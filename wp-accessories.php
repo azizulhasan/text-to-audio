@@ -182,7 +182,6 @@ speechRecognitionList[1] = newGrammar; // should add the new SpeechGrammar objec
 
 } else {
   console.log("Speech recognition not supported 😢");
-  // code to handle error
 }
 
 
@@ -195,10 +194,6 @@ speechRecognitionList[1] = newGrammar; // should add the new SpeechGrammar objec
     }, 3000);
 
     </script>
-
-
-
-
 
     <?php
 
