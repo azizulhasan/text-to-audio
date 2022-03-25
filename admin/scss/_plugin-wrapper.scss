@@ -1,0 +1,80 @@
+/* ----------------------------------------------- //
+//            WEBAPPICK CUSTOM WRAPPER             //
+// ----------------------------------------------- */
+.#{$prefix}-wrap {
+  font-family: $font;
+  border: 1px solid #e3ebf6;
+  margin: 20px 20px 20px 0;
+  font-size: 15px;
+  p {
+    font-size: 15px;
+  }
+}
+.#{$prefix}-no-border-wrap {
+  border: none !important;
+  margin: 0 !important;
+
+  .#{$prefix}-dashboard-content {
+    background: inherit;
+    padding: 0;
+  }
+}
+.#{$prefix}-dashboard-header {
+  border-bottom:1px solid #e3ebf6;
+  height:75px;
+  background: #fff;
+  img {
+    padding: 21px;
+  }
+}
+.#{$prefix}-dashboard-sidebar {
+  border-right: 1px solid #e3ebf6;
+  height: 100%;
+  background-color: #fff;
+}
+.#{$prefix}-dashboard-content {
+  list-style: none;
+  background: #F9FBFD;
+  height: 100%;
+  width: 100%;
+  padding: 30px;
+}
+
+.#{$prefix}-card-header {
+  display: -webkit-box;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  flex-direction: row;
+  -webkit-box-align: center;
+  align-items: center;
+  padding-top: .5rem;
+  padding-bottom: .5rem
+}
+
+.#{$prefix}-card-header>:first-child {
+  -webkit-box-flex: 1;
+  flex: 1
+}
+
+.#{$prefix}-card-title {
+  margin-bottom: .5rem
+}
+
+.#{$prefix}-card-header-title {
+  margin-bottom: 0
+}
+
+.#{$prefix}-card-header-tabs {
+  margin-top: -.5rem;
+  margin-bottom: -.5rem;
+  margin-left: 0;
+  margin-right: 0
+}
+.#{$prefix}-card .#{$prefix}-nav-tabs {
+  border: 0;
+}
+.#{$prefix}-card-header-tabs .#{$prefix}-nav-link {
+  padding-top: calc((60px - 1rem * 1.5)/ 2)!important;
+  padding-bottom: calc((60px - 1rem * 1.5)/ 2)!important
+}

@@ -1,0 +1,130 @@
+/* ---------------------------------------------- //
+//             WEBAPPICK PLUGIN TYPE              //
+// ---------------------------------------------- */
+
+// stylelint-disable declaration-no-important, selector-list-comma-newline-after
+
+//
+// Headings
+//
+
+
+.#{$prefix}-wrap h1, .#{$prefix}-wrap h2, .#{$prefix}-wrap h3, .#{$prefix}-wrap h4, .#{$prefix}-wrap h5, .#{$prefix}-wrap h6,
+.#{$prefix}-h1, .#{$prefix}-h2, .#{$prefix}-h3, .#{$prefix}-h4, .#{$prefix}-h5, .#{$prefix}-h6 {
+  margin-bottom: $headings-margin-bottom;
+  font-family: $headings-font-family;
+  font-weight: $headings-font-weight;
+  line-height: $headings-line-height;
+  color: $headings-color;
+}
+
+.#{$prefix}-wrap h1, .#{$prefix}-h1 { @include font-size($h1-font-size); }
+.#{$prefix}-wrap h2, .#{$prefix}-h2 { @include font-size($h2-font-size); }
+.#{$prefix}-wrap h3, .#{$prefix}-h3 { @include font-size($h3-font-size); }
+.#{$prefix}-wrap h4, .#{$prefix}-h4 { @include font-size($h4-font-size); }
+.#{$prefix}-wrap h5, .#{$prefix}-h5 { @include font-size($h5-font-size); }
+.#{$prefix}-wrap h6, .#{$prefix}-h6 { @include font-size($h6-font-size); }
+
+.#{$prefix}-lead {
+  @include font-size($lead-font-size);
+  font-weight: $lead-font-weight;
+}
+
+// Type display classes
+.#{$prefix}-display-1 {
+  @include font-size($display1-size);
+  font-weight: $display1-weight;
+  line-height: $display-line-height;
+}
+.#{$prefix}-display-2 {
+  @include font-size($display2-size);
+  font-weight: $display2-weight;
+  line-height: $display-line-height;
+}
+.#{$prefix}-display-3 {
+  @include font-size($display3-size);
+  font-weight: $display3-weight;
+  line-height: $display-line-height;
+}
+.#{$prefix}-display-4 {
+  @include font-size($display4-size);
+  font-weight: $display4-weight;
+  line-height: $display-line-height;
+}
+
+
+//
+// Horizontal rules
+//
+
+.#{$prefix}-wrap hr {
+  margin-top: $hr-margin-y;
+  margin-bottom: $hr-margin-y;
+  border: 0;
+  border-top: $hr-border-width solid $hr-border-color;
+}
+
+
+//
+// Emphasis
+//
+
+.#{$prefix}-wrap small,
+.#{$prefix}-small {
+  @include font-size($small-font-size);
+  font-weight: $font-weight-normal;
+}
+
+.#{$prefix}-wrap mark,
+.#{$prefix}-mark {
+  padding: $mark-padding;
+  background-color: $mark-bg;
+}
+
+
+//
+// Lists
+//
+
+.#{$prefix}-list-unstyled {
+  @include list-unstyled();
+}
+
+// Inline turns list items into inline-block
+.#{$prefix}-list-inline {
+  @include list-unstyled();
+}
+.#{$prefix}-list-inline-item {
+  display: inline-block;
+
+  &:not(:last-child) {
+    margin-right: $list-inline-padding;
+  }
+}
+
+
+//
+// Misc
+//
+
+// Builds on `abbr`
+.#{$prefix}-initialism {
+  @include font-size(90%);
+  text-transform: uppercase;
+}
+
+// Blockquotes
+.#{$prefix}-blockquote {
+  margin-bottom: $spacer;
+  @include font-size($blockquote-font-size);
+}
+
+.#{$prefix}-blockquote-footer {
+  display: block;
+  @include font-size($blockquote-small-font-size);
+  color: $blockquote-small-color;
+
+  &::before {
+    content: "\2014\00A0"; // em dash, nbsp
+  }
+}

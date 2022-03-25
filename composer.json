@@ -1,0 +1,20 @@
+{
+    "name": "azizu/webappick-tracker",
+    "type": "plugin",
+    "authors": [
+        {
+            "name": "Azizul Hasan",
+            "email": "azizulhasan.cr@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "WebappickTracker\\" : "includes",
+            "WebappickTracker_Admin\\" : "admin",
+            "WebappickTracker_Public\\" : "public",
+            "WebappickTracker_Api\\" : "api"
+        }
+    },
+
+    "require": {}
+}

@@ -1,0 +1,13 @@
+// stylelint-disable declaration-no-important
+
+//
+// Visibility utilities
+//
+
+.#{$prefix}-visible {
+  visibility: visible !important;
+}
+
+.#{$prefix}-invisible {
+  visibility: hidden !important;
+}

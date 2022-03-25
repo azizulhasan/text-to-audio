@@ -1,0 +1,78 @@
+.webappick-widget-primary-card.webappick-flat-card .webappick-row-table:first-child, .webappick-flat-card.webappick-widget-purple-card .webappick-row-table:first-child {
+    border-bottom: none;
+}
+
+.webappick-widget-primary-card.webappick-flat-card .webappick-row-table > [class*=col-], .webappick-flat-card.webappick-widget-purple-card .webappick-row-table > [class*=col-] {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.webappick-widget-primary-card.webappick-flat-card .webappick-row-table > [class*=col-]:first-child, .webappick-flat-card.webappick-widget-purple-card .webappick-row-table > [class*=col-]:first-child {
+    background-color: #5d50ed;
+    text-align: center;
+}
+
+.webappick-widget-primary-card.webappick-flat-card .webappick-row-table > [class*=col-] .webappick-row, .webappick-flat-card.webappick-widget-purple-card .webappick-row-table > [class*=col-] .webappick-row {
+    display: flex;
+    align-items: center;
+}
+
+.webappick-widget-purple-card.webappick-flat-card {
+    background-color: #17C666;
+}
+
+.webappick-widget-purple-card.webappick-flat-card .webappick-row-table:first-child {
+    border-bottom: none;
+}
+
+.webappick-widget-purple-card.webappick-flat-card .webappick-row-table > [class*=col-]:first-child {
+    background-color: #14af5a;
+}
+
+.webappick-flat-card .webappick-row-table {
+    display: table;
+    align-items: center;
+    table-layout: fixed;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+}
+
+.webappick-flat-card .webappick-row-table:first-child {
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.webappick-flat-card .webappick-row-table .webappick-br {
+    border-right: 1px solid #f1f1f1;
+}
+
+.webappick-flat-card .webappick-row-table i {
+    font-size: 30px;
+}
+
+.webappick-flat-card .webappick-row-table span {
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+.webappick-flat-card .webappick-row-table h5, .webappick-flat-card .webappick-row-table .webappick-h5 {
+    display: block;
+    margin-bottom: 0.3em;
+    margin-right: 0;
+}
+
+.webappick-flat-card .webappick-row-table > [class*=col-] {
+    display: table-cell;
+    float: none;
+    table-layout: fixed;
+    vertical-align: middle;
+}
+
+.webappick-flat-card .webappick-row-table > [class*=col-] .webappick-row {
+    display: flex;
+    align-items: center;
+}
+
+.webappick-flat-card[class*="widget-"] .webappick-row-table {
+    display: flex;
+}

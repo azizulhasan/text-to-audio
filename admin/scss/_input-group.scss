@@ -1,0 +1,335 @@
+/* ----------------------------------------------------- //
+//             WEBAPPICK PLUGIN INPUT GROUP              //
+// ----------------------------------------------------- */
+
+// stylelint-disable selector-no-qualifying-type
+
+//
+// Base styles
+//
+
+.#{$prefix}-input-group {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap; // For form validation feedback
+  align-items: stretch;
+  width: 100%;
+
+  > .#{$prefix}-form-control,
+  > .#{$prefix}-form-control-plaintext,
+  > .#{$prefix}-custom-select,
+  > .#{$prefix}-custom-file {
+    position: relative; // For focus state's z-index
+    flex: 1 1 0%;
+    min-width: 0; // https://stackoverflow.com/questions/36247140/why-dont-flex-items-shrink-past-content-size
+    margin-bottom: 0;
+
+    + .#{$prefix}-form-control,
+    + .#{$prefix}-custom-select,
+    + .#{$prefix}-custom-file {
+      margin-left: -$input-border-width;
+    }
+  }
+
+  // Bring the "active" form control to the top of surrounding elements
+  > .#{$prefix}-form-control:focus,
+  > .#{$prefix}-custom-select:focus,
+  > .#{$prefix}-custom-file .#{$prefix}-custom-file-input:focus ~ .#{$prefix}-custom-file-label {
+    z-index: 3;
+  }
+
+  // Bring the custom file input above the label
+  > .#{$prefix}-custom-file .#{$prefix}-custom-file-input:focus {
+    z-index: 4;
+  }
+
+  > .#{$prefix}-form-control,
+  > .#{$prefix}-custom-select {
+    &:not(:last-child) { @include border-right-radius($input-border-radius); }
+    &:not(:first-child) { @include border-left-radius($input-border-radius); }
+  }
+
+  // Custom file inputs have more complex markup, thus requiring different
+  // border-radius overrides.
+  > .#{$prefix}-custom-file {
+    display: flex;
+    align-items: center;
+
+    &:not(:last-child) .#{$prefix}-custom-file-label,
+    &:not(:last-child) .#{$prefix}-custom-file-label::after { @include border-right-radius(0); }
+    &:not(:first-child) .#{$prefix}-custom-file-label { @include border-left-radius(0); }
+  }
+}
+
+// Rounded form control
+.#{$prefix}-form-control-rounded {
+  @include border-radius($rounded-form-control-radius);
+}
+
+// Form control flush
+.#{$prefix}-form-control-flush {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border-color: transparent!important;
+  background-color: transparent!important;
+  resize: none;
+}
+
+// Form control auto
+.#{$prefix}-form-control-auto {
+  height: auto;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+// Prepend and append
+//
+// While it requires one extra layer of HTML for each, dedicated prepend and
+// append elements allow us to 1) be less clever, 2) simplify our selectors, and
+// 3) support HTML5 form validation.
+
+.#{$prefix}-input-group-prepend,
+.#{$prefix}-input-group-append {
+  display: flex;
+
+  // Ensure buttons are always above inputs for more visually pleasing borders.
+  // This isn't needed for `.input-group-text` since it shares the same border-color
+  // as our inputs.
+  .#{$prefix}-btn {
+    position: relative;
+    z-index: 2;
+
+    &:focus {
+      z-index: 3;
+    }
+  }
+
+  .#{$prefix}-btn + .#{$prefix}-btn,
+  .#{$prefix}-btn + .#{$prefix}-input-group-text,
+  .#{$prefix}-input-group-text + .#{$prefix}-input-group-text,
+  .#{$prefix}-input-group-text + .#{$prefix}-btn {
+    margin-left: -$input-border-width;
+  }
+}
+
+.#{$prefix}-input-group-prepend { margin-right: -$input-border-width; }
+.#{$prefix}-input-group-append { margin-left: -$input-border-width; }
+
+
+// Textual addons
+//
+// Serves as a catch-all element for any text or radio/checkbox input you wish
+// to prepend or append to an input.
+
+.#{$prefix}-input-group-text {
+  display: flex;
+  align-items: center;
+  padding: $input-padding-y $input-padding-x;
+  margin-bottom: 0; // Allow use of <label> elements by overriding our default margin-bottom
+  @include font-size($input-font-size); // Match inputs
+  font-weight: $font-weight-normal;
+  line-height: $input-line-height;
+  color: $input-group-addon-color;
+  text-align: center;
+  white-space: nowrap;
+  background-color: $input-group-addon-bg;
+  border: $input-border-width solid $input-group-addon-border-color;
+  @include border-radius($input-border-radius);
+
+  // Nuke default margins from checkboxes and radios to vertically center within.
+  input[type="radio"],
+  input[type="checkbox"] {
+    margin-top: 0;
+  }
+}
+
+
+// Sizing
+//
+// Remix the default form control sizing classes into new ones for easier
+// manipulation.
+
+.#{$prefix}-input-group-lg > .#{$prefix}-form-control:not(textarea),
+.#{$prefix}-input-group-lg > .#{$prefix}-custom-select {
+  height: $input-height-lg;
+}
+
+.#{$prefix}-input-group-lg > .#{$prefix}-form-control,
+.#{$prefix}-input-group-lg > .#{$prefix}-custom-select,
+.#{$prefix}-input-group-lg > .#{$prefix}-input-group-prepend > .#{$prefix}-input-group-text,
+.#{$prefix}-input-group-lg > .#{$prefix}-input-group-append > .#{$prefix}-input-group-text,
+.#{$prefix}-input-group-lg > .#{$prefix}-input-group-prepend > .#{$prefix}-btn,
+.#{$prefix}-input-group-lg > .#{$prefix}-input-group-append > .#{$prefix}-btn {
+  padding: $input-padding-y-lg $input-padding-x-lg;
+  @include font-size($input-font-size-lg);
+  line-height: $input-line-height-lg;
+  @include border-radius($input-border-radius-lg);
+}
+
+.#{$prefix}-input-group-sm > .#{$prefix}-form-control:not(textarea),
+.#{$prefix}-input-group-sm > .#{$prefix}-custom-select {
+  height: $input-height-sm;
+}
+
+.#{$prefix}-input-group-sm > .#{$prefix}-form-control,
+.#{$prefix}-input-group-sm > .#{$prefix}-custom-select,
+.#{$prefix}-input-group-sm > .#{$prefix}-input-group-prepend > .#{$prefix}-input-group-text,
+.#{$prefix}-input-group-sm > .#{$prefix}-input-group-append > .#{$prefix}-input-group-text,
+.#{$prefix}-input-group-sm > .#{$prefix}-input-group-prepend > .#{$prefix}-btn,
+.#{$prefix}-input-group-sm > .#{$prefix}-input-group-append > .#{$prefix}-btn {
+  padding: $input-padding-y-sm $input-padding-x-sm;
+  @include font-size($input-font-size-sm);
+  line-height: $input-line-height-sm;
+  @include border-radius($input-border-radius-sm);
+}
+
+.#{$prefix}-input-group-lg > .#{$prefix}-custom-select,
+.#{$prefix}-input-group-sm > .#{$prefix}-custom-select {
+  padding-right: $custom-select-padding-x + $custom-select-indicator-padding;
+}
+
+
+// Prepend and append rounded corners
+//
+// These rulesets must come after the sizing ones to properly override sm and lg
+// border-radius values when extending. They're more specific than we'd like
+// with the `.#{$prefix}-input-group >` part, but without it, we cannot override the sizing.
+
+
+.#{$prefix}-input-group > .#{$prefix}-input-group-prepend > .#{$prefix}-btn,
+.#{$prefix}-input-group > .#{$prefix}-input-group-prepend > .#{$prefix}-input-group-text{
+  @include border-right-radius(0);
+}
+
+.#{$prefix}-input-group > .#{$prefix}-input-group-append:not(:last-child) > .#{$prefix}-btn,
+.#{$prefix}-input-group > .#{$prefix}-input-group-append:not(:last-child) > .#{$prefix}-input-group-text,
+.#{$prefix}-input-group > .#{$prefix}-input-group-append:last-child > .#{$prefix}-btn:not(:last-child):not(.#{$prefix}-dropdown-toggle),
+.#{$prefix}-input-group > .#{$prefix}-input-group-append:last-child > .#{$prefix}-input-group-text:not(:last-child) {
+  @include border-right-radius(0);
+}
+
+.#{$prefix}-input-group > .#{$prefix}-input-group-append > .#{$prefix}-btn,
+.#{$prefix}-input-group > .#{$prefix}-input-group-append > .#{$prefix}-input-group-text {
+  @include border-left-radius(0);
+}
+.#{$prefix}-input-group > .#{$prefix}-input-group-prepend:not(:first-child) > .#{$prefix}-btn,
+.#{$prefix}-input-group > .#{$prefix}-input-group-prepend:not(:first-child) > .#{$prefix}-input-group-text,
+.#{$prefix}-input-group > .#{$prefix}-input-group-prepend:first-child > .#{$prefix}-btn:not(:first-child),
+.#{$prefix}-input-group > .#{$prefix}-input-group-prepend:first-child > .#{$prefix}-input-group-text:not(:first-child) {
+  @include border-right-radius(0);
+}
+
+/* input group*/
+
+.#{$prefix}-input-group.#{$prefix}-input-group-merge>.#{$prefix}-form-control-prepended {
+  padding-left: .375rem;
+  border-top-left-radius: 0!important;
+  border-bottom-left-radius: 0!important;
+  border-left-width: 0 !important;
+}
+
+.#{$prefix}-input-group.#{$prefix}-input-group-merge>.#{$prefix}-form-control-appended {
+  padding-right: .375rem;
+  border-top-right-radius: 0!important;
+  border-bottom-right-radius: 0!important;
+  border-right-width: 0 !important;
+}
+
+.#{$prefix}-input-group.#{$prefix}-input-group-merge>.#{$prefix}-input-group-prepend {
+  -webkit-box-ordinal-group: 0;
+  order: -1
+}
+
+.#{$prefix}-input-group.#{$prefix}-input-group-merge>.#{$prefix}-input-group-prepend>.#{$prefix}-input-group-text {
+  padding-right: .375rem;
+  border-top-left-radius: .375rem;
+  border-bottom-left-radius: .375rem;
+  border-right-width: 0;
+  -webkit-transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+  transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out
+}
+
+.#{$prefix}-input-group.#{$prefix}-input-group-merge>.#{$prefix}-input-group-append>.#{$prefix}-input-group-text {
+  padding-left: .375rem;
+  border-top-right-radius: .375rem;
+  border-bottom-right-radius: .375rem;
+  border-left-width: 0;
+  -webkit-transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+  transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out
+}
+
+.#{$prefix}-input-group-lg.#{$prefix}-input-group-merge>.#{$prefix}-form-control {
+  border-radius: .5rem
+}
+
+.#{$prefix}-input-group-lg.#{$prefix}-input-group-merge>.#{$prefix}-form-control-prepended {
+  padding-left: .625rem
+}
+
+.#{$prefix}-input-group-lg.#{$prefix}-input-group-merge>.#{$prefix}-form-control-appended {
+  padding-right: .625rem
+}
+
+.#{$prefix}-input-group-lg.#{$prefix}-input-group-merge>.#{$prefix}-input-group-prepend>.#{$prefix}-input-group-text {
+  padding-right: .625rem;
+  border-top-left-radius: .5rem;
+  border-bottom-left-radius: .5rem
+}
+
+.#{$prefix}-input-group-lg.#{$prefix}-input-group-merge>.#{$prefix}-input-group-append>.#{$prefix}-input-group-text {
+  padding-left: .625rem;
+  border-top-right-radius: .5rem;
+  border-bottom-right-radius: .5rem
+}
+
+.#{$prefix}-input-group-sm.#{$prefix}-input-group-merge>.#{$prefix}-form-control {
+  border-radius: .25rem
+}
+
+.#{$prefix}-input-group-sm.#{$prefix}-input-group-merge>.#{$prefix}-form-control-prepended {
+  padding-left: .25rem
+}
+
+.#{$prefix}-input-group-sm.#{$prefix}-input-group-merge>.#{$prefix}-form-control-appended {
+  padding-right: .25rem
+}
+
+.#{$prefix}-input-group-sm.#{$prefix}-input-group-merge>.#{$prefix}-input-group-prepend>.#{$prefix}-input-group-text {
+  padding-right: .25rem;
+  border-top-left-radius: .25rem;
+  border-bottom-left-radius: .25rem
+}
+
+.#{$prefix}-input-group-sm.#{$prefix}-input-group-merge>.#{$prefix}-input-group-append>.#{$prefix}-input-group-text {
+  padding-left: .25rem;
+  border-top-right-radius: .25rem;
+  border-bottom-right-radius: .25rem
+}
+
+.#{$prefix}-input-group-rounded.#{$prefix}-input-group-merge>.#{$prefix}-form-control {
+  border-radius: 20rem
+}
+
+.#{$prefix}-input-group-rounded.#{$prefix}-input-group-merge>.#{$prefix}-input-group-prepend>.#{$prefix}-input-group-text {
+  border-top-left-radius: 20rem;
+  border-bottom-left-radius: 20rem
+}
+
+.#{$prefix}-input-group-rounded.#{$prefix}-input-group-merge>.#{$prefix}-input-group-append>.#{$prefix}-input-group-text {
+  border-top-right-radius: 20rem;
+  border-bottom-right-radius: 20rem
+}
+
+.#{$prefix}-input-group-flush>.#{$prefix}-form-control {
+  padding-top: 0;
+  padding-bottom: 0;
+  border-color: transparent!important;
+  background-color: transparent!important
+}
+
+.#{$prefix}-input-group-flush>.#{$prefix}-input-group-append>.#{$prefix}-input-group-text,
+.#{$prefix}-input-group-flush>.#{$prefix}-input-group-prepend>.#{$prefix}-input-group-text {
+  padding: 0;
+  border-width: 0;
+  background-color: transparent
+}

@@ -1,0 +1,167 @@
+/* ------------------------------------------------------ //
+//             WEBAPPICK PLUGIN BUTTON GROUP              //
+// ------------------------------------------------------ */
+
+// stylelint-disable selector-no-qualifying-type
+
+// Make the div behave like a button
+.#{$prefix}-btn-group,
+.#{$prefix}-btn-group-vertical {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle; // match .#{$prefix}-btn alignment given font-size hack above
+
+  > .#{$prefix}-btn {
+    position: relative;
+    flex: 1 1 auto;
+
+    // Bring the hover, focused, and "active" buttons to the front to overlay
+    // the borders properly
+    @include hover() {
+      z-index: 1;
+    }
+    &:focus,
+    &:active,
+    &.active {
+      z-index: 1;
+    }
+  }
+}
+
+// Optional: Group multiple button groups together for a toolbar
+.#{$prefix}-btn-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+
+  .#{$prefix}-input-group {
+    width: auto;
+  }
+}
+
+.#{$prefix}-btn-group {
+  // Prevent double borders when buttons are next to each other
+  > .#{$prefix}-btn:not(:first-child),
+  > .#{$prefix}-btn-group:not(:first-child) {
+    margin-left: -$btn-border-width;
+  }
+
+  // Reset rounded corners
+  > .#{$prefix}-btn:not(:last-child):not(.#{$prefix}-dropdown-toggle),
+  > .#{$prefix}-btn-group:not(:last-child) > .#{$prefix}-btn {
+    @include border-right-radius(0);
+  }
+
+  > .#{$prefix}-btn:not(:first-child),
+  > .#{$prefix}-btn-group:not(:first-child) > .#{$prefix}-btn {
+    @include border-left-radius(0);
+  }
+}
+
+// Sizing
+//
+// Remix the default button sizing classes into new ones for easier manipulation.
+
+.#{$prefix}-btn-group-sm > .#{$prefix}-btn { @extend .#{$prefix}-btn-sm; }
+.#{$prefix}-btn-group-lg > .#{$prefix}-btn { @extend .#{$prefix}-btn-lg; }
+
+
+//
+// Split button dropdowns
+//
+
+.#{$prefix}-dropdown-toggle-split {
+  padding-right: $btn-padding-x * .75;
+  padding-left: $btn-padding-x * .75;
+
+  &::after,
+  .#{$prefix}-dropup &::after,
+  .#{$prefix}-dropright &::after {
+    margin-left: 0;
+  }
+
+  .#{$prefix}-dropleft &::before {
+    margin-right: 0;
+  }
+}
+
+.#{$prefix}-btn-sm + .#{$prefix}-dropdown-toggle-split {
+  padding-right: $btn-padding-x-sm * .75;
+  padding-left: $btn-padding-x-sm * .75;
+}
+
+.#{$prefix}-btn-lg + .#{$prefix}-dropdown-toggle-split {
+  padding-right: $btn-padding-x-lg * .75;
+  padding-left: $btn-padding-x-lg * .75;
+}
+
+
+// The clickable button for toggling the menu
+// Set the same inset shadow as the :active state
+.#{$prefix}-btn-group.show .#{$prefix}-dropdown-toggle {
+  @include box-shadow($btn-active-box-shadow);
+
+  // Show no shadow for `.#{$prefix}-btn-link` since it has no other button styles.
+  &.#{$prefix}-btn-link {
+    @include box-shadow(none);
+  }
+}
+
+
+//
+// Vertical button groups
+//
+
+.#{$prefix}-btn-group-vertical {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+
+  > .#{$prefix}-btn,
+  > .#{$prefix}-btn-group {
+    width: 100%;
+  }
+
+  > .#{$prefix}-btn:not(:first-child),
+  > .#{$prefix}-btn-group:not(:first-child) {
+    margin-top: -$btn-border-width;
+  }
+
+  // Reset rounded corners
+  > .#{$prefix}-btn:not(:last-child):not(.#{$prefix}-dropdown-toggle),
+  > .#{$prefix}-btn-group:not(:last-child) > .#{$prefix}-btn {
+    @include border-bottom-radius(0);
+  }
+
+  > .#{$prefix}-btn:not(:first-child),
+  > .#{$prefix}-btn-group:not(:first-child) > .#{$prefix}-btn {
+    @include border-top-radius(0);
+  }
+}
+
+
+// Checkbox and radio options
+//
+// In order to support the browser's form validation feedback, powered by the
+// `required` attribute, we have to "hide" the inputs via `clip`. We cannot use
+// `display: none;` or `visibility: hidden;` as that also hides the popover.
+// Simply visually hiding the inputs via `opacity` would leave them clickable in
+// certain cases which is prevented by using `clip` and `pointer-events`.
+// This way, we ensure a DOM element is visible to position the popover from.
+//
+// See https://github.com/twbs/bootstrap/pull/12794 and
+// https://github.com/twbs/bootstrap/pull/14559 for more information.
+
+.#{$prefix}-btn-group-toggle {
+  > .#{$prefix}-btn,
+  > .#{$prefix}-btn-group > .#{$prefix}-btn {
+    margin-bottom: 0; // Override default `<label>` value
+
+    input[type="radio"],
+    input[type="checkbox"] {
+      position: absolute;
+      clip: rect(0, 0, 0, 0);
+      pointer-events: none;
+    }
+  }
+}

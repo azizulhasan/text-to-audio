@@ -1,0 +1,174 @@
+/* ----------------------------------------------- //
+//             WEBAPPICK PLUGIN BADGE              //
+// ----------------------------------------------- */
+// Base class
+//
+// Requires one of the contextual, color modifier classes for `color` and
+// `background-color`.
+
+.#{$prefix}-badge {
+  display: inline-block;
+  padding: $badge-padding-y $badge-padding-x;
+  @include font-size($badge-font-size);
+  font-weight: $badge-font-weight;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  @include border-radius($badge-border-radius);
+  @include transition($badge-transition);
+
+  @at-root a#{&} {
+    @include hover-focus() {
+      text-decoration: none;
+    }
+  }
+
+  // Empty badges collapse automatically
+  &:empty {
+    display: none;
+  }
+}
+
+// Quick fix for badges in buttons
+.#{$prefix}-btn .#{$prefix}-badge {
+  position: relative;
+  top: -1px;
+}
+
+// Pill badges
+//
+// Make them extra rounded with a modifier to replace v3's badges.
+
+.#{$prefix}-badge-pill {
+  padding-right: $badge-pill-padding-x;
+  padding-left: $badge-pill-padding-x;
+  @include border-radius($badge-pill-border-radius);
+}
+
+// Colors
+//
+// Contextual variations (linked badges get darker on :hover).
+
+@each $color, $value in $theme-colors {
+  .#{$prefix}-badge-#{$color} {
+    @include badge-variant($value);
+  }
+}
+
+/* badge */
+.#{$prefix}-badge {
+  vertical-align: middle
+}
+
+.#{$prefix}-btn .#{$prefix}-badge {
+  top: -2px
+}
+
+.#{$prefix}-badge-soft-primary {
+  color: #2c7be5;
+  background-color: #d5e5fa
+}
+
+.#{$prefix}-badge-soft-primary[href]:focus,
+.#{$prefix}-badge-soft-primary[href]:hover {
+  color: #2c7be5;
+  text-decoration: none;
+  background-color: #bed7f7
+}
+
+.#{$prefix}-badge-soft-secondary {
+  color: #6e84a3;
+  background-color: #e2e6ed
+}
+
+.#{$prefix}-badge-soft-secondary[href]:focus,
+.#{$prefix}-badge-soft-secondary[href]:hover {
+  color: #6e84a3;
+  text-decoration: none;
+  background-color: #d2d8e3
+}
+
+.#{$prefix}-badge-soft-success {
+  color: #00d97e;
+  background-color: #ccf7e5
+}
+
+.#{$prefix}-badge-soft-success[href]:focus,
+.#{$prefix}-badge-soft-success[href]:hover {
+  color: #00d97e;
+  text-decoration: none;
+  background-color: #b6f4da
+}
+
+.#{$prefix}-badge-soft-info {
+  color: #39afd1;
+  background-color: #d7eff6
+}
+
+.#{$prefix}-badge-soft-info[href]:focus,
+.#{$prefix}-badge-soft-info[href]:hover {
+  color: #39afd1;
+  text-decoration: none;
+  background-color: #c2e7f1
+}
+
+.#{$prefix}-badge-soft-warning {
+  color: #f6c343;
+  background-color: #fdf3d9
+}
+
+.#{$prefix}-badge-soft-warning[href]:focus,
+.#{$prefix}-badge-soft-warning[href]:hover {
+  color: #f6c343;
+  text-decoration: none;
+  background-color: #fcebc1
+}
+
+.#{$prefix}-badge-soft-danger {
+  color: #e63757;
+  background-color: #fad7dd
+}
+
+.#{$prefix}-badge-soft-danger[href]:focus,
+.#{$prefix}-badge-soft-danger[href]:hover {
+  color: #e63757;
+  text-decoration: none;
+  background-color: #f7c0ca
+}
+
+.#{$prefix}-badge-soft-light {
+  color: #edf2f9;
+  background-color: #fbfcfe
+}
+
+.#{$prefix}-badge-soft-light[href]:focus,
+.#{$prefix}-badge-soft-light[href]:hover {
+  color: #edf2f9;
+  text-decoration: none;
+  background-color: #e7edf9
+}
+
+.#{$prefix}-badge-soft-dark {
+  color: #12263f;
+  background-color: #d0d4d9
+}
+
+.#{$prefix}-badge-soft-dark[href]:focus,
+.#{$prefix}-badge-soft-dark[href]:hover {
+  color: #12263f;
+  text-decoration: none;
+  background-color: #c2c7ce
+}
+
+.#{$prefix}-badge-soft-white {
+  color: #fff;
+  background-color: #fff
+}
+
+.#{$prefix}-badge-soft-white[href]:focus,
+.#{$prefix}-badge-soft-white[href]:hover {
+  color: #fff;
+  text-decoration: none;
+  background-color: #f2f2f2
+}
