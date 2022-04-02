@@ -65,10 +65,9 @@ class Webappick_Tracker_Hooks {
         global $post;
  
         ?>
-        <div class="wpa-metabox">
-            <button onclick="startRecord()">Start</button>
-            <button onclick="restartRecord()">Restart</button>
-            <button onclick="listentContent()">Listent</button>
+        <div class="wpa_metabox">
+            <a type="button" id="wpa__start__record" href="#">Start</a>
+            <a type="button" id="wpa__listent_content" href="#">Listen</a>
     </div>
 
         <?php
