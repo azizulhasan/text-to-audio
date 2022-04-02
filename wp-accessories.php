@@ -174,7 +174,6 @@ function getIframeContent() {
 
 </script>
 <?php
-
 }
 
 /**
