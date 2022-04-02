@@ -35,6 +35,10 @@ if (!defined('WPINC')) {
     die;
 }
 
+// Absolute path to the WordPress directory.
+// if ( !defined('ABSPATH') )
+//     define('ABSPATH', dirname(__FILE__) . '/');
+
 /**
  * Currently plugin version.
  * Start at version 1.0.0 and use SemVer - https://semver.org
@@ -106,8 +110,6 @@ $tracker = new Init();
 register_activation_hook(__FILE__, [$tracker, 'activate_vue_plugin_boilerplate']);
 register_deactivation_hook(__FILE__, [$tracker, 'deactivate_vue_plugin_boilerplate']);
 
-
-
 // https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API/Using_the_Web_Speech_API#javascript
 
 function posts_html()
@@ -115,95 +117,78 @@ function posts_html()
     ?>
     <script>
 
-  /**
-   * Get ifram content
-   */
-    function getIframeContent() {
+/**
+ * Get classic editor iframe content.
+ */
+function getIframeContent() {
 
-
-
-
-
-
-
-
-if ("speechSynthesis" in window) {
-  // new speech recognition object
-
-//   console.log(window)
-var SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
-var SpeechGrammarList = window.SpeechGrammarList || webkitSpeechGrammarList;
-var SpeechGrammar = window.SpeechGrammar || webkitSpeechGrammar;
-var SpeechRecognitionEvent = window.SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
-
-  var recognition = new SpeechRecognition();
-
-  var grammar = '#JSGF V1.0; grammar colors; public <color> = aqua | azure | beige | bisque | black | blue | brown | chocolate | coral | crimson | cyan | fuchsia | ghostwhite | gold | goldenrod | gray | green | indigo | ivory | khaki | lavender | lime | linen | magenta | maroon | moccasin | navy | olive | orange | orchid | peru | pink | plum | purple | red | salmon | sienna | silver | snow | tan | teal | thistle | tomato | turquoise | violet | white | yellow ;'
-
- 
-  var speechRecognitionList = new SpeechGrammarList();
-  speechRecognitionList.addFromString(grammar, 1);
-  recognition.grammars = speechRecognitionList;
-  var newGrammar = new SpeechGrammar();
-newGrammar.src = '#JSGF V1.0; grammar names; public <name> = chris | kirsty | mike;'
-speechRecognitionList[1] = newGrammar; // should add the new SpeechGrammar object to the list
-  recognition.continuous = true;
-  recognition.lang = 'en-US';
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
-
-  // This will run when the speech recognition service returns a result
-  recognition.onstart = function () {
-    console.log("Voice recognition started. Try speaking into the microphone.");
-  };
-
-  let iframeContent = document.getElementById("content_ifr").contentWindow
-        .document.body;
-  let current_text = "";
-  recognition.onresult = function (event) {
-    let event__length = event.results.length;
-    current_text = event.results[event__length - 1][0].transcript + ".";
-    let previous_text = iframeContent.innerHTML;
-    iframeContent.innerHTML = previous_text + " " + current_text;
-  };
-
-  // start recognition
-  recognition.start();
-
-
-  recognition.addEventListener('soundend', function(){
-      console.log('speach end')
-
-      setTimeout(() => {
-        recognition.start();
-      }, 5000);
-  })
-
-
-} else {
-  console.log("Speech recognition not supported 😢");
-  // code to handle error
-}
-
-
-
-
+    if ("speechSynthesis" in window) {
+    var SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
+    var SpeechGrammarList = window.SpeechGrammarList || webkitSpeechGrammarList;
+    var SpeechGrammar = window.SpeechGrammar || webkitSpeechGrammar;
+    var SpeechRecognitionEvent = window.SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
+    var recognition = new SpeechRecognition();
+    var grammar = '#JSGF V1.0; grammar colors; public <color> = aqua | azure | beige | bisque | black | blue | brown | chocolate | coral | crimson | cyan | fuchsia | ghostwhite | gold | goldenrod | gray | green | indigo | ivory | khaki | lavender | lime | linen | magenta | maroon | moccasin | navy | olive | orange | orchid | peru | pink | plum | purple | red | salmon | sienna | silver | snow | tan | teal | thistle | tomato | turquoise | violet | white | yellow ;'
+    var speechRecognitionList = new SpeechGrammarList();
+    speechRecognitionList.addFromString(grammar, 1);
+    recognition.grammars = speechRecognitionList;
+    var newGrammar = new SpeechGrammar();
+    newGrammar.src = '#JSGF V1.0; grammar names; public <name> = chris | kirsty | mike;'
+    speechRecognitionList[1] = newGrammar; // should add the new SpeechGrammar object to the list
+    recognition.continuous = true;
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    // This will run when the speech recognition service returns a result
+    recognition.onstart = function () {
+      console.log("Voice recognition started. Try speaking into the microphone.");
     };
 
-    setTimeout(() => {
-        getIframeContent()
-    }, 3000);
+    let classic_editor_iframe = document.getElementById("content_ifr").contentWindow.document.body;
+    let current_text = "";
+    recognition.onresult = function (event) {
+      let event__length = event.results.length;
+      current_text = event.results[event__length - 1][0].transcript + ".";
+      let previous_text = classic_editor_iframe.innerHTML;
+      classic_editor_iframe.innerHTML = previous_text + " " + current_text;
+    };
 
-    </script>
+    // start recognition
+    recognition.start();
 
+    // Restart on sound end.
+    recognition.addEventListener('soundend', function(){
+      console.log('speach end')
+      setTimeout(() => {
+        recognition.start();
+      }, 100);
+    })
+    } else {
+      console.log("Speech recognition not supported 😢");
+      // code to handle error
+    }
+  };
+  setTimeout(() => {
+      getIframeContent()
+  }, 1000);
 
-
-
-
-    <?php
+</script>
+<?php
 
 }
-// print "===================================="; print_r($_SERVER['REQUEST_URI']);
-if ($_SERVER['REQUEST_URI'] == '/azizulhasan/pro/wp-admin/post-new.php') {
-    posts_html();
-}
+
+/**
+ * If classic editor is active then on new-post and edit post 
+ * activate recording  for blog content.
+ */
+add_action('admin_init', function () {
+    if (is_plugin_active('classic-editor/classic-editor.php')) {
+        $server = explode('/', $_SERVER['REQUEST_URI']);
+        $end_uri = end($server);
+        if ('post-new.php' == $end_uri) {
+            posts_html();
+        } elseif (strpos($end_uri, 'post.php') !== false) {
+            posts_html();
+        }
+    }
+});

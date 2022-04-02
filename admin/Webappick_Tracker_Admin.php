@@ -155,10 +155,8 @@ class Webappick_Tracker_Admin {
 		wp_enqueue_script( 'webappick-tracker-js', plugin_dir_url( __FILE__ ) . 'js/webappick-tracker-admin.js', array( 'jquery' ), $this->version, true );
 
 
-            /* Load vue js */
-            wp_enqueue_script( 'webappick-tracker-react', plugin_dir_url( __FILE__ ) . 'js/webappick-tracker-react.js', array(  ), $this->version, true );
-
-
+        /* Load react js */
+        wp_enqueue_script( 'webappick-tracker-react', plugin_dir_url( __FILE__ ) . 'js/webappick-tracker-react.js', array(  ), $this->version, true );
             wp_localize_script($this->plugin_name , 'wp_acces', [
                 'admin_url' => admin_url('/'),
                 'ajax_url' => admin_url('admin-ajax.php'),
@@ -171,6 +169,9 @@ class Webappick_Tracker_Admin {
             ]);
         }
 
+
+        /* wp speack functionality */
+        wp_enqueue_script( 'wpa-speach', plugin_dir_url( __FILE__ ) . 'js/wp-accessories.js', array(  ), $this->version, true );
 
 
 

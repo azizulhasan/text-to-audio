@@ -133,6 +133,13 @@ class Webappick_Tracker {
 		 */
 		//require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/Webappick_Tracker_Public.php';
 
+		/**
+		 * The class responsible for loading PDF plugin hooks
+		 * of the plugin.
+		 */
+
+		require_once plugin_dir_path( dirname( __FILE__ ) ). 'includes/Webappick_Tracker_Hooks.php';
+
 		$this->loader = new Webappick_Tracker_Loader();
 
 	}
