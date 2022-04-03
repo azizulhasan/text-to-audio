@@ -17,98 +17,154 @@ recognition.continuous = true;
 recognition.lang = 'en-US';
 recognition.interimResults = false;
 recognition.maxAlternatives = 1;
-document.getElementById('wpa__start__record').addEventListener('click', function(e){
-  e.preventDefault();
-  if (record__status == 'stop') {
-    record__status = 'record';
-    recognition.stop();
-    e.target.innerHTML = 'Start'
-  }else if(record__status == 'record'){
-    startRecording();
-    record__status = 'stop';
-    e.target.innerHTML = 'Stop'
-  }
-})
+
+
 
 
 /**
- * 
- * restart recording
+ * Listen content.
  */
-recognition.onsoundend = function(){
-  record__status = 'record';
-  document.getElementById('wpa__start__record').innerHTML = 'Start'
+ var listen_status = 'listen'
+if ("speechSynthesis" in window) {
+  var utterence = new SpeechSynthesisUtterance();
+  var voices = speechSynthesis.getVoices();
+  utterence.voice = voices[0];
+  utterence.volume = 1; // From 0 to 1
+  utterence.rate = 1; // From 0.1 to 10
+  utterence.pitch = 2; // From 0 to 2
+  utterence.lang = "en-US";
+  //console.log(utterence)
+}else {
+  console.log("Speech speechSynthesis not supported 😢");
+  // code to handle error
 }
+
+
+localStorage.setItem('recordStarted', false)
 
 /**
  * Start recording.
  * @param {string} textarea_id 
  */
 function startRecording(textarea_id = 'content_ifr') {
-    recognition.start();
-     // This will run when the speech recognition service returns a result
-     recognition.onstart = function () {
-      console.log("Voice recognition started. Try speaking into the microphone.");
-    };
+  /**
+   * Stop listening before recording.
+   */
+   speechSynthesis.cancel();
 
-    let classic_editor_iframe = document.getElementById(textarea_id).contentWindow.document.body;
-    let current_text = "";
-    recognition.onresult = function (event) {
-      let event__length = event.results.length;
-      current_text = event.results[event__length - 1][0].transcript + ".";
-      let previous_text = classic_editor_iframe.innerHTML;
-      classic_editor_iframe.innerHTML = previous_text + " " + current_text;
-    };
+  let record_btn = document.getElementById('wpa__start__record')
+  if (record__status == 'stop') {
+    record__status = 'record';
+    recognition.stop()
+    localStorage.setItem('recordStarted', false)
+    record_btn.innerHTML = 'Start'
+  }else if(record__status == 'record'){
+    if(localStorage.getItem('recordStarted') == null  || localStorage.getItem('recordStarted') == 'false'){
+      localStorage.setItem('recordStarted', true)
+      recognition.start()
+    }
+    record__status = 'stop';
+    record_btn.innerHTML = 'Stop'
+  }
+  
+  let textarea__content = '';
+  console.log(textarea_id)
+  if(textarea_id == 'content_ifr'){
+     textarea__content = document.getElementById(textarea_id).contentWindow.document.body;
+  }else{
+    textarea__content = document.getElementById(textarea_id)
+  }
+  console.log(textarea__content.innerHTML);
+
+
+  let current_text = "";
+  recognition.onresult = function (event) {
+    let event__length = event.results.length;
+    current_text = event.results[event__length - 1][0].transcript + ".";
+    current_text = captalizeString(current_text)
+    let previous_text = textarea__content.innerHTML;
+    
+    textarea__content.innerHTML = previous_text + current_text;
+  };
 
 };
 
+/**
+ * Capitalize String.
+ */
+function captalizeString(string){
+  if(string[0] !== ' '){
+    return string[0].toUpperCase()+string.slice(1)
+  }else{
+    return ' '+string[1].toUpperCase()+string.slice(2)
+  }
+}
 
 /**
- * Listen content.
+ * 
+ * restart recording
  */
-var listen_status = 'listen'
-document.getElementById("wpa__listent_content").addEventListener('click', function(e){
-  e.preventDefault();
-  // Speech Synthesis supported
+ recognition.onsoundend = function(){
+  record__status = 'record';
+  document.getElementById('wpa__start__record').innerHTML = 'Start'
+}
+
+
+
+/**
+ * Listent/Pause/Resume content.
+ */
+function listenCotent(){
+  let listen_btn = document.getElementById('wpa__listent_content');
+  let  textarea__content = document.getElementById('content_ifr').contentWindow.document.body;
+  utterence.text = textarea__content.innerHTML;
+  /**
+   * Stop recording before listening.
+   */
   recognition.stop();
-  let  classic_editor_iframe = document.getElementById('content_ifr').contentWindow.document.body;
-    if ("speechSynthesis" in window) {
-      var utterence = new SpeechSynthesisUtterance();
-      var voices = speechSynthesis.getVoices();
-      utterence.voice = voices[0];
-      utterence.volume = 1; // From 0 to 1
-      utterence.rate = 1; // From 0.1 to 10
-      utterence.pitch = 2; // From 0 to 2
-      utterence.text = classic_editor_iframe.innerHTML;
-      utterence.lang = "en-US";
-
-      if(listen_status == 'listen'){
-        speechSynthesis.speak(utterence);
-        this.innerHTML = 'Pause'
-        listen_status = 'pause';
-      }else if(listen_status == 'pause'){
-        speechSynthesis.pause();
-        this.innerHTML = 'Resume';
-        listen_status = 'resume';
-      }else if(listen_status == 'resume'){
-        this.innerHTML = 'Pause';
-        listen_status = 'pause';
-        speechSynthesis.resume();
-      }
+  if(listen_status == 'listen'){
+    speechSynthesis.speak(utterence);
+    listen_btn.innerHTML = 'Pause'
+    listen_status = 'pause';
+  }else if(listen_status == 'pause'){
+    speechSynthesis.pause();
+    listen_btn.innerHTML = 'Resume';
+    listen_status = 'resume';
+  }else if(listen_status == 'resume'){
+    listen_btn.innerHTML = 'Pause';
+    listen_status = 'pause';
+    speechSynthesis.resume();
+  }
+}
 
 
-      utterence.addEventListener('end', function(event) {
-        console.log(event)
-        document.getElementById("wpa__listent_content").innerHTML = 'Listen';
-        listen_status = 'listen';
-      });
-      
-      //console.log(utterence)
-    }else {
-      console.log("Speech speechSynthesis not supported 😢");
-      // code to handle error
+/**
+ * After ending reading the content.
+ */
+ utterence.addEventListener('end', function(event) {
+  console.log(event)
+  document.getElementById("wpa__listent_content").innerHTML = 'Listen';
+  listen_status = 'listen';
+});
+
+
+
+Object.values(document.getElementsByTagName('textarea')).forEach((textarea, index)=>{
+  console.log(textarea.getAttribute('id'))
+  textarea.addEventListener('focus', function(){
+    if(textarea.getAttribute('id') == 'content'){
+      startRecording('content_ifr')
+    }else{
+      startRecording(textarea.getAttribute('id'))
+
     }
-
+    let record_btn = document.getElementById('wpa__start__record')
+    record__status = 'record';
+    record_btn.innerHTML = 'Stop'
+  })
 })
-
-
+// setTimeout(()=>{
+//   document.getElementsByTagName('textarea').map(textarea=>{
+//     console.log(textarea.getAttribute('id'))
+//   })
+// },1000)
