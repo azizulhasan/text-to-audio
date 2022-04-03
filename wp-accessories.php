@@ -129,3 +129,22 @@ add_action('admin_init', function () {
         // }
     }
 });
+
+
+/**
+ *
+ * Create short code for qr code.
+ * Example [wpa_listen_btn]
+ * @param $atts
+ * @return string
+ */
+function create_shortcode( $atts ) {
+
+    // $order = wc_get_order($atts['order_id']);
+
+   return  "<a type='button' id='wpa__listent_content' onclick='listenCotentInFrontend()' href='#'>Listen</a>";
+
+
+}
+
+add_shortcode( 'wpa_listen_btn', 'create_shortcode' );

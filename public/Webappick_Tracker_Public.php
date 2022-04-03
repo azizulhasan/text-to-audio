@@ -98,6 +98,13 @@ class Webappick_Tracker_Public {
 
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/webappick-tracker-public.js', array( 'jquery' ), $this->version, false );
 
+
+		 /**
+         * Looad wp-speeh script
+         *  */ 
+        wp_enqueue_script( 'wpa-speach', plugin_dir_url( __DIR__ ) . 'admin/js/wp-accessories.js', array(  ), $this->version, true );
+
+
 	}
 
 }

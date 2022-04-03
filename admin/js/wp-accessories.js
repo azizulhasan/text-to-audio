@@ -114,7 +114,7 @@ function captalizeString(string){
 /**
  * Listent/Pause/Resume content.
  */
-function listenCotent(){
+function listenCotentInDashboard(){
   let listen_btn = document.getElementById('wpa__listent_content');
   let  textarea__content = document.getElementById('content_ifr').contentWindow.document.body;
   utterence.text = textarea__content.innerHTML;
@@ -122,6 +122,16 @@ function listenCotent(){
    * Stop recording before listening.
    */
   recognition.stop();
+  startReadingContent(listen_btn)
+}
+
+
+/**
+ * Start Reading content
+ */
+
+function startReadingContent(){
+  let listen_btn = document.getElementById('wpa__listent_content');
   if(listen_status == 'listen'){
     speechSynthesis.speak(utterence);
     listen_btn.innerHTML = 'Pause'
@@ -137,12 +147,32 @@ function listenCotent(){
   }
 }
 
+/**
+ * Read the blog
+ */
+
+
+
+function listenCotentInFrontend(){
+
+  let  content = document.getElementsByClassName('entry-content')
+  let  title = document.getElementsByClassName('entry-title')
+  let  posted_on = document.getElementsByClassName('post-on')
+  let  posted_by = document.getElementsByClassName('post-author')
+  
+  let read__content = title[0].innerHTML;
+  // read__content += "posten on "+posted_on[0].innerHTML;
+  // read__content += "posten by "+posted_by[0].innerHTML;
+  read__content += content[0].innerHTML;
+  utterence.text = read__content;
+  startReadingContent()
+}
+
 
 /**
  * After ending reading the content.
  */
- utterence.addEventListener('end', function(event) {
-  console.log(event)
+utterence.addEventListener('end', function(event) {
   document.getElementById("wpa__listent_content").innerHTML = 'Listen';
   listen_status = 'listen';
 });
@@ -163,6 +193,7 @@ Object.values(document.getElementsByTagName('textarea')).forEach((textarea, inde
     record_btn.innerHTML = 'Stop'
   })
 })
+
 // setTimeout(()=>{
 //   document.getElementsByTagName('textarea').map(textarea=>{
 //     console.log(textarea.getAttribute('id'))
