@@ -151,15 +151,13 @@ function startReadingContent(){
  * Read the blog
  */
 
-
-
 function listenCotentInFrontend(){
 
   let  content = document.getElementsByClassName('entry-content')
   let  title = document.getElementsByClassName('entry-title')
   let  posted_on = document.getElementsByClassName('post-on')
   let  posted_by = document.getElementsByClassName('post-author')
-  
+
   let read__content = title[0].innerHTML;
   // read__content += "posten on "+posted_on[0].innerHTML;
   // read__content += "posten by "+posted_by[0].innerHTML;
