@@ -66,8 +66,9 @@ class Webappick_Tracker_Hooks {
  
         ?>
         <div class="wpa_metabox">
-            <a type="button" id="wpa__start__record" href="#">Start</a>
-            <a type="button" id="wpa__listent_content" href="#">Listen</a>
+        <a type="button" id="wpa__start__record" href="#">Start</a>
+        <a type="button" id="wpa__listent_content" href="#">Listen</a>
+            
     </div>
 
         <?php
