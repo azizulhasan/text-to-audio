@@ -36,9 +36,6 @@ class Webappick_Tracker_Hooks {
 	public static function activate() {
 
 	}
-
-
-
         /**
      * Register MetaBox to add PDF Download Button
      */

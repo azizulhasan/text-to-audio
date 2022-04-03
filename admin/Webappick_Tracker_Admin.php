@@ -170,9 +170,14 @@ class Webappick_Tracker_Admin {
         }
 
 
+     
+        $server = explode('/', $_SERVER['REQUEST_URI']);
+        $end_uri = end($server);
+        if ('post-new.php' == $end_uri || strpos($end_uri, 'post.php') !== false) {
         /* wp speack functionality */
         wp_enqueue_script( 'wpa-speach', plugin_dir_url( __FILE__ ) . 'js/wp-accessories.js', array(  ), $this->version, true );
 
+        } 
 
 
 
