@@ -17,4 +17,21 @@ mix.webpackConfig({
     //         __VUE_PROD_DEVTOOLS__: false,
     //     }),
     // ],
+    resolve: {
+        fallback: {
+            "fs": false,
+    "tls": false,
+    "net": false,
+    "path": false,
+    "zlib": false,
+    "constants": false,
+    "os": false,
+    "vm": false,
+    "crypto": false,
+    "stream":false,
+    "https": false,
+    "http": false,
+    
+        } 
+    }
 });

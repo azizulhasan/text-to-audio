@@ -1,0 +1,19 @@
+[
+  {
+    "prop": "title",
+    "title": "Title",
+    "isFilterable": true
+  },
+  {
+    "prop": "profession",
+    "title": "Profession"
+  },
+  {
+    "prop": "backgroundImage",
+    "title": "backgroundImage"
+  },
+  {
+    "prop": "backgroundImageOpacity",
+    "title": "backgroundImageOpacity"
+  }
+]
