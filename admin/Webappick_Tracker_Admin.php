@@ -218,7 +218,7 @@ class Webappick_Tracker_Admin {
      * Webappick main menu page callback
      */
     public function webappick_tracker_vue_layout() {
-        echo "<div class='wrap'><div id='app'></div></div>";
+        echo "<div class='wpwrap'><div id='app'></div></div>";
     }
 
 }
