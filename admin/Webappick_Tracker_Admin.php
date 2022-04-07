@@ -72,7 +72,7 @@ class Webappick_Tracker_Admin {
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
-        // if( isset($_REQUEST['page']) && ( 'webappick-tracker-react' == $_REQUEST['page'] || 'webappick-tracker' == $_REQUEST['page'] ) ) {
+        if( isset($_REQUEST['page']) && ( 'webappick-tracker-react' == $_REQUEST['page'] || 'webappick-tracker' == $_REQUEST['page'] ) ) {
 
             /* Code Highlight for development */
             wp_enqueue_style('vs2015', plugin_dir_url(__FILE__) . 'css/libs/vs2015.css', array(), $this->version, 'all');
@@ -101,7 +101,7 @@ class Webappick_Tracker_Admin {
 
             /* Dashicons */
             wp_enqueue_style('dashicons');
-        // }
+        }
 
 	}
 
@@ -123,7 +123,7 @@ class Webappick_Tracker_Admin {
 		 * between the defined hooks and the functions defined in this
 		 * class.
 		 */
-        // if( isset($_REQUEST['page']) && ( 'webappick-tracker-react' == $_REQUEST['page'] || 'webappick-tracker' == $_REQUEST['page'] ) ) {
+        if( isset($_REQUEST['page']) && ( 'webappick-tracker-react' == $_REQUEST['page'] || 'webappick-tracker' == $_REQUEST['page'] ) ) {
 		/* Bootstrap JS */
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/libs/bootstrap.bundle.min.js', array( 'jquery' ), $this->version, true );
 
@@ -168,12 +168,13 @@ class Webappick_Tracker_Admin {
                 'server' => $_SERVER,
                 'url' => $_SERVER['REQUEST_URI']
             ]);
-        // }
-
+        
+        }
         /**
          * Looad wp-speeh script
          *  */ 
         wp_enqueue_script( 'wpa-speach', plugin_dir_url( __FILE__ ) . 'js/wp-accessories.js', array(  ), $this->version, true );
+        wp_enqueue_script('wpa-axios', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js', array() , $this->version, true);
 
 
 

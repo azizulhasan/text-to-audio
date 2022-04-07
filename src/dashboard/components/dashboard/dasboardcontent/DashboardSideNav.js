@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { getUserName } from "../../context/utilities";
 
 export default function DashboardSideNav() {
 
@@ -32,10 +31,6 @@ export default function DashboardSideNav() {
               Settings
             </Link>
           </div>
-        </div>
-        <div className="sb-sidenav-footer">
-          <div className="small">Logged in as:</div>
-          {getUserName()}
         </div>
       </nav>
     </div>

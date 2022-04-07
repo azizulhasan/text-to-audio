@@ -40,7 +40,17 @@ if ("speechSynthesis" in window) {
 }
 
 
-localStorage.setItem('recordStarted', false)
+
+/**
+ * 
+ * @param {*} textarea_id 
+ */
+
+ window.onload = function(){
+  localStorage.setItem('recordStarted', false)
+  localStorage.setItem('listening_textarea', 'content_ifr')
+}
+window.onload()
 
 /**
  * Start recording.
@@ -116,8 +126,17 @@ function captalizeString(string){
  */
 function listenCotentInDashboard(){
   let listen_btn = document.getElementById('wpa__listent_content');
-  let  textarea__content = document.getElementById('content_ifr').contentWindow.document.body;
+  let  textarea__content = '';
+  if(localStorage.getItem('listening_textarea') !== null && localStorage.getItem('listening_textarea') != 'content_ifr'){
+    textarea__content = document.getElementById(localStorage.getItem('listening_textarea'));
+  }else{
+    textarea__content = document.getElementById('content_ifr').contentWindow.document.body;
+  }
+
+  // console.log(textarea__content);
+  // return;
   utterence.text = textarea__content.innerHTML;
+
   /**
    * Stop recording before listening.
    */
@@ -176,24 +195,42 @@ utterence.addEventListener('end', function(event) {
 });
 
 
-
+/**
+ * Get all textarea and start recording on focus event and stop recording on focusout event.
+ */
 Object.values(document.getElementsByTagName('textarea')).forEach((textarea, index)=>{
   console.log(textarea.getAttribute('id'))
-  textarea.addEventListener('focus', function(){
-    if(textarea.getAttribute('id') == 'content'){
-      startRecording('content_ifr')
-    }else{
-      startRecording(textarea.getAttribute('id'))
+  let record_btn = document.getElementById('wpa__start__record')
 
-    }
-    let record_btn = document.getElementById('wpa__start__record')
+  /**
+   * Start recording on focus event.
+   */
+  textarea.addEventListener('focus', function(){
+    /**
+     * Stop listening before recording.
+     */
+    speechSynthesis.cancel();
+    let listen_btn = document.getElementById('wpa__listent_content');
+    listen_btn.innerHTML = 'Listen'
+    listen_status = 'listen';
+    /**
+     * Start Recording.
+     */
+    startRecording(textarea.getAttribute('id'))
+    localStorage.setItem('listening_textarea', textarea.getAttribute('id'))
     record__status = 'record';
     record_btn.innerHTML = 'Stop'
   })
+
+  /**
+   * Stop recording on focusout event.
+   */
+  textarea.addEventListener('focusout', function(){
+    // recognition.stop();
+    // localStorage.setItem('recordStarted', false)
+    // record__status = 'record';
+    // record_btn.innerHTML = 'Start'
+  })
 })
 
-// setTimeout(()=>{
-//   document.getElementsByTagName('textarea').map(textarea=>{
-//     console.log(textarea.getAttribute('id'))
-//   })
-// },1000)
+
