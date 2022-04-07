@@ -142,9 +142,10 @@ function create_shortcode( $atts ) {
 
     // $order = wc_get_order($atts['order_id']);
 
-   return  "<a type='button' id='wpa__listent_content' onclick='listenCotentInFrontend()' href='#'>Listen</a>";
+   return  "<button type='button' id='wpa__listent_content' onclick='listenCotentInFrontend()' >Listen</button>";
+
 
 
 }
 
-add_shortcode( 'wpa_listen_btn', 'create_shortcode' );
+add_shortcode( 'wps_listen_btn', 'create_shortcode' );

@@ -40,18 +40,23 @@ class Webappick_Tracker_Hooks {
      * Register MetaBox to add PDF Download Button
      */
     public function add_custom_meta_box() {
+        
+
         add_meta_box(
-            'wpa-meta-box',
-            'Accessories',
+            'wps22-meta-box',
+            'WP Speech',
             array(
                 $this,
                 'wpa_meta_box',
             ),
-            'post',
+            get_current_screen()->post_type,
             'side',
             'high',
             null
         );
+        
+
+
     }
 
 
@@ -59,12 +64,12 @@ class Webappick_Tracker_Hooks {
      * Add meta box for record, re-record, listen content with loud.
      */
     public function wpa_meta_box() {
-        global $post;
  
         ?>
         <div class="wpa_metabox">
-        <a type="button" id="wpa__start__record" onclick="startRecording()" href="#">Start</a>
-        <a type="button" id="wpa__listent_content" onclick="listenCotentInDashboard()" href="#">Listen</a>
+        <button type="button" id="wpa__start__record" onclick="startRecording()">Start</button>
+        <button type="button" id="wpa__listent_content" onclick="listenCotentInDashboard()">Listen</button>
+
             
     </div>
 
