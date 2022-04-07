@@ -18,33 +18,28 @@ class Webappick_Tracker_Api_Routes   {
 
     public function __construct($current_user = null) {
         $this->version = 'v1';
-        $this->namespace = 'webappick_tracker/'.$this->version;
-        $this->rest_base  = '/tracker';
+        $this->namespace = 'wpa/'.$this->version;
+        $this->rest_base  = '/accessories';
         $this->current_user = $current_user;
-        add_action( 'rest_api_init', [$this, 'webappick_tracker_register_routes'] );
+        add_action( 'rest_api_init', [$this, 'wpa_accessories_register_routes'] );
     }
 
     /**
      * Register Routes
      */
-    public function webappick_tracker_register_routes() {
+    public function wpa_accessories_register_routes() {
         // Register settings route.
         register_rest_route(
             $this->namespace,
-            $this->rest_base.'/all',
+            $this->rest_base.'/record',
             array(
                 array(
-                    'methods'             => \WP_REST_Server::READABLE,
-                    'callback'            => array( $this, 'get_all_plugins_data' ),
-                    'permission_callback' => array( $this, 'get_route_access' ),
-                    'args'                => array(),
-                ),
-                array(
-                    'methods'             => \WP_REST_Server::CREATABLE,
-                    'callback'            => array( $this, 'search_plugin_data' ),
+                    'methods'             => \WP_REST_Server::ALLMETHODS,
+                    'callback'            => array( $this, 'wpa_manage_record_data' ),
                     'permission_callback' => array( $this, 'get_route_access' ),
                     'args'                => array(),
                 )
+                
             )
         );
         // Get single product details.
@@ -121,17 +116,167 @@ class Webappick_Tracker_Api_Routes   {
     /**
      * Get all plugins data.
      */
-    public function get_all_plugins_data(  $request ) {
-//        check_ajax_referer( 'wp_rest', 'rest_nonce');
-//        if ( ! wp_verify_nonce( $retrieved_nonce, 'wp_rest' ) ) {
-//            wp_send_json(['data'=> 'Nonce is not verified']);
-//            wp_die();
-//        }
+    public function wpa_manage_record_data(  $request ) {
+        // $retrieved_nonce = isset( $request['rest_nonce'] ) ? sanitize_text_field( wp_unslash( $request['rest_nonce'] ) ) : '';
+        // if ( ! wp_verify_nonce( $retrieved_nonce, 'wp_rest' ) ) {
+        //     die( 'Failed security check' );
+        // }
+        $response['status'] = true;
 
-        global $wpdb;
-        $response = $wpdb->get_results("SELECT id ,created_at, plugin, site, url, first_name, last_name, admin_email FROM plugin_tracking GROUP BY url ORDER BY id DESC LIMIT 100", 'ARRAY_A');
+        $fields = json_decode($request['fields']);
+       
+        $response['data'] = $fields;
+        // save data about recording.
+	    if ( 'post' == $request['method'] ) {
+		    $fields = json_decode($request['fields']);
+            
+		    update_option('wpa_record_settings', $fields);
 
-        return rest_ensure_response( $response );
+            $response['data'] = get_option('wpa_record_settings');
+
+		    return rest_ensure_response( $response );
+	    }
+
+
+        $default_languages = array(
+            'af' => 'Afrikaans',
+            'ar' => 'العربية',
+            'ary' => 'العربية المغربية',
+            'as' => 'অসমীয়া',
+            'azb' => 'گؤنئی آذربایجان',
+            'az' => 'Azərbaycan dili',
+            'bel' => 'Беларуская мова',
+            'bg_BG' => 'Български',
+            'bn_BD' => 'বাংলা',
+            'bo' => 'བོད་ཡིག',
+            'bs_BA' => 'Bosanski',
+            'ca' => 'Català',
+            'ceb' => 'Cebuano',
+            'cs_CZ' => 'Čeština',
+            'cy' => 'Cymraeg',
+            'da_DK' => 'Dansk',
+            'de_DE_formal' => 'Deutsch (Sie)',
+            'de_DE' => 'Deutsch',
+            'de_CH_informal' => 'Deutsch (Schweiz, Du)',
+            'de_CH' => 'Deutsch (Schweiz)',
+            'de_AT' => 'Deutsch (Österreich)',
+            'dsb' => 'Dolnoserbšćina',
+            'dzo' => 'རྫོང་ཁ',
+            'el' => 'Ελληνικά',
+            'en_CA' => 'English (Canada)',
+            'en_NZ' => 'English (New Zealand)',
+            'en_ZA' => 'English (South Africa)',
+            'en_GB' => 'English (UK)',
+            'en_AU' => 'English (Australia)',
+            'eo' => 'Esperanto',
+            'es_DO' => 'Español de República Dominicana',
+            'es_CR' => 'Español de Costa Rica',
+            'es_VE' => 'Español de Venezuela',
+            'es_CO' => 'Español de Colombia',
+            'es_CL' => 'Español de Chile',
+            'es_UY' => 'Español de Uruguay',
+            'es_PR' => 'Español de Puerto Rico',
+            'es_ES' => 'Español',
+            'es_GT' => 'Español de Guatemala',
+            'es_PE' => 'Español de Perú',
+            'es_MX' => 'Español de México',
+            'es_EC' => 'Español de Ecuador',
+            'es_AR' => 'Español de Argentina',
+            'et' => 'Eesti',
+            'eu' => 'Euskara',
+            'fa_AF' => '(فارسی (افغانستان',
+            'fa_IR' => 'فارسی',
+            'fi' => 'Suomi',
+            'fr_FR' => 'Français',
+            'fr_CA' => 'Français du Canada',
+            'fr_BE' => 'Français de Belgique',
+            'fur' => 'Friulian',
+            'gd' => 'Gàidhlig',
+            'gl_ES' => 'Galego',
+            'gu' => 'ગુજરાતી',
+            'haz' => 'هزاره گی',
+            'he_IL' => 'עִבְרִית',
+            'hi_IN' => 'हिन्दी',
+            'hr' => 'Hrvatski',
+            'hsb' => 'Hornjoserbšćina',
+            'hu_HU' => 'Magyar',
+            'hy' => 'Հայերեն',
+            'id_ID' => 'Bahasa Indonesia',
+            'is_IS' => 'Íslenska',
+            'it_IT' => 'Italiano',
+            'ja' => '日本語',
+            'jv_ID' => 'Basa Jawa',
+            'ka_GE' => 'ქართული',
+            'kab' => 'Taqbaylit',
+            'kk' => 'Қазақ тілі',
+            'km' => 'ភាសាខ្មែរ',
+            'kn' => 'ಕನ್ನಡ',
+            'ko_KR' => '한국어',
+            'ckb' => 'كوردی‎',
+            'lo' => 'ພາສາລາວ',
+            'lt_LT' => 'Lietuvių kalba',
+            'lv' => 'Latviešu valoda',
+            'mk_MK' => 'Македонски јазик',
+            'ml_IN' => 'മലയാളം',
+            'mn' => 'Монгол',
+            'mr' => 'मराठी',
+            'ms_MY' => 'Bahasa Melayu',
+            'my_MM' => 'ဗမာစာ',
+            'nb_NO' => 'Norsk bokmål',
+            'ne_NP' => 'नेपाली',
+            'nl_NL_formal' => 'Nederlands (Formeel)',
+            'nl_BE' => 'Nederlands (België)',
+            'nl_NL' => 'Nederlands',
+            'nn_NO' => 'Norsk nynorsk',
+            'oci' => 'Occitan',
+            'pa_IN' => 'ਪੰਜਾਬੀ',
+            'pl_PL' => 'Polski',
+            'ps' => 'پښتو',
+            'pt_PT' => 'Português',
+            'pt_PT_ao90' => 'Português (AO90)',
+            'pt_AO' => 'Português de Angola',
+            'pt_BR' => 'Português do Brasil',
+            'rhg' => 'Ruáinga',
+            'ro_RO' => 'Română',
+            'ru_RU' => 'Русский',
+            'sah' => 'Сахалыы',
+            'snd' => 'سنڌي',
+            'si_LK' => 'සිංහල',
+            'sk_SK' => 'Slovenčina',
+            'skr' => 'سرائیکی',
+            'sl_SI' => 'Slovenščina',
+            'sq' => 'Shqip',
+            'sr_RS' => 'Српски језик',
+            'sv_SE' => 'Svenska',
+            'sw' => 'Kiswahili',
+            'szl' => 'Ślōnskŏ gŏdka',
+            'ta_IN' => 'தமிழ்',
+            'ta_LK' => 'தமிழ்',
+            'te' => 'తెలుగు',
+            'th' => 'ไทย',
+            'tl' => 'Tagalog',
+            'tr_TR' => 'Türkçe',
+            'tt_RU' => 'Татар теле',
+            'tah' => 'Reo Tahiti',
+            'ug_CN' => 'ئۇيغۇرچە',
+            'uk' => 'Українська',
+            'ur' => 'اردو',
+            'uz_UZ' => 'O‘zbekcha',
+            'vi' => 'Tiếng Việt',
+            'zh_TW' => '繁體中文',
+            'zh_HK' => '香港中文版	',
+            'zh_CN' => '简体中文',
+        );
+
+
+        // get data about recording.
+	    if ( 'get' == $request['method'] ) {
+
+            $response['data'] = get_option('wpa_record_settings');
+		    return rest_ensure_response( $response );
+	    }
+
+
 
     }
 

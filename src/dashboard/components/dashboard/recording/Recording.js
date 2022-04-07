@@ -7,15 +7,13 @@ import { ToggleButton, Form, Row, Col } from "react-bootstrap";
  */
 import { postWithoutImage, getData } from "../../context/utilities";
 import toast from "../../context/Notify";
+import { languages } from "./languages";
 
 export default function Recording() {
   const [settings, setSettings] = useState({
-    _id: "",
     wpa__recording__lang: "",
-    password: "",
-    password_confirm: "",
-    welcome_message: "",
-    welcome_message_is_display: true,
+    is_record_continously: true,
+    rest_nonce: wp_access.rest_nonce,
   });
   const [alertContent, setAlertContent] = useState({
     isValid: false,
@@ -23,19 +21,23 @@ export default function Recording() {
   });
   const [checked, setChecked] = useState(false);
 
-  /**
-   * Languages
-   */
-  const languages = ['en-US', 'bn-BD']
-
   useEffect(() => {
     /**
      * Get data from and display to table.
      */
-    // getData(process.env.REACT_APP_API_URL + "/api/settings").then((res) => {
-    //   setSettings(res.data[0]);
-    //   setChecked(res.data[0].welcome_message_is_display);
-    // });
+    let data = new FormData();
+    data.append("method", "get");
+     postWithoutImage(wp_access.api_url + "wpa/v1/accessories/record", data)
+     .then((res) => {
+
+       console.log(res)
+       setSettings(res.data);
+       setChecked(res.data.is_record_continously);
+     })
+     .catch((err) => {
+       console.log(err);
+     });
+
   }, []);
 
   /**
@@ -45,27 +47,7 @@ export default function Recording() {
   const handleChange = (e) => {
     setSettings({ ...settings, ...{ [e.target.name]: e.target.value } });
   };
-  /**
-   * Handle confirm password
-   */
-  const handleConfirmPassword = (e) => {
-    if (
-      e.target.name === "password_confirm" &&
-      settings.password !== e.target.value
-    ) {
-      setAlertContent({
-        ...{ isValid: false },
-        ...{ message: "Password should be same." },
-      });
-    } else {
-      setAlertContent({
-        ...{ isValid: true },
-        ...{ message: "Password matched." },
-      });
-    }
 
-    setSettings({ ...settings, ...{ [e.target.name]: e.target.value } });
-  };
   /**
    * Handle form Submit
    */
@@ -75,7 +57,8 @@ export default function Recording() {
      * Get full form data and modify them for saving to database.
      */
     let form = new FormData(e.target);
-    let data = {};
+
+    let formData = {};
     for (let [key, value] of form.entries()) {
       if (key === "" || value === "") {
         toast("Please fill the  field : " + key);
@@ -84,35 +67,22 @@ export default function Recording() {
         toast("Password should be matched");
         return;
       }
-
-      data[key] = value;
+      formData[key] = value;
     }
-
-    data.welcome_message_is_display = checked;
-    if (data._id !== undefined) {
-      postWithoutImage(
-        process.env.REACT_APP_API_URL + "/api/settings/" + data._id,
-        data
-      )
-        .then((res) => {
-          setSettings(res);
-          setChecked(res.welcome_message_is_display);
-          toast("Settings Data Updated");
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    } else {
-      postWithoutImage(process.env.REACT_APP_API_URL + "/api/settings", data)
-        .then((res) => {
-          setSettings(res);
-          setChecked(res.welcome_message_is_display);
-          toast("Settings Data Saved");
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }
+    formData.is_record_continously = checked;
+    let data = new FormData();
+    data.append("fields", JSON.stringify(formData));
+    data.append("method", "post");
+    postWithoutImage(wp_access.api_url + "wpa/v1/accessories/record", data)
+      .then((res) => {
+        console.log(res);
+        // setSettings(res);
+        // setChecked(res.is_record_continously);
+        toast("Settings Data Saved");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (
@@ -127,50 +97,51 @@ export default function Recording() {
           <h4>SpeechRecognition</h4>
         </Col>
       </Row>
-      <Form onSubmit={handleSubmit} >
-        <Row className="border " >
+      <Form onSubmit={handleSubmit}>
+        <Row className="border ">
           <Col
             xs={12}
-            sm={6}
-            lg={4}
+            sm={12}
+            lg={12}
             className="d-flex flex-col justify-content-start align-items-start"
           >
-            {settings._id && (
+            {settings.rest_nonce && (
               <Form.Control
                 type="text"
-                id="_id"
+                id="rest_nonce"
                 onChange={handleChange}
-                value={settings._id}
-                name="_id"
+                value={settings.rest_nonce}
+                name="rest_nonce"
                 placeholder="id"
                 hidden
               />
             )}
-            <Form.Group controlId="wpa__recording__lang">
-              <Form.Label>Language </Form.Label>
+            <Form.Group>
+              <Form.Label>Record In </Form.Label>
               <Form.Select
-                    name="wpa__recording__lang"
-                    onChange={handleChange}
-                    value={languages[0]}
-                    aria-label="Default select Language"
-                >
-                    <option disabled>Open this select menu</option>
-                    {languages.map((lang) => {
-                    return (
-                        <option key={lang} value={lang}>
-                        {lang[0].toUpperCase() + lang.slice(1)}
-                        </option>
-                    );
-                    })}
-                </Form.Select>
+                onChange={handleChange}
+                name="wpa__recording__lang"
+                value={settings.wpa__recording__lang}
+                aria-label="Default select example"
+              >
+                <option disabled> Default Record Language</option>
+                {Object.keys(languages).map((lang_code, index) => {
+                  return (
+                    <option key={index} value={lang_code}>
+                      {languages[lang_code]}
+                    </option>
+                  );
+                })}
+              </Form.Select>
             </Form.Group>
           </Col>
-          <Col xs={12} sm={6} lg={4} className="d-flex flex-col">
-          <Form.Group>
-          <Form.Label>Continuous Record</Form.Label>
+          <Col xs={12} sm={12} lg={12} className="d-flex flex-col mt-3">
+            <Form.Group>
+              <Form.Label>Continuous Record</Form.Label>
               <ToggleButton
                 id="toggle-check"
                 type="checkbox"
+                className="form-controll"
                 variant={checked ? "outline-primary" : "outline-danger"}
                 checked={checked}
                 value="1"
@@ -193,29 +164,15 @@ export default function Recording() {
               />
             </Form.Group>
           </Col> */}
-          <Col xs={12} sm={12} lg={4} className="d-flex flex-col mt-3">
-            <Form.Group>
-              <ToggleButton
-                className={"mt-4"}
-                id="toggle-check"
-                type="checkbox"
-                variant={checked ? "outline-primary" : "outline-danger"}
-                checked={checked}
-                value="1"
-                onChange={(e) => setChecked(e.currentTarget.checked)}
-              >
-                {checked ? "Shwo" : "Hide"}
-              </ToggleButton>
-            </Form.Group>
-          </Col>
-          
           <div className="d-grid gap-3 col-2 mx-auto mt-5 mb-4">
-            <button type="submit" className="azh_btn azh_btn_edit azh_btn azh_btn_edit-primary btn-center">
-              {settings._id ? "Update" : "Submit"}
+            <button
+              type="submit"
+              className="azh_btn azh_btn_edit azh_btn azh_btn_edit-primary btn-center"
+            >
+              Submit
             </button>
           </div>
         </Row>
-        
       </Form>
     </React.Fragment>
   );

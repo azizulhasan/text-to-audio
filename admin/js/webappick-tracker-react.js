@@ -350,12 +350,12 @@ var postWithoutImage = /*#__PURE__*/function () {
             data = _args2.length > 1 && _args2[1] !== undefined ? _args2[1] : {};
             _context2.next = 4;
             return fetch(url, {
-              headers: {
-                "Content-Type": "application/json"
-              },
+              // headers: {
+              //   "Content-Type": "application/json",
+              // },
               method: "POST",
               // *GET, POST, PUT, DELETE, etc.
-              body: JSON.stringify(data) // body data type must match "Content-Type" header
+              body: data // body data type must match "Content-Type" header
 
             });
 
@@ -1122,14 +1122,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* binding */ Recording)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Row.js");
-/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Col.js");
-/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Form.js");
-/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/ToggleButton.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Row.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Col.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Form.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/ToggleButton.js");
 /* harmony import */ var _context_utilities__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../context/utilities */ "./src/dashboard/components/context/utilities.js");
 /* harmony import */ var _context_Notify__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../context/Notify */ "./src/dashboard/components/context/Notify.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
-/* provided dependency */ var process = __webpack_require__(/*! process/browser.js */ "./node_modules/process/browser.js");
+/* harmony import */ var _languages__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./languages */ "./src/dashboard/components/dashboard/recording/languages.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
@@ -1161,14 +1161,12 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 
+
 function Recording() {
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
-    _id: "",
     wpa__recording__lang: "",
-    password: "",
-    password_confirm: "",
-    welcome_message: "",
-    welcome_message_is_display: true
+    is_record_continously: true,
+    rest_nonce: wp_access.rest_nonce
   }),
       _useState2 = _slicedToArray(_useState, 2),
       settings = _useState2[0],
@@ -1186,20 +1184,20 @@ function Recording() {
       _useState6 = _slicedToArray(_useState5, 2),
       checked = _useState6[0],
       setChecked = _useState6[1];
-  /**
-   * Languages
-   */
 
-
-  var languages = ['en-US', 'bn-BD'];
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     /**
      * Get data from and display to table.
      */
-    // getData(process.env.REACT_APP_API_URL + "/api/settings").then((res) => {
-    //   setSettings(res.data[0]);
-    //   setChecked(res.data[0].welcome_message_is_display);
-    // });
+    var data = new FormData();
+    data.append("method", "get");
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wpa/v1/accessories/record", data).then(function (res) {
+      console.log(res);
+      setSettings(res.data);
+      setChecked(res.data.is_record_continously);
+    })["catch"](function (err) {
+      console.log(err);
+    });
   }, []);
   /**
    * handle change
@@ -1207,28 +1205,6 @@ function Recording() {
    */
 
   var handleChange = function handleChange(e) {
-    setSettings(_objectSpread(_objectSpread({}, settings), _defineProperty({}, e.target.name, e.target.value)));
-  };
-  /**
-   * Handle confirm password
-   */
-
-
-  var handleConfirmPassword = function handleConfirmPassword(e) {
-    if (e.target.name === "password_confirm" && settings.password !== e.target.value) {
-      setAlertContent(_objectSpread(_objectSpread({}, {
-        isValid: false
-      }), {
-        message: "Password should be same."
-      }));
-    } else {
-      setAlertContent(_objectSpread(_objectSpread({}, {
-        isValid: true
-      }), {
-        message: "Password matched."
-      }));
-    }
-
     setSettings(_objectSpread(_objectSpread({}, settings), _defineProperty({}, e.target.name, e.target.value)));
   };
   /**
@@ -1243,7 +1219,7 @@ function Recording() {
      */
 
     var form = new FormData(e.target);
-    var data = {};
+    var formData = {};
 
     var _iterator = _createForOfIteratorHelper(form.entries()),
         _step;
@@ -1262,7 +1238,7 @@ function Recording() {
           return;
         }
 
-        data[key] = value;
+        formData[key] = value;
       }
     } catch (err) {
       _iterator.e(err);
@@ -1270,88 +1246,81 @@ function Recording() {
       _iterator.f();
     }
 
-    data.welcome_message_is_display = checked;
+    formData.is_record_continously = checked;
+    var data = new FormData();
+    data.append("fields", JSON.stringify(formData));
+    data.append("method", "post");
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wpa/v1/accessories/record", data).then(function (res) {
+      console.log(res); // setSettings(res);
+      // setChecked(res.is_record_continously);
 
-    if (data._id !== undefined) {
-      (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(process.env.REACT_APP_API_URL + "/api/settings/" + data._id, data).then(function (res) {
-        setSettings(res);
-        setChecked(res.welcome_message_is_display);
-        (0,_context_Notify__WEBPACK_IMPORTED_MODULE_2__["default"])("Settings Data Updated");
-      })["catch"](function (err) {
-        console.log(err);
-      });
-    } else {
-      (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(process.env.REACT_APP_API_URL + "/api/settings", data).then(function (res) {
-        setSettings(res);
-        setChecked(res.welcome_message_is_display);
-        (0,_context_Notify__WEBPACK_IMPORTED_MODULE_2__["default"])("Settings Data Saved");
-      })["catch"](function (err) {
-        console.log(err);
-      });
-    }
+      (0,_context_Notify__WEBPACK_IMPORTED_MODULE_2__["default"])("Settings Data Saved");
+    })["catch"](function (err) {
+      console.log(err);
+    });
   };
 
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_4__["default"], {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
       id: "settings",
       className: "mt-4",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"], {
         xs: 12,
         sm: 12,
         lg: 12,
         className: " justify-content-start align-items-start mt-2",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("h4", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h4", {
           children: "SpeechRecognition"
         })
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"], {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"], {
       onSubmit: handleSubmit,
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_4__["default"], {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
         className: "border ",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"], {
           xs: 12,
-          sm: 6,
-          lg: 4,
+          sm: 12,
+          lg: 12,
           className: "d-flex flex-col justify-content-start align-items-start",
-          children: [settings._id && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Control, {
+          children: [settings.rest_nonce && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Control, {
             type: "text",
-            id: "_id",
+            id: "rest_nonce",
             onChange: handleChange,
-            value: settings._id,
-            name: "_id",
+            value: settings.rest_nonce,
+            name: "rest_nonce",
             placeholder: "id",
             hidden: true
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Group, {
-            controlId: "wpa__recording__lang",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Label, {
-              children: "Language "
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Select, {
-              name: "wpa__recording__lang",
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Group, {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Label, {
+              children: "Record In "
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Select, {
               onChange: handleChange,
-              value: languages[0],
-              "aria-label": "Default select Language",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("option", {
+              name: "wpa__recording__lang",
+              value: settings.wpa__recording__lang,
+              "aria-label": "Default select example",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
                 disabled: true,
-                children: "Open this select menu"
-              }), languages.map(function (lang) {
-                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("option", {
-                  value: lang,
-                  children: lang[0].toUpperCase() + lang.slice(1)
-                }, lang);
+                children: " Default Record Language"
+              }), Object.keys(_languages__WEBPACK_IMPORTED_MODULE_3__.languages).map(function (lang_code, index) {
+                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
+                  value: lang_code,
+                  children: _languages__WEBPACK_IMPORTED_MODULE_3__.languages[lang_code]
+                }, index);
               })]
             })]
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"], {
           xs: 12,
-          sm: 6,
-          lg: 4,
-          className: "d-flex flex-col",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Group, {
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Label, {
+          sm: 12,
+          lg: 12,
+          className: "d-flex flex-col mt-3",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Group, {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Label, {
               children: "Continuous Record"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"], {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"], {
               id: "toggle-check",
               type: "checkbox",
+              className: "form-controll",
               variant: checked ? "outline-primary" : "outline-danger",
               checked: checked,
               value: "1",
@@ -1361,37 +1330,161 @@ function Recording() {
               children: checked ? "Record" : "Not Record"
             })]
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
-          xs: 12,
-          sm: 12,
-          lg: 4,
-          className: "d-flex flex-col mt-3",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Group, {
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"], {
-              className: "mt-4",
-              id: "toggle-check",
-              type: "checkbox",
-              variant: checked ? "outline-primary" : "outline-danger",
-              checked: checked,
-              value: "1",
-              onChange: function onChange(e) {
-                return setChecked(e.currentTarget.checked);
-              },
-              children: checked ? "Shwo" : "Hide"
-            })
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
           className: "d-grid gap-3 col-2 mx-auto mt-5 mb-4",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
             type: "submit",
             className: "azh_btn azh_btn_edit azh_btn azh_btn_edit-primary btn-center",
-            children: settings._id ? "Update" : "Submit"
+            children: "Submit"
           })
         })]
       })
     })]
   });
 }
+
+/***/ }),
+
+/***/ "./src/dashboard/components/dashboard/recording/languages.js":
+/*!*******************************************************************!*\
+  !*** ./src/dashboard/components/dashboard/recording/languages.js ***!
+  \*******************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "languages": () => (/* binding */ languages)
+/* harmony export */ });
+var languages = {
+  "af": "Afrikaans",
+  "ar": "العربية",
+  "ary": "العربية المغربية",
+  "as": "অসমীয়া",
+  "azb": "گؤنئی آذربایجان",
+  "az": "Azərbaycan dili",
+  "bel": "Беларуская мова",
+  "bg_BG": "Български",
+  "bn_BD": "বাংলা",
+  "bo": "བོད་ཡིག",
+  "bs_BA": "Bosanski",
+  "ca": "Català",
+  "ceb": "Cebuano",
+  "cs_CZ": "Čeština",
+  "cy": "Cymraeg",
+  "da_DK": "Dansk",
+  "de_DE_formal": "Deutsch (Sie)",
+  "de_DE": "Deutsch",
+  "de_CH_informal": "Deutsch (Schweiz, Du)",
+  "de_CH": "Deutsch (Schweiz)",
+  "de_AT": "Deutsch (Österreich)",
+  "dsb": "Dolnoserbšćina",
+  "dzo": "རྫོང་ཁ",
+  "el": "Ελληνικά",
+  "en_CA": "English (Canada)",
+  "en_NZ": "English (New Zealand)",
+  "en_ZA": "English (South Africa)",
+  "en_GB": "English (UK)",
+  "en_AU": "English (Australia)",
+  "eo": "Esperanto",
+  "es_DO": "Español de República Dominicana",
+  "es_CR": "Español de Costa Rica",
+  "es_VE": "Español de Venezuela",
+  "es_CO": "Español de Colombia",
+  "es_CL": "Español de Chile",
+  "es_UY": "Español de Uruguay",
+  "es_PR": "Español de Puerto Rico",
+  "es_ES": "Español",
+  "es_GT": "Español de Guatemala",
+  "es_PE": "Español de Perú",
+  "es_MX": "Español de México",
+  "es_EC": "Español de Ecuador",
+  "es_AR": "Español de Argentina",
+  "et": "Eesti",
+  "eu": "Euskara",
+  "fa_AF": "(فارسی (افغانستان",
+  "fa_IR": "فارسی",
+  "fi": "Suomi",
+  "fr_FR": "Français",
+  "fr_CA": "Français du Canada",
+  "fr_BE": "Français de Belgique",
+  "fur": "Friulian",
+  "gd": "Gàidhlig",
+  "gl_ES": "Galego",
+  "gu": "ગુજરાતી",
+  "haz": "هزاره گی",
+  "he_IL": "עִבְרִית",
+  "hi_IN": "हिन्दी",
+  "hr": "Hrvatski",
+  "hsb": "Hornjoserbšćina",
+  "hu_HU": "Magyar",
+  "hy": "Հայերեն",
+  "id_ID": "Bahasa Indonesia",
+  "is_IS": "Íslenska",
+  "it_IT": "Italiano",
+  "ja": "日本語",
+  "jv_ID": "Basa Jawa",
+  "ka_GE": "ქართული",
+  "kab": "Taqbaylit",
+  "kk": "Қазақ тілі",
+  "km": "ភាសាខ្មែរ",
+  "kn": "ಕನ್ನಡ",
+  "ko_KR": "한국어",
+  "ckb": "كوردی‎",
+  "lo": "ພາສາລາວ",
+  "lt_LT": "Lietuvių kalba",
+  "lv": "Latviešu valoda",
+  "mk_MK": "Македонски јазик",
+  "ml_IN": "മലയാളം",
+  "mn": "Монгол",
+  "mr": "मराठी",
+  "ms_MY": "Bahasa Melayu",
+  "my_MM": "ဗမာစာ",
+  "nb_NO": "Norsk bokmål",
+  "ne_NP": "नेपाली",
+  "nl_NL_formal": "Nederlands (Formeel)",
+  "nl_BE": "Nederlands (België)",
+  "nl_NL": "Nederlands",
+  "nn_NO": "Norsk nynorsk",
+  "oci": "Occitan",
+  "pa_IN": "ਪੰਜਾਬੀ",
+  "pl_PL": "Polski",
+  "ps": "پښتو",
+  "pt_PT": "Português",
+  "pt_PT_ao90": "Português (AO90)",
+  "pt_AO": "Português de Angola",
+  "pt_BR": "Português do Brasil",
+  "rhg": "Ruáinga",
+  "ro_RO": "Română",
+  "ru_RU": "Русский",
+  "sah": "Сахалыы",
+  "snd": "سنڌي",
+  "si_LK": "සිංහල",
+  "sk_SK": "Slovenčina",
+  "skr": "سرائیکی",
+  "sl_SI": "Slovenščina",
+  "sq": "Shqip",
+  "sr_RS": "Српски језик",
+  "sv_SE": "Svenska",
+  "sw": "Kiswahili",
+  "szl": "Ślōnskŏ gŏdka",
+  "ta_IN": "தமிழ்",
+  "ta_LK": "தமிழ்",
+  "te": "తెలుగు",
+  "th": "ไทย",
+  "tl": "Tagalog",
+  "tr_TR": "Türkçe",
+  "tt_RU": "Татар теле",
+  "tah": "Reo Tahiti",
+  "ug_CN": "ئۇيغۇرچە",
+  "uk": "Українська",
+  "ur": "اردو",
+  "uz_UZ": "O‘zbekcha",
+  "vi": "Tiếng Việt",
+  "zh_TW": "繁體中文",
+  "zh_HK": "香港中文版\t",
+  "zh_CN": "简体中文"
+};
 
 /***/ }),
 

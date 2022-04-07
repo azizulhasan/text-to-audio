@@ -38,11 +38,11 @@ export const postData = async (url = "", data = {}) => {
 export const postWithoutImage = async (url = "", data = {}) => {
   // Default options are marked with *
   const response = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-    },
+    // headers: {
+    //   "Content-Type": "application/json",
+    // },
     method: "POST", // *GET, POST, PUT, DELETE, etc.
-    body: JSON.stringify(data), // body data type must match "Content-Type" header
+    body: data, // body data type must match "Content-Type" header
   });
   const responseData = await response.json(); // parses JSON response into native JavaScript objects
 
