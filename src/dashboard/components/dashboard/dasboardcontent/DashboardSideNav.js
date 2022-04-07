@@ -17,14 +17,26 @@ export default function DashboardSideNav() {
       >
         <div className="sb-sidenav-menu">
           <div className="nav">
-            <Link className="nav-link" to={"/dashboard/mail"} >
+            <Link className="nav-link" to={"/"} >
               <div className="sb-nav-link-icon">
                 <i className="fas fa-envelope"></i>
               </div>
-              Mail
+              Recording
+            </Link>
+            <Link className="nav-link" to={"/listening"} >
+              <div className="sb-nav-link-icon">
+                <i className="fas fa-envelope"></i>
+              </div>
+              Listening
+            </Link>
+            <Link className="nav-link" to={"/customize"} >
+              <div className="sb-nav-link-icon">
+                <i className="fas fa-envelope"></i>
+              </div>
+              Customization
             </Link>
             {/* Settings menu */}
-            <Link className="nav-link" to= { "/dashboard/settings"}>
+            <Link className="nav-link" to= { "/settings"}>
               <div className="sb-nav-link-icon">
                 <i className="fas fa-wrench"></i>
               </div>

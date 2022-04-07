@@ -96,61 +96,16 @@ export default function Mail() {
         isWelcomeModalShow={isWelcomeModalShow}
       />
 
-      <Row className="mb-4 p-2">
+      <Row className="p-0">
         <Col
           xs={12}
           lg={12}
           className="d-flex flex-col justify-content-start align-items-start"
         >
-          <MailModal
-            updateBtn={updateBtn}
-            modalShow={modalShow}
-            lgShow={lgShow}
-            setMailData={setMailData}
-          />
+          
         </Col>
       </Row>
-      <Table bordered>
-        <thead>
-          <tr>
-            {STORY_HEADERS.map((hearder) => (
-              <th key={hearder.prop}>{hearder.title}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {mails.length &&
-            mails.map((experience, index) => (
-              <tr key={index}>
-                {Object.keys(experience).map((key) => {
-                  if ( key === "date" || key === "name" || key === "email" || key === "subject") {
-                    return (
-                      <td
-                        key={key}
-                        dangerouslySetInnerHTML={{ __html: experience[key] }}
-                      ></td>
-                    );
-                  }
-                })}
-                <td>
-                  <Button
-                    className="mr-2"
-                    bsPrefix="azh_btn azh_btn_edit"
-                    onClick={(e) => modalShow(true, mails[index]["_id"])}
-                  >
-                    Open
-                  </Button>
-                  <Button
-                    bsPrefix="azh_btn btn-danger azh_btn_experience"
-                    onClick={(e) => deleteMail(mails[index]["_id"])}
-                  >
-                    Delete
-                  </Button>
-                </td>
-              </tr>
-            ))}
-        </tbody>
-      </Table>
+      
     </React.Fragment>
   );
 }

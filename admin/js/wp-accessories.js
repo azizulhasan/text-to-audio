@@ -16,7 +16,7 @@ speechRecognitionList[1] = newGrammar; // should add the new SpeechGrammar objec
 recognition.continuous = true;
 recognition.lang = 'en-US';
 recognition.interimResults = false;
-recognition.maxAlternatives = 1;
+recognition.maxAlternatives = 2;
 
 
 
@@ -78,13 +78,13 @@ function startRecording(textarea_id = 'content_ifr') {
   }
   
   let textarea__content = '';
-  console.log(textarea_id)
+  // console.log(textarea_id)
   if(textarea_id == 'content_ifr'){
      textarea__content = document.getElementById(textarea_id).contentWindow.document.body;
   }else{
     textarea__content = document.getElementById(textarea_id)
   }
-  console.log(textarea__content.innerHTML);
+  // console.log(textarea__content.innerHTML);
 
 
   let current_text = "";
@@ -141,6 +141,8 @@ function listenCotentInDashboard(){
    * Stop recording before listening.
    */
   recognition.stop();
+  localStorage.setItem('recordStarted', false)
+
   startReadingContent(listen_btn)
 }
 
@@ -199,7 +201,7 @@ utterence.addEventListener('end', function(event) {
  * Get all textarea and start recording on focus event and stop recording on focusout event.
  */
 Object.values(document.getElementsByTagName('textarea')).forEach((textarea, index)=>{
-  console.log(textarea.getAttribute('id'))
+  // console.log(textarea.getAttribute('id'))
   let record_btn = document.getElementById('wpa__start__record')
 
   /**

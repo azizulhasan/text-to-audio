@@ -17,14 +17,14 @@ import {
 /**
  * Dashboard Components
  */
-import DashboardContent from "./dasboardcontent/DashboardContent";
 import DashboardTopNav from "./dasboardcontent/DashboardTopNav";
 import DashboardSideNav from "./dasboardcontent/DashboardSideNav";
-import Mail from "./mail/Mail";
-
-
-
 import Settings from "./settings/Settings";
+import Recording from "./recording/Recording";
+import Listening from "./listening/Listening";
+import Customize from "./customize/Customize";
+
+
 
 export default function Dashboard() {
   // authenTicateUser();
@@ -61,10 +61,10 @@ export default function Dashboard() {
           <main>
             <div className="container-fluid">
               <Routes>
-                <Route path="/" element={<DashboardContent />} />
-                <Route path={ "/dashboard/mail"} element={<Mail />} />
-    
-                <Route path={"/dashboard/settings"} element={<Settings />} />
+                <Route path="/" element={<Recording />} />
+                <Route path={ "/listening"} element={<Listening/>} />
+                <Route path={ "/customize"} element={<Customize/>} />
+                <Route path={"/settings"} element={<Settings />} />
               </Routes>
             </div>
           </main>
