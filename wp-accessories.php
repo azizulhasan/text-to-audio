@@ -191,8 +191,8 @@ function wps_clean_content($text)
  */
 function create_shortcode( $atts ) {
 
-    $btn_no = WP_SPEACH_FRONT_LISTEN_BTN_NO;
-
+    static  $btn_no = 0;
+    $btn_no++;
     // https://responsivevoice.com/wordpress-text-to-speech-plugin/
 
     $title = get_the_title();
@@ -215,11 +215,11 @@ function create_shortcode( $atts ) {
     
     ';
     $class = (isset($atts['class'])) && strlen($atts['class'])? $atts['class']: "";
-    $button = '<button id="wpa__listent_content" style="width:100%" class="'.$class.'" type="button"  title="WP Speech:  Tap to listen post.">' . $speakIcon . ' </button>
+    $button = '<button id="wps__listent_content_'.$btn_no.'" style="width:100%" class="'.$class.'" type="button"  title="WP Speech:  Tap to listen post.">' . $speakIcon . ' </button>
         <script>
-        wpa__listent_content.onclick = function(){
+        wps__listent_content_'.$btn_no.'.onclick = function(){
                 
-                listenCotentInFrontend("' . $content . '");
+                listenCotentInFrontend("' . $content . '", "wps__listent_content_'.$btn_no.'");
                 
             };
         </script>

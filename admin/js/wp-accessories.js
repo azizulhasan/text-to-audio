@@ -48,7 +48,7 @@ if ("speechSynthesis" in window) {
 
  window.onload = function(){
   localStorage.setItem('recordStarted', false)
-  localStorage.setItem('listening_textarea', 'content_ifr')
+  localStorage.setItem('current_reading_content_id', 'content_ifr')
 }
 window.onload()
 
@@ -77,14 +77,14 @@ function startRecording(textarea_id = 'content_ifr') {
     if(record_btn) record_btn.innerHTML = "Stop"
   }
   
-  let textarea__content = '';
+  let current_reading_content = '';
   // console.log(textarea_id)
   if(textarea_id == 'content_ifr'){
-     textarea__content = document.getElementById(textarea_id).contentWindow.document.body;
+     current_reading_content = document.getElementById(textarea_id).contentWindow.document.body;
   }else{
-    textarea__content = document.getElementById(textarea_id)
+    current_reading_content = document.getElementById(textarea_id)
   }
-  // console.log(textarea__content.innerHTML);
+  // console.log(current_reading_content.innerHTML);
 
 
   let current_text = "";
@@ -92,9 +92,9 @@ function startRecording(textarea_id = 'content_ifr') {
     let event__length = event.results.length;
     current_text = event.results[event__length - 1][0].transcript + ".";
     current_text = captalizeString(current_text)
-    let previous_text = textarea__content.innerHTML;
+    let previous_text = current_reading_content.innerHTML;
     
-    textarea__content.innerHTML = previous_text + current_text;
+    current_reading_content.innerHTML = previous_text + current_text;
   };
 
 };
@@ -126,24 +126,25 @@ function captalizeString(string){
  */
 function listenCotentInDashboard(){
   let listen_btn = document.getElementById('wpa__listent_content');
-  let  textarea__content = '';
-  if(localStorage.getItem('listening_textarea') !== null && localStorage.getItem('listening_textarea') != 'content_ifr'){
-    textarea__content = document.getElementById(localStorage.getItem('listening_textarea'));
+  let  current_reading_content = '';
+  if(localStorage.getItem('current_reading_content_id') !== null && localStorage.getItem('current_reading_content_id') != 'content_ifr'){
+    current_reading_content = document.getElementById(localStorage.getItem('current_reading_content_id'));
   }else{
-    textarea__content = document.getElementById('content_ifr').contentWindow.document.body;
+    current_reading_content = document.getElementById('content_ifr').contentWindow.document.body;
   }
 
-  // console.log(textarea__content);
+  // console.log(current_reading_content);
   // return;
-  utterence.text = textarea__content.innerHTML;
+  utterence.text = current_reading_content.innerText;
 
   /**
    * Stop recording before listening.
    */
   recognition.stop();
   localStorage.setItem('recordStarted', false)
+  localStorage.setItem('current_play_btn_id', 'wpa__listent_content')
 
-  startReadingContent(listen_btn)
+  startReadingContent('wpa__listent_content')
 }
 
 
@@ -151,9 +152,8 @@ function listenCotentInDashboard(){
  * Start Reading content
  */
 
-function startReadingContent(){
-  let listen_btn = document.getElementById('wpa__listent_content');
-  console.log(listen_btn.innerText)
+function startReadingContent(btn_id){
+  let listen_btn = document.getElementById(btn_id);
   if(listen_status == 'listen'){
     speechSynthesis.speak(utterence);
     listen_btn.innerHTML = '<span class="dashicons dashicons-controls-pause"></span> Pause';
@@ -178,21 +178,16 @@ function startReadingContent(){
  * Read the blog
  */
 
-function listenCotentInFrontend(content){
+function listenCotentInFrontend(content ="Hellow World", btn_id= 'wpa__listent_content'){
 
-  // let  content = document.getElementsByClassName('entry-content')
-  let  title = document.getElementsByClassName('entry-title')
-  let  posted_on = document.getElementsByClassName('post-on')
-  let  posted_by = document.getElementsByClassName('post-author')
-
-  let read__content = title[0].innerText;
-  // read__content += "posten on "+posted_on[0].innerHTML;
-  // read__content += "posten by "+posted_by[0].innerHTML;
-  // read__content += content[0].innerText;
-
-  // console.log(content)
+  /**
+     * Stop recording before listening.
+     */
+  recognition.stop();
+  localStorage.setItem('recordStarted', false)
+  localStorage.setItem('current_play_btn_id', btn_id)
   utterence.text = content;
-  startReadingContent()
+  startReadingContent(btn_id)
 }
 
 
@@ -201,7 +196,7 @@ function listenCotentInFrontend(content){
  */
 utterence.addEventListener('end', function(event) {
 
-  let listen_btn = document.getElementById("wpa__listent_content");
+  let listen_btn = document.getElementById(localStorage.getItem('current_play_btn_id'));
   listen_btn.innerHTML = '<span class="dashicons dashicons-image-rotate"></span> Replay';
   listen_btn.setAttribute('title', "WP Speech: Replay")
   listen_status = 'listen';
@@ -232,7 +227,7 @@ Object.values(document.getElementsByTagName('textarea')).forEach((textarea, inde
      * Start Recording.
      */
     startRecording(textarea.getAttribute('id'))
-    localStorage.setItem('listening_textarea', textarea.getAttribute('id'))
+    localStorage.setItem('current_reading_content_id', textarea.getAttribute('id'))
     record__status = 'record';
     if(record_btn) record_btn.innerHTML = "Stop"
   })

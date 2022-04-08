@@ -68,7 +68,7 @@ class Webappick_Tracker_Hooks {
         ?>
         <div class="wpa_metabox">
         <button type="button" id="wpa__start__record" onclick="startRecording()">Start</button>
-        <button type="button" id="wpa__listent_content" onclick="listenCotentInDashboard()">Listen</button>
+        <button type="button" id="wpa__listent_content" onclick="listenCotentInDashboard()"><span class="dashicons dashicons-controls-play"></span> Play</button>
 
             
     </div>
