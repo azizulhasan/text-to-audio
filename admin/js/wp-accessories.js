@@ -67,14 +67,14 @@ function startRecording(textarea_id = 'content_ifr') {
     record__status = 'record';
     recognition.stop()
     localStorage.setItem('recordStarted', false)
-    record_btn.innerHTML = 'Start'
+    if(record_btn) record_btn.innerHTML = "Start"
   }else if(record__status == 'record'){
     if(localStorage.getItem('recordStarted') == null  || localStorage.getItem('recordStarted') == 'false'){
       localStorage.setItem('recordStarted', true)
       recognition.start()
     }
     record__status = 'stop';
-    record_btn.innerHTML = 'Stop'
+    if(record_btn) record_btn.innerHTML = "Stop"
   }
   
   let textarea__content = '';
@@ -226,7 +226,7 @@ Object.values(document.getElementsByTagName('textarea')).forEach((textarea, inde
      */
     speechSynthesis.cancel();
     let listen_btn = document.getElementById('wpa__listent_content');
-    listen_btn.innerHTML = 'Listen'
+    if(listen_btn) listen_btn.innerHTML = "Listen";
     listen_status = 'listen';
     /**
      * Start Recording.
@@ -234,7 +234,7 @@ Object.values(document.getElementsByTagName('textarea')).forEach((textarea, inde
     startRecording(textarea.getAttribute('id'))
     localStorage.setItem('listening_textarea', textarea.getAttribute('id'))
     record__status = 'record';
-    record_btn.innerHTML = 'Stop'
+    if(record_btn) record_btn.innerHTML = "Stop"
   })
 
   /**
