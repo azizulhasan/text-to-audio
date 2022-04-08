@@ -153,9 +153,11 @@ function listenCotentInDashboard(){
 
 function startReadingContent(){
   let listen_btn = document.getElementById('wpa__listent_content');
+  console.log(listen_btn.innerText)
   if(listen_status == 'listen'){
     speechSynthesis.speak(utterence);
-    listen_btn.innerHTML = 'Pause'
+
+    listen_btn.innerHTML = '<span class="dashicons dashicons-controls-pause"></span> Pause'
     listen_status = 'pause';
   }else if(listen_status == 'pause'){
     speechSynthesis.pause();
@@ -168,22 +170,26 @@ function startReadingContent(){
   }
 }
 
+
+
 /**
  * Read the blog
  */
 
-function listenCotentInFrontend(){
+function listenCotentInFrontend(content){
 
-  let  content = document.getElementsByClassName('entry-content')
+  // let  content = document.getElementsByClassName('entry-content')
   let  title = document.getElementsByClassName('entry-title')
   let  posted_on = document.getElementsByClassName('post-on')
   let  posted_by = document.getElementsByClassName('post-author')
 
-  let read__content = title[0].innerHTML;
+  let read__content = title[0].innerText;
   // read__content += "posten on "+posted_on[0].innerHTML;
   // read__content += "posten by "+posted_by[0].innerHTML;
-  read__content += content[0].innerHTML;
-  utterence.text = read__content;
+  // read__content += content[0].innerText;
+
+  // console.log(content)
+  utterence.text = content;
   startReadingContent()
 }
 
@@ -192,6 +198,7 @@ function listenCotentInFrontend(){
  * After ending reading the content.
  */
 utterence.addEventListener('end', function(event) {
+
   document.getElementById("wpa__listent_content").innerHTML = 'Listen';
   listen_status = 'listen';
 });

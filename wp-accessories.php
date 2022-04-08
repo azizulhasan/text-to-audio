@@ -55,6 +55,11 @@ if (!defined('WEBAPPICK_TRACKER_NONCE')) {
     define('WEBAPPICK_TRACKER_NONCE', 'WEBAPPICK_TRACKER_nonce');
 }
 
+if (!defined('WP_SPEACH_FRONT_LISTEN_BTN_NO')) {
+    $btn_no = (get_option('WP_SPEACH_FRONT_LISTEN_BTN_NO'))?get_option('WP_SPEACH_FRONT_LISTEN_BTN_NO'): 0;
+    define('WP_SPEACH_FRONT_LISTEN_BTN_NO', $btn_no);
+}
+
 /**
  * Begins execution of the plugin.
  *
@@ -118,17 +123,63 @@ register_deactivation_hook(__FILE__, [$tracker, 'deactivate_vue_plugin_boilerpla
  * If classic editor is active then on new-post and edit post 
  * activate recording  for blog content.
  */
-add_action('admin_init', function () {
-    if (is_plugin_active('classic-editor/classic-editor.php')) {
-        $server = explode('/', $_SERVER['REQUEST_URI']);
-        $end_uri = end($server);
-        // if ('post-new.php' == $end_uri) {
-        //     posts_html();
-        // } elseif (strpos($end_uri, 'post.php') !== false) {
-        //     posts_html();
-        // }
-    }
-});
+function wps_clean_content($text)
+{
+    $quotationMarks = array(
+        "'"       => "\'",
+        '"'       => '\"',
+        '&#8216;' => "\'",
+        '&#8217;' => "\'",
+        '&rsquo;' => "\'",
+        '&lsquo;' => "\'",
+        '&#8218;' => '',
+        '&#8220;' => '\"',
+        '&#8221;' => '\"',
+        '&#8222;' => '\"',
+        '&ldquo;' => '\"',
+        '&rdquo;' => '\"',
+        '&quot;'  => '\"',
+    );
+
+    $otherMarks = array(
+        '&auml;'  => 'ä',
+        '&Auml;'  => 'Ä',
+        '&ouml;'  => 'ö',
+        '&Ouml;'  => 'Ö',
+        '&uuml;'  => 'ü',
+        '&Uuml;'  => 'Ü',
+        '&szlig;' => 'ß',
+        '&euro;'  => '€',
+        '&copy;'  => '©',
+        '&trade;' => '™',
+        '&reg;'   => '®',
+        '&nbsp;'  => '',
+        '&mdash;' => '—',
+        '&amp;'   => '&',
+        '&gt;'    => 'greater than',
+        '&lt;'    => 'less than',
+        '&#8211;' => '-',
+        '&#8212;' => '—',
+    );
+
+    $text = strip_shortcodes($text);
+    $text = wp_strip_all_tags($text, true);
+
+    $text = str_replace(array_keys($quotationMarks), array_values($quotationMarks), $text);
+    $text = str_replace(array_keys($otherMarks), array_values($otherMarks), $text);
+
+    // CF 16-Oct-19: We want to make sure no quotes are over-escaped (if somebody writes \" it will get substituted as \\",
+    // which will escape the slash instead of the quotation mark. We don't merge them in one regex because neither mark
+    // can _always_ be substituted with the other without changing the meaning of the sentence for the TTS engine.
+    // Note: backspaces need to be doubled. The first regex (\\\\{2,}") means: match two or more \ followed by "
+    $text = preg_replace('/\\\\{2,}"/', '\"', $text);
+    $text = preg_replace("/\\\\{2,}'/", "\'", $text);
+
+    $text = preg_replace('/\s+/', ' ', trim($text)); // Get rid of /n and /s in the string.
+
+    return $text;
+}
+
 
 
 /**
@@ -140,12 +191,33 @@ add_action('admin_init', function () {
  */
 function create_shortcode( $atts ) {
 
-    // $order = wc_get_order($atts['order_id']);
+    $btn_no = WP_SPEACH_FRONT_LISTEN_BTN_NO;
 
-   return  "<button type='button' id='wpa__listent_content' onclick='listenCotentInFrontend()' >Listen</button>";
+    // https://responsivevoice.com/wordpress-text-to-speech-plugin/
 
+    $title = get_the_title();
+    $description= get_the_content( );
+    $description = apply_filters('wps_content_before_cleaning', $description);
+    $description = wps_clean_content($description);
+    $description = apply_filters('wps_content_after_cleaning', $description);
+    $content = $title;
+    $content .= $description;
 
+    $speakIcon = '<span class="dashicons dashicons-controls-play"></span>';
+    $btn_text = (isset($atts['btn_text'])) && strlen($atts['btn_text'])? $atts['btn_text']: "Listen";
+    $class = (isset($atts['class'])) && strlen($atts['class'])? $atts['class']: "";
+    $button = '<button id="wpa__listent_content" class="'.$class.'" type="button" value="Play" title="WP Speech Tap to Start/Stop/Resume Speech">' . $speakIcon . ' ' . $btn_text . '</button>
+        <script>
+        wpa__listent_content.onclick = function(){
+                
+                listenCotentInFrontend("' . $content . '");
+                
+            };
+        </script>
+            ';
 
+    return $button;
+    
 }
 
 add_shortcode( 'wps_listen_btn', 'create_shortcode' );
