@@ -27,13 +27,10 @@ recognition.maxAlternatives = 2;
  var listen_status = 'listen'
 if ("speechSynthesis" in window) {
   var utterence = new SpeechSynthesisUtterance();
-  var voices = speechSynthesis.getVoices();
-  utterence.voice = voices[0];
   utterence.volume = 1; // From 0 to 1
   utterence.rate = 1; // From 0.1 to 10
   utterence.pitch = 2; // From 0 to 2
   utterence.lang = "en-US";
-  //console.log(utterence)
 }else {
   console.log("Speech speechSynthesis not supported 😢");
   // code to handle error
@@ -43,20 +40,22 @@ if ("speechSynthesis" in window) {
 
 /**
  * 
- * @param {*} textarea_id 
+ * @param {*} current_reading_content_id 
  */
 
  window.onload = function(){
   localStorage.setItem('recordStarted', false)
   localStorage.setItem('current_reading_content_id', 'content_ifr')
+  var voices = speechSynthesis.getVoices();
+  utterence.voice = voices[0];
 }
 window.onload()
 
 /**
  * Start recording.
- * @param {string} textarea_id 
+ * @param {string} currnt_record_content_id 
  */
-function startRecording(textarea_id = 'content_ifr') {
+function startRecording(currnt_record_content_id = 'content_ifr') {
   /**
    * Stop listening before recording.
    */
@@ -78,11 +77,11 @@ function startRecording(textarea_id = 'content_ifr') {
   }
   
   let current_reading_content = '';
-  // console.log(textarea_id)
-  if(textarea_id == 'content_ifr'){
-     current_reading_content = document.getElementById(textarea_id).contentWindow.document.body;
+  // console.log(currnt_record_content_id)
+  if(currnt_record_content_id == 'content_ifr'){
+     current_reading_content = document.getElementById(currnt_record_content_id).contentWindow.document.body;
   }else{
-    current_reading_content = document.getElementById(textarea_id)
+    current_reading_content = document.getElementById(currnt_record_content_id)
   }
   // console.log(current_reading_content.innerHTML);
 
@@ -125,7 +124,7 @@ function captalizeString(string){
  * Listent/Pause/Resume content.
  */
 function listenCotentInDashboard(){
-  let listen_btn = document.getElementById('wpa__listent_content');
+
   let  current_reading_content = '';
   if(localStorage.getItem('current_reading_content_id') !== null && localStorage.getItem('current_reading_content_id') != 'content_ifr'){
     current_reading_content = document.getElementById(localStorage.getItem('current_reading_content_id'));
@@ -133,28 +132,30 @@ function listenCotentInDashboard(){
     current_reading_content = document.getElementById('content_ifr').contentWindow.document.body;
   }
 
-  // console.log(current_reading_content);
-  // return;
-  utterence.text = current_reading_content.innerText;
+  let text = current_reading_content.innerText || current_reading_content.textContent;
+  current_reading_content.innerHTML = text;
 
+  utterence.text = current_reading_content.innerHTML
   /**
    * Stop recording before listening.
    */
   recognition.stop();
   localStorage.setItem('recordStarted', false)
   localStorage.setItem('current_play_btn_id', 'wpa__listent_content')
+  localStorage.setItem('current_reading_content', current_reading_content.innerHTML)
 
   startReadingContent('wpa__listent_content')
 }
-
-
 /**
  * Start Reading content
  */
 
 function startReadingContent(btn_id){
   let listen_btn = document.getElementById(btn_id);
+  // utterence.text = localStorage.getItem('current_reading_content')
+  console.log(listen_status)
   if(listen_status == 'listen'){
+    console.log(utterence)
     speechSynthesis.speak(utterence);
     listen_btn.innerHTML = '<span class="dashicons dashicons-controls-pause"></span> Pause';
     listen_btn.setAttribute('title', "WP Speech: Pause")
@@ -221,7 +222,8 @@ Object.values(document.getElementsByTagName('textarea')).forEach((textarea, inde
      */
     speechSynthesis.cancel();
     let listen_btn = document.getElementById('wpa__listent_content');
-    if(listen_btn) listen_btn.innerHTML = "Listen";
+    if(listen_btn) listen_btn.innerHTML = '<span class="dashicons dashicons-controls-play"></span> Play';
+    if(listen_btn)   listen_btn.setAttribute('title', "WP Speech: Play")
     listen_status = 'listen';
     /**
      * Start Recording.
