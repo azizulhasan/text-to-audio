@@ -203,10 +203,19 @@ function create_shortcode( $atts ) {
     $content = $title;
     $content .= $description;
 
-    $speakIcon = '<span class="dashicons dashicons-controls-play"></span>';
+    ?>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <script>
+    </script>
+
+<?php
     $btn_text = (isset($atts['btn_text'])) && strlen($atts['btn_text'])? $atts['btn_text']: "Listen";
+
+    $speakIcon = '<span class="dashicons dashicons-controls-play"></span> ' . $btn_text . '
+    
+    ';
     $class = (isset($atts['class'])) && strlen($atts['class'])? $atts['class']: "";
-    $button = '<button id="wpa__listent_content" class="'.$class.'" type="button" value="Play" title="WP Speech Tap to Start/Stop/Resume Speech">' . $speakIcon . ' ' . $btn_text . '</button>
+    $button = '<button id="wpa__listent_content" style="width:100%" class="'.$class.'" type="button"  title="WP Speech:  Tap to listen post.">' . $speakIcon . ' </button>
         <script>
         wpa__listent_content.onclick = function(){
                 

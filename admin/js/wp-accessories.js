@@ -156,16 +156,18 @@ function startReadingContent(){
   console.log(listen_btn.innerText)
   if(listen_status == 'listen'){
     speechSynthesis.speak(utterence);
-
-    listen_btn.innerHTML = '<span class="dashicons dashicons-controls-pause"></span> Pause'
+    listen_btn.innerHTML = '<span class="dashicons dashicons-controls-pause"></span> Pause';
+    listen_btn.setAttribute('title', "WP Speech: Pause")
     listen_status = 'pause';
   }else if(listen_status == 'pause'){
     speechSynthesis.pause();
-    listen_btn.innerHTML = 'Resume';
+    listen_btn.innerHTML = '<span class="dashicons dashicons-controls-play"></span> Resume';
+    listen_btn.setAttribute('title', "WP Speech: Resume")
     listen_status = 'resume';
   }else if(listen_status == 'resume'){
-    listen_btn.innerHTML = 'Pause';
+    listen_btn.innerHTML = '<span class="dashicons dashicons-controls-pause"></span> Pause'
     listen_status = 'pause';
+    listen_btn.setAttribute('title', "WP Speech: Pause")
     speechSynthesis.resume();
   }
 }
@@ -199,8 +201,12 @@ function listenCotentInFrontend(content){
  */
 utterence.addEventListener('end', function(event) {
 
-  document.getElementById("wpa__listent_content").innerHTML = 'Listen';
+  let listen_btn = document.getElementById("wpa__listent_content");
+  listen_btn.innerHTML = '<span class="dashicons dashicons-image-rotate"></span> Replay';
+  listen_btn.setAttribute('title', "WP Speech: Replay")
   listen_status = 'listen';
+
+
 });
 
 
