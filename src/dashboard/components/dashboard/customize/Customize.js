@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Col, Container, Row, Form } from "react-bootstrap";
-
+import toast from "../../context/Notify";
 export default function Customize() {
 
   const [listeningBtnStyle, setListeningStyle] = useState({
@@ -15,7 +15,6 @@ export default function Customize() {
   })
 
   useEffect(()=>{
-    console.log(listeningBtnStyle2)
 
   }, [])
     /**
@@ -56,7 +55,7 @@ export default function Customize() {
   navigator.clipboard.writeText(copyText.value);
   
   /* Alert the copied text */
-  alert("Copied the text: " + copyText.value);
+  toast("Copied the text: " + copyText.value);
   }
   return (
     <Container>
