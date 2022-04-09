@@ -18,16 +18,16 @@ class Webappick_Tracker_Api_Routes   {
 
     public function __construct($current_user = null) {
         $this->version = 'v1';
-        $this->namespace = 'wpa/'.$this->version;
+        $this->namespace = 'wps/'.$this->version;
         $this->rest_base  = '/accessories';
         $this->current_user = $current_user;
-        add_action( 'rest_api_init', [$this, 'wpa_accessories_register_routes'] );
+        add_action( 'rest_api_init', [$this, 'wps_accessories_register_routes'] );
     }
 
     /**
      * Register Routes
      */
-    public function wpa_accessories_register_routes() {
+    public function wps_accessories_register_routes() {
         // Register settings route.
         register_rest_route(
             $this->namespace,
@@ -35,7 +35,7 @@ class Webappick_Tracker_Api_Routes   {
             array(
                 array(
                     'methods'             => \WP_REST_Server::ALLMETHODS,
-                    'callback'            => array( $this, 'wpa_manage_record_data' ),
+                    'callback'            => array( $this, 'wps_manage_record_data' ),
                     'permission_callback' => array( $this, 'get_route_access' ),
                     'args'                => array(),
                 )
@@ -45,11 +45,11 @@ class Webappick_Tracker_Api_Routes   {
         // Get single product details.
         register_rest_route(
             $this->namespace,
-            $this->rest_base.'/details',
+            $this->rest_base.'/listening',
             array(
                 array(
-                    'methods'             => \WP_REST_Server::CREATABLE,
-                    'callback'            => array( $this, 'get_single_product_details' ),
+                    'methods'             => \WP_REST_Server::ALLMETHODS,
+                    'callback'            => array( $this, 'wps_manage_listening_data' ),
                     'permission_callback' => array( $this, 'get_route_access' ),
                     'args'                => array(),
                 )
@@ -116,7 +116,7 @@ class Webappick_Tracker_Api_Routes   {
     /**
      * Get all plugins data.
      */
-    public function wpa_manage_record_data(  $request ) {
+    public function wps_manage_record_data(  $request ) {
         // $retrieved_nonce = isset( $request['rest_nonce'] ) ? sanitize_text_field( wp_unslash( $request['rest_nonce'] ) ) : '';
         // if ( ! wp_verify_nonce( $retrieved_nonce, 'wp_rest' ) ) {
         //     die( 'Failed security check' );
@@ -130,9 +130,9 @@ class Webappick_Tracker_Api_Routes   {
 	    if ( 'post' == $request['method'] ) {
 		    $fields = json_decode($request['fields']);
             
-		    update_option('wpa_record_settings', $fields);
+		    update_option('wps_record_settings', $fields);
 
-            $response['data'] = get_option('wpa_record_settings');
+            $response['data'] = get_option('wps_record_settings');
 
 		    return rest_ensure_response( $response );
 	    }
@@ -272,7 +272,7 @@ class Webappick_Tracker_Api_Routes   {
         // get data about recording.
 	    if ( 'get' == $request['method'] ) {
 
-            $response['data'] = get_option('wpa_record_settings');
+            $response['data'] = get_option('wps_record_settings');
 		    return rest_ensure_response( $response );
 	    }
 
@@ -283,17 +283,29 @@ class Webappick_Tracker_Api_Routes   {
     /*
      * Get single product details
      */
-    public function get_single_product_details($request){
-        $response = '';
-        if(isset($request['arguments']) && '' != $request['arguments']){
+    public function wps_manage_listening_data($request){
+        $response['status'] = true;
 
-            $tracking_id = $request['arguments'];
-            global $wpdb;
-            $response = $wpdb->get_results("SELECT id , tracking_id, log, created_at FROM plugin_tracking_details WHERE tracking_id='".$tracking_id."' ", 'ARRAY_A');
+        $fields = json_decode($request['fields']);
+       
+        $response['data'] = $fields;
+        // save data about recording.
+	    if ( 'post' == $request['method'] ) {
+		    $fields = json_decode($request['fields']);
+            
+		    update_option('wps_listening_settings', $fields);
 
-        }
+            $response['data'] = get_option('wps_listening_settings');
 
-        return rest_ensure_response( $response );
+		    return rest_ensure_response( $response );
+	    }
+
+        // get data about recording.
+	    if ( 'get' == $request['method'] ) {
+
+            $response['data'] = get_option('wps_listening_settings');
+		    return rest_ensure_response( $response );
+	    }
     }
 
 

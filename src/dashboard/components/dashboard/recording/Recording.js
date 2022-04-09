@@ -11,13 +11,9 @@ import { languages } from "./languages";
 
 export default function Recording() {
   const [settings, setSettings] = useState({
-    wpa__recording__lang: "",
+    wps__recording__lang: "",
     is_record_continously: true,
     rest_nonce: wp_access.rest_nonce,
-  });
-  const [alertContent, setAlertContent] = useState({
-    isValid: false,
-    message: "",
   });
   const [checked, setChecked] = useState(false);
 
@@ -27,7 +23,7 @@ export default function Recording() {
      */
     let data = new FormData();
     data.append("method", "get");
-     postWithoutImage(wp_access.api_url + "wpa/v1/accessories/record", data)
+     postWithoutImage(wp_access.api_url + "wps/v1/accessories/record", data)
      .then((res) => {
 
        console.log(res)
@@ -63,22 +59,20 @@ export default function Recording() {
       if (key === "" || value === "") {
         toast("Please fill the  field : " + key);
         return;
-      } else if (key === "password_confirm" && value !== data.password) {
-        toast("Password should be matched");
-        return;
-      }
+      } 
+      
       formData[key] = value;
     }
     formData.is_record_continously = checked;
     let data = new FormData();
     data.append("fields", JSON.stringify(formData));
     data.append("method", "post");
-    postWithoutImage(wp_access.api_url + "wpa/v1/accessories/record", data)
+    postWithoutImage(wp_access.api_url + "wps/v1/accessories/record", data)
       .then((res) => {
         console.log(res);
-        // setSettings(res);
-        // setChecked(res.is_record_continously);
-        toast("Settings Data Saved");
+        setSettings(res.data);
+        setChecked(res.data.is_record_continously);
+        toast("Recording Data Saved");
       })
       .catch((err) => {
         console.log(err);
@@ -120,8 +114,8 @@ export default function Recording() {
               <Form.Label>Record In </Form.Label>
               <Form.Select
                 onChange={handleChange}
-                name="wpa__recording__lang"
-                value={settings.wpa__recording__lang}
+                name="wps__recording__lang"
+                value={settings.wps__recording__lang}
                 aria-label="Default select example"
               >
                 <option disabled> Default Record Language</option>
@@ -151,19 +145,6 @@ export default function Recording() {
               </ToggleButton>
             </Form.Group>
           </Col>
-
-          {/* <Col xs={12} sm={12} lg={8} className=" mt-3">
-            <Form.Group>
-              <Form.Label>Message</Form.Label>
-              <Form.Control
-                type="text"
-                name="welcome_message"
-                value={settings.welcome_message}
-                onChange={handleChange}
-                placeholder="welcome message"
-              />
-            </Form.Group>
-          </Col> */}
           <div className="d-grid gap-3 col-2 mx-auto mt-5 mb-4">
             <button
               type="submit"
