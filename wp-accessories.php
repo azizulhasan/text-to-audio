@@ -191,6 +191,9 @@ function wps_clean_content($text)
  */
 function create_shortcode( $atts ) {
 
+    // Apply short code for only single page.
+    //TODO: Put this option into settings page.
+    if(!is_single()) return;
     static  $btn_no = 0;
     $btn_no++;
     // https://responsivevoice.com/wordpress-text-to-speech-plugin/
