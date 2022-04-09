@@ -42,6 +42,12 @@ export default function DashboardSideNav() {
               </div>
               Settings
             </Link>
+            <Link className="nav-link" to= { "/docs"}>
+              <div className="sb-nav-link-icon">
+                <i className="fas fa-wrench"></i>
+              </div>
+              Docs
+            </Link>
           </div>
         </div>
       </nav>

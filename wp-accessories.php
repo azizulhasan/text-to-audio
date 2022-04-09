@@ -204,10 +204,6 @@ function create_shortcode( $atts ) {
     $content .= $description;
 
     ?>
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-    <script>
-    </script>
-
 <?php
     $btn_text = (isset($atts['btn_text'])) && strlen($atts['btn_text'])? $atts['btn_text']: "Listen";
 

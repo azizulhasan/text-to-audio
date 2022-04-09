@@ -11,7 +11,7 @@ export default function DashboardTopNav() {
     <nav className="sb-topnav navbar navbar-expand topnav_bg">
       {/* <!-- Navbar Brand--> */}
       <Link className="navbar-brand ps-3 text-dark" style={style.head} to="/">
-        WP Accessories
+        WP Speech
       </Link>
       {/* <!-- Sidebar Toggle--> */}
       <button

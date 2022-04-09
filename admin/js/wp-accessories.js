@@ -30,7 +30,7 @@ if ("speechSynthesis" in window) {
   utterence.volume = 1; // From 0 to 1
   utterence.rate = 1; // From 0.1 to 10
   utterence.pitch = 2; // From 0 to 2
-  utterence.lang = "en-US";
+  utterence.lang = "en-US"; // It will be speaking language.
 }else {
   console.log("Speech speechSynthesis not supported 😢");
   // code to handle error

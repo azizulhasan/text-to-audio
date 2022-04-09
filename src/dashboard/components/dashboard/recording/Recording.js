@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ToggleButton, Form, Row, Col } from "react-bootstrap";
+import { ToggleButton, Form, Row, Col, Container } from "react-bootstrap";
 
 /**
  *
@@ -86,7 +86,7 @@ export default function Recording() {
   };
 
   return (
-    <React.Fragment>
+    <Container>
       <Row id="settings" className="mt-4">
         <Col
           xs={12}
@@ -174,6 +174,6 @@ export default function Recording() {
           </div>
         </Row>
       </Form>
-    </React.Fragment>
+    </Container>
   );
 }

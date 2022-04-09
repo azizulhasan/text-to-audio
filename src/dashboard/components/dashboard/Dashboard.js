@@ -23,6 +23,7 @@ import Settings from "./settings/Settings";
 import Recording from "./recording/Recording";
 import Listening from "./listening/Listening";
 import Customize from "./customize/Customize";
+import Docs from "./docs/Docs";
 
 
 
@@ -65,6 +66,7 @@ export default function Dashboard() {
                 <Route path={ "/listening"} element={<Listening/>} />
                 <Route path={ "/customize"} element={<Customize/>} />
                 <Route path={"/settings"} element={<Settings />} />
+                <Route path="/docs" element={<Docs/>} />
               </Routes>
             </div>
           </main>
