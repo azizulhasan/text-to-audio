@@ -5,7 +5,7 @@ import { ToggleButton, Form, Row, Col, Container } from "react-bootstrap";
  *
  * Scripts
  */
-import { postWithoutImage, getData } from "../../context/utilities";
+import { postWithoutImage } from "../../context/utilities";
 import toast from "../../context/Notify";
 import { languages } from "./languages";
 

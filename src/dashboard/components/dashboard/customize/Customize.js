@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Col, Container, Row, Form, FloatingLabel } from "react-bootstrap";
 import toast from "../../context/Notify";
+import { postWithoutImage } from "../../context/utilities";
 export default function Customize() {
   const [listeningBtnStyle, setListeningStyle] = useState({
     backgroundColor: "rgb(226, 222, 232)",
@@ -13,9 +14,38 @@ export default function Customize() {
     width: "100%",
     border: "0",
   });
-  const [speakingText, setSpeakingText]  = useState('Hello World.')
+  const [speakingText, setSpeakingText]  = useState('')
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    /**
+     * Get recording settings.
+     */
+     let record = new FormData();
+     record.append("method", "get");
+      postWithoutImage(wp_access.api_url + "wps/v1/accessories/record", record)
+      .then((res) => {
+ 
+        console.log(res.data)
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+      /**
+     * Get listening settings.
+     */
+     let listen = new FormData();
+     listen.append("method", "get");
+      postWithoutImage(wp_access.api_url + "wps/v1/accessories/listening", listen)
+      .then((res) => {
+ 
+        console.log(res.data)
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+ 
+  }, []);
   /**
    * handle change
    * @param {*} e
@@ -42,6 +72,54 @@ export default function Customize() {
       ...{ [e.target.name]: value },
     });
   };
+
+  /**
+   * Handle form Submit
+   */
+   const handleSubmit = (e) => {
+    e.preventDefault();
+    /**
+     * Get full form data and modify them for saving to database.
+     */
+    let form = new FormData(e.target);
+
+    let formData = {};
+    for (let [key, value] of form.entries()) {
+      if (key === "" || value === "") {
+        toast("Please fill the  field : " + key);
+        return;
+      } 
+      
+      formData[key] = value;
+    }
+    console.log(formData)
+    return;
+    let data = new FormData();
+    data.append("fields", JSON.stringify(formData));
+    data.append("method", "post");
+    postWithoutImage(wp_access.api_url + "wps/v1/accessories/customize", data)
+      .then((res) => {
+        console.log(res);
+        // setSettings(res.data);
+        // setChecked(res.data.is_record_continously);
+        toast("Recording Data Saved");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const callListeningFunction = (e) => {
+    let text = document.getElementById('wps__demo_text_for_play').value;
+
+    if(text === ''){
+      toast("Please write/say something into textarea.");
+      return;
+    }
+    setSpeakingText(text)
+    listenCotentInFrontend( text, "wps__listent_content")
+  }
+
   /**
    * Copy short Code
    */
@@ -67,7 +145,7 @@ export default function Customize() {
             <Col xs={12} sm={12} lg={12} className="mb-3">
               <button
                 id="wps__listent_content"
-                onClick={(e) => listenCotentInFrontend(speakingText, "wps__listent_content")}
+                onClick={(e) => callListeningFunction(e)}
                 style={listeningBtnStyle2}
                 type="button"
                 title="WP Speech:  Tap to listen post."
@@ -85,8 +163,8 @@ export default function Customize() {
                   <Form.Control
                     as="textarea"
                     onChange={(e)=> setSpeakingText(e.target.value)}
-                    onFocus={(e)=> toast("Write something here.")}
-                    defaultValue="Hello World."
+                    onFocus={(e)=> toast("Write/Say something here.")}
+                    value={speakingText}
                     placeholder="Write here something and click listen button."
                     style={{ height: "100px" }}
                   />
@@ -94,7 +172,7 @@ export default function Customize() {
               </>
             </Col>
 
-            <Col xs={12} sm={12} lg={11} className="mt-2">
+            <Col xs={12} sm={12} lg={11} className="mt-3">
               <Form.Label htmlFor="wps_play_btn_shortcode">Short Code</Form.Label>
               <Form.Control
                 type="text"
@@ -105,7 +183,7 @@ export default function Customize() {
                 title="Short code"
               />
             </Col>
-            <Col xs={12} sm={12} lg={1} className="mt-4">
+            <Col xs={12} sm={12} lg={1} className="mt-5">
               <button onClick={CopyShortcode}>
                 <img
                   src={wp_access.image_url + "/copy.svg"}
