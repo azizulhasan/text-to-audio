@@ -76,7 +76,7 @@ function startRecording(currnt_record_content_id = "content_ifr") {
   }
 
   let current_reading_content = "";
-  console.log(currnt_record_content_id)
+  // console.log(currnt_record_content_id)
   if (currnt_record_content_id == "content_ifr") {
     current_reading_content = document.getElementById(currnt_record_content_id)
       .contentWindow.document.body;

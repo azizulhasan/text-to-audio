@@ -28,7 +28,7 @@ class Webappick_Tracker_Api_Routes   {
      * Register Routes
      */
     public function wps_accessories_register_routes() {
-        // Register settings route.
+        // Register record route.
         register_rest_route(
             $this->namespace,
             $this->rest_base.'/record',
@@ -42,7 +42,7 @@ class Webappick_Tracker_Api_Routes   {
                 
             )
         );
-        // Get single product details.
+        // register listening route.
         register_rest_route(
             $this->namespace,
             $this->rest_base.'/listening',
@@ -50,6 +50,20 @@ class Webappick_Tracker_Api_Routes   {
                 array(
                     'methods'             => \WP_REST_Server::ALLMETHODS,
                     'callback'            => array( $this, 'wps_manage_listening_data' ),
+                    'permission_callback' => array( $this, 'get_route_access' ),
+                    'args'                => array(),
+                )
+            )
+        );
+
+        // register customize route.
+        register_rest_route(
+            $this->namespace,
+            $this->rest_base.'/customize',
+            array(
+                array(
+                    'methods'             => \WP_REST_Server::ALLMETHODS,
+                    'callback'            => array( $this, 'wps_manage_customize_data' ),
                     'permission_callback' => array( $this, 'get_route_access' ),
                     'args'                => array(),
                 )
@@ -114,7 +128,7 @@ class Webappick_Tracker_Api_Routes   {
     }
 
     /**
-     * Get all plugins data.
+     * Manage record data.
      */
     public function wps_manage_record_data(  $request ) {
         // $retrieved_nonce = isset( $request['rest_nonce'] ) ? sanitize_text_field( wp_unslash( $request['rest_nonce'] ) ) : '';
@@ -281,7 +295,7 @@ class Webappick_Tracker_Api_Routes   {
     }
 
     /*
-     * Get single product details
+     * Manage listening data
      */
     public function wps_manage_listening_data($request){
         $response['status'] = true;
@@ -304,6 +318,34 @@ class Webappick_Tracker_Api_Routes   {
 	    if ( 'get' == $request['method'] ) {
 
             $response['data'] = get_option('wps_listening_settings');
+		    return rest_ensure_response( $response );
+	    }
+    }
+
+        /*
+     * Manage customize data
+     */
+    public function wps_manage_customize_data($request){
+        $response['status'] = true;
+
+        $fields = json_decode($request['fields']);
+       
+        $response['data'] = $fields;
+        // save data about recording.
+	    if ( 'post' == $request['method'] ) {
+		    $fields = json_decode($request['fields']);
+            
+		    update_option('wps_customize_settings', $fields);
+
+            $response['data'] = get_option('wps_customize_settings');
+
+		    return rest_ensure_response( $response );
+	    }
+
+        // get data about recording.
+	    if ( 'get' == $request['method'] ) {
+
+            $response['data'] = get_option('wps_customize_settings');
 		    return rest_ensure_response( $response );
 	    }
     }

@@ -14,46 +14,39 @@ export default function Customize() {
     width: "100%",
     border: "0",
   });
-  const [speakingText, setSpeakingText]  = useState('')
+  const [speakingText, setSpeakingText] = useState("");
 
   useEffect(() => {
-    /**
-     * Get recording settings.
-     */
-     let record = new FormData();
-     record.append("method", "get");
-      postWithoutImage(wp_access.api_url + "wps/v1/accessories/record", record)
-      .then((res) => {
- 
-        console.log(res.data)
-      })
-      .catch((err) => {
-        console.log(err);
-      });
 
-      /**
-     * Get listening settings.
+    /**
+     * Get customize settings.
      */
-     let listen = new FormData();
-     listen.append("method", "get");
-      postWithoutImage(wp_access.api_url + "wps/v1/accessories/listening", listen)
+    let customize = new FormData();
+    customize.append("method", "get");
+    postWithoutImage(wp_access.api_url + "wps/v1/accessories/customize", customize)
       .then((res) => {
- 
-        console.log(res.data)
+        setListeningStyle(res.data)
+        setListeningStyle2({
+          ...listeningBtnStyle2,
+          ...{backgroundColor: res.data.backgroundColor},
+          ...{color: res.data.color},
+          ...{width: [res.data.width, "%"].join('')}
+        })
       })
       .catch((err) => {
         console.log(err);
       });
- 
   }, []);
   /**
    * handle change
    * @param {*} e
    */
   const handleChange = (e) => {
-
-    if(e.target.name ==='width' && (e.target.value > 100 || e.target.value < 0)){
-      toast("Value should between 0-100")
+    if (
+      e.target.name === "width" &&
+      (e.target.value > 100 || e.target.value < 0)
+    ) {
+      toast("Value should between 0-100");
       return;
     }
     setListeningStyle({
@@ -76,7 +69,7 @@ export default function Customize() {
   /**
    * Handle form Submit
    */
-   const handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     /**
      * Get full form data and modify them for saving to database.
@@ -88,21 +81,19 @@ export default function Customize() {
       if (key === "" || value === "") {
         toast("Please fill the  field : " + key);
         return;
-      } 
-      
+      }
+
       formData[key] = value;
     }
-    console.log(formData)
-    return;
+    // console.log(formData);
+    // return;
     let data = new FormData();
     data.append("fields", JSON.stringify(formData));
     data.append("method", "post");
     postWithoutImage(wp_access.api_url + "wps/v1/accessories/customize", data)
       .then((res) => {
-        console.log(res);
-        // setSettings(res.data);
-        // setChecked(res.data.is_record_continously);
-        toast("Recording Data Saved");
+        setListeningStyle(res.data)
+        toast("Customize Data Saved");
       })
       .catch((err) => {
         console.log(err);
@@ -110,15 +101,15 @@ export default function Customize() {
   };
 
   const callListeningFunction = (e) => {
-    let text = document.getElementById('wps__demo_text_for_play').value;
+    let text = document.getElementById("wps__demo_text_for_play").value;
 
-    if(text === ''){
+    if (text === "") {
       toast("Please write/say something into textarea.");
       return;
     }
-    setSpeakingText(text)
-    listenCotentInFrontend( text, "wps__listent_content")
-  }
+    setSpeakingText(text);
+    listenCotentInFrontend(text, "wps__listent_content");
+  };
 
   /**
    * Copy short Code
@@ -162,8 +153,8 @@ export default function Customize() {
                 >
                   <Form.Control
                     as="textarea"
-                    onChange={(e)=> setSpeakingText(e.target.value)}
-                    onFocus={(e)=> toast("Write/Say something here.")}
+                    onChange={(e) => setSpeakingText(e.target.value)}
+                    onFocus={(e) => toast("Write/Say something here.")}
                     value={speakingText}
                     placeholder="Write here something and click listen button."
                     style={{ height: "100px" }}
@@ -173,7 +164,9 @@ export default function Customize() {
             </Col>
 
             <Col xs={12} sm={12} lg={11} className="mt-3">
-              <Form.Label htmlFor="wps_play_btn_shortcode">Short Code</Form.Label>
+              <Form.Label htmlFor="wps_play_btn_shortcode">
+                Short Code
+              </Form.Label>
               <Form.Control
                 type="text"
                 name="wps_play_btn_shortcode"
@@ -195,7 +188,7 @@ export default function Customize() {
           </Row>
         </Col>
         <Col xs={12} sm={12} lg={4}>
-          <>
+          <Form onSubmit={handleSubmit}>
             <h4>Customize Listening Button</h4>
 
             <Form.Label htmlFor="backgroundColor">BackGround Color</Form.Label>
@@ -204,7 +197,7 @@ export default function Customize() {
               name="backgroundColor"
               onChange={handleChange}
               id="backgroundColor"
-              defaultValue={listeningBtnStyle.backgroundColor}
+              value={listeningBtnStyle.backgroundColor}
               title="Choose your color"
             />
             <Form.Label htmlFor="color">Text Color</Form.Label>
@@ -213,7 +206,7 @@ export default function Customize() {
               name="color"
               onChange={handleChange}
               id="color"
-              defaultValue={listeningBtnStyle.color}
+              value={listeningBtnStyle.color}
               title="Choose your color"
             />
             <Form.Label htmlFor="color">Button Width (%)</Form.Label>
@@ -222,10 +215,20 @@ export default function Customize() {
               name="width"
               onChange={handleChange}
               id="width"
-              defaultValue={listeningBtnStyle.width}
+              min={"0"}
+              max="100"
+              value={listeningBtnStyle.width}
               title="Button Width"
             />
-          </>
+            <div className="d-grid gap-3 col-2 mx-auto mt-5 mb-4">
+              <button
+                type="submit"
+                className="azh_btn azh_btn_edit azh_btn azh_btn_edit-primary btn-center btn-block"
+              >
+                Submit
+              </button>
+            </div>
+          </Form>
         </Col>
       </Row>
     </Container>

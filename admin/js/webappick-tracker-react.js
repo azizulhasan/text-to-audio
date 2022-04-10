@@ -5023,30 +5023,26 @@ function Customize() {
       listeningBtnStyle2 = _useState4[0],
       setListeningStyle2 = _useState4[1];
 
-  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(''),
+  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(""),
       _useState6 = _slicedToArray(_useState5, 2),
       speakingText = _useState6[0],
       setSpeakingText = _useState6[1];
 
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     /**
-     * Get recording settings.
+     * Get customize settings.
      */
-    var record = new FormData();
-    record.append("method", "get");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_2__.postWithoutImage)(wp_access.api_url + "wps/v1/accessories/record", record).then(function (res) {
-      console.log(res.data);
-    })["catch"](function (err) {
-      console.log(err);
-    });
-    /**
-    * Get listening settings.
-    */
-
-    var listen = new FormData();
-    listen.append("method", "get");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_2__.postWithoutImage)(wp_access.api_url + "wps/v1/accessories/listening", listen).then(function (res) {
-      console.log(res.data);
+    var customize = new FormData();
+    customize.append("method", "get");
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_2__.postWithoutImage)(wp_access.api_url + "wps/v1/accessories/customize", customize).then(function (res) {
+      setListeningStyle(res.data);
+      setListeningStyle2(_objectSpread(_objectSpread(_objectSpread(_objectSpread({}, listeningBtnStyle2), {
+        backgroundColor: res.data.backgroundColor
+      }), {
+        color: res.data.color
+      }), {
+        width: [res.data.width, "%"].join('')
+      }));
     })["catch"](function (err) {
       console.log(err);
     });
@@ -5057,7 +5053,7 @@ function Customize() {
    */
 
   var handleChange = function handleChange(e) {
-    if (e.target.name === 'width' && (e.target.value > 100 || e.target.value < 0)) {
+    if (e.target.name === "width" && (e.target.value > 100 || e.target.value < 0)) {
       (0,_context_Notify__WEBPACK_IMPORTED_MODULE_1__["default"])("Value should between 0-100");
       return;
     }
@@ -5103,32 +5099,30 @@ function Customize() {
         }
 
         formData[key] = value;
-      }
+      } // console.log(formData);
+      // return;
+
     } catch (err) {
       _iterator.e(err);
     } finally {
       _iterator.f();
     }
 
-    console.log(formData);
-    return;
     var data = new FormData();
     data.append("fields", JSON.stringify(formData));
     data.append("method", "post");
     (0,_context_utilities__WEBPACK_IMPORTED_MODULE_2__.postWithoutImage)(wp_access.api_url + "wps/v1/accessories/customize", data).then(function (res) {
-      console.log(res); // setSettings(res.data);
-      // setChecked(res.data.is_record_continously);
-
-      (0,_context_Notify__WEBPACK_IMPORTED_MODULE_1__["default"])("Recording Data Saved");
+      setListeningStyle(res.data);
+      (0,_context_Notify__WEBPACK_IMPORTED_MODULE_1__["default"])("Customize Data Saved");
     })["catch"](function (err) {
       console.log(err);
     });
   };
 
   var callListeningFunction = function callListeningFunction(e) {
-    var text = document.getElementById('wps__demo_text_for_play').value;
+    var text = document.getElementById("wps__demo_text_for_play").value;
 
-    if (text === '') {
+    if (text === "") {
       (0,_context_Notify__WEBPACK_IMPORTED_MODULE_1__["default"])("Please write/say something into textarea.");
       return;
     }
@@ -5243,7 +5237,8 @@ function Customize() {
         xs: 12,
         sm: 12,
         lg: 4,
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.Fragment, {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"], {
+          onSubmit: handleSubmit,
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("h4", {
             children: "Customize Listening Button"
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"].Label, {
@@ -5254,7 +5249,7 @@ function Customize() {
             name: "backgroundColor",
             onChange: handleChange,
             id: "backgroundColor",
-            defaultValue: listeningBtnStyle.backgroundColor,
+            value: listeningBtnStyle.backgroundColor,
             title: "Choose your color"
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"].Label, {
             htmlFor: "color",
@@ -5264,7 +5259,7 @@ function Customize() {
             name: "color",
             onChange: handleChange,
             id: "color",
-            defaultValue: listeningBtnStyle.color,
+            value: listeningBtnStyle.color,
             title: "Choose your color"
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"].Label, {
             htmlFor: "color",
@@ -5274,8 +5269,17 @@ function Customize() {
             name: "width",
             onChange: handleChange,
             id: "width",
-            defaultValue: listeningBtnStyle.width,
+            min: "0",
+            max: "100",
+            value: listeningBtnStyle.width,
             title: "Button Width"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+            className: "d-grid gap-3 col-2 mx-auto mt-5 mb-4",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
+              type: "submit",
+              className: "azh_btn azh_btn_edit azh_btn azh_btn_edit-primary btn-center btn-block",
+              children: "Submit"
+            })
           })]
         })
       })]
