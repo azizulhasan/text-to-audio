@@ -136,21 +136,21 @@ class Webappick_Tracker_Api_Routes   {
         //     die( 'Failed security check' );
         // }
         $response['status'] = true;
-
-        $fields = json_decode($request['fields']);
-       
-        $response['data'] = $fields;
         // save data about recording.
 	    if ( 'post' == $request['method'] ) {
 		    $fields = json_decode($request['fields']);
-            
+            $listeningFields = get_option('wps_listening_settings');
+            $listeningFields->wps__listening_lang = $fields->wps__recording__lang;
 		    update_option('wps_record_settings', $fields);
+            update_option('wps_listening_settings', $listeningFields);
 
             $response['data'] = get_option('wps_record_settings');
 
+                
 		    return rest_ensure_response( $response );
 	    }
-
+        
+        // print_r(get_option('wps_listening_settings')->wps__listening_lang);
 
         $default_languages = array(
             'af' => 'Afrikaans',
@@ -299,10 +299,6 @@ class Webappick_Tracker_Api_Routes   {
      */
     public function wps_manage_listening_data($request){
         $response['status'] = true;
-
-        $fields = json_decode($request['fields']);
-       
-        $response['data'] = $fields;
         // save data about recording.
 	    if ( 'post' == $request['method'] ) {
 		    $fields = json_decode($request['fields']);
@@ -327,10 +323,6 @@ class Webappick_Tracker_Api_Routes   {
      */
     public function wps_manage_customize_data($request){
         $response['status'] = true;
-
-        $fields = json_decode($request['fields']);
-       
-        $response['data'] = $fields;
         // save data about recording.
 	    if ( 'post' == $request['method'] ) {
 		    $fields = json_decode($request['fields']);

@@ -25,8 +25,6 @@ export default function Recording() {
     data.append("method", "get");
      postWithoutImage(wp_access.api_url + "wps/v1/accessories/record", data)
      .then((res) => {
-
-       console.log(res)
        setSettings(res.data);
        setChecked(res.data.is_record_continously);
      })

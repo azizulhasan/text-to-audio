@@ -5949,7 +5949,6 @@ function Recording() {
     var data = new FormData();
     data.append("method", "get");
     (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/accessories/record", data).then(function (res) {
-      console.log(res);
       setSettings(res.data);
       setChecked(res.data.is_record_continously);
     })["catch"](function (err) {

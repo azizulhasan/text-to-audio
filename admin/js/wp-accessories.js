@@ -1,3 +1,17 @@
+const getData = async (url = "", data = {}) => {
+  // Default options are marked with *
+  const response = await fetch(url, {
+    // headers: {
+    //   "Content-Type": "application/json",
+    // },
+    method: "POST", // *GET, POST, PUT, DELETE, etc.
+    body: data, // body data type must match "Content-Type" header
+  });
+  const responseData = await response.json(); // parses JSON response into native JavaScript objects
+
+  return responseData;
+};
+
 var record__status = "record";
 var SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
 var SpeechGrammarList = window.SpeechGrammarList || webkitSpeechGrammarList;
@@ -13,9 +27,29 @@ recognition.grammars = speechRecognitionList;
 var newGrammar = new SpeechGrammar();
 newGrammar.src =
   "#JSGF V1.0; grammar names; public <name> = chris | kirsty | mike;";
-speechRecognitionList[1] = newGrammar; // should add the new SpeechGrammar object to the list
-recognition.continuous = true;
-recognition.lang = "en-US";
+speechRecognitionList[1] = newGrammar; // should add the new SpeechGrammar object to the list.
+
+/**
+ * Get recording settings.
+ */
+let recordData = new FormData();
+let recordSettings = {};
+recordData.append("method", "get");
+getData(wp_access.api_url + "wps/v1/accessories/record", recordData)
+  .then((res) => {
+    recordSettings = res.data;
+
+    recognition.continuous = recordSettings.is_record_continously
+      ? recordSettings.is_record_continously
+      : true;
+    recognition.lang = recordSettings.wps__recording__lang
+      ? recordSettings.wps__recording__lang
+      : "en-US";
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+
 recognition.interimResults = false;
 recognition.maxAlternatives = 2;
 
@@ -25,10 +59,6 @@ recognition.maxAlternatives = 2;
 var listen_status = "listen";
 if ("speechSynthesis" in window) {
   var utterence = new SpeechSynthesisUtterance();
-  utterence.volume = 1; // From 0 to 1
-  utterence.rate = 1; // From 0.1 to 10
-  utterence.pitch = 2; // From 0 to 2
-  utterence.lang = "en-US"; // It will be speaking language.
 } else {
   console.log("Speech speechSynthesis not supported 😢");
   // code to handle error
@@ -42,8 +72,38 @@ if ("speechSynthesis" in window) {
 window.onload = function() {
   localStorage.setItem("recordStarted", false);
   localStorage.setItem("current_reading_content_id", "content_ifr");
-  var voices = speechSynthesis.getVoices();
-  utterence.voice = voices[0];
+  /**
+   * Get listening settings.
+   */
+  let listenData = new FormData();
+  let listeningSettings = {};
+  listenData.append("method", "get");
+  getData(wp_access.api_url + "wps/v1/accessories/listening", listenData)
+    .then((res) => {
+      listeningSettings = res.data;
+      console.log(listeningSettings);
+      var voices = speechSynthesis.getVoices();
+      utterence.voice = voices.filter((voice, i)=> voice.name === listeningSettings.wps__listening_voice)[0];
+      console.log(utterence.voice);
+      // voices.map((voice, i)=>{
+      //   console.log(voice.name)
+      // })
+      utterence.volume = listeningSettings.wps__listening_volume
+        ? listeningSettings.wps__listening_volume
+        : 1; // From 0 to 1
+      utterence.rate = listeningSettings.wps__listening_rate
+        ? listeningSettings.wps__listening_rate
+        : 1; // From 0.1 to 10
+      utterence.pitch = listeningSettings.wps__listening_pitch
+        ? listeningSettings.wps__listening_pitch
+        : 2; // From 0 to 2
+      utterence.lang = listeningSettings.wps__listening_lang
+        ? listeningSettings.wps__listening_lang
+        : "en-US"; // It will be speaking language.
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 window.onload();
 

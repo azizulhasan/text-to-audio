@@ -177,8 +177,9 @@ class Webappick_Tracker_Admin {
         /**
          * Looad wp-speeh script
          *  */ 
-        wp_enqueue_script( 'wpa-speach', plugin_dir_url( __FILE__ ) . 'js/wp-accessories.js', array(  ), $this->version, true );
         wp_enqueue_script('wpa-axios', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js', array() , $this->version, true);
+
+        wp_enqueue_script( 'wpa-speach', plugin_dir_url( __FILE__ ) . 'js/wp-accessories.js', array(  ), $this->version, true );
 
 
 
