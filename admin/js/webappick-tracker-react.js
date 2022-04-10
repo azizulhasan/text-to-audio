@@ -4971,7 +4971,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Container.js");
 /* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Row.js");
 /* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Col.js");
-/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Form.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/FloatingLabel.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Form.js");
 /* harmony import */ var _context_Notify__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../context/Notify */ "./src/dashboard/components/context/Notify.js");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
@@ -5011,25 +5012,36 @@ function Customize() {
   var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
     backgroundColor: "rgb(226, 222, 232)",
     color: "rgb(0, 0, 0)",
-    width: "100%"
+    width: "100%",
+    border: "0"
   }),
       _useState4 = _slicedToArray(_useState3, 2),
       listeningBtnStyle2 = _useState4[0],
       setListeningStyle2 = _useState4[1];
 
+  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('Hello World.'),
+      _useState6 = _slicedToArray(_useState5, 2),
+      speakingText = _useState6[0],
+      setSpeakingText = _useState6[1];
+
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {}, []);
   /**
-  * handle change
-  * @param {*} e
-  */
+   * handle change
+   * @param {*} e
+   */
 
   var handleChange = function handleChange(e) {
-    setListeningStyle(_objectSpread(_objectSpread({}, listeningBtnStyle), _defineProperty({}, e.target.name, e.target.value)));
-    var value = '';
+    if (e.target.name === 'width' && (e.target.value > 100 || e.target.value < 0)) {
+      (0,_context_Notify__WEBPACK_IMPORTED_MODULE_1__["default"])("Value should between 0-100");
+      return;
+    }
 
-    if (e.target.name === 'width') {
-      var arr = [e.target.value, '%'];
-      value = arr.join('');
+    setListeningStyle(_objectSpread(_objectSpread({}, listeningBtnStyle), _defineProperty({}, e.target.name, e.target.value)));
+    var value = "";
+
+    if (e.target.name === "width") {
+      var arr = [e.target.value, "%"];
+      value = arr.join("");
     } else {
       value = e.target.value;
     }
@@ -5061,33 +5073,84 @@ function Customize() {
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_3__["default"], {
     children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_4__["default"], {
       className: "mt-5",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
         xs: 12,
         sm: 12,
         lg: 8,
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("button", {
-          id: "wps__listent_content",
-          className: "",
-          style: listeningBtnStyle2,
-          type: "button",
-          title: "WP Speech:  Tap to listen post.",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
-            className: "dashicons dashicons-controls-play"
-          }), " Listen"]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Label, {
-          htmlFor: "color",
-          children: "Button Width (%)"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Control, {
-          type: "text",
-          name: "wps_play_btn_shortcode",
-          onChange: handleChange,
-          id: "wps_play_btn_shortcode",
-          defaultValue: '[wps_play_btn]',
-          title: "Button Width"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("button", {
-          onClick: CopyShortcode,
-          children: "Copy ShortCode"
-        })]
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_4__["default"], {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
+            xs: 12,
+            sm: 12,
+            lg: 12,
+            className: "mb-3",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("button", {
+              id: "wps__listent_content",
+              onClick: function onClick(e) {
+                return listenCotentInFrontend(speakingText, "wps__listent_content");
+              },
+              style: listeningBtnStyle2,
+              type: "button",
+              title: "WP Speech:  Tap to listen post.",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
+                className: "dashicons dashicons-controls-play"
+              }), " ", "Listen"]
+            })
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
+            xs: 12,
+            sm: 12,
+            lg: 12,
+            className: "mb-3",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.Fragment, {
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"], {
+                controlId: "wps__demo_text_for_play",
+                label: "Write here something and click listen button.",
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Control, {
+                  as: "textarea",
+                  onChange: function onChange(e) {
+                    return setSpeakingText(e.target.value);
+                  },
+                  onFocus: function onFocus(e) {
+                    return (0,_context_Notify__WEBPACK_IMPORTED_MODULE_1__["default"])("Write something here.");
+                  },
+                  defaultValue: "Hello World.",
+                  placeholder: "Write here something and click listen button.",
+                  style: {
+                    height: "100px"
+                  }
+                })
+              })
+            })
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
+            xs: 12,
+            sm: 12,
+            lg: 11,
+            className: "mt-2",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Label, {
+              htmlFor: "wps_play_btn_shortcode",
+              children: "Short Code"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Control, {
+              type: "text",
+              name: "wps_play_btn_shortcode",
+              onChange: handleChange,
+              id: "wps_play_btn_shortcode",
+              defaultValue: "[wps_play_btn]",
+              title: "Short code"
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
+            xs: 12,
+            sm: 12,
+            lg: 1,
+            className: "mt-4",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("button", {
+              onClick: CopyShortcode,
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("img", {
+                src: wp_access.image_url + "/copy.svg",
+                width: "15px",
+                alt: "Copy short code to clipboard"
+              })
+            })
+          })]
+        })
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
         xs: 12,
         sm: 12,
@@ -5095,30 +5158,30 @@ function Customize() {
         children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.Fragment, {
           children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("h4", {
             children: "Customize Listening Button"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Label, {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Label, {
             htmlFor: "backgroundColor",
             children: "BackGround Color"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Control, {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Control, {
             type: "color",
             name: "backgroundColor",
             onChange: handleChange,
             id: "backgroundColor",
-            defaultValue: "#563d7c",
+            defaultValue: listeningBtnStyle.backgroundColor,
             title: "Choose your color"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Label, {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Label, {
             htmlFor: "color",
             children: "Text Color"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Control, {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Control, {
             type: "color",
             name: "color",
             onChange: handleChange,
             id: "color",
-            defaultValue: "#563d7c",
+            defaultValue: listeningBtnStyle.color,
             title: "Choose your color"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Label, {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Label, {
             htmlFor: "color",
             children: "Button Width (%)"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Control, {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Control, {
             type: "number",
             name: "width",
             onChange: handleChange,

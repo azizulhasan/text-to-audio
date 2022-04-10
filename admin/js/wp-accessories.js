@@ -115,7 +115,8 @@ function captalizeString(string){
  */
  recognition.onsoundend = function(){
   record__status = 'record';
-  document.getElementById('wpa__start__record').innerHTML = 'Start'
+  let record_btn = document.getElementById('wpa__start__record');
+  if(record_btn) record_btn.innerHTML = 'Start'
 }
 
 

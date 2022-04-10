@@ -185,7 +185,7 @@ function wps_clean_content($text)
 /**
  *
  * Create short code for qr code.
- * Example [wpa_listen_btn]
+ * Example [wps_listen_btn]
  * @param $atts
  * @return string
  */

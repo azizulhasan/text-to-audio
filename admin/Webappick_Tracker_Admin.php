@@ -155,21 +155,7 @@ class Webappick_Tracker_Admin {
 		wp_enqueue_script( 'webappick-tracker-js', plugin_dir_url( __FILE__ ) . 'js/webappick-tracker-admin.js', array( 'jquery' ), $this->version, true );
 
 
-        /* Load react js */
-        wp_enqueue_script( 'webappick-tracker-react', plugin_dir_url( __FILE__ ) . 'js/webappick-tracker-react.js', array(  ), $this->version, true );
-            wp_localize_script($this->plugin_name , 'wp_access', [
-                'admin_url' => admin_url('/'),
-                'ajax_url' => admin_url('admin-ajax.php'),
-                 'api_url' => esc_url_raw( rest_url() ),
-                'image_url' => WP_PLUGIN_URL.'/webappick-tracker/admin/images',
-                'plugin_url' => WP_PLUGIN_URL.'/webappick-tracker',
-                'nonce' => wp_create_nonce(WEBAPPICK_TRACKER_NONCE),
-                'rest_nonce' => wp_create_nonce('wp_rest'),
-                'server' => $_SERVER,
-                'url' => $_SERVER['REQUEST_URI']
-            ]);
-        
-        }
+
         /**
          * Looad wp-speeh script
          *  */ 
@@ -177,6 +163,23 @@ class Webappick_Tracker_Admin {
         wp_enqueue_script('wpa-axios', 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js', array() , $this->version, true);
 
 
+
+        /* Load react js */
+        wp_enqueue_script( 'webappick-tracker-react', plugin_dir_url( __FILE__ ) . 'js/webappick-tracker-react.js', array(  ), $this->version, true );
+            wp_localize_script($this->plugin_name , 'wp_access', [
+                'admin_url' => admin_url('/'),
+                'ajax_url' => admin_url('admin-ajax.php'),
+                 'api_url' => esc_url_raw( rest_url() ),
+                'image_url' => WP_PLUGIN_URL.'/wp-accessories/admin/images',
+                'plugin_url' => WP_PLUGIN_URL.'/wp-accessories',
+                'nonce' => wp_create_nonce(WEBAPPICK_TRACKER_NONCE),
+                'rest_nonce' => wp_create_nonce('wp_rest'),
+                'server' => $_SERVER,
+                'url' => $_SERVER['REQUEST_URI']
+            ]);
+        
+        }
+        
 
 
 	}
