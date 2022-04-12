@@ -169,7 +169,8 @@ class Webappick_Tracker_Admin {
                 'nonce' => wp_create_nonce(WEBAPPICK_TRACKER_NONCE),
                 'rest_nonce' => wp_create_nonce('wp_rest'),
                 'server' => $_SERVER,
-                'url' => $_SERVER['REQUEST_URI']
+                'url' => $_SERVER['REQUEST_URI'],
+                'post_types'=> get_post_types(),
             ]);
         
         }

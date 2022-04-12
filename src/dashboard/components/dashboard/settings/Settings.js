@@ -24,6 +24,8 @@ export default function Settings() {
 
   const [checked, setChecked] = useState(false);
 
+  const [postTypes, setPostTypes] = useState(['post', 'shop_order', 'product', 'page'])
+
   useEffect(() => {
     /**
      * Get data from and display to table.
@@ -32,6 +34,8 @@ export default function Settings() {
     //   setSettings(res.data[0]);
     //   setChecked(res.data[0].welcome_message_is_display);
     // });
+
+    console.log(wp_access.post_types)
   }, []);
 
   /**
@@ -113,102 +117,49 @@ export default function Settings() {
 
   return (
     <React.Fragment>
-      <Row id="settings" className="mt-4">
-        <Col
-          xs={12}
-          sm={12}
-          lg={12}
-          className=" justify-content-start align-items-start mt-2"
-        >
-          <h4>Mail Credentials</h4>
-          <p className="text-danger mt-2 mb-2">Note: Please Enable Less secure app access for recieving email. <a href="https://www.google.com/settings/security/lesssecureapps" target="_blank"><button className="azh_btn azh_btn_edit azh_btn azh_btn_edit-primary" type="button">Enable</button></a></p>
-        </Col>
-      </Row>
-      <Form onSubmit={handleSubmit} >
-        <Row className="border " >
+      <Form onSubmit={handleSubmit}>
+        <Row>
           <Col
             xs={12}
             sm={6}
             lg={4}
             className="d-flex flex-col justify-content-start align-items-start"
           >
-            {settings._id && (
-              <Form.Control
-                type="text"
-                id="_id"
-                onChange={handleChange}
-                value={settings._id}
-                name="_id"
-                placeholder="id"
-                hidden
-              />
-            )}
+            <Form.Label id="wps__settings_allow_recording_for_post_type">
+              Allow Recording For Post Type
+            </Form.Label>
+          </Col>
+          <Col xs={12} sm={12} lg={8} >
             <Form.Group>
-              <Form.Label>Email </Form.Label>
-              <Form.Control
-                type="emial"
-                name="email"
-                value={settings.email}
-                onChange={handleChange}
-                placeholder="Email"
-              />
+              <Form.Select id="wps__settings_allow_recording_for_post_type" multiple >
+                <option disabled>Select recording post type</option>
+                <option value={'all'}>All</option>
+                {postTypes.map((posttype,i)=> {
+                    return (
+                      <option key={posttype} value={posttype}>{posttype}</option>
+                    )
+                })}
+
+              </Form.Select>
             </Form.Group>
           </Col>
-          <Col xs={12} sm={6} lg={4} className="d-flex flex-col">
-            <Form.Group>
-              <Form.Label>Password </Form.Label>
-              <Form.Control
-                type="password"
-                name="password"
-                value={settings.password}
-                onChange={handleChange}
-                placeholder="password"
-              />
-            </Form.Group>
-          </Col>
-          <Col xs={12} sm={6} lg={4} className="d-flex flex-col">
-            <Form.Group>
-              <Form.Label>Password Confirm</Form.Label>
-              <Form.Control
-                type="password"
-                name="password_confirm"
-                value={settings.password_confirm}
-                onChange={handleConfirmPassword}
-                placeholder="password confirm"
-              />
-              <Form.Control.Feedback
-                type={alertContent.isValid ? "valid" : "invalid"}
-                style={{ display: "block" }}
-              >
-                {alertContent.message ? alertContent.message : ""}
-              </Form.Control.Feedback>
-            </Form.Group>
-          </Col>
+        </Row>
+        <Row className="border-bottom mt-3">
           <Col
             xs={12}
-            sm={12}
-            lg={12}
-            className="d-flex flex-col justify-content-start align-items-start mt-2"
+            sm={6}
+            lg={4}
+            className="d-flex flex-col justify-content-start align-items-start"
           >
-            <h4>Show/Hide Welcome Message</h4>
+            <Form.Text id="wps__settings_display_btn_in_single_page">
+              Display Button Only Single Page
+            </Form.Text>
           </Col>
-          <Col xs={12} sm={12} lg={8} className=" mt-3">
-            <Form.Group>
-              <Form.Label>Message</Form.Label>
-              <Form.Control
-                type="text"
-                name="welcome_message"
-                value={settings.welcome_message}
-                onChange={handleChange}
-                placeholder="welcome message"
-              />
-            </Form.Group>
-          </Col>
-          <Col xs={12} sm={12} lg={4} className="d-flex flex-col mt-3">
+          <Col xs={12} sm={12} lg={8} className="d-flex flex-col">
             <Form.Group>
               <ToggleButton
-                className={"mt-4"}
-                id="toggle-check"
+                className={""}
+                id="wps__settings_display_btn_in_single_page"
                 type="checkbox"
                 variant={checked ? "outline-primary" : "outline-danger"}
                 checked={checked}
@@ -220,12 +171,14 @@ export default function Settings() {
             </Form.Group>
           </Col>
           <div className="d-grid gap-3 col-2 mx-auto mt-5 mb-4">
-            <button type="submit" className="azh_btn azh_btn_edit azh_btn azh_btn_edit-primary btn-center">
+            <button
+              type="submit"
+              className="azh_btn azh_btn_edit azh_btn azh_btn_edit-primary btn-block"
+            >
               {settings._id ? "Update" : "Submit"}
             </button>
           </div>
         </Row>
-        
       </Form>
     </React.Fragment>
   );

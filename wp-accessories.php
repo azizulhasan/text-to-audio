@@ -192,19 +192,19 @@ function wps_clean_content($text)
 function create_shortcode( $atts ) {
 
     // Apply short code for only single page.
-    //TODO: Put this option into settings page.
     if(!is_single()) return;
     static  $btn_no = 0;
     $btn_no++;
+
     // https://responsivevoice.com/wordpress-text-to-speech-plugin/
 
-    $title = get_the_title();
-    $description= get_the_content( );
-    $description = apply_filters('wps_content_before_cleaning', $description);
-    $description = wps_clean_content($description);
-    $description = apply_filters('wps_content_after_cleaning', $description);
-    $content = $title;
-    $content .= $description;
+    $title          = get_the_title();
+    $description    = get_the_content( );
+    $description    = apply_filters('wps__content_before_cleaning', $description);
+    $description    = wps_clean_content($description);
+    $description    = apply_filters('wps__content_after_cleaning', $description);
+    $content        = apply_filters( 'wps__content_title', $title );
+    $content        .= apply_filters( 'wps__content_description', $description );
 
     ?>
 <?php
