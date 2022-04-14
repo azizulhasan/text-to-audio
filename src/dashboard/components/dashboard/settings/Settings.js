@@ -7,35 +7,34 @@ import { ToggleButton, Form, Row, Col } from "react-bootstrap";
  */
 import { postWithoutImage, getData } from "../../context/utilities";
 import toast from "../../context/Notify";
+import { type } from "@testing-library/user-event/dist/type";
 
 export default function Settings() {
   const [settings, setSettings] = useState({
-    _id: "",
-    email: "",
-    password: "",
-    password_confirm: "",
-    welcome_message: "",
-    welcome_message_is_display: true,
-  });
-  const [alertContent, setAlertContent] = useState({
-    isValid: false,
-    message: "",
+    wps__settings_display_btn_in_single_page: false,
+    wps__settings_allow_recording_for_post_type: [],
   });
 
   const [checked, setChecked] = useState(false);
 
-  const [postTypes, setPostTypes] = useState(['post', 'shop_order', 'product', 'page'])
+  const [postTypes, setPostTypes] = useState([
+    "all",
+    "post",
+    "shop_order",
+    "product",
+    "page",
+  ]);
 
   useEffect(() => {
     /**
      * Get data from and display to table.
      */
-    // getData(process.env.REACT_APP_API_URL + "/api/settings").then((res) => {
-    //   setSettings(res.data[0]);
-    //   setChecked(res.data[0].welcome_message_is_display);
-    // });
+     let formData = new FormData();
+     formData.append("method", "get");
+     postWithoutImage(wp_access.api_url + "wps/v1/accessories/settings", formData).then(res=>{
+      setChecked(res.data.wps__settings_display_btn_in_single_page);
+     }) 
 
-    console.log(wp_access.post_types)
   }, []);
 
   /**
@@ -45,27 +44,7 @@ export default function Settings() {
   const handleChange = (e) => {
     setSettings({ ...settings, ...{ [e.target.name]: e.target.value } });
   };
-  /**
-   * Handle confirm password
-   */
-  const handleConfirmPassword = (e) => {
-    if (
-      e.target.name === "password_confirm" &&
-      settings.password !== e.target.value
-    ) {
-      setAlertContent({
-        ...{ isValid: false },
-        ...{ message: "Password should be same." },
-      });
-    } else {
-      setAlertContent({
-        ...{ isValid: true },
-        ...{ message: "Password matched." },
-      });
-    }
 
-    setSettings({ ...settings, ...{ [e.target.name]: e.target.value } });
-  };
   /**
    * Handle form Submit
    */
@@ -76,43 +55,33 @@ export default function Settings() {
      */
     let form = new FormData(e.target);
     let data = {};
+    let arr = []
     for (let [key, value] of form.entries()) {
       if (key === "" || value === "") {
         toast("Please fill the  field : " + key);
         return;
-      } else if (key === "password_confirm" && value !== data.password) {
-        toast("Password should be matched");
-        return;
+      }else if( key === 'wps__settings_allow_recording_for_post_type'){
+        arr.push(value)
+        data[key] = arr;
+      }else{
+        data[key] = value;
       }
-
-      data[key] = value;
     }
 
-    data.welcome_message_is_display = checked;
-    if (data._id !== undefined) {
-      postWithoutImage(
-        process.env.REACT_APP_API_URL + "/api/settings/" + data._id,
-        data
-      )
-        .then((res) => {
-          setSettings(res);
-          setChecked(res.welcome_message_is_display);
-          toast("Settings Data Updated");
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    } else {
-      postWithoutImage(process.env.REACT_APP_API_URL + "/api/settings", data)
-        .then((res) => {
-          setSettings(res);
-          setChecked(res.welcome_message_is_display);
-          toast("Settings Data Saved");
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }
+    data.wps__settings_display_btn_in_single_page = checked;
+    let formData = new FormData();
+    formData.append("fields", JSON.stringify(data));
+    formData.append("method", "post");
+    postWithoutImage(wp_access.api_url + "wps/v1/accessories/settings", formData)
+      .then((res) => {
+        console.log(res.data)
+        setSettings(res.data);
+        setChecked(res.data.wps__settings_display_btn_in_single_page);
+        toast("Settings Data Saved");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (
@@ -129,17 +98,23 @@ export default function Settings() {
               Allow Recording For Post Type
             </Form.Label>
           </Col>
-          <Col xs={12} sm={12} lg={8} >
+          <Col xs={12} sm={12} lg={8}>
             <Form.Group>
-              <Form.Select id="wps__settings_allow_recording_for_post_type" multiple >
+              <Form.Select
+                id="wps__settings_allow_recording_for_post_type"
+                name="wps__settings_allow_recording_for_post_type"
+                onChange={handleChange}
+                defaultValue={settings.wps__settings_allow_recording_for_post_type}
+                multiple
+              >
                 <option disabled>Select recording post type</option>
-                <option value={'all'}>All</option>
-                {postTypes.map((posttype,i)=> {
-                    return (
-                      <option key={posttype} value={posttype}>{posttype}</option>
-                    )
+                {postTypes.map((posttype, i) => {
+                  return (
+                    <option key={posttype}  value={posttype}>
+                      {posttype}
+                    </option>
+                  );
                 })}
-
               </Form.Select>
             </Form.Group>
           </Col>
@@ -158,15 +133,15 @@ export default function Settings() {
           <Col xs={12} sm={12} lg={8} className="d-flex flex-col">
             <Form.Group>
               <ToggleButton
-                className={""}
-                id="wps__settings_display_btn_in_single_page"
+                id="toggle-check"
                 type="checkbox"
+                className="form-controll"
                 variant={checked ? "outline-primary" : "outline-danger"}
                 checked={checked}
                 value="1"
                 onChange={(e) => setChecked(e.currentTarget.checked)}
               >
-                {checked ? "Shwo" : "Hide"}
+                {checked ? "Record" : "Not Record"}
               </ToggleButton>
             </Form.Group>
           </Col>
@@ -175,7 +150,7 @@ export default function Settings() {
               type="submit"
               className="azh_btn azh_btn_edit azh_btn azh_btn_edit-primary btn-block"
             >
-              {settings._id ? "Update" : "Submit"}
+              Submit
             </button>
           </div>
         </Row>

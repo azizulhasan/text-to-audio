@@ -70,6 +70,19 @@ class Webappick_Tracker_Api_Routes   {
             )
         );
 
+        // register settings route.
+        register_rest_route(
+            $this->namespace,
+            $this->rest_base.'/settings',
+            array(
+                array(
+                    'methods'             => \WP_REST_Server::ALLMETHODS,
+                    'callback'            => array( $this, 'wps_manage_settings_data' ),
+                    'permission_callback' => array( $this, 'get_route_access' ),
+                    'args'                => array(),
+                )
+            )
+        );
 
     }
 
@@ -342,6 +355,31 @@ class Webappick_Tracker_Api_Routes   {
 	    }
     }
 
+    /*
+     * Manage settings data
+     */
+    public function wps_manage_settings_data($request){
+        $response['status'] = true;
+        // save data about recording.
+	    if ( 'post' == $request['method'] ) {
+		    $fields = json_decode($request['fields']);
+            
+		    update_option('wps_settings_data', $fields);
+
+            $response['data'] = get_option('wps_settings_data');
+
+		    return rest_ensure_response( $response );
+	    }
+
+        // get data about recording.
+	    if ( 'get' == $request['method'] ) {
+
+            $response['data'] = get_option('wps_settings_data');
+		    return rest_ensure_response( $response );
+	    }
+    }
+
+    
 
     /*
      * Get route access if request is valid.
