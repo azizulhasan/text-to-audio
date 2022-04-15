@@ -20870,6 +20870,7 @@ function Customize() {
     })["catch"](function (err) {
       console.log(err);
     });
+    setSpeakingText(localStorage.getItem('speakingText'));
   }, []);
   /**
    * handle change
@@ -20976,6 +20977,11 @@ function Customize() {
     (0,_context_Notify__WEBPACK_IMPORTED_MODULE_1__["default"])("Copied the text: " + copyText.value);
   };
 
+  var setText = function setText(e) {
+    setSpeakingText(e.target.value);
+    localStorage.setItem('speakingText', e.target.value);
+  };
+
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_4__["default"], {
     children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
       className: "mt-5",
@@ -21013,7 +21019,7 @@ function Customize() {
                 children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"].Control, {
                   as: "textarea",
                   onChange: function onChange(e) {
-                    return setSpeakingText(e.target.value);
+                    return setText(e);
                   },
                   onFocus: function onFocus(e) {
                     return (0,_context_Notify__WEBPACK_IMPORTED_MODULE_1__["default"])("Write/Say something here.");
@@ -22280,6 +22286,8 @@ function Settings() {
     var formData = new FormData();
     formData.append("method", "get");
     (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/accessories/settings", formData).then(function (res) {
+      console.log(res.data);
+      setSettings(res.data);
       setChecked(res.data.wps__settings_display_btn_in_single_page);
     });
   }, []);
@@ -22289,7 +22297,13 @@ function Settings() {
    */
 
   var handleChange = function handleChange(e) {
-    setSettings(_objectSpread(_objectSpread({}, settings), _defineProperty({}, e.target.name, e.target.value)));
+    if (e.target.name === 'wps__settings_allow_recording_for_post_type') {
+      var temp = settings[e.target.name];
+      temp.push(e.target.value);
+      setSettings(_objectSpread(_objectSpread({}, settings), _defineProperty({}, e.target.name, temp)));
+    } else {
+      setSettings(_objectSpread(_objectSpread({}, settings), _defineProperty({}, e.target.name, e.target.value)));
+    }
   };
   /**
    * Handle form Submit
@@ -22362,8 +22376,8 @@ function Settings() {
           xs: 12,
           sm: 12,
           lg: 8,
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"].Group, {
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"].Select, {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"].Group, {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"].Select, {
               id: "wps__settings_allow_recording_for_post_type",
               name: "wps__settings_allow_recording_for_post_type",
               onChange: handleChange,
@@ -22372,13 +22386,15 @@ function Settings() {
               children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
                 disabled: true,
                 children: "Select recording post type"
-              }), postTypes.map(function (posttype, i) {
+              }), settings.wps__settings_allow_recording_for_post_type.length && postTypes.map(function (posttype, i) {
                 return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
                   value: posttype,
                   children: posttype
                 }, posttype);
               })]
-            })
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"].Text, {
+              children: ["Select: ", settings.wps__settings_allow_recording_for_post_type.join(', ')]
+            })]
           })
         })]
       }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"], {

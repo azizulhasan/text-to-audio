@@ -32,6 +32,8 @@ export default function Settings() {
      let formData = new FormData();
      formData.append("method", "get");
      postWithoutImage(wp_access.api_url + "wps/v1/accessories/settings", formData).then(res=>{
+       console.log(res.data)
+      setSettings(res.data);
       setChecked(res.data.wps__settings_display_btn_in_single_page);
      }) 
 
@@ -42,7 +44,15 @@ export default function Settings() {
    * @param {*} e
    */
   const handleChange = (e) => {
-    setSettings({ ...settings, ...{ [e.target.name]: e.target.value } });
+    if(e.target.name === 'wps__settings_allow_recording_for_post_type'){
+
+      let temp = settings[e.target.name]
+      temp.push(e.target.value)
+      setSettings({ ...settings, ...{ [e.target.name]: temp } });
+    }else{
+      setSettings({ ...settings, ...{ [e.target.name]: e.target.value } });
+
+    }
   };
 
   /**
@@ -108,14 +118,17 @@ export default function Settings() {
                 multiple
               >
                 <option disabled>Select recording post type</option>
-                {postTypes.map((posttype, i) => {
+                {settings.wps__settings_allow_recording_for_post_type.length && postTypes.map((posttype, i) => {
                   return (
-                    <option key={posttype}  value={posttype}>
+                    <option key={posttype}   value={posttype}>
                       {posttype}
                     </option>
                   );
                 })}
               </Form.Select>
+              <Form.Text>
+                Select: {settings.wps__settings_allow_recording_for_post_type.join(', ')}
+              </Form.Text>
             </Form.Group>
           </Col>
         </Row>

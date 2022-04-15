@@ -36,6 +36,8 @@ export default function Customize() {
       .catch((err) => {
         console.log(err);
       });
+
+      setSpeakingText(localStorage.getItem('speakingText'))
   }, []);
   /**
    * handle change
@@ -128,6 +130,11 @@ export default function Customize() {
     /* Alert the copied text */
     toast("Copied the text: " + copyText.value);
   };
+
+  const setText  = (e) => {
+    setSpeakingText(e.target.value)
+    localStorage.setItem('speakingText', e.target.value)
+  }
   return (
     <Container>
       <Row className="mt-5">
@@ -153,7 +160,7 @@ export default function Customize() {
                 >
                   <Form.Control
                     as="textarea"
-                    onChange={(e) => setSpeakingText(e.target.value)}
+                    onChange={(e) => setText(e)}
                     onFocus={(e) => toast("Write/Say something here.")}
                     value={speakingText}
                     placeholder="Write here something and click listen button."
