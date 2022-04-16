@@ -1,13 +1,13 @@
 <?php
-namespace WebappickTracker;
+namespace WPSpeech;
 /**
  * Fired during plugin deactivation
  *
- * @link       https://webappick.com
+ * @link       http://azizulhasan.com
  * @since      1.0.0
  *
- * @package    Webappick_Tracker
- * @subpackage Webappick_Tracker/includes
+ * @package    WP_Speech
+ * @subpackage WP_Speech/includes
  */
 
 /**
@@ -16,11 +16,11 @@ namespace WebappickTracker;
  * This class defines all code necessary to run during the plugin's deactivation.
  *
  * @since      1.0.0
- * @package    Webappick_Tracker
- * @subpackage Webappick_Tracker/includes
+ * @package    WP_Speech
+ * @subpackage WP_Speech/includes
  * @author     WebAppick <shoroar@webappick.com>
  */
-class Webappick_Tracker_Deactivator {
+class WP_Speech_Deactivator {
 
 	/**
 	 * Short Description. (use period)

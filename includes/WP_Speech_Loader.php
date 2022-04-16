@@ -1,13 +1,13 @@
 <?php
-namespace WebappickTracker;
+namespace WPSpeech;
 /**
  * Register all actions and filters for the plugin
  *
- * @link       https://webappick.com
+ * @link       http://azizulhasan.com
  * @since      1.0.0
  *
- * @package    Webappick_Tracker
- * @subpackage Webappick_Tracker/includes
+ * @package    WP_Speech
+ * @subpackage WP_Speech/includes
  */
 
 /**
@@ -17,11 +17,11 @@ namespace WebappickTracker;
  * the plugin, and register them with the WordPress API. Call the
  * run function to execute the list of actions and filters.
  *
- * @package    Webappick_Tracker
- * @subpackage Webappick_Tracker/includes
+ * @package    WP_Speech
+ * @subpackage WP_Speech/includes
  * @author     WebAppick <shoroar@webappick.com>
  */
-class Webappick_Tracker_Loader {
+class WP_Speech_Loader {
 
 	/**
 	 * The array of actions registered with WordPress.

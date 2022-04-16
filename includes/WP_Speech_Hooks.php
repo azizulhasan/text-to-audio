@@ -1,13 +1,13 @@
 <?php
-namespace WebappickTracker;
+namespace WPSpeech;
 /**
  * Fired during plugin activation
  *
- * @link       https://webappick.com
+ * @link       http://azizulhasan.com
  * @since      1.0.0
  *
- * @package    Webappick_Tracker
- * @subpackage Webappick_Tracker/includes
+ * @package    WP_Speech
+ * @subpackage WP_Speech/includes
  */
 
 /**
@@ -16,11 +16,11 @@ namespace WebappickTracker;
  * This class defines all code necessary to run during the plugin's activation.
  *
  * @since      1.0.0
- * @package    Webappick_Tracker
- * @subpackage Webappick_Tracker/includes
+ * @package    WP_Speech
+ * @subpackage WP_Speech/includes
  * @author     WebAppick <shoroar@webappick.com>
  */
-class Webappick_Tracker_Hooks {
+class WP_Speech_Hooks {
 
 
     public function __construct(){
@@ -77,4 +77,4 @@ class Webappick_Tracker_Hooks {
     }
 
 }
-new Webappick_Tracker_Hooks();
+new WP_Speech_Hooks();

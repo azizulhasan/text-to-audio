@@ -1,5 +1,5 @@
 {
-    "name": "azizu/webappick-tracker",
+    "name": "azizulhasan/wp-speech",
     "type": "plugin",
     "authors": [
         {
@@ -9,10 +9,10 @@
     ],
     "autoload": {
         "psr-4": {
-            "WebappickTracker\\" : "includes",
-            "WebappickTracker_Admin\\" : "admin",
-            "WebappickTracker_Public\\" : "public",
-            "WebappickTracker_Api\\" : "api"
+            "WPSpeech\\" : "includes",
+            "WPSpeech_Admin\\" : "admin",
+            "WPSpeech_Public\\" : "public",
+            "WPSpeech_Api\\" : "api"
         }
     },
 

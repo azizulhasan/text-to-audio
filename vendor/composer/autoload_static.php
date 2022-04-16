@@ -9,27 +9,27 @@ class ComposerStaticInit7f6653a5d36e71e944dcac886a5fa0c4
     public static $prefixLengthsPsr4 = array (
         'W' => 
         array (
-            'WebappickTracker_Public\\' => 24,
-            'WebappickTracker_Api\\' => 21,
-            'WebappickTracker_Admin\\' => 23,
-            'WebappickTracker\\' => 17,
+            'WPSpeech_Public\\' => 16,
+            'WPSpeech_Api\\' => 13,
+            'WPSpeech_Admin\\' => 15,
+            'WPSpeech\\' => 9,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'WebappickTracker_Public\\' => 
+        'WPSpeech_Public\\' => 
         array (
             0 => __DIR__ . '/../..' . '/public',
         ),
-        'WebappickTracker_Api\\' => 
+        'WPSpeech_Api\\' => 
         array (
             0 => __DIR__ . '/../..' . '/api',
         ),
-        'WebappickTracker_Admin\\' => 
+        'WPSpeech_Admin\\' => 
         array (
             0 => __DIR__ . '/../..' . '/admin',
         ),
-        'WebappickTracker\\' => 
+        'WPSpeech\\' => 
         array (
             0 => __DIR__ . '/../..' . '/includes',
         ),

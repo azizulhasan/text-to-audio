@@ -1,11 +1,11 @@
 <?php
 
-namespace WebappickTracker;
+namespace WPSpeech;
 
-use WebappickTracker\Webappick_Tracker_Loader;
-use WebappickTracker_Admin\Webappick_Tracker_Admin;
-use WebappickTracker_Public\Webappick_Tracker_Public;
-use WebappickTracker\Webappick_Tracker_i18n;
+use WPSpeech\WP_Speech_Loader;
+use WPSpeech_Admin\WP_Speech_Admin;
+use WPSpeech_Public\WP_Speech_Public;
+use WPSpeech\WP_Speech_i18n;
 
 /**
  * The file that defines the core plugin class
@@ -13,11 +13,11 @@ use WebappickTracker\Webappick_Tracker_i18n;
  * A class definition that includes attributes and functions used across both the
  * public-facing side of the site and the admin area.
  *
- * @link       https://webappick.com
+ * @link       http://azizulhasan.com
  * @since      1.0.0
  *
- * @package    Webappick_Tracker
- * @subpackage Webappick_Tracker/includes
+ * @package    WP_Speech
+ * @subpackage WP_Speech/includes
  */
 
 /**
@@ -30,13 +30,13 @@ use WebappickTracker\Webappick_Tracker_i18n;
  * version of the plugin.
  *
  * @since      1.0.0
- * @package    Webappick_Tracker
- * @subpackage Webappick_Tracker/includes
+ * @package    WP_Speech
+ * @subpackage WP_Speech/includes
  * @author     WebAppick <shoroar@webappick.com>
  */
 
 
-class Webappick_Tracker {
+class WP_Speech {
 
 	/**
 	 * The loader that's responsible for maintaining and registering all hooks that power
@@ -44,7 +44,7 @@ class Webappick_Tracker {
 	 *
 	 * @since    1.0.0
 	 * @access   protected
-	 * @var      Webappick_Tracker_Loader    $loader    Maintains and registers all hooks for the plugin.
+	 * @var      WP_Speech_Loader    $loader    Maintains and registers all hooks for the plugin.
 	 */
 	protected $loader;
 
@@ -76,8 +76,8 @@ class Webappick_Tracker {
 	 * @since    1.0.0
 	 */
 	public function __construct() {
-		if ( defined( 'WEBAPPICK_TRACKER_VERSION' ) ) {
-			$this->version = WEBAPPICK_TRACKER_VERSION;
+		if ( defined( 'WP_Speech_VERSION' ) ) {
+			$this->version = WP_Speech_VERSION;
 		} else {
 			$this->version = '1.0.0';
 		}
@@ -96,10 +96,10 @@ class Webappick_Tracker {
 	 *
 	 * Include the following files that make up the plugin:
 	 *
-	 * - Webappick_Tracker_Loader. Orchestrates the hooks of the plugin.
-	 * - Webappick_Tracker_i18n. Defines internationalization functionality.
-	 * - Webappick_Tracker_Admin. Defines all hooks for the admin area.
-	 * - Webappick_Tracker_Public. Defines all hooks for the public side of the site.
+	 * - WP_Speech_Loader. Orchestrates the hooks of the plugin.
+	 * - WP_Speech_i18n. Defines internationalization functionality.
+	 * - WP_Speech_Admin. Defines all hooks for the admin area.
+	 * - WP_Speech_Public. Defines all hooks for the public side of the site.
 	 *
 	 * Create an instance of the loader which will be used to register the hooks
 	 * with WordPress.
@@ -113,40 +113,40 @@ class Webappick_Tracker {
 		 * The class responsible for orchestrating the actions and filters of the
 		 * core plugin.
 		 */
-		//require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/Webappick_Tracker_Loader.php';
+		//require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/WP_Speech_Loader.php';
 
 		/**
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */
-		//require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/Webappick_Tracker_i18n.php';
+		//require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/WP_Speech_i18n.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
-		//require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/Webappick_Tracker_Admin.php';
+		//require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/WP_Speech_Admin.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
 		 * side of the site.
 		 */
-		//require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/Webappick_Tracker_Public.php';
+		//require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/WP_Speech_Public.php';
 
 		/**
 		 * The class responsible for loading PDF plugin hooks
 		 * of the plugin.
 		 */
 
-		require_once plugin_dir_path( dirname( __FILE__ ) ). 'includes/Webappick_Tracker_Hooks.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ). 'includes/WP_Speech_Hooks.php';
 
-		$this->loader = new Webappick_Tracker_Loader();
+		$this->loader = new WP_Speech_Loader();
 
 	}
 
 	/**
 	 * Define the locale for this plugin for internationalization.
 	 *
-	 * Uses the Webappick_Tracker_i18n class in order to set the domain and to register the hook
+	 * Uses the WP_Speech_i18n class in order to set the domain and to register the hook
 	 * with WordPress.
 	 *
 	 * @since    1.0.0
@@ -154,7 +154,7 @@ class Webappick_Tracker {
 	 */
 	private function set_locale() {
 
-		$plugin_i18n = new Webappick_Tracker_i18n();
+		$plugin_i18n = new WP_Speech_i18n();
 		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
 
 	}
@@ -168,18 +168,13 @@ class Webappick_Tracker {
 	 */
 	private function define_hooks() {
 
-		$plugin_admin = new Webappick_Tracker_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin = new WP_Speech_Admin( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles',999999 );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts',99999 );
         $this->loader->add_action( 'admin_menu', $plugin_admin, 'wp_speech_menu' );
 
-
-
-		$plugin_public = new Webappick_Tracker_Public( $this->get_plugin_name(), $this->get_version() );
-
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_admin, 'enqueue_wp_speech',99999 );
 
 	}
 
@@ -207,7 +202,7 @@ class Webappick_Tracker {
 	 * The reference to the class that orchestrates the hooks with the plugin.
 	 *
 	 * @since     1.0.0
-	 * @return    Webappick_Tracker_Loader    Orchestrates the hooks of the plugin.
+	 * @return    WP_Speech_Loader    Orchestrates the hooks of the plugin.
 	 */
 	public function get_loader() {
 		return $this->loader;

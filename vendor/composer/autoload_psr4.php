@@ -6,8 +6,8 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'WebappickTracker_Public\\' => array($baseDir . '/public'),
-    'WebappickTracker_Api\\' => array($baseDir . '/api'),
-    'WebappickTracker_Admin\\' => array($baseDir . '/admin'),
-    'WebappickTracker\\' => array($baseDir . '/includes'),
+    'WPSpeech_Public\\' => array($baseDir . '/public'),
+    'WPSpeech_Api\\' => array($baseDir . '/api'),
+    'WPSpeech_Admin\\' => array($baseDir . '/admin'),
+    'WPSpeech\\' => array($baseDir . '/includes'),
 );

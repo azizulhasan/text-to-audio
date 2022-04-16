@@ -1,13 +1,13 @@
 <?php
-namespace WebappickTracker_Admin;
+namespace WPSpeech_Admin;
 /**
  * The admin-specific functionality of the plugin.
  *
- * @link       https://webappick.com
+ * @link       http://azizulhasan.com
  * @since      1.0.0
  *
- * @package    Webappick_Tracker
- * @subpackage Webappick_Tracker/admin
+ * @package    WP_Speech
+ * @subpackage WP_Speech/admin
  */
 
 /**
@@ -16,11 +16,11 @@ namespace WebappickTracker_Admin;
  * Defines the plugin name, version, and two examples hooks for how to
  * enqueue the admin-specific stylesheet and JavaScript.
  *
- * @package    Webappick_Tracker
- * @subpackage Webappick_Tracker/admin
+ * @package    WP_Speech
+ * @subpackage WP_Speech/admin
  * @author     WebAppick <shoroar@webappick.com>
  */
-class Webappick_Tracker_Admin {
+class WP_Speech_Admin {
 
 	/**
 	 * The ID of this plugin.
@@ -106,9 +106,9 @@ class Webappick_Tracker_Admin {
                 'admin_url' => admin_url('/'),
                 'ajax_url' => admin_url('admin-ajax.php'),
                  'api_url' => esc_url_raw( rest_url() ),
-                'image_url' => WP_PLUGIN_URL.'/wp-accessories/admin/images',
-                'plugin_url' => WP_PLUGIN_URL.'/wp-accessories',
-                'nonce' => wp_create_nonce(WEBAPPICK_TRACKER_NONCE),
+                'image_url' => WP_PLUGIN_URL.'/wp-speech/admin/images',
+                'plugin_url' => WP_PLUGIN_URL.'/wp-speech',
+                'nonce' => wp_create_nonce(WP_Speech_NONCE),
                 'rest_nonce' => wp_create_nonce('wp_rest'),
                 'server' => $_SERVER,
                 'url' => $_SERVER['REQUEST_URI'],
@@ -119,14 +119,20 @@ class Webappick_Tracker_Admin {
          * Looad wp-speeh script
         */ 
         wp_enqueue_script( 'wp-speech', plugin_dir_url( __FILE__ ) . 'js/wp-speech.js', array(  ), $this->version, true );
-
-        
-     
-        
-       
-
-
 	}
+
+    /**
+     * Enqueue wp speech file
+     * 
+     */
+    public function enqueue_wp_speech(){
+
+        wp_enqueue_script( 'wp-speech', plugin_dir_url( __FILE__ ) . 'js/wp-speech.js', array(  ), $this->version, true );
+
+    }
+
+
+
     /**
      * Add Menu and Submenu page
      */

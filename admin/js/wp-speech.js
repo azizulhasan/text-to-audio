@@ -82,13 +82,8 @@ window.onload = function() {
   getData("http://localhost/azizulhasan/pro_two/wp-json/wps/v1/accessories/listening", listenData)
     .then((res) => {
       listeningSettings = res.data;
-      console.log(listeningSettings);
       var voices = speechSynthesis.getVoices();
       utterence.voice = voices.filter((voice, i)=> voice.name === listeningSettings.wps__listening_voice)[0];
-      console.log(utterence.voice);
-      // voices.map((voice, i)=>{
-      //   console.log(voice.name)
-      // })
       utterence.volume = listeningSettings.wps__listening_volume
         ? listeningSettings.wps__listening_volume
         : 1; // From 0 to 1

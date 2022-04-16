@@ -17,12 +17,11 @@
  * general skeleton and outline for how the file should work.
  *
  * For more information, see the following discussion:
- * https://github.com/tommcfarlin/WordPress-Plugin-Tracker/pull/123#issuecomment-28541913
  *
- * @link       https://webappick.com
+ * @link       http://azizulhasan.com
  * @since      1.0.0
  *
- * @package    Webappick_Tracker
+ * @package    WP_Speech
  */
 
 // If uninstall not called from WordPress, then exit.

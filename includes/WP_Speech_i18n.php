@@ -1,16 +1,16 @@
 <?php
-namespace WebappickTracker;
+namespace WPSpeech;
 /**
  * Define the internationalization functionality
  *
  * Loads and defines the internationalization files for this plugin
  * so that it is ready for translation.
  *
- * @link       https://webappick.com
+ * @link       http://azizulhasan.com
  * @since      1.0.0
  *
- * @package    Webappick_Tracker
- * @subpackage Webappick_Tracker/includes
+ * @package    WP_Speech
+ * @subpackage WP_Speech/includes
  */
 
 /**
@@ -20,11 +20,11 @@ namespace WebappickTracker;
  * so that it is ready for translation.
  *
  * @since      1.0.0
- * @package    Webappick_Tracker
- * @subpackage Webappick_Tracker/includes
+ * @package    WP_Speech
+ * @subpackage WP_Speech/includes
  * @author     WebAppick <shoroar@webappick.com>
  */
-class Webappick_Tracker_i18n {
+class WP_Speech_i18n {
 
 
 	/**

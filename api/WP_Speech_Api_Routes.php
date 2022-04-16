@@ -1,14 +1,14 @@
 <?php
-namespace WebappickTracker_Api;
+namespace WPSpeech_Api;
 /**
  * This class is for getting all plugin's data  through api.
  * This is applied for tracker menu.
  * @since      1.0.0
- * @package    Webappick_Tracker
- * @subpackage Webappick_Tracker/api
+ * @package    WP_Speech
+ * @subpackage WP_Speech/api
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
-class Webappick_Tracker_Api_Routes   {
+class WP_Speech_Api_Routes   {
 
     protected $namespace;
     protected $rest_base;
