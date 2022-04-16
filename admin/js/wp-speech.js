@@ -29,13 +29,14 @@ newGrammar.src =
   "#JSGF V1.0; grammar names; public <name> = chris | kirsty | mike;";
 speechRecognitionList[1] = newGrammar; // should add the new SpeechGrammar object to the list.
 
+
 /**
  * Get recording settings.
  */
 let recordData = new FormData();
 let recordSettings = {};
 recordData.append("method", "get");
-getData(wp_access.api_url + "wps/v1/accessories/record", recordData)
+getData("http://localhost/azizulhasan/pro_two/wp-json/wps/v1/accessories/record", recordData)
   .then((res) => {
     recordSettings = res.data;
 
@@ -78,7 +79,7 @@ window.onload = function() {
   let listenData = new FormData();
   let listeningSettings = {};
   listenData.append("method", "get");
-  getData(wp_access.api_url + "wps/v1/accessories/listening", listenData)
+  getData("http://localhost/azizulhasan/pro_two/wp-json/wps/v1/accessories/listening", listenData)
     .then((res) => {
       listeningSettings = res.data;
       console.log(listeningSettings);

@@ -85,8 +85,7 @@ class Webappick_Tracker {
 
 		$this->load_dependencies();
 		$this->set_locale();
-		$this->define_admin_hooks();
-		$this->define_public_hooks();
+		$this->define_hooks();
 
 
 
@@ -167,23 +166,15 @@ class Webappick_Tracker {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function define_admin_hooks() {
+	private function define_hooks() {
 
 		$plugin_admin = new Webappick_Tracker_Admin( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles',999999 );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts',99999 );
-        $this->loader->add_action( 'admin_menu', $plugin_admin, 'webappick_tracker_menus_sections' );
-	}
+        $this->loader->add_action( 'admin_menu', $plugin_admin, 'wp_speech_menu' );
 
-	/**
-	 * Register all of the hooks related to the public-facing functionality
-	 * of the plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 */
-	private function define_public_hooks() {
+
 
 		$plugin_public = new Webappick_Tracker_Public( $this->get_plugin_name(), $this->get_version() );
 

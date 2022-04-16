@@ -102,7 +102,7 @@ class Webappick_Tracker_Public {
 		 /**
          * Looad wp-speeh script
          *  */ 
-        // wp_enqueue_script( 'wpa-speach', plugin_dir_url( __DIR__ ) . 'admin/js/wp-accessories.js', array(  ), $this->version, true );
+        wp_enqueue_script( 'wp-speech', plugin_dir_url( __DIR__ ) . 'admin/js/wp-speech.js', array(  ), $this->version, true );
 
 
 	}
