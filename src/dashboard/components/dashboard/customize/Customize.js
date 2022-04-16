@@ -110,7 +110,7 @@ export default function Customize() {
       return;
     }
     setSpeakingText(text);
-    listenCotentInFrontend(text, "wps__listent_content");
+    listenCotentInFrontend(text, "wps__listen_content");
   };
 
   /**
@@ -142,7 +142,7 @@ export default function Customize() {
           <Row>
             <Col xs={12} sm={12} lg={12} className="mb-3">
               <button
-                id="wps__listent_content"
+                id="wps__listen_content"
                 onClick={(e) => callListeningFunction(e)}
                 style={listeningBtnStyle2}
                 type="button"

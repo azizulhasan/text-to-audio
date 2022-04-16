@@ -86,56 +86,15 @@ class WP_Speech {
 		$this->load_dependencies();
 		$this->set_locale();
 		$this->define_hooks();
-
-
-
 	}
 
 	/**
 	 * Load the required dependencies for this plugin.
 	 *
-	 * Include the following files that make up the plugin:
-	 *
-	 * - WP_Speech_Loader. Orchestrates the hooks of the plugin.
-	 * - WP_Speech_i18n. Defines internationalization functionality.
-	 * - WP_Speech_Admin. Defines all hooks for the admin area.
-	 * - WP_Speech_Public. Defines all hooks for the public side of the site.
-	 *
-	 * Create an instance of the loader which will be used to register the hooks
-	 * with WordPress.
-	 *
 	 * @since    1.0.0
 	 * @access   private
 	 */
 	private function load_dependencies() {
-
-		/**
-		 * The class responsible for orchestrating the actions and filters of the
-		 * core plugin.
-		 */
-		//require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/WP_Speech_Loader.php';
-
-		/**
-		 * The class responsible for defining internationalization functionality
-		 * of the plugin.
-		 */
-		//require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/WP_Speech_i18n.php';
-
-		/**
-		 * The class responsible for defining all actions that occur in the admin area.
-		 */
-		//require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/WP_Speech_Admin.php';
-
-		/**
-		 * The class responsible for defining all actions that occur in the public-facing
-		 * side of the site.
-		 */
-		//require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/WP_Speech_Public.php';
-
-		/**
-		 * The class responsible for loading PDF plugin hooks
-		 * of the plugin.
-		 */
 
 		require_once plugin_dir_path( dirname( __FILE__ ) ). 'includes/WP_Speech_Hooks.php';
 

@@ -251,7 +251,7 @@ function startReadingContent(btn_id) {
 
 function listenCotentInFrontend(
   content = "Hellow World",
-  btn_id = "wpa__listent_content"
+  btn_id = "wpa__listen_content"
 ) {
   /**
    * Stop recording before listening.
@@ -281,9 +281,7 @@ utterence.addEventListener("end", function(event) {
  */
 Object.values(document.getElementsByTagName("textarea")).forEach(
   (textarea, index) => {
-    // console.log(textarea.getAttribute('id'))
     let record_btn = document.getElementById("wpa__start__record");
-
     /**
      * Start recording on focus event.
      */

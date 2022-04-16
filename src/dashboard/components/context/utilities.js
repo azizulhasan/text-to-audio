@@ -3,12 +3,15 @@
  * @param {url} script url
  */
 export const addScripts = (scripts) => {
+  let fragment = document.createDocumentFragment();
+
   [...scripts].forEach((scirpt) => {
     let tag = document.createElement("script");
     tag.async = true;
     tag.src = scirpt;
-    document.body.appendChild(tag);
+    fragment.appendChild(tag);
   });
+  document.body.appendChild(fragment)
 };
 
 /**
@@ -59,6 +62,7 @@ export const getData = async (url = "") => {
   const data = await response.json();
   return data; // parses JSON response into native JavaScript objects
 };
+
 
 let lastUrl = window.location.pathname;
 let componentName = "";
