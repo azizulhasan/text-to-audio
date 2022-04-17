@@ -20,7 +20,6 @@ export default function Settings() {
   const [postTypes, setPostTypes] = useState([
     "all",
     "post",
-    "shop_order",
     "product",
     "page",
   ]);

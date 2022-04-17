@@ -22305,7 +22305,7 @@ function Settings() {
       checked = _useState4[0],
       setChecked = _useState4[1];
 
-  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(["all", "post", "shop_order", "product", "page"]),
+  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(["all", "post", "product", "page"]),
       _useState6 = _slicedToArray(_useState5, 2),
       postTypes = _useState6[0],
       setPostTypes = _useState6[1];

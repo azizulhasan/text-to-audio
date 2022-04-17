@@ -207,7 +207,7 @@ function create_shortcode( $atts ) {
     $btn_no++;
 
 
-    $title          = get_the_title();
+    $title          = get_the_title().". ";
     $description    = get_the_content( );
     $description    = apply_filters('wps__content_before_cleaning', $description);
     $description    = wps_clean_content($description);

@@ -89,12 +89,12 @@ function startRecording(currnt_record_content_id = "content_ifr") {
    */
   speechSynthesis.cancel();
 
-  let record_btn = document.getElementById("wpa__start__record");
+  let record_btn = document.getElementById("wps__start__record");
   if (record__status == "stop") {
     record__status = "record";
     recognition.stop();
     localStorage.setItem("recordStarted", false);
-    if (record_btn) record_btn.innerHTML = "Start";
+    if (record_btn) record_btn.innerHTML = '<span class="dashicons dashicons-controls-volumeoff"></span> Start';
   } else if (record__status == "record") {
     if (
       localStorage.getItem("recordStarted") == null ||
@@ -104,7 +104,7 @@ function startRecording(currnt_record_content_id = "content_ifr") {
       recognition.start();
     }
     record__status = "stop";
-    if (record_btn) record_btn.innerHTML = "Stop";
+    if (record_btn) record_btn.innerHTML = '<span class="dashicons dashicons-controls-volumeon"></span> Stop';
   }
 
   let current_reading_content = "";
@@ -152,14 +152,14 @@ function captalizeString(string) {
  */
 recognition.onsoundend = function() {
   record__status = "record";
-  let record_btn = document.getElementById("wpa__start__record");
-  if (record_btn) record_btn.innerHTML = "Start";
+  let record_btn = document.getElementById("wps__start__record");
+  if (record_btn) record_btn.innerHTML = '<span class="dashicons dashicons-controls-volumeoff"></span> Start';
 };
 
 /**
  * Listent/Pause/Resume content.
  */
-function listenCotentInDashboard() {
+function listenCotentInDashboard(btn_id, content, listeningSettings) {
   let current_reading_content = "";
   if (
     localStorage.getItem("current_reading_content_id") !== null &&
@@ -175,21 +175,20 @@ function listenCotentInDashboard() {
 
   let text =
     current_reading_content.innerText || current_reading_content.textContent;
-  current_reading_content.innerHTML = text;
 
-  utterence.text = current_reading_content.innerHTML;
+
   /**
    * Stop recording before listening.
    */
   recognition.stop();
   localStorage.setItem("recordStarted", false);
-  localStorage.setItem("current_play_btn_id", "wpa__listent_content");
+  localStorage.setItem("current_play_btn_id", btn_id, );
   localStorage.setItem(
     "current_reading_content",
-    current_reading_content.innerHTML
+    text
   );
 
-  startReadingContent("wpa__listent_content");
+  startReadingContent(btn_id, text, listeningSettings);
 }
 
 // speechSynthesis.cancel()
@@ -280,7 +279,7 @@ function listenCotentInFrontend(
  */
 Object.values(document.getElementsByTagName("textarea")).forEach(
   (textarea, index) => {
-    let record_btn = document.getElementById("wpa__start__record");
+    let record_btn = document.getElementById("wps__start__record");
     /**
      * Start recording on focus event.
      */
@@ -291,7 +290,7 @@ Object.values(document.getElementsByTagName("textarea")).forEach(
        */
       speechSynthesis.cancel();
       console.log(speechSynthesis);
-      let listen_btn = document.getElementById("wpa__listent_content");
+      let listen_btn = document.getElementById("wpa__listen_content");
       if (listen_btn)
         listen_btn.innerHTML =
           '<span class="dashicons dashicons-controls-play"></span> Play';
@@ -306,7 +305,7 @@ Object.values(document.getElementsByTagName("textarea")).forEach(
         textarea.getAttribute("id")
       );
       record__status = "record";
-      if (record_btn) record_btn.innerHTML = "Stop";
+      if (record_btn) record_btn.innerHTML = '<span class="dashicons dashicons-controls-volumeon"></span> Stop';
     });
 
     /**

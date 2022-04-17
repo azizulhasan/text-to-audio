@@ -32,7 +32,7 @@ use WPSpeech\WP_Speech_i18n;
  * @since      1.0.0
  * @package    WP_Speech
  * @subpackage WP_Speech/includes
- * @author     WebAppick <shoroar@webappick.com>
+ * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
 
 

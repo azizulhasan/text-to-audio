@@ -18,7 +18,7 @@ namespace WPSpeech_Admin;
  *
  * @package    WP_Speech
  * @subpackage WP_Speech/admin
- * @author     WebAppick <shoroar@webappick.com>
+ * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
 class WP_Speech_Admin {
 
@@ -68,7 +68,6 @@ class WP_Speech_Admin {
 
 
             /* Default styles css*/
-            // wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'css/webappick-tracker-admin.css', array(), $this->version, 'all');
 
             /* Dashicons */
             wp_enqueue_style('dashicons');
@@ -84,17 +83,16 @@ class WP_Speech_Admin {
 	public function enqueue_scripts() {
 
 
-        // if( isset($_REQUEST['page']) && ( 'wp-speech' == $_REQUEST['page']  ) ) {
+        if( isset($_REQUEST['page']) && ( 'wp-speech' == $_REQUEST['page']  ) ) {
 
             // /* List JS*/
-            wp_enqueue_script( 'list-js', plugin_dir_url( __FILE__ ) . 'js/libs/list.min.js', array( 'jquery' ), $this->version, true );
+            // wp_enqueue_script( 'list-js', plugin_dir_url( __FILE__ ) . 'js/libs/list.min.js', array( 'jquery' ), $this->version, true );
 
             // /* Seletize JS*/
             // wp_enqueue_script( 'seletize-js', plugin_dir_url( __FILE__ ) . 'js/libs/selectize.min.js', array( 'jquery' ), $this->version, true );
 
 
             /* Default JS*/
-            // wp_enqueue_script( 'webappick-tracker-js', plugin_dir_url( __FILE__ ) . 'js/webappick-tracker-admin.js', array( 'jquery' ), $this->version, true );
 
 
 
@@ -115,10 +113,12 @@ class WP_Speech_Admin {
                 'post_types'=> get_post_types(),
             ]);
 
+        }
              /**
          * Looad wp-speeh script
         */ 
         wp_enqueue_script( 'wp-speech', plugin_dir_url( __FILE__ ) . 'js/wp-speech.js', array(  ), $this->version, true );
+
 	}
 
     /**
@@ -144,14 +144,12 @@ class WP_Speech_Admin {
             'manage_options',
             'wp-speech',
             array($this, "wp_speech_settings"),
-            'dashicons-admin-settings',
-            null
+            'dashicons-controls-volumeon',
+            20
         );
     }
 
-    /**
-     * Webappick main menu page callback
-     */
+   
     public function wp_speech_settings() {
         echo "<div class='wpwrap'><div id='app'></div></div>";
     }

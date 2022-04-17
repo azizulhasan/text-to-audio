@@ -22,7 +22,7 @@ namespace WPSpeech;
  * @since      1.0.0
  * @package    WP_Speech
  * @subpackage WP_Speech/includes
- * @author     WebAppick <shoroar@webappick.com>
+ * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
 class WP_Speech_i18n {
 
@@ -35,7 +35,7 @@ class WP_Speech_i18n {
 	public function load_plugin_textdomain() {
 
 		load_plugin_textdomain(
-			'webappick-tracker',
+			'wp-speech',
 			false,
 			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
 		);
