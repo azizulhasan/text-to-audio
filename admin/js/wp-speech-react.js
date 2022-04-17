@@ -20106,12 +20106,16 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
  * @param {url} script url
  */
 var addScripts = function addScripts(scripts) {
+  var fragment = document.createDocumentFragment();
+
   _toConsumableArray(scripts).forEach(function (scirpt) {
     var tag = document.createElement("script");
     tag.async = true;
     tag.src = scirpt;
-    document.body.appendChild(tag);
+    fragment.appendChild(tag);
   });
+
+  document.body.appendChild(fragment);
 };
 /**
  * Post data method.
@@ -20858,7 +20862,7 @@ function Customize() {
      */
     var customize = new FormData();
     customize.append("method", "get");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_2__.postWithoutImage)(wp_access.api_url + "wps/v1/accessories/customize", customize).then(function (res) {
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_2__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/customize", customize).then(function (res) {
       setListeningStyle(res.data);
       setListeningStyle2(_objectSpread(_objectSpread(_objectSpread(_objectSpread({}, listeningBtnStyle2), {
         backgroundColor: res.data.backgroundColor
@@ -20936,7 +20940,7 @@ function Customize() {
     var data = new FormData();
     data.append("fields", JSON.stringify(formData));
     data.append("method", "post");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_2__.postWithoutImage)(wp_access.api_url + "wps/v1/accessories/customize", data).then(function (res) {
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_2__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/customize", data).then(function (res) {
       setListeningStyle(res.data);
       (0,_context_Notify__WEBPACK_IMPORTED_MODULE_1__["default"])("Customize Data Saved");
     })["catch"](function (err) {
@@ -20953,7 +20957,7 @@ function Customize() {
     }
 
     setSpeakingText(text);
-    listenCotentInFrontend(text, "wps__listent_content");
+    listenCotentInFrontend(text, "wps__listen_content");
   };
   /**
    * Copy short Code
@@ -20996,7 +21000,7 @@ function Customize() {
             lg: 12,
             className: "mb-3",
             children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("button", {
-              id: "wps__listent_content",
+              id: "wps__listen_content",
               onClick: function onClick(e) {
                 return callListeningFunction(e);
               },
@@ -21543,7 +21547,7 @@ function Listening() {
 
     var data = new FormData();
     data.append("method", "get");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/accessories/record", data).then(function (res) {
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/record", data).then(function (res) {
       console.log(res);
       setListeningLang(res.data.wps__recording__lang);
     })["catch"](function (err) {
@@ -21555,7 +21559,7 @@ function Listening() {
 
     var data2 = new FormData();
     data2.append("method", "get");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/accessories/listening", data2).then(function (res) {
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/listening", data2).then(function (res) {
       // console.log(res.data)
       setListeningSettings(res.data);
     })["catch"](function (err) {
@@ -21602,7 +21606,7 @@ function Listening() {
     var data = new FormData();
     data.append("fields", JSON.stringify(formData));
     data.append("method", "post");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/accessories/listening", data).then(function (res) {
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/listening", data).then(function (res) {
       console.log(res);
       setListeningSettings(res.data);
       (0,_context_Notify__WEBPACK_IMPORTED_MODULE_2__["default"])("Listening Data Saved");
@@ -21942,7 +21946,7 @@ function Recording() {
      */
     var data = new FormData();
     data.append("method", "get");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/accessories/record", data).then(function (res) {
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/record", data).then(function (res) {
       setSettings(res.data);
       setChecked(res.data.is_record_continously);
     })["catch"](function (err) {
@@ -21997,7 +22001,7 @@ function Recording() {
     var data = new FormData();
     data.append("fields", JSON.stringify(formData));
     data.append("method", "post");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/accessories/record", data).then(function (res) {
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/record", data).then(function (res) {
       console.log(res);
       setSettings(res.data);
       setChecked(res.data.is_record_continously);
@@ -22312,7 +22316,7 @@ function Settings() {
      */
     var formData = new FormData();
     formData.append("method", "get");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/accessories/settings", formData).then(function (res) {
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/settings", formData).then(function (res) {
       console.log(res.data);
       setSettings(res.data);
       setChecked(res.data.wps__settings_display_btn_in_single_page);
@@ -22376,7 +22380,7 @@ function Settings() {
     var formData = new FormData();
     formData.append("fields", JSON.stringify(data));
     formData.append("method", "post");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/accessories/settings", formData).then(function (res) {
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/settings", formData).then(function (res) {
       console.log(res.data);
       setSettings(res.data);
       setChecked(res.data.wps__settings_display_btn_in_single_page);
@@ -22413,14 +22417,14 @@ function Settings() {
               children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
                 disabled: true,
                 children: "Select recording post type"
-              }), settings.wps__settings_allow_recording_for_post_type.length && postTypes.map(function (posttype, i) {
+              }), postTypes.map(function (posttype, i) {
                 return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
                   value: posttype,
                   children: posttype
                 }, posttype);
               })]
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"].Text, {
-              children: ["Select: ", settings.wps__settings_allow_recording_for_post_type.join(', ')]
+              children: ["Select: ", settings.wps__settings_allow_recording_for_post_type]
             })]
           })
         })]

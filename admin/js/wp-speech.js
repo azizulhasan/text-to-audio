@@ -29,14 +29,16 @@ newGrammar.src =
   "#JSGF V1.0; grammar names; public <name> = chris | kirsty | mike;";
 speechRecognitionList[1] = newGrammar; // should add the new SpeechGrammar object to the list.
 
-
 /**
  * Get recording settings.
  */
 let recordData = new FormData();
 let recordSettings = {};
 recordData.append("method", "get");
-getData("http://localhost/azizulhasan/pro_two/wp-json/wps/v1/accessories/record", recordData)
+getData(
+  "http://localhost/azizulhasan/pro_two/wp-json/wps/v1/speech/record",
+  recordData
+)
   .then((res) => {
     recordSettings = res.data;
 
@@ -73,33 +75,7 @@ if ("speechSynthesis" in window) {
 window.onload = function() {
   localStorage.setItem("recordStarted", false);
   localStorage.setItem("current_reading_content_id", "content_ifr");
-  /**
-   * Get listening settings.
-   */
-  let listenData = new FormData();
-  let listeningSettings = {};
-  listenData.append("method", "get");
-  getData("http://localhost/azizulhasan/pro_two/wp-json/wps/v1/accessories/listening", listenData)
-    .then((res) => {
-      listeningSettings = res.data;
-      var voices = speechSynthesis.getVoices();
-      utterence.voice = voices.filter((voice, i)=> voice.name === listeningSettings.wps__listening_voice)[0];
-      utterence.volume = listeningSettings.wps__listening_volume
-        ? listeningSettings.wps__listening_volume
-        : 1; // From 0 to 1
-      utterence.rate = listeningSettings.wps__listening_rate
-        ? listeningSettings.wps__listening_rate
-        : 1; // From 0.1 to 10
-      utterence.pitch = listeningSettings.wps__listening_pitch
-        ? listeningSettings.wps__listening_pitch
-        : 2; // From 0 to 2
-      utterence.lang = listeningSettings.wps__listening_lang
-        ? listeningSettings.wps__listening_lang
-        : "en-US"; // It will be speaking language.
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+  speechSynthesis.cancel()
 };
 window.onload();
 
@@ -215,14 +191,33 @@ function listenCotentInDashboard() {
 
   startReadingContent("wpa__listent_content");
 }
+
+// speechSynthesis.cancel()
 /**
  * Start Reading content
  */
-
-function startReadingContent(btn_id) {
+function startReadingContent(btn_id, content, listeningSettings) {
   let listen_btn = document.getElementById(btn_id);
-  // utterence.text = localStorage.getItem('current_reading_content')
-  // console.log(listen_status)
+
+ 
+  utterence.text = content;
+  var voices = speechSynthesis.getVoices();
+  utterence.voice = voices.filter(
+    (voice, i) => voice.name === listeningSettings.wps__listening_voice
+  )[0];
+  utterence.volume = listeningSettings.wps__listening_volume
+    ? listeningSettings.wps__listening_volume
+    : 1; // From 0 to 1
+  utterence.rate = listeningSettings.wps__listening_rate
+    ? listeningSettings.wps__listening_rate
+    : 1; // From 0.1 to 10
+  utterence.pitch = listeningSettings.wps__listening_pitch
+    ? listeningSettings.wps__listening_pitch
+    : 2; // From 0 to 2
+  utterence.lang = listeningSettings.wps__listening_lang
+    ? listeningSettings.wps__listening_lang
+    : "en-US"; // It will be speaking language.
+
   if (listen_status == "listen") {
     // console.log(utterence)
     speechSynthesis.speak(utterence);
@@ -245,13 +240,28 @@ function startReadingContent(btn_id) {
   }
 }
 
+  /**
+   * After ending reading the content.
+   */
+   utterence.addEventListener("end", function(event) {
+    speechSynthesis.cancel();
+    let listen_btn = document.getElementById(
+      localStorage.getItem("current_play_btn_id")
+    );
+    listen_btn.innerHTML =
+      '<span class="dashicons dashicons-image-rotate"></span> Replay';
+    listen_btn.setAttribute("title", "WP Speech: Replay");
+    listen_status = "listen";
+  });
+
 /**
  * Read the blog
  */
 
 function listenCotentInFrontend(
   content = "Hellow World",
-  btn_id = "wpa__listen_content"
+  btn_id = "wpa__listen_content",
+  listeningSettings
 ) {
   /**
    * Stop recording before listening.
@@ -259,22 +269,11 @@ function listenCotentInFrontend(
   recognition.stop();
   localStorage.setItem("recordStarted", false);
   localStorage.setItem("current_play_btn_id", btn_id);
-  utterence.text = content;
-  startReadingContent(btn_id);
-}
 
-/**
- * After ending reading the content.
- */
-utterence.addEventListener("end", function(event) {
-  let listen_btn = document.getElementById(
-    localStorage.getItem("current_play_btn_id")
-  );
-  listen_btn.innerHTML =
-    '<span class="dashicons dashicons-image-rotate"></span> Replay';
-  listen_btn.setAttribute("title", "WP Speech: Replay");
-  listen_status = "listen";
-});
+  startReadingContent(btn_id, content, listeningSettings);
+
+  console.log(listeningSettings);
+}
 
 /**
  * Get all textarea and start recording on focus event and stop recording on focusout event.
@@ -286,10 +285,12 @@ Object.values(document.getElementsByTagName("textarea")).forEach(
      * Start recording on focus event.
      */
     textarea.addEventListener("focus", function() {
+      console.log(speechSynthesis);
       /**
        * Stop listening before recording.
        */
       speechSynthesis.cancel();
+      console.log(speechSynthesis);
       let listen_btn = document.getElementById("wpa__listent_content");
       if (listen_btn)
         listen_btn.innerHTML =

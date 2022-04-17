@@ -23,7 +23,7 @@ export default function Customize() {
      */
     let customize = new FormData();
     customize.append("method", "get");
-    postWithoutImage(wp_access.api_url + "wps/v1/accessories/customize", customize)
+    postWithoutImage(wp_access.api_url + "wps/v1/speech/customize", customize)
       .then((res) => {
         setListeningStyle(res.data)
         setListeningStyle2({
@@ -92,7 +92,7 @@ export default function Customize() {
     let data = new FormData();
     data.append("fields", JSON.stringify(formData));
     data.append("method", "post");
-    postWithoutImage(wp_access.api_url + "wps/v1/accessories/customize", data)
+    postWithoutImage(wp_access.api_url + "wps/v1/speech/customize", data)
       .then((res) => {
         setListeningStyle(res.data)
         toast("Customize Data Saved");

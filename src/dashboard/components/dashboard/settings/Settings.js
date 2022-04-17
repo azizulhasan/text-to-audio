@@ -31,7 +31,7 @@ export default function Settings() {
      */
      let formData = new FormData();
      formData.append("method", "get");
-     postWithoutImage(wp_access.api_url + "wps/v1/accessories/settings", formData).then(res=>{
+     postWithoutImage(wp_access.api_url + "wps/v1/speech/settings", formData).then(res=>{
        console.log(res.data)
       setSettings(res.data);
       setChecked(res.data.wps__settings_display_btn_in_single_page);
@@ -82,7 +82,7 @@ export default function Settings() {
     let formData = new FormData();
     formData.append("fields", JSON.stringify(data));
     formData.append("method", "post");
-    postWithoutImage(wp_access.api_url + "wps/v1/accessories/settings", formData)
+    postWithoutImage(wp_access.api_url + "wps/v1/speech/settings", formData)
       .then((res) => {
         console.log(res.data)
         setSettings(res.data);
@@ -118,7 +118,7 @@ export default function Settings() {
                 multiple
               >
                 <option disabled>Select recording post type</option>
-                {settings.wps__settings_allow_recording_for_post_type.length && postTypes.map((posttype, i) => {
+                {postTypes.map((posttype, i) => {
                   return (
                     <option key={posttype}   value={posttype}>
                       {posttype}
@@ -127,7 +127,7 @@ export default function Settings() {
                 })}
               </Form.Select>
               <Form.Text>
-                Select: {settings.wps__settings_allow_recording_for_post_type.join(', ')}
+                Select: {settings.wps__settings_allow_recording_for_post_type}
               </Form.Text>
             </Form.Group>
           </Col>

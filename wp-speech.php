@@ -186,15 +186,26 @@ function wps_clean_content($text)
  * Example [wps_listen_btn]
  * @param $atts
  * @return string
+ *  https://responsivevoice.com/wordpress-text-to-speech-plugin/
  */
 function create_shortcode( $atts ) {
 
+
+    $listening =  (array) get_option('wps_listening_settings');
+    $listening = json_encode($listening);
+    $customize = (array) get_option('wps_customize_settings');
+    $settings = (array) get_option('wps_settings_data');
+    // echo "<pre>";
+    //print_r($customize);
+    // print_r(json_encode($listening));
+    //print_r($settings);
+    // die();
+
     // Apply short code for only single page.
-    if(!is_single()) return;
+    if($settings['wps__settings_display_btn_in_single_page'] == '' &&  !is_single()) return;
     static  $btn_no = 0;
     $btn_no++;
 
-    // https://responsivevoice.com/wordpress-text-to-speech-plugin/
 
     $title          = get_the_title();
     $description    = get_the_content( );
@@ -206,17 +217,24 @@ function create_shortcode( $atts ) {
 
     ?>
 <?php
+    // Button start text.
     $btn_text = (isset($atts['btn_text'])) && strlen($atts['btn_text'])? $atts['btn_text']: "Listen";
-
+    // Speak Icon
     $speakIcon = '<span class="dashicons dashicons-controls-play"></span> ' . $btn_text . '
-    
     ';
+    // Button style.
+    if(isset($customize) && count($customize)){
+        $btn_style = 'background-color:'.$customize['backgroundColor'].';color:'.$customize['color'].';width:'.$customize['width'].'%;';
+    }else{
+        $btn_style = 'width:100%;';
+    }
+    // Custom class to button.
     $class = (isset($atts['class'])) && strlen($atts['class'])? $atts['class']: "";
-    $button = '<button id="wps__listent_content_'.$btn_no.'" style="width:100%" class="'.$class.'" type="button"  title="WP Speech:  Tap to listen post.">' . $speakIcon . ' </button>
+    $button = '<button id="wps__listent_content_'.$btn_no.'" style="'.$btn_style.'" class="'.$class.'" type="button"  title="WP Speech:  Tap to listen post.">' . $speakIcon . ' </button>
         <script>
         wps__listent_content_'.$btn_no.'.onclick = function(){
                 
-                listenCotentInFrontend("' . $content . '", "wps__listent_content_'.$btn_no.'");
+                listenCotentInFrontend("' . $content . '", "wps__listent_content_'.$btn_no.'",  '. $listening . ' );
                 
             };
         </script>

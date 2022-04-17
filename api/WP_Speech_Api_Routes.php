@@ -19,15 +19,15 @@ class WP_Speech_Api_Routes   {
     public function __construct($current_user = null) {
         $this->version = 'v1';
         $this->namespace = 'wps/'.$this->version;
-        $this->rest_base  = '/accessories';
+        $this->rest_base  = '/speech';
         $this->current_user = $current_user;
-        add_action( 'rest_api_init', [$this, 'wps_accessories_register_routes'] );
+        add_action( 'rest_api_init', [$this, 'wps_speech_register_routes'] );
     }
 
     /**
      * Register Routes
      */
-    public function wps_accessories_register_routes() {
+    public function wps_speech_register_routes() {
         // Register record route.
         register_rest_route(
             $this->namespace,

@@ -23,7 +23,7 @@ export default function Recording() {
      */
     let data = new FormData();
     data.append("method", "get");
-     postWithoutImage(wp_access.api_url + "wps/v1/accessories/record", data)
+     postWithoutImage(wp_access.api_url + "wps/v1/speech/record", data)
      .then((res) => {
        setSettings(res.data);
        setChecked(res.data.is_record_continously);
@@ -65,7 +65,7 @@ export default function Recording() {
     let data = new FormData();
     data.append("fields", JSON.stringify(formData));
     data.append("method", "post");
-    postWithoutImage(wp_access.api_url + "wps/v1/accessories/record", data)
+    postWithoutImage(wp_access.api_url + "wps/v1/speech/record", data)
       .then((res) => {
         console.log(res);
         setSettings(res.data);
