@@ -14,6 +14,7 @@ export default function Recording() {
     wps__recording__lang: "",
     is_record_continously: true,
     rest_nonce: wp_access.rest_nonce,
+    wps__sentence_delimiter: '.'
   });
   const [checked, setChecked] = useState(false);
 
@@ -97,17 +98,6 @@ export default function Recording() {
             lg={12}
             className="d-flex flex-col justify-content-start align-items-start"
           >
-            {settings.rest_nonce && (
-              <Form.Control
-                type="text"
-                id="rest_nonce"
-                onChange={handleChange}
-                value={settings.rest_nonce}
-                name="rest_nonce"
-                placeholder="id"
-                hidden
-              />
-            )}
             <Form.Group>
               <Form.Label>Record In </Form.Label>
               <Form.Select
@@ -143,6 +133,22 @@ export default function Recording() {
               </ToggleButton>
             </Form.Group>
           </Col>
+
+          <Col xs={12} sm={12} lg={12} className="d-flex flex-col mt-3">
+            <Form.Group>
+              <Form.Label>Sentence Delimiter</Form.Label>
+              <Form.Control
+                type="text"
+                id="wps__sentence_delimiter"
+                onChange={handleChange}
+                value={settings.wps__sentence_delimiter}
+                name="wps__sentence_delimiter"
+                placeholder="Sendtence Delimiter"
+              />
+            </Form.Group>
+          </Col>
+
+          
           <div className="d-grid gap-3 col-2 mx-auto mt-5 mb-4">
             <button
               type="submit"

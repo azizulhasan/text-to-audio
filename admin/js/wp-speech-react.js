@@ -20856,6 +20856,11 @@ function Customize() {
       speakingText = _useState6[0],
       setSpeakingText = _useState6[1];
 
+  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({}),
+      _useState8 = _slicedToArray(_useState7, 2),
+      listeningSettings = _useState8[0],
+      setListeningSettings = _useState8[1];
+
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     /**
      * Get customize settings.
@@ -20871,6 +20876,17 @@ function Customize() {
       }), {
         width: [res.data.width, "%"].join('')
       }));
+    })["catch"](function (err) {
+      console.log(err);
+    });
+    /**
+    * Get listening settings.
+    */
+
+    var listening = new FormData();
+    listening.append("method", "get");
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_2__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/listening", listening).then(function (res) {
+      setListeningSettings(res.data);
     })["catch"](function (err) {
       console.log(err);
     });
@@ -20957,7 +20973,7 @@ function Customize() {
     }
 
     setSpeakingText(text);
-    listenCotentInFrontend(text, "wps__listen_content");
+    listenCotentInFrontend(text, "wps__listen_content", listeningSettings);
   };
   /**
    * Copy short Code
@@ -21929,7 +21945,8 @@ function Recording() {
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
     wps__recording__lang: "",
     is_record_continously: true,
-    rest_nonce: wp_access.rest_nonce
+    rest_nonce: wp_access.rest_nonce,
+    wps__sentence_delimiter: '.'
   }),
       _useState2 = _slicedToArray(_useState, 2),
       settings = _useState2[0],
@@ -22028,20 +22045,12 @@ function Recording() {
       onSubmit: handleSubmit,
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"], {
         className: "border ",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"], {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"], {
           xs: 12,
           sm: 12,
           lg: 12,
           className: "d-flex flex-col justify-content-start align-items-start",
-          children: [settings.rest_nonce && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"].Control, {
-            type: "text",
-            id: "rest_nonce",
-            onChange: handleChange,
-            value: settings.rest_nonce,
-            name: "rest_nonce",
-            placeholder: "id",
-            hidden: true
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"].Group, {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"].Group, {
             children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"].Label, {
               children: "Record In "
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"].Select, {
@@ -22059,7 +22068,7 @@ function Recording() {
                 }, index);
               })]
             })]
-          })]
+          })
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"], {
           xs: 12,
           sm: 12,
@@ -22079,6 +22088,23 @@ function Recording() {
                 return setChecked(e.currentTarget.checked);
               },
               children: checked ? "Record" : "Not Record"
+            })]
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"], {
+          xs: 12,
+          sm: 12,
+          lg: 12,
+          className: "d-flex flex-col mt-3",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"].Group, {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"].Label, {
+              children: "Sentence Delimiter"
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"].Control, {
+              type: "text",
+              id: "wps__sentence_delimiter",
+              onChange: handleChange,
+              value: settings.wps__sentence_delimiter,
+              name: "wps__sentence_delimiter",
+              placeholder: "Sendtence Delimiter"
             })]
           })
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {

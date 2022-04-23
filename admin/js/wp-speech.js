@@ -48,6 +48,7 @@ getData(
     recognition.lang = recordSettings.wps__recording__lang
       ? recordSettings.wps__recording__lang
       : "en-US";
+      localStorage.setItem('wps__sentence_delimiter', recordSettings.wps__sentence_delimiter)
   })
   .catch((err) => {
     console.log(err);
@@ -83,7 +84,7 @@ window.onload();
  * Start recording.
  * @param {string} currnt_record_content_id
  */
-function startRecording(currnt_record_content_id = "content_ifr") {
+function startRecording(currnt_record_content_id = "content_ifr", wps__sentence_delimiter= '.') {
   /**
    * Stop listening before recording.
    */
@@ -120,7 +121,7 @@ function startRecording(currnt_record_content_id = "content_ifr") {
   let current_text = "";
   recognition.onresult = function(event) {
     let event__length = event.results.length;
-    current_text = event.results[event__length - 1][0].transcript + ".";
+    current_text = event.results[event__length - 1][0].transcript + wps__sentence_delimiter;
     current_text = captalizeString(current_text);
     /**
      * Customize page.
@@ -195,15 +196,19 @@ function listenCotentInDashboard(btn_id, content, listeningSettings) {
 /**
  * Start Reading content
  */
-function startReadingContent(btn_id, content, listeningSettings) {
+function startReadingContent(btn_id, content, listeningSettings=null) {
   let listen_btn = document.getElementById(btn_id);
 
  
   utterence.text = content;
   var voices = speechSynthesis.getVoices();
-  utterence.voice = voices.filter(
-    (voice, i) => voice.name === listeningSettings.wps__listening_voice
-  )[0];
+  if(listeningSettings){
+    utterence.voice = voices.filter(
+      (voice, i) => voice.name === listeningSettings.wps__listening_voice
+    )[0];
+  }else{
+    utterence.voice = voices[0];
+  }
   utterence.volume = listeningSettings.wps__listening_volume
     ? listeningSettings.wps__listening_volume
     : 1; // From 0 to 1
@@ -271,7 +276,7 @@ function listenCotentInFrontend(
 
   startReadingContent(btn_id, content, listeningSettings);
 
-  console.log(listeningSettings);
+ 
 }
 
 /**
@@ -284,12 +289,10 @@ Object.values(document.getElementsByTagName("textarea")).forEach(
      * Start recording on focus event.
      */
     textarea.addEventListener("focus", function() {
-      console.log(speechSynthesis);
       /**
        * Stop listening before recording.
        */
       speechSynthesis.cancel();
-      console.log(speechSynthesis);
       let listen_btn = document.getElementById("wpa__listen_content");
       if (listen_btn)
         listen_btn.innerHTML =
@@ -299,7 +302,7 @@ Object.values(document.getElementsByTagName("textarea")).forEach(
       /**
        * Start Recording.
        */
-      startRecording(textarea.getAttribute("id"));
+      startRecording(textarea.getAttribute("id"), localStorage.getItem('wps__sentence_delimiter'));
       localStorage.setItem(
         "current_reading_content_id",
         textarea.getAttribute("id")

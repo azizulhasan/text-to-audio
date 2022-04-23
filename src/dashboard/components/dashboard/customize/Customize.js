@@ -15,6 +15,7 @@ export default function Customize() {
     border: "0",
   });
   const [speakingText, setSpeakingText] = useState("");
+  const [listeningSettings, setListeningSettings] = useState({})
 
   useEffect(() => {
 
@@ -32,6 +33,19 @@ export default function Customize() {
           ...{color: res.data.color},
           ...{width: [res.data.width, "%"].join('')}
         })
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+      /**
+     * Get listening settings.
+     */
+    let listening = new FormData();
+    listening.append("method", "get");
+    postWithoutImage(wp_access.api_url + "wps/v1/speech/listening", listening)
+      .then((res) => {
+        setListeningSettings(res.data)
       })
       .catch((err) => {
         console.log(err);
@@ -110,7 +124,7 @@ export default function Customize() {
       return;
     }
     setSpeakingText(text);
-    listenCotentInFrontend(text, "wps__listen_content");
+    listenCotentInFrontend(text, "wps__listen_content", listeningSettings);
   };
 
   /**
