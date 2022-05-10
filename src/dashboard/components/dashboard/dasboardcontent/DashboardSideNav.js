@@ -12,7 +12,7 @@ export default function DashboardSideNav() {
   return (
     <div id="layoutSidenav_nav" style={style.side_nav}>
       <nav
-        className="sb-sidenav accordion sb-sidenav-dark"
+        className="sb-sidenav accordion sb-sidenav-dark text-white"
         id="sidenavAccordion"
       >
         <div className="sb-sidenav-menu">

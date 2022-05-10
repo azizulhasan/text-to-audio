@@ -11482,7 +11482,7 @@ body {
 }
 
 .sb-sidenav-dark {
-  background-color: rgb(240, 233, 224);
+  background-color: #1a4548;
   color: #000;
 }
 .sb-sidenav-dark .sb-sidenav-menu .sb-sidenav-menu-heading {
@@ -11507,7 +11507,7 @@ body {
   color: #000;
 }
 .sb-sidenav-dark .sb-sidenav-footer {
-  background-color: rgb(240, 233, 224)
+  background-color: #1a4548
 }
 
 .sb-sidenav-light {
@@ -11706,9 +11706,14 @@ body {
 My Custom css
 */
 .topnav_bg, .footer_bg{
-  background-color: rgb(240, 233, 224);
+  background-color: #1a4548;
+  
 }
-#layoutSidenav_content{background-color: #fbfaff;}
+.topnav_bg a, #sidenavAccordion div div a, #sidenavAccordion div div a div, 
+#layoutSidenav_content footer div{
+  color: #fff;
+}
+/* #layoutSidenav_content{background-color: #fbfaff;} */
 
 
 /**
@@ -11735,9 +11740,9 @@ button
 }
 
 .azh_btn{
-  background-color: rgb(240, 233, 224);
-  color: #000;
-  border-color: rgb(240, 233, 224);
+  background-color: #1a4548;
+  color: #fff;
+  border-color: #1a4548;
   border-radius: 2px;
 }
 

@@ -10,7 +10,7 @@ export default function DashboardTopNav() {
   return (
     <nav className="sb-topnav navbar navbar-expand topnav_bg">
       {/* <!-- Navbar Brand--> */}
-      <Link className="navbar-brand ps-3 text-dark" style={style.head} to="/">
+      <Link className="navbar-brand ps-3" style={style.head} to="/">
         WP Speech
       </Link>
       {/* <!-- Sidebar Toggle--> */}
@@ -19,7 +19,7 @@ export default function DashboardTopNav() {
         id="sidebarToggle"
         href="#!"
       >
-        <i className="fas fa-bars text-dark"></i>
+        <i className="fas fa-bars text-white"></i>
       </button>
     </nav>
   );

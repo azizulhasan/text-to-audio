@@ -188,7 +188,7 @@ function wps_clean_content($text)
  * @return string
  *  https://responsivevoice.com/wordpress-text-to-speech-plugin/
  */
-function create_shortcode( $atts ) {
+function wps_create_shortcode( $atts ) {
 
 
     $listening =  (array) get_option('wps_listening_settings');
@@ -244,4 +244,4 @@ function create_shortcode( $atts ) {
     
 }
 
-add_shortcode( 'wps_listen_btn', 'create_shortcode' );
+add_shortcode( 'wps_listen_btn', 'wps_create_shortcode' );
