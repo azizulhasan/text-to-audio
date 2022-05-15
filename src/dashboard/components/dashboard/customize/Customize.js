@@ -14,7 +14,7 @@ export default function Customize() {
     width: "100%",
     border: "0",
   });
-  const [speakingText, setSpeakingText] = useState("");
+  const [speakingText, setSpeakingText] = useState("Add functionality to wordpress site to read blogs out loud in any language and record blog by voice in any language.");
   const [listeningSettings, setListeningSettings] = useState({})
 
   useEffect(() => {

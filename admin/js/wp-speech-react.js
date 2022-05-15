@@ -20839,7 +20839,7 @@ function Customize() {
       listeningBtnStyle2 = _useState4[0],
       setListeningStyle2 = _useState4[1];
 
-  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(""),
+  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)("Add functionality to wordpress site to read blogs out loud in any language and record blog by voice in any language."),
       _useState6 = _slicedToArray(_useState5, 2),
       speakingText = _useState6[0],
       setSpeakingText = _useState6[1];

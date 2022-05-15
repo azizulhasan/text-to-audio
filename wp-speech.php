@@ -14,7 +14,7 @@
  * @wordpress-plugin
  * Plugin Name:       WP Speech
  * Plugin URI:        http://azizulhasan.com
- * Description:       Add functionality to wordpress site to read blogs out loud in any language and record blog by voice in any language.
+ * Description:       Add functionality to WordPress site to read blogs out loud in any language and record blogs by voice in any language.
  * Version:           1.0.0
  * Author:            Azizul Hasan
  * Author URI:        http://azizulhasan.com

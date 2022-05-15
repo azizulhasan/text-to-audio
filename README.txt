@@ -9,11 +9,9 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Add functionality to wordpress site to read blogs out loud in any language and record blog by voice in any language.
-
+Add functionality to WordPress site to read blogs out loud in any language and record blogs by voice in any language.
 == Description ==
-Add functionality to wordpress site to read blogs out loud in any language and record blog by voice in any language.
-
+Add functionality to WordPress site to read blogs out loud in any language and record blogs by voice in any language.
 
 **Features:**
 
