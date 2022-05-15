@@ -147,7 +147,7 @@ export default function Settings() {
               <ToggleButton
                 id="toggle-check"
                 type="checkbox"
-                className="form-controll"
+                className="form-controll "
                 variant={checked ? "outline-primary" : "outline-danger"}
                 checked={checked}
                 value="1"
