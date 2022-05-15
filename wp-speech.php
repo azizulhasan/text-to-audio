@@ -36,8 +36,8 @@ if (!defined('WPINC')) {
 }
 
 // Absolute path to the WordPress directory.
-// if ( !defined('ABSPATH') )
-//     define('ABSPATH', dirname(__FILE__) . '/');
+if ( !defined('ABSPATH') )
+    define('ABSPATH', dirname(__FILE__) . '/');
 
 /**
  * Currently plugin version.
@@ -196,13 +196,13 @@ function wps_create_shortcode( $atts ) {
     $customize = (array) get_option('wps_customize_settings');
     $settings = (array) get_option('wps_settings_data');
     // echo "<pre>";
-    //print_r($customize);
+    // print_r($customize);
     // print_r(json_encode($listening));
-    //print_r($settings);
+    // print_r($settings);
     // die();
 
     // Apply short code for only single page.
-    if($settings['wps__settings_display_btn_in_single_page'] == '' &&  !is_single()) return;
+    if($settings['wps__settings_display_btn_in_single_page'] == 1 &&  !is_single()) return;
     static  $btn_no = 0;
     $btn_no++;
 

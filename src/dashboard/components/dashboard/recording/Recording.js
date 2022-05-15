@@ -152,7 +152,7 @@ export default function Recording() {
           <div className="d-grid gap-3 col-2 mx-auto mt-5 mb-4">
             <button
               type="submit"
-              className="azh_btn azh_btn_edit azh_btn azh_btn_edit-primary btn-center"
+              className="wps_btn btn-center"
             >
               Submit
             </button>

@@ -72,7 +72,7 @@ export default function Dashboard() {
           </main>
           <footer className="py-4 mt-auto footer_bg">
             <div className="container-fluid px-4">
-              <div className="d-flex align-items-center justify-content-between small">
+              {/* <div className="d-flex align-items-center justify-content-between small">
                 <div className="text-muted">
                   Copyright &copy;{" "}
                   <a
@@ -83,7 +83,7 @@ export default function Dashboard() {
                     Azizul Hasan
                   </a>
                 </div>
-              </div>
+              </div> */}
             </div>
           </footer>
         </div>

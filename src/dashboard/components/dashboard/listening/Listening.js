@@ -101,7 +101,7 @@ export default function Listening() {
   const handleChange = (e) => {
 
     if(e.target.name == 'wps__listening_lang' && e.target.value !== listeningLang) {
-      toast("Listening language will be alway recording language.")
+      toast("Listening language will be always recording language.")
       return;
     }
     setListeningSettings({
@@ -113,7 +113,7 @@ export default function Listening() {
     <Container>
       <Form onSubmit={handleSubmit}>
         <Row>
-          <Col xs={12} sm={12} lg={8} className="">
+          <Col xs={12} sm={12} lg={8} >
             <Form.Group>
               <Form.Label>Voice to speak </Form.Label>
               <Form.Select
@@ -145,14 +145,14 @@ export default function Listening() {
                     </Tooltip>
                   }
                 >
-                  <Button variant="secondary">?</Button>
+                  <Button className="wps_btn">?</Button>
                 </OverlayTrigger>
               ))}
             </>
           </Col>
         </Row>
         <Row>
-          <Col xs={12} sm={12} lg={8} className="">
+          <Col xs={12} sm={12} lg={8} >
             <Form.Group>
               <Form.Label>Voice Pitch </Form.Label>
               <Form.Select
@@ -185,14 +185,14 @@ export default function Listening() {
                     </Tooltip>
                   }
                 >
-                  <Button variant="secondary">?</Button>
+                  <Button className="wps_btn">?</Button>
                 </OverlayTrigger>
               ))}
             </>
           </Col>
         </Row>
         <Row>
-          <Col xs={12} sm={12} lg={8} className="">
+          <Col xs={12} sm={12} lg={8} >
             <Form.Group>
               <Form.Label htmlFor="wps__listening_rate">Voice Speed</Form.Label>
               <Form.Control
@@ -221,14 +221,14 @@ export default function Listening() {
                     </Tooltip>
                   }
                 >
-                  <Button variant="secondary">?</Button>
+                  <Button className="wps_btn">?</Button>
                 </OverlayTrigger>
               ))}
             </>
           </Col>
         </Row>
         <Row>
-          <Col xs={12} sm={12} lg={8} className="">
+          <Col xs={12} sm={12} lg={8} >
             <Form.Group>
               <Form.Label htmlFor="wps__listening_volume">
                 Voice Volume
@@ -259,14 +259,14 @@ export default function Listening() {
                     </Tooltip>
                   }
                 >
-                  <Button variant="secondary">?</Button>
+                  <Button className="wps_btn">?</Button>
                 </OverlayTrigger>
               ))}
             </>
           </Col>
         </Row>
         <Row>
-          <Col xs={12} sm={12} lg={8} className="">
+          <Col xs={12} sm={12} lg={8} >
             <Form.Group>
               <Form.Label>Voice Language</Form.Label>
               <Form.Select
@@ -298,7 +298,7 @@ export default function Listening() {
                     </Tooltip>
                   }
                 >
-                  <Button variant="secondary">?</Button>
+                  <Button className="wps_btn">?</Button>
                 </OverlayTrigger>
               ))}
             </>
@@ -306,7 +306,7 @@ export default function Listening() {
           <div className="d-grid gap-3 col-2 mx-auto mt-5 mb-4">
             <button
               type="submit"
-              className="azh_btn azh_btn_edit azh_btn azh_btn_edit-primary btn-center"
+              className="wps_btn  btn-center"
             >
               Submit
             </button>

@@ -244,7 +244,7 @@ export default function Customize() {
             <div className="d-grid gap-3 col-12 mx-auto mt-5 mb-4">
               <button
                 type="submit"
-                className="azh_btn azh_btn_edit azh_btn azh_btn_edit-primary btn-center btn-block"
+                className="wps_btn  btn-center btn-block"
               >
                 Submit
               </button>

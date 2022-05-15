@@ -96,12 +96,12 @@ export default function Settings() {
   return (
     <React.Fragment>
       <Form onSubmit={handleSubmit}>
-        <Row>
+        <Row className="mt-4">
           <Col
             xs={12}
             sm={6}
             lg={4}
-            className="d-flex flex-col justify-content-start align-items-start"
+            className="d-flex flex-col justify-content-start align-items-start "
           >
             <Form.Label id="wps__settings_allow_recording_for_post_type">
               Allow Recording For Post Type
@@ -153,14 +153,14 @@ export default function Settings() {
                 value="1"
                 onChange={(e) => setChecked(e.currentTarget.checked)}
               >
-                {checked ? "Record" : "Not Record"}
+                {checked ? "True" : "False"}
               </ToggleButton>
             </Form.Group>
           </Col>
           <div className="d-grid gap-3 col-2 mx-auto mt-5 mb-4">
             <button
               type="submit"
-              className="azh_btn azh_btn_edit azh_btn azh_btn_edit-primary btn-block"
+              className="wps_btn  btn-block"
             >
               Submit
             </button>

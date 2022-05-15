@@ -11720,7 +11720,7 @@ My Custom css
 button 
 */
 
-.azh_btn {
+.wps_btn {
   display: inline-block;
   font-weight: 400;
   line-height: 1.5;
@@ -11739,11 +11739,14 @@ button
   transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
 
-.azh_btn{
+.wps_btn{
   background-color: #1a4548;
   color: #fff;
   border-color: #1a4548;
   border-radius: 2px;
+}
+.wps_btn:hover{
+  background-color: #1a4548;
 }
 
 .modal{background-color: rgba(0, 0, 0, .4)}
