@@ -30,7 +30,46 @@ class WP_Speech_Activator {
 	 * @since    1.0.0
 	 */
 	public static function activate() {
+		/**
+		 * Customization settings.
+		 */
+		update_option('wps_customize_settings', Array
+		(
+			"backgroundColor" => "#184c53",
+			"color" => "#ffffff",
+			"width" => "100",
+		));
 
+		/**
+		 * WP Speech settings.
+		 */
+		update_option('wps_settings_data', Array
+		(
+			"wps__settings_allow_recording_for_post_type" => ["all"],
+			"wps__settings_display_btn_in_single_page" => ''
+		));
+
+		/**
+		 * Listening settings.
+		 */
+		update_option('wps_listening_settings', Array
+		(
+			"wps__listening_voice" => "Microsoft Mark - English (United States)",
+			"wps__listening_pitch" => 1,
+			"wps__listening_rate" => 1,
+			"wps__listening_volume" => 1,
+			"wps__listening_lang" => "en_GB"
+		));
+
+		/**
+		 * Recording settings.
+		 */
+		update_option('wps_record_settings', Array
+		(
+			"is_record_continously"=>  true,
+			"wps__recording__lang"=>  "en_GB",
+			"wps__sentence_delimiter"=>  ".",
+		));
 	}
 
 }

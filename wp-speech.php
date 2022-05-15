@@ -14,7 +14,7 @@
  * @wordpress-plugin
  * Plugin Name:       WP Speech
  * Plugin URI:        http://azizulhasan.com
- * Description:       This is a short description of what the plugin does. It's displayed in the WordPress admin area.
+ * Description:       Add functionality to wordpress site to read blogs out loud in any language and record blog by voice in any language.
  * Version:           1.0.0
  * Author:            Azizul Hasan
  * Author URI:        http://azizulhasan.com
@@ -192,13 +192,14 @@ function wps_create_shortcode( $atts ) {
 
 
     $listening =  (array) get_option('wps_listening_settings');
-    $listening = json_encode($listening);
+    // $listening = json_encode($listening);
     $customize = (array) get_option('wps_customize_settings');
     $settings = (array) get_option('wps_settings_data');
-    // echo "<pre>";
-    // print_r($customize);
-    // print_r(json_encode($listening));
+    echo "<pre>";
     // print_r($settings);
+    print_r($listening);
+    // print_r($settings);
+    // print_r($listening);
     // die();
 
     // Apply short code for only single page.

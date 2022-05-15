@@ -21053,7 +21053,7 @@ function Customize() {
               name: "wps_play_btn_shortcode",
               onChange: handleChange,
               id: "wps_play_btn_shortcode",
-              defaultValue: "[wps_play_btn]",
+              defaultValue: "[wps_listen_btn]",
               title: "Short code"
             })]
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"], {

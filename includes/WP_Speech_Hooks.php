@@ -89,6 +89,38 @@ class WP_Speech_Hooks
         <div class="wps_metabox">
         <button type="button" id="wps__start__record"  style='<?php echo $btn_style; ?>' onclick="startRecording()"><span class="dashicons dashicons-controls-volumeoff"></span>Start</button>
         <button type="button" id="wps__listen_content" style='<?php echo $btn_style; ?>' onclick='listenCotentInDashboard("wps__listen_content","", <?php echo $listening; ?> )'><span class="dashicons dashicons-controls-play"></span> Play</button>
+        <input
+                type="text"
+                name="wps_play_btn_shortcode"
+                id="wps_play_btn_shortcode"
+                value="[wps_listen_btn]"
+                title="Short code"
+              />
+
+             
+              <button type="button" style='<?php echo $btn_style; ?>' onclick="copyshortcode()">
+                Copy
+              </button>
+
+              <script>
+                    /**
+                     * Copy short Code
+                     */
+                    function copyshortcode () {
+                        /* Get the text field */
+                        var copyText = document.getElementById("wps_play_btn_shortcode");
+
+                        /* Select the text field */
+                        // copyText.select();
+                        // copyText.setSelectionRange(0, 99999); /* For mobile devices */
+
+                        /* Copy the text inside the text field */
+                        navigator.clipboard.writeText(copyText.value);
+
+                        /* Alert the copied text */
+                        alert("Copied the text: " + copyText.value);
+                    };
+              </script>
 
 
     </div>

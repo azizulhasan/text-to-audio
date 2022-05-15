@@ -193,7 +193,7 @@ export default function Customize() {
                 name="wps_play_btn_shortcode"
                 onChange={handleChange}
                 id="wps_play_btn_shortcode"
-                defaultValue={"[wps_play_btn]"}
+                defaultValue={"[wps_listen_btn]"}
                 title="Short code"
               />
             </Col>
