@@ -84,23 +84,9 @@ class WP_Speech_Admin {
 
 
         if( isset($_REQUEST['page']) && ( 'wp-speech' == $_REQUEST['page']  ) ) {
-
-            // /* List JS*/
-            // wp_enqueue_script( 'list-js', plugin_dir_url( __FILE__ ) . 'js/libs/list.min.js', array( 'jquery' ), $this->version, true );
-
-            // /* Seletize JS*/
-            // wp_enqueue_script( 'seletize-js', plugin_dir_url( __FILE__ ) . 'js/libs/selectize.min.js', array( 'jquery' ), $this->version, true );
-
-
-            /* Default JS*/
-
-
-
-        
-
             /* Load react js */
-            wp_enqueue_script( 'wp-speech-react', plugin_dir_url( __FILE__ ) . 'js/wp-speech-react.js', array(  ), $this->version, true );
-            wp_localize_script('wp-speech-react' , 'wp_access', [
+            wp_enqueue_script( 'wp-speech-dashboard', plugin_dir_url( __FILE__ ) . 'js/wp-speech-dashboard.js', array(  ), $this->version, true );
+            wp_localize_script('wp-speech-dashboard' , 'wps_obj', [
                 'admin_url' => admin_url('/'),
                 'ajax_url' => admin_url('admin-ajax.php'),
                  'api_url' => esc_url_raw( rest_url() ),

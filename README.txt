@@ -13,11 +13,15 @@ Add functionality to WordPress site to read blogs out loud in any language and r
 == Description ==
 Add functionality to WordPress site to read blogs out loud in any language and record blogs by voice in any language.
 
+### Useful Links:
+> * [Live Demo](https://wp-speech.azizulhasan.com/2022/05/15/hello-world/)
+
 **Features:**
 
 1. Add play button to any content by shortcode "[wps_listen_btn]"
-1. Record comment on post by voice.
-1. Record blog on dashbord by voice.
+2. Record blog on dashbord by voice.
+3. Record comment on post by voice.
+
 
 
 

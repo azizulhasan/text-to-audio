@@ -30,7 +30,7 @@ export default function Settings() {
      */
      let formData = new FormData();
      formData.append("method", "get");
-     postWithoutImage(wp_access.api_url + "wps/v1/speech/settings", formData).then(res=>{
+     postWithoutImage(wps_obj.api_url + "wps/v1/speech/settings", formData).then(res=>{
        console.log(res.data)
       setSettings(res.data);
       setChecked(res.data.wps__settings_display_btn_in_single_page);
@@ -81,7 +81,7 @@ export default function Settings() {
     let formData = new FormData();
     formData.append("fields", JSON.stringify(data));
     formData.append("method", "post");
-    postWithoutImage(wp_access.api_url + "wps/v1/speech/settings", formData)
+    postWithoutImage(wps_obj.api_url + "wps/v1/speech/settings", formData)
       .then((res) => {
         console.log(res.data)
         setSettings(res.data);

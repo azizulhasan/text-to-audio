@@ -20855,7 +20855,7 @@ function Customize() {
      */
     var customize = new FormData();
     customize.append("method", "get");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_2__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/customize", customize).then(function (res) {
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_2__.postWithoutImage)(wps_obj.api_url + "wps/v1/speech/customize", customize).then(function (res) {
       setListeningStyle(res.data);
       setListeningStyle2(_objectSpread(_objectSpread(_objectSpread(_objectSpread({}, listeningBtnStyle2), {
         backgroundColor: res.data.backgroundColor
@@ -20873,7 +20873,7 @@ function Customize() {
 
     var listening = new FormData();
     listening.append("method", "get");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_2__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/listening", listening).then(function (res) {
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_2__.postWithoutImage)(wps_obj.api_url + "wps/v1/speech/listening", listening).then(function (res) {
       setListeningSettings(res.data);
     })["catch"](function (err) {
       console.log(err);
@@ -20944,7 +20944,7 @@ function Customize() {
     var data = new FormData();
     data.append("fields", JSON.stringify(formData));
     data.append("method", "post");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_2__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/customize", data).then(function (res) {
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_2__.postWithoutImage)(wps_obj.api_url + "wps/v1/speech/customize", data).then(function (res) {
       setListeningStyle(res.data);
       (0,_context_Notify__WEBPACK_IMPORTED_MODULE_1__["default"])("Customize Data Saved");
     })["catch"](function (err) {
@@ -21064,7 +21064,7 @@ function Customize() {
             children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
               onClick: CopyShortcode,
               children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("img", {
-                src: wp_access.image_url + "/copy.svg",
+                src: wps_obj.image_url + "/copy.svg",
                 width: "15px",
                 alt: "Copy short code to clipboard"
               })
@@ -21167,7 +21167,7 @@ function DashboardSideNav() {
             children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
               className: "sb-nav-link-icon",
               children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("i", {
-                className: "fas fa-envelope"
+                "class": "fas fa-record-vinyl"
               })
             }), "Recording"]
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Link, {
@@ -21176,7 +21176,7 @@ function DashboardSideNav() {
             children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
               className: "sb-nav-link-icon",
               children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("i", {
-                className: "fas fa-envelope"
+                "class": "fas fa-file-audio"
               })
             }), "Listening"]
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Link, {
@@ -21185,7 +21185,7 @@ function DashboardSideNav() {
             children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
               className: "sb-nav-link-icon",
               children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("i", {
-                className: "fas fa-envelope"
+                "class": "fas fa-edit"
               })
             }), "Customization"]
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_2__.Link, {
@@ -21203,7 +21203,7 @@ function DashboardSideNav() {
             children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("div", {
               className: "sb-nav-link-icon",
               children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("i", {
-                className: "fas fa-wrench"
+                "class": "fas fa-book"
               })
             }), "Docs"]
           })]
@@ -21375,7 +21375,7 @@ function Docs() {
             return copyToClipBoard("filter_hook");
           },
           children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("img", {
-            src: wp_access.image_url + "/copy.svg",
+            src: wps_obj.image_url + "/copy.svg",
             width: "15px",
             alt: "Copy short code to clipboard"
           })
@@ -21482,7 +21482,7 @@ function Listening() {
 
     var data = new FormData();
     data.append("method", "get");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/record", data).then(function (res) {
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wps_obj.api_url + "wps/v1/speech/record", data).then(function (res) {
       console.log(res);
       setListeningLang(res.data.wps__recording__lang);
     })["catch"](function (err) {
@@ -21494,7 +21494,7 @@ function Listening() {
 
     var data2 = new FormData();
     data2.append("method", "get");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/listening", data2).then(function (res) {
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wps_obj.api_url + "wps/v1/speech/listening", data2).then(function (res) {
       // console.log(res.data)
       setListeningSettings(res.data);
     })["catch"](function (err) {
@@ -21541,7 +21541,7 @@ function Listening() {
     var data = new FormData();
     data.append("fields", JSON.stringify(formData));
     data.append("method", "post");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/listening", data).then(function (res) {
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wps_obj.api_url + "wps/v1/speech/listening", data).then(function (res) {
       console.log(res);
       setListeningSettings(res.data);
       (0,_context_Notify__WEBPACK_IMPORTED_MODULE_2__["default"])("Listening Data Saved");
@@ -21859,7 +21859,7 @@ function Recording() {
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
     wps__recording__lang: "",
     is_record_continously: true,
-    rest_nonce: wp_access.rest_nonce,
+    rest_nonce: wps_obj.rest_nonce,
     wps__sentence_delimiter: '.'
   }),
       _useState2 = _slicedToArray(_useState, 2),
@@ -21877,7 +21877,7 @@ function Recording() {
      */
     var data = new FormData();
     data.append("method", "get");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/record", data).then(function (res) {
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wps_obj.api_url + "wps/v1/speech/record", data).then(function (res) {
       setSettings(res.data);
       setChecked(res.data.is_record_continously);
     })["catch"](function (err) {
@@ -21932,7 +21932,7 @@ function Recording() {
     var data = new FormData();
     data.append("fields", JSON.stringify(formData));
     data.append("method", "post");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/record", data).then(function (res) {
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wps_obj.api_url + "wps/v1/speech/record", data).then(function (res) {
       console.log(res);
       setSettings(res.data);
       setChecked(res.data.is_record_continously);
@@ -22256,7 +22256,7 @@ function Settings() {
      */
     var formData = new FormData();
     formData.append("method", "get");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/settings", formData).then(function (res) {
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wps_obj.api_url + "wps/v1/speech/settings", formData).then(function (res) {
       console.log(res.data);
       setSettings(res.data);
       setChecked(res.data.wps__settings_display_btn_in_single_page);
@@ -22320,7 +22320,7 @@ function Settings() {
     var formData = new FormData();
     formData.append("fields", JSON.stringify(data));
     formData.append("method", "post");
-    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wp_access.api_url + "wps/v1/speech/settings", formData).then(function (res) {
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wps_obj.api_url + "wps/v1/speech/settings", formData).then(function (res) {
       console.log(res.data);
       setSettings(res.data);
       setChecked(res.data.wps__settings_display_btn_in_single_page);

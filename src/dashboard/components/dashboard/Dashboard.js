@@ -11,7 +11,6 @@ import "./assets/js/scripts.js";
 import {
   addScripts,
   getComponentName,
-  authenTicateUser,
 } from "../context/utilities";
 
 /**

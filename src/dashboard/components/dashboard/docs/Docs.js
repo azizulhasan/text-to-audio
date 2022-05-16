@@ -77,7 +77,7 @@ export default function Docs() {
         <Accordion.Body>
           <button className="" onClick={(e) => copyToClipBoard("filter_hook")}>
             <img
-              src={wp_access.image_url + "/copy.svg"}
+              src={wps_obj.image_url + "/copy.svg"}
               width="15px"
               alt="Copy short code to clipboard"
             />

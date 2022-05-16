@@ -24,7 +24,7 @@ export default function Customize() {
      */
     let customize = new FormData();
     customize.append("method", "get");
-    postWithoutImage(wp_access.api_url + "wps/v1/speech/customize", customize)
+    postWithoutImage(wps_obj.api_url + "wps/v1/speech/customize", customize)
       .then((res) => {
         setListeningStyle(res.data)
         setListeningStyle2({
@@ -43,7 +43,7 @@ export default function Customize() {
      */
     let listening = new FormData();
     listening.append("method", "get");
-    postWithoutImage(wp_access.api_url + "wps/v1/speech/listening", listening)
+    postWithoutImage(wps_obj.api_url + "wps/v1/speech/listening", listening)
       .then((res) => {
         setListeningSettings(res.data)
       })
@@ -106,7 +106,7 @@ export default function Customize() {
     let data = new FormData();
     data.append("fields", JSON.stringify(formData));
     data.append("method", "post");
-    postWithoutImage(wp_access.api_url + "wps/v1/speech/customize", data)
+    postWithoutImage(wps_obj.api_url + "wps/v1/speech/customize", data)
       .then((res) => {
         setListeningStyle(res.data)
         toast("Customize Data Saved");
@@ -200,7 +200,7 @@ export default function Customize() {
             <Col xs={12} sm={12} lg={1} className="mt-5">
               <button onClick={CopyShortcode}>
                 <img
-                  src={wp_access.image_url + "/copy.svg"}
+                  src={wps_obj.image_url + "/copy.svg"}
                   width="15px"
                   alt="Copy short code to clipboard"
                 />

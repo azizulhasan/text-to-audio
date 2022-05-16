@@ -186,23 +186,19 @@ function wps_clean_content($text)
  * Example [wps_listen_btn]
  * @param $atts
  * @return string
- *  https://responsivevoice.com/wordpress-text-to-speech-plugin/
  */
 function wps_create_shortcode( $atts ) {
 
 
     $listening =  (array) get_option('wps_listening_settings');
-    // $listening = json_encode($listening);
+    $listening = json_encode($listening);
     $customize = (array) get_option('wps_customize_settings');
     $settings = (array) get_option('wps_settings_data');
-    echo "<pre>";
-    // print_r($settings);
-    print_r($listening);
-    // print_r($settings);
-    // print_r($listening);
-    // die();
 
-    // Apply short code for only single page.
+
+    /**
+     * Apply short code for only single page.
+     */
     if($settings['wps__settings_display_btn_in_single_page'] == 1 &&  !is_single()) return;
     static  $btn_no = 0;
     $btn_no++;

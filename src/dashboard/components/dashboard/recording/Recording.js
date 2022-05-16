@@ -13,7 +13,7 @@ export default function Recording() {
   const [settings, setSettings] = useState({
     wps__recording__lang: "",
     is_record_continously: true,
-    rest_nonce: wp_access.rest_nonce,
+    rest_nonce: wps_obj.rest_nonce,
     wps__sentence_delimiter: '.'
   });
   const [checked, setChecked] = useState(false);
@@ -24,7 +24,7 @@ export default function Recording() {
      */
     let data = new FormData();
     data.append("method", "get");
-     postWithoutImage(wp_access.api_url + "wps/v1/speech/record", data)
+     postWithoutImage(wps_obj.api_url + "wps/v1/speech/record", data)
      .then((res) => {
        setSettings(res.data);
        setChecked(res.data.is_record_continously);
@@ -66,7 +66,7 @@ export default function Recording() {
     let data = new FormData();
     data.append("fields", JSON.stringify(formData));
     data.append("method", "post");
-    postWithoutImage(wp_access.api_url + "wps/v1/speech/record", data)
+    postWithoutImage(wps_obj.api_url + "wps/v1/speech/record", data)
       .then((res) => {
         console.log(res);
         setSettings(res.data);
