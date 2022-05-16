@@ -104,6 +104,9 @@ class WP_Speech_Admin {
          * Looad wp-speeh script
         */ 
         wp_enqueue_script( 'wp-speech', plugin_dir_url( __FILE__ ) . 'js/wp-speech.js', array(  ), $this->version, true );
+        wp_localize_script('wp-speech' , 'wps_site_url', [
+            'site_url' => get_option('siteurl'),
+        ]);
 
 	}
 
@@ -114,7 +117,9 @@ class WP_Speech_Admin {
     public function enqueue_wp_speech(){
 
         wp_enqueue_script( 'wp-speech', plugin_dir_url( __FILE__ ) . 'js/wp-speech.js', array(  ), $this->version, true );
-
+        wp_localize_script('wp-speech' , 'wps_site_url', [
+            'site_url' => get_option('siteurl'),
+        ]);
     }
 
 

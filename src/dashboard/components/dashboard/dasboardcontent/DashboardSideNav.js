@@ -20,19 +20,19 @@ export default function DashboardSideNav() {
             <Link className="nav-link" to={"/"} >
               <div className="sb-nav-link-icon">
                 {/* <i className="fas fa-envelope"></i> */}
-                <i class="fas fa-record-vinyl"></i>
+                <i className="fas fa-record-vinyl"></i>
               </div>
               Recording
             </Link>
             <Link className="nav-link" to={"/listening"} >
               <div className="sb-nav-link-icon">
-              <i class="fas fa-file-audio"></i>
+              <i className="fas fa-file-audio"></i>
               </div>
               Listening
             </Link>
             <Link className="nav-link" to={"/customize"} >
               <div className="sb-nav-link-icon">
-              <i class="fas fa-edit"></i>
+              <i className="fas fa-edit"></i>
               </div>
               Customization
             </Link>
@@ -45,7 +45,7 @@ export default function DashboardSideNav() {
             </Link>
             <Link className="nav-link" to= { "/docs"}>
               <div className="sb-nav-link-icon">
-              <i class="fas fa-book"></i>
+              <i className="fas fa-book"></i>
               </div>
               Docs
             </Link>
