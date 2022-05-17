@@ -37,7 +37,7 @@ let recordData = new FormData();
 let recordSettings = {};
 recordData.append("method", "get");
 getData(
-  wps_site_url.site_url+"/wp-json/wps/v1/speech/record",
+  wps_site_url.site_url+"wps/v1/speech/record",
   recordData
 )
   .then((res) => {

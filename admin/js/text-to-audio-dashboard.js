@@ -21245,7 +21245,7 @@ function DashboardTopNav() {
       className: "navbar-brand ps-3",
       style: style.head,
       to: "/",
-      children: "WP Speech"
+      children: "Text To Audio"
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("button", {
       className: "btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0",
       id: "sidebarToggle",
@@ -22257,7 +22257,6 @@ function Settings() {
     var formData = new FormData();
     formData.append("method", "get");
     (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wps_obj.api_url + "wps/v1/speech/settings", formData).then(function (res) {
-      console.log(res.data);
       setSettings(res.data);
       setChecked(res.data.wps__settings_display_btn_in_single_page);
     });
@@ -22321,7 +22320,6 @@ function Settings() {
     formData.append("fields", JSON.stringify(data));
     formData.append("method", "post");
     (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.postWithoutImage)(wps_obj.api_url + "wps/v1/speech/settings", formData).then(function (res) {
-      console.log(res.data);
       setSettings(res.data);
       setChecked(res.data.wps__settings_display_btn_in_single_page);
       (0,_context_Notify__WEBPACK_IMPORTED_MODULE_2__["default"])("Settings Data Saved");
@@ -22365,7 +22363,7 @@ function Settings() {
                 }, posttype);
               })]
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"].Text, {
-              children: ["Select: ", settings.wps__settings_allow_recording_for_post_type]
+              children: ["Selected: ", settings.wps__settings_allow_recording_for_post_type]
             })]
           })
         })]

@@ -1,7 +1,7 @@
-=== WP Speech ===
+=== Text To Audio ===
 Contributors: hasanazizul
 Donate link: http://azizulhasan.com
-Tags: audio, speech, voice, text to audio, record, wp-speech, wp-voice, comment record, blog record
+Tags: audio, speech, voice, text to audio, record, voice comment, voice to text comment, comment record, blog record
 Requires at least: 4.0
 Tested up to: 5.9.3
 Requires PHP: 5.6

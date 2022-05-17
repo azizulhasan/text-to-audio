@@ -1,5 +1,6 @@
 <?php
 namespace WPSpeech_Admin;
+
 /**
  * The admin-specific functionality of the plugin.
  *
@@ -20,52 +21,54 @@ namespace WPSpeech_Admin;
  * @subpackage WP_Speech/admin
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
-class WP_Speech_Admin {
+class WP_Speech_Admin
+{
 
-	/**
-	 * The ID of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $plugin_name    The ID of this plugin.
-	 */
-	private $plugin_name;
+    /**
+     * The ID of this plugin.
+     *
+     * @since    1.0.0
+     * @access   private
+     * @var      string    $plugin_name    The ID of this plugin.
+     */
+    private $plugin_name;
 
-	/**
-	 * The version of this plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $version    The current version of this plugin.
-	 */
-	private $version;
+    /**
+     * The version of this plugin.
+     *
+     * @since    1.0.0
+     * @access   private
+     * @var      string    $version    The current version of this plugin.
+     */
+    private $version;
 
-	/**
-	 * Initialize the class and set its properties.
-	 *
-	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
-	 */
-	public function __construct( $plugin_name, $version ) {
+    /**
+     * Initialize the class and set its properties.
+     *
+     * @since    1.0.0
+     * @param      string    $plugin_name       The name of this plugin.
+     * @param      string    $version    The version of this plugin.
+     */
+    public function __construct($plugin_name, $version)
+    {
 
-		$this->plugin_name = $plugin_name;
-		$this->version = $version;
+        $this->plugin_name = $plugin_name;
+        $this->version = $version;
 
-	}
+    }
 
-	/**
-	 * Register the stylesheets for the admin area.
-	 *
-	 * @since    1.0.0
-	 */
-	public function enqueue_styles() {
+    /**
+     * Register the stylesheets for the admin area.
+     *
+     * @since    1.0.0
+     */
+    public function enqueue_styles()
+    {
 
-        if( isset($_REQUEST['page']) && ( 'wp-speech' == $_REQUEST['page']  ) ) {
+        if (isset($_REQUEST['page']) && (TEXT_TO_AUDIO_TEXT_DOMAIN == $_REQUEST['page'])) {
 
             // /* Selectize css*/
             // wp_enqueue_style('select-styles', plugin_dir_url(__FILE__) . 'css/libs/selectize.default.css', array(), $this->version, 'all');
-
 
             /* Default styles css*/
 
@@ -73,75 +76,73 @@ class WP_Speech_Admin {
             wp_enqueue_style('dashicons');
         }
 
-	}
+    }
 
-	/**
-	 * Register the JavaScript for the admin area.
-	 *
-	 * @since    1.0.0
-	 */
-	public function enqueue_scripts() {
+    /**
+     * Register the JavaScript for the admin area.
+     *
+     * @since    1.0.0
+     */
+    public function enqueue_scripts()
+    {
 
-
-        if( isset($_REQUEST['page']) && ( 'wp-speech' == $_REQUEST['page']  ) ) {
+        if (isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
             /* Load react js */
-            wp_enqueue_script( 'wp-speech-dashboard', plugin_dir_url( __FILE__ ) . 'js/wp-speech-dashboard.js', array(  ), $this->version, true );
-            wp_localize_script('wp-speech-dashboard' , 'wps_obj', [
+            wp_enqueue_script('wp-speech-dashboard', plugin_dir_url(__FILE__) . 'js/text-to-audio-dashboard.js', array(), $this->version, true);
+            wp_localize_script('wp-speech-dashboard', 'wps_obj', [
                 'admin_url' => admin_url('/'),
                 'ajax_url' => admin_url('admin-ajax.php'),
-                 'api_url' => esc_url_raw( rest_url() ),
-                'image_url' => WP_PLUGIN_URL.'/wp-speech/admin/images',
-                'plugin_url' => WP_PLUGIN_URL.'/wp-speech',
-                'nonce' => wp_create_nonce(WP_Speech_NONCE),
+                'api_url' => esc_url_raw(rest_url()),
+                'image_url' => WP_PLUGIN_URL . '/text-to-audio/admin/images',
+                'plugin_url' => WP_PLUGIN_URL . '/text-to-audio',
+                'nonce' => wp_create_nonce(TEXT_TO_AUDIO_NONCE),
                 'rest_nonce' => wp_create_nonce('wp_rest'),
-                'server' => $_SERVER,
-                'url' => $_SERVER['REQUEST_URI'],
-                'post_types'=> get_post_types(),
+                'post_types' => get_post_types(),
             ]);
 
         }
-             /**
+        /**
          * Looad wp-speeh script
-        */ 
-        wp_enqueue_script( 'wp-speech', plugin_dir_url( __FILE__ ) . 'js/wp-speech.js', array(  ), $this->version, true );
-        wp_localize_script('wp-speech' , 'wps_site_url', [
-            'site_url' => get_option('siteurl'),
+         */
+        wp_enqueue_script('text-to-audio', plugin_dir_url(__FILE__) . 'js/text-to-audio.js', array(), $this->version, true);
+        wp_localize_script('text-to-audio', 'wps_site_url', [
+            'site_url' => esc_url_raw(rest_url()),
         ]);
 
-	}
+    }
 
     /**
      * Enqueue wp speech file
-     * 
+     *
      */
-    public function enqueue_wp_speech(){
+    public function enqueue_wp_speech()
+    {
 
-        wp_enqueue_script( 'wp-speech', plugin_dir_url( __FILE__ ) . 'js/wp-speech.js', array(  ), $this->version, true );
-        wp_localize_script('wp-speech' , 'wps_site_url', [
-            'site_url' => get_option('siteurl'),
+        wp_enqueue_script('text-to-audio', plugin_dir_url(__FILE__) . 'js/text-to-audio.js', array(), $this->version, true);
+        wp_localize_script('text-to-audio', 'wps_site_url', [
+            'site_url' => esc_url_raw(rest_url()),
         ]);
     }
-
-
 
     /**
      * Add Menu and Submenu page
      */
 
-    public function wp_speech_menu() {
+    public function wp_speech_menu()
+    {
         add_menu_page(
-            __('WP Speech', 'wp-speech'),
-            __('WP Speech', 'wp-speech'),
+            __('Text To Audio', TEXT_TO_AUDIO_TEXT_DOMAIN),
+            __('Text To Audio', TEXT_TO_AUDIO_TEXT_DOMAIN),
             'manage_options',
-            'wp-speech',
+            TEXT_TO_AUDIO_TEXT_DOMAIN,
             array($this, "wp_speech_settings"),
             'dashicons-controls-volumeon',
             20
         );
     }
 
-   
-    public function wp_speech_settings() {
+    public function wp_speech_settings()
+    {
         echo "<div class='wpwrap'><div id='app'></div></div>";
     }
 

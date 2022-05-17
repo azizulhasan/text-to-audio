@@ -51,13 +51,14 @@ class WP_Speech_Hooks
             "page",
         ];
         $settings = (array) get_option('wps_settings_data');
-        if (isset($settings['wps__settings_allow_recording_for_post_type']) 
-        && in_array(get_current_screen()->post_type, $settings['wps__settings_allow_recording_for_post_type'])
-        || (in_array('all', $settings['wps__settings_allow_recording_for_post_type']) 
-        && in_array(get_current_screen()->post_type, $meta_box_arr ) ) ) {
+        $settings['wps__settings_allow_recording_for_post_type'] = isset($settings['wps__settings_allow_recording_for_post_type']) ? $settings['wps__settings_allow_recording_for_post_type'] : ['all'];
+        if (isset($settings['wps__settings_allow_recording_for_post_type'])
+            && in_array(get_current_screen()->post_type, $settings['wps__settings_allow_recording_for_post_type'])
+            || (in_array('all', $settings['wps__settings_allow_recording_for_post_type'])
+                && in_array(get_current_screen()->post_type, $meta_box_arr))) {
             add_meta_box(
                 'wps22-meta-box',
-                'WP Speech',
+                'Text To Audio',
                 array(
                     $this,
                     'wps_meta_box',
@@ -87,9 +88,9 @@ class WP_Speech_Hooks
         }
         ?>
         <div class="wps_metabox">
-        
-            <button type="button" id="wps__start__record"  style='<?php echo $btn_style; ?>;cursor: pointer' onclick="startRecording()"><span class="dashicons dashicons-controls-volumeoff"></span>Start</button>
-            <button type="button" id="wps__listen_content" style='<?php echo $btn_style; ?>;cursor: pointer' onclick='listenCotentInDashboard("wps__listen_content","", <?php echo $listening; ?> )'><span class="dashicons dashicons-controls-play"></span> Play</button>
+
+            <button type="button" id="wps__start__record"  style='<?php echo esc_attr($btn_style); ?>;cursor: pointer' onclick="startRecording()"><span class="dashicons dashicons-controls-volumeoff"></span>Start</button>
+            <button type="button" id="wps__listen_content" style='<?php echo esc_attr($btn_style); ?>;cursor: pointer' onclick='listenCotentInDashboard("wps__listen_content","", <?php echo esc_js($listening); ?> )'><span class="dashicons dashicons-controls-play"></span> Play</button>
             <!-- Shortcode text -->
             <input
                 type="text"
@@ -100,8 +101,8 @@ class WP_Speech_Hooks
             />
 
             <!-- Copy Button -->
-            <button type="button" style='<?php echo $btn_style; ?>;cursor: copy;margin-top:10px;padding:6px;' onclick="copyshortcode()">
-            <i class="fas fa-copy"></i>
+            <button type="button" style='<?php echo esc_attr($btn_style); ?>;cursor: copy;margin-top:10px;padding:6px;' onclick="copyshortcode()">
+            <span class="dashicons dashicons-admin-page"></span>
             </button>
 
             <script>
@@ -111,7 +112,7 @@ class WP_Speech_Hooks
             function copyshortcode () {
                 /* Get the text field */
                 var copyText = document.getElementById("wps_play_btn_shortcode");
-                
+
                 /* Copy the text inside the text field */
                 navigator.clipboard.writeText(copyText.value);
 

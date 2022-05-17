@@ -31,7 +31,6 @@ export default function Settings() {
      let formData = new FormData();
      formData.append("method", "get");
      postWithoutImage(wps_obj.api_url + "wps/v1/speech/settings", formData).then(res=>{
-       console.log(res.data)
       setSettings(res.data);
       setChecked(res.data.wps__settings_display_btn_in_single_page);
      }) 
@@ -83,7 +82,6 @@ export default function Settings() {
     formData.append("method", "post");
     postWithoutImage(wps_obj.api_url + "wps/v1/speech/settings", formData)
       .then((res) => {
-        console.log(res.data)
         setSettings(res.data);
         setChecked(res.data.wps__settings_display_btn_in_single_page);
         toast("Settings Data Saved");
@@ -126,7 +124,7 @@ export default function Settings() {
                 })}
               </Form.Select>
               <Form.Text>
-                Select: {settings.wps__settings_allow_recording_for_post_type}
+                Selected: {settings.wps__settings_allow_recording_for_post_type}
               </Form.Text>
             </Form.Group>
           </Col>
