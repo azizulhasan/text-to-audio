@@ -14,11 +14,16 @@ export default function Customize() {
     width: "100%",
     border: "0",
   });
-  const [speakingText, setSpeakingText] = useState("Add functionality to wordpress site to read blogs out loud in any language and record blog by voice in any language.");
-  const [listeningSettings, setListeningSettings] = useState({})
+
+  const [ shortCode , setShortCode ] = useState( '[wps_listen_btn]' )
+  const [ customCSS , setCustomCSS ] = useState( '' )
+
+  const [speakingText, setSpeakingText] = useState(
+    "Add functionality to wordpress site to read blogs out loud in any language and record blog by voice in any language."
+  );
+  const [listeningSettings, setListeningSettings] = useState({});
 
   useEffect(() => {
-
     /**
      * Get customize settings.
      */
@@ -26,32 +31,34 @@ export default function Customize() {
     customize.append("method", "get");
     postWithoutImage(wps_obj.api_url + "wps/v1/speech/customize", customize)
       .then((res) => {
-        setListeningStyle(res.data)
+        setListeningStyle(res.data);
+        setCustomCSS(res.data.custom_css)
+        setShortCode(res.data.wps_play_btn_shortcode)
         setListeningStyle2({
           ...listeningBtnStyle2,
-          ...{backgroundColor: res.data.backgroundColor},
-          ...{color: res.data.color},
-          ...{width: [res.data.width, "%"].join('')}
-        })
+          ...{ backgroundColor: res.data.backgroundColor },
+          ...{ color: res.data.color },
+          ...{ width: [res.data.width, "%"].join("") },
+        });
       })
       .catch((err) => {
         console.log(err);
       });
 
-      /**
+    /**
      * Get listening settings.
      */
     let listening = new FormData();
     listening.append("method", "get");
     postWithoutImage(wps_obj.api_url + "wps/v1/speech/listening", listening)
       .then((res) => {
-        setListeningSettings(res.data)
+        setListeningSettings(res.data);
       })
       .catch((err) => {
         console.log(err);
       });
 
-      setSpeakingText(localStorage.getItem('speakingText'))
+    setSpeakingText(localStorage.getItem("speakingText"));
   }, []);
   /**
    * handle change
@@ -65,6 +72,23 @@ export default function Customize() {
       toast("Value should between 0-100");
       return;
     }
+    /**
+     * setShortCode
+     */
+    if( e.target.name == 'wps_play_btn_shortcode' ){
+      setShortCode(e.target.value)
+      return;
+    }
+    /**
+     * setCustomCSS
+     */
+     if( e.target.name == 'custom_css' ){
+      setCustomCSS(e.target.value)
+      return;
+    }
+    /**
+     * set button style for database.
+     */
     setListeningStyle({
       ...listeningBtnStyle,
       ...{ [e.target.name]: e.target.value },
@@ -76,6 +100,9 @@ export default function Customize() {
     } else {
       value = e.target.value;
     }
+    /**
+     * set button style for live preveiw.
+     */
     setListeningStyle2({
       ...listeningBtnStyle2,
       ...{ [e.target.name]: value },
@@ -94,13 +121,18 @@ export default function Customize() {
 
     let formData = {};
     for (let [key, value] of form.entries()) {
-      if (key === "" || value === "") {
-        toast("Please fill the  field : " + key);
-        return;
+      if (key !== "custom_css") {
+        if (key === "" || value === "") {
+          toast("Please fill the  field : " + key);
+          return;
+        }
       }
 
       formData[key] = value;
     }
+    formData['custom_css'] = customCSS;
+    formData['wps_play_btn_shortcode'] = shortCode
+
     // console.log(formData);
     // return;
     let data = new FormData();
@@ -108,7 +140,7 @@ export default function Customize() {
     data.append("method", "post");
     postWithoutImage(wps_obj.api_url + "wps/v1/speech/customize", data)
       .then((res) => {
-        setListeningStyle(res.data)
+        setListeningStyle(res.data);
         toast("Customize Data Saved");
       })
       .catch((err) => {
@@ -145,10 +177,10 @@ export default function Customize() {
     toast("Copied the text: " + copyText.value);
   };
 
-  const setText  = (e) => {
-    setSpeakingText(e.target.value)
-    localStorage.setItem('speakingText', e.target.value)
-  }
+  const setText = (e) => {
+    setSpeakingText(e.target.value);
+    localStorage.setItem("speakingText", e.target.value);
+  };
   return (
     <Container>
       <Row className="mt-5">
@@ -192,8 +224,8 @@ export default function Customize() {
                 type="text"
                 name="wps_play_btn_shortcode"
                 onChange={handleChange}
+                value={shortCode}
                 id="wps_play_btn_shortcode"
-                defaultValue={"[wps_listen_btn]"}
                 title="Short code"
               />
             </Col>
@@ -230,7 +262,7 @@ export default function Customize() {
               value={listeningBtnStyle.color}
               title="Choose your color"
             />
-            <Form.Label htmlFor="color">Button Width (%)</Form.Label>
+            <Form.Label htmlFor="width">Button Width (%)</Form.Label>
             <Form.Control
               type="number"
               name="width"
@@ -241,11 +273,16 @@ export default function Customize() {
               value={listeningBtnStyle.width}
               title="Button Width"
             />
+            <Form.Label htmlFor="custom_css">Custom CSS</Form.Label>
+            <Form.Control
+              as="textarea"
+              name="custom_css"
+              onChange={handleChange}
+              value={customCSS}
+              placeholder="Custom CSS"
+            />
             <div className="d-grid gap-3 col-12 mx-auto mt-5 mb-4">
-              <button
-                type="submit"
-                className="wps_btn  btn-center btn-block"
-              >
+              <button type="submit" className="wps_btn  btn-center btn-block">
                 Submit
               </button>
             </div>

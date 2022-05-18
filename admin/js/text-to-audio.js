@@ -303,7 +303,9 @@ Object.values(document.getElementsByTagName("textarea")).forEach(
       /**
        * Start Recording.
        */
-      startRecording(textarea.getAttribute("id"), localStorage.getItem('wps__sentence_delimiter'));
+      if(textarea.getAttribute("id")){
+        startRecording(textarea.getAttribute("id"), localStorage.getItem('wps__sentence_delimiter'));
+      }
       localStorage.setItem(
         "current_reading_content_id",
         textarea.getAttribute("id")

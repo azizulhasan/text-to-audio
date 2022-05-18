@@ -215,20 +215,30 @@ function wps_create_shortcode( $atts ) {
     ?>
 <?php
     // Button start text.
-    $btn_text = (isset($atts['btn_text'])) && strlen($atts['btn_text'])? esc_html( $atts['btn_text'] ): "Listen";
+    $btn_text = ( isset($atts['btn_text'] ) ) && strlen( $atts['btn_text'] ) ? esc_html( $atts['btn_text'] ) : "Listen";
     // Speak Icon
     $speakIcon = '<span class="dashicons dashicons-controls-play"></span> ' . $btn_text . '
     ';
     // Button style.
-    if(isset($customize) && count($customize)){
+    if(isset( $customize ) && count( $customize ) ) {
         $btn_style = 'background-color:'.esc_html( $customize['backgroundColor'] ).';color:'.esc_html( $customize['color'] ).';width:'. esc_html( $customize['width'] ) .'%;border:0;';
     }else{
         $btn_style = 'width:100%;border:0;';
     }
+    //Custom Css
+    $custom_css = '';
+    if( isset( $customize['custom_css'] ) && '' !== $customize['custom_css'] ){
+        $custom_css = esc_attr( $customize['custom_css'] );
+    }
+
     // Custom class to button.
     $class = (isset($atts['class'])) && strlen($atts['class'])? esc_html( $atts['class'] ) : "";
-    $button = '<button id="wps__listent_content_'.$btn_no.'" style="'.esc_attr( $btn_style ).'" class="'.esc_attr( $class ).'" type="button"  title="WP Speech:  Tap to listen post.">' . $speakIcon . ' </button>
-        <script>
+    $button = '<button id="wps__listent_content_'.$btn_no.'" class="wps__listent_content '.esc_attr( $class ).'" type="button"  title="WP Speech:  Tap to listen post.">' . $speakIcon . ' </button>
+        <style>
+        .wps__listent_content{ '. esc_attr( $btn_style ) .' }
+        '. $custom_css .'
+        </style>
+    <script>
         wps__listent_content_'.$btn_no.'.onclick = function(){
                 
                 listenCotentInFrontend("' . $content . '", "wps__listent_content_'.$btn_no.'",  '. $listening . ' );

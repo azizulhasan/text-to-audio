@@ -5,9 +5,8 @@ import { ToggleButton, Form, Row, Col } from "react-bootstrap";
  *
  * Scripts
  */
-import { postWithoutImage, getData } from "../../context/utilities";
+import { postWithoutImage, } from "../../context/utilities";
 import toast from "../../context/Notify";
-import { type } from "@testing-library/user-event/dist/type";
 
 export default function Settings() {
   const [settings, setSettings] = useState({
