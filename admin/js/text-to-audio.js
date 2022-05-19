@@ -37,7 +37,7 @@ let recordData = new FormData();
 let recordSettings = {};
 recordData.append("method", "get");
 getData(
-  wps_site_url.site_url+"wps/v1/speech/record",
+  text_to_audio_obj.json_url+"wps/v1/speech/record",
   recordData
 )
   .then((res) => {
@@ -162,22 +162,17 @@ recognition.onsoundend = function() {
  * Listent/Pause/Resume content.
  */
 function listenCotentInDashboard(btn_id, content, listeningSettings) {
-  let current_reading_content = "";
-  if (
-    localStorage.getItem("current_reading_content_id") !== null &&
-    localStorage.getItem("current_reading_content_id") != "content_ifr"
-  ) {
-    current_reading_content = document.getElementById(
-      localStorage.getItem("current_reading_content_id")
-    );
-  } else {
-    current_reading_content = document.getElementById("content_ifr")
-      .contentWindow.document.body;
+
+  /**
+   * Get current reading content.
+   */
+  let current_reading_content = getCurrentReadingContent();
+  let text = ''
+  if( text_to_audio_obj.classic_editor_is_active ){
+    text =current_reading_content.innerText || current_reading_content.textContent;
+  }else{
+    text = current_reading_content;
   }
-
-  let text =
-    current_reading_content.innerText || current_reading_content.textContent;
-
 
   /**
    * Stop recording before listening.
@@ -191,6 +186,47 @@ function listenCotentInDashboard(btn_id, content, listeningSettings) {
   );
 
   startReadingContent(btn_id, text, listeningSettings);
+}
+
+
+
+function getCurrentReadingContent(){
+  let current_reading_content = ""
+  // True if classic editor active. and current reading content id is not "content_ifr"
+  if (
+    localStorage.getItem("current_reading_content_id") !== null &&
+    localStorage.getItem("current_reading_content_id") != "content_ifr"
+  ) {
+    current_reading_content = document.getElementById(
+      localStorage.getItem("current_reading_content_id")
+    );
+
+  } else {
+  /**
+   * Classsic editor
+   */
+    if( text_to_audio_obj.classic_editor_is_active ){
+      current_reading_content = document.getElementById("content_ifr")
+      .contentWindow.document.body;
+      // is block editor active.
+    }else if( document.getElementsByClassName('wp-block-post-title') ){
+
+      // Block Editor Title 
+      current_reading_content += document.getElementsByClassName('wp-block-post-title')[0].innerText+". ";
+      // Content
+      let blockEditorContent =  document.getElementsByClassName('block-editor-block-list__layout')
+      for( child of blockEditorContent[0].children ) {
+        // Get only innerText.
+        if( child.getAttribute('id') ){
+          current_reading_content += document.getElementById( child.getAttribute('id') ).innerText;
+        }
+      }
+    }
+
+
+    return current_reading_content;
+    
+  }
 }
 
 // speechSynthesis.cancel()

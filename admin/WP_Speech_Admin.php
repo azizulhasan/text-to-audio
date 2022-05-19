@@ -105,8 +105,9 @@ class WP_Speech_Admin
          * Looad wp-speeh script
          */
         wp_enqueue_script('text-to-audio', plugin_dir_url(__FILE__) . 'js/text-to-audio.js', array(), $this->version, true);
-        wp_localize_script('text-to-audio', 'wps_site_url', [
-            'site_url' => esc_url_raw(rest_url()),
+        wp_localize_script('text-to-audio', 'text_to_audio_obj', [
+            'json_url' => esc_url_raw(rest_url()),
+            'classic_editor_is_active' => is_plugin_active( 'classic-editor/classic-editor.php' ),
         ]);
 
     }
@@ -119,8 +120,9 @@ class WP_Speech_Admin
     {
 
         wp_enqueue_script('text-to-audio', plugin_dir_url(__FILE__) . 'js/text-to-audio.js', array(), $this->version, true);
-        wp_localize_script('text-to-audio', 'wps_site_url', [
-            'site_url' => esc_url_raw(rest_url()),
+        wp_localize_script('text-to-audio', 'text_to_audio_obj', [
+            'json_url' => esc_url_raw(rest_url()),
+            'classic_editor_is_active' => is_plugin_active( 'classic-editor/classic-editor.php' ),
         ]);
     }
 
