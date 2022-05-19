@@ -1,7 +1,7 @@
 === Text To Audio ===
 Contributors: hasanazizul
 Donate link: http://azizulhasan.com
-Tags: audio, speech, voice, text to audio, record, voice comment, voice to text comment, comment record, blog record
+Tags: audio, speech, voice, text to audio, text to speech, record, voice comment, voice to text-comment,
 Requires at least: 4.0
 Tested up to: 5.9.3
 Requires PHP: 5.6
@@ -9,20 +9,33 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Add functionality to WordPress site to read blogs out loud in any language and record blogs by voice in any language.
+Add functionality to WordPress site to read blogs out loud in any language and write blogs by voice in any language.
+
 == Description ==
-Add functionality to WordPress site to read blogs out loud in any language and record blogs by voice in any language.
+
+Add functionality to WordPress site to read blogs out loud in any language and write blogs by voice in any language.
+
+
+There is no need to create an account it’s completely free. Just install the plugin and enjoy the whole features of the plugin.
 
 ### Useful Links:
-> * [Live Demo](https://wp-speech.azizulhasan.com/2022/05/15/hello-world/)
+> * [Live Demo](https://wp-speech.azizulhasan.com/ )
+> * [Request A Feature](https://wp-speech.azizulhasan.com/contact/)
 
 **Features:**
 
-1. Add play button to any content by shortcode "[wps_listen_btn]"
-2. Record blog on dashbord by voice.
-3. Record comment on post by voice.
-
-
+1. Add a play button to any post/page by shortcode “[wps_listen_btn]”
+2. Write your post by voice from the mobile, desktop, tab, or any device.
+3. Write comment by voice on any post
+4. Unlimited text to speech vice versa
+5. Add more functionality to the website for a range of users including the visually impaired and the old people
+6. Customization of button color, width and button text.
+7. Live preview of play button during customization.
+8. Add custom CSS and custom class to the button.
+9. Change recording language to any language
+10. Change listening language to any language
+11. Choose a voice from more than 20 voices
+12. Unlimited speech to text
 
 
 
@@ -44,13 +57,16 @@ Add class on shortcode as an attribute. Example : `[wps_listen_btn class="custom
 Yes, you can change buttons background and text color from plugins dashboard's customization menu.
 
 == Screenshots ==
-1. Button to Blog.
-2. Metabox to post .
-3. Customization.
+1. Add play button to any post.
+2. Write post by voice.
+3. Customization of button.
+4. Choose listening voice.
+5. Choose recording language.
+6. Documentation.
 
 == Changelog ==
 
-= 1.0.0 (2022-05-15)  =
+= 1.0.0 (2022-05-18)  =
 * Initial release.
 
 == Upgrade Notice ==

@@ -87,7 +87,7 @@ class WP_Speech_Hooks
             $btn_style = 'background-color:' . $customize['backgroundColor'] . ';color:' . $customize['color'] . ';border:0;';
         }
         $short_code = '[wps_listen_btn]';
-        if( isset( $customize['wps_play_btn_shortcode'] ) ){
+        if( isset( $customize['wps_play_btn_shortcode'] ) && '' != $customize['wps_play_btn_shortcode'] ){
             $short_code = $customize['wps_play_btn_shortcode'];
         }
         ?>
