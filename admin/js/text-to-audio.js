@@ -99,6 +99,19 @@ if ("speechSynthesis" in window) {
 
 window.onload =  function() {
   localStorage.setItem("recordStarted", false);
+  speechSynthesis.cancel();
+}  
+window.onload()
+
+/**
+ * Start recording.
+ * @param {string} current_record_content_id
+ */
+function startRecording(
+  current_record_content_id = "content_ifr",
+  wps__sentence_delimiter = "."
+) {
+
   if( text_to_audio_obj.classic_editor_is_active ) {
     localStorage.setItem("current_reading_content_id", "content_ifr");
     localStorage.setItem("current_recording_content_id", "content_ifr");
@@ -117,28 +130,66 @@ window.onload =  function() {
             }
           }
         }
-      
-
   }
-  speechSynthesis.cancel();
-}  
-window.onload()
-
-/**
- * Start recording.
- * @param {string} current_record_content_id
- */
-function startRecording(
-  current_record_content_id = "content_ifr",
-  wps__sentence_delimiter = "."
-) {
 
   current_record_content_id = localStorage.getItem('current_recording_content_id')
   /**
    * Stop listening before recording.
    */
   speechSynthesis.cancel();
+  
+  
 
+  /**
+   * Get current recording element 
+   */
+  let current_recording_element = getCurrrentRecordingElement(current_record_content_id);
+  if( current_recording_element === false ) {
+    alert("Please add a paragraph tag then start recording.");
+    return;
+  }
+
+  /**
+   * Change voice recognition text and icon based on condition.
+   */
+   changeRecordButtonText()
+
+  /**
+   * Show current recorded text.
+   */
+  showRecordedContent(current_record_content_id , wps__sentence_delimiter, current_recording_element)
+}
+/**
+ * Show current recorded text.
+ * @param {*} current_text 
+ * @param {*} wps__sentence_delimiter 
+ * @param {*} current_recording_element 
+ */
+function showRecordedContent(current_record_content_id , wps__sentence_delimiter, current_recording_element){
+  let current_text = ''
+  recognition.onresult = function(event) {
+    let event__length = event.results.length;
+    current_text =
+      event.results[event__length - 1][0].transcript + wps__sentence_delimiter;
+    current_text = captalizeString(current_text);
+    /**
+     * Customize page id.
+     */
+    if (current_record_content_id == "wps__demo_text_for_play") {
+      let previous_text = current_recording_element.value;
+      current_recording_element.value = previous_text + current_text;
+    } else {
+      let previous_text = current_recording_element.innerHTML;
+      current_recording_element.innerHTML = previous_text + current_text;
+    }
+  };
+}
+
+
+/**
+ * Change record button text.
+ */
+function changeRecordButtonText(){
   let record_btn = document.getElementById("wps__start__record");
   if (record__status == "stop") {
     record__status = "record";
@@ -156,33 +207,13 @@ function startRecording(
     record__status = "stop";
     if (record_btn) record_btn.innerHTML = record_stop_button;
   }
-
-  /**
-   * Get current recording element 
-   */
-  let current_recording_element = getCurrrentRecordingElement(current_record_content_id);
-  
-  // console.log(current_recording_element.innerHTML);
-
-  let current_text = "";
-  recognition.onresult = function(event) {
-    let event__length = event.results.length;
-    current_text =
-      event.results[event__length - 1][0].transcript + wps__sentence_delimiter;
-    current_text = captalizeString(current_text);
-    /**
-     * Customize page.
-     */
-    if (current_record_content_id == "wps__demo_text_for_play") {
-      let previous_text = current_recording_element.value;
-      current_recording_element.value = previous_text + current_text;
-    } else {
-      let previous_text = current_recording_element.innerHTML;
-      current_recording_element.innerHTML = previous_text + current_text;
-    }
-  };
 }
 
+/**
+ * 
+ * @param {*} current_record_content_id 
+ * @returns 
+ */
 function getCurrrentRecordingElement(current_record_content_id) {
   let current_recording_element = ""
   // console.log(current_record_content_id)
@@ -191,6 +222,13 @@ function getCurrrentRecordingElement(current_record_content_id) {
       .contentWindow.document.body;
   }else {
     current_recording_element = document.getElementById(current_record_content_id);
+
+  /**
+   * If block editor is active and current_record_content_id is null then give alert.
+   */
+    if( document.getElementsByClassName("wp-block-post-title") && !current_recording_element ){
+      return false;
+    }
   }
 
   return current_recording_element;
@@ -241,7 +279,7 @@ function listenCotentInDashboard(btn_id, content, listeningSettings) {
   localStorage.setItem("current_play_btn_id", btn_id);
   localStorage.setItem("current_reading_content", text);
 
-  startReadingContent(btn_id, text, listeningSettings);
+  startListening(btn_id, text, listeningSettings);
 }
 
 function getCurrentReadingContent() {
@@ -281,6 +319,7 @@ function getCurrentReadingContent() {
       }
     }
 
+    
     return current_reading_content;
   }
 }
@@ -289,7 +328,7 @@ function getCurrentReadingContent() {
 /**
  * Start Reading content
  */
-function startReadingContent(btn_id, content, listeningSettings = null) {
+function startListening(btn_id, content, listeningSettings = null) {
   let listen_btn = document.getElementById(btn_id);
 
   utterence.text = content;
@@ -362,7 +401,7 @@ function listenCotentInFrontend(
   localStorage.setItem("recordStarted", false);
   localStorage.setItem("current_play_btn_id", btn_id);
 
-  startReadingContent(btn_id, content, listeningSettings);
+  startListening(btn_id, content, listeningSettings);
 }
 
 /**
