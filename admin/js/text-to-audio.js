@@ -29,7 +29,6 @@ newGrammar.src =
   "#JSGF V1.0; grammar names; public <name> = chris | kirsty | mike;";
 speechRecognitionList[1] = newGrammar; // should add the new SpeechGrammar object to the list.
 
-
 /**
  * Get recording settings.
  */
@@ -58,28 +57,24 @@ getData(text_to_audio_obj.json_url + "wps/v1/speech/record", recordData)
 recognition.interimResults = false;
 recognition.maxAlternatives = 2;
 
-
-
-
 /**
  * Play button content.
  */
- let play_button =
- '<span class="dashicons dashicons-controls-play"></span> Play';
+let play_button =
+  '<span class="dashicons dashicons-controls-play"></span> Play';
 let replay_button =
- '<span class="dashicons dashicons-image-rotate"></span> Replay';
+  '<span class="dashicons dashicons-image-rotate"></span> Replay';
 let pause_button =
- '<span class="dashicons dashicons-controls-pause"></span> Pause';
+  '<span class="dashicons dashicons-controls-pause"></span> Pause';
 let resume_button =
- '<span class="dashicons dashicons-controls-play"></span> Resume';
+  '<span class="dashicons dashicons-controls-play"></span> Resume';
 /**
-* Record button
-*/
+ * Record button
+ */
 let record_start_button =
- '<span class="dashicons dashicons-controls-volumeoff"></span> Start';
+  '<span class="dashicons dashicons-controls-volumeoff"></span> Start';
 let record_stop_button =
- '<span class="dashicons dashicons-controls-volumeon"></span> Stop';
-
+  '<span class="dashicons dashicons-controls-volumeon"></span> Stop';
 
 /**
  * Listen content.
@@ -97,11 +92,12 @@ if ("speechSynthesis" in window) {
  * @param {*} current_reading_content_id
  */
 
-window.onload =  function() {
+window.onload = function() {
   localStorage.setItem("recordStarted", false);
+  setCurrentRecordContentId()
   speechSynthesis.cancel();
-}  
-window.onload()
+};
+window.onload();
 
 /**
  * Start recording.
@@ -111,40 +107,23 @@ function startRecording(
   current_record_content_id = "content_ifr",
   wps__sentence_delimiter = "."
 ) {
+  setCurrentRecordContentId();
 
-  if( text_to_audio_obj.classic_editor_is_active ) {
-    localStorage.setItem("current_reading_content_id", "content_ifr");
-    localStorage.setItem("current_recording_content_id", "content_ifr");
-  }else if ( document.getElementsByClassName("wp-block-post-title") ){
-      /**
-       * Get last paragraph tag id for pasting voice text.
-       */
-        let blockEditorContent = document.getElementsByClassName(
-          "block-editor-block-list__layout"
-        );
-        
-        if( blockEditorContent[0]) {
-          for ( child of blockEditorContent[0].children ) {
-            if( child.tagName === 'P' ){
-              localStorage.setItem('current_recording_content_id', child.getAttribute('id'))
-            }
-          }
-        }
-  }
-
-  current_record_content_id = localStorage.getItem('current_recording_content_id')
+  current_record_content_id = localStorage.getItem(
+    "current_recording_content_id"
+  );
   /**
    * Stop listening before recording.
    */
   speechSynthesis.cancel();
-  
-  
 
   /**
-   * Get current recording element 
+   * Get current recording element
    */
-  let current_recording_element = getCurrrentRecordingElement(current_record_content_id);
-  if( current_recording_element === false ) {
+  let current_recording_element = getCurrrentRecordingElement(
+    current_record_content_id
+  );
+  if (current_recording_element === false) {
     alert("Please add a paragraph tag then start recording.");
     return;
   }
@@ -152,21 +131,56 @@ function startRecording(
   /**
    * Change voice recognition text and icon based on condition.
    */
-   changeRecordButtonText()
+  changeRecordButtonText();
 
   /**
    * Show current recorded text.
    */
-  showRecordedContent(current_record_content_id , wps__sentence_delimiter, current_recording_element)
+  showRecordedContent(
+    current_record_content_id,
+    wps__sentence_delimiter,
+    current_recording_element
+  );
 }
+
+function setCurrentRecordContentId() {
+  if (text_to_audio_obj.classic_editor_is_active) {
+    localStorage.setItem("current_reading_content_id", "content_ifr");
+    localStorage.setItem("current_recording_content_id", "content_ifr");
+  } else if (document.getElementsByClassName("wp-block-post-title")) {
+    /**
+     * Get last paragraph tag id for pasting voice text.
+     */
+    let blockEditorContent = document.getElementsByClassName(
+      "block-editor-block-list__layout"
+    );
+
+    if (blockEditorContent[0]) {
+      for (child of blockEditorContent[0].children) {
+        if (child.tagName === "P") {
+          localStorage.setItem(
+            "current_recording_content_id",
+            child.getAttribute("id")
+          );
+          localStorage.setItem("current_reading_content_id", child.getAttribute("id"));
+        }
+      }
+    }
+  }
+}
+
 /**
  * Show current recorded text.
- * @param {*} current_text 
- * @param {*} wps__sentence_delimiter 
- * @param {*} current_recording_element 
+ * @param {*} current_text
+ * @param {*} wps__sentence_delimiter
+ * @param {*} current_recording_element
  */
-function showRecordedContent(current_record_content_id , wps__sentence_delimiter, current_recording_element){
-  let current_text = ''
+function showRecordedContent(
+  current_record_content_id,
+  wps__sentence_delimiter,
+  current_recording_element
+) {
+  let current_text = "";
   recognition.onresult = function(event) {
     let event__length = event.results.length;
     current_text =
@@ -185,11 +199,10 @@ function showRecordedContent(current_record_content_id , wps__sentence_delimiter
   };
 }
 
-
 /**
  * Change record button text.
  */
-function changeRecordButtonText(){
+function changeRecordButtonText() {
   let record_btn = document.getElementById("wps__start__record");
   if (record__status == "stop") {
     record__status = "record";
@@ -210,23 +223,29 @@ function changeRecordButtonText(){
 }
 
 /**
- * 
- * @param {*} current_record_content_id 
- * @returns 
+ *
+ * @param {*} current_record_content_id
+ * @returns
  */
 function getCurrrentRecordingElement(current_record_content_id) {
-  let current_recording_element = ""
+  let current_recording_element = "";
   // console.log(current_record_content_id)
   if (current_record_content_id == "content_ifr") {
-    current_recording_element = document.getElementById(current_record_content_id)
-      .contentWindow.document.body;
-  }else {
-    current_recording_element = document.getElementById(current_record_content_id);
+    current_recording_element = document.getElementById(
+      current_record_content_id
+    ).contentWindow.document.body;
+  } else {
+    current_recording_element = document.getElementById(
+      current_record_content_id
+    );
 
-  /**
-   * If block editor is active and current_record_content_id is null then give alert.
-   */
-    if( document.getElementsByClassName("wp-block-post-title") && !current_recording_element ){
+    /**
+     * If block editor is active and current_record_content_id is null then give alert.
+     */
+    if (
+      document.getElementsByClassName("wp-block-post-title") &&
+      !current_recording_element
+    ) {
       return false;
     }
   }
@@ -300,7 +319,7 @@ function getCurrentReadingContent() {
       current_reading_content = document.getElementById("content_ifr")
         .contentWindow.document.body;
       // is block editor active.
-    } else if ( document.getElementsByClassName("wp-block-post-title") ) {
+    } else if (document.getElementsByClassName("wp-block-post-title")) {
       // Block Editor Title
       current_reading_content +=
         document.getElementsByClassName("wp-block-post-title")[0].innerText +
@@ -319,7 +338,6 @@ function getCurrentReadingContent() {
       }
     }
 
-    
     return current_reading_content;
   }
 }
@@ -422,12 +440,11 @@ Object.values(document.getElementsByTagName("textarea")).forEach(
       let listen_btn = document.getElementById("wpa__listen_content");
       if (listen_btn) listen_btn.innerHTML = play_button;
       if (listen_btn) listen_btn.setAttribute("title", "WP Speech: Play");
-      
+
       /**
        * Start Recording.
        */
       if (textarea.getAttribute("id")) {
-        
         startRecording(
           textarea.getAttribute("id"),
           localStorage.getItem("wps__sentence_delimiter")

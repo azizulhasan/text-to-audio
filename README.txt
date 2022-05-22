@@ -5,7 +5,7 @@ Tags: audio, speech, voice, text to audio, text to speech, record, voice comment
 Requires at least: 4.0
 Tested up to: 5.9.3
 Requires PHP: 5.6
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,23 +19,23 @@ Add functionality to WordPress site to read blogs out loud in any language and w
 There is no need to create an account it’s completely free. Just install the plugin and enjoy the whole features of the plugin.
 
 ### Useful Links:
-> * [Live Demo](https://wp-speech.azizulhasan.com/ )
+> * [Live Demo](https://wp-speech.azizulhasan.com/text-to-audio/ )
 > * [Request A Feature](https://wp-speech.azizulhasan.com/contact/)
 
 **Features:**
 
-1. Add a play button to any post/page by shortcode “[wps_listen_btn]”
+1. Add a play button to any post/page by shortcode “[wps_listen_btn]”.
 2. Write your post by voice from the mobile, desktop, tab, or any device.
-3. Write comment by voice on any post
-4. Unlimited text to speech vice versa
-5. Add more functionality to the website for a range of users including the visually impaired and the old people
+3. Write comment by voice on any post.
+4. Unlimited text to speech vice versa.
+5. Add more functionality to the website for a range of users including the visually impaired and the old people.
 6. Customization of button color, width and button text.
 7. Live preview of play button during customization.
 8. Add custom CSS and custom class to the button.
-9. Change recording language to any language
-10. Change listening language to any language
-11. Choose a voice from more than 20 voices
-12. Unlimited speech to text
+9. Change recording language to any language.
+10. Change listening language to any language.
+11. Choose a voice from more than 20 voices.
+12. Unlimited speech to text.
 
 
 
@@ -63,8 +63,12 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 4. Choose listening voice.
 5. Choose recording language.
 6. Documentation.
+6. Gutenburg Support.
 
 == Changelog ==
+
+= 1.0.1 (2022-05-22)  =
+* Gutenburg support added.
 
 = 1.0.0 (2022-05-18)  =
 * Initial release.
