@@ -14,7 +14,7 @@ import {
  */
 import { postWithoutImage, getData } from "../../context/utilities";
 import toast from "../../context/Notify";
-import { languages } from "../recording/languages";
+import { langs } from "../recording/languages";
 export default function Listening() {
   const [voices, setVoices] = useState([]);
   const [listeningSettings, setListeningSettings] = useState({
@@ -37,7 +37,7 @@ export default function Listening() {
     data.append("method", "get");
     postWithoutImage(wps_obj.api_url + "wps/v1/speech/record", data)
       .then((res) => {
-        console.log(res)
+        // console.log(res)
         setListeningLang(res.data.wps__recording__lang);
       })
       .catch((err) => {
@@ -85,7 +85,7 @@ export default function Listening() {
     data.append("method", "post");
     postWithoutImage(wps_obj.api_url + "wps/v1/speech/listening", data)
       .then((res) => {
-        console.log(res);
+        // console.log(res);
         setListeningSettings(res.data);
         toast("Listening Data Saved");
       })
@@ -276,11 +276,13 @@ export default function Listening() {
                 aria-label="Default select example"
               >
                 <option disabled> Default Listening Language</option>
-                {Object.keys(languages).map((lang_code, index) => {
+                {Object.keys(langs).map((lang_code, index) => {
                   return (
-                    <option key={index} value={lang_code}>
-                      {languages[lang_code]}
-                    </option>
+                    <option
+												key={index}
+												value={langs[lang_code][1][0]}>
+												{langs[lang_code][0]}
+											</option>
                   );
                 })}
               </Form.Select>

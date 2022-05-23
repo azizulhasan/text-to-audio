@@ -9,17 +9,15 @@ Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Add functionality to WordPress site to read blogs out loud in any language and write blogs by voice in any language.
-
+Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages.
 == Description ==
 
-Add functionality to WordPress site to read blogs out loud in any language and write blogs by voice in any language.
-
+Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages.
 
 There is no need to create an account it’s completely free. Just install the plugin and enjoy the whole features of the plugin.
 
 ### Useful Links:
-> * [Live Demo](https://wp-speech.azizulhasan.com/text-to-audio/ )
+> * [Live Demo](https://wp-speech.azizulhasan.com/text-to-audio/)
 > * [Request A Feature](https://wp-speech.azizulhasan.com/contact/)
 
 **Features:**
@@ -36,6 +34,7 @@ There is no need to create an account it’s completely free. Just install the p
 10. Change listening language to any language.
 11. Choose a voice from more than 20 voices.
 12. Unlimited speech to text.
+13. Block editor support.
 
 
 
@@ -67,7 +66,7 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 
 == Changelog ==
 
-= 1.0.1 (2022-05-22)  =
+= 1.0.1 (2022-05-23)  =
 * Gutenburg support added.
 
 = 1.0.0 (2022-05-18)  =

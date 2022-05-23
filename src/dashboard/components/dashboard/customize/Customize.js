@@ -58,7 +58,7 @@ export default function Customize() {
         console.log(err);
       });
 
-    setSpeakingText(localStorage.getItem("speakingText"));
+    setSpeakingText(localStorage.getItem("demo_listening_content"));
   }, []);
   /**
    * handle change
@@ -179,7 +179,7 @@ export default function Customize() {
 
   const setText = (e) => {
     setSpeakingText(e.target.value);
-    localStorage.setItem("speakingText", e.target.value);
+    localStorage.setItem("demo_listening_content", e.target.value);
   };
   return (
     <Container>
