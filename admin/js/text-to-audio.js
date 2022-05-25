@@ -12,12 +12,19 @@ const getData = async (url = "", data = {}) => {
 	return responseData;
 };
 
+// media.webspeech.recognition.enable = true;
+// media.webspeech.recognition.force_enable = true;
+
 var record__status = "record";
-var SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
-var SpeechGrammarList = window.SpeechGrammarList || webkitSpeechGrammarList;
-var SpeechGrammar = window.SpeechGrammar || webkitSpeechGrammar;
+var SpeechRecognition =
+	window.SpeechRecognition || window.webkitSpeechRecognition;
+var SpeechGrammarList =
+	window.SpeechGrammarList || window.webkitSpeechGrammarList;
+var SpeechGrammar = window.SpeechGrammar || window.webkitSpeechGrammar;
 var SpeechRecognitionEvent =
-	window.SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
+	window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent;
+console.log(navigator);
+
 var recognition = new SpeechRecognition();
 var grammar =
 	"#JSGF V1.0; grammar colors; public <color> = aqua | azure | beige | bisque | black | blue | brown | chocolate | coral | crimson | cyan | fuchsia | ghostwhite | gold | goldenrod | gray | green | indigo | ivory | khaki | lavender | lime | linen | magenta | maroon | moccasin | navy | olive | orange | orchid | peru | pink | plum | purple | red | salmon | sienna | silver | snow | tan | teal | thistle | tomato | turquoise | violet | white | yellow ;";
@@ -107,7 +114,10 @@ function startRecording(
 	current_record_content_id = "",
 	wps__sentence_delimiter = "."
 ) {
-	if (current_record_content_id !== "comment" && current_record_content_id !== 'wps__demo_text_for_play' ) {
+	if (
+		current_record_content_id !== "comment" &&
+		current_record_content_id !== "wps__demo_text_for_play"
+	) {
 		setCurrentRecordContentId();
 	}
 	current_record_content_id = localStorage.getItem(
@@ -186,11 +196,11 @@ function showRecordedContent(
 		let event__length = event.results.length;
 		if (event.results[event__length - 1].isFinal) {
 			current_text =
-			event.results[event__length - 1][0].transcript +
-			wps__sentence_delimiter;
+				event.results[event__length - 1][0].transcript +
+				shouldAddDelimiter(wps__sentence_delimiter);
 			current_text = captalizeString(current_text);
 		}
-		
+
 		/**
 		 * Customize page id.
 		 */
@@ -201,43 +211,35 @@ function showRecordedContent(
 			let previous_text = current_recording_element.innerHTML;
 			current_recording_element.innerHTML = previous_text + current_text;
 		}
-
-		// let interim_transcript = "";
-		// for (let i = event.resultIndex; i < event.results.length; ++i) {
-		// 	if (event.results[i].isFinal) {
-		// 		final_transcript +=
-		// 			captalizeString(event.results[i][0].transcript) +
-		// 			wps__sentence_delimiter;
-		// 	} else {
-		// 		interim_transcript += event.results[i][0].transcript;
-		// 	}
-		// }
-
-		// if (current_record_content_id == "wps__demo_text_for_play") {
-		// 	if( current_recording_element.value == '' ){
-		// 		current_recording_element.value =
-		// 		final_transcript + interim_transcript;
-		// 		localStorage.setItem("demo_listening_content", current_recording_element.value);
-		// 	}else{
-		// 		final_transcript = current_recording_element.value + final_transcript; 
-		// 		current_recording_element.value =
-		// 		final_transcript + interim_transcript;
-		// 		localStorage.setItem("demo_listening_content", current_recording_element.value);
-		// 	}
-			
-		// } else {
-
-		// 	if( current_recording_element.innerHTML == '' ){
-		// 		current_recording_element.innerHTML =
-		// 		final_transcript + interim_transcript;
-		// 	}else{
-		// 		final_transcript = current_recording_element.innerHTML + final_transcript;
-		// 		current_recording_element.innerHTML =
-		// 		final_transcript + interim_transcript;
-		// 	}
-			
-		// }
 	};
+}
+
+/**
+ * Should add delimiter.
+ */
+function shouldAddDelimiter(wps__sentence_delimiter) {
+	if (
+		(window.navigator.userAgent.indexOf("Opera") ||
+			window.navigator.userAgent.indexOf("OPR")) != -1
+	) {
+		return wps__sentence_delimiter;
+	} else if (window.navigator.userAgent.indexOf("Edg") != -1) {
+		return "";
+	} else if (window.navigator.userAgent.indexOf("Chrome") != -1) {
+		return wps__sentence_delimiter;
+	} else if (window.navigator.userAgent.indexOf("Safari") != -1) {
+		return wps__sentence_delimiter;
+	} else if (window.navigator.userAgent.indexOf("Firefox") != -1) {
+		return wps__sentence_delimiter;
+	} else if (
+		window.navigator.userAgent.indexOf("MSIE") != -1 ||
+		!!document.documentMode == true
+	) {
+		//IF IE > 10
+		return wps__sentence_delimiter;
+	} else {
+		return wps__sentence_delimiter;
+	}
 }
 
 /**
@@ -414,7 +416,6 @@ function startListening(btn_id, content, listeningSettings = null) {
 		: "en-US"; // It will be speaking language.
 
 	if (listen_status == "listen") {
-		// console.log(utterence)
 		speechSynthesis.speak(utterence);
 		listen_btn.innerHTML = pause_button;
 		listen_btn.setAttribute("title", "WP Speech: Pause");
@@ -485,7 +486,10 @@ Object.values(document.getElementsByTagName("textarea")).forEach(
 			/**
 			 * Start Recording.
 			 */
-			if (textarea.getAttribute("id") === "comment" || textarea.getAttribute("id") === 'wps__demo_text_for_play' ) {
+			if (
+				textarea.getAttribute("id") === "comment" ||
+				textarea.getAttribute("id") === "wps__demo_text_for_play"
+			) {
 				localStorage.setItem(
 					"current_recording_content_id",
 					textarea.getAttribute("id")
