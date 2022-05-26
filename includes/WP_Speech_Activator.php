@@ -63,7 +63,7 @@ class WP_Speech_Activator
                 "wps__listening_pitch" => 1,
                 "wps__listening_rate" => 1,
                 "wps__listening_volume" => 1,
-                "wps__listening_lang" => "en_GB",
+                "wps__listening_lang" => "en-AU",
             ));
 
         /**
@@ -72,9 +72,10 @@ class WP_Speech_Activator
         update_option('wps_record_settings', array
             (
                 "is_record_continously" => true,
-                "wps__recording__lang" => "en_GB",
+                "wps__recording__lang" => "en-AU",
                 "wps__sentence_delimiter" => ".",
             ));
+            
     }
 
 }

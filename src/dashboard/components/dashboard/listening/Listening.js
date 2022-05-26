@@ -113,7 +113,7 @@ export default function Listening() {
     <Container>
       <Form onSubmit={handleSubmit}>
         <Row>
-          <Col xs={12} sm={12} lg={8} >
+          <Col xs={12} sm={8} lg={8} >
             <Form.Group>
               <Form.Label>Voice to speak </Form.Label>
               <Form.Select
@@ -133,7 +133,7 @@ export default function Listening() {
               </Form.Select>
             </Form.Group>
           </Col>
-          <Col xs={12} sm={12} lg={4} className="mt-4">
+          <Col xs={12} sm={4} lg={4} className="mt-4">
             <>
               {["top"].map((placement) => (
                 <OverlayTrigger
@@ -152,7 +152,7 @@ export default function Listening() {
           </Col>
         </Row>
         <Row>
-          <Col xs={12} sm={12} lg={8} >
+          <Col xs={12} sm={8} lg={8} >
             <Form.Group>
               <Form.Label>Voice Pitch </Form.Label>
               <Form.Select
@@ -172,7 +172,7 @@ export default function Listening() {
               </Form.Select>
             </Form.Group>
           </Col>
-          <Col xs={12} sm={12} lg={4} className="mt-4">
+          <Col xs={12} sm={4} lg={4} className="mt-4">
             <>
               {["top"].map((placement) => (
                 <OverlayTrigger
@@ -192,7 +192,7 @@ export default function Listening() {
           </Col>
         </Row>
         <Row>
-          <Col xs={12} sm={12} lg={8} >
+          <Col xs={12} sm={8} lg={8} >
             <Form.Group>
               <Form.Label htmlFor="wps__listening_rate">Voice Speed</Form.Label>
               <Form.Control
@@ -208,7 +208,7 @@ export default function Listening() {
               </Form.Text>
             </Form.Group>
           </Col>
-          <Col xs={12} sm={12} lg={4} className="mt-4">
+          <Col xs={12} sm={4} lg={4} className="mt-4">
             <>
               {["top"].map((placement) => (
                 <OverlayTrigger
@@ -228,7 +228,7 @@ export default function Listening() {
           </Col>
         </Row>
         <Row>
-          <Col xs={12} sm={12} lg={8} >
+          <Col xs={12} sm={8} lg={8} >
             <Form.Group>
               <Form.Label htmlFor="wps__listening_volume">
                 Voice Volume
@@ -246,7 +246,7 @@ export default function Listening() {
               </Form.Text>
             </Form.Group>
           </Col>
-          <Col xs={12} sm={12} lg={4} className="mt-4">
+          <Col xs={12} sm={4} lg={4} className="mt-4">
             <>
               {["top"].map((placement) => (
                 <OverlayTrigger
@@ -266,7 +266,7 @@ export default function Listening() {
           </Col>
         </Row>
         <Row>
-          <Col xs={12} sm={12} lg={8} >
+          <Col xs={12} sm={8} lg={8} >
             <Form.Group>
               <Form.Label>Voice Language</Form.Label>
               <Form.Select
@@ -288,7 +288,7 @@ export default function Listening() {
               </Form.Select>
             </Form.Group>
           </Col>
-          <Col xs={12} sm={12} lg={4} className="mt-4">
+          <Col xs={12} sm={4} lg={4} className="mt-4">
             <>
               {["top"].map((placement) => (
                 <OverlayTrigger

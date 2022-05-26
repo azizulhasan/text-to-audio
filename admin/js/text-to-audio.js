@@ -23,7 +23,7 @@ var SpeechGrammarList =
 var SpeechGrammar = window.SpeechGrammar || window.webkitSpeechGrammar;
 var SpeechRecognitionEvent =
 	window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent;
-console.log(navigator);
+
 
 var recognition = new SpeechRecognition();
 var grammar =

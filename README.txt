@@ -3,9 +3,9 @@ Contributors: hasanazizul
 Donate link: http://azizulhasan.com
 Tags: audio, speech, voice, text to audio, text to speech, record, voice comment, voice to text-comment,
 Requires at least: 4.0
-Tested up to: 5.9.3
+Tested up to: 6.0
 Requires PHP: 5.6
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,7 +49,7 @@ There is no need to create an account it’s completely free. Just install the p
 
 = How to change button text? =
 Add button text on shortcode as an attribute. Example :
-`[wps_listen_btn btn_text="Your_Test"]`
+`[wps_listen_btn btn_text="Your_text"]`
 = How to add custom css class to button? =
 Add class on shortcode as an attribute. Example : `[wps_listen_btn class="custom_class"]`
 = How can I change button background and text color? =
@@ -65,6 +65,12 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 6. Gutenburg Support.
 
 == Changelog ==
+
+= 1.0.2 (2022-05-26)  =
+* Make dashboard responsive.
+* Ask for a feature button added.
+* Browser support documentation added.
+* Bugfixed.
 
 = 1.0.1 (2022-05-23)  =
 * Gutenburg support added.

@@ -11713,8 +11713,7 @@ My Custom css
 #layoutSidenav_content footer div{
   color: #fff;
 }
-/* #layoutSidenav_content{background-color: #fbfaff;} */
-
+#layoutSidenav_content{background-color: #fbfaff;}
 
 /**
 button 
@@ -11749,4 +11748,16 @@ button
   background-color: #1a4548;
 }
 
-.modal{background-color: rgba(0, 0, 0, .4)}
+
+
+@media (max-width: 599px) {
+  #layoutSidenav #layoutSidenav_content{
+    margin-left: -140px;
+  }
+}
+
+@media (min-width: 768px) and  (max-width: 991px){
+  #layoutSidenav #layoutSidenav_content{
+    margin-left: -160px;
+  }
+}

@@ -104,7 +104,12 @@ class WP_Speech_Api_Routes
 
             $fields = json_decode($request['fields']);
             $listeningFields = get_option('wps_listening_settings');
-            $listeningFields->wps__listening_lang = $fields->wps__recording__lang;
+            if ( is_array( $listeningFields ) ){
+                $listeningFields['wps__listening_lang'] = $fields->wps__recording__lang;
+            }else{
+                $listeningFields->wps__listening_lang = $fields->wps__recording__lang;
+            }
+            
             update_option('wps_record_settings', $fields);
             update_option('wps_listening_settings', $listeningFields);
 

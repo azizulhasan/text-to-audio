@@ -21,6 +21,11 @@ export default function DashboardTopNav() {
       >
         <i className="fas fa-bars text-white"></i>
       </button>
+
+      {/* me-3 me-lg-4 */}
+      <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://wp-speech.azizulhasan.com/contact/" target="_blank">
+      Rquest a feature
+      </a>
     </nav>
   );
 }

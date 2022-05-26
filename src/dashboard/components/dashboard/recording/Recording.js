@@ -77,12 +77,13 @@ export default function Recording() {
 			formData[key] = value;
 		}
 		formData.is_record_continously = checked;
+		// console.log(formData)
+		// return;
 		let data = new FormData();
 		data.append("fields", JSON.stringify(formData));
 		data.append("method", "post");
 		postWithoutImage(wps_obj.api_url + "wps/v1/speech/record", data)
 			.then((res) => {
-				// console.log(res);
 				setSettings(res.data);
 				setChecked(res.data.is_record_continously);
 				toast("Recording Data Saved");
@@ -99,7 +100,7 @@ export default function Recording() {
 					xs={12}
 					sm={12}
 					lg={12}
-					className=" justify-content-start align-items-start mt-2">
+					className="mt-2">
 					<h4>SpeechRecognition</h4>
 				</Col>
 			</Row>
@@ -109,12 +110,13 @@ export default function Recording() {
 						xs={12}
 						sm={12}
 						lg={12}
-						className="d-flex flex-col justify-content-start align-items-start">
+						className="">
 						<Form.Group>
-							<Form.Label>Record In </Form.Label>
+							<Form.Label htmlFor="wps__recording__lang">Record In </Form.Label>
 							<Form.Select
 								onChange={handleChange}
 								name="wps__recording__lang"
+								id="wps__recording__lang"
 								value={settings.wps__recording__lang}
 								aria-label="Default select example">
 								<option disabled>
@@ -135,30 +137,13 @@ export default function Recording() {
 							</Form.Select>
 						</Form.Group>
 					</Col>
-					{/* <Col
-						xs={12}
-						sm={12}
-						lg={12}
-						className="d-flex flex-col mt-3">
-						<Form.Group>
-							<Form.Label>Continuous Record</Form.Label>
-							<select
-								className="form-select bg-secondary text-light"
-								id="select_language"
-								onChange={updateCountry}></select>
-							<select
-								className="form-select bg-secondary text-light mt-2"
-								id="select_dialect"></select>
-						</Form.Group>
-					</Col> */}
-
 					<Col
 						xs={12}
-						sm={12}
-						lg={12}
-						className="d-flex flex-col mt-3">
+						sm={6}
+						lg={6}
+						className="mt-5">
 						<Form.Group>
-							<Form.Label>Continuous Record</Form.Label>
+							<Form.Label className="pr-2" htmlFor="toggle-check">Continuous Record</Form.Label>
 							<ToggleButton
 								id="toggle-check"
 								type="checkbox"
@@ -180,11 +165,11 @@ export default function Recording() {
 
 					<Col
 						xs={12}
-						sm={12}
-						lg={12}
-						className="d-flex flex-col mt-3">
+						sm={6}
+						lg={6}
+						className="mt-3">
 						<Form.Group>
-							<Form.Label>Sentence Delimiter</Form.Label>
+							<Form.Label htmlFor="wps__sentence_delimiter">Sentence Delimiter</Form.Label>
 							<Form.Control
 								type="text"
 								id="wps__sentence_delimiter"

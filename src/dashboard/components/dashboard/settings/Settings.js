@@ -98,7 +98,7 @@ export default function Settings() {
             xs={12}
             sm={6}
             lg={4}
-            className="d-flex flex-col justify-content-start align-items-start "
+            
           >
             <Form.Label id="wps__settings_allow_recording_for_post_type">
               Allow Recording For Post Type
@@ -133,13 +133,12 @@ export default function Settings() {
             xs={12}
             sm={6}
             lg={4}
-            className="d-flex flex-col justify-content-start align-items-start"
           >
             <Form.Text id="wps__settings_display_btn_in_single_page">
               Display Button Only Single Page
             </Form.Text>
           </Col>
-          <Col xs={12} sm={12} lg={8} className="d-flex flex-col">
+          <Col xs={12} sm={12} lg={8}>
             <Form.Group>
               <ToggleButton
                 id="toggle-check"

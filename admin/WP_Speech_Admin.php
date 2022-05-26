@@ -64,17 +64,9 @@ class WP_Speech_Admin
      */
     public function enqueue_styles()
     {
-
-        if (isset($_REQUEST['page']) && (TEXT_TO_AUDIO_TEXT_DOMAIN == $_REQUEST['page'])) {
-
-            // /* Selectize css*/
-            // wp_enqueue_style('select-styles', plugin_dir_url(__FILE__) . 'css/libs/selectize.default.css', array(), $this->version, 'all');
-
-            /* Default styles css*/
-
-            /* Dashicons */
-            wp_enqueue_style('dashicons');
-        }
+        /* Dashicons */
+        wp_enqueue_style('dashicons');
+        
 
     }
 
@@ -88,8 +80,8 @@ class WP_Speech_Admin
 
         if (isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
             /* Load react js */
-            wp_enqueue_script('wp-speech-dashboard', plugin_dir_url(__FILE__) . 'js/text-to-audio-dashboard.js', array(), $this->version, true);
-            wp_localize_script('wp-speech-dashboard', 'wps_obj', [
+            wp_enqueue_script('text-to-audio-dashboard', plugin_dir_url(__FILE__) . 'js/text-to-audio-dashboard.js', array(), $this->version, true);
+            wp_localize_script('text-to-audio-dashboard', 'wps_obj', [
                 'admin_url' => admin_url('/'),
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'api_url' => esc_url_raw(rest_url()),
