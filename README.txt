@@ -5,7 +5,7 @@ Tags: audio, speech, voice, text to audio, text to speech, record, voice comment
 Requires at least: 4.0
 Tested up to: 6.0
 Requires PHP: 5.6
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,7 +42,7 @@ There is no need to create an account it’s completely free. Just install the p
 1. Download and unzip the plugin
 2. Upload the entire "webappick-pdf-invoice-for-woocommerce" directory to the `/wp-content/plugins/` directory
 3. Activate the plugin through the 'Plugins' menu in WordPress
-4. Go to "Challan" menu and configure your settings
+4. Go to "Text To Audio" menu and configure your settings
 
 
 == Frequently Asked Questions ==
@@ -65,6 +65,10 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 6. Gutenburg Support.
 
 == Changelog ==
+
+= 1.0.3 (2022-06-17)  =
+* Fixed: Button CSS issue fixed.
+* Fixed: Button alignment issue fixed.
 
 = 1.0.2 (2022-05-26)  =
 * Make dashboard responsive.

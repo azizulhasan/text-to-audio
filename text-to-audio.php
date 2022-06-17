@@ -14,7 +14,7 @@
  * @wordpress-plugin
  * Plugin Name:       Text To Audio
  * Description:       Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages.
- * Version:           1.0.2
+ * Version:           1.0.3
  * Author:            Azizul Hasan
  * Author URI:        http://azizulhasan.com
  * License:           GPL-2.0+
@@ -196,17 +196,19 @@ function wps_create_shortcode( $atts ) {
     $listening = json_encode($listening);
     $customize = (array) get_option('wps_customize_settings');
     $settings = (array) get_option('wps_settings_data');
+    $recording =  (array) get_option('wps_record_settings');
     
-    /**
-     * Apply short code for only single page.
-     */
+    
+    //Apply short code for only single page.
     if($settings['wps__settings_display_btn_in_single_page'] == 1 &&  !is_single()) return;
     static  $btn_no = 0;
     $btn_no++;
 
 
-    $title          = get_the_title().". ";
-    $description    = get_the_content( );
+    $sentence_delimiter = isset( $recording['wps__sentence_delimiter'] ) ? $recording['wps__sentence_delimiter'] : '. ';
+    $title          = get_the_title() . $sentence_delimiter;
+
+    $description    = get_the_content();
     $description    = apply_filters('wps__content_before_cleaning', $description);
     $description    = wps_clean_content($description);
     $description    = apply_filters('wps__content_after_cleaning', $description);
@@ -222,9 +224,9 @@ function wps_create_shortcode( $atts ) {
     ';
     // Button style.
     if(isset( $customize ) && count( $customize ) ) {
-        $btn_style = 'background-color:'.esc_html( $customize['backgroundColor'] ).';color:'.esc_html( $customize['color'] ).';width:'. esc_html( $customize['width'] ) .'%;border:0;';
+        $btn_style = 'background-color:'.esc_attr( $customize['backgroundColor'] ).';color:'.esc_attr( $customize['color'] ).';width:'. esc_attr( $customize['width'] ) .'%;border:0;display:block;';
     }else{
-        $btn_style = 'width:100%;border:0;';
+        $btn_style = 'width:100%;border:0;display:block;';
     }
     //Custom Css
     $custom_css = '';
@@ -233,27 +235,25 @@ function wps_create_shortcode( $atts ) {
     }
 
     // Custom class to button.
-    $class = (isset($atts['class'])) && strlen($atts['class'])? esc_html( $atts['class'] ) : "";
-    $button = '<button id="wps__listent_content_'.$btn_no.'" class="wps__listent_content '.esc_attr( $class ).'" type="button"  title="WP Speech:  Tap to listen post.">' . $speakIcon . ' </button>
+    $class = ( isset($atts['class'] ) ) && strlen( $atts['class'] ) ? esc_attr( $atts['class'] ) : "";
+
+    // Listening button.
+    $button = '<button id="wps__listent_content_'.$btn_no.'" class="wps__listent_content '. esc_attr( $class ).'" type="button"  title="WP Speech:  Tap to listen post.">' . $speakIcon . ' </button>
         <style>
         .wps__listent_content{ '. esc_attr( $btn_style ) .' }
+        .wps__listent_content:hover{'. esc_attr( $btn_style ) .'}
+        .dashicons{ line-height: 1.5; }
         '. $custom_css .'
         </style>
-    <script>
-        wps__listent_content_'.$btn_no.'.onclick = function(){
-                
+        <script>
+            wps__listent_content_'.$btn_no.'.onclick = function() {
                 listenCotentInFrontend("' . $content . '", "wps__listent_content_'.$btn_no.'",  '. $listening . ' );
-                
             };
-        </script>
-            ';
+        </script>';
 
     return $button;
     
 }
-
-
-
 
 add_shortcode( 'wps_listen_btn', 'wps_create_shortcode' );
 
