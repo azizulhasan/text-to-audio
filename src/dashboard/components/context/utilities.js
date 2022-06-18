@@ -4,12 +4,14 @@
  */
 export const addScripts = (scripts) => {
   let fragment = document.createDocumentFragment();
-
   [...scripts].forEach((scirpt) => {
-    let tag = document.createElement("script");
-    tag.async = true;
-    tag.src = scirpt;
-    fragment.appendChild(tag);
+    if( true !== window.localStorage.getItem( scirpt ) ){
+      let tag = document.createElement("script");
+      tag.async = true;
+      tag.src = scirpt;
+      fragment.appendChild(tag);
+      window.localStorage.setItem( scirpt, true );
+    }
   });
   document.body.appendChild(fragment)
 };

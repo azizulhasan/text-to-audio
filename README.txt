@@ -69,6 +69,8 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 = 1.0.3 (2022-06-17)  =
 * Fixed: Button CSS issue fixed.
 * Fixed: Button alignment issue fixed.
+* Added: Support ticket button added.
+* Added: Review button added.
 
 = 1.0.2 (2022-05-26)  =
 * Make dashboard responsive.

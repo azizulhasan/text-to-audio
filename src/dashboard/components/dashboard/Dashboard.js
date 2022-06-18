@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useMemo, useState } from "react";
 import { BrowserRouter as Router, HashRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 
@@ -26,7 +26,7 @@ import Docs from "./docs/Docs";
 
 
 
-export default function Dashboard() {
+function Dashboard() {
   // authenTicateUser();
   const [componentName, setComponentName] = useState(getComponentName());
   useEffect(() => {
@@ -61,8 +61,8 @@ export default function Dashboard() {
           <main>
             <div className="container-fluid">
               <Routes>
-                <Route path="/" element={<Recording />} />
-                <Route path={ "/listening"} element={<Listening/>} />
+                <Route path="/" element={useMemo(()=> <Recording />)} />
+                <Route path={ "/listening"} element={useMemo(() => <Listening/>)} />
                 <Route path={ "/customize"} element={<Customize/>} />
                 <Route path={"/settings"} element={<Settings />} />
                 <Route path="/docs" element={<Docs/>} />
@@ -90,3 +90,4 @@ export default function Dashboard() {
     </HashRouter>
   );
 }
+export default   Dashboard  ;

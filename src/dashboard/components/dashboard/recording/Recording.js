@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+
 import { ToggleButton, Form, Row, Col, Container } from "react-bootstrap";
 
 /**
@@ -9,7 +10,7 @@ import { postWithoutImage } from "../../context/utilities";
 import toast from "../../context/Notify";
 import {  updateCountry, langs } from "./languages";
 
-export default function Recording() {
+function Recording() {
 	const [settings, setSettings] = useState({
 		wps__recording__lang: "",
 		is_record_continously: true,
@@ -191,3 +192,5 @@ export default function Recording() {
 		</Container>
 	);
 }
+
+export default  Recording ;
