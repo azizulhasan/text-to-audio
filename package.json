@@ -12,7 +12,9 @@
     "watch": "cross-env NODE_ENV=development webpack --watch --progress --config=node_modules/laravel-mix/setup/webpack.config.js",
     "dev": "cross-env NODE_ENV=development webpack  --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
     "hmr": "cross-env NODE_ENV=development webpack-dev-server --inline --hot --config=node_modules/laravel-mix/setup/webpack.config.js",
-    "production": "cross-env NODE_ENV=production webpack --progress --config=node_modules/laravel-mix/setup/webpack.config.js"
+    "production": "cross-env NODE_ENV=production webpack --progress --config=node_modules/laravel-mix/setup/webpack.config.js",
+    "block:build": "wp-scripts build admin/js/blocks/blocks.js",
+    "block:start": "wp-scripts start admin/js/blocks/blocks.js"
   },
   "keywords": [
     "voice",
@@ -41,5 +43,9 @@
   },
   "browser": {
     "child_process": false
+  },
+  "devDependencies": {
+    "@wordpress/i18n": "^4.13.0",
+    "@wordpress/scripts": "^23.5.0"
   }
 }
