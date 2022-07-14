@@ -1,5 +1,5 @@
 <?php
-namespace WPSpeech_Admin;
+namespace TTA_Admin;
 
 /**
  * The admin-specific functionality of the plugin.
@@ -7,8 +7,8 @@ namespace WPSpeech_Admin;
  * @link       http://azizulhasan.com
  * @since      1.0.0
  *
- * @package    WP_Speech
- * @subpackage WP_Speech/admin
+ * @package    TTA
+ * @subpackage TTA/admin
  */
 
 /**
@@ -17,12 +17,11 @@ namespace WPSpeech_Admin;
  * Defines the plugin name, version, and two examples hooks for how to
  * enqueue the admin-specific stylesheet and JavaScript.
  *
- * @package    WP_Speech
- * @subpackage WP_Speech/admin
+ * @package    TTA
+ * @subpackage TTA/admin
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
-class WP_Speech_Admin
-{
+class TTA_Admin {
 
     /**
      * The ID of this plugin.
@@ -49,8 +48,7 @@ class WP_Speech_Admin
      * @param      string    $plugin_name       The name of this plugin.
      * @param      string    $version    The version of this plugin.
      */
-    public function __construct($plugin_name, $version)
-    {
+    public function __construct($plugin_name, $version) {
 
         $this->plugin_name = $plugin_name;
         $this->version = $version;
@@ -62,11 +60,9 @@ class WP_Speech_Admin
      *
      * @since    1.0.0
      */
-    public function enqueue_styles()
-    {
+    public function enqueue_styles() {
         /* Dashicons */
         wp_enqueue_style('dashicons');
-        
 
     }
 
@@ -75,13 +71,12 @@ class WP_Speech_Admin
      *
      * @since    1.0.0
      */
-    public function enqueue_scripts()
-    {
+    public function enqueue_scripts() {
 
         if (isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
             /* Load react js */
             wp_enqueue_script('text-to-audio-dashboard', plugin_dir_url(__FILE__) . 'js/text-to-audio-dashboard.js', array(), $this->version, true);
-            wp_localize_script('text-to-audio-dashboard', 'wps_obj', [
+            wp_localize_script('text-to-audio-dashboard', 'tta_obj', [
                 'admin_url' => admin_url('/'),
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'api_url' => esc_url_raw(rest_url()),
@@ -97,9 +92,10 @@ class WP_Speech_Admin
          * Looad wp-speeh script
          */
         wp_enqueue_script('text-to-audio', plugin_dir_url(__FILE__) . 'js/text-to-audio.js', array(), $this->version, true);
+
         wp_localize_script('text-to-audio', 'text_to_audio_obj', [
             'json_url' => esc_url_raw(rest_url()),
-            'classic_editor_is_active' => is_plugin_active( 'classic-editor/classic-editor.php' ),
+            'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
         ]);
 
     }
@@ -108,13 +104,12 @@ class WP_Speech_Admin
      * Enqueue wp speech file
      *
      */
-    public function enqueue_wp_speech()
-    {
+    public function enqueue_TTA() {
 
         wp_enqueue_script('text-to-audio', plugin_dir_url(__FILE__) . 'js/text-to-audio.js', array(), $this->version, true);
         wp_localize_script('text-to-audio', 'text_to_audio_obj', [
             'json_url' => esc_url_raw(rest_url()),
-            'classic_editor_is_active' => is_plugin_active( 'classic-editor/classic-editor.php' ),
+            'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
         ]);
     }
 
@@ -122,21 +117,19 @@ class WP_Speech_Admin
      * Add Menu and Submenu page
      */
 
-    public function wp_speech_menu()
-    {
+    public function TTA_menu() {
         add_menu_page(
             __('Text To Audio', TEXT_TO_AUDIO_TEXT_DOMAIN),
             __('Text To Audio', TEXT_TO_AUDIO_TEXT_DOMAIN),
             'manage_options',
             TEXT_TO_AUDIO_TEXT_DOMAIN,
-            array($this, "wp_speech_settings"),
+            array($this, "TTA_settings"),
             'dashicons-controls-volumeon',
             20
         );
     }
 
-    public function wp_speech_settings()
-    {
+    public function TTA_settings() {
         echo "<div class='wpwrap'><div id='app'></div></div>";
     }
 

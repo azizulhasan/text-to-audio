@@ -1,10 +1,10 @@
 <?php
 
-namespace WPSpeech;
+namespace TTA;
 
-use WPSpeech\WP_Speech_i18n;
-use WPSpeech\WP_Speech_Loader;
-use WPSpeech_Admin\WP_Speech_Admin;
+use TTA\TTA_i18n;
+use TTA\TTA_Loader;
+use TTA_Admin\TTA_Admin;
 
 /**
  * The file that defines the core plugin class
@@ -15,8 +15,8 @@ use WPSpeech_Admin\WP_Speech_Admin;
  * @link       http://azizulhasan.com
  * @since      1.0.0
  *
- * @package    WP_Speech
- * @subpackage WP_Speech/includes
+ * @package    TTA
+ * @subpackage TTA/includes
  */
 
 /**
@@ -29,13 +29,12 @@ use WPSpeech_Admin\WP_Speech_Admin;
  * version of the plugin.
  *
  * @since      1.0.0
- * @package    WP_Speech
- * @subpackage WP_Speech/includes
+ * @package    TTA
+ * @subpackage TTA/includes
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
 
-class WP_Speech
-{
+class TTA {
 
     /**
      * The loader that's responsible for maintaining and registering all hooks that power
@@ -43,7 +42,7 @@ class WP_Speech
      *
      * @since    1.0.0
      * @access   protected
-     * @var      WP_Speech_Loader    $loader    Maintains and registers all hooks for the plugin.
+     * @var      TTA_Loader    $loader    Maintains and registers all hooks for the plugin.
      */
     protected $loader;
 
@@ -74,8 +73,7 @@ class WP_Speech
      *
      * @since    1.0.0
      */
-    public function __construct()
-    {
+    public function __construct() {
         if (defined('TEXT_TO_AUDIO_VERSION')) {
             $this->version = TEXT_TO_AUDIO_VERSION;
         } else {
@@ -94,28 +92,26 @@ class WP_Speech
      * @since    1.0.0
      * @access   private
      */
-    private function load_dependencies()
-    {
+    private function load_dependencies() {
 
-        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/WP_Speech_Hooks.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/TTA_Hooks.php';
 
-        $this->loader = new WP_Speech_Loader();
+        $this->loader = new TTA_Loader();
 
     }
 
     /**
      * Define the locale for this plugin for internationalization.
      *
-     * Uses the WP_Speech_i18n class in order to set the domain and to register the hook
+     * Uses the TTA_i18n class in order to set the domain and to register the hook
      * with WordPress.
      *
      * @since    1.0.0
      * @access   private
      */
-    private function set_locale()
-    {
+    private function set_locale() {
 
-        $plugin_i18n = new WP_Speech_i18n();
+        $plugin_i18n = new TTA_i18n();
         $this->loader->add_action('plugins_loaded', $plugin_i18n, 'load_plugin_textdomain');
 
     }
@@ -127,16 +123,15 @@ class WP_Speech
      * @since    1.0.0
      * @access   private
      */
-    private function define_hooks()
-    {
+    private function define_hooks() {
 
-        $plugin_admin = new WP_Speech_Admin($this->get_plugin_name(), $this->get_version());
+        $plugin_admin = new TTA_Admin($this->get_plugin_name(), $this->get_version());
 
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles', 999999);
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts', 99999);
-        $this->loader->add_action('admin_menu', $plugin_admin, 'wp_speech_menu');
+        $this->loader->add_action('admin_menu', $plugin_admin, 'TTA_menu');
 
-        $this->loader->add_action('wp_enqueue_scripts', $plugin_admin, 'enqueue_wp_speech', 99999);
+        $this->loader->add_action('wp_enqueue_scripts', $plugin_admin, 'enqueue_TTA', 99999);
 
     }
 
@@ -145,8 +140,7 @@ class WP_Speech
      *
      * @since    1.0.0
      */
-    public function run()
-    {
+    public function run() {
         $this->loader->run();
     }
 
@@ -157,8 +151,7 @@ class WP_Speech
      * @since     1.0.0
      * @return    string    The name of the plugin.
      */
-    public function get_plugin_name()
-    {
+    public function get_plugin_name() {
         return $this->plugin_name;
     }
 
@@ -166,10 +159,9 @@ class WP_Speech
      * The reference to the class that orchestrates the hooks with the plugin.
      *
      * @since     1.0.0
-     * @return    WP_Speech_Loader    Orchestrates the hooks of the plugin.
+     * @return    TTA_Loader    Orchestrates the hooks of the plugin.
      */
-    public function get_loader()
-    {
+    public function get_loader() {
         return $this->loader;
     }
 
@@ -179,8 +171,7 @@ class WP_Speech
      * @since     1.0.0
      * @return    string    The version number of the plugin.
      */
-    public function get_version()
-    {
+    public function get_version() {
         return $this->version;
     }
 

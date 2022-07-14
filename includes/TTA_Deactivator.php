@@ -1,13 +1,13 @@
 <?php
-namespace WPSpeech;
+namespace TTA;
 /**
  * Fired during plugin deactivation
  *
  * @link       http://azizulhasan.com
  * @since      1.0.0
  *
- * @package    WP_Speech
- * @subpackage WP_Speech/includes
+ * @package    TTA
+ * @subpackage TTA/includes
  */
 
 /**
@@ -16,21 +16,21 @@ namespace WPSpeech;
  * This class defines all code necessary to run during the plugin's deactivation.
  *
  * @since      1.0.0
- * @package    WP_Speech
- * @subpackage WP_Speech/includes
+ * @package    TTA
+ * @subpackage TTA/includes
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
-class WP_Speech_Deactivator {
+class TTA_Deactivator {
 
-	/**
-	 * Short Description. (use period)
-	 *
-	 * Long Description.
-	 *
-	 * @since    1.0.0
-	 */
-	public static function deactivate() {
+    /**
+     * Short Description. (use period)
+     *
+     * Long Description.
+     *
+     * @since    1.0.0
+     */
+    public static function deactivate() {
 
-	}
+    }
 
 }

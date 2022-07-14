@@ -9,10 +9,10 @@
     ],
     "autoload": {
         "psr-4": {
-            "WPSpeech\\" : "includes",
-            "WPSpeech_Admin\\" : "admin",
-            "WPSpeech_Public\\" : "public",
-            "WPSpeech_Api\\" : "api"
+            "TTA\\" : "includes",
+            "TTA_Admin\\" : "admin",
+            "TTA_Public\\" : "public",
+            "TTA_Api\\" : "api"
         }
     },
 

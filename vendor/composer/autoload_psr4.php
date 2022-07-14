@@ -6,8 +6,8 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'WPSpeech_Public\\' => array($baseDir . '/public'),
-    'WPSpeech_Api\\' => array($baseDir . '/api'),
-    'WPSpeech_Admin\\' => array($baseDir . '/admin'),
-    'WPSpeech\\' => array($baseDir . '/includes'),
+    'TTA_Public\\' => array($baseDir . '/public'),
+    'TTA_Api\\' => array($baseDir . '/api'),
+    'TTA_Admin\\' => array($baseDir . '/admin'),
+    'TTA\\' => array($baseDir . '/includes'),
 );

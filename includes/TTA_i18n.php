@@ -1,5 +1,5 @@
 <?php
-namespace WPSpeech;
+namespace TTA;
 /**
  * Define the internationalization functionality
  *
@@ -9,8 +9,8 @@ namespace WPSpeech;
  * @link       http://azizulhasan.com
  * @since      1.0.0
  *
- * @package    WP_Speech
- * @subpackage WP_Speech/includes
+ * @package    TTA
+ * @subpackage TTA/includes
  */
 
 /**
@@ -20,28 +20,25 @@ namespace WPSpeech;
  * so that it is ready for translation.
  *
  * @since      1.0.0
- * @package    WP_Speech
- * @subpackage WP_Speech/includes
+ * @package    TTA
+ * @subpackage TTA/includes
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
-class WP_Speech_i18n {
+class TTA_i18n {
 
+    /**
+     * Load the plugin text domain for translation.
+     *
+     * @since    1.0.0
+     */
+    public function load_plugin_textdomain() {
 
-	/**
-	 * Load the plugin text domain for translation.
-	 *
-	 * @since    1.0.0
-	 */
-	public function load_plugin_textdomain() {
+        load_plugin_textdomain(
+            'text-to-audio',
+            false,
+            dirname(dirname(plugin_basename(__FILE__))) . '/languages/'
+        );
 
-		load_plugin_textdomain(
-			'text-to-audio',
-			false,
-			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
-		);
-
-	}
-
-
+    }
 
 }

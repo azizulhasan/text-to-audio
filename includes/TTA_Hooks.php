@@ -1,5 +1,5 @@
 <?php
-namespace WPSpeech;
+namespace TTA;
 
 /**
  * Fired during plugin activation
@@ -7,8 +7,8 @@ namespace WPSpeech;
  * @link       http://azizulhasan.com
  * @since      1.0.0
  *
- * @package    WP_Speech
- * @subpackage WP_Speech/includes
+ * @package    TTA
+ * @subpackage TTA/includes
  */
 
 /**
@@ -17,16 +17,20 @@ namespace WPSpeech;
  * This class defines all code necessary to run during the plugin's activation.
  *
  * @since      1.0.0
- * @package    WP_Speech
- * @subpackage WP_Speech/includes
+ * @package    TTA
+ * @subpackage TTA/includes
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
-class WP_Speech_Hooks
-{
+class TTA_Hooks {
 
-    public function __construct()
-    {
+    public function __construct() {
         add_action('add_meta_boxes', array($this, 'add_custom_meta_box'));
+        // add_action('wp_head', array($this, 'inc_manifest_link'));
+    }
+    // Creates the link tag
+    public function inc_manifest_link() {
+        $url = WP_PLUGIN_URL . '/text-to-audio/admin/js/manifest.json';
+        echo '<link rel="manifest" href="' . $url . '">';
     }
     /**
      * Short Description. (use period)
@@ -35,33 +39,31 @@ class WP_Speech_Hooks
      *
      * @since    1.0.0
      */
-    public static function activate()
-    {
+    public static function activate() {
 
     }
     /**
      * Register MetaBox to add PDF Download Button
      */
-    public function add_custom_meta_box()
-    {
+    public function add_custom_meta_box() {
 
         $meta_box_arr = [
             "post",
             "product",
             "page",
         ];
-        $settings = (array) get_option('wps_settings_data');
-        $settings['wps__settings_allow_recording_for_post_type'] = isset($settings['wps__settings_allow_recording_for_post_type']) ? $settings['wps__settings_allow_recording_for_post_type'] : ['all'];
-        if (isset($settings['wps__settings_allow_recording_for_post_type'])
-            && in_array(get_current_screen()->post_type, $settings['wps__settings_allow_recording_for_post_type'])
-            || (in_array('all', $settings['wps__settings_allow_recording_for_post_type'])
+        $settings = (array) get_option('tta_settings_data');
+        $settings['tta__settings_allow_recording_for_post_type'] = isset($settings['tta__settings_allow_recording_for_post_type']) ? $settings['tta__settings_allow_recording_for_post_type'] : ['all'];
+        if (isset($settings['tta__settings_allow_recording_for_post_type'])
+            && in_array(get_current_screen()->post_type, $settings['tta__settings_allow_recording_for_post_type'])
+            || (in_array('all', $settings['tta__settings_allow_recording_for_post_type'])
                 && in_array(get_current_screen()->post_type, $meta_box_arr))) {
             add_meta_box(
                 'wps22-meta-box',
                 'Text To Audio',
                 array(
                     $this,
-                    'wps_meta_box',
+                    'tta_meta_box',
                 ),
                 get_current_screen()->post_type,
                 'side',
@@ -75,32 +77,31 @@ class WP_Speech_Hooks
     /**
      * Add meta box for record, re-record, listen content with loud.
      */
-    public function wps_meta_box()
-    {
+    public function tta_meta_box() {
 
-        $listening = (array) get_option('wps_listening_settings');
+        $listening = (array) get_option('tta_listening_settings');
         $listening = json_encode($listening);
-        $customize = (array) get_option('wps_customize_settings');
+        $customize = (array) get_option('tta_customize_settings');
 
         // Button style.
         if (isset($customize) && count($customize)) {
             $btn_style = 'background-color:' . $customize['backgroundColor'] . ';color:' . $customize['color'] . ';border:0;';
         }
-        $short_code = '[wps_listen_btn]';
-        if( isset( $customize['wps_play_btn_shortcode'] ) && '' != $customize['wps_play_btn_shortcode'] ){
-            $short_code = $customize['wps_play_btn_shortcode'];
+        $short_code = '[tta_listen_btn]';
+        if (isset($customize['tta_play_btn_shortcode']) && '' != $customize['tta_play_btn_shortcode']) {
+            $short_code = $customize['tta_play_btn_shortcode'];
         }
         ?>
-        <div class="wps_metabox">
+        <div class="tta_metabox">
 
-            <button type="button" id="wps__start__record"  style='<?php echo esc_attr($btn_style); ?>;cursor: pointer' onclick="startRecording()"><span class="dashicons dashicons-controls-volumeoff"></span>Start</button>
-            <button type="button" id="wps__listen_content" style='<?php echo esc_attr($btn_style); ?>;cursor: pointer' onclick='listenCotentInDashboard("wps__listen_content","", <?php echo esc_js($listening); ?> )'><span class="dashicons dashicons-controls-play"></span> Play</button>
+            <button type="button" id="tta__start__record"  style='<?php echo esc_attr($btn_style); ?>;cursor: pointer' onclick="startRecording()"><span class="dashicons dashicons-controls-volumeoff"></span>Start</button>
+            <button type="button" id="tta__listen_content" style='<?php echo esc_attr($btn_style); ?>;cursor: pointer' onclick='listenCotentInDashboard("tta__listen_content","", <?php echo esc_js($listening); ?> )'><span class="dashicons dashicons-controls-play"></span> Play</button>
             <!-- Shortcode text -->
             <input
                 type="text"
-                name="wps_play_btn_shortcode"
-                id="wps_play_btn_shortcode"
-                value="<?php echo esc_attr( $short_code )?>"
+                name="tta_play_btn_shortcode"
+                id="tta_play_btn_shortcode"
+                value="<?php echo esc_attr($short_code) ?>"
                 title="Short code"
             />
 
@@ -115,7 +116,7 @@ class WP_Speech_Hooks
              */
             function copyshortcode () {
                 /* Get the text field */
-                var copyText = document.getElementById("wps_play_btn_shortcode");
+                var copyText = document.getElementById("tta_play_btn_shortcode");
 
                 /* Copy the text inside the text field */
                 navigator.clipboard.writeText(copyText.value);
@@ -130,4 +131,4 @@ class WP_Speech_Hooks
 }
 
 }
-new WP_Speech_Hooks();
+new TTA_Hooks();

@@ -1,0 +1,79 @@
+<?php
+namespace TTA;
+
+/**
+ * Fired during plugin activation
+ *
+ * @link       http://azizulhasan.com
+ * @since      1.0.0
+ *
+ * @package    TTA
+ * @subpackage TTA/includes
+ */
+
+/**
+ * Fired during plugin activation.
+ *
+ * This class defines all code necessary to run during the plugin's activation.
+ *
+ * @since      1.0.0
+ * @package    TTA
+ * @subpackage TTA/includes
+ * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
+ */
+class TTA_Activator {
+
+    /**
+     * Short Description. (use period)
+     *
+     * Long Description.
+     *
+     * @since    1.0.0
+     */
+    public static function activate() {
+        /**
+         * Customization settings.
+         */
+        update_option('tta_customize_settings', array
+            (
+                "backgroundColor" => "#184c53",
+                "color" => "#ffffff",
+                "width" => "100",
+                'custom_css' => '',
+                'tta_play_btn_shortcode' => '[tta_listen_btn]',
+            ));
+
+        /**
+         * Text To Audio settings.
+         */
+        update_option('tta_settings_data', array
+            (
+                "tta__settings_allow_recording_for_post_type" => ["all"],
+                "tta__settings_display_btn_in_single_page" => '',
+            ));
+
+        /**
+         * Listening settings.
+         */
+        update_option('tta_listening_settings', array
+            (
+                "tta__listening_voice" => "Microsoft Mark - English (United States)",
+                "tta__listening_pitch" => 1,
+                "tta__listening_rate" => 1,
+                "tta__listening_volume" => 1,
+                "tta__listening_lang" => "en-AU",
+            ));
+
+        /**
+         * Recording settings.
+         */
+        update_option('tta_record_settings', array
+            (
+                "is_record_continously" => true,
+                "tta__recording__lang" => "en-AU",
+                "tta__sentence_delimiter" => ".",
+            ));
+
+    }
+
+}

@@ -7,29 +7,29 @@ namespace Composer\Autoload;
 class ComposerStaticInit7f6653a5d36e71e944dcac886a5fa0c4
 {
     public static $prefixLengthsPsr4 = array (
-        'W' => 
+        'T' => 
         array (
-            'WPSpeech_Public\\' => 16,
-            'WPSpeech_Api\\' => 13,
-            'WPSpeech_Admin\\' => 15,
-            'WPSpeech\\' => 9,
+            'TTA_Public\\' => 11,
+            'TTA_Api\\' => 8,
+            'TTA_Admin\\' => 10,
+            'TTA\\' => 4,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'WPSpeech_Public\\' => 
+        'TTA_Public\\' => 
         array (
             0 => __DIR__ . '/../..' . '/public',
         ),
-        'WPSpeech_Api\\' => 
+        'TTA_Api\\' => 
         array (
             0 => __DIR__ . '/../..' . '/api',
         ),
-        'WPSpeech_Admin\\' => 
+        'TTA_Admin\\' => 
         array (
             0 => __DIR__ . '/../..' . '/admin',
         ),
-        'WPSpeech\\' => 
+        'TTA\\' => 
         array (
             0 => __DIR__ . '/../..' . '/includes',
         ),

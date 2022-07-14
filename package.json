@@ -22,12 +22,6 @@
   "author": "Azizul Hasan <azizulhasan.cr@gmail.com>",
   "license": "ISC",
   "dependencies": {
-    "@testing-library/jest-dom": "^5.16.1",
-    "@testing-library/react": "^12.1.2",
-    "@testing-library/user-event": "^13.5.0",
-    "@tinymce/tinymce-react": "^3.13.0",
-    "apexcharts": "^3.33.0",
-    "axios": "^0.25.0",
     "bootstrap": "^5.1.3",
     "dotenv": "^16.0.0",
     "history": "^5.2.0",
