@@ -101,7 +101,8 @@ class TTA_Admin {
     }
 
     public function engueue_block_scripts() {
-
+        $listening = (array) get_option('tta_listening_settings');
+        $listening = json_encode($listening);
         wp_enqueue_script('tta-blocks', plugin_dir_url(dirname(__FILE__)) . 'build/blocks.js', array('wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor'), true, true);
         wp_localize_script('tta-blocks', 'ttaBlocks', [
             'admin_url' => admin_url('/'),
@@ -109,19 +110,84 @@ class TTA_Admin {
             'post_types' => get_post_types(),
             'is_logged_in' => is_user_logged_in(),
             'is_admin' => current_user_can('administrator'),
+            'listeningSettings' => $listening,
         ]);
 
         // wp_register_script('simple-poll', plugin_dir_url(__FILE__) . 'js/simple-poll.js', array(), true, true);
         // wp_enqueue_script('simple-poll');
-        // register_block_type('smpl/poll', [
-        //     'script' => 'simple-poll',
-        //     'render_callback' => [$this, 'render_poll'],
-        // ]);
+        register_block_type('tta/customize-button', [
+            'render_callback' => [$this, 'render_button'],
+        ]);
         // wp_localize_script('simple-poll', 'smpl', [
         //     'ajax_url' => admin_url('admin-ajax.php'),
         //     'nonce' => wp_create_nonce(SIMPLE_POLL_NONCE),
         // ]);
 
+    }
+
+    public function render_button($customize) {
+
+        $listening = (array) get_option('tta_listening_settings');
+        $listening = json_encode($listening);
+        // $customize = (array) get_option('tta_customize_settings');
+        $settings = (array) get_option('tta_settings_data');
+        $recording = (array) get_option('tta_record_settings');
+
+//Apply short code for only single page.
+        if (isset($settings['tta__settings_display_btn_in_single_page']) && $settings['tta__settings_display_btn_in_single_page'] == 1 && !is_single()) {
+            return;
+        }
+
+        static $btn_no = 0;
+        $btn_no++;
+
+        $sentence_delimiter = isset($recording['tta__sentence_delimiter']) ? $recording['tta__sentence_delimiter'] : '. ';
+        $title = get_the_title() . $sentence_delimiter . " ";
+
+        $description = get_the_content();
+        $description = apply_filters('tta__content_before_cleaning', $description);
+        $description = tta_clean_content($description);
+        $description = apply_filters('tta__content_after_cleaning', $description);
+        $content = apply_filters('tta__content_title', $title);
+        $content .= apply_filters('tta__content_description', $description);
+
+        ?>
+<?php
+// Button start text.
+        $btn_text = (isset($atts['btn_text'])) && strlen($atts['btn_text']) ? esc_html($atts['btn_text']) : "Listen";
+// Speak Icon
+        $speakIcon = '<span class="dashicons dashicons-controls-play"></span> ' . $btn_text . '
+    ';
+// Button style.
+        if (isset($customize) && count($customize)) {
+            $btn_style = 'background-color:' . esc_attr($customize['backgroundColor']) . ' !important;color:' . esc_attr($customize['color']) . ' !important;width:' . esc_attr($customize['width']) . '%;border:0;display:block;';
+        } else {
+            $btn_style = 'width:100%;border:0;display:block;';
+        }
+//Custom Css
+        $custom_css = '';
+        if (isset($customize['custom_css']) && '' !== $customize['custom_css']) {
+            $custom_css = esc_attr($customize['custom_css']);
+        }
+
+// Custom class to button.
+        $class = (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
+
+// Listening button.
+        $button = '<button id="tta__listent_content_' . $btn_no . '" class="tta__listent_content ' . esc_attr($class) . '" type="button"  title="Text To Audio:  Tap to listen post.">' . $speakIcon . ' </button>
+        <style>
+        .tta__listent_content{ ' . esc_attr($btn_style) . ' }
+        .tta__listent_content:hover{' . esc_attr($btn_style) . '}
+        .dashicons{ line-height: 1.5; }
+        ' . $custom_css . '
+        </style>
+        <script>
+            tta__listent_content_' . $btn_no . '.onclick = function() {
+                listenCotentInFrontend("' . $content . '", "tta__listent_content_' . $btn_no . '",  ' . $listening . ' );
+            };
+        </script>';
+
+        return $button;
     }
 
     /**
