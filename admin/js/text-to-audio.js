@@ -24,7 +24,6 @@ const TTA = {
 	noticeClass: 'tta_notice',
 
 	displayApiMissing(button_id = '', is_dashboard = false) {
-		// console.log(this.SpeechRecognition, this.speechSynthesis);
 		let notice = '';
 		let link = '';
 
@@ -619,3 +618,5 @@ Object.values(document.getElementsByTagName('textarea')).forEach(
 		});
 	},
 );
+
+window.tta = TTA;
