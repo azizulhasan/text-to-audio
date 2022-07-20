@@ -35,7 +35,7 @@ export default function Listening() {
 		 */
 		let data = new FormData();
 		data.append('method', 'get');
-		postWithoutImage(tta_obj.api_url + 'wps/v1/speech/record', data)
+		postWithoutImage(tta_obj.api_url + 'tta/v1/record', data)
 			.then((res) => {
 				// console.log(res)
 				setListeningLang(res.data.tta__recording__lang);
@@ -49,7 +49,7 @@ export default function Listening() {
 		 */
 		let data2 = new FormData();
 		data2.append('method', 'get');
-		postWithoutImage(tta_obj.api_url + 'wps/v1/speech/listening', data2)
+		postWithoutImage(tta_obj.api_url + 'tta/v1/listening', data2)
 			.then((res) => {
 				// console.log(res.data)
 				setListeningSettings(res.data);
@@ -83,7 +83,7 @@ export default function Listening() {
 		let data = new FormData();
 		data.append('fields', JSON.stringify(formData));
 		data.append('method', 'post');
-		postWithoutImage(tta_obj.api_url + 'wps/v1/speech/listening', data)
+		postWithoutImage(tta_obj.api_url + 'tta/v1/listening', data)
 			.then((res) => {
 				// console.log(res);
 				setListeningSettings(res.data);

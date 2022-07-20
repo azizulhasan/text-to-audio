@@ -1,15 +1,10 @@
 import { __ } from '@wordpress/i18n';
 
-import { Form } from 'react-bootstrap';
-
-import { ColorPalette } from '@wordpress/components';
-import { useState } from '@wordpress/element';
-
 //wp block editor
 const { InspectorControls } = wp.blockEditor;
 
 //wp components
-const { ColorPicker, PanelBody } = wp.components;
+const { PanelBody } = wp.components;
 
 const customizeButton = {
 	namespace: 'tta/customize-button',
@@ -25,14 +20,15 @@ const customizeButton = {
 			'audio',
 			'text-to-speech',
 		],
+		example: {},
 		attributes: {
 			backgroundColor: {
 				type: 'string',
-				default: 'rgb(226, 222, 232)',
+				default: '#184c53',
 			},
 			color: {
 				type: 'string',
-				default: 'rgb(0, 0, 0)',
+				default: '#ffffff',
 			},
 			width: {
 				type: 'string',
@@ -42,7 +38,7 @@ const customizeButton = {
 				type: 'string',
 				default: '0',
 			},
-			customCSS: {
+			custom_css: {
 				type: 'string',
 				default: '',
 			},
@@ -57,12 +53,6 @@ const customizeButton = {
 };
 
 function Customize(props) {
-	const [colorp, setColorp] = useState('#f00');
-	const colors = [
-		{ name: 'red', colorp: '#f00' },
-		{ name: 'white', colorp: '#fff' },
-		{ name: 'blue', colorp: '#00f' },
-	];
 	const setBackgroundColor = (e) => {
 		props.setAttributes({ backgroundColor: e.target.value });
 	};
@@ -73,43 +63,44 @@ function Customize(props) {
 		props.setAttributes({ width: e.target.value });
 	};
 
-	const setCustomCSS = (e) => {
-		props.setAttributes({ customCSS: e.target.value });
+	const setcustom_css = (e) => {
+		props.setAttributes({ custom_css: e.target.value });
 	};
-	const { color, backgroundColor, width, border, customCSS } =
+	const { color, backgroundColor, width, border, custom_css } =
 		props.attributes;
 
 	return [
 		<InspectorControls style={{ marginBottom: '40px' }}>
-			<PanelBody title={'Customize Button'}>
-				<ColorPalette
-					colors={colors}
-					value={colorp}
-					onChange={(color) => setColorp(color)}
-				/>
-				<Form>
-					<Form.Label htmlFor='backgroundColor'>
-						BackGround Color
-					</Form.Label>
-					<Form.Control
+			<PanelBody
+				className='tta_block_body'
+				title={__('Customize Button')}>
+				<div>
+					<label htmlFor='backgroundColor'>
+						{__('BackGround Color')}
+					</label>
+					<input
 						type='color'
 						name='backgroundColor'
 						onChange={setBackgroundColor}
 						id='backgroundColor'
 						value={backgroundColor}
-						title='Choose your color'
+						title={__('Choose your color')}
 					/>
-					<Form.Label htmlFor='color'>Text Color</Form.Label>
-					<Form.Control
+				</div>
+				<div>
+					<label htmlFor='color'> {__('Text Color')}</label>
+					<input
 						type='color'
 						name='color'
 						onChange={setColor}
 						id='color'
 						value={color}
-						title='Choose your color'
+						title={__('Choose your color')}
 					/>
-					<Form.Label htmlFor='width'>Button Width (%)</Form.Label>
-					<Form.Control
+				</div>
+				<div>
+					<label htmlFor='width'>{__('Button Width (%)')}</label>
+					<input
 						type='number'
 						name='width'
 						onChange={setWidth}
@@ -117,23 +108,39 @@ function Customize(props) {
 						min={'0'}
 						max='100'
 						value={width}
-						title='Button Width'
+						title={__('Button Width')}
 					/>
-					<Form.Label htmlFor='custom_css'>Custom CSS</Form.Label>
-					<Form.Control
-						as='textarea'
+				</div>
+				<div>
+					<label htmlFor='custom_css'>{__('Custom CSS')}</label>
+					<textarea
 						name='custom_css'
-						onChange={setCustomCSS}
-						value={customCSS ? customCSS : ''}
-						placeholder='Custom CSS'
+						onChange={setcustom_css}
+						value={custom_css ? custom_css : ''}
+						placeholder={__('class selector .tta__listen_content')}
 					/>
-				</Form>
+				</div>
 			</PanelBody>
+			<style
+				dangerouslySetInnerHTML={{
+					__html: [
+						'.tta_block_body div input, .tta_block_body div textarea {',
+						'float:right;',
+						'}',
+						'.tta_block_body div {',
+						'padding: 15px 0;',
+						'border-bottom: 1px solid #d7d7d7;',
+						'}',
+						'.tta_block_body div:last-child {',
+						'padding: 15px 0 30px;',
+						'}',
+					].join('\n'),
+				}}></style>
 		</InspectorControls>,
-
-		<div className='smpl_block'>
+		<div className='tta_block'>
 			<button
 				id='tta__listen_content_block'
+				className='tta__listen_content'
 				onClick={(e) =>
 					listenCotentInDashboard(
 						'tta__listen_content_block',
@@ -148,10 +155,23 @@ function Customize(props) {
 					border: border,
 				}}
 				type='button'
-				title='Text To Audio:  Tap to listen post.'>
-				<span className='dashicons dashicons-controls-play'></span>{' '}
-				Listen
+				title={__('Text To Audio:  Tap to listen post.')}>
+				<span
+					className='dashicons dashicons-controls-play'
+					style={{
+						lineHeight: '1.5;',
+					}}></span>
+				{__('Listen')}
 			</button>
+			<style
+				dangerouslySetInnerHTML={{
+					__html: [
+						'button.tta__listen_content .dashicons {',
+						'line-height: 1.5;',
+						'}',
+					].join('\n'),
+				}}></style>
+			<style>{custom_css}</style>
 		</div>,
 	];
 }

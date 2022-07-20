@@ -108,17 +108,38 @@ export default function Docs() {
 			</Accordion.Item>
 			<Accordion.Item eventKey='4'>
 				<Accordion.Header>
-					5. How to fix FireFox Browser issue.
+					5. How to enable <code>speechSynthesis</code> on FireFox?
 				</Accordion.Header>
 				<Accordion.Body>
-					<pre>
-						{`
-          Here is the solution to stop the error:
-          1. Open FireFox browser and search about about:config now search with these 2 object and enable them as true.
-          a. media.webspeech.recognition.enable
-          b. media.webspeech.recognition.force_enable
-          `}
-					</pre>
+					<p>
+						1. Open FireFox browser, open a new tab and search{' '}
+						<code>about:config</code>. Now search with this string
+						and enable as true.
+					</p>
+					<p>
+						a. <strong>media.webspeech.synth.enabled</strong>{' '}
+					</p>
+				</Accordion.Body>
+			</Accordion.Item>
+			<Accordion.Item eventKey='5'>
+				<Accordion.Header>
+					5. How to enable <code>SpeechRecognition</code> on FireFox?
+				</Accordion.Header>
+				<Accordion.Body>
+					<p>
+						1. Open FireFox browser, open a new tab and search{' '}
+						<code>about:config</code>. Now search with these 2
+						string and enable them as true.
+					</p>
+					<p>
+						a. <strong>media.webspeech.recognition.enable</strong>{' '}
+					</p>
+					<p>
+						b.{' '}
+						<strong>
+							media.webspeech.recognition.force_enable
+						</strong>
+					</p>
 				</Accordion.Body>
 			</Accordion.Item>
 		</Accordion>

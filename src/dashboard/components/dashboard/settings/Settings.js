@@ -29,13 +29,12 @@ export default function Settings() {
 		 */
 		let formData = new FormData();
 		formData.append('method', 'get');
-		postWithoutImage(
-			tta_obj.api_url + 'wps/v1/speech/settings',
-			formData,
-		).then((res) => {
-			setSettings(res.data);
-			setChecked(res.data.tta__settings_display_btn_in_single_page);
-		});
+		postWithoutImage(tta_obj.api_url + 'tta/v1/settings', formData).then(
+			(res) => {
+				setSettings(res.data);
+				setChecked(res.data.tta__settings_display_btn_in_single_page);
+			},
+		);
 	}, []);
 
 	/**
@@ -82,7 +81,7 @@ export default function Settings() {
 		let formData = new FormData();
 		formData.append('fields', JSON.stringify(data));
 		formData.append('method', 'post');
-		postWithoutImage(tta_obj.api_url + 'wps/v1/speech/settings', formData)
+		postWithoutImage(tta_obj.api_url + 'tta/v1/settings', formData)
 			.then((res) => {
 				setSettings(res.data);
 				setChecked(res.data.tta__settings_display_btn_in_single_page);
