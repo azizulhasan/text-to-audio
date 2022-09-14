@@ -5,7 +5,7 @@ Tags: audio, speech, voice, text to audio, text to speech, record, voice comment
 Requires at least: 4.0
 Tested up to: 6.0.1
 Requires PHP: 5.6
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -81,6 +81,10 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 8. Customize the button in block editor, Block Name ( Customize Button ).
 
 == Changelog ==
+
+= 1.1.2 (2022-09-14)  =
+* Bugfixed: is_plugin_active error fixed.
+* Improved: FireFox api missing notice update.
 
 = 1.1.1 (2022-07-23)  =
 * Bugfixed: FireFox api missing alert bug fixed.

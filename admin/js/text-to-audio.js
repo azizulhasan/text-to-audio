@@ -38,7 +38,7 @@ const TTA = {
 			let previousSibling =
 				document.getElementById(button_id).previousSibling;
 			if (previousSibling) {
-				notice += ` Click here to <a href="https://wordpress.org/plugins/text-to-audio/#how%20to%20change%20button%20text%3F" target="_blank">enable</a>`;
+				notice += ` Click here to <a href="https://wordpress.org/plugins/text-to-audio/#how%20to%20enable%20%60%60speechsynthesis%60%60%20on%20firefox%3F" target="_blank">enable</a>`;
 				previousSibling.style.display = 'block';
 				previousSibling.innerHTML = notice;
 				setTimeout(() => {
@@ -68,7 +68,7 @@ const TTA = {
 						'admin.php?page=text-to-audio#/docs';
 				} else {
 					link +=
-						'https://wordpress.org/plugins/text-to-audio/#how%20to%20change%20button%20text%3F';
+						'https://wordpress.org/plugins/text-to-audio/#how%20to%20enable%20%60%60speechsynthesis%60%60%20on%20firefox%3F';
 				}
 			}
 			notice += `\nFollow this link to enable: \n${link}`;

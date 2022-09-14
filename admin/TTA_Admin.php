@@ -93,6 +93,9 @@ class TTA_Admin {
          */
         wp_enqueue_script('text-to-audio', plugin_dir_url(__FILE__) . 'js/text-to-audio.js', array(), $this->version, true);
 
+        if( ! function_exists( 'is_plugin_active' ) ) {
+            include ABSPATH . 'wp-admin/includes/plugin.php';
+        }
         wp_localize_script('text-to-audio', 'text_to_audio_obj', [
             'json_url' => esc_url_raw(rest_url()),
             'admin_url' => admin_url('/'),
@@ -135,7 +138,9 @@ class TTA_Admin {
      *
      */
     public function enqueue_TTA() {
-
+        if( ! function_exists( 'is_plugin_active' ) ) {
+            include ABSPATH . 'wp-admin/includes/plugin.php';
+        }
         wp_enqueue_script('text-to-audio', plugin_dir_url(__FILE__) . 'js/text-to-audio.js', array(), $this->version, true);
         wp_localize_script('text-to-audio', 'text_to_audio_obj', [
             'json_url' => esc_url_raw(rest_url()),

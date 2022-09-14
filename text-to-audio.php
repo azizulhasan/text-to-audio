@@ -14,7 +14,7 @@
  * @wordpress-plugin
  * Plugin Name:       Text To Audio
  * Description:       Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages.
- * Version:           1.1.1
+ * Version:           1.1.2
  * Author:            Azizul Hasan
  * Author URI:        http://azizulhasan.com
  * License:           GPL-2.0+
@@ -47,7 +47,7 @@ if (!defined('ABSPATH')) {
 
 if (!defined('TEXT_TO_AUDIO_VERSION')) {
 
-    define('TEXT_TO_AUDIO_VERSION', '1.1.1');
+    define('TEXT_TO_AUDIO_VERSION', '1.1.2');
 }
 
 if (!defined('TEXT_TO_AUDIO_NONCE')) {
