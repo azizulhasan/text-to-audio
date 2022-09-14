@@ -12,10 +12,6 @@ const ttaGetData = async (url = '', data = {}) => {
 	return responseData;
 };
 
-// media.webspeech.recognition.enable = true;
-// media.webspeech.recognition.force_enable = true;
-// media.webspeech.synth.enabled = true;
-
 const TTA = {
 	speechSynthesis: true,
 	SpeechRecognition: true,
@@ -39,24 +35,41 @@ const TTA = {
 		}
 
 		if (button_id) {
-			notice += ` Click here to <a href="https://wordpress.org/plugins/text-to-audio/#how%20to%20fix%20firefox%20%20browser%20issue%3F" target="_blank">enable</a>`;
-
 			let previousSibling =
 				document.getElementById(button_id).previousSibling;
-			previousSibling.style.display = 'block';
-			previousSibling.innerHTML = notice;
-			setTimeout(() => {
-				document.querySelector('.tta_notice').style.display = 'none';
-				previousSibling.innerHTML = '';
-			}, 5000);
+			if (previousSibling) {
+				notice += ` Click here to <a href="https://wordpress.org/plugins/text-to-audio/#how%20to%20change%20button%20text%3F" target="_blank">enable</a>`;
+				previousSibling.style.display = 'block';
+				previousSibling.innerHTML = notice;
+				setTimeout(() => {
+					document.querySelector('.tta_notice').style.display =
+						'none';
+					previousSibling.innerHTML = '';
+				}, 5000);
+			} else {
+				link +=
+					text_to_audio_obj.admin_url +
+					'admin.php?page=text-to-audio#/docs';
+				notice += `\nFollow this link to enable: \n${link}`;
+				alert(notice);
+			}
 		} else {
 			if (is_dashboard) {
 				link +=
 					text_to_audio_obj.admin_url +
 					'admin.php?page=text-to-audio#/docs';
 			} else {
-				link +=
-					'https://wordpress.org/plugins/text-to-audio/#how%20to%20fix%20firefox%20%20browser%20issue%3F';
+				if (
+					location.search === '?page=text-to-audio' &&
+					location.hash === '#/customize'
+				) {
+					link +=
+						text_to_audio_obj.admin_url +
+						'admin.php?page=text-to-audio#/docs';
+				} else {
+					link +=
+						'https://wordpress.org/plugins/text-to-audio/#how%20to%20change%20button%20text%3F';
+				}
 			}
 			notice += `\nFollow this link to enable: \n${link}`;
 			alert(notice);
@@ -72,27 +85,6 @@ var SpeechGrammarList =
 var SpeechGrammar = window.SpeechGrammar || window.webkitSpeechGrammar;
 var SpeechRecognitionEvent =
 	window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent;
-
-var browserName = (function (agent) {
-	switch (true) {
-		case agent.indexOf('edge') > -1:
-			return 'MS Edge';
-		case agent.indexOf('edg/') > -1:
-			return 'Edge ( chromium based)';
-		case agent.indexOf('opr') > -1 && !!window.opr:
-			return 'Opera';
-		case agent.indexOf('chrome') > -1 && !!window.chrome:
-			return 'Chrome';
-		case agent.indexOf('trident') > -1:
-			return 'MS IE';
-		case agent.indexOf('firefox') > -1:
-			return 'Mozilla';
-		case agent.indexOf('safari') > -1:
-			return 'Safari';
-		default:
-			return 'other';
-	}
-})(window.navigator.userAgent.toLowerCase());
 
 /**
  * Check if SpeechRecognition, speechSynthesis is definded in FireFox.
@@ -185,7 +177,7 @@ if (window.speechSynthesis == undefined) {
 
 window.onload = function () {
 	localStorage.setItem('recordStarted', false);
-	setCurrentRecordContentId();
+	ttaSetCurrentRecordContentId();
 	if (window.speechSynthesis) speechSynthesis.cancel();
 };
 window.onload();
@@ -194,7 +186,7 @@ window.onload();
  * Start recording.
  * @param {string} current_record_content_id
  */
-function startRecording(
+function ttaStartRecording(
 	current_record_content_id = '',
 	tta__sentence_delimiter = '.',
 ) {
@@ -202,7 +194,7 @@ function startRecording(
 		current_record_content_id !== 'comment' &&
 		current_record_content_id !== 'tta__demo_text_for_play'
 	) {
-		setCurrentRecordContentId();
+		ttaSetCurrentRecordContentId();
 	}
 	current_record_content_id = localStorage.getItem(
 		'current_recording_content_id',
@@ -215,12 +207,16 @@ function startRecording(
 	}
 
 	if (!TTA.SpeechRecognition) {
-		TTA.displayApiMissing('', true);
+		if (document.getElementsByClassName('wp-block-post-title')) {
+			TTA.displayApiMissing('', true);
+		} else {
+			TTA.displayApiMissing();
+		}
 	}
 	/**
 	 * Get current recording element
 	 */
-	let current_recording_element = getCurrrentRecordingElement(
+	let current_recording_element = ttaGetCurrrentRecordingElement(
 		current_record_content_id,
 	);
 	if (current_recording_element === false) {
@@ -231,19 +227,19 @@ function startRecording(
 	/**
 	 * Change voice recognition text and icon based on condition.
 	 */
-	changeRecordButtonText();
+	ttaChangeRecordButtonText();
 
 	/**
 	 * Show current recorded text.
 	 */
-	showRecordedContent(
+	ttaShowRecordedContent(
 		current_record_content_id,
 		tta__sentence_delimiter,
 		current_recording_element,
 	);
 }
 
-function setCurrentRecordContentId() {
+function ttaSetCurrentRecordContentId() {
 	if (text_to_audio_obj.classic_editor_is_active) {
 		localStorage.setItem('current_listening_content_id', 'content_ifr');
 		localStorage.setItem('current_recording_content_id', 'content_ifr');
@@ -274,7 +270,7 @@ function setCurrentRecordContentId() {
  * @param {*} tta__sentence_delimiter
  * @param {*} current_recording_element
  */
-function showRecordedContent(
+function ttaShowRecordedContent(
 	current_record_content_id,
 	tta__sentence_delimiter,
 	current_recording_element,
@@ -286,8 +282,8 @@ function showRecordedContent(
 		if (event.results[event__length - 1].isFinal) {
 			current_text =
 				event.results[event__length - 1][0].transcript +
-				shouldAddDelimiter(tta__sentence_delimiter);
-			current_text = captalizeString(current_text);
+				ttaShouldAddDelimiter(tta__sentence_delimiter);
+			current_text = ttaCaptalizeString(current_text);
 		}
 
 		/**
@@ -306,7 +302,7 @@ function showRecordedContent(
 /**
  * Should add delimiter.
  */
-function shouldAddDelimiter(tta__sentence_delimiter) {
+function ttaShouldAddDelimiter(tta__sentence_delimiter) {
 	if (
 		(window.navigator.userAgent.indexOf('Opera') ||
 			window.navigator.userAgent.indexOf('OPR')) != -1
@@ -334,7 +330,7 @@ function shouldAddDelimiter(tta__sentence_delimiter) {
 /**
  * Change record button text.
  */
-function changeRecordButtonText() {
+function ttaChangeRecordButtonText() {
 	let record_btn = document.getElementById('tta__start__record');
 	if (TTA.recordStatus == 'stop') {
 		TTA.recordStatus = 'record';
@@ -359,9 +355,8 @@ function changeRecordButtonText() {
  * @param {*} current_record_content_id
  * @returns
  */
-function getCurrrentRecordingElement(current_record_content_id) {
+function ttaGetCurrrentRecordingElement(current_record_content_id) {
 	let current_recording_element = '';
-	// console.log(current_record_content_id)
 	if (current_record_content_id == 'content_ifr') {
 		current_recording_element = document.getElementById(
 			current_record_content_id,
@@ -388,7 +383,7 @@ function getCurrrentRecordingElement(current_record_content_id) {
 /**
  * Capitalize String.
  */
-function captalizeString(string) {
+function ttaCaptalizeString(string) {
 	if (string[0] !== ' ') {
 		return string[0].toUpperCase() + string.slice(1);
 	} else {
@@ -399,7 +394,7 @@ function captalizeString(string) {
 /**
  * Listent/Pause/Resume content.
  */
-function listenCotentInDashboard(btn_id, content, listeningSettings) {
+function ttaListenCotentInDashboard(btn_id, content, listeningSettings) {
 	/**
 	 * Stop recording before listening.
 	 */
@@ -413,25 +408,16 @@ function listenCotentInDashboard(btn_id, content, listeningSettings) {
 
 	localStorage.setItem('recordStarted', false);
 	localStorage.setItem('current_play_btn_id', btn_id);
-	setCurrentListeningContent();
+	ttaSetCurrentListeningContent();
 
 	let text = localStorage.getItem('current_listening_content');
 
-	startListening(btn_id, text, listeningSettings);
+	ttaStartListening(btn_id, text, listeningSettings);
 }
 
-function setCurrentListeningContent() {
+function ttaSetCurrentListeningContent() {
 	let current_listening_content = '';
 	let text = '';
-	// True if classic editor active. and current reading content id is not "content_ifr"
-	// if (
-	// 	localStorage.getItem("current_listening_content_id") !== null &&
-	// 	localStorage.getItem("current_listening_content_id") != "content_ifr"
-	// ) {
-	// 	current_listening_content = document.getElementById(
-	// 		localStorage.getItem("current_listening_content_id"),
-	// 	);
-	// } else {
 	/**
 	 * Classsic editor
 	 */
@@ -472,11 +458,10 @@ function setCurrentListeningContent() {
 	// }
 }
 
-// speechSynthesis.cancel()
 /**
  * Start Reading content
  */
-function startListening(btn_id, content, listeningSettings = null) {
+function ttaStartListening(btn_id, content, listeningSettings = null) {
 	let listen_btn = document.getElementById(btn_id);
 
 	utterence.text = content;
@@ -537,8 +522,7 @@ if (TTA.speechSynthesis && utterence) {
 /**
  * Read the blog
  */
-
-function listenCotentInFrontend(
+function ttaListenCotentInFrontend(
 	content = 'Hellow World',
 	btn_id = 'wpa__listen_content',
 	listeningSettings,
@@ -558,7 +542,7 @@ function listenCotentInFrontend(
 	localStorage.setItem('recordStarted', false);
 	localStorage.setItem('current_play_btn_id', btn_id);
 
-	startListening(btn_id, content, listeningSettings);
+	ttaStartListening(btn_id, content, listeningSettings);
 }
 
 /**
@@ -571,16 +555,6 @@ Object.values(document.getElementsByTagName('textarea')).forEach(
 		 * Start recording on focus event.
 		 */
 		textarea.addEventListener('focus', function () {
-			/**
-			 * Stop listening before recording.
-			 */
-			if (TTA.speechSynthesis) {
-				speechSynthesis.cancel();
-			}
-			if (!TTA.SpeechRecognition) {
-				TTA.displayApiMissing();
-			}
-
 			TTA.listenStatus = 'listen';
 			let listen_btn = document.getElementById('wpa__listen_content');
 			if (listen_btn) listen_btn.innerHTML = play_button;
@@ -593,11 +567,20 @@ Object.values(document.getElementsByTagName('textarea')).forEach(
 				textarea.getAttribute('id') === 'comment' ||
 				textarea.getAttribute('id') === 'tta__demo_text_for_play'
 			) {
+				/**
+				 * Stop listening before recording.
+				 */
+				if (TTA.speechSynthesis) {
+					speechSynthesis.cancel();
+				}
+				if (!TTA.SpeechRecognition) {
+					TTA.displayApiMissing();
+				}
 				localStorage.setItem(
 					'current_recording_content_id',
 					textarea.getAttribute('id'),
 				);
-				startRecording(
+				ttaStartRecording(
 					textarea.getAttribute('id'),
 					localStorage.getItem('tta__sentence_delimiter'),
 				);

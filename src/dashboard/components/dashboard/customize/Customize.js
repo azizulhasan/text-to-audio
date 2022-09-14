@@ -158,7 +158,11 @@ export default function Customize() {
 			return;
 		}
 		setSpeakingText(text);
-		listenCotentInFrontend(text, 'tta__listen_content', listeningSettings);
+		ttaListenCotentInFrontend(
+			text,
+			'tta__listen_content',
+			listeningSettings,
+		);
 	};
 
 	/**

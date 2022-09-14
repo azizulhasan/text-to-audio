@@ -142,7 +142,7 @@ function Customize(props) {
 				id='tta__listen_content_block'
 				className='tta__listen_content'
 				onClick={(e) =>
-					listenCotentInDashboard(
+					ttaListenCotentInDashboard(
 						'tta__listen_content_block',
 						'',
 						ttaBlocks.listeningSettings,

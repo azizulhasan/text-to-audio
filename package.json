@@ -46,6 +46,8 @@
   },
   "devDependencies": {
     "@wordpress/i18n": "^4.13.0",
-    "@wordpress/scripts": "^23.5.0"
+    "@wordpress/scripts": "^23.5.0",
+    "flowbite": "^1.5.1",
+    "flowbite-react": "^0.1.5"
   }
 }

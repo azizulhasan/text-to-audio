@@ -142,6 +142,14 @@ export default function Docs() {
 					</p>
 				</Accordion.Body>
 			</Accordion.Item>
+			<Accordion.Item eventKey='6'>
+				<Accordion.Header>
+					6. What is the name of block name of button?
+				</Accordion.Header>
+				<Accordion.Body>
+					<strong>Customize Button</strong>
+				</Accordion.Body>
+			</Accordion.Item>
 		</Accordion>
 	);
 }

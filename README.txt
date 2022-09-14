@@ -5,11 +5,12 @@ Tags: audio, speech, voice, text to audio, text to speech, record, voice comment
 Requires at least: 4.0
 Tested up to: 6.0.1
 Requires PHP: 5.6
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages.
+
 == Description ==
 
 Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages.
@@ -47,15 +48,15 @@ There is no need to create an account it’s completely free. Just install the p
 
 == Frequently Asked Questions ==
 
-= How to enable ```SpeechRecognition``` on FireFox? =
+= How to enable ``speechSynthesis`` on FireFox? =
+Notice: This solution only for FireFox Desktop.
+Open FireFox browser,  search ```about:config``` on a new tab. Now search with this string and enable as true.
+    a. ```media.webspeech.synth.enabled```
+= How to enable ``SpeechRecognition`` on FireFox? =
 Notice: This solution only for FireFox Desktop.
 Open FireFox browser, search ```about:config``` on a new tab. Now search with this string and enable as true.
     a. ```media.webspeech.recognition.enable```
     b. ```media.webspeech.recognition.force_enable```
-= How to enable ```speechSynthesis``` on FireFox? =
-Notice: This solution only for FireFox Desktop.
-Open FireFox browser,  search ```about:config``` on a new tab. Now search with this string and enable as true.
-    a. ```media.webspeech.synth.enabled```
 = Can I add button in Gutenburg block? =
 Yes, you can add listening button from block editor. Open you block editor and search ```Customize Button``` then add it.
 Now you can change ```color```, ```backgroundColor```, ```width```. And also add ```custom_css```.
@@ -77,15 +78,18 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 5. Choose recording language.
 6. Documentation.
 7. Gutenburg Support.
-8. Customize the button in block editor.
+8. Customize the button in block editor, Block Name ( Customize Button ).
 
 == Changelog ==
 
-= 1.1.0 (2022-07-16)  =
-* Feature: Customization of listening button from block editor.
+= 1.1.1 (2022-07-23)  =
+* Bugfixed: FireFox api missing alert bug fixed.
+* Improved: Documentation Improved.
+
+= 1.1.0 (2022-07-23)  =
+* Feature: Customization of listening button from block editor. Block Name ( Customize Button )
 * Added : Documentation added for how to enable ```SpeechRecognition``` and ```speechSynthesis``` on FireFox.
 * Solved: FireFox ```SpeechRecognition``` and ```speechSynthesis``` issue solved.
-
 
 
 = 1.0.4 (2022-07-12)  =

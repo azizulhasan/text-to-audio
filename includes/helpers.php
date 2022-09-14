@@ -68,15 +68,6 @@ function tta_clean_content($text) {
  * @return string
  */
 function tta_get_button_content($atts, $is_block = false) {
-    $notice = '';
-    $has_notice = 0;
-    $browser = get_option('tta_current_browser_info', []);
-    // Check if SpeechRecognition, speechSynthesis enabled.
-    if ((isset($browser['SpeechRecognition']) && 'undefined' == $browser['SpeechRecognition']) ||
-        (isset($browser['speechSynthesis']) && 'undefined' == $browser['speechSynthesis'])) {
-        $notice = tta_api_missing();
-        $has_notice = true;
-    }
 
     $listening = (array) get_option('tta_listening_settings');
     $listening = json_encode($listening);
@@ -142,11 +133,9 @@ button.tta__listent_content .dashicons{ line-height: 1.5; }
 ' . $custom_css . '
 </style>
 <script>
-
     tta__listent_content_' . $btn_no . '.onclick = function() {
-        listenCotentInFrontend("' . $content . '", "tta__listent_content_' . $btn_no . '",  ' . $listening . ' );
+        ttaListenCotentInFrontend("' . $content . '", "tta__listent_content_' . $btn_no . '",  ' . $listening . ' );
     };
-
 </script>';
 
     return $button;
