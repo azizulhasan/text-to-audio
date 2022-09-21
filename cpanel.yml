@@ -1,0 +1,5 @@
+---
+deployment:
+ tasks:
+ - export DEPLOYPATH=/home/azizyzjn/repositories/text-to-audio
+ - cp -r * $DEPLOYPATH
