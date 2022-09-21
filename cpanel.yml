@@ -1,5 +1,5 @@
 ---
 deployment:
  tasks:
- - export DEPLOYPATH=/home/azizyzjn/repositories/text-to-audio
+ - export DEPLOYPATH=/home/azizyzjn/challanpro.azizulhasan.com/wp-content/plugins/text-to-audio
  - cp -r * $DEPLOYPATH
