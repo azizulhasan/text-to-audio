@@ -100,6 +100,7 @@ class TTA_Admin {
             'json_url' => esc_url_raw(rest_url()),
             'admin_url' => admin_url('/'),
             'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
+            'buttonTextArr' => get_option( 'tta_button_text_arr' ),
         ]);
 
     }
@@ -146,6 +147,8 @@ class TTA_Admin {
             'json_url' => esc_url_raw(rest_url()),
             'admin_url' => admin_url('/'),
             'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
+            'buttonTextArr' => get_option( 'tta_button_text_arr' ),
+
         ]);
     }
 

@@ -94,14 +94,24 @@ function tta_get_button_content($atts, $is_block = false) {
     $description = apply_filters('tta__content_before_cleaning', $description);
     $description = tta_clean_content($description);
     $description = apply_filters('tta__content_after_cleaning', $description);
-    $content = apply_filters('tta__content_title', $title);
-    $content .= apply_filters('tta__content_description', $description);
+    $content     = apply_filters('tta__content_title', $title);
+    $content    .= apply_filters('tta__content_description', $description);
 
-    // Button start text.
-    $btn_text = (isset($atts['btn_text'])) && strlen($atts['btn_text']) ? esc_html($atts['btn_text']) : "Listen";
+    // Button listen text.
+    $listen_text = apply_filters('tta__listen_text', (isset($atts['listen_text'])) && strlen($atts['listen_text']) ? esc_html__($atts['listen_text']) : "Listen" );
+    $pause_text = apply_filters('tta__pause_text', (isset($atts['pause_text'])) && strlen($atts['pause_text']) ? esc_html__($atts['pause_text']) : "Pause" );
+    $resume_text = apply_filters('tta__resume_text', (isset($atts['resume_text'])) && strlen($atts['resume_text']) ? esc_html__($atts['resume_text']) : "Resume" );
+    $replay_text = apply_filters('tta__replay_text', (isset($atts['replay_text'])) && strlen($atts['replay_text']) ? esc_html__($atts['replay_text']) : "Replay" );
+
+    update_option( 'tta_button_text_arr', [
+        'listen_text' => $listen_text,
+        'pause_text' => $pause_text,
+        'resume_text' => $resume_text,
+        'replay_text' => $replay_text,
+    ]);
+
     // Speak Icon
-    $speakIcon = '<span class="dashicons dashicons-controls-play"></span> ' . $btn_text . '
-        ';
+    $speakIcon = apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ') . $listen_text;
     // Button style.
     if (isset($customize) && count($customize)) {
         if ($is_block) {
@@ -138,7 +148,9 @@ button.tta__listent_content .dashicons{ line-height: 1.5; }
     };
 </script>';
 
-    return $button;
+    
+
+    return apply_filters( 'tta__listening_button', $button );
 }
 
 /**

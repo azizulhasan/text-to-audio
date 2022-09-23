@@ -12,12 +12,29 @@ const ttaGetData = async (url = '', data = {}) => {
 	return responseData;
 };
 
-const TTA = {
+
+
+	 const TTA = {
 	speechSynthesis: true,
 	SpeechRecognition: true,
 	recordStatus: 'record',
 	listenStatus: 'listen',
 	noticeClass: 'tta_notice',
+	buttonTextArr: text_to_audio_obj.buttonTextArr,
+	playText: function(){
+		return '<span class="dashicons dashicons-controls-play"></span> ' + this.buttonTextArr.listen_text;
+	},
+	replayText: function() {
+		return '<span class="dashicons dashicons-image-rotate"></span> ' + this.buttonTextArr.replay_text;
+	},
+	pauseText: function() {
+		return '<span class="dashicons dashicons-controls-pause"></span> ' + this.buttonTextArr.pause_text;
+	},
+	resumeText: function(){
+		return '<span class="dashicons dashicons-controls-play"></span> ' + this.buttonTextArr.resume_text;
+	},
+
+	
 
 	displayApiMissing(button_id = '', is_dashboard = false) {
 		let notice = '';
@@ -77,6 +94,7 @@ const TTA = {
 		throw new Error(notice);
 	},
 };
+
 
 var SpeechRecognition =
 	window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -144,17 +162,7 @@ if (window.SpeechRecognition == undefined) {
 	};
 }
 
-/**
- * Play button content.
- */
-let play_button =
-	'<span class="dashicons dashicons-controls-play"></span> Play';
-let replay_button =
-	'<span class="dashicons dashicons-image-rotate"></span> Replay';
-let pause_button =
-	'<span class="dashicons dashicons-controls-pause"></span> Pause';
-let resume_button =
-	'<span class="dashicons dashicons-controls-play"></span> Resume';
+
 /**
  * Record button
  */
@@ -488,18 +496,18 @@ function ttaStartListening(btn_id, content, listeningSettings = null) {
 
 	if (TTA.listenStatus == 'listen') {
 		speechSynthesis.speak(utterence);
-		listen_btn.innerHTML = pause_button;
-		listen_btn.setAttribute('title', 'Text To Audio : Pause');
+		listen_btn.innerHTML = TTA.pauseText();
+		listen_btn.setAttribute('title', 'Text To Audio : '+ TTA.pauseText());
 		TTA.listenStatus = 'pause';
 	} else if (TTA.listenStatus == 'pause') {
 		speechSynthesis.pause();
-		listen_btn.innerHTML = resume_button;
-		listen_btn.setAttribute('title', 'Text To Audio : Resume');
+		listen_btn.innerHTML = TTA.resumeText();
+		listen_btn.setAttribute('title', 'Text To Audio : ' + TTA.resumeText() );
 		TTA.listenStatus = 'resume';
 	} else if (TTA.listenStatus == 'resume') {
-		listen_btn.innerHTML = pause_button;
+		listen_btn.innerHTML = TTA.pauseText();
 		TTA.listenStatus = 'pause';
-		listen_btn.setAttribute('title', 'Text To Audio : Pause');
+		listen_btn.setAttribute('title', 'Text To Audio : '+ TTA.pauseText() );
 		speechSynthesis.resume();
 	}
 }
@@ -513,8 +521,8 @@ if (TTA.speechSynthesis && utterence) {
 		let listen_btn = document.getElementById(
 			localStorage.getItem('current_play_btn_id'),
 		);
-		listen_btn.innerHTML = replay_button;
-		listen_btn.setAttribute('title', 'Text To Audio : Replay');
+		listen_btn.innerHTML = TTA.replayText();
+		listen_btn.setAttribute('title', 'Text To Audio : ' + TTA.replayText());
 		TTA.listenStatus = 'listen';
 	});
 }
@@ -557,9 +565,10 @@ Object.values(document.getElementsByTagName('textarea')).forEach(
 		textarea.addEventListener('focus', function () {
 			TTA.listenStatus = 'listen';
 			let listen_btn = document.getElementById('wpa__listen_content');
-			if (listen_btn) listen_btn.innerHTML = play_button;
+			console.log(TTA)
+			if (listen_btn) listen_btn.innerHTML = TTA.playText();
 			if (listen_btn)
-				listen_btn.setAttribute('title', 'Text To Audio : Play');
+				listen_btn.setAttribute('title', 'Text To Audio : ' + TTA.playText());
 			/**
 			 * Start Recording.
 			 */
@@ -602,4 +611,9 @@ Object.values(document.getElementsByTagName('textarea')).forEach(
 	},
 );
 
+console.log(TTA)
 window.tta = TTA;
+
+
+
+
