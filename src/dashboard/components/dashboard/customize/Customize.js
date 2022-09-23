@@ -29,7 +29,7 @@ export default function Customize() {
 		 */
 		let customize = new FormData();
 		customize.append('method', 'get');
-		postWithoutImage(tta_obj.api_url + 'wps/v1/speech/customize', customize)
+		postWithoutImage(tta_obj.api_url + 'tta/v1/customize', customize)
 			.then((res) => {
 				setListeningStyle(res.data);
 				if (res.data.custom_css) {
@@ -52,7 +52,7 @@ export default function Customize() {
 		 */
 		let listening = new FormData();
 		listening.append('method', 'get');
-		postWithoutImage(tta_obj.api_url + 'wps/v1/speech/listening', listening)
+		postWithoutImage(tta_obj.api_url + 'tta/v1/listening', listening)
 			.then((res) => {
 				setListeningSettings(res.data);
 			})
@@ -140,7 +140,7 @@ export default function Customize() {
 		let data = new FormData();
 		data.append('fields', JSON.stringify(formData));
 		data.append('method', 'post');
-		postWithoutImage(tta_obj.api_url + 'wps/v1/speech/customize', data)
+		postWithoutImage(tta_obj.api_url + 'tta/v1/customize', data)
 			.then((res) => {
 				setListeningStyle(res.data);
 				toast('Customize Data Saved');
@@ -158,7 +158,11 @@ export default function Customize() {
 			return;
 		}
 		setSpeakingText(text);
-		listenCotentInFrontend(text, 'tta__listen_content', listeningSettings);
+		ttaListenCotentInFrontend(
+			text,
+			'tta__listen_content',
+			listeningSettings,
+		);
 	};
 
 	/**

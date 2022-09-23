@@ -12,15 +12,13 @@ namespace TTA_Api;
 class TTA_Api_Routes {
 
     protected $namespace;
-    protected $rest_base;
     protected $woocommerce;
     protected $version;
     public $current_user;
 
     public function __construct($current_user = null) {
         $this->version = 'v1';
-        $this->namespace = 'wps/' . $this->version;
-        $this->rest_base = '/speech';
+        $this->namespace = 'tta/' . $this->version;
         $this->current_user = $current_user;
         add_action('rest_api_init', [$this, 'tta_speech_register_routes']);
     }
@@ -32,7 +30,7 @@ class TTA_Api_Routes {
         // Register record route.
         register_rest_route(
             $this->namespace,
-            $this->rest_base . '/record',
+            '/record',
             array(
                 array(
                     'methods' => \WP_REST_Server::ALLMETHODS,
@@ -46,7 +44,7 @@ class TTA_Api_Routes {
         // register listening route.
         register_rest_route(
             $this->namespace,
-            $this->rest_base . '/listening',
+            '/listening',
             array(
                 array(
                     'methods' => \WP_REST_Server::ALLMETHODS,
@@ -60,7 +58,7 @@ class TTA_Api_Routes {
         // register customize route.
         register_rest_route(
             $this->namespace,
-            $this->rest_base . '/customize',
+            '/customize',
             array(
                 array(
                     'methods' => \WP_REST_Server::ALLMETHODS,
@@ -74,11 +72,25 @@ class TTA_Api_Routes {
         // register settings route.
         register_rest_route(
             $this->namespace,
-            $this->rest_base . '/settings',
+            '/settings',
             array(
                 array(
                     'methods' => \WP_REST_Server::ALLMETHODS,
                     'callback' => array($this, 'tta_manage_settings_data'),
+                    'permission_callback' => array($this, 'get_route_access'),
+                    'args' => array(),
+                ),
+            )
+        );
+
+        // register settings route.
+        register_rest_route(
+            $this->namespace,
+            '/browser',
+            array(
+                array(
+                    'methods' => \WP_REST_Server::CREATABLE,
+                    'callback' => array($this, 'tta_browser_settings'),
                     'permission_callback' => array($this, 'get_route_access'),
                     'args' => array(),
                 ),
@@ -193,6 +205,24 @@ class TTA_Api_Routes {
             $response['data'] = get_option('tta_settings_data');
             return rest_ensure_response($response);
         }
+    }
+    /**
+     * @param WP_REST_Request
+     *
+     * @return WP_Rest_Response;
+     */
+    public function tta_browser_settings($request) {
+
+        $browser = isset($request['browserName']) ? $request['browserName'] : "Mozilla";
+        $SpeechRecognition = isset($request['SpeechRecognition']) ? $request['SpeechRecognition'] : "undefined";
+        $speechSynthesis = isset($request['speechSynthesis']) ? $request['speechSynthesis'] : "undefined";
+        update_option('tta_current_browser_info', [
+            'browser' => $browser,
+            'SpeechRecognition' => $SpeechRecognition,
+            'speechSynthesis' => $speechSynthesis,
+        ]);
+
+        return rest_ensure_response(get_option('tta_current_browser_info'));
     }
 
     /*

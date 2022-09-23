@@ -3,13 +3,14 @@ Contributors: hasanazizul
 Donate link: http://azizulhasan.com
 Tags: audio, speech, voice, text to audio, text to speech, record, voice comment, voice to text-comment,
 Requires at least: 4.0
-Tested up to: 6.0
+Tested up to: 6.0.1
 Requires PHP: 5.6
-Stable tag: 1.0.4
+Stable tag: 1.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages.
+
 == Description ==
 
 Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages.
@@ -23,9 +24,9 @@ There is no need to create an account it’s completely free. Just install the p
 **Features:**
 
 1. Add a play button to any post/page by shortcode “[tta_listen_btn]”.
-2. Write your post by voice from the mobile, desktop, tab, or any device.
-3. Write comment by voice on any post.
-4. Unlimited text to speech vice versa.
+2. Write your post by speech from the mobile, desktop, tab, or any device.
+3. Write comment by speech on any post.
+4. Unlimited text to speech and vice versa.
 5. Add more functionality to the website for a range of users including the visually impaired and the old people.
 6. Customization of button color, width and button text.
 7. Live preview of play button during customization.
@@ -33,8 +34,8 @@ There is no need to create an account it’s completely free. Just install the p
 9. Change recording language to any language.
 10. Change listening language to any language.
 11. Choose a voice from more than 20 voices.
-12. Unlimited speech to text.
-13. Block editor support.
+12. Unlimited speech to text and vice versa.
+13. Customization of listening in block editor.
 
 
 
@@ -47,6 +48,18 @@ There is no need to create an account it’s completely free. Just install the p
 
 == Frequently Asked Questions ==
 
+= How to enable ``speechSynthesis`` on FireFox? =
+Notice: This solution only for FireFox Desktop.
+Open FireFox browser,  search ```about:config``` on a new tab. Now search with this string and enable as true.
+    a. ```media.webspeech.synth.enabled```
+= How to enable ``SpeechRecognition`` on FireFox? =
+Notice: This solution only for FireFox Desktop.
+Open FireFox browser, search ```about:config``` on a new tab. Now search with this string and enable as true.
+    a. ```media.webspeech.recognition.enable```
+    b. ```media.webspeech.recognition.force_enable```
+= Can I add button in Gutenburg block? =
+Yes, you can add listening button from block editor. Open you block editor and search ```Customize Button``` then add it.
+Now you can change ```color```, ```backgroundColor```, ```width```. And also add ```custom_css```.
 = How to change button text? =
 Add button text on shortcode as an attribute. Example :
 `[tta_listen_btn btn_text="Your_text"]`
@@ -54,12 +67,8 @@ Add button text on shortcode as an attribute. Example :
 Add class on shortcode as an attribute. Example : `[tta_listen_btn class="custom_class"]`
 = How can I change button background and text color? =
 Yes, you can change buttons background and text color from plugins dashboard's customization menu.
-= How to fix FireFox  browser issue? =
-    This is not working on Firefox mobile phone. Here is the solution for that, But this solution for only ```desktop```. Also will work for only ```speechSynthesis``` not for ```speechRecognigtion```. We’re trying to get solution for mobile phone as soon as possible.
-    1. Open Firefox browser and search about ```about:config``` on desktop. Now search with these 3 flags and enable them as ```true```.
-        a. ```media.webspeech.recognition.enable```
-        b. ```media.webspeech.recognition.force_enable```
-        c. ```media.webspeech.synth.enabled```
+
+
 
 == Screenshots ==
 1. Add play button to any post.
@@ -68,9 +77,24 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 4. Choose listening voice.
 5. Choose recording language.
 6. Documentation.
-6. Gutenburg Support.
+7. Gutenburg Support.
+8. Customize the button in block editor, Block Name ( Customize Button ).
 
 == Changelog ==
+
+= 1.1.2 (2022-09-14)  =
+* Bugfixed: is_plugin_active error fixed.
+* Improved: FireFox api missing notice update.
+
+= 1.1.1 (2022-07-23)  =
+* Bugfixed: FireFox api missing alert bug fixed.
+* Improved: Documentation Improved.
+
+= 1.1.0 (2022-07-23)  =
+* Feature: Customization of listening button from block editor. Block Name ( Customize Button )
+* Added : Documentation added for how to enable ```SpeechRecognition``` and ```speechSynthesis``` on FireFox.
+* Solved: FireFox ```SpeechRecognition``` and ```speechSynthesis``` issue solved.
+
 
 = 1.0.4 (2022-07-12)  =
 * Changed: shortcode from  ```[wps_listen_btn]``` to ```[tta_listen_btn]```

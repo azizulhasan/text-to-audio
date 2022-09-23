@@ -94,6 +94,8 @@ class TTA {
      */
     private function load_dependencies() {
 
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/helpers.php';
+
         require_once plugin_dir_path(dirname(__FILE__)) . 'includes/TTA_Hooks.php';
 
         $this->loader = new TTA_Loader();

@@ -25,7 +25,7 @@ function Recording() {
 		 */
 		let data = new FormData();
 		data.append('method', 'get');
-		postWithoutImage(tta_obj.api_url + 'wps/v1/speech/record', data)
+		postWithoutImage(tta_obj.api_url + 'tta/v1/record', data)
 			.then((res) => {
 				setSettings(res.data);
 				setChecked(res.data.is_record_continously);
@@ -83,7 +83,7 @@ function Recording() {
 		let data = new FormData();
 		data.append('fields', JSON.stringify(formData));
 		data.append('method', 'post');
-		postWithoutImage(tta_obj.api_url + 'wps/v1/speech/record', data)
+		postWithoutImage(tta_obj.api_url + 'tta/v1/record', data)
 			.then((res) => {
 				setSettings(res.data);
 				setChecked(res.data.is_record_continously);

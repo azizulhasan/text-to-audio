@@ -3,6 +3,5 @@ const mix = require('laravel-mix');
 // const webpack = require('webpack')
 mix.js('src/dashboard/index.js', 'admin/js/text-to-audio-dashboard.js').react();
 
-mix.webpackConfig({
- 
-});
+// mix.js('admin/js/text-to-audio.js', 'admin/js/text-to-audio-build.js');
+mix.webpackConfig({});

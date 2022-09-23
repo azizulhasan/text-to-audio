@@ -12,10 +12,72 @@ const ttaGetData = async (url = '', data = {}) => {
 	return responseData;
 };
 
-// media.webspeech.recognition.enable = true;
-// media.webspeech.recognition.force_enable = true;
+const TTA = {
+	speechSynthesis: true,
+	SpeechRecognition: true,
+	recordStatus: 'record',
+	listenStatus: 'listen',
+	noticeClass: 'tta_notice',
 
-var record__status = 'record';
+	displayApiMissing(button_id = '', is_dashboard = false) {
+		let notice = '';
+		let link = '';
+
+		if (!this.SpeechRecognition) {
+			notice += 'Text To Audio: Please enable SpeechRecognition';
+		}
+		if (!this.speechSynthesis) {
+			if (notice) {
+				notice += ' , speechSynthesis.';
+			} else {
+				notice += 'Text To Audio: Please enable speechSynthesis.';
+			}
+		}
+
+		if (button_id) {
+			let previousSibling =
+				document.getElementById(button_id).previousSibling;
+			if (previousSibling) {
+				notice += ` Click here to <a href="https://wordpress.org/plugins/text-to-audio/#how%20to%20enable%20%60%60speechsynthesis%60%60%20on%20firefox%3F" target="_blank">enable</a>`;
+				previousSibling.style.display = 'block';
+				previousSibling.innerHTML = notice;
+				setTimeout(() => {
+					document.querySelector('.tta_notice').style.display =
+						'none';
+					previousSibling.innerHTML = '';
+				}, 5000);
+			} else {
+				link +=
+					text_to_audio_obj.admin_url +
+					'admin.php?page=text-to-audio#/docs';
+				notice += `\nFollow this link to enable: \n${link}`;
+				alert(notice);
+			}
+		} else {
+			if (is_dashboard) {
+				link +=
+					text_to_audio_obj.admin_url +
+					'admin.php?page=text-to-audio#/docs';
+			} else {
+				if (
+					location.search === '?page=text-to-audio' &&
+					location.hash === '#/customize'
+				) {
+					link +=
+						text_to_audio_obj.admin_url +
+						'admin.php?page=text-to-audio#/docs';
+				} else {
+					link +=
+						'https://wordpress.org/plugins/text-to-audio/#how%20to%20enable%20%60%60speechsynthesis%60%60%20on%20firefox%3F';
+				}
+			}
+			notice += `\nFollow this link to enable: \n${link}`;
+			alert(notice);
+		}
+		throw new Error(notice);
+	},
+};
+
 var SpeechRecognition =
 	window.SpeechRecognition || window.webkitSpeechRecognition;
 var SpeechGrammarList =
@@ -24,44 +86,63 @@ var SpeechGrammar = window.SpeechGrammar || window.webkitSpeechGrammar;
 var SpeechRecognitionEvent =
 	window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent;
 
-var recognition = new SpeechRecognition();
-var grammar =
-	'#JSGF V1.0; grammar colors; public <color> = aqua | azure | beige | bisque | black | blue | brown | chocolate | coral | crimson | cyan | fuchsia | ghostwhite | gold | goldenrod | gray | green | indigo | ivory | khaki | lavender | lime | linen | magenta | maroon | moccasin | navy | olive | orange | orchid | peru | pink | plum | purple | red | salmon | sienna | silver | snow | tan | teal | thistle | tomato | turquoise | violet | white | yellow ;';
-var speechRecognitionList = new SpeechGrammarList();
-speechRecognitionList.addFromString(grammar, 1);
-recognition.grammars = speechRecognitionList;
-var newGrammar = new SpeechGrammar();
-newGrammar.src =
-	'#JSGF V1.0; grammar names; public <name> = chris | kirsty | mike;';
-speechRecognitionList[1] = newGrammar; // should add the new SpeechGrammar object to the list.
-
 /**
- * Get recording settings.
+ * Check if SpeechRecognition, speechSynthesis is definded in FireFox.
+ * If not then show alert for enabling them.
+ *
  */
-let recordData = new FormData();
-let recordSettings = {};
-recordData.append('method', 'get');
-ttaGetData(text_to_audio_obj.json_url + 'wps/v1/speech/record', recordData)
-	.then((res) => {
-		recordSettings = res.data;
+if (window.SpeechRecognition == undefined) {
+	TTA.SpeechRecognition = false;
+} else {
+	var recognition = new SpeechRecognition();
+	var grammar =
+		'#JSGF V1.0; grammar colors; public <color> = aqua | azure | beige | bisque | black | blue | brown | chocolate | coral | crimson | cyan | fuchsia | ghostwhite | gold | goldenrod | gray | green | indigo | ivory | khaki | lavender | lime | linen | magenta | maroon | moccasin | navy | olive | orange | orchid | peru | pink | plum | purple | red | salmon | sienna | silver | snow | tan | teal | thistle | tomato | turquoise | violet | white | yellow ;';
+	var speechRecognitionList = new SpeechGrammarList();
+	speechRecognitionList.addFromString(grammar, 1);
+	recognition.grammars = speechRecognitionList;
+	var newGrammar = new SpeechGrammar();
+	newGrammar.src =
+		'#JSGF V1.0; grammar names; public <name> = chris | kirsty | mike;';
+	speechRecognitionList[1] = newGrammar; // should add the new SpeechGrammar object to the list.
 
-		recognition.continuous = recordSettings.is_record_continously
-			? recordSettings.is_record_continously
-			: true;
-		recognition.lang = recordSettings.tta__recording__lang
-			? recordSettings.tta__recording__lang
-			: 'en-US';
-		localStorage.setItem(
-			'tta__sentence_delimiter',
-			recordSettings.tta__sentence_delimiter,
-		);
-	})
-	.catch((err) => {
-		console.log(err);
-	});
+	/**
+	 * Get recording settings.
+	 */
+	let recordData = new FormData();
+	let recordSettings = {};
+	recordData.append('method', 'get');
+	ttaGetData(text_to_audio_obj.json_url + 'tta/v1/record', recordData)
+		.then((res) => {
+			recordSettings = res.data;
 
-recognition.interimResults = false;
-recognition.maxAlternatives = 2;
+			recognition.continuous = recordSettings.is_record_continously
+				? recordSettings.is_record_continously
+				: true;
+			recognition.lang = recordSettings.tta__recording__lang
+				? recordSettings.tta__recording__lang
+				: 'en-US';
+			localStorage.setItem(
+				'tta__sentence_delimiter',
+				recordSettings.tta__sentence_delimiter,
+			);
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+
+	recognition.interimResults = false;
+	recognition.maxAlternatives = 2;
+
+	/**
+	 *
+	 * restart recording
+	 */
+	recognition.onsoundend = function () {
+		TTA.recordStatus = 'record';
+		let record_btn = document.getElementById('tta__start__record');
+		if (record_btn) record_btn.innerHTML = record_start_button;
+	};
+}
 
 /**
  * Play button content.
@@ -82,15 +163,11 @@ let record_start_button =
 let record_stop_button =
 	'<span class="dashicons dashicons-controls-volumeon"></span> Stop';
 
-/**
- * Listen content.
- */
-var listen_status = 'listen';
-if ('speechSynthesis' in window) {
-	var utterence = new SpeechSynthesisUtterance();
+// Listen content.
+if (window.speechSynthesis == undefined) {
+	TTA.speechSynthesis = false;
 } else {
-	console.log('Speech speechSynthesis not supported 😢');
-	// code to handle error
+	var utterence = new SpeechSynthesisUtterance();
 }
 
 /**
@@ -100,8 +177,8 @@ if ('speechSynthesis' in window) {
 
 window.onload = function () {
 	localStorage.setItem('recordStarted', false);
-	setCurrentRecordContentId();
-	speechSynthesis.cancel();
+	ttaSetCurrentRecordContentId();
+	if (window.speechSynthesis) speechSynthesis.cancel();
 };
 window.onload();
 
@@ -109,7 +186,7 @@ window.onload();
  * Start recording.
  * @param {string} current_record_content_id
  */
-function startRecording(
+function ttaStartRecording(
 	current_record_content_id = '',
 	tta__sentence_delimiter = '.',
 ) {
@@ -117,7 +194,7 @@ function startRecording(
 		current_record_content_id !== 'comment' &&
 		current_record_content_id !== 'tta__demo_text_for_play'
 	) {
-		setCurrentRecordContentId();
+		ttaSetCurrentRecordContentId();
 	}
 	current_record_content_id = localStorage.getItem(
 		'current_recording_content_id',
@@ -125,12 +202,21 @@ function startRecording(
 	/**
 	 * Stop listening before recording.
 	 */
-	speechSynthesis.cancel();
+	if (TTA.speechSynthesis) {
+		speechSynthesis.cancel();
+	}
 
+	if (!TTA.SpeechRecognition) {
+		if (document.getElementsByClassName('wp-block-post-title')) {
+			TTA.displayApiMissing('', true);
+		} else {
+			TTA.displayApiMissing();
+		}
+	}
 	/**
 	 * Get current recording element
 	 */
-	let current_recording_element = getCurrrentRecordingElement(
+	let current_recording_element = ttaGetCurrrentRecordingElement(
 		current_record_content_id,
 	);
 	if (current_recording_element === false) {
@@ -141,19 +227,19 @@ function startRecording(
 	/**
 	 * Change voice recognition text and icon based on condition.
 	 */
-	changeRecordButtonText();
+	ttaChangeRecordButtonText();
 
 	/**
 	 * Show current recorded text.
 	 */
-	showRecordedContent(
+	ttaShowRecordedContent(
 		current_record_content_id,
 		tta__sentence_delimiter,
 		current_recording_element,
 	);
 }
 
-function setCurrentRecordContentId() {
+function ttaSetCurrentRecordContentId() {
 	if (text_to_audio_obj.classic_editor_is_active) {
 		localStorage.setItem('current_listening_content_id', 'content_ifr');
 		localStorage.setItem('current_recording_content_id', 'content_ifr');
@@ -184,7 +270,7 @@ function setCurrentRecordContentId() {
  * @param {*} tta__sentence_delimiter
  * @param {*} current_recording_element
  */
-function showRecordedContent(
+function ttaShowRecordedContent(
 	current_record_content_id,
 	tta__sentence_delimiter,
 	current_recording_element,
@@ -196,8 +282,8 @@ function showRecordedContent(
 		if (event.results[event__length - 1].isFinal) {
 			current_text =
 				event.results[event__length - 1][0].transcript +
-				shouldAddDelimiter(tta__sentence_delimiter);
-			current_text = captalizeString(current_text);
+				ttaShouldAddDelimiter(tta__sentence_delimiter);
+			current_text = ttaCaptalizeString(current_text);
 		}
 
 		/**
@@ -216,7 +302,7 @@ function showRecordedContent(
 /**
  * Should add delimiter.
  */
-function shouldAddDelimiter(tta__sentence_delimiter) {
+function ttaShouldAddDelimiter(tta__sentence_delimiter) {
 	if (
 		(window.navigator.userAgent.indexOf('Opera') ||
 			window.navigator.userAgent.indexOf('OPR')) != -1
@@ -244,14 +330,14 @@ function shouldAddDelimiter(tta__sentence_delimiter) {
 /**
  * Change record button text.
  */
-function changeRecordButtonText() {
+function ttaChangeRecordButtonText() {
 	let record_btn = document.getElementById('tta__start__record');
-	if (record__status == 'stop') {
-		record__status = 'record';
+	if (TTA.recordStatus == 'stop') {
+		TTA.recordStatus = 'record';
 		recognition.stop();
 		localStorage.setItem('recordStarted', false);
 		if (record_btn) record_btn.innerHTML = record_start_button;
-	} else if (record__status == 'record') {
+	} else if (TTA.recordStatus == 'record') {
 		if (
 			localStorage.getItem('recordStarted') == null ||
 			localStorage.getItem('recordStarted') == 'false'
@@ -259,7 +345,7 @@ function changeRecordButtonText() {
 			localStorage.setItem('recordStarted', true);
 			recognition.start();
 		}
-		record__status = 'stop';
+		TTA.recordStatus = 'stop';
 		if (record_btn) record_btn.innerHTML = record_stop_button;
 	}
 }
@@ -269,9 +355,8 @@ function changeRecordButtonText() {
  * @param {*} current_record_content_id
  * @returns
  */
-function getCurrrentRecordingElement(current_record_content_id) {
+function ttaGetCurrrentRecordingElement(current_record_content_id) {
 	let current_recording_element = '';
-	// console.log(current_record_content_id)
 	if (current_record_content_id == 'content_ifr') {
 		current_recording_element = document.getElementById(
 			current_record_content_id,
@@ -298,7 +383,7 @@ function getCurrrentRecordingElement(current_record_content_id) {
 /**
  * Capitalize String.
  */
-function captalizeString(string) {
+function ttaCaptalizeString(string) {
 	if (string[0] !== ' ') {
 		return string[0].toUpperCase() + string.slice(1);
 	} else {
@@ -307,44 +392,32 @@ function captalizeString(string) {
 }
 
 /**
- *
- * restart recording
- */
-recognition.onsoundend = function () {
-	record__status = 'record';
-	let record_btn = document.getElementById('tta__start__record');
-	if (record_btn) record_btn.innerHTML = record_start_button;
-};
-
-/**
  * Listent/Pause/Resume content.
  */
-function listenCotentInDashboard(btn_id, content, listeningSettings) {
+function ttaListenCotentInDashboard(btn_id, content, listeningSettings) {
 	/**
 	 * Stop recording before listening.
 	 */
-	recognition.stop();
+	if (TTA.SpeechRecognition && recognition) {
+		recognition.stop();
+	}
+
+	if (!TTA.speechSynthesis) {
+		TTA.displayApiMissing('', true);
+	}
+
 	localStorage.setItem('recordStarted', false);
 	localStorage.setItem('current_play_btn_id', btn_id);
-	setCurrentListeningContent();
+	ttaSetCurrentListeningContent();
 
 	let text = localStorage.getItem('current_listening_content');
 
-	startListening(btn_id, text, listeningSettings);
+	ttaStartListening(btn_id, text, listeningSettings);
 }
 
-function setCurrentListeningContent() {
+function ttaSetCurrentListeningContent() {
 	let current_listening_content = '';
 	let text = '';
-	// True if classic editor active. and current reading content id is not "content_ifr"
-	// if (
-	// 	localStorage.getItem("current_listening_content_id") !== null &&
-	// 	localStorage.getItem("current_listening_content_id") != "content_ifr"
-	// ) {
-	// 	current_listening_content = document.getElementById(
-	// 		localStorage.getItem("current_listening_content_id"),
-	// 	);
-	// } else {
 	/**
 	 * Classsic editor
 	 */
@@ -385,11 +458,10 @@ function setCurrentListeningContent() {
 	// }
 }
 
-// speechSynthesis.cancel()
 /**
  * Start Reading content
  */
-function startListening(btn_id, content, listeningSettings = null) {
+function ttaStartListening(btn_id, content, listeningSettings = null) {
 	let listen_btn = document.getElementById(btn_id);
 
 	utterence.text = content;
@@ -414,20 +486,20 @@ function startListening(btn_id, content, listeningSettings = null) {
 		? listeningSettings.tta__listening_lang
 		: 'en-US'; // It will be speaking language.
 
-	if (listen_status == 'listen') {
+	if (TTA.listenStatus == 'listen') {
 		speechSynthesis.speak(utterence);
 		listen_btn.innerHTML = pause_button;
-		listen_btn.setAttribute('title', 'WP Speech: Pause');
-		listen_status = 'pause';
-	} else if (listen_status == 'pause') {
+		listen_btn.setAttribute('title', 'Text To Audio : Pause');
+		TTA.listenStatus = 'pause';
+	} else if (TTA.listenStatus == 'pause') {
 		speechSynthesis.pause();
 		listen_btn.innerHTML = resume_button;
-		listen_btn.setAttribute('title', 'WP Speech: Resume');
-		listen_status = 'resume';
-	} else if (listen_status == 'resume') {
+		listen_btn.setAttribute('title', 'Text To Audio : Resume');
+		TTA.listenStatus = 'resume';
+	} else if (TTA.listenStatus == 'resume') {
 		listen_btn.innerHTML = pause_button;
-		listen_status = 'pause';
-		listen_btn.setAttribute('title', 'WP Speech: Pause');
+		TTA.listenStatus = 'pause';
+		listen_btn.setAttribute('title', 'Text To Audio : Pause');
 		speechSynthesis.resume();
 	}
 }
@@ -435,21 +507,22 @@ function startListening(btn_id, content, listeningSettings = null) {
 /**
  * After ending reading the content.
  */
-utterence.addEventListener('end', function (event) {
-	speechSynthesis.cancel();
-	let listen_btn = document.getElementById(
-		localStorage.getItem('current_play_btn_id'),
-	);
-	listen_btn.innerHTML = replay_button;
-	listen_btn.setAttribute('title', 'WP Speech: Replay');
-	listen_status = 'listen';
-});
+if (TTA.speechSynthesis && utterence) {
+	utterence.addEventListener('end', function (event) {
+		speechSynthesis.cancel();
+		let listen_btn = document.getElementById(
+			localStorage.getItem('current_play_btn_id'),
+		);
+		listen_btn.innerHTML = replay_button;
+		listen_btn.setAttribute('title', 'Text To Audio : Replay');
+		TTA.listenStatus = 'listen';
+	});
+}
 
 /**
  * Read the blog
  */
-
-function listenCotentInFrontend(
+function ttaListenCotentInFrontend(
 	content = 'Hellow World',
 	btn_id = 'wpa__listen_content',
 	listeningSettings,
@@ -457,11 +530,19 @@ function listenCotentInFrontend(
 	/**
 	 * Stop recording before listening.
 	 */
-	recognition.stop();
+	if (TTA.SpeechRecognition && recognition) {
+		recognition.stop();
+	}
+
+	if (!TTA.speechSynthesis) {
+		TTA.displayApiMissing(btn_id);
+	}
+
+	// Check if speechSynthesis is enabled or not?
 	localStorage.setItem('recordStarted', false);
 	localStorage.setItem('current_play_btn_id', btn_id);
 
-	startListening(btn_id, content, listeningSettings);
+	ttaStartListening(btn_id, content, listeningSettings);
 }
 
 /**
@@ -474,14 +555,11 @@ Object.values(document.getElementsByTagName('textarea')).forEach(
 		 * Start recording on focus event.
 		 */
 		textarea.addEventListener('focus', function () {
-			/**
-			 * Stop listening before recording.
-			 */
-			speechSynthesis.cancel();
-			listen_status = 'listen';
+			TTA.listenStatus = 'listen';
 			let listen_btn = document.getElementById('wpa__listen_content');
 			if (listen_btn) listen_btn.innerHTML = play_button;
-			if (listen_btn) listen_btn.setAttribute('title', 'WP Speech: Play');
+			if (listen_btn)
+				listen_btn.setAttribute('title', 'Text To Audio : Play');
 			/**
 			 * Start Recording.
 			 */
@@ -489,16 +567,25 @@ Object.values(document.getElementsByTagName('textarea')).forEach(
 				textarea.getAttribute('id') === 'comment' ||
 				textarea.getAttribute('id') === 'tta__demo_text_for_play'
 			) {
+				/**
+				 * Stop listening before recording.
+				 */
+				if (TTA.speechSynthesis) {
+					speechSynthesis.cancel();
+				}
+				if (!TTA.SpeechRecognition) {
+					TTA.displayApiMissing();
+				}
 				localStorage.setItem(
 					'current_recording_content_id',
 					textarea.getAttribute('id'),
 				);
-				startRecording(
+				ttaStartRecording(
 					textarea.getAttribute('id'),
 					localStorage.getItem('tta__sentence_delimiter'),
 				);
 
-				record__status = 'record';
+				TTA.recordStatus = 'record';
 				if (record_btn) record_btn.innerHTML = record_stop_button;
 			}
 		});
@@ -509,8 +596,10 @@ Object.values(document.getElementsByTagName('textarea')).forEach(
 		textarea.addEventListener('focusout', function () {
 			// recognition.stop();
 			// localStorage.setItem('recordStarted', false)
-			// record__status = 'record';
+			// TTA.recordStatus = 'record';
 			// record_btn.innerHTML = 'Start'
 		});
 	},
 );
+
+window.tta = TTA;

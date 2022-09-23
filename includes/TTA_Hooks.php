@@ -25,13 +25,8 @@ class TTA_Hooks {
 
     public function __construct() {
         add_action('add_meta_boxes', array($this, 'add_custom_meta_box'));
-        // add_action('wp_head', array($this, 'inc_manifest_link'));
     }
-    // Creates the link tag
-    public function inc_manifest_link() {
-        $url = WP_PLUGIN_URL . '/text-to-audio/admin/js/manifest.json';
-        echo '<link rel="manifest" href="' . $url . '">';
-    }
+
     /**
      * Short Description. (use period)
      *
@@ -85,7 +80,7 @@ class TTA_Hooks {
 
         // Button style.
         if (isset($customize) && count($customize)) {
-            $btn_style = 'background-color:' . $customize['backgroundColor'] . ';color:' . $customize['color'] . ';border:0;';
+            $btn_style = 'background-color:#184c53;color:#fff;border:0;';
         }
         $short_code = '[tta_listen_btn]';
         if (isset($customize['tta_play_btn_shortcode']) && '' != $customize['tta_play_btn_shortcode']) {
@@ -94,8 +89,8 @@ class TTA_Hooks {
         ?>
         <div class="tta_metabox">
 
-            <button type="button" id="tta__start__record"  style='<?php echo esc_attr($btn_style); ?>;cursor: pointer' onclick="startRecording()"><span class="dashicons dashicons-controls-volumeoff"></span>Start</button>
-            <button type="button" id="tta__listen_content" style='<?php echo esc_attr($btn_style); ?>;cursor: pointer' onclick='listenCotentInDashboard("tta__listen_content","", <?php echo esc_js($listening); ?> )'><span class="dashicons dashicons-controls-play"></span> Play</button>
+            <button type="button" id="tta__start__record"  style='<?php echo esc_attr($btn_style); ?>;cursor: pointer' onclick="ttaStartRecording()"><span class="dashicons dashicons-controls-volumeoff"></span>Start</button>
+            <button type="button" id="tta__listen_content" style='<?php echo esc_attr($btn_style); ?>;cursor: pointer' onclick='ttaListenCotentInDashboard("tta__listen_content","", <?php echo esc_js($listening); ?> )'><span class="dashicons dashicons-controls-play"></span> Play</button>
             <!-- Shortcode text -->
             <input
                 type="text"

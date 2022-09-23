@@ -93,15 +93,20 @@ class TTA_Admin {
          */
         wp_enqueue_script('text-to-audio', plugin_dir_url(__FILE__) . 'js/text-to-audio.js', array(), $this->version, true);
 
+        if( ! function_exists( 'is_plugin_active' ) ) {
+            include ABSPATH . 'wp-admin/includes/plugin.php';
+        }
         wp_localize_script('text-to-audio', 'text_to_audio_obj', [
             'json_url' => esc_url_raw(rest_url()),
+            'admin_url' => admin_url('/'),
             'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
         ]);
 
     }
 
     public function engueue_block_scripts() {
-
+        $listening = (array) get_option('tta_listening_settings');
+        $listening = json_encode($listening);
         wp_enqueue_script('tta-blocks', plugin_dir_url(dirname(__FILE__)) . 'build/blocks.js', array('wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor'), true, true);
         wp_localize_script('tta-blocks', 'ttaBlocks', [
             'admin_url' => admin_url('/'),
@@ -109,19 +114,23 @@ class TTA_Admin {
             'post_types' => get_post_types(),
             'is_logged_in' => is_user_logged_in(),
             'is_admin' => current_user_can('administrator'),
+            'listeningSettings' => $listening,
         ]);
 
-        // wp_register_script('simple-poll', plugin_dir_url(__FILE__) . 'js/simple-poll.js', array(), true, true);
-        // wp_enqueue_script('simple-poll');
-        // register_block_type('smpl/poll', [
-        //     'script' => 'simple-poll',
-        //     'render_callback' => [$this, 'render_poll'],
-        // ]);
-        // wp_localize_script('simple-poll', 'smpl', [
-        //     'ajax_url' => admin_url('admin-ajax.php'),
-        //     'nonce' => wp_create_nonce(SIMPLE_POLL_NONCE),
-        // ]);
+        register_block_type('tta/customize-button', [
+            'render_callback' => [$this, 'render_button'],
+        ]);
 
+    }
+
+    /**
+     * @param $customize button.
+     *
+     * @return string
+     */
+    public function render_button($customize) {
+
+        return tta_get_button_content($customize, true);
     }
 
     /**
@@ -129,10 +138,13 @@ class TTA_Admin {
      *
      */
     public function enqueue_TTA() {
-
+        if( ! function_exists( 'is_plugin_active' ) ) {
+            include ABSPATH . 'wp-admin/includes/plugin.php';
+        }
         wp_enqueue_script('text-to-audio', plugin_dir_url(__FILE__) . 'js/text-to-audio.js', array(), $this->version, true);
         wp_localize_script('text-to-audio', 'text_to_audio_obj', [
             'json_url' => esc_url_raw(rest_url()),
+            'admin_url' => admin_url('/'),
             'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
         ]);
     }

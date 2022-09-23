@@ -1,12 +1,17 @@
 import { __ } from '@wordpress/i18n';
-import { Form } from 'react-bootstrap';
+
+//wp block editor
+const { InspectorControls } = wp.blockEditor;
+
+//wp components
+const { PanelBody } = wp.components;
 
 const customizeButton = {
 	namespace: 'tta/customize-button',
 	object: {
 		title: __('Customize Button'),
 		description: __('Text to audio customize button.'),
-		icon: 'chart-bar',
+		icon: 'controls-play',
 		category: 'design',
 		keywords: [
 			'customize',
@@ -15,9 +20,28 @@ const customizeButton = {
 			'audio',
 			'text-to-speech',
 		],
+		example: {},
 		attributes: {
-			question: { type: 'string' },
-			answers: { type: 'array' },
+			backgroundColor: {
+				type: 'string',
+				default: '#184c53',
+			},
+			color: {
+				type: 'string',
+				default: '#ffffff',
+			},
+			width: {
+				type: 'string',
+				default: '100',
+			},
+			border: {
+				type: 'string',
+				default: '0',
+			},
+			custom_css: {
+				type: 'string',
+				default: '',
+			},
 		},
 
 		edit: Customize,
@@ -29,22 +53,127 @@ const customizeButton = {
 };
 
 function Customize(props) {
-	const setQuestion = (e) => {
-		props.setAttributes({ question: e.target.value });
-		props.setAttributes({ answers: ['Yes', 'No'] });
+	const setBackgroundColor = (e) => {
+		props.setAttributes({ backgroundColor: e.target.value });
 	};
-	return (
-		<div className='smpl_block'>
+	const setColor = (e) => {
+		props.setAttributes({ color: e.target.value });
+	};
+	const setWidth = (e) => {
+		props.setAttributes({ width: e.target.value });
+	};
+
+	const setcustom_css = (e) => {
+		props.setAttributes({ custom_css: e.target.value });
+	};
+	const { color, backgroundColor, width, border, custom_css } =
+		props.attributes;
+
+	return [
+		<InspectorControls style={{ marginBottom: '40px' }}>
+			<PanelBody
+				className='tta_block_body'
+				title={__('Customize Button')}>
+				<div>
+					<label htmlFor='backgroundColor'>
+						{__('BackGround Color')}
+					</label>
+					<input
+						type='color'
+						name='backgroundColor'
+						onChange={setBackgroundColor}
+						id='backgroundColor'
+						value={backgroundColor}
+						title={__('Choose your color')}
+					/>
+				</div>
+				<div>
+					<label htmlFor='color'> {__('Text Color')}</label>
+					<input
+						type='color'
+						name='color'
+						onChange={setColor}
+						id='color'
+						value={color}
+						title={__('Choose your color')}
+					/>
+				</div>
+				<div>
+					<label htmlFor='width'>{__('Button Width (%)')}</label>
+					<input
+						type='number'
+						name='width'
+						onChange={setWidth}
+						id='width'
+						min={'0'}
+						max='100'
+						value={width}
+						title={__('Button Width')}
+					/>
+				</div>
+				<div>
+					<label htmlFor='custom_css'>{__('Custom CSS')}</label>
+					<textarea
+						name='custom_css'
+						onChange={setcustom_css}
+						value={custom_css ? custom_css : ''}
+						placeholder={__('class selector .tta__listen_content')}
+					/>
+				</div>
+			</PanelBody>
+			<style
+				dangerouslySetInnerHTML={{
+					__html: [
+						'.tta_block_body div input, .tta_block_body div textarea {',
+						'float:right;',
+						'}',
+						'.tta_block_body div {',
+						'padding: 15px 0;',
+						'border-bottom: 1px solid #d7d7d7;',
+						'}',
+						'.tta_block_body div:last-child {',
+						'padding: 15px 0 30px;',
+						'}',
+					].join('\n'),
+				}}></style>
+		</InspectorControls>,
+		<div className='tta_block'>
 			<button
-				id='tta__listen_content'
-				onClick={(e) => alert('test')}
+				id='tta__listen_content_block'
+				className='tta__listen_content'
+				onClick={(e) =>
+					ttaListenCotentInDashboard(
+						'tta__listen_content_block',
+						'',
+						ttaBlocks.listeningSettings,
+					)
+				}
+				style={{
+					backgroundColor: backgroundColor,
+					color: color,
+					width: width + '%',
+					border: border,
+				}}
 				type='button'
-				title='Text To Audio:  Tap to listen post.'>
-				<span className='dashicons dashicons-controls-play'></span>{' '}
-				Listen
+				title={__('Text To Audio:  Tap to listen post.')}>
+				<span
+					className='dashicons dashicons-controls-play'
+					style={{
+						lineHeight: '1.5;',
+					}}></span>
+				{__('Listen')}
 			</button>
-		</div>
-	);
+			<style
+				dangerouslySetInnerHTML={{
+					__html: [
+						'button.tta__listen_content .dashicons {',
+						'line-height: 1.5;',
+						'}',
+					].join('\n'),
+				}}></style>
+			<style>{custom_css}</style>
+		</div>,
+	];
 }
 
 export default customizeButton;
