@@ -622,7 +622,6 @@ Object.values(document.getElementsByTagName('textarea')).forEach(
 	},
 );
 
-console.log(TTA)
 window.tta = TTA;
 
 
