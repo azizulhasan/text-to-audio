@@ -576,7 +576,7 @@ Object.values(document.getElementsByTagName('textarea')).forEach(
 		textarea.addEventListener('focus', function () {
 			TTA.listenStatus = 'listen';
 			let listen_btn = document.getElementById('wpa__listen_content');
-			console.log(TTA)
+			
 			if (listen_btn) listen_btn.innerHTML = TTA.playButtonContent();
 			if (listen_btn)
 				listen_btn.setAttribute('title', 'Text To Audio : ' + TTA.playButtonText());
