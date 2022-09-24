@@ -5,7 +5,7 @@ Tags: audio, speech, voice, text to audio, text to speech, record, voice comment
 Requires at least: 4.0
 Tested up to: 6.0.1
 Requires PHP: 5.6
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -39,6 +39,8 @@ There is no need to create an account it’s completely free. Just install the p
 
 
 
+
+
 == Installation ==
 1. Download and unzip the plugin
 2. Upload the entire "text-to-audio" directory to the `/wp-content/plugins/` directory
@@ -61,12 +63,12 @@ Open FireFox browser, search ```about:config``` on a new tab. Now search with th
 Yes, you can add listening button from block editor. Open you block editor and search ```Customize Button``` then add it.
 Now you can change ```color```, ```backgroundColor```, ```width```. And also add ```custom_css```.
 = How to change button text? =
-Add button text on shortcode as an attribute. Example :
-`[tta_listen_btn btn_text="Your_text"]`
+You can change button text 2 ways one is by shortcode attribute. Another way is adding filter. But filter always overrides the shortcode attributes. Here is short code Example :{' '}
+	`[tta_listen_btn listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay" start_text="Start" stop_text="Stop"]`
 = How to add custom css class to button? =
 Add class on shortcode as an attribute. Example : `[tta_listen_btn class="custom_class"]`
 = How can I change button background and text color? =
-Yes, you can change buttons background and text color from plugins dashboard's customization menu.
+Yes, you can change buttons background and text color from plugins dashboard's customization menu. also from block editor by applying the ```customization button``` block.
 
 
 
@@ -81,6 +83,12 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 8. Customize the button in block editor, Block Name ( Customize Button ).
 
 == Changelog ==
+
+= 1.1.3 (2022-09-24)  =
+* Button text : Listeing  and Recoding button text change option added throw filter and attribute.
+* Action Links: Plugin action lints added.
+* Documentation: Documentation Improved.
+* Filter added: ```tta__button_text_arr```, ```tta__content_title```, ```tta__content_description``` filter added.
 
 = 1.1.2 (2022-09-14)  =
 * Bugfixed: is_plugin_active error fixed.

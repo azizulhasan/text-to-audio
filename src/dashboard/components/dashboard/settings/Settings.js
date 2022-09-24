@@ -153,7 +153,7 @@ export default function Settings() {
 								onChange={(e) =>
 									setChecked(e.currentTarget.checked)
 								}>
-								{checked ? 'True' : 'False'}
+								{checked ? 'Enable' : 'Disable'}
 							</ToggleButton>
 						</Form.Group>
 					</Col>

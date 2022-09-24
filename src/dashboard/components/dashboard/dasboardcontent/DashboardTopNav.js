@@ -4,14 +4,16 @@ export default function DashboardTopNav() {
 
   const style = {
     head: {
-      width: "150px"
+      width: "150px",
+      fontSize: '16px',
     }
   }
   return (
     <nav className="sb-topnav navbar navbar-expand topnav_bg">
       {/* <!-- Navbar Brand--> */}
       <Link className="navbar-brand ps-3" style={style.head} to="/">
-      Text To Audio
+      Text To Audio<br></br>
+      <small>Version: {tta_obj.VERSION} </small>
       </Link>
       {/* <!-- Sidebar Toggle--> */}
       <button

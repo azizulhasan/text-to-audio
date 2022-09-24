@@ -20,12 +20,20 @@ export default function Docs() {
 	 */
 	const filters = [
 		{
-			name: 'tta__content_before_cleaning',
+			name: 'tta__content_title',
 			argument: '$description',
 		},
 		{
-			name: 'tta__content_after_cleaning',
+			name: 'tta__content_description',
 			argument: '$description',
+		},
+		{
+			name: 'tta__listening_button',
+			argument: '$button'
+		},
+		{
+			name: 'tta__button_text_arr',
+			argument: '$button_text_arr'
 		},
 	];
 	return (
@@ -35,8 +43,8 @@ export default function Docs() {
 					1. How to change button text?
 				</Accordion.Header>
 				<Accordion.Body>
-					Add button text on shortcode as an attribute. Example :{' '}
-					<code>[tta_listen_btn btn_text="Your_Test"]</code>
+					You can change button text 2 ways one is by shortcode attribute. Another way is adding filter. But filter always overrides the shortcode attributes. Here is short code Example :{' '}
+					<code>[tta_listen_btn listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay" start_text="Start" stop_text="Stop"]</code>
 				</Accordion.Body>
 			</Accordion.Item>
 			<Accordion.Item eventKey='1'>
@@ -50,7 +58,7 @@ export default function Docs() {
 			</Accordion.Item>
 			<Accordion.Item eventKey='2'>
 				<Accordion.Header>
-					3. Text To Audio Filter Hooks Reference.
+					3. Filter Hooks Reference.
 				</Accordion.Header>
 				<Accordion.Body>
 					<Table striped bordered hover size='sm'>
@@ -96,9 +104,18 @@ export default function Docs() {
 						<pre>
 							<code id='filter_hook'>
 								{`
-              add_filter( 'tta__content_before_cleaning', 'tta__content_before_cleaning_callback' );
-              function tta__content_before_cleaning_callback ($description) {
-                  // Your code here.
+              add_filter( 'tta__button_text_arr', 'tta__button_text_arr_callback' );
+              function tta__button_text_arr_callback ($button_text_arr) {
+		// Listen button
+		$text_arr['listen_text'] = 'Listen'; // paste custem text
+		$text_arr['pause_text'] = 'Pause'; // paste custem text
+		$text_arr['resume_text'] = 'Resume'; // paste custem text
+		$text_arr['replay_text'] = 'Replay'; // paste custem text
+		// Record button text
+		$text_arr['start_text'] = 'Start'; // paste custem text
+		$text_arr['stop_text'] = 'Stop'; // paste custem text
+		
+		return $text_arr;
               }
               `}
 							</code>
@@ -144,7 +161,7 @@ export default function Docs() {
 			</Accordion.Item>
 			<Accordion.Item eventKey='6'>
 				<Accordion.Header>
-					6. What is the name of block name of button?
+					6. What is the name of the block button?
 				</Accordion.Header>
 				<Accordion.Body>
 					<strong>Customize Button</strong>

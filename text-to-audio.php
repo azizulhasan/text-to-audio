@@ -14,7 +14,7 @@
  * @wordpress-plugin
  * Plugin Name:       Text To Audio
  * Description:       Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages.
- * Version:           1.1.2
+ * Version:           1.1.3
  * Author:            Azizul Hasan
  * Author URI:        http://azizulhasan.com
  * License:           GPL-2.0+
@@ -47,7 +47,7 @@ if (!defined('ABSPATH')) {
 
 if (!defined('TEXT_TO_AUDIO_VERSION')) {
 
-    define('TEXT_TO_AUDIO_VERSION', '1.1.2');
+    define('TEXT_TO_AUDIO_VERSION', '1.1.3');
 }
 
 if (!defined('TEXT_TO_AUDIO_NONCE')) {
@@ -95,6 +95,27 @@ class TTA_Init {
                 10, // priority
                 4   // parameters
             );
+        }
+
+        //add button text
+        if( ! get_option( 'tta__button_text_arr' ) ) {
+            // Button listen text.
+            $listen_text =  __( "Listen", 'text-to-audio' ) ;
+            $pause_text =  __( 'Pause', 'text-to-audio' ) ;
+            $resume_text =  __( 'Resume', 'text-to-audio' ) ;
+            $replay_text =  __( 'Replay', 'text-to-audio' ) ;
+            $start_text =  __( 'Start', 'text-to-audio' ) ;
+            $stop_text = __( 'Start', 'text-to-audio' ) ;
+
+            update_option( 'tta__button_text_arr', [
+                'listen_text' => $listen_text,
+                'pause_text' => $pause_text,
+                'resume_text' => $resume_text,
+                'replay_text' => $replay_text,
+                'start_text' => $start_text,
+                'stop_text' => $stop_text,
+            ]);
+
         }
         
     }

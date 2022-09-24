@@ -85,6 +85,9 @@ class TTA_Admin {
                 'nonce' => wp_create_nonce(TEXT_TO_AUDIO_NONCE),
                 'rest_nonce' => wp_create_nonce('wp_rest'),
                 'post_types' => get_post_types(),
+                'buttonTextArr' => apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr' ) ),
+                'VERSION' => TEXT_TO_AUDIO_VERSION,
+
             ]);
 
         }
@@ -100,7 +103,7 @@ class TTA_Admin {
             'json_url' => esc_url_raw(rest_url()),
             'admin_url' => admin_url('/'),
             'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
-            'buttonTextArr' => get_option( 'tta_button_text_arr' ),
+            'buttonTextArr' => apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr' ) ),
         ]);
 
     }
@@ -147,7 +150,7 @@ class TTA_Admin {
             'json_url' => esc_url_raw(rest_url()),
             'admin_url' => admin_url('/'),
             'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
-            'buttonTextArr' => get_option( 'tta_button_text_arr' ),
+            'buttonTextArr' => apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr' ) ),
 
         ]);
     }

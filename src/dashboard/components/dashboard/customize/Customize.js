@@ -24,6 +24,8 @@ export default function Customize() {
 	const [listeningSettings, setListeningSettings] = useState({});
 
 	useEffect(() => {
+
+
 		/**
 		 * Get customize settings.
 		 */
@@ -200,7 +202,7 @@ export default function Customize() {
 								type='button'
 								title='Text To Audio:  Tap to listen post.'>
 								<span className='dashicons dashicons-controls-play'></span>{' '}
-								Listen
+								{tta_obj.buttonTextArr.listen_text}
 							</button>
 						</Col>
 						<Col xs={12} sm={12} lg={12} className='mb-3'>

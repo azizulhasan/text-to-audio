@@ -78,7 +78,6 @@ function tta_get_button_content($atts, $is_block = false) {
     }
     $settings = (array) get_option('tta_settings_data');
     $recording = (array) get_option('tta_record_settings');
-
     //Apply short code for only single page.
     if (isset($settings['tta__settings_display_btn_in_single_page']) && $settings['tta__settings_display_btn_in_single_page'] == 1 && !is_single()) {
         return;
@@ -91,27 +90,15 @@ function tta_get_button_content($atts, $is_block = false) {
     $title = get_the_title() . $sentence_delimiter . " ";
 
     $description = get_the_content();
-    $description = apply_filters('tta__content_before_cleaning', $description);
     $description = tta_clean_content($description);
-    $description = apply_filters('tta__content_after_cleaning', $description);
     $content     = apply_filters('tta__content_title', $title);
     $content    .= apply_filters('tta__content_description', $description);
 
     // Button listen text.
-    $listen_text = apply_filters('tta__listen_text', (isset($atts['listen_text'])) && strlen($atts['listen_text']) ? esc_html__($atts['listen_text']) : "Listen" );
-    $pause_text = apply_filters('tta__pause_text', (isset($atts['pause_text'])) && strlen($atts['pause_text']) ? esc_html__($atts['pause_text']) : "Pause" );
-    $resume_text = apply_filters('tta__resume_text', (isset($atts['resume_text'])) && strlen($atts['resume_text']) ? esc_html__($atts['resume_text']) : "Resume" );
-    $replay_text = apply_filters('tta__replay_text', (isset($atts['replay_text'])) && strlen($atts['replay_text']) ? esc_html__($atts['replay_text']) : "Replay" );
-
-    update_option( 'tta_button_text_arr', [
-        'listen_text' => $listen_text,
-        'pause_text' => $pause_text,
-        'resume_text' => $resume_text,
-        'replay_text' => $replay_text,
-    ]);
+    $text_arr = get_button_text( $atts );
 
     // Speak Icon
-    $speakIcon = apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ') . $listen_text;
+    $speakIcon = apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ') . $text_arr['listen_text'];
     // Button style.
     if (isset($customize) && count($customize)) {
         if ($is_block) {
@@ -153,6 +140,30 @@ button.tta__listent_content .dashicons{ line-height: 1.5; }
     return apply_filters( 'tta__listening_button', $button );
 }
 
+
+/**
+ * Get button text
+ */
+function get_button_text( $atts ) {
+    $listen_text = (isset($atts['listen_text'])) && strlen($atts['listen_text']) ? esc_html__( sanitize_text_field( $atts['listen_text'] ) ) : __( "Listen", 'text-to-audio' );
+    $pause_text = (isset($atts['pause_text'])) && strlen($atts['pause_text']) ? esc_html__( sanitize_text_field( $atts['pause_text'] ) ) : __( 'Pause', 'text-to-audio' );
+    $resume_text = (isset($atts['resume_text'])) && strlen($atts['resume_text']) ? esc_html__( sanitize_text_field( $atts['resume_text'] ) ) : __( 'Resume', 'text-to-audio' );
+    $replay_text = (isset($atts['replay_text'])) && strlen($atts['replay_text']) ? esc_html__( sanitize_text_field( $atts['replay_text'] ) ) : __( 'Replay', 'text-to-audio' );
+    $start_text = (isset($atts['start_text'])) && strlen($atts['start_text']) ? esc_html__( sanitize_text_field( $atts['start_text'] ) ) : __( 'Start', 'text-to-audio' );
+    $stop_text = (isset($atts['stop_text'])) && strlen($atts['stop_text']) ? esc_html__( sanitize_text_field( $atts['stop_text'] ) ) : __( 'Start', 'text-to-audio' );
+
+    update_option( 'tta__button_text_arr', [
+        'listen_text' => $listen_text,
+        'pause_text' => $pause_text,
+        'resume_text' => $resume_text,
+        'replay_text' => $replay_text,
+        'start_text' => $start_text,
+        'stop_text' => $stop_text,
+    ]);
+
+    return apply_filters('tta__button_text_arr', get_option( 'tta__button_text_arr' ) );
+
+}
 /**
  * Admin notice
  *
@@ -175,8 +186,8 @@ function tta_api_missing() {
         return sprintf(
             /* translators: 1: Plugin name 2: SpeechRecognition  3: link to doc*/
             esc_html__('%1$s Please enable %2$s. Click here to %3$s.', 'text-to-audio'),
-            "<strong>" . esc_html__('Text To Audio:', 'text-to-audio') . "</strong>",
-            "<strong>" . esc_html($apis, 'text-to-audio') . "</strong>",
+            "<strong>" . esc_html('Text To Audio:') . "</strong>",
+            "<strong>" . esc_html( $apis ) . "</strong>",
             "<a href='https://wordpress.org/plugins/text-to-audio/#how%20to%20fix%20firefox%20%20browser%20issue%3F' target='_blank'>" . esc_html__('enable', 'text-to-audio') . "</a>"
         );
     }
