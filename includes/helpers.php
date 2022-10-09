@@ -83,6 +83,8 @@ function tta_get_button_content($atts, $is_block = false) {
         return;
     }
 
+    $display_icon = isset( $settings['tta__settings_display_btn_icon'] ) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
+
     static $btn_no = 0;
     $btn_no++;
 
@@ -124,9 +126,9 @@ function tta_get_button_content($atts, $is_block = false) {
     // Listening button.
     $button = '<div class="tta_notice" style="display:none;"></div><button id="tta__listent_content_' . $btn_no . '" class="tta__listent_content ' . esc_attr($class) . '" type="button"  title="Text To Audio:  Tap to listen post.">' . $speakIcon . ' </button>
 <style>
-button.tta__listent_content{ ' . esc_attr($btn_style) . ' }
-button.tta__listent_content:hover{' . esc_attr($btn_style) . '}
-button.tta__listent_content .dashicons{ line-height: 1.5; }
+#tta__listent_content_' . $btn_no .'.tta__listent_content{ ' . esc_attr($btn_style) . ' }
+#tta__listent_content_' . $btn_no .'.tta__listent_content:hover{' . esc_attr($btn_style) . '}
+#tta__listent_content_' . $btn_no .'.tta__listent_content .dashicons{ display: ' . esc_attr( $display_icon ) . ';line-height:1; }
 ' . $custom_css . '
 </style>
 <script>

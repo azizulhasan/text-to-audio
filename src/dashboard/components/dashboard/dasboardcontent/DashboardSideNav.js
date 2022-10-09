@@ -14,9 +14,15 @@ export default function DashboardSideNav() {
 				id='sidenavAccordion'>
 				<div className='tta-sidenav-menu'>
 					<div className='nav'>
+						{/* Settings menu */}
+						<Link className='nav-link' to={'/settings'}>
+							<div className='sb-nav-link-icon'>
+								<i className='fas fa-wrench'></i>
+							</div>
+							Settings
+						</Link>
 						<Link className='nav-link' to={'/'}>
 							<div className='sb-nav-link-icon'>
-								{/* <i className="fas fa-envelope"></i> */}
 								<i className='fas fa-record-vinyl'></i>
 							</div>
 							Recording
@@ -33,13 +39,7 @@ export default function DashboardSideNav() {
 							</div>
 							Customization
 						</Link>
-						{/* Settings menu */}
-						<Link className='nav-link' to={'/settings'}>
-							<div className='sb-nav-link-icon'>
-								<i className='fas fa-wrench'></i>
-							</div>
-							Settings
-						</Link>
+						
 						<Link className='nav-link' to={'/docs'}>
 							<div className='sb-nav-link-icon'>
 								<i className='fas fa-book'></i>

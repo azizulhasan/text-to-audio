@@ -11,10 +11,12 @@ import toast from '../../context/Notify';
 export default function Settings() {
 	const [settings, setSettings] = useState({
 		tta__settings_display_btn_in_single_page: false,
+		tta__settings_display_btn_icon: false,
 		tta__settings_allow_recording_for_post_type: ['all'],
 	});
 
-	const [checked, setChecked] = useState(false);
+	const [checked, setChecked] = useState(() => false);
+	const [showIcon, setShowIcon ] = useState(() => false)
 
 	const [postTypes, setPostTypes] = useState([
 		'all',
@@ -33,8 +35,8 @@ export default function Settings() {
 			(res) => {
 				setSettings(res.data);
 				setChecked(res.data.tta__settings_display_btn_in_single_page);
-			},
-		);
+				setChecked(res.data.tta__settings_display_btn_icon);
+			});
 	}, []);
 
 	/**
@@ -78,6 +80,8 @@ export default function Settings() {
 		}
 
 		data.tta__settings_display_btn_in_single_page = checked;
+		data.tta__settings_display_btn_icon = showIcon;
+		
 		let formData = new FormData();
 		formData.append('fields', JSON.stringify(data));
 		formData.append('method', 'post');
@@ -85,6 +89,7 @@ export default function Settings() {
 			.then((res) => {
 				setSettings(res.data);
 				setChecked(res.data.tta__settings_display_btn_in_single_page);
+				setShowIcon( res.data.tta__settings_display_btn_icon);
 				toast('Settings Data Saved');
 			})
 			.catch((err) => {
@@ -131,7 +136,7 @@ export default function Settings() {
 						</Form.Group>
 					</Col>
 				</Row>
-				<Row className='border-bottom mt-3'>
+				<Row className=' mt-3'>
 					<Col xs={12} sm={6} lg={4}>
 						<Form.Label id='tta__settings_display_btn_in_single_page'>
 							Display Button Only Single Page
@@ -154,6 +159,33 @@ export default function Settings() {
 									setChecked(e.currentTarget.checked)
 								}>
 								{checked ? 'Enable' : 'Disable'}
+							</ToggleButton>
+						</Form.Group>
+					</Col>
+					</Row>
+					<Row className=' mt-3'>
+					<Col xs={12} sm={6} lg={4}>
+						<Form.Label id='tta__settings_display_btn_icon'>
+							Enable Button Icon
+						</Form.Label>
+					</Col>
+					<Col xs={12} sm={12} lg={8}>
+						<Form.Group>
+							<ToggleButton
+								id='showIcon-check'
+								type='checkbox'
+								className='form-controll '
+								variant={
+									showIcon
+										? 'outline-primary'
+										: 'outline-danger'
+								}
+								checked={showIcon}
+								value='1'
+								onChange={(e) =>
+									setShowIcon(e.currentTarget.checked)
+								}>
+								{showIcon ? 'Enable' : 'Disable'}
 							</ToggleButton>
 						</Form.Group>
 					</Col>

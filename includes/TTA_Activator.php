@@ -50,6 +50,7 @@ class TTA_Activator {
             (
                 "tta__settings_allow_recording_for_post_type" => ["all"],
                 "tta__settings_display_btn_in_single_page" => '',
+                "tta__settings_display_btn_icon" => '',
             ));
 
         /**
