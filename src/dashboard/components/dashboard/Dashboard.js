@@ -62,7 +62,7 @@ function Dashboard() {
 								<Route
 									path='/'
 									element={useMemo(() => (
-										<Recording />
+										<Settings />
 									))}
 								/>
 								<Route
@@ -76,7 +76,7 @@ function Dashboard() {
 									element={<Customize />}
 								/>
 								<Route
-									path={'/settings'}
+									path={'/recording'}
 									element={<Settings />}
 								/>
 								<Route path='/docs' element={<Docs />} />
