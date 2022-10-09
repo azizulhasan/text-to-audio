@@ -1,11 +1,11 @@
 === Text To Audio ===
 Contributors: hasanazizul
 Donate link: http://azizulhasan.com
-Tags: audio, speech, voice, text to audio, text to speech, record, voice comment, voice to text-comment,
+Tags: audio, speech, voice, text to speech, text to audio, record, voice comment, voice to text-comment,
 Requires at least: 4.0
-Tested up to: 6.0.1
+Tested up to: 6.0.2
 Requires PHP: 5.6
-Stable tag: 1.1.3
+Stable tag: 1.1.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -84,9 +84,14 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 
 == Changelog ==
 
-= 1.1.3 (2022-09-24)  =
+= 1.1.4 (2022-10-09) =
+* Button Icon : Button Icon display hide/show option added.
+* Tabs: Settings tab rearranged.
+
+
+= 1.1.3 (2022-09-24) =
 * Button text : Listeing  and Recoding button text change option added throw filter and attribute.
-* Action Links: Plugin action lints added.
+* Action Links: Plugin action Links added.
 * Documentation: Documentation Improved.
 * Filter added: ```tta__button_text_arr```, ```tta__content_title```, ```tta__content_description``` filter added.
 

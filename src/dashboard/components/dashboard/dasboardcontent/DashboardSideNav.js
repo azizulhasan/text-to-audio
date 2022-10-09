@@ -15,13 +15,13 @@ export default function DashboardSideNav() {
 				<div className='tta-sidenav-menu'>
 					<div className='nav'>
 						{/* Settings menu */}
-						<Link className='nav-link' to={'/settings'}>
+						<Link className='nav-link' to={'/'}>
 							<div className='sb-nav-link-icon'>
 								<i className='fas fa-wrench'></i>
 							</div>
 							Settings
 						</Link>
-						<Link className='nav-link' to={'/'}>
+						<Link className='nav-link' to={'/recording'}>
 							<div className='sb-nav-link-icon'>
 								<i className='fas fa-record-vinyl'></i>
 							</div>

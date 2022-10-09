@@ -47,7 +47,7 @@ if (!defined('ABSPATH')) {
 
 if (!defined('TEXT_TO_AUDIO_VERSION')) {
 
-    define('TEXT_TO_AUDIO_VERSION', '1.1.3');
+    define('TEXT_TO_AUDIO_VERSION', '1.1.4');
 }
 
 if (!defined('TEXT_TO_AUDIO_NONCE')) {
