@@ -35,7 +35,7 @@ export default function Settings() {
 			(res) => {
 				setSettings(res.data);
 				setChecked(res.data.tta__settings_display_btn_in_single_page);
-				setChecked(res.data.tta__settings_display_btn_icon);
+				setShowIcon(res.data.tta__settings_display_btn_icon);
 			});
 	}, []);
 
