@@ -197,20 +197,22 @@ function tta_api_missing() {
     return '';
 }
 
-if( get_option( 'tta_settings_data')->tta__settings_enable_button_add ) {
-    add_filter( 'the_content', 'add_listen_button' );
-    /**
-     * Add listening button to every post by default.
-     */
-    function add_listen_button( $content ) {
-        ob_start();
-        echo do_shortcode('[tta_listen_btn]');
-        $button = ob_get_contents();
-        ob_end_clean();
+$settings = (array) get_option( 'tta_settings_data');
 
-        return $button.$content;
-    }
+
+
+if( isset( $settings['tta__settings_enable_button_add'] ) &&  $settings['tta__settings_enable_button_add'] ) {
+    add_filter( 'the_content', 'add_listen_button' );
 }
 
+/**
+ * Add listening button to every post by default.
+ */
+function add_listen_button( $content ) {
+    ob_start();
+    echo do_shortcode('[tta_listen_btn]');
+    $button = ob_get_contents();
+    ob_end_clean();
 
-
+    return $button.$content;
+}

@@ -130,11 +130,10 @@ class TTA_Hooks {
             "page",
         ];
         $settings = (array) get_option('tta_settings_data');
-        $settings['tta__settings_allow_recording_for_post_type'] = isset($settings['tta__settings_allow_recording_for_post_type']) ? $settings['tta__settings_allow_recording_for_post_type'] : ['all'];
+        $settings['tta__settings_allow_recording_for_post_type'] = isset($settings['tta__settings_allow_recording_for_post_type']) ? $settings['tta__settings_allow_recording_for_post_type'] : 'all';
         if (isset($settings['tta__settings_allow_recording_for_post_type'])
-            && in_array(get_current_screen()->post_type, $settings['tta__settings_allow_recording_for_post_type'])
-            || (in_array('all', $settings['tta__settings_allow_recording_for_post_type'])
-                && in_array(get_current_screen()->post_type, $meta_box_arr))) {
+            && ( 'all' === $settings['tta__settings_allow_recording_for_post_type']
+                || get_current_screen()->post_type === $settings['tta__settings_allow_recording_for_post_type']) ) {
             add_meta_box(
                 'wps22-meta-box',
                 'Text To Audio',
