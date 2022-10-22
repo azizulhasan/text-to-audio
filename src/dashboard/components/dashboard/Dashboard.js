@@ -77,7 +77,7 @@ function Dashboard() {
 								/>
 								<Route
 									path={'/recording'}
-									element={<Settings />}
+									element={<Recording />}
 								/>
 								<Route path='/docs' element={<Docs />} />
 							</Routes>
