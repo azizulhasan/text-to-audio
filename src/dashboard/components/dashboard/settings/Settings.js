@@ -9,14 +9,21 @@ import { postWithoutImage } from '../../context/utilities';
 import toast from '../../context/Notify';
 
 export default function Settings() {
-	const [settings, setSettings] = useState({
+	const [settings, setSettings] = useState( ()=> {
+		
+		return {
+			tta__settings_enable_button_add: false,
 		tta__settings_display_btn_in_single_page: false,
 		tta__settings_display_btn_icon: false,
-		tta__settings_allow_recording_for_post_type: ['all'],
+		tta__settings_allow_recording_for_post_type: 'all',
+		}
+	
 	});
 
 	const [checked, setChecked] = useState(() => false);
 	const [showIcon, setShowIcon ] = useState(() => false)
+	const [enableButtonAdd, setEnableButtonAdd ] = useState(() => true)
+	
 
 	const [postTypes, setPostTypes] = useState([
 		'all',
@@ -33,9 +40,13 @@ export default function Settings() {
 		formData.append('method', 'get');
 		postWithoutImage(tta_obj.api_url + 'tta/v1/settings', formData).then(
 			(res) => {
-				setSettings(res.data);
+				setSettings({...settings, ...res.data});
+				setEnableButtonAdd(res.data.tta__settings_enable_button_add);
 				setChecked(res.data.tta__settings_display_btn_in_single_page);
 				setShowIcon(res.data.tta__settings_display_btn_icon);
+									
+
+	
 			});
 	}, []);
 
@@ -44,16 +55,10 @@ export default function Settings() {
 	 * @param {*} e
 	 */
 	const handleChange = (e) => {
-		if (e.target.name === 'tta__settings_allow_recording_for_post_type') {
-			let temp = settings[e.target.name];
-			temp.push(e.target.value);
-			setSettings({ ...settings, ...{ [e.target.name]: temp } });
-		} else {
 			setSettings({
 				...settings,
 				...{ [e.target.name]: e.target.value },
 			});
-		}
 	};
 
 	/**
@@ -71,14 +76,13 @@ export default function Settings() {
 			if (key === '' || value === '') {
 				toast('Please fill the  field : ' + key);
 				return;
-			} else if (key === 'tta__settings_allow_recording_for_post_type') {
-				arr.push(value);
-				data[key] = arr;
-			} else {
+			} 
+			else {
 				data[key] = value;
 			}
 		}
 
+		data.tta__settings_enable_button_add = enableButtonAdd;
 		data.tta__settings_display_btn_in_single_page = checked;
 		data.tta__settings_display_btn_icon = showIcon;
 		
@@ -88,6 +92,7 @@ export default function Settings() {
 		postWithoutImage(tta_obj.api_url + 'tta/v1/settings', formData)
 			.then((res) => {
 				setSettings(res.data);
+				setEnableButtonAdd(res.data.tta__settings_enable_button_add);
 				setChecked(res.data.tta__settings_display_btn_in_single_page);
 				setShowIcon( res.data.tta__settings_display_btn_icon);
 				toast('Settings Data Saved');
@@ -98,8 +103,36 @@ export default function Settings() {
 	};
 
 	return (
+		
 		<React.Fragment>
 			<Form onSubmit={handleSubmit}>
+				<Row className=' mt-3'>
+					<Col xs={12} sm={6} lg={4}>
+						<Form.Label id='tta__settings_enable_button_add'>
+							Enable button add
+						</Form.Label>
+					</Col>
+					<Col xs={12} sm={12} lg={8}>
+						<Form.Group>
+							<ToggleButton
+								id='toggle-check'
+								type='checkbox'
+								className='form-controll '
+								variant={
+									enableButtonAdd
+										? 'outline-primary'
+										: 'outline-danger'
+								}
+								checked={enableButtonAdd}
+								value='1'
+								onChange={(e) =>
+									setEnableButtonAdd(e.currentTarget.checked)
+								}>
+								{enableButtonAdd ? 'Enable' : 'Disable'}
+							</ToggleButton>
+						</Form.Group>
+					</Col>
+				</Row>
 				<Row className='mt-4'>
 					<Col xs={12} sm={6} lg={4}>
 						<Form.Label id='tta__settings_allow_recording_for_post_type'>
@@ -107,32 +140,22 @@ export default function Settings() {
 						</Form.Label>
 					</Col>
 					<Col xs={12} sm={12} lg={8}>
-						<Form.Group>
+						<Form.Group controlId="tta__settings_allow_recording_for_post_type">
 							<Form.Select
-								id='tta__settings_allow_recording_for_post_type'
-								name='tta__settings_allow_recording_for_post_type'
+								name="tta__settings_allow_recording_for_post_type"
 								onChange={handleChange}
-								defaultValue={
-									settings.tta__settings_allow_recording_for_post_type
-								}
-								multiple>
-								<option disabled>
+								defaultValue={settings.tta__settings_allow_recording_for_post_type}>
+								<option value={'0'}>
 									Select recording post type
 								</option>
-								{postTypes.map((posttype, i) => {
+								{postTypes.length && postTypes.map((posttype, i) => {
 									return (
-										<option key={posttype} value={posttype}>
+										<option key={i} value={posttype}>
 											{posttype}
 										</option>
 									);
 								})}
 							</Form.Select>
-							<Form.Text>
-								Selected:{' '}
-								{
-									settings.tta__settings_allow_recording_for_post_type
-								}
-							</Form.Text>
 						</Form.Group>
 					</Col>
 				</Row>
@@ -145,7 +168,7 @@ export default function Settings() {
 					<Col xs={12} sm={12} lg={8}>
 						<Form.Group>
 							<ToggleButton
-								id='toggle-check'
+								id='display_button_only_single_page'
 								type='checkbox'
 								className='form-controll '
 								variant={
@@ -164,36 +187,36 @@ export default function Settings() {
 					</Col>
 					</Row>
 					<Row className=' mt-3'>
-					<Col xs={12} sm={6} lg={4}>
-						<Form.Label id='tta__settings_display_btn_icon'>
-							Enable Button Icon
-						</Form.Label>
-					</Col>
-					<Col xs={12} sm={12} lg={8}>
-						<Form.Group>
-							<ToggleButton
-								id='showIcon-check'
-								type='checkbox'
-								className='form-controll '
-								variant={
-									showIcon
-										? 'outline-primary'
-										: 'outline-danger'
-								}
-								checked={showIcon}
-								value='1'
-								onChange={(e) =>
-									setShowIcon(e.currentTarget.checked)
-								}>
-								{showIcon ? 'Enable' : 'Disable'}
-							</ToggleButton>
-						</Form.Group>
-					</Col>
-					<div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
-						<button type='submit' className='tta_btn  btn-block'>
-							Submit
-						</button>
-					</div>
+						<Col xs={12} sm={6} lg={4}>
+							<Form.Label id='tta__settings_display_btn_icon'>
+								Enable Button Icon
+							</Form.Label>
+						</Col>
+						<Col xs={12} sm={12} lg={8}>
+							<Form.Group>
+								<ToggleButton
+									id='showIcon-check'
+									type='checkbox'
+									className='form-controll '
+									variant={
+										showIcon
+											? 'outline-primary'
+											: 'outline-danger'
+									}
+									checked={showIcon}
+									value='1'
+									onChange={(e) =>
+										setShowIcon(e.currentTarget.checked)
+									}>
+									{showIcon ? 'Enable' : 'Disable'}
+								</ToggleButton>
+							</Form.Group>
+						</Col>
+						<div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
+							<button type='submit' className='tta_btn  btn-block'>
+								Submit
+							</button>
+						</div>
 				</Row>
 			</Form>
 		</React.Fragment>

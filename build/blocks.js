@@ -157,12 +157,7 @@ function Customize(props) {
     },
     type: "button",
     title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Text To Audio:  Tap to listen post.')
-  }, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("span", {
-    className: "dashicons dashicons-controls-play",
-    style: {
-      lineHeight: '1.5;'
-    }
-  }), (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Listen')), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("style", {
+  }, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Listen')), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("style", {
     dangerouslySetInnerHTML: {
       __html: ['button.tta__listen_content .dashicons {', 'line-height: 1.5;', '}'].join('\n')
     }

@@ -60,6 +60,11 @@ if (!defined('TEXT_TO_AUDIO_TEXT_DOMAIN')) {
     define('TEXT_TO_AUDIO_TEXT_DOMAIN', 'text-to-audio');
 }
 
+if (!defined('TEXT_TO_AUDIO_ROOT_FILE')) {
+
+    define('TEXT_TO_AUDIO_ROOT_FILE', __FILE__);
+}
+
 /**
  * Begins execution of the plugin.
  *
