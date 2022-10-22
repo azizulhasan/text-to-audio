@@ -156,11 +156,11 @@ function Customize(props) {
 				}}
 				type='button'
 				title={__('Text To Audio:  Tap to listen post.')}>
-				<span
+				{/* <span
 					className='dashicons dashicons-controls-play'
 					style={{
 						lineHeight: '1.5;',
-					}}></span>
+					}}></span> */}
 				{__('Listen')}
 			</button>
 			<style

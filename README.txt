@@ -5,7 +5,7 @@ Tags: audio, speech, voice, text to speech, text to audio, record, voice comment
 Requires at least: 4.0
 Tested up to: 6.0.2
 Requires PHP: 5.6
-Stable tag: 1.1.4
+Stable tag: 1.1.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,8 +63,27 @@ Open FireFox browser, search ```about:config``` on a new tab. Now search with th
 Yes, you can add listening button from block editor. Open you block editor and search ```Customize Button``` then add it.
 Now you can change ```color```, ```backgroundColor```, ```width```. And also add ```custom_css```.
 = How to change button text? =
-You can change button text 2 ways one is by shortcode attribute. Another way is adding filter. But filter always overrides the shortcode attributes. Here is short code Example :{' '}
+You can change button text 2 ways one is by shortcode attribute. Another way is adding filter. But filter always overrides the shortcode attributes. Here is short code Example :
 	`[tta_listen_btn listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay" start_text="Start" stop_text="Stop"]`
+
+    Filter Example :
+
+    add_filter( 'tta__button_text_arr', 'tta__button_text_arr_callback' );
+    function tta__button_text_arr_callback ( $button_text_arr ) {
+
+		// Listen button
+		$text_arr['listen_text'] = 'Listen'; // paste custem text
+		$text_arr['pause_text'] = 'Pause'; // paste custem text
+		$text_arr['resume_text'] = 'Resume'; // paste custem text
+		$text_arr['replay_text'] = 'Replay'; // paste custem text
+
+		// Record button text
+		$text_arr['start_text'] = 'Start'; // paste custem text
+		$text_arr['stop_text'] = 'Stop'; // paste custem text
+		
+		return $text_arr;
+    }
+              
 = How to add custom css class to button? =
 Add class on shortcode as an attribute. Example : `[tta_listen_btn class="custom_class"]`
 = How can I change button background and text color? =
@@ -83,6 +102,12 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 8. Customize the button in block editor, Block Name ( Customize Button ).
 
 == Changelog ==
+
+= 1.1.5 (2022-10-22) =
+* Added:  enable/disable option for adding button to every post.
+* Improved:  Settings UI improved.
+* Improved:  Documentation improved.
+
 
 = 1.1.4 (2022-10-09) =
 * Button Icon : Button Icon display hide/show option added.
