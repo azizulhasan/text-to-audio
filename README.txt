@@ -3,9 +3,9 @@ Contributors: hasanazizul
 Donate link: http://azizulhasan.com
 Tags: audio, speech, voice, text to speech, text to audio, record, voice comment, voice to text-comment,
 Requires at least: 4.0
-Tested up to: 6.0.2
+Tested up to: 6.1
 Requires PHP: 5.6
-Stable tag: 1.1.5
+Stable tag: 1.1.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -102,6 +102,10 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 8. Customize the button in block editor, Block Name ( Customize Button ).
 
 == Changelog ==
+
+= 1.1.5 (2022-10-22) =
+* Tested: WordPress verison 6.1 tested .
+* Improved: Button UI improved.
 
 = 1.1.5 (2022-10-22) =
 * Added:  enable/disable option for adding button to every post.
