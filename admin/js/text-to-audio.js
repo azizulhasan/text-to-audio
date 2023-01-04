@@ -12,53 +12,66 @@ const ttaGetData = async (url = '', data = {}) => {
 	return responseData;
 };
 
-
-	const TTA = {
+let TTA = {
 	speechSynthesis: true,
-	SpeechRecognition: true,
+	utterence: new SpeechSynthesisUtterance(),
+	speechRecognitionIsActive: true,
+	speechRecognition: window.speechRecognition || window.webkitSpeechRecognition,
 	recordStatus: 'record',
 	listenStatus: 'listen',
 	noticeClass: 'tta_notice',
+	timer: null,
+	// pauseResumeTimer: () => {
+	// 	speechSynthesis.pause();
+	// 	//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
+	// 	console.log(TTA.utterence);
+	// 	// Placing the speak invocation inside a callback fixes ordering and onend issues
+	// 	setTimeout(() => {
+	// 		speechSynthesis.resume();
+	// 	}, 0);
+
+	// 	timer = setTimeout(TTA.pauseResumeTimer, 10000)
+	// },
 	buttonTextArr: text_to_audio_obj.buttonTextArr,
-	playButtonText: function(){
+	playButtonText: function () {
 		return this.buttonTextArr.listen_text;
 	},
-	playButtonContent: function(){
+	playButtonContent: function () {
 		return '<span class="dashicons dashicons-controls-play"></span> ' + this.playButtonText();
 	},
-	replayButtonText: function(){
+	replayButtonText: function () {
 		return this.buttonTextArr.replay_text;
 	},
-	replayButtonContent: function() {
+	replayButtonContent: function () {
 		return '<span class="dashicons dashicons-image-rotate"></span> ' + this.replayButtonText();
 	},
-	pauseButtonText: function() {
+	pauseButtonText: function () {
 		return this.buttonTextArr.pause_text;
 	},
-	pauseButtonContent: function() {
+	pauseButtonContent: function () {
 		return '<span class="dashicons dashicons-controls-pause"></span> ' + this.pauseButtonText();
 	},
-	resumeButtonText: function() {
+	resumeButtonText: function () {
 		return this.buttonTextArr.resume_text;
 	},
-	resumeButtonContent: function(){
+	resumeButtonContent: function () {
 		return '<span class="dashicons dashicons-controls-play"></span> ' + this.buttonTextArr.resume_text;
 	},
-	recordStartButtonContent: function(){
+	recordStartButtonContent: function () {
 		return '<span class="dashicons dashicons-controls-volumeoff"></span> ' + this.buttonTextArr.start_text;
 	},
 
-	recordStopButtonConten: function(){
+	recordStopButtonConten: function () {
 		return '<span class="dashicons dashicons-controls-volumeon"></span> ' + this.buttonTextArr.stop_text;
 	},
-	
-	
+
+
 	displayApiMissing(button_id = '', is_dashboard = false) {
 		let notice = '';
 		let link = '';
 
-		if (!this.SpeechRecognition) {
-			notice += 'Text To Audio: Please enable SpeechRecognition';
+		if (!this.TTA.speechRecognitionIsActive) {
+			notice += 'Text To Audio: Please enable speechRecognition';
 		}
 		if (!this.speechSynthesis) {
 			if (notice) {
@@ -113,8 +126,7 @@ const ttaGetData = async (url = '', data = {}) => {
 };
 
 
-var SpeechRecognition =
-	window.SpeechRecognition || window.webkitSpeechRecognition;
+
 var SpeechGrammarList =
 	window.SpeechGrammarList || window.webkitSpeechGrammarList;
 var SpeechGrammar = window.SpeechGrammar || window.webkitSpeechGrammar;
@@ -122,14 +134,14 @@ var SpeechRecognitionEvent =
 	window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent;
 
 /**
- * Check if SpeechRecognition, speechSynthesis is definded in FireFox.
+ * Check if speechRecognition, speechSynthesis is definded in FireFox.
  * If not then show alert for enabling them.
  *
  */
-if (window.SpeechRecognition == undefined) {
-	TTA.SpeechRecognition = false;
+if (TTA.speechRecognition == undefined) {
+	TTA.speechRecognitionIsActive = false;
 } else {
-	var recognition = new SpeechRecognition();
+	var recognition = new TTA.speechRecognition();
 	var grammar =
 		'#JSGF V1.0; grammar colors; public <color> = aqua | azure | beige | bisque | black | blue | brown | chocolate | coral | crimson | cyan | fuchsia | ghostwhite | gold | goldenrod | gray | green | indigo | ivory | khaki | lavender | lime | linen | magenta | maroon | moccasin | navy | olive | orange | orchid | peru | pink | plum | purple | red | salmon | sienna | silver | snow | tan | teal | thistle | tomato | turquoise | violet | white | yellow ;';
 	var speechRecognitionList = new SpeechGrammarList();
@@ -186,7 +198,7 @@ if (window.SpeechRecognition == undefined) {
 if (window.speechSynthesis == undefined) {
 	TTA.speechSynthesis = false;
 } else {
-	var utterence = new SpeechSynthesisUtterance();
+	TTA.utterence = new SpeechSynthesisUtterance();
 }
 
 /**
@@ -225,7 +237,7 @@ function ttaStartRecording(
 		speechSynthesis.cancel();
 	}
 
-	if (!TTA.SpeechRecognition) {
+	if (!TTA.speechRecognitionIsActive) {
 		if (document.getElementsByClassName('wp-block-post-title')) {
 			TTA.displayApiMissing('', true);
 		} else {
@@ -417,7 +429,7 @@ function ttaListenCotentInDashboard(btn_id, content, listeningSettings) {
 	/**
 	 * Stop recording before listening.
 	 */
-	if (TTA.SpeechRecognition && recognition) {
+	if (TTA.speechRecognitionIsActive && recognition) {
 		recognition.stop();
 	}
 
@@ -482,53 +494,84 @@ function ttaSetCurrentListeningContent() {
  */
 function ttaStartListening(btn_id, content, listeningSettings = null) {
 	let listen_btn = document.getElementById(btn_id);
-
-	utterence.text = content;
+	TTA.utterence.text = content;
 	var voices = speechSynthesis.getVoices();
 	if (listeningSettings) {
-		utterence.voice = voices.filter(
+		TTA.utterence.voice = voices.filter(
 			(voice, i) => voice.name === listeningSettings.tta__listening_voice,
 		)[0];
 	} else {
-		utterence.voice = voices[0];
+		TTA.utterence.voice = voices[0];
 	}
-	utterence.volume = listeningSettings.tta__listening_volume
+	TTA.utterence.volume = listeningSettings.tta__listening_volume
 		? listeningSettings.tta__listening_volume
 		: 1; // From 0 to 1
-	utterence.rate = listeningSettings.tta__listening_rate
+	TTA.utterence.rate = listeningSettings.tta__listening_rate
 		? listeningSettings.tta__listening_rate
 		: 1; // From 0.1 to 10
-	utterence.pitch = listeningSettings.tta__listening_pitch
+	TTA.utterence.pitch = listeningSettings.tta__listening_pitch
 		? listeningSettings.tta__listening_pitch
 		: 2; // From 0 to 2
-	utterence.lang = listeningSettings.tta__listening_lang
+	TTA.utterence.lang = listeningSettings.tta__listening_lang
 		? listeningSettings.tta__listening_lang
 		: 'en-US'; // It will be speaking language.
 
 	if (TTA.listenStatus == 'listen') {
-		speechSynthesis.speak(utterence);
+		//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
+		console.log(TTA.utterence);
+		// Placing the speak invocation inside a callback fixes ordering and onend issues
+		setTimeout(() => {
+			speechSynthesis.speak(TTA.utterence);
+		}, 0);
+
+		TTA.timer = setTimeout(function pauseResumeTimer() {
+			speechSynthesis.pause();
+			//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
+			console.log(TTA.utterence);
+			// Placing the speak invocation inside a callback fixes ordering and onend issues
+			setTimeout(() => {
+				speechSynthesis.resume();
+			}, 0);
+
+			TTA.timer = setTimeout(pauseResumeTimer, 10000)
+		}, 10000);
 		listen_btn.innerHTML = TTA.pauseButtonContent();
-		listen_btn.setAttribute('title', 'Text To Audio : '+ TTA.pauseButtonText());
+		listen_btn.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
 		TTA.listenStatus = 'pause';
 	} else if (TTA.listenStatus == 'pause') {
+		clearTimeout(TTA.timer);
 		speechSynthesis.pause();
 		listen_btn.innerHTML = TTA.resumeButtonContent();
-		listen_btn.setAttribute('title', 'Text To Audio : ' + TTA.resumeButtonText() );
+		listen_btn.setAttribute('title', 'Text To Audio : ' + TTA.resumeButtonText());
 		TTA.listenStatus = 'resume';
 	} else if (TTA.listenStatus == 'resume') {
 		listen_btn.innerHTML = TTA.pauseButtonContent();
 		TTA.listenStatus = 'pause';
-		listen_btn.setAttribute('title', 'Text To Audio : '+ TTA.pauseButtonText() );
+		listen_btn.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
 		speechSynthesis.resume();
+		TTA.timer = setTimeout(function pauseResumeTimer() {
+			speechSynthesis.pause();
+			//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
+			console.log(TTA.utterence);
+			// Placing the speak invocation inside a callback fixes ordering and onend issues
+			setTimeout(() => {
+				speechSynthesis.resume();
+			}, 0);
+
+			TTA.timer = setTimeout(pauseResumeTimer, 10000)
+		}, 10000);
 	}
+
 }
 
 /**
  * After ending reading the content.
  */
-if (TTA.speechSynthesis && utterence) {
-	utterence.addEventListener('end', function (event) {
-		speechSynthesis.cancel();
+if (TTA.speechSynthesis && TTA.utterence) {
+	TTA.utterence.addEventListener('end', function (event) {
+		//speechSynthesis.cancel();
+		clearTimeout(TTA.timer);
+
 		let listen_btn = document.getElementById(
 			localStorage.getItem('current_play_btn_id'),
 		);
@@ -549,7 +592,7 @@ function ttaListenCotentInFrontend(
 	/**
 	 * Stop recording before listening.
 	 */
-	if (TTA.SpeechRecognition && recognition) {
+	if (TTA.speechRecognitionIsActive && recognition) {
 		recognition.stop();
 	}
 
@@ -576,7 +619,7 @@ Object.values(document.getElementsByTagName('textarea')).forEach(
 		textarea.addEventListener('focus', function () {
 			TTA.listenStatus = 'listen';
 			let listen_btn = document.getElementById('wpa__listen_content');
-			
+
 			if (listen_btn) listen_btn.innerHTML = TTA.playButtonContent();
 			if (listen_btn)
 				listen_btn.setAttribute('title', 'Text To Audio : ' + TTA.playButtonText());
@@ -593,7 +636,7 @@ Object.values(document.getElementsByTagName('textarea')).forEach(
 				if (TTA.speechSynthesis) {
 					speechSynthesis.cancel();
 				}
-				if (!TTA.SpeechRecognition) {
+				if (!TTA.speechRecognitionIsActive) {
 					TTA.displayApiMissing();
 				}
 				localStorage.setItem(
@@ -623,7 +666,3 @@ Object.values(document.getElementsByTagName('textarea')).forEach(
 );
 
 window.tta = TTA;
-
-
-
-
