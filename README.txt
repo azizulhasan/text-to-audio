@@ -5,7 +5,7 @@ Tags: audio, speech, voice, text to speech, text to audio, record, voice comment
 Requires at least: 4.0
 Tested up to: 6.1
 Requires PHP: 5.6
-Stable tag: 1.1.6
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -103,7 +103,11 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 
 == Changelog ==
 
-= 1.1.5 (2022-10-22) =
+= 1.2.0 (2023-01-04) =
+* Fixed: speechSynthesis pause after 10 - 15 seconds issue fixed.
+* Tested: WordPress verison 6.1.1 tested.
+
+= 1.1.6 (2022-10-22) =
 * Tested: WordPress verison 6.1 tested .
 * Improved: Button UI improved.
 
