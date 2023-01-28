@@ -1,11 +1,11 @@
-=== Text To Audio ===
+=== Text To Speech Ninja ===
 Contributors: hasanazizul
 Donate link: http://azizulhasan.com
-Tags: audio, speech, voice, text to speech, text to audio, record, voice comment, voice to text-comment,
+Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, voice to text-comment,
 Requires at least: 4.0
 Tested up to: 6.1
 Requires PHP: 5.6
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -67,6 +67,7 @@ You can change button text 2 ways one is by shortcode attribute. Another way is 
 	`[tta_listen_btn listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay" start_text="Start" stop_text="Stop"]`
 
     Filter Example :
+	Install the plugin Code Snippets Then Select Snippet > Add New Create a new snippet with this block of code
 
     add_filter( 'tta__button_text_arr', 'tta__button_text_arr_callback' );
     function tta__button_text_arr_callback ( $button_text_arr ) {
@@ -102,6 +103,11 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 8. Customize the button in block editor, Block Name ( Customize Button ).
 
 == Changelog ==
+
+= 1.2.1 (2023-01-28) =
+* Improved: Documentation improved.
+* Added: .pot file added for translation.
+* Updated: Plugin name from Text To Audio to Text To Speech Ninja.
 
 = 1.2.0 (2023-01-04) =
 * Fixed: speechSynthesis pause after 10 - 15 seconds issue fixed.

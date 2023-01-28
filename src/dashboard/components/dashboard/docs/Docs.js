@@ -101,6 +101,9 @@ export default function Docs() {
 						/>
 					</button>
 					<div>
+						Install the plugin <a href='https://wordpress.org/plugins/code-snippets/' target={'_blank'}>Code Snippets</a>
+						Then Select Snippet {'>'} Add New
+						Create a new snippet with this block of code
 						<pre>
 							<code id='filter_hook'>
 								{`

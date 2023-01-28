@@ -12,8 +12,8 @@ export default function DashboardTopNav() {
     <nav className="sb-topnav navbar navbar-expand topnav_bg">
       {/* <!-- Navbar Brand--> */}
       <Link className="navbar-brand ps-3" style={style.head} to="/">
-      Text To Audio<br></br>
-      <small>Version: {tta_obj.VERSION} </small>
+        {tta_obj.plugin_name}<br></br>
+        <small>Version: {tta_obj.VERSION} </small>
       </Link>
       {/* <!-- Sidebar Toggle--> */}
       <button
@@ -26,13 +26,13 @@ export default function DashboardTopNav() {
 
       {/* me-3 me-lg-4 */}
       <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://wordpress.org/support/plugin/text-to-audio/#new-topic-0" target="_blank">
-      Support
+        Support
       </a>
       <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://wordpress.org/support/plugin/text-to-audio/reviews/#new-post" target="_blank">
-      Give A Review
+        Give A Review
       </a>
       <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://wp-speech.azizulhasan.com/contact/" target="_blank">
-      Rquest a feature
+        Rquest a feature
       </a>
     </nav>
   );
