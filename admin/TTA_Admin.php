@@ -83,6 +83,7 @@ class TTA_Admin {
                 'image_url' => WP_PLUGIN_URL . '/text-to-audio/admin/images',
                 'plugin_url' => WP_PLUGIN_URL . '/text-to-audio',
                 'nonce' => wp_create_nonce(TEXT_TO_AUDIO_NONCE),
+                'plugin_name' => TEXT_TO_AUDIO_PLUGIN_NAME,
                 'rest_nonce' => wp_create_nonce('wp_rest'),
                 'post_types' => get_post_types(),
                 'buttonTextArr' => apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr' ) ),
@@ -161,8 +162,8 @@ class TTA_Admin {
 
     public function TTA_menu() {
         add_menu_page(
-            __('Text To Audio', TEXT_TO_AUDIO_TEXT_DOMAIN),
-            __('Text To Audio', TEXT_TO_AUDIO_TEXT_DOMAIN),
+            __('Text To Speech Ninja', TEXT_TO_AUDIO_TEXT_DOMAIN),
+            __('Text To Speech', TEXT_TO_AUDIO_TEXT_DOMAIN),
             'manage_options',
             TEXT_TO_AUDIO_TEXT_DOMAIN,
             array($this, "TTA_settings"),

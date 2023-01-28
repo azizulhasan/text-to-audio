@@ -9,21 +9,21 @@ import { postWithoutImage } from '../../context/utilities';
 import toast from '../../context/Notify';
 
 export default function Settings() {
-	const [settings, setSettings] = useState( ()=> {
-		
+	const [settings, setSettings] = useState(() => {
+
 		return {
 			tta__settings_enable_button_add: false,
-		tta__settings_display_btn_in_single_page: false,
-		tta__settings_display_btn_icon: false,
-		tta__settings_allow_recording_for_post_type: 'all',
+			tta__settings_display_btn_in_single_page: false,
+			tta__settings_display_btn_icon: false,
+			tta__settings_allow_recording_for_post_type: 'all',
 		}
-	
+
 	});
 
 	const [checked, setChecked] = useState(() => false);
-	const [showIcon, setShowIcon ] = useState(() => false)
-	const [enableButtonAdd, setEnableButtonAdd ] = useState(() => true)
-	
+	const [showIcon, setShowIcon] = useState(() => false)
+	const [enableButtonAdd, setEnableButtonAdd] = useState(() => true)
+
 
 	const [postTypes, setPostTypes] = useState([
 		'all',
@@ -40,13 +40,13 @@ export default function Settings() {
 		formData.append('method', 'get');
 		postWithoutImage(tta_obj.api_url + 'tta/v1/settings', formData).then(
 			(res) => {
-				setSettings({...settings, ...res.data});
+				setSettings({ ...settings, ...res.data });
 				setEnableButtonAdd(res.data.tta__settings_enable_button_add);
 				setChecked(res.data.tta__settings_display_btn_in_single_page);
 				setShowIcon(res.data.tta__settings_display_btn_icon);
-									
 
-	
+
+
 			});
 	}, []);
 
@@ -55,10 +55,10 @@ export default function Settings() {
 	 * @param {*} e
 	 */
 	const handleChange = (e) => {
-			setSettings({
-				...settings,
-				...{ [e.target.name]: e.target.value },
-			});
+		setSettings({
+			...settings,
+			...{ [e.target.name]: e.target.value },
+		});
 	};
 
 	/**
@@ -76,7 +76,7 @@ export default function Settings() {
 			if (key === '' || value === '') {
 				toast('Please fill the  field : ' + key);
 				return;
-			} 
+			}
 			else {
 				data[key] = value;
 			}
@@ -85,7 +85,7 @@ export default function Settings() {
 		data.tta__settings_enable_button_add = enableButtonAdd;
 		data.tta__settings_display_btn_in_single_page = checked;
 		data.tta__settings_display_btn_icon = showIcon;
-		
+
 		let formData = new FormData();
 		formData.append('fields', JSON.stringify(data));
 		formData.append('method', 'post');
@@ -94,7 +94,7 @@ export default function Settings() {
 				setSettings(res.data);
 				setEnableButtonAdd(res.data.tta__settings_enable_button_add);
 				setChecked(res.data.tta__settings_display_btn_in_single_page);
-				setShowIcon( res.data.tta__settings_display_btn_icon);
+				setShowIcon(res.data.tta__settings_display_btn_icon);
 				toast('Settings Data Saved');
 			})
 			.catch((err) => {
@@ -103,7 +103,7 @@ export default function Settings() {
 	};
 
 	return (
-		
+
 		<React.Fragment>
 			<Form onSubmit={handleSubmit}>
 				<Row className=' mt-3'>
@@ -185,38 +185,38 @@ export default function Settings() {
 							</ToggleButton>
 						</Form.Group>
 					</Col>
-					</Row>
-					<Row className=' mt-3'>
-						<Col xs={12} sm={6} lg={4}>
-							<Form.Label id='tta__settings_display_btn_icon'>
-								Enable Button Icon
-							</Form.Label>
-						</Col>
-						<Col xs={12} sm={12} lg={8}>
-							<Form.Group>
-								<ToggleButton
-									id='showIcon-check'
-									type='checkbox'
-									className='form-controll '
-									variant={
-										showIcon
-											? 'outline-primary'
-											: 'outline-danger'
-									}
-									checked={showIcon}
-									value='1'
-									onChange={(e) =>
-										setShowIcon(e.currentTarget.checked)
-									}>
-									{showIcon ? 'Enable' : 'Disable'}
-								</ToggleButton>
-							</Form.Group>
-						</Col>
-						<div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
-							<button type='submit' className='tta_btn  btn-block'>
-								Submit
-							</button>
-						</div>
+				</Row>
+				<Row className=' mt-3'>
+					<Col xs={12} sm={6} lg={4}>
+						<Form.Label id='tta__settings_display_btn_icon'>
+							Enable Button Icon
+						</Form.Label>
+					</Col>
+					<Col xs={12} sm={12} lg={8}>
+						<Form.Group>
+							<ToggleButton
+								id='showIcon-check'
+								type='checkbox'
+								className='form-controll '
+								variant={
+									showIcon
+										? 'outline-primary'
+										: 'outline-danger'
+								}
+								checked={showIcon}
+								value='1'
+								onChange={(e) =>
+									setShowIcon(e.currentTarget.checked)
+								}>
+								{showIcon ? 'Enable' : 'Disable'}
+							</ToggleButton>
+						</Form.Group>
+					</Col>
+					<div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
+						<button type='submit' className='tta_btn  btn-block'>
+							Submit
+						</button>
+					</div>
 				</Row>
 			</Form>
 		</React.Fragment>
