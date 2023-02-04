@@ -1,11 +1,11 @@
 === Text To Speech Ninja ===
-Contributors: hasanazizul
-Donate link: http://azizulhasan.com
+Contributors: atlasaidev, hasanazizul
+Donate link: http://atlasaidev.com/
 Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, voice to text-comment,
 Requires at least: 4.0
 Tested up to: 6.1
 Requires PHP: 5.6
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,8 +18,8 @@ Add functionality to WordPress site to read blogs out loud in more than 30 langu
 There is no need to create an account it’s completely free. Just install the plugin and enjoy the whole features of the plugin.
 
 ### Useful Links:
-> * [Live Demo](https://wp-speech.azizulhasan.com/text-to-audio/)
-> * [Request A Feature](https://wp-speech.azizulhasan.com/contact/)
+> * [Live Demo](http://atlasaidev.com/text-to-speech/)
+> * [Request A Feature](http://atlasaidev.com/contact/)
 
 **Features:**
 
@@ -103,6 +103,9 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 8. Customize the button in block editor, Block Name ( Customize Button ).
 
 == Changelog ==
+
+= 1.2.2 (2023-02-04) =
+* Updated: URL change.
 
 = 1.2.1 (2023-01-28) =
 * Improved: Documentation improved.

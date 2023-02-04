@@ -65,7 +65,6 @@ let TTA = {
 		return '<span class="dashicons dashicons-controls-volumeon"></span> ' + this.buttonTextArr.stop_text;
 	},
 
-
 	displayApiMissing(button_id = '', is_dashboard = false) {
 		let notice = '';
 		let link = '';
@@ -123,6 +122,37 @@ let TTA = {
 		}
 		throw new Error(notice);
 	},
+
+
+	isAndroid: function () {
+		var ua = navigator.userAgent.toLowerCase();
+		var isAndroid = ua.indexOf("android") > -1; //&& ua.indexOf("mobile");
+		console.log(isAndroid)
+		if (isAndroid) {
+			return true;
+		}
+		return true
+	},
+	getContentArr: function (content) {
+		let contentArr = content.split(' ');
+		let start = 0;
+		let prevIndex = start;
+		let contentArray = [];
+		let chunkLength = 23;
+		for (let i = 0; i < 500; i++) {
+			let data = contentArr.splice(start, chunkLength).join(' ')
+			contentArray.push(data)
+			prevIndex = start;
+			start += chunkLength
+			if (start > contentArr.length) {
+				let data = contentArr.splice(prevIndex, contentArr.length).join(' ')
+				contentArray.push(data)
+				break;
+			}
+		}
+
+		return contentArray;
+	}
 };
 
 
@@ -492,9 +522,14 @@ function ttaSetCurrentListeningContent() {
 /**
  * Start Reading content
  */
-function ttaStartListening(btn_id, content, listeningSettings = null) {
+function ttaStartListening(btn_id, content, listeningSettings = null, chunkIndex = 0) {
+	console.log(chunkIndex)
+	console.log(TTA.listenStatus)
+	if (content.length <= chunkIndex) {
+		return;
+	}
 	let listen_btn = document.getElementById(btn_id);
-	TTA.utterence.text = content;
+	TTA.utterence.text = content[chunkIndex];
 	var voices = speechSynthesis.getVoices();
 	if (listeningSettings) {
 		TTA.utterence.voice = voices.filter(
@@ -518,29 +553,47 @@ function ttaStartListening(btn_id, content, listeningSettings = null) {
 
 	if (TTA.listenStatus == 'listen') {
 		//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
-		console.log(TTA.utterence);
-		// Placing the speak invocation inside a callback fixes ordering and onend issues
-		setTimeout(() => {
-			speechSynthesis.speak(TTA.utterence);
-		}, 0);
-
-		TTA.timer = setTimeout(function pauseResumeTimer() {
-			speechSynthesis.pause();
-			//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
-			console.log(TTA.utterence);
+		console.log(TTA.utterence); ~
 			// Placing the speak invocation inside a callback fixes ordering and onend issues
-			setTimeout(() => {
-				speechSynthesis.resume();
-			}, 0);
+			// setTimeout(() => {
+			// 	speechSynthesis.speak(TTA.utterence);
+			// }, 0);
+			speechSynthesis.speak(TTA.utterence);
+		// TTA.timer = setTimeout(function pauseResumeTimer() {
 
-			TTA.timer = setTimeout(pauseResumeTimer, 10000)
-		}, 10000);
+		if (TTA.isAndroid()) {
+			TTA.utterence.addEventListener('end', function (event) {
+				speechSynthesis.cancel()
+				TTA.listenStatus = 'listen'
+				return ttaStartListening(btn_id, content, listeningSettings, ++chunkIndex)
+			})
+
+		} else {
+			speechSynthesis.pause();
+		}
+		// 	//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
+		// 	console.log(TTA.utterence);
+		// 	// Placing the speak invocation inside a callback fixes ordering and onend issues
+		// 	setTimeout(() => {
+		// 		speechSynthesis.resume();
+		// 	}, 0);
+
+		// 	TTA.timer = setTimeout(pauseResumeTimer, 15000)
+		// }, 15000);
 		listen_btn.innerHTML = TTA.pauseButtonContent();
 		listen_btn.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
 		TTA.listenStatus = 'pause';
 	} else if (TTA.listenStatus == 'pause') {
-		clearTimeout(TTA.timer);
-		speechSynthesis.pause();
+		// clearTimeout(TTA.timer);
+		if (TTA.isAndroid()) {
+			TTA.utterence.addEventListener('end', function (event) {
+				speechSynthesis.cancel()
+
+				return ttaStartListening(btn_id, content, listeningSettings, ++chunkIndex)
+			})
+		} else {
+			speechSynthesis.pause();
+		}
 		listen_btn.innerHTML = TTA.resumeButtonContent();
 		listen_btn.setAttribute('title', 'Text To Audio : ' + TTA.resumeButtonText());
 		TTA.listenStatus = 'resume';
@@ -549,17 +602,24 @@ function ttaStartListening(btn_id, content, listeningSettings = null) {
 		TTA.listenStatus = 'pause';
 		listen_btn.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
 		speechSynthesis.resume();
-		TTA.timer = setTimeout(function pauseResumeTimer() {
+		// TTA.timer = setTimeout(function pauseResumeTimer() {
+		if (TTA.isAndroid()) {
+			TTA.utterence.addEventListener('end', function (event) {
+				speechSynthesis.cancel()
+				return ttaStartListening(btn_id, content, listeningSettings, ++chunkIndex)
+			})
+		} else {
 			speechSynthesis.pause();
-			//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
-			console.log(TTA.utterence);
-			// Placing the speak invocation inside a callback fixes ordering and onend issues
-			setTimeout(() => {
-				speechSynthesis.resume();
-			}, 0);
+		}
+		// 	//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
+		// 	console.log(TTA.utterence);
+		// 	// Placing the speak invocation inside a callback fixes ordering and onend issues
+		// 	setTimeout(() => {
+		// 		speechSynthesis.resume();
+		// 	}, 0);
 
-			TTA.timer = setTimeout(pauseResumeTimer, 10000)
-		}, 10000);
+		// 	TTA.timer = setTimeout(pauseResumeTimer, 15000)
+		// }, 15000);
 	}
 
 }
@@ -567,19 +627,19 @@ function ttaStartListening(btn_id, content, listeningSettings = null) {
 /**
  * After ending reading the content.
  */
-if (TTA.speechSynthesis && TTA.utterence) {
-	TTA.utterence.addEventListener('end', function (event) {
-		//speechSynthesis.cancel();
-		clearTimeout(TTA.timer);
+// if (TTA.speechSynthesis && TTA.utterence) {
+// 	TTA.utterence.addEventListener('end', function (event) {
+// 		//speechSynthesis.cancel();
+// 		clearTimeout(TTA.timer);
 
-		let listen_btn = document.getElementById(
-			localStorage.getItem('current_play_btn_id'),
-		);
-		listen_btn.innerHTML = TTA.replayButtonContent();
-		listen_btn.setAttribute('title', 'Text To Audio : ' + TTA.replayButtonText());
-		TTA.listenStatus = 'listen';
-	});
-}
+// 		let listen_btn = document.getElementById(
+// 			localStorage.getItem('current_play_btn_id'),
+// 		);
+// 		listen_btn.innerHTML = TTA.replayButtonContent();
+// 		listen_btn.setAttribute('title', 'Text To Audio : ' + TTA.replayButtonText());
+// 		TTA.listenStatus = 'listen';
+// 	});
+// }
 
 /**
  * Read the blog
@@ -604,7 +664,9 @@ function ttaListenCotentInFrontend(
 	localStorage.setItem('recordStarted', false);
 	localStorage.setItem('current_play_btn_id', btn_id);
 
-	ttaStartListening(btn_id, content, listeningSettings);
+	let contentArr = TTA.getContentArr(content);
+
+	ttaStartListening(btn_id, contentArr, listeningSettings);
 }
 
 /**
