@@ -89,7 +89,7 @@ function tta_get_button_content($atts, $is_block = false) {
     $btn_no++;
 
     $sentence_delimiter = isset($recording['tta__sentence_delimiter']) ? $recording['tta__sentence_delimiter'] : '. ';
-    $title = get_the_title() . $sentence_delimiter . " ";
+    $title = tta_clean_content( get_the_title() ) . $sentence_delimiter . " ";
 
     $description = get_the_content();
     $description = tta_clean_content($description);
