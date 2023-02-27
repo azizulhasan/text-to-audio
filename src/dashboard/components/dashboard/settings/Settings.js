@@ -162,7 +162,7 @@ export default function Settings() {
 				<Row className=' mt-3'>
 					<Col xs={12} sm={6} lg={4}>
 						<Form.Label id='tta__settings_display_btn_in_single_page'>
-							Display Button Only Single Page
+							Display Button On Single Page
 						</Form.Label>
 					</Col>
 					<Col xs={12} sm={12} lg={8}>

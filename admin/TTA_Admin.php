@@ -152,8 +152,10 @@ class TTA_Admin {
             'admin_url' => admin_url('/'),
             'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
             'buttonTextArr' => apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr' ) ),
-
         ]);
+        
+        wp_enqueue_style('dashicons');
+
     }
 
     /**

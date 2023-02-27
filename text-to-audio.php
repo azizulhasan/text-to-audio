@@ -7,7 +7,7 @@
  * registers the activation and deactivation functions, and defines a function
  * that starts the plugin.
  *
- * @link              http://azizulhasan.com
+ * @link              http://atlasaidev.com/
  * @since             1.0.0
  * @package           TTA
  *
@@ -15,8 +15,8 @@
  * Plugin Name:       Text To Speech Ninja
  * Description:       Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages.
  * Version:           1.2.3
- * Author:            Azizul Hasan
- * Author URI:        http://azizulhasan.com
+ * Author:            Atlas AiDev
+ * Author URI:        http://atlasaidev.com/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       text-to-audio

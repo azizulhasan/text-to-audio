@@ -78,8 +78,8 @@ function tta_get_button_content($atts, $is_block = false) {
     }
     $settings = (array) get_option('tta_settings_data');
     $recording = (array) get_option('tta_record_settings');
-    //Apply short code for only single page.
-    if (isset($settings['tta__settings_display_btn_in_single_page']) && $settings['tta__settings_display_btn_in_single_page'] == 1 && !is_single()) {
+    //Apply short code for on single page.
+    if(is_page() && isset($settings['tta__settings_display_btn_in_single_page']) && !$settings['tta__settings_display_btn_in_single_page']){
         return;
     }
 
@@ -98,9 +98,11 @@ function tta_get_button_content($atts, $is_block = false) {
 
     // Button listen text.
     $text_arr = get_button_text( $atts );
-
+    $textClass= isset( $settings['tta__settings_display_btn_icon'] ) && $settings['tta__settings_display_btn_icon'] ? 'text-position' : '';
     // Speak Icon
-    $speakIcon = apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ') . $text_arr['listen_text'];
+    $speakIcon = "<div>";
+    $speakIcon .= apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ');
+    $speakIcon .= '<span class="'.$textClass.'"> '. $text_arr['listen_text'] . '<span></div>';
     // Button style.
     if (isset($customize) && count($customize)) {
         if ($is_block) {
@@ -128,6 +130,7 @@ function tta_get_button_content($atts, $is_block = false) {
 <style>
 #tta__listent_content_' . $btn_no .'.tta__listent_content{ ' . esc_attr($btn_style) . ' }
 #tta__listent_content_' . $btn_no .'.tta__listent_content:hover{' . esc_attr($btn_style) . '}
+#tta__listent_content_' . $btn_no .'.tta__listent_content .text-position{ position: absolute;padding-top: 2px; }
 #tta__listent_content_' . $btn_no .'.tta__listent_content .dashicons{ display: ' . esc_attr( $display_icon ) . ';line-height:1; }
 ' . $custom_css . '
 </style>
