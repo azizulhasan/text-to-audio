@@ -35,54 +35,35 @@ let TTA = {
 
 	// 	timer = setTimeout(TTA.pauseResumeTimer, 10000)
 	// },
-	settings: {},
-	getSettings: function () {
-		let settingsData = new FormData();
-		settingsData.append('method', 'get');
-		ttaGetData(text_to_audio_obj.json_url + 'tta/v1/settings', settingsData)
-			.then((res) => {
-				this.settings = res.data
-			})
-			.catch((err) => {
-				console.log(err);
-			});
-	},
 	buttonTextArr: text_to_audio_obj.buttonTextArr,
-	getTextPositionClass: function (settings) {
-		if (settings.hasOwnProperty('tta__settings_display_btn_icon') && settings.tta__settings_display_btn_icon) {
-			return 'text-position'
-		}
-		return '';
-	},
 	playButtonText: function () {
 		return this.buttonTextArr.listen_text;
 	},
 
 	playButtonContent: function () {
 
-		return '<div><span class="dashicons dashicons-controls-play"></span> <span class="' + this.getTextPositionClass(this.settings) + '"> ' + this.playButtonText() + '<span></span></span></div>'
+		return '<div style="display:flex;justify-content:center;align-items:center;"><span class="dashicons dashicons-controls-play"></span> <span> ' + this.playButtonText() + '<span></span></span></div>'
 	},
 	replayButtonText: function () {
 		return this.buttonTextArr.replay_text;
 	},
 	replayButtonContent: function () {
-		return '<div><span class="dashicons dashicons-image-rotate"></span> <span class="' + this.getTextPositionClass(this.settings) + '"> ' + this.replayButtonText() + '<span></span></span></div>'
+		return '<div style="display:flex;justify-content:center;align-items:center;"><span class="dashicons dashicons-image-rotate"></span> <span> ' + this.replayButtonText() + '<span></span></span></div>'
 	},
 	pauseButtonText: function () {
 		return this.buttonTextArr.pause_text;
 	},
 	pauseButtonContent: function () {
-		return '<div><span class="dashicons dashicons-controls-pause"></span> <span class="' + this.getTextPositionClass(this.settings) + '"> ' + this.pauseButtonText() + '<span></span></span></div>'
+		return '<div style="display:flex;justify-content:center;align-items:center;"><span class="dashicons dashicons-controls-pause"></span> <span> ' + this.pauseButtonText() + '<span></span></span></div>'
 	},
 	resumeButtonText: function () {
 		return this.buttonTextArr.resume_text;
 	},
 	resumeButtonContent: function () {
-		return '<div><span class="dashicons dashicons-controls-play"></span> <span class="' + this.getTextPositionClass(this.settings) + '"> ' + this.buttonTextArr.resume_text + '<span></span></span></div>'
+		return '<div style="display:flex;justify-content:center;align-items:center;"><span class="dashicons dashicons-controls-play"></span> <span> ' + this.buttonTextArr.resume_text + '<span></span></span></div>'
 	},
 	recordStartButtonContent: function () {
 		return '<span class="dashicons dashicons-controls-volumeoff"></span> ' + this.buttonTextArr.start_text;
-
 	},
 
 	recordStopButtonConten: function () {
@@ -148,9 +129,6 @@ let TTA = {
 		throw new Error(notice);
 	},
 };
-
-
-TTA.getSettings();
 
 var SpeechGrammarList =
 	window.SpeechGrammarList || window.webkitSpeechGrammarList;

@@ -98,23 +98,22 @@ function tta_get_button_content($atts, $is_block = false) {
 
     // Button listen text.
     $text_arr = get_button_text( $atts );
-    $textClass= isset( $settings['tta__settings_display_btn_icon'] ) && $settings['tta__settings_display_btn_icon'] ? 'text-position' : '';
     // Speak Icon
-    $speakIcon = "<div>";
+    $speakIcon = "<div style='display: flex;justify-content: center;align-items: center;'>";
     $speakIcon .= apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ');
-    $speakIcon .= '<span class="'.$textClass.'"> '. $text_arr['listen_text'] . '<span></div>';
+    $speakIcon .= '<span> '. $text_arr['listen_text'] . '<span></div>';
     // Button style.
     if (isset($customize) && count($customize)) {
         if ($is_block) {
             $backgroundColor = isset($customize['backgroundColor']) ? $customize['backgroundColor'] : '#184c53';
             $color = isset($customize['color']) ? $customize['color'] : '#ffffff';
             $width = isset($customize['width']) ? $customize['width'] : '100';
-            $btn_style = 'background-color:' . esc_attr($backgroundColor) . ' !important;color:' . esc_attr($color) . ' !important;width:' . esc_attr($width) . '%;border:0;display:block;height:30px;border-radius:4px;';
+            $btn_style = 'background-color:' . esc_attr($backgroundColor) . ' !important;color:' . esc_attr($color) . ' !important;width:' . esc_attr($width) . '%;border:0;display:block;border-radius:4px;text-decoration:none;';
         } else {
-            $btn_style = 'background-color:' . esc_attr($customize['backgroundColor']) . ';color:' . esc_attr($customize['color']) . ';width:' . esc_attr($customize['width']) . '%;border:0;display:block;height:30px;border-radius:4px;';
+            $btn_style = 'background-color:' . esc_attr($customize['backgroundColor']) . ';color:' . esc_attr($customize['color']) . ';width:' . esc_attr($customize['width']) . '%;border:0;display:block;border-radius:4px;text-decoration:none;';
         }
     } else {
-        $btn_style = 'background-color:#184c53;color:#ffffff;width:100%;border:0;display:block;height:30px;border-radius:4px;';
+        $btn_style = 'background-color:#184c53;color:#ffffff;width:100%;border:0;display:block;border-radius:4px;text-decoration:none;';
     }
     //Custom Css
     $custom_css = '';
@@ -131,7 +130,7 @@ function tta_get_button_content($atts, $is_block = false) {
 #tta__listent_content_' . $btn_no .'.tta__listent_content{ ' . esc_attr($btn_style) . ' }
 #tta__listent_content_' . $btn_no .'.tta__listent_content:hover{' . esc_attr($btn_style) . '}
 #tta__listent_content_' . $btn_no .'.tta__listent_content .text-position{ position: absolute;padding-top: 2px; }
-#tta__listent_content_' . $btn_no .'.tta__listent_content .dashicons{ display: ' . esc_attr( $display_icon ) . ';line-height:1; }
+#tta__listent_content_' . $btn_no .'.tta__listent_content .dashicons{ display: ' . esc_attr( $display_icon ) . ';line-height:1;font-size:25px;height:25px;width:25px; }
 ' . $custom_css . '
 </style>
 <script>
