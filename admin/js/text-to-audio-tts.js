@@ -426,7 +426,7 @@ __webpack_require__.r(__webpack_exports__);
 // };
 // let recordSettings = {}
 // let recordData = new FormData();
-// ttaGetData(text_to_audio_obj.json_url + 'tta/v1/record', recordData)
+// ttaGetData(ttsObj.json_url + 'tta/v1/record', recordData)
 // 	.then((res) => {
 // 		recordSettings = res.data;
 // 		recognition.continuous = recordSettings.is_record_continously
@@ -445,29 +445,62 @@ __webpack_require__.r(__webpack_exports__);
 // 	});
 
 var TTA = {
-  speechSynthesis: true,
+  speech: new speak_tts__WEBPACK_IMPORTED_MODULE_0__["default"](),
+  speechSynthesis: window.speechSynthesis,
   utterence: new SpeechSynthesisUtterance(),
   speechRecognitionIsActive: true,
   speechRecognition: window.speechRecognition || window.webkitSpeechRecognition,
   recordStatus: 'record',
   listenStatus: 'listen',
   noticeClass: 'tta_notice',
+  cofiguration: {},
   timer: null,
-  speakButton: document.getElementById("tta__listent_content_1"),
-  conntent: document.getElementById("content_1").innerHTML,
-  languages: null,
-  voices: null,
-  // pauseResumeTimer: () => {
-  // 	speechSynthesis.pause();
-  // 	//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
-  // 	console.log(TTA.utterence);
-  // 	// Placing the speak invocation inside a callback fixes ordering and onend issues
-  // 	setTimeout(() => {
-  // 		speechSynthesis.resume();
-  // 	}, 0);
-  // 	timer = setTimeout(TTA.pauseResumeTimer, 10000)
-  // },
-  buttonTextArr: text_to_audio_obj.buttonTextArr,
+  buttonId: window.buttonId,
+  speakButton: document.getElementById("tta__listent_content_" + window.buttonId),
+  conntent: window.ttsContent,
+  ttsListeningSettings: window.ttsListeningSettings,
+  languages: [],
+  voices: {},
+  voice: "Microsoft David - English (United States)",
+  language: 'en-AU',
+  speak: function speak(speech) {
+    TTA.language = TTA.ttsListeningSettings.tta__listening_lang;
+    TTA.voice = TTA.ttsListeningSettings.tta__listening_voice;
+    if (TTA.language) speech.setLanguage(TTA.language);
+    if (TTA.voice) speech.setVoice(TTA.voice);
+    speech.speak({
+      text: TTA.conntent,
+      queue: false,
+      listeners: {
+        onstart: function onstart() {
+          console.log("Start utterance");
+        },
+        onend: function onend() {
+          if (!TTA.speechSynthesis.speaking) {
+            console.log('End utterance');
+            TTA.speakButton.innerHTML = TTA.replayButtonContent();
+            TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.replayButtonText());
+            TTA.listenStatus = 'listen';
+          }
+        },
+        onresume: function onresume() {
+          console.log("Resume utterance");
+        } // onboundary: event => {
+        // 	console.log(
+        // 		event.name +
+        // 		" boundary reached after " +
+        // 		event.elapsedTime +
+        // 		" milliseconds."
+        // 	);
+        // }
+
+      }
+    }).then(function (data) {// console.log("Success !", data);
+    })["catch"](function (e) {
+      console.error("An error occurred :", e);
+    });
+  },
+  buttonTextArr: ttsObj.buttonTextArr,
   playButtonText: function playButtonText() {
     return this.buttonTextArr.listen_text;
   },
@@ -528,16 +561,16 @@ var TTA = {
           previousSibling.innerHTML = '';
         }, 5000);
       } else {
-        link += text_to_audio_obj.admin_url + 'admin.php?page=text-to-audio#/docs';
+        link += ttsObj.admin_url + 'admin.php?page=text-to-audio#/docs';
         notice += "\nFollow this link to enable: \n".concat(link);
         alert(notice);
       }
     } else {
       if (is_dashboard) {
-        link += text_to_audio_obj.admin_url + 'admin.php?page=text-to-audio#/docs';
+        link += ttsObj.admin_url + 'admin.php?page=text-to-audio#/docs';
       } else {
         if (location.search === '?page=text-to-audio' && location.hash === '#/customize') {
-          link += text_to_audio_obj.admin_url + 'admin.php?page=text-to-audio#/docs';
+          link += ttsObj.admin_url + 'admin.php?page=text-to-audio#/docs';
         } else {
           link += 'https://wordpress.org/plugins/text-to-audio/#how%20to%20enable%20%60%60speechsynthesis%60%60%20on%20firefox%3F';
         }
@@ -549,37 +582,37 @@ var TTA = {
 
     throw new Error(notice);
   }
-}; // let Speech = require("speak-tts");
+};
 
 function _init() {
-  var speech = new speak_tts__WEBPACK_IMPORTED_MODULE_0__["default"]();
-  speech.init({
-    volume: 0.5,
-    lang: "en-GB",
-    rate: 1,
-    pitch: 1,
-    //'voice':'Google UK English Male',
-    //'splitSentences': false,
+  if (TTA.ttsListeningSettings === undefined) return;
+  console.log(ttsListeningSettings);
+  console.log(TTA.voice);
+  console.log(TTA.speech);
+  console.log(TTA.voices);
+  TTA.speech.init({
+    volume: TTA.ttsListeningSettings.tta__listening_volume ? TTA.ttsListeningSettings.tta__listening_volume : 1,
+    // From 0 to 1,
+    lang: TTA.ttsListeningSettings.tta__listening_lang ? TTA.ttsListeningSettings.tta__listening_lang : TTA.language,
+    // It will be speaking language.
+    rate: TTA.ttsListeningSettings.tta__listening_rate ? TTA.ttsListeningSettings.tta__listening_rate : 1,
+    // From 0.1 to 10
+    pitch: TTA.ttsListeningSettings.tta__listening_pitch ? TTA.ttsListeningSettings.tta__listening_pitch : 2,
+    // From 0 to 2
+    voice: TTA.ttsListeningSettings.tta__listening_voice ? TTA.ttsListeningSettings.tta__listening_voice : TTA.voice,
+    splitSentences: true,
     listeners: {
-      onvoiceschanged: function onvoiceschanged(voices) {
-        console.log("Voices changed", voices);
+      onvoiceschanged: function onvoiceschanged(voices) {//
       }
     }
   }).then(function (data) {
-    console.log("Speech is ready", data); // if (listeningSettings) {
-    // 	TTA.utterence.voice = voices.filter(
-    // 		(voice, i) => voice.name === listeningSettings.tta__listening_voice,
-    // 	)[0];
-    // } else {
+    TTA.voices = data.voices;
 
-    TTA.voices = data.voices; // }
-    // _addVoicesList(data.voices);
-
-    _prepareSpeakButton(speech);
+    _prepareSpeakButton(TTA.speech);
   })["catch"](function (e) {
     console.error("An error occured while initializing : ", e);
   }); // This will require for later.
-  // const text = speech.hasBrowserSupport()
+  // const text = TTA.speech.hasBrowserSupport()
   // 	? "Hurray, your browser supports speech synthesis"
   // 	: "Your browser does NOT support speech synthesis. Try using Chrome of Safari instead !";
   // document.getElementById("support").innerHTML = text;
@@ -587,48 +620,18 @@ function _init() {
 
 function _prepareSpeakButton(speech) {
   TTA.speakButton.addEventListener("click", function () {
-    var language = TTA.voices[0].lang;
-    var voice = TTA.voices[0].name;
-    if (language) speech.setLanguage(language);
-    if (voice) speech.setVoice(voice);
-    speech.speak({
-      text: TTA.conntent,
-      queue: false,
-      listeners: {
-        onstart: function onstart() {
-          console.log("Start utterance");
-        },
-        onend: function onend() {
-          console.log('End utterance');
-          TTA.speakButton.innerHTML = TTA.replayButtonContent();
-          TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.replayButtonText());
-          TTA.listenStatus = 'listen';
-        },
-        onresume: function onresume() {
-          console.log("Resume utterance");
-        },
-        onboundary: function onboundary(event) {
-          console.log(event.name + " boundary reached after " + event.elapsedTime + " milliseconds.");
-        }
-      }
-    }).then(function (data) {
-      console.log("Success !", data);
-    })["catch"](function (e) {
-      console.error("An error occurred :", e);
-    });
-  });
-  TTA.speakButton.addEventListener("click", function () {
     if (TTA.listenStatus == 'listen') {
+      TTA.speak(speech);
       TTA.speakButton.innerHTML = TTA.pauseButtonContent();
       TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
       TTA.listenStatus = 'pause';
     } else if (TTA.listenStatus == 'pause') {
-      speech.pause();
+      TTA.speech.pause();
       TTA.speakButton.innerHTML = TTA.resumeButtonContent();
       TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.resumeButtonText());
       TTA.listenStatus = 'resume';
     } else if (TTA.listenStatus == 'resume') {
-      speech.resume();
+      TTA.speech.resume();
       TTA.speakButton.innerHTML = TTA.pauseButtonContent();
       TTA.listenStatus = 'pause';
       TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
@@ -636,9 +639,9 @@ function _prepareSpeakButton(speech) {
   });
 }
 
-_init();
-
 window.tta = TTA;
+
+_init();
 })();
 
 /******/ })()

@@ -128,8 +128,14 @@ function tta_get_button_content($atts, $is_block = false) {
     // Custom class to button.
     $class = (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
 
+    $config = json_encode([
+        'id' => $btn_no,
+        'content' => $content,
+        'listeningSettings' => $listening
+    ]);
+
     // Listening button.
-    $button = '<div style="display:none" id="content_'.$btn_no.'">'.$content.'</div><div class="tta_notice" style="display:none;"></div><button  id="tta__listent_content_' . $btn_no . '" class="tta__listent_content ' . esc_attr($class) . '" type="button"  title="Text To Audio:  Tap to listen post.">' . $speakIcon . ' </button>
+    $button = '<div style="display:none" id="content_'.$btn_no.'">'.$content.'</div><div class="tta_notice" style="display:none;"></div><button data-configure="'.$config.'"  id="tta__listent_content_' . $btn_no . '" class="tta__listent_content ' . esc_attr($class) . '" type="button"  title="Text To Audio:  Tap to listen post.">' . $speakIcon . ' </button>
 <style>
 #tta__listent_content_' . $btn_no .'.tta__listent_content{ ' . esc_attr($btn_style) . ' }
 #tta__listent_content_' . $btn_no .'.tta__listent_content:hover{' . esc_attr($btn_style) . '}
@@ -138,13 +144,12 @@ function tta_get_button_content($atts, $is_block = false) {
 ' . $custom_css . '
 </style>
 <script>
-    tta__listent_content_' . $btn_no . '.onclick = function() {
-        // init("' . $content . '", "tta__listent_content_' . $btn_no . '",  ' . $listening . ' );
-        // alert("teasdf");
-    };
+    window.ttsContent = "'.$content.'"
+    window.buttonId = '.$btn_no.'
+    window.ttsListeningSettings = '.$listening.'
 </script>';
 
-    
+
 
     return apply_filters( 'tta__listening_button', $button );
 }

@@ -34,7 +34,8 @@ class TTA_Activator {
         /**
          * Customization settings.
          */
-        update_option('tta_customize_settings', array
+        if(!get_option('tta_customize_settings')){
+            update_option('tta_customize_settings', array
             (
                 "backgroundColor" => "#184c53",
                 "color" => "#ffffff",
@@ -43,21 +44,28 @@ class TTA_Activator {
                 'tta_play_btn_shortcode' => '[tta_listen_btn]',
             ));
 
+        }
+        
         /**
          * Text To Audio settings.
          */
-        update_option('tta_settings_data', array
-            (
-                'tta__settings_enable_button_add'=> true,
-                "tta__settings_allow_recording_for_post_type" => "all",
-                "tta__settings_display_btn_in_single_page" => '',
-                "tta__settings_display_btn_icon" => '',
+        if(!get_option('tta_settings_data')){
+            update_option('tta_settings_data', array
+                (
+                    'tta__settings_enable_button_add'=> true,
+                    "tta__settings_allow_recording_for_post_type" => "all",
+                    "tta__settings_display_btn_in_single_page" => '',
+                    "tta__settings_display_btn_icon" => '',
             ));
+        }
+
+
 
         /**
          * Listening settings.
          */
-        update_option('tta_listening_settings', array
+        if(!get_option('tta_listening_settings')){
+                    update_option('tta_listening_settings', array
             (
                 "tta__listening_voice" => "Microsoft Mark - English (United States)",
                 "tta__listening_pitch" => 1,
@@ -65,33 +73,43 @@ class TTA_Activator {
                 "tta__listening_volume" => 1,
                 "tta__listening_lang" => "en-AU",
             ));
+        }
+
+
 
         /**
          * Recording settings.
          */
-        update_option('tta_record_settings', array
+        if(!get_option('tta_record_settings')){
+             update_option('tta_record_settings', array
             (
                 "is_record_continously" => true,
                 "tta__recording__lang" => "en-AU",
                 "tta__sentence_delimiter" => ".",
             ));
+        }
 
-    // Button listen text.
-    $listen_text =  __( "Listen", 'text-to-audio' ) ;
-    $pause_text =  __( 'Pause', 'text-to-audio' ) ;
-    $resume_text =  __( 'Resume', 'text-to-audio' ) ;
-    $replay_text =  __( 'Replay', 'text-to-audio' ) ;
-    $start_text =  __( 'Start', 'text-to-audio' ) ;
-    $stop_text = __( 'Start', 'text-to-audio' ) ;
 
-    update_option( 'tta__button_text_arr', [
-        'listen_text' => $listen_text,
-        'pause_text' => $pause_text,
-        'resume_text' => $resume_text,
-        'replay_text' => $replay_text,
-        'start_text' => $start_text,
-        'stop_text' => $stop_text,
-    ]);
+
+        // Button listen text.
+        $listen_text =  __( "Listen", 'text-to-audio' ) ;
+        $pause_text =  __( 'Pause', 'text-to-audio' ) ;
+        $resume_text =  __( 'Resume', 'text-to-audio' ) ;
+        $replay_text =  __( 'Replay', 'text-to-audio' ) ;
+        $start_text =  __( 'Start', 'text-to-audio' ) ;
+        $stop_text = __( 'Start', 'text-to-audio' ) ;
+
+        if(!get_option('tta_record_settings')){
+            update_option( 'tta__button_text_arr', [
+                'listen_text' => $listen_text,
+                'pause_text' => $pause_text,
+                'resume_text' => $resume_text,
+                'replay_text' => $replay_text,
+                'start_text' => $start_text,
+                'stop_text' => $stop_text,
+            ]);
+        }
+
 
     }
 
