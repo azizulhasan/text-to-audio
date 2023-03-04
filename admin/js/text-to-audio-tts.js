@@ -444,6 +444,17 @@ __webpack_require__.r(__webpack_exports__);
 // 		console.log(err);
 // 	});
 
+var isAndroid = function isAndroid() {
+  var ua = navigator.userAgent.toLowerCase();
+  var isAndroid = ua.indexOf("android") > -1; //&& ua.indexOf("mobile");
+
+  if (isAndroid) {
+    return true;
+  }
+
+  return false;
+};
+
 var TTA = {
   speech: new speak_tts__WEBPACK_IMPORTED_MODULE_0__["default"](),
   speechSynthesis: window.speechSynthesis,
@@ -461,13 +472,9 @@ var TTA = {
   ttsListeningSettings: window.ttsListeningSettings,
   languages: [],
   voices: {},
-  voice: "Microsoft David - English (United States)",
-  language: 'en-AU',
+  voice: isAndroid() ? 'English United Kingdom' : "Microsoft David - English (United States)",
+  language: isAndroid() ? 'en_GB' : 'en-AU',
   speak: function speak(speech) {
-    TTA.language = TTA.ttsListeningSettings.tta__listening_lang;
-    TTA.voice = TTA.ttsListeningSettings.tta__listening_voice;
-    if (TTA.language) speech.setLanguage(TTA.language);
-    if (TTA.voice) speech.setVoice(TTA.voice);
     speech.speak({
       text: TTA.conntent,
       queue: false,
@@ -587,19 +594,21 @@ var TTA = {
 function _init() {
   if (TTA.ttsListeningSettings === undefined) return;
   console.log(ttsListeningSettings);
-  console.log(TTA.voice);
   console.log(TTA.speech);
-  console.log(TTA.voices);
+  console.log(TTA.voice, TTA.language);
+  var voice = !isAndroid() ? TTA.ttsListeningSettings.tta__listening_voice : TTA.voice;
+  var lang = !isAndroid() ? TTA.ttsListeningSettings.tta__listening_lang : TTA.language;
+  console.log(voice, lang);
   TTA.speech.init({
     volume: TTA.ttsListeningSettings.tta__listening_volume ? TTA.ttsListeningSettings.tta__listening_volume : 1,
     // From 0 to 1,
-    lang: TTA.ttsListeningSettings.tta__listening_lang ? TTA.ttsListeningSettings.tta__listening_lang : TTA.language,
+    lang: lang,
     // It will be speaking language.
     rate: TTA.ttsListeningSettings.tta__listening_rate ? TTA.ttsListeningSettings.tta__listening_rate : 1,
     // From 0.1 to 10
     pitch: TTA.ttsListeningSettings.tta__listening_pitch ? TTA.ttsListeningSettings.tta__listening_pitch : 2,
     // From 0 to 2
-    voice: TTA.ttsListeningSettings.tta__listening_voice ? TTA.ttsListeningSettings.tta__listening_voice : TTA.voice,
+    voice: voice,
     splitSentences: true,
     listeners: {
       onvoiceschanged: function onvoiceschanged(voices) {//

@@ -37,6 +37,18 @@ import Speech from "speak-tts";
 // 	});
 
 
+let isAndroid = () => {
+	let ua = navigator.userAgent.toLowerCase();
+
+	let isAndroid = ua.indexOf("android") > -1; //&& ua.indexOf("mobile");
+	if (isAndroid) {
+		return true;
+	}
+	return false
+}
+
+
+
 let TTA = {
 
 	speech: new Speech(),
@@ -55,13 +67,9 @@ let TTA = {
 	ttsListeningSettings: window.ttsListeningSettings,
 	languages: [],
 	voices: {},
-	voice: "Microsoft David - English (United States)",
-	language: 'en-AU',
+	voice: isAndroid() ? 'English United Kingdom' : "Microsoft David - English (United States)",
+	language: isAndroid() ? 'en_GB' : 'en-AU',
 	speak: (speech) => {
-		TTA.language = TTA.ttsListeningSettings.tta__listening_lang;
-		TTA.voice = TTA.ttsListeningSettings.tta__listening_voice;
-		if (TTA.language) speech.setLanguage(TTA.language);
-		if (TTA.voice) speech.setVoice(TTA.voice);
 		speech
 			.speak({
 				text: TTA.conntent,
@@ -197,26 +205,30 @@ function _init() {
 
 	if (TTA.ttsListeningSettings === undefined) return;
 	console.log(ttsListeningSettings)
-	console.log(TTA.voice)
 	console.log(TTA.speech)
-	console.log(TTA.voices)
+	console.log(TTA.voice, TTA.language)
+	let voice = !isAndroid()
+		? TTA.ttsListeningSettings.tta__listening_voice
+		: TTA.voice;
+	let lang = !isAndroid()
+		? TTA.ttsListeningSettings.tta__listening_lang
+		: TTA.language
+
+	console.log(voice, lang)
+
 	TTA.speech
 		.init({
 			volume: TTA.ttsListeningSettings.tta__listening_volume
 				? TTA.ttsListeningSettings.tta__listening_volume
 				: 1, // From 0 to 1,
-			lang: TTA.ttsListeningSettings.tta__listening_lang
-				? TTA.ttsListeningSettings.tta__listening_lang
-				: TTA.language, // It will be speaking language.
+			lang: lang, // It will be speaking language.
 			rate: TTA.ttsListeningSettings.tta__listening_rate
 				? TTA.ttsListeningSettings.tta__listening_rate
 				: 1, // From 0.1 to 10
 			pitch: TTA.ttsListeningSettings.tta__listening_pitch
 				? TTA.ttsListeningSettings.tta__listening_pitch
 				: 2, // From 0 to 2
-			voice: TTA.ttsListeningSettings.tta__listening_voice
-				? TTA.ttsListeningSettings.tta__listening_voice
-				: TTA.voice,
+			voice: voice,
 			splitSentences: true,
 			listeners: {
 				onvoiceschanged: voices => {
