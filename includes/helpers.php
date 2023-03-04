@@ -82,6 +82,10 @@ function tta_get_button_content($atts, $is_block = false) {
     if(is_page() && isset($settings['tta__settings_display_btn_in_single_page']) && !$settings['tta__settings_display_btn_in_single_page']){
         return;
     }
+    // this is a pro feature to show button on blog main page with title and excerpt.
+    if(!is_single() ){
+        return;
+    }
 
     $display_icon = isset( $settings['tta__settings_display_btn_icon'] ) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
 
@@ -125,7 +129,7 @@ function tta_get_button_content($atts, $is_block = false) {
     $class = (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
 
     // Listening button.
-    $button = '<div class="tta_notice" style="display:none;"></div><button id="tta__listent_content_' . $btn_no . '" class="tta__listent_content ' . esc_attr($class) . '" type="button"  title="Text To Audio:  Tap to listen post.">' . $speakIcon . ' </button>
+    $button = '<div style="display:none" id="content_'.$btn_no.'">'.$content.'</div><div class="tta_notice" style="display:none;"></div><button  id="tta__listent_content_' . $btn_no . '" class="tta__listent_content ' . esc_attr($class) . '" type="button"  title="Text To Audio:  Tap to listen post.">' . $speakIcon . ' </button>
 <style>
 #tta__listent_content_' . $btn_no .'.tta__listent_content{ ' . esc_attr($btn_style) . ' }
 #tta__listent_content_' . $btn_no .'.tta__listent_content:hover{' . esc_attr($btn_style) . '}
@@ -135,7 +139,8 @@ function tta_get_button_content($atts, $is_block = false) {
 </style>
 <script>
     tta__listent_content_' . $btn_no . '.onclick = function() {
-        ttaListenCotentInFrontend("' . $content . '", "tta__listent_content_' . $btn_no . '",  ' . $listening . ' );
+        // init("' . $content . '", "tta__listent_content_' . $btn_no . '",  ' . $listening . ' );
+        // alert("teasdf");
     };
 </script>';
 
@@ -143,6 +148,24 @@ function tta_get_button_content($atts, $is_block = false) {
 
     return apply_filters( 'tta__listening_button', $button );
 }
+
+
+function tta_get_button_content_tts(){
+
+    $button = '		<textarea id="tts" style="width: 500px; height: 300px">Hello, how are you today ?</textarea>
+		<div>
+	
+			<button id="play"> Play </button>
+			<button id="pause"> Pause </button>
+			<button id="resume"> Resume </button>';
+
+        
+
+    return $button;
+
+}
+
+
 
 
 /**
