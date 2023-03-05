@@ -492,17 +492,19 @@ var TTA = {
         },
         onresume: function onresume() {
           console.log("Resume utterance");
-        } // onboundary: event => {
-        // 	console.log(
-        // 		event.name +
-        // 		" boundary reached after " +
-        // 		event.elapsedTime +
-        // 		" milliseconds."
-        // 	);
-        // }
-
+        },
+        onboundary: function onboundary(event) {
+          // console.log(
+          // 	event.name +
+          // 	" boundary reached after " +
+          // 	event.elapsedTime +
+          // 	" milliseconds."
+          // );
+          console.log(event);
+        }
       }
-    }).then(function (data) {// console.log("Success !", data);
+    }).then(function (data) {
+      console.log("Success !", data);
     })["catch"](function (e) {
       console.error("An error occurred :", e);
     });
@@ -594,7 +596,6 @@ var TTA = {
 function _init() {
   if (TTA.ttsListeningSettings === undefined) return;
   console.log(ttsListeningSettings);
-  console.log(TTA.speech);
   console.log(TTA.voice, TTA.language);
   var voice = !isAndroid() ? TTA.ttsListeningSettings.tta__listening_voice : TTA.voice;
   var lang = !isAndroid() ? TTA.ttsListeningSettings.tta__listening_lang : TTA.language;
@@ -611,7 +612,8 @@ function _init() {
     voice: voice,
     splitSentences: true,
     listeners: {
-      onvoiceschanged: function onvoiceschanged(voices) {//
+      onvoiceschanged: function onvoiceschanged(voices) {
+        console.log(voices); // TTA.voices = voices
       }
     }
   }).then(function (data) {

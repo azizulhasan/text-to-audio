@@ -89,18 +89,19 @@ let TTA = {
 					onresume: () => {
 						console.log("Resume utterance");
 					},
-					// onboundary: event => {
-					// 	console.log(
-					// 		event.name +
-					// 		" boundary reached after " +
-					// 		event.elapsedTime +
-					// 		" milliseconds."
-					// 	);
-					// }
+					onboundary: event => {
+						// console.log(
+						// 	event.name +
+						// 	" boundary reached after " +
+						// 	event.elapsedTime +
+						// 	" milliseconds."
+						// );
+						console.log(event)
+					}
 				}
 			})
 			.then(data => {
-				// console.log("Success !", data);
+				console.log("Success !", data);
 			})
 			.catch(e => {
 				console.error("An error occurred :", e);
@@ -205,7 +206,6 @@ function _init() {
 
 	if (TTA.ttsListeningSettings === undefined) return;
 	console.log(ttsListeningSettings)
-	console.log(TTA.speech)
 	console.log(TTA.voice, TTA.language)
 	let voice = !isAndroid()
 		? TTA.ttsListeningSettings.tta__listening_voice
@@ -232,7 +232,8 @@ function _init() {
 			splitSentences: true,
 			listeners: {
 				onvoiceschanged: voices => {
-					//
+					console.log(voices)
+					// TTA.voices = voices
 				}
 			}
 		})

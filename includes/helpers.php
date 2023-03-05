@@ -93,7 +93,7 @@ function tta_get_button_content($atts, $is_block = false) {
     $btn_no++;
 
     $sentence_delimiter = isset($recording['tta__sentence_delimiter']) ? $recording['tta__sentence_delimiter'] : '. ';
-    $title = tta_clean_content( get_the_title() ) . $sentence_delimiter . " ";
+    $title = tta_clean_content( get_the_title() . $sentence_delimiter  ). " ";
 
     $description = get_the_content();
     $description = tta_clean_content($description);
@@ -135,7 +135,7 @@ function tta_get_button_content($atts, $is_block = false) {
     ]);
 
     // Listening button.
-    $button = '<div style="display:none" id="content_'.$btn_no.'">'.$content.'</div><div class="tta_notice" style="display:none;"></div><button data-configure="'.$config.'"  id="tta__listent_content_' . $btn_no . '" class="tta__listent_content ' . esc_attr($class) . '" type="button"  title="Text To Audio:  Tap to listen post.">' . $speakIcon . ' </button>
+    $button = '<div class="tta_notice" style="display:none;"></div><button id="tta__listent_content_' . $btn_no . '" class="tta__listent_content ' . esc_attr($class) . '" type="button"  title="Text To Audio:  Tap to listen post.">' . $speakIcon . ' </button>
 <style>
 #tta__listent_content_' . $btn_no .'.tta__listent_content{ ' . esc_attr($btn_style) . ' }
 #tta__listent_content_' . $btn_no .'.tta__listent_content:hover{' . esc_attr($btn_style) . '}
