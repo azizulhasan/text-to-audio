@@ -493,14 +493,13 @@ var TTA = {
         onresume: function onresume() {
           console.log("Resume utterance");
         },
-        onboundary: function onboundary(event) {
-          // console.log(
+        onboundary: function onboundary(event) {// console.log(
           // 	event.name +
           // 	" boundary reached after " +
           // 	event.elapsedTime +
           // 	" milliseconds."
           // );
-          console.log(event);
+          // console.log(event)
         }
       }
     }).then(function (data) {
