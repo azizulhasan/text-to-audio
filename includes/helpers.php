@@ -82,6 +82,13 @@ function tta_get_button_content($atts, $is_block = false) {
     if(is_page() && isset($settings['tta__settings_display_btn_in_single_page']) && !$settings['tta__settings_display_btn_in_single_page']){
         return;
     }
+    
+    /**
+     * Remove button from blog main page.
+     * This feature will be added to pro version.
+     * With excerpt and title.
+     */
+    if(!is_single()) return;
 
     $display_icon = isset( $settings['tta__settings_display_btn_icon'] ) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
 
