@@ -102,8 +102,9 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 
 == Changelog ==
 
-= 1.2.4 (2023-03-01) =
+= 1.2.5 (2023-03-06) =
 * Added: Play button display only single single page.
+* Fixed: Database value delete after update plugin.
 
 = 1.2.4 (2023-03-01) =
 * Fixed: Button text position issue fixed.
