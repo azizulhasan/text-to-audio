@@ -14,12 +14,10 @@ class TTA_Api_Routes {
     protected $namespace;
     protected $woocommerce;
     protected $version;
-    public $current_user;
 
-    public function __construct($current_user = null) {
+    public function __construct() {
         $this->version = 'v1';
         $this->namespace = 'tta/' . $this->version;
-        $this->current_user = $current_user;
         add_action('rest_api_init', [$this, 'tta_speech_register_routes']);
     }
 

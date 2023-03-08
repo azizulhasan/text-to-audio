@@ -12,7 +12,10 @@ const ttaGetData = async (url = '', data = {}) => {
 	return responseData;
 };
 
+
+
 let TTA = {
+
 	speechSynthesis: true,
 	utterence: new SpeechSynthesisUtterance(),
 	speechRecognitionIsActive: true,
@@ -36,26 +39,28 @@ let TTA = {
 	playButtonText: function () {
 		return this.buttonTextArr.listen_text;
 	},
+
 	playButtonContent: function () {
-		return '<span class="dashicons dashicons-controls-play"></span> ' + this.playButtonText();
+
+		return '<div style="display:flex;justify-content:center;align-items:center;"><span class="dashicons dashicons-controls-play"></span> <span> ' + this.playButtonText() + '<span></span></span></div>'
 	},
 	replayButtonText: function () {
 		return this.buttonTextArr.replay_text;
 	},
 	replayButtonContent: function () {
-		return '<span class="dashicons dashicons-image-rotate"></span> ' + this.replayButtonText();
+		return '<div style="display:flex;justify-content:center;align-items:center;"><span class="dashicons dashicons-image-rotate"></span> <span> ' + this.replayButtonText() + '<span></span></span></div>'
 	},
 	pauseButtonText: function () {
 		return this.buttonTextArr.pause_text;
 	},
 	pauseButtonContent: function () {
-		return '<span class="dashicons dashicons-controls-pause"></span> ' + this.pauseButtonText();
+		return '<div style="display:flex;justify-content:center;align-items:center;"><span class="dashicons dashicons-controls-pause"></span> <span> ' + this.pauseButtonText() + '<span></span></span></div>'
 	},
 	resumeButtonText: function () {
 		return this.buttonTextArr.resume_text;
 	},
 	resumeButtonContent: function () {
-		return '<span class="dashicons dashicons-controls-play"></span> ' + this.buttonTextArr.resume_text;
+		return '<div style="display:flex;justify-content:center;align-items:center;"><span class="dashicons dashicons-controls-play"></span> <span> ' + this.buttonTextArr.resume_text + '<span></span></span></div>'
 	},
 	recordStartButtonContent: function () {
 		return '<span class="dashicons dashicons-controls-volumeoff"></span> ' + this.buttonTextArr.start_text;
@@ -154,8 +159,6 @@ let TTA = {
 		return contentArray;
 	}
 };
-
-
 
 var SpeechGrammarList =
 	window.SpeechGrammarList || window.webkitSpeechGrammarList;

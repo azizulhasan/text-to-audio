@@ -14,7 +14,7 @@
  * @wordpress-plugin
  * Plugin Name:       Text To Speech Ninja
  * Description:       Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages.
- * Version:           1.2.2
+ * Version:           1.2.5
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-2.0+
@@ -47,7 +47,7 @@ if (!defined('ABSPATH')) {
 
 if (!defined('TEXT_TO_AUDIO_VERSION')) {
 
-    define('TEXT_TO_AUDIO_VERSION', '1.2.2');
+    define('TEXT_TO_AUDIO_VERSION', '1.2.5');
 }
 
 if (!defined('TEXT_TO_AUDIO_NONCE')) {
@@ -88,12 +88,7 @@ class TTA_Init {
     public function run() {
         $plugin = new TTA();
         $plugin->run();
-        //Rest api init.
-        add_action('init', function () {
-            global $current_user;
-            new TTA_Api_Routes($current_user);
-        });
-
+        new TTA_Api_Routes();
         //add plugins action links.
         if( is_admin() ) {
             $basename = plugin_basename( __FILE__ );
@@ -149,28 +144,27 @@ class TTA_Init {
 
     }
 
-    /**
-     * The code that runs during plugin activation.
-     * This action is documented in includes/TTA_Activator.php
-     */
-    public function activate_tta() {
-        TTA_Activator::activate();
-    }
-
-    /**
-     * The code that runs during plugin deactivation.
-     * This action is documented in includes/TTA_Deactivator.php
-     */
-    public function deactivate_tta() {
-        TTA_Deactivator::deactivate();
-    }
-
 }
 
-$TTA = new TTA_Init();
+add_action('init', function () {
+    //Rest api init.
+    new TTA_Init();
+});
 
-register_activation_hook(__FILE__, [$TTA, 'activate_tta']);
-register_deactivation_hook(__FILE__, [$TTA, 'deactivate_tta']);
+ /**
+ * The code that runs during plugin activation.
+ * This action is documented in includes/TTA_Activator.php
+ */
+register_activation_hook(__FILE__, function () {
+        TTA_Activator::activate();
+    });
+/**
+ * The code that runs during plugin deactivation.
+ * This action is documented in includes/TTA_Deactivator.php
+ */
+register_deactivation_hook(__FILE__, function() {
+        TTA_Deactivator::deactivate();
+    });
 
 
 
