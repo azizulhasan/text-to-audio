@@ -1,0 +1,126 @@
+export default class BrowserSupport {
+    #browser = ''
+    #ttsObj = {}
+    #voices = []
+    #voice = ''
+    #lang = ''
+    #selectedLang = ''
+    #selectedVoice = ''
+    #filteredVoices = [];
+    constructor(ttsObj, voices, selectedLang, selectedVoice) {
+        this.#ttsObj = ttsObj
+        this.#voices = voices
+        this.#selectedLang = selectedLang
+        this.#selectedVoice = selectedVoice
+        this.#defineBrowser()
+        this.#defineVoiceAndLang(selectedVoice, selectedLang)
+        console.log(this.#voice, this.#lang)
+    }
+
+    isAndroid() {
+        let ua = navigator.userAgent.toLowerCase();
+
+        let isAndroid = ua.indexOf("android") > -1; //&& ua.indexOf("mobile");
+        if (isAndroid) {
+            return true;
+        }
+        return false
+    }
+
+    #defineBrowser() {
+        let brouserArr = this.#ttsObj.browser;
+        Object.keys(brouserArr).map(item => {
+            if (brouserArr[item]) {
+                this.#browser = item.replace('is_', '');
+            }
+        })
+    }
+
+    getBrowser() {
+        return this.#browser;
+    }
+
+    getLanguage(selectedVoice = this.#voice, selectedLang = this.#lang) {
+        if (this.#lang === selectedLang) {
+            return this.#lang;
+        }
+        this.#defineVoiceAndLang(selectedVoice, selectedLang)
+
+        return this.#lang;
+    }
+
+    getVoice(selectedVoice = this.#voice, selectedLang = this.#lang) {
+        if (this.#voice === selectedVoice) {
+            return this.#voice;
+        }
+
+        this.#defineVoiceAndLang(selectedVoice, selectedLang)
+
+
+        return this.#voice;
+    }
+
+    /**
+     * 
+     */
+    #defineVoiceAndLang(voice, lang) {
+        let currentVoice, currentLang = '';
+        let selectedVoice = voice ? voice : this.#selectedVoice
+        let selectedLang = lang ? lang : this.#selectedLang
+        let langCountryCode = this.#getCountryCode(selectedLang)
+        let filteredVoices = this.#getFilteredVoices(langCountryCode)
+        console.log(filteredVoices)
+        if (filteredVoices.length > 1) {
+            for (let j = 0; j < filteredVoices.length; j++) {
+                currentLang = filteredVoices[j].lang
+                currentVoice = filteredVoices[j].name
+                if (selectedVoice === filteredVoices[j].name) {
+                    this.#voice = currentVoice;
+                    this.#lang = currentLang;
+                    break;
+                } else {
+                    this.#voice = currentVoice;
+                    this.#lang = currentLang;
+                }
+            }
+        } else {
+            this.#voice = filteredVoices[0].name;
+            this.#lang = filteredVoices[0].lang
+        }
+    }
+
+    /**
+     * 
+     * @param {*} selectedLang 
+     * @returns 
+     */
+    #getCountryCode(selectedLang) {
+        if (selectedLang.indexOf('-') != undefined) {
+            return selectedLang.split('-')[0]
+        }
+
+        if (selectedLang.indexOf('_') != undefined) {
+            return selectedLang.split('_')[0]
+        }
+        return selectedLang
+    }
+
+    /**
+     * 
+     * @param {*} currentLang 
+     * @returns 
+     */
+    #getFilteredVoices(langCountryCode) {
+        this.#filteredVoices = [];
+
+        Object.values(this.#voices).map(voice => {
+            let regex = new RegExp(langCountryCode, "gi");
+            let matches = voice.lang.match(regex)
+            if (matches !== null && voice.name) {
+                this.#filteredVoices.push(voice)
+            }
+        })
+
+        return this.#filteredVoices;
+    }
+}

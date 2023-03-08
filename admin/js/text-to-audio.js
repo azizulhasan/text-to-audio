@@ -1,5 +1,5 @@
 import Speech from "speak-tts";
-
+import BrowserSupport from './tts/BrowserSupport'
 
 
 // const ttaGetData = async (url = '', data = {}) => {
@@ -37,20 +37,12 @@ import Speech from "speak-tts";
 // 	});
 
 
-let isAndroid = () => {
-	let ua = navigator.userAgent.toLowerCase();
 
-	let isAndroid = ua.indexOf("android") > -1; //&& ua.indexOf("mobile");
-	if (isAndroid) {
-		return true;
-	}
-	return false
-}
 
 
 
 let TTA = {
-
+	browser: null,
 	speech: new Speech(),
 	speechSynthesis: window.speechSynthesis,
 	utterence: new SpeechSynthesisUtterance(),
@@ -67,18 +59,29 @@ let TTA = {
 	ttsListeningSettings: window.ttsListeningSettings,
 	languages: [],
 	voices: {},
-	voice: isAndroid() ? 'English United Kingdom' : "Microsoft David - English (United States)",
-	language: isAndroid() ? 'en_GB' : 'en-AU',
-	speak: (speech) => {
+	voice: true ? 'English United Kingdom' : "Microsoft David - English (United States)",
+	language: true ? 'en_GB' : 'en-AU',
+	speak: function (speech) {
+		speech.setLanguage(TTA.browser.getLanguage())
+		speech.setVoice(TTA.browser.getVoice())
+		/**
+		 * 1. Microsoft edge browser has same voices(306 voices) for mobile and desktop
+		 * It uses the v8 engine as chrome browser.
+		 * 
+		 * 
+		 * 
+		 */
+		console.log(speech)
 		speech
 			.speak({
 				text: TTA.conntent,
 				queue: false,
 				listeners: {
 					onstart: () => {
-						console.log("Start utterance");
+						// console.log("Start utterance");
 					},
 					onend: () => {
+						console.log('End utterance');
 						if (!TTA.speechSynthesis.speaking) {
 							console.log('End utterance');
 							TTA.speakButton.innerHTML = TTA.replayButtonContent();
@@ -205,40 +208,33 @@ let TTA = {
 function _init() {
 
 	if (TTA.ttsListeningSettings === undefined) return;
-	console.log(ttsListeningSettings)
-	console.log(TTA.voice, TTA.language)
-	let voice = !isAndroid()
-		? TTA.ttsListeningSettings.tta__listening_voice
-		: TTA.voice;
-	let lang = !isAndroid()
-		? TTA.ttsListeningSettings.tta__listening_lang
-		: TTA.language
-
-	console.log(voice, lang)
 
 	TTA.speech
 		.init({
 			volume: TTA.ttsListeningSettings.tta__listening_volume
 				? TTA.ttsListeningSettings.tta__listening_volume
 				: 1, // From 0 to 1,
-			lang: lang, // It will be speaking language.
+			// lang: lang, // It will be speaking language.
 			rate: TTA.ttsListeningSettings.tta__listening_rate
 				? TTA.ttsListeningSettings.tta__listening_rate
 				: 1, // From 0.1 to 10
 			pitch: TTA.ttsListeningSettings.tta__listening_pitch
 				? TTA.ttsListeningSettings.tta__listening_pitch
 				: 2, // From 0 to 2
-			voice: voice,
+			// voice: voice,
 			splitSentences: true,
 			listeners: {
 				onvoiceschanged: voices => {
-					console.log(voices)
+					// console.log(voices)
 					// TTA.voices = voices
 				}
 			}
 		})
 		.then(data => {
 			TTA.voices = data.voices;
+			TTA.browser = new BrowserSupport(ttsObj, data.voices, TTA.ttsListeningSettings.tta__listening_lang, TTA.ttsListeningSettings.tta__listening_voice)
+
+			console.log(TTA.browser)
 			_prepareSpeakButton(TTA.speech);
 		})
 		.catch(e => {

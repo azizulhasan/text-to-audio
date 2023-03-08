@@ -108,3 +108,12 @@ export const fireFoxDesktopVoices = [
     },
 ]
 
+
+
+export const browsersVoiceStructure = {
+    chromeMobile: { default: false, lang: 'en_US', localService: true, name: 'English United States', voiceURI: 'English United States', },
+    chromeDesktop: { default: true, lang: "en-US", localService: true, name: "Microsoft David - English (United States)", voiceURI: "Microsoft David - English (United States)" },
+    fireFoxMobile: { default: false, lang: "eng-USA", localService: false, name: "English (USA)", voiceURI: "moz-tts:android:eng_USA" },
+    fireFoxDesktop: { default: false, lang: "en-US", localService: true, name: "Microsoft David - English (United States)", voiceURI: "urn:moz-tts:sapi:Microsoft David - English (United States)?en-US", },
+    edgeDesktop: { default: true, lang: "en-US", localService: true, name: "Microsoft David - English (United States)", voiceURI: "Microsoft David - English (United States)", }
+}

@@ -2,6 +2,265 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./admin/js/tts/BrowserSupport.js":
+/*!****************************************!*\
+  !*** ./admin/js/tts/BrowserSupport.js ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ BrowserSupport)
+/* harmony export */ });
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+function _classPrivateMethodInitSpec(obj, privateSet) { _checkPrivateRedeclaration(obj, privateSet); privateSet.add(obj); }
+
+function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
+
+function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
+
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
+
+function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
+
+function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
+
+function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "set"); _classApplyDescriptorSet(receiver, descriptor, value); return value; }
+
+function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
+
+function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
+
+var _browser = /*#__PURE__*/new WeakMap();
+
+var _ttsObj = /*#__PURE__*/new WeakMap();
+
+var _voices = /*#__PURE__*/new WeakMap();
+
+var _voice = /*#__PURE__*/new WeakMap();
+
+var _lang = /*#__PURE__*/new WeakMap();
+
+var _selectedLang = /*#__PURE__*/new WeakMap();
+
+var _selectedVoice = /*#__PURE__*/new WeakMap();
+
+var _filteredVoices = /*#__PURE__*/new WeakMap();
+
+var _defineBrowser = /*#__PURE__*/new WeakSet();
+
+var _defineVoiceAndLang = /*#__PURE__*/new WeakSet();
+
+var _getCountryCode = /*#__PURE__*/new WeakSet();
+
+var _getFilteredVoices = /*#__PURE__*/new WeakSet();
+
+var BrowserSupport = /*#__PURE__*/function () {
+  function BrowserSupport(ttsObj, voices, _selectedLang2, _selectedVoice2) {
+    _classCallCheck(this, BrowserSupport);
+
+    _classPrivateMethodInitSpec(this, _getFilteredVoices);
+
+    _classPrivateMethodInitSpec(this, _getCountryCode);
+
+    _classPrivateMethodInitSpec(this, _defineVoiceAndLang);
+
+    _classPrivateMethodInitSpec(this, _defineBrowser);
+
+    _classPrivateFieldInitSpec(this, _browser, {
+      writable: true,
+      value: ''
+    });
+
+    _classPrivateFieldInitSpec(this, _ttsObj, {
+      writable: true,
+      value: {}
+    });
+
+    _classPrivateFieldInitSpec(this, _voices, {
+      writable: true,
+      value: []
+    });
+
+    _classPrivateFieldInitSpec(this, _voice, {
+      writable: true,
+      value: ''
+    });
+
+    _classPrivateFieldInitSpec(this, _lang, {
+      writable: true,
+      value: ''
+    });
+
+    _classPrivateFieldInitSpec(this, _selectedLang, {
+      writable: true,
+      value: ''
+    });
+
+    _classPrivateFieldInitSpec(this, _selectedVoice, {
+      writable: true,
+      value: ''
+    });
+
+    _classPrivateFieldInitSpec(this, _filteredVoices, {
+      writable: true,
+      value: []
+    });
+
+    _classPrivateFieldSet(this, _ttsObj, ttsObj);
+
+    _classPrivateFieldSet(this, _voices, voices);
+
+    _classPrivateFieldSet(this, _selectedLang, _selectedLang2);
+
+    _classPrivateFieldSet(this, _selectedVoice, _selectedVoice2);
+
+    _classPrivateMethodGet(this, _defineBrowser, _defineBrowser2).call(this);
+
+    _classPrivateMethodGet(this, _defineVoiceAndLang, _defineVoiceAndLang2).call(this, _selectedVoice2, _selectedLang2);
+
+    console.log(_classPrivateFieldGet(this, _voice), _classPrivateFieldGet(this, _lang));
+  }
+
+  _createClass(BrowserSupport, [{
+    key: "isAndroid",
+    value: function isAndroid() {
+      var ua = navigator.userAgent.toLowerCase();
+      var isAndroid = ua.indexOf("android") > -1; //&& ua.indexOf("mobile");
+
+      if (isAndroid) {
+        return true;
+      }
+
+      return false;
+    }
+  }, {
+    key: "getBrowser",
+    value: function getBrowser() {
+      return _classPrivateFieldGet(this, _browser);
+    }
+  }, {
+    key: "getLanguage",
+    value: function getLanguage() {
+      var selectedVoice = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _classPrivateFieldGet(this, _voice);
+      var selectedLang = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _classPrivateFieldGet(this, _lang);
+
+      if (_classPrivateFieldGet(this, _lang) === selectedLang) {
+        return _classPrivateFieldGet(this, _lang);
+      }
+
+      _classPrivateMethodGet(this, _defineVoiceAndLang, _defineVoiceAndLang2).call(this, selectedVoice, selectedLang);
+
+      return _classPrivateFieldGet(this, _lang);
+    }
+  }, {
+    key: "getVoice",
+    value: function getVoice() {
+      var selectedVoice = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _classPrivateFieldGet(this, _voice);
+      var selectedLang = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _classPrivateFieldGet(this, _lang);
+
+      if (_classPrivateFieldGet(this, _voice) === selectedVoice) {
+        return _classPrivateFieldGet(this, _voice);
+      }
+
+      _classPrivateMethodGet(this, _defineVoiceAndLang, _defineVoiceAndLang2).call(this, selectedVoice, selectedLang);
+
+      return _classPrivateFieldGet(this, _voice);
+    }
+    /**
+     * 
+     */
+
+  }]);
+
+  return BrowserSupport;
+}();
+
+function _defineBrowser2() {
+  var _this = this;
+
+  var brouserArr = _classPrivateFieldGet(this, _ttsObj).browser;
+
+  Object.keys(brouserArr).map(function (item) {
+    if (brouserArr[item]) {
+      _classPrivateFieldSet(_this, _browser, item.replace('is_', ''));
+    }
+  });
+}
+
+function _defineVoiceAndLang2(voice, lang) {
+  var currentVoice,
+      currentLang = '';
+  var selectedVoice = voice ? voice : _classPrivateFieldGet(this, _selectedVoice);
+  var selectedLang = lang ? lang : _classPrivateFieldGet(this, _selectedLang);
+
+  var langCountryCode = _classPrivateMethodGet(this, _getCountryCode, _getCountryCode2).call(this, selectedLang);
+
+  var filteredVoices = _classPrivateMethodGet(this, _getFilteredVoices, _getFilteredVoices2).call(this, langCountryCode);
+
+  console.log(filteredVoices);
+
+  if (filteredVoices.length > 1) {
+    for (var j = 0; j < filteredVoices.length; j++) {
+      currentLang = filteredVoices[j].lang;
+      currentVoice = filteredVoices[j].name;
+
+      if (selectedVoice === filteredVoices[j].name) {
+        _classPrivateFieldSet(this, _voice, currentVoice);
+
+        _classPrivateFieldSet(this, _lang, currentLang);
+
+        break;
+      } else {
+        _classPrivateFieldSet(this, _voice, currentVoice);
+
+        _classPrivateFieldSet(this, _lang, currentLang);
+      }
+    }
+  } else {
+    _classPrivateFieldSet(this, _voice, filteredVoices[0].name);
+
+    _classPrivateFieldSet(this, _lang, filteredVoices[0].lang);
+  }
+}
+
+function _getCountryCode2(selectedLang) {
+  if (selectedLang.indexOf('-') != undefined) {
+    return selectedLang.split('-')[0];
+  }
+
+  if (selectedLang.indexOf('_') != undefined) {
+    return selectedLang.split('_')[0];
+  }
+
+  return selectedLang;
+}
+
+function _getFilteredVoices2(langCountryCode) {
+  var _this2 = this;
+
+  _classPrivateFieldSet(this, _filteredVoices, []);
+
+  Object.values(_classPrivateFieldGet(this, _voices)).map(function (voice) {
+    var regex = new RegExp(langCountryCode, "gi");
+    var matches = voice.lang.match(regex);
+
+    if (matches !== null && voice.name) {
+      _classPrivateFieldGet(_this2, _filteredVoices).push(voice);
+    }
+  });
+  return _classPrivateFieldGet(this, _filteredVoices);
+}
+
+
+
+/***/ }),
+
 /***/ "./node_modules/speak-tts/lib/speak-tts.js":
 /*!*************************************************!*\
   !*** ./node_modules/speak-tts/lib/speak-tts.js ***!
@@ -392,6 +651,23 @@ exports.trim = trim;
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/make namespace object */
 /******/ 	(() => {
 /******/ 		// define __esModule on exports
@@ -412,6 +688,8 @@ var __webpack_exports__ = {};
   \***********************************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var speak_tts__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! speak-tts */ "./node_modules/speak-tts/lib/speak-tts.js");
+/* harmony import */ var _tts_BrowserSupport__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./tts/BrowserSupport */ "./admin/js/tts/BrowserSupport.js");
+
  // const ttaGetData = async (url = '', data = {}) => {
 // 	// Default options are marked with *
 // 	const response = await fetch(url, {
@@ -444,18 +722,8 @@ __webpack_require__.r(__webpack_exports__);
 // 		console.log(err);
 // 	});
 
-var isAndroid = function isAndroid() {
-  var ua = navigator.userAgent.toLowerCase();
-  var isAndroid = ua.indexOf("android") > -1; //&& ua.indexOf("mobile");
-
-  if (isAndroid) {
-    return true;
-  }
-
-  return false;
-};
-
 var TTA = {
+  browser: null,
   speech: new speak_tts__WEBPACK_IMPORTED_MODULE_0__["default"](),
   speechSynthesis: window.speechSynthesis,
   utterence: new SpeechSynthesisUtterance(),
@@ -472,17 +740,29 @@ var TTA = {
   ttsListeningSettings: window.ttsListeningSettings,
   languages: [],
   voices: {},
-  voice: isAndroid() ? 'English United Kingdom' : "Microsoft David - English (United States)",
-  language: isAndroid() ? 'en_GB' : 'en-AU',
+  voice:  true ? 'English United Kingdom' : 0,
+  language:  true ? 'en_GB' : 0,
   speak: function speak(speech) {
+    speech.setLanguage(TTA.browser.getLanguage());
+    speech.setVoice(TTA.browser.getVoice());
+    /**
+     * 1. Microsoft edge browser has same voices(306 voices) for mobile and desktop
+     * It uses the v8 engine as chrome browser.
+     * 
+     * 
+     * 
+     */
+
+    console.log(speech);
     speech.speak({
       text: TTA.conntent,
       queue: false,
       listeners: {
-        onstart: function onstart() {
-          console.log("Start utterance");
+        onstart: function onstart() {// console.log("Start utterance");
         },
         onend: function onend() {
+          console.log('End utterance');
+
           if (!TTA.speechSynthesis.speaking) {
             console.log('End utterance');
             TTA.speakButton.innerHTML = TTA.replayButtonContent();
@@ -594,29 +874,25 @@ var TTA = {
 
 function _init() {
   if (TTA.ttsListeningSettings === undefined) return;
-  console.log(ttsListeningSettings);
-  console.log(TTA.voice, TTA.language);
-  var voice = !isAndroid() ? TTA.ttsListeningSettings.tta__listening_voice : TTA.voice;
-  var lang = !isAndroid() ? TTA.ttsListeningSettings.tta__listening_lang : TTA.language;
-  console.log(voice, lang);
   TTA.speech.init({
     volume: TTA.ttsListeningSettings.tta__listening_volume ? TTA.ttsListeningSettings.tta__listening_volume : 1,
     // From 0 to 1,
-    lang: lang,
-    // It will be speaking language.
+    // lang: lang, // It will be speaking language.
     rate: TTA.ttsListeningSettings.tta__listening_rate ? TTA.ttsListeningSettings.tta__listening_rate : 1,
     // From 0.1 to 10
     pitch: TTA.ttsListeningSettings.tta__listening_pitch ? TTA.ttsListeningSettings.tta__listening_pitch : 2,
     // From 0 to 2
-    voice: voice,
+    // voice: voice,
     splitSentences: true,
     listeners: {
-      onvoiceschanged: function onvoiceschanged(voices) {
-        console.log(voices); // TTA.voices = voices
+      onvoiceschanged: function onvoiceschanged(voices) {// console.log(voices)
+        // TTA.voices = voices
       }
     }
   }).then(function (data) {
     TTA.voices = data.voices;
+    TTA.browser = new _tts_BrowserSupport__WEBPACK_IMPORTED_MODULE_1__["default"](ttsObj, data.voices, TTA.ttsListeningSettings.tta__listening_lang, TTA.ttsListeningSettings.tta__listening_voice);
+    console.log(TTA.browser);
 
     _prepareSpeakButton(TTA.speech);
   })["catch"](function (e) {
