@@ -1,46 +1,6 @@
 import Speech from "speak-tts";
 import BrowserSupport from './tts/BrowserSupport'
 
-
-// const ttaGetData = async (url = '', data = {}) => {
-// 	// Default options are marked with *
-// 	const response = await fetch(url, {
-// 		// headers: {
-// 		//   "Content-Type": "application/json",
-// 		// },
-// 		method: 'POST', // *GET, POST, PUT, DELETE, etc.
-// 		body: data, // body data type must match "Content-Type" header
-// 	});
-// 	const responseData = await response.json(); // parses JSON response into native JavaScript objects
-
-// 	return responseData;
-// };
-// let recordSettings = {}
-// let recordData = new FormData();
-// ttaGetData(ttsObj.json_url + 'tta/v1/record', recordData)
-// 	.then((res) => {
-// 		recordSettings = res.data;
-
-// 		recognition.continuous = recordSettings.is_record_continously
-// 			? recordSettings.is_record_continously
-// 			: true;
-// 		recognition.lang = recordSettings.tta__recording__lang
-// 			? recordSettings.tta__recording__lang
-// 			: 'en-US';
-// 		localStorage.setItem(
-// 			'tta__sentence_delimiter',
-// 			recordSettings.tta__sentence_delimiter,
-// 		);
-// 	})
-// 	.catch((err) => {
-// 		console.log(err);
-// 	});
-
-
-
-
-
-
 let TTA = {
 	browser: null,
 	speech: new Speech(),
@@ -62,6 +22,12 @@ let TTA = {
 	voice: true ? 'English United Kingdom' : "Microsoft David - English (United States)",
 	language: true ? 'en_GB' : 'en-AU',
 	speak: function (speech) {
+
+		if (!TTA.speech.hasBrowserSupport()) {
+			TTA.displayApiMissing("tta__listent_content_" + window.buttonId)
+			return;
+		}
+
 		speech.setLanguage(TTA.browser.getLanguage())
 		speech.setVoice(TTA.browser.getVoice())
 		/**
@@ -77,33 +43,36 @@ let TTA = {
 				text: TTA.conntent,
 				queue: false,
 				listeners: {
-					onstart: () => {
+					onstart: (utterance) => {
 						// console.log("Start utterance");
 					},
-					onend: () => {
-						console.log('End utterance');
-						if (!TTA.speechSynthesis.speaking) {
-							console.log('End utterance');
-							TTA.speakButton.innerHTML = TTA.replayButtonContent();
-							TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.replayButtonText());
-							TTA.listenStatus = 'listen';
-						}
+					onend: (utterance) => {
+						//console.log('End utterance');
 					},
-					onresume: () => {
+					onpause: (utterance) => {
+						console.log('Pause utterance')
+					},
+					onresume: (utterance) => {
 						console.log("Resume utterance");
 					},
-					onboundary: event => {
+					onboundary: utterance => {
 						// console.log(
-						// 	event.name +
+						// 	utterance.name +
 						// 	" boundary reached after " +
-						// 	event.elapsedTime +
+						// 	utterance.elapsedTime +
 						// 	" milliseconds."
 						// );
-						// console.log(event)
+						// console.log(utterance)
 					}
 				}
 			})
 			.then(data => {
+				if (!TTA.speech.speaking()) {
+					console.log('End utterance' + TTA.speech.speaking());
+					TTA.speakButton.innerHTML = TTA.replayButtonContent();
+					TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.replayButtonText());
+					TTA.listenStatus = 'listen';
+				}
 				console.log("Success !", data);
 			})
 			.catch(e => {
@@ -150,10 +119,10 @@ let TTA = {
 		let notice = '';
 		let link = '';
 
-		if (!this.TTA.speechRecognitionIsActive) {
+		if (!TTA.speechRecognitionIsActive) {
 			notice += 'Text To Audio: Please enable speechRecognition';
 		}
-		if (!this.speechSynthesis) {
+		if (!TTA.speechSynthesis) {
 			if (notice) {
 				notice += ' , speechSynthesis.';
 			} else {
@@ -201,73 +170,67 @@ let TTA = {
 			notice += `\nFollow this link to enable: \n${link}`;
 			alert(notice);
 		}
+
 		throw new Error(notice);
 	},
-};
 
-function _init() {
 
-	if (TTA.ttsListeningSettings === undefined) return;
+	_init: function () {
 
-	TTA.speech
-		.init({
-			volume: TTA.ttsListeningSettings.tta__listening_volume
-				? TTA.ttsListeningSettings.tta__listening_volume
-				: 1, // From 0 to 1,
-			// lang: lang, // It will be speaking language.
-			rate: TTA.ttsListeningSettings.tta__listening_rate
-				? TTA.ttsListeningSettings.tta__listening_rate
-				: 1, // From 0.1 to 10
-			pitch: TTA.ttsListeningSettings.tta__listening_pitch
-				? TTA.ttsListeningSettings.tta__listening_pitch
-				: 2, // From 0 to 2
-			// voice: voice,
-			splitSentences: true,
-			listeners: {
-				onvoiceschanged: voices => {
-					// console.log(voices)
-					// TTA.voices = voices
+		if (TTA.ttsListeningSettings === undefined) return;
+
+		TTA.speech
+			.init({
+				volume: TTA.ttsListeningSettings.tta__listening_volume
+					? TTA.ttsListeningSettings.tta__listening_volume
+					: 1, // From 0 to 1,
+				// lang: lang, // It will be speaking language.
+				rate: TTA.ttsListeningSettings.tta__listening_rate
+					? TTA.ttsListeningSettings.tta__listening_rate
+					: 1, // From 0.1 to 10
+				pitch: TTA.ttsListeningSettings.tta__listening_pitch
+					? TTA.ttsListeningSettings.tta__listening_pitch
+					: 2, // From 0 to 2
+				// voice: voice,
+				splitSentences: true,
+				listeners: {
+					onvoiceschanged: voices => {
+						// console.log(voices)
+						// TTA.voices = voices
+					}
 				}
+			})
+			.then(data => {
+				TTA.voices = data.voices;
+				TTA.browser = new BrowserSupport(ttsObj, data.voices, TTA.ttsListeningSettings.tta__listening_lang, TTA.ttsListeningSettings.tta__listening_voice)
+				TTA._prepareSpeakButton(TTA.speech);
+			})
+			.catch(e => {
+				console.error("An error occured while initializing : ", e);
+			});
+	},
+	_prepareSpeakButton: function (speech) {
+		TTA.speakButton.addEventListener("click", () => {
+			if (TTA.listenStatus == 'listen') {
+				TTA.speak(speech)
+				TTA.speakButton.innerHTML = TTA.pauseButtonContent();
+				TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
+				TTA.listenStatus = 'pause';
+			} else if (TTA.listenStatus == 'pause') {
+				speech.pause();
+				TTA.speakButton.innerHTML = TTA.resumeButtonContent();
+				TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.resumeButtonText());
+				TTA.listenStatus = 'resume';
+			} else if (TTA.listenStatus == 'resume') {
+				speech.resume();
+				TTA.speakButton.innerHTML = TTA.pauseButtonContent();
+				TTA.listenStatus = 'pause';
+				TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
 			}
-		})
-		.then(data => {
-			TTA.voices = data.voices;
-			TTA.browser = new BrowserSupport(ttsObj, data.voices, TTA.ttsListeningSettings.tta__listening_lang, TTA.ttsListeningSettings.tta__listening_voice)
-
-			console.log(TTA.browser)
-			_prepareSpeakButton(TTA.speech);
-		})
-		.catch(e => {
-			console.error("An error occured while initializing : ", e);
 		});
-	// This will require for later.
-	// const text = TTA.speech.hasBrowserSupport()
-	// 	? "Hurray, your browser supports speech synthesis"
-	// 	: "Your browser does NOT support speech synthesis. Try using Chrome of Safari instead !";
-	// document.getElementById("support").innerHTML = text;
-}
+	}
 
-function _prepareSpeakButton(speech) {
-	TTA.speakButton.addEventListener("click", () => {
-		if (TTA.listenStatus == 'listen') {
-			TTA.speak(speech)
-			TTA.speakButton.innerHTML = TTA.pauseButtonContent();
-			TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
-			TTA.listenStatus = 'pause';
-		} else if (TTA.listenStatus == 'pause') {
-			TTA.speech.pause();
-			TTA.speakButton.innerHTML = TTA.resumeButtonContent();
-			TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.resumeButtonText());
-			TTA.listenStatus = 'resume';
-		} else if (TTA.listenStatus == 'resume') {
-			TTA.speech.resume();
-			TTA.speakButton.innerHTML = TTA.pauseButtonContent();
-			TTA.listenStatus = 'pause';
-			TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
-		}
-	});
-}
-
+};
 window.tta = TTA;
 
-_init();
+window.tta._init();

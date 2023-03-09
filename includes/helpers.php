@@ -61,6 +61,21 @@ function tta_clean_content($text) {
 }
 
 /**
+ * 
+ */
+function tta_should_add_dilimiter($title, $delimiter) {
+    $dilimiterArr = ['.', ',', '?', '!', '|', ];
+    $end = substr($title, -1);
+    if(in_array($end, $dilimiterArr)){
+        return $title. ' ';
+    }
+
+    return $title.$delimiter. " ";
+
+}
+
+
+/**
  * @param $atts
  *
  * @param $is_block
@@ -93,7 +108,9 @@ function tta_get_button_content($atts, $is_block = false) {
     $btn_no++;
 
     $sentence_delimiter = isset($recording['tta__sentence_delimiter']) ? $recording['tta__sentence_delimiter'] : '. ';
-    $title = tta_clean_content( get_the_title() . $sentence_delimiter  ). " ";
+    
+    $title = tta_clean_content( get_the_title());
+    $title = tta_should_add_dilimiter($title, $sentence_delimiter);
 
     $description = get_the_content();
     $description = tta_clean_content($description);
