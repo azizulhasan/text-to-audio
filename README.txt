@@ -5,7 +5,7 @@ Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, 
 Requires at least: 4.0
 Tested up to: 6.1
 Requires PHP: 5.6
-Stable tag: 1.2.4
+Stable tag: 1.2.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -102,11 +102,13 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 
 == Changelog ==
 
+= 1.2.5 (2023-03-06) =
+* Added: Play button display only single single page.
+* Fixed: Database value delete after update plugin.
+
 = 1.2.4 (2023-03-01) =
 * Fixed: Button text position issue fixed.
 * Fixed: Button icon position issue fixed.
-
-
 
 = 1.2.3 (2023-02-27) =
 * Fixed: Post title ASCII issue resolved.
