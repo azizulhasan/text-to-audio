@@ -29,6 +29,8 @@ export default function Listening() {
 	});
 	const [listeningLang, setListeningLang] = useState('en_GB');
 
+
+
 	useEffect(() => {
 		setTimeout(() => {
 			let langs = []
@@ -40,7 +42,6 @@ export default function Listening() {
 				}
 				voices.push(item)
 			})
-			console.log(langs)
 			setLanguages(langs)
 			setVoices(window.speechSynthesis.getVoices());
 		}, 800);
@@ -107,7 +108,7 @@ export default function Listening() {
 				console.log(err);
 			});
 	};
-
+	console.log(2)
 	/**
 	 * handle change
 	 * @param {*} e
@@ -347,6 +348,8 @@ export default function Listening() {
 						</button>
 					</div>
 				</Row>
+
+
 
 			</Form>
 		</Container>

@@ -7,6 +7,9 @@ export default function DashboardSideNav() {
 			flexBasis: '150px',
 		},
 	};
+
+	console.log(1)
+
 	return (
 		<div id='ttaTtaLayoutSidenav_nav' style={style.side_nav}>
 			<nav
@@ -39,13 +42,35 @@ export default function DashboardSideNav() {
 							</div>
 							Customization
 						</Link>
-						
+
 						<Link className='nav-link' to={'/docs'}>
 							<div className='sb-nav-link-icon'>
 								<i className='fas fa-book'></i>
 							</div>
 							Docs
 						</Link>
+						{
+							wp.hooks.addFilter('add_menu_to_text_to_audio', 'text-to-audio', function () {
+								console.log('dashboard')
+
+
+								return <Link className='nav-link' to={'/docs'}>
+									<div className='sb-nav-link-icon'>
+										<i className='fas fa-book'></i>
+									</div>
+									license66666666666
+								</Link>;
+							}, 10)
+						}
+
+						{
+							wp.hooks.applyFilters('add_menu_to_text_to_audio', <Link className='nav-link' to={'/docs'}>
+								<div className='sb-nav-link-icon'>
+									<i className='fas fa-book'></i>
+								</div>
+								license
+							</Link>)
+						}
 					</div>
 				</div>
 			</nav>

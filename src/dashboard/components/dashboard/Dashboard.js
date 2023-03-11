@@ -6,6 +6,7 @@ import {
 	Route,
 } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
+import { Link } from 'react-router-dom';
 
 import 'react-toastify/dist/ReactToastify.css';
 /**
@@ -33,12 +34,14 @@ function Dashboard() {
 		new MutationObserver(() => {
 			setComponentName(getComponentName());
 		}).observe(document, { subtree: true, childList: true });
+		console.log(wp.hooks.actions)
+
 	}, [componentName]);
 
 	addScripts([
 		'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js',
 	]);
-
+	console.log('hasdfasdf;asdfadfalsdfj;asldfalskdj')
 	return (
 		<HashRouter hashType='noslash'>
 			<ToastContainer
