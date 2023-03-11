@@ -1,6 +1,8 @@
 import Speech from "speak-tts";
 import BrowserSupport from './tts/BrowserSupport'
 
+
+
 let TTA = {
 	browser: null,
 	speech: new Speech(),
@@ -37,17 +39,16 @@ let TTA = {
 		 * 
 		 * 
 		 */
-		console.log(speech)
 		speech
 			.speak({
 				text: TTA.conntent,
 				queue: false,
 				listeners: {
 					onstart: (utterance) => {
-						// console.log("Start utterance");
+						console.log("Start utterance");
 					},
 					onend: (utterance) => {
-						//console.log('End utterance');
+						console.log('End utterance');
 					},
 					onpause: (utterance) => {
 						console.log('Pause utterance')
@@ -229,7 +230,6 @@ let TTA = {
 			}
 		});
 	}
-
 };
 window.tta = TTA;
 

@@ -40,10 +40,10 @@ export default function Listening() {
 				}
 				voices.push(item)
 			})
+			console.log(langs)
 			setLanguages(langs)
-			console.log(speechSynthesisVoices)
 			setVoices(window.speechSynthesis.getVoices());
-		}, 100);
+		}, 800);
 		/**
 		 * Set listening lang.
 		 */
@@ -113,13 +113,13 @@ export default function Listening() {
 	 * @param {*} e
 	 */
 	const handleChange = (e) => {
-		// if (
-		// 	e.target.name == 'tta__listening_lang' &&
-		// 	e.target.value !== listeningLang
-		// ) {
-		// 	toast('Listening language will be always recording language.');
-		// 	return;
-		// }
+		if (
+			e.target.name == 'tta__listening_lang' &&
+			e.target.value !== listeningLang
+		) {
+			toast('Listening language will be always recording language.');
+			return;
+		}
 		if (e.target.name === 'tta__listening_lang') {
 
 			let filteredVoices = speechSynthesisVoices.filter(voice => {

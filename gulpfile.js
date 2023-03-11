@@ -30,6 +30,7 @@ const productionSrc = [
 	'!admin/js/blocks/**',
 	'!admin/js/text-to-audio-dashboard.js',
 	'!admin/js/text-to-audio-front.js',
+	'!admin/js/build/speechify.js',
 	'!.browserslistrc',
 	'!.eslintrc',
 	'!.gitignore',

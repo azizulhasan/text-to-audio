@@ -5,7 +5,7 @@ Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, 
 Requires at least: 4.0
 Tested up to: 6.1
 Requires PHP: 5.6
-Stable tag: 1.2.5
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -23,9 +23,9 @@ There is no need to create an account it’s completely free. Just install the p
 
 **Features:**
 
-1. Add a play button to any post/page by shortcode “[tta_listen_btn]”.
-2. Write your post by speech from the mobile, desktop, tab, or any device.
-3. Write comment by speech on any post.
+1. Add a play button to any post or page.
+2. Write post by voice from the mobile, desktop, tab, or any device.
+3. Write comments by speech on any post.
 4. Unlimited text to speech and vice versa.
 5. Add more functionality to the website for a range of users including the visually impaired and the old people.
 6. Customization of button color, width and button text.
@@ -36,6 +36,7 @@ There is no need to create an account it’s completely free. Just install the p
 11. Choose a voice from more than 20 voices.
 12. Unlimited speech to text and vice versa.
 13. Customization of listening in block editor.
+14. Play button can be added by by shortcode “[tta_listen_btn]”.
 
 
 
@@ -101,6 +102,15 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 8. Customize the button in block editor, Block Name ( Customize Button ).
 
 == Changelog ==
+
+= 1.3.0 (2023-03-11) =
+* Fixed: Chrome android play button issue fixed.
+* Fixed: FireFox android play button issue fixed.
+* Fixed: Microsoft edge android play button issue fixed.
+* Fixed: IPhone Chrome android play button issue fixed.
+* Fixed: Dashboard UI improved.
+* Fixed: Listening voices are now based on browser API.
+
 
 = 1.2.5 (2023-03-06) =
 * Added: Play button display only single single page.

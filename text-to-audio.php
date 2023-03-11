@@ -14,7 +14,7 @@
  * @wordpress-plugin
  * Plugin Name:       Text To Speech Ninja
  * Description:       Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages.
- * Version:           1.2.5
+ * Version:           1.3.0
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-2.0+
@@ -47,7 +47,7 @@ if (!defined('ABSPATH')) {
 
 if (!defined('TEXT_TO_AUDIO_VERSION')) {
 
-    define('TEXT_TO_AUDIO_VERSION', '1.2.5');
+    define('TEXT_TO_AUDIO_VERSION', '1.3.0');
 }
 
 if (!defined('TEXT_TO_AUDIO_NONCE')) {
@@ -179,7 +179,6 @@ register_deactivation_hook(__FILE__, function() {
 function tta_create_shortcode($atts) {
 
     return tta_get_button_content($atts);
-    // return tta_get_button_content_tts($atts);
 
 }
 
