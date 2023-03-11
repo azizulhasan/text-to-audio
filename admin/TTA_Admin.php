@@ -75,8 +75,8 @@ class TTA_Admin {
 
         if (isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
             /* Load react js */
-            wp_enqueue_script('text-to-audio-dashboard', plugin_dir_url(__FILE__) . 'js/text-to-audio-dashboard.js', array(), $this->version, true);
-            wp_localize_script('text-to-audio-dashboard', 'tta_obj', [
+            wp_enqueue_script('text-to-audio-dashboard-ui', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-dashboard-ui.min.js', array(), $this->version, true);
+            wp_localize_script('text-to-audio-dashboard-ui', 'tta_obj', [
                 'admin_url' => admin_url('/'),
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'api_url' => esc_url_raw(rest_url()),
@@ -100,7 +100,8 @@ class TTA_Admin {
         if( ! function_exists( 'is_plugin_active' ) ) {
             include ABSPATH . 'wp-admin/includes/plugin.php';
         }
-        wp_localize_script('text-to-audio', 'text_to_audio_obj', [
+        wp_enqueue_script('text-to-audio-dashboard', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-dashboard.min.js', array(), $this->version, true);
+        wp_localize_script('text-to-audio-dashboard', 'text_to_audio_obj', [
             'json_url' => esc_url_raw(rest_url()),
             'admin_url' => admin_url('/'),
             'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
@@ -146,16 +147,30 @@ class TTA_Admin {
         if( ! function_exists( 'is_plugin_active' ) ) {
             include ABSPATH . 'wp-admin/includes/plugin.php';
         }
-        wp_enqueue_script('text-to-audio', plugin_dir_url(__FILE__) . 'js/text-to-audio-build.js', array(), $this->version, true);
-        wp_localize_script('text-to-audio', 'text_to_audio_obj', [
+        global $is_iphone, $is_iphone, $is_chrome,$is_safari,
+        $is_NS4,$is_opera,$is_macIE,$is_winIE, $is_gecko, $is_lynx, $is_IE, $is_edge; 
+
+        wp_enqueue_script('text-to-audio-front', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-front.min.js', array(), $this->version, true);
+        wp_localize_script('text-to-audio-front', 'ttsObj', [
             'json_url' => esc_url_raw(rest_url()),
             'admin_url' => admin_url('/'),
             'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
             'buttonTextArr' => apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr' ) ),
+            'browser' => [
+                'is_iphone' =>  $is_iphone, //(boolean): iPhone Safari
+                'is_chrome'=> $is_chrome,// (boolean): Google Chrome
+                'is_safari' =>  $is_safari,// (boolean): Safari
+                'is_NS4' => $is_NS4,//(boolean): Netscape 4
+                'is_opera' => $is_opera, //(boolean): Opera
+                'is_macIE' => $is_macIE, //(boolean): Mac Internet Explorer
+                'is_winIE' => $is_winIE, //(boolean): Windows Internet Explorer
+                'is_gecko' => $is_gecko, //(boolean): FireFox
+                'is_lynx'=> $is_lynx, //(boolean): Lynx
+                'is_IE' => $is_IE, //(boolean): Internet Explorer
+                'is_edge' => $is_edge, //(boolean): Microsoft Edge
+            ],
         ]);
-        
         wp_enqueue_style('dashicons');
-
     }
 
     /**
