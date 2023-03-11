@@ -14,7 +14,6 @@ export default class BrowserSupport {
         this.#selectedVoice = selectedVoice
         this.#defineBrowser()
         this.#defineVoiceAndLang(selectedVoice, selectedLang)
-        console.log(this.#voice, this.#lang)
     }
 
     isAndroid() {
@@ -69,7 +68,6 @@ export default class BrowserSupport {
         let selectedLang = lang ? lang : this.#selectedLang
         let langCountryCode = this.#getCountryCode(selectedLang)
         let filteredVoices = this.#getFilteredVoices(langCountryCode)
-        console.log(filteredVoices)
         if (filteredVoices.length > 1) {
             for (let j = 0; j < filteredVoices.length; j++) {
                 currentLang = filteredVoices[j].lang

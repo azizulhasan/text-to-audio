@@ -150,6 +150,8 @@ class TTA_Admin {
         global $is_iphone, $is_iphone, $is_chrome,$is_safari,
         $is_NS4,$is_opera,$is_macIE,$is_winIE, $is_gecko, $is_lynx, $is_IE, $is_edge; 
 
+    //    wp_enqueue_script('speechify', plugin_dir_url(__FILE__) . 'js/build/speechify.js', array(), $this->version, true);
+
         wp_enqueue_script('text-to-audio-front', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-front.min.js', array(), $this->version, true);
         wp_localize_script('text-to-audio-front', 'ttsObj', [
             'json_url' => esc_url_raw(rest_url()),

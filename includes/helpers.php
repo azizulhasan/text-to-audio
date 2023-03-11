@@ -145,12 +145,6 @@ function tta_get_button_content($atts, $is_block = false) {
     // Custom class to button.
     $class = (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
 
-    $config = json_encode([
-        'id' => $btn_no,
-        'content' => $content,
-        'listeningSettings' => $listening
-    ]);
-
     // Listening button.
     $button = '<div class="tta_notice" style="display:none;"></div><button id="tta__listent_content_' . $btn_no . '" class="tta__listent_content ' . esc_attr($class) . '" type="button"  title="Text To Audio:  Tap to listen post.">' . $speakIcon . ' </button>
 <style>
@@ -165,26 +159,10 @@ function tta_get_button_content($atts, $is_block = false) {
     window.buttonId = '.$btn_no.'
     window.ttsListeningSettings = '.$listening.'
 </script>';
-
-
+    // for pro.
+    //$button = '<div id="speechify-root"></div><div style="display:none;margin-bottom-500px;" id="speechify-content">'.$content.'</div>';
 
     return apply_filters( 'tta__listening_button', $button );
-}
-
-
-function tta_get_button_content_tts(){
-
-    $button = '		<textarea id="tts" style="width: 500px; height: 300px">Hello, how are you today ?</textarea>
-		<div>
-	
-			<button id="play"> Play </button>
-			<button id="pause"> Pause </button>
-			<button id="resume"> Resume </button>';
-
-        
-
-    return $button;
-
 }
 
 
