@@ -61,6 +61,21 @@ function tta_clean_content($text) {
 }
 
 /**
+ * 
+ */
+function tta_should_add_dilimiter($title, $delimiter) {
+    $dilimiterArr = ['.', ',', '?', '!', '|', ];
+    $end = substr($title, -1);
+    if(in_array($end, $dilimiterArr)){
+        return $title. ' ';
+    }
+
+    return $title.$delimiter. " ";
+
+}
+
+
+/**
  * @param $atts
  *
  * @param $is_block
@@ -78,8 +93,12 @@ function tta_get_button_content($atts, $is_block = false) {
     }
     $settings = (array) get_option('tta_settings_data');
     $recording = (array) get_option('tta_record_settings');
-    //Apply short code for only single page.
-    if (isset($settings['tta__settings_display_btn_in_single_page']) && $settings['tta__settings_display_btn_in_single_page'] == 1 && !is_single()) {
+    //Apply short code for on single page.
+    if(is_page() && isset($settings['tta__settings_display_btn_in_single_page']) && !$settings['tta__settings_display_btn_in_single_page']){
+        return;
+    }
+    // this is a pro feature to show button on blog main page with title and excerpt.
+    if(!is_single() ){
         return;
     }
 
@@ -89,7 +108,9 @@ function tta_get_button_content($atts, $is_block = false) {
     $btn_no++;
 
     $sentence_delimiter = isset($recording['tta__sentence_delimiter']) ? $recording['tta__sentence_delimiter'] : '. ';
-    $title = get_the_title() . $sentence_delimiter . " ";
+    
+    $title = tta_clean_content( get_the_title());
+    $title = tta_should_add_dilimiter($title, $sentence_delimiter);
 
     $description = get_the_content();
     $description = tta_clean_content($description);
@@ -98,21 +119,22 @@ function tta_get_button_content($atts, $is_block = false) {
 
     // Button listen text.
     $text_arr = get_button_text( $atts );
-
     // Speak Icon
-    $speakIcon = apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ') . $text_arr['listen_text'];
+    $speakIcon = "<div style='display: flex;justify-content: center;align-items: center;'>";
+    $speakIcon .= apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ');
+    $speakIcon .= '<span> '. $text_arr['listen_text'] . '<span></div>';
     // Button style.
     if (isset($customize) && count($customize)) {
         if ($is_block) {
             $backgroundColor = isset($customize['backgroundColor']) ? $customize['backgroundColor'] : '#184c53';
             $color = isset($customize['color']) ? $customize['color'] : '#ffffff';
             $width = isset($customize['width']) ? $customize['width'] : '100';
-            $btn_style = 'background-color:' . esc_attr($backgroundColor) . ' !important;color:' . esc_attr($color) . ' !important;width:' . esc_attr($width) . '%;border:0;display:block;height:30px;border-radius:4px;';
+            $btn_style = 'background-color:' . esc_attr($backgroundColor) . ' !important;color:' . esc_attr($color) . ' !important;width:' . esc_attr($width) . '%;border:0;display:block;border-radius:4px;text-decoration:none;';
         } else {
-            $btn_style = 'background-color:' . esc_attr($customize['backgroundColor']) . ';color:' . esc_attr($customize['color']) . ';width:' . esc_attr($customize['width']) . '%;border:0;display:block;height:30px;border-radius:4px;';
+            $btn_style = 'background-color:' . esc_attr($customize['backgroundColor']) . ';color:' . esc_attr($customize['color']) . ';width:' . esc_attr($customize['width']) . '%;border:0;display:block;border-radius:4px;text-decoration:none;';
         }
     } else {
-        $btn_style = 'background-color:#184c53;color:#ffffff;width:100%;border:0;display:block;height:30px;border-radius:4px;';
+        $btn_style = 'background-color:#184c53;color:#ffffff;width:100%;border:0;display:block;border-radius:4px;text-decoration:none;';
     }
     //Custom Css
     $custom_css = '';
@@ -128,19 +150,22 @@ function tta_get_button_content($atts, $is_block = false) {
 <style>
 #tta__listent_content_' . $btn_no .'.tta__listent_content{ ' . esc_attr($btn_style) . ' }
 #tta__listent_content_' . $btn_no .'.tta__listent_content:hover{' . esc_attr($btn_style) . '}
-#tta__listent_content_' . $btn_no .'.tta__listent_content .dashicons{ display: ' . esc_attr( $display_icon ) . ';line-height:1; }
+#tta__listent_content_' . $btn_no .'.tta__listent_content .text-position{ position: absolute;padding-top: 2px; }
+#tta__listent_content_' . $btn_no .'.tta__listent_content .dashicons{ display: ' . esc_attr( $display_icon ) . ';line-height:1;font-size:25px;height:25px;width:25px; }
 ' . $custom_css . '
 </style>
 <script>
-    tta__listent_content_' . $btn_no . '.onclick = function() {
-        ttaListenCotentInFrontend("' . $content . '", "tta__listent_content_' . $btn_no . '",  ' . $listening . ' );
-    };
+    window.ttsContent = "'.$content.'"
+    window.buttonId = '.$btn_no.'
+    window.ttsListeningSettings = '.$listening.'
 </script>';
-
-    
+    // for pro.
+    //$button = '<div id="speechify-root"></div><div style="display:none;margin-bottom-500px;" id="speechify-content">'.$content.'</div>';
 
     return apply_filters( 'tta__listening_button', $button );
 }
+
+
 
 
 /**

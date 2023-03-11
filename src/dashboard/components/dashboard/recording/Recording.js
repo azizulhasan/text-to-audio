@@ -8,7 +8,6 @@ import { ToggleButton, Form, Row, Col, Container } from 'react-bootstrap';
  */
 import { postWithoutImage } from '../../context/utilities';
 import toast from '../../context/Notify';
-import { updateCountry, langs } from './languages';
 
 function Recording() {
 	const [settings, setSettings] = useState({
@@ -18,6 +17,7 @@ function Recording() {
 		tta__sentence_delimiter: '.',
 	});
 	const [checked, setChecked] = useState(false);
+	const [languages, setLanguages] = useState([]);
 
 	useEffect(() => {
 		/**
@@ -38,16 +38,15 @@ function Recording() {
 		 *
 		 */
 
-		// let select_language = document.querySelector("#select_language");
-		// let select_dialect = document.querySelector("#select_dialect");
-
-		// for (var i = 0; i < langs.length; i++) {
-		// 	select_language.options[i] = new Option(langs[i][0], i);
-		// }
-
-		// select_language.selectedIndex = 6;
-		// updateCountry();
-		// select_dialect.selectedIndex = 6;
+		setTimeout(() => {
+			let langs = []
+			window.speechSynthesis.getVoices().map(item => {
+				if (!langs.includes(item.lang)) {
+					langs.push(item.lang)
+				}
+			})
+			setLanguages(langs)
+		}, 800);
 	}, []);
 
 	/**
@@ -118,12 +117,10 @@ function Recording() {
 									{' '}
 									Default Record Language
 								</option>
-								{Object.keys(langs).map((lang_code, index) => {
+								{languages.map((lang, index) => {
 									return (
-										<option
-											key={index}
-											value={langs[lang_code][1][0]}>
-											{langs[lang_code][0]}
+										<option key={index} value={lang}>
+											{lang}
 										</option>
 									);
 								})}

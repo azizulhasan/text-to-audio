@@ -1,0 +1,266 @@
+const gulp = require('gulp');
+const eslint = require('gulp-eslint');
+const babel = require('gulp-babel');
+const prettify = require('gulp-js-prettify');
+const uglify = require('gulp-uglify');
+const concat = require('gulp-concat');
+const beautify = require('gulp-beautify');
+const rename = require('gulp-rename');
+const sass = require('gulp-sass');
+const sourcemaps = require('gulp-sourcemaps');
+const minifyCSS = require('gulp-clean-css');
+const autoprefixer = require('gulp-autoprefixer');
+const wpPot = require('gulp-wp-pot');
+const zip = require('gulp-zip');
+const notify = require('gulp-notify');
+const checktextdomain = require('gulp-checktextdomain');
+// var env = require('gulp-env');
+// env({file: '.env.json'});
+// const gutil = require('gutil');
+// const ftp = require('vinyl-ftp');
+const gulpCopy = require('gulp-copy');
+const productionSrc = [
+	'**/*',
+	'!.git/**',
+	'!.husky/**',
+	'!node_modules/**',
+	'!production/**',
+	'!src/**',
+	'!admin/js/tts/**',
+	'!admin/js/blocks/**',
+	'!admin/js/text-to-audio-dashboard.js',
+	'!admin/js/text-to-audio-front.js',
+	'!admin/js/build/speechify.js',
+	'!.browserslistrc',
+	'!.eslintrc',
+	'!.gitignore',
+	'!gulpfile.js',
+	'!package.json',
+	'!composer.json',
+	'!composer.lock',
+	'!phpcs.xml',
+	'!.cpanel.yml',
+	'!package-lock.json',
+	'!mix-manifest.json',
+	'!webpack.mix.js',
+]
+
+
+const config = {
+	babel: {
+		presets: ['@babel/preset-env']
+	},
+	prettify: {
+		"indent_with_tabs": true
+	},
+	js: {
+		src: ['admin/js/*.js', '!admin/js/**/*.min.js'],
+		dist: 'admin/js/.',
+	},
+	css: {
+		src: ['admin/css/*.css', '!*.min.css'],
+		dist: 'admin/css/minify',
+	},
+	scss: {
+		src: 'assets/scss/*.scss',
+		dist: 'assets/css',
+	},
+	autoprefixer: {
+		options: {
+			cascade: false,
+		},
+	},
+	pot: {
+		src: '**/*.php',
+		dist: 'languages/text-to-audio.pot',
+		options: {
+			domain: 'text-to-audio',
+			package: 'Text To Audio',
+			bugReport: '',
+			headers: {
+				'X-Domain': 'text-to-audio'
+			}
+		}
+	},
+	zip: {
+		src: productionSrc,
+		file_name: 'text-to-audio',
+		dist: 'production',
+		options: {
+			compress: true,
+			modifiedTime: undefined
+		}
+	},
+	copy: {
+		src: productionSrc,
+		output: 'production/text-to-audio/',
+		options: {
+			//compress: true,
+			//modifiedTime: undefined
+		}
+	}
+
+	// ftp:{
+	// 	src: [
+	// 		'index.php',
+	// 		'uninstall.php',
+	// 		'woo-invoice.php',
+	// 		'LICENSE.txt',
+	// 		'README.txt',
+	// 		'libs/**',
+	// 		'admin/**',
+	// 		'includes/**',
+	// 		'languages/**',
+	// 		'!admin/css/flatpickr.css',
+	// 		'!admin/css/selectize.css',
+	// 		'!admin/css/selectize.default.css',
+	// 		'!admin/css/slick.css',
+	// 		'!admin/css/slick-theme.css',
+	// 		'!admin/css/webappick-boilerplate-admin.css',
+	// 		'!admin/css/webappick-pdf-invoice-for-woocommerce-admin.css'
+	// 	],
+	// 	options: {
+	// 		host: process.env.FTP_HOST,
+	// 		port: process.env.FTP_PORT,
+	// 		user: process.env.FTP_USER,
+	// 		password: process.env.FTP_PASSWORD,
+	// 		log: gutil.log,
+	// 		parallel: 9,
+	// 		maxConnections:9,
+	// 	},
+	// 	base: process.env.FTP_DEPLOYPATH,
+	// 	folder: process.env.FTP_DEPLOYFOLDER
+	// }
+};
+
+// Tasks
+gulp.task(
+	'compile:js',
+	() => {
+		return gulp.src(config.js.src)
+			.pipe(sourcemaps.init({ largeFile: true, loadMaps: true }))
+			.pipe(eslint.format())
+			.pipe(eslint())
+			.pipe(babel(config.babel))
+			.on('error', notify.onError({ title: "Error", message: "Error: <%= error.message %>" })) // phpcs:ignore WordPressVIPMinimum.Security.Underscorejs.OutputNotation
+			.pipe(uglify())
+			.pipe(rename({ suffix: '.min' }))
+			.pipe(sourcemaps.write())
+			.pipe(gulp.dest(config.js.dist))
+			.pipe(notify({ message: 'TASK: compile:js Completed! 💯', onLast: true }));
+	}
+);
+// minify:css
+gulp.task(
+	'minify:css',
+	() => {
+		return gulp.src(config.css.src)
+			.pipe(minifyCSS({ compatibility: 'ie8' }))
+			.pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9'))
+			.pipe(rename({ suffix: '.min' }))
+			.pipe(gulp.dest(config.css.dist));
+	}
+);
+// compile:scss
+gulp.task(
+	'compile:scss',
+	() => {
+		return gulp.src(config.scss.src)
+			.pipe(sass().on('error', sass.logError))
+			.on('error', notify.onError({ title: "Error", message: "Error: <%= error.message %>" })) // phpcs:ignore WordPressVIPMinimum.Security.Underscorejs.OutputNotation
+			.pipe(sourcemaps.init())
+			.pipe(autoprefixer(config.autoprefixer.options))
+			.pipe(beautify.js({ indent_size: 4 }))
+			.pipe(sourcemaps.write('.'))
+			.pipe(gulp.dest(config.scss.dist))
+			.pipe(minifyCSS())
+			.pipe(rename({ suffix: '.min' }))
+			.pipe(gulp.dest(config.scss.dist))
+			.pipe(notify({ message: 'TASK: compile:scss Completed! 💯', onLast: true }));
+	}
+);
+//makePot
+gulp.task(
+	'makePot',
+	() => {
+		return gulp.src(config.pot.src)
+			.pipe(wpPot(config.pot.options))
+			.on('error', notify.onError({ title: "Error", message: "Error: <%= error.message %>" })) // phpcs:ignore WordPressVIPMinimum.Security.Underscorejs.OutputNotation
+			.pipe(gulp.dest(config.pot.dist))
+			.pipe(notify({ message: 'TASK: makePot Completed! 💯', onLast: true }));
+	}
+);
+
+// makeZip
+gulp.task(
+	'makeZip',
+	function () {
+		return gulp.series('copy', 'zip')()
+	}
+);
+
+gulp.task('zip', function () {
+	return gulp.src('production/**')
+		.pipe(zip(config.zip.file_name.replace('.zip', '') + '.zip'), config.zip.options)
+		.pipe(gulp.dest(config.zip.dist))
+		.pipe(notify({ message: 'Zipping Completed! 💯', onLast: true }))
+})
+
+
+gulp.task('copy', function () {
+	return gulp.src(config.copy.src)
+		.pipe(gulpCopy(config.copy.output, config.copy.src.options))
+		.pipe(notify({ message: 'Copy Completed! 💯', onLast: true }))
+
+})
+
+gulp.task('release', function () {
+	return gulp.src(config.copy.src)
+		.pipe(gulpCopy('C:/xampp/htdocs/wordpress.org/text-to-audio/', config.copy.src.options))
+		.pipe(notify({ message: 'Release version copy Completed! 💯', onLast: true }))
+
+})
+
+// watch
+gulp.task(
+	'watch',
+	function () {
+		gulp.watch(config.css.src, gulp.series('minify:css'));
+	}
+);
+// checktextdomain
+gulp.task('checktextdomain', function () {
+	return gulp
+		.src('**/*.php')
+		.pipe(checktextdomain({
+			text_domain: 'webappick-pdf-invoice-for-woocommerce', //Specify allowed domain(s)
+			keywords: [ //List keyword specifications
+				'__:1,2d',
+				'_e:1,2d',
+				'_x:1,2c,3d',
+				'esc_html__:1,2d',
+				'esc_html_e:1,2d',
+				'esc_html_x:1,2c,3d',
+				'esc_attr__:1,2d',
+				'esc_attr_e:1,2d',
+				'esc_attr_x:1,2c,3d',
+				'_ex:1,2c,3d',
+				'_n:1,2,4d',
+				'_nx:1,2,4c,5d',
+				'_n_noop:1,2,3d',
+				'_nx_noop:1,2,3c,4d'
+			],
+		}));
+});
+
+// build
+gulp.task('build', gulp.series('checktextdomain', 'minify:css', 'compile:js', 'makeZip'));
+
+
+// gulp.task('deploy',  function(){
+// 	let conn = ftp.create(config.ftp.options);
+// 	return gulp.src(config.ftp.src, {base: '.', buffer: false})
+// 		.pipe(conn.newer(config.ftp.folder))
+// 		.pipe(conn.dest(config.ftp.folder))
+// 		.pipe( notify( {message: 'File Upload Completed! 💯', onLast: true} ) );
+// });

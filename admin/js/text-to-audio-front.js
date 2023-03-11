@@ -1,0 +1,236 @@
+import Speech from "speak-tts";
+import BrowserSupport from './tts/BrowserSupport'
+
+
+
+let TTA = {
+	browser: null,
+	speech: new Speech(),
+	speechSynthesis: window.speechSynthesis,
+	utterence: new SpeechSynthesisUtterance(),
+	speechRecognitionIsActive: true,
+	speechRecognition: window.speechRecognition || window.webkitSpeechRecognition,
+	recordStatus: 'record',
+	listenStatus: 'listen',
+	noticeClass: 'tta_notice',
+	cofiguration: {},
+	timer: null,
+	buttonId: window.buttonId,
+	speakButton: document.getElementById("tta__listent_content_" + window.buttonId),
+	conntent: window.ttsContent,
+	ttsListeningSettings: window.ttsListeningSettings,
+	languages: [],
+	voices: {},
+	voice: true ? 'English United Kingdom' : "Microsoft David - English (United States)",
+	language: true ? 'en_GB' : 'en-AU',
+	speak: function (speech) {
+
+		if (!TTA.speech.hasBrowserSupport()) {
+			TTA.displayApiMissing("tta__listent_content_" + window.buttonId)
+			return;
+		}
+
+		speech.setLanguage(TTA.browser.getLanguage())
+		speech.setVoice(TTA.browser.getVoice())
+		/**
+		 * 1. Microsoft edge browser has same voices(306 voices) for mobile and desktop
+		 * It uses the v8 engine as chrome browser.
+		 * 
+		 * 
+		 * 
+		 */
+		speech
+			.speak({
+				text: TTA.conntent,
+				queue: false,
+				listeners: {
+					onstart: (utterance) => {
+						console.log("Start utterance");
+					},
+					onend: (utterance) => {
+						console.log('End utterance');
+					},
+					onpause: (utterance) => {
+						console.log('Pause utterance')
+					},
+					onresume: (utterance) => {
+						console.log("Resume utterance");
+					},
+					onboundary: utterance => {
+						// console.log(
+						// 	utterance.name +
+						// 	" boundary reached after " +
+						// 	utterance.elapsedTime +
+						// 	" milliseconds."
+						// );
+						// console.log(utterance)
+					}
+				}
+			})
+			.then(data => {
+				if (!TTA.speech.speaking()) {
+					console.log('End utterance' + TTA.speech.speaking());
+					TTA.speakButton.innerHTML = TTA.replayButtonContent();
+					TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.replayButtonText());
+					TTA.listenStatus = 'listen';
+				}
+				console.log("Success !", data);
+			})
+			.catch(e => {
+				console.error("An error occurred :", e);
+			});
+	},
+	buttonTextArr: ttsObj.buttonTextArr,
+	playButtonText: function () {
+		return this.buttonTextArr.listen_text;
+	},
+
+	playButtonContent: function () {
+
+		return '<div style="display:flex;justify-content:center;align-items:center;"><span class="dashicons dashicons-controls-play"></span> <span> ' + this.playButtonText() + '<span></span></span></div>'
+	},
+	replayButtonText: function () {
+		return this.buttonTextArr.replay_text;
+	},
+	replayButtonContent: function () {
+		return '<div style="display:flex;justify-content:center;align-items:center;"><span class="dashicons dashicons-image-rotate"></span> <span> ' + this.replayButtonText() + '<span></span></span></div>'
+	},
+	pauseButtonText: function () {
+		return this.buttonTextArr.pause_text;
+	},
+	pauseButtonContent: function () {
+		return '<div style="display:flex;justify-content:center;align-items:center;"><span class="dashicons dashicons-controls-pause"></span> <span> ' + this.pauseButtonText() + '<span></span></span></div>'
+	},
+	resumeButtonText: function () {
+		return this.buttonTextArr.resume_text;
+	},
+	resumeButtonContent: function () {
+		return '<div style="display:flex;justify-content:center;align-items:center;"><span class="dashicons dashicons-controls-play"></span> <span> ' + this.buttonTextArr.resume_text + '<span></span></span></div>'
+	},
+	recordStartButtonContent: function () {
+		return '<span class="dashicons dashicons-controls-volumeoff"></span> ' + this.buttonTextArr.start_text;
+	},
+
+	recordStopButtonConten: function () {
+		return '<span class="dashicons dashicons-controls-volumeon"></span> ' + this.buttonTextArr.stop_text;
+	},
+
+
+	displayApiMissing(button_id = '', is_dashboard = false) {
+		let notice = '';
+		let link = '';
+
+		if (!TTA.speechRecognitionIsActive) {
+			notice += 'Text To Audio: Please enable speechRecognition';
+		}
+		if (!TTA.speechSynthesis) {
+			if (notice) {
+				notice += ' , speechSynthesis.';
+			} else {
+				notice += 'Text To Audio: Please enable speechSynthesis.';
+			}
+		}
+
+		if (button_id) {
+			let previousSibling =
+				document.getElementById(button_id).previousSibling;
+			if (previousSibling) {
+				notice += ` Click here to <a href="https://wordpress.org/plugins/text-to-audio/#how%20to%20enable%20%60%60speechsynthesis%60%60%20on%20firefox%3F" target="_blank">enable</a>`;
+				previousSibling.style.display = 'block';
+				previousSibling.innerHTML = notice;
+				setTimeout(() => {
+					document.querySelector('.tta_notice').style.display =
+						'none';
+					previousSibling.innerHTML = '';
+				}, 5000);
+			} else {
+				link +=
+					ttsObj.admin_url +
+					'admin.php?page=text-to-audio#/docs';
+				notice += `\nFollow this link to enable: \n${link}`;
+				alert(notice);
+			}
+		} else {
+			if (is_dashboard) {
+				link +=
+					ttsObj.admin_url +
+					'admin.php?page=text-to-audio#/docs';
+			} else {
+				if (
+					location.search === '?page=text-to-audio' &&
+					location.hash === '#/customize'
+				) {
+					link +=
+						ttsObj.admin_url +
+						'admin.php?page=text-to-audio#/docs';
+				} else {
+					link +=
+						'https://wordpress.org/plugins/text-to-audio/#how%20to%20enable%20%60%60speechsynthesis%60%60%20on%20firefox%3F';
+				}
+			}
+			notice += `\nFollow this link to enable: \n${link}`;
+			alert(notice);
+		}
+
+		throw new Error(notice);
+	},
+
+
+	_init: function () {
+
+		if (TTA.ttsListeningSettings === undefined) return;
+
+		TTA.speech
+			.init({
+				volume: TTA.ttsListeningSettings.tta__listening_volume
+					? TTA.ttsListeningSettings.tta__listening_volume
+					: 1, // From 0 to 1,
+				// lang: lang, // It will be speaking language.
+				rate: TTA.ttsListeningSettings.tta__listening_rate
+					? TTA.ttsListeningSettings.tta__listening_rate
+					: 1, // From 0.1 to 10
+				pitch: TTA.ttsListeningSettings.tta__listening_pitch
+					? TTA.ttsListeningSettings.tta__listening_pitch
+					: 2, // From 0 to 2
+				// voice: voice,
+				splitSentences: true,
+				listeners: {
+					onvoiceschanged: voices => {
+						// console.log(voices)
+						// TTA.voices = voices
+					}
+				}
+			})
+			.then(data => {
+				TTA.voices = data.voices;
+				TTA.browser = new BrowserSupport(ttsObj, data.voices, TTA.ttsListeningSettings.tta__listening_lang, TTA.ttsListeningSettings.tta__listening_voice)
+				TTA._prepareSpeakButton(TTA.speech);
+			})
+			.catch(e => {
+				console.error("An error occured while initializing : ", e);
+			});
+	},
+	_prepareSpeakButton: function (speech) {
+		TTA.speakButton.addEventListener("click", () => {
+			if (TTA.listenStatus == 'listen') {
+				TTA.speak(speech)
+				TTA.speakButton.innerHTML = TTA.pauseButtonContent();
+				TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
+				TTA.listenStatus = 'pause';
+			} else if (TTA.listenStatus == 'pause') {
+				speech.pause();
+				TTA.speakButton.innerHTML = TTA.resumeButtonContent();
+				TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.resumeButtonText());
+				TTA.listenStatus = 'resume';
+			} else if (TTA.listenStatus == 'resume') {
+				speech.resume();
+				TTA.speakButton.innerHTML = TTA.pauseButtonContent();
+				TTA.listenStatus = 'pause';
+				TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
+			}
+		});
+	}
+};
+window.tta = TTA;
+
+window.tta._init();

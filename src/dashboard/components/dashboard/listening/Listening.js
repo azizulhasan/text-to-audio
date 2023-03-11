@@ -17,6 +17,9 @@ import toast from '../../context/Notify';
 import { langs } from '../recording/languages';
 export default function Listening() {
 	const [voices, setVoices] = useState([]);
+	const [languages, setLanguages] = useState([]);
+	const [speechSynthesisVoices, setSpeechSynthesisVoices] = useState([]);
+
 	const [listeningSettings, setListeningSettings] = useState({
 		tta__listening_voice: 'Microsoft David - English (United States)',
 		tta__listening_pitch: 2,
@@ -28,8 +31,19 @@ export default function Listening() {
 
 	useEffect(() => {
 		setTimeout(() => {
+			let langs = []
+			let voices = []
+			setSpeechSynthesisVoices(window.speechSynthesis.getVoices())
+			window.speechSynthesis.getVoices().map(item => {
+				if (!langs.includes(item.lang)) {
+					langs.push(item.lang)
+				}
+				voices.push(item)
+			})
+			console.log(langs)
+			setLanguages(langs)
 			setVoices(window.speechSynthesis.getVoices());
-		}, 10);
+		}, 800);
 		/**
 		 * Set listening lang.
 		 */
@@ -106,6 +120,19 @@ export default function Listening() {
 			toast('Listening language will be always recording language.');
 			return;
 		}
+		if (e.target.name === 'tta__listening_lang') {
+
+			let filteredVoices = speechSynthesisVoices.filter(voice => {
+				return voice.lang == e.target.value;
+			})
+			if (filteredVoices.length === 1) {
+				setListeningSettings({
+					...listeningSettings,
+					...{ ['tta__listening_voice']: filteredVoices[0].lang },
+				});
+			}
+			setVoices(filteredVoices)
+		}
 		setListeningSettings({
 			...listeningSettings,
 			...{ [e.target.name]: e.target.value },
@@ -114,6 +141,48 @@ export default function Listening() {
 	return (
 		<Container>
 			<Form onSubmit={handleSubmit}>
+				<Row>
+					<Col xs={12} sm={8} lg={8}>
+						<Form.Group>
+							<Form.Label>Voice Language</Form.Label>
+							<Form.Select
+								onChange={handleChange}
+								name='tta__listening_lang'
+								value={listeningSettings.tta__listening_lang}
+								aria-label='Default select example'>
+								<option disabled>
+									{' '}
+									Default Listening Language
+								</option>
+								{languages.map((lang, index) => {
+									return (
+										<option key={index} value={lang}>
+											{lang}
+										</option>
+									);
+								})}
+							</Form.Select>
+						</Form.Group>
+					</Col>
+					<Col xs={12} sm={4} lg={4} className='mt-4'>
+						<>
+							{['top'].map((placement) => (
+								<OverlayTrigger
+									key={placement}
+									placement={placement}
+									overlay={
+										<Tooltip id={`tooltip-${placement}`}>
+											Gets and sets the language of the
+											utterance.
+										</Tooltip>
+									}>
+									<Button className='tta_btn'>?</Button>
+								</OverlayTrigger>
+							))}
+						</>
+					</Col>
+
+				</Row>
 				<Row>
 					<Col xs={12} sm={8} lg={8}>
 						<Form.Group>
@@ -129,7 +198,7 @@ export default function Listening() {
 								</option>
 								{voices.map((voice, index) => {
 									return (
-										<option key={index} value={voice.name}>
+										<option key={index} data-lang={voice.lang} value={voice.name}>
 											{voice.name}
 										</option>
 									);
@@ -155,6 +224,7 @@ export default function Listening() {
 						</>
 					</Col>
 				</Row>
+
 				<Row>
 					<Col xs={12} sm={8} lg={8}>
 						<Form.Group>
@@ -271,55 +341,13 @@ export default function Listening() {
 							))}
 						</>
 					</Col>
-				</Row>
-				<Row>
-					<Col xs={12} sm={8} lg={8}>
-						<Form.Group>
-							<Form.Label>Voice Language</Form.Label>
-							<Form.Select
-								onChange={handleChange}
-								name='tta__listening_lang'
-								value={listeningLang}
-								aria-label='Default select example'>
-								<option disabled>
-									{' '}
-									Default Listening Language
-								</option>
-								{Object.keys(langs).map((lang_code, index) => {
-									return (
-										<option
-											key={index}
-											value={langs[lang_code][1][0]}>
-											{langs[lang_code][0]}
-										</option>
-									);
-								})}
-							</Form.Select>
-						</Form.Group>
-					</Col>
-					<Col xs={12} sm={4} lg={4} className='mt-4'>
-						<>
-							{['top'].map((placement) => (
-								<OverlayTrigger
-									key={placement}
-									placement={placement}
-									overlay={
-										<Tooltip id={`tooltip-${placement}`}>
-											Gets and sets the language of the
-											utterance.
-										</Tooltip>
-									}>
-									<Button className='tta_btn'>?</Button>
-								</OverlayTrigger>
-							))}
-						</>
-					</Col>
 					<div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
 						<button type='submit' className='tta_btn  btn-center'>
 							Submit
 						</button>
 					</div>
 				</Row>
+
 			</Form>
 		</Container>
 	);
