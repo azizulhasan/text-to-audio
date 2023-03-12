@@ -1,20 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-export default function DashboardSideNav() {
+export default function DashboardSideNav({ isProVersion }) {
 	const style = {
 		side_nav: {
 			flexBasis: '150px',
 		},
 	};
-
-	const [hasPro, setHasPro] = useState(false)
-
-	useEffect(() => {
-		let Pro = wp.hooks.applyFilters('tta_has_pro', false);
-		console.log(Pro)
-		setHasPro(Pro)
-	}, [])
 
 
 
@@ -61,21 +53,14 @@ export default function DashboardSideNav() {
 							Docs
 						</Link>
 						{
-							hasPro ? <Link className='nav-link' to={'/customize'}>
+							(isProVersion) ? <Link className='nav-link' to={'/customize'}>
 								<div className='sb-nav-link-icon'>
 									<i className='fas fa-edit'></i>
 								</div>
-								License4444
-							</Link> : <>
-								{
-									console.log('false')
-								}
-							</>
+								License
+							</Link> : null
 						}
 					</div>
-					{
-						wp.hooks.doAction('add_menu_to_text_test')
-					}
 				</div>
 			</nav>
 		</div>

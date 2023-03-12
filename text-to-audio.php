@@ -128,6 +128,7 @@ class TTA_Init {
             ]);
 
         }
+
         
     }
 
@@ -190,23 +191,5 @@ function tta_create_shortcode($atts) {
 }
 
 add_shortcode('tta_listen_btn', 'tta_create_shortcode');
-
-/**************************************************************************
- * 
- * DOCS TO READ FOR FUTURE UPDATE
- * 
- **************************************************************************/
-/**
- * 1. https://developer.chrome.com/blog/web-apps-that-talk-introduction-to-the-speech-synthesis-api/
- * 2. https://www.sitepoint.com/talking-web-pages-and-the-speech-synthesis-api/
- * 3. https://stephenwalther.com/archive/2015/01/05/using-html5-speech-recognition-and-text-to-speech
- * 4. https://www.audero.it/demo/speech-synthesis-api-demo.html
- * 5. https://bugs.chromium.org/p/chromium/issues/attachmentText?aid=243004
- * 6. https://bugs.chromium.org/p/chromium/issues/detail?id=335907
- * 7. Final solution.
- * https://jsfiddle.net/8dsv1y7a/3/
- */
-
-
 
 

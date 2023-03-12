@@ -14,7 +14,7 @@ import 'react-toastify/dist/ReactToastify.css';
  */
 import './assets/css/styles.css';
 import './assets/js/scripts.js';
-import { addScripts, getComponentName } from '../context/utilities';
+import { addScripts, getComponentName, isPro } from '../context/utilities';
 
 /**
  * Dashboard Components
@@ -34,12 +34,18 @@ function Dashboard() {
 		new MutationObserver(() => {
 			setComponentName(getComponentName());
 		}).observe(document, { subtree: true, childList: true });
-		console.log('1')
 	}, [componentName]);
+	const [isProVersion, setIsProVersion] = useState(false)
 
-	// addScripts([
-	// 	'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js',
-	// ]);
+	useEffect(() => {
+		let pro = wp.hooks.applyFilters('tta_has_pro', false);
+		let licenseCheck = wp.hooks.applyFilters('tta_is_pro_license_active', false);
+		setIsProVersion(isPro(pro, licenseCheck))
+	}, [])
+
+	addScripts([
+		'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js',
+	]);
 	return (
 		<HashRouter hashType='noslash'>
 			<ToastContainer
@@ -54,22 +60,8 @@ function Dashboard() {
 				pauseOnHover
 			/>
 			<DashboardTopNav />
-			{
-				console.log('dashboard_dom')
-			}
-			{/* {
-				wp.hooks.addFilter('add_menu_to_text_to_audio', 'text-to-audio', function (nav) {
-					return <Link className='nav-link' to={'/docs'}>
-						<div className='sb-nav-link-icon'>
-							<i className='fas fa-book'></i>
-						</div>
-						License
-					</Link>
-				}, 10)
-			} */}
-
 			<div id='ttaLayoutSidenav'>
-				<DashboardSideNav />
+				<DashboardSideNav isProVersion={isProVersion} />
 				<div id='ttaLayoutSidenav_content'>
 					<main>
 						<div className='container-fluid'>

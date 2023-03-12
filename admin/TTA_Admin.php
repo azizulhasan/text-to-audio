@@ -89,6 +89,8 @@ class TTA_Admin {
             'buttonTextArr' => apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr' ) ),
         ]);
 
+        do_action('tta_enqueue_pro_dashboard_scripts');
+
         if (isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
             /* Load react js */
             wp_enqueue_script('text-to-audio-dashboard-ui', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-dashboard-ui.min.js', array(), $this->version, true);

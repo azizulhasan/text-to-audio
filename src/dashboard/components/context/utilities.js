@@ -5,12 +5,12 @@
 export const addScripts = (scripts) => {
   let fragment = document.createDocumentFragment();
   [...scripts].forEach((scirpt) => {
-    if( true !== window.localStorage.getItem( scirpt ) ){
+    if (true !== window.localStorage.getItem(scirpt)) {
       let tag = document.createElement("script");
       tag.async = true;
       tag.src = scirpt;
       fragment.appendChild(tag);
-      window.localStorage.setItem( scirpt, true );
+      window.localStorage.setItem(scirpt, true);
     }
   });
   document.body.appendChild(fragment)
@@ -349,8 +349,8 @@ export const getUserName = () => {
   return window.sessionStorage.getItem("email")
     ? window.sessionStorage.getItem("email").split("@")[0]
     : window.localStorage.getItem("email")
-    ? window.localStorage.getItem("email").split("@")[0]
-    : "";
+      ? window.localStorage.getItem("email").split("@")[0]
+      : "";
 };
 export const logout = () => {
   window.localStorage.removeItem("email");
@@ -416,19 +416,24 @@ export const getFormattedDate = () => {
   var month = months[d.getMonth()];
   var year = d.getFullYear();
   var x = document.getElementById("time");
-  
-   return  day + " " + hr + ":" + min + ampm + " " + date + " " + month + " " + year;
+
+  return day + " " + hr + ":" + min + ampm + " " + date + " " + month + " " + year;
 };
 
-  /**
-   * Get ifram content
-   */
- export  const getIframeContent = (textareaIndex) => {
-    let textareaId = document
-      .getElementsByTagName("textarea")[textareaIndex]
-      .getAttribute("id");
-    let iframeContent = document.getElementById(textareaId + "_ifr").contentWindow
-      .document.body.innerHTML;
-  
-    return iframeContent;
-  };
+/**
+ * Get ifram content
+ */
+export const getIframeContent = (textareaIndex) => {
+  let textareaId = document
+    .getElementsByTagName("textarea")[textareaIndex]
+    .getAttribute("id");
+  let iframeContent = document.getElementById(textareaId + "_ifr").contentWindow
+    .document.body.innerHTML;
+
+  return iframeContent;
+};
+
+
+export const isPro = (hasPro, isProLicenseActive) => {
+  return hasPro && isProLicenseActive;
+}

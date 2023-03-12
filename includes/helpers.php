@@ -242,5 +242,28 @@ function add_listen_button( $content ) {
     return $button.$content;
 }
 
+function has_pro() {
 
+    if(!function_exists('is_plugin_active') ){
+        include_once ABSPATH . 'wp-admin/includes/plugin.php';
+    }
 
+    if(is_plugin_active('text-to-audio-pro/text-to-audio-pro.php')){
+        return true;
+    }
+
+    return false;
+}
+
+function is_pro_active() {
+
+    if(!function_exists('is_plugin_active') ){
+        include_once ABSPATH . 'wp-admin/includes/plugin.php';
+    }
+
+    if(is_plugin_active('text-to-audio-pro/text-to-audio-pro.php')){
+        return apply_filters('tta_pro_is_license_active', false);
+    }
+
+    return false;
+}
