@@ -64,6 +64,13 @@ if (!defined('TEXT_TO_AUDIO_ROOT_FILE')) {
 
     define('TEXT_TO_AUDIO_ROOT_FILE', __FILE__);
 }
+
+if (!defined('TTA_ROOT_FILE_NAME')) {
+    $path = explode( DIRECTORY_SEPARATOR, TEXT_TO_AUDIO_ROOT_FILE);
+    $file = end($path);
+    define('TTA_ROOT_FILE_NAME', $file);
+}
+
 if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
 
     define('TEXT_TO_AUDIO_PLUGIN_NAME', 'Text To Speech');

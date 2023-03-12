@@ -15,6 +15,7 @@ import {
 import { postWithoutImage, getData } from '../../context/utilities';
 import toast from '../../context/Notify';
 import { langs } from '../recording/languages';
+import { Link } from 'react-router-dom';
 export default function Listening() {
 	const [voices, setVoices] = useState([]);
 	const [languages, setLanguages] = useState([]);
@@ -32,6 +33,9 @@ export default function Listening() {
 
 
 	useEffect(() => {
+
+		console.log('listening')
+
 		setTimeout(() => {
 			let langs = []
 			let voices = []
@@ -108,7 +112,6 @@ export default function Listening() {
 				console.log(err);
 			});
 	};
-	console.log(2)
 	/**
 	 * handle change
 	 * @param {*} e
@@ -141,6 +144,9 @@ export default function Listening() {
 	};
 	return (
 		<Container>
+			{
+				console.log('listening_dom')
+			}
 			<Form onSubmit={handleSubmit}>
 				<Row>
 					<Col xs={12} sm={8} lg={8}>
@@ -348,9 +354,6 @@ export default function Listening() {
 						</button>
 					</div>
 				</Row>
-
-
-
 			</Form>
 		</Container>
 	);

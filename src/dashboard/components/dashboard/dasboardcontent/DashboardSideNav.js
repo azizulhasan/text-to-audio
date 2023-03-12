@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function DashboardSideNav() {
@@ -8,10 +8,21 @@ export default function DashboardSideNav() {
 		},
 	};
 
-	console.log(1)
+	const [hasPro, setHasPro] = useState(false)
+
+	useEffect(() => {
+		let Pro = wp.hooks.applyFilters('tta_has_pro', false);
+		console.log(Pro)
+		setHasPro(Pro)
+	}, [])
+
+
 
 	return (
 		<div id='ttaTtaLayoutSidenav_nav' style={style.side_nav}>
+			{
+				console.log('sidenav_dom')
+			}
 			<nav
 				className='tta-sidenav accordion tta-sidenav-dark text-white'
 				id='sidenavAccordion'>
@@ -50,28 +61,21 @@ export default function DashboardSideNav() {
 							Docs
 						</Link>
 						{
-							wp.hooks.addFilter('add_menu_to_text_to_audio', 'text-to-audio', function () {
-								console.log('dashboard')
-
-
-								return <Link className='nav-link' to={'/docs'}>
-									<div className='sb-nav-link-icon'>
-										<i className='fas fa-book'></i>
-									</div>
-									license66666666666
-								</Link>;
-							}, 10)
-						}
-
-						{
-							wp.hooks.applyFilters('add_menu_to_text_to_audio', <Link className='nav-link' to={'/docs'}>
+							hasPro ? <Link className='nav-link' to={'/customize'}>
 								<div className='sb-nav-link-icon'>
-									<i className='fas fa-book'></i>
+									<i className='fas fa-edit'></i>
 								</div>
-								license
-							</Link>)
+								License4444
+							</Link> : <>
+								{
+									console.log('false')
+								}
+							</>
 						}
 					</div>
+					{
+						wp.hooks.doAction('add_menu_to_text_test')
+					}
 				</div>
 			</nav>
 		</div>

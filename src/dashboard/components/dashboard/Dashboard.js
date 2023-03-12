@@ -34,14 +34,12 @@ function Dashboard() {
 		new MutationObserver(() => {
 			setComponentName(getComponentName());
 		}).observe(document, { subtree: true, childList: true });
-		console.log(wp.hooks.actions)
-
+		console.log('1')
 	}, [componentName]);
 
-	addScripts([
-		'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js',
-	]);
-	console.log('hasdfasdf;asdfadfalsdfj;asldfalskdj')
+	// addScripts([
+	// 	'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js',
+	// ]);
 	return (
 		<HashRouter hashType='noslash'>
 			<ToastContainer
@@ -56,6 +54,20 @@ function Dashboard() {
 				pauseOnHover
 			/>
 			<DashboardTopNav />
+			{
+				console.log('dashboard_dom')
+			}
+			{/* {
+				wp.hooks.addFilter('add_menu_to_text_to_audio', 'text-to-audio', function (nav) {
+					return <Link className='nav-link' to={'/docs'}>
+						<div className='sb-nav-link-icon'>
+							<i className='fas fa-book'></i>
+						</div>
+						License
+					</Link>
+				}, 10)
+			} */}
+
 			<div id='ttaLayoutSidenav'>
 				<DashboardSideNav />
 				<div id='ttaLayoutSidenav_content'>
