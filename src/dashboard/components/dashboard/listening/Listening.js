@@ -40,7 +40,6 @@ export default function Listening() {
 				}
 				voices.push(item)
 			})
-			console.log(langs)
 			setLanguages(langs)
 			setVoices(window.speechSynthesis.getVoices());
 		}, 800);
@@ -117,8 +116,9 @@ export default function Listening() {
 			e.target.name == 'tta__listening_lang' &&
 			e.target.value !== listeningLang
 		) {
-			toast('Listening language will be always recording language.');
-			return;
+			toast('Listening language should be always recording language.', 'info', {
+				autoClose: 5000
+			});
 		}
 		if (e.target.name === 'tta__listening_lang') {
 

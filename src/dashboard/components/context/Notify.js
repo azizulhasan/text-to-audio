@@ -1,6 +1,6 @@
 import { toast } from "react-toastify";
 
-const toastConfig = {
+const configuration = {
   position: toast.POSITION.TOP_RIGHT,
   autoClose: 3000,
   hideProgressBar: false,
@@ -10,18 +10,26 @@ const toastConfig = {
   progress: undefined,
 };
 
-const notify = (message, type = "success") => {
+const notify = (message, type = "success", config = {}) => {
+  let toastConfig = {
+    ...configuration,
+    ...config,
+  }
   switch (type) {
-    case type === "success":
+    case "success":
       toast.success(message);
-    case type === "error":
+      break;
+    case "error":
       toast.error(message, toastConfig);
-    case type === "warn":
+      break
+    case "warn":
       toast.warn(message, toastConfig);
-    case type === "info":
+      break;
+    case "info":
       toast.info(message, toastConfig);
+      break;
     default:
-      toast(message, toastConfig);
+      toast.success(message, toastConfig);
   }
 };
 

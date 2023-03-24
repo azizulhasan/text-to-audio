@@ -215,10 +215,9 @@ gulp.task('copy', function () {
 })
 
 gulp.task('release', function () {
-	return gulp.src(config.copy.src)
+	return gulp.src('production/text-to-audio/**')
 		.pipe(gulpCopy('C:/xampp/htdocs/wordpress.org/text-to-audio/', config.copy.src.options))
 		.pipe(notify({ message: 'Release version copy Completed! 💯', onLast: true }))
-
 })
 
 // watch
