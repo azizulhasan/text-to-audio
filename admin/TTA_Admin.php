@@ -95,7 +95,6 @@ class TTA_Admin {
         /**
          * Looad wp-speeh script
          */
-        wp_enqueue_script('text-to-audio', plugin_dir_url(__FILE__) . 'js/text-to-audio-build.js', array(), $this->version, true);
 
         if( ! function_exists( 'is_plugin_active' ) ) {
             include ABSPATH . 'wp-admin/includes/plugin.php';
