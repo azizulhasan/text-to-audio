@@ -233,7 +233,7 @@ gulp.task('checktextdomain', function () {
 	return gulp
 		.src('**/*.php')
 		.pipe(checktextdomain({
-			text_domain: 'webappick-pdf-invoice-for-woocommerce', //Specify allowed domain(s)
+			text_domain: 'text-to-audio', //Specify allowed domain(s)
 			keywords: [ //List keyword specifications
 				'__:1,2d',
 				'_e:1,2d',
@@ -254,7 +254,7 @@ gulp.task('checktextdomain', function () {
 });
 
 // build
-gulp.task('build', gulp.series('checktextdomain', 'minify:css', 'compile:js', 'makeZip'));
+gulp.task('build', gulp.series('minify:css', 'compile:js', 'makeZip'));
 
 
 // gulp.task('deploy',  function(){

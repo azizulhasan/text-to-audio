@@ -5,7 +5,7 @@ Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, 
 Requires at least: 4.0
 Tested up to: 6.1
 Requires PHP: 5.6
-Stable tag: 1.3.0
+Stable tag: 1.3.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,22 +21,34 @@ There is no need to create an account it’s completely free. Just install the p
 > * [Live Demo](http://atlasaidev.com/text-to-speech/)
 > * [Request A Feature](http://atlasaidev.com/contact-us/)
 
+**Support Languages:**
+
+* Chrome Desktop: UK English, US English, Spanish ( Spain ), Spanish ( United States ), French, Deutsch, Italian, Russian, Dutch, Japanese, Korean, Chinese (China), Chinese (Hong Kong), Chinese (Taiwan) Hindi, Indonesian, Polish, Brazilian Portuguese.
+* Chrome Mobile: English USA, English UK, German, Italian, Russian, French, Spanish, 
+
+* Microsoft Edge Desktop : All Languages
+* Microsoft Edge Mobile : All Languages
+
+* FireFox Desktop: English
+* FireFox Mobile: English USA, English UK, German, Italian, Russian, French, Spanish, 
+
+
 **Features:**
 
-1. Add a play button to any post or page.
-2. Write post by voice from the mobile, desktop, tab, or any device.
-3. Write comments by speech on any post.
-4. Unlimited text to speech and vice versa.
-5. Add more functionality to the website for a range of users including the visually impaired and the old people.
-6. Customization of button color, width and button text.
-7. Live preview of play button during customization.
-8. Add custom CSS and custom class to the button.
-9. Change recording language to any language.
-10. Change listening language to any language.
-11. Choose a voice from more than 20 voices.
-12. Unlimited speech to text and vice versa.
-13. Customization of listening in block editor.
-14. Play button can be added by by shortcode “[tta_listen_btn]”.
+* Add a play button to any post or page.
+* Write post by voice from the mobile, desktop, tab, or any device.
+* Write comments by speech on any post.
+* Unlimited text to speech and vice versa.
+* Add more functionality to the website for a range of users including the visually impaired and the old people.
+* Customization of button color, width and button text.
+* Live preview of play button during customization.
+* Add custom CSS and custom class to the button.
+* Change recording language to any language.
+* Change listening language to any language.
+* Choose a voice from more than 20 voices.
+* Unlimited speech to text and vice versa.
+* Customization of listening in block editor.
+* Play button can be added by by shortcode “[tta_listen_btn]”.
 
 
 
@@ -102,6 +114,11 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 8. Customize the button in block editor, Block Name ( Customize Button ).
 
 == Changelog ==
+
+= 1.3.1 (2023-03-24) =
+* Added: Browser supported languages are added to documentation.
+* Fixed: Documentation Improveed.
+
 
 = 1.3.0 (2023-03-11) =
 * Fixed: Chrome android play button issue fixed.
