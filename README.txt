@@ -1,11 +1,11 @@
-=== Text To Speech Ninja ===
+=== Text To Speech TTS ===
 Contributors: atlasaidev, hasanazizul, 
 Donate link: http://atlasaidev.com/
 Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, voice to text-comment,
 Requires at least: 4.0
-Tested up to: 6.1
+Tested up to: 6.2
 Requires PHP: 5.6
-Stable tag: 1.3.2
+Stable tag: 1.3.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -115,6 +115,9 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 
 == Changelog ==
 
+= 1.3.3 (2023-04-05) =
+* Tested: WP version 6.2 tested.
+* Changed: Plugin name changed to "Text To Speech TTS"
 
 = 1.3.2 (2023-03-30) =
 * Improved: Dashboard Notice UI Improved.
