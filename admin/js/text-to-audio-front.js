@@ -48,7 +48,7 @@ let TTA = {
 						console.log("Start utterance");
 					},
 					onend: (utterance) => {
-						console.log('End utterance');
+						console.log('End utterance')
 					},
 					onpause: (utterance) => {
 						console.log('Pause utterance')
@@ -75,6 +75,8 @@ let TTA = {
 					TTA.listenStatus = 'listen';
 				}
 				console.log("Success !", data);
+				clearTimeout(TTA.timer);
+
 			})
 			.catch(e => {
 				console.error("An error occurred :", e);
@@ -217,16 +219,43 @@ let TTA = {
 				TTA.speakButton.innerHTML = TTA.pauseButtonContent();
 				TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
 				TTA.listenStatus = 'pause';
+
+				TTA.timer = setTimeout(function pauseResumeTimer() {
+					speech.pause();
+					//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
+					console.log(speech);
+					// Placing the speak invocation inside a callback fixes ordering and onend issues
+					setTimeout(() => {
+						speech.resume();
+					}, 0);
+
+					TTA.timer = setTimeout(pauseResumeTimer, 10000)
+				}, 10000);
+
 			} else if (TTA.listenStatus == 'pause') {
 				speech.pause();
 				TTA.speakButton.innerHTML = TTA.resumeButtonContent();
 				TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.resumeButtonText());
 				TTA.listenStatus = 'resume';
+				clearTimeout(TTA.timer);
 			} else if (TTA.listenStatus == 'resume') {
 				speech.resume();
 				TTA.speakButton.innerHTML = TTA.pauseButtonContent();
 				TTA.listenStatus = 'pause';
 				TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
+
+
+				TTA.timer = setTimeout(function pauseResumeTimer() {
+					speech.pause();
+					//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
+					console.log(speech);
+					// Placing the speak invocation inside a callback fixes ordering and onend issues
+					setTimeout(() => {
+						speech.resume();
+					}, 0);
+
+					TTA.timer = setTimeout(pauseResumeTimer, 10000)
+				}, 10000);
 			}
 		});
 	}
