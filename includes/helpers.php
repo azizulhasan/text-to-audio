@@ -93,14 +93,19 @@ function tta_get_button_content($atts, $is_block = false) {
     }
     $settings = (array) get_option('tta_settings_data');
     $recording = (array) get_option('tta_record_settings');
+
+    // echo "<pre>";
+    // print_r(is_home());
+
     //Apply short code for on single page.
     if(is_page() && isset($settings['tta__settings_display_btn_in_single_page']) && !$settings['tta__settings_display_btn_in_single_page']){
         return;
     }
     // this is a pro feature to show button on blog main page with title and excerpt.
-    if(!is_single() ){
+    if(is_home()){
         return;
     }
+
 
     $display_icon = isset( $settings['tta__settings_display_btn_icon'] ) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
 
