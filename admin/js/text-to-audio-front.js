@@ -75,7 +75,9 @@ let TTA = {
 					TTA.listenStatus = 'listen';
 				}
 				console.log("Success !", data);
-				clearTimeout(TTA.timer);
+				if (!TTA.browser.isAndroid()) {
+					clearTimeout(TTA.timer);
+				}
 
 			})
 			.catch(e => {
@@ -181,7 +183,6 @@ let TTA = {
 	_init: function () {
 
 		if (TTA.ttsListeningSettings === undefined) return;
-
 		TTA.speech
 			.init({
 				volume: TTA.ttsListeningSettings.tta__listening_volume
@@ -220,42 +221,49 @@ let TTA = {
 				TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
 				TTA.listenStatus = 'pause';
 
-				TTA.timer = setTimeout(function pauseResumeTimer() {
-					speech.pause();
-					//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
-					console.log(speech);
-					// Placing the speak invocation inside a callback fixes ordering and onend issues
-					setTimeout(() => {
-						speech.resume();
-					}, 0);
 
-					TTA.timer = setTimeout(pauseResumeTimer, 10000)
-				}, 10000);
+				if (!TTA.browser.isAndroid()) {
+					TTA.timer = setTimeout(function pauseResumeTimer() {
+						speech.pause();
+						//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
+						console.log(speech);
+						// Placing the speak invocation inside a callback fixes ordering and onend issues
+						setTimeout(() => {
+							speech.resume();
+						}, 0);
+
+						TTA.timer = setTimeout(pauseResumeTimer, 10000)
+					}, 10000);
+				}
 
 			} else if (TTA.listenStatus == 'pause') {
 				speech.pause();
+
 				TTA.speakButton.innerHTML = TTA.resumeButtonContent();
 				TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.resumeButtonText());
 				TTA.listenStatus = 'resume';
-				clearTimeout(TTA.timer);
+				if (!TTA.browser.isAndroid()) {
+					clearTimeout(TTA.timer);
+				}
 			} else if (TTA.listenStatus == 'resume') {
 				speech.resume();
 				TTA.speakButton.innerHTML = TTA.pauseButtonContent();
 				TTA.listenStatus = 'pause';
 				TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
 
+				if (!TTA.browser.isAndroid()) {
+					TTA.timer = setTimeout(function pauseResumeTimer() {
+						speech.pause();
+						//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
+						console.log(speech);
+						// Placing the speak invocation inside a callback fixes ordering and onend issues
+						setTimeout(() => {
+							speech.resume();
+						}, 0);
 
-				TTA.timer = setTimeout(function pauseResumeTimer() {
-					speech.pause();
-					//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
-					console.log(speech);
-					// Placing the speak invocation inside a callback fixes ordering and onend issues
-					setTimeout(() => {
-						speech.resume();
-					}, 0);
-
-					TTA.timer = setTimeout(pauseResumeTimer, 10000)
-				}, 10000);
+						TTA.timer = setTimeout(pauseResumeTimer, 10000)
+					}, 10000);
+				}
 			}
 		});
 	}
