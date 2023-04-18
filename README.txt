@@ -5,7 +5,7 @@ Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, 
 Requires at least: 4.0
 Tested up to: 6.2
 Requires PHP: 5.6
-Stable tag: 1.3.4
+Stable tag: 1.3.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -119,8 +119,11 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin [here](https://translate.wordpress.org/projects/wp-plugins/text-to-audio/)
 
+= 1.3.5 (Apr 17, 2023) =
+* Fixed : [Stops reading after around 700 words.](https://wordpress.org/support/topic/stops-reading-after-around-700-words/)
+
 = 1.3.4 (Apr 12, 2023) =
-* Changed: [Page don't show the button](https://wordpress.org/support/topic/pages-dont-show-the-button/) issue solved.
+* Fixed : [Page don't show the button](https://wordpress.org/support/topic/pages-dont-show-the-button/) issue solved.
 
 = 1.3.3 (2023-04-05) =
 * Tested: WP version 6.2 tested.
