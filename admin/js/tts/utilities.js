@@ -9,4 +9,3 @@ var trim = function trim(value) {
 let sentences = TTA.conntent.replace(/\.+/g, '.|').replace(/\?/g, '?|').replace(/\!/g, '!|').split("|").map(function (sentence) {
     return trim(sentence);
 }).filter(Boolean)
-console.log(sentences)
