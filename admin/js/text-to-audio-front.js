@@ -277,13 +277,14 @@ let TTA = {
 		// When browser tab switches to another tab.
 		document.addEventListener("visibilitychange", () => {
 			// it could be either hidden or visible
-			if ('hidden' === document.visibilityState) {
+			if ('hidden' === document.visibilityState && TTA.listenStatus === 'pause') {
 				TTA.pause(speech)
 			}
 
-			if ('visible' === document.visibilityState) {
+			if ('visible' === document.visibilityState && TTA.listenStatus === 'resume') {
 				TTA.resume(speech)
 			}
+
 		});
 
 	}
