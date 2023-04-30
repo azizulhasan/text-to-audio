@@ -3,6 +3,7 @@ import BrowserSupport from './tts/BrowserSupport'
 
 
 
+
 let TTA = {
 	browser: null,
 	speech: new Speech(),
@@ -23,6 +24,7 @@ let TTA = {
 	voices: {},
 	voice: true ? 'English United Kingdom' : "Microsoft David - English (United States)",
 	language: true ? 'en_GB' : 'en-AU',
+	buttonTextArr: ttsObj.buttonTextArr,
 	speak: function (speech) {
 
 		if (!TTA.speech.hasBrowserSupport()) {
@@ -83,8 +85,54 @@ let TTA = {
 			.catch(e => {
 				console.error("An error occurred :", e);
 			});
+
+
+		TTA.speakButton.innerHTML = TTA.pauseButtonContent();
+		TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
+		TTA.listenStatus = 'pause';
+		if (!TTA.browser.isAndroid()) {
+			TTA.timer = setTimeout(function pauseResumeTimer() {
+				speech.pause();
+				//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
+				console.log(speech);
+				// Placing the speak invocation inside a callback fixes ordering and onend issues
+				setTimeout(() => {
+					speech.resume();
+				}, 0);
+
+				TTA.timer = setTimeout(pauseResumeTimer, 10000)
+			}, 10000);
+		}
 	},
-	buttonTextArr: ttsObj.buttonTextArr,
+	pause: function (speech) {
+		speech.pause();
+
+		TTA.speakButton.innerHTML = TTA.resumeButtonContent();
+		TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.resumeButtonText());
+		TTA.listenStatus = 'resume';
+		if (!TTA.browser.isAndroid()) {
+			clearTimeout(TTA.timer);
+		}
+	},
+	resume: function (speech) {
+		speech.resume();
+		TTA.speakButton.innerHTML = TTA.pauseButtonContent();
+		TTA.listenStatus = 'pause';
+		TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
+		if (!TTA.browser.isAndroid()) {
+			TTA.timer = setTimeout(function pauseResumeTimer() {
+				speech.pause();
+				//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
+				console.log(speech);
+				// Placing the speak invocation inside a callback fixes ordering and onend issues
+				setTimeout(() => {
+					speech.resume();
+				}, 0);
+
+				TTA.timer = setTimeout(pauseResumeTimer, 10000)
+			}, 10000);
+		}
+	},
 	playButtonText: function () {
 		return this.buttonTextArr.listen_text;
 	},
@@ -213,59 +261,31 @@ let TTA = {
 				console.error("An error occured while initializing : ", e);
 			});
 	},
+
 	_prepareSpeakButton: function (speech) {
+		// Button click events
 		TTA.speakButton.addEventListener("click", () => {
 			if (TTA.listenStatus == 'listen') {
 				TTA.speak(speech)
-				TTA.speakButton.innerHTML = TTA.pauseButtonContent();
-				TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
-				TTA.listenStatus = 'pause';
-
-
-				if (!TTA.browser.isAndroid()) {
-					TTA.timer = setTimeout(function pauseResumeTimer() {
-						speech.pause();
-						//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
-						console.log(speech);
-						// Placing the speak invocation inside a callback fixes ordering and onend issues
-						setTimeout(() => {
-							speech.resume();
-						}, 0);
-
-						TTA.timer = setTimeout(pauseResumeTimer, 10000)
-					}, 10000);
-				}
-
 			} else if (TTA.listenStatus == 'pause') {
-				speech.pause();
-
-				TTA.speakButton.innerHTML = TTA.resumeButtonContent();
-				TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.resumeButtonText());
-				TTA.listenStatus = 'resume';
-				if (!TTA.browser.isAndroid()) {
-					clearTimeout(TTA.timer);
-				}
+				TTA.pause(speech)
 			} else if (TTA.listenStatus == 'resume') {
-				speech.resume();
-				TTA.speakButton.innerHTML = TTA.pauseButtonContent();
-				TTA.listenStatus = 'pause';
-				TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
-
-				if (!TTA.browser.isAndroid()) {
-					TTA.timer = setTimeout(function pauseResumeTimer() {
-						speech.pause();
-						//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
-						console.log(speech);
-						// Placing the speak invocation inside a callback fixes ordering and onend issues
-						setTimeout(() => {
-							speech.resume();
-						}, 0);
-
-						TTA.timer = setTimeout(pauseResumeTimer, 10000)
-					}, 10000);
-				}
+				TTA.resume(speech)
 			}
 		});
+
+		// When browser tab switches to another tab.
+		document.addEventListener("visibilitychange", () => {
+			// it could be either hidden or visible
+			if ('hidden' === document.visibilityState) {
+				TTA.pause(speech)
+			}
+
+			if ('visible' === document.visibilityState) {
+				TTA.resume(speech)
+			}
+		});
+
 	}
 };
 window.tta = TTA;
