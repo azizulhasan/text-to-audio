@@ -189,6 +189,7 @@ let TTA = {
 					TTA.listenStatus = 'listen';
 
 					TTA.content = window.ttsContent;
+					speech.cancel();
 				}
 				console.log("Success !", data);
 				if (!TTA.browser.isAndroid()) {
