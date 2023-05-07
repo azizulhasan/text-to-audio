@@ -119,6 +119,13 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin [here](https://translate.wordpress.org/projects/wp-plugins/text-to-audio/)
 
+= 1.3.9 (May 07, 2023) =
+* Fixed : 10 seconds after puase the resume button not working on mobile and desktop.
+* Fixed : after puase the resume button not working on mobile.
+
+= 1.3.8 (Apr 30, 2023) =
+* Improved : Don't stop reading text even tab switches functionality improved.
+
 = 1.3.7 (Apr 30, 2023) =
 * Fixed : Don't stop reading text even tab switches.
 

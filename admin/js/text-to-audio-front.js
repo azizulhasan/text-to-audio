@@ -342,10 +342,7 @@ let TTA = {
 			if ('visible' === document.visibilityState && TTA.listenStatus === 'resume') {
 				TTA.resume(speech)
 			}
-
-
 		});
-
 	}
 };
 window.tta = TTA;
