@@ -43,27 +43,7 @@ let TTA = {
 	splittedSantances: splitSentences(window.ttsContent),
 	isCanceled: false,
 	shouldCancelTimer: null,
-	higlightText: function (tempText) {
-		let tempText2 = tempText
-		if (!tempText) {
-			return;
-		}
-		let htmlArr = [...document.querySelector('.tts_content_wrapper_' + window.buttonId).children]
 
-		htmlArr.map((section, index) => {
-			let currentText = section.innerText;
-			console.log(currentText)
-			tempText = tempText2;
-			let reg = new RegExp(tempText, 'gi')
-			if (currentText.match(reg)) {
-				section.style.background = 'red';
-			} else {
-				section.removeAttribute('style')
-			}
-		})
-
-		tempText = ''
-	},
 
 	playButtonText: function () {
 		return this.buttonTextArr.listen_text;
@@ -178,12 +158,11 @@ let TTA = {
 				queue: false,
 				listeners: {
 					onstart: (utterance) => {
-						// console.log("Start utterance");
+						console.log("Start utterance");
 						TTA.utterence = utterance
-						TTA.higlightText(utterance.currentTarget.text)
 					},
 					onend: (utterance) => {
-						// console.log('End utterance')
+						console.log('End utterance')
 					},
 					onpause: (utterance) => {
 						console.log('Pause utterance')
@@ -241,20 +220,26 @@ let TTA = {
 	},
 	pause: function (speech) {
 
+		/**
+		 * If desktop then cancel after 7/8 second
+		 * If mobile cancel and restart again.
+		 */
 		if (!TTA.browser.isAndroid()) {
 			speech.pause();
+			TTA.shouldCancelTimer = setInterval(() => {
+				speech.cancel();
+				TTA.isCanceled = true;
+			}, 7000)
+
 		} else {
 			speech.cancel();
 			TTA.isCanceled = true;
 		}
 
+		// update current content
 		let currentIndex = TTA.splittedSantances.indexOf(TTA.utterence.target.text);
 		TTA.splittedSantances = TTA.splittedSantances.slice(currentIndex)
 		TTA.content = TTA.splittedSantances.join(' ')
-		TTA.shouldCancelTimer = setInterval(() => {
-			speech.cancel();
-			TTA.isCanceled = true;
-		}, 7000)
 
 
 
@@ -266,6 +251,7 @@ let TTA = {
 		}
 	},
 	resume: function (speech) {
+
 		if (TTA.isCanceled) {
 			TTA.speak(speech, TTA.content)
 			clearTimeout(TTA.shouldCancelTimer)
@@ -316,6 +302,8 @@ let TTA = {
 					onvoiceschanged: voices => {
 						// console.log(voices)
 						// TTA.voices = voices
+
+						// this function can be used in the pro version.
 					}
 				}
 			})
