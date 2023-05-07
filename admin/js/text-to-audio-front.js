@@ -43,7 +43,27 @@ let TTA = {
 	splittedSentances: splitSentences(window.ttsContent),
 	isCanceled: false,
 	shouldCancelTimer: null,
+	higlightText: function (tempText) {
+		let tempText2 = tempText
+		if (!tempText) {
+			return;
+		}
+		let htmlArr = [...document.querySelector('.tts_content_wrapper_' + window.buttonId).children]
 
+		htmlArr.map((section, index) => {
+			let currentText = section.innerText;
+			console.log(currentText)
+			tempText = tempText2;
+			let reg = new RegExp(tempText, 'gi')
+			if (currentText.match(reg)) {
+				section.style.background = 'red';
+			} else {
+				section.removeAttribute('style')
+			}
+		})
+
+		tempText = ''
+	},
 
 	playButtonText: function () {
 		return this.buttonTextArr.listen_text;
@@ -160,6 +180,7 @@ let TTA = {
 					onstart: (utterance) => {
 						console.log("Start utterance");
 						TTA.utterence = utterance
+						TTA.higlightText(utterance.currentTarget.text)
 					},
 					onend: (utterance) => {
 						console.log('End utterance')
