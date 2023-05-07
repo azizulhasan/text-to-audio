@@ -40,7 +40,7 @@ let TTA = {
 	voice: true ? 'English United Kingdom' : "Microsoft David - English (United States)",
 	language: true ? 'en_GB' : 'en-AU',
 	buttonTextArr: ttsObj.buttonTextArr,
-	splittedSantances: splitSentences(window.ttsContent),
+	splittedSentances: splitSentences(window.ttsContent),
 	isCanceled: false,
 	shouldCancelTimer: null,
 
@@ -183,12 +183,14 @@ let TTA = {
 			})
 			.then(data => {
 				if (!TTA.speech.speaking()) {
-					console.log('End utterance' + TTA.speech.speaking());
+					console.log('End utterance ' + TTA.speech.speaking());
 					TTA.speakButton.innerHTML = TTA.replayButtonContent();
 					TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.replayButtonText());
 					TTA.listenStatus = 'listen';
 
+					// set up initial content to replacy.
 					TTA.content = window.ttsContent;
+					TTA.splittedSentances = splitSentences(window.ttsContent)
 					speech.cancel();
 				}
 				console.log("Success !", data);
@@ -238,11 +240,9 @@ let TTA = {
 		}
 
 		// update current content
-		let currentIndex = TTA.splittedSantances.indexOf(TTA.utterence.target.text);
-		TTA.splittedSantances = TTA.splittedSantances.slice(currentIndex)
-		TTA.content = TTA.splittedSantances.join(' ')
-
-
+		let currentIndex = TTA.splittedSentances.indexOf(TTA.utterence.target.text);
+		TTA.splittedSentances = TTA.splittedSentances.slice(currentIndex)
+		TTA.content = TTA.splittedSentances.join(' ')
 
 		TTA.speakButton.innerHTML = TTA.resumeButtonContent();
 		TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.resumeButtonText());

@@ -239,13 +239,10 @@ if( isset( $settings['tta__settings_enable_button_add'] ) &&  $settings['tta__se
  * Add listening button to every post by default.
  */
 function add_listen_button( $content ) {
-    static $btn_no = 0;
-    $btn_no++;
     ob_start();
     echo do_shortcode('[tta_listen_btn]');
-    echo '<div class="tts_content_wrapper_'.$btn_no.'" >'.$content.'</div>'; 
-    $contentWithButton = ob_get_contents();
+    $button = ob_get_contents();
     ob_end_clean();
-    
-    return $contentWithButton;
+
+    return $button.$content;
 }
