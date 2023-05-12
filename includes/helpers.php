@@ -102,7 +102,7 @@ function tta_get_button_content($atts, $is_block = false) {
         return;
     }
     // this is a pro feature to show button on blog main page with title and excerpt.
-    if(is_home()){
+    if(is_home() || is_archive() ){
         return;
     }
 
