@@ -5,7 +5,7 @@ Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, 
 Requires at least: 4.0
 Tested up to: 6.2
 Requires PHP: 5.6
-Stable tag: 1.3.8
+Stable tag: 1.3.10
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -118,6 +118,14 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 💎 TRANSLATION REQUEST 💎
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin [here](https://translate.wordpress.org/projects/wp-plugins/text-to-audio/)
+
+= 1.3.10 (May 12, 2023) =
+* Added : inline css moved to text-to-audio-css file.
+* Fixed : customize button block not found on the block editor.
+
+= 1.3.9 (May 07, 2023) =
+* Fixed : 10 seconds after puase the resume button not working on mobile and desktop.
+* Fixed : after puase the resume button not working on mobile.
 
 = 1.3.8 (Apr 30, 2023) =
 * Improved : Don't stop reading text even tab switches functionality improved.

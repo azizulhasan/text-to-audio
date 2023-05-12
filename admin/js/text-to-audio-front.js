@@ -2,6 +2,21 @@ import Speech from "speak-tts";
 import BrowserSupport from './tts/BrowserSupport'
 
 
+let isString = function isString(value) {
+	return typeof value === 'string' || value instanceof String;
+};
+
+let trim = function trim(value) {
+	return isString(value) ? value.trim() : '';
+};
+
+let splitSentences = function splitSentences(text = '') {
+
+	return text.replace(/\.+/g, '.|').replace(/\?/g, '?|').replace(/\!/g, '!|').split("|").map(function (sentence) {
+		return trim(sentence);
+	}).filter(Boolean);
+};
+
 
 
 let TTA = {
@@ -18,121 +33,16 @@ let TTA = {
 	timer: null,
 	buttonId: window.buttonId,
 	speakButton: document.getElementById("tta__listent_content_" + window.buttonId),
-	conntent: window.ttsContent,
+	content: window.ttsContent,
 	ttsListeningSettings: window.ttsListeningSettings,
 	languages: [],
 	voices: {},
 	voice: true ? 'English United Kingdom' : "Microsoft David - English (United States)",
 	language: true ? 'en_GB' : 'en-AU',
 	buttonTextArr: ttsObj.buttonTextArr,
-	speak: function (speech) {
-
-		if (!TTA.speech.hasBrowserSupport()) {
-			TTA.displayApiMissing("tta__listent_content_" + window.buttonId)
-			return;
-		}
-
-		speech.setLanguage(TTA.browser.getLanguage())
-		speech.setVoice(TTA.browser.getVoice())
-		/**
-		 * 1. Microsoft edge browser has same voices(306 voices) for mobile and desktop
-		 * It uses the v8 engine as chrome browser.
-		 * 
-		 * 
-		 * 
-		 */
-		speech
-			.speak({
-				text: TTA.conntent,
-				queue: false,
-				listeners: {
-					onstart: (utterance) => {
-						console.log("Start utterance");
-					},
-					onend: (utterance) => {
-						console.log('End utterance')
-					},
-					onpause: (utterance) => {
-						console.log('Pause utterance')
-					},
-					onresume: (utterance) => {
-						console.log("Resume utterance");
-					},
-					onboundary: utterance => {
-						// console.log(
-						// 	utterance.name +
-						// 	" boundary reached after " +
-						// 	utterance.elapsedTime +
-						// 	" milliseconds."
-						// );
-						// console.log(utterance)
-					}
-				}
-			})
-			.then(data => {
-				if (!TTA.speech.speaking()) {
-					console.log('End utterance' + TTA.speech.speaking());
-					TTA.speakButton.innerHTML = TTA.replayButtonContent();
-					TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.replayButtonText());
-					TTA.listenStatus = 'listen';
-				}
-				console.log("Success !", data);
-				if (!TTA.browser.isAndroid()) {
-					clearTimeout(TTA.timer);
-				}
-
-			})
-			.catch(e => {
-				console.error("An error occurred :", e);
-			});
-
-
-		TTA.speakButton.innerHTML = TTA.pauseButtonContent();
-		TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
-		TTA.listenStatus = 'pause';
-		if (!TTA.browser.isAndroid()) {
-			TTA.timer = setTimeout(function pauseResumeTimer() {
-				speech.pause();
-				//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
-				console.log(speech);
-				// Placing the speak invocation inside a callback fixes ordering and onend issues
-				setTimeout(() => {
-					speech.resume();
-				}, 0);
-
-				TTA.timer = setTimeout(pauseResumeTimer, 10000)
-			}, 10000);
-		}
-	},
-	pause: function (speech) {
-		speech.pause();
-
-		TTA.speakButton.innerHTML = TTA.resumeButtonContent();
-		TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.resumeButtonText());
-		TTA.listenStatus = 'resume';
-		if (!TTA.browser.isAndroid()) {
-			clearTimeout(TTA.timer);
-		}
-	},
-	resume: function (speech) {
-		speech.resume();
-		TTA.speakButton.innerHTML = TTA.pauseButtonContent();
-		TTA.listenStatus = 'pause';
-		TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
-		if (!TTA.browser.isAndroid()) {
-			TTA.timer = setTimeout(function pauseResumeTimer() {
-				speech.pause();
-				//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
-				console.log(speech);
-				// Placing the speak invocation inside a callback fixes ordering and onend issues
-				setTimeout(() => {
-					speech.resume();
-				}, 0);
-
-				TTA.timer = setTimeout(pauseResumeTimer, 10000)
-			}, 10000);
-		}
-	},
+	splittedSentances: splitSentences(window.ttsContent),
+	isCanceled: false,
+	shouldCancelTimer: null,
 	playButtonText: function () {
 		return this.buttonTextArr.listen_text;
 	},
@@ -166,7 +76,6 @@ let TTA = {
 	recordStopButtonConten: function () {
 		return '<span class="dashicons dashicons-controls-volumeon"></span> ' + this.buttonTextArr.stop_text;
 	},
-
 
 	displayApiMissing(button_id = '', is_dashboard = false) {
 		let notice = '';
@@ -226,7 +135,150 @@ let TTA = {
 
 		throw new Error(notice);
 	},
+	speak: function (speech, content = TTA.content) {
+		if (!TTA.speech.hasBrowserSupport()) {
+			TTA.displayApiMissing("tta__listent_content_" + window.buttonId)
+			return;
+		}
 
+		speech.setLanguage(TTA.browser.getLanguage())
+		speech.setVoice(TTA.browser.getVoice())
+		/**
+		 * 1. Microsoft edge browser has same voices(306 voices) for mobile and desktop
+		 * It uses the v8 engine as chrome browser.
+		 * 
+		 * 
+		 * 
+		 */
+		speech
+			.speak({
+				text: content,
+				queue: false,
+				listeners: {
+					onstart: (utterance) => {
+						console.log("Start utterance");
+						TTA.utterence = utterance
+					},
+					onend: (utterance) => {
+						console.log('End utterance')
+					},
+					onpause: (utterance) => {
+						console.log('Pause utterance')
+					},
+					onresume: (utterance) => {
+						console.log("Resume utterance");
+					},
+					onboundary: utterance => {
+						// console.log(
+						// 	utterance.name +
+						// 	" boundary reached after " +
+						// 	utterance.elapsedTime +
+						// 	" milliseconds."
+						// );
+						// console.log(utterance)
+					}
+				}
+			})
+			.then(data => {
+				if (!TTA.speech.speaking()) {
+					console.log('End utterance ' + TTA.speech.speaking());
+					TTA.speakButton.innerHTML = TTA.replayButtonContent();
+					TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.replayButtonText());
+					TTA.listenStatus = 'listen';
+
+					// set up initial content to replacy.
+					TTA.content = window.ttsContent;
+					TTA.splittedSentances = splitSentences(window.ttsContent)
+					speech.cancel();
+				}
+				console.log("Success !", data);
+				if (!TTA.browser.isAndroid()) {
+					clearTimeout(TTA.timer);
+				}
+
+			})
+			.catch(e => {
+				console.error("An error occurred :", e);
+			});
+
+
+		TTA.speakButton.innerHTML = TTA.pauseButtonContent();
+		TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
+		TTA.listenStatus = 'pause';
+		if (!TTA.browser.isAndroid()) {
+			TTA.timer = setTimeout(function pauseResumeTimer() {
+				speech.pause();
+				//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
+				console.log(speech);
+				// Placing the speak invocation inside a callback fixes ordering and onend issues
+				setTimeout(() => {
+					speech.resume();
+				}, 0);
+
+				TTA.timer = setTimeout(pauseResumeTimer, 10000)
+			}, 10000);
+		}
+	},
+	pause: function (speech) {
+
+		/**
+		 * If desktop then cancel after 7/8 second
+		 * If mobile cancel and restart again.
+		 */
+		if (!TTA.browser.isAndroid()) {
+			speech.pause();
+			TTA.shouldCancelTimer = setInterval(() => {
+				speech.cancel();
+				TTA.isCanceled = true;
+			}, 7000)
+
+		} else {
+			speech.cancel();
+			TTA.isCanceled = true;
+		}
+
+		// update current content
+		let currentIndex = TTA.splittedSentances.indexOf(TTA.utterence.target.text);
+		TTA.splittedSentances = TTA.splittedSentances.slice(currentIndex)
+		TTA.content = TTA.splittedSentances.join(' ')
+
+		TTA.speakButton.innerHTML = TTA.resumeButtonContent();
+		TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.resumeButtonText());
+		TTA.listenStatus = 'resume';
+		if (!TTA.browser.isAndroid()) {
+			clearTimeout(TTA.timer);
+		}
+	},
+	resume: function (speech) {
+
+		if (TTA.isCanceled) {
+			TTA.speak(speech, TTA.content)
+			clearTimeout(TTA.shouldCancelTimer)
+			if (!TTA.browser.isAndroid()) {
+				clearTimeout(TTA.timer);
+			}
+		} else {
+			speech.resume();
+			clearTimeout(TTA.shouldCancelTimer)
+		}
+
+		TTA.speakButton.innerHTML = TTA.pauseButtonContent();
+		TTA.listenStatus = 'pause';
+		TTA.speakButton.setAttribute('title', 'Text To Audio : ' + TTA.pauseButtonText());
+		if (!TTA.browser.isAndroid()) {
+			TTA.timer = setTimeout(function pauseResumeTimer() {
+				speech.pause();
+				//IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
+				console.log(speech);
+				// Placing the speak invocation inside a callback fixes ordering and onend issues
+				setTimeout(() => {
+					speech.resume();
+				}, 0);
+
+				TTA.timer = setTimeout(pauseResumeTimer, 10000)
+			}, 10000);
+		}
+	},
 
 	_init: function () {
 
@@ -249,6 +301,8 @@ let TTA = {
 					onvoiceschanged: voices => {
 						// console.log(voices)
 						// TTA.voices = voices
+
+						// this function can be used in the pro version.
 					}
 				}
 			})
@@ -267,10 +321,13 @@ let TTA = {
 		TTA.speakButton.addEventListener("click", () => {
 			if (TTA.listenStatus == 'listen') {
 				TTA.speak(speech)
+
 			} else if (TTA.listenStatus == 'pause') {
 				TTA.pause(speech)
+
 			} else if (TTA.listenStatus == 'resume') {
 				TTA.resume(speech)
+
 			}
 		});
 
@@ -284,11 +341,11 @@ let TTA = {
 			if ('visible' === document.visibilityState && TTA.listenStatus === 'resume') {
 				TTA.resume(speech)
 			}
-
 		});
-
 	}
 };
 window.tta = TTA;
 
 window.tta._init();
+
+

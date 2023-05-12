@@ -125,7 +125,7 @@ function tta_get_button_content($atts, $is_block = false) {
     // Button listen text.
     $text_arr = get_button_text( $atts );
     // Speak Icon
-    $speakIcon = "<div style='display: flex;justify-content: center;align-items: center;'>";
+    $speakIcon = "<div class='tta_button'>";
     $speakIcon .= apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ');
     $speakIcon .= '<span> '. $text_arr['listen_text'] . '<span></div>';
     // Button style.
@@ -151,7 +151,7 @@ function tta_get_button_content($atts, $is_block = false) {
     $class = (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
 
     // Listening button.
-    $button = '<div class="tta_notice" style="display:none;"></div><button id="tta__listent_content_' . $btn_no . '" class="tta__listent_content ' . esc_attr($class) . '" type="button"  title="Text To Audio:  Tap to listen post.">' . $speakIcon . ' </button>
+    $button = '<div class="tta_notice"></div><button id="tta__listent_content_' . $btn_no . '" class="tta__listent_content ' . esc_attr($class) . '" type="button"  title="Text To Audio:  Tap to listen post.">' . $speakIcon . ' </button>
 <style>
 #tta__listent_content_' . $btn_no .'.tta__listent_content{ ' . esc_attr($btn_style) . ' }
 #tta__listent_content_' . $btn_no .'.tta__listent_content:hover{' . esc_attr($btn_style) . '}
@@ -164,11 +164,10 @@ function tta_get_button_content($atts, $is_block = false) {
     window.buttonId = '.$btn_no.'
     window.ttsListeningSettings = '.$listening.'
 </script>';
-    // for pro.
-    //$button = '<div id="speechify-root"></div><div style="display:none;margin-bottom-500px;" id="speechify-content">'.$content.'</div>';
 
     return apply_filters( 'tta__listening_button', $button );
 }
+
 
 
 

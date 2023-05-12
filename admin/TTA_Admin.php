@@ -107,6 +107,8 @@ class TTA_Admin {
             'buttonTextArr' => apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr' ) ),
         ]);
 
+        
+
     }
 
     public function engueue_block_scripts() {
@@ -149,8 +151,6 @@ class TTA_Admin {
         global $is_iphone, $is_iphone, $is_chrome,$is_safari,
         $is_NS4,$is_opera,$is_macIE,$is_winIE, $is_gecko, $is_lynx, $is_IE, $is_edge; 
 
-    //    wp_enqueue_script('speechify', plugin_dir_url(__FILE__) . 'js/build/speechify.js', array(), $this->version, true);
-
         wp_enqueue_script('text-to-audio-front', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-front.min.js', array(), $this->version, true);
         wp_localize_script('text-to-audio-front', 'ttsObj', [
             'json_url' => esc_url_raw(rest_url()),
@@ -172,6 +172,8 @@ class TTA_Admin {
             ],
         ]);
         wp_enqueue_style('dashicons');
+
+        wp_enqueue_style('text-to-audio-css', plugin_dir_url(__FILE__) . 'css/text-to-audio.css', [] , $this->version, 'all' );
     }
 
     /**
