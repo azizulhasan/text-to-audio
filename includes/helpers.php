@@ -125,7 +125,7 @@ function tta_get_button_content($atts, $is_block = false) {
     // Button listen text.
     $text_arr = get_button_text( $atts );
     // Speak Icon
-    $speakIcon = "<div style='display: flex;justify-content: center;align-items: center;'>";
+    $speakIcon = "<div class='tta_button'>";
     $speakIcon .= apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ');
     $speakIcon .= '<span> '. $text_arr['listen_text'] . '<span></div>';
     // Button style.
@@ -151,7 +151,7 @@ function tta_get_button_content($atts, $is_block = false) {
     $class = (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
 
     // Listening button.
-    $button = '<div class="tta_notice" style="display:none;"></div><button id="tta__listent_content_' . $btn_no . '" class="tta__listent_content ' . esc_attr($class) . '" type="button"  title="Text To Audio:  Tap to listen post.">' . $speakIcon . ' </button>
+    $button = '<div class="tta_notice"></div><button id="tta__listent_content_' . $btn_no . '" class="tta__listent_content ' . esc_attr($class) . '" type="button"  title="Text To Audio:  Tap to listen post.">' . $speakIcon . ' </button>
 <style>
 #tta__listent_content_' . $btn_no .'.tta__listent_content{ ' . esc_attr($btn_style) . ' }
 #tta__listent_content_' . $btn_no .'.tta__listent_content:hover{' . esc_attr($btn_style) . '}
@@ -169,6 +169,7 @@ function tta_get_button_content($atts, $is_block = false) {
 
     return apply_filters( 'tta__listening_button', $button );
 }
+
 
 
 
@@ -239,13 +240,10 @@ if( isset( $settings['tta__settings_enable_button_add'] ) &&  $settings['tta__se
  * Add listening button to every post by default.
  */
 function add_listen_button( $content ) {
-    static $btn_no = 0;
-    $btn_no++;
     ob_start();
     echo do_shortcode('[tta_listen_btn]');
-    echo '<div class="tts_content_wrapper_'.$btn_no.'" >'.$content.'</div>'; 
-    $contentWithButton = ob_get_contents();
+    $button = ob_get_contents();
     ob_end_clean();
-    
-    return $contentWithButton;
+
+    return $button.$content;
 }
