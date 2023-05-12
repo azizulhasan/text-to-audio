@@ -132,7 +132,8 @@ class TTA {
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles', 999999);
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts', 99999);
         $this->loader->add_action('admin_menu', $plugin_admin, 'TTA_menu');
-        $this->loader->add_action('init', $plugin_admin, 'engueue_block_scripts');
+        $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'engueue_block_scripts');
+
         $this->loader->add_action('wp_enqueue_scripts', $plugin_admin, 'enqueue_TTA', 99999);
 
     }

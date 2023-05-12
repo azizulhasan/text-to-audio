@@ -107,6 +107,8 @@ class TTA_Admin {
             'buttonTextArr' => apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr' ) ),
         ]);
 
+        
+
     }
 
     public function engueue_block_scripts() {
@@ -149,28 +151,26 @@ class TTA_Admin {
         global $is_iphone, $is_iphone, $is_chrome,$is_safari,
         $is_NS4,$is_opera,$is_macIE,$is_winIE, $is_gecko, $is_lynx, $is_IE, $is_edge; 
 
-    //    wp_enqueue_script('speechify', plugin_dir_url(__FILE__) . 'js/build/speechify.js', array(), $this->version, true);
-
         wp_enqueue_script('text-to-audio-front', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-front.min.js', array(), $this->version, true);
-        // wp_localize_script('text-to-audio-front', 'ttsObj', [
-        //     'json_url' => esc_url_raw(rest_url()),
-        //     'admin_url' => admin_url('/'),
-        //     'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
-        //     'buttonTextArr' => apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr' ) ),
-        //     'browser' => [
-        //         'is_iphone' =>  $is_iphone, //(boolean): iPhone Safari
-        //         'is_chrome'=> $is_chrome,// (boolean): Google Chrome
-        //         'is_safari' =>  $is_safari,// (boolean): Safari
-        //         'is_NS4' => $is_NS4,//(boolean): Netscape 4
-        //         'is_opera' => $is_opera, //(boolean): Opera
-        //         'is_macIE' => $is_macIE, //(boolean): Mac Internet Explorer
-        //         'is_winIE' => $is_winIE, //(boolean): Windows Internet Explorer
-        //         'is_gecko' => $is_gecko, //(boolean): FireFox
-        //         'is_lynx'=> $is_lynx, //(boolean): Lynx
-        //         'is_IE' => $is_IE, //(boolean): Internet Explorer
-        //         'is_edge' => $is_edge, //(boolean): Microsoft Edge
-        //     ],
-        // ]);
+        wp_localize_script('text-to-audio-front', 'ttsObj', [
+            'json_url' => esc_url_raw(rest_url()),
+            'admin_url' => admin_url('/'),
+            'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
+            'buttonTextArr' => apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr' ) ),
+            'browser' => [
+                'is_iphone' =>  $is_iphone, //(boolean): iPhone Safari
+                'is_chrome'=> $is_chrome,// (boolean): Google Chrome
+                'is_safari' =>  $is_safari,// (boolean): Safari
+                'is_NS4' => $is_NS4,//(boolean): Netscape 4
+                'is_opera' => $is_opera, //(boolean): Opera
+                'is_macIE' => $is_macIE, //(boolean): Mac Internet Explorer
+                'is_winIE' => $is_winIE, //(boolean): Windows Internet Explorer
+                'is_gecko' => $is_gecko, //(boolean): FireFox
+                'is_lynx'=> $is_lynx, //(boolean): Lynx
+                'is_IE' => $is_IE, //(boolean): Internet Explorer
+                'is_edge' => $is_edge, //(boolean): Microsoft Edge
+            ],
+        ]);
         wp_enqueue_style('dashicons');
 
         wp_enqueue_style('text-to-audio-css', plugin_dir_url(__FILE__) . 'css/text-to-audio.css', [] , $this->version, 'all' );

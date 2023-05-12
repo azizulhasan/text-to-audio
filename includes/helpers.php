@@ -164,8 +164,6 @@ function tta_get_button_content($atts, $is_block = false) {
     window.buttonId = '.$btn_no.'
     window.ttsListeningSettings = '.$listening.'
 </script>';
-    // for pro.
-    //$button = '<div id="speechify-root"></div><div style="display:none;margin-bottom-500px;" id="speechify-content">'.$content.'</div>';
 
     return apply_filters( 'tta__listening_button', $button );
 }
