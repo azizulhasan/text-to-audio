@@ -43,8 +43,6 @@ let TTA = {
 	splittedSentances: splitSentences(window.ttsContent),
 	isCanceled: false,
 	shouldCancelTimer: null,
-
-
 	playButtonText: function () {
 		return this.buttonTextArr.listen_text;
 	},
