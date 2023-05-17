@@ -72,6 +72,22 @@ class TTA_Admin {
      * @since    1.0.0
      */
     public function enqueue_scripts() {
+        /**
+         * Looad wp-speeh script
+         */
+
+        if( ! function_exists( 'is_plugin_active' ) ) {
+            include ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+        wp_enqueue_script('text-to-audio-dashboard', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-dashboard.min.js', array(), $this->version, true);
+        wp_localize_script('text-to-audio-dashboard', 'text_to_audio_obj', [
+            'json_url' => esc_url_raw(rest_url()),
+            'admin_url' => admin_url('/'),
+            'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
+            'buttonTextArr' => apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr' ) ),
+        ]);
+
+        do_action('tta_enqueue_pro_dashboard_scripts');
 
         if (isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
             /* Load react js */
@@ -92,23 +108,6 @@ class TTA_Admin {
             ]);
 
         }
-        /**
-         * Looad wp-speeh script
-         */
-
-        if( ! function_exists( 'is_plugin_active' ) ) {
-            include ABSPATH . 'wp-admin/includes/plugin.php';
-        }
-        wp_enqueue_script('text-to-audio-dashboard', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-dashboard.min.js', array(), $this->version, true);
-        wp_localize_script('text-to-audio-dashboard', 'text_to_audio_obj', [
-            'json_url' => esc_url_raw(rest_url()),
-            'admin_url' => admin_url('/'),
-            'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
-            'buttonTextArr' => apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr' ) ),
-        ]);
-
-        
-
     }
 
     public function engueue_block_scripts() {

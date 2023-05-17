@@ -6,6 +6,7 @@ import {
 	Route,
 } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
+import { Link } from 'react-router-dom';
 
 import 'react-toastify/dist/ReactToastify.css';
 /**
@@ -13,7 +14,7 @@ import 'react-toastify/dist/ReactToastify.css';
  */
 import './assets/css/styles.css';
 import './assets/js/scripts.js';
-import { addScripts, getComponentName } from '../context/utilities';
+import { addScripts, getComponentName, isPro } from '../context/utilities';
 
 /**
  * Dashboard Components
@@ -34,11 +35,17 @@ function Dashboard() {
 			setComponentName(getComponentName());
 		}).observe(document, { subtree: true, childList: true });
 	}, [componentName]);
+	const [isProVersion, setIsProVersion] = useState(false)
+
+	useEffect(() => {
+		let pro = wp.hooks.applyFilters('tta_has_pro', false);
+		let licenseCheck = wp.hooks.applyFilters('tta_is_pro_license_active', false);
+		setIsProVersion(isPro(pro, licenseCheck))
+	}, [])
 
 	addScripts([
 		'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js',
 	]);
-
 	return (
 		<HashRouter hashType='noslash'>
 			<ToastContainer
@@ -54,7 +61,7 @@ function Dashboard() {
 			/>
 			<DashboardTopNav />
 			<div id='ttaLayoutSidenav'>
-				<DashboardSideNav />
+				<DashboardSideNav isProVersion={isProVersion} />
 				<div id='ttaLayoutSidenav_content'>
 					<main>
 						<div className='container-fluid'>

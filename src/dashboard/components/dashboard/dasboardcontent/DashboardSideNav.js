@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-export default function DashboardSideNav() {
+export default function DashboardSideNav({ isProVersion }) {
 	const style = {
 		side_nav: {
 			flexBasis: '150px',
 		},
 	};
+
+
+
 	return (
 		<div id='ttaTtaLayoutSidenav_nav' style={style.side_nav}>
+			{
+				console.log('sidenav_dom')
+			}
 			<nav
 				className='tta-sidenav accordion tta-sidenav-dark text-white'
 				id='sidenavAccordion'>
@@ -39,13 +45,21 @@ export default function DashboardSideNav() {
 							</div>
 							Customization
 						</Link>
-						
+
 						<Link className='nav-link' to={'/docs'}>
 							<div className='sb-nav-link-icon'>
 								<i className='fas fa-book'></i>
 							</div>
 							Docs
 						</Link>
+						{
+							(isProVersion) ? <Link className='nav-link' to={'/customize'}>
+								<div className='sb-nav-link-icon'>
+									<i className='fas fa-edit'></i>
+								</div>
+								License
+							</Link> : null
+						}
 					</div>
 				</div>
 			</nav>
