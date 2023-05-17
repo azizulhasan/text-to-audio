@@ -5,7 +5,7 @@ Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, 
 Requires at least: 4.0
 Tested up to: 6.2
 Requires PHP: 5.6
-Stable tag: 1.3.10
+Stable tag: 1.3.11
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -118,6 +118,9 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 💎 TRANSLATION REQUEST 💎
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin [here](https://translate.wordpress.org/projects/wp-plugins/text-to-audio/)
+
+= 1.3.11 (May 17, 2023) =
+* Fixed : Multiple button are showing on archive, category, tag page.
 
 = 1.3.10 (May 12, 2023) =
 * Added : inline css moved to text-to-audio-css file.
