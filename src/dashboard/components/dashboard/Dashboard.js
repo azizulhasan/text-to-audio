@@ -26,6 +26,7 @@ import Recording from './recording/Recording';
 import Listening from './listening/Listening';
 import Customize from './customize/Customize';
 import Docs from './docs/Docs';
+import License from './license/Lincense';
 
 function Dashboard() {
 	// authenTicateUser();
@@ -87,7 +88,11 @@ function Dashboard() {
 									element={<Recording />}
 								/>
 								<Route path='/docs' element={<Docs />} />
+								{
+									isProVersion && <Route path='/license' element={<License />} />
+								}
 							</Routes>
+
 						</div>
 					</main>
 					<footer className='py-4 mt-auto footer_bg'>

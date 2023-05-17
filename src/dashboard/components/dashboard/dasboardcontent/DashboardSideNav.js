@@ -12,9 +12,6 @@ export default function DashboardSideNav({ isProVersion }) {
 
 	return (
 		<div id='ttaTtaLayoutSidenav_nav' style={style.side_nav}>
-			{
-				console.log('sidenav_dom')
-			}
 			<nav
 				className='tta-sidenav accordion tta-sidenav-dark text-white'
 				id='sidenavAccordion'>
@@ -53,7 +50,7 @@ export default function DashboardSideNav({ isProVersion }) {
 							Docs
 						</Link>
 						{
-							(isProVersion) ? <Link className='nav-link' to={'/customize'}>
+							(isProVersion) ? <Link className='nav-link' to={'/license'}>
 								<div className='sb-nav-link-icon'>
 									<i className='fas fa-edit'></i>
 								</div>
