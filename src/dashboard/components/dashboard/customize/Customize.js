@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Col, Container, Row, Form, FloatingLabel } from 'react-bootstrap';
 import toast from '../../context/Notify';
-import { postWithoutImage } from '../../context/utilities';
+import { copyToClipBoard, postWithoutImage } from '../../context/utilities';
 export default function Customize() {
 	const [listeningBtnStyle, setListeningStyle] = useState({
 		backgroundColor: 'rgb(226, 222, 232)',
@@ -170,20 +170,28 @@ export default function Customize() {
 	/**
 	 * Copy short Code
 	 */
-	const CopyShortcode = () => {
-		/* Get the text field */
-		var copyText = document.getElementById('tta_play_btn_shortcode');
+	// const copyToClipBoard = (id) => {
+	// 	/* Get the text field */
+	// 	var copyText = document.getElementById('tta_play_btn_shortcode');
 
-		/* Select the text field */
-		copyText.select();
-		copyText.setSelectionRange(0, 99999); /* For mobile devices */
+	// 	/* Select the text field */
+	// 	copyText.select();
+	// 	copyText.setSelectionRange(0, 99999); /* For mobile devices */
+	// 	/* Copy the text inside the text field */
+	// 	// navigator.clipboard.writeText(copyText.value);
+	// 	navigator.clipboard
+	// 		.writeText(copyText.value)
+	// 		.then(() => {
+	// 			toast('Copied the text: ' + copyText.value);
+	// 		})
+	// 		.catch(() => {
+	// 			alert("");
+	// 			toast('Something went wrong! ');
+	// 		});
+	// };
 
-		/* Copy the text inside the text field */
-		navigator.clipboard.writeText(copyText.value);
 
-		/* Alert the copied text */
-		toast('Copied the text: ' + copyText.value);
-	};
+
 
 	const setText = (e) => {
 		setSpeakingText(e.target.value);
@@ -238,7 +246,7 @@ export default function Customize() {
 							/>
 						</Col>
 						<Col xs={12} sm={12} lg={1} className='mt-5'>
-							<button onClick={CopyShortcode}>
+							<button onClick={(e) => copyToClipBoard('tta_play_btn_shortcode', true, "Copied ShortCode", toast)}>
 								<img
 									src={tta_obj.image_url + '/copy.svg'}
 									width='15px'

@@ -13,7 +13,7 @@
  *
  * @wordpress-plugin
  * Plugin Name:       Text To Speech TTS
- * Description:       Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages.
+ * Description:       Add functionality to WordPress site to read blogs out loud in more than 20 languages.
  * Version:           1.3.12
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/

@@ -92,7 +92,7 @@ You can change button text 2 ways one is by shortcode attribute. Another way is 
 	`[tta_listen_btn listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay" start_text="Start" stop_text="Stop"]`
 
     Filter Example :
-	Install the plugin Code Snippets Then Select Snippet > Add New Create a new snippet with this block of code
+	Install the plugin [Code Snippets](https://wordpress.org/plugins/code-snippets/) Then Select Snippet > Add New Create a new snippet with this block of code
 
     add_filter( 'tta__button_text_arr', 'tta__button_text_arr_callback' );
     function tta__button_text_arr_callback ( $button_text_arr ) {
