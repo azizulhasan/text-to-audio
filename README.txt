@@ -5,15 +5,15 @@ Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, 
 Requires at least: 4.0
 Tested up to: 6.2
 Requires PHP: 5.6
-Stable tag: 1.3.11
+Stable tag: 1.3.12
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages.
+Add functionality to WordPress site to read blogs out loud in more than 20 languages.
 
 == Description ==
 
-Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages.
+Add functionality to WordPress site to read blogs out loud in more than 20 languages.
 
 There is no need to create an account it’s completely free. Just install the plugin and enjoy the whole features of the plugin.
 
@@ -21,8 +21,17 @@ There is no need to create an account it’s completely free. Just install the p
 > * [Live Demo](http://atlasaidev.com/text-to-speech/)
 > * [Request A Feature](http://atlasaidev.com/contact-us/)
 
-**Support Languages:**
 
+
+* Important Note: 
+This plugin is built on browser speechSynthesis API. No external API is used. Here is the API used [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
+That is why it doesn’t support all android phones. here you can check which android phone support this [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility) API.
+
+Another issue speechSynthesis API is differ browser to browser also divice to divice . So it changes the voices and languages based on browser
+
+Here you can see some languages which are supported by the browsers.
+
+**Supported Languages:**
 * Chrome Desktop: UK English, US English, Spanish ( Spain ), Spanish ( United States ), French, Deutsch, Italian, Russian, Dutch, Japanese, Korean, Chinese (China), Chinese (Hong Kong), Chinese (Taiwan) Hindi, Indonesian, Polish, Brazilian Portuguese.
 * Chrome Mobile: English USA, English UK, German, Italian, Russian, French, Spanish, 
 
@@ -36,19 +45,15 @@ There is no need to create an account it’s completely free. Just install the p
 **Features:**
 
 * Add a play button to any post or page.
-* Write post by voice from the mobile, desktop, tab, or any device.
-* Write comments by speech on any post.
-* Unlimited text to speech and vice versa.
+* Unlimited text to speech.
 * Add more functionality to the website for a range of users including the visually impaired and the old people.
 * Customization of button color, width and button text.
 * Live preview of play button during customization.
 * Add custom CSS and custom class to the button.
-* Change recording language to any language.
 * Change listening language to any language.
 * Choose a voice from more than 20 voices.
-* Unlimited speech to text and vice versa.
 * Customization of listening in block editor.
-* Play button can be added by by shortcode “[tta_listen_btn]”.
+* Play button can be added by shortcode “[tta_listen_btn]”.
 
 
 
@@ -60,6 +65,15 @@ There is no need to create an account it’s completely free. Just install the p
 
 
 == Frequently Asked Questions ==
+
+= Browser support issue on android phone =
+This plugin is built on browser API. No external API is used. Here is the API used [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis)
+That is why it doesn’t support all android phones here you can check which android phone support this [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility) API
+
+If you still facing problems regarding browser issues please on a ticket.
+
+= Another voice language on mobile =
+This plugin is built on browser API speechSynthesis. So it changes based on browser.
 
 = How to enable ``speechSynthesis`` on FireFox? =
 Notice: This solution only for FireFox Desktop.
@@ -117,7 +131,11 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 
 💎 TRANSLATION REQUEST 💎
 We are looking for people to help translate this plugin. If you can help we would love here from you.
-Help us & the WordPress community to translate the plugin [here](https://translate.wordpress.org/projects/wp-plugins/text-to-audio/)
+Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+
+= 1.3.12 (May 21, 2023) =
+* Updated: Documentation updated.
 
 = 1.3.11 (May 17, 2023) =
 * Fixed : Multiple button are showing on archive, category, tag page.
