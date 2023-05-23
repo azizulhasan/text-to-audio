@@ -22,7 +22,8 @@ There is no need to create an account it’s completely free. Just install the p
 > * [Request A Feature](http://atlasaidev.com/contact-us/)
 
 
-* Important Note: 
+**Important Note:**
+
 This plugin is built on browser speechSynthesis API. No external API is used. Here is the API used [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
 That is why it doesn’t support all android phones, aslo all languages here you can check which android phone and which device support this [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility) API.
 

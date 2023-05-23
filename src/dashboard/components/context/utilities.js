@@ -434,6 +434,31 @@ export const getIframeContent = (textareaIndex) => {
 };
 
 
+const unsecuredCopyToClipboard = (text) => {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand('copy')
+    alert('Copied')
+
+  }
+  catch (err) {
+    console.error('Unable to copy to clipboard', err)
+  }
+
+  document.body.removeChild(textArea)
+};
+
+
+
+/**
+ * Copies the text passed as param to the system clipboard
+ * Check if using HTTPS and navigator.clipboard is available
+ * Then uses standard clipboard API, otherwise uses fallback
+*/
 export const copyToClipBoard = (id, shouldSelect = true, message = "Copied", callBack = alert) => {
   /* Get the text field */
   var copyText = document.getElementById(id);
@@ -443,17 +468,21 @@ export const copyToClipBoard = (id, shouldSelect = true, message = "Copied", cal
     copyText.select();
     copyText.setSelectionRange(0, 99999);
   }
-  /* For mobile devices */
 
-  /* Copy the text inside the text field */
-  navigator.clipboard
-    .writeText(copyText.value)
-    .then(() => {
-      // toast('Copied the text: ' + copyText.value);
-      callBack(message)
-    })
-    .catch((e) => {
-      callBack("Something went wrong! " + e.errorMessage());
-      // toast('Something went wrong! ');
-    });
+  if (window.isSecureContext && navigator.clipboard) {
+    /* Copy the text inside the text field */
+    navigator.clipboard
+      .writeText(copyText.value)
+      .then(() => {
+        // toast('Copied the text: ' + copyText.value);
+        callBack(message)
+      })
+      .catch((e) => {
+        callBack("Something went wrong! " + e.errorMessage());
+        // toast('Something went wrong! ');
+      });
+  } else {
+    unsecuredCopyToClipboard(copyText.value);
+  }
+
 };
