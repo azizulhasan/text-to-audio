@@ -39,12 +39,12 @@ export default function DashboardSideNav() {
 							</div>
 							Customization
 						</Link>
-						
+
 						<Link className='nav-link' to={'/docs'}>
 							<div className='sb-nav-link-icon'>
 								<i className='fas fa-book'></i>
 							</div>
-							Docs
+							Support Docs
 						</Link>
 					</div>
 				</div>
