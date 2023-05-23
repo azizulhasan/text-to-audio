@@ -42,11 +42,17 @@ export default function Docs() {
 		<Accordion>
 			<Accordion.Item eventKey='1'>
 				<Accordion.Header>
-					1. Browser support issue on android phone
+					1. Browser support issue on android phone on desktop
 				</Accordion.Header>
 				<Accordion.Body>
 					This plugin is built on browser API. No external API is used. Here is the API used <a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis' >speechSynthesis</a>
 					That is why it doesn’t support all android phones here you can check which android phone support this <a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility'>speechSynthesis</a> API
+
+
+					<br /><br />
+					Another issue speechSynthesis API is differ browser to browser also divice to divice . So it changes the voices and languages based on browser. one language may available on desktop
+					It can be not available on mobile phone. One voice may available on desktop, it may be not available on android.
+
 
 					<br /><br />If you still facing problems regarding browser issues please on a <a target='_blank' href='http://atlasaidev.com/contact-us/'>ticket</a>.
 				</Accordion.Body>
@@ -56,7 +62,10 @@ export default function Docs() {
 					2. Another voice language on mobile
 				</Accordion.Header>
 				<Accordion.Body>
-					This plugin is built on browser API <a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis' >speechSynthesis</a>. So it changes based on browser.
+					This plugin is built on browser API <a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis' >speechSynthesis</a>.
+					<br />speechSynthesis API is differ browser to browser also divice to divice . So it changes the voices and languages based on browser. one language may available on desktop
+					It can be not available on mobile phone. One voice may available on desktop, it may be not available on android.
+
 				</Accordion.Body>
 			</Accordion.Item>
 			<Accordion.Item eventKey='3'>
