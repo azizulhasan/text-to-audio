@@ -153,11 +153,7 @@ class TTA_Admin {
         }
         global $is_iphone, $is_iphone, $is_chrome,$is_safari,
         $is_NS4,$is_opera,$is_macIE,$is_winIE, $is_gecko, $is_lynx, $is_IE, $is_edge; 
-
-    //    wp_enqueue_script('speechify', plugin_dir_url(__FILE__) . 'js/build/speechify.js', array(), $this->version, true);
-
-        wp_enqueue_script('text-to-audio-front', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-front.min.js', array(), $this->version, true);
-        wp_localize_script('text-to-audio-front', 'ttsObj', [
+        $localize_data = [
             'json_url' => esc_url_raw(rest_url()),
             'admin_url' => admin_url('/'),
             'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
@@ -175,7 +171,14 @@ class TTA_Admin {
                 'is_IE' => $is_IE, //(boolean): Internet Explorer
                 'is_edge' => $is_edge, //(boolean): Microsoft Edge
             ],
-        ]);
+        ];
+
+        wp_enqueue_script('text-to-audio-front', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-front.min.js', array(), $this->version, true);
+        wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/text-to-audio-button.js', array(), $this->version, true);
+
+        wp_localize_script('text-to-audio-front', 'ttsObj', $localize_data );
+        wp_localize_script('text-to-audio-button', 'ttsButton', $localize_data );
+
         wp_enqueue_style('dashicons');
     }
 
