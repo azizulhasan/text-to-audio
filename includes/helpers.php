@@ -98,13 +98,13 @@ function tta_get_button_content($atts, $is_block = false) {
     // print_r(is_home());
 
     //Apply short code for on single page.
-    if(is_page() && isset($settings['tta__settings_display_btn_in_single_page']) && !$settings['tta__settings_display_btn_in_single_page']){
-        return;
-    }
+    // if(is_page() && isset($settings['tta__settings_display_btn_in_single_page']) && !$settings['tta__settings_display_btn_in_single_page']){
+    //     return;
+    // }
     // this is a pro feature to show button on blog main page with title and excerpt.
-    if(is_home() || is_archive() ){
-        return;
-    }
+    // if(is_home() || is_archive() ){
+    //     return;
+    // }
 
 
     $display_icon = isset( $settings['tta__settings_display_btn_icon'] ) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
@@ -151,19 +151,21 @@ function tta_get_button_content($atts, $is_block = false) {
     $class = (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
 
     // Listening button.
-    $button = '<div class="tta_notice"></div><button id="tta__listent_content_' . $btn_no . '" class="tta__listent_content ' . esc_attr($class) . '" type="button"  title="Text To Audio:  Tap to listen post.">' . $speakIcon . ' </button><tts-play-button></tts-play-button>
-<style>
-#tta__listent_content_' . $btn_no .'.tta__listent_content{ ' . esc_attr($btn_style) . ' }
-#tta__listent_content_' . $btn_no .'.tta__listent_content:hover{' . esc_attr($btn_style) . '}
-#tta__listent_content_' . $btn_no .'.tta__listent_content .text-position{ position: absolute;padding-top: 2px; }
-#tta__listent_content_' . $btn_no .'.tta__listent_content .dashicons{ display: ' . esc_attr( $display_icon ) . ';line-height:1;font-size:25px;height:25px;width:25px; }
-' . $custom_css . '
-</style>
-<script>
-    window.ttsContent = "'.$content.'"
-    window.buttonId = '.$btn_no.'
-    window.ttsListeningSettings = '.$listening.'
-</script>';
+//     $button = '<div class="tta_notice"></div><button id="tta__listent_content_' . $btn_no . '" class="tta__listent_content ' . esc_attr($class) . '" type="button"  title="Text To Audio:  Tap to listen post.">' . $speakIcon . ' </button><tts-play-button></tts-play-button>
+// <style>
+// #tta__listent_content_' . $btn_no .'.tta__listent_content{ ' . esc_attr($btn_style) . ' }
+// #tta__listent_content_' . $btn_no .'.tta__listent_content:hover{' . esc_attr($btn_style) . '}
+// #tta__listent_content_' . $btn_no .'.tta__listent_content .text-position{ position: absolute;padding-top: 2px; }
+// #tta__listent_content_' . $btn_no .'.tta__listent_content .dashicons{ display: ' . esc_attr( $display_icon ) . ';line-height:1;font-size:25px;height:25px;width:25px; }
+// ' . $custom_css . '
+// </style>
+// <script>
+//     window.ttsContent = "'.$content.'"
+//     window.buttonId = '.$btn_no.'
+//     window.ttsListeningSettings = '.$listening.'
+// </script>';
+
+        $button = "<tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
 
     return apply_filters( 'tta__listening_button', $button );
 }

@@ -170,7 +170,7 @@ class TTA_Admin {
         ];
 
         wp_enqueue_script('text-to-audio-front', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-front.min.js', array(), $this->version, true);
-        wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/text-to-audio-button.js', array(), $this->version, true);
+        wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/text-to-audio-button.js', array('wp-hooks', 'wp-shortcode'), $this->version, true);
 
         wp_localize_script('text-to-audio-front', 'ttsObj', $localize_data );
         wp_localize_script('text-to-audio-button', 'ttsButton', $localize_data );
