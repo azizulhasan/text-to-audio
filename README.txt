@@ -5,7 +5,7 @@ Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, 
 Requires at least: 4.0
 Tested up to: 6.2
 Requires PHP: 5.6
-Stable tag: 1.3.12
+Stable tag: 1.3.13
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -139,6 +139,13 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 💎 TRANSLATION REQUEST 💎
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+
+= 1.3.13 (May 29, 2023) =
+* Rename: Allow Recoding For Post Type to Allow Listeing For Post Type.
+* Fixed : Allow Listeing For Post Type not working issue.
+* Removed: Allow Button On Single Page option.
+* Moved: Allow Button On Single Page to Allow Listeing For Post Type
 
 
 = 1.3.12 (May 23, 2023) =
