@@ -28,6 +28,8 @@ class TTA_Hooks {
 
         // Update hook
         add_action('upgrader_process_complete', 'update_settings_data', 10, 2);
+
+        
     }
 
 
@@ -87,8 +89,7 @@ class TTA_Hooks {
                     $settings =  (array) get_option( 'tta_settings_data' , [] );
                     $data = (object) array_merge( $settings,  array(
                         'tta__settings_enable_button_add'=> true,
-                        "tta__settings_allow_recording_for_post_type" => "all",
-                        "tta__settings_display_btn_in_single_page" => '',
+                        "tta__settings_allow_listening_for_post_types" => ['post'],
                         "tta__settings_display_btn_icon" => '',
                     ));
 
