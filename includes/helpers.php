@@ -97,18 +97,18 @@ function tta_get_button_content($atts, $is_block = false) {
     // set default value.
     $settings['tta__settings_allow_listening_for_post_types'] = isset($settings['tta__settings_allow_listening_for_post_types']) && is_array($settings['tta__settings_allow_listening_for_post_types']) ? $settings['tta__settings_allow_listening_for_post_types'] : ['post', 'page', 'product'];
 
-    if(!isset($settings['tta__settings_allow_listening_for_post_types']) 
-    || count($settings['tta__settings_allow_listening_for_post_types']) === 0
-    || !is_array($settings['tta__settings_allow_listening_for_post_types'])
-    || !in_array(get_page_type(), $settings['tta__settings_allow_listening_for_post_types'])
-    ) {
-        return;
-    }
+    // if(!isset($settings['tta__settings_allow_listening_for_post_types']) 
+    // || count($settings['tta__settings_allow_listening_for_post_types']) === 0
+    // || !is_array($settings['tta__settings_allow_listening_for_post_types'])
+    // || !in_array(get_page_type(), $settings['tta__settings_allow_listening_for_post_types'])
+    // ) {
+    //     return;
+    // }
 
     // this is a pro feature to show button on blog main page with title and excerpt.
-    if(is_home() || is_archive() ){
-        return;
-    }
+    // if(is_home() || is_archive() ){
+    //     return;
+    // }
 
     $display_icon = isset( $settings['tta__settings_display_btn_icon'] ) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
 
@@ -170,8 +170,32 @@ function tta_get_button_content($atts, $is_block = false) {
 
         $button = "<tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
 
+        add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $listening) { 
+		?>
+		<!-- write your script to the head section  -->
+<script>
+    var currentButtonNo = <?php echo $btn_no; ?>;
+    var currentContent = "<?php echo $content; ?>";
+    if(window.hasOwnProperty('TTS')){
+        var prevContent = window.TTS.contents[currentButtonNo-1]
+        if(prevContent !== currentContent){
+            window.TTS.contents[currentButtonNo] = currentContent;
+        }
+        
+    }else{
+        window.TTS = {}
+        window.TTS.contents = {}
+        window.TTS.contents[currentButtonNo] = currentContent;
+    }
+    window.TTS.listening = <?php echo $listening; ?>;
+</script>
+<?php
+});
+
     return apply_filters( 'tta__listening_button', $button );
 }
+
+
 
 
 
