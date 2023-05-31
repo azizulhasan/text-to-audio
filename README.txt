@@ -5,15 +5,15 @@ Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, 
 Requires at least: 4.0
 Tested up to: 6.2
 Requires PHP: 5.6
-Stable tag: 1.3.11
+Stable tag: 1.3.13
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages.
+Add functionality to WordPress site to read blogs out loud in more than 20 languages.
 
 == Description ==
 
-Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages.
+Add functionality to WordPress site to read blogs out loud in more than 20 languages.
 
 There is no need to create an account it’s completely free. Just install the plugin and enjoy the whole features of the plugin.
 
@@ -22,8 +22,8 @@ There is no need to create an account it’s completely free. Just install the p
 > * [Request A Feature](http://atlasaidev.com/contact-us/)
 
 
+**Important Note:**
 
-* Important Note: 
 This plugin is built on browser speechSynthesis API. No external API is used. Here is the API used [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
 That is why it doesn’t support all android phones, aslo all languages here you can check which android phone and which device support this [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility) API.
 
@@ -68,7 +68,7 @@ Here you can see some languages which are supported by the browsers based on dev
 
 == Frequently Asked Questions ==
 
-= Browser support issue on android phone =
+= Browser support issue on android phone on desktop =
 This plugin is built on browser API. No external API is used. Here is the API used [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis)
 That is why it doesn’t support all android phones aslo all languages. Here you can check which android phone and which device support this [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility) API
 
@@ -99,7 +99,7 @@ You can change button text 2 ways one is by shortcode attribute. Another way is 
 	[tta_listen_btn listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay" start_text="Start" stop_text="Stop"]
 	`
     Filter Example :
-	Install the plugin Code Snippets Then Select Snippet > Add New Create a new snippet with this block of code
+	Install the plugin [Code Snippets](https://wordpress.org/plugins/code-snippets/) Then Select Snippet > Add New Create a new snippet with this block of code
 
     add_filter( 'tta__button_text_arr', 'tta__button_text_arr_callback' );
     function tta__button_text_arr_callback ( $button_text_arr ) {
@@ -138,7 +138,21 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 
 💎 TRANSLATION REQUEST 💎
 We are looking for people to help translate this plugin. If you can help we would love here from you.
-Help us & the WordPress community to translate the plugin [here](https://translate.wordpress.org/projects/wp-plugins/text-to-audio/)
+Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+
+= 1.3.13 (May 29, 2023) =
+* Rename: Allow Recoding For Post Type to Allow Listeing For Post Type.
+* Fixed : Allow Listeing For Post Type not working issue.
+* Removed: Allow Button On Single Page option.
+* Moved: Allow Button On Single Page to Allow Listeing For Post Type
+
+
+= 1.3.12 (May 23, 2023) =
+* Updated: Documentation updated.
+* Updated: Dashboard documentation menu change to "Support Docs".
+* Added: More Questions added to "Support Docs" menu
+* Fixed: Copy to clipboard is not working.
 
 = 1.3.11 (May 17, 2023) =
 * Fixed : Multiple button are showing on archive, category, tag page.

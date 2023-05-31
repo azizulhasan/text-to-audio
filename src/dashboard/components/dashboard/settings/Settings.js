@@ -13,24 +13,18 @@ export default function Settings() {
 
 		return {
 			tta__settings_enable_button_add: false,
-			tta__settings_display_btn_in_single_page: false,
 			tta__settings_display_btn_icon: false,
-			tta__settings_allow_recording_for_post_type: 'all',
+			tta__settings_allow_listening_for_post_types: ['post'],
 		}
 
 	});
-
-	const [checked, setChecked] = useState(() => false);
-	const [showIcon, setShowIcon] = useState(() => false)
-	const [enableButtonAdd, setEnableButtonAdd] = useState(() => true)
-
-
 	const [postTypes, setPostTypes] = useState([
-		'all',
 		'post',
 		'product',
 		'page',
 	]);
+
+
 
 	useEffect(() => {
 		/**
@@ -40,14 +34,12 @@ export default function Settings() {
 		formData.append('method', 'get');
 		postWithoutImage(tta_obj.api_url + 'tta/v1/settings', formData).then(
 			(res) => {
-				setSettings({ ...settings, ...res.data });
-				setEnableButtonAdd(res.data.tta__settings_enable_button_add);
-				setChecked(res.data.tta__settings_display_btn_in_single_page);
-				setShowIcon(res.data.tta__settings_display_btn_icon);
-
-
-
+				setSettings({ ...res.data });
 			});
+
+		let tempPostTypes = wp.hooks.applyFilters('tts_display_button_on_post_types', structuredClone(postTypes))
+		setPostTypes(tempPostTypes)
+
 	}, []);
 
 	/**
@@ -55,9 +47,21 @@ export default function Settings() {
 	 * @param {*} e
 	 */
 	const handleChange = (e) => {
+		let value = '';
+		if (e.target.name === 'tta__settings_allow_listening_for_post_types') {
+			value = Array.from(e.target.selectedOptions, option => option.value);
+		} else {
+			value = e.target.value
+		}
+
+		if (e.target.getAttribute('type') === 'checkbox') {
+			value = e.target.checked
+		}
+		if (!e.target.name) return;
 		setSettings({
 			...settings,
-			...{ [e.target.name]: e.target.value },
+			...{ [e.target.name]: value },
+
 		});
 	};
 
@@ -66,35 +70,12 @@ export default function Settings() {
 	 */
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		/**
-		 * Get full form data and modify them for saving to database.
-		 */
-		let form = new FormData(e.target);
-		let data = {};
-		let arr = [];
-		for (let [key, value] of form.entries()) {
-			if (key === '' || value === '') {
-				toast('Please fill the  field : ' + key);
-				return;
-			}
-			else {
-				data[key] = value;
-			}
-		}
-
-		data.tta__settings_enable_button_add = enableButtonAdd;
-		data.tta__settings_display_btn_in_single_page = checked;
-		data.tta__settings_display_btn_icon = showIcon;
-
 		let formData = new FormData();
-		formData.append('fields', JSON.stringify(data));
+		formData.append('fields', JSON.stringify(settings));
 		formData.append('method', 'post');
 		postWithoutImage(tta_obj.api_url + 'tta/v1/settings', formData)
 			.then((res) => {
 				setSettings(res.data);
-				setEnableButtonAdd(res.data.tta__settings_enable_button_add);
-				setChecked(res.data.tta__settings_display_btn_in_single_page);
-				setShowIcon(res.data.tta__settings_display_btn_icon);
 				toast('Settings Data Saved');
 			})
 			.catch((err) => {
@@ -117,34 +98,35 @@ export default function Settings() {
 							<ToggleButton
 								id='toggle-check'
 								type='checkbox'
-								className='form-controll '
+								className='form-controll'
+								name='tta__settings_enable_button_add'
 								variant={
-									enableButtonAdd
+									settings.tta__settings_enable_button_add
 										? 'outline-primary'
 										: 'outline-danger'
 								}
-								checked={enableButtonAdd}
-								value='1'
+								checked={settings.tta__settings_enable_button_add}
 								onChange={(e) =>
-									setEnableButtonAdd(e.currentTarget.checked)
+									handleChange(e)
 								}>
-								{enableButtonAdd ? 'Enable' : 'Disable'}
+								{settings.tta__settings_enable_button_add ? 'Enable' : 'Disable'}
 							</ToggleButton>
 						</Form.Group>
 					</Col>
 				</Row>
 				<Row className='mt-4'>
 					<Col xs={12} sm={6} lg={4}>
-						<Form.Label id='tta__settings_allow_recording_for_post_type'>
-							Allow Recording For Post Type
+						<Form.Label id='tta__settings_allow_listening_for_post_types'>
+							Allow Listening For Post Type
 						</Form.Label>
 					</Col>
 					<Col xs={12} sm={12} lg={8}>
-						<Form.Group controlId="tta__settings_allow_recording_for_post_type">
+						<Form.Group controlId="tta__settings_allow_listening_for_post_types">
 							<Form.Select
-								name="tta__settings_allow_recording_for_post_type"
+								name="tta__settings_allow_listening_for_post_types"
 								onChange={handleChange}
-								defaultValue={settings.tta__settings_allow_recording_for_post_type}>
+								multiple={true}
+								value={settings.tta__settings_allow_listening_for_post_types}>
 								<option value={'0'}>
 									Select recording post type
 								</option>
@@ -159,33 +141,7 @@ export default function Settings() {
 						</Form.Group>
 					</Col>
 				</Row>
-				<Row className=' mt-3'>
-					<Col xs={12} sm={6} lg={4}>
-						<Form.Label id='tta__settings_display_btn_in_single_page'>
-							Display Button On Single Page
-						</Form.Label>
-					</Col>
-					<Col xs={12} sm={12} lg={8}>
-						<Form.Group>
-							<ToggleButton
-								id='display_button_only_single_page'
-								type='checkbox'
-								className='form-controll '
-								variant={
-									checked
-										? 'outline-primary'
-										: 'outline-danger'
-								}
-								checked={checked}
-								value='1'
-								onChange={(e) =>
-									setChecked(e.currentTarget.checked)
-								}>
-								{checked ? 'Enable' : 'Disable'}
-							</ToggleButton>
-						</Form.Group>
-					</Col>
-				</Row>
+
 				<Row className=' mt-3'>
 					<Col xs={12} sm={6} lg={4}>
 						<Form.Label id='tta__settings_display_btn_icon'>
@@ -199,16 +155,16 @@ export default function Settings() {
 								type='checkbox'
 								className='form-controll '
 								variant={
-									showIcon
+									settings.tta__settings_display_btn_icon
 										? 'outline-primary'
 										: 'outline-danger'
 								}
-								checked={showIcon}
-								value='1'
+								checked={settings.tta__settings_display_btn_icon}
+								name='tta__settings_display_btn_icon'
 								onChange={(e) =>
-									setShowIcon(e.currentTarget.checked)
+									handleChange(e)
 								}>
-								{showIcon ? 'Enable' : 'Disable'}
+								{settings.tta__settings_display_btn_icon ? 'Enable' : 'Disable'}
 							</ToggleButton>
 						</Form.Group>
 					</Col>

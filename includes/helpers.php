@@ -94,18 +94,21 @@ function tta_get_button_content($atts, $is_block = false) {
     $settings = (array) get_option('tta_settings_data');
     $recording = (array) get_option('tta_record_settings');
 
-    // echo "<pre>";
-    // print_r(is_home());
+    // set default value.
+    $settings['tta__settings_allow_listening_for_post_types'] = isset($settings['tta__settings_allow_listening_for_post_types']) && is_array($settings['tta__settings_allow_listening_for_post_types']) ? $settings['tta__settings_allow_listening_for_post_types'] : ['post', 'page', 'product'];
 
-    //Apply short code for on single page.
-    // if(is_page() && isset($settings['tta__settings_display_btn_in_single_page']) && !$settings['tta__settings_display_btn_in_single_page']){
-    //     return;
-    // }
+    if(!isset($settings['tta__settings_allow_listening_for_post_types']) 
+    || count($settings['tta__settings_allow_listening_for_post_types']) === 0
+    || !is_array($settings['tta__settings_allow_listening_for_post_types'])
+    || !in_array(get_page_type(), $settings['tta__settings_allow_listening_for_post_types'])
+    ) {
+        return;
+    }
+
     // this is a pro feature to show button on blog main page with title and excerpt.
-    // if(is_home() || is_archive() ){
-    //     return;
-    // }
-
+    if(is_home() || is_archive() ){
+        return;
+    }
 
     $display_icon = isset( $settings['tta__settings_display_btn_icon'] ) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
 
@@ -168,6 +171,52 @@ function tta_get_button_content($atts, $is_block = false) {
         $button = "<tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
 
     return apply_filters( 'tta__listening_button', $button );
+}
+
+
+
+/**
+ * Get page type
+ * 
+ * @see  https://wordpress.stackexchange.com/questions/83887/return-current-page-type
+ */
+
+function get_page_type() {
+    global $wp_query;
+    $loop = 'notfound';
+
+    if ( $wp_query->is_page ) {
+        $loop = is_front_page() ? 'front' : 'page';
+    } elseif ( $wp_query->is_home ) {
+        $loop = 'home';
+    } elseif ( $wp_query->is_single ) {
+        $loop = ( $wp_query->is_attachment ) ? 'attachment' : 'single';
+        $loop = 'post';
+    } elseif ( $wp_query->is_category ) {
+        $loop = 'category';
+    } elseif ( $wp_query->is_tag ) {
+        $loop = 'tag';
+    } elseif ( $wp_query->is_tax ) {
+        $loop = 'tax';
+    } elseif ( $wp_query->is_archive ) {
+        if ( $wp_query->is_day ) {
+            $loop = 'day';
+        } elseif ( $wp_query->is_month ) {
+            $loop = 'month';
+        } elseif ( $wp_query->is_year ) {
+            $loop = 'year';
+        } elseif ( $wp_query->is_author ) {
+            $loop = 'author';
+        } else {
+            $loop = 'archive';
+        }
+    } elseif ( $wp_query->is_search ) {
+        $loop = 'search';
+    } elseif ( $wp_query->is_404 ) {
+        $loop = 'notfound';
+    }
+
+    return $loop;
 }
 
 

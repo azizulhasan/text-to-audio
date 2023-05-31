@@ -28,6 +28,8 @@ class TTA_Hooks {
 
         // Update hook
         add_action('upgrader_process_complete', 'update_settings_data', 10, 2);
+
+        
     }
 
 
@@ -87,8 +89,7 @@ class TTA_Hooks {
                     $settings =  (array) get_option( 'tta_settings_data' , [] );
                     $data = (object) array_merge( $settings,  array(
                         'tta__settings_enable_button_add'=> true,
-                        "tta__settings_allow_recording_for_post_type" => "all",
-                        "tta__settings_display_btn_in_single_page" => '',
+                        "tta__settings_allow_listening_for_post_types" => ['post'],
                         "tta__settings_display_btn_icon" => '',
                     ));
 
@@ -188,6 +189,22 @@ class TTA_Hooks {
             </button>
 
             <script>
+                const unsecuredCopyToClipboard = (text) => {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = text;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    textArea.setSelectionRange(0, 99999);
+                    try {
+                        document.execCommand('copy')
+                        alert('Copied')
+                    }
+                    catch (err) {
+                        console.error('Unable to copy to clipboard', err)
+                    }
+
+                    document.body.removeChild(textArea)
+                    };
             /**
              * Copy short Code
              */
@@ -195,11 +212,23 @@ class TTA_Hooks {
                 /* Get the text field */
                 var copyText = document.getElementById("tta_play_btn_shortcode");
 
-                /* Copy the text inside the text field */
-                navigator.clipboard.writeText(copyText.value);
-
-                /* Alert the copied text */
-                alert("Copied the text: " + copyText.value);
+                /* Select the text field */
+                copyText.select();
+                copyText.setSelectionRange(0, 99999);
+                if (window.isSecureContext && navigator.clipboard) {
+                    /* Copy the text inside the text field */
+                    navigator.clipboard
+                    .writeText(copyText.value)
+                    .then(() => {
+                        alert('Copied')
+                    })
+                    .catch((e) => {
+                        alert("Something went wrong! " + e);
+                        // toast('Something went wrong! ');
+                    });
+                } else {
+                    unsecuredCopyToClipboard(copyText.value);
+                }
             };
             </script>
         </div>
