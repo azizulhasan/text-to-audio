@@ -141,6 +141,10 @@ We are looking for people to help translate this plugin. If you can help we woul
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+= 1.3.14 (May 31, 2023) =
+* Fixed : Allow Listening For Post Type not working issue resolved.
+
+
 = 1.3.13 (May 29, 2023) =
 * Rename: Allow Recoding For Post Type to Allow Listeing For Post Type.
 * Fixed : Allow Listeing For Post Type not working issue.
