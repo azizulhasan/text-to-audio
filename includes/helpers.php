@@ -98,13 +98,13 @@ function tta_get_button_content($atts, $is_block = false) {
     $settings['tta__settings_allow_listening_for_post_types'] = isset($settings['tta__settings_allow_listening_for_post_types']) && is_array($settings['tta__settings_allow_listening_for_post_types']) ? $settings['tta__settings_allow_listening_for_post_types'] : ['post', 'page', 'product'];
 
 
-    if(!isset($settings['tta__settings_allow_listening_for_post_types']) 
-    || count($settings['tta__settings_allow_listening_for_post_types']) === 0
-    || !is_array($settings['tta__settings_allow_listening_for_post_types'])
-    || !in_array(tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'])
-    ) {
-        return;
-    }
+    // if(!isset($settings['tta__settings_allow_listening_for_post_types']) 
+    // || count($settings['tta__settings_allow_listening_for_post_types']) === 0
+    // || !is_array($settings['tta__settings_allow_listening_for_post_types'])
+    // || !in_array(tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'])
+    // ) {
+    //     return;
+    // }
 
 
     // this is a pro feature to show button on blog main page with title and excerpt.
@@ -112,7 +112,7 @@ function tta_get_button_content($atts, $is_block = false) {
     //     return;
     // }
 
-    $display_icon = isset( $settings['tta__settings_display_btn_icon'] ) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
+    $should_display_icon = isset( $settings['tta__settings_display_btn_icon'] ) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
 
     static $btn_no = 0;
     $btn_no++;
@@ -139,12 +139,12 @@ function tta_get_button_content($atts, $is_block = false) {
             $backgroundColor = isset($customize['backgroundColor']) ? $customize['backgroundColor'] : '#184c53';
             $color = isset($customize['color']) ? $customize['color'] : '#ffffff';
             $width = isset($customize['width']) ? $customize['width'] : '100';
-            $btn_style = 'background-color:' . esc_attr($backgroundColor) . ' !important;color:' . esc_attr($color) . ' !important;width:' . esc_attr($width) . '%;border:0;display:block;border-radius:4px;text-decoration:none;';
+            $btn_style = 'background-color:' . esc_attr($backgroundColor) . ' !important;color:' . esc_attr($color) . ' !important;width:' . esc_attr($width) . '%;border:0;display:block;border-radius:4px;text-decoration:none;cursor:pointer;';
         } else {
-            $btn_style = 'background-color:' . esc_attr($customize['backgroundColor']) . ';color:' . esc_attr($customize['color']) . ';width:' . esc_attr($customize['width']) . '%;border:0;display:block;border-radius:4px;text-decoration:none;';
+            $btn_style = 'background-color:' . esc_attr($customize['backgroundColor']) . ';color:' . esc_attr($customize['color']) . ';width:' . esc_attr($customize['width']) . '%;border:0;display:block;border-radius:4px;text-decoration:none;cursor:pointer;';
         }
     } else {
-        $btn_style = 'background-color:#184c53;color:#ffffff;width:100%;border:0;display:block;border-radius:4px;text-decoration:none;';
+        $btn_style = 'background-color:#184c53;color:#ffffff;width:100%;border:0;display:block;border-radius:4px;text-decoration:none;cursor:pointer;';
     }
     //Custom Css
     $custom_css = '';
@@ -172,12 +172,19 @@ function tta_get_button_content($atts, $is_block = false) {
 
         $button = "<tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
 
-        add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $listening) { 
+        add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon) { 
 		?>
 		<!-- write your script to the head section  -->
 <script>
     var currentButtonNo = <?php echo $btn_no; ?>;
     var currentContent = "<?php echo $content; ?>";
+    var listening = <?php echo $listening; ?>;
+    var css_class = "<?php echo $class; ?>";
+    var btn_style = "<?php echo $btn_style; ?>";
+    var text_arr = <?php echo json_encode($text_arr); ?>;
+    var custom_css = "<?php echo $custom_css; ?>";
+    var should_display_icon = "<?php echo $should_display_icon; ?>";
+    var settings = {listening, css_class , btn_style, text_arr, custom_css, should_display_icon};
     if(window.hasOwnProperty('TTS')){
         var prevContent = window.TTS.contents[currentButtonNo-1]
         if(prevContent !== currentContent){
@@ -188,8 +195,13 @@ function tta_get_button_content($atts, $is_block = false) {
         window.TTS = {}
         window.TTS.contents = {}
         window.TTS.contents[currentButtonNo] = currentContent;
+        window.TTS.contents[currentButtonNo] = currentContent;
+        window.TTS.contents[currentButtonNo] = currentContent;
     }
-    window.TTS.listening = <?php echo $listening; ?>;
+    if(!window.TTS.hasOwnProperty('ttsSettings')){
+        window.TTS.ttsSettings = settings
+    }
+
 </script>
 <?php
 });
