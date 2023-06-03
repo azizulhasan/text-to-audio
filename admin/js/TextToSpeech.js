@@ -39,6 +39,10 @@ export default class TextToSpeech {
         this.speech = new Speech()
     }
 
+    getData() {
+        return this;
+    }
+
     playButtonText() {
         return this.buttonTextArr.listen_text;
     }
@@ -190,6 +194,7 @@ export default class TextToSpeech {
                 console.log("Success !", data);
                 if (!this.browser.isAndroid()) {
                     clearTimeout(this.timer);
+                    this.timer = null
                 }
 
             })
@@ -202,17 +207,17 @@ export default class TextToSpeech {
         this.speakButton.setAttribute('title', 'Text To Audio : ' + this.pauseButtonText());
         this.listenStatus = 'pause';
         if (!this.browser.isAndroid()) {
-            this.timer = setTimeout(function pauseResumeTimer() {
-                speech.pause();
-                //IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
-                console.log(speech);
-                // Placing the speak invocation inside a callback fixes ordering and onend issues
-                setTimeout(() => {
-                    speech.resume();
-                }, 0);
+            // this.timer = setTimeout(function pauseResumeTimer() {
+            //     speech.pause();
+            //     //IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
+            //     console.log(speech);
+            //     // Placing the speak invocation inside a callback fixes ordering and onend issues
+            //     setTimeout(() => {
+            //         speech.resume();
+            //     }, 0);
 
-                this.timer = setTimeout(pauseResumeTimer, 10000)
-            }, 10000);
+            //     this.timer = setTimeout(pauseResumeTimer, 10000)
+            // }, 10000);
         }
     }
     pause(speech) {
@@ -262,17 +267,17 @@ export default class TextToSpeech {
         this.listenStatus = 'pause';
         this.speakButton.setAttribute('title', 'Text To Audio : ' + this.pauseButtonText());
         if (!this.browser.isAndroid()) {
-            this.timer = setTimeout(function pauseResumeTimer() {
-                speech.pause();
-                //IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
-                console.log(speech);
-                // Placing the speak invocation inside a callback fixes ordering and onend issues
-                setTimeout(() => {
-                    speech.resume();
-                }, 0);
+            // this.timer = setTimeout(function pauseResumeTimer() {
+            //     speech.pause();
+            //     //IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
+            //     console.log(speech);
+            //     // Placing the speak invocation inside a callback fixes ordering and onend issues
+            //     setTimeout(() => {
+            //         speech.resume();
+            //     }, 0);
 
-                this.timer = setTimeout(pauseResumeTimer, 10000)
-            }, 10000);
+            //     this.timer = setTimeout(pauseResumeTimer, 10000)
+            // }, 10000);
         }
     }
 
