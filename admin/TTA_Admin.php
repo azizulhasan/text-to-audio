@@ -53,6 +53,19 @@ class TTA_Admin {
         $this->plugin_name = $plugin_name;
         $this->version = $version;
 
+        add_filter('script_loader_tag', [ $this, 'load_script_as_tag'] , 10, 3);
+
+    }
+
+    public function load_script_as_tag($tag, $handle, $src) {
+        if(!in_array($handle, ['text-to-audio-button', 'TextToSpeech'])) {
+            return $tag;
+        }
+
+        $tag = '<script  type="module" src="' . \esc_url($src) . '"  ></script>';
+
+        return $tag;
+
     }
 
     /**
@@ -169,10 +182,10 @@ class TTA_Admin {
             ],
         ];
 
-        wp_enqueue_script('text-to-audio-front', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-front.min.js', array(), $this->version, true);
-        wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/text-to-audio-button.js', array('wp-hooks', 'wp-shortcode'), $this->version, true);
+        wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js',array('wp-hooks', 'wp-shortcode'), $this->version, true);
+        wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/text-to-audio-button.js', array('wp-hooks', 'wp-shortcode', 'TextToSpeech'), $this->version, true);
 
-        wp_localize_script('text-to-audio-front', 'ttsObj', $localize_data );
+        wp_localize_script('TextToSpeech', 'ttsObj', $localize_data );
         wp_localize_script('text-to-audio-button', 'ttsButton', $localize_data );
 
         wp_enqueue_style('dashicons');

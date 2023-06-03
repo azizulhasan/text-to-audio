@@ -1,3 +1,4 @@
+import TextToSpeech from "./TextToSpeech.js";
 // Create a class for the element
 class TTSPlayButton extends HTMLElement {
     constructor() {
@@ -8,32 +9,33 @@ class TTSPlayButton extends HTMLElement {
         const shadow = this.attachShadow({ mode: 'open' });
         setTimeout(() => {
             let contents = window.TTS.contents;
-            let ttsSettings = window.TTS.ttsSettings;
+            let settings = window.TTS.settings;
             let buttonIds = Object.keys(contents)
+            // Render all buttons in page have.
             for (let buttonNo of buttonIds) {
                 if (buttonNo == this.getAttribute('data-id')) {
-                    // Create spans
+                    // Create div
                     const wrapper = document.createElement('div');
                     wrapper.setAttribute('class', 'wrapper');
-                    wrapper.innerHTML = `<button id="tts__listent_content_${buttonNo}" class="tts__listent_content " type="button" title="Text To Audio:  Tap to listen post."><div class="tts_button"><span class="dashicons dashicons-controls-play"></span> <span> Listen<span></span></span></div> </button>`
-
-                    // Create some CSS to apply to the shadow dom
-                    const style = document.createElement('style');
-
-
+                    wrapper.innerHTML = `<button id="tts__listent_content_${buttonNo}" class="tts__listent_content  ${settings.cssClass}" type="button" title="Text To Audio:  Tap to listen post."><div class="tts_button"><span class="dashicons dashicons-controls-play"></span> <span> Listen<span></span></span></div> </button>`
 
 
                     this.addEventListener('click', function (e) {
-                        console.log(e.target)
+                        let button = [...wrapper.children][0]
+                        let tts = new TextToSpeech(buttonNo, contents[buttonNo], button, window.TTS)
+                        tts._init()
                     })
+                    // Create some CSS to apply to the shadow dom
+                    const style = document.createElement('style');
 
+                    // CSS style for thsi button
                     style.textContent = `
-                #tts__listent_content_${buttonNo}.tts__listent_content{ ${ttsSettings.btn_style} }
-                #tts__listent_content_${buttonNo}.tts__listent_content:hover{ ${ttsSettings.btn_style} }
-                #tts__listent_content_${buttonNo}.tts__listent_content .text-position{ position: absolute;padding-top: 2px; }
-                // #tts__listent_content_${buttonNo}.tts__listent_content .dashicons{ display:${ttsSettings.should_display_icon};line-height:1;font-size:25px;height:25px;width:25px; }
-                ${ttsSettings.custom_css}
-                `;
+                        #tts__listent_content_${buttonNo}.tts__listent_content{ ${settings.btnStyle}height:30px; }
+                        #tts__listent_content_${buttonNo}.tts__listent_content:hover{ ${settings.btnStyle}height:30px; }
+                        // #tts__listent_content_${buttonNo}.tts__listent_content .text-position{ position: absolute;padding-top: 2px; }
+                        // #tts__listent_content_${buttonNo}.tts__listent_content .dashicons{ display:${settings.shouldDisplayIcon};line-height:1;font-size:25px;height:25px;width:25px; }
+                        ${settings.customCSS}
+                    `;
 
                     // Attsch the created elements to the shadow dom
                     shadow.appendChild(style);

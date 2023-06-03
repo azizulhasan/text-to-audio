@@ -154,61 +154,65 @@ function tta_get_button_content($atts, $is_block = false) {
 
     // Custom class to button.
     $class = (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
+    $button = "<tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
 
-    // Listening button.
-//     $button = '<div class="tta_notice"></div><button id="tta__listent_content_' . $btn_no . '" class="tta__listent_content ' . esc_attr($class) . '" type="button"  title="Text To Audio:  Tap to listen post.">' . $speakIcon . ' </button><tts-play-button></tts-play-button>
-// <style>
-// #tta__listent_content_' . $btn_no .'.tta__listent_content{ ' . esc_attr($btn_style) . ' }
-// #tta__listent_content_' . $btn_no .'.tta__listent_content:hover{' . esc_attr($btn_style) . '}
-// #tta__listent_content_' . $btn_no .'.tta__listent_content .text-position{ position: absolute;padding-top: 2px; }
-// #tta__listent_content_' . $btn_no .'.tta__listent_content .dashicons{ display: ' . esc_attr( $display_icon ) . ';line-height:1;font-size:25px;height:25px;width:25px; }
-// ' . $custom_css . '
-// </style>
-// <script>
-//     window.ttsContent = "'.$content.'"
-//     window.buttonId = '.$btn_no.'
-//     window.ttsListeningSettings = '.$listening.'
-// </script>';
-
-        $button = "<tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
-
-        add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon) { 
-		?>
-		<!-- write your script to the head section  -->
-<script>
-    var currentButtonNo = <?php echo $btn_no; ?>;
-    var currentContent = "<?php echo $content; ?>";
-    var listening = <?php echo $listening; ?>;
-    var css_class = "<?php echo $class; ?>";
-    var btn_style = "<?php echo $btn_style; ?>";
-    var text_arr = <?php echo json_encode($text_arr); ?>;
-    var custom_css = "<?php echo $custom_css; ?>";
-    var should_display_icon = "<?php echo $should_display_icon; ?>";
-    var settings = {listening, css_class , btn_style, text_arr, custom_css, should_display_icon};
-    if(window.hasOwnProperty('TTS')){
-        var prevContent = window.TTS.contents[currentButtonNo-1]
-        if(prevContent !== currentContent){
-            window.TTS.contents[currentButtonNo] = currentContent;
-        }
-        
-    }else{
-        window.TTS = {}
-        window.TTS.contents = {}
-        window.TTS.contents[currentButtonNo] = currentContent;
-        window.TTS.contents[currentButtonNo] = currentContent;
-        window.TTS.contents[currentButtonNo] = currentContent;
-    }
-    if(!window.TTS.hasOwnProperty('ttsSettings')){
-        window.TTS.ttsSettings = settings
-    }
-
-</script>
-<?php
-});
+    // init button scripts
+    do_action('tts_enqueue_button_scripts' , $content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon);
 
     return apply_filters( 'tta__listening_button', $button );
 }
 
+
+add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 8);
+
+/**
+ * Enqueue button scripts
+ */
+function tts_enqueue_button_scripts ($content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon) {
+        // enqueue footer stript
+    add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon) { 
+    ?>
+    <!-- write your script to the head section  -->
+    <script>
+        var ttsCurrentButtonNo = <?php echo $btn_no; ?>;
+        var ttsCurrentContent = "<?php echo $content; ?>";
+        var ttsListening = <?php echo $listening; ?>;
+        var ttsCSSClass = "<?php echo $class; ?>";
+        var ttsBtnStyle = "<?php echo $btn_style; ?>";
+        var ttsTextArr = <?php echo json_encode($text_arr); ?>;
+        var ttsCustomCSS = "<?php echo $custom_css; ?>";
+        var ttsShouldDisplayIcon = "<?php echo $should_display_icon; ?>";
+        var ttsSettings = {
+            listening : ttsListening, 
+            cssClass : ttsCSSClass , 
+            btnStyle : ttsBtnStyle, 
+            textArr : ttsTextArr, 
+            customCSS : ttsCustomCSS, 
+            shouldDisplayIcon : ttsShouldDisplayIcon
+        };
+
+
+        if(window.hasOwnProperty('TTS')){ // add content if a page have multiple button
+            var prevContent = window.TTS.contents[ttsCurrentButtonNo-1]
+            if(prevContent !== ttsCurrentContent){ // don't repeat same content
+                window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
+            }
+            
+        }else{ // add content for the if a page have one button
+            window.TTS = {}
+            window.TTS.contents = {}
+            window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
+        }
+
+        // add settings
+        if(!window.TTS.hasOwnProperty('settings')){
+            window.TTS.settings = ttsSettings
+        }
+
+    </script>
+<?php
+});
+}
 
 
 
