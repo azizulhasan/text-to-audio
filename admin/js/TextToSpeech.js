@@ -28,13 +28,13 @@ export default class TextToSpeech {
     splittedSentances = ''
     isCanceled = false
     shouldCancelTimer = null
-    constructor(buttonId, content, button, TTS = window.TTS) {
+    constructor(buttonId, content = '', button = null, TTS = window.TTS) {
         this.TTS = TTS
-        this.content = content
+        this.content = content ? content : window.TTS.contents[buttonId]
         this.splittedSentances = splitSentences(content)
         this.buttonId = buttonId
         this.buttonTextArr = this.TTS.settings.textArr
-        this.speakButton = button
+        this.speakButton = button ? button : document.getElementById(buttonId)
         this.ttsListeningSettings = this.TTS.settings.listening
         this.speech = new Speech()
     }

@@ -102,7 +102,7 @@ class TTA_Admin {
     }
 
     public function load_script_as_tag($tag, $handle, $src) {
-        if(!in_array($handle, ['text-to-audio-button',])) {
+        if(!in_array($handle, ['text-to-audio-button', 'TextToSpeech'])) {
             return $tag;
         }
 
@@ -183,11 +183,13 @@ class TTA_Admin {
         
         
         if(is_pro_license_active()){
-            wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/text-to-audio-button.js', array('wp-hooks', 'wp-shortcode', 'text-to-audio-dashboard-pro'), $this->version, true);
+            wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/TextToSpeech.js', array('wp-hooks',), $this->version, true);
 
                  
-           wp_enqueue_script('text-to-audio-dashboard-ui', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-dashboard-ui.min.js', array('text-to-audio-button'), $this->version, true);
+            wp_enqueue_script('text-to-audio-dashboard-ui', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-dashboard-ui.min.js', array('TextToSpeech'), $this->version, true);
             wp_localize_script('text-to-audio-dashboard-ui', 'tta_obj', $this->localize_data);
+            wp_localize_script('TextToSpeech', 'ttsObj', $this->localize_data);
+
 
         }else{
             wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/text-to-audio-button.js', array('wp-hooks', 'wp-shortcode'), $this->version, true);

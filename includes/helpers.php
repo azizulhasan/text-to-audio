@@ -154,12 +154,12 @@ function tta_get_button_content($atts, $is_block = false) {
 
     // Custom class to button.
     $class = (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
-    $button = "<div id='tts-pro-play-button'></div><tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
+    $button = "<tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
 
     // init button scripts
     do_action('tts_enqueue_button_scripts' , $content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon);
 
-    return apply_filters( 'tta__listening_button', $button );
+    return apply_filters( 'tts__listening_button', $button, $btn_no, $class );
 }
 
 
