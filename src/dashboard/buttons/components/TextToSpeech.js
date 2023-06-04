@@ -3,7 +3,7 @@ import { FaRegPauseCircle, FaRegPlayCircle } from "react-icons/fa";
 import { BsSoundwave } from "react-icons/bs";
 import { CiSettings } from "react-icons/ci";
 import { IoCloseOutline, IoSpeedometerOutline } from "react-icons/io5";
-import { MdOutlineRecordVoiceOver } from "react-icons/md";
+import { MdOutlineRecordVoiceOver, MdOutlineReplay } from "react-icons/md";
 // Load css
 import '../assets/css/buttons.css'
 
@@ -26,8 +26,9 @@ const TextToSpeech = ({ buttonId, button }) => {
 
     };
 
-    const handleSecondPlayerClick = () => {
+    const handleSecondPlayerClick = (e) => {
         setIsPlaying(!isPlaying);
+        callTextToSpeech(e)
     };
 
     const handleSetting = () => {
@@ -45,6 +46,8 @@ const TextToSpeech = ({ buttonId, button }) => {
     };
 
     const callTextToSpeech = (e) => {
+        e.preventDefault();
+        console.log(speech)
         let contents = window.TTS.contents;
         TextToSpeechClass = window.TextToSpeech;
         if (speech != null && speech.listenStatus == 'listen') {
@@ -64,7 +67,8 @@ const TextToSpeech = ({ buttonId, button }) => {
         }
     }
     return (
-        <div className="bg-white">
+        <div className="bg-white" >
+
             {/* First player */}
             {isFirstPlayerPlay && (
                 <div className="player border shadow-custom bg-white mx-auto d-flex justify-content-between px-3 align-items-center position-relative">
@@ -73,11 +77,13 @@ const TextToSpeech = ({ buttonId, button }) => {
                             }`}
                         style={{ height: "55px" }}
                     >
+
                         <div className="position-relative">
                             <FaRegPlayCircle
                                 className="fs-3"
                                 onClick={handleFirstPlayerClick}
                             />
+                            {/* <MdOutlineReplay /> */}
                             {isPlaying && (
                                 <div
                                     className="position-absolute top-0 start-0 translate-middle spinner-border text-primary"

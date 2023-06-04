@@ -135,6 +135,22 @@ export default class TextToSpeech {
 
         throw new Error(notice);
     }
+
+    displayButtonText(listenStatus) {
+        if (!ttsObj.is_pro_license_active) {
+            if ('listent' === listenStatus) {
+                this.speakButton.innerHTML = this.replayButtonContent();
+                this.speakButton.setAttribute('title', 'Text To Audio : ' + this.replayButtonText());
+            } else if ('pause' === listenStatus) {
+                this.speakButton.innerHTML = this.pauseButtonContent();
+                this.speakButton.setAttribute('title', 'Text To Audio : ' + this.pauseButtonText());
+            } else if ('resume' === listenStatus) {
+                this.speakButton.innerHTML = this.resumeButtonContent();
+                this.speakButton.setAttribute('title', 'Text To Audio : ' + this.resumeButtonText());
+            }
+        }
+    }
+
     speak(speech, content = this.content) {
         if (!this.speech.hasBrowserSupport()) {
             this.displayApiMissing("tta__listent_content_" + this.buttonId)
@@ -182,9 +198,8 @@ export default class TextToSpeech {
             .then(data => {
                 if (!this.speech.speaking()) {
                     console.log('End utterance ' + this.speech.speaking());
-                    this.speakButton.innerHTML = this.replayButtonContent();
-                    this.speakButton.setAttribute('title', 'Text To Audio : ' + this.replayButtonText());
                     this.listenStatus = 'listen';
+                    this.displayButtonText(this.listenStatus)
 
                     // set up initial content to replacy.
                     this.content = window.ttsContent;
@@ -202,10 +217,8 @@ export default class TextToSpeech {
                 console.error("An error occurred :", e);
             });
 
-
-        this.speakButton.innerHTML = this.pauseButtonContent();
-        this.speakButton.setAttribute('title', 'Text To Audio : ' + this.pauseButtonText());
         this.listenStatus = 'pause';
+        this.displayButtonText(this.listenStatus)
         if (!this.browser.isAndroid()) {
             // this.timer = setTimeout(function pauseResumeTimer() {
             //     speech.pause();
@@ -243,9 +256,8 @@ export default class TextToSpeech {
         this.splittedSentances = this.splittedSentances.slice(currentIndex)
         this.content = this.splittedSentances.join(' ')
 
-        this.speakButton.innerHTML = this.resumeButtonContent();
-        this.speakButton.setAttribute('title', 'Text To Audio : ' + this.resumeButtonText());
         this.listenStatus = 'resume';
+        this.displayButtonText(this.listenStatus)
         if (!this.browser.isAndroid()) {
             clearTimeout(this.timer);
         }
@@ -263,9 +275,9 @@ export default class TextToSpeech {
             clearTimeout(this.shouldCancelTimer)
         }
 
-        this.speakButton.innerHTML = this.pauseButtonContent();
         this.listenStatus = 'pause';
-        this.speakButton.setAttribute('title', 'Text To Audio : ' + this.pauseButtonText());
+        this.displayButtonText(this.listenStatus)
+
         if (!this.browser.isAndroid()) {
             // this.timer = setTimeout(function pauseResumeTimer() {
             //     speech.pause();
