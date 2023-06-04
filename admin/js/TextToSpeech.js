@@ -343,5 +343,6 @@ export default class TextToSpeech {
             }
         });
     }
-
 }
+
+window.TextToSpeech = TextToSpeech;

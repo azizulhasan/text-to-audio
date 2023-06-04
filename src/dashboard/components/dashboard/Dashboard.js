@@ -1,12 +1,14 @@
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState, } from 'react';
 import {
 	BrowserRouter as Router,
 	HashRouter,
 	Routes,
 	Route,
+
 } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import { Link } from 'react-router-dom';
+
 
 import 'react-toastify/dist/ReactToastify.css';
 /**
@@ -39,8 +41,8 @@ function Dashboard() {
 	const [isProVersion, setIsProVersion] = useState(false)
 
 	useEffect(() => {
-		let pro = wp.hooks.applyFilters('tta_has_pro', false);
-		let licenseCheck = wp.hooks.applyFilters('tta_is_pro_license_active', false);
+		let pro = wp.hooks.applyFilters('tts_is_pro_active', false);
+		let licenseCheck = wp.hooks.applyFilters('tts_is_pro_license_active', false);
 		setIsProVersion(isPro(pro, licenseCheck))
 	}, [])
 

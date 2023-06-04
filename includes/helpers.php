@@ -154,7 +154,7 @@ function tta_get_button_content($atts, $is_block = false) {
 
     // Custom class to button.
     $class = (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
-    $button = "<tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
+    $button = "<div id='tts-pro-play-button'></div><tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
 
     // init button scripts
     do_action('tts_enqueue_button_scripts' , $content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon);
@@ -307,27 +307,24 @@ function add_listen_button( $content ) {
     return $button.$content;
 }
 
-function has_pro() {
-
-    if(!function_exists('is_plugin_active') ){
-        include_once ABSPATH . 'wp-admin/includes/plugin.php';
-    }
-
-    if(is_plugin_active('text-to-audio-pro/text-to-audio-pro.php')){
-        return true;
-    }
-
-    return false;
-}
-
+/**
+ * Is plugin active
+ */
 function is_pro_active() {
 
     if(!function_exists('is_plugin_active') ){
         include_once ABSPATH . 'wp-admin/includes/plugin.php';
     }
+    
+    return is_plugin_active('text-to-audio-pro/text-to-audio-pro.php');
+}
 
-    if(is_plugin_active('text-to-audio-pro/text-to-audio-pro.php')){
-        return apply_filters('tta_pro_is_license_active', false);
+/**
+ * Is pro license active
+ */
+function is_pro_license_active() {
+    if(is_pro_active()){
+        return apply_filters('tts_is_pro_license_active', true);
     }
 
     return false;

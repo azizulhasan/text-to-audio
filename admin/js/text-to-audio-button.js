@@ -1,11 +1,15 @@
 import TextToSpeech from "./TextToSpeech.js";
+import { getButtonContent } from "./tts/utilities.js";
+
 // Create a class for the element
 class TTSPlayButton extends HTMLElement {
     speech = null
+    isProLicenseActive = false
+
     constructor() {
         // Always call super first in constructor
         super();
-
+        this.isProLicenseActive = window.ttsObj.is_pro_license_active;
         // Create a shadow root
         const shadow = this.attachShadow({ mode: 'open' });
         setTimeout(() => {
@@ -13,12 +17,13 @@ class TTSPlayButton extends HTMLElement {
             let settings = window.TTS.settings;
             let buttonIds = Object.keys(contents)
             // Render all buttons in page have.
-            for (let buttonNo of buttonIds) {
-                if (buttonNo == this.getAttribute('data-id')) {
+            for (let buttonId of buttonIds) {
+                if (buttonId == this.getAttribute('data-id')) {
                     // Create div
                     const wrapper = document.createElement('div');
                     wrapper.setAttribute('class', 'wrapper');
-                    wrapper.innerHTML = `<button id="tts__listent_content_${buttonNo}" class="tts__listent_content  ${settings.cssClass}" type="button" title="Text To Audio:  Tap to listen post."><div class="tts_button"><span class="dashicons dashicons-controls-play"></span><span>Listen<span></div> </button>`
+
+                    wrapper.innerHTML = getButtonContent(buttonId, settings.cssClass, this.isProLicenseActive)
 
                     this.addEventListener('click', function (e) {
                         let button = [...wrapper.children][0]
@@ -26,7 +31,7 @@ class TTSPlayButton extends HTMLElement {
                             this.speech = null
                         }
                         if (this.speech === null) {
-                            this.speech = new TextToSpeech(buttonNo, contents[buttonNo], button, window.TTS)
+                            this.speech = new TextToSpeech(buttonId, contents[buttonId], button, window.TTS)
                             this.speech._init()
                         } else {
 
@@ -43,10 +48,10 @@ class TTSPlayButton extends HTMLElement {
 
                     // CSS style for thsi button
                     style.textContent = `
-                        #tts__listent_content_${buttonNo}.tts__listent_content{ ${settings.btnStyle}height:30px; }
-                        #tts__listent_content_${buttonNo}.tts__listent_content:hover{ ${settings.btnStyle}height:30px; }
-                        // #tts__listent_content_${buttonNo}.tts__listent_content .text-position{ position: absolute;padding-top: 2px; }
-                        // #tts__listent_content_${buttonNo}.tts__listent_content .dashicons{ display:${settings.shouldDisplayIcon};line-height:1;font-size:25px;height:25px;width:25px; }
+                        #tts__listent_content_${buttonId}.tts__listent_content{ ${settings.btnStyle}height:30px; }
+                        #tts__listent_content_${buttonId}.tts__listent_content:hover{ ${settings.btnStyle}height:30px; }
+                        // #tts__listent_content_${buttonId}.tts__listent_content .text-position{ position: absolute;padding-top: 2px; }
+                        // #tts__listent_content_${buttonId}.tts__listent_content .dashicons{ display:${settings.shouldDisplayIcon};line-height:1;font-size:25px;height:25px;width:25px; }
                         ${settings.customCSS}
                     `;
 
@@ -56,12 +61,9 @@ class TTSPlayButton extends HTMLElement {
 
                     break;
                 }
+            } // end loop
 
-            }
-
-        }, 900)
-
-
+        }, 900) // end setTimeout
     }
 }
 

@@ -27,3 +27,8 @@ export const splitSentences = function splitSentences(text = '') {
         return trim(sentence);
     }).filter(Boolean);
 };
+
+
+export const getButtonContent = (buttonId, cssClass, isProLicenseActive) => {
+    return wp.hooks.applyFilters('tts_play_button_content', `<button id="tts__listent_content_${buttonId}" class="tts__listent_content  ${cssClass}" type="button" title="Text To Audio:  Tap to listen post."><div class="tts_button"><span class="dashicons dashicons-controls-play"></span><span>Listen<span></div> </button>`, isProLicenseActive)
+}
