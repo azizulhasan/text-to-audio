@@ -193,9 +193,10 @@ class TTA_Admin {
 
         }else{
             wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/text-to-audio-button.js', array('wp-hooks', 'wp-shortcode'), $this->version, true);
+            wp_localize_script('text-to-audio-button', 'ttsObj', $this->localize_data );
+
         }
 
-        wp_localize_script('text-to-audio-button', 'ttsObj', $this->localize_data );
 
 
 

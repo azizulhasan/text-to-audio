@@ -8,7 +8,7 @@ import { MdOutlineRecordVoiceOver, MdOutlineReplay } from "react-icons/md";
 import '../assets/css/buttons.css'
 
 let speech = null
-let TextToSpeechClass = null;
+let TextToSpeechPro = null;
 const TextToSpeech = ({ buttonId, button }) => {
     const [isFirstPlayerPlay, setFirstPlayerPlay] = useState(true);
     const [isSecondPlayerPlay, setSecondPlayerPlay] = useState(false);
@@ -47,12 +47,12 @@ const TextToSpeech = ({ buttonId, button }) => {
         e.preventDefault()
 
         let contents = window.TTS.contents;
-        TextToSpeechClass = window.TextToSpeech;
+        TextToSpeechPro = window.TextToSpeechPro;
         if (speech != null && speech.listenStatus == 'listen') {
             speech = null
         }
         if (speech === null) {
-            speech = new TextToSpeechClass(buttonId, contents[buttonId], button, window.TTS)
+            speech = new TextToSpeechPro(buttonId, contents[buttonId], button, window.TTS)
             speech._init(callBackAfterEnd)
             setFirstPlayerPlay(false);
             setSecondPlayerPlay(true);
