@@ -28,6 +28,7 @@ export default class TextToSpeech {
     splittedSentances = ''
     isCanceled = false
     shouldCancelTimer = null
+    callBackAfterEnd = null
     constructor(buttonId, content = '', button = null, TTS = window.TTS) {
         this.TTS = TTS
         this.content = content ? content : window.TTS.contents[buttonId]
@@ -207,6 +208,8 @@ export default class TextToSpeech {
                     speech.cancel();
                 }
                 console.log("Success !", data);
+
+                if (this.callBackAfterEnd) this.callBackAfterEnd()
                 if (!this.browser.isAndroid()) {
                     clearTimeout(this.timer);
                     this.timer = null
@@ -293,7 +296,13 @@ export default class TextToSpeech {
         }
     }
 
-    _init() { // init speaking
+    /**
+     * Callback function will need for pro version.
+     * @param {*} callBackAfterEnd 
+     * @returns 
+     */
+    _init(callBackAfterEnd = null) { // init speaking, 
+        this.callBackAfterEnd = callBackAfterEnd
         if (this.ttsListeningSettings === undefined) return;
         this.speech
             .init({

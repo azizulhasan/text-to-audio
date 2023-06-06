@@ -17,20 +17,6 @@ const TextToSpeech = ({ buttonId, button }) => {
     const [isSelectSpeed, setIsSelectedSpeed] = useState(false);
     const [isSelectVoice, setIsSelectedVoice] = useState(false);
 
-    const handleFirstPlayerClick = (e) => {
-        e.preventDefault()
-        setFirstPlayerPlay(false);
-        setSecondPlayerPlay(true);
-
-        callTextToSpeech(e)
-
-    };
-
-    const handleSecondPlayerClick = (e) => {
-        setIsPlaying(!isPlaying);
-        callTextToSpeech(e)
-    };
-
     const handleSetting = () => {
         setSettingOpen(!isSettingOpen);
     };
@@ -45,9 +31,21 @@ const TextToSpeech = ({ buttonId, button }) => {
         setIsSelectedSpeed(false); // Hide the speed button
     };
 
-    const callTextToSpeech = (e) => {
-        e.preventDefault();
-        console.log(speech)
+
+    const callBackAfterEnd = () => {
+        speech = speech.getData()
+        console.log(speech.listenStatus)
+    }
+
+    // TODO need to create a TextToSpeechPro class on pro plugin
+    // TODO modiy TextToSpeech functionality by action and filter hook
+    // TODO apply google text to speech for pro version.
+
+
+
+    const handlePlayButtonClick = (e) => {
+        e.preventDefault()
+
         let contents = window.TTS.contents;
         TextToSpeechClass = window.TextToSpeech;
         if (speech != null && speech.listenStatus == 'listen') {
@@ -55,12 +53,17 @@ const TextToSpeech = ({ buttonId, button }) => {
         }
         if (speech === null) {
             speech = new TextToSpeechClass(buttonId, contents[buttonId], button, window.TTS)
-            speech._init()
+            speech._init(callBackAfterEnd)
+            setFirstPlayerPlay(false);
+            setSecondPlayerPlay(true);
         } else {
 
             speech = speech.getData()
             if (speech.listenStatus == 'pause') {
                 speech.pause(speech.speech)
+                setIsPlaying(!isPlaying);
+                // setFirstPlayerPlay(true);
+                // setSecondPlayerPlay(false);
             } else if (speech.listenStatus == 'resume') {
                 speech.resume(speech.speech)
             }
@@ -81,7 +84,7 @@ const TextToSpeech = ({ buttonId, button }) => {
                         <div className="position-relative">
                             <FaRegPlayCircle
                                 className="fs-3"
-                                onClick={handleFirstPlayerClick}
+                                onClick={handlePlayButtonClick}
                             />
                             {/* <MdOutlineReplay /> */}
                             {isPlaying && (
@@ -118,12 +121,12 @@ const TextToSpeech = ({ buttonId, button }) => {
                                 {isPlaying ? (
                                     <FaRegPlayCircle
                                         className="fs-3"
-                                        onClick={handleSecondPlayerClick}
+                                        onClick={handlePlayButtonClick}
                                     />
                                 ) : (
                                     <FaRegPauseCircle
                                         className="fs-3"
-                                        onClick={handleSecondPlayerClick}
+                                        onClick={handlePlayButtonClick}
                                     />
                                 )}
                             </div>
