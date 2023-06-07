@@ -136,7 +136,10 @@ export default class TextToSpeech {
 
         throw new Error(notice);
     }
-
+    /**
+     * Don't display this text in pro version.
+     * @param {*} listenStatus 
+     */
     displayButtonText(listenStatus) {
         if (!ttsObj.is_pro_license_active) {
             if ('listent' === listenStatus) {
@@ -154,7 +157,7 @@ export default class TextToSpeech {
 
     speak(speech, content = this.content) {
         if (!this.speech.hasBrowserSupport()) {
-            this.displayApiMissing("tta__listent_content_" + this.buttonId)
+            this.displayApiMissing("tts__listent_content_" + this.buttonId)
             return;
         }
 
