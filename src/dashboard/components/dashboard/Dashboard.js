@@ -7,14 +7,14 @@ import {
 
 } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
-import { Link } from 'react-router-dom';
 
 
-import 'react-toastify/dist/ReactToastify.css';
 /**
  * Scripts
  */
 import './assets/css/styles.css';
+import 'react-toastify/dist/ReactToastify.css';
+
 import './assets/js/scripts.js';
 import { addScripts, getComponentName, isPro } from '../context/utilities';
 

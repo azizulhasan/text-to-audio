@@ -2,8 +2,8 @@ import React from "react";
 /**
  * Stypes and scripts
  */
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.js";
+// import "bootstrap/dist/css/bootstrap.min.css";
+// import "bootstrap/dist/js/bootstrap.bundle.js";
 
 
 /**
