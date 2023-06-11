@@ -30,5 +30,7 @@ export const splitSentences = function splitSentences(text = '') {
 
 
 export const getButtonContent = (buttonId, cssClass, isProLicenseActive) => {
-    return wp.hooks.applyFilters('tts__listening_button', `<button id="tts__listent_content_${buttonId}" class="tts__listent_content  ${cssClass}" type="button" title="Text To Audio:  Tap to listen post."><div class="tts_button"><span class="dashicons dashicons-controls-play"></span><span>Listen<span></div> </button>`, buttonId)
+    // return wp.hooks.applyFilters('tts__listening_button', `<button id="tts__listent_content_${buttonId}" class="tts__listent_content  ${cssClass}" type="button" title="Text To Audio:  Tap to listen post."><div class="tts_button"><span class="dashicons dashicons-controls-play"></span><span>Listen<span></div> </button>`, buttonId)
+
+    return `<button id="tts__listent_content_${buttonId}" class="tts__listent_content  ${cssClass}" type="button" title="Text To Audio:  Tap to listen post."><div class="tts_button"><span class="dashicons dashicons-controls-play"></span><span>Listen<span></div> </button>`;
 }

@@ -178,6 +178,7 @@ export default class TextToSpeech {
                     onstart: (utterance) => {
                         console.log("Start utterance");
                         this.utterence = utterance
+                        // this.higlightText(utterance.currentTarget.text)
                     },
                     onend: (utterance) => {
                         console.log('End utterance')

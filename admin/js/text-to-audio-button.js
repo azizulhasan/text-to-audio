@@ -5,11 +5,11 @@ import { getButtonContent } from "./tts/utilities.js";
 class TTSPlayButton extends HTMLElement {
     speech = null
     isProLicenseActive = false
-
     constructor() {
         // Always call super first in constructor
         super();
         this.isProLicenseActive = window.ttsObj.is_pro_license_active;
+
         // Create a shadow root
         const shadow = this.attachShadow({ mode: 'open' });
         setTimeout(() => {
@@ -22,7 +22,6 @@ class TTSPlayButton extends HTMLElement {
                     // Create div
                     const wrapper = document.createElement('div');
                     wrapper.setAttribute('class', 'wrapper');
-
                     wrapper.innerHTML = getButtonContent(buttonId, settings.cssClass, this.isProLicenseActive)
 
                     this.addEventListener('click', function (e) {
