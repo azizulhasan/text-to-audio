@@ -360,10 +360,12 @@ export default class TextToSpeech {
             // it could be either hidden or visible
             if ('hidden' === document.visibilityState && this.listenStatus === 'pause') {
                 this.pause(speech)
+                if (this.callBackAfterEnd) this.callBackAfterEnd()
             }
 
             if ('visible' === document.visibilityState && this.listenStatus === 'resume') {
                 this.resume(speech)
+                if (this.callBackAfterEnd) this.callBackAfterEnd()
             }
         });
     }
