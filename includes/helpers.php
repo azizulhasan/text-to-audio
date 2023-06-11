@@ -273,11 +273,8 @@ function add_listen_button( $content ) {
     $button = ob_get_contents();
     ob_end_clean();
 
-    // $data = apply_filters('tts_button_with_content', $button.$content, $button, $content);
-    
-   \error_log(print_r($button.$content, true));
+    return apply_filters('tts_button_with_content', $button.$content, $button, $content);
 
-   return $button.$content;
 }
 
 /**

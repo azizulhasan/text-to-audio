@@ -29,6 +29,7 @@ export default class TextToSpeech {
     isCanceled = false
     shouldCancelTimer = null
     callBackAfterEnd = null
+    splitSentences = null
     constructor(buttonId, content = '', button = null, TTS = window.TTS) {
         this.TTS = TTS
         this.content = content ? content : window.TTS.contents[buttonId]
@@ -38,6 +39,8 @@ export default class TextToSpeech {
         this.speakButton = button ? button : document.getElementById(buttonId)
         this.ttsListeningSettings = this.TTS.settings.listening
         this.speech = new Speech()
+        this.splitSentences = splitSentences
+
     }
 
     getData() {
@@ -179,7 +182,7 @@ export default class TextToSpeech {
                     onstart: (utterance) => {
                         console.log("Start utterance");
                         this.utterence = utterance
-                        // this.higlightText(utterance.currentTarget.text)
+                        wp.hooks.doAction('tts_high_light_text', utterance.currentTarget.text, this.buttonId, splitSentences)
                     },
                     onend: (utterance) => {
                         console.log('End utterance')
