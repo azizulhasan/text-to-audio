@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-// Load css
-// import '../assets/css/buttons.css'
 
 //TODO : Need to apply onClick function to all icons and dynamic  custom class on demand
 import { Close, Play, Replay, Settings, SoundWave, Speed, VoiceOver, Pause } from "../assets/icons/TTSIcons";
