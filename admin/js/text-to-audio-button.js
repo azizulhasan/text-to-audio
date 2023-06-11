@@ -30,10 +30,11 @@ class TTSPlayButton extends HTMLElement {
                             this.speech = null
                         }
                         if (this.speech === null) {
-                            this.speech = new TextToSpeech(buttonId, contents[buttonId], button, window.TTS)
-                            this.speech._init()
+                            let speech = new TextToSpeech(buttonId, contents[buttonId], button, window.TTS)
+                            speech._init()
+                            this.speech = speech.getData()
+                            this.speech.callBackAfterEnd = this.callBackAfterEnd
                         } else {
-
                             this.speech = this.speech.getData()
                             if (this.speech.listenStatus == 'pause') {
                                 this.speech.pause(this.speech.speech)
@@ -63,6 +64,12 @@ class TTSPlayButton extends HTMLElement {
             } // end loop
 
         }, 900) // end setTimeout
+    }
+
+    callBackAfterEnd() {
+        if (this.listenStatus === 'listen') {
+            this.displayButtonText()
+        }
     }
 }
 
