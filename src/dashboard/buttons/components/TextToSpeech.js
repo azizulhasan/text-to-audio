@@ -50,6 +50,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
             speech = null
             setListenStatus('listen')
         }
+
         if (speech === null) {
             speech = new TextToSpeechPro(buttonId, contents[buttonId], button, window.TTS)
             speech._init(callBackAfterEnd)
