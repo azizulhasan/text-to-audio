@@ -43,8 +43,10 @@ export default class TextToSpeech {
 
     }
 
-    getData() {
-        window.TextToSpeech = this
+    getData(shouldAsingThis = true) {
+        if (shouldAsingThis) {
+            window.TextToSpeech = this
+        }
         return this;
     }
 
@@ -377,3 +379,59 @@ export default class TextToSpeech {
 }
 
 window.TextToSpeech = TextToSpeech;
+
+
+
+let timerDashboar;
+timerDashboar = setTimeout(() => {
+    if (window.hasOwnProperty('ttsObj') && ttsObj.is_logged_in && !window.ttsObj.is_pro_license_active) {
+        declare_init_content()
+        clearTimeout(timerDashboar)
+        timerDashboar = null
+    }
+}, 1000)
+
+function declare_init_content() {
+    let ttsSettings = {
+        listening: {
+            tta__listening_lang: "en-US",
+            tta__listening_voice: "Microsoft David - English (United States)",
+            tta__listening_pitch: "1",
+            tta__listening_rate: "1",
+            tta__listening_volume: "1"
+        },
+        cssClass: "",
+        btnStyle: "background-color:#ee6d6d;color:#ffffff;width:100%;border:0;display:block;border-radius:4px;text-decoration:none;cursor:pointer;",
+        textArr: {
+            listen_text: "Listen",
+            pause_text: "Pause",
+            resume_text: "Resume",
+            replay_text: "Replay",
+            start_text: "Start",
+            stop_text: "Start"
+        },
+        customCSS: "",
+        shouldDisplayIcon: "inline-block"
+    }
+
+    var ttsCurrentButtonNo = 1;
+    var ttsCurrentContent = '';
+    if (window.hasOwnProperty('TTS')) { // add content if a page have multiple button
+        var prevContent = window.TTS.contents[ttsCurrentButtonNo - 1]
+        if (prevContent !== ttsCurrentContent) { // don't repeat same content
+            window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
+        }
+
+    } else { // add content for the if a page have one button
+        window.TTS = {}
+        window.TTS.contents = {}
+        window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
+    }
+
+    // add settings
+    if (!window.TTS.hasOwnProperty('settings')) {
+        window.TTS.settings = ttsSettings
+    }
+}
+
+

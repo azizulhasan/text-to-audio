@@ -43,8 +43,12 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
     // TODO apply google text to speech for pro version.
     const handlePlayButtonClick = (e) => {
         e.preventDefault()
-
         let contents = window.TTS.contents;
+        // in the customization menu of dhashboard set initail text.
+        if (document.getElementById('tta__demo_text_for_play')) {
+            let text = document.getElementById('tta__demo_text_for_play').value;
+            contents[buttonId] = text
+        }
         TextToSpeechPro = window.TextToSpeechPro;
         if (speech != null && speech.listenStatus == 'listen') {
             speech = null

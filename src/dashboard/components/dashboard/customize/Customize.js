@@ -3,6 +3,8 @@ import { Col, Container, Row, Form, FloatingLabel } from 'react-bootstrap';
 import toast from '../../context/Notify';
 import { copyToClipBoard, postWithoutImage } from '../../context/utilities';
 import TextToSpeech from '../../../buttons/components/TextToSpeech';
+let speech = null;
+let TextToSpeechFree = null;
 export default function Customize() {
 	const [listeningBtnStyle, setListeningStyle] = useState({
 		backgroundColor: 'rgb(226, 222, 232)',
@@ -163,25 +165,29 @@ export default function Customize() {
 		let text = document.getElementById('tta__demo_text_for_play').value;
 		let button = document.getElementById('tta__listen_content');
 
-
-		// if (text === '') {
-		// 	toast('Please write/say something into textarea.');
-		// 	return;
-		// }
-		// setSpeakingText(text);
-		// ttaListenCotentInFrontend(
-		// 	text,
-		// 	'tta__listen_content',
-		// 	listeningSettings,
-		// );
-
-		window.TTS.contents[1] = text
-		setTimeout(() => {
-			console.log(window.TTS)
-			let TextToSpeechFree = window.TextToSpeech;
-			let speech = new TextToSpeechFree(1, text, button, window.TTS)
+		// setTimeout(() => {
+		if (speech != null && speech.listenStatus == 'listen') {
+			speech = null
+			TextToSpeechFree = null
+		}
+		if (speech === null) {
+			window.TTS.contents[1] = text
+			console.log(TextToSpeechFree)
+			console.log(window.TextToSpeech)
+			TextToSpeechFree = window.TextToSpeech;
+			speech = new TextToSpeechFree(1, text, button, window.TTS)
 			speech._init()
-		}, 10)
+			speech = speech.getData(false)
+		} else {
+			speech = speech.getData(false)
+			if (speech.listenStatus == 'pause') {
+				speech.pause(speech.speech)
+			} else if (speech.listenStatus == 'resume') {
+				speech.resume(speech.speech)
+			}
+		}
+
+		// }, 10)
 	};
 
 
