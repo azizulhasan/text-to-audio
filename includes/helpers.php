@@ -115,8 +115,7 @@ function tta_get_button_content($atts, $is_block = false) {
 
     $display_icon = isset( $settings['tta__settings_display_btn_icon'] ) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
 
-    static $btn_no = 0;
-    $btn_no++;
+
 
     $sentence_delimiter = isset($recording['tta__sentence_delimiter']) ? $recording['tta__sentence_delimiter'] : '. ';
     
@@ -155,7 +154,8 @@ function tta_get_button_content($atts, $is_block = false) {
 
     // Custom class to button.
     $class = (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
-
+    static $btn_no = 0;
+    $btn_no++;
     // Listening button.
     $button = '<div class="tta_notice"></div><button id="tta__listent_content_' . $btn_no . '" class="tta__listent_content ' . esc_attr($class) . '" type="button"  title="Text To Audio:  Tap to listen post.">' . $speakIcon . ' </button>
 <style>
@@ -165,15 +165,33 @@ function tta_get_button_content($atts, $is_block = false) {
 #tta__listent_content_' . $btn_no .'.tta__listent_content .dashicons{ display: ' . esc_attr( $display_icon ) . ';line-height:1;font-size:25px;height:25px;width:25px; }
 ' . $custom_css . '
 </style>
-<script>
-    window.ttsContent = "'.$content.'"
-    window.buttonId = '.$btn_no.'
-    window.ttsListeningSettings = '.$listening.'
-</script>';
+';
+
+    // add button data to footer
+    do_action('tts_enqueue_button_scripts', $content, $btn_no, $listening );
 
     return apply_filters( 'tta__listening_button', $button );
 }
 
+
+add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 3);
+
+/**
+ * Enqueue button scripts
+ */
+function tts_enqueue_button_scripts ($content, $btn_no, $listening) {
+        // enqueue footer stript
+    add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $listening ) { 
+    ?>
+    <!-- write your script to the head section  -->
+    <script>
+    window.ttsContent = <?php echo '"'.$content.'"'; ?>;
+    window.buttonId = <?php echo $btn_no; ?>;
+    window.ttsListeningSettings = <?php echo $listening; ?>;
+    </script>
+<?php
+});
+}
 
 
 /**
