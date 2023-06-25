@@ -106,9 +106,6 @@ class TTA_Admin {
             'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
             'buttonTextArr' => apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr' ) ),
         ]);
-
-        
-
     }
 
     public function engueue_block_scripts() {
