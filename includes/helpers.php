@@ -215,41 +215,10 @@ function get_button_text( $atts ) {
     return apply_filters('tta__button_text_arr', get_option( 'tta__button_text_arr' ) );
 
 }
-/**
- * Admin notice
- *
- * When browser doesn'nt support SpeechRecognition/speechSynthesis.
- *
- * @since 1.0.0
- */
-function tta_api_missing() {
-    $browser = get_option('tta_current_browser_info', []);
 
-    $apis = '';
 
-    if (isset($browser['SpeechRecognition']) && 'undefined' == $browser['SpeechRecognition']) {
-        $apis .= 'SpeechRecognition';
-    }
-    if (isset($browser['speechSynthesis']) && 'undefined' == $browser['speechSynthesis']) {
-        $apis .= $apis ? ', speechSynthesis' : 'speechSynthesis';
-    }
-    if ($apis) {
-        return sprintf(
-            /* translators: 1: Plugin name 2: SpeechRecognition  3: link to doc*/
-            esc_html__('%1$s Please enable %2$s. Click here to %3$s.', 'text-to-audio'),
-            "<strong>" . esc_html('Text To Audio:') . "</strong>",
-            "<strong>" . esc_html( $apis ) . "</strong>",
-            "<a href='https://wordpress.org/plugins/text-to-audio/#how%20to%20fix%20firefox%20%20browser%20issue%3F' target='_blank'>" . esc_html__('enable', 'text-to-audio') . "</a>"
-        );
-    }
-
-    return '';
-}
 
 $settings = (array) get_option( 'tta_settings_data');
-
-
-
 if( isset( $settings['tta__settings_enable_button_add'] ) &&  $settings['tta__settings_enable_button_add'] ) {
     add_filter( 'the_content', 'add_listen_button' );
 }
