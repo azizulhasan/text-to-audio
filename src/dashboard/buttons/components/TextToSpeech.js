@@ -20,7 +20,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
     const [decreamentDeadline, setDecreamentDeadline] = useState(0)
     const [isPaused, setIsPaused] = useState(false)
     const [isResumed, setIsResumed] = useState(false)
-
+    const [progressbarValue, setProgressbarValue] = useState(0)
 
     const handleSetting = (e) => {
         e.preventDefault()
@@ -124,6 +124,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
         let timeleft = 0;
         function updateIncreamentTime() {
             setIncreamentedTime(now)
+            setProgressbarProgress(now)
             timeleft = now + 1000
             if (document.getElementById('audio_time_start')) {
                 document.getElementById('audio_time_start').innerHTML = getFormattedTime(now).formatted;
@@ -142,6 +143,20 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
         // Run timer every second
         timer = setInterval(updateIncreamentTime, 1000);
         setInreamentInterval(timer)
+    }
+
+    const setProgressbarProgress = (now) => {
+        let time = window?.TTS.settings?.readingTime
+        let totalTime = 1000 * 60 * parseInt(time)
+        if (now) {
+            let progressbarPercent = getPercentage(now, totalTime)
+            setProgressbarValue(progressbarPercent)
+        }
+
+    }
+
+    const getPercentage = (x, y) => {
+        return Math.floor((x / y) * 100);
     }
 
     /**
@@ -302,7 +317,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                                                 >
                                                     <div
                                                         className="progress-bar bg-black"
-                                                        style={{ width: "25%", height: "4px" }}
+                                                        style={{ width: `${progressbarValue}%`, height: "4px" }}
                                                     />
                                                 </div>
                                                 <div className="audio-time-end" id="audio_time_end">00:00</div>
