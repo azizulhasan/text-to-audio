@@ -123,9 +123,9 @@ function tta_get_button_content($atts, $is_block = false) {
     $title = tta_should_add_dilimiter($title, $sentence_delimiter);
 
     $description = get_the_content();
-    $description = tta_clean_content($description);
+    $description_sanitized = tta_clean_content($description);
     $content     = apply_filters('tta__content_title', $title);
-    $content    .= apply_filters('tta__content_description', $description);
+    $content    .= apply_filters('tta__content_description', $description_sanitized, $description, get_the_ID() );
 
     // Button listen text.
     $text_arr = get_button_text( $atts );
@@ -169,8 +169,10 @@ add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 8);
  * Enqueue button scripts
  */
 function tts_enqueue_button_scripts ($content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon) {
-        // enqueue footer stript
-    add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon) { 
+    
+    $reading_time = apply_filters('tts_content_reading_time', 1, $content );
+    // enqueue footer stript
+    add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $reading_time) { 
     ?>
     <!-- write your script to the head section  -->
     <script>
@@ -182,13 +184,15 @@ function tts_enqueue_button_scripts ($content, $btn_no, $listening, $class, $btn
         var ttsTextArr = <?php echo json_encode($text_arr); ?>;
         var ttsCustomCSS = "<?php echo $custom_css; ?>";
         var ttsShouldDisplayIcon = "<?php echo $should_display_icon; ?>";
+        var readingTime = "<?php echo $reading_time; ?>";
         var ttsSettings = {
             listening : ttsListening, 
             cssClass : ttsCSSClass , 
             btnStyle : ttsBtnStyle, 
             textArr : ttsTextArr, 
             customCSS : ttsCustomCSS, 
-            shouldDisplayIcon : ttsShouldDisplayIcon
+            shouldDisplayIcon : ttsShouldDisplayIcon,
+            readingTime: readingTime,
         };
 
 

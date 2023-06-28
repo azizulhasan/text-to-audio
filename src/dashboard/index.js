@@ -17,15 +17,24 @@ if (app) {
 
 
 
-let buttons = [...document.querySelectorAll('.tts__listent_content')]
-if (buttons.length) {
-    buttons.map(button => {
-        let buttonId = button.getAttribute('data-id')
-        // button.attachShadow({ mode: 'open' });
-        return ReactDOM.render(
-            <TextToSpeech button={button} buttonId={buttonId} cssStyle={''} />,
-            button
-        )
+let timer = setTimeout(function loadProButton() {
+    timer = setTimeout(loadProButton, 1000)
+    if (window.hasOwnProperty('TTS')) {
+        clearTimeout(timer)
+        timer = null
 
-    })
-}
+
+        let buttons = [...document.querySelectorAll('.tts__listent_content')]
+        if (buttons.length) {
+            buttons.map(button => {
+                let buttonId = button.getAttribute('data-id')
+                // button.attachShadow({ mode: 'open' });
+                return ReactDOM.render(
+                    <TextToSpeech button={button} buttonId={buttonId} cssStyle={''} />,
+                    button
+                )
+
+            })
+        }
+    }
+}, 1000)

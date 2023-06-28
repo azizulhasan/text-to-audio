@@ -13,6 +13,14 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
     const [isSelectSpeed, setIsSelectedSpeed] = useState(false);
     const [isSelectVoice, setIsSelectedVoice] = useState(false);
     const [listenStatus, setListenStatus] = useState('listen')
+    const [decreamentInterval, setDecreamentInterval] = useState(null)
+    const [increamentInterval, setInreamentInterval] = useState(null)
+    const [increamentDeadline, setIncreamentDeadline] = useState(0)
+    const [increamentedTime, setIncreamentedTime] = useState(0)
+    const [decreamentDeadline, setDecreamentDeadline] = useState(0)
+    const [isPaused, setIsPaused] = useState(false)
+    const [isResumed, setIsResumed] = useState(false)
+
 
     const handleSetting = (e) => {
         e.preventDefault()
@@ -35,7 +43,6 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
      */
     const callBackAfterEnd = () => {
         speech = speech.getData()
-        console.log(speech.listenStatus)
         setListenStatus(speech.listenStatus)
     }
 
@@ -60,6 +67,8 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
             speech._init(callBackAfterEnd)
             setFirstPlayerPlay(false);
             setSecondPlayerPlay(true);
+            getIncreamentTime()
+            getDecreamentTime()
             setTimeout(() => {
                 speech = speech.getData()
                 setListenStatus(speech.listenStatus)
@@ -72,11 +81,16 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
             if (speech.listenStatus == 'pause') {
                 speech.pause(speech.speech)
                 setIsPlaying(!isPlaying);
+                clearInterval(decreamentInterval);
+                clearInterval(increamentInterval);
                 setTimeout(() => {
                     setListenStatus(speech.listenStatus)
                 }, 100)
             } else if (speech.listenStatus == 'resume') {
                 speech.resume(speech.speech)
+                let deadline = new Date(Date.parse(new Date()) + decreamentDeadline);
+                getDecreamentTime(deadline)
+                getIncreamentTime(increamentDeadline, increamentedTime)
                 setTimeout(() => {
                     setListenStatus(speech.listenStatus)
                 }, 100)
@@ -84,6 +98,145 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
         }
 
     }
+
+
+    /**
+     * 
+     * @param {*} time 
+     * @returns 
+     */
+    const getIncreamentTime = (increamentDeadline = null, increamentedTime = 0) => {
+        // The data/time we want to countdown to
+        let deadline;
+        if (!increamentDeadline) {
+            let readingTime = window?.TTS.settings?.readingTime
+            deadline = 1000 * 60 * parseInt(readingTime);
+            setIncreamentDeadline(deadline)
+
+        } else {
+            deadline = increamentDeadline
+        }
+        let t = increament_time_remaining(deadline)
+        setIncreamentDeadline(t.total)
+
+        let timer;
+        let now = increamentedTime;
+        let timeleft = 0;
+        function updateIncreamentTime() {
+            setIncreamentedTime(now)
+            timeleft = now + 1000
+            if (document.getElementById('audio_time_start')) {
+                document.getElementById('audio_time_start').innerHTML = getFormattedTime(now).formatted;
+                // Display the message when countdown is over
+                if (timeleft > t.total) {
+                    clearInterval(timer);
+                    // TODO: match with settings if minute and second extension will be added.
+                    document.getElementById('audio_time_start').innerHTML = '00:00'
+                }
+            } else {
+                clearInterval(timer);
+            }
+            now = timeleft
+        }
+        updateIncreamentTime()
+        // Run timer every second
+        timer = setInterval(updateIncreamentTime, 1000);
+        setInreamentInterval(timer)
+    }
+
+    /**
+     * 
+     * @param {*} endtime date string
+     * @returns 
+     */
+    function increament_time_remaining(endtime, shouldCreate = false) {
+        let t = 0;
+        if (shouldCreate) {
+            t = 1000 * 60 * parseInt(endtime);
+        } else {
+            t = endtime
+        }
+
+        return getFormattedTime(t);
+    }
+
+    /**
+     * 
+     * @param {*} time 
+     * @returns 
+     */
+    const getDecreamentTime = (decreamentDeadline = null) => {
+
+        // The data/time we want to countdown to
+        let deadline;
+        if (!decreamentDeadline) {
+            let readingTime = window?.TTS.settings?.readingTime
+            deadline = new Date().getTime() + (1000 * 60 * parseInt(readingTime));
+            setDecreamentDeadline(deadline)
+        } else {
+            deadline = decreamentDeadline
+        }
+
+        let timer;
+        function updateDecreamentTime() {
+            // Calculating the days, hours, minutes and seconds left
+            let t = decreament_time_remaining(deadline)
+            setDecreamentDeadline(t.total)
+            if (document.getElementById('audio_time_end')) {
+                document.getElementById('audio_time_end').innerHTML = t.formatted;
+                // Display the message when countdown is over
+                if (t.total <= 0) {
+                    clearInterval(timer);
+                    document.getElementById('audio_time_end').innerHTML = decreament_time_remaining(readingTime, false, true).formatted
+                }
+            } else {
+                clearInterval(timer);
+            }
+        }
+
+        updateDecreamentTime()
+        // Run timer every second
+        timer = setInterval(updateDecreamentTime, 1000);
+        setDecreamentInterval(timer)
+
+    }
+
+
+    /**
+     * 
+     * @param {*} endtime date string
+     * @returns 
+     */
+    function decreament_time_remaining(endtime, shouldParse = false, shouldCreate = false) {
+        let t = 0;
+        if (shouldCreate) {
+            t = 1000 * 60 * parseInt(endtime);
+        } else {
+            if (shouldParse) {
+                t = Date.parse(endtime) - Date.parse(new Date())
+            } else {
+                t = endtime - Date.parse(new Date())
+            }
+        }
+
+
+
+        return getFormattedTime(t);
+    }
+
+
+    const getFormattedTime = (t) => {
+        let seconds = Math.floor((t / 1000) % 60);
+        let minutes = Math.floor((t / 1000 / 60) % 60);
+        // TODO: match with settings if minute and second extension will be added.
+        minutes = (minutes < 10) ? '0' + minutes : minutes;
+        seconds = (seconds < 10) ? '0' + seconds : seconds;
+        let tObj = { 'total': t, 'minutes': minutes, 'seconds': seconds }
+        tObj.formatted = tObj.minutes + ":" + tObj.seconds;
+
+        return tObj;
+    }
+
     return (
         <>
 
@@ -130,14 +283,14 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                                     <div className="mt-3">
                                         <p>
                                             Listen to article
-                                            <span className="text-secondary"> 8 minutes</span>
+                                            <span className="text-secondary"> {window.TTS.settings.readingTime} minutes</span>
                                         </p>
                                     </div>
                                 ) : (
                                     <div className="d-flex gap-3 justify-content-between align-items-center">
                                         <div className="audio-player">
                                             <div className="audio-controls">
-                                                <div className="audio-time-start">0:00</div>
+                                                <div className="audio-time-start" id="audio_time_start">00:00</div>
                                                 <div
                                                     style={{ height: "4px", marginTop: "10px" }}
                                                     className="progress audio-progress"
@@ -152,7 +305,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                                                         style={{ width: "25%", height: "4px" }}
                                                     />
                                                 </div>
-                                                <div className="audio-time-end">3:45</div>
+                                                <div className="audio-time-end" id="audio_time_end">00:00</div>
                                             </div>
                                             <div className="audio-volume"></div>
                                         </div>
