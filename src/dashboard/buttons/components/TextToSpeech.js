@@ -294,7 +294,8 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                         )} */}
                             </div>
                             {
-                                listenStatus === 'listen' ? (
+                                listenStatus === 'listen' && window.hasOwnProperty('TTS') ? (
+
                                     <div className="mt-3">
                                         <p>
                                             Listen to article
@@ -388,7 +389,11 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                             </div>
                             <Close onClick={(e) => handleSetting(e)} />
                         </>
-                    ) : listenStatus !== 'listen' ? (
+                    ) : <SoundWave />}
+
+                    {/**
+                    //TODO implement this in the future to change voice and reading speed.
+                       listenStatus !== 'listen' ? (
                         <>
                             <div className="ps-2">
                                 {listenStatus != 'listen' && !isSettingOpen && (
@@ -398,8 +403,10 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                                 )}
                             </div>
                         </>
-                    ) : <SoundWave />
-                    }
+                    ) 
+                */}
+
+
                 </div>
             </div>
         </>

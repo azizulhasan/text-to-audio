@@ -43,8 +43,10 @@ function Dashboard() {
 	useEffect(() => {
 		let pro = wp.hooks.applyFilters('tts_is_pro_active', false);
 		let licenseCheck = wp.hooks.applyFilters('tts_is_pro_license_active', false);
-		setIsProVersion(isPro(pro, licenseCheck))
+		setIsProVersion(ttsObj.is_pro_active)
 	}, [])
+
+
 
 	addScripts([
 		'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js',

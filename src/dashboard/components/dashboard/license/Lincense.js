@@ -48,6 +48,9 @@ export default function License() {
                                 name='license'
                                 placeholder='license'
                             />
+                            <Form.Label className='text-danger' htmlFor='notice'>
+                                <strong>Notice:</strong> License must be active and valid to enjoy pro features of the plugin.
+                            </Form.Label>
                         </Form.Group>
                     </Col>
                     <div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>

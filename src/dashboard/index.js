@@ -23,7 +23,6 @@ let timer = setTimeout(function loadProButton() {
         clearTimeout(timer)
         timer = null
 
-
         let buttons = [...document.querySelectorAll('.tts__listent_content')]
         if (buttons.length) {
             buttons.map(button => {

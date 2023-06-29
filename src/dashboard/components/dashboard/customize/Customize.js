@@ -172,8 +172,6 @@ export default function Customize() {
 		}
 		if (speech === null) {
 			window.TTS.contents[1] = text
-			console.log(TextToSpeechFree)
-			console.log(window.TextToSpeech)
 			TextToSpeechFree = window.TextToSpeech;
 			speech = new TextToSpeechFree(1, text, button, window.TTS)
 			speech._init()

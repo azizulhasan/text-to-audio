@@ -384,7 +384,7 @@ window.TextToSpeech = TextToSpeech;
 
 let timerDashboar;
 timerDashboar = setTimeout(() => {
-    if (window.hasOwnProperty('ttsObj') && ttsObj.is_logged_in && !window.ttsObj.is_pro_license_active) {
+    if (window.hasOwnProperty('ttsObj') && ttsObj.is_logged_in) {
         declare_init_content()
         clearTimeout(timerDashboar)
         timerDashboar = null
@@ -431,6 +431,7 @@ function declare_init_content() {
     // add settings
     if (!window.TTS.hasOwnProperty('settings')) {
         window.TTS.settings = ttsSettings
+        window.TTS.settings.readingTime = 1;
     }
 }
 
