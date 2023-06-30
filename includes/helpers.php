@@ -121,6 +121,7 @@ function tta_get_button_content($atts, $is_block = false) {
     
     $title = tta_clean_content( get_the_title());
     $title = tta_should_add_dilimiter($title, $sentence_delimiter);
+    $date = get_the_date('Y/m/d');
 
     $description = get_the_content();
     $description_sanitized = tta_clean_content($description);
@@ -157,22 +158,22 @@ function tta_get_button_content($atts, $is_block = false) {
     $button = "<tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
 
     // init button scripts
-    do_action('tts_enqueue_button_scripts' , $content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon);
+    do_action('tts_enqueue_button_scripts' , $content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date);
 
     return apply_filters( 'tts__listening_button', $button, $btn_no, $class );
 }
 
 
-add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 8);
+add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 10);
 
 /**
  * Enqueue button scripts
  */
-function tts_enqueue_button_scripts ($content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon) {
+function tts_enqueue_button_scripts ($content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date) {
     
     $reading_time = apply_filters('tts_content_reading_time', 1, $content );
     // enqueue footer stript
-    add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $reading_time) { 
+    add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $reading_time, $title, $date) { 
     ?>
     <!-- write your script to the head section  -->
     <script>
@@ -195,17 +196,26 @@ function tts_enqueue_button_scripts ($content, $btn_no, $listening, $class, $btn
             readingTime: readingTime,
         };
 
+        var dateTitle = {
+            title: "<?php echo $title; ?>",
+            date: "<?php echo $date; ?>",
+        }
+
 
         if(window.hasOwnProperty('TTS')){ // add content if a page have multiple button
             var prevContent = window.TTS.contents[ttsCurrentButtonNo-1]
             if(prevContent !== ttsCurrentContent){ // don't repeat same content
                 window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
+                window.TTS.extra  = {}
+                window.TTS.extra[ttsCurrentButtonNo] = dateTitle;
             }
             
         }else{ // add content for the if a page have one button
             window.TTS = {}
             window.TTS.contents = {}
             window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
+            window.TTS.extra  = {}
+            window.TTS.extra[ttsCurrentButtonNo] = dateTitle;
         }
 
         // add settings

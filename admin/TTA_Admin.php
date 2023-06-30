@@ -99,6 +99,7 @@ class TTA_Admin {
             'VERSION' => TEXT_TO_AUDIO_VERSION,
             'is_logged_in' => is_user_logged_in(),
             'is_admin' => current_user_can('administrator'),
+            'is_dashboard' => is_admin(),
             'listeningSettings' => $listening,
             'is_pro_active' => is_pro_active(),
             'is_pro_license_active' => is_pro_license_active()

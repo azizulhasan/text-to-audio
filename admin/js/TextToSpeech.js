@@ -384,7 +384,7 @@ window.TextToSpeech = TextToSpeech;
 
 let timerDashboar;
 timerDashboar = setTimeout(() => {
-    if (window.hasOwnProperty('ttsObj') && ttsObj.is_logged_in) {
+    if (window.hasOwnProperty('ttsObj') && ttsObj.is_dashboard) {
         declare_init_content()
         clearTimeout(timerDashboar)
         timerDashboar = null
