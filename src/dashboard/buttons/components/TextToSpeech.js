@@ -21,6 +21,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
     const [isPaused, setIsPaused] = useState(false)
     const [isResumed, setIsResumed] = useState(false)
     const [progressbarValue, setProgressbarValue] = useState(0)
+    const [shouldFloat, setShouldFloat] = useState(false)
 
     const handleSetting = (e) => {
         e.preventDefault()
@@ -252,11 +253,9 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
         return tObj;
     }
 
-    return (
-        <>
-
-            <style>{cssStyle}</style>
-            <div className="bg-white" >
+    const getButtonHTML = () => {
+        return (
+            <div id="tts_button_should_float" className="bg-white" >
 
                 {/* First player */}
                 {/* {isFirstPlayerPlay && ( */}
@@ -409,6 +408,42 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
 
                 </div>
             </div>
+        )
+    }
+
+
+    useEffect(() => {
+        const detectScroll = (e) => {
+            let button = document.getElementById('tts_button_should_float');
+            let postTitle = document.querySelector('.post-title')
+            let titlePosition = postTitle.getBoundingClientRect().top;
+            let topPos = Math.floor(button.getBoundingClientRect().top);
+            if (topPos < 1) {
+                setShouldFloat(true)
+            }
+            if (titlePosition > 0) {
+                setShouldFloat(false)
+            }
+        }
+        document.addEventListener('scroll', detectScroll)
+
+        return () => {
+            document.removeEventListener('scroll', detectScroll)
+        }
+    }, [])
+
+    return (
+        <>
+
+            {
+                cssStyle && <style>{cssStyle}</style>
+            }
+
+            {
+                shouldFloat ? <div className="custom-position" >{getButtonHTML()}</div> : getButtonHTML()
+            }
+
+
         </>
     );
 };
