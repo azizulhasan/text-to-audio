@@ -122,7 +122,13 @@ function tta_get_button_content($atts, $is_block = false) {
     $title = tta_clean_content( get_the_title());
     $title = tta_should_add_dilimiter($title, $sentence_delimiter);
     $date = get_the_date('Y/m/d');
-
+    // error_log(print_r($description, true));
+    // TODO: write functionality if current page is home page where content is excerpt.
+    // if(is_single()) {
+    //     $description = get_the_content();
+    // }elseif(did_filter( 'the_excerpt' )){
+    //     $description = get_the_excerpt();
+    // }
     $description = get_the_content();
     $description_sanitized = tta_clean_content($description);
     $content     = apply_filters('tta__content_title', $title);
@@ -273,7 +279,14 @@ function get_button_text( $atts ) {
 
 $settings = (array) get_option( 'tta_settings_data');
 
-if( isset( $settings['tta__settings_enable_button_add'] ) &&  $settings['tta__settings_enable_button_add'] ) {
+if( isset( $settings['tta__settings_enable_button_add'] ) &&  $settings['tta__settings_enable_button_add'] ) {    
+    // TODO: write functionality if current page is home page where content is excerpt.
+    // if(is_single()) {
+    //     add_filter( 'the_content', 'add_listen_button' );
+    // }
+    // elseif(did_filter( 'the_excerpt' )){
+    //     add_filter( 'the_excerpt', 'add_listen_button' , 9999 );
+    // }
     add_filter( 'the_content', 'add_listen_button' );
 }
 

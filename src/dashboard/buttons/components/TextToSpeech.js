@@ -256,7 +256,6 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
     const getButtonHTML = () => {
         return (
             <div id="tts_button_should_float" className="bg-white" >
-
                 {/* First player */}
                 {/* {isFirstPlayerPlay && ( */}
                 <div className="player border shadow-custom bg-white mx-auto d-flex justify-content-between px-3 align-items-center position-relative">
@@ -266,7 +265,6 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                         }`}
                             style={{ height: "55px" }}
                         >
-
                             <div className="position-relative">
                                 {
                                     (!speech || listenStatus === 'resume') && <Play onClick={(e) => handlePlayButtonClick(e)} />
@@ -275,34 +273,25 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                                     speech && listenStatus === 'listen' && <Replay onClick={(e) => handlePlayButtonClick(e)} />
                                 }
                                 {
-                                    speech && listenStatus === 'pause' &&
-                                    // <FaRegPauseCircle
-                                    //     className="fs-3"
-                                    //     onClick={handlePlayButtonClick}
-                                    // />
-                                    <Pause onClick={(e) => handlePlayButtonClick(e)} />
+                                    speech && listenStatus === 'pause' && <Pause onClick={(e) => handlePlayButtonClick(e)} />
                                 }
-
                                 {/* {isPlaying && (
-                            <div
-                                className="position-absolute top-0 start-0 translate-middle spinner-border text-primary"
-                                role="status"
-                            >
-                                <span className="visually-hidden">Loading...</span>
-                            </div>
-                        )} */}
+                                    <div
+                                        className="position-absolute top-0 start-0 translate-middle spinner-border text-primary"
+                                        role="status"
+                                    >
+                                        <span className="visually-hidden">Loading...</span>
+                                    </div>
+                                )} */}
                             </div>
                             {
                                 listenStatus === 'listen' && window.hasOwnProperty('TTS') ? (
-
-                                    <div className="mt-3">
-                                        <p>
-                                            Listen to article
-                                            <span className="text-secondary"> {window.TTS.settings.readingTime} minutes</span>
-                                        </p>
+                                    <div className="align-items-center">
+                                        Listen to article
+                                        <span className="text-secondary"> {window.TTS.settings.readingTime} minutes</span>
                                     </div>
                                 ) : (
-                                    <div className="d-flex gap-3 justify-content-between align-items-center">
+                                    <div className="d-flex gap-3  justify-content-between align-items-center">
                                         <div className="audio-player">
                                             <div className="audio-controls">
                                                 <div className="audio-time-start" id="audio_time_start">00:00</div>
@@ -317,7 +306,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                                                 >
                                                     <div
                                                         className="progress-bar bg-black"
-                                                        style={{ width: `${progressbarValue}%`, height: "4px" }}
+                                                        style={{ width: `${progressbarValue}%`, height: "6px" }}
                                                     />
                                                 </div>
                                                 <div className="audio-time-end" id="audio_time_end">00:00</div>
@@ -327,9 +316,11 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                                     </div>
                                 )
                             }
+
                         </div>
+
                     }
-                    {isSettingOpen ? (
+                    {/* {isSettingOpen ? (
                         <>
                             <div className="d-flex gap-3 justify-content-between align-items-center" style={{ height: "55px" }} >
                                 <div className="audio-player">
@@ -388,7 +379,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                             </div>
                             <Close onClick={(e) => handleSetting(e)} />
                         </>
-                    ) : <SoundWave />}
+                    ) : <SoundWave />} */}
 
                     {/**
                     //TODO implement this in the future to change voice and reading speed.
@@ -404,8 +395,9 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                         </>
                     ) 
                 */}
-
-
+                    <div className="ps-3">
+                        <SoundWave />
+                    </div>
                 </div>
             </div>
         )
@@ -415,35 +407,44 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
     useEffect(() => {
         const detectScroll = (e) => {
             let button = document.getElementById('tts_button_should_float');
-            let postTitle = document.querySelector('.post-title')
-            let titlePosition = postTitle.getBoundingClientRect().top;
+            let postTitle = null;
+            let titlePosition = 0;
+            if (document.querySelector('.post-title')) {
+                postTitle = document.querySelector('.post-title')
+                titlePosition = postTitle.getBoundingClientRect().top;
+            } else if (document.querySelector('.entry-title')) {
+                postTitle = document.querySelector('.entry-title')
+                titlePosition = postTitle.getBoundingClientRect().top;
+            }
+
             let topPos = Math.floor(button.getBoundingClientRect().top);
             if (topPos < 1) {
                 setShouldFloat(true)
             }
+
             if (titlePosition > 0) {
                 setShouldFloat(false)
             }
+
         }
         document.addEventListener('scroll', detectScroll)
+        document.addEventListener('wheel', detectScroll)
+
 
         return () => {
             document.removeEventListener('scroll', detectScroll)
+            document.removeEventListener('wheel', detectScroll)
         }
     }, [])
 
     return (
         <>
-
             {
                 cssStyle && <style>{cssStyle}</style>
             }
-
             {
                 shouldFloat ? <div className="custom-position" >{getButtonHTML()}</div> : getButtonHTML()
             }
-
-
         </>
     );
 };
