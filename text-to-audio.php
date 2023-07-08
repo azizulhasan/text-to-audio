@@ -76,6 +76,11 @@ if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
     define('TEXT_TO_AUDIO_PLUGIN_NAME', 'Text To Speech TTS');
 }
 
+if (!defined('TTA_LIBS_PATH')) {
+
+    define('TTA_LIBS_PATH', dirname(TEXT_TO_AUDIO_ROOT_FILE) . '/libs/');
+}
+
 /**
  * Begins execution of the plugin.
  *
