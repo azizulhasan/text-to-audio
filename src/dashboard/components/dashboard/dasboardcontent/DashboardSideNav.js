@@ -40,11 +40,11 @@ export default function DashboardSideNav() {
 							Customization
 						</Link>
 
-						<Link className='nav-link' to={'/docs'}>
+						<Link className='nav-link' to={'/faq'}>
 							<div className='sb-nav-link-icon'>
 								<i className='fas fa-book'></i>
 							</div>
-							Support Docs
+							FAQ
 						</Link>
 					</div>
 				</div>

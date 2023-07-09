@@ -53,7 +53,7 @@ class TTA_Activator {
             update_option('tta_settings_data', array
                 (
                     'tta__settings_enable_button_add'=> true,
-                    "tta__settings_allow_listening_for_post_types" => ['post'],
+                    "tta__settings_allow_listening_for_post_types" => ['post', 'page'],
                     "tta__settings_display_btn_icon" => '',
             ));
         }
