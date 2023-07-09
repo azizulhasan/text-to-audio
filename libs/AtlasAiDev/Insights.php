@@ -1415,6 +1415,7 @@ class Insights {
 	
 		$allowed_pages  = [
 			admin_url() . 'index.php',
+			admin_url() . 'plugins.php',
 			admin_url().'admin.php?page=' . TEXT_TO_AUDIO_TEXT_DOMAIN
 		];
 		
