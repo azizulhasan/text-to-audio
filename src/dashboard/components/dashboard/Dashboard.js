@@ -79,7 +79,7 @@ function Dashboard() {
 									path={'/recording'}
 									element={<Recording />}
 								/>
-								<Route path='/docs' element={<Docs />} />
+								<Route path='/faq' element={<Docs />} />
 							</Routes>
 						</div>
 					</main>
