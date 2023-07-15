@@ -5,7 +5,7 @@ Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, 
 Requires at least: 4.0
 Tested up to: 6.2
 Requires PHP: 5.6
-Stable tag: 1.3.18
+Stable tag: 1.3.19
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,8 +24,8 @@ There is no need to create an account it’s completely free. Just install the p
 
 **Important Note:**
 
-This plugin is built on browser speechSynthesis API. No external API is used. Here is the API used [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
-That is why it doesn’t support all android phones, aslo all languages here you can check which android phone and which device support this [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility) API.
+Text To Speech TTS plugin is built on browser speechSynthesis API. No external API is used. Here is the API used [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
+That is why Text To Speech TTS doesn’t support all android phones, aslo all languages. Here you can check which android phone and which device support [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility) API.
 
 Another issue speechSynthesis API is differ browser to browser also divice to divice . So it changes the voices and languages based on browser. one language may available on desktop
 It can be not available on mobile phone. One voice may available on desktop, it may be not available on android.
@@ -41,7 +41,12 @@ Here you can see some languages which are supported by the browsers based on dev
 * Microsoft Edge Mobile : All Languages
 
 * FireFox Desktop: English
-* FireFox Mobile: English USA, English UK, German, Italian, Russian, French, Spanish, 
+* FireFox Mobile: English USA, English UK, German, Italian, Russian, French, Spanish
+
+
+**Listening is a better way to read:**
+Boost your understanding and focus with listening by Text To Speech TTS. Remember more of what you read. Maximize your time,
+Breeze through your content 2-3x faster than it takes to read it. Do more at once, Take your reading wherever you go – to the gym, the park, or the couch, or the journy.
 
 
 **Features:**
@@ -142,6 +147,12 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 
 
 
+= 1.3.19 ( JULY 15 , 2023) =
+* Added : Invitation to translation notice added to dashboard.
+* Added : Review notice added to dashboard.
+* Updated : Pluign documentation updated.
+
+
 = 1.3.18 ( JULY 09 , 2023) =
 * Fixed : Error during plugin update issue fixed.
 * Added : By default play button showing to page added.
@@ -149,7 +160,7 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 
 
 = 1.3.17 (JUNE 28, 2023) =
-* Fixed : (Text2Speech Stopped Working)[https://wordpress.org/support/topic/text2speech-stopped-working/] issue fixed.
+* Fixed : [Text2Speech Stopped Working](https://wordpress.org/support/topic/text2speech-stopped-working/) issue fixed.
 
 
 = 1.3.16 (JUNE 25, 2023) =

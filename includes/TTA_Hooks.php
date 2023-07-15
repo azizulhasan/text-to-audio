@@ -29,7 +29,7 @@ class TTA_Hooks {
         // Update hook
         // add_action('upgrader_process_complete', 'update_settings_data', 10, 2);
 
-        
+
     }
 
 
