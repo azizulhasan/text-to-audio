@@ -5,7 +5,7 @@ Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, 
 Requires at least: 4.0
 Tested up to: 6.2
 Requires PHP: 5.6
-Stable tag: 1.3.19
+Stable tag: 1.3.20
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -146,6 +146,10 @@ We are looking for people to help translate this plugin. If you can help we woul
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+
+= 1.3.20 ( JULY 15 , 2023) =
+* Removed : Invitation to translation notice added to dashboard.
+* Removed : Review notice added to dashboard.
 
 = 1.3.19 ( JULY 15 , 2023) =
 * Added : Invitation to translation notice added to dashboard.
