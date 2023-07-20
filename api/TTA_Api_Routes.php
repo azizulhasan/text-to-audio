@@ -95,6 +95,21 @@ class TTA_Api_Routes {
             )
         );
 
+        // file upload
+        register_rest_route(
+            $this->namespace,
+            '/upload_file',
+            array(
+                array(
+                    'methods' => \WP_REST_Server::CREATABLE,
+                    'callback' => array($this, 'tta_upload_file'),
+                    'permission_callback' => array($this, 'get_route_access'),
+                    'args' => array(),
+                ),
+            )
+        );
+        
+
     }
     /**
      * Manage record data.
@@ -221,6 +236,23 @@ class TTA_Api_Routes {
         ]);
 
         return rest_ensure_response(get_option('tta_current_browser_info'));
+    }
+
+
+    public function tta_upload_file($request) {
+
+        $extension = pathinfo($_FILES['auth_file']['name'], PATHINFO_EXTENSION);
+
+	    $new_name = 'tts_auth_file_'. time() . '.' . $extension;
+
+        update_option('tts_auth_file_name' , $new_name);
+
+        $is_uploaded = move_uploaded_file($_FILES['auth_file']['tmp_name'], \TTA_PRO_AUDIO_DIR . $new_name);
+
+        return \rest_ensure_response([
+            'file_name' => $new_name,
+            'status' => $is_uploaded
+        ]);
     }
 
     /*

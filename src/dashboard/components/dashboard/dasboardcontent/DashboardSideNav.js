@@ -50,11 +50,11 @@ export default function DashboardSideNav({ isProVersion }) {
 							Support Docs
 						</Link>
 						{
-							(isProVersion) ? <Link className='nav-link' to={'/license'}>
+							(isProVersion) ? <Link className='nav-link' to={'/gtts'}>
 								<div className='sb-nav-link-icon'>
 									<i className='fas fa-edit'></i>
 								</div>
-								License
+								TTS
 							</Link> : null
 						}
 					</div>

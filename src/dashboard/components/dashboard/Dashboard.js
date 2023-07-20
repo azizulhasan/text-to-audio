@@ -28,7 +28,7 @@ import Recording from './recording/Recording';
 import Listening from './listening/Listening';
 import Customize from './customize/Customize';
 import Docs from './docs/Docs';
-import License from './license/Lincense';
+import GoogleTTS from './tts/GoogleTTS';
 
 function Dashboard() {
 	// authenTicateUser();
@@ -93,7 +93,7 @@ function Dashboard() {
 								/>
 								<Route path='/docs' element={<Docs />} />
 								{
-									isProVersion && <Route path='/license' element={<License />} />
+									isProVersion && <Route path='/gtts' element={<GoogleTTS />} />
 								}
 							</Routes>
 

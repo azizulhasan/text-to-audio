@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Form, Row, Col, Container } from 'react-bootstrap';
+import { postData } from '../../context/utilities';
+import toast from '../../context/Notify';
 
-export default function License() {
+export default function GoogleTTS() {
 
     const [license, setLicense] = useState();
 
@@ -10,7 +12,7 @@ export default function License() {
      * @param {*} e
      */
     const handleChange = (e) => {
-        setLicense(e.target.value);
+        setLicense(e.target.files);
     };
 
     /**
@@ -19,13 +21,17 @@ export default function License() {
     const handleSubmit = (e) => {
         e.preventDefault();
         let data = new FormData();
-        data.append('fields', JSON.stringify(formData));
+        data.append('auth_file', license[0]);
         data.append('method', 'post');
-        postWithoutImage(tta_obj.api_url + 'tta/v1/record', data)
+
+        postData(tta_obj.api_url + 'tta/v1/upload_file', data)
             .then((res) => {
-                setSettings(res.data);
-                setChecked(res.data.is_record_continously);
-                toast('Recording Data Saved');
+                if (res.status) {
+                    toast('File uploaded successfully');
+                } else {
+                    toast('Something went wrong');
+                }
+
             })
             .catch((err) => {
                 console.log(err);
@@ -41,10 +47,9 @@ export default function License() {
                                 Insert License
                             </Form.Label>
                             <Form.Control
-                                type='text'
+                                type='file'
                                 id='license'
                                 onChange={handleChange}
-                                value={license}
                                 name='license'
                                 placeholder='license'
                             />
