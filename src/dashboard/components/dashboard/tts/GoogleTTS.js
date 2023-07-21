@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, Row, Col, Container } from 'react-bootstrap';
 import { postData } from '../../context/utilities';
 import toast from '../../context/Notify';
@@ -6,6 +6,7 @@ import toast from '../../context/Notify';
 export default function GoogleTTS() {
 
     const [license, setLicense] = useState();
+    const [authFile, setAuthFile] = useState('')
 
     /**
      * handle change
@@ -37,6 +38,40 @@ export default function GoogleTTS() {
                 console.log(err);
             });
     };
+
+
+
+    useEffect(() => {
+        postData(tta_obj.api_url + 'tta/v1/get_auth_file', {}, 'GET')
+            .then((res) => {
+                // if (res.status) {
+                //     toast('File uploaded successfully');
+                // } else {
+                //     toast('Something went wrong');
+                // }
+
+                setAuthFile(res.file)
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }, [])
+    const authenticateTTS = (e) => {
+        e.preventDefault();
+        postData(tta_obj.api_url + 'tta/v1/authenticate', JSON.stringify({ file: authFile }))
+            .then((res) => {
+                console.log(res)
+                // if (res.status) {
+                //     toast('File uploaded successfully');
+                // } else {
+                //     toast('Something went wrong');
+                // }
+                window.open(res[0], '_blank');
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
     return (
         <Container>
             <Form onSubmit={handleSubmit}>
@@ -54,7 +89,9 @@ export default function GoogleTTS() {
                                 placeholder='license'
                             />
                             <Form.Label className='text-danger' htmlFor='notice'>
-                                <strong>Notice:</strong> License must be active and valid to enjoy pro features of the plugin.
+                                {
+                                    authFile ? authFile : <><strong>Notice:</strong> License must be active and valid to enjoy pro features of the plugin.</>
+                                }
                             </Form.Label>
                         </Form.Group>
                     </Col>
@@ -65,6 +102,9 @@ export default function GoogleTTS() {
                     </div>
                 </Row>
             </Form>
+            <button disabled={!authFile ? true : false} onClick={(e) => authenticateTTS(e)} className='tta_btn btn-center'>
+                Authenticate
+            </button>
         </Container>
     );
 }

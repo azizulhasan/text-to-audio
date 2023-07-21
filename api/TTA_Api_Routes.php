@@ -1,6 +1,9 @@
 <?php
 namespace TTA_Api;
 
+
+use \Google\Client;
+use \Google\Service\Texttospeech;
 /**
  * This class is for getting all plugin's data  through api.
  * This is applied for tracker menu.
@@ -108,6 +111,36 @@ class TTA_Api_Routes {
                 ),
             )
         );
+
+        // Get auth file path
+        register_rest_route(
+            $this->namespace,
+            '/get_auth_file',
+            array(
+                array(
+                    'methods' => \WP_REST_Server::READABLE,
+                    'callback' => array($this, 'tta_get_auth_file'),
+                    'permission_callback' => array($this, 'get_route_access'),
+                    'args' => array(),
+                ),
+            )
+        );
+
+        // Get auth file path
+        register_rest_route(
+            $this->namespace,
+            '/authenticate',
+            array(
+                array(
+                    'methods' => \WP_REST_Server::CREATABLE,
+                    'callback' => array($this, 'tta_authenticate'),
+                    'permission_callback' => array($this, 'get_route_access'),
+                    'args' => array(),
+                ),
+            )
+        );
+
+        
         
 
     }
@@ -252,6 +285,39 @@ class TTA_Api_Routes {
         return \rest_ensure_response([
             'file_name' => $new_name,
             'status' => $is_uploaded
+        ]);
+    }
+
+
+    public function tta_get_auth_file() {
+        $file_name = \get_option('tts_auth_file_name', '');
+        return  \rest_ensure_response([
+            'file' => TTA_PRO_AUDIO_DIR . $file_name,
+        ]);
+    }
+
+    public function tta_authenticate($request) {
+session_start();
+        $body = \json_decode( $request->get_body(), true);
+        $redirect_uri =  \admin_url('admin.php?page=text-to-audio');
+        $client = new Client();
+        $client->setAuthConfig( $body['file']);
+        $client->addScope(Texttospeech::CLOUD_PLATFORM);
+        $client->setRedirectUri($redirect_uri);
+        $client->setAccessType('offline');        // offline access
+        $client->setIncludeGrantedScopes(true);   // incremental auth
+
+
+        if (! isset($_GET['code'])) {
+        $auth_url = $client->createAuthUrl();
+        // header('Location: ' . filter_var($auth_url, FILTER_SANITIZE_URL));
+        }
+        
+
+        return \rest_ensure_response([
+            $auth_url,
+            $redirect_uri,
+            \json_decode(file_get_contents($body['file'])),
         ]);
     }
 
