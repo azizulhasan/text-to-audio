@@ -83,7 +83,7 @@ function tta_should_add_dilimiter($title, $delimiter) {
  * @return string
  */
 function tta_get_button_content($atts, $is_block = false) {
-
+    global $post;
     $listening = (array) get_option('tta_listening_settings');
     $listening = json_encode($listening);
     if ($is_block) {
@@ -125,8 +125,9 @@ function tta_get_button_content($atts, $is_block = false) {
 
     $description = get_the_content();
     $description = tta_clean_content($description);
-    $content     = apply_filters('tta__content_title', $title);
-    $content    .= apply_filters('tta__content_description', $description);
+    $content     = apply_filters('tta__content_title', $title, $post);
+    $content    .= apply_filters('tta__content_description', $description, $post);
+    $content     = apply_filters('tta__content', $content, $post);
 
     // Button listen text.
     $text_arr = get_button_text( $atts );

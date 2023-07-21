@@ -23,19 +23,23 @@ export default function Docs() {
 	const filters = [
 		{
 			name: 'tta__content_title',
-			argument: '$description',
+			arguments: '$description, $post',
 		},
 		{
 			name: 'tta__content_description',
-			argument: '$description',
+			arguments: '$description, $post',
+		},
+		{
+			name: 'tta__content',
+			arguments: '$content, $post',
 		},
 		{
 			name: 'tta__listening_button',
-			argument: '$button'
+			arguments: '$button'
 		},
 		{
 			name: 'tta__button_text_arr',
-			argument: '$button_text_arr'
+			arguments: '$button_text_arr'
 		},
 	];
 	return (
@@ -145,7 +149,7 @@ export default function Docs() {
 												<code>{filter.name}</code>
 											</td>
 											<td>
-												<code>{filter.argument}</code>
+												<code>{filter.arguments}</code>
 											</td>
 										</tr>
 									);
