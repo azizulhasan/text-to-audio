@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
 	Col,
 	Container,
@@ -29,26 +29,42 @@ export default function Listening() {
 		tta__listening_lang: 'en_GB',
 	});
 	const [listeningLang, setListeningLang] = useState('en_GB');
-
+	const apiURL = useMemo(() => {
+		return ttsObjPro.api_url + ttsObjPro.api_namespace + "/" + ttsObjPro.api_version + "/";
+	})
 
 
 	useEffect(() => {
+		if (ttsObj.is_pro_license_active) {
+			getData(apiURL + 'voices')
+				.then((res) => {
+					console.log(res)
+					// if (res.status) {
+					// 	toast('File uploaded successfully');
+					// } else {
+					// 	toast('Something went wrong');
+					// }
 
-		console.log('listening')
+				})
+				.catch((err) => {
+					console.log(err);
+				});
 
-		setTimeout(() => {
-			let langs = []
-			let voices = []
-			setSpeechSynthesisVoices(window.speechSynthesis.getVoices())
-			window.speechSynthesis.getVoices().map(item => {
-				if (!langs.includes(item.lang)) {
-					langs.push(item.lang)
-				}
-				voices.push(item)
-			})
-			setLanguages(langs)
-			setVoices(window.speechSynthesis.getVoices());
-		}, 800);
+		} else {
+			setTimeout(() => {
+				let langs = []
+				let voices = []
+				setSpeechSynthesisVoices(window.speechSynthesis.getVoices())
+				window.speechSynthesis.getVoices().map(item => {
+					if (!langs.includes(item.lang)) {
+						langs.push(item.lang)
+					}
+					voices.push(item)
+				})
+				setLanguages(langs)
+				setVoices(window.speechSynthesis.getVoices());
+			}, 800);
+		}
 		/**
 		 * Set listening lang.
 		 */
@@ -145,9 +161,6 @@ export default function Listening() {
 	};
 	return (
 		<Container>
-			{
-				console.log('listening_dom')
-			}
 			<Form onSubmit={handleSubmit}>
 				<Row>
 					<Col xs={12} sm={8} lg={8}>
