@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Form, Row, Col, Container } from 'react-bootstrap';
 import { postData } from '../../context/utilities';
 import toast from '../../context/Notify';
@@ -7,6 +7,11 @@ export default function GoogleTTS() {
 
     const [license, setLicense] = useState();
     const [authFile, setAuthFile] = useState('')
+    const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+    const apiURL = useMemo(() => {
+        return ttsObjPro.api_url + ttsObjPro.api_namespace + "/" + ttsObjPro.api_version + "/";
+    })
 
     /**
      * handle change
@@ -25,7 +30,7 @@ export default function GoogleTTS() {
         data.append('auth_file', license[0]);
         data.append('method', 'post');
 
-        postData(tta_obj.api_url + 'tta/v1/upload_file', data)
+        postData(apiURL + 'upload_file', data)
             .then((res) => {
                 if (res.status) {
                     toast('File uploaded successfully');
@@ -42,15 +47,10 @@ export default function GoogleTTS() {
 
 
     useEffect(() => {
-        postData(tta_obj.api_url + 'tta/v1/get_auth_file', {}, 'GET')
+        postData(apiURL + 'get_auth_file', {}, 'GET')
             .then((res) => {
-                // if (res.status) {
-                //     toast('File uploaded successfully');
-                // } else {
-                //     toast('Something went wrong');
-                // }
-
                 setAuthFile(res.file)
+                setIsAuthenticated(res.is_authenticated)
             })
             .catch((err) => {
                 console.log(err);
@@ -58,20 +58,50 @@ export default function GoogleTTS() {
     }, [])
     const authenticateTTS = (e) => {
         e.preventDefault();
-        postData(tta_obj.api_url + 'tta/v1/authenticate', JSON.stringify({ file: authFile }))
+        if (isAuthenticated) {
+            toast('You are already athenticated');
+            return;
+        }
+        postData(apiURL + 'authenticate', JSON.stringify({ file: authFile }))
             .then((res) => {
-                console.log(res)
-                // if (res.status) {
-                //     toast('File uploaded successfully');
-                // } else {
-                //     toast('Something went wrong');
-                // }
-                window.open(res[0], '_blank');
+                if (res.auth_url) {
+                    window.open(res.auth_url);
+                } else if (res.access_token) {
+                    toast('You are already athenticated');
+                    setIsAuthenticated(true)
+                }
+                else {
+                    toast('Something went wrong');
+                }
+
             })
             .catch((err) => {
                 console.log(err);
             });
     }
+
+
+    const revokeAccessToken = (e) => {
+        e.preventDefault();
+        if (!isAuthenticated) {
+            toast('You have to be athenticated to revoke.');
+            return;
+        }
+        postData(apiURL + 'revoke_access_token', '', 'GET')
+            .then((res) => {
+                if (res) {
+                    toast('Authentication removed.')
+                    setIsAuthenticated(false)
+                } else {
+                    toast('Something went wrong');
+                }
+
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
+
     return (
         <Container>
             <Form onSubmit={handleSubmit}>
@@ -102,9 +132,14 @@ export default function GoogleTTS() {
                     </div>
                 </Row>
             </Form>
-            <button disabled={!authFile ? true : false} onClick={(e) => authenticateTTS(e)} className='tta_btn btn-center'>
+            <button disabled={!authFile ? true : false} onClick={(e) => authenticateTTS(e)} className={['tta_btn btn-center', ""].join(' ')}  >
                 Authenticate
             </button>
+            {
+                isAuthenticated && <button onClick={(e) => revokeAccessToken(e)} className='tta_btn btn-center' style={{ marginLeft: '20px' }}>
+                    Romove Authentication
+                </button>
+            }
         </Container>
     );
 }

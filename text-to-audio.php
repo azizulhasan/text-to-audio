@@ -196,9 +196,9 @@ function tta_create_shortcode($atts) {
 }
 
 add_shortcode('tta_listen_btn', 'tta_create_shortcode');
+$client = new \Google\Client();
 
 if(isset($_GET['code']) && $_GET['code']){
-    $client = new \Google\Client();
     $redirect_uri =  \admin_url('admin.php?page=text-to-audio');
 
     $client->setAuthConfigFile(  'C:\\xampp\\htdocs\\azizulhasan\\tts\/wp-content\/uploads\/TTA_Pro\/tts_auth_file_1689874157.json');
@@ -206,11 +206,12 @@ if(isset($_GET['code']) && $_GET['code']){
     $client->addScope(\Google\Service\Texttospeech::CLOUD_PLATFORM);
     $client->authenticate($_GET['code']);
     $_SESSION['access_token'] = $client->getAccessToken();
-    error_log(print_r([
-        $_GET,
-        $_SESSION], true));
-        $url  =  \admin_url('admin.php?page=text-to-audio#/gtts');;
-    header('Location: ' . filter_var($url, FILTER_SANITIZE_URL));
+    
+    if(isset($_SESSION['access_token']) && $_SESSION['access_token'] ) {
+        update_option('tta_gtts_auth_data', [
+            'access_token' => $_SESSION['access_token']
+        ] );
+    }
+    $redirect =  \admin_url('admin.php?page=text-to-audio#/gtts');
+    header('Location: ' . filter_var($redirect, FILTER_SANITIZE_URL));
 }
-
-
