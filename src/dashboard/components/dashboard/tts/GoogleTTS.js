@@ -118,9 +118,9 @@ export default function GoogleTTS() {
                                 name='license'
                                 placeholder='license'
                             />
-                            <Form.Label className='text-danger' htmlFor='notice'>
+                            <Form.Label className={isAuthenticated ? 'text-green' : 'text-danger'} htmlFor='notice'>
                                 {
-                                    authFile ? authFile : <><strong>Notice:</strong> License must be active and valid to enjoy pro features of the plugin.</>
+                                    isAuthenticated ? <><strong>Google Text To Speech Authentication Done.</strong></> : <><strong>Notice:</strong> License must be active and valid to enjoy pro features of the plugin.</>
                                 }
                             </Form.Label>
                         </Form.Group>
