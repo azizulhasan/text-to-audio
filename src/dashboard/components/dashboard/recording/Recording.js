@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import { ToggleButton, Form, Row, Col, Container } from 'react-bootstrap';
 
@@ -6,7 +6,7 @@ import { ToggleButton, Form, Row, Col, Container } from 'react-bootstrap';
  *
  * Scripts
  */
-import { postWithoutImage } from '../../context/utilities';
+import { postWithoutImage, setLocalStorage, getLocalStorage } from '../../context/utilities';
 import toast from '../../context/Notify';
 
 function Recording() {
@@ -18,6 +18,13 @@ function Recording() {
 	});
 	const [checked, setChecked] = useState(false);
 	const [languages, setLanguages] = useState([]);
+	const apiURL = useMemo(() => {
+		if (window.hasOwnProperty('ttsObjPro')) {
+			return ttsObjPro.api_url + ttsObjPro.api_namespace + "/" + ttsObjPro.api_version + "/";
+		}
+
+		return ttsObj.api_url + ttsObj.api_namespace + "/" + ttsObj.api_version + "/";
+	})
 
 	useEffect(() => {
 		/**
@@ -38,15 +45,45 @@ function Recording() {
 		 *
 		 */
 
-		setTimeout(() => {
-			let langs = []
-			window.speechSynthesis.getVoices().map(item => {
-				if (!langs.includes(item.lang)) {
-					langs.push(item.lang)
+		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active && ttsObjPro.gtts_is_authenticated) {
+			let stored_voices = getLocalStorage(['tta__voices']);
+			if (!stored_voices.tta__voices) {
+				getData(apiURL + 'voices')
+					.then((res) => {
+						setLocalStorage({ tta__voices: res.voices })
+					})
+					.catch((err) => {
+						console.log(err);
+					});
+			} else {
+				let voices = JSON.parse(stored_voices.tta__voices);
+				console.log(voices)
+				let langs = []
+				voices.voices.map(voice => {
+					if (!langs.includes(voice.languageCodes[0])) {
+						langs.push(voice.languageCodes[0])
+					}
+				})
+
+				setLanguages(langs)
+			}
+		} else {
+			let timer = setTimeout(function handleTime() {
+				timer = setTimeout(handleTime, 1000)
+				if (window.hasOwnProperty('speechSynthesis') && window.speechSynthesis.getVoices().length) {
+					clearTimeout(timer)
+					timer = null
+					let langs = []
+					window.speechSynthesis.getVoices().map(item => {
+						if (!langs.includes(item.lang)) {
+							langs.push(item.lang)
+						}
+					})
+					setLanguages(langs)
 				}
 			})
-			setLanguages(langs)
-		}, 800);
+		}
+
 	}, []);
 
 	/**

@@ -12,7 +12,7 @@ import {
  *
  * Scripts
  */
-import { postWithoutImage, getData } from '../../context/utilities';
+import { postWithoutImage, getData, setLocalStorage, getLocalStorage } from '../../context/utilities';
 import toast from '../../context/Notify';
 import { langs } from '../recording/languages';
 import { Link } from 'react-router-dom';
@@ -30,40 +30,63 @@ export default function Listening() {
 	});
 	const [listeningLang, setListeningLang] = useState('en_GB');
 	const apiURL = useMemo(() => {
-		return ttsObjPro.api_url + ttsObjPro.api_namespace + "/" + ttsObjPro.api_version + "/";
+		if (window.hasOwnProperty('ttsObjPro')) {
+			return ttsObjPro.api_url + ttsObjPro.api_namespace + "/" + ttsObjPro.api_version + "/";
+		}
+
+		return ttsObj.api_url + ttsObj.api_namespace + "/" + ttsObj.api_version + "/";
 	})
 
 
 	useEffect(() => {
-		if (ttsObj.is_pro_license_active) {
-			getData(apiURL + 'voices')
-				.then((res) => {
-					console.log(res)
-					// if (res.status) {
-					// 	toast('File uploaded successfully');
-					// } else {
-					// 	toast('Something went wrong');
-					// }
+		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active && ttsObjPro.gtts_is_authenticated) {
+			let stored_voices = getLocalStorage(['tta__voices']);
+			if (!stored_voices.tta__voices) {
+				getData(apiURL + 'voices')
+					.then((res) => {
+						// if (res.status) {
+						// 	toast('File uploaded successfully');
+						// } else {
+						// 	toast('Something went wrong');
+						// }
+						setLocalStorage({ tta__voices: res.voices })
 
-				})
-				.catch((err) => {
-					console.log(err);
-				});
-
-		} else {
-			setTimeout(() => {
+					})
+					.catch((err) => {
+						console.log(err);
+					});
+			} else {
+				console.log(JSON.parse(stored_voices.tta__voices))
+				let voices = JSON.parse(stored_voices.tta__voices);
 				let langs = []
-				let voices = []
-				setSpeechSynthesisVoices(window.speechSynthesis.getVoices())
-				window.speechSynthesis.getVoices().map(item => {
-					if (!langs.includes(item.lang)) {
-						langs.push(item.lang)
+				voices.voices.map(voice => {
+					if (!langs.includes(voice.languageCodes[0])) {
+						langs.push(voice.languageCodes[0])
 					}
-					voices.push(item)
 				})
+
 				setLanguages(langs)
-				setVoices(window.speechSynthesis.getVoices());
-			}, 800);
+				setVoices(voices.voices);
+				setSpeechSynthesisVoices(voices.voices)
+			}
+		} else {
+			let timer = setTimeout(function handleTime() {
+				timer = setTimeout(handleTime, 1000)
+				if (window.hasOwnProperty('speechSynthesis') && window.speechSynthesis.getVoices().length) {
+					clearTimeout(timer)
+					timer = null
+					let langs = []
+					let voices = []
+					setSpeechSynthesisVoices(window.speechSynthesis.getVoices())
+					window.speechSynthesis.getVoices().map(item => {
+						if (!langs.includes(item.lang)) {
+							langs.push(item.lang)
+						}
+					})
+					setLanguages(langs)
+					setVoices(window.speechSynthesis.getVoices());
+				}
+			})
 		}
 		/**
 		 * Set listening lang.
@@ -144,12 +167,12 @@ export default function Listening() {
 		if (e.target.name === 'tta__listening_lang') {
 
 			let filteredVoices = speechSynthesisVoices.filter(voice => {
-				return voice.lang == e.target.value;
+				return voice.languageCodes[0] == e.target.value;
 			})
 			if (filteredVoices.length === 1) {
 				setListeningSettings({
 					...listeningSettings,
-					...{ ['tta__listening_voice']: filteredVoices[0].lang },
+					...{ ['tta__listening_voice']: filteredVoices[0].languageCodes[0] },
 				});
 			}
 			setVoices(filteredVoices)
@@ -217,13 +240,12 @@ export default function Listening() {
 									{' '}
 									Default Listening Voice
 								</option>
-								{voices.map((voice, index) => {
-									return (
-										<option key={index} data-lang={voice.lang} value={voice.name}>
-											{voice.name}
-										</option>
-									);
-								})}
+								{voices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active && ttsObjPro.gtts_is_authenticated ? <option key={index} data-lang={voice.languageCodes[0]} value={[voice.name, voice.ssmlGender].join('-')}>
+									{voice.name} {'-'} {voice.ssmlGender}
+								</option> : <option key={index} data-lang={voice.lang} value={voice.name}>
+									{voice.name}
+								</option>
+								)}
 							</Form.Select>
 						</Form.Group>
 					</Col>

@@ -323,11 +323,13 @@ export const setLocalStorage = (data) => {
  */
 export const getLocalStorage = (keys = []) => {
   let localData = {};
-  if (typeof keys === "array" && keys.length) {
+  if (Array.isArray(keys) && keys.length) {
     for (let i = 0; i < keys.length; i++) {
       localData[keys[i]] = window.localStorage.getItem(keys[i]);
     }
-  } else {
+  }
+
+  else {
     let storage = window.localStorage;
     for (let key in storage) {
       let keyData = window.localStorage.getItem(key);
