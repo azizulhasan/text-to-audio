@@ -57,7 +57,6 @@ function Recording() {
 					});
 			} else {
 				let voices = JSON.parse(stored_voices.tta__voices);
-				console.log(voices)
 				let langs = []
 				voices.voices.map(voice => {
 					if (!langs.includes(voice.languageCodes[0])) {
