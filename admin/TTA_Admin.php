@@ -91,12 +91,7 @@ class TTA_Admin {
 
             ]);
 
-        }
-        /**
-         * Looad wp-speeh script
-         */
-
-        if( ! function_exists( 'is_plugin_active' ) ) {
+            if( ! function_exists( 'is_plugin_active' ) ) {
             include ABSPATH . 'wp-admin/includes/plugin.php';
         }
         wp_enqueue_script('text-to-audio-dashboard', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-dashboard.min.js', array(), $this->version, true);
@@ -106,6 +101,13 @@ class TTA_Admin {
             'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
             'buttonTextArr' => apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr' ) ),
         ]);
+
+        }
+        /**
+         * Looad wp-speeh script
+         */
+
+        
     }
 
     public function engueue_block_scripts() {
