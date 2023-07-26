@@ -26,7 +26,6 @@ const productionSrc = [
 	'!node_modules/**',
 	'!production/**',
 	'!src/**',
-	'!admin/js/tts/**',
 	'!admin/js/blocks/**',
 	'!admin/js/text-to-audio-dashboard.js',
 	'!admin/js/text-to-audio-front.js',
