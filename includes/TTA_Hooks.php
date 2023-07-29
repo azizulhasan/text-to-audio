@@ -27,7 +27,7 @@ class TTA_Hooks {
         add_action('add_meta_boxes', array($this, 'add_custom_meta_box'));
 
         // Update hook
-        add_action('upgrader_process_complete', 'update_settings_data', 10, 2);
+        // add_action('upgrader_process_complete', 'update_settings_data', 10, 2);
 
         
     }
