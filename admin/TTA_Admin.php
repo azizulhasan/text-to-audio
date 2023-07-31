@@ -146,7 +146,7 @@ class TTA_Admin {
 
         if (isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
             /* Load react js */
-                wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/TextToSpeech.js', array('wp-hooks',), $this->version, true);
+                wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', array('wp-hooks',), $this->version, true);
                 wp_localize_script('TextToSpeech', 'ttsObj', $this->localize_data);
                 wp_enqueue_script('text-to-audio-dashboard-ui', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-dashboard-ui.min.js', array('TextToSpeech'), $this->version, true);
                 wp_localize_script('text-to-audio-dashboard-ui', 'tta_obj', $this->localize_data);
@@ -186,12 +186,12 @@ class TTA_Admin {
      */
     public function enqueue_TTA() {
         if(is_pro_license_active()){
-            wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/TextToSpeech.js', array('wp-hooks',), $this->version, true);
+            wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', array('wp-hooks',), $this->version, true);
             wp_enqueue_script('text-to-audio-dashboard-ui', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-dashboard-ui.min.js', array('TextToSpeech'), $this->version, true);
             wp_localize_script('text-to-audio-dashboard-ui', 'tta_obj', $this->localize_data);
             wp_localize_script('TextToSpeech', 'ttsObj', $this->localize_data);
         }else{
-            wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/text-to-audio-button.js', array('wp-hooks', 'wp-shortcode'), $this->version, true);
+            wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-button.min.js', array('wp-hooks', 'wp-shortcode'), $this->version, true);
             wp_localize_script('text-to-audio-button', 'ttsObj', $this->localize_data );
             wp_enqueue_style('dashicons');
             wp_enqueue_style('text-to-audio-css', plugin_dir_url(__FILE__) . 'css/text-to-audio.css', [] , $this->version, 'all' );

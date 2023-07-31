@@ -20,7 +20,7 @@ if (app) {
 
 let timer = setTimeout(function loadProButton() {
     timer = setTimeout(loadProButton, 1000)
-    if (window.hasOwnProperty('TTS') && !ttsObjPro.should_activate_pro_features) {
+    if (window.hasOwnProperty('TTS') && window.hasOwnProperty('ttsObjPro') && !ttsObjPro.should_activate_pro_features) {
         clearTimeout(timer)
         timer = null
 
