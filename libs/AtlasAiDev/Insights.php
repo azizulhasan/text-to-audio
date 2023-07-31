@@ -842,7 +842,7 @@ class Insights {
 		if ( ! empty( $extra ) ) {
 			$data['extra'] = $extra;
 		}
-		$this->client->send_request( $data, 'reason' );
+		$this->client->send_request( $data, 'tracker/reason' );
 		wp_send_json_success();
 		wp_die();
 	}
@@ -1371,7 +1371,7 @@ class Insights {
 				'ip_address'  => $this->__get_user_ip_address(),
 				'version'     => $this->client->getProjectVersion(),
 			];
-			$this->client->send_request( $data, 'reason' );
+			$this->client->send_request( $data, 'tracker/reason' );
 		}
 	}
 	

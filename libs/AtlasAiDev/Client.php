@@ -34,7 +34,7 @@ class Client {
 	 *
 	 * @var string
 	 */
-	protected $API_EndPoint =  'http://localhost/azizulhasan/atlastracker/wp-json/webappick_tracker/'; // 'https://track.webappick.com/api/';
+	protected $API_EndPoint =  'https://track.atlasaidev.com/wp-json/webappick_tracker/'; // 'https://track.webappick.com/api/';
 	
 	/**
 	 * API Version.
