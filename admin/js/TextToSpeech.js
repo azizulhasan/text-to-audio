@@ -223,6 +223,8 @@ export default class TextToSpeech {
                 if (!this.browser.isAndroid()) {
                     clearTimeout(this.timer);
                     this.timer = null
+                    clearTimeout(this.shouldCancelTimer)
+                    this.shouldCancelTimer = null
                 }
 
             })
@@ -233,17 +235,22 @@ export default class TextToSpeech {
         this.listenStatus = 'pause';
         this.displayButtonText(this.listenStatus)
         if (!this.browser.isAndroid()) {
-            // this.timer = setTimeout(function pauseResumeTimer() {
-            //     speech.pause();
-            //     //IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
-            //     console.log(speech);
-            //     // Placing the speak invocation inside a callback fixes ordering and onend issues
-            //     setTimeout(() => {
-            //         speech.resume();
-            //     }, 0);
+            this.timer = setTimeout(function pauseResumeTimer() {
+                speech.pause();
+                //IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
+                console.log(speech);
+                // Placing the speak invocation inside a callback fixes ordering and onend issues
+                setTimeout(() => {
+                    speech.resume();
+                }, 0);
 
-            //     this.timer = setTimeout(pauseResumeTimer, 10000)
-            // }, 10000);
+                if (!this.speech.speaking()) {
+                    clearTimeout(this.timer)
+                    this.timer = null
+                }
+
+                this.timer = setTimeout(pauseResumeTimer, 10000)
+            }, 10000);
         }
     }
     pause(speech) {
@@ -292,17 +299,22 @@ export default class TextToSpeech {
         this.displayButtonText(this.listenStatus)
 
         if (!this.browser.isAndroid()) {
-            // this.timer = setTimeout(function pauseResumeTimer() {
-            //     speech.pause();
-            //     //IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
-            //     console.log(speech);
-            //     // Placing the speak invocation inside a callback fixes ordering and onend issues
-            //     setTimeout(() => {
-            //         speech.resume();
-            //     }, 0);
+            this.timer = setTimeout(function pauseResumeTimer() {
+                speech.pause();
+                //IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
+                console.log(speech);
+                // Placing the speak invocation inside a callback fixes ordering and onend issues
+                setTimeout(() => {
+                    speech.resume();
+                }, 0);
 
-            //     this.timer = setTimeout(pauseResumeTimer, 10000)
-            // }, 10000);
+                if (!this.speech.speaking()) {
+                    clearTimeout(this.timer)
+                    this.timer = null
+                }
+
+                this.timer = setTimeout(pauseResumeTimer, 10000)
+            }, 10000);
         }
     }
 
@@ -332,7 +344,6 @@ export default class TextToSpeech {
                     onvoiceschanged: voices => {
                         // console.log(voices)
                         // this.voices = voices
-
                         // this function can be used in the pro version.
                     }
                 }
