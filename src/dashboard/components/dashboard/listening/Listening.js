@@ -30,7 +30,7 @@ export default function Listening() {
 	});
 	const [listeningLang, setListeningLang] = useState('en_GB');
 	const apiURL = useMemo(() => {
-		if (window.hasOwnProperty('ttsObjPro')) {
+		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features) {
 			return ttsObjPro.api_url + ttsObjPro.api_namespace + "/" + ttsObjPro.api_version + "/";
 		}
 
@@ -39,7 +39,8 @@ export default function Listening() {
 
 
 	useEffect(() => {
-		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active && ttsObjPro.gtts_is_authenticated) {
+		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features === '1') {
+			console.log('yest i become truth')
 			let stored_voices = getLocalStorage(['tta__voices']);
 			if (!stored_voices.tta__voices) {
 				getData(apiURL + 'voices')
@@ -56,7 +57,6 @@ export default function Listening() {
 						console.log(err);
 					});
 			} else {
-				console.log(JSON.parse(stored_voices.tta__voices))
 				let voices = JSON.parse(stored_voices.tta__voices);
 				let langs = []
 				voices.voices.map(voice => {
@@ -166,15 +166,16 @@ export default function Listening() {
 		}
 		if (e.target.name === 'tta__listening_lang') {
 
-			let filteredVoices = speechSynthesisVoices.filter(voice => {
-				return voice.languageCodes[0] == e.target.value;
-			})
-			if (filteredVoices.length === 1) {
-				setListeningSettings({
-					...listeningSettings,
-					...{ ['tta__listening_voice']: filteredVoices[0].languageCodes[0] },
-				});
-			}
+			console.log(speechSynthesisVoices)
+			// let filteredVoices = speechSynthesisVoices.filter(voice => {
+			// 	return voice.languageCodes[0] == e.target.value;
+			// })
+			// if (filteredVoices.length === 1) {
+			// 	setListeningSettings({
+			// 		...listeningSettings,
+			// 		...{ ['tta__listening_voice']: filteredVoices[0].languageCodes[0] },
+			// 	});
+			// }
 			setVoices(filteredVoices)
 		}
 		setListeningSettings({
@@ -240,7 +241,7 @@ export default function Listening() {
 									{' '}
 									Default Listening Voice
 								</option>
-								{voices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active && ttsObjPro.gtts_is_authenticated ? <option key={index} data-lang={voice.languageCodes[0]} value={[voice.name, voice.ssmlGender].join('-')}>
+								{voices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features ? <option key={index} data-lang={voice.languageCodes[0]} value={[voice.name, voice.ssmlGender].join('-')}>
 									{voice.name} {'-'} {voice.ssmlGender}
 								</option> : <option key={index} data-lang={voice.lang} value={voice.name}>
 									{voice.name}

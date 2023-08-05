@@ -6,7 +6,7 @@ import { ToggleButton, Form, Row, Col, Container } from 'react-bootstrap';
  *
  * Scripts
  */
-import { postWithoutImage, setLocalStorage, getLocalStorage } from '../../context/utilities';
+import { postWithoutImage, setLocalStorage, getLocalStorage, getData } from '../../context/utilities';
 import toast from '../../context/Notify';
 
 function Recording() {
@@ -19,7 +19,7 @@ function Recording() {
 	const [checked, setChecked] = useState(false);
 	const [languages, setLanguages] = useState([]);
 	const apiURL = useMemo(() => {
-		if (window.hasOwnProperty('ttsObjPro')) {
+		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features) {
 			return ttsObjPro.api_url + ttsObjPro.api_namespace + "/" + ttsObjPro.api_version + "/";
 		}
 
@@ -45,7 +45,7 @@ function Recording() {
 		 *
 		 */
 
-		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active && ttsObjPro.gtts_is_authenticated) {
+		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features) {
 			let stored_voices = getLocalStorage(['tta__voices']);
 			if (!stored_voices.tta__voices) {
 				getData(apiURL + 'voices')
