@@ -29,11 +29,17 @@ export const postData = async (url = "", data = {}, $method = "POST") => {
   if ($method === 'GET') {
     response = await fetch(url, {
       method: $method, // *GET, POST, PUT, DELETE, etc.
+      headers: {
+        'X-WP-Nonce': ttsObj.rest_nonce
+      },
     });
   } else {
     response = await fetch(url, {
       method: $method, // *GET, POST, PUT, DELETE, etc.
       body: data, // body data type must match "Content-Type" header
+      headers: {
+        'X-WP-Nonce': ttsObj.rest_nonce
+      },
     });
   }
 
@@ -56,6 +62,9 @@ export const postWithoutImage = async (url = "", data = {}) => {
     // },
     method: "POST", // *GET, POST, PUT, DELETE, etc.
     body: data, // body data type must match "Content-Type" header
+    headers: {
+      'X-WP-Nonce': ttsObj.rest_nonce
+    },
   });
   const responseData = await response.json(); // parses JSON response into native JavaScript objects
 
@@ -68,7 +77,11 @@ export const postWithoutImage = async (url = "", data = {}) => {
  * @returns  data mixed.
  */
 export const getData = async (url = "") => {
-  const response = await fetch(url);
+  const response = await fetch(url, {
+    headers: {
+      'X-WP-Nonce': ttsObj.rest_nonce
+    },
+  });
   const data = await response.json();
   return data; // parses JSON response into native JavaScript objects
 };

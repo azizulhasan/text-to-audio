@@ -326,3 +326,162 @@ function is_pro_license_active() {
 
     return false;
 }
+
+
+function tta_is_audio_folder_writable() {
+    $upload_dir             = wp_upload_dir();
+    $base_dir               = $upload_dir['basedir'];
+
+    if ( is_writable( $base_dir ) ) {
+        return true;
+    }
+    return false;
+}
+
+function tta_get_default_languages(){
+    return array(
+        'af'             => 'Afrikaans',
+        'ar'             => 'العربية',
+        'ary'            => 'العربية المغربية',
+        'as'             => 'অসমীয়া',
+        'azb'            => 'گؤنئی آذربایجان',
+        'az'             => 'Azərbaycan dili',
+        'bel'            => 'Беларуская мова',
+        'bg_BG'          => 'Български',
+        'bn_BD'          => 'বাংলা',
+        'bo'             => 'བོད་ཡིག',
+        'bs_BA'          => 'Bosanski',
+        'ca'             => 'Català',
+        'ceb'            => 'Cebuano',
+        'cs_CZ'          => 'Čeština',
+        'cy'             => 'Cymraeg',
+        'da_DK'          => 'Dansk',
+        'de_DE_formal'   => 'Deutsch (Sie)',
+        'de_DE'          => 'Deutsch',
+        'de_CH_informal' => 'Deutsch (Schweiz, Du)',
+        'de_CH'          => 'Deutsch (Schweiz)',
+        'de_AT'          => 'Deutsch (Österreich)',
+        'dsb'            => 'Dolnoserbšćina',
+        'dzo'            => 'རྫོང་ཁ',
+        'el'             => 'Ελληνικά',
+        'en_CA'          => 'English (Canada)',
+        'en_NZ'          => 'English (New Zealand)',
+        'en_ZA'          => 'English (South Africa)',
+        'en_GB'          => 'English (UK)',
+        'en_AU'          => 'English (Australia)',
+        'eo'             => 'Esperanto',
+        'es_DO'          => 'Español de República Dominicana',
+        'es_CR'          => 'Español de Costa Rica',
+        'es_VE'          => 'Español de Venezuela',
+        'es_CO'          => 'Español de Colombia',
+        'es_CL'          => 'Español de Chile',
+        'es_UY'          => 'Español de Uruguay',
+        'es_PR'          => 'Español de Puerto Rico',
+        'es_ES'          => 'Español',
+        'es_GT'          => 'Español de Guatemala',
+        'es_PE'          => 'Español de Perú',
+        'es_MX'          => 'Español de México',
+        'es_EC'          => 'Español de Ecuador',
+        'es_AR'          => 'Español de Argentina',
+        'et'             => 'Eesti',
+        'eu'             => 'Euskara',
+        'fa_AF'          => '(فارسی (افغانستان',
+        'fa_IR'          => 'فارسی',
+        'fi'             => 'Suomi',
+        'fr_FR'          => 'Français',
+        'fr_CA'          => 'Français du Canada',
+        'fr_BE'          => 'Français de Belgique',
+        'fur'            => 'Friulian',
+        'gd'             => 'Gàidhlig',
+        'gl_ES'          => 'Galego',
+        'gu'             => 'ગુજરાતી',
+        'haz'            => 'هزاره گی',
+        'he_IL'          => 'עִבְרִית',
+        'hi_IN'          => 'हिन्दी',
+        'hr'             => 'Hrvatski',
+        'hsb'            => 'Hornjoserbšćina',
+        'hu_HU'          => 'Magyar',
+        'hy'             => 'Հայերեն',
+        'id_ID'          => 'Bahasa Indonesia',
+        'is_IS'          => 'Íslenska',
+        'it_IT'          => 'Italiano',
+        'ja'             => '日本語',
+        'jv_ID'          => 'Basa Jawa',
+        'ka_GE'          => 'ქართული',
+        'kab'            => 'Taqbaylit',
+        'kk'             => 'Қазақ тілі',
+        'km'             => 'ភាសាខ្មែរ',
+        'kn'             => 'ಕನ್ನಡ',
+        'ko_KR'          => '한국어',
+        'ckb'            => 'كوردی‎',
+        'lo'             => 'ພາສາລາວ',
+        'lt_LT'          => 'Lietuvių kalba',
+        'lv'             => 'Latviešu valoda',
+        'mk_MK'          => 'Македонски јазик',
+        'ml_IN'          => 'മലയാളം',
+        'mn'             => 'Монгол',
+        'mr'             => 'मराठी',
+        'ms_MY'          => 'Bahasa Melayu',
+        'my_MM'          => 'ဗမာစာ',
+        'nb_NO'          => 'Norsk bokmål',
+        'ne_NP'          => 'नेपाली',
+        'nl_NL_formal'   => 'Nederlands (Formeel)',
+        'nl_BE'          => 'Nederlands (België)',
+        'nl_NL'          => 'Nederlands',
+        'nn_NO'          => 'Norsk nynorsk',
+        'oci'            => 'Occitan',
+        'pa_IN'          => 'ਪੰਜਾਬੀ',
+        'pl_PL'          => 'Polski',
+        'ps'             => 'پښتو',
+        'pt_PT'          => 'Português',
+        'pt_PT_ao90'     => 'Português (AO90)',
+        'pt_AO'          => 'Português de Angola',
+        'pt_BR'          => 'Português do Brasil',
+        'rhg'            => 'Ruáinga',
+        'ro_RO'          => 'Română',
+        'ru_RU'          => 'Русский',
+        'sah'            => 'Сахалыы',
+        'snd'            => 'سنڌي',
+        'si_LK'          => 'සිංහල',
+        'sk_SK'          => 'Slovenčina',
+        'skr'            => 'سرائیکی',
+        'sl_SI'          => 'Slovenščina',
+        'sq'             => 'Shqip',
+        'sr_RS'          => 'Српски језик',
+        'sv_SE'          => 'Svenska',
+        'sw'             => 'Kiswahili',
+        'szl'            => 'Ślōnskŏ gŏdka',
+        'ta_IN'          => 'தமிழ்',
+        'ta_LK'          => 'தமிழ்',
+        'te'             => 'తెలుగు',
+        'th'             => 'ไทย',
+        'tl'             => 'Tagalog',
+        'tr_TR'          => 'Türkçe',
+        'tt_RU'          => 'Татар теле',
+        'tah'            => 'Reo Tahiti',
+        'ug_CN'          => 'ئۇيغۇرچە',
+        'uk'             => 'Українська',
+        'ur'             => 'اردو',
+        'uz_UZ'          => 'O‘zbekcha',
+        'vi'             => 'Tiếng Việt',
+        'zh_TW'          => '繁體中文',
+        'zh_HK'          => '香港中文版	',
+        'zh_CN'          => '简体中文',
+    );
+}
+
+// Define rtl
+function tta_is_rtl() {
+    global $locale;
+    if ( false !== strpos( $locale, 'ar' )
+        || false !== strpos( $locale, 'he' )
+        || false !== strpos( $locale, 'he_IL' )
+        || false !== strpos( $locale, 'ur' )
+    ) {
+        $rtl = true;
+    } else {
+        $rtl = false;
+    }
+
+    return $rtl;
+}

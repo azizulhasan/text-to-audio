@@ -225,10 +225,12 @@ class TTA_Api_Routes {
     /*
      * Get route access if request is valid.
      */
-
     public function get_route_access() {
 
-        return true;
+        if ( !$_SERVER['HTTP_X_WP_NONCE'] || !wp_verify_nonce( $_SERVER['HTTP_X_WP_NONCE'], 'wp_rest' ) ) {
+            return false;
+        }
 
+        return true;
     }
 }

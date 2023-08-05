@@ -28,7 +28,7 @@ use TTA\TTA;
 use TTA\TTA_Activator;
 use TTA\TTA_Deactivator;
 use TTA_Api\TTA_Api_Routes;
-
+use TTA\TTA_Notices;
 // If this file is called directly, abort.
 if (!defined('WPINC')) {
     die;
@@ -101,6 +101,7 @@ class TTA_Init {
         $plugin = new TTA();
         $plugin->run();
         new TTA_Api_Routes();
+        new TTA_Notices();
         //add plugins action links.
         if( is_admin() ) {
             $basename = plugin_basename( __FILE__ );

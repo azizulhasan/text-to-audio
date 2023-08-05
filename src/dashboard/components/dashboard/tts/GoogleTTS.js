@@ -35,6 +35,12 @@ export default function GoogleTTS() {
             toast('Please select file')
             return
         };
+
+        if (!ttsObjPro.is_folder_writable) {
+            toast("Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.", 'error', { autoClose: 10000 })
+            return
+        };
+
         let data = new FormData();
         data.append('auth_file', googTTSJsonFile[0]);
         data.append('method', 'post');
