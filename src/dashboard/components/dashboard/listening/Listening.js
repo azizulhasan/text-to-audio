@@ -40,7 +40,6 @@ export default function Listening() {
 
 	useEffect(() => {
 		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features === '1') {
-			console.log('yest i become truth')
 			let stored_voices = getLocalStorage(['tta__voices']);
 			if (!stored_voices.tta__voices) {
 				getData(apiURL + 'voices')
@@ -167,15 +166,15 @@ export default function Listening() {
 		if (e.target.name === 'tta__listening_lang') {
 
 			console.log(speechSynthesisVoices)
-			// let filteredVoices = speechSynthesisVoices.filter(voice => {
-			// 	return voice.languageCodes[0] == e.target.value;
-			// })
-			// if (filteredVoices.length === 1) {
-			// 	setListeningSettings({
-			// 		...listeningSettings,
-			// 		...{ ['tta__listening_voice']: filteredVoices[0].languageCodes[0] },
-			// 	});
-			// }
+			let filteredVoices = speechSynthesisVoices.filter(voice => {
+				return voice.languageCodes[0] == e.target.value;
+			})
+			if (filteredVoices.length === 1) {
+				setListeningSettings({
+					...listeningSettings,
+					...{ ['tta__listening_voice']: filteredVoices[0].languageCodes[0] },
+				});
+			}
 			setVoices(filteredVoices)
 		}
 		setListeningSettings({
