@@ -244,17 +244,17 @@ export default class TextToSpeech {
                     speech.resume();
                 }, 0);
 
-                if (!this.speech.speaking()) {
+                this.timer = setTimeout(pauseResumeTimer, 10000)
+
+                if (!speech.speaking()) {
                     clearTimeout(this.timer)
                     this.timer = null
                 }
 
-                this.timer = setTimeout(pauseResumeTimer, 10000)
             }, 10000);
         }
     }
     pause(speech) {
-
         /**
          * If desktop then cancel after 7/8 second
          * If mobile cancel and restart again.
@@ -308,12 +308,12 @@ export default class TextToSpeech {
                     speech.resume();
                 }, 0);
 
-                if (!this.speech.speaking()) {
+                this.timer = setTimeout(pauseResumeTimer, 10000)
+
+                if (!speech.speaking()) {
                     clearTimeout(this.timer)
                     this.timer = null
                 }
-
-                this.timer = setTimeout(pauseResumeTimer, 10000)
             }, 10000);
         }
     }
