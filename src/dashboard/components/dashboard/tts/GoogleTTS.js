@@ -132,13 +132,13 @@ export default function GoogleTTS() {
                                 onChange={handleChange}
                                 name='googTTSJsonFile'
                                 placeholder='googTTSJsonFile'
+                                accept='.json'
                             />
                             <Form.Label className={isAuthenticated ? 'text-green' : 'text-danger'} htmlFor='notice'>
                                 {
                                     ttsObjPro.is_pro_license_active ?
-                                        isAuthenticated ? <><strong>Google Text To Speech Authentication Done. Enjoy the whole featuers of the plugin.</strong></> : authFile ? <><strong>Please click the authenticate button to authenticate Google Text To Speech</strong></> : <><strong>Please upload .json file to authenticate Google Text To Speech.</strong></>
+                                        isAuthenticated ? <><strong>Google Text To Speech Authentication Done. Enjoy the whole featuers of the plugin.</strong></> : <><strong>Please upload a service account  .json file to authenticate Google Text To Speech.</strong></>
                                         : <><strong>Notice:</strong> <p className='text-danger d-inline'>License must be active and valid to enjoy pro features of the plugin.</p>
-
                                             {
                                                 isAuthenticated && <>
                                                     <br />
@@ -157,16 +157,6 @@ export default function GoogleTTS() {
                     </div>
                 </Row>
             </Form>
-            {
-                authFile && <button disabled={!authFile ? true : false} onClick={(e) => authenticateTTS(e)} className={['tta_btn btn-center', ""].join(' ')}  >
-                    Authenticate
-                </button>
-            }
-            {
-                ttsObjPro.is_pro_license_active && isAuthenticated && <button onClick={(e) => revokeAccessToken(e)} className='tta_btn btn-center' style={{ marginLeft: '20px' }}>
-                    Romove Authentication
-                </button>
-            }
         </Container>
     );
 }
