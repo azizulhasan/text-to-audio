@@ -3,9 +3,9 @@ Contributors: atlasaidev, hasanazizul,
 Donate link: http://atlasaidev.com/
 Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, voice to text-comment,
 Requires at least: 4.0
-Tested up to: 6.2
-Requires PHP: 5.6
-Stable tag: 1.3.22
+Tested up to: 6.3
+Requires PHP: 7.4
+Stable tag: 1.3.23
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -27,7 +27,7 @@ There is no need to create an account it’s completely free. Just install the p
 Text To Speech TTS plugin is built on browser speechSynthesis API. No external API is used. Here is the API used [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
 That is why Text To Speech TTS doesn’t support all android phones, aslo all languages. Here you can check which android phone and which device support [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility) API.
 
-Another issue speechSynthesis API is differ browser to browser also divice to divice . So it changes the voices and languages based on browser. one language may available on desktop
+Another issue speechSynthesis API is differ browser to browser also device to device . So it changes the voices and languages based on browser. one language may available on desktop
 It can be not available on mobile phone. One voice may available on desktop, it may be not available on android.
 
 Here you can see some languages which are supported by the browsers based on device.
@@ -37,11 +37,11 @@ Here you can see some languages which are supported by the browsers based on dev
 * Chrome Desktop: UK English, US English, Spanish ( Spain ), Spanish ( United States ), French, Deutsch, Italian, Russian, Dutch, Japanese, Korean, Chinese (China), Chinese (Hong Kong), Chinese (Taiwan) Hindi, Indonesian, Polish, Brazilian Portuguese.
 * Chrome Mobile: English USA, English UK, German, Italian, Russian, French, Spanish, 
 
-* Microsoft Edge Desktop : All Languages
-* Microsoft Edge Mobile : All Languages
+* Microsoft Edge Desktop : All Languages.
+* Microsoft Edge Mobile : All Languages.
 
-* FireFox Desktop: English
-* FireFox Mobile: English USA, English UK, German, Italian, Russian, French, Spanish
+* FireFox Desktop: English.
+* FireFox Mobile: English USA, English UK, German, Italian, Russian, French, Spanish.
 
 
 **Listening is a better way to read:**
@@ -77,13 +77,13 @@ Breeze through your content 2-3x faster than it takes to read it. Do more at onc
 This plugin is built on browser API. No external API is used. Here is the API used [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis)
 That is why it doesn’t support all android phones aslo all languages. Here you can check which android phone and which device support this [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility) API
 
-Another issue speechSynthesis API is differ browser to browser also divice to divice . So it changes the voices and languages based on browser. one language may available on desktop
+Another issue speechSynthesis API is differ browser to browser also device to device . So it changes the voices and languages based on browser. one language may available on desktop
 It can be not available on mobile phone. One voice may available on desktop, it may be not available on android.
 
 If you still facing problems regarding browser issues please on a ticket.
 
 = Another voice language on mobile =
-speechSynthesis API is differ browser to browser also divice to divice . So it changes the voices and languages based on browser. one language may available on desktop
+speechSynthesis API is differ browser to browser also device to device . So it changes the voices and languages based on browser. one language may available on desktop
 It can be not available on mobile phone. One voice may available on desktop, it may be not available on android.
 
 = How to enable ``speechSynthesis`` on FireFox? =
@@ -144,6 +144,11 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 💎 TRANSLATION REQUEST 💎
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+= 1.3.23 ( August 9 , 2023) =
+* Tested : WordPress 6.3
+* PHP version: PHP version 7.4 is recomended as WordPress 6.3 [recomendation](https://wordpress.org/download/#:~:text=Recommend%20PHP%207.4%20or%20greater%20and%20MySQL%20version%205.7%20or%20MariaDB%20version%2010.4%20or%20greater.)
+* Updated: Documentation updated.
 
 = 1.3.22 ( JULY 27 , 2023) =
 * Added : Invitation to translate plugin notice added to dashboard.
