@@ -69,7 +69,7 @@ class TTA_Notices {
             <div class="tta-notice notice notice-info is-dismissible" dir="<?php echo tta_is_rtl() ? 'ltr' : 'auto'?>" data-which="translate" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <p><?php
 					printf(
-						esc_html__( '%6$s %2$s  We are looking for people to translate this plugin%4$s If you can help we would love for you to jump in and contact with us %5$s, we will guide you. %3$s Thanks for using %1$s.', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
+						esc_html__( '%6$s %2$s  We are looking for people to translate this plugin%4$s If you can help we would here you. Please contact with us %5$s, we will guide you. %3$s Thanks for using %1$s.', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
 						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						'<div class="tta-review-notice-logo"></div>',
 						'<br/>',
