@@ -37,8 +37,14 @@ export default function Settings() {
 				setSettings({ ...res.data });
 			});
 
-		let tempPostTypes = wp.hooks.applyFilters('tts_display_button_on_post_types', structuredClone(postTypes))
-		setPostTypes(tempPostTypes)
+
+		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features) {
+			let tempPostTypes = wp.hooks.applyFilters('tts_display_button_on_post_types', structuredClone(Object.keys(ttsObjPro.post_types)))
+			setPostTypes(tempPostTypes)
+		} else {
+			let tempPostTypes = wp.hooks.applyFilters('tts_display_button_on_post_types', structuredClone(postTypes))
+			setPostTypes(tempPostTypes)
+		}
 
 	}, []);
 

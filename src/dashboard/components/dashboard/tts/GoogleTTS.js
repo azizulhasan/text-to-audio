@@ -49,6 +49,7 @@ export default function GoogleTTS() {
             .then((res) => {
                 if (res.status) {
                     toast('File uploaded successfully');
+                    setIsAuthenticated(res.status)
                 } else {
                     toast('Something went wrong');
                 }
@@ -102,6 +103,15 @@ export default function GoogleTTS() {
             toast('You have to be athenticated to revoke.');
             return;
         }
+        let delete_file = false;
+        if (confirm('Do you want to revoke access and delete the file uploaded during authentication. If you delete the file you have to upload the file again. Make sure you have a backup otherwise, you have to crete another auth file from Google Cloud text to speech.')) {
+            delete_file = true;
+        }
+
+        if (!delete_file) {
+            return;
+        }
+
         postData(apiURL + 'revoke_access_token', '', 'GET')
             .then((res) => {
                 if (res) {
@@ -132,7 +142,6 @@ export default function GoogleTTS() {
                                 onChange={handleChange}
                                 name='googTTSJsonFile'
                                 placeholder='googTTSJsonFile'
-                                accept='.json'
                             />
                             <Form.Label className={isAuthenticated ? 'text-green' : 'text-danger'} htmlFor='notice'>
                                 {
@@ -157,6 +166,11 @@ export default function GoogleTTS() {
                     </div>
                 </Row>
             </Form>
+            {
+                ttsObjPro.is_pro_license_active && isAuthenticated && <button onClick={(e) => revokeAccessToken(e)} className='tta_btn btn-center' style={{ marginLeft: '20px' }}>
+                    Romove Authentication
+                </button>
+            }
         </Container>
     );
 }
