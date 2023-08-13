@@ -40,6 +40,11 @@ let timer = setTimeout(function loadProButton() {
 
         let buttons = [...document.querySelectorAll('.tts__listent_content')]
         if (buttons.length) {
+
+            if (window.TextToSpeechProPlayer) {
+                clearTimeout(timer)
+                timer = null
+            }
             buttons.map(button => {
                 let buttonId = button.getAttribute('data-id')
                 // button.attachShadow({ mode: 'open' });
@@ -48,6 +53,7 @@ let timer = setTimeout(function loadProButton() {
                     button
                 )
             })
+
         }
 
     }
