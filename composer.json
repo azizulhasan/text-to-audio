@@ -9,12 +9,12 @@
     ],
     "autoload": {
         "psr-4": {
-            "TTA\\" : "includes",
-            "TTA_Admin\\" : "admin",
-            "TTA_Public\\" : "public",
-            "TTA_Api\\" : "api"
+            "TTA\\": "includes",
+            "TTA_Admin\\": "admin",
+            "TTA_Public\\": "public",
+            "TTA_Api\\": "api",
+            "AtlasAiDev\\AppService\\": "libs/AtlasAiDev"
         }
     },
-
     "require": {}
 }

@@ -1,19 +1,22 @@
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState, } from 'react';
 import {
 	BrowserRouter as Router,
 	HashRouter,
 	Routes,
 	Route,
+
 } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 
-import 'react-toastify/dist/ReactToastify.css';
+
 /**
  * Scripts
  */
 import './assets/css/styles.css';
+import 'react-toastify/dist/ReactToastify.css';
+
 import './assets/js/scripts.js';
-import { addScripts, getComponentName } from '../context/utilities';
+import { addScripts, getComponentName, isPro } from '../context/utilities';
 
 /**
  * Dashboard Components
@@ -25,6 +28,7 @@ import Recording from './recording/Recording';
 import Listening from './listening/Listening';
 import Customize from './customize/Customize';
 import Docs from './docs/Docs';
+import GoogleTTS from './tts/GoogleTTS';
 
 function Dashboard() {
 	// authenTicateUser();
@@ -34,11 +38,17 @@ function Dashboard() {
 			setComponentName(getComponentName());
 		}).observe(document, { subtree: true, childList: true });
 	}, [componentName]);
+	const [isProVersion, setIsProVersion] = useState(false)
+
+	useEffect(() => {
+		setIsProVersion(ttsObj.is_pro_active)
+	}, [])
+
+
 
 	addScripts([
 		'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js',
 	]);
-
 	return (
 		<HashRouter hashType='noslash'>
 			<ToastContainer
@@ -54,7 +64,7 @@ function Dashboard() {
 			/>
 			<DashboardTopNav />
 			<div id='ttaLayoutSidenav'>
-				<DashboardSideNav />
+				<DashboardSideNav isProVersion={isProVersion} />
 				<div id='ttaLayoutSidenav_content'>
 					<main>
 						<div className='container-fluid'>
@@ -80,7 +90,9 @@ function Dashboard() {
 									element={<Recording />}
 								/>
 								<Route path='/faq' element={<Docs />} />
+								<Route path='/gtts' element={<GoogleTTS />} />
 							</Routes>
+
 						</div>
 					</main>
 					<footer className='py-4 mt-auto footer_bg'>

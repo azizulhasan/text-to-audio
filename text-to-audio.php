@@ -46,7 +46,6 @@ if (!defined('ABSPATH')) {
  */
 
 if (!defined('TEXT_TO_AUDIO_VERSION')) {
-
     define('TEXT_TO_AUDIO_VERSION', '1.3.23');
 }
 
@@ -64,9 +63,21 @@ if (!defined('TEXT_TO_AUDIO_ROOT_FILE')) {
 
     define('TEXT_TO_AUDIO_ROOT_FILE', __FILE__);
 }
+
+if (!defined('TTA_ROOT_FILE_NAME')) {
+    $path = explode( DIRECTORY_SEPARATOR, TEXT_TO_AUDIO_ROOT_FILE);
+    $file = end($path);
+    define('TTA_ROOT_FILE_NAME', $file);
+}
+
 if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
 
     define('TEXT_TO_AUDIO_PLUGIN_NAME', 'Text To Speech TTS');
+}
+
+if (!defined('TTA_LIBS_PATH')) {
+
+    define('TTA_LIBS_PATH', dirname(TEXT_TO_AUDIO_ROOT_FILE) . '/libs/');
 }
 
 /**
@@ -122,6 +133,7 @@ class TTA_Init {
             ]);
 
         }
+
         
     }
 

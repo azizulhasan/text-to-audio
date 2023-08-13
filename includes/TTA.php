@@ -5,6 +5,7 @@ namespace TTA;
 use TTA\TTA_i18n;
 use TTA\TTA_Loader;
 use TTA_Admin\TTA_Admin;
+use TTA\TTA_Lib_AtlasAiDev;
 
 /**
  * The file that defines the core plugin class
@@ -97,6 +98,11 @@ class TTA {
         require_once plugin_dir_path(dirname(__FILE__)) . 'includes/helpers.php';
 
         require_once plugin_dir_path(dirname(__FILE__)) . 'includes/TTA_Hooks.php';
+
+
+        if(!defined('TTA_PRO_PLUGIN_PATH')){
+            TTA_Lib_AtlasAiDev::instance()->init();
+        }
 
         $this->loader = new TTA_Loader();
 

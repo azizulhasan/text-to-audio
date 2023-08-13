@@ -14,6 +14,10 @@ class ComposerStaticInit7f6653a5d36e71e944dcac886a5fa0c4
             'TTA_Admin\\' => 10,
             'TTA\\' => 4,
         ),
+        'A' => 
+        array (
+            'AtlasAiDev\\AppService\\' => 22,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -32,6 +36,10 @@ class ComposerStaticInit7f6653a5d36e71e944dcac886a5fa0c4
         'TTA\\' => 
         array (
             0 => __DIR__ . '/../..' . '/includes',
+        ),
+        'AtlasAiDev\\AppService\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/libs/AtlasAiDev',
         ),
     );
 

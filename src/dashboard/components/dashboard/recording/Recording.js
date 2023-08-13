@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 import { ToggleButton, Form, Row, Col, Container } from 'react-bootstrap';
 
@@ -6,8 +6,9 @@ import { ToggleButton, Form, Row, Col, Container } from 'react-bootstrap';
  *
  * Scripts
  */
-import { postWithoutImage } from '../../context/utilities';
+import { postWithoutImage, setLocalStorage, getLocalStorage, getData } from '../../context/utilities';
 import toast from '../../context/Notify';
+import UpgradeToPro from '../../UpgradeToPro';
 
 function Recording() {
 	const [settings, setSettings] = useState({
@@ -18,6 +19,13 @@ function Recording() {
 	});
 	const [checked, setChecked] = useState(false);
 	const [languages, setLanguages] = useState([]);
+	const apiURL = useMemo(() => {
+		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features) {
+			return ttsObjPro.api_url + ttsObjPro.api_namespace + "/" + ttsObjPro.api_version + "/";
+		}
+
+		return ttsObj.api_url + ttsObj.api_namespace + "/" + ttsObj.api_version + "/";
+	})
 
 	useEffect(() => {
 		/**
@@ -38,15 +46,44 @@ function Recording() {
 		 *
 		 */
 
-		setTimeout(() => {
-			let langs = []
-			window.speechSynthesis.getVoices().map(item => {
-				if (!langs.includes(item.lang)) {
-					langs.push(item.lang)
+		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features) {
+			let stored_voices = getLocalStorage(['tta__voices']);
+			if (!stored_voices.tta__voices) {
+				getData(apiURL + 'voices')
+					.then((res) => {
+						setLocalStorage({ tta__voices: res.voices })
+					})
+					.catch((err) => {
+						console.log(err);
+					});
+			} else {
+				let voices = JSON.parse(stored_voices.tta__voices);
+				let langs = []
+				voices.voices.map(voice => {
+					if (!langs.includes(voice.languageCodes[0])) {
+						langs.push(voice.languageCodes[0])
+					}
+				})
+
+				setLanguages(langs)
+			}
+		} else {
+			let timer = setTimeout(function handleTime() {
+				timer = setTimeout(handleTime, 1000)
+				if (window.hasOwnProperty('speechSynthesis') && window.speechSynthesis.getVoices().length) {
+					clearTimeout(timer)
+					timer = null
+					let langs = []
+					window.speechSynthesis.getVoices().map(item => {
+						if (!langs.includes(item.lang)) {
+							langs.push(item.lang)
+						}
+					})
+					setLanguages(langs)
 				}
 			})
-			setLanguages(langs)
-		}, 800);
+		}
+
 	}, []);
 
 	/**
@@ -95,85 +132,92 @@ function Recording() {
 
 	return (
 		<Container>
-			<Row id='settings' className='mt-4'>
-				<Col xs={12} sm={12} lg={12} className='mt-2'>
-					<h4>SpeechRecognition</h4>
-				</Col>
-			</Row>
-			<Form onSubmit={handleSubmit}>
-				<Row className='border '>
-					<Col xs={12} sm={12} lg={12} className=''>
-						<Form.Group>
-							<Form.Label htmlFor='tta__recording__lang'>
-								Record In{' '}
-							</Form.Label>
-							<Form.Select
-								onChange={handleChange}
-								name='tta__recording__lang'
-								id='tta__recording__lang'
-								value={settings.tta__recording__lang}
-								aria-label='Default select example'>
-								<option disabled>
-									{' '}
-									Default Record Language
-								</option>
-								{languages.map((lang, index) => {
-									return (
-										<option key={index} value={lang}>
-											{lang}
+			<Row>
+				<Col xs={12} sm={12} lg={8}>
+					<Row id='settings' className='mt-4'>
+						<Col xs={12} sm={12} lg={12} className='mt-2'>
+							<h4>SpeechRecognition</h4>
+						</Col>
+					</Row>
+					<Form onSubmit={handleSubmit}>
+						<Row className='border '>
+							<Col xs={12} sm={12} lg={12} className=''>
+								<Form.Group>
+									<Form.Label htmlFor='tta__recording__lang'>
+										Record In{' '}
+									</Form.Label>
+									<Form.Select
+										onChange={handleChange}
+										name='tta__recording__lang'
+										id='tta__recording__lang'
+										value={settings.tta__recording__lang}
+										aria-label='Default select example'>
+										<option disabled>
+											{' '}
+											Default Record Language
 										</option>
-									);
-								})}
-							</Form.Select>
-						</Form.Group>
-					</Col>
-					<Col xs={12} sm={6} lg={6} className='mt-5'>
-						<Form.Group>
-							<Form.Label className='pr-2' htmlFor='toggle-check'>
-								Continuous Record
-							</Form.Label>
-							<ToggleButton
-								id='toggle-check'
-								type='checkbox'
-								className='form-controll'
-								variant={
-									checked
-										? 'outline-primary'
-										: 'outline-danger'
-								}
-								checked={checked}
-								value='1'
-								onChange={(e) =>
-									setChecked(e.currentTarget.checked)
-								}>
-								{checked ? 'Record' : 'Not Record'}
-							</ToggleButton>
-						</Form.Group>
-					</Col>
+										{languages.map((lang, index) => {
+											return (
+												<option key={index} value={lang}>
+													{lang}
+												</option>
+											);
+										})}
+									</Form.Select>
+								</Form.Group>
+							</Col>
+							<Col xs={12} sm={6} lg={6} className='mt-5'>
+								<Form.Group>
+									<Form.Label className='pr-2' htmlFor='toggle-check'>
+										Continuous Record
+									</Form.Label>
+									<ToggleButton
+										id='toggle-check'
+										type='checkbox'
+										className='form-controll'
+										variant={
+											checked
+												? 'outline-primary'
+												: 'outline-danger'
+										}
+										checked={checked}
+										value='1'
+										onChange={(e) =>
+											setChecked(e.currentTarget.checked)
+										}>
+										{checked ? 'Record' : 'Not Record'}
+									</ToggleButton>
+								</Form.Group>
+							</Col>
 
-					<Col xs={12} sm={6} lg={6} className='mt-3'>
-						<Form.Group>
-							<Form.Label htmlFor='tta__sentence_delimiter'>
-								Sentence Delimiter
-							</Form.Label>
-							<Form.Control
-								type='text'
-								id='tta__sentence_delimiter'
-								onChange={handleChange}
-								value={settings.tta__sentence_delimiter}
-								name='tta__sentence_delimiter'
-								placeholder='Sendtence Delimiter'
-							/>
-						</Form.Group>
-					</Col>
+							<Col xs={12} sm={6} lg={6} className='mt-3'>
+								<Form.Group>
+									<Form.Label htmlFor='tta__sentence_delimiter'>
+										Sentence Delimiter
+									</Form.Label>
+									<Form.Control
+										type='text'
+										id='tta__sentence_delimiter'
+										onChange={handleChange}
+										value={settings.tta__sentence_delimiter}
+										name='tta__sentence_delimiter'
+										placeholder='Sendtence Delimiter'
+									/>
+								</Form.Group>
+							</Col>
 
-					<div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
-						<button type='submit' className='tta_btn btn-center'>
-							Submit
-						</button>
-					</div>
-				</Row>
-			</Form>
+							<div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
+								<button type='submit' className='tta_btn btn-center'>
+									Submit
+								</button>
+							</div>
+						</Row>
+					</Form>
+				</Col>
+				<Col xs={12} sm={12} lg={4}>
+					<UpgradeToPro />
+				</Col>
+			</Row >
 		</Container>
 	);
 }
