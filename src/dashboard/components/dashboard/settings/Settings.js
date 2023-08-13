@@ -25,7 +25,6 @@ export default function Settings() {
 	]);
 
 
-
 	useEffect(() => {
 		/**
 		 * Get data from and display to table.

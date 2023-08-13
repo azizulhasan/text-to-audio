@@ -57,7 +57,11 @@ export default function TexToSpeechThree({ buttonId, button, cssStyle = '' }) {
                 cssStyle && <style>{cssStyle}</style>
             }
             {
-                shouldFloat ? <div className="custom-position" >{getButtonHTML()}</div> : getButtonHTML()
+                shouldFloat ? <div className="custom-position" style={{
+                    border: '1px solid rgb(61, 61, 61)',
+                    borderRadius: '2px',
+                    overflow: 'visible !important'
+                }} >{getButtonHTML()}</div> : getButtonHTML()
             }
         </>
     )

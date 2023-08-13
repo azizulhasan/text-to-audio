@@ -240,7 +240,11 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
         return getFormattedTime(t);
     }
 
-
+    /**
+     * 
+     * @param {*} t 
+     * @returns 
+     */
     const getFormattedTime = (t) => {
         let seconds = Math.floor((t / 1000) % 60);
         let minutes = Math.floor((t / 1000 / 60) % 60);
