@@ -90,6 +90,8 @@ class TTA_Admin {
             ],
             'ajax_url' => admin_url('admin-ajax.php'),
             'api_url' => esc_url_raw(rest_url()),
+            'api_namespace' => 'tta',
+            'api_version' => 'v1',
             'image_url' => WP_PLUGIN_URL . '/text-to-audio/admin/images',
             'plugin_url' => WP_PLUGIN_URL . '/text-to-audio',
             'nonce' => wp_create_nonce(TEXT_TO_AUDIO_NONCE),

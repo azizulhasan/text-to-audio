@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ToggleButton, Form, Row, Col } from 'react-bootstrap';
+import { ToggleButton, Form, Row, Col, Container } from 'react-bootstrap';
 
 /**
  *
@@ -7,6 +7,7 @@ import { ToggleButton, Form, Row, Col } from 'react-bootstrap';
  */
 import { postWithoutImage } from '../../context/utilities';
 import toast from '../../context/Notify';
+import UpgradeToPro from '../../UpgradeToPro';
 
 export default function Settings() {
 	const [settings, setSettings] = useState(() => {
@@ -91,95 +92,103 @@ export default function Settings() {
 	return (
 
 		<React.Fragment>
-			<Form onSubmit={handleSubmit}>
-				<Row className=' mt-3'>
-					<Col xs={12} sm={6} lg={4}>
-						<Form.Label id='tta__settings_enable_button_add'>
-							Enable button add
-						</Form.Label>
-					</Col>
+			<Container>
+				<Row>
 					<Col xs={12} sm={12} lg={8}>
-						<Form.Group>
-							<ToggleButton
-								id='toggle-check'
-								type='checkbox'
-								className='form-controll'
-								name='tta__settings_enable_button_add'
-								variant={
-									settings.tta__settings_enable_button_add
-										? 'outline-primary'
-										: 'outline-danger'
-								}
-								checked={settings.tta__settings_enable_button_add}
-								onChange={(e) =>
-									handleChange(e)
-								}>
-								{settings.tta__settings_enable_button_add ? 'Enable' : 'Disable'}
-							</ToggleButton>
-						</Form.Group>
+						<Form onSubmit={handleSubmit}>
+							<Row className=' mt-3'>
+								<Col xs={12} sm={6} lg={4}>
+									<Form.Label id='tta__settings_enable_button_add'>
+										Enable button add
+									</Form.Label>
+								</Col>
+								<Col xs={12} sm={12} lg={8}>
+									<Form.Group>
+										<ToggleButton
+											id='toggle-check'
+											type='checkbox'
+											className='form-controll'
+											name='tta__settings_enable_button_add'
+											variant={
+												settings.tta__settings_enable_button_add
+													? 'outline-primary'
+													: 'outline-danger'
+											}
+											checked={settings.tta__settings_enable_button_add}
+											onChange={(e) =>
+												handleChange(e)
+											}>
+											{settings.tta__settings_enable_button_add ? 'Enable' : 'Disable'}
+										</ToggleButton>
+									</Form.Group>
+								</Col>
+							</Row>
+							<Row className='mt-4'>
+								<Col xs={12} sm={6} lg={4}>
+									<Form.Label id='tta__settings_allow_listening_for_post_types'>
+										Allow Listening For Post Type
+									</Form.Label>
+								</Col>
+								<Col xs={12} sm={12} lg={8}>
+									<Form.Group controlId="tta__settings_allow_listening_for_post_types">
+										<Form.Select
+											name="tta__settings_allow_listening_for_post_types"
+											onChange={handleChange}
+											multiple={true}
+											value={settings.tta__settings_allow_listening_for_post_types}>
+											<option value={'0'}>
+												Select recording post type
+											</option>
+											{postTypes.length && postTypes.map((posttype, i) => {
+												return (
+													<option key={i} value={posttype}>
+														{posttype}
+													</option>
+												);
+											})}
+										</Form.Select>
+									</Form.Group>
+								</Col>
+							</Row>
+							<Row className=' mt-3'>
+								<Col xs={12} sm={6} lg={4}>
+									<Form.Label id='tta__settings_display_btn_icon'>
+										Enable Button Icon
+									</Form.Label>
+								</Col>
+								<Col xs={12} sm={12} lg={8}>
+									<Form.Group>
+										<ToggleButton
+											id='showIcon-check'
+											type='checkbox'
+											className='form-controll '
+											variant={
+												settings.tta__settings_display_btn_icon
+													? 'outline-primary'
+													: 'outline-danger'
+											}
+											checked={settings.tta__settings_display_btn_icon}
+											name='tta__settings_display_btn_icon'
+											onChange={(e) =>
+												handleChange(e)
+											}>
+											{settings.tta__settings_display_btn_icon ? 'Enable' : 'Disable'}
+										</ToggleButton>
+									</Form.Group>
+								</Col>
+								<div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
+									<button type='submit' className='tta_btn  btn-block'>
+										Submit
+									</button>
+								</div>
+							</Row>
+						</Form>
+					</Col>
+					<Col xs={12} sm={12} lg={4}>
+						<UpgradeToPro />
 					</Col>
 				</Row>
-				<Row className='mt-4'>
-					<Col xs={12} sm={6} lg={4}>
-						<Form.Label id='tta__settings_allow_listening_for_post_types'>
-							Allow Listening For Post Type
-						</Form.Label>
-					</Col>
-					<Col xs={12} sm={12} lg={8}>
-						<Form.Group controlId="tta__settings_allow_listening_for_post_types">
-							<Form.Select
-								name="tta__settings_allow_listening_for_post_types"
-								onChange={handleChange}
-								multiple={true}
-								value={settings.tta__settings_allow_listening_for_post_types}>
-								<option value={'0'}>
-									Select recording post type
-								</option>
-								{postTypes.length && postTypes.map((posttype, i) => {
-									return (
-										<option key={i} value={posttype}>
-											{posttype}
-										</option>
-									);
-								})}
-							</Form.Select>
-						</Form.Group>
-					</Col>
-				</Row>
-
-				<Row className=' mt-3'>
-					<Col xs={12} sm={6} lg={4}>
-						<Form.Label id='tta__settings_display_btn_icon'>
-							Enable Button Icon
-						</Form.Label>
-					</Col>
-					<Col xs={12} sm={12} lg={8}>
-						<Form.Group>
-							<ToggleButton
-								id='showIcon-check'
-								type='checkbox'
-								className='form-controll '
-								variant={
-									settings.tta__settings_display_btn_icon
-										? 'outline-primary'
-										: 'outline-danger'
-								}
-								checked={settings.tta__settings_display_btn_icon}
-								name='tta__settings_display_btn_icon'
-								onChange={(e) =>
-									handleChange(e)
-								}>
-								{settings.tta__settings_display_btn_icon ? 'Enable' : 'Disable'}
-							</ToggleButton>
-						</Form.Group>
-					</Col>
-					<div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
-						<button type='submit' className='tta_btn  btn-block'>
-							Submit
-						</button>
-					</div>
-				</Row>
-			</Form>
+			</Container>
 		</React.Fragment>
 	);
 }

@@ -23,9 +23,6 @@ class TTA_Notices {
 
 		add_action('wp_ajax_tta_save_review_notice', [ $this, 'tta_save_review_notice' ] );
 		add_action('wp_ajax_tta_hide_notice', [ $this, 'tta_hide_notice' ] );
-
-
-
 	}
 
 

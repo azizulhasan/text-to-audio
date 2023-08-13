@@ -67,7 +67,7 @@ export default function Customize() {
 		localStorage.setItem('demo_listening_content', initialText)
 		setSpeakingText(initialText);
 		setTimeout(() => {
-			if (window.hasOwnProperty('TTS') && ttsObjPro.is_pro_license_active) {
+			if (window.hasOwnProperty('TTS') && window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active) {
 				window.TTS.contents[1] = initialText;
 			}
 		}, 1000)
@@ -193,7 +193,7 @@ export default function Customize() {
 	const setText = (e) => {
 		setSpeakingText(e.target.value);
 		localStorage.setItem('demo_listening_content', e.target.value);
-		if (window.hasOwnProperty('TTS') && ttsObjPro.is_pro_license_active) {
+		if (window.hasOwnProperty('TTS') && window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active) {
 			window.TTS.contents[1] = e.target.value;;
 		}
 	};

@@ -41,8 +41,6 @@ function Dashboard() {
 	const [isProVersion, setIsProVersion] = useState(false)
 
 	useEffect(() => {
-		let pro = wp.hooks.applyFilters('tts_is_pro_active', false);
-		let licenseCheck = wp.hooks.applyFilters('tts_is_pro_license_active', false);
 		setIsProVersion(ttsObj.is_pro_active)
 	}, [])
 
@@ -92,9 +90,7 @@ function Dashboard() {
 									element={<Recording />}
 								/>
 								<Route path='/docs' element={<Docs />} />
-								{
-									isProVersion && <Route path='/gtts' element={<GoogleTTS />} />
-								}
+								<Route path='/gtts' element={<GoogleTTS />} />
 							</Routes>
 
 						</div>

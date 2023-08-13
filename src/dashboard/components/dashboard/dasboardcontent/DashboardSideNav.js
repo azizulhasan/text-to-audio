@@ -7,9 +7,6 @@ export default function DashboardSideNav({ isProVersion }) {
 			flexBasis: '150px',
 		},
 	};
-
-
-
 	return (
 		<div id='ttaTtaLayoutSidenav_nav' style={style.side_nav}>
 			<nav
@@ -49,14 +46,12 @@ export default function DashboardSideNav({ isProVersion }) {
 							</div>
 							Support Docs
 						</Link>
-						{
-							(isProVersion) ? <Link className='nav-link' to={'/gtts'}>
-								<div className='sb-nav-link-icon'>
-									<i className='fas fa-edit'></i>
-								</div>
-								TTS
-							</Link> : null
-						}
+						<Link className='nav-link' to={'/gtts'}>
+							<div className='sb-nav-link-icon'>
+								<i className='fas fa-edit'></i>
+							</div>
+							{isProVersion ? "TTS" : "TTS Pro"}
+						</Link>
 					</div>
 				</div>
 			</nav>

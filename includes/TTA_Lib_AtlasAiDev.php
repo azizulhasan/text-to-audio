@@ -62,7 +62,7 @@ final class TTA_Lib_AtlasAiDev {
         $this->insights  = $this->client->insights(); // Plugin Insights
         $this->promotion = $this->client->promotions(); // Promo offers
 
-        $this->promotion->set_source( 'https://api.bitbucket.org/2.0/snippets/woofeed/RLbyop/files/woo-feed-notice.json' );
+        $this->promotion->set_source( 'https://gist.githubusercontent.com/azizulhasan/afcc74f398b290e586f3a4578341b699/raw/text-to-speech-pro.json' );
 
         // Initialize
         $this->insightInit();
