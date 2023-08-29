@@ -195,7 +195,7 @@ let TTA = {
 				if (!TTA.browser.isAndroid()) {
 					clearTimeout(TTA.timer);
 				}
-
+				window.sessionStorage.setItem('tts_paused_by_intention', false);
 			})
 			.catch(e => {
 				console.error("An error occurred :", e);
@@ -310,6 +310,7 @@ let TTA = {
 				TTA.voices = data.voices;
 				TTA.browser = new BrowserSupport(ttsObj, data.voices, TTA.ttsListeningSettings.tta__listening_lang, TTA.ttsListeningSettings.tta__listening_voice)
 				TTA._prepareSpeakButton(TTA.speech);
+				window.sessionStorage.setItem('tts_paused_by_intention', false);
 			})
 			.catch(e => {
 				console.error("An error occured while initializing : ", e);
@@ -324,10 +325,9 @@ let TTA = {
 
 			} else if (TTA.listenStatus == 'pause') {
 				TTA.pause(speech)
-
+				window.sessionStorage.setItem('tts_paused_by_intention', true);
 			} else if (TTA.listenStatus == 'resume') {
 				TTA.resume(speech)
-
 			}
 		});
 
@@ -339,7 +339,12 @@ let TTA = {
 			}
 
 			if ('visible' === document.visibilityState && TTA.listenStatus === 'resume') {
-				TTA.resume(speech)
+				let isPausedByIntention = JSON.parse(window.sessionStorage.getItem('tts_paused_by_intention'));
+				if (isPausedByIntention) {
+					window.sessionStorage.setItem('tts_paused_by_intention', false);
+				} else {
+					TTA.resume(speech)
+				}
 			}
 		});
 	}
