@@ -2,7 +2,7 @@
 export default function UpgradeToPro({ }) {
     return <>
         {
-            window.hasOwnProperty('ttsObj') && ttsObj.is_pro_license_active ? <div className="card p-0">
+            window.hasOwnProperty('ttsObj') && !ttsObj.is_pro_license_active ? <div className="card p-0">
                 <div className="card-header bg-primary text-center text-white">
                     Upgrade to Pro
                 </div>

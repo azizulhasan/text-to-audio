@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 export default function DashboardSideNav({ isProVersion }) {
@@ -46,12 +46,12 @@ export default function DashboardSideNav({ isProVersion }) {
 							</div>
 							FAQ
 						</Link>
-						{/* <Link className='nav-link' to={'/gtts'}>
+						<Link className='nav-link' to={'/gtts'}>
 							<div className='sb-nav-link-icon'>
 								<i className='fas fa-edit'></i>
 							</div>
 							{isProVersion ? "TTS" : "TTS Pro"}
-						</Link> */}
+						</Link>
 					</div>
 				</div>
 			</nav>
