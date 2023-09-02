@@ -45,10 +45,6 @@ if (!defined('ABSPATH')) {
  * Rename this for your plugin and update it as you release new versions.
  */
 
-if (!defined('TEXT_TO_AUDIO_VERSION')) {
-    define('TEXT_TO_AUDIO_VERSION', '1.3.23');
-}
-
 if (!defined('TEXT_TO_AUDIO_NONCE')) {
 
     define('TEXT_TO_AUDIO_NONCE', 'TEXT_TO_AUDIO_NONCE');
@@ -70,11 +66,6 @@ if (!defined('TTA_ROOT_FILE_NAME')) {
     define('TTA_ROOT_FILE_NAME', $file);
 }
 
-if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
-
-    define('TEXT_TO_AUDIO_PLUGIN_NAME', 'Text To Speech TTS');
-}
-
 if (!defined('TTA_LIBS_PATH')) {
 
     define('TTA_LIBS_PATH', dirname(TEXT_TO_AUDIO_ROOT_FILE) . '/libs/');
@@ -93,6 +84,14 @@ if (!defined('TTA_LIBS_PATH')) {
 class TTA_Init {
 
     public function __construct() {
+        if (!defined('TEXT_TO_AUDIO_VERSION')) {
+            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '1.3.23'));
+        }
+
+        if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
+            define('TEXT_TO_AUDIO_PLUGIN_NAME', apply_filters('tts_plugin_name', 'Text To Speech TTS' ) );
+        }
+
         $this->run();
     }
 
@@ -112,6 +111,7 @@ class TTA_Init {
                 4   // parameters
             );
         }
+        
 
         //add button text
         if( ! get_option( 'tta__button_text_arr' ) ) {
