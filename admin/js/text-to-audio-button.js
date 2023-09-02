@@ -38,6 +38,7 @@ class TTSPlayButton extends HTMLElement {
                             this.speech = this.speech.getData()
                             if (this.speech.listenStatus == 'pause') {
                                 this.speech.pause(this.speech.speech)
+                                window.sessionStorage.setItem('tts_paused_by_intention', true);
                             } else if (this.speech.listenStatus == 'resume') {
                                 this.speech.resume(this.speech.speech)
                             }

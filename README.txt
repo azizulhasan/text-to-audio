@@ -5,7 +5,7 @@ Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, 
 Requires at least: 4.0
 Tested up to: 6.3
 Requires PHP: 7.4
-Stable tag: 1.3.23
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -20,6 +20,7 @@ There is no need to create an account it’s completely free. Just install the p
 ### Useful Links:
 > * [Live Demo](http://atlasaidev.com/text-to-speech/)
 > * [Request A Feature](http://atlasaidev.com/contact-us/)
+> * [Pro Version](http://atlasaidev.com/)
 
 
 **Important Note:**
@@ -47,6 +48,18 @@ Here you can see some languages which are supported by the browsers based on dev
 **Listening is a better way to read:**
 Boost your understanding and focus with listening by Text To Speech TTS. Remember more of what you read. Maximize your time,
 Breeze through your content 2-3x faster than it takes to read it. Do more at once, Take your reading wherever you go – to the gym, the park, or the couch, or the journy.
+
+
+**Pro Features:**
+
+* Save time by listening while you’re doing other tasks.
+* Engage with your customers more interactively.
+* Improved UI of the button.
+* Integrate with Google Cloud Text To Speech.
+* Get more than 600 voices when you’re using Google Cloud Text To Speech.
+* Remove special characters from content during reading.
+* Remove URL from content during reading.
+* Responsive speaking button.
 
 
 **Features:**
@@ -144,6 +157,17 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 💎 TRANSLATION REQUEST 💎
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+
+= 1.4.0 ( Sep 2 , 2023) =
+* Tested : WordPress 6.3
+* Updated: Documentation updated. Pro Features added.
+
+= 1.3.25 ( August 24 , 2023) =
+* Added : After switching tab stop speeching, if paused by intention.
+
+= 1.3.24 ( August 24 , 2023) =
+* Added : After switching tab stop speeching, if paused by intention.
 
 = 1.3.23 ( August 9 , 2023) =
 * Tested : WordPress 6.3

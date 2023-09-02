@@ -226,7 +226,7 @@ export default class TextToSpeech {
                     clearTimeout(this.shouldCancelTimer)
                     this.shouldCancelTimer = null
                 }
-
+                window.sessionStorage.setItem('tts_paused_by_intention', false);
             })
             .catch(e => {
                 console.error("An error occurred :", e);
@@ -352,6 +352,7 @@ export default class TextToSpeech {
                 this.voices = data.voices;
                 this.browser = new BrowserSupport(ttsObj, data.voices, this.ttsListeningSettings.tta__listening_lang, this.ttsListeningSettings.tta__listening_voice)
                 this._prepareSpeakButton(this.speech);
+                window.sessionStorage.setItem('tts_paused_by_intention', false);
             })
             .catch(e => {
                 console.error("An error occured while initializing : ", e);
@@ -363,13 +364,10 @@ export default class TextToSpeech {
         // this.speakButton.addEventListener("click", () => {
         if (this.listenStatus == 'listen') {
             this.speak(speech)
-
         } else if (this.listenStatus == 'pause') {
             this.pause(speech)
-
         } else if (this.listenStatus == 'resume') {
             this.resume(speech)
-
         }
         // });
 
@@ -382,7 +380,13 @@ export default class TextToSpeech {
             }
 
             if ('visible' === document.visibilityState && this.listenStatus === 'resume') {
-                this.resume(speech)
+                let isPausedByIntention = JSON.parse(window.sessionStorage.getItem('tts_paused_by_intention'));
+                if (isPausedByIntention) {
+                    window.sessionStorage.setItem('tts_paused_by_intention', false);
+                } else {
+                    this.resume(speech)
+                }
+
                 if (this.callBackAfterEnd) this.callBackAfterEnd()
             }
         });

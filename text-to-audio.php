@@ -14,7 +14,7 @@
  * @wordpress-plugin
  * Plugin Name:       Text To Speech TTS
  * Description:       Add functionality to WordPress site to read blogs out loud in more than 20 languages.
- * Version:           1.3.23
+ * Version:           1.4.0
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-2.0+
@@ -85,7 +85,7 @@ class TTA_Init {
 
     public function __construct() {
         if (!defined('TEXT_TO_AUDIO_VERSION')) {
-            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '1.3.23'));
+            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '1.4.0'));
         }
 
         if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
@@ -143,7 +143,7 @@ class TTA_Init {
     public function add_action_links( $actions, $plugin_file, $plugin_data, $context ) {
         $plugin_url = esc_url( admin_url() . 'admin.php?page=text-to-audio' );
         $doc_url    = esc_url( admin_url() . 'admin.php?page=text-to-audio#/docs' );
-        $support    = esc_url( 'https://wordpress.org/support/plugin/text-to-audio/' );
+        $support    = esc_url( 'https://atlasaidev.com/contact-us/' );
         $review    = esc_url( 'https://wordpress.org/support/plugin/text-to-audio/reviews/' );
         $custom_actions = array(
             'settings' => sprintf( '<a href="%s" target="_blank">%s</a>', $plugin_url , __( 'Settings', 'text-to-audio' ) ),
