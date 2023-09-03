@@ -56,25 +56,25 @@ export default class TextToSpeech {
 
     playButtonContent() {
 
-        return '<div style="display:flex;justify-content:center;align-items:center;"><span class="dashicons dashicons-controls-play"></span> <span> ' + this.playButtonText() + '<span></span></span></div>'
+        return '<div class="tts_button"><span class="dashicons dashicons-controls-play"></span> <span> ' + this.playButtonText() + '<span></span></span></div>'
     }
     replayButtonText() {
         return this.buttonTextArr.replay_text;
     }
     replayButtonContent() {
-        return '<div style="display:flex;justify-content:center;align-items:center;"><span class="dashicons dashicons-image-rotate"></span> <span> ' + this.replayButtonText() + '<span></span></span></div>'
+        return '<div class="tts_button"><span class="dashicons dashicons-image-rotate"></span> <span> ' + this.replayButtonText() + '<span></span></span></div>'
     }
     pauseButtonText() {
         return this.buttonTextArr.pause_text;
     }
     pauseButtonContent() {
-        return '<div style="display:flex;justify-content:center;align-items:center;"><span class="dashicons dashicons-controls-pause"></span> <span> ' + this.pauseButtonText() + '<span></span></span></div>'
+        return '<div class="tts_button"><span class="dashicons dashicons-controls-pause"></span> <span> ' + this.pauseButtonText() + '<span></span></span></div>'
     }
     resumeButtonText() {
         return this.buttonTextArr.resume_text;
     }
     resumeButtonContent() {
-        return '<div style="display:flex;justify-content:center;align-items:center;"><span class="dashicons dashicons-controls-play"></span> <span> ' + this.buttonTextArr.resume_text + '<span></span></span></div>'
+        return '<div class="tts_button"><span class="dashicons dashicons-controls-play"></span> <span> ' + this.buttonTextArr.resume_text + '<span></span></span></div>'
     }
     recordStartButtonContent() {
         return '<span class="dashicons dashicons-controls-volumeoff"></span> ' + this.buttonTextArr.start_text;

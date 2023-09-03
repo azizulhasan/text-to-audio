@@ -147,17 +147,20 @@ function tta_get_button_content($atts, $is_block = false) {
             $backgroundColor = isset($customize['backgroundColor']) ? $customize['backgroundColor'] : '#184c53';
             $color = isset($customize['color']) ? $customize['color'] : '#ffffff';
             $width = isset($customize['width']) ? $customize['width'] : '100';
-            $btn_style = 'background-color:' . esc_attr($backgroundColor) . ' !important;color:' . esc_attr($color) . ' !important;width:' . esc_attr($width) . '%;border:0;display:block;border-radius:4px;text-decoration:none;cursor:pointer;';
+            $btn_style = 'background-color:' . esc_attr($backgroundColor) . ' !important;color:' . esc_attr($color) . ' !important;width:' . esc_attr($width) . '%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;';
         } else {
-            $btn_style = 'background-color:' . esc_attr($customize['backgroundColor']) . ';color:' . esc_attr($customize['color']) . ';width:' . esc_attr($customize['width']) . '%;border:0;display:block;border-radius:4px;text-decoration:none;cursor:pointer;';
+            $btn_style = 'background-color:' . esc_attr($customize['backgroundColor']) . ';color:' . esc_attr($customize['color']) . ';width:' . esc_attr($customize['width']) . '%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;';
         }
     } else {
-        $btn_style = 'background-color:#184c53;color:#ffffff;width:100%;border:0;display:block;border-radius:4px;text-decoration:none;cursor:pointer;';
+        $btn_style = 'background-color:#184c53;color:#ffffff;width:100%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;';
     }
+
+
     //Custom Css
     $custom_css = '';
     if (isset($customize['custom_css']) && '' !== $customize['custom_css']) {
         $custom_css = esc_attr($customize['custom_css']);
+        $custom_css = str_replace( "\n", '', $custom_css );
     }
 
     // Custom class to button.
