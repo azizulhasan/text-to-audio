@@ -7,9 +7,6 @@ namespace TTA;
  * Class Chalan_Review_Reminder
  */
 class TTA_Notices {
-	/**
-	 * Challan_Review_Reminder constructor.
-	 */
 	public function __construct() {
 		$this->notifications_load_hooks();
 	}
@@ -20,23 +17,22 @@ class TTA_Notices {
 	public function notifications_load_hooks() {
 		if (in_array(admin_url(basename($_SERVER['REQUEST_URI'])), [ admin_url('index.php') , admin_url('plugins.php'), admin_url('update-core.php'), \admin_url('plugin-install.php')] ) )  {
 			add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
-			add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
+			// add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
 		}
 
 		add_action('wp_ajax_tta_save_review_notice', [ $this, 'tta_save_review_notice' ] );
 		add_action('wp_ajax_tta_hide_notice', [ $this, 'tta_hide_notice' ] );
-
-
 	}
+
 
 	/**
 	 * Translation notice action.
 	 */
 	public function tta_translation_request() {
 
-	//     delete_option('tta_translation_notice_next_show_time');
-	//     delete_user_meta('1', 'tta_translation_notice_dismissed');
-    //  update_option('tta_translation_notice_next_show_time', 12);
+        //     delete_option('tta_translation_notice_next_show_time');
+        //     delete_user_meta('1', 'tta_translation_notice_dismissed');
+        //  update_option('tta_translation_notice_next_show_time', 12);
 
 		$pluginName    = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
 		$has_notice    = false;
@@ -69,7 +65,7 @@ class TTA_Notices {
             <div class="tta-notice notice notice-info is-dismissible" dir="<?php echo tta_is_rtl() ? 'ltr' : 'auto'?>" data-which="translate" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <p><?php
 					printf(
-						esc_html__( '%6$s %2$s  We are looking for people to translate this plugin%4$s If you can help we would here you. Please contact with us %5$s, we will guide you. %3$s Thanks for using %1$s.', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
+						esc_html__( '%6$s %2$s  We are looking for people to translate this plugin%4$s If you can help we would love to heare from you and please contact with us %5$s, we will guide you. %3$s Thanks for using %1$s.', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
 						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						'<div class="tta-review-notice-logo"></div>',
 						'<br/>',
@@ -131,9 +127,9 @@ class TTA_Notices {
 	 */
 	public function tta_review_notice() {
 
-	//     delete_option('tta_review_notice_next_show_time');
-	//     delete_user_meta('1', 'tta_review_notice_dismissed');
-    //  update_option('tta_review_notice_next_show_time', 12);
+        //     delete_option('tta_review_notice_next_show_time');
+        //     delete_user_meta('1', 'tta_review_notice_dismissed');
+        //  update_option('tta_review_notice_next_show_time', 12);
 
 		$pluginName    = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
 		$has_notice    = false;
@@ -251,7 +247,7 @@ class TTA_Notices {
 	 */
 	public function tta_hide_notice() {
 		check_ajax_referer( 'tta_notice_nonce' );
-		$notices = [ 'rp-wcdpd', 'wpml', 'rating', 'product_limit', 'translate' ];
+		$notices = [  'wpml', 'rating',  'translate',  ];
 		if ( isset( $_REQUEST['which'] ) && ! empty( $_REQUEST['which'] ) && in_array( $_REQUEST['which'], $notices ) ) {
 			$user_id = get_current_user_id();
 
@@ -261,6 +257,9 @@ class TTA_Notices {
 			}elseif ( 'translate' == $_REQUEST['which'] ) {
 				update_option( 'tta_translation_notice_next_show_time', time() + ( DAY_IN_SECONDS * 30 )  );
 				add_user_meta($user_id, 'tta_translation_notice_dismissed', true, true);
+			}elseif ( 'writable' == $_REQUEST['which'] ) {
+				update_option( 'tta_folder_writable_notice_next_show_time', time() + ( DAY_IN_SECONDS * 30 )  );
+				add_user_meta($user_id, 'tta_folder_writable_notice_dismissed', true, true);
 			}
 
 			if ( isset($updated_user_meta ) && $updated_user_meta ) {
@@ -275,4 +274,3 @@ class TTA_Notices {
 	}
 
 }
-

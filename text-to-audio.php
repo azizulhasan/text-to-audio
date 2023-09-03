@@ -14,7 +14,7 @@
  * @wordpress-plugin
  * Plugin Name:       Text To Speech TTS
  * Description:       Add functionality to WordPress site to read blogs out loud in more than 20 languages.
- * Version:           1.3.23
+ * Version:           1.4.1
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-2.0+
@@ -45,11 +45,6 @@ if (!defined('ABSPATH')) {
  * Rename this for your plugin and update it as you release new versions.
  */
 
-if (!defined('TEXT_TO_AUDIO_VERSION')) {
-
-    define('TEXT_TO_AUDIO_VERSION', '1.3.23');
-}
-
 if (!defined('TEXT_TO_AUDIO_NONCE')) {
 
     define('TEXT_TO_AUDIO_NONCE', 'TEXT_TO_AUDIO_NONCE');
@@ -64,9 +59,16 @@ if (!defined('TEXT_TO_AUDIO_ROOT_FILE')) {
 
     define('TEXT_TO_AUDIO_ROOT_FILE', __FILE__);
 }
-if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
 
-    define('TEXT_TO_AUDIO_PLUGIN_NAME', 'Text To Speech TTS');
+if (!defined('TTA_ROOT_FILE_NAME')) {
+    $path = explode( DIRECTORY_SEPARATOR, TEXT_TO_AUDIO_ROOT_FILE);
+    $file = end($path);
+    define('TTA_ROOT_FILE_NAME', $file);
+}
+
+if (!defined('TTA_LIBS_PATH')) {
+
+    define('TTA_LIBS_PATH', dirname(TEXT_TO_AUDIO_ROOT_FILE) . '/libs/');
 }
 
 /**
@@ -82,6 +84,14 @@ if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
 class TTA_Init {
 
     public function __construct() {
+        if (!defined('TEXT_TO_AUDIO_VERSION')) {
+            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '1.4.1'));
+        }
+
+        if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
+            define('TEXT_TO_AUDIO_PLUGIN_NAME', apply_filters('tts_plugin_name', 'Text To Speech TTS' ) );
+        }
+
         $this->run();
     }
 
@@ -101,6 +111,7 @@ class TTA_Init {
                 4   // parameters
             );
         }
+        
 
         //add button text
         if( ! get_option( 'tta__button_text_arr' ) ) {
@@ -122,6 +133,7 @@ class TTA_Init {
             ]);
 
         }
+
         
     }
 
@@ -131,7 +143,7 @@ class TTA_Init {
     public function add_action_links( $actions, $plugin_file, $plugin_data, $context ) {
         $plugin_url = esc_url( admin_url() . 'admin.php?page=text-to-audio' );
         $doc_url    = esc_url( admin_url() . 'admin.php?page=text-to-audio#/docs' );
-        $support    = esc_url( 'https://wordpress.org/support/plugin/text-to-audio/' );
+        $support    = esc_url( 'https://atlasaidev.com/contact-us/' );
         $review    = esc_url( 'https://wordpress.org/support/plugin/text-to-audio/reviews/' );
         $custom_actions = array(
             'settings' => sprintf( '<a href="%s" target="_blank">%s</a>', $plugin_url , __( 'Settings', 'text-to-audio' ) ),

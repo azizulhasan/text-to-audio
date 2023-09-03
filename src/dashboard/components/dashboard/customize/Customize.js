@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Col, Container, Row, Form, FloatingLabel } from 'react-bootstrap';
 import toast from '../../context/Notify';
 import { copyToClipBoard, postWithoutImage } from '../../context/utilities';
+import TextToSpeech from '../../../buttons/components/TextToSpeech';
+let speech = null;
+let TextToSpeechFree = null;
 export default function Customize() {
 	const [listeningBtnStyle, setListeningStyle] = useState({
 		backgroundColor: 'rgb(226, 222, 232)',
@@ -18,9 +21,7 @@ export default function Customize() {
 	const [shortCode, setShortCode] = useState('[tta_listen_btn]');
 	const [customCSS, setCustomCSS] = useState('');
 
-	const [speakingText, setSpeakingText] = useState(
-		'Add functionality to wordpress site to read blogs out loud in any language and record blog by voice in any language.',
-	);
+	const [speakingText, setSpeakingText] = useState('');
 	const [listeningSettings, setListeningSettings] = useState({});
 
 	useEffect(() => {
@@ -61,8 +62,16 @@ export default function Customize() {
 			.catch((err) => {
 				console.log(err);
 			});
+		let initialText = 'Add functionality to wordpress site to read blogs out loud in any language and record blog by voice in any language.'
 
-		setSpeakingText(localStorage.getItem('demo_listening_content'));
+		localStorage.setItem('demo_listening_content', initialText)
+		setSpeakingText(initialText);
+		setTimeout(() => {
+			if (window.hasOwnProperty('TTS') && window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active) {
+				window.TTS.contents[1] = initialText;
+			}
+		}, 1000)
+
 	}, []);
 	/**
 	 * handle change
@@ -154,48 +163,39 @@ export default function Customize() {
 
 	const callListeningFunction = (e) => {
 		let text = document.getElementById('tta__demo_text_for_play').value;
+		let button = document.getElementById('tta__listen_content');
 
-		if (text === '') {
-			toast('Please write/say something into textarea.');
-			return;
+		// setTimeout(() => {
+		if (speech != null && speech.listenStatus == 'listen') {
+			speech = null
+			TextToSpeechFree = null
 		}
-		setSpeakingText(text);
-		ttaListenCotentInFrontend(
-			text,
-			'tta__listen_content',
-			listeningSettings,
-		);
+		if (speech === null) {
+			window.TTS.contents[1] = text
+			TextToSpeechFree = window.TextToSpeech;
+			speech = new TextToSpeechFree(1, text, button, window.TTS)
+			speech._init()
+			speech = speech.getData(false)
+		} else {
+			speech = speech.getData(false)
+			if (speech.listenStatus == 'pause') {
+				speech.pause(speech.speech)
+			} else if (speech.listenStatus == 'resume') {
+				speech.resume(speech.speech)
+			}
+		}
+
+		// }, 10)
 	};
-
-	/**
-	 * Copy short Code
-	 */
-	// const copyToClipBoard = (id) => {
-	// 	/* Get the text field */
-	// 	var copyText = document.getElementById('tta_play_btn_shortcode');
-
-	// 	/* Select the text field */
-	// 	copyText.select();
-	// 	copyText.setSelectionRange(0, 99999); /* For mobile devices */
-	// 	/* Copy the text inside the text field */
-	// 	// navigator.clipboard.writeText(copyText.value);
-	// 	navigator.clipboard
-	// 		.writeText(copyText.value)
-	// 		.then(() => {
-	// 			toast('Copied the text: ' + copyText.value);
-	// 		})
-	// 		.catch(() => {
-	// 			alert("");
-	// 			toast('Something went wrong! ');
-	// 		});
-	// };
-
 
 
 
 	const setText = (e) => {
 		setSpeakingText(e.target.value);
 		localStorage.setItem('demo_listening_content', e.target.value);
+		if (window.hasOwnProperty('TTS') && window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active) {
+			window.TTS.contents[1] = e.target.value;;
+		}
 	};
 	return (
 		<Container>
@@ -203,15 +203,19 @@ export default function Customize() {
 				<Col xs={12} sm={12} lg={8}>
 					<Row>
 						<Col xs={12} sm={12} lg={12} className='mb-3'>
-							<button
-								id='tta__listen_content'
-								onClick={(e) => callListeningFunction(e)}
-								style={listeningBtnStyle2}
-								type='button'
-								title='Text To Audio:  Tap to listen post.'>
-								<span className='dashicons dashicons-controls-play'></span>{' '}
-								{tta_obj.buttonTextArr.listen_text}
-							</button>
+							{
+								tta_obj.is_pro_license_active ? <TextToSpeech button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={1} /> : (
+									<button
+										id='tta__listen_content'
+										onClick={(e) => callListeningFunction(e)}
+										style={listeningBtnStyle2}
+										type='button'
+										title='Text To Audio:  Tap to listen post.'>
+										<span className='dashicons dashicons-controls-play'></span>{' '}
+										{tta_obj.buttonTextArr.listen_text}
+									</button>
+								)
+							}
 						</Col>
 						<Col xs={12} sm={12} lg={12} className='mb-3'>
 							<>
@@ -224,7 +228,7 @@ export default function Customize() {
 										onFocus={(e) =>
 											toast('Write/Say something here.')
 										}
-										value={speakingText}
+										value={speakingText ? speakingText : ''}
 										placeholder='Write here something and click listen button.'
 										style={{ height: '100px' }}
 									/>

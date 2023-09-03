@@ -22,13 +22,27 @@ export const addScripts = (scripts) => {
  * @param {method} method request type
  * @returns
  */
-export const postData = async (url = "", data = {}) => {
+export const postData = async (url = "", data = {}, $method = "POST") => {
   // Default options are marked with *
 
-  const response = await fetch(url, {
-    method: "POST", // *GET, POST, PUT, DELETE, etc.
-    body: data, // body data type must match "Content-Type" header
-  });
+  let response = '';
+  if ($method === 'GET') {
+    response = await fetch(url, {
+      method: $method, // *GET, POST, PUT, DELETE, etc.
+      headers: {
+        'X-WP-Nonce': ttsObj.rest_nonce
+      },
+    });
+  } else {
+    response = await fetch(url, {
+      method: $method, // *GET, POST, PUT, DELETE, etc.
+      body: data, // body data type must match "Content-Type" header
+      headers: {
+        'X-WP-Nonce': ttsObj.rest_nonce
+      },
+    });
+  }
+
   const responseData = await response.json(); // parses JSON response into native JavaScript objects
 
   return responseData;
@@ -48,6 +62,9 @@ export const postWithoutImage = async (url = "", data = {}) => {
     // },
     method: "POST", // *GET, POST, PUT, DELETE, etc.
     body: data, // body data type must match "Content-Type" header
+    headers: {
+      'X-WP-Nonce': ttsObj.rest_nonce
+    },
   });
   const responseData = await response.json(); // parses JSON response into native JavaScript objects
 
@@ -60,7 +77,11 @@ export const postWithoutImage = async (url = "", data = {}) => {
  * @returns  data mixed.
  */
 export const getData = async (url = "") => {
-  const response = await fetch(url);
+  const response = await fetch(url, {
+    headers: {
+      'X-WP-Nonce': ttsObj.rest_nonce
+    },
+  });
   const data = await response.json();
   return data; // parses JSON response into native JavaScript objects
 };
@@ -315,11 +336,13 @@ export const setLocalStorage = (data) => {
  */
 export const getLocalStorage = (keys = []) => {
   let localData = {};
-  if (typeof keys === "array" && keys.length) {
+  if (Array.isArray(keys) && keys.length) {
     for (let i = 0; i < keys.length; i++) {
       localData[keys[i]] = window.localStorage.getItem(keys[i]);
     }
-  } else {
+  }
+
+  else {
     let storage = window.localStorage;
     for (let key in storage) {
       let keyData = window.localStorage.getItem(key);
@@ -432,6 +455,11 @@ export const getIframeContent = (textareaIndex) => {
 
   return iframeContent;
 };
+
+
+export const isPro = (hasPro, isProLicenseActive) => {
+  return hasPro && isProLicenseActive;
+}
 
 
 const unsecuredCopyToClipboard = (text) => {

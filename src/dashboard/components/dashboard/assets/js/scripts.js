@@ -57,17 +57,19 @@ window.addEventListener('DOMContentLoaded', (event) => {
 });
 
 window.onresize = function () {
-	if (window.innerWidth > 991) {
-		document.getElementById('ttaLayoutSidenav_content').style.marginLeft =
-			'0';
-	} else if (window.innerWidth > 767 && window.innerWidth < 991) {
-		document.getElementById('ttaLayoutSidenav_content').style.marginLeft =
-			'-160px';
-	} else if (window.innerWidth > 576 && window.innerWidth < 768) {
-		document.getElementById('ttaLayoutSidenav_content').style.marginLeft =
-			'-170px';
-	} else if (window.innerWidth < 576) {
-		document.getElementById('ttaLayoutSidenav_content').style.marginLeft =
-			'-150px';
+	if (document.getElementById('ttaLayoutSidenav_content')) {
+		if (window.innerWidth > 991) {
+			document.getElementById('ttaLayoutSidenav_content').style.marginLeft =
+				'0';
+		} else if (window.innerWidth > 767 && window.innerWidth < 991) {
+			document.getElementById('ttaLayoutSidenav_content').style.marginLeft =
+				'-160px';
+		} else if (window.innerWidth > 576 && window.innerWidth < 768) {
+			document.getElementById('ttaLayoutSidenav_content').style.marginLeft =
+				'-170px';
+		} else if (window.innerWidth < 576) {
+			document.getElementById('ttaLayoutSidenav_content').style.marginLeft =
+				'-150px';
+		}
 	}
 };

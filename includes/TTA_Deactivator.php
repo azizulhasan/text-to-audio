@@ -30,7 +30,15 @@ class TTA_Deactivator {
      * @since    1.0.0
      */
     public static function deactivate() {
-
+        if(!function_exists('is_plugin_active') ){
+            include_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+        if(is_plugin_active('text-to-audio-pro/text-to-audio-pro.php')){
+            deactivate_plugins(['text-to-audio-pro/text-to-audio-pro.php'], true);
+            $url = admin_url( 'plugins.php?deactivate=true' );
+            header( "Location: $url" );
+            die();
+        }
     }
 
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-export default function DashboardSideNav() {
+export default function DashboardSideNav({ isProVersion }) {
 	const style = {
 		side_nav: {
 			flexBasis: '150px',
@@ -45,6 +45,12 @@ export default function DashboardSideNav() {
 								<i className='fas fa-book'></i>
 							</div>
 							FAQ
+						</Link>
+						<Link className='nav-link' to={'/gtts'}>
+							<div className='sb-nav-link-icon'>
+								<i className='fas fa-edit'></i>
+							</div>
+							{isProVersion ? "TTS" : "TTS Pro"}
 						</Link>
 					</div>
 				</div>
