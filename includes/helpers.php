@@ -84,6 +84,17 @@ function tta_should_add_dilimiter($title, $delimiter) {
  */
 function tta_get_button_content($atts, $is_block = false) {
     global $post;
+
+    $settings = (array) get_option('tta_settings_data');
+
+        if(!isset($settings['tta__settings_allow_listening_for_post_types']) 
+        || count($settings['tta__settings_allow_listening_for_post_types']) === 0
+        || !is_array($settings['tta__settings_allow_listening_for_post_types'])
+        || !in_array(tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'])
+        ) {
+            return;
+        }
+
     $listening = (array) get_option('tta_listening_settings');
     $listening = json_encode($listening);
     if ($is_block) {
@@ -91,21 +102,10 @@ function tta_get_button_content($atts, $is_block = false) {
     } else {
         $customize = (array) get_option('tta_customize_settings');
     }
-    $settings = (array) get_option('tta_settings_data');
     $recording = (array) get_option('tta_record_settings');
 
     // set default value.
     $settings['tta__settings_allow_listening_for_post_types'] = isset($settings['tta__settings_allow_listening_for_post_types']) && is_array($settings['tta__settings_allow_listening_for_post_types']) ? $settings['tta__settings_allow_listening_for_post_types'] : [];
-
-
-    if(!isset($settings['tta__settings_allow_listening_for_post_types']) 
-    || count($settings['tta__settings_allow_listening_for_post_types']) === 0
-    || !is_array($settings['tta__settings_allow_listening_for_post_types'])
-    || !in_array(tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'])
-    ) {
-        return;
-    }
-
 
     // this is a pro feature to show button on blog main page with title and excerpt.
     // if(is_home() || is_archive() ){
@@ -136,7 +136,11 @@ function tta_get_button_content($atts, $is_block = false) {
     $content    .= apply_filters('tta__content_description', $description_sanitized, $description, get_the_ID() );
 
     // Button listen text.
-    $text_arr = get_button_text( $atts );
+    if($atts) {
+        $text_arr = get_button_text( $atts );
+    }else{
+        $text_arr = get_option('tta__button_text_arr');
+    }
     // Speak Icon
     $speakIcon = "<div class='tta_button'>";
     $speakIcon .= apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ');
@@ -169,6 +173,7 @@ function tta_get_button_content($atts, $is_block = false) {
 
     // init button scripts
     do_action('tts_enqueue_button_scripts' , $content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date);
+
 
     return apply_filters( 'tts__listening_button', $button, $btn_no, $class );
 }
@@ -268,45 +273,77 @@ function get_button_text( $atts ) {
     $start_text = (isset($atts['start_text'])) && strlen($atts['start_text']) ? esc_html__( sanitize_text_field( $atts['start_text'] ) ) : __( 'Start', 'text-to-audio' );
     $stop_text = (isset($atts['stop_text'])) && strlen($atts['stop_text']) ? esc_html__( sanitize_text_field( $atts['stop_text'] ) ) : __( 'Start', 'text-to-audio' );
 
-    update_option( 'tta__button_text_arr', [
+
+    $text_arr = [
         'listen_text' => $listen_text,
         'pause_text' => $pause_text,
         'resume_text' => $resume_text,
         'replay_text' => $replay_text,
         'start_text' => $start_text,
         'stop_text' => $stop_text,
-    ]);
+    ];
 
-    return apply_filters('tta__button_text_arr', get_option( 'tta__button_text_arr' ) );
+    $text_arr = array_map(function($text){
+        $text =  preg_replace('/[\W]/', '', $text);
+        return $text;
+    }, $text_arr);
+
+
+    update_option( 'tta__button_text_arr', $text_arr);
+
+    return apply_filters('tta__button_text_arr', $text_arr );
 
 }
 
-$settings = (array) get_option( 'tta_settings_data');
 
-if( isset( $settings['tta__settings_enable_button_add'] ) &&  $settings['tta__settings_enable_button_add'] ) {    
-    // TODO: write functionality if current page is home page where content is excerpt.
-    // if(is_single()) {
-    //     add_filter( 'the_content', 'add_listen_button' );
-    // }
-    // elseif(did_filter( 'the_excerpt' )){
-    //     add_filter( 'the_excerpt', 'add_listen_button' , 9999 );
-    // }
-    add_filter( 'the_content', 'add_listen_button' );
-}
-
+add_filter( 'the_content', 'add_listen_button' );
 
 /**
  * Add listening button to every post by default.
  */
 function add_listen_button( $content ) {
-    ob_start();
-    echo do_shortcode('[tta_listen_btn]');
-    $button = ob_get_contents();
-    ob_end_clean();
+    $settings = (array) get_option( 'tta_settings_data');
+    if( isset( $settings['tta__settings_enable_button_add'] ) &&  $settings['tta__settings_enable_button_add'] ) {    
+        // TODO: write functionality if current page is home page where content is excerpt.
+        // if(is_single()) {
+        //     add_filter( 'the_content', 'add_listen_button' );
+        // }
+        // elseif(did_filter( 'the_excerpt' )){
+        //     add_filter( 'the_excerpt', 'add_listen_button' , 9999 );
+        // }
+        $all_short_codes = array_values( get_used_shortcodes($content) );
+        if( !in_array('tta_listen_btn', $all_short_codes ) ) {
+            ob_start();
+            echo tta_get_button_content('');
+            $button = ob_get_contents();
+            ob_end_clean();
 
-    return apply_filters('tts_button_with_content', $button.$content, $button, $content);
+            return apply_filters('tts_button_with_content', $button.$content, $button, $content);
+        }else{
+             return $content;
+        }
+            
+    }
+
+    return $content;
 
 }
+
+
+function get_used_shortcodes( $content) {
+    global $shortcode_tags;
+    if ( false === strpos( $content, '[' ) ) {
+        return array();
+    }
+    if ( empty( $shortcode_tags ) || ! is_array( $shortcode_tags ) ) {
+        return array();
+    }
+    // Find all registered tag names in $content.
+    preg_match_all( '@\[([^<>&/\[\]\x00-\x20=]++)@', $content, $matches );
+    $tagnames = array_intersect( array_keys( $shortcode_tags ), $matches[1] );
+    return $tagnames;
+}
+
 
 /**
  * Is plugin active
