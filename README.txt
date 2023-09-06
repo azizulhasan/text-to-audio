@@ -5,7 +5,7 @@ Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, 
 Requires at least: 4.0
 Tested up to: 6.3
 Requires PHP: 7.4
-Stable tag: 1.4.1
+Stable tag: 1.4.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,10 +17,14 @@ Add functionality to WordPress site to read blogs out loud in more than 20 langu
 
 There is no need to create an account it’s completely free. Just install the plugin and enjoy the whole features of the plugin.
 
+== Free text to speech (TTS) plugin for WordPress - Video Tutorial ==
+[youtube https://www.youtube.com/watch?v=P_dw_YjnVxc&t=21s&ab_channel=AtlasAiDev]
+
 ### Useful Links:
 > * [Live Demo](http://atlasaidev.com/text-to-speech/)
 > * [Request A Feature](http://atlasaidev.com/contact-us/)
 > * [Pro Version](http://atlasaidev.com/)
+> * [Video Tutorial](https://www.youtube.com/@atlasaidev)
 
 
 **Important Note:**
@@ -158,6 +162,12 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+
+= 1.4.3 ( Sep 14 , 2023) =
+* Fixed: css loaded properly.
+
+= 1.4.2 ( Sep 10 , 2023) =
+* Fixed: short code text not displaying issue solved.
 
 = 1.4.1 ( Sep 6 , 2023) =
 * Fixed: Custom css adding issue solved.
