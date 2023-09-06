@@ -17,10 +17,14 @@ Add functionality to WordPress site to read blogs out loud in more than 20 langu
 
 There is no need to create an account it’s completely free. Just install the plugin and enjoy the whole features of the plugin.
 
+== Free text to speech (TTS) plugin for WordPress - Video Tutorial ==
+[youtube https://www.youtube.com/watch?v=P_dw_YjnVxc&t=21s&ab_channel=AtlasAiDev]
+
 ### Useful Links:
 > * [Live Demo](http://atlasaidev.com/text-to-speech/)
 > * [Request A Feature](http://atlasaidev.com/contact-us/)
 > * [Pro Version](http://atlasaidev.com/)
+> * [Video Tutorial](https://www.youtube.com/@atlasaidev)
 
 
 **Important Note:**
