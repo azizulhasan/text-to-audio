@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useMemo, useState, } from 'react';
+import React, { useEffect, useMemo, useState, } from 'react';
 import {
 	BrowserRouter as Router,
 	HashRouter,
@@ -12,7 +12,6 @@ import { ToastContainer } from 'react-toastify';
 /**
  * Scripts
  */
-import './assets/css/styles.css';
 import 'react-toastify/dist/ReactToastify.css';
 
 import './assets/js/scripts.js';
@@ -44,11 +43,6 @@ function Dashboard() {
 		setIsProVersion(ttsObj.is_pro_active)
 	}, [])
 
-
-
-	addScripts([
-		'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js',
-	]);
 	return (
 		<HashRouter hashType='noslash'>
 			<ToastContainer
