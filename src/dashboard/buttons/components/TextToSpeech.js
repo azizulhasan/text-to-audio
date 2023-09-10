@@ -300,7 +300,6 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                                             <div className="audio-controls">
                                                 <div className="audio-time-start" id="audio_time_start">00:00</div>
                                                 <div
-                                                    style={{ height: "4px", marginTop: "10px" }}
                                                     className="progress audio-progress"
                                                     role="progressbar"
                                                     aria-label="Success example"
@@ -310,7 +309,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                                                 >
                                                     <div
                                                         className="progress-bar bg-black"
-                                                        style={{ width: `${progressbarValue}%`, height: "6px" }}
+                                                        style={{ width: `${progressbarValue}%`, height: "10px" }}
                                                     />
                                                 </div>
                                                 <div className="audio-time-end" id="audio_time_end">00:00</div>

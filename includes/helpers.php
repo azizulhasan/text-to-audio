@@ -108,9 +108,9 @@ function tta_get_button_content($atts, $is_block = false) {
     $settings['tta__settings_allow_listening_for_post_types'] = isset($settings['tta__settings_allow_listening_for_post_types']) && is_array($settings['tta__settings_allow_listening_for_post_types']) ? $settings['tta__settings_allow_listening_for_post_types'] : [];
 
     // this is a pro feature to show button on blog main page with title and excerpt.
-    // if(is_home() || is_archive() ){
-    //     return;
-    // }
+    if(is_home() || is_archive() || is_front_page() || is_category() ){
+        return;
+    }
 
     $should_display_icon = isset( $settings['tta__settings_display_btn_icon'] ) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
 

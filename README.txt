@@ -163,11 +163,15 @@ We are looking for people to help translate this plugin. If you can help we woul
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
-= 1.4.3 ( Sep 14 , 2023) =
-* Fixed: css loaded properly.
+= 1.4.3 ( Sep 10 , 2023) =
+* Fixed: CSS loaded properly.
+* Fixed: Short code text not displaying issue solved.
+* Added: Integrate with [Text To Speech Pro](https://atlasaidev.com/text-to-speech-pro/) version.
+* Added: Plugin URI added.
 
-= 1.4.2 ( Sep 10 , 2023) =
-* Fixed: short code text not displaying issue solved.
+
+= 1.4.2 ( Sep 07 , 2023) =
+* Fixed: Fixed: button showing issue is solved.
 
 = 1.4.1 ( Sep 6 , 2023) =
 * Fixed: Custom css adding issue solved.
