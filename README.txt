@@ -3,9 +3,9 @@ Contributors: atlasaidev, hasanazizul,
 Donate link: http://atlasaidev.com/
 Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, voice to text-comment,
 Requires at least: 4.0
-Tested up to: 6.3
+Tested up to: 6.3.1
 Requires PHP: 7.4
-Stable tag: 1.4.3
+Stable tag: 1.4.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -162,6 +162,11 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+
+= 1.4.4 ( Sep 14 , 2023) =
+* Fixed: JS error fixed.
+* Tested: WordPress 6.3.1.
+* Improved: JS loading improved on front.
 
 = 1.4.3 ( Sep 10 , 2023) =
 * Fixed: CSS loaded properly.

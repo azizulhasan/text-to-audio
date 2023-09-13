@@ -7,13 +7,13 @@ let speech = null;
 let TextToSpeechFree = null;
 export default function Customize() {
 	const [listeningBtnStyle, setListeningStyle] = useState({
-		backgroundColor: 'rgb(226, 222, 232)',
-		color: 'rgb(0, 0, 0)',
+		backgroundColor: '#FFFFFF',
+		color: '#000000',
 		width: '100',
 	});
 	const [listeningBtnStyle2, setListeningStyle2] = useState({
-		backgroundColor: 'rgb(226, 222, 232)',
-		color: 'rgb(0, 0, 0)',
+		backgroundColor: '#FFFFFF',
+		color: '#000000',
 		width: '100%',
 		border: '0',
 	});
@@ -301,6 +301,7 @@ export default function Customize() {
 						<Form.Control
 							as='textarea'
 							name='custom_css'
+							id='custom_css'
 							onChange={handleChange}
 							value={customCSS ? customCSS : ''}
 							placeholder='Custom CSS'
