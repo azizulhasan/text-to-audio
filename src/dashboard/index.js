@@ -20,7 +20,7 @@ if (app && window?.ttsObj?.is_admin_page && ttsObj.is_admin_page) {
 
 let timer = setTimeout(function loadProButton() {
     timer = setTimeout(loadProButton, 1000)
-    if (window.hasOwnProperty('TTS') && window.hasOwnProperty('ttsObjPro') && !ttsObjPro.should_activate_pro_features) {
+    if (window.hasOwnProperty('TTS') && window.hasOwnProperty('ttsObjPro') && !ttsObjPro.should_activate_pro_features && window.TextToSpeechProPlayer) {
         clearTimeout(timer)
         timer = null
 
