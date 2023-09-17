@@ -30,7 +30,8 @@ let timer = setTimeout(function loadProButton() {
                 let buttonId = button.getAttribute('data-id')
                 // button.attachShadow({ mode: 'open' });
                 return ReactDOM.render(
-                    <TextToSpeech button={button} buttonId={buttonId} cssStyle={''} />,
+                    // <TextToSpeech button={button} buttonId={buttonId} cssStyle={''} />,
+                    <TexToSpeechThree button={button} buttonId={buttonId} cssStyle={''} />,
                     button
                 )
 
