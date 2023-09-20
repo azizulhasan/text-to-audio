@@ -10,14 +10,10 @@ import toast from '../../context/Notify';
 import UpgradeToPro from '../../UpgradeToPro';
 
 export default function Settings() {
-	const [settings, setSettings] = useState(() => {
-
-		return {
-			tta__settings_enable_button_add: false,
-			tta__settings_display_btn_icon: false,
-			tta__settings_allow_listening_for_post_types: ['post'],
-		}
-
+	const [settings, setSettings] = useState({
+		tta__settings_enable_button_add: false,
+		tta__settings_display_btn_icon: false,
+		tta__settings_allow_listening_for_post_types: ['post'],
 	});
 	const [postTypes, setPostTypes] = useState([
 		'post',
@@ -98,14 +94,14 @@ export default function Settings() {
 						<Form onSubmit={handleSubmit}>
 							<Row className=' mt-3'>
 								<Col xs={12} sm={6} lg={4}>
-									<Form.Label id='tta__settings_enable_button_add'>
+									<Form.Label htmlFor='tta__settings_enable_button_add'>
 										Enable button add
 									</Form.Label>
 								</Col>
 								<Col xs={12} sm={12} lg={8}>
 									<Form.Group>
 										<ToggleButton
-											id='toggle-check'
+											id='tta__settings_enable_button_add'
 											type='checkbox'
 											className='form-controll'
 											name='tta__settings_enable_button_add'
@@ -125,13 +121,14 @@ export default function Settings() {
 							</Row>
 							<Row className='mt-4'>
 								<Col xs={12} sm={6} lg={4}>
-									<Form.Label id='tta__settings_allow_listening_for_post_types'>
+									<Form.Label htmlFor='tta__settings_allow_listening_for_post_types'>
 										Allow Listening For Post Type
 									</Form.Label>
 								</Col>
 								<Col xs={12} sm={12} lg={8}>
 									<Form.Group controlId="tta__settings_allow_listening_for_post_types">
 										<Form.Select
+											id="tta__settings_allow_listening_for_post_types"
 											name="tta__settings_allow_listening_for_post_types"
 											onChange={handleChange}
 											multiple={true}
@@ -152,14 +149,14 @@ export default function Settings() {
 							</Row>
 							<Row className=' mt-3'>
 								<Col xs={12} sm={6} lg={4}>
-									<Form.Label id='tta__settings_display_btn_icon'>
+									<Form.Label htmlFor='tta__settings_display_btn_icon'>
 										Enable Button Icon
 									</Form.Label>
 								</Col>
 								<Col xs={12} sm={12} lg={8}>
 									<Form.Group>
 										<ToggleButton
-											id='showIcon-check'
+											id='tta__settings_display_btn_icon'
 											type='checkbox'
 											className='form-controll '
 											variant={

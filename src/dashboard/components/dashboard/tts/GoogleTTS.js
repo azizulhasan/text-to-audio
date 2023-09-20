@@ -173,7 +173,7 @@ export default function GoogleTTS() {
                                         name='googTTSJsonFile'
                                         placeholder='googTTSJsonFile'
                                     />
-                                    <Form.Label className={isAuthenticated ? 'text-green' : 'text-danger'} htmlFor='notice'>
+                                    <div className={isAuthenticated ? 'text-green' : 'text-danger'} >
                                         {
                                             window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active ?
                                                 isAuthenticated ? <><strong>Google Text To Speech Authentication Done. Enjoy the whole featuers of the plugin.</strong></> : <><strong>Please upload a service account  .json file to authenticate Google Text To Speech.</strong></>
@@ -186,7 +186,7 @@ export default function GoogleTTS() {
                                                     }
                                                 </>
                                         }
-                                    </Form.Label>
+                                    </div>
                                 </Form.Group>
                             </Col>
                             <div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>

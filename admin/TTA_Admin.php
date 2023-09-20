@@ -104,7 +104,8 @@ class TTA_Admin {
             'is_dashboard' => is_admin(),
             'listeningSettings' => $listening,
             'is_pro_active' => is_pro_active(),
-            'is_pro_license_active' => is_pro_license_active()
+            'is_pro_license_active' => is_pro_license_active(),
+            'is_admin_page' => \is_admin(),
         ];
     }
 
@@ -221,7 +222,7 @@ class TTA_Admin {
     }
 
     public function TTA_settings() {
-        echo "<div class='wpwrap'><div id='app'></div></div>";
+        echo "<div class='wpwrap'><div id='tts_dashboard_ui'></div></div>";
     }
 
 }

@@ -46,44 +46,43 @@ function Recording() {
 		 *
 		 */
 
-		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features) {
-			let stored_voices = getLocalStorage(['tta__voices']);
-			if (!stored_voices.tta__voices) {
-				getData(apiURL + 'voices')
-					.then((res) => {
-						setLocalStorage({ tta__voices: res.voices })
-					})
-					.catch((err) => {
-						console.log(err);
-					});
-			} else {
-				let voices = JSON.parse(stored_voices.tta__voices);
-				let langs = []
-				voices.voices.map(voice => {
-					if (!langs.includes(voice.languageCodes[0])) {
-						langs.push(voice.languageCodes[0])
-					}
-				})
+		// if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features) {
+		// 	let stored_voices = getLocalStorage(['tta__voices']);
+		// 	if (!stored_voices.tta__voices) {
+		// 		getData(apiURL + 'voices')
+		// 			.then((res) => {
+		// 				setLocalStorage({ tta__voices: res.voices })
+		// 			})
+		// 			.catch((err) => {
+		// 				console.log(err);
+		// 			});
+		// 	} else {
+		// 		let voices = JSON.parse(stored_voices.tta__voices);
+		// 		let langs = []
+		// 		voices.voices.map(voice => {
+		// 			if (!langs.includes(voice.languageCodes[0])) {
+		// 				langs.push(voice.languageCodes[0])
+		// 			}
+		// 		})
 
-				setLanguages(langs)
-			}
-		} else {
-			let timer = setTimeout(function handleTime() {
-				timer = setTimeout(handleTime, 1000)
-				if (window.hasOwnProperty('speechSynthesis') && window.speechSynthesis.getVoices().length) {
-					clearTimeout(timer)
-					timer = null
-					let langs = []
-					window.speechSynthesis.getVoices().map(item => {
-						if (!langs.includes(item.lang)) {
-							langs.push(item.lang)
-						}
-					})
-					setLanguages(langs)
-				}
-			})
-		}
-
+		// 		setLanguages(langs)
+		// 	}
+		// } else {
+		// 	let timer = setTimeout(function handleTime() {
+		// 		timer = setTimeout(handleTime, 1000)
+		// 		if (window.hasOwnProperty('speechSynthesis') && window.speechSynthesis.getVoices().length) {
+		// 			clearTimeout(timer)
+		// 			timer = null
+		// 			let langs = []
+		// 			window.speechSynthesis.getVoices().map(item => {
+		// 				if (!langs.includes(item.lang)) {
+		// 					langs.push(item.lang)
+		// 				}
+		// 			})
+		// 			setLanguages(langs)
+		// 		}
+		// 	})
+		// }
 	}, []);
 
 	/**
