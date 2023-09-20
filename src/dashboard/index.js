@@ -4,8 +4,8 @@ import App from "./App";
 import TextToSpeech from './buttons/components/TextToSpeech';
 import TexToSpeechThree from "./buttons/components/TexToSpeechThree";
 
-let app = document.getElementById("app")
-if (app) {
+let app = document.getElementById("tts_dashboard_ui")
+if (app && window?.ttsObj?.is_admin_page && ttsObj.is_admin_page) {
     ReactDOM.render(
         <React.StrictMode>
             <App />

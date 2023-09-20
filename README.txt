@@ -3,9 +3,9 @@ Contributors: atlasaidev, hasanazizul,
 Donate link: http://atlasaidev.com/
 Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, voice to text-comment,
 Requires at least: 4.0
-Tested up to: 6.3
+Tested up to: 6.3.1
 Requires PHP: 7.4
-Stable tag: 1.4.3
+Stable tag: 1.4.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -163,11 +163,20 @@ We are looking for people to help translate this plugin. If you can help we woul
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
-= 1.4.3 ( Sep 14 , 2023) =
-* Fixed: css loaded properly.
+= 1.4.4 ( Sep 14 , 2023) =
+* Fixed: JS error fixed.
+* Tested: WordPress 6.3.1.
+* Improved: JS loading improved on front.
 
-= 1.4.2 ( Sep 10 , 2023) =
-* Fixed: short code text not displaying issue solved.
+= 1.4.3 ( Sep 10 , 2023) =
+* Fixed: CSS loaded properly.
+* Fixed: Short code text not displaying issue solved.
+* Added: Integrate with [Text To Speech Pro](https://atlasaidev.com/text-to-speech-pro/) version.
+* Added: Plugin URI added.
+
+
+= 1.4.2 ( Sep 07 , 2023) =
+* Fixed: Fixed: button showing issue is solved.
 
 = 1.4.1 ( Sep 6 , 2023) =
 * Fixed: Custom css adding issue solved.

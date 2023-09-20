@@ -191,10 +191,11 @@ export default function Listening() {
 						<Row>
 							<Col xs={12} sm={8} lg={8}>
 								<Form.Group>
-									<Form.Label>Voice Language</Form.Label>
+									<Form.Label htmlFor='tta__listening_lang'>Voice Language</Form.Label>
 									<Form.Select
 										onChange={handleChange}
 										name='tta__listening_lang'
+										id='tta__listening_lang'
 										value={listeningSettings.tta__listening_lang}
 										aria-label='Default select example'>
 										<option disabled>
@@ -233,10 +234,11 @@ export default function Listening() {
 						<Row>
 							<Col xs={12} sm={8} lg={8}>
 								<Form.Group>
-									<Form.Label>Voice to speak </Form.Label>
+									<Form.Label htmlFor='tta__listening_voice'>Voice to speak </Form.Label>
 									<Form.Select
 										onChange={handleChange}
 										name='tta__listening_voice'
+										id='tta__listening_voice'
 										value={listeningSettings.tta__listening_voice}
 										aria-label='Default select example'>
 										<option disabled>
@@ -274,10 +276,11 @@ export default function Listening() {
 						<Row>
 							<Col xs={12} sm={8} lg={8}>
 								<Form.Group>
-									<Form.Label>Voice Pitch </Form.Label>
+									<Form.Label htmlFor='tta__listening_pitch' >Voice Pitch </Form.Label>
 									<Form.Select
 										onChange={handleChange}
 										name='tta__listening_pitch'
+										id='tta__listening_pitch'
 										value={listeningSettings.tta__listening_pitch}
 										aria-label='Default select example'>
 										<option disabled>
