@@ -83,16 +83,21 @@ function tta_should_add_dilimiter($title, $delimiter) {
  * @return string
  */
 function tta_get_button_content($atts, $is_block = false) {
-    global $post;
-    $settings = (array) get_option('tta_settings_data');
 
-        // if(!isset($settings['tta__settings_allow_listening_for_post_types']) 
-        // || count($settings['tta__settings_allow_listening_for_post_types']) === 0
-        // || !is_array($settings['tta__settings_allow_listening_for_post_types'])
-        // || !in_array(tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'])
-        // ) {
-        //     return;
-        // }
+    // this is a pro feature to show button on blog main page with title and excerpt.
+    if(is_home() || is_archive() || is_front_page() || is_category() ){
+        return;
+    }
+
+    $settings = (array) get_option('tta_settings_data');
+    
+    if(!isset($settings['tta__settings_allow_listening_for_post_types']) 
+    || count($settings['tta__settings_allow_listening_for_post_types']) === 0
+    || !is_array($settings['tta__settings_allow_listening_for_post_types'])
+    || !in_array(tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'])
+    ) {
+        return;
+    }
 
     $listening = (array) get_option('tta_listening_settings');
     $listening = json_encode($listening);
@@ -106,10 +111,7 @@ function tta_get_button_content($atts, $is_block = false) {
     // set default value.
     $settings['tta__settings_allow_listening_for_post_types'] = isset($settings['tta__settings_allow_listening_for_post_types']) && is_array($settings['tta__settings_allow_listening_for_post_types']) ? $settings['tta__settings_allow_listening_for_post_types'] : [];
 
-    // this is a pro feature to show button on blog main page with title and excerpt.
-    // if(is_home() || is_archive() || is_front_page() || is_category() ){
-    //     return;
-    // }
+
 
     $should_display_icon = isset( $settings['tta__settings_display_btn_icon'] ) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
 
@@ -138,9 +140,12 @@ function tta_get_button_content($atts, $is_block = false) {
     // Button listen text.
     if($atts) {
         $text_arr = get_button_text( $atts );
+    }else if(has_filter('tta__button_text_arr')) {
+        $text_arr = get_button_text( $atts );
     }else{
         $text_arr = get_option('tta__button_text_arr');
     }
+    
     // Speak Icon
     $speakIcon = "<div class='tta_button'>";
     $speakIcon .= apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ');
