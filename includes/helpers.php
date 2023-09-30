@@ -83,16 +83,19 @@ function tta_should_add_dilimiter($title, $delimiter) {
  * @return string
  */
 function tta_get_button_content($atts, $is_block = false) {
-    global $post;
     $settings = (array) get_option('tta_settings_data');
-
-        // if(!isset($settings['tta__settings_allow_listening_for_post_types']) 
-        // || count($settings['tta__settings_allow_listening_for_post_types']) === 0
-        // || !is_array($settings['tta__settings_allow_listening_for_post_types'])
-        // || !in_array(tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'])
-        // ) {
-        //     return;
-        // }
+    // this is a pro feature to show button on blog main page with title and excerpt.
+    if(is_home() || is_archive() || is_front_page() || is_category() ){
+        return;
+    }
+    
+    if(!isset($settings['tta__settings_allow_listening_for_post_types']) 
+    || count($settings['tta__settings_allow_listening_for_post_types']) === 0
+    || !is_array($settings['tta__settings_allow_listening_for_post_types'])
+    || !in_array(tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'])
+    ) {
+        return;
+    }
 
     $listening = (array) get_option('tta_listening_settings');
     $listening = json_encode($listening);
@@ -106,10 +109,7 @@ function tta_get_button_content($atts, $is_block = false) {
     // set default value.
     $settings['tta__settings_allow_listening_for_post_types'] = isset($settings['tta__settings_allow_listening_for_post_types']) && is_array($settings['tta__settings_allow_listening_for_post_types']) ? $settings['tta__settings_allow_listening_for_post_types'] : [];
 
-    // this is a pro feature to show button on blog main page with title and excerpt.
-    // if(is_home() || is_archive() || is_front_page() || is_category() ){
-    //     return;
-    // }
+
 
     $should_display_icon = isset( $settings['tta__settings_display_btn_icon'] ) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
 
@@ -138,9 +138,12 @@ function tta_get_button_content($atts, $is_block = false) {
     // Button listen text.
     if($atts) {
         $text_arr = get_button_text( $atts );
+    }else if(has_filter('tta__button_text_arr')) {
+        $text_arr = get_button_text( $atts );
     }else{
         $text_arr = get_option('tta__button_text_arr');
     }
+    
     // Speak Icon
     $speakIcon = "<div class='tta_button'>";
     $speakIcon .= apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ');
@@ -162,6 +165,8 @@ function tta_get_button_content($atts, $is_block = false) {
 
     //Custom Css
     $custom_css = '';
+
+
     if (isset($customize['custom_css']) && '' !== $customize['custom_css']) {
         $custom_css = esc_attr($customize['custom_css']);
         $custom_css = str_replace( "\n", '', $custom_css );
@@ -187,14 +192,14 @@ add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 10);
  * Enqueue button scripts
  */
 function tts_enqueue_button_scripts ($content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date) {
-    
-
-  
+           
     $reading_time = apply_filters('tts_content_reading_time', 1, $content );
     // enqueue footer stript
     add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $reading_time, $title, $date) { 
         $temp_title = trim(str_replace('.', '', $title));
-        if(get_the_title() == $temp_title) :
+        $title = trim(get_the_title());
+        $title = tta_clean_content( $title );
+        if($title == $temp_title) :
         ?>
         <!-- write your script to the head section  -->
         <script>
@@ -204,7 +209,7 @@ function tts_enqueue_button_scripts ($content, $btn_no, $listening, $class, $btn
             var ttsCSSClass = "<?php echo $class; ?>";
             var ttsBtnStyle = "<?php echo $btn_style; ?>";
             var ttsTextArr = <?php echo json_encode($text_arr); ?>;
-            var ttsCustomCSS = "<?php echo $custom_css; ?>";
+            var ttsCustomCSS = "<?php print($custom_css); ?>";
             var ttsShouldDisplayIcon = "<?php echo $should_display_icon; ?>";
             var readingTime = "<?php echo $reading_time; ?>";
             var ttsSettings = {
