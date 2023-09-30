@@ -83,13 +83,11 @@ function tta_should_add_dilimiter($title, $delimiter) {
  * @return string
  */
 function tta_get_button_content($atts, $is_block = false) {
-
+    $settings = (array) get_option('tta_settings_data');
     // this is a pro feature to show button on blog main page with title and excerpt.
     if(is_home() || is_archive() || is_front_page() || is_category() ){
         return;
     }
-
-    $settings = (array) get_option('tta_settings_data');
     
     if(!isset($settings['tta__settings_allow_listening_for_post_types']) 
     || count($settings['tta__settings_allow_listening_for_post_types']) === 0
@@ -167,6 +165,8 @@ function tta_get_button_content($atts, $is_block = false) {
 
     //Custom Css
     $custom_css = '';
+
+
     if (isset($customize['custom_css']) && '' !== $customize['custom_css']) {
         $custom_css = esc_attr($customize['custom_css']);
         $custom_css = str_replace( "\n", '', $custom_css );
@@ -209,7 +209,7 @@ function tts_enqueue_button_scripts ($content, $btn_no, $listening, $class, $btn
             var ttsCSSClass = "<?php echo $class; ?>";
             var ttsBtnStyle = "<?php echo $btn_style; ?>";
             var ttsTextArr = <?php echo json_encode($text_arr); ?>;
-            var ttsCustomCSS = "<?php echo $custom_css; ?>";
+            var ttsCustomCSS = "<?php print($custom_css); ?>";
             var ttsShouldDisplayIcon = "<?php echo $should_display_icon; ?>";
             var readingTime = "<?php echo $reading_time; ?>";
             var ttsSettings = {

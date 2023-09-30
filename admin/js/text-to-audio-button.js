@@ -53,9 +53,8 @@ class TTSPlayButton extends HTMLElement {
                         #tts__listent_content_${buttonId}.tts__listent_content:hover{ ${settings.btnStyle}height:30px; }
                         // #tts__listent_content_${buttonId}.tts__listent_content .text-position{ position: absolute;padding-top: 2px; }
                         // #tts__listent_content_${buttonId}.tts__listent_content .dashicons{ display:${settings.shouldDisplayIcon};line-height:1;font-size:25px;height:25px;width:25px; }
-                        ${settings.customCSS}
+                        ${this.#htmlDecode(settings.customCSS)}
                     `;
-
                         // Attsch the created elements to the shadow dom
                         shadow.appendChild(style);
                         shadow.appendChild(wrapper);
@@ -71,6 +70,16 @@ class TTSPlayButton extends HTMLElement {
         if (this.listenStatus === 'listen') {
             this.displayButtonText()
         }
+    }
+
+    #htmlDecode(str) {
+
+        let txt = document.createElement("textarea");
+
+        txt.innerHTML = str;
+
+        return txt.value;
+
     }
 }
 
