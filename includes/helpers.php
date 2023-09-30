@@ -192,14 +192,14 @@ add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 10);
  * Enqueue button scripts
  */
 function tts_enqueue_button_scripts ($content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date) {
-    
-
-  
+           
     $reading_time = apply_filters('tts_content_reading_time', 1, $content );
     // enqueue footer stript
     add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $reading_time, $title, $date) { 
         $temp_title = trim(str_replace('.', '', $title));
-        if(get_the_title() == $temp_title) :
+        $title = trim(get_the_title());
+        $title = tta_clean_content( $title );
+        if($title == $temp_title) :
         ?>
         <!-- write your script to the head section  -->
         <script>
