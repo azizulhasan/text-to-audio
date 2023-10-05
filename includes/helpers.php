@@ -105,6 +105,7 @@ function tta_get_button_content($atts, $is_block = false) {
     }
     $recording = (array) get_option('tta_record_settings');
 
+
     // set default value.
     $settings['tta__settings_allow_listening_for_post_types'] = isset($settings['tta__settings_allow_listening_for_post_types']) && is_array($settings['tta__settings_allow_listening_for_post_types']) ? $settings['tta__settings_allow_listening_for_post_types'] : [];
 
@@ -159,7 +160,7 @@ function tta_get_button_content($atts, $is_block = false) {
         $btn_style = 'background-color:#184c53;color:#ffffff;width:100%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;';
     }
 
-
+    
     //Custom Css
     $custom_css = '';
 
@@ -168,7 +169,7 @@ function tta_get_button_content($atts, $is_block = false) {
         $custom_css = esc_attr($customize['custom_css']);
         $custom_css = str_replace( "\n", '', $custom_css );
     }
-
+    $custom_css = compatibility_with_themes($custom_css);
     // Custom class to button.
     $class = (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
     $button = "<tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
@@ -330,8 +331,8 @@ add_filter( 'the_content', 'add_listen_button' );
  */
 function add_listen_button( $content ) {
     $settings = (array) get_option( 'tta_settings_data');
-    if( isset( $settings['tta__settings_enable_button_add'] ) ) {
-        TTA\TTA_Activator::activate();
+    if( ! isset( $settings['tta__settings_enable_button_add'] ) ) {
+        TTA\TTA_Activator::activate(true);
     }
     if( isset( $settings['tta__settings_enable_button_add'] ) &&  $settings['tta__settings_enable_button_add'] ) {    
         // TODO: write functionality if current page is home page where content is excerpt.
@@ -564,4 +565,14 @@ function tta_is_rtl() {
     }
 
     return $rtl;
+}
+
+
+function compatibility_with_themes( $custom_css ) {
+    
+    if(get_option('stylesheet') == 'twentytwentythree'){
+       $custom_css .= '#tts__listent_content_1.tts__listent_content  {max-width:650px;margin:auto;}';
+    }
+
+    return $custom_css;
 }

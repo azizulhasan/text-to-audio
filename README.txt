@@ -167,6 +167,8 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 * Fixed: [Shortcode stop working](https://wordpress.org/support/topic/shortcode-stop-working-2/)
 * Fixed: Button hide issue fixed.
 * Fixed: Listeing language change issue solved.
+* Fixed: [change the button text](https://wordpress.org/support/topic/change-the-button-text-7/)
+* compatibility added for twentytwentythree theme
 
 = 1.4.6 ( Sep 30 , 2023) =
 * Fixed: [Error using quotes in customized CSS](https://wordpress.org/support/topic/error-using-quotes-in-customized-css/)
