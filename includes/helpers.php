@@ -96,7 +96,6 @@ function tta_get_button_content($atts, $is_block = false) {
     ) {
         return;
     }
-
     $listening = (array) get_option('tta_listening_settings');
     $listening = json_encode($listening);
     if ($is_block) {
@@ -136,14 +135,12 @@ function tta_get_button_content($atts, $is_block = false) {
     $content    .= apply_filters('tta__content_description', $description_sanitized, $description, get_the_ID() );
 
     // Button listen text.
-    if($atts) {
-        $text_arr = get_button_text( $atts );
-    }else if(has_filter('tta__button_text_arr')) {
+     if($atts || has_filter('tta__button_text_arr')) {
         $text_arr = get_button_text( $atts );
     }else{
         $text_arr = get_option('tta__button_text_arr');
     }
-    
+
     // Speak Icon
     $speakIcon = "<div class='tta_button'>";
     $speakIcon .= apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ');
@@ -199,10 +196,11 @@ function tts_enqueue_button_scripts ($content, $btn_no, $listening, $class, $btn
         $temp_title = trim(str_replace('.', '', $title));
         $title = trim(get_the_title());
         $title = tta_clean_content( $title );
-        if($title == $temp_title) :
+
+        if(tts_text_match_80_percent($title , $temp_title)) :
         ?>
-        <!-- write your script to the head section  -->
-        <script>
+        <!-- Text To Speech TTS Settings  -->
+        <script id='tts_button_settings_<?php echo $btn_no; ?>' >
             var ttsCurrentButtonNo = <?php echo $btn_no; ?>;
             var ttsCurrentContent = "<?php echo $content; ?>";
             var ttsListening = <?php echo $listening; ?>;
@@ -229,7 +227,6 @@ function tts_enqueue_button_scripts ($content, $btn_no, $listening, $class, $btn
 
             if(window.hasOwnProperty('TTS')){ // add content if a page have multiple button
                 window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
-                window.TTS.extra  = {}
                 window.TTS.extra[ttsCurrentButtonNo] = dateTitle;
             }else{ // add content for the if a page have one button
                 window.TTS = {}
@@ -251,6 +248,29 @@ function tts_enqueue_button_scripts ($content, $btn_no, $listening, $class, $btn
 }
 
 
+function tts_text_match_80_percent($text1, $text2) {
+    // Tokenize the input texts into words
+    $words1 = explode(" ", $text1);
+    $words2 = explode(" ", $text2);
+
+    // Convert the arrays of words into sets for faster comparison
+    $set1 = array_unique($words1);
+    $set2 = array_unique($words2);
+
+    // Calculate the intersection and union of the two sets
+    $intersection = count(array_intersect($set1, $set2));
+    $union = count($set1) + count($set2) - $intersection;
+
+    // Calculate the Jaccard similarity coefficient
+    $jaccardSimilarity = $intersection / $union;
+
+    // If the similarity is at least 80%, return true; otherwise, return false
+    if ($jaccardSimilarity >= 0.8) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 
 /**
@@ -278,7 +298,7 @@ function get_button_text( $atts ) {
     $resume_text = (isset($atts['resume_text'])) && strlen($atts['resume_text']) ? esc_html__( sanitize_text_field( $atts['resume_text'] ) ) : __( 'Resume', 'text-to-audio' );
     $replay_text = (isset($atts['replay_text'])) && strlen($atts['replay_text']) ? esc_html__( sanitize_text_field( $atts['replay_text'] ) ) : __( 'Replay', 'text-to-audio' );
     $start_text = (isset($atts['start_text'])) && strlen($atts['start_text']) ? esc_html__( sanitize_text_field( $atts['start_text'] ) ) : __( 'Start', 'text-to-audio' );
-    $stop_text = (isset($atts['stop_text'])) && strlen($atts['stop_text']) ? esc_html__( sanitize_text_field( $atts['stop_text'] ) ) : __( 'Start', 'text-to-audio' );
+    $stop_text = (isset($atts['stop_text'])) && strlen($atts['stop_text']) ? esc_html__( sanitize_text_field( $atts['stop_text'] ) ) : __( 'Stop', 'text-to-audio' );
 
 
     $text_arr = [
@@ -290,10 +310,10 @@ function get_button_text( $atts ) {
         'stop_text' => $stop_text,
     ];
 
-    $text_arr = array_map(function($text){
-        $text =  preg_replace('/[\W]/', '', $text);
-        return $text;
-    }, $text_arr);
+    // $text_arr = array_map(function($text){
+    //     $text =  preg_replace('/[\W]/', '', $text);
+    //     return $text;
+    // }, $text_arr);
 
 
     update_option( 'tta__button_text_arr', $text_arr);
@@ -310,6 +330,9 @@ add_filter( 'the_content', 'add_listen_button' );
  */
 function add_listen_button( $content ) {
     $settings = (array) get_option( 'tta_settings_data');
+    if( isset( $settings['tta__settings_enable_button_add'] ) ) {
+        TTA\TTA_Activator::activate();
+    }
     if( isset( $settings['tta__settings_enable_button_add'] ) &&  $settings['tta__settings_enable_button_add'] ) {    
         // TODO: write functionality if current page is home page where content is excerpt.
         // if(is_single()) {

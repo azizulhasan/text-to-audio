@@ -5466,7 +5466,7 @@ fieldset:disabled .btn {
 }
 .progress {
 	display: flex;
-	height: 1rem;
+	/* height: 1rem; */
 	overflow: hidden;
 	font-size: 0.75rem;
 	background-color: #e9ecef;
@@ -12284,6 +12284,11 @@ button
 .tta_btn:hover {
 	background-color: #1a4548;
 }
+
+.audio-time-start, .audio-time-end{
+    white-space: nowrap;
+}
+
 
 @media (max-width: 599px) {
 	#ttaLayoutSidenav #ttaLayoutSidenav_content {

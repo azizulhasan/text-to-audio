@@ -204,7 +204,7 @@ export default function Customize() {
 					<Row>
 						<Col xs={12} sm={12} lg={12} className='mb-3'>
 							{
-								tta_obj.is_pro_license_active ? <TextToSpeech button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={1} /> : (
+								tta_obj.is_pro_license_active ? <TextToSpeech buttonCSS={listeningBtnStyle} buttonLiveCSS={listeningBtnStyle2} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={1} /> : (
 									<button
 										id='tta__listen_content'
 										onClick={(e) => callListeningFunction(e)}
