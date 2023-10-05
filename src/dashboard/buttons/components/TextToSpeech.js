@@ -5,7 +5,7 @@ import { Close, Play, Replay, Settings, SoundWave, Speed, VoiceOver, Pause } fro
 
 let speech = null
 let TextToSpeechPro = null;
-const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
+const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonLiveCSS = {} }) => {
     const [isFirstPlayerPlay, setFirstPlayerPlay] = useState(true);
     const [isSecondPlayerPlay, setSecondPlayerPlay] = useState(false);
     const [isSettingOpen, setSettingOpen] = useState(false);
@@ -22,6 +22,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
     const [isResumed, setIsResumed] = useState(false)
     const [progressbarValue, setProgressbarValue] = useState(0)
     const [shouldFloat, setShouldFloat] = useState(false)
+
 
     const handleSetting = (e) => {
         e.preventDefault()
@@ -259,10 +260,10 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
 
     const getButtonHTML = () => {
         return (
-            <div id="tts_button_should_float" className="bg-white" >
+            <div id="tts_button_should_float" style={{ backgroundColor: buttonCSS.backgroundColor }} >
                 {/* First player */}
                 {/* {isFirstPlayerPlay && ( */}
-                <div className="player border shadow-custom bg-white mx-auto d-flex justify-content-between px-3 align-items-center position-relative">
+                <div style={{ color: buttonCSS.color }} className="player border shadow-custom  mx-auto d-flex justify-content-between px-3 align-items-center position-relative">
                     {
                         !isSettingOpen && <div
                             className={`d-flex gap-3 justify-content-between align-items-center
@@ -290,9 +291,9 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                             </div>
                             {
                                 listenStatus === 'listen' && window.hasOwnProperty('TTS') ? (
-                                    <div className="align-items-center">
+                                    <div style={{ color: buttonCSS.color }} className="align-items-center">
                                         Listen to article
-                                        <span className="text-secondary"> {window.TTS.settings.readingTime} minutes</span>
+                                        <span> {window.TTS.settings.readingTime} minutes</span>
                                     </div>
                                 ) : (
                                     <div className="d-flex gap-3  justify-content-between align-items-center">
@@ -306,10 +307,11 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                                                     aria-valuenow={0}
                                                     aria-valuemin={0}
                                                     aria-valuemax={100}
+                                                    style={{ height: '5px' }}
                                                 >
                                                     <div
-                                                        className="progress-bar bg-black"
-                                                        style={{ width: `${progressbarValue}%`, height: "10px" }}
+                                                        className="progress-bar"
+                                                        style={{ backgroundColor: buttonCSS.color, width: `${progressbarValue}%` }}
                                                     />
                                                 </div>
                                                 <div className="audio-time-end" id="audio_time_end">00:00</div>
