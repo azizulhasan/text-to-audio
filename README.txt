@@ -1,11 +1,11 @@
 === Text To Speech TTS ===
 Contributors: atlasaidev, hasanazizul, 
 Donate link: http://atlasaidev.com/
-Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, voice to text-comment,
+Tags: google text to speech, speech, tts, text to speech, text to audio, record, voice comment, voice to text-comment,
 Requires at least: 4.0
 Tested up to: 6.3.1
 Requires PHP: 7.4
-Stable tag: 1.4.6
+Stable tag: 1.4.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,7 +50,7 @@ Here you can see some languages which are supported by the browsers based on dev
 
 
 **Listening is a better way to read:**
-Boost your understanding and focus with listening by Text To Speech TTS. Remember more of what you read. Maximize your time,
+Boost your understanding and focus with listening by Text To Audio TTS. Remember more of what you read. Maximize your time,
 Breeze through your content 2-3x faster than it takes to read it. Do more at once, Take your reading wherever you go – to the gym, the park, or the couch, or the journy.
 
 
@@ -162,6 +162,13 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+
+= 1.4.7 ( 5 Oct 2023 ) =
+* Fixed: [Shortcode stop working](https://wordpress.org/support/topic/shortcode-stop-working-2/)
+* Fixed: Button hide issue fixed.
+* Fixed: Listeing language change issue solved.
+* Fixed: [change the button text](https://wordpress.org/support/topic/change-the-button-text-7/)
+* compatibility added for twentytwentythree theme
 
 = 1.4.6 ( Sep 30 , 2023) =
 * Fixed: [Error using quotes in customized CSS](https://wordpress.org/support/topic/error-using-quotes-in-customized-css/)
