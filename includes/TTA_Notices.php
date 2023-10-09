@@ -17,7 +17,8 @@ class TTA_Notices {
 	public function notifications_load_hooks() {
 		if (in_array(admin_url(basename($_SERVER['REQUEST_URI'])), [ admin_url('index.php') , admin_url('plugins.php'), admin_url('update-core.php'), \admin_url('plugin-install.php')] ) )  {
 			add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
-			// add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
+			add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
+			add_action('admin_notices', [$this, 'tta_free_promotion_notice']);
 		}
 
 		add_action('wp_ajax_tta_save_review_notice', [ $this, 'tta_save_review_notice' ] );
@@ -95,7 +96,7 @@ class TTA_Notices {
                                 let self = $(this);
                                 self.closest(".tta-notice").slideUp( 200, 'linear' );
 
-                                let  invoice_notice = self.closest('.tta-notice'), which = invoice_notice.attr('data-which');
+                                let  tta_notice = self.closest('.tta-notice'), which = tta_notice.attr('data-which');
                                 wp.ajax.post( 'tta_hide_notice', { _wpnonce: '<?php echo esc_attr( $nonce ); ?>', which: which } );
 
                                 let notice = self.attr('data-response');
@@ -107,7 +108,7 @@ class TTA_Notices {
                             .on('click', '.tta-notice .notice-dismiss', function (e) {
                                 e.preventDefault();
                                 // noinspection ES6ConvertVarToLetConst
-                                var self = $(this), invoice_notice = self.closest('.tta-notice'), which = invoice_notice.attr('data-which');
+                                var self = $(this), tta_notice = self.closest('.tta-notice'), which = tta_notice.attr('data-which');
                                 wp.ajax.post( 'tta_hide_notice', { _wpnonce: '<?php echo esc_attr( $nonce ); ?>', which: which } );
                             });
 
@@ -198,7 +199,7 @@ class TTA_Notices {
                             .on('click', '.tta-notice .notice-dismiss', function (e) {
                                 e.preventDefault();
                                 // noinspection ES6ConvertVarToLetConst
-                                var self = $(this), invoice_notice = self.closest('.tta-notice'), which = invoice_notice.attr('data-which');
+                                var self = $(this), tta_notice = self.closest('.tta-notice'), which = tta_notice.attr('data-which');
                                 wp.ajax.post( 'tta_hide_notice', { _wpnonce: '<?php echo esc_attr( $nonce ); ?>', which: which } );
                             });
                     })(jQuery)
@@ -208,6 +209,65 @@ class TTA_Notices {
 
 	}
 
+
+		/**
+	 * Black friday implementation.
+	 */
+	public function tta_free_promotion_notice() {
+
+    //    delete_user_meta( 1, 'tta_promotion_notice_dismissed');
+
+		$image_url = TTA_PLUGIN_URL . 'admin/images/halloween-spacial.jpg';
+		// $image_url = TTA_PLUGIN_URL . 'admin/images/halloween-banner-22.png';
+		
+		$pluginName    = sprintf( '<b>%s</b>', esc_html( 'Challan' ) );
+		$user_id       = get_current_user_id();
+		$review_notice_dismissed = get_user_meta($user_id, 'tta_promotion_notice_dismissed', true);
+		$nonce         = wp_create_nonce( 'tta_notice_nonce' );
+
+        if ( isset($review_notice_dismissed) && ! empty($review_notice_dismissed) ) {
+            $show_notice = false;
+        }else {
+            $show_notice = true;
+        }
+
+		if ( $show_notice ) {
+			?>
+            <div class="tta-notice notice notice-info is-dismissible price_update" style="line-height:1.5;" data-which="promotion_close" data-nonce="<?php echo esc_attr( $nonce ); ?>">
+                <p><?php
+					printf(
+					/* translators: 1: plugin name,2: Slightly Smiling Face (Emoji), 3: line break 'br' tag */
+						'<a class="tta_promotion_notice" href="http://atlasaidev.com/text-to-speech-pro/" target="_blank"><img  src="'.$image_url.'" alt="text_to_speech_Free_Price"></a>', //phpcs:ignore
+						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						'<span style="font-size: 16px;">&#128516</span>',
+						'<div class="tta-review-notice-logo"></div>',
+						'<br>'
+					);
+					?></p>
+            </div>
+			<?php
+
+			if ( $show_notice ) {
+				add_action( 'admin_print_footer_scripts', function() use ( $nonce ) {
+					?>
+                    <script>
+                        (function($){
+                            "use strict";
+                            $(document)
+                                .on('click', '.tta-notice .notice-dismiss', function (e) {
+                                    e.preventDefault();
+                                    // noinspection ES6ConvertVarToLetConst
+                                    var self = $(this), tta_notice = self.closest('.tta-notice'), which = tta_notice.attr('data-which');
+                                    console.log(tta_notice.attr('data-which'))
+                                    wp.ajax.post( 'tta_hide_notice', { _wpnonce: '<?php echo esc_attr( $nonce ); ?>', which: which } );
+                                });
+                        })(jQuery)
+                    </script><?php
+				}, 99 );
+			}
+		}
+
+	}
 
 	/**
 	 * Show Review request admin notice
@@ -247,7 +307,8 @@ class TTA_Notices {
 	 */
 	public function tta_hide_notice() {
 		check_ajax_referer( 'tta_notice_nonce' );
-		$notices = [  'wpml', 'rating',  'translate',  ];
+		$notices = [  'wpml', 'rating',  'translate', 'promotion_close',  ];
+
 		if ( isset( $_REQUEST['which'] ) && ! empty( $_REQUEST['which'] ) && in_array( $_REQUEST['which'], $notices ) ) {
 			$user_id = get_current_user_id();
 
@@ -260,6 +321,8 @@ class TTA_Notices {
 			}elseif ( 'writable' == $_REQUEST['which'] ) {
 				update_option( 'tta_folder_writable_notice_next_show_time', time() + ( DAY_IN_SECONDS * 30 )  );
 				add_user_meta($user_id, 'tta_folder_writable_notice_dismissed', true, true);
+			}elseif ( 'promotion_close' == $_REQUEST['which'] ) {
+				add_user_meta($user_id, 'tta_promotion_notice_dismissed', true, true);
 			}
 
 			if ( isset($updated_user_meta ) && $updated_user_meta ) {
