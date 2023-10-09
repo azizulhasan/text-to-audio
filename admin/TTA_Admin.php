@@ -128,6 +128,8 @@ class TTA_Admin {
     public function enqueue_styles() {
         /* Dashicons */
         wp_enqueue_style('dashicons');
+                    wp_enqueue_style('text-to-audio-css', plugin_dir_url(__FILE__) . 'css/text-to-audio.css', [] , $this->version, 'all' );
+
 
     }
 
