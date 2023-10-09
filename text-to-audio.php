@@ -72,6 +72,17 @@ if (!defined('TTA_LIBS_PATH')) {
     define('TTA_LIBS_PATH', dirname(TEXT_TO_AUDIO_ROOT_FILE) . '/libs/');
 }
 
+
+if ( ! defined( 'TTA_PLUGIN_URL' ) ) {
+    /**
+     * Plugin Directory URL
+     *
+     * @var string
+     * @since 1.2.2
+     */
+    define( 'TTA_PLUGIN_URL', trailingslashit( plugin_dir_url( TEXT_TO_AUDIO_ROOT_FILE ) ) );
+}
+
 /**
  * Begins execution of the plugin.
  *
