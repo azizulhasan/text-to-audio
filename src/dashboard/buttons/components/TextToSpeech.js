@@ -45,7 +45,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
      */
     const callBackAfterEnd = () => {
         speech = speech.getData()
-        setListenStatus(speech.listenStatus)
+        // setListenStatus(speech.listenStatus)
     }
 
     // TODO modiy TextToSpeech functionality by action and filter hook
@@ -61,11 +61,12 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
         TextToSpeechPro = window.TextToSpeechPro;
         if (speech != null && speech.listenStatus == 'listen') {
             speech = null
-            setListenStatus('listen')
+            // setListenStatus('listen')
         }
 
         if (speech === null) {
             speech = new TextToSpeechPro(buttonId, contents[buttonId], button, window.TTS)
+
             speech._init(callBackAfterEnd)
             setFirstPlayerPlay(false);
             setSecondPlayerPlay(true);
@@ -73,20 +74,20 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             getDecreamentTime()
             setTimeout(() => {
                 speech = speech.getData()
-                setListenStatus(speech.listenStatus)
+                // setListenStatus(speech.listenStatus)
                 console.log(speech.listenStatus)
             }, 100)
         } else {
 
             speech = speech.getData()
-            setListenStatus(speech.listenStatus)
+            // setListenStatus(speech.listenStatus)
             if (speech.listenStatus == 'pause') {
                 speech.pause(speech.speech)
                 setIsPlaying(!isPlaying);
                 clearInterval(decreamentInterval);
                 clearInterval(increamentInterval);
                 setTimeout(() => {
-                    setListenStatus(speech.listenStatus)
+                    // setListenStatus(speech.listenStatus)
                 }, 100)
             } else if (speech.listenStatus == 'resume') {
                 speech.resume(speech.speech)
@@ -94,7 +95,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                 getDecreamentTime(deadline)
                 getIncreamentTime(increamentDeadline, increamentedTime)
                 setTimeout(() => {
-                    setListenStatus(speech.listenStatus)
+                    // setListenStatus(speech.listenStatus)
                 }, 100)
             }
         }
@@ -420,6 +421,9 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             } else if (document.querySelector('.entry-title')) {
                 postTitle = document.querySelector('.entry-title')
                 titlePosition = postTitle.getBoundingClientRect().top;
+            } else if (document.querySelector('.wp-block-post-title')) {
+                postTitle = document.querySelector('.wp-block-post-title')
+                titlePosition = postTitle.getBoundingClientRect().top;
             }
 
             let topPos = Math.floor(button.getBoundingClientRect().top);
@@ -430,16 +434,15 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             if (titlePosition > 0) {
                 setShouldFloat(false)
             }
-
         }
-        document.addEventListener('scroll', detectScroll)
-        document.addEventListener('wheel', detectScroll)
+        // document.addEventListener('scroll', detectScroll)
+        // document.addEventListener('wheel', detectScroll)
 
 
-        return () => {
-            document.removeEventListener('scroll', detectScroll)
-            document.removeEventListener('wheel', detectScroll)
-        }
+        // return () => {
+        //     document.removeEventListener('scroll', detectScroll)
+        //     document.removeEventListener('wheel', detectScroll)
+        // }
     }, [])
 
     return (
