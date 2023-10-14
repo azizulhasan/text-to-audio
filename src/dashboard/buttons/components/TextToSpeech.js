@@ -411,30 +411,30 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
 
 
     useEffect(() => {
-        const detectScroll = (e) => {
-            let button = document.getElementById('tts_button_should_float');
-            let postTitle = null;
-            let titlePosition = 0;
-            if (document.querySelector('.post-title')) {
-                postTitle = document.querySelector('.post-title')
-                titlePosition = postTitle.getBoundingClientRect().top;
-            } else if (document.querySelector('.entry-title')) {
-                postTitle = document.querySelector('.entry-title')
-                titlePosition = postTitle.getBoundingClientRect().top;
-            } else if (document.querySelector('.wp-block-post-title')) {
-                postTitle = document.querySelector('.wp-block-post-title')
-                titlePosition = postTitle.getBoundingClientRect().top;
-            }
+        // const detectScroll = (e) => {
+        //     let button = document.getElementById('tts_button_should_float');
+        //     let postTitle = null;
+        //     let titlePosition = 0;
+        //     if (document.querySelector('.post-title')) {
+        //         postTitle = document.querySelector('.post-title')
+        //         titlePosition = postTitle.getBoundingClientRect().top;
+        //     } else if (document.querySelector('.entry-title')) {
+        //         postTitle = document.querySelector('.entry-title')
+        //         titlePosition = postTitle.getBoundingClientRect().top;
+        //     } else if (document.querySelector('.wp-block-post-title')) {
+        //         postTitle = document.querySelector('.wp-block-post-title')
+        //         titlePosition = postTitle.getBoundingClientRect().top;
+        //     }
 
-            let topPos = Math.floor(button.getBoundingClientRect().top);
-            if (topPos < 1) {
-                setShouldFloat(true)
-            }
+        //     let topPos = Math.floor(button.getBoundingClientRect().top);
+        //     if (topPos < 1) {
+        //         setShouldFloat(true)
+        //     }
 
-            if (titlePosition > 0) {
-                setShouldFloat(false)
-            }
-        }
+        //     if (titlePosition > 0) {
+        //         setShouldFloat(false)
+        //     }
+        // }
         // document.addEventListener('scroll', detectScroll)
         // document.addEventListener('wheel', detectScroll)
 
