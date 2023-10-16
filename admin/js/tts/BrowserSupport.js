@@ -67,7 +67,6 @@ export default class BrowserSupport {
             if (matches !== null && voice.name) {
                 this.#lang = voice.lang;
                 isSupported = true;
-                console.log(voice.lang)
             }
         })
 

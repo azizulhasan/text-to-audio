@@ -351,10 +351,7 @@ export default class TextToSpeech {
             .then(data => {
                 this.voices = data.voices;
                 if (!this.browser) {
-                    console.log(this.browser)
                     this.browser = new BrowserSupport(ttsObj, data.voices, this.ttsListeningSettings.tta__listening_lang, this.ttsListeningSettings.tta__listening_voice)
-                } else {
-                    console.log({ "else": this.browser })
                 }
                 this._prepareSpeakButton(this.speech);
                 window.sessionStorage.setItem('tts_paused_by_intention', false);

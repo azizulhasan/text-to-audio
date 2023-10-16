@@ -45,7 +45,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
      */
     const callBackAfterEnd = () => {
         speech = speech.getData()
-        // setListenStatus(speech.listenStatus)
+        setListenStatus(speech.listenStatus)
     }
 
     // TODO modiy TextToSpeech functionality by action and filter hook
@@ -61,7 +61,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
         TextToSpeechPro = window.TextToSpeechPro;
         if (speech != null && speech.listenStatus == 'listen') {
             speech = null
-            // setListenStatus('listen')
+            setListenStatus('listen')
         }
 
         if (speech === null) {
@@ -74,20 +74,20 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             getDecreamentTime()
             setTimeout(() => {
                 speech = speech.getData()
-                // setListenStatus(speech.listenStatus)
+                setListenStatus(speech.listenStatus)
                 console.log(speech.listenStatus)
             }, 100)
         } else {
 
             speech = speech.getData()
-            // setListenStatus(speech.listenStatus)
+            setListenStatus(speech.listenStatus)
             if (speech.listenStatus == 'pause') {
                 speech.pause(speech.speech)
                 setIsPlaying(!isPlaying);
                 clearInterval(decreamentInterval);
                 clearInterval(increamentInterval);
                 setTimeout(() => {
-                    // setListenStatus(speech.listenStatus)
+                    setListenStatus(speech.listenStatus)
                 }, 100)
             } else if (speech.listenStatus == 'resume') {
                 speech.resume(speech.speech)
@@ -95,7 +95,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                 getDecreamentTime(deadline)
                 getIncreamentTime(increamentDeadline, increamentedTime)
                 setTimeout(() => {
-                    // setListenStatus(speech.listenStatus)
+                    setListenStatus(speech.listenStatus)
                 }, 100)
             }
         }
@@ -281,6 +281,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                 {
                                     speech && listenStatus === 'pause' && <Pause onClick={(e) => handlePlayButtonClick(e)} />
                                 }
+
                                 {/* {isPlaying && (
                                     <div
                                         className="position-absolute top-0 start-0 translate-middle spinner-border text-primary"
@@ -291,36 +292,35 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                 )} */}
                             </div>
                             {
-                                listenStatus === 'listen' && window.hasOwnProperty('TTS') ? (
-                                    <div style={{ color: buttonCSS.color }} className="align-items-center">
-                                        Listen to article
-                                        <span> {window.TTS.settings.readingTime} minutes</span>
-                                    </div>
-                                ) : (
-                                    <div className="d-flex gap-3  justify-content-between align-items-center">
-                                        <div className="audio-player">
-                                            <div className="audio-controls">
-                                                <div className="audio-time-start" id="audio_time_start">00:00</div>
+                                listenStatus === 'listen' && window.hasOwnProperty('TTS') && <div style={{ color: buttonCSS.color }} className="align-items-center">
+                                    Listen to article
+                                    <span> {window.TTS.settings.readingTime} minutes</span>
+                                </div>
+                            }
+                            {
+                                listenStatus !== 'listen' && window.hasOwnProperty('TTS') && <div className="d-flex gap-3  justify-content-between align-items-center">
+                                    <div className="audio-player">
+                                        <div className="audio-controls">
+                                            <div className="audio-time-start" id="audio_time_start">00:00</div>
+                                            <div
+                                                className="progress audio-progress"
+                                                role="progressbar"
+                                                aria-label="Success example"
+                                                aria-valuenow={0}
+                                                aria-valuemin={0}
+                                                aria-valuemax={100}
+                                                style={{ height: '5px' }}
+                                            >
                                                 <div
-                                                    className="progress audio-progress"
-                                                    role="progressbar"
-                                                    aria-label="Success example"
-                                                    aria-valuenow={0}
-                                                    aria-valuemin={0}
-                                                    aria-valuemax={100}
-                                                    style={{ height: '5px' }}
-                                                >
-                                                    <div
-                                                        className="progress-bar"
-                                                        style={{ backgroundColor: buttonCSS.color, width: `${progressbarValue}%` }}
-                                                    />
-                                                </div>
-                                                <div className="audio-time-end" id="audio_time_end">00:00</div>
+                                                    className="progress-bar"
+                                                    style={{ backgroundColor: buttonCSS.color, width: `${progressbarValue}%` }}
+                                                />
                                             </div>
-                                            <div className="audio-volume"></div>
+                                            <div className="audio-time-end" id="audio_time_end">00:00</div>
                                         </div>
+                                        <div className="audio-volume"></div>
                                     </div>
-                                )
+                                </div>
                             }
 
                         </div>
@@ -411,38 +411,41 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
 
 
     useEffect(() => {
-        // const detectScroll = (e) => {
-        //     let button = document.getElementById('tts_button_should_float');
-        //     let postTitle = null;
-        //     let titlePosition = 0;
-        //     if (document.querySelector('.post-title')) {
-        //         postTitle = document.querySelector('.post-title')
-        //         titlePosition = postTitle.getBoundingClientRect().top;
-        //     } else if (document.querySelector('.entry-title')) {
-        //         postTitle = document.querySelector('.entry-title')
-        //         titlePosition = postTitle.getBoundingClientRect().top;
-        //     } else if (document.querySelector('.wp-block-post-title')) {
-        //         postTitle = document.querySelector('.wp-block-post-title')
-        //         titlePosition = postTitle.getBoundingClientRect().top;
-        //     }
+        const detectScroll = (e) => {
+            let button = document.getElementById('tts_button_should_float');
+            let postTitle = null;
+            let titlePosition = 0;
+            if (document.querySelector('.post-title')) {
+                postTitle = document.querySelector('.post-title')
+                titlePosition = postTitle.getBoundingClientRect().top;
+            } else if (document.querySelector('.entry-title')) {
+                postTitle = document.querySelector('.entry-title')
+                titlePosition = postTitle.getBoundingClientRect().top;
+            } else if (document.querySelector('.wp-block-post-title')) {
+                postTitle = document.querySelector('.wp-block-post-title')
+                titlePosition = postTitle.getBoundingClientRect().top;
+            }
 
-        //     let topPos = Math.floor(button.getBoundingClientRect().top);
-        //     if (topPos < 1) {
-        //         setShouldFloat(true)
-        //     }
+            if (button) {
+                let topPos = Math.floor(button.getBoundingClientRect().top);
+                if (topPos < 1) {
+                    setShouldFloat(true)
+                }
 
-        //     if (titlePosition > 0) {
-        //         setShouldFloat(false)
-        //     }
-        // }
-        // document.addEventListener('scroll', detectScroll)
-        // document.addEventListener('wheel', detectScroll)
+                if (titlePosition > 0) {
+                    setShouldFloat(false)
+                }
+            }
+        }
+        document.addEventListener('scroll', detectScroll)
+        document.addEventListener('wheel', detectScroll)
 
 
-        // return () => {
-        //     document.removeEventListener('scroll', detectScroll)
-        //     document.removeEventListener('wheel', detectScroll)
-        // }
+        return () => {
+            document.removeEventListener('scroll', detectScroll)
+            document.removeEventListener('wheel', detectScroll)
+        }
+
     }, [])
 
     return (
