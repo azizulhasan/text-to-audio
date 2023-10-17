@@ -31,8 +31,11 @@ export default function DashboardTopNav() {
       <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://wordpress.org/support/plugin/text-to-audio/reviews/#new-post" target="_blank">
         Give A Review
       </a>
-      <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="http://atlasaidev.com/contact-us/" target="_blank">
-        Rquest a feature
+      <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://atlasaidev.com/docs/" target="_blank">
+        Documentation
+      </a>
+      <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://www.youtube.com/@AtlasAiDev" target="_blank">
+        YouTube
       </a>
     </nav>
   );
