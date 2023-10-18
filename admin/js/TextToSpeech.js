@@ -398,7 +398,6 @@ export default class TextToSpeech {
 window.TextToSpeech = TextToSpeech;
 
 
-
 let timerDashboar;
 timerDashboar = setTimeout(() => {
     if (window.hasOwnProperty('ttsObj') && ttsObj.is_dashboard) {

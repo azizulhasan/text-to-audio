@@ -59,18 +59,25 @@ export default class BrowserSupport {
         return this.#voice;
     }
 
-    setLanguage(lang) {
+    setLanguage(lang, callback) {
         let isSupported = false;
-        Object.values(this.voices).map(voice => {
-            let regex = new RegExp(lang, "gi");
-            let matches = voice.lang.match(regex)
-            if (matches !== null && voice.name) {
-                this.#lang = voice.lang;
-                isSupported = true;
-            }
-        })
+        if (this.voices.length) {
+            Object.values(this.voices).map(voice => {
+                let regex = new RegExp(lang, "gi");
+                let matches = voice.lang.match(regex)
+                if (matches !== null && voice.name) {
+                    this.#lang = voice.lang;
+                    isSupported = true;
+                }
+            })
+            return { lang: this.#lang, isSupported };
+        }
+
 
         return { lang: this.#lang, isSupported };
+
+
+
     }
 
     setVoice(voice) {
@@ -111,9 +118,12 @@ export default class BrowserSupport {
                     this.#lang = currentLang;
                 }
             }
-        } else {
+        } else if (filteredVoices.length === 1) {
             this.#voice = filteredVoices[0].name;
             this.#lang = filteredVoices[0].lang
+        } else {
+            this.#voice = voice;
+            this.#lang = lang
         }
     }
 
