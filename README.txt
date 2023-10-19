@@ -5,7 +5,7 @@ Tags: google text to speech, speech, tts, text to speech, text to audio, record,
 Requires at least: 4.0
 Tested up to: 6.3.1
 Requires PHP: 7.4
-Stable tag: 1.4.9
+Stable tag: 1.4.10
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -166,6 +166,9 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 💎 TRANSLATION REQUEST 💎
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+= 1.4.10 ( 19 Oct 2023 ) =
+* Added: GTranslate plugin compatibility added.
 
 = 1.4.9 ( 17 Oct 2023 ) =
 * Added: Documentation link added.
