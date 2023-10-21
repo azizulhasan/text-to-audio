@@ -48,6 +48,28 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
         setListenStatus(speech.listenStatus)
     }
 
+    const pauseButton = (speech) => {
+        speech.pause(speech.speech)
+        setIsPlaying(!isPlaying);
+        clearInterval(decreamentInterval);
+        clearInterval(increamentInterval);
+        setTimeout(() => {
+            setListenStatus(speech.listenStatus)
+        }, 100)
+    }
+
+
+    useEffect(() => {
+        if (speech) {
+            speech.onAValueChanged((newValue) => {
+                if ('resume' === newValue) {
+                    pauseButton(speech)
+                }
+                console.log('Property "a" has changed to:', newValue);
+            });
+        }
+    }, [speech])
+
     // TODO modiy TextToSpeech functionality by action and filter hook
     // TODO apply google text to speech for pro version.
     const handlePlayButtonClick = (e) => {
@@ -78,17 +100,10 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                 console.log(speech.listenStatus)
             }, 100)
         } else {
-
             speech = speech.getData()
             setListenStatus(speech.listenStatus)
             if (speech.listenStatus == 'pause') {
-                speech.pause(speech.speech)
-                setIsPlaying(!isPlaying);
-                clearInterval(decreamentInterval);
-                clearInterval(increamentInterval);
-                setTimeout(() => {
-                    setListenStatus(speech.listenStatus)
-                }, 100)
+                pauseButton(speech)
             } else if (speech.listenStatus == 'resume') {
                 speech.resume(speech.speech)
                 let deadline = new Date(Date.parse(new Date()) + decreamentDeadline);
