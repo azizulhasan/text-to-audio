@@ -64,8 +64,8 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             speech.onAValueChanged((newValue) => {
                 if ('resume' === newValue) {
                     pauseButton(speech)
+                    speech = null
                 }
-                console.log('Property "a" has changed to:', newValue);
             });
         }
     }, [speech])
@@ -85,9 +85,21 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             speech = null
             setListenStatus('listen')
         }
-
+        console.log({
+            speech,
+            listenStatus,
+            contents,
+            TextToSpeechPro
+        })
         if (speech === null) {
-            speech = new TextToSpeechPro(buttonId, contents[buttonId], button, window.TTS)
+            if (TextToSpeechPro?.TTS) {
+                speech = new window.TextToSpeechPro2(buttonId, contents[buttonId], button, window.TTS)
+                console.log({ speech2: speech })
+            } else {
+                speech = new TextToSpeechPro(buttonId, contents[buttonId], button, window.TTS)
+                console.log({ speech })
+            }
+
 
             speech._init(callBackAfterEnd)
             setFirstPlayerPlay(false);
