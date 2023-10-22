@@ -48,11 +48,24 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
         setListenStatus(speech.listenStatus)
     }
 
-    const pauseButton = (speech) => {
+    const pauseButton = (speech, finishIntentionally = false) => {
         speech.pause(speech.speech)
+        if (finishIntentionally) {
+            speech.finishedSpeaking(speech.speech, {}, finishIntentionally);
+        }
         setIsPlaying(!isPlaying);
         clearInterval(decreamentInterval);
         clearInterval(increamentInterval);
+        setTimeout(() => {
+            setListenStatus(speech.listenStatus)
+        }, 100)
+    }
+
+    const resumeButton = (speech) => {
+        speech.resume(speech.speech)
+        let deadline = new Date(Date.parse(new Date()) + decreamentDeadline);
+        getDecreamentTime(deadline)
+        getIncreamentTime(increamentDeadline, increamentedTime)
         setTimeout(() => {
             setListenStatus(speech.listenStatus)
         }, 100)
@@ -62,9 +75,10 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
     useEffect(() => {
         if (speech) {
             speech.onAValueChanged((newValue) => {
-                if ('resume' === newValue) {
-                    pauseButton(speech)
+                if ('listen' === newValue) {
+                    pauseButton(speech, true)
                     speech = null
+                    setListenStatus(newValue)
                 }
             });
         }
@@ -85,19 +99,11 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             speech = null
             setListenStatus('listen')
         }
-        console.log({
-            speech,
-            listenStatus,
-            contents,
-            TextToSpeechPro
-        })
         if (speech === null) {
             if (TextToSpeechPro?.TTS) {
                 speech = new window.TextToSpeechPro2(buttonId, contents[buttonId], button, window.TTS)
-                console.log({ speech2: speech })
             } else {
                 speech = new TextToSpeechPro(buttonId, contents[buttonId], button, window.TTS)
-                console.log({ speech })
             }
 
 
@@ -109,7 +115,6 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             setTimeout(() => {
                 speech = speech.getData()
                 setListenStatus(speech.listenStatus)
-                console.log(speech.listenStatus)
             }, 100)
         } else {
             speech = speech.getData()
@@ -117,13 +122,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             if (speech.listenStatus == 'pause') {
                 pauseButton(speech)
             } else if (speech.listenStatus == 'resume') {
-                speech.resume(speech.speech)
-                let deadline = new Date(Date.parse(new Date()) + decreamentDeadline);
-                getDecreamentTime(deadline)
-                getIncreamentTime(increamentDeadline, increamentedTime)
-                setTimeout(() => {
-                    setListenStatus(speech.listenStatus)
-                }, 100)
+                resumeButton(speech)
             }
         }
 
