@@ -171,8 +171,6 @@ export default class TextToSpeech {
             // set up initial content to replacy.
             this.splittedSentances = splitSentences(window.TTS.contents[this.buttonId])
             speech.cancel();
-            console.log('ive canceled')
-            console.log({ content: this.splittedSentances })
         }
         console.log("Success !", data);
 
@@ -191,11 +189,7 @@ export default class TextToSpeech {
             this.displayApiMissing("tts__listent_content_" + this.buttonId)
             return;
         }
-        console.log({
-            lang: this.browser.getLanguage(),
-            voice: this.browser.getVoice(),
-            content,
-        })
+
         speech.setLanguage(this.browser.getLanguage())
         speech.setVoice(this.browser.getVoice())
         /**

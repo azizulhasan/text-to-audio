@@ -168,7 +168,7 @@ We are looking for people to help translate this plugin. If you can help we woul
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 = 1.4.10 ( 19 Oct 2023 ) =
-* Added: GTranslate plugin compatibility added.
+* Added: GTranslate plugin compatibility added for premium version.
 
 = 1.4.9 ( 17 Oct 2023 ) =
 * Added: Documentation link added.
