@@ -161,6 +161,29 @@ export default class TextToSpeech {
         }
     }
 
+
+    finishedSpeaking(speech, data = {}, cancelIntentionally = false,) {
+        if (!this.speech.speaking() || cancelIntentionally) {
+            console.log('End utterance ' + this.speech.speaking());
+            this.listenStatus = 'listen';
+            this.displayButtonText(this.listenStatus)
+
+            // set up initial content to replacy.
+            this.splittedSentances = splitSentences(window.TTS.contents[this.buttonId])
+            speech.cancel();
+        }
+        console.log("Success !", data);
+
+        if (this.callBackAfterEnd) this.callBackAfterEnd()
+        if (!this.browser.isAndroid()) {
+            clearTimeout(this.timer);
+            this.timer = null
+            clearTimeout(this.shouldCancelTimer)
+            this.shouldCancelTimer = null
+        }
+        window.sessionStorage.setItem('tts_paused_by_intention', false);
+    }
+
     speak(speech, content = this.content) {
         if (!this.speech.hasBrowserSupport()) {
             this.displayApiMissing("tts__listent_content_" + this.buttonId)
@@ -207,26 +230,7 @@ export default class TextToSpeech {
                 }
             })
             .then(data => {
-                if (!this.speech.speaking()) {
-                    console.log('End utterance ' + this.speech.speaking());
-                    this.listenStatus = 'listen';
-                    this.displayButtonText(this.listenStatus)
-
-                    // set up initial content to replacy.
-                    this.content = window.ttsContent;
-                    this.splittedSentances = splitSentences(window.ttsContent)
-                    speech.cancel();
-                }
-                console.log("Success !", data);
-
-                if (this.callBackAfterEnd) this.callBackAfterEnd()
-                if (!this.browser.isAndroid()) {
-                    clearTimeout(this.timer);
-                    this.timer = null
-                    clearTimeout(this.shouldCancelTimer)
-                    this.shouldCancelTimer = null
-                }
-                window.sessionStorage.setItem('tts_paused_by_intention', false);
+                this.finishedSpeaking(speech, data)
             })
             .catch(e => {
                 console.error("An error occurred :", e);
@@ -350,7 +354,9 @@ export default class TextToSpeech {
             })
             .then(data => {
                 this.voices = data.voices;
+                // if (!this.browser) {
                 this.browser = new BrowserSupport(ttsObj, data.voices, this.ttsListeningSettings.tta__listening_lang, this.ttsListeningSettings.tta__listening_voice)
+                // }
                 this._prepareSpeakButton(this.speech);
                 window.sessionStorage.setItem('tts_paused_by_intention', false);
             })
@@ -394,7 +400,6 @@ export default class TextToSpeech {
 }
 
 window.TextToSpeech = TextToSpeech;
-
 
 
 let timerDashboar;
