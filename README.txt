@@ -1,11 +1,11 @@
 === Text To Speech TTS ===
 Contributors: atlasaidev, hasanazizul, 
 Donate link: http://atlasaidev.com/
-Tags: google text to speech, speech, tts, text to speech, text to audio, record, voice comment, voice to text-comment,
+Tags: accessibility, speech, tts, text to speech, text to audio, record, voice comment, voice to text-comment,
 Requires at least: 4.0
-Tested up to: 6.3.1
+Tested up to: 6.3.2
 Requires PHP: 7.4
-Stable tag: 1.4.10
+Stable tag: 1.4.11
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,19 +15,38 @@ Add functionality to WordPress site to read blogs out loud in more than 20 langu
 
 Add functionality to WordPress site to read blogs out loud in more than 20 languages.
 
-There is no need to create an account it’s completely free. Just install the plugin and enjoy the whole features of the plugin.
+There is no need to create an account text to speech plugin is completely free. Just install the plugin and enjoy the whole features of the plugin.
 
 == Free text to speech (TTS) plugin for WordPress - Video Tutorial ==
 [youtube https://www.youtube.com/watch?v=P_dw_YjnVxc&t=21s&ab_channel=AtlasAiDev]
 
-### Useful Links:
+### SUPPORT AND QUESTIONS VISIT HERE:
+> * [Support](http://atlasaidev.com/contact-us/)
+
+### USEFULL LINKS:
 > * [Live Demo](http://atlasaidev.com/text-to-speech/)
-> * [Request A Feature](http://atlasaidev.com/contact-us/)
 > * [Pro Version](http://atlasaidev.com/)
 > * [Video Tutorial](https://www.youtube.com/@atlasaidev)
 
 
-**Important Note:**
+### USAGE:
+ * It’s Easy – To have the text to audio button in the content put the following shortcode anywhere in the text of your page or post.
+	
+	`[tta_listen_btn]`
+
+* TTS button text can be changed by providing attributes to shortcode like this.
+
+	`[tta_listen_btn listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay"]`
+
+* It can be possible to create a shortcode with custom text to read like this.
+
+	`[tta_listen_btn text_to_read="Hello WordPress" ]`
+
+* Add class on shortcode as an attribute. Example : 
+
+	`[tta_listen_btn class="custom_class"]`	
+
+**IMPORTANT NOTE:**
 
 Text To Speech TTS plugin is built on browser speechSynthesis API. No external API is used. Here is the API used [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
 That is why Text To Speech TTS doesn’t support all android phones, aslo all languages. Here you can check which android phone and which device support [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility) API.
@@ -49,29 +68,7 @@ Here you can see some languages which are supported by the browsers based on dev
 * FireFox Mobile: English USA, English UK, German, Italian, Russian, French, Spanish.
 
 
-**Listening is a better way to read:**
-Boost your understanding and focus with listening by Text To Audio TTS. Remember more of what you read. Maximize your time,
-Breeze through your content 2-3x faster than it takes to read it. Do more at once, Take your reading wherever you go – to the gym, the park, or the couch, or the journy.
-
-
-**Pro Features:**
-* Get Live Support for firts time Integration.
-* Get Priority Support.
-* Save time by listening while you’re doing other tasks.
-* Engage with your customers more interactively.
-* Improved UI of the button.
-* Integrate with Google Cloud Text To Speech.
-* Get more than 600 voices when you’re using Google Cloud Text To Speech.
-* Remove special characters from content during reading.
-* Remove URL from content during reading.
-* Responsive speaking button.
-
-This plugin is compatible with below multi-language plugins:
-
-* <a hrefs='https://wordpress.org/plugins/gtranslate/' target='_blank'>Translate WordPress with GTranslate Plugin Support</a>
-
-
-**Features:**
+**FEAUTES:**
 
 * Add a play button to any post or page.
 * Unlimited text to speech.
@@ -84,7 +81,30 @@ This plugin is compatible with below multi-language plugins:
 * Customization of button in block editor.
 * Play button can be added by shortcode “[tta_listen_btn]”.
 
+**Listening is a better way to read:**
+Boost your understanding and focus with listening by Text To Audio TTS. Remember more of what you read. Maximize your time,
+Breeze through your content 2-3x faster than it takes to read it. Do more at once, Take your reading wherever you go – to the gym, the park, or the couch, or the journy.
 
+
+**PRO FEATURES:**
+* Get Live Support for first time integration.
+* Get Priority Support.
+* Save time by listening while you’re doing other tasks.
+* Engage with your customers more interactively.
+* Improved UI of the button.
+* Integrate with Google Cloud Text To Speech.
+* Get more than 600 voices when you’re using Google Cloud Text To Speech.
+* Remove special characters from content during reading.
+* Remove URL from content during reading.
+* Responsive speaking button.
+
+**Multi-lingual supported plugins**
+* <a hrefs='https://wordpress.org/plugins/gtranslate/' target='_blank'>Translate WordPress with GTranslate Plugin</a>
+
+**Custom Post Type supported plugins**
+* <a hrefs='https://wordpress.org/plugins/advanced-custom-fields/' target='_blank'>Advanced Custom Fields (ACF)</a>
+* <a hrefs='https://wordpress.org/plugins/custom-post-type-ui/' target='_blank'>Custom Post Type UI</a>
+* <a hrefs='https://toolset.com/home/types-manage-post-types-taxonomy-and-custom-fields/' target='_blank'>Toolset Types</a>
 
 == Installation ==
 1. Download and unzip the plugin
@@ -123,7 +143,7 @@ Now you can change ```color```, ```backgroundColor```, ```width```. And also add
 = How to change button text? =
 You can change button text 2 ways one is by shortcode attribute. Another way is adding filter. But filter always overrides the shortcode attributes. Here is short code Example :
 	`
-	[tta_listen_btn listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay" start_text="Start" stop_text="Stop"]
+	[tta_listen_btn listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay"]
 	`
     Filter Example :
 	Install the plugin [Code Snippets](https://wordpress.org/plugins/code-snippets/) Then Select Snippet > Add New Create a new snippet with this block of code
@@ -166,6 +186,14 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 💎 TRANSLATION REQUEST 💎
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+= 1.4.11 ( 26 Oct 2023 ) =
+* Added: Shortcode attribute ```text_to_read``` added. 
+* Added: Custom post type support for premium verison.
+* Added: [Advanced Custom Fields (ACF)](https://wordpress.org/plugins/advanced-custom-fields/) support for pro version.
+* Added: [Custom Post Type UI](https://wordpress.org/plugins/custom-post-type-ui/) support for pro version.
+* Added: [Toolset Types](https://toolset.com/home/types-manage-post-types-taxonomy-and-custom-fields/) support for pro version.
+
 
 = 1.4.10 ( 19 Oct 2023 ) =
 * Added: GTranslate plugin compatibility added for premium version.

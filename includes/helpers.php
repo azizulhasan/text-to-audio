@@ -137,10 +137,15 @@ function tta_get_button_content($atts, $is_block = false) {
 
     // Button listen text.
      if($atts || has_filter('tta__button_text_arr')) {
+        if( isset( $atts['text_to_read'] ) && $atts['text_to_read'] ) {
+            $content = $atts['text_to_read'];
+        }
         $text_arr = get_button_text( $atts );
     }else{
         $text_arr = get_option('tta__button_text_arr');
     }
+
+
 
     // Speak Icon
     $speakIcon = "<div class='tta_button'>";
