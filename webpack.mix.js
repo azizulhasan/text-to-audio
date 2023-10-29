@@ -4,9 +4,6 @@ const mix = require('laravel-mix');
 
 mix.js('src/dashboard/index.js', 'admin/js/build/text-to-audio-dashboard-ui.min.js').react();
 
-mix.js('admin/js/text-to-audio-dashboard.js', 'admin/js/build/text-to-audio-dashboard.min.js');
-
-
 mix.js('admin/js/TextToSpeech.js', 'admin/js/build/TextToSpeech.min.js');
 
 mix.js('admin/js/text-to-audio-button.js', 'admin/js/build/text-to-audio-button.min.js');

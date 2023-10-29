@@ -402,8 +402,16 @@ export default class TextToSpeech {
     }
 }
 
-window.TextToSpeech = TextToSpeech;
-
+/**
+ * Load text to speech after DOMContentLoaded in free version.
+ */
+if (window?.ttsObj?.is_pro_active) {
+    window.TextToSpeech = TextToSpeech;
+} else {
+    window.document.addEventListener('DOMContentLoaded', function () {
+        window.TextToSpeech = TextToSpeech;
+    })
+}
 
 
 
