@@ -15,7 +15,6 @@ export default class BrowserSupport {
         this.#defineBrowser()
         this.defineVoiceAndLang(selectedVoice, selectedLang)
     }
-
     isAndroid() {
         let ua = navigator.userAgent.toLowerCase();
 
