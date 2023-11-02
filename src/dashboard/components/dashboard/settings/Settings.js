@@ -94,7 +94,7 @@ export default function Settings() {
 							<Row className=' mt-3'>
 								<Col xs={12} sm={6} lg={4}>
 									<Form.Label htmlFor='tta__settings_enable_button_add'>
-										Enable button add
+										Enable Autometically Button Add
 									</Form.Label>
 								</Col>
 								<Col xs={12} sm={12} lg={8}>

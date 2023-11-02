@@ -96,7 +96,7 @@ class TTA_Activator {
         $resume_text =  __( 'Resume', 'text-to-audio' ) ;
         $replay_text =  __( 'Replay', 'text-to-audio' ) ;
         $start_text =  __( 'Start', 'text-to-audio' ) ;
-        $stop_text = __( 'Start', 'text-to-audio' ) ;
+        $stop_text = __( 'Stop', 'text-to-audio' ) ;
 
         if( $renew_all_settings || !get_option('tta_record_settings')){
             update_option( 'tta__button_text_arr', [

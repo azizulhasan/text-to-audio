@@ -299,13 +299,18 @@ function tts_post_type() {
  * Get button text
  */
 function get_button_text( $atts ) {
-    $listen_text = (isset($atts['listen_text'])) && strlen($atts['listen_text']) ? esc_html__( sanitize_text_field( $atts['listen_text'] ) ) : __( "Listen", 'text-to-audio' );
-    $pause_text = (isset($atts['pause_text'])) && strlen($atts['pause_text']) ? esc_html__( sanitize_text_field( $atts['pause_text'] ) ) : __( 'Pause', 'text-to-audio' );
-    $resume_text = (isset($atts['resume_text'])) && strlen($atts['resume_text']) ? esc_html__( sanitize_text_field( $atts['resume_text'] ) ) : __( 'Resume', 'text-to-audio' );
-    $replay_text = (isset($atts['replay_text'])) && strlen($atts['replay_text']) ? esc_html__( sanitize_text_field( $atts['replay_text'] ) ) : __( 'Replay', 'text-to-audio' );
-    $start_text = (isset($atts['start_text'])) && strlen($atts['start_text']) ? esc_html__( sanitize_text_field( $atts['start_text'] ) ) : __( 'Start', 'text-to-audio' );
-    $stop_text = (isset($atts['stop_text'])) && strlen($atts['stop_text']) ? esc_html__( sanitize_text_field( $atts['stop_text'] ) ) : __( 'Stop', 'text-to-audio' );
 
+    $saved_texts = get_option('tta__button_text_arr');
+    if(!$saved_texts){
+        $saved_texts = set_initial_button_texts();
+    }
+
+    $listen_text = (isset($atts['listen_text'])) && strlen($atts['listen_text']) ? esc_html__( sanitize_text_field( $atts['listen_text'] ) ) : $saved_texts['listen_text'];
+    $pause_text = (isset($atts['pause_text'])) && strlen($atts['pause_text']) ? esc_html__( sanitize_text_field( $atts['pause_text'] ) ) : $saved_texts['pause_text'];
+    $resume_text = (isset($atts['resume_text'])) && strlen($atts['resume_text']) ? esc_html__( sanitize_text_field( $atts['resume_text'] ) ) : $saved_texts['resume_text'];
+    $replay_text = (isset($atts['replay_text'])) && strlen($atts['replay_text']) ? esc_html__( sanitize_text_field( $atts['replay_text'] ) ) : $saved_texts['replay_text'];
+    $start_text = (isset($atts['start_text'])) && strlen($atts['start_text']) ? esc_html__( sanitize_text_field( $atts['start_text'] ) ) : $saved_texts['start_text'];
+    $stop_text = (isset($atts['stop_text'])) && strlen($atts['stop_text']) ? esc_html__( sanitize_text_field( $atts['stop_text'] ) ) : $saved_texts['stop_text'];
 
     $text_arr = [
         'listen_text' => $listen_text,
@@ -315,12 +320,6 @@ function get_button_text( $atts ) {
         'start_text' => $start_text,
         'stop_text' => $stop_text,
     ];
-
-    // $text_arr = array_map(function($text){
-    //     $text =  preg_replace('/[\W]/', '', $text);
-    //     return $text;
-    // }, $text_arr);
-
 
     update_option( 'tta__button_text_arr', $text_arr);
 
@@ -580,4 +579,28 @@ function compatibility_with_themes( $custom_css ) {
     }
 
     return $custom_css;
+}
+
+function set_initial_button_texts() {
+    if( ! get_option( 'tta__button_text_arr' ) ) {
+        // Button listen text.
+        $listen_text =  __( "Listen", 'text-to-audio' ) ;
+        $pause_text =  __( 'Pause', 'text-to-audio' ) ;
+        $resume_text =  __( 'Resume', 'text-to-audio' ) ;
+        $replay_text =  __( 'Replay', 'text-to-audio' ) ;
+        $start_text =  __( 'Start', 'text-to-audio' ) ;
+        $stop_text = __( 'Stop', 'text-to-audio' ) ;
+
+        update_option( 'tta__button_text_arr', [
+            'listen_text' => $listen_text,
+            'pause_text' => $pause_text,
+            'resume_text' => $resume_text,
+            'replay_text' => $replay_text,
+            'start_text' => $start_text,
+            'stop_text' => $stop_text,
+        ]);
+
+    }
+
+    return get_option( 'tta__button_text_arr' );
 }

@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio, record, voice c
 Requires at least: 4.0
 Tested up to: 6.3.2
 Requires PHP: 7.4
-Stable tag: 1.4.11
+Stable tag: 1.4.12
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,15 +36,21 @@ There is no need to create an account text to speech plugin is completely free. 
 
 * TTS button text can be changed by providing attributes to shortcode like this.
 
-	`[tta_listen_btn listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay"]`
+	`
+	[tta_listen_btn listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay"]
+	`
 
 * It can be possible to create a shortcode with custom text to read like this.
 
-	`[tta_listen_btn text_to_read="Hello WordPress" ]`
+	`
+	[tta_listen_btn text_to_read="Hello WordPress" ]
+	`
 
 * Add class on shortcode as an attribute. Example : 
 
-	`[tta_listen_btn class="custom_class"]`	
+	`
+	[tta_listen_btn class="custom_class"]
+	`	
 
 **IMPORTANT NOTE:**
 
@@ -79,7 +85,7 @@ Here you can see some languages which are supported by the browsers based on dev
 * Change listening language to any language.
 * Choose a voice from more than 20 voices.
 * Customization of button in block editor.
-* Play button can be added by shortcode “[tta_listen_btn]”.
+* Play button can be added by shortcode `[tta_listen_btn]`.
 
 **Listening is a better way to read:**
 Boost your understanding and focus with listening by Text To Audio TTS. Remember more of what you read. Maximize your time,
@@ -87,6 +93,7 @@ Breeze through your content 2-3x faster than it takes to read it. Do more at onc
 
 
 **PRO FEATURES:**
+
 * Get Live Support for first time integration.
 * Get Priority Support.
 * Save time by listening while you’re doing other tasks.
@@ -99,12 +106,19 @@ Breeze through your content 2-3x faster than it takes to read it. Do more at onc
 * Responsive speaking button.
 
 **Multi-lingual supported plugins**
-* <a hrefs='https://wordpress.org/plugins/gtranslate/' target='_blank'>Translate WordPress with GTranslate Plugin</a>
+
+* <a href='https://wordpress.org/plugins/gtranslate/' target='_blank'>Translate WordPress with GTranslate Plugin</a>.
 
 **Custom Post Type supported plugins**
-* <a hrefs='https://wordpress.org/plugins/advanced-custom-fields/' target='_blank'>Advanced Custom Fields (ACF)</a>
-* <a hrefs='https://wordpress.org/plugins/custom-post-type-ui/' target='_blank'>Custom Post Type UI</a>
-* <a hrefs='https://toolset.com/home/types-manage-post-types-taxonomy-and-custom-fields/' target='_blank'>Toolset Types</a>
+
+* <a href='https://wordpress.org/plugins/advanced-custom-fields/' target='_blank'>Advanced Custom Fields (ACF)</a>.
+* <a href='https://wordpress.org/plugins/custom-post-type-ui/' target='_blank'>Custom Post Type UI</a>.
+* <a href='https://toolset.com/home/types-manage-post-types-taxonomy-and-custom-fields/' target='_blank'>Toolset Types</a>.
+
+**OTHER SUPPORTED PLUGINS**
+* <a href='https://wordpress.org/plugins/wp-optimize/' target='_blank'>WP-Optimize - Clean, Compress, Cache</a>.
+* <a href='https://wordpress.org/plugins/elementor/' target='_blank'>Elementor Website Builder – More than Just a Page Builder</a>.
+
 
 == Installation ==
 1. Download and unzip the plugin
@@ -187,13 +201,20 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+
+= 1.4.12 ( 30 Oct 2023 ) =
+* Compatible: [WP-Optimize - Clean, Compress, Cache](https://wordpress.org/plugins/wp-optimize/) plugin compatibility added.
+* Compatible: [Elementor Website Builder – More than Just a Page Builder](https://wordpress.org/plugins/elementor/) plugin compatibility added.
+* Fixed: Initialized the button after ducument load.
+* Change button text by shortcode [attribute](https://wordpress.org/plugins/text-to-audio/#:~:text=TTS%20button%20text%20can%20be%20changed%20by%20providing%20attributes%20to%20shortcode%20like%20this)
+* Code refactor
+
 = 1.4.11 ( 26 Oct 2023 ) =
 * Added: Shortcode attribute ```text_to_read``` added. 
 * Added: Custom post type support for premium verison.
 * Added: [Advanced Custom Fields (ACF)](https://wordpress.org/plugins/advanced-custom-fields/) support for pro version.
 * Added: [Custom Post Type UI](https://wordpress.org/plugins/custom-post-type-ui/) support for pro version.
 * Added: [Toolset Types](https://toolset.com/home/types-manage-post-types-taxonomy-and-custom-fields/) support for pro version.
-
 
 = 1.4.10 ( 19 Oct 2023 ) =
 * Added: GTranslate plugin compatibility added for premium version.
