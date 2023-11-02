@@ -42,7 +42,7 @@ function tta_clean_content($text) {
         '&#8212;' => '—',
     );
 
-    $text = strip_shortcodes($text);
+    // $text = strip_shortcodes($text);
     $text = wp_strip_all_tags($text, true);
 
     $text = str_replace(array_keys($quotationMarks), array_values($quotationMarks), $text);
@@ -184,6 +184,9 @@ function tta_get_button_content($atts, $is_block = false) {
 
 
     $data =  apply_filters( 'tts__listening_button', $button, $btn_no, $class );
+
+    
+
 
     return $data;
 }
@@ -338,6 +341,8 @@ function add_listen_button( $content ) {
     if( ! isset( $settings['tta__settings_enable_button_add'] ) ) {
         TTA\TTA_Activator::activate(true);
     }
+        $all_short_codes = array_values( get_used_shortcodes($content) );
+
     if( isset( $settings['tta__settings_enable_button_add'] ) &&  $settings['tta__settings_enable_button_add'] ) {    
         // TODO: write functionality if current page is home page where content is excerpt.
         // if(is_single()) {
@@ -346,7 +351,7 @@ function add_listen_button( $content ) {
         // elseif(did_filter( 'the_excerpt' )){
         //     add_filter( 'the_excerpt', 'add_listen_button' , 9999 );
         // }
-        $all_short_codes = array_values( get_used_shortcodes($content) );
+
         if( !in_array('tta_listen_btn', $all_short_codes ) ) {
             ob_start();
             echo tta_get_button_content('');
@@ -357,7 +362,6 @@ function add_listen_button( $content ) {
         }else{
              return $content;
         }
-            
     }
 
     return $content;
