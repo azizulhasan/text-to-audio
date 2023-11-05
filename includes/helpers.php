@@ -574,7 +574,7 @@ function tta_is_rtl() {
 
 function compatibility_with_themes( $custom_css ) {
     
-    if(get_option('stylesheet') == 'twentytwentythree'){
+    if( false !== strpos(get_option('stylesheet'), 'twenty') ){
        $custom_css .= '#tts__listent_content_1.tts__listent_content  {max-width:650px;margin:auto;}';
     }
 
