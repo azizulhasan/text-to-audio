@@ -117,7 +117,7 @@ function tta_get_button_content($atts, $is_block = false) {
     $btn_no++;
 
     $sentence_delimiter = isset($recording['tta__sentence_delimiter']) ? $recording['tta__sentence_delimiter'] : '. ';
-        
+        global $post;
 
     $title = tta_clean_content( get_the_title());
     $title = tta_should_add_dilimiter($title, $sentence_delimiter);
@@ -331,7 +331,7 @@ function get_button_text( $atts ) {
 }
 
 
-add_filter( 'the_content', 'add_listen_button' );
+add_filter( 'the_content', 'add_listen_button', 1 );
 
 /**
  * Add listening button to every post by default.
@@ -354,6 +354,9 @@ function add_listen_button( $content ) {
 
         if( !in_array('tta_listen_btn', $all_short_codes ) ) {
             ob_start();
+            echo do_shortcode('[wpv-post-body]');
+            echo do_shortcode('[wpv-post-title]');
+            echo do_shortcode('[wpv-post-shortcode]');
             echo tta_get_button_content('');
             $button = ob_get_contents();
             ob_end_clean();
