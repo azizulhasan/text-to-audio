@@ -15,15 +15,11 @@ class TTA_Notices {
 	 * Load all Notifications hooks.
 	 */
 	public function notifications_load_hooks() {
-		// if (in_array(admin_url(basename($_SERVER['REQUEST_URI'])), [ admin_url('index.php') , admin_url('plugins.php'), admin_url('update-core.php'), \admin_url('plugin-install.php'), \admin_url('admin.php?page=text-to-audio')] ) )  {
-		// 	add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
-		// 	add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
-		// 	add_action('admin_notices', [$this, 'tta_free_promotion_notice']);
-		// }
-
-		add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
-		add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
-		add_action('admin_notices', [$this, 'tta_free_promotion_notice']);
+		if (in_array(admin_url(basename($_SERVER['REQUEST_URI'])), [ admin_url('index.php') , admin_url('plugins.php'), admin_url('update-core.php'), \admin_url('plugin-install.php'), \admin_url('admin.php?page=text-to-audio')] ) )  {
+			add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
+			add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
+			// add_action('admin_notices', [$this, 'tta_free_promotion_notice']);
+		}
 
 		add_action('wp_ajax_tta_save_review_notice', [ $this, 'tta_save_review_notice' ] );
 		add_action('wp_ajax_tta_hide_notice', [ $this, 'tta_hide_notice' ] );
