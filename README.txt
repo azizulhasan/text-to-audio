@@ -3,17 +3,17 @@ Contributors: atlasaidev, hasanazizul,
 Donate link: http://atlasaidev.com/
 Tags: accessibility, speech, tts, text to speech, text to audio, record, voice comment, voice to text-comment,
 Requires at least: 4.0
-Tested up to: 6.3.2
+Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.4.12
+Stable tag: 1.4.13
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Add functionality to WordPress site to read blogs out loud in more than 20 languages.
+Add accessibility to WordPress site to read contents out loud in more than 20 languages.
 
 == Description ==
 
-Add functionality to WordPress site to read blogs out loud in more than 20 languages.
+Add accessibility to WordPress site to read contents out loud in more than 20 languages.
 
 There is no need to create an account text to speech plugin is completely free. Just install the plugin and enjoy the whole features of the plugin.
 
@@ -90,6 +90,8 @@ Here you can see some languages which are supported by the browsers based on dev
 **Listening is a better way to read:**
 Boost your understanding and focus with listening by Text To Audio TTS. Remember more of what you read. Maximize your time,
 Breeze through your content 2-3x faster than it takes to read it. Do more at once, Take your reading wherever you go – to the gym, the park, or the couch, or the journy.
+
+Text to speech plugin allow you to add accessibility feature in wordpress site easily.  Speech plugin implements Web Content Accessibility Guidelines (WCAG) in the sit easily.
 
 
 **PRO FEATURES:**
@@ -200,6 +202,11 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 💎 TRANSLATION REQUEST 💎
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+= 1.4.13 ( 05 Nov 2023 ) =
+* Compatible: WordPress 6.4 tested
+* Add: Button width issue fixed.
+* Removed: Banner Removed.
 
 
 = 1.4.12 ( 30 Oct 2023 ) =
