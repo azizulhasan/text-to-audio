@@ -1,11 +1,11 @@
-=== Text To Speech TTS ===
+=== Text To Speech TTS Accessibility ===
 Contributors: atlasaidev, hasanazizul, 
 Donate link: http://atlasaidev.com/
 Tags: accessibility, speech, tts, text to speech, text to audio, record, voice comment, voice to text-comment,
 Requires at least: 4.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.4.13
+Stable tag: 1.4.14
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,6 +17,8 @@ Add accessibility to WordPress site to read contents out loud in more than 20 la
 
 There is no need to create an account text to speech plugin is completely free. Just install the plugin and enjoy the whole features of the plugin.
 
+Adding text-to-speech (TTS) accessibility to your WordPress website can make your site more accessible to people with disabilities and enhance the experience of users that prefer listening to content over reading.
+
 == Free text to speech (TTS) plugin for WordPress - Video Tutorial ==
 [youtube https://www.youtube.com/watch?v=P_dw_YjnVxc&t=21s&ab_channel=AtlasAiDev]
 
@@ -25,7 +27,7 @@ There is no need to create an account text to speech plugin is completely free. 
 
 ### USEFULL LINKS:
 > * [Live Demo](http://atlasaidev.com/text-to-speech/)
-> * [Pro Version](http://atlasaidev.com/)
+> * [Pro Version](https://atlasaidev.com/text-to-speech-pro/)
 > * [Video Tutorial](https://www.youtube.com/@atlasaidev)
 
 
@@ -51,6 +53,17 @@ There is no need to create an account text to speech plugin is completely free. 
 	`
 	[tta_listen_btn class="custom_class"]
 	`	
+* Missing content can be added by filter. Example:
+
+	`
+    add_filter( 'tta__content_description', 'tta__content_description_callback', 10, 3 );
+    function tta__content_description_callback ( $output, $description, $post_id ) {
+
+		$output .=" extra content here";
+		
+		return $output;
+    }
+	` 
 
 **IMPORTANT NOTE:**
 
@@ -140,10 +153,21 @@ It can be not available on mobile phone. One voice may available on desktop, it 
 
 If you still facing problems regarding browser issues please on a ticket.
 
-= Another voice language on mobile =
-speechSynthesis API is differ browser to browser also device to device . So it changes the voices and languages based on browser. one language may available on desktop
-It can be not available on mobile phone. One voice may available on desktop, it may be not available on android.
+= Button content missing =
+	Missing content can be added by filters. 
+    Filter Example :
+	Install the plugin [Code Snippets](https://wordpress.org/plugins/code-snippets/) Then Select Snippet > Add New Create a new snippet with this block of code
 
+	`
+    add_filter( 'tta__content_description', 'tta__content_description_callback', 10, 3 );
+    function tta__content_description_callback ( $output, $description, $post_id ) {
+
+		$output .=" extra content here";
+		
+		return $output;
+    }
+
+	`   
 = How to enable ``speechSynthesis`` on FireFox? =
 Notice: This solution only for FireFox Desktop.
 Open FireFox browser,  search ```about:config``` on a new tab. Now search with this string and enable as true.
@@ -202,6 +226,11 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 💎 TRANSLATION REQUEST 💎
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+= 1.4.14 ( 10 Nov 2023 ) =
+* Documentation updated
+* Get Pro button added
+
 
 = 1.4.13 ( 05 Nov 2023 ) =
 * Compatible: WordPress 6.4 tested
