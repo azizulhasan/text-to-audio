@@ -25,6 +25,9 @@ export default function DashboardTopNav() {
       </button>
 
       {/* me-3 me-lg-4 */}
+      <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://atlasaidev.com/text-to-speech-pro/" target="_blank">
+        Get Pro
+      </a>
       <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="http://atlasaidev.com/contact-us/" target="_blank">
         Support
       </a>
