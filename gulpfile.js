@@ -31,6 +31,8 @@ const productionSrc = [
 	'!admin/js/text-to-audio-dashboard.js',
 	'!admin/js/text-to-audio-button.js',
 	'!admin/js/TextToSpeech.js',
+	'!admin/js/build/text-to-audio-pro-button.min.js',
+	'!admin/js/build/text-to-audio-pro-button.min.js.LICENSE.txt',
 	'!.browserslistrc',
 	'!.eslintrc',
 	'!.gitignore',
@@ -94,6 +96,16 @@ const config = {
 	copy: {
 		src: productionSrc,
 		output: 'production/text-to-audio/',
+		options: {
+			//compress: true,
+			//modifiedTime: undefined
+		}
+	},
+	copyProButton: {
+		src: [
+			'admin/js/build/text-to-audio-pro-button.min.js'
+		],
+		output: 'C:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio-pro/Assets/js/build/',
 		options: {
 			//compress: true,
 			//modifiedTime: undefined
@@ -195,7 +207,7 @@ gulp.task(
 gulp.task(
 	'makeZip',
 	function () {
-		return gulp.series('copy', 'zip')()
+		return gulp.series('copyProButton', 'copy', 'zip')()
 	}
 );
 
@@ -212,6 +224,13 @@ gulp.task('copy', function () {
 		.pipe(gulpCopy(config.copy.output, config.copy.src.options))
 		.pipe(notify({ message: 'Copy Completed! 💯', onLast: true }))
 
+})
+
+// Copy pro button
+gulp.task('copyProButton', function () {
+	return gulp.src(config.copyProButton.src)
+		.pipe(gulpCopy(config.copyProButton.output, config.copyProButton.src.options))
+		.pipe(notify({ message: 'Copy Completed! 💯', onLast: true }))
 })
 
 gulp.task('release', function () {

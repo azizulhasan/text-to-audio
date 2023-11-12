@@ -290,14 +290,13 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             <div id="tts_button_should_float" style={{ backgroundColor: buttonCSS.backgroundColor }} >
                 {/* First player */}
                 {/* {isFirstPlayerPlay && ( */}
-                <div style={{ color: buttonCSS.color }} className="player border shadow-custom  mx-auto d-flex justify-content-between px-3 align-items-center position-relative">
+                <div style={{ color: buttonCSS.color }} className="tts__player tts__border tts__shadow-custom  tts__mx-auto tts__d-flex tts__justify-content-between tts__px-3 tts__align-items-center tts__position-relative">
                     {
                         !isSettingOpen && <div
-                            className={`d-flex gap-3 justify-content-between align-items-center
-                        }`}
+                            className="tts__d-flex tts__gap-3 tts__justify-content-between tts__align-items-center"
                             style={{ height: "55px" }}
                         >
-                            <div className="position-relative">
+                            <div className="tts__position-relative">
                                 {
                                     (!speech || listenStatus === 'resume') && <Play onClick={(e) => handlePlayButtonClick(e)} />
                                 }
@@ -318,18 +317,18 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                 )} */}
                             </div>
                             {
-                                listenStatus === 'listen' && window.hasOwnProperty('TTS') && <div style={{ color: buttonCSS.color }} className="align-items-center">
+                                listenStatus === 'listen' && window.hasOwnProperty('TTS') && <div style={{ color: buttonCSS.color }} className="tts__align-items-center">
                                     Listen to article
                                     <span> {window.TTS.settings.readingTime} minutes</span>
                                 </div>
                             }
                             {
-                                listenStatus !== 'listen' && window.hasOwnProperty('TTS') && <div className="d-flex gap-3  justify-content-between align-items-center">
-                                    <div className="audio-player">
-                                        <div className="audio-controls">
-                                            <div className="audio-time-start" id="audio_time_start">00:00</div>
+                                listenStatus !== 'listen' && window.hasOwnProperty('TTS') && <div className="tts__d-flex tts__gap-3  tts__justify-content-between tts__align-items-center">
+                                    <div className="tts__audio-player">
+                                        <div className="tts__audio-controls">
+                                            <div className="tts__audio-time-start" id="audio_time_start">00:00</div>
                                             <div
-                                                className="progress audio-progress"
+                                                className="tts__progress tts__audio-progress"
                                                 role="progressbar"
                                                 aria-label="Success example"
                                                 aria-valuenow={0}
@@ -338,13 +337,13 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                                 style={{ height: '5px' }}
                                             >
                                                 <div
-                                                    className="progress-bar"
-                                                    style={{ backgroundColor: buttonCSS.color, width: `${progressbarValue}%` }}
+                                                    className="tts__progress-bar"
+                                                    style={{ backgroundColor: buttonCSS.color, height: '5px', width: `${progressbarValue}%` }}
                                                 />
                                             </div>
-                                            <div className="audio-time-end" id="audio_time_end">00:00</div>
+                                            <div className="tts__audio-time-end" id="audio_time_end">00:00</div>
                                         </div>
-                                        <div className="audio-volume"></div>
+                                        <div className="tts__audio-volume"></div>
                                     </div>
                                 </div>
                             }
@@ -355,7 +354,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                     {/* {isSettingOpen ? (
                         <>
                             <div className="d-flex gap-3 justify-content-between align-items-center" style={{ height: "55px" }} >
-                                <div className="audio-player">
+                                <div className="tts__audio-player">
                                     {!isSelectSpeed && !isSelectVoice && (
                                         <div className="d-flex pl-3">
                                             <div onClick={handleChangeSpeed} className="custom-hover d-block">
@@ -427,7 +426,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                         </>
                     ) 
                 */}
-                    <div className="ps-3">
+                    <div className="tts__ps-3">
                         <SoundWave />
                     </div>
                 </div>
@@ -480,7 +479,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                 cssStyle && <style>{cssStyle}</style>
             }
             {
-                shouldFloat ? <div className="custom-position" >{getButtonHTML()}</div> : getButtonHTML()
+                shouldFloat ? <div className="tts__custom-position" >{getButtonHTML()}</div> : getButtonHTML()
             }
         </>
     );

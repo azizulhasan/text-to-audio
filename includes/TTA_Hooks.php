@@ -24,6 +24,7 @@ namespace TTA;
 class TTA_Hooks {
 
     public function __construct() {
+        // TODO it should work with new functionality 
         add_action('add_meta_boxes', array($this, 'add_custom_meta_box'));
 
         // Update hook
@@ -137,7 +138,7 @@ class TTA_Hooks {
                 || get_current_screen()->post_type === $settings['tta__settings_allow_recording_for_post_type']) ) {
             add_meta_box(
                 'wps22-meta-box',
-                'Text To Audio',
+                'Text To Speech TTS',
                 array(
                     $this,
                     'tta_meta_box',
@@ -156,10 +157,10 @@ class TTA_Hooks {
      */
     public function tta_meta_box() {
 
-        $listening = (array) get_option('tta_listening_settings');
-        $listening = json_encode($listening);
+        // $listening = (array) get_option('tta_listening_settings');
+        // $listening = json_encode($listening);
         $customize = (array) get_option('tta_customize_settings');
-        $button_text_arr =  apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr') );
+        // $button_text_arr =  apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr') );
         
         // Button style.
         if (isset($customize) && count($customize)) {
@@ -172,8 +173,8 @@ class TTA_Hooks {
         ?>
         <div class="tta_metabox">
 
-            <button type="button" id="tta__start__record"  style='<?php echo esc_attr($btn_style); ?>;cursor: pointer' onclick="ttaStartRecording()"><span class="dashicons dashicons-controls-volumeoff"></span><?php echo esc_html( $button_text_arr['start_text'] ) ?></button>
-            <button type="button" id="tta__listen_content" style='<?php echo esc_attr($btn_style); ?>;cursor: pointer' onclick='ttaListenCotentInDashboard("tta__listen_content","", <?php echo esc_js($listening); ?> )'><span class="dashicons dashicons-controls-play"></span> <?php echo esc_html( $button_text_arr['listen_text'] ) ?></button>
+            <!-- <button type="button" id="tta__start__record"  style='<?php //echo esc_attr($btn_style); ?>;cursor: pointer' onclick="ttaStartRecording()"><span class="dashicons dashicons-controls-volumeoff"></span><?php //echo esc_html( $button_text_arr['start_text'] ) ?></button> -->
+            <!-- <button type="button" id="tta__listen_content" style='<?php // echo esc_attr($btn_style); ?>;cursor: pointer' onclick='ttaListenCotentInDashboard("tta__listen_content","", <?php //echo esc_js($listening); ?> )'><span class="dashicons dashicons-controls-play"></span> <?php// echo esc_html( $button_text_arr['listen_text'] ) ?></button> -->
             <!-- Shortcode text -->
             <input
                 type="text"
