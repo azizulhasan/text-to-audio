@@ -138,7 +138,7 @@ function tta_get_button_content($atts, $is_block = false) {
     // Button listen text.
      if($atts || has_filter('tta__button_text_arr')) {
         if( isset( $atts['text_to_read'] ) && $atts['text_to_read'] ) {
-            $content = $atts['text_to_read'];
+            $content = tta_clean_content($atts['text_to_read']);
         }
         $text_arr = get_button_text( $atts );
     }else{
@@ -179,6 +179,9 @@ function tta_get_button_content($atts, $is_block = false) {
     $class = (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
     $button = "<tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
 
+    // add extra content by filter.
+    $content = apply_filters('tta__content_description', $content, $description, get_the_ID() );
+    $content = tta_clean_content($content);
     // init button scripts
     do_action('tts_enqueue_button_scripts' , $content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date);
 
@@ -287,8 +290,8 @@ function tts_text_match_80_percent($text1, $text2) {
 
 function tts_post_type() {
     global  $post;
-
-    return $post->post_type;
+    
+    return isset($post->post_type) ? $post->post_type : '';
 }
 
 
