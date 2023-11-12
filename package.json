@@ -16,7 +16,8 @@
     "block:build": "wp-scripts build admin/js/blocks/blocks.js",
     "block:start": "wp-scripts start admin/js/blocks/blocks.js",
     "makeZip": "gulp makeZip",
-    "release": "gulp release"
+    "release": "gulp release",
+    "copyProButton": "gulp copyProButton"
   },
   "keywords": [
     "voice",
