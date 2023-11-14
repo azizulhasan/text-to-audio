@@ -227,7 +227,7 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
-= 1.4.16 ( 18 Nov 2023 ) =
+= 1.4.16 ( 13 Nov 2023 ) =
 * Removed: setTimeout function removed.
 * Hooks file issue is fixed.
 
