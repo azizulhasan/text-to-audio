@@ -229,6 +229,7 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 
 = 1.4.16 ( 18 Nov 2023 ) =
 * Removed: setTimeout function removed.
+* Hooks file issue is fixed.
 
 = 1.4.15 ( 13 Nov 2023 ) =
 * CSS issue solved.

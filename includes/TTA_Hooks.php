@@ -172,10 +172,6 @@ class TTA_Hooks {
         }
         ?>
         <div class="tta_metabox">
-
-            <!-- <button type="button" id="tta__start__record"  style='<?php //echo esc_attr($btn_style); ?>;cursor: pointer' onclick="ttaStartRecording()"><span class="dashicons dashicons-controls-volumeoff"></span><?php //echo esc_html( $button_text_arr['start_text'] ) ?></button> -->
-            <!-- <button type="button" id="tta__listen_content" style='<?php // echo esc_attr($btn_style); ?>;cursor: pointer' onclick='ttaListenCotentInDashboard("tta__listen_content","", <?php //echo esc_js($listening); ?> )'><span class="dashicons dashicons-controls-play"></span> <?php// echo esc_html( $button_text_arr['listen_text'] ) ?></button> -->
-            <!-- Shortcode text -->
             <input
                 type="text"
                 name="tta_play_btn_shortcode"
