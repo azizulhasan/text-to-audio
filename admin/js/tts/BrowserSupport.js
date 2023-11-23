@@ -1,7 +1,7 @@
 export default class BrowserSupport {
     #browser = ''
     #ttsObj = {}
-    #voices = []
+    voices = []
     #voice = ''
     #lang = ''
     #selectedLang = ''
@@ -9,13 +9,12 @@ export default class BrowserSupport {
     #filteredVoices = [];
     constructor(ttsObj, voices, selectedLang, selectedVoice) {
         this.#ttsObj = ttsObj
-        this.#voices = voices
+        this.voices = voices
         this.#selectedLang = selectedLang
         this.#selectedVoice = selectedVoice
         this.#defineBrowser()
-        this.#defineVoiceAndLang(selectedVoice, selectedLang)
+        this.defineVoiceAndLang(selectedVoice, selectedLang)
     }
-
     isAndroid() {
         let ua = navigator.userAgent.toLowerCase();
 
@@ -43,7 +42,7 @@ export default class BrowserSupport {
         if (this.#lang === selectedLang) {
             return this.#lang;
         }
-        this.#defineVoiceAndLang(selectedVoice, selectedLang)
+        this.defineVoiceAndLang(selectedVoice, selectedLang)
 
         return this.#lang;
     }
@@ -53,16 +52,53 @@ export default class BrowserSupport {
             return this.#voice;
         }
 
-        this.#defineVoiceAndLang(selectedVoice, selectedLang)
+        this.defineVoiceAndLang(selectedVoice, selectedLang)
 
 
         return this.#voice;
     }
 
+    setLanguage(lang, callback) {
+        let isSupported = false;
+        if (this.voices.length) {
+            Object.values(this.voices).map(voice => {
+                let regex = new RegExp(lang, "gi");
+                let matches = voice.lang.match(regex)
+                if (matches !== null && voice.name) {
+                    this.#lang = voice.lang;
+                    isSupported = true;
+                }
+            })
+            return { lang: this.#lang, isSupported };
+        }
+
+
+        return { lang: this.#lang, isSupported };
+
+
+
+    }
+
+    setVoice(voice) {
+        this.#voice = voice;
+    }
+
+    getVoiceByLangCode(lang) {
+        for (let i = 0; i < this.voices.length; i++) {
+            let voice = this.voices[i]
+            if (voice.lang === lang) {
+                return voice.name;
+                break;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * 
      */
-    #defineVoiceAndLang(voice, lang) {
+    defineVoiceAndLang(voice, lang) {
         let currentVoice, currentLang = '';
         let selectedVoice = voice ? voice : this.#selectedVoice
         let selectedLang = lang ? lang : this.#selectedLang
@@ -81,9 +117,12 @@ export default class BrowserSupport {
                     this.#lang = currentLang;
                 }
             }
-        } else {
+        } else if (filteredVoices.length === 1) {
             this.#voice = filteredVoices[0].name;
             this.#lang = filteredVoices[0].lang
+        } else {
+            this.#voice = voice;
+            this.#lang = lang
         }
     }
 
@@ -111,7 +150,7 @@ export default class BrowserSupport {
     #getFilteredVoices(langCountryCode) {
         this.#filteredVoices = [];
 
-        Object.values(this.#voices).map(voice => {
+        Object.values(this.voices).map(voice => {
             let regex = new RegExp(langCountryCode, "gi");
             let matches = voice.lang.match(regex)
             if (matches !== null && voice.name) {
@@ -122,3 +161,5 @@ export default class BrowserSupport {
         return this.#filteredVoices;
     }
 }
+
+window.BrowserSupport = BrowserSupport;

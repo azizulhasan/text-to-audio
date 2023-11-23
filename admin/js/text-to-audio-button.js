@@ -8,11 +8,10 @@ class TTSPlayButton extends HTMLElement {
     constructor() {
         // Always call super first in constructor
         super();
-        this.isProLicenseActive = window.ttsObj.is_pro_license_active;
-
+        this.isProLicenseActive = window?.ttsObj?.is_pro_license_active;
         // Create a shadow root
         const shadow = this.attachShadow({ mode: 'open' });
-        setTimeout(() => {
+        if (window.hasOwnProperty('TTS')) {
             let contents = window.TTS.contents;
             let settings = window.TTS.settings;
             let buttonIds = Object.keys(contents)
@@ -53,9 +52,8 @@ class TTSPlayButton extends HTMLElement {
                         #tts__listent_content_${buttonId}.tts__listent_content:hover{ ${settings.btnStyle}height:30px; }
                         // #tts__listent_content_${buttonId}.tts__listent_content .text-position{ position: absolute;padding-top: 2px; }
                         // #tts__listent_content_${buttonId}.tts__listent_content .dashicons{ display:${settings.shouldDisplayIcon};line-height:1;font-size:25px;height:25px;width:25px; }
-                        ${settings.customCSS}
+                        ${this.#htmlDecode(settings.customCSS)}
                     `;
-
                     // Attsch the created elements to the shadow dom
                     shadow.appendChild(style);
                     shadow.appendChild(wrapper);
@@ -63,8 +61,7 @@ class TTSPlayButton extends HTMLElement {
                     break;
                 }
             } // end loop
-
-        }, 900) // end setTimeout
+        }
     }
 
     callBackAfterEnd() {
@@ -72,7 +69,19 @@ class TTSPlayButton extends HTMLElement {
             this.displayButtonText()
         }
     }
+
+    #htmlDecode(str) {
+
+        let txt = document.createElement("textarea");
+
+        txt.innerHTML = str;
+
+        return txt.value;
+
+    }
 }
 
-// Define the new element
-customElements.define('tts-play-button', TTSPlayButton);
+document.addEventListener('DOMContentLoaded', function () {
+    // Define the new element
+    customElements.define('tts-play-button', TTSPlayButton);
+})

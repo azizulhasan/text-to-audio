@@ -1,4 +1,7 @@
-// import Speech from "./tts/speak-tts/demo/build/demo.bundle.js";
+
+/**
+ * @see https://www.npmjs.com/package/speak-tts
+ */
 import Speech from "./tts/speak-tts/lib/speak-tts.js";
 import BrowserSupport from './tts/BrowserSupport.js'
 import { splitSentences } from "./tts/utilities.js";
@@ -161,6 +164,29 @@ export default class TextToSpeech {
         }
     }
 
+
+    finishedSpeaking(speech, data = {}, cancelIntentionally = false,) {
+        if (!this.speech.speaking() || cancelIntentionally) {
+            console.log('End utterance ' + this.speech.speaking());
+            this.listenStatus = 'listen';
+            this.displayButtonText(this.listenStatus)
+
+            // set up initial content to replacy.
+            this.splittedSentances = splitSentences(window.TTS.contents[this.buttonId])
+            speech.cancel();
+        }
+        console.log("Success !", data);
+
+        if (this.callBackAfterEnd) this.callBackAfterEnd()
+        if (!this.browser.isAndroid()) {
+            clearTimeout(this.timer);
+            this.timer = null
+            clearTimeout(this.shouldCancelTimer)
+            this.shouldCancelTimer = null
+        }
+        window.sessionStorage.setItem('tts_paused_by_intention', false);
+    }
+
     speak(speech, content = this.content) {
         if (!this.speech.hasBrowserSupport()) {
             this.displayApiMissing("tts__listent_content_" + this.buttonId)
@@ -207,26 +233,7 @@ export default class TextToSpeech {
                 }
             })
             .then(data => {
-                if (!this.speech.speaking()) {
-                    console.log('End utterance ' + this.speech.speaking());
-                    this.listenStatus = 'listen';
-                    this.displayButtonText(this.listenStatus)
-
-                    // set up initial content to replacy.
-                    this.content = window.ttsContent;
-                    this.splittedSentances = splitSentences(window.ttsContent)
-                    speech.cancel();
-                }
-                console.log("Success !", data);
-
-                if (this.callBackAfterEnd) this.callBackAfterEnd()
-                if (!this.browser.isAndroid()) {
-                    clearTimeout(this.timer);
-                    this.timer = null
-                    clearTimeout(this.shouldCancelTimer)
-                    this.shouldCancelTimer = null
-                }
-                window.sessionStorage.setItem('tts_paused_by_intention', false);
+                this.finishedSpeaking(speech, data)
             })
             .catch(e => {
                 console.error("An error occurred :", e);
@@ -350,7 +357,9 @@ export default class TextToSpeech {
             })
             .then(data => {
                 this.voices = data.voices;
+                // if (!this.browser) {
                 this.browser = new BrowserSupport(ttsObj, data.voices, this.ttsListeningSettings.tta__listening_lang, this.ttsListeningSettings.tta__listening_voice)
+                // }
                 this._prepareSpeakButton(this.speech);
                 window.sessionStorage.setItem('tts_paused_by_intention', false);
             })
@@ -393,61 +402,78 @@ export default class TextToSpeech {
     }
 }
 
-window.TextToSpeech = TextToSpeech;
+/**
+ * Load text to speech after DOMContentLoaded in free version.
+ */
+if (window?.ttsObj?.is_pro_active) {
+    window.TextToSpeech = TextToSpeech;
+} else {
+    window.document.addEventListener('DOMContentLoaded', function () {
+        window.TextToSpeech = TextToSpeech;
+    })
+}
 
 
 
-let timerDashboar;
-timerDashboar = setTimeout(() => {
-    if (window.hasOwnProperty('ttsObj') && ttsObj.is_dashboard) {
-        declare_init_content()
-        clearTimeout(timerDashboar)
-        timerDashboar = null
-    }
-}, 1000)
 
-function declare_init_content() {
-    let ttsSettings = {
-        listening: {
-            tta__listening_lang: "en-US",
-            tta__listening_voice: "Microsoft David - English (United States)",
-            tta__listening_pitch: "1",
-            tta__listening_rate: "1",
-            tta__listening_volume: "1"
-        },
-        cssClass: "",
-        btnStyle: "background-color:#ee6d6d;color:#ffffff;width:100%;border:0;display:block;border-radius:4px;text-decoration:none;cursor:pointer;",
-        textArr: {
-            listen_text: "Listen",
-            pause_text: "Pause",
-            resume_text: "Resume",
-            replay_text: "Replay",
-            start_text: "Start",
-            stop_text: "Start"
-        },
-        customCSS: "",
-        shouldDisplayIcon: "inline-block"
-    }
+/**
+ * This potion of the code will only applied in the dashboard. 
+ * When plugin dashboard with open.
+ */
+let urlParams = new URLSearchParams('page=text-to-audio').toString()
+if ('page=text-to-audio' === urlParams) {
+    let timerDashboar;
+    timerDashboar = setInterval(() => {
+        if (window.hasOwnProperty('ttsObj') && ttsObj.is_dashboard) {
+            declare_init_content()
+            clearInterval(timerDashboar)
+            timerDashboar = null
+        }
+    }, 1000)
 
-    var ttsCurrentButtonNo = 1;
-    var ttsCurrentContent = '';
-    if (window.hasOwnProperty('TTS')) { // add content if a page have multiple button
-        var prevContent = window.TTS.contents[ttsCurrentButtonNo - 1]
-        if (prevContent !== ttsCurrentContent) { // don't repeat same content
+    function declare_init_content() {
+        let ttsSettings = {
+            listening: {
+                tta__listening_lang: "en-US",
+                tta__listening_voice: "Microsoft David - English (United States)",
+                tta__listening_pitch: "1",
+                tta__listening_rate: "1",
+                tta__listening_volume: "1"
+            },
+            cssClass: "",
+            btnStyle: "background-color:#ee6d6d;color:#ffffff;width:100%;border:0;display:block;border-radius:4px;text-decoration:none;cursor:pointer;",
+            textArr: {
+                listen_text: "Listen",
+                pause_text: "Pause",
+                resume_text: "Resume",
+                replay_text: "Replay",
+                start_text: "Start",
+                stop_text: "Start"
+            },
+            customCSS: "",
+            shouldDisplayIcon: "inline-block"
+        }
+
+        var ttsCurrentButtonNo = 1;
+        var ttsCurrentContent = '';
+        if (window.hasOwnProperty('TTS')) { // add content if a page have multiple button
+            var prevContent = window.TTS.contents[ttsCurrentButtonNo - 1]
+            if (prevContent !== ttsCurrentContent) { // don't repeat same content
+                window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
+            }
+
+        } else { // add content for the if a page have one button
+            window.TTS = {}
+            window.TTS.contents = {}
             window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
         }
 
-    } else { // add content for the if a page have one button
-        window.TTS = {}
-        window.TTS.contents = {}
-        window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
+        // add settings
+        if (!window.TTS.hasOwnProperty('settings')) {
+            window.TTS.settings = ttsSettings
+            window.TTS.settings.readingTime = 1;
+        }
     }
 
-    // add settings
-    if (!window.TTS.hasOwnProperty('settings')) {
-        window.TTS.settings = ttsSettings
-        window.TTS.settings.readingTime = 1;
-    }
 }
-
 

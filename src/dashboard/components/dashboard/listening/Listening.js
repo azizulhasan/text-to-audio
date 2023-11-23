@@ -164,9 +164,8 @@ export default function Listening() {
 				autoClose: 5000
 			});
 		}
-		if (e.target.name === 'tta__listening_lang') {
+		if (e.target.name === 'tta__listening_lang' && window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features) {
 
-			console.log(speechSynthesisVoices)
 			let filteredVoices = speechSynthesisVoices.filter(voice => {
 				return voice.languageCodes[0] == e.target.value;
 			})
@@ -178,6 +177,7 @@ export default function Listening() {
 			}
 			setVoices(filteredVoices)
 		}
+
 		setListeningSettings({
 			...listeningSettings,
 			...{ [e.target.name]: e.target.value },

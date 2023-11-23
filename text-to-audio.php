@@ -12,10 +12,10 @@
  * @package           TTA
  *
  * @wordpress-plugin
- * Plugin Name:       Text To Speech TTS
+ * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
- * Description:       Add functionality to WordPress site to read blogs out loud in more than 20 languages.
- * Version:           1.4.4
+ * Description:       Add accessibility to WordPress site to read contents out loud in more than 20 languages.
+ * Version:           1.4.16
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-2.0+
@@ -72,6 +72,17 @@ if (!defined('TTA_LIBS_PATH')) {
     define('TTA_LIBS_PATH', dirname(TEXT_TO_AUDIO_ROOT_FILE) . '/libs/');
 }
 
+
+if ( ! defined( 'TTA_PLUGIN_URL' ) ) {
+    /**
+     * Plugin Directory URL
+     *
+     * @var string
+     * @since 1.2.2
+     */
+    define( 'TTA_PLUGIN_URL', trailingslashit( plugin_dir_url( TEXT_TO_AUDIO_ROOT_FILE ) ) );
+}
+
 /**
  * Begins execution of the plugin.
  *
@@ -86,7 +97,7 @@ class TTA_Init {
 
     public function __construct() {
         if (!defined('TEXT_TO_AUDIO_VERSION')) {
-            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '1.4.4'));
+            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '1.4.16'));
         }
 
         if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
@@ -115,25 +126,7 @@ class TTA_Init {
         
 
         //add button text
-        if( ! get_option( 'tta__button_text_arr' ) ) {
-            // Button listen text.
-            $listen_text =  __( "Listen", 'text-to-audio' ) ;
-            $pause_text =  __( 'Pause', 'text-to-audio' ) ;
-            $resume_text =  __( 'Resume', 'text-to-audio' ) ;
-            $replay_text =  __( 'Replay', 'text-to-audio' ) ;
-            $start_text =  __( 'Start', 'text-to-audio' ) ;
-            $stop_text = __( 'Start', 'text-to-audio' ) ;
-
-            update_option( 'tta__button_text_arr', [
-                'listen_text' => $listen_text,
-                'pause_text' => $pause_text,
-                'resume_text' => $resume_text,
-                'replay_text' => $replay_text,
-                'start_text' => $start_text,
-                'stop_text' => $stop_text,
-            ]);
-
-        }
+        set_initial_button_texts();
 
         
     }

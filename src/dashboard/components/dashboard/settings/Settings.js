@@ -17,7 +17,6 @@ export default function Settings() {
 	});
 	const [postTypes, setPostTypes] = useState([
 		'post',
-		'product',
 		'page',
 	]);
 
@@ -34,7 +33,7 @@ export default function Settings() {
 			});
 
 
-		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features) {
+		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active) {
 			let tempPostTypes = wp.hooks.applyFilters('tts_display_button_on_post_types', structuredClone(Object.keys(ttsObjPro.post_types)))
 			setPostTypes(tempPostTypes)
 		} else {
@@ -95,7 +94,7 @@ export default function Settings() {
 							<Row className=' mt-3'>
 								<Col xs={12} sm={6} lg={4}>
 									<Form.Label htmlFor='tta__settings_enable_button_add'>
-										Enable button add
+										Enable Autometically Button Add
 									</Form.Label>
 								</Col>
 								<Col xs={12} sm={12} lg={8}>

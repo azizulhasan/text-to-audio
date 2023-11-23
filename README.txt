@@ -1,33 +1,71 @@
-=== Text To Speech TTS ===
+=== Text To Speech TTS Accessibility ===
 Contributors: atlasaidev, hasanazizul, 
 Donate link: http://atlasaidev.com/
-Tags: tts, speech, audio, text to speech, text to audio, record, voice comment, voice to text-comment,
+Tags: accessibility, speech, tts, text to speech, text to audio, record, voice comment, voice to text-comment,
 Requires at least: 4.0
-Tested up to: 6.3.1
+Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.4.4
+Stable tag: 1.4.16
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Add functionality to WordPress site to read blogs out loud in more than 20 languages.
+Add accessibility to WordPress site to read contents out loud in more than 20 languages.
 
 == Description ==
 
-Add functionality to WordPress site to read blogs out loud in more than 20 languages.
+Add accessibility to WordPress site to read contents out loud in more than 20 languages.
 
-There is no need to create an account it’s completely free. Just install the plugin and enjoy the whole features of the plugin.
+There is no need to create an account text to speech plugin is completely free. Just install the plugin and enjoy the whole features of the plugin.
+
+Adding text-to-speech (TTS) accessibility to your WordPress website can make your site more accessible to people with disabilities and enhance the experience of users that prefer listening to content over reading.
 
 == Free text to speech (TTS) plugin for WordPress - Video Tutorial ==
 [youtube https://www.youtube.com/watch?v=P_dw_YjnVxc&t=21s&ab_channel=AtlasAiDev]
 
-### Useful Links:
+### SUPPORT AND QUESTIONS VISIT HERE:
+> * [Support](http://atlasaidev.com/contact-us/)
+
+### USEFULL LINKS:
 > * [Live Demo](http://atlasaidev.com/text-to-speech/)
-> * [Request A Feature](http://atlasaidev.com/contact-us/)
-> * [Pro Version](http://atlasaidev.com/)
+> * [Pro Version](https://atlasaidev.com/text-to-speech-pro/)
 > * [Video Tutorial](https://www.youtube.com/@atlasaidev)
 
 
-**Important Note:**
+### USAGE:
+ * It’s Easy – To have the text to audio button in the content put the following shortcode anywhere in the text of your page or post.
+	
+	`[tta_listen_btn]`
+
+* TTS button text can be changed by providing attributes to shortcode like this.
+
+	`
+	[tta_listen_btn listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay"]
+	`
+
+* It can be possible to create a shortcode with custom text to read like this.
+
+	`
+	[tta_listen_btn text_to_read="Hello WordPress" ]
+	`
+
+* Add class on shortcode as an attribute. Example : 
+
+	`
+	[tta_listen_btn class="custom_class"]
+	`	
+* Missing content can be added by filter. Example:
+
+	`
+    add_filter( 'tta__content_description', 'tta__content_description_callback', 10, 3 );
+    function tta__content_description_callback ( $output, $description, $post_id ) {
+
+		$output .=" extra content here";
+		
+		return $output;
+    }
+	` 
+
+**IMPORTANT NOTE:**
 
 Text To Speech TTS plugin is built on browser speechSynthesis API. No external API is used. Here is the API used [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
 That is why Text To Speech TTS doesn’t support all android phones, aslo all languages. Here you can check which android phone and which device support [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility) API.
@@ -49,24 +87,7 @@ Here you can see some languages which are supported by the browsers based on dev
 * FireFox Mobile: English USA, English UK, German, Italian, Russian, French, Spanish.
 
 
-**Listening is a better way to read:**
-Boost your understanding and focus with listening by Text To Speech TTS. Remember more of what you read. Maximize your time,
-Breeze through your content 2-3x faster than it takes to read it. Do more at once, Take your reading wherever you go – to the gym, the park, or the couch, or the journy.
-
-
-**Pro Features:**
-
-* Save time by listening while you’re doing other tasks.
-* Engage with your customers more interactively.
-* Improved UI of the button.
-* Integrate with Google Cloud Text To Speech.
-* Get more than 600 voices when you’re using Google Cloud Text To Speech.
-* Remove special characters from content during reading.
-* Remove URL from content during reading.
-* Responsive speaking button.
-
-
-**Features:**
+**FEAUTES:**
 
 * Add a play button to any post or page.
 * Unlimited text to speech.
@@ -77,8 +98,41 @@ Breeze through your content 2-3x faster than it takes to read it. Do more at onc
 * Change listening language to any language.
 * Choose a voice from more than 20 voices.
 * Customization of button in block editor.
-* Play button can be added by shortcode “[tta_listen_btn]”.
+* Play button can be added by shortcode `[tta_listen_btn]`.
 
+**Listening is a better way to read:**
+Boost your understanding and focus with listening by Text To Audio TTS. Remember more of what you read. Maximize your time,
+Breeze through your content 2-3x faster than it takes to read it. Do more at once, Take your reading wherever you go – to the gym, the park, or the couch, or the journy.
+
+Text to speech plugin allow you to add accessibility feature in wordpress site easily.  Speech plugin implements Web Content Accessibility Guidelines (WCAG) in the sit easily.
+
+
+**PRO FEATURES:**
+
+* Get Live Support for first time integration.
+* Get Priority Support.
+* Save time by listening while you’re doing other tasks.
+* Engage with your customers more interactively.
+* Improved UI of the button.
+* Integrate with Google Cloud Text To Speech.
+* Get more than 600 voices when you’re using Google Cloud Text To Speech.
+* Remove special characters from content during reading.
+* Remove URL from content during reading.
+* Responsive speaking button.
+
+**Multi-lingual supported plugins**
+
+* <a href='https://wordpress.org/plugins/gtranslate/' target='_blank'>Translate WordPress with GTranslate Plugin</a>.
+
+**Custom Post Type supported plugins**
+
+* <a href='https://wordpress.org/plugins/advanced-custom-fields/' target='_blank'>Advanced Custom Fields (ACF)</a>.
+* <a href='https://wordpress.org/plugins/custom-post-type-ui/' target='_blank'>Custom Post Type UI</a>.
+* <a href='https://toolset.com/home/types-manage-post-types-taxonomy-and-custom-fields/' target='_blank'>Toolset Types</a>.
+
+**OTHER SUPPORTED PLUGINS**
+* <a href='https://wordpress.org/plugins/wp-optimize/' target='_blank'>WP-Optimize - Clean, Compress, Cache</a>.
+* <a href='https://wordpress.org/plugins/elementor/' target='_blank'>Elementor Website Builder – More than Just a Page Builder</a>.
 
 
 == Installation ==
@@ -99,10 +153,21 @@ It can be not available on mobile phone. One voice may available on desktop, it 
 
 If you still facing problems regarding browser issues please on a ticket.
 
-= Another voice language on mobile =
-speechSynthesis API is differ browser to browser also device to device . So it changes the voices and languages based on browser. one language may available on desktop
-It can be not available on mobile phone. One voice may available on desktop, it may be not available on android.
+= Button content missing =
+	Missing content can be added by filters. 
+    Filter Example :
+	Install the plugin [Code Snippets](https://wordpress.org/plugins/code-snippets/) Then Select Snippet > Add New Create a new snippet with this block of code
 
+	`
+    add_filter( 'tta__content_description', 'tta__content_description_callback', 10, 3 );
+    function tta__content_description_callback ( $output, $description, $post_id ) {
+
+		$output .=" extra content here";
+		
+		return $output;
+    }
+
+	`   
 = How to enable ``speechSynthesis`` on FireFox? =
 Notice: This solution only for FireFox Desktop.
 Open FireFox browser,  search ```about:config``` on a new tab. Now search with this string and enable as true.
@@ -118,7 +183,7 @@ Now you can change ```color```, ```backgroundColor```, ```width```. And also add
 = How to change button text? =
 You can change button text 2 ways one is by shortcode attribute. Another way is adding filter. But filter always overrides the shortcode attributes. Here is short code Example :
 	`
-	[tta_listen_btn listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay" start_text="Start" stop_text="Stop"]
+	[tta_listen_btn listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay"]
 	`
     Filter Example :
 	Install the plugin [Code Snippets](https://wordpress.org/plugins/code-snippets/) Then Select Snippet > Add New Create a new snippet with this block of code
@@ -162,6 +227,64 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+= 1.4.16 ( 13 Nov 2023 ) =
+* Removed: setTimeout function removed.
+* Hooks file issue is fixed.
+
+= 1.4.15 ( 13 Nov 2023 ) =
+* CSS issue solved.
+
+= 1.4.14 ( 10 Nov 2023 ) =
+* Documentation updated
+* Get Pro button added
+
+
+= 1.4.13 ( 05 Nov 2023 ) =
+* Compatible: WordPress 6.4 tested
+* Add: Button width issue fixed.
+* Removed: Banner Removed.
+
+
+= 1.4.12 ( 30 Oct 2023 ) =
+* Compatible: [WP-Optimize - Clean, Compress, Cache](https://wordpress.org/plugins/wp-optimize/) plugin compatibility added.
+* Compatible: [Elementor Website Builder – More than Just a Page Builder](https://wordpress.org/plugins/elementor/) plugin compatibility added.
+* Fixed: Initialized the button after ducument load.
+* Change button text by shortcode [attribute](https://wordpress.org/plugins/text-to-audio/#:~:text=TTS%20button%20text%20can%20be%20changed%20by%20providing%20attributes%20to%20shortcode%20like%20this)
+* Code refactor
+
+= 1.4.11 ( 26 Oct 2023 ) =
+* Added: Shortcode attribute ```text_to_read``` added. 
+* Added: Custom post type support for premium verison.
+* Added: [Advanced Custom Fields (ACF)](https://wordpress.org/plugins/advanced-custom-fields/) support for pro version.
+* Added: [Custom Post Type UI](https://wordpress.org/plugins/custom-post-type-ui/) support for pro version.
+* Added: [Toolset Types](https://toolset.com/home/types-manage-post-types-taxonomy-and-custom-fields/) support for pro version.
+
+= 1.4.10 ( 19 Oct 2023 ) =
+* Added: GTranslate plugin compatibility added for premium version.
+
+= 1.4.9 ( 17 Oct 2023 ) =
+* Added: Documentation link added.
+* Added: YouTube Link added.
+
+= 1.4.8 ( 09 Oct 2023 ) =
+* Added: Halloween banner added.
+
+= 1.4.7 ( 5 Oct 2023 ) =
+* Fixed: [Shortcode stop working](https://wordpress.org/support/topic/shortcode-stop-working-2/)
+* Fixed: Button hide issue fixed.
+* Fixed: Listeing language change issue solved.
+* Fixed: [change the button text](https://wordpress.org/support/topic/change-the-button-text-7/)
+* compatibility added for twentytwentythree theme
+
+= 1.4.6 ( Sep 30 , 2023) =
+* Fixed: [Error using quotes in customized CSS](https://wordpress.org/support/topic/error-using-quotes-in-customized-css/)
+* Fixed: [The custom labels for translating strings in button text issue](https://wordpress.org/support/topic/error-using-quotes-in-customized-css/)
+* Fixed: [Javascript errors](https://wordpress.org/support/topic/javascript-errors-61/)
+
+
+= 1.4.5 ( Sep 21 , 2023) =
+* Theme support: Divi, Enfold, Astra, Kadance, OceanWP, Hello Elementor, GeneratePress, Dynamic News, Kadance, Darknews theme supported.
+* Plugin support: Elementor builder supported.
 
 = 1.4.4 ( Sep 14 , 2023) =
 * Fixed: JS error fixed.

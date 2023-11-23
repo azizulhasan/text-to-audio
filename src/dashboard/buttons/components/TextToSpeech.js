@@ -5,7 +5,7 @@ import { Close, Play, Replay, Settings, SoundWave, Speed, VoiceOver, Pause } fro
 
 let speech = null
 let TextToSpeechPro = null;
-const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
+const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonLiveCSS = {} }) => {
     const [isFirstPlayerPlay, setFirstPlayerPlay] = useState(true);
     const [isSecondPlayerPlay, setSecondPlayerPlay] = useState(false);
     const [isSettingOpen, setSettingOpen] = useState(false);
@@ -22,6 +22,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
     const [isResumed, setIsResumed] = useState(false)
     const [progressbarValue, setProgressbarValue] = useState(0)
     const [shouldFloat, setShouldFloat] = useState(false)
+
 
     const handleSetting = (e) => {
         e.preventDefault()
@@ -47,6 +48,42 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
         setListenStatus(speech.listenStatus)
     }
 
+    const pauseButton = (speech, finishIntentionally = false) => {
+        speech.pause(speech.speech)
+        if (finishIntentionally) {
+            speech.finishedSpeaking(speech.speech, {}, finishIntentionally);
+        }
+        setIsPlaying(!isPlaying);
+        clearInterval(decreamentInterval);
+        clearInterval(increamentInterval);
+        setTimeout(() => {
+            setListenStatus(speech.listenStatus)
+        }, 100)
+    }
+
+    const resumeButton = (speech) => {
+        speech.resume(speech.speech)
+        let deadline = new Date(Date.parse(new Date()) + decreamentDeadline);
+        getDecreamentTime(deadline)
+        getIncreamentTime(increamentDeadline, increamentedTime)
+        setTimeout(() => {
+            setListenStatus(speech.listenStatus)
+        }, 100)
+    }
+
+
+    useEffect(() => {
+        if (speech) {
+            speech.onAValueChanged((newValue) => {
+                if ('listen' === newValue) {
+                    pauseButton(speech, true)
+                    speech = null
+                    setListenStatus(newValue)
+                }
+            });
+        }
+    }, [speech])
+
     // TODO modiy TextToSpeech functionality by action and filter hook
     // TODO apply google text to speech for pro version.
     const handlePlayButtonClick = (e) => {
@@ -62,9 +99,14 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
             speech = null
             setListenStatus('listen')
         }
-
         if (speech === null) {
-            speech = new TextToSpeechPro(buttonId, contents[buttonId], button, window.TTS)
+            if (TextToSpeechPro?.TTS) {
+                speech = new window.TextToSpeechPro2(buttonId, contents[buttonId], button, window.TTS)
+            } else {
+                speech = new TextToSpeechPro(buttonId, contents[buttonId], button, window.TTS)
+            }
+
+
             speech._init(callBackAfterEnd)
             setFirstPlayerPlay(false);
             setSecondPlayerPlay(true);
@@ -73,28 +115,14 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
             setTimeout(() => {
                 speech = speech.getData()
                 setListenStatus(speech.listenStatus)
-                console.log(speech.listenStatus)
             }, 100)
         } else {
-
             speech = speech.getData()
             setListenStatus(speech.listenStatus)
             if (speech.listenStatus == 'pause') {
-                speech.pause(speech.speech)
-                setIsPlaying(!isPlaying);
-                clearInterval(decreamentInterval);
-                clearInterval(increamentInterval);
-                setTimeout(() => {
-                    setListenStatus(speech.listenStatus)
-                }, 100)
+                pauseButton(speech)
             } else if (speech.listenStatus == 'resume') {
-                speech.resume(speech.speech)
-                let deadline = new Date(Date.parse(new Date()) + decreamentDeadline);
-                getDecreamentTime(deadline)
-                getIncreamentTime(increamentDeadline, increamentedTime)
-                setTimeout(() => {
-                    setListenStatus(speech.listenStatus)
-                }, 100)
+                resumeButton(speech)
             }
         }
 
@@ -259,17 +287,16 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
 
     const getButtonHTML = () => {
         return (
-            <div id="tts_button_should_float" className="bg-white" >
+            <div id="tts_button_should_float" style={{ backgroundColor: buttonCSS.backgroundColor }} >
                 {/* First player */}
                 {/* {isFirstPlayerPlay && ( */}
-                <div className="player border shadow-custom bg-white mx-auto d-flex justify-content-between px-3 align-items-center position-relative">
+                <div style={{ color: buttonCSS.color }} className="tts__player tts__border tts__shadow-custom  tts__mx-auto tts__d-flex tts__justify-content-between tts__px-3 tts__align-items-center tts__position-relative">
                     {
                         !isSettingOpen && <div
-                            className={`d-flex gap-3 justify-content-between align-items-center
-                        }`}
+                            className="tts__d-flex tts__gap-3 tts__justify-content-between tts__align-items-center"
                             style={{ height: "55px" }}
                         >
-                            <div className="position-relative">
+                            <div className="tts__position-relative">
                                 {
                                     (!speech || listenStatus === 'resume') && <Play onClick={(e) => handlePlayButtonClick(e)} />
                                 }
@@ -279,6 +306,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                                 {
                                     speech && listenStatus === 'pause' && <Pause onClick={(e) => handlePlayButtonClick(e)} />
                                 }
+
                                 {/* {isPlaying && (
                                     <div
                                         className="position-absolute top-0 start-0 translate-middle spinner-border text-primary"
@@ -289,35 +317,35 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                                 )} */}
                             </div>
                             {
-                                listenStatus === 'listen' && window.hasOwnProperty('TTS') ? (
-                                    <div className="align-items-center">
-                                        Listen to article
-                                        <span className="text-secondary"> {window.TTS.settings.readingTime} minutes</span>
-                                    </div>
-                                ) : (
-                                    <div className="d-flex gap-3  justify-content-between align-items-center">
-                                        <div className="audio-player">
-                                            <div className="audio-controls">
-                                                <div className="audio-time-start" id="audio_time_start">00:00</div>
+                                listenStatus === 'listen' && window.hasOwnProperty('TTS') && <div style={{ color: buttonCSS.color }} className="tts__align-items-center">
+                                    Listen to article
+                                    <span> {window.TTS.settings.readingTime} minutes</span>
+                                </div>
+                            }
+                            {
+                                listenStatus !== 'listen' && window.hasOwnProperty('TTS') && <div className="tts__d-flex tts__gap-3  tts__justify-content-between tts__align-items-center">
+                                    <div className="tts__audio-player">
+                                        <div className="tts__audio-controls">
+                                            <div className="tts__audio-time-start" id="audio_time_start">00:00</div>
+                                            <div
+                                                className="tts__progress tts__audio-progress"
+                                                role="progressbar"
+                                                aria-label="Success example"
+                                                aria-valuenow={0}
+                                                aria-valuemin={0}
+                                                aria-valuemax={100}
+                                                style={{ height: '5px' }}
+                                            >
                                                 <div
-                                                    className="progress audio-progress"
-                                                    role="progressbar"
-                                                    aria-label="Success example"
-                                                    aria-valuenow={0}
-                                                    aria-valuemin={0}
-                                                    aria-valuemax={100}
-                                                >
-                                                    <div
-                                                        className="progress-bar bg-black"
-                                                        style={{ width: `${progressbarValue}%`, height: "10px" }}
-                                                    />
-                                                </div>
-                                                <div className="audio-time-end" id="audio_time_end">00:00</div>
+                                                    className="tts__progress-bar"
+                                                    style={{ backgroundColor: buttonCSS.color, height: '5px', width: `${progressbarValue}%` }}
+                                                />
                                             </div>
-                                            <div className="audio-volume"></div>
+                                            <div className="tts__audio-time-end" id="audio_time_end">00:00</div>
                                         </div>
+                                        <div className="tts__audio-volume"></div>
                                     </div>
-                                )
+                                </div>
                             }
 
                         </div>
@@ -326,7 +354,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                     {/* {isSettingOpen ? (
                         <>
                             <div className="d-flex gap-3 justify-content-between align-items-center" style={{ height: "55px" }} >
-                                <div className="audio-player">
+                                <div className="tts__audio-player">
                                     {!isSelectSpeed && !isSelectVoice && (
                                         <div className="d-flex pl-3">
                                             <div onClick={handleChangeSpeed} className="custom-hover d-block">
@@ -398,7 +426,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                         </>
                     ) 
                 */}
-                    <div className="ps-3">
+                    <div className="tts__ps-3">
                         <SoundWave />
                     </div>
                 </div>
@@ -418,17 +446,21 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
             } else if (document.querySelector('.entry-title')) {
                 postTitle = document.querySelector('.entry-title')
                 titlePosition = postTitle.getBoundingClientRect().top;
+            } else if (document.querySelector('.wp-block-post-title')) {
+                postTitle = document.querySelector('.wp-block-post-title')
+                titlePosition = postTitle.getBoundingClientRect().top;
             }
 
-            let topPos = Math.floor(button.getBoundingClientRect().top);
-            if (topPos < 1) {
-                setShouldFloat(true)
-            }
+            if (button) {
+                let topPos = Math.floor(button.getBoundingClientRect().top);
+                if (topPos < 1) {
+                    setShouldFloat(true)
+                }
 
-            if (titlePosition > 0) {
-                setShouldFloat(false)
+                if (titlePosition > 0) {
+                    setShouldFloat(false)
+                }
             }
-
         }
         document.addEventListener('scroll', detectScroll)
         document.addEventListener('wheel', detectScroll)
@@ -438,6 +470,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
             document.removeEventListener('scroll', detectScroll)
             document.removeEventListener('wheel', detectScroll)
         }
+
     }, [])
 
     return (
@@ -446,7 +479,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '' }) => {
                 cssStyle && <style>{cssStyle}</style>
             }
             {
-                shouldFloat ? <div className="custom-position" >{getButtonHTML()}</div> : getButtonHTML()
+                shouldFloat ? <div className="tts__custom-position" >{getButtonHTML()}</div> : getButtonHTML()
             }
         </>
     );
