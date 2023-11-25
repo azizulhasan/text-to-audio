@@ -1,5 +1,5 @@
 <?php
-
+use TTA\TTA_Helper;
 /**
  * If classic editor is active then on new-post and edit post
  * activate recording  for blog content.
@@ -85,9 +85,16 @@ function tta_should_add_dilimiter($title, $delimiter) {
 function tta_get_button_content($atts, $is_block = false) {
     $settings = (array) get_option('tta_settings_data');
     // this is a pro feature to show button on blog main page with title and excerpt.
-    if(is_home() || is_archive() || is_front_page() || is_category() ){
+    if(!TTA_Helper::should_load_button()){
         return;
     }
+
+            global $post;
+        \error_log(print_r([
+            'is_single' => \is_single(),
+            'is_singular' => is_singular(),
+            'post' => $post,
+        ], true));
     
     if(!isset($settings['tta__settings_allow_listening_for_post_types']) 
     || count($settings['tta__settings_allow_listening_for_post_types']) === 0
@@ -357,9 +364,6 @@ function add_listen_button( $content ) {
 
         if( !in_array('tta_listen_btn', $all_short_codes ) ) {
             ob_start();
-            echo do_shortcode('[wpv-post-body]');
-            echo do_shortcode('[wpv-post-title]');
-            echo do_shortcode('[wpv-post-shortcode]');
             echo tta_get_button_content('');
             $button = ob_get_contents();
             ob_end_clean();
@@ -614,3 +618,4 @@ function set_initial_button_texts() {
 
     return get_option( 'tta__button_text_arr' );
 }
+
