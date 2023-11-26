@@ -89,12 +89,12 @@ function tta_get_button_content($atts, $is_block = false) {
         return;
     }
 
-            global $post;
-        \error_log(print_r([
-            'is_single' => \is_single(),
-            'is_singular' => is_singular(),
-            'post' => $post,
-        ], true));
+        //     global $post;
+        // \error_log(print_r([
+        //     'is_single' => \is_single(),
+        //     'is_singular' => is_singular(),
+        //     'post' => $post,
+        // ], true));
     
     if(!isset($settings['tta__settings_allow_listening_for_post_types']) 
     || count($settings['tta__settings_allow_listening_for_post_types']) === 0
