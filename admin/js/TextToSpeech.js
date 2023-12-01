@@ -271,7 +271,7 @@ export default class TextToSpeech {
             this.shouldCancelTimer = setInterval(() => {
                 speech.cancel();
                 this.isCanceled = true;
-            }, 7000)
+            }, 1)
 
         } else {
             speech.cancel();
@@ -380,7 +380,20 @@ export default class TextToSpeech {
         }
         // });
 
-        // When browser tab switches to another tab.
+        /**
+         * When browser tab switches to another tab.
+         * 
+         * Some users wants when they switches to another tab. TTS should be 
+         * autometically paused. And when they return to TTS page it should be 
+         * autometically start speeking again.
+         * 
+         * On the other hand if they pause the TTS button intentionally then 
+         * switch to another tab. it will remain paused, untill they intentionally
+         * resume it. Even though they switch to another tab and return to 
+         * current TTS page. 
+         * 
+         */
+
         document.addEventListener("visibilitychange", () => {
             // it could be either hidden or visible
             if ('hidden' === document.visibilityState && this.listenStatus === 'pause') {
@@ -390,9 +403,8 @@ export default class TextToSpeech {
 
             if ('visible' === document.visibilityState && this.listenStatus === 'resume') {
                 let isPausedByIntention = JSON.parse(window.sessionStorage.getItem('tts_paused_by_intention'));
-                if (isPausedByIntention) {
+                if (!isPausedByIntention) {
                     window.sessionStorage.setItem('tts_paused_by_intention', false);
-                } else {
                     this.resume(speech)
                 }
 
