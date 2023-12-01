@@ -105,7 +105,7 @@ const config = {
 		src: [
 			'admin/js/build/text-to-audio-pro-button.min.js'
 		],
-		output: 'C:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio-pro/Assets/js/build/',
+		output: 'D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio-pro/Assets/js/build/',
 		options: {
 			//compress: true,
 			//modifiedTime: undefined
@@ -207,7 +207,7 @@ gulp.task(
 gulp.task(
 	'makeZip',
 	function () {
-		return gulp.series('copyProButton', 'copy', 'zip')()
+		return gulp.series('copy', 'zip')()
 	}
 );
 
@@ -235,7 +235,7 @@ gulp.task('copyProButton', function () {
 
 gulp.task('release', function () {
 	return gulp.src('production/text-to-audio/**')
-		.pipe(gulpCopy('C:/xampp/htdocs/wordpress.org/text-to-audio/', config.copy.src.options))
+		.pipe(gulpCopy('D:/xampp/htdocs/wordpress.org/text-to-audio-release/', config.copy.src.options))
 		.pipe(notify({ message: 'Release version copy Completed! 💯', onLast: true }))
 })
 
