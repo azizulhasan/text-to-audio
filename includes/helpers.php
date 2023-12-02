@@ -357,9 +357,6 @@ function add_listen_button( $content ) {
 
         if( !in_array('tta_listen_btn', $all_short_codes ) ) {
             ob_start();
-            echo do_shortcode('[wpv-post-body]');
-            echo do_shortcode('[wpv-post-title]');
-            echo do_shortcode('[wpv-post-shortcode]');
             echo tta_get_button_content('');
             $button = ob_get_contents();
             ob_end_clean();
