@@ -1,5 +1,3 @@
 {
-    "/admin/js/build/text-to-audio-dashboard-ui.min.js": "/admin/js/build/text-to-audio-dashboard-ui.min.js",
-    "/admin/js/build/TextToSpeech.min.js": "/admin/js/build/TextToSpeech.min.js",
-    "/admin/js/build/text-to-audio-button.min.js": "/admin/js/build/text-to-audio-button.min.js"
+    "/admin/js/build/text-to-audio-dashboard-ui.min.js": "/admin/js/build/text-to-audio-dashboard-ui.min.js"
 }

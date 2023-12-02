@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { __ } from '@wordpress/i18n';
 import { ToggleButton, Form, Row, Col, Container } from 'react-bootstrap';
 
 /**
@@ -8,6 +9,7 @@ import { ToggleButton, Form, Row, Col, Container } from 'react-bootstrap';
 import { postWithoutImage } from '../../context/utilities';
 import toast from '../../context/Notify';
 import UpgradeToPro from '../../UpgradeToPro';
+import { MultiSelect } from '../../context/MultiSelect'
 
 export default function Settings() {
 	const [settings, setSettings] = useState({
@@ -19,6 +21,7 @@ export default function Settings() {
 		'post',
 		'page',
 	]);
+	const [isDataLoaded, setIsDataLoaded] = useState(false)
 
 
 	useEffect(() => {
@@ -30,6 +33,7 @@ export default function Settings() {
 		postWithoutImage(tta_obj.api_url + 'tta/v1/settings', formData).then(
 			(res) => {
 				setSettings({ ...res.data });
+				setIsDataLoaded(true)
 			});
 
 
@@ -49,8 +53,14 @@ export default function Settings() {
 	 */
 	const handleChange = (e) => {
 		let value = '';
-		if (e.target.name === 'tta__settings_allow_listening_for_post_types') {
-			value = Array.from(e.target.selectedOptions, option => option.value);
+		if (Array.isArray(e)) {
+			value = e;
+			setSettings({
+				...settings,
+				...{ tta__settings_allow_listening_for_post_types: value },
+
+			});
+			return;
 		} else {
 			value = e.target.value
 		}
@@ -59,10 +69,10 @@ export default function Settings() {
 			value = e.target.checked
 		}
 		if (!e.target.name) return;
+
 		setSettings({
 			...settings,
 			...{ [e.target.name]: value },
-
 		});
 	};
 
@@ -71,6 +81,7 @@ export default function Settings() {
 	 */
 	const handleSubmit = (e) => {
 		e.preventDefault();
+		setIsDataLoaded(false)
 		let formData = new FormData();
 		formData.append('fields', JSON.stringify(settings));
 		formData.append('method', 'post');
@@ -78,6 +89,7 @@ export default function Settings() {
 			.then((res) => {
 				setSettings(res.data);
 				toast('Settings Data Saved');
+				setIsDataLoaded(true)
 			})
 			.catch((err) => {
 				console.log(err);
@@ -85,8 +97,7 @@ export default function Settings() {
 	};
 
 	return (
-
-		<React.Fragment>
+		isDataLoaded ? <React.Fragment>
 			<Container>
 				<Row>
 					<Col xs={12} sm={12} lg={8}>
@@ -98,24 +109,15 @@ export default function Settings() {
 									</Form.Label>
 								</Col>
 								<Col xs={12} sm={12} lg={8}>
-									<Form.Group>
-										<ToggleButton
-											id='tta__settings_enable_button_add'
-											type='checkbox'
-											className='form-controll'
-											name='tta__settings_enable_button_add'
-											variant={
-												settings.tta__settings_enable_button_add
-													? 'outline-primary'
-													: 'outline-danger'
-											}
-											checked={settings.tta__settings_enable_button_add}
-											onChange={(e) =>
-												handleChange(e)
-											}>
-											{settings.tta__settings_enable_button_add ? 'Enable' : 'Disable'}
-										</ToggleButton>
-									</Form.Group>
+									<Form.Check // prettier-ignore
+										type={'checkbox'}
+										checked={settings.tta__settings_enable_button_add}
+										onChange={(e) =>
+											handleChange(e)
+										}
+										name={`tta__settings_enable_button_add`}
+										id={`tta__settings_enable_button_add`}
+									/>
 								</Col>
 							</Row>
 							<Row className='mt-4'>
@@ -126,7 +128,7 @@ export default function Settings() {
 								</Col>
 								<Col xs={12} sm={12} lg={8}>
 									<Form.Group controlId="tta__settings_allow_listening_for_post_types">
-										<Form.Select
+										{/* <Form.Select
 											id="tta__settings_allow_listening_for_post_types"
 											name="tta__settings_allow_listening_for_post_types"
 											onChange={handleChange}
@@ -142,7 +144,14 @@ export default function Settings() {
 													</option>
 												);
 											})}
-										</Form.Select>
+										</Form.Select> */}
+
+										<MultiSelect
+											id="tta__settings_allow_listening_for_post_types"
+											name="tta__settings_allow_listening_for_post_types"
+											onChange={handleChange}
+											selectedItems={settings.tta__settings_allow_listening_for_post_types}
+											options={postTypes} />
 									</Form.Group>
 								</Col>
 							</Row>
@@ -153,24 +162,15 @@ export default function Settings() {
 									</Form.Label>
 								</Col>
 								<Col xs={12} sm={12} lg={8}>
-									<Form.Group>
-										<ToggleButton
-											id='tta__settings_display_btn_icon'
-											type='checkbox'
-											className='form-controll '
-											variant={
-												settings.tta__settings_display_btn_icon
-													? 'outline-primary'
-													: 'outline-danger'
-											}
-											checked={settings.tta__settings_display_btn_icon}
-											name='tta__settings_display_btn_icon'
-											onChange={(e) =>
-												handleChange(e)
-											}>
-											{settings.tta__settings_display_btn_icon ? 'Enable' : 'Disable'}
-										</ToggleButton>
-									</Form.Group>
+									<Form.Check // prettier-ignore
+										type={'checkbox'}
+										checked={settings.tta__settings_display_btn_icon}
+										onChange={(e) =>
+											handleChange(e)
+										}
+										name={`tta__settings_display_btn_icon`}
+										id={`tta__settings_display_btn_icon`}
+									/>
 								</Col>
 								<div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
 									<button type='submit' className='tta_btn  btn-block'>
@@ -185,6 +185,7 @@ export default function Settings() {
 					</Col>
 				</Row>
 			</Container>
-		</React.Fragment>
+		</React.Fragment> : <h1>Loading</h1>
+
 	);
 }
