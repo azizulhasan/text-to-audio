@@ -3,6 +3,8 @@ import { Col, Container, Row, Form, FloatingLabel } from 'react-bootstrap';
 import toast from '../../context/Notify';
 import { copyToClipBoard, postWithoutImage } from '../../context/utilities';
 import TextToSpeech from '../../../buttons/components/TextToSpeech';
+import TexToSpeechThree from '../../../buttons/components/TexToSpeechThree';
+
 let speech = null;
 let TextToSpeechFree = null;
 export default function Customize() {
@@ -10,12 +12,14 @@ export default function Customize() {
 		backgroundColor: '#FFFFFF',
 		color: '#000000',
 		width: '100',
+		buttonNo: 3,
 	});
 	const [listeningBtnStyle2, setListeningStyle2] = useState({
 		backgroundColor: '#FFFFFF',
 		color: '#000000',
 		width: '100%',
 		border: '0',
+		buttonNo: 3,
 	});
 
 	const [shortCode, setShortCode] = useState('[tta_listen_btn]');
@@ -92,6 +96,7 @@ export default function Customize() {
 			setShortCode(e.target.value);
 			return;
 		}
+		console.log(e.target.value)
 		/**
 		 * setCustomCSS
 		 */
@@ -165,7 +170,6 @@ export default function Customize() {
 		let text = document.getElementById('tta__demo_text_for_play').value;
 		let button = document.getElementById('tta__listen_content');
 
-		// setTimeout(() => {
 		if (speech != null && speech.listenStatus == 'listen') {
 			speech = null
 			TextToSpeechFree = null
@@ -185,7 +189,6 @@ export default function Customize() {
 			}
 		}
 
-		// }, 10)
 	};
 
 
@@ -204,17 +207,19 @@ export default function Customize() {
 					<Row>
 						<Col xs={12} sm={12} lg={12} className='mb-3'>
 							{
-								tta_obj.is_pro_license_active ? <TextToSpeech buttonCSS={listeningBtnStyle} buttonLiveCSS={listeningBtnStyle2} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={1} /> : (
-									<button
-										id='tta__listen_content'
-										onClick={(e) => callListeningFunction(e)}
-										style={listeningBtnStyle2}
-										type='button'
-										title='Text To Audio:  Tap to listen post.'>
-										<span className='dashicons dashicons-controls-play'></span>{' '}
-										{tta_obj.buttonTextArr.listen_text}
-									</button>
-								)
+								listeningBtnStyle.buttonNo == 2 ?
+									<TextToSpeech buttonCSS={listeningBtnStyle} buttonLiveCSS={listeningBtnStyle2} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={2} /> :
+									listeningBtnStyle.buttonNo == 3 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> : (
+										<button
+											id='tta__listen_content'
+											onClick={(e) => callListeningFunction(e)}
+											style={listeningBtnStyle2}
+											type='button'
+											title='Text To Audio:  Tap to listen post.'>
+											<span className='dashicons dashicons-controls-play'></span>{' '}
+											{tta_obj.buttonTextArr.listen_text}
+										</button>
+									)
 							}
 						</Col>
 						<Col xs={12} sm={12} lg={12} className='mb-3'>
@@ -263,7 +268,29 @@ export default function Customize() {
 				<Col xs={12} sm={12} lg={4}>
 					<Form onSubmit={handleSubmit}>
 						<h4>Customize Listening Button</h4>
-
+						<Form.Group>
+							<Form.Label htmlFor='buttonNo'>
+								Select Button
+							</Form.Label>
+							<Form.Select
+								onChange={handleChange}
+								name='buttonNo'
+								id='buttonNo'
+								value={listeningBtnStyle.buttonNo}
+								aria-label='Default select Button'>
+								<option disabled>
+									{' '}
+									Select Button
+								</option>
+								{[{ id: 1, name: 'Normal' }, { id: 2, name: 'Special' }, { id: 3, name: "Special-2" }].map((button, index) => {
+									return (
+										<option key={button.id} value={button.id}>
+											{button.name}
+										</option>
+									);
+								})}
+							</Form.Select>
+						</Form.Group>
 						<Form.Label htmlFor='backgroundColor'>
 							BackGround Color
 						</Form.Label>

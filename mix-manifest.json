@@ -1,3 +1,4 @@
 {
-    "/admin/js/build/text-to-audio-dashboard-ui.min.js": "/admin/js/build/text-to-audio-dashboard-ui.min.js"
+    "/admin/js/build/text-to-audio-dashboard-ui.min.js": "/admin/js/build/text-to-audio-dashboard-ui.min.js",
+    "/admin/demos/player3/js/build/plyr.min.js": "/admin/demos/player3/js/build/plyr.min.js"
 }

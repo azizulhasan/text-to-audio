@@ -157,7 +157,13 @@ class TTA_Admin {
                 wp_enqueue_script('text-to-audio-dashboard-ui', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-dashboard-ui.min.js', array('TextToSpeech'), $this->version, true);
                 wp_localize_script('text-to-audio-dashboard-ui', 'tta_obj', $this->localize_data);
                 wp_enqueue_style('dashicons');
-        }
+                // Player 3
+                wp_enqueue_style('tts-pro-plyr', plugin_dir_url(__FILE__) . 'demos/player3/css/plyr.min.css', [] , $this->version, 'all');
+                wp_enqueue_script('text-to-audio-plyr-lib', plugin_dir_url(__FILE__) .'demos/player3/js/build/plyr.lib.min.js', array('wp-hooks'), $this->version, true);
+                wp_enqueue_script('text-to-audio-plyr', plugin_dir_url(__FILE__) .'demos/player3/js/build/plyr.min.js', array(), $this->version, true);
+                wp_localize_script('text-to-audio-plyr', 'ttsObj', $this->localize_data);
+        
+            }
     }
 
     public function engueue_block_scripts() {
