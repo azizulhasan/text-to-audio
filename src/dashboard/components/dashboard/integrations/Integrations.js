@@ -44,7 +44,7 @@ export default function Integrations() {
             </Form.Group>
         </Form>
         {
-            currentTTSServic === 'google_cloud_tts' ? <GoogleTTS getCurrentTTSService={getCurrentTTSService} currentTTSServic={currentTTSServic} /> : <ChatGPTTTS getCurrentTTSService={getCurrentTTSService} currentTTSServic={currentTTSServic} />
+            currentTTSServic !== 'chatgpt_tts' ? <GoogleTTS getCurrentTTSService={getCurrentTTSService} currentTTSServic={currentTTSServic} /> : <ChatGPTTTS getCurrentTTSService={getCurrentTTSService} currentTTSServic={currentTTSServic} />
         }
     </>
 }
