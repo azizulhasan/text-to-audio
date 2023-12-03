@@ -128,24 +128,6 @@ export default function Settings() {
 								</Col>
 								<Col xs={12} sm={12} lg={8}>
 									<Form.Group controlId="tta__settings_allow_listening_for_post_types">
-										{/* <Form.Select
-											id="tta__settings_allow_listening_for_post_types"
-											name="tta__settings_allow_listening_for_post_types"
-											onChange={handleChange}
-											multiple={true}
-											value={settings.tta__settings_allow_listening_for_post_types}>
-											<option value={'0'}>
-												Select recording post type
-											</option>
-											{postTypes.length && postTypes.map((posttype, i) => {
-												return (
-													<option key={i} value={posttype}>
-														{posttype}
-													</option>
-												);
-											})}
-										</Form.Select> */}
-
 										<MultiSelect
 											id="tta__settings_allow_listening_for_post_types"
 											name="tta__settings_allow_listening_for_post_types"

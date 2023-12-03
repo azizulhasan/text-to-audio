@@ -46,11 +46,11 @@ export default function DashboardSideNav({ isProVersion }) {
 							</div>
 							FAQ
 						</Link>
-						<Link className='nav-link' to={'/gtts'}>
+						<Link className='nav-link' to={'/integrations'}>
 							<div className='sb-nav-link-icon'>
 								<i className='fas fa-edit'></i>
 							</div>
-							{isProVersion ? "TTS" : "TTS Pro"}
+							{isProVersion ? "Integrations" : "Integrations Pro"}
 						</Link>
 					</div>
 				</div>
