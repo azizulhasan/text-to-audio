@@ -190,9 +190,6 @@ export default function Customize() {
 		}
 
 	};
-
-
-
 	const setText = (e) => {
 		setSpeakingText(e.target.value);
 		localStorage.setItem('demo_listening_content', e.target.value);
@@ -200,6 +197,35 @@ export default function Customize() {
 			window.TTS.contents[1] = e.target.value;;
 		}
 	};
+
+
+	const [buttonLists, setButtonLists] = useState([
+		{ id: 1, name: 'Default', object: 'TextToSpeech' },
+		{ id: 2, name: 'Default Pro', object: 'TextToSpeechPro' },
+		{ id: 5, name: "Google TTS Pro", object: 'TextToSpeechPro' },
+		{ id: 4, name: "Google Cloud TTS Pro", object: 'TextToSpeechPro' },
+		{ id: 3, name: "ChatGPT TTS Pro", object: 'TextToSpeechPro' }
+	])
+
+	// const getTTSButtonByButtonNo = (buttonNo) => {
+	// 	{
+	// 		listeningBtnStyle.buttonNo == 2 ?
+	// 			<TextToSpeech buttonCSS={listeningBtnStyle} buttonLiveCSS={listeningBtnStyle2} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={2} /> :
+	// 			listeningBtnStyle.buttonNo == 3 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> : (
+	// 				<button
+	// 					id='tta__listen_content'
+	// 					onClick={(e) => callListeningFunction(e)}
+	// 					style={listeningBtnStyle2}
+	// 					type='button'
+	// 					title='Text To Audio:  Tap to listen post.'>
+	// 					<span className='dashicons dashicons-controls-play'></span>{' '}
+	// 					{tta_obj.buttonTextArr.listen_text}
+	// 				</button>
+	// 			)
+	// 	}
+	// }
+
+
 	return (
 		<Container>
 			<Row className='mt-5'>
@@ -209,17 +235,19 @@ export default function Customize() {
 							{
 								listeningBtnStyle.buttonNo == 2 ?
 									<TextToSpeech buttonCSS={listeningBtnStyle} buttonLiveCSS={listeningBtnStyle2} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={2} /> :
-									listeningBtnStyle.buttonNo == 3 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> : (
-										<button
-											id='tta__listen_content'
-											onClick={(e) => callListeningFunction(e)}
-											style={listeningBtnStyle2}
-											type='button'
-											title='Text To Audio:  Tap to listen post.'>
-											<span className='dashicons dashicons-controls-play'></span>{' '}
-											{tta_obj.buttonTextArr.listen_text}
-										</button>
-									)
+									listeningBtnStyle.buttonNo == 3 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> :
+										listeningBtnStyle.buttonNo == 4 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> :
+											listeningBtnStyle.buttonNo == 5 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> : (
+												<button
+													id='tta__listen_content'
+													onClick={(e) => callListeningFunction(e)}
+													style={listeningBtnStyle2}
+													type='button'
+													title='Text To Audio:  Tap to listen post.'>
+													<span className='dashicons dashicons-controls-play'></span>{' '}
+													{tta_obj.buttonTextArr.listen_text}
+												</button>
+											)
 							}
 						</Col>
 						<Col xs={12} sm={12} lg={12} className='mb-3'>
@@ -282,7 +310,7 @@ export default function Customize() {
 									{' '}
 									Select Button
 								</option>
-								{[{ id: 1, name: 'Normal' }, { id: 2, name: 'Special' }, { id: 3, name: "Special-2" }].map((button, index) => {
+								{buttonLists.map((button, index) => {
 									return (
 										<option key={button.id} value={button.id}>
 											{button.name}
