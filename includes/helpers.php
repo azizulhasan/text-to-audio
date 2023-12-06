@@ -621,30 +621,33 @@ function set_initial_button_texts() {
     return get_option( 'tta__button_text_arr' );
 }
 
-function tts_get_settings($settings_key = '', $identifier = '') {
+function tts_get_settings($identifier = '') {
    
     $all_settings_data = [];
-
-    if($settings_key) {
-         $settings = (array) get_option($settings_key);
-        if($identifier) {
+    $cached_settings = get_transient('tts_all_settings');
+    if(!$cached_settings) {
+        $all_settings = [
+            'tta_listening_settings' => 'listening',
+            'tta_settings_data' => 'settings',
+            'tta_record_settings' => 'recording',
+            'tta_customize_settings' => 'customize',
+        ];
+        
+        foreach($all_settings as $settings_key => $identifier) {
+            $settings = get_option($settings_key);
+            $settings = ! $settings ? false : (array) $settings ;
             $all_settings_data[$identifier] = $settings;
-        }else{
-            $all_settings_data[$settings_key] = $settings;
         }
 
-        return $all_settings_data;
+        set_transient('tts_all_settings', $all_settings_data);
 
+    }else{
+        $all_settings_data = $cached_settings;
     }
 
-    $all_settings = [
-        'tta_listening_settings' => 'listening',
-        'tta_settings_data' => 'settings',
-    ];
-    
-    foreach($all_settings as $settings_key => $identifier) {
-        $settings = (array) get_option($settings_key);
-        $all_settings_data[$identifier] = $settings;
+    if($identifier) {
+        $specified_identifier_data = isset($all_settings_data[$identifier]) ? $all_settings_data[$identifier] : $all_settings_data;
+        $all_settings_data = $specified_identifier_data;
     }
 
     return $all_settings_data;

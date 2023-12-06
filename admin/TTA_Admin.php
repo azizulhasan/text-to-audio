@@ -61,8 +61,7 @@ class TTA_Admin {
 
         $this->plugin_name = $plugin_name;
         $this->version = $version;
-        $listening = (array) get_option('tta_listening_settings');
-        $listening = json_encode($listening);
+        $listening = json_encode(tts_get_settings('listening'));
         add_filter('script_loader_tag', [ $this, 'load_script_as_tag'] , 10, 3);
             global $is_iphone, $is_iphone, $is_chrome,$is_safari,
         $is_NS4,$is_opera,$is_macIE,$is_winIE, $is_gecko, $is_lynx, $is_IE, $is_edge; 
