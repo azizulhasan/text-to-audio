@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { __ } from '@wordpress/i18n';
-import { ToggleButton, Form, Row, Col, Container } from 'react-bootstrap';
+import {
+	ToggleButton, Form, Row, Col, Container, Tooltip,
+	OverlayTrigger,
+	Button
+} from 'react-bootstrap';
 
 /**
  *
@@ -16,6 +19,7 @@ export default function Settings() {
 		tta__settings_enable_button_add: false,
 		tta__settings_display_btn_icon: false,
 		tta__settings_allow_listening_for_post_types: ['post'],
+		tta__settings_css_selectors: ''
 	});
 	const [postTypes, setPostTypes] = useState([
 		'post',
@@ -81,7 +85,10 @@ export default function Settings() {
 	 */
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		setIsDataLoaded(false)
+		if (!ttsObj.is_pro_active) {
+			settings.tta__settings_css_selectors = ''
+		}
+
 		let formData = new FormData();
 		formData.append('fields', JSON.stringify(settings));
 		formData.append('method', 'post');
@@ -135,6 +142,40 @@ export default function Settings() {
 											selectedItems={settings.tta__settings_allow_listening_for_post_types}
 											options={postTypes} />
 									</Form.Group>
+								</Col>
+							</Row>
+							<Row className='mt-4'>
+								<Col xs={12} sm={6} lg={4}>
+									<Form.Label htmlFor='tta__settings_css_selectors'>
+										Add CSS Selector {ttsObj.is_pro_active ? "" : "Pro"}
+									</Form.Label>
+								</Col>
+								<Col xs={11} sm={11} lg={7}>
+									<Form.Control
+										id="tta__settings_css_selectors"
+										name="tta__settings_css_selectors"
+										as='textarea'
+										onChange={(e) => handleChange(e)}
+										value={settings.tta__settings_css_selectors}
+										placeholder={ttsObj.is_pro_active ? 'Multiple selector will be multiline.' : 'Some content may be missing, It can be found by css selectors'}
+										disabled={ttsObj.is_pro_active ? false : true}
+									/>
+								</Col>
+								<Col xs={1} sm={1} lg={1} className='mt-4'>
+									<>
+										{['top'].map((placement) => (
+											<OverlayTrigger
+												key={placement}
+												placement={placement}
+												overlay={
+													<Tooltip id={`tooltip-${placement}`}>
+														{ttsObj.is_pro_active ? 'Multiple selector will be multiline.' : 'CSS selector is available in pro version'}
+													</Tooltip>
+												}>
+												<Button className="tta_btn m-0 p-0 text-dark bg-light border-0">{ttsObj.is_pro_active ? <i class="fas fa-unlock" /> : <i class="fas fa-lock" />}</Button>
+											</OverlayTrigger>
+										))}
+									</>
 								</Col>
 							</Row>
 							<Row className=' mt-3'>

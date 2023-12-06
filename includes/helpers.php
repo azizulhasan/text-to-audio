@@ -103,8 +103,7 @@ function tta_get_button_content($atts, $is_block = false) {
     ) {
         return;
     }
-    $listening = (array) get_option('tta_listening_settings');
-    $listening = json_encode($listening);
+
     if ($is_block) {
         $customize = $atts;
     } else {
@@ -129,7 +128,7 @@ function tta_get_button_content($atts, $is_block = false) {
     $title = tta_clean_content( get_the_title());
     $title = tta_should_add_dilimiter($title, $sentence_delimiter);
     $date = get_the_date('Y/m/d');
-    // error_log(print_r($description, true));
+    
     // TODO: write functionality if current page is home page where content is excerpt.
     // if(is_single()) {
     //     $description = get_the_content();
@@ -190,31 +189,30 @@ function tta_get_button_content($atts, $is_block = false) {
     $content = apply_filters('tta__content_description', $content, $description, get_the_ID() );
     $content = tta_clean_content($content);
     // init button scripts
-    do_action('tts_enqueue_button_scripts' , $content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date);
-
+    do_action('tts_enqueue_button_scripts' , $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date);
 
     $data =  apply_filters( 'tts__listening_button', $button, $btn_no, $class );
-
-    
-
 
     return $data;
 }
 
 
-add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 10);
+add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 9);
 
 /**
  * Enqueue button scripts
  */
-function tts_enqueue_button_scripts ($content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date) {
+function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date) {
            
     $reading_time = apply_filters('tts_content_reading_time', 1, $content );
     // enqueue footer stript
-    add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $listening, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $reading_time, $title, $date) { 
+    add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $reading_time, $title, $date) { 
         $temp_title = trim(str_replace('.', '', $title));
         $title = trim(get_the_title());
         $title = tta_clean_content( $title );
+
+        // Get plugin all settings and pass it to TTS ja Object.
+        $plugin_all_settings = tts_get_settings();
 
         if(tts_text_match_80_percent($title , $temp_title)) :
         ?>
@@ -222,13 +220,15 @@ function tts_enqueue_button_scripts ($content, $btn_no, $listening, $class, $btn
         <script id='tts_button_settings_<?php echo $btn_no; ?>' >
             var ttsCurrentButtonNo = <?php echo $btn_no; ?>;
             var ttsCurrentContent = "<?php echo $content; ?>";
-            var ttsListening = <?php echo $listening; ?>;
+            var ttsListening = <?php echo json_encode($plugin_all_settings['listening']); ?>;
             var ttsCSSClass = "<?php echo $class; ?>";
             var ttsBtnStyle = "<?php echo $btn_style; ?>";
             var ttsTextArr = <?php echo json_encode($text_arr); ?>;
+            var allSettings = <?php echo json_encode( $plugin_all_settings) ?>;
             var ttsCustomCSS = "<?php print($custom_css); ?>";
             var ttsShouldDisplayIcon = "<?php echo $should_display_icon; ?>";
             var readingTime = "<?php echo $reading_time; ?>";
+            
             var ttsSettings = {
                 listening : ttsListening, 
                 cssClass : ttsCSSClass , 
@@ -237,7 +237,9 @@ function tts_enqueue_button_scripts ($content, $btn_no, $listening, $class, $btn
                 customCSS : ttsCustomCSS, 
                 shouldDisplayIcon : ttsShouldDisplayIcon,
                 readingTime: readingTime,
+                settings: allSettings,
             };
+
 
             var dateTitle = {
                 title: "<?php echo $title; ?>",
@@ -341,7 +343,7 @@ function get_button_text( $atts ) {
 }
 
 
-add_filter( 'the_content', 'add_listen_button', 1 );
+add_filter( 'the_content', 'add_listen_button',  9999999 );
 
 /**
  * Add listening button to every post by default.
@@ -619,3 +621,31 @@ function set_initial_button_texts() {
     return get_option( 'tta__button_text_arr' );
 }
 
+function tts_get_settings($settings_key = '', $identifier = '') {
+   
+    $all_settings_data = [];
+
+    if($settings_key) {
+         $settings = (array) get_option($settings_key);
+        if($identifier) {
+            $all_settings_data[$identifier] = $settings;
+        }else{
+            $all_settings_data[$settings_key] = $settings;
+        }
+
+        return $all_settings_data;
+
+    }
+
+    $all_settings = [
+        'tta_listening_settings' => 'listening',
+        'tta_settings_data' => 'settings',
+    ];
+    
+    foreach($all_settings as $settings_key => $identifier) {
+        $settings = (array) get_option($settings_key);
+        $all_settings_data[$identifier] = $settings;
+    }
+
+    return $all_settings_data;
+}

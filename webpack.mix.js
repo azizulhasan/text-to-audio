@@ -7,9 +7,9 @@ mix.js('admin/demos/player3/js/plyr.js', 'admin/demos/player3/js/build/plyr.min.
 // mix.js('src/dashboard/button.js', 'admin/js/build/text-to-audio-pro-button.min.js').react();
 
 
-// mix.js('admin/js/TextToSpeech.js', 'admin/js/build/TextToSpeech.min.js');
+mix.js('admin/js/TextToSpeech.js', 'admin/js/build/TextToSpeech.min.js');
 
-// mix.js('admin/js/text-to-audio-button.js', 'admin/js/build/text-to-audio-button.min.js');
+mix.js('admin/js/text-to-audio-button.js', 'admin/js/build/text-to-audio-button.min.js');
 
 
 
