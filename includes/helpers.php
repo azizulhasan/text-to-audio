@@ -621,7 +621,7 @@ function set_initial_button_texts() {
     return get_option( 'tta__button_text_arr' );
 }
 
-function tts_get_settings($identifier = '') {
+function tts_get_settings($identifier = '') {  
    
     $all_settings_data = [];
     $cached_settings = get_transient('tts_all_settings');

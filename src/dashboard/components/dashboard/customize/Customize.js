@@ -202,29 +202,10 @@ export default function Customize() {
 	const [buttonLists, setButtonLists] = useState([
 		{ id: 1, name: 'Default', object: 'TextToSpeech' },
 		{ id: 2, name: 'Default Pro', object: 'TextToSpeechPro' },
-		{ id: 5, name: "Google TTS Pro", object: 'TextToSpeechPro' },
+		{ id: 3, name: "ChatGPT TTS Pro", object: 'TextToSpeechPro' },
 		{ id: 4, name: "Google Cloud TTS Pro", object: 'TextToSpeechPro' },
-		{ id: 3, name: "ChatGPT TTS Pro", object: 'TextToSpeechPro' }
+		{ id: 5, name: "Google TTS Pro", object: 'TextToSpeechPro' },
 	])
-
-	// const getTTSButtonByButtonNo = (buttonNo) => {
-	// 	{
-	// 		listeningBtnStyle.buttonNo == 2 ?
-	// 			<TextToSpeech buttonCSS={listeningBtnStyle} buttonLiveCSS={listeningBtnStyle2} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={2} /> :
-	// 			listeningBtnStyle.buttonNo == 3 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> : (
-	// 				<button
-	// 					id='tta__listen_content'
-	// 					onClick={(e) => callListeningFunction(e)}
-	// 					style={listeningBtnStyle2}
-	// 					type='button'
-	// 					title='Text To Audio:  Tap to listen post.'>
-	// 					<span className='dashicons dashicons-controls-play'></span>{' '}
-	// 					{tta_obj.buttonTextArr.listen_text}
-	// 				</button>
-	// 			)
-	// 	}
-	// }
-
 
 	return (
 		<Container>
