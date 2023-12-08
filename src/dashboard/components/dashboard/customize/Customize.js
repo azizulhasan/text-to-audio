@@ -4,6 +4,7 @@ import toast from '../../context/Notify';
 import { copyToClipBoard, postWithoutImage } from '../../context/utilities';
 import TextToSpeech from '../../../buttons/components/TextToSpeech';
 import TexToSpeechThree from '../../../buttons/components/TexToSpeechThree';
+import CustomizationTabs from './CustomizationTabs'
 
 let speech = null;
 let TextToSpeechFree = null;
@@ -199,13 +200,7 @@ export default function Customize() {
 	};
 
 
-	const [buttonLists, setButtonLists] = useState([
-		{ id: 1, name: 'Default', object: 'TextToSpeech' },
-		{ id: 2, name: 'Default Pro', object: 'TextToSpeechPro' },
-		{ id: 3, name: "ChatGPT TTS Pro", object: 'TextToSpeechPro' },
-		{ id: 4, name: "Google Cloud TTS Pro", object: 'TextToSpeechPro' },
-		{ id: 5, name: "Google TTS Pro", object: 'TextToSpeechPro' },
-	])
+
 
 	return (
 		<Container>
@@ -275,81 +270,7 @@ export default function Customize() {
 					</Row>
 				</Col>
 				<Col xs={12} sm={12} lg={4}>
-					<Form onSubmit={handleSubmit}>
-						<h4>Customize Listening Button</h4>
-						<Form.Group>
-							<Form.Label htmlFor='buttonNo'>
-								Select Button
-							</Form.Label>
-							<Form.Select
-								onChange={handleChange}
-								name='buttonNo'
-								id='buttonNo'
-								value={listeningBtnStyle.buttonNo}
-								aria-label='Default select Button'>
-								<option disabled>
-									{' '}
-									Select Button
-								</option>
-								{buttonLists.map((button, index) => {
-									return (
-										<option key={button.id} value={button.id}>
-											{button.name}
-										</option>
-									);
-								})}
-							</Form.Select>
-						</Form.Group>
-						<Form.Label htmlFor='backgroundColor'>
-							BackGround Color
-						</Form.Label>
-						<Form.Control
-							type='color'
-							name='backgroundColor'
-							onChange={handleChange}
-							id='backgroundColor'
-							value={listeningBtnStyle.backgroundColor}
-							title='Choose your color'
-						/>
-						<Form.Label htmlFor='color'>Text Color</Form.Label>
-						<Form.Control
-							type='color'
-							name='color'
-							onChange={handleChange}
-							id='color'
-							value={listeningBtnStyle.color}
-							title='Choose your color'
-						/>
-						<Form.Label htmlFor='width'>
-							Button Width (%)
-						</Form.Label>
-						<Form.Control
-							type='number'
-							name='width'
-							onChange={handleChange}
-							id='width'
-							min={'0'}
-							max='100'
-							value={listeningBtnStyle.width}
-							title='Button Width'
-						/>
-						<Form.Label htmlFor='custom_css'>Custom CSS</Form.Label>
-						<Form.Control
-							as='textarea'
-							name='custom_css'
-							id='custom_css'
-							onChange={handleChange}
-							value={customCSS ? customCSS : ''}
-							placeholder='Custom CSS'
-						/>
-						<div className='d-grid gap-3 col-12 mx-auto mt-5 mb-4'>
-							<button
-								type='submit'
-								className='tta_btn  btn-center btn-block'>
-								Submit
-							</button>
-						</div>
-					</Form>
+					<CustomizationTabs />
 				</Col>
 			</Row>
 		</Container>

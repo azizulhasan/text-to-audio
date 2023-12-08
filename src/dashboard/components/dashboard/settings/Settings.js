@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { __ } from '@wordpress/i18n'
 import {
 	ToggleButton, Form, Row, Col, Container, Tooltip,
 	OverlayTrigger,
@@ -147,7 +148,22 @@ export default function Settings() {
 							<Row className='mt-4'>
 								<Col xs={12} sm={6} lg={4}>
 									<Form.Label htmlFor='tta__settings_css_selectors'>
-										Add CSS Selector {ttsObj.is_pro_active ? "" : "Pro"}
+										Add CSS Selector {ttsObj.is_pro_active ? "" : (
+											<>
+												{['top'].map((placement) => (
+													<OverlayTrigger
+														key={placement}
+														placement={placement}
+														overlay={
+															<Tooltip id={`tooltip-${placement}`}>
+																{__('CSS selector is available in pro version')}
+															</Tooltip>
+														}>
+														<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i class="fas fa-lock" /></Button>
+													</OverlayTrigger>
+												))}
+											</>
+										)}
 									</Form.Label>
 								</Col>
 								<Col xs={11} sm={11} lg={7}>
@@ -157,7 +173,7 @@ export default function Settings() {
 										as='textarea'
 										onChange={(e) => handleChange(e)}
 										value={settings.tta__settings_css_selectors}
-										placeholder={ttsObj.is_pro_active ? 'Multiple selector will be multiline.' : 'Some content may be missing, It can be found by css selectors'}
+										placeholder={ttsObj.is_pro_active ? __('Multiple selector will be multiline.') : 'Some content may be missing, It can be found by css selectors'}
 										disabled={ttsObj.is_pro_active ? false : true}
 									/>
 								</Col>
@@ -169,10 +185,10 @@ export default function Settings() {
 												placement={placement}
 												overlay={
 													<Tooltip id={`tooltip-${placement}`}>
-														{ttsObj.is_pro_active ? 'Multiple selector will be multiline.' : 'CSS selector is available in pro version'}
+														{__('Click To Know How It Works?')}
 													</Tooltip>
 												}>
-												<Button className="tta_btn m-0 p-0 text-dark bg-light border-0">{ttsObj.is_pro_active ? <i class="fas fa-unlock" /> : <i class="fas fa-lock" />}</Button>
+												<a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/' > <i class="fas fa-info-circle"></i></a>
 											</OverlayTrigger>
 										))}
 									</>
