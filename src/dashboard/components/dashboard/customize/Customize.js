@@ -13,14 +13,14 @@ export default function Customize() {
 		backgroundColor: '#FFFFFF',
 		color: '#000000',
 		width: '100',
-		buttonNo: 3,
+		buttonSettings: {
+		}
 	});
 	const [listeningBtnStyle2, setListeningStyle2] = useState({
 		backgroundColor: '#FFFFFF',
 		color: '#000000',
 		width: '100%',
 		border: '0',
-		buttonNo: 3,
 	});
 
 	const [shortCode, setShortCode] = useState('[tta_listen_btn]');
@@ -30,8 +30,6 @@ export default function Customize() {
 	const [listeningSettings, setListeningSettings] = useState({});
 
 	useEffect(() => {
-
-
 		/**
 		 * Get customize settings.
 		 */
@@ -78,6 +76,7 @@ export default function Customize() {
 		}, 1000)
 
 	}, []);
+
 	/**
 	 * handle change
 	 * @param {*} e
@@ -105,6 +104,26 @@ export default function Customize() {
 			setCustomCSS(e.target.value);
 			return;
 		}
+
+		// ChatGPT TTS player button settings
+		// && listeningBtnStyle?.buttonSettings?.id == 3
+		if (!['backgroundColor', 'width', 'color'].includes(e.target.name)) {
+
+			let tempButtonSettings = structuredClone(listeningBtnStyle.buttonSettings)
+			tempButtonSettings = {
+				...tempButtonSettings,
+				...{ [e.target.name]: e.target.value }
+			}
+			setListeningStyle({
+				...listeningBtnStyle,
+				...{
+					buttonSettings: tempButtonSettings
+				}
+			});
+
+			return;
+		}
+
 		/**
 		 * set button style for database.
 		 */
@@ -112,6 +131,9 @@ export default function Customize() {
 			...listeningBtnStyle,
 			...{ [e.target.name]: e.target.value },
 		});
+		/**
+		 * set button style for live preveiw.
+		 */
 		let value = '';
 		if (e.target.name === 'width') {
 			let arr = [e.target.value, '%'];
@@ -119,9 +141,6 @@ export default function Customize() {
 		} else {
 			value = e.target.value;
 		}
-		/**
-		 * set button style for live preveiw.
-		 */
 		setListeningStyle2({
 			...listeningBtnStyle2,
 			...{ [e.target.name]: value },
@@ -146,17 +165,24 @@ export default function Customize() {
 					return;
 				}
 			}
+			if (!['backgroundColor', 'width', 'color'].includes(key)) {
+				continue;
+			}
 
 			formData[key] = value;
 		}
+
 		formData['custom_css'] = customCSS;
 		formData['tta_play_btn_shortcode'] = shortCode;
+		formData['buttonSettings'] = listeningBtnStyle.buttonSettings;
+
 
 		// console.log(formData);
 		// return;
 		let data = new FormData();
 		data.append('fields', JSON.stringify(formData));
 		data.append('method', 'post');
+		console.log(formData)
 		postWithoutImage(tta_obj.api_url + 'tta/v1/customize', data)
 			.then((res) => {
 				setListeningStyle(res.data);
@@ -199,8 +225,13 @@ export default function Customize() {
 		}
 	};
 
-
-
+	const [buttonLists, setButtonLists] = useState([
+		{ id: 1, name: 'Default', object: 'TextToSpeech' },
+		{ id: 2, name: 'Default Pro', object: 'TextToSpeechPro' },
+		{ id: 3, name: "ChatGPT TTS Pro", object: 'TextToSpeechPro' },
+		{ id: 4, name: "Google Cloud TTS Pro", object: 'TextToSpeechPro' },
+		{ id: 5, name: "Google TTS Pro", object: 'TextToSpeechPro' },
+	])
 
 	return (
 		<Container>
@@ -209,11 +240,11 @@ export default function Customize() {
 					<Row>
 						<Col xs={12} sm={12} lg={12} className='mb-3'>
 							{
-								listeningBtnStyle.buttonNo == 2 ?
+								listeningBtnStyle?.buttonSettings?.id == 2 ?
 									<TextToSpeech buttonCSS={listeningBtnStyle} buttonLiveCSS={listeningBtnStyle2} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={2} /> :
-									listeningBtnStyle.buttonNo == 3 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> :
-										listeningBtnStyle.buttonNo == 4 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> :
-											listeningBtnStyle.buttonNo == 5 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> : (
+									listeningBtnStyle?.buttonSettings?.id == 3 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> :
+										listeningBtnStyle?.buttonSettings?.id == 4 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> :
+											listeningBtnStyle?.buttonSettings?.id == 5 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> : (
 												<button
 													id='tta__listen_content'
 													onClick={(e) => callListeningFunction(e)}
@@ -270,7 +301,7 @@ export default function Customize() {
 					</Row>
 				</Col>
 				<Col xs={12} sm={12} lg={4}>
-					<CustomizationTabs />
+					<CustomizationTabs buttonLists={buttonLists} customCSS={customCSS} handleSubmit={handleSubmit} listeningBtnStyle={listeningBtnStyle} handleChange={handleChange} listeningSettings={listeningSettings} />
 				</Col>
 			</Row>
 		</Container>
