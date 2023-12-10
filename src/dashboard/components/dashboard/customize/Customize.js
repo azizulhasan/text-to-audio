@@ -226,11 +226,11 @@ export default function Customize() {
 	};
 
 	const [buttonLists, setButtonLists] = useState([
-		{ id: 1, name: 'Default', object: 'TextToSpeech' },
-		{ id: 2, name: 'Default Pro', object: 'TextToSpeechPro' },
-		{ id: 3, name: "ChatGPT TTS Pro", object: 'TextToSpeechPro' },
-		{ id: 4, name: "Google Cloud TTS Pro", object: 'TextToSpeechPro' },
-		{ id: 5, name: "Google TTS Pro", object: 'TextToSpeechPro' },
+		{ id: 1, name: 'Default', object: 'TextToSpeech', disabled: false },
+		{ id: 2, name: 'Default Pro', object: 'TextToSpeechPro', disabled: false },
+		{ id: 3, name: 'Google TTS Pro', object: 'TextToSpeechPro', disabled: false },
+		{ id: 4, name: "ChatGPT TTS (Soon)", object: 'TextToSpeechPro', disabled: true },
+		{ id: 5, name: "Google Cloud TTS (Soon)", object: 'TextToSpeechPro', disabled: true },
 	])
 
 	return (

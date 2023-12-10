@@ -156,11 +156,19 @@ class TTA_Admin {
                 wp_enqueue_script('text-to-audio-dashboard-ui', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-dashboard-ui.min.js', array('TextToSpeech'), $this->version, true);
                 wp_localize_script('text-to-audio-dashboard-ui', 'tta_obj', $this->localize_data);
                 wp_enqueue_style('dashicons');
+
+
+                $this->localize_data['is_demo_page'] = true;
+                // Player 2
+                wp_enqueue_style('text-to-audio-pro-demo', plugin_dir_url(__FILE__) . 'demos/player2/text-to-audio-pro-demo.css', [] , $this->version, 'all' );
+                wp_enqueue_script('TextToSpeechProDemo', plugin_dir_url(__FILE__) .'demos/player2/js/TextToSpeechProDemo.min.js', array('wp-hooks', 'TextToSpeech'), $this->version, true);
+                wp_localize_script('TextToSpeechProDemo', 'ttsObjPro', $this->localize_data);
+
                 // Player 3
-                wp_enqueue_style('tts-pro-plyr', plugin_dir_url(__FILE__) . 'demos/player3/css/plyr.min.css', [] , $this->version, 'all');
-                wp_enqueue_script('text-to-audio-plyr-lib', plugin_dir_url(__FILE__) .'demos/player3/js/build/plyr.lib.min.js', array('wp-hooks'), $this->version, true);
-                wp_enqueue_script('text-to-audio-plyr', plugin_dir_url(__FILE__) .'demos/player3/js/build/plyr.min.js', array(), $this->version, true);
-                wp_localize_script('text-to-audio-plyr', 'ttsObj', $this->localize_data);
+                wp_enqueue_style('tts-pro-demo-plyr', plugin_dir_url(__FILE__) . 'demos/player3/css/plyr-demo.min.css', [] , $this->version, 'all');
+                wp_enqueue_script('text-to-audio-plyr-demo-lib', plugin_dir_url(__FILE__) .'demos/player3/js/build/plyr-demo.lib.min.js', array('wp-hooks'), $this->version, true);
+                wp_enqueue_script('text-to-audio-demo-plyr', plugin_dir_url(__FILE__) .'demos/player3/js/build/plyr-demo.min.js', array(), $this->version, true);
+                wp_localize_script('text-to-audio-demo-plyr', 'ttsObj', $this->localize_data);
         
             }
     }

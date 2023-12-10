@@ -96,85 +96,13 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
                     </option>
                     {buttonLists.map((button, index) => {
                         return (
-                            <option key={button.id} value={button.id}>
+                            <option disabled={button.disabled} key={button.id} value={button.id}>
                                 {button.name}
                             </option>
                         );
                     })}
                 </Form.Select>
             </Form.Group>
-            {
-                // TODO: add  pro version like to go to pro page.
-                listeningBtnStyle?.buttonSettings?.id == 3 && <div onClick={!ttsObj.is_pro_active ? () => alert(__('ChatGPT TTS is available for pro version')) : () => { }}>
-                    <Form.Group>
-                        <Form.Label htmlFor='voice'>
-                            {__('Select Voice')}
-                        </Form.Label>
-                        <Form.Select
-                            onChange={handleChange}
-                            name='voice'
-                            id='voice'
-                            value={listeningBtnStyle?.buttonSettings?.voice}
-                            aria-label='Select Voice'>
-                            <option disabled>
-                                {' '}
-                                {__('Select Voice')}
-                            </option>
-                            {chatGPTTTSOptions.voices.map((voice, index) => {
-                                return (
-                                    <option key={voice} value={voice}>
-                                        {voice}
-                                    </option>
-                                );
-                            })}
-                        </Form.Select>
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Label htmlFor='model'>
-                            {__('Select Model')}
-                        </Form.Label>
-                        <Form.Select
-                            onChange={handleChange}
-                            name='model'
-                            id='model'
-                            value={listeningBtnStyle?.buttonSettings?.model}
-                            aria-label='Select Voice'>
-                            <option disabled>
-                                {__('Select Model')}
-                            </option>
-                            {Object.keys(chatGPTTTSOptions.models).map((model, index) => {
-                                return (
-                                    <option key={model} value={model}>
-                                        {chatGPTTTSOptions.models[model]}
-                                    </option>
-                                );
-                            })}
-                        </Form.Select>
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Label htmlFor='speed'>
-                            {__('Select Speed')}
-                        </Form.Label>
-                        <Form.Select
-                            onChange={handleChange}
-                            name='speed'
-                            id='speed'
-                            value={listeningBtnStyle?.buttonSettings?.speed}
-                            aria-label='Select Speed'>
-                            <option disabled>
-                                {__('Select Speed')}
-                            </option>
-                            {chatGPTTTSOptions.speeds.map((speed, index) => {
-                                return (
-                                    <option key={speed} value={speed}>
-                                        {speed}
-                                    </option>
-                                );
-                            })}
-                        </Form.Select>
-                    </Form.Group>
-                </div >
-            }
         </>
     )
 }

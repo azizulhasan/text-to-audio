@@ -1,7 +1,7 @@
 
 import { setCORS } from "google-translate-api-browser";
-
-const translate = setCORS(ttsObjPro.cors_domain);
+let cors_domain = 'https://cors.atlasaidev.com/';
+const translate = setCORS(window?.ttsObjPro?.cors_domain || cors_domain);
 
 class TTSGtranslate {
     textToSpeechPro = null
