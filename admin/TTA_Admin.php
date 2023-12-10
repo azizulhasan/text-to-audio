@@ -158,7 +158,6 @@ class TTA_Admin {
                 wp_enqueue_style('dashicons');
 
 
-                $this->localize_data['is_demo_page'] = true;
                 // Player 2
                 wp_enqueue_style('text-to-audio-pro-demo', plugin_dir_url(__FILE__) . 'demos/player2/text-to-audio-pro-demo.css', [] , $this->version, 'all' );
                 wp_enqueue_script('TextToSpeechProDemo', plugin_dir_url(__FILE__) .'demos/player2/js/TextToSpeechProDemo.min.js', array('wp-hooks', 'TextToSpeech'), $this->version, true);
@@ -199,10 +198,11 @@ class TTA_Admin {
      *
      */
     public function enqueue_TTA() {
-        if(is_pro_license_active()){
+        $player_id = get_player_id();
+        if( $player_id > 1){
             wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', array('wp-hooks',), $this->version, true);
             wp_localize_script('TextToSpeech', 'ttsObj', $this->localize_data);
-        }else{
+        }else if($player_id == 1){
             wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-button.min.js', array('wp-hooks', 'wp-shortcode'), $this->version, true);
             wp_localize_script('text-to-audio-button', 'ttsObj', $this->localize_data );
             wp_enqueue_style('dashicons');

@@ -70,6 +70,10 @@ function tta_should_add_dilimiter($title, $delimiter) {
         return $title. ' ';
     }
 
+    if(! $title) {
+        return $title;
+    }
+
     return $title.$delimiter. " ";
 
 }
@@ -651,4 +655,15 @@ function tts_get_settings($identifier = '') {
     }
 
     return $all_settings_data;
+}
+
+function get_player_id() {
+    $customize_settings = (array) tts_get_settings('customize');
+    $customize_settings['buttonSettings'] = isset( $customize_settings['buttonSettings'] ) ? (array) $customize_settings['buttonSettings'] : [ 'id' => 1];
+    $player_id = isset($customize_settings['buttonSettings']['id']) ? $customize_settings['buttonSettings']['id'] : 1;
+    if(is_pro_license_active() && $player_id == 1) {
+        $player_id = 2;
+    }
+    
+    return $player_id;
 }
