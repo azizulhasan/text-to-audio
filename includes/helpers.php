@@ -93,20 +93,12 @@ function tta_get_button_content($atts, $is_block = false) {
         return;
     }
 
-        //     global $post;
-        // \error_log(print_r([
-        //     'is_single' => \is_single(),
-        //     'is_singular' => is_singular(),
-        //     'post' => $post,
-        // ], true));
-    
-    if(!isset($settings['tta__settings_allow_listening_for_post_types']) 
-    || count($settings['tta__settings_allow_listening_for_post_types']) === 0
-    || !is_array($settings['tta__settings_allow_listening_for_post_types'])
-    || !in_array(tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'])
-    ) {
-        return;
-    }
+    global $post;
+        \error_log(print_r([
+            'is_single' => \is_single(),
+            'is_singular' => is_singular(),
+            'post' => $post->title,
+        ], true));
 
     if ($is_block) {
         $customize = $atts;
@@ -217,7 +209,6 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
 
         // Get plugin all settings and pass it to TTS ja Object.
         $plugin_all_settings = tts_get_settings();
-
         if(tts_text_match_80_percent($title , $temp_title)) :
         ?>
         <!-- Text To Speech TTS Settings  -->
@@ -295,19 +286,6 @@ function tts_text_match_80_percent($text1, $text2) {
     } else {
         return false;
     }
-}
-
-
-/**
- * Get post type
- * 
- * @see 
- */
-
-function tts_post_type() {
-    global  $post;
-    
-    return isset($post->post_type) ? $post->post_type : '';
 }
 
 
