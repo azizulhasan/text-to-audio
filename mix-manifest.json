@@ -2,6 +2,7 @@
     "/admin/js/build/text-to-audio-dashboard-ui.min.js": "/admin/js/build/text-to-audio-dashboard-ui.min.js",
     "/admin/demos/player3/js/build/plyr-demo.min.js": "/admin/demos/player3/js/build/plyr-demo.min.js",
     "/admin/demos/player2/js/TextToSpeechProDemo.min.js": "/admin/demos/player2/js/TextToSpeechProDemo.min.js",
+    "/admin/js/build/text-to-audio-pro-button.min.js": "/admin/js/build/text-to-audio-pro-button.min.js",
     "/admin/js/build/TextToSpeech.min.js": "/admin/js/build/TextToSpeech.min.js",
     "/admin/js/build/text-to-audio-button.min.js": "/admin/js/build/text-to-audio-button.min.js"
 }
