@@ -442,19 +442,27 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             let titlePosition = 0;
             if (document.querySelector('.post-title')) {
                 postTitle = document.querySelector('.post-title')
-                titlePosition = postTitle.getBoundingClientRect().top;
+                if (shouldCallPositionFunction(postTitle)) {
+                    titlePosition = postTitle.getBoundingClientRect().top;
+                }
             } else if (document.querySelector('.entry-title')) {
                 postTitle = document.querySelector('.entry-title')
-                titlePosition = postTitle.getBoundingClientRect().top;
+                if (shouldCallPositionFunction(postTitle)) {
+                    titlePosition = postTitle.getBoundingClientRect().top;
+                }
             } else if (document.querySelector('.wp-block-post-title')) {
                 postTitle = document.querySelector('.wp-block-post-title')
-                titlePosition = postTitle.getBoundingClientRect().top;
+                if (shouldCallPositionFunction(postTitle)) {
+                    titlePosition = postTitle.getBoundingClientRect().top;
+                }
             }
 
             if (button) {
-                let topPos = Math.floor(button.getBoundingClientRect().top);
-                if (topPos < 1) {
-                    setShouldFloat(true)
+                if (shouldCallPositionFunction(button)) {
+                    let topPos = Math.floor(button.getBoundingClientRect().top);
+                    if (topPos < 1) {
+                        setShouldFloat(true)
+                    }
                 }
 
                 if (titlePosition > 0) {
@@ -472,6 +480,15 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
         }
 
     }, [])
+
+    const shouldCallPositionFunction = (button) => {
+        if (button && typeof button?.getBoundingClientRect === "function") {
+            return true;
+        }
+
+        return false;
+    }
+
 
     return (
         <>
