@@ -30,7 +30,6 @@ class TTA_Hooks {
         // Update hook
         // add_action('upgrader_process_complete', 'update_settings_data', 10, 2);
 
-
     }
 
 
@@ -107,10 +106,6 @@ class TTA_Hooks {
         }// endif; $hook_extra
     }
 
-
-
-
-
     /**
      * Short Description. (use period)
      *
@@ -119,24 +114,13 @@ class TTA_Hooks {
      * @since    1.0.0
      */
     public static function activate() {
-
+            // do something here
     }
     /**
      * Register MetaBox to add PDF Download Button
      */
     public function add_custom_meta_box() {
-
-        $meta_box_arr = [
-            "post",
-            "product",
-            "page",
-        ];
-        $settings = (array) get_option('tta_settings_data');
-        $settings['tta__settings_allow_recording_for_post_type'] = isset($settings['tta__settings_allow_recording_for_post_type']) ? $settings['tta__settings_allow_recording_for_post_type'] : 'all';
-        if (isset($settings['tta__settings_allow_recording_for_post_type'])
-            && ( 'all' === $settings['tta__settings_allow_recording_for_post_type']
-                || get_current_screen()->post_type === $settings['tta__settings_allow_recording_for_post_type']) ) {
-            add_meta_box(
+        add_meta_box(
                 'wps22-meta-box',
                 'Text To Speech TTS',
                 array(
@@ -148,7 +132,6 @@ class TTA_Hooks {
                 'high',
                 null
             );
-        }
 
     }
 

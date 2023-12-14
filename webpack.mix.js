@@ -11,7 +11,7 @@ mix.js('admin/demos/player2/js/TextToSpeechProDemo.js', 'admin/demos/player2/js/
 
 
 
-mix.js('src/dashboard/button.js', 'admin/js/build/text-to-audio-pro-button.min.js').react();
+// mix.js('src/dashboard/button.js', 'admin/js/build/text-to-audio-pro-button.min.js').react();
 
 
 mix.js('admin/js/TextToSpeech.js', 'admin/js/build/TextToSpeech.min.js');
