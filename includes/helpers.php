@@ -198,10 +198,10 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
         $title = trim(get_the_title());
         $title = tta_clean_content( $title );
 
-        // Get plugin all settings and pass it to TTS ja Object.
+        // Get plugin all settings and pass it to TTS javascript Object.
         $plugin_all_settings = tts_get_settings();
 
-        if(tts_text_match_80_percent($title , $temp_title)) :
+        if(tts_text_match_80_percent($title , $temp_title) || apply_filters('tts_ignore_match_80_percent', false)) :
         ?>
         <!-- Text To Speech TTS Settings  -->
         <script id='tts_button_settings_<?php echo $btn_no; ?>' >

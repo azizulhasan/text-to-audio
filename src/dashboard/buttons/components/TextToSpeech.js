@@ -264,7 +264,6 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             }
         }
 
-        console.log({ t })
 
         return getFormattedTime(t);
     }
