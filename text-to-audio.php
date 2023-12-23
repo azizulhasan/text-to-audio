@@ -72,6 +72,16 @@ if (!defined('TTA_LIBS_PATH')) {
     define('TTA_LIBS_PATH', dirname(TEXT_TO_AUDIO_ROOT_FILE) . '/libs/');
 }
 
+if (!defined('TTA_ADMIN_PATH')) {
+
+    define('TTA_ADMIN_PATH', plugin_dir_url(__FILE__) . '/admin/');
+}
+
+if (!defined('TTA_DEBUG_MODE')) {
+
+    define('TTA_DEBUG_MODE', true);
+}
+
 
 if ( ! defined( 'TTA_PLUGIN_URL' ) ) {
     /**
@@ -123,12 +133,6 @@ class TTA_Init {
                 4   // parameters
             );
         }
-        
-
-        //add button text
-        set_initial_button_texts();
-
-        
     }
 
     /**

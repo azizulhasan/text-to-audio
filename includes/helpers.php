@@ -139,11 +139,10 @@ function tta_get_button_content($atts, $is_block = false) {
         if( isset( $atts['text_to_read'] ) && $atts['text_to_read'] ) {
             $content = tta_clean_content($atts['text_to_read']);
         }
-        $text_arr = get_button_text( $atts );
-    }else{
-        $text_arr = get_option('tta__button_text_arr');
     }
 
+    $content_read_time = apply_filters('tts_content_reading_time', 1, $content );
+    $text_arr = get_button_text( $atts , $content_read_time);
 
 
     // Speak Icon
@@ -178,11 +177,8 @@ function tta_get_button_content($atts, $is_block = false) {
     $class = (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
     $button = "<tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
 
-    // add extra content by filter.
-    $content = apply_filters('tta__content_description', $content, $description, get_the_ID() );
-    $content = tta_clean_content($content);
     // init button scripts
-    do_action('tts_enqueue_button_scripts' , $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date);
+    do_action('tts_enqueue_button_scripts' , $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time);
 
     $data =  apply_filters( 'tts__listening_button', $button, $btn_no, $class );
 
@@ -190,16 +186,14 @@ function tta_get_button_content($atts, $is_block = false) {
 }
 
 
-add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 9);
+add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 10);
 
 /**
  * Enqueue button scripts
  */
-function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date) {
-           
-    $reading_time = apply_filters('tts_content_reading_time', 1, $content );
+function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time) {
     // enqueue footer stript
-    add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $reading_time, $title, $date) { 
+    add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time) { 
         $temp_title = trim(str_replace('.', '', $title));
         $title = trim(get_the_title());
         $title = tta_clean_content( $title );
@@ -220,8 +214,7 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
             var allSettings = <?php echo json_encode( $plugin_all_settings) ?>;
             var ttsCustomCSS = "<?php print($custom_css); ?>";
             var ttsShouldDisplayIcon = "<?php echo $should_display_icon; ?>";
-            var readingTime = "<?php echo $reading_time; ?>";
-            
+            var readingTime = "<?php echo $content_read_time; ?>";
             var ttsSettings = {
                 listening : ttsListening, 
                 cssClass : ttsCSSClass , 
@@ -229,8 +222,8 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
                 textArr : ttsTextArr, 
                 customCSS : ttsCustomCSS, 
                 shouldDisplayIcon : ttsShouldDisplayIcon,
-                readingTime: readingTime,
                 settings: allSettings,
+                readingTime: readingTime,
             };
 
 
@@ -306,11 +299,10 @@ function tts_post_type() {
 /**
  * Get button text
  */
-function get_button_text( $atts ) {
-
+function get_button_text( $atts, $content_read_time ) {
     $saved_texts = get_option('tta__button_text_arr');
     if(!$saved_texts){
-        $saved_texts = set_initial_button_texts();
+        $saved_texts = set_initial_button_texts($content_read_time);
     }
 
     $listen_text = (isset($atts['listen_text'])) && strlen($atts['listen_text']) ? esc_html__( sanitize_text_field( $atts['listen_text'] ) ) : $saved_texts['listen_text'];
@@ -329,14 +321,17 @@ function get_button_text( $atts ) {
         'stop_text' => $stop_text,
     ];
 
+   
+
+    $text_arr =  apply_filters('tta__button_text_arr', $text_arr, $atts, $content_read_time );
+    
     update_option( 'tta__button_text_arr', $text_arr);
 
-    return apply_filters('tta__button_text_arr', $text_arr );
-
+    return $text_arr;
 }
 
 
-add_filter( 'the_content', 'add_listen_button',  9999999 );
+add_filter( 'the_content', 'add_listen_button',  999 );
 
 /**
  * Add listening button to every post by default.
@@ -346,8 +341,7 @@ function add_listen_button( $content ) {
     if( ! isset( $settings['tta__settings_enable_button_add'] ) ) {
         TTA\TTA_Activator::activate(true);
     }
-        $all_short_codes = array_values( get_used_shortcodes($content) );
-
+    global $post;
     if( isset( $settings['tta__settings_enable_button_add'] ) &&  $settings['tta__settings_enable_button_add'] ) {    
         // TODO: write functionality if current page is home page where content is excerpt.
         // if(is_single()) {
@@ -357,7 +351,8 @@ function add_listen_button( $content ) {
         //     add_filter( 'the_excerpt', 'add_listen_button' , 9999 );
         // }
 
-        if( !in_array('tta_listen_btn', $all_short_codes ) ) {
+        if( ! has_shortcode($post->post_content, 'tta_listen_btn') ) {
+
             ob_start();
             echo tta_get_button_content('');
             $button = ob_get_contents();
@@ -590,10 +585,11 @@ function compatibility_with_themes( $custom_css ) {
     return $custom_css;
 }
 
-function set_initial_button_texts() {
+function set_initial_button_texts($content_read_time) {
     if( ! get_option( 'tta__button_text_arr' ) ) {
+        
         // Button listen text.
-        $listen_text =  __( "Listen", 'text-to-audio' ) ;
+        $listen_text = __( "Listen", 'text-to-audio' );
         $pause_text =  __( 'Pause', 'text-to-audio' ) ;
         $resume_text =  __( 'Resume', 'text-to-audio' ) ;
         $replay_text =  __( 'Replay', 'text-to-audio' ) ;
@@ -611,7 +607,14 @@ function set_initial_button_texts() {
 
     }
 
-    return get_option( 'tta__button_text_arr' );
+    return apply_filters('tts_initial_button_texts', [
+            'listen_text' => $listen_text,
+            'pause_text' => $pause_text,
+            'resume_text' => $resume_text,
+            'replay_text' => $replay_text,
+            'start_text' => $start_text,
+            'stop_text' => $stop_text,
+        ], $content_read_time);
 }
 
 function tts_get_settings($settings_key = '', $identifier = '') {
