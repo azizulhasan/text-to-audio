@@ -74,7 +74,7 @@ class TTA_Admin {
             'json_url' => esc_url_raw(rest_url()),
             'admin_url' => admin_url('/'),
             'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
-            'buttonTextArr' => apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr' ) ),
+            'buttonTextArr' => get_option( 'tta__button_text_arr' ) ,
             'browser' => [
                 'is_iphone' =>  $is_iphone, //(boolean): iPhone Safari
                 'is_chrome'=> $is_chrome,// (boolean): Google Chrome
