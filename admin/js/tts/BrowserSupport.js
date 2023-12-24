@@ -38,6 +38,8 @@ export default class BrowserSupport {
         return this.#browser;
     }
 
+
+
     getLanguage(selectedVoice = this.#voice, selectedLang = this.#lang) {
         if (this.#lang === selectedLang) {
             return this.#lang;
@@ -159,6 +161,23 @@ export default class BrowserSupport {
         })
 
         return this.#filteredVoices;
+    }
+
+
+    getVoices() {
+        return this.voices;
+    }
+
+    validateCountryCode(countryCode) {
+        let voices = this.voices;
+        for (let j = 0; j < voices.length; j++) {
+            let currentCountryCode = voices[j].lang
+            currentCountryCode = this.#getCountryCode(currentCountryCode)
+            if (currentCountryCode == countryCode) {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
