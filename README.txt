@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio, record, voice c
 Requires at least: 4.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.4.22
+Stable tag: 1.4.23
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -92,13 +92,14 @@ Here you can see some languages which are supported by the browsers based on dev
 * Add a play button to any post or page.
 * Unlimited text to speech.
 * Add more functionality to the website for a range of users including the visually impaired and the old people.
-* Customization of button color, width and button text based on site language through [filter](https://wordpress.org/plugins/text-to-audio/#:~:text=How%20to%20change%20button%20text%3F).
+* Customization of button color, width and button text based on site language through [filter](https://wordpress.org/plugins/text-to-audio/#:~:text=How%20to%20change%20button%20text%3F) and [shortcode](https://wordpress.org/plugins/text-to-audio/#description:~:text=TTS%20button%20text%20can%20be%20changed%20by%20providing%20attributes%20to%20shortcode%20like%20this.).
 * Live preview of play button during customization.
 * Add custom CSS and custom class to the button.
 * Change listening language to any language.
 * Choose a voice from more than 20 voices.
 * Customization of button in block editor.
 * Play button can be added by shortcode `[tta_listen_btn]`.
+* Add custom content to speak with [shortcode](https://wordpress.org/plugins/text-to-audio/#description:~:text=It%20can%20be%20possible%20to%20create%20a%20shortcode%20with%20custom%20text%20to%20read%20like%20this.).
 
 **Listening is a better way to read:**
 Boost your understanding and focus with listening by Text To Audio TTS. Remember more of what you read. Maximize your time,
@@ -111,17 +112,19 @@ Text to speech plugin allow you to add accessibility feature in wordpress site e
 
 * Get Live Support for first time integration.
 * Get Priority Support.
-* Save time by listening while you’re doing other tasks.
 * Engage with your customers more interactively.
 * Improved UI of the button.
+* Multilingual support.
 * Integrate with Google Cloud Text To Speech.
 * Get more than 600 voices when you’re using Google Cloud Text To Speech.
 * Remove special characters from content during reading.
 * Remove URL from content during reading.
 * Responsive speaking button.
+* Specify speeking content with CSS selectors.
 
-**Multi-lingual supported plugins**
+**Multilingual supported plugins**
 
+* <a href='https://wpml.org/' target='_blank'>WPML WordPress Multilingual Plugin</a>.
 * <a href='https://wordpress.org/plugins/gtranslate/' target='_blank'>Translate WordPress with GTranslate Plugin</a>.
 
 **Custom Post Type supported plugins**
@@ -226,6 +229,10 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 💎 TRANSLATION REQUEST 💎
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+= 1.4.23 ( 25 Dec 2023 ) =
+* added: [WPML](https://wpml.org/) support.
+
 
 = 1.4.22 ( 13 Dec 2023 ) =
 * added: `tts_ignore_match_80_percent` filter added.
