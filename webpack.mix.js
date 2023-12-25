@@ -3,7 +3,7 @@ const mix = require('laravel-mix');
 // const webpack = require('webpack')
 
 
-// mix.js('src/dashboard/index.js', 'admin/js/build/text-to-audio-dashboard-ui.min.js').react();
+mix.js('src/dashboard/index.js', 'admin/js/build/text-to-audio-dashboard-ui.min.js').react();
 
 
 // mix.js('src/dashboard/button.js', 'admin/js/build/text-to-audio-pro-button.min.js').react();
