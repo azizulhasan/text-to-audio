@@ -1,9 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App";
-import TextToSpeech from './buttons/components/TextToSpeech';
-import TexToSpeechThree from "./buttons/components/TexToSpeechThree";
-import { postWithoutImage } from './components/context/utilities';
 
 let app = document.getElementById("tts_dashboard_ui")
 if (app && window?.ttsObj?.is_admin_page && ttsObj.is_admin_page) {
@@ -15,59 +12,3 @@ if (app && window?.ttsObj?.is_admin_page && ttsObj.is_admin_page) {
     );
 
 }
-
-
-
-/**
- * Get customize settings.
- */
-let customize = new FormData();
-customize.append('method', 'get');
-let buttonCSS = '';
-postWithoutImage(tta_obj.api_url + 'tta/v1/customize', customize)
-    .then((res) => {
-        buttonCSS = res.data
-    })
-    .catch((err) => {
-        console.log(err);
-    });
-let timer = setTimeout(function loadProButton() {
-    timer = setTimeout(loadProButton, 1000)
-    if (window.hasOwnProperty('TTS') && window.hasOwnProperty('ttsObjPro') && !ttsObjPro.should_activate_pro_features && buttonCSS) {
-        clearTimeout(timer)
-        timer = null
-
-        let buttons = [...document.querySelectorAll('.tts__listent_content')]
-        if (buttons.length) {
-            buttons.map(button => {
-                let buttonId = button.getAttribute('data-id')
-                // button.attachShadow({ mode: 'open' });
-                return ReactDOM.render(
-                    <TextToSpeech buttonCSS={buttonCSS} button={button} buttonId={buttonId} cssStyle={''} />,
-                    button
-                )
-
-            })
-        }
-    } else {
-
-        let buttons = [...document.querySelectorAll('.tts__listent_content')]
-        if (buttons.length) {
-
-            if (window.TextToSpeechProPlayer) {
-                clearTimeout(timer)
-                timer = null
-            }
-            buttons.map(button => {
-                let buttonId = button.getAttribute('data-id')
-                // button.attachShadow({ mode: 'open' });
-                return ReactDOM.render(
-                    <TexToSpeechThree button={button} buttonId={buttonId} cssStyle={''} />,
-                    button
-                )
-            })
-
-        }
-
-    }
-}, 1000)

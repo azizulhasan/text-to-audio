@@ -12,7 +12,7 @@ import UpgradeToPro from '../../UpgradeToPro';
 
 function Recording() {
 	const [settings, setSettings] = useState({
-		tta__recording__lang: '',
+		tta__recording__lang: 'en_US',
 		is_record_continously: true,
 		rest_nonce: tta_obj.rest_nonce,
 		tta__sentence_delimiter: '.',
@@ -20,7 +20,7 @@ function Recording() {
 	const [checked, setChecked] = useState(false);
 	const [languages, setLanguages] = useState([]);
 	const apiURL = useMemo(() => {
-		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features) {
+		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features == '1') {
 			return ttsObjPro.api_url + ttsObjPro.api_namespace + "/" + ttsObjPro.api_version + "/";
 		}
 
@@ -45,12 +45,16 @@ function Recording() {
 		/**
 		 *
 		 */
-		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features) {
+		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.gtts_is_authenticated === '1') {
 			let stored_voices = getLocalStorage(['tta__voices']);
 			if (!stored_voices.tta__voices) {
 				getData(apiURL + 'voices')
 					.then((res) => {
-						setLocalStorage({ tta__voices: res.voices })
+						if (res.voices.length) {
+							setLocalStorage({ tta__voices: res.voices })
+						} else {
+							setCurrentLanguage()
+						}
 					})
 					.catch((err) => {
 						console.log(err);
@@ -64,25 +68,34 @@ function Recording() {
 					}
 				})
 
-				setLanguages(langs)
+				setCurrentLanguage(langs)
 			}
 		} else {
-			let timer = setTimeout(function handleTime() {
-				timer = setTimeout(handleTime, 1000)
-				if (window.hasOwnProperty('speechSynthesis') && window.speechSynthesis.getVoices().length) {
-					clearTimeout(timer)
-					timer = null
-					let langs = []
-					window.speechSynthesis.getVoices().map(item => {
-						if (!langs.includes(item.lang)) {
-							langs.push(item.lang)
-						}
-					})
-					setLanguages(langs)
-				}
-			})
+			setCurrentLanguage()
 		}
 	}, []);
+
+
+	const setCurrentLanguage = (langs = []) => {
+		if (langs.length) {
+			setLanguages(langs)
+			return;
+		}
+		let timer = setTimeout(function handleTime() {
+			timer = setTimeout(handleTime, 1000)
+			if (window.hasOwnProperty('speechSynthesis') && window.speechSynthesis.getVoices().length) {
+				clearTimeout(timer)
+				timer = null
+				let langs = []
+				window.speechSynthesis.getVoices().map(item => {
+					if (!langs.includes(item.lang)) {
+						langs.push(item.lang)
+					}
+				})
+				setLanguages(langs)
+			}
+		})
+	}
 
 	/**
 	 * handle change
@@ -169,7 +182,7 @@ function Recording() {
 									<Form.Label className='pr-2' htmlFor='toggle-check'>
 										Continuous Record
 									</Form.Label>
-									<ToggleButton
+									{/* <ToggleButton
 										id='toggle-check'
 										type='checkbox'
 										className='form-controll'
@@ -184,7 +197,17 @@ function Recording() {
 											setChecked(e.currentTarget.checked)
 										}>
 										{checked ? 'Record' : 'Not Record'}
-									</ToggleButton>
+									</ToggleButton> */}
+									<Form.Check // prettier-ignore
+										type={'checkbox'}
+										checked={checked}
+										onChange={(e) =>
+											setChecked(e.currentTarget.checked)
+										}
+										value='1'
+										name={`toggle-check`}
+										id={`toggle-check`}
+									/>
 								</Form.Group>
 							</Col>
 

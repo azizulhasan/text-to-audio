@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Form, Row, Col, Container } from 'react-bootstrap';
-import { postData } from '../../context/utilities';
-import toast from '../../context/Notify';
-import UpgradeToPro from '../../UpgradeToPro';
+import { postData } from '../../../context/utilities';
+import toast from '../../../context/Notify';
+import UpgradeToPro from '../../../UpgradeToPro';
 
-export default function GoogleTTS() {
+export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
 
     const [googTTSJsonFile, setGoogTTSJsonFile] = useState('');
     const [authFile, setAuthFile] = useState('')
