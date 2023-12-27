@@ -227,6 +227,11 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+= 2.5.0 ( 25 Dec 2023 ) =
+* Improved: UI design improved.
+* Google text to speech integration.
+
+
 = 1.4.20 ( 13 Dec 2023 ) =
 * [TTS Plugin conflicts with Themes and other plugins](https://wordpress.org/support/topic/tts-plugin-conflicts-with-themes-and-other-plugins/).
 

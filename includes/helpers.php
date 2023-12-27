@@ -94,11 +94,6 @@ function tta_get_button_content($atts, $is_block = false) {
     }
 
     global $post;
-        \error_log(print_r([
-            'is_single' => \is_single(),
-            'is_singular' => is_singular(),
-            'post' => $post->title,
-        ], true));
 
     if ($is_block) {
         $customize = $atts;
