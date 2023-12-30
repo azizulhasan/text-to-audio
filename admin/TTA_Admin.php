@@ -67,7 +67,7 @@ class TTA_Admin {
         add_filter('script_loader_tag', [ $this, 'load_script_as_tag'] , 10, 3);
             global $is_iphone, $is_iphone, $is_chrome,$is_safari,
         $is_NS4,$is_opera,$is_macIE,$is_winIE, $is_gecko, $is_lynx, $is_IE, $is_edge; 
-
+        
         if( ! function_exists( 'is_plugin_active' ) ) {
             include ABSPATH . 'wp-admin/includes/plugin.php';
         }
@@ -108,6 +108,8 @@ class TTA_Admin {
             'is_pro_license_active' => is_pro_license_active(),
             'is_admin_page' => \is_admin(),
             'current_post' => TTA_Helper::tts_post_type(),
+            "player_id" => get_player_id(),
+            'compatible' => TTA_Helper::get_compatible_plugins_data(),
         ];
     }
 
