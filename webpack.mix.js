@@ -1,7 +1,7 @@
 const mix = require('laravel-mix');
 
 
-// mix.js('src/dashboard/index.js', 'admin/js/build/text-to-audio-dashboard-ui.min.js').react();
+mix.js('src/dashboard/index.js', 'admin/js/build/text-to-audio-dashboard-ui.min.js').react();
 
 /**
  * Demos Assets
