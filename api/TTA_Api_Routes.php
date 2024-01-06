@@ -120,6 +120,8 @@ class TTA_Api_Routes {
 
             $response['data'] = get_option('tta_record_settings');
 
+            delete_transient('tts_all_settings');
+
             return rest_ensure_response($response);
         }
 
@@ -143,6 +145,7 @@ class TTA_Api_Routes {
             update_option('tta_listening_settings', $fields);
 
             $response['data'] = get_option('tta_listening_settings');
+            delete_transient('tts_all_settings');
 
             return rest_ensure_response($response);
         }
@@ -169,6 +172,8 @@ class TTA_Api_Routes {
 
             $response['data'] = get_option('tta_customize_settings');
 
+            delete_transient('tts_all_settings');
+
             return rest_ensure_response($response);
         }
 
@@ -192,6 +197,8 @@ class TTA_Api_Routes {
             update_option('tta_settings_data', $fields);
 
             $response['data'] = get_option('tta_settings_data');
+
+            delete_transient('tts_all_settings');
 
             return rest_ensure_response($response);
         }

@@ -27,10 +27,9 @@ import Recording from './recording/Recording';
 import Listening from './listening/Listening';
 import Customize from './customize/Customize';
 import Docs from './docs/Docs';
-import GoogleTTS from './tts/GoogleTTS';
+import Analitics from './analitics/Analitics.js';
 
 function Dashboard() {
-	// authenTicateUser();
 	const [componentName, setComponentName] = useState(getComponentName());
 	useEffect(() => {
 		new MutationObserver(() => {
@@ -79,12 +78,12 @@ function Dashboard() {
 									path={'/customize'}
 									element={<Customize />}
 								/>
-								<Route
+								{/* <Route
 									path={'/recording'}
 									element={<Recording />}
-								/>
+								/> */}
 								<Route path='/faq' element={<Docs />} />
-								<Route path='/gtts' element={<GoogleTTS />} />
+								<Route path='/analitics' element={<Analitics />} />
 							</Routes>
 
 						</div>

@@ -17,6 +17,7 @@ import toast from '../../context/Notify';
 import { langs } from '../recording/languages';
 import { Link } from 'react-router-dom';
 import UpgradeToPro from '../../UpgradeToPro';
+import { array } from 'prop-types';
 export default function Listening() {
 	const [voices, setVoices] = useState([]);
 	const [languages, setLanguages] = useState([]);
@@ -40,18 +41,16 @@ export default function Listening() {
 
 
 	useEffect(() => {
-		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features === '1') {
+		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.gtts_is_authenticated == '1') {
 			let stored_voices = getLocalStorage(['tta__voices']);
 			if (!stored_voices.tta__voices) {
 				getData(apiURL + 'voices')
 					.then((res) => {
-						// if (res.status) {
-						// 	toast('File uploaded successfully');
-						// } else {
-						// 	toast('Something went wrong');
-						// }
-						setLocalStorage({ tta__voices: res.voices })
-
+						if (res.voices.length) {
+							setLocalStorage({ tta__voices: res.voices })
+						} else {
+							setVoicesAndLanguages()
+						}
 					})
 					.catch((err) => {
 						console.log(err);
@@ -65,28 +64,10 @@ export default function Listening() {
 					}
 				})
 
-				setLanguages(langs)
-				setVoices(voices.voices);
-				setSpeechSynthesisVoices(voices.voices)
+				setVoicesAndLanguages(voices.voices, langs)
 			}
 		} else {
-			let timer = setTimeout(function handleTime() {
-				timer = setTimeout(handleTime, 1000)
-				if (window.hasOwnProperty('speechSynthesis') && window.speechSynthesis.getVoices().length) {
-					clearTimeout(timer)
-					timer = null
-					let langs = []
-					let voices = []
-					setSpeechSynthesisVoices(window.speechSynthesis.getVoices())
-					window.speechSynthesis.getVoices().map(item => {
-						if (!langs.includes(item.lang)) {
-							langs.push(item.lang)
-						}
-					})
-					setLanguages(langs)
-					setVoices(window.speechSynthesis.getVoices());
-				}
-			})
+			setVoicesAndLanguages()
 		}
 		/**
 		 * Set listening lang.
@@ -116,6 +97,37 @@ export default function Listening() {
 				console.log(err);
 			});
 	}, []);
+
+
+	const setVoicesAndLanguages = (voices = [], langs = [],) => {
+
+		if (Array.isArray(voices) && voices.length) {
+			setVoices(voices)
+			setSpeechSynthesisVoices(voices)
+		}
+		if (Array.isArray(langs) && langs.length) {
+			setLanguages(langs)
+		}
+
+		if (Array.isArray(langs) && Array.isArray(voices) && voices.length) return;
+
+		let timer = setTimeout(function handleTime() {
+			timer = setTimeout(handleTime, 1000)
+			if (window.hasOwnProperty('speechSynthesis') && window.speechSynthesis.getVoices().length) {
+				clearTimeout(timer)
+				timer = null
+				setSpeechSynthesisVoices(window.speechSynthesis.getVoices())
+
+				window.speechSynthesis.getVoices().map(item => {
+					if (!langs.includes(item.lang)) {
+						langs.push(item.lang)
+					}
+				})
+				setLanguages(langs)
+				setVoices(window.speechSynthesis.getVoices());
+			}
+		})
+	}
 
 	/**
 	 * Handle form Submit
@@ -164,7 +176,7 @@ export default function Listening() {
 				autoClose: 5000
 			});
 		}
-		if (e.target.name === 'tta__listening_lang' && window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features) {
+		if (e.target.name === 'tta__listening_lang' && window.hasOwnProperty('ttsObjPro') && ttsObjPro.gtts_is_authenticated == '1') {
 
 			let filteredVoices = speechSynthesisVoices.filter(voice => {
 				return voice.languageCodes[0] == e.target.value;
@@ -245,7 +257,7 @@ export default function Listening() {
 											{' '}
 											Default Listening Voice
 										</option>
-										{voices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features ? <option key={index} data-lang={voice.languageCodes[0]} value={[voice.name, voice.ssmlGender].join('-')}>
+										{voices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && ttsObjPro.gtts_is_authenticated ? <option key={index} data-lang={voice.languageCodes[0]} value={[voice.name, voice.ssmlGender].join('-')}>
 											{voice.name} {'-'} {voice.ssmlGender}
 										</option> : <option key={index} data-lang={voice.lang} value={voice.name}>
 											{voice.name}

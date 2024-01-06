@@ -3,6 +3,9 @@ import { Col, Container, Row, Form, FloatingLabel } from 'react-bootstrap';
 import toast from '../../context/Notify';
 import { copyToClipBoard, postWithoutImage } from '../../context/utilities';
 import TextToSpeech from '../../../buttons/components/TextToSpeech';
+import TexToSpeechThree from '../../../buttons/components/TexToSpeechThree';
+import CustomizationTabs from './CustomizationTabs'
+
 let speech = null;
 let TextToSpeechFree = null;
 export default function Customize() {
@@ -10,6 +13,8 @@ export default function Customize() {
 		backgroundColor: '#FFFFFF',
 		color: '#000000',
 		width: '100',
+		buttonSettings: {
+		}
 	});
 	const [listeningBtnStyle2, setListeningStyle2] = useState({
 		backgroundColor: '#FFFFFF',
@@ -25,8 +30,6 @@ export default function Customize() {
 	const [listeningSettings, setListeningSettings] = useState({});
 
 	useEffect(() => {
-
-
 		/**
 		 * Get customize settings.
 		 */
@@ -62,7 +65,7 @@ export default function Customize() {
 			.catch((err) => {
 				console.log(err);
 			});
-		let initialText = 'Add functionality to wordpress site to read blogs out loud in any language and record blog by voice in any language.'
+		let initialText = 'Add accessibility to WordPress site to read contents out loud in more than 20 languages.'
 
 		localStorage.setItem('demo_listening_content', initialText)
 		setSpeakingText(initialText);
@@ -73,6 +76,7 @@ export default function Customize() {
 		}, 1000)
 
 	}, []);
+
 	/**
 	 * handle change
 	 * @param {*} e
@@ -92,6 +96,7 @@ export default function Customize() {
 			setShortCode(e.target.value);
 			return;
 		}
+
 		/**
 		 * setCustomCSS
 		 */
@@ -99,6 +104,26 @@ export default function Customize() {
 			setCustomCSS(e.target.value);
 			return;
 		}
+
+		// ChatGPT TTS player button settings
+		// && listeningBtnStyle?.buttonSettings?.id == 3
+		if (!['backgroundColor', 'width', 'color'].includes(e.target.name)) {
+
+			let tempButtonSettings = structuredClone(listeningBtnStyle.buttonSettings)
+			tempButtonSettings = {
+				...tempButtonSettings,
+				...{ [e.target.name]: e.target.value }
+			}
+			setListeningStyle({
+				...listeningBtnStyle,
+				...{
+					buttonSettings: tempButtonSettings
+				}
+			});
+
+			return;
+		}
+
 		/**
 		 * set button style for database.
 		 */
@@ -106,6 +131,9 @@ export default function Customize() {
 			...listeningBtnStyle,
 			...{ [e.target.name]: e.target.value },
 		});
+		/**
+		 * set button style for live preveiw.
+		 */
 		let value = '';
 		if (e.target.name === 'width') {
 			let arr = [e.target.value, '%'];
@@ -113,9 +141,6 @@ export default function Customize() {
 		} else {
 			value = e.target.value;
 		}
-		/**
-		 * set button style for live preveiw.
-		 */
 		setListeningStyle2({
 			...listeningBtnStyle2,
 			...{ [e.target.name]: value },
@@ -140,11 +165,21 @@ export default function Customize() {
 					return;
 				}
 			}
+			if (!['backgroundColor', 'width', 'color'].includes(key)) {
+				continue;
+			}
 
 			formData[key] = value;
 		}
+
 		formData['custom_css'] = customCSS;
 		formData['tta_play_btn_shortcode'] = shortCode;
+		formData['buttonSettings'] = listeningBtnStyle.buttonSettings;
+
+		if (!ttsObj.is_pro_active && formData?.buttonSettings?.id > 1) {
+			toast('This player is only available for pro version.', 'error');
+			return;
+		}
 
 		// console.log(formData);
 		// return;
@@ -165,7 +200,6 @@ export default function Customize() {
 		let text = document.getElementById('tta__demo_text_for_play').value;
 		let button = document.getElementById('tta__listen_content');
 
-		// setTimeout(() => {
 		if (speech != null && speech.listenStatus == 'listen') {
 			speech = null
 			TextToSpeechFree = null
@@ -185,11 +219,7 @@ export default function Customize() {
 			}
 		}
 
-		// }, 10)
 	};
-
-
-
 	const setText = (e) => {
 		setSpeakingText(e.target.value);
 		localStorage.setItem('demo_listening_content', e.target.value);
@@ -197,6 +227,15 @@ export default function Customize() {
 			window.TTS.contents[1] = e.target.value;;
 		}
 	};
+
+	const [buttonLists, setButtonLists] = useState([
+		{ id: 1, name: 'Default', object: 'TextToSpeech', disabled: false },
+		{ id: 2, name: 'Default Pro', object: 'TextToSpeechPro', disabled: false },
+		{ id: 3, name: 'Google TTS Pro', object: 'TextToSpeechPro', disabled: false },
+		{ id: 4, name: "ChatGPT TTS (Soon)", object: 'TextToSpeechPro', disabled: true },
+		{ id: 5, name: "Google Cloud TTS (Soon)", object: 'TextToSpeechPro', disabled: true },
+	])
+
 	return (
 		<Container>
 			<Row className='mt-5'>
@@ -204,17 +243,21 @@ export default function Customize() {
 					<Row>
 						<Col xs={12} sm={12} lg={12} className='mb-3'>
 							{
-								tta_obj.is_pro_license_active ? <TextToSpeech buttonCSS={listeningBtnStyle} buttonLiveCSS={listeningBtnStyle2} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={1} /> : (
-									<button
-										id='tta__listen_content'
-										onClick={(e) => callListeningFunction(e)}
-										style={listeningBtnStyle2}
-										type='button'
-										title='Text To Audio:  Tap to listen post.'>
-										<span className='dashicons dashicons-controls-play'></span>{' '}
-										{tta_obj.buttonTextArr.listen_text}
-									</button>
-								)
+								listeningBtnStyle?.buttonSettings?.id == 2 ?
+									<TextToSpeech buttonCSS={listeningBtnStyle} buttonLiveCSS={listeningBtnStyle2} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={2} /> :
+									listeningBtnStyle?.buttonSettings?.id == 3 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> :
+										listeningBtnStyle?.buttonSettings?.id == 4 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> :
+											listeningBtnStyle?.buttonSettings?.id == 5 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> : (
+												<button
+													id='tta__listen_content'
+													onClick={(e) => callListeningFunction(e)}
+													style={listeningBtnStyle2}
+													type='button'
+													title='Text To Audio:  Tap to listen post.'>
+													<span className='dashicons dashicons-controls-play'></span>{' '}
+													{tta_obj.buttonTextArr.listen_text}
+												</button>
+											)
 							}
 						</Col>
 						<Col xs={12} sm={12} lg={12} className='mb-3'>
@@ -261,59 +304,7 @@ export default function Customize() {
 					</Row>
 				</Col>
 				<Col xs={12} sm={12} lg={4}>
-					<Form onSubmit={handleSubmit}>
-						<h4>Customize Listening Button</h4>
-
-						<Form.Label htmlFor='backgroundColor'>
-							BackGround Color
-						</Form.Label>
-						<Form.Control
-							type='color'
-							name='backgroundColor'
-							onChange={handleChange}
-							id='backgroundColor'
-							value={listeningBtnStyle.backgroundColor}
-							title='Choose your color'
-						/>
-						<Form.Label htmlFor='color'>Text Color</Form.Label>
-						<Form.Control
-							type='color'
-							name='color'
-							onChange={handleChange}
-							id='color'
-							value={listeningBtnStyle.color}
-							title='Choose your color'
-						/>
-						<Form.Label htmlFor='width'>
-							Button Width (%)
-						</Form.Label>
-						<Form.Control
-							type='number'
-							name='width'
-							onChange={handleChange}
-							id='width'
-							min={'0'}
-							max='100'
-							value={listeningBtnStyle.width}
-							title='Button Width'
-						/>
-						<Form.Label htmlFor='custom_css'>Custom CSS</Form.Label>
-						<Form.Control
-							as='textarea'
-							name='custom_css'
-							id='custom_css'
-							onChange={handleChange}
-							value={customCSS ? customCSS : ''}
-							placeholder='Custom CSS'
-						/>
-						<div className='d-grid gap-3 col-12 mx-auto mt-5 mb-4'>
-							<button
-								type='submit'
-								className='tta_btn  btn-center btn-block'>
-								Submit
-							</button>
-						</div>
-					</Form>
+					<CustomizationTabs buttonLists={buttonLists} customCSS={customCSS} handleSubmit={handleSubmit} listeningBtnStyle={listeningBtnStyle} handleChange={handleChange} listeningSettings={listeningSettings} />
 				</Col>
 			</Row>
 		</Container>

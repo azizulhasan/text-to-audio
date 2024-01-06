@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio, record, voice c
 Requires at least: 4.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.4.23
+Stable tag: 1.5.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -230,6 +230,16 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+
+= 1.5.1 ( 6 Jan 2024 ) =
+* Bug fix
+
+
+= 1.5.0 ( 28 Dec 2023 ) =
+* Improved: UI design improved.
+* Google text to speech integration.
+
+
 = 1.4.23 ( 25 Dec 2023 ) =
 * added: [WPML](https://wpml.org/) support.
 
@@ -242,6 +252,8 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 
 = 1.4.21 ( 13 Dec 2023 ) =
 * Minor  bug fix.
+
+
 
 
 = 1.4.20 ( 13 Dec 2023 ) =

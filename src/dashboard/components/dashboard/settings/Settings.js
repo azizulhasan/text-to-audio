@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { __ } from '@wordpress/i18n'
 import {
 	ToggleButton, Form, Row, Col, Container, Tooltip,
 	OverlayTrigger,
@@ -12,6 +13,7 @@ import {
 import { postWithoutImage } from '../../context/utilities';
 import toast from '../../context/Notify';
 import UpgradeToPro from '../../UpgradeToPro';
+import { MultiSelect } from '../../context/MultiSelect'
 
 export default function Settings() {
 	const [settings, setSettings] = useState({
@@ -24,6 +26,7 @@ export default function Settings() {
 		'post',
 		'page',
 	]);
+	const [isDataLoaded, setIsDataLoaded] = useState(false)
 
 
 	useEffect(() => {
@@ -35,6 +38,7 @@ export default function Settings() {
 		postWithoutImage(tta_obj.api_url + 'tta/v1/settings', formData).then(
 			(res) => {
 				setSettings({ ...res.data });
+				setIsDataLoaded(true)
 			});
 
 
@@ -54,8 +58,14 @@ export default function Settings() {
 	 */
 	const handleChange = (e) => {
 		let value = '';
-		if (e.target.name === 'tta__settings_allow_listening_for_post_types') {
-			value = Array.from(e.target.selectedOptions, option => option.value);
+		if (Array.isArray(e)) {
+			value = e;
+			setSettings({
+				...settings,
+				...{ tta__settings_allow_listening_for_post_types: value },
+
+			});
+			return;
 		} else {
 			value = e.target.value
 		}
@@ -64,10 +74,10 @@ export default function Settings() {
 			value = e.target.checked
 		}
 		if (!e.target.name) return;
+
 		setSettings({
 			...settings,
 			...{ [e.target.name]: value },
-
 		});
 	};
 
@@ -87,6 +97,7 @@ export default function Settings() {
 			.then((res) => {
 				setSettings(res.data);
 				toast('Settings Data Saved');
+				setIsDataLoaded(true)
 			})
 			.catch((err) => {
 				console.log(err);
@@ -94,8 +105,7 @@ export default function Settings() {
 	};
 
 	return (
-
-		<React.Fragment>
+		isDataLoaded ? <React.Fragment>
 			<Container>
 				<Row>
 					<Col xs={12} sm={12} lg={8}>
@@ -107,24 +117,15 @@ export default function Settings() {
 									</Form.Label>
 								</Col>
 								<Col xs={12} sm={12} lg={8}>
-									<Form.Group>
-										<ToggleButton
-											id='tta__settings_enable_button_add'
-											type='checkbox'
-											className='form-controll'
-											name='tta__settings_enable_button_add'
-											variant={
-												settings.tta__settings_enable_button_add
-													? 'outline-primary'
-													: 'outline-danger'
-											}
-											checked={settings.tta__settings_enable_button_add}
-											onChange={(e) =>
-												handleChange(e)
-											}>
-											{settings.tta__settings_enable_button_add ? 'Enable' : 'Disable'}
-										</ToggleButton>
-									</Form.Group>
+									<Form.Check // prettier-ignore
+										type={'checkbox'}
+										checked={settings.tta__settings_enable_button_add}
+										onChange={(e) =>
+											handleChange(e)
+										}
+										name={`tta__settings_enable_button_add`}
+										id={`tta__settings_enable_button_add`}
+									/>
 								</Col>
 							</Row>
 							<Row className='mt-4'>
@@ -135,30 +136,34 @@ export default function Settings() {
 								</Col>
 								<Col xs={12} sm={12} lg={8}>
 									<Form.Group controlId="tta__settings_allow_listening_for_post_types">
-										<Form.Select
+										<MultiSelect
 											id="tta__settings_allow_listening_for_post_types"
 											name="tta__settings_allow_listening_for_post_types"
 											onChange={handleChange}
-											multiple={true}
-											value={settings.tta__settings_allow_listening_for_post_types}>
-											<option value={'0'}>
-												Select recording post type
-											</option>
-											{postTypes.length && postTypes.map((posttype, i) => {
-												return (
-													<option key={i} value={posttype}>
-														{posttype}
-													</option>
-												);
-											})}
-										</Form.Select>
+											selectedItems={settings.tta__settings_allow_listening_for_post_types}
+											options={postTypes} />
 									</Form.Group>
 								</Col>
 							</Row>
 							<Row className='mt-4'>
 								<Col xs={12} sm={6} lg={4}>
 									<Form.Label htmlFor='tta__settings_css_selectors'>
-										Add CSS Selector {ttsObj.is_pro_active ? "" : "Pro"}
+										Add CSS Selector {ttsObj.is_pro_active ? "" : (
+											<>
+												{['top'].map((placement) => (
+													<OverlayTrigger
+														key={placement}
+														placement={placement}
+														overlay={
+															<Tooltip id={`tooltip-${placement}`}>
+																{__('CSS selector is available in pro version')}
+															</Tooltip>
+														}>
+														<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i class="fas fa-lock" /></Button>
+													</OverlayTrigger>
+												))}
+											</>
+										)}
 									</Form.Label>
 								</Col>
 								<Col xs={11} sm={11} lg={7}>
@@ -168,7 +173,7 @@ export default function Settings() {
 										as='textarea'
 										onChange={(e) => handleChange(e)}
 										value={settings.tta__settings_css_selectors}
-										placeholder={ttsObj.is_pro_active ? 'Multiple selector will be multiline.' : 'Some content may be missing, It can be found by css selectors'}
+										placeholder={ttsObj.is_pro_active ? __('Multiple selector will be multiline.') : 'Some content may be missing, It can be found by css selectors'}
 										disabled={ttsObj.is_pro_active ? false : true}
 									/>
 								</Col>
@@ -180,41 +185,32 @@ export default function Settings() {
 												placement={placement}
 												overlay={
 													<Tooltip id={`tooltip-${placement}`}>
-														{ttsObj.is_pro_active ? 'Multiple selector will be multiline.' : 'CSS selector is available in pro version'}
+														{__('Click To Know How It Works?')}
 													</Tooltip>
 												}>
-												<Button className="tta_btn m-0 p-0 text-dark bg-light border-0">{ttsObj.is_pro_active ? <i class="fas fa-unlock" /> : <i class="fas fa-lock" />}</Button>
+												<a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/' > <i class="fas fa-info-circle"></i></a>
 											</OverlayTrigger>
 										))}
 									</>
 								</Col>
 							</Row>
 							<Row className=' mt-3'>
-								<Col xs={12} sm={6} lg={4}>
+								{/* <Col xs={12} sm={6} lg={4}>
 									<Form.Label htmlFor='tta__settings_display_btn_icon'>
 										Enable Button Icon
 									</Form.Label>
 								</Col>
 								<Col xs={12} sm={12} lg={8}>
-									<Form.Group>
-										<ToggleButton
-											id='tta__settings_display_btn_icon'
-											type='checkbox'
-											className='form-controll '
-											variant={
-												settings.tta__settings_display_btn_icon
-													? 'outline-primary'
-													: 'outline-danger'
-											}
-											checked={settings.tta__settings_display_btn_icon}
-											name='tta__settings_display_btn_icon'
-											onChange={(e) =>
-												handleChange(e)
-											}>
-											{settings.tta__settings_display_btn_icon ? 'Enable' : 'Disable'}
-										</ToggleButton>
-									</Form.Group>
-								</Col>
+									<Form.Check // prettier-ignore
+										type={'checkbox'}
+										checked={settings.tta__settings_display_btn_icon}
+										onChange={(e) =>
+											handleChange(e)
+										}
+										name={`tta__settings_display_btn_icon`}
+										id={`tta__settings_display_btn_icon`}
+									/>
+								</Col> */}
 								<div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
 									<button type='submit' className='tta_btn  btn-block'>
 										Submit
@@ -228,6 +224,7 @@ export default function Settings() {
 					</Col>
 				</Row>
 			</Container>
-		</React.Fragment>
+		</React.Fragment> : <h1>Loading</h1>
+
 	);
 }

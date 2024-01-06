@@ -1,5 +1,5 @@
 <?php
-
+use TTA\TTA_Helper;
 /**
  * If classic editor is active then on new-post and edit post
  * activate recording  for blog content.
@@ -70,6 +70,10 @@ function tta_should_add_dilimiter($title, $delimiter) {
         return $title. ' ';
     }
 
+    if(! $title) {
+        return $title;
+    }
+
     return $title.$delimiter. " ";
 
 }
@@ -85,17 +89,11 @@ function tta_should_add_dilimiter($title, $delimiter) {
 function tta_get_button_content($atts, $is_block = false) {
     $settings = (array) get_option('tta_settings_data');
     // this is a pro feature to show button on blog main page with title and excerpt.
-    if(is_home() || is_archive() || is_front_page() || is_category() ){
+    if(!TTA_Helper::should_load_button()){
         return;
     }
-    
-    if(!isset($settings['tta__settings_allow_listening_for_post_types']) 
-    || count($settings['tta__settings_allow_listening_for_post_types']) === 0
-    || !is_array($settings['tta__settings_allow_listening_for_post_types'])
-    || !in_array(tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'])
-    ) {
-        return;
-    }
+
+    global $post;
 
     if ($is_block) {
         $customize = $atts;
@@ -133,7 +131,7 @@ function tta_get_button_content($atts, $is_block = false) {
     $description_sanitized = tta_clean_content($description);
     $content     = apply_filters('tta__content_title', $title);
     $content    .= apply_filters('tta__content_description', $description_sanitized, $description, get_the_ID() );
-
+    $content    = TTA_Helper::sazitize_content($content);
     // Button listen text.
      if($atts || has_filter('tta__button_text_arr')) {
         if( isset( $atts['text_to_read'] ) && $atts['text_to_read'] ) {
@@ -197,13 +195,21 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
         $temp_title = trim(str_replace('.', '', $title));
         $title = trim(get_the_title());
         $title = tta_clean_content( $title );
-
         // Get plugin all settings and pass it to TTS javascript Object.
         $plugin_all_settings = tts_get_settings();
 
-        if(tts_text_match_80_percent($title , $temp_title) || apply_filters('tts_ignore_match_80_percent', false)) :
-        ?>
-        <!-- Text To Speech TTS Settings  -->
+        if( apply_filters('tts_ignore_match_80_percent', false) && tts_text_match_80_percent($title , $temp_title) ) {
+            get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
+        }else{
+            get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
+        }
+    });
+}
+
+function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings) {
+    $object = ob_start();
+    ?>
+            <!-- Text To Speech TTS Settings  -->
         <script id='tts_button_settings_<?php echo $btn_no; ?>' >
             var ttsCurrentButtonNo = <?php echo $btn_no; ?>;
             var ttsCurrentContent = "<?php echo $content; ?>";
@@ -249,9 +255,9 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
             }
 
         </script>
-        <?php
-        endif;
-    });
+    <?php
+    $object = ob_get_contents();
+    return $object;
 }
 
 
@@ -277,19 +283,6 @@ function tts_text_match_80_percent($text1, $text2) {
     } else {
         return false;
     }
-}
-
-
-/**
- * Get post type
- * 
- * @see 
- */
-
-function tts_post_type() {
-    global  $post;
-    
-    return isset($post->post_type) ? $post->post_type : '';
 }
 
 
@@ -617,31 +610,45 @@ function set_initial_button_texts($content_read_time) {
         ], $content_read_time);
 }
 
-function tts_get_settings($settings_key = '', $identifier = '') {
+function tts_get_settings($identifier = '') {  
    
     $all_settings_data = [];
-
-    if($settings_key) {
-         $settings = (array) get_option($settings_key);
-        if($identifier) {
+    $cached_settings = get_transient('tts_all_settings');
+    if(!$cached_settings) {
+        $all_settings = [
+            'tta_listening_settings' => 'listening',
+            'tta_settings_data' => 'settings',
+            'tta_record_settings' => 'recording',
+            'tta_customize_settings' => 'customize',
+        ];
+        
+        foreach($all_settings as $settings_key => $identifier) {
+            $settings = get_option($settings_key);
+            $settings = ! $settings ? false : (array) $settings ;
             $all_settings_data[$identifier] = $settings;
-        }else{
-            $all_settings_data[$settings_key] = $settings;
         }
 
-        return $all_settings_data;
+        set_transient('tts_all_settings', $all_settings_data);
 
+    }else{
+        $all_settings_data = $cached_settings;
     }
 
-    $all_settings = [
-        'tta_listening_settings' => 'listening',
-        'tta_settings_data' => 'settings',
-    ];
-    
-    foreach($all_settings as $settings_key => $identifier) {
-        $settings = (array) get_option($settings_key);
-        $all_settings_data[$identifier] = $settings;
+    if($identifier) {
+        $specified_identifier_data = isset($all_settings_data[$identifier]) ? $all_settings_data[$identifier] : $all_settings_data;
+        $all_settings_data = $specified_identifier_data;
     }
 
     return $all_settings_data;
+}
+
+function get_player_id() {
+    $customize_settings = (array) tts_get_settings('customize');
+    $customize_settings['buttonSettings'] = isset( $customize_settings['buttonSettings'] ) ? (array) $customize_settings['buttonSettings'] : [ 'id' => 1];
+    $player_id = isset($customize_settings['buttonSettings']['id']) ? $customize_settings['buttonSettings']['id'] : 1;
+    if(is_pro_license_active() && $player_id == 1) {
+        $player_id = 2;
+    }
+    
+    return $player_id;
 }
