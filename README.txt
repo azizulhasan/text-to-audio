@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio, record, voice c
 Requires at least: 4.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.5.1
+Stable tag: 1.5.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -75,7 +75,7 @@ It can be not available on mobile phone. One voice may available on desktop, it 
 
 Here you can see some languages which are supported by the browsers based on device.
 
-**Supported Languages:**
+### Supported Languages:
 
 * Chrome Desktop: UK English, US English, Spanish ( Spain ), Spanish ( United States ), French, Deutsch, Italian, Russian, Dutch, Japanese, Korean, Chinese (China), Chinese (Hong Kong), Chinese (Taiwan) Hindi, Indonesian, Polish, Brazilian Portuguese.
 * Chrome Mobile: English USA, English UK, German, Italian, Russian, French, Spanish, 
@@ -87,7 +87,7 @@ Here you can see some languages which are supported by the browsers based on dev
 * FireFox Mobile: English USA, English UK, German, Italian, Russian, French, Spanish.
 
 
-**FEAUTES:**
+### FEAUTES
 
 * Add a play button to any post or page.
 * Unlimited text to speech.
@@ -103,14 +103,14 @@ Here you can see some languages which are supported by the browsers based on dev
 * Remove special characters from content.
 * Remove URL from content.
 
-**Listening is a better way to read:**
+### Listening is a better way to read:
 Boost your understanding and focus with listening by Text To Audio TTS. Remember more of what you read. Maximize your time,
 Breeze through your content 2-3x faster than it takes to read it. Do more at once, Take your reading wherever you go – to the gym, the park, or the couch, or the journy.
 
 Text to speech plugin allow you to add accessibility feature in wordpress site easily.  Speech plugin implements Web Content Accessibility Guidelines (WCAG) in the sit easily.
 
 
-**PRO FEATURES:**
+### PRO FEATURES:
 
 * Get Live Support for first time integration.
 * Get Priority Support.
@@ -118,24 +118,32 @@ Text to speech plugin allow you to add accessibility feature in wordpress site e
 * Improved UI of the button.
 * Multilingual support.
 * Responsive speaking button.
-* Specify speeking content with CSS selectors.
+* Specify speaking content with CSS selectors.
 * Translate your content to any language by multilingual plugin.
 * Support all custom post types.
 * Download **mp3** file.
 * Multiple audio player support.
 
-**Multilingual supported plugins**
-
+### Multilingual supported plugins
 * <a href='https://wpml.org/' target='_blank'>WPML WordPress Multilingual Plugin</a>.
 * <a href='https://wordpress.org/plugins/gtranslate/' target='_blank'>Translate WordPress with GTranslate Plugin</a>.
 
-**Custom Post Type supported plugins**
+# How WPML pluign works?
+After translating content by [WPML](https://wpml.org/) Text To Audio Accessibility plugin will autometically translate content to the correct language.
+Text To Audio Accessibility will detect content language from the URL of that particular page or post.
+
+# How GTranslate pluign works?
+Text To Audio Accessibility plugin detect page or post language when page or post are translated by [GTranslate](https://wordpress.org/plugins/gtranslate/).
+Also, Text To Audio Accessibility translate content when a page language chages by GTranslate plugin's language switching wizard.
+
+
+### Custom Post Type supported plugins
 
 * <a href='https://wordpress.org/plugins/advanced-custom-fields/' target='_blank'>Advanced Custom Fields (ACF)</a>.
 * <a href='https://wordpress.org/plugins/custom-post-type-ui/' target='_blank'>Custom Post Type UI</a>.
 * <a href='https://toolset.com/home/types-manage-post-types-taxonomy-and-custom-fields/' target='_blank'>Toolset Types</a>.
 
-**OTHER SUPPORTED PLUGINS**
+### OTHER SUPPORTED PLUGINS
 * <a href='https://wordpress.org/plugins/wp-optimize/' target='_blank'>WP-Optimize - Clean, Compress, Cache</a>.
 * <a href='https://wordpress.org/plugins/elementor/' target='_blank'>Elementor Website Builder – More than Just a Page Builder</a>.
 
@@ -149,7 +157,7 @@ Text to speech plugin allow you to add accessibility feature in wordpress site e
 
 == Frequently Asked Questions ==
 
-= Does Text To Speech support All Andriod Phones ? =
+= Does Text To Speech Support All Andriod Phones ? =
 Yes, Text To Speech support all android phones. But this fully support is available only for [pro version](https://atlasaidev.com/text-to-speech-pro/). 
 Free vesion has some limitatios. Here it is.
 Text To Speech plugin is built on browser API. No external API is used. Here is the API used [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis)
@@ -159,6 +167,16 @@ Another issue speechSynthesis API is differ browser to browser also device to de
 It can be not available on mobile phone. One voice may available on desktop, it may be not available on android.
 
 If you still facing problems regarding browser issues please on a [ticket](https://atlasaidev.com/contact-us/).
+
+
+= Does Text To Speech Support Multilingual Plugins ? =
+Yes, [pro version](https://atlasaidev.com/text-to-speech-pro/) of Text To Speech plugin supports
+WPML and GTranslate for now. We'll give support soon for [TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/),
+[Loco Translate](https://wordpress.org/plugins/loco-translate/), [Polylang](https://wordpress.org/plugins/polylang/).
+
+= Does Text To Speech Support Custom Post Types ? =
+Yes, [pro version](https://atlasaidev.com/text-to-speech-pro/) of Text To Speech plugin supports custom post types.
+
 
 = Content Missing From Post =
 You can add missing content by **CSS Selectors**. This custom **CSS Selector** is available for [pro version](https://atlasaidev.com/text-to-speech-pro/).
@@ -241,6 +259,7 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 = 1.5.2 ( 7 Jan 2024 ) =
 * Strip HTML Tags from content.
 * Strip URL from content.
+* Updated Documentation.
 
 = 1.5.1 ( 6 Jan 2024 ) =
 * Bug fix
