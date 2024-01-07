@@ -100,6 +100,8 @@ Here you can see some languages which are supported by the browsers based on dev
 * Customization of button in block editor.
 * Play button can be added by shortcode `[tta_listen_btn]`.
 * Add custom content to speak with [shortcode](https://wordpress.org/plugins/text-to-audio/#description:~:text=It%20can%20be%20possible%20to%20create%20a%20shortcode%20with%20custom%20text%20to%20read%20like%20this.).
+* Remove special characters from content.
+* Remove URL from content.
 
 **Listening is a better way to read:**
 Boost your understanding and focus with listening by Text To Audio TTS. Remember more of what you read. Maximize your time,
@@ -115,12 +117,12 @@ Text to speech plugin allow you to add accessibility feature in wordpress site e
 * Engage with your customers more interactively.
 * Improved UI of the button.
 * Multilingual support.
-* Integrate with Google Cloud Text To Speech.
-* Get more than 600 voices when you’re using Google Cloud Text To Speech.
-* Remove special characters from content during reading.
-* Remove URL from content during reading.
 * Responsive speaking button.
 * Specify speeking content with CSS selectors.
+* Translate your content to any language by multilingual plugin.
+* Support all custom post types.
+* Download **mp3** file.
+* Multiple audio player support.
 
 **Multilingual supported plugins**
 
@@ -147,70 +149,76 @@ Text to speech plugin allow you to add accessibility feature in wordpress site e
 
 == Frequently Asked Questions ==
 
-= Browser support issue on android phone on desktop =
-This plugin is built on browser API. No external API is used. Here is the API used [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis)
-That is why it doesn’t support all android phones aslo all languages. Here you can check which android phone and which device support this [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility) API
+= Does Text To Speech support All Andriod Phones ? =
+Yes, Text To Speech support all android phones. But this fully support is available only for [pro version](https://atlasaidev.com/text-to-speech-pro/). 
+Free vesion has some limitatios. Here it is.
+Text To Speech plugin is built on browser API. No external API is used. Here is the API used [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis)
+That is why Text To Speech plugin doesn’t support all android phones aslo all languages. Here you can check which android phone and which device support this [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility) API
 
 Another issue speechSynthesis API is differ browser to browser also device to device . So it changes the voices and languages based on browser. one language may available on desktop
 It can be not available on mobile phone. One voice may available on desktop, it may be not available on android.
 
-If you still facing problems regarding browser issues please on a ticket.
+If you still facing problems regarding browser issues please on a [ticket](https://atlasaidev.com/contact-us/).
 
-= Button content missing =
-	Missing content can be added by filters. 
-    Filter Example :
-	Install the plugin [Code Snippets](https://wordpress.org/plugins/code-snippets/) Then Select Snippet > Add New Create a new snippet with this block of code
+= Content Missing From Post =
+You can add missing content by **CSS Selectors**. This custom **CSS Selector** is available for [pro version](https://atlasaidev.com/text-to-speech-pro/).
+Go to the **Settings** menu of the plugin. Add all of the **CSS Selectors**. It can be from multiple pages. The benifit of **CSS Selector** over filter 
+that it is dynamic. But filter is static.
 
-	`
-    add_filter( 'tta__content_description', 'tta__content_description_callback', 10, 3 );
-    function tta__content_description_callback ( $output, $description, $post_id ) {
+Also miissing content can be added by filters. 
+Filter Example :
+Install the plugin [Code Snippets](https://wordpress.org/plugins/code-snippets/) Then Select Snippet > Add New Create a new snippet with this block of code
 
-		$output .=" extra content here";
-		
-		return $output;
-    }
+`
+add_filter( 'tta__content_description', 'tta__content_description_callback', 10, 3 );
+function tta__content_description_callback ( $output, $description, $post_id ) {
 
-	`   
-= How to enable ``speechSynthesis`` on FireFox? =
-Notice: This solution only for FireFox Desktop.
-Open FireFox browser,  search ```about:config``` on a new tab. Now search with this string and enable as true.
-    a. ```media.webspeech.synth.enabled```
-= How to enable ``SpeechRecognition`` on FireFox? =
-Notice: This solution only for FireFox Desktop.
-Open FireFox browser, search ```about:config``` on a new tab. Now search with this string and enable as true.
-    a. ```media.webspeech.recognition.enable```
-    b. ```media.webspeech.recognition.force_enable```
+	$output .=" extra content here";
+	
+	return $output;
+}
+
+` 
+
 = Can I add button in Gutenburg block? =
-Yes, you can add listening button from block editor. Open you block editor and search ```Customize Button``` then add it.
-Now you can change ```color```, ```backgroundColor```, ```width```. And also add ```custom_css```.
+Yes, you can add listening button from block editor. Open you block editor and search **Customize Button** then add it.
+Now you can change **color**,  **backgroundColor** , **width**. And also add **custom_css**.
+
 = How to change button text? =
 You can change button text 2 ways one is by shortcode attribute. Another way is adding filter. But filter always overrides the shortcode attributes. Here is short code Example :
 	`
 	[tta_listen_btn listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay"]
+	
 	`
-    Filter Example :
-	Install the plugin [Code Snippets](https://wordpress.org/plugins/code-snippets/) Then Select Snippet > Add New Create a new snippet with this block of code
 
-    add_filter( 'tta__button_text_arr', 'tta__button_text_arr_callback' );
-    function tta__button_text_arr_callback ( $button_text_arr ) {
+Here Is Filter Example :
 
-		// Listen button
-		$text_arr['listen_text'] = 'Listen'; // paste custem text
-		$text_arr['pause_text'] = 'Pause'; // paste custem text
-		$text_arr['resume_text'] = 'Resume'; // paste custem text
-		$text_arr['replay_text'] = 'Replay'; // paste custem text
+Install the plugin [Code Snippets](https://wordpress.org/plugins/code-snippets/) Then Select Snippet > Add New Create a new snippet with this block of code
 
-		// Record button text
-		$text_arr['start_text'] = 'Start'; // paste custem text
-		$text_arr['stop_text'] = 'Stop'; // paste custem text
-		
-		return $text_arr;
-    }
+`
+add_filter( 'tta__button_text_arr', 'tta__button_text_arr_callback' );
+function tta__button_text_arr_callback ( $button_text_arr ) {
+
+	// Listen button
+	$text_arr['listen_text'] = 'Listen'; // paste custem text
+	$text_arr['pause_text'] = 'Pause'; // paste custem text
+	$text_arr['resume_text'] = 'Resume'; // paste custem text
+	$text_arr['replay_text'] = 'Replay'; // paste custem text
+
+	return $text_arr;
+}
+
+`
               
 = How to add custom css class to button? =
-Add class on shortcode as an attribute. Example : `[tta_listen_btn class="custom_class"]`
+Add class on shortcode as an attribute. Example : 
+`
+[tta_listen_btn class="custom_class"]
+
+`
+
 = How can I change button background and text color? =
-Yes, you can change buttons background and text color from plugins dashboard's customization menu. also from block editor by applying the ```customization button``` block.
+Yes, you can change button background and text color from plugins dashboard's customization menu. also from block editor by applying the **customization button** block.
 
 
 
@@ -230,6 +238,9 @@ Yes, you can change buttons background and text color from plugins dashboard's c
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+= 1.5.2 ( 7 Jan 2024 ) =
+* Strip HTML Tags from content.
+* Strip URL from content.
 
 = 1.5.1 ( 6 Jan 2024 ) =
 * Bug fix
@@ -252,8 +263,6 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 
 = 1.4.21 ( 13 Dec 2023 ) =
 * Minor  bug fix.
-
-
 
 
 = 1.4.20 ( 13 Dec 2023 ) =
