@@ -21,6 +21,7 @@ class MultiSelect extends React.Component {
     }
 
     handleChange = (event) => {
+        event.preventDefault()
         const selectedItems = this.state.selectedItems;
         const value = event.target.value;
 
@@ -53,6 +54,7 @@ class MultiSelect extends React.Component {
     }
 
     handleClick = (event) => {
+        event.preventDefault();
         const selectedItems = this.state.selectedItems;
         const value = event.target.innerText;
 
@@ -154,19 +156,17 @@ class MultiSelect extends React.Component {
         const { isFocused } = this.state;
 
         return (
-            <form>
-                <div className="multiselect-wrapper">
-                    <div className={'select-input'}>
-                        {this.hydrateInput()}
-                    </div>
-
-                    {
-                        isFocused && <div className="select-dropdown shown">
-                            {this.renderDropdown()}
-                        </div>
-                    }
+            <div className="multiselect-wrapper">
+                <div className={'select-input'}>
+                    {this.hydrateInput()}
                 </div>
-            </form>
+
+                {
+                    isFocused && <div className="select-dropdown shown">
+                        {this.renderDropdown()}
+                    </div>
+                }
+            </div>
         );
     }
 }

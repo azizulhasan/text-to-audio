@@ -159,7 +159,7 @@ export default function Settings() {
 																{__('CSS selector is available in pro version')}
 															</Tooltip>
 														}>
-														<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i class="fas fa-lock" /></Button>
+														<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i className="fas fa-lock" /></Button>
 													</OverlayTrigger>
 												))}
 											</>
@@ -188,13 +188,13 @@ export default function Settings() {
 														{__('Click To Know How It Works?')}
 													</Tooltip>
 												}>
-												<a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/' > <i class="fas fa-info-circle"></i></a>
+												<a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/' > <i className="fas fa-info-circle"></i></a>
 											</OverlayTrigger>
 										))}
 									</>
 								</Col>
 							</Row>
-							<Row className=' mt-3'>
+							<Row className='mt-3'>
 								{/* <Col xs={12} sm={6} lg={4}>
 									<Form.Label htmlFor='tta__settings_display_btn_icon'>
 										Enable Button Icon

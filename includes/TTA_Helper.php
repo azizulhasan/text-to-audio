@@ -29,6 +29,7 @@ class TTA_Helper {
         if(\is_single() || is_singular() ){
             $should_load_button = true;
         }
+        
         $settings = tts_get_settings('settings');
         if(!isset($settings['tta__settings_allow_listening_for_post_types']) 
         || count($settings['tta__settings_allow_listening_for_post_types']) === 0
@@ -60,8 +61,6 @@ class TTA_Helper {
 		if ( $content === '' ) {
 			return '';
 		}
-
-		// $content = do_shortcode( $content );
 
 		// Covers all kinds of shortcodes
 		$expression = '/\[\/*[a-zA-Z1-90_| -=\'"\{\}]*\/*\]/m';
