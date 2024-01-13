@@ -649,6 +649,10 @@ function get_player_id() {
     if(is_pro_license_active() && $player_id == 1) {
         $player_id = 2;
     }
+
+    if(!is_pro_license_active() && $player_id >  1) {
+        $player_id = 1;
+    }
     
     return $player_id;
 }
