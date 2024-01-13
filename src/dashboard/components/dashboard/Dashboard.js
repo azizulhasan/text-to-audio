@@ -27,7 +27,7 @@ import Recording from './recording/Recording';
 import Listening from './listening/Listening';
 import Customize from './customize/Customize';
 import Docs from './docs/Docs';
-import Integrations from './integrations/Integrations.js';
+import Analitics from './analitics/Analitics.js';
 
 function Dashboard() {
 	const [componentName, setComponentName] = useState(getComponentName());
@@ -78,12 +78,12 @@ function Dashboard() {
 									path={'/customize'}
 									element={<Customize />}
 								/>
-								<Route
+								{/* <Route
 									path={'/recording'}
 									element={<Recording />}
-								/>
+								/> */}
 								<Route path='/faq' element={<Docs />} />
-								<Route path='/integrations' element={<Integrations />} />
+								<Route path='/analitics' element={<Analitics />} />
 							</Routes>
 
 						</div>

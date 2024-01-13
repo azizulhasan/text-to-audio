@@ -21,12 +21,12 @@ export default function DashboardSideNav({ isProVersion }) {
 							</div>
 							Settings
 						</Link>
-						<Link className='nav-link' to={'/recording'}>
+						{/* <Link className='nav-link' to={'/recording'}>
 							<div className='sb-nav-link-icon'>
 								<i className='fas fa-record-vinyl'></i>
 							</div>
 							Recording
-						</Link>
+						</Link> */}
 						<Link className='nav-link' to={'/listening'}>
 							<div className='sb-nav-link-icon'>
 								<i className='fas fa-file-audio'></i>
@@ -46,12 +46,13 @@ export default function DashboardSideNav({ isProVersion }) {
 							</div>
 							FAQ
 						</Link>
-						<Link className='nav-link' to={'/integrations'}>
+						<Link className='nav-link' to={'/analitics'}>
 							<div className='sb-nav-link-icon'>
-								<i className='fas fa-edit'></i>
+								<i className='fas fa-book'></i>
 							</div>
-							{isProVersion ? "Integrations" : "Integrations Pro"}
+							Analytics Pro
 						</Link>
+
 					</div>
 				</div>
 			</nav>

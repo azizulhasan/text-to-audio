@@ -1,6 +1,8 @@
 <?php
 namespace TTA_Admin;
 
+use TTA\TTA_Helper;
+
 /**
  * The admin-specific functionality of the plugin.
  *
@@ -65,7 +67,7 @@ class TTA_Admin {
         add_filter('script_loader_tag', [ $this, 'load_script_as_tag'] , 10, 3);
             global $is_iphone, $is_iphone, $is_chrome,$is_safari,
         $is_NS4,$is_opera,$is_macIE,$is_winIE, $is_gecko, $is_lynx, $is_IE, $is_edge; 
-
+        
         if( ! function_exists( 'is_plugin_active' ) ) {
             include ABSPATH . 'wp-admin/includes/plugin.php';
         }
@@ -73,7 +75,7 @@ class TTA_Admin {
             'json_url' => esc_url_raw(rest_url()),
             'admin_url' => admin_url('/'),
             'classic_editor_is_active' => is_plugin_active('classic-editor/classic-editor.php'),
-            'buttonTextArr' => apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr' ) ),
+            'buttonTextArr' => get_option( 'tta__button_text_arr' ) ,
             'browser' => [
                 'is_iphone' =>  $is_iphone, //(boolean): iPhone Safari
                 'is_chrome'=> $is_chrome,// (boolean): Google Chrome
@@ -105,6 +107,9 @@ class TTA_Admin {
             'is_pro_active' => is_pro_active(),
             'is_pro_license_active' => is_pro_license_active(),
             'is_admin_page' => \is_admin(),
+            'current_post' => TTA_Helper::tts_post_type(),
+            "player_id" => get_player_id(),
+            'compatible' => TTA_Helper::get_compatible_plugins_data(),
         ];
     }
 
@@ -156,11 +161,18 @@ class TTA_Admin {
                 wp_enqueue_script('text-to-audio-dashboard-ui', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-dashboard-ui.min.js', array('TextToSpeech'), $this->version, true);
                 wp_localize_script('text-to-audio-dashboard-ui', 'tta_obj', $this->localize_data);
                 wp_enqueue_style('dashicons');
+
+
+                // Player 2
+                wp_enqueue_style('text-to-audio-pro-demo', plugin_dir_url(__FILE__) . 'demos/player2/text-to-audio-pro-demo.css', [] , $this->version, 'all' );
+                wp_enqueue_script('TextToSpeechProDemo', plugin_dir_url(__FILE__) .'demos/player2/js/TextToSpeechProDemo.min.js', array('wp-hooks', 'TextToSpeech'), $this->version, true);
+                wp_localize_script('TextToSpeechProDemo', 'ttsObjPro', $this->localize_data);
+
                 // Player 3
-                wp_enqueue_style('tts-pro-plyr', plugin_dir_url(__FILE__) . 'demos/player3/css/plyr.min.css', [] , $this->version, 'all');
-                wp_enqueue_script('text-to-audio-plyr-lib', plugin_dir_url(__FILE__) .'demos/player3/js/build/plyr.lib.min.js', array('wp-hooks'), $this->version, true);
-                wp_enqueue_script('text-to-audio-plyr', plugin_dir_url(__FILE__) .'demos/player3/js/build/plyr.min.js', array(), $this->version, true);
-                wp_localize_script('text-to-audio-plyr', 'ttsObj', $this->localize_data);
+                wp_enqueue_style('tts-pro-demo-plyr', plugin_dir_url(__FILE__) . 'demos/player3/css/plyr-demo.min.css', [] , $this->version, 'all');
+                wp_enqueue_script('text-to-audio-plyr-demo-lib', plugin_dir_url(__FILE__) .'demos/player3/js/build/plyr-demo.lib.min.js', array('wp-hooks'), $this->version, true);
+                wp_enqueue_script('text-to-audio-demo-plyr', plugin_dir_url(__FILE__) .'demos/player3/js/build/plyr-demo.min.js', array(), $this->version, true);
+                wp_localize_script('text-to-audio-demo-plyr', 'ttsObj', $this->localize_data);
         
             }
     }
@@ -191,10 +203,12 @@ class TTA_Admin {
      *
      */
     public function enqueue_TTA() {
-        if(is_pro_license_active()){
+        $player_id = get_player_id();
+        
+        if( $player_id > 1){
             wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', array('wp-hooks',), $this->version, true);
             wp_localize_script('TextToSpeech', 'ttsObj', $this->localize_data);
-        }else{
+        }else if($player_id == 1){
             wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-button.min.js', array('wp-hooks', 'wp-shortcode'), $this->version, true);
             wp_localize_script('text-to-audio-button', 'ttsObj', $this->localize_data );
             wp_enqueue_style('dashicons');

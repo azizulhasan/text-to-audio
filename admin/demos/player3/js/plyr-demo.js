@@ -16,7 +16,7 @@ class TextToSpeechProPlayer {
         this.#setTitle(TTS)
         this.#setPath(TTS)
         this.content = content
-        this.#setUpPlayer(ttsObj.plugin_url + '/admin/demos/player3/Hello_world!__lang=en_AU__voice=Microsoft_Mark___English_(United_States).mp3')
+        this.#setUpPlayer(ttsObj.plugin_url + '/admin/demos/player3/demo.mp3')
     }
 
 

@@ -225,6 +225,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
         function updateDecreamentTime() {
             // Calculating the days, hours, minutes and seconds left
             let t = decreament_time_remaining(deadline)
+            // console.log(t)
             setDecreamentDeadline(t.total)
             if (document.getElementById('audio_time_end')) {
                 document.getElementById('audio_time_end').innerHTML = t.formatted;
@@ -262,7 +263,6 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                 t = endtime - Date.parse(new Date())
             }
         }
-
 
 
         return getFormattedTime(t);
@@ -318,8 +318,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                             </div>
                             {
                                 listenStatus === 'listen' && window.hasOwnProperty('TTS') && <div style={{ color: buttonCSS.color }} className="tts__align-items-center">
-                                    Listen to article
-                                    <span> {window.TTS.settings.readingTime} minutes</span>
+                                    <span>{window.TTS.settings.textArr.listen_text}</span>
                                 </div>
                             }
                             {
@@ -442,19 +441,27 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             let titlePosition = 0;
             if (document.querySelector('.post-title')) {
                 postTitle = document.querySelector('.post-title')
-                titlePosition = postTitle.getBoundingClientRect().top;
+                if (shouldCallPositionFunction(postTitle)) {
+                    titlePosition = postTitle.getBoundingClientRect().top;
+                }
             } else if (document.querySelector('.entry-title')) {
                 postTitle = document.querySelector('.entry-title')
-                titlePosition = postTitle.getBoundingClientRect().top;
+                if (shouldCallPositionFunction(postTitle)) {
+                    titlePosition = postTitle.getBoundingClientRect().top;
+                }
             } else if (document.querySelector('.wp-block-post-title')) {
                 postTitle = document.querySelector('.wp-block-post-title')
-                titlePosition = postTitle.getBoundingClientRect().top;
+                if (shouldCallPositionFunction(postTitle)) {
+                    titlePosition = postTitle.getBoundingClientRect().top;
+                }
             }
 
             if (button) {
-                let topPos = Math.floor(button.getBoundingClientRect().top);
-                if (topPos < 1) {
-                    setShouldFloat(true)
+                if (shouldCallPositionFunction(button)) {
+                    let topPos = Math.floor(button.getBoundingClientRect().top);
+                    if (topPos < 1) {
+                        setShouldFloat(true)
+                    }
                 }
 
                 if (titlePosition > 0) {
@@ -472,6 +479,15 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
         }
 
     }, [])
+
+    const shouldCallPositionFunction = (button) => {
+        if (button && typeof button?.getBoundingClientRect === "function") {
+            return true;
+        }
+
+        return false;
+    }
+
 
     return (
         <>

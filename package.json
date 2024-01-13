@@ -18,8 +18,7 @@
     "makeZip": "gulp makeZip",
     "release": "gulp release",
     "copy": "gulp copy",
-    "copyProButton": "gulp copyProButton",
-    "preinstall": "npx npm-force-resolutions"
+    "copyProButton": "gulp copyProButton"
   },
   "keywords": [
     "voice",
@@ -40,6 +39,7 @@
     "react-router-dom": "^6.2.1",
     "react-scripts": "^3.0.1",
     "react-toastify": "^8.2.0",
+    "save-dev": "^0.0.1-security",
     "web-vitals": "^2.1.4"
   },
   "browser": {
@@ -52,14 +52,14 @@
     "cross-env": "^7.0.3",
     "cross-var": "^1.1.0",
     "dotenv": "^16.0.0",
-    "gulp": "^3.9.1",
-    "gulp-autoprefixer": "^9.0.0",
+    "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^7.0.1",
     "gulp-babel": "^8.0.0",
     "gulp-beautify": "^3.0.0",
     "gulp-checktextdomain": "^2.2.2",
     "gulp-clean-css": "^4.3.0",
     "gulp-concat": "^2.6.1",
-    "gulp-copy": "^1.1.0",
+    "gulp-copy": "^4.0.1",
     "gulp-env": "^0.4.0",
     "gulp-eslint": "^6.0.0",
     "gulp-js-prettify": "^0.1.0",
@@ -69,12 +69,8 @@
     "gulp-sourcemaps": "^2.6.5",
     "gulp-uglify": "^3.0.2",
     "gulp-wp-pot": "^2.5.0",
-    "gulp-zip": "^4.2.0",
+    "gulp-zip": "^5.0.2",
     "husky": "^8.0.1",
     "laravel-mix": "^6.0.31"
-  },
-  "resolutions": {
-    "graceful-fs": "^4.2.11"
   }
-
 }

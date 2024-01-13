@@ -1428,7 +1428,7 @@ class Insights {
 	 */
 	public function get_current_admin_url()
 	{
-		return admin_url(sprintf(basename($_SERVER['REQUEST_URI'])));
+		return admin_url(basename($_SERVER['REQUEST_URI']));
 	}
 }
 // End of file Insights.php.

@@ -65,7 +65,7 @@ export default function Customize() {
 			.catch((err) => {
 				console.log(err);
 			});
-		let initialText = 'Add functionality to wordpress site to read blogs out loud in any language and record blog by voice in any language.'
+		let initialText = 'Add accessibility to WordPress site to read contents out loud in more than 20 languages.'
 
 		localStorage.setItem('demo_listening_content', initialText)
 		setSpeakingText(initialText);
@@ -96,7 +96,7 @@ export default function Customize() {
 			setShortCode(e.target.value);
 			return;
 		}
-		console.log(e.target.value)
+
 		/**
 		 * setCustomCSS
 		 */
@@ -176,13 +176,16 @@ export default function Customize() {
 		formData['tta_play_btn_shortcode'] = shortCode;
 		formData['buttonSettings'] = listeningBtnStyle.buttonSettings;
 
+		if (!ttsObj.is_pro_active && formData?.buttonSettings?.id > 1) {
+			toast('This player is only available for pro version.', 'error');
+			return;
+		}
 
 		// console.log(formData);
 		// return;
 		let data = new FormData();
 		data.append('fields', JSON.stringify(formData));
 		data.append('method', 'post');
-		console.log(formData)
 		postWithoutImage(tta_obj.api_url + 'tta/v1/customize', data)
 			.then((res) => {
 				setListeningStyle(res.data);
@@ -226,11 +229,11 @@ export default function Customize() {
 	};
 
 	const [buttonLists, setButtonLists] = useState([
-		{ id: 1, name: 'Default', object: 'TextToSpeech' },
-		{ id: 2, name: 'Default Pro', object: 'TextToSpeechPro' },
-		{ id: 3, name: "ChatGPT TTS Pro", object: 'TextToSpeechPro' },
-		{ id: 4, name: "Google Cloud TTS Pro", object: 'TextToSpeechPro' },
-		{ id: 5, name: "Google TTS Pro", object: 'TextToSpeechPro' },
+		{ id: 1, name: 'Default', object: 'TextToSpeech', disabled: false },
+		{ id: 2, name: 'Default Pro', object: 'TextToSpeechPro', disabled: false },
+		{ id: 3, name: 'Google TTS Pro', object: 'TextToSpeechPro', disabled: false },
+		{ id: 4, name: "ChatGPT TTS (Soon)", object: 'TextToSpeechPro', disabled: true },
+		{ id: 5, name: "Google Cloud TTS (Soon)", object: 'TextToSpeechPro', disabled: true },
 	])
 
 	return (
