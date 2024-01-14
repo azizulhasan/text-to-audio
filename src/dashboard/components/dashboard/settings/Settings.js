@@ -54,9 +54,6 @@ export default function Settings() {
 		let value = '';
 		if (Array.isArray(e)) {
 			value = e;
-			// if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_license_active && e.length !== 1) {
-			// 	value = [e.pop()]
-			// }
 			setSettings({
 				...settings,
 				...{ tta__settings_allow_listening_for_post_types: value },

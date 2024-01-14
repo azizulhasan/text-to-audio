@@ -27,8 +27,8 @@ class MultiSelect extends React.Component {
         let selectedItems = this.state.selectedItems;
         const value = event.target.value;
 
-        if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_license_active && selectedItems.length === 1) {
-            toast(<h6>Showing button to multiple post is not supported in free version. Please <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>buy pro version</a></h6>, 'info', { autoClose: 10000 })
+        if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_license_active) {
+            toast(<h6>Showing button to multiple post type is not supported in free version. Please <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>buy pro version</a></h6>, 'info', { autoClose: 10000 })
             selectedItems = []
             selectedItems.push(value);
             this.setState({
