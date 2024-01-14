@@ -514,3 +514,29 @@ export const copyToClipBoard = (id, shouldSelect = true, message = "Copied", cal
   }
 
 };
+
+
+export const isFreemiusActive = (res) => {
+  let is_freemiu_active = true;
+
+  if (!res.is_pro_license_active) {
+    is_freemiu_active = false
+  }
+
+  if (res.ttsp_fs_methods.length < 10) {
+    is_freemiu_active = false
+  }
+
+  if (res.ttsp_fs_properties.length < 10) {
+    is_freemiu_active = false
+  }
+
+  if (!is_freemiu_active) {
+    window.ttsObj.is_pro_license_active = false
+    window.ttsObj.is_pro_active = false
+    window.ttsObjPro.is_pro_license_active = false
+    window.ttsObjPro.is_pro_active = false
+  }
+
+  return is_freemiu_active;
+};

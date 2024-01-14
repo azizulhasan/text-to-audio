@@ -22,10 +22,7 @@ export default function Settings() {
 		tta__settings_allow_listening_for_post_types: ['post'],
 		tta__settings_css_selectors: ''
 	});
-	const [postTypes, setPostTypes] = useState([
-		'post',
-		'page',
-	]);
+	const [postTypes, setPostTypes] = useState([]);
 	const [isDataLoaded, setIsDataLoaded] = useState(false)
 
 
@@ -40,17 +37,14 @@ export default function Settings() {
 				setSettings({ ...res.data });
 				setIsDataLoaded(true)
 			});
+	}, []);
 
-
-		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active) {
-			let tempPostTypes = wp.hooks.applyFilters('tts_display_button_on_post_types', structuredClone(Object.keys(ttsObjPro.post_types)))
-			setPostTypes(tempPostTypes)
-		} else {
-			let tempPostTypes = wp.hooks.applyFilters('tts_display_button_on_post_types', structuredClone(postTypes))
+	useEffect(() => {
+		if (window.hasOwnProperty('ttsObj') && ttsObj?.post_types) {
+			let tempPostTypes = wp.hooks.applyFilters('tts_display_button_on_post_types', structuredClone(Object.keys(ttsObj.post_types)))
 			setPostTypes(tempPostTypes)
 		}
-
-	}, []);
+	}, [window.ttsObj])
 
 	/**
 	 * handle change
@@ -159,7 +153,7 @@ export default function Settings() {
 																{__('CSS selector is available in pro version')}
 															</Tooltip>
 														}>
-														<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i class="fas fa-lock" /></Button>
+														<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i className="fas fa-lock" /></Button>
 													</OverlayTrigger>
 												))}
 											</>
@@ -188,13 +182,13 @@ export default function Settings() {
 														{__('Click To Know How It Works?')}
 													</Tooltip>
 												}>
-												<a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/' > <i class="fas fa-info-circle"></i></a>
+												<a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/' > <i className="fas fa-info-circle"></i></a>
 											</OverlayTrigger>
 										))}
 									</>
 								</Col>
 							</Row>
-							<Row className=' mt-3'>
+							<Row className='mt-3'>
 								{/* <Col xs={12} sm={6} lg={4}>
 									<Form.Label htmlFor='tta__settings_display_btn_icon'>
 										Enable Button Icon
