@@ -22,10 +22,7 @@ export default function Settings() {
 		tta__settings_allow_listening_for_post_types: ['post'],
 		tta__settings_css_selectors: ''
 	});
-	const [postTypes, setPostTypes] = useState([
-		'post',
-		'page',
-	]);
+	const [postTypes, setPostTypes] = useState([]);
 	const [isDataLoaded, setIsDataLoaded] = useState(false)
 
 
@@ -40,17 +37,14 @@ export default function Settings() {
 				setSettings({ ...res.data });
 				setIsDataLoaded(true)
 			});
+	}, []);
 
-
-		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active) {
-			let tempPostTypes = wp.hooks.applyFilters('tts_display_button_on_post_types', structuredClone(Object.keys(ttsObjPro.post_types)))
-			setPostTypes(tempPostTypes)
-		} else {
-			let tempPostTypes = wp.hooks.applyFilters('tts_display_button_on_post_types', structuredClone(postTypes))
+	useEffect(() => {
+		if (window.hasOwnProperty('ttsObj') && ttsObj?.post_types) {
+			let tempPostTypes = wp.hooks.applyFilters('tts_display_button_on_post_types', structuredClone(Object.keys(ttsObj.post_types)))
 			setPostTypes(tempPostTypes)
 		}
-
-	}, []);
+	}, [window.ttsObj])
 
 	/**
 	 * handle change
@@ -60,6 +54,9 @@ export default function Settings() {
 		let value = '';
 		if (Array.isArray(e)) {
 			value = e;
+			// if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_license_active && e.length !== 1) {
+			// 	value = [e.pop()]
+			// }
 			setSettings({
 				...settings,
 				...{ tta__settings_allow_listening_for_post_types: value },

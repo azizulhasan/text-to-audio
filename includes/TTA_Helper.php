@@ -41,12 +41,13 @@ class TTA_Helper {
 
         return apply_filters('tta_should_load_button', $should_load_button);
     }
+    
 
     /**
- * Get post type
- * 
- * @see 
- */
+     * Get post type
+     * 
+     * @see 
+     */
 
     public static function tts_post_type() {
         global  $post;

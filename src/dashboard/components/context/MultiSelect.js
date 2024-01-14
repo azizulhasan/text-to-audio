@@ -1,4 +1,6 @@
 import './multiselect.css'
+import toast from './Notify';
+
 class MultiSelect extends React.Component {
     constructor(props) {
         super(props);
@@ -22,8 +24,19 @@ class MultiSelect extends React.Component {
 
     handleChange = (event) => {
         event.preventDefault()
-        const selectedItems = this.state.selectedItems;
+        let selectedItems = this.state.selectedItems;
         const value = event.target.value;
+
+        if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_license_active && selectedItems.length === 1) {
+            toast(<h6>Showing button to multiple post is not supported in free version. Please <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>buy pro version</a></h6>, 'info', { autoClose: 10000 })
+            selectedItems = []
+            selectedItems.push(value);
+            this.setState({
+                selectedItems: selectedItems,
+            });
+            this.props.onChange(selectedItems)
+            return;
+        }
 
         if (selectedItems.length === 0) {
             selectedItems.push(value);
@@ -33,6 +46,11 @@ class MultiSelect extends React.Component {
             this.props.onChange(selectedItems)
 
         } else {
+            if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_license_active && selectedItems.length === 1) {
+                toast(<h6>Showing button to multiple post is not supported in free version. Please <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>buy pro version</a></h6>, 'info', { autoClose: 10000 })
+                return;
+            }
+
             for (let i = 0; i < selectedItems.length; i++) {
                 if (value === selectedItems[i]) {
                     selectedItems.splice(i, 1);
@@ -81,7 +99,6 @@ class MultiSelect extends React.Component {
                 selectedItems: selectedItems,
             });
             this.props.onChange(selectedItems)
-
         }
     }
 
