@@ -19,7 +19,7 @@ postWithoutImage(tta_obj.api_url + 'tta/v1/customize', customize)
     });
 let timer = setTimeout(function loadProButton() {
     timer = setTimeout(loadProButton, 1000)
-    if (window.hasOwnProperty('TTS') && window.hasOwnProperty('ttsObjPro') && ttsObjPro.player_id == 2 && buttonCSS) {
+    if (window.hasOwnProperty('TTS') && window.hasOwnProperty('TextToSpeechPro') && window.hasOwnProperty('ttsObjPro') && ttsObjPro.player_id == 2 && buttonCSS) {
         clearTimeout(timer)
         timer = null
 
@@ -35,7 +35,7 @@ let timer = setTimeout(function loadProButton() {
 
             })
         }
-    } else {
+    } else if (ttsObjPro.player_id == 3) {
 
         let buttons = [...document.querySelectorAll('.tts__listent_content')]
         if (buttons.length) {

@@ -4,7 +4,6 @@ import toast from './Notify';
 class MultiSelect extends React.Component {
     constructor(props) {
         super(props);
-        console.log(props)
         this.state = {
             selectedItems: props.selectedItems,
             expanded: true,
