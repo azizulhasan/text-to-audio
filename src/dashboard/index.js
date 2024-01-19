@@ -16,7 +16,8 @@ ttsObjProLoadInterval = setInterval(function () {
         clearInterval(ttsObjProLoadInterval)
         postData(ttsObj.api_url + ttsObj.api_namespace + "_pro" + "/" + ttsObj.api_version + "/" + 'is_pro_license_active', {}, 'GET')
             .then((res) => {
-                isFreemiusActive(res)
+                console.log(res)
+                // isFreemiusActive(res)
             })
             .catch((err) => {
                 console.log(err);
