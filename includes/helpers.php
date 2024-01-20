@@ -208,6 +208,7 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
 
 function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings) {
     $object = ob_start();
+    global $post;
     ?>
             <!-- Text To Speech TTS Settings  -->
         <script id='tts_button_settings_<?php echo $btn_no; ?>' >
@@ -221,6 +222,9 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
             var ttsCustomCSS = "<?php print($custom_css); ?>";
             var ttsShouldDisplayIcon = "<?php echo $should_display_icon; ?>";
             var readingTime = "<?php echo $content_read_time; ?>";
+            var postId = "<?php echo $post->ID; ?>";
+            var fileURL = "<?php echo get_post_meta($post->ID, 'tts_mp3_file_url', true); ?>";
+
             var ttsSettings = {
                 listening : ttsListening, 
                 cssClass : ttsCSSClass , 
@@ -230,6 +234,8 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
                 shouldDisplayIcon : ttsShouldDisplayIcon,
                 settings: allSettings,
                 readingTime: readingTime,
+                postId: postId,
+                fileURL: fileURL,
             };
 
 
