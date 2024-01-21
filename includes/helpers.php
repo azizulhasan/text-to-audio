@@ -112,7 +112,7 @@ function tta_get_button_content($atts, $is_block = false) {
 
     static $btn_no = 0;
     $btn_no++;
-
+    // TODO make it dynamic. now Recording it not available in UI.
     $sentence_delimiter = isset($recording['tta__sentence_delimiter']) ? $recording['tta__sentence_delimiter'] : '. ';
         global $post;
 
