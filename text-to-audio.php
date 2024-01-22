@@ -79,7 +79,7 @@ if (!defined('TTA_ADMIN_PATH')) {
 
 if (!defined('TTA_DEBUG_MODE')) {
 
-    define('TTA_DEBUG_MODE', false);
+    define('TTA_DEBUG_MODE', 0);
 }
 
 
