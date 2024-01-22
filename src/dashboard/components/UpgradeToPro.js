@@ -15,7 +15,7 @@ export default function UpgradeToPro({ }) {
                             Get Priority Support
                         </li>
                         <li className="list-group-item">
-                            30 Days money back.
+                            14 Days money back.
                         </li>
                         <li className="list-group-item" >
                             <a target="_blank" href="https://wpml.org/"> WPML Support</a>
