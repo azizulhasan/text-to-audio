@@ -153,8 +153,10 @@ class TTA_Hooks {
         if (isset($customize['tta_play_btn_shortcode']) && '' != $customize['tta_play_btn_shortcode']) {
             $short_code = $customize['tta_play_btn_shortcode'];
         }
+        \do_action('tts_before_metabox_content');
         ?>
         <div class="tta_metabox">
+            
             <input
                 type="text"
                 name="tta_play_btn_shortcode"
@@ -212,8 +214,8 @@ class TTA_Hooks {
             };
             </script>
         </div>
-
         <?php
+        \do_action('tts_after_metabox_content');
 }
 
 }

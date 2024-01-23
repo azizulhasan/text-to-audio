@@ -99,8 +99,14 @@ class TTA_Helper {
 	 *
 	 * @return array|false|int|mixed|string|string[]|null
 	 */
-	public static function sazitize_content( $output ) {
+	public static function sazitize_content( $output, $should_clean_content = false, $content_type = '' ) {
 
+        if($should_clean_content) {
+            $output = \tta_clean_content($output);
+            if($content_type === 'title') {
+                $output = \tta_should_add_dilimiter($output, \apply_filters('tts_sentence_delimiter', '. '));
+            }
+        }
         // Format Output According to output type
         $output = self::tts_strip_all_tags( html_entity_decode( $output ) );
 
