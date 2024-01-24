@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio, record, voice c
 Requires at least: 4.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.5.5
+Stable tag: 1.5.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,21 @@ Here you can see some languages which are supported by the browsers based on dev
 * FireFox Desktop: English.
 * FireFox Mobile: English USA, English UK, German, Italian, Russian, French, Spanish.
 
+### Pro Supported Languages:
+Text To Speech Pro TTS Accessibility plugin supports these languages.
+
+Afrikaans, Albanian, Arabic, Armenian, Catalan, Chinese, 
+Chinese (Mandarin/China), Chinese (Mandarin/Taiwan), 
+Chinese (Cantonese), Croatian, Czech, Danish, Dutch, 
+English, English (Australia), English (United Kingdom), 
+English (United States), Esperanto, Finnish, French, German, 
+Greek, Haitian Creole, Hindi, Hungarian, Icelandic, 
+Indonesian, Italian, Japanese, Korean, Latin, Latvian, 
+Macedonian, Norwegian, Polish, Portuguese, Portuguese (Brazil), 
+Romanian, Russian, Serbian, Slovak, Spanish, Spanish (Spain), 
+Spanish (United States), Swahili, Swedish, Tamil, Thai, 
+Turkish, Vietnamese, Welsh
+
 
 ### FEAUTES
 
@@ -112,6 +127,7 @@ Text to speech plugin allow you to add accessibility feature in wordpress site e
 
 ### PRO FEATURES:
 
+* 51 languages support.
 * Get Live Support for first time integration.
 * Get Priority Support.
 * Engage with your customers more interactively.
@@ -167,6 +183,12 @@ Another issue speechSynthesis API is differ browser to browser also device to de
 It can be not available on mobile phone. One voice may available on desktop, it may be not available on android.
 
 If you still facing problems regarding browser issues please on a [ticket](https://atlasaidev.com/contact-us/).
+
+
+= Does Text To Speech Support My Language? =
+Tex To Speech Pro TTS Accessibility supports these [languages](https://wordpress.org/plugins/text-to-audio/#:~:text=PRO%20SUPPORTED%20LANGUAGES%3A).
+
+Tex To Speech Free TTS Accessibility supports these [languages](https://wordpress.org/plugins/text-to-audio/#:~:text=based%20on%20device.-,SUPPORTED%20LANGUAGES,-%3A).
 
 
 = Does Text To Speech Support Multilingual Plugins ? =
@@ -255,6 +277,9 @@ Yes, you can change button background and text color from plugins dashboard's cu
 💎 TRANSLATION REQUEST 💎
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+= 1.5.6 ( 24 Jan 2024 ) =
+* Documentation Updated.
 
 = 1.5.5 ( 22 Jan 2024 ) =
 * Asset dependency issue fixed.
