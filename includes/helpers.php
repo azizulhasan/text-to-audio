@@ -42,8 +42,11 @@ function tta_clean_content($text) {
         '&#8212;' => '—',
     );
 
-    // $text = strip_shortcodes($text);
+    $text = apply_filters('tta_before_clean_content', $text);
+
     $text = wp_strip_all_tags($text, true);
+
+    $text = apply_filters('tta_after_clean_content', $text);
 
     $text = str_replace(array_keys($quotationMarks), array_values($quotationMarks), $text);
     $text = str_replace(array_keys($otherMarks), array_values($otherMarks), $text);
@@ -57,7 +60,8 @@ function tta_clean_content($text) {
 
     $text = preg_replace('/\s+/', ' ', trim($text)); // Get rid of /n and /s in the string.
 
-    return $text;
+    return apply_filters('tta_clean_content', $text);
+
 }
 
 /**
@@ -116,6 +120,7 @@ function tta_get_button_content($atts, $is_block = false) {
     $sentence_delimiter = isset($recording['tta__sentence_delimiter']) ? $recording['tta__sentence_delimiter'] : '. ';
         global $post;
 
+
     $title = tta_clean_content( $post->post_title);
     $title = tta_should_add_dilimiter($title, $sentence_delimiter);
     $date = get_the_date('Y/m/d');
@@ -126,12 +131,14 @@ function tta_get_button_content($atts, $is_block = false) {
     // }elseif(did_filter( 'the_excerpt' )){
     //     $description = get_the_excerpt();
     // }
-    
     $description = $post->post_content;
     $description_sanitized = tta_clean_content($description);
+
     $content     = apply_filters('tta__content_title', $title);
     $content    .= apply_filters('tta__content_description', $description_sanitized, $description, get_the_ID() );
-    $content    = TTA_Helper::sazitize_content($content);
+    // $content    = TTA_Helper::sazitize_content($content);
+                // error_log(print_r($content, true));
+
     // Button listen text.
      if($atts || has_filter('tta__button_text_arr')) {
         if( isset( $atts['text_to_read'] ) && $atts['text_to_read'] ) {
