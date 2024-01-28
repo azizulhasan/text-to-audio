@@ -40,7 +40,8 @@ class TTA_Notices {
 
         foreach ( $plugins as $plugin_name =>  $data ){
 			if(is_plugin_active($plugin_name )) {
-				$this->active_pluin_name = $data['name'];
+				$this->active_pluin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+
 				add_action( 'admin_notices', [ $this, $data['callback'] ] );
 				break;
 			}
@@ -434,6 +435,7 @@ class TTA_Notices {
 	 */
 	public function tta_hide_notice() {
 		check_ajax_referer( 'tta_notice_nonce' );
+		\error_log(print_r($_REQUEST, true));
 		$notices = [  'compitable', 'rating',  'translate', 'promotion_close',  ];
 		if ( isset( $_REQUEST['which'] ) && ! empty( $_REQUEST['which'] ) && in_array( $_REQUEST['which'], $notices ) ) {
 			$user_id = get_current_user_id();
