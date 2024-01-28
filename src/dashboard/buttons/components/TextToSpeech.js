@@ -492,7 +492,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
     return (
         <>
             {
-                cssStyle && <style>{cssStyle}</style>
+                buttonCSS?.custom_css && <style>{buttonCSS?.custom_css}</style>
             }
             {
                 shouldFloat ? <div className="tts__custom-position" >{getButtonHTML()}</div> : getButtonHTML()

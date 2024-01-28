@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 let TextToSpeechProPlayer = null;
-export default function TexToSpeechThree({ buttonId, button, cssStyle = '' }) {
+export default function TexToSpeechThree({ buttonId, button, buttonCSS, cssStyle = '' }) {
     const [shouldFloat, setShouldFloat] = useState(false)
     useEffect(() => {
         if (window.TextToSpeechProPlayer) {
@@ -59,21 +59,23 @@ export default function TexToSpeechThree({ buttonId, button, cssStyle = '' }) {
         }
     }, [])
 
+
+
     const getButtonHTML = () => {
         return <div className="player_content" style={shouldFloat ? {} : {
             border: '1px solid rgb(61, 61, 61)',
             borderRadius: '2px',
-            overflow: 'visible !important'
+            overflow: 'visible !important',
         }} id={"player_content_" + buttonId}></div>;
     }
 
     return (
         <>
             {
-                cssStyle && <style>{cssStyle}</style>
+                buttonCSS?.custom_css && <style>{buttonCSS?.custom_css}</style>
             }
             {
-                shouldFloat ? <div className="custom-position" style={{
+                shouldFloat ? <div className="tts__custom-position" style={{
                     border: '1px solid rgb(61, 61, 61)',
                     borderRadius: '2px',
                     overflow: 'visible !important'
