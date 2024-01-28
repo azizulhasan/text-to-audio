@@ -243,7 +243,7 @@ export default function Settings() {
 							<Row className='mt-4'>
 								<Col xs={12} sm={6} lg={4}>
 									<Form.Label htmlFor='tta__settings_exclude_tags'>
-										Exlclude Tags Content {ttsObj.is_pro_active ? "" : (
+										Exlclude Tag's Content {ttsObj.is_pro_active ? "" : (
 											<>
 												{['top'].map((placement) => (
 													<OverlayTrigger

@@ -136,8 +136,7 @@ function tta_get_button_content($atts, $is_block = false) {
 
     $content     = apply_filters('tta__content_title', $title);
     $content    .= apply_filters('tta__content_description', $description_sanitized, $description, get_the_ID() );
-    // $content    = TTA_Helper::sazitize_content($content);
-                // error_log(print_r($content, true));
+    $content    = TTA_Helper::sazitize_content($content);
 
     // Button listen text.
      if($atts || has_filter('tta__button_text_arr')) {
