@@ -435,7 +435,7 @@ class TTA_Notices {
 	 */
 	public function tta_hide_notice() {
 		check_ajax_referer( 'tta_notice_nonce' );
-		\error_log(print_r($_REQUEST, true));
+		
 		$notices = [  'compitable', 'rating',  'translate', 'promotion_close',  ];
 		if ( isset( $_REQUEST['which'] ) && ! empty( $_REQUEST['which'] ) && in_array( $_REQUEST['which'], $notices ) ) {
 			$user_id = get_current_user_id();
