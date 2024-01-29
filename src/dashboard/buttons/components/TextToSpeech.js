@@ -287,10 +287,10 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
 
     const getButtonHTML = () => {
         return (
-            <div id="tts_button_should_float" style={{ backgroundColor: buttonCSS.backgroundColor }} >
+            <div id="tts_button_should_float">
                 {/* First player */}
                 {/* {isFirstPlayerPlay && ( */}
-                <div style={{ color: buttonCSS.color }} className="tts__player tts__border tts__shadow-custom  tts__mx-auto tts__d-flex tts__justify-content-between tts__px-3 tts__align-items-center tts__position-relative">
+                <div className="tts__player tts__border tts__shadow-custom  tts__mx-auto tts__d-flex tts__justify-content-between tts__px-3 tts__align-items-center tts__position-relative">
                     {
                         !isSettingOpen && <div
                             className="tts__d-flex tts__gap-3 tts__justify-content-between tts__align-items-center"
@@ -317,7 +317,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                 )} */}
                             </div>
                             {
-                                listenStatus === 'listen' && window.hasOwnProperty('TTS') && <div style={{ color: buttonCSS.color }} className="tts__align-items-center">
+                                listenStatus === 'listen' && window.hasOwnProperty('TTS') && <div className="tts__align-items-center">
                                     <span>{window.TTS.settings.textArr.listen_text}</span>
                                 </div>
                             }
@@ -492,7 +492,17 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
     return (
         <>
             {
-                cssStyle && <style>{cssStyle}</style>
+
+                buttonCSS && <style>
+                    {
+                        `#tts_button_should_float{ background-color: ${buttonCSS?.backgroundColor};color:${buttonCSS.color};width:${buttonCSS.width}%;cursor:pointer}
+                        #tts_button_should_float div:nth-child(1){ color:${buttonCSS.color};}
+                        `
+                    }
+                    {
+                        buttonCSS?.custom_css && buttonCSS?.custom_css
+                    }
+                </style>
             }
             {
                 shouldFloat ? <div className="tts__custom-position" >{getButtonHTML()}</div> : getButtonHTML()

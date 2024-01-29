@@ -244,8 +244,8 @@ export default function Customize() {
 						<Col xs={12} sm={12} lg={12} className='mb-3'>
 							{
 								listeningBtnStyle?.buttonSettings?.id == 2 ?
-									<TextToSpeech buttonCSS={listeningBtnStyle} buttonLiveCSS={listeningBtnStyle2} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={2} /> :
-									listeningBtnStyle?.buttonSettings?.id == 3 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> :
+									<TextToSpeech buttonCSS={listeningBtnStyle} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={2} /> :
+									listeningBtnStyle?.buttonSettings?.id == 3 ? <TexToSpeechThree buttonCSS={listeningBtnStyle} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> :
 										listeningBtnStyle?.buttonSettings?.id == 4 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> :
 											listeningBtnStyle?.buttonSettings?.id == 5 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> : (
 												<button
