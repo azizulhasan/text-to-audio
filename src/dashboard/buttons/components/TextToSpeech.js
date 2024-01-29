@@ -495,7 +495,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
 
                 buttonCSS && <style>
                     {
-                        `#tts_button_should_float{ background-color: ${buttonCSS?.backgroundColor};color:${buttonCSS.color};cursor:pointer}
+                        `#tts_button_should_float{ background-color: ${buttonCSS?.backgroundColor};color:${buttonCSS.color};width:${buttonCSS.width}%;cursor:pointer}
                         #tts_button_should_float div:nth-child(1){ color:${buttonCSS.color};}
                         `
                     }
