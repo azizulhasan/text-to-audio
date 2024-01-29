@@ -38,14 +38,16 @@ class TTA_Notices {
             require_once \ABSPATH . 'wp-admin/includes/pluin.php';
         }
 
-        foreach ( $plugins as $plugin_name =>  $data ){
-			if(is_plugin_active($plugin_name )) {
-				$this->active_pluin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+        if(!is_pro_active()){
+			foreach ( $plugins as $plugin_name =>  $data ){
+				if(is_plugin_active($plugin_name )) {
+					$this->active_pluin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
 
-				add_action( 'admin_notices', [ $this, $data['callback'] ] );
-				break;
-			}
-        }
+					add_action( 'admin_notices', [ $this, $data['callback'] ] );
+					break;
+				}
+        	}
+		}
 
 		add_action('wp_ajax_tta_save_review_notice', [ $this, 'tta_save_review_notice' ] );
 		add_action('wp_ajax_tta_hide_notice', [ $this, 'tta_hide_notice' ] );
