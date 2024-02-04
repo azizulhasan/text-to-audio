@@ -12,6 +12,7 @@ customize.append('method', 'get');
 let buttonCSS = '';
 postWithoutImage(tta_obj.api_url + 'tta/v1/customize', customize)
     .then((res) => {
+        console.log({ res })
         buttonCSS = res.data
     })
     .catch((err) => {
@@ -35,7 +36,7 @@ let timer = setTimeout(function loadProButton() {
 
             })
         }
-    } else if (ttsObjPro.player_id == 3) {
+    } else if (ttsObjPro.player_id == 3 && buttonCSS) {
 
         let buttons = [...document.querySelectorAll('.tts__listent_content')]
         if (buttons.length) {
@@ -48,7 +49,7 @@ let timer = setTimeout(function loadProButton() {
                 let buttonId = button.getAttribute('data-id')
                 // button.attachShadow({ mode: 'open' });
                 return ReactDOM.render(
-                    <TexToSpeechThree button={button} buttonId={buttonId} cssStyle={''} />,
+                    <TexToSpeechThree button={button} buttonId={buttonId} buttonCSS={buttonCSS} cssStyle={''} />,
                     button
                 )
             })
