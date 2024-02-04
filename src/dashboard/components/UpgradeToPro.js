@@ -9,19 +9,19 @@ export default function UpgradeToPro({ }) {
                 <div className="card-body">
                     <u className="list-group text-left">
                         <li className="list-group-item">
-                            Get Live Support for firts time Integration
+                            Get Live Support for firts time Integration.
                         </li>
                         <li className="list-group-item">
-                            Get Priority Support
+                            51 languages support in pro version.
                         </li>
                         <li className="list-group-item">
                             14 Days money back.
                         </li>
                         <li className="list-group-item" >
-                            <a target="_blank" href="https://wpml.org/"> WPML Support</a>
+                            <a target="_blank" href="https://wpml.org/"> WPML Plugin Support</a>
                         </li>
                         <li className="list-group-item">
-                            <a target='_blank' href="https://wordpress.org/plugins/gtranslate/">Translate WordPress with GTranslate Plugin Support</a>
+                            <a target='_blank' href="https://wordpress.org/plugins/gtranslate/">GTranslate Plugin Support</a>
                         </li>
                         <li className="list-group-item" >
                             Download the audio file for offline listening.
