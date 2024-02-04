@@ -212,9 +212,72 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
     });
 }
 
+function tts_site_language($plugin_all_settings) {
+    // TODO: Match with multilinguage UI and default language.
+    $default_language = $plugin_all_settings['listening']['tta__listening_lang'];
+
+    return apply_filters('tts_site_language', $default_language);
+}
+
+function tts_get_title($title, $selectedLang) {
+
+    if (!$title) {
+       $title = 'Demo Content';
+    }
+
+    $title .= "__lang__" . strtolower($selectedLang);
+    $title = str_replace([' ', '-'], '_', $title);
+    $title = preg_replace("/[^a-z0-9_-]/i", "", $title);
+
+    return $title;
+}
+
+function handle_old_url($post, $new_urls, $old_url) {
+    $associative_urls = [];
+    if(isset($new_urls[0])) {
+        $associative_urls = $new_urls[0];
+    }
+
+    if($old_url) {
+        $arr = explode('lang', $old_url);
+        $language = end($arr);
+        $language = str_replace('__', '',$language);
+        $language = explode('.', $language)[0];
+        if(!array_key_exists($language, $associative_urls)) {
+            $associative_urls[$language] = $old_url;
+            update_post_meta($post->ID, 'tts_mp3_file_urls', $associative_urls);
+
+            // delete_post_meta($post->ID, 'tts_mp3_file_url');
+        }
+    }
+}
+
+
 function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings) {
     $object = ob_start();
     global $post;
+            //    delete_post_meta($post->ID, 'tts_mp3_file_urls');
+
+    $new_urls = get_post_meta($post->ID, 'tts_mp3_file_urls');
+    
+    $old_url = get_post_meta($post->ID, 'tts_mp3_file_url', true);
+
+    handle_old_url($post, $new_urls, $old_url);
+    $mp3_file_urls = get_post_meta($post->ID, 'tts_mp3_file_urls');
+    if(isset($mp3_file_urls[0])) {
+        $mp3_file_urls = json_encode($mp3_file_urls[0]);
+    }
+
+        // error_log(print_r(tts_site_language($plugin_all_settings), true));
+        // error_log(print_r( get_post_meta($post->ID, 'tts_mp3_file_url', true), true));
+
+    // error_log(print_r(get_post_meta($post->ID, 'tts_mp3_file_urls'), true));
+
+        // delete_post_meta($post->ID, 'tts_mp3_file_url');
+
+
+
+        $language = tts_site_language($plugin_all_settings);
     ?>
             <!-- Text To Speech TTS Settings  -->
         <script id='tts_button_settings_<?php echo $btn_no; ?>' >
@@ -230,6 +293,8 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
             var readingTime = "<?php echo $content_read_time; ?>";
             var postId = "<?php echo $post->ID; ?>";
             var fileURL = "<?php echo get_post_meta($post->ID, 'tts_mp3_file_url', true); ?>";
+            var fileURLs = <?php echo $mp3_file_urls; ?>;
+
 
             var ttsSettings = {
                 listening : ttsListening, 
@@ -242,11 +307,13 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
                 readingTime: readingTime,
                 postId: postId,
                 fileURL: fileURL,
+                fileURLs: fileURLs,
             };
 
 
             var dateTitle = {
                 title: "<?php echo $title; ?>",
+                backend_title: "<?php echo tts_get_title($title, $language) ?>",
                 date: "<?php echo $date; ?>",
             }
 
