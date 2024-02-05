@@ -250,6 +250,9 @@ function handle_old_url($post, $new_urls, $old_url) {
             // delete_post_meta($post->ID, 'tts_mp3_file_url');
         }
     }
+
+    return $associative_urls;
+
 }
 
 
@@ -262,22 +265,10 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
     
     $old_url = get_post_meta($post->ID, 'tts_mp3_file_url', true);
 
-    handle_old_url($post, $new_urls, $old_url);
-    $mp3_file_urls = get_post_meta($post->ID, 'tts_mp3_file_urls');
-    if(isset($mp3_file_urls[0])) {
-        $mp3_file_urls = json_encode($mp3_file_urls[0]);
-    }
+    $mp3_file_urls = handle_old_url($post, $new_urls, $old_url);
+    $mp3_file_urls = json_encode($mp3_file_urls);
 
-        // error_log(print_r(tts_site_language($plugin_all_settings), true));
-        // error_log(print_r( get_post_meta($post->ID, 'tts_mp3_file_url', true), true));
-
-    // error_log(print_r(get_post_meta($post->ID, 'tts_mp3_file_urls'), true));
-
-        // delete_post_meta($post->ID, 'tts_mp3_file_url');
-
-
-
-        $language = tts_site_language($plugin_all_settings);
+    $language = tts_site_language($plugin_all_settings);
     ?>
             <!-- Text To Speech TTS Settings  -->
         <script id='tts_button_settings_<?php echo $btn_no; ?>' >
