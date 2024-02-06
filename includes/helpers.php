@@ -215,6 +215,9 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
 function tts_site_language($plugin_all_settings) {
     // TODO: Match with multilinguage UI and default language.
     $default_language = $plugin_all_settings['listening']['tta__listening_lang'];
+    $default_language = str_replace(['-', ' '], '_', $default_language);
+    $default_language = strtolower($default_language);
+
 
     return apply_filters('tts_site_language', $default_language);
 }
@@ -306,6 +309,7 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
                 title: "<?php echo $title; ?>",
                 backend_title: "<?php echo tts_get_title($title, $language) ?>",
                 date: "<?php echo $date; ?>",
+                language: "<?php echo $language; ?>",
             }
 
             if(window.hasOwnProperty('TTS')){ // add content if a page have multiple button
