@@ -151,4 +151,14 @@ class TTA_Helper {
         return \apply_filters('tts_pro_compatible_plugins_data', $compatible_plugins_data, \get_plugins());
     }
 
+    public static function get_language_code_from_url($url) {
+        $arr = explode('lang', $url);
+        $language_code = end($arr);
+        $language_code = str_replace('__', '',$language_code);
+        $language_code = explode('.', $language_code)[0];
+        $language_code = \str_replace('_', '-', $language_code);
+
+        return $language_code;
+    }
+
 }

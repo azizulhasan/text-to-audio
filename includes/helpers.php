@@ -215,9 +215,8 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
 function tts_site_language($plugin_all_settings) {
     // TODO: Match with multilinguage UI and default language.
     $default_language = $plugin_all_settings['listening']['tta__listening_lang'];
-    $default_language = str_replace(['-', ' '], '_', $default_language);
+    // $default_language = str_replace(['-', ' '], '_', $default_language);
     $default_language = strtolower($default_language);
-
 
     return apply_filters('tts_site_language', $default_language);
 }
@@ -242,15 +241,11 @@ function handle_old_url($post, $new_urls, $old_url) {
     }
 
     if($old_url) {
-        $arr = explode('lang', $old_url);
-        $language = end($arr);
-        $language = str_replace('__', '',$language);
-        $language = explode('.', $language)[0];
-        if(!array_key_exists($language, $associative_urls)) {
-            $associative_urls[$language] = $old_url;
+        $language_code = TTA_Helper::get_language_code_from_url($old_url);
+        if(!array_key_exists($language_code, $associative_urls)) {
+            $associative_urls[$language_code] = $old_url;
             update_post_meta($post->ID, 'tts_mp3_file_urls', $associative_urls);
-
-            // delete_post_meta($post->ID, 'tts_mp3_file_url');
+            delete_post_meta($post->ID, 'tts_mp3_file_url');
         }
     }
 
@@ -260,18 +255,16 @@ function handle_old_url($post, $new_urls, $old_url) {
 
 
 function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings) {
-    $object = ob_start();
-    global $post;
-            //    delete_post_meta($post->ID, 'tts_mp3_file_urls');
-
-    $new_urls = get_post_meta($post->ID, 'tts_mp3_file_urls');
     
-    $old_url = get_post_meta($post->ID, 'tts_mp3_file_url', true);
+   global $post;
 
+    // delete_post_meta($post->ID, 'tts_mp3_file_urls');
+    $new_urls = get_post_meta($post->ID, 'tts_mp3_file_urls');
+    $old_url = get_post_meta($post->ID, 'tts_mp3_file_url', true);
     $mp3_file_urls = handle_old_url($post, $new_urls, $old_url);
     $mp3_file_urls = json_encode($mp3_file_urls);
-
     $language = tts_site_language($plugin_all_settings);
+    $object = ob_start();
     ?>
             <!-- Text To Speech TTS Settings  -->
         <script id='tts_button_settings_<?php echo $btn_no; ?>' >
