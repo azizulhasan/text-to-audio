@@ -154,7 +154,7 @@ export default function Docs() {
 																<code>{filter.name}</code>
 															</td>
 															<td>
-																<code>{filter.argument}</code>
+																<code>{filter.arguments}</code>
 															</td>
 														</tr>
 													);
@@ -208,6 +208,47 @@ export default function Docs() {
 								</Accordion.Header>
 								<Accordion.Body>
 									<strong>Customize Button</strong>
+								</Accordion.Body>
+							</Accordion.Item>
+							<Accordion.Item eventKey='10'>
+								<Accordion.Header>
+									10. How many languages support in pro version?
+								</Accordion.Header>
+								<Accordion.Body>
+									<strong>PRO SUPPORTED LANGUAGES:</strong><br />
+									Text To Speech Pro TTS Accessibility plugin supports these languages.<br /><br />
+
+									Afrikaans, Albanian, Arabic, Armenian, Catalan, Chinese,
+									Chinese (Mandarin/China), Chinese (Mandarin/Taiwan),
+									Chinese (Cantonese), Croatian, Czech, Danish, Dutch,
+									English, English (Australia), English (United Kingdom),
+									English (United States), Esperanto, Finnish, French, German,
+									Greek, Haitian Creole, Hindi, Hungarian, Icelandic,
+									Indonesian, Italian, Japanese, Korean, Latin, Latvian,
+									Macedonian, Norwegian, Polish, Portuguese, Portuguese (Brazil),
+									Romanian, Russian, Serbian, Slovak, Spanish, Spanish (Spain),
+									Spanish (United States), Swahili, Swedish, Tamil, Thai,
+									Turkish, Vietnamese, Welsh
+								</Accordion.Body>
+							</Accordion.Item>
+							<Accordion.Item eventKey='11'>
+								<Accordion.Header>
+									11. How many languages support in free version?
+								</Accordion.Header>
+								<Accordion.Body>
+									<strong>Free SUPPORTED LANGUAGES:</strong><br />
+									Text To Speech TTS Accessibility plugin supports these languages.<br /><br />
+
+									<strong>Chrome Desktop:</strong> UK English, US English, Spanish ( Spain ), Spanish ( United States ), French, Deutsch, Italian, Russian, Dutch, Japanese, Korean, Chinese (China), Chinese (Hong Kong), Chinese (Taiwan) Hindi, Indonesian, Polish, Brazilian Portuguese.<br />
+									<strong>Chrome Mobile:</strong> English USA, English UK, German, Italian, Russian, French, Spanish<br />
+
+									<strong>Microsoft Edge Desktop :</strong> All Languages.<br />
+
+									<strong>Microsoft Edge Mobile :</strong> All Languages.<br />
+
+									<strong>FireFox Desktop:</strong> English.<br />
+
+									<strong>FireFox Mobile:</strong> English USA, English UK, German, Italian, Russian, French, Spanish.<br />
 								</Accordion.Body>
 							</Accordion.Item>
 						</Accordion>
