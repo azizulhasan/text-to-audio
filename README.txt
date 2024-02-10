@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio, record, voice c
 Requires at least: 4.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.5.10
+Stable tag: 1.5.11
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,28 +65,25 @@ Adding text-to-speech (TTS) accessibility to your WordPress website can make you
     }
 	` 
 
-**IMPORTANT NOTE:**
+### Tex To Speech Free Features:
 
-Text To Speech TTS plugin is built on browser speechSynthesis API. No external API is used. Here is the API used [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
-That is why Text To Speech TTS doesn’t support all android phones, aslo all languages. Here you can check which android phone and which device support [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility) API.
+* 51 languages support.
+* Get Live Support for first time integration.
+* Get Priority Support.
+* Engage with your customers more interactively.
+* Improved UI of the button.
+* Multilingual support.
+* Multi-lang Websites
+* Responsive speaking button.
+* Specify speaking content with CSS selectors.
+* Translate your content to any language by multilingual plugin.
+* Support all custom post types.
+* Download **mp3** file.
+* Unlimited Downloads
+* Multiple audio player support.
 
-Another issue speechSynthesis API is differ browser to browser also device to device . So it changes the voices and languages based on browser. one language may available on desktop
-It can be not available on mobile phone. One voice may available on desktop, it may be not available on android.
+### Text To Speech Pro Supported Languages:
 
-Here you can see some languages which are supported by the browsers based on device.
-
-### Supported Languages:
-
-* Chrome Desktop: UK English, US English, Spanish ( Spain ), Spanish ( United States ), French, Deutsch, Italian, Russian, Dutch, Japanese, Korean, Chinese (China), Chinese (Hong Kong), Chinese (Taiwan) Hindi, Indonesian, Polish, Brazilian Portuguese.
-* Chrome Mobile: English USA, English UK, German, Italian, Russian, French, Spanish, 
-
-* Microsoft Edge Desktop : All Languages.
-* Microsoft Edge Mobile : All Languages.
-
-* FireFox Desktop: English.
-* FireFox Mobile: English USA, English UK, German, Italian, Russian, French, Spanish.
-
-### Pro Supported Languages:
 Text To Speech Pro TTS Accessibility plugin supports these languages.
 
 Afrikaans, Albanian, Arabic, Armenian, Catalan, Chinese, 
@@ -102,7 +99,29 @@ Spanish (United States), Swahili, Swedish, Tamil, Thai,
 Turkish, Vietnamese, Welsh
 
 
-### FEAUTES
+**IMPORTANT NOTE:**
+
+Text To Speech TTS plugin is built on browser speechSynthesis API. No external API is used. Here is the API used [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
+That is why Text To Speech TTS doesn’t support all android phones, aslo all languages. Here you can check which android phone and which device support [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility) API.
+
+Another issue speechSynthesis API is differ browser to browser also device to device . So it changes the voices and languages based on browser. one language may available on desktop
+It can be not available on mobile phone. One voice may available on desktop, it may be not available on android.
+
+Here you can see some languages which are supported by the browsers based on device.
+
+### Tex To Speech Free Supported Languages:
+
+* Chrome Desktop: UK English, US English, Spanish ( Spain ), Spanish ( United States ), French, Deutsch, Italian, Russian, Dutch, Japanese, Korean, Chinese (China), Chinese (Hong Kong), Chinese (Taiwan) Hindi, Indonesian, Polish, Brazilian Portuguese.
+* Chrome Mobile: English USA, English UK, German, Italian, Russian, French, Spanish, 
+
+* Microsoft Edge Desktop : All Languages.
+* Microsoft Edge Mobile : All Languages.
+
+* FireFox Desktop: English.
+* FireFox Mobile: English USA, English UK, German, Italian, Russian, French, Spanish.
+
+
+### Tex To Speech Free Features:
 
 * Add a play button to any post or page.
 * Unlimited text to speech.
@@ -118,48 +137,33 @@ Turkish, Vietnamese, Welsh
 * Remove special characters from content.
 * Remove URL from content.
 
-### Listening is a better way to read:
+### Listening Is A Better Way To Read:
 Boost your understanding and focus with listening by Text To Audio TTS. Remember more of what you read. Maximize your time,
 Breeze through your content 2-3x faster than it takes to read it. Do more at once, Take your reading wherever you go – to the gym, the park, or the couch, or the journy.
 
 Text to speech plugin allow you to add accessibility feature in wordpress site easily.  Speech plugin implements Web Content Accessibility Guidelines (WCAG) in the sit easily.
 
 
-### PRO FEATURES:
-
-* 51 languages support.
-* Get Live Support for first time integration.
-* Get Priority Support.
-* Engage with your customers more interactively.
-* Improved UI of the button.
-* Multilingual support.
-* Responsive speaking button.
-* Specify speaking content with CSS selectors.
-* Translate your content to any language by multilingual plugin.
-* Support all custom post types.
-* Download **mp3** file.
-* Multiple audio player support.
-
-### Multilingual supported plugins
-* <a href='https://wpml.org/' target='_blank'>WPML WordPress Multilingual Plugin</a>.
+### Multilingual Supported Plugins:
+* <a href='https://wpml.org/' target='_blank' rel='ugc' >WPML WordPress Multilingual Plugin</a>.
 * <a href='https://wordpress.org/plugins/gtranslate/' target='_blank'>Translate WordPress with GTranslate Plugin</a>.
 
-# How WPML pluign works?
+# How WPML WordPress Multilingual Plugin  Works?
 After translating content by [WPML](https://wpml.org/) Text To Audio Accessibility plugin will autometically translate content to the correct language.
 Text To Audio Accessibility will detect content language from the URL of that particular page or post.
 
-# How GTranslate pluign works?
+# How GTranslate Pluign Works?
 Text To Audio Accessibility plugin detect page or post language when page or post are translated by [GTranslate](https://wordpress.org/plugins/gtranslate/).
 Also, Text To Audio Accessibility translate content when a page language chages by GTranslate plugin's language switching wizard.
 
 
-### Custom Post Type supported plugins
+### Custom Post Type Supported Plugins:
 
 * <a href='https://wordpress.org/plugins/advanced-custom-fields/' target='_blank'>Advanced Custom Fields (ACF)</a>.
 * <a href='https://wordpress.org/plugins/custom-post-type-ui/' target='_blank'>Custom Post Type UI</a>.
 * <a href='https://toolset.com/home/types-manage-post-types-taxonomy-and-custom-fields/' target='_blank'>Toolset Types</a>.
 
-### OTHER SUPPORTED PLUGINS
+### Other Supported Plugins:
 * <a href='https://wordpress.org/plugins/wp-optimize/' target='_blank'>WP-Optimize - Clean, Compress, Cache</a>.
 * <a href='https://wordpress.org/plugins/elementor/' target='_blank'>Elementor Website Builder – More than Just a Page Builder</a>.
 
@@ -277,6 +281,14 @@ Yes, you can change button background and text color from plugins dashboard's cu
 💎 TRANSLATION REQUEST 💎
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+= 1.5.11 ( 01 Feb 2024 ) =
+* ReadMe file improved.
+* Documentation updated.
+
+
+= 1.5.10 ( 05 Feb 2024 ) =
+* Minor bug fix.
 
 = 1.5.9 ( 05 Feb 2024 ) =
 * Faq: Faq update.
