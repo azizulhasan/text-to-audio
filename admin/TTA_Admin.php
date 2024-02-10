@@ -105,7 +105,7 @@ class TTA_Admin {
             'is_dashboard' => is_admin(),
             'listeningSettings' => $listening,
             'is_pro_active' => is_pro_active(),
-            'is_pro_license_active' => is_pro_license_active(),
+            'is_pro_license_active' => is_pro_active(),
             'is_admin_page' => \is_admin(),
             'current_post' => TTA_Helper::tts_post_type(),
             "player_id" => get_player_id(),
