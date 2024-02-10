@@ -65,7 +65,7 @@ Adding text-to-speech (TTS) accessibility to your WordPress website can make you
     }
 	` 
 
-### Tex To Speech Free Features:
+### Tex To Speech Pro Features:
 
 * 51 languages support.
 * Get Live Support for first time integration.
