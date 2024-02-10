@@ -30,7 +30,7 @@ export default function UpgradeToPro({ }) {
                             Improved UI and Responsive of the button
                         </li>
                         <li className="list-group-item">
-                            Remove special characters, URL, ShortCodes from content during reading.
+                            Multiple Audio Player Support.
                         </li>
                     </u>
                     <a target='_blank' href="https://atlasaidev.com/text-to-speech-pro/" className="tta_btn btn-center text-center">Upgrade</a>
