@@ -51,7 +51,7 @@ export default function Docs() {
 						<Accordion>
 							<Accordion.Item eventKey='1'>
 								<Accordion.Header>
-									1. Browser support issue on android phone on desktop
+									1. Browser support issue on android phone and desktop
 								</Accordion.Header>
 								<Accordion.Body>
 									This plugin is built on browser API. No external API is used. Here is the API used <a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis' >speechSynthesis</a>
@@ -64,6 +64,7 @@ export default function Docs() {
 
 
 									<br /><br />If you still facing problems regarding browser issues please on a <a target='_blank' href='http://atlasaidev.com/contact-us/'>ticket</a>.
+									<br /><br /> There is no issue releated to browser on <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>pro version.</a>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='2'>
@@ -74,7 +75,7 @@ export default function Docs() {
 									This plugin is built on browser API <a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis' >speechSynthesis</a>.
 									<br />speechSynthesis API is differ browser to browser also divice to divice . So it changes the voices and languages based on browser. one language may available on desktop
 									It can be not available on mobile phone. One voice may available on desktop, it may be not available on android.
-
+									<br /><br /> There is no issue releated to voices on <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>pro version.</a>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='3'>
