@@ -202,7 +202,7 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
         $title = trim(get_the_title());
         $title = tta_clean_content( $title );
         // Get plugin all settings and pass it to TTS javascript Object.
-        $plugin_all_settings = tts_get_settings();
+        $plugin_all_settings = TTA_Helper::tts_get_settings();
 
         if( apply_filters('tts_ignore_match_80_percent', false) && tts_text_match_80_percent($title , $temp_title) ) {
             get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
@@ -212,58 +212,24 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
     });
 }
 
-function tts_site_language($plugin_all_settings) {
-    // TODO: Match with multilinguage UI and default language.
-    $default_language = $plugin_all_settings['listening']['tta__listening_lang'];
-    // $default_language = str_replace(['-', ' '], '_', $default_language);
-    $default_language = strtolower($default_language);
-
-    return apply_filters('tts_site_language', $default_language);
-}
-
-function tts_get_title($title, $selectedLang) {
-
-    if (!$title) {
-       $title = 'Demo Content';
-    }
-
-    $title .= "__lang__" . strtolower($selectedLang);
-    $title = str_replace([' ', '-'], '_', $title);
-    $title = preg_replace("/[^a-z0-9_-]/i", "", $title);
-
-    return $title;
-}
-
-function handle_old_url($post, $new_urls, $old_url) {
-    $associative_urls = [];
-    if(isset($new_urls[0])) {
-        $associative_urls = $new_urls[0];
-    }
-
-    if($old_url) {
-        $language_code = TTA_Helper::get_language_code_from_url($old_url);
-        if(!array_key_exists($language_code, $associative_urls)) {
-            $associative_urls[$language_code] = $old_url;
-            update_post_meta($post->ID, 'tts_mp3_file_urls', $associative_urls);
-            delete_post_meta($post->ID, 'tts_mp3_file_url');
-        }
-    }
-
-    return $associative_urls;
-
-}
-
-
 function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings) {
     
    global $post;
 
     // delete_post_meta($post->ID, 'tts_mp3_file_urls');
-    $new_urls = get_post_meta($post->ID, 'tts_mp3_file_urls');
-    $old_url = get_post_meta($post->ID, 'tts_mp3_file_url', true);
-    $mp3_file_urls = handle_old_url($post, $new_urls, $old_url);
-    $mp3_file_urls = json_encode($mp3_file_urls);
-    $language = tts_site_language($plugin_all_settings);
+    $mp3_file_urls = TTA_Helper::get_mp3_file_urls($post);
+    $language = TTA_Helper::tts_site_language($plugin_all_settings);
+    $file_name = TTA_Helper::tts_file_name($title, $language);
+
+    // global $tts;
+    // $GLOBALS['tts'] = [
+    //     'title' => $title,
+    //     'content' => $content,
+    //     'button_no' => $btn_no,
+    //     'language' => $language,
+    //     'file_name' => $file_name,
+    // ];
+
     $object = ob_start();
     ?>
             <!-- Text To Speech TTS Settings  -->
@@ -279,8 +245,7 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
             var ttsShouldDisplayIcon = "<?php echo $should_display_icon; ?>";
             var readingTime = "<?php echo $content_read_time; ?>";
             var postId = "<?php echo $post->ID; ?>";
-            var fileURL = "<?php echo get_post_meta($post->ID, 'tts_mp3_file_url', true); ?>";
-            var fileURLs = <?php echo $mp3_file_urls; ?>;
+            var fileURLs = <?php echo json_encode($mp3_file_urls); ?>;
 
 
             var ttsSettings = {
@@ -293,14 +258,13 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
                 settings: allSettings,
                 readingTime: readingTime,
                 postId: postId,
-                fileURL: fileURL,
                 fileURLs: fileURLs,
             };
 
 
             var dateTitle = {
                 title: "<?php echo $title; ?>",
-                backend_title: "<?php echo tts_get_title($title, $language) ?>",
+                file_name: "<?php echo $file_name; ?>",
                 date: "<?php echo $date; ?>",
                 language: "<?php echo $language; ?>",
             }
@@ -677,40 +641,10 @@ function set_initial_button_texts($content_read_time) {
         ], $content_read_time);
 }
 
-function tts_get_settings($identifier = '') {  
-   
-    $all_settings_data = [];
-    $cached_settings = get_transient('tts_all_settings');
-    if(!$cached_settings) {
-        $all_settings = [
-            'tta_listening_settings' => 'listening',
-            'tta_settings_data' => 'settings',
-            'tta_record_settings' => 'recording',
-            'tta_customize_settings' => 'customize',
-        ];
-        
-        foreach($all_settings as $settings_key => $identifier) {
-            $settings = get_option($settings_key);
-            $settings = ! $settings ? false : (array) $settings ;
-            $all_settings_data[$identifier] = $settings;
-        }
 
-        set_transient('tts_all_settings', $all_settings_data);
-
-    }else{
-        $all_settings_data = $cached_settings;
-    }
-
-    if($identifier) {
-        $specified_identifier_data = isset($all_settings_data[$identifier]) ? $all_settings_data[$identifier] : $all_settings_data;
-        $all_settings_data = $specified_identifier_data;
-    }
-
-    return $all_settings_data;
-}
 
 function get_player_id() {
-    $customize_settings = (array) tts_get_settings('customize');
+    $customize_settings = (array) TTA_Helper::tts_get_settings('customize');
     $customize_settings['buttonSettings'] = isset( $customize_settings['buttonSettings'] ) ? (array) $customize_settings['buttonSettings'] : [ 'id' => 1];
     $player_id = isset($customize_settings['buttonSettings']['id']) ? $customize_settings['buttonSettings']['id'] : 1;
     if(is_pro_license_active() && $player_id == 1) {
