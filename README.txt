@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio, record, voice c
 Requires at least: 4.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.5.11
+Stable tag: 1.5.12
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -224,6 +224,16 @@ function tta__content_description_callback ( $output, $description, $post_id ) {
 
 ` 
 
+= Can I skip contents to read? =
+Yes, you can skip contents from reading. This is a [pro](https://atlasaidev.com/text-to-speech-pro/) feature. 
+There is a textarea in the settings tab of [text to speech pro](https://atlasaidev.com/text-to-speech-pro/).
+You can skip multiple texts. Multiple tags will be pipe(|) separated.
+
+= Can I skip tags to read? =
+Yes, you can skip tags from reading. This is a [pro](https://atlasaidev.com/text-to-speech-pro/) feature. 
+There is a textarea in the settings tab of [text to speech pro](https://atlasaidev.com/text-to-speech-pro/).
+You can skip multiple tags. Multiple tags will be pipe(|) separated.
+
 = Can I add button in Gutenburg block? =
 Yes, you can add listening button from block editor. Open you block editor and search **Customize Button** then add it.
 Now you can change **color**,  **backgroundColor** , **width**. And also add **custom_css**.
@@ -282,7 +292,11 @@ Yes, you can change button background and text color from plugins dashboard's cu
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
-= 1.5.11 ( 01 Feb 2024 ) =
+= 1.5.12 ( 15 Feb 2024 ) =
+* ReadMe file improved.
+* Documentation updated.
+
+= 1.5.11 ( 10 Feb 2024 ) =
 * ReadMe file improved.
 * Documentation updated.
 
