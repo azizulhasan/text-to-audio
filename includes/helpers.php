@@ -221,14 +221,6 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
     $language = TTA_Helper::tts_site_language($plugin_all_settings);
     $file_name = TTA_Helper::tts_file_name($title, $language);
 
-    // global $tts;
-    // $GLOBALS['tts'] = [
-    //     'title' => $title,
-    //     'content' => $content,
-    //     'button_no' => $btn_no,
-    //     'language' => $language,
-    //     'file_name' => $file_name,
-    // ];
 
     $object = ob_start();
     ?>
