@@ -30,7 +30,7 @@ class TTA_Helper {
             $should_load_button = true;
         }
         
-        $settings = tts_get_settings('settings');
+        $settings = self::tts_get_settings('settings');
         if(!isset($settings['tta__settings_allow_listening_for_post_types']) 
         || count($settings['tta__settings_allow_listening_for_post_types']) === 0
         || !is_array($settings['tta__settings_allow_listening_for_post_types'])
@@ -150,5 +150,112 @@ class TTA_Helper {
 
         return \apply_filters('tts_pro_compatible_plugins_data', $compatible_plugins_data, \get_plugins());
     }
+
+    public static function get_language_code_from_url($url) {
+        $arr = explode('lang', $url);
+        $language_code = end($arr);
+        $language_code = str_replace('__', '',$language_code);
+        $language_code = explode('.', $language_code)[0];
+        $language_code = \str_replace('_', '-', $language_code);
+
+        return $language_code;
+    }
+
+
+    public static function tts_site_language($plugin_all_settings) {
+        // TODO: Match with multilinguage UI and default language.
+        $default_language = $plugin_all_settings['listening']['tta__listening_lang'];
+        // $default_language = str_replace(['-', ' '], '_', $default_language);
+        $default_language = strtolower($default_language);
+
+        return apply_filters('tts_site_language', $default_language);
+    }
+
+    public static function tts_file_name($title, $selectedLang) {
+
+        if (!$title) {
+        $title = 'Demo Content';
+        }
+
+        $title .= "__lang__" . strtolower($selectedLang);
+        $title = str_replace([' ', '-'], '_', $title);
+        $title = preg_replace("/[^a-z0-9_-]/i", "", $title);
+
+        return $title;
+    }
+
+    public static function handle_old_url($post, $new_urls, $old_url) {
+        $associative_urls = [];
+        if(isset($new_urls[0])) {
+            $associative_urls = $new_urls[0];
+        }else{
+            $associative_urls = $new_urls;
+        }
+
+        if($old_url) {
+            $language_code = self::get_language_code_from_url($old_url);
+            if(!array_key_exists($language_code, $associative_urls)) {
+                $associative_urls[$language_code] = $old_url;
+                update_post_meta($post->ID, 'tts_mp3_file_urls', $associative_urls);
+                delete_post_meta($post->ID, 'tts_mp3_file_url');
+            }
+        }
+
+        return $associative_urls;
+
+    }
+
+    public static function tts_get_settings($identifier = '') {  
+   
+        $all_settings_data = [];
+        $cached_settings = get_transient('tts_all_settings');
+        if(!$cached_settings) {
+            $all_settings = [
+                'tta_listening_settings' => 'listening',
+                'tta_settings_data' => 'settings',
+                'tta_record_settings' => 'recording',
+                'tta_customize_settings' => 'customize',
+            ];
+            
+            foreach($all_settings as $settings_key => $identifier) {
+                $settings = get_option($settings_key);
+                $settings = ! $settings ? false : (array) $settings ;
+                $all_settings_data[$identifier] = $settings;
+            }
+
+            set_transient('tts_all_settings', $all_settings_data);
+
+        }else{
+            $all_settings_data = $cached_settings;
+        }
+
+        if($identifier) {
+            $specified_identifier_data = isset($all_settings_data[$identifier]) ? $all_settings_data[$identifier] : $all_settings_data;
+            $all_settings_data = $specified_identifier_data;
+        }
+        global $post;
+
+        return \apply_filters('tts_get_settings', $all_settings_data, $post);
+    }
+
+    public static function get_mp3_file_urls($post = '') {
+        if(!$post) {
+            global $post;
+        }
+
+        $mp3_file_urls = get_post_meta($post->ID, 'tts_mp3_file_urls');
+        $old_url = get_post_meta($post->ID, 'tts_mp3_file_url', true);
+
+        if(is_pro_active() && $old_url) {
+            $mp3_file_urls = self::handle_old_url($post, $mp3_file_urls, $old_url);
+        }
+
+        if(isset($mp3_file_urls[0])) {
+            $mp3_file_urls = $mp3_file_urls[0];
+        }
+
+        return \apply_filters('tts_mp3_file_urls', $mp3_file_urls, $post);
+    }
+
 
 }

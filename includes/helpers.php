@@ -202,7 +202,7 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
         $title = trim(get_the_title());
         $title = tta_clean_content( $title );
         // Get plugin all settings and pass it to TTS javascript Object.
-        $plugin_all_settings = tts_get_settings();
+        $plugin_all_settings = TTA_Helper::tts_get_settings();
 
         if( apply_filters('tts_ignore_match_80_percent', false) && tts_text_match_80_percent($title , $temp_title) ) {
             get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
@@ -213,8 +213,15 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
 }
 
 function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings) {
+    
+   global $post;
+
+    // delete_post_meta($post->ID, 'tts_mp3_file_urls');
+    $mp3_file_urls = TTA_Helper::get_mp3_file_urls($post);
+    $language = TTA_Helper::tts_site_language($plugin_all_settings);
+    $file_name = TTA_Helper::tts_file_name($title, $language);
+
     $object = ob_start();
-    global $post;
     ?>
             <!-- Text To Speech TTS Settings  -->
         <script id='tts_button_settings_<?php echo $btn_no; ?>' >
@@ -229,7 +236,8 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
             var ttsShouldDisplayIcon = "<?php echo $should_display_icon; ?>";
             var readingTime = "<?php echo $content_read_time; ?>";
             var postId = "<?php echo $post->ID; ?>";
-            var fileURL = "<?php echo get_post_meta($post->ID, 'tts_mp3_file_url', true); ?>";
+            var fileURLs = <?php echo json_encode($mp3_file_urls); ?>;
+
 
             var ttsSettings = {
                 listening : ttsListening, 
@@ -241,13 +249,15 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
                 settings: allSettings,
                 readingTime: readingTime,
                 postId: postId,
-                fileURL: fileURL,
+                fileURLs: fileURLs,
             };
 
 
             var dateTitle = {
                 title: "<?php echo $title; ?>",
+                file_name: "<?php echo $file_name; ?>",
                 date: "<?php echo $date; ?>",
+                language: "<?php echo $language; ?>",
             }
 
             if(window.hasOwnProperty('TTS')){ // add content if a page have multiple button
@@ -622,40 +632,10 @@ function set_initial_button_texts($content_read_time) {
         ], $content_read_time);
 }
 
-function tts_get_settings($identifier = '') {  
-   
-    $all_settings_data = [];
-    $cached_settings = get_transient('tts_all_settings');
-    if(!$cached_settings) {
-        $all_settings = [
-            'tta_listening_settings' => 'listening',
-            'tta_settings_data' => 'settings',
-            'tta_record_settings' => 'recording',
-            'tta_customize_settings' => 'customize',
-        ];
-        
-        foreach($all_settings as $settings_key => $identifier) {
-            $settings = get_option($settings_key);
-            $settings = ! $settings ? false : (array) $settings ;
-            $all_settings_data[$identifier] = $settings;
-        }
 
-        set_transient('tts_all_settings', $all_settings_data);
-
-    }else{
-        $all_settings_data = $cached_settings;
-    }
-
-    if($identifier) {
-        $specified_identifier_data = isset($all_settings_data[$identifier]) ? $all_settings_data[$identifier] : $all_settings_data;
-        $all_settings_data = $specified_identifier_data;
-    }
-
-    return $all_settings_data;
-}
 
 function get_player_id() {
-    $customize_settings = (array) tts_get_settings('customize');
+    $customize_settings = (array) TTA_Helper::tts_get_settings('customize');
     $customize_settings['buttonSettings'] = isset( $customize_settings['buttonSettings'] ) ? (array) $customize_settings['buttonSettings'] : [ 'id' => 1];
     $player_id = isset($customize_settings['buttonSettings']['id']) ? $customize_settings['buttonSettings']['id'] : 1;
     if(is_pro_license_active() && $player_id == 1) {
