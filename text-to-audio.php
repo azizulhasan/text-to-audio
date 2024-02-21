@@ -40,6 +40,48 @@ if (!defined('ABSPATH')) {
     define('ABSPATH', dirname(__FILE__) . '/');
 }
 
+if ( ! function_exists( 'ttsp_fs' ) ) {
+    // Create a helper function for easy SDK access.
+    function ttsp_fs() {
+        global $ttsp_fs;
+
+        if ( ! isset( $ttsp_fs ) ) {
+            // Include Freemius SDK.
+            require_once dirname(__FILE__) . '/freemius/start.php';
+
+            $ttsp_fs = fs_dynamic_init( array(
+                'id'                  => '13388',
+                'slug'                => 'text-to-audio',
+                'type'                => 'plugin',
+                'public_key'          => 'pk_937e16238dbdbc42dc1d7a4ead3b7',
+                'is_premium'          => false,
+                'is_premium_only'     => false,
+                'has_premium_version' => true,
+                'has_addons'          => false,
+                'has_paid_plans'      => true,
+                'menu'                => array(
+                    'slug'           => 'text-to-audio',
+                    'support' => 1,
+                    'pricing' => 1,
+                    'contact' => false,
+                ),
+            ) );
+        }
+
+        return $ttsp_fs;
+    }
+
+    // Init Freemius.
+     ttsp_fs();
+    // Signal that SDK was initiated.
+     do_action( 'ttsp_fs_loaded' );
+
+     	// ttsp_fs()->add_action('fs_support_forum_url_text-to-audio', function (){
+        //     echo "http://localhost/azizulhasan/tts/hallow-world/";
+        // });
+
+}
+
 /**
  * Currently plugin version.
  * Start at version 1.0.0 and use SemVer - https://semver.org
