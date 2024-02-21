@@ -152,7 +152,7 @@ class TTA_Admin {
         do_action('tta_enqueue_pro_dashboard_scripts');
 
 
-        if (isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
+        if (is_admin() &&  isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
             /* Load react js */
                 wp_enqueue_script('tts-font-awesome', plugin_dir_url(__FILE__) . 'js/build/font-awesome.min.js', array(), $this->version, true);
                 wp_enqueue_style('tts-bootstrap', plugin_dir_url(__FILE__) . 'css/bootstrap.css', [] , $this->version, 'all' );
@@ -175,6 +175,31 @@ class TTA_Admin {
                 wp_localize_script('text-to-audio-demo-plyr', 'ttsObj', $this->localize_data);
         
             }
+
+            if (is_admin() && isset($GLOBALS['pagenow']) && $GLOBALS['pagenow'] === 'plugins.php' && !$this->localize_data['is_pro_active']) {
+                $object = ob_start();
+                ?>
+                    <script>
+                        window.document.addEventListener('DOMContentLoaded', function () {
+                            /**
+                             * If free version then remove the opt-in link from plugin link.
+                             * Also remove the deactivation modal by freemius. So that 
+                             * AtlasAiDev tracking software works properly.
+                             */
+                            if(document.querySelector('.opt-in-or-opt-out.text-to-audio')) {
+                                document.querySelector('.opt-in-or-opt-out.text-to-audio').style.display = 'none';
+                            }
+                            
+                            if(document.querySelector('[data-module-id="13388"]')) {
+                                document.querySelector('[data-module-id="13388"]').remove();
+                            }
+                        })
+                    </script>
+                <?php
+                $object = ob_get_contents();
+                echo  $object;
+            }
+
     }
 
     public function engueue_block_scripts() {

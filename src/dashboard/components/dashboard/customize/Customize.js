@@ -281,7 +281,7 @@ export default function Customize() {
 
 						<Col xs={12} sm={12} lg={11} className='mt-3'>
 							<Form.Label htmlFor='tta_play_btn_shortcode'>
-								Short Code
+								Short Code | Attributes value must be wraped with " ( double quotation ).
 							</Form.Label>
 							<Form.Control
 								type='text'

@@ -36,8 +36,6 @@
 
 .wp-core-ui .tta_promotion_notice img{width: 100%;} */
 
-
-
 /** 
 My Custom css
 */
@@ -55,7 +53,6 @@ My Custom css
 	background-color: #fbfaff;
 }
 
-
 .tta_btn {
 	display: inline-block;
 	font-weight: 400;
@@ -72,8 +69,11 @@ My Custom css
 	padding: 0.375rem 0.75rem;
 	font-size: 1rem;
 	border-radius: 0.25rem;
-	transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
-		border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+	transition:
+		color 0.15s ease-in-out,
+		background-color 0.15s ease-in-out,
+		border-color 0.15s ease-in-out,
+		box-shadow 0.15s ease-in-out;
 }
 
 .tta_btn {
@@ -86,10 +86,10 @@ My Custom css
 	background-color: #1a4548;
 }
 
-.audio-time-start, .audio-time-end{
-    white-space: nowrap;
+.audio-time-start,
+.audio-time-end {
+	white-space: nowrap;
 }
-
 
 @media (max-width: 599px) {
 	#ttaLayoutSidenav #ttaLayoutSidenav_content {
@@ -103,30 +103,31 @@ My Custom css
 	}
 }
 
-
 .wp-core-ui .tta-notice.notice.is-dismissible {
-    padding-right: 10px;
+	padding-right: 10px;
 }
 .wp-core-ui .tta-notice.notice.is-dismissible .notice-dismiss {
-    top: 10px;
-    right: 10px;
+	top: 10px;
+	right: 10px;
 }
 .wp-core-ui .tta-notice.notice.is-dismissible .notice-dismiss:before {
-    font: normal 20px/20px dashicons;
+	font: normal 20px/20px dashicons;
 }
 .wp-core-ui #fonts_downloading p {
-    font-weight: 400;
-    font-size: 15px;
+	font-weight: 400;
+	font-size: 15px;
 }
-.wp-core-ui .tta-notice.tta-fd-notice.notice.is-dismissible .tta-review-notice-logo {
-    width: 36px;
-    height: 38px;
-    margin-right: 10px;
+.wp-core-ui
+	.tta-notice.tta-fd-notice.notice.is-dismissible
+	.tta-review-notice-logo {
+	width: 36px;
+	height: 38px;
+	margin-right: 10px;
 }
 .wp-core-ui .tta-notice.tta-fd-notice.notice.is-dismissible p {
-    padding: 4px;
-    margin: 0;
+	padding: 4px;
+	margin: 0;
 }
 .wp-core-ui .tta-notice.tta-fd-notice.notice.is-dismissible p #download_button {
-    margin-left: 10px;
+	margin-left: 10px;
 }
