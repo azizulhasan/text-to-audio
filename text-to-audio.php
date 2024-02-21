@@ -64,6 +64,7 @@ if ( ! function_exists( 'ttsp_fs' ) ) {
                     'support' => 1,
                     'pricing' => 1,
                     'contact' => false,
+                    'account' => false,
                 ),
             ) );
         }
