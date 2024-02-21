@@ -120,9 +120,13 @@ class TTA_Hooks {
      * Register MetaBox to add PDF Download Button
      */
     public function add_custom_meta_box() {
+        $plugin_name = 'Text To Speech TTS';
+        if(\is_pro_active()) {
+            $plugin_name = 'Text To Speech Pro';
+        }
         add_meta_box(
                 'wps22-meta-box',
-                'Text To Speech TTS',
+                $plugin_name,
                 array(
                     $this,
                     'tta_meta_box',

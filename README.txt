@@ -5,15 +5,15 @@ Tags: accessibility, speech, tts, text to speech, text to audio, record, voice c
 Requires at least: 4.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.5.12
+Stable tag: 1.5.13
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Add accessibility to WordPress site to read contents out loud in more than 20 languages.
+Add accessibility to WordPress site to read contents out loud in more than 51 languages.
 
 == Description ==
 
-Add accessibility to WordPress site to read contents out loud in more than 20 languages.
+Add accessibility to WordPress site to read contents out loud in more than 51 languages.
 
 There is no need to create an account text to speech plugin is completely free. Just install the plugin and enjoy the whole features of the plugin.
 
@@ -71,12 +71,13 @@ Adding text-to-speech (TTS) accessibility to your WordPress website can make you
 * Get Live Support for first time integration.
 * Get Priority Support.
 * Engage with your customers more interactively.
+* Listen content while doing other task.
 * Improved UI of the button.
 * Multilingual support.
 * Multi-lang Websites
 * Responsive speaking button.
 * Specify speaking content with CSS selectors.
-* Translate your content to any language by multilingual plugin.
+* Translate your content to any language by this plugin.
 * Support all custom post types.
 * Download **mp3** file.
 * Unlimited Downloads
@@ -291,6 +292,17 @@ Yes, you can change button background and text color from plugins dashboard's cu
 💎 TRANSLATION REQUEST 💎
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+* <a href='https://wordpress.org/plugins/gtranslate/' target='_blank'>Translate WordPress with GTranslate Plugin</a>.
+
+# How WPML WordPress Multilingual Plugin  Works?
+After translating content by [WPML](https://wpml.org/) Text To Audio Accessibility plugin will autometically translate content to the correct language.
+Text To Audio Accessibility will detect content language from the URL of that particular page or post.
+
+= 1.5.13 ( 19 Feb 2024 ) =
+* [WPML](https://wpml.org/) and [Gtranslate](https://wordpress.org/plugins/gtranslate/) plugin compatibility improved.
+* Save multiple url to database for generated mp3 file.
+* Documentation updated.
 
 = 1.5.12 ( 15 Feb 2024 ) =
 * ReadMe file improved.
