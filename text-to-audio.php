@@ -15,7 +15,7 @@
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
  * Description:       Add accessibility to WordPress site to read contents out loud in more than 51 languages.
- * Version:           1.5.13
+ * Version:           1.5.14
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-2.0+
@@ -30,6 +30,8 @@ use TTA\TTA_Activator;
 use TTA\TTA_Deactivator;
 use TTA_Api\TTA_Api_Routes;
 use TTA\TTA_Notices;
+use TTA\TTA_Helper;
+
 // If this file is called directly, abort.
 if (!defined('WPINC')) {
     die;
@@ -40,7 +42,8 @@ if (!defined('ABSPATH')) {
     define('ABSPATH', dirname(__FILE__) . '/');
 }
 
-if ( ! function_exists( 'ttsp_fs' ) ) {
+
+if (!TTA_Helper::is_pro_active() &&  ! function_exists( 'ttsp_fs' ) ) {
     // Create a helper function for easy SDK access.
     function ttsp_fs() {
         global $ttsp_fs;
@@ -160,7 +163,7 @@ class TTA_Init {
 
     public function __construct() {
         if (!defined('TEXT_TO_AUDIO_VERSION')) {
-            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '1.5.13'));
+            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '1.5.14'));
         }
 
         if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {

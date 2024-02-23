@@ -176,7 +176,9 @@ function tta_get_button_content($atts, $is_block = false) {
     }
     $custom_css = compatibility_with_themes($custom_css);
     // Custom class to button.
-    $class = (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
+    $class = (isset($text_arr['class'])) && strlen($text_arr['class']) ? esc_attr($text_arr['class']) : "";
+    $class .= (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
+    
     $button = "<tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
 
     // init button scripts
@@ -341,6 +343,7 @@ function get_button_text( $atts, $content_read_time ) {
     
     update_option( 'tta__button_text_arr', $text_arr);
 
+
     return $text_arr;
 }
 
@@ -366,15 +369,16 @@ function get_text_array_from_shortcode($customize_settings, $text_arr) {
         $attributes[$match[1]] = $match[2];
     }
 
-    foreach($text_arr as $key => $value) {
+    foreach($attributes as $key => $value) {
         if( isset( $attributes[$key] ) && $attributes[$key] ) {
-            $text = sanitize_text_field($attributes[$key]);
+            $text = sanitize_text_field($value);
             $text = esc_html($text);
-            $text_arr[$key] = $text ? $text : $value;
+            if($text) {
+                $text_arr[$key] = $text;
+            }
         }
     }
 
-    error_log(print_r([$shortcode, $text_arr, $attributes],1));
 
     return $text_arr;
 
