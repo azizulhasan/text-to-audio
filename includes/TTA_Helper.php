@@ -257,5 +257,26 @@ class TTA_Helper {
         return \apply_filters('tts_mp3_file_urls', $mp3_file_urls, $post);
     }
 
+    /**
+     * Is plugin active
+     */
+    public static function is_pro_active() {
+
+        if(!function_exists('is_plugin_active') ){
+            include_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        $status = is_plugin_active('text-to-speech-pro/text-to-audio-pro.php');
+
+        if($status) return true;
+
+        $status = is_plugin_active('text-to-speech-pro-premium/text-to-audio-pro.php');
+
+        if($status) return true;
+        
+        
+        return is_plugin_active('text-to-audio-pro/text-to-audio-pro.php');
+    }
+
 
 }

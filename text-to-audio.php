@@ -30,6 +30,8 @@ use TTA\TTA_Activator;
 use TTA\TTA_Deactivator;
 use TTA_Api\TTA_Api_Routes;
 use TTA\TTA_Notices;
+use TTA\TTA_Helper;
+
 // If this file is called directly, abort.
 if (!defined('WPINC')) {
     die;
@@ -40,7 +42,8 @@ if (!defined('ABSPATH')) {
     define('ABSPATH', dirname(__FILE__) . '/');
 }
 
-if ( ! function_exists( 'ttsp_fs' ) ) {
+
+if (!TTA_Helper::is_pro_active() &&  ! function_exists( 'ttsp_fs' ) ) {
     // Create a helper function for easy SDK access.
     function ttsp_fs() {
         global $ttsp_fs;
