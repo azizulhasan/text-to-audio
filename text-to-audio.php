@@ -15,7 +15,7 @@
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
  * Description:       Add accessibility to WordPress site to read contents out loud in more than 51 languages.
- * Version:           1.5.13
+ * Version:           1.5.14
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-2.0+
@@ -30,6 +30,8 @@ use TTA\TTA_Activator;
 use TTA\TTA_Deactivator;
 use TTA_Api\TTA_Api_Routes;
 use TTA\TTA_Notices;
+use TTA\TTA_Helper;
+
 // If this file is called directly, abort.
 if (!defined('WPINC')) {
     die;
@@ -38,6 +40,50 @@ if (!defined('WPINC')) {
 // Absolute path to the WordPress directory.
 if (!defined('ABSPATH')) {
     define('ABSPATH', dirname(__FILE__) . '/');
+}
+
+
+if (!TTA_Helper::is_pro_active() &&  ! function_exists( 'ttsp_fs' ) ) {
+    // Create a helper function for easy SDK access.
+    function ttsp_fs() {
+        global $ttsp_fs;
+
+        if ( ! isset( $ttsp_fs ) ) {
+            // Include Freemius SDK.
+            require_once dirname(__FILE__) . '/freemius/start.php';
+
+            $ttsp_fs = fs_dynamic_init( array(
+                'id'                  => '13388',
+                'slug'                => 'text-to-audio',
+                'type'                => 'plugin',
+                'public_key'          => 'pk_937e16238dbdbc42dc1d7a4ead3b7',
+                'is_premium'          => false,
+                'is_premium_only'     => false,
+                'has_premium_version' => true,
+                'has_addons'          => false,
+                'has_paid_plans'      => true,
+                'menu'                => array(
+                    'slug'           => 'text-to-audio',
+                    'support' => 1,
+                    'pricing' => 1,
+                    'contact' => false,
+                    'account' => false,
+                ),
+            ) );
+        }
+
+        return $ttsp_fs;
+    }
+
+    // Init Freemius.
+     ttsp_fs();
+    // Signal that SDK was initiated.
+     do_action( 'ttsp_fs_loaded' );
+
+     	// ttsp_fs()->add_action('fs_support_forum_url_text-to-audio', function (){
+        //     echo "http://localhost/azizulhasan/tts/hallow-world/";
+        // });
+
 }
 
 /**
@@ -117,7 +163,7 @@ class TTA_Init {
 
     public function __construct() {
         if (!defined('TEXT_TO_AUDIO_VERSION')) {
-            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '1.5.13'));
+            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '1.5.14'));
         }
 
         if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
