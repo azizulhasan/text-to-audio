@@ -1,11 +1,11 @@
 === Text To Speech TTS Accessibility ===
 Contributors: atlasaidev, hasanazizul, 
 Donate link: http://atlasaidev.com/
-Tags: accessibility, speech, tts, text to speech, text to audio, record, voice comment, voice to text-comment,
+Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 4.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.5.14
+Stable tag: 1.5.15
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -299,6 +299,9 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 After translating content by [WPML](https://wpml.org/) Text To Audio Accessibility plugin will autometically translate content to the correct language.
 Text To Audio Accessibility will detect content language from the URL of that particular page or post.
 
+= 1.5.15 ( 28 Feb 2024 ) =
+* Live preview for free version added.
+
 = 1.5.14 ( 22 Feb 2024 ) =
 * Change Button text from customization menu.
 * Freemius integration for free version.
@@ -470,208 +473,6 @@ Text To Audio Accessibility will detect content language from the URL of that pa
 
 = 1.4.1 ( Sep 6 , 2023) =
 * Fixed: Custom css adding issue solved.
-
-= 1.4.0 ( Sep 2 , 2023) =
-* Tested : WordPress 6.3
-* Updated: Documentation updated. Pro Features added.
-
-= 1.3.25 ( August 24 , 2023) =
-* Added : After switching tab stop speeching, if paused by intention.
-
-= 1.3.24 ( August 24 , 2023) =
-* Added : After switching tab stop speeching, if paused by intention.
-
-= 1.3.23 ( August 9 , 2023) =
-* Tested : WordPress 6.3
-* PHP version: PHP version 7.4 is recomended as WordPress 6.3 [recomendation](https://wordpress.org/download/#:~:text=Recommend%20PHP%207.4%20or%20greater%20and%20MySQL%20version%205.7%20or%20MariaDB%20version%2010.4%20or%20greater.)
-* Updated: Documentation updated.
-
-= 1.3.22 ( JULY 27 , 2023) =
-* Added : Invitation to translate plugin notice added to dashboard.
-* Added : Review notice added to dashboard.
-
-
-= 1.3.21 ( JULY 21 , 2023) =
-* Added : `tta__content` filter added. Arguments are `$content, $post`.
-
-
-= 1.3.20 ( JULY 15 , 2023) =
-* Removed : Invitation to translate plugin notice added to dashboard.
-* Removed : Review notice added to dashboard.
-
-= 1.3.19 ( JULY 15 , 2023) =
-* Added : Invitation to translate plugin notice added to dashboard.
-* Added : Review notice added to dashboard.
-* Updated : Pluign documentation updated.
-
-
-= 1.3.18 ( JULY 09 , 2023) =
-* Fixed : Error during plugin update issue fixed.
-* Added : By default play button showing to page added.
-* Renamed : Menu name "Docs" to "FAQ" renamed.
-
-
-= 1.3.17 (JUNE 28, 2023) =
-* Fixed : [Text2Speech Stopped Working](https://wordpress.org/support/topic/text2speech-stopped-working/) issue fixed.
-
-
-= 1.3.16 (JUNE 25, 2023) =
-* Moved : Button id number, content, and listening settings moved to footer.
-
-
-= 1.3.15 (June 11, 2023) =
-* Improved : On button hover cursor is now pointer.
-
-= 1.3.14 (May 31, 2023) =
-* Fixed : Allow Listening For Post Type not working issue resolved.
-
-
-= 1.3.13 (May 29, 2023) =
-* Rename: Allow Recoding For Post Type to Allow Listeing For Post Type.
-* Fixed : Allow Listeing For Post Type not working issue.
-* Removed: Allow Button On Single Page option.
-* Moved: Allow Button On Single Page to Allow Listeing For Post Type
-
-
-= 1.3.12 (May 23, 2023) =
-* Updated: Documentation updated.
-* Updated: Dashboard documentation menu change to "Support Docs".
-* Added: More Questions added to "Support Docs" menu
-* Fixed: Copy to clipboard is not working.
-
-= 1.3.11 (May 17, 2023) =
-* Fixed : Multiple button are showing on archive, category, tag page.
-
-= 1.3.10 (May 12, 2023) =
-* Added : inline css moved to text-to-audio-css file.
-* Fixed : customize button block not found on the block editor.
-
-= 1.3.9 (May 07, 2023) =
-* Fixed : 10 seconds after puase the resume button not working on mobile and desktop.
-* Fixed : after puase the resume button not working on mobile.
-
-= 1.3.8 (Apr 30, 2023) =
-* Improved : Don't stop reading text even tab switches functionality improved.
-
-= 1.3.7 (Apr 30, 2023) =
-* Fixed : Don't stop reading text even tab switches.
-
-= 1.3.6 (Apr 19, 2023) =
-* Fixed : Stop reading after first paragragh in android issue solved.
-
-= 1.3.5 (Apr 18, 2023) =
-* Fixed : [Stops reading after around 700 words.](https://wordpress.org/support/topic/stops-reading-after-around-700-words/)
-
-= 1.3.4 (Apr 12, 2023) =
-* Fixed : [Page don't show the button](https://wordpress.org/support/topic/pages-dont-show-the-button/) issue solved.
-
-= 1.3.3 (2023-04-05) =
-* Tested: WP version 6.2 tested.
-* Changed: Plugin name changed to "Text To Speech TTS"
-
-= 1.3.2 (2023-03-30) =
-* Improved: Dashboard Notice UI Improved.
-* Fixed: Selection of listening language to any language.
-
-
-= 1.3.1 (2023-03-24) =
-* Added: Browser supported languages are added to documentation.
-* Fixed: Documentation Improveed.
-
-
-= 1.3.0 (2023-03-11) =
-* Fixed: Chrome android play button issue fixed.
-* Fixed: FireFox android play button issue fixed.
-* Fixed: Microsoft edge android play button issue fixed.
-* Fixed: IPhone Chrome android play button issue fixed.
-* Fixed: Dashboard UI improved.
-* Fixed: Listening voices are now based on browser API.
-
-
-= 1.2.5 (2023-03-06) =
-* Added: Play button display only single single page.
-* Fixed: Database value delete after update plugin.
-
-= 1.2.4 (2023-03-01) =
-* Fixed: Button text position issue fixed.
-* Fixed: Button icon position issue fixed.
-
-= 1.2.3 (2023-02-27) =
-* Fixed: Post title ASCII issue resolved.
-* Fixed: Error on incognito mode issue solved.
-* Fixed: Dashicons load in incognito mode or for non logged in users.
-* Fixed: Dashicon related css issue fixed.
-* Fixed: enable/disable button in single page.
-
-= 1.2.2 (2023-02-04) =
-* Updated: URL change.
-
-= 1.2.1 (2023-01-28) =
-* Improved: Documentation improved.
-* Added: .pot file added for translation.
-* Updated: Plugin name from Text To Audio to Text To Speech Ninja.
-
-= 1.2.0 (2023-01-04) =
-* Fixed: speechSynthesis pause after 10 - 15 seconds issue fixed.
-* Tested: WordPress verison 6.1.1 tested.
-
-= 1.1.6 (2022-10-22) =
-* Tested: WordPress verison 6.1 tested .
-* Improved: Button UI improved.
-
-= 1.1.5 (2022-10-22) =
-* Added:  enable/disable option for adding button to every post.
-* Improved:  Settings UI improved.
-* Improved:  Documentation improved.
-
-
-= 1.1.4 (2022-10-09) =
-* Button Icon : Button Icon display hide/show option added.
-* Tabs: Settings tab rearranged.
-
-
-= 1.1.3 (2022-09-24) =
-* Button text : Listeing  and Recoding button text change option added throw filter and attribute.
-* Action Links: Plugin action Links added.
-* Documentation: Documentation Improved.
-* Filter added: ```tta__button_text_arr```, ```tta__content_title```, ```tta__content_description``` filter added.
-
-= 1.1.2 (2022-09-14)  =
-* Bugfixed: is_plugin_active error fixed.
-* Improved: FireFox api missing notice update.
-
-= 1.1.1 (2022-07-23)  =
-* Bugfixed: FireFox api missing alert bug fixed.
-* Improved: Documentation Improved.
-
-= 1.1.0 (2022-07-23)  =
-* Feature: Customization of listening button from block editor. Block Name ( Customize Button )
-* Added : Documentation added for how to enable ```SpeechRecognition``` and ```speechSynthesis``` on FireFox.
-* Solved: FireFox ```SpeechRecognition``` and ```speechSynthesis``` issue solved.
-
-
-= 1.0.4 (2022-07-12)  =
-* Changed: shortcode from  ```[wps_listen_btn]``` to ```[tta_listen_btn]```
-* Changed: Files name changed.
-* Fixed: Customization UI issue fixed.
-
-= 1.0.3 (2022-06-17)  =
-* Fixed: Button CSS issue fixed.
-* Fixed: Button alignment issue fixed.
-* Added: Support ticket button added.
-* Added: Review button added.
-
-= 1.0.2 (2022-05-26)  =
-* Make dashboard responsive.
-* Ask for a feature button added.
-* Browser support documentation added.
-* Bugfixed.
-
-= 1.0.1 (2022-05-23)  =
-* Gutenburg support added.
-
-= 1.0.0 (2022-05-18)  =
-* Initial release.
 
 == Upgrade Notice ==
 
