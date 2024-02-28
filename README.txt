@@ -1,5 +1,5 @@
 === Text To Speech TTS Accessibility ===
-Contributors: atlasaidev, hasanazizul, 
+Contributors: atlasaidev, hasanazizul
 Donate link: http://atlasaidev.com/
 Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 4.0
