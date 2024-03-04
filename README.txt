@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 4.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.5.15
+Stable tag: 1.5.16
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -298,6 +298,10 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 # How WPML WordPress Multilingual Plugin  Works?
 After translating content by [WPML](https://wpml.org/) Text To Audio Accessibility plugin will autometically translate content to the correct language.
 Text To Audio Accessibility will detect content language from the URL of that particular page or post.
+
+= 1.5.16 ( 04 Mars 2024 ) =
+* Faq menu is now Docs.
+* Multilingual notice added.
 
 = 1.5.15 ( 28 Feb 2024 ) =
 * Live preview for free version added.

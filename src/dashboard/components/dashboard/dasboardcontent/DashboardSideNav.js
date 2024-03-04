@@ -44,7 +44,7 @@ export default function DashboardSideNav({ isProVersion }) {
 							<div className='sb-nav-link-icon'>
 								<i className='fas fa-book'></i>
 							</div>
-							FAQ
+							Docs
 						</Link>
 						<Link className='nav-link' to={'/analitics'}>
 							<div className='sb-nav-link-icon'>
