@@ -269,7 +269,7 @@ export default function Customize() {
 										as='textarea'
 										onChange={(e) => setText(e)}
 										onFocus={(e) =>
-											toast('Write/Say something here.')
+											toast('Write something here.')
 										}
 										value={speakingText ? speakingText : ''}
 										placeholder='Write here something and click listen button.'
