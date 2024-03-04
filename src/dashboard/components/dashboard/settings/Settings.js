@@ -185,7 +185,7 @@ export default function Settings() {
 														{__('Click To Know How It Works?')}
 													</Tooltip>
 												}>
-												<a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/' > <i className="fas fa-info-circle"></i></a>
+												<a target='_blank' href='https://atlasaidev.com/docs/' > <i className="fas fa-info-circle"></i></a>
 											</OverlayTrigger>
 										))}
 									</>
@@ -234,7 +234,7 @@ export default function Settings() {
 														{__('Click To Know How It Works?')}
 													</Tooltip>
 												}>
-												<a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/' > <i className="fas fa-info-circle"></i></a>
+												<a target='_blank' href='https://atlasaidev.com/docs/' > <i className="fas fa-info-circle"></i></a>
 											</OverlayTrigger>
 										))}
 									</>
@@ -283,7 +283,7 @@ export default function Settings() {
 														{__('Click To Know How It Works?')}
 													</Tooltip>
 												}>
-												<a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/' > <i className="fas fa-info-circle"></i></a>
+												<a target='_blank' href='https://atlasaidev.com/docs/' > <i className="fas fa-info-circle"></i></a>
 											</OverlayTrigger>
 										))}
 									</>

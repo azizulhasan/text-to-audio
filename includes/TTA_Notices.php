@@ -32,6 +32,10 @@ class TTA_Notices {
 					'callback' => 'plugin_compatible_notice_callback',
 					'name' => 'WPML Multilingual CMS',
 				],
+				'tts-multilingual' => [
+					'callback' => 'plugin_compatible_notice_callback',
+					'name' => 'WPML Multilingual CMS And GTranslate',
+				],
         ];
 
 		if(!function_exists('is_plugin_active')) {
@@ -45,6 +49,9 @@ class TTA_Notices {
 
 					add_action( 'admin_notices', [ $this, $data['callback'] ] );
 					break;
+				}else if( $plugin_name == 'tts-multilingual') {
+					$this->active_pluin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+					add_action( 'admin_notices', [ $this, $data['callback'] ] );
 				}
         	}
 		}
@@ -55,10 +62,13 @@ class TTA_Notices {
 
 
 	public function plugin_compatible_notice_callback() {
-		
-        //     delete_option('tta_plugin_compatible_notice_next_show_time');
-        //     delete_user_meta('1', 'tta_plugin_compatible_notice_dismissed');
-        //  update_option('tta_plugin_compatible_notice_next_show_time', 12);
+		$wpml_and_gtranslate_notice_displaid = \get_option('wpml_and_gtranslate_notice_displaid', false);
+		if('WPML Multilingual CMS And GTranslate' == \strip_tags($this->active_pluin_name) && !$wpml_and_gtranslate_notice_displaid) {
+			delete_option('tta_plugin_compatible_notice_next_show_time');
+			delete_user_meta(\get_current_user_id(), 'tta_plugin_compatible_notice_dismissed');
+			update_option('tta_plugin_compatible_notice_next_show_time', 12);
+			\update_option('wpml_and_gtranslate_notice_displaid', true);
+		}
 
 		$pluginName    = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
 		$ProPluginName    = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS Pro', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
@@ -101,7 +111,7 @@ class TTA_Notices {
 					);
 					?></p>
                 <p>
-                    <a class="button button-primary" data-response="compitable" href="#" target="_blank"><?php esc_html_e( 'Buy Now', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                    <a class="button button-primary" data-response="compitable" href="https://atlasaidev.com/text-to-speech/" target="_blank"><?php esc_html_e( 'Buy Now', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
                 </p>
             </div>
 
@@ -124,7 +134,9 @@ class TTA_Notices {
                                 let  tta_notice = self.closest('.tta-notice'), which = tta_notice.attr('data-which');
                                 								console.log( which)
 
-								wp.ajax.post( 'tta_hide_notice', { _wpnonce: '<?php echo esc_attr( $nonce ); ?>', which: which } );
+								if(wp.ajax) {
+									wp.ajax.post( 'tta_hide_notice', { _wpnonce: '<?php echo esc_attr( $nonce ); ?>', which: which } );
+								}
                                 let notice = self.attr('data-response');
 
                                 if ( 'compitable' === notice ) {
@@ -137,7 +149,9 @@ class TTA_Notices {
 								
                                 // noinspection ES6ConvertVarToLetConst
                                 var self = $(this), tta_notice = self.closest('.tta-notice'), which = tta_notice.attr('data-which');
-                                wp.ajax.post( 'tta_hide_notice', { _wpnonce: '<?php echo esc_attr( $nonce ); ?>', which: which } );
+                                if(wp.ajax) {
+									wp.ajax.post( 'tta_hide_notice', { _wpnonce: '<?php echo esc_attr( $nonce ); ?>', which: which } );
+								}
                             });
 
 						<?php if ( tta_is_rtl() ) { ?>
@@ -224,8 +238,9 @@ class TTA_Notices {
 
                                 let  tta_notice = self.closest('.tta-notice'), which = tta_notice.attr('data-which');
                                 								console.log( which)
-
-								wp.ajax.post( 'tta_hide_notice', { _wpnonce: '<?php echo esc_attr( $nonce ); ?>', which: which } );
+								if(wp.ajax) {
+									wp.ajax.post( 'tta_hide_notice', { _wpnonce: '<?php echo esc_attr( $nonce ); ?>', which: which } );
+								}
                                 let notice = self.attr('data-response');
 
                                 if ( 'translate' === notice ) {
