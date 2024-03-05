@@ -182,7 +182,7 @@ function tta_get_button_content($atts, $is_block = false) {
     $button = "<tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
 
     // init button scripts
-    do_action('tts_enqueue_button_scripts' , $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time);
+    do_action('tts_enqueue_button_scripts' , $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts);
 
     $data =  apply_filters( 'tts__listening_button', $button, $btn_no, $class );
 
@@ -190,20 +190,27 @@ function tta_get_button_content($atts, $is_block = false) {
 }
 
 
-add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 10);
+add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 11);
 
 /**
  * Enqueue button scripts
  */
-function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time) {
+function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts) {
     // enqueue footer stript
-    add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time) { 
+    add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts) { 
         $temp_title = trim(str_replace('.', '', $title));
         $title = trim(get_the_title());
         $title = tta_clean_content( $title );
         // Get plugin all settings and pass it to TTS javascript Object.
         $plugin_all_settings = TTA_Helper::tts_get_settings();
+        if( isset($atts['lang']) && $atts['lang'] && isset($plugin_all_settings['listening']['tta__listening_lang'])  &&  $atts['lang'] != $plugin_all_settings['listening']['tta__listening_lang'] ) {
+            $plugin_all_settings['listening']['tta__listening_lang'] = $atts['lang'];
+        }
 
+        if( isset($atts['voice']) && $atts['voice']  && isset($plugin_all_settings['listening']['tta__listening_voice'])  &&  $atts['voice'] != $plugin_all_settings['listening']['tta__listening_voice'] ) {
+            $plugin_all_settings['listening']['tta__listening_voice'] = $atts['voice'];
+        }
+        
         if( apply_filters('tts_ignore_match_80_percent', false) && tts_text_match_80_percent($title , $temp_title) ) {
             get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
         }else{
