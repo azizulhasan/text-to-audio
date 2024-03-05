@@ -110,6 +110,8 @@ class TTA_Admin {
             'current_post' => TTA_Helper::tts_post_type(),
             "player_id" => get_player_id(),
             'compatible' => TTA_Helper::get_compatible_plugins_data(),
+            'is_folder_writable' => TTA_Helper::is_audio_folder_writable(),
+
         ];
     }
 

@@ -65,7 +65,7 @@ export default function Customize() {
 			.catch((err) => {
 				console.log(err);
 			});
-		let initialText = 'Add accessibility to WordPress site to read contents out loud in more than 20 languages.'
+		let initialText = 'Add accessibility to WordPress site to read contents out loud in more than 51 languages.'
 
 		localStorage.setItem('demo_listening_content', initialText)
 		setSpeakingText(initialText);
@@ -232,8 +232,8 @@ export default function Customize() {
 		{ id: 1, name: 'Default', object: 'TextToSpeech', disabled: false },
 		{ id: 2, name: 'Default Pro', object: 'TextToSpeechPro', disabled: false },
 		{ id: 3, name: 'Google TTS Pro', object: 'TextToSpeechPro', disabled: false },
-		{ id: 4, name: "ChatGPT TTS (Soon)", object: 'TextToSpeechPro', disabled: true },
-		{ id: 5, name: "Google Cloud TTS (Soon)", object: 'TextToSpeechPro', disabled: true },
+		{ id: 4, name: "ChatGPT TTS", object: 'TextToSpeechPro', disabled: false },
+		{ id: 5, name: "Google Cloud TTS", object: 'TextToSpeechPro', disabled: false },
 	])
 
 	return (
