@@ -44,6 +44,9 @@ export default class TextToSpeech {
         this.speech = new Speech()
         this.splitSentences = splitSentences
 
+        console.log({ test: this.buttonTextArr.listen_text })
+
+
     }
 
     getData(shouldAsingThis = true) {
@@ -54,7 +57,7 @@ export default class TextToSpeech {
     }
 
     playButtonText() {
-        return this.buttonTextArr.listen_text;
+        return this?.buttonTextArr?.listen_text ?? 'Listen';
     }
 
     playButtonContent() {
@@ -62,19 +65,19 @@ export default class TextToSpeech {
         return '<div class="tts_button"><span class="dashicons dashicons-controls-play"></span> <span> ' + this.playButtonText() + '<span></span></span></div>'
     }
     replayButtonText() {
-        return this.buttonTextArr.replay_text;
+        return this?.buttonTextArr?.replay_text ?? 'Replay';
     }
     replayButtonContent() {
         return '<div class="tts_button"><span class="dashicons dashicons-image-rotate"></span> <span> ' + this.replayButtonText() + '<span></span></span></div>'
     }
     pauseButtonText() {
-        return this.buttonTextArr.pause_text;
+        return this?.buttonTextArr?.pause_text ?? 'Pause';
     }
     pauseButtonContent() {
         return '<div class="tts_button"><span class="dashicons dashicons-controls-pause"></span> <span> ' + this.pauseButtonText() + '<span></span></span></div>'
     }
     resumeButtonText() {
-        return this.buttonTextArr.resume_text;
+        return this?.buttonTextArr?.resume_text ?? 'Resume';
     }
     resumeButtonContent() {
         return '<div class="tts_button"><span class="dashicons dashicons-controls-play"></span> <span> ' + this.buttonTextArr.resume_text + '<span></span></span></div>'
