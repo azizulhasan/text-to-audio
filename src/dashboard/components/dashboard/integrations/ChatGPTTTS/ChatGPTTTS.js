@@ -48,7 +48,7 @@ export default function ChatGPTTTS({ getCurrentTTSService, currentTTSServic }) {
             toast('Please Activate the Text To Speech Pro license to enjoy full features of the plugin.');
             return;
         }
-        // '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'
+
         if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_folder_writable) {
             toast("Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.", 'error', { autoClose: 10000 })
             return

@@ -39,12 +39,12 @@ export default function DashboardSideNav({ isProVersion }) {
 							</div>
 							Customization
 						</Link>
-						<Link className='nav-link' to={'/integrations'}>
+						{/* <Link className='nav-link' to={'/integrations'}>
 							<div className='sb-nav-link-icon'>
 								<i className='fas fa-book'></i>
 							</div>
 							Integrations
-						</Link>
+						</Link> */}
 						<Link className='nav-link' to={'/faq'}>
 							<div className='sb-nav-link-icon'>
 								<i className='fas fa-book'></i>

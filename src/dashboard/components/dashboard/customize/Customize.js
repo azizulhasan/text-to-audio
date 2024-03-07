@@ -232,8 +232,8 @@ export default function Customize() {
 		{ id: 1, name: 'Default', object: 'TextToSpeech', disabled: false },
 		{ id: 2, name: 'Default Pro', object: 'TextToSpeechPro', disabled: false },
 		{ id: 3, name: 'Google TTS Pro', object: 'TextToSpeechPro', disabled: false },
-		{ id: 4, name: "ChatGPT TTS", object: 'TextToSpeechPro', disabled: false },
-		{ id: 5, name: "Google Cloud TTS", object: 'TextToSpeechPro', disabled: false },
+		{ id: 4, name: "ChatGPT TTS(Soo)", object: 'TextToSpeechPro', disabled: true },
+		{ id: 5, name: "Google Cloud TTS(Soo)", object: 'TextToSpeechPro', disabled: true },
 	])
 
 	return (
