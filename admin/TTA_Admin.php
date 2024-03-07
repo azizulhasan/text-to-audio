@@ -178,10 +178,10 @@ class TTA_Admin {
         
             }
 
-            if (is_admin() && isset($GLOBALS['pagenow']) && $GLOBALS['pagenow'] === 'plugins.php' && !$this->localize_data['is_pro_active']) {
-                $object = ob_start();
-                ?>
-                    <script>
+            // if (is_admin() && isset($GLOBALS['pagenow']) && $GLOBALS['pagenow'] === 'plugins.php' && !$this->localize_data['is_pro_active']) {
+            //     $object = ob_start();
+            //     ?>
+                    <!-- <script>
                         window.document.addEventListener('DOMContentLoaded', function () {
                             /**
                              * If free version then remove the opt-in link from plugin link.
@@ -196,11 +196,12 @@ class TTA_Admin {
                                 document.querySelector('[data-module-id="13388"]').remove();
                             }
                         })
-                    </script>
+                    </script> -->
+                    
                 <?php
-                $object = ob_get_contents();
-                echo  $object;
-            }
+            //     $object = ob_get_contents();
+            //     echo  $object;
+            // }
 
     }
 
