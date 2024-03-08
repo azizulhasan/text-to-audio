@@ -281,7 +281,7 @@ Add class on shortcode as an attribute. Example :
 = How to  change button background and text color? =
 Yes, you can change button background and text color from plugins dashboard's customization menu. also from block editor by applying the **customization button** block.
 
-= How to change voice and lang by shortcode? =
+= How to change voice and language by shortcode? =
 	`
 	[tta_listen_btn lang="en-GB" voice="Google US English"]
 	`	
