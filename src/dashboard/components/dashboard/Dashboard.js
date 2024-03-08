@@ -28,6 +28,7 @@ import Listening from './listening/Listening';
 import Customize from './customize/Customize';
 import Docs from './docs/Docs';
 import Analitics from './analitics/Analitics.js';
+import Integrations from './integrations/Integrations.js'
 
 function Dashboard() {
 	const [componentName, setComponentName] = useState(getComponentName());
@@ -78,10 +79,17 @@ function Dashboard() {
 									path={'/customize'}
 									element={<Customize />}
 								/>
+								<Route
+									path={'/in'}
+									element={useMemo(() => (
+										<Listening />
+									))}
+								/>
 								{/* <Route
 									path={'/recording'}
 									element={<Recording />}
 								/> */}
+								<Route path='/integrations' element={<Integrations />} />
 								<Route path='/faq' element={<Docs />} />
 								<Route path='/analitics' element={<Analitics />} />
 							</Routes>

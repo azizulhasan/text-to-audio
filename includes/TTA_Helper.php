@@ -278,5 +278,15 @@ class TTA_Helper {
         return is_plugin_active('text-to-audio-pro/text-to-audio-pro.php');
     }
 
+    public static function is_audio_folder_writable() {
+        $upload_dir             = wp_upload_dir();
+        $base_dir               = $upload_dir['basedir'];
+
+        if ( is_writable( $base_dir ) ) {
+            return true;
+        }
+        return false;
+    }
+
 
 }

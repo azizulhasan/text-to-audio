@@ -110,6 +110,8 @@ class TTA_Admin {
             'current_post' => TTA_Helper::tts_post_type(),
             "player_id" => get_player_id(),
             'compatible' => TTA_Helper::get_compatible_plugins_data(),
+            'is_folder_writable' => TTA_Helper::is_audio_folder_writable(),
+
         ];
     }
 
@@ -176,25 +178,30 @@ class TTA_Admin {
         
             }
 
-            if (is_admin() && isset($GLOBALS['pagenow']) && $GLOBALS['pagenow'] === 'plugins.php' && !$this->localize_data['is_pro_active']) {
+            if (is_admin() && isset($GLOBALS['pagenow']) && $GLOBALS['pagenow'] === 'plugins.php') {
                 $object = ob_start();
                 ?>
                     <script>
+                        // let isProActive2 = "<?php echo $this->localize_data['is_pro_active']?>";
                         window.document.addEventListener('DOMContentLoaded', function () {
                             /**
                              * If free version then remove the opt-in link from plugin link.
                              * Also remove the deactivation modal by freemius. So that 
                              * AtlasAiDev tracking software works properly.
                              */
-                            if(document.querySelector('.opt-in-or-opt-out.text-to-audio')) {
-                                document.querySelector('.opt-in-or-opt-out.text-to-audio').style.display = 'none';
-                            }
+                            // if(isProActive && document.querySelector('.opt-in-or-opt-out.text-to-audio')) {
+                            //     document.querySelector('.opt-in-or-opt-out.text-to-audio').style.display = 'none';
+                            // }
                             
-                            if(document.querySelector('[data-module-id="13388"]')) {
-                                document.querySelector('[data-module-id="13388"]').remove();
+                            if(document.querySelector('[data-plugin="text-to-audio/text-to-audio.php"]')) {
+                                 var moduleIdElement = document.querySelector('i.fs-module-id[data-module-id="13388"]');
+                                if (moduleIdElement) {
+                                    moduleIdElement.parentNode.removeChild(moduleIdElement);
+                                }
                             }
                         })
                     </script>
+                    
                 <?php
                 $object = ob_get_contents();
                 echo  $object;
