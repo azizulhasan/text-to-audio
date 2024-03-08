@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 4.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.5.16
+Stable tag: 1.5.17
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -53,6 +53,12 @@ Adding text-to-speech (TTS) accessibility to your WordPress website can make you
 	`
 	[tta_listen_btn class="custom_class"]
 	`	
+* Change language and voice : 
+
+	`
+	[tta_listen_btn lang="en-GB" voice="Google US English"]
+	`	
+
 * Missing content can be added by filter. Example:
 
 	`
@@ -272,10 +278,13 @@ Add class on shortcode as an attribute. Example :
 
 `
 
-= How can I change button background and text color? =
+= How to  change button background and text color? =
 Yes, you can change button background and text color from plugins dashboard's customization menu. also from block editor by applying the **customization button** block.
 
-
+= How to change voice and language by shortcode? =
+	`
+	[tta_listen_btn lang="en-GB" voice="Google US English"]
+	`	
 
 == Screenshots ==
 1. Add play button to any post.
@@ -298,6 +307,11 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 # How WPML WordPress Multilingual Plugin  Works?
 After translating content by [WPML](https://wpml.org/) Text To Audio Accessibility plugin will autometically translate content to the correct language.
 Text To Audio Accessibility will detect content language from the URL of that particular page or post.
+
+= 1.5.17 ( 08 Mars 2024 ) =
+* Shortcode attribute added for changing voice and language.
+* Button Default text issue solved.
+
 
 = 1.5.16 ( 04 Mars 2024 ) =
 * Faq menu is now Docs.
