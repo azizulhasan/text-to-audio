@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 let TextToSpeechProPlayer = null;
-export default function TexToSpeechThree({ buttonId, button, buttonCSS, cssStyle = '' }) {
+export default function TextToSpeechThree({ buttonId, button, buttonCSS, cssStyle = '' }) {
     const [shouldFloat, setShouldFloat] = useState(false)
     useEffect(() => {
         if (window.TextToSpeechProPlayer) {

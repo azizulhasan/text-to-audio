@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Col, Container, Row, Form, FloatingLabel } from 'react-bootstrap';
 import toast from '../../context/Notify';
-import { copyToClipBoard, postWithoutImage } from '../../context/utilities';
+import { copyToClipBoard, postData, postWithoutImage } from '../../context/utilities';
 import TextToSpeech from '../../../buttons/components/TextToSpeech';
-import TexToSpeechThree from '../../../buttons/components/TexToSpeechThree';
+import TextToSpeechThree from '../../../buttons/components/TextToSpeechThree';
+import TextToSpeechFour from '../../../buttons/components/TextToSpeechFour';
 import CustomizationTabs from './CustomizationTabs'
 
 let speech = null;
@@ -28,6 +29,7 @@ export default function Customize() {
 
 	const [speakingText, setSpeakingText] = useState('');
 	const [listeningSettings, setListeningSettings] = useState({});
+	const [isGCAuthenticated, setGCIsAuthenticated] = useState(false)
 
 	useEffect(() => {
 		/**
@@ -74,6 +76,19 @@ export default function Customize() {
 				window.TTS.contents[1] = initialText;
 			}
 		}, 1000)
+
+
+		if (window.hasOwnProperty('ttsObj') && ttsObj?.is_pro_active) {
+			postData(ttsObj.api_url + 'tta_pro/v1/get_auth_file', {}, "GET")
+				.then((res) => {
+					if (res?.file && res?.is_authenticated) {
+						setGCIsAuthenticated(res.is_authenticated)
+					}
+				})
+				.catch((err) => {
+					console.log(err);
+				});
+		}
 
 	}, []);
 
@@ -181,6 +196,11 @@ export default function Customize() {
 			return;
 		}
 
+		if (formData?.buttonSettings?.id == 4 && (!isGCAuthenticated || !ttsObj.is_pro_active)) {
+			toast('To use Google Cloud Text To Speech you have to authenticate first from integrations menu', 'error');
+			return;
+		}
+
 		// console.log(formData);
 		// return;
 		let data = new FormData();
@@ -232,8 +252,8 @@ export default function Customize() {
 		{ id: 1, name: 'Default', object: 'TextToSpeech', disabled: false },
 		{ id: 2, name: 'Default Pro', object: 'TextToSpeechPro', disabled: false },
 		{ id: 3, name: 'Google TTS Pro', object: 'TextToSpeechPro', disabled: false },
-		{ id: 4, name: "ChatGPT TTS(Soon)", object: 'TextToSpeechPro', disabled: true },
-		{ id: 5, name: "Google Cloud TTS(Soon)", object: 'TextToSpeechPro', disabled: true },
+		{ id: 4, name: "Google Cloud TTS", object: 'TextToSpeechPro', disabled: false },
+		{ id: 5, name: "ChatGPT TTS(Soon)", object: 'TextToSpeechPro', disabled: true },
 	])
 
 	return (
@@ -245,9 +265,9 @@ export default function Customize() {
 							{
 								listeningBtnStyle?.buttonSettings?.id == 2 ?
 									<TextToSpeech buttonCSS={listeningBtnStyle} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={2} /> :
-									listeningBtnStyle?.buttonSettings?.id == 3 ? <TexToSpeechThree buttonCSS={listeningBtnStyle} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> :
-										listeningBtnStyle?.buttonSettings?.id == 4 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> :
-											listeningBtnStyle?.buttonSettings?.id == 5 ? <TexToSpeechThree button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> : (
+									listeningBtnStyle?.buttonSettings?.id == 3 ? <TextToSpeechThree buttonCSS={listeningBtnStyle} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> :
+										listeningBtnStyle?.buttonSettings?.id == 4 ? <TextToSpeechFour buttonCSS={listeningBtnStyle} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={4} cssStyle={''} /> :
+											listeningBtnStyle?.buttonSettings?.id == 5 ? <TextToSpeechThree buttonCSS={listeningBtnStyle} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={5} cssStyle={''} /> : (
 												<button
 													id='tta__listen_content'
 													onClick={(e) => callListeningFunction(e)}

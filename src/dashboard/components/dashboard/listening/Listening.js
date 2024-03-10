@@ -41,7 +41,7 @@ export default function Listening() {
 
 
 	useEffect(() => {
-		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.gtts_is_authenticated == '1') {
+		if (window.hasOwnProperty('ttsObj') && ttsObj?.gctts_is_authenticated == 1) {
 			let stored_voices = getLocalStorage(['tta__voices']);
 			if (!stored_voices.tta__voices) {
 				getData(apiURL + 'voices')

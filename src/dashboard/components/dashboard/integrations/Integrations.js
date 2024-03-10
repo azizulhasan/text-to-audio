@@ -32,14 +32,14 @@ export default function Integrations() {
                 />
                 <Form.Check
                     inline
-                    label="ChatGPT TTS"
-                    title="ChatGPT TTS"
+                    label="ChatGPT TTS(soon)"
+                    title="ChatGPT TTS(soon)"
                     name="group1"
                     type={'radio'}
                     checked={currentTTSServic === 'chatgpt_tts'}
                     id={`chatgpt_tts`}
                     onClick={handleClick}
-
+                    disabled
                 />
             </Form.Group>
         </Form>
