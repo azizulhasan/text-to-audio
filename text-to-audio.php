@@ -22,6 +22,8 @@
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       text-to-audio
  * Domain Path:       /languages
+ * Requires PHP:      7.4
+ * Requires WP:       5.0
  */
 include 'vendor/autoload.php';
 
