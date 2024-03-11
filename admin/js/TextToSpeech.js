@@ -44,9 +44,6 @@ export default class TextToSpeech {
         this.speech = new Speech()
         this.splitSentences = splitSentences
 
-        console.log({ test: this.buttonTextArr.listen_text })
-
-
     }
 
     getData(shouldAsingThis = true) {
