@@ -15,7 +15,7 @@
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
  * Description:       Add accessibility to WordPress site to read contents out loud in more than 51 languages.
- * Version:           1.5.18
+ * Version:           1.5.19
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-2.0+
@@ -30,9 +30,9 @@ include 'vendor/autoload.php';
 use TTA\TTA;
 use TTA\TTA_Activator;
 use TTA\TTA_Deactivator;
+use TTA\TTA_Helper;
 use TTA_Api\TTA_Api_Routes;
 use TTA\TTA_Notices;
-use TTA\TTA_Helper;
 
 // If this file is called directly, abort.
 if (!defined('WPINC')) {
@@ -45,7 +45,28 @@ if (!defined('ABSPATH')) {
 }
 
 
-if (!TTA_Helper::is_pro_active() &&  ! function_exists( 'ttsp_fs' ) ) {
+/**
+ * Is plugin active
+ */
+function is_pro_active() {
+
+    if(!function_exists('is_plugin_active') ){
+        include_once ABSPATH . 'wp-admin/includes/plugin.php';
+    }
+
+    $status = is_plugin_active('text-to-speech-pro/text-to-audio-pro.php');
+
+    if($status) return true;
+
+    $status = is_plugin_active('text-to-speech-pro-premium/text-to-audio-pro.php');
+
+    if($status) return true;
+    
+    
+    return is_plugin_active('text-to-audio-pro/text-to-audio-pro.php');
+}
+
+if (!is_pro_active() &&  ! function_exists( 'ttsp_fs' ) ) {
     // Create a helper function for easy SDK access.
     function ttsp_fs() {
         global $ttsp_fs;
@@ -78,11 +99,12 @@ if (!TTA_Helper::is_pro_active() &&  ! function_exists( 'ttsp_fs' ) ) {
     }
 
     // Init Freemius.
-     ttsp_fs();
+    ttsp_fs();
     // Signal that SDK was initiated.
-     do_action( 'ttsp_fs_loaded' );
+    do_action( 'ttsp_fs_loaded' );
 
 }
+
 
 /**
  * Currently plugin version.
@@ -161,7 +183,7 @@ class TTA_Init {
 
     public function __construct() {
         if (!defined('TEXT_TO_AUDIO_VERSION')) {
-            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '1.5.18'));
+            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '1.5.19'));
         }
 
         if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
@@ -176,6 +198,9 @@ class TTA_Init {
         $plugin->run();
         new TTA_Api_Routes();
         new TTA_Notices();
+
+
+
         //add plugins action links.
         if( is_admin() ) {
             $basename = plugin_basename( __FILE__ );
