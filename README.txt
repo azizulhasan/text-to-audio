@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 4.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.5.17
+Stable tag: 1.5.18
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -27,7 +27,7 @@ Adding text-to-speech (TTS) accessibility to your WordPress website can make you
 
 ### USEFULL LINKS:
 > * [Live Demo](http://atlasaidev.com/text-to-speech/)
-> * [Pro Version](https://atlasaidev.com/text-to-speech-pro/)
+> * [Text To Speech Pro](https://atlasaidev.com/text-to-speech-pro/)
 > * [Video Tutorial](https://www.youtube.com/@atlasaidev)
 
 
@@ -89,9 +89,11 @@ Adding text-to-speech (TTS) accessibility to your WordPress website can make you
 * Unlimited Downloads
 * Multiple audio player support.
 
+Try [Text To Speech Pro](https://atlasaidev.com/text-to-speech-pro/) version.
+
 ### Text To Speech Pro Supported Languages:
 
-Text To Speech Pro TTS Accessibility plugin supports these languages.
+[Text To Speech Pro](https://atlasaidev.com/text-to-speech-pro/) TTS Accessibility plugin supports these languages.
 
 Afrikaans, Albanian, Arabic, Armenian, Catalan, Chinese, 
 Chinese (Mandarin/China), Chinese (Mandarin/Taiwan), 
@@ -143,6 +145,8 @@ Here you can see some languages which are supported by the browsers based on dev
 * Add custom content to speak with [shortcode](https://wordpress.org/plugins/text-to-audio/#description:~:text=It%20can%20be%20possible%20to%20create%20a%20shortcode%20with%20custom%20text%20to%20read%20like%20this.).
 * Remove special characters from content.
 * Remove URL from content.
+
+Try [Text To Speech Pro](https://atlasaidev.com/text-to-speech-pro/) version to enjoy whole features of the plugin.
 
 ### Listening Is A Better Way To Read:
 Boost your understanding and focus with listening by Text To Audio TTS. Remember more of what you read. Maximize your time,
@@ -207,6 +211,7 @@ Yes, [pro version](https://atlasaidev.com/text-to-speech-pro/) of Text To Speech
 WPML and GTranslate for now. We'll give support soon for [TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/),
 [Loco Translate](https://wordpress.org/plugins/loco-translate/), [Polylang](https://wordpress.org/plugins/polylang/).
 
+
 = Does Text To Speech Support Custom Post Types ? =
 Yes, [pro version](https://atlasaidev.com/text-to-speech-pro/) of Text To Speech plugin supports custom post types.
 
@@ -231,17 +236,17 @@ function tta__content_description_callback ( $output, $description, $post_id ) {
 
 ` 
 
-= Can I skip contents to read? =
+= How to skip contents to read? =
 Yes, you can skip contents from reading. This is a [pro](https://atlasaidev.com/text-to-speech-pro/) feature. 
 There is a textarea in the settings tab of [text to speech pro](https://atlasaidev.com/text-to-speech-pro/).
 You can skip multiple texts. Multiple tags will be pipe(|) separated.
 
-= Can I skip tags to read? =
+= How to  skip tags to read? =
 Yes, you can skip tags from reading. This is a [pro](https://atlasaidev.com/text-to-speech-pro/) feature. 
 There is a textarea in the settings tab of [text to speech pro](https://atlasaidev.com/text-to-speech-pro/).
 You can skip multiple tags. Multiple tags will be pipe(|) separated.
 
-= Can I add button in Gutenburg block? =
+= How to add button in Gutenburg block? =
 Yes, you can add listening button from block editor. Open you block editor and search **Customize Button** then add it.
 Now you can change **color**,  **backgroundColor** , **width**. And also add **custom_css**.
 
@@ -271,17 +276,20 @@ function tta__button_text_arr_callback ( $button_text_arr ) {
 
 `
               
-= How to add custom css class to button? =
+= How to add custom CSS class to button? =
 Add class on shortcode as an attribute. Example : 
 `
 [tta_listen_btn class="custom_class"]
 
 `
 
+
+
 = How to  change button background and text color? =
 Yes, you can change button background and text color from plugins dashboard's customization menu. also from block editor by applying the **customization button** block.
 
 = How to change voice and language by shortcode? =
+You can change the voice and language of the tex to speech player by shortcode. Here is how...
 	`
 	[tta_listen_btn lang="en-GB" voice="Google US English"]
 	`	
@@ -302,18 +310,17 @@ Yes, you can change button background and text color from plugins dashboard's cu
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
-* <a href='https://wordpress.org/plugins/gtranslate/' target='_blank'>Translate WordPress with GTranslate Plugin</a>.
 
-# How WPML WordPress Multilingual Plugin  Works?
-After translating content by [WPML](https://wpml.org/) Text To Audio Accessibility plugin will autometically translate content to the correct language.
-Text To Audio Accessibility will detect content language from the URL of that particular page or post.
+= 1.5.18 ( 12 Mar 2024 ) =
+* Default listening language issue fixed at listening menu.
+* Faq improved.
 
-= 1.5.17 ( 08 Mars 2024 ) =
+= 1.5.17 ( 08 Mar 2024 ) =
 * Shortcode attribute added for changing voice and language.
 * Button Default text issue solved.
 
 
-= 1.5.16 ( 04 Mars 2024 ) =
+= 1.5.16 ( 04 Mar 2024 ) =
 * Faq menu is now Docs.
 * Multilingual notice added.
 

@@ -70,7 +70,7 @@ class TTA_Activator {
                 "tta__listening_pitch" => 1,
                 "tta__listening_rate" => 1,
                 "tta__listening_volume" => 1,
-                "tta__listening_lang" => "en-AU",
+                "tta__listening_lang" => "en-US",
             ));
         }
 
@@ -83,7 +83,7 @@ class TTA_Activator {
              update_option('tta_record_settings', array
             (
                 "is_record_continously" => true,
-                "tta__recording__lang" => "en-AU",
+                "tta__recording__lang" => "en-US",
                 "tta__sentence_delimiter" => ".",
             ));
         }
@@ -98,7 +98,7 @@ class TTA_Activator {
         $start_text =  __( 'Start', 'text-to-audio' ) ;
         $stop_text = __( 'Stop', 'text-to-audio' ) ;
 
-        if( $renew_all_settings || !get_option('tta_record_settings')){
+        if( $renew_all_settings || !get_option('tta__button_text_arr')){
             update_option( 'tta__button_text_arr', [
                 'listen_text' => $listen_text,
                 'pause_text' => $pause_text,
@@ -109,6 +109,9 @@ class TTA_Activator {
             ]);
         }
 
+        if(get_transient('tts_all_settings')) {
+            \delete_transient('tts_all_settings');
+        }
 
     }
 

@@ -26,7 +26,7 @@ export default class TextToSpeech {
     languages = []
     voices = {}
     voice = true ? 'English United Kingdom' : "Microsoft David - English (United States)"
-    language = true ? 'en_GB' : 'en-AU'
+    language = true ? 'en_GB' : 'en-US'
     buttonTextArr = null
     splittedSentances = ''
     isCanceled = false
