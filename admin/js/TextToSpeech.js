@@ -26,7 +26,7 @@ export default class TextToSpeech {
     languages = []
     voices = {}
     voice = true ? 'English United Kingdom' : "Microsoft David - English (United States)"
-    language = true ? 'en_GB' : 'en-AU'
+    language = true ? 'en_GB' : 'en-US'
     buttonTextArr = null
     splittedSentances = ''
     isCanceled = false
@@ -43,9 +43,6 @@ export default class TextToSpeech {
         this.ttsListeningSettings = this.TTS.settings.listening
         this.speech = new Speech()
         this.splitSentences = splitSentences
-
-        console.log({ test: this.buttonTextArr.listen_text })
-
 
     }
 

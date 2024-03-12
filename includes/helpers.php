@@ -212,9 +212,9 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
         }
         
         if( apply_filters('tts_ignore_match_80_percent', false) && tts_text_match_80_percent($title , $temp_title) ) {
-            get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
+           get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
         }else{
-            get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
+           get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
         }
     });
 }
@@ -343,6 +343,7 @@ function get_button_text( $atts, $content_read_time ) {
         'stop_text' => $stop_text,
     ];
 
+
     $customize_settings = (array) TTA_Helper::tts_get_settings('customize');
     $text_arr = get_text_array_from_shortcode($customize_settings, $text_arr);
 
@@ -418,7 +419,7 @@ function add_listen_button( $content ) {
             echo tta_get_button_content('');
             $button = ob_get_contents();
             ob_end_clean();
-
+            
             return apply_filters('tts_button_with_content', $button.$content, $button, $content);
         }else{
              return $content;
