@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 4.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.5.18
+Stable tag: 1.5.19
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -310,6 +310,8 @@ You can change the voice and language of the tex to speech player by shortcode. 
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+= 1.5.19 ( 12 Mar 2024 ) =
+* Minor error fix.
 
 = 1.5.18 ( 12 Mar 2024 ) =
 * Default listening language issue fixed at listening menu.
