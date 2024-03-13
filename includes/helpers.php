@@ -663,13 +663,10 @@ function get_player_id() {
     $customize_settings = (array) TTA_Helper::tts_get_settings('customize');
     $customize_settings['buttonSettings'] = isset( $customize_settings['buttonSettings'] ) ? (array) $customize_settings['buttonSettings'] : [ 'id' => 1];
     $player_id = isset($customize_settings['buttonSettings']['id']) ? $customize_settings['buttonSettings']['id'] : 1;
-    if(is_pro_license_active() && $player_id == 1) {
-        $player_id = 2;
-    }
 
     if(!is_pro_license_active() && $player_id >  1) {
         $player_id = 1;
     }
     
-    return $player_id;
+    return apply_filters('tts_get_player_id', $player_id, $customize_settings);
 }
