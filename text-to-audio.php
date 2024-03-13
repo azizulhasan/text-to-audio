@@ -23,7 +23,7 @@
  * Text Domain:       text-to-audio
  * Domain Path:       /languages
  * Requires PHP:      7.4
- * Requires WP:       5.0
+ * Requires at least: 5.6
  */
 include 'vendor/autoload.php';
 
