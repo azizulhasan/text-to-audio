@@ -214,7 +214,7 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
         if( apply_filters('tts_ignore_match_80_percent', false) && tts_text_match_80_percent($title , $temp_title) ) {
            get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
         }else{
-           get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
+          get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
         }
     });
 }
@@ -223,7 +223,7 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
     
    global $post;
 
-    // delete_post_meta($post->ID, 'tts_mp3_file_urls');
+    delete_post_meta($post->ID, 'tts_mp3_file_urls');
     $mp3_file_urls = TTA_Helper::get_mp3_file_urls($post);
     $language = TTA_Helper::tts_site_language($plugin_all_settings);
     $file_name = TTA_Helper::tts_file_name($title, $language);
@@ -265,6 +265,7 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
                 file_name: "<?php echo $file_name; ?>",
                 date: "<?php echo $date; ?>",
                 language: "<?php echo $language; ?>",
+                post: <?php echo json_encode($post); ?>,
             }
 
             if(window.hasOwnProperty('TTS')){ // add content if a page have multiple button
