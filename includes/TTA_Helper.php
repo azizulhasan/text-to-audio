@@ -24,11 +24,11 @@ namespace TTA;
 class TTA_Helper { 
 
     public static function should_load_button() {
-        $should_load_button = 1;
+        $should_load_button = false;
         // is_home() || is_archive() || is_front_page() || is_category()
-        // if(\is_single() || is_singular() ){
-        //     $should_load_button = true;
-        // }
+        if(\is_single() || is_singular() ){
+            $should_load_button = true;
+        }
         
         $settings = self::tts_get_settings('settings');
         if(!isset($settings['tta__settings_allow_listening_for_post_types']) 
