@@ -396,6 +396,7 @@ function get_text_array_from_shortcode($customize_settings, $text_arr) {
 
 add_filter( 'the_content', 'add_listen_button',  999 );
 
+
 /**
  * Add listening button to every post by default.
  */
@@ -420,13 +421,12 @@ function add_listen_button( $content ) {
             echo tta_get_button_content('');
             $button = ob_get_contents();
             ob_end_clean();
-            
+
             return apply_filters('tts_button_with_content', $button.$content, $button, $content);
         }else{
              return $content;
         }
     }
-
     return $content;
 
 }
