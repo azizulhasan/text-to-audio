@@ -81,7 +81,7 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
                     })}
                 </Form.Select>
             </Form.Group>
-            {
+            {/* {
                 listeningBtnStyle?.buttonSettings?.id == 3 && <Form.Group>
                     <Form.Label htmlFor='language'>
                         {__('Select Language')}
@@ -104,7 +104,7 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
                         })}
                     </Form.Select>
                 </Form.Group>
-            }
+            } */}
         </>
     )
 }

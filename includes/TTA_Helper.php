@@ -243,6 +243,9 @@ class TTA_Helper {
             global $post;
         }
 
+        
+
+
         $mp3_file_urls = get_post_meta($post->ID, 'tts_mp3_file_urls');
         $old_url = get_post_meta($post->ID, 'tts_mp3_file_url', true);
 
@@ -253,9 +256,54 @@ class TTA_Helper {
         if(isset($mp3_file_urls[0])) {
             $mp3_file_urls = $mp3_file_urls[0];
         }
+        $final_mp3_file_ulrs = [];
+        $should_update_urls = \false;
+        foreach($mp3_file_urls as $language_code =>  $url ) {
+            $file_headers = @get_headers($url);
+            if(!$file_headers || $file_headers[0] == 'HTTP/1.1 404 Not Found') {
+                $should_update_urls = true;
+            }
+            else {
+                $final_mp3_file_ulrs[$language_code] = $url;
+            }
+        }
 
-        return \apply_filters('tts_mp3_file_urls', $mp3_file_urls, $post);
+        if( $should_update_urls ) {
+            update_post_meta($post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs);
+        }
+
+        return \apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post);
     }
+
+
+    public static function deleteFilesAndFolders($dir) {
+        // Check if the directory exists
+        if (!is_dir($dir)) {
+            return false;
+        }
+
+        // Get all files and folders within the directory
+        $files = glob($dir . '/*');
+
+        // Loop through each file and folder
+        foreach ($files as $file) {
+            // If it's a file, delete it
+            if (is_file($file)) {
+                unlink($file);
+            }
+            // If it's a directory, recursively call the function
+            elseif (is_dir($file)) {
+                deleteFilesAndFolders($file);
+            }
+        }
+
+        // After all files and folders are deleted, delete the directory itself
+        rmdir($dir);
+
+        return true;
+    }
+
+
 
     /**
      * Is plugin active
@@ -285,6 +333,29 @@ class TTA_Helper {
         if ( is_writable( $base_dir ) ) {
             return true;
         }
+        return false;
+    }
+
+    public static function get_player_id() {
+        $customize_settings = (array) TTA_Helper::tts_get_settings('customize');
+        $customize_settings['buttonSettings'] = isset( $customize_settings['buttonSettings'] ) ? (array) $customize_settings['buttonSettings'] : [ 'id' => 1];
+        $player_id = isset($customize_settings['buttonSettings']['id']) ? $customize_settings['buttonSettings']['id'] : 1;
+
+        if(!self::is_pro_license_active() && $player_id >  1) {
+            $player_id = 1;
+        }
+        
+        return apply_filters('tts_get_player_id', $player_id, $customize_settings);
+    }
+
+    /**
+     * Is pro license active
+     */
+    public static function is_pro_license_active() {
+        if(is_pro_active()){
+            return apply_filters('tts_is_pro_license_active', false);
+        }
+
         return false;
     }
 

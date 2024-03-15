@@ -17,7 +17,7 @@ class TTSPlayButton extends HTMLElement {
             let contents = window.TTS.contents;
             let settings = window.TTS.settings;
             let buttonIds = Object.keys(contents)
-
+            console.log({ buttonIds })
             // Render all buttons in page have.
             for (let buttonId of buttonIds) {
                 if (buttonId == this.getAttribute('data-id')) {
@@ -83,7 +83,6 @@ class TTSPlayButton extends HTMLElement {
 
     }
 }
-
 document.addEventListener('DOMContentLoaded', function () {
     // Define the new element
     if (!customElements.get('tts-play-button')) {

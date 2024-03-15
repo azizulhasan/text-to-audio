@@ -129,7 +129,7 @@ function tta_get_button_content($atts, $is_block = false) {
     // }elseif(did_filter( 'the_excerpt' )){
     //     $description = get_the_excerpt();
     // }
-    $description = $post->post_content;
+    $description = get_the_content();
     $description_sanitized = tta_clean_content($description);
 
     $content     = apply_filters('tta__content_title', $title);
@@ -223,7 +223,7 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
     
    global $post;
 
-    delete_post_meta($post->ID, 'tts_mp3_file_urls');
+    // delete_post_meta($post->ID, 'tts_mp3_file_urls');
     $mp3_file_urls = TTA_Helper::get_mp3_file_urls($post);
     $language = TTA_Helper::tts_site_language($plugin_all_settings);
     $file_name = TTA_Helper::tts_file_name($title, $language);
