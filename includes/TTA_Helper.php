@@ -275,36 +275,6 @@ class TTA_Helper {
         return \apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post);
     }
 
-
-    public static function deleteFilesAndFolders($dir) {
-        // Check if the directory exists
-        if (!is_dir($dir)) {
-            return false;
-        }
-
-        // Get all files and folders within the directory
-        $files = glob($dir . '/*');
-
-        // Loop through each file and folder
-        foreach ($files as $file) {
-            // If it's a file, delete it
-            if (is_file($file)) {
-                unlink($file);
-            }
-            // If it's a directory, recursively call the function
-            elseif (is_dir($file)) {
-                deleteFilesAndFolders($file);
-            }
-        }
-
-        // After all files and folders are deleted, delete the directory itself
-        rmdir($dir);
-
-        return true;
-    }
-
-
-
     /**
      * Is plugin active
      */
