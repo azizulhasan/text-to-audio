@@ -260,10 +260,9 @@ class TTA_Helper {
         $should_update_urls = \false;
         foreach($mp3_file_urls as $language_code =>  $url ) {
             $file_headers = @get_headers($url);
-            if(!$file_headers || $file_headers[0] == 'HTTP/1.1 404 Not Found') {
+             if(!$file_headers || strpos( $file_headers[0], 'Not Found')  !== false) {
                 $should_update_urls = true;
-            }
-            else {
+            } else {
                 $final_mp3_file_ulrs[$language_code] = $url;
             }
         }
