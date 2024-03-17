@@ -129,7 +129,7 @@ function tta_get_button_content($atts, $is_block = false) {
     // }elseif(did_filter( 'the_excerpt' )){
     //     $description = get_the_excerpt();
     // }
-    $description = $post->post_content;
+    $description = get_the_content();
     $description_sanitized = tta_clean_content($description);
 
     $content     = apply_filters('tta__content_title', $title);
@@ -214,7 +214,7 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
         if( apply_filters('tts_ignore_match_80_percent', false) && tts_text_match_80_percent($title , $temp_title) ) {
            get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
         }else{
-           get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
+          get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
         }
     });
 }
@@ -265,6 +265,7 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
                 file_name: "<?php echo $file_name; ?>",
                 date: "<?php echo $date; ?>",
                 language: "<?php echo $language; ?>",
+                post: <?php echo json_encode($post); ?>,
             }
 
             if(window.hasOwnProperty('TTS')){ // add content if a page have multiple button
@@ -395,6 +396,7 @@ function get_text_array_from_shortcode($customize_settings, $text_arr) {
 
 add_filter( 'the_content', 'add_listen_button',  999 );
 
+
 /**
  * Add listening button to every post by default.
  */
@@ -419,13 +421,12 @@ function add_listen_button( $content ) {
             echo tta_get_button_content('');
             $button = ob_get_contents();
             ob_end_clean();
-            
+
             return apply_filters('tts_button_with_content', $button.$content, $button, $content);
         }else{
              return $content;
         }
     }
-
     return $content;
 
 }

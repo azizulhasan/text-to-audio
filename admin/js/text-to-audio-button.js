@@ -8,6 +8,8 @@ class TTSPlayButton extends HTMLElement {
     constructor() {
         // Always call super first in constructor
         super();
+        console.log({ tts: window.TTS })
+
         this.isProLicenseActive = window?.ttsObj?.is_pro_license_active;
         // Create a shadow root
         const shadow = this.attachShadow({ mode: 'open' });
@@ -15,6 +17,7 @@ class TTSPlayButton extends HTMLElement {
             let contents = window.TTS.contents;
             let settings = window.TTS.settings;
             let buttonIds = Object.keys(contents)
+            console.log({ buttonIds })
             // Render all buttons in page have.
             for (let buttonId of buttonIds) {
                 if (buttonId == this.getAttribute('data-id')) {
@@ -22,7 +25,7 @@ class TTSPlayButton extends HTMLElement {
                     const wrapper = document.createElement('div');
                     wrapper.setAttribute('class', 'wrapper');
                     wrapper.innerHTML = getButtonContent(buttonId, settings.cssClass, this.isProLicenseActive)
-
+                    console.log({ wrapper })
                     this.addEventListener('click', function (e) {
                         let button = [...wrapper.children][0]
                         if (this.speech != null && this.speech.listenStatus == 'listen') {
@@ -80,8 +83,12 @@ class TTSPlayButton extends HTMLElement {
 
     }
 }
-
 document.addEventListener('DOMContentLoaded', function () {
     // Define the new element
-    customElements.define('tts-play-button', TTSPlayButton);
+    if (!customElements.get('tts-play-button')) {
+        console.log({ notFoundcustomElements: customElements.get('tts-play-button') })
+        customElements.define('tts-play-button', TTSPlayButton)
+    } else {
+        console.log({ foundcustomElements: customElements.get('tts-play-button') })
+    }
 })
