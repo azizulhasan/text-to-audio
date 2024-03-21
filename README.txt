@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 4.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.5.19
+Stable tag: 1.5.20
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -309,6 +309,13 @@ You can change the voice and language of the tex to speech player by shortcode. 
 💎 TRANSLATION REQUEST 💎
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+= 1.5.20 ( 18 Mar 2024 ) =
+* Button rendering bug fix.
+* Dashboard UI improved.
+* `tts_clean_gtts_folder` filter added to delete all MP3 files delete in pro version.
+* If MP3 file is not existed, then regenerate file autometically. This functionality added in pro version.
+* Pro version button selection issue fixed.
 
 = 1.5.19 ( 12 Mar 2024 ) =
 * Minor error fix.
