@@ -187,9 +187,7 @@ class TTA_Helper {
             $md5_hash = md5($title);
             $title = $md5_hash. '_'. time(). '__lang__'.$selectedLang;
         }
-
-       
-
+        
         return $title;
     }
 
