@@ -120,6 +120,7 @@ function tta_get_button_content($atts, $is_block = false) {
 
 
     $title = tta_clean_content( $post->post_title);
+
     $title = tta_should_add_dilimiter($title, $sentence_delimiter);
     $date = get_the_date('Y/m/d');
     
@@ -201,6 +202,7 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
         $temp_title = trim(str_replace('.', '', $title));
         $title = trim(get_the_title());
         $title = tta_clean_content( $title );
+
         // Get plugin all settings and pass it to TTS javascript Object.
         $plugin_all_settings = TTA_Helper::tts_get_settings();
         if( isset($atts['lang']) && $atts['lang'] && isset($plugin_all_settings['listening']['tta__listening_lang'])  &&  $atts['lang'] != $plugin_all_settings['listening']['tta__listening_lang'] ) {
@@ -227,7 +229,6 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
     $mp3_file_urls = TTA_Helper::get_mp3_file_urls($post);
     $language = TTA_Helper::tts_site_language($plugin_all_settings);
     $file_name = TTA_Helper::tts_file_name($title, $language);
-
     $object = ob_start();
     ?>
             <!-- Text To Speech TTS Settings  -->
@@ -261,7 +262,7 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
 
 
             var dateTitle = {
-                title: "<?php echo $title; ?>",
+                title: "<?php echo $file_name; ?>",
                 file_name: "<?php echo $file_name; ?>",
                 date: "<?php echo $date; ?>",
                 language: "<?php echo $language; ?>",
@@ -670,4 +671,25 @@ function get_player_id() {
     }
     
     return apply_filters('tts_get_player_id', $player_id, $customize_settings);
+}
+
+/**
+ * Is plugin active
+ */
+function is_pro_active() {
+
+    if(!function_exists('is_plugin_active') ){
+        include_once ABSPATH . 'wp-admin/includes/plugin.php';
+    }
+
+    $status = is_plugin_active('text-to-speech-pro/text-to-audio-pro.php');
+
+    if($status) return true;
+
+    $status = is_plugin_active('text-to-speech-pro-premium/text-to-audio-pro.php');
+
+    if($status) return true;
+    
+    
+    return is_plugin_active('text-to-audio-pro/text-to-audio-pro.php');
 }

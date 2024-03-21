@@ -15,7 +15,7 @@
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
  * Description:       Add accessibility to WordPress site to read contents out loud in more than 51 languages.
- * Version:           1.5.19
+ * Version:           1.5.20
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-2.0+
@@ -44,29 +44,24 @@ if (!defined('ABSPATH')) {
     define('ABSPATH', dirname(__FILE__) . '/');
 }
 
-
 /**
  * Is plugin active
  */
-function is_pro_active() {
-
-    if(!function_exists('is_plugin_active') ){
-        include_once ABSPATH . 'wp-admin/includes/plugin.php';
-    }
-
-    $status = is_plugin_active('text-to-speech-pro/text-to-audio-pro.php');
+function is_pro_plugin_exists() {
+    $plugin_path = \WP_PLUGIN_DIR;
+    $status = file_exists( $plugin_path . '/text-to-speech-pro/text-to-audio-pro.php');
 
     if($status) return true;
 
-    $status = is_plugin_active('text-to-speech-pro-premium/text-to-audio-pro.php');
+    $status = file_exists( $plugin_path . '/text-to-speech-pro-premium/text-to-audio-pro.php');
 
     if($status) return true;
     
     
-    return is_plugin_active('text-to-audio-pro/text-to-audio-pro.php');
+    return file_exists( $plugin_path . '/text-to-audio-pro/text-to-audio-pro.php');
 }
 
-if (!is_pro_active() &&  ! function_exists( 'ttsp_fs' ) ) {
+if (!is_pro_plugin_exists() &&  ! function_exists( 'ttsp_fs' ) ) {
     // Create a helper function for easy SDK access.
     function ttsp_fs() {
         global $ttsp_fs;
@@ -183,7 +178,7 @@ class TTA_Init {
 
     public function __construct() {
         if (!defined('TEXT_TO_AUDIO_VERSION')) {
-            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '1.5.19'));
+            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '1.5.20'));
         }
 
         if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
