@@ -130,7 +130,7 @@ function tta_get_button_content($atts, $is_block = false) {
     // }elseif(did_filter( 'the_excerpt' )){
     //     $description = get_the_excerpt();
     // }
-    $description = get_the_content();
+    $description = $post->post_content;
     $description_sanitized = tta_clean_content($description);
 
     $content     = apply_filters('tta__content_title', $title);
