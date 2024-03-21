@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 4.0
 Tested up to: 6.4
 Requires PHP: 7.4
-Stable tag: 1.5.20
+Stable tag: 1.5.21
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,10 +28,11 @@ Right after you install this text to speech free plugin, it will automatically s
 > * [Support](http://atlasaidev.com/contact-us/)
 
 ### USEFULL LINKS:
-> * [Live Demo Free Version](https://wordpress.org/plugins/text-to-audio/?preview=1)
-> * [Live Demo Pro Version](http://atlasaidev.com/text-to-speech/)
 > * [Get Text To Speech Pro](https://atlasaidev.com/text-to-speech-pro/)
+> * [Live Demo Of Free Version](https://wordpress.org/plugins/text-to-audio/?preview=1)
+> * [Live Demo Of Version](http://atlasaidev.com/text-to-speech/)
 > * [Video Tutorial](https://www.youtube.com/@atlasaidev)
+
 
 ### Why Use The Text-to-Speech TTS Accessibility Plugin?
 1. **Accessibility:** Make your content accessible to users with disabilities, including those with visual impairments, by providing an audio option for consuming content.
@@ -376,6 +377,10 @@ You can customize the voice and language of the text-to-speech player using shor
 We are looking for people to help translate this plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+
+= 1.5.21 ( 22 Mar 2024 ) =
+* Documentation updated.
+* Title and mp3 file name are same in pro version.
 
 = 1.5.20 ( 18 Mar 2024 ) =
 * Button rendering bug fix.
