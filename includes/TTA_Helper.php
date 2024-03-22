@@ -176,11 +176,18 @@ class TTA_Helper {
         if (!$title) {
         $title = 'Demo Content';
         }
+        
+        $lang_code = explode('-', str_replace(['_', ' '], '-', $selectedLang));
 
-        $title .= "__lang__" . strtolower($selectedLang);
-        $title = str_replace([' ', '-'], '_', $title);
-        $title = preg_replace("/[^a-z0-9_-]/i", "", $title);
-
+        if(array_shift($lang_code) == 'en' ) {
+             $title .= "__lang__" . strtolower($selectedLang);
+            $title = str_replace([' ', '-'], '_', $title);
+            $title = preg_replace("/[^\p{L}a-z0-9_-]/ui", "", $title);
+        }else{
+            $md5_hash = md5($title);
+            $title = $md5_hash. '_'. time(). '__lang__'.$selectedLang;
+        }
+        
         return $title;
     }
 
@@ -321,7 +328,7 @@ class TTA_Helper {
      * Is pro license active
      */
     public static function is_pro_license_active() {
-        if(is_pro_active()){
+        if(self::is_pro_active()){
             return apply_filters('tts_is_pro_license_active', false);
         }
 
