@@ -221,8 +221,8 @@ Boost engagement, accessibility, and productivity on your WordPress and WooComme
 == Installation ==
 1. From your WordPress admin go to Plugins>> Add New. Search for the plugin Text To Speech TTS Accessibility. Install and Activate.
 2. Alternatively download the plugin from WordPress Plugin repository.
-3. Go to Plugins>> Add New and Upload the plugin zip file you downloaded and activate it.
-4. Go to "Text To Audio" menu and configure your settings
+3. Go to Plugins > Add New and Upload the plugin zip file you downloaded and activate it.
+4. Go to "Text To Speech" menu and configure your settings
 
 
 == Frequently Asked Questions ==
@@ -241,7 +241,7 @@ Tex To Speech Free TTS Accessibility supports these [languages](https://wordpres
 
 = Does Text To Speech Support Multilingual Plugins ? =
 Yes, the [pro version](https://atlasaidev.com/text-to-speech-pro/) of the Text To Speech plugin currently supports WPML and GTranslate. We plan to extend support to [TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/),
-[Loco Translate](https://wordpress.org/plugins/loco-translate/), and [Polylang](https://wordpress.org/plugins/polylang/)soon.
+[Loco Translate](https://wordpress.org/plugins/loco-translate/), and [Polylang](https://wordpress.org/plugins/polylang/) soon.
 
 
 = Does Text To Speech Support Custom Post Types ? =
