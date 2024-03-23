@@ -135,7 +135,7 @@ if (!defined('TTA_LIBS_PATH')) {
 
 if (!defined('TTA_ADMIN_PATH')) {
 
-    define('TTA_ADMIN_PATH', plugin_dir_url(__FILE__) . '/admin/');
+    define('TTA_ADMIN_PATH', plugin_dir_url(__FILE__) . 'admin/');
 }
 
 if (!defined('TTA_DEBUG_MODE')) {

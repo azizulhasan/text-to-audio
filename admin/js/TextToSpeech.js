@@ -150,7 +150,7 @@ export default class TextToSpeech {
      * @param {*} listenStatus 
      */
     displayButtonText(listenStatus) {
-        if (!ttsObj.is_pro_license_active && this?.speakButton?.innerHTML) {
+        if ((!ttsObj.is_pro_license_active || this?.buttonId == 1) && this?.speakButton?.innerHTML) {
             if ('listen' === listenStatus) {
                 this.speakButton.innerHTML = this.replayButtonContent();
                 this.speakButton.setAttribute('title', 'Text To Audio : ' + this.replayButtonText());

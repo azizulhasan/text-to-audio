@@ -21,6 +21,7 @@ export default function Settings() {
 		tta__settings_display_btn_icon: false,
 		tta__settings_allow_listening_for_post_types: ['post'],
 		tta__settings_css_selectors: '',
+		tta__settings_exclude_content_by_css_selectors: '',
 		tta__settings_exclude_texts: [],
 		tta__settings_exclude_tags: [],
 	});
@@ -142,25 +143,26 @@ export default function Settings() {
 									</Form.Group>
 								</Col>
 							</Row>
+							{/*Include Content By CSS Selector*/}
 							<Row className='mt-4'>
 								<Col xs={12} sm={6} lg={4}>
 									<Form.Label htmlFor='tta__settings_css_selectors'>
-										Add CSS Selector {ttsObj.is_pro_active ? "" : (
-											<>
-												{['top'].map((placement) => (
-													<OverlayTrigger
-														key={placement}
-														placement={placement}
-														overlay={
-															<Tooltip id={`tooltip-${placement}`}>
-																{__('CSS selector is available in pro version')}
-															</Tooltip>
-														}>
-														<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i className="fas fa-lock" /></Button>
-													</OverlayTrigger>
-												))}
-											</>
-										)}
+										Include Content By CSS Selector {ttsObj.is_pro_active ? "" : (
+										<>
+											{['top'].map((placement) => (
+												<OverlayTrigger
+													key={placement}
+													placement={placement}
+													overlay={
+														<Tooltip id={`tooltip-${placement}`}>
+															{__('Include Content By CSS Selector is available in pro version')}
+														</Tooltip>
+													}>
+													<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i className="fas fa-lock" /></Button>
+												</OverlayTrigger>
+											))}
+										</>
+									)}
 									</Form.Label>
 								</Col>
 								<Col xs={11} sm={11} lg={7}>
@@ -191,25 +193,76 @@ export default function Settings() {
 									</>
 								</Col>
 							</Row>
+							{/*Exclude Content By CSS Selector*/}
+							<Row className='mt-4'>
+								<Col xs={12} sm={6} lg={4}>
+									<Form.Label htmlFor='tta__settings_exclude_content_by_css_selectors'>
+										Exclude Content By CSS Selector {ttsObj.is_pro_active ? "" : (
+										<>
+											{['top'].map((placement) => (
+												<OverlayTrigger
+													key={placement}
+													placement={placement}
+													overlay={
+														<Tooltip id={`tooltip-${placement}`}>
+															{__('Exclude Content By CSS Selector is available in pro version')}
+														</Tooltip>
+													}>
+													<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i className="fas fa-lock" /></Button>
+												</OverlayTrigger>
+											))}
+										</>
+									)}
+									</Form.Label>
+								</Col>
+								<Col xs={11} sm={11} lg={7}>
+									<Form.Control
+										id="tta__settings_exclude_content_by_css_selectors"
+										name="tta__settings_exclude_content_by_css_selectors"
+										as='textarea'
+										onChange={(e) => handleChange(e)}
+										value={settings.tta__settings_exclude_content_by_css_selectors}
+										placeholder={ttsObj.is_pro_active ? __('Multiple selector will be multiline.') : 'Exclude content by CSS selectors'}
+										disabled={ttsObj.is_pro_active ? false : true}
+									/>
+								</Col>
+								<Col xs={1} sm={1} lg={1} className='mt-4'>
+									<>
+										{['top'].map((placement) => (
+											<OverlayTrigger
+												key={placement}
+												placement={placement}
+												overlay={
+													<Tooltip id={`tooltip-${placement}`}>
+														{__('Click To Know How It Works?')}
+													</Tooltip>
+												}>
+												<a target='_blank' href='https://atlasaidev.com/docs/' > <i className="fas fa-info-circle"></i></a>
+											</OverlayTrigger>
+										))}
+									</>
+								</Col>
+							</Row>
+							{/*Exclude Texts To Speak*/}
 							<Row className='mt-4'>
 								<Col xs={12} sm={6} lg={4}>
 									<Form.Label htmlFor='tta__settings_exclude_texts'>
-										Exlclude Texts To Speak {ttsObj.is_pro_active ? "" : (
-											<>
-												{['top'].map((placement) => (
-													<OverlayTrigger
-														key={placement}
-														placement={placement}
-														overlay={
-															<Tooltip id={`tooltip-${placement}`}>
-																{__('Excluding texts to be spoken is a pro feature.')}
-															</Tooltip>
-														}>
-														<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i className="fas fa-lock" /></Button>
-													</OverlayTrigger>
-												))}
-											</>
-										)}
+										Exclude Texts To Speak {ttsObj.is_pro_active ? "" : (
+										<>
+											{['top'].map((placement) => (
+												<OverlayTrigger
+													key={placement}
+													placement={placement}
+													overlay={
+														<Tooltip id={`tooltip-${placement}`}>
+															{__('Excluding texts to be spoken is a pro feature.')}
+														</Tooltip>
+													}>
+													<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i className="fas fa-lock" /></Button>
+												</OverlayTrigger>
+											))}
+										</>
+									)}
 									</Form.Label>
 								</Col>
 								<Col xs={11} sm={11} lg={7}>
@@ -243,22 +296,22 @@ export default function Settings() {
 							<Row className='mt-4'>
 								<Col xs={12} sm={6} lg={4}>
 									<Form.Label htmlFor='tta__settings_exclude_tags'>
-										Exlclude Tag's Content {ttsObj.is_pro_active ? "" : (
-											<>
-												{['top'].map((placement) => (
-													<OverlayTrigger
-														key={placement}
-														placement={placement}
-														overlay={
-															<Tooltip id={`tooltip-${placement}`}>
-																{__('Exclude Tags. So that its content skiped. Like ( Subscript, Superscript etc.) This is a pro feature.')}
-															</Tooltip>
-														}>
-														<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i className="fas fa-lock" /></Button>
-													</OverlayTrigger>
-												))}
-											</>
-										)}
+										Exclude Tag's Content {ttsObj.is_pro_active ? "" : (
+										<>
+											{['top'].map((placement) => (
+												<OverlayTrigger
+													key={placement}
+													placement={placement}
+													overlay={
+														<Tooltip id={`tooltip-${placement}`}>
+															{__('Exclude Tags. So that its content skiped. Like ( Subscript, Superscript etc.) This is a pro feature.')}
+														</Tooltip>
+													}>
+													<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i className="fas fa-lock" /></Button>
+												</OverlayTrigger>
+											))}
+										</>
+									)}
 									</Form.Label>
 								</Col>
 								<Col xs={11} sm={11} lg={7}>
