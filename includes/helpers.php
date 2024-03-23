@@ -262,7 +262,7 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
 
 
             var dateTitle = {
-                title: "<?php echo $file_name; ?>",
+                title: "<?php echo $title; ?>",
                 file_name: "<?php echo $file_name; ?>",
                 date: "<?php echo $date; ?>",
                 language: "<?php echo $language; ?>",
@@ -407,6 +407,7 @@ function add_listen_button( $content ) {
         TTA\TTA_Activator::activate(true);
     }
     global $post;
+	$button = '';
     if( isset( $settings['tta__settings_enable_button_add'] ) &&  $settings['tta__settings_enable_button_add'] ) {    
         // TODO: write functionality if current page is home page where content is excerpt.
         // if(is_single()) {
@@ -417,18 +418,15 @@ function add_listen_button( $content ) {
         // }
 
         if( ! has_shortcode($post->post_content, 'tta_listen_btn') ) {
-
             ob_start();
             echo tta_get_button_content('');
             $button = ob_get_contents();
             ob_end_clean();
-
-            return apply_filters('tts_button_with_content', $button.$content, $button, $content);
-        }else{
-             return $content;
         }
     }
-    return $content;
+
+	return apply_filters('tts_button_with_content', $button.$content, $button, $content);
+
 
 }
 

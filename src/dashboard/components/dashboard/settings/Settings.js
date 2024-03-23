@@ -147,7 +147,7 @@ export default function Settings() {
 							<Row className='mt-4'>
 								<Col xs={12} sm={6} lg={4}>
 									<Form.Label htmlFor='tta__settings_css_selectors'>
-										Include Content By CSS Selector {ttsObj.is_pro_active ? "" : (
+										Include Content By CSS Selectors {ttsObj.is_pro_active ? "" : (
 										<>
 											{['top'].map((placement) => (
 												<OverlayTrigger
@@ -155,7 +155,7 @@ export default function Settings() {
 													placement={placement}
 													overlay={
 														<Tooltip id={`tooltip-${placement}`}>
-															{__('Include Content By CSS Selector is available in pro version')}
+															{__('Include Content By CSS Selectors feature is available in pro version')}
 														</Tooltip>
 													}>
 													<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i className="fas fa-lock" /></Button>
@@ -197,7 +197,7 @@ export default function Settings() {
 							<Row className='mt-4'>
 								<Col xs={12} sm={6} lg={4}>
 									<Form.Label htmlFor='tta__settings_exclude_content_by_css_selectors'>
-										Exclude Content By CSS Selector {ttsObj.is_pro_active ? "" : (
+										Exclude Content By CSS Selectors {ttsObj.is_pro_active ? "" : (
 										<>
 											{['top'].map((placement) => (
 												<OverlayTrigger
@@ -205,7 +205,7 @@ export default function Settings() {
 													placement={placement}
 													overlay={
 														<Tooltip id={`tooltip-${placement}`}>
-															{__('Exclude Content By CSS Selector is available in pro version')}
+															{__('Exclude Content By CSS Selectors feature is available in pro version')}
 														</Tooltip>
 													}>
 													<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i className="fas fa-lock" /></Button>
@@ -223,6 +223,56 @@ export default function Settings() {
 										onChange={(e) => handleChange(e)}
 										value={settings.tta__settings_exclude_content_by_css_selectors}
 										placeholder={ttsObj.is_pro_active ? __('Multiple selector will be multiline.') : 'Exclude content by CSS selectors'}
+										disabled={ttsObj.is_pro_active ? false : true}
+									/>
+								</Col>
+								<Col xs={1} sm={1} lg={1} className='mt-4'>
+									<>
+										{['top'].map((placement) => (
+											<OverlayTrigger
+												key={placement}
+												placement={placement}
+												overlay={
+													<Tooltip id={`tooltip-${placement}`}>
+														{__('Click To Know How It Works?')}
+													</Tooltip>
+												}>
+												<a target='_blank' href='https://atlasaidev.com/docs/' > <i className="fas fa-info-circle"></i></a>
+											</OverlayTrigger>
+										))}
+									</>
+								</Col>
+							</Row>
+							{/*Exclude Tags To Speak*/}
+							<Row className='mt-4'>
+								<Col xs={12} sm={6} lg={4}>
+									<Form.Label htmlFor='tta__settings_exclude_tags'>
+										Exclude Tags To Speak {ttsObj.is_pro_active ? "" : (
+										<>
+											{['top'].map((placement) => (
+												<OverlayTrigger
+													key={placement}
+													placement={placement}
+													overlay={
+														<Tooltip id={`tooltip-${placement}`}>
+															{__('Exclude Tags. So that its content skiped. Like ( Subscript, Superscript etc.) This is a pro feature.')}
+														</Tooltip>
+													}>
+													<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i className="fas fa-lock" /></Button>
+												</OverlayTrigger>
+											))}
+										</>
+									)}
+									</Form.Label>
+								</Col>
+								<Col xs={11} sm={11} lg={7}>
+									<Form.Control
+										id="tta__settings_exclude_tags"
+										name="tta__settings_exclude_tags"
+										as='textarea'
+										onChange={(e) => handleChange(e)}
+										value={settings.tta__settings_exclude_tags}
+										placeholder={ttsObj.is_pro_active ? __('Multiple Tags Will Be Pipe(|) Separated.') : __('Exclude tags is a pro feature.')}
 										disabled={ttsObj.is_pro_active ? false : true}
 									/>
 								</Col>
@@ -273,55 +323,6 @@ export default function Settings() {
 										onChange={(e) => handleChange(e)}
 										value={settings.tta__settings_exclude_texts}
 										placeholder={ttsObj.is_pro_active ? __('Multiple Texts Will Be Pipe(|) Separated.') : 'Exclude texts is a pro feature.'}
-										disabled={ttsObj.is_pro_active ? false : true}
-									/>
-								</Col>
-								<Col xs={1} sm={1} lg={1} className='mt-4'>
-									<>
-										{['top'].map((placement) => (
-											<OverlayTrigger
-												key={placement}
-												placement={placement}
-												overlay={
-													<Tooltip id={`tooltip-${placement}`}>
-														{__('Click To Know How It Works?')}
-													</Tooltip>
-												}>
-												<a target='_blank' href='https://atlasaidev.com/docs/' > <i className="fas fa-info-circle"></i></a>
-											</OverlayTrigger>
-										))}
-									</>
-								</Col>
-							</Row>
-							<Row className='mt-4'>
-								<Col xs={12} sm={6} lg={4}>
-									<Form.Label htmlFor='tta__settings_exclude_tags'>
-										Exclude Tag's Content {ttsObj.is_pro_active ? "" : (
-										<>
-											{['top'].map((placement) => (
-												<OverlayTrigger
-													key={placement}
-													placement={placement}
-													overlay={
-														<Tooltip id={`tooltip-${placement}`}>
-															{__('Exclude Tags. So that its content skiped. Like ( Subscript, Superscript etc.) This is a pro feature.')}
-														</Tooltip>
-													}>
-													<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i className="fas fa-lock" /></Button>
-												</OverlayTrigger>
-											))}
-										</>
-									)}
-									</Form.Label>
-								</Col>
-								<Col xs={11} sm={11} lg={7}>
-									<Form.Control
-										id="tta__settings_exclude_tags"
-										name="tta__settings_exclude_tags"
-										as='textarea'
-										onChange={(e) => handleChange(e)}
-										value={settings.tta__settings_exclude_tags}
-										placeholder={ttsObj.is_pro_active ? __('Multiple Tags Will Be Pipe(|) Separated.') : __('Exclude tags is a pro feature.')}
 										disabled={ttsObj.is_pro_active ? false : true}
 									/>
 								</Col>

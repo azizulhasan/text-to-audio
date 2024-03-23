@@ -33,6 +33,7 @@ export default class TextToSpeech {
     shouldCancelTimer = null
     callBackAfterEnd = null
     splitSentences = null
+    playButtonNo = 1
     constructor(buttonId, content = '', button = null, TTS = window.TTS) {
         this.TTS = TTS
         this.content = content ? content : window.TTS.contents[buttonId]
@@ -41,8 +42,10 @@ export default class TextToSpeech {
         this.buttonTextArr = this.TTS.settings.textArr
         this.speakButton = button ? button : document.getElementById(buttonId)
         this.ttsListeningSettings = this.TTS.settings.listening
+        this.ttsListeningSettings = this.TTS.settings.listening
         this.speech = new Speech()
         this.splitSentences = splitSentences
+        this.playButtonNo = this?.TTS?.settings?.settings?.customize?.buttonSettings?.id
 
     }
 
@@ -150,7 +153,7 @@ export default class TextToSpeech {
      * @param {*} listenStatus 
      */
     displayButtonText(listenStatus) {
-        if ((!ttsObj.is_pro_license_active || this?.buttonId == 1) && this?.speakButton?.innerHTML) {
+        if (this?.playButtonNo == 1 && this?.speakButton?.innerHTML) {
             if ('listen' === listenStatus) {
                 this.speakButton.innerHTML = this.replayButtonContent();
                 this.speakButton.setAttribute('title', 'Text To Audio : ' + this.replayButtonText());
