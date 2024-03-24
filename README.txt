@@ -385,6 +385,7 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 = 1.5.21 ( 22 Mar 2024 ) =
 * Documentation updated.
 * Title and mp3 file name are same in pro version.
+* Filter added `tts_player_customizations` for customizing button icon.
 
 = 1.5.20 ( 18 Mar 2024 ) =
 * Button rendering bug fix.
