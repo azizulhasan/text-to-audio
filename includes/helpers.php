@@ -133,8 +133,8 @@ function tta_get_button_content($atts, $is_block = false) {
     $description = get_the_content();
     $description_sanitized = tta_clean_content($description);
 
-    $content     = apply_filters('tta__content_title', $title);
-    $content    .= apply_filters('tta__content_description', $description_sanitized, $description, get_the_ID() );
+    $content     = apply_filters('tta__content_title', $title, $post);
+    $content    .= apply_filters('tta__content_description', $description_sanitized, $description, get_the_ID(), $post );
     $content    = TTA_Helper::sazitize_content($content);
 
     // Button listen text.
@@ -144,7 +144,7 @@ function tta_get_button_content($atts, $is_block = false) {
         }
     }
 
-    $content_read_time = apply_filters('tts_content_reading_time', 1, $content );
+    $content_read_time = apply_filters('tts_content_reading_time', 1, $content, $post );
     $text_arr = get_button_text( $atts , $content_read_time);
 
 
@@ -185,7 +185,7 @@ function tta_get_button_content($atts, $is_block = false) {
     // init button scripts
     do_action('tts_enqueue_button_scripts' , $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts);
 
-    $data =  apply_filters( 'tts__listening_button', $button, $btn_no, $class );
+    $data =  apply_filters( 'tts__listening_button', $button, $btn_no, $class, $post );
 
     return $data;
 }
