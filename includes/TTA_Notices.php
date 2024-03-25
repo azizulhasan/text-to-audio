@@ -19,8 +19,8 @@ class TTA_Notices {
 	 */
 	public function notifications_load_hooks() {
 		if (in_array(admin_url(basename($_SERVER['REQUEST_URI'])), [ admin_url('index.php') , admin_url('plugins.php'), admin_url('update-core.php'), \admin_url('plugin-install.php'), \admin_url('admin.php?page=text-to-audio')] ) )  {
-			add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
-			add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
+//			add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
+//			add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
 		}
 
 		$plugins = [
@@ -39,7 +39,7 @@ class TTA_Notices {
         ];
 
 		if(!function_exists('is_plugin_active')) {
-            require_once \ABSPATH . 'wp-admin/includes/pluin.php';
+            require_once \ABSPATH . 'wp-admin/includes/plugin.php';
         }
 
         if(!is_pro_active()){
@@ -212,7 +212,7 @@ class TTA_Notices {
 						'<br/>',
 						$language_string, //phpcs:ignore
 						$contact_link, //phpcs:ignore
-                        "<h3>$pluginName</h3>", //phpcs:ignore
+                        "<h3>$pluginName</h3>" //phpcs:ignore
 					);
 					?></p>
                 <p>
@@ -310,7 +310,7 @@ class TTA_Notices {
 						'<span style="font-size: 16px;">&#128516</span>',
 						'<div class="tta-review-notice-logo"></div>',
 						'<br>',
-                        "<h3>$pluginName</h3>", //phpcs:ignore
+                        "<h3>$pluginName</h3>" //phpcs:ignore
 					);
 					?></p>
                 <p>
