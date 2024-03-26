@@ -39,7 +39,7 @@ class TTA_Notices {
         ];
 
 		if(!function_exists('is_plugin_active')) {
-            require_once \ABSPATH . 'wp-admin/includes/pluin.php';
+            require_once \ABSPATH . 'wp-admin/includes/plugin.php';
         }
 
         if(!is_pro_active()){
@@ -212,7 +212,7 @@ class TTA_Notices {
 						'<br/>',
 						$language_string, //phpcs:ignore
 						$contact_link, //phpcs:ignore
-                        "<h3>$pluginName</h3>", //phpcs:ignore
+                        "<h3>$pluginName</h3>" //phpcs:ignore
 					);
 					?></p>
                 <p>
@@ -310,7 +310,7 @@ class TTA_Notices {
 						'<span style="font-size: 16px;">&#128516</span>',
 						'<div class="tta-review-notice-logo"></div>',
 						'<br>',
-                        "<h3>$pluginName</h3>", //phpcs:ignore
+                        "<h3>$pluginName</h3>" //phpcs:ignore
 					);
 					?></p>
                 <p>
