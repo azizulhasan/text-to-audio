@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.5
 Requires PHP: 7.4
-Stable tag: 1.5.23
+Stable tag: 1.5.24
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -378,9 +378,17 @@ We are looking for people to help translate this plugin. If you can help we woul
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+= 1.5.24 ( 28 Mar 2024 ) =
+* Filter added `tts_player_pro_customizations` for customizing "Default Pro" button.
+* Exclude content by CSS selectors added.
+* UI Improved.
+
+* By default settings update for button icon display.
+
 = 1.5.23 ( 26 Mar 2024 ) =
 * WordPress 6.5 tested.
 * By default settings update for button icon display.
+* Filter added `tts_player_customizations` for customizing button icon.
 
 
 = 1.5.22 ( 25 Mar 2024 ) =
@@ -390,7 +398,6 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 = 1.5.21 ( 22 Mar 2024 ) =
 * Documentation updated.
 * Title and mp3 file name are same in pro version.
-* Filter added `tts_player_customizations` for customizing button icon.
 
 = 1.5.20 ( 18 Mar 2024 ) =
 * Button rendering bug fix.
