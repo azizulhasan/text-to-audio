@@ -174,7 +174,7 @@ class TTA_Helper {
     public static function tts_file_name($title, $selectedLang) {
 
         if (!$title) {
-        $title = 'Demo Content';
+            $title = 'Demo Content';
         }
         
         $lang_code = explode('-', str_replace(['_', ' '], '-', $selectedLang));
