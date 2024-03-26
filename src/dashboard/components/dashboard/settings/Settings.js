@@ -343,29 +343,35 @@ export default function Settings() {
 									</>
 								</Col>
 							</Row>
-							<Row className='mt-3'>
-								 <Col xs={12} sm={6} lg={4}>
-									<Form.Label htmlFor='tta__settings_display_btn_icon'>
-										Enable Button Icon
-									</Form.Label>
-								</Col>
-								<Col xs={12} sm={12} lg={8}>
-									<Form.Check // prettier-ignore
-										type={'checkbox'}
-										checked={settings.tta__settings_display_btn_icon}
-										onChange={(e) =>
-											handleChange(e)
-										}
-										name={`tta__settings_display_btn_icon`}
-										id={`tta__settings_display_btn_icon`}
-									/>
-								</Col>
-								<div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
-									<button type='submit' className='tta_btn  btn-block'>
-										Submit
-									</button>
-								</div>
-							</Row>
+							 <Row className='mt-3'>
+									{
+									 !window?.ttsObjPro?.is_pro_active  &&
+										<>
+										<Col xs={12} sm={6} lg={4}>
+											<Form.Label htmlFor='tta__settings_display_btn_icon'>
+												Enable Button Icon
+											</Form.Label>
+										</Col>
+										<Col xs={12} sm={12} lg={8}>
+											<Form.Check // prettier-ignore
+												type={'checkbox'}
+												checked={settings.tta__settings_display_btn_icon}
+												onChange={(e) =>
+													handleChange(e)
+												}
+												name={`tta__settings_display_btn_icon`}
+												id={`tta__settings_display_btn_icon`}
+											/>
+										</Col>
+									</>
+									}
+									<div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
+										<button type='submit' className='tta_btn  btn-block'>
+											Submit
+										</button>
+									</div>
+								</Row>
+
 						</Form>
 					</Col>
 					<Col xs={12} sm={12} lg={4}>
