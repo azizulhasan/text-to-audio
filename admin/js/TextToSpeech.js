@@ -104,10 +104,10 @@ export default class TextToSpeech {
     }
     resumeButtonContent() {
         let icon = '<div class="tts_button"><span class="dashicons dashicons-controls-play"></span> <span>';
-        if(ttsObj?.player_customizations?.[1]?.replay) {
+        if(ttsObj?.player_customizations?.[1]?.resume) {
             const parser = new DOMParser();
             // convert html string into DOM
-            let document = parser.parseFromString(ttsObj?.player_customizations?.[1]?.replay, "image/svg+xml");
+            let document = parser.parseFromString(ttsObj?.player_customizations?.[1]?.resume, "image/svg+xml");
             icon = `<div className="tts_button">${document.documentElement.outerHTML}</div><span>`;
         }
 
