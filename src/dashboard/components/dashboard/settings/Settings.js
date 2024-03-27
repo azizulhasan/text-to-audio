@@ -187,7 +187,7 @@ export default function Settings() {
 														{__('Click To Know How It Works?')}
 													</Tooltip>
 												}>
-												<a target='_blank' href='https://atlasaidev.com/docs/' > <i className="fas fa-info-circle"></i></a>
+												<a target='_blank' href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev' > <i className="fas fa-info-circle"></i></a>
 											</OverlayTrigger>
 										))}
 									</>
@@ -237,7 +237,7 @@ export default function Settings() {
 														{__('Click To Know How It Works?')}
 													</Tooltip>
 												}>
-												<a target='_blank' href='https://atlasaidev.com/docs/' > <i className="fas fa-info-circle"></i></a>
+												<a target='_blank' href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev' > <i className="fas fa-info-circle"></i></a>
 											</OverlayTrigger>
 										))}
 									</>
@@ -287,7 +287,7 @@ export default function Settings() {
 														{__('Click To Know How It Works?')}
 													</Tooltip>
 												}>
-												<a target='_blank' href='https://atlasaidev.com/docs/' > <i className="fas fa-info-circle"></i></a>
+												<a target='_blank' href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev' > <i className="fas fa-info-circle"></i></a>
 											</OverlayTrigger>
 										))}
 									</>
@@ -337,7 +337,7 @@ export default function Settings() {
 														{__('Click To Know How It Works?')}
 													</Tooltip>
 												}>
-												<a target='_blank' href='https://atlasaidev.com/docs/' > <i className="fas fa-info-circle"></i></a>
+												<a target='_blank' href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev' > <i className="fas fa-info-circle"></i></a>
 											</OverlayTrigger>
 										))}
 									</>
