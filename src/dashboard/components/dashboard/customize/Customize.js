@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { __ } from '@wordpress/i18n';
 import { Col, Container, Row, Form, FloatingLabel } from 'react-bootstrap';
 import toast from '../../context/Notify';
 import { copyToClipBoard, postWithoutImage } from '../../context/utilities';
@@ -259,6 +260,11 @@ export default function Customize() {
 												</button>
 											)
 							}
+							<p className='pt-2'>
+								{
+									listeningBtnStyle?.buttonSettings?.id == 1 && ttsObjPro.is_pro_active ? __('If you\'re selecting this button then you may not get pro features. Suppose CSS selectors from settings page and WPML/GTranslate will not work with this button.') : ''
+								}
+							</p>
 						</Col>
 						<Col xs={12} sm={12} lg={12} className='mb-3'>
 							<>
