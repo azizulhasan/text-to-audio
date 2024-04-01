@@ -125,21 +125,21 @@ class TTA_Helper {
 
     public static function  get_compatible_plugins_data() {
         $compatible_plugins_data = [];
-        $datas = \apply_filters('tts_pro_plugins_data', [
-                'gtranslate/gtranslate.php' => [
-                    'type' => 'class',
-                    'data' => [ 'gt_options', 'gt_languages','gt_switcher_wrapper', 'gt_selector', ],//  'gt_selector',], // 'gt_white_content', 'gtranslate_wrapper'],
-                    'plugin' => 'gtranslate' 
-                ],
-                'sitepress-multilingual-cms/sitepress.php' => [
-                    'type' => 'class',
-                    'data' => [ ],
-                    'plugin' => 'sitepress' 
-                ],
-        ]);
+        $datas = [
+	        'gtranslate/gtranslate.php' => [
+		        'type' => 'class',
+		        'data' => [ 'gt_options', 'gt_languages','gt_switcher_wrapper', 'gt_selector', ],//  'gt_selector',], // 'gt_white_content', 'gtranslate_wrapper'],
+		        'plugin' => 'gtranslate'
+	        ],
+	        'sitepress-multilingual-cms/sitepress.php' => [
+		        'type' => 'class',
+		        'data' => [ ],
+		        'plugin' => 'sitepress'
+	        ],
+        ];
 
         if(!function_exists('is_plugin_active')) {
-            require_once \ABSPATH . 'wp-admin/includes/pluin.php';
+            require_once \ABSPATH . 'wp-admin/includes/plugin.php';
         }
 
         foreach ( $datas as $plugin_name =>  $data ){
@@ -148,7 +148,7 @@ class TTA_Helper {
                 }
          }
 
-        return \apply_filters('tts_pro_compatible_plugins_data', $compatible_plugins_data, \get_plugins());
+        return \apply_filters('tts_compatible_plugins_data', $compatible_plugins_data, \get_plugins());
     }
 
     public static function get_language_code_from_url($url) {
