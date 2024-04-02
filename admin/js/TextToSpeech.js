@@ -316,7 +316,7 @@ export default class TextToSpeech {
         }
 
         // update current content
-        let currentIndex = this.splittedSentances.indexOf(this.utterence.target.text);
+        let currentIndex = this.splittedSentances.indexOf(this.utterence?.target?.text || '');
         this.splittedSentances = this.splittedSentances.slice(currentIndex)
         this.content = this.splittedSentances.join(' ')
 
