@@ -104,7 +104,7 @@ class TTA_Helper {
         if($should_clean_content) {
             $output = \tta_clean_content($output);
             if($content_type === 'title') {
-                $output = \tta_should_add_dilimiter($output, \apply_filters('tts_sentence_delimiter', '. '));
+                $output = \tta_should_add_delimiter($output, \apply_filters('tts_sentence_delimiter', '. '));
             }
         }
         // Format Output According to output type

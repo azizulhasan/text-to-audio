@@ -1,8 +1,12 @@
 <?php
 use TTA\TTA_Helper;
+
 /**
- * If classic editor is active then on new-post and edit post
- * activate recording  for blog content.
+ * Clean content like title/description.
+ * 
+ * @param $text
+ *
+ * @return mixed|null
  */
 function tta_clean_content($text) {
     $quotationMarks = array(
@@ -67,10 +71,10 @@ function tta_clean_content($text) {
 /**
  * 
  */
-function tta_should_add_dilimiter($title, $delimiter) {
-    $dilimiterArr = ['.', ',', '?', '!', '|', ];
+function tta_should_add_delimiter($title, $delimiter) {
+    $delimiterArr = ['.', ',', '?', '!', '|', ];
     $end = substr($title, -1);
-    if(in_array($end, $dilimiterArr)){
+    if(in_array($end, $delimiterArr)){
         return $title. ' ';
     }
 
@@ -88,7 +92,6 @@ function tta_should_add_dilimiter($title, $delimiter) {
  *
  * @param $is_block
  *
- * @return string
  */
 function tta_get_button_content($atts, $is_block = false) {
     $settings = (array) get_option('tta_settings_data');
@@ -121,7 +124,7 @@ function tta_get_button_content($atts, $is_block = false) {
 
     $title = tta_clean_content( $post->post_title);
 
-    $title = tta_should_add_dilimiter($title, $sentence_delimiter);
+    $title = tta_should_add_delimiter($title, $sentence_delimiter);
     $date = get_the_date('Y/m/d');
     
     // TODO: write functionality if current page is home page where content is excerpt.
@@ -144,6 +147,7 @@ function tta_get_button_content($atts, $is_block = false) {
         }
     }
 
+     // Get content reading time.
     $content_read_time = apply_filters('tts_content_reading_time', 1, $content, $post );
     $text_arr = get_button_text( $atts , $content_read_time);
 
@@ -151,7 +155,7 @@ function tta_get_button_content($atts, $is_block = false) {
     // Speak Icon
     $speakIcon = "<div class='tta_button'>";
     $speakIcon .= apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ');
-    $speakIcon .= '<span> '. $text_arr['listen_text'] . '<span></div>';
+    $speakIcon .= '<span> '. $text_arr['listen_text'] . '<span></div>'; // TODO: should remove this if unnecessary.
     // Button style.
     if (isset($customize) && count($customize)) {
         if ($is_block) {
@@ -169,8 +173,6 @@ function tta_get_button_content($atts, $is_block = false) {
     
     //Custom Css
     $custom_css = '';
-
-
     if (isset($customize['custom_css']) && '' !== $customize['custom_css']) {
         $custom_css = esc_attr($customize['custom_css']);
         $custom_css = str_replace( "\n", '', $custom_css );
@@ -214,14 +216,14 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
         }
         
         if( apply_filters('tts_ignore_match_80_percent', false) && tts_text_match_80_percent($title , $temp_title) ) {
-           get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
+           get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
         }else{
-          get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
+          get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
         }
     });
 }
 
-function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings) {
+function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings) {
     
    global $post;
 
