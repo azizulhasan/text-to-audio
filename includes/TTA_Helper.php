@@ -1,6 +1,8 @@
 <?php
 
 namespace TTA;
+use ParagonIE\Sodium\Core\Curve25519\Fe;
+
 /**
  * Fired during plugin activation
  *
@@ -245,7 +247,7 @@ class TTA_Helper {
         return \apply_filters('tts_get_settings', $all_settings_data, $post);
     }
 
-    public static function get_mp3_file_urls($post = '') {
+    public static function get_mp3_file_urls($post = '') {// TODO: when google cloud TTS is applied. the mp3 file path will be different.
         if(!$post) {
             global $post;
         }
@@ -267,19 +269,51 @@ class TTA_Helper {
         $should_update_urls = \false;
         foreach($mp3_file_urls as $language_code =>  $url ) {
             $file_headers = @get_headers($url);
-             if(!$file_headers || strpos( $file_headers[0], 'Not Found')  !== false) {
+
+	        if(self::is_pro_active()) {
+				$full_path = self::get_path_from_url($url);
+				if(filesize($full_path) == 0) {
+					$should_update_urls = true;
+					continue;
+				}
+	        }
+
+             if(!$file_headers || strpos( $file_headers[0], 'Not Found')  !== false ) {
                 $should_update_urls = true;
             } else {
                 $final_mp3_file_ulrs[$language_code] = $url;
             }
         }
 
-        if( $should_update_urls ) {
+//	    error_log(print_r([
+//		    '$should_update_urls' => $should_update_urls,
+//		    '$final_mp3_file_ulrs' => $final_mp3_file_ulrs ,
+//	    ],1));
+
+        if( $should_update_urls || empty( $final_mp3_file_ulrs ) ) {
             update_post_meta($post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs);
         }
 
         return \apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post);
     }
+
+	/**
+	 * @param $url
+	 *
+	 * @return string
+	 */
+	public static function get_path_from_url($url) {
+		$log_data = array(
+			'url' => $url,
+			'path' => TTA_PRO_GTTS_DIR,
+			'home_url' => home_url(),
+		);
+		// Extract the relative path from the full URL
+		$relative_path = str_replace($log_data['home_url'] . '/wp-content/uploads/TTA_Pro/gtts/', '', $log_data['url']);
+
+		// Construct the full path
+		return  rtrim($log_data['path'], '/') . '/' . $relative_path;
+	}
 
     /**
      * Is plugin active
