@@ -64,7 +64,7 @@ export default function Docs() {
 
 
 									<br /><br />If you still facing problems regarding browser issues please on a <a target='_blank' href='http://atlasaidev.com/contact-us/'>ticket</a>.
-									<br /><br /> There is no issue releated to browser on <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>pro version.</a>
+									<br /><br /> There is no issue related to browser on <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>pro version.</a>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='2'>
@@ -80,38 +80,62 @@ export default function Docs() {
 							</Accordion.Item>
 							<Accordion.Item eventKey='3'>
 								<Accordion.Header>
-									3. How to enable <code>speechSynthesis</code> on FireFox?
+									3. Can I Restrict/Exclude Certain Words From Playing?
 								</Accordion.Header>
 								<Accordion.Body>
 									<p>
-										1. Open FireFox browser, open a new tab and search{' '}
-										<code>about:config</code>. Now search with this string
-										and enable as true.
+										Absolutely! You have the flexibility to exclude specific content from being read
+										aloud, and this feature is available in the <a target='_blank'
+																					   href='https://atlasaidev.com/text-to-speech-pro/'>pro
+										version.</a> of Text to Speech.
 									</p>
 									<p>
-										a. <strong>media.webspeech.synth.enabled</strong>{' '}
+										Here’s how to exclude words from playback:
 									</p>
+
+									<p>Navigate to the Settings tab of Text to Speech Pro.</p>
+
+										<p>Look for the “Exclude Texts To Speak” textarea.</p>
+										<p>
+											In this field, you can list the words or phrases you wish to exclude from being read aloud.
+										</p>
+										<p>
+											If you want to exclude multiple words or phrases, simply separate them using the pipe symbol (|).
+										</p>
+										<p>
+											With this capability, you can fine-tune the playback experience, ensuring that only the desired content is read aloud to your audience.
+										</p>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='4'>
 								<Accordion.Header>
-									4. How to enable <code>SpeechRecognition</code> on FireFox?
+									4. Is it possible to exclude specific HTML tags from being read aloud by the Text to Speech plugin?
 								</Accordion.Header>
 								<Accordion.Body>
 									<p>
-										1. Open FireFox browser, open a new tab and search{' '}
-										<code>about:config</code>. Now search with these 2
-										string and enable them as true.
+										Of course! With the <a target='_blank'
+															   href='https://atlasaidev.com/text-to-speech-pro/'>pro
+										version.</a> of Text to Speech, you gain the ability to skip the content
+										enclosed within certain HTML tags during playback.
 									</p>
 									<p>
-										a. <strong>media.webspeech.recognition.enable</strong>{' '}
+										**Here's how it works:**
 									</p>
 									<p>
-										b.{' '}
-										<strong>
-											media.webspeech.recognition.force_enable
-										</strong>
-									</p>
+									*Navigate to the Settings tab of Text to Speech Pro.
+										</p>
+										<p>
+											*Locate the "Exclude Tag's Content" textarea.
+										</p>
+										<p>
+											*In this field, you can specify the HTML tags whose content you want to exclude from being read aloud.
+										</p>
+										<p>
+											*If you need to skip multiple tags, simply separate them using the pipe symbol (|).
+										</p>
+										<p>
+											By utilizing this feature, you can tailor the reading experience to your preferences, ensuring that specific HTML elements are omitted from the audio playback.
+										</p>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='5'>
@@ -230,6 +254,26 @@ export default function Docs() {
 									Romanian, Russian, Serbian, Slovak, Spanish, Spanish (Spain),
 									Spanish (United States), Swahili, Swedish, Tamil, Thai,
 									Turkish, Vietnamese, Welsh
+								</Accordion.Body>
+							</Accordion.Item>
+							<Accordion.Item eventKey='11'>
+								<Accordion.Header>
+									11. How many languages support in free version?
+								</Accordion.Header>
+								<Accordion.Body>
+									<strong>Free SUPPORTED LANGUAGES:</strong><br />
+									Text To Speech TTS Accessibility plugin supports these languages.<br /><br />
+
+									<strong>Chrome Desktop:</strong> UK English, US English, Spanish ( Spain ), Spanish ( United States ), French, Deutsch, Italian, Russian, Dutch, Japanese, Korean, Chinese (China), Chinese (Hong Kong), Chinese (Taiwan) Hindi, Indonesian, Polish, Brazilian Portuguese.<br />
+									<strong>Chrome Mobile:</strong> English USA, English UK, German, Italian, Russian, French, Spanish<br />
+
+									<strong>Microsoft Edge Desktop :</strong> All Languages.<br />
+
+									<strong>Microsoft Edge Mobile :</strong> All Languages.<br />
+
+									<strong>FireFox Desktop:</strong> English.<br />
+
+									<strong>FireFox Mobile:</strong> English USA, English UK, German, Italian, Russian, French, Spanish.<br />
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='11'>
