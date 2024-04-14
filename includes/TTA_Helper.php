@@ -272,7 +272,7 @@ class TTA_Helper {
 
 	        if(self::is_pro_active()) {
 				$full_path = self::get_path_from_url($url);
-				if(filesize($full_path) == 0) {
+				if( file_exists($full_path) && filesize($full_path) == 0) {
 					$should_update_urls = true;
 					continue;
 				}
