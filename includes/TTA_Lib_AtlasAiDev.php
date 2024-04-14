@@ -115,7 +115,7 @@ final class TTA_Lib_AtlasAiDev {
         add_filter(
             "AtlasAiDev_{$projectSlug}_Support_Ticket_Recipient_Email",
             function () {
-                return 'atlasaidev@gmail.com';
+                return 'contact.atlasaidev@gmail.com';
             },
             10
         );
@@ -184,7 +184,7 @@ final class TTA_Lib_AtlasAiDev {
         $ticketSubmitted = esc_html__( 'Your ticket has been successfully submitted.', TEXT_TO_AUDIO_TEXT_DOMAIN );
         $twenty4Hours    = sprintf( '<strong>%s</strong>', esc_html__( '24 hours', TEXT_TO_AUDIO_TEXT_DOMAIN ) );
         /* translators: %s: Approx. time to response after ticket submission. */
-        $notification = sprintf( esc_html__( 'You will receive an email notification from "atlasaidev@gmail.com" in your inbox within %s.', TEXT_TO_AUDIO_TEXT_DOMAIN ), $twenty4Hours );
+        $notification = sprintf( esc_html__( 'You will receive an email notification from "contact.atlasaidev@gmail.com" in your inbox within %s.', TEXT_TO_AUDIO_TEXT_DOMAIN ), $twenty4Hours );
         $followUp     = esc_html__( 'Please Follow the email and AtlasAiDev Support Team will get back with you shortly.', TEXT_TO_AUDIO_TEXT_DOMAIN );
         $response    .= sprintf( '<p>%s %s %s</p>', $ticketSubmitted, $notification, $followUp );
         $docLink      = sprintf( '<a class="button button-primary" href="https://atlasaidev.helpscoutdocs.com/" target="_blank"><span class="dashicons dashicons-media-document" aria-hidden="true"></span> %s</a>', esc_html__( 'Documentation', TEXT_TO_AUDIO_TEXT_DOMAIN ) );

@@ -27,8 +27,9 @@ class TTA_Helper {
 
     public static function should_load_button() {
         $should_load_button = false;
+		global $post;
         // is_home() || is_archive() || is_front_page() || is_category()
-        if(\is_single() || is_singular() ){
+        if(\is_single() || \is_singular() ){
             $should_load_button = true;
         }
         
@@ -37,6 +38,7 @@ class TTA_Helper {
         || count($settings['tta__settings_allow_listening_for_post_types']) === 0
         || !is_array($settings['tta__settings_allow_listening_for_post_types'])
         || !in_array(self::tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'])
+        || in_array($post->ID, $settings['tta__settings_exclude_post_ids'])
         ) {
             $should_load_button = false;
         }
