@@ -249,55 +249,100 @@ class TTA_Helper {
         return \apply_filters('tts_get_settings', $all_settings_data, $post);
     }
 
-    public static function get_mp3_file_urls($post = '') {// TODO: when google cloud TTS is applied. the mp3 file path will be different.
-        if(!$post) {
-            global $post;
-        }
+	public static function get_mp3_file_urls($post = '') {// TODO: when google cloud TTS is applied. the mp3 file path will be different.
 
-        
+		if(!$post) {
+
+			global $post;
+
+		}
 
 
-        $mp3_file_urls = get_post_meta($post->ID, 'tts_mp3_file_urls');
-        $old_url = get_post_meta($post->ID, 'tts_mp3_file_url', true);
 
-        if(is_pro_active() && $old_url) {
-            $mp3_file_urls = self::handle_old_url($post, $mp3_file_urls, $old_url);
-        }
+		$mp3_file_urls = get_post_meta($post->ID, 'tts_mp3_file_urls');
 
-        if(isset($mp3_file_urls[0])) {
-            $mp3_file_urls = $mp3_file_urls[0];
-        }
-        $final_mp3_file_ulrs = [];
-        $should_update_urls = \false;
-        foreach($mp3_file_urls as $language_code =>  $url ) {
-            $file_headers = @get_headers($url);
+		$old_url = get_post_meta($post->ID, 'tts_mp3_file_url', true);
 
-	        if(self::is_pro_active()) {
+
+
+		if(is_pro_active() && $old_url) {
+
+			$mp3_file_urls = self::handle_old_url($post, $mp3_file_urls, $old_url);
+
+		}
+
+
+
+		if(isset($mp3_file_urls[0])) {
+
+			$mp3_file_urls = $mp3_file_urls[0];
+
+		}
+
+
+		$final_mp3_file_ulrs = [];
+
+		$should_update_urls = \false;
+
+		foreach($mp3_file_urls as $language_code =>  $url ) {
+
+			$file_headers = @get_headers($url);
+
+			if (!$file_headers && function_exists('curl_init')) {
+				$ch = curl_init();
+				curl_setopt($ch, CURLOPT_URL, $url);
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+				curl_setopt($ch, CURLOPT_HEADER, true);
+				$file_headers = curl_exec($ch);
+				curl_close($ch);
+			}
+
+			if(isset($file_headers[0])) {
+				$file_headers = $file_headers[0];
+			}
+
+			if(self::is_pro_active()) {
+
 				$full_path = self::get_path_from_url($url);
-				if( file_exists($full_path) && filesize($full_path) == 0) {
+
+
+
+				if( !file_exists($full_path) || (file_exists($full_path) && filesize($full_path) == 0) ) {
+
 					$should_update_urls = true;
+
 					continue;
+
 				}
-	        }
 
-             if(!$file_headers || strpos( $file_headers[0], 'Not Found')  !== false ) {
-                $should_update_urls = true;
-            } else {
-                $final_mp3_file_ulrs[$language_code] = $url;
-            }
-        }
+			}
 
-//	    error_log(print_r([
-//		    '$should_update_urls' => $should_update_urls,
-//		    '$final_mp3_file_ulrs' => $final_mp3_file_ulrs ,
-//	    ],1));
 
-        if( $should_update_urls || empty( $final_mp3_file_ulrs ) ) {
-            update_post_meta($post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs);
-        }
 
-        return \apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post);
-    }
+			if(!$file_headers || strpos($file_headers, 'Not Found')  !== false ) {
+
+				$should_update_urls = true;
+
+			} else {
+
+				$final_mp3_file_ulrs[$language_code] = $url;
+
+			}
+
+		}
+
+
+		if( $should_update_urls || empty( $final_mp3_file_ulrs ) ) {
+
+			update_post_meta($post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs);
+
+		}
+
+
+
+		return \apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post);
+
+	}
 
 	/**
 	 * @param $url
