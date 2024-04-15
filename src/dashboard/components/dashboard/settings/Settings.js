@@ -24,6 +24,7 @@ export default function Settings() {
 		tta__settings_exclude_content_by_css_selectors: '',
 		tta__settings_exclude_texts: [],
 		tta__settings_exclude_tags: [],
+		tta__settings_exclude_post_ids: [],
 	});
 	const [postTypes, setPostTypes] = useState([]);
 	const [isDataLoaded, setIsDataLoaded] = useState(false)
@@ -70,6 +71,16 @@ export default function Settings() {
 		if (e.target.getAttribute('type') === 'checkbox') {
 			value = e.target.checked
 		}
+		if(e.target.name == 'tta__settings_exclude_post_ids') {
+			let ids = []
+			if(ttsObj.is_pro_active) {
+				ids = e.target.value?.split(',');
+			}else{
+				ids = e.target.value?.split(',')?.slice(0, 5);
+			}
+			value = ids;
+		}
+
 		if (!e.target.name) return;
 
 		setSettings({
@@ -343,6 +354,56 @@ export default function Settings() {
 									</>
 								</Col>
 							</Row>
+							{/*Exclude Posts To Speak*/}
+							<Row className='mt-4'>
+								<Col xs={12} sm={6} lg={4}>
+									<Form.Label htmlFor='tta__settings_exclude_post_ids'>
+										Exclude Posts By IDs To Speak {ttsObj.is_pro_active ? "" : (
+										<>
+											{['top'].map((placement) => (
+												<OverlayTrigger
+													key={placement}
+													placement={placement}
+													overlay={
+														<Tooltip id={`tooltip-${placement}`}>
+															{__('Exclude more than 5 IDs is a pro feature')}
+														</Tooltip>
+													}>
+													<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i className="fas fa-lock" /></Button>
+												</OverlayTrigger>
+											))}
+										</>
+									)}
+									</Form.Label>
+								</Col>
+								<Col xs={11} sm={11} lg={7}>
+									<Form.Control
+										id="tta__settings_exclude_post_ids"
+										name="tta__settings_exclude_post_ids"
+										as='textarea'
+										onChange={(e) => handleChange(e)}
+										value={settings.tta__settings_exclude_post_ids}
+										placeholder={ttsObj.is_pro_active ? __('Multiple IDs Will Be Comma(,) Separated.') : 'Excluding more than 5 IDs is a pro feature. Multiple IDs Will Be Comma(,) Separated.' }
+									/>
+								</Col>
+								<Col xs={1} sm={1} lg={1} className='mt-4'>
+									<>
+										{['top'].map((placement) => (
+											<OverlayTrigger
+												key={placement}
+												placement={placement}
+												overlay={
+													<Tooltip id={`tooltip-${placement}`}>
+														{__('Click To Know How It Works?')}
+													</Tooltip>
+												}>
+												<a target='_blank' href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev' > <i className="fas fa-info-circle"></i></a>
+											</OverlayTrigger>
+										))}
+									</>
+								</Col>
+							</Row>
+							{/*Display Button Icon*/}
 							 <Row className='mt-3'>
 									{
 									 !window?.ttsObjPro?.is_pro_active  &&
@@ -371,7 +432,6 @@ export default function Settings() {
 										</button>
 									</div>
 								</Row>
-
 						</Form>
 					</Col>
 					<Col xs={12} sm={12} lg={4}>
