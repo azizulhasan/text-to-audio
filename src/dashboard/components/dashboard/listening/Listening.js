@@ -34,8 +34,8 @@ export default function Listening() {
 	});
 	const [listeningLang, setListeningLang] = useState('en_GB');
 	const apiURL = useMemo(() => {
-		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features) {
-			return ttsObjPro.api_url + ttsObjPro.api_namespace + "/" + ttsObjPro.api_version + "/";
+		if (window.hasOwnProperty('ttsObj') && ttsObj.is_pro_active) {
+			return ttsObj.api_url + ttsObj.api_namespace + "_pro/" + ttsObj.api_version + "/";
 		}
 
 		return ttsObj.api_url + ttsObj.api_namespace + "/" + ttsObj.api_version + "/";
@@ -46,7 +46,7 @@ export default function Listening() {
 		if (!stored_voices?.tta__voices) {
 			getData(apiURL + 'voices')
 				.then((res) => {
-					if (res.voices.length) {
+					if (res?.voices?.length) {
 						setLocalStorage({ tta__voices: res.voices })
 					} else {
 						setVoicesAndLanguages()
