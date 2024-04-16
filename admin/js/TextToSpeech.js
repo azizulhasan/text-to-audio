@@ -33,6 +33,7 @@ export default class TextToSpeech {
     shouldCancelTimer = null
     callBackAfterEnd = null
     splitSentences = null
+    playButtonNo = 1
     constructor(buttonId, content = '', button = null, TTS = window.TTS) {
         this.TTS = TTS
         this.content = content ? content : window.TTS.contents[buttonId]
@@ -41,8 +42,10 @@ export default class TextToSpeech {
         this.buttonTextArr = this.TTS.settings.textArr
         this.speakButton = button ? button : document.getElementById(buttonId)
         this.ttsListeningSettings = this.TTS.settings.listening
+        this.ttsListeningSettings = this.TTS.settings.listening
         this.speech = new Speech()
         this.splitSentences = splitSentences
+        this.playButtonNo = this?.TTS?.settings?.settings?.customize?.buttonSettings?.id
 
     }
 
@@ -58,26 +61,60 @@ export default class TextToSpeech {
     }
 
     playButtonContent() {
+        let icon = '<div class="tts_button"><span class="dashicons dashicons-controls-play"></span> <span>';
+        if(ttsObj?.player_customizations?.[1]?.play) {
+            const parser = new DOMParser();
+            // convert html string into DOM
+            let document = parser.parseFromString(ttsObj?.player_customizations?.[1]?.play, "image/svg+xml");
+            icon = `<div className="tts_button">${document.documentElement.outerHTML}</div><span>`;
+        }
 
-        return '<div class="tts_button"><span class="dashicons dashicons-controls-play"></span> <span> ' + this.playButtonText() + '<span></span></span></div>'
+        return icon + ' ' + this.playButtonText() + '</span></span></div>'
     }
     replayButtonText() {
         return this?.buttonTextArr?.replay_text ?? 'Replay';
     }
     replayButtonContent() {
-        return '<div class="tts_button"><span class="dashicons dashicons-image-rotate"></span> <span> ' + this.replayButtonText() + '<span></span></span></div>'
+        let icon = '<div class="tts_button"><span class="dashicons dashicons-image-rotate"></span> <span>';
+        if(ttsObj?.player_customizations?.[1]?.replay) {
+            const parser = new DOMParser();
+            // convert html string into DOM
+            let document = parser.parseFromString(ttsObj?.player_customizations?.[1]?.replay, "image/svg+xml");
+            icon = `<div className="tts_button">${document.documentElement.outerHTML}</div><span>`;
+        }
+
+        return icon + ' ' + this.replayButtonText() + '<span></span></span></div>'
+
     }
     pauseButtonText() {
         return this?.buttonTextArr?.pause_text ?? 'Pause';
     }
     pauseButtonContent() {
-        return '<div class="tts_button"><span class="dashicons dashicons-controls-pause"></span> <span> ' + this.pauseButtonText() + '<span></span></span></div>'
+        let icon = '<div class="tts_button"><span class="dashicons dashicons-controls-pause"></span> <span>';
+        if(ttsObj?.player_customizations?.[1]?.pause) {
+            const parser = new DOMParser();
+            // convert html string into DOM
+            let document = parser.parseFromString(ttsObj?.player_customizations?.[1]?.pause, "image/svg+xml");
+            icon = `<div className="tts_button">${document.documentElement.outerHTML}</div><span>`;
+        }
+
+        return icon + ' ' + this.pauseButtonText() + '<span></span></span></div>'
+
+
     }
     resumeButtonText() {
         return this?.buttonTextArr?.resume_text ?? 'Resume';
     }
     resumeButtonContent() {
-        return '<div class="tts_button"><span class="dashicons dashicons-controls-play"></span> <span> ' + this.buttonTextArr.resume_text + '<span></span></span></div>'
+        let icon = '<div class="tts_button"><span class="dashicons dashicons-controls-play"></span> <span>';
+        if(ttsObj?.player_customizations?.[1]?.resume) {
+            const parser = new DOMParser();
+            // convert html string into DOM
+            let document = parser.parseFromString(ttsObj?.player_customizations?.[1]?.resume, "image/svg+xml");
+            icon = `<div className="tts_button">${document.documentElement.outerHTML}</div><span>`;
+        }
+
+        return icon + ' ' + this.buttonTextArr.resume_text + '<span></span></span></div>'
     }
     recordStartButtonContent() {
         return '<span class="dashicons dashicons-controls-volumeoff"></span> ' + this.buttonTextArr.start_text;
@@ -150,7 +187,7 @@ export default class TextToSpeech {
      * @param {*} listenStatus 
      */
     displayButtonText(listenStatus) {
-        if (!ttsObj.is_pro_license_active && this?.speakButton?.innerHTML) {
+        if (this?.playButtonNo == 1 && this?.speakButton?.innerHTML) {
             if ('listen' === listenStatus) {
                 this.speakButton.innerHTML = this.replayButtonContent();
                 this.speakButton.setAttribute('title', 'Text To Audio : ' + this.replayButtonText());
@@ -279,7 +316,7 @@ export default class TextToSpeech {
         }
 
         // update current content
-        let currentIndex = this.splittedSentances.indexOf(this.utterence.target.text);
+        let currentIndex = this.splittedSentances.indexOf(this.utterence?.target?.text || '');
         this.splittedSentances = this.splittedSentances.slice(currentIndex)
         this.content = this.splittedSentances.join(' ')
 
@@ -366,6 +403,7 @@ export default class TextToSpeech {
             .catch(e => {
                 console.error("An error occured while initializing : ", e);
             });
+
     }
 
     _prepareSpeakButton(speech) {

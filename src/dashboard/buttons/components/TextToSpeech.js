@@ -296,15 +296,15 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                             className="tts__d-flex tts__gap-3 tts__justify-content-between tts__align-items-center"
                             style={{ height: "55px" }}
                         >
-                            <div className="tts__position-relative">
+
                                 {
-                                    (!speech || listenStatus === 'resume') && <Play onClick={(e) => handlePlayButtonClick(e)} />
+                                    (!speech || listenStatus === 'resume') && <Play ttsObjPro={ttsObjPro}  onClick={(e) => handlePlayButtonClick(e)} />
                                 }
                                 {
-                                    speech && listenStatus === 'listen' && <Replay onClick={(e) => handlePlayButtonClick(e)} />
+                                    speech && listenStatus === 'listen' && <Replay ttsObjPro={ttsObjPro} onClick={(e) => handlePlayButtonClick(e)} />
                                 }
                                 {
-                                    speech && listenStatus === 'pause' && <Pause onClick={(e) => handlePlayButtonClick(e)} />
+                                    speech && listenStatus === 'pause' && <Pause ttsObjPro={ttsObjPro} onClick={(e) => handlePlayButtonClick(e)} />
                                 }
 
                                 {/* {isPlaying && (
@@ -315,7 +315,6 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                         <span className="visually-hidden">Loading...</span>
                                     </div>
                                 )} */}
-                            </div>
                             {
                                 listenStatus === 'listen' && window.hasOwnProperty('TTS') && <div className="tts__align-items-center">
                                     <span>{window.TTS.settings.textArr.listen_text}</span>

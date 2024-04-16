@@ -234,10 +234,10 @@ class TTA_Api_Routes {
      */
     public function get_route_access() {
 
-        if ( !$_SERVER['HTTP_X_WP_NONCE'] || !wp_verify_nonce( $_SERVER['HTTP_X_WP_NONCE'], 'wp_rest' ) ) {
-            return false;
-        }
+	    if (!$_SERVER['HTTP_X_WP_NONCE'] || !wp_verify_nonce($_SERVER['HTTP_X_WP_NONCE'], 'wp_rest')) {
+		    return apply_filters( 'tts_rest_route_access', false);
+	    }
 
-        return true;
+	    return apply_filters( 'tts_rest_route_access', true);
     }
 }

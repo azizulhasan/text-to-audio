@@ -4,11 +4,12 @@ namespace TTA;
 
 
 /**
- * Class Chalan_Review_Reminder
+ * Class TTA_Notices
  */
 class TTA_Notices {
 
-	private $active_pluin_name = '';
+	private $active_plugin_name = '';
+	private $plugin_features = [];
 
 	public function __construct() {
 		$this->notifications_load_hooks();
@@ -19,8 +20,8 @@ class TTA_Notices {
 	 */
 	public function notifications_load_hooks() {
 		if (in_array(admin_url(basename($_SERVER['REQUEST_URI'])), [ admin_url('index.php') , admin_url('plugins.php'), admin_url('update-core.php'), \admin_url('plugin-install.php'), \admin_url('admin.php?page=text-to-audio')] ) )  {
-			add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
-			add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
+//			add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
+//			add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
 		}
 
 		$plugins = [
@@ -38,36 +39,65 @@ class TTA_Notices {
 				],
         ];
 
+		$features_notice = [
+			'Get Live Support for first time Integration.',
+			'51 languages support in pro version.',
+			'14 Days money back guarantee.',
+			'WPML Plugin Support.',
+			'GTranslate Plugin Support.',
+			'Download the audio file for offline listening.',
+			'Improved UI and Responsive of the button.',
+			'Multiple Audio Player Support.',
+			'Include Content By CSS Selectors.',
+			'Exclude Content By CSS Selectors.',
+			'Exclude Tags To Speak.',
+			'Exclude Texts To Speak.',
+		];
+
 		if(!function_exists('is_plugin_active')) {
-            require_once \ABSPATH . 'wp-admin/includes/pluin.php';
+            require_once \ABSPATH . 'wp-admin/includes/plugin.php';
         }
 
         if(!is_pro_active()){
 			foreach ( $plugins as $plugin_name =>  $data ){
 				if(is_plugin_active($plugin_name )) {
-					$this->active_pluin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+					$this->active_plugin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
 
 					add_action( 'admin_notices', [ $this, $data['callback'] ] );
 					break;
 				}else if( $plugin_name == 'tts-multilingual') {
-					$this->active_pluin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+					$this->active_plugin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
 					add_action( 'admin_notices', [ $this, $data['callback'] ] );
 				}
         	}
-		}
 
-		add_action('wp_ajax_tta_save_review_notice', [ $this, 'tta_save_review_notice' ] );
+            // Display free version notice.
+            $i = rand(0, (count($features_notice) -1));
+            $feature1 = $features_notice[$i];
+            $i++;
+            $feature2 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[0];
+	        $i++;
+            $feature3 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[1];
+            array_push($this->plugin_features, "<strong>1. $feature1</strong>");
+            array_push($this->plugin_features, "<strong>2. $feature2</strong>");
+            array_push($this->plugin_features, "<strong>3. $feature3</strong>");
+
+	        add_action( 'admin_notices', [ $this, 'plugin_features_notice_callback' ] );
+
+        }
+
+//		add_action('wp_ajax_tta_save_review_notice', [ $this, 'tta_save_review_notice' ] );
 		add_action('wp_ajax_tta_hide_notice', [ $this, 'tta_hide_notice' ] );
 	}
 
 
 	public function plugin_compatible_notice_callback() {
-		$wpml_and_gtranslate_notice_displaid = \get_option('wpml_and_gtranslate_notice_displaid', false);
-		if('WPML Multilingual CMS And GTranslate' == \strip_tags($this->active_pluin_name) && !$wpml_and_gtranslate_notice_displaid) {
+		$wpml_and_gtranslate_notice_displaid = \get_option('wpml_and_gtranslate_notice_displayed', false);
+		if('WPML Multilingual CMS And GTranslate' == \strip_tags($this->active_plugin_name) && !$wpml_and_gtranslate_notice_displaid) {
 			delete_option('tta_plugin_compatible_notice_next_show_time');
 			delete_user_meta(\get_current_user_id(), 'tta_plugin_compatible_notice_dismissed');
 			update_option('tta_plugin_compatible_notice_next_show_time', 12);
-			\update_option('wpml_and_gtranslate_notice_displaid', true);
+			\update_option('wpml_and_gtranslate_notice_displayed', true);
 		}
 
 		$pluginName    = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
@@ -104,14 +134,14 @@ class TTA_Notices {
 						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						'<div class="tta-review-notice-logo"></div>',
 						'<br/>',
-						$this->active_pluin_name, //phpcs:ignore
+						$this->active_plugin_name, //phpcs:ignore
 						$ProPluginName, //phpcs:ignore
                         "<h3>$pluginName</h3>", //phpcs:ignore
 						"$learn_more" //phpcs:ignore
 					);
 					?></p>
                 <p>
-                    <a class="button button-primary" data-response="compitable" href="https://atlasaidev.com/text-to-speech/" target="_blank"><?php esc_html_e( 'Buy Now', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                    <a class="button button-primary" data-response="compitable" href="https://atlasaidev.com/text-to-speech-pro/" target="_blank"><?php esc_html_e( 'Buy Now', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
                 </p>
             </div>
 
@@ -152,6 +182,110 @@ class TTA_Notices {
                                 if(wp.ajax) {
 									wp.ajax.post( 'tta_hide_notice', { _wpnonce: '<?php echo esc_attr( $nonce ); ?>', which: which } );
 								}
+                            });
+
+						<?php if ( tta_is_rtl() ) { ?>
+                        setTimeout(function () {
+                            $('.notice-dismiss').css('left', '97%');
+                        },100)
+						<?php } ?>
+                    })(jQuery)
+                </script><?php
+			}, 99 );
+		}
+	}
+
+	public function plugin_features_notice_callback() {
+		$plugin_features_notice_displayed = \get_option('plugin_features_notice_displayed', false);
+		if( !$plugin_features_notice_displayed) {
+			delete_option('tta_plugin_features_notice_next_show_time');
+			delete_user_meta(\get_current_user_id(), 'tta_plugin_features_notice_dismissed');
+			update_option('tta_plugin_features_notice_next_show_time', 12);
+			\update_option('plugin_features_notice_displayed', true);
+		}
+
+		$pluginName    = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+		$ProPluginName    = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS Pro', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+
+		$has_notice    = false;
+		$user_id       = get_current_user_id();
+		$next_timestamp = get_option( 'tta_plugin_features_notice_next_show_time' );
+		$review_notice_dismissed = get_user_meta($user_id, 'tta_plugin_features_notice_dismissed', true);
+		$nonce         = wp_create_nonce( 'tta_notice_nonce' );
+		if ( ! empty($next_timestamp) ) {
+			if ( ( time() > $next_timestamp ) ) {
+				$show_notice = true;
+			}else {
+				$show_notice = false;
+			}
+		} else {
+			if ( isset($review_notice_dismissed) && ! empty($review_notice_dismissed) ) {
+				$show_notice = false;
+			}else {
+				$show_notice = true;
+			}
+		}
+		// translation Notice.
+		if ( $show_notice ) {
+			$has_notice = true;
+			$learn_more = '<a href="http://atlasaidev.com/text-to-speech-pro/" target="_blank" style="color:blue">See more features</a>'
+
+			?>
+            <div class="tta-notice notice notice-info is-dismissible" dir="<?php echo tta_is_rtl() ? 'ltr' : 'auto'?>" data-which="features" data-nonce="<?php echo esc_attr( $nonce ); ?>">
+                <p><?php
+					printf(
+						esc_html__( '%6$s %2$s %3$s %4$s', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
+						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						'<div class="tta-review-notice-logo"></div>',
+						'<br/>',
+						implode(' <br/> ', $this->plugin_features), //phpcs:ignore
+						$ProPluginName, //phpcs:ignore
+						"<h3>$ProPluginName Features</h3>", //phpcs:ignore
+						"$learn_more" //phpcs:ignore
+					);
+					?></p>
+                <p>
+                    <a class="button button-primary" data-response="features" href="https://atlasaidev.com/text-to-speech-pro/" target="_blank"><?php esc_html_e( 'Sea More Features', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                </p>
+            </div>
+
+			<?php
+		}
+
+		if ( true == $has_notice ) {
+			add_action( 'admin_print_footer_scripts', function() use ( $nonce ) {
+				?>
+                <script>
+                    (function($){
+                        "use strict";
+                        $(document)
+                            .on('click', '.tta-notice a.button', function (e) {
+                                e.preventDefault();
+                                // noinspection ES6ConvertVarToLetConst
+                                let self = $(this);
+                                self.closest(".tta-notice").slideUp( 200, 'linear' );
+
+                                let  tta_notice = self.closest('.tta-notice'), which = tta_notice.attr('data-which');
+                                console.log( which)
+
+                                if(wp.ajax) {
+                                    wp.ajax.post( 'tta_hide_notice', { _wpnonce: '<?php echo esc_attr( $nonce ); ?>', which: which } );
+                                }
+                                let notice = self.attr('data-response');
+
+                                if ( 'features' === notice ) {
+                                    window.open('http://atlasaidev.com/text-to-speech-pro/', '_blank');
+                                }
+                            })
+
+                            .on('click', '.tta-notice .notice-dismiss', function (e) {
+                                e.preventDefault();
+
+                                // noinspection ES6ConvertVarToLetConst
+                                var self = $(this), tta_notice = self.closest('.tta-notice'), which = tta_notice.attr('data-which');
+                                if(wp.ajax) {
+                                    wp.ajax.post( 'tta_hide_notice', { _wpnonce: '<?php echo esc_attr( $nonce ); ?>', which: which } );
+                                }
                             });
 
 						<?php if ( tta_is_rtl() ) { ?>
@@ -212,7 +346,7 @@ class TTA_Notices {
 						'<br/>',
 						$language_string, //phpcs:ignore
 						$contact_link, //phpcs:ignore
-                        "<h3>$pluginName</h3>", //phpcs:ignore
+                        "<h3>$pluginName</h3>" //phpcs:ignore
 					);
 					?></p>
                 <p>
@@ -310,7 +444,7 @@ class TTA_Notices {
 						'<span style="font-size: 16px;">&#128516</span>',
 						'<div class="tta-review-notice-logo"></div>',
 						'<br>',
-                        "<h3>$pluginName</h3>", //phpcs:ignore
+                        "<h3>$pluginName</h3>" //phpcs:ignore
 					);
 					?></p>
                 <p>
@@ -453,7 +587,7 @@ class TTA_Notices {
 	public function tta_hide_notice() {
 		check_ajax_referer( 'tta_notice_nonce' );
 		
-		$notices = [  'compitable', 'rating',  'translate', 'promotion_close',  ];
+		$notices = [  'compitable', 'rating',  'translate', 'promotion_close', 'features'  ];
 		if ( isset( $_REQUEST['which'] ) && ! empty( $_REQUEST['which'] ) && in_array( $_REQUEST['which'], $notices ) ) {
 			$user_id = get_current_user_id();
 
@@ -471,6 +605,9 @@ class TTA_Notices {
 			}elseif ( 'compitable' == $_REQUEST['which'] ) {
 				update_option( 'tta_plugin_compatible_notice_next_show_time', time() + ( DAY_IN_SECONDS * 30 )  );
 				$updated_user_meta = update_user_meta($user_id, 'tta_plugin_compatible_notice_dismissed', true, true);
+			}elseif ( 'features' == $_REQUEST['which'] ) {
+				update_option( 'tta_plugin_features_notice_next_show_time', time() + ( DAY_IN_SECONDS * 30 )  );
+				$updated_user_meta = update_user_meta($user_id, 'tta_plugin_features_notice_dismissed', true, true);
 			}
 
 			if ( isset($updated_user_meta ) && $updated_user_meta ) {

@@ -14,8 +14,8 @@
  * @wordpress-plugin
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
- * Description:       Add accessibility to WordPress site to read contents out loud in more than 51 languages.
- * Version:           1.5.18
+ * Description:       The most user-friendly, easy-to-use Text-to-Speech WordPress plugin. Just install and automatically add a Text to Audio player to your WordPress site!
+ * Version:           1.5.29
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-2.0+
@@ -23,16 +23,16 @@
  * Text Domain:       text-to-audio
  * Domain Path:       /languages
  * Requires PHP:      7.4
- * Requires WP:       5.0
+ * Requires at least: 5.6
  */
 include 'vendor/autoload.php';
 
 use TTA\TTA;
 use TTA\TTA_Activator;
 use TTA\TTA_Deactivator;
+use TTA\TTA_Helper;
 use TTA_Api\TTA_Api_Routes;
 use TTA\TTA_Notices;
-use TTA\TTA_Helper;
 
 // If this file is called directly, abort.
 if (!defined('WPINC')) {
@@ -44,8 +44,24 @@ if (!defined('ABSPATH')) {
     define('ABSPATH', dirname(__FILE__) . '/');
 }
 
+/**
+ * Is plugin active
+ */
+function is_pro_plugin_exists() {
+    $plugin_path = \WP_PLUGIN_DIR;
+    $status = file_exists( $plugin_path . '/text-to-speech-pro/text-to-audio-pro.php');
 
-if (!TTA_Helper::is_pro_active() &&  ! function_exists( 'ttsp_fs' ) ) {
+    if($status) return true;
+
+    $status = file_exists( $plugin_path . '/text-to-speech-pro-premium/text-to-audio-pro.php');
+
+    if($status) return true;
+    
+    
+    return file_exists( $plugin_path . '/text-to-audio-pro/text-to-audio-pro.php');
+}
+
+if (!is_pro_plugin_exists() &&  ! function_exists( 'ttsp_fs' ) ) {
     // Create a helper function for easy SDK access.
     function ttsp_fs() {
         global $ttsp_fs;
@@ -78,11 +94,12 @@ if (!TTA_Helper::is_pro_active() &&  ! function_exists( 'ttsp_fs' ) ) {
     }
 
     // Init Freemius.
-     ttsp_fs();
+    ttsp_fs();
     // Signal that SDK was initiated.
-     do_action( 'ttsp_fs_loaded' );
+    do_action( 'ttsp_fs_loaded' );
 
 }
+
 
 /**
  * Currently plugin version.
@@ -118,7 +135,7 @@ if (!defined('TTA_LIBS_PATH')) {
 
 if (!defined('TTA_ADMIN_PATH')) {
 
-    define('TTA_ADMIN_PATH', plugin_dir_url(__FILE__) . '/admin/');
+    define('TTA_ADMIN_PATH', plugin_dir_url(__FILE__) . 'admin/');
 }
 
 if (!defined('TTA_DEBUG_MODE')) {
@@ -161,7 +178,7 @@ class TTA_Init {
 
     public function __construct() {
         if (!defined('TEXT_TO_AUDIO_VERSION')) {
-            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '1.5.18'));
+            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '1.5.29'));
         }
 
         if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
@@ -176,6 +193,9 @@ class TTA_Init {
         $plugin->run();
         new TTA_Api_Routes();
         new TTA_Notices();
+
+
+
         //add plugins action links.
         if( is_admin() ) {
             $basename = plugin_basename( __FILE__ );

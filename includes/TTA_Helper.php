@@ -1,6 +1,8 @@
 <?php
 
 namespace TTA;
+use ParagonIE\Sodium\Core\Curve25519\Fe;
+
 /**
  * Fired during plugin activation
  *
@@ -25,8 +27,9 @@ class TTA_Helper {
 
     public static function should_load_button() {
         $should_load_button = false;
+		global $post;
         // is_home() || is_archive() || is_front_page() || is_category()
-        if(\is_single() || is_singular() ){
+        if(\is_single() || \is_singular() ){
             $should_load_button = true;
         }
         
@@ -35,6 +38,7 @@ class TTA_Helper {
         || count($settings['tta__settings_allow_listening_for_post_types']) === 0
         || !is_array($settings['tta__settings_allow_listening_for_post_types'])
         || !in_array(self::tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'])
+        || in_array($post->ID, $settings['tta__settings_exclude_post_ids'])
         ) {
             $should_load_button = false;
         }
@@ -104,7 +108,7 @@ class TTA_Helper {
         if($should_clean_content) {
             $output = \tta_clean_content($output);
             if($content_type === 'title') {
-                $output = \tta_should_add_dilimiter($output, \apply_filters('tts_sentence_delimiter', '. '));
+                $output = \tta_should_add_delimiter($output, \apply_filters('tts_sentence_delimiter', '. '));
             }
         }
         // Format Output According to output type
@@ -125,21 +129,21 @@ class TTA_Helper {
 
     public static function  get_compatible_plugins_data() {
         $compatible_plugins_data = [];
-        $datas = \apply_filters('tts_pro_plugins_data', [
-                'gtranslate/gtranslate.php' => [
-                    'type' => 'class',
-                    'data' => [ 'gt_options', 'gt_languages','gt_switcher_wrapper', 'gt_selector', ],//  'gt_selector',], // 'gt_white_content', 'gtranslate_wrapper'],
-                    'plugin' => 'gtranslate' 
-                ],
-                'sitepress-multilingual-cms/sitepress.php' => [
-                    'type' => 'class',
-                    'data' => [ ],
-                    'plugin' => 'sitepress' 
-                ],
-        ]);
+        $datas = [
+	        'gtranslate/gtranslate.php' => [
+		        'type' => 'class',
+		        'data' => [ 'gt_options', 'gt_languages','gt_switcher_wrapper', 'gt_selector', ],//  'gt_selector',], // 'gt_white_content', 'gtranslate_wrapper'],
+		        'plugin' => 'gtranslate'
+	        ],
+	        'sitepress-multilingual-cms/sitepress.php' => [
+		        'type' => 'class',
+		        'data' => [ ],
+		        'plugin' => 'sitepress'
+	        ],
+        ];
 
         if(!function_exists('is_plugin_active')) {
-            require_once \ABSPATH . 'wp-admin/includes/pluin.php';
+            require_once \ABSPATH . 'wp-admin/includes/plugin.php';
         }
 
         foreach ( $datas as $plugin_name =>  $data ){
@@ -148,7 +152,7 @@ class TTA_Helper {
                 }
          }
 
-        return \apply_filters('tts_pro_compatible_plugins_data', $compatible_plugins_data, \get_plugins());
+        return \apply_filters('tts_compatible_plugins_data', $compatible_plugins_data, \get_plugins());
     }
 
     public static function get_language_code_from_url($url) {
@@ -181,13 +185,20 @@ class TTA_Helper {
     public static function tts_file_name($title, $selectedLang) {
 
         if (!$title) {
-        $title = 'Demo Content';
+            $title = 'Demo Content';
         }
+        
+        $lang_code = explode('-', str_replace(['_', ' '], '-', $selectedLang));
 
-        $title .= "__lang__" . strtolower($selectedLang);
-        $title = str_replace([' ', '-'], '_', $title);
-        $title = preg_replace("/[^a-z0-9_-]/i", "", $title);
-
+        if(array_shift($lang_code) == 'en' ) {
+             $title .= "__lang__" . strtolower($selectedLang);
+            $title = str_replace([' ', '-'], '_', $title);
+            $title = preg_replace("/[^\p{L}a-z0-9_-]/ui", "", $title);
+        }else{
+            $md5_hash = md5($title);
+            $title = $md5_hash. '_'. time(). '__lang__'.$selectedLang;
+        }
+        
         return $title;
     }
 
@@ -245,100 +256,52 @@ class TTA_Helper {
         return \apply_filters('tts_get_settings', $all_settings_data, $post);
     }
 
-	public static function get_mp3_file_urls($post = '') {// TODO: when google cloud TTS is applied. the mp3 file path will be different.
 
-		if(!$post) {
+    public static function get_mp3_file_urls($post = '') {// TODO: when google cloud TTS is applied. the mp3 file path will be different.
+        if(!$post) {
+            global $post;
+        }
 
-			global $post;
-
-		}
-
-
-
-		$mp3_file_urls = get_post_meta($post->ID, 'tts_mp3_file_urls');
-
-		$old_url = get_post_meta($post->ID, 'tts_mp3_file_url', true);
+        
 
 
+        $mp3_file_urls = get_post_meta($post->ID, 'tts_mp3_file_urls');
+        $old_url = get_post_meta($post->ID, 'tts_mp3_file_url', true);
 
-		if(is_pro_active() && $old_url) {
+        if(isset($mp3_file_urls[0])) {
+            $mp3_file_urls = $mp3_file_urls[0];
+        }
+        $final_mp3_file_ulrs = [];
+        $should_update_urls = \false;
+        foreach($mp3_file_urls as $language_code =>  $url ) {
+            $file_headers = @get_headers($url);
 
-			$mp3_file_urls = self::handle_old_url($post, $mp3_file_urls, $old_url);
-
-		}
-
-
-
-		if(isset($mp3_file_urls[0])) {
-
-			$mp3_file_urls = $mp3_file_urls[0];
-
-		}
-
-
-		$final_mp3_file_ulrs = [];
-
-		$should_update_urls = \false;
-
-		foreach($mp3_file_urls as $language_code =>  $url ) {
-
-			$file_headers = @get_headers($url);
-
-			if (!$file_headers && function_exists('curl_init')) {
-				$ch = curl_init();
-				curl_setopt($ch, CURLOPT_URL, $url);
-				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-				curl_setopt($ch, CURLOPT_HEADER, true);
-				$file_headers = curl_exec($ch);
-				curl_close($ch);
-			}
-
-			if(isset($file_headers[0])) {
-				$file_headers = $file_headers[0];
-			}
-
-			if(self::is_pro_active()) {
-
+	        if(self::is_pro_active()) {
 				$full_path = self::get_path_from_url($url);
-
-
-
-				if( !file_exists($full_path) || (file_exists($full_path) && filesize($full_path) == 0) ) {
-
+				if( file_exists($full_path) && filesize($full_path) == 0) {
 					$should_update_urls = true;
-
 					continue;
-
 				}
+	        }
 
-			}
+             if(!$file_headers || strpos( $file_headers[0], 'Not Found')  !== false ) {
+                $should_update_urls = true;
+            } else {
+                $final_mp3_file_ulrs[$language_code] = $url;
+            }
+        }
 
+//	    error_log(print_r([
+//		    '$should_update_urls' => $should_update_urls,
+//		    '$final_mp3_file_ulrs' => $final_mp3_file_ulrs ,
+//	    ],1));
 
+        if( $should_update_urls || empty( $final_mp3_file_ulrs ) ) {
+            update_post_meta($post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs);
+        }
 
-			if(!$file_headers || strpos($file_headers, 'Not Found')  !== false ) {
-
-				$should_update_urls = true;
-
-			} else {
-
-				$final_mp3_file_ulrs[$language_code] = $url;
-
-			}
-
-		}
-
-
-		if( $should_update_urls || empty( $final_mp3_file_ulrs ) ) {
-
-			update_post_meta($post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs);
-
-		}
-
-
-
-		return \apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post);
-
-	}
+        return \apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post);
+    }
 
 	/**
 	 * @param $url
@@ -346,20 +309,13 @@ class TTA_Helper {
 	 * @return string
 	 */
 	public static function get_path_from_url($url) {
-		$audio_dir = TTA_PRO_GTTS_DIR;
-		$replaceable_string = '/wp-content/uploads/TTA_Pro/gtts/';
-		if(get_player_id() == 4){
-			$audio_dir = TTA_PRO_AUDIO_DIR_URL;
-			$replaceable_string = '/wp-content/uploads/TTA_Pro/';
-		}
-
 		$log_data = array(
 			'url' => $url,
-			'path' => $audio_dir,
+			'path' => TTA_PRO_GTTS_DIR,
 			'home_url' => home_url(),
 		);
 		// Extract the relative path from the full URL
-		$relative_path = str_replace($log_data['home_url'] . $replaceable_string, '', $log_data['url']);
+		$relative_path = str_replace($log_data['home_url'] . '/wp-content/uploads/TTA_Pro/gtts/', '', $log_data['url']);
 
 		// Construct the full path
 		return  rtrim($log_data['path'], '/') . '/' . $relative_path;
@@ -393,6 +349,29 @@ class TTA_Helper {
         if ( is_writable( $base_dir ) ) {
             return true;
         }
+        return false;
+    }
+
+    public static function get_player_id() {
+        $customize_settings = (array) TTA_Helper::tts_get_settings('customize');
+        $customize_settings['buttonSettings'] = isset( $customize_settings['buttonSettings'] ) ? (array) $customize_settings['buttonSettings'] : [ 'id' => 1];
+        $player_id = isset($customize_settings['buttonSettings']['id']) ? $customize_settings['buttonSettings']['id'] : 1;
+
+        if(!self::is_pro_license_active() && $player_id >  1) {
+            $player_id = 1;
+        }
+        
+        return apply_filters('tts_get_player_id', $player_id, $customize_settings);
+    }
+
+    /**
+     * Is pro license active
+     */
+    public static function is_pro_license_active() {
+        if(self::is_pro_active()){
+            return apply_filters('tts_is_pro_license_active', false);
+        }
+
         return false;
     }
 

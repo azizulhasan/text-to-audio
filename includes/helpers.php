@@ -1,8 +1,12 @@
 <?php
 use TTA\TTA_Helper;
+
 /**
- * If classic editor is active then on new-post and edit post
- * activate recording  for blog content.
+ * Clean content like title/description.
+ * 
+ * @param $text
+ *
+ * @return mixed|null
  */
 function tta_clean_content($text) {
     $quotationMarks = array(
@@ -67,10 +71,10 @@ function tta_clean_content($text) {
 /**
  * 
  */
-function tta_should_add_dilimiter($title, $delimiter) {
-    $dilimiterArr = ['.', ',', '?', '!', '|', ];
+function tta_should_add_delimiter($title, $delimiter) {
+    $delimiterArr = ['.', ',', '?', '!', '|', ];
     $end = substr($title, -1);
-    if(in_array($end, $dilimiterArr)){
+    if(in_array($end, $delimiterArr)){
         return $title. ' ';
     }
 
@@ -88,7 +92,6 @@ function tta_should_add_dilimiter($title, $delimiter) {
  *
  * @param $is_block
  *
- * @return string
  */
 function tta_get_button_content($atts, $is_block = false) {
     $settings = (array) get_option('tta_settings_data');
@@ -120,7 +123,8 @@ function tta_get_button_content($atts, $is_block = false) {
 
 
     $title = tta_clean_content( $post->post_title);
-    $title = tta_should_add_dilimiter($title, $sentence_delimiter);
+
+    $title = tta_should_add_delimiter($title, $sentence_delimiter);
     $date = get_the_date('Y/m/d');
     
     // TODO: write functionality if current page is home page where content is excerpt.
@@ -129,11 +133,11 @@ function tta_get_button_content($atts, $is_block = false) {
     // }elseif(did_filter( 'the_excerpt' )){
     //     $description = get_the_excerpt();
     // }
-    $description = $post->post_content;
+    $description = get_the_content();
     $description_sanitized = tta_clean_content($description);
 
-    $content     = apply_filters('tta__content_title', $title);
-    $content    .= apply_filters('tta__content_description', $description_sanitized, $description, get_the_ID() );
+    $content     = apply_filters('tta__content_title', $title, $post);
+    $content    .= apply_filters('tta__content_description', $description_sanitized, $description, get_the_ID(), $post );
     $content    = TTA_Helper::sazitize_content($content);
 
     // Button listen text.
@@ -143,14 +147,15 @@ function tta_get_button_content($atts, $is_block = false) {
         }
     }
 
-    $content_read_time = apply_filters('tts_content_reading_time', 1, $content );
+     // Get content reading time.
+    $content_read_time = apply_filters('tts_content_reading_time', 1, $content, $post );
     $text_arr = get_button_text( $atts , $content_read_time);
 
 
     // Speak Icon
     $speakIcon = "<div class='tta_button'>";
     $speakIcon .= apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ');
-    $speakIcon .= '<span> '. $text_arr['listen_text'] . '<span></div>';
+    $speakIcon .= '<span> '. $text_arr['listen_text'] . '<span></div>'; // TODO: should remove this if unnecessary.
     // Button style.
     if (isset($customize) && count($customize)) {
         if ($is_block) {
@@ -168,8 +173,6 @@ function tta_get_button_content($atts, $is_block = false) {
     
     //Custom Css
     $custom_css = '';
-
-
     if (isset($customize['custom_css']) && '' !== $customize['custom_css']) {
         $custom_css = esc_attr($customize['custom_css']);
         $custom_css = str_replace( "\n", '', $custom_css );
@@ -184,7 +187,7 @@ function tta_get_button_content($atts, $is_block = false) {
     // init button scripts
     do_action('tts_enqueue_button_scripts' , $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts);
 
-    $data =  apply_filters( 'tts__listening_button', $button, $btn_no, $class );
+    $data =  apply_filters( 'tts__listening_button', $button, $btn_no, $class, $post );
 
     return $data;
 }
@@ -201,6 +204,7 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
         $temp_title = trim(str_replace('.', '', $title));
         $title = trim(get_the_title());
         $title = tta_clean_content( $title );
+
         // Get plugin all settings and pass it to TTS javascript Object.
         $plugin_all_settings = TTA_Helper::tts_get_settings();
         if( isset($atts['lang']) && $atts['lang'] && isset($plugin_all_settings['listening']['tta__listening_lang'])  &&  $atts['lang'] != $plugin_all_settings['listening']['tta__listening_lang'] ) {
@@ -212,14 +216,14 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
         }
         
         if( apply_filters('tts_ignore_match_80_percent', false) && tts_text_match_80_percent($title , $temp_title) ) {
-           get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
+           get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
         }else{
-           get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
+          get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
         }
     });
 }
 
-function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings) {
+function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings) {
     
    global $post;
 
@@ -228,7 +232,6 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
     $language = TTA_Helper::tts_site_language($plugin_all_settings);
     $voice = TTA_Helper::tts_get_voice($plugin_all_settings);
     $file_name = TTA_Helper::tts_file_name($title, $language);
-
     $object = ob_start();
     ?>
             <!-- Text To Speech TTS Settings  -->
@@ -267,6 +270,7 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
                 date: "<?php echo $date; ?>",
                 language: "<?php echo $language; ?>",
                 voice: "<?php echo $voice; ?>",
+                post: <?php echo json_encode($post); ?>,
             }
 
             if(window.hasOwnProperty('TTS')){ // add content if a page have multiple button
@@ -397,6 +401,7 @@ function get_text_array_from_shortcode($customize_settings, $text_arr) {
 
 add_filter( 'the_content', 'add_listen_button',  999 );
 
+
 /**
  * Add listening button to every post by default.
  */
@@ -406,6 +411,7 @@ function add_listen_button( $content ) {
         TTA\TTA_Activator::activate(true);
     }
     global $post;
+	$button = '';
     if( isset( $settings['tta__settings_enable_button_add'] ) &&  $settings['tta__settings_enable_button_add'] ) {    
         // TODO: write functionality if current page is home page where content is excerpt.
         // if(is_single()) {
@@ -416,19 +422,15 @@ function add_listen_button( $content ) {
         // }
 
         if( ! has_shortcode($post->post_content, 'tta_listen_btn') ) {
-
             ob_start();
             echo tta_get_button_content('');
             $button = ob_get_contents();
             ob_end_clean();
-            
-            return apply_filters('tts_button_with_content', $button.$content, $button, $content);
-        }else{
-             return $content;
         }
     }
 
-    return $content;
+	return apply_filters('tts_button_with_content', $button.$content, $button, $content);
+
 
 }
 
@@ -445,28 +447,6 @@ function get_used_shortcodes( $content) {
     preg_match_all( '@\[([^<>&/\[\]\x00-\x20=]++)@', $content, $matches );
     $tagnames = array_intersect( array_keys( $shortcode_tags ), $matches[1] );
     return $tagnames;
-}
-
-
-/**
- * Is plugin active
- */
-function is_pro_active() {
-
-    if(!function_exists('is_plugin_active') ){
-        include_once ABSPATH . 'wp-admin/includes/plugin.php';
-    }
-
-    $status = is_plugin_active('text-to-speech-pro/text-to-audio-pro.php');
-
-    if($status) return true;
-
-    $status = is_plugin_active('text-to-speech-pro-premium/text-to-audio-pro.php');
-
-    if($status) return true;
-    
-    
-    return is_plugin_active('text-to-audio-pro/text-to-audio-pro.php');
 }
 
 /**
@@ -687,13 +667,31 @@ function get_player_id() {
     $customize_settings = (array) TTA_Helper::tts_get_settings('customize');
     $customize_settings['buttonSettings'] = isset( $customize_settings['buttonSettings'] ) ? (array) $customize_settings['buttonSettings'] : [ 'id' => 1];
     $player_id = isset($customize_settings['buttonSettings']['id']) ? $customize_settings['buttonSettings']['id'] : 1;
-    if(is_pro_license_active() && $player_id == 1) {
-        $player_id = 2;
-    }
 
     if(!is_pro_license_active() && $player_id >  1) {
         $player_id = 1;
     }
     
-    return $player_id;
+    return apply_filters('tts_get_player_id', $player_id, $customize_settings);
+}
+
+/**
+ * Is plugin active
+ */
+function is_pro_active() {
+
+    if(!function_exists('is_plugin_active') ){
+        include_once ABSPATH . 'wp-admin/includes/plugin.php';
+    }
+
+    $status = is_plugin_active('text-to-speech-pro/text-to-audio-pro.php');
+
+    if($status) return true;
+
+    $status = is_plugin_active('text-to-speech-pro-premium/text-to-audio-pro.php');
+
+    if($status) return true;
+    
+    
+    return is_plugin_active('text-to-audio-pro/text-to-audio-pro.php');
 }
