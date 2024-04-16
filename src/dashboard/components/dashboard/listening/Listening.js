@@ -58,12 +58,16 @@ export default function Listening() {
 		} else {
 			let voices = JSON.parse(stored_voices.tta__voices);
 			let langs = []
+			let langs2 = []
 			voices.voices.map(voice => {
 				if (!langs.includes(voice.languageCodes[0])) {
 					langs.push(voice.languageCodes[0])
+					langs2[voice.languageCodes[0]] = voice.languageCodes[0];
 				}
 			})
-
+			console.log({
+				langs, langs2
+			})
 			setVoicesAndLanguages(voices.voices, langs)
 		}
 	}
@@ -259,7 +263,7 @@ export default function Listening() {
 										</option>
 										{Object.keys(languages).map((langKey, index) => {
 											return (
-												<option key={langKey} value={langKey}>
+												<option key={langKey} value={customizationSettings?.buttonSettings?.id == 4 ? languages[langKey] :langKey}>
 													{languages[langKey]}
 												</option>
 											);
