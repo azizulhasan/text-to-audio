@@ -226,6 +226,7 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
     // delete_post_meta($post->ID, 'tts_mp3_file_urls');
     $mp3_file_urls = TTA_Helper::get_mp3_file_urls($post);
     $language = TTA_Helper::tts_site_language($plugin_all_settings);
+    $voice = TTA_Helper::tts_get_voice($plugin_all_settings);
     $file_name = TTA_Helper::tts_file_name($title, $language);
 
     $object = ob_start();
@@ -265,6 +266,7 @@ function get_enqued_js_object($content, $btn_no, $class, $btn_style, $text_arr, 
                 file_name: "<?php echo $file_name; ?>",
                 date: "<?php echo $date; ?>",
                 language: "<?php echo $language; ?>",
+                voice: "<?php echo $voice; ?>",
             }
 
             if(window.hasOwnProperty('TTS')){ // add content if a page have multiple button

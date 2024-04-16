@@ -171,6 +171,13 @@ class TTA_Helper {
         return apply_filters('tts_site_language', $default_language);
     }
 
+	public static function tts_get_voice($plugin_all_settings) {
+		// TODO: Match with multilingual UI and default voice.
+		$default_language = $plugin_all_settings['listening']['tta__listening_voice'];
+
+		return apply_filters('tts_get_voice', $default_language);
+	}
+
     public static function tts_file_name($title, $selectedLang) {
 
         if (!$title) {
