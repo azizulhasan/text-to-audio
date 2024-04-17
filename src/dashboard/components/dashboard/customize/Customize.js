@@ -7,6 +7,7 @@ import TextToSpeech from '../../../buttons/components/TextToSpeech';
 import TextToSpeechThree from '../../../buttons/components/TextToSpeechThree';
 import TextToSpeechFour from '../../../buttons/components/TextToSpeechFour';
 import CustomizationTabs from './CustomizationTabs'
+import notify from "../../context/Notify";
 
 let speech = null;
 let TextToSpeechFree = null;
@@ -98,6 +99,7 @@ export default function Customize() {
 	 * @param {*} e
 	 */
 	const handleChange = (e) => {
+
 		if (
 			e.target.name === 'width' &&
 			(e.target.value > 100 || e.target.value < 0)
@@ -124,8 +126,17 @@ export default function Customize() {
 		// ChatGPT TTS player button settings
 		// && listeningBtnStyle?.buttonSettings?.id == 3
 		if (!['backgroundColor', 'width', 'color'].includes(e.target.name)) {
+			if(e.target.name == 'id' && e.target.value == 4 && !isGCAuthenticated) {
+				notify('To select this player you have to authenticate first from Integration menu', 'info' ,{
+					autoClose: 8000,
+				});
+				return;
+			}else{
+				console.log({id: e.target.value, name: e.target.name, isGCAuthenticated})
+			}
 
 			let tempButtonSettings = structuredClone(listeningBtnStyle.buttonSettings)
+
 			tempButtonSettings = {
 				...tempButtonSettings,
 				...{ [e.target.name]: e.target.value }
@@ -157,6 +168,7 @@ export default function Customize() {
 		} else {
 			value = e.target.value;
 		}
+
 		setListeningStyle2({
 			...listeningBtnStyle2,
 			...{ [e.target.name]: value },
@@ -282,7 +294,7 @@ export default function Customize() {
 							}
 							<p className='pt-2'>
 								{
-									listeningBtnStyle?.buttonSettings?.id == 1 && ttsObjPro.is_pro_active ? __('If you\'re selecting this button then you may not get pro features. Suppose CSS selectors from settings page and WPML/GTranslate will not work with this button.') : ''
+									listeningBtnStyle?.buttonSettings?.id == 1 && ttsObjPro.is_pro_active ? __('If you\'re selecting this button then you may not get pro features. Suppose CSS selectors from settings page and WPML/GTranslate will not work with this button.') : __('Save this player then configure proper voice and lanuage from listening menu. ')
 								}
 							</p>
 						</Col>
