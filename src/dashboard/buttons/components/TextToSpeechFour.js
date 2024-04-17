@@ -3,12 +3,15 @@ let TextToSpeechProPlayer = null;
 export default function TextToSpeechFour({ buttonId, button, buttonCSS, cssStyle = '' }) {
     const [shouldFloat, setShouldFloat] = useState(false)
     useEffect(() => {
+        // TODO: after reload while I have in customization menu. the player is getting hide.
         if (window.TextToSpeechProPlayer) {
-            let contents = window.TTS.contents;
+            let contents = window?.TTS?.contents;
             TextToSpeechProPlayer = window.TextToSpeechProPlayer;
-            new TextToSpeechProPlayer(buttonId, contents[buttonId], button, window.TTS)
+            if(contents){
+                new TextToSpeechProPlayer(buttonId, contents[buttonId], button, window.TTS)
+            }
         }
-    }, [window.TextToSpeechProPlayer])
+    }, [window.TextToSpeechProPlayer, window?.TTS?.contents])
 
     useEffect(() => {
         const detectScroll = (e) => {

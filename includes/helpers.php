@@ -231,7 +231,8 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
     $mp3_file_urls = TTA_Helper::get_mp3_file_urls($post);
     $language = TTA_Helper::tts_site_language($plugin_all_settings);
     $voice = TTA_Helper::tts_get_voice($plugin_all_settings);
-    $file_name = TTA_Helper::tts_file_name($title, $language);
+    $file_url_key = TTA_Helper::tts_get_file_url_key($language, $voice);
+    $file_name = TTA_Helper::tts_file_name($title, $language, $voice);
     $object = ob_start();
     ?>
             <!-- Text To Speech TTS Settings  -->
@@ -270,6 +271,7 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
                 date: "<?php echo $date; ?>",
                 language: "<?php echo $language; ?>",
                 voice: "<?php echo $voice; ?>",
+                file_url_key: "<?php echo $file_url_key; ?>",
                 post: <?php echo json_encode($post); ?>,
             }
 
