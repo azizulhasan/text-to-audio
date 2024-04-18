@@ -21,8 +21,8 @@ export default function Integrations() {
                 </Form.Label>
                 <Form.Check
                     inline
-                    label="Google Clud TTS"
-                    title="Google Clud TTS"
+                    label="Google Cloud TTS"
+                    title="Google Cloud TTS"
                     name="group1"
                     type={'radio'}
                     className="mt-2"
