@@ -74,6 +74,7 @@ export default function Listening() {
 
 
 	useEffect(() => {
+		
 		if (window.hasOwnProperty('ttsObj') && ttsObj?.gctts_is_authenticated == 1) {
 			setGoogleVoicesAndLanguages()
 		} else {
@@ -223,7 +224,7 @@ export default function Listening() {
 				autoClose: 5000
 			});
 		}
-		if (e.target.name === 'tta__listening_lang' && window.hasOwnProperty('ttsObjPro') && ttsObjPro.gtts_is_authenticated == '1') {
+		if (e.target.name === 'tta__listening_lang' && window.hasOwnProperty('ttsObjPro') && ttsObjPro.gctts_is_authenticated == '1') {
 
 			let filteredVoices = speechSynthesisVoices.filter(voice => {
 				return voice.languageCodes[0] == e.target.value;
@@ -311,7 +312,7 @@ export default function Listening() {
 												{' '}
 												Default Listening Voice
 											</option>
-											{voices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && ttsObjPro.gtts_is_authenticated ? <option key={index} data-lang={voice.languageCodes[0]} value={[voice.name, voice.ssmlGender].join('-')}>
+											{voices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && ttsObjPro.gctts_is_authenticated ? <option key={index} data-lang={voice.languageCodes[0]} value={[voice.name, voice.ssmlGender].join('-')}>
 												{voice.name} {'-'} {voice.ssmlGender}
 											</option> : <option key={index} data-lang={voice.lang} value={voice.name}>
 												{voice.name}
