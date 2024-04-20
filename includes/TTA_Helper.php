@@ -160,13 +160,27 @@ class TTA_Helper {
 		return \apply_filters('tts_compatible_plugins_data', $compatible_plugins_data, \get_plugins());
 	}
 
-	public static function get_language_code_from_url($url) {
-		$arr = explode('lang', $url);
-		$language_code = end($arr);
-		$language_code = str_replace('__', '',$language_code);
-		$language_code = explode('.', $language_code)[0];
-		$language_code = \str_replace('_', '-', $language_code);
+	// public static function get_language_code_from_url($url) {
+	// 	$arr = explode('lang', $url);
+	// 	$language_code = end($arr);
+	// 	$language_code = str_replace('__', '',$language_code);
+	// 	$language_code = explode('.', $language_code)[0];
+	// 	$language_code = \str_replace('_', '-', $language_code);
 
+	// 	return $language_code;
+	// }
+
+	public static function get_language_code_from_url( $url ) {
+		$arr           = explode( 'lang', $url );
+		$language_code = end( $arr );
+		if(self::get_player_id() != 4 ) {
+			$language_code = str_replace( '__', '', $language_code );
+		}
+		$language_code = explode( '.', $language_code )[0];
+		$language_code = \str_replace( '_', '-', $language_code );
+		if(self::get_player_id() == 4 ) {
+			$language_code = substr($language_code, 2);
+		}
 		return $language_code;
 	}
 
@@ -200,21 +214,26 @@ class TTA_Helper {
 		return apply_filters( 'tts_get_voice', $default_voice );
 	}
 
-	public static function tts_file_name($title, $selectedLang) {
+	public static function tts_file_name( $title, $selectedLang, $voice = '' ) {
 
-		if (!$title) {
+		if ( ! $title ) {
 			$title = 'Demo Content';
 		}
 
-		$lang_code = explode('-', str_replace(['_', ' '], '-', $selectedLang));
+		$lang_code = explode( '-', str_replace( [ '_', ' ' ], '-', $selectedLang ) );
 
-		if(array_shift($lang_code) == 'en' ) {
-			$title .= "__lang__" . strtolower($selectedLang);
-			$title = str_replace([' ', '-'], '_', $title);
-			$title = preg_replace("/[^\p{L}a-z0-9_-]/ui", "", $title);
-		}else{
-			$md5_hash = md5($title);
-			$title = $md5_hash. '_'. time(). '__lang__'.$selectedLang;
+		if ( array_shift( $lang_code ) == 'en' ) {
+			$title .= "__lang__" . strtolower( $selectedLang );
+			$title = str_replace( [ ' ', '-' ], '_', $title );
+			$title = preg_replace( "/[^\p{L}a-z0-9_-]/ui", "", $title );
+		} else {
+			$md5_hash = md5( $title );
+			$title    = $md5_hash . '_' . time() . '__lang__' . $selectedLang;
+		}
+
+		if(get_player_id() == 4 && $voice ) {
+			$voice = strtolower( $voice );
+			$title .= '__voice__'.$voice;
 		}
 
 		return $title;
