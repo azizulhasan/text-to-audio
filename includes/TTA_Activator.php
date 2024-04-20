@@ -54,7 +54,12 @@ class TTA_Activator {
                 (
                     'tta__settings_enable_button_add'=> true,
                     "tta__settings_allow_listening_for_post_types" => ['post'],
+	                'tta__settings_css_selectors' => '',
+					'tta__settings_exclude_content_by_css_selectors' => '',
+					'tta__settings_exclude_texts' =>  [],
+					'tta__settings_exclude_tags' =>  [],
                     "tta__settings_display_btn_icon" => true,
+                    "tta__settings_exclude_post_ids" => true,
             ));
         }
 
