@@ -157,7 +157,7 @@ function tta_get_button_content($atts, $is_block = false) {
     $speakIcon .= apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ');
     $speakIcon .= '<span> '. $text_arr['listen_text'] . '<span></div>'; // TODO: should remove this if unnecessary.
     // Button style.
-    if (isset($customize) && count($customize)) {
+    if (isset($customize['backgroundColor'], $customize['color'], $customize['width'])) {
         if ($is_block) {
             $backgroundColor = isset($customize['backgroundColor']) ? $customize['backgroundColor'] : '#184c53';
             $color = isset($customize['color']) ? $customize['color'] : '#ffffff';
@@ -230,7 +230,9 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
     // delete_post_meta($post->ID, 'tts_mp3_file_urls');
     $mp3_file_urls = TTA_Helper::get_mp3_file_urls($post);
     $language = TTA_Helper::tts_site_language($plugin_all_settings);
-    $file_name = TTA_Helper::tts_file_name($title, $language);
+    $voice = TTA_Helper::tts_get_voice($plugin_all_settings);
+    $file_url_key = TTA_Helper::tts_get_file_url_key($language, $voice);
+    $file_name = TTA_Helper::tts_file_name($title, $language, $voice);
     $object = ob_start();
     ?>
             <!-- Text To Speech TTS Settings  -->
@@ -268,6 +270,8 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
                 file_name: "<?php echo $file_name; ?>",
                 date: "<?php echo $date; ?>",
                 language: "<?php echo $language; ?>",
+                voice: "<?php echo $voice; ?>",
+                file_url_key: "<?php echo $file_url_key; ?>",
                 post: <?php echo json_encode($post); ?>,
             }
 
@@ -362,7 +366,7 @@ function get_button_text( $atts, $content_read_time ) {
 
 
 function get_text_array_from_shortcode($customize_settings, $text_arr) {
-
+    $shortcode = '[tta_listen_btn]';
     if(isset($customize_settings['tta_play_btn_shortcode']) && $customize_settings['tta_play_btn_shortcode']) {
         $shortcode = $customize_settings['tta_play_btn_shortcode'];
     }

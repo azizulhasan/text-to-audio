@@ -32,7 +32,7 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
             toast(<>
                 <h4>Google cloud text to speech feature is only in pro version.</h4>
                 <button onClick={(e) => {
-                    window.open('https://atlasaidev.com/')
+                    window.open('https://atlasaidev.com/docs/')
                 }} className='tta_btn'>
                     Learn More
                 </button>
@@ -165,6 +165,9 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
                                         Select Google Service acount authentication Json file. How to get? Click <a target='_blank' href='https://clincher.medium.com/how-to-use-a-google-cloud-ai-powered-text-to-speech-rest-service-b1980b2c6b7a'>here</a>.
                                         <br />
                                         <a target='_blank' href='https://cloud.google.com/text-to-speech/docs/before-you-begin'>Read More</a>
+                                        <br/>
+                                        <br/>
+                                        <a target='_blank' href='https://www.youtube.com/watch?v=4dsbhaBavms&t=43s&ab_channel=AtlasAiDev'>How To Integrate Google Cloud Text To Speech?</a>
                                     </Form.Label>
                                     <Form.Control
                                         type='file'
@@ -176,8 +179,8 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
                                     <div className={isAuthenticated ? 'text-green' : 'text-danger'} >
                                         {
                                             window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active ?
-                                                isAuthenticated ? <><strong>Google Text To Speech Authentication Done. Enjoy the whole featuers of the plugin.</strong></> : <><strong>Please upload a service account  .json file to authenticate Google Text To Speech.</strong></>
-                                                : <><strong>Notice:</strong> <p className='text-danger d-inline'>License must be active and valid to enjoy pro features of the plugin.</p>
+                                                isAuthenticated ? <><strong>Google Text To Speech Authentication Done. Enjoy the Google Cloud TTS featuers of the plugin.</strong></> : <><strong>Please upload a service account  .json file to authenticate Google Text To Speech.</strong></>
+                                                : <><strong>Notice:</strong> <p className='text-danger d-inline'>License must be active and valid to enjoy Google Cloud Text To Speech features of the plugin.</p>
                                                     {
                                                         isAuthenticated && <>
                                                             <br />

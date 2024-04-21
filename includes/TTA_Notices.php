@@ -52,6 +52,8 @@ class TTA_Notices {
 			'Exclude Content By CSS Selectors.',
 			'Exclude Tags To Speak.',
 			'Exclude Texts To Speak.',
+			'Google Cloud Text To Speech.',
+			'ChatGPT Text To Speech (Soon).',
 		];
 
 		if(!function_exists('is_plugin_active')) {
