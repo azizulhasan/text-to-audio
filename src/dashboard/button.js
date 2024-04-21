@@ -1,8 +1,8 @@
 import ReactDOM from "react-dom";
 import TextToSpeech from './buttons/components/TextToSpeech';
-import TexToSpeechThree from "./buttons/components/TexToSpeechThree";
+import TextToSpeechThree from "./buttons/components/TextToSpeechThree";
+import TextToSpeechFour from "./buttons/components/TextToSpeechFour";
 import { postWithoutImage } from './components/context/utilities';
-
 
 /**
  * Get customize settings.
@@ -36,7 +36,7 @@ let timer = setTimeout(function loadProButton() {
 
             })
         }
-    } else if (ttsObjPro.player_id == 3 && buttonCSS) {
+    } else if (ttsObjPro.player_id > 2 && buttonCSS) {
 
         let buttons = [...document.querySelectorAll('.tts__listent_content')]
         if (buttons.length) {
@@ -48,8 +48,13 @@ let timer = setTimeout(function loadProButton() {
             buttons.map(button => {
                 let buttonId = button.getAttribute('data-id')
                 // button.attachShadow({ mode: 'open' });
+                let buttonContent = <TextToSpeechThree button={button} buttonId={buttonId} buttonCSS={buttonCSS} cssStyle={''} />
+                if (ttsObjPro.player_id > 3) {
+                    buttonContent = <TextToSpeechFour button={button} buttonId={buttonId} buttonCSS={buttonCSS} cssStyle={''} />
+                }
+
                 return ReactDOM.render(
-                    <TexToSpeechThree button={button} buttonId={buttonId} buttonCSS={buttonCSS} cssStyle={''} />,
+                    buttonContent,
                     button
                 )
             })

@@ -34,40 +34,49 @@ export default function Listening() {
 	});
 	const [listeningLang, setListeningLang] = useState('en_GB');
 	const apiURL = useMemo(() => {
-		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.should_activate_pro_features) {
-			return ttsObjPro.api_url + ttsObjPro.api_namespace + "/" + ttsObjPro.api_version + "/";
+		if (window.hasOwnProperty('ttsObj') && ttsObj.is_pro_active) {
+			return ttsObj.api_url + ttsObj.api_namespace + "_pro/" + ttsObj.api_version + "/";
 		}
 
 		return ttsObj.api_url + ttsObj.api_namespace + "/" + ttsObj.api_version + "/";
 	})
 
-
-	useEffect(() => {
-		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.gtts_is_authenticated == '1') {
-			let stored_voices = getLocalStorage(['tta__voices']);
-			if (!stored_voices.tta__voices) {
-				getData(apiURL + 'voices')
-					.then((res) => {
-						if (res.voices.length) {
-							setLocalStorage({ tta__voices: res.voices })
-						} else {
-							setVoicesAndLanguages()
-						}
-					})
-					.catch((err) => {
-						console.log(err);
-					});
-			} else {
-				let voices = JSON.parse(stored_voices.tta__voices);
-				let langs = []
-				voices.voices.map(voice => {
-					if (!langs.includes(voice.languageCodes[0])) {
-						langs.push(voice.languageCodes[0])
+	const setGoogleVoicesAndLanguages = () => {
+		let stored_voices = getLocalStorage(['tta__voices']);
+		if (!stored_voices?.tta__voices) {
+			getData(apiURL + 'voices')
+				.then((res) => {
+					if (res?.voices?.length) {
+						setLocalStorage({ tta__voices: res.voices })
+					} else {
+						setVoicesAndLanguages()
 					}
 				})
+				.catch((err) => {
+					console.log(err);
+				});
+		} else {
+			let voices = JSON.parse(stored_voices.tta__voices);
+			let langs = []
+			let langs2 = []
+			voices.voices.map(voice => {
+				if (!langs.includes(voice.languageCodes[0])) {
+					langs.push(voice.languageCodes[0])
+					langs2[voice.languageCodes[0]] = voice.languageCodes[0];
+				}
+			})
+			console.log({
+				langs, langs2
+			})
+			setVoicesAndLanguages(voices.voices, langs)
+		}
+	}
 
-				setVoicesAndLanguages(voices.voices, langs)
-			}
+
+	useEffect(() => {
+		
+		if (window.hasOwnProperty('ttsObj') && ttsObj?.gctts_is_authenticated == 1) {
+			setGoogleVoicesAndLanguages()
 		} else {
 			setVoicesAndLanguages()
 		}
@@ -158,8 +167,11 @@ export default function Listening() {
 				let gttsLanguages = gttsSupportedLanguages();
 				setLanguages(gttsLanguages)
 				setLanguageMissingMessage('')
-			} else {
-				setLanguageMissingMessage('Looking for another language? Please select the "Google TTS Pro" button from customization menu. Your language will be appeared. ')
+			} else if (customizationSettings?.buttonSettings?.id < 3) {
+				setLanguageMissingMessage('Looking for another language? Please select the another button from customization menu. Your language may be appear.')
+			} else if (customizationSettings?.buttonSettings?.id == 4) {
+				setGoogleVoicesAndLanguages();
+				console.log({ voices, languages, speechSynthesisVoices })
 			}
 		}
 
@@ -212,7 +224,7 @@ export default function Listening() {
 				autoClose: 5000
 			});
 		}
-		if (e.target.name === 'tta__listening_lang' && window.hasOwnProperty('ttsObjPro') && ttsObjPro.gtts_is_authenticated == '1') {
+		if (e.target.name === 'tta__listening_lang' && window.hasOwnProperty('ttsObjPro') && ttsObjPro.gctts_is_authenticated == '1') {
 
 			let filteredVoices = speechSynthesisVoices.filter(voice => {
 				return voice.languageCodes[0] == e.target.value;
@@ -252,7 +264,7 @@ export default function Listening() {
 										</option>
 										{Object.keys(languages).map((langKey, index) => {
 											return (
-												<option key={langKey} value={langKey}>
+												<option key={langKey} value={customizationSettings?.buttonSettings?.id == 4 ? languages[langKey] :langKey}>
 													{languages[langKey]}
 												</option>
 											);
@@ -300,7 +312,7 @@ export default function Listening() {
 												{' '}
 												Default Listening Voice
 											</option>
-											{voices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && ttsObjPro.gtts_is_authenticated ? <option key={index} data-lang={voice.languageCodes[0]} value={[voice.name, voice.ssmlGender].join('-')}>
+											{voices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && ttsObjPro.gctts_is_authenticated ? <option key={index} data-lang={voice.languageCodes[0]} value={[voice.name, voice.ssmlGender].join('-')}>
 												{voice.name} {'-'} {voice.ssmlGender}
 											</option> : <option key={index} data-lang={voice.lang} value={voice.name}>
 												{voice.name}
