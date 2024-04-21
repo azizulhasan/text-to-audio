@@ -21,8 +21,8 @@ export default function Integrations() {
                 </Form.Label>
                 <Form.Check
                     inline
-                    label="Google Clud TTS"
-                    title="Google Clud TTS"
+                    label="Google Cloud TTS"
+                    title="Google Cloud TTS"
                     name="group1"
                     type={'radio'}
                     className="mt-2"
@@ -32,14 +32,14 @@ export default function Integrations() {
                 />
                 <Form.Check
                     inline
-                    label="ChatGPT TTS"
-                    title="ChatGPT TTS"
+                    label="ChatGPT TTS(soon)"
+                    title="ChatGPT TTS(soon)"
                     name="group1"
                     type={'radio'}
                     checked={currentTTSServic === 'chatgpt_tts'}
                     id={`chatgpt_tts`}
                     onClick={handleClick}
-
+                    disabled
                 />
             </Form.Group>
         </Form>

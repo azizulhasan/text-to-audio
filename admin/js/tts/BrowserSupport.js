@@ -134,13 +134,14 @@ export default class BrowserSupport {
      * @returns 
      */
     #getCountryCode(selectedLang) {
-        if (selectedLang.indexOf('-') != undefined) {
+        if (selectedLang && selectedLang.indexOf('-') != undefined) {
             return selectedLang.split('-')[0]
         }
 
-        if (selectedLang.indexOf('_') != undefined) {
+        if (selectedLang && selectedLang.indexOf('_') != undefined) {
             return selectedLang.split('_')[0]
         }
+        
         return selectedLang
     }
 
