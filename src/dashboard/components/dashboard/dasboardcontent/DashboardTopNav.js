@@ -13,7 +13,7 @@ export default function DashboardTopNav() {
       {/* <!-- Navbar Brand--> */}
       <Link className="navbar-brand ps-3" style={style.head} to="/">
         {tta_obj.plugin_name}<br></br>
-        <small>Version: {tta_obj.VERSION} </small>
+        <small>Version: {ttsObj.VERSION} </small>
       </Link>
       {/* <!-- Sidebar Toggle--> */}
       <button
