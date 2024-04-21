@@ -106,7 +106,7 @@ class TTA_Admin {
             'plugin_name' => TEXT_TO_AUDIO_PLUGIN_NAME,
             'rest_nonce' => wp_create_nonce('wp_rest'),
             'post_types' => get_post_types(),
-            'VERSION' => TEXT_TO_AUDIO_VERSION,
+            'VERSION' => is_pro_active() ? get_option('TTA_PRO_VERSION' ) :  TEXT_TO_AUDIO_VERSION,
             'is_logged_in' => is_user_logged_in(),
             'is_admin' => current_user_can('administrator'),
             'is_dashboard' => is_admin(),

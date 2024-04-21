@@ -456,7 +456,7 @@ function get_used_shortcodes( $content) {
  */
 function is_pro_license_active() {
     if(is_pro_active()){
-        return apply_filters('tts_is_pro_license_active', false);
+        return true;
     }
 
     return false;

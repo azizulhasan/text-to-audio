@@ -25,6 +25,9 @@ export default function UpgradeToPro({ }) {
                                 Support</a>
                         </li>
                         <li className="list-group-item">
+                            <a target='_blank' href="https://www.youtube.com/watch?v=4dsbhaBavms&t=43s&ab_channel=AtlasAiDev">Goole Cloud Text To Speech.</a>
+                        </li>
+                        <li className="list-group-item">
                             Download the audio file for offline listening.
                         </li>
                         <li className="list-group-item">
