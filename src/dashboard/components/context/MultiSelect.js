@@ -23,7 +23,7 @@ class MultiSelect extends React.Component {
 
     handleChange = (event) => {
         event.preventDefault()
-        let selectedItems = this.state.selectedItems;
+        let selectedItems = this.state?.selectedItems?? [];
         const value = event.target.value;
 
         if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_license_active) {
@@ -102,7 +102,7 @@ class MultiSelect extends React.Component {
     }
 
     checkStatus = (item) => {
-        const status = this.state.selectedItems.some(element => {
+        const status = this.state?.selectedItems?.some(element => {
             return element === item;
         });
 
@@ -122,7 +122,7 @@ class MultiSelect extends React.Component {
     }
 
     hydrateInput() {
-        const items = this.state.selectedItems;
+        const items = this.state?.selectedItems ?? [];
         return (
             items.length > 0 ?
                 items.map((item, index) => (

@@ -157,7 +157,7 @@ function tta_get_button_content($atts, $is_block = false) {
     $speakIcon .= apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ');
     $speakIcon .= '<span> '. $text_arr['listen_text'] . '<span></div>'; // TODO: should remove this if unnecessary.
     // Button style.
-    if (isset($customize) && count($customize)) {
+    if (isset($customize['backgroundColor'], $customize['color'], $customize['width'])) {
         if ($is_block) {
             $backgroundColor = isset($customize['backgroundColor']) ? $customize['backgroundColor'] : '#184c53';
             $color = isset($customize['color']) ? $customize['color'] : '#ffffff';
@@ -366,7 +366,7 @@ function get_button_text( $atts, $content_read_time ) {
 
 
 function get_text_array_from_shortcode($customize_settings, $text_arr) {
-
+    $shortcode = '[tta_listen_btn]';
     if(isset($customize_settings['tta_play_btn_shortcode']) && $customize_settings['tta_play_btn_shortcode']) {
         $shortcode = $customize_settings['tta_play_btn_shortcode'];
     }

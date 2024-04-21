@@ -372,7 +372,6 @@ class TTA_Helper {
 
 		}
 
-
 		$final_mp3_file_ulrs = [];
 
 		$should_update_urls = \false;
@@ -380,6 +379,7 @@ class TTA_Helper {
 		foreach($mp3_file_urls as $language_code =>  $url ) {
 
 			$file_headers = @get_headers($url);
+
 
 			if (!$file_headers && function_exists('curl_init')) {
 				$ch = curl_init();
@@ -410,8 +410,6 @@ class TTA_Helper {
 
 			}
 
-
-
 			if(!$file_headers || strpos($file_headers, 'Not Found')  !== false ) {
 
 				$should_update_urls = true;
@@ -427,7 +425,7 @@ class TTA_Helper {
 
 		if( $should_update_urls || empty( $final_mp3_file_ulrs ) ) {
 
-			update_post_meta($post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs);
+			// update_post_meta($post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs);
 
 		}
 
@@ -446,7 +444,7 @@ class TTA_Helper {
 		$audio_dir = TTA_PRO_GTTS_DIR;
 		$replaceable_string = '/wp-content/uploads/TTA_Pro/gtts/';
 		if(get_player_id() == 4){
-			$audio_dir = TTA_PRO_AUDIO_DIR_URL;
+			$audio_dir = TTA_PRO_AUDIO_DIR;
 			$replaceable_string = '/wp-content/uploads/TTA_Pro/';
 		}
 

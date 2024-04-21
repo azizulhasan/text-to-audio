@@ -165,6 +165,9 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
                                         Select Google Service acount authentication Json file. How to get? Click <a target='_blank' href='https://clincher.medium.com/how-to-use-a-google-cloud-ai-powered-text-to-speech-rest-service-b1980b2c6b7a'>here</a>.
                                         <br />
                                         <a target='_blank' href='https://cloud.google.com/text-to-speech/docs/before-you-begin'>Read More</a>
+                                        <br/>
+                                        <br/>
+                                        <a target='_blank' href='https://www.youtube.com/watch?v=4dsbhaBavms&t=43s&ab_channel=AtlasAiDev'>How To Integrate Google Cloud Text To Speech?</a>
                                     </Form.Label>
                                     <Form.Control
                                         type='file'
