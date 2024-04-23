@@ -132,7 +132,7 @@ class TTA_Hooks {
                     'tta_meta_box',
                 ),
                 get_current_screen()->post_type,
-                'side',
+                'advanced',
                 'high',
                 null
             );
@@ -151,7 +151,7 @@ class TTA_Hooks {
         
         // Button style.
         if (isset($customize) && count($customize)) {
-            $btn_style = 'background-color:#184c53;color:#fff;border:0;';
+            $btn_style = 'background-color:#184c53;color:#fff;border:0;border-radius:3px;';
         }
         $short_code = '[tta_listen_btn]';
         if (isset($customize['tta_play_btn_shortcode']) && '' != $customize['tta_play_btn_shortcode']) {

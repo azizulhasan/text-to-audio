@@ -312,7 +312,7 @@ class TTA_Helper {
 		}
 
 
-
+		// update_post_meta($post->ID, 'tts_mp3_file_urls', []);
 
 		$mp3_file_urls = get_post_meta($post->ID, 'tts_mp3_file_urls');
 		$old_url = get_post_meta($post->ID, 'tts_mp3_file_url', true);
