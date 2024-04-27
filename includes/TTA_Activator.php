@@ -59,7 +59,9 @@ class TTA_Activator {
 					'tta__settings_exclude_texts' =>  [],
 					'tta__settings_exclude_tags' =>  [],
                     "tta__settings_display_btn_icon" => true,
-                    "tta__settings_exclude_post_ids" => true,
+                    "tta__settings_exclude_post_ids" => [],
+                    "tta__settings_display_button_if_user_logged_in" => false,
+
             ));
         }
 

@@ -39,11 +39,24 @@ class TTA_Helper {
 		if(isset($settings['tta__settings_exclude_post_ids']) && is_array($settings['tta__settings_exclude_post_ids'])) {
 			$ids = $settings['tta__settings_exclude_post_ids'];
 		}
+		if(!function_exists('is_user_logged_in')) {
+			include_once WPINC . '/pluggable.php';
+		}
+		
+		$should_display_button_based_on_user_logged_user = true;
+		if(isset($settings['tta__settings_display_button_if_user_logged_in']) && $settings['tta__settings_display_button_if_user_logged_in'] ) {
+			if(!is_user_logged_in()) {
+				$should_display_button_based_on_user_logged_user = false;
+			}
+		}
+
 		if(!isset($settings['tta__settings_allow_listening_for_post_types'])
 		   || count($settings['tta__settings_allow_listening_for_post_types']) === 0
 		   || !is_array($settings['tta__settings_allow_listening_for_post_types'])
 		   || !in_array(self::tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'])
 		   || in_array($post->ID, $ids)
+		   || !$should_display_button_based_on_user_logged_user
+
 		) {
 			$should_load_button = false;
 		}
@@ -299,7 +312,7 @@ class TTA_Helper {
 		}
 
 
-
+		// update_post_meta($post->ID, 'tts_mp3_file_urls', []);
 
 		$mp3_file_urls = get_post_meta($post->ID, 'tts_mp3_file_urls');
 		$old_url = get_post_meta($post->ID, 'tts_mp3_file_url', true);

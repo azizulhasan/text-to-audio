@@ -25,6 +25,7 @@ export default function Settings() {
 		tta__settings_exclude_texts: [],
 		tta__settings_exclude_tags: [],
 		tta__settings_exclude_post_ids: [],
+		tta__settings_display_button_if_user_logged_in: false,
 	});
 	const [postTypes, setPostTypes] = useState([]);
 	const [isDataLoaded, setIsDataLoaded] = useState(false)
@@ -119,6 +120,7 @@ export default function Settings() {
 				<Row>
 					<Col xs={12} sm={12} lg={8}>
 						<Form onSubmit={handleSubmit}>
+							{/* Add Button or Player Automatically */}
 							<Row className=' mt-3'>
 								<Col xs={12} sm={6} lg={4}>
 									<Form.Label htmlFor='tta__settings_enable_button_add'>
@@ -134,6 +136,25 @@ export default function Settings() {
 										}
 										name={`tta__settings_enable_button_add`}
 										id={`tta__settings_enable_button_add`}
+									/>
+								</Col>
+							</Row>
+							{/* Display Button Only If User Logged In. */}
+							<Row className=' mt-3'>
+								<Col xs={12} sm={6} lg={4}>
+									<Form.Label htmlFor='tta__settings_display_button_if_user_logged_in'>
+									Display Button Only If User Logged In
+									</Form.Label>
+								</Col>
+								<Col xs={12} sm={12} lg={8}>
+									<Form.Check // prettier-ignore
+										type={'checkbox'}
+										checked={settings.tta__settings_display_button_if_user_logged_in}
+										onChange={(e) =>
+											handleChange(e)
+										}
+										name={`tta__settings_display_button_if_user_logged_in`}
+										id={`tta__settings_display_button_if_user_logged_in`}
 									/>
 								</Col>
 							</Row>
@@ -431,7 +452,7 @@ export default function Settings() {
 											Submit
 										</button>
 									</div>
-								</Row>
+							</Row>
 						</Form>
 					</Col>
 					<Col xs={12} sm={12} lg={4}>
