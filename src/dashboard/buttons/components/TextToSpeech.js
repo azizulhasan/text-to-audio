@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 
 //TODO : Need to apply onClick function to all icons and dynamic  custom class on demand
 import { Close, Play, Replay, Settings, SoundWave, Speed, VoiceOver, Pause } from "../assets/icons/TTSIcons";
+import { shouldCallPositionFunction } from "../assets/buttonsHelper";
 
 let speech = null
 let TextToSpeechPro = null;
@@ -468,25 +469,16 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                 }
             }
         }
-        document.addEventListener('scroll', detectScroll)
-        document.addEventListener('wheel', detectScroll)
+        document.addEventListener('scroll', detectScroll, { passive: true })
+        document.addEventListener('wheel', detectScroll, { passive: true })
 
 
         return () => {
-            document.removeEventListener('scroll', detectScroll)
-            document.removeEventListener('wheel', detectScroll)
+            document.removeEventListener('scroll', detectScroll, { passive: true })
+            document.removeEventListener('wheel', detectScroll, { passive: true })
         }
 
     }, [])
-
-    const shouldCallPositionFunction = (button) => {
-        if (button && typeof button?.getBoundingClientRect === "function") {
-            return true;
-        }
-
-        return false;
-    }
-
 
     return (
         <>

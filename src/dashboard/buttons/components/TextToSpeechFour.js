@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { shouldCallPositionFunction } from "../assets/buttonsHelper";
 let TextToSpeechProPlayer = null;
 export default function TextToSpeechFour({ buttonId, button, buttonCSS, cssStyle = '' }) {
     const [shouldFloat, setShouldFloat] = useState(false)
@@ -13,6 +14,7 @@ export default function TextToSpeechFour({ buttonId, button, buttonCSS, cssStyle
         }
     }, [window.TextToSpeechProPlayer, window?.TTS?.contents])
 
+
     useEffect(() => {
         const detectScroll = (e) => {
             let button = document.getElementById('player_content_' + buttonId);
@@ -20,46 +22,43 @@ export default function TextToSpeechFour({ buttonId, button, buttonCSS, cssStyle
             let titlePosition = 0;
             if (document.querySelector('.post-title')) {
                 postTitle = document.querySelector('.post-title')
-                titlePosition = postTitle.getBoundingClientRect().top;
+                if (shouldCallPositionFunction(postTitle)) {
+                    titlePosition = postTitle.getBoundingClientRect().top;
+                }
             } else if (document.querySelector('.entry-title')) {
                 postTitle = document.querySelector('.entry-title')
-                titlePosition = postTitle.getBoundingClientRect().top;
-            }
-
-            let topPos = Math.floor(button.getBoundingClientRect().top);
-            if (topPos < 1) {
-                setShouldFloat(true)
-            }
-
-            if (titlePosition > 0) {
-                setShouldFloat(false)
-            }
-
-        }
-
-
-        // Test via a getter in the options object to see if the passive property is accessed
-        let supportsPassive = false;
-        try {
-            let opts = Object.defineProperty({}, 'passive', {
-                get: function () {
-                    supportsPassive = true;
+                if (shouldCallPositionFunction(postTitle)) {
+                    titlePosition = postTitle.getBoundingClientRect().top;
                 }
-            });
-            window.addEventListener("testPassive", null, opts);
-            window.removeEventListener("testPassive", null, opts);
-        } catch (e) { }
+            } else if (document.querySelector('.wp-block-post-title')) {
+                postTitle = document.querySelector('.wp-block-post-title')
+                if (shouldCallPositionFunction(postTitle)) {
+                    titlePosition = postTitle.getBoundingClientRect().top;
+                }
+            }
 
-        document.addEventListener('scroll', detectScroll, supportsPassive ? { passive: true } : false)
-        document.addEventListener('wheel', detectScroll, supportsPassive ? { passive: true } : false)
-        document.addEventListener('touchstart', detectScroll, supportsPassive ? { passive: true } : false)
+            if (button) {
+                if (shouldCallPositionFunction(button)) {
+                    let topPos = Math.floor(button.getBoundingClientRect().top);
+                    if (topPos < 1) {
+                        setShouldFloat(true)
+                    }
+                }
+
+                if (titlePosition > 0) {
+                    setShouldFloat(false)
+                }
+            }
+        }
+        document.addEventListener('scroll', detectScroll, { passive: true })
+        document.addEventListener('wheel', detectScroll, { passive: true })
+
 
         return () => {
-            document.removeEventListener('scroll', detectScroll, supportsPassive ? { passive: true } : false)
-            document.removeEventListener('wheel', detectScroll, supportsPassive ? { passive: true } : false)
-            document.removeEventListener('touchstart', detectScroll, supportsPassive ? { passive: true } : false)
-
+            document.removeEventListener('scroll', detectScroll, { passive: true })
+            document.removeEventListener('wheel', detectScroll, { passive: true })
         }
+
     }, [])
 
 
