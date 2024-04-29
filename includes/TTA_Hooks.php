@@ -64,7 +64,7 @@ class TTA_Hooks {
         add_filter('rocket_excluded_inline_js_content', [$this, 'rocket_defer_inline_exclusions_callback'], 1000, 1);
 
         // W3 Total Cache
-        add_filter('w3tc_minify_js_do_tag_minification', 'w3tc_minify_js_do_tag_minification_callback', 10, 3);
+        add_filter('w3tc_minify_js_do_tag_minification', [$this, 'w3tc_minify_js_do_tag_minification_callback'], 10, 3);
 
         // WP Optimize
         add_filter('wp-optimize-minify-default-exclusions', [$this, 'cache_exclude_js_text_to_speech'], 10, 1);
