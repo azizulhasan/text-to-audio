@@ -12,14 +12,13 @@ customize.append('method', 'get');
 let buttonCSS = '';
 postWithoutImage(tta_obj.api_url + 'tta/v1/customize', customize)
     .then((res) => {
-        console.log({ res })
         buttonCSS = res.data
     })
     .catch((err) => {
         console.log(err);
     });
 let timer = setTimeout(function loadProButton() {
-    timer = setTimeout(loadProButton, 1000)
+    timer = setTimeout(loadProButton, 1)
     if (window.hasOwnProperty('TTS') && window.hasOwnProperty('TextToSpeechPro') && window.hasOwnProperty('ttsObjPro') && ttsObjPro.player_id == 2 && buttonCSS) {
         clearTimeout(timer)
         timer = null
@@ -62,4 +61,4 @@ let timer = setTimeout(function loadProButton() {
         }
 
     }
-}, 1000)
+}, 1)
