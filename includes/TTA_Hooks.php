@@ -23,12 +23,56 @@ namespace TTA;
  */
 class TTA_Hooks {
 
+    private static $excludable_js_arr = [];
+    private static $excludable_js_string = '';
+
     public function __construct() {
         // TODO it should work with new functionality 
         add_action('add_meta_boxes', array($this, 'add_custom_meta_box'));
 
         // Update hook
         // add_action('upgrader_process_complete', 'update_settings_data', 10, 2);
+
+        self::$excludable_js_arr = apply_filters('tts_excludable_js_arr', [
+            'TextToSpeech.min.js',
+            'text-to-audio-button.min.js',
+            'text-to-audio-dashboard-ui.min.js',
+            'tts_button_settings',
+            'tts_button_settings_1',
+            'tts_button_settings_2',
+            'tts_button_settings_3',
+            'tts_button_settings_4',
+        ]);
+
+        $strings = implode( ',', self::$excludable_js_arr);
+
+        self::$excludable_js_string = apply_filters('tts_excludable_js_string', $strings);
+
+        // Autoptimize Plugin
+        add_filter( 'autoptimize_filter_js_exclude', [$this, 'autoptimize_filter_js_exclude_callback'] );
+
+        // LiteSpeed Cache
+        add_filter( 'litespeed_optimize_js_excludes', [$this, 'cache_exclude_js_text_to_speech'] );
+
+        // WP Rocket
+        add_filter('rocket_exclude_js', [$this, 'cache_exclude_js_text_to_speech']);
+        add_filter('rocket_minify_excluded_external_js', [$this, 'cache_exclude_js_text_to_speech']);
+
+        // WP Rocket inline script exclusions
+        add_filter('rocket_defer_inline_exclusions', [$this, 'rocket_defer_inline_exclusions_callback'], 1000, 1);
+        add_filter('rocket_exclude_defer_js', [$this, 'rocket_defer_inline_exclusions_callback'], 1000, 1);
+        add_filter('rocket_excluded_inline_js_content', [$this, 'rocket_defer_inline_exclusions_callback'], 1000, 1);
+
+        // W3 Total Cache
+        add_filter('w3tc_minify_js_do_tag_minification', 'w3tc_minify_js_do_tag_minification_callback', 10, 3);
+
+        // WP Optimize
+        add_filter('wp-optimize-minify-default-exclusions', [$this, 'cache_exclude_js_text_to_speech'], 10, 1);
+
+        // Siteground SG Optimize
+        add_filter('sgo_js_minify_exclude', [$this, 'sgo_js_minify_exclude_callback'], 10, 1);
+        add_filter('sgo_javascript_combine_exclude', [$this, 'sgo_js_minify_exclude_callback'], 10, 1);
+        add_filter('sgo_javascript_combine_excluded_external_paths', [$this, 'sgo_js_minify_exclude_callback'], 10, 1);
 
     }
 
@@ -220,7 +264,97 @@ class TTA_Hooks {
         </div>
         <?php
         \do_action('tts_after_metabox_content');
-}
+    }
+
+
+    	/**
+	 * Autoptimize Plugin
+	 *
+	 * @param $excluded_js_files
+	 *
+	 * @return string
+	 * @see: https://wordpress.org/plugins/autoptimize/
+	 */
+	public  function autoptimize_filter_js_exclude_callback( $excluded_js_files ) {
+
+		$excluded_js_files .=   ', ' . self::$excludable_js_string;
+
+		return $excluded_js_files;
+	}
+
+	/**
+	 * @param $excluded_js_files
+	 *
+	 * @return mixed
+	 *
+	 * @see: https://wordpress.org/plugins/litespeed-cache/
+	 * @see: https://wordpress.org/plugins/wp-optimize/
+	 */
+	public  function cache_exclude_js_text_to_speech( $excluded_js_files ) {
+		if(is_array($excluded_js_files) or empty($excluded_js)) {
+			$excluded_js_files += self::$excludable_js_arr;
+		}
+
+
+		return $excluded_js_files;
+	}
+
+	/**
+	 * WP Rocket inline script exclusions
+	 *
+	 * @param $excluded_patterns
+	 *
+	 * @return string[]
+	 */
+	public function rocket_defer_inline_exclusions_callback($excluded_patterns) {
+		if(is_array($excluded_patterns)) {
+			$excluded_patterns += self::$excludable_js_arr;
+
+			return $excluded_patterns;
+		}
+
+		return self::$excludable_js_arr;
+	}
+
+
+	/**
+	 * @param $do_tag_minification
+	 * @param $script_tag
+	 * @param $file
+	 *
+	 * @return false|mixed
+	 *
+	 * @see: https://wordpress.org/plugins/w3-total-cache/
+	 */
+	public function w3tc_minify_js_do_tag_minification_callback($do_tag_minification, $script_tag, $file) {
+		if(in_array($file, self::$excludable_js_arr)) {
+			return false;
+		}
+
+		return $do_tag_minification;
+	}
+
+	/**
+	 * @param $excluded_js
+	 *
+	 * @return array|mixed
+	 * @see: https://wordpress.org/plugins/sg-cachepress/
+	 */
+	public  function sgo_js_minify_exclude_callback($excluded_js) {
+		if(!is_array($excluded_js))
+			return $excluded_js;
+
+		global $wp_scripts;
+		$registered_handles = array_keys($wp_scripts->registered);
+		foreach($registered_handles as $handle) {
+			if(in_array($handle, self::$excludable_js_arr)) {
+				$excluded_js[] = $handle;
+			}
+
+		}
+
+		return $excluded_js;
+	}
 
 }
 new TTA_Hooks();
