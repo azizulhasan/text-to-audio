@@ -379,11 +379,11 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 
 
 = 1.6.3 ( 30 Apr 2024 ) =
-Added: Compatible with (LiteSpeed Cache Plugin)[https://wordpress.org/plugins/litespeed-cache/]
-Added: Compatible with (WP-Optimize – Cache, Compress images, Minify & Clean database to boost page speed & performance Plugin)[https://wordpress.org/plugins/wp-optimize/]
-Added: Compatible with (Autoptimize Plugin)[https://wordpress.org/plugins/autoptimize/]
-Added: Compatible with (W3 Total Cache Plugin)[https://wordpress.org/plugins/w3-total-cache/]
-Added: Compatible with (Speed Optimizer – The All-In-One WordPress Performance-Boosting Plugin)[https://wordpress.org/plugins/sg-cachepress/]
+Added: Compatible with [LiteSpeed Cache Plugin](https://wordpress.org/plugins/litespeed-cache/)
+Added: Compatible with [WP-Optimize – Cache, Compress images, Minify & Clean database to boost page speed & performance Plugin](https://wordpress.org/plugins/wp-optimize/)
+Added: Compatible with [Autoptimize Plugin](https://wordpress.org/plugins/autoptimize/)
+Added: Compatible with [W3 Total Cache Plugin](https://wordpress.org/plugins/w3-total-cache/)
+Added: Compatible with [Speed Optimizer – The All-In-One WordPress Performance-Boosting Plugin](https://wordpress.org/plugins/sg-cachepress/)
 
 
 = 1.6.2 ( 28 Apr 2024 ) =
