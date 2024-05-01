@@ -382,7 +382,6 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 Added: Settings added to stop auto play after switching tab.
 Added: Default button set during plugin activation.
 
-
 = 1.6.3 ( 30 Apr 2024 ) =
 Added: Compatible with [LiteSpeed Cache Plugin](https://wordpress.org/plugins/litespeed-cache/)
 Added: Compatible with [WP-Optimize – Cache, Compress images, Minify & Clean database to boost page speed & performance Plugin](https://wordpress.org/plugins/wp-optimize/)
