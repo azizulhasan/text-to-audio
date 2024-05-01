@@ -73,7 +73,13 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
                     toast('File uploaded successfully');
                     setIsAuthenticated(res.status)
                 } else {
-                    toast('Something went wrong');
+                    if(res?.bcmath) {
+                        toast(bcmathNotice(), 'error', {
+                            autoClose: 8000,
+                        });
+                    }else{
+                        toast(res?.message || 'Something went wrong!');
+                    }
                 }
 
             })
@@ -151,7 +157,13 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
             });
     }
 
-
+    const bcmathNotice = () => {
+        return <>
+            BCMath extension is not enabled. Please enable this extension. Learn more how to enable.
+                <a target='_blank' href="https://atlasaidev.com/docs/text-to-speech/usage-setup/bcmath/" >Learn More</a>
+            </>
+        
+    }
 
     return (
         <Container>
