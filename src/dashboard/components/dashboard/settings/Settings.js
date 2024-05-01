@@ -159,11 +159,11 @@ export default function Settings() {
 									/>
 								</Col>
 							</Row>
-							{/* Stop Auto Playing After Switching Tab. */}
+							{/* Stop Auto Play After Switching Tab. */}
 							<Row className=' mt-3'>
 								<Col xs={12} sm={6} lg={4}>
 									<Form.Label htmlFor='tta__settings_stop_auto_playing_after_switching_tab'>
-									Stop Auto Playing After Switching Tab
+									Stop Auto Play After Switching Tab
 									</Form.Label>
 								</Col>
 								<Col xs={12} sm={12} lg={8}>
