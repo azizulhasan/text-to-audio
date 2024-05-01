@@ -441,7 +441,9 @@ export default class TextToSpeech {
 
             if ('visible' === document.visibilityState && this.listenStatus === 'resume') {
                 let isPausedByIntention = JSON.parse(window.sessionStorage.getItem('tts_paused_by_intention'));
-                if (!isPausedByIntention) {
+                let stop_autoplay =  window?.TTS?.settings?.settings?.settings?.tta__settings_stop_auto_playing_after_switching_tab ?? false;
+
+                if (!isPausedByIntention && !stop_autoplay) {
                     window.sessionStorage.setItem('tts_paused_by_intention', false);
                     this.resume(speech)
                 }

@@ -26,6 +26,7 @@ export default function Settings() {
 		tta__settings_exclude_tags: [],
 		tta__settings_exclude_post_ids: [],
 		tta__settings_display_button_if_user_logged_in: false,
+		tta__settings_stop_auto_playing_after_switching_tab: false,
 	});
 	const [postTypes, setPostTypes] = useState([]);
 	const [isDataLoaded, setIsDataLoaded] = useState(false)
@@ -155,6 +156,25 @@ export default function Settings() {
 										}
 										name={`tta__settings_display_button_if_user_logged_in`}
 										id={`tta__settings_display_button_if_user_logged_in`}
+									/>
+								</Col>
+							</Row>
+							{/* Stop Auto Playing After Switching Tab. */}
+							<Row className=' mt-3'>
+								<Col xs={12} sm={6} lg={4}>
+									<Form.Label htmlFor='tta__settings_stop_auto_playing_after_switching_tab'>
+									Stop Auto Playing After Switching Tab
+									</Form.Label>
+								</Col>
+								<Col xs={12} sm={12} lg={8}>
+									<Form.Check // prettier-ignore
+										type={'checkbox'}
+										checked={settings.tta__settings_stop_auto_playing_after_switching_tab}
+										onChange={(e) =>
+											handleChange(e)
+										}
+										name={`tta__settings_stop_auto_playing_after_switching_tab`}
+										id={`tta__settings_stop_auto_playing_after_switching_tab`}
 									/>
 								</Col>
 							</Row>
