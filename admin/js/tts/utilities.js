@@ -31,9 +31,9 @@ export const splitSentences = function splitSentences(text = '') {
 
 export const getButtonContent = (buttonId, cssClass, isProLicenseActive) => {
     // return wp.hooks.applyFilters('tts__listening_button', `<button id="tts__listent_content_${buttonId}" class="tts__listent_content  ${cssClass}" type="button" title="Text To Audio:  Tap to listen post."><div class="tts_button"><span class="dashicons dashicons-controls-play"></span><span>Listen<span></div> </button>`, buttonId)
-    let buttonText = ttsObj?.buttonTextArr?.listen_text ?? 'Listen';
+    let buttonText = window?.ttsObj?.buttonTextArr?.listen_text ?? 'Listen';
 
-    if(ttsObj?.player_customizations?.[1]?.play) {
+    if(window?.ttsObj?.player_customizations?.[1]?.play) {
         const parser = new DOMParser();
         // convert html string into DOM
         let document = parser.parseFromString(ttsObj?.player_customizations?.[1]?.play, "image/svg+xml");

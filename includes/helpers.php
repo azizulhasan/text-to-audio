@@ -408,12 +408,10 @@ add_filter( 'the_content', 'add_listen_button',  999 );
  * Add listening button to every post by default.
  */
 function add_listen_button( $content ) {
-    $settings = (array) get_option( 'tta_settings_data');
-    if( ! isset( $settings['tta__settings_enable_button_add'] ) ) {
-        TTA\TTA_Activator::activate(true);
-    }
+    TTA_Helper::set_default_settings();
     global $post;
 	$button = '';
+    $settings = (array) get_option( 'tta_settings_data');
     if( isset( $settings['tta__settings_enable_button_add'] ) &&  $settings['tta__settings_enable_button_add'] ) {    
         // TODO: write functionality if current page is home page where content is excerpt.
         // if(is_single()) {

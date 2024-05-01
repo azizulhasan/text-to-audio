@@ -42,6 +42,9 @@ class TTA_Activator {
                 "width" => "100",
                 'custom_css' => '',
                 'tta_play_btn_shortcode' => '[tta_listen_btn]',
+                'buttonSettings' => [
+                    'id' => 1,
+                ],
             ));
 
         }

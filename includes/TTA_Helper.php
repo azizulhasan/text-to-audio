@@ -2,7 +2,6 @@
 
 namespace TTA;
 
-use ParagonIE\Sodium\Core\Curve25519\Fe;
 
 /**
  * Fired during plugin activation
@@ -528,5 +527,11 @@ class TTA_Helper {
 		return false;
 	}
 
+	public static function set_default_settings() {
+		$settings = (array) get_option( 'tta_settings_data');
+		if( ! isset( $settings['tta__settings_enable_button_add'] ) ) {
+			TTA_Activator::activate(true);
+		}
+	}
 
 }
