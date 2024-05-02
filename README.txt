@@ -227,16 +227,16 @@ Boost engagement, accessibility, and productivity on your WordPress and WooComme
 
 == Frequently Asked Questions ==
 
-= Does Text To Speech Support All Andriod Phones ? =
+= Does Text To Speech Support All Android Phones ? =
 Yes, Text To Speech supports all Android phones. However, full support is exclusively available in the [pro version](https://atlasaidev.com/text-to-speech-pro/). The free version has certain limitations. Here's what you need to know:
 Text To Speech TTS plugin relies on the browser's API, with no external API used. The [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis) API varies from browser to browser and device to device. Consequently, voices and languages may differ based on the browser used.
 For example, a language available on a desktop may not be available on a mobile phone, and a voice available on a desktop may not be available on Android. In that case, the browser will play the default voice it supports.
 Overall, your users will still be able to listen to the content from almost all devices despite the voice change. If you encounter any browser-related issues, please submit a [ticket](https://atlasaidev.com/contact-us/) for assistance.
 
 = Does Text To Speech Support My Language? =
-Tex To Speech Pro TTS Accessibility supports these [languages](https://wordpress.org/plugins/text-to-audio/#:~:text=PRO%20SUPPORTED%20LANGUAGES%3A).
+Text To Speech Pro TTS Accessibility supports these [languages](https://wordpress.org/plugins/text-to-audio/#:~:text=PRO%20SUPPORTED%20LANGUAGES%3A).
 
-Tex To Speech Free TTS Accessibility supports these [languages](https://wordpress.org/plugins/text-to-audio/#:~:text=based%20on%20device.-,SUPPORTED%20LANGUAGES,-%3A).
+Text To Speech Free TTS Accessibility supports these [languages](https://wordpress.org/plugins/text-to-audio/#:~:text=based%20on%20device.-,SUPPORTED%20LANGUAGES,-%3A).
 
 
 = Does Text To Speech Support Multilingual Plugins ? =
