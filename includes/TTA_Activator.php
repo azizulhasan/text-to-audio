@@ -42,6 +42,9 @@ class TTA_Activator {
                 "width" => "100",
                 'custom_css' => '',
                 'tta_play_btn_shortcode' => '[tta_listen_btn]',
+                'buttonSettings' => [
+                    'id' => 1,
+                ],
             ));
 
         }
@@ -61,6 +64,7 @@ class TTA_Activator {
                     "tta__settings_display_btn_icon" => true,
                     "tta__settings_exclude_post_ids" => [],
                     "tta__settings_display_button_if_user_logged_in" => false,
+                    'tta__settings_stop_auto_playing_after_switching_tab' => false,
 
             ));
         }

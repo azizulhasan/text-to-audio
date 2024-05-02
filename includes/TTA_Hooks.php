@@ -31,7 +31,7 @@ class TTA_Hooks {
         add_action('add_meta_boxes', array($this, 'add_custom_meta_box'));
 
         // Update hook
-        // add_action('upgrader_process_complete', 'update_settings_data', 10, 2);
+        // add_action('upgrader_process_complete', [$this, 'update_tts_default_data']);
 
         self::$excludable_js_arr = apply_filters('tts_excludable_js_arr', [
             'TextToSpeech.min.js',
@@ -85,7 +85,7 @@ class TTA_Hooks {
      * @param array $hook_extra
      * @see https://wordpress.stackexchange.com/questions/144870/wordpress-update-plugin-hook-action-since-3-9
      */
-    function update_settings_data(\WP_Upgrader $upgrader_object, $hook_extra){
+    public function update_settings_data(\WP_Upgrader $upgrader_object, $hook_extra){
         // get current plugin version. ( https://wordpress.stackexchange.com/a/18270/41315 )
         if(!function_exists('get_plugin_data')){
             require_once(ABSPATH . 'wp-admin/includes/plugin.php');
@@ -148,6 +148,28 @@ class TTA_Hooks {
                 // normal update or via auto update will be set the name in $hook_extra['theme'] as 'theme1'.
             }
         }// endif; $hook_extra
+    }
+
+        /**
+     * Upgrader process complete.
+     *
+     * @see \WP_Upgrader::run() (wp-admin/includes/class-wp-upgrader.php)
+     * @param \WP_Upgrader $upgrader_object
+     * @param array $hook_extra
+     * @see https://wordpress.stackexchange.com/questions/144870/wordpress-update-plugin-hook-action-since-3-9
+     */
+    public function update_tts_default_data(){
+        // $customize_settings =  (array) get_option( 'tta_customize_settings' , [] );
+        // $customize_settings['buttonSettings'] = isset( $customize_settings['buttonSettings'] ) ? (array) $customize_settings['buttonSettings'] : [ 'id' => 1];
+        // if( ! isset( $customize_settings['buttonSettings'] ) || !isset( $customize_settings['buttonSettings']['id'] ) ) {
+        //     $data = (object) array_merge( $customize_settings,  array(
+        //         'buttonSettings' => [
+        //             'id' => 1,
+        //         ]
+        //     ));
+        //     update_option( 'tta_customize_settings', $data );
+
+        // }
     }
 
     /**
