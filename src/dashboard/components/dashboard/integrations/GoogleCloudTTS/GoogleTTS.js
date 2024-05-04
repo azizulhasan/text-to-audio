@@ -9,6 +9,8 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
     const [googTTSJsonFile, setGoogTTSJsonFile] = useState('');
     const [authFile, setAuthFile] = useState('')
     const [isAuthenticated, setIsAuthenticated] = useState(false)
+    const [isBackUpToDrive, setIsBackUpToDrive] = useState(false)
+
 
     const apiURL = useMemo(() => {
         return ttsObj.api_url + ttsObj.api_namespace + "_pro" + "/" + ttsObj.api_version + "/";
@@ -19,7 +21,13 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
      * @param {*} e
      */
     const handleChange = (e) => {
-        setGoogTTSJsonFile(e.target.files);
+        console.log(e.target.name)
+        if(e.target.name == 'tta__integration_is_backup_to_gogole_drive') {
+            console.log(e.target.checked)
+            setIsBackUpToDrive(e.target.checked)
+        }else{
+            setGoogTTSJsonFile(e.target.files);
+        }
     };
 
     /**
@@ -65,13 +73,14 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
 
         let data = new FormData();
         data.append('auth_file', googTTSJsonFile[0]);
+        data.append('tts_is_backup_mp3_file', isBackUpToDrive);
         data.append('method', 'post');
-
         postData(apiURL + 'upload_file', data)
             .then((res) => {
                 if (res.status) {
                     toast('File uploaded successfully');
                     setIsAuthenticated(res.status)
+                    setIsBackUpToDrive(res?.tts_is_backup_mp3_file|| false);
                 } else {
                     if(res?.bcmath) {
                         toast(bcmathNotice(), 'error', {
@@ -96,6 +105,7 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
                 .then((res) => {
                     setAuthFile(res.file)
                     setIsAuthenticated(res.is_authenticated)
+                    setIsBackUpToDrive(res?.tts_is_backup_mp3_file|| false);
                 })
                 .catch((err) => {
                     console.log(err);
@@ -174,7 +184,7 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
                             <Col xs={12} sm={12} lg={12} className=''>
                                 <Form.Group>
                                     <Form.Label htmlFor='googTTSJsonFile'>
-                                        Select Google Service acount authentication Json file. How to get? Click <a target='_blank' href='https://clincher.medium.com/how-to-use-a-google-cloud-ai-powered-text-to-speech-rest-service-b1980b2c6b7a'>here</a>.
+                                        Select Google Service Acount Authentication Json file. How to get? Click <a target='_blank' href='https://clincher.medium.com/how-to-use-a-google-cloud-ai-powered-text-to-speech-rest-service-b1980b2c6b7a'>here</a>.
                                         <br />
                                         <a target='_blank' href='https://cloud.google.com/text-to-speech/docs/before-you-begin'>Read More</a>
                                         <br/>
@@ -204,9 +214,28 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
                                     </div>
                                 </Form.Group>
                             </Col>
+                            {/* Stop Auto Play After Switching Tab. */}
+                            <Col xs={12} sm={12} lg={12} >
+                                <Row className=' mt-3'>
+                                    <Col xs={12} sm={6} lg={4}>
+                                        <Form.Label htmlFor='tta__integration_is_backup_to_gogole_drive'>
+                                        Backup MP3 Files To Google Drive.
+                                        </Form.Label>
+                                    </Col>
+                                    <Col xs={12} sm={12} lg={8}>
+                                        <Form.Check // prettier-ignore
+                                            type={'checkbox'}
+                                            checked={isBackUpToDrive}
+                                            onChange={(e)=>handleChange(e)}
+                                            name={`tta__integration_is_backup_to_gogole_drive`}
+                                            id={`tta__integration_is_backup_to_gogole_drive`}
+                                        />
+                                    </Col>
+                                </Row>
+							</Col>
                             <div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
                                 <button type='submit' className='tta_btn btn-center'>
-                                    Submit
+                                    Save
                                 </button>
                             </div>
                         </Row>
