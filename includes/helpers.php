@@ -235,6 +235,10 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
     $file_name = TTA_Helper::tts_file_name($title, $language, $voice);
     $drive_file_link = apply_filters('tts_get_drive_file_link', $file_name);
 
+
+    // $mp3_file_urls['en-us--voice--en-us-wavenet-c-female'] = $drive_file_link;
+
+
     error_log(print_r([
         'file_name' => $file_name,
         '$drive_file_link' => $drive_file_link,
