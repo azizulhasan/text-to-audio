@@ -400,8 +400,14 @@ function get_text_array_from_shortcode($customize_settings, $text_arr) {
 
 }
 
+/**
+ * Compatible with Payment forms, Buy now buttons and Invoicing System | GetPaid
+ * 
+ * @see https://wordpress.org/plugins/invoicing/
+ */
+$display_button_priority = apply_filters('tta_display_button_priority', 999);
 
-add_filter( 'the_content', 'add_listen_button',  999 );
+add_filter( 'the_content', 'add_listen_button',  $display_button_priority );
 
 
 /**
