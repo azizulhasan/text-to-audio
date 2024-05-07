@@ -103,9 +103,11 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
         if (window.hasOwnProperty('ttsObjPro')) {
             postData(apiURL + 'get_auth_file', {}, 'GET')
                 .then((res) => {
+                    
                     setAuthFile(res.file)
                     setIsAuthenticated(res.is_authenticated)
                     setIsBackUpToDrive(res?.tts_is_backup_mp3_file|| false);
+                    
                 })
                 .catch((err) => {
                     console.log(err);
@@ -219,7 +221,7 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
                                 <Row className=' mt-3'>
                                     <Col xs={12} sm={6} lg={4}>
                                         <Form.Label htmlFor='tta__integration_is_backup_to_gogole_drive'>
-                                        Backup MP3 Files To Google Drive.
+                                        Backup MP3 Files To Google Cloud Storage.
                                         </Form.Label>
                                     </Col>
                                     <Col xs={12} sm={12} lg={8}>
