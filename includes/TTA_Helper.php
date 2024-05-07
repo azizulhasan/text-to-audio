@@ -354,7 +354,7 @@ class TTA_Helper {
 		return \apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post);
 	}
 
-	public static function get_mp3_file_urls($post = '') {
+	public static function get_mp3_file_urls($file_url_key, $post = '') {
 
 		if(!$post) {
 
@@ -394,43 +394,34 @@ class TTA_Helper {
 
 		foreach($mp3_file_urls as $language_code =>  $url ) {
 
-			// $file_headers = @get_headers($url);
-
-
-			// if (!$file_headers && function_exists('curl_init')) {
-			// 	$ch = curl_init();
-			// 	curl_setopt($ch, CURLOPT_URL, $url);
-			// 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			// 	curl_setopt($ch, CURLOPT_HEADER, true);
-			// 	$file_headers = curl_exec($ch);
-			// 	curl_close($ch);
-			// }
-
-			// if(isset($file_headers[0])) {
-			// 	$file_headers = $file_headers[0];
-			// }
-
-			// $full_path = self::get_path_from_url($url);
-			// if( !file_exists($full_path) || (file_exists($full_path) && filesize($full_path) == 0) ) {
-			// 	$should_update_urls = true;
-			// 	continue;
-			// }
-
-			// if(!$file_headers || strpos($file_headers, 'Not Found')  !== false ) {
-
-			// 	$should_update_urls = true;
-
-			// } else {
-
-			// 	$final_mp3_file_ulrs[$language_code] = $url;
-
-			// }
-
-			if(self::is_file_not_url_exists_and_is_file_empty($url)) {
+			if(self::is_file_url_no_exists_and_is_file_empty($url)) {
 
 				$should_update_urls = true;
 
 			} else {
+
+				// Generate new singed url or backup only current post applicable url.
+				if(get_option( 'tts_is_backup_mp3_file' ) && $language_code == $file_url_key ) {
+					// previously generated mp3 file to 'TTA_Pro' folder but not backup to Google Cloud Storage.
+					$gcs_url = '';
+					if(strpos($url, 'TTA_Pro') !== false ) {
+						$full_path = self::get_path_from_url($url);
+						$gcs_url = apply_filters('tts_upload_previous_file_to_gcs_and_get_new_url', $url, $full_path);
+						if($gcs_url) {
+							$url = $gcs_url;
+						}
+					}
+
+					if(self::is_signed_url_expired($url)) {
+						// Get new signed url
+						$gcs_new_signed_url = apply_filters('tts_get_gcs_new_signed_url', $url);
+						if($gcs_new_signed_url) {
+							$url = $gcs_new_signed_url;
+						}
+
+					}
+
+				}
 
 				$final_mp3_file_ulrs[$language_code] = $url;
 
@@ -444,8 +435,6 @@ class TTA_Helper {
 			update_post_meta($post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs);
 
 		}
-
-
 
 		return \apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post);
 
@@ -538,7 +527,7 @@ class TTA_Helper {
 		}
 	}
 
-	public static function is_file_not_url_exists_and_is_file_empty($url) {
+	public static function is_file_url_no_exists_and_is_file_empty($url) {
 		$file_headers = @get_headers($url);
 
 		if (!$file_headers && function_exists('curl_init')) {
@@ -554,19 +543,43 @@ class TTA_Helper {
 			$file_headers = $file_headers[0];
 		}
 
-		$full_path = self::get_path_from_url($url);
+		// If file backup is not enabled then check if file exists and file has content.
+		if(!get_option( 'tts_is_backup_mp3_file' )) {
+			$full_path = self::get_path_from_url($url);
 		
-		if( !file_exists($full_path) || (file_exists($full_path) && filesize($full_path) == 0) ) {
-			return true;
+			if( !file_exists($full_path) || (file_exists($full_path) && filesize($full_path) == 0) ) {
+				return true;
+			}
 		}
 		
 		if(!$file_headers || strpos($file_headers, 'Not Found')  !== false ) {
 
 			return true;
 
-		} 
+		}
 
 		return false;
 	}
+
+	/**
+     * Function to check if a signed URL has expired.
+     */
+    public static function is_signed_url_expired($signedUrl) {
+        // Parse the URL to get the query string
+        $urlComponents = parse_url($signedUrl);
+        parse_str($urlComponents['query'], $queryParameters);
+    
+        // Get the expiration time from the query parameters
+        $expirationTime = $queryParameters['Expires'];
+    
+        // Convert the expiration time to a Unix timestamp
+        $expirationTimestamp = strtotime($expirationTime);
+    
+        // Get the current Unix timestamp
+        $currentTimestamp = time();
+    
+        // Compare the expiration time with the current time
+        return $expirationTimestamp < $currentTimestamp;
+    }
 
 }

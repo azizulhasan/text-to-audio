@@ -228,20 +228,17 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
    global $post;
 
     // delete_post_meta($post->ID, 'tts_mp3_file_urls');
-    $mp3_file_urls = TTA_Helper::get_mp3_file_urls($post);
     $language = TTA_Helper::tts_site_language($plugin_all_settings);
     $voice = TTA_Helper::tts_get_voice($plugin_all_settings);
     $file_url_key = TTA_Helper::tts_get_file_url_key($language, $voice);
+    $mp3_file_urls = TTA_Helper::get_mp3_file_urls($file_url_key, $post);
+
     $file_name = TTA_Helper::tts_file_name($title, $language, $voice);
     $drive_file_link = apply_filters('tts_get_drive_file_link', $file_name);
 
-
-    // $mp3_file_urls['en-us--voice--en-us-wavenet-c-female'] = $drive_file_link;
-
-
     error_log(print_r([
         'file_name' => $file_name,
-        '$drive_file_link' => $drive_file_link,
+        '$$mp3_file_urls[$file_url_key]' => $mp3_file_urls[$file_url_key],
     ], true));
     $object = ob_start();
     ?>
