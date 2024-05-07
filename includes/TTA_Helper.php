@@ -394,7 +394,7 @@ class TTA_Helper {
 
 		foreach($mp3_file_urls as $language_code =>  $url ) {
 
-			if(self::is_file_url_no_exists_and_is_file_empty($url)) {
+			if(self::is_file_url_not_exists_and_is_file_empty($url)) {
 
 				$should_update_urls = true;
 
@@ -403,10 +403,11 @@ class TTA_Helper {
 				// Generate new singed url or backup only current post applicable url.
 				if(get_option( 'tts_is_backup_mp3_file' ) && $language_code == $file_url_key ) {
 					// previously generated mp3 file to 'TTA_Pro' folder but not backup to Google Cloud Storage.
+					// $url = 'http://localhost/azizulhasan/tts/wp-content/uploads/TTA_Pro/gtts/2024/04/21/Hello_world__lang__en_us.mp3';
 					$gcs_url = '';
 					if(strpos($url, 'TTA_Pro') !== false ) {
 						$full_path = self::get_path_from_url($url);
-						$gcs_url = apply_filters('tts_upload_previous_file_to_gcs_and_get_new_url', $url, $full_path);
+						$gcs_url = apply_filters('tts_upload_previous_file_to_gcs_and_get_new_url', $url, $full_path,  $post, $language_code);
 						if($gcs_url) {
 							$url = $gcs_url;
 						}
@@ -414,11 +415,14 @@ class TTA_Helper {
 
 					if(self::is_signed_url_expired($url)) {
 						// Get new signed url
-						$gcs_new_signed_url = apply_filters('tts_get_gcs_new_signed_url', $url);
+						$gcs_new_signed_url = apply_filters('tts_get_gcs_new_signed_url', $url, $post);
 						if($gcs_new_signed_url) {
 							$url = $gcs_new_signed_url;
 						}
-
+						error_log(print_r([
+							'url_expired' => $url,
+							// 'gcs_new_signed_url' => $gcs_new_signed_url,
+						], 1));
 					}
 
 				}
@@ -527,7 +531,7 @@ class TTA_Helper {
 		}
 	}
 
-	public static function is_file_url_no_exists_and_is_file_empty($url) {
+	public static function is_file_url_not_exists_and_is_file_empty($url) {
 		$file_headers = @get_headers($url);
 
 		if (!$file_headers && function_exists('curl_init')) {
@@ -569,15 +573,13 @@ class TTA_Helper {
         $urlComponents = parse_url($signedUrl);
         parse_str($urlComponents['query'], $queryParameters);
     
-        // Get the expiration time from the query parameters
-        $expirationTime = $queryParameters['Expires'];
-    
         // Convert the expiration time to a Unix timestamp
-        $expirationTimestamp = strtotime($expirationTime);
-    
+		$expirationTimestamp = strtotime($queryParameters['X-Goog-Date']) + $queryParameters['X-Goog-Expires'];
+
+		
         // Get the current Unix timestamp
         $currentTimestamp = time();
-    
+
         // Compare the expiration time with the current time
         return $expirationTimestamp < $currentTimestamp;
     }

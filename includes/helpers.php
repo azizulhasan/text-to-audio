@@ -232,14 +232,8 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
     $voice = TTA_Helper::tts_get_voice($plugin_all_settings);
     $file_url_key = TTA_Helper::tts_get_file_url_key($language, $voice);
     $mp3_file_urls = TTA_Helper::get_mp3_file_urls($file_url_key, $post);
-
     $file_name = TTA_Helper::tts_file_name($title, $language, $voice);
-    $drive_file_link = apply_filters('tts_get_drive_file_link', $file_name);
 
-    error_log(print_r([
-        'file_name' => $file_name,
-        '$$mp3_file_urls[$file_url_key]' => $mp3_file_urls[$file_url_key],
-    ], true));
     $object = ob_start();
     ?>
             <!-- Text To Speech TTS Settings  -->
