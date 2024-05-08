@@ -245,6 +245,8 @@ class TTA_Helper {
 
 		if(get_player_id() == 4 && $voice ) {
 			$voice = strtolower( $voice );
+			$voice = str_replace( [' ', '-', '(', ')', '%20' ], '_', $voice);
+
 			$title .= '__voice__'.$voice;
 		}
 
