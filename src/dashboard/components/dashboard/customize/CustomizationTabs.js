@@ -21,7 +21,7 @@ function CustomizationTabs({ buttonLists, listeningSettings, handleChange, handl
                     <button
                         type='submit'
                         className='tta_btn  btn-block tta_btn  btn-center btn-block'>
-                        Submit
+                        Save
                     </button>
                 </div>
             </Form>

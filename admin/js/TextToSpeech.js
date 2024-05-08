@@ -434,6 +434,9 @@ export default class TextToSpeech {
 
         document.addEventListener("visibilitychange", () => {
             // it could be either hidden or visible
+            // TODO: when stop auto pause it's not reading the content properly. it stops for a few miliseconds. Fix it the release this new feature.
+            // let stop_autopause =  window?.TTS?.settings?.settings?.settings?.tta__settings_stop_auto_pause_after_switching_tab ?? false;
+
             if ('hidden' === document.visibilityState && this.listenStatus === 'pause') {
                 this.pause(speech)
                 if (this.callBackAfterEnd) this.callBackAfterEnd()

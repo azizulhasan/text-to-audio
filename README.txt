@@ -379,6 +379,10 @@ You can customize the voice and language of the text-to-speech player using shor
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+= 1.6.6 ( 09 May 2024 ) =
+Added: Cache exclude for various plugins issue fixed.
+Added: UI improvement.
+
 
 = 1.6.5 ( 06 May 2024 ) =
 Added: Compatibility with [Payment forms, Buy now buttons and Invoicing System](https://wordpress.org/plugins/invoicing/) plugin.

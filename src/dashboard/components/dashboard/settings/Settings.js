@@ -27,6 +27,8 @@ export default function Settings() {
 		tta__settings_exclude_post_ids: [],
 		tta__settings_display_button_if_user_logged_in: false,
 		tta__settings_stop_auto_playing_after_switching_tab: false,
+		// tta__settings_stop_auto_pause_after_switching_tab: false,
+
 	});
 	const [postTypes, setPostTypes] = useState([]);
 	const [isDataLoaded, setIsDataLoaded] = useState(false)
@@ -178,6 +180,29 @@ export default function Settings() {
 									/>
 								</Col>
 							</Row>
+
+							{/* Stop Auto Pause After Switching Tab. */}
+							{/* <Row className=' mt-3'>
+								<Col xs={12} sm={6} lg={4}>
+									<Form.Label htmlFor='tta__settings_stop_auto_pause_after_switching_tab'>
+									Stop Auto Pause After Switching Tab
+									</Form.Label>
+								</Col>
+								<Col xs={12} sm={12} lg={8}>
+									<Form.Check // prettier-ignore
+										type={'checkbox'}
+										checked={settings.tta__settings_stop_auto_pause_after_switching_tab}
+										onChange={(e) =>
+											handleChange(e)
+										}
+										name={`tta__settings_stop_auto_pause_after_switching_tab`}
+										id={`tta__settings_stop_auto_pause_after_switching_tab`}
+									/>
+								</Col>
+							</Row> */}
+
+							
+
 							<Row className='mt-4'>
 								<Col xs={12} sm={6} lg={4}>
 									<Form.Label htmlFor='tta__settings_allow_listening_for_post_types'>
@@ -469,7 +494,7 @@ export default function Settings() {
 									}
 									<div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
 										<button type='submit' className='tta_btn  btn-block'>
-											Submit
+											Save
 										</button>
 									</div>
 							</Row>
