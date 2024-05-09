@@ -223,7 +223,11 @@ class TTA_Helper {
 			$default_voice = $plugin_all_settings['listening']['tta__listening_voice'];
 		}
 
-		return apply_filters( 'tts_get_voice', $default_voice );
+		$voice = apply_filters( 'tts_get_voice', $default_voice );
+
+		$voice = str_replace( [' ', '(', ')', '%20' ], '_', $voice);
+
+		return $voice;
 	}
 
 	public static function tts_file_name( $title, $selectedLang, $voice = '' ) {
@@ -245,6 +249,8 @@ class TTA_Helper {
 
 		if(get_player_id() == 4 && $voice ) {
 			$voice = strtolower( $voice );
+			$voice = str_replace( [' ', '(', ')', '%20' ], '_', $voice);
+
 			$title .= '__voice__'.$voice;
 		}
 
