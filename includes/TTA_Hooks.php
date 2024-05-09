@@ -313,12 +313,14 @@ class TTA_Hooks {
 	 * @see: https://wordpress.org/plugins/wp-optimize/
 	 */
 	public  function cache_exclude_js_text_to_speech( $excluded_js_files ) {
-		if(is_array($excluded_js_files) or empty($excluded_js)) {
-			$excluded_js_files += self::$excludable_js_arr;
-		}
+        $new_arr = [];
+		if(is_array($excluded_js_files)) {
+            $new_arr = array_merge( $excluded_js_files, self::$excludable_js_arr);
+		}else{
+            $new_arr = self::$excludable_js_arr;
+        }
 
-
-		return $excluded_js_files;
+		return $new_arr;
 	}
 
 	/**
@@ -329,13 +331,15 @@ class TTA_Hooks {
 	 * @return string[]
 	 */
 	public function rocket_defer_inline_exclusions_callback($excluded_patterns) {
-		if(is_array($excluded_patterns)) {
-			$excluded_patterns += self::$excludable_js_arr;
+        $new_arr = [];
+		if(is_array($excluded_patterns) ) {
+            $new_arr = array_merge( $excluded_patterns, self::$excludable_js_arr);
+		}else{
+            $new_arr = self::$excludable_js_arr;
+        }
 
-			return $excluded_patterns;
-		}
+		return $new_arr;
 
-		return self::$excludable_js_arr;
 	}
 
 
@@ -349,7 +353,8 @@ class TTA_Hooks {
 	 * @see: https://wordpress.org/plugins/w3-total-cache/
 	 */
 	public function w3tc_minify_js_do_tag_minification_callback($do_tag_minification, $script_tag, $file) {
-		if(in_array($file, self::$excludable_js_arr)) {
+        $basename = basename($file);
+		if(in_array($basename, self::$excludable_js_arr)) {
 			return false;
 		}
 
@@ -368,12 +373,13 @@ class TTA_Hooks {
 
 		global $wp_scripts;
 		$registered_handles = array_keys($wp_scripts->registered);
-		foreach($registered_handles as $handle) {
-			if(in_array($handle, self::$excludable_js_arr)) {
-				$excluded_js[] = $handle;
-			}
+		// foreach($registered_handles as $handle) {
+        //     error_log(print_r($handle,1));
+		// 	if(in_array($handle, self::$excludable_js_arr)) {
+		// 		$excluded_js[] = $handle;
+		// 	}
 
-		}
+		// }
 
 		return $excluded_js;
 	}
