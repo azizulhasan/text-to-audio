@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.5.2
 Requires PHP: 7.4
-Stable tag: 1.6.6
+Stable tag: 1.6.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -212,6 +212,11 @@ Here's how to use the Text to Speech button shortcode:
     }
 	` 
 
+7. **Use ShortCode As Tag:** You can use `tta_listen_btn` as tag. Like
+
+	`[tta_listen_btn]This is example content![/tta_listen_btn]`
+
+
 These shortcodes and attributes provide flexibility in customizing the text-to-audio functionality on your WordPress and WooCommerce sites.
 
 **Get Started Today!**
@@ -378,6 +383,12 @@ You can customize the voice and language of the text-to-speech player using shor
 ### TRANSLATION REQUEST
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+
+
+= 1.6.7 ( 13 May 2024 ) =
+Added: Shortcode tag introduced. `[tta_listen_btn]This is example content [/tta_listen_btn]`
+
 
 = 1.6.6 ( 09 May 2024 ) =
 Added: Cache exclude for various plugins issue fixed.
