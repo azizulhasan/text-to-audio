@@ -93,7 +93,7 @@ function tta_should_add_delimiter($title, $delimiter) {
  * @param $is_block
  *
  */
-function tta_get_button_content($atts, $is_block = false) {
+function tta_get_button_content($atts, $is_block = false, $tag_content = '') {
     $settings = (array) get_option('tta_settings_data');
     // this is a pro feature to show button on blog main page with title and excerpt.
     if(!TTA_Helper::should_load_button()){
@@ -145,6 +145,10 @@ function tta_get_button_content($atts, $is_block = false) {
         if( isset( $atts['text_to_read'] ) && $atts['text_to_read'] ) {
             $content = tta_clean_content($atts['text_to_read']);
         }
+    }
+
+    if($tag_content) {
+        $content = $tag_content;
     }
 
      // Get content reading time.
