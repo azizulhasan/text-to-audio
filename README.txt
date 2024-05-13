@@ -214,7 +214,8 @@ Here's how to use the Text to Speech button shortcode:
 
 7. **Use ShortCode As Tag:** You can use `tta_listen_btn` as tag. Like
 
-	`[tta_listen_btn]This is example content![/tta_listen_btn]`
+	`[tta_listen_btn ]This is example content [/tta_listen_btn]`
+	
 
 
 These shortcodes and attributes provide flexibility in customizing the text-to-audio functionality on your WordPress and WooCommerce sites.
@@ -387,7 +388,8 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 
 
 = 1.6.7 ( 13 May 2024 ) =
-Added: Shortcode tag introduced. `[tta_listen_btn]This is example content [/tta_listen_btn]`
+Added: Shortcode tag introduced. `[tta_listen_btn position="after"]This is example content for after button positioning. [/tta_listen_btn]`
+
 
 
 = 1.6.6 ( 09 May 2024 ) =
