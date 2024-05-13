@@ -31,7 +31,8 @@ export default function Customize() {
 
 	const [speakingText, setSpeakingText] = useState('');
 	const [listeningSettings, setListeningSettings] = useState({});
-	const [isGCAuthenticated, setGCIsAuthenticated] = useState(false)
+	const [isGCAuthenticated, setGCIsAuthenticated] = useState(false);
+	const [isBackUpToGCS, setIsBackUpToGCS] = useState(false)
 
 	useEffect(() => {
 		/**
@@ -85,6 +86,7 @@ export default function Customize() {
 				.then((res) => {
 					if (res?.file && res?.is_authenticated) {
 						setGCIsAuthenticated(res.is_authenticated)
+						setIsBackUpToGCS(res?.tts_is_backup_mp3_file || false)
 					}
 				})
 				.catch((err) => {
@@ -213,6 +215,12 @@ export default function Customize() {
 			toast('To use Google Cloud Text To Speech you have to authenticate first from integrations menu', 'error');
 			return;
 		}
+
+		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_folder_writable && formData?.buttonSettings?.id > 2 && !isBackUpToGCS) {
+            toast("Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.", 'error', { autoClose: 10000 })
+            return
+        };
+
 
 		// console.log(formData);
 		// return;

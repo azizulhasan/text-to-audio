@@ -9,7 +9,7 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
     const [googTTSJsonFile, setGoogTTSJsonFile] = useState('');
     const [authFile, setAuthFile] = useState('')
     const [isAuthenticated, setIsAuthenticated] = useState(false)
-    const [isBackUpToDrive, setIsBackUpToDrive] = useState(false)
+    const [isBackUpToGCS, setIsBackUpToGCS] = useState(false)
 
 
     const apiURL = useMemo(() => {
@@ -23,9 +23,26 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
     const handleChange = (e) => {
         console.log(e.target.name)
         if(e.target.name == 'tta__integration_is_backup_to_gogole_drive') {
-            console.log(e.target.checked)
-            setIsBackUpToDrive(e.target.checked)
+            let shouldUpdate = true;
+            if(e.target.checked) {
+                if(!isAuthenticated ) {
+                    if(!googTTSJsonFile) {
+                        toast('Backup MP3 Files To Google Cloud Storage Can Be Enabled If Google Text To Speech Is Authenticated.', 'error', {
+                            position: 'top-center',
+                            autoClose: 10000,
+                        });
+                        shouldUpdate = false;
+                    }
+                }
+                
+            }
+            if(shouldUpdate) {
+                console.log(e.target.checked)
+                setIsBackUpToGCS(e.target.checked)
+            }
+            
         }else{
+            console.log(e.target.files)
             setGoogTTSJsonFile(e.target.files);
         }
     };
@@ -52,35 +69,43 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
         }
 
 
-        if (isAuthenticated) {
-            toast('You are already authenticated. To add new service account please remove access first')
-            return
-        }
+        // if (isAuthenticated) {
+        //     toast('You are already authenticated. To add new service account please remove access first')
+        //     return
+        // }
 
         if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_license_active) {
             toast('Please Activate the Text To Speech Pro license to enjoy full features of the plugin.');
             return;
         }
-        if (!googTTSJsonFile) {
-            toast('Please select file')
-            return
-        };
+        // if (!googTTSJsonFile) {
+        //     toast('Please select file')
+        //     return
+        // };
 
-        if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_folder_writable) {
+        if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_folder_writable && !isBackUpToGCS) {
             toast("Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.", 'error', { autoClose: 10000 })
             return
         };
 
+
+
         let data = new FormData();
         data.append('auth_file', googTTSJsonFile[0]);
-        data.append('tts_is_backup_mp3_file', isBackUpToDrive);
+        data.append('tts_is_backup_mp3_file', isBackUpToGCS);
         data.append('method', 'post');
+        for(let val of data.values()) {
+            console.log({val})
+        }
+        // return;
         postData(apiURL + 'upload_file', data)
             .then((res) => {
                 if (res.status) {
                     toast('File uploaded successfully');
                     setIsAuthenticated(res.status)
-                    setIsBackUpToDrive(res?.tts_is_backup_mp3_file|| false);
+                    if(res?.tts_is_backup_mp3_file == 'true') {
+                        setIsBackUpToGCS(res?.tts_is_backup_mp3_file|| false);
+                    }
                 } else {
                     if(res?.bcmath) {
                         toast(bcmathNotice(), 'error', {
@@ -100,19 +125,21 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
 
 
     useEffect(() => {
-        if (window.hasOwnProperty('ttsObjPro')) {
+        // if (window.hasOwnProperty('ttsObjPro')) {
             postData(apiURL + 'get_auth_file', {}, 'GET')
                 .then((res) => {
                     
                     setAuthFile(res.file)
                     setIsAuthenticated(res.is_authenticated)
-                    setIsBackUpToDrive(res?.tts_is_backup_mp3_file|| false);
+                    if(res?.tts_is_backup_mp3_file == 'true') {
+                        setIsBackUpToGCS(res?.tts_is_backup_mp3_file|| false);
+                    }
                     
                 })
                 .catch((err) => {
                     console.log(err);
                 });
-        }
+        // }
     }, [])
     const authenticateTTS = (e) => {
         e.preventDefault();
@@ -227,7 +254,7 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
                                     <Col xs={12} sm={12} lg={8}>
                                         <Form.Check // prettier-ignore
                                             type={'checkbox'}
-                                            checked={isBackUpToDrive}
+                                            checked={isBackUpToGCS}
                                             onChange={(e)=>handleChange(e)}
                                             name={`tta__integration_is_backup_to_gogole_drive`}
                                             id={`tta__integration_is_backup_to_gogole_drive`}
@@ -244,7 +271,7 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
                     </Form>
                     {
                         window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active && isAuthenticated && <button onClick={(e) => revokeAccessToken(e)} className='tta_btn btn-center' style={{ marginLeft: '20px' }}>
-                            Romove Authentication
+                            Remove Authentication
                         </button>
                     }
                 </Col>
