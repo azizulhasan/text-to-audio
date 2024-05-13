@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.5.2
 Requires PHP: 7.4
-Stable tag: 1.6.4
+Stable tag: 1.6.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,17 +21,19 @@ Enhance your WordPress and WooCommerce website's accessibility and engage users 
 
 Right after you install this text to speech free plugin, it will automatically start displaying an easy-to-use player on selected post/page types, giving visitors the option to listen to your website's written content at their own pace.
 
-== Free text to speech (TTS) plugin for WordPress - Video Tutorial ==
+== Best Free Text To Speech TTS Accessibility Plugin For WordPress - Video Tutorial ==
 [youtube https://www.youtube.com/watch?v=P_dw_YjnVxc&t=21s&ab_channel=AtlasAiDev]
 
-### SUPPORT AND QUESTIONS VISIT HERE:
-> * [Support](http://atlasaidev.com/contact-us/)
+### SUPPORT AND HAVE QUESTIONS ? VISIT HERE:
+> * [Contack UsSupport](http://atlasaidev.com/contact-us/)
 
 ### USEFULL LINKS:
 > * [Get Text To Speech Pro](https://atlasaidev.com/text-to-speech-pro/)
-> * [Live Demo Of Free Version](https://wordpress.org/plugins/text-to-audio/?preview=1)
-> * [Live Demo Of Version](http://atlasaidev.com/text-to-speech/)
-> * [Video Tutorial](https://www.youtube.com/@atlasaidev)
+> * [View Pricing](https://atlasaidev.com/pricing/)
+> * [See Live Demo](https://wordpress.org/plugins/text-to-audio/?preview=1)
+> * [Watch Video Tutorial](https://www.youtube.com/@atlasaidev)
+> * [See Documentation](https://atlasaidev.com/docs/)
+
 
 
 ### Why Use The Text-to-Speech TTS Accessibility Plugin?
@@ -210,6 +212,12 @@ Here's how to use the Text to Speech button shortcode:
     }
 	` 
 
+7. **Use ShortCode As Tag:** You can use `tta_listen_btn` as tag. Like
+
+	`[tta_listen_btn ]This is example content [/tta_listen_btn]`
+	
+
+
 These shortcodes and attributes provide flexibility in customizing the text-to-audio functionality on your WordPress and WooCommerce sites.
 
 **Get Started Today!**
@@ -374,9 +382,25 @@ You can customize the voice and language of the text-to-speech player using shor
 == Changelog ==
 
 ### TRANSLATION REQUEST
-We are looking for people to help translate this plugin. If you can help we would love here from you.
+We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+
+
+= 1.6.7 ( 13 May 2024 ) =
+Added: Shortcode tag introduced. `[tta_listen_btn position="after"]This is example content for after button positioning. [/tta_listen_btn]`
+
+
+
+= 1.6.6 ( 09 May 2024 ) =
+Added: Cache exclude for various plugins issue fixed.
+Added: UI improvement.
+Added: MP3 file space issue solved.
+
+
+= 1.6.5 ( 06 May 2024 ) =
+Added: Compatibility with [Payment forms, Buy now buttons and Invoicing System](https://wordpress.org/plugins/invoicing/) plugin.
+Added: Display notice for bccomp PHP package missing for pro version.
 
 = 1.6.4 ( 02 May 2024 ) =
 Added: Settings added to stop auto play after switching tab.

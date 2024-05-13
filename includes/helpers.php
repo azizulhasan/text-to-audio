@@ -93,7 +93,7 @@ function tta_should_add_delimiter($title, $delimiter) {
  * @param $is_block
  *
  */
-function tta_get_button_content($atts, $is_block = false) {
+function tta_get_button_content($atts, $is_block = false, $tag_content = '') {
     $settings = (array) get_option('tta_settings_data');
     // this is a pro feature to show button on blog main page with title and excerpt.
     if(!TTA_Helper::should_load_button()){
@@ -147,6 +147,10 @@ function tta_get_button_content($atts, $is_block = false) {
         }
     }
 
+    if($tag_content) {
+        $content = tta_clean_content( $tag_content);
+    }
+
      // Get content reading time.
     $content_read_time = apply_filters('tts_content_reading_time', 1, $content, $post );
     $text_arr = get_button_text( $atts , $content_read_time);
@@ -177,7 +181,7 @@ function tta_get_button_content($atts, $is_block = false) {
         $custom_css = esc_attr($customize['custom_css']);
         $custom_css = str_replace( "\n", '', $custom_css );
     }
-    $custom_css = compatibility_with_themes($custom_css);
+    $custom_css = compatibility_with_themes($custom_css, $btn_no);
     // Custom class to button.
     $class = (isset($text_arr['class'])) && strlen($text_arr['class']) ? esc_attr($text_arr['class']) : "";
     $class .= (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
@@ -627,10 +631,10 @@ function tta_is_rtl() {
 }
 
 
-function compatibility_with_themes( $custom_css ) {
+function compatibility_with_themes( $custom_css, $btn_no = 1 ) {
     
     if( false !== strpos(get_option('stylesheet'), 'twenty') ){
-       $custom_css .= '#tts__listent_content_1.tts__listent_content  {max-width:650px;margin:auto;}';
+       $custom_css .= '#tts__listent_content_'.++$btn_no.'.tts__listent_content  {max-width:650px;margin:auto;}';
     }
 
     return $custom_css;

@@ -15,7 +15,7 @@
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
  * Description:       The most user-friendly, easy-to-use Text-to-Speech WordPress plugin. Just install and automatically add a Text to Audio player to your WordPress site!
- * Version:           1.6.4
+ * Version:           1.6.7
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-2.0+
@@ -177,7 +177,7 @@ class TTA_Init {
 
     public function __construct() {
         if (!defined('TEXT_TO_AUDIO_VERSION')) {
-            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '1.6.4'));
+            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '1.6.7'));
         }
 
         if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
@@ -267,5 +267,21 @@ function tta_create_shortcode($atts) {
 }
 
 add_shortcode('tta_listen_btn', 'tta_create_shortcode');
+
+// Filter to allow shortcodes in HTML tags
+add_filter('do_shortcode_tag', 'allow_shortcode_in_html_tag', 10, 4);
+function allow_shortcode_in_html_tag($output, $tag, $attr, $m) {
+    if ($tag == 'tta_listen_btn') {
+        if( isset( $attr['position'] ) && $attr['position'] == 'after' ) {
+            $content = tta_get_button_content($attr, false, $m[5]) . $m[5];
+        }else{
+            $content = $m[5] . tta_get_button_content($attr, false, $m[5]);
+        }
+        // Get the content wrapped by the shortcode.
+        return $content;
+    }
+    
+    return $output;
+}
 
 
