@@ -22,7 +22,7 @@ class TTA_Notices {
 		if (in_array(admin_url(basename($_SERVER['REQUEST_URI'])), [ admin_url('index.php') , admin_url('plugins.php'), admin_url('update-core.php'), \admin_url('plugin-install.php'), \admin_url('admin.php?page=text-to-audio')] ) )  {
 			// add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
 			add_action( 'admin_notices', [ $this, 'tta_feedback_notice' ] );
-//			add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
+			add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
 		}
 
 		$plugins = [
@@ -738,8 +738,6 @@ class TTA_Notices {
 				$updated_user_meta = update_user_meta( $user_id, 'tta_feedback_notice_dismissed', true, true );
 				update_option( 'tta_feedback_notice_next_show_time', time() + ( DAY_IN_SECONDS * 30 ) );
 			}
-
-			error_log(print_r($_REQUEST, 1));
 
 			if ( isset($updated_user_meta ) && $updated_user_meta ) {
 				wp_send_json_success( esc_html__( 'Request Successful.', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
