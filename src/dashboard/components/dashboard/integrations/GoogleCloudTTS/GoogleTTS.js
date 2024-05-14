@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Form, Row, Col, Container } from 'react-bootstrap';
+import { Form, Row, Col, Container, Tooltip, OverlayTrigger, Button } from 'react-bootstrap';
 import { postData } from '../../../context/utilities';
 import toast from '../../../context/Notify';
 import UpgradeToPro from '../../../UpgradeToPro';
@@ -251,7 +251,7 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
                                         Backup MP3 Files To Google Cloud Storage.
                                         </Form.Label>
                                     </Col>
-                                    <Col xs={12} sm={12} lg={8}>
+                                    <Col xs={12} sm={12} lg={6}>
                                         <Form.Check // prettier-ignore
                                             type={'checkbox'}
                                             checked={isBackUpToGCS}
@@ -259,6 +259,25 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
                                             name={`tta__integration_is_backup_to_gogole_drive`}
                                             id={`tta__integration_is_backup_to_gogole_drive`}
                                         />
+                                    </Col>
+                                    <Col xs={12} sm={12} lg={2}>
+                                    <>
+									{['top'].map((placement) => (
+										<OverlayTrigger
+											key={placement}
+											placement={placement}
+											overlay={
+												<Tooltip id={`tooltip-${placement}`}>
+													Click Here To Know How To Enable Automatic Backup To Google Cloud Storage For Text To Speech Pro Plugin?
+												</Tooltip>
+											}>
+											<Button onClick={(e)=>{
+                                                e.preventDefault();
+                                                window.open('https://atlasaidev.com/docs/text-to-speech/usage-setup/how-to-enable-automatic-backup-to-google-cloud-storage-for-text-to-speech-pro-plugin/', '_blank')
+                                            }} className='tta_btn'>?</Button>
+										</OverlayTrigger>
+									))}
+								</>
                                     </Col>
                                 </Row>
 							</Col>
