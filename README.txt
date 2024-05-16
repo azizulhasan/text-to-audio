@@ -13,7 +13,7 @@ The most user-friendly, easy-to-use Text-to-Speech WordPress plugin. Just instal
 
 == Description ==
 
-The most user-friendly, easy-to-use Text-to-Speech WordPress plugin. Just install and automatically add a Text to Audio player to your WordPress site!
+[Text To Speech TTS Accessibility](https://atlasaidev.com/text-to-speech-pro/) is the most user-friendly, easy-to-use Text-to-Speech WordPress plugin. Just install and automatically add a Text to Audio player to your WordPress site!
 
 **No Registration, No Account, No API installation required. Simply install and let your visitors listen.**
 
@@ -28,11 +28,11 @@ Right after you install this text to speech free plugin, it will automatically s
 > * [Contact Us](http://atlasaidev.com/contact-us/)
 
 ### USEFULL LINKS:
-> * [Get Text To Speech Pro](https://atlasaidev.com/text-to-speech-pro/)
-> * [View Pricing](https://atlasaidev.com/pricing/)
-> * [See Live Demo](https://wordpress.org/plugins/text-to-audio/?preview=1)
-> * [Watch Video Tutorial](https://www.youtube.com/@atlasaidev)
-> * [See Documentation](https://atlasaidev.com/docs/)
+> * [Text To Speech Pro](https://atlasaidev.com/text-to-speech-pro/)
+> * [Pricing](https://atlasaidev.com/pricing/)
+> * [Live Demo](https://wordpress.org/plugins/text-to-audio/?preview=1)
+> * [Video Tutorial](https://www.youtube.com/@atlasaidev)
+> * [Documentation](https://atlasaidev.com/docs/)
 
 
 
@@ -164,19 +164,19 @@ Please keep these factors in mind when implementing our plugin to ensure optimal
 **Additional Supported Plugins:** Boost your website's functionality with our support for:
 
 * <a href='https://wordpress.org/plugins/wp-optimize/' target='_blank'>
- WP-Optimize:</a> Clean, compress, and cache your website for optimal performance.
+WP-Optimize – Cache, Compress images, Minify & Clean database to boost page speed & performance</a> 
 
 * <a href='https://wordpress.org/plugins/litespeed-cache/' target='_blank'>
- WP-Optimize:</a> LiteSpeed Cache Plugin
+ LiteSpeed Cache Plugin</a>
 
 * <a href='https://wordpress.org/plugins/autoptimize/' target='_blank'>
- WP-Optimize:</a> Autoptimize Plugin
+Autoptimize Plugin</a> 
 
 * <a href='https://wordpress.org/plugins/w3-total-cache/' target='_blank'>
- WP-Optimize:</a> W3 Total Cache Plugin
+ W3 Total Cache Plugin</a> 
 
 * <a href='https://wordpress.org/plugins/sg-cachepress/' target='_blank'>
- WP-Optimize:</a> Speed Optimizer – The All-In-One WordPress Performance-Boosting Plugin
+Speed Optimizer – The All-In-One WordPress Performance-Boosting Plugin</a> 
 
 
 * <a href='https://wordpress.org/plugins/elementor/' target='_blank'>
