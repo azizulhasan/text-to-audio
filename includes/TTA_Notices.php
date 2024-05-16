@@ -19,6 +19,11 @@ class TTA_Notices {
 	 * Load all Notifications hooks.
 	 */
 	public function notifications_load_hooks() {
+
+		add_action('admin_init', [$this, 'test']);
+
+
+
 		if (in_array(admin_url(basename($_SERVER['REQUEST_URI'])), [ admin_url('index.php') , admin_url('plugins.php'), admin_url('update-core.php'), \admin_url('plugin-install.php'), \admin_url('admin.php?page=text-to-audio')] ) )  {
 			// add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
 			add_action( 'admin_notices', [ $this, 'tta_feedback_notice' ] );
@@ -95,6 +100,28 @@ class TTA_Notices {
 		add_action('wp_ajax_tta_hide_notice', [ $this, 'tta_hide_notice' ] );
 	}
 
+	public function test() {
+		$nonce         = wp_create_nonce( 'tta_notice_nonce' );
+		add_action( 'admin_print_footer_scripts', function() use ($nonce) {
+
+		?>
+                <script>
+                    (function($){
+                        "use strict";
+                        $(window)
+                            .on('load', function (e) {
+								if ( 'speechSynthesis' in window || 'webkitSpeechSynthesis' in window) {
+								} else {
+									if(wp.ajax) {
+									}else{
+										alert('This browser don\'t support speechSynthesis API. Please use one of these browser to use Text To Speech Free.  Chrome, FireFox, Safari, Samsung, Edge, Opera. On our Pro version there is no issue releated to browser.')
+									}
+								}
+                            });
+                    })(jQuery)
+                </script><?php
+				});
+	}
 
 	public function plugin_compatible_notice_callback() {
 		$wpml_and_gtranslate_notice_displaid = \get_option('wpml_and_gtranslate_notice_displayed', false);

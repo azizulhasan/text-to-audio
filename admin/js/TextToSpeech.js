@@ -141,7 +141,7 @@ export default class TextToSpeech {
 
         if (button_id) {
             let previousSibling =
-                document.getElementById(button_id).previousSibling;
+                document.getElementById(button_id)?.previousSibling;
             if (previousSibling) {
                 notice += ` Click here to <a href="https://wordpress.org/plugins/text-to-audio/#how%20to%20enable%20%60%60speechsynthesis%60%60%20on%20firefox%3F" target="_blank">enable</a>`;
                 previousSibling.style.display = 'block';
@@ -152,9 +152,7 @@ export default class TextToSpeech {
                     previousSibling.innerHTML = '';
                 }, 5000);
             } else {
-                link +=
-                    ttsObj.admin_url +
-                    'admin.php?page=text-to-audio#/docs';
+                link +='This browser not supports speechSynthesis API';
                 notice += `\nFollow this link to enable: \n${link}`;
                 alert(notice);
             }
@@ -180,7 +178,7 @@ export default class TextToSpeech {
             alert(notice);
         }
 
-        throw new Error(notice);
+        return true;
     }
     /**
      * Don't display this text in pro version.
