@@ -634,7 +634,15 @@ function tta_is_rtl() {
 function compatibility_with_themes( $custom_css, $btn_no = 1 ) {
     
     if( false !== strpos(get_option('stylesheet'), 'twenty') ){
-       $custom_css .= '#tts__listent_content_'.++$btn_no.'.tts__listent_content  {max-width:650px;margin:auto;}';
+        $selector = '';
+        for($i =1; $i <= $btn_no; $i++) {
+            $comma = '';
+            if($i > 1 && $i < $btn_no) {
+                $comma = ', ';
+            }
+            $selector .= '#tts__listent_content_'.$i.'.tts__listent_content'. $comma;
+        }
+       $custom_css .= $selector . '  {max-width:650px;margin:auto;}';
     }
 
     return $custom_css;
