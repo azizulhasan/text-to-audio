@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.5.2
 Requires PHP: 7.4
-Stable tag: 1.6.7
+Stable tag: 1.6.8
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -25,7 +25,7 @@ Right after you install this text to speech free plugin, it will automatically s
 [youtube https://www.youtube.com/watch?v=P_dw_YjnVxc&t=21s&ab_channel=AtlasAiDev]
 
 ### SUPPORT AND HAVE QUESTIONS ? VISIT HERE:
-> * [Contack UsSupport](http://atlasaidev.com/contact-us/)
+> * [Contact Us](http://atlasaidev.com/contact-us/)
 
 ### USEFULL LINKS:
 > * [Get Text To Speech Pro](https://atlasaidev.com/text-to-speech-pro/)
@@ -165,6 +165,19 @@ Please keep these factors in mind when implementing our plugin to ensure optimal
 
 * <a href='https://wordpress.org/plugins/wp-optimize/' target='_blank'>
  WP-Optimize:</a> Clean, compress, and cache your website for optimal performance.
+
+* <a href='https://wordpress.org/plugins/litespeed-cache/' target='_blank'>
+ WP-Optimize:</a> LiteSpeed Cache Plugin
+
+* <a href='https://wordpress.org/plugins/autoptimize/' target='_blank'>
+ WP-Optimize:</a> Autoptimize Plugin
+
+* <a href='https://wordpress.org/plugins/w3-total-cache/' target='_blank'>
+ WP-Optimize:</a> W3 Total Cache Plugin
+
+* <a href='https://wordpress.org/plugins/sg-cachepress/' target='_blank'>
+ WP-Optimize:</a> Speed Optimizer – The All-In-One WordPress Performance-Boosting Plugin
+
 
 * <a href='https://wordpress.org/plugins/elementor/' target='_blank'>
  Elementor Website Builder:</a> Elevate your website design and functionality with more than just a page builder.
@@ -384,6 +397,11 @@ You can customize the voice and language of the text-to-speech player using shor
 ### TRANSLATION REQUEST
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+
+= 1.6.8 ( 15 May 2024 ) =
+Added: Backup MP3 file to Google Cloud Storage System added.
+
 
 
 

@@ -232,11 +232,12 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
    global $post;
 
     // delete_post_meta($post->ID, 'tts_mp3_file_urls');
-    $mp3_file_urls = TTA_Helper::get_mp3_file_urls($post);
     $language = TTA_Helper::tts_site_language($plugin_all_settings);
     $voice = TTA_Helper::tts_get_voice($plugin_all_settings);
     $file_url_key = TTA_Helper::tts_get_file_url_key($language, $voice);
+    $mp3_file_urls = TTA_Helper::get_mp3_file_urls($file_url_key, $post);
     $file_name = TTA_Helper::tts_file_name($title, $language, $voice);
+
     $object = ob_start();
     ?>
             <!-- Text To Speech TTS Settings  -->
@@ -633,7 +634,15 @@ function tta_is_rtl() {
 function compatibility_with_themes( $custom_css, $btn_no = 1 ) {
     
     if( false !== strpos(get_option('stylesheet'), 'twenty') ){
-       $custom_css .= '#tts__listent_content_'.++$btn_no.'.tts__listent_content  {max-width:650px;margin:auto;}';
+        $selector = '';
+        for($i =1; $i <= $btn_no; $i++) {
+            $comma = '';
+            if($i > 1 && $i < $btn_no) {
+                $comma = ', ';
+            }
+            $selector .= '#tts__listent_content_'.$i.'.tts__listent_content'. $comma;
+        }
+       $custom_css .= $selector . '  {max-width:650px;margin:auto;}';
     }
 
     return $custom_css;
