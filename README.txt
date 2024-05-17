@@ -400,7 +400,7 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 
 
 = 1.6.9 ( 17 May 2024 ) =
-Added: SpeechSynthesis broser support notice added.
+Added: SpeechSynthesis browser support notice added.
 Updated: documentation added.
 
 = 1.6.8 ( 16 May 2024 ) =

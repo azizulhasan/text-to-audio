@@ -606,10 +606,4 @@ class TTA_Helper
 		return $expirationTimestamp < $currentTimestamp;
 	}
 
-	public static function get_browser_list() {
-		if(!function_exists('wp_check_browser_version')) {
-			include_once ABSPATH . 'wp-admin/includes/dashboard.php';
-		}
-		return wp_check_browser_version();
-	}
 }

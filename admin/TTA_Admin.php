@@ -96,7 +96,6 @@ class TTA_Admin {
                 'is_IE' => $is_IE, //(boolean): Internet Explorer
                 'is_edge' => $is_edge, //(boolean): Microsoft Edge
             ],
-            'get_browser_list' => TTA_Helper::get_browser_list(),
             'ajax_url' => admin_url('admin-ajax.php'),
             'api_url' => esc_url_raw(rest_url()),
             'api_namespace' => 'tta',
