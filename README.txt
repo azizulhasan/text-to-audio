@@ -3,9 +3,9 @@ Contributors: atlasaidev, hasanazizul
 Donate link: http://atlasaidev.com/
 Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
-Tested up to: 6.5.2
+Tested up to: 6.5.3
 Requires PHP: 7.4
-Stable tag: 1.6.8
+Stable tag: 1.6.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -399,16 +399,16 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
-= 1.6.8 ( 15 May 2024 ) =
+= 1.6.9 ( 17 May 2024 ) =
+Added: SpeechSynthesis browser support notice added.
+Updated: documentation added.
+
+= 1.6.8 ( 16 May 2024 ) =
 Added: Backup MP3 file to Google Cloud Storage System added.
-
-
 
 
 = 1.6.7 ( 13 May 2024 ) =
 Added: Shortcode tag introduced. `[tta_listen_btn position="after"]This is example content for after button positioning. [/tta_listen_btn]`
-
-
 
 = 1.6.6 ( 09 May 2024 ) =
 Added: Cache exclude for various plugins issue fixed.
