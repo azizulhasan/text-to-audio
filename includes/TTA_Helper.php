@@ -605,4 +605,5 @@ class TTA_Helper
 		// Compare the expiration time with the current time
 		return $expirationTimestamp < $currentTimestamp;
 	}
+
 }

@@ -3,9 +3,9 @@ Contributors: atlasaidev, hasanazizul
 Donate link: http://atlasaidev.com/
 Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
-Tested up to: 6.5.2
+Tested up to: 6.5.3
 Requires PHP: 7.4
-Stable tag: 1.6.8
+Stable tag: 1.6.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,7 +13,7 @@ The most user-friendly, easy-to-use Text-to-Speech WordPress plugin. Just instal
 
 == Description ==
 
-The most user-friendly, easy-to-use Text-to-Speech WordPress plugin. Just install and automatically add a Text to Audio player to your WordPress site!
+[Text To Speech TTS Accessibility](https://atlasaidev.com/text-to-speech-pro/) is the most user-friendly, easy-to-use Text-to-Speech WordPress plugin. Just install and automatically add a Text to Audio player to your WordPress site!
 
 **No Registration, No Account, No API installation required. Simply install and let your visitors listen.**
 
@@ -28,11 +28,11 @@ Right after you install this text to speech free plugin, it will automatically s
 > * [Contact Us](http://atlasaidev.com/contact-us/)
 
 ### USEFULL LINKS:
-> * [Get Text To Speech Pro](https://atlasaidev.com/text-to-speech-pro/)
-> * [View Pricing](https://atlasaidev.com/pricing/)
-> * [See Live Demo](https://wordpress.org/plugins/text-to-audio/?preview=1)
-> * [Watch Video Tutorial](https://www.youtube.com/@atlasaidev)
-> * [See Documentation](https://atlasaidev.com/docs/)
+> * [Text To Speech Pro](https://atlasaidev.com/text-to-speech-pro/)
+> * [Pricing](https://atlasaidev.com/pricing/)
+> * [Live Demo](https://wordpress.org/plugins/text-to-audio/?preview=1)
+> * [Video Tutorial](https://www.youtube.com/@atlasaidev)
+> * [Documentation](https://atlasaidev.com/docs/)
 
 
 
@@ -164,19 +164,19 @@ Please keep these factors in mind when implementing our plugin to ensure optimal
 **Additional Supported Plugins:** Boost your website's functionality with our support for:
 
 * <a href='https://wordpress.org/plugins/wp-optimize/' target='_blank'>
- WP-Optimize:</a> Clean, compress, and cache your website for optimal performance.
+WP-Optimize – Cache, Compress images, Minify & Clean database to boost page speed & performance</a> 
 
 * <a href='https://wordpress.org/plugins/litespeed-cache/' target='_blank'>
- WP-Optimize:</a> LiteSpeed Cache Plugin
+ LiteSpeed Cache Plugin</a>
 
 * <a href='https://wordpress.org/plugins/autoptimize/' target='_blank'>
- WP-Optimize:</a> Autoptimize Plugin
+Autoptimize Plugin</a> 
 
 * <a href='https://wordpress.org/plugins/w3-total-cache/' target='_blank'>
- WP-Optimize:</a> W3 Total Cache Plugin
+ W3 Total Cache Plugin</a> 
 
 * <a href='https://wordpress.org/plugins/sg-cachepress/' target='_blank'>
- WP-Optimize:</a> Speed Optimizer – The All-In-One WordPress Performance-Boosting Plugin
+Speed Optimizer – The All-In-One WordPress Performance-Boosting Plugin</a> 
 
 
 * <a href='https://wordpress.org/plugins/elementor/' target='_blank'>
@@ -399,16 +399,16 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
-= 1.6.8 ( 15 May 2024 ) =
+= 1.6.9 ( 17 May 2024 ) =
+Added: SpeechSynthesis browser support notice added.
+Updated: documentation added.
+
+= 1.6.8 ( 16 May 2024 ) =
 Added: Backup MP3 file to Google Cloud Storage System added.
-
-
 
 
 = 1.6.7 ( 13 May 2024 ) =
 Added: Shortcode tag introduced. `[tta_listen_btn position="after"]This is example content for after button positioning. [/tta_listen_btn]`
-
-
 
 = 1.6.6 ( 09 May 2024 ) =
 Added: Cache exclude for various plugins issue fixed.
