@@ -27,7 +27,7 @@ export default function Settings() {
 		tta__settings_exclude_post_ids: [],
 		tta__settings_display_button_if_user_logged_in: false,
 		tta__settings_stop_auto_playing_after_switching_tab: false,
-		// tta__settings_stop_auto_pause_after_switching_tab: false,
+		tta__settings_stop_floating_button: false,
 
 	});
 	const [postTypes, setPostTypes] = useState([]);
@@ -180,7 +180,30 @@ export default function Settings() {
 									/>
 								</Col>
 							</Row>
-
+							{/*When Scroll Down Stop Floating Player.  */}
+							{
+								window?.ttsObj?.is_pro_active && <>
+									<Row className=' mt-3'>
+										<Col xs={12} sm={6} lg={4}>
+											<Form.Label htmlFor='tta__settings_stop_floating_button'>
+											When Scroll Down Stop Floating Player
+											</Form.Label>
+										</Col>
+										<Col xs={12} sm={12} lg={8}>
+											<Form.Check // prettier-ignore
+												type={'checkbox'}
+												checked={settings.tta__settings_stop_floating_button}
+												onChange={(e) =>
+													handleChange(e)
+												}
+												name={`tta__settings_stop_floating_button`}
+												id={`tta__settings_stop_floating_button`}
+											/>
+										</Col>
+									</Row>
+								</>
+								
+							}
 							{/* Stop Auto Pause After Switching Tab. */}
 							{/* <Row className=' mt-3'>
 								<Col xs={12} sm={6} lg={4}>
