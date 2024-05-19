@@ -65,7 +65,7 @@ class TTA_Activator {
                     "tta__settings_exclude_post_ids" => [],
                     "tta__settings_display_button_if_user_logged_in" => false,
                     'tta__settings_stop_auto_playing_after_switching_tab' => false,
-                    // 'tta__settings_stop_auto_pause_after_switching_tab'  => false,
+                    'tta__settings_stop_floating_button'  => false,
  
             ));
         }
