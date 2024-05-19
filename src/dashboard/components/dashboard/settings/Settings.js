@@ -182,7 +182,7 @@ export default function Settings() {
 							</Row>
 							{/*When Scroll Down Stop Floating Player.  */}
 							{
-								// window?.ttsObj?.is_pro_active && <>
+								window?.ttsObj?.is_pro_active && <>
 									<Row className=' mt-3'>
 										<Col xs={12} sm={6} lg={4}>
 											<Form.Label htmlFor='tta__settings_stop_floating_button'>
@@ -201,7 +201,7 @@ export default function Settings() {
 											/>
 										</Col>
 									</Row>
-								// </>
+								</>
 								
 							}
 							{/* Stop Auto Pause After Switching Tab. */}
