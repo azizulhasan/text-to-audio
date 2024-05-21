@@ -16,47 +16,49 @@ export default function TextToSpeechFour({ buttonId, button, buttonCSS, cssStyle
 
 
     useEffect(() => {
-        const detectScroll = (e) => {
-            let button = document.getElementById('player_content_' + buttonId);
-            let postTitle = null;
-            let titlePosition = 0;
-            if (document.querySelector('.post-title')) {
-                postTitle = document.querySelector('.post-title')
-                if (shouldCallPositionFunction(postTitle)) {
-                    titlePosition = postTitle.getBoundingClientRect().top;
-                }
-            } else if (document.querySelector('.entry-title')) {
-                postTitle = document.querySelector('.entry-title')
-                if (shouldCallPositionFunction(postTitle)) {
-                    titlePosition = postTitle.getBoundingClientRect().top;
-                }
-            } else if (document.querySelector('.wp-block-post-title')) {
-                postTitle = document.querySelector('.wp-block-post-title')
-                if (shouldCallPositionFunction(postTitle)) {
-                    titlePosition = postTitle.getBoundingClientRect().top;
-                }
-            }
-
-            if (button) {
-                if (shouldCallPositionFunction(button)) {
-                    let topPos = Math.floor(button.getBoundingClientRect().top);
-                    if (topPos < 1) {
-                        setShouldFloat(true)
+        if(!window?.ttsObj?.settings?.settings?.tta__settings_stop_floating_button) {
+            const detectScroll = (e) => {
+                let button = document.getElementById('player_content_' + buttonId);
+                let postTitle = null;
+                let titlePosition = 0;
+                if (document.querySelector('.post-title')) {
+                    postTitle = document.querySelector('.post-title')
+                    if (shouldCallPositionFunction(postTitle)) {
+                        titlePosition = postTitle.getBoundingClientRect().top;
+                    }
+                } else if (document.querySelector('.entry-title')) {
+                    postTitle = document.querySelector('.entry-title')
+                    if (shouldCallPositionFunction(postTitle)) {
+                        titlePosition = postTitle.getBoundingClientRect().top;
+                    }
+                } else if (document.querySelector('.wp-block-post-title')) {
+                    postTitle = document.querySelector('.wp-block-post-title')
+                    if (shouldCallPositionFunction(postTitle)) {
+                        titlePosition = postTitle.getBoundingClientRect().top;
                     }
                 }
-
-                if (titlePosition > 0) {
-                    setShouldFloat(false)
+    
+                if (button) {
+                    if (shouldCallPositionFunction(button)) {
+                        let topPos = Math.floor(button.getBoundingClientRect().top);
+                        if (topPos < 1) {
+                            setShouldFloat(true)
+                        }
+                    }
+    
+                    if (titlePosition > 0) {
+                        setShouldFloat(false)
+                    }
                 }
             }
-        }
-        document.addEventListener('scroll', detectScroll, { passive: true })
-        document.addEventListener('wheel', detectScroll, { passive: true })
-
-
-        return () => {
-            document.removeEventListener('scroll', detectScroll, { passive: true })
-            document.removeEventListener('wheel', detectScroll, { passive: true })
+            document.addEventListener('scroll', detectScroll, { passive: true })
+            document.addEventListener('wheel', detectScroll, { passive: true })
+    
+    
+            return () => {
+                document.removeEventListener('scroll', detectScroll, { passive: true })
+                document.removeEventListener('wheel', detectScroll, { passive: true })
+            }
         }
 
     }, [])
