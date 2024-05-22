@@ -70,7 +70,7 @@ export default function Customize() {
 			.catch((err) => {
 				console.log(err);
 			});
-		let initialText = 'Add accessibility to WordPress site to read contents out loud in more than 51 languages.'
+		let initialText = 'The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!'
 
 		localStorage.setItem('demo_listening_content', initialText)
 		setSpeakingText(initialText);
@@ -149,6 +149,15 @@ export default function Customize() {
 					buttonSettings: tempButtonSettings
 				}
 			});
+
+			if(e.target.name == 'id' && e.target.value > 2 ) {
+				document.getElementById('tta__demo_text_for_play').setAttribute('disabled', true)
+
+			}else{
+				document.getElementById('tta__demo_text_for_play').removeAttribute('disabled')
+
+			}
+
 
 			return;
 		}

@@ -1,3 +1,4 @@
+import { Button } from "react-bootstrap"
 
 
 
@@ -16,7 +17,11 @@ class TextToSpeechProPlayer {
         this.#setTitle(TTS)
         this.#setPath(TTS)
         this.content = content
-        this.#setUpPlayer(ttsObj.plugin_url + '/admin/demos/player3/demo.mp3')
+        let demo_file = '/admin/demos/player3/demo.mp3';
+        if(this.buttonId == 4) {
+            demo_file = '/admin/demos/player3/demo4.mp3';
+        }
+        this.#setUpPlayer(ttsObj.plugin_url + demo_file)
     }
 
 
