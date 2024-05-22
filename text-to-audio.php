@@ -14,7 +14,7 @@
  * @wordpress-plugin
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
- * Description:       The most user-friendly, easy-to-use Text-to-Speech WordPress plugin. Just install and automatically add a Text to Audio player to your WordPress site!
+ * Description:       The most user-friendly Text-to-Speech accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
  * Version:           1.6.11
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
