@@ -9,11 +9,11 @@ Stable tag: 1.6.11
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-The most user-friendly, easy-to-use Text-to-Speech WordPress plugin. Just install and automatically add a Text to Audio player to your WordPress site!
+The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
 
 == Description ==
 
-[Text To Speech TTS Accessibility](https://atlasaidev.com/text-to-speech-pro/) is the most user-friendly, easy-to-use Text-to-Speech WordPress plugin. Just install and automatically add a Text to Audio player to your WordPress site!
+[Text To Speech TTS Accessibility](https://atlasaidev.com/text-to-speech-pro/) is the most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
 
 **No Registration, No Account, No API installation required. Simply install and let your visitors listen.**
 
