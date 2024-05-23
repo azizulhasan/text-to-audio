@@ -5,6 +5,11 @@ import {
 	OverlayTrigger,
 	Button
 } from 'react-bootstrap';
+import { ToastContainer } from 'react-toastify';
+/**
+ * Scripts
+ */
+import 'react-toastify/dist/ReactToastify.css';
 
 /**
  *
@@ -15,20 +20,14 @@ import toast from '../components/context/Notify';
 
 export default function CSSSelectorsForPosts() {
 	const [settings, setSettings] = useState({
-		tta__settings_enable_button_add: false,
-		tta__settings_display_btn_icon: false,
-		tta__settings_allow_listening_for_post_types: ['post'],
 		tta__settings_css_selectors: '',
 		tta__settings_exclude_content_by_css_selectors: '',
 		tta__settings_exclude_texts: [],
 		tta__settings_exclude_tags: [],
-		tta__settings_exclude_post_ids: [],
-		tta__settings_display_button_if_user_logged_in: false,
-		tta__settings_stop_auto_playing_after_switching_tab: false,
-		tta__settings_stop_floating_button: false,
-
 	});
-	const [postTypes, setPostTypes] = useState([]);
+
+
+	const [postID, setPostID] = useState('');
 	const [isDataLoaded, setIsDataLoaded] = useState(false)
 
 
@@ -41,22 +40,21 @@ export default function CSSSelectorsForPosts() {
 		let url2 = new URLSearchParams(window.location.search);
 
 		let post_id = url2.get('post');
-		
+		setPostID(post_id)
 		let formData = new FormData();
 		formData.append('method', 'get');
+		formData.append('post_id', post_id);
 		postWithoutImage(tta_obj.api_url + 'tta_pro/v1/css_selectors_for_posts', formData).then(
 			(res) => {
-				setSettings({ ...res.data });
+				setSettings({...settings, ...res.data });
 				setIsDataLoaded(true)
+				
 			});
 	}, []);
 
-	useEffect(() => {
-		if (window.hasOwnProperty('ttsObj') && ttsObj?.post_types) {
-			let tempPostTypes = wp.hooks.applyFilters('tts_display_button_on_post_types', structuredClone(Object.keys(ttsObj.post_types)))
-			setPostTypes(tempPostTypes)
-		}
-	}, [window.ttsObj])
+	useEffect(()=> {
+		console.log({settings})
+	}, [settings])
 
 	/**
 	 * handle change
@@ -64,30 +62,12 @@ export default function CSSSelectorsForPosts() {
 	 */
 	const handleChange = (e) => {
 		let value = '';
-		if (Array.isArray(e)) {
-			value = e;
-			setSettings({
-				...settings,
-				...{ tta__settings_allow_listening_for_post_types: value },
-
-			});
-			return;
-		} else {
-			value = e.target.value
-		}
+		value = e.target.value
 
 		if (e.target.getAttribute('type') === 'checkbox') {
 			value = e.target.checked
 		}
-		if(e.target.name == 'tta__settings_exclude_post_ids') {
-			let ids = []
-			if(ttsObj.is_pro_active) {
-				ids = e.target.value?.split(',');
-			}else{
-				ids = e.target.value?.split(',')?.slice(0, 5);
-			}
-			value = ids;
-		}
+
 
 		if (!e.target.name) return;
 
@@ -102,14 +82,24 @@ export default function CSSSelectorsForPosts() {
 	 */
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		if (!ttsObj.is_pro_active) {
-			settings.tta__settings_css_selectors = ''
+		
+		if(!postID) {
+			toast('Please save the post then try to add custom CSS selectors.');
+			return;
 		}
+		
+		if(!checkAllPropertiesAreEmpty(settings)) {
+			console.log('empty value can not be saved.')
+		}
+		
+		
+		console.log({postID, settings})
 
-		// return;
+
 		let formData = new FormData();
 		formData.append('fields', JSON.stringify(settings));
 		formData.append('method', 'post');
+		formData.append('post_id', postID);
 		postWithoutImage(tta_obj.api_url + 'tta_pro/v1/css_selectors_for_posts', formData)
 			.then((res) => {
 				setSettings(res.data);
@@ -121,8 +111,33 @@ export default function CSSSelectorsForPosts() {
 			});
 	};
 
+	function checkAllPropertiesAreEmpty(obj) {
+		// Iterate over each property in the object
+		for (let key in obj) {
+			if (obj.hasOwnProperty(key)) {
+				// Check if the property value is not empty
+				if (obj[key] !== "") {
+					return true; // Return true if any property is not empty
+				}
+			}
+		}
+		return false; // Return false if all properties are empty
+	}
+
+
 	return (
 		isDataLoaded ? <React.Fragment>
+			<ToastContainer
+				position='top-right'
+				autoClose={5000}
+				hideProgressBar={false}
+				newestOnTop={false}
+				closeOnClick
+				rtl={false}
+				pauseOnFocusLoss
+				draggable
+				pauseOnHover
+			/>
 			<Container>
 				<Row>
 					<Col xs={12} sm={12} lg={8}>

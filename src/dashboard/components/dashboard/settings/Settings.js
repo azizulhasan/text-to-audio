@@ -42,7 +42,7 @@ export default function Settings() {
 		formData.append('method', 'get');
 		postWithoutImage(tta_obj.api_url + 'tta/v1/settings', formData).then(
 			(res) => {
-				setSettings({ ...res.data });
+				setSettings({...settings, ...res.data });
 				setIsDataLoaded(true)
 			});
 	}, []);

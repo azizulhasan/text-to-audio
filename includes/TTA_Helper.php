@@ -2,6 +2,7 @@
 
 namespace TTA;
 
+use stdClass;
 
 /**
  * Fired during plugin activation
@@ -291,9 +292,18 @@ class TTA_Helper
 		return $associative_urls;
 	}
 
-	public static function tts_get_settings($identifier = '')
+	public static function tts_get_settings($identifier = '', $post_id = '')
 	{
-
+		
+		$post_css_selectors = get_post_meta($post_id, 'tts_pro_custom_css_selectors');
+		if(!empty($post_css_selectors) ) {
+			$post_css_selectors = (array) $post_css_selectors[0];
+			$settings['tta__settings_css_selectors'] = $post_css_selectors['tta__settings_css_selectors'];
+			$settings['tta__settings_exclude_content_by_css_selectors'] = $post_css_selectors['tta__settings_exclude_content_by_css_selectors'];
+			$settings['tta__settings_exclude_texts'] = $post_css_selectors['tta__settings_exclude_texts'];
+			$settings['tta__settings_exclude_tags'] = $post_css_selectors['tta__settings_exclude_tags'];
+			error_log(print_r($settings,1));
+		}
 		$all_settings_data = [];
 		$cached_settings = get_transient('tts_all_settings');
 		if (!$cached_settings) {
@@ -306,6 +316,17 @@ class TTA_Helper
 
 			foreach ($all_settings as $settings_key => $identifier) {
 				$settings = get_option($settings_key);
+				if($settings_key == 'tta_settings_data' && $post_id) {
+					$post_css_selectors = get_post_meta($post_id, 'tts_pro_custom_css_selectors');
+					if(!empty($post_css_selectors) ) {
+						$post_css_selectors = (array) $post_css_selectors[0];
+						$settings['tta__settings_css_selectors'] = $post_css_selectors['tta__settings_css_selectors'];
+						$settings['tta__settings_exclude_content_by_css_selectors'] = $post_css_selectors['tta__settings_exclude_content_by_css_selectors'];
+						$settings['tta__settings_exclude_texts'] = $post_css_selectors['tta__settings_exclude_texts'];
+						$settings['tta__settings_exclude_tags'] = $post_css_selectors['tta__settings_exclude_tags'];
+					}
+				}
+
 				$settings = !$settings ? false : (array) $settings;
 				$all_settings_data[$identifier] = $settings;
 			}
