@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.5.3
 Requires PHP: 7.4
-Stable tag: 1.6.11
+Stable tag: 1.6.12
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,7 +13,7 @@ The most user-friendly Text-to-Speech Accessibility plugin. Just install and aut
 
 == Description ==
 
-[Text To Speech TTS Accessibility](https://atlasaidev.com/text-to-speech-pro/) is the most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
+[Text To Speech TTS Accessibility](https://atlasaidev.com/text-to-speech-pro/) is the most user-friendly Text-to-Speech tts plugin. Just install and automatically add a Text to Audio player to your WordPress site!
 
 **No Registration, No Account, No API installation required. Simply install and let your visitors listen.**
 
@@ -398,6 +398,10 @@ You can customize the voice and language of the text-to-speech player using shor
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+
+= 1.6.12 ( 23 May 2024 ) =
+Added: Default value set.
+Added: Customization Demo MP3 updated.
 
 = 1.6.11 ( 20 May 2024 ) =
 Added: PHP 8.2 tested.
