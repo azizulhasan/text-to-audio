@@ -25,8 +25,8 @@ export default class TextToSpeech {
     ttsListeningSettings = null
     languages = []
     voices = {}
-    voice = true ? 'English United Kingdom' : "Microsoft David - English (United States)"
-    language = true ? 'en_GB' : 'en-US'
+    voice = true ?  "Google UK English Female" : 'English United Kingdom';
+    language = true ?  'en-US' : 'en-GB';
     buttonTextArr = null
     splittedSentances = ''
     isCanceled = false
@@ -488,7 +488,7 @@ if ('page=text-to-audio' === urlParams) {
         let ttsSettings = {
             listening: {
                 tta__listening_lang: "en-US",
-                tta__listening_voice: "Microsoft David - English (United States)",
+                tta__listening_voice: "Google UK English Female",
                 tta__listening_pitch: "1",
                 tta__listening_rate: "1",
                 tta__listening_volume: "1"
