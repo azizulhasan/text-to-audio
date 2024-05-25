@@ -294,16 +294,6 @@ class TTA_Helper
 
 	public static function tts_get_settings($identifier = '', $post_id = '')
 	{
-		
-		$post_css_selectors = get_post_meta($post_id, 'tts_pro_custom_css_selectors');
-		if(!empty($post_css_selectors) ) {
-			$post_css_selectors = (array) $post_css_selectors[0];
-			$settings['tta__settings_css_selectors'] = $post_css_selectors['tta__settings_css_selectors'];
-			$settings['tta__settings_exclude_content_by_css_selectors'] = $post_css_selectors['tta__settings_exclude_content_by_css_selectors'];
-			$settings['tta__settings_exclude_texts'] = $post_css_selectors['tta__settings_exclude_texts'];
-			$settings['tta__settings_exclude_tags'] = $post_css_selectors['tta__settings_exclude_tags'];
-			error_log(print_r($settings,1));
-		}
 		$all_settings_data = [];
 		$cached_settings = get_transient('tts_all_settings');
 		if (!$cached_settings) {
@@ -316,16 +306,17 @@ class TTA_Helper
 
 			foreach ($all_settings as $settings_key => $identifier) {
 				$settings = get_option($settings_key);
-				if($settings_key == 'tta_settings_data' && $post_id) {
-					$post_css_selectors = get_post_meta($post_id, 'tts_pro_custom_css_selectors');
-					if(!empty($post_css_selectors) ) {
-						$post_css_selectors = (array) $post_css_selectors[0];
-						$settings['tta__settings_css_selectors'] = $post_css_selectors['tta__settings_css_selectors'];
-						$settings['tta__settings_exclude_content_by_css_selectors'] = $post_css_selectors['tta__settings_exclude_content_by_css_selectors'];
-						$settings['tta__settings_exclude_texts'] = $post_css_selectors['tta__settings_exclude_texts'];
-						$settings['tta__settings_exclude_tags'] = $post_css_selectors['tta__settings_exclude_tags'];
-					}
-				}
+
+				// if($settings_key == 'tta_settings_data' && $post ) {
+				// 	$post_css_selectors = get_post_meta($post->ID, 'tts_pro_custom_css_selectors');
+				// 	if(!empty($post_css_selectors) ) {
+				// 		$post_css_selectors = (array) $post_css_selectors[0];
+				// 		$settings['tta__settings_css_selectors'] = $post_css_selectors['tta__settings_css_selectors'];
+				// 		$settings['tta__settings_exclude_content_by_css_selectors'] = $post_css_selectors['tta__settings_exclude_content_by_css_selectors'];
+				// 		$settings['tta__settings_exclude_texts'] = $post_css_selectors['tta__settings_exclude_texts'];
+				// 		$settings['tta__settings_exclude_tags'] = $post_css_selectors['tta__settings_exclude_tags'];
+				// 	}
+				// }
 
 				$settings = !$settings ? false : (array) $settings;
 				$all_settings_data[$identifier] = $settings;
@@ -336,6 +327,29 @@ class TTA_Helper
 			$all_settings_data = $cached_settings;
 		}
 
+		if( $post_id ) {
+			$post_css_selectors = get_post_meta($post_id, 'tts_pro_custom_css_selectors');
+			$post_css_selectors = json_decode(json_encode($post_css_selectors[0]), true);
+			if(!empty($post_css_selectors) && isset($post_css_selectors[0]) ) {
+				$post_css_selectors = $post_css_selectors[0];
+				if(self::check_all_properties_are_empty($post_css_selectors)){
+					$settings = $all_settings_data['settings'];
+					$settings['tta__settings_css_selectors'] = $post_css_selectors['tta__settings_css_selectors'];
+					$settings['tta__settings_exclude_content_by_css_selectors'] = $post_css_selectors['tta__settings_exclude_content_by_css_selectors'];
+					$settings['tta__settings_exclude_texts'] = $post_css_selectors['tta__settings_exclude_texts'];
+					$settings['tta__settings_exclude_tags'] = $post_css_selectors['tta__settings_exclude_tags'];
+	
+					$all_settings_data['settings'] = $settings;
+				}
+			}
+			
+			
+			error_log(print_r([
+				'$all_settings_data' => $all_settings_data,
+			],1));
+		}
+
+
 		if ($identifier) {
 			$specified_identifier_data = isset($all_settings_data[$identifier]) ? $all_settings_data[$identifier] : $all_settings_data;
 			$all_settings_data = $specified_identifier_data;
@@ -344,6 +358,23 @@ class TTA_Helper
 
 		return \apply_filters('tts_get_settings', $all_settings_data, $post);
 	}
+
+	/**
+	* Check if all properties in an array are empty.
+	*
+	* @param array $array The array to check.
+	* @return bool True if any property is not empty, false if all properties are empty.
+	*/
+	public static  function check_all_properties_are_empty( $array ) {
+	   // Iterate over each property in the array
+	   foreach ( $array as $key => $value ) {
+		   // Check if the property value is not empty
+		   if ( ! empty( $value ) ) {
+			   return true; // Return true if any property is not empty
+		   }
+	   }
+	   return false; // Return false if all properties are empty
+   }
 
 	public static function get_mp3_file_urls_old($post = '')
 	{ // TODO: when google cloud TTS is applied. the mp3 file path will be different.

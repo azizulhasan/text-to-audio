@@ -89,12 +89,9 @@ export default function CSSSelectorsForPosts() {
 		}
 		
 		if(!checkAllPropertiesAreEmpty(settings)) {
-			console.log('empty value can not be saved.')
+			toast('Empty value can not be saved.');
+			return;
 		}
-		
-		
-		console.log({postID, settings})
-
 
 		let formData = new FormData();
 		formData.append('fields', JSON.stringify(settings));
@@ -116,7 +113,7 @@ export default function CSSSelectorsForPosts() {
 		for (let key in obj) {
 			if (obj.hasOwnProperty(key)) {
 				// Check if the property value is not empty
-				if (obj[key] !== "") {
+				if (obj[key].length)  {
 					return true; // Return true if any property is not empty
 				}
 			}
