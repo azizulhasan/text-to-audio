@@ -209,10 +209,14 @@ class TTA_Helper
 
 	public static function tts_site_language($plugin_all_settings)
 	{
-		// TODO: Match with multilinguage UI and default language.
-		$default_language = $plugin_all_settings['listening']['tta__listening_lang'];
-		// $default_language = str_replace(['-', ' '], '_', $default_language);
-		$default_language = strtolower($default_language);
+
+		$default_language = '';
+		if(isset($plugin_all_settings['listening'])) {
+			// TODO: Match with multilinguage UI and default language.
+			$default_language = $plugin_all_settings['listening']['tta__listening_lang'];
+			// $default_language = str_replace(['-', ' '], '_', $default_language);
+			$default_language = strtolower($default_language);
+		}
 
 		return apply_filters('tts_site_language', $default_language);
 	}
@@ -332,7 +336,6 @@ class TTA_Helper
 			$post_css_selectors = json_decode(json_encode($post_css_selectors[0]), true);
 
 			if(!empty($post_css_selectors) && isset($post_css_selectors['tta__settings_use_own_css_selectors']) && $post_css_selectors['tta__settings_use_own_css_selectors'] ) {
-				error_log(print_r($post_css_selectors,1));
 
 				if(self::check_all_properties_are_empty($post_css_selectors)){
 					$settings = $all_settings_data['settings'];
@@ -344,8 +347,7 @@ class TTA_Helper
 					$all_settings_data['settings'] = $settings;
 				}
 			}
-			
-			
+
 			// error_log(print_r([
 			// 	'$all_settings_data' => $all_settings_data,
 			// ],1));
@@ -356,6 +358,8 @@ class TTA_Helper
 			$specified_identifier_data = isset($all_settings_data[$identifier]) ? $all_settings_data[$identifier] : $all_settings_data;
 			$all_settings_data = $specified_identifier_data;
 		}
+
+
 		global $post;
 
 		return \apply_filters('tts_get_settings', $all_settings_data, $post);

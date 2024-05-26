@@ -22,8 +22,8 @@ export default function CSSSelectorsForPosts() {
 	const [settings, setSettings] = useState({
 		tta__settings_css_selectors: '',
 		tta__settings_exclude_content_by_css_selectors: '',
-		tta__settings_exclude_texts: [],
-		tta__settings_exclude_tags: [],
+		tta__settings_exclude_texts: "",
+		tta__settings_exclude_tags: "",
 		tta__settings_use_own_css_selectors: true,
 	});
 
