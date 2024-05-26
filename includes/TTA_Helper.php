@@ -330,8 +330,10 @@ class TTA_Helper
 		if( $post_id ) {
 			$post_css_selectors = get_post_meta($post_id, 'tts_pro_custom_css_selectors');
 			$post_css_selectors = json_decode(json_encode($post_css_selectors[0]), true);
-			if(!empty($post_css_selectors) && isset($post_css_selectors[0]) ) {
-				$post_css_selectors = $post_css_selectors[0];
+
+			if(!empty($post_css_selectors) && isset($post_css_selectors['tta__settings_use_own_css_selectors']) && $post_css_selectors['tta__settings_use_own_css_selectors'] ) {
+				error_log(print_r($post_css_selectors,1));
+
 				if(self::check_all_properties_are_empty($post_css_selectors)){
 					$settings = $all_settings_data['settings'];
 					$settings['tta__settings_css_selectors'] = $post_css_selectors['tta__settings_css_selectors'];
@@ -344,9 +346,9 @@ class TTA_Helper
 			}
 			
 			
-			error_log(print_r([
-				'$all_settings_data' => $all_settings_data,
-			],1));
+			// error_log(print_r([
+			// 	'$all_settings_data' => $all_settings_data,
+			// ],1));
 		}
 
 

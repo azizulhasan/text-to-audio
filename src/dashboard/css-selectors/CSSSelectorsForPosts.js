@@ -24,6 +24,7 @@ export default function CSSSelectorsForPosts() {
 		tta__settings_exclude_content_by_css_selectors: '',
 		tta__settings_exclude_texts: [],
 		tta__settings_exclude_tags: [],
+		tta__settings_use_own_css_selectors: true,
 	});
 
 
@@ -87,12 +88,16 @@ export default function CSSSelectorsForPosts() {
 			toast('Please save the post then try to add custom CSS selectors.');
 			return;
 		}
-		
-		if(!checkAllPropertiesAreEmpty(settings)) {
-			toast('Empty value can not be saved.');
+		if(settings.tta__settings_use_own_css_selectors && !checkAllPropertiesAreEmpty(settings)) {
+			toast('Empty value can not be saved. You can uncheck the "Use Own CSS Selectors" Option.', 'info', {
+				autoClose: 10000
+			});
 			return;
 		}
 
+		console.log(settings)
+
+		// return;
 		let formData = new FormData();
 		formData.append('fields', JSON.stringify(settings));
 		formData.append('method', 'post');
@@ -139,6 +144,25 @@ export default function CSSSelectorsForPosts() {
 				<Row>
 					<Col xs={12} sm={12} lg={8}>
 						<Form onSubmit={handleSubmit}>
+							{/* Use Own CSS Selectors */}
+							<Row className=' mt-3'>
+								<Col xs={12} sm={6} lg={4}>
+									<Form.Label htmlFor='tta__settings_use_own_css_selectors'>
+										Use Own CSS Selectors
+									</Form.Label>
+								</Col>
+								<Col xs={12} sm={12} lg={8}>
+									<Form.Check // prettier-ignore
+										type={'checkbox'}
+										checked={settings.tta__settings_use_own_css_selectors}
+										onChange={(e) =>
+											handleChange(e)
+										}
+										name={`tta__settings_use_own_css_selectors`}
+										id={`tta__settings_use_own_css_selectors`}
+									/>
+								</Col>
+							</Row>
 							{/*Include Content By CSS Selector*/}
 							<Row className='mt-4'>
 								<Col xs={12} sm={6} lg={4}>
