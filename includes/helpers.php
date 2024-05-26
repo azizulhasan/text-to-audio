@@ -72,7 +72,7 @@ function tta_clean_content($text) {
  * 
  */
 function tta_should_add_delimiter($title, $delimiter) {
-    $delimiterArr = ['.', ',', '?', '!', '|', ];
+    $delimiterArr = ['.', ',', '?', '!', '|', ';', ':', '¿', '¡', '،', '؟'];
     $end = substr($title, -1);
     if(in_array($end, $delimiterArr)){
         return $title. ' ';
@@ -81,6 +81,7 @@ function tta_should_add_delimiter($title, $delimiter) {
     if(! $title) {
         return $title;
     }
+    
 
     return $title.$delimiter. " ";
 
