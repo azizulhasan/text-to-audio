@@ -35,7 +35,7 @@ export default function DashboardTopNav() {
       </a>
       
       {
-        !ttsObj.is_pro_active && <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://atlasaidev.com/how-to-choose-the-best-text-to-speech-plugin/" target="_blank">
+        !ttsObj.is_pro_active && <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://atlasaidev.com/text-to-speech-pro/demo/" target="_blank">
         Pro Version Demo
       </a>
       }

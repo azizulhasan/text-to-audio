@@ -30,7 +30,7 @@ Right after you install this text to speech free plugin, it will automatically s
 ### USEFULL LINKS:
 > * [Text To Speech Pro](https://atlasaidev.com/text-to-speech-pro/)
 > * [Pricing](https://atlasaidev.com/pricing/)
-> * [Live Demo Pro Version](https://atlasaidev.com/how-to-choose-the-best-text-to-speech-plugin/)
+> * [Live Demo Pro Version](https://atlasaidev.com/text-to-speech-pro/demo/)
 > * [Live Demo Free Version](https://wordpress.org/plugins/text-to-audio/?preview=1)
 > * [Video Tutorial](https://www.youtube.com/@atlasaidev)
 > * [Documentation](https://atlasaidev.com/docs/)
