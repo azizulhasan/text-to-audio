@@ -72,7 +72,7 @@ function tta_clean_content($text) {
  * 
  */
 function tta_should_add_delimiter($title, $delimiter) {
-    $delimiterArr = ['.', ',', '?', '!', '|', ];
+    $delimiterArr = ['.', ',', '?', '!', '|', ';', ':', '¿', '¡', '،', '؟'];
     $end = substr($title, -1);
     if(in_array($end, $delimiterArr)){
         return $title. ' ';
@@ -81,6 +81,7 @@ function tta_should_add_delimiter($title, $delimiter) {
     if(! $title) {
         return $title;
     }
+    
 
     return $title.$delimiter. " ";
 
@@ -189,7 +190,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '') {
     $button = "<tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
 
     // init button scripts
-    do_action('tts_enqueue_button_scripts' , $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts);
+    do_action('tts_enqueue_button_scripts' , $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post);
 
     $data =  apply_filters( 'tts__listening_button', $button, $btn_no, $class, $post );
 
@@ -197,20 +198,21 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '') {
 }
 
 
-add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 11);
+add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 12);
 
 /**
  * Enqueue button scripts
  */
-function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts) {
+function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post) {
     // enqueue footer stript
-    add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts) { 
+    add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post) { 
         $temp_title = trim(str_replace('.', '', $title));
         $title = trim(get_the_title());
         $title = tta_clean_content( $title );
-
+        
         // Get plugin all settings and pass it to TTS javascript Object.
-        $plugin_all_settings = TTA_Helper::tts_get_settings();
+        $plugin_all_settings = TTA_Helper::tts_get_settings('', $post->ID);
+        // error_log(print_r($plugin_all_settings,1));
         if( isset($atts['lang']) && $atts['lang'] && isset($plugin_all_settings['listening']['tta__listening_lang'])  &&  $atts['lang'] != $plugin_all_settings['listening']['tta__listening_lang'] ) {
             $plugin_all_settings['listening']['tta__listening_lang'] = $atts['lang'];
         }

@@ -89,7 +89,7 @@ class TTSPlayButton extends HTMLElement {
 document.addEventListener('DOMContentLoaded', function () {
     // Define the new element
     if (!customElements.get('tts-play-button')) {
-        console.log({ notFoundcustomElements: customElements.get('tts-play-button') })
+        // console.log({ notFoundcustomElements: customElements.get('tts-play-button') })
         customElements.define('tts-play-button', TTSPlayButton)
     } else {
         console.log({ foundcustomElements: customElements.get('tts-play-button') })
