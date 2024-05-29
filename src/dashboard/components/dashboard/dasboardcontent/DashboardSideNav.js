@@ -21,6 +21,18 @@ export default function DashboardSideNav({ isProVersion }) {
 							</div>
 							Settings
 						</Link>
+						<Link className='nav-link' to={'/integrations'}>
+							<div className='sb-nav-link-icon'>
+								<i className='fas fa-book'></i>
+							</div>
+							Integrations
+						</Link>
+						<Link className='nav-link' to={'/customize'}>
+							<div className='sb-nav-link-icon'>
+								<i className='fas fa-edit'></i>
+							</div>
+							Customization
+						</Link>
 						{/* <Link className='nav-link' to={'/recording'}>
 							<div className='sb-nav-link-icon'>
 								<i className='fas fa-record-vinyl'></i>
@@ -33,30 +45,19 @@ export default function DashboardSideNav({ isProVersion }) {
 							</div>
 							Listening
 						</Link>
-						<Link className='nav-link' to={'/customize'}>
-							<div className='sb-nav-link-icon'>
-								<i className='fas fa-edit'></i>
-							</div>
-							Customization
-						</Link>
-						<Link className='nav-link' to={'/integrations'}>
-							<div className='sb-nav-link-icon'>
-								<i className='fas fa-book'></i>
-							</div>
-							Integrations
-						</Link>
+						
 						<Link className='nav-link' to={'/faq'}>
 							<div className='sb-nav-link-icon'>
 								<i className='fas fa-book'></i>
 							</div>
 							Docs
 						</Link>
-						<Link className='nav-link' to={'/analitics'}>
+						{/* <Link className='nav-link' to={'/analitics'}>
 							<div className='sb-nav-link-icon'>
 								<i className='fas fa-book'></i>
 							</div>
 							Analytics Pro
-						</Link>
+						</Link> */}
 
 					</div>
 				</div>

@@ -20,14 +20,14 @@ class TTA_Notices {
 	 */
 	public function notifications_load_hooks() {
 
-		add_action('admin_init', [$this, 'test']);
+		add_action('admin_init', [$this, 'browser_support_notice']);
 
 
 
 		if (in_array(admin_url(basename($_SERVER['REQUEST_URI'])), [ admin_url('index.php') , admin_url('plugins.php'), admin_url('update-core.php'), \admin_url('plugin-install.php'), \admin_url('admin.php?page=text-to-audio')] ) )  {
 			// add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
-			add_action( 'admin_notices', [ $this, 'tta_feedback_notice' ] );
-			// add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
+			// add_action( 'admin_notices', [ $this, 'tta_feedback_notice' ] );
+			add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
 		}
 
 		$plugins = [
@@ -62,45 +62,45 @@ class TTA_Notices {
 			'ChatGPT Text To Speech (Soon).',
 		];
 
-		if(!function_exists('is_plugin_active')) {
-            require_once \ABSPATH . 'wp-admin/includes/plugin.php';
-        }
+		// if(!function_exists('is_plugin_active')) {
+        //     require_once \ABSPATH . 'wp-admin/includes/plugin.php';
+        // }
 
-        if(!is_pro_active()){
-			foreach ( $plugins as $plugin_name =>  $data ){
-				if(is_plugin_active($plugin_name )) {
-					$this->active_plugin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+        // if(!is_pro_active()){
+		// 	foreach ( $plugins as $plugin_name =>  $data ){
+		// 		if(is_plugin_active($plugin_name )) {
+		// 			$this->active_plugin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
 
-					add_action( 'admin_notices', [ $this, $data['callback'] ] );
-					break;
-				}else if( $plugin_name == 'tts-multilingual') {
-					$this->active_plugin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
-					add_action( 'admin_notices', [ $this, $data['callback'] ] );
-				}
-        	}
+		// 			add_action( 'admin_notices', [ $this, $data['callback'] ] );
+		// 			break;
+		// 		}else if( $plugin_name == 'tts-multilingual') {
+		// 			$this->active_plugin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+		// 			add_action( 'admin_notices', [ $this, $data['callback'] ] );
+		// 		}
+        // 	}
 
-            // Display free version notice.
-            $i = rand(0, (count($features_notice) -1));
-            $feature1 = $features_notice[$i];
-            $i++;
-            $feature2 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[0];
-	        $i++;
-            $feature3 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[1];
-            array_push($this->plugin_features, "<strong>1. $feature1</strong>");
-            array_push($this->plugin_features, "<strong>2. $feature2</strong>");
-            array_push($this->plugin_features, "<strong>3. $feature3</strong>");
+        //     // Display free version notice.
+        //     $i = rand(0, (count($features_notice) -1));
+        //     $feature1 = $features_notice[$i];
+        //     $i++;
+        //     $feature2 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[0];
+	    //     $i++;
+        //     $feature3 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[1];
+        //     array_push($this->plugin_features, "<strong>1. $feature1</strong>");
+        //     array_push($this->plugin_features, "<strong>2. $feature2</strong>");
+        //     array_push($this->plugin_features, "<strong>3. $feature3</strong>");
 
-	        add_action( 'admin_notices', [ $this, 'plugin_features_notice_callback' ] );
+	    //     add_action( 'admin_notices', [ $this, 'plugin_features_notice_callback' ] );
 
-        }
+        // }
 
 //		add_action('wp_ajax_tta_save_review_notice', [ $this, 'tta_save_review_notice' ] );
-		add_action('wp_ajax_tta_save_feedback_notice', [ $this, 'tta_save_feedback_notice' ] );
+		// add_action('wp_ajax_tta_save_feedback_notice', [ $this, 'tta_save_feedback_notice' ] );
 
 		add_action('wp_ajax_tta_hide_notice', [ $this, 'tta_hide_notice' ] );
 	}
 
-	public function test() {
+	public function browser_support_notice() {
 		$nonce         = wp_create_nonce( 'tta_notice_nonce' );
 		add_action( 'admin_print_footer_scripts', function() use ($nonce) {
 
