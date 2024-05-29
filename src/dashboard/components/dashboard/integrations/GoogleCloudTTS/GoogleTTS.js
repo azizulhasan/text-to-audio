@@ -21,7 +21,6 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
      * @param {*} e
      */
     const handleChange = (e) => {
-        console.log(e.target.name)
         if(e.target.name == 'tta__integration_is_backup_to_gogole_drive') {
             let shouldUpdate = true;
             if(e.target.checked) {
@@ -125,7 +124,7 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
 
 
     useEffect(() => {
-        // if (window.hasOwnProperty('ttsObjPro')) {
+        if (ttsObj.is_pro_active) {
             postData(apiURL + 'get_auth_file', {}, 'GET')
                 .then((res) => {
                     
@@ -139,7 +138,7 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
                 .catch((err) => {
                     console.log(err);
                 });
-        // }
+        }
     }, [])
     const authenticateTTS = (e) => {
         e.preventDefault();
