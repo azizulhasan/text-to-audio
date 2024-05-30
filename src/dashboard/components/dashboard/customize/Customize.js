@@ -128,14 +128,6 @@ export default function Customize() {
 		// ChatGPT TTS player button settings
 		// && listeningBtnStyle?.buttonSettings?.id == 3
 		if (!['backgroundColor', 'width', 'color'].includes(e.target.name)) {
-			if(e.target.name == 'id' && e.target.value == 4 && !isGCAuthenticated) {
-				notify('To select this player you have to authenticate first from Integration menu', 'info' ,{
-					autoClose: 8000,
-				});
-				return;
-			}else{
-				console.log({id: e.target.value, name: e.target.name, isGCAuthenticated})
-			}
 
 			let tempButtonSettings = structuredClone(listeningBtnStyle.buttonSettings)
 
@@ -215,10 +207,18 @@ export default function Customize() {
 		formData['tta_play_btn_shortcode'] = shortCode;
 		formData['buttonSettings'] = listeningBtnStyle.buttonSettings;
 
+		if( formData?.buttonSettings?.id  == 4 && !isGCAuthenticated) {
+			notify('To select this player you have to authenticate first from Integration menu', 'error' ,{
+				autoClose: 8000,
+			});
+			return;
+		}
+
 		if (!ttsObj.is_pro_active && formData?.buttonSettings?.id > 1) {
 			toast('This player is only available for pro version.', 'error');
 			return;
 		}
+
 
 		if (formData?.buttonSettings?.id == 4 && (!isGCAuthenticated || !ttsObj.is_pro_active)) {
 			toast('To use Google Cloud Text To Speech you have to authenticate first from integrations menu', 'error');
