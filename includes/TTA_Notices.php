@@ -28,6 +28,7 @@ class TTA_Notices {
 			// add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
 			// add_action( 'admin_notices', [ $this, 'tta_feedback_notice' ] );
 			add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
+
 		}
 
 		$plugins = [
@@ -337,9 +338,14 @@ class TTA_Notices {
 	 */
 	public function tta_translation_request() {
 
-        //     delete_option('tta_translation_notice_next_show_time');
-        //     delete_user_meta('1', 'tta_translation_notice_dismissed');
-        //  update_option('tta_translation_notice_next_show_time', 12);
+    //    delete_option('tts_is_displayed_force_notice');
+		if(!get_option('tts_is_displayed_force_notice')) {
+			delete_option('tta_translation_notice_next_show_time');
+			delete_user_meta('1', 'tta_translation_notice_dismissed');
+			update_option('tta_translation_notice_next_show_time', 12);
+
+			update_option('tts_is_displayed_force_notice', true);
+		}
 
 		$pluginName    = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
 		$has_notice    = false;
