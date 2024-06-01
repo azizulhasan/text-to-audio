@@ -155,18 +155,22 @@ class TTA_Helper
 	public static function  get_compatible_plugins_data()
 	{
 		$compatible_plugins_data = [];
-		$datas = [
-			'gtranslate/gtranslate.php' => [
-				'type' => 'class',
-				'data' => ['gt_options', 'gt_languages', 'gt_switcher_wrapper', 'gt_selector',], //  'gt_selector',], // 'gt_white_content', 'gtranslate_wrapper'],
-				'plugin' => 'gtranslate'
-			],
-			'sitepress-multilingual-cms/sitepress.php' => [
-				'type' => 'class',
-				'data' => [],
-				'plugin' => 'sitepress'
-			],
-		];
+
+        $GTranslate = get_option('GTranslate');
+
+        $datas = \apply_filters('tts_pro_plugins_data', [
+                'gtranslate/gtranslate.php' => [
+                    'type' => 'class',
+                    'data' => [ 'gt_options', 'gt_languages','gt_switcher_wrapper', 'gt_selector', ],//  'gt_selector',], // 'gt_white_content', 'gtranslate_wrapper'],
+                    'plugin' => 'gtranslate',
+                    'GTranslate'  => $GTranslate,
+                ],
+                'sitepress-multilingual-cms/sitepress.php' => [
+                    'type' => 'class',
+                    'data' => [ ],
+                    'plugin' => 'sitepress' 
+                ],
+        ]);
 
 		if (!function_exists('is_plugin_active')) {
 			require_once \ABSPATH . 'wp-admin/includes/plugin.php';

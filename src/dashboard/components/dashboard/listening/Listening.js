@@ -25,12 +25,69 @@ export default function Listening() {
 	const [customizationSettings, setCustomizationSettings] = useState({});
 	const [languageMissingMessage, setLanguageMissingMessage] = useState('');
 
+	const [gttsLanguages, setGttsLanguages] = useState({
+
+		"af": "Afrikaans",
+		"sq": "Albanian",
+		"ar": "Arabic",
+		"hy": "Armenian",
+		"ca": "Catalan",
+		"zh": "Chinese",
+		"zh-cn": "Chinese (Mandarin/China)",
+		"zh-tw": "Chinese (Mandarin/Taiwan)",
+		"zh-yue": "Chinese (Cantonese)",
+		"hr": "Croatian",
+		"cs": "Czech",
+		"da": "Danish",
+		"nl": "Dutch",
+		"en": "English",
+		"en-au": "English (Australia)",
+		"en-uk": "English (United Kingdom)",
+		"en-us": "English (United States)",
+		"eo": "Esperanto",
+		"fi": "Finnish",
+		"fr": "French",
+		"de": "German",
+		"el": "Greek",
+		"ht": "Haitian Creole",
+		"hi": "Hindi",
+		"hu": "Hungarian",
+		"is": "Icelandic",
+		"id": "Indonesian",
+		"it": "Italian",
+		"ja": "Japanese",
+		"ko": "Korean",
+		"la": "Latin",
+		"lv": "Latvian",
+		"mk": "Macedonian",
+		"no": "Norwegian",
+		"pl": "Polish",
+		"pt": "Portuguese",
+		"pt-br": "Portuguese (Brazil)",
+		"ro": "Romanian",
+		"ru": "Russian",
+		"sr": "Serbian",
+		"sk": "Slovak",
+		"es": "Spanish",
+		"es-es": "Spanish (Spain)",
+		"es-us": "Spanish (United States)",
+		"sw": "Swahili",
+		"sv": "Swedish",
+		"ta": "Tamil",
+		"th": "Thai",
+		"tr": "Turkish",
+		"vi": "Vietnamese",
+		"cy": "Welsh"
+	
+	})
+	
 	const [listeningSettings, setListeningSettings] = useState({
 		tta__listening_voice: 'Microsoft David - English (United States)',
 		tta__listening_pitch: 2,
 		tta__listening_rate: 1,
 		tta__listening_volume: 1,
 		tta__listening_lang: 'en_GB',
+		tta__listening_activeLanguages_mapping: {},
 	});
 	const [listeningLang, setListeningLang] = useState('en_GB');
 	const apiURL = useMemo(() => {
@@ -40,6 +97,31 @@ export default function Listening() {
 
 		return ttsObj.api_url + ttsObj.api_namespace + "/" + ttsObj.api_version + "/";
 	})
+
+	const [activeLanguages, setActiveLanguages] = useState([]);
+	const [mapLanguages, setMapLanguages] = useState([]);
+
+	useEffect(() => {
+		if (window?.ttsObjPro?.compatible?.['gtranslate/gtranslate.php']) {
+			let gtranslateActiveLanguages = ttsObjPro?.compatible?.['gtranslate/gtranslate.php']?.GTranslate?.fincl_langs;
+			setActiveLanguages(gtranslateActiveLanguages || [])
+
+			// Initialize an empty object
+			const languageObject = {};
+
+			// Populate the object using a loop
+			for (const langCode of gtranslateActiveLanguages) {
+				languageObject[langCode] = langCode;
+			}
+
+			setListeningSettings({
+				...listeningSettings,
+				...{ tta__listening_activeLanguages_mapping: languageObject },
+			});
+		}
+	}, [window?.ttsObjPro])
+
+
 
 	const setGoogleVoicesAndLanguages = () => {
 		let stored_voices = getLocalStorage(['tta__voices']);
@@ -78,10 +160,84 @@ export default function Listening() {
 	}
 
 
-	useEffect(() => {
+	// useEffect(() => {
 		
-		if (window.hasOwnProperty('ttsObj') && ttsObj?.gctts_is_authenticated == 1) {
-			setGoogleVoicesAndLanguages()
+	// 	if (window.hasOwnProperty('ttsObj') && ttsObj?.gctts_is_authenticated == 1) {
+	// 		setGoogleVoicesAndLanguages()
+	// 	} else {
+	// 		setVoicesAndLanguages()
+	// 	}
+	// 	/**
+	// 	 * Set listening lang.
+	// 	 */
+	// 	let data = new FormData();
+	// 	data.append('method', 'get');
+	// 	postWithoutImage(tta_obj.api_url + 'tta/v1/record', data)
+	// 		.then((res) => {
+	// 			// console.log(res)
+	// 			setListeningLang(res.data.tta__recording__lang);
+	// 		})
+	// 		.catch((err) => {
+	// 			console.log(err);
+	// 		});
+
+	// 	/**
+	// 	 * Set listening data.
+	// 	 */
+	// 	let data2 = new FormData();
+	// 	data2.append('method', 'get');
+	// 	postWithoutImage(tta_obj.api_url + 'tta/v1/listening', data2)
+	// 		.then((res) => {
+	// 			// console.log(res.data)
+	// 			setListeningSettings(res.data);
+	// 		})
+	// 		.catch((err) => {
+	// 			console.log(err);
+	// 		});
+
+
+	// 	/**
+	// 	* Get customize settings.
+	// 	*/
+	// 	let customize = new FormData();
+	// 	customize.append('method', 'get');
+	// 	postWithoutImage(tta_obj.api_url + 'tta/v1/customize', customize)
+	// 		.then((res) => {
+	// 			console.log({ customize: res.data })
+	// 			setCustomizationSettings(res.data);
+	// 		})
+	// 		.catch((err) => {
+	// 			console.log(err);
+	// 		});
+	// }, []);
+
+	useEffect(() => {
+		// console.log(ttsObjPro);
+		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.gtts_is_authenticated == '1') {
+			let stored_voices = getLocalStorage(['tta__voices']);
+			if (!stored_voices.tta__voices) {
+				getData(apiURL + 'voices')
+					.then((res) => {
+						if (res.voices.length) {
+							setLocalStorage({ tta__voices: res.voices })
+						} else {
+							setVoicesAndLanguages()
+						}
+					})
+					.catch((err) => {
+						console.log(err);
+					});
+			} else {
+				let voices = JSON.parse(stored_voices.tta__voices);
+				let langs = []
+				voices.voices.map(voice => {
+					if (!langs.includes(voice.languageCodes[0])) {
+						langs.push(voice.languageCodes[0])
+					}
+				})
+	
+				setVoicesAndLanguages(voices.voices, langs)
+			}
 		} else {
 			setVoicesAndLanguages()
 		}
@@ -98,7 +254,7 @@ export default function Listening() {
 			.catch((err) => {
 				console.log(err);
 			});
-
+	
 		/**
 		 * Set listening data.
 		 */
@@ -106,23 +262,7 @@ export default function Listening() {
 		data2.append('method', 'get');
 		postWithoutImage(tta_obj.api_url + 'tta/v1/listening', data2)
 			.then((res) => {
-				// console.log(res.data)
-				setListeningSettings(res.data);
-			})
-			.catch((err) => {
-				console.log(err);
-			});
-
-
-		/**
-		* Get customize settings.
-		*/
-		let customize = new FormData();
-		customize.append('method', 'get');
-		postWithoutImage(tta_obj.api_url + 'tta/v1/customize', customize)
-			.then((res) => {
-				console.log({ customize: res.data })
-				setCustomizationSettings(res.data);
+				setListeningSettings({ ...res.data, ...listeningSettings });
 			})
 			.catch((err) => {
 				console.log(err);
@@ -130,8 +270,48 @@ export default function Listening() {
 	}, []);
 
 
-	const setVoicesAndLanguages = (voices = [], langs = [],) => {
+	// const setVoicesAndLanguages = (voices = [], langs = [],) => {
 
+	// 	if (Array.isArray(voices) && voices.length) {
+	// 		setVoices(voices)
+	// 		setSpeechSynthesisVoices(voices)
+	// 	}
+	// 	if (Array.isArray(langs) && langs.length) {
+	// 		setLanguages(langs)
+	// 	}
+
+	// 	if (Array.isArray(langs) && Array.isArray(voices) && voices.length) return;
+
+	// 	let speechSynthesisLanguages = {};
+	// 	let timer = setTimeout(function handleTime() {
+	// 		timer = setTimeout(handleTime, 1000)
+	// 		if (window.hasOwnProperty('speechSynthesis') && window.speechSynthesis.getVoices().length) {
+	// 			clearTimeout(timer)
+	// 			timer = null
+	// 			setSpeechSynthesisVoices(window.speechSynthesis.getVoices())
+
+	// 			window.speechSynthesis.getVoices().map(item => {
+	// 				if (!langs.includes(item.lang)) {
+	// 					langs.push(item.lang)
+	// 				}
+	// 			})
+	// 			langs.forEach(lang => {
+	// 				speechSynthesisLanguages[lang] = lang;
+	// 			})
+
+	// 			setLanguages(speechSynthesisLanguages)
+	// 			setVoices(window.speechSynthesis.getVoices());
+	// 		}
+	// 	})
+
+	// }
+
+	useEffect(() => {
+		console.log(listeningSettings)
+	}, [listeningSettings])
+	
+	const setVoicesAndLanguages = (voices = [], langs = [],) => {
+	
 		if (Array.isArray(voices) && voices.length) {
 			setVoices(voices)
 			setSpeechSynthesisVoices(voices)
@@ -139,31 +319,25 @@ export default function Listening() {
 		if (Array.isArray(langs) && langs.length) {
 			setLanguages(langs)
 		}
-
+	
 		if (Array.isArray(langs) && Array.isArray(voices) && voices.length) return;
-
-		let speechSynthesisLanguages = {};
+	
 		let timer = setTimeout(function handleTime() {
 			timer = setTimeout(handleTime, 1000)
 			if (window.hasOwnProperty('speechSynthesis') && window.speechSynthesis.getVoices().length) {
 				clearTimeout(timer)
 				timer = null
 				setSpeechSynthesisVoices(window.speechSynthesis.getVoices())
-
+	
 				window.speechSynthesis.getVoices().map(item => {
 					if (!langs.includes(item.lang)) {
 						langs.push(item.lang)
 					}
 				})
-				langs.forEach(lang => {
-					speechSynthesisLanguages[lang] = lang;
-				})
-
-				setLanguages(speechSynthesisLanguages)
+				setLanguages(langs)
 				setVoices(window.speechSynthesis.getVoices());
 			}
 		})
-
 	}
 
 	useEffect(() => {
@@ -462,6 +636,55 @@ export default function Listening() {
 									))}
 								</>
 							</Col>
+							{
+								activeLanguages.length && activeLanguages.map((language, index) => <Row key={index}>
+									<Col xs={12} sm={6} lg={6} >
+										<Form.Group >
+											<Form.Label htmlFor={'tta__listening_activeLanguages_index' + index}>{language}</Form.Label>
+											<Form.Select
+												onChange={handleChange}
+												name={'tta__listening_activeLanguages_index' + index}
+												id={'tta__listening_activeLanguages_index' + index}
+												value={language}
+												aria-label='Default select example'>
+												<option disabled>
+													{' '}
+													Default Listening Language
+												</option>
+												{activeLanguages.map((lang, index) => {
+													return (
+														<option key={index} value={lang}>
+															{lang}
+														</option>
+													);
+												})}
+											</Form.Select>
+
+										</Form.Group>
+									</Col>
+									<Col>
+										<Form.Label htmlFor={'tta_available_gttsLanguages_index' + index}>Select Language For {language}</Form.Label>
+										<Form.Select
+											onChange={handleChange}
+											name={'tta_available_gttsLanguages_index' + index}
+											id={'tta_available_gttsLanguages_index' + index}
+											value={Object.keys(gttsLanguages).filter(lang => lang.startsWith(language))[0]}
+											aria-label='Default select example'>
+											<option disabled>
+												{' '}
+												Default Listening Language
+											</option>
+											{Object.keys(gttsLanguages).map((lang, index) => {
+												return (
+													<option key={index} value={lang}>
+														{gttsLanguages[lang]}
+													</option>
+												);
+											})}
+										</Form.Select>
+									</Col>
+								</Row>)
+							}
 							<div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
 								<button type='submit' className='tta_btn  btn-center'>
 									Save
