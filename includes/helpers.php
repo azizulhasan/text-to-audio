@@ -123,7 +123,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '') {
         global $post;
 
 
-    $title = tta_clean_content( get_the_title());
+    $title = tta_clean_content( $post->post_title);
 
     $title = tta_should_add_delimiter($title, $sentence_delimiter);
     $date = get_the_date('Y/m/d');
@@ -137,7 +137,8 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '') {
     $description = get_the_content();
     $description_sanitized = tta_clean_content($description);
 
-    $content     = apply_filters('tta__content_title', $title, $post);
+    $title      = apply_filters('tta__content_title', $title, $post);
+    $content    = $title;
     $content    .= apply_filters('tta__content_description', $description_sanitized, $description, get_the_ID(), $post );
     $content    = TTA_Helper::sazitize_content($content);
 
@@ -206,9 +207,9 @@ add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 12);
 function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post) {
     // enqueue footer stript
     add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post) { 
-            $title = trim(str_replace('.', '', $title));
-        // $title = trim(get_the_title());
-        // $title = tta_clean_content( $title );
+        $original_title = trim(str_replace('.', '', $title));
+        $temp_title = trim(get_the_title());
+        $temp_title = tta_clean_content( $temp_title );
         
         // Get plugin all settings and pass it to TTS javascript Object.
         $plugin_all_settings = TTA_Helper::tts_get_settings('', $post->ID);
@@ -221,10 +222,10 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
             $plugin_all_settings['listening']['tta__listening_voice'] = $atts['voice'];
         }
         
-        if( apply_filters('tts_ignore_match_80_percent', false) && tts_text_match_80_percent($title , $temp_title) ) {
-           get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
+        if( apply_filters('tts_ignore_match_80_percent', false) && tts_text_match_80_percent($original_title , $temp_title) ) {
+           get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time,  $plugin_all_settings);
         }else{
-          get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time,  $plugin_all_settings);
+          get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time,  $plugin_all_settings);
         }
     });
 }
