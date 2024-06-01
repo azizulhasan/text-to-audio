@@ -123,7 +123,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '') {
         global $post;
 
 
-    $title = tta_clean_content( $post->post_title);
+    $title = tta_clean_content( get_the_title());
 
     $title = tta_should_add_delimiter($title, $sentence_delimiter);
     $date = get_the_date('Y/m/d');
@@ -206,9 +206,9 @@ add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 12);
 function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post) {
     // enqueue footer stript
     add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post) { 
-        $temp_title = trim(str_replace('.', '', $title));
-        $title = trim(get_the_title());
-        $title = tta_clean_content( $title );
+            $title = trim(str_replace('.', '', $title));
+        // $title = trim(get_the_title());
+        // $title = tta_clean_content( $title );
         
         // Get plugin all settings and pass it to TTS javascript Object.
         $plugin_all_settings = TTA_Helper::tts_get_settings('', $post->ID);
