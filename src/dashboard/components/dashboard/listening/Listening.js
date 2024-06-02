@@ -18,7 +18,7 @@ import { Link } from 'react-router-dom';
 import UpgradeToPro from '../../UpgradeToPro';
 import { array } from 'prop-types';
 export default function Listening() {
-	const [voices, setVoices] = useState([]);
+	const [currentPlayerVoices, setCurrentPlayerVoices] = useState([]);
 	const [currentPlayerLanguages, setCurrentPlayerLanguages] = useState([]);
 	const [speechSynthesisVoices, setSpeechSynthesisVoices] = useState([]);
 	const [customizationSettings, setCustomizationSettings] = useState({});
@@ -78,7 +78,6 @@ export default function Listening() {
 
 			setMultilingualActiveLanguages(languageObject)
 
-			console.log(languageObject)
 
 			setListeningSettings({
 				...listeningSettings,
@@ -119,9 +118,7 @@ export default function Listening() {
 					langs2[voice.languageCodes[0]] = voice.languageCodes[0];
 				}
 			})
-			console.log({
-				langs, langs2
-			})
+			
 			setVoicesAndLanguages(voices, langs)
 		}
 	}
@@ -171,7 +168,6 @@ export default function Listening() {
 			.then((res) => {
 				setCustomizationSettings(res.data);
 				if(res?.data.buttonSettings?.id < 3) {
-					console.log({ customize: res.data })
 					setVoicesAndLanguages()
 				}
 			})
@@ -180,100 +176,7 @@ export default function Listening() {
 			});
 	}, []);
 
-	// useEffect(() => {
-	// 	// console.log(ttsObjPro);
-	// 	if (window.hasOwnProperty('ttsObjPro') && ttsObjPro.gtts_is_authenticated == '1') {
-	// 		let stored_voices = getLocalStorage(['tta__voices']);
-	// 		if (!stored_voices.tta__voices) {
-	// 			getData(apiURL + 'voices')
-	// 				.then((res) => {
-	// 					if (res.voices.length) {
-	// 						setLocalStorage({ tta__voices: res.voices })
-	// 					} else {
-	// 						setVoicesAndLanguages()
-	// 					}
-	// 				})
-	// 				.catch((err) => {
-	// 					console.log(err);
-	// 				});
-	// 		} else {
-	// 			let voices = JSON.parse(stored_voices.tta__voices);
-	// 			let langs = []
-	// 			voices.voices.map(voice => {
-	// 				if (!langs.includes(voice.languageCodes[0])) {
-	// 					langs.push(voice.languageCodes[0])
-	// 				}
-	// 			})
-	
-	// 			setVoicesAndLanguages(voices.voices, langs)
-	// 		}
-	// 	} else {
-	// 		setVoicesAndLanguages()
-	// 	}
-	// 	/**
-	// 	 * Set listening lang.
-	// 	 */
-	// 	let data = new FormData();
-	// 	data.append('method', 'get');
-	// 	postWithoutImage(tta_obj.api_url + 'tta/v1/record', data)
-	// 		.then((res) => {
-	// 			// console.log(res)
-	// 			setListeningLang(res.data.tta__recording__lang);
-	// 		})
-	// 		.catch((err) => {
-	// 			console.log(err);
-	// 		});
-	
-	// 	/**
-	// 	 * Set listening data.
-	// 	 */
-	// 	let data2 = new FormData();
-	// 	data2.append('method', 'get');
-	// 	postWithoutImage(tta_obj.api_url + 'tta/v1/listening', data2)
-	// 		.then((res) => {
-	// 			setListeningSettings({ ...res.data, ...listeningSettings });
-	// 		})
-	// 		.catch((err) => {
-	// 			console.log(err);
-	// 		});
-	// }, []);
 
-
-	// const setVoicesAndLanguages = (voices = [], langs = [],) => {
-
-	// 	if (Array.isArray(voices) && voices.length) {
-	// 		setVoices(voices)
-	// 		setSpeechSynthesisVoices(voices)
-	// 	}
-	// 	if (Array.isArray(langs) && langs.length) {
-	// 		setCurrentPlayerLanguages(langs)
-	// 	}
-
-	// 	if (Array.isArray(langs) && Array.isArray(voices) && voices.length) return;
-
-	// 	let speechSynthesisLanguages = {};
-	// 	let timer = setTimeout(function handleTime() {
-	// 		timer = setTimeout(handleTime, 1000)
-	// 		if (window.hasOwnProperty('speechSynthesis') && window.speechSynthesis.getVoices().length) {
-	// 			clearTimeout(timer)
-	// 			timer = null
-	// 			setSpeechSynthesisVoices(window.speechSynthesis.getVoices())
-
-	// 			window.speechSynthesis.getVoices().map(item => {
-	// 				if (!langs.includes(item.lang)) {
-	// 					langs.push(item.lang)
-	// 				}
-	// 			})
-	// 			langs.forEach(lang => {
-	// 				speechSynthesisLanguages[lang] = lang;
-	// 			})
-
-	// 			setCurrentPlayerLanguages(speechSynthesisLanguages)
-	// 			setVoices(window.speechSynthesis.getVoices());
-	// 		}
-	// 	})
-
-	// }
 
 	useEffect(() => {
 		if (customizationSettings?.buttonSettings?.id < 3) {
@@ -284,19 +187,17 @@ export default function Listening() {
 	const setVoicesAndLanguages = (voices = [], langs = [],) => {
 	
 		if (Array.isArray(voices) && voices.length) {
-			setVoices(voices)
+			setCurrentPlayerVoices(voices)
 			setSpeechSynthesisVoices(voices)
 		}
 		if (Array.isArray(langs) && langs.length) {
 			setCurrentPlayerLanguages(langs)
-			console.log({langs, arr: []})
 		}
 	
 		if (Array.isArray(langs) && Array.isArray(voices) && voices.length) return;
 	
 		let timer = setTimeout(function handleTime() {
 			timer = setTimeout(handleTime, 1000)
-			console.log({customizationSettings})
 
 			if(timer > 65 || customizationSettings?.buttonSettings == undefined ) {
 				clearTimeout(timer)
@@ -314,7 +215,7 @@ export default function Listening() {
 				})
 
 				setCurrentPlayerLanguages(langs)
-				setVoices(window.speechSynthesis.getVoices());
+				setCurrentPlayerVoices(window.speechSynthesis.getVoices());
 			}
 		})
 	}
@@ -330,7 +231,6 @@ export default function Listening() {
 			} else if (customizationSettings?.buttonSettings?.id == 4) {
 				setGoogleVoicesAndLanguages();
 				setLanguageMissingMessage('')
-				console.log({ voices, currentPlayerLanguages, speechSynthesisVoices })
 			}
 		}
 
@@ -375,15 +275,15 @@ export default function Listening() {
 	 * @param {*} e
 	 */
 	const handleChange = (e) => {
-		if (
-			e.target.name == 'tta__listening_lang' &&
-			e.target.value !== listeningLang
-		) {
-			toast('Listening language should be always recording language.', 'info', {
-				autoClose: 5000
-			});
-		}
-		if (e.target.name === 'tta__listening_lang' && window.hasOwnProperty('ttsObjPro') && ttsObjPro.gctts_is_authenticated == '1') {
+		// if (
+		// 	e.target.name == 'tta__listening_lang' &&
+		// 	e.target.value !== listeningLang
+		// ) {
+		// 	toast('Listening language should be always recording language.', 'info', {
+		// 		autoClose: 5000
+		// 	});
+		// }
+		if (e.target.name === 'tta__listening_lang' && customizationSettings?.buttonSettings?.id == 4 ) {
 
 			let filteredVoices = speechSynthesisVoices.filter(voice => {
 				return voice.languageCodes[0] == e.target.value;
@@ -394,9 +294,10 @@ export default function Listening() {
 					...{ ['tta__listening_voice']: filteredVoices[0].languageCodes[0] },
 				});
 			}
-			setVoices(filteredVoices)
+			setCurrentPlayerVoices(filteredVoices)
 		}
 
+		console.log({name : e.target.name, value : e.target.value, currentPlayerLanguages})
 		setListeningSettings({
 			...listeningSettings,
 			...{ [e.target.name]: e.target.value },
@@ -423,7 +324,7 @@ export default function Listening() {
 										</option>
 										{Object.keys(currentPlayerLanguages).map((langKey, index) => {
 											return (
-												<option key={langKey} value={customizationSettings?.buttonSettings?.id == 4 ? currentPlayerLanguages[langKey] :langKey}>
+												<option key={langKey} value={ customizationSettings?.buttonSettings?.id < 3 ?  currentPlayerLanguages[langKey] : langKey}>
 													{currentPlayerLanguages[langKey]}
 												</option>
 											);
@@ -471,7 +372,7 @@ export default function Listening() {
 												{' '}
 												Default Listening Voice
 											</option>
-											{voices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && customizationSettings?.buttonSettings?.id == 4 ? <option key={index} data-lang={voice?.languageCodes?.[0]} value={[voice.name, voice.ssmlGender].join('-')}>
+											{currentPlayerVoices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && customizationSettings?.buttonSettings?.id == 4 ? <option key={index} data-lang={voice?.languageCodes?.[0]} value={[voice.name, voice.ssmlGender].join('-')}>
 												{voice.name} {'-'} {voice.ssmlGender}
 											</option> : <option key={index} data-lang={voice.lang} value={voice.name}>
 												{voice.name}
@@ -620,11 +521,11 @@ export default function Listening() {
 								Object.keys(multilingualActiveLanguages).length && Object.keys(multilingualActiveLanguages).map((languageCode, index) => <Row key={index}>
 									<Col xs={12} sm={4} lg={4} >
 										<Form.Group >
-											<Form.Label htmlFor={'tta__listening_activeLanguages_index' + index}>{multilingualActiveLanguages[languageCode]}</Form.Label>
+											<Form.Label htmlFor={'tta_multilingualActiveLanguages_index_' + index}>{multilingualActiveLanguages[languageCode]}</Form.Label>
 											<Form.Select
 												onChange={handleChange}
-												name={'tta__listening_activeLanguages_index' + index}
-												id={'tta__listening_activeLanguages_index' + index}
+												name={'tta_multilingualActiveLanguages_index_' + index}
+												id={'tta_multilingualActiveLanguages_index_' + index}
 												value={languageCode}
 												aria-label='Default select example'>
 												<option disabled>
@@ -643,21 +544,30 @@ export default function Listening() {
 										</Form.Group>
 									</Col>
 									<Col xs={12} sm={4} lg={4} >
-										<Form.Label htmlFor={'tta_available_gttsLanguages_index' + index}>Select Language For {multilingualActiveLanguages[languageCode]}</Form.Label>
+										<Form.Label htmlFor={'tta_currentPlayerLanguages_index_' + index}>Select Language For {multilingualActiveLanguages[languageCode]}</Form.Label>
 										<Form.Select
 											onChange={handleChange}
-											name={'tta_available_gttsLanguages_index' + index}
-											id={'tta_available_gttsLanguages_index' + index}
-											value={Object.keys(currentPlayerLanguages).filter(lang => lang.startsWith(languageCode))[0]}
+											name={'tta_currentPlayerLanguages_index_' + index}
+											id={'tta_currentPlayerLanguages_index_' + index}
+											value={Object.keys(currentPlayerLanguages).filter(lang => {
+												
+												if(customizationSettings?.buttonSettings?.id < 3) {
+													console.log({lang: currentPlayerLanguages[lang], startsWith: currentPlayerLanguages[lang].startsWith(languageCode), languageCode})
+													return currentPlayerLanguages[lang].startsWith(languageCode);
+												}
+
+												return lang.startsWith(languageCode)
+												
+											})}
 											aria-label='Default select example'>
 											<option disabled>
 												{' '}
 												Default Listening Language
 											</option>
-											{Object.keys(currentPlayerLanguages).map((lang, index) => {
+											{Object.keys(currentPlayerLanguages).map((langKey, index) => {
 												return (
-													<option key={index} value={lang}>
-														{currentPlayerLanguages[lang]}
+													<option key={index} value={ customizationSettings?.buttonSettings?.id < 3 ?  currentPlayerLanguages[langKey] : langKey}>
+														{currentPlayerLanguages[langKey]}
 													</option>
 												);
 											})}
@@ -677,7 +587,7 @@ export default function Listening() {
 													{' '}
 													Current Player Voice
 												</option>
-												{voices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && customizationSettings?.buttonSettings?.id == 4 ? <option key={index} data-lang={voice?.languageCodes?.[0]} value={[voice.name, voice.ssmlGender].join('-')}>
+												{currentPlayerVoices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && customizationSettings?.buttonSettings?.id == 4 ? <option key={index} data-lang={voice?.languageCodes?.[0]} value={[voice.name, voice.ssmlGender].join('-')}>
 													{voice.name} {'-'} {voice.ssmlGender}
 												</option> : <option key={index} data-lang={voice.lang} value={voice.name}>
 													{voice.name}
