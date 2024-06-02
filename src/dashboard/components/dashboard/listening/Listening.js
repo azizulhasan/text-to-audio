@@ -14,13 +14,12 @@ import {
  */
 import { postWithoutImage, getData, setLocalStorage, getLocalStorage, gttsSupportedLanguages } from '../../context/utilities';
 import toast from '../../context/Notify';
-import { langs } from '../recording/languages';
 import { Link } from 'react-router-dom';
 import UpgradeToPro from '../../UpgradeToPro';
 import { array } from 'prop-types';
 export default function Listening() {
 	const [voices, setVoices] = useState([]);
-	const [languages, setLanguages] = useState([]);
+	const [currentPlayerLanguages, setCurrentPlayerLanguages] = useState([]);
 	const [speechSynthesisVoices, setSpeechSynthesisVoices] = useState([]);
 	const [customizationSettings, setCustomizationSettings] = useState({});
 	const [languageMissingMessage, setLanguageMissingMessage] = useState('');
@@ -42,8 +41,8 @@ export default function Listening() {
 		return ttsObj.api_url + ttsObj.api_namespace + "/" + ttsObj.api_version + "/";
 	})
 
-	const [activeLanguages, setActiveLanguages] = useState([]);
-	const [mapLanguages, setMapLanguages] = useState([]);
+
+	const [multilingualActiveLanguages, setMultilingualActiveLanguages] = useState([]);
 
 	useEffect(() => {
 		if (window?.ttsObjPro?.compatible?.['gtranslate/gtranslate.php']) {
@@ -57,7 +56,7 @@ export default function Listening() {
 				languageObject[langCode] = langCode;
 			}
 
-			setActiveLanguages(languageObject)
+			setMultilingualActiveLanguages(languageObject)
 
 
 			setListeningSettings({
@@ -77,7 +76,7 @@ export default function Listening() {
 			}
 
 
-			setActiveLanguages(languageObject)
+			setMultilingualActiveLanguages(languageObject)
 
 			console.log(languageObject)
 
@@ -120,9 +119,9 @@ export default function Listening() {
 					langs2[voice.languageCodes[0]] = voice.languageCodes[0];
 				}
 			})
-			// console.log({
-			// 	langs, langs2
-			// })
+			console.log({
+				langs, langs2
+			})
 			setVoicesAndLanguages(voices, langs)
 		}
 	}
@@ -170,8 +169,11 @@ export default function Listening() {
 		customize.append('method', 'get');
 		postWithoutImage(tta_obj.api_url + 'tta/v1/customize', customize)
 			.then((res) => {
-				// console.log({ customize: res.data })
 				setCustomizationSettings(res.data);
+				if(res?.data.buttonSettings?.id < 3) {
+					console.log({ customize: res.data })
+					setVoicesAndLanguages()
+				}
 			})
 			.catch((err) => {
 				console.log(err);
@@ -244,7 +246,7 @@ export default function Listening() {
 	// 		setSpeechSynthesisVoices(voices)
 	// 	}
 	// 	if (Array.isArray(langs) && langs.length) {
-	// 		setLanguages(langs)
+	// 		setCurrentPlayerLanguages(langs)
 	// 	}
 
 	// 	if (Array.isArray(langs) && Array.isArray(voices) && voices.length) return;
@@ -266,16 +268,18 @@ export default function Listening() {
 	// 				speechSynthesisLanguages[lang] = lang;
 	// 			})
 
-	// 			setLanguages(speechSynthesisLanguages)
+	// 			setCurrentPlayerLanguages(speechSynthesisLanguages)
 	// 			setVoices(window.speechSynthesis.getVoices());
 	// 		}
 	// 	})
 
 	// }
 
-	// useEffect(() => {
-	// 	console.log(listeningSettings)
-	// }, [listeningSettings])
+	useEffect(() => {
+		if (customizationSettings?.buttonSettings?.id < 3) {
+			setVoicesAndLanguages()
+		}
+	}, [customizationSettings])
 	
 	const setVoicesAndLanguages = (voices = [], langs = [],) => {
 	
@@ -284,7 +288,7 @@ export default function Listening() {
 			setSpeechSynthesisVoices(voices)
 		}
 		if (Array.isArray(langs) && langs.length) {
-			setLanguages(langs)
+			setCurrentPlayerLanguages(langs)
 			console.log({langs, arr: []})
 		}
 	
@@ -292,6 +296,12 @@ export default function Listening() {
 	
 		let timer = setTimeout(function handleTime() {
 			timer = setTimeout(handleTime, 1000)
+			console.log({customizationSettings})
+
+			if(timer > 65 || customizationSettings?.buttonSettings == undefined ) {
+				clearTimeout(timer)
+				timer = null;
+			}
 			if (window.hasOwnProperty('speechSynthesis') && window.speechSynthesis.getVoices().length && customizationSettings?.buttonSettings?.id < 3) {
 				clearTimeout(timer)
 				timer = null
@@ -302,9 +312,8 @@ export default function Listening() {
 						langs.push(item.lang)
 					}
 				})
-				console.log({langs})
 
-				setLanguages(langs)
+				setCurrentPlayerLanguages(langs)
 				setVoices(window.speechSynthesis.getVoices());
 			}
 		})
@@ -314,16 +323,14 @@ export default function Listening() {
 		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro?.is_pro_active) {
 			if (customizationSettings?.buttonSettings?.id == 3) {
 				let gttsLanguages = gttsSupportedLanguages();
-				setLanguages(gttsLanguages)
-				console.log({gttsLanguages})
-
+				setCurrentPlayerLanguages(gttsLanguages)
 				setLanguageMissingMessage('')
 			} else if (customizationSettings?.buttonSettings?.id < 3) {
-				setLanguageMissingMessage('Looking for another language? Please select the another button from customization menu. Your language may be appear.')
+				setLanguageMissingMessage('Looking for another language? Please select the another player from customization menu. Your language may be appear.')
 			} else if (customizationSettings?.buttonSettings?.id == 4) {
 				setGoogleVoicesAndLanguages();
 				setLanguageMissingMessage('')
-				console.log({ voices, languages, speechSynthesisVoices })
+				console.log({ voices, currentPlayerLanguages, speechSynthesisVoices })
 			}
 		}
 
@@ -414,10 +421,10 @@ export default function Listening() {
 											{' '}
 											Default Listening Language
 										</option>
-										{Object.keys(languages).map((langKey, index) => {
+										{Object.keys(currentPlayerLanguages).map((langKey, index) => {
 											return (
-												<option key={langKey} value={customizationSettings?.buttonSettings?.id == 4 ? languages[langKey] :langKey}>
-													{languages[langKey]}
+												<option key={langKey} value={customizationSettings?.buttonSettings?.id == 4 ? currentPlayerLanguages[langKey] :langKey}>
+													{currentPlayerLanguages[langKey]}
 												</option>
 											);
 										})}
@@ -610,10 +617,10 @@ export default function Listening() {
 								</>
 							</Col>
 							{
-								Object.keys(activeLanguages).length && Object.keys(activeLanguages).map((languageCode, index) => <Row key={index}>
-									<Col xs={12} sm={6} lg={6} >
+								Object.keys(multilingualActiveLanguages).length && Object.keys(multilingualActiveLanguages).map((languageCode, index) => <Row key={index}>
+									<Col xs={12} sm={4} lg={4} >
 										<Form.Group >
-											<Form.Label htmlFor={'tta__listening_activeLanguages_index' + index}>{activeLanguages[languageCode]}</Form.Label>
+											<Form.Label htmlFor={'tta__listening_activeLanguages_index' + index}>{multilingualActiveLanguages[languageCode]}</Form.Label>
 											<Form.Select
 												onChange={handleChange}
 												name={'tta__listening_activeLanguages_index' + index}
@@ -624,10 +631,10 @@ export default function Listening() {
 													{' '}
 													Default Listening Language
 												</option>
-												{Object.keys(activeLanguages).map((langCode, index) => {
+												{Object.keys(multilingualActiveLanguages).map((langCode, index) => {
 													return (
 														<option key={index} value={langCode}>
-															{activeLanguages[langCode]}
+															{multilingualActiveLanguages[langCode]}
 														</option>
 													);
 												})}
@@ -635,27 +642,51 @@ export default function Listening() {
 
 										</Form.Group>
 									</Col>
-									<Col>
-										<Form.Label htmlFor={'tta_available_gttsLanguages_index' + index}>Select Language For {activeLanguages[languageCode]}</Form.Label>
+									<Col xs={12} sm={4} lg={4} >
+										<Form.Label htmlFor={'tta_available_gttsLanguages_index' + index}>Select Language For {multilingualActiveLanguages[languageCode]}</Form.Label>
 										<Form.Select
 											onChange={handleChange}
 											name={'tta_available_gttsLanguages_index' + index}
 											id={'tta_available_gttsLanguages_index' + index}
-											value={Object.keys(languages).filter(lang => lang.startsWith(languageCode))[0]}
+											value={Object.keys(currentPlayerLanguages).filter(lang => lang.startsWith(languageCode))[0]}
 											aria-label='Default select example'>
 											<option disabled>
 												{' '}
 												Default Listening Language
 											</option>
-											{Object.keys(languages).map((lang, index) => {
+											{Object.keys(currentPlayerLanguages).map((lang, index) => {
 												return (
 													<option key={index} value={lang}>
-														{languages[lang]}
+														{currentPlayerLanguages[lang]}
 													</option>
 												);
 											})}
 										</Form.Select>
 									</Col>
+									{
+										customizationSettings?.buttonSettings?.id != 3 && <Col xs={12} sm={4} lg={4} >
+											<Form.Label htmlFor={'tta_available_currentPlayerVoices_index_' + index}>Select Voice For {multilingualActiveLanguages[languageCode]}</Form.Label>
+											<Form.Select
+												onChange={handleChange}
+												name={'tta_available_currentPlayerVoices_index_' + index}
+												id={'tta_available_currentPlayerVoices_index_' + index}
+												// value={Object.keys(currentPlayerLanguages).filter(lang => lang.startsWith(languageCode))[0]}
+												value={listeningSettings.tta__listening_voice}
+												aria-label='Default select example'>
+												<option disabled>
+													{' '}
+													Current Player Voice
+												</option>
+												{voices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && customizationSettings?.buttonSettings?.id == 4 ? <option key={index} data-lang={voice?.languageCodes?.[0]} value={[voice.name, voice.ssmlGender].join('-')}>
+													{voice.name} {'-'} {voice.ssmlGender}
+												</option> : <option key={index} data-lang={voice.lang} value={voice.name}>
+													{voice.name}
+												</option>
+												)}
+										</Form.Select>
+									</Col>
+									}
+									
 								</Row>)
 							}
 							<div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
