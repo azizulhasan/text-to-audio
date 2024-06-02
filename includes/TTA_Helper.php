@@ -667,4 +667,47 @@ class TTA_Helper
 		return $expirationTimestamp < $currentTimestamp;
 	}
 
+
+	/**
+	 * Get all categories in a specific format.
+	 *
+	 * @return array An associative array with category slugs as keys and category names as values.
+	 */
+	public static function get_all_categories() {
+		// Fetch all categories.
+		$categories = get_categories();
+
+		// Initialize an empty array to hold the formatted categories.
+		$formatted_categories = array();
+
+		// Loop through each category and format the output.
+		foreach ( $categories as $category ) {
+			$formatted_categories[ $category->slug ] = $category->name;
+		}
+
+		return $formatted_categories;
+	}
+
+	/**
+	 * Get all tags in a specific format.
+	 *
+	 * @return array An associative array with tag slugs as keys and tag names as values.
+	 */
+	public static function get_all_tags() {
+		// Fetch all tags.
+		$tags = get_tags();
+
+		// Initialize an empty array to hold the formatted tags.
+		$formatted_tags = array();
+
+		// Loop through each tag and format the output.
+		foreach ( $tags as $tag ) {
+			$formatted_tags[ $tag->slug ] = $tag->name;
+		}
+
+		return $formatted_tags;
+	}
+
+
+
 }

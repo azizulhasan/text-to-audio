@@ -28,7 +28,7 @@ export default function Settings() {
 		tta__settings_display_button_if_user_logged_in: false,
 		tta__settings_stop_auto_playing_after_switching_tab: false,
 		tta__settings_stop_floating_button: false,
-
+		tta__settings_exclude_categories: [],
 	});
 	const [postTypes, setPostTypes] = useState([]);
 	const [isDataLoaded, setIsDataLoaded] = useState(false)
@@ -487,6 +487,55 @@ export default function Settings() {
 													</Tooltip>
 												}>
 												<a target='_blank' href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev' > <i className="fas fa-info-circle"></i></a>
+											</OverlayTrigger>
+										))}
+									</>
+								</Col>
+							</Row>
+							{/*Exclude Categories To Speak*/}
+							<Row className='mt-4'>
+								<Col xs={12} sm={6} lg={4}>
+									<Form.Label htmlFor='tta__settings_exclude_categories'>
+										Exclude Categories To Speak {ttsObj.is_pro_active ? "" : (
+										<>
+											{['top'].map((placement) => (
+												<OverlayTrigger
+													key={placement}
+													placement={placement}
+													overlay={
+														<Tooltip id={`tooltip-${placement}`}>
+															{__('Exclude more than 1 categories is a pro feature')}
+														</Tooltip>
+													}>
+													<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i className="fas fa-lock" /></Button>
+												</OverlayTrigger>
+											))}
+										</>
+									)}
+									</Form.Label>
+								</Col>
+								<Col xs={11} sm={11} lg={7}>
+									<Form.Control
+										id="tta__settings_exclude_categories"
+										name="tta__settings_exclude_categories"
+										as='textarea'
+										onChange={(e) => handleChange(e)}
+										value={settings.tta__settings_exclude_categories}
+										placeholder={ttsObj.is_pro_active ? '' : 'Excluding more than 1 categories is a pro feature' }
+									/>
+								</Col>
+								<Col xs={1} sm={1} lg={1} className='mt-4'>
+									<>
+										{['top'].map((placement) => (
+											<OverlayTrigger
+												key={placement}
+												placement={placement}
+												overlay={
+													<Tooltip id={`tooltip-${placement}`}>
+														{__('Click To Know How It Works?')}
+													</Tooltip>
+												}>
+												<a target='_blank' href='https://atlasaidev.com/docs/text-to-speech/' > <i className="fas fa-info-circle"></i></a>
 											</OverlayTrigger>
 										))}
 									</>
