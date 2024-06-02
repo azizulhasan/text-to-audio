@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.5.3
 Requires PHP: 7.4
-Stable tag: 1.6.14
+Stable tag: 1.6.15
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -400,6 +400,10 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+
+= 1.6.15 ( 02 June 2024 ) =
+Fixed: `tta__content_title` filter issue fixed.
+ 
 = 1.6.14 ( 30 May 2024 ) =
 Added: Dashboard munus reordering.
 Fixed: Integration menu API calling issue fixed.
