@@ -157,6 +157,12 @@ class TTA_Helper
 		$compatible_plugins_data = [];
 
         $GTranslate = get_option('GTranslate');
+		/* var WPML_Language_Switcher $wpml_language_switcher */
+		global $sitepress, $sitepress_settings, $wpdb, $wpml_language_switcher;
+		$active_languages = [];
+		if($sitepress) {
+			$active_languages = $sitepress->get_active_languages();
+		}
 
         $datas = \apply_filters('tts_pro_plugins_data', [
                 'gtranslate/gtranslate.php' => [
@@ -168,7 +174,8 @@ class TTA_Helper
                 'sitepress-multilingual-cms/sitepress.php' => [
                     'type' => 'class',
                     'data' => [ ],
-                    'plugin' => 'sitepress' 
+                    'plugin' => 'sitepress',
+					'active_languages' => $active_languages,
                 ],
         ]);
 

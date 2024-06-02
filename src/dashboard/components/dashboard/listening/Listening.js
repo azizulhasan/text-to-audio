@@ -48,7 +48,6 @@ export default function Listening() {
 	useEffect(() => {
 		if (window?.ttsObjPro?.compatible?.['gtranslate/gtranslate.php']) {
 			let gtranslateActiveLanguages = ttsObjPro?.compatible?.['gtranslate/gtranslate.php']?.GTranslate?.fincl_langs;
-			setActiveLanguages(gtranslateActiveLanguages || [])
 
 			// Initialize an empty object
 			const languageObject = {};
@@ -58,11 +57,36 @@ export default function Listening() {
 				languageObject[langCode] = langCode;
 			}
 
+			setActiveLanguages(languageObject)
+
+
+			setListeningSettings({
+				...listeningSettings,
+				...{ tta__listening_activeLanguages_mapping: languageObject },
+			});
+		}else if (window?.ttsObjPro?.compatible?.['sitepress-multilingual-cms/sitepress.php']) {
+			let gtranslateActiveLanguages = ttsObjPro?.compatible?.['sitepress-multilingual-cms/sitepress.php']?.active_languages;
+			
+			// Initialize an empty object
+			const languageObject = {};
+			let active_languages = Object.keys(gtranslateActiveLanguages);
+
+			// Populate the object using a loop
+			for (const langCode of active_languages) {
+				languageObject[langCode] = gtranslateActiveLanguages[langCode].english_name;
+			}
+
+
+			setActiveLanguages(languageObject)
+
+			console.log(languageObject)
+
 			setListeningSettings({
 				...listeningSettings,
 				...{ tta__listening_activeLanguages_mapping: languageObject },
 			});
 		}
+		
 	}, [window?.ttsObjPro])
 
 
@@ -261,13 +285,14 @@ export default function Listening() {
 		}
 		if (Array.isArray(langs) && langs.length) {
 			setLanguages(langs)
+			console.log({langs, arr: []})
 		}
 	
 		if (Array.isArray(langs) && Array.isArray(voices) && voices.length) return;
 	
 		let timer = setTimeout(function handleTime() {
 			timer = setTimeout(handleTime, 1000)
-			if (window.hasOwnProperty('speechSynthesis') && window.speechSynthesis.getVoices().length) {
+			if (window.hasOwnProperty('speechSynthesis') && window.speechSynthesis.getVoices().length && customizationSettings?.buttonSettings?.id < 3) {
 				clearTimeout(timer)
 				timer = null
 				setSpeechSynthesisVoices(window.speechSynthesis.getVoices())
@@ -277,6 +302,8 @@ export default function Listening() {
 						langs.push(item.lang)
 					}
 				})
+				console.log({langs})
+
 				setLanguages(langs)
 				setVoices(window.speechSynthesis.getVoices());
 			}
@@ -285,10 +312,11 @@ export default function Listening() {
 
 	useEffect(() => {
 		if (window.hasOwnProperty('ttsObjPro') && ttsObjPro?.is_pro_active) {
-			console.log({customizationSettings})
 			if (customizationSettings?.buttonSettings?.id == 3) {
 				let gttsLanguages = gttsSupportedLanguages();
 				setLanguages(gttsLanguages)
+				console.log({gttsLanguages})
+
 				setLanguageMissingMessage('')
 			} else if (customizationSettings?.buttonSettings?.id < 3) {
 				setLanguageMissingMessage('Looking for another language? Please select the another button from customization menu. Your language may be appear.')
@@ -582,24 +610,24 @@ export default function Listening() {
 								</>
 							</Col>
 							{
-								activeLanguages.length && activeLanguages.map((language, index) => <Row key={index}>
+								Object.keys(activeLanguages).length && Object.keys(activeLanguages).map((languageCode, index) => <Row key={index}>
 									<Col xs={12} sm={6} lg={6} >
 										<Form.Group >
-											<Form.Label htmlFor={'tta__listening_activeLanguages_index' + index}>{language}</Form.Label>
+											<Form.Label htmlFor={'tta__listening_activeLanguages_index' + index}>{activeLanguages[languageCode]}</Form.Label>
 											<Form.Select
 												onChange={handleChange}
 												name={'tta__listening_activeLanguages_index' + index}
 												id={'tta__listening_activeLanguages_index' + index}
-												value={language}
+												value={languageCode}
 												aria-label='Default select example'>
 												<option disabled>
 													{' '}
 													Default Listening Language
 												</option>
-												{activeLanguages.map((lang, index) => {
+												{Object.keys(activeLanguages).map((langCode, index) => {
 													return (
-														<option key={index} value={lang}>
-															{lang}
+														<option key={index} value={langCode}>
+															{activeLanguages[langCode]}
 														</option>
 													);
 												})}
@@ -608,12 +636,12 @@ export default function Listening() {
 										</Form.Group>
 									</Col>
 									<Col>
-										<Form.Label htmlFor={'tta_available_gttsLanguages_index' + index}>Select Language For {language}</Form.Label>
+										<Form.Label htmlFor={'tta_available_gttsLanguages_index' + index}>Select Language For {activeLanguages[languageCode]}</Form.Label>
 										<Form.Select
 											onChange={handleChange}
 											name={'tta_available_gttsLanguages_index' + index}
 											id={'tta_available_gttsLanguages_index' + index}
-											value={Object.keys(languages).filter(lang => lang.startsWith(language))[0]}
+											value={Object.keys(languages).filter(lang => lang.startsWith(languageCode))[0]}
 											aria-label='Default select example'>
 											<option disabled>
 												{' '}
