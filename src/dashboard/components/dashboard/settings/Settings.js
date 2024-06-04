@@ -14,6 +14,7 @@ import { postWithoutImage } from '../../context/utilities';
 import toast from '../../context/Notify';
 import UpgradeToPro from '../../UpgradeToPro';
 import { MultiSelect } from '../../context/MultiSelect'
+import { CategoryMultiSelect } from '../../context/CategoryMultiSelect'
 
 export default function Settings() {
 	const [settings, setSettings] = useState({
@@ -29,6 +30,7 @@ export default function Settings() {
 		tta__settings_stop_auto_playing_after_switching_tab: false,
 		tta__settings_stop_floating_button: false,
 		tta__settings_exclude_categories: [],
+		tta__settings_exclude_wp_tags: [],
 	});
 	const [postTypes, setPostTypes] = useState([]);
 	const [isDataLoaded, setIsDataLoaded] = useState(false)
@@ -225,7 +227,7 @@ export default function Settings() {
 							</Row> */}
 
 							
-
+							{/* Allow Listening For Post Type */}
 							<Row className='mt-4'>
 								<Col xs={12} sm={6} lg={4}>
 									<Form.Label htmlFor='tta__settings_allow_listening_for_post_types'>
@@ -515,14 +517,63 @@ export default function Settings() {
 									</Form.Label>
 								</Col>
 								<Col xs={11} sm={11} lg={7}>
-									<Form.Control
-										id="tta__settings_exclude_categories"
-										name="tta__settings_exclude_categories"
-										as='textarea'
-										onChange={(e) => handleChange(e)}
-										value={settings.tta__settings_exclude_categories}
-										placeholder={ttsObj.is_pro_active ? '' : 'Excluding more than 1 categories is a pro feature' }
-									/>
+										<MultiSelect
+											id="tta__settings_exclude_categories"
+											name="tta__settings_exclude_categories"
+											multiselectIndex={1}
+											onChange={handleChange}
+											selectedItems={settings.tta__settings_exclude_categories}
+											options={Object.keys(ttsObj?.categories) || []} />
+
+								</Col>
+								<Col xs={1} sm={1} lg={1} className='mt-4'>
+									<>
+										{['top'].map((placement) => (
+											<OverlayTrigger
+												key={placement}
+												placement={placement}
+												overlay={
+													<Tooltip id={`tooltip-${placement}`}>
+														{__('Click To Know How It Works?')}
+													</Tooltip>
+												}>
+												<a target='_blank' href='https://atlasaidev.com/docs/text-to-speech/' > <i className="fas fa-info-circle"></i></a>
+											</OverlayTrigger>
+										))}
+									</>
+								</Col>
+							</Row>
+							{/*Exclude tags To Speak*/}
+							<Row className='mt-4'>
+								<Col xs={12} sm={6} lg={4}>
+									<Form.Label htmlFor='tta__settings_exclude_wp_tags'>
+										Exclude Tags To Speak {ttsObj.is_pro_active ? "" : (
+										<>
+											{['top'].map((placement) => (
+												<OverlayTrigger
+													key={placement}
+													placement={placement}
+													overlay={
+														<Tooltip id={`tooltip-${placement}`}>
+															{__('Exclude more than 1 tags is a pro feature')}
+														</Tooltip>
+													}>
+													<Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i className="fas fa-lock" /></Button>
+												</OverlayTrigger>
+											))}
+										</>
+									)}
+									</Form.Label>
+								</Col>
+								<Col xs={11} sm={11} lg={7}>
+										<MultiSelect
+											id="tta__settings_exclude_wp_tags"
+											name="tta__settings_exclude_wp_tags"
+											multiselectIndex={2}
+											onChange={handleChange}
+											selectedItems={settings.tta__settings_exclude_wp_tags}
+											options={Object.keys(ttsObj?.tags) || []} />
+
 								</Col>
 								<Col xs={1} sm={1} lg={1} className='mt-4'>
 									<>

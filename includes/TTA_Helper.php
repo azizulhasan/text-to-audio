@@ -695,7 +695,9 @@ class TTA_Helper
 	 */
 	public static function get_all_tags() {
 		// Fetch all tags.
-		$tags = get_tags();
+		$tags = get_tags(array(
+			'hide_empty' => false
+		  ));
 
 		// Initialize an empty array to hold the formatted tags.
 		$formatted_tags = array();

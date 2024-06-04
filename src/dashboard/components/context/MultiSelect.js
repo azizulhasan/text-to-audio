@@ -11,7 +11,8 @@ class MultiSelect extends React.Component {
             isFocused: false,
             id: props.id,
             name: props.name,
-            onChange: props.onChange
+            onChange: props.onChange,
+            multiselectIndex : props.multiselectIndex || 0
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -137,9 +138,9 @@ class MultiSelect extends React.Component {
     }
 
     componentDidMount() {
-        let { isFocused } = this.state
+        let { isFocused, multiselectIndex } = this.state
         let self = this;
-        let selectItem = document.getElementsByClassName('select-input')[0]
+        let selectItem = document.getElementsByClassName('select-input')[multiselectIndex]
         selectItem.addEventListener('click', function (e) {
             e.preventDefault()
             if (isFocused) {
@@ -154,7 +155,7 @@ class MultiSelect extends React.Component {
 
         })
 
-        let multiselectwrapper = document.getElementsByClassName('multiselect-wrapper')[0]
+        let multiselectwrapper = document.getElementsByClassName('multiselect-wrapper')[multiselectIndex]
         multiselectwrapper.addEventListener('mousemove ', function (e) {
             e.preventDefault()
             self.setState({
