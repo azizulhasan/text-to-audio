@@ -12,8 +12,11 @@ class MultiSelect extends React.Component {
             id: props.id,
             name: props.name,
             onChange: props.onChange,
-            multiselectIndex : props.multiselectIndex || 0
+            multiselectIndex : props.multiselectIndex || 0,
+            toastMessage: props.toastMessage || 'Showing button to multiple post is not supported in free version.'
         };
+
+        // console.log(this.state)
 
         this.handleChange = this.handleChange.bind(this);
         this.handleClick = this.handleClick.bind(this);
@@ -28,13 +31,13 @@ class MultiSelect extends React.Component {
         const value = event.target.value;
 
         if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_license_active) {
-            toast(<h6>Showing button to multiple post type is not supported in free version. Please <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>buy pro version</a></h6>, 'info', { autoClose: 10000 })
+            toast(<h6>{this.state.toastMessage} Please <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>buy pro version</a></h6>, 'info', { autoClose: 10000 })
             selectedItems = []
             selectedItems.push(value);
             this.setState({
                 selectedItems: selectedItems,
             });
-            this.props.onChange(selectedItems)
+            this.props.onChange(selectedItems, event.target.name)
             return;
         }
 
@@ -47,7 +50,7 @@ class MultiSelect extends React.Component {
 
         } else {
             if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_license_active && selectedItems.length === 1) {
-                toast(<h6>Showing button to multiple post is not supported in free version. Please <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>buy pro version</a></h6>, 'info', { autoClose: 10000 })
+                toast(<h6>{this.state.toastMessage} Please <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>buy pro version</a></h6>, 'info', { autoClose: 10000 })
                 return;
             }
 

@@ -27,6 +27,27 @@ use stdClass;
 class TTA_Helper
 {
 
+	public static function is_exluded_by_terms( $post_terms, $excluded_terms, $term_type = 'tag' ) {
+		$terms = [];
+		$is_exclude = false;
+		
+		if( is_array( $post_terms ) && is_array( $excluded_terms) ) {
+			foreach( $post_terms as $term ) {
+				array_push( $terms, $term->slug );
+			}
+			
+	
+			foreach( $terms as $term ) {
+				if( in_array( $term,  $excluded_terms) ) {
+					$is_exclude = true;
+					break;
+				}
+			}
+		}
+
+		return apply_filters( 'tts_is_exluded_by_terms', $is_exclude, $term_type );
+	}
+
 	public static function should_load_button()
 	{
 		$should_load_button = false;
@@ -41,6 +62,27 @@ class TTA_Helper
 		if (isset($settings['tta__settings_exclude_post_ids']) && is_array($settings['tta__settings_exclude_post_ids'])) {
 			$ids = $settings['tta__settings_exclude_post_ids'];
 		}
+
+		$excluded_tags = [];
+		if (isset($settings['tta__settings_exclude_wp_tags']) && is_array($settings['tta__settings_exclude_wp_tags'])) {
+			$excluded_tags = $settings['tta__settings_exclude_wp_tags'];
+		}
+
+		$post_tags = get_the_terms( $post->ID, 'post_tag' );
+
+		$is_exclude_by_tags = self::is_exluded_by_terms($post_tags, $excluded_tags);
+
+
+		$excluded_categories = [];
+		if (isset($settings['tta__settings_exclude_categories']) && is_array($settings['tta__settings_exclude_categories'])) {
+			$excluded_categories = $settings['tta__settings_exclude_categories'];
+		}
+
+		$post_categories = get_the_terms( $post->ID, 'category' );
+
+		$is_exclude_by_cagories = self::is_exluded_by_terms($post_categories, $excluded_categories, 'category');
+
+
 		if (!function_exists('is_user_logged_in')) {
 			include_once WPINC . '/pluggable.php';
 		}
@@ -59,6 +101,8 @@ class TTA_Helper
 			|| !in_array(self::tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'])
 			|| in_array($post->ID, $ids)
 			|| !$should_display_button_based_on_user_logged_user
+			|| $is_exclude_by_tags
+			|| $is_exclude_by_cagories
 
 		) {
 			$should_load_button = false;
@@ -336,7 +380,7 @@ class TTA_Helper
 			if(isset($post_css_selectors[0])) {
 				$post_css_selectors = json_decode(json_encode($post_css_selectors[0]), true);
 			}
-			
+
 
 			if(!empty($post_css_selectors) && isset($post_css_selectors['tta__settings_use_own_css_selectors']) && $post_css_selectors['tta__settings_use_own_css_selectors'] ) {
 

@@ -14,7 +14,6 @@ import { postWithoutImage } from '../../context/utilities';
 import toast from '../../context/Notify';
 import UpgradeToPro from '../../UpgradeToPro';
 import { MultiSelect } from '../../context/MultiSelect'
-import { CategoryMultiSelect } from '../../context/CategoryMultiSelect'
 
 export default function Settings() {
 	const [settings, setSettings] = useState({
@@ -60,14 +59,13 @@ export default function Settings() {
 	 * handle change
 	 * @param {*} e
 	 */
-	const handleChange = (e) => {
+	const handleChange = (e, targeName = 'tta__settings_allow_listening_for_post_types') => {
 		let value = '';
 		if (Array.isArray(e)) {
 			value = e;
 			setSettings({
 				...settings,
-				...{ tta__settings_allow_listening_for_post_types: value },
-
+				...{ targeName : value },
 			});
 			return;
 		} else {
@@ -522,6 +520,7 @@ export default function Settings() {
 											name="tta__settings_exclude_categories"
 											multiselectIndex={1}
 											onChange={handleChange}
+											toastMessage={'On Free Version You Can Select Only 1 Category.'}
 											selectedItems={settings.tta__settings_exclude_categories}
 											options={Object.keys(ttsObj?.categories) || []} />
 
@@ -571,6 +570,7 @@ export default function Settings() {
 											name="tta__settings_exclude_wp_tags"
 											multiselectIndex={2}
 											onChange={handleChange}
+											toastMessage={'On Free Version You Can Select Only 1 Tag.'}
 											selectedItems={settings.tta__settings_exclude_wp_tags}
 											options={Object.keys(ttsObj?.tags) || []} />
 
