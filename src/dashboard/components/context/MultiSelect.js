@@ -16,7 +16,6 @@ class MultiSelect extends React.Component {
             toastMessage: props.toastMessage || 'Showing button to multiple post is not supported in free version.'
         };
 
-        // console.log(this.state)
 
         this.handleChange = this.handleChange.bind(this);
         this.handleClick = this.handleClick.bind(this);

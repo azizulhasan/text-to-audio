@@ -395,9 +395,6 @@ class TTA_Helper
 				}
 			}
 
-			// error_log(print_r([
-			// 	'$all_settings_data' => $all_settings_data,
-			// ],1));
 		}
 
 
@@ -544,10 +541,6 @@ class TTA_Helper
 					}
 				} elseif (get_option('tts_is_backup_mp3_file') == 'false' && $language_code == $file_url_key && strpos($url, 'https://storage.googleapis.com') !== false) {
 					$should_update_urls = true;
-					// error_log(print_r([
-					// 	'url_expired' => $url,
-					// 	'tts_is_backup_mp3_file' => get_option( 'tts_is_backup_mp3_file' ),
-					// ], 1));
 					continue;
 				}
 
@@ -729,7 +722,7 @@ class TTA_Helper
 			$formatted_categories[ $category->slug ] = $category->name;
 		}
 
-		return $formatted_categories;
+		return apply_filters( 'tts_get_all_categories', $formatted_categories );
 	}
 
 	/**
@@ -751,7 +744,8 @@ class TTA_Helper
 			$formatted_tags[ $tag->slug ] = $tag->name;
 		}
 
-		return $formatted_tags;
+		return apply_filters( 'get_all_tags', $formatted_tags );
+
 	}
 
 
