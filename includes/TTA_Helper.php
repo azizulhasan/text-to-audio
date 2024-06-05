@@ -68,6 +68,10 @@ class TTA_Helper
 			$excluded_tags = $settings['tta__settings_exclude_wp_tags'];
 		}
 
+		if(!function_exists('get_tags')) {
+			require_once WPINC . '/category-template.php';
+		}
+
 		$post_tags = get_the_terms( $post->ID, 'post_tag' );
 
 		$is_exclude_by_tags = self::is_exluded_by_terms($post_tags, $excluded_tags);
@@ -713,12 +717,11 @@ class TTA_Helper
 	public static function get_all_categories() {
 
 		if(!function_exists('get_categories')) {
-			require_once ABSPATH . 'wp-includes/category.php';
+			require_once WPINC . '/category.php';
 		}
 
 		// Fetch all categories.
 		$categories = get_categories();
-			error_log(print_r($categories,1));
 		// Initialize an empty array to hold the formatted categories.
 		$formatted_categories = array();
 
@@ -737,7 +740,7 @@ class TTA_Helper
 	 */
 	public static function get_all_tags() {
 		if(!function_exists('get_tags')) {
-			require_once ABSPATH . 'wp-includes/category.php';
+			require_once WPINC . '/category.php';
 		}
 		// Fetch all tags.
 		$tags = get_tags(array(

@@ -241,6 +241,15 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
     $mp3_file_urls = TTA_Helper::get_mp3_file_urls($file_url_key, $post);
     $file_name = TTA_Helper::tts_file_name($title, $language, $voice);
 
+    $saved_post_content = '';
+    $saved_post_content = get_post_meta( $post->ID, 'tts_save_post_content_for_lang__'.$language, true );
+    $is_content_from_post_meta = false;
+    if($saved_post_content) {
+        $content = $saved_post_content;
+        $is_content_from_post_meta = true;
+        error_log(print_r($saved_post_content, true));
+    }
+
     $object = ob_start();
     ?>
             <!-- Text To Speech TTS Settings  -->
@@ -257,7 +266,7 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
             var readingTime = "<?php echo $content_read_time; ?>";
             var postId = "<?php echo $post->ID; ?>";
             var fileURLs = <?php echo json_encode($mp3_file_urls); ?>;
-
+            var isContentFromPostMeta = <?php echo $is_content_from_post_meta; ?>;
 
             var ttsSettings = {
                 listening : ttsListening, 
@@ -270,6 +279,7 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
                 readingTime: readingTime,
                 postId: postId,
                 fileURLs: fileURLs,
+                isContentFromPostMeta: isContentFromPostMeta,
             };
 
 
