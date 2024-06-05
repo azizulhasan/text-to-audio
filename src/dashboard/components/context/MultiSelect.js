@@ -28,7 +28,6 @@ class MultiSelect extends React.Component {
         event.preventDefault()
         let selectedItems = this.state?.selectedItems?? [];
         const value = event.target.value;
-
         if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_license_active) {
             toast(<h6>{this.state.toastMessage} Please <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>buy pro version</a></h6>, 'info', { autoClose: 10000 })
             selectedItems = []
@@ -36,7 +35,7 @@ class MultiSelect extends React.Component {
             this.setState({
                 selectedItems: selectedItems,
             });
-            this.props.onChange(selectedItems, event.target.name)
+            this.props.onChange(selectedItems, this.state.name)
             return;
         }
 
@@ -45,7 +44,7 @@ class MultiSelect extends React.Component {
             this.setState({
                 selectedItems: selectedItems,
             });
-            this.props.onChange(selectedItems)
+            this.props.onChange(selectedItems, this.state.name)
 
         } else {
             if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_license_active && selectedItems.length === 1) {
@@ -60,7 +59,7 @@ class MultiSelect extends React.Component {
                     this.setState({
                         selectedItems: selectedItems,
                     });
-                    this.props.onChange(selectedItems)
+                    this.props.onChange(selectedItems, this.state.name)
                     return;
                 }
             }
@@ -68,7 +67,7 @@ class MultiSelect extends React.Component {
             this.setState({
                 selectedItems: selectedItems,
             });
-            this.props.onChange(selectedItems)
+            this.props.onChange(selectedItems, this.state.name)
 
         }
     }
@@ -83,7 +82,7 @@ class MultiSelect extends React.Component {
             this.setState({
                 selectedItems: selectedItems,
             });
-            this.props.onChange(selectedItems)
+            this.props.onChange(selectedItems, this.state.name)
 
         } else {
             for (let i = 0; i < selectedItems.length; i++) {
@@ -92,7 +91,7 @@ class MultiSelect extends React.Component {
                     this.setState({
                         selectedItems: selectedItems,
                     });
-                    this.props.onChange(selectedItems)
+                    this.props.onChange(selectedItems, this.state.name)
                     return;
                 }
             }
@@ -100,7 +99,7 @@ class MultiSelect extends React.Component {
             this.setState({
                 selectedItems: selectedItems,
             });
-            this.props.onChange(selectedItems)
+            this.props.onChange(selectedItems, this.state.name)
         }
     }
 

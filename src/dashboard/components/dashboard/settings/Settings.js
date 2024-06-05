@@ -59,13 +59,14 @@ export default function Settings() {
 	 * handle change
 	 * @param {*} e
 	 */
-	const handleChange = (e, targeName = 'tta__settings_allow_listening_for_post_types') => {
+	const handleChange = (e, targetName = 'tta__settings_allow_listening_for_post_types') => {
 		let value = '';
+		console.log({targetName, e})
 		if (Array.isArray(e)) {
 			value = e;
 			setSettings({
 				...settings,
-				...{ targeName : value },
+				...{ [targetName] : value },
 			});
 			return;
 		} else {
