@@ -235,20 +235,23 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
    global $post;
 
     // delete_post_meta($post->ID, 'tts_mp3_file_urls');
+    $player_id = get_player_id(true);
     $language = TTA_Helper::tts_site_language($plugin_all_settings);
     $voice = TTA_Helper::tts_get_voice($plugin_all_settings);
     $file_url_key = TTA_Helper::tts_get_file_url_key($language, $voice);
     $mp3_file_urls = TTA_Helper::get_mp3_file_urls($file_url_key, $post);
     $file_name = TTA_Helper::tts_file_name($title, $language, $voice);
-
+    
     $saved_post_content = '';
-    $saved_post_content = get_post_meta( $post->ID, 'tts_save_post_content_for_lang__'.$language, true );
+    $saved_post_content = get_post_meta( $post->ID, 'tts_save_post_content_for__player_id__'.$player_id.'__lang__'.$language, true );
     $is_content_from_post_meta = false;
     if($saved_post_content) {
         $content = $saved_post_content;
         $is_content_from_post_meta = true;
-        error_log(print_r($saved_post_content, true));
     }
+
+    error_log(print_r([$saved_post_content, 'tts_save_post_content_for__player_id__'.$player_id.'__lang__'.$language], true));
+
 
     $object = ob_start();
     ?>
@@ -695,12 +698,13 @@ function set_initial_button_texts($content_read_time) {
 
 
 
-function get_player_id() {
+function get_player_id( $should_return_database_value = false) {
     $customize_settings = (array) TTA_Helper::tts_get_settings('customize');
     $customize_settings['buttonSettings'] = isset( $customize_settings['buttonSettings'] ) ? (array) $customize_settings['buttonSettings'] : [ 'id' => 1];
     $player_id = isset($customize_settings['buttonSettings']['id']) ? $customize_settings['buttonSettings']['id'] : 1;
 
-    if(!is_pro_license_active() && $player_id >  1) {
+
+    if(!is_pro_license_active() && $player_id >  1 && !$should_return_database_value ) {
         $player_id = 1;
     }
     

@@ -262,13 +262,18 @@ class TTA_Helper
 		if(isset($plugin_all_settings['listening'])) {
 			// TODO: Match with multilinguage UI and default language.
 			$default_language = $plugin_all_settings['listening']['tta__listening_lang'];
-			// $default_language = str_replace(['-', ' '], '_', $default_language);
-			if(get_player_id() < 3) {
-				$default_language = strtolower($default_language);
-			}
+			// if(get_player_id() > 2) {
+			// 	$default_language = strtolower($default_language);
+			// }
 		}
+		if(get_player_id() == 4) {
+			// $default_language = strtolower($default_language);
+			return apply_filters('tts_site_language', $default_language);
+		}
+		
+		return $default_language;
 
-		return apply_filters('tts_site_language', $default_language);
+		
 	}
 
 	public static function tts_get_file_url_key($language, $voice)
