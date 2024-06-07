@@ -425,8 +425,9 @@ function add_listen_button( $content ) {
     TTA_Helper::set_default_settings();
     global $post;
 	$button = '';
+
     $settings = (array) get_option( 'tta_settings_data');
-    if( isset( $settings['tta__settings_enable_button_add'] ) &&  $settings['tta__settings_enable_button_add'] ) {    
+    if( isset( $settings['tta__settings_enable_button_add'] ) &&  $settings['tta__settings_enable_button_add'] ) {
         // TODO: write functionality if current page is home page where content is excerpt.
         // if(is_single()) {
         //     add_filter( 'the_content', 'add_listen_button' );
@@ -435,7 +436,7 @@ function add_listen_button( $content ) {
         //     add_filter( 'the_excerpt', 'add_listen_button' , 9999 );
         // }
 
-        if( ! has_shortcode($post->post_content, 'tta_listen_btn') ) {
+        if( ! has_shortcode($content, 'tta_listen_btn') ) {
             ob_start();
             echo tta_get_button_content('');
             $button = ob_get_contents();
