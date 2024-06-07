@@ -287,7 +287,7 @@ class TTA_Helper
 		return $file_url_key;
 	}
 
-	public static function tts_get_voice($plugin_all_settings)
+	public static function tts_get_voice($plugin_all_settings, $language)
 	{
 		// TODO: Match with multilingual UI and default voice.
 		$default_voice = '';
@@ -295,7 +295,7 @@ class TTA_Helper
 			$default_voice = $plugin_all_settings['listening']['tta__listening_voice'];
 		}
 
-		$voice = apply_filters('tts_get_voice', $default_voice);
+		$voice = apply_filters('tts_get_voice', $default_voice, $language);
 
 		$voice = str_replace([' ', '(', ')', '%20'], '_', $voice);
 
