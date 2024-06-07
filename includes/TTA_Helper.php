@@ -711,9 +711,14 @@ class TTA_Helper
 	 * @return array An associative array with category slugs as keys and category names as values.
 	 */
 	public static function get_all_categories() {
+
+		if(!function_exists('get_categories')) {
+			require_once ABSPATH . 'wp-includes/category.php';
+		}
+
 		// Fetch all categories.
 		$categories = get_categories();
-
+			error_log(print_r($categories,1));
 		// Initialize an empty array to hold the formatted categories.
 		$formatted_categories = array();
 
@@ -731,6 +736,9 @@ class TTA_Helper
 	 * @return array An associative array with tag slugs as keys and tag names as values.
 	 */
 	public static function get_all_tags() {
+		if(!function_exists('get_tags')) {
+			require_once ABSPATH . 'wp-includes/category.php';
+		}
 		// Fetch all tags.
 		$tags = get_tags(array(
 			'hide_empty' => false
