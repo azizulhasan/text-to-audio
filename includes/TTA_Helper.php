@@ -266,7 +266,7 @@ class TTA_Helper
 			// 	$default_language = strtolower($default_language);
 			// }
 		}
-		if(get_player_id() == 4) {
+		if(get_player_id() > 2) {
 			// $default_language = strtolower($default_language);
 			return apply_filters('tts_site_language', $default_language);
 		}
