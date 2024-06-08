@@ -241,22 +241,16 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
     $file_url_key = TTA_Helper::tts_get_file_url_key($language, $voice);
     $mp3_file_urls = TTA_Helper::get_mp3_file_urls($file_url_key, $post);
     $file_name = TTA_Helper::tts_file_name($title, $language, $voice);
-    
-    $default_language = $language;
-    if(isset($plugin_all_settings['listening'])) {
-        $default_language = $plugin_all_settings['listening']['tta__listening_lang'];
-    }
 
-    $saved_post_content = '';
-    $saved_post_content = get_post_meta( $post->ID, 'tts_save_post_content_for__player_id__'.$player_id.'__lang__'.$default_language, true );
-    $saved_post_content = trim( $saved_post_content );
+
+    $saved_post_content = apply_filters('tts_save_post_content', '', $post, $language, $plugin_all_settings);
     $is_content_from_post_meta = '0';
     if($saved_post_content) {
         $content = $saved_post_content;
         $is_content_from_post_meta = true;
     }
 
-    error_log(print_r([$saved_post_content, 'tts_save_post_content_for__player_id__'.$player_id.'__lang__'.$default_language, $voice], true));
+    error_log(print_r([$saved_post_content, 'tts_save_post_content_for__player_id__'.$player_id.'__lang__'.$language, $voice], true));
 
 
     $object = ob_start();
