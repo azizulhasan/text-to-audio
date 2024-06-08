@@ -241,18 +241,12 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
     $mp3_file_urls = TTA_Helper::get_mp3_file_urls($file_url_key, $post);
     $file_name = TTA_Helper::tts_file_name($title, $language, $voice);
 
-
     $saved_post_content = apply_filters('tts_save_post_content', '', $post, $language, $plugin_all_settings);
     $is_content_from_post_meta = '0';
     if($saved_post_content) {
         $content = $saved_post_content;
         $is_content_from_post_meta = true;
     }
-
-    error_log(print_r([
-            '$is_content_from_post_meta' => $is_content_from_post_meta,
-    ], true));
-
 
     $object = ob_start();
     ?>
