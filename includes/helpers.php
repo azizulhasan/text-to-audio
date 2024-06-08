@@ -233,7 +233,6 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
 function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings) {
     
    global $post;
-
     // delete_post_meta($post->ID, 'tts_mp3_file_urls');
     $player_id = get_player_id(true);
     $language = TTA_Helper::tts_site_language($plugin_all_settings);
@@ -250,7 +249,9 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
         $is_content_from_post_meta = true;
     }
 
-    error_log(print_r([$saved_post_content, 'tts_save_post_content_for__player_id__'.$player_id.'__lang__'.$language, $voice], true));
+    error_log(print_r([
+            '$is_content_from_post_meta' => $is_content_from_post_meta,
+    ], true));
 
 
     $object = ob_start();
