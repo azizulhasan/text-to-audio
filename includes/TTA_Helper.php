@@ -755,6 +755,40 @@ class TTA_Helper
 
 	}
 
+	 /**
+	 * Cleans up the input string by removing double delimiters,
+	 * extra spaces, and extra newlines.
+	 *
+	 * @param string $inputString The input string to process.
+	 * @param string $delimiter The delimiter to check for doubles.
+	 * @return string The cleaned-up string.
+	 */
+	 public static function clean_string($inputString) {
+		 $delimiter = \apply_filters('tts_sentence_delimiter', '.');
+		// Remove double delimiters separated by space
+		$spaceSeparatedDoubleDelimiterPattern = '/' . preg_quote($delimiter) . '\s+' . preg_quote($delimiter) . '/';
+		$cleanedString = preg_replace($spaceSeparatedDoubleDelimiterPattern, $delimiter, $inputString);
+
+		// Remove double delimiters (without space separation)
+		$doubleDelimiterPattern = '/' . preg_quote($delimiter) . '{2,}/';
+		$cleanedString = preg_replace($doubleDelimiterPattern, $delimiter, $cleanedString);
+
+		// Remove extra spaces (more than one space)
+		$cleanedString = preg_replace('/\s{2,}/', ' ', $cleanedString);
+
+		// Remove spaces before the delimiter and ensure one space after
+		$spaceAroundDelimiterPattern = '/\s*' . preg_quote($delimiter) . '\s*/';
+		$cleanedString = preg_replace($spaceAroundDelimiterPattern, $delimiter . ' ', $cleanedString);
+
+		// Remove extra newlines (more than one newline)
+		$cleanedString = preg_replace('/\n{2,}/', "\n", $cleanedString);
+
+		// Trim leading and trailing whitespace
+		$cleanedString = trim($cleanedString);
+
+		return $cleanedString;
+	}
+
 
 
 }

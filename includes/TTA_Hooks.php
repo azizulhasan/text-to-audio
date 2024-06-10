@@ -402,7 +402,7 @@ class TTA_Hooks {
 	 */
     public function tta_before_clean_content_callback($htmlString) {
 	    $tags = apply_filters( 'tts_delimiter_addable_tags', ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
-	    $delimiter = \apply_filters('tts_sentence_delimiter', '. ');
+	    $delimiter = \apply_filters('tts_sentence_delimiter', '.');
 		// Iterate through each tag
 		foreach ($tags as $tag) {
 			// Create a regex pattern to match the closing tag

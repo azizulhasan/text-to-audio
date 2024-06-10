@@ -62,7 +62,7 @@ function tta_clean_content($text) {
     $text = preg_replace('/\\\\{2,}"/', '\"', $text);
     $text = preg_replace("/\\\\{2,}'/", "\'", $text);
 
-    $text = preg_replace('/\s+/', ' ', trim($text)); // Get rid of /n and /s in the string.
+    $text = TTA_Helper::clean_string($text);
 
     return apply_filters('tta_clean_content', $text);
 
