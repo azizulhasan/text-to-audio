@@ -1,6 +1,8 @@
 <?php
 namespace TTA;
 
+use function WPML\FP\apply;
+
 /**
  * Fired during plugin activation
  *
@@ -73,6 +75,8 @@ class TTA_Hooks {
         add_filter('sgo_js_minify_exclude', [$this, 'sgo_js_minify_exclude_callback'], 10, 1);
         add_filter('sgo_javascript_combine_exclude', [$this, 'sgo_js_minify_exclude_callback'], 10, 1);
         add_filter('sgo_javascript_combine_excluded_external_paths', [$this, 'sgo_js_minify_exclude_callback'], 10, 1);
+
+        add_filter( 'tta_before_clean_content', [$this, 'tta_before_clean_content_callback'], 10);
 
     }
 
@@ -382,6 +386,33 @@ class TTA_Hooks {
 		// }
 
 		return $excluded_js;
+	}
+
+
+    public function test() {
+
+    }
+	/**
+	 * Add a delimiter after specific tags in the HTML string.
+	 *
+	 * @param string $htmlString The input HTML string.
+	 * @param array $tags The array of tags to add delimiter after.
+	 * @param string $delimiter The delimiter to add.
+	 * @return string The modified HTML string.
+	 */
+    public function tta_before_clean_content_callback($htmlString) {
+	    $tags = apply_filters( 'tts_delimiter_addable_tags', ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
+	    $delimiter = \apply_filters('tts_sentence_delimiter', '. ');
+		// Iterate through each tag
+		foreach ($tags as $tag) {
+			// Create a regex pattern to match the closing tag
+			$pattern = sprintf('/(<\/\s*%s\s*>)(?!\s*%s)/i', $tag, preg_quote($delimiter, '/'));
+
+			// Replace each closing tag with the tag followed by the delimiter if it doesn't already have it
+			$htmlString = preg_replace($pattern, '$1' . $delimiter, $htmlString);
+		}
+
+		return apply_filters( 'tta_pro_before_clean_content', $htmlString);
 	}
 
 }

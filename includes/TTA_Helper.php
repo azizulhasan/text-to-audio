@@ -718,7 +718,6 @@ class TTA_Helper
 
 		// Fetch all categories.
 		$categories = get_categories();
-			error_log(print_r($categories,1));
 		// Initialize an empty array to hold the formatted categories.
 		$formatted_categories = array();
 
