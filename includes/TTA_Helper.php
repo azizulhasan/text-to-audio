@@ -108,7 +108,7 @@ class TTA_Helper
 			$should_load_button = false;
 		}
 
-		return apply_filters('tta_should_load_button', $should_load_button);
+		return apply_filters('tta_should_load_button', $should_load_button, $post);
 	}
 
 
