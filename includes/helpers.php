@@ -221,6 +221,7 @@ function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $tex
         if( isset($atts['voice']) && $atts['voice']  && isset($plugin_all_settings['listening']['tta__listening_voice'])  &&  $atts['voice'] != $plugin_all_settings['listening']['tta__listening_voice'] ) {
             $plugin_all_settings['listening']['tta__listening_voice'] = $atts['voice'];
         }
+
         
         if( apply_filters('tts_ignore_match_80_percent', false) && tts_text_match_80_percent($original_title , $temp_title) ) {
            get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time,  $plugin_all_settings);
@@ -687,6 +688,8 @@ function set_initial_button_texts($content_read_time) {
 
 
 function get_player_id() {
+    global  $post;
+
     $customize_settings = (array) TTA_Helper::tts_get_settings('customize');
     $customize_settings['buttonSettings'] = isset( $customize_settings['buttonSettings'] ) ? (array) $customize_settings['buttonSettings'] : [ 'id' => 1];
     $player_id = isset($customize_settings['buttonSettings']['id']) ? $customize_settings['buttonSettings']['id'] : 1;
@@ -694,8 +697,8 @@ function get_player_id() {
     if(!is_pro_license_active() && $player_id >  1) {
         $player_id = 1;
     }
-    
-    return apply_filters('tts_get_player_id', $player_id, $customize_settings);
+
+    return apply_filters('tts_get_player_id', $player_id, $customize_settings, $post );
 }
 
 /**
