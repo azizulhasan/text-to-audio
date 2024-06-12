@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.5.3
 Requires PHP: 7.4
-Stable tag: 1.6.18
+Stable tag: 1.6.19
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -401,10 +401,31 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 
 
 
+= 1.6.19 ( 10 June 2024 ) =
+Added: `tts_get_player_id` filter modified. `$post` parameter added.
+Added: `tta_should_load_button` filter modified. `$post` parameter added.
+Updated:  Settings default value changed.
+Added: Delimiter added after heading tags if needed in free and pro version.
+Added: `tts_pro_exclude_between_delimiters` added in the pro version to exclude content example : `
+add_filter('tts_pro_exclude_between_delimiters', function($arr) {
+    return [
+        'curly' => '{{...}}',
+        //..........
+    ];
+});
+ `
+Added: `tts_pro_delimiter_addable_tags` added in the pro version to add delimiter if needed. example : `
+
+ add_filter('tts_pro_delimiter_addable_tags', function($arr) {
+    // all heading tags are added by default.
+     return $arr; // push your desired tags.
+ });
+  `.
+
+
+
 = 1.6.18 ( 10 June 2024 ) =
-Added: delimiter added after heading tag in needed.
-
-
+Added: delimiter added after heading tags if needed.
 
 = 1.6.17 ( 08 June 2024 ) =
 Fixed : Bug fixed.
