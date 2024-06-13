@@ -251,8 +251,6 @@ register_deactivation_hook(__FILE__, function() {
     });
 
 
-
-
 /**
  *
  * Create short code for qr code.
@@ -261,9 +259,7 @@ register_deactivation_hook(__FILE__, function() {
  * @return string
  */
 function tta_create_shortcode($atts) {
-
-    return tta_get_button_content($atts);
-
+	return tta_get_button_content($atts);
 }
 
 add_shortcode('tta_listen_btn', 'tta_create_shortcode');
@@ -271,17 +267,23 @@ add_shortcode('tta_listen_btn', 'tta_create_shortcode');
 // Filter to allow shortcodes in HTML tags
 add_filter('do_shortcode_tag', 'allow_shortcode_in_html_tag', 10, 4);
 function allow_shortcode_in_html_tag($output, $tag, $attr, $m) {
-    if ($tag == 'tta_listen_btn') {
-        if( isset( $attr['position'] ) && $attr['position'] == 'after' ) {
-            $content = tta_get_button_content($attr, false, $m[5]) . $m[5];
-        }else{
-            $content = $m[5] . tta_get_button_content($attr, false, $m[5]);
-        }
-        // Get the content wrapped by the shortcode.
-        return $content;
-    }
-    
-    return $output;
+
+	if ($tag == 'tta_listen_btn') {
+
+		if( isset( $attr['position'] ) && $attr['position'] == 'after' ) {
+			$content = $output . $m[5];
+		}else{
+			$content = $m[5] . $output;
+		}
+		// Get the content wrapped by the shortcode.
+
+//		error_log(print_r([
+//			$output
+//		],1));
+//		[tta_listen_btn position="before" lang="en"]Welcome to WordPress. This is your first post. Edit or delete it, then start writing![/tta_listen_btn]
+
+		return $content;
+	}
+
+	return $output;
 }
-
-

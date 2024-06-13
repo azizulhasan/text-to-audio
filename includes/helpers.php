@@ -96,8 +96,11 @@ function tta_should_add_delimiter($title, $delimiter) {
  */
 function tta_get_button_content($atts, $is_block = false, $tag_content = '') {
     $settings = (array) get_option('tta_settings_data');
+	static $btn_no = 0;
+	$btn_no++;
+
     // this is a pro feature to show button on blog main page with title and excerpt.
-    if(!TTA_Helper::should_load_button()){
+    if(!TTA_Helper::should_load_button() ){
         return;
     }
 
@@ -116,8 +119,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '') {
 
     $should_display_icon = isset( $settings['tta__settings_display_btn_icon'] ) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
 
-    static $btn_no = 0;
-    $btn_no++;
+
     // TODO make it dynamic. now Recording it not available in UI.
     $sentence_delimiter = isset($recording['tta__sentence_delimiter']) ? $recording['tta__sentence_delimiter'] : '. ';
         global $post;
@@ -194,6 +196,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '') {
     do_action('tts_enqueue_button_scripts' , $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post);
 
     $data =  apply_filters( 'tts__listening_button', $button, $btn_no, $class, $post );
+
 
     return $data;
 }
@@ -423,27 +426,30 @@ add_filter( 'the_content', 'add_listen_button',  $display_button_priority );
  * Add listening button to every post by default.
  */
 function add_listen_button( $content ) {
-    TTA_Helper::set_default_settings();
+//    TTA_Helper::set_default_settings();
     global $post;
 	$button = '';
-
+    $should_add_button = false;
     $settings = (array) get_option( 'tta_settings_data');
-    if( isset( $settings['tta__settings_enable_button_add'] ) &&  $settings['tta__settings_enable_button_add'] ) {
+    if( ! isset( $settings['tta__settings_enable_button_add'] )  || !  $settings['tta__settings_enable_button_add'] ) {
         // TODO: write functionality if current page is home page where content is excerpt.
-        // if(is_single()) {
-        //     add_filter( 'the_content', 'add_listen_button' );
-        // }
-        // elseif(did_filter( 'the_excerpt' )){
-        //     add_filter( 'the_excerpt', 'add_listen_button' , 9999 );
-        // }
-
-        if( ! has_shortcode($content, 'tta_listen_btn') ) {
-            ob_start();
-            echo tta_get_button_content('');
-            $button = ob_get_contents();
-            ob_end_clean();
-        }
+	    return apply_filters('tts_button_with_content', $button.$content, $button, $content);
     }
+
+	if( ! tts_has_button_class($content) ) {
+		$should_add_button = true;
+	}
+
+    $should_add_button = apply_filters( 'tts_should_add_button', $should_add_button, $post, $settings, $content);
+
+    if($should_add_button) {
+	    ob_start();
+        $button_content = tta_get_button_content('');
+	    echo $button_content;
+	    $button = ob_get_contents();
+	    ob_end_clean();
+    }
+
 
 	return apply_filters('tts_button_with_content', $button.$content, $button, $content);
 
@@ -451,18 +457,22 @@ function add_listen_button( $content ) {
 }
 
 
-function get_used_shortcodes( $content) {
-    global $shortcode_tags;
-    if ( false === strpos( $content, '[' ) ) {
-        return array();
+
+
+
+
+
+function tts_has_button_class( $content, $class = 'tts__listent_content' ) {
+	$has_class = false;
+	$short_code_position = strpos($content, $class );
+
+    if($short_code_position) {
+	    $has_class = true;
     }
-    if ( empty( $shortcode_tags ) || ! is_array( $shortcode_tags ) ) {
-        return array();
-    }
-    // Find all registered tag names in $content.
-    preg_match_all( '@\[([^<>&/\[\]\x00-\x20=]++)@', $content, $matches );
-    $tagnames = array_intersect( array_keys( $shortcode_tags ), $matches[1] );
-    return $tagnames;
+
+
+    return apply_filters( 'tts_has_button_class', $has_class, $content);
+
 }
 
 /**
