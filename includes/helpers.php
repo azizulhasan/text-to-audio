@@ -136,6 +136,9 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '') {
 
     // TODO make it dynamic. now Recording it not available in UI.
     $sentence_delimiter = isset($recording['tta__sentence_delimiter']) ? $recording['tta__sentence_delimiter'] : '. ';
+	if( isset($atts['delimiter']) && $atts['delimiter'] ) {
+		$sentence_delimiter = $sentence_delimiter;
+	}
         global $post;
 
 
@@ -259,10 +262,20 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
 	if( isset($atts['voice']) && $atts['voice']  && isset($plugin_all_settings['listening']['tta__listening_voice'])  &&  $atts['voice'] != $plugin_all_settings['listening']['tta__listening_voice'] ) {
 		$plugin_all_settings['listening']['tta__listening_voice'] = $atts['voice'];
 	}
+	$sentence_delimiter = isset($recording['tta__sentence_delimiter']) ? $recording['tta__sentence_delimiter'] : '. ';
+	if( isset($atts['delimiter']) && $atts['delimiter'] ) {
+		$sentence_delimiter = $sentence_delimiter;
+	}
 
 	$is_multiple_player = apply_filters( 'tts_is_multiple_player', false);
 	if( isset($atts['is_multiple_player']) && $atts['is_multiple_player'] == 'true'  ) {
 		$is_multiple_player = 1;
+        $first_sentence = $title;
+        $first_sentence_arr = explode($sentence_delimiter, $content );
+        if(isset($first_sentence_arr[0])){
+	        $first_sentence = $first_sentence_arr[0];
+        }
+        $title = $first_sentence;
 	}
 
     // delete_post_meta($post->ID, 'tts_mp3_file_urls');

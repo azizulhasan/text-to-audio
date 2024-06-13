@@ -265,9 +265,12 @@ class TTA_Helper
 		return apply_filters('tts_site_language', $default_language);
 	}
 
-	public static function tts_get_file_url_key($language, $voice, $btn_no)
+	public static function tts_get_file_url_key($language, $voice, $btn_no = '')
 	{
-		$file_url_key = $btn_no . '-'. $language;
+		if($btn_no) {
+			$btn_no .= '-';
+		}
+		$file_url_key = $btn_no . $language;
 		if (get_player_id() == 4 && $voice) {
 			$voice = strtolower($voice);
 			$file_url_key .= '--voice--' . $voice;
