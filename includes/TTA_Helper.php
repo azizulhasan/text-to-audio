@@ -265,9 +265,9 @@ class TTA_Helper
 		return apply_filters('tts_site_language', $default_language);
 	}
 
-	public static function tts_get_file_url_key($language, $voice)
+	public static function tts_get_file_url_key($language, $voice, $btn_no)
 	{
-		$file_url_key = $language;
+		$file_url_key = $btn_no . '-'. $language;
 		if (get_player_id() == 4 && $voice) {
 			$voice = strtolower($voice);
 			$file_url_key .= '--voice--' . $voice;
@@ -514,15 +514,21 @@ class TTA_Helper
 
 		foreach ($mp3_file_urls as $language_code =>  $url) {
 
+			$button_id_excluded_file_url_key = self::remove_first_part_if_number($file_url_key);
+
 			if (self::is_file_url_not_exists_and_is_file_empty($url)) {
 
 				$should_update_urls = true;
 			} else {
 
 				// Generate new singed url or backup only current post applicable url.
-				if (get_option('tts_is_backup_mp3_file') == 'true' && $language_code == $file_url_key) {
+				if (get_option('tts_is_backup_mp3_file') == 'true') {
+
+					if($language_code != $file_url_key || $button_id_excluded_file_url_key != $language_code  ) {
+						continue;
+					}
+
 					// previously generated mp3 file to 'TTA_Pro' folder but not backup to Google Cloud Storage.
-					// $url = 'http://localhost/azizulhasan/tts/wp-content/uploads/TTA_Pro/gtts/2024/04/21/Hello_world__lang__en_us.mp3';
 					$gcs_url = '';
 					if (strpos($url, 'TTA_Pro') !== false) {
 						$full_path = self::get_path_from_url($url);
@@ -539,7 +545,7 @@ class TTA_Helper
 							$url = $gcs_new_signed_url;
 						}
 					}
-				} elseif (get_option('tts_is_backup_mp3_file') == 'false' && $language_code == $file_url_key && strpos($url, 'https://storage.googleapis.com') !== false) {
+				} elseif (get_option('tts_is_backup_mp3_file') == 'false' && ($language_code != $file_url_key || $button_id_excluded_file_url_key != $language_code) && strpos($url, 'https://storage.googleapis.com') !== false) {
 					$should_update_urls = true;
 					continue;
 				}
@@ -551,10 +557,30 @@ class TTA_Helper
 
 		if ($should_update_urls || empty($final_mp3_file_ulrs)) {
 
-			update_post_meta($post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs);
+//			update_post_meta($post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs);
 		}
 
 		return \apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post);
+	}
+
+	/**
+	 * Remove the first part of a string separated by a dash if it is a number.
+	 *
+	 * @param string $string The input string.
+	 * @return string The modified string.
+	 */
+	public static function remove_first_part_if_number($input) {
+		// Split the string by hyphen
+		$parts = explode('-', $input);
+
+		// Check if the first part is a number
+		if (is_numeric($parts[0])) {
+			// Remove the first part
+			array_shift($parts);
+		}
+
+		// Reassemble the string without the first part
+		return implode('-', $parts);
 	}
 
 	/**

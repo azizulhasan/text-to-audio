@@ -96,15 +96,29 @@ function tta_should_add_delimiter($title, $delimiter) {
  */
 function tta_get_button_content($atts, $is_block = false, $tag_content = '') {
     $settings = (array) get_option('tta_settings_data');
+	global $post;
+
+	$should_enqueue = true;
+
+    $is_multiple_player = false;
+	if( isset($atts['is_multiple_player']) && $atts['is_multiple_player'] == 'true'  ) {
+		$is_multiple_player = 1;
+	}
 	static $btn_no = 0;
-	$btn_no++;
+	// init button scripts
+	if( $is_multiple_player ) {
+        $should_enqueue = false;
+	}else{
+		$btn_no++;
+    }
+
+
 
     // this is a pro feature to show button on blog main page with title and excerpt.
     if(!TTA_Helper::should_load_button() ){
         return;
     }
 
-    global $post;
 
     if ($is_block) {
         $customize = $atts;
@@ -185,15 +199,23 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '') {
         $custom_css = esc_attr($customize['custom_css']);
         $custom_css = str_replace( "\n", '', $custom_css );
     }
-    $custom_css = compatibility_with_themes($custom_css, $btn_no);
     // Custom class to button.
     $class = (isset($text_arr['class'])) && strlen($text_arr['class']) ? esc_attr($text_arr['class']) : "";
     $class .= (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
     
     $button = "<tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
 
-    // init button scripts
-    do_action('tts_enqueue_button_scripts' , $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post);
+
+    if($is_multiple_player && $tag_content) {
+	    $should_enqueue = true;
+        $btn_no++;
+    }
+
+	$custom_css = compatibility_with_themes($custom_css, $btn_no);
+
+	if($should_enqueue){
+	    do_action('tts_enqueue_button_scripts' , $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post, $is_multiple_player);
+    }
 
     $data =  apply_filters( 'tts__listening_button', $button, $btn_no, $class, $post );
 
@@ -207,41 +229,46 @@ add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 12);
 /**
  * Enqueue button scripts
  */
-function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post) {
+function tts_enqueue_button_scripts ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post ) {
     // enqueue footer stript
-    add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post) { 
+    add_action('wp_print_footer_scripts', function() use ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post) {
         $original_title = trim(str_replace('.', '', $title));
         $temp_title = trim(get_the_title());
         $temp_title = tta_clean_content( $temp_title );
-        
-        // Get plugin all settings and pass it to TTS javascript Object.
-        $plugin_all_settings = TTA_Helper::tts_get_settings('', $post->ID);
-        // error_log(print_r($plugin_all_settings,1));
-        if( isset($atts['lang']) && $atts['lang'] && isset($plugin_all_settings['listening']['tta__listening_lang'])  &&  $atts['lang'] != $plugin_all_settings['listening']['tta__listening_lang'] ) {
-            $plugin_all_settings['listening']['tta__listening_lang'] = $atts['lang'];
-        }
-
-        if( isset($atts['voice']) && $atts['voice']  && isset($plugin_all_settings['listening']['tta__listening_voice'])  &&  $atts['voice'] != $plugin_all_settings['listening']['tta__listening_voice'] ) {
-            $plugin_all_settings['listening']['tta__listening_voice'] = $atts['voice'];
-        }
 
         
         if( apply_filters('tts_ignore_match_80_percent', false) && tts_text_match_80_percent($original_title , $temp_title) ) {
-           get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time,  $plugin_all_settings);
+           get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time, $atts);
         }else{
-          get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time,  $plugin_all_settings);
+          get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time, $atts);
         }
     });
 }
 
-function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings) {
+function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts) {
     
    global $post;
+
+	// Get plugin all settings and pass it to TTS javascript Object.
+	$plugin_all_settings = TTA_Helper::tts_get_settings('', $post->ID);
+	// error_log(print_r($plugin_all_settings,1));
+	if( isset($atts['lang']) && $atts['lang'] && isset($plugin_all_settings['listening']['tta__listening_lang'])  &&  $atts['lang'] != $plugin_all_settings['listening']['tta__listening_lang'] ) {
+		$plugin_all_settings['listening']['tta__listening_lang'] = $atts['lang'];
+	}
+
+	if( isset($atts['voice']) && $atts['voice']  && isset($plugin_all_settings['listening']['tta__listening_voice'])  &&  $atts['voice'] != $plugin_all_settings['listening']['tta__listening_voice'] ) {
+		$plugin_all_settings['listening']['tta__listening_voice'] = $atts['voice'];
+	}
+
+	$is_multiple_player = apply_filters( 'tts_is_multiple_player', false);
+	if( isset($atts['is_multiple_player']) && $atts['is_multiple_player'] == 'true'  ) {
+		$is_multiple_player = 1;
+	}
 
     // delete_post_meta($post->ID, 'tts_mp3_file_urls');
     $language = TTA_Helper::tts_site_language($plugin_all_settings);
     $voice = TTA_Helper::tts_get_voice($plugin_all_settings);
-    $file_url_key = TTA_Helper::tts_get_file_url_key($language, $voice);
+    $file_url_key = TTA_Helper::tts_get_file_url_key($language, $voice, $btn_no);
     $mp3_file_urls = TTA_Helper::get_mp3_file_urls($file_url_key, $post);
     $file_name = TTA_Helper::tts_file_name($title, $language, $voice);
 
@@ -261,6 +288,7 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
             var readingTime = "<?php echo $content_read_time; ?>";
             var postId = "<?php echo $post->ID; ?>";
             var fileURLs = <?php echo json_encode($mp3_file_urls); ?>;
+            var isMultiplePlayer = "<?php echo $is_multiple_player; ?>";
 
 
             var ttsSettings = {
@@ -274,6 +302,7 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
                 readingTime: readingTime,
                 postId: postId,
                 fileURLs: fileURLs,
+                isMultiplePlayer,
             };
 
 
@@ -427,6 +456,7 @@ add_filter( 'the_content', 'add_listen_button',  $display_button_priority );
  */
 function add_listen_button( $content ) {
 //    TTA_Helper::set_default_settings();
+
     global $post;
 	$button = '';
     $should_add_button = false;
@@ -441,8 +471,9 @@ function add_listen_button( $content ) {
 	}
 
     $should_add_button = apply_filters( 'tts_should_add_button', $should_add_button, $post, $settings, $content);
-
-    if($should_add_button) {
+    static $is_enqueued = 0;
+    $is_enqueued++;
+    if($should_add_button && $is_enqueued == 1) {
 	    ob_start();
         $button_content = tta_get_button_content('');
 	    echo $button_content;

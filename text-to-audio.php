@@ -269,18 +269,12 @@ add_filter('do_shortcode_tag', 'allow_shortcode_in_html_tag', 10, 4);
 function allow_shortcode_in_html_tag($output, $tag, $attr, $m) {
 
 	if ($tag == 'tta_listen_btn') {
-
 		if( isset( $attr['position'] ) && $attr['position'] == 'after' ) {
-			$content = $output . $m[5];
+			$content = tta_get_button_content($attr, false, $m[5]) . $m[5];
 		}else{
-			$content = $m[5] . $output;
+			$content = $m[5] . tta_get_button_content($attr, false, $m[5]);
 		}
 		// Get the content wrapped by the shortcode.
-
-//		error_log(print_r([
-//			$output
-//		],1));
-//		[tta_listen_btn position="before" lang="en"]Welcome to WordPress. This is your first post. Edit or delete it, then start writing![/tta_listen_btn]
 
 		return $content;
 	}
