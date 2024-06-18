@@ -28,7 +28,7 @@ class MultiSelect extends React.Component {
         event.preventDefault()
         let selectedItems = this.state?.selectedItems?? [];
         const value = event.target.value;
-        if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_license_active) {
+        if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_active && selectedItems.length > 1) {
             toast(<h6>{this.state.toastMessage} Please <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>buy pro version</a></h6>, 'info', { autoClose: 10000 })
             selectedItems = []
             selectedItems.push(value);
@@ -47,7 +47,7 @@ class MultiSelect extends React.Component {
             this.props.onChange(selectedItems, this.state.name)
 
         } else {
-            if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_license_active && selectedItems.length === 1) {
+            if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_active && selectedItems.length === 1) {
                 toast(<h6>{this.state.toastMessage} Please <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>buy pro version</a></h6>, 'info', { autoClose: 10000 })
                 return;
             }
