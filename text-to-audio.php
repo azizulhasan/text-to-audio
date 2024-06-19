@@ -34,68 +34,72 @@ use TTA_Api\TTA_Api_Routes;
 use TTA\TTA_Notices;
 
 // If this file is called directly, abort.
-if (!defined('WPINC')) {
-    die;
+if ( ! defined( 'WPINC' ) ) {
+	die;
 }
 
 // Absolute path to the WordPress directory.
-if (!defined('ABSPATH')) {
-    define('ABSPATH', dirname(__FILE__) . '/');
+if ( ! defined( 'ABSPATH' ) ) {
+	define( 'ABSPATH', dirname( __FILE__ ) . '/' );
 }
 
 /**
  * Is plugin active
  */
 function is_pro_plugin_exists() {
-    $plugin_path = \WP_PLUGIN_DIR;
-    $status = file_exists( $plugin_path . '/text-to-speech-pro/text-to-audio-pro.php');
+	$plugin_path = \WP_PLUGIN_DIR;
+	$status      = file_exists( $plugin_path . '/text-to-speech-pro/text-to-audio-pro.php' );
 
-    if($status) return true;
+	if ( $status ) {
+		return true;
+	}
 
-    $status = file_exists( $plugin_path . '/text-to-speech-pro-premium/text-to-audio-pro.php');
+	$status = file_exists( $plugin_path . '/text-to-speech-pro-premium/text-to-audio-pro.php' );
 
-    if($status) return true;
-    
-    
-    return file_exists( $plugin_path . '/text-to-audio-pro/text-to-audio-pro.php');
+	if ( $status ) {
+		return true;
+	}
+
+
+	return file_exists( $plugin_path . '/text-to-audio-pro/text-to-audio-pro.php' );
 }
 
-if (!is_pro_plugin_exists() &&  ! function_exists( 'ttsp_fs' ) ) {
-    // Create a helper function for easy SDK access.
-    function ttsp_fs() {
-        global $ttsp_fs;
+if ( ! is_pro_plugin_exists() && ! function_exists( 'ttsp_fs' ) ) {
+	// Create a helper function for easy SDK access.
+	function ttsp_fs() {
+		global $ttsp_fs;
 
-        if ( ! isset( $ttsp_fs ) ) {
-            // Include Freemius SDK.
-            require_once dirname(__FILE__) . '/freemius/start.php';
+		if ( ! isset( $ttsp_fs ) ) {
+			// Include Freemius SDK.
+			require_once dirname( __FILE__ ) . '/freemius/start.php';
 
-            $ttsp_fs = fs_dynamic_init( array(
-                'id'                  => '13388',
-                'slug'                => 'text-to-audio',
-                'type'                => 'plugin',
-                'public_key'          => 'pk_937e16238dbdbc42dc1d7a4ead3b7',
-                'is_premium'          => false,
-                'is_premium_only'     => false,
-                'has_premium_version' => true,
-                'has_addons'          => false,
-                'has_paid_plans'      => true,
-                'menu'                => array(
-                    'slug'           => 'text-to-audio',
-                    'support' => 1,
-                    'pricing' => 1,
-                    'contact' => false,
-                    'account' => false,
-                ),
-            ) );
-        }
+			$ttsp_fs = fs_dynamic_init( array(
+				'id'                  => '13388',
+				'slug'                => 'text-to-audio',
+				'type'                => 'plugin',
+				'public_key'          => 'pk_937e16238dbdbc42dc1d7a4ead3b7',
+				'is_premium'          => false,
+				'is_premium_only'     => false,
+				'has_premium_version' => true,
+				'has_addons'          => false,
+				'has_paid_plans'      => true,
+				'menu'                => array(
+					'slug'    => 'text-to-audio',
+					'support' => 1,
+					'pricing' => 1,
+					'contact' => false,
+					'account' => false,
+				),
+			) );
+		}
 
-        return $ttsp_fs;
-    }
+		return $ttsp_fs;
+	}
 
-    // Init Freemius.
-    ttsp_fs();
-    // Signal that SDK was initiated.
-    do_action( 'ttsp_fs_loaded' );
+	// Init Freemius.
+	ttsp_fs();
+	// Signal that SDK was initiated.
+	do_action( 'ttsp_fs_loaded' );
 
 }
 
@@ -106,61 +110,61 @@ if (!is_pro_plugin_exists() &&  ! function_exists( 'ttsp_fs' ) ) {
  * Rename this for your plugin and update it as you release new versions.
  */
 
-if (!defined('TEXT_TO_AUDIO_NONCE')) {
+if ( ! defined( 'TEXT_TO_AUDIO_NONCE' ) ) {
 
-    define('TEXT_TO_AUDIO_NONCE', 'TEXT_TO_AUDIO_NONCE');
+	define( 'TEXT_TO_AUDIO_NONCE', 'TEXT_TO_AUDIO_NONCE' );
 }
 
-if (!defined('TEXT_TO_AUDIO_TEXT_DOMAIN')) {
+if ( ! defined( 'TEXT_TO_AUDIO_TEXT_DOMAIN' ) ) {
 
-    define('TEXT_TO_AUDIO_TEXT_DOMAIN', 'text-to-audio');
+	define( 'TEXT_TO_AUDIO_TEXT_DOMAIN', 'text-to-audio' );
 }
 
-if (!defined('TEXT_TO_AUDIO_ROOT_FILE')) {
+if ( ! defined( 'TEXT_TO_AUDIO_ROOT_FILE' ) ) {
 
-    define('TEXT_TO_AUDIO_ROOT_FILE', __FILE__);
+	define( 'TEXT_TO_AUDIO_ROOT_FILE', __FILE__ );
 }
 
-if (!defined('TTA_ROOT_FILE_NAME')) {
-    $path = explode( DIRECTORY_SEPARATOR, TEXT_TO_AUDIO_ROOT_FILE);
-    $file = end($path);
-    define('TTA_ROOT_FILE_NAME', $file);
+if ( ! defined( 'TTA_ROOT_FILE_NAME' ) ) {
+	$path = explode( DIRECTORY_SEPARATOR, TEXT_TO_AUDIO_ROOT_FILE );
+	$file = end( $path );
+	define( 'TTA_ROOT_FILE_NAME', $file );
 }
 
-if (!defined('TTA_LIBS_PATH')) {
+if ( ! defined( 'TTA_LIBS_PATH' ) ) {
 
-    define('TTA_LIBS_PATH', dirname(TEXT_TO_AUDIO_ROOT_FILE) . '/libs/');
+	define( 'TTA_LIBS_PATH', dirname( TEXT_TO_AUDIO_ROOT_FILE ) . '/libs/' );
 }
 
-if (!defined('TTA_ADMIN_PATH')) {
+if ( ! defined( 'TTA_ADMIN_PATH' ) ) {
 
-    define('TTA_ADMIN_PATH', plugin_dir_url(__FILE__) . 'admin/');
+	define( 'TTA_ADMIN_PATH', plugin_dir_url( __FILE__ ) . 'admin/' );
 }
 
-if (!defined('TTA_DEBUG_MODE')) {
+if ( ! defined( 'TTA_DEBUG_MODE' ) ) {
 
-    define('TTA_DEBUG_MODE', 0);
+	define( 'TTA_DEBUG_MODE', 0 );
 }
 
 
 if ( ! defined( 'TTA_PLUGIN_URL' ) ) {
-    /**
-     * Plugin Directory URL
-     *
-     * @var string
-     * @since 1.2.2
-     */
-    define( 'TTA_PLUGIN_URL', trailingslashit( plugin_dir_url( TEXT_TO_AUDIO_ROOT_FILE ) ) );
+	/**
+	 * Plugin Directory URL
+	 *
+	 * @var string
+	 * @since 1.2.2
+	 */
+	define( 'TTA_PLUGIN_URL', trailingslashit( plugin_dir_url( TEXT_TO_AUDIO_ROOT_FILE ) ) );
 }
 
 if ( ! defined( 'TTA_PLUGIN_PATH' ) ) {
-    /**
-     * Plugin Directory PATH
-     *
-     * @var string
-     * @since 1.2.2
-     */
-    define( 'TTA_PLUGIN_PATH', trailingslashit( plugin_dir_path( TEXT_TO_AUDIO_ROOT_FILE ) ) );
+	/**
+	 * Plugin Directory PATH
+	 *
+	 * @var string
+	 * @since 1.2.2
+	 */
+	define( 'TTA_PLUGIN_PATH', trailingslashit( plugin_dir_path( TEXT_TO_AUDIO_ROOT_FILE ) ) );
 }
 
 /**
@@ -172,108 +176,111 @@ if ( ! defined( 'TTA_PLUGIN_PATH' ) ) {
  *
  * @since    1.0.0
  */
-
 class TTA_Init {
 
-    public function __construct() {
-        if (!defined('TEXT_TO_AUDIO_VERSION')) {
-            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '1.6.19'));
-        }
+	public function __construct() {
+		if ( ! defined( 'TEXT_TO_AUDIO_VERSION' ) ) {
+			define( 'TEXT_TO_AUDIO_VERSION', apply_filters( 'tts_version', '1.6.19' ) );
+		}
 
-        if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
-            define('TEXT_TO_AUDIO_PLUGIN_NAME', apply_filters('tts_plugin_name', 'Text To Speech TTS' ) );
-        }
+		if ( ! defined( 'TEXT_TO_AUDIO_PLUGIN_NAME' ) ) {
+			define( 'TEXT_TO_AUDIO_PLUGIN_NAME', apply_filters( 'tts_plugin_name', 'Text To Speech TTS' ) );
+		}
 
-        $this->run();
-    }
+		$this->run();
+	}
 
-    public function run() {
-        $plugin = new TTA();
-        $plugin->run();
-        new TTA_Api_Routes();
-        new TTA_Notices();
+	public function run() {
+		$plugin = new TTA();
+		$plugin->run();
+		new TTA_Api_Routes();
+		new TTA_Notices();
 
 
+		//add plugins action links.
+		if ( is_admin() ) {
+			$basename = plugin_basename( __FILE__ );
+			$prefix   = is_network_admin() ? 'network_admin_' : '';
+			add_filter(
+				"{$prefix}plugin_action_links_$basename",
+				array( $this, 'add_action_links' ),
+				10, // priority
+				4   // parameters
+			);
+		}
+	}
 
-        //add plugins action links.
-        if( is_admin() ) {
-            $basename = plugin_basename( __FILE__ );
-            $prefix = is_network_admin() ? 'network_admin_' : '';
-            add_filter( 
-                "{$prefix}plugin_action_links_$basename", 
-                array( $this,'add_action_links' ), 
-                10, // priority
-                4   // parameters
-            );
-        }
-    }
+	/**
+	 * add action list to plugin.
+	 */
+	public function add_action_links( $actions, $plugin_file, $plugin_data, $context ) {
+		$plugin_url     = esc_url( admin_url() . 'admin.php?page=text-to-audio' );
+		$doc_url        = esc_url( admin_url() . 'admin.php?page=text-to-audio#/docs' );
+		$support        = esc_url( 'https://atlasaidev.com/contact-us/' );
+		$review         = esc_url( 'https://wordpress.org/support/plugin/text-to-audio/reviews/' );
+		$custom_actions = array(
+			'settings' => sprintf( '<a href="%s" target="_blank">%s</a>', $plugin_url, __( 'Settings', 'text-to-audio' ) ),
+			'docs'     => sprintf( '<a href="%s" target="_blank">%s</a>', $doc_url, __( 'Docs', 'text-to-audio' ) ),
+			'support'  => sprintf( '<a href="%s" target="_blank">%s</a>', $support, __( 'Support', 'text-to-audio' ) ),
+			'review'   => sprintf( '<a href="%s" target="_blank">%s</a>', $review, __( 'Write a Review', 'text-to-audio' ) ),
+		);
 
-    /**
-     * add action list to plugin.
-     */
-    public function add_action_links( $actions, $plugin_file, $plugin_data, $context ) {
-        $plugin_url = esc_url( admin_url() . 'admin.php?page=text-to-audio' );
-        $doc_url    = esc_url( admin_url() . 'admin.php?page=text-to-audio#/docs' );
-        $support    = esc_url( 'https://atlasaidev.com/contact-us/' );
-        $review    = esc_url( 'https://wordpress.org/support/plugin/text-to-audio/reviews/' );
-        $custom_actions = array(
-            'settings' => sprintf( '<a href="%s" target="_blank">%s</a>', $plugin_url , __( 'Settings', 'text-to-audio' ) ),
-            'docs'      => sprintf( '<a href="%s" target="_blank">%s</a>', $doc_url, __( 'Docs', 'text-to-audio' ) ),
-            'support'   => sprintf( '<a href="%s" target="_blank">%s</a>', $support, __( 'Support', 'text-to-audio' ) ),
-            'review'    => sprintf( '<a href="%s" target="_blank">%s</a>', $review, __( 'Write a Review', 'text-to-audio' ) ),
-        );
+		// add the links to the front of the actions list
+		return array_merge( $custom_actions, $actions );
 
-        // add the links to the front of the actions list
-        return array_merge( $custom_actions, $actions );
-
-    }
+	}
 
 }
 
-add_action('init', function () {
-    //Rest api init.
-    new TTA_Init();
-});
+add_action( 'init', function () {
+	//Rest api init.
+	new TTA_Init();
+} );
 
- /**
+/**
  * The code that runs during plugin activation.
  * This action is documented in includes/TTA_Activator.php
  */
-register_activation_hook(__FILE__, function () {
-        TTA_Activator::activate();
-    });
+register_activation_hook( __FILE__, function () {
+	TTA_Activator::activate();
+} );
 /**
  * The code that runs during plugin deactivation.
  * This action is documented in includes/TTA_Deactivator.php
  */
-register_deactivation_hook(__FILE__, function() {
-        TTA_Deactivator::deactivate();
-    });
+register_deactivation_hook( __FILE__, function () {
+	TTA_Deactivator::deactivate();
+} );
 
 
 /**
  *
  * Create short code for qr code.
  * Example [tta_listen_btn]
+ *
  * @param $atts
+ *
  * @return string
  */
-function tta_create_shortcode($atts) {
-	return tta_get_button_content($atts);
+function tta_create_shortcode( $atts ) {
+	return tta_get_button_content( $atts );
 }
 
-add_shortcode('tta_listen_btn', 'tta_create_shortcode');
+add_shortcode( 'tta_listen_btn', 'tta_create_shortcode' );
+add_shortcode( 'atlasvoice', 'tta_create_shortcode' );
+add_shortcode( 'AtlasVoice', 'tta_create_shortcode' );
 
 // Filter to allow shortcodes in HTML tags
-add_filter('do_shortcode_tag', 'allow_shortcode_in_html_tag', 10, 4);
-function allow_shortcode_in_html_tag($output, $tag, $attr, $m) {
+add_filter( 'do_shortcode_tag', 'allow_shortcode_in_html_tag', 10, 4 );
+function allow_shortcode_in_html_tag( $output, $tag, $attr, $m ) {
 
-	if ($tag == 'tta_listen_btn') {
-		if( isset( $attr['position'] ) && $attr['position'] == 'after' ) {
-			$content = tta_get_button_content($attr, false, $m[5]) . $m[5];
-		}else{
-			$content = $m[5] . tta_get_button_content($attr, false, $m[5]);
+	if ( $tag == 'tta_listen_btn' || 'atlasvoice' || 'AtlasVoice' ) {
+		if ( isset( $attr['position'] ) && $attr['position'] == 'after' ) {
+			$content = tta_get_button_content( $attr, false, $m[5] ) . $m[5];
+		} else {
+			$content = $m[5] . tta_get_button_content( $attr, false, $m[5] );
 		}
+
 		// Get the content wrapped by the shortcode.
 
 		return $content;
