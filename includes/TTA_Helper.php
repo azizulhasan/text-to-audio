@@ -251,15 +251,26 @@ class TTA_Helper
 	}
 
 
-	public static function tts_site_language($plugin_all_settings)
+	public static function tts_site_language($plugin_all_settings,  $post = '', $btn_no = '')
 	{
-
+		$cache_key = '';
+		if($btn_no && $post) {
+			$cache_key = 'tts_post_id_'.$post->ID.'_player_id'.$btn_no.'_site_language';
+			$cached_site_language = get_transient($cache_key);
+			if($cached_site_language) {
+				return $cached_site_language;
+			}
+		}
 		$default_language = '';
 		if(isset($plugin_all_settings['listening'])) {
 			// TODO: Match with multilinguage UI and default language.
 			$default_language = $plugin_all_settings['listening']['tta__listening_lang'];
 			// $default_language = str_replace(['-', ' '], '_', $default_language);
 			$default_language = strtolower($default_language);
+		}
+
+		if($cache_key) {
+			set_transient($cache_key, $default_language);
 		}
 
 		return apply_filters('tts_site_language', $default_language);
@@ -479,13 +490,19 @@ class TTA_Helper
 		return \apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post);
 	}
 
-	public static function get_mp3_file_urls($file_url_key, $post = '')
+	public static function get_mp3_file_urls($file_url_key, $post = '', $btn_no = '')
 	{
-
 		if (!$post) {
 
 			global $post;
 		}
+		$cache_key = 'tts_post_id_'.$post->ID.'_player_id'.$btn_no.'_mp3_file_urls';
+		$cached_urls = get_transient($cache_key);
+
+		if($cached_urls){
+			return $cached_urls;
+		}
+
 
 		if (!is_pro_active()) {
 			return [];
@@ -559,9 +576,10 @@ class TTA_Helper
 
 
 		if ($should_update_urls || empty($final_mp3_file_ulrs)) {
-
-//			update_post_meta($post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs);
+			update_post_meta($post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs);
 		}
+
+		set_transient($cache_key, $final_mp3_file_ulrs);
 
 		return \apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post);
 	}

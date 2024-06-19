@@ -279,10 +279,10 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
 	}
 
     // delete_post_meta($post->ID, 'tts_mp3_file_urls');
-    $language = TTA_Helper::tts_site_language($plugin_all_settings);
-    $voice = TTA_Helper::tts_get_voice($plugin_all_settings);
+    $language = TTA_Helper::tts_site_language($plugin_all_settings, $post,  $btn_no);
+    $voice = TTA_Helper::tts_get_voice($plugin_all_settings, $post, $btn_no);
     $file_url_key = TTA_Helper::tts_get_file_url_key($language, $voice, $btn_no);
-    $mp3_file_urls = TTA_Helper::get_mp3_file_urls($file_url_key, $post);
+    $mp3_file_urls = TTA_Helper::get_mp3_file_urls($file_url_key, $post, $btn_no );
     $file_name = TTA_Helper::tts_file_name($title, $language, $voice);
 
     $object = ob_start();
