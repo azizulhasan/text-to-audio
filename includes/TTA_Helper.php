@@ -27,6 +27,27 @@ use stdClass;
 class TTA_Helper
 {
 
+	public static function is_exluded_by_terms( $post_terms, $excluded_terms, $term_type = 'tag' ) {
+		$terms = [];
+		$is_exclude = false;
+		
+		if( is_array( $post_terms ) && is_array( $excluded_terms) ) {
+			foreach( $post_terms as $term ) {
+				array_push( $terms, $term->slug );
+			}
+			
+	
+			foreach( $terms as $term ) {
+				if( in_array( $term,  $excluded_terms) ) {
+					$is_exclude = true;
+					break;
+				}
+			}
+		}
+
+		return apply_filters( 'tts_is_exluded_by_terms', $is_exclude, $term_type );
+	}
+
 	public static function should_load_button()
 	{
 		$should_load_button = false;
@@ -41,6 +62,27 @@ class TTA_Helper
 		if (isset($settings['tta__settings_exclude_post_ids']) && is_array($settings['tta__settings_exclude_post_ids'])) {
 			$ids = $settings['tta__settings_exclude_post_ids'];
 		}
+
+		$excluded_tags = [];
+		if (isset($settings['tta__settings_exclude_wp_tags']) && is_array($settings['tta__settings_exclude_wp_tags'])) {
+			$excluded_tags = $settings['tta__settings_exclude_wp_tags'];
+		}
+
+		$post_tags = get_the_terms( $post->ID, 'post_tag' );
+
+		$is_exclude_by_tags = self::is_exluded_by_terms($post_tags, $excluded_tags);
+
+
+		$excluded_categories = [];
+		if (isset($settings['tta__settings_exclude_categories']) && is_array($settings['tta__settings_exclude_categories'])) {
+			$excluded_categories = $settings['tta__settings_exclude_categories'];
+		}
+
+		$post_categories = get_the_terms( $post->ID, 'category' );
+
+		$is_exclude_by_cagories = self::is_exluded_by_terms($post_categories, $excluded_categories, 'category');
+
+
 		if (!function_exists('is_user_logged_in')) {
 			include_once WPINC . '/pluggable.php';
 		}
@@ -59,12 +101,14 @@ class TTA_Helper
 			|| !in_array(self::tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'])
 			|| in_array($post->ID, $ids)
 			|| !$should_display_button_based_on_user_logged_user
+			|| $is_exclude_by_tags
+			|| $is_exclude_by_cagories
 
 		) {
 			$should_load_button = false;
 		}
 
-		return apply_filters('tta_should_load_button', $should_load_button);
+		return apply_filters('tta_should_load_button', $should_load_button, $post);
 	}
 
 
@@ -347,7 +391,7 @@ class TTA_Helper
 			if(isset($post_css_selectors[0])) {
 				$post_css_selectors = json_decode(json_encode($post_css_selectors[0]), true);
 			}
-			
+
 
 			if(!empty($post_css_selectors) && isset($post_css_selectors['tta__settings_use_own_css_selectors']) && $post_css_selectors['tta__settings_use_own_css_selectors'] ) {
 
@@ -362,9 +406,6 @@ class TTA_Helper
 				}
 			}
 
-			// error_log(print_r([
-			// 	'$all_settings_data' => $all_settings_data,
-			// ],1));
 		}
 
 
@@ -511,10 +552,6 @@ class TTA_Helper
 					}
 				} elseif (get_option('tts_is_backup_mp3_file') == 'false' && $language_code == $file_url_key && strpos($url, 'https://storage.googleapis.com') !== false) {
 					$should_update_urls = true;
-					// error_log(print_r([
-					// 	'url_expired' => $url,
-					// 	'tts_is_backup_mp3_file' => get_option( 'tts_is_backup_mp3_file' ),
-					// ], 1));
 					continue;
 				}
 
@@ -677,5 +714,92 @@ class TTA_Helper
 		// Compare the expiration time with the current time
 		return $expirationTimestamp < $currentTimestamp;
 	}
+
+
+	/**
+	 * Get all categories in a specific format.
+	 *
+	 * @return array An associative array with category slugs as keys and category names as values.
+	 */
+	public static function get_all_categories() {
+
+		if(!function_exists('get_categories')) {
+			require_once ABSPATH . 'wp-includes/category.php';
+		}
+
+		// Fetch all categories.
+		$categories = get_categories();
+		// Initialize an empty array to hold the formatted categories.
+		$formatted_categories = array();
+
+		// Loop through each category and format the output.
+		foreach ( $categories as $category ) {
+			$formatted_categories[ $category->slug ] = $category->name;
+		}
+
+		return apply_filters( 'tts_get_all_categories', $formatted_categories );
+	}
+
+	/**
+	 * Get all tags in a specific format.
+	 *
+	 * @return array An associative array with tag slugs as keys and tag names as values.
+	 */
+	public static function get_all_tags() {
+		if(!function_exists('get_tags')) {
+			require_once ABSPATH . 'wp-includes/category.php';
+		}
+		// Fetch all tags.
+		$tags = get_tags(array(
+			'hide_empty' => false
+		  ));
+
+		// Initialize an empty array to hold the formatted tags.
+		$formatted_tags = array();
+
+		// Loop through each tag and format the output.
+		foreach ( $tags as $tag ) {
+			$formatted_tags[ $tag->slug ] = $tag->name;
+		}
+
+		return apply_filters( 'get_all_tags', $formatted_tags );
+
+	}
+
+	 /**
+	 * Cleans up the input string by removing double delimiters,
+	 * extra spaces, and extra newlines.
+	 *
+	 * @param string $inputString The input string to process.
+	 * @param string $delimiter The delimiter to check for doubles.
+	 * @return string The cleaned-up string.
+	 */
+	 public static function clean_string($inputString) {
+		 $delimiter = \apply_filters('tts_sentence_delimiter', '.');
+		// Remove double delimiters separated by space
+		$spaceSeparatedDoubleDelimiterPattern = '/' . preg_quote($delimiter) . '\s+' . preg_quote($delimiter) . '/';
+		$cleanedString = preg_replace($spaceSeparatedDoubleDelimiterPattern, $delimiter, $inputString);
+
+		// Remove double delimiters (without space separation)
+		$doubleDelimiterPattern = '/' . preg_quote($delimiter) . '{2,}/';
+		$cleanedString = preg_replace($doubleDelimiterPattern, $delimiter, $cleanedString);
+
+		// Remove extra spaces (more than one space)
+		$cleanedString = preg_replace('/\s{2,}/', ' ', $cleanedString);
+
+		// Remove spaces before the delimiter and ensure one space after
+		$spaceAroundDelimiterPattern = '/\s*' . preg_quote($delimiter) . '\s*/';
+		$cleanedString = preg_replace($spaceAroundDelimiterPattern, $delimiter . ' ', $cleanedString);
+
+		// Remove extra newlines (more than one newline)
+		$cleanedString = preg_replace('/\n{2,}/', "\n", $cleanedString);
+
+		// Trim leading and trailing whitespace
+		$cleanedString = trim($cleanedString);
+
+		return $cleanedString;
+	}
+
+
 
 }
