@@ -12,7 +12,14 @@ import {
  *
  * Scripts
  */
-import { postWithoutImage, getData, setLocalStorage, getLocalStorage, gttsSupportedLanguages } from '../../context/utilities';
+import {
+	postWithoutImage,
+	getData,
+	setLocalStorage,
+	getLocalStorage,
+	gttsSupportedLanguages,
+	areAllKeysNumeric
+} from '../../context/utilities';
 import toast from '../../context/Notify';
 import { Link } from 'react-router-dom';
 import UpgradeToPro from '../../UpgradeToPro';
@@ -191,7 +198,19 @@ export default function Listening() {
 			setSpeechSynthesisVoices(voices)
 		}
 		if (Array.isArray(langs) && langs.length) {
-			setCurrentPlayerLanguages(langs)
+			if(areAllKeysNumeric(langs)) {
+				let newLangs = {};
+				for(let lang of langs) {
+					newLangs[lang] = lang;
+				}
+				setCurrentPlayerLanguages(newLangs)
+
+			}else{
+				setCurrentPlayerLanguages(langs)
+			}
+
+
+
 		}
 	
 		if (Array.isArray(langs) && Array.isArray(voices) && voices.length) return;
@@ -255,8 +274,8 @@ export default function Listening() {
 			formData[key] = value;
 		}
 
-		// console.log(formData)
-		// return;
+		console.log(formData)
+		return;
 		let data = new FormData();
 		data.append('fields', JSON.stringify(formData));
 		data.append('method', 'post');
@@ -557,8 +576,7 @@ export default function Listening() {
 												}
 
 												return lang.startsWith(languageCode)
-												
-											})}
+											})[0]}
 											aria-label='Default select example'>
 											<option disabled>
 												{' '}
@@ -574,20 +592,23 @@ export default function Listening() {
 										</Form.Select>
 									</Col>
 									{
-										customizationSettings?.buttonSettings?.id != 3 && <Col xs={12} sm={4} lg={4} >
+										customizationSettings?.buttonSettings?.id != 3 && Object.keys(currentPlayerLanguages).length && <Col xs={12} sm={4} lg={4} >
 											<Form.Label htmlFor={'tta_available_currentPlayerVoices_index_' + index}>Select Voice For {multilingualActiveLanguages[languageCode]}</Form.Label>
 											<Form.Select
 												onChange={handleChange}
 												name={'tta_available_currentPlayerVoices_index_' + index}
 												id={'tta_available_currentPlayerVoices_index_' + index}
-												// value={Object.keys(currentPlayerLanguages).filter(lang => lang.startsWith(languageCode))[0]}
-												value={listeningSettings.tta__listening_voice}
+												value={Object.values(currentPlayerVoices).filter(voice => {
+													// console.log({voice: voice, startwith: voice?.name.startsWith(languageCode)})
+													return voice?.name.startsWith(languageCode);
+												})[0]?.name}
+												// value={listeningSettings.tta__listening_voice}
 												aria-label='Default select example'>
 												<option disabled>
 													{' '}
 													Current Player Voice
 												</option>
-												{currentPlayerVoices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && customizationSettings?.buttonSettings?.id == 4 ? <option key={index} data-lang={voice?.languageCodes?.[0]} value={[voice.name, voice.ssmlGender].join('-')}>
+												{currentPlayerVoices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && customizationSettings?.buttonSettings?.id == 4 ? <option key={index} data-lang={voice?.languageCodes?.[0]} value={voice.name}>
 													{voice.name} {'-'} {voice.ssmlGender}
 												</option> : <option key={index} data-lang={voice.lang} value={voice.name}>
 													{voice.name}
