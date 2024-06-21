@@ -266,7 +266,7 @@ class TTA_Helper
 	{
 
 		$default_language = '';
-		if(isset($plugin_all_settings['listening'])) {
+		if(isset($plugin_all_settings['listening']['tta__listening_lang'])) {
 			// TODO: Match with multilinguage UI and default language.
 			$default_language = $plugin_all_settings['listening']['tta__listening_lang'];
 			// $default_language = str_replace(['-', ' '], '_', $default_language);
