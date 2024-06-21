@@ -209,8 +209,6 @@ export default function Listening() {
 				setCurrentPlayerLanguages(langs)
 			}
 
-
-
 		}
 	
 		if (Array.isArray(langs) && Array.isArray(voices) && voices.length) return;
@@ -226,15 +224,12 @@ export default function Listening() {
 				clearTimeout(timer)
 				timer = null
 				setSpeechSynthesisVoices(window.speechSynthesis.getVoices())
-	
+				let newLangs = {};
 				window.speechSynthesis.getVoices().map(item => {
 					if (!langs.includes(item.lang)) {
-						langs.push(item.lang)
+						langs[item.lang] = item.lang;
 					}
 				})
-
-				setCurrentPlayerLanguages(langs)
-				setCurrentPlayerVoices(window.speechSynthesis.getVoices());
 			}
 		})
 	}
@@ -569,9 +564,8 @@ export default function Listening() {
 											name={'tta_currentPlayerLanguages_index_' + index}
 											id={'tta_currentPlayerLanguages_index_' + index}
 											value={Object.keys(currentPlayerLanguages).filter(lang => {
-												
 												if(customizationSettings?.buttonSettings?.id < 3) {
-													console.log({lang: currentPlayerLanguages[lang], startsWith: currentPlayerLanguages[lang].startsWith(languageCode), languageCode})
+													// console.log({lang: currentPlayerLanguages[lang], startsWith: currentPlayerLanguages[lang].startsWith(languageCode), languageCode})
 													return currentPlayerLanguages[lang].startsWith(languageCode);
 												}
 
@@ -599,7 +593,9 @@ export default function Listening() {
 												name={'tta_available_currentPlayerVoices_index_' + index}
 												id={'tta_available_currentPlayerVoices_index_' + index}
 												value={Object.values(currentPlayerVoices).filter(voice => {
-													// console.log({voice: voice, startwith: voice?.name.startsWith(languageCode)})
+													if(customizationSettings?.buttonSettings?.id < 3) {
+														return voice?.lang.startsWith(languageCode);
+													}
 													return voice?.name.startsWith(languageCode);
 												})[0]?.name}
 												// value={listeningSettings.tta__listening_voice}
