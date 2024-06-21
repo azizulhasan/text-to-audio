@@ -39,9 +39,9 @@ export default function Listening() {
         tta__listening_volume: 1,
         tta__listening_lang: 'en_GB',
         tta__listening_activeLanguages_mapping: {},
-        tta__multilingualActiveLanguages: [],
-        tta__currentPlayerLanguages: [],
-        tta__available_currentPlayerVoices: [],
+        tta__multilingualActiveLanguages: {},
+        tta__currentPlayerLanguages: {},
+        tta__available_currentPlayerVoices: {},
     });
     const [listeningLang, setListeningLang] = useState('en_GB');
     const apiURL = useMemo(() => {
@@ -161,13 +161,16 @@ export default function Listening() {
         data2.append('method', 'get');
         postWithoutImage(tta_obj.api_url + 'tta/v1/listening', data2)
             .then((res) => {
+                // setListeningSettings({
+                //     ...res.data,
+                //     ...listeningSettings,
+                //     tta__multilingualActiveLanguages: [...res.data?.tta__multilingualActiveLanguages, ...listeningSettings?.tta__multilingualActiveLanguages],
+                //     tta__currentPlayerLanguages: [...res.data?.tta__currentPlayerLanguages, ...listeningSettings?.tta__currentPlayerLanguages],
+                //     tta__available_currentPlayerVoices: [...res.data?.tta__available_currentPlayerVoices, ...listeningSettings?.tta__available_currentPlayerVoices]
+                // });
                 setListeningSettings({
                     ...res.data,
-                    ...listeningSettings,
-                    tta__multilingualActiveLanguages: [...res.data?.tta__multilingualActiveLanguages, ...listeningSettings?.tta__multilingualActiveLanguages],
-                    tta__currentPlayerLanguages: [...res.data?.tta__currentPlayerLanguages, ...listeningSettings?.tta__currentPlayerLanguages],
-                    tta__available_currentPlayerVoices: [...res.data?.tta__available_currentPlayerVoices, ...listeningSettings?.tta__available_currentPlayerVoices]
-                });
+                })
             })
             .catch((err) => {
                 console.log(err);
@@ -237,6 +240,8 @@ export default function Listening() {
                         langs[item.lang] = item.lang;
                     }
                 })
+                setCurrentPlayerLanguages(langs)
+                setCurrentPlayerVoices(window.speechSynthesis.getVoices())
             }
         })
     }
@@ -274,17 +279,32 @@ export default function Listening() {
                 return;
             }
             if (key === 'tta__available_currentPlayerVoices' || 'tta__currentPlayerLanguages' === key || 'tta__multilingualActiveLanguages' === key) {
-                if (!formData?.[key]) {
-                    formData[key] = [];
+                if(!formData?.[key]){
+                    formData[key] = {};
                 }
-                formData[key].push(value);
+                if(!Object.keys(formData?.[key]).length){
+                    formData[key][customizationSettings?.buttonSettings?.id] = [];
+                }
+                formData[key][customizationSettings?.buttonSettings?.id].push(value);
             } else {
                 formData[key] = value;
             }
-
+        }
+        formData.tta__available_currentPlayerVoices = {
+            ...listeningSettings.tta__available_currentPlayerVoices,
+            ...formData.tta__available_currentPlayerVoices,
         }
 
-        // console.log(formData)
+        formData.tta__currentPlayerLanguages = {
+            ...listeningSettings.tta__currentPlayerLanguages,
+            ...formData.tta__currentPlayerLanguages,
+        }
+
+
+        formData.tta__multilingualActiveLanguages = {
+            ...listeningSettings.tta__multilingualActiveLanguages,
+            ...formData.tta__multilingualActiveLanguages,
+        }
         // return;
         let data = new FormData();
         data.append('fields', JSON.stringify(formData));
@@ -303,15 +323,8 @@ export default function Listening() {
      * handle change
      * @param {*} e
      */
-    const handleChange = (e, index = '') => {
-        // if (
-        // 	e.target.name == 'tta__listening_lang' &&
-        // 	e.target.value !== listeningLang
-        // ) {
-        // 	toast('Listening language should be always recording language.', 'info', {
-        // 		autoClose: 5000
-        // 	});
-        // }
+    const handleChange = (e, index = '', player_id = '') => {
+
         if (e.target.name === 'tta__listening_lang' && customizationSettings?.buttonSettings?.id == 4) {
 
             let filteredVoices = speechSynthesisVoices.filter(voice => {
@@ -327,13 +340,16 @@ export default function Listening() {
         }
 
         let listeningSettingsCloned = structuredClone(listeningSettings)
+        // console.log(listeningSettingsCloned)
+
         if (e.target.name === 'tta__available_currentPlayerVoices' || 'tta__currentPlayerLanguages' === e.target.name || 'tta__multilingualActiveLanguages' === e.target.name) {
-            if (!listeningSettingsCloned?.[e.target.name]) {
-                listeningSettingsCloned[e.target.name] = [];
+            if (!listeningSettingsCloned?.[e.target.name]?.[player_id]) {
+                if(!Object.keys(listeningSettingsCloned[e.target.name]).length){
+                    listeningSettingsCloned[e.target.name] = {}
+                }
+                listeningSettingsCloned[e.target.name][player_id] = [];
             }
-
-            listeningSettingsCloned[e.target.name][index] = e.target.value;
-
+            listeningSettingsCloned[e.target.name][player_id][index] = e.target.value;
             if( 'tta__multilingualActiveLanguages' != e.target.name) {
                 setListeningSettings(listeningSettingsCloned);
             }
@@ -596,10 +612,10 @@ export default function Listening() {
                                             <Form.Label htmlFor={'tta__currentPlayerLanguages_index_' + index}>Select
                                                 Language For {multilingualActiveLanguages[languageCode]}</Form.Label>
                                             <Form.Select
-                                                onChange={(e)=> handleChange(e, index)}
+                                                onChange={(e)=> handleChange(e, index, customizationSettings?.buttonSettings?.id)}
                                                 name={'tta__currentPlayerLanguages'}
                                                 id={'tta__currentPlayerLanguages_index_' + index}
-                                                value={ listeningSettings?.tta__currentPlayerLanguages?.[index] ?? Object.keys(currentPlayerLanguages).filter(lang => {
+                                                value={ listeningSettings?.tta__currentPlayerLanguages?.[customizationSettings?.buttonSettings?.id]?.[index] ??  Object.keys(currentPlayerLanguages).filter(lang => {
                                                     if (customizationSettings?.buttonSettings?.id < 3) {
                                                         return currentPlayerLanguages[lang].startsWith(languageCode);
                                                     }
@@ -626,16 +642,15 @@ export default function Listening() {
                                                 <Form.Label htmlFor={'tta__available_currentPlayerVoices_index_' + index}>Select
                                                     Voice For {multilingualActiveLanguages[languageCode]}</Form.Label>
                                                 <Form.Select
-                                                    onChange={(e)=> handleChange(e, index)}
+                                                    onChange={(e)=> handleChange(e, index, customizationSettings?.buttonSettings?.id)}
                                                     name={'tta__available_currentPlayerVoices'}
                                                     id={'tta__available_currentPlayerVoices_index_' + index}
-                                                    value={listeningSettings?.tta__available_currentPlayerVoices?.[index] ?? Object.values(currentPlayerVoices).filter(voice => {
+                                                    value={listeningSettings?.tta__available_currentPlayerVoices?.[customizationSettings?.buttonSettings?.id]?.[index] ?? Object.values(currentPlayerVoices).filter(voice => {
                                                         if (customizationSettings?.buttonSettings?.id < 3) {
                                                             return voice?.lang.startsWith(languageCode);
                                                         }
                                                         return voice?.name.startsWith(languageCode);
                                                     })[0]?.name}
-                                                    // value={listeningSettings.tta__listening_voice}
                                                     aria-label='Default select example'>
                                                     <option disabled>
                                                         {' '}
