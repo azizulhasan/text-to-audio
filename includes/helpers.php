@@ -56,14 +56,11 @@ function tta_clean_content( $text ) {
 	$text = str_replace( array_keys( $quotationMarks ), array_values( $quotationMarks ), $text );
 	$text = str_replace( array_keys( $otherMarks ), array_values( $otherMarks ), $text );
 
-	// CF 16-Oct-19: We want to make sure no quotes are over-escaped (if somebody writes \" it will get substituted as \\",
-	// which will escape the slash instead of the quotation mark. We don't merge them in one regex because neither mark
-	// can _always_ be substituted with the other without changing the meaning of the sentence for the TTS engine.
-	// Note: backspaces need to be doubled. The first regex (\\\\{2,}") means: match two or more \ followed by "
-	$text = preg_replace( '/\\\\{2,}"/', '\"', $text );
-	$text = preg_replace( "/\\\\{2,}'/", "\'", $text );
 
-	$text = preg_replace( '/\s+/', ' ', trim( $text ) ); // Get rid of /n and /s in the string.
+    $text = preg_replace('/\\\\{2,}"/', '\"', $text);
+    $text = preg_replace("/\\\\{2,}'/", "\'", $text);
+
+    $text = TTA_Helper::clean_string($text);
 
 	return apply_filters( 'tta_clean_content', $text );
 
@@ -229,6 +226,7 @@ function tts_enqueue_button_scripts( $content, $btn_no, $class, $btn_style, $tex
 			get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time, $plugin_all_settings );
 		}
 	} );
+
 }
 
 function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings ) {
@@ -447,6 +445,7 @@ function add_listen_button( $content ) {
 			ob_end_clean();
 		}
 	}
+
 
 	return apply_filters( 'tts_button_with_content', $button . $content, $button, $content );
 
@@ -692,6 +691,9 @@ function set_initial_button_texts( $content_read_time ) {
 
 
 function get_player_id( $should_return_database_value = false ) {
+	global  $post;
+
+}
 	$customize_settings                   = (array) TTA_Helper::tts_get_settings( 'customize' );
 	$customize_settings['buttonSettings'] = isset( $customize_settings['buttonSettings'] ) ? (array) $customize_settings['buttonSettings'] : [ 'id' => 1 ];
 	$player_id                            = isset( $customize_settings['buttonSettings']['id'] ) ? $customize_settings['buttonSettings']['id'] : 1;
@@ -701,7 +703,8 @@ function get_player_id( $should_return_database_value = false ) {
 		$player_id = 1;
 	}
 
-	return apply_filters( 'tts_get_player_id', $player_id, $customize_settings );
+    return apply_filters('tts_get_player_id', $player_id, $customize_settings, $post );
+
 }
 
 /**
