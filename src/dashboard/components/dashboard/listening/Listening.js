@@ -58,7 +58,6 @@ export default function Listening() {
     useEffect(() => {
         if (window?.ttsObjPro?.compatible?.['gtranslate/gtranslate.php']) {
             let gtranslateActiveLanguages = ttsObjPro?.compatible?.['gtranslate/gtranslate.php']?.GTranslate?.fincl_langs;
-
             // Initialize an empty object
             const languageObject = {};
 
@@ -85,7 +84,6 @@ export default function Listening() {
             for (const langCode of active_languages) {
                 languageObject[langCode] = gtranslateActiveLanguages[langCode].english_name;
             }
-
 
             setMultilingualActiveLanguages(languageObject)
 
@@ -147,7 +145,6 @@ export default function Listening() {
         data.append('method', 'get');
         postWithoutImage(tta_obj.api_url + 'tta/v1/record', data)
             .then((res) => {
-                // console.log(res)
                 setListeningLang(res.data.tta__recording__lang);
             })
             .catch((err) => {
@@ -161,13 +158,6 @@ export default function Listening() {
         data2.append('method', 'get');
         postWithoutImage(tta_obj.api_url + 'tta/v1/listening', data2)
             .then((res) => {
-                // setListeningSettings({
-                //     ...res.data,
-                //     ...listeningSettings,
-                //     tta__multilingualActiveLanguages: [...res.data?.tta__multilingualActiveLanguages, ...listeningSettings?.tta__multilingualActiveLanguages],
-                //     tta__currentPlayerLanguages: [...res.data?.tta__currentPlayerLanguages, ...listeningSettings?.tta__currentPlayerLanguages],
-                //     tta__available_currentPlayerVoices: [...res.data?.tta__available_currentPlayerVoices, ...listeningSettings?.tta__available_currentPlayerVoices]
-                // });
                 setListeningSettings({
                     ...res.data,
                 })
@@ -279,10 +269,17 @@ export default function Listening() {
                 return;
             }
             if (key === 'tta__available_currentPlayerVoices' || 'tta__currentPlayerLanguages' === key || 'tta__multilingualActiveLanguages' === key) {
-                if(!formData?.[key]){
+
+                if (!ttsObj.is_pro_active) {
+                    formData[key] = {};
+                    continue;
+                }
+
+
+                if (!formData?.[key]) {
                     formData[key] = {};
                 }
-                if(!Object.keys(formData?.[key]).length){
+                if (!Object.keys(formData?.[key]).length) {
                     formData[key][customizationSettings?.buttonSettings?.id] = [];
                 }
                 formData[key][customizationSettings?.buttonSettings?.id].push(value);
@@ -305,6 +302,7 @@ export default function Listening() {
             ...listeningSettings.tta__multilingualActiveLanguages,
             ...formData.tta__multilingualActiveLanguages,
         }
+        console.log(formData)
         // return;
         let data = new FormData();
         data.append('fields', JSON.stringify(formData));
@@ -344,13 +342,13 @@ export default function Listening() {
 
         if (e.target.name === 'tta__available_currentPlayerVoices' || 'tta__currentPlayerLanguages' === e.target.name || 'tta__multilingualActiveLanguages' === e.target.name) {
             if (!listeningSettingsCloned?.[e.target.name]?.[player_id]) {
-                if(!Object.keys(listeningSettingsCloned[e.target.name]).length){
+                if (!Object.keys(listeningSettingsCloned[e.target.name]).length) {
                     listeningSettingsCloned[e.target.name] = {}
                 }
                 listeningSettingsCloned[e.target.name][player_id] = [];
             }
             listeningSettingsCloned[e.target.name][player_id][index] = e.target.value;
-            if( 'tta__multilingualActiveLanguages' != e.target.name) {
+            if ('tta__multilingualActiveLanguages' != e.target.name) {
                 setListeningSettings(listeningSettingsCloned);
             }
         } else {
@@ -361,6 +359,16 @@ export default function Listening() {
         }
 
     };
+
+    const getActiveMultingualPluginName = () => {
+        let activePluginName = '';
+        if (window?.ttsObjPro?.compatible?.['sitepress-multilingual-cms/sitepress.php']) {
+            activePluginName = 'WPML'
+        } else if (window?.ttsObjPro?.compatible?.['gtranslate/gtranslate.php']) {
+            activePluginName = "Gtranslate";
+        }
+        return activePluginName
+    }
     return (
         <Container>
             <Row>
@@ -580,8 +588,32 @@ export default function Listening() {
                                     ))}
                                 </>
                             </Col>
+                        </Row>
+                        <Row>
                             {
-                                Object.keys(multilingualActiveLanguages).length && Object.keys(multilingualActiveLanguages).map((languageCode, index) =>
+                                Object.keys(multilingualActiveLanguages).length ?
+                                    <h1> {getActiveMultingualPluginName()} Plugin Language
+                                        Mapping {!ttsObj.is_pro_active && <>
+                                            {['top'].map((placement) => (
+                                                <OverlayTrigger
+                                                    key={placement}
+                                                    placement={placement}
+                                                    overlay={
+                                                        <Tooltip id={`tooltip-${placement}`}>
+                                                            Language mapping for WPML, Gtranalate plugin is available in
+                                                            the pro version.
+                                                        </Tooltip>
+                                                    }>
+                                                    <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i className="fas fa-lock" /></Button>
+                                                </OverlayTrigger>
+                                            ))}
+                                        </>
+                                        } </h1> : <></>
+                            }
+                        </Row>
+                        <Row>
+                            {
+                                Object.keys(multilingualActiveLanguages).length ? Object.keys(multilingualActiveLanguages).map((languageCode, index) =>
                                     <Row key={index}>
                                         <Col xs={12} sm={4} lg={4}>
                                             <Form.Group>
@@ -612,10 +644,10 @@ export default function Listening() {
                                             <Form.Label htmlFor={'tta__currentPlayerLanguages_index_' + index}>Select
                                                 Language For {multilingualActiveLanguages[languageCode]}</Form.Label>
                                             <Form.Select
-                                                onChange={(e)=> handleChange(e, index, customizationSettings?.buttonSettings?.id)}
+                                                onChange={(e) => handleChange(e, index, customizationSettings?.buttonSettings?.id)}
                                                 name={'tta__currentPlayerLanguages'}
                                                 id={'tta__currentPlayerLanguages_index_' + index}
-                                                value={ listeningSettings?.tta__currentPlayerLanguages?.[customizationSettings?.buttonSettings?.id]?.[index] ??  Object.keys(currentPlayerLanguages).filter(lang => {
+                                                value={listeningSettings?.tta__currentPlayerLanguages?.[customizationSettings?.buttonSettings?.id]?.[index] ?? Object.keys(currentPlayerLanguages).filter(lang => {
                                                     if (customizationSettings?.buttonSettings?.id < 3) {
                                                         return currentPlayerLanguages[lang].startsWith(languageCode);
                                                     }
@@ -639,10 +671,11 @@ export default function Listening() {
                                         {
                                             customizationSettings?.buttonSettings?.id != 3 && Object.keys(currentPlayerLanguages).length &&
                                             <Col xs={12} sm={4} lg={4}>
-                                                <Form.Label htmlFor={'tta__available_currentPlayerVoices_index_' + index}>Select
+                                                <Form.Label
+                                                    htmlFor={'tta__available_currentPlayerVoices_index_' + index}>Select
                                                     Voice For {multilingualActiveLanguages[languageCode]}</Form.Label>
                                                 <Form.Select
-                                                    onChange={(e)=> handleChange(e, index, customizationSettings?.buttonSettings?.id)}
+                                                    onChange={(e) => handleChange(e, index, customizationSettings?.buttonSettings?.id)}
                                                     name={'tta__available_currentPlayerVoices'}
                                                     id={'tta__available_currentPlayerVoices_index_' + index}
                                                     value={listeningSettings?.tta__available_currentPlayerVoices?.[customizationSettings?.buttonSettings?.id]?.[index] ?? Object.values(currentPlayerVoices).filter(voice => {
@@ -669,7 +702,7 @@ export default function Listening() {
                                             </Col>
                                         }
 
-                                    </Row>)
+                                    </Row>) : <></>
                             }
                             <div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
                                 <button type='submit' className='tta_btn  btn-center'>
