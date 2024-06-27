@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.5.3
 Requires PHP: 7.4
-Stable tag: 1.6.19
+Stable tag: 1.6.21
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,9 +24,6 @@ Right after you install this text to speech free plugin, it will automatically s
 == Best Free Text To Speech TTS Accessibility Plugin For WordPress - Video Tutorial ==
 [youtube https://www.youtube.com/watch?v=P_dw_YjnVxc&t=21s&ab_channel=AtlasAiDev]
 
-### SUPPORT AND HAVE QUESTIONS ? VISIT HERE:
-> * [Contact Us](http://atlasaidev.com/contact-us/)
-
 ### USEFULL LINKS:
 > * [Text To Speech Pro](https://atlasaidev.com/text-to-speech-pro/)
 > * [Pricing](https://atlasaidev.com/pricing/)
@@ -35,6 +32,9 @@ Right after you install this text to speech free plugin, it will automatically s
 > * [Video Tutorial](https://www.youtube.com/@atlasaidev)
 > * [Documentation](https://atlasaidev.com/docs/)
 
+
+### SUPPORT AND HAVE QUESTIONS ? VISIT HERE:
+> * [Contact Us](http://atlasaidev.com/contact-us/)
 
 
 ### Why Use The Text-to-Speech TTS Accessibility Plugin?
@@ -399,7 +399,13 @@ You can customize the voice and language of the text-to-speech player using shor
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+= 1.6.21 ( 26 June 2024 ) =
+Added: Language Mapping for Gtranslate and WPML plugin added.
+Fixed: Minor bug fixed.
 
+= 1.6.20 ( 18 June 2024 ) =
+Added: `AtlasVoice` shortcode added.
+Fixed: Dashboard notification issue fixed.
 
 = 1.6.19 ( 10 June 2024 ) =
 Added: `tts_get_player_id` filter modified. `$post` parameter added.
