@@ -324,21 +324,20 @@ export default function Listening() {
     const handleChange = (e, index = '', player_id = '') => {
 
         if (e.target.name === 'tta__listening_lang' && customizationSettings?.buttonSettings?.id == 4) {
-
-            let filteredVoices = speechSynthesisVoices.filter(voice => {
-                return voice.languageCodes[0] == e.target.value;
-            })
-            if (filteredVoices.length === 1) {
-                setListeningSettings({
-                    ...listeningSettings,
-                    ...{['tta__listening_voice']: filteredVoices[0].languageCodes[0]},
-                });
-            }
-            setCurrentPlayerVoices(filteredVoices)
+            // TODO: this filter will only be applied for default language not for WPML or GTranslate plugins.
+            // let filteredVoices = speechSynthesisVoices.filter(voice => {
+            //     return voice.languageCodes[0] == e.target.value;
+            // })
+            // if (filteredVoices.length === 1) {
+            //     setListeningSettings({
+            //         ...listeningSettings,
+            //         ...{['tta__listening_voice']: filteredVoices[0].languageCodes[0]},
+            //     });
+            // }
+            // setCurrentPlayerVoices(filteredVoices)
         }
 
         let listeningSettingsCloned = structuredClone(listeningSettings)
-        // console.log(listeningSettingsCloned)
 
         if (e.target.name === 'tta__available_currentPlayerVoices' || 'tta__currentPlayerLanguages' === e.target.name || 'tta__multilingualActiveLanguages' === e.target.name) {
             if (!listeningSettingsCloned?.[e.target.name]?.[player_id]) {
