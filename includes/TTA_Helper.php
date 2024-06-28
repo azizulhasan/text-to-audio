@@ -476,7 +476,7 @@ class TTA_Helper {
 		return \apply_filters( 'tts_mp3_file_urls', $final_mp3_file_ulrs, $post );
 	}
 
-	public static function get_mp3_file_urls( $file_url_key, $post = '' ) {
+	public static function get_mp3_file_urls( $file_url_key, $post = '', $date = '', $file_name = '' ) {
 
 		if ( ! $post ) {
 
@@ -510,7 +510,7 @@ class TTA_Helper {
 
 		foreach ( $mp3_file_urls as $language_code => $url ) {
 
-			if ( self::is_file_url_not_exists_and_is_file_empty( $url ) ) {
+			if ( self::is_file_url_not_exists_and_is_file_empty( $url, $date, $file_name ) ) {
 
 				$should_update_urls = true;
 			} else {
@@ -645,7 +645,7 @@ class TTA_Helper {
 		}
 	}
 
-	public static function is_file_url_not_exists_and_is_file_empty( $url ) {
+	public static function is_file_url_not_exists_and_is_file_empty( $url, $date, $file_name ) {
 		$file_headers = @get_headers( $url );
 
 		if ( ! $file_headers && function_exists( 'curl_init' ) ) {
@@ -664,16 +664,36 @@ class TTA_Helper {
 		// If file backup is not enabled then check if file exists and file has content.
 		if ( ! get_option( 'tts_is_backup_mp3_file' ) ) {
 			$full_path = self::get_path_from_url( $url );
-
 			if ( ! file_exists( $full_path ) || ( file_exists( $full_path ) && filesize( $full_path ) == 0 ) ) {
 				return true;
 			}
 		}
 
 		if ( ! $file_headers || strpos( $file_headers, 'Not Found' ) !== false ) {
-
 			return true;
 		}
+
+		// Check if the file is exist in proper folder also check if the file name is same?
+		if ( $date && $file_name ) {
+			$url_file_name = explode( $date, $url );
+			$url_file_name = isset( $url_file_name[1] ) ? trim( $url_file_name[1], "/\\" ) : false;
+
+			if ( ! $url_file_name ) {
+				return true;
+			}
+
+			if ( apply_filters( 'tts_should_match_filename_with_post_title', false ) ) {
+				$url_file_basename     = explode( '__lang__', $url_file_name );
+				$url_file_basename     = isset( $url_file_basename[0] ) ? trim( $url_file_basename[0] ) : false;
+				$current_post_basename = explode( '__lang__', $file_name );
+				$current_post_basename = isset( $current_post_basename[0] ) ? trim( $current_post_basename[0] ) : false;
+				if ( ! is_string( $url_file_basename ) && ! is_string( $current_post_basename ) && $url_file_basename != $current_post_basename ) {
+					return true;
+				}
+			}
+
+		}
+
 
 		return false;
 	}
