@@ -687,7 +687,7 @@ class TTA_Helper {
 				$url_file_basename     = isset( $url_file_basename[0] ) ? trim( $url_file_basename[0] ) : false;
 				$current_post_basename = explode( '__lang__', $file_name );
 				$current_post_basename = isset( $current_post_basename[0] ) ? trim( $current_post_basename[0] ) : false;
-				if ( ! is_string( $url_file_basename ) && ! is_string( $current_post_basename ) && $url_file_basename != $current_post_basename ) {
+				if ( ! is_string( $url_file_basename ) || ! is_string( $current_post_basename ) || $url_file_basename != $current_post_basename ) {
 					return true;
 				}
 			}
