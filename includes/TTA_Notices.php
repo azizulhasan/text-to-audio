@@ -536,9 +536,9 @@ class TTA_Notices {
 	 */
 	public function tts_setup_notice() {
 
-		 delete_option('tts_setup_notice_next_show_time');
-		 delete_user_meta('1', 'tts_setup_notice_dismissed');
-         update_option('tts_setup_notice_next_show_time', 12);
+//		 delete_option('tts_setup_notice_next_show_time');
+//		 delete_user_meta('1', 'tts_setup_notice_dismissed');
+//         update_option('tts_setup_notice_next_show_time', 12);
 
 		$has_notice    = false;
 		$user_id       = get_current_user_id();
