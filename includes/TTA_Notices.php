@@ -565,7 +565,7 @@ class TTA_Notices {
             <div class="tta-notice notice notice-info is-dismissible" dir="<?php echo tta_is_rtl() ? 'ltr' : 'auto'?>" data-which="setup" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <p><?php
 					printf(
-						esc_html__( '%2$s  %1$s  %1$s  If you need help with the setup of the Text-to-Speech plugin, please contact us. We will provide you live support.', TEXT_TO_AUDIO_TEXT_DOMAIN ),
+						esc_html__( '%2$s  %1$s  %1$s  If you need help with the setup of the Text-to-Speech plugin, please contact us. We will provide you support.', TEXT_TO_AUDIO_TEXT_DOMAIN ),
 						'<div class="tta-review-notice-logo"></div>',
 						"<h1><strong>Need Support For Text To Speech?</strong></h1>", //phpcs:ignore
 					);
