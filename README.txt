@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.5.3
 Requires PHP: 7.4
-Stable tag: 1.6.21
+Stable tag: 1.6.22
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -384,20 +384,28 @@ You can customize the voice and language of the text-to-speech player using shor
 	`	
 
 == Screenshots ==
-1. Add play button to any post.
-2. Write post by voice.
-3. Customization of button.
-4. Choose listening voice.
-5. Choose recording language.
-6. Documentation.
-7. Gutenberg Support.
-8. Customize the button in block editor, Block Name ( Customize Button ).
+1. Player 1.
+2. Player 2.
+3. Player 3.
+4. Settings Page.
+5. Post Content Customization.
+6. Integrate Google Cloud Text To Speech In Pro Version.
+7. Choose Multiple Player.
+8. Player Customization.
+9. Individual Post Content Customization.
+
 
 == Changelog ==
 
 ### TRANSLATION REQUEST
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+= 1.6.22 ( 01 July 2024 ) =
+Improved: Instruction improved.
+Added: Support notice added.
+Added: Error handler added.
+Improved: Load MP3 file from proper folder in pro version.
 
 = 1.6.21 ( 26 June 2024 ) =
 Added: Language Mapping for Gtranslate and WPML plugin added.
