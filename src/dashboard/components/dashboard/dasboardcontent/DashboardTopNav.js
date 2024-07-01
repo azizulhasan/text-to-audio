@@ -26,8 +26,8 @@ export default function DashboardTopNav() {
 
       {/* me-3 me-lg-4 */}
       {
-        !ttsObj.is_pro_active && <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://atlasaidev.com/text-to-speech-pro/" target="_blank">
-          Get Pro
+        !ttsObj.is_pro_active && <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/" target="_blank">
+          See Pricing
         </a>
       }
       <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="http://atlasaidev.com/contact-us/" target="_blank">

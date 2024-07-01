@@ -239,7 +239,9 @@ export default function Customize() {
 		postWithoutImage(tta_obj.api_url + 'tta/v1/customize', data)
 			.then((res) => {
 				setListeningStyle(res.data);
-				toast('Customize Data Saved');
+				toast('Customization saved. Now go to the "Listening" menu.', 'info', {
+					autoClose: 15000
+				});
 			})
 			.catch((err) => {
 				console.log(err);

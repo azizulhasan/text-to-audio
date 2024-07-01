@@ -95,6 +95,10 @@ class TTA_Notices {
 
         // }
 
+        if( ! is_pro_active() && version_compare( TEXT_TO_AUDIO_VERSION, TEXT_TO_AUDIO_VERSION, '>=')) {
+	        add_action( 'admin_notices', [ $this, 'tts_setup_notice' ] );
+        }
+
 //		add_action('wp_ajax_tta_save_review_notice', [ $this, 'tta_save_review_notice' ] );
 		// add_action('wp_ajax_tta_save_feedback_notice', [ $this, 'tta_save_feedback_notice' ] );
 
@@ -526,6 +530,94 @@ class TTA_Notices {
 
 	}
 
+
+	/**
+	 * Upload folder is writable notice.
+	 */
+	public function tts_setup_notice() {
+
+//		 delete_option('tts_setup_notice_next_show_time');
+//		 delete_user_meta('1', 'tts_setup_notice_dismissed');
+//         update_option('tts_setup_notice_next_show_time', 12);
+
+		$has_notice    = false;
+		$user_id       = get_current_user_id();
+		$next_timestamp = get_option( 'tts_setup_notice_next_show_time' );
+		$review_notice_dismissed = get_user_meta($user_id, 'tts_setup_notice_dismissed', true);
+		$nonce         = wp_create_nonce( 'tta_notice_nonce' );
+		if ( ! empty($next_timestamp) ) {
+			if ( ( time() > $next_timestamp ) ) {
+				$show_notice = true;
+			}else {
+				$show_notice = false;
+			}
+		} else {
+			if ( isset($review_notice_dismissed) && ! empty($review_notice_dismissed) ) {
+				$show_notice = false;
+			}else {
+				$show_notice = true;
+			}
+		}
+		// writable Notice.
+		if ( $show_notice ) {
+			$has_notice = true;
+			?>
+            <div class="tta-notice notice notice-info is-dismissible" dir="<?php echo tta_is_rtl() ? 'ltr' : 'auto'?>" data-which="setup" data-nonce="<?php echo esc_attr( $nonce ); ?>">
+                <p><?php
+					printf(
+						esc_html__( '%2$s  %1$s  %1$s  If you need help with the setup of the Text-to-Speech plugin, please contact us. We will provide you support.', TEXT_TO_AUDIO_TEXT_DOMAIN ),
+						'<div class="tta-review-notice-logo"></div>',
+						"<h1><strong>Need Support For Text To Speech?</strong></h1>", //phpcs:ignore
+					);
+					?></p>
+                <p>
+                    <a class="button button-primary"  href="https://atlasaidev.com/contact-us/" target="_blank"><?php esc_html_e( 'Get Support', TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                </p>
+            </div>
+
+			<?php
+		}
+
+		if ( true === $has_notice ) {
+			add_action( 'admin_print_footer_scripts', function() use ( $nonce ) {
+				?>
+                <script>
+                    (function($){
+                        "use strict";
+                        $(document)
+                            .on('click', '.tta-notice a.button', function (e) {
+                                e.preventDefault();
+                                // noinspection ES6ConvertVarToLetConst
+                                let self = $(this);
+                                self.closest(".tta-notice").slideUp( 200, 'linear' );
+
+                                let  tts_notice = self.closest('.tta-notice'), which = tts_notice.attr('data-which');
+
+                                wp?.ajax?.post( 'tta_hide_notice', { _wpnonce: '<?php echo esc_attr( $nonce ); ?>', which: which } );
+
+                                window.open('https://atlasaidev.com/contact-us/')
+
+                            })
+
+                            .on('click', '.tta-notice .notice-dismiss', function (e) {
+                                e.preventDefault();
+                                // noinspection ES6ConvertVarToLetConst
+                                var self = $(this), tts_notice = self.closest('.tta-notice'), which = tts_notice.attr('data-which');
+                                wp.ajax.post( 'tta_hide_notice', { _wpnonce: '<?php echo esc_attr( $nonce ); ?>', which: which } );
+                            });
+
+						<?php if ( tta_is_rtl() ) { ?>
+                        setTimeout(function () {
+                            $('.notice-dismiss').css('left', '97%');
+                        },100)
+						<?php } ?>
+                    })(jQuery)
+                </script><?php
+			}, 99 );
+		}
+	}
+
+
 	/**
 	 * Feedback notice action.
 	 */
@@ -746,7 +838,7 @@ class TTA_Notices {
 	public function tta_hide_notice() {
 		check_ajax_referer( 'tta_notice_nonce' );
 		
-		$notices = [  'compitable', 'rating',  'translate', 'promotion_close', 'features', 'feedback'  ];
+		$notices = [  'compitable', 'rating',  'translate', 'promotion_close', 'features', 'feedback', 'setup'  ];
 		if ( isset( $_REQUEST['which'] ) && ! empty( $_REQUEST['which'] ) && in_array( $_REQUEST['which'], $notices ) ) {
 			$user_id = get_current_user_id();
 
@@ -770,6 +862,9 @@ class TTA_Notices {
 			}elseif ( 'feedback' == $_REQUEST['which'] ) {
 				$updated_user_meta = update_user_meta( $user_id, 'tta_feedback_notice_dismissed', true, true );
 				update_option( 'tta_feedback_notice_next_show_time', time() + ( DAY_IN_SECONDS * 30 ) );
+			}elseif ( 'setup' == $_REQUEST['which'] ) {
+				update_option( 'tts_setup_notice_next_show_time', time() + ( DAY_IN_SECONDS * 30 )  );
+				$updated_user_meta = update_user_meta($user_id, 'tts_setup_notice_dismissed', true);
 			}
 
 			if ( isset($updated_user_meta ) && $updated_user_meta ) {

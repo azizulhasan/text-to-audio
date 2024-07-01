@@ -311,7 +311,9 @@ export default function Listening() {
             .then((res) => {
                 // console.log(res);
                 setListeningSettings(res.data);
-                toast('Listening Data Saved');
+                toast('Listening settings saved. Now all setup done. Enjoy', 'info', {
+                    autoClose: 15000
+                });
             })
             .catch((err) => {
                 console.log(err);

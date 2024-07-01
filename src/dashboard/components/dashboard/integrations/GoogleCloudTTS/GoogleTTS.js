@@ -100,7 +100,9 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
         postData(apiURL + 'upload_file', data)
             .then((res) => {
                 if (res.status) {
-                    toast('File uploaded successfully');
+                    toast('File uploaded successfully. Now go to the "Customization" menu.', 'info', {
+                        autoClose: 15000
+                    });
                     setIsAuthenticated(res.status)
                     if(res?.tts_is_backup_mp3_file == 'true') {
                         setIsBackUpToGCS(res?.tts_is_backup_mp3_file|| false);
