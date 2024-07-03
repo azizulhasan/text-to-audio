@@ -16,14 +16,16 @@ class AtlasVoice_Analytics {
  */
 	public function track( $request ) {
 
-
 		$body = $request->get_body();
 		$body = json_decode( $body, 1 );
 
-		$post_id = isset( $body['post_id'] ) ? intval( $body['post_id'] ) : 0;
-		$event   = isset( $body['event'] ) ? sanitize_text_field( $body['event'] ) : '';
+		$post_id = isset( $body['data']['post_id'] ) ? intval( $body['data']['post_id'] ) : 0;
+		$event   = isset( $body['eventType'] ) ? sanitize_text_field( $body['eventType'] ) : '';
 		$time    = isset( $body['time'] ) ? intval( $body['time'] ) : 0;
 
+		error_log( print_r( [
+			'$body' => $body,
+		], 1 ) );
 		switch ( $event ) {
 
 			case 'init':

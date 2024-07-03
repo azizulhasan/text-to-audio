@@ -1,30 +1,33 @@
 import TextToSpeech from "./TextToSpeech.js";
 import { getButtonContent } from "./tts/utilities.js";
+import AtlasVoiceAnalytics from "./AtlasVoiceAnalytics";
 
 // Create a class for the element
 class TTSPlayButton extends HTMLElement {
     speech = null
     isProLicenseActive = false
+    analytics = null
     constructor() {
         // Always call super first in constructor
         super();
         console.log({ tts: window.TTS })
 
-        this.isProLicenseActive = window?.ttsObj?.is_pro_license_active;
+        this.isProLicenseActive = window?.ttsObj?.is_pro_active;
         // Create a shadow root
         const shadow = this.attachShadow({ mode: 'open' });
         if (window.hasOwnProperty('TTS')) {
             let contents = window.TTS.contents;
             let settings = window.TTS.settings;
             let buttonIds = Object.keys(contents)
-            console.log({ buttonIds })
-            // Render all buttons in page have.
+            this.analytics = new AtlasVoiceAnalytics(window.TTS.settings.postId)// Render all buttons in page have.
             for (let buttonId of buttonIds) {
                 if (buttonId == this.getAttribute('data-id')) {
                     // Create div
                     const wrapper = document.createElement('div');
                     wrapper.setAttribute('class', 'wrapper');
                     wrapper.innerHTML = getButtonContent(buttonId, settings.cssClass, this.isProLicenseActive)
+                    this.analytics.trackInit();
+
                     this.addEventListener('click', function (e) {
                         let button = [...wrapper.children][0]
                         if (this.speech != null && this.speech.listenStatus == 'listen') {

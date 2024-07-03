@@ -3,6 +3,102 @@ class AtlasVoiceAnalytics {
         this.userId = this.getUniqueUserId();
         this.apiUrl = ttsObj.api_url + ttsObj.api_namespace + '/' + ttsObj.api_version + '/track'; // Replace with your backend API URL
         this.postID = postId
+        this.sessionData = this.getSessionData();
+        this._startTimeTracking = false;
+        this.listeningLengthInterval = null;
+        this.listeningLength = 0;
+
+        // Bind the event listeners for beforeunload and unload
+        window.addEventListener('beforeunload', this.sendSessionData.bind(this));
+        // window.addEventListener('unload', this.sendSessionData.bind(this));
+
+    }
+
+
+    get startTimeTracking() {
+        return this._startTimeTracking;
+    }
+
+    set startTimeTracking(value) {
+        this._startTimeTracking = value;
+        this.trackListeningLength();
+    }
+
+    handleStartTimeTracking(value) {
+        this.trackListeningLength()
+    }
+
+    trackInit() {
+        this.addEvent('init');
+    }
+
+    trackPlay() {
+        this.startTimeTracking = true;
+        this.addEvent('play');
+    }
+
+    trackPause() {
+        this.startTimeTracking = false;
+        this.addEvent('pause');
+    }
+
+    trackResume() {
+        this.startTimeTracking = true;
+        this.addEvent('resume');
+    }
+
+    trackEnd() {
+        this.startTimeTracking = false;
+        this.addEvent('end');
+    }
+
+    trackListeningLength() {
+        if (this.startTimeTracking) {
+            if (!this.listeningLengthInterval) {
+                this.listeningLengthInterval = setInterval(() => {
+
+                    let sessionData = this.getSessionData();
+                    if (sessionData?.listening_length) {
+                        this.listeningLength = sessionData?.listening_length?.length
+                    }
+
+                    this.listeningLength += 1; // Default tracking interval of 5 seconds
+                    this.addEvent('listening_length', {length: this.listeningLength});
+                }, 1000);
+            }
+        } else {
+            clearInterval(this.listeningLengthInterval);
+            this.listeningLengthInterval = null;
+            // Add the total listening length to session data when tracking stops
+            this.addEvent('listening_length', {length: this.listeningLength});
+            this.listeningLength = 0; // Reset the listening length for the next session
+        }
+    }
+
+
+    getSessionData() {
+        const sessionData = sessionStorage.getItem('atlasVoice_analytics_data');
+        return sessionData ? JSON.parse(sessionData) : {};
+    }
+
+    saveSessionData() {
+        sessionStorage.setItem('atlasVoice_analytics_data', JSON.stringify(this.sessionData));
+    }
+
+    sendSessionData() {
+        if (this.sessionData.length === 0) return;
+        fetch(this.apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-WP-NONCE': window?.ttsObj?.rest_nonce,
+            },
+            body: JSON.stringify({
+                analytics: this.sessionData,
+                post_id: this.postID
+            }),
+        });
+        sessionStorage.removeItem('atlasVoice_analytics_data'); // Clear the session data after sending
     }
 
     getUniqueUserId() {
@@ -14,50 +110,24 @@ class AtlasVoiceAnalytics {
         return userId;
     }
 
-    sendEvent(eventType, data = {}) {
-        const eventData = {
-            eventType: eventType,
-            data: {
-                ...{
-                    post_id: this.postID
-                },
+    addEvent(eventType, data = {}) {
+        let eventData = {}
+        if (this.sessionData?.[eventType]) {
+            let eventCount = this.sessionData?.[eventType]?.count;
+            eventData = {
+                count: eventCount + 1,
                 ...data
-            },
-            nonce: window?.ttsObj?.rest_nonce,
-        };
+            };
+        } else {
+            eventData = {
+                count: 1,
+                ...data
+            };
+        }
 
-        fetch(this.apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-WP-NONCE': window?.ttsObj?.rest_nonce,
-            },
-            body: JSON.stringify(eventData),
-        });
-    }
+        this.sessionData[eventType] = eventData;
+        this.saveSessionData();
 
-    trackInit() {
-        this.sendEvent('init');
-    }
-
-    trackPlay() {
-        this.sendEvent('play');
-    }
-
-    trackPause() {
-        this.sendEvent('pause');
-    }
-
-    trackResume() {
-        this.sendEvent('resume');
-    }
-
-    trackEnd() {
-        this.sendEvent('end');
-    }
-
-    trackListeningLength(length) {
-        this.sendEvent('listening_length', {length: length});
     }
 
     captureDemographics() {
@@ -66,7 +136,7 @@ class AtlasVoiceAnalytics {
         fetch('https://ipinfo.io/json?token=your_token')
             .then(response => response.json())
             .then(data => {
-                this.sendEvent('demographics', data);
+                this.addEvent('demographics', data);
             });
     }
 
@@ -76,7 +146,7 @@ class AtlasVoiceAnalytics {
             platform: navigator.platform,
             language: navigator.language,
         };
-        this.sendEvent('device_info', deviceInfo);
+        this.addEvent('device_info', deviceInfo);
     }
 
     getReport(period) {
@@ -87,11 +157,4 @@ class AtlasVoiceAnalytics {
     }
 }
 
-// Usage
 export default AtlasVoiceAnalytics;
-// document.querySelector('.play-button').addEventListener('click', () => analytics.trackPlay(postId));
-// document.querySelector('.resume-button').addEventListener('click', () => analytics.trackResume(postId));
-// document.querySelector('.replay-button').addEventListener('click', () => analytics.trackReplay(postId));
-// document.querySelector('.download-button').addEventListener('click', () => analytics.trackDownload(postId));
-// analytics.captureDemographics();
-// analytics.captureDeviceInfo();
