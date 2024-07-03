@@ -31,6 +31,7 @@ use TTA\TTA;
 use TTA\TTA_Activator;
 use TTA\TTA_Deactivator;
 use TTA_Api\TTA_Api_Routes;
+use TTA_Api\AtlasVoice_Analytics;
 use TTA\TTA_Notices;
 
 // If this file is called directly, abort.

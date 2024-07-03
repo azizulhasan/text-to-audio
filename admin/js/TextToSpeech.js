@@ -1,10 +1,10 @@
-
 /**
  * @see https://www.npmjs.com/package/speak-tts
  */
 import Speech from "./tts/speak-tts/lib/speak-tts.js";
 import BrowserSupport from './tts/BrowserSupport.js'
-import { splitSentences } from "./tts/utilities.js";
+import {splitSentences} from "./tts/utilities.js";
+import AtlasVoiceAnalytics from "./AtlasVoiceAnalytics";
 
 export default class TextToSpeech {
     TTS = window.TTS
@@ -25,8 +25,8 @@ export default class TextToSpeech {
     ttsListeningSettings = null
     languages = []
     voices = {}
-    voice = true ?  "Google UK English Female" : 'English United Kingdom';
-    language = true ?  'en-US' : 'en-GB';
+    voice = true ? "Google UK English Female" : 'English United Kingdom';
+    language = true ? 'en-US' : 'en-GB';
     buttonTextArr = null
     splittedSentances = ''
     isCanceled = false
@@ -34,6 +34,8 @@ export default class TextToSpeech {
     callBackAfterEnd = null
     splitSentences = null
     playButtonNo = 1
+    analytics = null
+
     constructor(buttonId, content = '', button = null, TTS = window.TTS) {
         this.TTS = TTS
         this.content = content ? content : window.TTS.contents[buttonId]
@@ -46,7 +48,7 @@ export default class TextToSpeech {
         this.speech = new Speech()
         this.splitSentences = splitSentences
         this.playButtonNo = this?.TTS?.settings?.settings?.customize?.buttonSettings?.id
-
+        this.analytics = new AtlasVoiceAnalytics(this.TTS.settings.postId)
     }
 
     getData(shouldAsingThis = true) {
@@ -62,7 +64,7 @@ export default class TextToSpeech {
 
     playButtonContent() {
         let icon = '<div class="tts_button"><span class="dashicons dashicons-controls-play"></span> <span>';
-        if(ttsObj?.player_customizations?.[1]?.play) {
+        if (ttsObj?.player_customizations?.[1]?.play) {
             const parser = new DOMParser();
             // convert html string into DOM
             let document = parser.parseFromString(ttsObj?.player_customizations?.[1]?.play, "image/svg+xml");
@@ -71,12 +73,14 @@ export default class TextToSpeech {
 
         return icon + ' ' + this.playButtonText() + '</span></span></div>'
     }
+
     replayButtonText() {
         return this?.buttonTextArr?.replay_text ?? 'Replay';
     }
+
     replayButtonContent() {
         let icon = '<div class="tts_button"><span class="dashicons dashicons-image-rotate"></span> <span>';
-        if(ttsObj?.player_customizations?.[1]?.replay) {
+        if (ttsObj?.player_customizations?.[1]?.replay) {
             const parser = new DOMParser();
             // convert html string into DOM
             let document = parser.parseFromString(ttsObj?.player_customizations?.[1]?.replay, "image/svg+xml");
@@ -86,12 +90,14 @@ export default class TextToSpeech {
         return icon + ' ' + this.replayButtonText() + '<span></span></span></div>'
 
     }
+
     pauseButtonText() {
         return this?.buttonTextArr?.pause_text ?? 'Pause';
     }
+
     pauseButtonContent() {
         let icon = '<div class="tts_button"><span class="dashicons dashicons-controls-pause"></span> <span>';
-        if(ttsObj?.player_customizations?.[1]?.pause) {
+        if (ttsObj?.player_customizations?.[1]?.pause) {
             const parser = new DOMParser();
             // convert html string into DOM
             let document = parser.parseFromString(ttsObj?.player_customizations?.[1]?.pause, "image/svg+xml");
@@ -102,12 +108,14 @@ export default class TextToSpeech {
 
 
     }
+
     resumeButtonText() {
         return this?.buttonTextArr?.resume_text ?? 'Resume';
     }
+
     resumeButtonContent() {
         let icon = '<div class="tts_button"><span class="dashicons dashicons-controls-play"></span> <span>';
-        if(ttsObj?.player_customizations?.[1]?.resume) {
+        if (ttsObj?.player_customizations?.[1]?.resume) {
             const parser = new DOMParser();
             // convert html string into DOM
             let document = parser.parseFromString(ttsObj?.player_customizations?.[1]?.resume, "image/svg+xml");
@@ -116,6 +124,7 @@ export default class TextToSpeech {
 
         return icon + ' ' + this.buttonTextArr.resume_text + '<span></span></span></div>'
     }
+
     recordStartButtonContent() {
         return '<span class="dashicons dashicons-controls-volumeoff"></span> ' + this.buttonTextArr.start_text;
     }
@@ -152,7 +161,7 @@ export default class TextToSpeech {
                     previousSibling.innerHTML = '';
                 }, 5000);
             } else {
-                link +='This browser not supports speechSynthesis API';
+                link += 'This browser not supports speechSynthesis API';
                 notice += `\nFollow this link to enable: \n${link}`;
                 alert(notice);
             }
@@ -180,9 +189,10 @@ export default class TextToSpeech {
 
         return true;
     }
+
     /**
      * Don't display this text in pro version.
-     * @param {*} listenStatus 
+     * @param {*} listenStatus
      */
     displayButtonText(listenStatus) {
         if (this?.playButtonNo == 1 && this?.speakButton?.innerHTML) {
@@ -211,7 +221,7 @@ export default class TextToSpeech {
             speech.cancel();
         }
         console.log("Success !", data);
-
+        this.analytics.trackEnd();
         if (this.callBackAfterEnd) this.callBackAfterEnd()
         if (!this.browser.isAndroid()) {
             clearTimeout(this.timer);
@@ -233,9 +243,9 @@ export default class TextToSpeech {
         /**
          * 1. Microsoft edge browser has same voices(306 voices) for mobile and desktop
          * It uses the v8 engine as chrome browser.
-         * 
-         * 
-         * 
+         *
+         *
+         *
          */
         speech
             .speak({
@@ -276,6 +286,7 @@ export default class TextToSpeech {
 
         this.listenStatus = 'pause';
         this.displayButtonText(this.listenStatus)
+        this.analytics.trackPlay();
         if (!this.browser.isAndroid()) {
             this.timer = setTimeout(function pauseResumeTimer() {
                 speech.pause();
@@ -296,6 +307,7 @@ export default class TextToSpeech {
             }, 10000);
         }
     }
+
     pause(speech) {
         /**
          * If desktop then cancel after 7/8 second
@@ -320,10 +332,12 @@ export default class TextToSpeech {
 
         this.listenStatus = 'resume';
         this.displayButtonText(this.listenStatus)
+        this.analytics.trackPause();
         if (!this.browser.isAndroid()) {
             clearTimeout(this.timer);
         }
     }
+
     resume(speech) {
 
         if (this.isCanceled) {
@@ -339,7 +353,6 @@ export default class TextToSpeech {
 
         this.listenStatus = 'pause';
         this.displayButtonText(this.listenStatus)
-
         if (!this.browser.isAndroid()) {
             this.timer = setTimeout(function pauseResumeTimer() {
                 speech.pause();
@@ -362,8 +375,8 @@ export default class TextToSpeech {
 
     /**
      * Callback function will need for pro version.
-     * @param {*} callBackAfterEnd 
-     * @returns 
+     * @param {*} callBackAfterEnd
+     * @returns
      */
     _init(callBackAfterEnd = null) { // init speaking, 
         this.callBackAfterEnd = callBackAfterEnd
@@ -418,16 +431,16 @@ export default class TextToSpeech {
 
         /**
          * When browser tab switches to another tab.
-         * 
-         * Some users wants when they switches to another tab. TTS should be 
-         * autometically paused. And when they return to TTS page it should be 
+         *
+         * Some users wants when they switches to another tab. TTS should be
+         * autometically paused. And when they return to TTS page it should be
          * autometically start speeking again.
-         * 
-         * On the other hand if they pause the TTS button intentionally then 
+         *
+         * On the other hand if they pause the TTS button intentionally then
          * switch to another tab. it will remain paused, untill they intentionally
-         * resume it. Even though they switch to another tab and return to 
-         * current TTS page. 
-         * 
+         * resume it. Even though they switch to another tab and return to
+         * current TTS page.
+         *
          */
 
         document.addEventListener("visibilitychange", () => {
@@ -442,7 +455,7 @@ export default class TextToSpeech {
 
             if ('visible' === document.visibilityState && this.listenStatus === 'resume') {
                 let isPausedByIntention = JSON.parse(window.sessionStorage.getItem('tts_paused_by_intention'));
-                let stop_autoplay =  window?.TTS?.settings?.settings?.settings?.tta__settings_stop_auto_playing_after_switching_tab ?? false;
+                let stop_autoplay = window?.TTS?.settings?.settings?.settings?.tta__settings_stop_auto_playing_after_switching_tab ?? false;
 
                 if (!isPausedByIntention && !stop_autoplay) {
                     window.sessionStorage.setItem('tts_paused_by_intention', false);
@@ -467,10 +480,8 @@ if (window?.ttsObj?.is_pro_active) {
 }
 
 
-
-
 /**
- * This potion of the code will only applied in the dashboard. 
+ * This potion of the code will only applied in the dashboard.
  * When plugin dashboard with open.
  */
 let urlParams = new URLSearchParams('page=text-to-audio').toString()

@@ -135,7 +135,7 @@ class TTA_Admin {
     }
 
     public function load_script_as_tag($tag, $handle, $src) {
-        if(!in_array($handle, ['text-to-audio-button', 'TextToSpeech'])) {
+        if(!in_array($handle, ['text-to-audio-button', 'TextToSpeech', 'AtlasVoiceAnalytics' ])) {
             return $tag;
         }
 
@@ -263,6 +263,8 @@ class TTA_Admin {
             wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-button.min.js', array('wp-hooks', 'wp-shortcode'), $this->version, true);
             wp_localize_script('text-to-audio-button', 'ttsObj', $this->localize_data );
             wp_enqueue_style('dashicons');
+//	        wp_enqueue_script('AtlasVoiceAnalytics', plugin_dir_url(__FILE__) . 'js/build/AtlasVoiceAnalytics.min.js', array(), $this->version, true);
+//	        wp_localize_script('AtlasVoiceAnalytics', 'ttsObj', $this->localize_data );
         }
     }
 

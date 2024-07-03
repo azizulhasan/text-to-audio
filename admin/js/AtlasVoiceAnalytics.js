@@ -1,8 +1,8 @@
-
-export default class TTSAnalytics {
-    constructor() {
+class AtlasVoiceAnalytics {
+    constructor(postId = '') {
         this.userId = this.getUniqueUserId();
-        this.apiUrl = 'https://your-backend-api.com/analytics'; // Replace with your backend API URL
+        this.apiUrl = ttsObj.api_url + ttsObj.api_namespace + '/' + ttsObj.api_version + '/track'; // Replace with your backend API URL
+        this.postID = postId
     }
 
     getUniqueUserId() {
@@ -14,41 +14,50 @@ export default class TTSAnalytics {
         return userId;
     }
 
-    sendEvent(eventType, data) {
+    sendEvent(eventType, data = {}) {
         const eventData = {
-            userId: this.userId,
             eventType: eventType,
-            data: data,
-            timestamp: new Date().toISOString(),
+            data: {
+                ...{
+                    post_id: this.postID
+                },
+                ...data
+            },
+            nonce: window?.ttsObj?.rest_nonce,
         };
 
         fetch(this.apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-WP-NONCE': window?.ttsObj?.rest_nonce,
             },
             body: JSON.stringify(eventData),
         });
     }
 
-    trackPlay(postId) {
-        this.sendEvent('play', { postId: postId });
+    trackInit() {
+        this.sendEvent('init');
     }
 
-    trackResume(postId) {
-        this.sendEvent('resume', { postId: postId });
+    trackPlay() {
+        this.sendEvent('play');
     }
 
-    trackReplay(postId) {
-        this.sendEvent('replay', { postId: postId });
+    trackPause() {
+        this.sendEvent('pause');
     }
 
-    trackDownload(postId) {
-        this.sendEvent('download', { postId: postId });
+    trackResume() {
+        this.sendEvent('resume');
     }
 
-    trackListeningLength(postId, length) {
-        this.sendEvent('listening_length', { postId: postId, length: length });
+    trackEnd() {
+        this.sendEvent('end');
+    }
+
+    trackListeningLength(length) {
+        this.sendEvent('listening_length', {length: length});
     }
 
     captureDemographics() {
@@ -79,10 +88,10 @@ export default class TTSAnalytics {
 }
 
 // Usage
-const analytics = new TTSAnalytics();
-document.querySelector('.play-button').addEventListener('click', () => analytics.trackPlay(postId));
-document.querySelector('.resume-button').addEventListener('click', () => analytics.trackResume(postId));
-document.querySelector('.replay-button').addEventListener('click', () => analytics.trackReplay(postId));
-document.querySelector('.download-button').addEventListener('click', () => analytics.trackDownload(postId));
-analytics.captureDemographics();
-analytics.captureDeviceInfo();
+export default AtlasVoiceAnalytics;
+// document.querySelector('.play-button').addEventListener('click', () => analytics.trackPlay(postId));
+// document.querySelector('.resume-button').addEventListener('click', () => analytics.trackResume(postId));
+// document.querySelector('.replay-button').addEventListener('click', () => analytics.trackReplay(postId));
+// document.querySelector('.download-button').addEventListener('click', () => analytics.trackDownload(postId));
+// analytics.captureDemographics();
+// analytics.captureDeviceInfo();
