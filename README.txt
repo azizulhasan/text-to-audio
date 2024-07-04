@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.5.3
 Requires PHP: 7.4
-Stable tag: 1.6.22
+Stable tag: 1.6.23
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -404,6 +404,7 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 = 1.6.23 ( 04 July 2024 ) =
 Improved: Unnecessary API call removed.
 Fixed: Post edit page UI broken issue solved.
+Fixed: Content sanitization improved.
 
 
 
