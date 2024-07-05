@@ -11,60 +11,59 @@ namespace TTA_Api;
  */
 class AtlasVoice_Analytics {
 
-	/*
- * Manage customize data
- */
+	/**
+	 * @param $request
+	 *
+	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+	 */
 	public function track( $request ) {
 
 		$body = $request->get_body();
 		$body = json_decode( $body, 1 );
 
-		$post_id = isset( $body['data']['post_id'] ) ? intval( $body['data']['post_id'] ) : 0;
-		$event   = isset( $body['eventType'] ) ? sanitize_text_field( $body['eventType'] ) : '';
-		$time    = isset( $body['time'] ) ? intval( $body['time'] ) : 0;
+		if ( isset( $body['post_id'], $body['analytics'] ) && count( $body['analytics'] ) ) {
+			$post_id = $body['post_id'];
+			//delete_post_meta( $post_id, 'atlasVoice_analytics' );
+			$analytics = get_post_meta( $body['post_id'], 'atlasVoice_analytics' );
+			if ( isset( $analytics[0] ) ) {
+				$analytics = $analytics[0];
+			}
+			$merged_analytics = self::merge_analytics_arrays( $analytics, $body['analytics'] );
+			update_post_meta( $post_id, 'atlasVoice_analytics', $merged_analytics );
 
-		error_log( print_r( [
-			'$body' => $body,
-		], 1 ) );
-		switch ( $event ) {
-
-			case 'init':
-				$init_counter = get_post_meta( $post_id, 'atlasVoice_analytics_init', true );
-				update_post_meta( $post_id, 'atlasVoice_analytics_init', $init_counter ? $init_counter + 1 : 1 );
-				break;
-
-			case 'play':
-				$play_counter = get_post_meta( $post_id, 'atlasVoice_analytics_play', true );
-				update_post_meta( $post_id, 'atlasVoice_analytics_play', $play_counter ? $play_counter + 1 : 1 );
-				break;
-
-			case 'pause':
-				$pause_counter = get_post_meta( $post_id, 'atlasVoice_analytics_pause', true );
-				update_post_meta( $post_id, 'atlasVoice_analytics_pause', $pause_counter ? $pause_counter + 1 : 1 );
-				break;
-
-			case 'resume':
-				$resume_counter = get_post_meta( $post_id, 'atlasVoice_analytics_resume', true );
-				update_post_meta( $post_id, 'atlasVoice_analytics_resume', $resume_counter ? $resume_counter + 1 : 1 );
-				break;
-
-			case 'listening_length':
-				$time_counter = get_post_meta( $post_id, 'atlasVoice_analytics_time', true );
-				update_post_meta( $post_id, 'atlasVoice_analytics_time', $time_counter ? $time_counter + $time : $time );
-				break;
-
-			case 'end':
-				$end_counter = get_post_meta( $post_id, 'atlasVoice_analytics_end', true );
-				update_post_meta( $post_id, 'atlasVoice_analytics_end', $end_counter ? $end_counter + 1 : 1 );
-				break;
-
-			default:
-				break;
 		}
 
 		$response['status'] = true;
 		$response['data']   = [];
 
 		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * @param $array1
+	 * @param $array2
+	 *
+	 * @return array
+	 */
+	private static function merge_analytics_arrays( $array1, $array2 ) {
+		$merged = [];
+
+		// Merge keys from both arrays
+		$all_keys = array_unique( array_merge( array_keys( $array1 ), array_keys( $array2 ) ) );
+
+		foreach ( $all_keys as $key ) {
+			if ( isset( $array1[ $key ] ) && isset( $array2[ $key ] ) ) {
+				// If the key exists in both arrays, sum the counts
+				$merged[ $key ]['count'] = $array1[ $key ]['count'] + $array2[ $key ]['count'];
+			} elseif ( isset( $array1[ $key ] ) ) {
+				// If the key only exists in the first array, use its value
+				$merged[ $key ] = $array1[ $key ];
+			} elseif ( isset( $array2[ $key ] ) ) {
+				// If the key only exists in the second array, use its value
+				$merged[ $key ] = $array2[ $key ];
+			}
+		}
+
+		return $merged;
 	}
 }

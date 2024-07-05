@@ -63,14 +63,14 @@ class AtlasVoiceAnalytics {
                     }
 
                     this.listeningLength += 1; // Default tracking interval of 5 seconds
-                    this.addEvent('listening_length', {length: this.listeningLength});
+                    this.addEvent('time');
                 }, 1000);
             }
         } else {
             clearInterval(this.listeningLengthInterval);
             this.listeningLengthInterval = null;
             // Add the total listening length to session data when tracking stops
-            this.addEvent('listening_length', {length: this.listeningLength});
+            this.addEvent('time');
             this.listeningLength = 0; // Reset the listening length for the next session
         }
     }
@@ -86,7 +86,7 @@ class AtlasVoiceAnalytics {
     }
 
     sendSessionData() {
-        if (this.sessionData.length === 0) return;
+        if (Object.keys(this.sessionData)?.length === 1) return;
         fetch(this.apiUrl, {
             method: 'POST',
             headers: {
