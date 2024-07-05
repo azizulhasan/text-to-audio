@@ -166,9 +166,9 @@ function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 			$backgroundColor = isset( $customize['backgroundColor'] ) ? $customize['backgroundColor'] : '#184c53';
 			$color           = isset( $customize['color'] ) ? $customize['color'] : '#ffffff';
 			$width           = isset( $customize['width'] ) ? $customize['width'] : '100';
-			$btn_style       = 'background-color:' . esc_attr( $backgroundColor ) . ' !important;color:' . esc_attr( $color ) . ' !important;width:' . esc_attr( $width ) . '%;border:0;display:flex;align-content:center;justify-content:space-between;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;';
+			$btn_style       = 'background-color:' . esc_attr( $backgroundColor ) . ' !important;color:' . esc_attr( $color ) . ' !important;width:' . esc_attr( $width ) . '%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;';
 		} else {
-			$btn_style = 'background-color:' . esc_attr( $customize['backgroundColor'] ) . ';color:' . esc_attr( $customize['color'] ) . ';width:' . esc_attr( $customize['width'] ) . '%;border:0;display:flex;align-content:center;justify-content:space-between;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;';
+			$btn_style = 'background-color:' . esc_attr( $customize['backgroundColor'] ) . ';color:' . esc_attr( $customize['color'] ) . ';width:' . esc_attr( $customize['width'] ) . '%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;';
 		}
 	} else {
 		$btn_style = 'background-color:#184c53;color:#ffffff;width:100%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;';
