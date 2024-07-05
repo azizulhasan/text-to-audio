@@ -10,7 +10,6 @@ class AtlasVoiceAnalytics {
 
         // Bind the event listeners for beforeunload and unload
         window.addEventListener('beforeunload', this.sendSessionData.bind(this));
-        // window.addEventListener('unload', this.sendSessionData.bind(this));
 
     }
 
@@ -86,7 +85,7 @@ class AtlasVoiceAnalytics {
     }
 
     sendSessionData() {
-        if (Object.keys(this.sessionData)?.length === 1) return;
+        if (Object.keys(this.sessionData)?.length === 0) return;
         fetch(this.apiUrl, {
             method: 'POST',
             headers: {
@@ -129,6 +128,34 @@ class AtlasVoiceAnalytics {
         this.saveSessionData();
 
     }
+
+    /**
+     * if multiple post data should be track
+     * @param eventType
+     * @param data
+     */
+    addEvent_new(eventType, data = {}) {
+        // Initialize post data if not already set
+        if (!this.sessionData[this.postID]) {
+            this.sessionData[this.postID] = {};
+        }
+
+        // Initialize event type data if not already set
+        if (!this.sessionData[this.postID][eventType]) {
+            this.sessionData[this.postID][eventType] = { count: 0 };
+        }
+
+        // Increment the event count and merge any additional data
+        this.sessionData[this.postID][eventType].count += 1;
+        this.sessionData[this.postID][eventType] = {
+            ...this.sessionData[this.postID][eventType],
+            ...data,
+        };
+
+        // Save session data
+        this.saveSessionData();
+    }
+
 
     captureDemographics() {
         // Use a service or API to get user demographics
