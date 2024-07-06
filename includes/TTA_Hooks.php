@@ -1,8 +1,5 @@
 <?php
 namespace TTA;
-
-use function WPML\FP\apply;
-
 /**
  * Fired during plugin activation
  *
@@ -195,11 +192,11 @@ class TTA_Hooks {
             $plugin_name = 'Text To Speech Pro';
         }
         add_meta_box(
-                'wps22-meta-box',
+                'atlasVoice-meta-box',
                 $plugin_name,
                 array(
                     $this,
-                    'tta_meta_box',
+                    'atlasVoice_meta_box',
                 ),
                 get_current_screen()->post_type,
                 'advanced',
@@ -212,7 +209,7 @@ class TTA_Hooks {
     /**
      * Add meta box for record, re-record, listen content with loud.
      */
-    public function tta_meta_box() {
+    public function atlasVoice_meta_box() {
 
         // $listening = (array) get_option('tta_listening_settings');
         // $listening = json_encode($listening);
@@ -240,53 +237,14 @@ class TTA_Hooks {
             />
 
             <!-- Copy Button -->
-            <button type="button" style='<?php echo esc_attr($btn_style); ?>;cursor: copy;margin-top:10px;padding:6px;' onclick="copyshortcode()">
+            <button type="button" id="tta_play_btn_shortcode_copy_button" style='<?php echo esc_attr($btn_style); ?>;cursor: copy;margin-top:10px;padding:6px;' >
             <span class="dashicons dashicons-admin-page"></span>
             </button>
 
-            <script>
-                const unsecuredCopyToClipboard = (text) => {
-                    const textArea = document.createElement("textarea");
-                    textArea.value = text;
-                    document.body.appendChild(textArea);
-                    textArea.select();
-                    textArea.setSelectionRange(0, 99999);
-                    try {
-                        document.execCommand('copy')
-                        alert('Copied')
-                    }
-                    catch (err) {
-                        console.error('Unable to copy to clipboard', err)
-                    }
 
-                    document.body.removeChild(textArea)
-                    };
-            /**
-             * Copy short Code
-             */
-            function copyshortcode () {
-                /* Get the text field */
-                var copyText = document.getElementById("tta_play_btn_shortcode");
-
-                /* Select the text field */
-                copyText.select();
-                copyText.setSelectionRange(0, 99999);
-                if (window.isSecureContext && navigator.clipboard) {
-                    /* Copy the text inside the text field */
-                    navigator.clipboard
-                    .writeText(copyText.value)
-                    .then(() => {
-                        alert('Copied')
-                    })
-                    .catch((e) => {
-                        alert("Something went wrong! " + e);
-                        // toast('Something went wrong! ');
-                    });
-                } else {
-                    unsecuredCopyToClipboard(copyText.value);
-                }
-            };
-            </script>
+            <div id="atlasVoice_analytics">
+                <h2><?php echo __('Analytics Data For The Post.', 'text-to-audio')  ?></h2>
+            </div>
         </div>
         <?php
         \do_action('tts_after_metabox_content');

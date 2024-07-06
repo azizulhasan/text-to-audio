@@ -829,9 +829,8 @@ class TTA_Helper {
 		if (is_admin()) {
 			// Get the current screen object
 			$screen = get_current_screen();
-
 			// Check if we are on the "text-to-audio" page
-			if ($screen && $screen->id === 'text-to-audio') {
+			if ($screen && $screen->id === 'toplevel_page_text-to-audio') {
 				return true;
 			}
 
