@@ -185,3 +185,10 @@ class AtlasVoiceAnalytics {
 }
 
 export default AtlasVoiceAnalytics;
+
+/**
+ * Load text to speech after DOMContentLoaded in free version.
+ */
+if (window?.ttsObj?.is_pro_active) {
+    window.AtlasVoiceAnalytics = AtlasVoiceAnalytics;
+}
