@@ -811,5 +811,34 @@ class TTA_Helper {
 		], $plugin_all_settings, $post );
 	}
 
+	public static function is_edit_page() {
+		global $pagenow;
+
+		// Check if we are in the admin area and on the edit post/page screen
+		if ( is_admin() ) {
+			if ( $pagenow === 'post.php' || $pagenow === 'post-new.php' ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public  static  function is_text_to_audio_page() {
+		// Ensure we are in the admin area
+		if (is_admin()) {
+			// Get the current screen object
+			$screen = get_current_screen();
+
+			// Check if we are on the "text-to-audio" page
+			if ($screen && $screen->id === 'text-to-audio') {
+				return true;
+			}
+
+			return false;
+		}
+	}
+
+
 
 }

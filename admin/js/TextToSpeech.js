@@ -479,6 +479,7 @@ if (window?.ttsObj?.is_pro_active) {
     })
 }
 
+console.log(new URLSearchParams())
 
 /**
  * This potion of the code will only applied in the dashboard.

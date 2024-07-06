@@ -97,7 +97,7 @@ class TTA_Api_Routes {
 			)
 		);
 
-		// register settings route.
+		// register track route.
 		register_rest_route(
 			$this->namespace,
 			'/track',
@@ -105,6 +105,20 @@ class TTA_Api_Routes {
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this->analytics, 'track' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
+		// register track route.
+		register_rest_route(
+			$this->namespace,
+			'/insights/(?P<id>\d+)',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this->analytics, 'insights' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
 					'args'                => array(),
 				),

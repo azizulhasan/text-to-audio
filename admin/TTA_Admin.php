@@ -162,6 +162,7 @@ class TTA_Admin {
      * @since    1.0.0
      */
     public function enqueue_scripts() {
+
         /**
          * Looad wp-speeh script
          */
@@ -224,6 +225,13 @@ class TTA_Admin {
                 <?php
                 $object = ob_get_contents();
                 echo  $object;
+            }
+
+	        if (TTA_Helper::is_edit_page() || TTA_Helper::is_text_to_audio_page() ) {
+		        wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', array('wp-hooks',), $this->version, true);
+		        wp_localize_script('TextToSpeech', 'ttsObj', $this->localize_data);
+		        wp_enqueue_script('AtlasVoicePlayerInsights', plugin_dir_url(__FILE__) .'js/build/AtlasVoicePlayerInsights.min.js', array('TextToSpeech'), $this->version, true);
+		        wp_localize_script('AtlasVoicePlayerInsights', 'ttsObj', $this->localize_data);
             }
 
     }

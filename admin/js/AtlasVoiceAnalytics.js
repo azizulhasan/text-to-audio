@@ -1,3 +1,4 @@
+
 class AtlasVoiceAnalytics {
     constructor(postId = '') {
         this.userId = this.getUniqueUserId();
@@ -98,6 +99,7 @@ class AtlasVoiceAnalytics {
             }),
         });
         sessionStorage.removeItem('atlasVoice_analytics_data'); // Clear the session data after sending
+        sessionStorage.removeItem('atlasVoice_analytics_is_initiated'); // Clear the session data after sending
     }
 
     getUniqueUserId() {
@@ -187,7 +189,7 @@ class AtlasVoiceAnalytics {
 export default AtlasVoiceAnalytics;
 
 /**
- * Load text to speech after DOMContentLoaded in free version.
+ * Load AtlasVoiceAnalytics after DOMContentLoaded if pro version exists.
  */
 if (window?.ttsObj?.is_pro_active) {
     window.AtlasVoiceAnalytics = AtlasVoiceAnalytics;
