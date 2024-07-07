@@ -20,7 +20,7 @@ class AtlasVoicePlayerInsights {
 
     constructor(postId = '') {
         this.postId = postId
-        this.apiUrl = ttsObj.api_url + ttsObj.api_namespace + '/' + ttsObj.api_version + '/insights/' + this.postId; // Replace with your backend API URL
+        this.apiUrl = ttsObj.api_url + ttsObj.api_namespace + '/' + ttsObj.api_version + '/insights'; // Replace with your backend API URL
         this.getInsights()
 
     }
@@ -74,6 +74,7 @@ class AtlasVoicePlayerInsights {
     async getInsights() {
 
         if (this.postId) {
+            this.apiUrl += '/'+ this.postId
             let response = await fetch(this.apiUrl, {
                 method: 'GET',
                 headers: {
@@ -84,7 +85,23 @@ class AtlasVoicePlayerInsights {
             let data = await response.json();
             this.data = data.data;
             this.insights = this.generateInsights()
+        }else{
+            console.log(ttsObj)
+            // let response = await fetch(this.apiUrl, {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //         'X-WP-NONCE': window?.ttsObj?.rest_nonce,
+            //     }
+            // });
+            // let data = await response.json();
+            // this.data = data.data;
+            // // this.insights = this.generateInsights()
+            // console.log(this.data)
         }
+
+
+
         if (Object.keys(this.insights).length) {
             this.displayInsights()
         }
@@ -216,13 +233,15 @@ if (window?.ttsObj?.is_admin_page) {
     if (postId) {
         new AtlasVoicePlayerInsights(postId)
     } else {
-        console.error('Post Id is not found:' + postId)
+        new AtlasVoicePlayerInsights()
+        // console.error('Post Id is not found:' + postId)
     }
 
 }
 
 function getPostIdFromUrl(url) {
     try {
+        console.log(url)
         // Create a URL object
         const urlObj = new URL(url);
 

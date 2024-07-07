@@ -45,20 +45,18 @@ export default function DashboardSideNav({ isProVersion }) {
 							</div>
 							Listening
 						</Link>
-						
-						<Link className='nav-link' to={'/faq'}>
+						<Link className='nav-link' to={'/analitics'}>
 							<div className='sb-nav-link-icon'>
+								<span className="dashicons dashicons-analytics"></span>
+							</div>
+							Analytics
+						</Link>
+						<Link className='nav-link' to={'/faq'}>
+						<div className='sb-nav-link-icon'>
 								<i className='fas fa-book'></i>
 							</div>
 							Docs
 						</Link>
-						{/* <Link className='nav-link' to={'/analitics'}>
-							<div className='sb-nav-link-icon'>
-								<i className='fas fa-book'></i>
-							</div>
-							Analytics Pro
-						</Link> */}
-
 					</div>
 				</div>
 			</nav>

@@ -9,6 +9,9 @@ namespace TTA_Api;
  * @subpackage TTA/api
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
+
+use TTA\TTA_Helper;
+
 class AtlasVoice_Analytics {
 
 	/**
@@ -63,6 +66,66 @@ class AtlasVoice_Analytics {
 
 		return rest_ensure_response( $response );
 	}
+
+	/**
+	 * @param $request
+	 *
+	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+	 */
+	public function all_insights( $request ) {
+		$post_id = $request->get_param( 'id' );
+
+		$insights = [];
+		if ( $post_id ) {
+			$insights = get_post_meta( $post_id, 'atlasVoice_analytics' );
+		}
+
+		if ( isset( $insights[0] ) ) {
+			$insights = $insights[0];
+		}
+
+		$response['status'] = true;
+		$response['data']   = $insights;
+
+		return rest_ensure_response( $response );
+	}
+
+	public function latest_100_posts( $request ) {
+
+		$settings = TTA_Helper::tts_get_settings( 'settings' );
+		if ( isset( $settings['tta__settings_allow_listening_for_post_types'] ) && count( $settings['tta__settings_allow_listening_for_post_types'] ) ) {
+			if ( ! TTA_Helper::is_pro_active() ) {
+				$post_types[] = $settings['tta__settings_allow_listening_for_post_types'][0];
+			} else {
+				$post_types = $settings['tta__settings_allow_listening_for_post_types'];
+			}
+		}
+		if ( empty( $post_types ) ) {
+			$post_types = array( 'post' );
+		}
+		$args = array(
+			'numberposts' => 100,
+			'post_status' => 'publish',
+			'post_type'   => $post_types,
+			'orderby'     => 'date',
+			'order'       => 'DESC',
+			'fields'      => 'ids',
+		);
+
+		$query = new \WP_Query( $args );
+		$posts = $query->posts;
+
+		$post_data = array();
+
+		foreach ( $posts as $post_id ) {
+			$post_data[ $post_id ] = get_the_title( $post_id );
+		}
+		$response['status'] = true;
+		$response['data']   = $post_data;
+
+		return rest_ensure_response( $response );
+	}
+
 
 	/**
 	 * @param $array1
