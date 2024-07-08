@@ -2,13 +2,12 @@ import ReactDOM from "react-dom";
 import TextToSpeech from './buttons/components/TextToSpeech';
 import TextToSpeechThree from "./buttons/components/TextToSpeechThree";
 import TextToSpeechFour from "./buttons/components/TextToSpeechFour";
-import {postWithoutImage} from './components/context/utilities';
 
-/**
- * Get customize settings.
- */
-let customize = new FormData();
-customize.append('method', 'get');
+
+window.document.addEventListener('DOMContentLoaded', function () {
+    window.sessionStorage.setItem('atlasVoice__playerStartGeneratingFile', false)
+})
+
 let buttonCSS = '';
 
 let timer = setTimeout(function loadProButton() {
@@ -40,6 +39,7 @@ let timer = setTimeout(function loadProButton() {
             }
             buttons.map(button => {
                 let buttonId = button.getAttribute('data-id')
+
                 // button.attachShadow({ mode: 'open' });
                 let buttonContent = <TextToSpeechThree button={button} buttonId={buttonId} buttonCSS={buttonCSS}
                                                        cssStyle={''}/>
@@ -55,6 +55,5 @@ let timer = setTimeout(function loadProButton() {
             })
 
         }
-
     }
 }, 1)
