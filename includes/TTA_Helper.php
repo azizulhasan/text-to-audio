@@ -438,7 +438,7 @@ class TTA_Helper {
 		$mp3_file_urls = get_post_meta( $post->ID, 'tts_mp3_file_urls' );
 		$old_url       = get_post_meta( $post->ID, 'tts_mp3_file_url', true );
 
-		if ( is_pro_active() && $old_url ) {
+		if ( self::is_pro_active() && $old_url ) {
 			$mp3_file_urls = self::handle_old_url( $post, $mp3_file_urls, $old_url );
 		}
 
@@ -583,25 +583,7 @@ class TTA_Helper {
 	 * Is plugin active
 	 */
 	public static function is_pro_active() {
-
-		if ( ! function_exists( 'is_plugin_active' ) ) {
-			include_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-
-		$status = is_plugin_active( 'text-to-speech-pro/text-to-audio-pro.php' );
-
-		if ( $status ) {
-			return true;
-		}
-
-		$status = is_plugin_active( 'text-to-speech-pro-premium/text-to-audio-pro.php' );
-
-		if ( $status ) {
-			return true;
-		}
-
-
-		return is_plugin_active( 'text-to-audio-pro/text-to-audio-pro.php' );
+		return is_pro_active();
 	}
 
 	public static function is_audio_folder_writable() {
@@ -809,6 +791,20 @@ class TTA_Helper {
 			'language' => $language,
 			'voice'    => $voice
 		], $plugin_all_settings, $post );
+	}
+
+	public  static  function is_text_to_audio_page() {
+		// Ensure we are in the admin area
+		if (is_admin()) {
+			// Get the current screen object
+			$screen = get_current_screen();
+			// Check if we are on the "text-to-audio" page
+			if ($screen && $screen->id === 'toplevel_page_text-to-audio') {
+				return true;
+			}
+
+			return false;
+		}
 	}
 
 
