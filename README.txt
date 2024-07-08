@@ -402,9 +402,9 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 = 1.6.25 ( 08 July 2024 ) =
-Improved: Unnecessary API call removed.
-Fixed: Post edit page UI broken issue solved.
-Fixed: Content sanitization improved.
+Tested: WP 6.6 tested.
+Fixed: MP3 file generate issue solved.
+Fixed: Edit page design broken issue solved.
 
 = 1.6.24 ( 04 July 2024 ) =
 Improved: Unnecessary API call removed.
