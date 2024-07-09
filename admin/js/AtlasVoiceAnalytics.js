@@ -1,17 +1,19 @@
+import * as FingerprintJS from './analytics/fingerprint.js';
 
 class AtlasVoiceAnalytics {
     constructor(postId = '') {
-        this.userId = this.getUniqueUserId();
+        this.userId = ttsObj.user_id;
+        if(this.userId == '0') {
+            this.getUniqueUserId();
+        }
         this.apiUrl = ttsObj.api_url + ttsObj.api_namespace + '/' + ttsObj.api_version + '/track'; // Replace with your backend API URL
         this.postID = postId
         this.sessionData = this.getSessionData();
         this._startTimeTracking = false;
         this.listeningLengthInterval = null;
-        this.listeningLength = 0;
 
         // Bind the event listeners for beforeunload and unload
         window.addEventListener('beforeunload', this.sendSessionData.bind(this));
-
     }
 
 
@@ -29,6 +31,9 @@ class AtlasVoiceAnalytics {
     }
 
     trackInit() {
+        if(this.userId == '0') {
+            this.getUniqueUserId();
+        }
         this.addEvent('init');
     }
 
@@ -86,6 +91,7 @@ class AtlasVoiceAnalytics {
     }
 
     sendSessionData() {
+        console.log(this.userId)
         if (Object.keys(this.sessionData)?.length === 0) return;
         fetch(this.apiUrl, {
             method: 'POST',
@@ -95,20 +101,39 @@ class AtlasVoiceAnalytics {
             },
             body: JSON.stringify({
                 analytics: this.sessionData,
-                post_id: this.postID
+                post_id: this.postID,
+                user_id: this.userId,
+                other_data: {}
             }),
         });
         sessionStorage.removeItem('atlasVoice_analytics_data'); // Clear the session data after sending
         sessionStorage.removeItem('atlasVoice_analytics_is_initiated'); // Clear the session data after sending
     }
 
-    getUniqueUserId() {
-        let userId = localStorage.getItem('tts_user_id');
-        if (!userId) {
-            userId = 'user_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('tts_user_id', userId);
+    async getUniqueUserId() {
+        let userId = this.userId;
+        if (this.userId == '0') {
+            // Initialize the agent at application startup.
+            // If you're using an ad blocker or Brave/Firefox, this import will not work.
+            // Please use the NPM package instead: https://t.ly/ORyXk
+            /**
+             * chrome desktop logged in      :       c22574275fc8a2fb843ffbf953e1052c
+             * Chrome dekstop incognito mode :       c22574275fc8a2fb843ffbf953e1052c
+             * Firefox desktop not logged in :       fa5adde2cf549ab409591706ebb01c46
+             * Edge desktop not logged in    :       de807730a48f78ab5fe12e68277b2c0d
+             */
+            let fpPromise = FingerprintJS.load()
+            // Get the visitor identifier when you need it.
+
+            await fpPromise.then(fp => fp.get())
+                .then(result => {
+                    // This is the visitor identifier:
+                    userId = result.visitorId
+                })
         }
-        return userId;
+
+        this.userId = userId
+
     }
 
     addEvent(eventType, data = {}) {
@@ -117,12 +142,14 @@ class AtlasVoiceAnalytics {
             let eventCount = this.sessionData?.[eventType]?.count;
             eventData = {
                 count: eventCount + 1,
-                ...data
+                timestamp: new Date().toISOString(),
+                ...data,
             };
         } else {
             eventData = {
                 count: 1,
-                ...data
+                timestamp: new Date().toISOString(),
+                ...data,
             };
         }
 
@@ -144,7 +171,7 @@ class AtlasVoiceAnalytics {
 
         // Initialize event type data if not already set
         if (!this.sessionData[this.postID][eventType]) {
-            this.sessionData[this.postID][eventType] = { count: 0 };
+            this.sessionData[this.postID][eventType] = {count: 0};
         }
 
         // Increment the event count and merge any additional data

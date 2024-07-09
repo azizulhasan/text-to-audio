@@ -10,6 +10,7 @@ namespace TTA_Api;
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
 
+use TTA\TTA_Activator;
 use TTA\TTA_Helper;
 
 class AtlasVoice_Analytics {
@@ -19,7 +20,7 @@ class AtlasVoice_Analytics {
 	 *
 	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
 	 */
-	public function track( $request ) {
+	public function track_old( $request ) {
 
 		$body = $request->get_body();
 		$body = json_decode( $body, 1 );
@@ -42,6 +43,85 @@ class AtlasVoice_Analytics {
 		$response['data']   = [];
 
 		return rest_ensure_response( $response );
+	}
+
+	public function track( $request ) {
+
+		$body = $request->get_body();
+		$body = json_decode( $body, 1 );
+		$user_id       = isset( $body['user_id'] ) ? $body['user_id'] : '';
+		$post_id       = isset( $body['post_id'] ) ? $body['post_id'] : '';
+		$new_analytics = isset( $body['analytics'] ) ? $body['analytics'] : [];
+		$other_data    = isset( $body['other_data'] ) ? $body['other_data'] : null;
+
+		if ( ! $post_id || ! $user_id || empty( $new_analytics ) ) {
+			$response['status'] = false;
+			$response['data']   = [];
+
+			return rest_ensure_response( $response );
+		}
+
+		if ( ! get_option( 'atlasvoice_analytics_table_is_created' ) ) {
+			TTA_Activator::create_analytics_table_if_not_exists();
+		}
+
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'atlasvoice_analytics';
+
+		// Check if an entry exists
+		$existing_entry = $wpdb->get_row( $wpdb->prepare(
+			"SELECT * FROM $table_name WHERE user_id = %s AND post_id = %d",
+			$user_id,
+			$post_id
+		) );
+
+		if ( $existing_entry ) {
+			// Unserialize the existing analytics data
+			$existing_analytics = maybe_unserialize( $existing_entry->analytics );
+
+			// Sum the existing and new analytics data
+			foreach ( $new_analytics as $key => $value ) {
+				if ( isset( $existing_analytics[ $key ] ) ) {
+					$existing_analytics[ $key ]['count']     += $value['count'];
+					$existing_analytics[ $key ]['timestamp'] = $value['timestamp'];
+				} else {
+					$existing_analytics[ $key ] = $value;
+				}
+			}
+
+			// Update the entry
+			$wpdb->update(
+				$table_name,
+				array(
+					'analytics'  => maybe_serialize( $existing_analytics ),
+					'other_data' => maybe_serialize( $other_data ),
+					'updated_at' => current_time( 'mysql' ),
+				),
+				array( 'id' => $existing_entry->id ),
+				array( '%s', '%s', '%s' ),
+				array( '%d' )
+			);
+		} else {
+			// Create a new entry
+			$wpdb->insert(
+				$table_name,
+				array(
+					'user_id'    => $user_id,
+					'post_id'    => $post_id,
+					'analytics'  => maybe_serialize( $new_analytics ),
+					'other_data' => maybe_serialize( $other_data ),
+					'created_at' => current_time( 'mysql' ),
+					'updated_at' => current_time( 'mysql' ),
+				),
+				array( '%s', '%d', '%s', '%s', '%s', '%s' )
+			);
+		}
+
+		$response['status'] = true;
+		$response['data']   = [];
+
+		return rest_ensure_response( $response );
+
 	}
 
 	/**

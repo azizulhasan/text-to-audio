@@ -109,6 +109,7 @@ class TTA_Admin {
             'VERSION' => is_pro_active() ? get_option('TTA_PRO_VERSION' ) :  TEXT_TO_AUDIO_VERSION,
             'is_logged_in' => is_user_logged_in(),
             'is_admin' => current_user_can('administrator'),
+            'user_id' => get_current_user_id(),
             'is_dashboard' => is_admin(),
             'listeningSettings' => $listening,
             'is_pro_active' => is_pro_active(),
