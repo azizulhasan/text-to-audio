@@ -47,8 +47,8 @@ class AtlasVoice_Analytics {
 
 	public function track( $request ) {
 
-		$body = $request->get_body();
-		$body = json_decode( $body, 1 );
+		$body          = $request->get_body();
+		$body          = json_decode( $body, 1 );
 		$user_id       = isset( $body['user_id'] ) ? $body['user_id'] : '';
 		$post_id       = isset( $body['post_id'] ) ? $body['post_id'] : '';
 		$new_analytics = isset( $body['analytics'] ) ? $body['analytics'] : [];
@@ -78,7 +78,10 @@ class AtlasVoice_Analytics {
 		if ( $existing_entry ) {
 			// Unserialize the existing analytics data
 			$existing_analytics = maybe_unserialize( $existing_entry->analytics );
-
+			error_log( print_r( [
+				'$new_analytics'      => $new_analytics,
+				'$existing_analytics' => $existing_analytics,
+			], 1 ) );
 			// Sum the existing and new analytics data
 			foreach ( $new_analytics as $key => $value ) {
 				if ( isset( $existing_analytics[ $key ] ) ) {
@@ -129,7 +132,7 @@ class AtlasVoice_Analytics {
 	 *
 	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
 	 */
-	public function insights( $request ) {
+	public function insights_old( $request ) {
 		$post_id = $request->get_param( 'id' );
 
 		$insights = [];
@@ -143,6 +146,72 @@ class AtlasVoice_Analytics {
 
 		$response['status'] = true;
 		$response['data']   = $insights;
+
+		return rest_ensure_response( $response );
+	}
+
+	function insights( $request ) {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'atlasvoice_analytics';
+
+		$post_id         = $request->get_param( 'id' );
+		$args['post_id'] = $post_id;
+		$defaults        = array(
+			'user_id'   => null,
+			'post_id'   => null,
+			'from_date' => null,
+			'to_date'   => current_time( 'mysql' ), // Default to today if 'to_date' is not provided
+		);
+
+		$args       = wp_parse_args( $args, $defaults );
+		$conditions = array();
+		$values     = array();
+
+		if ( $args['user_id'] ) {
+			$conditions[] = 'user_id = %s';
+			$values[]     = $args['user_id'];
+		}
+
+		if ( $args['post_id'] ) {
+			$conditions[] = 'post_id = %d';
+			$values[]     = $args['post_id'];
+		}
+
+		if ( ! $args['post_id'] ) {
+			$response['status']  = false;
+			$response['data']    = [];
+			$response['message'] = __( 'Post ID or User ID is missing', 'text-to-audio' );
+
+			return rest_ensure_response( $response );
+		}
+
+
+		if ( $args['from_date'] && $args['to_date'] ) {
+
+			$conditions[] = 'created_at >= %s';
+			$values[]     = $args['from_date'];
+
+			$conditions[] = 'updated_at <= %s';
+			$values[]     = $args['to_date'];
+		}
+
+		$where_clause = '';
+		if ( ! empty( $conditions ) ) {
+			$where_clause = 'WHERE ' . implode( ' AND ', $conditions );
+		}
+
+		$query          = "SELECT * FROM $table_name $where_clause";
+		$prepared_query = $wpdb->prepare( $query, ...$values );
+		$results        = $wpdb->get_results( $prepared_query );
+		$total_results  = [];
+		foreach ( $results as $result ) {
+			$result->analytics  = maybe_unserialize( $result->analytics );
+			$result->other_data = maybe_unserialize( $result->other_data );
+			$total_results[]    = $result;
+		}
+
+		$response['status'] = true;
+		$response['data']   = $total_results;
 
 		return rest_ensure_response( $response );
 	}

@@ -91,7 +91,6 @@ class AtlasVoiceAnalytics {
     }
 
     sendSessionData() {
-        console.log(this.userId)
         if (Object.keys(this.sessionData)?.length === 0) return;
         fetch(this.apiUrl, {
             method: 'POST',

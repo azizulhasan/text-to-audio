@@ -55,26 +55,112 @@ class AtlasVoicePlayerInsights {
         return this.getTotalCount('end');
     }
 
+    // TODO: move these functions pro version
+
+
+    // 1. Average click ratio on play button
+    getAveragePlayClickRatio() {
+        const initCount = this.getTotalCount('init');
+        const playCount = this.getTotalCount('play');
+        return initCount > 0 ? (playCount / initCount) * 100 : 0;
+    }
+
+    // 2. Average ratio of listening till end
+    getAverageListenTillEndRatio() {
+        const playCount = this.getTotalCount('play');
+        const endCount = this.getTotalCount('end');
+        return playCount > 0 ? (endCount / playCount) * 100 : 0;
+    }
+
+    // Additional functionalities
+
+    // 3. Average listening time per play
+    getAverageListeningTimePerPlay() {
+        const playCount = this.getTotalCount('play');
+        const totalTime = this.getTotalCount('time');
+        return playCount > 0 ? totalTime / playCount : 0;
+    }
+
+
+    // 4. Average number of pauses per play
+    getAveragePausesPerPlay() {
+        const playCount = this.getTotalCount('play');
+        const pauseCount = this.getTotalCount('pause');
+        return playCount > 0 ? pauseCount / playCount : 0;
+    }
+
+    // Function to generate insights
+    generateInsightsPro() {
+        let result = {
+            totalEnd: this.getTotalEnd(),
+            averagePlayClickRatio: this.getAveragePlayClickRatio().toFixed(2) + '%',
+            averageListenTillEndRatio: this.getAverageListenTillEndRatio().toFixed(2) + '%',
+            averageListeningTimePerPlay: this.getAverageListeningTimePerPlay().toFixed(2) + ' seconds',
+            averagePausesPerPlay: this.getAveragePausesPerPlay().toFixed(2),
+        }
+
+        return result;
+    }
+
 
     // Function to generate insights
     generateInsights() {
-        return this.hooks.applyFilters('atlasVoice_player_insights', {
-            totalInit: this.getTotalInit(),
-            totalPlay: this.getTotalPlay(),
-            totalPause: this.getTotalPause(),
-            totalTime: this.getTotalTime(),
-            totalEnd: this.getTotalEnd(),
-            averagePlayClickRatio: this.pro,
-            averageListenTillEndRatio: this.pro,
-            averageListeningTimePerPlay: this.pro,
-            averagePausesPerPlay: this.pro,
-        });
+
+        if (ttsObj.is_pro_active) {
+            let resultFree = this.hooks.applyFilters('atlasVoice_player_insights', {
+                totalInit: this.getTotalInit(),
+                totalPlay: this.getTotalPlay(),
+                totalPause: this.getTotalPause(),
+                totalTime: this.getTotalTime(),
+            });
+            let resultPro = this.generateInsightsPro();
+
+            return {
+                ...resultFree,
+                ...resultPro
+            }
+
+        } else {
+            return this.hooks.applyFilters('atlasVoice_player_insights', {
+                totalInit: this.getTotalInit(),
+                totalPlay: this.getTotalPlay(),
+                totalPause: this.getTotalPause(),
+                totalTime: this.getTotalTime(),
+                totalEnd: this.pro,
+                averagePlayClickRatio: this.pro,
+                averageListenTillEndRatio: this.pro,
+                averageListeningTimePerPlay: this.pro,
+                averagePausesPerPlay: this.pro,
+            });
+        }
+
     }
+
+    mergeAnalytics(data) {
+        const mergedAnalytics = {};
+
+        data.forEach(item => {
+            const analytics = item.analytics;
+            for (const [key, value] of Object.entries(analytics)) {
+                if (!mergedAnalytics[key]) {
+                    mergedAnalytics[key] = {count: 0, timestamp: value.timestamp};
+                }
+                mergedAnalytics[key].count += value.count;
+                // Keep the latest timestamp
+                if (new Date(value.timestamp) > new Date(mergedAnalytics[key].timestamp)) {
+                    mergedAnalytics[key].timestamp = value.timestamp;
+                }
+            }
+        });
+
+        return mergedAnalytics;
+    }
+
 
     async getInsights() {
 
         if (this.postId) {
-            this.apiUrl += '/'+ this.postId
+            this.apiUrl += '/' + this.postId
             let response = await fetch(this.apiUrl, {
                 method: 'GET',
                 headers: {
@@ -83,9 +169,10 @@ class AtlasVoicePlayerInsights {
                 }
             });
             let data = await response.json();
-            this.data = data.data;
+            data = this.mergeAnalytics(data.data)
+            this.data = data;
             this.insights = this.generateInsights()
-        }else{
+        } else {
             console.log(ttsObj)
             // let response = await fetch(this.apiUrl, {
             //     method: 'POST',
@@ -99,7 +186,6 @@ class AtlasVoicePlayerInsights {
             // // this.insights = this.generateInsights()
             // console.log(this.data)
         }
-
 
 
         if (Object.keys(this.insights).length) {
@@ -214,6 +300,7 @@ class AtlasVoicePlayerInsights {
                 cursor: pointer;
             }
         `;
+
         container.appendChild(style);
     }
 
