@@ -11,6 +11,7 @@ class AtlasVoicePlayerInsights {
         totalPause: __("Number of times the pause button was clicked"),
         totalTime: __("Total time the player has played (in seconds)"),
         totalEnd: __("Number of times the player reached the end"),
+        totalDownload: __("Number of times the MP3 file downloaded."),
         averagePlayClickRatio: __("Percentage of times the play button was clicked after initiation"),
         averageListenTillEndRatio: __("Percentage of times users listened till the end"),
         averageListeningTimePerPlay: __("Average listening time per play"),
@@ -56,6 +57,10 @@ class AtlasVoicePlayerInsights {
         return this.getTotalCount('end');
     }
 
+    getTotalDownload() {
+        return this.getTotalCount('download');
+    }
+
     // TODO: move these functions pro version
 
 
@@ -94,11 +99,13 @@ class AtlasVoicePlayerInsights {
     generateInsightsPro() {
         let result = {
             totalEnd: this.getTotalEnd(),
+            totalDownload: this.getTotalDownload(),
             averagePlayClickRatio: this.getAveragePlayClickRatio().toFixed(2) + '%',
             averageListenTillEndRatio: this.getAverageListenTillEndRatio().toFixed(2) + '%',
             averageListeningTimePerPlay: this.getAverageListeningTimePerPlay().toFixed(2) + ' seconds',
             averagePausesPerPlay: this.getAveragePausesPerPlay().toFixed(2),
         }
+
 
         return result;
     }
@@ -209,14 +216,15 @@ class AtlasVoicePlayerInsights {
         const table = this.createTable(this.insights);
         tableContainer.appendChild(table);
     }
+
     setAnalyticsTitle() {
         const tableContainer = document.getElementById('atlasVoice_analytics');
         let title = document.createElement('h2')
-        if(!this.shouldTrackAnalyticsData()) {
+        if (!this.shouldTrackAnalyticsData()) {
             title = document.createElement('h1')
             title.innerHTML = 'Tracking analytics for this post is not enabled. Enable it from <strong>Anlytics</strong> menu.'
             tableContainer.appendChild(title);
-        }else{
+        } else {
             let perser = new DOMParser();
             let header = `<div style="margin-top:30px;font-size:20px;background-color:#184c53;color:#fff;padding:5px;" for="">
                 Analytics Of The Post

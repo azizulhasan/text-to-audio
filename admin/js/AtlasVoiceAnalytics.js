@@ -57,6 +57,7 @@ class AtlasVoiceAnalytics {
         this.addEvent('end');
     }
 
+
     trackListeningLength() {
         if (this.startTimeTracking) {
             if (!this.listeningLengthInterval) {
@@ -241,6 +242,4 @@ export default AtlasVoiceAnalytics;
 /**
  * Load AtlasVoiceAnalytics after DOMContentLoaded if pro version exists.
  */
-if (window?.ttsObj?.is_pro_active) {
-    window.AtlasVoiceAnalytics = AtlasVoiceAnalytics;
-}
+window.AtlasVoiceAnalytics = AtlasVoiceAnalytics;
