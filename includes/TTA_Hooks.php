@@ -256,8 +256,6 @@ class TTA_Hooks {
                     style='<?php echo esc_attr( $btn_style ); ?>;cursor: copy;margin-top:10px;padding:6px;'>
                 <span class="dashicons dashicons-admin-page"></span>
             </button>
-
-
             <div id="atlasVoice_analytics"></div>
         </div>
 		<?php

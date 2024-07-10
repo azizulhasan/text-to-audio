@@ -212,13 +212,22 @@ class AtlasVoicePlayerInsights {
     setAnalyticsTitle() {
         const tableContainer = document.getElementById('atlasVoice_analytics');
         let title = document.createElement('h2')
-        title.innerHTML = 'Analytics Data For The Post.'
         if(!this.shouldTrackAnalyticsData()) {
             title = document.createElement('h1')
             title.innerHTML = 'Tracking analytics for this post is not enabled. Enable it from <strong>Anlytics</strong> menu.'
-        }
+            tableContainer.appendChild(title);
+        }else{
+            let perser = new DOMParser();
+            let header = `<div style="margin-top:30px;font-size:20px;background-color:#184c53;color:#fff;padding:5px;" for="">
+                Analytics Of The Post
+            </div>`
+            header = perser.parseFromString(header, 'text/html')
 
-        tableContainer.appendChild(title);
+            // Extract the div element from the parsed document
+            let headerElement = header.body.firstChild;
+
+            tableContainer.prepend(headerElement)
+        }
     }
 
     createTable(data) {
