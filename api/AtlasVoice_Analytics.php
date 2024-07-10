@@ -271,7 +271,7 @@ class AtlasVoice_Analytics {
 		$posts = $query->posts;
 
 		$post_data = array();
-		if ( ! TTA_Helper::is_pro_active() && apply_filters( 'tts_track_all_ids_by_default', true ) ) {
+		if ( TTA_Helper::is_pro_active() && apply_filters( 'tts_track_all_ids_by_default', true ) ) {
 			$post_data['all'] = 'All Posts:: Track All Ids of post type ' . implode( ', ', $post_types );
 		}
 		foreach ( $posts as $post_id ) {
@@ -304,6 +304,9 @@ class AtlasVoice_Analytics {
 		update_option( 'tta_analytics_settings', $body );
 
 		$saved_data = get_option( 'tta_analytics_settings' );
+
+		delete_transient( 'tts_all_settings' );
+
 
 		$response['status'] = true;
 		$response['data']   = $saved_data;

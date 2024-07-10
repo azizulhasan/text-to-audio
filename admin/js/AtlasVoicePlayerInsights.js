@@ -21,6 +21,7 @@ class AtlasVoicePlayerInsights {
     constructor(postId = '') {
         this.postId = postId
         this.apiUrl = ttsObj.api_url + ttsObj.api_namespace + '/' + ttsObj.api_version + '/insights'; // Replace with your backend API URL
+        this.setAnalyticsTitle();
         this.getInsights()
 
     }
@@ -158,7 +159,9 @@ class AtlasVoicePlayerInsights {
 
 
     async getInsights() {
-
+        if (!this.shouldTrackAnalyticsData()) {
+            return;
+        }
         if (this.postId) {
             this.apiUrl += '/' + this.postId
             let response = await fetch(this.apiUrl, {
@@ -205,6 +208,17 @@ class AtlasVoicePlayerInsights {
         this.prependCSS(tableContainer);
         const table = this.createTable(this.insights);
         tableContainer.appendChild(table);
+    }
+    setAnalyticsTitle() {
+        const tableContainer = document.getElementById('atlasVoice_analytics');
+        let title = document.createElement('h2')
+        title.innerHTML = 'Analytics Data For The Post.'
+        if(!this.shouldTrackAnalyticsData()) {
+            title = document.createElement('h1')
+            title.innerHTML = 'Tracking analytics for this post is not enabled. Enable it from <strong>Anlytics</strong> menu.'
+        }
+
+        tableContainer.appendChild(title);
     }
 
     createTable(data) {
@@ -303,6 +317,24 @@ class AtlasVoicePlayerInsights {
 
         container.appendChild(style);
     }
+
+    shouldTrackAnalyticsData() {
+        let should_track = true;
+        if (!window?.ttsObj?.settings?.analytics?.tts_enable_analytics) {
+            return false;
+        }
+        if (window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids?.length) {
+
+            if ((window?.ttsObj.is_pro_active && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes('all')) || window?.ttsObj.is_pro_active && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.postId)) {
+                should_track = true;
+            } else if (!window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.postId)) {
+                should_track = false;
+            }
+        }
+
+        return should_track;
+    }
+
 
 }
 

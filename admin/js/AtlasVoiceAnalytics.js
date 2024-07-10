@@ -3,11 +3,11 @@ import * as FingerprintJS from './analytics/fingerprint.js';
 class AtlasVoiceAnalytics {
     constructor(postId = '') {
         this.userId = ttsObj.user_id;
-        if(this.userId == '0') {
+        if (this.userId == '0') {
             this.getUniqueUserId();
         }
         this.apiUrl = ttsObj.api_url + ttsObj.api_namespace + '/' + ttsObj.api_version + '/track'; // Replace with your backend API URL
-        this.postID = postId
+        this.postId = postId
         this.sessionData = this.getSessionData();
         this._startTimeTracking = false;
         this.listeningLengthInterval = null;
@@ -31,7 +31,7 @@ class AtlasVoiceAnalytics {
     }
 
     trackInit() {
-        if(this.userId == '0') {
+        if (this.userId == '0') {
             this.getUniqueUserId();
         }
         this.addEvent('init');
@@ -91,6 +91,10 @@ class AtlasVoiceAnalytics {
     }
 
     sendSessionData() {
+        if (!this.shouldTrackAnalyticsData()) {
+            return;
+        }
+
         if (Object.keys(this.sessionData)?.length === 0) return;
         fetch(this.apiUrl, {
             method: 'POST',
@@ -100,7 +104,7 @@ class AtlasVoiceAnalytics {
             },
             body: JSON.stringify({
                 analytics: this.sessionData,
-                post_id: this.postID,
+                post_id: this.postId,
                 user_id: this.userId,
                 other_data: {}
             }),
@@ -136,6 +140,9 @@ class AtlasVoiceAnalytics {
     }
 
     addEvent(eventType, data = {}) {
+        if (!this.shouldTrackAnalyticsData()) {
+            return;
+        }
         let eventData = {}
         if (this.sessionData?.[eventType]) {
             let eventCount = this.sessionData?.[eventType]?.count;
@@ -164,19 +171,19 @@ class AtlasVoiceAnalytics {
      */
     addEvent_new(eventType, data = {}) {
         // Initialize post data if not already set
-        if (!this.sessionData[this.postID]) {
-            this.sessionData[this.postID] = {};
+        if (!this.sessionData[this.postId]) {
+            this.sessionData[this.postId] = {};
         }
 
         // Initialize event type data if not already set
-        if (!this.sessionData[this.postID][eventType]) {
-            this.sessionData[this.postID][eventType] = {count: 0};
+        if (!this.sessionData[this.postId][eventType]) {
+            this.sessionData[this.postId][eventType] = {count: 0};
         }
 
         // Increment the event count and merge any additional data
-        this.sessionData[this.postID][eventType].count += 1;
-        this.sessionData[this.postID][eventType] = {
-            ...this.sessionData[this.postID][eventType],
+        this.sessionData[this.postId][eventType].count += 1;
+        this.sessionData[this.postId][eventType] = {
+            ...this.sessionData[this.postId][eventType],
             ...data,
         };
 
@@ -209,6 +216,23 @@ class AtlasVoiceAnalytics {
         // Period can be 'all_time', '7_days', '15_days', '30_days', etc.
         return fetch(`${this.apiUrl}/report?period=${period}`)
             .then(response => response.json());
+    }
+
+    shouldTrackAnalyticsData() {
+        let should_track = true;
+        if (!window?.ttsObj?.settings?.analytics?.tts_enable_analytics) {
+            return false;
+        }
+        if (window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids?.length) {
+
+            if ((window?.ttsObj.is_pro_active && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes('all')) || window?.ttsObj.is_pro_active && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.postId)) {
+                should_track = true;
+            } else if (!window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.postId)) {
+                should_track = false;
+            }
+        }
+
+        return should_track;
     }
 }
 

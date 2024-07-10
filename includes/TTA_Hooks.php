@@ -179,7 +179,8 @@ class TTA_Hooks {
 				// Check to ensure it's my plugin
 				if ( $plugin == $text_to_audio ) {
 					TTA_Activator::create_analytics_table_if_not_exists();
-                    break;
+					delete_transient( 'tts_all_settings' );
+					break;
 				}
 			}
 		}
@@ -257,9 +258,7 @@ class TTA_Hooks {
             </button>
 
 
-            <div id="atlasVoice_analytics">
-                <h2><?php echo __( 'Analytics Data For The Post.', 'text-to-audio' ) ?></h2>
-            </div>
+            <div id="atlasVoice_analytics"></div>
         </div>
 		<?php
 		\do_action( 'tts_after_metabox_content' );
