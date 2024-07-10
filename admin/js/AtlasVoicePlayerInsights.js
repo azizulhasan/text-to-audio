@@ -230,13 +230,13 @@ class AtlasVoicePlayerInsights {
                     const lockIcon = document.createElement('span');
                     lockIcon.innerHTML = '🔒';
                     lockIcon.classList.add('lock-icon', 'has-tooltip');
-                    lockIcon.title = 'This feature is available in the pro version';
+                    lockIcon.title = __('Click To Visit Price');
                     lockIcon.addEventListener('click', () => {
                         window.open(this.proPage, '_blank'); // Replace with your pro version URL
                     });
                     const tooltip = document.createElement('span');
                     tooltip.classList.add('tooltip');
-                    tooltip.textContent = 'This feature is available in the pro version';
+                    tooltip.textContent = __('This feature is available in the pro version');
                     lockIcon.appendChild(tooltip);
                     cellValue.appendChild(lockIcon);
                 } else {

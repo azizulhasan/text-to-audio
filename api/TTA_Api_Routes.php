@@ -142,11 +142,39 @@ class TTA_Api_Routes {
 		// register insights all post route.
 		register_rest_route(
 			$this->namespace,
-			'/latest_100_posts',
+			'/latest_posts',
 			array(
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( $this->analytics, 'latest_100_posts' ),
+					'callback'            => array( $this->analytics, 'latest_posts' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
+		// register save_trackable_ids route.
+		register_rest_route(
+			$this->namespace,
+			'/save_analytics_settings',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this->analytics, 'save_analytics_settings' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
+		// register get_trackable_ids route.
+		register_rest_route(
+			$this->namespace,
+			'/get_analytics_settings',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this->analytics, 'get_analytics_settings' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
 					'args'                => array(),
 				),

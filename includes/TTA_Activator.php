@@ -125,6 +125,17 @@ class TTA_Activator {
 			\delete_transient( 'tts_all_settings' );
 		}
 
+		/**
+		 * analytics settings.
+		 */
+		if ( $renew_all_settings || ! get_option( 'tta_analytics_settings' ) ) {
+			update_option( 'tta_analytics_settings', array
+			(
+				"tts_enable_analytics"   => true,
+				"tts_trackable_post_ids" => []
+			) );
+		}
+
 		self::create_analytics_table_if_not_exists();
 	}
 

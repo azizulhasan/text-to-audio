@@ -78,10 +78,6 @@ class AtlasVoice_Analytics {
 		if ( $existing_entry ) {
 			// Unserialize the existing analytics data
 			$existing_analytics = maybe_unserialize( $existing_entry->analytics );
-			error_log( print_r( [
-				'$new_analytics'      => $new_analytics,
-				'$existing_analytics' => $existing_analytics,
-			], 1 ) );
 			// Sum the existing and new analytics data
 			foreach ( $new_analytics as $key => $value ) {
 				if ( isset( $existing_analytics[ $key ] ) ) {
@@ -150,7 +146,12 @@ class AtlasVoice_Analytics {
 		return rest_ensure_response( $response );
 	}
 
-	function insights( $request ) {
+	/**
+	 * @param $request
+	 *
+	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+	 */
+	public function insights( $request ) {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'atlasvoice_analytics';
 
@@ -239,7 +240,12 @@ class AtlasVoice_Analytics {
 		return rest_ensure_response( $response );
 	}
 
-	public function latest_100_posts( $request ) {
+	/**
+	 * @param $request
+	 *
+	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+	 */
+	public function latest_posts( $request ) {
 
 		$settings = TTA_Helper::tts_get_settings( 'settings' );
 		if ( isset( $settings['tta__settings_allow_listening_for_post_types'] ) && count( $settings['tta__settings_allow_listening_for_post_types'] ) ) {
@@ -265,12 +271,61 @@ class AtlasVoice_Analytics {
 		$posts = $query->posts;
 
 		$post_data = array();
-
+		if ( ! TTA_Helper::is_pro_active() && apply_filters( 'tts_track_all_ids_by_default', true ) ) {
+			$post_data['all'] = 'All Posts:: Track All Ids of post type ' . implode( ', ', $post_types );
+		}
 		foreach ( $posts as $post_id ) {
 			$post_data[ $post_id ] = get_the_title( $post_id );
 		}
+
+
 		$response['status'] = true;
 		$response['data']   = $post_data;
+
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * @param $request
+	 *
+	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+	 */
+	public function save_analytics_settings( $request ) {
+		$body = [];
+		if ( isset( $request['analytics'] ) ) {
+			$body = json_decode( $request['analytics'] );
+		} else {
+			$response['status'] = false;
+			$response['data']   = [];
+
+			return rest_ensure_response( $response );
+		}
+
+		update_option( 'tta_analytics_settings', $body );
+
+		$saved_data = get_option( 'tta_analytics_settings' );
+
+		$response['status'] = true;
+		$response['data']   = $saved_data;
+
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * @param $request
+	 *
+	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+	 */
+	public function get_analytics_settings( $request ) {
+		$body = [];
+		$body = (array) get_option( 'tta_analytics_settings' );
+
+		if ( TTA_Helper::is_pro_active() && apply_filters( 'tts_track_all_ids_by_default', true ) && isset( $body['tts_trackable_post_ids'] ) && ! in_array( 'all', $body['tts_trackable_post_ids'] ) ) {
+			array_push( $body['tts_trackable_post_ids'], 'all' );
+		}
+
+		$response['status'] = true;
+		$response['data']   = $body;
 
 		return rest_ensure_response( $response );
 	}

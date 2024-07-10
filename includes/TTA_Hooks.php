@@ -176,7 +176,6 @@ class TTA_Hooks {
 		// If an update has taken place and the updated type is plugins and the plugins element exists
 		if ( $options['action'] == 'update' && $options['type'] == 'plugin' && isset( $options['plugins'] ) ) {
 			foreach ( $options['plugins'] as $plugin ) {
-                error_log(print_r($options, 1));
 				// Check to ensure it's my plugin
 				if ( $plugin == $text_to_audio ) {
 					TTA_Activator::create_analytics_table_if_not_exists();
