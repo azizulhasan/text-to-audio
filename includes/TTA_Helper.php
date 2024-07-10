@@ -446,7 +446,7 @@ class TTA_Helper {
 		$mp3_file_urls = get_post_meta( $post->ID, 'tts_mp3_file_urls' );
 		$old_url       = get_post_meta( $post->ID, 'tts_mp3_file_url', true );
 
-		if ( is_pro_active() && $old_url ) {
+		if ( self::is_pro_active() && $old_url ) {
 			$mp3_file_urls = self::handle_old_url( $post, $mp3_file_urls, $old_url );
 		}
 

@@ -152,12 +152,9 @@ class TTA_Admin {
      * @since    1.0.0
      */
     public function enqueue_styles() {
-        /* Dashicons */
-        if(TTA_Helper::is_text_to_audio_page()) {
-	        wp_enqueue_style( 'dashicons' );
-	        wp_enqueue_style( 'text-to-audio-dashboard', plugin_dir_url( __FILE__ ) . 'css/text-to-audio-dashboard.css', [], $this->version, 'all' );
-
-        }
+	    if(TTA_Helper::is_text_to_audio_page()) {
+		    wp_enqueue_style( 'text-to-audio-dashboard', plugin_dir_url( __FILE__ ) . 'css/text-to-audio-dashboard.css', [], $this->version, 'all' );
+	    }
     }
 
     /**
