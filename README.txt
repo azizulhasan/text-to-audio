@@ -350,10 +350,15 @@ add_filter( 'tta__button_text_arr', 'tta__button_text_arr_callback' );
 function tta__button_text_arr_callback ( $button_text_arr ) {
 
 	// Listen button
-	$text_arr['listen_text'] = 'Listen'; // paste custem text
-	$text_arr['pause_text'] = 'Pause'; // paste custem text
-	$text_arr['resume_text'] = 'Resume'; // paste custem text
-	$text_arr['replay_text'] = 'Replay'; // paste custem text
+	$text_arr['listen_text'] = 'Listen'; // paste custom text
+    $text_arr['pause_text'] = 'Pause'; // paste custom text
+    $text_arr['resume_text'] = 'Resume'; // paste custom text
+    $text_arr['replay_text'] = 'Replay'; // paste custom text
+    // Hover title
+    $text_arr['listen_hover_title'] = 'test listen title',
+    $text_arr['pause_hover_title'] = 'test pause title',
+    $text_arr['resume_hover_title'] = 'test resume title',
+    $text_arr['replay_hover_title'] = 'test replay title',
 
 	return $text_arr;
 }

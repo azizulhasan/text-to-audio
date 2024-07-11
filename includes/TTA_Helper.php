@@ -807,5 +807,25 @@ class TTA_Helper {
 		}
 	}
 
+	/**
+	 * Get the text value based on the given attributes and saved texts.
+	 *
+	 * @param array  $atts        The attributes array.
+	 * @param array  $saved_texts The saved texts array.
+	 * @param string $key         The key to look for in both arrays.
+	 * @param string $default     The default text if neither $atts nor $saved_texts has the value.
+	 * @param string $text_domain The text domain for translation.
+	 * @return string The final text value.
+	 */
+	public static function get_text_value($atts, $saved_texts, $key, $default, $text_domain) {
+		if (isset($atts[$key]) && strlen($atts[$key])) {
+			return esc_html(sanitize_text_field($atts[$key]));
+		} elseif (isset($saved_texts[$key])) {
+			return esc_html(sanitize_text_field($saved_texts[$key]));
+		} else {
+			return __($default, $text_domain);
+		}
+	}
+
 
 }

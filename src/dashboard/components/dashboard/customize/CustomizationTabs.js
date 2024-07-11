@@ -14,7 +14,7 @@ function CustomizationTabs({ buttonLists, listeningSettings, handleChange, handl
                     id="customization-button"
                     className="mb-3"
                 >
-                    <Tab eventKey="button" title="Button" ><TTSCustomizationButton buttonLists={buttonLists} listeningBtnStyle={listeningBtnStyle} handleChange={handleChange} /></Tab>
+                    <Tab eventKey="button" title="Player" ><TTSCustomizationButton buttonLists={buttonLists} listeningBtnStyle={listeningBtnStyle} handleChange={handleChange} /></Tab>
                     <Tab eventKey="design" title="Design" ><TTSButtonDesign customCSS={customCSS} handleSubmit={handleSubmit} listeningBtnStyle={listeningBtnStyle} handleChange={handleChange} /></Tab>
                 </Tabs >
                 <div className='d-grid gap-3 col-12 mx-auto mt-5 mb-4'>

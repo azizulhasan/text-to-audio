@@ -143,8 +143,35 @@ export default function Docs() {
 									5. How to change button text?
 								</Accordion.Header>
 								<Accordion.Body>
-									You can change button text 2 ways one is by shortcode attribute. Another way is adding filter. But filter always overrides the shortcode attributes. Here is short code Example :{' '}
-									<code>[tta_listen_btn listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay" start_text="Start" stop_text="Stop"]</code>
+									You can change button text 2 ways one is by shortcode attribute. Another way is
+									adding filter. But filter always overrides the shortcode attributes. Here is short
+									code Example :{' '}
+									<pre>
+										<code>[tta_listen_btn listen_text="Listen" pause_text="Pause" resume_text="Resume"
+										replay_text="Replay" start_text="Start" stop_text="Stop"]</code>
+									</pre>
+									Also you can change it by filter. We prefer by filter.
+									<pre>
+											<code id='filter_hook'>
+												{`
+              add_filter( 'tta__button_text_arr', 'tta__button_text_arr_callback' );
+              function tta__button_text_arr_callback ($button_text_arr) {
+		// Listen button
+		$text_arr['listen_text'] = 'Listen'; // paste custom text
+		$text_arr['pause_text'] = 'Pause'; // paste custom text
+		$text_arr['resume_text'] = 'Resume'; // paste custom text
+		$text_arr['replay_text'] = 'Replay'; // paste custom text
+		// Hover title
+		$text_arr['listen_hover_title'] = 'test listen title',
+		$text_arr['pause_hover_title'] = 'test pause title',
+		$text_arr['resume_hover_title'] = 'test resume title',
+		$text_arr['replay_hover_title'] = 'test replay title',
+		
+		return $text_arr;
+              }
+              `}
+											</code>
+										</pre>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='6'>
@@ -163,11 +190,11 @@ export default function Docs() {
 								<Accordion.Body>
 									<Table striped bordered hover size='sm'>
 										<thead>
-											<tr>
-												<th>Sr.</th>
-												<th>Filter Name</th>
-												<th>Arguments</th>
-											</tr>
+										<tr>
+											<th>Sr.</th>
+											<th>Filter Name</th>
+											<th>Arguments</th>
+										</tr>
 										</thead>
 										<tbody>
 											{filters.length &&
@@ -210,13 +237,15 @@ export default function Docs() {
               add_filter( 'tta__button_text_arr', 'tta__button_text_arr_callback' );
               function tta__button_text_arr_callback ($button_text_arr) {
 		// Listen button
-		$text_arr['listen_text'] = 'Listen'; // paste custem text
-		$text_arr['pause_text'] = 'Pause'; // paste custem text
-		$text_arr['resume_text'] = 'Resume'; // paste custem text
-		$text_arr['replay_text'] = 'Replay'; // paste custem text
-		// Record button text
-		$text_arr['start_text'] = 'Start'; // paste custem text
-		$text_arr['stop_text'] = 'Stop'; // paste custem text
+		$text_arr['listen_text'] = 'Listen'; // paste custom text
+		$text_arr['pause_text'] = 'Pause'; // paste custom text
+		$text_arr['resume_text'] = 'Resume'; // paste custom text
+		$text_arr['replay_text'] = 'Replay'; // paste custom text
+		// Hover title
+		$text_arr['listen_hover_title'] = 'test listen title',
+		$text_arr['pause_hover_title'] = 'test pause title',
+		$text_arr['resume_hover_title'] = 'test resume title',
+		$text_arr['replay_hover_title'] = 'test replay title',
 		
 		return $text_arr;
               }

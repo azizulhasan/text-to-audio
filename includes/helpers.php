@@ -344,12 +344,13 @@ function get_button_text( $atts, $content_read_time ) {
 		$saved_texts = set_initial_button_texts( $content_read_time );
 	}
 
-	$listen_text = ( isset( $atts['listen_text'] ) ) && strlen( $atts['listen_text'] ) ? esc_html__( sanitize_text_field( $atts['listen_text'] ) ) : $saved_texts['listen_text'];
-	$pause_text  = ( isset( $atts['pause_text'] ) ) && strlen( $atts['pause_text'] ) ? esc_html__( sanitize_text_field( $atts['pause_text'] ) ) : $saved_texts['pause_text'];
-	$resume_text = ( isset( $atts['resume_text'] ) ) && strlen( $atts['resume_text'] ) ? esc_html__( sanitize_text_field( $atts['resume_text'] ) ) : $saved_texts['resume_text'];
-	$replay_text = ( isset( $atts['replay_text'] ) ) && strlen( $atts['replay_text'] ) ? esc_html__( sanitize_text_field( $atts['replay_text'] ) ) : $saved_texts['replay_text'];
-	$start_text  = ( isset( $atts['start_text'] ) ) && strlen( $atts['start_text'] ) ? esc_html__( sanitize_text_field( $atts['start_text'] ) ) : $saved_texts['start_text'];
-	$stop_text   = ( isset( $atts['stop_text'] ) ) && strlen( $atts['stop_text'] ) ? esc_html__( sanitize_text_field( $atts['stop_text'] ) ) : $saved_texts['stop_text'];
+	// Example usage
+	$listen_text = TTA_Helper::get_text_value($atts, $saved_texts, 'listen_text', 'Listen', 'text-to-audio');
+	$pause_text  = TTA_Helper::get_text_value($atts, $saved_texts, 'pause_text', 'Pause', 'text-to-audio');
+	$resume_text = TTA_Helper::get_text_value($atts, $saved_texts, 'resume_text', 'Resume', 'text-to-audio');
+	$replay_text = TTA_Helper::get_text_value($atts, $saved_texts, 'replay_text', 'Replay', 'text-to-audio');
+	$start_text  = TTA_Helper::get_text_value($atts, $saved_texts, 'start_text', 'Start', 'text-to-audio');
+	$stop_text   = TTA_Helper::get_text_value($atts, $saved_texts, 'stop_text', 'Stop', 'text-to-audio');
 
 	$text_arr = [
 		'listen_text' => $listen_text,
@@ -436,7 +437,7 @@ function add_listen_button( $content ) {
 		//     add_filter( 'the_excerpt', 'add_listen_button' , 9999 );
 		// }
 
-		if ( ! has_shortcode( $content, 'tta_listen_btn' ) ) {
+		if ( ! has_shortcode( $post->post_content, 'tta_listen_btn' ) ) {
 			ob_start();
 			echo tta_get_button_content( '' );
 			$button = ob_get_contents();

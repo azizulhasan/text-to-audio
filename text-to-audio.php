@@ -267,7 +267,7 @@ function tta_create_shortcode($atts) {
 }
 
 add_shortcode('tta_listen_btn', 'tta_create_shortcode');
-add_shortcode('AtlasVoice', 'tta_create_shortcode');
+//add_shortcode('AtlasVoice', 'tta_create_shortcode');
 
 // Filter to allow shortcodes in HTML tags
 add_filter('do_shortcode_tag', 'allow_shortcode_in_html_tag', 10, 4);

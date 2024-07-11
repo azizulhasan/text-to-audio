@@ -114,7 +114,7 @@ export default class TextToSpeech {
             icon = `<div className="tts_button">${document.documentElement.outerHTML}</div><span>`;
         }
 
-        return icon + ' ' + this.buttonTextArr.resume_text + '<span></span></span></div>'
+        return icon + ' ' + this.resumeButtonText() + '<span></span></span></div>'
     }
     recordStartButtonContent() {
         return '<span class="dashicons dashicons-controls-volumeoff"></span> ' + this.buttonTextArr.start_text;
@@ -188,13 +188,16 @@ export default class TextToSpeech {
         if (this?.playButtonNo == 1 && this?.speakButton?.innerHTML) {
             if ('listen' === listenStatus) {
                 this.speakButton.innerHTML = this.replayButtonContent();
-                this.speakButton.setAttribute('title', 'Text To Audio : ' + this.replayButtonText());
+                let buttonHoverTitle = window?.ttsObj?.buttonTextArr?.replay_hover_title??'Click to listen post.';
+                this.speakButton.setAttribute('title', 'Text To Audio : ' + buttonHoverTitle );
             } else if ('pause' === listenStatus) {
                 this.speakButton.innerHTML = this.pauseButtonContent();
-                this.speakButton.setAttribute('title', 'Text To Audio : ' + this.pauseButtonText());
+                let buttonHoverTitle = window?.ttsObj?.buttonTextArr?.pause_hover_title ??this.pauseButtonText();
+                this.speakButton.setAttribute('title', 'Text To Audio : ' + buttonHoverTitle);
             } else if ('resume' === listenStatus) {
                 this.speakButton.innerHTML = this.resumeButtonContent();
-                this.speakButton.setAttribute('title', 'Text To Audio : ' + this.resumeButtonText());
+                let buttonHoverTitle = window?.ttsObj?.buttonTextArr?.resume_hover_title?? this.resumeButtonText();
+                this.speakButton.setAttribute('title', 'Text To Audio : ' + buttonHoverTitle);
             }
         }
     }
