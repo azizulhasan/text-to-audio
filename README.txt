@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.6.25
+Stable tag: 1.6.26
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -350,10 +350,15 @@ add_filter( 'tta__button_text_arr', 'tta__button_text_arr_callback' );
 function tta__button_text_arr_callback ( $button_text_arr ) {
 
 	// Listen button
-	$text_arr['listen_text'] = 'Listen'; // paste custem text
-	$text_arr['pause_text'] = 'Pause'; // paste custem text
-	$text_arr['resume_text'] = 'Resume'; // paste custem text
-	$text_arr['replay_text'] = 'Replay'; // paste custem text
+	$text_arr['listen_text'] = 'Listen'; // paste custom text
+    $text_arr['pause_text'] = 'Pause'; // paste custom text
+    $text_arr['resume_text'] = 'Resume'; // paste custom text
+    $text_arr['replay_text'] = 'Replay'; // paste custom text
+    // Hover title
+    $text_arr['listen_hover_title'] = 'test listen title',
+    $text_arr['pause_hover_title'] = 'test pause title',
+    $text_arr['resume_hover_title'] = 'test resume title',
+    $text_arr['replay_hover_title'] = 'test replay title',
 
 	return $text_arr;
 }
@@ -400,6 +405,12 @@ You can customize the voice and language of the text-to-speech player using shor
 ### TRANSLATION REQUEST
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+= 1.6.26 ( 11 July 2024 ) =
+Fixed: Shortcode placement issue fixed.
+Fixed: Player button text and player hover title change by filter `tta__button_text_arr` [learn more](https://wordpress.org/plugins/text-to-audio/#how%20to%20change%20button%20text%3F:~:text=How%20to%20change%20button%20text%3F)
+Improved: Dashboard UI improved.
+
 
 = 1.6.25 ( 08 July 2024 ) =
 Tested: WP 6.6 tested.
