@@ -1,5 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
+
+import './DashboardSideNav.css'; // Make sure to import the CSS
 
 export default function DashboardSideNav({ isProVersion }) {
 	const style = {
@@ -7,6 +9,10 @@ export default function DashboardSideNav({ isProVersion }) {
 			flexBasis: '150px',
 		},
 	};
+
+	const getNavLinkClass = ({ isActive }) =>
+		isActive ? 'nav-link active' : 'nav-link';
+
 	return (
 		<div id='ttaTtaLayoutSidenav_nav' style={style.side_nav}>
 			<nav
@@ -15,48 +21,54 @@ export default function DashboardSideNav({ isProVersion }) {
 				<div className='tta-sidenav-menu'>
 					<div className='nav'>
 						{/* Settings menu */}
-						<Link className='nav-link' to={'/'}>
+						<NavLink className={getNavLinkClass} to={'/'}>
 							<div className='sb-nav-link-icon'>
-								<i className='fas fa-wrench'></i>
+								<span className="dashicons dashicons-admin-settings"></span>
 							</div>
 							Settings
-						</Link>
-						<Link className='nav-link' to={'/integrations'}>
+						</NavLink>
+						<NavLink className={getNavLinkClass} to={'/integrations'}>
 							<div className='sb-nav-link-icon'>
-								<i className='fas fa-book'></i>
+								<span className="dashicons dashicons-admin-plugins"></span>
 							</div>
 							Integrations
-						</Link>
-						<Link className='nav-link' to={'/customize'}>
+						</NavLink>
+						<NavLink className={getNavLinkClass} to={'/customize'}>
 							<div className='sb-nav-link-icon'>
-								<i className='fas fa-edit'></i>
+								<span className="dashicons dashicons-admin-customizer"></span>
 							</div>
 							Customization
-						</Link>
-						{/* <Link className='nav-link' to={'/recording'}>
+						</NavLink>
+						{/* <NavLink className={getNavLinkClass} to={'/recording'}>
 							<div className='sb-nav-link-icon'>
-								<i className='fas fa-record-vinyl'></i>
+								<span class="dashicons dashicons-microphone"></span>
 							</div>
 							Recording
-						</Link> */}
-						<Link className='nav-link' to={'/listening'}>
+						</NavLink> */}
+						<NavLink className={getNavLinkClass} to={'/listening'}>
 							<div className='sb-nav-link-icon'>
-								<i className='fas fa-file-audio'></i>
+								<span className="dashicons dashicons-controls-volumeon"></span>
 							</div>
 							Listening
-						</Link>
-						<Link className='nav-link' to={'/analitics'}>
+						</NavLink>
+						<NavLink className={getNavLinkClass} to={'/analitics'}>
 							<div className='sb-nav-link-icon'>
-								<span className="dashicons dashicons-analytics"></span>
+								<span className="dashicons dashicons-chart-bar"></span>
 							</div>
 							Analytics
-						</Link>
-						<Link className='nav-link' to={'/faq'}>
-						<div className='sb-nav-link-icon'>
-								<i className='fas fa-book'></i>
+						</NavLink>
+						<NavLink className={getNavLinkClass} to={'/faq'}>
+							<div className='sb-nav-link-icon'>
+								<span className="dashicons dashicons-media-document"></span>
 							</div>
 							Docs
-						</Link>
+						</NavLink>
+						{/* <NavLink className={getNavLinkClass} to={'/analitics'}>
+							<div className='sb-nav-link-icon'>
+								<span class="dashicons dashicons-chart-bar"></span>
+							</div>
+							Analytics Pro
+						</NavLink> */}
 					</div>
 				</div>
 			</nav>

@@ -143,31 +143,37 @@ export default function Docs() {
 									5. How to change button text?
 								</Accordion.Header>
 								<Accordion.Body>
-									You can change button text 2 ways one is by shortcode attribute. Another way is adding filter. But filter always overrides the shortcode attributes. Here is short code Example :{' '}
+									You can change button text 2 ways one is by shortcode attribute. Another way is
+									adding filter. But filter always overrides the shortcode attributes. Here is short
+									code Example :{' '}
 									<pre>
-																			<code>[tta_listen_btn listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay" start_text="Start" stop_text="Stop"]</code>
-
+										<code>[tta_listen_btn listen_text="Listen" pause_text="Pause" resume_text="Resume"
+										replay_text="Replay" start_text="Start" stop_text="Stop"]</code>
 									</pre>
-									Or you can apply filter and we prefer filter.
+									Also you can change it by filter. We prefer by filter.
 									<pre>
-										<code>
-										{`
+											<code id='filter_hook'>
+												{`
               add_filter( 'tta__button_text_arr', 'tta__button_text_arr_callback' );
               function tta__button_text_arr_callback ($button_text_arr) {
 		// Listen button
-		$text_arr['listen_text'] = 'Listen'; // paste custem text
-		$text_arr['pause_text'] = 'Pause'; // paste custem text
-		$text_arr['resume_text'] = 'Resume'; // paste custem text
-		$text_arr['replay_text'] = 'Replay'; // paste custem text
-		// Record button text
-		$text_arr['start_text'] = 'Start'; // paste custem text
-		$text_arr['stop_text'] = 'Stop'; // paste custem text
+		$text_arr['listen_text'] = 'Listen'; // paste custom text
+		$text_arr['pause_text'] = 'Pause'; // paste custom text
+		$text_arr['resume_text'] = 'Resume'; // paste custom text
+		$text_arr['replay_text'] = 'Replay'; // paste custom text
+		// Hover title
+		$text_arr['listen_hover_title'] = 'test listen title',
+		$text_arr['pause_hover_title'] = 'test pause title',
+		$text_arr['resume_hover_title'] = 'test resume title',
+		$text_arr['replay_hover_title'] = 'test replay title',
+
 		
 		return $text_arr;
               }
               `}
-									</code>
-									</pre>
+
+											</code>
+										</pre>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='6'>
@@ -188,9 +194,10 @@ export default function Docs() {
 										<thead>
 										<tr>
 											<th>Sr.</th>
-												<th>Filter Name</th>
-												<th>Arguments</th>
-											</tr>
+
+											<th>Filter Name</th>
+											<th>Arguments</th>
+										</tr>
 										</thead>
 										<tbody>
 											{filters.length &&
@@ -233,13 +240,15 @@ export default function Docs() {
               add_filter( 'tta__button_text_arr', 'tta__button_text_arr_callback' );
               function tta__button_text_arr_callback ($button_text_arr) {
 		// Listen button
-		$text_arr['listen_text'] = 'Listen'; // paste custem text
-		$text_arr['pause_text'] = 'Pause'; // paste custem text
-		$text_arr['resume_text'] = 'Resume'; // paste custem text
-		$text_arr['replay_text'] = 'Replay'; // paste custem text
-		// Record button text
-		$text_arr['start_text'] = 'Start'; // paste custem text
-		$text_arr['stop_text'] = 'Stop'; // paste custem text
+		$text_arr['listen_text'] = 'Listen'; // paste custom text
+		$text_arr['pause_text'] = 'Pause'; // paste custom text
+		$text_arr['resume_text'] = 'Resume'; // paste custom text
+		$text_arr['replay_text'] = 'Replay'; // paste custom text
+		// Hover title
+		$text_arr['listen_hover_title'] = 'test listen title',
+		$text_arr['pause_hover_title'] = 'test pause title',
+		$text_arr['resume_hover_title'] = 'test resume title',
+		$text_arr['replay_hover_title'] = 'test replay title',
 		
 		return $text_arr;
               }
@@ -299,24 +308,25 @@ export default function Docs() {
 									<strong>FireFox Mobile:</strong> English USA, English UK, German, Italian, Russian, French, Spanish.<br />
 								</Accordion.Body>
 							</Accordion.Item>
-							<Accordion.Item eventKey='11'>
+							<Accordion.Item eventKey='12'>
 								<Accordion.Header>
-									11. How many languages support in free version?
+									12. How many languages support in Pro version?
 								</Accordion.Header>
 								<Accordion.Body>
-									<strong>Free SUPPORTED LANGUAGES:</strong><br />
-									Text To Speech TTS Accessibility plugin supports these languages.<br /><br />
-
-									<strong>Chrome Desktop:</strong> UK English, US English, Spanish ( Spain ), Spanish ( United States ), French, Deutsch, Italian, Russian, Dutch, Japanese, Korean, Chinese (China), Chinese (Hong Kong), Chinese (Taiwan) Hindi, Indonesian, Polish, Brazilian Portuguese.<br />
-									<strong>Chrome Mobile:</strong> English USA, English UK, German, Italian, Russian, French, Spanish<br />
-
-									<strong>Microsoft Edge Desktop :</strong> All Languages.<br />
-
-									<strong>Microsoft Edge Mobile :</strong> All Languages.<br />
-
-									<strong>FireFox Desktop:</strong> English.<br />
-
-									<strong>FireFox Mobile:</strong> English USA, English UK, German, Italian, Russian, French, Spanish.<br />
+									Text To Speech Pro TTS Accessibility plugin supports these languages.
+									<br/>
+									<br/>
+									Afrikaans, Albanian, Arabic, Armenian, Catalan, Chinese,
+									Chinese (Mandarin/China), Chinese (Mandarin/Taiwan),
+									Chinese (Cantonese), Croatian, Czech, Danish, Dutch,
+									English, English (Australia), English (United Kingdom),
+									English (United States), Esperanto, Finnish, French, German,
+									Greek, Haitian Creole, Hindi, Hungarian, Icelandic,
+									Indonesian, Italian, Japanese, Korean, Latin, Latvian,
+									Macedonian, Norwegian, Polish, Portuguese, Portuguese (Brazil),
+									Romanian, Russian, Serbian, Slovak, Spanish, Spanish (Spain),
+									Spanish (United States), Swahili, Swedish, Tamil, Thai,
+									Turkish, Vietnamese, Welsh.
 								</Accordion.Body>
 							</Accordion.Item>
 						</Accordion>
