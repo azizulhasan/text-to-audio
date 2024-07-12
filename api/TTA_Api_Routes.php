@@ -1,4 +1,5 @@
 <?php
+
 namespace TTA_Api;
 /**
  * This class is for getting all plugin's data  through api.
@@ -10,234 +11,324 @@ namespace TTA_Api;
  */
 class TTA_Api_Routes {
 
-    protected $namespace;
-    protected $woocommerce;
-    protected $version;
+	protected $namespace;
+	protected $woocommerce;
+	protected $version;
+	protected $analytics;
 
-    public function __construct() {
-        $this->version = 'v1';
-        $this->namespace = 'tta/' . $this->version;
-        add_action('rest_api_init', [$this, 'tta_speech_register_routes']);
-    }
+	public function __construct() {
+		$this->version   = 'v1';
+		$this->namespace = 'tta/' . $this->version;
+		$this->analytics = new AtlasVoice_Analytics();
+		add_action( 'rest_api_init', [ $this, 'tta_speech_register_routes' ] );
+	}
 
-    /**
-     * Register Routes
-     */
-    public function tta_speech_register_routes() {
-        // Register record route.
-        register_rest_route(
-            $this->namespace,
-            '/record',
-            array(
-                array(
-                    'methods' => \WP_REST_Server::ALLMETHODS,
-                    'callback' => array($this, 'tta_manage_record_data'),
-                    'permission_callback' => array($this, 'get_route_access'),
-                    'args' => array(),
-                ),
+	/**
+	 * Register Routes
+	 */
+	public function tta_speech_register_routes() {
+		// Register record route.
+		register_rest_route(
+			$this->namespace,
+			'/record',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::ALLMETHODS,
+					'callback'            => array( $this, 'tta_manage_record_data' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
 
-            )
-        );
-        // register listening route.
-        register_rest_route(
-            $this->namespace,
-            '/listening',
-            array(
-                array(
-                    'methods' => \WP_REST_Server::ALLMETHODS,
-                    'callback' => array($this, 'tta_manage_listening_data'),
-                    'permission_callback' => array($this, 'get_route_access'),
-                    'args' => array(),
-                ),
-            )
-        );
+			)
+		);
+		// register listening route.
+		register_rest_route(
+			$this->namespace,
+			'/listening',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::ALLMETHODS,
+					'callback'            => array( $this, 'tta_manage_listening_data' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
 
-        // register customize route.
-        register_rest_route(
-            $this->namespace,
-            '/customize',
-            array(
-                array(
-                    'methods' => \WP_REST_Server::ALLMETHODS,
-                    'callback' => array($this, 'tta_manage_customize_data'),
-                    'permission_callback' => array($this, 'get_route_access'),
-                    'args' => array(),
-                ),
-            )
-        );
+		// register customize route.
+		register_rest_route(
+			$this->namespace,
+			'/customize',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::ALLMETHODS,
+					'callback'            => array( $this, 'tta_manage_customize_data' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
 
-        // register settings route.
-        register_rest_route(
-            $this->namespace,
-            '/settings',
-            array(
-                array(
-                    'methods' => \WP_REST_Server::ALLMETHODS,
-                    'callback' => array($this, 'tta_manage_settings_data'),
-                    'permission_callback' => array($this, 'get_route_access'),
-                    'args' => array(),
-                ),
-            )
-        );
+		// register settings route.
+		register_rest_route(
+			$this->namespace,
+			'/settings',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::ALLMETHODS,
+					'callback'            => array( $this, 'tta_manage_settings_data' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
 
-        // register settings route.
-        register_rest_route(
-            $this->namespace,
-            '/browser',
-            array(
-                array(
-                    'methods' => \WP_REST_Server::CREATABLE,
-                    'callback' => array($this, 'tta_browser_settings'),
-                    'permission_callback' => array($this, 'get_route_access'),
-                    'args' => array(),
-                ),
-            )
-        );
+		// register settings route.
+		register_rest_route(
+			$this->namespace,
+			'/browser',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'tta_browser_settings' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
 
-    }
-    /**
-     * Manage record data.
-     */
-    public function tta_manage_record_data($request) {
-        // $retrieved_nonce = isset( $request['rest_nonce'] ) ? sanitize_text_field( wp_unslash( $request['rest_nonce'] ) ) : '';
-        // if ( ! wp_verify_nonce( $retrieved_nonce, 'wp_rest' ) ) {
-        //     die( 'Failed security check' );
-        // }
-        $response['status'] = true;
-        // save data about recording.
-        if ('post' == $request['method']) {
+		// register track route.
+		register_rest_route(
+			$this->namespace,
+			'/track',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this->analytics, 'track' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
 
-            $fields = json_decode($request['fields']);
-            $listeningFields = get_option('tta_listening_settings');
-            if (is_array($listeningFields)) {
-                $listeningFields['tta__listening_lang'] = $fields->tta__recording__lang;
-            } else {
-                $listeningFields->tta__listening_lang = $fields->tta__recording__lang;
-            }
+		// register insights for single post route.
+		register_rest_route(
+			$this->namespace,
+			'/insights/(?P<id>\d+)',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this->analytics, 'insights' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
 
-            update_option('tta_record_settings', $fields);
-            update_option('tta_listening_settings', $listeningFields);
+		// register insights all post route.
+		register_rest_route(
+			$this->namespace,
+			'/insights',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this->analytics, 'all_insights' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
 
-            $response['data'] = get_option('tta_record_settings');
+		// register insights all post route.
+		register_rest_route(
+			$this->namespace,
+			'/latest_posts',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this->analytics, 'latest_posts' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
 
-            delete_transient('tts_all_settings');
+		// register save_trackable_ids route.
+		register_rest_route(
+			$this->namespace,
+			'/save_analytics_settings',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this->analytics, 'save_analytics_settings' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
 
-            return rest_ensure_response($response);
-        }
+		// register get_trackable_ids route.
+		register_rest_route(
+			$this->namespace,
+			'/get_analytics_settings',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this->analytics, 'get_analytics_settings' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
 
-        // get data about recording.
-        if ('get' == $request['method']) {
+	}
 
-            $response['data'] = get_option('tta_record_settings');
-            return rest_ensure_response($response);
-        }
-    }
+	/**
+	 * Manage record data.
+	 */
+	public function tta_manage_record_data( $request ) {
+		// $retrieved_nonce = isset( $request['rest_nonce'] ) ? sanitize_text_field( wp_unslash( $request['rest_nonce'] ) ) : '';
+		// if ( ! wp_verify_nonce( $retrieved_nonce, 'wp_rest' ) ) {
+		//     die( 'Failed security check' );
+		// }
+		$response['status'] = true;
+		// save data about recording.
+		if ( 'post' == $request['method'] ) {
 
-    /*
-     * Manage listening data
-     */
-    public function tta_manage_listening_data($request) {
-        $response['status'] = true;
-        // save data about recording.
-        if ('post' == $request['method']) {
-            $fields = json_decode($request['fields']);
+			$fields          = json_decode( $request['fields'] );
+			$listeningFields = get_option( 'tta_listening_settings' );
+			if ( is_array( $listeningFields ) ) {
+				$listeningFields['tta__listening_lang'] = $fields->tta__recording__lang;
+			} else {
+				$listeningFields->tta__listening_lang = $fields->tta__recording__lang;
+			}
 
-            update_option('tta_listening_settings', $fields);
+			update_option( 'tta_record_settings', $fields );
+			update_option( 'tta_listening_settings', $listeningFields );
 
-            $response['data'] = get_option('tta_listening_settings');
-            delete_transient('tts_all_settings');
+			$response['data'] = get_option( 'tta_record_settings' );
 
-            return rest_ensure_response($response);
-        }
+			delete_transient( 'tts_all_settings' );
 
-        // get data about recording.
-        if ('get' == $request['method']) {
+			return rest_ensure_response( $response );
+		}
 
-            $response['data'] = get_option('tta_listening_settings');
+		// get data about recording.
+		if ( 'get' == $request['method'] ) {
 
-            return rest_ensure_response($response);
-        }
-    }
+			$response['data'] = get_option( 'tta_record_settings' );
 
-    /*
-     * Manage customize data
-     */
-    public function tta_manage_customize_data($request) {
-        $response['status'] = true;
-        // save data about recording.
-        if ('post' == $request['method']) {
-            $fields = json_decode($request['fields']);
+			return rest_ensure_response( $response );
+		}
+	}
 
-            update_option('tta_customize_settings', $fields);
+	/*
+	 * Manage listening data
+	 */
+	public function tta_manage_listening_data( $request ) {
+		$response['status'] = true;
+		// save data about recording.
+		if ( 'post' == $request['method'] ) {
+			$fields = json_decode( $request['fields'] );
 
-            $response['data'] = get_option('tta_customize_settings');
+			update_option( 'tta_listening_settings', $fields );
 
-            delete_transient('tts_all_settings');
+			$response['data'] = get_option( 'tta_listening_settings' );
+			delete_transient( 'tts_all_settings' );
 
-            return rest_ensure_response($response);
-        }
+			return rest_ensure_response( $response );
+		}
 
-        // get data about recording.
-        if ('get' == $request['method']) {
+		// get data about recording.
+		if ( 'get' == $request['method'] ) {
 
-            $response['data'] = get_option('tta_customize_settings');
-            return rest_ensure_response($response);
-        }
-    }
+			$response['data'] = get_option( 'tta_listening_settings' );
 
-    /*
-     * Manage settings data
-     */
-    public function tta_manage_settings_data($request) {
-        $response['status'] = true;
-        // save data about recording.
-        if ('post' == $request['method']) {
-            $fields = json_decode($request['fields']);
+			return rest_ensure_response( $response );
+		}
+	}
 
-            update_option('tta_settings_data', $fields);
+	/*
+	 * Manage customize data
+	 */
+	public function tta_manage_customize_data( $request ) {
+		$response['status'] = true;
+		// save data about recording.
+		if ( 'post' == $request['method'] ) {
+			$fields = json_decode( $request['fields'] );
 
-            $response['data'] = get_option('tta_settings_data');
+			update_option( 'tta_customize_settings', $fields );
 
-            delete_transient('tts_all_settings');
+			$response['data'] = get_option( 'tta_customize_settings' );
 
-            return rest_ensure_response($response);
-        }
+			delete_transient( 'tts_all_settings' );
 
-        // get data about recording.
-        if ('get' == $request['method']) {
+			return rest_ensure_response( $response );
+		}
 
-            $response['data'] = get_option('tta_settings_data');
-            return rest_ensure_response($response);
-        }
-    }
-    /**
-     * @param WP_REST_Request
-     *
-     * @return WP_Rest_Response;
-     */
-    public function tta_browser_settings($request) {
+		// get data about recording.
+		if ( 'get' == $request['method'] ) {
 
-        $browser = isset($request['browserName']) ? $request['browserName'] : "Mozilla";
-        $SpeechRecognition = isset($request['SpeechRecognition']) ? $request['SpeechRecognition'] : "undefined";
-        $speechSynthesis = isset($request['speechSynthesis']) ? $request['speechSynthesis'] : "undefined";
-        update_option('tta_current_browser_info', [
-            'browser' => $browser,
-            'SpeechRecognition' => $SpeechRecognition,
-            'speechSynthesis' => $speechSynthesis,
-        ]);
+			$response['data'] = get_option( 'tta_customize_settings' );
 
-        return rest_ensure_response(get_option('tta_current_browser_info'));
-    }
+			return rest_ensure_response( $response );
+		}
+	}
 
-    /*
-     * Get route access if request is valid.
-     */
-    public function get_route_access() {
+	/*
+	 * Manage settings data
+	 */
+	public function tta_manage_settings_data( $request ) {
+		$response['status'] = true;
+		// save data about recording.
+		if ( 'post' == $request['method'] ) {
+			$fields = json_decode( $request['fields'] );
 
-	    if ( !isset($_SERVER['HTTP_X_WP_NONCE']) || !$_SERVER['HTTP_X_WP_NONCE'] || !wp_verify_nonce($_SERVER['HTTP_X_WP_NONCE'], 'wp_rest')) {
-		    return apply_filters( 'tts_rest_route_access', false);
-	    }
+			update_option( 'tta_settings_data', $fields );
 
-	    return apply_filters( 'tts_rest_route_access', true);
-    }
+			$response['data'] = get_option( 'tta_settings_data' );
+
+			delete_transient( 'tts_all_settings' );
+
+			return rest_ensure_response( $response );
+		}
+
+		// get data about recording.
+		if ( 'get' == $request['method'] ) {
+
+			$response['data'] = get_option( 'tta_settings_data' );
+
+			return rest_ensure_response( $response );
+		}
+	}
+
+	/**
+	 * @param WP_REST_Request
+	 *
+	 * @return WP_Rest_Response;
+	 */
+	public function tta_browser_settings( $request ) {
+
+		$browser           = isset( $request['browserName'] ) ? $request['browserName'] : "Mozilla";
+		$SpeechRecognition = isset( $request['SpeechRecognition'] ) ? $request['SpeechRecognition'] : "undefined";
+		$speechSynthesis   = isset( $request['speechSynthesis'] ) ? $request['speechSynthesis'] : "undefined";
+		update_option( 'tta_current_browser_info', [
+			'browser'           => $browser,
+			'SpeechRecognition' => $SpeechRecognition,
+			'speechSynthesis'   => $speechSynthesis,
+		] );
+
+		return rest_ensure_response( get_option( 'tta_current_browser_info' ) );
+	}
+
+	/*
+	 * Get route access if request is valid.
+	 */
+	public function get_route_access() {
+		if ( ! isset( $_SERVER['HTTP_X_WP_NONCE'] ) || ! $_SERVER['HTTP_X_WP_NONCE'] || ! wp_verify_nonce( $_SERVER['HTTP_X_WP_NONCE'], 'wp_rest' ) ) {
+			return apply_filters( 'tts_rest_route_access', false );
+		}
+
+		return apply_filters( 'tts_rest_route_access', true );
+	}
 }

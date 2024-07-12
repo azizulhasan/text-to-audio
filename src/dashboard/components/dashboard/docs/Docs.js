@@ -166,10 +166,12 @@ export default function Docs() {
 		$text_arr['pause_hover_title'] = 'test pause title',
 		$text_arr['resume_hover_title'] = 'test resume title',
 		$text_arr['replay_hover_title'] = 'test replay title',
+
 		
 		return $text_arr;
               }
               `}
+
 											</code>
 										</pre>
 								</Accordion.Body>
@@ -192,6 +194,7 @@ export default function Docs() {
 										<thead>
 										<tr>
 											<th>Sr.</th>
+
 											<th>Filter Name</th>
 											<th>Arguments</th>
 										</tr>
@@ -283,26 +286,6 @@ export default function Docs() {
 									Romanian, Russian, Serbian, Slovak, Spanish, Spanish (Spain),
 									Spanish (United States), Swahili, Swedish, Tamil, Thai,
 									Turkish, Vietnamese, Welsh
-								</Accordion.Body>
-							</Accordion.Item>
-							<Accordion.Item eventKey='11'>
-								<Accordion.Header>
-									11. How many languages support in free version?
-								</Accordion.Header>
-								<Accordion.Body>
-									<strong>Free SUPPORTED LANGUAGES:</strong><br />
-									Text To Speech TTS Accessibility plugin supports these languages.<br /><br />
-
-									<strong>Chrome Desktop:</strong> UK English, US English, Spanish ( Spain ), Spanish ( United States ), French, Deutsch, Italian, Russian, Dutch, Japanese, Korean, Chinese (China), Chinese (Hong Kong), Chinese (Taiwan) Hindi, Indonesian, Polish, Brazilian Portuguese.<br />
-									<strong>Chrome Mobile:</strong> English USA, English UK, German, Italian, Russian, French, Spanish<br />
-
-									<strong>Microsoft Edge Desktop :</strong> All Languages.<br />
-
-									<strong>Microsoft Edge Mobile :</strong> All Languages.<br />
-
-									<strong>FireFox Desktop:</strong> English.<br />
-
-									<strong>FireFox Mobile:</strong> English USA, English UK, German, Italian, Russian, French, Spanish.<br />
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='11'>

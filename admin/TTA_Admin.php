@@ -109,6 +109,7 @@ class TTA_Admin {
             'VERSION' => is_pro_active() ? get_option('TTA_PRO_VERSION' ) :  TEXT_TO_AUDIO_VERSION,
             'is_logged_in' => is_user_logged_in(),
             'is_admin' => current_user_can('administrator'),
+            'user_id' => get_current_user_id(),
             'is_dashboard' => is_admin(),
             'listeningSettings' => $listening,
             'is_pro_active' => is_pro_active(),
@@ -135,7 +136,7 @@ class TTA_Admin {
     }
 
     public function load_script_as_tag($tag, $handle, $src) {
-        if(!in_array($handle, ['text-to-audio-button', 'TextToSpeech'])) {
+        if(!in_array($handle, ['text-to-audio-button', 'TextToSpeech', 'AtlasVoiceAnalytics' ])) {
             return $tag;
         }
 
@@ -162,6 +163,7 @@ class TTA_Admin {
      * @since    1.0.0
      */
     public function enqueue_scripts() {
+
         /**
          * Looad wp-speeh script
          */
@@ -226,6 +228,15 @@ class TTA_Admin {
                 echo  $object;
             }
 
+	        if (TTA_Helper::is_edit_page() || TTA_Helper::is_text_to_audio_page() ) {
+		        wp_enqueue_script('AtlasVoicePlayerInsights', plugin_dir_url(__FILE__) .'js/build/AtlasVoicePlayerInsights.min.js', array( 'wp-hooks', 'wp-i18n'), $this->version, true);
+		        wp_localize_script('AtlasVoicePlayerInsights', 'ttsObj', $this->localize_data);
+
+                if(TTA_Helper::is_edit_page()) {
+	                wp_enqueue_script('AtlasVoiceCopyShortcode', plugin_dir_url(__FILE__) .'js/AtlasVoiceCopyShortcode.js', array( 'wp-hooks' ), $this->version, true);
+                }
+            }
+
     }
 
     public function engueue_block_scripts() {
@@ -262,7 +273,6 @@ class TTA_Admin {
         }else if($player_id == 1){
             wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-button.min.js', array('wp-hooks', 'wp-shortcode'), $this->version, true);
             wp_localize_script('text-to-audio-button', 'ttsObj', $this->localize_data );
-            wp_enqueue_style('dashicons');
         }
     }
 

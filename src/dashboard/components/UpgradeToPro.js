@@ -15,10 +15,14 @@ export default function UpgradeToPro({ }) {
                             51 languages support in pro version.
                         </li>
                         <li className="list-group-item">
-                            <a target="_blank" href="https://atlasaidev.com/refund-policy/"> 14 Days money back guarantee.</a>
+                            Advance Analytics.
                         </li>
                         <li className="list-group-item">
-                        <a target="_blank" href="https://wpml.org/"> WPML Plugin Support</a>
+                            <a target="_blank" href="https://atlasaidev.com/refund-policy/"> 14 Days money back
+                                guarantee.</a>
+                        </li>
+                        <li className="list-group-item">
+                            <a target="_blank" href="https://wpml.org/"> WPML Plugin Support</a>
                         </li>
                         <li className="list-group-item">
                             <a target='_blank' href="https://wordpress.org/plugins/gtranslate/">GTranslate Plugin
@@ -26,7 +30,8 @@ export default function UpgradeToPro({ }) {
                         </li>
                         <li className="list-group-item">
                             <a target='_blank'
-                               href="https://www.youtube.com/watch?v=4dsbhaBavms&t=43s&ab_channel=AtlasAiDev">You Can Integrate
+                               href="https://www.youtube.com/watch?v=4dsbhaBavms&t=43s&ab_channel=AtlasAiDev">You Can
+                                Integrate
                                 With Google Cloud Text To Speech.</a>
                         </li>
                         <li className="list-group-item">

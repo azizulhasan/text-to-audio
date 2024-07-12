@@ -51,6 +51,12 @@ export default function DashboardSideNav({ isProVersion }) {
 							</div>
 							Listening
 						</NavLink>
+						<NavLink className={getNavLinkClass} to={'/analitics'}>
+							<div className='sb-nav-link-icon'>
+								<span className="dashicons dashicons-chart-bar"></span>
+							</div>
+							Analytics
+						</NavLink>
 						<NavLink className={getNavLinkClass} to={'/faq'}>
 							<div className='sb-nav-link-icon'>
 								<span className="dashicons dashicons-media-document"></span>

@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {__} from '@wordpress/i18n'
 import {
-    ToggleButton, Form, Row, Col, Container, Tooltip,
+    Form, Row, Col, Container, Tooltip,
     OverlayTrigger,
     Button
 } from 'react-bootstrap';
@@ -110,7 +110,7 @@ export default function Settings() {
         postWithoutImage(tta_obj.api_url + 'tta/v1/settings', formData)
             .then((res) => {
                 setSettings(res.data);
-                toast('Succeessfully Saved. Now go to the "Integrations" menu if you\'re a pro user. Otherwise go to the "Customization" menu.', 'info', {
+                toast('Successfully Saved. Now go to the "Integrations" menu if you\'re a pro user. Otherwise go to the "Customization" menu.', 'info', {
                     autoClose: 15000
                 });
                 setIsDataLoaded(true)
