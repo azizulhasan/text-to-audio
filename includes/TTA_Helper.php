@@ -65,9 +65,10 @@ class TTA_Helper {
 		if ( isset( $settings['tta__settings_exclude_wp_tags'] ) && is_array( $settings['tta__settings_exclude_wp_tags'] ) ) {
 			$excluded_tags = $settings['tta__settings_exclude_wp_tags'];
 		}
-
-		$post_tags = get_the_terms( $post->ID, 'post_tag' );
-
+		$post_tags = [];
+		if ( isset( $post->ID ) ) {
+			$post_tags = get_the_terms( $post->ID, 'post_tag' );
+		}
 		$is_exclude_by_tags = self::is_exluded_by_terms( $post_tags, $excluded_tags );
 
 
@@ -76,8 +77,10 @@ class TTA_Helper {
 			$excluded_categories = $settings['tta__settings_exclude_categories'];
 		}
 
-		$post_categories = get_the_terms( $post->ID, 'category' );
-
+		$post_categories = [];
+		if ( isset( $post->ID ) ) {
+			$post_categories = get_the_terms( $post->ID, 'category' );
+		}
 		$is_exclude_by_cagories = self::is_exluded_by_terms( $post_categories, $excluded_categories, 'category' );
 
 
@@ -372,7 +375,7 @@ class TTA_Helper {
 			$all_settings_data = self::set_tts_transient( $all_settings_keys );
 		} else {
 
-			foreach ($all_settings_keys as $identifier_key => $settings_key ) {
+			foreach ( $all_settings_keys as $identifier_key => $settings_key ) {
 				if ( ! isset( $cached_settings[ $identifier_key ] ) ) {
 					$cached_settings = self::set_tts_transient( $all_settings_keys );
 					break;
@@ -831,20 +834,21 @@ class TTA_Helper {
 	/**
 	 * Get the text value based on the given attributes and saved texts.
 	 *
-	 * @param array  $atts        The attributes array.
-	 * @param array  $saved_texts The saved texts array.
-	 * @param string $key         The key to look for in both arrays.
-	 * @param string $default     The default text if neither $atts nor $saved_texts has the value.
+	 * @param array $atts The attributes array.
+	 * @param array $saved_texts The saved texts array.
+	 * @param string $key The key to look for in both arrays.
+	 * @param string $default The default text if neither $atts nor $saved_texts has the value.
 	 * @param string $text_domain The text domain for translation.
+	 *
 	 * @return string The final text value.
 	 */
-	public static function get_text_value($atts, $saved_texts, $key, $default, $text_domain) {
-		if (isset($atts[$key]) && strlen($atts[$key])) {
-			return esc_html(sanitize_text_field($atts[$key]));
-		} elseif (isset($saved_texts[$key])) {
-			return esc_html(sanitize_text_field($saved_texts[$key]));
+	public static function get_text_value( $atts, $saved_texts, $key, $default, $text_domain ) {
+		if ( isset( $atts[ $key ] ) && strlen( $atts[ $key ] ) ) {
+			return esc_html( sanitize_text_field( $atts[ $key ] ) );
+		} elseif ( isset( $saved_texts[ $key ] ) ) {
+			return esc_html( sanitize_text_field( $saved_texts[ $key ] ) );
 		} else {
-			return __($default, $text_domain);
+			return __( $default, $text_domain );
 		}
 	}
 
