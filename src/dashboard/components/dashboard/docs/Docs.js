@@ -308,27 +308,6 @@ export default function Docs() {
 									<strong>FireFox Mobile:</strong> English USA, English UK, German, Italian, Russian, French, Spanish.<br />
 								</Accordion.Body>
 							</Accordion.Item>
-							<Accordion.Item eventKey='12'>
-								<Accordion.Header>
-									12. How many languages support in Pro version?
-								</Accordion.Header>
-								<Accordion.Body>
-									Text To Speech Pro TTS Accessibility plugin supports these languages.
-									<br/>
-									<br/>
-									Afrikaans, Albanian, Arabic, Armenian, Catalan, Chinese,
-									Chinese (Mandarin/China), Chinese (Mandarin/Taiwan),
-									Chinese (Cantonese), Croatian, Czech, Danish, Dutch,
-									English, English (Australia), English (United Kingdom),
-									English (United States), Esperanto, Finnish, French, German,
-									Greek, Haitian Creole, Hindi, Hungarian, Icelandic,
-									Indonesian, Italian, Japanese, Korean, Latin, Latvian,
-									Macedonian, Norwegian, Polish, Portuguese, Portuguese (Brazil),
-									Romanian, Russian, Serbian, Slovak, Spanish, Spanish (Spain),
-									Spanish (United States), Swahili, Swedish, Tamil, Thai,
-									Turkish, Vietnamese, Welsh.
-								</Accordion.Body>
-							</Accordion.Item>
 						</Accordion>
 					</Col>
 					<Col xs={12} sm={12} lg={4}>

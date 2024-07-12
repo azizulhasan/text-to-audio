@@ -76,7 +76,9 @@ class AtlasVoiceAnalytics {
             clearInterval(this.listeningLengthInterval);
             this.listeningLengthInterval = null;
             // Add the total listening length to session data when tracking stops
-            this.addEvent('time');
+            if(this.startTimeTracking) {
+                this.addEvent('time');
+            }
             this.listeningLength = 0; // Reset the listening length for the next session
         }
     }
