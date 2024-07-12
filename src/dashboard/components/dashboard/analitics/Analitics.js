@@ -170,7 +170,7 @@ export default function Analitics() {
                     </Form>
                 </Col>
                 <Col xs={12} sm={12} lg={4}>
-                    <UpgradeToPro/>
+                    <UpgradeToPro promotionType={'analytics'} />
                 </Col>
             </Row>
         </Container>
