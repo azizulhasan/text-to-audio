@@ -51,14 +51,14 @@ class TTA_Hooks {
         self::$excludable_js_string = apply_filters('tts_excludable_js_string', $strings);
 
         // Autoptimize Plugin
-        add_filter( 'autoptimize_filter_js_exclude', [$this, 'autoptimize_filter_js_exclude_callback'] );
+        add_filter( 'autoptimize_filter_js_exclude', [$this, 'autoptimize_filter_js_exclude_callback'], 999 );
 
         // LiteSpeed Cache
-        add_filter( 'litespeed_optimize_js_excludes', [$this, 'cache_exclude_js_text_to_speech'] );
+        add_filter( 'litespeed_optimize_js_excludes', [$this, 'cache_exclude_js_text_to_speech'], 999 );
 
         // WP Rocket
-        add_filter('rocket_exclude_js', [$this, 'cache_exclude_js_text_to_speech']);
-        add_filter('rocket_minify_excluded_external_js', [$this, 'cache_exclude_js_text_to_speech']);
+        add_filter('rocket_exclude_js', [$this, 'cache_exclude_js_text_to_speech'], 999);
+        add_filter('rocket_minify_excluded_external_js', [$this, 'cache_exclude_js_text_to_speech'], 999);
 
         // WP Rocket inline script exclusions
         add_filter('rocket_defer_inline_exclusions', [$this, 'rocket_defer_inline_exclusions_callback'], 1000, 1);

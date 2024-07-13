@@ -12,7 +12,8 @@ let buttonCSS = '';
 
 let timer = setTimeout(function loadProButton() {
     timer = setTimeout(loadProButton, 1)
-    if (window.hasOwnProperty('TTS') && window.hasOwnProperty('TextToSpeechPro') && window.hasOwnProperty('ttsObjPro') && ttsObjPro.player_id == 2) {
+    console.log(window?.ttsObjPro?.player_id)
+    if (window.hasOwnProperty('TTS') && window.hasOwnProperty('TextToSpeechPro') && window.hasOwnProperty('ttsObjPro') && window?.ttsObjPro?.player_id == 2) {
         clearTimeout(timer)
         timer = null
         buttonCSS = TTS.settings.settings.customize;
@@ -28,7 +29,7 @@ let timer = setTimeout(function loadProButton() {
 
             })
         }
-    } else if (window.hasOwnProperty('TTS') && ttsObjPro.player_id > 2) {
+    } else if (window.hasOwnProperty('TTS') && window?.ttsObjPro?.player_id > 2) {
         buttonCSS = TTS.settings.settings.customize;
         let buttons = [...document.querySelectorAll('.tts__listent_content')]
         if (buttons.length) {
@@ -56,4 +57,4 @@ let timer = setTimeout(function loadProButton() {
 
         }
     }
-}, 1)
+}, 500)
