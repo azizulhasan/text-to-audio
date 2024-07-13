@@ -726,7 +726,7 @@ function is_pro_active() {
 		return false;
 	}
 
-	if ( ! ttsp_fs()->can_use_premium_code() ) {
+	if( ! ttsp_fs()->is__premium_only()  ) {
 		return false;
 	}
 
