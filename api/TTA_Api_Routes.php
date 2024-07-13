@@ -263,6 +263,8 @@ class TTA_Api_Routes {
 
 			delete_transient( 'tts_all_settings' );
 
+			delete_transient( 'tts_cached_player_id');
+
 			return rest_ensure_response( $response );
 		}
 

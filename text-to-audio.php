@@ -237,6 +237,7 @@ add_action('init', function () {
     new TTA_Init();
 });
 
+
  /**
  * The code that runs during plugin activation.
  * This action is documented in includes/TTA_Activator.php
