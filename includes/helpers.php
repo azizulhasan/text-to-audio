@@ -289,12 +289,14 @@ function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_ar
         if (window.hasOwnProperty('TTS')) { // add content if a page have multiple button
             window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
             window.TTS.extra[ttsCurrentButtonNo] = dateTitle;
+            window.TTS.extra.player_id = "<?php echo get_player_id(); ?>";
         } else { // add content for the if a page have one button
             window.TTS = {}
             window.TTS.contents = {}
             window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
             window.TTS.extra = {}
             window.TTS.extra[ttsCurrentButtonNo] = dateTitle;
+            window.TTS.extra.player_id = "<?php echo get_player_id(); ?>";
         }
 
         // add settings
