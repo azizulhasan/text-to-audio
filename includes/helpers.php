@@ -289,12 +289,34 @@ function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_ar
         if (window.hasOwnProperty('TTS')) { // add content if a page have multiple button
             window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
             window.TTS.extra[ttsCurrentButtonNo] = dateTitle;
+            window.TTS.extra.player_id = "<?php echo get_player_id(); ?>";
+            //window.TTS.extra.delimiter_addable_tags = <?php //echo json_encode( apply_filters( 'tts_delimiter_addable_tags', [] ) ); ?>//;
+            //window.TTS.extra.content_exclude_delimiters = <?php //echo json_encode( apply_filters( 'tts_content_exclude_delimiters', [] ) ); ?>//;
+            //window.TTS.extra.batch_charlen = <?php //echo json_encode( apply_filters( 'tts_batch_charlen', [] ) ); ?>//;
+            //window.TTS.extra.json_url = "<?php //echo 	esc_url_raw( rest_url() ) ; ?>//";
+            //window.TTS.extra.api_url = "<?php //echo 	esc_url_raw( rest_url() ) ; ?>//";
+            //window.TTS.extra.api_namespace = "<?php //echo  'tta_pro' ; ?>//";
+            //window.TTS.extra.api_version = "<?php //echo  'v1' ; ?>//";
+            //window.TTS.extra.rest_nonce = "<?php //echo  wp_create_nonce( 'wp_rest' ); ?>//";
+            //window.TTS.extra.site_url = "<?php //echo  site_url(); ?>//";
+
         } else { // add content for the if a page have one button
             window.TTS = {}
             window.TTS.contents = {}
             window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
             window.TTS.extra = {}
             window.TTS.extra[ttsCurrentButtonNo] = dateTitle;
+            window.TTS.extra.player_id = "<?php echo get_player_id(); ?>";
+            //window.TTS.extra.delimiter_addable_tags = <?php //echo json_encode( apply_filters( 'tts_delimiter_addable_tags', [] ) ); ?>//;
+            //window.TTS.extra.content_exclude_delimiters = <?php //echo json_encode( apply_filters( 'tts_content_exclude_delimiters', [] ) ); ?>//;
+            //window.TTS.extra.batch_charlen = <?php //echo json_encode( apply_filters( 'tts_batch_charlen', [] ) ); ?>//;
+            //window.TTS.extra.json_url = "<?php //echo 	esc_url_raw( rest_url() ) ; ?>//";
+            //window.TTS.extra.api_url = "<?php //echo 	esc_url_raw( rest_url() ) ; ?>//";
+            //window.TTS.extra.api_namespace = "<?php //echo  'tta_pro' ; ?>//";
+            //window.TTS.extra.api_version = "<?php //echo  'v1' ; ?>//";
+            //window.TTS.extra.rest_nonce = "<?php //echo  wp_create_nonce( 'wp_rest' ); ?>//";
+            //window.TTS.extra.site_url = "<?php //echo  site_url(); ?>//";
+
         }
 
         // add settings
@@ -345,12 +367,12 @@ function get_button_text( $atts, $content_read_time ) {
 	}
 
 	// Example usage
-	$listen_text = TTA_Helper::get_text_value($atts, $saved_texts, 'listen_text', 'Listen', 'text-to-audio');
-	$pause_text  = TTA_Helper::get_text_value($atts, $saved_texts, 'pause_text', 'Pause', 'text-to-audio');
-	$resume_text = TTA_Helper::get_text_value($atts, $saved_texts, 'resume_text', 'Resume', 'text-to-audio');
-	$replay_text = TTA_Helper::get_text_value($atts, $saved_texts, 'replay_text', 'Replay', 'text-to-audio');
-	$start_text  = TTA_Helper::get_text_value($atts, $saved_texts, 'start_text', 'Start', 'text-to-audio');
-	$stop_text   = TTA_Helper::get_text_value($atts, $saved_texts, 'stop_text', 'Stop', 'text-to-audio');
+	$listen_text = TTA_Helper::get_text_value( $atts, $saved_texts, 'listen_text', 'Listen', 'text-to-audio' );
+	$pause_text  = TTA_Helper::get_text_value( $atts, $saved_texts, 'pause_text', 'Pause', 'text-to-audio' );
+	$resume_text = TTA_Helper::get_text_value( $atts, $saved_texts, 'resume_text', 'Resume', 'text-to-audio' );
+	$replay_text = TTA_Helper::get_text_value( $atts, $saved_texts, 'replay_text', 'Replay', 'text-to-audio' );
+	$start_text  = TTA_Helper::get_text_value( $atts, $saved_texts, 'start_text', 'Start', 'text-to-audio' );
+	$stop_text   = TTA_Helper::get_text_value( $atts, $saved_texts, 'stop_text', 'Stop', 'text-to-audio' );
 
 	$text_arr = [
 		'listen_text' => $listen_text,
