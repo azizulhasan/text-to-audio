@@ -3,5 +3,7 @@
     "/admin/js/build/text-to-audio-pro-button.min.js": "/admin/js/build/text-to-audio-pro-button.min.js",
     "/admin/js/build/tts-css-selectors.min.js": "/admin/js/build/tts-css-selectors.min.js",
     "/admin/js/build/TextToSpeech.min.js": "/admin/js/build/TextToSpeech.min.js",
-    "/admin/js/build/text-to-audio-button.min.js": "/admin/js/build/text-to-audio-button.min.js"
+    "/admin/js/build/text-to-audio-button.min.js": "/admin/js/build/text-to-audio-button.min.js",
+    "/admin/js/build/AtlasVoiceAnalytics.min.js": "/admin/js/build/AtlasVoiceAnalytics.min.js",
+    "/admin/js/build/AtlasVoicePlayerInsights.min.js": "/admin/js/build/AtlasVoicePlayerInsights.min.js"
 }

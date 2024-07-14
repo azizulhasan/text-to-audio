@@ -1,5 +1,6 @@
 import './multiselect.css'
 import toast from './Notify';
+import {isObject} from './utilities'
 
 class MultiSelect extends React.Component {
     constructor(props) {
@@ -12,8 +13,9 @@ class MultiSelect extends React.Component {
             id: props.id,
             name: props.name,
             onChange: props.onChange,
-            multiselectIndex : props.multiselectIndex || 0,
-            toastMessage: props.toastMessage || 'Showing button to multiple post is not supported in free version.'
+            multiselectIndex: props.multiselectIndex || 0,
+            toastMessage: props.toastMessage || 'Showing button to multiple post is not supported in free version.',
+            selectionLimit: props.selectionLimit || 1
         };
 
 
@@ -26,10 +28,13 @@ class MultiSelect extends React.Component {
 
     handleChange = (event) => {
         event.preventDefault()
-        let selectedItems = this.state?.selectedItems?? [];
+        let selectedItems = this.state?.selectedItems ?? [];
+        let selectionLimit = this.state?.selectionLimit ?? 1;
         const value = event.target.value;
-        if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_active && selectedItems.length > 1) {
-            toast(<h6>{this.state.toastMessage} Please <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>buy pro version</a></h6>, 'info', { autoClose: 10000 })
+        if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_active && selectedItems.length > selectionLimit) {
+            toast(<h6>{this.state.toastMessage} Please <a target='_blank'
+                                                          href='https://atlasaidev.com/text-to-speech-pro/'>buy pro
+                version</a></h6>, 'info', {autoClose: 10000})
             selectedItems = []
             selectedItems.push(value);
             this.setState({
@@ -47,8 +52,10 @@ class MultiSelect extends React.Component {
             this.props.onChange(selectedItems, this.state.name)
 
         } else {
-            if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_active && selectedItems.length === 1) {
-                toast(<h6>{this.state.toastMessage} Please <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>buy pro version</a></h6>, 'info', { autoClose: 10000 })
+            if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_active && selectedItems.length === selectionLimit) {
+                toast(<h6>{this.state.toastMessage} Please <a target='_blank'
+                                                              href='https://atlasaidev.com/text-to-speech-pro/'>buy pro
+                    version</a></h6>, 'info', {autoClose: 10000})
                 return;
             }
 
@@ -112,14 +119,25 @@ class MultiSelect extends React.Component {
     }
 
     renderDropdown = () => {
-        const { inputValue } = this.state;
+        const {inputValue} = this.state;
+
         return (
-            inputValue.map((item, index) => (
+
+            isObject(inputValue) ? Object.keys(inputValue).map((id, index) => (
+                <React.Fragment key={`${id}-${index} `}>
+                    <input id={id} type="checkbox" value={id} onChange={this.handleChange}
+                           ref={input => this[`checkbox${id}`] = input} checked={this.checkStatus(id)}/>
+                    <label htmlFor={id}>{inputValue[id]}</label>
+                </React.Fragment>
+            )) : inputValue.map((item, index) => (
                 <React.Fragment key={`${item}-${index} `}>
-                    <input id={item} type="checkbox" value={item} onChange={this.handleChange} ref={input => this[`checkbox${item}`] = input} checked={this.checkStatus(item)} />
+                    <input id={item} type="checkbox" value={item} onChange={this.handleChange}
+                           ref={input => this[`checkbox${item}`] = input} checked={this.checkStatus(item)}/>
                     <label htmlFor={item}>{item}</label>
                 </React.Fragment>
             ))
+
+
         );
     }
 
@@ -139,7 +157,7 @@ class MultiSelect extends React.Component {
     }
 
     componentDidMount() {
-        let { isFocused, multiselectIndex } = this.state
+        let {isFocused, multiselectIndex} = this.state
         let self = this;
         let selectItem = document.getElementsByClassName('select-input')[multiselectIndex]
         selectItem.addEventListener('click', function (e) {
@@ -168,10 +186,8 @@ class MultiSelect extends React.Component {
     }
 
 
-
-
     render() {
-        const { isFocused } = this.state;
+        const {isFocused} = this.state;
 
         return (
             <div className="multiselect-wrapper">
@@ -188,12 +204,6 @@ class MultiSelect extends React.Component {
         );
     }
 }
-
-
-
-
-
-
 
 
 export {

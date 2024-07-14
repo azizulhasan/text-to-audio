@@ -340,37 +340,45 @@ class TTA_Helper {
 		return $associative_urls;
 	}
 
+	private static function set_tts_transient( $all_settings_keys ) {
+		foreach ( $all_settings_keys as $identifier => $settings_key ) {
+			$settings                         = get_option( $settings_key );
+			$settings                         = ! $settings ? false : (array) $settings;
+			$all_settings_data[ $identifier ] = $settings;
+		}
+
+		set_transient( 'tts_all_settings', $all_settings_data );
+
+		return $all_settings_data;
+	}
+
+	/**
+	 * @param $identifier
+	 * @param $post_id
+	 *
+	 * @return mixed|null
+	 */
 	public static function tts_get_settings( $identifier = '', $post_id = '' ) {
 		$all_settings_data = [];
+		$all_settings_keys = [
+			'listening' => 'tta_listening_settings',
+			'settings'  => 'tta_settings_data',
+			'recording' => 'tta_record_settings',
+			'customize' => 'tta_customize_settings',
+			'analytics' => 'tta_analytics_settings'
+		];
 		$cached_settings   = get_transient( 'tts_all_settings' );
 		if ( ! $cached_settings ) {
-			$all_settings = [
-				'tta_listening_settings' => 'listening',
-				'tta_settings_data'      => 'settings',
-				'tta_record_settings'    => 'recording',
-				'tta_customize_settings' => 'customize',
-			];
+			$all_settings_data = self::set_tts_transient( $all_settings_keys );
+		} else {
 
-			foreach ( $all_settings as $settings_key => $identifier ) {
-				$settings = get_option( $settings_key );
-
-				// if($settings_key == 'tta_settings_data' && $post ) {
-				// 	$post_css_selectors = get_post_meta($post->ID, 'tts_pro_custom_css_selectors');
-				// 	if(!empty($post_css_selectors) ) {
-				// 		$post_css_selectors = (array) $post_css_selectors[0];
-				// 		$settings['tta__settings_css_selectors'] = $post_css_selectors['tta__settings_css_selectors'];
-				// 		$settings['tta__settings_exclude_content_by_css_selectors'] = $post_css_selectors['tta__settings_exclude_content_by_css_selectors'];
-				// 		$settings['tta__settings_exclude_texts'] = $post_css_selectors['tta__settings_exclude_texts'];
-				// 		$settings['tta__settings_exclude_tags'] = $post_css_selectors['tta__settings_exclude_tags'];
-				// 	}
-				// }
-
-				$settings                         = ! $settings ? false : (array) $settings;
-				$all_settings_data[ $identifier ] = $settings;
+			foreach ($all_settings_keys as $identifier_key => $settings_key ) {
+				if ( ! isset( $cached_settings[ $identifier_key ] ) ) {
+					$cached_settings = self::set_tts_transient( $all_settings_keys );
+					break;
+				}
 			}
 
-			set_transient( 'tts_all_settings', $all_settings_data );
-		} else {
 			$all_settings_data = $cached_settings;
 		}
 
@@ -793,13 +801,26 @@ class TTA_Helper {
 		], $plugin_all_settings, $post );
 	}
 
-	public  static  function is_text_to_audio_page() {
+	public static function is_edit_page() {
+		global $pagenow;
+
+		// Check if we are in the admin area and on the edit post/page screen
+		if ( is_admin() ) {
+			if ( $pagenow === 'post.php' || $pagenow === 'post-new.php' ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public static function is_text_to_audio_page() {
 		// Ensure we are in the admin area
-		if (is_admin()) {
+		if ( is_admin() ) {
 			// Get the current screen object
 			$screen = get_current_screen();
 			// Check if we are on the "text-to-audio" page
-			if ($screen && $screen->id === 'toplevel_page_text-to-audio') {
+			if ( $screen && $screen->id === 'toplevel_page_text-to-audio' ) {
 				return true;
 			}
 

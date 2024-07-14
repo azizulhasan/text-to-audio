@@ -91,7 +91,7 @@ function Dashboard() {
 								/> */}
 								<Route path='/integrations' element={<Integrations />} />
 								<Route path='/faq' element={<Docs />} />
-								{/* <Route path='/analitics' element={<Analitics />} /> */}
+								 <Route path='/analitics' element={<Analitics />} />
 							</Routes>
 
 						</div>
