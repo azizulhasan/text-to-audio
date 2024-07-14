@@ -37,6 +37,8 @@ class TTA_Hooks {
 			'TextToSpeech.min.js',
 			'text-to-audio-button.min.js',
 			'text-to-audio-dashboard-ui.min.js',
+            'AtlasVoiceAnalytics.min.js',
+            'AtlasVoicePlayerInsights.min.js',
 			'tts_button_settings',
 			'tts_button_settings_1',
 			'tts_button_settings_2',
