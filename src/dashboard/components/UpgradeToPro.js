@@ -1,72 +1,60 @@
-
-export default function UpgradeToPro({ }) {
+import {__} from  '@wordpress/i18n'
+export default function UpgradeToPro({ promotionType = 'general' }) {
+    let proFeatures = {
+        general : [
+            'Get Live Support for first time Integration.',
+            '51 languages support in pro version.',
+            'Advance Analytics.',
+            '<a target="_blank" href="https://atlasaidev.com/refund-policy/"> 14 Days money back\n' +
+            '                                guarantee.</a>',
+            '<a target=\'_blank\' href="https://wordpress.org/plugins/gtranslate/">GTranslate Plugin\n' +
+            '                                Support</a>',
+            '<a target=\'_blank\'\n' +
+            '                               href="https://www.youtube.com/watch?v=4dsbhaBavms&t=43s&ab_channel=AtlasAiDev">You Can\n' +
+            '                                Integrate\n' +
+            '                                With Google Cloud Text To Speech.</a>',
+            'Get more than 200 voices with Google Cloud Text To Speech.',
+            'Download the audio file for offline listening.',
+            'Multiple Audio Player Support.',
+            'Include Content By CSS Selectors',
+            'Exclude HTML Tags To Speak',
+            'Exclude Texts To Speak',
+            'Exclude Tags To Speak',
+            'Exclude Categories To Speak',
+        ],
+        analytics : [
+            __("Number of times the player button was initiated"),
+            __("Number of times the play button was clicked"),
+            __("Number of times the pause button was clicked"),
+            __("Total time the player has played (in seconds)"),
+            __("Number of times the player reached the end. 🔒"),
+            __("Number of times the MP3 file downloaded. 🔒"),
+            __("Percentage of times the play button was clicked after initiation. 🔒"),
+            __("Percentage of times users listened till the end. 🔒"),
+            __("Average listening time per play. 🔒"),
+            __("Average number of pauses per play. 🔒"),
+        ]
+    }
     return <>
         {
             window.hasOwnProperty('ttsObj') && !ttsObj.is_pro_license_active ? <div className="card p-0">
                 <div className="card-header text-center tta_btn btn-center">
-                    <a target='_blank' href="https://atlasaidev.com/text-to-speech-pro/" className="tta_btn btn-center text-center">Upgrade To Pro</a>
+                    <a target='_blank' href="https://atlasaidev.com/plugins/text-to-speech-pro/" className="tta_btn btn-center text-center text-white">Premium Features</a>
                 </div>
                 <div className="card-body">
                     <u className="list-group text-left">
-                        <li className="list-group-item">
-                            Get Live Support for first time Integration.
-                        </li>
-                        <li className="list-group-item">
-                            51 languages support in pro version.
-                        </li>
-                        <li className="list-group-item">
-                            Advance Analytics.
-                        </li>
-                        <li className="list-group-item">
-                            <a target="_blank" href="https://atlasaidev.com/refund-policy/"> 14 Days money back
-                                guarantee.</a>
-                        </li>
-                        <li className="list-group-item">
-                            <a target="_blank" href="https://wpml.org/"> WPML Plugin Support</a>
-                        </li>
-                        <li className="list-group-item">
-                            <a target='_blank' href="https://wordpress.org/plugins/gtranslate/">GTranslate Plugin
-                                Support</a>
-                        </li>
-                        <li className="list-group-item">
-                            <a target='_blank'
-                               href="https://www.youtube.com/watch?v=4dsbhaBavms&t=43s&ab_channel=AtlasAiDev">You Can
-                                Integrate
-                                With Google Cloud Text To Speech.</a>
-                        </li>
-                        <li className="list-group-item">
-                            Get more than 200 voices with Google Cloud Text To Speech.
-                        </li>
-                        <li className="list-group-item">
-                            Download the audio file for offline listening.
-                        </li>
-                        <li className="list-group-item">
-                            Improved UI and Responsive of the button
-                        </li>
-                        <li className="list-group-item">
-                            Multiple Audio Player Support.
-                        </li>
-                        <li className="list-group-item">
-                            Include Content By CSS Selectors
-                        </li>
-                        <li className="list-group-item">
-                            Exclude Content By CSS Selectors
-                        </li>
-                        <li className="list-group-item">
-                            Exclude HTML Tags To Speak
-                        </li>
-                        <li className="list-group-item">
-                            Exclude Texts To Speak
-                        </li>
-                        <li className="list-group-item">
-                            Exclude Tags To Speak
-                        </li>
-                        <li className="list-group-item">
-                            Exclude Categories To Speak
-                        </li>
+                        {
+                            Object.keys(proFeatures).map(type => {
+                                if(promotionType === type) {
+                                    return proFeatures[promotionType].map(feature => {
+                                        return <li className="list-group-item" dangerouslySetInnerHTML={{ __html: feature }}/>
+                                    })
+                                }
+                            })
+                        }
                     </u>
-                    <a target='_blank' href="https://atlasaidev.com/text-to-speech-pro/"
-                       className="tta_btn btn-center text-center">Upgrade</a>
+                    <a target='_blank' href="https://atlasaidev.com/plugins/text-to-speech-pro/"
+                       className="tta_btn text-white">Unlock Premium Features</a>
                 </div>
             </div> : null
         }
