@@ -107,12 +107,12 @@ class TTA_Notices {
 //             array_push($this->plugin_features, "<strong>3. $feature3</strong>");
 //
 //	         add_action( 'admin_notices', [ $this, 'plugin_features_notice_callback' ] );
-
-	         add_action( 'admin_notices', [ $this, 'plugin_analytics_notice_callback' ] );
-
          }
 
-        if( ! is_pro_active() && version_compare( TEXT_TO_AUDIO_VERSION, TEXT_TO_AUDIO_VERSION, '>=')) {
+		add_action( 'admin_notices', [ $this, 'plugin_analytics_notice_callback' ] );
+
+
+		if( ! is_pro_active() && version_compare( TEXT_TO_AUDIO_VERSION, TEXT_TO_AUDIO_VERSION, '>=')) {
 	        add_action( 'admin_notices', [ $this, 'tts_setup_notice' ] );
         }
 
@@ -279,7 +279,8 @@ class TTA_Notices {
 		// translation Notice.
 		if ( $show_notice ) {
 			$has_notice = true;
-			$learn_more = '<a href="https://atlasaidev.com/plugins/text-to-speech-pro/" target="_blank" style="color:blue">Unlock The Premium Features</a>'
+			$learn_more = '<a href="https://atlasaidev.com/plugins/text-to-speech-pro/" target="_blank" style="color:blue">Unlock The Premium Features</a>';
+			$learn_more = '';
 
 			?>
             <div class="tta-notice notice notice-info is-dismissible" dir="<?php echo tta_is_rtl() ? 'ltr' : 'auto'?>" data-which="analytics" data-nonce="<?php echo esc_attr( $nonce ); ?>">
@@ -295,9 +296,10 @@ class TTA_Notices {
 						"$learn_more" //phpcs:ignore
 					);
 					?></p>
-                <p>
-                    <a class="button button-primary" data-response="analytics" href="https://atlasaidev.com/text-to-speech-pro/" target="_blank"><?php esc_html_e( 'Unlock The Premium Features', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
-                </p>
+                    <?php
+                     if(!is_pro_active()) { ?>
+                        <a class="button button-primary" data-response="analytics" href="https://atlasaidev.com/text-to-speech-pro/" target="_blank"><?php esc_html_e( 'Unlock The Premium Features', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a></p>
+                     <?php } ?>
             </div>
 
 			<?php

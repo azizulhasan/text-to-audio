@@ -347,12 +347,12 @@ function get_button_text( $atts, $content_read_time ) {
 	}
 
 	// Example usage
-	$listen_text = TTA_Helper::get_text_value($atts, $saved_texts, 'listen_text', 'Listen', 'text-to-audio');
-	$pause_text  = TTA_Helper::get_text_value($atts, $saved_texts, 'pause_text', 'Pause', 'text-to-audio');
-	$resume_text = TTA_Helper::get_text_value($atts, $saved_texts, 'resume_text', 'Resume', 'text-to-audio');
-	$replay_text = TTA_Helper::get_text_value($atts, $saved_texts, 'replay_text', 'Replay', 'text-to-audio');
-	$start_text  = TTA_Helper::get_text_value($atts, $saved_texts, 'start_text', 'Start', 'text-to-audio');
-	$stop_text   = TTA_Helper::get_text_value($atts, $saved_texts, 'stop_text', 'Stop', 'text-to-audio');
+	$listen_text = TTA_Helper::get_text_value( $atts, $saved_texts, 'listen_text', 'Listen', 'text-to-audio' );
+	$pause_text  = TTA_Helper::get_text_value( $atts, $saved_texts, 'pause_text', 'Pause', 'text-to-audio' );
+	$resume_text = TTA_Helper::get_text_value( $atts, $saved_texts, 'resume_text', 'Resume', 'text-to-audio' );
+	$replay_text = TTA_Helper::get_text_value( $atts, $saved_texts, 'replay_text', 'Replay', 'text-to-audio' );
+	$start_text  = TTA_Helper::get_text_value( $atts, $saved_texts, 'start_text', 'Start', 'text-to-audio' );
+	$stop_text   = TTA_Helper::get_text_value( $atts, $saved_texts, 'stop_text', 'Stop', 'text-to-audio' );
 
 	$text_arr = [
 		'listen_text' => $listen_text,
@@ -427,9 +427,9 @@ add_filter( 'the_content', 'add_listen_button', $display_button_priority );
 function add_listen_button( $content ) {
 	TTA_Helper::set_default_settings();
 	global $post;
-	$button = '';
-
+	$button   = '';
 	$settings = (array) get_option( 'tta_settings_data' );
+
 	if ( isset( $settings['tta__settings_enable_button_add'] ) && $settings['tta__settings_enable_button_add'] ) {
 		// TODO: write functionality if current page is home page where content is excerpt.
 		// if(is_single()) {
@@ -439,7 +439,7 @@ function add_listen_button( $content ) {
 		//     add_filter( 'the_excerpt', 'add_listen_button' , 9999 );
 		// }
 
-		if ( ! has_shortcode( $post->post_content, 'tta_listen_btn' ) ) {
+		if ( isset( $post->post_content ) && ! has_shortcode( $post->post_content, 'tta_listen_btn' ) ) {
 			ob_start();
 			echo tta_get_button_content( '' );
 			$button = ob_get_contents();
@@ -695,11 +695,26 @@ function get_player_id() {
 
 	$customize_settings                   = (array) TTA_Helper::tts_get_settings( 'customize' );
 	$customize_settings['buttonSettings'] = isset( $customize_settings['buttonSettings'] ) ? (array) $customize_settings['buttonSettings'] : [ 'id' => 1 ];
-	$player_id                            = isset( $customize_settings['buttonSettings']['id'] ) ? $customize_settings['buttonSettings']['id'] : 1;
+
+	$should_update_transient = false;
+	$cached_player_id        = get_transient( 'tts_cached_player_id' );
+	if ( $cached_player_id ) {
+		$player_id = $cached_player_id;
+	} else {
+		$player_id = isset( $customize_settings['buttonSettings']['id'] ) ? $customize_settings['buttonSettings']['id'] : 1;
+	}
 
 	if ( ! is_pro_license_active() && $player_id > 1 ) {
 		$player_id = 1;
 	}
+	if ( $cached_player_id != $player_id ) {
+		$should_update_transient = true;
+	}
+
+	if ( $should_update_transient ) {
+		set_transient( 'tts_cached_player_id', $player_id );
+	}
+
 
 	return apply_filters( 'tts_get_player_id', $player_id, $customize_settings, $post );
 }
@@ -708,6 +723,15 @@ function get_player_id() {
  * Is plugin active
  */
 function is_pro_active() {
+
+	if ( ! function_exists( 'ttsp_fs' ) ) {
+		return false;
+	}
+
+	if( ! ttsp_fs()->is__premium_only()  ) {
+		return false;
+	}
+
 
 	if ( ! function_exists( 'is_plugin_active' ) ) {
 		include_once ABSPATH . 'wp-admin/includes/plugin.php';
