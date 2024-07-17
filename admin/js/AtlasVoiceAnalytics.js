@@ -14,6 +14,7 @@ class AtlasVoiceAnalytics {
 
         // Bind the event listeners for beforeunload and unload
         window.addEventListener('beforeunload', this.sendSessionData.bind(this));
+
     }
 
 
@@ -98,6 +99,8 @@ class AtlasVoiceAnalytics {
             return;
         }
 
+        this.sessionData = this.getSessionData()
+
         if (Object.keys(this.sessionData)?.length === 0) return;
         fetch(this.apiUrl, {
             method: 'POST',
@@ -114,6 +117,7 @@ class AtlasVoiceAnalytics {
         });
         sessionStorage.removeItem('atlasVoice_analytics_data'); // Clear the session data after sending
         sessionStorage.removeItem('atlasVoice_analytics_is_initiated'); // Clear the session data after sending
+        window.hasAtlasVoiceAnalyticsBeforeUnloadListener = false;
     }
 
     async getUniqueUserId() {

@@ -409,6 +409,8 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 
 = 1.7.0 ( 15 July 2024 ) =
 Introduced: Analytics added.
+Fixed: FireFox, Microsoft Edge browser issue fixed.
+Improved: Caching functionality improved.
 
 = 1.6.26 ( 11 July 2024 ) =
 Fixed: Shortcode placement issue fixed.

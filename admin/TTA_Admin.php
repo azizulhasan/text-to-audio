@@ -228,13 +228,10 @@ class TTA_Admin {
                 echo  $object;
             }
 
-	        if (TTA_Helper::is_edit_page() || TTA_Helper::is_text_to_audio_page() ) {
+	        if (TTA_Helper::is_edit_page() ) {
 		        wp_enqueue_script('AtlasVoicePlayerInsights', plugin_dir_url(__FILE__) .'js/build/AtlasVoicePlayerInsights.min.js', array( 'wp-hooks', 'wp-i18n'), $this->version, true);
 		        wp_localize_script('AtlasVoicePlayerInsights', 'ttsObj', $this->localize_data);
-
-                if(TTA_Helper::is_edit_page()) {
-	                wp_enqueue_script('AtlasVoiceCopyShortcode', plugin_dir_url(__FILE__) .'js/AtlasVoiceCopyShortcode.js', array( 'wp-hooks' ), $this->version, true);
-                }
+                wp_enqueue_script('AtlasVoiceCopyShortcode', plugin_dir_url(__FILE__) .'js/AtlasVoiceCopyShortcode.js', array( 'wp-hooks' ), $this->version, true);
             }
 
     }
