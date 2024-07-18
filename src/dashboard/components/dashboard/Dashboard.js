@@ -29,6 +29,7 @@ import Customize from './customize/Customize';
 import Docs from './docs/Docs';
 import Analitics from './analitics/Analitics.js';
 import Integrations from './integrations/Integrations.js'
+import Compatibility from './compatibility/Compatibility.js'
 
 function Dashboard() {
 	const [componentName, setComponentName] = useState(getComponentName());
@@ -69,18 +70,13 @@ function Dashboard() {
 										<Settings />
 									))}
 								/>
-								<Route
-									path={'/listening'}
-									element={useMemo(() => (
-										<Listening />
-									))}
-								/>
+								<Route path='/integrations' element={<Integrations />} />
 								<Route
 									path={'/customize'}
 									element={<Customize />}
 								/>
 								<Route
-									path={'/in'}
+									path={'/listening'}
 									element={useMemo(() => (
 										<Listening />
 									))}
@@ -89,9 +85,10 @@ function Dashboard() {
 									path={'/recording'}
 									element={<Recording />}
 								/> */}
-								<Route path='/integrations' element={<Integrations />} />
+								<Route path='/analytics' element={<Analitics />} />
+								<Route path='/compatibility' element={<Compatibility />} />
 								<Route path='/faq' element={<Docs />} />
-								 <Route path='/analitics' element={<Analitics />} />
+
 							</Routes>
 
 						</div>

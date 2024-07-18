@@ -203,6 +203,10 @@ class TTA_Helper {
 		if ( $sitepress ) {
 			$active_languages = $sitepress->get_active_languages();
 		}
+		$acf_fields = [];
+		if ( function_exists( 'acf' ) ) {
+			$acf_fields = self::get_all_acf_fields();
+		}
 
 		$datas = \apply_filters( 'tts_pro_plugins_data', [
 			'gtranslate/gtranslate.php'                => [
@@ -218,6 +222,11 @@ class TTA_Helper {
 				'plugin'           => 'sitepress',
 				'active_languages' => $active_languages,
 			],
+			'advanced-custom-fields/acf.php'           => [
+				'type'   => 'class',
+				'data'   => $acf_fields,
+				'plugin' => 'acf',
+			]
 		] );
 
 		if ( ! function_exists( 'is_plugin_active' ) ) {
@@ -368,7 +377,8 @@ class TTA_Helper {
 			'settings'  => 'tta_settings_data',
 			'recording' => 'tta_record_settings',
 			'customize' => 'tta_customize_settings',
-			'analytics' => 'tta_analytics_settings'
+			'analytics' => 'tta_analytics_settings',
+			'compatible' => 'tta_compatible_data',
 		];
 		$cached_settings   = get_transient( 'tts_all_settings' );
 		if ( ! $cached_settings ) {
@@ -850,6 +860,31 @@ class TTA_Helper {
 		} else {
 			return __( $default, $text_domain );
 		}
+	}
+
+	private static function get_all_acf_fields() {
+		// Get all field groups
+		$field_groups   = acf_get_field_groups();
+		$all_acf_fields = [];
+		if ( $field_groups ) {
+			// Loop through each field group
+			foreach ( $field_groups as $field_group ) {
+				// Get all fields for the current field group
+				$fields = acf_get_fields( $field_group['key'] );
+				if ( $fields ) {
+					// Loop through each field
+					foreach ( $fields as $field ) {
+						$all_acf_fields[ $field['name'] ] = $field['name'] . '::' . $field['label'];
+					}
+				}
+			}
+		}
+
+		return $all_acf_fields;
+	}
+
+	public static function get_compatible_plugin_content( $content , $post) {
+
 	}
 
 
