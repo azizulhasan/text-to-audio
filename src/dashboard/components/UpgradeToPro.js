@@ -33,6 +33,16 @@ export default function UpgradeToPro({ promotionType = 'general' }) {
             __("Percentage of times users listened till the end. 🔒"),
             __("Average listening time per play. 🔒"),
             __("Average number of pauses per play. 🔒"),
+        ],
+        compatible : [
+            __("WPML Multilingual Support"),
+            __("Gtranslate Plugin Support"),
+            __("Advance Custom Field ( ACF ) Support"),
+            __("WooCommerc Support"),
+            __("Elementor Page Builder Plugin Support"),
+            __("WP Bakery Page Builder Plugin Support"),
+            __("All Android Support"),
+            __( 'All Browser Support')
         ]
     }
     return <>

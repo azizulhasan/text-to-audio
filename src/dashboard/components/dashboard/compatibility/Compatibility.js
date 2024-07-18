@@ -106,7 +106,7 @@ export default function Compatibility() {
                                         key={placement}
                                         placement={placement}
                                         overlay={<Tooltip id={`tooltip-${placement}`}>
-                                            {__('Tracking more than 5 post IDs is a pro feature')}
+                                            {__('Adding more than 1  ACF field is a pro feature')}
                                         </Tooltip>}>
                                         <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
                                             className="fas fa-lock"/></Button>
@@ -115,7 +115,7 @@ export default function Compatibility() {
                                 </Form.Label>
                             </Col>
                             <Col xs={11} sm={11} lg={7}>
-                                <MultiSelect toastMessage={'Tracking more than 1 post IDs is a pro feature'}
+                                <MultiSelect toastMessage={'Adding more than 1  ACF field is a pro feature'}
                                              name={'tts_trackable_post_ids'}
                                              id={'tts_trackable_post_ids'}
                                              selectedItems={selectedACFFields}
