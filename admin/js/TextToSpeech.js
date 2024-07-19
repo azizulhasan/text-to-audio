@@ -487,10 +487,17 @@ if (window?.ttsObj?.is_pro_active) {
  * When plugin dashboard with open.
  */
 let urlParams = new URLSearchParams('page=text-to-audio').toString()
-if ('page=text-to-audio' === urlParams) {
+let urlParams2 = new URLSearchParams('tts-live-demo').toString()
+let shouldInitTTS = false;
+if(urlParams = 'page=text-to-audio' ) {
+    shouldInitTTS = true
+}else  if (urlParams2  === 'text-to-speech-pro-demo=' || urlParams2 === 'text-to-speech-pro-demo') {
+    shouldInitTTS = true
+}
+if (shouldInitTTS) {
     let timerDashboar;
     timerDashboar = setInterval(() => {
-        if (window.hasOwnProperty('ttsObj') && ttsObj.is_dashboard) {
+        if (window.hasOwnProperty('ttsObj')) {
             declare_init_content()
             clearInterval(timerDashboar)
             timerDashboar = null
