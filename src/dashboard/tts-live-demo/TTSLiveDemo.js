@@ -12,14 +12,19 @@ import notify from "../components/context/Notify";
 let speech = null;
 let TextToSpeechFree = null;
 export default function TTSLiveDemo() {
-    const [listeningBtnStyle, setListeningStyle] = useState({
+    const [demoSettings, setDemoSettings] = useState({
         backgroundColor: '#FFFFFF',
         color: '#000000',
         width: '100',
         buttonSettings: {
-        }
+        },
+        tta__listening_voice: 'Microsoft David - English (United States)',
+        tta__listening_pitch: 2,
+        tta__listening_rate: 1,
+        tta__listening_volume: 1,
+        tta__listening_lang: 'en_GB',
     });
-    const [listeningBtnStyle2, setListeningStyle2] = useState({
+    const [demoSettings2, setDemoSettings2] = useState({
         backgroundColor: '#FFFFFF',
         color: '#000000',
         width: '100%',
@@ -42,13 +47,13 @@ export default function TTSLiveDemo() {
         customize.append('method', 'get');
         postWithoutImage(tta_obj.api_url + 'tta/v1/customize', customize)
             .then((res) => {
-                setListeningStyle(res.data);
+                setDemoSettings(res.data);
                 if (res.data.custom_css) {
                     setCustomCSS(res.data.custom_css);
                 }
                 setShortCode(res.data.tta_play_btn_shortcode);
-                setListeningStyle2({
-                    ...listeningBtnStyle2,
+                setDemoSettings2({
+                    ...demoSettings2,
                     ...{ backgroundColor: res.data.backgroundColor },
                     ...{ color: res.data.color },
                     ...{ width: [res.data.width, '%'].join('') },
@@ -63,13 +68,13 @@ export default function TTSLiveDemo() {
          */
         let listening = new FormData();
         listening.append('method', 'get');
-        postWithoutImage(tta_obj.api_url + 'tta/v1/listening', listening)
-            .then((res) => {
-                setListeningSettings(res.data);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+        // postWithoutImage(tta_obj.api_url + 'tta/v1/listening', listening)
+        //     .then((res) => {
+        //         setListeningSettings(res.data);
+        //     })
+        //     .catch((err) => {
+        //         console.log(err);
+        //     });
         let initialText = 'The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!'
 
         localStorage.setItem('demo_listening_content', initialText)
@@ -84,7 +89,7 @@ export default function TTSLiveDemo() {
         if (window.hasOwnProperty('ttsObj') && ttsObj?.is_pro_active) {
             postData(ttsObj.api_url + 'tta_pro/v1/get_auth_file', {}, "GET")
                 .then((res) => {
-                    if (res?.file && res?.is_authenticated) {
+                    if (res?.is_authenticated) {
                         setGCIsAuthenticated(res.is_authenticated)
                         setIsBackUpToGCS(res?.tts_is_backup_mp3_file || false)
                     }
@@ -126,29 +131,21 @@ export default function TTSLiveDemo() {
         }
 
         // ChatGPT TTS player button settings
-        // && listeningBtnStyle?.buttonSettings?.id == 3
+        // && demoSettings?.buttonSettings?.id == 3
         if (!['backgroundColor', 'width', 'color'].includes(e.target.name)) {
 
-            let tempButtonSettings = structuredClone(listeningBtnStyle.buttonSettings)
+            let tempButtonSettings = structuredClone(demoSettings.buttonSettings)
 
             tempButtonSettings = {
                 ...tempButtonSettings,
                 ...{ [e.target.name]: e.target.value }
             }
-            setListeningStyle({
-                ...listeningBtnStyle,
+            setDemoSettings({
+                ...demoSettings,
                 ...{
                     buttonSettings: tempButtonSettings
                 }
             });
-
-            if(e.target.name == 'id' && e.target.value > 2 ) {
-                document.getElementById('tta__demo_text_for_play').setAttribute('disabled', true)
-
-            }else{
-                document.getElementById('tta__demo_text_for_play').removeAttribute('disabled')
-
-            }
 
             return;
         }
@@ -156,8 +153,8 @@ export default function TTSLiveDemo() {
         /**
          * set button style for database.
          */
-        setListeningStyle({
-            ...listeningBtnStyle,
+        setDemoSettings({
+            ...demoSettings,
             ...{ [e.target.name]: e.target.value },
         });
         /**
@@ -171,15 +168,17 @@ export default function TTSLiveDemo() {
             value = e.target.value;
         }
 
-        setListeningStyle2({
-            ...listeningBtnStyle2,
+        setDemoSettings2({
+            ...demoSettings2,
             ...{ [e.target.name]: value },
         });
     };
 
     useEffect(() =>{
-        console.log({listeningBtnStyle})
-    }, [listeningBtnStyle])
+        let length = 'The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!';
+        console.log(length.length)
+
+    }, [demoSettings])
 
     /**
      * Handle form Submit
@@ -208,7 +207,7 @@ export default function TTSLiveDemo() {
 
         formData['custom_css'] = customCSS;
         formData['tta_play_btn_shortcode'] = shortCode;
-        formData['buttonSettings'] = listeningBtnStyle.buttonSettings;
+        formData['buttonSettings'] = demoSettings.buttonSettings;
 
         console.log({formData})
 
@@ -245,7 +244,7 @@ export default function TTSLiveDemo() {
         data.append('method', 'post');
         postWithoutImage(tta_obj.api_url + 'tta/v1/customize', data)
             .then((res) => {
-                setListeningStyle(res.data);
+                setDemoSettings(res.data);
                 toast('Customization saved. Now go to the "Listening" menu.', 'info', {
                     autoClose: 15000
                 });
@@ -283,7 +282,7 @@ export default function TTSLiveDemo() {
         setSpeakingText(e.target.value);
         localStorage.setItem('demo_listening_content', e.target.value);
         if (window.hasOwnProperty('TTS') && window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active) {
-            window.TTS.contents[1] = e.target.value;;
+            window.TTS.contents[1] = e.target.value;
         }
     };
 
@@ -291,7 +290,7 @@ export default function TTSLiveDemo() {
         { id: 1, name: 'Default', object: 'TextToSpeech', disabled: false },
         { id: 2, name: 'Default Pro', object: 'TextToSpeechPro', disabled: false },
         { id: 3, name: 'Google TTS Pro', object: 'TextToSpeechPro', disabled: false },
-        { id: 4, name: "Google Cloud TTS", object: 'TextToSpeechPro', disabled: false },
+        { id: 4, name: "Google Cloud TTS Pro", object: 'TextToSpeechPro', disabled: false },
         { id: 5, name: "ChatGPT TTS(Soon)", object: 'TextToSpeechPro', disabled: true },
     ])
 
@@ -302,15 +301,15 @@ export default function TTSLiveDemo() {
                     <Row>
                         <Col xs={12} sm={12} lg={12} className='mb-3'>
                             {
-                                listeningBtnStyle?.buttonSettings?.id == 2 ?
-                                    <TextToSpeech buttonCSS={listeningBtnStyle} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={2} /> :
-                                    listeningBtnStyle?.buttonSettings?.id == 3 ? <TextToSpeechThree buttonCSS={listeningBtnStyle} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> :
-                                        listeningBtnStyle?.buttonSettings?.id == 4 ? <TextToSpeechFour buttonCSS={listeningBtnStyle} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={4} cssStyle={''} /> :
-                                            listeningBtnStyle?.buttonSettings?.id == 5 ? <TextToSpeechThree buttonCSS={listeningBtnStyle} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={5} cssStyle={''} /> : (
+                                demoSettings?.buttonSettings?.id == 2 ?
+                                    <TextToSpeech buttonCSS={demoSettings} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={2} /> :
+                                    demoSettings?.buttonSettings?.id == 3 ? <TextToSpeechThree buttonCSS={demoSettings} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> :
+                                        demoSettings?.buttonSettings?.id == 4 ? <TextToSpeechFour buttonCSS={demoSettings} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={4} cssStyle={''} /> :
+                                            demoSettings?.buttonSettings?.id == 5 ? <TextToSpeechThree buttonCSS={demoSettings} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={5} cssStyle={''} /> : (
                                                 <button
                                                     id='tta__listen_content'
                                                     onClick={(e) => callListeningFunction(e)}
-                                                    style={listeningBtnStyle2}
+                                                    style={demoSettings2}
                                                     type='button'
                                                     title='Text To Audio:  Tap to listen post.'>
                                                     <span className='dashicons dashicons-controls-play'></span>{' '}
@@ -320,7 +319,7 @@ export default function TTSLiveDemo() {
                             }
                             <p className='pt-2'>
                                 {
-                                    listeningBtnStyle?.buttonSettings?.id == 1 && ttsObjPro.is_pro_active ? __('If you\'re selecting this button then you may not get pro features. Suppose CSS selectors from settings page and WPML/GTranslate will not work with this button.') : __('Save this player then configure proper voice and lanuage from listening menu. ')
+                                    demoSettings?.buttonSettings?.id == 4 && ttsObjPro.is_pro_active ? __('You have to configure Google Cloud Text To Speech to use this player.') : demoSettings?.buttonSettings?.id < 3 ? " this plsyer"  : ""
                                 }
                             </p>
                         </Col>
@@ -346,7 +345,7 @@ export default function TTSLiveDemo() {
                     </Row>
                 </Col>
                 <Col xs={12} sm={12} lg={4}>
-                    <CustomizationTabs buttonLists={buttonLists} customCSS={customCSS} handleSubmit={handleSubmit} listeningBtnStyle={listeningBtnStyle} handleChange={handleChange} listeningSettings={listeningSettings} />
+                    <CustomizationTabs buttonLists={buttonLists} customCSS={customCSS} handleSubmit={handleSubmit} demoSettings={demoSettings} handleChange={handleChange} listeningSettings={listeningSettings} />
                 </Col>
             </Row>
         </Container>

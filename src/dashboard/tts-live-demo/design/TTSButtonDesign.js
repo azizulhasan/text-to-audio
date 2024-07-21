@@ -1,5 +1,5 @@
 import { Form } from 'react-bootstrap';
-export default function TTSButtonDesign({ handleChange, customCSS, listeningBtnStyle }) {
+export default function TTSButtonDesign({ handleChange, customCSS, demoSettings }) {
     return (
         <>
             <Form.Label htmlFor='backgroundColor'>
@@ -10,7 +10,7 @@ export default function TTSButtonDesign({ handleChange, customCSS, listeningBtnS
                 name='backgroundColor'
                 onChange={handleChange}
                 id='backgroundColor'
-                value={listeningBtnStyle.backgroundColor}
+                value={demoSettings.backgroundColor}
                 title='Choose your color'
             />
             <Form.Label htmlFor='color'>Text Color</Form.Label>
@@ -19,7 +19,7 @@ export default function TTSButtonDesign({ handleChange, customCSS, listeningBtnS
                 name='color'
                 onChange={handleChange}
                 id='color'
-                value={listeningBtnStyle.color}
+                value={demoSettings.color}
                 title='Choose your color'
             />
             <Form.Label htmlFor='width'>
@@ -32,7 +32,7 @@ export default function TTSButtonDesign({ handleChange, customCSS, listeningBtnS
                 id='width'
                 min={'0'}
                 max='100'
-                value={listeningBtnStyle.width}
+                value={demoSettings.width}
                 title='Button Width'
             />
             <Form.Label htmlFor='custom_css'>Custom CSS</Form.Label>

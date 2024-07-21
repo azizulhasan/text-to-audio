@@ -84,7 +84,7 @@ export default function Customize() {
 		if (window.hasOwnProperty('ttsObj') && ttsObj?.is_pro_active) {
 			postData(ttsObj.api_url + 'tta_pro/v1/get_auth_file', {}, "GET")
 				.then((res) => {
-					if (res?.file && res?.is_authenticated) {
+					if (res?.is_authenticated) {
 						setGCIsAuthenticated(res.is_authenticated)
 						setIsBackUpToGCS(res?.tts_is_backup_mp3_file || false)
 					}
