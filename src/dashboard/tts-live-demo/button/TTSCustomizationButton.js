@@ -1,63 +1,120 @@
-import React, { useState } from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {Button, Col, Form, OverlayTrigger, Row, Tooltip} from 'react-bootstrap';
 import { __ } from '@wordpress/i18n'
+import {
+    areAllKeysNumeric,
+    getData,
+    getLocalStorage,
+    gttsSupportedLanguages,
+    setLocalStorage
+} from "../../components/context/utilities";
 
 export default function TTSCustomizationButton({ demoSettings, handleChange, buttonLists }) {
-    let gttsLanguages = {
-        "af": "Afrikaans",
-        "sq": "Albanian",
-        "ar": "Arabic",
-        "hy": "Armenian",
-        "ca": "Catalan",
-        "zh": "Chinese",
-        "zh-cn": "Chinese (Mandarin/China)",
-        "zh-tw": "Chinese (Mandarin/Taiwan)",
-        "zh-yue": "Chinese (Cantonese)",
-        "hr": "Croatian",
-        "cs": "Czech",
-        "da": "Danish",
-        "nl": "Dutch",
-        "en": "English",
-        "en-au": "English (Australia)",
-        "en-uk": "English (United Kingdom)",
-        "en-us": "English (United States)",
-        "eo": "Esperanto",
-        "fi": "Finnish",
-        "fr": "French",
-        "de": "German",
-        "el": "Greek",
-        "ht": "Haitian Creole",
-        "hi": "Hindi",
-        "hu": "Hungarian",
-        "is": "Icelandic",
-        "id": "Indonesian",
-        "it": "Italian",
-        "ja": "Japanese",
-        "ko": "Korean",
-        "la": "Latin",
-        "lv": "Latvian",
-        "mk": "Macedonian",
-        "no": "Norwegian",
-        "pl": "Polish",
-        "pt": "Portuguese",
-        "pt-br": "Portuguese (Brazil)",
-        "ro": "Romanian",
-        "ru": "Russian",
-        "sr": "Serbian",
-        "sk": "Slovak",
-        "es": "Spanish",
-        "es-es": "Spanish (Spain)",
-        "es-us": "Spanish (United States)",
-        "sw": "Swahili",
-        "sv": "Swedish",
-        "ta": "Tamil",
-        "th": "Thai",
-        "tr": "Turkish",
-        "vi": "Vietnamese",
-        "cy": "Welsh"
-    }
     const [currentPlayerVoices, setCurrentPlayerVoices] = useState([]);
     const [currentPlayerLanguages, setCurrentPlayerLanguages] = useState([]);
+    const [speechSynthesisVoices, setSpeechSynthesisVoices] = useState([]);
+    const apiURL = useMemo(() => {
+        if (window.hasOwnProperty('ttsObj') && ttsObj.is_pro_active) {
+            return ttsObj.api_url + ttsObj.api_namespace + "_pro/" + ttsObj.api_version + "/";
+        }
+
+        return ttsObj.api_url + ttsObj.api_namespace + "/" + ttsObj.api_version + "/";
+    })
+    const setVoicesAndLanguages = (voices = [], langs = [],) => {
+
+        if (Array.isArray(voices) && voices.length) {
+            setCurrentPlayerVoices(voices)
+            setSpeechSynthesisVoices(voices)
+        }
+        if (Array.isArray(langs) && langs.length) {
+            if (areAllKeysNumeric(langs)) {
+                let newLangs = {};
+                for (let lang of langs) {
+                    newLangs[lang] = lang;
+                }
+                setCurrentPlayerLanguages(newLangs)
+
+            } else {
+                setCurrentPlayerLanguages(langs)
+            }
+
+        }
+
+        if (Array.isArray(langs) && Array.isArray(voices) && voices.length) return;
+
+        let timer = setTimeout(function handleTime() {
+            timer = setTimeout(handleTime, 1000)
+
+            if (timer > 65 || demoSettings?.buttonSettings == undefined) {
+                clearTimeout(timer)
+                timer = null;
+            }
+            if (window.hasOwnProperty('speechSynthesis') && window.speechSynthesis.getVoices().length && demoSettings?.buttonSettings?.id < 3) {
+                clearTimeout(timer)
+                timer = null
+                setSpeechSynthesisVoices(window.speechSynthesis.getVoices())
+                let newLangs = {};
+                window.speechSynthesis.getVoices().map(item => {
+                    if (!langs.includes(item.lang)) {
+                        langs[item.lang] = item.lang;
+                    }
+                })
+                setCurrentPlayerLanguages(langs)
+                setCurrentPlayerVoices(window.speechSynthesis.getVoices())
+            }
+        })
+    }
+
+
+    useEffect(() => {
+        if (window.hasOwnProperty('ttsObjPro') && ttsObjPro?.is_pro_active) {
+            if (demoSettings?.buttonSettings?.id == 3) {
+                let gttsLanguages = gttsSupportedLanguages();
+                setCurrentPlayerLanguages(gttsLanguages)
+            } else if (demoSettings?.buttonSettings?.id == 4) {
+                setGoogleVoicesAndLanguages();
+            }else{
+                setVoicesAndLanguages()
+            }
+
+        }
+
+
+    }, [demoSettings])
+
+    const setGoogleVoicesAndLanguages = () => {
+        let stored_voices = getLocalStorage(['tta__voices']);
+        if (!stored_voices?.tta__voices) {
+            getData(apiURL + 'voices')
+                .then((res) => {
+                    if (res?.voices?.length) {
+                        setLocalStorage({tta__voices: res.voices})
+                    } else {
+                        setVoicesAndLanguages()
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        } else {
+            let voices = JSON.parse(stored_voices.tta__voices);
+            let langs = []
+            let langs2 = []
+
+            if (voices?.voices) {
+                voices = voices.voices;
+            }
+
+            voices.map(voice => {
+                if (!langs.includes(voice.languageCodes[0])) {
+                    langs.push(voice.languageCodes[0])
+                    langs2[voice.languageCodes[0]] = voice.languageCodes[0];
+                }
+            })
+
+            setVoicesAndLanguages(voices, langs)
+        }
+    }
 
 
 

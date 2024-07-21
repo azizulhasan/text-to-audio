@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { __ } from '@wordpress/i18n';
-import { Col, Container, Row, Form, FloatingLabel } from 'react-bootstrap';
+import React, {useState, useEffect} from 'react';
+import {__} from '@wordpress/i18n';
+import {Col, Container, Row, Form, FloatingLabel} from 'react-bootstrap';
 import toast from '../components/context/Notify';
-import { copyToClipBoard, postData, postWithoutImage } from '../components/context/utilities';
+import {copyToClipBoard, postData, postWithoutImage} from '../components/context/utilities';
 import TextToSpeech from '../buttons/components/TextToSpeech';
 import TextToSpeechThree from '../buttons/components/TextToSpeechThree';
 import TextToSpeechFour from '../buttons/components/TextToSpeechFour';
@@ -13,10 +13,11 @@ let speech = null;
 let TextToSpeechFree = null;
 export default function TTSLiveDemo() {
     const [demoSettings, setDemoSettings] = useState({
-        backgroundColor: '#FFFFFF',
-        color: '#000000',
+        backgroundColor: '#1a4548',
+        color: '#ffffff',
         width: '100',
         buttonSettings: {
+            id: 1
         },
         tta__listening_voice: 'Microsoft David - English (United States)',
         tta__listening_pitch: 2,
@@ -25,8 +26,8 @@ export default function TTSLiveDemo() {
         tta__listening_lang: 'en_GB',
     });
     const [demoSettings2, setDemoSettings2] = useState({
-        backgroundColor: '#FFFFFF',
-        color: '#000000',
+        backgroundColor: '#1a4548',
+        color: '#ffffff',
         width: '100%',
         border: '0',
     });
@@ -38,30 +39,31 @@ export default function TTSLiveDemo() {
     const [listeningSettings, setListeningSettings] = useState({});
     const [isGCAuthenticated, setGCIsAuthenticated] = useState(false);
     const [isBackUpToGCS, setIsBackUpToGCS] = useState(false)
+    const [testingDemoContentMessage, setTestingDemoContentMessage] = useState('')
 
     useEffect(() => {
         /**
          * Get customize settings.
          */
-        let customize = new FormData();
-        customize.append('method', 'get');
-        postWithoutImage(tta_obj.api_url + 'tta/v1/customize', customize)
-            .then((res) => {
-                setDemoSettings(res.data);
-                if (res.data.custom_css) {
-                    setCustomCSS(res.data.custom_css);
-                }
-                setShortCode(res.data.tta_play_btn_shortcode);
-                setDemoSettings2({
-                    ...demoSettings2,
-                    ...{ backgroundColor: res.data.backgroundColor },
-                    ...{ color: res.data.color },
-                    ...{ width: [res.data.width, '%'].join('') },
-                });
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+        // let customize = new FormData();
+        // customize.append('method', 'get');
+        // postWithoutImage(tta_obj.api_url + 'tta/v1/customize', customize)
+        //     .then((res) => {
+        //         setDemoSettings(res.data);
+        //         if (res.data.custom_css) {
+        //             setCustomCSS(res.data.custom_css);
+        //         }
+        //         setShortCode(res.data.tta_play_btn_shortcode);
+        //         setDemoSettings2({
+        //             ...demoSettings2,
+        //             ...{ backgroundColor: res.data.backgroundColor },
+        //             ...{ color: res.data.color },
+        //             ...{ width: [res.data.width, '%'].join('') },
+        //         });
+        //     })
+        //     .catch((err) => {
+        //         console.log(err);
+        //     });
 
         /**
          * Get listening settings.
@@ -114,13 +116,7 @@ export default function TTSLiveDemo() {
             toast('Value should between 0-100');
             return;
         }
-        /**
-         * setShortCode
-         */
-        if (e.target.name == 'tta_play_btn_shortcode') {
-            setShortCode(e.target.value);
-            return;
-        }
+
 
         /**
          * setCustomCSS
@@ -138,7 +134,7 @@ export default function TTSLiveDemo() {
 
             tempButtonSettings = {
                 ...tempButtonSettings,
-                ...{ [e.target.name]: e.target.value }
+                ...{[e.target.name]: e.target.value}
             }
             setDemoSettings({
                 ...demoSettings,
@@ -155,7 +151,7 @@ export default function TTSLiveDemo() {
          */
         setDemoSettings({
             ...demoSettings,
-            ...{ [e.target.name]: e.target.value },
+            ...{[e.target.name]: e.target.value},
         });
         /**
          * set button style for live preveiw.
@@ -170,15 +166,15 @@ export default function TTSLiveDemo() {
 
         setDemoSettings2({
             ...demoSettings2,
-            ...{ [e.target.name]: value },
+            ...{[e.target.name]: value},
         });
     };
 
-    useEffect(() =>{
+    useEffect(() => {
         let length = 'The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!';
-        console.log(length.length)
+        // console.log({length: speakingText.length, testingDemoContentMessage, id: demoSettings.buttonSettings.id})
 
-    }, [demoSettings])
+    }, [speakingText])
 
     /**
      * Handle form Submit
@@ -213,8 +209,8 @@ export default function TTSLiveDemo() {
 
         return;
 
-        if( formData?.buttonSettings?.id  == 4 && !isGCAuthenticated) {
-            notify('To select this player you have to authenticate first from Integration menu', 'error' ,{
+        if (formData?.buttonSettings?.id == 4 && !isGCAuthenticated) {
+            notify('To select this player you have to authenticate first from Integration menu', 'error', {
                 autoClose: 8000,
             });
             return;
@@ -232,9 +228,10 @@ export default function TTSLiveDemo() {
         }
 
         if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_folder_writable && formData?.buttonSettings?.id > 2 && !isBackUpToGCS) {
-            toast("Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.", 'error', { autoClose: 10000 })
+            toast("Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.", 'error', {autoClose: 10000})
             return
-        };
+        }
+        ;
 
 
         // console.log(formData);
@@ -278,20 +275,56 @@ export default function TTSLiveDemo() {
         }
 
     };
-    const setText = (e) => {
-        setSpeakingText(e.target.value);
-        localStorage.setItem('demo_listening_content', e.target.value);
+    const setText = (e, buttonText = '') => {
+        // TODO:: must validate
+        let value = e.target.value;
+        if(buttonText) {
+            value = buttonText;
+        }
+
+        if(demoSettings.buttonSettings.id == 3 ) {
+            if (value.length > 599) {
+                setTestingDemoContentMessage('You can\'t  generate more than 600 characters during demo testing with Google TTS Pro.')
+                value = value.slice(0, 598);
+            }
+            setSpeakingText(value);
+            localStorage.setItem('demo_listening_content', value);
+            if (window.hasOwnProperty('TTS') && window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active) {
+                window.TTS.contents[1] = value;
+            }
+            return;
+        }
+
+        if (demoSettings.buttonSettings.id == 4) {
+
+            if (value.length > 149) {
+                setTestingDemoContentMessage('You can\'t  generate more than 150 characters during demo testing with Google Cloud Text To Speech.')
+                value = value.slice(0, 148);
+            }
+            setSpeakingText(value);
+            localStorage.setItem('demo_listening_content', value);
+            if (window.hasOwnProperty('TTS') && window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active) {
+                window.TTS.contents[1] = value;
+            }
+            return;
+        }
+
+
+        setSpeakingText(value);
+        localStorage.setItem('demo_listening_content', value);
         if (window.hasOwnProperty('TTS') && window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active) {
-            window.TTS.contents[1] = e.target.value;
+            window.TTS.contents[1] = value;
         }
     };
 
+
+
     const [buttonLists, setButtonLists] = useState([
-        { id: 1, name: 'Default', object: 'TextToSpeech', disabled: false },
-        { id: 2, name: 'Default Pro', object: 'TextToSpeechPro', disabled: false },
-        { id: 3, name: 'Google TTS Pro', object: 'TextToSpeechPro', disabled: false },
-        { id: 4, name: "Google Cloud TTS Pro", object: 'TextToSpeechPro', disabled: false },
-        { id: 5, name: "ChatGPT TTS(Soon)", object: 'TextToSpeechPro', disabled: true },
+        {id: 1, name: 'Default', object: 'TextToSpeech', disabled: false},
+        {id: 2, name: 'Default Pro', object: 'TextToSpeechPro', disabled: false},
+        {id: 3, name: 'Google TTS Pro', object: 'TextToSpeechPro', disabled: false},
+        {id: 4, name: "Google Cloud TTS Pro", object: 'TextToSpeechPro', disabled: false},
+        {id: 5, name: "ChatGPT TTS(Soon)", object: 'TextToSpeechPro', disabled: true},
     ])
 
     return (
@@ -302,24 +335,39 @@ export default function TTSLiveDemo() {
                         <Col xs={12} sm={12} lg={12} className='mb-3'>
                             {
                                 demoSettings?.buttonSettings?.id == 2 ?
-                                    <TextToSpeech buttonCSS={demoSettings} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={2} /> :
-                                    demoSettings?.buttonSettings?.id == 3 ? <TextToSpeechThree buttonCSS={demoSettings} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={3} cssStyle={''} /> :
-                                        demoSettings?.buttonSettings?.id == 4 ? <TextToSpeechFour buttonCSS={demoSettings} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={4} cssStyle={''} /> :
-                                            demoSettings?.buttonSettings?.id == 5 ? <TextToSpeechThree buttonCSS={demoSettings} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={5} cssStyle={''} /> : (
-                                                <button
-                                                    id='tta__listen_content'
-                                                    onClick={(e) => callListeningFunction(e)}
-                                                    style={demoSettings2}
-                                                    type='button'
-                                                    title='Text To Audio:  Tap to listen post.'>
-                                                    <span className='dashicons dashicons-controls-play'></span>{' '}
-                                                    {tta_obj.buttonTextArr.listen_text}
-                                                </button>
-                                            )
+                                    <TextToSpeech buttonCSS={demoSettings}
+                                                  button={<div dataId="1" id="tts__listent_content_1"
+                                                               className='tts__listent_content'></div>} buttonId={2}/> :
+                                    demoSettings?.buttonSettings?.id == 3 ? <TextToSpeechThree buttonCSS={demoSettings}
+                                                                                               button={<div dataId="1"
+                                                                                                            id="tts__listent_content_1"
+                                                                                                            className='tts__listent_content'></div>}
+                                                                                               buttonId={3}
+                                                                                               cssStyle={''}/> :
+                                        demoSettings?.buttonSettings?.id == 4 ?
+                                            <TextToSpeechFour buttonCSS={demoSettings}
+                                                              button={<div dataId="1" id="tts__listent_content_1"
+                                                                           className='tts__listent_content'></div>}
+                                                              buttonId={4} cssStyle={''}/> :
+                                            demoSettings?.buttonSettings?.id == 5 ?
+                                                <TextToSpeechThree buttonCSS={demoSettings}
+                                                                   button={<div dataId="1" id="tts__listent_content_1"
+                                                                                className='tts__listent_content'></div>}
+                                                                   buttonId={5} cssStyle={''}/> : (
+                                                    <button
+                                                        id='tta__listen_content'
+                                                        onClick={(e) => callListeningFunction(e)}
+                                                        style={demoSettings2}
+                                                        type='button'
+                                                        title='Text To Audio:  Tap to listen post.'>
+                                                        <span className='dashicons dashicons-controls-play'></span>{' '}
+                                                        {tta_obj.buttonTextArr.listen_text}
+                                                    </button>
+                                                )
                             }
                             <p className='pt-2'>
                                 {
-                                    demoSettings?.buttonSettings?.id == 4 && ttsObjPro.is_pro_active ? __('You have to configure Google Cloud Text To Speech to use this player.') : demoSettings?.buttonSettings?.id < 3 ? " this plsyer"  : ""
+                                    demoSettings?.buttonSettings?.id == 4 && ttsObjPro.is_pro_active ? __('You have to configure Google Cloud Text To Speech to use this player.') : demoSettings?.buttonSettings?.id < 3 ? " This player is based on speechSynthesis browser API. So, It may behave inconsistent on different devices and browsers." : ""
                                 }
                             </p>
                         </Col>
@@ -331,21 +379,29 @@ export default function TTSLiveDemo() {
                                     <Form.Control
                                         as='textarea'
                                         onChange={(e) => setText(e)}
+                                        onPaste={(e) => setText(e)}
                                         onFocus={(e) =>
                                             toast('Write something here.')
                                         }
                                         value={speakingText ? speakingText : ''}
                                         placeholder='Write here something and click listen button.'
-                                        style={{ height: '300px' }}
+                                        style={{height: '300px'}}
                                         row={10}
                                     />
                                 </FloatingLabel>
+                                <p className='pt-2'>
+                                    {
+                                        testingDemoContentMessage ?? ''
+                                    }
+                                </p>
                             </>
                         </Col>
                     </Row>
                 </Col>
                 <Col xs={12} sm={12} lg={4}>
-                    <CustomizationTabs buttonLists={buttonLists} customCSS={customCSS} handleSubmit={handleSubmit} demoSettings={demoSettings} handleChange={handleChange} listeningSettings={listeningSettings} />
+                    <CustomizationTabs buttonLists={buttonLists} customCSS={customCSS} handleSubmit={handleSubmit}
+                                       demoSettings={demoSettings} handleChange={handleChange}
+                                       listeningSettings={listeningSettings}/>
                 </Col>
             </Row>
         </Container>
