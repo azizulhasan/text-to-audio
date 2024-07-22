@@ -8,7 +8,6 @@ import TTSLiveDemo from "./tts-live-demo/TTSLiveDemo";
  */
 
 let app = document.getElementById("tts_live_demo")
-console.log(app)
 ReactDOM.render(
     <React.StrictMode>
         <TTSLiveDemo/>
