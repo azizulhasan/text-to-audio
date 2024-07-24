@@ -65,9 +65,10 @@ class TTA_Helper {
 		if ( isset( $settings['tta__settings_exclude_wp_tags'] ) && is_array( $settings['tta__settings_exclude_wp_tags'] ) ) {
 			$excluded_tags = $settings['tta__settings_exclude_wp_tags'];
 		}
-
-		$post_tags = get_the_terms( $post->ID, 'post_tag' );
-
+		$post_tags = [];
+		if ( isset( $post->ID ) ) {
+			$post_tags = get_the_terms( $post->ID, 'post_tag' );
+		}
 		$is_exclude_by_tags = self::is_exluded_by_terms( $post_tags, $excluded_tags );
 
 
@@ -76,8 +77,10 @@ class TTA_Helper {
 			$excluded_categories = $settings['tta__settings_exclude_categories'];
 		}
 
-		$post_categories = get_the_terms( $post->ID, 'category' );
-
+		$post_categories = [];
+		if ( isset( $post->ID ) ) {
+			$post_categories = get_the_terms( $post->ID, 'category' );
+		}
 		$is_exclude_by_cagories = self::is_exluded_by_terms( $post_categories, $excluded_categories, 'category' );
 
 
@@ -200,6 +203,10 @@ class TTA_Helper {
 		if ( $sitepress ) {
 			$active_languages = $sitepress->get_active_languages();
 		}
+		$acf_fields = [];
+		if ( function_exists( 'acf' ) ) {
+			$acf_fields = self::get_all_acf_fields();
+		}
 
 		$datas = \apply_filters( 'tts_pro_plugins_data', [
 			'gtranslate/gtranslate.php'                => [
@@ -215,6 +222,11 @@ class TTA_Helper {
 				'plugin'           => 'sitepress',
 				'active_languages' => $active_languages,
 			],
+			'advanced-custom-fields/acf.php'           => [
+				'type'   => 'class',
+				'data'   => $acf_fields,
+				'plugin' => 'acf',
+			]
 		] );
 
 		if ( ! function_exists( 'is_plugin_active' ) ) {
@@ -229,16 +241,6 @@ class TTA_Helper {
 
 		return \apply_filters( 'tts_compatible_plugins_data', $compatible_plugins_data, \get_plugins() );
 	}
-
-	// public static function get_language_code_from_url($url) {
-	// 	$arr = explode('lang', $url);
-	// 	$language_code = end($arr);
-	// 	$language_code = str_replace('__', '',$language_code);
-	// 	$language_code = explode('.', $language_code)[0];
-	// 	$language_code = \str_replace('_', '-', $language_code);
-
-	// 	return $language_code;
-	// }
 
 	public static function get_language_code_from_url( $url ) {
 		$arr           = explode( 'lang', $url );
@@ -365,14 +367,15 @@ class TTA_Helper {
 			'settings'  => 'tta_settings_data',
 			'recording' => 'tta_record_settings',
 			'customize' => 'tta_customize_settings',
-			'analytics' => 'tta_analytics_settings'
+			'analytics' => 'tta_analytics_settings',
+			'compatible' => 'tta_compatible_data',
 		];
 		$cached_settings   = get_transient( 'tts_all_settings' );
 		if ( ! $cached_settings ) {
 			$all_settings_data = self::set_tts_transient( $all_settings_keys );
 		} else {
 
-			foreach ($all_settings_keys as $identifier_key => $settings_key ) {
+			foreach ( $all_settings_keys as $identifier_key => $settings_key ) {
 				if ( ! isset( $cached_settings[ $identifier_key ] ) ) {
 					$cached_settings = self::set_tts_transient( $all_settings_keys );
 					break;
@@ -831,22 +834,43 @@ class TTA_Helper {
 	/**
 	 * Get the text value based on the given attributes and saved texts.
 	 *
-	 * @param array  $atts        The attributes array.
-	 * @param array  $saved_texts The saved texts array.
-	 * @param string $key         The key to look for in both arrays.
-	 * @param string $default     The default text if neither $atts nor $saved_texts has the value.
+	 * @param array $atts The attributes array.
+	 * @param array $saved_texts The saved texts array.
+	 * @param string $key The key to look for in both arrays.
+	 * @param string $default The default text if neither $atts nor $saved_texts has the value.
 	 * @param string $text_domain The text domain for translation.
+	 *
 	 * @return string The final text value.
 	 */
-	public static function get_text_value($atts, $saved_texts, $key, $default, $text_domain) {
-		if (isset($atts[$key]) && strlen($atts[$key])) {
-			return esc_html(sanitize_text_field($atts[$key]));
-		} elseif (isset($saved_texts[$key])) {
-			return esc_html(sanitize_text_field($saved_texts[$key]));
+	public static function get_text_value( $atts, $saved_texts, $key, $default, $text_domain ) {
+		if ( isset( $atts[ $key ] ) && strlen( $atts[ $key ] ) ) {
+			return esc_html( sanitize_text_field( $atts[ $key ] ) );
+		} elseif ( isset( $saved_texts[ $key ] ) ) {
+			return esc_html( sanitize_text_field( $saved_texts[ $key ] ) );
 		} else {
-			return __($default, $text_domain);
+			return __( $default, $text_domain );
 		}
 	}
 
+	private static function get_all_acf_fields() {
+		// Get all field groups
+		$field_groups   = acf_get_field_groups();
+		$all_acf_fields = [];
+		if ( $field_groups ) {
+			// Loop through each field group
+			foreach ( $field_groups as $field_group ) {
+				// Get all fields for the current field group
+				$fields = acf_get_fields( $field_group['key'] );
+				if ( $fields ) {
+					// Loop through each field
+					foreach ( $fields as $field ) {
+						$all_acf_fields[ $field['name'] ] = $field['name'] . '::' . $field['label'];
+					}
+				}
+			}
+		}
+
+		return $all_acf_fields;
+	}
 
 }

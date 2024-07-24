@@ -33,7 +33,7 @@ class MultiSelect extends React.Component {
         const value = event.target.value;
         if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_active && selectedItems.length > selectionLimit) {
             toast(<h6>{this.state.toastMessage} Please <a target='_blank'
-                                                          href='https://atlasaidev.com/text-to-speech-pro/'>buy pro
+                                                          href='https://atlasaidev.com/plugins/text-to-speech-pro/'>buy pro
                 version</a></h6>, 'info', {autoClose: 10000})
             selectedItems = []
             selectedItems.push(value);
@@ -54,7 +54,7 @@ class MultiSelect extends React.Component {
         } else {
             if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_active && selectedItems.length === selectionLimit) {
                 toast(<h6>{this.state.toastMessage} Please <a target='_blank'
-                                                              href='https://atlasaidev.com/text-to-speech-pro/'>buy pro
+                                                              href='https://atlasaidev.com/plugins/text-to-speech-pro/'>buy pro
                     version</a></h6>, 'info', {autoClose: 10000})
                 return;
             }
