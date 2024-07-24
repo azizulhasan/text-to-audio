@@ -49,7 +49,29 @@ class AtlasVoicePlayerInsights {
 
     // 5. Total number of pauses
     getTotalTime() {
-        return this.getTotalCount('time');
+        let totalSeconds = this.getTotalCount('time');
+        totalSeconds = 4702
+        let output = totalSeconds / 60;
+        let summeryString = ' Minute';
+
+
+        if (output > 1) {
+            summeryString = ' Minutes';
+        }
+
+        if (output > 60) {
+            summeryString = ' Hour'
+            output = output / 60;
+            if (output > 1) {
+                summeryString = ' Hours';
+            }
+        }
+
+        output = output.toFixed(2);
+
+        output += summeryString;
+
+        return output;
     }
 
     // 5. Total number of pauses
