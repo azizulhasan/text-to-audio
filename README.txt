@@ -3,7 +3,7 @@ Contributors: atlasaidev, hasanazizul
 Donate link: http://atlasaidev.com/
 Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 6.0
-Tested up to: 6.6
+Tested up to: 6.6.1
 Requires PHP: 7.4
 Stable tag: 1.7.2
 License: GPLv2 or later
