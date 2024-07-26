@@ -395,7 +395,7 @@ class TTA_Hooks {
 
 	public function tta__content_description_callback( $description_sanitized, $description, $post_id, $post ) {
 		$compatible_data = TTA_Helper::tts_get_settings( 'compatible' );
-		if ( ! TTA_Helper::is_pro_active() && isset( $compatible_data['tts_acf_fields'] ) && count( $compatible_data['tts_acf_fields'] ) ) {
+		if ( TTA_Helper::is_acf_active() && ! TTA_Helper::is_pro_active() && isset( $compatible_data['tts_acf_fields'] ) && count( $compatible_data['tts_acf_fields'] ) ) {
 			$selected_acf_fields = $compatible_data['tts_acf_fields'];
 
 			$fields = get_field_objects( $post_id );

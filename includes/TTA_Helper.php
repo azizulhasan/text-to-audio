@@ -204,7 +204,7 @@ class TTA_Helper {
 			$active_languages = $sitepress->get_active_languages();
 		}
 		$acf_fields = [];
-		if ( function_exists( 'acf' ) ) {
+		if ( self::is_acf_active() ) {
 			$acf_fields = self::get_all_acf_fields();
 		}
 
@@ -871,6 +871,10 @@ class TTA_Helper {
 		}
 
 		return $all_acf_fields;
+	}
+
+	public static function is_acf_active() {
+		return function_exists('acf');
 	}
 
 }
