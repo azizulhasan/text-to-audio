@@ -242,8 +242,8 @@ function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_ar
 	$file_url_key       = TTA_Helper::tts_get_file_url_key( $language, $voice );
 	$file_name          = TTA_Helper::tts_file_name( $title, $language, $voice );
 	$mp3_file_urls      = TTA_Helper::get_mp3_file_urls( $file_url_key, $post, $date, $file_name );
-	$compatible_data = TTA_Helper::tts_get_settings( 'compatible' );
-	$compatible_content      = apply_filters('tts_compatible_plugins_content', [], $compatible_data, $post);
+	$compatible_data    = TTA_Helper::tts_get_settings( 'compatible' );
+	$compatible_content = apply_filters( 'tts_compatible_plugins_content', [], $compatible_data, $post );
 
 
 	$object = ob_start();
@@ -731,7 +731,7 @@ function is_pro_active() {
 		return false;
 	}
 
-	if( ! ttsp_fs()->is__premium_only()  ) {
+	if ( ! ttsp_fs()->is__premium_only() ) {
 		return false;
 	}
 
