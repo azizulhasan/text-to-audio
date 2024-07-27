@@ -30,7 +30,7 @@ import Docs from './docs/Docs';
 import Analitics from './analitics/Analitics.js';
 import Integrations from './integrations/Integrations.js'
 import Compatibility from './compatibility/Compatibility.js'
-import Aliases from './alias/Aliases.js'
+import Aliases from './aliases/Aliases.js'
 
 function Dashboard() {
 	const [componentName, setComponentName] = useState(getComponentName());

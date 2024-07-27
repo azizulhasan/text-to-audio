@@ -363,12 +363,13 @@ class TTA_Helper {
 	public static function tts_get_settings( $identifier = '', $post_id = '' ) {
 		$all_settings_data = [];
 		$all_settings_keys = [
-			'listening' => 'tta_listening_settings',
-			'settings'  => 'tta_settings_data',
-			'recording' => 'tta_record_settings',
-			'customize' => 'tta_customize_settings',
-			'analytics' => 'tta_analytics_settings',
+			'listening'  => 'tta_listening_settings',
+			'settings'   => 'tta_settings_data',
+			'recording'  => 'tta_record_settings',
+			'customize'  => 'tta_customize_settings',
+			'analytics'  => 'tta_analytics_settings',
 			'compatible' => 'tta_compatible_data',
+			'aliases'    => 'tts_text_aliases',
 		];
 		$cached_settings   = get_transient( 'tts_all_settings' );
 		if ( ! $cached_settings ) {
@@ -874,7 +875,7 @@ class TTA_Helper {
 	}
 
 	public static function is_acf_active() {
-		return function_exists('acf');
+		return function_exists( 'acf' );
 	}
 
 }

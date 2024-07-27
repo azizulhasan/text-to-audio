@@ -394,6 +394,7 @@ class TTA_Hooks {
 
 
 	public function tta__content_description_callback( $description_sanitized, $description, $post_id, $post ) {
+		// ACF plugin compatible.
 		$compatible_data = TTA_Helper::tts_get_settings( 'compatible' );
 		if ( TTA_Helper::is_acf_active() && ! TTA_Helper::is_pro_active() && isset( $compatible_data['tts_acf_fields'] ) && count( $compatible_data['tts_acf_fields'] ) ) {
 			$selected_acf_fields = $compatible_data['tts_acf_fields'];
@@ -414,6 +415,22 @@ class TTA_Hooks {
 					if ( $counter > 0 ) {
 						break;
 					}
+				}
+			}
+		}
+
+		// Aliases
+		$alias_data = (array) TTA_Helper::tts_get_settings( 'aliases' );
+		if ( ! TTA_Helper::is_pro_active() && ! empty( $compatible_data ) && count( $compatible_data ) ) {
+			$counter = 0;
+			foreach ( $alias_data as $index => $alias ) {
+				$alias = (array) $alias;
+				if ( isset( $alias['actual_text'] ) && isset( $alias['to_read'] ) ) {
+					$description_sanitized = str_replace( $alias['actual_text'], $alias['to_read'], $description_sanitized );
+					$counter ++;
+				}
+				if ( $counter > 0 ) {
+					break;
 				}
 			}
 		}
