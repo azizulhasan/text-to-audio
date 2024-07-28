@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 6.0
 Tested up to: 6.6.1
 Requires PHP: 7.4
-Stable tag: 1.7.3
+Stable tag: 1.7.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -407,6 +407,9 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+
+= 1.7.4 ( 28 July 2024 ) =
+* Fixed: Bug fix.
 
 = 1.7.3 ( 26 July 2024 ) =
 * Fixed: [Advanced Custom Fields (ACF)](https://wordpress.org/plugins/advanced-custom-fields/) related bug fixed.
