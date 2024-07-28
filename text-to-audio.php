@@ -15,7 +15,7 @@
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
  * Description:       The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
- * Version:           1.7.3
+ * Version:           1.7.4
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-2.0+
@@ -205,7 +205,7 @@ class TTA_Init {
 
 	public function __construct() {
 		if ( ! defined( 'TEXT_TO_AUDIO_VERSION' ) ) {
-			define( 'TEXT_TO_AUDIO_VERSION', apply_filters( 'tts_version', '1.7.3' ) );
+			define( 'TEXT_TO_AUDIO_VERSION', apply_filters( 'tts_version', '1.7.4' ) );
 		}
 
 		if ( ! defined( 'TEXT_TO_AUDIO_PLUGIN_NAME' ) ) {
@@ -263,7 +263,6 @@ add_action( 'init', function () {
 	//Rest api init.
 	new TTA_Init();
 }, 9999 );
-add_action( 'init', 'register_pen_custom_post_type' );
 
 
 /**
@@ -318,40 +317,4 @@ function allow_shortcode_in_html_tag( $output, $tag, $attr, $m ) {
 }
 
 
-function register_pen_custom_post_type() {
-	$labels = array(
-		'name'               => _x( 'Pens', 'post type general name', 'textdomain' ),
-		'singular_name'      => _x( 'Pen', 'post type singular name', 'textdomain' ),
-		'menu_name'          => _x( 'Pens', 'admin menu', 'textdomain' ),
-		'name_admin_bar'     => _x( 'Pen', 'add new on admin bar', 'textdomain' ),
-		'add_new'            => _x( 'Add New', 'pen', 'textdomain' ),
-		'add_new_item'       => __( 'Add New Pen', 'textdomain' ),
-		'new_item'           => __( 'New Pen', 'textdomain' ),
-		'edit_item'          => __( 'Edit Pen', 'textdomain' ),
-		'view_item'          => __( 'View Pen', 'textdomain' ),
-		'all_items'          => __( 'All Pens', 'textdomain' ),
-		'search_items'       => __( 'Search Pens', 'textdomain' ),
-		'parent_item_colon'  => __( 'Parent Pens:', 'textdomain' ),
-		'not_found'          => __( 'No pens found.', 'textdomain' ),
-		'not_found_in_trash' => __( 'No pens found in Trash.', 'textdomain' )
-	);
-
-	$args = array(
-		'labels'             => $labels,
-		'public'             => true,
-		'publicly_queryable' => true,
-		'show_ui'            => true,
-		'show_in_menu'       => true,
-		'query_var'          => true,
-		'rewrite'            => array( 'slug' => 'pen' ),
-		'capability_type'    => 'post',
-		'has_archive'        => true,
-		'hierarchical'       => false,
-		'menu_position'      => null,
-		'supports'           => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'comments' ),
-		'taxonomies'         => [ 'category', 'tag' ],
-	);
-
-	register_post_type( 'pen', $args );
-}
 
