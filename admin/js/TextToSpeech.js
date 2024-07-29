@@ -240,7 +240,6 @@ export default class TextToSpeech {
             this.displayApiMissing("tts__listent_content_" + this.buttonId)
             return;
         }
-        console.log(this.browser)
         speech.setLanguage(this.browser.getLanguage())
         speech.setVoice(this.browser.getVoice())
         /**

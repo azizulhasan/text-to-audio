@@ -245,21 +245,21 @@ function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_ar
 	$compatible_data    = TTA_Helper::tts_get_settings( 'compatible' );
 	$compatible_content = apply_filters( 'tts_compatible_plugins_content', [], $compatible_data, $post );
 
-    // Always priorities shortcode value
-	if ( !isset( $atts['lang'] )  && isset( $plugin_all_settings['listening']['tta__listening_lang'] )  ) {
-		$plugin_all_settings['listening']['tta__listening_lang'] = $language;
-	}
-    // Always priorities shortcode value
-	if ( ! isset( $atts['voice'] ) && isset( $plugin_all_settings['listening']['tta__listening_voice'] )  ) {
-		$plugin_all_settings['listening']['tta__listening_voice'] = $voice;
-	}
+//    // Always priorities shortcode value
+//	if ( !isset( $atts['lang'] )  && isset( $plugin_all_settings['listening']['tta__listening_lang'] )  ) {
+//		$plugin_all_settings['listening']['tta__listening_lang'] = $language;
+//	}
+//    // Always priorities shortcode value
+//	if ( ! isset( $atts['voice'] ) && isset( $plugin_all_settings['listening']['tta__listening_voice'] )  ) {
+//		$plugin_all_settings['listening']['tta__listening_voice'] = $voice;
+//	}
 
 	$object = ob_start();
 	?>
     <!-- Text To Speech TTS Settings  -->
     <script id='tts_button_settings_<?php echo $btn_no; ?>'>
         var ttsCurrentButtonNo = <?php echo $btn_no; ?>;
-        var ttsCurrentContent = "<?php echo '$content'; ?>";
+        var ttsCurrentContent = "<?php echo $content; ?>";
         var ttsListening = <?php echo json_encode( $plugin_all_settings['listening'] ); ?>;
         var ttsCSSClass = "<?php echo $class; ?>";
         var ttsBtnStyle = "<?php echo $btn_style; ?>";
