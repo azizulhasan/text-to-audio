@@ -240,7 +240,7 @@ export default class TextToSpeech {
             this.displayApiMissing("tts__listent_content_" + this.buttonId)
             return;
         }
-
+        console.log(this.browser)
         speech.setLanguage(this.browser.getLanguage())
         speech.setVoice(this.browser.getVoice())
         /**
@@ -291,6 +291,7 @@ export default class TextToSpeech {
         this.displayButtonText(this.listenStatus)
         this.analytics.trackPlay();
         if (!this.browser.isAndroid()) {
+            let thisClass = this;
             this.timer = setTimeout(function pauseResumeTimer() {
                 speech.pause();
                 //IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
@@ -300,11 +301,11 @@ export default class TextToSpeech {
                     speech.resume();
                 }, 0);
 
-                this.timer = setTimeout(pauseResumeTimer, 10000)
+                thisClass.timer = setTimeout(pauseResumeTimer, 10000)
 
                 if (!speech.speaking()) {
-                    clearTimeout(this.timer)
-                    this.timer = null
+                    clearTimeout(thisClass.timer)
+                    thisClass.timer = null
                 }
 
             }, 10000);
@@ -357,6 +358,7 @@ export default class TextToSpeech {
         this.listenStatus = 'pause';
         this.displayButtonText(this.listenStatus)
         if (!this.browser.isAndroid()) {
+            let thisClass = this;
             this.timer = setTimeout(function pauseResumeTimer() {
                 speech.pause();
                 //IMPORTANT!! Do not remove: Logging the object out fixes some onend firing issues.
@@ -366,11 +368,11 @@ export default class TextToSpeech {
                     speech.resume();
                 }, 0);
 
-                this.timer = setTimeout(pauseResumeTimer, 10000)
+                thisClass.timer = setTimeout(pauseResumeTimer, 10000)
 
                 if (!speech.speaking()) {
-                    clearTimeout(this.timer)
-                    this.timer = null
+                    clearTimeout(thisClass.timer)
+                    thisClass.timer = null
                 }
             }, 10000);
         }
