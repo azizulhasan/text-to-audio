@@ -245,15 +245,6 @@ function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_ar
 	$compatible_data    = TTA_Helper::tts_get_settings( 'compatible' );
 	$compatible_content = apply_filters( 'tts_compatible_plugins_content', [], $compatible_data, $post );
 
-//    // Always priorities shortcode value
-//	if ( !isset( $atts['lang'] )  && isset( $plugin_all_settings['listening']['tta__listening_lang'] )  ) {
-//		$plugin_all_settings['listening']['tta__listening_lang'] = $language;
-//	}
-//    // Always priorities shortcode value
-//	if ( ! isset( $atts['voice'] ) && isset( $plugin_all_settings['listening']['tta__listening_voice'] )  ) {
-//		$plugin_all_settings['listening']['tta__listening_voice'] = $voice;
-//	}
-
 	$object = ob_start();
 	?>
     <!-- Text To Speech TTS Settings  -->
