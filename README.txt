@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 6.0
 Tested up to: 6.6.1
 Requires PHP: 7.4
-Stable tag: 1.7.4
+Stable tag: 1.7.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -405,6 +405,13 @@ You can customize the voice and language of the text-to-speech player using shor
 ### TRANSLATION REQUEST
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+
+= 1.7.5 ( 4 Aug 2024 ) =
+Introduced: Text alias introduced.
+* Fixed: Translation issue with Gtranslate plugin fixed.
+* Fixed: Content repeat in MP3 file issue fixed.
+
 
 
 
