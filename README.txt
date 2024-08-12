@@ -2,12 +2,12 @@
 Contributors: atlasaidev, hasanazizul
 Donate link: http://atlasaidev.com/
 Tags: accessibility, speech, tts, text to speech, text to audio
-Requires at least: 6.0
+Requires at least: 5.6
 Tested up to: 6.6.1
 Requires PHP: 7.4
-Stable tag: 1.7.5
-License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Stable tag: 1.7.6
+License: GPLv3 or later
+License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
 The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
 
@@ -407,12 +407,16 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+= 1.7.6 ( 11 Aug 2024 ) =
+* Fixed: Translation issue with Gtranslate and Google Cloud TTS player issue fixed.
+* Fixed: Google Cloud TTS player file loading issue fixed.
+* Checked : PHP Version 8.1, 8.2 and 8.3 checked.
+* Updated : GPL3 License.
+
 = 1.7.5 ( 4 Aug 2024 ) =
 Introduced: Text alias introduced.
 * Fixed: Translation issue with Gtranslate plugin fixed.
 * Fixed: Content repeat in MP3 file issue fixed.
-
-
 
 
 = 1.7.4 ( 28 July 2024 ) =
