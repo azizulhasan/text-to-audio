@@ -265,7 +265,6 @@ class TTA_Helper {
 			// TODO: Match with multilinguage UI and default language.
 			$default_language = $plugin_all_settings['listening']['tta__listening_lang'];
 			// $default_language = str_replace(['-', ' '], '_', $default_language);
-			$default_language = strtolower( $default_language );
 		}
 
 		return apply_filters( 'tts_site_language', $default_language );
@@ -274,7 +273,6 @@ class TTA_Helper {
 	public static function tts_get_file_url_key( $language, $voice ) {
 		$file_url_key = $language;
 		if ( get_player_id() == 4 && $voice ) {
-			$voice        = strtolower( $voice );
 			$file_url_key .= '--voice--' . $voice;
 		}
 
@@ -304,7 +302,7 @@ class TTA_Helper {
 		$lang_code = explode( '-', str_replace( [ '_', ' ' ], '-', $selectedLang ) );
 
 		if ( array_shift( $lang_code ) == 'en' ) {
-			$title .= "__lang__" . strtolower( $selectedLang );
+			$title .= "__lang__" . $selectedLang;
 			$title = str_replace( [ ' ', '-' ], '_', $title );
 			$title = preg_replace( "/[^\p{L}a-z0-9_-]/ui", "", $title );
 		} else {
@@ -313,7 +311,6 @@ class TTA_Helper {
 		}
 
 		if ( get_player_id() == 4 && $voice ) {
-			$voice = strtolower( $voice );
 			$voice = str_replace( [ ' ', '(', ')', '%20' ], '_', $voice );
 
 			$title .= '__voice__' . $voice;
@@ -363,12 +360,13 @@ class TTA_Helper {
 	public static function tts_get_settings( $identifier = '', $post_id = '' ) {
 		$all_settings_data = [];
 		$all_settings_keys = [
-			'listening' => 'tta_listening_settings',
-			'settings'  => 'tta_settings_data',
-			'recording' => 'tta_record_settings',
-			'customize' => 'tta_customize_settings',
-			'analytics' => 'tta_analytics_settings',
+			'listening'  => 'tta_listening_settings',
+			'settings'   => 'tta_settings_data',
+			'recording'  => 'tta_record_settings',
+			'customize'  => 'tta_customize_settings',
+			'analytics'  => 'tta_analytics_settings',
 			'compatible' => 'tta_compatible_data',
+			'aliases'    => 'tts_text_aliases',
 		];
 		$cached_settings   = get_transient( 'tts_all_settings' );
 		if ( ! $cached_settings ) {
@@ -874,7 +872,7 @@ class TTA_Helper {
 	}
 
 	public static function is_acf_active() {
-		return function_exists('acf');
+		return function_exists( 'acf' );
 	}
 
 }

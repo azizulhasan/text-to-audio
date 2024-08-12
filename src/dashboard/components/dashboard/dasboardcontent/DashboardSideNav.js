@@ -63,6 +63,12 @@ export default function DashboardSideNav({ isProVersion }) {
 							</div>
 							Compatibility
 						</NavLink>
+						<NavLink className={getNavLinkClass} to={'/aliases'}>
+							<div className='sb-nav-link-icon'>
+								<span className="dashicons dashicons-text"></span>
+							</div>
+							Aliases
+						</NavLink>
 						<NavLink className={getNavLinkClass} to={'/faq'}>
 							<div className='sb-nav-link-icon'>
 								<span className="dashicons dashicons-media-document"></span>
