@@ -239,9 +239,10 @@ export default function Customize() {
 		postWithoutImage(tta_obj.api_url + 'tta/v1/customize', data)
 			.then((res) => {
 				setListeningStyle(res.data);
-				toast('Customization saved. Now go to the "Listening" menu.', 'info', {
+				toast('Customization saved.', 'success');
+				toast('Now go to the "Listening" menu to select proper language and voice.', 'error',{
 					autoClose: 15000
-				});
+				})
 			})
 			.catch((err) => {
 				console.log(err);
@@ -311,7 +312,7 @@ export default function Customize() {
 												</button>
 											)
 							}
-							<p className='pt-2'>
+							<p className='pt-2 text-danger'>
 								{
 									listeningBtnStyle?.buttonSettings?.id == 1 && ttsObjPro.is_pro_active ? __('If you\'re selecting this button then you may not get pro features. Suppose CSS selectors from settings page and WPML/GTranslate will not work with this button.') : __('Save this player then configure proper voice and lanuage from listening menu. ')
 								}
