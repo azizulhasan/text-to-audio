@@ -20,6 +20,7 @@ export default function Settings() {
         tta__settings_enable_button_add: false,
         tta__settings_display_btn_icon: false,
         tta__settings_allow_listening_for_post_types: ['post'],
+        tta__settings_allow_listening_for_posts_status: ['publish'],
         tta__settings_css_selectors: '',
         tta__settings_exclude_content_by_css_selectors: '',
         tta__settings_exclude_texts: '',
@@ -33,7 +34,7 @@ export default function Settings() {
     });
     const [postTypes, setPostTypes] = useState([]);
     const [isDataLoaded, setIsDataLoaded] = useState(false)
-
+    const [postsStatus, setPostsStatus] =  useState([])
 
     useEffect(() => {
         /**
@@ -52,6 +53,8 @@ export default function Settings() {
         if (window.hasOwnProperty('ttsObj') && ttsObj?.post_types) {
             let tempPostTypes = wp.hooks.applyFilters('tts_display_button_on_post_types', structuredClone(Object.keys(ttsObj.post_types)))
             setPostTypes(tempPostTypes)
+            let tempPostStatus = wp.hooks.applyFilters('tta__settings_allow_listening_for_post_types', structuredClone(Object.keys(ttsObj.post_status)))
+            setPostsStatus(tempPostStatus)
         }
     }, [window.ttsObj])
 
@@ -243,6 +246,28 @@ export default function Settings() {
                                             onChange={handleChange}
                                             selectedItems={settings.tta__settings_allow_listening_for_post_types}
                                             options={postTypes}/>
+                                    </Form.Group>
+                                </Col>
+                            </Row>
+                            {/*Allow Listening For Post Status*/}
+                            <Row className='mt-4'>
+                                <Col xs={12} sm={6} lg={4}>
+                                    <Form.Label htmlFor='tta__settings_allow_listening_for_posts_status'>
+                                        Allow Listening For Post Status
+                                    </Form.Label>
+                                </Col>
+                                <Col xs={12} sm={12} lg={8}>
+                                    <Form.Group controlId="tta__settings_allow_listening_for_posts_status">
+                                        <MultiSelect
+                                            id="tta__settings_allow_listening_for_posts_status"
+                                            name="tta__settings_allow_listening_for_posts_status"
+                                            multiselectIndex={1}
+                                            onChange={handleChange}
+                                            selectedItems={settings.tta__settings_allow_listening_for_posts_status}
+                                            options={postsStatus}
+                                            toastMessage={'On Free Version You Can Select Only 1 post type.'}
+                                        />
+
                                     </Form.Group>
                                 </Col>
                             </Row>
@@ -537,7 +562,7 @@ export default function Settings() {
                                     <MultiSelect
                                         id="tta__settings_exclude_categories"
                                         name="tta__settings_exclude_categories"
-                                        multiselectIndex={1}
+                                        multiselectIndex={2}
                                         onChange={handleChange}
                                         toastMessage={'On Free Version You Can Select Only 1 Category.'}
                                         selectedItems={settings.tta__settings_exclude_categories}
@@ -589,12 +614,11 @@ export default function Settings() {
                                     <MultiSelect
                                         id="tta__settings_exclude_wp_tags"
                                         name="tta__settings_exclude_wp_tags"
-                                        multiselectIndex={2}
+                                        multiselectIndex={3}
                                         onChange={handleChange}
                                         toastMessage={'On Free Version You Can Select Only 1 Tag.'}
                                         selectedItems={settings.tta__settings_exclude_wp_tags}
                                         options={Object.keys(ttsObj?.tags) || []}/>
-
                                 </Col>
                                 <Col xs={1} sm={1} lg={1} className='mt-4'>
                                     <>

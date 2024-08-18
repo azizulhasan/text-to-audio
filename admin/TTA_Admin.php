@@ -108,6 +108,7 @@ class TTA_Admin {
             'post_types' => get_post_types( array(
 	            'public'   => 1, // Only get public post types
             ), 'array'),
+            'post_status' => TTA_Helper::all_post_status(),
             'VERSION' => is_pro_active() ? get_option('TTA_PRO_VERSION' ) :  TEXT_TO_AUDIO_VERSION,
             'is_logged_in' => is_user_logged_in(),
             'is_admin' => current_user_can('administrator'),
