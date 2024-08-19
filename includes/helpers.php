@@ -445,7 +445,7 @@ function add_listen_button( $content ) {
 		//     add_filter( 'the_excerpt', 'add_listen_button' , 9999 );
 		// }
 
-		if ( isset( $button_settings['button_position'] ) && in_array( $button_settings['button_position'], $button_positions ) && isset( $post->post_content ) && ! has_shortcode( $post->post_content, 'tta_listen_btn' ) ) {
+		if ( isset( $post->post_content ) && ! has_shortcode( $post->post_content, 'tta_listen_btn' ) ) {
 			ob_start();
 			echo tta_get_button_content( '' );
 			$button = ob_get_contents();

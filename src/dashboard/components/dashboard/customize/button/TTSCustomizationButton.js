@@ -7,10 +7,10 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
         "before_content": "Before Content",
         "after_content": "After Content",
         // "top_fixed": "Top Fixed",
-        // "bottom_fixed": "Bottom Fixed (Pro)",
-        // "bottom_left": "Bottom Left",
-        // "bottom_right": "Bottom Right (Pro)",
-        // "bottom_center": "Bottom Center",
+        "bottom_fixed": "Bottom Fixed (Pro)",
+        "bottom_left": "Bottom Left (Pro)",
+        "bottom_right": "Bottom Right (Pro)",
+        "bottom_center": "Bottom Center (Pro)",
     }
 
     return (
