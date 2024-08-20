@@ -95,6 +95,13 @@ class TTA_Helper {
 			}
 		}
 
+		$tta__settings_allow_listening_for_posts_status = false;
+		if ( isset( $settings['tta__settings_allow_listening_for_posts_status'] ) && $settings['tta__settings_allow_listening_for_posts_status'] ) {
+			if (! in_array( self::tts_post_status(), $settings['tta__settings_allow_listening_for_posts_status'] )) {
+				$tta__settings_allow_listening_for_posts_status = true;
+			}
+		}
+
 		if (
 			! isset( $settings['tta__settings_allow_listening_for_post_types'] )
 			|| count( $settings['tta__settings_allow_listening_for_post_types'] ) === 0
@@ -104,6 +111,7 @@ class TTA_Helper {
 			|| ! $should_display_button_based_on_user_logged_user
 			|| $is_exclude_by_tags
 			|| $is_exclude_by_cagories
+			|| $tta__settings_allow_listening_for_posts_status
 
 		) {
 			$should_load_button = false;
@@ -123,6 +131,12 @@ class TTA_Helper {
 		global $post;
 
 		return isset( $post->post_type ) ? $post->post_type : '';
+	}
+
+	public static function tts_post_status() {
+		global $post;
+
+		return isset( $post->post_status ) ? $post->post_status : '';
 	}
 
 
@@ -873,6 +887,18 @@ class TTA_Helper {
 
 	public static function is_acf_active() {
 		return function_exists( 'acf' );
+	}
+
+	public static function all_post_status() {
+		$post_statuses = get_post_stati(['show_in_admin_status_list' => true], 'objects');
+		$status_array = [];
+
+		foreach ($post_statuses as $status) {
+			$status_array[$status->name] = $status->label;
+		}
+
+
+		return $status_array;
 	}
 
 }
