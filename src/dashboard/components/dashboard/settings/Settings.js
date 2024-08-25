@@ -670,7 +670,7 @@ export default function Settings() {
                         </Form>
                     </Col>
                     <Col xs={12} sm={12} lg={4}>
-                        <UpgradeToPro/>
+                        <UpgradeToPro promotionType={'youtube'}/>
                     </Col>
                 </Row>
             </Container>
