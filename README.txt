@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.6.1
 Requires PHP: 7.4
-Stable tag: 1.7.10
+Stable tag: 1.7.10.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -50,7 +50,9 @@ Right after you install this text to speech free plugin, it will automatically s
 
 * **Easy Integration:** Utilize intuitive shortcodes to seamlessly add the text-to-speech button to any post or page on your site.
 
-* **Customize Button Gutenberg Block:** The Text-to-Speech TTS Accessibility Plugin also offers a dedicated Gutenberg block for seamless integration and customization of the text-to-speech player. Users can effortlessly place the button, adjust button colors, width, and apply custom CSS directly from the Gutenberg editor, enhancing accessibility and user experience.
+* **Analytics:** AtlasVoice Support [Advance Analytics](https://www.youtube.com/watch?v=amkrAtVQGBY).
+
+* **Text Alias:** AtlasVoice Support [Text Alias](https://www.youtube.com/watch?v=oeW652YKmG0&t=3s).
 
 * **Unlimited Text-to-Speech:** Convert unlimited text to speech, providing flexibility for various content types.
 
@@ -72,7 +74,13 @@ Unlock additional features and support by upgrading to [Text To Speech TTS Pro](
 
 **Text To Speech TTS Accessibility Pro Features:**
 
-* **Live Support:** Receive assistance for first-time integration to ensure a seamless experience.
+* **Live Support:** We usually reply with 1 hour.
+
+* **Advance Analytics:** AtlasVoice Support [Advance Analytics](https://www.youtube.com/watch?v=amkrAtVQGBY).
+
+* **Unlimited Text Alias:** AtlasVoice Support [Text Alias](https://www.youtube.com/watch?v=oeW652YKmG0&t=3s).
+
+
 * **Enhanced Productivity:** Listen to content while multitasking or performing other tasks, saving time and increasing efficiency.
 
 * **Interactive Engagement:** Engage with customers more interactively by providing audio options for content consumption.
@@ -109,12 +117,12 @@ With the Text To Speech Pro text-to-voice generator plugin, you can empower your
 
 Text To Speech Pro TTS Accessibility plugin supports these languages.
 
-Afrikaans, Albanian, Arabic, Armenian, Catalan, Chinese,
+Afrikaans, Albanian, Arabic, Armenian, Bulgarian, Bulgarian ( Bulgarian ), Catalan, Chinese,
 Chinese (Mandarin/China), Chinese (Mandarin/Taiwan),
 Chinese (Cantonese), Croatian, Czech, Danish, Dutch,
 English, English (Australia), English (United Kingdom),
 English (United States), Esperanto, Finnish, French, German,
-Greek, Haitian Creole, Hindi, Hungarian, Icelandic,
+Greek, Haitian Creole, Hebrew, Hindi, Hungarian, Icelandic,
 Indonesian, Italian, Japanese, Korean, Latin, Latvian,
 Macedonian, Norwegian, Polish, Portuguese, Portuguese (Brazil),
 Romanian, Russian, Serbian, Slovak, Spanish, Spanish (Spain),
