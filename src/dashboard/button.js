@@ -15,11 +15,10 @@ const checkInterval = 100;
 const maxChecks = 600; // Check for a maximum of 30 seconds
 let checkCount = 0;
 let timer = setInterval(loadProButton, checkInterval);
-console.log(timer)
 function loadProButton() {
     checkCount++;
-    console.log({player_id: window.TTS.extra.player_id });
-    if (window.TTS.extra.player_id ) {
+    console.log({player_id: window?.TTS?.extra?.player_id });
+    if (window?.TTS?.extra?.player_id ) {
 
         const playerId = window.TTS.extra.player_id;
         buttonCSS = TTS.settings.settings.customize;
