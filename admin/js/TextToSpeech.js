@@ -451,13 +451,14 @@ export default class TextToSpeech {
             // it could be either hidden or visible
             // TODO: when stop auto pause it's not reading the content properly. it stops for a few miliseconds. Fix it the release this new feature.
             // let stop_autopause =  window?.TTS?.settings?.settings?.settings?.tta__settings_stop_auto_pause_after_switching_tab ?? false;
+            let stop_autopause = wp.hooks.applyFilters('tta__settings_stop_auto_pause_after_switching_tab', true);
 
-            if ('hidden' === document.visibilityState && this.listenStatus === 'pause') {
+            if ('hidden' === document.visibilityState && this.listenStatus === 'pause' && stop_autopause) {
                 this.pause(speech)
                 if (this.callBackAfterEnd) this.callBackAfterEnd()
             }
 
-            if ('visible' === document.visibilityState && this.listenStatus === 'resume') {
+            if ('visible' === document.visibilityState && this.listenStatus === 'resume' && stop_autopause) {
                 let isPausedByIntention = JSON.parse(window.sessionStorage.getItem('tts_paused_by_intention'));
                 let stop_autoplay = window?.TTS?.settings?.settings?.settings?.tta__settings_stop_auto_playing_after_switching_tab ?? false;
 
