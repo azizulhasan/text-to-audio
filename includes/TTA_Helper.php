@@ -95,6 +95,13 @@ class TTA_Helper {
 			}
 		}
 
+		$tta__settings_allow_listening_for_posts_status = false;
+		if ( isset( $settings['tta__settings_allow_listening_for_posts_status'] ) && $settings['tta__settings_allow_listening_for_posts_status'] ) {
+			if (! in_array( self::tts_post_status(), $settings['tta__settings_allow_listening_for_posts_status'] )) {
+				$tta__settings_allow_listening_for_posts_status = true;
+			}
+		}
+
 		if (
 			! isset( $settings['tta__settings_allow_listening_for_post_types'] )
 			|| count( $settings['tta__settings_allow_listening_for_post_types'] ) === 0
@@ -104,6 +111,7 @@ class TTA_Helper {
 			|| ! $should_display_button_based_on_user_logged_user
 			|| $is_exclude_by_tags
 			|| $is_exclude_by_cagories
+			|| $tta__settings_allow_listening_for_posts_status
 
 		) {
 			$should_load_button = false;
@@ -123,6 +131,12 @@ class TTA_Helper {
 		global $post;
 
 		return isset( $post->post_type ) ? $post->post_type : '';
+	}
+
+	public static function tts_post_status() {
+		global $post;
+
+		return isset( $post->post_status ) ? $post->post_status : '';
 	}
 
 
@@ -203,6 +217,10 @@ class TTA_Helper {
 		if ( $sitepress ) {
 			$active_languages = $sitepress->get_active_languages();
 		}
+		$acf_fields = [];
+		if ( self::is_acf_active() ) {
+			$acf_fields = self::get_all_acf_fields();
+		}
 
 		$datas = \apply_filters( 'tts_pro_plugins_data', [
 			'gtranslate/gtranslate.php'                => [
@@ -218,6 +236,11 @@ class TTA_Helper {
 				'plugin'           => 'sitepress',
 				'active_languages' => $active_languages,
 			],
+			'advanced-custom-fields/acf.php'           => [
+				'type'   => 'class',
+				'data'   => $acf_fields,
+				'plugin' => 'acf',
+			]
 		] );
 
 		if ( ! function_exists( 'is_plugin_active' ) ) {
@@ -232,16 +255,6 @@ class TTA_Helper {
 
 		return \apply_filters( 'tts_compatible_plugins_data', $compatible_plugins_data, \get_plugins() );
 	}
-
-	// public static function get_language_code_from_url($url) {
-	// 	$arr = explode('lang', $url);
-	// 	$language_code = end($arr);
-	// 	$language_code = str_replace('__', '',$language_code);
-	// 	$language_code = explode('.', $language_code)[0];
-	// 	$language_code = \str_replace('_', '-', $language_code);
-
-	// 	return $language_code;
-	// }
 
 	public static function get_language_code_from_url( $url ) {
 		$arr           = explode( 'lang', $url );
@@ -266,7 +279,6 @@ class TTA_Helper {
 			// TODO: Match with multilinguage UI and default language.
 			$default_language = $plugin_all_settings['listening']['tta__listening_lang'];
 			// $default_language = str_replace(['-', ' '], '_', $default_language);
-			$default_language = strtolower( $default_language );
 		}
 
 		return apply_filters( 'tts_site_language', $default_language );
@@ -275,7 +287,6 @@ class TTA_Helper {
 	public static function tts_get_file_url_key( $language, $voice ) {
 		$file_url_key = $language;
 		if ( get_player_id() == 4 && $voice ) {
-			$voice        = strtolower( $voice );
 			$file_url_key .= '--voice--' . $voice;
 		}
 
@@ -305,7 +316,7 @@ class TTA_Helper {
 		$lang_code = explode( '-', str_replace( [ '_', ' ' ], '-', $selectedLang ) );
 
 		if ( array_shift( $lang_code ) == 'en' ) {
-			$title .= "__lang__" . strtolower( $selectedLang );
+			$title .= "__lang__" . $selectedLang;
 			$title = str_replace( [ ' ', '-' ], '_', $title );
 			$title = preg_replace( "/[^\p{L}a-z0-9_-]/ui", "", $title );
 		} else {
@@ -314,7 +325,6 @@ class TTA_Helper {
 		}
 
 		if ( get_player_id() == 4 && $voice ) {
-			$voice = strtolower( $voice );
 			$voice = str_replace( [ ' ', '(', ')', '%20' ], '_', $voice );
 
 			$title .= '__voice__' . $voice;
@@ -364,11 +374,13 @@ class TTA_Helper {
 	public static function tts_get_settings( $identifier = '', $post_id = '' ) {
 		$all_settings_data = [];
 		$all_settings_keys = [
-			'listening' => 'tta_listening_settings',
-			'settings'  => 'tta_settings_data',
-			'recording' => 'tta_record_settings',
-			'customize' => 'tta_customize_settings',
-			'analytics' => 'tta_analytics_settings'
+			'listening'  => 'tta_listening_settings',
+			'settings'   => 'tta_settings_data',
+			'recording'  => 'tta_record_settings',
+			'customize'  => 'tta_customize_settings',
+			'analytics'  => 'tta_analytics_settings',
+			'compatible' => 'tta_compatible_data',
+			'aliases'    => 'tts_text_aliases',
 		];
 		$cached_settings   = get_transient( 'tts_all_settings' );
 		if ( ! $cached_settings ) {
@@ -852,5 +864,41 @@ class TTA_Helper {
 		}
 	}
 
+	private static function get_all_acf_fields() {
+		// Get all field groups
+		$field_groups   = acf_get_field_groups();
+		$all_acf_fields = [];
+		if ( $field_groups ) {
+			// Loop through each field group
+			foreach ( $field_groups as $field_group ) {
+				// Get all fields for the current field group
+				$fields = acf_get_fields( $field_group['key'] );
+				if ( $fields ) {
+					// Loop through each field
+					foreach ( $fields as $field ) {
+						$all_acf_fields[ $field['name'] ] = $field['name'] . '::' . $field['label'];
+					}
+				}
+			}
+		}
+
+		return $all_acf_fields;
+	}
+
+	public static function is_acf_active() {
+		return function_exists( 'acf' );
+	}
+
+	public static function all_post_status() {
+		$post_statuses = get_post_stati(['show_in_admin_status_list' => true], 'objects');
+		$status_array = [];
+
+		foreach ($post_statuses as $status) {
+			$status_array[$status->name] = $status->label;
+		}
+
+
+		return $status_array;
+	}
 
 }

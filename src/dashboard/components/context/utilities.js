@@ -547,6 +547,8 @@ export const gttsSupportedLanguages = () => {
         "sq": "Albanian",
         "ar": "Arabic",
         "hy": "Armenian",
+        'bg': 'Bulgarian',
+        'bg-bg': 'Bulgarian ( Bulgarian )',
         "ca": "Catalan",
         "zh": "Chinese",
         "zh-cn": "Chinese (Mandarin/China)",
@@ -566,6 +568,7 @@ export const gttsSupportedLanguages = () => {
         "de": "German",
         "el": "Greek",
         "ht": "Haitian Creole",
+        'he': 'Hebrew',
         "hi": "Hindi",
         "hu": "Hungarian",
         "is": "Icelandic",
@@ -593,7 +596,7 @@ export const gttsSupportedLanguages = () => {
         "th": "Thai",
         "tr": "Turkish",
         "vi": "Vietnamese",
-        "cy": "Welsh"
+        "cy": "Welsh",
     }
 }
 

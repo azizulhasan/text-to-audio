@@ -2,12 +2,12 @@
 Contributors: atlasaidev, hasanazizul
 Donate link: http://atlasaidev.com/
 Tags: accessibility, speech, tts, text to speech, text to audio
-Requires at least: 6.0
-Tested up to: 6.6
+Requires at least: 5.6
+Tested up to: 6.6.1
 Requires PHP: 7.4
-Stable tag: 1.7.1
-License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Stable tag: 1.7.11
+License: GPLv3 or later
+License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
 The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
 
@@ -50,7 +50,9 @@ Right after you install this text to speech free plugin, it will automatically s
 
 * **Easy Integration:** Utilize intuitive shortcodes to seamlessly add the text-to-speech button to any post or page on your site.
 
-* **Customize Button Gutenberg Block:** The Text-to-Speech TTS Accessibility Plugin also offers a dedicated Gutenberg block for seamless integration and customization of the text-to-speech player. Users can effortlessly place the button, adjust button colors, width, and apply custom CSS directly from the Gutenberg editor, enhancing accessibility and user experience.
+* **Analytics:** AtlasVoice Support [Advance Analytics](https://www.youtube.com/watch?v=amkrAtVQGBY).
+
+* **Text Alias:** AtlasVoice Support [Text Alias](https://www.youtube.com/watch?v=oeW652YKmG0&t=3s).
 
 * **Unlimited Text-to-Speech:** Convert unlimited text to speech, providing flexibility for various content types.
 
@@ -72,7 +74,13 @@ Unlock additional features and support by upgrading to [Text To Speech TTS Pro](
 
 **Text To Speech TTS Accessibility Pro Features:**
 
-* **Live Support:** Receive assistance for first-time integration to ensure a seamless experience.
+* **Live Support:** We usually reply with 1 hour.
+
+* **Advance Analytics:** AtlasVoice Support [Advance Analytics](https://www.youtube.com/watch?v=amkrAtVQGBY).
+
+* **Unlimited Text Alias:** AtlasVoice Support [Text Alias](https://www.youtube.com/watch?v=oeW652YKmG0&t=3s).
+
+
 * **Enhanced Productivity:** Listen to content while multitasking or performing other tasks, saving time and increasing efficiency.
 
 * **Interactive Engagement:** Engage with customers more interactively by providing audio options for content consumption.
@@ -109,12 +117,12 @@ With the Text To Speech Pro text-to-voice generator plugin, you can empower your
 
 Text To Speech Pro TTS Accessibility plugin supports these languages.
 
-Afrikaans, Albanian, Arabic, Armenian, Catalan, Chinese,
+Afrikaans, Albanian, Arabic, Armenian, Bulgarian, Bulgarian ( Bulgarian ), Catalan, Chinese,
 Chinese (Mandarin/China), Chinese (Mandarin/Taiwan),
 Chinese (Cantonese), Croatian, Czech, Danish, Dutch,
 English, English (Australia), English (United Kingdom),
 English (United States), Esperanto, Finnish, French, German,
-Greek, Haitian Creole, Hindi, Hungarian, Icelandic,
+Greek, Haitian Creole, Hebrew, Hindi, Hungarian, Icelandic,
 Indonesian, Italian, Japanese, Korean, Latin, Latvian,
 Macedonian, Norwegian, Polish, Portuguese, Portuguese (Brazil),
 Romanian, Russian, Serbian, Slovak, Spanish, Spanish (Spain),
@@ -405,6 +413,50 @@ You can customize the voice and language of the text-to-speech player using shor
 ### TRANSLATION REQUEST
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+
+= 1.7.11 ( 26 Aug 2024 ) =
+Fixed: [How To Stop Pause Of Text To Speech WordPress Plugin Player After Switching Tab?](https://www.youtube.com/watch?v=rYFY0QA3aqk&t=28s).
+Added: In the pro version Hebrew, Bulgarian language added.
+
+
+= 1.7.10 ( 21 Aug 2024 ) =
+Fixe: player icon issue fixed.
+
+
+= 1.7.9 ( 20 Aug 2024 ) =
+* Introduced: Display player based on post status in the free version and pro version.
+* Introduced: Generate the MP3 file based on asynchronously in pro version.
+
+= 1.7.8 ( 17 Aug 2024 ) =
+* Fixed: Pro version GTranslate plugin  issue solved.
+* Improved: Free version dashboard notification improved.
+
+= 1.7.7 ( 13 Aug 2024 ) =
+* Fixed: Required PHP  and WordPress version updated.
+
+= 1.7.6 ( 11 Aug 2024 ) =
+* Fixed: Translation issue with Gtranslate and Google Cloud TTS player issue fixed.
+* Fixed: Google Cloud TTS player file loading issue fixed.
+* Checked : PHP Version 8.1, 8.2 and 8.3 checked.
+* Updated : GPL3 License.
+
+= 1.7.5 ( 4 Aug 2024 ) =
+Introduced: Text alias introduced.
+* Fixed: Translation issue with Gtranslate plugin fixed.
+* Fixed: Content repeat in MP3 file issue fixed.
+
+
+= 1.7.4 ( 28 July 2024 ) =
+* Fixed: Bug fix.
+
+= 1.7.3 ( 26 July 2024 ) =
+* Fixed: [Advanced Custom Fields (ACF)](https://wordpress.org/plugins/advanced-custom-fields/) related bug fixed.
+
+
+= 1.7.2 ( 23 July 2024 ) =
+* Added: [Advanced Custom Fields (ACF)](https://wordpress.org/plugins/advanced-custom-fields/) support for both versions.
+* Introduced : Compatibility menu added.
 
 
 = 1.7.1 ( 17 July 2024 ) =

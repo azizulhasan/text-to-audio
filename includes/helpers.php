@@ -166,12 +166,12 @@ function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 			$backgroundColor = isset( $customize['backgroundColor'] ) ? $customize['backgroundColor'] : '#184c53';
 			$color           = isset( $customize['color'] ) ? $customize['color'] : '#ffffff';
 			$width           = isset( $customize['width'] ) ? $customize['width'] : '100';
-			$btn_style       = 'background-color:' . esc_attr( $backgroundColor ) . ' !important;color:' . esc_attr( $color ) . ' !important;width:' . esc_attr( $width ) . '%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;';
+			$btn_style       = 'background-color:' . esc_attr( $backgroundColor ) . ' !important;color:' . esc_attr( $color ) . ' !important;width:' . esc_attr( $width ) . '%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
 		} else {
-			$btn_style = 'background-color:' . esc_attr( $customize['backgroundColor'] ) . ';color:' . esc_attr( $customize['color'] ) . ';width:' . esc_attr( $customize['width'] ) . '%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;';
+			$btn_style = 'background-color:' . esc_attr( $customize['backgroundColor'] ) . ';color:' . esc_attr( $customize['color'] ) . ';width:' . esc_attr( $customize['width'] ) . '%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
 		}
 	} else {
-		$btn_style = 'background-color:#184c53;color:#ffffff;width:100%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;';
+		$btn_style = 'background-color:#184c53;color:#ffffff;width:100%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
 	}
 
 
@@ -222,14 +222,14 @@ function tts_enqueue_button_scripts( $content, $btn_no, $class, $btn_style, $tex
 
 
 		if ( apply_filters( 'tts_ignore_match_80_percent', false ) && tts_text_match_80_percent( $original_title, $temp_title ) ) {
-			get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time, $plugin_all_settings );
+			get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time, $plugin_all_settings, $atts );
 		} else {
-			get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time, $plugin_all_settings );
+			get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time, $plugin_all_settings, $atts );
 		}
 	} );
 }
 
-function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings ) {
+function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings, $atts ) {
 
 	global $post;
 
@@ -242,7 +242,8 @@ function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_ar
 	$file_url_key       = TTA_Helper::tts_get_file_url_key( $language, $voice );
 	$file_name          = TTA_Helper::tts_file_name( $title, $language, $voice );
 	$mp3_file_urls      = TTA_Helper::get_mp3_file_urls( $file_url_key, $post, $date, $file_name );
-
+	$compatible_data    = TTA_Helper::tts_get_settings( 'compatible' );
+	$compatible_content = apply_filters( 'tts_compatible_plugins_content', [], $compatible_data, $post );
 
 	$object = ob_start();
 	?>
@@ -283,7 +284,8 @@ function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_ar
             language: "<?php echo $language; ?>",
             voice: "<?php echo $voice; ?>",
             file_url_key: "<?php echo $file_url_key; ?>",
-            post: <?php echo json_encode( $post ); ?>,
+            //post: <?php //echo json_encode( $post ); ?>//,
+            compatible_contents: <?php echo json_encode( $compatible_content ); ?>,
         }
 
         if (window.hasOwnProperty('TTS')) { // add content if a page have multiple button
@@ -427,8 +429,12 @@ add_filter( 'the_content', 'add_listen_button', $display_button_priority );
 function add_listen_button( $content ) {
 	TTA_Helper::set_default_settings();
 	global $post;
-	$button   = '';
-	$settings = (array) get_option( 'tta_settings_data' );
+	$button    = '';
+	$settings  = TTA_Helper::tts_get_settings( 'settings' );
+	$customize = TTA_Helper::tts_get_settings( 'customize' );
+    $button_settings = (array) $customize['buttonSettings'];
+//	error_log( print_r( $customize, 1 ) );
+	$button_positions = [ 'before_content', 'after_content' ];
 
 	if ( isset( $settings['tta__settings_enable_button_add'] ) && $settings['tta__settings_enable_button_add'] ) {
 		// TODO: write functionality if current page is home page where content is excerpt.
@@ -446,8 +452,16 @@ function add_listen_button( $content ) {
 			ob_end_clean();
 		}
 	}
+	$button_position = '';
+	if ( isset( $button_settings['button_position'] ) ) {
+		$button_position = $button_settings['button_position'];
+	}
+    $final_content = $button . $content;
+    if($button_position == 'after_content' ) {
+        $final_content = $content . $button;
+    }
 
-	return apply_filters( 'tts_button_with_content', $button . $content, $button, $content );
+	return apply_filters( 'tts_button_with_content', $final_content, $button, $content, $button_position );
 
 
 }
@@ -728,7 +742,7 @@ function is_pro_active() {
 		return false;
 	}
 
-	if( ! ttsp_fs()->is__premium_only()  ) {
+	if ( ! ttsp_fs()->is__premium_only() ) {
 		return false;
 	}
 

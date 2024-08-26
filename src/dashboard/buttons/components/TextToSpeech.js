@@ -456,7 +456,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                         titlePosition = postTitle.getBoundingClientRect().top;
                     }
                 }
-    
+
                 if (button) {
                     if (shouldCallPositionFunction(button)) {
                         let topPos = Math.floor(button.getBoundingClientRect().top);
@@ -464,7 +464,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                             setShouldFloat(true)
                         }
                     }
-    
+
                     if (titlePosition > 0) {
                         setShouldFloat(false)
                     }
@@ -472,8 +472,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             }
             document.addEventListener('scroll', detectScroll, { passive: true })
             document.addEventListener('wheel', detectScroll, { passive: true })
-    
-            console.log('test')
+
             return () => {
                 document.removeEventListener('scroll', detectScroll, { passive: true })
                 document.removeEventListener('wheel', detectScroll, { passive: true })
@@ -499,7 +498,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                 </style>
             }
             {
-                shouldFloat ? <div className="tts__custom-position" >{getButtonHTML()}</div> : getButtonHTML()
+                shouldFloat ? <div className={'tts__custom-position_bottom_right'} >{getButtonHTML()}</div> : getButtonHTML()
             }
         </>
     );

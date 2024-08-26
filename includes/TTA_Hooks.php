@@ -31,14 +31,14 @@ class TTA_Hooks {
 		add_action( 'add_meta_boxes', array( $this, 'add_custom_meta_box' ) );
 
 		// Update hook
-		add_action( 'upgrader_process_complete', [ $this, 'update_tts_default_data' ] , 10, 2  );
+		add_action( 'upgrader_process_complete', [ $this, 'update_tts_default_data' ], 10, 2 );
 
 		self::$excludable_js_arr = apply_filters( 'tts_excludable_js_arr', [
 			'TextToSpeech.min.js',
 			'text-to-audio-button.min.js',
 			'text-to-audio-dashboard-ui.min.js',
-            'AtlasVoiceAnalytics.min.js',
-            'AtlasVoicePlayerInsights.min.js',
+			'AtlasVoiceAnalytics.min.js',
+			'AtlasVoicePlayerInsights.min.js',
 			'tts_button_settings',
 			'tts_button_settings_1',
 			'tts_button_settings_2',
@@ -86,6 +86,8 @@ class TTA_Hooks {
 		], 10, 1 );
 
 		add_filter( 'tta_before_clean_content', [ $this, 'tta_before_clean_content_callback' ], 10 );
+
+		add_filter( 'tta__content_description', [ $this, 'tta__content_description_callback' ], 99, 4 );
 
 	}
 
@@ -174,7 +176,7 @@ class TTA_Hooks {
 	 * @see https://wordpress.stackexchange.com/questions/144870/wordpress-update-plugin-hook-action-since-3-9
 	 */
 	public function update_tts_default_data( $upgrader_object, $options ) {
-        $text_to_audio = 'text-to-audio';
+		$text_to_audio = 'text-to-audio';
 		// If an update has taken place and the updated type is plugins and the plugins element exists
 		if ( $options['action'] == 'update' && $options['type'] == 'plugin' && isset( $options['plugins'] ) ) {
 			foreach ( $options['plugins'] as $plugin ) {
@@ -388,6 +390,52 @@ class TTA_Hooks {
 		}
 
 		return apply_filters( 'tta_pro_before_clean_content', $htmlString );
+	}
+
+
+	public function tta__content_description_callback( $description_sanitized, $description, $post_id, $post ) {
+		// ACF plugin compatible.
+		$compatible_data = TTA_Helper::tts_get_settings( 'compatible' );
+		if ( TTA_Helper::is_acf_active() && ! TTA_Helper::is_pro_active() && isset( $compatible_data['tts_acf_fields'] ) && count( $compatible_data['tts_acf_fields'] ) ) {
+			$selected_acf_fields = $compatible_data['tts_acf_fields'];
+
+			$fields = get_field_objects( $post_id );
+
+			// Check if there are any fields
+			if ( $fields && $selected_acf_fields ) {
+				// Display the fields
+				$counter = 0;
+				foreach ( $fields as $field_name => $field ) {
+					if ( in_array( $field_name, $selected_acf_fields ) ) {
+						if ( is_string( $field['value'] ) ) {
+							$description_sanitized .= ' ' . $field['value'];
+							$counter ++;
+						}
+					}
+					if ( $counter > 0 ) {
+						break;
+					}
+				}
+			}
+		}
+
+		// Aliases
+		$alias_data = (array) TTA_Helper::tts_get_settings( 'aliases' );
+		if ( ! TTA_Helper::is_pro_active() && ! empty( $compatible_data ) && count( $compatible_data ) ) {
+			$counter = 0;
+			foreach ( $alias_data as $index => $alias ) {
+				$alias = (array) $alias;
+				if ( isset( $alias['actual_text'] ) && isset( $alias['to_read'] ) ) {
+					$description_sanitized = str_replace( $alias['actual_text'], $alias['to_read'], $description_sanitized );
+					$counter ++;
+				}
+				if ( $counter > 0 ) {
+					break;
+				}
+			}
+		}
+
+		return $description_sanitized;
 	}
 
 }

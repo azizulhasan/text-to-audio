@@ -44,7 +44,8 @@ class TTA_Activator {
 				'custom_css'             => '',
 				'tta_play_btn_shortcode' => '[tta_listen_btn]',
 				'buttonSettings'         => [
-					'id' => 1,
+					'id'             => 1,
+					'button_position' => 'before_content',
 				],
 			) );
 
@@ -58,6 +59,7 @@ class TTA_Activator {
 			(
 				'tta__settings_enable_button_add'                     => true,
 				"tta__settings_allow_listening_for_post_types"        => [ 'post' ],
+				"tta__settings_allow_listening_for_posts_status"      => [ 'publish' ],
 				'tta__settings_css_selectors'                         => '',
 				'tta__settings_exclude_content_by_css_selectors'      => '',
 				'tta__settings_exclude_texts'                         => [],
@@ -148,7 +150,7 @@ class TTA_Activator {
 
 			$charset_collate = $wpdb->get_charset_collate();
 
-				$sql = "CREATE TABLE $table_name (
+			$sql = "CREATE TABLE $table_name (
 	        id mediumint(9) NOT NULL AUTO_INCREMENT,
 	        user_id VARCHAR(50) NOT NULL,
 	        post_id bigint(20) NOT NULL,

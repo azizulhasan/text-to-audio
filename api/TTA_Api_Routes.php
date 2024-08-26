@@ -15,11 +15,13 @@ class TTA_Api_Routes {
 	protected $woocommerce;
 	protected $version;
 	protected $analytics;
+	protected $compatibility;
 
 	public function __construct() {
-		$this->version   = 'v1';
-		$this->namespace = 'tta/' . $this->version;
-		$this->analytics = new AtlasVoice_Analytics();
+		$this->version       = 'v1';
+		$this->namespace     = 'tta/' . $this->version;
+		$this->analytics     = new AtlasVoice_Analytics();
+		$this->compatibility = new AtlasVoice_Plugin_Compatibility();
 		add_action( 'rest_api_init', [ $this, 'tta_speech_register_routes' ] );
 	}
 
@@ -181,6 +183,35 @@ class TTA_Api_Routes {
 			)
 		);
 
+		// register get_trackable_ids route.
+		register_rest_route(
+			$this->namespace,
+			'/compatible_data',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this->compatibility, 'compatible_data' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
+		// register text_alias route.
+		register_rest_route(
+			$this->namespace,
+			'/text_alias',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'text_alias' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
+
 	}
 
 	/**
@@ -263,7 +294,7 @@ class TTA_Api_Routes {
 
 			delete_transient( 'tts_all_settings' );
 
-			delete_transient( 'tts_cached_player_id');
+			delete_transient( 'tts_cached_player_id' );
 
 			return rest_ensure_response( $response );
 		}
@@ -321,6 +352,30 @@ class TTA_Api_Routes {
 		] );
 
 		return rest_ensure_response( get_option( 'tta_current_browser_info' ) );
+	}
+
+	public function text_alias( $request ) {
+		$response['status'] = true;
+		// save data.
+		if ( 'post' == $request['method'] ) {
+			$fields = json_decode( $request['aliases'] );
+
+			update_option( 'tts_text_aliases', $fields );
+
+			$response['data'] = get_option( 'tts_text_aliases' );
+
+			delete_transient( 'tts_all_settings' );
+
+			return rest_ensure_response( $response );
+		}
+
+		// get data.
+		if ( 'get' == $request['method'] ) {
+
+			$response['data'] = get_option( 'tts_text_aliases' );
+
+			return rest_ensure_response( $response );
+		}
 	}
 
 	/*
