@@ -342,13 +342,13 @@ export default function TTSLiveDemo() {
                                                                                                button={<div dataId="1"
                                                                                                             id="tts__listent_content_1"
                                                                                                             className='tts__listent_content'></div>}
-                                                                                               buttonId={3}
+                                                                                               buttonId={1}
                                                                                                cssStyle={''}/> :
                                         demoSettings?.buttonSettings?.id == 4 ?
                                             <TextToSpeechFour buttonCSS={demoSettings}
                                                               button={<div dataId="1" id="tts__listent_content_1"
                                                                            className='tts__listent_content'></div>}
-                                                              buttonId={4} cssStyle={''}/> :
+                                                              buttonId={1} cssStyle={''}/> :
                                             demoSettings?.buttonSettings?.id == 5 ?
                                                 <TextToSpeechThree buttonCSS={demoSettings}
                                                                    button={<div dataId="1" id="tts__listent_content_1"
