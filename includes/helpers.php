@@ -429,8 +429,12 @@ add_filter( 'the_content', 'add_listen_button', $display_button_priority );
 function add_listen_button( $content ) {
 	TTA_Helper::set_default_settings();
 	global $post;
-	$button   = '';
-	$settings = (array) get_option( 'tta_settings_data' );
+	$button    = '';
+	$settings  = TTA_Helper::tts_get_settings( 'settings' );
+	$customize = TTA_Helper::tts_get_settings( 'customize' );
+    $button_settings = (array) $customize['buttonSettings'];
+//	error_log( print_r( $customize, 1 ) );
+	$button_positions = [ 'before_content', 'after_content' ];
 
 	if ( isset( $settings['tta__settings_enable_button_add'] ) && $settings['tta__settings_enable_button_add'] ) {
 		// TODO: write functionality if current page is home page where content is excerpt.
@@ -448,8 +452,16 @@ function add_listen_button( $content ) {
 			ob_end_clean();
 		}
 	}
+	$button_position = '';
+	if ( isset( $button_settings['button_position'] ) ) {
+		$button_position = $button_settings['button_position'];
+	}
+    $final_content = $button . $content;
+    if($button_position == 'after_content' ) {
+        $final_content = $content . $button;
+    }
 
-	return apply_filters( 'tts_button_with_content', $button . $content, $button, $content );
+	return apply_filters( 'tts_button_with_content', $final_content, $button, $content, $button_position );
 
 
 }

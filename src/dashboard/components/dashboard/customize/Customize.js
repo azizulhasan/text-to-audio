@@ -96,6 +96,7 @@ export default function Customize() {
 
 	}, []);
 
+
 	/**
 	 * handle change
 	 * @param {*} e
@@ -128,6 +129,11 @@ export default function Customize() {
 		// ChatGPT TTS player button settings
 		// && listeningBtnStyle?.buttonSettings?.id == 3
 		if (!['backgroundColor', 'width', 'color'].includes(e.target.name)) {
+
+			if(e.target.name === 'button_position' && ! ['before_content', 'after_content'].includes(e.target.value) && !ttsObj.is_pro_active) {
+				toast('This option is only available for pro version.', 'error');
+				return;
+			}
 
 			let tempButtonSettings = structuredClone(listeningBtnStyle.buttonSettings)
 
