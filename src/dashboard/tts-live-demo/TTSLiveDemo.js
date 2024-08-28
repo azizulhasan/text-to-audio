@@ -16,9 +16,7 @@ export default function TTSLiveDemo() {
         backgroundColor: '#1a4548',
         color: '#ffffff',
         width: '100',
-        buttonSettings: {
-            id: 1
-        },
+        id:1,
         tta__listening_voice: 'Microsoft David - English (United States)',
         tta__listening_pitch: 2,
         tta__listening_rate: 1,
@@ -108,6 +106,7 @@ export default function TTSLiveDemo() {
      * @param {*} e
      */
     const handleChange = (e) => {
+        console.log(e.target.name)
 
         if (
             e.target.name === 'width' &&
@@ -127,20 +126,17 @@ export default function TTSLiveDemo() {
         }
 
         // ChatGPT TTS player button settings
-        // && demoSettings?.buttonSettings?.id == 3
+        // && demoSettings?.id == 3
         if (!['backgroundColor', 'width', 'color'].includes(e.target.name)) {
 
-            let tempButtonSettings = structuredClone(demoSettings.buttonSettings)
+            let tempdemoSettings = structuredClone(demoSettings)
 
-            tempButtonSettings = {
-                ...tempButtonSettings,
+            tempdemoSettings = {
+                ...tempdemoSettings,
                 ...{[e.target.name]: e.target.value}
             }
             setDemoSettings({
-                ...demoSettings,
-                ...{
-                    buttonSettings: tempButtonSettings
-                }
+                ...tempdemoSettings
             });
 
             return;
@@ -168,13 +164,18 @@ export default function TTSLiveDemo() {
             ...demoSettings2,
             ...{[e.target.name]: value},
         });
+
     };
 
     useEffect(() => {
         let length = 'The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!';
-        // console.log({length: speakingText.length, testingDemoContentMessage, id: demoSettings.buttonSettings.id})
+        // console.log({length: speakingText.length, testingDemoContentMessage, id: demoSettings.id})
 
     }, [speakingText])
+
+    useEffect(() => {
+        console.log(demoSettings)
+    }, [demoSettings]);
 
     /**
      * Handle form Submit
@@ -203,31 +204,30 @@ export default function TTSLiveDemo() {
 
         formData['custom_css'] = customCSS;
         formData['tta_play_btn_shortcode'] = shortCode;
-        formData['buttonSettings'] = demoSettings.buttonSettings;
 
         console.log({formData})
 
         return;
 
-        if (formData?.buttonSettings?.id == 4 && !isGCAuthenticated) {
+        if (formData?.id == 4 && !isGCAuthenticated) {
             notify('To select this player you have to authenticate first from Integration menu', 'error', {
                 autoClose: 8000,
             });
             return;
         }
 
-        if (!ttsObj.is_pro_active && formData?.buttonSettings?.id > 1) {
+        if (!ttsObj.is_pro_active && formData?.id > 1) {
             toast('This player is only available for pro version.', 'error');
             return;
         }
 
 
-        if (formData?.buttonSettings?.id == 4 && (!isGCAuthenticated || !ttsObj.is_pro_active)) {
+        if (formData?.id == 4 && (!isGCAuthenticated || !ttsObj.is_pro_active)) {
             toast('To use Google Cloud Text To Speech you have to authenticate first from integrations menu', 'error');
             return;
         }
 
-        if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_folder_writable && formData?.buttonSettings?.id > 2 && !isBackUpToGCS) {
+        if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_folder_writable && formData?.id > 2 && !isBackUpToGCS) {
             toast("Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.", 'error', {autoClose: 10000})
             return
         }
@@ -282,7 +282,7 @@ export default function TTSLiveDemo() {
             value = buttonText;
         }
 
-        if(demoSettings.buttonSettings.id == 3 ) {
+        if(demoSettings.id == 3 ) {
             if (value.length > 599) {
                 setTestingDemoContentMessage('You can\'t  generate more than 600 characters during demo testing with Google TTS Pro.')
                 value = value.slice(0, 598);
@@ -295,7 +295,7 @@ export default function TTSLiveDemo() {
             return;
         }
 
-        if (demoSettings.buttonSettings.id == 4) {
+        if (demoSettings.id == 4) {
 
             if (value.length > 149) {
                 setTestingDemoContentMessage('You can\'t  generate more than 150 characters during demo testing with Google Cloud Text To Speech.')
@@ -334,22 +334,22 @@ export default function TTSLiveDemo() {
                     <Row>
                         <Col xs={12} sm={12} lg={12} className='mb-3'>
                             {
-                                demoSettings?.buttonSettings?.id == 2 ?
+                                demoSettings?.id == 2 ?
                                     <TextToSpeech buttonCSS={demoSettings}
                                                   button={<div dataId="1" id="tts__listent_content_1"
                                                                className='tts__listent_content'></div>} buttonId={2}/> :
-                                    demoSettings?.buttonSettings?.id == 3 ? <TextToSpeechThree buttonCSS={demoSettings}
+                                    demoSettings?.id == 3 ? <TextToSpeechThree buttonCSS={demoSettings}
                                                                                                button={<div dataId="1"
                                                                                                             id="tts__listent_content_1"
                                                                                                             className='tts__listent_content'></div>}
                                                                                                buttonId={1}
                                                                                                cssStyle={''}/> :
-                                        demoSettings?.buttonSettings?.id == 4 ?
+                                        demoSettings?.id == 4 ?
                                             <TextToSpeechFour buttonCSS={demoSettings}
                                                               button={<div dataId="1" id="tts__listent_content_1"
                                                                            className='tts__listent_content'></div>}
                                                               buttonId={1} cssStyle={''}/> :
-                                            demoSettings?.buttonSettings?.id == 5 ?
+                                            demoSettings?.id == 5 ?
                                                 <TextToSpeechThree buttonCSS={demoSettings}
                                                                    button={<div dataId="1" id="tts__listent_content_1"
                                                                                 className='tts__listent_content'></div>}
@@ -367,7 +367,7 @@ export default function TTSLiveDemo() {
                             }
                             <p className='pt-2'>
                                 {
-                                    demoSettings?.buttonSettings?.id == 4 && ttsObjPro.is_pro_active ? __('You have to configure Google Cloud Text To Speech to use this player.') : demoSettings?.buttonSettings?.id < 3 ? " This player is based on speechSynthesis browser API. So, It may behave inconsistent on different devices and browsers." : ""
+                                    demoSettings?.id == 4 && ttsObjPro.is_pro_active ? __('You have to configure Google Cloud Text To Speech to use this player.') : demoSettings?.id < 3 ? " This player is based on speechSynthesis browser API. So, It may behave inconsistent on different devices and browsers." : ""
                                 }
                             </p>
                         </Col>

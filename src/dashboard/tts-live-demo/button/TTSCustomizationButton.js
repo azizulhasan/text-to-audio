@@ -45,11 +45,11 @@ export default function TTSCustomizationButton({ demoSettings, handleChange, but
         let timer = setTimeout(function handleTime() {
             timer = setTimeout(handleTime, 1000)
 
-            if (timer > 65 || demoSettings?.buttonSettings == undefined) {
+            if (timer > 65 || demoSettings == undefined) {
                 clearTimeout(timer)
                 timer = null;
             }
-            if (window.hasOwnProperty('speechSynthesis') && window.speechSynthesis.getVoices().length && demoSettings?.buttonSettings?.id < 3) {
+            if (window.hasOwnProperty('speechSynthesis') && window.speechSynthesis.getVoices().length && demoSettings?.id < 3) {
                 clearTimeout(timer)
                 timer = null
                 setSpeechSynthesisVoices(window.speechSynthesis.getVoices())
@@ -68,10 +68,10 @@ export default function TTSCustomizationButton({ demoSettings, handleChange, but
 
     useEffect(() => {
         if (window.hasOwnProperty('ttsObjPro') && ttsObjPro?.is_pro_active) {
-            if (demoSettings?.buttonSettings?.id == 3) {
+            if (demoSettings?.id == 3) {
                 let gttsLanguages = gttsSupportedLanguages();
                 setCurrentPlayerLanguages(gttsLanguages)
-            } else if (demoSettings?.buttonSettings?.id == 4) {
+            } else if (demoSettings?.id == 4) {
                 setGoogleVoicesAndLanguages();
             }else{
                 setVoicesAndLanguages()
@@ -128,7 +128,7 @@ export default function TTSCustomizationButton({ demoSettings, handleChange, but
                     onChange={handleChange}
                     name='id'
                     id='id'
-                    value={demoSettings?.buttonSettings?.id || 1}
+                    value={demoSettings?.id || 1}
                     aria-label='Select Player'>
                     <option disabled>
                         {__('Select Player')}
@@ -158,7 +158,7 @@ export default function TTSCustomizationButton({ demoSettings, handleChange, but
                     {Object.keys(currentPlayerLanguages).map((langKey, index) => {
                         return (
                             <option key={langKey}
-                                    value={demoSettings?.buttonSettings?.id < 3 ? currentPlayerLanguages[langKey] : langKey}>
+                                    value={demoSettings?.id < 3 ? currentPlayerLanguages[langKey] : langKey}>
                                 {currentPlayerLanguages[langKey]}
                             </option>
                         );
@@ -167,7 +167,7 @@ export default function TTSCustomizationButton({ demoSettings, handleChange, but
             </Form.Group>
 
             {
-                demoSettings?.buttonSettings?.id != 3 && <>
+                demoSettings?.id != 3 && <>
                     <Form.Group>
                         <Form.Label htmlFor='tta__listening_voice'>Voice to speak </Form.Label>
                         <Form.Select
@@ -180,7 +180,7 @@ export default function TTSCustomizationButton({ demoSettings, handleChange, but
                                 {' '}
                                 Default Listening Voice
                             </option>
-                            {currentPlayerVoices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && demoSettings?.buttonSettings?.id == 4 ?
+                            {currentPlayerVoices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && demoSettings?.id == 4 ?
                                 <option key={index} data-lang={voice?.languageCodes?.[0]}
                                         value={[voice.name, voice.ssmlGender].join('-')}>
                                     {voice.name} {'-'} {voice.ssmlGender}
@@ -194,7 +194,7 @@ export default function TTSCustomizationButton({ demoSettings, handleChange, but
             }
 
             {/*{*/}
-            {/*    demoSettings?.buttonSettings?.id == 3 && <Form.Group>*/}
+            {/*    demoSettings?.id == 3 && <Form.Group>*/}
             {/*        <Form.Label htmlFor='language'>*/}
             {/*            {__('Select Language')}*/}
             {/*        </Form.Label>*/}
@@ -202,7 +202,7 @@ export default function TTSCustomizationButton({ demoSettings, handleChange, but
             {/*            onChange={handleChange}*/}
             {/*            name='language'*/}
             {/*            id='language'*/}
-            {/*            value={demoSettings?.buttonSettings?.language || 'en-us'}*/}
+            {/*            value={demoSettings?.language || 'en-us'}*/}
             {/*            aria-label='Select Language'>*/}
             {/*            <option disabled>*/}
             {/*                {__('Select Language')}*/}
