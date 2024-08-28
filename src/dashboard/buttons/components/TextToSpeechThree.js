@@ -9,10 +9,12 @@ export default function TextToSpeechThree({ buttonId, button, buttonCSS, cssStyl
             let contents = window?.TTS?.contents;
             TextToSpeechProPlayer = window.TextToSpeechProPlayer;
             if(contents){
-                new TextToSpeechProPlayer(buttonId, contents[buttonId], button, window.TTS)
+                window.TextToSpeechProPlayerGTTS = new TextToSpeechProPlayer(buttonId, contents[buttonId], button, window.TTS)
             }
         }
     }, [window.TextToSpeechProPlayer, window?.TTS?.contents])
+
+
 
 
     useEffect(() => {

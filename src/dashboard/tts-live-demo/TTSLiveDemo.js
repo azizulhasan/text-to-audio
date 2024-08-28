@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import {ToastContainer} from "react-toastify";
 import {__} from '@wordpress/i18n';
 import {Col, Container, Row, Form, FloatingLabel} from 'react-bootstrap';
 import toast from '../components/context/Notify';
@@ -9,6 +10,12 @@ import TextToSpeechFour from '../buttons/components/TextToSpeechFour';
 import CustomizationTabs from './CustomizationTabs'
 import notify from "../components/context/Notify";
 
+
+/**
+ * Scripts
+ */
+import 'react-toastify/dist/ReactToastify.css';
+
 let speech = null;
 let TextToSpeechFree = null;
 export default function TTSLiveDemo() {
@@ -16,7 +23,7 @@ export default function TTSLiveDemo() {
         backgroundColor: '#1a4548',
         color: '#ffffff',
         width: '100',
-        id:1,
+        id: 1,
         tta__listening_voice: 'Microsoft David - English (United States)',
         tta__listening_pitch: 2,
         tta__listening_rate: 1,
@@ -82,6 +89,8 @@ export default function TTSLiveDemo() {
         setTimeout(() => {
             if (window.hasOwnProperty('TTS') && window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active) {
                 window.TTS.contents[1] = initialText;
+                window.TTS.isLiveDemo = true;
+                window.TTS.extra[1].title = 'test';
             }
         }, 1000)
 
@@ -106,8 +115,6 @@ export default function TTSLiveDemo() {
      * @param {*} e
      */
     const handleChange = (e) => {
-        console.log(e.target.name)
-
         if (
             e.target.name === 'width' &&
             (e.target.value > 100 || e.target.value < 0)
@@ -138,6 +145,31 @@ export default function TTSLiveDemo() {
             setDemoSettings({
                 ...tempdemoSettings
             });
+
+            if (e.target.name == 'tta__listening_voice') {
+                window.TTS.settings.listening.tta__listening_voice = e.target.value;
+                window.TTS.extra[1].voice = e.target.value;
+                if(window?.TextToSpeechProPlayerGTTS) {
+                    window.TextToSpeechProPlayerGTTS.voice = e.target.value;
+                }
+            }
+            if (e.target.name == 'tta__listening_lang') {
+                window.TTS.settings.listening.tta__listening_lang = e.target.value;
+                window.TTS.extra[1].language = e.target.value;
+                window.TTS.extra[1].file_url_key = e.target.value;
+                window.TTS.extra[1].file_name = window.TTS.extra[1].title + '__lang__' + e.target.value;
+                if(window?.TextToSpeechProPlayerGTTS) {
+                    window.TextToSpeechProPlayerGTTS.selectedLang = e.target.value;
+                    window.TextToSpeechProPlayerGTTS.title = window.TTS.extra[1].title + '__lang__' + e.target.value;
+                }
+            }
+
+            if (e.target.name == 'id') {
+                window.TTS.settings.fileURLs = {};
+                ttsObjPro.player_id = e.target.value;
+                window.TTS.settings.settings.customize.buttonSettings.id = e.target.value
+                window.TTS.contents[1] = document.getElementById('tta__demo_text_for_play').value;
+            }
 
             return;
         }
@@ -278,11 +310,11 @@ export default function TTSLiveDemo() {
     const setText = (e, buttonText = '') => {
         // TODO:: must validate
         let value = e.target.value;
-        if(buttonText) {
+        if (buttonText) {
             value = buttonText;
         }
 
-        if(demoSettings.id == 3 ) {
+        if (demoSettings.id == 3) {
             if (value.length > 599) {
                 setTestingDemoContentMessage('You can\'t  generate more than 600 characters during demo testing with Google TTS Pro.')
                 value = value.slice(0, 598);
@@ -317,6 +349,11 @@ export default function TTSLiveDemo() {
         }
     };
 
+    useEffect(() => {
+        if(testingDemoContentMessage) {
+            toast(testingDemoContentMessage, 'warn')
+        }
+    }, [testingDemoContentMessage]);
 
 
     const [buttonLists, setButtonLists] = useState([
@@ -329,6 +366,17 @@ export default function TTSLiveDemo() {
 
     return (
         <Container>
+            <ToastContainer
+                position='top-right'
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+            />
             <Row className='mt-5'>
                 <Col xs={12} sm={12} lg={8}>
                     <Row>
@@ -339,11 +387,11 @@ export default function TTSLiveDemo() {
                                                   button={<div dataId="1" id="tts__listent_content_1"
                                                                className='tts__listent_content'></div>} buttonId={2}/> :
                                     demoSettings?.id == 3 ? <TextToSpeechThree buttonCSS={demoSettings}
-                                                                                               button={<div dataId="1"
-                                                                                                            id="tts__listent_content_1"
-                                                                                                            className='tts__listent_content'></div>}
-                                                                                               buttonId={1}
-                                                                                               cssStyle={''}/> :
+                                                                               button={<div dataId="1"
+                                                                                            id="tts__listent_content_1"
+                                                                                            className='tts__listent_content'></div>}
+                                                                               buttonId={1}
+                                                                               cssStyle={''}/> :
                                         demoSettings?.id == 4 ?
                                             <TextToSpeechFour buttonCSS={demoSettings}
                                                               button={<div dataId="1" id="tts__listent_content_1"
