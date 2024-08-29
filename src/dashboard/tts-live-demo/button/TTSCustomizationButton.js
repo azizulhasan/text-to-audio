@@ -116,7 +116,12 @@ export default function TTSCustomizationButton({ demoSettings, handleChange, but
         }
     }
 
-
+    const filterVoices = (e) => {
+        handleChange(e)
+        if(ttsObjPro.player_id == 4) {
+            console.log(e.target.value)
+        }
+    }
 
     return (
         <>
@@ -146,7 +151,7 @@ export default function TTSCustomizationButton({ demoSettings, handleChange, but
             <Form.Group>
                 <Form.Label htmlFor='tta__listening_lang'>Voice Language</Form.Label>
                 <Form.Select
-                    onChange={handleChange}
+                    onChange={filterVoices}
                     name='tta__listening_lang'
                     id='tta__listening_lang'
                     value={demoSettings.tta__listening_lang}

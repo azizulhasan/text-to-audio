@@ -24,11 +24,11 @@ export default function TTSLiveDemo() {
         color: '#ffffff',
         width: '100',
         id: 1,
-        tta__listening_voice: 'Microsoft David - English (United States)',
+        tta__listening_voice: '',
         tta__listening_pitch: 2,
         tta__listening_rate: 1,
         tta__listening_volume: 1,
-        tta__listening_lang: 'en_GB',
+        tta__listening_lang: '',
     });
     const [demoSettings2, setDemoSettings2] = useState({
         backgroundColor: '#1a4548',
@@ -86,11 +86,12 @@ export default function TTSLiveDemo() {
 
         localStorage.setItem('demo_listening_content', initialText)
         setSpeakingText(initialText);
-        setTimeout(() => {
+
+        setTimeout( async  () => {
             if (window.hasOwnProperty('TTS') && window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active) {
                 window.TTS.contents[1] = initialText;
-                window.TTS.isLiveDemo = true;
-                window.TTS.extra[1].title = 'test';
+                let Analytics =  new window.AtlasVoiceAnalytics(ttsObjPro.post_id)
+                window.TTS.extra[1].title = await Analytics.getUniqueUserId();
             }
         }, 1000)
 
@@ -152,6 +153,11 @@ export default function TTSLiveDemo() {
                 if(window?.TextToSpeechProPlayerGTTS) {
                     window.TextToSpeechProPlayerGTTS.voice = e.target.value;
                 }
+
+                if(ttsObjPro.player_id == 4) {
+                    window.TTS.extra[1].file_name = window.TTS.extra[1].title + '__lang__'+ window.TTS.extra[1].language + '__voice__' + e.target.value;
+                }
+
             }
             if (e.target.name == 'tta__listening_lang') {
                 window.TTS.settings.listening.tta__listening_lang = e.target.value;
