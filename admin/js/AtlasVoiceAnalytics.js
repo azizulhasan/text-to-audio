@@ -122,7 +122,7 @@ class AtlasVoiceAnalytics {
 
     async getUniqueUserId() {
         let userId = this.userId;
-        if (this.userId == '0' || window?.ttsObjPro?.is_live_demo) {
+        if (this.userId == '0' || window?.TTS?.extra?.is_live_demo) {
             // Initialize the agent at application startup.
             // If you're using an ad blocker or Brave/Firefox, this import will not work.
             // Please use the NPM package instead: https://t.ly/ORyXk

@@ -90,6 +90,7 @@ export default function TTSLiveDemo() {
         setTimeout( async  () => {
             if (window.hasOwnProperty('TTS') && window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active) {
                 window.TTS.contents[1] = initialText;
+                window.TTS.extra.is_live_demo = true;
                 let Analytics =  new window.AtlasVoiceAnalytics(ttsObjPro.post_id)
                 window.TTS.extra[1].title = await Analytics.getUniqueUserId();
             }
@@ -156,6 +157,7 @@ export default function TTSLiveDemo() {
 
                 if(ttsObjPro.player_id == 4) {
                     window.TTS.extra[1].file_name = window.TTS.extra[1].title + '__lang__'+ window.TTS.extra[1].language + '__voice__' + e.target.value;
+                    window.TTS.extra[1].title = window.TTS.extra[1].title + '__lang__'+ window.TTS.extra[1].language + '__voice__' + e.target.value;
                 }
 
             }
@@ -164,6 +166,7 @@ export default function TTSLiveDemo() {
                 window.TTS.extra[1].language = e.target.value;
                 window.TTS.extra[1].file_url_key = e.target.value;
                 window.TTS.extra[1].file_name = window.TTS.extra[1].title + '__lang__' + e.target.value;
+                window.TTS.extra[1].title = window.TTS.extra[1].title + '__lang__' + e.target.value;
                 if(window?.TextToSpeechProPlayerGTTS) {
                     window.TextToSpeechProPlayerGTTS.selectedLang = e.target.value;
                     window.TextToSpeechProPlayerGTTS.title = window.TTS.extra[1].title + '__lang__' + e.target.value;
