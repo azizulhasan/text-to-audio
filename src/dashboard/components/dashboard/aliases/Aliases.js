@@ -3,6 +3,7 @@ import {Button, Col, Container, Form, OverlayTrigger, Row, Tooltip} from "react-
 import UpgradeToPro from "../../UpgradeToPro";
 import toast from '../../context/Notify';
 import {postWithoutImage} from "../../context/utilities";
+import {__} from "@wordpress/i18n";
 
 
 export default function Aliases() {
@@ -81,7 +82,19 @@ export default function Aliases() {
         <Container>
             <Row>
                 <Col xs={12} sm={12} lg={8}>
-                    <h2>Text to Speech Aliases</h2>
+                    <h2>Text to Speech Aliases
+                        <>
+                            {['top'].map((placement) => (<OverlayTrigger
+                                key={placement}
+                                placement={placement}
+                                overlay={<Tooltip id={`tooltip-${placement}`}>
+                                    {__('Click To Know How It Works?')}
+                                </Tooltip>}>
+                                <a target='_blank' href='https://www.youtube.com/watch?v=oeW652YKmG0&t=9s'>
+                                    <i className="fas fa-info-circle"></i></a>
+                            </OverlayTrigger>))}
+                        </>
+                    </h2>
                     <Form onSubmit={handleSubmit}>
                         {/* Add Button or Player Automatically */}
                         {ttsTextAliases.map((alias, index) => (
