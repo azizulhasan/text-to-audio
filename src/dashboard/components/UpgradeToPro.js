@@ -4,6 +4,7 @@ export default function UpgradeToPro({promotionType = 'general'}) {
     let proFeatures = {
         youtube: [
             [ // free video
+                'h4VJxM-mh74?si=pmgy6TkvvppqtQV7',
                 'yanuoEBfG4A?si=WVJYL656B1LmrEVY',
                 'amkrAtVQGBY?si=ZI1HfRBYaR60PVVx',
                 'oeW652YKmG0?si=q97jAR0pTT3LhhH-',
@@ -11,6 +12,7 @@ export default function UpgradeToPro({promotionType = 'general'}) {
                 'qDzatRpEXN8?si=jb3MSEA1FsOxadgV',
             ],
             [ // pro video
+                'h4VJxM-mh74?si=pmgy6TkvvppqtQV7',
                 'yanuoEBfG4A?si=WVJYL656B1LmrEVY',
                 'amkrAtVQGBY?si=ZI1HfRBYaR60PVVx',
                 'oeW652YKmG0?si=q97jAR0pTT3LhhH-',

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form } from 'react-bootstrap';
+import {Form, OverlayTrigger, Tooltip} from 'react-bootstrap';
 import { __ } from '@wordpress/i18n'
 
 export default function TTSCustomizationButton({ listeningBtnStyle, handleChange, buttonLists }) {
@@ -18,6 +18,21 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
             <Form.Group>
                 <Form.Label htmlFor='id'>
                     {__('Select Player')}
+                    <div className={'d-inline-flex ps-3'}>
+                        {
+                            <>
+                                {['top'].map((placement) => (<OverlayTrigger
+                                    key={placement}
+                                    placement={placement}
+                                    overlay={<Tooltip id={`tooltip-${placement}`}>
+                                        {__('Click To Know How It Works?')}
+                                    </Tooltip>}>
+                                    <a target='_blank' href='https://www.youtube.com/watch?v=h4VJxM-mh74&t=936s'>
+                                        <i className="fas fa-info-circle"></i></a>
+                                </OverlayTrigger>))}
+                            </>
+                        }
+                    </div>
                 </Form.Label>
                 <Form.Select
                     onChange={handleChange}

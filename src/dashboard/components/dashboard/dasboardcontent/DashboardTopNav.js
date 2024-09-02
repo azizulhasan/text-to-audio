@@ -43,7 +43,7 @@ export default function DashboardTopNav() {
         Documentation
       </a>
       <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://www.youtube.com/@AtlasAiDev" target="_blank">
-        Tutorials
+        Video Tutorials
       </a>
     </nav>
   );
