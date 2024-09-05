@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.6.1
 Requires PHP: 7.4
-Stable tag: 1.7.13
+Stable tag: 1.7.15
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -13,7 +13,7 @@ The most user-friendly Text-to-Speech Accessibility plugin. Just install and aut
 
 == Description ==
 
-[Text To Speech TTS Accessibility](https://atlasaidev.com/text-to-speech-pro/) is the most user-friendly Text-to-Speech tts plugin. Just install and automatically add a Text to Audio player to your WordPress site!
+[Text To Speech TTS Accessibility](https://atlasaidev.com/plugins/text-to-speech-pro/) is the most user-friendly Text-to-Speech tts plugin. Just install and automatically add a Text to Audio player to your WordPress site!
 
 **No Registration, No Account, No API installation required. Simply install and let your visitors listen.**
 
@@ -24,10 +24,14 @@ Right after you install this text to speech free plugin, it will automatically s
 == Best Free Text To Speech TTS Accessibility Plugin For WordPress - Video Tutorial ==
 [youtube https://www.youtube.com/watch?v=P_dw_YjnVxc&t=21s&ab_channel=AtlasAiDev]
 
-### USEFULL LINKS:
-> * [Text To Speech Pro](https://atlasaidev.com/text-to-speech-pro/)
+== How To Setup Text To Speech Player Properly? - Video Tutorial  ==
+[youtube https://www.youtube.com/watch?v=h4VJxM-mh74&t=4s&ab_channel=AtlasAiDev]
+
+
+### SOME USEFULL LINKS:
+> * [Text To Speech Pro](https://atlasaidev.com/plugins/text-to-speech-pro/)
 > * [Pricing](https://atlasaidev.com/pricing/)
-> * [Live Demo Pro Version](https://atlasaidev.com/text-to-speech-pro/demo/)
+> * [Live Demo Pro Version](https://atlasaidev.com/plugins/text-to-speech-pro/demo/)
 > * [Live Demo Free Version](https://wordpress.org/plugins/text-to-audio/?preview=1)
 > * [Video Tutorial](https://www.youtube.com/@atlasaidev)
 > * [Documentation](https://atlasaidev.com/docs/)
@@ -54,7 +58,7 @@ Right after you install this text to speech free plugin, it will automatically s
 
 * **Text Alias:** AtlasVoice Support [Text Alias](https://www.youtube.com/watch?v=oeW652YKmG0&t=3s).
 
-* **Unlimited Text-to-Speech:** Convert unlimited text to speech, providing flexibility for various content types.
+* **Unlimited Text-to-Speech:** Convert unlimited text to speech.
 
 * **Customization Options:** Easily customize the appearance and behavior of the text-to-speech button to match your website's design and user preferences. Customize button color, width, and text based on site language through filters and shortcodes. Preview changes in real-time for a seamless user experience.
 
@@ -70,7 +74,7 @@ Custom CSS: Apply custom styles to the text-to-speech button using CSS for seaml
 
 ### Upgrade to Text To Speech Pro for Advanced Features:
 
-Unlock additional features and support by upgrading to [Text To Speech TTS Pro](https://atlasaidev.com/text-to-speech-pro/). This premium version of the text-to-speech generator plugin offers enhanced features designed to take your content to the next level.
+Unlock additional features and support by upgrading to [Text To Speech TTS Pro](https://atlasaidev.com/plugins/text-to-speech-pro/). This premium version of the text-to-speech generator plugin offers enhanced features designed to take your content to the next level.
 
 **Text To Speech TTS Accessibility Pro Features:**
 
@@ -80,6 +84,7 @@ Unlock additional features and support by upgrading to [Text To Speech TTS Pro](
 
 * **Unlimited Text Alias:** AtlasVoice Support [Text Alias](https://www.youtube.com/watch?v=oeW652YKmG0&t=3s).
 
+* **Unlimited Characters:** Convert unlimited text to speech.
 
 * **Enhanced Productivity:** Listen to content while multitasking or performing other tasks, saving time and increasing efficiency.
 
@@ -110,7 +115,7 @@ Support for Custom Post Types: Ensure compatibility with all custom post types o
 
 With the Text To Speech Pro text-to-voice generator plugin, you can empower your website with cutting-edge features that cater to a diverse audience. Upgrade now to unlock the full potential of your content delivery strategy.
 
-**Try [Text To Speech Pro](https://atlasaidev.com/text-to-speech-pro/) version.**
+**Try [Text To Speech Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) version.**
 
 
 ### Text To Speech Pro Supported Languages:
@@ -244,7 +249,7 @@ These shortcodes and attributes provide flexibility in customizing the text-to-a
 
 **Get Started Today!**
 
-Boost engagement, accessibility, and productivity on your WordPress and WooCommerce site with Text To Speech TTS Plugin. Implement Web Content Accessibility Guidelines (WCAG) easily and cater to a broader audience base. Try the free version today and upgrade to [Text To Speech Pro](https://atlasaidev.com/text-to-speech-pro/) for advanced features and support.
+Boost engagement, accessibility, and productivity on your WordPress and WooCommerce site with Text To Speech TTS Plugin. Implement Web Content Accessibility Guidelines (WCAG) easily and cater to a broader audience base. Try the free version today and upgrade to [Text To Speech Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) for advanced features and support.
 
 
 
@@ -258,7 +263,7 @@ Boost engagement, accessibility, and productivity on your WordPress and WooComme
 == Frequently Asked Questions ==
 
 = Does Text To Speech Support All Android Phones ? =
-Yes, Text To Speech supports all Android phones. However, full support is exclusively available in the [pro version](https://atlasaidev.com/text-to-speech-pro/). The free version has certain limitations. Here's what you need to know:
+Yes, Text To Speech supports all Android phones. However, full support is exclusively available in the [pro version](https://atlasaidev.com/plugins/text-to-speech-pro/). The free version has certain limitations. Here's what you need to know:
 Text To Speech TTS plugin relies on the browser's API, with no external API used. The [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis) API varies from browser to browser and device to device. Consequently, voices and languages may differ based on the browser used.
 For example, a language available on a desktop may not be available on a mobile phone, and a voice available on a desktop may not be available on Android. In that case, the browser will play the default voice it supports.
 Overall, your users will still be able to listen to the content from almost all devices despite the voice change. If you encounter any browser-related issues, please submit a [ticket](https://atlasaidev.com/contact-us/) for assistance.
@@ -270,12 +275,12 @@ Text To Speech Free TTS Accessibility supports these [languages](https://wordpre
 
 
 = Does Text To Speech Support Multilingual Plugins ? =
-Yes, the [pro version](https://atlasaidev.com/text-to-speech-pro/) of the Text To Speech plugin currently supports WPML and GTranslate. We plan to extend support to [TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/),
+Yes, the [pro version](https://atlasaidev.com/plugins/text-to-speech-pro/) of the Text To Speech plugin currently supports WPML and GTranslate. We plan to extend support to [TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/),
 [Loco Translate](https://wordpress.org/plugins/loco-translate/), and [Polylang](https://wordpress.org/plugins/polylang/) soon.
 
 
 = Does Text To Speech Support Custom Post Types ? =
-Yes, [pro version](https://atlasaidev.com/text-to-speech-pro/) of Text To Speech plugin supports custom post types.
+Yes, [pro version](https://atlasaidev.com/plugins/text-to-speech-pro/) of Text To Speech plugin supports custom post types.
 
 
 = Content Missing From Post =
@@ -302,7 +307,7 @@ function tta__content_description_callback ( $output, $description, $post_id ) {
 This filter allows you to append extra content to your posts dynamically.
 
 = Can I Restrict/Exclude Certain Words From Playing? =
-Absolutely! You have the flexibility to exclude specific content from being read aloud, and this feature is available in the [pro version](https://atlasaidev.com/text-to-speech-pro/) of Text to Speech.
+Absolutely! You have the flexibility to exclude specific content from being read aloud, and this feature is available in the [pro version](https://atlasaidev.com/plugins/text-to-speech-pro/) of Text to Speech.
 
 Here's how to exclude words from playback:
 
@@ -317,7 +322,7 @@ Here's how to exclude words from playback:
 With this capability, you can fine-tune the playback experience, ensuring that only the desired content is read aloud to your audience.
 
 = Is it possible to exclude specific HTML tags from being read aloud by the Text to Speech plugin? =
-Of course! With the [pro](https://atlasaidev.com/text-to-speech-pro/) version of Text to Speech, you gain the ability to skip the content enclosed within certain HTML tags during playback.
+Of course! With the [pro](https://atlasaidev.com/plugins/text-to-speech-pro/) version of Text to Speech, you gain the ability to skip the content enclosed within certain HTML tags during playback.
 
 **Here's how it works:**
 
@@ -415,6 +420,12 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+= 1.7.15 ( 05 Sep 2024 ) =
+Fixed: Player display issue fixed.
+
+= 1.7.14 ( 05 Sep 2024 ) =
+Fixed: Pro version loader issue fixed.
+Improved: Dashboard UI improved.
 
 = 1.7.13 ( 02 Sep 2024 ) =
 Improved: Dashboard UI improved.
@@ -858,7 +869,7 @@ Added: Display button based on user login status.
 = 1.4.3 ( Sep 10 , 2023) =
 * Fixed: CSS loaded properly.
 * Fixed: Short code text not displaying issue solved.
-* Added: Integrate with [Text To Speech Pro](https://atlasaidev.com/text-to-speech-pro/) version.
+* Added: Integrate with [Text To Speech Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) version.
 * Added: Plugin URI added.
 
 

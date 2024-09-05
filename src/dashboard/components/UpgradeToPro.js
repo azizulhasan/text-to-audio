@@ -20,10 +20,11 @@ export default function UpgradeToPro({promotionType = 'general'}) {
             ]
         ],
         general: [
-            'Get Live Support for first time Integration.',
+            'Get Live Support for setup.',
             '51 languages support in pro version.',
             'Advance Analytics',
             'Text Aliases',
+            'Unlimited Characters',
             '<a target="_blank" href="https://atlasaidev.com/refund-policy/"> 14 Days money back\n' +
             '                                guarantee.</a>',
             '<a target=\'_blank\' href="https://wordpress.org/plugins/gtranslate/">GTranslate Plugin\n' +
@@ -57,7 +58,7 @@ export default function UpgradeToPro({promotionType = 'general'}) {
             __("WPML Multilingual Support"),
             __("Gtranslate Plugin Support"),
             __("Advance Custom Field ( ACF ) Support"),
-            __("WooCommerc Support"),
+            __("WooCommerce Support"),
             __("Elementor Page Builder Plugin Support"),
             __("WP Bakery Page Builder Plugin Support"),
             __("All Android Support"),
