@@ -452,7 +452,7 @@ function add_listen_button( $content ) {
 			ob_end_clean();
 		}
 	}
-	$button_position = '';
+	$button_position = 'before_content';
 	if ( isset( $button_settings['button_position'] ) ) {
 		$button_position = $button_settings['button_position'];
 	}

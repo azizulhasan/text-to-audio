@@ -86,7 +86,7 @@ class TTA_Activator {
 				"tta__listening_pitch"  => 1,
 				"tta__listening_rate"   => 1,
 				"tta__listening_volume" => 1,
-				"tta__listening_lang"   => "en-US",
+				"tta__listening_lang"   => "en-GB",
 			) );
 		}
 
