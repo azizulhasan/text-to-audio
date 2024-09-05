@@ -17,7 +17,7 @@ export default function Integrations() {
         <Row>
             <Col xs={12} sm={12} lg={8}>
                 <div className={'text-danger'}>
-                    <strong>Important Notice:</strong> <p className='text-danger d-inline'>Integrating with Google Text To Speech is optional to function AtlasVoice Pro version.</p>
+                    <strong>Important Notice:</strong> <p className='text-danger d-inline'>Integrating with Google Cloud Text To Speech is an optional for function AtlasVoice Pro version. Without integration you can still use our pro version.</p>
                 </div>
                 <Form className="py-4">
                     <Form.Group>
