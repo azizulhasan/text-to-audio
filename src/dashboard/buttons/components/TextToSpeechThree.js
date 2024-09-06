@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import { shouldCallPositionFunction } from "../assets/buttonsHelper";
 let TextToSpeechProPlayer = null;
+let player = window?.wp ? wp.hooks.applyFilters('ttsProPlayerDesign', {
+    isPlayerCustomizing: false,
+    displayLabels: false
+}) : {
+    isPlayerCustomizing: false,
+    displayLabels:false,
+}
 export default function TextToSpeechThree({ buttonId, button, buttonCSS, cssStyle = '' }) {
     const [shouldFloat, setShouldFloat] = useState(false)
     useEffect(() => {
@@ -75,9 +82,11 @@ export default function TextToSpeechThree({ buttonId, button, buttonCSS, cssStyl
                             border-radius: 2px;
                             overflow: visible !important;
                         }
-                        .plyr--audio .plyr__controls{background-color:${buttonCSS.backgroundColor};color:${buttonCSS.color};width:${buttonCSS.width}%;}
-                        .plyr--audio .plyr__control.plyr__tab-focus, .plyr--audio .plyr__control:hover, .plyr--audio .plyr__control[aria-expanded=true]{background-color:${buttonCSS.backgroundColor};color:${buttonCSS.color};}
-                        .plyr--full-ui input[type=range], .plyr__volume input[type=range] {color:${buttonCSS.color};}
+                        .plyr--audio .plyr__controls{background-color:${buttonCSS.backgroundColor};color:${buttonCSS.color};width:${buttonCSS.width}%;${player?.isPlayerCustomizing ? `display:inline-flex;`: ''}}
+                        .plyr--audio .plyr__control.plyr__tab-focus, .plyr--audio .plyr__control, .plyr--audio .plyr__control:hover, .plyr--audio .plyr__control[aria-expanded=true]{background-color:${buttonCSS.backgroundColor};color:${buttonCSS.color};${player?.isPlayerCustomizing ? `display:inline-flex;align-items:center;` : ''}}
+                        .plyr--full-ui input[type=range], .plyr__volume input[type=range] {color:${buttonCSS.color}${player?.isPlayerCustomizing ? `display:inline-flex;`: ''}}
+                        
+                        ${player?.isPlayerCustomizing ? `.plyr__control svg{margin-right:5px;}`: ''}
                         `
                     }
                     {
