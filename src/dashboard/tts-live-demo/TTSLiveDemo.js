@@ -18,7 +18,13 @@ import 'react-toastify/dist/ReactToastify.css';
 
 let speech = null;
 let TextToSpeechFree = null;
+let userId = null
 export default function TTSLiveDemo() {
+
+    wp?.hooks?.addFilter('ttsAsynchronousMP3Generate', 'atlasvoice', function(val) {
+        return true;
+    });
+
     const [demoSettings, setDemoSettings] = useState({
         backgroundColor: '#1a4548',
         color: '#ffffff',
@@ -92,7 +98,8 @@ export default function TTSLiveDemo() {
                 window.TTS.contents[1] = initialText;
                 window.TTS.extra.is_live_demo = true;
                 let Analytics =  new window.AtlasVoiceAnalytics(ttsObjPro.post_id)
-                window.TTS.extra[1].title = await Analytics.getUniqueUserId();
+                userId = await Analytics.getUniqueUserId();
+                window.TTS.extra[1].title = userId
             }
         }, 1000)
 
@@ -156,8 +163,8 @@ export default function TTSLiveDemo() {
                 }
 
                 if(ttsObjPro.player_id == 4) {
-                    window.TTS.extra[1].file_name = window.TTS.extra[1].title + '__lang__'+ window.TTS.extra[1].language + '__voice__' + e.target.value;
-                    window.TTS.extra[1].title = window.TTS.extra[1].title + '__lang__'+ window.TTS.extra[1].language + '__voice__' + e.target.value;
+                    window.TTS.extra[1].file_name = userId + '__lang__'+ window.TTS.extra[1].language + '__voice__' + e.target.value;
+                    window.TTS.extra[1].title = userId + '__lang__'+ window.TTS.extra[1].language + '__voice__' + e.target.value;
                 }
 
             }
@@ -165,11 +172,11 @@ export default function TTSLiveDemo() {
                 window.TTS.settings.listening.tta__listening_lang = e.target.value;
                 window.TTS.extra[1].language = e.target.value;
                 window.TTS.extra[1].file_url_key = e.target.value;
-                window.TTS.extra[1].file_name = window.TTS.extra[1].title + '__lang__' + e.target.value;
-                window.TTS.extra[1].title = window.TTS.extra[1].title + '__lang__' + e.target.value;
+                window.TTS.extra[1].file_name = userId + '__lang__' + e.target.value;
+                window.TTS.extra[1].title = userId + '__lang__' + e.target.value;
                 if(window?.TextToSpeechProPlayerGTTS) {
                     window.TextToSpeechProPlayerGTTS.selectedLang = e.target.value;
-                    window.TextToSpeechProPlayerGTTS.title = window.TTS.extra[1].title + '__lang__' + e.target.value;
+                    window.TextToSpeechProPlayerGTTS.title = userId + '__lang__' + e.target.value;
                 }
             }
 
@@ -178,6 +185,29 @@ export default function TTSLiveDemo() {
                 ttsObjPro.player_id = e.target.value;
                 window.TTS.settings.settings.customize.buttonSettings.id = e.target.value
                 window.TTS.contents[1] = document.getElementById('tta__demo_text_for_play').value;
+
+                // clear language
+                window.TTS.settings.listening.tta__listening_lang = '';
+                window.TTS.extra[1].language = '';
+                window.TTS.extra[1].file_url_key = '';
+                window.TTS.extra[1].file_name = userId;
+                window.TTS.extra[1].title = userId;
+                if(window?.TextToSpeechProPlayerGTTS) {
+                    window.TextToSpeechProPlayerGTTS.selectedLang = '';
+                    window.TextToSpeechProPlayerGTTS.title = userId;
+                }
+                // clear voice
+                window.TTS.settings.listening.tta__listening_voice = '';
+                window.TTS.extra[1].voice = '';
+                if(window?.TextToSpeechProPlayerGTTS) {
+                    window.TextToSpeechProPlayerGTTS.voice = '';
+                }
+
+                if(ttsObjPro.player_id == 4) {
+                    window.TTS.extra[1].file_name = userId;
+                }
+
+                console.log(window.TTS)
             }
 
             return;
