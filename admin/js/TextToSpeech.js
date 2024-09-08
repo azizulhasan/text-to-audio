@@ -486,17 +486,24 @@ if (window?.ttsObj?.is_pro_active) {
 
 /**
  * This potion of the code will only applied in the dashboard.
- * When plugin dashboard with open.
+ * When plugin dashboard with open. also for live demo.
  */
-let urlParams = new URLSearchParams('page=text-to-audio').toString()
-let urlParams2 = new URLSearchParams('tts-live-demo').toString()
 let shouldInitTTS = false;
-if(urlParams = 'page=text-to-audio' ) {
+
+// Get the current URL path
+const path = window.location.toString();
+let url = new URL(path);
+
+// Split the path by '/' and get the last part
+const slug = path.split('/').filter(Boolean).pop();
+
+if(url.search === '?page=text-to-audio' ) {
     shouldInitTTS = true
-}else  if (urlParams2  === 'text-to-speech-pro-demo=' || urlParams2 === 'text-to-speech-pro-demo') {
+}else  if ( slug === 'text-to-speech-online') {
     shouldInitTTS = true
 }
-if (shouldInitTTS) {
+
+if (!shouldInitTTS) {
     let timerDashboar;
     timerDashboar = setInterval(() => {
         if (window.hasOwnProperty('ttsObj')) {
