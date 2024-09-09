@@ -25,6 +25,7 @@ class TTA_Hooks {
 
 	private static $excludable_js_arr = [];
 	private static $excludable_js_string = '';
+	private static $excludable_css_arr = [];
 
 	public function __construct() {
 		// TODO it should work with new functionality
@@ -89,6 +90,29 @@ class TTA_Hooks {
 
 		add_filter( 'tta__content_description', [ $this, 'tta__content_description_callback' ], 99, 4 );
 
+
+		self::$excludable_css_arr = apply_filters( 'tts_excludable_css_arr', [
+			'plyr.min.css',
+			'text-to-audio-pro.css',
+		] );
+
+		// WP Rocket
+		add_filter( 'rocket_exclude_css', [ $this, 'cache_exclude_css_text_to_speech' ] );
+
+	}
+
+	/**
+	 * @param $excluded_css_files
+	 *
+	 * @return mixed
+	 */
+	public function cache_exclude_css_text_to_speech( $excluded_css_files ) {
+		$new_arr = self::$excludable_css_arr;
+		if ( is_array( $excluded_css_files ) ) {
+			$new_arr = array_merge( $excluded_css_files, self::$excludable_css_arr );
+		}
+
+		return $new_arr;
 	}
 
 
