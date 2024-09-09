@@ -307,10 +307,14 @@ class TTA_Helper {
 		return $voice;
 	}
 
-	public static function tts_file_name( $title, $selectedLang, $voice = '' ) {
+	public static function tts_file_name( $title, $selectedLang, $voice = '', $post_id = '' ) {
 
 		if ( ! $title ) {
 			$title = 'Demo Content';
+		}
+		global $post;
+		if(!$post_id &&  $post) {
+			$post_id = $post->ID;
 		}
 
 		$lang_code = explode( '-', str_replace( [ '_', ' ' ], '-', $selectedLang ) );
@@ -330,7 +334,7 @@ class TTA_Helper {
 			$title .= '__voice__' . $voice;
 		}
 
-		return $title;
+		return apply_filters('tts_file_name', $title, $selectedLang, $voice, $post);
 	}
 
 	public static function handle_old_url( $post, $new_urls, $old_url ) {

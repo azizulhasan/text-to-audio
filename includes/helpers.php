@@ -240,7 +240,7 @@ function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_ar
 	$language           = $language_and_voice['language'];
 	$voice              = $language_and_voice['voice'];
 	$file_url_key       = TTA_Helper::tts_get_file_url_key( $language, $voice );
-	$file_name          = TTA_Helper::tts_file_name( $title, $language, $voice );
+	$file_name          = TTA_Helper::tts_file_name( $title, $language, $voice, $post->ID );
 	$mp3_file_urls      = TTA_Helper::get_mp3_file_urls( $file_url_key, $post, $date, $file_name );
 	$compatible_data    = TTA_Helper::tts_get_settings( 'compatible' );
 	$compatible_content = apply_filters( 'tts_compatible_plugins_content', [], $compatible_data, $post );
@@ -738,13 +738,13 @@ function get_player_id() {
  */
 function is_pro_active() {
 
-	if ( ! function_exists( 'ttsp_fs' ) ) {
-		return false;
-	}
+//	if ( ! function_exists( 'ttsp_fs' ) ) {
+//		return false;
+//	}
 
-	if ( ! ttsp_fs()->is__premium_only() ) {
-		return false;
-	}
+//	if ( ! ttsp_fs()->is__premium_only() ) {
+//		return false;
+//	}
 
 
 	if ( ! function_exists( 'is_plugin_active' ) ) {
