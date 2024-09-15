@@ -432,7 +432,7 @@ function add_listen_button( $content ) {
 	$button    = '';
 	$settings  = TTA_Helper::tts_get_settings( 'settings' );
 	$customize = TTA_Helper::tts_get_settings( 'customize' );
-	if (! isset( $customize['buttonSettings'] ) ) {
+	if ( isset( $customize['buttonSettings'] ) ) {
 		$button_settings = (array) $customize['buttonSettings'];
 	} else {
 		$button_settings = [
