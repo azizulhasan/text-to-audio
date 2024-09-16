@@ -49,6 +49,15 @@ export default class TextToSpeech {
         this.splitSentences = splitSentences
         this.playButtonNo = this?.TTS?.settings?.settings?.customize?.buttonSettings?.id
         this.analytics = new AtlasVoiceAnalytics(this.TTS.settings.postId)
+
+
+        if(typeof NoSleep === 'function' && ttsObj?.is_mobile) {
+            const noSleep = new NoSleep();
+            window.onload = function() {
+                noSleep.enable();
+                console.log("NoSleep enabled");
+            };
+        }
     }
 
     getData(shouldAsingThis = true) {

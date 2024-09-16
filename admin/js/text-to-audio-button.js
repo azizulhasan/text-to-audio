@@ -12,6 +12,14 @@ class TTSPlayButton extends HTMLElement {
         super();
         console.log({ tts: window.TTS })
 
+        if(typeof NoSleep === 'function' && ttsObj?.is_mobile) {
+            const noSleep = new NoSleep();
+            window.onload = function() {
+                noSleep.enable();
+                console.log("NoSleep enabled");
+            };
+        }
+
         this.isProLicenseActive = window?.ttsObj?.is_pro_active;
         // Create a shadow root
         const shadow = this.attachShadow({ mode: 'open' });
