@@ -45,6 +45,7 @@ class TTA_Hooks {
 			'tts_button_settings_2',
 			'tts_button_settings_3',
 			'tts_button_settings_4',
+            'NoSleep.min.js'
 		] );
 
 		$strings = implode( ',', self::$excludable_js_arr );

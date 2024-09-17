@@ -33,17 +33,17 @@ export default function Listening() {
     const [languageMissingMessage, setLanguageMissingMessage] = useState('');
 
     const [listeningSettings, setListeningSettings] = useState({
-        tta__listening_voice: 'Microsoft David - English (United States)',
+        tta__listening_voice: 'Google UK English Female',
         tta__listening_pitch: 2,
         tta__listening_rate: 1,
         tta__listening_volume: 1,
-        tta__listening_lang: 'en_GB',
+        tta__listening_lang: 'en-GB',
         tta__listening_activeLanguages_mapping: {},
         tta__multilingualActiveLanguages: {},
         tta__currentPlayerLanguages: {},
         tta__available_currentPlayerVoices: {},
     });
-    const [listeningLang, setListeningLang] = useState('en_GB');
+    const [listeningLang, setListeningLang] = useState('en-GB');
     const apiURL = useMemo(() => {
         if (window.hasOwnProperty('ttsObj') && ttsObj.is_pro_active) {
             return ttsObj.api_url + ttsObj.api_namespace + "_pro/" + ttsObj.api_version + "/";
@@ -174,8 +174,12 @@ export default function Listening() {
         customize.append('method', 'get');
         postWithoutImage(tta_obj.api_url + 'tta/v1/customize', customize)
             .then((res) => {
+                if(!res.data?.buttonSettings?.id){
+                    res.data.buttonSettings.id = 1;
+                }
+
                 setCustomizationSettings(res.data);
-                if (res?.data.buttonSettings?.id < 3) {
+                if (res?.data?.buttonSettings?.id < 3) {
                     setVoicesAndLanguages()
                 }
             })

@@ -212,6 +212,12 @@ export default function Customize() {
 		formData['custom_css'] = customCSS;
 		formData['tta_play_btn_shortcode'] = shortCode;
 		formData['buttonSettings'] = listeningBtnStyle.buttonSettings;
+		if(!formData?.buttonSettings?.button_position){
+			formData.buttonSettings.button_position = 'before_content';
+		}
+		if(!formData?.buttonSettings?.id){
+			formData.buttonSettings.id = 1;
+		}
 
 		if( formData?.buttonSettings?.id  == 4 && !isGCAuthenticated) {
 			notify('To select this player you have to authenticate first from Integration menu', 'error' ,{
@@ -236,9 +242,6 @@ export default function Customize() {
             return
         };
 
-
-		// console.log(formData);
-		// return;
 		let data = new FormData();
 		data.append('fields', JSON.stringify(formData));
 		data.append('method', 'post');

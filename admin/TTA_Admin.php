@@ -74,6 +74,10 @@ class TTA_Admin {
 			include ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
+		if ( ! function_exists( 'wp_is_mobile' ) ) {
+			include_once ABSPATH . 'wp-includes/vars.php';
+		}
+
 		$settings = TTA_Helper::tts_get_settings();
 
 		$color = '#ffffff';
@@ -137,6 +141,7 @@ class TTA_Admin {
 			] ),
 			'categories'               => TTA_Helper::get_all_categories(),
 			'tags'                     => TTA_Helper::get_all_tags(),
+			'is_mobile'                => wp_is_mobile(),
 		];
 	}
 
@@ -280,14 +285,29 @@ class TTA_Admin {
 	public function enqueue_TTA() {
 		$player_id = get_player_id();
 
-		if ( $player_id > 1 ) {
-			wp_enqueue_script( 'TextToSpeech', plugin_dir_url( __FILE__ ) . 'js/build/TextToSpeech.min.js', array( 'wp-hooks', ), $this->version, true );
-			wp_localize_script( 'TextToSpeech', 'ttsObj', $this->localize_data );
-		} else if ( $player_id == 1 ) {
-			wp_enqueue_script( 'text-to-audio-button', plugin_dir_url( __FILE__ ) . 'js/build/text-to-audio-button.min.js', array(
+		$dependencies = [ 'wp-hooks' ];
+		if ( wp_is_mobile() ) {
+			if ( $player_id > 1 ) {
+				$dependencies[] = 'tts-no-sleep';
+			} else {
+				$dependencies = array(
+					'wp-hooks',
+					'wp-shortcode'
+				);
+			}
+			wp_enqueue_script( 'tts-no-sleep', plugin_dir_url( __FILE__ ) . 'js/build/NoSleep.min.js', array(), $this->version, true );
+		} else {
+			$dependencies = array(
 				'wp-hooks',
 				'wp-shortcode'
-			), $this->version, true );
+			);
+		}
+
+		if ( $player_id > 1 ) {
+			wp_enqueue_script( 'TextToSpeech', plugin_dir_url( __FILE__ ) . 'js/build/TextToSpeech.min.js', $dependencies, $this->version, true );
+			wp_localize_script( 'TextToSpeech', 'ttsObj', $this->localize_data );
+		} else if ( $player_id == 1 ) {
+			wp_enqueue_script( 'text-to-audio-button', plugin_dir_url( __FILE__ ) . 'js/build/text-to-audio-button.min.js', $dependencies, $this->version, true );
 			wp_localize_script( 'text-to-audio-button', 'ttsObj', $this->localize_data );
 		}
 	}
