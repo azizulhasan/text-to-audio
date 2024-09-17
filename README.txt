@@ -424,6 +424,7 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 Fixed: File Name issue fixed.
 Fixed: No Sleep on mobile version.
 Fixed: Constant issue on pro version.
+Fixed: Thundering Herd Problem in pro version.
 
 
 = 1.7.19 ( 15 Sep 2024 ) =
