@@ -290,7 +290,7 @@ class TTA_Helper {
 			$file_url_key .= '--voice--' . $voice;
 		}
 
-		return $file_url_key;
+		return apply_filters('tts_get_file_url_key', $file_url_key, $language, $voice);
 	}
 
 	public static function tts_get_voice( $plugin_all_settings ) {
@@ -543,7 +543,7 @@ class TTA_Helper {
 			} else {
 
 				// Generate new singed url or backup only current post applicable url.
-				if ( get_option( 'tts_is_backup_mp3_file' ) == 'true' && $language_code == $file_url_key ) {
+				if ( get_option( 'tts_is_backup_mp3_file' ) == 'true' && strtolower($language_code) == strtolower($file_url_key) ) {
 					// previously generated mp3 file to 'TTA_Pro' folder but not backup to Google Cloud Storage.
 					// $url = 'http://localhost/azizulhasan/tts/wp-content/uploads/TTA_Pro/gtts/2024/04/21/Hello_world__lang__en_us.mp3';
 					$gcs_url = '';
@@ -562,10 +562,12 @@ class TTA_Helper {
 							$url = $gcs_new_signed_url;
 						}
 					}
-				} elseif ( get_option( 'tts_is_backup_mp3_file' ) == 'false' && $language_code == $file_url_key && strpos( $url, 'https://storage.googleapis.com' ) !== false ) {
+				} elseif ( get_option( 'tts_is_backup_mp3_file' ) == 'false' && strtolower($language_code) == strtolower($file_url_key) && strpos( $url, 'https://storage.googleapis.com' ) !== false ) {
 					$should_update_urls = true;
 					continue;
 				}
+
+
 
 				$final_mp3_file_ulrs[ $language_code ] = $url;
 			}
@@ -577,7 +579,7 @@ class TTA_Helper {
 			update_post_meta( $post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs );
 		}
 
-		return \apply_filters( 'tts_mp3_file_urls', $final_mp3_file_ulrs, $post );
+		return \apply_filters( 'tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls );
 	}
 
 	/**
@@ -593,11 +595,11 @@ class TTA_Helper {
 			$replaceable_string = '/wp-content/uploads/TTA_Pro/';
 		}
 
-		$log_data = array(
+		$log_data = apply_filters('tts_get_path_from_url', array(
 			'url'      => $url,
 			'path'     => $audio_dir,
 			'home_url' => home_url(),
-		);
+		));
 		// Extract the relative path from the full URL
 		$relative_path = str_replace( $log_data['home_url'] . $replaceable_string, '', $log_data['url'] );
 
