@@ -97,7 +97,7 @@ class TTA_Helper {
 
 		$tta__settings_allow_listening_for_posts_status = false;
 		if ( isset( $settings['tta__settings_allow_listening_for_posts_status'] ) && $settings['tta__settings_allow_listening_for_posts_status'] ) {
-			if (! in_array( self::tts_post_status(), $settings['tta__settings_allow_listening_for_posts_status'] )) {
+			if ( ! in_array( self::tts_post_status(), $settings['tta__settings_allow_listening_for_posts_status'] ) ) {
 				$tta__settings_allow_listening_for_posts_status = true;
 			}
 		}
@@ -222,6 +222,15 @@ class TTA_Helper {
 			$acf_fields = self::get_all_acf_fields();
 		}
 
+
+		// Translatepress multilingual plugin.
+		$trp_languages = [];
+		if ( class_exists( 'TRP_Settings' ) ) {
+			$TRP_languages = new \TRP_Settings();
+			// Get the available languages
+			$trp_languages = $TRP_languages->get_settings()['translation-languages'];
+		}
+
 		$datas = \apply_filters( 'tts_pro_plugins_data', [
 			'gtranslate/gtranslate.php'                => [
 				'type'       => 'class',
@@ -240,6 +249,11 @@ class TTA_Helper {
 				'type'   => 'class',
 				'data'   => $acf_fields,
 				'plugin' => 'acf',
+			],
+			'translatepress-multilingual/index.php'    => [
+				'type'   => 'class',
+				'data'   => $trp_languages,
+				'plugin' => 'translatepress',
 			]
 		] );
 
@@ -290,7 +304,7 @@ class TTA_Helper {
 			$file_url_key .= '--voice--' . $voice;
 		}
 
-		return apply_filters('tts_get_file_url_key', $file_url_key, $language, $voice);
+		return apply_filters( 'tts_get_file_url_key', $file_url_key, $language, $voice );
 	}
 
 	public static function tts_get_voice( $plugin_all_settings ) {
@@ -313,7 +327,7 @@ class TTA_Helper {
 			$title = 'Demo Content';
 		}
 		global $post;
-		if(!$post_id &&  $post) {
+		if ( ! $post_id && $post ) {
 			$post_id = $post->ID;
 		}
 
@@ -334,7 +348,7 @@ class TTA_Helper {
 			$title .= '__voice__' . $voice;
 		}
 
-		return apply_filters('tts_file_name', $title, $selectedLang, $voice, $post);
+		return apply_filters( 'tts_file_name', $title, $selectedLang, $voice, $post );
 	}
 
 	public static function handle_old_url( $post, $new_urls, $old_url ) {
@@ -543,7 +557,7 @@ class TTA_Helper {
 			} else {
 
 				// Generate new singed url or backup only current post applicable url.
-				if ( get_option( 'tts_is_backup_mp3_file' ) == 'true' && strtolower($language_code) == strtolower($file_url_key) ) {
+				if ( get_option( 'tts_is_backup_mp3_file' ) == 'true' && strtolower( $language_code ) == strtolower( $file_url_key ) ) {
 					// previously generated mp3 file to 'TTA_Pro' folder but not backup to Google Cloud Storage.
 					// $url = 'http://localhost/azizulhasan/tts/wp-content/uploads/TTA_Pro/gtts/2024/04/21/Hello_world__lang__en_us.mp3';
 					$gcs_url = '';
@@ -562,11 +576,10 @@ class TTA_Helper {
 							$url = $gcs_new_signed_url;
 						}
 					}
-				} elseif ( get_option( 'tts_is_backup_mp3_file' ) == 'false' && strtolower($language_code) == strtolower($file_url_key) && strpos( $url, 'https://storage.googleapis.com' ) !== false ) {
+				} elseif ( get_option( 'tts_is_backup_mp3_file' ) == 'false' && strtolower( $language_code ) == strtolower( $file_url_key ) && strpos( $url, 'https://storage.googleapis.com' ) !== false ) {
 					$should_update_urls = true;
 					continue;
 				}
-
 
 
 				$final_mp3_file_ulrs[ $language_code ] = $url;
@@ -595,11 +608,11 @@ class TTA_Helper {
 			$replaceable_string = '/wp-content/uploads/TTA_Pro/';
 		}
 
-		$log_data = apply_filters('tts_get_path_from_url', array(
+		$log_data = apply_filters( 'tts_get_path_from_url', array(
 			'url'      => $url,
 			'path'     => $audio_dir,
 			'home_url' => home_url(),
-		));
+		) );
 		// Extract the relative path from the full URL
 		$relative_path = str_replace( $log_data['home_url'] . $replaceable_string, '', $log_data['url'] );
 
@@ -896,11 +909,11 @@ class TTA_Helper {
 	}
 
 	public static function all_post_status() {
-		$post_statuses = get_post_stati(['show_in_admin_status_list' => true], 'objects');
-		$status_array = [];
+		$post_statuses = get_post_stati( [ 'show_in_admin_status_list' => true ], 'objects' );
+		$status_array  = [];
 
-		foreach ($post_statuses as $status) {
-			$status_array[$status->name] = $status->label;
+		foreach ( $post_statuses as $status ) {
+			$status_array[ $status->name ] = $status->label;
 		}
 
 
