@@ -327,7 +327,7 @@ class TTA_Helper {
 			$title = 'Demo Content';
 		}
 		global $post;
-		if ( ! $post_id && $post ) {
+		if ( ! $post_id && $post ) { // TODO: must add post ID to file name.
 			$post_id = $post->ID;
 		}
 
@@ -339,7 +339,7 @@ class TTA_Helper {
 			$title = preg_replace( "/[^\p{L}a-z0-9_-]/ui", "", $title );
 		} else {
 			$md5_hash = md5( $title );
-			$title    = $md5_hash . '_' . time() . '__lang__' . $selectedLang;
+			$title    = $md5_hash  . '__lang__' . $selectedLang;
 		}
 
 		if ( get_player_id() == 4 && $voice ) {
@@ -528,17 +528,17 @@ class TTA_Helper {
 			return [];
 		}
 
+		$date  = get_the_date( 'Y/m/d' , $post);
 
 		$mp3_file_urls = get_post_meta( $post->ID, 'tts_mp3_file_urls' );
 
-		$old_url = get_post_meta( $post->ID, 'tts_mp3_file_url', true );
 
+		$old_url = get_post_meta( $post->ID, 'tts_mp3_file_url', true );
 
 		if ( $old_url ) {
 
 			$mp3_file_urls = self::handle_old_url( $post, $mp3_file_urls, $old_url );
 		}
-
 
 		if ( isset( $mp3_file_urls[0] ) ) {
 
@@ -588,9 +588,9 @@ class TTA_Helper {
 
 
 		if ( $should_update_urls || empty( $final_mp3_file_ulrs ) ) {
-
 			update_post_meta( $post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs );
 		}
+
 
 		return \apply_filters( 'tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls );
 	}
@@ -602,19 +602,21 @@ class TTA_Helper {
 	 */
 	public static function get_path_from_url( $url ) {
 		$audio_dir          = TTA_PRO_GTTS_DIR;
-		$replaceable_string = '/wp-content/uploads/TTA_Pro/gtts/';
+		$audio_dir_url      = TTA_PRO_GTTS_DIR_URL;
+
 		if ( get_player_id() == 4 ) {
 			$audio_dir          = TTA_PRO_AUDIO_DIR;
-			$replaceable_string = '/wp-content/uploads/TTA_Pro/';
+			$audio_dir_url      = TTA_PRO_AUDIO_DIR_URL;
 		}
 
 		$log_data = apply_filters( 'tts_get_path_from_url', array(
 			'url'      => $url,
 			'path'     => $audio_dir,
-			'home_url' => home_url(),
 		) );
+
+
 		// Extract the relative path from the full URL
-		$relative_path = str_replace( $log_data['home_url'] . $replaceable_string, '', $log_data['url'] );
+		$relative_path = str_replace( $audio_dir_url, '', $log_data['url'] );
 
 		// Construct the full path
 		return rtrim( $log_data['path'], '/' ) . '/' . $relative_path;
