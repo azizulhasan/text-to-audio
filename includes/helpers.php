@@ -61,7 +61,7 @@ function tta_clean_content( $text ) {
 	$text = preg_replace( "/\\\\{2,}'/", "\'", $text );
 
 	$text = TTA_Helper::clean_string( $text );
-
+    error_log(print_r($text,1));
 	return apply_filters( 'tta_clean_content', $text );
 
 }
