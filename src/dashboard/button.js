@@ -11,8 +11,8 @@ let buttonCSS = '';
 
 // document.addEventListener("DOMContentLoaded", function () {
 
-const checkInterval = 300;
-const maxChecks = 30; // Check for a maximum of 30 seconds
+const checkInterval = 500;
+const maxChecks = 100; // Check for a maximum of 30 seconds
 let checkCount = 0;
 let timer = setInterval(loadProButton, checkInterval);
 function loadProButton() {
