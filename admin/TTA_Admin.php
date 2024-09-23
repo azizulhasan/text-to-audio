@@ -283,6 +283,11 @@ class TTA_Admin {
 	 *
 	 */
 	public function enqueue_TTA() {
+
+		if ( ! TTA_Helper::should_load_button() ) {
+			return;
+		}
+
 		$player_id = get_player_id();
 
 		$dependencies = [ 'wp-hooks' ];
