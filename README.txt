@@ -424,6 +424,7 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 Added: [Translate Multilingual sites – TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/).
 Fixed: WPML Translation issue fixed.
 Fixed: Content clean issue fixed.
+Fixed: Edit page issue fixed.
 Improved: Load assets only where needed.
 Improved: MP3 file name issue update.
 Improved: MP3 file generation process improved.
