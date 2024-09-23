@@ -420,7 +420,7 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
-= 1.7.21 ( 22 Sep 2024 ) =
+= 1.7.21 ( 23 Sep 2024 ) =
 Added: [Translate Multilingual sites – TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/).
 Fixed: WPML Translation issue fixed.
 Fixed: Content clean issue fixed.
