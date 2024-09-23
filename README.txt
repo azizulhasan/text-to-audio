@@ -3,17 +3,17 @@ Contributors: atlasaidev, hasanazizul
 Donate link: http://atlasaidev.com/
 Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
-Tested up to: 6.6.1
+Tested up to: 6.6.2
 Requires PHP: 7.4
-Stable tag: 1.7.20
+Stable tag: 1.7.21
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
-The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
+The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a __text to audio__ player to your WordPress site!
 
 == Description ==
 
-[Text To Speech TTS Accessibility](https://atlasaidev.com/plugins/text-to-speech-pro/) is the most user-friendly Text-to-Speech tts plugin. Just install and automatically add a Text to Audio player to your WordPress site!
+[Text To Speech TTS Accessibility](https://atlasaidev.com/plugins/text-to-speech-pro/) is the most user-friendly Text-to-Speech tts plugin. Just install and automatically add a __text to audio__ player to your WordPress site!
 
 **No Registration, No Account, No API installation required. Simply install and let your visitors listen.**
 
@@ -163,11 +163,12 @@ Please keep these factors in mind when implementing our plugin to ensure optimal
 **Unlock Multilingual Capabilities:** Text To Speech TTS Pro is the best text to speech WordPress plugin when it comes to multilingual support. Break language barriers with ease using our supported plugins:
 
 * <a href='https://wpml.org/' target='_blank' rel='ugc' >WPML WordPress Multilingual Plugin</a>.
-* <a href='https://wordpress.org/plugins/gtranslate/' target='_blank'>Translate WordPress with GTranslate Plugin</a>.
+* <a href='https://wordpress.org/plugins/gtranslate/' target='_blank'>Translate WordPress with __Gtranslate__ Plugin</a>.
+* <a href='https://wordpress.org/plugins/translatepress-multilingual/' target='_blank'>Translate Multilingual sites – TranslatePress</a>.
 
-**How WPML Works:** Translate content seamlessly with the WPML Text To Audio Accessibility plugin. It automatically detects the language of your content and translates it accordingly, ensuring a smooth user experience.
+**How WPML Works:** Translate content seamlessly with the __WPML__ by __text to audio__ Accessibility plugin. It automatically detects the language of your content and translates it accordingly, ensuring a smooth user experience.
 
-**How GTranslate Works:** With our Text To Audio Accessibility plugin, translating content is a breeze when using GTranslate. Whether pages or posts, it adapts to changes made by GTranslate's language switching wizard, ensuring content remains accessible across languages.
+**How GTranslate Works:** With our __Text To Audio Accessibility__ plugin, translating content is a breeze when using __Gtranslate__. Whether pages or posts, it adapts to changes made by GTranslate's language switching wizard, ensuring content remains accessible across languages.
 
 **Support for Custom Post Types:** Our plugin seamlessly integrates with popular custom post type plugins, including:
 
@@ -273,9 +274,8 @@ Text To Speech Pro TTS Accessibility supports these [languages](https://wordpres
 
 Text To Speech Free TTS Accessibility supports these [languages](https://wordpress.org/plugins/text-to-audio/#:~:text=based%20on%20device.-,SUPPORTED%20LANGUAGES,-%3A).
 
-
 = Does Text To Speech Support Multilingual Plugins ? =
-Yes, the [pro version](https://atlasaidev.com/plugins/text-to-speech-pro/) of the Text To Speech plugin currently supports WPML and GTranslate. We plan to extend support to [TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/),
+Yes, the [pro version](https://atlasaidev.com/plugins/text-to-speech-pro/) of the Text To Speech plugin currently supports __WPML__, __TranslatePress__ and __Gtranslate__. We plan to extend support to
 [Loco Translate](https://wordpress.org/plugins/loco-translate/), and [Polylang](https://wordpress.org/plugins/polylang/) soon.
 
 
@@ -418,6 +418,17 @@ You can customize the voice and language of the text-to-speech player using shor
 ### TRANSLATION REQUEST
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+
+= 1.7.21 ( 23 Sep 2024 ) =
+Added: [Translate Multilingual sites – TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/).
+Fixed: WPML Translation issue fixed.
+Fixed: Content clean issue fixed.
+Fixed: Edit page issue fixed.
+Improved: Load assets only where needed.
+Improved: MP3 file name issue update.
+Improved: MP3 file generation process improved.
+
 
 
 = 1.7.20 ( 17 Sep 2024 ) =

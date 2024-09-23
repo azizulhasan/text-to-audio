@@ -92,6 +92,24 @@ export default function Listening() {
                 ...listeningSettings,
                 ...{tta__listening_activeLanguages_mapping: languageObject},
             });
+        } else if (window?.ttsObjPro?.compatible?.['translatepress-multilingual/index.php']) {
+            let activeLanguages = ttsObjPro?.compatible?.['translatepress-multilingual/index.php']?.data;
+
+            // Initialize an empty object
+            const languageObject = {};
+
+            // Populate the object using a loop
+            for (const langCode of activeLanguages) {
+                languageObject[langCode] = langCode;
+            }
+
+            setMultilingualActiveLanguages(languageObject)
+
+            console.log(languageObject)
+            setListeningSettings({
+                ...listeningSettings,
+                ...{tta__listening_activeLanguages_mapping: languageObject},
+            });
         }
 
     }, [window?.ttsObjPro])
@@ -371,6 +389,8 @@ export default function Listening() {
             activePluginName = 'WPML'
         } else if (window?.ttsObjPro?.compatible?.['gtranslate/gtranslate.php']) {
             activePluginName = "Gtranslate";
+        } else if (window?.ttsObjPro?.compatible?.['translatepress-multilingual/index.php']) {
+            activePluginName = "TranslatePress";
         }
         return activePluginName
     }

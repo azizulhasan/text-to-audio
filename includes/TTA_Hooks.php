@@ -89,6 +89,8 @@ class TTA_Hooks {
 
 		add_filter( 'tta_before_clean_content', [ $this, 'tta_before_clean_content_callback' ], 10 );
 
+		add_filter( 'tta_after_clean_content', [ $this, 'tta_after_clean_content_callback' ], 10 );
+
 		add_filter( 'tta__content_description', [ $this, 'tta__content_description_callback' ], 99, 4 );
 
 
@@ -416,6 +418,26 @@ class TTA_Hooks {
 
 		return apply_filters( 'tta_pro_before_clean_content', $htmlString );
 	}
+
+	/**
+	 * removing only the last delimiter in a sequence of two or more delimiters (with or without spaces between them),
+     * while preserving the first one and ensuring a space after it
+	 *
+	 * @return string The modified HTML string.
+	 */
+	public function tta_after_clean_content_callback( $content ) {
+//        second one
+		// Define the delimiters
+		$delimiters = ['\.', ',', '\?', '!', '\|', ';', ':', '¿', '¡', '،', '؟'];
+
+		// Build a regular expression pattern to match multiple delimiters (with or without spaces) and keep only the first one
+		$pattern = '/([' . implode('', $delimiters) . '])\s*([' . implode('', $delimiters) . '])+(\s*)/';
+
+		// Replace the matched pattern with the first delimiter and ensure there is a space after it
+		return preg_replace($pattern, '$1 ', $content);
+	}
+
+
 
 
 	public function tta__content_description_callback( $description_sanitized, $description, $post_id, $post ) {
