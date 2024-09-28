@@ -101,8 +101,26 @@ export default function Customize() {
 	 * handle change
 	 * @param {*} e
 	 */
-	const handleChange = (e) => {
+	const handleChange = (e, keyName = '') => {
 
+		if(Array.isArray(e) && keyName) {
+
+			let tempButtonSettings = structuredClone(listeningBtnStyle.buttonSettings)
+
+			tempButtonSettings = {
+				...tempButtonSettings,
+				...{
+					[keyName]: e
+				}
+			}
+			setListeningStyle({
+				...listeningBtnStyle,
+				...{
+					buttonSettings: tempButtonSettings
+				}
+			});
+			return;
+		}
 		if (
 			e.target.name === 'width' &&
 			(e.target.value > 100 || e.target.value < 0)
@@ -218,7 +236,7 @@ export default function Customize() {
 		if(!formData?.buttonSettings?.id){
 			formData.buttonSettings.id = 1;
 		}
-
+		console.log({listeningBtnStyle})
 		if( formData?.buttonSettings?.id  == 4 && !isGCAuthenticated) {
 			notify('To select this player you have to authenticate first from Integration menu', 'error' ,{
 				autoClose: 8000,
@@ -245,6 +263,8 @@ export default function Customize() {
 		let data = new FormData();
 		data.append('fields', JSON.stringify(formData));
 		data.append('method', 'post');
+
+		// return;
 		postWithoutImage(tta_obj.api_url + 'tta/v1/customize', data)
 			.then((res) => {
 				setListeningStyle(res.data);

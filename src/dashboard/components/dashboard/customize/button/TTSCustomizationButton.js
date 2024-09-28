@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {Form, OverlayTrigger, Tooltip} from 'react-bootstrap';
 import { __ } from '@wordpress/i18n'
+import {postData} from "../../../context/utilities";
+import {MultiSelect} from "../../../context/MultiSelect";
 
 export default function TTSCustomizationButton({ listeningBtnStyle, handleChange, buttonLists }) {
+    const [userRoles, setUserRoles] = useState({})
     let buttonPositions = {
         "before_content": "Before Content",
         "after_content": "After Content",
@@ -12,6 +15,18 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
         "bottom_right": "Bottom Right (Pro)",
         "bottom_center": "Bottom Center (Pro)",
     }
+
+    useEffect(() => {
+        postData(ttsObj.api_url + 'tta/v1/get_all_user_roles', {}, "GET")
+            .then((res) => {
+                if(res?.status) {
+                    setUserRoles(res.data)
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }, []);
 
     return (
         <>
@@ -53,7 +68,7 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
                 </Form.Select>
             </Form.Group>
             {/*Button Positions*/}
-            <Form.Group>
+            <Form.Group className={'mt-3'}>
                 <Form.Label htmlFor='button_position'>
                     {__('Select Button Position')}
                 </Form.Label>
@@ -66,15 +81,45 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
                     <option disabled>
                         {__('Select Button Position')}
                     </option>
-                    {Object.keys(buttonPositions).map((langKey, index) => {
+                    {Object.keys(buttonPositions).map((positionKey, index) => {
                         return (
-                            <option key={langKey} value={langKey}>
-                                {buttonPositions[langKey]}
+                            <option key={positionKey} value={positionKey}>
+                                {buttonPositions[positionKey]}
                             </option>
                         );
                     })}
                 </Form.Select>
             </Form.Group>
+            {/*Display Player To*/}
+            <Form.Group className={'mt-3'}>
+                <Form.Label htmlFor='display_player_to'>
+                    {__('Display Player To')}
+                </Form.Label>
+                {
+                    listeningBtnStyle?.buttonSettings?.display_player_to && Object.keys(userRoles).length && <MultiSelect toastMessage={'Player display restriction to multiple user type is available in the pro version'}
+                                                          name={'display_player_to'}
+                                                          id={'display_player_to'}
+                                                          selectedItems={listeningBtnStyle?.buttonSettings?.display_player_to ||  ['all']}
+                                                          selectionLimit={1} options={userRoles} onChange={handleChange}/>
+                }
+            </Form.Group>
+
+            {/*Who Can Download MP3 File*/}
+            {
+                listeningBtnStyle?.buttonSettings?.id > 2 && Object.keys(userRoles).length && <Form.Group className={'mt-3'}>
+                    <Form.Label htmlFor='who_can_download_mp3_file'>
+                        {__('Who Can Download MP3 File')}
+                    </Form.Label>
+                    <MultiSelect toastMessage={'Player display restriction to multiple user type is available in the pro version'}
+                       name={'who_can_download_mp3_file'}
+                       id={'who_can_download_mp3_file'}
+                       multiselectIndex={1}
+                       selectedItems={listeningBtnStyle?.buttonSettings?.who_can_download_mp3_file ||  ['all']}
+                       selectionLimit={1} options={userRoles} onChange={handleChange}/>
+                </Form.Group>
+
+            }
+
         </>
     )
 }
