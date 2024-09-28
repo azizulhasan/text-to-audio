@@ -85,6 +85,9 @@ export default function TextToSpeechFour({ buttonId, button, buttonCSS, cssStyle
                             border-radius: 2px;
                             overflow: visible !important;
                         }
+                        .plyr--audio {
+                            z-index: 99999;
+                        }
                         .plyr--audio .plyr__controls{background-color:${buttonCSS.backgroundColor};color:${buttonCSS.color};width:${buttonCSS.width}%;${player?.isPlayerCustomizing ? `display:inline-flex;`: ''}}
                         .plyr--audio .plyr__control.plyr__tab-focus, .plyr--audio .plyr__control, .plyr--audio .plyr__control:hover, .plyr--audio .plyr__control[aria-expanded=true]{background-color:${buttonCSS.backgroundColor};color:${buttonCSS.color};${player?.isPlayerCustomizing ? `display:inline-flex;align-items:center;` : ''}}
                         .plyr--full-ui input[type=range], .plyr__volume input[type=range] {color:${buttonCSS.color}${player?.isPlayerCustomizing ? `display:inline-flex;`: ''}}
