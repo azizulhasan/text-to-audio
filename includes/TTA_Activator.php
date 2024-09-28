@@ -44,8 +44,10 @@ class TTA_Activator {
 				'custom_css'             => '',
 				'tta_play_btn_shortcode' => '[tta_listen_btn]',
 				'buttonSettings'         => [
-					'id'             => 1,
-					'button_position' => 'before_content',
+					'id'                        => 1,
+					'button_position'           => 'before_content',
+					'display_player_to'         => [ 'all' ],
+					'who_can_download_mp3_file' => [ 'all' ],
 				],
 			) );
 
