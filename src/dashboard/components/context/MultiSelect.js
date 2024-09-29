@@ -160,26 +160,30 @@ class MultiSelect extends React.Component {
         let {isFocused, multiselectIndex} = this.state
         let self = this;
         let selectItem = document.getElementsByClassName('select-input')[multiselectIndex]
-        selectItem.addEventListener('click', function (e) {
-            e.preventDefault()
-            if (isFocused) {
+        if(selectItem) {
+            selectItem.addEventListener('click', function (e) {
+                e.preventDefault()
+                if (isFocused) {
+                    self.setState({
+                        isFocused: false
+                    })
+                } else {
+                    self.setState({
+                        isFocused: true
+                    })
+                }
+            })
+        }
+
+        let multiselectwrapper = document.getElementsByClassName('multiselect-wrapper')[multiselectIndex]
+        if(multiselectwrapper) {
+            multiselectwrapper.addEventListener('focusout', function (e) {
+                e.preventDefault()
                 self.setState({
                     isFocused: false
                 })
-            } else {
-                self.setState({
-                    isFocused: true
-                })
-            }
-        })
-
-        let multiselectwrapper = document.getElementsByClassName('multiselect-wrapper')[multiselectIndex]
-        multiselectwrapper.addEventListener('focusout', function (e) {
-            e.preventDefault()
-            self.setState({
-                isFocused: false
             })
-        })
+        }
 
 
     }

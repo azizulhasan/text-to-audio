@@ -88,13 +88,6 @@ class TTA_Helper {
 			include_once WPINC . '/pluggable.php';
 		}
 
-		$should_display_button_based_on_user_logged_user = true;
-		if ( isset( $settings['tta__settings_display_button_if_user_logged_in'] ) && $settings['tta__settings_display_button_if_user_logged_in'] ) {
-			if ( ! is_user_logged_in() ) {
-				$should_display_button_based_on_user_logged_user = false;
-			}
-		}
-
 		$tta__settings_allow_listening_for_posts_status = false;
 		if ( isset( $settings['tta__settings_allow_listening_for_posts_status'] ) && $settings['tta__settings_allow_listening_for_posts_status'] ) {
 			if ( ! in_array( self::tts_post_status(), $settings['tta__settings_allow_listening_for_posts_status'] ) ) {
@@ -111,7 +104,6 @@ class TTA_Helper {
 			|| ! is_array( $settings['tta__settings_allow_listening_for_post_types'] )
 			|| ! in_array( self::tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'] )
 			|| in_array( $post->ID, $ids )
-			|| ! $should_display_button_based_on_user_logged_user
 			|| $is_exclude_by_tags
 			|| $is_exclude_by_cagories
 			|| $tta__settings_allow_listening_for_posts_status
