@@ -212,6 +212,21 @@ class TTA_Api_Routes {
 		);
 
 
+		// register text_alias route.
+		register_rest_route(
+			$this->namespace,
+			'/get_all_user_roles',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_all_user_roles' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
+
 	}
 
 	/**
@@ -377,6 +392,31 @@ class TTA_Api_Routes {
 			return rest_ensure_response( $response );
 		}
 	}
+
+	public function get_all_user_roles($request) {
+		// Access the global $wp_roles object
+		if (!isset($wp_roles)) {
+			global $wp_roles;
+		}
+
+		// Get all roles
+		$all_roles = $wp_roles->roles;
+
+		$user_roles = [];
+		$user_roles['all'] = 'All';
+
+		// Output all roles
+		foreach ($all_roles as $role_key => $role_data) {
+			$user_roles[$role_key]  = $role_data['name'];
+		}
+
+		$response['status'] = true;
+
+		$response['data'] = $user_roles;
+
+		return rest_ensure_response( $response );
+	}
+
 
 	/*
 	 * Get route access if request is valid.

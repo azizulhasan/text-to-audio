@@ -25,6 +25,7 @@ class TTA_Hooks {
 
 	private static $excludable_js_arr = [];
 	private static $excludable_js_string = '';
+	private static $excludable_css_arr = [];
 
 	public function __construct() {
 		// TODO it should work with new functionality
@@ -44,6 +45,7 @@ class TTA_Hooks {
 			'tts_button_settings_2',
 			'tts_button_settings_3',
 			'tts_button_settings_4',
+            'NoSleep.min.js'
 		] );
 
 		$strings = implode( ',', self::$excludable_js_arr );
@@ -87,8 +89,33 @@ class TTA_Hooks {
 
 		add_filter( 'tta_before_clean_content', [ $this, 'tta_before_clean_content_callback' ], 10 );
 
+		add_filter( 'tta_after_clean_content', [ $this, 'tta_after_clean_content_callback' ], 10 );
+
 		add_filter( 'tta__content_description', [ $this, 'tta__content_description_callback' ], 99, 4 );
 
+
+		self::$excludable_css_arr = apply_filters( 'tts_excludable_css_arr', [
+			'plyr.min.css',
+			'text-to-audio-pro.css',
+		] );
+
+		// WP Rocket
+		add_filter( 'rocket_exclude_css', [ $this, 'cache_exclude_css_text_to_speech' ] );
+
+	}
+
+	/**
+	 * @param $excluded_css_files
+	 *
+	 * @return mixed
+	 */
+	public function cache_exclude_css_text_to_speech( $excluded_css_files ) {
+		$new_arr = self::$excludable_css_arr;
+		if ( is_array( $excluded_css_files ) ) {
+			$new_arr = array_merge( $excluded_css_files, self::$excludable_css_arr );
+		}
+
+		return $new_arr;
 	}
 
 
@@ -391,6 +418,26 @@ class TTA_Hooks {
 
 		return apply_filters( 'tta_pro_before_clean_content', $htmlString );
 	}
+
+	/**
+	 * removing only the last delimiter in a sequence of two or more delimiters (with or without spaces between them),
+     * while preserving the first one and ensuring a space after it
+	 *
+	 * @return string The modified HTML string.
+	 */
+	public function tta_after_clean_content_callback( $content ) {
+//        second one
+		// Define the delimiters
+		$delimiters = ['\.', ',', '\?', '!', '\|', ';', ':', '¿', '¡', '،', '؟'];
+
+		// Build a regular expression pattern to match multiple delimiters (with or without spaces) and keep only the first one
+		$pattern = '/([' . implode('', $delimiters) . '])\s*([' . implode('', $delimiters) . '])+(\s*)/';
+
+		// Replace the matched pattern with the first delimiter and ensure there is a space after it
+		return preg_replace($pattern, '$1 ', $content);
+	}
+
+
 
 
 	public function tta__content_description_callback( $description_sanitized, $description, $post_id, $post ) {

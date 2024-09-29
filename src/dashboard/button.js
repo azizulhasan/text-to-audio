@@ -11,8 +11,8 @@ let buttonCSS = '';
 
 // document.addEventListener("DOMContentLoaded", function () {
 
-const checkInterval = 100;
-const maxChecks = 600; // Check for a maximum of 30 seconds
+const checkInterval = 500;
+const maxChecks = 100; // Check for a maximum of 30 seconds
 let checkCount = 0;
 let timer = setInterval(loadProButton, checkInterval);
 function loadProButton() {
@@ -61,7 +61,7 @@ function loadProButton() {
         }
     }  else if (checkCount >= maxChecks) {
         clearInterval(timer);
-        console.error("Required resources for TextToSpeechPro are not available after multiple checks.");
+        console.log("Required resources for TextToSpeechPro are not available after multiple checks.");
     }
 }
 // });

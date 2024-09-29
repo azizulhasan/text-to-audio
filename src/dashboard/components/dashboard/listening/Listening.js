@@ -33,17 +33,17 @@ export default function Listening() {
     const [languageMissingMessage, setLanguageMissingMessage] = useState('');
 
     const [listeningSettings, setListeningSettings] = useState({
-        tta__listening_voice: 'Microsoft David - English (United States)',
+        tta__listening_voice: 'Google UK English Female',
         tta__listening_pitch: 2,
         tta__listening_rate: 1,
         tta__listening_volume: 1,
-        tta__listening_lang: 'en_GB',
+        tta__listening_lang: 'en-GB',
         tta__listening_activeLanguages_mapping: {},
         tta__multilingualActiveLanguages: {},
         tta__currentPlayerLanguages: {},
         tta__available_currentPlayerVoices: {},
     });
-    const [listeningLang, setListeningLang] = useState('en_GB');
+    const [listeningLang, setListeningLang] = useState('en-GB');
     const apiURL = useMemo(() => {
         if (window.hasOwnProperty('ttsObj') && ttsObj.is_pro_active) {
             return ttsObj.api_url + ttsObj.api_namespace + "_pro/" + ttsObj.api_version + "/";
@@ -88,6 +88,24 @@ export default function Listening() {
             setMultilingualActiveLanguages(languageObject)
 
 
+            setListeningSettings({
+                ...listeningSettings,
+                ...{tta__listening_activeLanguages_mapping: languageObject},
+            });
+        } else if (window?.ttsObjPro?.compatible?.['translatepress-multilingual/index.php']) {
+            let activeLanguages = ttsObjPro?.compatible?.['translatepress-multilingual/index.php']?.data;
+
+            // Initialize an empty object
+            const languageObject = {};
+
+            // Populate the object using a loop
+            for (const langCode of activeLanguages) {
+                languageObject[langCode] = langCode;
+            }
+
+            setMultilingualActiveLanguages(languageObject)
+
+            console.log(languageObject)
             setListeningSettings({
                 ...listeningSettings,
                 ...{tta__listening_activeLanguages_mapping: languageObject},
@@ -174,8 +192,12 @@ export default function Listening() {
         customize.append('method', 'get');
         postWithoutImage(tta_obj.api_url + 'tta/v1/customize', customize)
             .then((res) => {
+                if(!res.data?.buttonSettings?.id){
+                    res.data.buttonSettings.id = 1;
+                }
+
                 setCustomizationSettings(res.data);
-                if (res?.data.buttonSettings?.id < 3) {
+                if (res?.data?.buttonSettings?.id < 3) {
                     setVoicesAndLanguages()
                 }
             })
@@ -367,6 +389,8 @@ export default function Listening() {
             activePluginName = 'WPML'
         } else if (window?.ttsObjPro?.compatible?.['gtranslate/gtranslate.php']) {
             activePluginName = "Gtranslate";
+        } else if (window?.ttsObjPro?.compatible?.['translatepress-multilingual/index.php']) {
+            activePluginName = "TranslatePress";
         }
         return activePluginName
     }

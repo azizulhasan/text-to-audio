@@ -5,11 +5,11 @@ export default function Pause({ onClick, ttsObjPro }) {
         const parser = new DOMParser();
         // convert html string into DOM
         let document = parser.parseFromString(ttsObjPro?.player_customizations?.[2]?.pause, "image/svg+xml");
-        let svgImage = <div className="tts__position-relative" onClick={onClick} dangerouslySetInnerHTML={{__html: document.documentElement.outerHTML}}></div>;
+        let svgImage = <div className="tts__position-relative atlasvoice_player_button" onClick={onClick} dangerouslySetInnerHTML={{__html: document.documentElement.outerHTML}}></div>;
         return svgImage;
 
     }
-    return <div className="tts__position-relative">
+    return <div className="tts__position-relative atlasvoice_player_button">
         <svg onClick={onClick} stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 512 512"
              className="fs-3 cursor-pointer" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
             <path

@@ -88,19 +88,15 @@ class TTA_Helper {
 			include_once WPINC . '/pluggable.php';
 		}
 
-		$should_display_button_based_on_user_logged_user = true;
-		if ( isset( $settings['tta__settings_display_button_if_user_logged_in'] ) && $settings['tta__settings_display_button_if_user_logged_in'] ) {
-			if ( ! is_user_logged_in() ) {
-				$should_display_button_based_on_user_logged_user = false;
-			}
-		}
-
 		$tta__settings_allow_listening_for_posts_status = false;
 		if ( isset( $settings['tta__settings_allow_listening_for_posts_status'] ) && $settings['tta__settings_allow_listening_for_posts_status'] ) {
-			if (! in_array( self::tts_post_status(), $settings['tta__settings_allow_listening_for_posts_status'] )) {
+			if ( ! in_array( self::tts_post_status(), $settings['tta__settings_allow_listening_for_posts_status'] ) ) {
 				$tta__settings_allow_listening_for_posts_status = true;
 			}
 		}
+
+		// Display player settings from customization menu
+		$display_player_to = self::display_player_based_on_user_role();
 
 		if (
 			! isset( $settings['tta__settings_allow_listening_for_post_types'] )
@@ -108,11 +104,10 @@ class TTA_Helper {
 			|| ! is_array( $settings['tta__settings_allow_listening_for_post_types'] )
 			|| ! in_array( self::tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'] )
 			|| in_array( $post->ID, $ids )
-			|| ! $should_display_button_based_on_user_logged_user
 			|| $is_exclude_by_tags
 			|| $is_exclude_by_cagories
 			|| $tta__settings_allow_listening_for_posts_status
-
+			|| $display_player_to
 		) {
 			$should_load_button = false;
 		}
@@ -222,6 +217,15 @@ class TTA_Helper {
 			$acf_fields = self::get_all_acf_fields();
 		}
 
+
+		// Translatepress multilingual plugin.
+		$trp_languages = [];
+		if ( class_exists( 'TRP_Settings' ) ) {
+			$TRP_languages = new \TRP_Settings();
+			// Get the available languages
+			$trp_languages = $TRP_languages->get_settings()['translation-languages'];
+		}
+
 		$datas = \apply_filters( 'tts_pro_plugins_data', [
 			'gtranslate/gtranslate.php'                => [
 				'type'       => 'class',
@@ -240,6 +244,11 @@ class TTA_Helper {
 				'type'   => 'class',
 				'data'   => $acf_fields,
 				'plugin' => 'acf',
+			],
+			'translatepress-multilingual/index.php'    => [
+				'type'   => 'class',
+				'data'   => $trp_languages,
+				'plugin' => 'translatepress',
 			]
 		] );
 
@@ -290,7 +299,7 @@ class TTA_Helper {
 			$file_url_key .= '--voice--' . $voice;
 		}
 
-		return $file_url_key;
+		return apply_filters( 'tts_get_file_url_key', $file_url_key, $language, $voice );
 	}
 
 	public static function tts_get_voice( $plugin_all_settings ) {
@@ -307,10 +316,14 @@ class TTA_Helper {
 		return $voice;
 	}
 
-	public static function tts_file_name( $title, $selectedLang, $voice = '' ) {
+	public static function tts_file_name( $title, $selectedLang, $voice = '', $post_id = '' ) {
 
 		if ( ! $title ) {
 			$title = 'Demo Content';
+		}
+		global $post;
+		if ( ! $post_id && $post ) { // TODO: must add post ID to file name.
+			$post_id = $post->ID;
 		}
 
 		$lang_code = explode( '-', str_replace( [ '_', ' ' ], '-', $selectedLang ) );
@@ -321,7 +334,7 @@ class TTA_Helper {
 			$title = preg_replace( "/[^\p{L}a-z0-9_-]/ui", "", $title );
 		} else {
 			$md5_hash = md5( $title );
-			$title    = $md5_hash . '_' . time() . '__lang__' . $selectedLang;
+			$title    = $md5_hash . '__lang__' . $selectedLang;
 		}
 
 		if ( get_player_id() == 4 && $voice ) {
@@ -330,7 +343,7 @@ class TTA_Helper {
 			$title .= '__voice__' . $voice;
 		}
 
-		return $title;
+		return apply_filters( 'tts_file_name', $title, $selectedLang, $voice, $post );
 	}
 
 	public static function handle_old_url( $post, $new_urls, $old_url ) {
@@ -510,17 +523,17 @@ class TTA_Helper {
 			return [];
 		}
 
+		$date = get_the_date( 'Y/m/d', $post );
 
 		$mp3_file_urls = get_post_meta( $post->ID, 'tts_mp3_file_urls' );
 
-		$old_url = get_post_meta( $post->ID, 'tts_mp3_file_url', true );
 
+		$old_url = get_post_meta( $post->ID, 'tts_mp3_file_url', true );
 
 		if ( $old_url ) {
 
 			$mp3_file_urls = self::handle_old_url( $post, $mp3_file_urls, $old_url );
 		}
-
 
 		if ( isset( $mp3_file_urls[0] ) ) {
 
@@ -539,7 +552,7 @@ class TTA_Helper {
 			} else {
 
 				// Generate new singed url or backup only current post applicable url.
-				if ( get_option( 'tts_is_backup_mp3_file' ) == 'true' && $language_code == $file_url_key ) {
+				if ( get_option( 'tts_is_backup_mp3_file' ) == 'true' && strtolower( $language_code ) == strtolower( $file_url_key ) ) {
 					// previously generated mp3 file to 'TTA_Pro' folder but not backup to Google Cloud Storage.
 					// $url = 'http://localhost/azizulhasan/tts/wp-content/uploads/TTA_Pro/gtts/2024/04/21/Hello_world__lang__en_us.mp3';
 					$gcs_url = '';
@@ -558,10 +571,11 @@ class TTA_Helper {
 							$url = $gcs_new_signed_url;
 						}
 					}
-				} elseif ( get_option( 'tts_is_backup_mp3_file' ) == 'false' && $language_code == $file_url_key && strpos( $url, 'https://storage.googleapis.com' ) !== false ) {
+				} elseif ( get_option( 'tts_is_backup_mp3_file' ) == 'false' && strtolower( $language_code ) == strtolower( $file_url_key ) && strpos( $url, 'https://storage.googleapis.com' ) !== false ) {
 					$should_update_urls = true;
 					continue;
 				}
+
 
 				$final_mp3_file_ulrs[ $language_code ] = $url;
 			}
@@ -569,11 +583,11 @@ class TTA_Helper {
 
 
 		if ( $should_update_urls || empty( $final_mp3_file_ulrs ) ) {
-
 			update_post_meta( $post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs );
 		}
 
-		return \apply_filters( 'tts_mp3_file_urls', $final_mp3_file_ulrs, $post );
+
+		return \apply_filters( 'tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls );
 	}
 
 	/**
@@ -582,20 +596,22 @@ class TTA_Helper {
 	 * @return string
 	 */
 	public static function get_path_from_url( $url ) {
-		$audio_dir          = TTA_PRO_GTTS_DIR;
-		$replaceable_string = '/wp-content/uploads/TTA_Pro/gtts/';
+		$audio_dir     = TTA_PRO_GTTS_DIR;
+		$audio_dir_url = TTA_PRO_GTTS_DIR_URL;
+
 		if ( get_player_id() == 4 ) {
-			$audio_dir          = TTA_PRO_AUDIO_DIR;
-			$replaceable_string = '/wp-content/uploads/TTA_Pro/';
+			$audio_dir     = TTA_PRO_AUDIO_DIR;
+			$audio_dir_url = TTA_PRO_AUDIO_DIR_URL;
 		}
 
-		$log_data = array(
-			'url'      => $url,
-			'path'     => $audio_dir,
-			'home_url' => home_url(),
-		);
+		$log_data = apply_filters( 'tts_get_path_from_url', array(
+			'url'  => $url,
+			'path' => $audio_dir,
+		) );
+
+
 		// Extract the relative path from the full URL
-		$relative_path = str_replace( $log_data['home_url'] . $replaceable_string, '', $log_data['url'] );
+		$relative_path = str_replace( $audio_dir_url, '', $log_data['url'] );
 
 		// Construct the full path
 		return rtrim( $log_data['path'], '/' ) . '/' . $relative_path;
@@ -785,19 +801,19 @@ class TTA_Helper {
 	public static function clean_string( $inputString ) {
 		$delimiter = \apply_filters( 'tts_sentence_delimiter', '.' );
 		// Remove double delimiters separated by space
-		$spaceSeparatedDoubleDelimiterPattern = '/' . preg_quote( $delimiter ) . '\s+' . preg_quote( $delimiter ) . '/';
-		$cleanedString                        = preg_replace( $spaceSeparatedDoubleDelimiterPattern, $delimiter, $inputString );
+//		$spaceSeparatedDoubleDelimiterPattern = '/' . preg_quote( $delimiter ) . '\s+' . preg_quote( $delimiter ) . '/';
+//		$cleanedString                        = preg_replace( $spaceSeparatedDoubleDelimiterPattern, $delimiter, $inputString );
 
 		// Remove double delimiters (without space separation)
-		$doubleDelimiterPattern = '/' . preg_quote( $delimiter ) . '{2,}/';
-		$cleanedString          = preg_replace( $doubleDelimiterPattern, $delimiter, $cleanedString );
+//		$doubleDelimiterPattern = '/' . preg_quote( $delimiter ) . '{2,}/';
+//		$cleanedString          = preg_replace( $doubleDelimiterPattern, $delimiter, $cleanedString );
 
 		// Remove extra spaces (more than one space)
-		$cleanedString = preg_replace( '/\s{2,}/', ' ', $cleanedString );
+		$cleanedString = preg_replace( '/\s{2,}/', ' ', $inputString );
 
 		// Remove spaces before the delimiter and ensure one space after
 		$spaceAroundDelimiterPattern = '/\s*' . preg_quote( $delimiter ) . '\s*/';
-		$cleanedString               = preg_replace( $spaceAroundDelimiterPattern, $delimiter . ' ', $cleanedString );
+//		$cleanedString               = preg_replace( $spaceAroundDelimiterPattern, $delimiter . ' ', $inputString );
 
 		// Remove extra newlines (more than one newline)
 		$cleanedString = preg_replace( '/\n{2,}/', "\n", $cleanedString );
@@ -890,15 +906,73 @@ class TTA_Helper {
 	}
 
 	public static function all_post_status() {
-		$post_statuses = get_post_stati(['show_in_admin_status_list' => true], 'objects');
-		$status_array = [];
+		$post_statuses = get_post_stati( [ 'show_in_admin_status_list' => true ], 'objects' );
+		$status_array  = [];
 
-		foreach ($post_statuses as $status) {
-			$status_array[$status->name] = $status->label;
+		foreach ( $post_statuses as $status ) {
+			$status_array[ $status->name ] = $status->label;
 		}
 
 
 		return $status_array;
 	}
+
+	/**
+	 * Retrieves and displays player settings based on user roles and customization options.
+	 *
+	 * This function checks if the current user has permission to view the player button
+	 * based on the settings retrieved from the customization menu. It first loads the
+	 * settings for the player button, and then verifies whether the user belongs to
+	 * one of the allowed roles. If no roles are specified, it defaults to displaying
+	 * the player button to all users.
+	 *
+	 * @return bool True if the player button should be displayed, false otherwise.
+	 */
+	private static function display_player_based_on_user_role() {
+		// Retrieve customization settings for the player
+		$customize         = (array) self::tts_get_settings( 'customize' );
+		$display_player_to = false;
+
+		// Check if button settings exist
+		if ( isset( $customize['buttonSettings'] ) ) {
+			// Get current user and their roles
+			$user      = wp_get_current_user();
+			$user_role = ! empty( $user->roles ) ? $user->roles : [];
+
+			// Safely retrieve button settings, avoid key error
+			$button_settings         = (array) $customize['buttonSettings'];
+			$display_player_to_roles = isset( $button_settings['display_player_to'] )
+				? (array) $button_settings['display_player_to']
+				: [];
+
+			// If user roles are restricted and the 'all' role is not allowed
+			if ( ! empty( $user_role ) && ! in_array( 'all', $display_player_to_roles ) ) {
+				$has_any_role = false;
+				// Check if the user has any of the allowed roles
+				foreach ( $display_player_to_roles as $role ) {
+					if ( in_array( $role, $user_role ) ) {
+						$has_any_role = true;
+						break; // Stop checking once a matching role is found
+					}
+				}
+
+				// If no matching role is found, prevent player display
+				if ( ! $has_any_role ) {
+					$display_player_to = true;
+				}
+			} else {
+				$display_player_to = true;
+			}
+
+			// If 'all' is included in the allowed roles display player.
+			// or this "who_can_download_mp3_file" not exists to support already installed plugins.
+			if ( in_array( 'all', $display_player_to_roles ) || ! isset( $button_settings['display_player_to'] ) ) {
+				$display_player_to = false;
+			}
+		}
+
+		return $display_player_to;
+	}
+
 
 }
