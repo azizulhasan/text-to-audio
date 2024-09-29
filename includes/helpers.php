@@ -205,7 +205,7 @@ add_action( 'tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 12 )
 function tts_enqueue_button_scripts( $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post ) {
 	// enqueue footer stript
 	add_action( 'wp_print_footer_scripts', function () use ( $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post ) {
-		$original_title = trim( str_replace( '.', '', $title ) );
+		$original_title = trim( $title );
 		$temp_title     = trim( get_the_title() );
 		$temp_title     = tta_clean_content( $temp_title );
 
