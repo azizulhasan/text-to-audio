@@ -129,19 +129,20 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
         if (ttsObj.is_pro_active) {
             postData(apiURL + 'get_auth_file', {}, 'GET')
                 .then((res) => {
-                    
+
                     setAuthFile(res.file)
                     setIsAuthenticated(res.is_authenticated)
                     if(res?.tts_is_backup_mp3_file == 'true') {
                         setIsBackUpToGCS(res?.tts_is_backup_mp3_file|| false);
                     }
-                    
+
                 })
                 .catch((err) => {
                     console.log(err);
                 });
         }
     }, [])
+
     const authenticateTTS = (e) => {
         e.preventDefault();
         if (isAuthenticated) {

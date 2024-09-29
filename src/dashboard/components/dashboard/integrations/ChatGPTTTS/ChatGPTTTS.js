@@ -4,12 +4,7 @@ import { postData } from '../../../context/utilities';
 import toast from '../../../context/Notify';
 import UpgradeToPro from '../../../UpgradeToPro';
 
-export default function ChatGPTTTS({ getCurrentTTSService, currentTTSServic }) {
-
-    const [chatGPTAPIData, setChatGPTAPIData] = useState({
-        chatgpt_tts_api_key: '',
-        currentTTSServic: currentTTSServic
-    })
+export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic }) {
 
     const apiURL = useMemo(() => {
         return ttsObj.api_url + ttsObj.api_namespace + "_pro" + "/" + ttsObj.api_version + "/";
@@ -68,7 +63,7 @@ export default function ChatGPTTTS({ getCurrentTTSService, currentTTSServic }) {
             formData[key] = value;
         }
         formData['currentTTSServic'] = currentTTSServic;
-        if (formData.currentTTSServic !== 'chatgpt_tts') {
+        if (formData.currentTTSServic !== 'chat_gpt_tts') {
             formData.currentTTSServic = ''
         }
 
@@ -76,7 +71,7 @@ export default function ChatGPTTTS({ getCurrentTTSService, currentTTSServic }) {
         data.append('fields', JSON.stringify(formData));
         data.append('method', 'post');
 
-        postData(apiURL + 'chatgpt_tts_api', data)
+        postData(apiURL + 'chat_gpt_tts', data)
             .then((res) => {
                 if (res.status) {
                     toast('API key is saveed successfully');
@@ -90,24 +85,6 @@ export default function ChatGPTTTS({ getCurrentTTSService, currentTTSServic }) {
                 console.log(err);
             });
     };
-
-
-
-    useEffect(() => {
-        if (window.hasOwnProperty('ttsObjPro')) {
-            postData(apiURL + 'chatgpt_tts_api', {}, 'GET')
-                .then((res) => {
-                    setChatGPTAPIData(res.data)
-                    if (res.data?.currentTTSServic == 'chatgpt_tts') {
-                        getCurrentTTSService && getCurrentTTSService(res.data.currentTTSServic)
-                    }
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
-        }
-    }, [])
-
 
 
     return (
