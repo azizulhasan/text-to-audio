@@ -423,11 +423,11 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 
 = 1.7.22 ( 30 Sep 2024 ) =
 Added: Display player to multiple user type option added.
-Added: Who can download MP3 option added.
-Added: MP3 File generation system improved and optimized.
-Added: MP3 player speed settings update and optimized.
-Added: Default Pro player mouse pointer issue solved.
-Added: Google Cloud text to speech MP3 file generation, character limit reduced.
+Added: Who can download the MP3 option added.
+Improved: MP3 File generation system improved and optimized.
+Improved: MP3 player speed settings updated and optimized.
+Fixed: Default Pro player mouse pointer issue solved.
+Improved: Google Cloud text to speech MP3 file generation, character limit reduced.
 
 
 
