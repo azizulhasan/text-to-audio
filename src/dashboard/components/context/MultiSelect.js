@@ -33,7 +33,7 @@ class MultiSelect extends React.Component {
         const value = event.target.value;
         if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_active && selectedItems.length > selectionLimit) {
             toast(<h6>{this.state.toastMessage} Please <a target='_blank'
-                                                          href='https://atlasaidev.com/plugins/text-to-speech-pro/'>buy pro
+                                                          href='https://atlasaidev.com/plugins/text-to-speech-pro/pricing/'>buy pro
                 version</a></h6>, 'info', {autoClose: 10000})
             selectedItems = []
             selectedItems.push(value);
@@ -54,7 +54,7 @@ class MultiSelect extends React.Component {
         } else {
             if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_active && selectedItems.length === selectionLimit) {
                 toast(<h6>{this.state.toastMessage} Please <a target='_blank'
-                                                              href='https://atlasaidev.com/plugins/text-to-speech-pro/'>buy pro
+                                                              href='https://atlasaidev.com/plugins/text-to-speech-pro/pricing/'>buy pro
                     version</a></h6>, 'info', {autoClose: 10000})
                 return;
             }
@@ -160,27 +160,30 @@ class MultiSelect extends React.Component {
         let {isFocused, multiselectIndex} = this.state
         let self = this;
         let selectItem = document.getElementsByClassName('select-input')[multiselectIndex]
-        selectItem.addEventListener('click', function (e) {
-            e.preventDefault()
-            if (isFocused) {
+        if(selectItem) {
+            selectItem.addEventListener('click', function (e) {
+                e.preventDefault()
+                if (isFocused) {
+                    self.setState({
+                        isFocused: false
+                    })
+                } else {
+                    self.setState({
+                        isFocused: true
+                    })
+                }
+            })
+        }
+
+        let multiselectwrapper = document.getElementsByClassName('multiselect-wrapper')[multiselectIndex]
+        if(multiselectwrapper) {
+            multiselectwrapper.addEventListener('focusout', function (e) {
+                e.preventDefault()
                 self.setState({
                     isFocused: false
                 })
-            } else {
-                self.setState({
-                    isFocused: true
-                })
-            }
-
-        })
-
-        let multiselectwrapper = document.getElementsByClassName('multiselect-wrapper')[multiselectIndex]
-        multiselectwrapper.addEventListener('mousemove ', function (e) {
-            e.preventDefault()
-            self.setState({
-                isFocused: false
             })
-        })
+        }
 
 
     }

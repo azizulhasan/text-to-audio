@@ -44,8 +44,10 @@ class TTA_Activator {
 				'custom_css'             => '',
 				'tta_play_btn_shortcode' => '[tta_listen_btn]',
 				'buttonSettings'         => [
-					'id'             => 1,
-					'button_position' => 'before_content',
+					'id'                        => 1,
+					'button_position'           => 'before_content',
+					'display_player_to'         => [ 'all' ],
+					'who_can_download_mp3_file' => [ 'all' ],
 				],
 			) );
 
@@ -66,7 +68,6 @@ class TTA_Activator {
 				'tta__settings_exclude_tags'                          => [],
 				"tta__settings_display_btn_icon"                      => true,
 				"tta__settings_exclude_post_ids"                      => [],
-				"tta__settings_display_button_if_user_logged_in"      => false,
 				'tta__settings_stop_auto_playing_after_switching_tab' => true,
 				'tta__settings_stop_floating_button'                  => true,
 				'tta__settings_exclude_categories'                    => [],

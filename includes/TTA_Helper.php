@@ -88,13 +88,6 @@ class TTA_Helper {
 			include_once WPINC . '/pluggable.php';
 		}
 
-		$should_display_button_based_on_user_logged_user = true;
-		if ( isset( $settings['tta__settings_display_button_if_user_logged_in'] ) && $settings['tta__settings_display_button_if_user_logged_in'] ) {
-			if ( ! is_user_logged_in() ) {
-				$should_display_button_based_on_user_logged_user = false;
-			}
-		}
-
 		$tta__settings_allow_listening_for_posts_status = false;
 		if ( isset( $settings['tta__settings_allow_listening_for_posts_status'] ) && $settings['tta__settings_allow_listening_for_posts_status'] ) {
 			if ( ! in_array( self::tts_post_status(), $settings['tta__settings_allow_listening_for_posts_status'] ) ) {
@@ -102,17 +95,19 @@ class TTA_Helper {
 			}
 		}
 
+		// Display player settings from customization menu
+		$display_player_to = self::display_player_based_on_user_role();
+
 		if (
 			! isset( $settings['tta__settings_allow_listening_for_post_types'] )
 			|| count( $settings['tta__settings_allow_listening_for_post_types'] ) === 0
 			|| ! is_array( $settings['tta__settings_allow_listening_for_post_types'] )
 			|| ! in_array( self::tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'] )
 			|| in_array( $post->ID, $ids )
-			|| ! $should_display_button_based_on_user_logged_user
 			|| $is_exclude_by_tags
 			|| $is_exclude_by_cagories
 			|| $tta__settings_allow_listening_for_posts_status
-
+			|| $display_player_to
 		) {
 			$should_load_button = false;
 		}
@@ -339,7 +334,7 @@ class TTA_Helper {
 			$title = preg_replace( "/[^\p{L}a-z0-9_-]/ui", "", $title );
 		} else {
 			$md5_hash = md5( $title );
-			$title    = $md5_hash  . '__lang__' . $selectedLang;
+			$title    = $md5_hash . '__lang__' . $selectedLang;
 		}
 
 		if ( get_player_id() == 4 && $voice ) {
@@ -528,7 +523,7 @@ class TTA_Helper {
 			return [];
 		}
 
-		$date  = get_the_date( 'Y/m/d' , $post);
+		$date = get_the_date( 'Y/m/d', $post );
 
 		$mp3_file_urls = get_post_meta( $post->ID, 'tts_mp3_file_urls' );
 
@@ -601,17 +596,17 @@ class TTA_Helper {
 	 * @return string
 	 */
 	public static function get_path_from_url( $url ) {
-		$audio_dir          = TTA_PRO_GTTS_DIR;
-		$audio_dir_url      = TTA_PRO_GTTS_DIR_URL;
+		$audio_dir     = TTA_PRO_GTTS_DIR;
+		$audio_dir_url = TTA_PRO_GTTS_DIR_URL;
 
 		if ( get_player_id() == 4 ) {
-			$audio_dir          = TTA_PRO_AUDIO_DIR;
-			$audio_dir_url      = TTA_PRO_AUDIO_DIR_URL;
+			$audio_dir     = TTA_PRO_AUDIO_DIR;
+			$audio_dir_url = TTA_PRO_AUDIO_DIR_URL;
 		}
 
 		$log_data = apply_filters( 'tts_get_path_from_url', array(
-			'url'      => $url,
-			'path'     => $audio_dir,
+			'url'  => $url,
+			'path' => $audio_dir,
 		) );
 
 
@@ -921,5 +916,63 @@ class TTA_Helper {
 
 		return $status_array;
 	}
+
+	/**
+	 * Retrieves and displays player settings based on user roles and customization options.
+	 *
+	 * This function checks if the current user has permission to view the player button
+	 * based on the settings retrieved from the customization menu. It first loads the
+	 * settings for the player button, and then verifies whether the user belongs to
+	 * one of the allowed roles. If no roles are specified, it defaults to displaying
+	 * the player button to all users.
+	 *
+	 * @return bool True if the player button should be displayed, false otherwise.
+	 */
+	private static function display_player_based_on_user_role() {
+		// Retrieve customization settings for the player
+		$customize         = (array) self::tts_get_settings( 'customize' );
+		$display_player_to = false;
+
+		// Check if button settings exist
+		if ( isset( $customize['buttonSettings'] ) ) {
+			// Get current user and their roles
+			$user      = wp_get_current_user();
+			$user_role = ! empty( $user->roles ) ? $user->roles : [];
+
+			// Safely retrieve button settings, avoid key error
+			$button_settings         = (array) $customize['buttonSettings'];
+			$display_player_to_roles = isset( $button_settings['display_player_to'] )
+				? (array) $button_settings['display_player_to']
+				: [];
+
+			// If user roles are restricted and the 'all' role is not allowed
+			if ( ! empty( $user_role ) && ! in_array( 'all', $display_player_to_roles ) ) {
+				$has_any_role = false;
+				// Check if the user has any of the allowed roles
+				foreach ( $display_player_to_roles as $role ) {
+					if ( in_array( $role, $user_role ) ) {
+						$has_any_role = true;
+						break; // Stop checking once a matching role is found
+					}
+				}
+
+				// If no matching role is found, prevent player display
+				if ( ! $has_any_role ) {
+					$display_player_to = true;
+				}
+			} else {
+				$display_player_to = true;
+			}
+
+			// If 'all' is included in the allowed roles display player.
+			// or this "who_can_download_mp3_file" not exists to support already installed plugins.
+			if ( in_array( 'all', $display_player_to_roles ) || ! isset( $button_settings['display_player_to'] ) ) {
+				$display_player_to = false;
+			}
+		}
+
+		return $display_player_to;
+	}
+
 
 }

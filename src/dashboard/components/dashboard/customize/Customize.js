@@ -101,8 +101,26 @@ export default function Customize() {
 	 * handle change
 	 * @param {*} e
 	 */
-	const handleChange = (e) => {
+	const handleChange = (e, keyName = '') => {
 
+		if(Array.isArray(e) && keyName) {
+
+			let tempButtonSettings = structuredClone(listeningBtnStyle.buttonSettings)
+
+			tempButtonSettings = {
+				...tempButtonSettings,
+				...{
+					[keyName]: e
+				}
+			}
+			setListeningStyle({
+				...listeningBtnStyle,
+				...{
+					buttonSettings: tempButtonSettings
+				}
+			});
+			return;
+		}
 		if (
 			e.target.name === 'width' &&
 			(e.target.value > 100 || e.target.value < 0)
@@ -218,7 +236,7 @@ export default function Customize() {
 		if(!formData?.buttonSettings?.id){
 			formData.buttonSettings.id = 1;
 		}
-
+		console.log({listeningBtnStyle})
 		if( formData?.buttonSettings?.id  == 4 && !isGCAuthenticated) {
 			notify('To select this player you have to authenticate first from Integration menu', 'error' ,{
 				autoClose: 8000,
@@ -245,6 +263,8 @@ export default function Customize() {
 		let data = new FormData();
 		data.append('fields', JSON.stringify(formData));
 		data.append('method', 'post');
+
+		// return;
 		postWithoutImage(tta_obj.api_url + 'tta/v1/customize', data)
 			.then((res) => {
 				setListeningStyle(res.data);
@@ -304,6 +324,24 @@ export default function Customize() {
 				<Col xs={12} sm={12} lg={8}>
 					<Row>
 						<Col xs={12} sm={12} lg={12} className='mb-3'>
+							<>
+								<FloatingLabel
+									controlId='tta__demo_text_for_play'
+									label='Write here something and click listen button.'>
+									<Form.Control
+										as='textarea'
+										onChange={(e) => setText(e)}
+										onFocus={(e) =>
+											toast('Write something here.')
+										}
+										value={speakingText ? speakingText : ''}
+										placeholder='Write here something and click listen button.'
+										style={{ height: '100px' }}
+									/>
+								</FloatingLabel>
+							</>
+						</Col>
+						<Col xs={12} sm={12} lg={12} className='mb-3 mt-3'>
 							{
 								listeningBtnStyle?.buttonSettings?.id == 2 ?
 									<TextToSpeech buttonCSS={listeningBtnStyle} button={<div dataId="1" id="tts__listent_content_1" className='tts__listent_content' ></div>} buttonId={2} /> :
@@ -326,24 +364,6 @@ export default function Customize() {
 									listeningBtnStyle?.buttonSettings?.id == 1 && ttsObjPro.is_pro_active ? __('If you\'re selecting this button then you may not get pro features. Suppose CSS selectors from settings page and WPML/GTranslate will not work with this button.') : __('Save this player then configure proper voice and lanuage from listening menu. ')
 								}
 							</p>
-						</Col>
-						<Col xs={12} sm={12} lg={12} className='mb-3'>
-							<>
-								<FloatingLabel
-									controlId='tta__demo_text_for_play'
-									label='Write here something and click listen button.'>
-									<Form.Control
-										as='textarea'
-										onChange={(e) => setText(e)}
-										onFocus={(e) =>
-											toast('Write something here.')
-										}
-										value={speakingText ? speakingText : ''}
-										placeholder='Write here something and click listen button.'
-										style={{ height: '100px' }}
-									/>
-								</FloatingLabel>
-							</>
 						</Col>
 
 						<Col xs={12} sm={12} lg={11} className='mt-3'>
