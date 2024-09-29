@@ -78,7 +78,9 @@ class TextToSpeechProPlayer {
                     'download',
                     'settings'
                 ],
+                speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 1.75] }
             });
+
             player.on('play', function (e) {
                 // console.log(e)
             })
