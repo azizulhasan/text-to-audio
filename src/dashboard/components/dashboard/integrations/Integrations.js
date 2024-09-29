@@ -34,7 +34,7 @@ export default function Integrations() {
             postData(apiURL + 'chat_gpt_tts', data)
                 .then((res) => {
                     setChatGPTAPIData(res.data)
-                    if (res.data?.currentTTSServic === 'chat_gpt_tts') {
+                    if (res.data?.currentTTSServic === 'chat_gpt_tts' && res?.data?.chatgpt_tts_api_key) {
                         getCurrentTTSService(res.data.currentTTSServic)
                     }
                 })
@@ -86,7 +86,7 @@ export default function Integrations() {
         {
             currentTTSServic !== 'chat_gpt_tts' ?
                 <GoogleTTS getCurrentTTSService={getCurrentTTSService} currentTTSServic={currentTTSServic}/> :
-                <ChatGPTTTS chatGPTAPIData={chatGPTAPIData} currentTTSServic={currentTTSServic}/>
+                <ChatGPTTTS setChatGPTAPIData={setChatGPTAPIData} chatGPTAPIData={chatGPTAPIData} currentTTSServic={currentTTSServic}/>
         }
     </>
 }

@@ -4,7 +4,7 @@ import { postData } from '../../../context/utilities';
 import toast from '../../../context/Notify';
 import UpgradeToPro from '../../../UpgradeToPro';
 
-export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic }) {
+export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGPTAPIData }) {
 
     const apiURL = useMemo(() => {
         return ttsObj.api_url + ttsObj.api_namespace + "_pro" + "/" + ttsObj.api_version + "/";
@@ -56,10 +56,10 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic }) {
 
         let formData = {};
         for (let [key, value] of form.entries()) {
-            if (key === '' || value === '') {
-                toast('Please fill the  field : ' + key);
-                return;
-            }
+            // if (key === '' || value === '') {
+            //     toast('Please fill the  field : ' + key);
+            //     return;
+            // }
             formData[key] = value;
         }
         formData['currentTTSServic'] = currentTTSServic;
