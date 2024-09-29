@@ -115,7 +115,7 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
                        id={'who_can_download_mp3_file'}
                        multiselectIndex={1}
                        selectedItems={listeningBtnStyle?.buttonSettings?.who_can_download_mp3_file ||  ['all']}
-                       selectionLimit={1} options={userRoles} onChange={handleChange}/>
+                       selectionLimit={100} options={userRoles} onChange={handleChange}/>
                 </Form.Group>
 
             }
