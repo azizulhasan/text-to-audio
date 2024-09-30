@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.6.2
 Requires PHP: 7.4
-Stable tag: 1.7.22
+Stable tag: 1.7.24
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -420,6 +420,13 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+= 1.7.24 ( 30 Sep 2024 ) =
+Fixed: customization menu page issue fixed.
+Fixed: MP3 file generation issue.
+
+= 1.7.23 ( 30 Sep 2024 ) =
+Fixed: customization menu page issue fixed.
+
 
 = 1.7.22 ( 30 Sep 2024 ) =
 Added: Display player to multiple user type option added.
@@ -428,6 +435,7 @@ Improved: MP3 File generation system improved and optimized.
 Improved: MP3 player speed settings updated and optimized.
 Fixed: Default Pro player mouse pointer issue solved.
 Improved: Google Cloud text to speech MP3 file generation, character limit reduced.
+Fixed: Text Alias issue fixed.
 
 
 
