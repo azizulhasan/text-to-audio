@@ -28,6 +28,10 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
             });
     }, []);
 
+    useEffect(() => {
+        console.log(userRoles)
+    }, [userRoles]);
+
     return (
         <>
             <Form.Group>
@@ -92,7 +96,7 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
             </Form.Group>
             {/*Display Player To*/}
             <Form.Group className={'mt-3'}>
-                <Form.Label htmlFor='display_player_to'>
+                <Form.Label>
                     {__('Display Player To')}
                 </Form.Label>
                 {
@@ -107,7 +111,7 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
             {/*Who Can Download MP3 File*/}
             {
                 listeningBtnStyle?.buttonSettings?.id > 2 && Object.keys(userRoles).length && <Form.Group className={'mt-3'}>
-                    <Form.Label htmlFor='who_can_download_mp3_file'>
+                    <Form.Label>
                         {__('Who Can Download MP3 File')}
                     </Form.Label>
                     <MultiSelect toastMessage={'Player display restriction to multiple user type is available in the pro version'}

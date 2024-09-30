@@ -17,6 +17,8 @@ export default function Customize() {
 		color: '#000000',
 		width: '100',
 		buttonSettings: {
+			id: 1,
+			button_position: 'before_content'
 		}
 	});
 	const [listeningBtnStyle2, setListeningStyle2] = useState({
@@ -35,6 +37,26 @@ export default function Customize() {
 	const [isBackUpToGCS, setIsBackUpToGCS] = useState(false)
 	const [isChatGPTAuthenticated, setIsChatGPTAuthenticated] = useState(false)
 
+	const setDefaultButtonSettingsIfNeeded = (res) => {
+		let tempButtonSettings = structuredClone(listeningBtnStyle.buttonSettings)
+
+		if(!res?.data?.buttonSettings?.display_player_to || res?.data?.buttonSettings?.display_player_to.length < 1 ) {
+			res.data.buttonSettings.display_player_to = ['all']
+		}
+		if(!res?.data?.buttonSettings?.who_can_download_mp3_file || res?.data?.buttonSettings?.who_can_download_mp3_file.length < 1 ) {
+			res.data.buttonSettings.who_can_download_mp3_file = ['all']
+		}
+
+		if(!res?.data?.buttonSettings?.id ) {
+			res.data.buttonSettings.id = tempButtonSettings.id
+		}
+		if(!res?.data?.buttonSettings?.button_position ) {
+			res.data.buttonSettings.id = tempButtonSettings.button_position
+		}
+
+		return res;
+	}
+
 	useEffect(() => {
 		/**
 		 * Get customize settings.
@@ -43,6 +65,9 @@ export default function Customize() {
 		customize.append('method', 'get');
 		postWithoutImage(tta_obj.api_url + 'tta/v1/customize', customize)
 			.then((res) => {
+				res = setDefaultButtonSettingsIfNeeded(res)
+
+				console.log({res})
 				setListeningStyle(res.data);
 				if (res.data.custom_css) {
 					setCustomCSS(res.data.custom_css);
@@ -384,7 +409,7 @@ export default function Customize() {
 							}
 							<p className='pt-2 text-danger'>
 								{
-									listeningBtnStyle?.buttonSettings?.id == 1 && ttsObjPro.is_pro_active ? __('If you\'re selecting this button then you may not get pro features. Suppose CSS selectors from settings page and WPML/GTranslate will not work with this button.') : __('Save this player then configure proper voice and lanuage from listening menu. ')
+									listeningBtnStyle?.buttonSettings?.id == 1 && ttsObj.is_pro_active ? __('If you\'re selecting this button then you may not get pro features. Suppose CSS selectors from settings page and WPML/GTranslate will not work with this button.') : __('Save this player then configure proper voice and lanuage from listening menu. ')
 								}
 							</p>
 						</Col>
