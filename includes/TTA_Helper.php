@@ -966,7 +966,10 @@ class TTA_Helper {
 
 			// If 'all' is included in the allowed roles display player.
 			// or this "who_can_download_mp3_file" not exists to support already installed plugins.
-			if ( in_array( 'all', $display_player_to_roles ) || ! isset( $button_settings['display_player_to'] ) ) {
+			if ( in_array( 'all', $display_player_to_roles )
+			     || ! isset( $button_settings['display_player_to'] )
+			     || empty( $button_settings['display_player_to'] )
+			 ) {
 				$display_player_to = false;
 			}
 		}
