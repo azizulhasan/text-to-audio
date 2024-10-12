@@ -90,17 +90,28 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
     const handlePlayButtonClick = (e) => {
         e.preventDefault()
         let contents = window.TTS.contents;
-        // in the customization menu of dhashboard set initail text.
+        // in the customization menu of dashboard set initial text.
         if (document.getElementById('tta__demo_text_for_play')) {
             let text = document.getElementById('tta__demo_text_for_play').value;
             contents[buttonId] = text
         }
+        const currentPlayerId = JSON.parse(window.sessionStorage.getItem('currentPlayerId'));
+        window.sessionStorage.setItem('currentPlayerId', buttonId)
+
         TextToSpeechPro = window.TextToSpeechPro;
-        if (speech != null && speech.listenStatus == 'listen') {
+        if ((speech != null && speech.listenStatus == 'listen') || buttonId != currentPlayerId) {
+            if(speech && buttonId != currentPlayerId) {
+                speech = speech.getData()
+                setListenStatus(speech.listenStatus)
+                pauseButton(speech, true)
+            }
             speech = null
             setListenStatus('listen')
+
         }
+
         if (speech === null) {
+
             if (TextToSpeechPro?.TTS) {
                 speech = new window.TextToSpeechPro2(buttonId, contents[buttonId], button, window.TTS)
             } else {
