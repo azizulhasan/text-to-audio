@@ -297,12 +297,12 @@ function tta_create_shortcode( $atts ) {
 }
 
 add_shortcode( 'tta_listen_btn', 'tta_create_shortcode' );
-add_shortcode( 'AtlasVoice', 'tta_create_shortcode' );
+add_shortcode( 'atlasvoice', 'tta_create_shortcode' );
 
 // Filter to allow shortcodes in HTML tags
 add_filter( 'do_shortcode_tag', 'allow_shortcode_in_html_tag', 10, 4 );
 function allow_shortcode_in_html_tag( $output, $tag, $attr, $m ) {
-	if ( $tag == 'tta_listen_btn' ) {
+	if ( $tag == 'tta_listen_btn' ||  $tag == 'atlasvoice'  ) {
 		if ( isset( $attr['position'] ) && $attr['position'] == 'after' ) {
 			$content = tta_get_button_content( $attr, false, $m[5] ) . $m[5];
 		} else {
