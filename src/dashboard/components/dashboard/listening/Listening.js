@@ -18,7 +18,8 @@ import {
     setLocalStorage,
     getLocalStorage,
     gttsSupportedLanguages,
-    areAllKeysNumeric
+    areAllKeysNumeric,
+    chatGPTLanguages
 } from '../../context/utilities';
 import toast from '../../context/Notify';
 import {Link} from 'react-router-dom';
@@ -42,6 +43,7 @@ export default function Listening() {
         tta__multilingualActiveLanguages: {},
         tta__currentPlayerLanguages: {},
         tta__available_currentPlayerVoices: {},
+        tta__listening_voice_model: 'tts-1',
     });
     const [listeningLang, setListeningLang] = useState('en-GB');
     const apiURL = useMemo(() => {
@@ -200,6 +202,7 @@ export default function Listening() {
                 if (res?.data?.buttonSettings?.id < 3) {
                     setVoicesAndLanguages()
                 }
+
             })
             .catch((err) => {
                 console.log(err);
@@ -211,10 +214,28 @@ export default function Listening() {
         if (customizationSettings?.buttonSettings?.id < 3) {
             setVoicesAndLanguages()
         }
+
+        if (customizationSettings?.buttonSettings?.id == 5) {
+            setGPTVoicesAndLanguages()
+        }
     }, [customizationSettings])
 
-    const setVoicesAndLanguages = (voices = [], langs = [],) => {
 
+    const setGPTVoicesAndLanguages = () => {
+        const names = {
+            alloy: "alloy",
+            echo: "echo",
+            fable: "fable",
+            onyx: "onyx",
+            nova: "nova",
+            shimmer: "shimmer"
+        };
+
+        setCurrentPlayerVoices(Object.keys(names))
+        setSpeechSynthesisVoices(Object.keys(names))
+    }
+
+    const setVoicesAndLanguages = (voices = [], langs = [],) => {
         if (Array.isArray(voices) && voices.length) {
             setCurrentPlayerVoices(voices)
             setSpeechSynthesisVoices(voices)
@@ -237,6 +258,7 @@ export default function Listening() {
 
         let timer = setTimeout(function handleTime() {
             timer = setTimeout(handleTime, 1000)
+            console.log({customizationSettings, timer})
 
             if (timer > 65 || customizationSettings?.buttonSettings == undefined) {
                 clearTimeout(timer)
@@ -263,6 +285,10 @@ export default function Listening() {
             if (customizationSettings?.buttonSettings?.id == 3) {
                 let gttsLanguages = gttsSupportedLanguages();
                 setCurrentPlayerLanguages(gttsLanguages)
+                setLanguageMissingMessage('')
+            }else if (customizationSettings?.buttonSettings?.id == 5) {
+                let languages = chatGPTLanguages();
+                setCurrentPlayerLanguages(languages)
                 setLanguageMissingMessage('')
             } else if (customizationSettings?.buttonSettings?.id < 3) {
                 setLanguageMissingMessage('Looking for another language? Please select the another player from customization menu. Your language may be appear.')
@@ -470,9 +496,11 @@ export default function Listening() {
                                                 <option key={index} data-lang={voice?.languageCodes?.[0]}
                                                         value={[voice.name, voice.ssmlGender].join('-')}>
                                                     {voice.name} {'-'} {voice.ssmlGender}
-                                                </option> : <option key={index} data-lang={voice.lang} value={voice.name}>
-                                                    {voice.name}
-                                                </option>
+                                                </option> : customizationSettings?.buttonSettings?.id == 5 ? <option key={index} data-lang={voice} value={voice}>
+                                                        {voice}
+                                                    </option> : <option key={index} data-lang={voice.lang} value={voice.name}>
+                                                        {voice.name}
+                                                    </option>
                                             )}
                                         </Form.Select>
                                     </Form.Group>
@@ -496,124 +524,167 @@ export default function Listening() {
                                 </Col>
                             </Row>
                         }
-                        <Row>
-                            <Col xs={12} sm={8} lg={8}>
-                                <Form.Group>
-                                    <Form.Label htmlFor='tta__listening_pitch'>Voice Pitch </Form.Label>
-                                    <Form.Select
-                                        onChange={handleChange}
-                                        name='tta__listening_pitch'
-                                        id='tta__listening_pitch'
-                                        value={listeningSettings.tta__listening_pitch}
-                                        aria-label='Default select example'>
-                                        <option disabled>
-                                            {' '}
-                                            Default Listening Pitch
-                                        </option>
-                                        {[0, 1, 2].map((pitch, index) => {
-                                            return (
-                                                <option key={index} value={pitch}>
-                                                    {pitch}
+                        {
+                            customizationSettings?.buttonSettings?.id == 5 && <Row>
+                                <Col xs={12} sm={8} lg={8}>
+                                    <Form.Group>
+                                        <Form.Label htmlFor='tta__listening_voice_model'>Voice Model </Form.Label>
+                                        <Form.Select
+                                            onChange={handleChange}
+                                            name='tta__listening_voice_model'
+                                            id='tta__listening_voice_model'
+                                            value={listeningSettings.tta__listening_voice_model}
+                                            aria-label='Default select example'>
+                                            <option disabled>
+                                                {' '}
+                                                Default Listening Model
+                                            </option>
+                                            <option value="tts-1">TTS-1</option>
+                                            <option value="tts-1-hd">TTS-1 HD</option>
+                                        </Form.Select>
+                                    </Form.Group>
+                                </Col>
+                                <Col xs={12} sm={4} lg={4} className='mt-4'>
+                                    <>
+                                        {['top'].map((placement) => (
+                                            <OverlayTrigger
+                                                key={placement}
+                                                placement={placement}
+                                                overlay={
+                                                    <Tooltip id={`tooltip-${placement}`}>
+                                                        For real-time applications, the standard tts-1 model provides the lowest latency but at a lower quality than the tts-1-hd model. Due to the way the audio is generated, tts-1 is likely to generate content that has more static in certain situations than tts-1-hd. In some cases, the audio may not have noticeable differences depending on your listening device and the individual person.
+                                                    </Tooltip>
+                                                }>
+                                                <Button className='tta_btn'>?</Button>
+                                            </OverlayTrigger>
+                                        ))}
+                                    </>
+                                </Col>
+                            </Row>
+                        }
+                        {
+                            customizationSettings?.buttonSettings?.id < 3 && <>
+                                <Row>
+                                    <Col xs={12} sm={8} lg={8}>
+                                        <Form.Group>
+                                            <Form.Label htmlFor='tta__listening_pitch'>Voice Pitch </Form.Label>
+                                            <Form.Select
+                                                onChange={handleChange}
+                                                name='tta__listening_pitch'
+                                                id='tta__listening_pitch'
+                                                value={listeningSettings.tta__listening_pitch}
+                                                aria-label='Default select example'>
+                                                <option disabled>
+                                                    {' '}
+                                                    Default Listening Pitch
                                                 </option>
-                                            );
-                                        })}
-                                    </Form.Select>
-                                </Form.Group>
-                            </Col>
-                            <Col xs={12} sm={4} lg={4} className='mt-4'>
-                                <>
-                                    {['top'].map((placement) => (
-                                        <OverlayTrigger
-                                            key={placement}
-                                            placement={placement}
-                                            overlay={
-                                                <Tooltip id={`tooltip-${placement}`}>
-                                                    Gets and sets the pitch at which the
-                                                    utterance will be spoken at.
-                                                </Tooltip>
-                                            }>
-                                            <Button className='tta_btn'>?</Button>
-                                        </OverlayTrigger>
-                                    ))}
-                                </>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col xs={12} sm={8} lg={8}>
-                                <Form.Group>
-                                    <Form.Label htmlFor='tta__listening_rate'>
-                                        Voice Speed
-                                    </Form.Label>
-                                    <Form.Control
-                                        type='text'
-                                        id='tta__listening_rate'
-                                        name='tta__listening_rate'
-                                        onChange={handleChange}
-                                        value={listeningSettings.tta__listening_rate}
-                                        aria-describedby='tta__listening_rate'
-                                    />
-                                    <Form.Text id='tta__listening_rate' muted>
-                                        Value : From 0.1 to 10.
-                                    </Form.Text>
-                                </Form.Group>
-                            </Col>
-                            <Col xs={12} sm={4} lg={4} className='mt-4'>
-                                <>
-                                    {['top'].map((placement) => (
-                                        <OverlayTrigger
-                                            key={placement}
-                                            placement={placement}
-                                            overlay={
-                                                <Tooltip id={`tooltip-${placement}`}>
-                                                    Gets and sets the speed at which the
-                                                    utterance will be spoken at. Value :
-                                                    From 0.1 to 10
-                                                </Tooltip>
-                                            }>
-                                            <Button className='tta_btn'>?</Button>
-                                        </OverlayTrigger>
-                                    ))}
-                                </>
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col xs={12} sm={8} lg={8}>
-                                <Form.Group>
-                                    <Form.Label htmlFor='tta__listening_volume'>
-                                        Voice Volume
-                                    </Form.Label>
-                                    <Form.Control
-                                        type='text'
-                                        id='tta__listening_volume'
-                                        name='tta__listening_volume'
-                                        onChange={handleChange}
-                                        value={listeningSettings.tta__listening_volume}
-                                        aria-describedby='tta__listening_volume'
-                                    />
-                                    <Form.Text id='tta__listening_volume' muted>
-                                        Value : From 0 to 1.
-                                    </Form.Text>
-                                </Form.Group>
-                            </Col>
-                            <Col xs={12} sm={4} lg={4} className='mt-4'>
-                                <>
-                                    {['top'].map((placement) => (
-                                        <OverlayTrigger
-                                            key={placement}
-                                            placement={placement}
-                                            overlay={
-                                                <Tooltip id={`tooltip-${placement}`}>
-                                                    Gets and sets the volume that the
-                                                    utterance will be spoken at. Value :
-                                                    From 0 to 1
-                                                </Tooltip>
-                                            }>
-                                            <Button className='tta_btn'>?</Button>
-                                        </OverlayTrigger>
-                                    ))}
-                                </>
-                            </Col>
-                        </Row>
+                                                {[0, 1, 2].map((pitch, index) => {
+                                                    return (
+                                                        <option key={index} value={pitch}>
+                                                            {pitch}
+                                                        </option>
+                                                    );
+                                                })}
+                                            </Form.Select>
+                                        </Form.Group>
+                                    </Col>
+                                    <Col xs={12} sm={4} lg={4} className='mt-4'>
+                                        <>
+                                            {['top'].map((placement) => (
+                                                <OverlayTrigger
+                                                    key={placement}
+                                                    placement={placement}
+                                                    overlay={
+                                                        <Tooltip id={`tooltip-${placement}`}>
+                                                            Gets and sets the pitch at which the
+                                                            utterance will be spoken at.
+                                                        </Tooltip>
+                                                    }>
+                                                    <Button className='tta_btn'>?</Button>
+                                                </OverlayTrigger>
+                                            ))}
+                                        </>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col xs={12} sm={8} lg={8}>
+                                        <Form.Group>
+                                            <Form.Label htmlFor='tta__listening_rate'>
+                                                Voice Speed
+                                            </Form.Label>
+                                            <Form.Control
+                                                type='text'
+                                                id='tta__listening_rate'
+                                                name='tta__listening_rate'
+                                                onChange={handleChange}
+                                                value={listeningSettings.tta__listening_rate}
+                                                aria-describedby='tta__listening_rate'
+                                            />
+                                            <Form.Text id='tta__listening_rate' muted>
+                                                Value : From 0.1 to 10.
+                                            </Form.Text>
+                                        </Form.Group>
+                                    </Col>
+                                    <Col xs={12} sm={4} lg={4} className='mt-4'>
+                                        <>
+                                            {['top'].map((placement) => (
+                                                <OverlayTrigger
+                                                    key={placement}
+                                                    placement={placement}
+                                                    overlay={
+                                                        <Tooltip id={`tooltip-${placement}`}>
+                                                            Gets and sets the speed at which the
+                                                            utterance will be spoken at. Value :
+                                                            From 0.1 to 10
+                                                        </Tooltip>
+                                                    }>
+                                                    <Button className='tta_btn'>?</Button>
+                                                </OverlayTrigger>
+                                            ))}
+                                        </>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col xs={12} sm={8} lg={8}>
+                                        <Form.Group>
+                                            <Form.Label htmlFor='tta__listening_volume'>
+                                                Voice Volume
+                                            </Form.Label>
+                                            <Form.Control
+                                                type='text'
+                                                id='tta__listening_volume'
+                                                name='tta__listening_volume'
+                                                onChange={handleChange}
+                                                value={listeningSettings.tta__listening_volume}
+                                                aria-describedby='tta__listening_volume'
+                                            />
+                                            <Form.Text id='tta__listening_volume' muted>
+                                                Value : From 0 to 1.
+                                            </Form.Text>
+                                        </Form.Group>
+                                    </Col>
+                                    <Col xs={12} sm={4} lg={4} className='mt-4'>
+                                        <>
+                                            {['top'].map((placement) => (
+                                                <OverlayTrigger
+                                                    key={placement}
+                                                    placement={placement}
+                                                    overlay={
+                                                        <Tooltip id={`tooltip-${placement}`}>
+                                                            Gets and sets the volume that the
+                                                            utterance will be spoken at. Value :
+                                                            From 0 to 1
+                                                        </Tooltip>
+                                                    }>
+                                                    <Button className='tta_btn'>?</Button>
+                                                </OverlayTrigger>
+                                            ))}
+                                        </>
+                                    </Col>
+                                </Row>
+                            </>
+                        }
+
                         <Row>
                             {
                                 Object.keys(multilingualActiveLanguages).length ?
