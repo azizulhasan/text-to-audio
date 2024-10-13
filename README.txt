@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.6.2
 Requires PHP: 7.4
-Stable tag: 1.7.24
+Stable tag: 1.7.25
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -419,6 +419,13 @@ You can customize the voice and language of the text-to-speech player using shor
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+
+
+= 1.7.25 ( 13 Oct 2024 ) =
+Updated: Freemius SDK update.
+Fixed: Number format issue fixed. [Text To Speech Pro : How To Implement Number Format?](https://www.youtube.com/watch?v=xQCw7mJXrxo&t=42s)
+Fixed: Multiple player issue fixed for "Default Pro" player.
+Fixed: MP3 file generation total batch issue fixed.
 
 = 1.7.24 ( 30 Sep 2024 ) =
 Fixed: customization menu page issue fixed.
