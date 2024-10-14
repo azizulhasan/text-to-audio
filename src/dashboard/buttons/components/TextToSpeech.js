@@ -62,14 +62,24 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
         }, 100)
     }
 
-    const resumeButton = (speech) => {
+    const resumeButton = (speech, finishIntentionally = false) => {
         speech.resume(speech.speech)
-        let deadline = new Date(Date.parse(new Date()) + decreamentDeadline);
-        getDecreamentTime(deadline)
-        getIncreamentTime(increamentDeadline, increamentedTime)
-        setTimeout(() => {
-            setListenStatus(speech.listenStatus)
-        }, 100)
+        if (finishIntentionally) {
+            speech.finishedSpeaking(speech.speech, {}, finishIntentionally);
+            setIsPlaying(!isPlaying);
+            clearInterval(decreamentInterval);
+            clearInterval(increamentInterval);
+            setTimeout(() => {
+                setListenStatus(speech.listenStatus)
+            }, 100)
+        }else{
+            let deadline = new Date(Date.parse(new Date()) + decreamentDeadline);
+            getDecreamentTime(deadline)
+            getIncreamentTime(increamentDeadline, increamentedTime)
+            setTimeout(() => {
+                setListenStatus(speech.listenStatus)
+            }, 100)
+        }
     }
 
 
@@ -102,14 +112,20 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
         if ((speech != null && speech.listenStatus == 'listen') || buttonId != currentPlayerId) {
             if(speech && buttonId != currentPlayerId) {
                 speech = speech.getData()
-                setListenStatus(speech.listenStatus)
-                pauseButton(speech, true)
+                console.log(speech.listenStatus)
+                if(speech.listenStatus == 'resume') {
+                    setListenStatus(speech.listenStatus)
+                    resumeButton(speech, true)
+                }else {
+                    setListenStatus(speech.listenStatus)
+                    pauseButton(speech, true)
+                }
             }
             speech = null
             setListenStatus('listen')
 
         }
-
+        console.log({speech, currentPlayerId, buttonId})
         if (speech === null) {
 
             if (TextToSpeechPro?.TTS) {
@@ -167,13 +183,13 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             setIncreamentedTime(now)
             setProgressbarProgress(now)
             timeleft = now + 1000
-            if (document.getElementById('audio_time_start')) {
-                document.getElementById('audio_time_start').innerHTML = getFormattedTime(now).formatted;
+            if (document.getElementById(`audio_time_start_${buttonId}`)) {
+                document.getElementById(`audio_time_start_${buttonId}`).innerHTML = getFormattedTime(now).formatted;
                 // Display the message when countdown is over
                 if (timeleft > t.total) {
                     clearInterval(timer);
                     // TODO: match with settings if minute and second extension will be added.
-                    document.getElementById('audio_time_start').innerHTML = '00:00'
+                    document.getElementById(`audio_time_start_${buttonId}`).innerHTML = '00:00'
                 }
             } else {
                 clearInterval(timer);
@@ -239,12 +255,12 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             let t = decreament_time_remaining(deadline)
             // console.log(t)
             setDecreamentDeadline(t.total)
-            if (document.getElementById('audio_time_end')) {
-                document.getElementById('audio_time_end').innerHTML = t.formatted;
+            if (document.getElementById(`audio_time_end_${buttonId}`)) {
+                document.getElementById(`audio_time_end_${buttonId}`).innerHTML = t.formatted;
                 // Display the message when countdown is over
                 if (t.total <= 0) {
                     clearInterval(timer);
-                    document.getElementById('audio_time_end').innerHTML = decreament_time_remaining(readingTime, false, true).formatted
+                    document.getElementById(`audio_time_end_${buttonId}`).innerHTML = decreament_time_remaining(readingTime, false, true).formatted
                 }
             } else {
                 clearInterval(timer);
@@ -336,7 +352,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                 listenStatus !== 'listen' && window.hasOwnProperty('TTS') && <div className="tts__d-flex tts__gap-3  tts__justify-content-between tts__align-items-center">
                                     <div className="tts__audio-player">
                                         <div className="tts__audio-controls">
-                                            <div className="tts__audio-time-start" id="audio_time_start">00:00</div>
+                                            <div className="tts__audio-time-start" id={`audio_time_start_${buttonId}`}>00:00</div>
                                             <div
                                                 className="tts__progress tts__audio-progress"
                                                 role="progressbar"
@@ -351,7 +367,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                                     style={{ backgroundColor: buttonCSS.color, height: '5px', width: `${progressbarValue}%` }}
                                                 />
                                             </div>
-                                            <div className="tts__audio-time-end" id="audio_time_end">00:00</div>
+                                            <div className="tts__audio-time-end" id={`audio_time_end_${buttonId}`}>00:00</div>
                                         </div>
                                         <div className="tts__audio-volume"></div>
                                     </div>
