@@ -15,7 +15,7 @@
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
  * Description:       The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
- * Version:           1.7.24
+ * Version:           1.7.25
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-3.0+
@@ -205,7 +205,7 @@ class TTA_Init {
 
 	public function __construct() {
 		if ( ! defined( 'TEXT_TO_AUDIO_VERSION' ) ) {
-			define( 'TEXT_TO_AUDIO_VERSION', apply_filters( 'tts_version', '1.7.24' ) );
+			define( 'TEXT_TO_AUDIO_VERSION', apply_filters( 'tts_version', '1.7.25' ) );
 		}
 
 		if ( ! defined( 'TEXT_TO_AUDIO_PLUGIN_NAME' ) ) {
@@ -297,12 +297,12 @@ function tta_create_shortcode( $atts ) {
 }
 
 add_shortcode( 'tta_listen_btn', 'tta_create_shortcode' );
-add_shortcode( 'AtlasVoice', 'tta_create_shortcode' );
+add_shortcode( 'atlasvoice', 'tta_create_shortcode' );
 
 // Filter to allow shortcodes in HTML tags
 add_filter( 'do_shortcode_tag', 'allow_shortcode_in_html_tag', 10, 4 );
 function allow_shortcode_in_html_tag( $output, $tag, $attr, $m ) {
-	if ( $tag == 'tta_listen_btn' ) {
+	if ( $tag == 'tta_listen_btn' ||  $tag == 'atlasvoice'  ) {
 		if ( isset( $attr['position'] ) && $attr['position'] == 'after' ) {
 			$content = tta_get_button_content( $attr, false, $m[5] ) . $m[5];
 		} else {
