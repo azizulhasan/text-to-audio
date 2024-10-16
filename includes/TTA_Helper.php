@@ -519,7 +519,7 @@ class TTA_Helper {
 			global $post;
 		}
 
-		if ( ! is_pro_active() ) {
+		if ( ! is_pro_active() || self::get_player_id() < 3 ) {
 			return [];
 		}
 

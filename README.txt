@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.6.2
 Requires PHP: 7.4
-Stable tag: 1.7.25
+Stable tag: 1.7.26
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -203,29 +203,29 @@ Here's how to use the Text to Speech button shortcode:
 
 1. **Basic Usage:** Simply add the following shortcode anywhere in the content of your page or post to insert the text-to-audio button.
 	
-	`[tta_listen_btn]`
+	`[atlasvoice]`
 
 2. **Customize Button Text:** You can customize the text displayed on the button by adding attributes to the shortcode. For example:
 
 	`
-	[tta_listen_btn listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay"]
+	[atlasvoice listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay"]
 	`
 
 3. **Custom Text to Read:** To specify custom text for the button to read aloud, use the ‘text_to_read’ attribute in the shortcode. For example:
 
 	`
-	[tta_listen_btn text_to_read="Hello WordPress" ]
+	[atlasvoice text_to_read="Hello WordPress" ]
 	`
 
 4. **Add CSS Class:** You can also add a custom CSS class to the button by including the ‘class’ attribute in the shortcode. For example:
 
 	`
-	[tta_listen_btn class="custom_class"]
+	[atlasvoice class="custom_class"]
 	`	
 5. **Change Language and Voice:** Alter the language and voice of the text-to-speech by using the `lang` and `voice` attributes in the shortcode. For example:
 
 	`
-	[tta_listen_btn lang="en-GB" voice="Google US English"]
+	[atlasvoice lang="en-GB" voice="Google US English"]
 	`	
 
 6. **Adding Missing Content:** If there is missing content that you want to include, you can do so using a filter. Here's an example of how to add extra content via a filter:
@@ -240,9 +240,9 @@ Here's how to use the Text to Speech button shortcode:
     }
 	` 
 
-7. **Use ShortCode As Tag:** You can use `tta_listen_btn` as tag. Like
+7. **Use ShortCode As Tag:** You can use `atlasvoice` as tag. Like
 
-	`[tta_listen_btn ]This is example content [/tta_listen_btn]`
+	`[atlasvoice ]This is example content [/atlasvoice]`
 	
 
 
@@ -351,7 +351,7 @@ You have two methods to modify the button text. One is by utilizing shortcode at
 Shortcode Example:
 
 	`
-	[tta_listen_btn listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay"]
+	[atlasvoice listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay"]
 	
 	`
 
@@ -384,7 +384,7 @@ Replace 'Listen', 'Pause', 'Resume', and 'Replay' with your desired custom text.
 You can add a custom CSS class to the button by including it as an attribute in the shortcode. Here's an example:
 
 `
-[tta_listen_btn class="custom_class"]
+[atlasvoice class="custom_class"]
 
 `
 
@@ -398,7 +398,7 @@ You can easily customize the button background and text color directly from the 
 You can customize the voice and language of the text-to-speech player using shortcode. Here's how:
 
 	`
-	[tta_listen_btn lang="en-GB" voice="Google US English"]
+	[atlasvoice lang="en-GB" voice="Google US English"]
 	`	
 
 == Screenshots ==
@@ -419,6 +419,12 @@ You can customize the voice and language of the text-to-speech player using shor
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+
+
+= 1.7.26 ( 16 Oct 2024 ) =
+Fixed: Multiple enqueue for player data is fixed.
+Fixed: Multiple player issue fixed.
+Added: new shortcode added `[atlasvoice]`.
 
 
 = 1.7.25 ( 13 Oct 2024 ) =
@@ -657,7 +663,7 @@ Added: Backup MP3 file to Google Cloud Storage System added.
 
 
 = 1.6.7 ( 13 May 2024 ) =
-Added: Shortcode tag introduced. `[tta_listen_btn position="after"]This is example content for after button positioning. [/tta_listen_btn]`
+Added: Shortcode tag introduced. `[atlasvoice position="after"]This is example content for after button positioning. [/atlasvoice]`
 
 = 1.6.6 ( 09 May 2024 ) =
 Added: Cache exclude for various plugins issue fixed.
