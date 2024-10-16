@@ -42,7 +42,7 @@ class TTA_Activator {
 				"color"                  => "#ffffff",
 				"width"                  => "100",
 				'custom_css'             => '',
-				'tta_play_btn_shortcode' => '[tta_listen_btn]',
+				'tta_play_btn_shortcode' => '[atlasvoice]',
 				'buttonSettings'         => [
 					'id'                        => 1,
 					'button_position'           => 'before_content',

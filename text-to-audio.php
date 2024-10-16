@@ -15,7 +15,7 @@
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
  * Description:       The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
- * Version:           1.7.25
+ * Version:           1.7.26
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-3.0+
@@ -205,7 +205,7 @@ class TTA_Init {
 
 	public function __construct() {
 		if ( ! defined( 'TEXT_TO_AUDIO_VERSION' ) ) {
-			define( 'TEXT_TO_AUDIO_VERSION', apply_filters( 'tts_version', '1.7.25' ) );
+			define( 'TEXT_TO_AUDIO_VERSION', apply_filters( 'tts_version', '1.7.26' ) );
 		}
 
 		if ( ! defined( 'TEXT_TO_AUDIO_PLUGIN_NAME' ) ) {
@@ -258,7 +258,6 @@ class TTA_Init {
 }
 
 
-
 add_action( 'init', function () {
 	//Rest api init.
 	new TTA_Init();
@@ -284,7 +283,7 @@ register_deactivation_hook( __FILE__, function () {
 /**
  *
  * Create short code for qr code.
- * Example [tta_listen_btn]
+ * Example [atlasvoice]
  *
  * @param $atts
  *
@@ -302,14 +301,14 @@ add_shortcode( 'atlasvoice', 'tta_create_shortcode' );
 // Filter to allow shortcodes in HTML tags
 add_filter( 'do_shortcode_tag', 'allow_shortcode_in_html_tag', 10, 4 );
 function allow_shortcode_in_html_tag( $output, $tag, $attr, $m ) {
-	if ( $tag == 'tta_listen_btn' ||  $tag == 'atlasvoice'  ) {
+	if ( $tag == 'tta_listen_btn' || $tag == 'atlasvoice' && ! empty( $attr ) ) {
 		if ( isset( $attr['position'] ) && $attr['position'] == 'after' ) {
 			$content = tta_get_button_content( $attr, false, $m[5] ) . $m[5];
 		} else {
 			$content = $m[5] . tta_get_button_content( $attr, false, $m[5] );
 		}
 
-		// Get the content wrapped by the shortcode.
+       //Get the content wrapped by the shortcode.
 		return $content;
 	}
 
