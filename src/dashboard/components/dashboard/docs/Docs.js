@@ -147,7 +147,7 @@ export default function Docs() {
 									adding filter. But filter always overrides the shortcode attributes. Here is short
 									code Example :{' '}
 									<pre>
-										<code>[tta_listen_btn listen_text="Listen" pause_text="Pause" resume_text="Resume"
+										<code>[atlasvoice listen_text="Listen" pause_text="Pause" resume_text="Resume"
 										replay_text="Replay" start_text="Start" stop_text="Stop"]</code>
 									</pre>
 									Also you can change it by filter. We prefer by filter.
@@ -182,7 +182,7 @@ export default function Docs() {
 								</Accordion.Header>
 								<Accordion.Body>
 									Add class on shortcode as an attribute. Example :{' '}
-									<code>[tta_listen_btn class="custom_class"]</code>
+									<code>[atlasvoice class="custom_class"]</code>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='7'>
