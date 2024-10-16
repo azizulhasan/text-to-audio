@@ -28,7 +28,7 @@ export default function Customize() {
 		border: '0',
 	});
 
-	const [shortCode, setShortCode] = useState('[tta_listen_btn]');
+	const [shortCode, setShortCode] = useState('[atlasvoice]');
 	const [customCSS, setCustomCSS] = useState('');
 
 	const [speakingText, setSpeakingText] = useState('');

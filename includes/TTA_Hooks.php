@@ -269,7 +269,7 @@ class TTA_Hooks {
 		if ( isset( $customize ) && count( $customize ) ) {
 			$btn_style = 'background-color:#184c53;color:#fff;border:0;border-radius:3px;';
 		}
-		$short_code = '[tta_listen_btn]';
+		$short_code = '[atlasvoice]';
 		if ( isset( $customize['tta_play_btn_shortcode'] ) && '' != $customize['tta_play_btn_shortcode'] ) {
 			$short_code = $customize['tta_play_btn_shortcode'];
 		}

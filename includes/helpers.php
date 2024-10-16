@@ -61,7 +61,7 @@ function tta_clean_content( $text ) {
 	$text = preg_replace( "/\\\\{2,}'/", "\'", $text );
 
 	$text = TTA_Helper::clean_string( $text );
-    
+
 	return apply_filters( 'tta_clean_content', $text );
 
 }
@@ -203,7 +203,7 @@ add_action( 'tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 12 )
  * Enqueue button scripts
  */
 function tts_enqueue_button_scripts( $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post ) {
-	// enqueue footer stript
+	// enqueue footer script
 	add_action( 'wp_print_footer_scripts', function () use ( $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post ) {
 		$original_title = trim( $title );
 		$temp_title     = trim( get_the_title() );
@@ -211,7 +211,7 @@ function tts_enqueue_button_scripts( $content, $btn_no, $class, $btn_style, $tex
 
 		// Get plugin all settings and pass it to TTS javascript Object.
 		$plugin_all_settings = TTA_Helper::tts_get_settings( '', $post->ID );
-		// error_log(print_r($plugin_all_settings,1));
+
 		if ( isset( $atts['lang'] ) && $atts['lang'] && isset( $plugin_all_settings['listening']['tta__listening_lang'] ) && $atts['lang'] != $plugin_all_settings['listening']['tta__listening_lang'] ) {
 			$plugin_all_settings['listening']['tta__listening_lang'] = $atts['lang'];
 		}
@@ -379,7 +379,7 @@ function get_button_text( $atts, $content_read_time ) {
 
 
 function get_text_array_from_shortcode( $customize_settings, $text_arr ) {
-	$shortcode = '[tta_listen_btn]';
+	$shortcode = '[atlasvoice]';
 	if ( isset( $customize_settings['tta_play_btn_shortcode'] ) && $customize_settings['tta_play_btn_shortcode'] ) {
 		$shortcode = $customize_settings['tta_play_btn_shortcode'];
 	}
