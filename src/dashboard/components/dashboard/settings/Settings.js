@@ -18,6 +18,7 @@ import {MultiSelect} from '../../context/MultiSelect'
 export default function Settings() {
     const [settings, setSettings] = useState({
         tta__settings_enable_button_add: false,
+        tta__settings_apply_number_format: false,
         tta__settings_display_btn_icon: false,
         tta__settings_allow_listening_for_post_types: ['post'],
         tta__settings_allow_listening_for_posts_status: ['publish'],
@@ -190,6 +191,49 @@ export default function Settings() {
                                 </>
 
                             }
+                            {/*Apply number format*/}
+                            {
+                                window?.ttsObj?.is_pro_active && <>
+                                    <Row className=' mt-3'>
+                                        <Col xs={6} sm={6} lg={4}>
+                                            <Form.Label htmlFor='tta__settings_apply_number_format'>
+                                                Apply number format
+                                            </Form.Label>
+                                        </Col>
+                                        <Col xs={5} sm={5} lg={7}>
+                                            <Form.Check // prettier-ignore
+                                                type={'checkbox'}
+                                                checked={settings.tta__settings_apply_number_format}
+                                                onChange={(e) =>
+                                                    handleChange(e)
+                                                }
+                                                name={`tta__settings_apply_number_format`}
+                                                id={`tta__settings_apply_number_format`}
+                                            />
+                                        </Col>
+                                        <Col xs={1} sm={1} lg={1} className='mt-4'>
+                                            <>
+                                                {['top'].map((placement) => (
+                                                    <OverlayTrigger
+                                                        key={placement}
+                                                        placement={placement}
+                                                        overlay={
+                                                            <Tooltip id={`tooltip-${placement}`}>
+                                                                {__('Click To Know How It Works?')}
+                                                            </Tooltip>
+                                                        }>
+                                                        <a className={'text-danger'} target='_blank'
+                                                           href='https://www.youtube.com/watch?v=xQCw7mJXrxo&t=46s'>
+                                                            <i className="fab fa-youtube"></i>
+                                                        </a>
+                                                    </OverlayTrigger>
+                                                    ))}
+                                            </>
+                                        </Col>
+                                    </Row>
+                                </>
+
+                            }
                             {/* Stop Auto Pause After Switching Tab. */}
                             {/* <Row className=' mt-3'>
 								<Col xs={12} sm={6} lg={4}>
@@ -296,9 +340,9 @@ export default function Settings() {
                                                         {__('Click To Know How It Works?')}
                                                     </Tooltip>
                                                 }>
-                                                <a target='_blank'
+                                                <a className={'text-danger'} target='_blank'
                                                    href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
-                                                    <i className="fas fa-info-circle"></i></a>
+                                                    <i className="fab fa-youtube"></i></a>
                                             </OverlayTrigger>
                                         ))}
                                     </>
@@ -349,9 +393,9 @@ export default function Settings() {
                                                         {__('Click To Know How It Works?')}
                                                     </Tooltip>
                                                 }>
-                                                <a target='_blank'
+                                                <a className={'text-danger'} target='_blank'
                                                    href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
-                                                    <i className="fas fa-info-circle"></i></a>
+                                                    <i className="fab fa-youtube"></i></a>
                                             </OverlayTrigger>
                                         ))}
                                     </>
@@ -402,9 +446,9 @@ export default function Settings() {
                                                         {__('Click To Know How It Works?')}
                                                     </Tooltip>
                                                 }>
-                                                <a target='_blank'
+                                                <a className={'text-danger'} target='_blank'
                                                    href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
-                                                    <i className="fas fa-info-circle"></i></a>
+                                                    <i className="fab fa-youtube"></i></a>
                                             </OverlayTrigger>
                                         ))}
                                     </>
@@ -455,9 +499,9 @@ export default function Settings() {
                                                         {__('Click To Know How It Works?')}
                                                     </Tooltip>
                                                 }>
-                                                <a target='_blank'
+                                                <a className={'text-danger'} target='_blank'
                                                    href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
-                                                    <i className="fas fa-info-circle"></i></a>
+                                                    <i className="fab fa-youtube"></i></a>
                                             </OverlayTrigger>
                                         ))}
                                     </>
@@ -507,9 +551,9 @@ export default function Settings() {
                                                         {__('Click To Know How It Works?')}
                                                     </Tooltip>
                                                 }>
-                                                <a target='_blank'
+                                                <a className={'text-danger'} target='_blank'
                                                    href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
-                                                    <i className="fas fa-info-circle"></i></a>
+                                                    <i className="fab fa-youtube"></i></a>
                                             </OverlayTrigger>
                                         ))}
                                     </>
