@@ -244,7 +244,6 @@ function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_ar
 	$mp3_file_urls      = TTA_Helper::get_mp3_file_urls( $file_url_key, $post, $date, $file_name );
 	$compatible_data    = TTA_Helper::tts_get_settings( 'compatible' );
 	$compatible_content = apply_filters( 'tts_compatible_plugins_content', [], $compatible_data, $post );
-	error_log(print_r($language_and_voice,1));
 
 	$object = ob_start();
 	?>

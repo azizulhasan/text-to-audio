@@ -522,7 +522,10 @@ class TTA_Helper {
 		if ( ! is_pro_active() || self::get_player_id() < 3 ) {
 			return [];
 		}
-
+//update_post_meta($post->ID, 'tts_mp3_file_urls', [
+//	'en' => 'http://localhost/azizulhasan/tts/wp-content/uploads/TTA_Pro/gtts/2024/04/21/Sample_Page__lang__en.mp3',
+//	'en--voice--alloy' => 'http://localhost/azizulhasan/tts/wp-content/uploads/TTA_Pro/chat_gpt_tts/2024/04/21/Sample_Page__lang__en__voice__alloy.mp3'
+//]);
 		$date = get_the_date( 'Y/m/d', $post );
 
 		$mp3_file_urls = get_post_meta( $post->ID, 'tts_mp3_file_urls' );
@@ -582,8 +585,9 @@ class TTA_Helper {
 
 
 		if ( $should_update_urls || empty( $final_mp3_file_ulrs ) ) {
-//			update_post_meta( $post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs );
+			update_post_meta( $post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs );
 		}
+		error_log(print_r($final_mp3_file_ulrs, 1));
 
 		return \apply_filters( 'tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls );
 	}
@@ -690,8 +694,6 @@ class TTA_Helper {
 
 		if ( ! $backup_status ) {
 			$full_path = self::get_path_from_url( $url );
-			error_log( print_r( [ $full_path, $url ], 1 ) );
-
 			if ( ! file_exists( $full_path ) || ( file_exists( $full_path ) && filesize( $full_path ) == 0 ) ) {
 				return true;
 			}

@@ -563,6 +563,52 @@ export default function Listening() {
                             </Row>
                         }
                         {
+                            customizationSettings?.buttonSettings?.id < 3 || customizationSettings?.buttonSettings?.id == 5 && <Row>
+                                <Col xs={12} sm={8} lg={8}>
+                                    <Form.Group>
+                                        <Form.Label htmlFor='tta__listening_rate'>
+                                            Voice Speed
+                                        </Form.Label>
+                                        <Form.Control
+                                            type='text'
+                                            id='tta__listening_rate'
+                                            name='tta__listening_rate'
+                                            onChange={handleChange}
+                                            value={listeningSettings.tta__listening_rate}
+                                            aria-describedby='tta__listening_rate'
+                                        />
+                                        <Form.Text id='tta__listening_rate' muted>
+                                            Value : From 0.1 to 10.
+                                            {
+                                                customizationSettings?.buttonSettings?.id == 5 ? "From 0.25 to 4.0" : "From 0.1 to 10"
+                                            }
+                                        </Form.Text>
+                                    </Form.Group>
+                                </Col>
+                                <Col xs={12} sm={4} lg={4} className='mt-4'>
+                                    <>
+                                        {['top'].map((placement) => (
+                                            <OverlayTrigger
+                                                key={placement}
+                                                placement={placement}
+                                                overlay={
+                                                    <Tooltip id={`tooltip-${placement}`}>
+                                                        {
+                                                           customizationSettings?.buttonSettings?.id == 5 ? 'The speed of the generated audio. Select a value from 0.25 to 4.0. 1.0 is the default.\n' +
+                                                               '\n' :" Gets and sets the speed at which the\n" +
+                                                               "                                                        utterance will be spoken at. Value :\n" +
+                                                               "                                                        From 0.1 to 10"
+                                                        }
+                                                    </Tooltip>
+                                                }>
+                                                <Button className='tta_btn'>?</Button>
+                                            </OverlayTrigger>
+                                        ))}
+                                    </>
+                                </Col>
+                            </Row>
+                        }
+                        {
                             customizationSettings?.buttonSettings?.id < 3 && <>
                                 <Row>
                                     <Col xs={12} sm={8} lg={8}>
@@ -598,44 +644,6 @@ export default function Listening() {
                                                         <Tooltip id={`tooltip-${placement}`}>
                                                             Gets and sets the pitch at which the
                                                             utterance will be spoken at.
-                                                        </Tooltip>
-                                                    }>
-                                                    <Button className='tta_btn'>?</Button>
-                                                </OverlayTrigger>
-                                            ))}
-                                        </>
-                                    </Col>
-                                </Row>
-                                <Row>
-                                    <Col xs={12} sm={8} lg={8}>
-                                        <Form.Group>
-                                            <Form.Label htmlFor='tta__listening_rate'>
-                                                Voice Speed
-                                            </Form.Label>
-                                            <Form.Control
-                                                type='text'
-                                                id='tta__listening_rate'
-                                                name='tta__listening_rate'
-                                                onChange={handleChange}
-                                                value={listeningSettings.tta__listening_rate}
-                                                aria-describedby='tta__listening_rate'
-                                            />
-                                            <Form.Text id='tta__listening_rate' muted>
-                                                Value : From 0.1 to 10.
-                                            </Form.Text>
-                                        </Form.Group>
-                                    </Col>
-                                    <Col xs={12} sm={4} lg={4} className='mt-4'>
-                                        <>
-                                            {['top'].map((placement) => (
-                                                <OverlayTrigger
-                                                    key={placement}
-                                                    placement={placement}
-                                                    overlay={
-                                                        <Tooltip id={`tooltip-${placement}`}>
-                                                            Gets and sets the speed at which the
-                                                            utterance will be spoken at. Value :
-                                                            From 0.1 to 10
                                                         </Tooltip>
                                                     }>
                                                     <Button className='tta_btn'>?</Button>
