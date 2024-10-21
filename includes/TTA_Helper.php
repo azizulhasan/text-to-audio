@@ -295,7 +295,7 @@ class TTA_Helper {
 
 	public static function tts_get_file_url_key( $language, $voice ) {
 		$file_url_key = $language;
-		if ( get_player_id() == 4 && $voice ) {
+		if ( ( get_player_id() == 4 || get_player_id() == 5 ) && $voice ) {
 			$file_url_key .= '--voice--' . $voice;
 		}
 
@@ -305,7 +305,7 @@ class TTA_Helper {
 	public static function tts_get_voice( $plugin_all_settings ) {
 		// TODO: Match with multilingual UI and default voice.
 		$default_voice = '';
-		if ( isset( $plugin_all_settings['listening']['tta__listening_voice'] ) && get_player_id() == 4 ) {
+		if ( isset( $plugin_all_settings['listening']['tta__listening_voice'] ) && ( get_player_id() == 4 || get_player_id() == 5 ) ) {
 			$default_voice = $plugin_all_settings['listening']['tta__listening_voice'];
 		}
 
@@ -337,7 +337,7 @@ class TTA_Helper {
 			$title    = $md5_hash . '__lang__' . $selectedLang;
 		}
 
-		if ( get_player_id() == 4 && $voice ) {
+		if ( ( get_player_id() == 4 || get_player_id() == 5 ) && $voice ) {
 			$voice = str_replace( [ ' ', '(', ')', '%20' ], '_', $voice );
 
 			$title .= '__voice__' . $voice;
@@ -522,7 +522,10 @@ class TTA_Helper {
 		if ( ! is_pro_active() || self::get_player_id() < 3 ) {
 			return [];
 		}
-
+//update_post_meta($post->ID, 'tts_mp3_file_urls', [
+//	'en' => 'http://localhost/azizulhasan/tts/wp-content/uploads/TTA_Pro/gtts/2024/04/21/Sample_Page__lang__en.mp3',
+//	'en--voice--alloy' => 'http://localhost/azizulhasan/tts/wp-content/uploads/TTA_Pro/chat_gpt_tts/2024/04/21/Sample_Page__lang__en__voice__alloy.mp3'
+//]);
 		$date = get_the_date( 'Y/m/d', $post );
 
 		$mp3_file_urls = get_post_meta( $post->ID, 'tts_mp3_file_urls' );
@@ -550,7 +553,6 @@ class TTA_Helper {
 
 				$should_update_urls = true;
 			} else {
-
 				// Generate new singed url or backup only current post applicable url.
 				if ( get_option( 'tts_is_backup_mp3_file' ) == 'true' && strtolower( $language_code ) == strtolower( $file_url_key ) ) {
 					// previously generated mp3 file to 'TTA_Pro' folder but not backup to Google Cloud Storage.
@@ -586,7 +588,6 @@ class TTA_Helper {
 			update_post_meta( $post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs );
 		}
 
-
 		return \apply_filters( 'tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls );
 	}
 
@@ -602,6 +603,11 @@ class TTA_Helper {
 		if ( get_player_id() == 4 ) {
 			$audio_dir     = TTA_PRO_AUDIO_DIR;
 			$audio_dir_url = TTA_PRO_AUDIO_DIR_URL;
+		}
+
+		if ( get_player_id() == 5 ) {
+			$audio_dir     = TTA_PRO_CHAT_GPT_TTS_DIR;
+			$audio_dir_url = TTA_PRO_CHAT_GPT_TTS_DIR_URL;
 		}
 
 		$log_data = apply_filters( 'tts_get_path_from_url', array(
@@ -683,7 +689,9 @@ class TTA_Helper {
 		}
 
 		// If file backup is not enabled then check if file exists and file has content.
-		if ( ! get_option( 'tts_is_backup_mp3_file' ) ) {
+		$backup_status = (int) get_option( 'tts_is_backup_mp3_file' );
+
+		if ( ! $backup_status ) {
 			$full_path = self::get_path_from_url( $url );
 			if ( ! file_exists( $full_path ) || ( file_exists( $full_path ) && filesize( $full_path ) == 0 ) ) {
 				return true;
@@ -702,7 +710,7 @@ class TTA_Helper {
 			if ( ! $url_file_name ) {
 				return true;
 			}
-
+			// TODO: create documentation for this filter.
 			if ( apply_filters( 'tts_should_match_filename_with_post_title', false ) ) {
 				$url_file_basename     = explode( '__lang__', $url_file_name );
 				$url_file_basename     = isset( $url_file_basename[0] ) ? trim( $url_file_basename[0] ) : false;
@@ -969,7 +977,7 @@ class TTA_Helper {
 			if ( in_array( 'all', $display_player_to_roles )
 			     || ! isset( $button_settings['display_player_to'] )
 			     || empty( $button_settings['display_player_to'] )
-			 ) {
+			) {
 				$display_player_to = false;
 			}
 		}

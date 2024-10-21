@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import 	React, { useState, useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Col, Container, Row, Form, FloatingLabel } from 'react-bootstrap';
 import toast from '../../context/Notify';
@@ -35,6 +35,7 @@ export default function Customize() {
 	const [listeningSettings, setListeningSettings] = useState({});
 	const [isGCAuthenticated, setGCIsAuthenticated] = useState(false);
 	const [isBackUpToGCS, setIsBackUpToGCS] = useState(false)
+	const [isChatGPTAuthenticated, setIsChatGPTAuthenticated] = useState(false)
 
 	const setDefaultButtonSettingsIfNeeded = (res) => {
 		let tempButtonSettings = structuredClone(listeningBtnStyle.buttonSettings)
@@ -107,11 +108,26 @@ export default function Customize() {
 
 
 		if (window.hasOwnProperty('ttsObj') && ttsObj?.is_pro_active) {
+
+			// Check Google TTS API authentication.
 			postData(ttsObj.api_url + 'tta_pro/v1/get_auth_file', {}, "GET")
 				.then((res) => {
 					if (res?.file && res?.is_authenticated) {
 						setGCIsAuthenticated(res.is_authenticated)
 						setIsBackUpToGCS(res?.tts_is_backup_mp3_file || false)
+					}
+				})
+				.catch((err) => {
+					console.log(err);
+				});
+
+			// check ChatGPT authentication.
+			let data = new FormData();
+			data.append('method', 'get');
+			postData(ttsObj.api_url + 'tta_pro/v1/chat_gpt_tts', data)
+				.then((res) => {
+					if (res.data?.currentTTSServic === 'chat_gpt_tts' && res?.data?.chatgpt_tts_api_key) {
+						setIsChatGPTAuthenticated(true)
 					}
 				})
 				.catch((err) => {
@@ -261,8 +277,15 @@ export default function Customize() {
 		if(!formData?.buttonSettings?.id){
 			formData.buttonSettings.id = 1;
 		}
-		console.log({listeningBtnStyle})
+
 		if( formData?.buttonSettings?.id  == 4 && !isGCAuthenticated) {
+			notify('To select this player you have to authenticate first from Integration menu', 'error' ,{
+				autoClose: 8000,
+			});
+			return;
+		}
+
+		if( formData?.buttonSettings?.id  == 5 && !isChatGPTAuthenticated) {
 			notify('To select this player you have to authenticate first from Integration menu', 'error' ,{
 				autoClose: 8000,
 			});
@@ -340,7 +363,7 @@ export default function Customize() {
 		{ id: 2, name: 'Default Pro', object: 'TextToSpeechPro', disabled: false },
 		{ id: 3, name: 'Google TTS Pro', object: 'TextToSpeechPro', disabled: false },
 		{ id: 4, name: "Google Cloud TTS", object: 'TextToSpeechPro', disabled: false },
-		{ id: 5, name: "ChatGPT TTS(Soon)", object: 'TextToSpeechPro', disabled: true },
+		{ id: 5, name: "ChatGPT TTS", object: 'TextToSpeechPro', disabled: false },
 	])
 
 	return (
