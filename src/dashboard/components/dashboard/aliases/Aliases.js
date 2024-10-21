@@ -90,8 +90,10 @@ export default function Aliases() {
                                 overlay={<Tooltip id={`tooltip-${placement}`}>
                                     {__('Click To Know How It Works?')}
                                 </Tooltip>}>
-                                <a target='_blank' href='https://www.youtube.com/watch?v=oeW652YKmG0&t=9s'>
-                                    <i className="fas fa-info-circle"></i></a>
+                                <a className={'text-danger'} target='_blank'
+                                   href='https://www.youtube.com/watch?v=oeW652YKmG0&t=9s'>
+                                    <i className="fab fa-youtube"></i>
+                                </a>
                             </OverlayTrigger>))}
                         </>
                     </h2>
