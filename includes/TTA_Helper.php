@@ -587,7 +587,6 @@ class TTA_Helper {
 		if ( $should_update_urls || empty( $final_mp3_file_ulrs ) ) {
 			update_post_meta( $post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs );
 		}
-		error_log(print_r($final_mp3_file_ulrs, 1));
 
 		return \apply_filters( 'tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls );
 	}
