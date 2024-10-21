@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.6.2
 Requires PHP: 7.4
-Stable tag: 1.7.26
+Stable tag: 1.7.27
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -28,7 +28,7 @@ Right after you install this text to speech free plugin, it will automatically s
 [youtube https://www.youtube.com/watch?v=h4VJxM-mh74&t=4s&ab_channel=AtlasAiDev]
 
 
-### SOME USEFULL LINKS:
+### SOME USEFUL LINKS:
 > * [Text To Speech Pro](https://atlasaidev.com/plugins/text-to-speech-pro/)
 > * [Pricing](https://atlasaidev.com/pricing/)
 > * [Live Demo Pro Version](https://atlasaidev.com/plugins/text-to-speech-pro/demo/)
@@ -54,9 +54,9 @@ Right after you install this text to speech free plugin, it will automatically s
 
 * **Easy Integration:** Utilize intuitive shortcodes to seamlessly add the text-to-speech button to any post or page on your site.
 
-* **Analytics:** AtlasVoice Support [Advance Analytics](https://www.youtube.com/watch?v=amkrAtVQGBY).
+* **Analytics:** __AtlasVoice__ Support [Advance Analytics](https://www.youtube.com/watch?v=amkrAtVQGBY).
 
-* **Text Alias:** AtlasVoice Support [Text Alias](https://www.youtube.com/watch?v=oeW652YKmG0&t=3s).
+* **Text Alias:** __AtlasVoice__ Support [Text Alias](https://www.youtube.com/watch?v=oeW652YKmG0&t=3s).
 
 * **Unlimited Text-to-Speech:** Convert unlimited text to speech.
 
@@ -80,9 +80,13 @@ Unlock additional features and support by upgrading to [Text To Speech TTS Pro](
 
 * **Live Support:** We usually reply with 1 hour.
 
-* **Advance Analytics:** AtlasVoice Support [Advance Analytics](https://www.youtube.com/watch?v=amkrAtVQGBY).
+* **Advance Analytics:** __AtlasVoice__ Support [Advance Analytics](https://www.youtube.com/watch?v=amkrAtVQGBY).
 
-* **Unlimited Text Alias:** AtlasVoice Support [Text Alias](https://www.youtube.com/watch?v=oeW652YKmG0&t=3s).
+* **Unlimited Text Alias:** __AtlasVoice__ Support [Text Alias](https://www.youtube.com/watch?v=oeW652YKmG0&t=3s).
+
+* **Google Cloud Text To Speech:** You can integrate with [Google Cloud Text To Speech](https://cloud.google.com/text-to-speech). It is optional. [Learn more](https://www.youtube.com/watch?v=h4VJxM-mh74&t=200s)
+
+* **ChatGPT Text To Speech:** You can integrate with [ChatGPT Text To Speech](https://platform.openai.com/docs/guides/text-to-speech/overview). It is optional. [Learn more](https://www.youtube.com/watch?v=h4VJxM-mh74&t=200s)
 
 * **Unlimited Characters:** Convert unlimited text to speech.
 
@@ -117,6 +121,10 @@ With the Text To Speech Pro text-to-voice generator plugin, you can empower your
 
 **Try [Text To Speech Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) version.**
 
+
+### AtlasVoice: Text To Speech Pro Review by Experts
+
+[youtube https://www.youtube.com/watch?v=Nzph8h8zH8o&t=788s]
 
 ### Text To Speech Pro Supported Languages:
 
@@ -420,6 +428,11 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+= 1.7.27 ( 21 Oct 2024 ) =
+Introduced: [ChatGPT Text To Speech API](https://platform.openai.com/docs/guides/text-to-speech/overview) introduced.
+Fixed: MP3 file generation for German language issue fixed.
+Fixed: MP3 player hide issue after click on play button for Google Cloud TTS player issue fixed.
+Improved: Dashboard UI improved.
 
 = 1.7.26 ( 16 Oct 2024 ) =
 Fixed: Multiple enqueue for player data is fixed.
