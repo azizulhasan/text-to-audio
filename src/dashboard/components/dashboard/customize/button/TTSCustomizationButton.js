@@ -46,8 +46,10 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
                                     overlay={<Tooltip id={`tooltip-${placement}`}>
                                         {__('Click To Know How It Works?')}
                                     </Tooltip>}>
-                                    <a target='_blank' href='https://www.youtube.com/watch?v=h4VJxM-mh74&t=936s'>
-                                        <i className="fas fa-info-circle"></i></a>
+                                    <a className={'text-danger'} target='_blank'
+                                       href='https://www.youtube.com/watch?v=h4VJxM-mh74&t=936s'>
+                                        <i className="fab fa-youtube"></i>
+                                    </a>
                                 </OverlayTrigger>))}
                             </>
                         }
