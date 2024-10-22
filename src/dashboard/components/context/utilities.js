@@ -677,3 +677,33 @@ export const chatGPTLanguages = () => {
         cy: "Welsh"
     };
 }
+
+
+export const getMultilingualActiveLanguages = (ttsObjPro) => {
+    // Initialize an empty object
+    let languageObject = {};
+    if (ttsObjPro?.compatible?.['gtranslate/gtranslate.php']) {
+        let gtranslateActiveLanguages = ttsObjPro?.compatible?.['gtranslate/gtranslate.php']?.GTranslate?.fincl_langs;
+        // Populate the object using a loop
+        for (const langCode of gtranslateActiveLanguages) {
+            languageObject[langCode] = langCode;
+        }
+    } else if (ttsObjPro?.compatible?.['sitepress-multilingual-cms/sitepress.php']) {
+        let gtranslateActiveLanguages = ttsObjPro?.compatible?.['sitepress-multilingual-cms/sitepress.php']?.active_languages;
+
+        let active_languages = Object.keys(gtranslateActiveLanguages);
+
+        // Populate the object using a loop
+        for (const langCode of active_languages) {
+            languageObject[langCode] = gtranslateActiveLanguages[langCode].english_name;
+        }
+    } else if (ttsObjPro?.compatible?.['translatepress-multilingual/index.php']) {
+        let activeLanguages = ttsObjPro?.compatible?.['translatepress-multilingual/index.php']?.data;
+        // Populate the object using a loop
+        for (const langCode of activeLanguages) {
+            languageObject[langCode] = langCode;
+        }
+    }
+
+    return languageObject;
+}
