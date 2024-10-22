@@ -1,23 +1,56 @@
-import React, { useState } from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import { Container, Form, Row, Col } from 'react-bootstrap'
 import GoogleTTS from "./GoogleCloudTTS/GoogleTTS";
 import ChatGPTTTS from './ChatGPTTTS/ChatGPTTTS'
+import {postData} from "../../context/utilities";
 
+
+// sk-vMMk3ymTrtl9nVEFw9XIFxSeWXgsOPWng9mDutzbD8T3BlbkFJYi1aThW9dtsMgCmO9lFnud5xo8VYzCcFt-f_AM0d4A
 
 export default function Integrations() {
     const [currentTTSServic, setCurrentTTSServic] = useState('')
+
+    const apiURL = useMemo(() => {
+        return ttsObj.api_url + ttsObj.api_namespace + "_pro" + "/" + ttsObj.api_version + "/";
+    }, [window]);
+
+    const [chatGPTAPIData, setChatGPTAPIData] = useState({
+        chatgpt_tts_api_key: '',
+        currentTTSServic: currentTTSServic
+    })
     const handleClick = (e) => {
+        console.log(e.target.id)
         setCurrentTTSServic(e.target.id)
     }
     const getCurrentTTSService = (ttsService) => {
         setCurrentTTSServic(ttsService)
     }
+
+    useEffect(() => {
+        // console.log({ttsObjPro})
+        if (ttsObj.is_pro_active) {
+            let data = new FormData();
+            data.append('method', 'get');
+            postData(apiURL + 'chat_gpt_tts', data)
+                .then((res) => {
+                    setChatGPTAPIData(res.data)
+                    if (res.data?.currentTTSServic === 'chat_gpt_tts' && res?.data?.chatgpt_tts_api_key) {
+                        getCurrentTTSService(res.data.currentTTSServic)
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        }
+    }, [currentTTSServic])
+
+
     return <>
       <Container>
         <Row>
             <Col xs={12} sm={12} lg={8}>
                 <div className={'text-danger'}>
-                    <strong>Important Notice:</strong> <p className='text-danger d-inline'>Integrating with Google Cloud Text To Speech is an optional for function AtlasVoice Pro version. Without integration you can still use our pro version.</p>
+                    <strong>Important Notice:</strong> <p className='text-danger d-inline'>Integrating with Google Cloud Text To Speech/ChatGPT is an optional function for AtlasVoice Pro version. Without integration you can still use our pro version.</p>
                 </div>
                 <Form className="py-4">
                     <Form.Group>
@@ -31,7 +64,7 @@ export default function Integrations() {
                             name="group1"
                             type={'radio'}
                             className="mt-2"
-                            checked={currentTTSServic !== 'chatgpt_tts'}
+                            checked={currentTTSServic !== 'chat_gpt_tts'}
                             id={`google_cloud_tts`}
                             onClick={handleClick}
                         />
@@ -41,10 +74,9 @@ export default function Integrations() {
                             title="ChatGPT TTS(soon)"
                             name="group1"
                             type={'radio'}
-                            checked={currentTTSServic === 'chatgpt_tts'}
-                            id={`chatgpt_tts`}
+                            checked={currentTTSServic === 'chat_gpt_tts'}
+                            id={`chat_gpt_tts`}
                             onClick={handleClick}
-                            disabled
                         />
                     </Form.Group>
                 </Form>
@@ -52,9 +84,9 @@ export default function Integrations() {
         </Row>
       </Container>
         {
-            currentTTSServic !== 'chatgpt_tts' ?
+            currentTTSServic !== 'chat_gpt_tts' ?
                 <GoogleTTS getCurrentTTSService={getCurrentTTSService} currentTTSServic={currentTTSServic}/> :
-                <ChatGPTTTS getCurrentTTSService={getCurrentTTSService} currentTTSServic={currentTTSServic}/>
+                <ChatGPTTTS setChatGPTAPIData={setChatGPTAPIData} chatGPTAPIData={chatGPTAPIData} currentTTSServic={currentTTSServic}/>
         }
     </>
 }
