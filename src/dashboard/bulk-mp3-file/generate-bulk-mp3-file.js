@@ -31,8 +31,8 @@ export default function GenerateBulkMp3File({ postId, language, selectedLang, is
 
 
     const [postIDs, setPostIDs] = useState([]);
+    const [postContents, setPostContents] = useState([])
     const [isDataLoaded, setIsDataLoaded] = useState(false)
-
     const [metaKeys, setMetaKeys] = useState('');
     const [content, setContent] = useState('');
 
@@ -50,26 +50,7 @@ export default function GenerateBulkMp3File({ postId, language, selectedLang, is
     };
 
 
-    useEffect(() => {
-        /**
-         * Get data from and display to table.
-         */
-        // const url = new URL(window.location.href);
-        //
-        // let url2 = new URLSearchParams(window.location.search);
-        //
-        // let post_id = url2.get('post');
-        // setPostID(post_id)
-        // let formData = new FormData();
-        // formData.append('method', 'get');
-        // formData.append('post_id', post_id);
-        // postWithoutImage(tta_obj.api_url + 'tta_pro/v1/css_selectors_for_posts', formData).then(
-        //     (res) => {
-        //         setSettings({...settings, ...res.data});
-        //         setIsDataLoaded(true)
-        //
-        //     });
-    }, []);
+
 
     useEffect(() => {
         let activeLanguages = getMultilingualActiveLanguages(window?.ttsObjPro)
@@ -83,17 +64,26 @@ export default function GenerateBulkMp3File({ postId, language, selectedLang, is
         console.log(post_ids)
         setPostIDs(setPostIDs)
 
-        for (const post_id of post_ids) {
-            let formData = new FormData();
-            formData.append('method', 'get');
-            formData.append('post_id', post_id);
-            await  postWithoutImage(tta_obj.api_url + 'tta_pro/v1/get_bulk_post_content', formData).then(
-                (res) => {
-                    console.log(res.data)
-                });
-        }
+        let formData = new FormData();
+        formData.append('method', 'get');
+        formData.append('post_ids', post_ids);
+        await  postWithoutImage(ttsObjPro.api_url + 'tta_pro/v1/get_bulk_post_content', formData).then(
+            (res) => {
+                if(res.status) {
+                    setPostContents(res.data)
+                }
+
+            });
 
     }, []);
+
+    useEffect(async () => {
+        if(Object.keys(postContents).length) {
+            for (let postContent  of Object.values(postContents)) {
+                let bulkMP3File = new BulkMP3File(postContent)
+            }
+        }
+    }, [postContents]);
 
     /**
      * handle change
@@ -140,7 +130,7 @@ export default function GenerateBulkMp3File({ postId, language, selectedLang, is
         formData.append('fields', JSON.stringify(settings));
         formData.append('method', 'post');
         formData.append('post_id', postID);
-        postWithoutImage(tta_obj.api_url + 'tta_pro/v1/css_selectors_for_posts', formData)
+        postWithoutImage(ttsObjPro.api_url + 'tta_pro/v1/css_selectors_for_posts', formData)
             .then((res) => {
                 setSettings(res.data);
                 toast('Settings Data Saved');

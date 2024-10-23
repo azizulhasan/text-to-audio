@@ -63,7 +63,7 @@ export const postWithoutImage = async (url = "", data = {}) => {
         method: "POST", // *GET, POST, PUT, DELETE, etc.
         body: data, // body data type must match "Content-Type" header
         headers: {
-            'X-WP-Nonce': ttsObj.rest_nonce
+            'X-WP-Nonce': window?.ttsObj?.rest_nonce ?? ttsObjPro?.rest_nonce
         },
     });
     const responseData = await response.json(); // parses JSON response into native JavaScript objects
