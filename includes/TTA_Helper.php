@@ -936,7 +936,7 @@ class TTA_Helper {
 	 *
 	 * @return bool True if the player button should be displayed, false otherwise.
 	 */
-	private static function display_player_based_on_user_role() {
+	public static function display_player_based_on_user_role() {
 		// Retrieve customization settings for the player
 		$customize         = (array) self::tts_get_settings( 'customize' );
 		$display_player_to = false;
