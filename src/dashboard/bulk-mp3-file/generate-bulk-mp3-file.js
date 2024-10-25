@@ -79,8 +79,9 @@ export default function GenerateBulkMp3File({ postId, language, selectedLang, is
 
     useEffect(async () => {
         if(Object.keys(postContents).length) {
-            for (let postContent  of Object.values(postContents)) {
-                let bulkMP3File = new BulkMP3File(postContent)
+            for (let postId  of Object.keys(postContents)) {
+                let bulkMP3File = await new BulkMP3File( postContents[postId])
+                console.log({bulkMP3File})
             }
         }
     }, [postContents]);
