@@ -110,7 +110,7 @@ export default function GenerateBulkMp3File({ postId, language, selectedLang, is
 
     useEffect( () => {
             if(Object.keys(postContents).length) {
-                // console.log({postContents})
+                console.log({postContents})
                 // window.sessionStorage.setItem('tts_temp_post_contents', JSON.stringify(postContents))
             }
         }, [postContents]);
@@ -202,6 +202,13 @@ export default function GenerateBulkMp3File({ postId, language, selectedLang, is
         return false; // Return false if all properties are empty
     }
 
+    const postHasURL = (postId, postContents2 ) => {
+
+        let urls = postContents[postId].settings.fileURLs;
+
+        return Object.keys(urls).length  > 0 ? <i className="fa fa-check-circle"></i> : <i className="fa fa-times"></i>
+    }
+
 
     return (
         isDataLoaded ? <React.Fragment>
@@ -234,23 +241,16 @@ export default function GenerateBulkMp3File({ postId, language, selectedLang, is
                                                     let title = postContents[postId].extra[1].title;
                                                     let content = postContents[postId].contents[1];
                                                     let urls = postContents[postId].settings.fileURLs;
-                                                    console.log({urls})
                                                    return <Accordion key={postId}>
                                                         <Accordion.Item eventKey='1'>
                                                             <Accordion.Header>
-
-
-                                                                <div className={'pe-2'}>
-                                                                    {
-                                                                        Object.keys(urls).length ?
-                                                                            <i className="fa fa-check-circle"
-                                                                               aria-hidden="true"></i> :
-                                                                            <i className="fa fa-times"
-                                                                               aria-hidden="true"></i>
-                                                                    }
+                                                                <div className={'pe-2'}> {
+                                                                    Object.keys(urls).length ?
+                                                                        <i className="fa fa-check-circle"></i> :
+                                                                        <i className="fa fa-times"></i>
+                                                                }
                                                                 </div>
-
-                                                                {title}
+                                                                    {title}
                                                             </Accordion.Header>
                                                             <Accordion.Body>
                                                                 <Form.Group controlId={postId}>
