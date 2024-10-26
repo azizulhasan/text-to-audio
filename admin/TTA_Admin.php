@@ -335,6 +335,9 @@ class TTA_Admin {
 
 
         if(get_player_id() > 2) {
+	        wp_enqueue_script( 'tts-font-awesome', plugin_dir_url( __FILE__ ) . 'js/build/font-awesome.min.js', array(), $this->version, true );
+	        wp_enqueue_style( 'tts-bootstrap', plugin_dir_url( __FILE__ ) . 'css/bootstrap.css', [], $this->version, 'all' );
+
 	        // Register a new admin page under "Bulk MP3 Generate" menu
 	        add_submenu_page(
 		        'text-to-audio',         // Page title
