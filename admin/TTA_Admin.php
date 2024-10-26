@@ -323,7 +323,7 @@ class TTA_Admin {
 
 	public function TTA_menu() {
 		add_menu_page(
-			__( 'Text To Speech Ninja', TEXT_TO_AUDIO_TEXT_DOMAIN ),
+			__( 'Text To Speech', TEXT_TO_AUDIO_TEXT_DOMAIN ),
 			__( 'Text To Speech', TEXT_TO_AUDIO_TEXT_DOMAIN ),
 			'manage_options',
 			TEXT_TO_AUDIO_TEXT_DOMAIN,
@@ -331,6 +331,35 @@ class TTA_Admin {
 			'dashicons-controls-volumeon',
 			20
 		);
+		add_submenu_page( TEXT_TO_AUDIO_TEXT_DOMAIN, __( 'Text To Speech', TEXT_TO_AUDIO_TEXT_DOMAIN ), __( 'Text To Speech', TEXT_TO_AUDIO_TEXT_DOMAIN ), 'manage_options', TEXT_TO_AUDIO_TEXT_DOMAIN , array( $this, "TTA_settings" ), 21 );
+
+
+        if(get_player_id() > 2) {
+	        // Register a new admin page under "Bulk MP3 Generate" menu
+	        add_submenu_page(
+		        'text-to-audio',         // Page title
+		        'Bulk MP3 Generate',               // Menu title
+		        'Bulk MP3 Generate',            // Capability
+		        'manage_options',         // Menu slug
+		        'bulk-mp3-generate',   // Icon (optional)
+		        [$this, 'bulk_mp3_generate'],
+		        33, // Position (optional)
+	        );
+        }
+
+	}
+
+	// Callback function to display the content of the page
+	public  function bulk_mp3_generate() {
+		echo '<h1>AtlasVoice Pro : Bulk MP3 File Generate</h1>';
+
+		if ( ! empty( $_REQUEST['atlasvoice_mp3_file'] ) ) {
+			echo  '<div id="atlasvoice_generate_bulk_mp3_file"></div>' ;
+        }else{
+			$url = admin_url( 'edit.php' );
+			echo '<p>No post ID found. Please select multiple posts from the post page. And apply <strong>AtlasVoice Generate MP3 File</strong> bulk action. <a href="' . $url . '">Go to Posts Page</a></p>';
+		}
+
 	}
 
 	public function TTA_settings() {

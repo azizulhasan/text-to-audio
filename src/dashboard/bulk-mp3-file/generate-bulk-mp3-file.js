@@ -71,6 +71,7 @@ export default function GenerateBulkMp3File({ postId, language, selectedLang, is
             (res) => {
                 if(res.status) {
                     setPostContents(res.data)
+                    setIsDataLoaded(res.status)
                 }
 
             });
@@ -80,8 +81,34 @@ export default function GenerateBulkMp3File({ postId, language, selectedLang, is
     useEffect(async () => {
         if(Object.keys(postContents).length) {
             for (let postId  of Object.keys(postContents)) {
-                let bulkMP3File = await new BulkMP3File( postContents[postId])
-                console.log({bulkMP3File})
+                let bulkMP3File = await new BulkMP3File(postContents[postId])
+                let mp3File = await bulkMP3File.init_gtts(1)
+                console.log({mp3File})
+                // bulkMP3File.ttsLoader()
+                // if (!this.fileURL) {
+                //
+                //     if (ttsObjPro.player_id == 3) {
+                //         if (this.compatible?.initiatedPlugins?.gtranslate) {
+                //             this.#gtranslateCompitable()
+                //         } else {
+                //             this.init_gtts(1)
+                //         }
+                //     }
+                //     else if (ttsObjPro.player_id == 4) {
+                //         if (this.compatible?.initiatedPlugins?.gtranslate) {
+                //             this.#gtranslateCompitable()
+                //         } else {
+                //             this.init_gctts()
+                //         }
+                //     }else if (ttsObjPro.player_id == 5) {
+                //         if (this.compatible?.initiatedPlugins?.gtranslate) {
+                //             this.#gtranslateCompitable()
+                //         } else {
+                //             this.init_chat_gpt()
+                //         }
+                //     }
+                // }
+
             }
         }
     }, [postContents]);
@@ -169,91 +196,107 @@ export default function GenerateBulkMp3File({ postId, language, selectedLang, is
                 draggable
                 pauseOnHover
             />
-            <Container className={'atlasVoice-container'}  >
+            <Container className={'atlasVoice-container'}>
                 <div className={'atlasVoice-row'}>
                     <Col bsPrefix="atlasVoice" xs={12} sm={12} lg={8}>
-                        <Form onSubmit={handleSubmit}>
-                            {/* Use Own CSS Selectors */}
-                            <div className='atlasVoice-mt-3 atlasVoice-row'>
-                                <Col  xs={12} sm={6} lg={4}>
-                                    <Form.Label htmlFor='tta__settings_use_own_css_selectors'>
-                                        Use Own CSS Selectors
-                                    </Form.Label>
-                                </Col>
-                                <Col bsPrefix="atlasVoice" xs={12} sm={12} lg={8}>
-                                    <Form.Check // prettier-ignore
-                                        type={'checkbox'}
-                                        checked={settings.tta__settings_use_own_css_selectors}
-                                        onChange={(e) =>
-                                            handleChange(e)
-                                        }
-                                        name={`tta__settings_use_own_css_selectors`}
-                                        id={`tta__settings_use_own_css_selectors`}
-                                    />
-                                </Col>
-                            </div>
-                            {/*Include Content By CSS Selector*/}
-                            <div className='atlasVoice-mt-4 atlasVoice-row'>
-                                <Col bsPrefix="atlasVoice" xs={12} sm={6} lg={4}>
-                                    <Form.Group controlId={`tts_metabox_fields_${postId}`}>
-                                        <Form.Label>Add custom fields (comma separated)</Form.Label>
-                                        <Form.Control
-                                            type="text"
-                                            value={metaKeys}
-                                            onChange={handleMetaKeysChange}
-                                            placeholder="Add custom fields (comma separated)"
-                                            style={{ marginTop: '5px' }}
-                                        />
-                                    </Form.Group>
-                                </Col>
-                                <Col bsPrefix="atlasVoice" xs={11} sm={11} lg={7}>
-                                    <Form.Group controlId="tts_mp3_file_regenerate_contents" style={{ marginTop: '15px' }}>
-                                        <Form.Label>
-                                            <a id="translation_link" target="_blank" rel="noopener noreferrer" href="https://translate.google.com/">
-                                                Translate From {language} To {language}
-                                            </a>
-                                        </Form.Label>
-                                        <Form.Control
-                                            as="textarea"
-                                            value={content}
-                                            onChange={handleContentChange}
-                                            rows={10}
-                                            placeholder={`Site language is ${selectedLang}. If you want to generate the MP3 file for other languages, paste the translated content here and select the language, then generate the MP3 file.`}
-                                            style={{ marginTop: '5px' }}
-                                        />
-                                    </Form.Group>
-                                </Col>
-                                <Col bsPrefix="atlasVoice" xs={1} sm={1} lg={1} className='mt-4'>
-                                    <>
-                                        {['top'].map((placement) => (
-                                            <OverlayTrigger
-                                                key={placement}
-                                                placement={placement}
-                                                overlay={
-                                                    <Tooltip id={`tooltip-${placement}`}>
-                                                        {__('Click To Know How It Works?')}
-                                                    </Tooltip>
-                                                }>
-                                                <a style={{textDecoration: 'none'}} target='_blank'
-                                                   href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
-                                                    <span className="dashicons dashicons-info-outline"></span></a>
-                                            </OverlayTrigger>
-                                        ))}
-                                    </>
-                                </Col>
-                                <Button
-                                    variant="primary"
-                                    onClick={generateMP3File}
-                                    style={{ width: '100%', marginTop: '5px', backgroundColor: '#184c53', color: 'white' }}
-                                >
-                                    {isRegenerateFile ? 'Regenerate' : 'Generate'} MP3 File
-                                </Button>
-                            </div>
-                        </Form>
+                        <div id={"player_content_1"}></div>
                     </Col>
                 </div>
-            </Container>
-        </React.Fragment> : <h1>Loading</h1>
+                        <div className={'atlasVoice-row'}>
+                            <Col bsPrefix="atlasVoice" xs={12} sm={12} lg={8}>
 
-    );
+                                <Form onSubmit={handleSubmit}>
+                                    {/* Use Own CSS Selectors */}
+                                    <div className='atlasVoice-mt-3 atlasVoice-row'>
+                                        <Col xs={12} sm={6} lg={4}>
+                                            <Form.Label htmlFor='tta__settings_use_own_css_selectors'>
+                                                Use Own CSS Selectors
+                                            </Form.Label>
+                                        </Col>
+                                        <Col bsPrefix="atlasVoice" xs={12} sm={12} lg={8}>
+                                            <Form.Check // prettier-ignore
+                                                type={'checkbox'}
+                                                checked={settings.tta__settings_use_own_css_selectors}
+                                                onChange={(e) =>
+                                                    handleChange(e)
+                                                }
+                                                name={`tta__settings_use_own_css_selectors`}
+                                                id={`tta__settings_use_own_css_selectors`}
+                                            />
+                                        </Col>
+                                    </div>
+                                    {/*Include Content By CSS Selector*/}
+                                    <div className='atlasVoice-mt-4 atlasVoice-row'>
+                                        <Col bsPrefix="atlasVoice" xs={12} sm={6} lg={4}>
+                                            <Form.Group controlId={`tts_metabox_fields_${postId}`}>
+                                                <Form.Label>Add custom fields (comma separated)</Form.Label>
+                                                <Form.Control
+                                                    type="text"
+                                                    value={metaKeys}
+                                                    onChange={handleMetaKeysChange}
+                                                    placeholder="Add custom fields (comma separated)"
+                                                    style={{marginTop: '5px'}}
+                                                />
+                                            </Form.Group>
+                                        </Col>
+                                        <Col bsPrefix="atlasVoice" xs={11} sm={11} lg={7}>
+                                            <Form.Group controlId="tts_mp3_file_regenerate_contents"
+                                                        style={{marginTop: '15px'}}>
+                                                <Form.Label>
+                                                    <a id="translation_link" target="_blank" rel="noopener noreferrer"
+                                                       href="https://translate.google.com/">
+                                                        Translate From {language} To {language}
+                                                    </a>
+                                                </Form.Label>
+                                                <Form.Control
+                                                    as="textarea"
+                                                    value={content}
+                                                    onChange={handleContentChange}
+                                                    rows={10}
+                                                    placeholder={`Site language is ${selectedLang}. If you want to generate the MP3 file for other languages, paste the translated content here and select the language, then generate the MP3 file.`}
+                                                    style={{marginTop: '5px'}}
+                                                />
+                                            </Form.Group>
+                                        </Col>
+                                        <Col bsPrefix="atlasVoice" xs={1} sm={1} lg={1} className='mt-4'>
+                                            <>
+                                                {['top'].map((placement) => (
+                                                    <OverlayTrigger
+                                                        key={placement}
+                                                        placement={placement}
+                                                        overlay={
+                                                            <Tooltip id={`tooltip-${placement}`}>
+                                                                {__('Click To Know How It Works?')}
+                                                            </Tooltip>
+                                                        }>
+                                                        <a style={{textDecoration: 'none'}} target='_blank'
+                                                           href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
+                                                            <span
+                                                                className="dashicons dashicons-info-outline"></span></a>
+                                                    </OverlayTrigger>
+                                                ))}
+                                            </>
+                                        </Col>
+                                        <Button
+                                            variant="primary"
+                                            onClick={generateMP3File}
+                                            style={{
+                                                width: '100%',
+                                                marginTop: '5px',
+                                                backgroundColor: '#184c53',
+                                                color: 'white'
+                                            }}
+                                        >
+                                            {isRegenerateFile ? 'Regenerate' : 'Generate'} MP3 File
+                                        </Button>
+                                    </div>
+                                </Form>
+                            </Col>
+                        </div>
+            </Container>
+        </React.Fragment>
+:
+    <h1>Loading</h1>
+
+);
 }
