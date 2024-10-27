@@ -335,9 +335,10 @@ class TTA_Admin {
 
 
         if(get_player_id() > 2) {
-	        wp_enqueue_script( 'tts-font-awesome', plugin_dir_url( __FILE__ ) . 'js/build/font-awesome.min.js', array(), $this->version, true );
-	        wp_enqueue_style( 'tts-bootstrap', plugin_dir_url( __FILE__ ) . 'css/bootstrap.css', [], $this->version, 'all' );
-
+            if(! empty( $_REQUEST['page'] ) &&  $_REQUEST['page'] == 'bulk-mp3-generate') {
+	            wp_enqueue_script( 'tts-font-awesome', plugin_dir_url( __FILE__ ) . 'js/build/font-awesome.min.js', array(), $this->version, true );
+	            wp_enqueue_style( 'tts-bootstrap', plugin_dir_url( __FILE__ ) . 'css/bootstrap.css', [], $this->version, 'all' );
+            }
 	        // Register a new admin page under "Bulk MP3 Generate" menu
 	        add_submenu_page(
 		        'text-to-audio',         // Page title
@@ -361,6 +362,7 @@ class TTA_Admin {
         }else{
 			$url = admin_url( 'edit.php' );
 			echo '<p>No post ID found. Please select multiple posts from the post page. And apply <strong>AtlasVoice Generate MP3 File</strong> bulk action. <a href="' . $url . '">Go to Posts Page</a></p>';
+            echo 'How it works? <a style="text-decoration:none;color:red" target="_blank" href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"><span class="fab fa-youtube"></span></a>';
 		}
 
 	}

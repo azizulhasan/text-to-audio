@@ -19,13 +19,9 @@ import {postWithoutImage, getMultilingualActiveLanguages, copyToClipBoard} from 
 import toast from '../components/context/Notify';
 import {forEach} from "react-bootstrap/ElementChildren";
 
-export default function GenerateBulkMp3File({ postId, language, selectedLang, isRegenerateFile }) {
+export default function GenerateBulkMp3File({postId, language, selectedLang, isRegenerateFile}) {
     const [settings, setSettings] = useState({
-        tta__settings_css_selectors: '',
-        tta__settings_exclude_content_by_css_selectors: '',
-        tta__settings_exclude_texts: "",
-        tta__settings_exclude_tags: "",
-        tta__settings_use_own_css_selectors: true,
+        tts_regenerate_mp3_files: false
     });
     const [multilingualActiveLanguages, setMultilingualActiveLanguages] = useState([]);
 
@@ -33,32 +29,20 @@ export default function GenerateBulkMp3File({ postId, language, selectedLang, is
     const [postIDs, setPostIDs] = useState([]);
     const [postContents, setPostContents] = useState([])
     const [isDataLoaded, setIsDataLoaded] = useState(false)
-    const [metaKeys, setMetaKeys] = useState('');
-    const [content, setContent] = useState('');
-
-    const handleMetaKeysChange = (e) => {
-        setMetaKeys(e.target.value);
-    };
+    const [isAllMP3FileGenerated, setIsAllMP3FileGenerated] = useState(false)
 
     const handleContentChange = (e) => {
         // setContent(e.target.value);
         let parsedContents = structuredClone(postContents)
-        let settings = parsedContents[e.target.id]
-        settings.contents[1] = e.target.value;
-        parsedContents[e.target.id] = settings;
+        let postSettings = parsedContents[e.target.id]
+        postSettings.contents[1] = e.target.value;
+        parsedContents[e.target.id] = postSettings;
 
         console.log(parsedContents)
 
         setPostContents(parsedContents)
         console.log({id: e.target.id, val: e.target.value})
     };
-
-    const generateMP3File = () => {
-        // Add your MP3 generation logic here
-        console.log('Generating MP3 file...');
-    };
-
-
 
 
     useEffect(() => {
@@ -76,44 +60,22 @@ export default function GenerateBulkMp3File({ postId, language, selectedLang, is
         let formData = new FormData();
         formData.append('method', 'get');
         formData.append('post_ids', post_ids);
-        await  postWithoutImage(ttsObjPro.api_url + 'tta_pro/v1/get_bulk_post_content', formData).then(
+        await postWithoutImage(ttsObjPro.api_url + 'tta_pro/v1/get_bulk_post_content', formData).then(
             (res) => {
-                if(res.status) {
+                if (res.status) {
                     setPostContents(res.data)
                     setIsDataLoaded(res.status)
                 }
 
             });
-
-
-        // if(!data) {
-        //     let formData = new FormData();
-        //     formData.append('method', 'get');
-        //     formData.append('post_ids', post_ids);
-        //     await  postWithoutImage(ttsObjPro.api_url + 'tta_pro/v1/get_bulk_post_content', formData).then(
-        //         (res) => {
-        //             if(res.status) {
-        //                 setPostContents(res.data)
-        //                 setIsDataLoaded(res.status)
-        //                 window.sessionStorage.setItem('tts_temp_post_contents', JSON.stringify(res.data))
-        //             }
-        //
-        //         });
-        // }else{
-        //     setPostContents(data)
-        //     setIsDataLoaded(1)
-        //
-        // }
-
-
     }, []);
 
-    useEffect( () => {
-            if(Object.keys(postContents).length) {
-                console.log({postContents})
-                // window.sessionStorage.setItem('tts_temp_post_contents', JSON.stringify(postContents))
-            }
-        }, [postContents]);
+    useEffect(() => {
+        if (Object.keys(postContents).length) {
+            console.log({postContents})
+            // window.sessionStorage.setItem('tts_temp_post_contents', JSON.stringify(postContents))
+        }
+    }, [postContents]);
 
     /**
      * handle change
@@ -142,31 +104,25 @@ export default function GenerateBulkMp3File({ postId, language, selectedLang, is
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if(Object.keys(postContents).length) {
-            for (let postId  of Object.keys(postContents)) {
-                let bulkMP3File = await new BulkMP3File(postContents[postId])
+        if (Object.keys(postContents).length) {
+            let mp3FileGenerateCount = 0;
+            if(settings.tts_regenerate_mp3_files) {
+                if(!confirm('Are you sure? You want to regenerate all MP3 files ?')) {
+                    return;
+                }
+            }
+            for (let postId of Object.keys(postContents)) {
+                let postSettings = postContents[postId];
+                postSettings.settings.is_regenerate_file = settings.tts_regenerate_mp3_files;
+                console.log(postSettings)
+                let bulkMP3File = await new BulkMP3File(postSettings)
+                console.log({mp3file: bulkMP3File.fileURL})
                 if (!bulkMP3File.fileURL) {
                     if (ttsObjPro.player_id == 3) {
-                        if (bulkMP3File.compatible?.initiatedPlugins?.gtranslate) {
-                            // mp3File.gtranslateCompitable()
-                        } else {
-                            let mp3File = await bulkMP3File.init_gtts(1)
-                            console.log({mp3File})
-                            if(mp3File) {
-                                let parsedContents = structuredClone(postContents)
-                                let settings = parsedContents[postId]
-                                let urls = settings.settings.fileURLs;
-                                let file_url_key = settings.extra[1].file_url_key;
-                                settings.settings.fileURLs = {
-                                        ...{
-                                            [file_url_key]: mp3File
-                                        },
-                                    ...urls
-                                };
-                                parsedContents[postId] = settings;
-                                console.log({parsedContents})
-                                setPostContents(parsedContents)
-                            }
+                        let mp3File = await bulkMP3File.init_gtts(1)
+                        if (mp3File) {
+                            mp3FileGenerateCount++;
+                            setPostURL(mp3File, mp3FileGenerateCount, postId)
                         }
                     }
                     // else if (ttsObjPro.player_id == 4) {
@@ -182,12 +138,44 @@ export default function GenerateBulkMp3File({ postId, language, selectedLang, is
                     //         this.init_chat_gpt()
                     //     }
                     // }
+                }else{
+                    mp3FileGenerateCount++;
+                    setPostURL(bulkMP3File.fileURL, mp3FileGenerateCount, postId)
                 }
 
             }
         }
 
     };
+
+    function setPostURL (mp3File, mp3FileGenerateCount, postId) {
+        let parsedContents = structuredClone(postContents)
+        let postSettings = parsedContents[postId]
+        console.log(postSettings)
+        let urls = postSettings.settings.fileURLs;
+        let file_url_key = postSettings.extra[1].file_url_key;
+        postSettings.settings.fileURLs = {
+            ...{
+                [file_url_key]: mp3File
+            },
+            ...urls
+        };
+        parsedContents[postId] = postSettings;
+        setPostContents(parsedContents)
+
+        let postIDCount = Object.keys(postContents).length;
+        if(mp3FileGenerateCount === postIDCount) {
+            alert('All MP3 File Generated')
+            if(document.getElementById('tts_bulk_mp3_file_generate_save_button')) {
+                document.getElementById('tts_bulk_mp3_file_generate_save_button').innerHTML = 'Generate MP3 File'
+                setIsAllMP3FileGenerated(true)
+            }
+        }else{
+            if(document.getElementById('tts_bulk_mp3_file_generate_save_button')) {
+                document.getElementById('tts_bulk_mp3_file_generate_save_button').innerHTML = mp3FileGenerateCount +' MP3 file generated out of '+ postIDCount;
+            }
+        }
+    }
 
     function checkAllPropertiesAreEmpty(obj) {
         // Iterate over each property in the object
@@ -202,116 +190,116 @@ export default function GenerateBulkMp3File({ postId, language, selectedLang, is
         return false; // Return false if all properties are empty
     }
 
-    const postHasURL = (postId, postContents2 ) => {
-
-        let urls = postContents[postId].settings.fileURLs;
-
-        return Object.keys(urls).length  > 0 ? <i className="fa fa-check-circle"></i> : <i className="fa fa-times"></i>
-    }
-
 
     return (
         isDataLoaded ? <React.Fragment>
-            <ToastContainer
-                position='top-right'
-                autoClose={5000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-            />
-            <Container className={'atlasVoice-container'}>
-                <div className={'atlasVoice-row'}>
-                    <Col bsPrefix="atlasVoice" xs={12} sm={12} lg={8}>
-                        <div id={"player_content_1"}></div>
-                    </Col>
-                </div>
-                        <div className={'atlasVoice-row'}>
-                            <Col bsPrefix="atlasVoice" xs={12} sm={12} lg={8}>
-
-                                <Form onSubmit={handleSubmit}>
-                                    {/* Use Own CSS Selectors */}
-                                    <div className='atlasVoice-mt-3 atlasVoice-row'>
-                                        <Col xs={12} sm={12} lg={12}>
-                                            {
-                                                Object.keys(postContents).map(postId=> {
-                                                    let title = postContents[postId].extra[1].title;
-                                                    let content = postContents[postId].contents[1];
-                                                    let urls = postContents[postId].settings.fileURLs;
-                                                   return <Accordion key={postId}>
-                                                        <Accordion.Item eventKey='1'>
-                                                            <Accordion.Header>
-                                                                <div className={'pe-2'}> {
-                                                                    Object.keys(urls).length ?
-                                                                        <i className="fa fa-check-circle"></i> :
-                                                                        <i className="fa fa-times"></i>
-                                                                }
-                                                                </div>
-                                                                    {title}
-                                                            </Accordion.Header>
-                                                            <Accordion.Body>
-                                                                <Form.Group controlId={postId}>
-                                                                    <Form.Control
-                                                                        as="textarea"
-                                                                        value={content}
-                                                                        onChange={handleContentChange}
-                                                                        onPaste={handleContentChange}
-                                                                        rows={10}
-                                                                        placeholder={`Site language is ${selectedLang}. If you want to generate the MP3 file for other languages, paste the translated content here and select the language, then generate the MP3 file.`}
-                                                                    />
-                                                                </Form.Group>
-                                                            </Accordion.Body>
-                                                        </Accordion.Item>
-                                                    </Accordion>
-                                                })
-                                            }
-                                        </Col>
-                                    </div>
-                                    {/*Include Content By CSS Selector*/}
-                                    <div className='atlasVoice-mt-4 atlasVoice-row'>
-                                        <Col bsPrefix="atlasVoice" xs={1} sm={1} lg={1} className='mt-4'>
-                                            <>
-                                                {['top'].map((placement) => (
-                                                    <OverlayTrigger
-                                                        key={placement}
-                                                        placement={placement}
-                                                        overlay={
-                                                            <Tooltip id={`tooltip-${placement}`}>
-                                                                {__('Click To Know How It Works?')}
-                                                            </Tooltip>
-                                                        }>
-                                                        <a style={{textDecoration: 'none'}} target='_blank'
-                                                           href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
+                <ToastContainer
+                    position='top-right'
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                />
+                <Container className={'atlasVoice-container'}>
+                    <div className={'atlasVoice-row'}>
+                        <Col bsPrefix="atlasVoice" xs={12} sm={12} lg={8}>
+                            How it works? <a style={{textDecoration: 'none',}} className={'text-danger'} target='_blank'
+                                             href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
                                                             <span
-                                                                className="dashicons dashicons-info-outline"></span></a>
-                                                    </OverlayTrigger>
-                                                ))}
-                                            </>
-                                        </Col>
-                                        <Button
-                                            variant="primary"
-                                            type={'submit'}
-                                            style={{
-                                                width: '100%',
-                                                marginTop: '5px',
-                                                backgroundColor: '#184c53',
-                                                color: 'white',
-                                                cursor: 'pointer'
-                                            }}
-                                        >
-                                            {isRegenerateFile ? 'Regenerate' : 'Generate'} MP3 File
-                                        </Button>
-                                    </div>
-                                </Form>
-                            </Col>
-                        </div>
-            </Container>
-        </React.Fragment>
-:
-    <h1>Loading</h1>
+                                                                className="fab fa-youtube"></span></a>
+                        </Col>
+                        <Col bsPrefix="atlasVoice" xs={12} sm={12} lg={8}>
+                            <div id={"player_content_1"}></div>
+                        </Col>
 
-);
+                    </div>
+                    {/* Add Button or Player Automatically */}
+                    <Row className=' mt-3'>
+                        <Col xs={12} sm={6} lg={4}>
+                            <Form.Label htmlFor='tta__settings_enable_button_add'>
+                                Regenerate All MP3 Files.
+                            </Form.Label>
+                        </Col>
+                        <Col xs={12} sm={12} lg={8}>
+                            <Form.Check // prettier-ignore
+                                type={'checkbox'}
+                                checked={settings.tts_regenerate_mp3_files}
+                                onChange={(e) =>
+                                    handleChange(e)
+                                }
+                                name={`tts_regenerate_mp3_files`}
+                                id={`tts_regenerate_mp3_files`}
+                            />
+                        </Col>
+                    </Row>
+                    <div className={'atlasVoice-row'}>
+                        <Col bsPrefix="atlasVoice" xs={12} sm={12} lg={8}>
+                            <Form onSubmit={handleSubmit}>
+                                {/* Use Own CSS Selectors */}
+                                <div className='atlasVoice-mt-3 atlasVoice-row'>
+                                    <Col xs={12} sm={12} lg={12}>
+                                        {
+                                            Object.keys(postContents).map(postId => {
+                                                let title = postContents[postId].extra[1].title;
+                                                let content = postContents[postId].contents[1];
+                                                let urls = postContents[postId].settings.fileURLs;
+                                                return <Accordion key={postId}>
+                                                    <Accordion.Item eventKey='1'>
+                                                        <Accordion.Header>
+                                                            <div className={'pe-2'}> {
+                                                                Object.keys(urls).length ?
+                                                                    <i className="fa fa-check-circle"></i> :
+                                                                    <i className="fa fa-times"></i>
+                                                            }
+                                                            </div>
+                                                            {title}
+                                                        </Accordion.Header>
+                                                        <Accordion.Body>
+                                                            <Form.Group controlId={postId}>
+                                                                <Form.Control
+                                                                    as="textarea"
+                                                                    value={content}
+                                                                    onChange={handleContentChange}
+                                                                    onPaste={handleContentChange}
+                                                                    rows={10}
+                                                                    placeholder={`Site language is ${selectedLang}. If you want to generate the MP3 file for other languages, paste the translated content here and select the language, then generate the MP3 file.`}
+                                                                />
+                                                            </Form.Group>
+                                                        </Accordion.Body>
+                                                    </Accordion.Item>
+                                                </Accordion>
+                                            })
+                                        }
+                                    </Col>
+                                </div>
+                                {/*Include Content By CSS Selector*/}
+                                <div className='atlasVoice-mt-4 atlasVoice-row'>
+                                    <Button
+                                        variant="primary"
+                                        type={'submit'}
+                                        id={'tts_bulk_mp3_file_generate_save_button'}
+                                        style={{
+                                            width: '100%',
+                                            marginTop: '5px',
+                                            backgroundColor: '#184c53',
+                                            color: 'white',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        Generate MP3 File
+                                    </Button>
+                                </div>
+                            </Form>
+                        </Col>
+                    </div>
+                </Container>
+            </React.Fragment>
+            :
+            <h1>Loading</h1>
+
+    );
 }
