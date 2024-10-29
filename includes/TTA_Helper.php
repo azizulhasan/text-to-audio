@@ -229,7 +229,13 @@ class TTA_Helper {
 		$datas = \apply_filters( 'tts_pro_plugins_data', [
 			'gtranslate/gtranslate.php'                => [
 				'type'       => 'class',
-				'data'       => [ 'gt_options', 'gt_languages', 'gt_switcher_wrapper', 'gt_selector', ],
+				'data'       => [
+					'gt_options',
+					'gt_languages',
+					'gt_switcher_wrapper',
+					'gt_selector',
+					'gtranslate_wrapper'
+				],
 				//  'gt_selector',], // 'gt_white_content', 'gtranslate_wrapper'],
 				'plugin'     => 'gtranslate',
 				'GTranslate' => $GTranslate,
@@ -888,7 +894,7 @@ class TTA_Helper {
 		}
 	}
 
-	private static function get_all_acf_fields() {
+	public static function get_all_acf_fields() {
 		// Get all field groups
 		$field_groups   = acf_get_field_groups();
 		$all_acf_fields = [];
@@ -936,7 +942,7 @@ class TTA_Helper {
 	 *
 	 * @return bool True if the player button should be displayed, false otherwise.
 	 */
-	private static function display_player_based_on_user_role() {
+	public static function display_player_based_on_user_role() {
 		// Retrieve customization settings for the player
 		$customize         = (array) self::tts_get_settings( 'customize' );
 		$display_player_to = false;
