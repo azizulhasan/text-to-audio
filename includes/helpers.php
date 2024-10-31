@@ -714,25 +714,19 @@ function get_player_id() {
 	global $post;
 
 	$customize_settings                   = (array) TTA_Helper::tts_get_settings( 'customize' );
-	$customize_settings['buttonSettings'] = isset( $customize_settings['buttonSettings'] ) ? (array) $customize_settings['buttonSettings'] : [ 'id' => 1 ];
+	$customize_settings['buttonSettings'] = isset( $customize_settings['buttonSettings'] ) ? (array) $customize_settings['buttonSettings'] : [
+		'id'                        => 1,
+		'button_position'           => 'before_content',
+		'display_player_to'         => [ 'all' ],
+		'who_can_download_mp3_file' => [ 'all' ],
+	];
 
-	$should_update_transient = false;
-	$cached_player_id        = get_transient( 'tts_cached_player_id' );
-	if ( $cached_player_id ) {
-		$player_id = $cached_player_id;
-	} else {
-		$player_id = isset( $customize_settings['buttonSettings']['id'] ) ? $customize_settings['buttonSettings']['id'] : 1;
-	}
+
+	$player_id = isset( $customize_settings['buttonSettings']['id'] ) ? $customize_settings['buttonSettings']['id'] : 1;
+
 
 	if ( ! is_pro_license_active() && $player_id > 1 ) {
 		$player_id = 1;
-	}
-	if ( $cached_player_id != $player_id ) {
-		$should_update_transient = true;
-	}
-
-	if ( $should_update_transient ) {
-		set_transient( 'tts_cached_player_id', $player_id );
 	}
 
 
