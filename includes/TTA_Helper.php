@@ -112,6 +112,23 @@ class TTA_Helper {
 			$should_load_button = false;
 		}
 
+		if ( TTA_Helper::is_edit_page() ) {
+			$should_load_button = true;
+			if (
+				! isset( $settings['tta__settings_allow_listening_for_post_types'] )
+				|| count( $settings['tta__settings_allow_listening_for_post_types'] ) === 0
+				|| ! is_array( $settings['tta__settings_allow_listening_for_post_types'] )
+				|| ! in_array( self::tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'] )
+				|| in_array( $post->ID, $ids )
+				|| $is_exclude_by_tags
+				|| $is_exclude_by_cagories
+				|| $tta__settings_allow_listening_for_posts_status
+				|| $display_player_to
+			) {
+				$should_load_button = false;
+			}
+		}
+
 		return apply_filters( 'tta_should_load_button', $should_load_button, $post );
 	}
 
