@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.6.2
 Requires PHP: 7.4
-Stable tag: 1.7.28
+Stable tag: 1.7.29
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -367,22 +367,19 @@ Filter Example:
 Install the plugin [Code Snippets](https://wordpress.org/plugins/code-snippets/), then navigate to Snippets > Add New. Create a new snippet with the following code block:
 
 `
-add_filter( 'tta__button_text_arr', 'tta__button_text_arr_callback' );
-function tta__button_text_arr_callback ( $button_text_arr ) {
-
-	// Listen button
-	$text_arr['listen_text'] = 'Listen'; // paste custom text
-    $text_arr['pause_text'] = 'Pause'; // paste custom text
-    $text_arr['resume_text'] = 'Resume'; // paste custom text
-    $text_arr['replay_text'] = 'Replay'; // paste custom text
-    // Hover title
-    $text_arr['listen_hover_title'] = 'test listen title',
-    $text_arr['pause_hover_title'] = 'test pause title',
-    $text_arr['resume_hover_title'] = 'test resume title',
-    $text_arr['replay_hover_title'] = 'test replay title',
-
-	return $text_arr;
-}
+	add_filter('tta__button_text_arr', 'tta__button_text_arr_callback');
+	function tta__button_text_arr_callback($text_arr) {
+		return [
+			'listen_text' => 'Listen',
+			'pause_text'  => 'Pause',
+			'resume_text' => 'Resume',
+			'replay_text' => 'Replay',
+			'listen_hover_title' => 'listen title',
+			'pause_hover_title' => 'pause title',
+			'resume_hover_title' => 'resume title',
+			'replay_hover_title' => 'replay title',
+		];
+	}
 
 `
   
@@ -427,6 +424,10 @@ You can customize the voice and language of the text-to-speech player using shor
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+
+= 1.7.29 ( 30 Oct 2024 ) =
+Fixed: After update player button issue fixed.
+Fixed: Documentation updated.
 
 = 1.7.28 ( 29 Oct 2024 ) =
 Fixed: After update of post caching issue fixed.
