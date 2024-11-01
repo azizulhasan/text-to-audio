@@ -125,19 +125,19 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                             setPostURL(mp3File, mp3FileGenerateCount, postId)
                         }
                     }
-                    // else if (ttsObjPro.player_id == 4) {
-                    //     if (this.compatible?.initiatedPlugins?.gtranslate) {
-                    //         this.#gtranslateCompitable()
-                    //     } else {
-                    //         this.init_gctts()
-                    //     }
-                    // }else if (ttsObjPro.player_id == 5) {
-                    //     if (this.compatible?.initiatedPlugins?.gtranslate) {
-                    //         this.#gtranslateCompitable()
-                    //     } else {
-                    //         this.init_chat_gpt()
-                    //     }
-                    // }
+                    else if (ttsObjPro.player_id == 4) {
+                        let mp3File = await bulkMP3File.init_gctts(1)
+                        if (mp3File) {
+                            mp3FileGenerateCount++;
+                            setPostURL(mp3File, mp3FileGenerateCount, postId)
+                        }
+                    }else if (ttsObjPro.player_id == 5) {
+                        let mp3File = await bulkMP3File.init_chat_gpt(1)
+                        if (mp3File) {
+                            mp3FileGenerateCount++;
+                            setPostURL(mp3File, mp3FileGenerateCount, postId)
+                        }
+                    }
                 }else{
                     mp3FileGenerateCount++;
                     setPostURL(bulkMP3File.fileURL, mp3FileGenerateCount, postId)

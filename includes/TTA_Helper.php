@@ -622,16 +622,27 @@ class TTA_Helper {
 	public static function get_path_from_url( $url ) {
 		$audio_dir     = TTA_PRO_GTTS_DIR;
 		$audio_dir_url = TTA_PRO_GTTS_DIR_URL;
+		$player_id     = self::get_player_id();
 
-		if ( get_player_id() == 4 ) {
+		if ( $player_id == 4 ) {
+
+			if ( strpos( $url, 'gtts' ) !== false ) {
+				$url = str_replace( 'gtts/', '', $url );
+			}
+
+			if ( strpos( $url, 'chat_gpt_tts' ) !== false ) {
+				$url = str_replace( 'chat_gpt_tts/', '', $url );
+			}
+
 			$audio_dir     = TTA_PRO_AUDIO_DIR;
 			$audio_dir_url = TTA_PRO_AUDIO_DIR_URL;
 		}
 
-		if ( get_player_id() == 5 ) {
+		if ( $player_id == 5 ) {
 			$audio_dir     = TTA_PRO_CHAT_GPT_TTS_DIR;
 			$audio_dir_url = TTA_PRO_CHAT_GPT_TTS_DIR_URL;
 		}
+
 
 		$log_data = apply_filters( 'tts_get_path_from_url', array(
 			'url'  => $url,
@@ -666,15 +677,7 @@ class TTA_Helper {
 	}
 
 	public static function get_player_id() {
-		$customize_settings                   = (array) TTA_Helper::tts_get_settings( 'customize' );
-		$customize_settings['buttonSettings'] = isset( $customize_settings['buttonSettings'] ) ? (array) $customize_settings['buttonSettings'] : [ 'id' => 1 ];
-		$player_id                            = isset( $customize_settings['buttonSettings']['id'] ) ? $customize_settings['buttonSettings']['id'] : 1;
-
-		if ( ! self::is_pro_license_active() && $player_id > 1 ) {
-			$player_id = 1;
-		}
-
-		return apply_filters( 'tts_get_player_id', $player_id, $customize_settings );
+		return get_player_id();
 	}
 
 	/**
