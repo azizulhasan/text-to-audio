@@ -244,6 +244,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                                         {
                                             Object.keys(postContents).map(postId => {
                                                 let title = postContents[postId].extra[1].title;
+                                                let language = postContents[postId].extra[1].language;
                                                 let content = postContents[postId].contents[1];
                                                 let urls = postContents[postId].settings.fileURLs;
                                                 let postURL = postContents[postId].settings.postURL;
@@ -252,7 +253,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                                                         <Accordion.Item eventKey={postId}>
                                                             <Accordion.Header>
                                                                 <div className={'pe-2'}> {
-                                                                    Object.keys(urls).length ?
+                                                                    Object.keys(urls).length && Object.keys(urls).includes(language) ?
                                                                         <i className="fa fa-check-circle"></i> :
                                                                         <i className="fa fa-times"></i>
                                                                 }
@@ -274,7 +275,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                                                         </Accordion.Item>
                                                     </Accordion>
                                                     {
-                                                        Object.keys(urls).length ?
+                                                        Object.keys(urls).length && Object.keys(urls).includes(language) ?
                                                         <a className={'px-2'} href={postURL} target={'_blank'}><i className="fa fa-eye"
                                                                                                aria-hidden="true"></i></a>: ''
                                                     }
