@@ -106,8 +106,8 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
 
         if (Object.keys(postContents).length) {
             let mp3FileGenerateCount = 0;
-            if(settings.tts_regenerate_mp3_files) {
-                if(!confirm('Are you sure? You want to regenerate all MP3 files ?')) {
+            if (settings.tts_regenerate_mp3_files) {
+                if (!confirm('Are you sure? You want to regenerate all MP3 files ?')) {
                     return;
                 }
             }
@@ -124,21 +124,20 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                             mp3FileGenerateCount++;
                             setPostURL(mp3File, mp3FileGenerateCount, postId)
                         }
-                    }
-                    else if (ttsObjPro.player_id == 4) {
+                    } else if (ttsObjPro.player_id == 4) {
                         let mp3File = await bulkMP3File.init_gctts(1)
                         if (mp3File) {
                             mp3FileGenerateCount++;
                             setPostURL(mp3File, mp3FileGenerateCount, postId)
                         }
-                    }else if (ttsObjPro.player_id == 5) {
+                    } else if (ttsObjPro.player_id == 5) {
                         let mp3File = await bulkMP3File.init_chat_gpt(1)
                         if (mp3File) {
                             mp3FileGenerateCount++;
                             setPostURL(mp3File, mp3FileGenerateCount, postId)
                         }
                     }
-                }else{
+                } else {
                     mp3FileGenerateCount++;
                     setPostURL(bulkMP3File.fileURL, mp3FileGenerateCount, postId)
                 }
@@ -148,7 +147,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
 
     };
 
-    function setPostURL (mp3File, mp3FileGenerateCount, postId) {
+    function setPostURL(mp3File, mp3FileGenerateCount, postId) {
         let parsedContents = structuredClone(postContents)
         let postSettings = parsedContents[postId]
         console.log(postSettings)
@@ -164,15 +163,15 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
         setPostContents(parsedContents)
 
         let postIDCount = Object.keys(postContents).length;
-        if(mp3FileGenerateCount === postIDCount) {
+        if (mp3FileGenerateCount === postIDCount) {
             alert('All MP3 File Generated')
-            if(document.getElementById('tts_bulk_mp3_file_generate_save_button')) {
+            if (document.getElementById('tts_bulk_mp3_file_generate_save_button')) {
                 document.getElementById('tts_bulk_mp3_file_generate_save_button').innerHTML = 'Generate MP3 File'
                 setIsAllMP3FileGenerated(true)
             }
-        }else{
-            if(document.getElementById('tts_bulk_mp3_file_generate_save_button')) {
-                document.getElementById('tts_bulk_mp3_file_generate_save_button').innerHTML = mp3FileGenerateCount +' MP3 file generated out of '+ postIDCount;
+        } else {
+            if (document.getElementById('tts_bulk_mp3_file_generate_save_button')) {
+                document.getElementById('tts_bulk_mp3_file_generate_save_button').innerHTML = mp3FileGenerateCount + ' MP3 file generated out of ' + postIDCount;
             }
         }
     }
@@ -247,31 +246,40 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                                                 let title = postContents[postId].extra[1].title;
                                                 let content = postContents[postId].contents[1];
                                                 let urls = postContents[postId].settings.fileURLs;
-                                                return <Accordion key={postId}>
-                                                    <Accordion.Item eventKey='1'>
-                                                        <Accordion.Header>
-                                                            <div className={'pe-2'}> {
-                                                                Object.keys(urls).length ?
-                                                                    <i className="fa fa-check-circle"></i> :
-                                                                    <i className="fa fa-times"></i>
-                                                            }
-                                                            </div>
-                                                            {title}
-                                                        </Accordion.Header>
-                                                        <Accordion.Body>
-                                                            <Form.Group controlId={postId}>
-                                                                <Form.Control
-                                                                    as="textarea"
-                                                                    value={content}
-                                                                    onChange={handleContentChange}
-                                                                    onPaste={handleContentChange}
-                                                                    rows={10}
-                                                                    placeholder={`Site language is ${selectedLang}. If you want to generate the MP3 file for other languages, paste the translated content here and select the language, then generate the MP3 file.`}
-                                                                />
-                                                            </Form.Group>
-                                                        </Accordion.Body>
-                                                    </Accordion.Item>
-                                                </Accordion>
+                                                let postURL = postContents[postId].settings.postURL;
+                                                return <div key={postId} className={'d-flex d-inline align-items-center'}>
+                                                    <Accordion className={'flex-grow-1'}>
+                                                        <Accordion.Item eventKey={postId}>
+                                                            <Accordion.Header>
+                                                                <div className={'pe-2'}> {
+                                                                    Object.keys(urls).length ?
+                                                                        <i className="fa fa-check-circle"></i> :
+                                                                        <i className="fa fa-times"></i>
+                                                                }
+                                                                </div>
+                                                                {title}
+                                                            </Accordion.Header>
+                                                            <Accordion.Body>
+                                                                <Form.Group controlId={postId}>
+                                                                    <Form.Control
+                                                                        as="textarea"
+                                                                        value={content}
+                                                                        onChange={handleContentChange}
+                                                                        onPaste={handleContentChange}
+                                                                        rows={10}
+                                                                        placeholder={`Site language is ${selectedLang}. If you want to generate the MP3 file for other languages, paste the translated content here and select the language, then generate the MP3 file.`}
+                                                                    />
+                                                                </Form.Group>
+                                                            </Accordion.Body>
+                                                        </Accordion.Item>
+                                                    </Accordion>
+                                                    {
+                                                        Object.keys(urls).length ?
+                                                        <a className={'px-2'} href={postURL} target={'_blank'}><i className="fa fa-eye"
+                                                                                               aria-hidden="true"></i></a>: ''
+                                                    }
+
+                                                </div>
                                             })
                                         }
                                     </Col>
