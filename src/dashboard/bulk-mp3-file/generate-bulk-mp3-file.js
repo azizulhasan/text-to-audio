@@ -207,7 +207,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                     <div className={'atlasVoice-row'}>
                         <Col bsPrefix="atlasVoice" xs={12} sm={12} lg={8}>
                             How it works? <a style={{textDecoration: 'none',}} className={'text-danger'} target='_blank'
-                                             href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
+                                             href='https://www.youtube.com/watch?v=HFoqlkPCP80'>
                                                             <span
                                                                 className="fab fa-youtube"></span></a>
                         </Col>
@@ -244,7 +244,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                                         {
                                             Object.keys(postContents).map(postId => {
                                                 let title = postContents[postId].extra[1].title;
-                                                let language = postContents[postId].extra[1].language;
+                                                let file_url_key = postContents[postId].extra[1].file_url_key;
                                                 let content = postContents[postId].contents[1];
                                                 let urls = postContents[postId].settings.fileURLs;
                                                 let postURL = postContents[postId].settings.postURL;
@@ -253,7 +253,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                                                         <Accordion.Item eventKey={postId}>
                                                             <Accordion.Header>
                                                                 <div className={'pe-2'}> {
-                                                                    Object.keys(urls).length && Object.keys(urls).includes(language) ?
+                                                                    Object.keys(urls).length && Object.keys(urls).includes(file_url_key) ?
                                                                         <i className="fa fa-check-circle"></i> :
                                                                         <i className="fa fa-times"></i>
                                                                 }
@@ -275,7 +275,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                                                         </Accordion.Item>
                                                     </Accordion>
                                                     {
-                                                        Object.keys(urls).length && Object.keys(urls).includes(language) ?
+                                                        Object.keys(urls).length && Object.keys(urls).includes(file_url_key) ?
                                                         <a className={'px-2'} href={postURL} target={'_blank'}><i className="fa fa-eye"
                                                                                                aria-hidden="true"></i></a>: ''
                                                     }
