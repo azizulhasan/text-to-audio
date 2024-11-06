@@ -49,6 +49,9 @@ class TTA_Helper {
 
 	public static function should_load_button() {
 		$should_load_button = false;
+
+		return true;
+		// TODO:: TTS-122
 		global $post;
 		// is_home() || is_archive() || is_front_page() || is_category()
 		if ( \is_single() || \is_singular() ) {
@@ -261,7 +264,8 @@ class TTA_Helper {
 				$compatible_plugins_data[ $plugin_name ] = $data;
 			}
 		}
-
+		return [];
+		// TODO: TTS-122
 		return \apply_filters( 'tts_compatible_plugins_data', $compatible_plugins_data, \get_plugins() );
 	}
 
@@ -518,7 +522,7 @@ class TTA_Helper {
 
 			global $post;
 		}
-
+		// TODO: TTS-122
 		if ( ! is_pro_active() || self::get_player_id() < 3 ) {
 			return [];
 		}
@@ -753,7 +757,8 @@ class TTA_Helper {
 	 * @return array An associative array with category slugs as keys and category names as values.
 	 */
 	public static function get_all_categories() {
-
+		return [];
+		// TODO: TTS-122
 		if ( ! function_exists( 'get_categories' ) ) {
 			require_once ABSPATH . 'wp-includes/category.php';
 		}
@@ -777,6 +782,8 @@ class TTA_Helper {
 	 * @return array An associative array with tag slugs as keys and tag names as values.
 	 */
 	public static function get_all_tags() {
+		return [];
+		// TODO: TTS-122
 		if ( ! function_exists( 'get_tags' ) ) {
 			require_once ABSPATH . 'wp-includes/category.php';
 		}
