@@ -80,6 +80,8 @@ Unlock additional features and support by upgrading to [Text To Speech TTS Pro](
 
 * **Live Support:** We usually reply with 1 hour.
 
+* **Bulk MP3 File Generation:** [Text To Speech Pro ( AtlasVoice Pro ) : How To Generate Bulk MP3 File?](https://www.youtube.com/watch?v=HFoqlkPCP80).
+
 * **Advance Analytics:** __AtlasVoice__ Support [Advance Analytics](https://www.youtube.com/watch?v=amkrAtVQGBY).
 
 * **Unlimited Text Alias:** __AtlasVoice__ Support [Text Alias](https://www.youtube.com/watch?v=oeW652YKmG0&t=3s).
