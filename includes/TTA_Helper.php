@@ -344,6 +344,7 @@ class TTA_Helper {
 		if ( ! $title ) {
 			$title = 'Demo Content';
 		}
+		$title = trim( $title );
 		global $post;
 		if ( ! $post_id && $post ) { // TODO: must add post ID to file name.
 			$post_id = $post->ID;
