@@ -30,7 +30,6 @@ class TTA_Hooks {
 	public function __construct() {
 		// TODO it should work with new functionality
 		add_action( 'add_meta_boxes', array( $this, 'add_custom_meta_box' ) );
-
 		// Update hook
 		add_action( 'upgrader_process_complete', [ $this, 'update_tts_default_data' ], 10, 2 );
 
@@ -240,18 +239,23 @@ class TTA_Hooks {
 		if ( \is_pro_active() ) {
 			$plugin_name = 'Text To Speech Pro';
 		}
-		add_meta_box(
-			'atlasVoice-meta-box',
-			$plugin_name,
-			array(
-				$this,
-				'atlasVoice_meta_box',
-			),
-			get_current_screen()->post_type,
-			'advanced',
-			'high',
-			null
-		);
+
+		// TODO: make UI for this to display matabox widget.
+		if ( TTA_Helper::should_load_button() || apply_filters( 'atlas_voice_display_metabox', false ) ) {
+			add_meta_box(
+				'atlasVoice-meta-box',
+				$plugin_name,
+				array(
+					$this,
+					'atlasVoice_meta_box',
+				),
+				get_current_screen()->post_type,
+				'advanced',
+				'high',
+				null
+			);
+		}
+
 
 	}
 

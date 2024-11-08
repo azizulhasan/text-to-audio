@@ -112,6 +112,23 @@ class TTA_Helper {
 			$should_load_button = false;
 		}
 
+		if ( TTA_Helper::is_edit_page() ) {
+			$should_load_button = true;
+			if (
+				! isset( $settings['tta__settings_allow_listening_for_post_types'] )
+				|| count( $settings['tta__settings_allow_listening_for_post_types'] ) === 0
+				|| ! is_array( $settings['tta__settings_allow_listening_for_post_types'] )
+				|| ! in_array( self::tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'] )
+				|| in_array( $post->ID, $ids )
+				|| $is_exclude_by_tags
+				|| $is_exclude_by_cagories
+				|| $tta__settings_allow_listening_for_posts_status
+				|| $display_player_to
+			) {
+				$should_load_button = false;
+			}
+		}
+
 		return apply_filters( 'tta_should_load_button', $should_load_button, $post );
 	}
 
@@ -229,7 +246,13 @@ class TTA_Helper {
 		$datas = \apply_filters( 'tts_pro_plugins_data', [
 			'gtranslate/gtranslate.php'                => [
 				'type'       => 'class',
-				'data'       => [ 'gt_options', 'gt_languages', 'gt_switcher_wrapper', 'gt_selector', ],
+				'data'       => [
+					'gt_options',
+					'gt_languages',
+					'gt_switcher_wrapper',
+					'gt_selector',
+					'gtranslate_wrapper'
+				],
 				//  'gt_selector',], // 'gt_white_content', 'gtranslate_wrapper'],
 				'plugin'     => 'gtranslate',
 				'GTranslate' => $GTranslate,
@@ -321,6 +344,7 @@ class TTA_Helper {
 		if ( ! $title ) {
 			$title = 'Demo Content';
 		}
+		$title = trim( $title );
 		global $post;
 		if ( ! $post_id && $post ) { // TODO: must add post ID to file name.
 			$post_id = $post->ID;
@@ -599,16 +623,27 @@ class TTA_Helper {
 	public static function get_path_from_url( $url ) {
 		$audio_dir     = TTA_PRO_GTTS_DIR;
 		$audio_dir_url = TTA_PRO_GTTS_DIR_URL;
+		$player_id     = self::get_player_id();
 
-		if ( get_player_id() == 4 ) {
+		if ( $player_id == 4 ) {
+
+			if ( strpos( $url, 'gtts' ) !== false ) {
+				$url = str_replace( 'gtts/', '', $url );
+			}
+
+			if ( strpos( $url, 'chat_gpt_tts' ) !== false ) {
+				$url = str_replace( 'chat_gpt_tts/', '', $url );
+			}
+
 			$audio_dir     = TTA_PRO_AUDIO_DIR;
 			$audio_dir_url = TTA_PRO_AUDIO_DIR_URL;
 		}
 
-		if ( get_player_id() == 5 ) {
+		if ( $player_id == 5 ) {
 			$audio_dir     = TTA_PRO_CHAT_GPT_TTS_DIR;
 			$audio_dir_url = TTA_PRO_CHAT_GPT_TTS_DIR_URL;
 		}
+
 
 		$log_data = apply_filters( 'tts_get_path_from_url', array(
 			'url'  => $url,
@@ -643,15 +678,7 @@ class TTA_Helper {
 	}
 
 	public static function get_player_id() {
-		$customize_settings                   = (array) TTA_Helper::tts_get_settings( 'customize' );
-		$customize_settings['buttonSettings'] = isset( $customize_settings['buttonSettings'] ) ? (array) $customize_settings['buttonSettings'] : [ 'id' => 1 ];
-		$player_id                            = isset( $customize_settings['buttonSettings']['id'] ) ? $customize_settings['buttonSettings']['id'] : 1;
-
-		if ( ! self::is_pro_license_active() && $player_id > 1 ) {
-			$player_id = 1;
-		}
-
-		return apply_filters( 'tts_get_player_id', $player_id, $customize_settings );
+		return get_player_id();
 	}
 
 	/**
@@ -888,7 +915,7 @@ class TTA_Helper {
 		}
 	}
 
-	private static function get_all_acf_fields() {
+	public static function get_all_acf_fields() {
 		// Get all field groups
 		$field_groups   = acf_get_field_groups();
 		$all_acf_fields = [];
