@@ -34,6 +34,8 @@ const productionSrc = [
 	'!admin/js/AtlasVoiceAnalytics.js',
 	'!admin/js/AtlasVoicePlayerInsights.js',
 	'!admin/js/build/text-to-audio-pro-button.min.js',
+	'!admin/js/build/tts-bulk-mp3-file.min.js',
+	'!admin/js/build/tts-bulk-mp3-file.min.js.LICENSE.txt',
 	'!admin/js/build/tts-css-selectors.min.js',
 	'!admin/js/build/tts-css-selectors.min.js.LICENSE.txt',
 	'!admin/js/build/text-to-audio-pro-button.min.js.LICENSE.txt',

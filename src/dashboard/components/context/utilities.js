@@ -63,7 +63,7 @@ export const postWithoutImage = async (url = "", data = {}) => {
         method: "POST", // *GET, POST, PUT, DELETE, etc.
         body: data, // body data type must match "Content-Type" header
         headers: {
-            'X-WP-Nonce': ttsObj.rest_nonce
+            'X-WP-Nonce': window?.ttsObj?.rest_nonce ?? ttsObjPro?.rest_nonce
         },
     });
     const responseData = await response.json(); // parses JSON response into native JavaScript objects
@@ -676,4 +676,34 @@ export const chatGPTLanguages = () => {
         vi: "Vietnamese",
         cy: "Welsh"
     };
+}
+
+
+export const getMultilingualActiveLanguages = (ttsObjPro) => {
+    // Initialize an empty object
+    let languageObject = {};
+    if (ttsObjPro?.compatible?.['gtranslate/gtranslate.php']) {
+        let gtranslateActiveLanguages = ttsObjPro?.compatible?.['gtranslate/gtranslate.php']?.GTranslate?.fincl_langs;
+        // Populate the object using a loop
+        for (const langCode of gtranslateActiveLanguages) {
+            languageObject[langCode] = langCode;
+        }
+    } else if (ttsObjPro?.compatible?.['sitepress-multilingual-cms/sitepress.php']) {
+        let gtranslateActiveLanguages = ttsObjPro?.compatible?.['sitepress-multilingual-cms/sitepress.php']?.active_languages;
+
+        let active_languages = Object.keys(gtranslateActiveLanguages);
+
+        // Populate the object using a loop
+        for (const langCode of active_languages) {
+            languageObject[langCode] = gtranslateActiveLanguages[langCode].english_name;
+        }
+    } else if (ttsObjPro?.compatible?.['translatepress-multilingual/index.php']) {
+        let activeLanguages = ttsObjPro?.compatible?.['translatepress-multilingual/index.php']?.data;
+        // Populate the object using a loop
+        for (const langCode of activeLanguages) {
+            languageObject[langCode] = langCode;
+        }
+    }
+
+    return languageObject;
 }

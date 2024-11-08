@@ -6,6 +6,7 @@ export default function UpgradeToPro({promotionType = 'general'}) {
             [ // free video
                 'h4VJxM-mh74?si=pmgy6TkvvppqtQV7',
                 'yanuoEBfG4A?si=WVJYL656B1LmrEVY',
+                'HFoqlkPCP80?si=XVBvLEp2ATKT7EXz',
                 'amkrAtVQGBY?si=ZI1HfRBYaR60PVVx',
                 'oeW652YKmG0?si=q97jAR0pTT3LhhH-',
                 'vdgJ_V2REE0?si=DSHrm7tlt8dbcF1R',
@@ -14,6 +15,7 @@ export default function UpgradeToPro({promotionType = 'general'}) {
             [ // pro video
                 'h4VJxM-mh74?si=pmgy6TkvvppqtQV7',
                 'yanuoEBfG4A?si=WVJYL656B1LmrEVY',
+                'HFoqlkPCP80?si=XVBvLEp2ATKT7EXz',
                 'amkrAtVQGBY?si=ZI1HfRBYaR60PVVx',
                 'oeW652YKmG0?si=q97jAR0pTT3LhhH-',
                 'uMJBdM24w_c?si=XZ0hsLADaQiB2UN2',
@@ -22,6 +24,7 @@ export default function UpgradeToPro({promotionType = 'general'}) {
         general: [
             'Get Live Support for setup.',
             '51 languages support in pro version.',
+            '<a target="_blank" href="https://atlasaidev.com/refund-policy/">Bulk MP3 File Generation</a>',
             'Advance Analytics',
             'Text Aliases',
             'Unlimited Characters',

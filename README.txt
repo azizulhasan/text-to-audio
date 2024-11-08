@@ -3,9 +3,9 @@ Contributors: atlasaidev, hasanazizul
 Donate link: http://atlasaidev.com/
 Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
-Tested up to: 6.6.2
+Tested up to: 6.7.0
 Requires PHP: 7.4
-Stable tag: 1.7.29
+Stable tag: 1.7.30
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -79,6 +79,8 @@ Unlock additional features and support by upgrading to [Text To Speech TTS Pro](
 **Text To Speech TTS Accessibility Pro Features:**
 
 * **Live Support:** We usually reply with 1 hour.
+
+* **Bulk MP3 File Generation:** [Text To Speech Pro ( AtlasVoice Pro ) : How To Generate Bulk MP3 File?](https://www.youtube.com/watch?v=HFoqlkPCP80).
 
 * **Advance Analytics:** __AtlasVoice__ Support [Advance Analytics](https://www.youtube.com/watch?v=amkrAtVQGBY).
 
@@ -424,6 +426,12 @@ You can customize the voice and language of the text-to-speech player using shor
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+
+= 1.7.30 ( 07 Nov 2024 ) =
+Texted: WordPress 6.7 tested.
+Introduced : Bulk download introduced for pro version.[Text To Speech Pro ( AtlasVoice Pro ) : How To Generate Bulk MP3 File?](https://www.youtube.com/watch?v=HFoqlkPCP80)
+Fixed: Player button duplication issue solved.
+Fixed: Player hide issue solved.
 
 = 1.7.29 ( 30 Oct 2024 ) =
 Fixed: After update player button issue fixed.
