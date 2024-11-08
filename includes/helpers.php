@@ -737,7 +737,7 @@ function get_player_id() {
  * Is plugin active
  */
 function is_pro_active() {
-
+    // TODO: TTS-122
 //	if ( ! function_exists( 'ttsp_fs' ) ) {
 //		return false;
 //	}

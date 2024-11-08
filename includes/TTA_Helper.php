@@ -287,7 +287,9 @@ class TTA_Helper {
 				$compatible_plugins_data[ $plugin_name ] = $data;
 			}
 		}
+
 		return [];
+
 		// TODO: TTS-122
 		return \apply_filters( 'tts_compatible_plugins_data', $compatible_plugins_data, \get_plugins() );
 	}
@@ -550,13 +552,14 @@ class TTA_Helper {
 		if ( ! is_pro_active() || self::get_player_id() < 3 ) {
 			return [];
 		}
-//update_post_meta($post->ID, 'tts_mp3_file_urls', [
-//	'en' => 'http://localhost/azizulhasan/tts/wp-content/uploads/TTA_Pro/gtts/2024/04/21/Sample_Page__lang__en.mp3',
-//	'en--voice--alloy' => 'http://localhost/azizulhasan/tts/wp-content/uploads/TTA_Pro/chat_gpt_tts/2024/04/21/Sample_Page__lang__en__voice__alloy.mp3'
-//]);
+
 		$date = get_the_date( 'Y/m/d', $post );
 
-		$mp3_file_urls = get_post_meta( $post->ID, 'tts_mp3_file_urls' );
+		$mp3_file_urls        = get_post_meta( $post->ID, 'tts_mp3_file_urls' );
+		$cached_mp3_file_urls = TTA_Cache::get( "mp3_file_urls_post_id__$post->ID" );
+		if ( $cached_mp3_file_urls ) {
+			return $cached_mp3_file_urls;
+		}
 
 
 		$old_url = get_post_meta( $post->ID, 'tts_mp3_file_url', true );
@@ -570,6 +573,11 @@ class TTA_Helper {
 
 			$mp3_file_urls = $mp3_file_urls[0];
 		}
+
+		error_log( print_r( [
+			'$mp3_file_urls'        => $mp3_file_urls,
+			'$cached_mp3_file_urls' => $cached_mp3_file_urls
+		], 1 ) );
 
 		$final_mp3_file_ulrs = [];
 
@@ -614,7 +622,13 @@ class TTA_Helper {
 
 		if ( $should_update_urls || empty( $final_mp3_file_ulrs ) ) {
 			update_post_meta( $post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs );
+			TTA_Cache::set( "mp3_file_urls_post_id__$post->ID", $final_mp3_file_ulrs );
 		}
+
+		if ( ! $cached_mp3_file_urls ) {
+			TTA_Cache::set( "mp3_file_urls_post_id__$post->ID", $final_mp3_file_ulrs );
+		}
+
 
 		return \apply_filters( 'tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls );
 	}
