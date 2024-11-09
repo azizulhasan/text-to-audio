@@ -1,5 +1,4 @@
 <?php
-
 namespace TTA;
 
 /**
@@ -115,6 +114,7 @@ class TTA_Cache {
 			if ( ! empty( $post_css_selectors ) && isset( $post_css_selectors['tta__settings_use_own_css_selectors'] ) && $post_css_selectors['tta__settings_use_own_css_selectors'] ) {
 
 				if ( TTA_Helper::check_all_properties_are_empty( $post_css_selectors ) ) {
+
 					$settings                                                   = $all_settings_data['settings'];
 					$settings['tta__settings_css_selectors']                    = $post_css_selectors['tta__settings_css_selectors'];
 					$settings['tta__settings_exclude_content_by_css_selectors'] = $post_css_selectors['tta__settings_exclude_content_by_css_selectors'];

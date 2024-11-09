@@ -561,14 +561,6 @@ class TTA_Helper {
 			return $cached_mp3_file_urls;
 		}
 
-
-		$old_url = get_post_meta( $post->ID, 'tts_mp3_file_url', true );
-
-		if ( $old_url ) {
-
-			$mp3_file_urls = self::handle_old_url( $post, $mp3_file_urls, $old_url );
-		}
-
 		if ( isset( $mp3_file_urls[0] ) ) {
 
 			$mp3_file_urls = $mp3_file_urls[0];
@@ -578,6 +570,12 @@ class TTA_Helper {
 			'$mp3_file_urls'        => $mp3_file_urls,
 			'$cached_mp3_file_urls' => $cached_mp3_file_urls
 		], 1 ) );
+		$cached_mp3_file_urls = TTA_Cache::get( "mp3_file_urls_post_id__$post->ID" );
+
+		if ( $cached_mp3_file_urls && $cached_mp3_file_urls === $mp3_file_urls ) {
+			return $cached_mp3_file_urls;
+		}
+
 
 		$final_mp3_file_ulrs = [];
 
@@ -625,7 +623,8 @@ class TTA_Helper {
 			TTA_Cache::set( "mp3_file_urls_post_id__$post->ID", $final_mp3_file_ulrs );
 		}
 
-		if ( ! $cached_mp3_file_urls ) {
+
+		if ( ! $cached_mp3_file_urls || $cached_mp3_file_urls !== $final_mp3_file_ulrs ) {
 			TTA_Cache::set( "mp3_file_urls_post_id__$post->ID", $final_mp3_file_ulrs );
 		}
 
