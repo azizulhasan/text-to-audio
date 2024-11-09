@@ -48,10 +48,13 @@ class TTA_Helper {
 	}
 
 	public static function should_load_button() {
-		$should_load_button = false;
+		$should_load_button_cache_key   = TTA_Cache::get_key( 'should_load_button' );
+		$should_load_button_cache_value = TTA_Cache::get( $should_load_button_cache_key );
+		if ( $should_load_button_cache_value ) {
+			return $should_load_button_cache_value;
+		}
 
-		return true;
-		// TODO:: TTS-122
+		$should_load_button = false;
 		global $post;
 		// is_home() || is_archive() || is_front_page() || is_category()
 		if ( \is_single() || \is_singular() ) {
@@ -131,6 +134,8 @@ class TTA_Helper {
 				$should_load_button = false;
 			}
 		}
+
+		TTA_Cache::set( $should_load_button_cache_key, $should_load_button );
 
 		return apply_filters( 'tta_should_load_button', $should_load_button, $post );
 	}
@@ -288,10 +293,8 @@ class TTA_Helper {
 			}
 		}
 
-		return [];
 
-		// TODO: TTS-122
-		return \apply_filters( 'tts_compatible_plugins_data', $compatible_plugins_data, \get_plugins() );
+		return \apply_filters( 'tts_compatible_plugins_data', $compatible_plugins_data, TTA_Cache::all_plugins() );
 	}
 
 	public static function get_language_code_from_url( $url ) {
@@ -548,7 +551,6 @@ class TTA_Helper {
 
 			global $post;
 		}
-		// TODO: TTS-122
 		if ( ! is_pro_active() || self::get_player_id() < 3 ) {
 			return [];
 		}
@@ -797,8 +799,13 @@ class TTA_Helper {
 	 * @return array An associative array with category slugs as keys and category names as values.
 	 */
 	public static function get_all_categories() {
-		return [];
-		// TODO: TTS-122
+
+		$cache_key   = TTA_Cache::get_key( 'get_all_categories' );
+		$cache_value = TTA_Cache::get( $cache_key );
+		if ( $cache_value ) {
+			return $cache_value;
+		}
+
 		if ( ! function_exists( 'get_categories' ) ) {
 			require_once ABSPATH . 'wp-includes/category.php';
 		}
@@ -813,7 +820,11 @@ class TTA_Helper {
 			$formatted_categories[ $category->slug ] = $category->name;
 		}
 
-		return apply_filters( 'tts_get_all_categories', $formatted_categories );
+		$formatted_categories = apply_filters( 'tts_get_all_categories', $formatted_categories );
+
+		TTA_Cache::set( $cache_key, $formatted_categories );
+
+		return  $formatted_categories;
 	}
 
 	/**
@@ -822,8 +833,13 @@ class TTA_Helper {
 	 * @return array An associative array with tag slugs as keys and tag names as values.
 	 */
 	public static function get_all_tags() {
-		return [];
-		// TODO: TTS-122
+
+		$cache_key   = TTA_Cache::get_key( 'get_all_tags' );
+		$cache_value = TTA_Cache::get( $cache_key );
+		if ( $cache_value ) {
+			return $cache_value;
+		}
+
 		if ( ! function_exists( 'get_tags' ) ) {
 			require_once ABSPATH . 'wp-includes/category.php';
 		}
@@ -840,7 +856,12 @@ class TTA_Helper {
 			$formatted_tags[ $tag->slug ] = $tag->name;
 		}
 
-		return apply_filters( 'get_all_tags', $formatted_tags );
+
+		$formatted_tags = apply_filters( 'get_all_tags', $formatted_tags );
+
+		TTA_Cache::set( $cache_key, $formatted_tags );
+
+		return  $formatted_tags;
 
 	}
 
