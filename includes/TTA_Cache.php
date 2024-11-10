@@ -48,7 +48,7 @@ class TTA_Cache {
 		if ( false === $expiration ) {
 			// TODO: this dynamic.
 //			$expiration = get_option( 'atlas_voice_settings', array( 'cache_ttl' => 6 * HOUR_IN_SECONDS ) );
-			$expiration =  24 * HOUR_IN_SECONDS;
+			$expiration = 24 * HOUR_IN_SECONDS;
 		}
 
 		return set_transient( $prefix . $key, $data, $expiration );
@@ -89,6 +89,7 @@ class TTA_Cache {
 			'all_post_status'    => 'all_post_status',
 			'tts_get_settings'   => 'all_settings',
 			'get_post_types'     => 'get_post_types',
+			'all_plugins'        => 'all_plugins',
 		];
 
 		if ( $cache_key == 'all' ) {
@@ -222,16 +223,17 @@ class TTA_Cache {
 		// Get the post type of the current post
 		$post_type = get_post_type( $post_id );
 		$cache_key = self::get_key( 'get_post_types' );
-		self::delete($cache_key);
+		self::delete( $cache_key );
 		// Only proceed if the post type is valid
 		TTA_Helper::get_post_types();
 	}
 
-	public  static  function update_transient_during_plugins_crud() {
+	public static function update_transient_during_plugins_crud() {
+		$cache_key = self::get_key( 'is_pro_active' );
+		self::delete( $cache_key );
 
-		$cache_key = self::get_key('is_pro_active');
-		self::delete($cache_key);
-		TTA_Helper::is_pro_active();
+		$cache_key = self::get_key( 'all_plugins' );
+		self::delete( $cache_key );
 
 	}
 }

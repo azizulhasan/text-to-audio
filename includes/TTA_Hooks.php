@@ -127,6 +127,12 @@ class TTA_Hooks {
 		// Hook to update cache when any post is deleted
 		add_action( 'delete_post', [ 'TTA\TTA_Cache', 'update_post_type_cache' ] );
 
+		// Hook after any plugin is activated
+		add_action('activated_plugin', 'after_any_plugin_activated', 10, 2);
+
+		// Hook after any plugin is deactivated
+		add_action('deactivated_plugin', 'after_any_plugin_deactivated', 10, 2);
+
 
 	}
 
@@ -241,6 +247,10 @@ class TTA_Hooks {
 				}
 			}
 		}
+
+		if ( $options['type'] == 'plugin' ) {
+            TTA_Cache::update_transient_during_plugins_crud();
+        }
 
 	}
 

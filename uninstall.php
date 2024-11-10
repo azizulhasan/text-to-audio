@@ -25,9 +25,6 @@
  */
 
 // If uninstall not called from WordPress, then exit.
-if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-	exit;
+if (!defined('WP_UNINSTALL_PLUGIN')) {
+    exit;
 }
-
-\TTA\TTA_Cache::update_transient_during_plugins_crud();
-
