@@ -37,7 +37,8 @@ class TTA_Deactivator {
             deactivate_plugins(['text-to-audio-pro/text-to-audio-pro.php'], true);
             $url = admin_url( 'plugins.php?deactivate=true' );
             header( "Location: $url" );
-            die();
+	        TTA_Cache::update_transient_during_plugins_crud();
+	        die();
         }
     }
 

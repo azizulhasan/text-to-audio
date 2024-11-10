@@ -48,12 +48,6 @@ class TTA_Helper {
 	}
 
 	public static function should_load_button() {
-		$should_load_button_cache_key   = TTA_Cache::get_key( 'should_load_button' );
-		$should_load_button_cache_value = TTA_Cache::get( $should_load_button_cache_key );
-		if ( $should_load_button_cache_value ) {
-			return $should_load_button_cache_value;
-		}
-
 		$should_load_button = false;
 		global $post;
 		// is_home() || is_archive() || is_front_page() || is_category()
@@ -135,7 +129,6 @@ class TTA_Helper {
 			}
 		}
 
-		TTA_Cache::set( $should_load_button_cache_key, $should_load_button );
 
 		return apply_filters( 'tta_should_load_button', $should_load_button, $post );
 	}

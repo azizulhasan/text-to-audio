@@ -104,6 +104,30 @@ class TTA_Hooks {
 		// WP Rocket
 		add_filter( 'rocket_exclude_css', [ $this, 'cache_exclude_css_text_to_speech' ] );
 
+
+		// Cache data update.
+		// Hook into category create, update, and delete actions
+		add_action( 'create_category', [ 'TTA\TTA_Cache', 'update_cached_categories' ] );
+		add_action( 'edit_category', [ 'TTA\TTA_Cache', 'update_cached_categories' ] );
+		add_action( 'delete_category', [ 'TTA\TTA_Cache', 'update_cached_categories' ] );
+		// Hook into tag create, update, and delete actions
+		add_action( 'create_post_tag', [ 'TTA\TTA_Cache', 'update_cached_tags' ] );
+		add_action( 'edit_post_tag', [ 'TTA\TTA_Cache', 'update_cached_tags' ] );
+		add_action( 'delete_post_tag', [ 'TTA\TTA_Cache', 'update_cached_tags' ] );
+
+		// Hook to update cache when any post is created or updated
+		add_action( 'save_post', [ 'TTA\TTA_Cache', 'update_post_type_cache' ] );
+
+		// Hook to update cache when any post is deleted
+		add_action( 'delete_post', [ 'TTA\TTA_Cache', 'update_post_type_cache' ] );
+
+		// Hook to update cache when any post is created or updated
+		add_action( 'save_post', [ 'TTA\TTA_Cache', 'update_post_type_cache' ] );
+
+		// Hook to update cache when any post is deleted
+		add_action( 'delete_post', [ 'TTA\TTA_Cache', 'update_post_type_cache' ] );
+
+
 	}
 
 	/**

@@ -142,6 +142,8 @@ class TTA_Activator {
 		}
 
 		self::create_analytics_table_if_not_exists();
+
+		TTA_Cache::update_transient_during_plugins_crud();
 	}
 
 
