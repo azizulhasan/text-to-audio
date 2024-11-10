@@ -31,6 +31,7 @@ export default function Settings() {
         tta__settings_stop_floating_button: true,
         tta__settings_exclude_categories: [],
         tta__settings_exclude_wp_tags: [],
+        tta__settings_clear_all_cache: false,
     });
     const [postTypes, setPostTypes] = useState([]);
     const [isDataLoaded, setIsDataLoaded] = useState(false)
@@ -64,7 +65,6 @@ export default function Settings() {
      */
     const handleChange = (e, targetName = 'tta__settings_allow_listening_for_post_types') => {
         let value = '';
-        console.log({targetName, e})
         if (Array.isArray(e)) {
             value = e;
             setSettings({
@@ -76,9 +76,13 @@ export default function Settings() {
             value = e.target.value
         }
 
+
         if (e.target.getAttribute('type') === 'checkbox') {
             value = e.target.checked
         }
+
+        console.log({name: e.target.name, value})
+
         if (e.target.name == 'tta__settings_exclude_post_ids') {
             let ids = []
             if (ttsObj.is_pro_active) {
@@ -105,7 +109,10 @@ export default function Settings() {
         if (!ttsObj.is_pro_active) {
             settings.tta__settings_css_selectors = ''
         }
-
+        let cache_clear_notice_text = '';
+        if (settings?.tta__settings_clear_all_cache) {
+            cache_clear_notice_text = 'All cache deleted';
+        }
         // return;
         let formData = new FormData();
         formData.append('fields', JSON.stringify(settings));
@@ -116,6 +123,11 @@ export default function Settings() {
                 toast('Successfully Saved. Now go to the "Integrations" menu if you\'re a pro user. Otherwise go to the "Customization" menu.', 'info', {
                     autoClose: 15000
                 });
+                if (cache_clear_notice_text) {
+                    toast(cache_clear_notice_text, 'info', {
+                        autoClose: 1500
+                    });
+                }
                 setIsDataLoaded(true)
             })
             .catch((err) => {
@@ -683,6 +695,25 @@ export default function Settings() {
                                     </Col>
                                 </Row>
                             }
+                            {/* Clear all cache */}
+                            <Row className=' mt-3'>
+                                <Col xs={12} sm={6} lg={4}>
+                                    <Form.Label htmlFor='tta__settings_clear_all_cache'>
+                                        Clear all cache
+                                    </Form.Label>
+                                </Col>
+                                <Col xs={12} sm={12} lg={8}>
+                                    <Form.Check // prettier-ignore
+                                        type={'checkbox'}
+                                        checked={settings?.tta__settings_clear_all_cache}
+                                        onChange={(e) =>
+                                            handleChange(e)
+                                        }
+                                        name={`tta__settings_clear_all_cache`}
+                                        id={`tta__settings_clear_all_cache`}
+                                    />
+                                </Col>
+                            </Row>
                             {/*Clear cache*/}
                             <Row className='mt-3'>
                                 <div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
