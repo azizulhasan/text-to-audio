@@ -234,7 +234,6 @@ function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_ar
 
 	global $post;
 
-	// delete_post_meta($post->ID, 'tts_mp3_file_urls');
 	$language           = TTA_Helper::tts_site_language( $plugin_all_settings );
 	$voice              = TTA_Helper::tts_get_voice( $plugin_all_settings );
 	$language_and_voice = TTA_Helper::get_player_language_and_player_voice( $language, $voice, $plugin_all_settings, $post );

@@ -83,7 +83,7 @@ class TTA_Cache {
 			'get_player_id'      => 'get_player_id', // TODO:: when to update.
 			'is_pro_active'      => 'is_pro_active', // TODO:: when to update.
 			'all_post_status'    => 'all_post_status', // TODO:: when to update.
-			'tts_get_settings'   => 'all_settings', // TODO:: when to update.
+			'tts_get_settings'   => 'all_settings',
 			'get_post_types'     => 'get_post_types', // TODO:: when to update.
 		];
 
@@ -100,7 +100,7 @@ class TTA_Cache {
 	 *
 	 * @return mixed|null
 	 */
-	public static function all_settings( $identifier = '', $post_id = '' ) {
+	private static function all_settings( $identifier = '', $post_id = '' ) {
 		$all_settings_keys = [
 			'listening'  => 'tta_listening_settings',
 			'settings'   => 'tta_settings_data',
