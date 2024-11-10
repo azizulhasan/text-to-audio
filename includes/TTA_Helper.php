@@ -317,7 +317,6 @@ class TTA_Helper {
 
 		$default_language = '';
 		if ( isset( $plugin_all_settings['listening']['tta__listening_lang'] ) ) {
-			// TODO: Match with multilinguage UI and default language.
 			$default_language = $plugin_all_settings['listening']['tta__listening_lang'];
 			// $default_language = str_replace(['-', ' '], '_', $default_language);
 		}
@@ -335,7 +334,6 @@ class TTA_Helper {
 	}
 
 	public static function tts_get_voice( $plugin_all_settings ) {
-		// TODO: Match with multilingual UI and default voice.
 		$default_voice = '';
 		if ( isset( $plugin_all_settings['listening']['tta__listening_voice'] ) && ( get_player_id() == 4 || get_player_id() == 5 ) ) {
 			$default_voice = $plugin_all_settings['listening']['tta__listening_voice'];
@@ -399,14 +397,20 @@ class TTA_Helper {
 		return $associative_urls;
 	}
 
+	/**
+	 * @param $all_settings_keys
+	 *
+	 * @return array
+	 */
 	private static function set_tts_transient( $all_settings_keys ) {
+		$all_settings_data = [];
 		foreach ( $all_settings_keys as $identifier => $settings_key ) {
 			$settings                         = get_option( $settings_key );
 			$settings                         = ! $settings ? false : (array) $settings;
 			$all_settings_data[ $identifier ] = $settings;
 		}
-
-		set_transient( 'tts_all_settings', $all_settings_data );
+		$cache_key = TTA_Cache::get_key( 'tts_get_settings' );
+		TTA_Cache::set( $cache_key, $all_settings_data );
 
 		return $all_settings_data;
 	}
@@ -428,7 +432,8 @@ class TTA_Helper {
 			'compatible' => 'tta_compatible_data',
 			'aliases'    => 'tts_text_aliases',
 		];
-		$cached_settings   = get_transient( 'tts_all_settings' );
+		$cache_key         = TTA_Cache::get_key( 'tts_get_settings' );
+		$cached_settings   = TTA_Cache::get( $cache_key );
 		if ( ! $cached_settings ) {
 			$all_settings_data = self::set_tts_transient( $all_settings_keys );
 		} else {
@@ -470,7 +475,6 @@ class TTA_Helper {
 			$specified_identifier_data = isset( $all_settings_data[ $identifier ] ) ? $all_settings_data[ $identifier ] : $all_settings_data;
 			$all_settings_data         = $specified_identifier_data;
 		}
-
 
 		global $post;
 
@@ -824,7 +828,7 @@ class TTA_Helper {
 
 		TTA_Cache::set( $cache_key, $formatted_categories );
 
-		return  $formatted_categories;
+		return $formatted_categories;
 	}
 
 	/**
@@ -861,7 +865,7 @@ class TTA_Helper {
 
 		TTA_Cache::set( $cache_key, $formatted_tags );
 
-		return  $formatted_tags;
+		return $formatted_tags;
 
 	}
 
@@ -982,6 +986,13 @@ class TTA_Helper {
 	}
 
 	public static function all_post_status() {
+
+		$cache_key   = TTA_Cache::get_key( 'all_post_status' );
+		$cache_value = TTA_Cache::get( $cache_key );
+		if ( $cache_value ) {
+			return $cache_value;
+		}
+
 		$post_statuses = get_post_stati( [ 'show_in_admin_status_list' => true ], 'objects' );
 		$status_array  = [];
 
@@ -989,6 +1000,7 @@ class TTA_Helper {
 			$status_array[ $status->name ] = $status->label;
 		}
 
+		TTA_Cache::set( $cache_key, $status_array );
 
 		return $status_array;
 	}
@@ -1051,6 +1063,21 @@ class TTA_Helper {
 		}
 
 		return $display_player_to;
+	}
+
+	public static function get_post_types() {
+		$cache_key   = TTA_Cache::get_key( 'get_post_types' );
+		$cache_value = TTA_Cache::get( $cache_key );
+		if ( $cache_value ) {
+			return $cache_value;
+		}
+		$post_types = get_post_types( array(
+			'public' => 1, // Only get public post types
+		), 'array' );
+
+		TTA_Cache::set( $cache_key, $post_types );
+
+		return apply_filters( 'tts_get_post_types', $post_types );
 	}
 
 

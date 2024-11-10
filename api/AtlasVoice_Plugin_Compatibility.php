@@ -57,7 +57,7 @@ class AtlasVoice_Plugin_Compatibility {
 
 			$response['data'] = get_option( 'tta_compatible_data' );
 
-			delete_transient( 'tts_all_settings' );
+			TTA_Cache::delete( 'all_settings' );
 
 			return rest_ensure_response( $response );
 		}

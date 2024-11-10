@@ -126,9 +126,9 @@ class TTA_Activator {
 			] );
 		}
 
-		if ( get_transient( 'tts_all_settings' ) ) {
-			\delete_transient( 'tts_all_settings' );
-		}
+//		if ( get_transient( 'tts_all_settings' ) ) {
+//			\TTA_Cache::delete( 'all_settings' );
+//		}
 
 		/**
 		 * analytics settings.

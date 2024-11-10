@@ -80,8 +80,11 @@ class TTA_Cache {
 			'should_load_button' => 'should_load_button', // TODO:: when to update.
 			'get_all_categories' => 'get_all_categories', // TODO:: when to update.
 			'get_all_tags'       => 'get_all_tags', // TODO:: when to update.
-			'get_player_id'       => 'get_player_id', // TODO:: when to update.
-			'is_pro_active'       => 'is_pro_active', // TODO:: when to update.
+			'get_player_id'      => 'get_player_id', // TODO:: when to update.
+			'is_pro_active'      => 'is_pro_active', // TODO:: when to update.
+			'all_post_status'    => 'all_post_status', // TODO:: when to update.
+			'tts_get_settings'   => 'all_settings', // TODO:: when to update.
+			'get_post_types'     => 'get_post_types', // TODO:: when to update.
 		];
 
 		if ( $cache_key == 'all' ) {
@@ -173,27 +176,21 @@ class TTA_Cache {
 	/**
 	 * @return mixed|void
 	 */
-	public static function all_plugins( $action_type = 'get' ) {
+	public static function all_plugins() {
 		$all_plugins_cache_key = 'all_plugins';
-		if ( $action_type === 'get' ) {
-			$cached_all_plugins = self::get( $all_plugins_cache_key );
-			if ( $cached_all_plugins ) {
-				return $cached_all_plugins;
-			}
-
-			if ( ! function_exists( 'get_plugins' ) ) {
-				require_once ABSPATH . 'wp-admin/includes/plugin.php';
-			}
-
-			$all_plugins = get_plugins();
-
-			self::set( $all_plugins_cache_key, $all_plugins );
-
-			return $all_plugins;
+		$cached_all_plugins    = self::get( $all_plugins_cache_key );
+		if ( $cached_all_plugins ) {
+			return $cached_all_plugins;
 		}
 
-		if ( $action_type === 'delete' ) {
-			self::delete( $all_plugins_cache_key );
+		if ( ! function_exists( 'get_plugins' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
+
+		$all_plugins = get_plugins();
+
+		self::set( $all_plugins_cache_key, $all_plugins );
+
+		return $all_plugins;
 	}
 }
