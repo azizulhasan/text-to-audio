@@ -5,7 +5,6 @@ import ChatGPTTTS from './ChatGPTTTS/ChatGPTTTS'
 import {postData} from "../../context/utilities";
 
 
-// sk-vMMk3ymTrtl9nVEFw9XIFxSeWXgsOPWng9mDutzbD8T3BlbkFJYi1aThW9dtsMgCmO9lFnud5xo8VYzCcFt-f_AM0d4A
 
 export default function Integrations() {
     const [currentTTSServic, setCurrentTTSServic] = useState('chat_gpt_tts')
