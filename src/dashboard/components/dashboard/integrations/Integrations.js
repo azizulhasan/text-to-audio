@@ -72,8 +72,8 @@ export default function Integrations() {
                             />
                             <Form.Check
                                 inline
-                                label="ChatGPT TTS(soon)"
-                                title="ChatGPT TTS(soon)"
+                                label="ChatGPT TTS"
+                                title="ChatGPT TTS"
                                 name="group1"
                                 type={'radio'}
                                 checked={currentTTSServic === 'chat_gpt_tts'}

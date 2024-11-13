@@ -30,10 +30,11 @@ class TTA_Notices {
 
 //		if (!is_pro_active() && in_array(admin_url(basename($_SERVER['REQUEST_URI'])), [ admin_url('index.php') , admin_url('plugins.php'), admin_url('update-core.php'), \admin_url('plugin-install.php'), \admin_url('admin.php?page=text-to-audio')] ) )  {
 //		if (!is_pro_active())  {
-//			 add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
+		add_action( 'admin_notices', [ $this, 'tta_free_promotion_notice' ] );
+
 //			 add_action( 'admin_notices', [ $this, 'tta_feedback_notice' ] );
 //			 add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
-		add_action( 'admin_notices', [ $this, 'tta_affiliation_notice' ] );
+//		add_action( 'admin_notices', [ $this, 'tta_affiliation_notice' ] );
 
 //		}
 
@@ -116,6 +117,9 @@ class TTA_Notices {
 		if ( ! is_pro_active() && version_compare( TEXT_TO_AUDIO_VERSION, TEXT_TO_AUDIO_VERSION, '>=' ) ) {
 			add_action( 'admin_notices', [ $this, 'tts_setup_notice' ] );
 		}
+
+		add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
+
 
 //		add_action('wp_ajax_tta_save_review_notice', [ $this, 'tta_save_review_notice' ] );
 		// add_action('wp_ajax_tta_save_feedback_notice', [ $this, 'tta_save_feedback_notice' ] );
@@ -823,9 +827,9 @@ class TTA_Notices {
 	 */
 	public function tts_setup_notice() {
 
-//		 delete_option('tts_setup_notice_next_show_time');
-//		 delete_user_meta('1', 'tts_setup_notice_dismissed');
-//         update_option('tts_setup_notice_next_show_time', 12);
+		 delete_option('tts_setup_notice_next_show_time');
+		 delete_user_meta('1', 'tts_setup_notice_dismissed');
+         update_option('tts_setup_notice_next_show_time', 12);
 
 		$has_notice              = false;
 		$user_id                 = get_current_user_id();
@@ -853,14 +857,14 @@ class TTA_Notices {
                  data-which="setup" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <p><?php
 					printf(
-						esc_html__( '%2$s  %1$s  %1$s  If you need help with the setup of the Text-to-Speech plugin, please contact us. We will provide you support.', TEXT_TO_AUDIO_TEXT_DOMAIN ),
+						esc_html__( '%2$s  %1$s  %1$s  If you need trial of the Text-to-Speech pro plugin, please contact us. We will provide you.', TEXT_TO_AUDIO_TEXT_DOMAIN ),
 						'<div class="tta-review-notice-logo"></div>',
-						"<h1><strong>Need Support For Text To Speech?</strong></h1>", //phpcs:ignore
+						"<h1><strong>Do you want trial of Text To Speech Pro?</strong></h1>", //phpcs:ignore
 					);
 					?></p>
                 <p>
                     <a class="button button-primary" href="https://atlasaidev.com/contact-us/"
-                       target="_blank"><?php esc_html_e( 'Get Support', TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       target="_blank"><?php esc_html_e( 'Get Trial', TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
                 </p>
             </div>
 
@@ -1020,10 +1024,9 @@ class TTA_Notices {
 
 		//    delete_user_meta( 1, 'tta_promotion_notice_dismissed');
 
-		$image_url = TTA_PLUGIN_URL . 'admin/images/halloween-spacial.jpg';
-		// $image_url = TTA_PLUGIN_URL . 'admin/images/halloween-banner-22.png';
+		$image_url = TTA_PLUGIN_URL . 'admin/images/freemius10.jpg';
 
-		$pluginName              = sprintf( '<b>%s</b>', esc_html( 'Challan' ) );
+		$pluginName              = sprintf( '<b>%s</b>', esc_html( 'Text To Speech Pro' ) );
 		$user_id                 = get_current_user_id();
 		$review_notice_dismissed = get_user_meta( $user_id, 'tta_promotion_notice_dismissed', true );
 		$nonce                   = wp_create_nonce( 'tta_notice_nonce' );
@@ -1039,15 +1042,14 @@ class TTA_Notices {
             <div class="tta-notice notice notice-info is-dismissible price_update" style="line-height:1.5;"
                  data-which="promotion_close" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <p><?php
-					printf(
-					/* translators: 1: plugin name,2: Slightly Smiling Face (Emoji), 3: line break 'br' tag */
-						'<a class="tta_promotion_notice" href="http://atlasaidev.com/text-to-speech-pro/" target="_blank"><img  src="' . $image_url . '" alt="text_to_speech_Free_Price"></a>', //phpcs:ignore
-						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-						'<span style="font-size: 16px;">&#128516</span>',
-						'<div class="tta-review-notice-logo"></div>',
-						'<br>'
-					);
-					?></p>
+	                printf(
+	                /* translators: 1: plugin name,2: Slightly Smiling Face (Emoji), 3: line break 'br' tag */
+		                 '%3$s %2$s <a class="tta_promotion_notice" href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/" target="_blank"><img src="%1$s" alt="text_to_speech_Free_Price" height="70px;" width="100%%"></a>',
+		                $image_url,
+		                '<br/>',
+		                "<h3>$pluginName</h3>" //phpcs:ignore
+	                );
+	                ?></p>
             </div>
 			<?php
 

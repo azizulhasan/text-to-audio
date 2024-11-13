@@ -616,8 +616,9 @@ export default function Settings() {
                                                         {__('Click To Know How It Works?')}
                                                     </Tooltip>
                                                 }>
-                                                <a target='_blank' href='https://atlasaidev.com/docs/text-to-speech/'>
-                                                    <i className="fas fa-info-circle"></i></a>
+                                                <a className={'text-danger'} target='_blank'
+                                                   href='https://www.youtube.com/watch?v=yanuoEBfG4A'>
+                                                    <i className="fab fa-youtube"></i></a>
                                             </OverlayTrigger>
                                         ))}
                                     </>
@@ -667,8 +668,9 @@ export default function Settings() {
                                                         {__('Click To Know How It Works?')}
                                                     </Tooltip>
                                                 }>
-                                                <a target='_blank' href='https://atlasaidev.com/docs/text-to-speech/'>
-                                                    <i className="fas fa-info-circle"></i></a>
+                                                <a className={'text-danger'} target='_blank'
+                                                   href='https://www.youtube.com/watch?v=yanuoEBfG4A'>
+                                                    <i className="fab fa-youtube"></i></a>
                                             </OverlayTrigger>
                                         ))}
                                     </>
