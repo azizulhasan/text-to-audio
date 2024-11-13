@@ -45,6 +45,7 @@ export default function Listening() {
         tta__available_currentPlayerVoices: {},
         tta__listening_voice_model: 'tts-1',
     });
+
     const [listeningLang, setListeningLang] = useState('en-GB');
     const apiURL = useMemo(() => {
         if (window.hasOwnProperty('ttsObj') && ttsObj.is_pro_active) {
@@ -56,6 +57,7 @@ export default function Listening() {
 
 
     const [multilingualActiveLanguages, setMultilingualActiveLanguages] = useState([]);
+    const [isListeningSettingsLoaded, setIsListeningSettingsLoaded] = useState(false)
 
     useEffect(() => {
         if (window?.ttsObjPro?.compatible?.['gtranslate/gtranslate.php']) {
@@ -199,6 +201,7 @@ export default function Listening() {
                 }
 
                 setCustomizationSettings(res.data);
+                setIsListeningSettingsLoaded(true)
                 if (res?.data?.buttonSettings?.id < 3) {
                     setVoicesAndLanguages()
                 }
@@ -704,7 +707,7 @@ export default function Listening() {
                                                     placement={placement}
                                                     overlay={
                                                         <Tooltip id={`tooltip-${placement}`}>
-                                                            Language mapping for WPML, Gtranalate plugin is available in
+                                                            Language mapping for WPML, GTranalate plugin is available in
                                                             the pro version.
                                                         </Tooltip>
                                                     }>
@@ -717,7 +720,7 @@ export default function Listening() {
                         </Row>
                         <Row>
                             {
-                                Object.keys(multilingualActiveLanguages).length ? Object.keys(multilingualActiveLanguages).map((languageCode, index) =>
+                               Object.keys(multilingualActiveLanguages).length ? Object.keys(multilingualActiveLanguages).map((languageCode, index) =>
                                     <Row key={index}>
                                         <Col xs={12} sm={4} lg={4}>
                                             <Form.Group>
@@ -782,11 +785,11 @@ export default function Listening() {
                                                     onChange={(e) => handleChange(e, index, customizationSettings?.buttonSettings?.id)}
                                                     name={'tta__available_currentPlayerVoices'}
                                                     id={'tta__available_currentPlayerVoices_index_' + index}
-                                                    value={listeningSettings?.tta__available_currentPlayerVoices?.[customizationSettings?.buttonSettings?.id]?.[index] ?? Object.values(currentPlayerVoices).filter(voice => {
+                                                    value={customizationSettings?.buttonSettings?.id == 5 ? listeningSettings.tta__listening_voice : listeningSettings?.tta__available_currentPlayerVoices?.[customizationSettings?.buttonSettings?.id]?.[index] ?? Object.values(currentPlayerVoices).filter(voice => {
                                                         if (customizationSettings?.buttonSettings?.id < 3) {
-                                                            return voice?.lang.startsWith(languageCode);
+                                                            return voice?.lang?.startsWith(languageCode);
                                                         }
-                                                        return voice?.name.startsWith(languageCode);
+                                                        return  voice?.name?.startsWith(languageCode)
                                                     })[0]?.name}
                                                     aria-label='Default select example'>
                                                     <option disabled>
@@ -799,7 +802,7 @@ export default function Listening() {
                                                             {voice.name} {'-'} {voice.ssmlGender}
                                                         </option> :
                                                         <option key={index} data-lang={voice.lang} value={voice.name}>
-                                                            {voice.name}
+                                                            {voice?.name || voice}
                                                         </option>
                                                     )}
                                                 </Form.Select>

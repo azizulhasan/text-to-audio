@@ -362,7 +362,7 @@ class TTA_Admin {
         }else{
 			$url = admin_url( 'edit.php' );
 			echo '<p>No post ID found. Please select multiple posts from the post page. And apply <strong>AtlasVoice Generate MP3 File</strong> bulk action. <a href="' . $url . '">Go to Posts Page</a></p>';
-            echo 'How it works? <a style="text-decoration:none;color:red" target="_blank" href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"><span class="fab fa-youtube"></span></a>';
+            echo 'How it works? <a style="text-decoration:none;color:red" target="_blank" href="https://www.youtube.com/watch?v=HFoqlkPCP80"><span class="fab fa-youtube"></span></a>';
 		}
 
 	}
