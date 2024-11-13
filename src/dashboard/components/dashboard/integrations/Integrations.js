@@ -7,7 +7,7 @@ import {postData} from "../../context/utilities";
 
 
 export default function Integrations() {
-    const [currentTTSServic, setCurrentTTSServic] = useState('chat_gpt_tts')
+    const [currentTTSServic, setCurrentTTSServic] = useState('google_cloud_tts')
 
     const apiURL = useMemo(() => {
         return ttsObj.api_url + ttsObj.api_namespace + "_pro" + "/" + ttsObj.api_version + "/";
@@ -17,18 +17,22 @@ export default function Integrations() {
         chatgpt_tts_api_key: '',
         currentTTSServic: currentTTSServic
     })
+
+    const [shouldCheckChatGPT, setShouldCheckChatGPT] = useState(false)
     const handleClick = (e) => {
-        console.log(e.target.id)
-        console.log(e.target.value)
         setCurrentTTSServic(e.target.id)
     }
     const getCurrentTTSService = (ttsService) => {
         setCurrentTTSServic(ttsService)
     }
 
+    const getShouldCheckChatGPT = (val) => {
+        setShouldCheckChatGPT(val)
+    }
+
     useEffect(() => {
         // console.log({ttsObjPro})
-        if (ttsObj.is_pro_active && currentTTSServic === 'chat_gpt_tts') {
+        if ((ttsObj.is_pro_active && currentTTSServic === 'chat_gpt_tts') || shouldCheckChatGPT) {
             let data = new FormData();
             data.append('method', 'get');
             postData(apiURL + 'chat_gpt_tts', data)
@@ -42,7 +46,7 @@ export default function Integrations() {
                     console.log(err);
                 });
         }
-    }, [currentTTSServic])
+    }, [currentTTSServic, shouldCheckChatGPT])
 
 
     return <>
@@ -87,7 +91,7 @@ export default function Integrations() {
         </Container>
         {
             currentTTSServic !== 'chat_gpt_tts' ?
-                <GoogleTTS currentTTSServic={currentTTSServic}/> :
+                <GoogleTTS currentTTSServic={currentTTSServic}  getShouldCheckChatGPT={getShouldCheckChatGPT} /> :
                 <ChatGPTTTS setChatGPTAPIData={setChatGPTAPIData} chatGPTAPIData={chatGPTAPIData}
                             currentTTSServic={currentTTSServic}/>
         }

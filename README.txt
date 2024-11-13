@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.7.0
 Requires PHP: 7.4
-Stable tag: 1.7.32
+Stable tag: 1.7.33
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -427,6 +427,13 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+
+= 1.7.33 ( 13 Nov 2024 ) =
+Solved: Integration menu related issue solved.
+Improvement: UI improvement.
+Removed: Unnecessary banner removed.
+Fixed: After update delete of cache problem solved.
+Updated: Freemius updated to 2.9.0
 
 = 1.7.32 ( 12 Nov 2024 ) =
 Solved: Security related issue solved.
