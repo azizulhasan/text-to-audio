@@ -94,9 +94,17 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
                     <Form onSubmit={handleSubmit}>
                         <Row className='border '>
                             <Col xs={12} sm={12} lg={12} className=''>
+                                <Form.Label htmlFor='chatgpt_tts_api_key'>
+                                    How it works?
+                                    <a className={'text-danger'} target='_blank'
+                                       href='https://www.youtube.com/watch?v=6uGPboXW2Q8'>
+                                        <i className="fab fa-youtube"></i></a>
+                                </Form.Label>
+
+
                                 <Form.Group>
                                     <Form.Label htmlFor='chatgpt_tts_api_key'>
-                                        Paste here ChatGPT TTS API key. How to get? Click <a target='_blank' href='https://platform.openai.com/api-keys'>here</a>.
+                                        Paste here ChatGPT API key. How to get? Click <a target='_blank' href='https://platform.openai.com/api-keys'>here</a>.
                                     </Form.Label>
                                     <Form.Control
                                         type='password'
