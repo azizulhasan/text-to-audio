@@ -30,7 +30,7 @@ class TTA_Notices {
 
 //		if (!is_pro_active() && in_array(admin_url(basename($_SERVER['REQUEST_URI'])), [ admin_url('index.php') , admin_url('plugins.php'), admin_url('update-core.php'), \admin_url('plugin-install.php'), \admin_url('admin.php?page=text-to-audio')] ) )  {
 //		if (!is_pro_active())  {
-		add_action( 'admin_notices', [ $this, 'tta_free_promotion_notice' ] );
+//		add_action( 'admin_notices', [ $this, 'tta_free_promotion_notice' ] );
 
 //			 add_action( 'admin_notices', [ $this, 'tta_feedback_notice' ] );
 //			 add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
@@ -118,7 +118,7 @@ class TTA_Notices {
 			add_action( 'admin_notices', [ $this, 'tts_setup_notice' ] );
 		}
 
-		add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
+//		add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
 
 
 //		add_action('wp_ajax_tta_save_review_notice', [ $this, 'tta_save_review_notice' ] );
@@ -827,9 +827,9 @@ class TTA_Notices {
 	 */
 	public function tts_setup_notice() {
 
-		 delete_option('tts_setup_notice_next_show_time');
-		 delete_user_meta('1', 'tts_setup_notice_dismissed');
-         update_option('tts_setup_notice_next_show_time', 12);
+//		 delete_option('tts_setup_notice_next_show_time');
+//		 delete_user_meta('1', 'tts_setup_notice_dismissed');
+//         update_option('tts_setup_notice_next_show_time', 12);
 
 		$has_notice              = false;
 		$user_id                 = get_current_user_id();
