@@ -212,7 +212,6 @@ class TTA_Hooks {
 				// Check to ensure it's my plugin
 				if ( $plugin == $text_to_audio ) {
 					TTA_Activator::create_analytics_table_if_not_exists();
-					delete_transient( 'tts_all_settings' );
 					break;
 				}
 			}

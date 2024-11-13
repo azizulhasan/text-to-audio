@@ -432,6 +432,8 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 Solved: Integration menu related issue solved.
 Improvement: UI improvement.
 Removed: Unnecessary banner removed.
+Fixed: After update delete of cache problem solved.
+Updated: Freemius updated to 2.9.0
 
 = 1.7.32 ( 12 Nov 2024 ) =
 Solved: Security related issue solved.

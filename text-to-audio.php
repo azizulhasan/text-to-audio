@@ -65,7 +65,7 @@ function is_pro_plugin_exists() {
 	return file_exists( $plugin_path . '/text-to-audio-pro/text-to-audio-pro.php' );
 }
 
-if ( ! is_pro_plugin_exists() && ! function_exists( 'ttsp_fs' ) ) {
+if (  ! function_exists( 'ttsp_fs' ) ) {
 	// Create a helper function for easy SDK access.
 	function ttsp_fs() {
 		global $ttsp_fs;
@@ -85,10 +85,6 @@ if ( ! is_pro_plugin_exists() && ! function_exists( 'ttsp_fs' ) ) {
 				'has_addons'          => false,
 				'has_paid_plans'      => true,
 				'has_affiliation'     => 'all',
-				'trial'               => array(
-					'days'               => 14,
-					'is_require_payment' => true,
-				),
 				'menu'                => array(
 					'slug'    => 'text-to-audio',
 					'support' => 1,
