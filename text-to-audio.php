@@ -85,6 +85,10 @@ if ( ! is_pro_plugin_exists() && ! function_exists( 'ttsp_fs' ) ) {
 				'has_addons'          => false,
 				'has_paid_plans'      => true,
 				'has_affiliation'     => 'all',
+				'trial'               => array(
+					'days'               => 14,
+					'is_require_payment' => true,
+				),
 				'menu'                => array(
 					'slug'    => 'text-to-audio',
 					'support' => 1,
