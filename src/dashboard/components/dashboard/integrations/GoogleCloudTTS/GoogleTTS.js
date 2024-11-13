@@ -4,7 +4,7 @@ import { postData } from '../../../context/utilities';
 import toast from '../../../context/Notify';
 import UpgradeToPro from '../../../UpgradeToPro';
 
-export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
+export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
 
     const [googTTSJsonFile, setGoogTTSJsonFile] = useState('');
     const [authFile, setAuthFile] = useState('')
@@ -136,6 +136,10 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
                         setIsBackUpToGCS(res?.tts_is_backup_mp3_file|| false);
                     }
 
+                    if(!res?.is_authenticated) {
+                        getShouldCheckChatGPT(true);
+                    }
+
                 })
                 .catch((err) => {
                     console.log(err);
@@ -250,6 +254,10 @@ export default function GoogleTTS({ getCurrentTTSService, currentTTSServic }) {
                                         <Form.Label htmlFor='tta__integration_is_backup_to_gogole_drive'>
                                         Backup MP3 Files To Google Cloud Storage.
                                         </Form.Label>
+                                        {
+                                            isBackUpToGCS &&   <Form.FloatingLabel className={'text-danger'} label={'You must give this service account read, write access. Otherwise may cause errors.'} >
+                                            </Form.FloatingLabel>
+                                        }
                                     </Col>
                                     <Col xs={12} sm={12} lg={6}>
                                         <Form.Check // prettier-ignore

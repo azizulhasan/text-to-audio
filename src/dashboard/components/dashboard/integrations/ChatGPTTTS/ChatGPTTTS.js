@@ -28,7 +28,7 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
             toast(<>
                 <h4>ChatGPT TTS feature is only in pro version.</h4>
                 <button onClick={(e) => {
-                    window.open('https://atlasaidev.com/')
+                    window.open('https://atlasaidev.com/plugins/text-to-speech-pro/pricing/')
                 }} className='tta_btn'>
                     Learn More
                 </button>
@@ -74,7 +74,7 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
         postData(apiURL + 'chat_gpt_tts', data)
             .then((res) => {
                 if (res.status) {
-                    toast('API key is saveed successfully');
+                    toast('API key is saved successfully');
                     setChatGPTAPIData(res.data)
                 } else {
                     toast('Something went wrong');
