@@ -128,10 +128,10 @@ class TTA_Hooks {
 		add_action( 'delete_post', [ 'TTA\TTA_Cache', 'update_post_type_cache' ] );
 
 		// Hook after any plugin is activated
-		add_action('activated_plugin', 'after_any_plugin_activated', 10, 2);
+		add_action('activated_plugin', [$this, 'clear_necessary_cache'], 10, 2);
 
 		// Hook after any plugin is deactivated
-		add_action('deactivated_plugin', 'after_any_plugin_deactivated', 10, 2);
+		add_action('deactivated_plugin', [$this, 'clear_necessary_cache'], 10, 2);
 
 
 	}
@@ -242,15 +242,14 @@ class TTA_Hooks {
 				// Check to ensure it's my plugin
 				if ( $plugin == $text_to_audio ) {
 					TTA_Activator::create_analytics_table_if_not_exists();
-					TTA_Cache::delete( 'all_settings' );
 					break;
 				}
 			}
 		}
 
 		if ( $options['type'] == 'plugin' ) {
-            TTA_Cache::update_transient_during_plugins_crud();
-        }
+			TTA_Cache::update_transient_during_plugins_crud();
+		}
 
 	}
 
@@ -531,6 +530,11 @@ class TTA_Hooks {
 
 		return $content_sanitized;
 	}
+
+    public function clear_necessary_cache($plugin, $network) {
+		    error_log( print_r( [ $plugin, $network ], 1 ) );
+		    TTA_Cache::update_transient_during_plugins_crud();
+    }
 
 }
 
