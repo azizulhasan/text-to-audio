@@ -427,6 +427,8 @@ add_filter( 'the_content', 'add_listen_button', $display_button_priority );
  * Add listening button to every post by default.
  */
 function add_listen_button( $content ) {
+	static $button_no = 0;
+	$button_no ++;
 	TTA_Helper::set_default_settings();
 	global $post;
 	$button    = '';
@@ -450,13 +452,27 @@ function add_listen_button( $content ) {
 		// elseif(did_filter( 'the_excerpt' )){
 		//     add_filter( 'the_excerpt', 'add_listen_button' , 9999 );
 		// }
-
-		if ( isset( $post->post_content ) && ! (has_shortcode( $post->post_content, 'tta_listen_btn' ) || has_shortcode( $post->post_content, 'atlasvoice' )) ) {
-			ob_start();
-			echo tta_get_button_content( '' );
-			$button = ob_get_contents();
-			ob_end_clean();
-		}
+		$reduce_enqueue = apply_filters( 'tts_reduce_enqueue', [ 'reduce_enqueue_status' => false, 'button_no' => 1 ] );
+		if (
+			isset( $reduce_enqueue['button_no'] )
+			&& isset( $reduce_enqueue['reduce_enqueue_status'] )
+			&& $reduce_enqueue['reduce_enqueue_status']
+			&& $reduce_enqueue['button_no'] > 0
+		) {
+			if ( $button_no == $reduce_enqueue['button_no'] && isset( $post->post_content ) && ! ( has_shortcode( $post->post_content, 'tta_listen_btn' ) || has_shortcode( $post->post_content, 'atlasvoice' ) ) ) {
+				ob_start();
+				echo tta_get_button_content( '' );
+				$button = ob_get_contents();
+				ob_end_clean();
+			}
+		}else{
+			if ( isset( $post->post_content ) && ! ( has_shortcode( $post->post_content, 'tta_listen_btn' ) || has_shortcode( $post->post_content, 'atlasvoice' ) ) ) {
+				ob_start();
+				echo tta_get_button_content( '' );
+				$button = ob_get_contents();
+				ob_end_clean();
+			}
+        }
 	}
 	$button_position = 'before_content';
 	if ( isset( $button_settings['button_position'] ) ) {
