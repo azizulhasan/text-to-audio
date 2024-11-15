@@ -29,14 +29,14 @@ class TTA_Notices {
 
 
 //		if (!is_pro_active() && in_array(admin_url(basename($_SERVER['REQUEST_URI'])), [ admin_url('index.php') , admin_url('plugins.php'), admin_url('update-core.php'), \admin_url('plugin-install.php'), \admin_url('admin.php?page=text-to-audio')] ) )  {
-//		if (!is_pro_active())  {
+		if ( ! is_pro_active() || TTA_Helper::get_player_id() < 3 ) {
 //		add_action( 'admin_notices', [ $this, 'tta_free_promotion_notice' ] );
 
 //			 add_action( 'admin_notices', [ $this, 'tta_feedback_notice' ] );
 //			 add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
-//		add_action( 'admin_notices', [ $this, 'tta_affiliation_notice' ] );
+			add_action( 'admin_notices', [ $this, 'tta_affiliation_notice' ] );
 
-//		}
+		}
 
 		$plugins = [
 			'gtranslate/gtranslate.php'                => [
@@ -612,13 +612,13 @@ class TTA_Notices {
 	 */
 	public function tta_affiliation_notice() {
 
-//		delete_option( 'tts_is_displayed_affiliation_notice' );
-		if ( ! get_option( 'tts_is_displayed_affiliation_notice' ) ) {
+//		delete_option( 'tts_is_displayed_browser_issue_notice' );
+		if ( ! get_option( 'tts_is_displayed_browser_issue_notice' ) ) {
 			delete_option( 'tta_affiliation_notice_next_show_time' );
 			delete_user_meta( '1', 'tta_affiliation_notice_dismissed' );
 			update_option( 'tta_affiliation_notice_next_show_time', 12 );
 
-			update_option( 'tts_is_displayed_affiliation_notice', true );
+			update_option( 'tts_is_displayed_browser_issue_notice', true );
 		}
 
 		$pluginName              = sprintf( '%s', esc_html__( 'AtlasVoice Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
@@ -647,24 +647,23 @@ class TTA_Notices {
 			global $locale;
 			$language        = isset ( $languages[ $locale ] ) ? $languages[ $locale ] : "";
 			$language_string = $language ? ' in <b>' . $language . '</b>.' : '.';
-			$contact_link    = '<a href="http://atlasaidev.com/contact-us/" target="_blank" style="color:blue">here</a>'
+			$contact_link    = '<a href="https://atlasaidev.com/docs/text-to-speech/usage-setup/fix-for-chrome-130-speechsynthesis-speak-not-working/?utm_source=client&utm_medium=tts_plugin&utm_campaign=speechSysnthesis" target="_blank" style="color:blue">here</a>'
 			?>
             <div class="tta-notice notice notice-info is-dismissible" dir="<?php echo tta_is_rtl() ? 'ltr' : 'auto' ?>"
                  data-which="affiliation" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <p><?php
 					printf(
-						esc_html__( '%4$s %2$s %3$s Thank you for using AtlasVoice Text To Speech TTS! We’re excited to invite you to join our affiliate program and start earning %5$s on every sale you refer. Simply promote AtlasVoice, and we’ll guide you through the process. It’s a great way to help others improve their website accessibility while boosting your income!.', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
+						esc_html__( '%4$s %2$s %3$s We are getting reports from our users that on first click the player is not working. Please visit this documentation to get the solution', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
 						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						'<div class="tta-review-notice-logo"></div>',
 						'<br/>',
-						"<h1 style='color:red'>Earn 10% Commission by Promoting AtlasVoice!</h1>", //phpcs:ignore
-						"<strong>10%  commission</strong>" //phpcs:ignore
+						"<h1 style='color:red'>Solution : Player not working on first click?</h1>", //phpcs:ignore
 					);
 					?></p>
                 <p>
                     <a class="button button-primary" data-response="affiliation"
                        href="#"
-                       target="_blank"><?php esc_html_e( 'Become an affiliate', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       target="_blank"><?php esc_html_e( 'Get Solution', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
                 </p>
             </div>
 
@@ -695,7 +694,7 @@ class TTA_Notices {
                                 let notice = self.attr('data-response');
 
                                 if ('affiliation' === notice) {
-                                    window.open('<?php echo admin_url() . 'admin.php?page=text-to-audio-affiliation'  ?>', '_blank');
+                                    window.open('https://atlasaidev.com/docs/text-to-speech/usage-setup/fix-for-chrome-130-speechsynthesis-speak-not-working/?utm_source=client&utm_medium=tts_plugin&utm_campaign=speechSysnthesis', '_blank');
                                 }
                             })
 
@@ -829,7 +828,7 @@ class TTA_Notices {
 
 //		 delete_option('tts_setup_notice_next_show_time');
 //		 delete_user_meta('1', 'tts_setup_notice_dismissed');
-//         update_option('tts_setup_notice_next_show_time', 12);
+//        update_option('tts_setup_notice_next_show_time', 12);
 
 		$has_notice              = false;
 		$user_id                 = get_current_user_id();
@@ -1042,14 +1041,14 @@ class TTA_Notices {
             <div class="tta-notice notice notice-info is-dismissible price_update" style="line-height:1.5;"
                  data-which="promotion_close" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <p><?php
-	                printf(
-	                /* translators: 1: plugin name,2: Slightly Smiling Face (Emoji), 3: line break 'br' tag */
-		                 '%3$s %2$s <a class="tta_promotion_notice" href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/" target="_blank"><img src="%1$s" alt="text_to_speech_Free_Price" height="70px;" width="100%%"></a>',
-		                $image_url,
-		                '<br/>',
-		                "<h3>$pluginName</h3>" //phpcs:ignore
-	                );
-	                ?></p>
+					printf(
+					/* translators: 1: plugin name,2: Slightly Smiling Face (Emoji), 3: line break 'br' tag */
+						'%3$s %2$s <a class="tta_promotion_notice" href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/" target="_blank"><img src="%1$s" alt="text_to_speech_Free_Price" height="70px;" width="100%%"></a>',
+						$image_url,
+						'<br/>',
+						"<h3>$pluginName</h3>" //phpcs:ignore
+					);
+					?></p>
             </div>
 			<?php
 
