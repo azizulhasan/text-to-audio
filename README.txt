@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.7.0
 Requires PHP: 7.4
-Stable tag: 1.7.33
+Stable tag: 1.7.35
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -425,6 +425,10 @@ You can customize the voice and language of the text-to-speech player using shor
 ### TRANSLATION REQUEST
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+
+= 1.7.34 ( 30 Nov 2024 ) =
+Added: [Black Friday & Cyber Monday Banner Added](https://atlasaidev.com/plugins/text-to-speech-pro/pricing/?utm_source=plugin&utm_medium=changelog&utm_campaign=black_friday_24)
 
 
 = 1.7.34 ( 15 Nov 2024 ) =
