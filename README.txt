@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.7.0
 Requires PHP: 7.4
-Stable tag: 1.7.32
+Stable tag: 1.7.35
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -427,6 +427,20 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+= 1.7.34 ( 30 Nov 2024 ) =
+Added: [Black Friday & Cyber Monday Banner Added](https://atlasaidev.com/plugins/text-to-speech-pro/pricing/?utm_source=plugin&utm_medium=changelog&utm_campaign=black_friday_24)
+
+
+= 1.7.34 ( 15 Nov 2024 ) =
+Added: `tts_reduce_enqueue` filter added.
+Added: [Fix for Chrome 130: SpeechSynthesis.speak Not Working](https://atlasaidev.com/docs/text-to-speech/usage-setup/fix-for-chrome-130-speechsynthesis-speak-not-working/?utm_source=org&utm_medium=documentation&utm_campaign=speechSysnthesis)
+
+= 1.7.33 ( 13 Nov 2024 ) =
+Solved: Integration menu related issue solved.
+Improvement: UI improvement.
+Removed: Unnecessary banner removed.
+Fixed: After update delete of cache problem solved.
+Updated: Freemius updated to 2.9.0
 
 = 1.7.32 ( 12 Nov 2024 ) =
 Solved: Security related issue solved.
