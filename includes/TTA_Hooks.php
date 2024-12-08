@@ -532,7 +532,6 @@ class TTA_Hooks {
 	}
 
     public function clear_necessary_cache($plugin, $network) {
-		    error_log( print_r( [ $plugin, $network ], 1 ) );
 		    TTA_Cache::update_transient_during_plugins_crud();
     }
 
