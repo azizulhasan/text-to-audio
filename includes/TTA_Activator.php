@@ -74,6 +74,7 @@ class TTA_Activator {
 				'tta__settings_exclude_categories'                    => [],
 				'tta__settings_exclude_wp_tags'                       => [],
 				'tta__settings_clear_cache'                           => [],
+				'tta__settings_clear_all_cache'                       => true,
 
 			) );
 		}
@@ -126,9 +127,9 @@ class TTA_Activator {
 			] );
 		}
 
-		if ( get_transient( 'tts_all_settings' ) ) {
-			\delete_transient( 'tts_all_settings' );
-		}
+//		if ( get_transient( 'tts_all_settings' ) ) {
+//			\TTA_Cache::delete( 'all_settings' );
+//		}
 
 		/**
 		 * analytics settings.
