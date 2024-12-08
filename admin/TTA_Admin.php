@@ -84,6 +84,7 @@ class TTA_Admin {
 		if ( isset( $settings['customize']['color'] ) ) {
 			$color = $settings['customize']['color'];
 		}
+
 		$this->localize_data = [
 			'json_url'                 => esc_url_raw( rest_url() ),
 			'admin_url'                => admin_url( '/' ),
@@ -111,9 +112,7 @@ class TTA_Admin {
 			'nonce'                    => wp_create_nonce( TEXT_TO_AUDIO_NONCE ),
 			'plugin_name'              => TEXT_TO_AUDIO_PLUGIN_NAME,
 			'rest_nonce'               => wp_create_nonce( 'wp_rest' ),
-			'post_types'               => get_post_types( array(
-				'public' => 1, // Only get public post types
-			), 'array' ),
+			'post_types'               => TTA_Helper::get_post_types(),
 			'post_status'              => TTA_Helper::all_post_status(),
 			'VERSION'                  => is_pro_active() ? get_option( 'TTA_PRO_VERSION' ) : TEXT_TO_AUDIO_VERSION,
 			'is_logged_in'             => is_user_logged_in(),

@@ -305,7 +305,7 @@ class AtlasVoice_Analytics {
 
 		$saved_data = get_option( 'tta_analytics_settings' );
 
-		delete_transient( 'tts_all_settings' );
+		TTA_Cache::delete( 'all_settings' );
 
 
 		$response['status'] = true;
