@@ -65,7 +65,8 @@ function is_pro_plugin_exists() {
 	return file_exists( $plugin_path . '/text-to-audio-pro/text-to-audio-pro.php' );
 }
 
-if (  ! is_pro_plugin_exists() &&  ! function_exists( 'ttsp_fs' ) ) {
+
+if ( ! is_pro_plugin_exists() &&  ! function_exists( 'ttsp_fs' ) ) {
 	// Create a helper function for easy SDK access.
 	function ttsp_fs() {
 		global $ttsp_fs;
