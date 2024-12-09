@@ -420,7 +420,6 @@ class TTA_Hooks {
 		global $wp_scripts;
 		$registered_handles = array_keys( $wp_scripts->registered );
 		// foreach($registered_handles as $handle) {
-		//     error_log(print_r($handle,1));
 		// 	if(in_array($handle, self::$excludable_js_arr)) {
 		// 		$excluded_js[] = $handle;
 		// 	}
@@ -532,7 +531,6 @@ class TTA_Hooks {
 	}
 
     public function clear_necessary_cache($plugin, $network) {
-		    error_log( print_r( [ $plugin, $network ], 1 ) );
 		    TTA_Cache::update_transient_during_plugins_crud();
     }
 
