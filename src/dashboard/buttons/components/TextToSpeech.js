@@ -482,6 +482,11 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                     if (shouldCallPositionFunction(postTitle)) {
                         titlePosition = postTitle.getBoundingClientRect().top;
                     }
+                }else if (document.querySelector('.elementor-heading-title')) {
+                    postTitle = document.querySelector('.elementor-heading-title')
+                    if (shouldCallPositionFunction(postTitle)) {
+                        titlePosition = postTitle.getBoundingClientRect().top;
+                    }
                 }
 
                 if (button) {
