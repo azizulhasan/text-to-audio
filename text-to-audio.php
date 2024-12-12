@@ -49,20 +49,20 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function is_pro_plugin_exists() {
 	$plugin_path = \WP_PLUGIN_DIR;
-	$status      = file_exists( $plugin_path . '/text-to-speech-pro/text-to-audio-pro.php' );
+	$pro_plugins = [
+		'/text-to-speech-pro/text-to-audio-pro.php',
+		'/text-to-speech-pro-premium/text-to-audio-pro.php',
+		'/text-to-audio-pro/text-to-audio-pro.php',
+		'/text-to-audio-pro-premium/text-to-audio-pro.php'
+	];
 
-	if ( $status ) {
-		return true;
+	foreach ( $pro_plugins as $pro_plugin ) {
+		if ( file_exists( $plugin_path . $pro_plugin ) ) {
+			return true;
+		}
 	}
 
-	$status = file_exists( $plugin_path . '/text-to-speech-pro-premium/text-to-audio-pro.php' );
-
-	if ( $status ) {
-		return true;
-	}
-
-
-	return file_exists( $plugin_path . '/text-to-audio-pro/text-to-audio-pro.php' );
+	return false;
 }
 
 
@@ -169,7 +169,7 @@ if ( ! defined( 'TTA_ADMIN_PATH' ) ) {
 
 if ( ! defined( 'TTA_DEBUG_MODE' ) ) {
 
-	define( 'TTA_DEBUG_MODE', 1 );
+	define( 'TTA_DEBUG_MODE', 0 );
 }
 
 

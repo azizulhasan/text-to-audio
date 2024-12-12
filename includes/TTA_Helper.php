@@ -230,11 +230,11 @@ class TTA_Helper {
 		if ( $sitepress ) {
 			$active_languages = $sitepress->get_active_languages();
 		}
-		$acf_fields = [];
-		if ( self::is_acf_active() ) {
-			$acf_fields = self::get_all_acf_fields();
-		}
 
+		$acf_fields = [];
+		if ( TTA_Helper::is_acf_active() ) {
+			$acf_fields = TTA_Helper::get_all_acf_fields();
+		}
 
 		// Translatepress multilingual plugin.
 		$trp_languages = [];
@@ -265,6 +265,11 @@ class TTA_Helper {
 				'active_languages' => $active_languages,
 			],
 			'advanced-custom-fields/acf.php'           => [
+				'type'   => 'class',
+				'data'   => $acf_fields,
+				'plugin' => 'acf',
+			],
+			'advanced-custom-fields-pro/acf.php'       => [
 				'type'   => 'class',
 				'data'   => $acf_fields,
 				'plugin' => 'acf',
@@ -486,7 +491,7 @@ class TTA_Helper {
 
 		$date = get_the_date( 'Y/m/d', $post );
 
-		$cache_key = "mp3_file_urls_post_id__$post->ID";
+		$cache_key            = "mp3_file_urls_post_id__$post->ID";
 		$cached_mp3_file_urls = TTA_Cache::get( $cache_key );
 
 
@@ -899,7 +904,24 @@ class TTA_Helper {
 	}
 
 	public static function is_acf_active() {
-		return function_exists( 'acf' );
+
+		$pro_plugins = [
+			'advanced-custom-fields/acf.php',
+			'advanced-custom-fields-pro/acf.php',
+			'advanced-custom-fields-pro/acf-pro.php'
+		];
+
+		$status = false;
+
+		foreach ( $pro_plugins as $plugin ) {
+			if ( is_plugin_active( $plugin ) ) {
+				$status = true;
+				break; // Exit loop as soon as one active plugin is found
+			}
+		}
+
+
+		return $status;
 	}
 
 	public static function all_post_status() {
