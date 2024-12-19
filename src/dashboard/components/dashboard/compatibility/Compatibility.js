@@ -23,6 +23,10 @@ export default function Compatibility() {
             console.log({compatible: ttsObj.compatible})
             setAcfFields(ttsObj?.compatible?.['advanced-custom-fields/acf.php']?.data)
         }
+        if (ttsObj?.compatible?.['advanced-custom-fields-pro/acf.php']?.data) {
+            console.log({compatible: ttsObj?.compatible?.['advanced-custom-fields-pro/acf.php']?.data})
+            setAcfFields(ttsObj?.compatible?.['advanced-custom-fields-pro/acf.php']?.data)
+        }
     }, [ttsObj]);
 
     useEffect(() => {

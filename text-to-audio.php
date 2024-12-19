@@ -15,7 +15,7 @@
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
  * Description:       The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
- * Version:           1.7.3.6
+ * Version:           1.8.1
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-3.0+
@@ -49,20 +49,20 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function is_pro_plugin_exists() {
 	$plugin_path = \WP_PLUGIN_DIR;
-	$status      = file_exists( $plugin_path . '/text-to-speech-pro/text-to-audio-pro.php' );
+	$pro_plugins = [
+		'/text-to-speech-pro/text-to-audio-pro.php',
+		'/text-to-speech-pro-premium/text-to-audio-pro.php',
+		'/text-to-audio-pro/text-to-audio-pro.php',
+		'/text-to-audio-pro-premium/text-to-audio-pro.php'
+	];
 
-	if ( $status ) {
-		return true;
+	foreach ( $pro_plugins as $pro_plugin ) {
+		if ( file_exists( $plugin_path . $pro_plugin ) ) {
+			return true;
+		}
 	}
 
-	$status = file_exists( $plugin_path . '/text-to-speech-pro-premium/text-to-audio-pro.php' );
-
-	if ( $status ) {
-		return true;
-	}
-
-
-	return file_exists( $plugin_path . '/text-to-audio-pro/text-to-audio-pro.php' );
+	return false;
 }
 
 

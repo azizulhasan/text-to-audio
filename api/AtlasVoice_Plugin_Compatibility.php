@@ -10,8 +10,7 @@ namespace TTA_Api;
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
 
-use TTA\TTA_Activator;
-use TTA\TTA_Helper;
+use TTA\TTA_Cache;
 class AtlasVoice_Plugin_Compatibility {
 
 	/**
