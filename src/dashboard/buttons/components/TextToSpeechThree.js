@@ -46,8 +46,8 @@ export default function TextToSpeechThree({buttonId, button, buttonCSS, cssStyle
                     if (shouldCallPositionFunction(postTitle)) {
                         titlePosition = postTitle.getBoundingClientRect().top;
                     }
-                } else if (document.querySelector('.elementor-heading-title')) {
-                    postTitle = document.querySelector('.elementor-heading-title')
+                } else if (document.querySelector('h1.elementor-heading-title')) {
+                    postTitle = document.querySelector('h1.elementor-heading-title')
                     if (shouldCallPositionFunction(postTitle)) {
                         titlePosition = postTitle.getBoundingClientRect().top;
                     }
