@@ -727,12 +727,7 @@ function set_initial_button_texts( $content_read_time ) {
 
 
 function get_player_id() {
-//	$cache_key   = TTA_Cache::get_key( 'get_player_id' );
-//	$cache_value = TTA_Cache::get( $cache_key );
-//
-//	if ( $cache_value ) {
-//		return $cache_value;
-//	}
+
 	global $post;
 
 	$customize_settings                   = (array) TTA_Helper::tts_get_settings( 'customize' );
@@ -752,8 +747,6 @@ function get_player_id() {
 
 
 	$player_id = apply_filters( 'tts_get_player_id', $player_id );
-
-//	TTA_Cache::set( $cache_key, $player_id );
 
 	return $player_id;
 
