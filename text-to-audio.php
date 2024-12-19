@@ -15,7 +15,7 @@
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
  * Description:       The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
- * Version:           1.8.0
+ * Version:           1.8.2
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-3.0+
@@ -31,7 +31,6 @@ use TTA\TTA;
 use TTA\TTA_Activator;
 use TTA\TTA_Deactivator;
 use TTA_Api\TTA_Api_Routes;
-use TTA_Api\AtlasVoice_Analytics;
 use TTA\TTA_Notices;
 
 // If this file is called directly, abort.
@@ -49,22 +48,21 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function is_pro_plugin_exists() {
 	$plugin_path = \WP_PLUGIN_DIR;
-	$status      = file_exists( $plugin_path . '/text-to-speech-pro/text-to-audio-pro.php' );
+	$pro_plugins = [
+		'/text-to-speech-pro/text-to-audio-pro.php',
+		'/text-to-speech-pro-premium/text-to-audio-pro.php',
+		'/text-to-audio-pro/text-to-audio-pro.php',
+		'/text-to-audio-pro-premium/text-to-audio-pro.php'
+	];
 
-	if ( $status ) {
-		return true;
+	foreach ( $pro_plugins as $pro_plugin ) {
+		if ( file_exists( $plugin_path . $pro_plugin ) ) {
+			return true;
+		}
 	}
 
-	$status = file_exists( $plugin_path . '/text-to-speech-pro-premium/text-to-audio-pro.php' );
-
-	if ( $status ) {
-		return true;
-	}
-
-
-	return file_exists( $plugin_path . '/text-to-audio-pro/text-to-audio-pro.php' );
+	return false;
 }
-
 
 if ( ! is_pro_plugin_exists() &&  ! function_exists( 'ttsp_fs' ) ) {
 	// Create a helper function for easy SDK access.
@@ -206,7 +204,7 @@ class TTA_Init {
 
 	public function __construct() {
 		if ( ! defined( 'TEXT_TO_AUDIO_VERSION' ) ) {
-			define( 'TEXT_TO_AUDIO_VERSION', apply_filters( 'tts_version', '1.8.0' ) );
+			define( 'TEXT_TO_AUDIO_VERSION', apply_filters( 'tts_version', '1.8.2' ) );
 		}
 
 		if ( ! defined( 'TEXT_TO_AUDIO_PLUGIN_NAME' ) ) {

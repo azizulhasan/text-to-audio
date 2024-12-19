@@ -33,7 +33,6 @@ class AtlasVoice_Analytics {
 				$analytics = $analytics[0];
 			}
 			$merged_analytics = self::merge_analytics_arrays( $analytics, $body['analytics'] );
-//			error_log( print_r( $merged_analytics, 1 ) );
 
 			update_post_meta( $post_id, 'atlasVoice_analytics', $merged_analytics );
 

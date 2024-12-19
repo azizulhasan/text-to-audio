@@ -727,12 +727,7 @@ function set_initial_button_texts( $content_read_time ) {
 
 
 function get_player_id() {
-//	$cache_key   = TTA_Cache::get_key( 'get_player_id' );
-//	$cache_value = TTA_Cache::get( $cache_key );
-//
-//	if ( $cache_value ) {
-//		return $cache_value;
-//	}
+
 	global $post;
 
 	$customize_settings                   = (array) TTA_Helper::tts_get_settings( 'customize' );
@@ -753,8 +748,6 @@ function get_player_id() {
 
 	$player_id = apply_filters( 'tts_get_player_id', $player_id );
 
-//	TTA_Cache::set( $cache_key, $player_id );
-
 	return $player_id;
 
 
@@ -765,12 +758,12 @@ function get_player_id() {
  */
 function is_pro_active() {
 
-	$cache_key   = TTA_Cache::get_key( 'is_pro_active' );
-	$cache_value = TTA_Cache::get( $cache_key );
-
-	if ( $cache_value ) {
-		return $cache_value;
-	}
+//	$cache_key   = TTA_Cache::get_key( 'is_pro_active' );
+//	$cache_value = TTA_Cache::get( $cache_key );
+//
+//	if ( $cache_value ) {
+//		return $cache_value;
+//	}
 
 //	if ( ! function_exists( 'ttsp_fs' ) ) {
 //		return false;
@@ -780,25 +773,31 @@ function is_pro_active() {
 //		return false;
 //	}
 
-
 	if ( ! function_exists( 'is_plugin_active' ) ) {
 		include_once ABSPATH . 'wp-admin/includes/plugin.php';
 	}
 
+	$pro_plugins = [
+		'text-to-speech-pro/text-to-audio-pro.php',
+		'text-to-speech-pro-premium/text-to-audio-pro.php',
+		'text-to-audio-pro/text-to-audio-pro.php',
+		'text-to-audio-pro-premium/text-to-audio-pro.php',
+	];
+
 	$status = false;
 
-	if ( is_plugin_active( 'text-to-speech-pro/text-to-audio-pro.php' ) ) {
-		$status = true;
-	} else if ( is_plugin_active( 'text-to-speech-pro/text-to-audio-pro.php' ) ) {
-		$status = true;
-	} else if ( is_plugin_active( 'text-to-audio-pro/text-to-audio-pro.php' ) ) {
-		$status = true;
+	foreach ( $pro_plugins as $plugin ) {
+		if ( is_plugin_active( $plugin ) ) {
+			$status = true;
+			break; // Exit loop as soon as one active plugin is found
+		}
 	}
 
 	$status = apply_filters( 'tts_is_pro_active', $status );
 
-	TTA_Cache::set( $cache_key, $status );
+    // TTA_Cache::set( $cache_key, $status );
 
 	return $status;
+
 
 }
