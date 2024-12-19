@@ -615,13 +615,13 @@ class TTA_Notices {
 	 */
 	public function tta_affiliation_notice() {
 
-//		delete_option( 'tts_is_displayed_browser_issue_notice' );
-		if ( ! get_option( 'tts_is_displayed_browser_issue_notice' ) ) {
+//		delete_option( 'tts_is_displayed_browser_issue_notice_reissue_notice' );
+		if ( ! get_option( 'tts_is_displayed_browser_issue_notice_reissue_notice' ) ) {
 			delete_option( 'tta_affiliation_notice_next_show_time' );
 			delete_user_meta( '1', 'tta_affiliation_notice_dismissed' );
 			update_option( 'tta_affiliation_notice_next_show_time', 12 );
 
-			update_option( 'tts_is_displayed_browser_issue_notice', true );
+			update_option( 'tts_is_displayed_browser_issue_notice_reissue_notice', true );
 		}
 
 		$pluginName              = sprintf( '%s', esc_html__( 'AtlasVoice Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
