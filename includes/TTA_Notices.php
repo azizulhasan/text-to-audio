@@ -29,12 +29,13 @@ class TTA_Notices {
 
 
 //		if (!is_pro_active() && in_array(admin_url(basename($_SERVER['REQUEST_URI'])), [ admin_url('index.php') , admin_url('plugins.php'), admin_url('update-core.php'), \admin_url('plugin-install.php'), \admin_url('admin.php?page=text-to-audio')] ) )  {
+		if (  is_pro_active() ) {
+//			add_action( 'admin_notices', [ $this, 'tta_free_promotion_notice' ] );
+			add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
+		}
 
 		if ( ! is_pro_active() || TTA_Helper::get_player_id() < 3 ) {
-//			add_action( 'admin_notices', [ $this, 'tta_free_promotion_notice' ] );
-
 //			 add_action( 'admin_notices', [ $this, 'tta_feedback_notice' ] );
-//			 add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
 			add_action( 'admin_notices', [ $this, 'tta_affiliation_notice' ] );
 
 		}
@@ -497,13 +498,13 @@ class TTA_Notices {
 	 */
 	public function tta_translation_request() {
 
-//        delete_option('tts_is_displayed_force_notice');
-		if ( ! get_option( 'tts_is_displayed_force_notice' ) ) {
+        delete_option('tts_is_displayed_force_notice_december_24');
+		if ( ! get_option( 'tts_is_displayed_force_notice_december_24' ) ) {
 			delete_option( 'tta_translation_notice_next_show_time' );
 			delete_user_meta( '1', 'tta_translation_notice_dismissed' );
 			update_option( 'tta_translation_notice_next_show_time', 12 );
 
-			update_option( 'tts_is_displayed_force_notice', true );
+			update_option( 'tts_is_displayed_force_notice_december_24', true );
 		}
 
 		$pluginName              = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
@@ -530,15 +531,16 @@ class TTA_Notices {
 			$has_notice = true;
 			$languages  = tta_get_default_languages();
 			global $locale;
-			$language        = isset ( $languages[ $locale ] ) ? $languages[ $locale ] : "";
-			$language_string = $language ? ' in <b>' . $language . '</b>.' : '.';
+
+			$language        = isset ( $languages[ $locale ] ) ? $languages[ $locale ] : "your local language";
+			$language_string = $language ? ' in <b>' . $language . '</b>.' : '';
 			$contact_link    = '<a href="http://atlasaidev.com/contact-us/" target="_blank" style="color:blue">here</a>'
 			?>
             <div class="tta-notice notice notice-info is-dismissible" dir="<?php echo tta_is_rtl() ? 'ltr' : 'auto' ?>"
                  data-which="translate" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <p><?php
 					printf(
-						esc_html__( '%6$s %2$s  We are looking for people to translate this plugin%4$s If you can help we would love to heare from you and please contact with us %5$s, we will guide you. %3$s Thanks for using %1$s.', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
+						esc_html__( '%6$s %2$s  We are seeking contributors to help translate this plugin into %4$s. If you’re interested in assisting, we’d love to hear from you! Please reach out to us %5$s, and we’ll provide all the necessary guidance.. %3$s Thank you for choosing %1$s.', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
 						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						'<div class="tta-review-notice-logo"></div>',
 						'<br/>',
@@ -613,13 +615,13 @@ class TTA_Notices {
 	 */
 	public function tta_affiliation_notice() {
 
-//		delete_option( 'tts_is_displayed_browser_issue_notice' );
-		if ( ! get_option( 'tts_is_displayed_browser_issue_notice' ) ) {
+//		delete_option( 'tts_is_displayed_browser_issue_notice_reissue_notice' );
+		if ( ! get_option( 'tts_is_displayed_browser_issue_notice_reissue_notice' ) ) {
 			delete_option( 'tta_affiliation_notice_next_show_time' );
 			delete_user_meta( '1', 'tta_affiliation_notice_dismissed' );
 			update_option( 'tta_affiliation_notice_next_show_time', 12 );
 
-			update_option( 'tts_is_displayed_browser_issue_notice', true );
+			update_option( 'tts_is_displayed_browser_issue_notice_reissue_notice', true );
 		}
 
 		$pluginName              = sprintf( '%s', esc_html__( 'AtlasVoice Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
@@ -1028,7 +1030,7 @@ class TTA_Notices {
 		$review_notice_dismissed = get_user_meta( $user_id, 'tta_promotion_black_friday_24_notice_dismissed', true );
 		$nonce                   = wp_create_nonce( 'tta_notice_nonce' );
 
-//		delete_user_meta( $user_id, 'tta_promotion_black_friday_24_notice_dismissed');
+		delete_user_meta( $user_id, 'tta_promotion_black_friday_24_notice_dismissed' );
 
 		if ( isset( $review_notice_dismissed ) && ! empty( $review_notice_dismissed ) ) {
 			$show_notice = false;
@@ -1042,8 +1044,8 @@ class TTA_Notices {
                  data-which="promotion_black_friday_close" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <div id="black-friday-banner"
                      style="background-color: #ffcc00; color: #333; text-align: center; padding: 5px; font-family: Arial, sans-serif; position: sticky; top: 0; width: 100%; z-index: 1000; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
-                    <h2 style="margin: 0; font-size: 24px; font-weight: bold;">Text To Speech🔥 Black Friday & Cyber
-                        Monday Sale - 40% OFF! 🔥</h2>
+                    <h2 style="margin: 0; font-size: 24px; font-weight: bold;">Text To Speech🔥 Holiday Deals & New Year
+                        Offer Sale - 40% OFF! 🔥</h2>
                     <p style="margin: 10px 0; font-size: 16px;">Get 40% off on AtlasVoice Pro in all package. Use the
                         coupon code below and save big!</p>
                     <p style="margin: 10px 0; font-size: 18px; font-weight: bold;">Offer Ends In: <span id="countdown"
@@ -1100,13 +1102,13 @@ class TTA_Notices {
 
                         // Countdown Timer Logic
                         function updateCountdown() {
-                            const offerEndDate = new Date("December 5, 2024 23:59:59").getTime();
+                            const offerEndDate = new Date("January 5, 2025 23:59:59").getTime();
                             const now = new Date().getTime();
                             const timeLeft = offerEndDate - now;
 
                             if (timeLeft < 0) {
                                 document.getElementById("black-friday-banner").innerHTML =
-                                    "<h2 style='color: #d9534f;'>🎉 The Black Friday & Cyber Monday Offer Has Ended!</h2>";
+                                    "<h2 style='color: #d9534f;'>🎉 Holiday Deals & New Year Offer Has Ended!</h2>";
                                 return;
                             }
 
