@@ -25,7 +25,10 @@
  * Requires PHP:      7.4
  * Requires at least: 5.6
  */
-include 'vendor/autoload.php';
+// Include Composer autoloader if using Composer
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+	require_once __DIR__ . '/vendor/autoload.php';
+}
 
 use TTA\TTA;
 use TTA\TTA_Activator;
