@@ -29,10 +29,10 @@ class TTA_Notices {
 
 
 //		if (!is_pro_active() && in_array(admin_url(basename($_SERVER['REQUEST_URI'])), [ admin_url('index.php') , admin_url('plugins.php'), admin_url('update-core.php'), \admin_url('plugin-install.php'), \admin_url('admin.php?page=text-to-audio')] ) )  {
-		if ( ! is_pro_active() ) {
+//		if ( ! is_pro_active() ) {
 //			add_action( 'admin_notices', [ $this, 'tta_free_promotion_notice' ] );
-			add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
-		}
+//			add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
+//		}
 
 		if ( ! is_pro_active() || TTA_Helper::get_player_id() < 3 ) {
 //			 add_action( 'admin_notices', [ $this, 'tta_feedback_notice' ] );
