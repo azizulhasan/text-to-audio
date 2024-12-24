@@ -15,7 +15,7 @@
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
  * Description:       The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
- * Version:           1.8.2
+ * Version:           1.8.4
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-3.0+
@@ -25,7 +25,22 @@
  * Requires PHP:      7.4
  * Requires at least: 5.6
  */
-include 'vendor/autoload.php';
+
+
+// Absolute path to the WordPress directory.
+if ( ! defined( 'ABSPATH' ) ) {
+	define( 'ABSPATH', dirname( __FILE__ ) . '/' );
+}
+
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+// Include Composer autoloader if using Composer
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+	require_once __DIR__ . '/vendor/autoload.php';
+}
 
 use TTA\TTA;
 use TTA\TTA_Activator;
@@ -33,15 +48,6 @@ use TTA\TTA_Deactivator;
 use TTA_Api\TTA_Api_Routes;
 use TTA\TTA_Notices;
 
-// If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) ) {
-	die;
-}
-
-// Absolute path to the WordPress directory.
-if ( ! defined( 'ABSPATH' ) ) {
-	define( 'ABSPATH', dirname( __FILE__ ) . '/' );
-}
 
 /**
  * Is plugin active
@@ -204,7 +210,7 @@ class TTA_Init {
 
 	public function __construct() {
 		if ( ! defined( 'TEXT_TO_AUDIO_VERSION' ) ) {
-			define( 'TEXT_TO_AUDIO_VERSION', apply_filters( 'tts_version', '1.8.2' ) );
+			define( 'TEXT_TO_AUDIO_VERSION', apply_filters( 'tts_version', '1.8.4' ) );
 		}
 
 		if ( ! defined( 'TEXT_TO_AUDIO_PLUGIN_NAME' ) ) {

@@ -1,5 +1,10 @@
 <?php
 
+// Absolute path to the WordPress directory.
+if ( ! defined( 'ABSPATH' ) ) {
+	die();
+}
+
 use TTA\TTA_Cache;
 use TTA\TTA_Helper;
 
