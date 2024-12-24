@@ -25,6 +25,18 @@
  * Requires PHP:      7.4
  * Requires at least: 5.6
  */
+
+
+// Absolute path to the WordPress directory.
+if ( ! defined( 'ABSPATH' ) ) {
+	define( 'ABSPATH', dirname( __FILE__ ) . '/' );
+}
+
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
 // Include Composer autoloader if using Composer
 if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 	require_once __DIR__ . '/vendor/autoload.php';
@@ -36,15 +48,6 @@ use TTA\TTA_Deactivator;
 use TTA_Api\TTA_Api_Routes;
 use TTA\TTA_Notices;
 
-// If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) ) {
-	die;
-}
-
-// Absolute path to the WordPress directory.
-if ( ! defined( 'ABSPATH' ) ) {
-	define( 'ABSPATH', dirname( __FILE__ ) . '/' );
-}
 
 /**
  * Is plugin active
