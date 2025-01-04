@@ -47,6 +47,8 @@ use TTA\TTA_Activator;
 use TTA\TTA_Deactivator;
 use TTA_Api\TTA_Api_Routes;
 use TTA\TTA_Notices;
+use TTA\TTA_Lib_AtlasAiDev;
+
 
 
 /**
@@ -223,9 +225,14 @@ class TTA_Init {
 	public function run() {
 		$plugin = new TTA();
 		$plugin->run();
-		new TTA_Api_Routes();
 		new TTA_Notices();
-
+		add_action( 'init', function () {
+			if ( ! defined( 'TTA_PRO_PLUGIN_PATH' ) ) {
+				TTA_Lib_AtlasAiDev::instance()->init();
+			}
+			//Rest api init.
+			new TTA_Api_Routes();
+		}, 9999 );
 
 		//add plugins action links.
 		if ( is_admin() ) {
@@ -263,7 +270,7 @@ class TTA_Init {
 }
 
 
-add_action( 'init', function () {
+add_action( 'plugins_loaded', function () {
 	//Rest api init.
 	new TTA_Init();
 }, 9999 );

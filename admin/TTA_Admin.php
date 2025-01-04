@@ -78,6 +78,10 @@ class TTA_Admin {
 			include_once ABSPATH . 'wp-includes/vars.php';
 		}
 
+        if ( ! function_exists( 'wp_create_nonce' ) ) {
+			include_once ABSPATH . 'wp-includes/pluggable.php';
+		}
+
 		$settings = TTA_Helper::tts_get_settings();
 
 		$color = '#ffffff';
@@ -86,7 +90,7 @@ class TTA_Admin {
 		}
 
 		$this->localize_data = [
-			'json_url'                 => esc_url_raw( rest_url() ),
+			'json_url'                 => esc_url_raw( site_url() . '/wp-json/' ),
 			'admin_url'                => admin_url( '/' ),
 			'classic_editor_is_active' => is_plugin_active( 'classic-editor/classic-editor.php' ),
 			'buttonTextArr'            => get_option( 'tta__button_text_arr' ),
@@ -104,7 +108,7 @@ class TTA_Admin {
 				'is_edge'   => $is_edge, //(boolean): Microsoft Edge
 			],
 			'ajax_url'                 => admin_url( 'admin-ajax.php' ),
-			'api_url'                  => esc_url_raw( rest_url() ),
+			'api_url'                  => esc_url_raw( site_url() . '/wp-json/' ),
 			'api_namespace'            => 'tta',
 			'api_version'              => 'v1',
 			'image_url'                => WP_PLUGIN_URL . '/text-to-audio/admin/images',
