@@ -38,7 +38,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Include Composer autoloader if using Composer
-if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 	require_once __DIR__ . '/vendor/autoload.php';
 }
 
@@ -48,8 +48,7 @@ use TTA\TTA_Deactivator;
 use TTA_Api\TTA_Api_Routes;
 use TTA\TTA_Notices;
 use TTA\TTA_Lib_AtlasAiDev;
-
-
+use TTA\TTA_Cache;
 
 /**
  * Is plugin active
@@ -72,7 +71,7 @@ function is_pro_plugin_exists() {
 	return false;
 }
 
-if ( ! is_pro_plugin_exists() &&  ! function_exists( 'ttsp_fs' ) ) {
+if ( ! is_pro_plugin_exists() && ! function_exists( 'ttsp_fs' ) ) {
 	// Create a helper function for easy SDK access.
 	function ttsp_fs() {
 		global $ttsp_fs;
@@ -230,6 +229,12 @@ class TTA_Init {
 			if ( ! defined( 'TTA_PRO_PLUGIN_PATH' ) ) {
 				TTA_Lib_AtlasAiDev::instance()->init();
 			}
+			if ( ! TTA_Cache::get( 'tts_rest_api_url' ) ) {
+				$rest_url = esc_url_raw( rest_url() );
+				update_option( 'tts_rest_api_url', $rest_url );
+				TTA_Cache::set( 'tts_rest_api_url', $rest_url );
+			}
+
 			//Rest api init.
 			new TTA_Api_Routes();
 		}, 9999 );
@@ -320,7 +325,7 @@ function allow_shortcode_in_html_tag( $output, $tag, $attr, $m ) {
 			$content = $m[5] . tta_get_button_content( $attr, false, $m[5] );
 		}
 
-       //Get the content wrapped by the shortcode.
+		//Get the content wrapped by the shortcode.
 		return $content;
 	}
 

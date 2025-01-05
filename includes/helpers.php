@@ -100,8 +100,12 @@ function tta_should_add_delimiter( $title, $delimiter ) {
  */
 function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 	$settings = (array) get_option( 'tta_settings_data' );
+	static $btn_no = 0;
+	static $block_btn_no = 0;
+	$btn_no ++;
+
 	// this is a pro feature to show button on blog main page with title and excerpt.
-	if ( ! TTA_Helper::should_load_button() ) {
+	if ( ! TTA_Helper::should_load_button() || $block_btn_no > 0 ) {
 		return;
 	}
 
@@ -109,19 +113,16 @@ function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 
 	if ( $is_block ) {
 		$customize = $atts;
+		$block_btn_no++;
 	} else {
 		$customize = (array) get_option( 'tta_customize_settings' );
 	}
 	$recording = (array) get_option( 'tta_record_settings' );
 
 
-	// set default value.
-	$settings['tta__settings_allow_listening_for_post_types'] = isset( $settings['tta__settings_allow_listening_for_post_types'] ) && is_array( $settings['tta__settings_allow_listening_for_post_types'] ) ? $settings['tta__settings_allow_listening_for_post_types'] : [ 'post' ];
-
 	$should_display_icon = isset( $settings['tta__settings_display_btn_icon'] ) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
 
-	static $btn_no = 0;
-	$btn_no ++;
+
 	// TODO make it dynamic. now Recording it not available in UI.
 	$sentence_delimiter = isset( $recording['tta__sentence_delimiter'] ) ? $recording['tta__sentence_delimiter'] : '. ';
 	global $post;
@@ -520,18 +521,6 @@ function is_pro_license_active() {
 	return false;
 }
 
-
-function tta_is_audio_folder_writable() {
-	$upload_dir = wp_upload_dir();
-	$base_dir   = $upload_dir['basedir'];
-
-	if ( is_writable( $base_dir ) ) {
-		return true;
-	}
-
-	return false;
-}
-
 function tta_get_default_languages() {
 	return array(
 		'af'             => 'Afrikaans',
@@ -763,21 +752,6 @@ function get_player_id() {
  */
 function is_pro_active() {
 
-//	$cache_key   = TTA_Cache::get_key( 'is_pro_active' );
-//	$cache_value = TTA_Cache::get( $cache_key );
-//
-//	if ( $cache_value ) {
-//		return $cache_value;
-//	}
-
-//	if ( ! function_exists( 'ttsp_fs' ) ) {
-//		return false;
-//	}
-
-//	if ( ! ttsp_fs()->is__premium_only() ) {
-//		return false;
-//	}
-
 	if ( ! function_exists( 'is_plugin_active' ) ) {
 		include_once ABSPATH . 'wp-admin/includes/plugin.php';
 	}
@@ -800,7 +774,6 @@ function is_pro_active() {
 
 	$status = apply_filters( 'tts_is_pro_active', $status );
 
-    // TTA_Cache::set( $cache_key, $status );
 
 	return $status;
 
