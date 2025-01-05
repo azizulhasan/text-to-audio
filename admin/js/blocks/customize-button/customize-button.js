@@ -124,8 +124,9 @@ function Customize(props) {
 			<style
 				dangerouslySetInnerHTML={{
 					__html: [
-						'.tta_block_body div input, .tta_block_body div textarea {',
+						'.tta_block_body div input {',
 						'float:right;',
+						'height:35px;',
 						'}',
 						'.tta_block_body div {',
 						'padding: 15px 0;',
@@ -142,11 +143,7 @@ function Customize(props) {
 				id='tta__listen_content_block'
 				className='tta__listen_content'
 				onClick={(e) =>
-					ttaListenCotentInDashboard(
-						'tta__listen_content_block',
-						'',
-						ttaBlocks.listeningSettings,
-					)
+					console.log('block_editor')
 				}
 				style={{
 					backgroundColor: backgroundColor,
