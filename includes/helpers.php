@@ -113,7 +113,7 @@ function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 
 	if ( $is_block ) {
 		$customize = $atts;
-		$block_btn_no++;
+		$block_btn_no ++;
 	} else {
 		$customize = (array) get_option( 'tta_customize_settings' );
 	}
@@ -169,13 +169,18 @@ function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 	$speakIcon .= '<span> ' . $text_arr['listen_text'] . '<span></div>'; // TODO: should remove this if unnecessary.
 	// Button style.
 	if ( isset( $customize['backgroundColor'], $customize['color'], $customize['width'] ) ) {
+		$backgroundColor = isset( $customize['backgroundColor'] ) ? $customize['backgroundColor'] : '#184c53';
+		$color           = isset( $customize['color'] ) ? $customize['color'] : '#ffffff';
+		$width           = isset( $customize['width'] ) ? $customize['width'] : '100';
+		$height          = isset( $customize['height'] ) ? $customize['height'] . 'px' : '30px';
+		$border          = isset( $customize['border'] ) ? $customize['border'] . 'px' : '0';
+		$border_color    = isset( $customize['border_color'] ) ? $customize['border_color'] : '#ffffff';
+		$border          = $border . ' solid ' . $border_color;
+		$font_size       = isset( $customize['font-size'] ) ? $customize['font-size'] . 'px' : '18px';
 		if ( $is_block ) {
-			$backgroundColor = isset( $customize['backgroundColor'] ) ? $customize['backgroundColor'] : '#184c53';
-			$color           = isset( $customize['color'] ) ? $customize['color'] : '#ffffff';
-			$width           = isset( $customize['width'] ) ? $customize['width'] : '100';
-			$btn_style       = 'background-color:' . esc_attr( $backgroundColor ) . ' !important;color:' . esc_attr( $color ) . ' !important;width:' . esc_attr( $width ) . '%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
+			$btn_style = 'background-color:' . esc_attr( $backgroundColor ) . ' !important;color:' . esc_attr( $color ) . ' !important;width:' . esc_attr( $width ) . '%;height:' . esc_attr( $height ) . ';font-size:' . esc_attr( $font_size ) . ';border:' . esc_attr( $border ) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
 		} else {
-			$btn_style = 'background-color:' . esc_attr( $customize['backgroundColor'] ) . ';color:' . esc_attr( $customize['color'] ) . ';width:' . esc_attr( $customize['width'] ) . '%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
+			$btn_style = 'background-color:' . esc_attr( $customize['backgroundColor'] ) . ';color:' . esc_attr( $customize['color'] ) . ';width:' . esc_attr( $customize['width'] ) . '%;height:' . esc_attr( $height ) . ';font-size:' . esc_attr( $font_size ) . ';border:' . esc_attr( $border ) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
 		}
 	} else {
 		$btn_style = 'background-color:#184c53;color:#ffffff;width:100%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
@@ -471,14 +476,14 @@ function add_listen_button( $content ) {
 				$button = ob_get_contents();
 				ob_end_clean();
 			}
-		}else{
+		} else {
 			if ( isset( $post->post_content ) && ! ( has_shortcode( $post->post_content, 'tta_listen_btn' ) || has_shortcode( $post->post_content, 'atlasvoice' ) ) ) {
 				ob_start();
 				echo tta_get_button_content( '' );
 				$button = ob_get_contents();
 				ob_end_clean();
 			}
-        }
+		}
 	}
 	$button_position = 'before_content';
 	if ( isset( $button_settings['button_position'] ) ) {
