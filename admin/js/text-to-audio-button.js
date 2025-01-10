@@ -58,11 +58,10 @@ class TTSPlayButton extends HTMLElement {
                     })
                     // Create some CSS to apply to the shadow dom
                     const style = document.createElement('style');
-
                     // CSS style for thsi button
                     style.textContent = `
-                        #tts__listent_content_${buttonId}.tts__listent_content{ ${settings.btnStyle}height:30px; }
-                        #tts__listent_content_${buttonId}.tts__listent_content:hover{ ${settings.btnStyle}height:30px; }
+                        #tts__listent_content_${buttonId}.tts__listent_content{ ${settings.btnStyle} }
+                        #tts__listent_content_${buttonId}.tts__listent_content:hover{ ${settings.btnStyle} }
                         // #tts__listent_content_${buttonId}.tts__listent_content .text-position{ position: absolute;padding-top: 2px; }
                         // #tts__listent_content_${buttonId}.tts__listent_content .dashicons{ display:${settings.shouldDisplayIcon};line-height:1;font-size:25px;height:25px;width:25px; }
                         
