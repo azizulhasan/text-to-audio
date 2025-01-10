@@ -3,6 +3,7 @@
 namespace TTA_Admin;
 
 use TTA\TTA_Helper;
+use TTA\TTA_Cache;
 
 /**
  * The admin-specific functionality of the plugin.
@@ -78,6 +79,10 @@ class TTA_Admin {
 			include_once ABSPATH . 'wp-includes/vars.php';
 		}
 
+		if ( ! function_exists( 'wp_create_nonce' ) ) {
+			include_once ABSPATH . 'wp-includes/pluggable.php';
+		}
+
 		$settings = TTA_Helper::tts_get_settings();
 
 		$color = '#ffffff';
@@ -85,8 +90,10 @@ class TTA_Admin {
 			$color = $settings['customize']['color'];
 		}
 
+        $rest_api_url = TTA_Cache::get( 'tts_rest_api_url' ) ?? esc_url_raw( site_url() . '/wp-json/' );
+
 		$this->localize_data = [
-			'json_url'                 => esc_url_raw( rest_url() ),
+			'json_url'                 => $rest_api_url,
 			'admin_url'                => admin_url( '/' ),
 			'classic_editor_is_active' => is_plugin_active( 'classic-editor/classic-editor.php' ),
 			'buttonTextArr'            => get_option( 'tta__button_text_arr' ),
@@ -104,7 +111,7 @@ class TTA_Admin {
 				'is_edge'   => $is_edge, //(boolean): Microsoft Edge
 			],
 			'ajax_url'                 => admin_url( 'admin-ajax.php' ),
-			'api_url'                  => esc_url_raw( rest_url() ),
+			'api_url'                  => $rest_api_url,
 			'api_namespace'            => 'tta',
 			'api_version'              => 'v1',
 			'image_url'                => WP_PLUGIN_URL . '/text-to-audio/admin/images',
@@ -273,7 +280,6 @@ class TTA_Admin {
 	 * @return string
 	 */
 	public function render_button( $customize ) {
-
 		return tta_get_button_content( $customize, true );
 	}
 
@@ -330,38 +336,41 @@ class TTA_Admin {
 			'dashicons-controls-volumeon',
 			20
 		);
-		add_submenu_page( TEXT_TO_AUDIO_TEXT_DOMAIN, __( 'Text To Speech', TEXT_TO_AUDIO_TEXT_DOMAIN ), __( 'Text To Speech', TEXT_TO_AUDIO_TEXT_DOMAIN ), 'manage_options', TEXT_TO_AUDIO_TEXT_DOMAIN , array( $this, "TTA_settings" ), 21 );
+		add_submenu_page( TEXT_TO_AUDIO_TEXT_DOMAIN, __( 'Text To Speech', TEXT_TO_AUDIO_TEXT_DOMAIN ), __( 'Text To Speech', TEXT_TO_AUDIO_TEXT_DOMAIN ), 'manage_options', TEXT_TO_AUDIO_TEXT_DOMAIN, array(
+			$this,
+			"TTA_settings"
+		), 21 );
 
 
-        if(get_player_id() > 2) {
-            if(! empty( $_REQUEST['page'] ) &&  $_REQUEST['page'] == 'bulk-mp3-generate') {
-	            wp_enqueue_script( 'tts-font-awesome', plugin_dir_url( __FILE__ ) . 'js/build/font-awesome.min.js', array(), $this->version, true );
-	            wp_enqueue_style( 'tts-bootstrap', plugin_dir_url( __FILE__ ) . 'css/bootstrap.css', [], $this->version, 'all' );
-            }
-	        // Register a new admin page under "Bulk MP3 Generate" menu
-	        add_submenu_page(
-		        'text-to-audio',         // Page title
-		        'Bulk MP3 Generate',               // Menu title
-		        'Bulk MP3 Generate',            // Capability
-		        'manage_options',         // Menu slug
-		        'bulk-mp3-generate',   // Icon (optional)
-		        [$this, 'bulk_mp3_generate'],
-		        33, // Position (optional)
-	        );
-        }
+		if ( get_player_id() > 2 ) {
+			if ( ! empty( $_REQUEST['page'] ) && $_REQUEST['page'] == 'bulk-mp3-generate' ) {
+				wp_enqueue_script( 'tts-font-awesome', plugin_dir_url( __FILE__ ) . 'js/build/font-awesome.min.js', array(), $this->version, true );
+				wp_enqueue_style( 'tts-bootstrap', plugin_dir_url( __FILE__ ) . 'css/bootstrap.css', [], $this->version, 'all' );
+			}
+			// Register a new admin page under "Bulk MP3 Generate" menu
+			add_submenu_page(
+				'text-to-audio',         // Page title
+				'Bulk MP3 Generate',               // Menu title
+				'Bulk MP3 Generate',            // Capability
+				'manage_options',         // Menu slug
+				'bulk-mp3-generate',   // Icon (optional)
+				[ $this, 'bulk_mp3_generate' ],
+				33, // Position (optional)
+			);
+		}
 
 	}
 
 	// Callback function to display the content of the page
-	public  function bulk_mp3_generate() {
+	public function bulk_mp3_generate() {
 		echo '<h1>AtlasVoice Pro : Bulk MP3 File Generate</h1>';
 
 		if ( ! empty( $_REQUEST['atlasvoice_mp3_file'] ) ) {
-			echo  '<div id="atlasvoice_generate_bulk_mp3_file"></div>' ;
-        }else{
+			echo '<div id="atlasvoice_generate_bulk_mp3_file"></div>';
+		} else {
 			$url = admin_url( 'edit.php' );
 			echo '<p>No post ID found. Please select multiple posts from the post page. And apply <strong>AtlasVoice Generate MP3 File</strong> bulk action. <a href="' . $url . '">Go to Posts Page</a></p>';
-            echo 'How it works? <a style="text-decoration:none;color:red" target="_blank" href="https://www.youtube.com/watch?v=HFoqlkPCP80"><span class="fab fa-youtube"></span></a>';
+			echo 'How it works? <a style="text-decoration:none;color:red" target="_blank" href="https://www.youtube.com/watch?v=HFoqlkPCP80"><span class="fab fa-youtube"></span></a>';
 		}
 
 	}

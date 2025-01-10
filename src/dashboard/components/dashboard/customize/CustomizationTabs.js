@@ -10,9 +10,10 @@ function CustomizationTabs({ buttonLists, listeningSettings, handleChange, handl
         <>
             <Form onSubmit={handleSubmit} >
                 <Tabs
-                    defaultActiveKey="button"
+                    defaultActiveKey="design"
                     id="customization-button"
                     className="mb-3"
+
                 >
                     <Tab eventKey="button" title="Player" ><TTSCustomizationButton buttonLists={buttonLists} listeningBtnStyle={listeningBtnStyle} handleChange={handleChange} /></Tab>
                     <Tab eventKey="design" title="Design" ><TTSButtonDesign customCSS={customCSS} handleSubmit={handleSubmit} listeningBtnStyle={listeningBtnStyle} handleChange={handleChange} /></Tab>

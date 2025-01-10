@@ -100,8 +100,12 @@ function tta_should_add_delimiter( $title, $delimiter ) {
  */
 function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 	$settings = (array) get_option( 'tta_settings_data' );
+	static $btn_no = 0;
+	static $block_btn_no = 0;
+	$btn_no ++;
+
 	// this is a pro feature to show button on blog main page with title and excerpt.
-	if ( ! TTA_Helper::should_load_button() ) {
+	if ( ! TTA_Helper::should_load_button() || $block_btn_no > 0 ) {
 		return;
 	}
 
@@ -109,19 +113,16 @@ function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 
 	if ( $is_block ) {
 		$customize = $atts;
+		$block_btn_no ++;
 	} else {
 		$customize = (array) get_option( 'tta_customize_settings' );
 	}
 	$recording = (array) get_option( 'tta_record_settings' );
 
 
-	// set default value.
-	$settings['tta__settings_allow_listening_for_post_types'] = isset( $settings['tta__settings_allow_listening_for_post_types'] ) && is_array( $settings['tta__settings_allow_listening_for_post_types'] ) ? $settings['tta__settings_allow_listening_for_post_types'] : [ 'post' ];
-
 	$should_display_icon = isset( $settings['tta__settings_display_btn_icon'] ) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
 
-	static $btn_no = 0;
-	$btn_no ++;
+
 	// TODO make it dynamic. now Recording it not available in UI.
 	$sentence_delimiter = isset( $recording['tta__sentence_delimiter'] ) ? $recording['tta__sentence_delimiter'] : '. ';
 	global $post;
@@ -168,13 +169,18 @@ function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 	$speakIcon .= '<span> ' . $text_arr['listen_text'] . '<span></div>'; // TODO: should remove this if unnecessary.
 	// Button style.
 	if ( isset( $customize['backgroundColor'], $customize['color'], $customize['width'] ) ) {
+		$backgroundColor = isset( $customize['backgroundColor'] ) ? $customize['backgroundColor'] : '#184c53';
+		$color           = isset( $customize['color'] ) ? $customize['color'] : '#ffffff';
+		$width           = isset( $customize['width'] ) ? $customize['width'] : '100';
+		$height          = isset( $customize['height'] ) ? $customize['height'] . 'px' : '30px';
+		$border          = isset( $customize['border'] ) ? $customize['border'] . 'px' : '0';
+		$border_color    = isset( $customize['border_color'] ) ? $customize['border_color'] : '#ffffff';
+		$border          = $border . ' solid ' . $border_color;
+		$font_size       = isset( $customize['font-size'] ) ? $customize['font-size'] . 'px' : '18px';
 		if ( $is_block ) {
-			$backgroundColor = isset( $customize['backgroundColor'] ) ? $customize['backgroundColor'] : '#184c53';
-			$color           = isset( $customize['color'] ) ? $customize['color'] : '#ffffff';
-			$width           = isset( $customize['width'] ) ? $customize['width'] : '100';
-			$btn_style       = 'background-color:' . esc_attr( $backgroundColor ) . ' !important;color:' . esc_attr( $color ) . ' !important;width:' . esc_attr( $width ) . '%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
+			$btn_style = 'background-color:' . esc_attr( $backgroundColor ) . ' !important;color:' . esc_attr( $color ) . ' !important;width:' . esc_attr( $width ) . '%;height:' . esc_attr( $height ) . ';font-size:' . esc_attr( $font_size ) . ';border:' . esc_attr( $border ) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
 		} else {
-			$btn_style = 'background-color:' . esc_attr( $customize['backgroundColor'] ) . ';color:' . esc_attr( $customize['color'] ) . ';width:' . esc_attr( $customize['width'] ) . '%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
+			$btn_style = 'background-color:' . esc_attr( $customize['backgroundColor'] ) . ';color:' . esc_attr( $customize['color'] ) . ';width:' . esc_attr( $customize['width'] ) . '%;height:' . esc_attr( $height ) . ';font-size:' . esc_attr( $font_size ) . ';border:' . esc_attr( $border ) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
 		}
 	} else {
 		$btn_style = 'background-color:#184c53;color:#ffffff;width:100%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
@@ -470,14 +476,14 @@ function add_listen_button( $content ) {
 				$button = ob_get_contents();
 				ob_end_clean();
 			}
-		}else{
+		} else {
 			if ( isset( $post->post_content ) && ! ( has_shortcode( $post->post_content, 'tta_listen_btn' ) || has_shortcode( $post->post_content, 'atlasvoice' ) ) ) {
 				ob_start();
 				echo tta_get_button_content( '' );
 				$button = ob_get_contents();
 				ob_end_clean();
 			}
-        }
+		}
 	}
 	$button_position = 'before_content';
 	if ( isset( $button_settings['button_position'] ) ) {
@@ -514,18 +520,6 @@ function get_used_shortcodes( $content ) {
  */
 function is_pro_license_active() {
 	if ( is_pro_active() ) {
-		return true;
-	}
-
-	return false;
-}
-
-
-function tta_is_audio_folder_writable() {
-	$upload_dir = wp_upload_dir();
-	$base_dir   = $upload_dir['basedir'];
-
-	if ( is_writable( $base_dir ) ) {
 		return true;
 	}
 
@@ -763,21 +757,6 @@ function get_player_id() {
  */
 function is_pro_active() {
 
-//	$cache_key   = TTA_Cache::get_key( 'is_pro_active' );
-//	$cache_value = TTA_Cache::get( $cache_key );
-//
-//	if ( $cache_value ) {
-//		return $cache_value;
-//	}
-
-//	if ( ! function_exists( 'ttsp_fs' ) ) {
-//		return false;
-//	}
-
-//	if ( ! ttsp_fs()->is__premium_only() ) {
-//		return false;
-//	}
-
 	if ( ! function_exists( 'is_plugin_active' ) ) {
 		include_once ABSPATH . 'wp-admin/includes/plugin.php';
 	}
@@ -800,7 +779,6 @@ function is_pro_active() {
 
 	$status = apply_filters( 'tts_is_pro_active', $status );
 
-    // TTA_Cache::set( $cache_key, $status );
 
 	return $status;
 

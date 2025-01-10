@@ -1,8 +1,9 @@
-import { Form } from 'react-bootstrap';
-export default function TTSButtonDesign({ handleChange, customCSS, listeningBtnStyle }) {
+import {Form} from 'react-bootstrap';
+
+export default function TTSButtonDesign({handleChange, customCSS, listeningBtnStyle}) {
     return (
         <>
-            <Form.Label htmlFor='backgroundColor'>
+            <Form.Label className={'font-weight-bold'} htmlFor='backgroundColor'>
                 BackGround Color
             </Form.Label>
             <Form.Control
@@ -13,7 +14,7 @@ export default function TTSButtonDesign({ handleChange, customCSS, listeningBtnS
                 value={listeningBtnStyle.backgroundColor}
                 title='Choose your color'
             />
-            <Form.Label htmlFor='color'>Text Color</Form.Label>
+            <Form.Label className={'pt-3 font-weight-bold'} htmlFor='color'>Text Color</Form.Label>
             <Form.Control
                 type='color'
                 name='color'
@@ -22,7 +23,7 @@ export default function TTSButtonDesign({ handleChange, customCSS, listeningBtnS
                 value={listeningBtnStyle.color}
                 title='Choose your color'
             />
-            <Form.Label htmlFor='width'>
+            <Form.Label className={'pt-3 font-weight-bold'} htmlFor='width'>
                 Button Width (%)
             </Form.Label>
             <Form.Control
@@ -35,7 +36,62 @@ export default function TTSButtonDesign({ handleChange, customCSS, listeningBtnS
                 value={listeningBtnStyle.width}
                 title='Button Width'
             />
-            <Form.Label htmlFor='custom_css'>Custom CSS</Form.Label>
+            {
+                listeningBtnStyle?.buttonSettings?.id == 1 && <>
+                    <Form.Label className={'pt-3 font-weight-bold'} htmlFor='font-size'>
+                        Font Size (px)
+                    </Form.Label>
+                    <Form.Control
+                        type='number'
+                        name='font-size'
+                        onChange={handleChange}
+                        id='font-size'
+                        min={'0'}
+                        max='100'
+                        value={listeningBtnStyle['font-size']}
+                        title='Font size'
+                    />
+                    <Form.Label className={'pt-3 font-weight-bold'} htmlFor='height'>
+                        Button Height (px)
+                    </Form.Label>
+                    <Form.Control
+                        type='number'
+                        name='height'
+                        onChange={handleChange}
+                        id='height'
+                        min={'0'}
+                        max='200'
+                        value={listeningBtnStyle.height}
+                        title='Button height'
+                    />
+                    <Form.Label className={'pt-3 font-weight-bold'} htmlFor='border_color'>
+                        Border Color
+                    </Form.Label>
+                    <Form.Control
+                        type='color'
+                        name='border_color'
+                        onChange={handleChange}
+                        id='border_color'
+                        value={listeningBtnStyle.border_color}
+                        title='Border Color'
+                    />
+                    <Form.Label className={'pt-3 font-weight-bold'} htmlFor='border'>
+                        Button Border (px)
+                    </Form.Label>
+                    <Form.Control
+                        type='number'
+                        name='border'
+                        onChange={handleChange}
+                        id='border'
+                        min={'0'}
+                        max='20'
+                        value={listeningBtnStyle.border}
+                        title='Button border'
+                    />
+                </>
+            }
+
+            <Form.Label className={'pt-3 font-weight-bold'} htmlFor='custom_css'>Custom CSS</Form.Label>
             <Form.Control
                 as='textarea'
                 name='custom_css'

@@ -15,7 +15,7 @@
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
  * Description:       The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
- * Version:           1.8.6
+ * Version:           1.0.7
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-3.0+
@@ -38,7 +38,7 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 // Include Composer autoloader if using Composer
-if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 	require_once __DIR__ . '/vendor/autoload.php';
 }
 
@@ -47,7 +47,8 @@ use TTA\TTA_Activator;
 use TTA\TTA_Deactivator;
 use TTA_Api\TTA_Api_Routes;
 use TTA\TTA_Notices;
-
+use TTA\TTA_Lib_AtlasAiDev;
+use TTA\TTA_Cache;
 
 /**
  * Is plugin active
@@ -70,7 +71,7 @@ function is_pro_plugin_exists() {
 	return false;
 }
 
-if ( ! is_pro_plugin_exists() &&  ! function_exists( 'ttsp_fs' ) ) {
+if ( ! is_pro_plugin_exists() && ! function_exists( 'ttsp_fs' ) ) {
 	// Create a helper function for easy SDK access.
 	function ttsp_fs() {
 		global $ttsp_fs;
@@ -210,7 +211,7 @@ class TTA_Init {
 
 	public function __construct() {
 		if ( ! defined( 'TEXT_TO_AUDIO_VERSION' ) ) {
-			define( 'TEXT_TO_AUDIO_VERSION', apply_filters( 'tts_version', '1.8.6' ) );
+			define( 'TEXT_TO_AUDIO_VERSION', apply_filters( 'tts_version', '1.0.7' ) );
 		}
 
 		if ( ! defined( 'TEXT_TO_AUDIO_PLUGIN_NAME' ) ) {
@@ -223,9 +224,20 @@ class TTA_Init {
 	public function run() {
 		$plugin = new TTA();
 		$plugin->run();
-		new TTA_Api_Routes();
 		new TTA_Notices();
+		add_action( 'init', function () {
+			if ( ! defined( 'TTA_PRO_PLUGIN_PATH' ) ) {
+				TTA_Lib_AtlasAiDev::instance()->init();
+			}
+			if ( ! TTA_Cache::get( 'tts_rest_api_url' ) ) {
+				$rest_url = esc_url_raw( rest_url() );
+				update_option( 'tts_rest_api_url', $rest_url );
+				TTA_Cache::set( 'tts_rest_api_url', $rest_url );
+			}
 
+			//Rest api init.
+			new TTA_Api_Routes();
+		}, 9999 );
 
 		//add plugins action links.
 		if ( is_admin() ) {
@@ -263,7 +275,7 @@ class TTA_Init {
 }
 
 
-add_action( 'init', function () {
+add_action( 'plugins_loaded', function () {
 	//Rest api init.
 	new TTA_Init();
 }, 9999 );
@@ -313,7 +325,7 @@ function allow_shortcode_in_html_tag( $output, $tag, $attr, $m ) {
 			$content = $m[5] . tta_get_button_content( $attr, false, $m[5] );
 		}
 
-       //Get the content wrapped by the shortcode.
+		//Get the content wrapped by the shortcode.
 		return $content;
 	}
 
