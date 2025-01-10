@@ -49,6 +49,10 @@ class TTA_Activator {
 					'display_player_to'         => [ 'all' ],
 					'who_can_download_mp3_file' => [ 'all' ],
 				],
+				'height'                 => '30',
+				'border'                 => '0',
+				'border_color'           => '0',
+				'font-size'              => '18',
 			) );
 
 		}
