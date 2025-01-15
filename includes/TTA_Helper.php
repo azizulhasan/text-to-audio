@@ -1044,4 +1044,34 @@ class TTA_Helper {
 	}
 
 
+	public static function get_block_css( $atts, $customize ) {
+		if ( isset( $atts['backgroundColor'] ) ) {
+			$customize['backgroundColor'] = $atts['backgroundColor'];
+		} elseif ( isset( $customize['backgroundColor'] ) ) {
+			$customize['backgroundColor'] = $customize['backgroundColor'];
+		} else {
+			$customize['backgroundColor'] = '#184c53';
+		}
+
+		if ( isset( $atts['color'] ) ) {
+			$customize['color'] = $atts['color'];
+		} elseif ( isset( $customize['color'] ) ) {
+			$customize['color'] = $customize['color'];
+		} else {
+			$customize['color'] = '#ffffff';
+		}
+
+		if ( isset( $atts['width'] ) ) {
+			$customize['width'] = $atts['width'];
+		} elseif ( isset( $customize['width'] ) ) {
+			$customize['width'] = $customize['width'];
+		} else {
+			$customize['width'] = '100';
+		}
+
+
+		return apply_filters( 'get_block_css', $customize );
+	}
+
+
 }
