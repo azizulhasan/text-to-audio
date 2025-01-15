@@ -257,12 +257,12 @@ class TTA_Init {
 	 */
 	public function add_action_links( $actions, $plugin_file, $plugin_data, $context ) {
 		$plugin_url     = esc_url( admin_url() . 'admin.php?page=text-to-audio' );
-		$doc_url        = esc_url( admin_url() . 'admin.php?page=text-to-audio#/docs' );
+		$doc_url        = esc_url( admin_url() . 'admin.php?page=text-to-audio#/faq' );
 		$support        = esc_url( 'https://atlasaidev.com/contact-us/' );
 		$review         = esc_url( 'https://wordpress.org/support/plugin/text-to-audio/reviews/' );
 		$custom_actions = array(
 			'settings' => sprintf( '<a href="%s" target="_blank">%s</a>', $plugin_url, __( 'Settings', 'text-to-audio' ) ),
-			'docs'     => sprintf( '<a href="%s" target="_blank">%s</a>', $doc_url, __( 'Docs', 'text-to-audio' ) ),
+			'faq'     => sprintf( '<a href="%s" target="_blank">%s</a>', $doc_url, __( 'Docs', 'text-to-audio' ) ),
 			'support'  => sprintf( '<a href="%s" target="_blank">%s</a>', $support, __( 'Support', 'text-to-audio' ) ),
 			'review'   => sprintf( '<a href="%s" target="_blank">%s</a>', $review, __( 'Write a Review', 'text-to-audio' ) ),
 		);

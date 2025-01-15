@@ -53,6 +53,7 @@ class TTA_Activator {
 				'border'                 => '0',
 				'border_color'           => '0',
 				'font-size'              => '18',
+				'border-radius'              => '4px',
 			) );
 
 		}

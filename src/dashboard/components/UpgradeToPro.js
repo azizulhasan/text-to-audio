@@ -63,31 +63,21 @@ export default function UpgradeToPro({promotionType = 'general'}) {
         ],
         general: [
             'Get Live Support for setup.',
-            '51 languages support in pro version.',
-            '<a target="_blank" href="https://atlasaidev.com/refund-policy/">Bulk MP3 File Generation</a>',
-            'Advance Analytics',
+            'Convert unlimited characters to MP3 in bulk.',
+            'WPML, GTranslate, TranslatePress Plugins Support',
+            'Works with ACF, SCF, and other popular plugins.',
+            'Google Cloud Text-to-Speech & ChatGPT Text-to-Speech (usage fees apply)',
+            'Save MP3 files directly to Google Cloud Storage.',
+            'Live integration support + 14-day money-back guarantee (<a target="_blank" href="https://atlasaidev.com/refund-policy/">conditions apply</a>).',
+            'Multiple audio player support',
+            'Unlimited Download MP3 files',
+            '200+ Voices with Google Cloud Text To Speech',
+            'Customizable content selection with CSS selectors',
+            'Exclude content by categories, tags, IDs',
+            'Advance analytics',
+            'Responsive Audio Player',
             'Text Aliases',
             'Unlimited Characters',
-            '14 Days money back guarantee.<a target="_blank" href="https://atlasaidev.com/refund-policy/"> Conditions applies' +
-            '                                </a>',
-            '<a target=\'_blank\' href="https://wordpress.org/plugins/gtranslate/">GTranslate Plugin\n' +
-            '                                Support</a>',
-            '<a target=\'_blank\'\n' +
-            '                               href="https://www.youtube.com/watch?v=4dsbhaBavms&t=43s&ab_channel=AtlasAiDev">You Can\n' +
-            '                                Integrate\n' +
-            '                                With Google Cloud Text To Speech.</a>',
-            '<a target=\'_blank\'\n' +
-            '                               href="https://www.youtube.com/watch?v=6uGPboXW2Q8">You Can\n' +
-            '                                Integrate\n' +
-            '                                With ChatGPT TTS.</a>',
-            'Get more than 200 voices with Google Cloud Text To Speech.',
-            'Download the audio file for offline listening.',
-            'Multiple Audio Player Support.',
-            'Include Content By CSS Selectors',
-            'Exclude HTML Tags To Speak',
-            'Exclude Texts To Speak',
-            'Exclude Tags To Speak',
-            'Exclude Categories To Speak',
         ],
         analytics: [
             __("Number of times the player button was initiated"),
@@ -114,18 +104,19 @@ export default function UpgradeToPro({promotionType = 'general'}) {
     }
     return <>
         {
-            window.hasOwnProperty('ttsObj') && (ttsObj.is_pro_active || promotionType === 'youtube') ?
-                <div className="card p-0">
+            window.hasOwnProperty('ttsObj') ?
+                <div style={{display: ttsObj.is_pro_active && promotionType !== 'youtube' ? 'none' : 'block' }} className="card p-0">
                     <div className="card-header text-center tta_btn btn-center">
                         {
-                            promotionType === 'youtube' ? 'Video Tutorials' :
+                            promotionType === 'youtube' ? <button
+                                                             className="tta_btn btn-center text-center text-white">Video Tutorials</button> :
                                 <a target='_blank' href="https://atlasaidev.com/plugins/text-to-speech-pro/"
                                    className="tta_btn btn-center text-center text-white">Premium Features</a>
 
                         }
                     </div>
                     <div className="card-body">
-                        <u className="list-group text-left">
+                        <u className="list-group text-left text-decoration-none">
                             {
                                 Object.keys(proFeatures).map(type => {
                                     if (promotionType === type) {
@@ -134,19 +125,18 @@ export default function UpgradeToPro({promotionType = 'general'}) {
                                                 if (index == 0 && !ttsObj.is_pro_active) {
                                                     return feature.map((obj, index) => {
 
-                                                        return <div className={'d-flex d-inline py-2'}>
-                                                            <i className="fab fa-youtube text-danger me-2"></i>
-                                                            <a target={'_blank'}
+                                                        return <div className='d-flex d-inline py-2 border-bottom border-width-2 border-gray-dark '>
+                                                            <i className="fab fa-youtube text-danger me-2 mt-2"></i>
+                                                            <a className={'text-decoration-none'} target={'_blank'}
                                                                href={'https://www.youtube.com/watch?v=' + obj.id}>{obj.title}</a>
                                                         </div>
 
                                                     })
-                                                }
-                                                else if (index == 1 && ttsObj.is_pro_active) {
+                                                } else if (index == 1 && ttsObj.is_pro_active) {
                                                     return feature.map((obj, index) => {
-                                                        return <div className={'d-flex d-inline py-2'}>
-                                                            <i className="fab fa-youtube text-danger me-2"></i>
-                                                            <a target={'_blank'}
+                                                        return <div className={'d-flex d-inline py-2 border-bottom border-width-2 border-gray-dark '}>
+                                                            <i className="fab fa-youtube text-danger me-2 mt-2"></i>
+                                                            <a className={'text-decoration-none'} target={'_blank'}
                                                                href={'https://www.youtube.com/watch?v=' + obj.id}>{obj.title}</a>
                                                         </div>
 

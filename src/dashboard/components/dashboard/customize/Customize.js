@@ -19,6 +19,7 @@ export default function Customize() {
         height: '30',
         border: '0',
         border_color: '0',
+        ['border-radius']: '4px',
         ['font-size']: '18',
         buttonSettings: {
             id: 1,
@@ -32,6 +33,7 @@ export default function Customize() {
         border: '0px',
         height: '30px',
         ['font-size']: '18px',
+        ['border-radius']: '4px',
         display: 'flex',
         ['justify-content'] : 'center',
         ['align-items'] : 'center',
@@ -87,6 +89,7 @@ export default function Customize() {
                     ...{color: res.data.color},
                     ...{height: res.data.height+ 'px'},
                     ...{['font-size']: res.data['font-size']+ 'px'},
+                    ...{['border-radius']: res.data['border-radius']+ 'px'},
                     ...{border: res.data.border+ 'px solid '+ res.data.border_color},
                     ...{width: [res.data.width, '%'].join('')},
                 });
@@ -197,7 +200,7 @@ export default function Customize() {
 
         // ChatGPT TTS player button settings
         // && listeningBtnStyle?.buttonSettings?.id == 3
-        if (!['backgroundColor', 'width', 'color', 'height', 'border', 'border_color', 'font-size'].includes(e.target.name)) {
+        if (!['backgroundColor', 'width', 'color', 'height', 'border', 'border_color', 'font-size', 'border-radius'].includes(e.target.name)) {
 
             if (e.target.name === 'button_position' && !['before_content', 'after_content'].includes(e.target.value) && !ttsObj.is_pro_active) {
                 toast('This option is only available for pro version.', 'error');
@@ -256,9 +259,10 @@ export default function Customize() {
                 value += e.target.value;
             }
             // e.target.name = 'border';
-        } else if (e.target.name === 'font_size' || e.target.name === 'font-size') {
+        } else if (e.target.name === 'font-size') {
             value = e.target.value + 'px';
-            e.target.name = 'font-size';
+        }else if (e.target.name === 'border-radius') {
+            value = e.target.value + 'px';
         } else {
             value = e.target.value;
         }
@@ -288,7 +292,7 @@ export default function Customize() {
                     return;
                 }
             }
-            if (!['backgroundColor', 'width', 'color', 'border', 'border_color', 'height', 'font-size'].includes(key)) {
+            if (!['backgroundColor', 'width', 'color', 'border', 'border_color', 'height', 'font-size', 'border-radius'].includes(key)) {
                 continue;
             }
 
