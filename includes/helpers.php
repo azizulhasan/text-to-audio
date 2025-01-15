@@ -111,11 +111,10 @@ function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 
 	global $post;
 
+	$customize = (array) get_option( 'tta_customize_settings' );
 	if ( $is_block ) {
-		$customize = $atts;
+		$customize = TTA_Helper::get_block_css( $atts, $customize );
 		$block_btn_no ++;
-	} else {
-		$customize = (array) get_option( 'tta_customize_settings' );
 	}
 	$recording = (array) get_option( 'tta_record_settings' );
 
@@ -167,25 +166,22 @@ function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 	$speakIcon = "<div class='tta_button'>";
 	$speakIcon .= apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ' );
 	$speakIcon .= '<span> ' . $text_arr['listen_text'] . '<span></div>'; // TODO: should remove this if unnecessary.
-	// Button style.
-	if ( isset( $customize['backgroundColor'], $customize['color'], $customize['width'] ) ) {
-		$backgroundColor = isset( $customize['backgroundColor'] ) ? $customize['backgroundColor'] : '#184c53';
-		$color           = isset( $customize['color'] ) ? $customize['color'] : '#ffffff';
-		$width           = isset( $customize['width'] ) ? $customize['width'] : '100';
-		$height          = isset( $customize['height'] ) ? $customize['height'] . 'px' : '30px';
-		$border          = isset( $customize['border'] ) ? $customize['border'] . 'px' : '0';
-		$border_color    = isset( $customize['border_color'] ) ? $customize['border_color'] : '#ffffff';
-		$border          = $border . ' solid ' . $border_color;
-		$font_size       = isset( $customize['font-size'] ) ? $customize['font-size'] . 'px' : '18px';
-		if ( $is_block ) {
-			$btn_style = 'background-color:' . esc_attr( $backgroundColor ) . ' !important;color:' . esc_attr( $color ) . ' !important;width:' . esc_attr( $width ) . '%;height:' . esc_attr( $height ) . ';font-size:' . esc_attr( $font_size ) . ';border:' . esc_attr( $border ) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
-		} else {
-			$btn_style = 'background-color:' . esc_attr( $customize['backgroundColor'] ) . ';color:' . esc_attr( $customize['color'] ) . ';width:' . esc_attr( $customize['width'] ) . '%;height:' . esc_attr( $height ) . ';font-size:' . esc_attr( $font_size ) . ';border:' . esc_attr( $border ) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
-		}
-	} else {
-		$btn_style = 'background-color:#184c53;color:#ffffff;width:100%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
-	}
 
+    // Button style.
+	$backgroundColor = isset( $customize['backgroundColor'] ) ? $customize['backgroundColor'] : '#184c53';
+	$color           = isset( $customize['color'] ) ? $customize['color'] : '#ffffff';
+	$width           = isset( $customize['width'] ) ? $customize['width'] : '100';
+	$height          = isset( $customize['height'] ) ? $customize['height'] . 'px' : '30px';
+	$border          = isset( $customize['border'] ) ? $customize['border'] . 'px' : '0px';
+	$border_color    = isset( $customize['border_color'] ) ? $customize['border_color'] : '#ffffff';
+	$border_radius   = isset( $customize['border-radius'] ) ? $customize['border-radius'] . 'px' : '4px';
+	$border          = $border . ' solid ' . $border_color;
+	$font_size       = isset( $customize['font-size'] ) ? $customize['font-size'] . 'px' : '18px';
+	if ( $is_block ) {
+		$btn_style = 'background-color:' . esc_attr( $backgroundColor ) . ' !important;color:' . esc_attr( $color ) . ' !important;width:' . esc_attr( $width ) . '%;height:' . esc_attr( $height ) . ';font-size:' . esc_attr( $font_size ) . ';border:' . esc_attr( $border ) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:' . esc_attr( $border_radius ) . ';text-decoration:none;cursor:pointer;margin:auto;';
+	} else {
+		$btn_style = 'background-color:' . esc_attr( $backgroundColor ) . ';color:' . esc_attr( $color ) . ';width:' . esc_attr( $width ) . '%;height:' . esc_attr( $height ) . ';font-size:' . esc_attr( $font_size ) . ';border:' . esc_attr( $border ) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:' . esc_attr( $border_radius ) . ';text-decoration:none;cursor:pointer;margin:auto;';
+	}
 
 	//Custom Css
 	$custom_css = '';
