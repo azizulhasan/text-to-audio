@@ -175,12 +175,13 @@ function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 		$height          = isset( $customize['height'] ) ? $customize['height'] . 'px' : '30px';
 		$border          = isset( $customize['border'] ) ? $customize['border'] . 'px' : '0';
 		$border_color    = isset( $customize['border_color'] ) ? $customize['border_color'] : '#ffffff';
+		$border_radius   = isset( $customize['border-radius'] ) ? $customize['border-radius'] . 'px' : '4px';
 		$border          = $border . ' solid ' . $border_color;
 		$font_size       = isset( $customize['font-size'] ) ? $customize['font-size'] . 'px' : '18px';
 		if ( $is_block ) {
-			$btn_style = 'background-color:' . esc_attr( $backgroundColor ) . ' !important;color:' . esc_attr( $color ) . ' !important;width:' . esc_attr( $width ) . '%;height:' . esc_attr( $height ) . ';font-size:' . esc_attr( $font_size ) . ';border:' . esc_attr( $border ) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
+			$btn_style = 'background-color:' . esc_attr( $backgroundColor ) . ' !important;color:' . esc_attr( $color ) . ' !important;width:' . esc_attr( $width ) . '%;height:' . esc_attr( $height ) . ';font-size:' . esc_attr( $font_size ) . ';border:' . esc_attr( $border ) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:' . esc_attr( $border_radius ) . ';text-decoration:none;cursor:pointer;margin:auto;';
 		} else {
-			$btn_style = 'background-color:' . esc_attr( $customize['backgroundColor'] ) . ';color:' . esc_attr( $customize['color'] ) . ';width:' . esc_attr( $customize['width'] ) . '%;height:' . esc_attr( $height ) . ';font-size:' . esc_attr( $font_size ) . ';border:' . esc_attr( $border ) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
+			$btn_style = 'background-color:' . esc_attr( $customize['backgroundColor'] ) . ';color:' . esc_attr( $customize['color'] ) . ';width:' . esc_attr( $customize['width'] ) . '%;height:' . esc_attr( $height ) . ';font-size:' . esc_attr( $font_size ) . ';border:' . esc_attr( $border ) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:' . esc_attr( $border_radius ) . ';text-decoration:none;cursor:pointer;margin:auto;';
 		}
 	} else {
 		$btn_style = 'background-color:#184c53;color:#ffffff;width:100%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
