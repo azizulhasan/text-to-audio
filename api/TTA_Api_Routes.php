@@ -3,6 +3,7 @@
 namespace TTA_Api;
 
 use TTA\TTA_Cache;
+use TTA\TTA_Helper;
 
 /**
  * This class is for getting all plugin's data  through api.
@@ -229,6 +230,20 @@ class TTA_Api_Routes {
 			)
 		);
 
+		// register text_alias route.
+		register_rest_route(
+			$this->namespace,
+			'/acf_fields',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'acf_fields' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
 
 	}
 
@@ -421,6 +436,19 @@ class TTA_Api_Routes {
 		$response['status'] = true;
 
 		$response['data'] = $user_roles;
+
+		return rest_ensure_response( $response );
+	}
+
+	public function acf_fields( $request ) {
+		$acf_fields = [];
+		if ( TTA_Helper::is_acf_active() ) {
+			$acf_fields = TTA_Helper::get_all_acf_fields();
+		}
+
+		$response['status'] = true;
+
+		$response['data'] = $acf_fields;
 
 		return rest_ensure_response( $response );
 	}

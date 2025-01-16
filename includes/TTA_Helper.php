@@ -232,9 +232,7 @@ class TTA_Helper {
 		}
 
 		$acf_fields = [];
-		if ( TTA_Helper::is_acf_active() ) {
-			$acf_fields = TTA_Helper::get_all_acf_fields();
-		}
+		// TODO: moved to api instead of init. because it giving error. Because it's is calling too early.
 
 		// Translatepress multilingual plugin.
 		$trp_languages = [];
@@ -906,25 +904,61 @@ class TTA_Helper {
 		}
 	}
 
-	public static function get_all_acf_fields() {
+	/**
+	 * Get all ACF fields including subfields.
+	 *
+	 * @return array An associative array of all ACF fields with field names as keys and "name::label" as values.
+	 */
+	public static  function get_all_acf_fields() {
+		// Ensure the ACF API is loaded
+		if (!function_exists('acf_get_field_groups') || !function_exists('acf_get_fields')) {
+			return [];
+		}
+
 		// Get all field groups
-		$field_groups   = acf_get_field_groups();
+		$field_groups = acf_get_field_groups();
 		$all_acf_fields = [];
-		if ( $field_groups ) {
-			// Loop through each field group
-			foreach ( $field_groups as $field_group ) {
-				// Get all fields for the current field group
-				$fields = acf_get_fields( $field_group['key'] );
-				if ( $fields ) {
-					// Loop through each field
-					foreach ( $fields as $field ) {
-						$all_acf_fields[ $field['name'] ] = $field['name'] . '::' . $field['label'];
-					}
+
+		if ($field_groups) {
+			foreach ($field_groups as $field_group) {
+				// Attempt to get fields for the current field group
+				$fields = acf_get_fields($field_group);
+				foreach ($fields as $field) {
+					// Add the field to the result array
+					$all_acf_fields[$field['name']] = $field['name'] . '::' . $field['label'];
+
+					// Check if the field has subfields and process them recursively
+//					if (isset($field['sub_fields']) && is_array($field['sub_fields'])) {
+//						self::process_acf_fields($field['sub_fields'], $all_acf_fields);
+//					}
 				}
+
+//				if (is_array($fields)) {
+//					// Process fields recursively
+//					self::process_acf_fields($fields, $all_acf_fields);
+//				}
 			}
 		}
 
 		return $all_acf_fields;
+	}
+
+	/**
+	 * Recursive helper function to process ACF fields and subfields.
+	 *
+	 * @param array $fields List of fields to process.
+	 * @param array &$all_acf_fields Reference to the result array.
+	 */
+	public static  function process_acf_fields($fields, &$all_acf_fields) {
+		foreach ($fields as $field) {
+			// Add the field to the result array
+			$all_acf_fields[$field['name']] = $field['name'] . '::' . $field['label'];
+
+			// Check if the field has subfields and process them recursively
+			if (isset($field['sub_fields']) && is_array($field['sub_fields'])) {
+				self::process_acf_fields($field['sub_fields'], $all_acf_fields);
+			}
+		}
 	}
 
 	public static function is_acf_active() {
