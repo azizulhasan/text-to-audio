@@ -61,7 +61,7 @@ export default function Listening() {
 
     useEffect(() => {
         if (window?.ttsObjPro?.compatible?.['gtranslate/gtranslate.php']) {
-            let gtranslateActiveLanguages = ttsObjPro?.compatible?.['gtranslate/gtranslate.php']?.GTranslate?.fincl_langs;
+            let gtranslateActiveLanguages = ttsObjPro?.compatible?.['gtranslate/gtranslate.php']?.GTranslate?.incl_langs;
             // Initialize an empty object
             const languageObject = {};
 
