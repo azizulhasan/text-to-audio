@@ -495,7 +495,7 @@ class TTA_Helper {
 			$mp3_file_urls = $mp3_file_urls[0];
 		}
 
-		$final_mp3_file_ulrs = [];
+		$final_mp3_file_ulrs = $mp3_file_urls;
 
 		$should_update_urls = false;
 
@@ -534,7 +534,7 @@ class TTA_Helper {
 			}
 		}
 
-
+		//TODO: don't remove this loop, setup a settings if needed to check oll url or single url.
 //		foreach ( $mp3_file_urls as $language_code => $url ) {
 //
 //			if ( self::is_file_url_not_exists_and_is_file_empty( $url, $date, $file_name ) ) {
@@ -570,7 +570,6 @@ class TTA_Helper {
 //				$final_mp3_file_ulrs[ $language_code ] = $url;
 //			}
 //		}
-
 
 		if ( $should_update_urls
 		     || empty( $final_mp3_file_ulrs )

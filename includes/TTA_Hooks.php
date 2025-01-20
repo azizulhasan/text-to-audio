@@ -297,10 +297,7 @@ class TTA_Hooks {
 	 */
 	public function atlasVoice_meta_box() {
 
-		// $listening = (array) get_option('tta_listening_settings');
-		// $listening = json_encode($listening);
 		$customize = (array) get_option( 'tta_customize_settings' );
-		// $button_text_arr =  apply_filters( 'tta__button_text_arr', get_option( 'tta__button_text_arr') );
 
 		// Button style.
 		if ( isset( $customize ) && count( $customize ) ) {
