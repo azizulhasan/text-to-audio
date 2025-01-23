@@ -35,7 +35,7 @@ export default function Listening() {
 
     const [listeningSettings, setListeningSettings] = useState({
         tta__listening_voice: 'Google UK English Female',
-        tta__listening_pitch: 2,
+        tta__listening_pitch: 1,
         tta__listening_rate: 1,
         tta__listening_volume: 1,
         tta__listening_lang: 'en-GB',
