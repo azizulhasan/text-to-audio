@@ -110,6 +110,7 @@ function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 	}
 
 	global $post;
+//	update_option('tta_customize_settings', []);
 
 	$customize = (array) get_option( 'tta_customize_settings' );
 	if ( $is_block ) {
@@ -161,7 +162,6 @@ function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 	$content_read_time = apply_filters( 'tts_content_reading_time', 1, $content, $post );
 	$text_arr          = get_button_text( $atts, $content_read_time );
 
-
 	// Speak Icon
 	$speakIcon = "<div class='tta_button'>";
 	$speakIcon .= apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ' );
@@ -173,10 +173,10 @@ function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 	$width           = isset( $customize['width'] ) ? $customize['width'] : '100';
 	$height          = isset( $customize['height'] ) ? $customize['height'] . 'px' : '30px';
 	$border          = isset( $customize['border'] ) ? $customize['border'] . 'px' : '0px';
-	$border_color    = isset( $customize['border_color'] ) ? $customize['border_color'] : '#ffffff';
-	$border_radius   = isset( $customize['border-radius'] ) ? $customize['border-radius'] . 'px' : '4px';
+	$border_color    = isset( $customize['border_color'] ) ? $customize['border_color'] : '#000000';
+	$border_radius   = isset( $customize['borderRadius'] ) ? $customize['borderRadius'] . 'px' : '4px';
 	$border          = $border . ' solid ' . $border_color;
-	$font_size       = isset( $customize['font-size'] ) ? $customize['font-size'] . 'px' : '18px';
+	$font_size       = isset( $customize['fontSize'] ) ? $customize['fontSize'] . 'px' : '18px';
 	if ( $is_block ) {
 		$btn_style = 'background-color:' . esc_attr( $backgroundColor ) . ' !important;color:' . esc_attr( $color ) . ' !important;width:' . esc_attr( $width ) . '%;height:' . esc_attr( $height ) . ';font-size:' . esc_attr( $font_size ) . ';border:' . esc_attr( $border ) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:' . esc_attr( $border_radius ) . ';text-decoration:none;cursor:pointer;margin:auto;';
 	} else {
