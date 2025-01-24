@@ -405,7 +405,7 @@ export default class TextToSpeech {
                     : 1, // From 0.1 to 10
                 pitch: this.ttsListeningSettings.tta__listening_pitch
                     ? this.ttsListeningSettings.tta__listening_pitch
-                    : 2, // From 0 to 2
+                    : 1, // From 0 to 2
                 // voice: voice,
                 splitSentences: true,
                 listeners: {
