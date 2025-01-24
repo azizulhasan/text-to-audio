@@ -11,6 +11,7 @@ namespace TTA_Api;
  */
 
 use TTA\TTA_Activator;
+use TTA\TTA_Cache;
 use TTA\TTA_Helper;
 
 class AtlasVoice_Analytics {
