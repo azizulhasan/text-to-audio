@@ -511,7 +511,7 @@ if ('page=text-to-audio' === urlParams) {
     function declare_init_content() {
         let ttsSettings = {
             listening: {
-                tta__listening_lang: "en-US",
+                tta__listening_lang: "en-GB",
                 tta__listening_voice: "Google UK English Female",
                 tta__listening_pitch: "1",
                 tta__listening_rate: "1",
