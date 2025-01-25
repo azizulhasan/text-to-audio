@@ -798,7 +798,7 @@ export default function Listening() {
                                                     </option>
                                                     {currentPlayerVoices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && customizationSettings?.buttonSettings?.id == 4 ?
                                                         <option key={index} data-lang={voice?.languageCodes?.[0]}
-                                                                value={voice.name}>
+                                                                value={[voice.name, voice.ssmlGender].join('-')}>
                                                             {voice.name} {'-'} {voice.ssmlGender}
                                                         </option> :
                                                         <option key={index} data-lang={voice.lang} value={voice.name}>

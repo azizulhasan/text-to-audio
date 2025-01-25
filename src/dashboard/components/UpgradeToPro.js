@@ -125,7 +125,7 @@ export default function UpgradeToPro({promotionType = 'general'}) {
                                                 if (index == 0 && !ttsObj.is_pro_active) {
                                                     return feature.map((obj, index) => {
 
-                                                        return <div className='d-flex d-inline py-2 border-bottom border-width-2 border-gray-dark '>
+                                                        return <div key={obj.id} className='d-flex d-inline py-2 border-bottom border-width-2 border-gray-dark '>
                                                             <i className="fab fa-youtube text-danger me-2 mt-2"></i>
                                                             <a className={'text-decoration-none'} target={'_blank'}
                                                                href={'https://www.youtube.com/watch?v=' + obj.id}>{obj.title}</a>
@@ -134,7 +134,7 @@ export default function UpgradeToPro({promotionType = 'general'}) {
                                                     })
                                                 } else if (index == 1 && ttsObj.is_pro_active) {
                                                     return feature.map((obj, index) => {
-                                                        return <div className={'d-flex d-inline py-2 border-bottom border-width-2 border-gray-dark '}>
+                                                        return <div key={obj.id} className={'d-flex d-inline py-2 border-bottom border-width-2 border-gray-dark '}>
                                                             <i className="fab fa-youtube text-danger me-2 mt-2"></i>
                                                             <a className={'text-decoration-none'} target={'_blank'}
                                                                href={'https://www.youtube.com/watch?v=' + obj.id}>{obj.title}</a>
@@ -143,7 +143,7 @@ export default function UpgradeToPro({promotionType = 'general'}) {
                                                     })
                                                 }
                                             } else {
-                                                return <li className="list-group-item"
+                                                return <li key={index}  className="list-group-item"
                                                            dangerouslySetInnerHTML={{__html: feature}}/>
                                             }
 
