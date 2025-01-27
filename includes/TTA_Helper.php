@@ -223,7 +223,17 @@ class TTA_Helper {
 	public static function get_compatible_plugins_data() {
 		$compatible_plugins_data = [];
 
-		$GTranslate = get_option( 'GTranslate' );
+		$GTranslate        = get_option( 'GTranslate' );
+		$allowed_languages = [];
+		if ( ! empty( $GTranslate ) && isset( $GTranslate['widget_look'], $GTranslate['incl_langs'], $GTranslate['fincl_langs'] ) ) {
+			if ( $GTranslate['widget_look'] == 'float' or $GTranslate['widget_look'] == 'flags' or $GTranslate['widget_look'] == 'float' or $GTranslate['widget_look'] == 'dropdown_with_flags' or $GTranslate['widget_look'] == 'flags_name' or $GTranslate['widget_look'] == 'flags_code' or $GTranslate['widget_look'] == 'popup' ) {
+				$allowed_languages = $GTranslate['fincl_langs'];
+			} elseif ( $GTranslate['widget_look'] == 'flags_dropdown' ) {
+				$allowed_languages = array_values( array_unique( array_merge( $GTranslate['fincl_langs'], $GTranslate['incl_langs'] ) ) );
+			} else {
+				$allowed_languages = $GTranslate['incl_langs'];
+			}
+		}
 		/* var WPML_Language_Switcher $wpml_language_switcher */
 		global $sitepress, $sitepress_settings, $wpdb, $wpml_language_switcher;
 		$active_languages = [];
@@ -244,8 +254,8 @@ class TTA_Helper {
 
 		$datas = \apply_filters( 'tts_pro_plugins_data', [
 			'gtranslate/gtranslate.php'                => [
-				'type'       => 'class',
-				'data'       => [
+				'type'              => 'class',
+				'data'              => [
 					'gt_options',
 					'gt_languages',
 					'gt_switcher_wrapper',
@@ -253,8 +263,8 @@ class TTA_Helper {
 					'gtranslate_wrapper'
 				],
 				//  'gt_selector',], // 'gt_white_content', 'gtranslate_wrapper'],
-				'plugin'     => 'gtranslate',
-				'GTranslate' => $GTranslate,
+				'plugin'            => 'gtranslate',
+				'allowed_languages' => $allowed_languages,
 			],
 			'sitepress-multilingual-cms/sitepress.php' => [
 				'type'             => 'class',
@@ -495,7 +505,7 @@ class TTA_Helper {
 			$mp3_file_urls = $mp3_file_urls[0];
 		}
 
-		$final_mp3_file_ulrs = [];
+		$final_mp3_file_ulrs = $mp3_file_urls;
 
 		$should_update_urls = false;
 
@@ -534,7 +544,7 @@ class TTA_Helper {
 			}
 		}
 
-
+		//TODO: don't remove this loop, setup a settings if needed to check oll url or single url.
 //		foreach ( $mp3_file_urls as $language_code => $url ) {
 //
 //			if ( self::is_file_url_not_exists_and_is_file_empty( $url, $date, $file_name ) ) {
@@ -570,7 +580,6 @@ class TTA_Helper {
 //				$final_mp3_file_ulrs[ $language_code ] = $url;
 //			}
 //		}
-
 
 		if ( $should_update_urls
 		     || empty( $final_mp3_file_ulrs )
@@ -909,23 +918,23 @@ class TTA_Helper {
 	 *
 	 * @return array An associative array of all ACF fields with field names as keys and "name::label" as values.
 	 */
-	public static  function get_all_acf_fields() {
+	public static function get_all_acf_fields() {
 		// Ensure the ACF API is loaded
-		if (!function_exists('acf_get_field_groups') || !function_exists('acf_get_fields')) {
+		if ( ! function_exists( 'acf_get_field_groups' ) || ! function_exists( 'acf_get_fields' ) ) {
 			return [];
 		}
 
 		// Get all field groups
-		$field_groups = acf_get_field_groups();
+		$field_groups   = acf_get_field_groups();
 		$all_acf_fields = [];
 
-		if ($field_groups) {
-			foreach ($field_groups as $field_group) {
+		if ( $field_groups ) {
+			foreach ( $field_groups as $field_group ) {
 				// Attempt to get fields for the current field group
-				$fields = acf_get_fields($field_group);
-				foreach ($fields as $field) {
+				$fields = acf_get_fields( $field_group );
+				foreach ( $fields as $field ) {
 					// Add the field to the result array
-					$all_acf_fields[$field['name']] = $field['name'] . '::' . $field['label'];
+					$all_acf_fields[ $field['name'] ] = $field['name'] . '::' . $field['label'];
 
 					// Check if the field has subfields and process them recursively
 //					if (isset($field['sub_fields']) && is_array($field['sub_fields'])) {
@@ -949,14 +958,14 @@ class TTA_Helper {
 	 * @param array $fields List of fields to process.
 	 * @param array &$all_acf_fields Reference to the result array.
 	 */
-	public static  function process_acf_fields($fields, &$all_acf_fields) {
-		foreach ($fields as $field) {
+	public static function process_acf_fields( $fields, &$all_acf_fields ) {
+		foreach ( $fields as $field ) {
 			// Add the field to the result array
-			$all_acf_fields[$field['name']] = $field['name'] . '::' . $field['label'];
+			$all_acf_fields[ $field['name'] ] = $field['name'] . '::' . $field['label'];
 
 			// Check if the field has subfields and process them recursively
-			if (isset($field['sub_fields']) && is_array($field['sub_fields'])) {
-				self::process_acf_fields($field['sub_fields'], $all_acf_fields);
+			if ( isset( $field['sub_fields'] ) && is_array( $field['sub_fields'] ) ) {
+				self::process_acf_fields( $field['sub_fields'], $all_acf_fields );
 			}
 		}
 	}

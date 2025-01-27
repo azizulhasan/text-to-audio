@@ -50,10 +50,10 @@ class TTA_Activator {
 					'who_can_download_mp3_file' => [ 'all' ],
 				],
 				'height'                 => '30',
-				'border'                 => '0',
+				'border'                 => '#00000',
 				'border_color'           => '0',
-				'font-size'              => '18',
-				'border-radius'              => '4px',
+				'fontSize'               => '18',
+				'borderRadius'           => '4',
 			) );
 
 		}
