@@ -10,8 +10,7 @@ namespace TTA_Api;
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
 
-use TTA\TTA_Activator;
-use TTA\TTA_Helper;
+use TTA\TTA_Cache;
 class AtlasVoice_Plugin_Compatibility {
 
 	/**
@@ -32,7 +31,6 @@ class AtlasVoice_Plugin_Compatibility {
 				$analytics = $analytics[0];
 			}
 			$merged_analytics = self::merge_analytics_arrays( $analytics, $body['analytics'] );
-//			error_log( print_r( $merged_analytics, 1 ) );
 
 			update_post_meta( $post_id, 'atlasVoice_analytics', $merged_analytics );
 
@@ -57,7 +55,7 @@ class AtlasVoice_Plugin_Compatibility {
 
 			$response['data'] = get_option( 'tta_compatible_data' );
 
-			delete_transient( 'tts_all_settings' );
+			TTA_Cache::delete( 'all_settings' );
 
 			return rest_ensure_response( $response );
 		}

@@ -405,7 +405,7 @@ export default class TextToSpeech {
                     : 1, // From 0.1 to 10
                 pitch: this.ttsListeningSettings.tta__listening_pitch
                     ? this.ttsListeningSettings.tta__listening_pitch
-                    : 2, // From 0 to 2
+                    : 1, // From 0 to 2
                 // voice: voice,
                 splitSentences: true,
                 listeners: {
@@ -525,7 +525,7 @@ if (!shouldInitTTS) {
     function declare_init_content() {
         let ttsSettings = {
             listening: {
-                tta__listening_lang: "en-US",
+                tta__listening_lang: "en-GB",
                 tta__listening_voice: "Google UK English Female",
                 tta__listening_pitch: "1",
                 tta__listening_rate: "1",

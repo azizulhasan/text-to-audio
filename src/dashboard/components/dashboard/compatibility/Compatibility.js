@@ -15,15 +15,9 @@ export default function Compatibility() {
     const [acfFields, setAcfFields] = useState([])
     const [selectedACFFields, setSelectedACFFields] = useState([])
     const [isDataLoaded, setIsDataLoaded] = useState(false)
+    const [hasACFFields, setHasACFFields] = useState(false)
 
 
-
-    useEffect(() => {
-        if (ttsObj?.compatible?.['advanced-custom-fields/acf.php']?.data) {
-            console.log({compatible: ttsObj.compatible})
-            setAcfFields(ttsObj?.compatible?.['advanced-custom-fields/acf.php']?.data)
-        }
-    }, [ttsObj]);
 
     useEffect(() => {
         /**
@@ -31,16 +25,33 @@ export default function Compatibility() {
          */
         let formData = new FormData();
         formData.append('method', 'get');
-        postWithoutImage(tta_obj.api_url + 'tta/v1/compatible_data', formData).then((res) => {
+        postWithoutImage(tta_obj.api_url + 'tta/v1/acf_fields', formData).then((res) => {
             console.log(res.data)
-            if(res?.data?.tts_acf_fields) {
-                console.log(res?.data?.tts_acf_fields)
-                setSelectedACFFields(res?.data?.tts_acf_fields)
+            setHasACFFields(true)
+            if(res?.data) {
+                setAcfFields(res?.data)
             }
-            setIsDataLoaded(true)
-
         });
+
     }, []);
+
+    useEffect(() => {
+        /**
+         * Get data from and display to table.
+         */
+        if(hasACFFields) {
+            let formData = new FormData();
+            formData.append('method', 'get');
+            postWithoutImage(tta_obj.api_url + 'tta/v1/compatible_data', formData).then((res) => {
+                console.log(res.data)
+                if(res?.data?.tts_acf_fields) {
+                    console.log(res?.data?.tts_acf_fields)
+                    setSelectedACFFields(res?.data?.tts_acf_fields)
+                }
+                setIsDataLoaded(true)
+            });
+        }
+    }, [hasACFFields]);
 
     const handleSelectionChange = (selectedIds) => {
         setSelectedACFFields(selectedIds)

@@ -129,6 +129,7 @@ class TTA_Helper {
 			}
 		}
 
+
 		return apply_filters( 'tta_should_load_button', $should_load_button, $post );
 	}
 
@@ -222,18 +223,26 @@ class TTA_Helper {
 	public static function get_compatible_plugins_data() {
 		$compatible_plugins_data = [];
 
-		$GTranslate = get_option( 'GTranslate' );
+		$GTranslate        = get_option( 'GTranslate' );
+		$allowed_languages = [];
+		if ( ! empty( $GTranslate ) && isset( $GTranslate['widget_look'], $GTranslate['incl_langs'], $GTranslate['fincl_langs'] ) ) {
+			if ( $GTranslate['widget_look'] == 'float' or $GTranslate['widget_look'] == 'flags' or $GTranslate['widget_look'] == 'float' or $GTranslate['widget_look'] == 'dropdown_with_flags' or $GTranslate['widget_look'] == 'flags_name' or $GTranslate['widget_look'] == 'flags_code' or $GTranslate['widget_look'] == 'popup' ) {
+				$allowed_languages = $GTranslate['fincl_langs'];
+			} elseif ( $GTranslate['widget_look'] == 'flags_dropdown' ) {
+				$allowed_languages = array_values( array_unique( array_merge( $GTranslate['fincl_langs'], $GTranslate['incl_langs'] ) ) );
+			} else {
+				$allowed_languages = $GTranslate['incl_langs'];
+			}
+		}
 		/* var WPML_Language_Switcher $wpml_language_switcher */
 		global $sitepress, $sitepress_settings, $wpdb, $wpml_language_switcher;
 		$active_languages = [];
 		if ( $sitepress ) {
 			$active_languages = $sitepress->get_active_languages();
 		}
-		$acf_fields = [];
-		if ( self::is_acf_active() ) {
-			$acf_fields = self::get_all_acf_fields();
-		}
 
+		$acf_fields = [];
+		// TODO: moved to api instead of init. because it giving error. Because it's is calling too early.
 
 		// Translatepress multilingual plugin.
 		$trp_languages = [];
@@ -245,8 +254,8 @@ class TTA_Helper {
 
 		$datas = \apply_filters( 'tts_pro_plugins_data', [
 			'gtranslate/gtranslate.php'                => [
-				'type'       => 'class',
-				'data'       => [
+				'type'              => 'class',
+				'data'              => [
 					'gt_options',
 					'gt_languages',
 					'gt_switcher_wrapper',
@@ -254,8 +263,8 @@ class TTA_Helper {
 					'gtranslate_wrapper'
 				],
 				//  'gt_selector',], // 'gt_white_content', 'gtranslate_wrapper'],
-				'plugin'     => 'gtranslate',
-				'GTranslate' => $GTranslate,
+				'plugin'            => 'gtranslate',
+				'allowed_languages' => $allowed_languages,
 			],
 			'sitepress-multilingual-cms/sitepress.php' => [
 				'type'             => 'class',
@@ -264,6 +273,11 @@ class TTA_Helper {
 				'active_languages' => $active_languages,
 			],
 			'advanced-custom-fields/acf.php'           => [
+				'type'   => 'class',
+				'data'   => $acf_fields,
+				'plugin' => 'acf',
+			],
+			'advanced-custom-fields-pro/acf.php'       => [
 				'type'   => 'class',
 				'data'   => $acf_fields,
 				'plugin' => 'acf',
@@ -285,7 +299,8 @@ class TTA_Helper {
 			}
 		}
 
-		return \apply_filters( 'tts_compatible_plugins_data', $compatible_plugins_data, \get_plugins() );
+
+		return \apply_filters( 'tts_compatible_plugins_data', $compatible_plugins_data, TTA_Cache::all_plugins() );
 	}
 
 	public static function get_language_code_from_url( $url ) {
@@ -308,7 +323,6 @@ class TTA_Helper {
 
 		$default_language = '';
 		if ( isset( $plugin_all_settings['listening']['tta__listening_lang'] ) ) {
-			// TODO: Match with multilinguage UI and default language.
 			$default_language = $plugin_all_settings['listening']['tta__listening_lang'];
 			// $default_language = str_replace(['-', ' '], '_', $default_language);
 		}
@@ -326,7 +340,6 @@ class TTA_Helper {
 	}
 
 	public static function tts_get_voice( $plugin_all_settings ) {
-		// TODO: Match with multilingual UI and default voice.
 		$default_voice = '';
 		if ( isset( $plugin_all_settings['listening']['tta__listening_voice'] ) && ( get_player_id() == 4 || get_player_id() == 5 ) ) {
 			$default_voice = $plugin_all_settings['listening']['tta__listening_voice'];
@@ -370,34 +383,21 @@ class TTA_Helper {
 		return apply_filters( 'tts_file_name', $title, $selectedLang, $voice, $post );
 	}
 
-	public static function handle_old_url( $post, $new_urls, $old_url ) {
-		$associative_urls = [];
-		if ( isset( $new_urls[0] ) ) {
-			$associative_urls = $new_urls[0];
-		} else {
-			$associative_urls = $new_urls;
-		}
 
-		if ( $old_url ) {
-			$language_code = self::get_language_code_from_url( $old_url );
-			if ( ! array_key_exists( $language_code, $associative_urls ) ) {
-				$associative_urls[ $language_code ] = $old_url;
-				update_post_meta( $post->ID, 'tts_mp3_file_urls', $associative_urls );
-				delete_post_meta( $post->ID, 'tts_mp3_file_url' );
-			}
-		}
-
-		return $associative_urls;
-	}
-
+	/**
+	 * @param $all_settings_keys
+	 *
+	 * @return array
+	 */
 	private static function set_tts_transient( $all_settings_keys ) {
+		$all_settings_data = [];
 		foreach ( $all_settings_keys as $identifier => $settings_key ) {
 			$settings                         = get_option( $settings_key );
 			$settings                         = ! $settings ? false : (array) $settings;
 			$all_settings_data[ $identifier ] = $settings;
 		}
-
-		set_transient( 'tts_all_settings', $all_settings_data );
+		$cache_key = TTA_Cache::get_key( 'tts_get_settings' );
+		TTA_Cache::set( $cache_key, $all_settings_data );
 
 		return $all_settings_data;
 	}
@@ -419,7 +419,8 @@ class TTA_Helper {
 			'compatible' => 'tta_compatible_data',
 			'aliases'    => 'tts_text_aliases',
 		];
-		$cached_settings   = get_transient( 'tts_all_settings' );
+		$cache_key         = TTA_Cache::get_key( 'tts_get_settings' );
+		$cached_settings   = TTA_Cache::get( $cache_key );
 		if ( ! $cached_settings ) {
 			$all_settings_data = self::set_tts_transient( $all_settings_keys );
 		} else {
@@ -462,7 +463,6 @@ class TTA_Helper {
 			$all_settings_data         = $specified_identifier_data;
 		}
 
-
 		global $post;
 
 		return \apply_filters( 'tts_get_settings', $all_settings_data, $post );
@@ -487,62 +487,12 @@ class TTA_Helper {
 		return false; // Return false if all properties are empty
 	}
 
-	public static function get_mp3_file_urls_old( $post = '' ) { // TODO: when google cloud TTS is applied. the mp3 file path will be different.
-		if ( ! $post ) {
-			global $post;
-		}
-
-
-		// update_post_meta($post->ID, 'tts_mp3_file_urls', []);
-
-		$mp3_file_urls = get_post_meta( $post->ID, 'tts_mp3_file_urls' );
-		$old_url       = get_post_meta( $post->ID, 'tts_mp3_file_url', true );
-
-		if ( self::is_pro_active() && $old_url ) {
-			$mp3_file_urls = self::handle_old_url( $post, $mp3_file_urls, $old_url );
-		}
-
-		if ( isset( $mp3_file_urls[0] ) ) {
-			$mp3_file_urls = $mp3_file_urls[0];
-		}
-		$final_mp3_file_ulrs = [];
-		$should_update_urls  = \false;
-		foreach ( $mp3_file_urls as $language_code => $url ) {
-			$file_headers = @get_headers( $url );
-
-			if ( self::is_pro_active() ) {
-				$full_path = self::get_path_from_url( $url );
-				if ( file_exists( $full_path ) && filesize( $full_path ) == 0 ) {
-					$should_update_urls = true;
-					continue;
-				}
-			}
-
-			if ( ! $file_headers || strpos( $file_headers[0], 'Not Found' ) !== false ) {
-				$should_update_urls = true;
-			} else {
-				$final_mp3_file_ulrs[ $language_code ] = $url;
-			}
-		}
-
-		if ( $should_update_urls || empty( $final_mp3_file_ulrs ) ) {
-			update_post_meta( $post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs );
-		}
-
-		if ( $should_update_urls || empty( $final_mp3_file_ulrs ) ) {
-			update_post_meta( $post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs );
-		}
-
-		return \apply_filters( 'tts_mp3_file_urls', $final_mp3_file_ulrs, $post );
-	}
-
 	public static function get_mp3_file_urls( $file_url_key, $post = '', $date = '', $file_name = '' ) {
 
 		if ( ! $post ) {
 
 			global $post;
 		}
-
 		if ( ! is_pro_active() || self::get_player_id() < 3 ) {
 			return [];
 		}
@@ -551,28 +501,20 @@ class TTA_Helper {
 
 
 		$mp3_file_urls = get_post_meta( $post->ID, 'tts_mp3_file_urls' );
-
 		if ( isset( $mp3_file_urls[0] ) ) {
-
 			$mp3_file_urls = $mp3_file_urls[0];
 		}
 
-		$cached_mp3_file_urls = TTA_Cache::get( "mp3_file_urls_post_id__$post->ID" );
-
-		if ( $cached_mp3_file_urls && $cached_mp3_file_urls === $mp3_file_urls ) {
-			return $cached_mp3_file_urls;
-		}
-
-
-		$final_mp3_file_ulrs = [];
+		$final_mp3_file_ulrs = $mp3_file_urls;
 
 		$should_update_urls = false;
 
-		foreach ( $mp3_file_urls as $language_code => $url ) {
-
+		if ( isset( $mp3_file_urls[ $file_url_key ] ) && $mp3_file_urls[ $file_url_key ] ) {
+			$url           = $mp3_file_urls[ $file_url_key ];
+			$language_code = $file_url_key;
 			if ( self::is_file_url_not_exists_and_is_file_empty( $url, $date, $file_name ) ) {
-
 				$should_update_urls = true;
+				unset( $mp3_file_urls[ $file_url_key ] );
 			} else {
 				// Generate new singed url or backup only current post applicable url.
 				if ( get_option( 'tts_is_backup_mp3_file' ) == 'true' && strtolower( $language_code ) == strtolower( $file_url_key ) ) {
@@ -596,22 +538,53 @@ class TTA_Helper {
 					}
 				} elseif ( get_option( 'tts_is_backup_mp3_file' ) == 'false' && strtolower( $language_code ) == strtolower( $file_url_key ) && strpos( $url, 'https://storage.googleapis.com' ) !== false ) {
 					$should_update_urls = true;
-					continue;
 				}
-
 
 				$final_mp3_file_ulrs[ $language_code ] = $url;
 			}
 		}
 
+		//TODO: don't remove this loop, setup a settings if needed to check oll url or single url.
+//		foreach ( $mp3_file_urls as $language_code => $url ) {
+//
+//			if ( self::is_file_url_not_exists_and_is_file_empty( $url, $date, $file_name ) ) {
+//
+//				$should_update_urls = true;
+//			} else {
+//				// Generate new singed url or backup only current post applicable url.
+//				if ( get_option( 'tts_is_backup_mp3_file' ) == 'true' && strtolower( $language_code ) == strtolower( $file_url_key ) ) {
+//					// previously generated mp3 file to 'TTA_Pro' folder but not backup to Google Cloud Storage.
+//					// $url = 'http://localhost/azizulhasan/tts/wp-content/uploads/TTA_Pro/gtts/2024/04/21/Hello_world__lang__en_us.mp3';
+//					$gcs_url = '';
+//					if ( strpos( $url, 'TTA_Pro' ) !== false ) {
+//						$full_path = self::get_path_from_url( $url );
+//						$gcs_url   = apply_filters( 'tts_upload_previous_file_to_gcs_and_get_new_url', $url, $full_path, $post, $language_code );
+//						if ( $gcs_url ) {
+//							$url = $gcs_url;
+//						}
+//					}
+//
+//					if ( self::is_signed_url_expired( $url ) ) {
+//						// Get new signed url
+//						$gcs_new_signed_url = apply_filters( 'tts_get_gcs_new_signed_url', $url, $post );
+//						if ( $gcs_new_signed_url ) {
+//							$url = $gcs_new_signed_url;
+//						}
+//					}
+//				} elseif ( get_option( 'tts_is_backup_mp3_file' ) == 'false' && strtolower( $language_code ) == strtolower( $file_url_key ) && strpos( $url, 'https://storage.googleapis.com' ) !== false ) {
+//					$should_update_urls = true;
+//					continue;
+//				}
+//
+//
+//				$final_mp3_file_ulrs[ $language_code ] = $url;
+//			}
+//		}
 
-		if ( $should_update_urls || empty( $final_mp3_file_ulrs ) ) {
+		if ( $should_update_urls
+		     || empty( $final_mp3_file_ulrs )
+		) {
 			update_post_meta( $post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs );
-			TTA_Cache::set( "mp3_file_urls_post_id__$post->ID", $final_mp3_file_ulrs );
-		}
-
-		if ( ! $cached_mp3_file_urls || $cached_mp3_file_urls !== $final_mp3_file_ulrs ) {
-			TTA_Cache::set( "mp3_file_urls_post_id__$post->ID", $final_mp3_file_ulrs );
 		}
 
 
@@ -784,6 +757,12 @@ class TTA_Helper {
 	 */
 	public static function get_all_categories() {
 
+		$cache_key   = TTA_Cache::get_key( 'get_all_categories' );
+		$cache_value = TTA_Cache::get( $cache_key );
+		if ( $cache_value ) {
+			return $cache_value;
+		}
+
 		if ( ! function_exists( 'get_categories' ) ) {
 			require_once ABSPATH . 'wp-includes/category.php';
 		}
@@ -798,7 +777,11 @@ class TTA_Helper {
 			$formatted_categories[ $category->slug ] = $category->name;
 		}
 
-		return apply_filters( 'tts_get_all_categories', $formatted_categories );
+		$formatted_categories = apply_filters( 'tts_get_all_categories', $formatted_categories );
+
+		TTA_Cache::set( $cache_key, $formatted_categories );
+
+		return $formatted_categories;
 	}
 
 	/**
@@ -807,6 +790,13 @@ class TTA_Helper {
 	 * @return array An associative array with tag slugs as keys and tag names as values.
 	 */
 	public static function get_all_tags() {
+
+		$cache_key   = TTA_Cache::get_key( 'get_all_tags' );
+		$cache_value = TTA_Cache::get( $cache_key );
+		if ( $cache_value ) {
+			return $cache_value;
+		}
+
 		if ( ! function_exists( 'get_tags' ) ) {
 			require_once ABSPATH . 'wp-includes/category.php';
 		}
@@ -823,7 +813,12 @@ class TTA_Helper {
 			$formatted_tags[ $tag->slug ] = $tag->name;
 		}
 
-		return apply_filters( 'get_all_tags', $formatted_tags );
+
+		$formatted_tags = apply_filters( 'get_all_tags', $formatted_tags );
+
+		TTA_Cache::set( $cache_key, $formatted_tags );
+
+		return $formatted_tags;
 
 	}
 
@@ -918,32 +913,92 @@ class TTA_Helper {
 		}
 	}
 
+	/**
+	 * Get all ACF fields including subfields.
+	 *
+	 * @return array An associative array of all ACF fields with field names as keys and "name::label" as values.
+	 */
 	public static function get_all_acf_fields() {
+		// Ensure the ACF API is loaded
+		if ( ! function_exists( 'acf_get_field_groups' ) || ! function_exists( 'acf_get_fields' ) ) {
+			return [];
+		}
+
 		// Get all field groups
 		$field_groups   = acf_get_field_groups();
 		$all_acf_fields = [];
+
 		if ( $field_groups ) {
-			// Loop through each field group
 			foreach ( $field_groups as $field_group ) {
-				// Get all fields for the current field group
-				$fields = acf_get_fields( $field_group['key'] );
-				if ( $fields ) {
-					// Loop through each field
-					foreach ( $fields as $field ) {
-						$all_acf_fields[ $field['name'] ] = $field['name'] . '::' . $field['label'];
-					}
+				// Attempt to get fields for the current field group
+				$fields = acf_get_fields( $field_group );
+				foreach ( $fields as $field ) {
+					// Add the field to the result array
+					$all_acf_fields[ $field['name'] ] = $field['name'] . '::' . $field['label'];
+
+					// Check if the field has subfields and process them recursively
+//					if (isset($field['sub_fields']) && is_array($field['sub_fields'])) {
+//						self::process_acf_fields($field['sub_fields'], $all_acf_fields);
+//					}
 				}
+
+//				if (is_array($fields)) {
+//					// Process fields recursively
+//					self::process_acf_fields($fields, $all_acf_fields);
+//				}
 			}
 		}
 
 		return $all_acf_fields;
 	}
 
+	/**
+	 * Recursive helper function to process ACF fields and subfields.
+	 *
+	 * @param array $fields List of fields to process.
+	 * @param array &$all_acf_fields Reference to the result array.
+	 */
+	public static function process_acf_fields( $fields, &$all_acf_fields ) {
+		foreach ( $fields as $field ) {
+			// Add the field to the result array
+			$all_acf_fields[ $field['name'] ] = $field['name'] . '::' . $field['label'];
+
+			// Check if the field has subfields and process them recursively
+			if ( isset( $field['sub_fields'] ) && is_array( $field['sub_fields'] ) ) {
+				self::process_acf_fields( $field['sub_fields'], $all_acf_fields );
+			}
+		}
+	}
+
 	public static function is_acf_active() {
-		return function_exists( 'acf' );
+
+		$pro_plugins = [
+			'advanced-custom-fields/acf.php',
+			'advanced-custom-fields-pro/acf.php',
+			'advanced-custom-fields-pro/acf-pro.php'
+		];
+
+		$status = false;
+
+		foreach ( $pro_plugins as $plugin ) {
+			if ( is_plugin_active( $plugin ) ) {
+				$status = true;
+				break; // Exit loop as soon as one active plugin is found
+			}
+		}
+
+
+		return $status;
 	}
 
 	public static function all_post_status() {
+
+		$cache_key   = TTA_Cache::get_key( 'all_post_status' );
+		$cache_value = TTA_Cache::get( $cache_key );
+		if ( $cache_value ) {
+			return $cache_value;
+		}
+
 		$post_statuses = get_post_stati( [ 'show_in_admin_status_list' => true ], 'objects' );
 		$status_array  = [];
 
@@ -951,6 +1006,7 @@ class TTA_Helper {
 			$status_array[ $status->name ] = $status->label;
 		}
 
+		TTA_Cache::set( $cache_key, $status_array );
 
 		return $status_array;
 	}
@@ -1013,6 +1069,51 @@ class TTA_Helper {
 		}
 
 		return $display_player_to;
+	}
+
+	public static function get_post_types() {
+		$cache_key   = TTA_Cache::get_key( 'get_post_types' );
+		$cache_value = TTA_Cache::get( $cache_key );
+		if ( $cache_value ) {
+			return $cache_value;
+		}
+		$post_types = get_post_types( array(
+			'public' => 1, // Only get public post types
+		), 'array' );
+
+		TTA_Cache::set( $cache_key, $post_types );
+
+		return apply_filters( 'tts_get_post_types', $post_types );
+	}
+
+
+	public static function get_block_css( $atts, $customize ) {
+		if ( isset( $atts['backgroundColor'] ) ) {
+			$customize['backgroundColor'] = $atts['backgroundColor'];
+		} elseif ( isset( $customize['backgroundColor'] ) ) {
+			$customize['backgroundColor'] = $customize['backgroundColor'];
+		} else {
+			$customize['backgroundColor'] = '#184c53';
+		}
+
+		if ( isset( $atts['color'] ) ) {
+			$customize['color'] = $atts['color'];
+		} elseif ( isset( $customize['color'] ) ) {
+			$customize['color'] = $customize['color'];
+		} else {
+			$customize['color'] = '#ffffff';
+		}
+
+		if ( isset( $atts['width'] ) ) {
+			$customize['width'] = $atts['width'];
+		} elseif ( isset( $customize['width'] ) ) {
+			$customize['width'] = $customize['width'];
+		} else {
+			$customize['width'] = '100';
+		}
+
+
+		return apply_filters( 'get_block_css', $customize );
 	}
 
 

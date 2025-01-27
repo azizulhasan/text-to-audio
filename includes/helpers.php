@@ -1,5 +1,11 @@
 <?php
 
+// Absolute path to the WordPress directory.
+if ( ! defined( 'ABSPATH' ) ) {
+	die();
+}
+
+use TTA\TTA_Cache;
 use TTA\TTA_Helper;
 
 /**
@@ -94,28 +100,29 @@ function tta_should_add_delimiter( $title, $delimiter ) {
  */
 function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 	$settings = (array) get_option( 'tta_settings_data' );
+	static $btn_no = 0;
+	static $block_btn_no = 0;
+	$btn_no ++;
+
 	// this is a pro feature to show button on blog main page with title and excerpt.
-	if ( ! TTA_Helper::should_load_button() ) {
+	if ( ! TTA_Helper::should_load_button() || $block_btn_no > 0 ) {
 		return;
 	}
 
 	global $post;
+//	update_option('tta_customize_settings', []);
 
+	$customize = (array) get_option( 'tta_customize_settings' );
 	if ( $is_block ) {
-		$customize = $atts;
-	} else {
-		$customize = (array) get_option( 'tta_customize_settings' );
+		$customize = TTA_Helper::get_block_css( $atts, $customize );
+		$block_btn_no ++;
 	}
 	$recording = (array) get_option( 'tta_record_settings' );
 
 
-	// set default value.
-	$settings['tta__settings_allow_listening_for_post_types'] = isset( $settings['tta__settings_allow_listening_for_post_types'] ) && is_array( $settings['tta__settings_allow_listening_for_post_types'] ) ? $settings['tta__settings_allow_listening_for_post_types'] : [ 'post' ];
-
 	$should_display_icon = isset( $settings['tta__settings_display_btn_icon'] ) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
 
-	static $btn_no = 0;
-	$btn_no ++;
+
 	// TODO make it dynamic. now Recording it not available in UI.
 	$sentence_delimiter = isset( $recording['tta__sentence_delimiter'] ) ? $recording['tta__sentence_delimiter'] : '. ';
 	global $post;
@@ -155,25 +162,26 @@ function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 	$content_read_time = apply_filters( 'tts_content_reading_time', 1, $content, $post );
 	$text_arr          = get_button_text( $atts, $content_read_time );
 
-
 	// Speak Icon
 	$speakIcon = "<div class='tta_button'>";
 	$speakIcon .= apply_filters( 'tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ' );
 	$speakIcon .= '<span> ' . $text_arr['listen_text'] . '<span></div>'; // TODO: should remove this if unnecessary.
-	// Button style.
-	if ( isset( $customize['backgroundColor'], $customize['color'], $customize['width'] ) ) {
-		if ( $is_block ) {
-			$backgroundColor = isset( $customize['backgroundColor'] ) ? $customize['backgroundColor'] : '#184c53';
-			$color           = isset( $customize['color'] ) ? $customize['color'] : '#ffffff';
-			$width           = isset( $customize['width'] ) ? $customize['width'] : '100';
-			$btn_style       = 'background-color:' . esc_attr( $backgroundColor ) . ' !important;color:' . esc_attr( $color ) . ' !important;width:' . esc_attr( $width ) . '%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
-		} else {
-			$btn_style = 'background-color:' . esc_attr( $customize['backgroundColor'] ) . ';color:' . esc_attr( $customize['color'] ) . ';width:' . esc_attr( $customize['width'] ) . '%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
-		}
-	} else {
-		$btn_style = 'background-color:#184c53;color:#ffffff;width:100%;border:0;display:flex;align-content:center;justify-content:center;align-items:center;border-radius:4px;text-decoration:none;cursor:pointer;margin:auto;';
-	}
 
+    // Button style.
+	$backgroundColor = isset( $customize['backgroundColor'] ) ? $customize['backgroundColor'] : '#184c53';
+	$color           = isset( $customize['color'] ) ? $customize['color'] : '#ffffff';
+	$width           = isset( $customize['width'] ) ? $customize['width'] : '100';
+	$height          = isset( $customize['height'] ) ? $customize['height'] . 'px' : '30px';
+	$border          = isset( $customize['border'] ) ? $customize['border'] . 'px' : '0px';
+	$border_color    = isset( $customize['border_color'] ) ? $customize['border_color'] : '#000000';
+	$border_radius   = isset( $customize['borderRadius'] ) ? $customize['borderRadius'] . 'px' : '4px';
+	$border          = $border . ' solid ' . $border_color;
+	$font_size       = isset( $customize['fontSize'] ) ? $customize['fontSize'] . 'px' : '18px';
+	if ( $is_block ) {
+		$btn_style = 'background-color:' . esc_attr( $backgroundColor ) . ' !important;color:' . esc_attr( $color ) . ' !important;width:' . esc_attr( $width ) . '%;height:' . esc_attr( $height ) . ';font-size:' . esc_attr( $font_size ) . ';border:' . esc_attr( $border ) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:' . esc_attr( $border_radius ) . ';text-decoration:none;cursor:pointer;margin:auto;';
+	} else {
+		$btn_style = 'background-color:' . esc_attr( $backgroundColor ) . ';color:' . esc_attr( $color ) . ';width:' . esc_attr( $width ) . '%;height:' . esc_attr( $height ) . ';font-size:' . esc_attr( $font_size ) . ';border:' . esc_attr( $border ) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:' . esc_attr( $border_radius ) . ';text-decoration:none;cursor:pointer;margin:auto;';
+	}
 
 	//Custom Css
 	$custom_css = '';
@@ -233,7 +241,6 @@ function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_ar
 
 	global $post;
 
-	// delete_post_meta($post->ID, 'tts_mp3_file_urls');
 	$language           = TTA_Helper::tts_site_language( $plugin_all_settings );
 	$voice              = TTA_Helper::tts_get_voice( $plugin_all_settings );
 	$language_and_voice = TTA_Helper::get_player_language_and_player_voice( $language, $voice, $plugin_all_settings, $post );
@@ -427,6 +434,8 @@ add_filter( 'the_content', 'add_listen_button', $display_button_priority );
  * Add listening button to every post by default.
  */
 function add_listen_button( $content ) {
+	static $button_no = 0;
+	$button_no ++;
 	TTA_Helper::set_default_settings();
 	global $post;
 	$button    = '';
@@ -450,12 +459,26 @@ function add_listen_button( $content ) {
 		// elseif(did_filter( 'the_excerpt' )){
 		//     add_filter( 'the_excerpt', 'add_listen_button' , 9999 );
 		// }
-
-		if ( isset( $post->post_content ) && ! (has_shortcode( $post->post_content, 'tta_listen_btn' ) || has_shortcode( $post->post_content, 'atlasvoice' )) ) {
-			ob_start();
-			echo tta_get_button_content( '' );
-			$button = ob_get_contents();
-			ob_end_clean();
+		$reduce_enqueue = apply_filters( 'tts_reduce_enqueue', [ 'reduce_enqueue_status' => false, 'button_no' => 1 ] );
+		if (
+			isset( $reduce_enqueue['button_no'] )
+			&& isset( $reduce_enqueue['reduce_enqueue_status'] )
+			&& $reduce_enqueue['reduce_enqueue_status']
+			&& $reduce_enqueue['button_no'] > 0
+		) {
+			if ( $button_no == $reduce_enqueue['button_no'] && isset( $post->post_content ) && ! ( has_shortcode( $post->post_content, 'tta_listen_btn' ) || has_shortcode( $post->post_content, 'atlasvoice' ) ) ) {
+				ob_start();
+				echo tta_get_button_content( '' );
+				$button = ob_get_contents();
+				ob_end_clean();
+			}
+		} else {
+			if ( isset( $post->post_content ) && ! ( has_shortcode( $post->post_content, 'tta_listen_btn' ) || has_shortcode( $post->post_content, 'atlasvoice' ) ) ) {
+				ob_start();
+				echo tta_get_button_content( '' );
+				$button = ob_get_contents();
+				ob_end_clean();
+			}
 		}
 	}
 	$button_position = 'before_content';
@@ -493,18 +516,6 @@ function get_used_shortcodes( $content ) {
  */
 function is_pro_license_active() {
 	if ( is_pro_active() ) {
-		return true;
-	}
-
-	return false;
-}
-
-
-function tta_is_audio_folder_writable() {
-	$upload_dir = wp_upload_dir();
-	$base_dir   = $upload_dir['basedir'];
-
-	if ( is_writable( $base_dir ) ) {
 		return true;
 	}
 
@@ -711,6 +722,7 @@ function set_initial_button_texts( $content_read_time ) {
 
 
 function get_player_id() {
+
 	global $post;
 
 	$customize_settings                   = (array) TTA_Helper::tts_get_settings( 'customize' );
@@ -724,13 +736,16 @@ function get_player_id() {
 
 	$player_id = isset( $customize_settings['buttonSettings']['id'] ) ? $customize_settings['buttonSettings']['id'] : 1;
 
-
 	if ( ! is_pro_license_active() && $player_id > 1 ) {
 		$player_id = 1;
 	}
 
 
-	return apply_filters( 'tts_get_player_id', $player_id, $customize_settings, $post );
+	$player_id = apply_filters( 'tts_get_player_id', $player_id );
+
+	return $player_id;
+
+
 }
 
 /**
@@ -738,31 +753,30 @@ function get_player_id() {
  */
 function is_pro_active() {
 
-//	if ( ! function_exists( 'ttsp_fs' ) ) {
-//		return false;
-//	}
-
-//	if ( ! ttsp_fs()->is__premium_only() ) {
-//		return false;
-//	}
-
-
 	if ( ! function_exists( 'is_plugin_active' ) ) {
 		include_once ABSPATH . 'wp-admin/includes/plugin.php';
 	}
 
-	$status = is_plugin_active( 'text-to-speech-pro/text-to-audio-pro.php' );
+	$pro_plugins = [
+		'text-to-speech-pro/text-to-audio-pro.php',
+		'text-to-speech-pro-premium/text-to-audio-pro.php',
+		'text-to-audio-pro/text-to-audio-pro.php',
+		'text-to-audio-pro-premium/text-to-audio-pro.php',
+	];
 
-	if ( $status ) {
-		return true;
+	$status = false;
+
+	foreach ( $pro_plugins as $plugin ) {
+		if ( is_plugin_active( $plugin ) ) {
+			$status = true;
+			break; // Exit loop as soon as one active plugin is found
+		}
 	}
 
-	$status = is_plugin_active( 'text-to-speech-pro-premium/text-to-audio-pro.php' );
-
-	if ( $status ) {
-		return true;
-	}
+	$status = apply_filters( 'tts_is_pro_active', $status );
 
 
-	return is_plugin_active( 'text-to-audio-pro/text-to-audio-pro.php' );
+	return $status;
+
+
 }

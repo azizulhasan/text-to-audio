@@ -29,14 +29,16 @@ class TTA_Notices {
 
 
 //		if (!is_pro_active() && in_array(admin_url(basename($_SERVER['REQUEST_URI'])), [ admin_url('index.php') , admin_url('plugins.php'), admin_url('update-core.php'), \admin_url('plugin-install.php'), \admin_url('admin.php?page=text-to-audio')] ) )  {
-//		if (!is_pro_active())  {
-		add_action( 'admin_notices', [ $this, 'tta_free_promotion_notice' ] );
-
-//			 add_action( 'admin_notices', [ $this, 'tta_feedback_notice' ] );
-//			 add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
-//		add_action( 'admin_notices', [ $this, 'tta_affiliation_notice' ] );
-
+//		if ( ! is_pro_active() ) {
+//			add_action( 'admin_notices', [ $this, 'tta_free_promotion_notice' ] );
+//			add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
 //		}
+
+		if ( ! is_pro_active() || TTA_Helper::get_player_id() < 3 ) {
+//			 add_action( 'admin_notices', [ $this, 'tta_feedback_notice' ] );
+			add_action( 'admin_notices', [ $this, 'tta_affiliation_notice' ] );
+
+		}
 
 		$plugins = [
 			'gtranslate/gtranslate.php'                => [
@@ -114,11 +116,11 @@ class TTA_Notices {
 //		add_action( 'admin_notices', [ $this, 'plugin_analytics_notice_callback' ] );
 
 
-		if ( ! is_pro_active() && version_compare( TEXT_TO_AUDIO_VERSION, TEXT_TO_AUDIO_VERSION, '>=' ) ) {
-			add_action( 'admin_notices', [ $this, 'tts_setup_notice' ] );
-		}
+//		if ( ! is_pro_active() && version_compare( TEXT_TO_AUDIO_VERSION, TEXT_TO_AUDIO_VERSION, '>=' ) ) {
+//			add_action( 'admin_notices', [ $this, 'tts_setup_notice' ] );
+//		}
 
-		add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
+//		add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
 
 
 //		add_action('wp_ajax_tta_save_review_notice', [ $this, 'tta_save_review_notice' ] );
@@ -496,13 +498,13 @@ class TTA_Notices {
 	 */
 	public function tta_translation_request() {
 
-//        delete_option('tts_is_displayed_force_notice');
-		if ( ! get_option( 'tts_is_displayed_force_notice' ) ) {
+        delete_option('tts_is_displayed_force_notice_december_24');
+		if ( ! get_option( 'tts_is_displayed_force_notice_december_24' ) ) {
 			delete_option( 'tta_translation_notice_next_show_time' );
 			delete_user_meta( '1', 'tta_translation_notice_dismissed' );
 			update_option( 'tta_translation_notice_next_show_time', 12 );
 
-			update_option( 'tts_is_displayed_force_notice', true );
+			update_option( 'tts_is_displayed_force_notice_december_24', true );
 		}
 
 		$pluginName              = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
@@ -529,15 +531,16 @@ class TTA_Notices {
 			$has_notice = true;
 			$languages  = tta_get_default_languages();
 			global $locale;
-			$language        = isset ( $languages[ $locale ] ) ? $languages[ $locale ] : "";
-			$language_string = $language ? ' in <b>' . $language . '</b>.' : '.';
+
+			$language        = isset ( $languages[ $locale ] ) ? $languages[ $locale ] : "your local language";
+			$language_string = $language ? ' in <b>' . $language . '</b>.' : '';
 			$contact_link    = '<a href="http://atlasaidev.com/contact-us/" target="_blank" style="color:blue">here</a>'
 			?>
             <div class="tta-notice notice notice-info is-dismissible" dir="<?php echo tta_is_rtl() ? 'ltr' : 'auto' ?>"
                  data-which="translate" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <p><?php
 					printf(
-						esc_html__( '%6$s %2$s  We are looking for people to translate this plugin%4$s If you can help we would love to heare from you and please contact with us %5$s, we will guide you. %3$s Thanks for using %1$s.', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
+						esc_html__( '%6$s %2$s  We are seeking contributors to help translate this plugin into %4$s. If you’re interested in assisting, we’d love to hear from you! Please reach out to us %5$s, and we’ll provide all the necessary guidance.. %3$s Thank you for choosing %1$s.', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
 						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						'<div class="tta-review-notice-logo"></div>',
 						'<br/>',
@@ -612,13 +615,13 @@ class TTA_Notices {
 	 */
 	public function tta_affiliation_notice() {
 
-//		delete_option( 'tts_is_displayed_affiliation_notice' );
-		if ( ! get_option( 'tts_is_displayed_affiliation_notice' ) ) {
+//		delete_option( 'tts_is_displayed_browser_issue_notice_reissue_notice' );
+		if ( ! get_option( 'tts_is_displayed_browser_issue_notice_reissue_notice' ) ) {
 			delete_option( 'tta_affiliation_notice_next_show_time' );
 			delete_user_meta( '1', 'tta_affiliation_notice_dismissed' );
 			update_option( 'tta_affiliation_notice_next_show_time', 12 );
 
-			update_option( 'tts_is_displayed_affiliation_notice', true );
+			update_option( 'tts_is_displayed_browser_issue_notice_reissue_notice', true );
 		}
 
 		$pluginName              = sprintf( '%s', esc_html__( 'AtlasVoice Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
@@ -647,24 +650,23 @@ class TTA_Notices {
 			global $locale;
 			$language        = isset ( $languages[ $locale ] ) ? $languages[ $locale ] : "";
 			$language_string = $language ? ' in <b>' . $language . '</b>.' : '.';
-			$contact_link    = '<a href="http://atlasaidev.com/contact-us/" target="_blank" style="color:blue">here</a>'
+			$contact_link    = '<a href="https://atlasaidev.com/docs/text-to-speech/usage-setup/fix-for-chrome-130-speechsynthesis-speak-not-working/?utm_source=client&utm_medium=tts_plugin&utm_campaign=speechSysnthesis" target="_blank" style="color:blue">here</a>'
 			?>
             <div class="tta-notice notice notice-info is-dismissible" dir="<?php echo tta_is_rtl() ? 'ltr' : 'auto' ?>"
                  data-which="affiliation" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <p><?php
 					printf(
-						esc_html__( '%4$s %2$s %3$s Thank you for using AtlasVoice Text To Speech TTS! We’re excited to invite you to join our affiliate program and start earning %5$s on every sale you refer. Simply promote AtlasVoice, and we’ll guide you through the process. It’s a great way to help others improve their website accessibility while boosting your income!.', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
+						esc_html__( '%4$s %2$s %3$s We are getting reports from our users that on first click the player is not working. Please visit this documentation to get the solution', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
 						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						'<div class="tta-review-notice-logo"></div>',
 						'<br/>',
-						"<h1 style='color:red'>Earn 10% Commission by Promoting AtlasVoice!</h1>", //phpcs:ignore
-						"<strong>10%  commission</strong>" //phpcs:ignore
+						"<h1 style='color:red'>Solution : Player not working on first click?</h1>", //phpcs:ignore
 					);
 					?></p>
                 <p>
                     <a class="button button-primary" data-response="affiliation"
                        href="#"
-                       target="_blank"><?php esc_html_e( 'Become an affiliate', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       target="_blank"><?php esc_html_e( 'Get Solution', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
                 </p>
             </div>
 
@@ -695,7 +697,7 @@ class TTA_Notices {
                                 let notice = self.attr('data-response');
 
                                 if ('affiliation' === notice) {
-                                    window.open('<?php echo admin_url() . 'admin.php?page=text-to-audio-affiliation'  ?>', '_blank');
+                                    window.open('https://atlasaidev.com/docs/text-to-speech/usage-setup/fix-for-chrome-130-speechsynthesis-speak-not-working/?utm_source=client&utm_medium=tts_plugin&utm_campaign=speechSysnthesis', '_blank');
                                 }
                             })
 
@@ -827,9 +829,9 @@ class TTA_Notices {
 	 */
 	public function tts_setup_notice() {
 
-		 delete_option('tts_setup_notice_next_show_time');
-		 delete_user_meta('1', 'tts_setup_notice_dismissed');
-         update_option('tts_setup_notice_next_show_time', 12);
+//		 delete_option('tts_setup_notice_next_show_time');
+//		 delete_user_meta('1', 'tts_setup_notice_dismissed');
+//        update_option('tts_setup_notice_next_show_time', 12);
 
 		$has_notice              = false;
 		$user_id                 = get_current_user_id();
@@ -1022,14 +1024,13 @@ class TTA_Notices {
 	 */
 	public function tta_free_promotion_notice() {
 
-		//    delete_user_meta( 1, 'tta_promotion_notice_dismissed');
 
-		$image_url = TTA_PLUGIN_URL . 'admin/images/freemius10.jpg';
-
-		$pluginName              = sprintf( '<b>%s</b>', esc_html( 'Text To Speech Pro' ) );
+		$pluginName              = sprintf( '<b>%s</b>', esc_html( 'Text To Speech: 🔥 Black Friday & Cyber Monday Sale - 40% OFF!' ) );
 		$user_id                 = get_current_user_id();
-		$review_notice_dismissed = get_user_meta( $user_id, 'tta_promotion_notice_dismissed', true );
+		$review_notice_dismissed = get_user_meta( $user_id, 'tta_promotion_black_friday_24_notice_dismissed', true );
 		$nonce                   = wp_create_nonce( 'tta_notice_nonce' );
+
+		delete_user_meta( $user_id, 'tta_promotion_black_friday_24_notice_dismissed' );
 
 		if ( isset( $review_notice_dismissed ) && ! empty( $review_notice_dismissed ) ) {
 			$show_notice = false;
@@ -1039,17 +1040,26 @@ class TTA_Notices {
 
 		if ( $show_notice ) {
 			?>
-            <div class="tta-notice notice notice-info is-dismissible price_update" style="line-height:1.5;"
-                 data-which="promotion_close" data-nonce="<?php echo esc_attr( $nonce ); ?>">
-                <p><?php
-	                printf(
-	                /* translators: 1: plugin name,2: Slightly Smiling Face (Emoji), 3: line break 'br' tag */
-		                 '%3$s %2$s <a class="tta_promotion_notice" href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/" target="_blank"><img src="%1$s" alt="text_to_speech_Free_Price" height="70px;" width="100%%"></a>',
-		                $image_url,
-		                '<br/>',
-		                "<h3>$pluginName</h3>" //phpcs:ignore
-	                );
-	                ?></p>
+            <div class="tta-promotion-notice notice notice-info is-dismissible price_update" style="line-height:1.5;"
+                 data-which="promotion_black_friday_close" data-nonce="<?php echo esc_attr( $nonce ); ?>">
+                <div id="black-friday-banner"
+                     style="background-color: #ffcc00; color: #333; text-align: center; padding: 5px; font-family: Arial, sans-serif; position: sticky; top: 0; width: 100%; z-index: 1000; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+                    <h2 style="margin: 0; font-size: 24px; font-weight: bold;">Text To Speech🔥 Holiday Deals & New Year
+                        Offer Sale - 40% OFF! 🔥</h2>
+                    <p style="margin: 10px 0; font-size: 16px;">Get 40% off on AtlasVoice Pro in all package. Use the
+                        coupon code below and save big!</p>
+                    <p style="margin: 10px 0; font-size: 18px; font-weight: bold;">Offer Ends In: <span id="countdown"
+                                                                                                        style="color: #d9534f;"></span>
+                    </p>
+                    <button id="copy-coupon-btn"
+                            style="background-color: #333; color: #fff; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px;"
+                            onclick="copyCouponCode()">Copy Coupon Code: <strong>FSBFCM2024</strong></button>
+                </div>
+                <p>
+                    <a data-which="promotion_black_friday_close" class="button button-primary tta-promotion-notice"
+                       href="#"
+                       target="_blank">Upgrade Now</a>
+                </p>
             </div>
 			<?php
 
@@ -1060,18 +1070,70 @@ class TTA_Notices {
                         (function ($) {
                             "use strict";
                             $(document)
-                                .on('click', '.tta-notice .notice-dismiss', function (e) {
+                                .on('click', '.tta-promotion-notice .notice-dismiss', function (e) {
                                     e.preventDefault();
                                     // noinspection ES6ConvertVarToLetConst
-                                    var self = $(this), tta_notice = self.closest('.tta-notice'),
+                                    var self = $(this), tta_notice = self.closest('.tta-promotion-notice'),
                                         which = tta_notice.attr('data-which');
                                     console.log(tta_notice.attr('data-which'))
-                                    wp.ajax.post('tta_hide_notice', {
-                                        _wpnonce: '<?php echo esc_attr( $nonce ); ?>',
-                                        which: which
-                                    });
+                                    window.open('https://atlasaidev.com/plugins/text-to-speech-pro/pricing/?utm_source=plugin&utm_medium=user_dashboard&utm_campaign=black_friday_24', '_blank');
+                                    if (wp.ajax) {
+                                        wp.ajax.post('tta_hide_notice', {
+                                            _wpnonce: '<?php echo esc_attr( $nonce ); ?>',
+                                            which: which
+                                        });
+                                    }
+                                })
+                                .on('click', '.tta-promotion-notice', function (e) {
+                                    e.preventDefault();
+                                    // noinspection ES6ConvertVarToLetConst
+                                    var self = $(this), tta_notice = self.closest('.tta-promotion-notice'),
+                                        which = tta_notice.attr('data-which');
+                                    console.log(tta_notice.attr('data-which'))
+                                    window.open('https://atlasaidev.com/plugins/text-to-speech-pro/pricing/?utm_source=plugin&utm_medium=user_dashboard&utm_campaign=black_friday_24', '_blank');
+                                    if (wp.ajax) {
+                                        wp.ajax.post('tta_hide_notice', {
+                                            _wpnonce: '<?php echo esc_attr( $nonce ); ?>',
+                                            which: which
+                                        });
+                                    }
                                 });
                         })(jQuery)
+
+                        // Countdown Timer Logic
+                        function updateCountdown() {
+                            const offerEndDate = new Date("January 5, 2025 23:59:59").getTime();
+                            const now = new Date().getTime();
+                            const timeLeft = offerEndDate - now;
+
+                            if (timeLeft < 0) {
+                                document.getElementById("black-friday-banner").innerHTML =
+                                    "<h2 style='color: #d9534f;'>🎉 Holiday Deals & New Year Offer Has Ended!</h2>";
+                                return;
+                            }
+
+                            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                            document.getElementById("countdown").innerText =
+                                `${days}d ${hours}h ${minutes}m ${seconds}s`;
+                        }
+
+                        // Update countdown every second
+                        setInterval(updateCountdown, 1000);
+                        // Initialize the countdown
+                        updateCountdown();
+
+                        // Copy Coupon Code Logic
+                        function copyCouponCode() {
+                            navigator.clipboard.writeText("FSBFCM2024").then(() => {
+                                alert("Coupon code copied to clipboard!");
+                            }).catch(err => {
+                                console.error("Failed to copy text: ", err);
+                            });
+                        }
                     </script><?php
 				}, 99 );
 			}
@@ -1157,7 +1219,7 @@ class TTA_Notices {
 			'compitable',
 			'rating',
 			'translate',
-			'promotion_close',
+			'promotion_black_friday_close',
 			'features',
 			'feedback',
 			'setup',
@@ -1176,8 +1238,8 @@ class TTA_Notices {
 			} elseif ( 'writable' == $_REQUEST['which'] ) {
 				update_option( 'tta_folder_writable_notice_next_show_time', time() + ( DAY_IN_SECONDS * 30 ) );
 				$updated_user_meta = update_user_meta( $user_id, 'tta_folder_writable_notice_dismissed', true, true );
-			} elseif ( 'promotion_close' == $_REQUEST['which'] ) {
-				$updated_user_meta = update_user_meta( $user_id, 'tta_promotion_notice_dismissed', true, true );
+			} elseif ( 'promotion_black_friday_close' == $_REQUEST['which'] ) {
+				$updated_user_meta = update_user_meta( $user_id, 'tta_promotion_black_friday_24_notice_dismissed', true, true );
 			} elseif ( 'compitable' == $_REQUEST['which'] ) {
 				update_option( 'tta_plugin_compatible_notice_next_show_time', time() + ( DAY_IN_SECONDS * 30 ) );
 				$updated_user_meta = update_user_meta( $user_id, 'tta_plugin_compatible_notice_dismissed', true, true );

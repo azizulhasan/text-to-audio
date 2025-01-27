@@ -683,7 +683,7 @@ export const getMultilingualActiveLanguages = (ttsObjPro) => {
     // Initialize an empty object
     let languageObject = {};
     if (ttsObjPro?.compatible?.['gtranslate/gtranslate.php']) {
-        let gtranslateActiveLanguages = ttsObjPro?.compatible?.['gtranslate/gtranslate.php']?.GTranslate?.fincl_langs;
+        let gtranslateActiveLanguages = ttsObjPro?.compatible?.['gtranslate/gtranslate.php']?.allowed_languages;
         // Populate the object using a loop
         for (const langCode of gtranslateActiveLanguages) {
             languageObject[langCode] = langCode;

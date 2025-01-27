@@ -1,49 +1,83 @@
 import {__} from '@wordpress/i18n'
+import React from "react";
 
 export default function UpgradeToPro({promotionType = 'general'}) {
     let proFeatures = {
         youtube: [
             [ // free video
-                'h4VJxM-mh74?si=pmgy6TkvvppqtQV7',
-                'yanuoEBfG4A?si=WVJYL656B1LmrEVY',
-                'HFoqlkPCP80?si=XVBvLEp2ATKT7EXz',
-                'amkrAtVQGBY?si=ZI1HfRBYaR60PVVx',
-                'oeW652YKmG0?si=q97jAR0pTT3LhhH-',
-                'vdgJ_V2REE0?si=DSHrm7tlt8dbcF1R',
-                'qDzatRpEXN8?si=jb3MSEA1FsOxadgV',
+                {
+                    title : 'How To Setup Text To Speech Player Properly?',
+                    id: 'h4VJxM-mh74?si=pmgy6TkvvppqtQV7',
+                },
+                {
+                    title : 'How To Setup Settings Menu For AtlasVoice Text To Speech Pro WordPress Plugin?',
+                    id: 'yanuoEBfG4A?si=WVJYL656B1LmrEVY',
+                },
+                {
+                    title : 'Text To Speech Pro ( AtlasVoice Pro ) : How To Generate Bulk MP3 File?',
+                    id: 'HFoqlkPCP80?si=XVBvLEp2ATKT7EXz',
+                },
+                {
+                    title : 'How To Enable Analytics In Text To Speech Free And Pro WordPress Plugin?',
+                    id: 'amkrAtVQGBY?si=ZI1HfRBYaR60PVVx',
+                },
+                {
+                    title : 'How To Use Text Alias In AtlasVoice Text To Speech Free And Pro WordPress Plugin?',
+                    id: 'oeW652YKmG0?si=q97jAR0pTT3LhhH-',
+                },
+                {
+                    title : 'How To Customize Text To Speech WordPress Plugin Player With Custom CSS ?',
+                    id: 'vdgJ_V2REE0?si=DSHrm7tlt8dbcF1R',
+                },
+                {
+                    title : 'How To Change Text To Speech WordPress Plugin ( AtlasVoice ) Player Text And Hover Text?',
+                    id: 'qDzatRpEXN8?si=jb3MSEA1FsOxadgV',
+                },
             ],
             [ // pro video
-                'h4VJxM-mh74?si=pmgy6TkvvppqtQV7',
-                'yanuoEBfG4A?si=WVJYL656B1LmrEVY',
-                'HFoqlkPCP80?si=XVBvLEp2ATKT7EXz',
-                'amkrAtVQGBY?si=ZI1HfRBYaR60PVVx',
-                'oeW652YKmG0?si=q97jAR0pTT3LhhH-',
-                'uMJBdM24w_c?si=XZ0hsLADaQiB2UN2',
+                {
+                    title : 'How To Setup Text To Speech Player Properly?',
+                    id: 'h4VJxM-mh74?si=pmgy6TkvvppqtQV7',
+                },
+                {
+                    title : 'How To Setup Settings Menu For AtlasVoice Text To Speech Pro WordPress Plugin?',
+                    id: 'yanuoEBfG4A?si=WVJYL656B1LmrEVY',
+                },
+                {
+                    title : 'Text To Speech Pro ( AtlasVoice Pro ) : How To Generate Bulk MP3 File?',
+                    id: 'HFoqlkPCP80?si=XVBvLEp2ATKT7EXz',
+                },
+                {
+                    title : 'How To Enable Analytics In Text To Speech Free And Pro WordPress Plugin?',
+                    id: 'amkrAtVQGBY?si=ZI1HfRBYaR60PVVx',
+                },
+                {
+                    title : 'How To Use Text Alias In AtlasVoice Text To Speech Free And Pro WordPress Plugin?',
+                    id: 'oeW652YKmG0?si=q97jAR0pTT3LhhH-',
+                },
+                {
+                    title : 'How to Configure GTranslate And Text To Speech Pro ( AtlasVoice ) WordPress Plugin',
+                    id: 'uMJBdM24w_c?si=XZ0hsLADaQiB2UN2',
+                },
             ]
         ],
         general: [
             'Get Live Support for setup.',
-            '51 languages support in pro version.',
-            '<a target="_blank" href="https://atlasaidev.com/refund-policy/">Bulk MP3 File Generation</a>',
-            'Advance Analytics',
+            'Convert unlimited characters to MP3 in bulk.',
+            'WPML, GTranslate, TranslatePress Plugins Support',
+            'Works with ACF, SCF, and other popular plugins.',
+            'Google Cloud Text-to-Speech & ChatGPT Text-to-Speech (usage fees apply)',
+            'Save MP3 files directly to Google Cloud Storage.',
+            'Live integration support + 14-day money-back guarantee (<a target="_blank" href="https://atlasaidev.com/refund-policy/">conditions apply</a>).',
+            'Multiple audio player support',
+            'Unlimited Download MP3 files',
+            '200+ Voices with Google Cloud Text To Speech',
+            'Customizable content selection with CSS selectors',
+            'Exclude content by categories, tags, IDs',
+            'Advance analytics',
+            'Responsive Audio Player',
             'Text Aliases',
             'Unlimited Characters',
-            '<a target="_blank" href="https://atlasaidev.com/refund-policy/"> 14 Days money back\n' +
-            '                                guarantee.</a>',
-            '<a target=\'_blank\' href="https://wordpress.org/plugins/gtranslate/">GTranslate Plugin\n' +
-            '                                Support</a>',
-            '<a target=\'_blank\'\n' +
-            '                               href="https://www.youtube.com/watch?v=4dsbhaBavms&t=43s&ab_channel=AtlasAiDev">You Can\n' +
-            '                                Integrate\n' +
-            '                                With Google Cloud Text To Speech.</a>',
-            'Get more than 200 voices with Google Cloud Text To Speech.',
-            'Download the audio file for offline listening.',
-            'Multiple Audio Player Support.',
-            'Include Content By CSS Selectors',
-            'Exclude HTML Tags To Speak',
-            'Exclude Texts To Speak',
-            'Exclude Tags To Speak',
-            'Exclude Categories To Speak',
         ],
         analytics: [
             __("Number of times the player button was initiated"),
@@ -70,52 +104,46 @@ export default function UpgradeToPro({promotionType = 'general'}) {
     }
     return <>
         {
-            window.hasOwnProperty('ttsObj') && (!ttsObj.is_pro_active || promotionType === 'youtube') ?
-                <div className="card p-0">
+            window.hasOwnProperty('ttsObj') ?
+                <div style={{display: ttsObj.is_pro_active && promotionType !== 'youtube' ? 'none' : 'block' }} className="card p-0">
                     <div className="card-header text-center tta_btn btn-center">
                         {
-                            promotionType === 'youtube' ? 'Video Tutorials' :
+                            promotionType === 'youtube' ? <button
+                                                             className="tta_btn btn-center text-center text-white">Video Tutorials</button> :
                                 <a target='_blank' href="https://atlasaidev.com/plugins/text-to-speech-pro/"
                                    className="tta_btn btn-center text-center text-white">Premium Features</a>
 
                         }
                     </div>
                     <div className="card-body">
-                        <u className="list-group text-left">
+                        <u className="list-group text-left text-decoration-none">
                             {
                                 Object.keys(proFeatures).map(type => {
                                     if (promotionType === type) {
                                         return proFeatures[promotionType].map((feature, index) => {
                                             if (promotionType === type && promotionType === 'youtube') {
                                                 if (index == 0 && !ttsObj.is_pro_active) {
-                                                    return feature.map((videoId, index) => {
-                                                        return <iframe
-                                                            style={{marginBottom: '15px'}}
-                                                            width="100%"
-                                                            // height="200"
-                                                            src={`https://www.youtube.com/embed/${videoId}`}
-                                                            frameBorder="0"
-                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                            allowFullScreen
-                                                            title="YouTube video player"
-                                                        ></iframe>
+                                                    return feature.map((obj, index) => {
+
+                                                        return <div key={obj.id} className='d-flex d-inline py-2 border-bottom border-width-2 border-gray-dark '>
+                                                            <i className="fab fa-youtube text-danger me-2 mt-2"></i>
+                                                            <a className={'text-decoration-none'} target={'_blank'}
+                                                               href={'https://www.youtube.com/watch?v=' + obj.id}>{obj.title}</a>
+                                                        </div>
+
                                                     })
-                                                } else if(index == 1 && ttsObj.is_pro_active) {
-                                                    return feature.map((videoId, index) => {
-                                                        return <iframe
-                                                            style={{marginBottom: '15px'}}
-                                                            width="100%"
-                                                            // height="200"
-                                                            src={`https://www.youtube.com/embed/${videoId}`}
-                                                            frameBorder="0"
-                                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                            allowFullScreen
-                                                            title="YouTube video player"
-                                                        ></iframe>
+                                                } else if (index == 1 && ttsObj.is_pro_active) {
+                                                    return feature.map((obj, index) => {
+                                                        return <div key={obj.id} className={'d-flex d-inline py-2 border-bottom border-width-2 border-gray-dark '}>
+                                                            <i className="fab fa-youtube text-danger me-2 mt-2"></i>
+                                                            <a className={'text-decoration-none'} target={'_blank'}
+                                                               href={'https://www.youtube.com/watch?v=' + obj.id}>{obj.title}</a>
+                                                        </div>
+
                                                     })
                                                 }
                                             } else {
-                                                return <li className="list-group-item"
+                                                return <li key={index}  className="list-group-item"
                                                            dangerouslySetInnerHTML={{__html: feature}}/>
                                             }
 

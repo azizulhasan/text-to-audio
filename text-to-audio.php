@@ -15,7 +15,7 @@
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
  * Description:       The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
- * Version:           1.7.32
+ * Version:           1.8.11
  * Author:            Atlas AiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-3.0+
@@ -25,44 +25,50 @@
  * Requires PHP:      7.4
  * Requires at least: 5.6
  */
-include 'vendor/autoload.php';
 
-use TTA\TTA;
-use TTA\TTA_Activator;
-use TTA\TTA_Deactivator;
-use TTA_Api\TTA_Api_Routes;
-use TTA_Api\AtlasVoice_Analytics;
-use TTA\TTA_Notices;
-
-// If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) ) {
-	die;
-}
 
 // Absolute path to the WordPress directory.
 if ( ! defined( 'ABSPATH' ) ) {
 	define( 'ABSPATH', dirname( __FILE__ ) . '/' );
 }
 
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+// Include Composer autoloader if using Composer
+if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+	require_once __DIR__ . '/vendor/autoload.php';
+}
+
+use TTA\TTA;
+use TTA\TTA_Activator;
+use TTA\TTA_Deactivator;
+use TTA_Api\TTA_Api_Routes;
+use TTA\TTA_Notices;
+use TTA\TTA_Lib_AtlasAiDev;
+use TTA\TTA_Cache;
+
 /**
  * Is plugin active
  */
 function is_pro_plugin_exists() {
 	$plugin_path = \WP_PLUGIN_DIR;
-	$status      = file_exists( $plugin_path . '/text-to-speech-pro/text-to-audio-pro.php' );
+	$pro_plugins = [
+		'/text-to-speech-pro/text-to-audio-pro.php',
+		'/text-to-speech-pro-premium/text-to-audio-pro.php',
+		'/text-to-audio-pro/text-to-audio-pro.php',
+		'/text-to-audio-pro-premium/text-to-audio-pro.php'
+	];
 
-	if ( $status ) {
-		return true;
+	foreach ( $pro_plugins as $pro_plugin ) {
+		if ( file_exists( $plugin_path . $pro_plugin ) ) {
+			return true;
+		}
 	}
 
-	$status = file_exists( $plugin_path . '/text-to-speech-pro-premium/text-to-audio-pro.php' );
-
-	if ( $status ) {
-		return true;
-	}
-
-
-	return file_exists( $plugin_path . '/text-to-audio-pro/text-to-audio-pro.php' );
+	return false;
 }
 
 if ( ! is_pro_plugin_exists() && ! function_exists( 'ttsp_fs' ) ) {
@@ -85,10 +91,6 @@ if ( ! is_pro_plugin_exists() && ! function_exists( 'ttsp_fs' ) ) {
 				'has_addons'          => false,
 				'has_paid_plans'      => true,
 				'has_affiliation'     => 'all',
-				'trial'               => array(
-					'days'               => 14,
-					'is_require_payment' => true,
-				),
 				'menu'                => array(
 					'slug'    => 'text-to-audio',
 					'support' => 1,
@@ -209,7 +211,7 @@ class TTA_Init {
 
 	public function __construct() {
 		if ( ! defined( 'TEXT_TO_AUDIO_VERSION' ) ) {
-			define( 'TEXT_TO_AUDIO_VERSION', apply_filters( 'tts_version', '1.7.32' ) );
+			define( 'TEXT_TO_AUDIO_VERSION', apply_filters( 'tts_version', '1.8.11' ) );
 		}
 
 		if ( ! defined( 'TEXT_TO_AUDIO_PLUGIN_NAME' ) ) {
@@ -222,9 +224,20 @@ class TTA_Init {
 	public function run() {
 		$plugin = new TTA();
 		$plugin->run();
-		new TTA_Api_Routes();
 		new TTA_Notices();
+		add_action( 'init', function () {
+			if ( ! defined( 'TTA_PRO_PLUGIN_PATH' ) ) {
+				TTA_Lib_AtlasAiDev::instance()->init();
+			}
+			if ( ! TTA_Cache::get( 'tts_rest_api_url' ) ) {
+				$rest_url = esc_url_raw( rest_url() );
+				update_option( 'tts_rest_api_url', $rest_url );
+				TTA_Cache::set( 'tts_rest_api_url', $rest_url );
+			}
 
+			//Rest api init.
+			new TTA_Api_Routes();
+		}, 9999 );
 
 		//add plugins action links.
 		if ( is_admin() ) {
@@ -244,12 +257,12 @@ class TTA_Init {
 	 */
 	public function add_action_links( $actions, $plugin_file, $plugin_data, $context ) {
 		$plugin_url     = esc_url( admin_url() . 'admin.php?page=text-to-audio' );
-		$doc_url        = esc_url( admin_url() . 'admin.php?page=text-to-audio#/docs' );
+		$doc_url        = esc_url( admin_url() . 'admin.php?page=text-to-audio#/faq' );
 		$support        = esc_url( 'https://atlasaidev.com/contact-us/' );
 		$review         = esc_url( 'https://wordpress.org/support/plugin/text-to-audio/reviews/' );
 		$custom_actions = array(
 			'settings' => sprintf( '<a href="%s" target="_blank">%s</a>', $plugin_url, __( 'Settings', 'text-to-audio' ) ),
-			'docs'     => sprintf( '<a href="%s" target="_blank">%s</a>', $doc_url, __( 'Docs', 'text-to-audio' ) ),
+			'faq'     => sprintf( '<a href="%s" target="_blank">%s</a>', $doc_url, __( 'Docs', 'text-to-audio' ) ),
 			'support'  => sprintf( '<a href="%s" target="_blank">%s</a>', $support, __( 'Support', 'text-to-audio' ) ),
 			'review'   => sprintf( '<a href="%s" target="_blank">%s</a>', $review, __( 'Write a Review', 'text-to-audio' ) ),
 		);
@@ -262,7 +275,7 @@ class TTA_Init {
 }
 
 
-add_action( 'init', function () {
+add_action( 'plugins_loaded', function () {
 	//Rest api init.
 	new TTA_Init();
 }, 9999 );
@@ -312,7 +325,7 @@ function allow_shortcode_in_html_tag( $output, $tag, $attr, $m ) {
 			$content = $m[5] . tta_get_button_content( $attr, false, $m[5] );
 		}
 
-       //Get the content wrapped by the shortcode.
+		//Get the content wrapped by the shortcode.
 		return $content;
 	}
 

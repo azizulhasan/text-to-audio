@@ -49,6 +49,11 @@ class TTA_Activator {
 					'display_player_to'         => [ 'all' ],
 					'who_can_download_mp3_file' => [ 'all' ],
 				],
+				'height'                 => '30',
+				'border'                 => '#00000',
+				'border_color'           => '0',
+				'fontSize'               => '18',
+				'borderRadius'           => '4',
 			) );
 
 		}
@@ -74,6 +79,7 @@ class TTA_Activator {
 				'tta__settings_exclude_categories'                    => [],
 				'tta__settings_exclude_wp_tags'                       => [],
 				'tta__settings_clear_cache'                           => [],
+				'tta__settings_clear_all_cache'                       => true,
 
 			) );
 		}
@@ -126,9 +132,9 @@ class TTA_Activator {
 			] );
 		}
 
-		if ( get_transient( 'tts_all_settings' ) ) {
-			\delete_transient( 'tts_all_settings' );
-		}
+//		if ( get_transient( 'tts_all_settings' ) ) {
+//			\TTA_Cache::delete( 'all_settings' );
+//		}
 
 		/**
 		 * analytics settings.
