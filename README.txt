@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.7.0
 Requires PHP: 7.4
-Stable tag: 1.8.10
+Stable tag: 1.8.11
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -426,6 +426,15 @@ You can customize the voice and language of the text-to-speech player using shor
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+
+
+= 1.8.11 ( 26 Jan 2025 ) =
+Fixed: Default Player default value issue solved.
+Fixed: Pro version mp3 file load issue solved.
+Fixed: Default player voice pitch issue solved.
+Fixed: GTranslate plugin allowed language issue solved.
+Added: `ttsSetSelectedLanguageFromDom` JS Filter added.
+Fixed: Generate Bulk MP3 page font family change issue solved.
 
 = 1.8.10 ( 16 Jan 2025 ) =
 Fixed: ACF/ACF Pro plugin error with Text To Speech Plugin issue solved.

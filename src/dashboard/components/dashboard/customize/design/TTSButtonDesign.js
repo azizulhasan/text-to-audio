@@ -46,17 +46,17 @@ export default function TTSButtonDesign({handleChange, customCSS, listeningBtnSt
                 listeningBtnStyle?.buttonSettings?.id == 1 && <>
                     <div className="d-flex flex-row justify-content-between py-3 border-bottom border-dark ">
                         <div>
-                            <Form.Label className={'font-weight-bold'} htmlFor='font-size'>
+                            <Form.Label className={'font-weight-bold'} htmlFor='fontSize'>
                                 Font Size (px)
                             </Form.Label>
                             <Form.Control
                                 type='number'
-                                name='font-size'
+                                name='fontSize'
                                 onChange={handleChange}
-                                id='font-size'
+                                id='fontSize'
                                 min={'0'}
                                 max='100'
-                                value={listeningBtnStyle['font-size']}
+                                value={listeningBtnStyle.fontSize}
                                 title='Font size'
                             /></div>
                         <div>
@@ -107,17 +107,17 @@ export default function TTSButtonDesign({handleChange, customCSS, listeningBtnSt
                     </div>
                     <div className="d-flex flex-row justify-content-between py-3 border-bottom border-dark ">
                         <div>
-                            <Form.Label className={'font-weight-bold'} htmlFor='border-radius'>
+                            <Form.Label className={'font-weight-bold'} htmlFor='borderRadius'>
                                 Button Border Radius (px)
                             </Form.Label>
                             <Form.Control
                                 type='number'
-                                name='border-radius'
+                                name='borderRadius'
                                 onChange={handleChange}
-                                id='border-radius'
+                                id='borderRadius'
                                 min={'0'}
                                 max='200'
-                                value={listeningBtnStyle['border-radius']}
+                                value={listeningBtnStyle.borderRadius}
                                 title='Button border radius'
                             />
                         </div>

@@ -35,7 +35,7 @@ export default function Listening() {
 
     const [listeningSettings, setListeningSettings] = useState({
         tta__listening_voice: 'Google UK English Female',
-        tta__listening_pitch: 2,
+        tta__listening_pitch: 1,
         tta__listening_rate: 1,
         tta__listening_volume: 1,
         tta__listening_lang: 'en-GB',
@@ -61,7 +61,7 @@ export default function Listening() {
 
     useEffect(() => {
         if (window?.ttsObjPro?.compatible?.['gtranslate/gtranslate.php']) {
-            let gtranslateActiveLanguages = ttsObjPro?.compatible?.['gtranslate/gtranslate.php']?.GTranslate?.fincl_langs;
+            let gtranslateActiveLanguages = ttsObjPro?.compatible?.['gtranslate/gtranslate.php']?.allowed_languages;
             // Initialize an empty object
             const languageObject = {};
 
@@ -798,7 +798,7 @@ export default function Listening() {
                                                     </option>
                                                     {currentPlayerVoices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && customizationSettings?.buttonSettings?.id == 4 ?
                                                         <option key={index} data-lang={voice?.languageCodes?.[0]}
-                                                                value={voice.name}>
+                                                                value={[voice.name, voice.ssmlGender].join('-')}>
                                                             {voice.name} {'-'} {voice.ssmlGender}
                                                         </option> :
                                                         <option key={index} data-lang={voice.lang} value={voice.name}>

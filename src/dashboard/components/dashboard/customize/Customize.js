@@ -12,31 +12,37 @@ import notify from "../../context/Notify";
 let speech = null;
 let TextToSpeechFree = null;
 export default function Customize() {
-    const [listeningBtnStyle, setListeningStyle] = useState({
-        backgroundColor: '#FFFFFF',
-        color: '#000000',
+    const defaultValue = {
+        backgroundColor: '#184c53',
+        color: '#ffffff',
         width: '100',
         height: '30',
         border: '0',
-        border_color: '0',
-        ['border-radius']: '4px',
-        ['font-size']: '18',
+        border_color: '#000000',
+        borderRadius: '4',
+        fontSize: '18',
+        tta_play_btn_shortcode: "[atlasvoice]",
         buttonSettings: {
             id: 1,
-            button_position: 'before_content'
-        }
-    });
+            button_position: 'before_content',
+            display_player_to: ["all"],
+            who_can_download_mp3_file: ["all"],
+        },
+        custom_css: ''
+    }
+
+    const [listeningBtnStyle, setListeningStyle] = useState(defaultValue);
     const [listeningBtnStyle2, setListeningStyle2] = useState({
         backgroundColor: '#FFFFFF',
         color: '#000000',
         width: '100%',
         border: '0px',
         height: '30px',
-        ['font-size']: '18px',
-        ['border-radius']: '4px',
+        fontSize: '18px',
+        borderRadius: '4px',
         display: 'flex',
-        ['justify-content'] : 'center',
-        ['align-items'] : 'center',
+        justifyContent: 'center',
+        alignItems: 'center',
     });
 
     const [shortCode, setShortCode] = useState('[atlasvoice]');
@@ -49,8 +55,9 @@ export default function Customize() {
     const [isChatGPTAuthenticated, setIsChatGPTAuthenticated] = useState(false)
 
     const setDefaultButtonSettingsIfNeeded = (res) => {
-        let tempButtonSettings = structuredClone(listeningBtnStyle.buttonSettings)
-
+        if (!res.data?.buttonSettings) {
+            res.data.buttonSettings = {}
+        }
         if (!res?.data?.buttonSettings?.display_player_to || res?.data?.buttonSettings?.display_player_to.length < 1) {
             res.data.buttonSettings.display_player_to = ['all']
         }
@@ -59,10 +66,10 @@ export default function Customize() {
         }
 
         if (!res?.data?.buttonSettings?.id) {
-            res.data.buttonSettings.id = tempButtonSettings.id
+            res.data.buttonSettings.id = defaultValue.buttonSettings.id
         }
         if (!res?.data?.buttonSettings?.button_position) {
-            res.data.buttonSettings.id = tempButtonSettings.button_position
+            res.data.buttonSettings.button_position = defaultValue.buttonSettings.button_position
         }
 
         return res;
@@ -78,21 +85,39 @@ export default function Customize() {
             .then((res) => {
                 res = setDefaultButtonSettingsIfNeeded(res)
 
-                setListeningStyle(res.data);
-                if (res.data.custom_css) {
-                    setCustomCSS(res.data.custom_css);
-                }
-                setShortCode(res.data.tta_play_btn_shortcode);
-                setListeningStyle2({
+                let css = {
                     ...listeningBtnStyle2,
-                    ...{backgroundColor: res.data.backgroundColor},
-                    ...{color: res.data.color},
-                    ...{height: res.data.height+ 'px'},
-                    ...{['font-size']: res.data['font-size']+ 'px'},
-                    ...{['border-radius']: res.data['border-radius']+ 'px'},
-                    ...{border: res.data.border+ 'px solid '+ res.data.border_color},
+                    ...{backgroundColor: res.data.backgroundColor || defaultValue.backgroundColor},
+                    ...{color: res.data.color || defaultValue.color},
+                    ...{height: res.data?.height || defaultValue.height + 'px'},
+                    ...{fontSize: res.data?.fontSize || defaultValue.fontSize + 'px'},
+                    ...{borderRadius: res.data?.borderRadius || defaultValue.borderRadius + 'px'},
+                    ...{border: res.data?.border || defaultValue.border + 'px solid '},
                     ...{width: [res.data.width, '%'].join('')},
-                });
+                }
+                css.border += res.data?.border_color || defaultValue.border_color;
+
+                let value = {
+                    ...res.data,
+                    ...{backgroundColor: res.data.backgroundColor || defaultValue.backgroundColor},
+                    ...{color: res.data.color || defaultValue.color},
+                    ...{height: res.data?.height || defaultValue.height},
+                    ...{fontSize: res.data?.fontSize || defaultValue.fontSize},
+                    ...{borderRadius: res.data?.borderRadius || defaultValue.borderRadius},
+                    ...{border: res.data?.border || defaultValue.border},
+                    ...{border_color: res.data?.border_color || defaultValue.border_color},
+                    ...{width: res.data?.width || defaultValue.width},
+                    ...{tta_play_btn_shortcode: res.data?.tta_play_btn_shortcode || defaultValue.tta_play_btn_shortcode},
+                    ...{custom_css: res.data?.custom_css || defaultValue.custom_css}
+                }
+                console.log({css, value})
+
+                setListeningStyle(value);
+                if (res.data.custom_css) {
+                    setCustomCSS(res.data.custom_css || '');
+                }
+                setShortCode(res.data?.tta_play_btn_shortcode || defaultValue.tta_play_btn_shortcode);
+                setListeningStyle2(css);
             })
             .catch((err) => {
                 console.log(err);
@@ -157,6 +182,7 @@ export default function Customize() {
      * @param {*} e
      */
     const handleChange = (e, keyName = '') => {
+
         if (Array.isArray(e) && keyName) {
 
             let tempButtonSettings = structuredClone(listeningBtnStyle.buttonSettings)
@@ -200,7 +226,7 @@ export default function Customize() {
 
         // ChatGPT TTS player button settings
         // && listeningBtnStyle?.buttonSettings?.id == 3
-        if (!['backgroundColor', 'width', 'color', 'height', 'border', 'border_color', 'font-size', 'border-radius'].includes(e.target.name)) {
+        if (!['backgroundColor', 'width', 'color', 'height', 'border', 'border_color', 'fontSize', 'borderRadius'].includes(e.target.name)) {
 
             if (e.target.name === 'button_position' && !['before_content', 'after_content'].includes(e.target.value) && !ttsObj.is_pro_active) {
                 toast('This option is only available for pro version.', 'error');
@@ -252,21 +278,20 @@ export default function Customize() {
                 value += listeningBtnStyle?.border_color ?? ' black';
             } else {
                 value = listeningBtnStyle?.border ?? '1px ';
-                if(value.indexOf('px') < 0) {
+                if (value.indexOf('px') < 0) {
                     value += 'px';
                 }
                 value += ' solid ';
                 value += e.target.value;
             }
             // e.target.name = 'border';
-        } else if (e.target.name === 'font-size') {
+        } else if (e.target.name === 'fontSize') {
             value = e.target.value + 'px';
-        }else if (e.target.name === 'border-radius') {
+        } else if (e.target.name === 'borderRadius') {
             value = e.target.value + 'px';
         } else {
             value = e.target.value;
         }
-
         setListeningStyle2({
             ...listeningBtnStyle2,
             ...{[e.target.name]: value},
@@ -292,7 +317,7 @@ export default function Customize() {
                     return;
                 }
             }
-            if (!['backgroundColor', 'width', 'color', 'border', 'border_color', 'height', 'font-size', 'border-radius'].includes(key)) {
+            if (!['backgroundColor', 'width', 'color', 'border', 'border_color', 'height', 'fontSize', 'borderRadius'].includes(key)) {
                 continue;
             }
 
@@ -387,7 +412,6 @@ export default function Customize() {
         localStorage.setItem('demo_listening_content', e.target.value);
         if (window.hasOwnProperty('TTS') && window.hasOwnProperty('ttsObjPro') && ttsObjPro.is_pro_license_active) {
             window.TTS.contents[1] = e.target.value;
-            ;
         }
     };
 
@@ -449,7 +473,8 @@ export default function Customize() {
                                                         style={listeningBtnStyle2}
                                                         type='button'
                                                         title='Text To Audio:  Tap to listen post.'>
-                                                        <span style={{fontSize:listeningBtnStyle2["font-size"]}} className='dashicons dashicons-controls-play'></span>{' '}
+                                                        <span style={{fontSize: listeningBtnStyle2?.fontSize}}
+                                                              className='dashicons dashicons-controls-play'></span>{' '}
                                                         {tta_obj.buttonTextArr.listen_text}
                                                     </button>
                                                 )

@@ -55,7 +55,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
         let post_ids = url.get('atlasvoice_mp3_file');
         post_ids = post_ids.split(',')
         console.log(post_ids)
-        setPostIDs(setPostIDs)
+        setPostIDs(post_ids)
 
         let formData = new FormData();
         formData.append('method', 'get');

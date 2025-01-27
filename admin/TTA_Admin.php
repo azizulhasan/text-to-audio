@@ -90,7 +90,7 @@ class TTA_Admin {
 			$color = $settings['customize']['color'];
 		}
 
-        $rest_api_url = TTA_Cache::get( 'tts_rest_api_url' ) ?? esc_url_raw( site_url() . '/wp-json/' );
+		$rest_api_url = TTA_Cache::get( 'tts_rest_api_url' ) ?? esc_url_raw( site_url() . '/wp-json/' );
 
 		$this->localize_data = [
 			'json_url'                 => $rest_api_url,
@@ -147,7 +147,7 @@ class TTA_Admin {
 			] ),
 			'categories'               => TTA_Helper::get_all_categories(),
 			'tags'                     => TTA_Helper::get_all_tags(),
-			'is_mobile'                => wp_is_mobile(),
+			'is_mobile'                => 'wp_is_mobile()',
 		];
 	}
 
@@ -259,14 +259,15 @@ class TTA_Admin {
 	}
 
 	public function engueue_block_scripts() {
-
-		wp_enqueue_script( 'tta-blocks', plugin_dir_url( dirname( __FILE__ ) ) . 'build/blocks.js', array(
-			'wp-blocks',
-			'wp-i18n',
-			'wp-element',
-			'wp-editor'
-		), true, true );
-		wp_localize_script( 'tta-blocks', 'ttaBlocks', $this->localize_data );
+		if ( TTA_Helper::is_edit_page() || isset( $_REQUEST['page'] ) && ( 'text-to-audio' == $_REQUEST['page'] ) ) {
+			wp_enqueue_script( 'tta-blocks', plugin_dir_url( dirname( __FILE__ ) ) . 'build/blocks.js', array(
+				'wp-blocks',
+				'wp-i18n',
+				'wp-element',
+				'wp-editor'
+			), true, true );
+			wp_localize_script( 'tta-blocks', 'ttaBlocks', $this->localize_data );
+		}
 
 		register_block_type( 'tta/customize-button', [
 			'render_callback' => [ $this, 'render_button' ],

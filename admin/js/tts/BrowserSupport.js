@@ -2,16 +2,20 @@ export default class BrowserSupport {
     #browser = ''
     #ttsObj = {}
     voices = []
-    #voice = ''
-    #lang = ''
-    #selectedLang = ''
-    #selectedVoice = ''
+    #voice = 'Google UK English Female'
+    #lang = 'en-GB'
+    #selectedLang = 'en-GB'
+    #selectedVoice = 'Google UK English Female'
     #filteredVoices = [];
     constructor(ttsObj, voices, selectedLang, selectedVoice) {
         this.#ttsObj = ttsObj
         this.voices = voices
-        this.#selectedLang = selectedLang
-        this.#selectedVoice = selectedVoice
+        if(selectedLang){
+            this.#selectedLang = selectedLang
+        }
+        if(selectedVoice) {
+            this.#selectedVoice = selectedVoice
+        }
         this.#defineBrowser()
         this.defineVoiceAndLang(selectedVoice, selectedLang)
     }
@@ -141,6 +145,7 @@ export default class BrowserSupport {
         if (selectedLang && selectedLang.indexOf('_') != undefined) {
             return selectedLang.split('_')[0]
         }
+
         
         return selectedLang
     }
