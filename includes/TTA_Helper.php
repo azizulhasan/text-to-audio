@@ -96,7 +96,8 @@ class TTA_Helper {
 		}
 
 		// Display player settings from customization menu
-		$display_player_to = self::display_player_based_on_user_role();
+		$display_player_to                  = self::display_player_based_on_user_role();
+		$display_player_based_on_date_range = self::display_player_based_on_date_range( $post );
 
 		if (
 			! isset( $settings['tta__settings_allow_listening_for_post_types'] )
@@ -108,6 +109,7 @@ class TTA_Helper {
 			|| $is_exclude_by_cagories
 			|| $tta__settings_allow_listening_for_posts_status
 			|| $display_player_to
+			|| ! $display_player_based_on_date_range
 		) {
 			$should_load_button = false;
 		}
@@ -124,6 +126,7 @@ class TTA_Helper {
 				|| $is_exclude_by_cagories
 				|| $tta__settings_allow_listening_for_posts_status
 				|| $display_player_to
+				|| ! $display_player_based_on_date_range
 			) {
 				$should_load_button = false;
 			}
@@ -1087,6 +1090,18 @@ class TTA_Helper {
 	}
 
 
+	/**
+	 * Retrieves and applies custom CSS styles for a block.
+	 *
+	 * This function takes in attributes and existing customization settings,
+	 * then determines the final values for background color, text color, and width.
+	 * If attributes are provided, they override existing customization settings;
+	 * otherwise, defaults are applied.
+	 *
+	 * @param array $atts Attributes passed to the block (e.g., background color, text color, width).
+	 * @param array $customize Existing customization settings.
+	 * @return array Filtered array of CSS styles for the block.
+	 */
 	public static function get_block_css( $atts, $customize ) {
 		if ( isset( $atts['backgroundColor'] ) ) {
 			$customize['backgroundColor'] = $atts['backgroundColor'];
@@ -1112,8 +1127,86 @@ class TTA_Helper {
 			$customize['width'] = '100';
 		}
 
-
 		return apply_filters( 'get_block_css', $customize );
+	}
+
+
+	/**
+	 * Determines whether the player should generate an MP3 file based on a date range.
+	 *
+	 * This function retrieves the customization settings, checks if the button settings contain
+	 * the `generate_mp3_date_from` and `generate_mp3_date_to` values, and determines whether
+	 * the current date falls within the specified date range.
+	 *
+	 * @param object $post post object.
+	 *
+	 * @return bool True if the MP3 should be generated based on the date range, false otherwise.
+	 */
+	public static function display_player_based_on_date_range( $post ) {
+		// Retrieve customization settings for the player
+		$customize           = (array) self::tts_get_settings( 'customize' );
+		$should_generate_mp3 = false;
+
+		// Check if button settings exist
+		if ( isset( $customize['buttonSettings'] ) ) {
+			// Safely retrieve button settings, avoiding key errors
+			$button_settings = (array) $customize['buttonSettings'];
+
+			$generate_mp3_date_from = isset( $button_settings['generate_mp3_date_from'] )
+				? (string) $button_settings['generate_mp3_date_from']
+				: '';
+
+			$generate_mp3_date_to = isset( $button_settings['generate_mp3_date_to'] )
+				? (string) $button_settings['generate_mp3_date_to']
+				: '';
+
+			// Get the current date in YYYY-MM-DD format
+			$post_date = explode( ' ', $post->post_date );
+			if ( isset( $post_date[0] ) ) {
+				$post_date = $post_date[0];
+			}
+			// Validate date format (ensure correct YYYY-MM-DD format)
+			if ( self::validate_date( $generate_mp3_date_from ) && self::validate_date( $generate_mp3_date_to ) ) {
+				// Check if the post date falls within the date range
+				if ( $post_date >= $generate_mp3_date_from && $post_date <= $generate_mp3_date_to ) {
+					$should_generate_mp3 = true;
+				}
+			}
+
+			if ( empty( $generate_mp3_date_to ) && self::validate_date( $generate_mp3_date_from ) ) {
+				// Check if the post date is greater or equal to date_from
+				if ( $post_date >= $generate_mp3_date_from ) {
+					$should_generate_mp3 = true;
+				}
+			}
+
+			if ( empty( $generate_mp3_date_from ) && self::validate_date( $generate_mp3_date_to ) ) {
+				// Check if the post date is less or equal to  date_to
+				if ( $post_date <= $generate_mp3_date_to  ) {
+					$should_generate_mp3 = true;
+				}
+			}
+
+
+			// both value are empty then return true
+			if ( empty( $generate_mp3_date_from ) && empty( $generate_mp3_date_to ) ) {
+				$should_generate_mp3 = true;
+			}
+
+		}
+
+		return $should_generate_mp3;
+	}
+
+	/**
+	 * Validates a date string to ensure it follows the YYYY-MM-DD format.
+	 *
+	 * @param string $date The date string to validate.
+	 *
+	 * @return bool True if valid, false otherwise.
+	 */
+	private static function validate_date( $date ) {
+		return preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) === 1;
 	}
 
 

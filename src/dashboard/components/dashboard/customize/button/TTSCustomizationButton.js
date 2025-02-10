@@ -112,17 +112,48 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
 
             {/*Who Can Download MP3 File*/}
             {
-                listeningBtnStyle?.buttonSettings?.id > 2 && Object.keys(userRoles).length && <Form.Group className={'mt-3'}>
-                    <Form.Label>
-                        {__('Who Can Download MP3 File')}
-                    </Form.Label>
-                    <MultiSelect toastMessage={'Player display restriction to multiple user type is available in the pro version'}
-                       name={'who_can_download_mp3_file'}
-                       id={'who_can_download_mp3_file'}
-                       multiselectIndex={1}
-                       selectedItems={listeningBtnStyle?.buttonSettings?.who_can_download_mp3_file ||  ['all']}
-                       selectionLimit={100} options={userRoles} onChange={handleChange}/>
-                </Form.Group>
+                listeningBtnStyle?.buttonSettings?.id > 2 && Object.keys(userRoles).length && <>
+                    <Form.Group className={'mt-3'}>
+                        <Form.Label>
+                            {__('Who Can Download MP3 File')}
+                        </Form.Label>
+                        <MultiSelect toastMessage={'Player display restriction to multiple user type is available in the pro version'}
+                                     name={'who_can_download_mp3_file'}
+                                     id={'who_can_download_mp3_file'}
+                                     multiselectIndex={1}
+                                     selectedItems={listeningBtnStyle?.buttonSettings?.who_can_download_mp3_file ||  ['all']}
+                                     selectionLimit={100} options={userRoles} onChange={handleChange}/>
+                    </Form.Group>
+                    <Form.Group className={'mt-3'}>
+                        <Form.Label>
+                            {__('Generate MP3 File Date From')}
+                        </Form.Label>
+                        <Form.Control
+                            type='date'
+                            name='generate_mp3_date_from'
+                            onChange={handleChange}
+                            id='generate_mp3_date_from'
+                            value={listeningBtnStyle?.buttonSettings?.generate_mp3_date_from || '' }
+                            title='Generate MP3 File Date From'
+                        />
+
+                    </Form.Group>
+                    <Form.Group className={'mt-3'}>
+                        <Form.Label>
+                            {__('Generate MP3 File Date To')}
+                        </Form.Label>
+                        <Form.Control
+                            type='date'
+                            name='generate_mp3_date_to'
+                            onChange={handleChange}
+                            id='generate_mp3_date_to'
+                            value={listeningBtnStyle?.buttonSettings?.generate_mp3_date_to || '' }
+                            title='Generate MP3 File Date To'
+                        />
+
+                    </Form.Group>
+                </>
+
 
             }
 
