@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.7.0
 Requires PHP: 7.4
-Stable tag: 1.8.12
+Stable tag: 1.8.13
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -264,6 +264,10 @@ Boost engagement, accessibility, and productivity on your WordPress and WooComme
 
 
 
+### CHECK OUT OUR OTHER ADDONS 👑:
+> * [Augmented Reality and 3D Model Viewer for WordPress and WooCommerce – AR VR Try-On](https://wordpress.org/plugins/ar-vr-3d-model-try-on/) – Best user friendly augmented reality plugin. There is no limit just install and engage shoppers with 3D models, AR experiences.
+
+
 == Installation ==
 1. From your WordPress admin go to Plugins>> Add New. Search for the plugin Text To Speech TTS Accessibility. Install and Activate.
 2. Alternatively download the plugin from WordPress Plugin repository.
@@ -427,6 +431,9 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+
+= 1.8.13 ( 10 Feb 2025 ) =
+Added: Display player based on date range in pro version.
 
 = 1.8.12 ( 27 Jan 2025 ) =
 Updated: Freemius version updated.
