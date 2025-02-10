@@ -27,6 +27,8 @@ export default function Customize() {
             button_position: 'before_content',
             display_player_to: ["all"],
             who_can_download_mp3_file: ["all"],
+            generate_mp3_date_from: '',
+            generate_mp3_date_to: ''
         },
         custom_css: ''
     }
@@ -311,7 +313,8 @@ export default function Customize() {
 
         let formData = {};
         for (let [key, value] of form.entries()) {
-            if (key !== 'custom_css') {
+            if (key !== 'custom_css' && key !== 'generate_mp3_date_to' && key !== 'generate_mp3_date_from') {
+
                 if (key === '' || value === '') {
                     toast('Please fill the  field : ' + key);
                     return;

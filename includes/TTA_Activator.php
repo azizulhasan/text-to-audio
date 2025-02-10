@@ -44,10 +44,12 @@ class TTA_Activator {
 				'custom_css'             => '',
 				'tta_play_btn_shortcode' => '[atlasvoice]',
 				'buttonSettings'         => [
-					'id'                        => 1,
-					'button_position'           => 'before_content',
-					'display_player_to'         => [ 'all' ],
-					'who_can_download_mp3_file' => [ 'all' ],
+					'id'                         => 1,
+					'button_position'            => 'before_content',
+					'display_player_to'          => [ 'all' ],
+					'who_can_download_mp3_file'  => [ 'all' ],
+					'generate_mp3_date_from' => '',
+					'generate_mp3_date_to'   => ''
 				],
 				'height'                 => '30',
 				'border'                 => '#00000',
