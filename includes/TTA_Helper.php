@@ -1148,7 +1148,7 @@ class TTA_Helper {
 		$should_generate_mp3 = false;
 
 		// Check if button settings exist
-		if ( isset( $customize['buttonSettings'] ) ) {
+		if ( isset( $customize['buttonSettings'] ) && isset( $post->post_date ) ) {
 			// Safely retrieve button settings, avoiding key errors
 			$button_settings = (array) $customize['buttonSettings'];
 
