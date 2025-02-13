@@ -193,7 +193,7 @@ export default function Docs() {
 							</Accordion.Item>
 							<Accordion.Item eventKey='7'>
 								<Accordion.Header>
-									7. Filter Hooks Reference. (Free Version)
+									7. Apply Backend Filters and Actions ( Free Version )
 								</Accordion.Header>
 								<Accordion.Body>
 									<Table striped bordered hover size='sm'>
@@ -315,7 +315,7 @@ export default function Docs() {
 							</Accordion.Item>
 							<Accordion.Item eventKey='12'>
 								<Accordion.Header>
-									12. Filter Hooks Reference. (Pro Version)
+									12. Apply Backend Filters and Actions ( Pro Version )
 								</Accordion.Header>
 								<Accordion.Body>
 									<Table striped bordered hover size='sm'>
