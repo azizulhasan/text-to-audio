@@ -5,43 +5,30 @@ import { copyToClipBoard } from '../../context/utilities';
 import UpgradeToPro from '../../UpgradeToPro';
 export default function Docs() {
 	/**
-	 * Copy Code
-	 */
-	// const copyToClipBoard = (id) => {
-	// 	/* Get the text field */
-	// 	var copyText = document.getElementById(id);
-
-	// 	/* Copy the text inside the text field */
-	// 	navigator.clipboard.writeText(copyText.innerText);
-
-	// 	/* Alert the copied text */
-	// 	toast('Copied to clipboard');
-	// };
-
-	/**
 	 * Filters
 	 */
 	const filters = [
 		{
 			name: 'tta__content_title',
-			arguments: '$description, $post',
+			arguments: '$title, $post',
 		},
 		{
 			name: 'tta__content_description',
-			arguments: '$description, $post',
-		},
-		{
-			name: 'tta__content',
-			arguments: '$content, $post',
-		},
-		{
-			name: 'tta__listening_button',
-			arguments: '$button'
+			arguments: '$description_sanitized, $description, $post_id, $post',
 		},
 		{
 			name: 'tta__button_text_arr',
-			arguments: '$button_text_arr'
+			arguments: '$text_arr, $atts, $content_read_time'
 		},
+		{
+			name: 'tta_clean_content',
+			arguments: '$text'
+		},
+		{
+			name: 'tts__listening_button',
+			arguments: '$button, $btn_no, $class, $post'
+		},
+
 	];
 	return (
 		<>
