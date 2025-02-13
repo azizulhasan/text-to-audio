@@ -5,42 +5,51 @@ import { copyToClipBoard } from '../../context/utilities';
 import UpgradeToPro from '../../UpgradeToPro';
 export default function Docs() {
 	/**
-	 * Copy Code
-	 */
-	// const copyToClipBoard = (id) => {
-	// 	/* Get the text field */
-	// 	var copyText = document.getElementById(id);
-
-	// 	/* Copy the text inside the text field */
-	// 	navigator.clipboard.writeText(copyText.innerText);
-
-	// 	/* Alert the copied text */
-	// 	toast('Copied to clipboard');
-	// };
-
-	/**
 	 * Filters
 	 */
 	const filters = [
 		{
 			name: 'tta__content_title',
-			arguments: '$description, $post',
+			arguments: '$title, $post',
 		},
 		{
 			name: 'tta__content_description',
-			arguments: '$description, $post',
-		},
-		{
-			name: 'tta__content',
-			arguments: '$content, $post',
-		},
-		{
-			name: 'tta__listening_button',
-			arguments: '$button'
+			arguments: '$description_sanitized, $description, $post_id, $post',
 		},
 		{
 			name: 'tta__button_text_arr',
-			arguments: '$button_text_arr'
+			arguments: '$text_arr, $atts, $content_read_time'
+		},
+		{
+			name: 'tta_clean_content',
+			arguments: '$text'
+		},
+		{
+			name: 'tts__listening_button',
+			arguments: '$button, $btn_no, $class, $post'
+		},
+		{
+			name: 'tts_player_customizations',
+			arguments: '$player_icons'
+		},
+
+	];
+
+	/**
+	 * Filters
+	 */
+	const pro_filters = [
+		{
+			name: 'tts_clean_gtts_folder',
+			arguments: '$should_delete_mp3_folder',
+		},
+		{
+			name: 'tts_pro_batch_charlen',
+			arguments: '$charlen_arr',
+		},
+		{
+			name: 'tts_pro_exclude_between_delimiters',
+			arguments: '$delimiters_arr',
 		},
 	];
 	return (
@@ -184,7 +193,7 @@ export default function Docs() {
 							</Accordion.Item>
 							<Accordion.Item eventKey='7'>
 								<Accordion.Header>
-									7. Filter Hooks Reference.
+									7. Apply Backend Filters and Actions ( Free Version )
 								</Accordion.Header>
 								<Accordion.Body>
 									<Table striped bordered hover size='sm'>
@@ -213,6 +222,7 @@ export default function Docs() {
 												})}
 										</tbody>
 									</Table>
+									visit examples <a href={'https://atlasaidev.com/docs/text-to-speech/filters-actions/apply-backend-filters-and-actions/'} target={'_blank'}>here</a>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='8'>
@@ -303,6 +313,41 @@ export default function Docs() {
 									<strong>FireFox Mobile:</strong> English USA, English UK, German, Italian, Russian, French, Spanish.<br />
 								</Accordion.Body>
 							</Accordion.Item>
+							<Accordion.Item eventKey='12'>
+								<Accordion.Header>
+									12. Apply Backend Filters and Actions ( Pro Version )
+								</Accordion.Header>
+								<Accordion.Body>
+									<Table striped bordered hover size='sm'>
+										<thead>
+										<tr>
+											<th>Sr.</th>
+
+											<th>Filter Name</th>
+											<th>Arguments</th>
+										</tr>
+										</thead>
+										<tbody>
+										{pro_filters.length &&
+											pro_filters.map((filter, index) => {
+												return (
+													<tr key={filter.name}>
+														<td>{++index}</td>
+														<td>
+															<code>{filter.name}</code>
+														</td>
+														<td>
+															<code>{filter.arguments}</code>
+														</td>
+													</tr>
+												);
+											})}
+										</tbody>
+									</Table>
+									visit examples <a href={'https://atlasaidev.com/docs/text-to-speech/filters-actions/apply-backend-filters-and-actions-pro-version/'} target={'_blank'}>here</a>
+								</Accordion.Body>
+							</Accordion.Item>
+
 						</Accordion>
 					</Col>
 					<Col xs={12} sm={12} lg={4}>
