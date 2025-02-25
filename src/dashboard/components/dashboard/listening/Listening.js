@@ -196,15 +196,12 @@ export default function Listening() {
         customize.append('method', 'get');
         postWithoutImage(tta_obj.api_url + 'tta/v1/customize', customize)
             .then((res) => {
-                if(!res.data?.buttonSettings?.id){
+                if (!res.data?.buttonSettings?.id) {
                     res.data.buttonSettings.id = 1;
                 }
-
+                console.log({dta: res.data.buttonSettings.id})
                 setCustomizationSettings(res.data);
                 setIsListeningSettingsLoaded(true)
-                if (res?.data?.buttonSettings?.id < 3) {
-                    setVoicesAndLanguages()
-                }
 
             })
             .catch((err) => {
@@ -263,7 +260,7 @@ export default function Listening() {
             timer = setTimeout(handleTime, 1000)
             console.log({customizationSettings, timer})
 
-            if (timer > 65 || customizationSettings?.buttonSettings == undefined) {
+            if (timer > 999 || customizationSettings?.buttonSettings == undefined) {
                 clearTimeout(timer)
                 timer = null;
             }
@@ -289,7 +286,7 @@ export default function Listening() {
                 let gttsLanguages = gttsSupportedLanguages();
                 setCurrentPlayerLanguages(gttsLanguages)
                 setLanguageMissingMessage('')
-            }else if (customizationSettings?.buttonSettings?.id == 5) {
+            } else if (customizationSettings?.buttonSettings?.id == 5) {
                 let languages = chatGPTLanguages();
                 setCurrentPlayerLanguages(languages)
                 setLanguageMissingMessage('')
@@ -499,9 +496,11 @@ export default function Listening() {
                                                 <option key={index} data-lang={voice?.languageCodes?.[0]}
                                                         value={[voice.name, voice.ssmlGender].join('-')}>
                                                     {voice.name} {'-'} {voice.ssmlGender}
-                                                </option> : customizationSettings?.buttonSettings?.id == 5 ? <option key={index} data-lang={voice} value={voice}>
+                                                </option> : customizationSettings?.buttonSettings?.id == 5 ?
+                                                    <option key={index} data-lang={voice} value={voice}>
                                                         {voice}
-                                                    </option> : <option key={index} data-lang={voice.lang} value={voice.name}>
+                                                    </option> :
+                                                    <option key={index} data-lang={voice.lang} value={voice.name}>
                                                         {voice.name}
                                                     </option>
                                             )}
@@ -555,7 +554,12 @@ export default function Listening() {
                                                 placement={placement}
                                                 overlay={
                                                     <Tooltip id={`tooltip-${placement}`}>
-                                                        For real-time applications, the standard tts-1 model provides the lowest latency but at a lower quality than the tts-1-hd model. Due to the way the audio is generated, tts-1 is likely to generate content that has more static in certain situations than tts-1-hd. In some cases, the audio may not have noticeable differences depending on your listening device and the individual person.
+                                                        For real-time applications, the standard tts-1 model provides the
+                                                        lowest latency but at a lower quality than the tts-1-hd model. Due
+                                                        to the way the audio is generated, tts-1 is likely to generate
+                                                        content that has more static in certain situations than tts-1-hd. In
+                                                        some cases, the audio may not have noticeable differences depending
+                                                        on your listening device and the individual person.
                                                     </Tooltip>
                                                 }>
                                                 <Button className='tta_btn'>?</Button>
@@ -566,7 +570,8 @@ export default function Listening() {
                             </Row>
                         }
                         {
-                            customizationSettings?.buttonSettings?.id < 3 || customizationSettings?.buttonSettings?.id == 5 && <Row>
+                            (customizationSettings?.buttonSettings?.id < 3 || customizationSettings?.buttonSettings?.id == 5) &&
+                            <Row>
                                 <Col xs={12} sm={8} lg={8}>
                                     <Form.Group>
                                         <Form.Label htmlFor='tta__listening_rate'>
@@ -597,10 +602,10 @@ export default function Listening() {
                                                 overlay={
                                                     <Tooltip id={`tooltip-${placement}`}>
                                                         {
-                                                           customizationSettings?.buttonSettings?.id == 5 ? 'The speed of the generated audio. Select a value from 0.25 to 4.0. 1.0 is the default.\n' +
-                                                               '\n' :" Gets and sets the speed at which the\n" +
-                                                               "                                                        utterance will be spoken at. Value :\n" +
-                                                               "                                                        From 0.1 to 10"
+                                                            customizationSettings?.buttonSettings?.id == 5 ? 'The speed of the generated audio. Select a value from 0.25 to 4.0. 1.0 is the default.\n' +
+                                                                '\n' : " Gets and sets the speed at which the\n" +
+                                                                "                                                        utterance will be spoken at. Value :\n" +
+                                                                "                                                        From 0.1 to 10"
                                                         }
                                                     </Tooltip>
                                                 }>
@@ -711,7 +716,8 @@ export default function Listening() {
                                                             the pro version.
                                                         </Tooltip>
                                                     }>
-                                                    <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i className="fas fa-lock" /></Button>
+                                                    <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
+                                                        className="fas fa-lock"/></Button>
                                                 </OverlayTrigger>
                                             ))}
                                         </>
@@ -720,7 +726,7 @@ export default function Listening() {
                         </Row>
                         <Row>
                             {
-                               Object.keys(multilingualActiveLanguages).length ? Object.keys(multilingualActiveLanguages).map((languageCode, index) =>
+                                Object.keys(multilingualActiveLanguages).length ? Object.keys(multilingualActiveLanguages).map((languageCode, index) =>
                                     <Row key={index}>
                                         <Col xs={12} sm={4} lg={4}>
                                             <Form.Group>
@@ -789,7 +795,7 @@ export default function Listening() {
                                                         if (customizationSettings?.buttonSettings?.id < 3) {
                                                             return voice?.lang?.startsWith(languageCode);
                                                         }
-                                                        return  voice?.name?.startsWith(languageCode)
+                                                        return voice?.name?.startsWith(languageCode)
                                                     })[0]?.name}
                                                     aria-label='Default select example'>
                                                     <option disabled>
