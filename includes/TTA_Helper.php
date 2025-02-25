@@ -2,8 +2,6 @@
 
 namespace TTA;
 
-use stdClass;
-
 /**
  * Fired during plugin activation
  *
