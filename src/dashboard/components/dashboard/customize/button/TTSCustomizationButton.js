@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Form, OverlayTrigger, Tooltip} from 'react-bootstrap';
+import {Button, Form, OverlayTrigger, Tooltip} from 'react-bootstrap';
 import { __ } from '@wordpress/i18n'
 import {postData} from "../../../context/utilities";
 import {MultiSelect} from "../../../context/MultiSelect";
@@ -126,7 +126,21 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
                     </Form.Group>
                     <Form.Group className={'mt-3'}>
                         <Form.Label>
-                            {__('MP3 Generation Start Date')}
+                            {__('MP3 Generation From Post\'s Publish Date ')}
+                            <>
+                                {['top'].map((placement) => (
+                                    <OverlayTrigger
+                                        key={placement}
+                                        placement={placement}
+                                        overlay={
+                                            <Tooltip id={`tooltip-${placement}`}>
+                                                Start Generating MP3 file from an specific post publish date. Select this only if you want to generate mp3 file based on date range.
+                                            </Tooltip>
+                                        }>
+                                        <Button className='tta_btn'>?</Button>
+                                    </OverlayTrigger>
+                                ))}
+                            </>
                         </Form.Label>
                         <Form.Control
                             type='date'
@@ -140,7 +154,21 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
                     </Form.Group>
                     <Form.Group className={'mt-3'}>
                         <Form.Label>
-                            {__('MP3 Generation End Date')}
+                            {__('MP3 Generation Till Post\'s Publish Date ')}
+                            <>
+                                {['top'].map((placement) => (
+                                    <OverlayTrigger
+                                        key={placement}
+                                        placement={placement}
+                                        overlay={
+                                            <Tooltip id={`tooltip-${placement}`}>
+                                                Start Generating MP3 file till an specific post publish date. Select this only if you want to generate mp3 file based on date range.
+                                            </Tooltip>
+                                        }>
+                                        <Button className='tta_btn'>?</Button>
+                                    </OverlayTrigger>
+                                ))}
+                            </>
                         </Form.Label>
                         <Form.Control
                             type='date'
