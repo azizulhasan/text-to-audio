@@ -126,7 +126,7 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
                     </Form.Group>
                     <Form.Group className={'mt-3'}>
                         <Form.Label>
-                            {__('Generate MP3 File Date From')}
+                            {__('MP3 Generation Start Date')}
                         </Form.Label>
                         <Form.Control
                             type='date'
@@ -140,7 +140,7 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
                     </Form.Group>
                     <Form.Group className={'mt-3'}>
                         <Form.Label>
-                            {__('Generate MP3 File Date To')}
+                            {__('MP3 Generation End Date')}
                         </Form.Label>
                         <Form.Control
                             type='date'

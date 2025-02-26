@@ -484,7 +484,7 @@ export default function Customize() {
                             }
                             <p className='pt-2 text-danger'>
                                 {
-                                    listeningBtnStyle?.buttonSettings?.id == 1 && ttsObj.is_pro_active ? __('If you\'re selecting this button then you may not get pro features. Suppose CSS selectors from settings page and WPML/GTranslate will not work with this button.') : __('Save this player then configure proper voice and lanuage from listening menu. ')
+                                    listeningBtnStyle?.buttonSettings?.id == 1 && ttsObj.is_pro_active ? __('If you\'re selecting this button then you may not get pro features. Suppose CSS selectors from settings page and WPML/GTranslate will not work with this button.') : __('Save this player then configure proper voice and language from listening menu. ')
                                 }
                             </p>
                         </Col>
