@@ -2,8 +2,6 @@
 
 namespace TTA;
 
-use stdClass;
-
 /**
  * Fired during plugin activation
  *
@@ -509,15 +507,14 @@ class TTA_Helper {
 		}
 
 		$final_mp3_file_ulrs = $mp3_file_urls;
-
-		$should_update_urls = false;
+		$should_update_urls  = false;
 
 		if ( isset( $mp3_file_urls[ $file_url_key ] ) && $mp3_file_urls[ $file_url_key ] ) {
 			$url           = $mp3_file_urls[ $file_url_key ];
 			$language_code = $file_url_key;
 			if ( self::is_file_url_not_exists_and_is_file_empty( $url, $date, $file_name ) ) {
 				$should_update_urls = true;
-				unset( $mp3_file_urls[ $file_url_key ] );
+				unset( $final_mp3_file_ulrs[ $file_url_key ] );
 			} else {
 				// Generate new singed url or backup only current post applicable url.
 				if ( get_option( 'tts_is_backup_mp3_file' ) == 'true' && strtolower( $language_code ) == strtolower( $file_url_key ) ) {
@@ -589,7 +586,6 @@ class TTA_Helper {
 		) {
 			update_post_meta( $post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs );
 		}
-
 
 		return \apply_filters( 'tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls );
 	}
@@ -1078,7 +1074,7 @@ class TTA_Helper {
 		$cache_key   = TTA_Cache::get_key( 'get_post_types' );
 		$cache_value = TTA_Cache::get( $cache_key );
 		if ( $cache_value ) {
-			return $cache_value;
+			return apply_filters( 'tts_get_post_types', $cache_value );
 		}
 		$post_types = get_post_types( array(
 			'public' => 1, // Only get public post types
@@ -1100,6 +1096,7 @@ class TTA_Helper {
 	 *
 	 * @param array $atts Attributes passed to the block (e.g., background color, text color, width).
 	 * @param array $customize Existing customization settings.
+	 *
 	 * @return array Filtered array of CSS styles for the block.
 	 */
 	public static function get_block_css( $atts, $customize ) {
@@ -1182,7 +1179,7 @@ class TTA_Helper {
 
 			if ( empty( $generate_mp3_date_from ) && self::validate_date( $generate_mp3_date_to ) ) {
 				// Check if the post date is less or equal to  date_to
-				if ( $post_date <= $generate_mp3_date_to  ) {
+				if ( $post_date <= $generate_mp3_date_to ) {
 					$should_generate_mp3 = true;
 				}
 			}

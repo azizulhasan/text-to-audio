@@ -1,9 +1,8 @@
 import React, {useState, useEffect} from 'react';
-import {__} from '@wordpress/i18n'
 import {
-    ToggleButton, Form, Row, Col, Container, Tooltip,
-    OverlayTrigger,
-    Button, Accordion, Table
+     Form, Row, Col, Container,
+
+    Button, Accordion
 } from 'react-bootstrap';
 import {ToastContainer} from 'react-toastify';
 /**
@@ -15,9 +14,7 @@ import 'react-toastify/dist/ReactToastify.css';
  *
  * Scripts
  */
-import {postWithoutImage, getMultilingualActiveLanguages, copyToClipBoard} from '../components/context/utilities';
-import toast from '../components/context/Notify';
-import {forEach} from "react-bootstrap/ElementChildren";
+import {postWithoutImage, getMultilingualActiveLanguages} from '../components/context/utilities';
 
 export default function GenerateBulkMp3File({postId, language, selectedLang, isRegenerateFile}) {
     const [settings, setSettings] = useState({
@@ -120,6 +117,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                 if (!bulkMP3File.fileURL) {
                     if (ttsObjPro.player_id == 3) {
                         let mp3File = await bulkMP3File.init_gtts(1)
+                        console.log({mp3File})
                         if (mp3File) {
                             mp3FileGenerateCount++;
                             setPostURL(mp3File, mp3FileGenerateCount, postId)
