@@ -203,9 +203,19 @@ Autoptimize Plugin</a>
 * <a href='https://wordpress.org/plugins/sg-cachepress/' target='_blank'>
 Speed Optimizer – The All-In-One WordPress Performance-Boosting Plugin</a> 
 
-
 * <a href='https://wordpress.org/plugins/elementor/' target='_blank'>
  Elementor Website Builder:</a> Elevate your website design and functionality with more than just a page builder.
+
+* <a href='https://wordpress.org/plugins/duplicate-post/' target='_blank'>
+  Yoast Duplicate Post:</a> This plugin allows users to clone posts of any type, or copy them to new drafts for further editing.
+
+* <a href='https://wordpress.org/plugins/copy-delete-posts/' target='_blank'>
+  Duplicate Post:</a> Massively increase your WordPress productivity!
+
+ * <a href='https://wordpress.org/plugins/duplicate-page/' target='_blank'>
+  Duplicate Page:</a> Duplicate Posts, Pages and Custom Posts easily using single click.
+
+
 
 ### USAGE:
 
@@ -438,7 +448,9 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 Fixed: Speed option is hidden on listening menu.
 Fixed: MP3 file generating issue fixed.
 Fixed: Bulk mp3 file generate with google cloud tts issue fixed.
-Minor bug fixed.
+Added: compatibility added [Yoast Duplicate Post](https://wordpress.org/plugins/duplicate-post/),
+[Duplicate Post](https://wordpress.org/plugins/copy-delete-posts/),
+[Duplicate Page](https://wordpress.org/plugins/duplicate-page/)
 
 = 1.8.15 ( 13 Feb 2025 ) =
 Updated: Documentation update of the plugin. on "Docs" menu
