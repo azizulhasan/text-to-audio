@@ -226,6 +226,7 @@ class TTA_Helper {
 
 		$GTranslate        = get_option( 'GTranslate' );
 		$allowed_languages = [];
+		$gtranslate_data = [];
 		if ( ! empty( $GTranslate ) && isset( $GTranslate['widget_look'], $GTranslate['incl_langs'], $GTranslate['fincl_langs'] ) ) {
 			if ( $GTranslate['widget_look'] == 'float' or $GTranslate['widget_look'] == 'flags' or $GTranslate['widget_look'] == 'float' or $GTranslate['widget_look'] == 'dropdown_with_flags' or $GTranslate['widget_look'] == 'flags_name' or $GTranslate['widget_look'] == 'flags_code' or $GTranslate['widget_look'] == 'popup' ) {
 				$allowed_languages = $GTranslate['fincl_langs'];
@@ -234,7 +235,20 @@ class TTA_Helper {
 			} else {
 				$allowed_languages = $GTranslate['incl_langs'];
 			}
+
+			if ( isset( $GTranslate['wrapper_selector'] ) ) {
+				array_push( $gtranslate_data, $GTranslate['wrapper_selector'] );
+			}else{
+				$gtranslate_data  = [
+					'.gt_options',
+					'.gt_languages',
+					'.gt_switcher_wrapper',
+					'.gt_selector',
+					'.gtranslate_wrapper'
+				];
+			}
 		}
+
 		/* var WPML_Language_Switcher $wpml_language_switcher */
 		global $sitepress, $sitepress_settings, $wpdb, $wpml_language_switcher;
 		$active_languages = [];
@@ -256,13 +270,7 @@ class TTA_Helper {
 		$datas = \apply_filters( 'tts_pro_plugins_data', [
 			'gtranslate/gtranslate.php'                => [
 				'type'              => 'class',
-				'data'              => [
-					'gt_options',
-					'gt_languages',
-					'gt_switcher_wrapper',
-					'gt_selector',
-					'gtranslate_wrapper'
-				],
+				'data'              => $gtranslate_data,
 				//  'gt_selector',], // 'gt_white_content', 'gtranslate_wrapper'],
 				'plugin'            => 'gtranslate',
 				'allowed_languages' => $allowed_languages,
@@ -498,7 +506,7 @@ class TTA_Helper {
 			return [];
 		}
 
-		$date = TTA_Helper::get_post_date($post);
+		$date = TTA_Helper::get_post_date( $post );
 
 
 		$mp3_file_urls = get_post_meta( $post->ID, 'tts_mp3_file_urls' );
@@ -1207,9 +1215,9 @@ class TTA_Helper {
 	}
 
 
-	public static function get_post_date($post) {
+	public static function get_post_date( $post ) {
 		$post_date = get_post_field( 'post_date', $post->ID );
-		$date = date( 'Y/m/d', strtotime( $post_date ) );
+		$date      = date( 'Y/m/d', strtotime( $post_date ) );
 
 		return $date;
 	}
