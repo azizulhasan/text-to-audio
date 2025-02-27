@@ -498,7 +498,7 @@ class TTA_Helper {
 			return [];
 		}
 
-		$date = get_the_date( 'Y/m/d', $post );
+		$date = TTA_Helper::get_post_date($post);
 
 
 		$mp3_file_urls = get_post_meta( $post->ID, 'tts_mp3_file_urls' );
@@ -1204,6 +1204,14 @@ class TTA_Helper {
 	 */
 	private static function validate_date( $date ) {
 		return preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) === 1;
+	}
+
+
+	public static function get_post_date($post) {
+		$post_date = get_post_field( 'post_date', $post->ID );
+		$date = date( 'Y/m/d', strtotime( $post_date ) );
+
+		return $date;
 	}
 
 

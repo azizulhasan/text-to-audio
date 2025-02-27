@@ -131,7 +131,8 @@ function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 	$title = tta_clean_content( $post->post_title );
 
 	$title = tta_should_add_delimiter( $title, $sentence_delimiter );
-	$date  = get_the_date( 'Y/m/d' );
+	$date = TTA_Helper::get_post_date($post);
+	error_log(print_r($date,1));
 
 	// TODO: write functionality if current page is home page where content is excerpt.
 	// if(is_single()) {
