@@ -236,7 +236,7 @@ class TTA_Helper {
 				$allowed_languages = $GTranslate['incl_langs'];
 			}
 
-			if ( isset( $GTranslate['wrapper_selector'] ) ) {
+			if ( isset( $GTranslate['wrapper_selector'] ) && $GTranslate['wrapper_selector'] ) {
 				array_push( $gtranslate_data, $GTranslate['wrapper_selector'] );
 			}else{
 				$gtranslate_data  = [
@@ -244,7 +244,8 @@ class TTA_Helper {
 					'.gt_languages',
 					'.gt_switcher_wrapper',
 					'.gt_selector',
-					'.gtranslate_wrapper'
+					'.gtranslate_wrapper',
+					'.gtranslate-dropdown'
 				];
 			}
 		}
