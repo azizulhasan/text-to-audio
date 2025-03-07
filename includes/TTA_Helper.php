@@ -2,8 +2,6 @@
 
 namespace TTA;
 
-use stdClass;
-
 /**
  * Fired during plugin activation
  *
@@ -96,7 +94,8 @@ class TTA_Helper {
 		}
 
 		// Display player settings from customization menu
-		$display_player_to = self::display_player_based_on_user_role();
+		$display_player_to                  = self::display_player_based_on_user_role();
+		$display_player_based_on_date_range = self::display_player_based_on_date_range( $post );
 
 		if (
 			! isset( $settings['tta__settings_allow_listening_for_post_types'] )
@@ -108,6 +107,7 @@ class TTA_Helper {
 			|| $is_exclude_by_cagories
 			|| $tta__settings_allow_listening_for_posts_status
 			|| $display_player_to
+			|| ! $display_player_based_on_date_range
 		) {
 			$should_load_button = false;
 		}
@@ -124,6 +124,7 @@ class TTA_Helper {
 				|| $is_exclude_by_cagories
 				|| $tta__settings_allow_listening_for_posts_status
 				|| $display_player_to
+				|| ! $display_player_based_on_date_range
 			) {
 				$should_load_button = false;
 			}
@@ -225,6 +226,7 @@ class TTA_Helper {
 
 		$GTranslate        = get_option( 'GTranslate' );
 		$allowed_languages = [];
+		$gtranslate_data = [];
 		if ( ! empty( $GTranslate ) && isset( $GTranslate['widget_look'], $GTranslate['incl_langs'], $GTranslate['fincl_langs'] ) ) {
 			if ( $GTranslate['widget_look'] == 'float' or $GTranslate['widget_look'] == 'flags' or $GTranslate['widget_look'] == 'float' or $GTranslate['widget_look'] == 'dropdown_with_flags' or $GTranslate['widget_look'] == 'flags_name' or $GTranslate['widget_look'] == 'flags_code' or $GTranslate['widget_look'] == 'popup' ) {
 				$allowed_languages = $GTranslate['fincl_langs'];
@@ -233,7 +235,21 @@ class TTA_Helper {
 			} else {
 				$allowed_languages = $GTranslate['incl_langs'];
 			}
+
+			if ( isset( $GTranslate['wrapper_selector'] ) && $GTranslate['wrapper_selector'] ) {
+				array_push( $gtranslate_data, $GTranslate['wrapper_selector'] );
+			}else{
+				$gtranslate_data  = [
+					'.gt_options',
+					'.gt_languages',
+					'.gt_switcher_wrapper',
+					'.gt_selector',
+					'.gtranslate_wrapper',
+					'.gtranslate-dropdown'
+				];
+			}
 		}
+
 		/* var WPML_Language_Switcher $wpml_language_switcher */
 		global $sitepress, $sitepress_settings, $wpdb, $wpml_language_switcher;
 		$active_languages = [];
@@ -255,13 +271,7 @@ class TTA_Helper {
 		$datas = \apply_filters( 'tts_pro_plugins_data', [
 			'gtranslate/gtranslate.php'                => [
 				'type'              => 'class',
-				'data'              => [
-					'gt_options',
-					'gt_languages',
-					'gt_switcher_wrapper',
-					'gt_selector',
-					'gtranslate_wrapper'
-				],
+				'data'              => $gtranslate_data,
 				//  'gt_selector',], // 'gt_white_content', 'gtranslate_wrapper'],
 				'plugin'            => 'gtranslate',
 				'allowed_languages' => $allowed_languages,
@@ -332,7 +342,7 @@ class TTA_Helper {
 
 	public static function tts_get_file_url_key( $language, $voice ) {
 		$file_url_key = $language;
-		if ( ( get_player_id() == 4 || get_player_id() == 5 ) && $voice ) {
+		if ( ( get_player_id() > 3 ) && $voice ) {
 			$file_url_key .= '--voice--' . $voice;
 		}
 
@@ -497,7 +507,7 @@ class TTA_Helper {
 			return [];
 		}
 
-		$date = get_the_date( 'Y/m/d', $post );
+		$date = TTA_Helper::get_post_date( $post );
 
 
 		$mp3_file_urls = get_post_meta( $post->ID, 'tts_mp3_file_urls' );
@@ -506,15 +516,16 @@ class TTA_Helper {
 		}
 
 		$final_mp3_file_ulrs = $mp3_file_urls;
+		$should_update_urls  = false;
 
-		$should_update_urls = false;
+
 
 		if ( isset( $mp3_file_urls[ $file_url_key ] ) && $mp3_file_urls[ $file_url_key ] ) {
 			$url           = $mp3_file_urls[ $file_url_key ];
 			$language_code = $file_url_key;
 			if ( self::is_file_url_not_exists_and_is_file_empty( $url, $date, $file_name ) ) {
 				$should_update_urls = true;
-				unset( $mp3_file_urls[ $file_url_key ] );
+				unset( $final_mp3_file_ulrs[ $file_url_key ] );
 			} else {
 				// Generate new singed url or backup only current post applicable url.
 				if ( get_option( 'tts_is_backup_mp3_file' ) == 'true' && strtolower( $language_code ) == strtolower( $file_url_key ) ) {
@@ -586,7 +597,6 @@ class TTA_Helper {
 		) {
 			update_post_meta( $post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs );
 		}
-
 
 		return \apply_filters( 'tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls );
 	}
@@ -1075,7 +1085,7 @@ class TTA_Helper {
 		$cache_key   = TTA_Cache::get_key( 'get_post_types' );
 		$cache_value = TTA_Cache::get( $cache_key );
 		if ( $cache_value ) {
-			return $cache_value;
+			return apply_filters( 'tts_get_post_types', $cache_value );
 		}
 		$post_types = get_post_types( array(
 			'public' => 1, // Only get public post types
@@ -1087,6 +1097,19 @@ class TTA_Helper {
 	}
 
 
+	/**
+	 * Retrieves and applies custom CSS styles for a block.
+	 *
+	 * This function takes in attributes and existing customization settings,
+	 * then determines the final values for background color, text color, and width.
+	 * If attributes are provided, they override existing customization settings;
+	 * otherwise, defaults are applied.
+	 *
+	 * @param array $atts Attributes passed to the block (e.g., background color, text color, width).
+	 * @param array $customize Existing customization settings.
+	 *
+	 * @return array Filtered array of CSS styles for the block.
+	 */
 	public static function get_block_css( $atts, $customize ) {
 		if ( isset( $atts['backgroundColor'] ) ) {
 			$customize['backgroundColor'] = $atts['backgroundColor'];
@@ -1112,8 +1135,94 @@ class TTA_Helper {
 			$customize['width'] = '100';
 		}
 
-
 		return apply_filters( 'get_block_css', $customize );
+	}
+
+
+	/**
+	 * Determines whether the player should generate an MP3 file based on a date range.
+	 *
+	 * This function retrieves the customization settings, checks if the button settings contain
+	 * the `generate_mp3_date_from` and `generate_mp3_date_to` values, and determines whether
+	 * the current date falls within the specified date range.
+	 *
+	 * @param object $post post object.
+	 *
+	 * @return bool True if the MP3 should be generated based on the date range, false otherwise.
+	 */
+	public static function display_player_based_on_date_range( $post ) {
+		// Retrieve customization settings for the player
+		$customize           = (array) self::tts_get_settings( 'customize' );
+		$should_generate_mp3 = false;
+
+		// Check if button settings exist
+		if ( isset( $customize['buttonSettings'] ) && isset( $post->post_date ) ) {
+			// Safely retrieve button settings, avoiding key errors
+			$button_settings = (array) $customize['buttonSettings'];
+
+			$generate_mp3_date_from = isset( $button_settings['generate_mp3_date_from'] )
+				? (string) $button_settings['generate_mp3_date_from']
+				: '';
+
+			$generate_mp3_date_to = isset( $button_settings['generate_mp3_date_to'] )
+				? (string) $button_settings['generate_mp3_date_to']
+				: '';
+
+			// Get the current date in YYYY-MM-DD format
+			$post_date = explode( ' ', $post->post_date );
+			if ( isset( $post_date[0] ) ) {
+				$post_date = $post_date[0];
+			}
+			// Validate date format (ensure correct YYYY-MM-DD format)
+			if ( self::validate_date( $generate_mp3_date_from ) && self::validate_date( $generate_mp3_date_to ) ) {
+				// Check if the post date falls within the date range
+				if ( $post_date >= $generate_mp3_date_from && $post_date <= $generate_mp3_date_to ) {
+					$should_generate_mp3 = true;
+				}
+			}
+
+			if ( empty( $generate_mp3_date_to ) && self::validate_date( $generate_mp3_date_from ) ) {
+				// Check if the post date is greater or equal to date_from
+				if ( $post_date >= $generate_mp3_date_from ) {
+					$should_generate_mp3 = true;
+				}
+			}
+
+			if ( empty( $generate_mp3_date_from ) && self::validate_date( $generate_mp3_date_to ) ) {
+				// Check if the post date is less or equal to  date_to
+				if ( $post_date <= $generate_mp3_date_to ) {
+					$should_generate_mp3 = true;
+				}
+			}
+
+
+			// both value are empty then return true
+			if ( empty( $generate_mp3_date_from ) && empty( $generate_mp3_date_to ) ) {
+				$should_generate_mp3 = true;
+			}
+
+		}
+
+		return $should_generate_mp3;
+	}
+
+	/**
+	 * Validates a date string to ensure it follows the YYYY-MM-DD format.
+	 *
+	 * @param string $date The date string to validate.
+	 *
+	 * @return bool True if valid, false otherwise.
+	 */
+	private static function validate_date( $date ) {
+		return preg_match( '/^\d{4}-\d{2}-\d{2}$/', $date ) === 1;
+	}
+
+
+	public static function get_post_date( $post ) {
+		$post_date = get_post_field( 'post_date', $post->ID );
+		$date      = date( 'Y/m/d', strtotime( $post_date ) );
+
+		return $date;
 	}
 
 

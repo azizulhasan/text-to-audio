@@ -3,9 +3,9 @@ Contributors: atlasaidev, hasanazizul
 Donate link: http://atlasaidev.com/
 Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
-Tested up to: 6.7.0
+Tested up to: 6.7.2
 Requires PHP: 7.4
-Stable tag: 1.8.11
+Stable tag: 1.8.17
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -203,9 +203,19 @@ Autoptimize Plugin</a>
 * <a href='https://wordpress.org/plugins/sg-cachepress/' target='_blank'>
 Speed Optimizer – The All-In-One WordPress Performance-Boosting Plugin</a> 
 
-
 * <a href='https://wordpress.org/plugins/elementor/' target='_blank'>
  Elementor Website Builder:</a> Elevate your website design and functionality with more than just a page builder.
+
+* <a href='https://wordpress.org/plugins/duplicate-post/' target='_blank'>
+  Yoast Duplicate Post:</a> This plugin allows users to clone posts of any type, or copy them to new drafts for further editing.
+
+* <a href='https://wordpress.org/plugins/copy-delete-posts/' target='_blank'>
+  Duplicate Post:</a> Massively increase your WordPress productivity!
+
+ * <a href='https://wordpress.org/plugins/duplicate-page/' target='_blank'>
+  Duplicate Page:</a> Duplicate Posts, Pages and Custom Posts easily using single click.
+
+
 
 ### USAGE:
 
@@ -262,6 +272,10 @@ These shortcodes and attributes provide flexibility in customizing the text-to-a
 
 Boost engagement, accessibility, and productivity on your WordPress and WooCommerce site with Text To Speech TTS Plugin. Implement Web Content Accessibility Guidelines (WCAG) easily and cater to a broader audience base. Try the free version today and upgrade to [Text To Speech Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) for advanced features and support.
 
+
+
+### CHECK OUT OUR OTHER ADDONS 👑:
+> * [Augmented Reality and 3D Model Viewer for WordPress and WooCommerce – AR VR Try-On](https://wordpress.org/plugins/ar-vr-3d-model-try-on/) – Best user friendly augmented reality plugin. There is no limit just install and engage shoppers with 3D models, AR experiences.
 
 
 == Installation ==
@@ -427,6 +441,39 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+
+
+
+= 1.8.17 ( 07 Mar 2025 ) =
+Introduced: MP3 file upload manually.
+Fixed: GTranslate plugin selector issue solved.
+Added: `ttsProLink` filter added.
+Added: Pro version MP3 file loader text translation system added.
+Fixed: minor bug fixed.
+
+
+
+= 1.8.16 ( 26 Feb 2025 ) =
+Fixed: Speed option is hidden on listening menu.
+Fixed: MP3 file generating issue fixed.
+Fixed: Bulk mp3 file generate with google cloud tts issue fixed.
+Added: compatibility added [Yoast Duplicate Post](https://wordpress.org/plugins/duplicate-post/),
+[Duplicate Post](https://wordpress.org/plugins/copy-delete-posts/),
+[Duplicate Page](https://wordpress.org/plugins/duplicate-page/)
+
+= 1.8.15 ( 13 Feb 2025 ) =
+Updated: Documentation update of the plugin. on "Docs" menu
+
+
+= 1.8.14 ( 12 Feb 2025 ) =
+Fixed: Error issue fixed.
+
+
+= 1.8.13 ( 10 Feb 2025 ) =
+Added: Display player based on date range in pro version.
+
+= 1.8.12 ( 27 Jan 2025 ) =
+Updated: Freemius version updated.
 
 = 1.8.11 ( 26 Jan 2025 ) =
 Fixed: Default Player default value issue solved.

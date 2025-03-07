@@ -27,6 +27,8 @@ export default function Customize() {
             button_position: 'before_content',
             display_player_to: ["all"],
             who_can_download_mp3_file: ["all"],
+            generate_mp3_date_from: '',
+            generate_mp3_date_to: ''
         },
         custom_css: ''
     }
@@ -311,7 +313,8 @@ export default function Customize() {
 
         let formData = {};
         for (let [key, value] of form.entries()) {
-            if (key !== 'custom_css') {
+            if (key !== 'custom_css' && key !== 'generate_mp3_date_to' && key !== 'generate_mp3_date_from') {
+
                 if (key === '' || value === '') {
                     toast('Please fill the  field : ' + key);
                     return;
@@ -481,7 +484,7 @@ export default function Customize() {
                             }
                             <p className='pt-2 text-danger'>
                                 {
-                                    listeningBtnStyle?.buttonSettings?.id == 1 && ttsObj.is_pro_active ? __('If you\'re selecting this button then you may not get pro features. Suppose CSS selectors from settings page and WPML/GTranslate will not work with this button.') : __('Save this player then configure proper voice and lanuage from listening menu. ')
+                                    listeningBtnStyle?.buttonSettings?.id == 1 && ttsObj.is_pro_active ? __('If you\'re selecting this button then you may not get pro features. Suppose CSS selectors from settings page and WPML/GTranslate will not work with this button.') : __('Save this player then configure proper voice and language from listening menu. ')
                                 }
                             </p>
                         </Col>
