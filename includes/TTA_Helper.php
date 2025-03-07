@@ -342,7 +342,7 @@ class TTA_Helper {
 
 	public static function tts_get_file_url_key( $language, $voice ) {
 		$file_url_key = $language;
-		if ( ( get_player_id() == 4 || get_player_id() == 5 ) && $voice ) {
+		if ( ( get_player_id() > 3 ) && $voice ) {
 			$file_url_key .= '--voice--' . $voice;
 		}
 
@@ -517,6 +517,8 @@ class TTA_Helper {
 
 		$final_mp3_file_ulrs = $mp3_file_urls;
 		$should_update_urls  = false;
+
+
 
 		if ( isset( $mp3_file_urls[ $file_url_key ] ) && $mp3_file_urls[ $file_url_key ] ) {
 			$url           = $mp3_file_urls[ $file_url_key ];
