@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.7.2
 Requires PHP: 7.4
-Stable tag: 1.8.16
+Stable tag: 1.8.17
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -441,6 +441,15 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+
+
+
+= 1.8.17 ( 07 Mar 2025 ) =
+Introduced: MP3 file upload manually.
+Fixed: GTranslate plugin selector issue solved.
+Added: `ttsProLink` filter added.
+Added: Pro version MP3 file loader text translation system added.
+Fixed: minor bug fixed.
 
 
 
