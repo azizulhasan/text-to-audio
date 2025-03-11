@@ -223,19 +223,20 @@ class AtlasVoice_Analytics {
 	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
 	 */
 	public function all_insights( $request ) {
-		$post_id = $request->get_param( 'id' );
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'atlasvoice_analytics'; // Replace with your table name
+		$results    = $wpdb->get_results( "SELECT * FROM $table_name", ARRAY_A); // ARRAY_A returns an associative array
 
-		$insights = [];
-		if ( $post_id ) {
-			$insights = get_post_meta( $post_id, 'atlasVoice_analytics' );
-		}
-
-		if ( isset( $insights[0] ) ) {
-			$insights = $insights[0];
+		if ( ! empty( $results ) ) {
+			foreach ( $results as &$result ) {
+				if ( isset( $result['analytics'] ) ) {
+					$result['analytics'] = maybe_unserialize( $result['analytics'] );
+				}
+			}
 		}
 
 		$response['status'] = true;
-		$response['data']   = $insights;
+		$response['data']   = $results;
 
 		return rest_ensure_response( $response );
 	}
