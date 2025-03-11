@@ -50,7 +50,6 @@ class AtlasVoicePlayerInsights {
     // 5. Total number of pauses
     getTotalTime() {
         let totalSeconds = this.getTotalCount('time');
-        totalSeconds = 4702
         let output = totalSeconds / 60;
         let summeryString = ' Minute';
 
