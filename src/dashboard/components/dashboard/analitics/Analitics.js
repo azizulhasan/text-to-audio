@@ -16,6 +16,8 @@ export default function Analitics() {
     const [selectedIds, setSelectedIds] = useState([])
     const [isDataLoaded, setIsDataLoaded] = useState(false)
     const [summary, setSummary] = useState({})
+    const [mostPopularPosts, setMostPopularPosts] = useState({})
+    const [popularPostsIds, setPopularPostsIds] = useState([])
 
     function getTotalTime(totalSeconds) {
 
@@ -78,6 +80,17 @@ export default function Analitics() {
     }
 
 
+    function getPopularPosts(data) {
+        return data
+            .map(post => {
+                const {post_id, analytics} = post;
+                const totalScore = Object.values(analytics).reduce((sum, event) => sum + event.count, 0);
+                return {post_id, totalScore};
+            })
+            .sort((a, b) => b.totalScore - a.totalScore)
+            .slice(0, 10);
+    }
+
     useEffect(() => {
         /**
          * Get data from and display to table.
@@ -93,9 +106,40 @@ export default function Analitics() {
         postWithoutImage(tta_obj.api_url + 'tta/v1/all_insights', formData).then((res) => {
             const summary = summarizeAnalytics(res.data)
             setSummary(summary)
-            console.log(summary)
+            // console.log(summary)
+
+            const popularPosts = getPopularPosts(res.data)
+            setMostPopularPosts(popularPosts)
+
+            const post_ids = [...new Set(popularPosts.map(item => item.post_id))];
+            setPopularPostsIds(post_ids)
+            console.log(popularPosts)
         });
     }, []);
+
+    useEffect(() => {
+        if (popularPostsIds.length) {
+            /**
+             * Get data from and display to table.
+             */
+            let formData = new FormData();
+            formData.append('method', 'post');
+            formData.append('ids', JSON.stringify(popularPostsIds));
+            postWithoutImage(tta_obj.api_url + 'tta/v1/latest_posts', formData).then((res) => {
+                let postsWithTitle = res.data
+                let postsData = structuredClone(mostPopularPosts)
+                postsData.map(post => {
+                    post.title = postsWithTitle[post.post_id];
+                    return post;
+                })
+
+                console.log({postsData})
+
+                setMostPopularPosts(postsData)
+
+            });
+        }
+    }, [popularPostsIds]);
 
     useEffect(() => {
         console.log(postIds)
@@ -269,8 +313,37 @@ export default function Analitics() {
                                         </tbody>
                                     </Table>
                                 </Card>
+                                {
+                                    mostPopularPosts.length && <Card className="shadow-bg p-4">
+                                        <h3 className="mb-3">🔥 Most Popular TTS Posts</h3>
+                                        {
+                                            ttsObj.is_pro_active ? <Table striped bordered hover responsive>
+                                                <thead className="atlasvoice-bg text-white">
+                                                <tr>
+                                                    <th>Rank</th>
+                                                    <th>Post ID</th>
+                                                    <th>Total Interactions</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                {mostPopularPosts.map((post, index) => (
+                                                    <tr key={post.post_id}>
+                                                        <td><strong>#{index + 1}</strong></td>
+                                                        <td>{post.title}</td>
+                                                        <td>{post.totalScore}</td>
+                                                    </tr>
+                                                ))}
+                                                </tbody>
+                                            </Table> : <>
+                                                <h3> to see popular post analytics post you have to <a target={'_blank'} href={'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/'} > pro version.</a></h3>
+                                            </>
+                                        }
+                                    </Card>
+                                }
                             </Row>
                         }
+
+
                     </Form>
                 </Col>
                 <Col xs={12} sm={12} lg={4}>
