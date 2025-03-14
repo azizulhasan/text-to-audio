@@ -442,6 +442,9 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 
 
 
+= 1.8.18 ( 14 Mar 2025 ) =
+Introduced: Analytics summery added.
+Fixed: API url issue fixed.
 
 
 = 1.8.17 ( 07 Mar 2025 ) =
