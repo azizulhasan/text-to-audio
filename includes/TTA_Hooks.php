@@ -241,6 +241,7 @@ class TTA_Hooks {
 			foreach ( $options['plugins'] as $plugin ) {
 				// Check to ensure it's my plugin
 				if ( $plugin == $text_to_audio ) {
+					TTA_Cache::delete( 'tts_rest_api_url' );
 					TTA_Activator::create_analytics_table_if_not_exists();
 					break;
 				}

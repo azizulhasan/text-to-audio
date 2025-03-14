@@ -234,6 +234,7 @@ class TTA_Cache {
 
 		$cache_key = self::get_key( 'all_plugins' );
 		self::delete( $cache_key );
+		self::delete( 'tts_rest_api_url' );
 
 	}
 }
