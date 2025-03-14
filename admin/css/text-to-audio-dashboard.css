@@ -131,3 +131,7 @@ My Custom css
 .wp-core-ui .tta-notice.tta-fd-notice.notice.is-dismissible p #download_button {
 	margin-left: 10px;
 }
+
+.atlasvoice-bg {
+	background-color: #1a4548;
+}

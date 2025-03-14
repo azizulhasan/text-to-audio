@@ -223,19 +223,20 @@ class AtlasVoice_Analytics {
 	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
 	 */
 	public function all_insights( $request ) {
-		$post_id = $request->get_param( 'id' );
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'atlasvoice_analytics'; // Replace with your table name
+		$results    = $wpdb->get_results( "SELECT * FROM $table_name", ARRAY_A ); // ARRAY_A returns an associative array
 
-		$insights = [];
-		if ( $post_id ) {
-			$insights = get_post_meta( $post_id, 'atlasVoice_analytics' );
-		}
-
-		if ( isset( $insights[0] ) ) {
-			$insights = $insights[0];
+		if ( ! empty( $results ) ) {
+			foreach ( $results as &$result ) {
+				if ( isset( $result['analytics'] ) ) {
+					$result['analytics'] = maybe_unserialize( $result['analytics'] );
+				}
+			}
 		}
 
 		$response['status'] = true;
-		$response['data']   = $insights;
+		$response['data']   = $results;
 
 		return rest_ensure_response( $response );
 	}
@@ -247,7 +248,12 @@ class AtlasVoice_Analytics {
 	 */
 	public function latest_posts( $request ) {
 
+		$post_ids = [];
+		if ( isset( $request['ids'] ) ) {
+			$post_ids = json_decode( $request['ids'], true );
+		}
 		$settings = TTA_Helper::tts_get_settings( 'settings' );
+
 		if ( isset( $settings['tta__settings_allow_listening_for_post_types'] ) && count( $settings['tta__settings_allow_listening_for_post_types'] ) ) {
 			if ( ! TTA_Helper::is_pro_active() ) {
 				$post_types[] = $settings['tta__settings_allow_listening_for_post_types'][0];
@@ -255,35 +261,50 @@ class AtlasVoice_Analytics {
 				$post_types = $settings['tta__settings_allow_listening_for_post_types'];
 			}
 		}
+
 		if ( empty( $post_types ) ) {
 			$post_types = array( 'post' );
 		}
+
+		// Default query args
 		$args = array(
-			'numberposts' => 100,
-			'post_status' => 'publish',
-			'post_type'   => $post_types,
-			'orderby'     => 'date',
-			'order'       => 'DESC',
-			'fields'      => 'ids',
+			'orderby' => 'date',
+			'order'   => 'DESC',
+			'fields'  => 'ids',
 		);
+
+		// If post IDs are provided, fetch only those
+		if ( ! empty( $post_ids ) && is_array( $post_ids ) ) {
+			$args['post__in']    = $post_ids;
+			$args['orderby']     = 'post__in'; // Maintain provided order
+			$args['post_type']   = 'any';
+			$args['post_status'] = 'any';
+		} else {
+			$args['numberposts'] = 100; // Fetch latest 100 posts if no IDs given
+			$args['post_type']   = $post_types;
+			$args['post_status'] = 'publish';
+		}
 
 		$query = new \WP_Query( $args );
 		$posts = $query->posts;
 
 		$post_data = array();
-		if ( TTA_Helper::is_pro_active() && apply_filters( 'tts_track_all_ids_by_default', true ) ) {
+		if ( TTA_Helper::is_pro_active() && apply_filters( 'tts_track_all_ids_by_default', true ) && empty( $post_ids ) ) {
 			$post_data['all'] = 'All Posts:: Track All Ids of post type ' . implode( ', ', $post_types );
 		}
+
 		foreach ( $posts as $post_id ) {
 			$post_data[ $post_id ] = get_the_title( $post_id );
 		}
 
-
-		$response['status'] = true;
-		$response['data']   = $post_data;
+		$response['status']    = true;
+		$response['data']      = $post_data;
+		$response['args']      = $args;
+		$response['$post_ids'] = $post_ids;
 
 		return rest_ensure_response( $response );
 	}
+
 
 	/**
 	 * @param $request

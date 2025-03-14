@@ -134,10 +134,10 @@ class TTA_Api_Routes {
 		// register insights all post route.
 		register_rest_route(
 			$this->namespace,
-			'/insights',
+			'/all_insights',
 			array(
 				array(
-					'methods'             => \WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this->analytics, 'all_insights' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
 					'args'                => array(),
