@@ -321,7 +321,7 @@ export default function Analitics() {
                                                 <thead className="atlasvoice-bg text-white">
                                                 <tr>
                                                     <th>Rank</th>
-                                                    <th>Post ID</th>
+                                                    <th>Post Title</th>
                                                     <th>Total Interactions</th>
                                                 </tr>
                                                 </thead>
