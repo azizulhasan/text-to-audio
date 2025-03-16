@@ -258,11 +258,8 @@ function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_ar
     <script id='tts_button_settings_<?php echo $btn_no; ?>'>
         var ttsCurrentButtonNo = <?php echo $btn_no; ?>;
         var ttsCurrentContent = "<?php echo $content; ?>";
-        var ttsListening = <?php echo json_encode( $plugin_all_settings['listening'] ); ?>;
         var ttsCSSClass = "<?php echo $class; ?>";
         var ttsBtnStyle = "<?php echo $btn_style; ?>";
-        var ttsTextArr = <?php echo json_encode( $text_arr ); ?>;
-        var allSettings = <?php echo json_encode( $plugin_all_settings ) ?>;
         var ttsCustomCSS = "<?php print( $custom_css ); ?>";
         var ttsShouldDisplayIcon = "<?php echo $should_display_icon; ?>";
         var readingTime = "<?php echo $content_read_time; ?>";
@@ -271,13 +268,10 @@ function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_ar
 
 
         var ttsSettings = {
-            listening: ttsListening,
             cssClass: ttsCSSClass,
             btnStyle: ttsBtnStyle,
-            textArr: ttsTextArr,
             customCSS: ttsCustomCSS,
             shouldDisplayIcon: ttsShouldDisplayIcon,
-            settings: allSettings,
             readingTime: readingTime,
             postId: postId,
             fileURLs: fileURLs,
@@ -291,7 +285,6 @@ function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_ar
             language: "<?php echo $language; ?>",
             voice: "<?php echo $voice; ?>",
             file_url_key: "<?php echo $file_url_key; ?>",
-            //post: <?php //echo json_encode( $post ); ?>//,
             compatible_contents: <?php echo json_encode( $compatible_content ); ?>,
         }
 

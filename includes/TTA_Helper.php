@@ -226,7 +226,7 @@ class TTA_Helper {
 
 		$GTranslate        = get_option( 'GTranslate' );
 		$allowed_languages = [];
-		$gtranslate_data = [];
+		$gtranslate_data   = [];
 		if ( ! empty( $GTranslate ) && isset( $GTranslate['widget_look'], $GTranslate['incl_langs'], $GTranslate['fincl_langs'] ) ) {
 			if ( $GTranslate['widget_look'] == 'float' or $GTranslate['widget_look'] == 'flags' or $GTranslate['widget_look'] == 'float' or $GTranslate['widget_look'] == 'dropdown_with_flags' or $GTranslate['widget_look'] == 'flags_name' or $GTranslate['widget_look'] == 'flags_code' or $GTranslate['widget_look'] == 'popup' ) {
 				$allowed_languages = $GTranslate['fincl_langs'];
@@ -238,8 +238,8 @@ class TTA_Helper {
 
 			if ( isset( $GTranslate['wrapper_selector'] ) && $GTranslate['wrapper_selector'] ) {
 				array_push( $gtranslate_data, $GTranslate['wrapper_selector'] );
-			}else{
-				$gtranslate_data  = [
+			} else {
+				$gtranslate_data = [
 					'.gt_options',
 					'.gt_languages',
 					'.gt_switcher_wrapper',
@@ -517,7 +517,6 @@ class TTA_Helper {
 
 		$final_mp3_file_ulrs = $mp3_file_urls;
 		$should_update_urls  = false;
-
 
 
 		if ( isset( $mp3_file_urls[ $file_url_key ] ) && $mp3_file_urls[ $file_url_key ] ) {
@@ -1084,6 +1083,7 @@ class TTA_Helper {
 	public static function get_post_types() {
 		$cache_key   = TTA_Cache::get_key( 'get_post_types' );
 		$cache_value = TTA_Cache::get( $cache_key );
+
 		if ( $cache_value ) {
 			return apply_filters( 'tts_get_post_types', $cache_value );
 		}
@@ -1091,7 +1091,8 @@ class TTA_Helper {
 			'public' => 1, // Only get public post types
 		), 'array' );
 
-		TTA_Cache::set( $cache_key, $post_types );
+
+		TTA_Cache::set( $cache_key, array_keys( $post_types ) );
 
 		return apply_filters( 'tts_get_post_types', $post_types );
 	}

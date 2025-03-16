@@ -41,16 +41,14 @@ export default class TextToSpeech {
         this.content = content ? content : window.TTS.contents[buttonId]
         this.splittedSentances = splitSentences(content)
         this.buttonId = buttonId
-        this.buttonTextArr = this.TTS.settings.textArr
+        this.buttonTextArr = ttsObj.buttonTextArr
         this.speakButton = button ? button : document.getElementById(buttonId)
-        this.ttsListeningSettings = this.TTS.settings.listening
-        this.ttsListeningSettings = this.TTS.settings.listening
+        this.ttsListeningSettings = ttsObj.listeningSettings
         this.speech = new Speech()
         this.splitSentences = splitSentences
-        this.playButtonNo = this?.TTS?.settings?.settings?.customize?.buttonSettings?.id
+        this.playButtonNo = ttsObj.player_id
         this.analytics = new AtlasVoiceAnalytics(this.TTS.settings.postId)
-
-
+        console.log(this.ttsListeningSettings)
         if(typeof NoSleep === 'function' && ttsObj?.is_mobile) {
             const noSleep = new NoSleep();
             window.onload = function() {
