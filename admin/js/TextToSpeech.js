@@ -43,12 +43,11 @@ export default class TextToSpeech {
         this.buttonId = buttonId
         this.buttonTextArr = ttsObj.buttonTextArr
         this.speakButton = button ? button : document.getElementById(buttonId)
-        this.ttsListeningSettings = ttsObj.listeningSettings
+        this.ttsListeningSettings = ttsObj.listening
         this.speech = new Speech()
         this.splitSentences = splitSentences
         this.playButtonNo = ttsObj.player_id
         this.analytics = new AtlasVoiceAnalytics(this.TTS.settings.postId)
-        console.log(this.ttsListeningSettings)
         if(typeof NoSleep === 'function' && ttsObj?.is_mobile) {
             const noSleep = new NoSleep();
             window.onload = function() {

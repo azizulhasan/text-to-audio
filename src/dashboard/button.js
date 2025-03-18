@@ -21,7 +21,9 @@ function loadProButton() {
     if (window?.TTS?.extra?.player_id ) {
 
         const playerId = window.TTS.extra.player_id;
-        buttonCSS = TTS.settings.settings.customize;
+        buttonCSS = ttsObj.customize;
+        console.log({buttonCSS})
+
         let buttons = [...document.querySelectorAll('.tts__listent_content')];
 
         if (buttons.length) {

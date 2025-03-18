@@ -1227,4 +1227,21 @@ class TTA_Helper {
 	}
 
 
+	public static function get_button_text() {
+		$saved_texts = get_option( 'tta__button_text_arr' );
+		if ( ! $saved_texts ) {
+			$saved_texts = set_initial_button_texts( '' );
+		}
+
+		$text_arr = apply_filters( 'tta__button_text_arr', $saved_texts, [], 1 );
+
+		if ( $saved_texts !== $text_arr ) {
+			update_option( 'tta__button_text_arr', $text_arr );
+		}
+
+
+		return $text_arr;
+	}
+
+
 }

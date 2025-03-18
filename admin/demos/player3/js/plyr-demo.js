@@ -38,8 +38,8 @@ class TextToSpeechProPlayer {
         }
         // this.title = this.title.replaceAll(/[^a-zA-Z ]/g, "");
         this.title = this.title.split(' ').join('_');
-        this.title = this.title + "__lang=" + tts.settings.listening.tta__listening_lang;
-        this.title = this.title + "__voice=" + tts.settings.listening.tta__listening_voice;
+        this.title = this.title + "__lang=" + ttsObj.listening.tta__listening_lang;
+        this.title = this.title + "__voice=" + ttsObj.listening.tta__listening_voice;
         this.title = this.title.replaceAll(' ', '_');
         this.title = this.title.replaceAll('-', '_');
 

@@ -59,8 +59,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                     this.title = this.title.replace(/[^a-zA-Z ]/g, "");
                     this.title = this.title.split(' ').join('_')
-                    this.title = this.title + "__lang=" + tts.settings.listening.tta__listening_lang
-                    this.title = this.title + "__voice=" + tts.settings.listening.tta__listening_voice
+                    this.title = this.title + "__lang=" + ttsObj.listening.tta__listening_lang
+                    this.title = this.title + "__voice=" + ttsObj.listening.tta__listening_voice
                 }
 
 

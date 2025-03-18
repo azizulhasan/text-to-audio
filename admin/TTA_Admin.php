@@ -66,7 +66,8 @@ class TTA_Admin {
 
 		$this->plugin_name = $plugin_name;
 		$this->version     = $version;
-		$listening         = json_encode( TTA_Helper::tts_get_settings( 'listening' ) );
+		$listening         = TTA_Helper::tts_get_settings( 'listening' );
+		$customize         = TTA_Helper::tts_get_settings( 'customize' );
 		add_filter( 'script_loader_tag', [ $this, 'load_script_as_tag' ], 10, 3 );
 		global $is_iphone, $is_chrome, $is_safari,
 		       $is_NS4, $is_opera, $is_macIE, $is_winIE, $is_gecko, $is_lynx, $is_IE, $is_edge;
@@ -95,7 +96,7 @@ class TTA_Admin {
 		$this->localize_data = [
 			'admin_url'                => admin_url( '/' ),
 			'classic_editor_is_active' => is_plugin_active( 'classic-editor/classic-editor.php' ),
-			'buttonTextArr'            => get_option( 'tta__button_text_arr' ),
+			'buttonTextArr'            => TTA_Helper::get_button_text(),
 			'ajax_url'                 => admin_url( 'admin-ajax.php' ),
 			'api_url'                  => $rest_api_url,
 			'api_namespace'            => 'tta',
@@ -112,7 +113,7 @@ class TTA_Admin {
 			'is_admin'                 => current_user_can( 'administrator' ),
 			'user_id'                  => get_current_user_id(),
 			'is_dashboard'             => is_admin(),
-			'listeningSettings'        => $listening,
+			'listening'                => $listening,
 			'is_pro_active'            => is_pro_active(),
 			'is_pro_license_active'    => is_pro_active(),
 			'is_admin_page'            => \is_admin(),
@@ -133,6 +134,7 @@ class TTA_Admin {
 			'categories'               => TTA_Helper::get_all_categories(),
 			'tags'                     => TTA_Helper::get_all_tags(),
 			'is_mobile'                => wp_is_mobile(),
+			'customize'                => $customize,
 		];
 	}
 
