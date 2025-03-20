@@ -68,6 +68,7 @@ class TTA_Admin {
 		$this->version     = $version;
 		$listening         = TTA_Helper::tts_get_settings( 'listening' );
 		$customize         = TTA_Helper::tts_get_settings( 'customize' );
+		$aliases           = TTA_Helper::tts_get_settings( 'aliases' );
 		add_filter( 'script_loader_tag', [ $this, 'load_script_as_tag' ], 10, 3 );
 		global $is_iphone, $is_chrome, $is_safari,
 		       $is_NS4, $is_opera, $is_macIE, $is_winIE, $is_gecko, $is_lynx, $is_IE, $is_edge;
@@ -135,6 +136,7 @@ class TTA_Admin {
 			'tags'                     => TTA_Helper::get_all_tags(),
 			'is_mobile'                => wp_is_mobile(),
 			'customize'                => $customize,
+			'aliases'                  => $aliases,
 		];
 	}
 
