@@ -358,14 +358,14 @@ class AtlasVoicePlayerInsights {
 
     shouldTrackAnalyticsData() {
         let should_track = true;
-        if (!window?.ttsObj?.settings?.analytics?.tts_enable_analytics) {
+        if (!window?.ttsObj?.analytics?.tts_enable_analytics) {
             return false;
         }
-        if (window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids?.length) {
+        if (window?.ttsObj?.analytics?.tts_trackable_post_ids?.length) {
 
-            if ((window?.ttsObj.is_pro_active && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes('all')) || window?.ttsObj.is_pro_active && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.postId)) {
+            if ((window?.ttsObj.is_pro_active && window?.ttsObj?.analytics?.tts_trackable_post_ids.includes('all')) || window?.ttsObj.is_pro_active && window?.ttsObj?.analytics?.tts_trackable_post_ids.includes(this.postId)) {
                 should_track = true;
-            } else if (!window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.postId)) {
+            } else if (!window?.ttsObj?.analytics?.tts_trackable_post_ids.includes(this.postId)) {
                 should_track = false;
             }
         }
