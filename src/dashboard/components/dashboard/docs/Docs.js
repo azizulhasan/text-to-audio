@@ -52,6 +52,46 @@ export default function Docs() {
 			arguments: '$delimiters_arr',
 		},
 	];
+
+	/**
+	 *  JS pro Filters
+	 */
+	const js_free_filters = [
+		{
+			name: 'tta__settings_stop_auto_pause_after_switching_tab',
+			arguments: 'true',
+		},
+	];
+
+	/**
+	 *  JS pro Filters
+	 */
+	const js_pro_filters = [
+		{
+			name: 'ttsProPlayerOptions',
+			arguments: 'obj',
+		},
+		{
+			name: 'ttsProLink',
+			arguments: 'link',
+		},
+		{
+			name: 'ttsSetSelectedLanguageFromDom',
+			arguments: 'false',
+		},
+		{
+			name: 'ttsProApplyNumberFormat',
+			arguments: 'false',
+		},
+		{
+			name: 'ttsProGetContentFromDOM',
+			arguments: 'true',
+		},
+		{
+			name: 'ttsProPlayerDesign',
+			arguments: 'obj',
+		},
+	];
 	return (
 		<>
 			<Container>
@@ -345,6 +385,74 @@ export default function Docs() {
 										</tbody>
 									</Table>
 									visit examples <a href={'https://atlasaidev.com/docs/text-to-speech/filters-actions/apply-backend-filters-and-actions-pro-version/'} target={'_blank'}>here</a>
+								</Accordion.Body>
+							</Accordion.Item>
+							<Accordion.Item eventKey='13'>
+								<Accordion.Header>
+									13. Apply Frontend Filters and Actions ( Free Version )
+								</Accordion.Header>
+								<Accordion.Body>
+									<Table striped bordered hover size='sm'>
+										<thead>
+										<tr>
+											<th>Sr.</th>
+
+											<th>Filter Name</th>
+											<th>Arguments</th>
+										</tr>
+										</thead>
+										<tbody>
+										{js_free_filters.length &&
+											js_free_filters.map((filter, index) => {
+												return (
+													<tr key={filter.name}>
+														<td>{++index}</td>
+														<td>
+															<code>{filter.name}</code>
+														</td>
+														<td>
+															<code>{filter.arguments}</code>
+														</td>
+													</tr>
+												);
+											})}
+										</tbody>
+									</Table>
+									visit examples <a href={'https://atlasaidev.com/docs/text-to-speech/filters-actions/apply-frontend-filters-and-actions-free-version/'} target={'_blank'}>here</a>
+								</Accordion.Body>
+							</Accordion.Item>
+							<Accordion.Item eventKey='14'>
+								<Accordion.Header>
+									14. Apply Frontend Filters and Actions ( Pro Version )
+								</Accordion.Header>
+								<Accordion.Body>
+									<Table striped bordered hover size='sm'>
+										<thead>
+										<tr>
+											<th>Sr.</th>
+
+											<th>Filter Name</th>
+											<th>Arguments</th>
+										</tr>
+										</thead>
+										<tbody>
+										{js_pro_filters.length &&
+											js_pro_filters.map((filter, index) => {
+												return (
+													<tr key={filter.name}>
+														<td>{++index}</td>
+														<td>
+															<code>{filter.name}</code>
+														</td>
+														<td>
+															<code>{filter.arguments}</code>
+														</td>
+													</tr>
+												);
+											})}
+										</tbody>
+									</Table>
+									visit examples <a href={'https://atlasaidev.com/docs/text-to-speech/filters-actions/apply-frontend-filters-and-actions-pro-version/'} target={'_blank'}>here</a>
 								</Accordion.Body>
 							</Accordion.Item>
 
