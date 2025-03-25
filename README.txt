@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.7.2
 Requires PHP: 7.4
-Stable tag: 1.8.17
+Stable tag: 1.8.19
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -441,6 +441,9 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+
+= 1.8.19 ( 25 Mar 2025 ) =
+Added: Documentation update to "Doc" menu
 
 = 1.8.18 ( 14 Mar 2025 ) =
 Introduced: Analytics summery added.
