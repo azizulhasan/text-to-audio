@@ -34,11 +34,10 @@ class TTA_Notices {
 //			add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
 //		}
 
-		if ( ! is_pro_active() || TTA_Helper::get_player_id() < 3 ) {
+//		if ( ! is_pro_active() || TTA_Helper::get_player_id() < 3 ) {
 //			 add_action( 'admin_notices', [ $this, 'tta_feedback_notice' ] );
-			add_action( 'admin_notices', [ $this, 'tta_affiliation_notice' ] );
-
-		}
+//			add_action( 'admin_notices', [ $this, 'tta_affiliation_notice' ] );
+//		}
 
 		$plugins = [
 			'gtranslate/gtranslate.php'                => [
