@@ -365,15 +365,15 @@ class TTA_Helper {
 	}
 
 	public static function tts_file_name( $title, $selectedLang, $voice = '', $post_id = '' ) {
-
-		if ( ! $title ) {
-			$title = 'Demo Content';
-		}
-		$title = trim( $title );
 		global $post;
 		if ( ! $post_id && $post ) { // TODO: must add post ID to file name.
 			$post_id = $post->ID;
 		}
+
+		if ( ! $title ) {
+			$title = $post_id;
+		}
+		$title = trim( $title );
 
 		$lang_code = explode( '-', str_replace( [ '_', ' ' ], '-', $selectedLang ) );
 
