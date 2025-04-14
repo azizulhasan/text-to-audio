@@ -226,7 +226,7 @@ class TTA_Helper {
 
 		$GTranslate        = get_option( 'GTranslate' );
 		$allowed_languages = [];
-		$gtranslate_data = [];
+		$gtranslate_data   = [];
 		if ( ! empty( $GTranslate ) && isset( $GTranslate['widget_look'], $GTranslate['incl_langs'], $GTranslate['fincl_langs'] ) ) {
 			if ( $GTranslate['widget_look'] == 'float' or $GTranslate['widget_look'] == 'flags' or $GTranslate['widget_look'] == 'float' or $GTranslate['widget_look'] == 'dropdown_with_flags' or $GTranslate['widget_look'] == 'flags_name' or $GTranslate['widget_look'] == 'flags_code' or $GTranslate['widget_look'] == 'popup' ) {
 				$allowed_languages = $GTranslate['fincl_langs'];
@@ -238,8 +238,8 @@ class TTA_Helper {
 
 			if ( isset( $GTranslate['wrapper_selector'] ) && $GTranslate['wrapper_selector'] ) {
 				array_push( $gtranslate_data, $GTranslate['wrapper_selector'] );
-			}else{
-				$gtranslate_data  = [
+			} else {
+				$gtranslate_data = [
 					'.gt_options',
 					'.gt_languages',
 					'.gt_switcher_wrapper',
@@ -270,11 +270,13 @@ class TTA_Helper {
 
 		$datas = \apply_filters( 'tts_pro_plugins_data', [
 			'gtranslate/gtranslate.php'                => [
-				'type'              => 'class',
-				'data'              => $gtranslate_data,
+				'type'               => 'class',
+				'data'               => $gtranslate_data,
 				//  'gt_selector',], // 'gt_white_content', 'gtranslate_wrapper'],
-				'plugin'            => 'gtranslate',
-				'allowed_languages' => $allowed_languages,
+				'plugin'             => 'gtranslate',
+				'allowed_languages'  => $allowed_languages,
+				'enterprise_version' => isset( $GTranslate['enterprise_version'] ) ? $GTranslate['enterprise_version'] : '',
+				'pro_version'        => isset( $GTranslate['pro_version'] ) ? $GTranslate['pro_version'] : '',
 			],
 			'sitepress-multilingual-cms/sitepress.php' => [
 				'type'             => 'class',
@@ -363,15 +365,15 @@ class TTA_Helper {
 	}
 
 	public static function tts_file_name( $title, $selectedLang, $voice = '', $post_id = '' ) {
-
-		if ( ! $title ) {
-			$title = 'Demo Content';
-		}
-		$title = trim( $title );
 		global $post;
 		if ( ! $post_id && $post ) { // TODO: must add post ID to file name.
 			$post_id = $post->ID;
 		}
+
+		if ( ! $title ) {
+			$title = $post_id;
+		}
+		$title = trim( $title );
 
 		$lang_code = explode( '-', str_replace( [ '_', ' ' ], '-', $selectedLang ) );
 
@@ -517,7 +519,6 @@ class TTA_Helper {
 
 		$final_mp3_file_ulrs = $mp3_file_urls;
 		$should_update_urls  = false;
-
 
 
 		if ( isset( $mp3_file_urls[ $file_url_key ] ) && $mp3_file_urls[ $file_url_key ] ) {
