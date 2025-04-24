@@ -93,11 +93,11 @@ class TTA_Activator {
 		if ( $renew_all_settings || ! get_option( 'tta_listening_settings' ) ) {
 			update_option( 'tta_listening_settings', array
 			(
-				"tta__listening_voice"  => "Google UK English Female",
+				"tta__listening_voice"  => "Microsoft Zira - English (United States)",
 				"tta__listening_pitch"  => 1,
 				"tta__listening_rate"   => 1,
 				"tta__listening_volume" => 1,
-				"tta__listening_lang"   => "en-GB",
+				"tta__listening_lang"   => "en-US",
 			) );
 		}
 
