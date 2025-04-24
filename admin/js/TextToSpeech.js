@@ -25,7 +25,7 @@ export default class TextToSpeech {
     ttsListeningSettings = null
     languages = []
     voices = {}
-    voice = true ? "Google UK English Female" : 'English United Kingdom';
+    voice = true ? "Microsoft Zira - English (United States)" : 'English United Kingdom';
     language = true ? 'en-US' : 'en-GB';
     buttonTextArr = null
     splittedSentances = ''
@@ -251,6 +251,7 @@ export default class TextToSpeech {
         }
         speech.setLanguage(this.browser.getLanguage())
         speech.setVoice(this.browser.getVoice())
+
         /**
          * 1. Microsoft edge browser has same voices(306 voices) for mobile and desktop
          * It uses the v8 engine as chrome browser.
@@ -419,7 +420,21 @@ export default class TextToSpeech {
             .then(data => {
                 this.voices = data.voices;
                 // if (!this.browser) {
+                /**
+                 * Version 1.8.21
+                 *
+                 * From this version or some other previous version google voices are not working on chrome browser that is why
+                 * the voice and language are changed by manual coding.
+                 *
+                 * This code is implemented from version 1.8.22
+                 */
+                if(this.ttsListeningSettings.tta__listening_lang.indexOf('en') === 0 && this.ttsListeningSettings.tta__listening_voice.indexOf('Google') === 0) {
+                    this.ttsListeningSettings.tta__listening_lang = "en-US"
+                    this.ttsListeningSettings.tta__listening_voice = "Microsoft Zira - English (United States)"
+                }
+
                 this.browser = new BrowserSupport(ttsObj, data.voices, this.ttsListeningSettings.tta__listening_lang, this.ttsListeningSettings.tta__listening_voice)
+
                 // }
                 this._prepareSpeakButton(this.speech);
                 window.sessionStorage.setItem('tts_paused_by_intention', false);
