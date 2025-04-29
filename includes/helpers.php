@@ -109,7 +109,6 @@ function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 		return;
 	}
 
-	global $post;
 //	update_option('tta_customize_settings', []);
 
 	$customize = (array) get_option( 'tta_customize_settings' );
@@ -230,16 +229,15 @@ function tts_enqueue_button_scripts( $content, $btn_no, $class, $btn_style, $tex
 
 
 		if ( apply_filters( 'tts_ignore_match_80_percent', false ) && tts_text_match_80_percent( $original_title, $temp_title ) ) {
-			get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time, $plugin_all_settings, $atts );
+			get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time, $plugin_all_settings, $atts, $post );
 		} else {
-			get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time, $plugin_all_settings, $atts );
+			get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time, $plugin_all_settings, $atts, $post );
 		}
 	} );
 }
 
-function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings, $atts ) {
+function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings, $atts, $post ) {
 
-	global $post;
 
 	$language           = TTA_Helper::tts_site_language( $plugin_all_settings );
 	$voice              = TTA_Helper::tts_get_voice( $plugin_all_settings );
@@ -312,7 +310,6 @@ function get_enqueued_js_object( $content, $btn_no, $class, $btn_style, $text_ar
         if (!window.TTS.hasOwnProperty('settings')) {
             window.TTS.settings = ttsSettings
         }
-
     </script>
 	<?php
 	$object = ob_get_contents();
