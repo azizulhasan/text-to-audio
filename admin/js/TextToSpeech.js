@@ -3,7 +3,7 @@
  */
 import Speech from "./tts/speak-tts/lib/speak-tts.js";
 import BrowserSupport from './tts/BrowserSupport.js'
-import {splitSentences} from "./tts/utilities.js";
+import { splitSentences } from "./tts/utilities.js";
 import AtlasVoiceAnalytics from "./AtlasVoiceAnalytics";
 
 export default class TextToSpeech {
@@ -51,9 +51,9 @@ export default class TextToSpeech {
         this.analytics = new AtlasVoiceAnalytics(this.TTS.settings.postId)
 
 
-        if(typeof NoSleep === 'function' && ttsObj?.is_mobile) {
+        if (typeof NoSleep === 'function' && ttsObj?.is_mobile) {
             const noSleep = new NoSleep();
-            window.onload = function() {
+            window.onload = function () {
                 noSleep.enable();
                 console.log("NoSleep enabled");
             };
@@ -207,15 +207,15 @@ export default class TextToSpeech {
         if (this?.playButtonNo == 1 && this?.speakButton?.innerHTML) {
             if ('listen' === listenStatus) {
                 this.speakButton.innerHTML = this.replayButtonContent();
-                let buttonHoverTitle = window?.ttsObj?.buttonTextArr?.replay_hover_title??'Click to listen post.';
-                this.speakButton.setAttribute('title', 'Text To Audio : ' + buttonHoverTitle );
+                let buttonHoverTitle = window?.ttsObj?.buttonTextArr?.replay_hover_title ?? 'Click to listen post.';
+                this.speakButton.setAttribute('title', 'Text To Audio : ' + buttonHoverTitle);
             } else if ('pause' === listenStatus) {
                 this.speakButton.innerHTML = this.pauseButtonContent();
-                let buttonHoverTitle = window?.ttsObj?.buttonTextArr?.pause_hover_title ??this.pauseButtonText();
+                let buttonHoverTitle = window?.ttsObj?.buttonTextArr?.pause_hover_title ?? this.pauseButtonText();
                 this.speakButton.setAttribute('title', 'Text To Audio : ' + buttonHoverTitle);
             } else if ('resume' === listenStatus) {
                 this.speakButton.innerHTML = this.resumeButtonContent();
-                let buttonHoverTitle = window?.ttsObj?.buttonTextArr?.resume_hover_title?? this.resumeButtonText();
+                let buttonHoverTitle = window?.ttsObj?.buttonTextArr?.resume_hover_title ?? this.resumeButtonText();
                 this.speakButton.setAttribute('title', 'Text To Audio : ' + buttonHoverTitle);
             }
         }
@@ -428,7 +428,7 @@ export default class TextToSpeech {
                  *
                  * This code is implemented from version 1.8.22
                  */
-                if(this.ttsListeningSettings.tta__listening_lang.indexOf('en') === 0 && this.ttsListeningSettings.tta__listening_voice.indexOf('Google') === 0) {
+                if (this.ttsListeningSettings.tta__listening_lang.indexOf('en') === 0 && this.ttsListeningSettings.tta__listening_voice.indexOf('Google') === 0) {
                     this.ttsListeningSettings.tta__listening_lang = "en-US"
                     this.ttsListeningSettings.tta__listening_voice = "Microsoft Zira - English (United States)"
                 }

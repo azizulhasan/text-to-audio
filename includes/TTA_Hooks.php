@@ -134,6 +134,7 @@ class TTA_Hooks {
 		add_action('deactivated_plugin', [$this, 'clear_necessary_cache'], 10, 2);
 
 
+		add_filter('tta__content_title', [$this, 'tta__content_title_callback'], 9999, 2);
 	}
 
 	/**
@@ -531,6 +532,16 @@ class TTA_Hooks {
     public function clear_necessary_cache($plugin, $network) {
 		    TTA_Cache::update_transient_during_plugins_crud();
     }
+
+	public function tta__content_title_callback($title, $post) {
+		$settings = TTA_Helper::tts_get_settings( 'settings' );
+
+		if(isset($settings['tta__settings_add_post_title_to_read']) && !$settings['tta__settings_add_post_title_to_read'] ) {
+			$title = '';
+		}
+
+		return $title;
+	}
 
 }
 

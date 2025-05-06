@@ -369,7 +369,13 @@ class TTA_Helper {
 		if ( ! $post_id && $post ) { // TODO: must add post ID to file name.
 			$post_id = $post->ID;
 		}
-
+		/**
+		 * When title is not added to readble content. Then file name of 
+		 * mp3 file will be post id and language key. 
+		 * 
+		 * if this system needs to be changed then must need to 
+		 * think about already created mp3 files with current system.
+		 */
 		if ( ! $title ) {
 			$title = $post_id;
 		}
