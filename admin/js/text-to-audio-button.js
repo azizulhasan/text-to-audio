@@ -10,11 +10,10 @@ class TTSPlayButton extends HTMLElement {
     constructor() {
         // Always call super first in constructor
         super();
-        console.log({ tts: window.TTS })
 
-        if(typeof NoSleep === 'function' && ttsObj?.is_mobile) {
+        if (typeof NoSleep === 'function' && ttsObj?.is_mobile) {
             const noSleep = new NoSleep();
-            window.onload = function() {
+            window.onload = function () {
                 noSleep.enable();
                 console.log("NoSleep enabled");
             };

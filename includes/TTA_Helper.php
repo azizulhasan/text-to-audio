@@ -369,9 +369,13 @@ class TTA_Helper {
 		if ( ! $post_id && $post ) { // TODO: must add post ID to file name.
 			$post_id = $post->ID;
 		}
-
+		/**
+		 * When title is not added to readble content by UI 
+		 * option of settings page. Then post title of the post
+		 * will be the file name.
+		 */
 		if ( ! $title ) {
-			$title = $post_id;
+			$title = $post->post_title;
 		}
 		$title = trim( $title );
 

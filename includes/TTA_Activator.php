@@ -82,6 +82,7 @@ class TTA_Activator {
 				'tta__settings_exclude_wp_tags'                       => [],
 				'tta__settings_clear_cache'                           => [],
 				'tta__settings_clear_all_cache'                       => true,
+				'tta__settings_add_post_title_to_read'                => true,
 
 			) );
 		}
