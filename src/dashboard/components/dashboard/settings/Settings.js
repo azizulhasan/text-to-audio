@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react';
-import {__} from '@wordpress/i18n'
+import React, { useState, useEffect } from 'react';
+import { __ } from '@wordpress/i18n'
 import {
     Form, Row, Col, Container, Tooltip,
     OverlayTrigger,
@@ -10,10 +10,10 @@ import {
  *
  * Scripts
  */
-import {postWithoutImage} from '../../context/utilities';
+import { postWithoutImage } from '../../context/utilities';
 import toast from '../../context/Notify';
 import UpgradeToPro from '../../UpgradeToPro';
-import {MultiSelect} from '../../context/MultiSelect'
+import { MultiSelect } from '../../context/MultiSelect'
 
 export default function Settings() {
     const [settings, setSettings] = useState({
@@ -32,6 +32,7 @@ export default function Settings() {
         tta__settings_exclude_categories: [],
         tta__settings_exclude_wp_tags: [],
         tta__settings_clear_all_cache: false,
+        tta__settings_add_post_title_to_read: true,
     });
     const [postTypes, setPostTypes] = useState([]);
     const [isDataLoaded, setIsDataLoaded] = useState(false)
@@ -45,7 +46,7 @@ export default function Settings() {
         formData.append('method', 'get');
         postWithoutImage(tta_obj.api_url + 'tta/v1/settings', formData).then(
             (res) => {
-                setSettings({...settings, ...res.data});
+                setSettings({ ...settings, ...res.data });
                 setIsDataLoaded(true)
             });
     }, []);
@@ -54,7 +55,7 @@ export default function Settings() {
         if (window.hasOwnProperty('ttsObj') && ttsObj?.post_types) {
             let tempPostTypes = wp.hooks.applyFilters('tts_display_button_on_post_types', structuredClone(Object.keys(ttsObj.post_types)))
             setPostTypes(tempPostTypes)
-            console.log({tempPostTypes})
+            console.log({ tempPostTypes })
             let tempPostStatus = wp.hooks.applyFilters('tta__settings_allow_listening_for_post_types', structuredClone(Object.keys(ttsObj.post_status)))
             setPostsStatus(tempPostStatus)
         }
@@ -70,7 +71,7 @@ export default function Settings() {
             value = e;
             setSettings({
                 ...settings,
-                ...{[targetName]: value},
+                ...{ [targetName]: value },
             });
             return;
         } else {
@@ -82,7 +83,7 @@ export default function Settings() {
             value = e.target.checked
         }
 
-        console.log({name: e.target.name, value})
+        console.log({ name: e.target.name, value })
 
         if (e.target.name == 'tta__settings_exclude_post_ids') {
             let ids = []
@@ -98,7 +99,7 @@ export default function Settings() {
 
         setSettings({
             ...settings,
-            ...{[e.target.name]: value},
+            ...{ [e.target.name]: value },
         });
     };
 
@@ -224,7 +225,7 @@ export default function Settings() {
                                                 id={`tta__settings_apply_number_format`}
                                             />
                                         </Col>
-                                        <Col xs={1} sm={1} lg={1} className='mt-4'>
+                                        <Col xs={1} sm={1} lg={1} >
                                             <>
                                                 {['top'].map((placement) => (
                                                     <OverlayTrigger
@@ -236,7 +237,7 @@ export default function Settings() {
                                                             </Tooltip>
                                                         }>
                                                         <a className={'text-danger'} target='_blank'
-                                                           href='https://www.youtube.com/watch?v=xQCw7mJXrxo&t=46s'>
+                                                            href='https://www.youtube.com/watch?v=xQCw7mJXrxo&t=46s'>
                                                             <i className="fab fa-youtube"></i>
                                                         </a>
                                                     </OverlayTrigger>
@@ -247,6 +248,25 @@ export default function Settings() {
                                 </>
 
                             }
+                            {/*Add Post Title To Read*/}
+                            <Row className=' mt-3'>
+                                <Col xs={12} sm={6} lg={4}>
+                                    <Form.Label htmlFor='tta__settings_add_post_title_to_read'>
+                                        Add Post Title To Read
+                                    </Form.Label>
+                                </Col>
+                                <Col xs={12} sm={6} lg={8}>
+                                    <Form.Check // prettier-ignore
+                                        type={'checkbox'}
+                                        checked={settings.tta__settings_add_post_title_to_read}
+                                        onChange={(e) =>
+                                            handleChange(e)
+                                        }
+                                        name={`tta__settings_add_post_title_to_read`}
+                                        id={`tta__settings_add_post_title_to_read`}
+                                    />
+                                </Col>
+                            </Row>
                             {/* Stop Auto Pause After Switching Tab. */}
                             {/* <Row className=' mt-3'>
 								<Col xs={12} sm={6} lg={4}>
@@ -282,7 +302,7 @@ export default function Settings() {
                                             name="tta__settings_allow_listening_for_post_types"
                                             onChange={handleChange}
                                             selectedItems={settings.tta__settings_allow_listening_for_post_types}
-                                            options={postTypes}/>
+                                            options={postTypes} />
                                     </Form.Group>
                                 </Col>
                             </Row>
@@ -313,22 +333,22 @@ export default function Settings() {
                                 <Col xs={12} sm={6} lg={4}>
                                     <Form.Label htmlFor='tta__settings_css_selectors'>
                                         Include Content By CSS Selectors {ttsObj.is_pro_active ? "" : (
-                                        <>
-                                            {['top'].map((placement) => (
-                                                <OverlayTrigger
-                                                    key={placement}
-                                                    placement={placement}
-                                                    overlay={
-                                                        <Tooltip id={`tooltip-${placement}`}>
-                                                            {__('Include Content By CSS Selectors feature is available in pro version')}
-                                                        </Tooltip>
-                                                    }>
-                                                    <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
-                                                        className="fas fa-lock"/></Button>
-                                                </OverlayTrigger>
-                                            ))}
-                                        </>
-                                    )}
+                                            <>
+                                                {['top'].map((placement) => (
+                                                    <OverlayTrigger
+                                                        key={placement}
+                                                        placement={placement}
+                                                        overlay={
+                                                            <Tooltip id={`tooltip-${placement}`}>
+                                                                {__('Include Content By CSS Selectors feature is available in pro version')}
+                                                            </Tooltip>
+                                                        }>
+                                                        <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
+                                                            className="fas fa-lock" /></Button>
+                                                    </OverlayTrigger>
+                                                ))}
+                                            </>
+                                        )}
                                     </Form.Label>
                                 </Col>
                                 <Col xs={11} sm={11} lg={7}>
@@ -354,7 +374,7 @@ export default function Settings() {
                                                     </Tooltip>
                                                 }>
                                                 <a className={'text-danger'} target='_blank'
-                                                   href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
+                                                    href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
                                                     <i className="fab fa-youtube"></i></a>
                                             </OverlayTrigger>
                                         ))}
@@ -366,22 +386,22 @@ export default function Settings() {
                                 <Col xs={12} sm={6} lg={4}>
                                     <Form.Label htmlFor='tta__settings_exclude_content_by_css_selectors'>
                                         Exclude Content By CSS Selectors {ttsObj.is_pro_active ? "" : (
-                                        <>
-                                            {['top'].map((placement) => (
-                                                <OverlayTrigger
-                                                    key={placement}
-                                                    placement={placement}
-                                                    overlay={
-                                                        <Tooltip id={`tooltip-${placement}`}>
-                                                            {__('Exclude Content By CSS Selectors feature is available in pro version')}
-                                                        </Tooltip>
-                                                    }>
-                                                    <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
-                                                        className="fas fa-lock"/></Button>
-                                                </OverlayTrigger>
-                                            ))}
-                                        </>
-                                    )}
+                                            <>
+                                                {['top'].map((placement) => (
+                                                    <OverlayTrigger
+                                                        key={placement}
+                                                        placement={placement}
+                                                        overlay={
+                                                            <Tooltip id={`tooltip-${placement}`}>
+                                                                {__('Exclude Content By CSS Selectors feature is available in pro version')}
+                                                            </Tooltip>
+                                                        }>
+                                                        <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
+                                                            className="fas fa-lock" /></Button>
+                                                    </OverlayTrigger>
+                                                ))}
+                                            </>
+                                        )}
                                     </Form.Label>
                                 </Col>
                                 <Col xs={11} sm={11} lg={7}>
@@ -407,7 +427,7 @@ export default function Settings() {
                                                     </Tooltip>
                                                 }>
                                                 <a className={'text-danger'} target='_blank'
-                                                   href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
+                                                    href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
                                                     <i className="fab fa-youtube"></i></a>
                                             </OverlayTrigger>
                                         ))}
@@ -419,22 +439,22 @@ export default function Settings() {
                                 <Col xs={12} sm={6} lg={4}>
                                     <Form.Label htmlFor='tta__settings_exclude_tags'>
                                         Exclude HTML Tags To Speak {ttsObj.is_pro_active ? "" : (
-                                        <>
-                                            {['top'].map((placement) => (
-                                                <OverlayTrigger
-                                                    key={placement}
-                                                    placement={placement}
-                                                    overlay={
-                                                        <Tooltip id={`tooltip-${placement}`}>
-                                                            {__('Exclude Tags. So that its content skiped. Like ( Subscript, Superscript etc.) This is a pro feature.')}
-                                                        </Tooltip>
-                                                    }>
-                                                    <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
-                                                        className="fas fa-lock"/></Button>
-                                                </OverlayTrigger>
-                                            ))}
-                                        </>
-                                    )}
+                                            <>
+                                                {['top'].map((placement) => (
+                                                    <OverlayTrigger
+                                                        key={placement}
+                                                        placement={placement}
+                                                        overlay={
+                                                            <Tooltip id={`tooltip-${placement}`}>
+                                                                {__('Exclude Tags. So that its content skiped. Like ( Subscript, Superscript etc.) This is a pro feature.')}
+                                                            </Tooltip>
+                                                        }>
+                                                        <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
+                                                            className="fas fa-lock" /></Button>
+                                                    </OverlayTrigger>
+                                                ))}
+                                            </>
+                                        )}
                                     </Form.Label>
                                 </Col>
                                 <Col xs={11} sm={11} lg={7}>
@@ -460,7 +480,7 @@ export default function Settings() {
                                                     </Tooltip>
                                                 }>
                                                 <a className={'text-danger'} target='_blank'
-                                                   href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
+                                                    href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
                                                     <i className="fab fa-youtube"></i></a>
                                             </OverlayTrigger>
                                         ))}
@@ -472,22 +492,22 @@ export default function Settings() {
                                 <Col xs={12} sm={6} lg={4}>
                                     <Form.Label htmlFor='tta__settings_exclude_texts'>
                                         Exclude Texts To Speak {ttsObj.is_pro_active ? "" : (
-                                        <>
-                                            {['top'].map((placement) => (
-                                                <OverlayTrigger
-                                                    key={placement}
-                                                    placement={placement}
-                                                    overlay={
-                                                        <Tooltip id={`tooltip-${placement}`}>
-                                                            {__('Excluding texts to be spoken is a pro feature.')}
-                                                        </Tooltip>
-                                                    }>
-                                                    <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
-                                                        className="fas fa-lock"/></Button>
-                                                </OverlayTrigger>
-                                            ))}
-                                        </>
-                                    )}
+                                            <>
+                                                {['top'].map((placement) => (
+                                                    <OverlayTrigger
+                                                        key={placement}
+                                                        placement={placement}
+                                                        overlay={
+                                                            <Tooltip id={`tooltip-${placement}`}>
+                                                                {__('Excluding texts to be spoken is a pro feature.')}
+                                                            </Tooltip>
+                                                        }>
+                                                        <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
+                                                            className="fas fa-lock" /></Button>
+                                                    </OverlayTrigger>
+                                                ))}
+                                            </>
+                                        )}
                                     </Form.Label>
                                 </Col>
                                 <Col xs={11} sm={11} lg={7}>
@@ -513,7 +533,7 @@ export default function Settings() {
                                                     </Tooltip>
                                                 }>
                                                 <a className={'text-danger'} target='_blank'
-                                                   href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
+                                                    href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
                                                     <i className="fab fa-youtube"></i></a>
                                             </OverlayTrigger>
                                         ))}
@@ -525,22 +545,22 @@ export default function Settings() {
                                 <Col xs={12} sm={6} lg={4}>
                                     <Form.Label htmlFor='tta__settings_exclude_post_ids'>
                                         Exclude Posts By IDs To Speak {ttsObj.is_pro_active ? "" : (
-                                        <>
-                                            {['top'].map((placement) => (
-                                                <OverlayTrigger
-                                                    key={placement}
-                                                    placement={placement}
-                                                    overlay={
-                                                        <Tooltip id={`tooltip-${placement}`}>
-                                                            {__('Exclude more than 5 IDs is a pro feature')}
-                                                        </Tooltip>
-                                                    }>
-                                                    <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
-                                                        className="fas fa-lock"/></Button>
-                                                </OverlayTrigger>
-                                            ))}
-                                        </>
-                                    )}
+                                            <>
+                                                {['top'].map((placement) => (
+                                                    <OverlayTrigger
+                                                        key={placement}
+                                                        placement={placement}
+                                                        overlay={
+                                                            <Tooltip id={`tooltip-${placement}`}>
+                                                                {__('Exclude more than 5 IDs is a pro feature')}
+                                                            </Tooltip>
+                                                        }>
+                                                        <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
+                                                            className="fas fa-lock" /></Button>
+                                                    </OverlayTrigger>
+                                                ))}
+                                            </>
+                                        )}
                                     </Form.Label>
                                 </Col>
                                 <Col xs={11} sm={11} lg={7}>
@@ -565,7 +585,7 @@ export default function Settings() {
                                                     </Tooltip>
                                                 }>
                                                 <a className={'text-danger'} target='_blank'
-                                                   href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
+                                                    href='https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev'>
                                                     <i className="fab fa-youtube"></i></a>
                                             </OverlayTrigger>
                                         ))}
@@ -577,22 +597,22 @@ export default function Settings() {
                                 <Col xs={12} sm={6} lg={4}>
                                     <Form.Label htmlFor='tta__settings_exclude_categories'>
                                         Exclude Categories To Speak {ttsObj.is_pro_active ? "" : (
-                                        <>
-                                            {['top'].map((placement) => (
-                                                <OverlayTrigger
-                                                    key={placement}
-                                                    placement={placement}
-                                                    overlay={
-                                                        <Tooltip id={`tooltip-${placement}`}>
-                                                            {__('Exclude more than 1 categories is a pro feature')}
-                                                        </Tooltip>
-                                                    }>
-                                                    <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
-                                                        className="fas fa-lock"/></Button>
-                                                </OverlayTrigger>
-                                            ))}
-                                        </>
-                                    )}
+                                            <>
+                                                {['top'].map((placement) => (
+                                                    <OverlayTrigger
+                                                        key={placement}
+                                                        placement={placement}
+                                                        overlay={
+                                                            <Tooltip id={`tooltip-${placement}`}>
+                                                                {__('Exclude more than 1 categories is a pro feature')}
+                                                            </Tooltip>
+                                                        }>
+                                                        <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
+                                                            className="fas fa-lock" /></Button>
+                                                    </OverlayTrigger>
+                                                ))}
+                                            </>
+                                        )}
                                     </Form.Label>
                                 </Col>
                                 <Col xs={11} sm={11} lg={7}>
@@ -603,7 +623,7 @@ export default function Settings() {
                                         onChange={handleChange}
                                         toastMessage={'On Free Version You Can Select Only 1 Category.'}
                                         selectedItems={settings.tta__settings_exclude_categories}
-                                        options={Object.keys(ttsObj?.categories) || []}/>
+                                        options={Object.keys(ttsObj?.categories) || []} />
 
                                 </Col>
                                 <Col xs={1} sm={1} lg={1} className='mt-4'>
@@ -618,7 +638,7 @@ export default function Settings() {
                                                     </Tooltip>
                                                 }>
                                                 <a className={'text-danger'} target='_blank'
-                                                   href='https://www.youtube.com/watch?v=yanuoEBfG4A'>
+                                                    href='https://www.youtube.com/watch?v=yanuoEBfG4A'>
                                                     <i className="fab fa-youtube"></i></a>
                                             </OverlayTrigger>
                                         ))}
@@ -630,22 +650,22 @@ export default function Settings() {
                                 <Col xs={12} sm={6} lg={4}>
                                     <Form.Label htmlFor='tta__settings_exclude_wp_tags'>
                                         Exclude Tags To Speak {ttsObj.is_pro_active ? "" : (
-                                        <>
-                                            {['top'].map((placement) => (
-                                                <OverlayTrigger
-                                                    key={placement}
-                                                    placement={placement}
-                                                    overlay={
-                                                        <Tooltip id={`tooltip-${placement}`}>
-                                                            {__('Exclude more than 1 tags is a pro feature')}
-                                                        </Tooltip>
-                                                    }>
-                                                    <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
-                                                        className="fas fa-lock"/></Button>
-                                                </OverlayTrigger>
-                                            ))}
-                                        </>
-                                    )}
+                                            <>
+                                                {['top'].map((placement) => (
+                                                    <OverlayTrigger
+                                                        key={placement}
+                                                        placement={placement}
+                                                        overlay={
+                                                            <Tooltip id={`tooltip-${placement}`}>
+                                                                {__('Exclude more than 1 tags is a pro feature')}
+                                                            </Tooltip>
+                                                        }>
+                                                        <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
+                                                            className="fas fa-lock" /></Button>
+                                                    </OverlayTrigger>
+                                                ))}
+                                            </>
+                                        )}
                                     </Form.Label>
                                 </Col>
                                 <Col xs={11} sm={11} lg={7}>
@@ -656,7 +676,7 @@ export default function Settings() {
                                         onChange={handleChange}
                                         toastMessage={'On Free Version You Can Select Only 1 Tag.'}
                                         selectedItems={settings.tta__settings_exclude_wp_tags}
-                                        options={Object.keys(ttsObj?.tags) || []}/>
+                                        options={Object.keys(ttsObj?.tags) || []} />
                                 </Col>
                                 <Col xs={1} sm={1} lg={1} className='mt-4'>
                                     <>
@@ -670,7 +690,7 @@ export default function Settings() {
                                                     </Tooltip>
                                                 }>
                                                 <a className={'text-danger'} target='_blank'
-                                                   href='https://www.youtube.com/watch?v=yanuoEBfG4A'>
+                                                    href='https://www.youtube.com/watch?v=yanuoEBfG4A'>
                                                     <i className="fab fa-youtube"></i></a>
                                             </OverlayTrigger>
                                         ))}
@@ -728,7 +748,7 @@ export default function Settings() {
                         </Form>
                     </Col>
                     <Col xs={12} sm={12} lg={4}>
-                        <UpgradeToPro promotionType={'youtube'}/>
+                        <UpgradeToPro promotionType={'youtube'} />
                     </Col>
                 </Row>
             </Container>
