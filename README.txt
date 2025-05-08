@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.8.24
+Stable tag: 1.8.25
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -142,7 +142,7 @@ Indonesian, Italian, Japanese, Korean, Latin, Latvian,
 Macedonian, Norwegian, Polish, Portuguese, Portuguese (Brazil),
 Romanian, Russian, Serbian, Slovak, Spanish, Spanish (Spain),
 Spanish (United States), Swahili, Swedish, Tamil, Thai,
-Turkish, Vietnamese, Welsh.
+Turkish, Vietnamese, Welsh. Bengali, Urdu, Portuguese ( Portuguese ), Hebrew
 
 ### Text To Speech TTS Free Supported Languages:
 
@@ -441,6 +441,9 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+
+= 1.8.25 ( 08 May 2025 ) =
+Added: Bengali, Urdu, Portuguese ( Portuguese) Languages added to pro version.
 
 = 1.8.24 ( 06 May 2025 ) =
 Added: Post Title add or remove UI added to settings page.
