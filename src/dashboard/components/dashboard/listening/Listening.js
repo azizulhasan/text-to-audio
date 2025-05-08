@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useMemo} from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
     Col,
     Container,
@@ -22,9 +22,7 @@ import {
     chatGPTLanguages
 } from '../../context/utilities';
 import toast from '../../context/Notify';
-import {Link} from 'react-router-dom';
 import UpgradeToPro from '../../UpgradeToPro';
-import {array} from 'prop-types';
 
 export default function Listening() {
     const [currentPlayerVoices, setCurrentPlayerVoices] = useState([]);
@@ -75,7 +73,7 @@ export default function Listening() {
 
             setListeningSettings({
                 ...listeningSettings,
-                ...{tta__listening_activeLanguages_mapping: languageObject},
+                ...{ tta__listening_activeLanguages_mapping: languageObject },
             });
         } else if (window?.ttsObjPro?.compatible?.['sitepress-multilingual-cms/sitepress.php']) {
             let gtranslateActiveLanguages = ttsObjPro?.compatible?.['sitepress-multilingual-cms/sitepress.php']?.active_languages;
@@ -94,7 +92,7 @@ export default function Listening() {
 
             setListeningSettings({
                 ...listeningSettings,
-                ...{tta__listening_activeLanguages_mapping: languageObject},
+                ...{ tta__listening_activeLanguages_mapping: languageObject },
             });
         } else if (window?.ttsObjPro?.compatible?.['translatepress-multilingual/index.php']) {
             let activeLanguages = ttsObjPro?.compatible?.['translatepress-multilingual/index.php']?.data;
@@ -112,7 +110,7 @@ export default function Listening() {
             console.log(languageObject)
             setListeningSettings({
                 ...listeningSettings,
-                ...{tta__listening_activeLanguages_mapping: languageObject},
+                ...{ tta__listening_activeLanguages_mapping: languageObject },
             });
         }
 
@@ -125,7 +123,7 @@ export default function Listening() {
             getData(apiURL + 'voices')
                 .then((res) => {
                     if (res?.voices?.length) {
-                        setLocalStorage({tta__voices: res.voices})
+                        setLocalStorage({ tta__voices: res.voices })
                     } else {
                         setVoicesAndLanguages()
                     }
@@ -199,7 +197,7 @@ export default function Listening() {
                 if (!res.data?.buttonSettings?.id) {
                     res.data.buttonSettings.id = 1;
                 }
-                console.log({dta: res.data.buttonSettings.id})
+                console.log({ dta: res.data.buttonSettings.id })
                 setCustomizationSettings(res.data);
                 setIsListeningSettingsLoaded(true)
 
@@ -258,7 +256,7 @@ export default function Listening() {
 
         let timer = setTimeout(function handleTime() {
             timer = setTimeout(handleTime, 1000)
-            console.log({customizationSettings, timer})
+            console.log({ customizationSettings, timer })
 
             if (timer > 999 || customizationSettings?.buttonSettings == undefined) {
                 clearTimeout(timer)
@@ -403,7 +401,7 @@ export default function Listening() {
         } else {
             setListeningSettings({
                 ...listeningSettings,
-                ...{[e.target.name]: e.target.value},
+                ...{ [e.target.name]: e.target.value },
             });
         }
 
@@ -442,7 +440,7 @@ export default function Listening() {
                                         {Object.keys(currentPlayerLanguages).map((langKey, index) => {
                                             return (
                                                 <option key={langKey}
-                                                        value={customizationSettings?.buttonSettings?.id < 3 ? currentPlayerLanguages[langKey] : langKey}>
+                                                    value={customizationSettings?.buttonSettings?.id < 3 ? currentPlayerLanguages[langKey] : langKey}>
                                                     {currentPlayerLanguages[langKey]}
                                                 </option>
                                             );
@@ -494,7 +492,7 @@ export default function Listening() {
                                             </option>
                                             {currentPlayerVoices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && customizationSettings?.buttonSettings?.id == 4 ?
                                                 <option key={index} data-lang={voice?.languageCodes?.[0]}
-                                                        value={[voice.name, voice.ssmlGender].join('-')}>
+                                                    value={[voice.name, voice.ssmlGender].join('-')}>
                                                     {voice.name} {'-'} {voice.ssmlGender}
                                                 </option> : customizationSettings?.buttonSettings?.id == 5 ?
                                                     <option key={index} data-lang={voice} value={voice}>
@@ -605,7 +603,7 @@ export default function Listening() {
                                                             customizationSettings?.buttonSettings?.id == 5 ? 'The speed of the generated audio. Select a value from 0.25 to 4.0. 1.0 is the default.\n' +
                                                                 '\n' : " Gets and sets the speed at which the\n" +
                                                                 "                                                        utterance will be spoken at. Value :\n" +
-                                                                "                                                        From 0.1 to 10"
+                                                            "                                                        From 0.1 to 10"
                                                         }
                                                     </Tooltip>
                                                 }>
@@ -717,7 +715,7 @@ export default function Listening() {
                                                         </Tooltip>
                                                     }>
                                                     <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
-                                                        className="fas fa-lock"/></Button>
+                                                        className="fas fa-lock" /></Button>
                                                 </OverlayTrigger>
                                             ))}
                                         </>
@@ -774,7 +772,7 @@ export default function Listening() {
                                                 {Object.keys(currentPlayerLanguages).map((langKey, index) => {
                                                     return (
                                                         <option key={index}
-                                                                value={customizationSettings?.buttonSettings?.id < 3 ? currentPlayerLanguages[langKey] : langKey}>
+                                                            value={customizationSettings?.buttonSettings?.id < 3 ? currentPlayerLanguages[langKey] : langKey}>
                                                             {currentPlayerLanguages[langKey]}
                                                         </option>
                                                     );
@@ -804,7 +802,7 @@ export default function Listening() {
                                                     </option>
                                                     {currentPlayerVoices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && customizationSettings?.buttonSettings?.id == 4 ?
                                                         <option key={index} data-lang={voice?.languageCodes?.[0]}
-                                                                value={[voice.name, voice.ssmlGender].join('-')}>
+                                                            value={[voice.name, voice.ssmlGender].join('-')}>
                                                             {voice.name} {'-'} {voice.ssmlGender}
                                                         </option> :
                                                         <option key={index} data-lang={voice.lang} value={voice.name}>
@@ -826,7 +824,7 @@ export default function Listening() {
                     </Form>
                 </Col>
                 <Col xs={12} sm={12} lg={4}>
-                    <UpgradeToPro/>
+                    <UpgradeToPro />
                 </Col>
             </Row>
         </Container>
