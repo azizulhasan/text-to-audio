@@ -54,6 +54,14 @@ export default function Listening() {
         return ttsObj.api_url + ttsObj.api_namespace + "/" + ttsObj.api_version + "/";
     })
 
+    const baseMP3File = useMemo(() => {
+        if (window.hasOwnProperty('ttsObj') && ttsObj.is_pro_active && customizationSettings?.buttonSettings?.id == 5) {
+            return 'https://cdn.openai.com/API/docs/audio/alloy.wav';
+        }
+
+        return 'https://cloud.google.com/text-to-speech/docs/audio/en-GB-Chirp-HD-F.wav';
+    })
+
 
     const [multilingualActiveLanguages, setMultilingualActiveLanguages] = useState([]);
     const [isListeningSettingsLoaded, setIsListeningSettingsLoaded] = useState(false)
@@ -400,6 +408,32 @@ export default function Listening() {
             setCurrentPlayerFilteredVoices(filteredVoices)
         }
 
+        if (e.target.name === 'tta__listening_voice' && customizationSettings?.buttonSettings?.id > 3) {
+            let currentVoice = e.target.value;
+            let baseURL = 'https://cloud.google.com/text-to-speech/docs/audio/';
+            if (customizationSettings?.buttonSettings?.id == 5) {
+                baseURL = 'https://cdn.openai.com/API/docs/audio/';
+            }
+            currentVoice = currentVoice.replace(/-(MALE|FEMALE)$/, '');
+            console.log(currentVoice)
+
+            let wavFileName = baseURL + currentVoice + '.wav'
+            let mp3FileName = baseURL + currentVoice + '.mp3'
+            const audio_wav = document.getElementById('tts_audio_wav')
+            const audio_mp3 = document.getElementById('tts_audio_mp3')
+            const audio_tag = document.getElementById('tts_audio_tag')
+            // wavFileName = 'https://cdn.openai.com/API/docs/audio/coral.wav';
+            // mp3FileName = 'https://cdn.openai.com/API/docs/audio/coral.mp3';
+
+            audio_wav.src = wavFileName;
+            audio_mp3.src = mp3FileName
+            audio_tag.load();
+            console.log({ mp3FileName, wavFileName })
+        }
+
+
+
+
         let listeningSettingsCloned = structuredClone(listeningSettings)
 
         if (e.target.name === 'tta__available_currentPlayerVoices' || 'tta__currentPlayerLanguages' === e.target.name || 'tta__multilingualActiveLanguages' === e.target.name) {
@@ -442,7 +476,7 @@ export default function Listening() {
                         <Row>
                             <Col xs={12} sm={8} lg={8}>
                                 <Form.Group>
-                                    <Form.Label htmlFor='tta__listening_lang'>Voice Language11</Form.Label>
+                                    <Form.Label htmlFor='tta__listening_lang'>Voice Language</Form.Label>
                                     <Form.Select
                                         onChange={handleChange}
                                         name='tta__listening_lang'
@@ -492,53 +526,65 @@ export default function Listening() {
                         </Row>
 
                         {
-                            customizationSettings?.buttonSettings?.id != 3 && <Row>
-                                <Col xs={12} sm={8} lg={8}>
-                                    <Form.Group>
-                                        <Form.Label htmlFor='tta__listening_voice'>Voice to speak </Form.Label>
-                                        <Form.Select
-                                            onChange={handleChange}
-                                            name='tta__listening_voice'
-                                            id='tta__listening_voice'
-                                            value={listeningSettings.tta__listening_voice}
-                                            aria-label='Default select example'>
-                                            <option disabled>
-                                                {' '}
-                                                Default Listening Voice
-                                            </option>
-                                            {currentPlayerFilteredVoices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && customizationSettings?.buttonSettings?.id == 4 ?
-                                                <option key={index} data-lang={voice?.languageCodes?.[0]}
-                                                    value={[voice.name, voice.ssmlGender].join('-')}>
-                                                    {voice.name} {'-'} {voice.ssmlGender}
-                                                </option> : customizationSettings?.buttonSettings?.id == 5 ?
-                                                    <option key={index} data-lang={voice} value={voice}>
-                                                        {voice}
-                                                    </option> :
-                                                    <option key={index} data-lang={voice.lang} value={voice.name}>
-                                                        {voice.name}
-                                                    </option>
-                                            )}
-                                        </Form.Select>
-                                    </Form.Group>
-                                </Col>
-                                <Col xs={12} sm={4} lg={4} className='mt-4'>
-                                    <>
-                                        {['top'].map((placement) => (
-                                            <OverlayTrigger
-                                                key={placement}
-                                                placement={placement}
-                                                overlay={
-                                                    <Tooltip id={`tooltip-${placement}`}>
-                                                        Gets and sets the voice that will be
-                                                        used to speak
-                                                    </Tooltip>
-                                                }>
-                                                <Button className='tta_btn'>?</Button>
-                                            </OverlayTrigger>
-                                        ))}
-                                    </>
-                                </Col>
-                            </Row>
+                            customizationSettings?.buttonSettings?.id != 3 && <>
+                                <Row>
+                                    <Col xs={12} sm={8} lg={8}>
+                                        <Form.Group>
+                                            <Form.Label htmlFor='tta__listening_voice'>Voice to speak </Form.Label>
+                                            <Form.Select
+                                                onChange={handleChange}
+                                                name='tta__listening_voice'
+                                                id='tta__listening_voice'
+                                                value={listeningSettings.tta__listening_voice}
+                                                aria-label='Default select example'>
+                                                <option disabled>
+                                                    {' '}
+                                                    Default Listening Voice
+                                                </option>
+                                                {currentPlayerFilteredVoices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && customizationSettings?.buttonSettings?.id == 4 ?
+                                                    <option key={index} data-lang={voice?.languageCodes?.[0]}
+                                                        value={[voice.name, voice.ssmlGender].join('-')}>
+                                                        {voice.name} {'-'} {voice.ssmlGender}
+                                                    </option> : customizationSettings?.buttonSettings?.id == 5 ?
+                                                        <option key={index} data-lang={voice} value={voice}>
+                                                            {voice}
+                                                        </option> :
+                                                        <option key={index} data-lang={voice.lang} value={voice.name}>
+                                                            {voice.name}
+                                                        </option>
+                                                )}
+                                            </Form.Select>
+                                        </Form.Group>
+                                    </Col>
+                                    <Col xs={12} sm={4} lg={4} className='mt-4'>
+                                        <>
+                                            {['top'].map((placement) => (
+                                                <OverlayTrigger
+                                                    key={placement}
+                                                    placement={placement}
+                                                    overlay={
+                                                        <Tooltip id={`tooltip-${placement}`}>
+                                                            Gets and sets the voice that will be
+                                                            used to speak
+                                                        </Tooltip>
+                                                    }>
+                                                    <Button className='tta_btn'>?</Button>
+                                                </OverlayTrigger>
+                                            ))}
+                                        </>
+                                    </Col>
+                                </Row>
+                                <Row>
+                                    <Col xs={12} sm={12} lg={12} className='mt-4'>
+                                        <audio id='tts_audio_tag' controls>
+                                            <source id="tts_audio_wav" src={baseMP3File} type="audio/wav" />
+                                            <source id="tts_audio_mp3" src={baseMP3File} type="audio/mpeg" />
+                                            Your browser does not support the audio element.
+                                        </audio>
+
+                                    </Col>
+                                </Row>
+                            </>
                         }
                         {
                             customizationSettings?.buttonSettings?.id == 5 && <Row>
