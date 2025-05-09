@@ -30,6 +30,7 @@ export default function Listening() {
     const [speechSynthesisVoices, setSpeechSynthesisVoices] = useState([]);
     const [customizationSettings, setCustomizationSettings] = useState({});
     const [languageMissingMessage, setLanguageMissingMessage] = useState('');
+    const [currentPlayerFilteredVoices, setCurrentPlayerFilteredVoices] = useState([]);
 
     const [listeningSettings, setListeningSettings] = useState({
         tta__listening_voice: 'Microsoft Zira - English (United States)',
@@ -119,6 +120,12 @@ export default function Listening() {
 
     const setGoogleVoicesAndLanguages = () => {
         let stored_voices = getLocalStorage(['tta__voices']);
+        let languageHelper = null
+        if (typeof TTSProLanguageHelper === 'function') {
+            languageHelper = new TTSProLanguageHelper();
+            // const voicesByLangCode = languageHelper.getVoicesByLanguageCode('fr-FR')
+            // console.log(voicesByLangCode)
+        }
         if (!stored_voices?.tta__voices) {
             getData(apiURL + 'voices')
                 .then((res) => {
@@ -134,7 +141,7 @@ export default function Listening() {
         } else {
             let voices = JSON.parse(stored_voices.tta__voices);
             let langs = []
-            let langs2 = []
+            let langs2 = {}
 
             if (voices?.voices) {
                 voices = voices.voices;
@@ -143,11 +150,15 @@ export default function Listening() {
             voices.map(voice => {
                 if (!langs.includes(voice.languageCodes[0])) {
                     langs.push(voice.languageCodes[0])
-                    langs2[voice.languageCodes[0]] = voice.languageCodes[0];
+                    let languageName = voice.languageCodes[0];
+                    if (languageHelper) {
+                        languageName = languageHelper.getLangByCode(languageName);
+                    }
+                    langs2[voice.languageCodes[0]] = languageName;
                 }
             })
 
-            setVoicesAndLanguages(voices, langs)
+            setVoicesAndLanguages(voices, langs2)
         }
     }
 
@@ -230,12 +241,14 @@ export default function Listening() {
         };
 
         setCurrentPlayerVoices(Object.keys(names))
+        setCurrentPlayerFilteredVoices(Object.keys(names))
         setSpeechSynthesisVoices(Object.keys(names))
     }
 
     const setVoicesAndLanguages = (voices = [], langs = [],) => {
         if (Array.isArray(voices) && voices.length) {
             setCurrentPlayerVoices(voices)
+            setCurrentPlayerFilteredVoices(voices)
             setSpeechSynthesisVoices(voices)
         }
         if (Array.isArray(langs) && langs.length) {
@@ -245,14 +258,14 @@ export default function Listening() {
                     newLangs[lang] = lang;
                 }
                 setCurrentPlayerLanguages(newLangs)
-
             } else {
                 setCurrentPlayerLanguages(langs)
             }
-
+        } else {
+            setCurrentPlayerLanguages(langs)
         }
 
-        if (Array.isArray(langs) && Array.isArray(voices) && voices.length) return;
+        if (Object.keys(langs).length && Array.isArray(voices) && voices.length) return;
 
         let timer = setTimeout(function handleTime() {
             timer = setTimeout(handleTime, 1000)
@@ -274,6 +287,7 @@ export default function Listening() {
                 })
                 setCurrentPlayerLanguages(langs)
                 setCurrentPlayerVoices(window.speechSynthesis.getVoices())
+                setCurrentPlayerFilteredVoices(window.speechSynthesis.getVoices())
             }
         })
     }
@@ -373,16 +387,17 @@ export default function Listening() {
 
         if (e.target.name === 'tta__listening_lang' && customizationSettings?.buttonSettings?.id == 4) {
             // TODO: this filter will only be applied for default language not for WPML or GTranslate plugins.
-            // let filteredVoices = speechSynthesisVoices.filter(voice => {
-            //     return voice.languageCodes[0] == e.target.value;
-            // })
-            // if (filteredVoices.length === 1) {
-            //     setListeningSettings({
-            //         ...listeningSettings,
-            //         ...{['tta__listening_voice']: filteredVoices[0].languageCodes[0]},
-            //     });
-            // }
-            // setCurrentPlayerVoices(filteredVoices)
+            let filteredVoices = speechSynthesisVoices.filter(voice => {
+                return voice.languageCodes[0] == e.target.value;
+            })
+            if (filteredVoices.length === 1) {
+                setListeningSettings({
+                    ...listeningSettings,
+                    ...{ ['tta__listening_voice']: filteredVoices[0].languageCodes[0] },
+                });
+            }
+
+            setCurrentPlayerFilteredVoices(filteredVoices)
         }
 
         let listeningSettingsCloned = structuredClone(listeningSettings)
@@ -418,6 +433,7 @@ export default function Listening() {
         }
         return activePluginName
     }
+
     return (
         <Container>
             <Row>
@@ -426,7 +442,7 @@ export default function Listening() {
                         <Row>
                             <Col xs={12} sm={8} lg={8}>
                                 <Form.Group>
-                                    <Form.Label htmlFor='tta__listening_lang'>Voice Language</Form.Label>
+                                    <Form.Label htmlFor='tta__listening_lang'>Voice Language11</Form.Label>
                                     <Form.Select
                                         onChange={handleChange}
                                         name='tta__listening_lang'
@@ -490,7 +506,7 @@ export default function Listening() {
                                                 {' '}
                                                 Default Listening Voice
                                             </option>
-                                            {currentPlayerVoices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && customizationSettings?.buttonSettings?.id == 4 ?
+                                            {currentPlayerFilteredVoices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && customizationSettings?.buttonSettings?.id == 4 ?
                                                 <option key={index} data-lang={voice?.languageCodes?.[0]}
                                                     value={[voice.name, voice.ssmlGender].join('-')}>
                                                     {voice.name} {'-'} {voice.ssmlGender}
