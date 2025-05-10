@@ -46,6 +46,7 @@ export default function Listening() {
     });
 
     const [listeningLang, setListeningLang] = useState('en-GB');
+    const [baseMP3File, setBaseMP3File] = useState('https://cloud.google.com/text-to-speech/docs/audio/en-GB-Chirp-HD-F.wav')
     const apiURL = useMemo(() => {
         if (window.hasOwnProperty('ttsObj') && ttsObj.is_pro_active) {
             return ttsObj.api_url + ttsObj.api_namespace + "_pro/" + ttsObj.api_version + "/";
@@ -54,13 +55,19 @@ export default function Listening() {
         return ttsObj.api_url + ttsObj.api_namespace + "/" + ttsObj.api_version + "/";
     })
 
-    const baseMP3File = useMemo(() => {
+    useEffect(() => {
+        console.log({ pro: ttsObj.is_pro_active, id: customizationSettings?.buttonSettings?.id })
         if (window.hasOwnProperty('ttsObj') && ttsObj.is_pro_active && customizationSettings?.buttonSettings?.id == 5) {
-            return 'https://cdn.openai.com/API/docs/audio/alloy.wav';
-        }
+            setBaseMP3File('https://cdn.openai.com/API/docs/audio/alloy.wav')
+            const audio_wav = document.getElementById('tts_audio_wav')
+            const audio_mp3 = document.getElementById('tts_audio_mp3')
+            const audio_tag = document.getElementById('tts_audio_tag')
 
-        return 'https://cloud.google.com/text-to-speech/docs/audio/en-GB-Chirp-HD-F.wav';
-    })
+            audio_wav.src = 'https://cdn.openai.com/API/docs/audio/alloy.wav';
+            audio_mp3.src = 'https://cdn.openai.com/API/docs/audio/alloy.wav'
+            audio_tag.load();
+        }
+    }, [customizationSettings])
 
 
     const [multilingualActiveLanguages, setMultilingualActiveLanguages] = useState([]);
@@ -415,7 +422,6 @@ export default function Listening() {
                 baseURL = 'https://cdn.openai.com/API/docs/audio/';
             }
             currentVoice = currentVoice.replace(/-(MALE|FEMALE)$/, '');
-            console.log(currentVoice)
 
             let wavFileName = baseURL + currentVoice + '.wav'
             let mp3FileName = baseURL + currentVoice + '.mp3'
@@ -428,7 +434,7 @@ export default function Listening() {
             audio_wav.src = wavFileName;
             audio_mp3.src = mp3FileName
             audio_tag.load();
-            console.log({ mp3FileName, wavFileName })
+            audio_tag.play();
         }
 
 
@@ -574,16 +580,18 @@ export default function Listening() {
                                         </>
                                     </Col>
                                 </Row>
-                                <Row>
-                                    <Col xs={12} sm={12} lg={12} className='mt-4'>
-                                        <audio id='tts_audio_tag' controls>
-                                            <source id="tts_audio_wav" src={baseMP3File} type="audio/wav" />
-                                            <source id="tts_audio_mp3" src={baseMP3File} type="audio/mpeg" />
-                                            Your browser does not support the audio element.
-                                        </audio>
+                                {
+                                    customizationSettings?.buttonSettings?.id > 3 && <Row>
+                                        <Col xs={12} sm={12} lg={12} className='mt-4'>
+                                            <audio id='tts_audio_tag' controls>
+                                                <source id="tts_audio_wav" src={baseMP3File} type="audio/wav" />
+                                                <source id="tts_audio_mp3" src={baseMP3File} type="audio/mpeg" />
+                                                Your browser does not support the audio element.
+                                            </audio>
 
-                                    </Col>
-                                </Row>
+                                        </Col>
+                                    </Row>
+                                }
                             </>
                         }
                         {

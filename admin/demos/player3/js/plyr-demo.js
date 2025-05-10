@@ -18,10 +18,16 @@ class TextToSpeechProPlayer {
         this.#setPath(TTS)
         this.content = content
         let demo_file = '/admin/demos/player3/demo.mp3';
-        if(this.buttonId == 4) {
-            demo_file = '/admin/demos/player3/demo4.mp3';
-        }
         this.#setUpPlayer(ttsObj.plugin_url + demo_file)
+        if (this.buttonId == 4) {
+            demo_file = 'https://cloud.google.com/text-to-speech/docs/audio/en-GB-Chirp-HD-F.wav'
+            this.#setUpPlayer(demo_file, 1)
+        }
+        if (this.buttonId == 5) {
+            demo_file = 'https://cdn.openai.com/API/docs/audio/alloy.wav'
+            this.#setUpPlayer(demo_file, 1)
+        }
+
     }
 
 
