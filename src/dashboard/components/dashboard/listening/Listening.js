@@ -30,6 +30,7 @@ export default function Listening() {
     const [speechSynthesisVoices, setSpeechSynthesisVoices] = useState([]);
     const [customizationSettings, setCustomizationSettings] = useState({});
     const [languageMissingMessage, setLanguageMissingMessage] = useState('');
+    const [currentPlayerFilteredVoices, setCurrentPlayerFilteredVoices] = useState([]);
 
     const [listeningSettings, setListeningSettings] = useState({
         tta__listening_voice: 'Microsoft Zira - English (United States)',
@@ -45,6 +46,7 @@ export default function Listening() {
     });
 
     const [listeningLang, setListeningLang] = useState('en-GB');
+    const [baseMP3File, setBaseMP3File] = useState('https://cloud.google.com/text-to-speech/docs/audio/en-GB-Chirp-HD-F.wav')
     const apiURL = useMemo(() => {
         if (window.hasOwnProperty('ttsObj') && ttsObj.is_pro_active) {
             return ttsObj.api_url + ttsObj.api_namespace + "_pro/" + ttsObj.api_version + "/";
@@ -52,6 +54,20 @@ export default function Listening() {
 
         return ttsObj.api_url + ttsObj.api_namespace + "/" + ttsObj.api_version + "/";
     })
+
+    useEffect(() => {
+        console.log({ pro: ttsObj.is_pro_active, id: customizationSettings?.buttonSettings?.id })
+        if (window.hasOwnProperty('ttsObj') && ttsObj.is_pro_active && customizationSettings?.buttonSettings?.id == 5) {
+            setBaseMP3File('https://cdn.openai.com/API/docs/audio/alloy.wav')
+            const audio_wav = document.getElementById('tts_audio_wav')
+            const audio_mp3 = document.getElementById('tts_audio_mp3')
+            const audio_tag = document.getElementById('tts_audio_tag')
+
+            audio_wav.src = 'https://cdn.openai.com/API/docs/audio/alloy.wav';
+            audio_mp3.src = 'https://cdn.openai.com/API/docs/audio/alloy.wav'
+            audio_tag.load();
+        }
+    }, [customizationSettings])
 
 
     const [multilingualActiveLanguages, setMultilingualActiveLanguages] = useState([]);
@@ -119,6 +135,12 @@ export default function Listening() {
 
     const setGoogleVoicesAndLanguages = () => {
         let stored_voices = getLocalStorage(['tta__voices']);
+        let languageHelper = null
+        if (typeof TTSProLanguageHelper === 'function') {
+            languageHelper = new TTSProLanguageHelper();
+            // const voicesByLangCode = languageHelper.getVoicesByLanguageCode('fr-FR')
+            // console.log(voicesByLangCode)
+        }
         if (!stored_voices?.tta__voices) {
             getData(apiURL + 'voices')
                 .then((res) => {
@@ -134,7 +156,7 @@ export default function Listening() {
         } else {
             let voices = JSON.parse(stored_voices.tta__voices);
             let langs = []
-            let langs2 = []
+            let langs2 = {}
 
             if (voices?.voices) {
                 voices = voices.voices;
@@ -143,11 +165,15 @@ export default function Listening() {
             voices.map(voice => {
                 if (!langs.includes(voice.languageCodes[0])) {
                     langs.push(voice.languageCodes[0])
-                    langs2[voice.languageCodes[0]] = voice.languageCodes[0];
+                    let languageName = voice.languageCodes[0];
+                    if (languageHelper) {
+                        languageName = languageHelper.getLangByCode(languageName);
+                    }
+                    langs2[voice.languageCodes[0]] = languageName;
                 }
             })
 
-            setVoicesAndLanguages(voices, langs)
+            setVoicesAndLanguages(voices, langs2)
         }
     }
 
@@ -230,12 +256,14 @@ export default function Listening() {
         };
 
         setCurrentPlayerVoices(Object.keys(names))
+        setCurrentPlayerFilteredVoices(Object.keys(names))
         setSpeechSynthesisVoices(Object.keys(names))
     }
 
     const setVoicesAndLanguages = (voices = [], langs = [],) => {
         if (Array.isArray(voices) && voices.length) {
             setCurrentPlayerVoices(voices)
+            setCurrentPlayerFilteredVoices(voices)
             setSpeechSynthesisVoices(voices)
         }
         if (Array.isArray(langs) && langs.length) {
@@ -245,14 +273,14 @@ export default function Listening() {
                     newLangs[lang] = lang;
                 }
                 setCurrentPlayerLanguages(newLangs)
-
             } else {
                 setCurrentPlayerLanguages(langs)
             }
-
+        } else {
+            setCurrentPlayerLanguages(langs)
         }
 
-        if (Array.isArray(langs) && Array.isArray(voices) && voices.length) return;
+        if (Object.keys(langs).length && Array.isArray(voices) && voices.length) return;
 
         let timer = setTimeout(function handleTime() {
             timer = setTimeout(handleTime, 1000)
@@ -274,6 +302,7 @@ export default function Listening() {
                 })
                 setCurrentPlayerLanguages(langs)
                 setCurrentPlayerVoices(window.speechSynthesis.getVoices())
+                setCurrentPlayerFilteredVoices(window.speechSynthesis.getVoices())
             }
         })
     }
@@ -373,17 +402,43 @@ export default function Listening() {
 
         if (e.target.name === 'tta__listening_lang' && customizationSettings?.buttonSettings?.id == 4) {
             // TODO: this filter will only be applied for default language not for WPML or GTranslate plugins.
-            // let filteredVoices = speechSynthesisVoices.filter(voice => {
-            //     return voice.languageCodes[0] == e.target.value;
-            // })
-            // if (filteredVoices.length === 1) {
-            //     setListeningSettings({
-            //         ...listeningSettings,
-            //         ...{['tta__listening_voice']: filteredVoices[0].languageCodes[0]},
-            //     });
-            // }
-            // setCurrentPlayerVoices(filteredVoices)
+            let filteredVoices = speechSynthesisVoices.filter(voice => {
+                return voice.languageCodes[0] == e.target.value;
+            })
+            if (filteredVoices.length === 1) {
+                setListeningSettings({
+                    ...listeningSettings,
+                    ...{ ['tta__listening_voice']: filteredVoices[0].languageCodes[0] },
+                });
+            }
+
+            setCurrentPlayerFilteredVoices(filteredVoices)
         }
+
+        if (e.target.name === 'tta__listening_voice' && customizationSettings?.buttonSettings?.id > 3) {
+            let currentVoice = e.target.value;
+            let baseURL = 'https://cloud.google.com/text-to-speech/docs/audio/';
+            if (customizationSettings?.buttonSettings?.id == 5) {
+                baseURL = 'https://cdn.openai.com/API/docs/audio/';
+            }
+            currentVoice = currentVoice.replace(/-(MALE|FEMALE)$/, '');
+
+            let wavFileName = baseURL + currentVoice + '.wav'
+            let mp3FileName = baseURL + currentVoice + '.mp3'
+            const audio_wav = document.getElementById('tts_audio_wav')
+            const audio_mp3 = document.getElementById('tts_audio_mp3')
+            const audio_tag = document.getElementById('tts_audio_tag')
+            // wavFileName = 'https://cdn.openai.com/API/docs/audio/coral.wav';
+            // mp3FileName = 'https://cdn.openai.com/API/docs/audio/coral.mp3';
+
+            audio_wav.src = wavFileName;
+            audio_mp3.src = mp3FileName
+            audio_tag.load();
+            audio_tag.play();
+        }
+
+
+
 
         let listeningSettingsCloned = structuredClone(listeningSettings)
 
@@ -418,6 +473,7 @@ export default function Listening() {
         }
         return activePluginName
     }
+
     return (
         <Container>
             <Row>
@@ -476,53 +532,67 @@ export default function Listening() {
                         </Row>
 
                         {
-                            customizationSettings?.buttonSettings?.id != 3 && <Row>
-                                <Col xs={12} sm={8} lg={8}>
-                                    <Form.Group>
-                                        <Form.Label htmlFor='tta__listening_voice'>Voice to speak </Form.Label>
-                                        <Form.Select
-                                            onChange={handleChange}
-                                            name='tta__listening_voice'
-                                            id='tta__listening_voice'
-                                            value={listeningSettings.tta__listening_voice}
-                                            aria-label='Default select example'>
-                                            <option disabled>
-                                                {' '}
-                                                Default Listening Voice
-                                            </option>
-                                            {currentPlayerVoices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && customizationSettings?.buttonSettings?.id == 4 ?
-                                                <option key={index} data-lang={voice?.languageCodes?.[0]}
-                                                    value={[voice.name, voice.ssmlGender].join('-')}>
-                                                    {voice.name} {'-'} {voice.ssmlGender}
-                                                </option> : customizationSettings?.buttonSettings?.id == 5 ?
-                                                    <option key={index} data-lang={voice} value={voice}>
-                                                        {voice}
-                                                    </option> :
-                                                    <option key={index} data-lang={voice.lang} value={voice.name}>
-                                                        {voice.name}
-                                                    </option>
-                                            )}
-                                        </Form.Select>
-                                    </Form.Group>
-                                </Col>
-                                <Col xs={12} sm={4} lg={4} className='mt-4'>
-                                    <>
-                                        {['top'].map((placement) => (
-                                            <OverlayTrigger
-                                                key={placement}
-                                                placement={placement}
-                                                overlay={
-                                                    <Tooltip id={`tooltip-${placement}`}>
-                                                        Gets and sets the voice that will be
-                                                        used to speak
-                                                    </Tooltip>
-                                                }>
-                                                <Button className='tta_btn'>?</Button>
-                                            </OverlayTrigger>
-                                        ))}
-                                    </>
-                                </Col>
-                            </Row>
+                            customizationSettings?.buttonSettings?.id != 3 && <>
+                                <Row>
+                                    <Col xs={12} sm={8} lg={8}>
+                                        <Form.Group>
+                                            <Form.Label htmlFor='tta__listening_voice'>Voice to speak </Form.Label>
+                                            <Form.Select
+                                                onChange={handleChange}
+                                                name='tta__listening_voice'
+                                                id='tta__listening_voice'
+                                                value={listeningSettings.tta__listening_voice}
+                                                aria-label='Default select example'>
+                                                <option disabled>
+                                                    {' '}
+                                                    Default Listening Voice
+                                                </option>
+                                                {currentPlayerFilteredVoices.map((voice, index) => window.hasOwnProperty('ttsObjPro') && customizationSettings?.buttonSettings?.id == 4 ?
+                                                    <option key={index} data-lang={voice?.languageCodes?.[0]}
+                                                        value={[voice.name, voice.ssmlGender].join('-')}>
+                                                        {voice.name} {'-'} {voice.ssmlGender}
+                                                    </option> : customizationSettings?.buttonSettings?.id == 5 ?
+                                                        <option key={index} data-lang={voice} value={voice}>
+                                                            {voice}
+                                                        </option> :
+                                                        <option key={index} data-lang={voice.lang} value={voice.name}>
+                                                            {voice.name}
+                                                        </option>
+                                                )}
+                                            </Form.Select>
+                                        </Form.Group>
+                                    </Col>
+                                    <Col xs={12} sm={4} lg={4} className='mt-4'>
+                                        <>
+                                            {['top'].map((placement) => (
+                                                <OverlayTrigger
+                                                    key={placement}
+                                                    placement={placement}
+                                                    overlay={
+                                                        <Tooltip id={`tooltip-${placement}`}>
+                                                            Gets and sets the voice that will be
+                                                            used to speak
+                                                        </Tooltip>
+                                                    }>
+                                                    <Button className='tta_btn'>?</Button>
+                                                </OverlayTrigger>
+                                            ))}
+                                        </>
+                                    </Col>
+                                </Row>
+                                {
+                                    customizationSettings?.buttonSettings?.id > 3 && <Row>
+                                        <Col xs={12} sm={12} lg={12} className='mt-4'>
+                                            <audio id='tts_audio_tag' controls>
+                                                <source id="tts_audio_wav" src={baseMP3File} type="audio/wav" />
+                                                <source id="tts_audio_mp3" src={baseMP3File} type="audio/mpeg" />
+                                                Your browser does not support the audio element.
+                                            </audio>
+
+                                        </Col>
+                                    </Row>
+                                }
+                            </>
                         }
                         {
                             customizationSettings?.buttonSettings?.id == 5 && <Row>
