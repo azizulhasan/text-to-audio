@@ -1,5 +1,7 @@
 {
     "/admin/js/build/text-to-audio-dashboard-ui.min.js": "/admin/js/build/text-to-audio-dashboard-ui.min.js",
+    "/admin/demos/player3/js/build/plyr-demo.min.js": "/admin/demos/player3/js/build/plyr-demo.min.js",
+    "/admin/demos/player2/js/TextToSpeechProDemo.min.js": "/admin/demos/player2/js/TextToSpeechProDemo.min.js",
     "/admin/js/build/text-to-audio-pro-button.min.js": "/admin/js/build/text-to-audio-pro-button.min.js",
     "/admin/js/build/tts-css-selectors.min.js": "/admin/js/build/tts-css-selectors.min.js",
     "/admin/js/build/tts-bulk-mp3-file.min.js": "/admin/js/build/tts-bulk-mp3-file.min.js",
