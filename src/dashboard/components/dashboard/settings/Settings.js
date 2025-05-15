@@ -33,6 +33,7 @@ export default function Settings() {
         tta__settings_exclude_wp_tags: [],
         tta__settings_clear_all_cache: false,
         tta__settings_add_post_title_to_read: true,
+        tta__settings_add_post_excerpt_to_read: false,
     });
     const [postTypes, setPostTypes] = useState([]);
     const [isDataLoaded, setIsDataLoaded] = useState(false)
@@ -264,6 +265,25 @@ export default function Settings() {
                                         }
                                         name={`tta__settings_add_post_title_to_read`}
                                         id={`tta__settings_add_post_title_to_read`}
+                                    />
+                                </Col>
+                            </Row>
+                            {/*Add Post Excerpt To Read*/}
+                            <Row className=' mt-3'>
+                                <Col xs={12} sm={6} lg={4}>
+                                    <Form.Label htmlFor='tta__settings_add_post_excerpt_to_read'>
+                                        Add Post Excerpt To Read
+                                    </Form.Label>
+                                </Col>
+                                <Col xs={12} sm={6} lg={8}>
+                                    <Form.Check // prettier-ignore
+                                        type={'checkbox'}
+                                        checked={settings.tta__settings_add_post_excerpt_to_read}
+                                        onChange={(e) =>
+                                            handleChange(e)
+                                        }
+                                        name={`tta__settings_add_post_excerpt_to_read`}
+                                        id={`tta__settings_add_post_excerpt_to_read`}
                                     />
                                 </Col>
                             </Row>
