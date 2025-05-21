@@ -93,7 +93,7 @@ export default function TextToSpeechFour({ buttonId, button, buttonCSS, cssStyle
                         .plyr--audio {
                             z-index: 99999;
                         }
-                        .plyr--audio .plyr__controls{background-color:${buttonCSS.backgroundColor};margin-top:${buttonCSS.marginTop}px;margin-bottom:${buttonCSS.marginBottom}px;margin-right:${buttonCSS.marginRight}px;margin-left:${buttonCSS.marginLeft}px;color:${buttonCSS.color};width:${buttonCSS.width}%;${player?.isPlayerCustomizing ? `display:inline-flex;` : ''}}
+                        .plyr--audio .plyr__controls{background-color:${buttonCSS.backgroundColor};margin-top:${buttonCSS.marginTop}px;margin-bottom:${buttonCSS.marginBottom}px;margin-right:${buttonCSS.marginRight}px;margin-left:${buttonCSS.marginLeft}%;color:${buttonCSS.color};width:${buttonCSS.width}%;${player?.isPlayerCustomizing ? `display:inline-flex;` : ''}}
                         .plyr--audio .plyr__control.plyr__tab-focus, .plyr--audio .plyr__control, .plyr--audio .plyr__control:hover, .plyr--audio .plyr__control[aria-expanded=true]{background-color:${buttonCSS.backgroundColor};color:${buttonCSS.color};${player?.isPlayerCustomizing ? `display:inline-flex;align-items:center;` : ''}}
                         .plyr--full-ui input[type=range], .plyr__volume input[type=range] {color:${buttonCSS.color}${player?.isPlayerCustomizing ? `display:inline-flex;`: ''}}
                         

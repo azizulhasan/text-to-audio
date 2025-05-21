@@ -103,7 +103,7 @@ export default function Customize() {
                     ...{fontSize: res.data?.fontSize || defaultValue.fontSize + 'px'},
                     ...{marginTop: res.data?.marginTop || defaultValue.marginTop + 'px'},
                     ...{marginBottom: res.data?.marginBottom || defaultValue.marginBottom + 'px'},
-                    ...{marginLeft: res.data?.marginLeft || defaultValue.marginLeft + 'px'},
+                    ...{marginLeft: res.data?.marginLeft || defaultValue.marginLeft + '%'},
                     ...{marginRight: res.data?.marginRight || defaultValue.marginRight + 'px'},
                     ...{borderRadius: res.data?.borderRadius || defaultValue.borderRadius + 'px'},
                     ...{border: res.data?.border || defaultValue.border + 'px solid '},
@@ -305,10 +305,11 @@ export default function Customize() {
             // e.target.name = 'border';
         } else if (e.target.name === 'fontSize') {
             value = e.target.value + 'px';
+        }else if (  e.target.name === 'marginLeft' ) {
+            value = e.target.value + '%';
         } else if (e.target.name === 'borderRadius'
         || e.target.name === 'marginTop'
         || e.target.name === 'marginBottom'
-        || e.target.name === 'marginLeft'
         || e.target.name === 'marginRight'
         ) {
             value = e.target.value + 'px';
