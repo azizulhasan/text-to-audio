@@ -60,7 +60,7 @@ export default function TTSButtonDesign({handleChange, customCSS, listeningBtnSt
             <div className="d-flex flex-row justify-content-between py-3 border-bottom border-dark ">
                 <div>
                     <Form.Label className={'font-weight-bold'} htmlFor='marginLeft'>
-                        Margin Left (px)
+                        Margin Left (%)
                     </Form.Label>
                     <Form.Control
                         type='number'
