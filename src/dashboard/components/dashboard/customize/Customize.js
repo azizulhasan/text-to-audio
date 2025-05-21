@@ -30,7 +30,11 @@ export default function Customize() {
             generate_mp3_date_from: '',
             generate_mp3_date_to: ''
         },
-        custom_css: ''
+        custom_css: '',
+        marginTop: 0,
+        marginBottom: 0,
+        marginLeft: 0,
+        marginRight: 0,
     }
 
     const [listeningBtnStyle, setListeningStyle] = useState(defaultValue);
@@ -45,6 +49,10 @@ export default function Customize() {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
+        marginTop: 0,
+        marginBottom: 0,
+        marginLeft: 0,
+        marginRight: 0,
     });
 
     const [shortCode, setShortCode] = useState('[atlasvoice]');
@@ -93,6 +101,10 @@ export default function Customize() {
                     ...{color: res.data.color || defaultValue.color},
                     ...{height: res.data?.height || defaultValue.height + 'px'},
                     ...{fontSize: res.data?.fontSize || defaultValue.fontSize + 'px'},
+                    ...{marginTop: res.data?.marginTop || defaultValue.marginTop + 'px'},
+                    ...{marginBottom: res.data?.marginBottom || defaultValue.marginBottom + 'px'},
+                    ...{marginLeft: res.data?.marginLeft || defaultValue.marginLeft + '%'},
+                    ...{marginRight: res.data?.marginRight || defaultValue.marginRight + 'px'},
                     ...{borderRadius: res.data?.borderRadius || defaultValue.borderRadius + 'px'},
                     ...{border: res.data?.border || defaultValue.border + 'px solid '},
                     ...{width: [res.data.width, '%'].join('')},
@@ -105,6 +117,10 @@ export default function Customize() {
                     ...{color: res.data.color || defaultValue.color},
                     ...{height: res.data?.height || defaultValue.height},
                     ...{fontSize: res.data?.fontSize || defaultValue.fontSize},
+                    ...{marginTop: res.data?.marginTop || defaultValue.marginTop},
+                    ...{marginBottom: res.data?.marginBottom || defaultValue.marginBottom},
+                    ...{marginLeft: res.data?.marginLeft || defaultValue.marginLeft },
+                    ...{marginRight: res.data?.marginRight || defaultValue.marginRight},
                     ...{borderRadius: res.data?.borderRadius || defaultValue.borderRadius},
                     ...{border: res.data?.border || defaultValue.border},
                     ...{border_color: res.data?.border_color || defaultValue.border_color},
@@ -228,7 +244,7 @@ export default function Customize() {
 
         // ChatGPT TTS player button settings
         // && listeningBtnStyle?.buttonSettings?.id == 3
-        if (!['backgroundColor', 'width', 'color', 'height', 'border', 'border_color', 'fontSize', 'borderRadius'].includes(e.target.name)) {
+        if (!['backgroundColor', 'width', 'color', 'height', 'border', 'border_color', 'fontSize', 'borderRadius',  'marginTop', 'marginBottom', 'marginRight', 'marginLeft' ].includes(e.target.name)) {
 
             if (e.target.name === 'button_position' && !['before_content', 'after_content'].includes(e.target.value) && !ttsObj.is_pro_active) {
                 toast('This option is only available for pro version.', 'error');
@@ -289,7 +305,13 @@ export default function Customize() {
             // e.target.name = 'border';
         } else if (e.target.name === 'fontSize') {
             value = e.target.value + 'px';
-        } else if (e.target.name === 'borderRadius') {
+        }else if (  e.target.name === 'marginLeft' ) {
+            value = e.target.value + '%';
+        } else if (e.target.name === 'borderRadius'
+        || e.target.name === 'marginTop'
+        || e.target.name === 'marginBottom'
+        || e.target.name === 'marginRight'
+        ) {
             value = e.target.value + 'px';
         } else {
             value = e.target.value;
@@ -320,7 +342,7 @@ export default function Customize() {
                     return;
                 }
             }
-            if (!['backgroundColor', 'width', 'color', 'border', 'border_color', 'height', 'fontSize', 'borderRadius'].includes(key)) {
+            if (!['backgroundColor', 'width', 'color', 'border', 'border_color', 'height', 'fontSize', 'borderRadius', 'marginTop', 'marginBottom', 'marginRight', 'marginLeft'  ].includes(key)) {
                 continue;
             }
 

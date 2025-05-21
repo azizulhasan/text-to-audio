@@ -29,6 +29,62 @@ export default function TTSButtonDesign({handleChange, customCSS, listeningBtnSt
                     />
                 </div>
             </div>
+            <div className="d-flex flex-row justify-content-between py-3 border-bottom border-dark ">
+                <div>
+                    <Form.Label className={'font-weight-bold'} htmlFor='marginTop'>
+                        Margin Top  (px)
+                    </Form.Label>
+                    <Form.Control
+                        type='number'
+                        name='marginTop'
+                        onChange={handleChange}
+                        id='marginTop'
+                        value={listeningBtnStyle.marginTop}
+                        title='Margin Top'
+                        className={'w-75'}
+                    />
+                </div>
+                <div>
+                    <Form.Label className="font-weight-bold" htmlFor='color'>Margin Bottom (px)</Form.Label>
+                    <Form.Control
+                        type='number'
+                        name='marginBottom'
+                        onChange={handleChange}
+                        id='marginBottom'
+                        value={listeningBtnStyle.marginBottom}
+                        title='Margin Bottom'
+                        className={'w-75'}
+                    />
+                </div>
+            </div>
+            <div className="d-flex flex-row justify-content-between py-3 border-bottom border-dark ">
+                <div>
+                    <Form.Label className={'font-weight-bold'} htmlFor='marginLeft'>
+                        Margin Left (%)
+                    </Form.Label>
+                    <Form.Control
+                        type='number'
+                        name='marginLeft'
+                        onChange={handleChange}
+                        id='marginLeft'
+                        value={listeningBtnStyle.marginLeft}
+                        title='Margin Left'
+                        className={'w-75'}
+                    />
+                </div>
+                <div>
+                    <Form.Label className="font-weight-bold" htmlFor='marginRight'>Margin Right (px)</Form.Label>
+                    <Form.Control
+                        type='number'
+                        name='marginRight'
+                        onChange={handleChange}
+                        id='marginRight'
+                        value={listeningBtnStyle.marginRight}
+                        title='Margin Right'
+                        className={'w-75'}
+                    />
+                </div>
+            </div>
             <Form.Label className={' pt-3 font-weight-bold'} htmlFor='width'>
                 Button Width (%)
             </Form.Label>

@@ -56,6 +56,10 @@ class TTA_Activator {
 				'border_color'           => '0',
 				'fontSize'               => '18',
 				'borderRadius'           => '4',
+                'marginTop'              => '0',
+                'marginBottom'           => '0',
+                'marginLeft'             => '0',
+                'marginRight'            => '0',
 			) );
 
 		}
