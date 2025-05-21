@@ -181,11 +181,15 @@ function tta_get_button_content( $atts, $is_block = false, $tag_content = '' ) {
 	$border_color    = isset( $customize['border_color'] ) ? $customize['border_color'] : '#000000';
 	$border_radius   = isset( $customize['borderRadius'] ) ? $customize['borderRadius'] . 'px' : '4px';
 	$border          = $border . ' solid ' . $border_color;
-	$font_size       = isset( $customize['fontSize'] ) ? $customize['fontSize'] . 'px' : '18px';
+    $font_size       = isset( $customize['fontSize'] ) ? $customize['fontSize'] . 'px' : '18px';
+    $margin_top       = isset( $customize['marginTop'] ) ? $customize['marginTop'] . 'px' : '0px';
+    $margin_bottom       = isset( $customize['marginBottom'] ) ? $customize['marginBottom'] . 'px' : '0px';
+    $margin_left       = isset( $customize['marginLeft'] ) ? $customize['marginLeft'] . 'px' : '0px';
+    $margin_right       = isset( $customize['marginRight'] ) ? $customize['marginRight'] . 'px' : '0px';
 	if ( $is_block ) {
-		$btn_style = 'background-color:' . esc_attr( $backgroundColor ) . ' !important;color:' . esc_attr( $color ) . ' !important;width:' . esc_attr( $width ) . '%;height:' . esc_attr( $height ) . ';font-size:' . esc_attr( $font_size ) . ';border:' . esc_attr( $border ) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:' . esc_attr( $border_radius ) . ';text-decoration:none;cursor:pointer;margin:auto;';
+		$btn_style = 'background-color:' . esc_attr( $backgroundColor ) . ' !important;color:' . esc_attr( $color ) . ' !important;width:' . esc_attr( $width ) . '%;height:' . esc_attr( $height ) . ';font-size:' . esc_attr( $font_size ) . ';border:' . esc_attr( $border ) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:' . esc_attr( $border_radius ) . ';text-decoration:none;cursor:pointer;margin-top:' . esc_attr( $margin_top ) . ';margin-bottom:' . esc_attr( $margin_bottom ) .  ';margin-left:' . esc_attr( $margin_left ) . ';margin-right:' . esc_attr( $margin_right ) .';';
 	} else {
-		$btn_style = 'background-color:' . esc_attr( $backgroundColor ) . ';color:' . esc_attr( $color ) . ';width:' . esc_attr( $width ) . '%;height:' . esc_attr( $height ) . ';font-size:' . esc_attr( $font_size ) . ';border:' . esc_attr( $border ) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:' . esc_attr( $border_radius ) . ';text-decoration:none;cursor:pointer;margin:auto;';
+		$btn_style = 'background-color:' . esc_attr( $backgroundColor ) . ';color:' . esc_attr( $color ) . ';width:' . esc_attr( $width ) . '%;height:' . esc_attr( $height ) . ';font-size:' . esc_attr( $font_size ) . ';border:' . esc_attr( $border ) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:' . esc_attr( $border_radius ) . ';text-decoration:none;cursor:pointer;margin:auto;margin-top:' . esc_attr( $margin_top ) . ';margin-bottom:' . esc_attr( $margin_bottom ) .  ';margin-left:' . esc_attr( $margin_left ) . ';margin-right:' . esc_attr( $margin_right ) .';';
 	}
 
 	//Custom Css

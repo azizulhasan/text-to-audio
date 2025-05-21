@@ -520,7 +520,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
 
                 buttonCSS && <style>
                     {
-                        `#tts_button_should_float{ background-color: ${buttonCSS?.backgroundColor};color:${buttonCSS.color};width:${buttonCSS.width}%;}
+                        `#tts_button_should_float{ background-color: ${buttonCSS?.backgroundColor};color:${buttonCSS.color};width:${buttonCSS.width}%;margin-top:${buttonCSS.marginTop}px;margin-bottom:${buttonCSS.marginBottom}px;margin-right:${buttonCSS.marginRight}px;margin-left:${buttonCSS.marginLeft}px;}
                         #tts_button_should_float div:nth-child(1){ color:${buttonCSS.color};}
                         .atlasvoice_player_button svg {cursor:pointer;}
                         `
