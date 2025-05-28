@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.8.28
+Stable tag: 1.8.29
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -441,6 +441,9 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+= 1.8.29  ( 28 May 2025 )  =
+Added: MP3 file load improved.
+Added: "tts_pro_change_post_by_force" action added.
 
 = 1.8.28 ( 21 May 2025 ) =
 Added: Player margin adding UI added to the "Customization" menu.
