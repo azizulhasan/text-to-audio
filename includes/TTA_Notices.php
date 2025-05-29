@@ -36,7 +36,7 @@ class TTA_Notices {
 
 //		if ( ! is_pro_active() || TTA_Helper::get_player_id() < 3 ) {
 //			 add_action( 'admin_notices', [ $this, 'tta_feedback_notice' ] );
-//			add_action( 'admin_notices', [ $this, 'tta_affiliation_notice' ] );
+			add_action( 'admin_notices', [ $this, 'tta_ar_vr_plugin_notice' ] );
 //		}
 
 		$plugins = [
@@ -610,24 +610,24 @@ class TTA_Notices {
 	}
 
 	/**
-	 * Affiliation notice
+	 * Ar_Vr_Plugin notice
 	 */
-	public function tta_affiliation_notice() {
+	public function tta_ar_vr_plugin_notice() {
 
-//		delete_option( 'tts_is_displayed_browser_issue_notice_reissue_notice' );
-		if ( ! get_option( 'tts_is_displayed_browser_issue_notice_reissue_notice' ) ) {
-			delete_option( 'tta_affiliation_notice_next_show_time' );
-			delete_user_meta( '1', 'tta_affiliation_notice_dismissed' );
-			update_option( 'tta_affiliation_notice_next_show_time', 12 );
+//		delete_option( 'tts_is_displayed_ar_vr_plugin_notice' );
+		if ( ! get_option( 'tts_is_displayed_ar_vr_plugin_notice' ) ) {
+			delete_option( 'tta_ar_vr_plugin_notice_next_show_time' );
+			delete_user_meta( '1', 'tta_ar_vr_plugin_notice_dismissed' );
+			update_option( 'tta_ar_vr_plugin_notice_next_show_time', 12 );
 
-			update_option( 'tts_is_displayed_browser_issue_notice_reissue_notice', true );
+			update_option( 'tts_is_displayed_ar_vr_plugin_notice', true );
 		}
 
 		$pluginName              = sprintf( '%s', esc_html__( 'AtlasVoice Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
 		$has_notice              = false;
 		$user_id                 = get_current_user_id();
-		$next_timestamp          = get_option( 'tta_affiliation_notice_next_show_time' );
-		$review_notice_dismissed = get_user_meta( $user_id, 'tta_affiliation_notice_dismissed', true );
+		$next_timestamp          = get_option( 'tta_ar_vr_plugin_notice_next_show_time' );
+		$review_notice_dismissed = get_user_meta( $user_id, 'tta_ar_vr_plugin_notice_dismissed', true );
 		$nonce                   = wp_create_nonce( 'tta_notice_nonce' );
 		if ( ! empty( $next_timestamp ) ) {
 			if ( ( time() > $next_timestamp ) ) {
@@ -652,20 +652,33 @@ class TTA_Notices {
 			$contact_link    = '<a href="https://atlasaidev.com/docs/text-to-speech/usage-setup/fix-for-chrome-130-speechsynthesis-speak-not-working/?utm_source=client&utm_medium=tts_plugin&utm_campaign=speechSysnthesis" target="_blank" style="color:blue">here</a>'
 			?>
             <div class="tta-notice notice notice-info is-dismissible" dir="<?php echo tta_is_rtl() ? 'ltr' : 'auto' ?>"
-                 data-which="affiliation" data-nonce="<?php echo esc_attr( $nonce ); ?>">
+                 data-which="ar_vr_plugin" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <p><?php
 					printf(
-						esc_html__( '%4$s %2$s %3$s We are getting reports from our users that on first click the player is not working. Please visit this documentation to get the solution', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
+						esc_html__( '%4$s %2$s %3$s New from AtlasAiDev! Supercharge your WooCommerce store with our free AR/VR Plugin – let customers try products in real-world spaces using 3D & Augmented Reality, no app needed!', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
 						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						'<div class="tta-review-notice-logo"></div>',
 						'<br/>',
-						"<h1 style='color:red'>Solution : Player not working on first click?</h1>", //phpcs:ignore
+						"<h1 style='color:red'>🚀 Introducing AR/VR for WooCommerce – Free & Powerful!</h1>", //phpcs:ignore
 					);
 					?></p>
                 <p>
-                    <a class="button button-primary" data-response="affiliation"
+                    <a class="button button-primary" data-response="ar_vr_plugin"
                        href="#"
-                       target="_blank"><?php esc_html_e( 'Get Solution', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       target="_blank"><?php esc_html_e( 'Try It Now', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                    <a class="button button-primary" data-response="ar_vr_demo"
+                       href="https://wpaugmentedreality.com/shop/"
+                       target="_blank"><?php esc_html_e( 'Real World Demo', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                    <a class="button button-primary" data-response="ar_vr_how_it_works"
+                       href="https://wordpress.org/plugins/ar-vr-3d-model-try-on/"
+                       target="_blank"><?php esc_html_e( 'How To Use', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                    <a class="button button-primary" data-response="ar_vr_download"
+                       href="https://downloads.wordpress.org/plugin/ar-vr-3d-model-try-on.zip"
+                       target="_blank"><?php esc_html_e( 'Download', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                    <a class="button button-primary" data-response="ar_vr_contact"
+                       href="https://wpaugmentedreality.com/contact-us/"
+                       target="_blank"><?php esc_html_e( 'Contact Us', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+
                 </p>
             </div>
 
@@ -683,20 +696,35 @@ class TTA_Notices {
                                 e.preventDefault();
                                 // noinspection ES6ConvertVarToLetConst
                                 let self = $(this);
-                                self.closest(".tta-notice").slideUp(200, 'linear');
-
-                                let tta_notice = self.closest('.tta-notice'), which = tta_notice.attr('data-which');
-                                console.log(which)
-                                if (wp.ajax) {
-                                    wp.ajax.post('tta_hide_notice', {
-                                        _wpnonce: '<?php echo esc_attr( $nonce ); ?>',
-                                        which: which
-                                    });
-                                }
+                                // self.closest(".tta-notice").slideUp(200, 'linear');
+                                //let tta_notice = self.closest('.tta-notice'), which = tta_notice.attr('data-which');
+                                //console.log(which)
+                                //if (wp.ajax) {
+                                //    wp.ajax.post('tta_hide_notice', {
+                                //        _wpnonce: '<?php //echo esc_attr( $nonce ); ?>//',
+                                //        which: which
+                                //    });
+                                //}
                                 let notice = self.attr('data-response');
 
-                                if ('affiliation' === notice) {
-                                    window.open('https://atlasaidev.com/docs/text-to-speech/usage-setup/fix-for-chrome-130-speechsynthesis-speak-not-working/?utm_source=client&utm_medium=tts_plugin&utm_campaign=speechSysnthesis', '_blank');
+                                if ('ar_vr_plugin' === notice) {
+                                    window.open('https://wordpress.org/plugins/ar-vr-3d-model-try-on/?preview=1', '_blank');
+                                }
+
+                                if ('ar_vr_demo' === notice) {
+                                    window.open('https://wpaugmentedreality.com/shop/', '_blank');
+                                }
+
+                                if ('ar_vr_download' === notice) {
+                                    window.open('https://downloads.wordpress.org/plugin/ar-vr-3d-model-try-on.zip', '_blank');
+                                }
+
+                                if ('ar_vr_contact' === notice) {
+                                    window.open('https://wpaugmentedreality.com/contact-us/', '_blank');
+                                }
+
+                                if ('ar_vr_how_it_works' === notice) {
+                                    window.open('https://wordpress.org/plugins/ar-vr-3d-model-try-on/', '_blank');
                                 }
                             })
 
@@ -1223,7 +1251,7 @@ class TTA_Notices {
 			'feedback',
 			'setup',
 			'analytics',
-			'affiliation'
+			'ar_vr_plugin'
 		];
 		if ( isset( $_REQUEST['which'] ) && ! empty( $_REQUEST['which'] ) && in_array( $_REQUEST['which'], $notices ) ) {
 			$user_id = get_current_user_id();
@@ -1254,9 +1282,9 @@ class TTA_Notices {
 			} elseif ( 'analytics' == $_REQUEST['which'] ) {
 				update_option( 'tta_plugin_analytics_notice_next_show_time', time() + ( DAY_IN_SECONDS * 30 ) );
 				$updated_user_meta = update_user_meta( $user_id, 'tta_plugin_analytics_notice_dismissed', true, true );
-			} elseif ( 'affiliation' == $_REQUEST['which'] ) {
-				update_option( 'tta_affiliation_notice_next_show_time', time() + ( DAY_IN_SECONDS * 30 ) );
-				$updated_user_meta = update_user_meta( $user_id, 'tta_affiliation_notice_dismissed', true, true );
+			} elseif ( 'ar_vr_plugin' == $_REQUEST['which'] ) {
+				update_option( 'tta_ar_vr_plugin_notice_next_show_time', time() + ( DAY_IN_SECONDS * 30 ) );
+				$updated_user_meta = update_user_meta( $user_id, 'tta_ar_vr_plugin_notice_dismissed', true, true );
 			}
 
 			if ( isset( $updated_user_meta ) && $updated_user_meta ) {
