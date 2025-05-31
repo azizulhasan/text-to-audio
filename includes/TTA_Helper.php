@@ -542,7 +542,6 @@ class TTA_Helper
         $should_update_urls = false;
 
         if (get_post_meta($post->ID, 'tts_is_mp3_file_url_exists') && count($final_mp3_file_ulrs)) {
-            error_log(print_r($final_mp3_file_ulrs, true));
             return apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls);
         }
 
@@ -1338,9 +1337,7 @@ class TTA_Helper
             )
         );
 
-        error_log(print_r([
-            '$deleted' => $deleted,
-        ], true));
+
         return $deleted;
     }
 
