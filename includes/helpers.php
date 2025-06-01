@@ -208,6 +208,21 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
 
     $button = "<tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
 
+    $text_before_content = isset($settings['tta__settings_text_before_content']) && $settings['tta__settings_text_before_content'] ? $settings['tta__settings_text_before_content'] : '';
+    $text_before_content = TTA_Helper::clean_content($text_before_content);
+    $text_before_content = tta_should_add_delimiter($text_before_content, $sentence_delimiter);
+
+
+    $text_after_content = isset($settings['tta__settings_text_after_content']) && $settings['tta__settings_text_after_content'] ? $settings['tta__settings_text_after_content'] : '';
+    $text_after_content = TTA_Helper::clean_content($text_after_content);
+    $text_after_content = tta_should_add_delimiter($text_after_content, $sentence_delimiter);
+
+
+    $content = $text_before_content . $content;
+
+    $content .=  ' '. $text_after_content;
+    $content = trim($content);
+
     // init button scripts
     do_action('tts_enqueue_button_scripts', $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post, $excerpt_sanitized);
 
