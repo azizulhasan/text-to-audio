@@ -222,7 +222,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     $content = trim($content);
 
     // init button scripts
-    do_action('tts_enqueue_button_scripts', $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post, $excerpt_sanitized);
+    do_action('tts_enqueue_button_scripts', $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content);
 
     $data = apply_filters('tts__listening_button', $button, $btn_no, $class, $post);
 
@@ -230,15 +230,15 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
 }
 
 
-add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 13);
+add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 15);
 
 /**
  * Enqueue button scripts
  */
-function tts_enqueue_button_scripts($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post, $excerpt_sanitized)
+function tts_enqueue_button_scripts($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content)
 {
     // enqueue footer script
-    add_action('wp_print_footer_scripts', function () use ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post, $excerpt_sanitized) {
+    add_action('wp_print_footer_scripts', function () use ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content) {
         $original_title = trim($title);
         $temp_title = trim(get_the_title());
         $temp_title = tta_clean_content($temp_title);
@@ -256,14 +256,14 @@ function tts_enqueue_button_scripts($content, $btn_no, $class, $btn_style, $text
 
 
         if (apply_filters('tts_ignore_match_80_percent', false) && tts_text_match_80_percent($original_title, $temp_title)) {
-            get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time, $plugin_all_settings, $atts, $post, $excerpt_sanitized);
+            get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time, $plugin_all_settings, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content);
         } else {
-            get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time, $plugin_all_settings, $atts, $post, $excerpt_sanitized);
+            get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time, $plugin_all_settings, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content);
         }
     });
 }
 
-function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings, $atts, $post, $excerpt_sanitized)
+function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content)
 {
 
 
@@ -319,6 +319,8 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
             file_url_key: "<?php echo $file_url_key; ?>",
             compatible_contents: <?php echo json_encode($compatible_content); ?>,
             excerpt: "<?php echo $excerpt_sanitized; ?>",
+            text_before_content: "<?php echo $text_before_content; ?>",
+            text_after_content: "<?php echo $text_after_content; ?>",
         }
 
         if (window.hasOwnProperty('TTS')) { // add content if a page have multiple button
