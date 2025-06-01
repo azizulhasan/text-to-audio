@@ -217,9 +217,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     $text_after_content = TTA_Helper::clean_content($text_after_content);
     $text_after_content = tta_should_add_delimiter($text_after_content, $sentence_delimiter);
 
-
     $content = $text_before_content . $content;
-
     $content .=  ' '. $text_after_content;
     $content = trim($content);
 
