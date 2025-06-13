@@ -542,7 +542,6 @@ class TTA_Helper
         $should_update_urls = false;
 
         if (get_post_meta($post->ID, 'tts_is_mp3_file_url_exists') && count($final_mp3_file_ulrs)) {
-            error_log(print_r($final_mp3_file_ulrs, true));
             return apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls);
         }
 
@@ -1338,11 +1337,41 @@ class TTA_Helper
             )
         );
 
-        error_log(print_r([
-            '$deleted' => $deleted,
-        ], true));
+
         return $deleted;
     }
+
+    public static function clean_content($content) {
+
+        $content = wp_strip_all_tags($content, true);
+
+        $content = preg_replace('/\\\\{2,}"/', '\"', $content);
+
+        $content = preg_replace("/\\\\{2,}'/", "\'", $content);
+
+        $content = self::clean_string($content);
+
+        $content = self::remove_js_and_css_from_content($content);
+
+        return $content;
+    }
+
+    public static function remove_js_and_css_from_content($content) {
+        // Remove <script>...</script>
+        $content = preg_replace('#<script\b[^>]*>(.*?)</script>#is', '', $content);
+    
+        // Remove <style>...</style>
+        $content = preg_replace('#<style\b[^>]*>(.*?)</style>#is', '', $content);
+    
+        // Remove external CSS <link rel="stylesheet">
+        $content = preg_replace('#<link\b[^>]*rel=["\']stylesheet["\'][^>]*>#i', '', $content);
+    
+        // Remove external JS <script src="..."></script>
+        $content = preg_replace('#<script\b[^>]*src=["\'].*?["\'][^>]*></script>#i', '', $content);
+    
+        return $content;
+    }
+    
 
 
 }

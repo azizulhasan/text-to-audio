@@ -34,6 +34,8 @@ export default function Settings() {
         tta__settings_clear_all_cache: false,
         tta__settings_add_post_title_to_read: true,
         tta__settings_add_post_excerpt_to_read: false,
+        tta__settings_text_after_content: '',
+        tta__settings_text_before_content: '',
     });
     const [postTypes, setPostTypes] = useState([]);
     const [isDataLoaded, setIsDataLoaded] = useState(false)
@@ -307,6 +309,42 @@ export default function Settings() {
 								</Col>
 							</Row> */}
 
+                            {/*Add Text Before Content*/}
+                            <Row className='mt-4'>
+                                <Col xs={12} sm={6} lg={4}>
+                                    <Form.Label htmlFor='tta__settings_text_before_content'>
+                                        Add Text Before Content(intro)
+                                    </Form.Label>
+                                </Col>
+                                <Col xs={12} sm={12} lg={8}>
+                                    <Form.Control
+                                        id="tta__settings_text_before_content"
+                                        name="tta__settings_text_before_content"
+                                        as='textarea'
+                                        onChange={(e) => handleChange(e)}
+                                        value={settings.tta__settings_text_before_content}
+                                        placeholder={__('Add Text Before Content')}
+                                    />
+                                </Col>
+                            </Row>
+                            {/*Add Text After Content*/}
+                            <Row className='mt-4'>
+                                <Col xs={12} sm={6} lg={4}>
+                                    <Form.Label htmlFor='tta__settings_text_after_content'>
+                                        Add Text After Content(outro)
+                                    </Form.Label>
+                                </Col>
+                                <Col xs={12} sm={12} lg={8}>
+                                    <Form.Control
+                                        id="tta__settings_text_after_content"
+                                        name="tta__settings_text_after_content"
+                                        as='textarea'
+                                        onChange={(e) => handleChange(e)}
+                                        value={settings.tta__settings_text_after_content}
+                                        placeholder={__('Add Text After Content')}
+                                    />
+                                </Col>
+                            </Row>
 
                             {/* Allow Listening For Post Type */}
                             <Row className='mt-4'>
