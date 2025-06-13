@@ -1282,10 +1282,15 @@ class TTA_Helper
     {
         $previous_data = get_option('tta_listening_settings');
 
-//        error_log(print_r( [
-//            'previous_data' => $previous_data,
-//            'current_data' => $current_data,
-//        ], true));
+
+        if ( !is_object($previous_data) ) {
+            $previous_data = (object) $previous_data;
+        }
+
+        if ( !is_object($current_data) ) {
+            $current_data = (object) $current_data;
+        }
+
         $keys_to_check = [
             'tta__listening_lang',
             'tta__listening_voice',
