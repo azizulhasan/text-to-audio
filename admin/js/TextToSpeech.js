@@ -47,7 +47,7 @@ export default class TextToSpeech {
         this.ttsListeningSettings = this.TTS.settings.listening
         this.speech = new Speech()
         this.splitSentences = splitSentences
-        this.playButtonNo = this?.TTS?.settings?.settings?.customize?.buttonSettings?.id
+        this.playButtonNo = window.TTS.extra.player_id
         this.analytics = new AtlasVoiceAnalytics(this.TTS.settings.postId)
 
 
