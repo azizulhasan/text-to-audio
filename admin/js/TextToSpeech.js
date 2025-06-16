@@ -470,6 +470,7 @@ export default class TextToSpeech {
          * current TTS page.
          *
          */
+        console.log({status:this.listenStatus, settings: this.ttsListeningSettings})
 
         document.addEventListener("visibilitychange", () => {
             // it could be either hidden or visible
