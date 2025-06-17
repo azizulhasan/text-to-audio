@@ -353,7 +353,7 @@ class TTA_Helper
         return apply_filters('tts_site_language', $default_language);
     }
 
-    public static function tts_get_file_url_key($language, $voice)
+    public static function tts_get_file_url_key($language, $voice = '')
     {
         $file_url_key = $language;
         if ((get_player_id() > 3) && $voice) {
@@ -540,11 +540,9 @@ class TTA_Helper
         }
         $final_mp3_file_ulrs = $mp3_file_urls;
         $should_update_urls = false;
-
         if (get_post_meta($post->ID, 'tts_is_mp3_file_url_exists') && count($final_mp3_file_ulrs)) {
             return apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls);
         }
-
 
         if (isset($mp3_file_urls[$file_url_key]) && $mp3_file_urls[$file_url_key]) {
             $url = $mp3_file_urls[$file_url_key];

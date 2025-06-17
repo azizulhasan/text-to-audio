@@ -288,7 +288,6 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
         var ttsCSSClass = "<?php echo $class; ?>";
         var ttsBtnStyle = "<?php echo $btn_style; ?>";
         var ttsTextArr = <?php echo json_encode($text_arr); ?>;
-        var allSettings = <?php echo json_encode($plugin_all_settings) ?>;
         var ttsCustomCSS = "<?php print($custom_css); ?>";
         var ttsShouldDisplayIcon = "<?php echo $should_display_icon; ?>";
         var readingTime = "<?php echo $content_read_time; ?>";
@@ -303,7 +302,6 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
             textArr: ttsTextArr,
             customCSS: ttsCustomCSS,
             shouldDisplayIcon: ttsShouldDisplayIcon,
-            settings: allSettings,
             readingTime: readingTime,
             postId: postId,
             fileURLs: fileURLs,
