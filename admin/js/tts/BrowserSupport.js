@@ -16,7 +16,7 @@ export default class BrowserSupport {
         if(selectedVoice) {
             this.#selectedVoice = selectedVoice
         }
-        this.#defineBrowser()
+
         this.defineVoiceAndLang(selectedVoice, selectedLang)
     }
     isAndroid() {
@@ -28,20 +28,6 @@ export default class BrowserSupport {
         }
         return false
     }
-
-    #defineBrowser() {
-        let brouserArr = this.#ttsObj.browser;
-        Object.keys(brouserArr).map(item => {
-            if (brouserArr[item]) {
-                this.#browser = item.replace('is_', '');
-            }
-        })
-    }
-
-    getBrowser() {
-        return this.#browser;
-    }
-
 
 
     getLanguage(selectedVoice = this.#voice, selectedLang = this.#lang) {
