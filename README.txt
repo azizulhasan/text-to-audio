@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.9.0
+Stable tag: 1.9.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -275,7 +275,7 @@ Boost engagement, accessibility, and productivity on your WordPress and WooComme
 
 
 ### CHECK OUT OUR OTHER ADDONS 👑:
-> * [Augmented Reality and 3D Model Viewer for WordPress and WooCommerce – AR VR Try-On](https://wordpress.org/plugins/ar-vr-3d-model-try-on/) – Best user friendly augmented reality plugin. There is no limit just install and engage shoppers with 3D models, AR experiences.
+> * [Augmented Reality and 3D Model Viewer for WordPress and WooCommerce – AR VR Try-On](https://wordpress.org/plugins/ar-vr-3d-model-try-on/) – Turn your WooCommerce store into an immersive 3D experience. Let customers explore products in detail using interactive 3D viewers and Augmented Reality (AR) on both iOS and Android—no apps needed.
 
 
 == Installation ==
@@ -440,6 +440,9 @@ You can customize the voice and language of the text-to-speech player using shor
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+
+= 1.9.1  ( 03 July 2025 )  =
+minor change
 
 = 1.9.0  ( 17 June 2025 )  =
 Improved: Performance improved.
