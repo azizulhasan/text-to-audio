@@ -151,7 +151,7 @@ class TTA_Activator {
 		if ( $renew_all_settings || ! get_option( 'tta_analytics_settings' ) ) {
 			update_option( 'tta_analytics_settings', array
 			(
-				"tts_enable_analytics"   => true,
+				"tts_enable_analytics"   => false,
 				"tts_trackable_post_ids" => []
 			) );
 		}
