@@ -1,15 +1,15 @@
-import React, {useEffect, useState} from "react";
-import {Button, Col, Container, Form, OverlayTrigger, Row, Tooltip, Card, Table} from "react-bootstrap";
-import {__} from "@wordpress/i18n";
+import React, { useEffect, useState } from "react";
+import { Button, Col, Container, Form, OverlayTrigger, Row, Tooltip, Card, Table } from "react-bootstrap";
+import { __ } from "@wordpress/i18n";
 import UpgradeToPro from "../../UpgradeToPro";
-import {postWithoutImage} from "../../context/utilities";
-import {MultiSelect} from "../../context/MultiSelect";
+import { postWithoutImage } from "../../context/utilities";
+import { MultiSelect } from "../../context/MultiSelect";
 import toast from '../../context/Notify';
 
 
 export default function Analitics() {
     const [analytics, setAnalytics] = useState({
-        'tts_enable_analytics': true,
+        'tts_enable_analytics': false,
         'tts_trackable_post_ids': [],
     })
     const [postIds, setPostIds] = useState([])
@@ -83,9 +83,9 @@ export default function Analitics() {
     function getPopularPosts(data) {
         return data
             .map(post => {
-                const {post_id, analytics} = post;
+                const { post_id, analytics } = post;
                 const totalScore = Object.values(analytics).reduce((sum, event) => sum + event.count, 0);
-                return {post_id, totalScore};
+                return { post_id, totalScore };
             })
             .sort((a, b) => b.totalScore - a.totalScore)
             .slice(0, 10);
@@ -133,7 +133,7 @@ export default function Analitics() {
                     return post;
                 })
 
-                console.log({postsData})
+                console.log({ postsData })
 
                 setMostPopularPosts(postsData)
 
@@ -179,7 +179,7 @@ export default function Analitics() {
 
         setAnalytics({
             ...analytics,
-            ...{[e.target.name]: value},
+            ...{ [e.target.name]: value },
         });
     };
 
@@ -239,24 +239,24 @@ export default function Analitics() {
                             <Col xs={12} sm={6} lg={4}>
                                 <Form.Label htmlFor='tta__settings_exclude_wp_tags'>
                                     {__('Track Post IDs For Analytics')} {ttsObj.is_pro_active ? "" : (<>
-                                    {['top'].map((placement) => (<OverlayTrigger
-                                        key={placement}
-                                        placement={placement}
-                                        overlay={<Tooltip id={`tooltip-${placement}`}>
-                                            {__('Tracking more than 5 post IDs is a pro feature')}
-                                        </Tooltip>}>
-                                        <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
-                                            className="fas fa-lock"/></Button>
-                                    </OverlayTrigger>))}
-                                </>)}
+                                        {['top'].map((placement) => (<OverlayTrigger
+                                            key={placement}
+                                            placement={placement}
+                                            overlay={<Tooltip id={`tooltip-${placement}`}>
+                                                {__('Tracking more than 5 post IDs is a pro feature')}
+                                            </Tooltip>}>
+                                            <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
+                                                className="fas fa-lock" /></Button>
+                                        </OverlayTrigger>))}
+                                    </>)}
                                 </Form.Label>
                             </Col>
                             <Col xs={11} sm={11} lg={7}>
                                 <MultiSelect toastMessage={'Tracking more than 5 post IDs is a pro feature'}
-                                             name={'tts_trackable_post_ids'}
-                                             id={'tts_trackable_post_ids'}
-                                             selectedItems={selectedIds}
-                                             selectionLimit={5} options={postIds} onChange={handleSelectionChange}/>
+                                    name={'tts_trackable_post_ids'}
+                                    id={'tts_trackable_post_ids'}
+                                    selectedItems={selectedIds}
+                                    selectionLimit={5} options={postIds} onChange={handleSelectionChange} />
 
                             </Col>
                             <Col xs={1} sm={1} lg={1} className='mt-4'>
@@ -268,7 +268,7 @@ export default function Analitics() {
                                             {__('Click To Know How It Works?')}
                                         </Tooltip>}>
                                         <a className={'text-danger'} target='_blank'
-                                           href='https://www.youtube.com/watch?v=amkrAtVQGBY&t=8s'>
+                                            href='https://www.youtube.com/watch?v=amkrAtVQGBY&t=8s'>
                                             <i className="fab fa-youtube"></i>
                                         </a>
                                     </OverlayTrigger>))}
@@ -290,26 +290,26 @@ export default function Analitics() {
                                     <h3 className="mb-3">📊 TTS Player Analytics Summary</h3>
                                     <Table striped bordered hover responsive>
                                         <thead className="atlasvoice-bg text-white">
-                                        <tr>
-                                            <th>Metric</th>
-                                            <th>Count</th>
-                                        </tr>
+                                            <tr>
+                                                <th>Metric</th>
+                                                <th>Count</th>
+                                            </tr>
                                         </thead>
                                         <tbody>
-                                        <tr>
-                                            <td><strong>Total Posts</strong></td>
-                                            <td>{summary.totalPosts}</td>
-                                        </tr>
-                                        {Object.entries(summary.totalCounts).map(([key, value]) => (
-                                            <tr key={key}>
-                                                <td><strong>{key.charAt(0).toUpperCase() + key.slice(1)}</strong></td>
-                                                <td>{value}</td>
+                                            <tr>
+                                                <td><strong>Total Posts</strong></td>
+                                                <td>{summary.totalPosts}</td>
                                             </tr>
-                                        ))}
-                                        <tr className="table-success">
-                                            <td><strong>🔥 Total Interactions</strong></td>
-                                            <td><strong>{summary.totalInteractions}</strong></td>
-                                        </tr>
+                                            {Object.entries(summary.totalCounts).map(([key, value]) => (
+                                                <tr key={key}>
+                                                    <td><strong>{key.charAt(0).toUpperCase() + key.slice(1)}</strong></td>
+                                                    <td>{value}</td>
+                                                </tr>
+                                            ))}
+                                            <tr className="table-success">
+                                                <td><strong>🔥 Total Interactions</strong></td>
+                                                <td><strong>{summary.totalInteractions}</strong></td>
+                                            </tr>
                                         </tbody>
                                     </Table>
                                 </Card>
@@ -319,20 +319,20 @@ export default function Analitics() {
                                         {
                                             ttsObj.is_pro_active ? <Table striped bordered hover responsive>
                                                 <thead className="atlasvoice-bg text-white">
-                                                <tr>
-                                                    <th>Rank</th>
-                                                    <th>Post Title</th>
-                                                    <th>Total Interactions</th>
-                                                </tr>
+                                                    <tr>
+                                                        <th>Rank</th>
+                                                        <th>Post Title</th>
+                                                        <th>Total Interactions</th>
+                                                    </tr>
                                                 </thead>
                                                 <tbody>
-                                                {mostPopularPosts.map((post, index) => (
-                                                    <tr key={post.post_id}>
-                                                        <td><strong>#{index + 1}</strong></td>
-                                                        <td>{post.title}</td>
-                                                        <td>{post.totalScore}</td>
-                                                    </tr>
-                                                ))}
+                                                    {mostPopularPosts.map((post, index) => (
+                                                        <tr key={post.post_id}>
+                                                            <td><strong>#{index + 1}</strong></td>
+                                                            <td>{post.title}</td>
+                                                            <td>{post.totalScore}</td>
+                                                        </tr>
+                                                    ))}
                                                 </tbody>
                                             </Table> : <>
                                                 <h3> to see popular post analytics post you have to <a target={'_blank'} href={'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/'} > pro version.</a></h3>
@@ -347,7 +347,7 @@ export default function Analitics() {
                     </Form>
                 </Col>
                 <Col xs={12} sm={12} lg={4}>
-                    <UpgradeToPro promotionType={'analytics'}/>
+                    <UpgradeToPro promotionType={'analytics'} />
                 </Col>
             </Row>
         </Container>
