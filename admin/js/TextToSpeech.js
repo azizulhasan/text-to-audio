@@ -25,7 +25,7 @@ export default class TextToSpeech {
     ttsListeningSettings = null
     languages = []
     voices = {}
-    voice = true ? "Microsoft Zira - English (United States)" : 'English United Kingdom';
+    voice = true ? "Microsoft Zira - English (United States)" : 'Google UK English Female';
     language = true ? 'en-US' : 'en-GB';
     buttonTextArr = null
     splittedSentances = ''
@@ -43,7 +43,6 @@ export default class TextToSpeech {
         this.buttonId = buttonId
         this.buttonTextArr = this.TTS.settings.textArr
         this.speakButton = button ? button : document.getElementById(buttonId)
-        this.ttsListeningSettings = this.TTS.settings.listening
         this.ttsListeningSettings = this.TTS.settings.listening
         this.speech = new Speech()
         this.splitSentences = splitSentences
@@ -428,12 +427,13 @@ export default class TextToSpeech {
                  *
                  * This code is implemented from version 1.8.22
                  */
-                if (this.ttsListeningSettings.tta__listening_lang.indexOf('en') === 0 && this.ttsListeningSettings.tta__listening_voice.indexOf('Google') === 0) {
+
+                if (this.ttsListeningSettings?.tta__listening_lang?.indexOf('en') === 0 && this.ttsListeningSettings?.tta__listening_voice?.indexOf('Google') === 0) {
                     this.ttsListeningSettings.tta__listening_lang = "en-US"
                     this.ttsListeningSettings.tta__listening_voice = "Microsoft Zira - English (United States)"
                 }
 
-                this.browser = new BrowserSupport(ttsObj, data.voices, this.ttsListeningSettings.tta__listening_lang, this.ttsListeningSettings.tta__listening_voice)
+                this.browser = new BrowserSupport(ttsObj, data.voices, this.ttsListeningSettings?.tta__listening_lang, this.ttsListeningSettings?.tta__listening_voice)
 
                 // }
                 this._prepareSpeakButton(this.speech);
@@ -470,7 +470,7 @@ export default class TextToSpeech {
          * current TTS page.
          *
          */
-        console.log({status:this.listenStatus, settings: this.ttsListeningSettings})
+        console.log({ status: this.listenStatus, settings: this.ttsListeningSettings })
 
         document.addEventListener("visibilitychange", () => {
             // it could be either hidden or visible
@@ -527,8 +527,8 @@ if ('page=text-to-audio' === urlParams) {
     function declare_init_content() {
         let ttsSettings = {
             listening: {
-                tta__listening_lang: "en-GB",
-                tta__listening_voice: "Google UK English Female",
+                tta__listening_lang: "en-US",
+                tta__listening_voice: "Microsoft Zira - English (United States)",
                 tta__listening_pitch: "1",
                 tta__listening_rate: "1",
                 tta__listening_volume: "1"
