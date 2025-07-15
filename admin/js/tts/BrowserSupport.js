@@ -2,18 +2,18 @@ export default class BrowserSupport {
     #browser = ''
     #ttsObj = {}
     voices = []
-    #voice = 'Google UK English Female'
-    #lang = 'en-GB'
-    #selectedLang = 'en-GB'
-    #selectedVoice = 'Google UK English Female'
+    #voice = 'Microsoft Zira - English (United States)'
+    #lang = 'en-US'
+    #selectedLang = 'en-US'
+    #selectedVoice = 'Microsoft Zira - English (United States)'
     #filteredVoices = [];
     constructor(ttsObj, voices, selectedLang, selectedVoice) {
         this.#ttsObj = ttsObj
         this.voices = voices
-        if(selectedLang){
+        if (selectedLang) {
             this.#selectedLang = selectedLang
         }
-        if(selectedVoice) {
+        if (selectedVoice) {
             this.#selectedVoice = selectedVoice
         }
 
@@ -132,7 +132,7 @@ export default class BrowserSupport {
             return selectedLang.split('_')[0]
         }
 
-        
+
         return selectedLang
     }
 
