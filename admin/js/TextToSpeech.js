@@ -427,7 +427,6 @@ export default class TextToSpeech {
                  *
                  * This code is implemented from version 1.8.22
                  */
-
                 if (this.ttsListeningSettings?.tta__listening_lang?.indexOf('en') === 0 && this.ttsListeningSettings?.tta__listening_voice?.indexOf('Google') === 0) {
                     this.ttsListeningSettings.tta__listening_lang = "en-US"
                     this.ttsListeningSettings.tta__listening_voice = "Microsoft Zira - English (United States)"
