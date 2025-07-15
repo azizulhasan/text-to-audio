@@ -18,6 +18,9 @@ export default class BrowserSupport {
         }
 
         this.defineVoiceAndLang(selectedVoice, selectedLang)
+
+        console.log({ voice: this.getVoice(), lang: this.getLanguage() })
+
     }
     isAndroid() {
         let ua = navigator.userAgent.toLowerCase();
@@ -96,6 +99,7 @@ export default class BrowserSupport {
         let selectedLang = lang ? lang : this.#selectedLang
         let langCountryCode = this.#getCountryCode(selectedLang)
         let filteredVoices = this.#getFilteredVoices(langCountryCode)
+        console.log({ selectedLang, selectedVoice, langCountryCode, filteredVoices })
         if (filteredVoices.length > 1) {
             for (let j = 0; j < filteredVoices.length; j++) {
                 currentLang = filteredVoices[j].lang
@@ -124,11 +128,11 @@ export default class BrowserSupport {
      * @returns 
      */
     #getCountryCode(selectedLang) {
-        if (selectedLang && selectedLang.indexOf('-') != undefined) {
+        if (selectedLang && selectedLang.indexOf('-') !== -1) {
             return selectedLang.split('-')[0]
         }
 
-        if (selectedLang && selectedLang.indexOf('_') != undefined) {
+        if (selectedLang && selectedLang.indexOf('_') !== -1) {
             return selectedLang.split('_')[0]
         }
 
