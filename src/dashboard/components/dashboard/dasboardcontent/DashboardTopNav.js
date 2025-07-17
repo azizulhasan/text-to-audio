@@ -33,17 +33,24 @@ export default function DashboardTopNav() {
       <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="http://atlasaidev.com/contact-us/" target="_blank">
         Support
       </a>
-      
+
       {
         !ttsObj.is_pro_active && <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://atlasaidev.com/text-to-speech-pro/demo/" target="_blank">
-        Pro Version Demo
-      </a>
+          Pro Version Demo
+        </a>
       }
       <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://atlasaidev.com/docs/" target="_blank">
-        Documentation
+        <span class="dashicons dashicons-media-document"></span> Documentation
       </a>
-      <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://www.youtube.com/@AtlasAiDev" target="_blank">
-        Video Tutorials
+      <a className="navbar-nav ms-auto  me-1 text-decoration-none    order-2 order-lg-1" href="https://www.youtube.com/@AtlasAiDev" target="_blank">
+        <span class="dashicons dashicons-youtube text-danger"></span>
+      </a>
+      <a className="navbar-nav ms-auto  me-1 text-decoration-none   order-2 order-lg-1" href="https://www.facebook.com/AtlasAiDev/" target="_blank">
+        {/* <span class="dashicons dashicons-facebook text-primary"></span> */}
+        <span class="dashicons dashicons-facebook-alt text-primary"></span>
+      </a>
+      <a className="navbar-nav ms-auto  me-1 text-decoration-none   order-2 order-lg-1" href="https://x.com/atlasaidev" target="_blank">
+        <span class="dashicons dashicons-twitter text-primary"></span>
       </a>
     </nav>
   );
