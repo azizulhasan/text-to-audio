@@ -1,62 +1,62 @@
-import {__} from '@wordpress/i18n'
+import { __ } from '@wordpress/i18n'
 import React from "react";
 
-export default function UpgradeToPro({promotionType = 'general'}) {
+export default function UpgradeToPro({ promotionType = 'general' }) {
     let proFeatures = {
         youtube: [
             [ // free video
                 {
-                    title : 'How To Setup Text To Speech Player Properly?',
+                    title: 'How To Setup Text To Speech Player Properly?',
                     id: 'h4VJxM-mh74?si=pmgy6TkvvppqtQV7',
                 },
                 {
-                    title : 'How To Setup Settings Menu For AtlasVoice Text To Speech Pro WordPress Plugin?',
+                    title: 'How To Setup Settings Menu For AtlasVoice Text To Speech Pro WordPress Plugin?',
                     id: 'yanuoEBfG4A?si=WVJYL656B1LmrEVY',
                 },
                 {
-                    title : 'Text To Speech Pro ( AtlasVoice Pro ) : How To Generate Bulk MP3 File?',
+                    title: 'Text To Speech Pro ( AtlasVoice Pro ) : How To Generate Bulk MP3 File?',
                     id: 'HFoqlkPCP80?si=XVBvLEp2ATKT7EXz',
                 },
                 {
-                    title : 'How To Enable Analytics In Text To Speech Free And Pro WordPress Plugin?',
+                    title: 'How To Enable Analytics In Text To Speech Free And Pro WordPress Plugin?',
                     id: 'amkrAtVQGBY?si=ZI1HfRBYaR60PVVx',
                 },
                 {
-                    title : 'How To Use Text Alias In AtlasVoice Text To Speech Free And Pro WordPress Plugin?',
+                    title: 'How To Use Text Alias In AtlasVoice Text To Speech Free And Pro WordPress Plugin?',
                     id: 'oeW652YKmG0?si=q97jAR0pTT3LhhH-',
                 },
                 {
-                    title : 'How To Customize Text To Speech WordPress Plugin Player With Custom CSS ?',
+                    title: 'How To Customize Text To Speech WordPress Plugin Player With Custom CSS ?',
                     id: 'vdgJ_V2REE0?si=DSHrm7tlt8dbcF1R',
                 },
                 {
-                    title : 'How To Change Text To Speech WordPress Plugin ( AtlasVoice ) Player Text And Hover Text?',
+                    title: 'How To Change Text To Speech WordPress Plugin ( AtlasVoice ) Player Text And Hover Text?',
                     id: 'qDzatRpEXN8?si=jb3MSEA1FsOxadgV',
                 },
             ],
             [ // pro video
                 {
-                    title : 'How To Setup Text To Speech Player Properly?',
+                    title: 'How To Setup Text To Speech Player Properly?',
                     id: 'h4VJxM-mh74?si=pmgy6TkvvppqtQV7',
                 },
                 {
-                    title : 'How To Setup Settings Menu For AtlasVoice Text To Speech Pro WordPress Plugin?',
+                    title: 'How To Setup Settings Menu For AtlasVoice Text To Speech Pro WordPress Plugin?',
                     id: 'yanuoEBfG4A?si=WVJYL656B1LmrEVY',
                 },
                 {
-                    title : 'Text To Speech Pro ( AtlasVoice Pro ) : How To Generate Bulk MP3 File?',
+                    title: 'Text To Speech Pro ( AtlasVoice Pro ) : How To Generate Bulk MP3 File?',
                     id: 'HFoqlkPCP80?si=XVBvLEp2ATKT7EXz',
                 },
                 {
-                    title : 'How To Enable Analytics In Text To Speech Free And Pro WordPress Plugin?',
+                    title: 'How To Enable Analytics In Text To Speech Free And Pro WordPress Plugin?',
                     id: 'amkrAtVQGBY?si=ZI1HfRBYaR60PVVx',
                 },
                 {
-                    title : 'How To Use Text Alias In AtlasVoice Text To Speech Free And Pro WordPress Plugin?',
+                    title: 'How To Use Text Alias In AtlasVoice Text To Speech Free And Pro WordPress Plugin?',
                     id: 'oeW652YKmG0?si=q97jAR0pTT3LhhH-',
                 },
                 {
-                    title : 'How to Configure GTranslate And Text To Speech Pro ( AtlasVoice ) WordPress Plugin',
+                    title: 'How to Configure GTranslate And Text To Speech Pro ( AtlasVoice ) WordPress Plugin',
                     id: 'uMJBdM24w_c?si=XZ0hsLADaQiB2UN2',
                 },
             ]
@@ -105,13 +105,13 @@ export default function UpgradeToPro({promotionType = 'general'}) {
     return <>
         {
             window.hasOwnProperty('ttsObj') ?
-                <div style={{display: ttsObj.is_pro_active && promotionType !== 'youtube' ? 'none' : 'block' }} className="card p-0">
+                <div style={{ display: ttsObj.is_pro_active && promotionType !== 'youtube' ? 'none' : 'block' }} className="card p-0">
                     <div className="card-header text-center tta_btn btn-center">
                         {
                             promotionType === 'youtube' ? <button
-                                                             className="tta_btn btn-center text-center text-white">Video Tutorials</button> :
-                                <a target='_blank' href="https://atlasaidev.com/plugins/text-to-speech-pro/"
-                                   className="tta_btn btn-center text-center text-white">Premium Features</a>
+                                className="tta_btn btn-center text-center text-white"><span class="dashicons dashicons-youtube text-danger"></span> Video Tutorials</button> :
+                                <a target='_blank' href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
+                                    className="tta_btn btn-center text-center text-white">Premium Features</a>
 
                         }
                     </div>
@@ -128,7 +128,7 @@ export default function UpgradeToPro({promotionType = 'general'}) {
                                                         return <div key={obj.id} className='d-flex d-inline py-2 border-bottom border-width-2 border-gray-dark '>
                                                             <i className="fab fa-youtube text-danger me-2 mt-2"></i>
                                                             <a className={'text-decoration-none'} target={'_blank'}
-                                                               href={'https://www.youtube.com/watch?v=' + obj.id}>{obj.title}</a>
+                                                                href={'https://www.youtube.com/watch?v=' + obj.id}>{obj.title}</a>
                                                         </div>
 
                                                     })
@@ -137,14 +137,14 @@ export default function UpgradeToPro({promotionType = 'general'}) {
                                                         return <div key={obj.id} className={'d-flex d-inline py-2 border-bottom border-width-2 border-gray-dark '}>
                                                             <i className="fab fa-youtube text-danger me-2 mt-2"></i>
                                                             <a className={'text-decoration-none'} target={'_blank'}
-                                                               href={'https://www.youtube.com/watch?v=' + obj.id}>{obj.title}</a>
+                                                                href={'https://www.youtube.com/watch?v=' + obj.id}>{obj.title}</a>
                                                         </div>
 
                                                     })
                                                 }
                                             } else {
-                                                return <li key={index}  className="list-group-item"
-                                                           dangerouslySetInnerHTML={{__html: feature}}/>
+                                                return <li key={index} className="list-group-item"
+                                                    dangerouslySetInnerHTML={{ __html: feature }} />
                                             }
 
 
@@ -156,7 +156,7 @@ export default function UpgradeToPro({promotionType = 'general'}) {
                         {
                             !ttsObj.is_pro_active &&
                             <a target='_blank' href="https://atlasaidev.com/plugins/text-to-speech-pro/"
-                               className="tta_btn text-white">Unlock Premium Features</a>
+                                className="tta_btn text-white">Unlock Premium Features</a>
                         }
                     </div>
                 </div> : null

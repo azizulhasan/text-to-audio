@@ -3,9 +3,9 @@ Contributors: atlasaidev, hasanazizul
 Donate link: http://atlasaidev.com/
 Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
-Tested up to: 6.8
+Tested up to: 6.8.2
 Requires PHP: 7.4
-Stable tag: 1.9.4
+Stable tag: 1.9.5
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -21,8 +21,8 @@ Enhance your WordPress and WooCommerce website's accessibility and engage users 
 
 Right after you install this text to speech free plugin, it will automatically start displaying an easy-to-use player on selected post/page types, giving visitors the option to listen to your website's written content at their own pace.
 
-== Best Free Text To Speech TTS Accessibility Plugin For WordPress - Video Tutorial ==
-[youtube https://www.youtube.com/watch?v=P_dw_YjnVxc&t=21s&ab_channel=AtlasAiDev]
+== Text To Speech TTS Accessibility Plugin For WordPress How To Install ? ==
+[youtube https://www.youtube.com/watch?v=25xJtIwFM2U&ab_channel=AtlasAiDev]
 
 == How To Setup Text To Speech Player Properly? - Video Tutorial  ==
 [youtube https://www.youtube.com/watch?v=h4VJxM-mh74&t=4s&ab_channel=AtlasAiDev]
@@ -440,6 +440,12 @@ You can customize the voice and language of the text-to-speech player using shor
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+
+
+= 1.9.5  ( 17 July 2025 )  =
+Improved: UI improvement done.
+Fixed: bug fixed.
+Added: [How to install text to speech plugin?](https://www.youtube.com/watch?v=25xJtIwFM2U&ab_channel=AtlasAiDev) added.
 
 
 = 1.9.4  ( 15 July 2025 )  =
