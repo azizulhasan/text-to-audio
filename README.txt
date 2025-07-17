@@ -21,8 +21,8 @@ Enhance your WordPress and WooCommerce website's accessibility and engage users 
 
 Right after you install this text to speech free plugin, it will automatically start displaying an easy-to-use player on selected post/page types, giving visitors the option to listen to your website's written content at their own pace.
 
-== Best Free Text To Speech TTS Accessibility Plugin For WordPress - Video Tutorial ==
-[youtube https://www.youtube.com/watch?v=P_dw_YjnVxc&t=21s&ab_channel=AtlasAiDev]
+== Text To Speech TTS Accessibility Plugin For WordPress How To Install ? ==
+[youtube https://www.youtube.com/watch?v=25xJtIwFM2U&ab_channel=AtlasAiDev]
 
 == How To Setup Text To Speech Player Properly? - Video Tutorial  ==
 [youtube https://www.youtube.com/watch?v=h4VJxM-mh74&t=4s&ab_channel=AtlasAiDev]

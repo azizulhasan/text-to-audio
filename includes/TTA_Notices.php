@@ -89,39 +89,39 @@ class TTA_Notices {
 		];
 
 
-        if(!is_pro_active()){
-			foreach ( $plugins as $plugin_name =>  $data ){
-				if(is_plugin_active($plugin_name )) {
-					$this->active_plugin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+        // if(!is_pro_active()){
+		// 	foreach ( $plugins as $plugin_name =>  $data ){
+		// 		if(is_plugin_active($plugin_name )) {
+		// 			$this->active_plugin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
 
-					add_action( 'admin_notices', [ $this, $data['callback'] ] );
-					break;
-				}else if( $plugin_name == 'tts-multilingual') {
-					$this->active_plugin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
-					add_action( 'admin_notices', [ $this, $data['callback'] ] );
-				}
-			}
+		// 			add_action( 'admin_notices', [ $this, $data['callback'] ] );
+		// 			break;
+		// 		}else if( $plugin_name == 'tts-multilingual') {
+		// 			$this->active_plugin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+		// 			add_action( 'admin_notices', [ $this, $data['callback'] ] );
+		// 		}
+		// 	}
 		
-			// Display free version notice.
-            $i = rand(0, (count($features_notice) -1));
-            $feature1 = $features_notice[$i];
-            $i++;
-            $feature2 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[0];
-	        $i++;
-            $feature3 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[1];
-			$i++;
-            $feature4 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[2];
-			$i++;
-            $feature5 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[3];
-            array_push($this->plugin_features, "<strong>1. $feature1</strong>");
-            array_push($this->plugin_features, "<strong>2. $feature2</strong>");
-            array_push($this->plugin_features, "<strong>3. $feature3</strong>");
-			array_push($this->plugin_features, "<strong>4. $feature4</strong>");
-			array_push($this->plugin_features, "<strong>5. $feature5</strong>");
+		// 	// Display free version notice.
+        //     $i = rand(0, (count($features_notice) -1));
+        //     $feature1 = $features_notice[$i];
+        //     $i++;
+        //     $feature2 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[0];
+	    //     $i++;
+        //     $feature3 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[1];
+		// 	$i++;
+        //     $feature4 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[2];
+		// 	$i++;
+        //     $feature5 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[3];
+        //     array_push($this->plugin_features, "<strong>1. $feature1</strong>");
+        //     array_push($this->plugin_features, "<strong>2. $feature2</strong>");
+        //     array_push($this->plugin_features, "<strong>3. $feature3</strong>");
+		// 	array_push($this->plugin_features, "<strong>4. $feature4</strong>");
+		// 	array_push($this->plugin_features, "<strong>5. $feature5</strong>");
 
-	         add_action( 'admin_notices', [ $this, 'plugin_features_notice_callback' ] );
-			//  add_action( 'admin_notices', [ $this, 'plugin_analytics_notice_callback' ] );
-        }
+	    //      add_action( 'admin_notices', [ $this, 'plugin_features_notice_callback' ] );
+		// 	 add_action( 'admin_notices', [ $this, 'plugin_analytics_notice_callback' ] );
+        // }
 
 		
 
@@ -135,7 +135,7 @@ class TTA_Notices {
 
 //		add_action('wp_ajax_tta_save_review_notice', [ $this, 'tta_save_review_notice' ] );
 		// add_action('wp_ajax_tta_save_feedback_notice', [ $this, 'tta_save_feedback_notice' ] );
-		add_action( 'wp_ajax_tta_hide_notice', [ $this, 'tta_hide_notice' ] );
+		// add_action( 'wp_ajax_tta_hide_notice', [ $this, 'tta_hide_notice' ] );
 	}
 
 	public function browser_support_notice() {
