@@ -36,7 +36,7 @@ class TTA_Notices {
 
 		// if ( ! is_pro_active() || TTA_Helper::get_player_id() < 3 ) {
 		// 	 add_action( 'admin_notices', [ $this, 'tta_feedback_notice' ] );
-		// 	add_action( 'admin_notices', [ $this, 'tta_ar_vr_plugin_notice' ] );
+			add_action( 'admin_notices', [ $this, 'tta_ar_vr_plugin_notice' ] );
 		// }
 
 		$plugins = [
@@ -90,36 +90,36 @@ class TTA_Notices {
 
 
         // if(!is_pro_active()){
-		// 	foreach ( $plugins as $plugin_name =>  $data ){
-		// 		if(is_plugin_active($plugin_name )) {
-		// 			$this->active_plugin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+			// foreach ( $plugins as $plugin_name =>  $data ){
+			// 	if(is_plugin_active($plugin_name )) {
+			// 		$this->active_plugin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
 
-		// 			add_action( 'admin_notices', [ $this, $data['callback'] ] );
-		// 			break;
-		// 		}else if( $plugin_name == 'tts-multilingual') {
-		// 			$this->active_plugin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
-		// 			add_action( 'admin_notices', [ $this, $data['callback'] ] );
-		// 		}
-		// 	}
+			// 		add_action( 'admin_notices', [ $this, $data['callback'] ] );
+			// 		break;
+			// 	}else if( $plugin_name == 'tts-multilingual') {
+			// 		$this->active_plugin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+			// 		add_action( 'admin_notices', [ $this, $data['callback'] ] );
+			// 	}
+			// }
 		
 		// 	// Display free version notice.
-        //     $i = rand(0, (count($features_notice) -1));
-        //     $feature1 = $features_notice[$i];
-        //     $i++;
-        //     $feature2 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[0];
-	    //     $i++;
-        //     $feature3 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[1];
-		// 	$i++;
-        //     $feature4 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[2];
-		// 	$i++;
-        //     $feature5 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[3];
-        //     array_push($this->plugin_features, "<strong>1. $feature1</strong>");
-        //     array_push($this->plugin_features, "<strong>2. $feature2</strong>");
-        //     array_push($this->plugin_features, "<strong>3. $feature3</strong>");
-		// 	array_push($this->plugin_features, "<strong>4. $feature4</strong>");
-		// 	array_push($this->plugin_features, "<strong>5. $feature5</strong>");
+            // $i = rand(0, (count($features_notice) -1));
+            // $feature1 = $features_notice[$i];
+            // $i++;
+            // $feature2 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[0];
+	        // $i++;
+            // $feature3 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[1];
+			// $i++;
+            // $feature4 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[2];
+			// $i++;
+            // $feature5 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[3];
+            // array_push($this->plugin_features, "<strong>1. $feature1</strong>");
+            // array_push($this->plugin_features, "<strong>2. $feature2</strong>");
+            // array_push($this->plugin_features, "<strong>3. $feature3</strong>");
+			// array_push($this->plugin_features, "<strong>4. $feature4</strong>");
+			// array_push($this->plugin_features, "<strong>5. $feature5</strong>");
 
-	    //      add_action( 'admin_notices', [ $this, 'plugin_features_notice_callback' ] );
+	        //  add_action( 'admin_notices', [ $this, 'plugin_features_notice_callback' ] );
 		// 	 add_action( 'admin_notices', [ $this, 'plugin_analytics_notice_callback' ] );
         // }
 
@@ -135,7 +135,7 @@ class TTA_Notices {
 
 //		add_action('wp_ajax_tta_save_review_notice', [ $this, 'tta_save_review_notice' ] );
 		// add_action('wp_ajax_tta_save_feedback_notice', [ $this, 'tta_save_feedback_notice' ] );
-		// add_action( 'wp_ajax_tta_hide_notice', [ $this, 'tta_hide_notice' ] );
+		add_action( 'wp_ajax_tta_hide_notice', [ $this, 'tta_hide_notice' ] );
 	}
 
 	public function browser_support_notice() {
@@ -162,6 +162,9 @@ class TTA_Notices {
 	}
 
 	public function plugin_compatible_notice_callback() {
+		if(!is_pro_active()){
+			return;
+		}
 		$wpml_and_gtranslate_notice_displaid = \get_option( 'wpml_and_gtranslate_notice_displayed', false );
 		if ( 'WPML Multilingual CMS, GTranslate, TranslatePress' == \strip_tags( $this->active_plugin_name ) && ! $wpml_and_gtranslate_notice_displaid ) {
 			delete_option( 'tta_plugin_compatible_notice_next_show_time' );
@@ -389,6 +392,9 @@ class TTA_Notices {
 	}
 
 	public function plugin_features_notice_callback() {
+		if(!is_pro_active()){
+			return;
+		}
 		$plugin_features_notice_displayed = \get_option( 'plugin_features_notice_1', false );
 		if ( ! $plugin_features_notice_displayed ) {
 			delete_option( 'tta_plugin_features_notice_next_show_time' );
