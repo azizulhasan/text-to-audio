@@ -1,8 +1,8 @@
-import React, {useState, useEffect} from 'react';
-import {__} from '@wordpress/i18n';
-import {Col, Container, Row, Form, FloatingLabel} from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { __ } from '@wordpress/i18n';
+import { Col, Container, Row, Form, FloatingLabel } from 'react-bootstrap';
 import toast from '../../context/Notify';
-import {copyToClipBoard, postData, postWithoutImage} from '../../context/utilities';
+import { copyToClipBoard, postData, postWithoutImage } from '../../context/utilities';
 import TextToSpeech from '../../../buttons/components/TextToSpeech';
 import TextToSpeechThree from '../../../buttons/components/TextToSpeechThree';
 import TextToSpeechFour from '../../../buttons/components/TextToSpeechFour';
@@ -13,14 +13,15 @@ let speech = null;
 let TextToSpeechFree = null;
 export default function Customize() {
     const defaultValue = {
-        backgroundColor: '#184c53',
-        color: '#ffffff',
+        backgroundColor: '#ffffff',
+        color: '#000000',
+        hoverBackgroundColor: '#f0f0f0',
         width: '100',
-        height: '30',
-        border: '0',
+        height: '50',
+        border: '2',
         border_color: '#000000',
-        borderRadius: '4',
-        fontSize: '18',
+        borderRadius: '10',
+        fontSize: '20',
         tta_play_btn_shortcode: "[atlasvoice]",
         buttonSettings: {
             id: 1,
@@ -42,10 +43,10 @@ export default function Customize() {
         backgroundColor: '#FFFFFF',
         color: '#000000',
         width: '100%',
-        border: '0px',
-        height: '30px',
-        fontSize: '18px',
-        borderRadius: '4px',
+        border: '2px solid #000000',
+        height: '50px',
+        fontSize: '20px',
+        borderRadius: '10px',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -97,38 +98,38 @@ export default function Customize() {
 
                 let css = {
                     ...listeningBtnStyle2,
-                    ...{backgroundColor: res.data.backgroundColor || defaultValue.backgroundColor},
-                    ...{color: res.data.color || defaultValue.color},
-                    ...{height: res.data?.height || defaultValue.height + 'px'},
-                    ...{fontSize: res.data?.fontSize || defaultValue.fontSize + 'px'},
-                    ...{marginTop: res.data?.marginTop || defaultValue.marginTop + 'px'},
-                    ...{marginBottom: res.data?.marginBottom || defaultValue.marginBottom + 'px'},
-                    ...{marginLeft: res.data?.marginLeft || defaultValue.marginLeft + '%'},
-                    ...{marginRight: res.data?.marginRight || defaultValue.marginRight + 'px'},
-                    ...{borderRadius: res.data?.borderRadius || defaultValue.borderRadius + 'px'},
-                    ...{border: res.data?.border || defaultValue.border + 'px solid '},
-                    ...{width: [res.data.width, '%'].join('')},
+                    ...{ backgroundColor: res.data.backgroundColor || defaultValue.backgroundColor },
+                    ...{ color: res.data.color || defaultValue.color },
+                    ...{ height: res.data?.height || defaultValue.height + 'px' },
+                    ...{ fontSize: res.data?.fontSize || defaultValue.fontSize + 'px' },
+                    ...{ marginTop: res.data?.marginTop || defaultValue.marginTop + 'px' },
+                    ...{ marginBottom: res.data?.marginBottom || defaultValue.marginBottom + 'px' },
+                    ...{ marginLeft: res.data?.marginLeft || defaultValue.marginLeft + '%' },
+                    ...{ marginRight: res.data?.marginRight || defaultValue.marginRight + 'px' },
+                    ...{ borderRadius: res.data?.borderRadius || defaultValue.borderRadius + 'px' },
+                    ...{ border: res.data?.border || defaultValue.border + 'px solid ' },
+                    ...{ width: [res.data.width, '%'].join('') },
                 }
                 css.border += res.data?.border_color || defaultValue.border_color;
 
                 let value = {
                     ...res.data,
-                    ...{backgroundColor: res.data.backgroundColor || defaultValue.backgroundColor},
-                    ...{color: res.data.color || defaultValue.color},
-                    ...{height: res.data?.height || defaultValue.height},
-                    ...{fontSize: res.data?.fontSize || defaultValue.fontSize},
-                    ...{marginTop: res.data?.marginTop || defaultValue.marginTop},
-                    ...{marginBottom: res.data?.marginBottom || defaultValue.marginBottom},
-                    ...{marginLeft: res.data?.marginLeft || defaultValue.marginLeft },
-                    ...{marginRight: res.data?.marginRight || defaultValue.marginRight},
-                    ...{borderRadius: res.data?.borderRadius || defaultValue.borderRadius},
-                    ...{border: res.data?.border || defaultValue.border},
-                    ...{border_color: res.data?.border_color || defaultValue.border_color},
-                    ...{width: res.data?.width || defaultValue.width},
-                    ...{tta_play_btn_shortcode: res.data?.tta_play_btn_shortcode || defaultValue.tta_play_btn_shortcode},
-                    ...{custom_css: res.data?.custom_css || defaultValue.custom_css}
+                    ...{ backgroundColor: res.data.backgroundColor || defaultValue.backgroundColor },
+                    ...{ color: res.data.color || defaultValue.color },
+                    ...{ height: res.data?.height || defaultValue.height },
+                    ...{ fontSize: res.data?.fontSize || defaultValue.fontSize },
+                    ...{ marginTop: res.data?.marginTop || defaultValue.marginTop },
+                    ...{ marginBottom: res.data?.marginBottom || defaultValue.marginBottom },
+                    ...{ marginLeft: res.data?.marginLeft || defaultValue.marginLeft },
+                    ...{ marginRight: res.data?.marginRight || defaultValue.marginRight },
+                    ...{ borderRadius: res.data?.borderRadius || defaultValue.borderRadius },
+                    ...{ border: res.data?.border || defaultValue.border },
+                    ...{ border_color: res.data?.border_color || defaultValue.border_color },
+                    ...{ width: res.data?.width || defaultValue.width },
+                    ...{ tta_play_btn_shortcode: res.data?.tta_play_btn_shortcode || defaultValue.tta_play_btn_shortcode },
+                    ...{ custom_css: res.data?.custom_css || defaultValue.custom_css }
                 }
-                console.log({css, value})
+                console.log({ css, value })
 
                 setListeningStyle(value);
                 if (res.data.custom_css) {
@@ -244,7 +245,7 @@ export default function Customize() {
 
         // ChatGPT TTS player button settings
         // && listeningBtnStyle?.buttonSettings?.id == 3
-        if (!['backgroundColor', 'width', 'color', 'height', 'border', 'border_color', 'fontSize', 'borderRadius',  'marginTop', 'marginBottom', 'marginRight', 'marginLeft' ].includes(e.target.name)) {
+        if (!['backgroundColor', 'width', 'color', 'height', 'border', 'border_color', 'fontSize', 'borderRadius', 'marginTop', 'marginBottom', 'marginRight', 'marginLeft', 'hoverBackgroundColor'].includes(e.target.name)) {
 
             if (e.target.name === 'button_position' && !['before_content', 'after_content'].includes(e.target.value) && !ttsObj.is_pro_active) {
                 toast('This option is only available for pro version.', 'error');
@@ -255,7 +256,7 @@ export default function Customize() {
 
             tempButtonSettings = {
                 ...tempButtonSettings,
-                ...{[e.target.name]: e.target.value}
+                ...{ [e.target.name]: e.target.value }
             }
             setListeningStyle({
                 ...listeningBtnStyle,
@@ -279,7 +280,7 @@ export default function Customize() {
          */
         setListeningStyle({
             ...listeningBtnStyle,
-            ...{[e.target.name]: e.target.value},
+            ...{ [e.target.name]: e.target.value },
         });
         /**
          * set button style for live preveiw.
@@ -305,12 +306,12 @@ export default function Customize() {
             // e.target.name = 'border';
         } else if (e.target.name === 'fontSize') {
             value = e.target.value + 'px';
-        }else if (  e.target.name === 'marginLeft' ) {
+        } else if (e.target.name === 'marginLeft') {
             value = e.target.value + '%';
         } else if (e.target.name === 'borderRadius'
-        || e.target.name === 'marginTop'
-        || e.target.name === 'marginBottom'
-        || e.target.name === 'marginRight'
+            || e.target.name === 'marginTop'
+            || e.target.name === 'marginBottom'
+            || e.target.name === 'marginRight'
         ) {
             value = e.target.value + 'px';
         } else {
@@ -318,7 +319,7 @@ export default function Customize() {
         }
         setListeningStyle2({
             ...listeningBtnStyle2,
-            ...{[e.target.name]: value},
+            ...{ [e.target.name]: value },
         });
     };
 
@@ -342,7 +343,7 @@ export default function Customize() {
                     return;
                 }
             }
-            if (!['backgroundColor', 'width', 'color', 'border', 'border_color', 'height', 'fontSize', 'borderRadius', 'marginTop', 'marginBottom', 'marginRight', 'marginLeft'  ].includes(key)) {
+            if (!['backgroundColor', 'width', 'color', 'border', 'border_color', 'height', 'fontSize', 'borderRadius', 'marginTop', 'marginBottom', 'marginRight', 'marginLeft', 'hoverBackgroundColor'].includes(key)) {
                 continue;
             }
 
@@ -385,7 +386,7 @@ export default function Customize() {
         }
 
         if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_folder_writable && formData?.buttonSettings?.id > 2 && !isBackUpToGCS) {
-            toast("Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.", 'error', {autoClose: 10000})
+            toast("Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.", 'error', { autoClose: 10000 })
             return
         }
         ;
@@ -441,11 +442,11 @@ export default function Customize() {
     };
 
     const [buttonLists, setButtonLists] = useState([
-        {id: 1, name: 'Default', object: 'TextToSpeech', disabled: false},
-        {id: 2, name: 'Default Pro', object: 'TextToSpeechPro', disabled: false},
-        {id: 3, name: 'Google TTS Pro', object: 'TextToSpeechPro', disabled: false},
-        {id: 4, name: "Google Cloud TTS", object: 'TextToSpeechPro', disabled: false},
-        {id: 5, name: "ChatGPT TTS", object: 'TextToSpeechPro', disabled: false},
+        { id: 1, name: 'Default', object: 'TextToSpeech', disabled: false },
+        { id: 2, name: 'Default Pro', object: 'TextToSpeechPro', disabled: false },
+        { id: 3, name: 'Google TTS Pro', object: 'TextToSpeechPro', disabled: false },
+        { id: 4, name: "Google Cloud TTS", object: 'TextToSpeechPro', disabled: false },
+        { id: 5, name: "ChatGPT TTS", object: 'TextToSpeechPro', disabled: false },
     ])
 
     return (
@@ -466,7 +467,7 @@ export default function Customize() {
                                         }
                                         value={speakingText ? speakingText : ''}
                                         placeholder='Write here something and click listen button.'
-                                        style={{height: '100px'}}
+                                        style={{ height: '100px' }}
                                     />
                                 </FloatingLabel>
                             </>
@@ -475,31 +476,31 @@ export default function Customize() {
                             {
                                 listeningBtnStyle?.buttonSettings?.id == 2 ?
                                     <TextToSpeech buttonCSS={listeningBtnStyle}
-                                                  button={<div dataId="1" id="tts__listent_content_1"
-                                                               className='tts__listent_content'></div>} buttonId={2}/> :
+                                        button={<div dataId="1" id="tts__listent_content_1"
+                                            className='tts__listent_content'></div>} buttonId={2} /> :
                                     listeningBtnStyle?.buttonSettings?.id == 3 ?
                                         <TextToSpeechThree buttonCSS={listeningBtnStyle}
-                                                           button={<div dataId="1" id="tts__listent_content_1"
-                                                                        className='tts__listent_content'></div>}
-                                                           buttonId={3} cssStyle={''}/> :
+                                            button={<div dataId="1" id="tts__listent_content_1"
+                                                className='tts__listent_content'></div>}
+                                            buttonId={3} cssStyle={''} /> :
                                         listeningBtnStyle?.buttonSettings?.id == 4 ?
                                             <TextToSpeechFour buttonCSS={listeningBtnStyle}
-                                                              button={<div dataId="1" id="tts__listent_content_1"
-                                                                           className='tts__listent_content'></div>}
-                                                              buttonId={4} cssStyle={''}/> :
+                                                button={<div dataId="1" id="tts__listent_content_1"
+                                                    className='tts__listent_content'></div>}
+                                                buttonId={4} cssStyle={''} /> :
                                             listeningBtnStyle?.buttonSettings?.id == 5 ?
                                                 <TextToSpeechThree buttonCSS={listeningBtnStyle}
-                                                                   button={<div dataId="1" id="tts__listent_content_1"
-                                                                                className='tts__listent_content'></div>}
-                                                                   buttonId={5} cssStyle={''}/> : (
+                                                    button={<div dataId="1" id="tts__listent_content_1"
+                                                        className='tts__listent_content'></div>}
+                                                    buttonId={5} cssStyle={''} /> : (
                                                     <button
                                                         id='tta__listen_content'
                                                         onClick={(e) => callListeningFunction(e)}
                                                         style={listeningBtnStyle2}
                                                         type='button'
                                                         title='Text To Audio:  Tap to listen post.'>
-                                                        <span style={{fontSize: listeningBtnStyle2?.fontSize}}
-                                                              className='dashicons dashicons-controls-play'></span>{' '}
+                                                        <span style={{ fontSize: listeningBtnStyle2?.fontSize }}
+                                                            className='dashicons dashicons-controls-play'></span>{' '}
                                                         {tta_obj.buttonTextArr.listen_text}
                                                     </button>
                                                 )
@@ -538,8 +539,8 @@ export default function Customize() {
                 </Col>
                 <Col xs={12} sm={12} lg={4}>
                     <CustomizationTabs buttonLists={buttonLists} customCSS={customCSS} handleSubmit={handleSubmit}
-                                       listeningBtnStyle={listeningBtnStyle} handleChange={handleChange}
-                                       listeningSettings={listeningSettings}/>
+                        listeningBtnStyle={listeningBtnStyle} handleChange={handleChange}
+                        listeningSettings={listeningSettings} />
                 </Col>
             </Row>
         </Container>

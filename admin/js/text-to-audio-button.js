@@ -59,16 +59,18 @@ class TTSPlayButton extends HTMLElement {
                     const style = document.createElement('style');
                     // CSS style for thsi button
                     style.textContent = `
-                        #tts__listent_content_${buttonId}.tts__listent_content{ ${settings.btnStyle} }
-                        #tts__listent_content_${buttonId}.tts__listent_content:hover{ ${settings.btnStyle} }
-                        // #tts__listent_content_${buttonId}.tts__listent_content .text-position{ position: absolute;padding-top: 2px; }
-                        // #tts__listent_content_${buttonId}.tts__listent_content .dashicons{ display:${settings.shouldDisplayIcon};line-height:1;font-size:25px;height:25px;width:25px; }
-                        
-                        #tts__listent_content_${buttonId}.tts__listent_content svg{ display:${settings.shouldDisplayIcon}; padding-right:7px !important; }
-                        #tts__listent_content_${buttonId}.tts__listent_content:hover  svg{ display:${settings.shouldDisplayIcon}; padding-right:7px !important; }
-                        
-                        ${this.#htmlDecode(settings.customCSS)}
+                        #tts__listent_content_${buttonId}.tts__listent_content{ ${settings.btnStyle} transition: all 0.5s ease-in-out; }
+                        #tts__listent_content_${buttonId}.tts__listent_content:hover{ ${settings.btnStyle} background-color:${ttsObj?.settings?.customize?.hoverBackgroundColor || '#f0f0f0'};}
+
+                        #tts__listent_content_${buttonId}.tts__listent_content svg{ display:${settings.shouldDisplayIcon}; padding-right:7px !important;padding-top: 5px; }
+                        #tts__listent_content_${buttonId}.tts__listent_content:hover  svg{ display:${settings.shouldDisplayIcon}; padding-right:7px !important; padding-top: 5px; } 
                     `;
+
+                    if (settings?.customCSS) {
+                        style.textContent += `
+                            ${this.#htmlDecode(settings.customCSS)}
+                        `;
+                    }
                     // Attsch the created elements to the shadow dom
                     shadow.appendChild(style);
                     shadow.appendChild(wrapper);
