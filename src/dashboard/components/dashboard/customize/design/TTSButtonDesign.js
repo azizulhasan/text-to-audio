@@ -1,6 +1,6 @@
-import {Form} from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 
-export default function TTSButtonDesign({handleChange, customCSS, listeningBtnStyle}) {
+export default function TTSButtonDesign({ handleChange, customCSS, listeningBtnStyle }) {
     return (
         <>
             <div className="d-flex flex-row justify-content-between pb-3 border-bottom  border-dark ">
@@ -14,7 +14,7 @@ export default function TTSButtonDesign({handleChange, customCSS, listeningBtnSt
                         onChange={handleChange}
                         id='backgroundColor'
                         value={listeningBtnStyle.backgroundColor}
-                        title='Choose your color'
+                        title='Choose player background color'
                     />
                 </div>
                 <div>
@@ -26,6 +26,21 @@ export default function TTSButtonDesign({handleChange, customCSS, listeningBtnSt
                         id='color'
                         value={listeningBtnStyle.color}
                         title='Choose your color'
+                    />
+                </div>
+            </div>
+            <div className="d-flex flex-row justify-content-between pb-3 border-bottom  border-dark ">
+                <div>
+                    <Form.Label className={'font-weight-bold'} htmlFor='hoverBackgroundColor'>
+                        Hover Background Color
+                    </Form.Label>
+                    <Form.Control
+                        type='color'
+                        name='hoverBackgroundColor'
+                        onChange={handleChange}
+                        id='hoverBackgroundColor'
+                        value={listeningBtnStyle.hoverBackgroundColor}
+                        title='Choose your hover background color'
                     />
                 </div>
             </div>

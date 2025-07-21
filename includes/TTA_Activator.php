@@ -38,8 +38,8 @@ class TTA_Activator {
 		if ( $renew_all_settings || ! get_option( 'tta_customize_settings' ) ) {
 			update_option( 'tta_customize_settings', array
 			(
-				"backgroundColor"        => "#184c53",
-				"color"                  => "#ffffff",
+				"backgroundColor"        => "#ffffff",
+				"color"                  => "#000000",
 				"width"                  => "100",
 				'custom_css'             => '',
 				'tta_play_btn_shortcode' => '[atlasvoice]',
@@ -51,11 +51,11 @@ class TTA_Activator {
 					'generate_mp3_date_from' => '',
 					'generate_mp3_date_to'   => ''
 				],
-				'height'                 => '30',
-				'border'                 => '#00000',
-				'border_color'           => '0',
-				'fontSize'               => '18',
-				'borderRadius'           => '4',
+				'height'                 => '50',
+				'border'                 => '2',
+				'border_color'           => '#000000',
+				'fontSize'               => '20',
+				'borderRadius'           => '10',
                 'marginTop'              => '0',
                 'marginBottom'           => '0',
                 'marginLeft'             => '0',
