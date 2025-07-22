@@ -91,6 +91,9 @@ class TTA_Admin {
 		}
 
 		$rest_api_url = esc_url_raw( home_url() . '/wp-json/' );
+		if(TTA_Cache::get( 'tts_rest_api_url' )) {
+			$rest_api_url = TTA_Cache::get( 'tts_rest_api_url' );
+		}
 
 		$this->localize_data = [
 			'json_url'                 => $rest_api_url,
