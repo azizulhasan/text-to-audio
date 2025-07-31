@@ -133,7 +133,6 @@ class TTA_Helper
             }
         }
 
-
         return apply_filters('tta_should_load_button', $should_load_button, $post);
     }
 

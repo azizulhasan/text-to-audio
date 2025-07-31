@@ -1,11 +1,11 @@
 === Text To Speech TTS Accessibility ===
-Contributors: atlasaidev, hasanazizul
+Contributors: atlasaidev, hasanazizul, freemius
 Donate link: http://atlasaidev.com/
 Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.8.2
 Requires PHP: 7.4
-Stable tag: 1.9.8
+Stable tag: 1.9.9
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -441,6 +441,11 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+
+= 1.9.9  ( 31 July 2025 )  =
+Fixed: Post Edit page Category hieght issue fixed.
+Fixed: Player not on working on mobile or tab issue fixed.
+Improved: Pro version performance improved.
 
 = 1.9.8  ( 27 July 2025 )  =
 Improved: Settings page UI functionality and readability Improved.
