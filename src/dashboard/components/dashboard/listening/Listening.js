@@ -33,11 +33,11 @@ export default function Listening() {
     const [currentPlayerFilteredVoices, setCurrentPlayerFilteredVoices] = useState([]);
 
     const [listeningSettings, setListeningSettings] = useState({
-        tta__listening_voice: 'Microsoft Zira - English (United States)',
+        tta__listening_voice: 'Google UK English Female',
         tta__listening_pitch: 1,
         tta__listening_rate: 1,
         tta__listening_volume: 1,
-        tta__listening_lang: 'en-US',
+        tta__listening_lang: 'en-GB',
         tta__listening_activeLanguages_mapping: {},
         tta__multilingualActiveLanguages: {},
         tta__currentPlayerLanguages: {},

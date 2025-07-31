@@ -25,8 +25,8 @@ export default class TextToSpeech {
     ttsListeningSettings = null
     languages = []
     voices = {}
-    voice = true ? "Microsoft Zira - English (United States)" : 'Google UK English Female';
-    language = true ? 'en-US' : 'en-GB';
+    voice = true ? "Google UK English Female" : 'Microsoft Zira - English (United States)';
+    language = true ? 'en-GB' : 'en-US';
     buttonTextArr = null
     splittedSentances = ''
     isCanceled = false
@@ -426,11 +426,18 @@ export default class TextToSpeech {
                  * the voice and language are changed by manual coding.
                  *
                  * This code is implemented from version 1.8.22
+                 * 
+                 * TTS-168: This code is removed.
+                 * From this condition is preventing from reading other valid google voices even though 
+                 * user selected voice are there in the machine. One more thing. This code is fixed for
+                 * all devices, and for all browsers. So this is a weak code, because it did not cover 
+                 * all situaations ( like devices, browsers check etc ). 
                  */
-                if (this.ttsListeningSettings?.tta__listening_lang?.indexOf('en') === 0 && this.ttsListeningSettings?.tta__listening_voice?.indexOf('Google') === 0) {
-                    this.ttsListeningSettings.tta__listening_lang = "en-US"
-                    this.ttsListeningSettings.tta__listening_voice = "Microsoft Zira - English (United States)"
-                }
+
+                // if (this.ttsListeningSettings?.tta__listening_lang?.indexOf('en') === 0 && this.ttsListeningSettings?.tta__listening_voice?.indexOf('Google') === 0) {
+                //     this.ttsListeningSettings.tta__listening_lang = "en-US"
+                //     this.ttsListeningSettings.tta__listening_voice = "Microsoft Zira - English (United States)"
+                // }
 
                 this.browser = new BrowserSupport(ttsObj, data.voices, this.ttsListeningSettings?.tta__listening_lang, this.ttsListeningSettings?.tta__listening_voice)
 
@@ -527,8 +534,8 @@ if ('page=text-to-audio' === urlParams) {
     function declare_init_content() {
         let ttsSettings = {
             listening: {
-                tta__listening_lang: "en-US",
-                tta__listening_voice: "Microsoft Zira - English (United States)",
+                tta__listening_lang: "en-GB",
+                tta__listening_voice: "Google UK English Female",
                 tta__listening_pitch: "1",
                 tta__listening_rate: "1",
                 tta__listening_volume: "1"

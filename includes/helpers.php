@@ -111,6 +111,12 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     if (!TTA_Helper::should_load_button() || $block_btn_no > 0) {
         return;
     }
+    /**
+     * TTS-168
+     */
+    if(TTA_Helper::is_edit_page()) {
+        return;
+    }
 
 //	update_option('tta_customize_settings', []);
 

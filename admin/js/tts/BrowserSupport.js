@@ -2,10 +2,10 @@ export default class BrowserSupport {
     #browser = ''
     #ttsObj = {}
     voices = []
-    #voice = 'Microsoft Zira - English (United States)'
-    #lang = 'en-US'
-    #selectedLang = 'en-US'
-    #selectedVoice = 'Microsoft Zira - English (United States)'
+    #voice = 'Google UK English Female'
+    #lang = 'en-GB'
+    #selectedLang = 'en-GB'
+    #selectedVoice = 'Google UK English Female'
     #filteredVoices = [];
     constructor(ttsObj, voices, selectedLang, selectedVoice) {
         this.#ttsObj = ttsObj
