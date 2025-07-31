@@ -128,7 +128,6 @@ class TTA_Helper
                 || $tta__settings_allow_listening_for_posts_status
                 || $display_player_to
                 || !$display_player_based_on_date_range
-                // || self::is_edit_page()
             ) {
                 $should_load_button = false;
             }
