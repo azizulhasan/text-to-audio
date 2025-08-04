@@ -114,7 +114,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     /**
      * TTS-168
      */
-    if(TTA_Helper::is_edit_page()) {
+    if(is_admin()) {
         return;
     }
 
