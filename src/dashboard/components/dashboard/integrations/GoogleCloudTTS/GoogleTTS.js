@@ -21,11 +21,11 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
      * @param {*} e
      */
     const handleChange = (e) => {
-        if(e.target.name == 'tta__integration_is_backup_to_gogole_drive') {
+        if (e.target.name == 'tta__integration_is_backup_to_gogole_drive') {
             let shouldUpdate = true;
-            if(e.target.checked) {
-                if(!isAuthenticated ) {
-                    if(!googTTSJsonFile) {
+            if (e.target.checked) {
+                if (!isAuthenticated) {
+                    if (!googTTSJsonFile) {
                         toast('Backup MP3 Files To Google Cloud Storage Can Be Enabled If Google Text To Speech Is Authenticated.', 'error', {
                             position: 'top-center',
                             autoClose: 10000,
@@ -33,14 +33,14 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
                         shouldUpdate = false;
                     }
                 }
-                
+
             }
-            if(shouldUpdate) {
+            if (shouldUpdate) {
                 console.log(e.target.checked)
                 setIsBackUpToGCS(e.target.checked)
             }
-            
-        }else{
+
+        } else {
             console.log(e.target.files)
             setGoogTTSJsonFile(e.target.files);
         }
@@ -56,7 +56,7 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
             toast(<>
                 <h4>Google cloud text to speech feature is only in pro version.</h4>
                 <button onClick={(e) => {
-                    window.open('https://atlasaidev.com/docs/')
+                    window.open('https://atlasaidev.com/plugins/text-to-speech-pro/pricing/')
                 }} className='tta_btn'>
                     Learn More
                 </button>
@@ -74,7 +74,17 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
         // }
 
         if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_license_active) {
-            toast('Please Activate the Text To Speech Pro license to enjoy full features of the plugin.');
+            toast(<>
+                <h4>Google cloud text to speech feature is only in pro version.</h4>
+                <button onClick={(e) => {
+                    window.open('https://atlasaidev.com/plugins/text-to-speech-pro/pricing/')
+                }} className='tta_btn'>
+                    Buy Now
+                </button>
+            </>, 'info', {
+                position: 'top-center',
+                autoClose: 10000,
+            });
             return;
         }
         // if (!googTTSJsonFile) {
@@ -93,8 +103,8 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
         data.append('auth_file', googTTSJsonFile[0]);
         data.append('tts_is_backup_mp3_file', isBackUpToGCS);
         data.append('method', 'post');
-        for(let val of data.values()) {
-            console.log({val})
+        for (let val of data.values()) {
+            console.log({ val })
         }
         // return;
         postData(apiURL + 'upload_file', data)
@@ -104,15 +114,15 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
                         autoClose: 15000
                     });
                     setIsAuthenticated(res.status)
-                    if(res?.tts_is_backup_mp3_file == 'true') {
-                        setIsBackUpToGCS(res?.tts_is_backup_mp3_file|| false);
+                    if (res?.tts_is_backup_mp3_file == 'true') {
+                        setIsBackUpToGCS(res?.tts_is_backup_mp3_file || false);
                     }
                 } else {
-                    if(res?.bcmath) {
+                    if (res?.bcmath) {
                         toast(bcmathNotice(), 'error', {
                             autoClose: 8000,
                         });
-                    }else{
+                    } else {
                         toast(res?.message || 'Something went wrong!');
                     }
                 }
@@ -132,11 +142,11 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
 
                     setAuthFile(res.file)
                     setIsAuthenticated(res.is_authenticated)
-                    if(res?.tts_is_backup_mp3_file == 'true') {
-                        setIsBackUpToGCS(res?.tts_is_backup_mp3_file|| false);
+                    if (res?.tts_is_backup_mp3_file == 'true') {
+                        setIsBackUpToGCS(res?.tts_is_backup_mp3_file || false);
                     }
 
-                    if(!res?.is_authenticated) {
+                    if (!res?.is_authenticated) {
                         getShouldCheckChatGPT(true);
                     }
 
@@ -205,9 +215,9 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
     const bcmathNotice = () => {
         return <>
             BCMath extension is not enabled. Please enable this extension. Learn more how to enable.
-                <a target='_blank' href="https://atlasaidev.com/docs/text-to-speech/usage-setup/bcmath/" >Learn More</a>
-            </>
-        
+            <a target='_blank' href="https://atlasaidev.com/docs/text-to-speech/usage-setup/bcmath/" >Learn More</a>
+        </>
+
     }
 
     return (
@@ -221,7 +231,7 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
                                     <Form.Label htmlFor='googTTSJsonFile'>
                                         Select Google Service Account Authentication Json file. How to get? Click <a target='_blank' href='https://www.youtube.com/watch?v=yIAnL7W9kr8'>here</a>.
                                         <br />
-                                        <br/>
+                                        <br />
                                         <a target='_blank' href='https://www.youtube.com/watch?v=yIAnL7W9kr8'>How To Integrate Google Text To Speech With AtlasVoice Pro WordPress Plugin?</a>
                                     </Form.Label>
                                     <Form.Control
@@ -252,10 +262,10 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
                                 <Row className=' mt-3'>
                                     <Col xs={12} sm={6} lg={4}>
                                         <Form.Label htmlFor='tta__integration_is_backup_to_gogole_drive'>
-                                        Backup MP3 Files To Google Cloud Storage.
+                                            Backup MP3 Files To Google Cloud Storage.
                                         </Form.Label>
                                         {
-                                            isBackUpToGCS &&   <Form.FloatingLabel className={'text-danger'} label={'You must give this service account read, write access. Otherwise may cause errors.'} >
+                                            isBackUpToGCS && <Form.FloatingLabel className={'text-danger'} label={'You must give this service account read, write access. Otherwise may cause errors.'} >
                                             </Form.FloatingLabel>
                                         }
                                     </Col>
@@ -263,32 +273,32 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
                                         <Form.Check // prettier-ignore
                                             type={'checkbox'}
                                             checked={isBackUpToGCS}
-                                            onChange={(e)=>handleChange(e)}
+                                            onChange={(e) => handleChange(e)}
                                             name={`tta__integration_is_backup_to_gogole_drive`}
                                             id={`tta__integration_is_backup_to_gogole_drive`}
                                         />
                                     </Col>
                                     <Col xs={12} sm={12} lg={2}>
-                                    <>
-									{['top'].map((placement) => (
-										<OverlayTrigger
-											key={placement}
-											placement={placement}
-											overlay={
-												<Tooltip id={`tooltip-${placement}`}>
-													Click Here To Know How To Enable Automatic Backup To Google Cloud Storage For Text To Speech Pro Plugin?
-												</Tooltip>
-											}>
-											<Button onClick={(e)=>{
-                                                e.preventDefault();
-                                                window.open('https://atlasaidev.com/docs/text-to-speech/usage-setup/how-to-enable-automatic-backup-to-google-cloud-storage-for-text-to-speech-pro-plugin/', '_blank')
-                                            }} className='tta_btn'>?</Button>
-										</OverlayTrigger>
-									))}
-								</>
+                                        <>
+                                            {['top'].map((placement) => (
+                                                <OverlayTrigger
+                                                    key={placement}
+                                                    placement={placement}
+                                                    overlay={
+                                                        <Tooltip id={`tooltip-${placement}`}>
+                                                            Click Here To Know How To Enable Automatic Backup To Google Cloud Storage For Text To Speech Pro Plugin?
+                                                        </Tooltip>
+                                                    }>
+                                                    <Button onClick={(e) => {
+                                                        e.preventDefault();
+                                                        window.open('https://atlasaidev.com/docs/text-to-speech/usage-setup/how-to-enable-automatic-backup-to-google-cloud-storage-for-text-to-speech-pro-plugin/', '_blank')
+                                                    }} className='tta_btn'>?</Button>
+                                                </OverlayTrigger>
+                                            ))}
+                                        </>
                                     </Col>
                                 </Row>
-							</Col>
+                            </Col>
                             <div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
                                 <button type='submit' className='tta_btn btn-center'>
                                     Save

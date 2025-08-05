@@ -109,7 +109,7 @@ export default function UpgradeToPro({ promotionType = 'general' }) {
                     <div className="card-header text-center tta_btn btn-center">
                         {
                             promotionType === 'youtube' ? <button
-                                className="tta_btn btn-center text-center text-white"><span class="dashicons dashicons-youtube text-danger"></span> Video Tutorials</button> :
+                                className="tta_btn btn-center text-center text-white"><span className="dashicons dashicons-youtube text-danger"></span> Video Tutorials</button> :
                                 <a target='_blank' href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
                                     className="tta_btn btn-center text-center text-white">Premium Features</a>
 

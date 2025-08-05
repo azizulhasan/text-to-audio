@@ -41,7 +41,7 @@ export default function DashboardSideNav({ isProVersion }) {
 						</NavLink>
 						{/* <NavLink className={getNavLinkClass} to={'/recording'}>
 							<div className='sb-nav-link-icon'>
-								<span class="dashicons dashicons-microphone"></span>
+								<span className="dashicons dashicons-microphone"></span>
 							</div>
 							Recording
 						</NavLink> */}
@@ -77,7 +77,7 @@ export default function DashboardSideNav({ isProVersion }) {
 						</NavLink>
 						{/* <NavLink className={getNavLinkClass} to={'/analitics'}>
 							<div className='sb-nav-link-icon'>
-								<span class="dashicons dashicons-chart-bar"></span>
+								<span className="dashicons dashicons-chart-bar"></span>
 							</div>
 							Analytics Pro
 						</NavLink> */}
