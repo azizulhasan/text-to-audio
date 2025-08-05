@@ -1,8 +1,9 @@
-import React, {useEffect, useMemo, useState} from "react";
-import {Container, Form, Row, Col} from 'react-bootstrap'
+import React, { useEffect, useMemo, useState } from "react";
+import { Container, Form, Row, Col } from 'react-bootstrap'
 import GoogleTTS from "./GoogleCloudTTS/GoogleTTS";
 import ChatGPTTTS from './ChatGPTTTS/ChatGPTTTS'
-import {postData} from "../../context/utilities";
+import { postData } from "../../context/utilities";
+import toast from '../../context/Notify';
 
 
 
@@ -55,8 +56,8 @@ export default function Integrations() {
                 <Col xs={12} sm={12} lg={8}>
                     <div className={'text-danger'}>
                         <strong>Important Notice:</strong> <p className='text-danger d-inline'>Integrating with Google
-                        Cloud Text To Speech/ChatGPT is an optional function for AtlasVoice Pro version. Without
-                        integration you can still use our pro version.</p>
+                            Cloud Text To Speech/ChatGPT is an optional function for AtlasVoice Pro version. Without
+                            integration you can still use our pro version.</p>
                     </div>
                     <Form className="py-4">
                         <Form.Group>
@@ -91,9 +92,9 @@ export default function Integrations() {
         </Container>
         {
             currentTTSServic !== 'chat_gpt_tts' ?
-                <GoogleTTS currentTTSServic={currentTTSServic}  getShouldCheckChatGPT={getShouldCheckChatGPT} /> :
+                <GoogleTTS currentTTSServic={currentTTSServic} getShouldCheckChatGPT={getShouldCheckChatGPT} /> :
                 <ChatGPTTTS setChatGPTAPIData={setChatGPTAPIData} chatGPTAPIData={chatGPTAPIData}
-                            currentTTSServic={currentTTSServic}/>
+                    currentTTSServic={currentTTSServic} />
         }
     </>
 }

@@ -135,8 +135,8 @@ export default function Docs() {
 									<p>
 										Absolutely! You have the flexibility to exclude specific content from being read
 										aloud, and this feature is available in the <a target='_blank'
-																					   href='https://atlasaidev.com/text-to-speech-pro/'>pro
-										version.</a> of Text to Speech.
+											href='https://atlasaidev.com/text-to-speech-pro/'>pro
+											version.</a> of Text to Speech.
 									</p>
 									<p>
 										Here’s how to exclude words from playback:
@@ -144,16 +144,16 @@ export default function Docs() {
 
 									<p>Navigate to the Settings tab of Text to Speech Pro.</p>
 
-										<p>Look for the “Exclude Texts To Speak” textarea.</p>
-										<p>
-											In this field, you can list the words or phrases you wish to exclude from being read aloud.
-										</p>
-										<p>
-											If you want to exclude multiple words or phrases, simply separate them using the pipe symbol (|).
-										</p>
-										<p>
-											With this capability, you can fine-tune the playback experience, ensuring that only the desired content is read aloud to your audience.
-										</p>
+									<p>Look for the “Exclude Texts To Speak” textarea.</p>
+									<p>
+										In this field, you can list the words or phrases you wish to exclude from being read aloud.
+									</p>
+									<p>
+										If you want to exclude multiple words or phrases, simply separate them using the pipe symbol (|).
+									</p>
+									<p>
+										With this capability, you can fine-tune the playback experience, ensuring that only the desired content is read aloud to your audience.
+									</p>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='4'>
@@ -163,28 +163,28 @@ export default function Docs() {
 								<Accordion.Body>
 									<p>
 										Of course! With the <a target='_blank'
-															   href='https://atlasaidev.com/text-to-speech-pro/'>pro
-										version.</a> of Text to Speech, you gain the ability to skip the content
+											href='https://atlasaidev.com/text-to-speech-pro/'>pro
+											version.</a> of Text to Speech, you gain the ability to skip the content
 										enclosed within certain HTML tags during playback.
 									</p>
 									<p>
 										**Here's how it works:**
 									</p>
 									<p>
-									*Navigate to the Settings tab of Text to Speech Pro.
-										</p>
-										<p>
-											*Locate the "Exclude Tag's Content" textarea.
-										</p>
-										<p>
-											*In this field, you can specify the HTML tags whose content you want to exclude from being read aloud.
-										</p>
-										<p>
-											*If you need to skip multiple tags, simply separate them using the pipe symbol (|).
-										</p>
-										<p>
-											By utilizing this feature, you can tailor the reading experience to your preferences, ensuring that specific HTML elements are omitted from the audio playback.
-										</p>
+										*Navigate to the Settings tab of Text to Speech Pro.
+									</p>
+									<p>
+										*Locate the "Exclude Tag's Content" textarea.
+									</p>
+									<p>
+										*In this field, you can specify the HTML tags whose content you want to exclude from being read aloud.
+									</p>
+									<p>
+										*If you need to skip multiple tags, simply separate them using the pipe symbol (|).
+									</p>
+									<p>
+										By utilizing this feature, you can tailor the reading experience to your preferences, ensuring that specific HTML elements are omitted from the audio playback.
+									</p>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='5'>
@@ -197,12 +197,12 @@ export default function Docs() {
 									code Example :{' '}
 									<pre>
 										<code>[atlasvoice listen_text="Listen" pause_text="Pause" resume_text="Resume"
-										replay_text="Replay" start_text="Start" stop_text="Stop"]</code>
+											replay_text="Replay" start_text="Start" stop_text="Stop"]</code>
 									</pre>
 									Also you can change it by filter. We prefer by filter.
 									<pre>
-											<code id='filter_hook'>
-												{`
+										<code id='filter_hook'>
+											{`
 	add_filter('tta__button_text_arr', 'tta__button_text_arr_callback');
 	function tta__button_text_arr_callback($text_arr) {
 		return [
@@ -218,8 +218,8 @@ export default function Docs() {
 	}
               `}
 
-											</code>
-										</pre>
+										</code>
+									</pre>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='6'>
@@ -228,7 +228,7 @@ export default function Docs() {
 								</Accordion.Header>
 								<Accordion.Body>
 									Add class on shortcode as an attribute. Example :{' '}
-									<code>[atlasvoice class="custom_class"]</code>
+									<code>[atlasvoice className="custom_class"]</code>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='7'>
@@ -238,12 +238,12 @@ export default function Docs() {
 								<Accordion.Body>
 									<Table striped bordered hover size='sm'>
 										<thead>
-										<tr>
-											<th>Sr.</th>
+											<tr>
+												<th>Sr.</th>
 
-											<th>Filter Name</th>
-											<th>Arguments</th>
-										</tr>
+												<th>Filter Name</th>
+												<th>Arguments</th>
+											</tr>
 										</thead>
 										<tbody>
 											{filters.length &&
@@ -360,28 +360,28 @@ export default function Docs() {
 								<Accordion.Body>
 									<Table striped bordered hover size='sm'>
 										<thead>
-										<tr>
-											<th>Sr.</th>
+											<tr>
+												<th>Sr.</th>
 
-											<th>Filter Name</th>
-											<th>Arguments</th>
-										</tr>
+												<th>Filter Name</th>
+												<th>Arguments</th>
+											</tr>
 										</thead>
 										<tbody>
-										{pro_filters.length &&
-											pro_filters.map((filter, index) => {
-												return (
-													<tr key={filter.name}>
-														<td>{++index}</td>
-														<td>
-															<code>{filter.name}</code>
-														</td>
-														<td>
-															<code>{filter.arguments}</code>
-														</td>
-													</tr>
-												);
-											})}
+											{pro_filters.length &&
+												pro_filters.map((filter, index) => {
+													return (
+														<tr key={filter.name}>
+															<td>{++index}</td>
+															<td>
+																<code>{filter.name}</code>
+															</td>
+															<td>
+																<code>{filter.arguments}</code>
+															</td>
+														</tr>
+													);
+												})}
 										</tbody>
 									</Table>
 									visit examples <a href={'https://atlasaidev.com/docs/text-to-speech/filters-actions/apply-backend-filters-and-actions-pro-version/'} target={'_blank'}>here</a>
@@ -394,28 +394,28 @@ export default function Docs() {
 								<Accordion.Body>
 									<Table striped bordered hover size='sm'>
 										<thead>
-										<tr>
-											<th>Sr.</th>
+											<tr>
+												<th>Sr.</th>
 
-											<th>Filter Name</th>
-											<th>Arguments</th>
-										</tr>
+												<th>Filter Name</th>
+												<th>Arguments</th>
+											</tr>
 										</thead>
 										<tbody>
-										{js_free_filters.length &&
-											js_free_filters.map((filter, index) => {
-												return (
-													<tr key={filter.name}>
-														<td>{++index}</td>
-														<td>
-															<code>{filter.name}</code>
-														</td>
-														<td>
-															<code>{filter.arguments}</code>
-														</td>
-													</tr>
-												);
-											})}
+											{js_free_filters.length &&
+												js_free_filters.map((filter, index) => {
+													return (
+														<tr key={filter.name}>
+															<td>{++index}</td>
+															<td>
+																<code>{filter.name}</code>
+															</td>
+															<td>
+																<code>{filter.arguments}</code>
+															</td>
+														</tr>
+													);
+												})}
 										</tbody>
 									</Table>
 									visit examples <a href={'https://atlasaidev.com/docs/text-to-speech/filters-actions/apply-frontend-filters-and-actions-free-version/'} target={'_blank'}>here</a>
@@ -428,28 +428,28 @@ export default function Docs() {
 								<Accordion.Body>
 									<Table striped bordered hover size='sm'>
 										<thead>
-										<tr>
-											<th>Sr.</th>
+											<tr>
+												<th>Sr.</th>
 
-											<th>Filter Name</th>
-											<th>Arguments</th>
-										</tr>
+												<th>Filter Name</th>
+												<th>Arguments</th>
+											</tr>
 										</thead>
 										<tbody>
-										{js_pro_filters.length &&
-											js_pro_filters.map((filter, index) => {
-												return (
-													<tr key={filter.name}>
-														<td>{++index}</td>
-														<td>
-															<code>{filter.name}</code>
-														</td>
-														<td>
-															<code>{filter.arguments}</code>
-														</td>
-													</tr>
-												);
-											})}
+											{js_pro_filters.length &&
+												js_pro_filters.map((filter, index) => {
+													return (
+														<tr key={filter.name}>
+															<td>{++index}</td>
+															<td>
+																<code>{filter.name}</code>
+															</td>
+															<td>
+																<code>{filter.arguments}</code>
+															</td>
+														</tr>
+													);
+												})}
 										</tbody>
 									</Table>
 									visit examples <a href={'https://atlasaidev.com/docs/text-to-speech/filters-actions/apply-frontend-filters-and-actions-pro-version/'} target={'_blank'}>here</a>
