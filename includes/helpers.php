@@ -5,7 +5,6 @@ if (!defined('ABSPATH')) {
     die();
 }
 
-use TTA\TTA_Cache;
 use TTA\TTA_Helper;
 
 /**
@@ -102,15 +101,11 @@ function tta_should_add_delimiter($title, $delimiter)
  */
 function tta_get_button_content($atts, $is_block = false, $tag_content = '')
 {
-    $settings = (array)get_option('tta_settings_data');
+    
     static $btn_no = 0;
     static $block_btn_no = 0;
     $btn_no++;
 
-    // this is a pro feature to show button on blog main page with title and excerpt.
-    if (!TTA_Helper::should_load_button() || $block_btn_no > 0) {
-        return;
-    }
     /**
      * TTS-168
      */
@@ -118,21 +113,24 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
         return;
     }
 
-//	update_option('tta_customize_settings', []);
+    // this is a pro feature to show button on blog main page with title and excerpt.
+    if (!TTA_Helper::should_load_button() || $block_btn_no > 0) {
+        return;
+    }
 
-    $customize = (array)get_option('tta_customize_settings');
+    $settings = TTA_Helper::tts_get_settings('settings');
+    $customize = TTA_Helper::tts_get_settings('customize');
+
     if ($is_block) {
         $customize = TTA_Helper::get_block_css($atts, $customize);
         $block_btn_no++;
     }
-    $recording = (array)get_option('tta_record_settings');
 
 
     $should_display_icon = isset($settings['tta__settings_display_btn_icon']) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
 
-
     // TODO make it dynamic. now Recording it not available in UI.
-    $sentence_delimiter = isset($recording['tta__sentence_delimiter']) ? $recording['tta__sentence_delimiter'] : '. ';
+    $sentence_delimiter =  apply_filters('tts_sentence_delimiter', '. ' );
     global $post;
 
 
