@@ -631,7 +631,7 @@ class TTA_Notices {
 	 */
 	public function tta_ar_vr_plugin_notice() {
 
-//		delete_option( 'tts_is_displayed_ar_vr_plugin_notice' );
+		// delete_option( 'tts_is_displayed_ar_vr_plugin_notice' );
 		if ( ! get_option( 'tts_is_displayed_ar_vr_plugin_notice' ) ) {
 			delete_option( 'tta_ar_vr_plugin_notice_next_show_time' );
 			delete_user_meta( '1', 'tta_ar_vr_plugin_notice_dismissed' );
@@ -676,10 +676,15 @@ class TTA_Notices {
 						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						'<div class="tta-review-notice-logo"></div>',
 						'<br/>',
-						"<h1 style='color:red'>🚀 Introducing AR/VR for WooCommerce – Free & Powerful!</h1>", //phpcs:ignore
+						"<h1 style='color:red'>🚀 Introducing 3D Model Viewer & AR for WordPress – Free & Powerful!</h1>", //phpcs:ignore
 					);
 					?></p>
                 <p>
+					<?php
+					$install_url = admin_url('plugin-install.php?tab=plugin-information&plugin=ar-vr-3d-model-try-on&TB_iframe=true&width=772&height=500');
+					?>
+					<a class="button button-primary thickbox" data-response="ar_vr_install"
+					 href="<?php echo esc_url($install_url); ?>">Install 3D Model Viewer</a>
                     <a class="button button-primary" data-response="ar_vr_plugin"
                        href="#"
                        target="_blank"><?php esc_html_e( 'Try It Now', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>

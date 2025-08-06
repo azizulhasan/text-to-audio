@@ -1137,9 +1137,15 @@ class TTA_Helper
             'public' => 1, // Only get public post types
         ), 'array');
 
-        TTA_Cache::set($cache_key, $post_types);
+        $post_types_arr = [];
 
-        return apply_filters('tts_get_post_types', $post_types);
+        foreach ($post_types as $post_type) {
+            $post_types_arr[$post_type->name] = $post_type->label;
+        }
+
+        TTA_Cache::set($cache_key, $post_types_arr);
+
+        return apply_filters('tts_get_post_types', $post_types_arr);
     }
 
 

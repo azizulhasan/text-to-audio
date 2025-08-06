@@ -40,7 +40,17 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
         }
 
         if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_license_active) {
-            toast('Please Activate the Text To Speech Pro license to enjoy full features of the plugin.');
+            toast(<>
+                <h4>ChatGPT text to speech feature is only in pro version.</h4>
+                <button onClick={(e) => {
+                    window.open('https://atlasaidev.com/plugins/text-to-speech-pro/pricing/')
+                }} className='tta_btn'>
+                    Buy Now
+                </button>
+            </>, 'info', {
+                position: 'top-center',
+                autoClose: 10000,
+            });
             return;
         }
 
@@ -97,7 +107,7 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
                                 <Form.Label htmlFor='chatgpt_tts_api_key'>
                                     How it works?
                                     <a className={'text-danger'} target='_blank'
-                                       href='https://www.youtube.com/watch?v=6uGPboXW2Q8'>
+                                        href='https://www.youtube.com/watch?v=6uGPboXW2Q8'>
                                         <i className="fab fa-youtube"></i></a>
                                 </Form.Label>
 

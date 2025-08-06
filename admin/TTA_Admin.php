@@ -212,7 +212,6 @@ class TTA_Admin {
 			$object = ob_start();
 			?>
             <script>
-                // let isProActive2 = "<?php echo $this->localize_data['is_pro_active']?>";
                 window.document.addEventListener('DOMContentLoaded', function () {
                     /**
                      * If free version then remove the opt-in link from plugin link.
