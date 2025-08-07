@@ -38,8 +38,18 @@ export const getButtonContent = (buttonId, cssClass, isProLicenseActive) => {
         const parser = new DOMParser();
         // convert html string into DOM
         let document = parser.parseFromString(ttsObj?.player_customizations?.[1]?.play, "image/svg+xml");
-        let icon = `<button id="tts__listent_content_${buttonId}" class="tts__listent_content  ${cssClass}" type="button" title="${buttonHoverTitle}"><div className="tts_button">${document.documentElement.outerHTML}</div> <span>`;
-        return icon + ' ' + buttonText + '<span></span></span></div>';
+        let icon = `<button id="tts__listent_content_${buttonId}" class="tts__listent_content  ${cssClass}" type="button" title="${buttonHoverTitle}"><div class="tts_button">${document.documentElement.outerHTML}</div> <span>`;
+        icon += buttonText + '<span></span></span>';
+        icon += `<select >
+            <option value="en-US">US</option>
+            <option value="en-UK">US</option>
+            <option value="en-AU">AU</option>
+            <option value="en-IN">IN</option>
+        </select>
+        `;
+        console.log(speechSynthesis.getVoices());
+
+        return icon + '</div>';
     }
 
     return `<button id="tts__listent_content_${buttonId}" class="tts__listent_content  ${cssClass}" type="button" title="${buttonHoverTitle}"><div class="tts_button"><span class="dashicons dashicons-controls-play"></span><span>${buttonText}<span></div> </button>`;

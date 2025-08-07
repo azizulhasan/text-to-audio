@@ -35,8 +35,9 @@ class TTSPlayButton extends HTMLElement {
                     wrapper.innerHTML = getButtonContent(buttonId, settings.cssClass, this.isProLicenseActive)
                     this.analytics.trackInit();
                     console.log(contents[buttonId])
-                    this.addEventListener('click', function (e) {
+                    wrapper.getElementsByClassName('tts_button')[0].addEventListener('click', function (e) {
                         let button = [...wrapper.children][0]
+
                         if (this.speech != null && this.speech.listenStatus == 'listen') {
                             this.speech = null
                         }
