@@ -40,17 +40,53 @@ export const getButtonContent = (buttonId, cssClass, isProLicenseActive) => {
         let document = parser.parseFromString(ttsObj?.player_customizations?.[1]?.play, "image/svg+xml");
         let icon = `<button id="tts__listent_content_${buttonId}" class="tts__listent_content  ${cssClass}" type="button" title="${buttonHoverTitle}"><div class="tts_button">${document.documentElement.outerHTML}</div> <span>`;
         icon += buttonText + '<span></span></span>';
-        icon += `<select >
-            <option value="en-US">US</option>
-            <option value="en-UK">US</option>
-            <option value="en-AU">AU</option>
-            <option value="en-IN">IN</option>
-        </select>
+        icon += `<select style="display:none;" id=${'tts_current_player_voices_' + buttonId} ></select>
         `;
-        console.log(speechSynthesis.getVoices());
+
+
 
         return icon + '</div>';
     }
 
     return `<button id="tts__listent_content_${buttonId}" class="tts__listent_content  ${cssClass}" type="button" title="${buttonHoverTitle}"><div class="tts_button"><span class="dashicons dashicons-controls-play"></span><span>${buttonText}<span></div> </button>`;
+}
+
+/**
+ * 
+ * @param {*} selectedLang 
+ * @returns 
+ */
+export const getCountryCode = (selectedLang) => {
+    if (selectedLang && selectedLang.indexOf('-') !== -1) {
+        return selectedLang.split('-')[0]
+    }
+
+    if (selectedLang && selectedLang.indexOf('_') !== -1) {
+        return selectedLang.split('_')[0]
+    }
+
+
+    return selectedLang
+}
+
+/**
+* 
+* @param {*} currentLang 
+* @returns 
+*/
+export const getFilteredVoices = (langCountryCode, voices = []) => {
+    let filteredVoices = [];
+    if (voices.length < 1) {
+        voices = window.speechSynthesis.getVoices()
+    }
+
+    Object.values(voices).map(voice => {
+        let regex = new RegExp(langCountryCode, "gi");
+        let matches = voice.lang.match(regex)
+        if (matches !== null && voice.name) {
+            filteredVoices.push(voice)
+        }
+    })
+
+    return filteredVoices;
 }

@@ -1,5 +1,5 @@
 import TextToSpeech from "./TextToSpeech.js";
-import { getButtonContent } from "./tts/utilities.js";
+import { getButtonContent, getCountryCode, getFilteredVoices } from "./tts/utilities.js";
 import AtlasVoiceAnalytics from "./AtlasVoiceAnalytics";
 
 // Create a class for the element
@@ -35,27 +35,50 @@ class TTSPlayButton extends HTMLElement {
                     wrapper.innerHTML = getButtonContent(buttonId, settings.cssClass, this.isProLicenseActive)
                     this.analytics.trackInit();
                     console.log(contents[buttonId])
+                    let speechClass = this
+                    console.log(wrapper.getElementsByClassName('tts_button'))
                     wrapper.getElementsByClassName('tts_button')[0].addEventListener('click', function (e) {
                         let button = [...wrapper.children][0]
 
-                        if (this.speech != null && this.speech.listenStatus == 'listen') {
-                            this.speech = null
+                        if (speechClass.speech != null && speechClass.speech.listenStatus == 'listen') {
+                            speechClass.speech = null
                         }
-                        if (this.speech === null) {
+                        if (speechClass.speech === null) {
                             let speech = new TextToSpeech(buttonId, contents[buttonId], button, window.TTS)
                             speech._init()
-                            this.speech = speech.getData()
-                            this.speech.callBackAfterEnd = this.callBackAfterEnd
+                            speechClass.speech = speech.getData()
+                            speechClass.speech.callBackAfterEnd = speechClass.callBackAfterEnd
                         } else {
-                            this.speech = this.speech.getData()
-                            if (this.speech.listenStatus == 'pause') {
-                                this.speech.pause(this.speech.speech)
+                            speechClass.speech = speechClass.speech.getData()
+                            if (speechClass.speech.listenStatus == 'pause') {
+                                speechClass.speech.pause(speechClass.speech.speech)
                                 window.sessionStorage.setItem('tts_paused_by_intention', true);
-                            } else if (this.speech.listenStatus == 'resume') {
-                                this.speech.resume(this.speech.speech)
+                            } else if (speechClass.speech.listenStatus == 'resume') {
+                                speechClass.speech.resume(speechClass.speech.speech)
                             }
                         }
                     })
+
+                    this.getVoiceOptions(wrapper, buttonId, window.TTS.settings.listening.tta__listening_lang)
+
+
+
+                    // const script = document.createElement('script');
+                    // let setVoices = setInterval(() => {
+                    //     if (window.speechSynthesis.getVoices().length
+                    //         && document.getElementById('tts_current_player_voices_' + buttonId)) {
+                    //         clearInterval(setVoices);
+                    //         setVoices = null
+                    //         document.getElementById('tts_current_player_voices_' + buttonId).innerHTML = `
+                    //             <option value='en-US'>US</option>
+                    //         `
+                    //         console.log(window.speechSynthesis.getVoices())
+                    //     }
+
+                    // }, 100)
+
+
+
                     // Create some CSS to apply to the shadow dom
                     const style = document.createElement('style');
                     // CSS style for thsi button
@@ -97,13 +120,41 @@ class TTSPlayButton extends HTMLElement {
         return txt.value;
 
     }
+
+
+
+    getVoiceOptions(wrapper, buttonId, langCode) {
+        let countryCode = getCountryCode(langCode)
+        let filteredVoices = getFilteredVoices(countryCode)
+        console.log(filteredVoices)
+        for (let i = 0; i < filteredVoices.length; i++) {
+            const option = document.createElement('option');
+            option.value = filteredVoices[i].lang;   // value attribute
+            option.text = filteredVoices[i].name;    // visible text
+            wrapper.querySelector('#tts_current_player_voices_' + buttonId).appendChild(option);
+        }
+
+        wrapper.querySelector('#tts_current_player_voices_' + buttonId).style.display = 'block';
+
+    }
 }
 document.addEventListener('DOMContentLoaded', function () {
-    // Define the new element
-    if (!customElements.get('tts-play-button')) {
-        // console.log({ notFoundcustomElements: customElements.get('tts-play-button') })
-        customElements.define('tts-play-button', TTSPlayButton)
-    } else {
-        console.log({ foundcustomElements: customElements.get('tts-play-button') })
-    }
+
+
+
+    let setVoices = setInterval(() => {
+        if (window.speechSynthesis.getVoices().length) {
+            clearInterval(setVoices);
+            setVoices = null
+            console.log(window.speechSynthesis.getVoices())
+            // Define the new element
+            if (!customElements.get('tts-play-button')) {
+                // console.log({ notFoundcustomElements: customElements.get('tts-play-button') })
+                customElements.define('tts-play-button', TTSPlayButton)
+            } else {
+                console.log({ foundcustomElements: customElements.get('tts-play-button') })
+            }
+        }
+
+    }, 100)
 })

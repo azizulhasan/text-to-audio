@@ -48,8 +48,6 @@ export default class TextToSpeech {
         this.splitSentences = splitSentences
         this.playButtonNo = window.TTS.extra.player_id
         this.analytics = new AtlasVoiceAnalytics(this.TTS.settings.postId)
-
-
         if (typeof NoSleep === 'function' && ttsObj?.is_mobile) {
             const noSleep = new NoSleep();
             window.onload = function () {
@@ -109,10 +107,10 @@ export default class TextToSpeech {
             const parser = new DOMParser();
             // convert html string into DOM
             let document = parser.parseFromString(ttsObj?.player_customizations?.[1]?.pause, "image/svg+xml");
-            icon = `<div className="tts_button">${document.documentElement.outerHTML}</div><span>`;
+            icon = `<div className="tts_button">${document.documentElement.outerHTML}<span>`;
         }
 
-        return icon + ' ' + this.pauseButtonText() + '<span></span></span></div>'
+        return icon + ' ' + this.pauseButtonText() + '</span></div>'
 
 
     }
@@ -209,15 +207,32 @@ export default class TextToSpeech {
                 let buttonHoverTitle = window?.ttsObj?.buttonTextArr?.replay_hover_title ?? 'Click to listen post.';
                 this.speakButton.setAttribute('title', 'Text To Audio : ' + buttonHoverTitle);
             } else if ('pause' === listenStatus) {
-                this.speakButton.innerHTML = this.pauseButtonContent();
+                // this.speakButton.removeChild(this.speakButton.children[0]); // remove first
+                // this.speakButton.removeChild(this.speakButton.children[0]); // remove (new) first, originally second
+                // const temp = document.createElement('div');
+                // temp.innerHTML = this.pauseButtonContent();
+                // this.speakButton.insertBefore(temp.firstChild, this.speakButton.firstChild); // insert at the start
+
                 let buttonHoverTitle = window?.ttsObj?.buttonTextArr?.pause_hover_title ?? this.pauseButtonText();
-                this.speakButton.setAttribute('title', 'Text To Audio : ' + buttonHoverTitle);
+                // this.speakButton.setAttribute('title', 'Text To Audio : ' + buttonHoverTitle);
+
+                this.setButtonInnerContent(this.pauseButtonContent(), buttonHoverTitle)
             } else if ('resume' === listenStatus) {
                 this.speakButton.innerHTML = this.resumeButtonContent();
                 let buttonHoverTitle = window?.ttsObj?.buttonTextArr?.resume_hover_title ?? this.resumeButtonText();
                 this.speakButton.setAttribute('title', 'Text To Audio : ' + buttonHoverTitle);
             }
         }
+    }
+
+    setButtonInnerContent(content, buttonHoverTitle) {
+        this.speakButton.removeChild(this.speakButton.children[0]); // remove first
+        this.speakButton.removeChild(this.speakButton.children[0]); // remove (new) first, originally second
+        const temp = document.createElement('div');
+        temp.innerHTML = content;
+        console.log(temp)
+        this.speakButton.insertBefore(temp, this.speakButton.firstChild); // insert at the start
+        this.speakButton.setAttribute('title', 'Text To Audio : ' + buttonHoverTitle);
     }
 
 
