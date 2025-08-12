@@ -244,6 +244,21 @@ class TTA_Api_Routes {
 			)
 		);
 
+		// register categories_and_tags route.
+		register_rest_route(
+			$this->namespace,
+			'/categories_and_tags',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'categories_and_tags' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
+		
 
 	}
 
@@ -457,6 +472,23 @@ class TTA_Api_Routes {
 		$response['status'] = true;
 
 		$response['data'] = $acf_fields;
+
+		return rest_ensure_response( $response );
+	}
+
+	public function categories_and_tags( $request ) {
+		$categories = [];
+		$categories = TTA_Helper::get_all_categories();
+
+		$tags = [];
+		$tags = TTA_Helper::get_all_tags();
+
+		$response['status'] = true;
+
+		$response['data'] = [
+			'categories' => $categories,
+			'tags' => $tags,
+		];
 
 		return rest_ensure_response( $response );
 	}
