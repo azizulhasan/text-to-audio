@@ -70,21 +70,22 @@ export default function Settings() {
                     setTags(res.data.tags)
                 }
 
+                if (res?.data?.post_types) {
+                    let tempPostTypes = wp.hooks.applyFilters('tts_display_button_on_post_types', res.data.post_types)
+                    setPostTypes(tempPostTypes)
+                }
+
+                if (res?.data?.post_status) {
+                    let tempPostStatus = wp.hooks.applyFilters('tta__settings_allow_listening_for_post_types', res?.data?.post_status)
+                    setPostsStatus(tempPostStatus)
+                }
+
                 setIsDataLoaded(true)
             });
 
 
     }, []);
 
-    useEffect(() => {
-        if (window.hasOwnProperty('ttsObj') && ttsObj?.post_types) {
-            let tempPostTypes = wp.hooks.applyFilters('tts_display_button_on_post_types', structuredClone(Object.keys(ttsObj.post_types)))
-            setPostTypes(tempPostTypes)
-            console.log({ tempPostTypes })
-            let tempPostStatus = wp.hooks.applyFilters('tta__settings_allow_listening_for_post_types', structuredClone(Object.keys(ttsObj.post_status)))
-            setPostsStatus(tempPostStatus)
-        }
-    }, [window.ttsObj])
 
     /**
      * handle change

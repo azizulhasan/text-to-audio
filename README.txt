@@ -445,6 +445,8 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 = 1.9.12  ( 13 August 2025 )  =
 Fixed: missing categories issue fixed.
 Fixed: missing tags issue fixed.
+Fixed: missing post type issue fixed.
+Fixed: missing post status issue fixed.
 Added: Custom listeners added during mp3 file download.
 
 = 1.9.11  ( 08 August 2025 )  =
