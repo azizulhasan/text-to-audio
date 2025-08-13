@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.8.2
 Requires PHP: 7.4
-Stable tag: 1.9.11
+Stable tag: 1.9.12
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -441,6 +441,13 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+
+= 1.9.12  ( 13 August 2025 )  =
+Fixed: missing categories issue fixed.
+Fixed: missing tags issue fixed.
+Fixed: missing post type issue fixed.
+Fixed: missing post status issue fixed.
+Added: Custom listeners added during mp3 file download.
 
 = 1.9.11  ( 08 August 2025 )  =
 Fixed: Customization menu player demo issue fixed.

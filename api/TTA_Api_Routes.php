@@ -483,11 +483,19 @@ class TTA_Api_Routes {
 		$tags = [];
 		$tags = TTA_Helper::get_all_tags();
 
+		$post_types = [];
+		$post_types = TTA_Helper::get_post_types();
+
+		$post_status = [];
+		$post_status  = TTA_Helper::all_post_status();
+
 		$response['status'] = true;
 
 		$response['data'] = [
 			'categories' => $categories,
 			'tags' => $tags,
+			'post_types' => $post_types,
+			'post_status' => $post_status,
 		];
 
 		return rest_ensure_response( $response );
