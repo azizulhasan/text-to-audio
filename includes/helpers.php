@@ -105,7 +105,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     static $btn_no = 0;
     static $block_btn_no = 0;
     $btn_no++;
-
+    global $post;
     /**
      * TTS-168
      */
@@ -114,7 +114,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     }
 
     // this is a pro feature to show button on blog main page with title and excerpt.
-    if (!TTA_Helper::should_load_button() || $block_btn_no > 0) {
+    if (!TTA_Helper::should_load_button($post) || $block_btn_no > 0) {
         return;
     }
 
@@ -131,7 +131,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
 
     // TODO make it dynamic. now Recording it not available in UI.
     $sentence_delimiter =  apply_filters('tts_sentence_delimiter', '. ' );
-    global $post;
+    
 
 
     $title = tta_clean_content($post->post_title);
@@ -506,7 +506,7 @@ function add_listen_button($content)
                 ob_end_clean();
             }
         } else {
-            if (isset($post->post_content) && !(has_shortcode($post->post_content, 'tta_listen_btn') || has_shortcode($post->post_content, 'atlasvoice'))) {
+            if (!TTA_Helper::tts_has_shortcode($post)) {
                 ob_start();
                 echo tta_get_button_content('');
                 $button = ob_get_contents();

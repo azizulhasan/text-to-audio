@@ -47,10 +47,13 @@ class TTA_Helper
         return apply_filters('tts_is_exluded_by_terms', $is_exclude, $term_type);
     }
 
-    public static function should_load_button()
+    public static function should_load_button($current_post = '')
     {
         $should_load_button = false;
-        global $post;
+        if(!$current_post) {
+            global $post;
+            $current_post = $post;
+        }
         // is_home() || is_archive() || is_front_page() || is_category()
         if (\is_single() || \is_singular()) {
             $should_load_button = true;
@@ -67,8 +70,8 @@ class TTA_Helper
             $excluded_tags = $settings['tta__settings_exclude_wp_tags'];
         }
         $post_tags = [];
-        if (isset($post->ID)) {
-            $post_tags = get_the_terms($post->ID, 'post_tag');
+        if (isset($current_post->ID)) {
+            $post_tags = get_the_terms($current_post->ID, 'post_tag');
         }
         $is_exclude_by_tags = self::is_exluded_by_terms($post_tags, $excluded_tags);
 
@@ -79,8 +82,8 @@ class TTA_Helper
         }
 
         $post_categories = [];
-        if (isset($post->ID)) {
-            $post_categories = get_the_terms($post->ID, 'category');
+        if (isset($current_post->ID)) {
+            $post_categories = get_the_terms($current_post->ID, 'category');
         }
         $is_exclude_by_cagories = self::is_exluded_by_terms($post_categories, $excluded_categories, 'category');
 
@@ -98,14 +101,14 @@ class TTA_Helper
 
         // Display player settings from customization menu
         $display_player_to = self::display_player_based_on_user_role();
-        $display_player_based_on_date_range = self::display_player_based_on_date_range($post);
+        $display_player_based_on_date_range = self::display_player_based_on_date_range($current_post);
 
         if (
             !isset($settings['tta__settings_allow_listening_for_post_types'])
             || count($settings['tta__settings_allow_listening_for_post_types']) === 0
             || !is_array($settings['tta__settings_allow_listening_for_post_types'])
             || !in_array(self::tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'])
-            || in_array($post->ID, $ids)
+            || in_array($current_post->ID, $ids)
             || $is_exclude_by_tags
             || $is_exclude_by_cagories
             || $tta__settings_allow_listening_for_posts_status
@@ -122,7 +125,7 @@ class TTA_Helper
                 || count($settings['tta__settings_allow_listening_for_post_types']) === 0
                 || !is_array($settings['tta__settings_allow_listening_for_post_types'])
                 || !in_array(self::tts_post_type(), $settings['tta__settings_allow_listening_for_post_types'])
-                || in_array($post->ID, $ids)
+                || in_array($current_post->ID, $ids)
                 || $is_exclude_by_tags
                 || $is_exclude_by_cagories
                 || $tta__settings_allow_listening_for_posts_status
@@ -133,7 +136,7 @@ class TTA_Helper
             }
         }
 
-        return apply_filters('tta_should_load_button', $should_load_button, $post);
+        return apply_filters('tta_should_load_button', $should_load_button, $current_post);
     }
 
 
@@ -820,10 +823,15 @@ class TTA_Helper
         foreach ($categories as $category) {
             $formatted_categories[$category->slug] = $category->name;
         }
+        /**
+         * TTS-174
+         */
+        $formatted_categories += self::tts_get_all_wc_categories($formatted_categories);
 
         $formatted_categories = apply_filters('tts_get_all_categories', $formatted_categories);
 
         TTA_Cache::set($cache_key, $formatted_categories);
+
 
         return $formatted_categories;
     }
@@ -858,13 +866,56 @@ class TTA_Helper
             $formatted_tags[$tag->slug] = $tag->name;
         }
 
+        /**
+         * TTS-174
+         */
+        $formatted_tags += self::tts_get_all_wc_tags($formatted_tags);
 
-        $formatted_tags = apply_filters('get_all_tags', $formatted_tags);
+        $formatted_tags = apply_filters('tts_get_all_tags', $formatted_tags);
 
         TTA_Cache::set($cache_key, $formatted_tags);
 
         return $formatted_tags;
 
+    }
+
+    private static function tts_get_all_wc_categories($formatted_categories) {
+        if ( ! class_exists( 'WooCommerce' ) ) {
+            return $formatted_categories;
+        }
+        $terms = get_terms([
+            'taxonomy' => 'product_cat',
+            'hide_empty' => false,
+        ]);
+
+
+        $categories = [];
+        if (!is_wp_error($terms)) {
+            foreach ($terms as $term) {
+                $categories[$term->slug] = $term->name;
+            }
+        }
+
+        return $formatted_categories + $categories;
+    }
+
+    private static function tts_get_all_wc_tags($formatted_tags) {
+        if ( ! class_exists( 'WooCommerce' ) ) {
+            return $formatted_tags;
+        }
+        $terms = get_terms([
+            'taxonomy' => 'product_tag',
+            'hide_empty' => false,
+        ]);
+
+        $tags = [];
+        if (!is_wp_error($terms)) {
+            foreach ($terms as $term) {
+                $tags[$term->slug] = $term->name;
+            }
+        }
+
+        return $formatted_tags + $tags;
     }
 
     /**
@@ -1380,6 +1431,8 @@ class TTA_Helper
         return $content;
     }
     
-
+    public static function tts_has_shortcode($post) {
+        return isset($post->post_content) && (has_shortcode($post->post_content, 'tta_listen_btn') || has_shortcode($post->post_content, 'atlasvoice'));
+    }
 
 }

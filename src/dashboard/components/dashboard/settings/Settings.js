@@ -41,6 +41,8 @@ export default function Settings() {
     const [postTypes, setPostTypes] = useState([]);
     const [isDataLoaded, setIsDataLoaded] = useState(false)
     const [postsStatus, setPostsStatus] = useState([])
+    const [categories, setCategories] = useState([]);
+    const [tags, setTags] = useState([]);
 
     useEffect(() => {
         /**
@@ -51,19 +53,39 @@ export default function Settings() {
         postWithoutImage(tta_obj.api_url + 'tta/v1/settings', formData).then(
             (res) => {
                 setSettings({ ...settings, ...res.data });
+            });
+
+
+        /**
+         * Get categories and tags
+         */
+        let formData2 = new FormData();
+        formData2.append('method', 'get');
+        postWithoutImage(tta_obj.api_url + 'tta/v1/categories_and_tags', formData2).then(
+            (res) => {
+                if (res?.data?.categories) {
+                    setCategories(res.data.categories)
+                }
+                if (res?.data?.tags) {
+                    setTags(res.data.tags)
+                }
+
+                if (res?.data?.post_types) {
+                    let tempPostTypes = wp.hooks.applyFilters('tts_display_button_on_post_types', res.data.post_types)
+                    setPostTypes(tempPostTypes)
+                }
+
+                if (res?.data?.post_status) {
+                    let tempPostStatus = wp.hooks.applyFilters('tta__settings_allow_listening_for_post_types', res?.data?.post_status)
+                    setPostsStatus(tempPostStatus)
+                }
+
                 setIsDataLoaded(true)
             });
+
+
     }, []);
 
-    useEffect(() => {
-        if (window.hasOwnProperty('ttsObj') && ttsObj?.post_types) {
-            let tempPostTypes = wp.hooks.applyFilters('tts_display_button_on_post_types', structuredClone(Object.keys(ttsObj.post_types)))
-            setPostTypes(tempPostTypes)
-            console.log({ tempPostTypes })
-            let tempPostStatus = wp.hooks.applyFilters('tta__settings_allow_listening_for_post_types', structuredClone(Object.keys(ttsObj.post_status)))
-            setPostsStatus(tempPostStatus)
-        }
-    }, [window.ttsObj])
 
     /**
      * handle change
@@ -126,7 +148,7 @@ export default function Settings() {
         postWithoutImage(tta_obj.api_url + 'tta/v1/settings', formData)
             .then((res) => {
                 setSettings(res.data);
-                toast('Successfully Saved. Now go to the "Integrations" menu if you\'re a pro user. Otherwise go to the "Customization" menu.', 'info', {
+                toast('Successfully Saved. Now go to the "Customization" menu.', 'info', {
                     autoClose: 15000
                 });
                 if (cache_clear_notice_text) {
@@ -689,7 +711,7 @@ export default function Settings() {
                                         onChange={handleChange}
                                         toastMessage={'On Free Version You Can Select Only 1 Category.'}
                                         selectedItems={settings.tta__settings_exclude_categories}
-                                        options={Object.keys(ttsObj?.categories) || []} />
+                                        options={Object.keys(categories)} />
 
                                 </Col>
                                 <Col xs={1} sm={1} lg={1} className='mt-4'>
@@ -742,7 +764,7 @@ export default function Settings() {
                                         onChange={handleChange}
                                         toastMessage={'On Free Version You Can Select Only 1 Tag.'}
                                         selectedItems={settings.tta__settings_exclude_wp_tags}
-                                        options={Object.keys(ttsObj?.tags) || []} />
+                                        options={Object.keys(tags)} />
                                 </Col>
                                 <Col xs={1} sm={1} lg={1} className='mt-4'>
                                     <>
