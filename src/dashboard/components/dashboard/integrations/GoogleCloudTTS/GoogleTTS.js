@@ -12,6 +12,7 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
     const [isBackUpToGCS, setIsBackUpToGCS] = useState(false)
     const [bucketName, setBucketName] = useState('')
     const [isValidBucketName, setIsValidBucketName] = useState(false)
+    const [storedBucketName, setStoredBucketName] = useState('')
 
 
     const apiURL = useMemo(() => {
@@ -166,6 +167,7 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
 
                     if (res?.bucket_name) {
                         setBucketName(res?.bucket_name || '');
+                        setStoredBucketName(res?.bucket_name)
                     }
 
                 })
@@ -241,6 +243,15 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
     const validateBucketName = (e) => {
         e.preventDefault();
 
+        if (bucketName == storedBucketName) {
+            toast('This bucket is already have to your cloud storage.', 'info', {
+                position: 'top-center',
+                autoClose: 4000,
+            });
+            return;
+        } else {
+            setIsValidBucketName(false)
+        }
         let data = new FormData();
         data.append('bucket_name', bucketName);
         data.append('method', 'post');
@@ -250,6 +261,9 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
         postData(apiURL + 'validate_bucket_name', data)
             .then((res) => {
                 setIsValidBucketName(res)
+                if (res?.status) {
+                    setStoredBucketName(bucketName)
+                }
             })
             .catch((err) => {
                 console.log(err);

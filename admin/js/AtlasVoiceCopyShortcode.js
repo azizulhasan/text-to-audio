@@ -1,7 +1,6 @@
 document.getElementById('tta_play_btn_shortcode_copy_button')?.addEventListener('click', copyshortcode);
 
-
-function unsecuredCopyToClipboard()  {
+function unsecuredCopyShortCodeToClipboard() {
     const textArea = document.createElement("textarea");
     textArea.value = text;
     document.body.appendChild(textArea);
@@ -39,6 +38,6 @@ function copyshortcode() {
                 // toast('Something went wrong! ');
             });
     } else {
-        unsecuredCopyToClipboard(copyText.value);
+        unsecuredCopyShortCodeToClipboard(copyText.value);
     }
 };
