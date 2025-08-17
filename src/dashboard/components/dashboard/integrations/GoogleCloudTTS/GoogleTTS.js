@@ -250,8 +250,16 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
             });
             return;
         } else {
+
+            if (storedBucketName && bucketName != storedBucketName) {
+                if (!confirm(`Are you sure that, you want to create a bucket with this name ${bucketName} . Even though you already have a bucket with the name ${storedBucketName}. Because once you create new bucket then all of the mp3 file will generate again. So decidee carefully.`)) {
+                    return;
+                }
+            }
+
             setIsValidBucketName(false)
         }
+
         let data = new FormData();
         data.append('bucket_name', bucketName);
         data.append('method', 'post');
