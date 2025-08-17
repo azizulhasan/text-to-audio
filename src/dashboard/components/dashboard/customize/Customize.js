@@ -444,7 +444,7 @@ export default function Customize() {
     const [buttonLists, setButtonLists] = useState([
         { id: 1, name: 'Default', object: 'TextToSpeech', disabled: false },
         { id: 2, name: 'Default Pro', object: 'TextToSpeechPro', disabled: false },
-        { id: 3, name: 'Google TTS Pro', object: 'TextToSpeechPro', disabled: false },
+        { id: 3, name: 'AtlasVoice TTS Pro', object: 'TextToSpeechPro', disabled: false },
         { id: 4, name: "Google Cloud TTS", object: 'TextToSpeechPro', disabled: false },
         { id: 5, name: "ChatGPT TTS", object: 'TextToSpeechPro', disabled: false },
     ])
