@@ -542,7 +542,7 @@ class TTA_Helper
         }
         $final_mp3_file_ulrs = $mp3_file_urls;
         $should_update_urls = false;
-        if (get_post_meta($post->ID, 'tts_is_mp3_file_url_exists') && count($final_mp3_file_ulrs)) {
+        if (get_post_meta($post->ID, 'tts_is_mp3_file_url_exists', true) && count($final_mp3_file_ulrs)) {
             return apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls);
         }
 
@@ -561,6 +561,7 @@ class TTA_Helper
                     $gcs_url = '';
                     if (strpos($url, 'TTA_Pro') !== false) {
                         $full_path = self::get_path_from_url($url);
+
                         $gcs_url = apply_filters('tts_upload_previous_file_to_gcs_and_get_new_url', $url, $full_path, $post, $language_code);
                         if ($gcs_url) {
                             $url = $gcs_url;
@@ -569,7 +570,7 @@ class TTA_Helper
 
                     if (self::is_signed_url_expired($url)) {
                         // Get new signed url
-                        $gcs_new_signed_url = apply_filters('tts_get_gcs_new_signed_url', $url, $post);
+                        $gcs_new_signed_url = apply_filters('tts_get_gcs_new_signed_url', $url, $post, $language_code);
                         if ($gcs_new_signed_url) {
                             $url = $gcs_new_signed_url;
                         }
@@ -731,13 +732,14 @@ class TTA_Helper
             $file_headers = curl_exec($ch);
             curl_close($ch);
         }
+                
 
         if (isset($file_headers[0])) {
             $file_headers = $file_headers[0];
         }
 
         // If file backup is not enabled then check if file exists and file has content.
-        $backup_status = (int)get_option('tts_is_backup_mp3_file');
+        $backup_status = get_option('tts_is_backup_mp3_file');
 
         if (!$backup_status) {
             $full_path = self::get_path_from_url($url);
@@ -749,6 +751,8 @@ class TTA_Helper
         if (!$file_headers || strpos($file_headers, 'Not Found') !== false) {
             return true;
         }
+
+       
 
         // Check if the file is exist in proper folder also check if the file name is same?
         if ($date && $file_name) {

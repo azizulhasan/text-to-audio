@@ -502,6 +502,7 @@ export default function Settings() {
                                         placeholder={ttsObj.is_pro_active ? __('Multiple selector will be multiline.') : 'Exclude content by CSS selectors'}
                                         disabled={ttsObj.is_pro_active ? false : true}
                                     />
+                                    <small className='text-danger'>You can add ".atlasvoice_no_read" class to exlude content.</small>
                                 </Col>
                                 <Col xs={1} sm={1} lg={1} className='mt-4'>
                                     <>

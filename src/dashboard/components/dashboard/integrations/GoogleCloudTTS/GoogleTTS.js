@@ -10,6 +10,9 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
     const [authFile, setAuthFile] = useState('')
     const [isAuthenticated, setIsAuthenticated] = useState(false)
     const [isBackUpToGCS, setIsBackUpToGCS] = useState(false)
+    const [bucketName, setBucketName] = useState('')
+    const [isValidBucketName, setIsValidBucketName] = useState(false)
+    const [storedBucketName, setStoredBucketName] = useState('')
 
 
     const apiURL = useMemo(() => {
@@ -40,6 +43,8 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
                 setIsBackUpToGCS(e.target.checked)
             }
 
+        } else if (e.target.name == 'tta__integration_google_storage_folder_name') {
+            setBucketName(e.target.value)
         } else {
             console.log(e.target.files)
             setGoogTTSJsonFile(e.target.files);
@@ -97,11 +102,17 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
             return
         };
 
+        if (isBackUpToGCS && !bucketName) {
+            toast("Please create a valid bucket name first", 'error', { autoClose: 10000 })
+            return
+        }
+
 
 
         let data = new FormData();
         data.append('auth_file', googTTSJsonFile[0]);
         data.append('tts_is_backup_mp3_file', isBackUpToGCS);
+        data.append('bucket_name', bucketName);
         data.append('method', 'post');
         for (let val of data.values()) {
             console.log({ val })
@@ -116,6 +127,10 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
                     setIsAuthenticated(res.status)
                     if (res?.tts_is_backup_mp3_file == 'true') {
                         setIsBackUpToGCS(res?.tts_is_backup_mp3_file || false);
+                    }
+
+                    if (res?.bucket_name) {
+                        setBucketName(res?.bucket_name || '');
                     }
                 } else {
                     if (res?.bcmath) {
@@ -148,6 +163,11 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
 
                     if (!res?.is_authenticated) {
                         getShouldCheckChatGPT(true);
+                    }
+
+                    if (res?.bucket_name) {
+                        setBucketName(res?.bucket_name || '');
+                        setStoredBucketName(res?.bucket_name)
                     }
 
                 })
@@ -220,6 +240,45 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
 
     }
 
+    const validateBucketName = (e) => {
+        e.preventDefault();
+
+        if (bucketName == storedBucketName) {
+            toast('This bucket is already have to your cloud storage.', 'info', {
+                position: 'top-center',
+                autoClose: 4000,
+            });
+            return;
+        } else {
+
+            if (storedBucketName && bucketName != storedBucketName) {
+                if (!confirm(`Are you sure that, you want to create a bucket with this name ${bucketName} . Even though you already have a bucket with the name ${storedBucketName}. Because once you create new bucket then all of the mp3 file will generate again. So decidee carefully.`)) {
+                    return;
+                }
+            }
+
+            setIsValidBucketName(false)
+        }
+
+        let data = new FormData();
+        data.append('bucket_name', bucketName);
+        data.append('method', 'post');
+        for (let val of data.values()) {
+            console.log({ val })
+        }
+        postData(apiURL + 'validate_bucket_name', data)
+            .then((res) => {
+                setIsValidBucketName(res)
+                if (res?.status) {
+                    setStoredBucketName(bucketName)
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+
+    }
+
     return (
         <Container>
             <Row>
@@ -257,17 +316,17 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
                                     </div>
                                 </Form.Group>
                             </Col>
-                            {/* Stop Auto Play After Switching Tab. */}
+                            {/* Bckup mp3 fils. */}
                             <Col xs={12} sm={12} lg={12} >
                                 <Row className=' mt-3'>
                                     <Col xs={12} sm={6} lg={4}>
                                         <Form.Label htmlFor='tta__integration_is_backup_to_gogole_drive'>
                                             Backup MP3 Files To Google Cloud Storage.
                                         </Form.Label>
-                                        {
+                                        {/* {
                                             isBackUpToGCS && <Form.FloatingLabel className={'text-danger'} label={'You must give this service account read, write access. Otherwise may cause errors.'} >
                                             </Form.FloatingLabel>
-                                        }
+                                        } */}
                                     </Col>
                                     <Col xs={12} sm={12} lg={6}>
                                         <Form.Check // prettier-ignore
@@ -299,6 +358,59 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
                                     </Col>
                                 </Row>
                             </Col>
+                            {/* Backup folder name. */}
+                            {
+                                isBackUpToGCS && <Col xs={12} sm={12} lg={12} >
+                                    <Row className=' mt-3'>
+                                        <Col xs={12} sm={6} lg={4}>
+                                            <Form.Label htmlFor='tta__integration_google_storage_folder_name'>
+                                                Create And Validate Bucket Name.
+                                            </Form.Label>
+                                        </Col>
+                                        <Col xs={12} sm={12} lg={6}>
+                                            {/* Row for input + button */}
+                                            <div className="d-flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    onChange={handleChange}
+                                                    value={bucketName}
+                                                    className="form-control"
+                                                    name="tta__integration_google_storage_folder_name"
+                                                    id="tta__integration_google_storage_folder_name"
+                                                />
+                                                <Button onClick={validateBucketName} className="tta_btn">
+                                                    Create Bucket
+                                                </Button>
+                                            </div>
+
+                                            {/* Message area */}
+                                            {isValidBucketName?.message && (
+                                                <p className="mt-2 mb-0">{isValidBucketName.message}</p>
+                                            )}
+                                        </Col>
+
+                                        <Col xs={12} sm={12} lg={2}>
+                                            <>
+                                                {['top'].map((placement) => (
+                                                    <OverlayTrigger
+                                                        key={placement}
+                                                        placement={placement}
+                                                        overlay={
+                                                            <Tooltip id={`tooltip-${placement}`}>
+                                                                Click Here To Know Buckek Name Rules.
+                                                            </Tooltip>
+                                                        }>
+                                                        <Button onClick={(e) => {
+                                                            e.preventDefault();
+                                                            window.open('https://cloud.google.com/storage/docs/buckets#naming', '_blank')
+                                                        }} className='tta_btn'>?</Button>
+                                                    </OverlayTrigger>
+                                                ))}
+                                            </>
+                                        </Col>
+                                    </Row>
+                                </Col>
+                            }
                             <div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
                                 <button type='submit' className='tta_btn btn-center'>
                                     Save
