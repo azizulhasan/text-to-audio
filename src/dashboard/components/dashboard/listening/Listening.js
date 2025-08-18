@@ -145,7 +145,7 @@ export default function Listening() {
             getData(apiURL + 'voices')
                 .then((res) => {
                     if (res?.voices?.length) {
-                        setLocalStorage({ tta__voices: res.voices })
+                        setLocalStorage({ tta__voices: JSON.stringify(res.voices) })
                     } else {
                         setVoicesAndLanguages()
                     }
