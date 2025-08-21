@@ -142,6 +142,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
 
     $excerpt_sanitized = '';
     if (isset($settings['tta__settings_add_post_excerpt_to_read']) && $settings['tta__settings_add_post_excerpt_to_read']) {
+        remove_all_filters('get_the_excerpt');
         $excerpt = get_the_excerpt();
         $excerpt_sanitized = tta_clean_content($excerpt);
         $excerpt_sanitized = tta_should_add_delimiter($excerpt_sanitized, $sentence_delimiter);
