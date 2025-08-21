@@ -445,6 +445,7 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 = 1.9.15  ( 21 August 2025 )  =
 Fixed: post excerpt issue solved.
 Improved: performance improved.
+Updated: freemius version update to 2.121
 
 = 1.9.14  ( 18 August 2025 )  =
 Fixed: Google cloud text to speech voice and language issue solved.
