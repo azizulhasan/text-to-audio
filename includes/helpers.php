@@ -142,9 +142,6 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
 
     $excerpt_sanitized = '';
     if (isset($settings['tta__settings_add_post_excerpt_to_read']) && $settings['tta__settings_add_post_excerpt_to_read']) {
-<<<<<<< HEAD
-        $excerpt = $post->post_excerpt;
-=======
         /**
          * Version 1.9.15
          * When excerpt is empty is call this function wp_trim_excerpt
@@ -163,8 +160,6 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
         if ( $backup_filters !== null ) {
             $wp_filter['get_the_excerpt'] = $backup_filters;
         }
-
->>>>>>> develop
         $excerpt_sanitized = tta_clean_content($excerpt);
         $excerpt_sanitized = tta_should_add_delimiter($excerpt_sanitized, $sentence_delimiter);
         $excerpt_sanitized = apply_filters('tta__content_excerpt', $excerpt_sanitized, $post);
