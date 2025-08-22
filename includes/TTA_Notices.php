@@ -36,7 +36,7 @@ class TTA_Notices {
 
 		// if ( ! is_pro_active() || TTA_Helper::get_player_id() < 3 ) {
 		// 	 add_action( 'admin_notices', [ $this, 'tta_feedback_notice' ] );
-			add_action( 'admin_notices', [ $this, 'tta_ar_vr_plugin_notice' ] );
+//			add_action( 'admin_notices', [ $this, 'tta_ar_vr_plugin_notice' ] );
 		// }
 
 		$plugins = [
@@ -89,46 +89,46 @@ class TTA_Notices {
 		];
 
 
-        // if(!is_pro_active()){
-			// foreach ( $plugins as $plugin_name =>  $data ){
-			// 	if(is_plugin_active($plugin_name )) {
-			// 		$this->active_plugin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+         if(!is_pro_active()){
+			 foreach ( $plugins as $plugin_name =>  $data ){
+			 	if(is_plugin_active($plugin_name )) {
+			 		$this->active_plugin_name    = sprintf( '<b>%s</b>', $data['name'] );
 
-			// 		add_action( 'admin_notices', [ $this, $data['callback'] ] );
-			// 		break;
-			// 	}else if( $plugin_name == 'tts-multilingual') {
-			// 		$this->active_plugin_name    = sprintf( '<b>%s</b>', esc_html__( $data['name'], \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
-			// 		add_action( 'admin_notices', [ $this, $data['callback'] ] );
-			// 	}
-			// }
+			 		add_action( 'admin_notices', [ $this, $data['callback'] ] );
+			 		break;
+			 	}else if( $plugin_name == 'tts-multilingual') {
+			 		$this->active_plugin_name    = sprintf( '<b>%s</b>', $data['name'] );
+			 		add_action( 'admin_notices', [ $this, $data['callback'] ] );
+			 	}
+			 }
 		
-		// 	// Display free version notice.
-            // $i = rand(0, (count($features_notice) -1));
-            // $feature1 = $features_notice[$i];
-            // $i++;
-            // $feature2 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[0];
-	        // $i++;
-            // $feature3 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[1];
-			// $i++;
-            // $feature4 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[2];
-			// $i++;
-            // $feature5 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[3];
-            // array_push($this->plugin_features, "<strong>1. $feature1</strong>");
-            // array_push($this->plugin_features, "<strong>2. $feature2</strong>");
-            // array_push($this->plugin_features, "<strong>3. $feature3</strong>");
-			// array_push($this->plugin_features, "<strong>4. $feature4</strong>");
-			// array_push($this->plugin_features, "<strong>5. $feature5</strong>");
+		 	// Display free version notice.
+//             $i = rand(0, (count($features_notice) -1));
+//             $feature1 = $features_notice[$i];
+//             $i++;
+//             $feature2 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[0];
+//	         $i++;
+//             $feature3 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[1];
+//			 $i++;
+//             $feature4 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[2];
+//			 $i++;
+//             $feature5 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[3];
+//             array_push($this->plugin_features, "<strong>1. $feature1</strong>");
+//             array_push($this->plugin_features, "<strong>2. $feature2</strong>");
+//             array_push($this->plugin_features, "<strong>3. $feature3</strong>");
+//			 array_push($this->plugin_features, "<strong>4. $feature4</strong>");
+//			 array_push($this->plugin_features, "<strong>5. $feature5</strong>");
 
-	        //  add_action( 'admin_notices', [ $this, 'plugin_features_notice_callback' ] );
-		// 	 add_action( 'admin_notices', [ $this, 'plugin_analytics_notice_callback' ] );
-        // }
+//	          add_action( 'admin_notices', [ $this, 'plugin_features_notice_callback' ] );
+//		 	 add_action( 'admin_notices', [ $this, 'plugin_analytics_notice_callback' ] );
+         }
 
 		
 
 
-//		if ( ! is_pro_active() && version_compare( TEXT_TO_AUDIO_VERSION, TEXT_TO_AUDIO_VERSION, '>=' ) ) {
-//			add_action( 'admin_notices', [ $this, 'tts_setup_notice' ] );
-//		}
+		if ( ! is_pro_active() && version_compare( TEXT_TO_AUDIO_VERSION, TEXT_TO_AUDIO_VERSION, '>=' ) ) {
+			add_action( 'admin_notices', [ $this, 'tts_setup_notice' ] );
+		}
 
 //		add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
 
@@ -162,15 +162,15 @@ class TTA_Notices {
 	}
 
 	public function plugin_compatible_notice_callback() {
-		if(!is_pro_active()){
+		if(is_pro_active()){
 			return;
 		}
-		$wpml_and_gtranslate_notice_displaid = \get_option( 'wpml_and_gtranslate_notice_displayed', false );
-		if ( 'WPML Multilingual CMS, GTranslate, TranslatePress' == \strip_tags( $this->active_plugin_name ) && ! $wpml_and_gtranslate_notice_displaid ) {
+		$wpml_and_gtranslate_notice_displaid = \get_option( 'wpml_and_gtranslate_notice_displayed_aug_25', false );
+		if ( ! $wpml_and_gtranslate_notice_displaid ) {
 			delete_option( 'tta_plugin_compatible_notice_next_show_time' );
 			delete_user_meta( \get_current_user_id(), 'tta_plugin_compatible_notice_dismissed' );
 			update_option( 'tta_plugin_compatible_notice_next_show_time', 12 );
-			\update_option( 'wpml_and_gtranslate_notice_displayed', true );
+			\update_option( 'wpml_and_gtranslate_notice_displayed_aug_25', true );
 		}
 
 		$pluginName    = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
@@ -908,14 +908,14 @@ class TTA_Notices {
                  data-which="setup" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <p><?php
 					printf(
-						esc_html__( '%2$s  %1$s  %1$s  If you need trial of the Text-to-Speech pro plugin, please contact us. We will provide you.', TEXT_TO_AUDIO_TEXT_DOMAIN ),
+						esc_html__( '%2$s  %1$s  %1$s  Do you need support for setup of Text To Speech TTS plugin. We willll give you support as soon as possible.', TEXT_TO_AUDIO_TEXT_DOMAIN ),
 						'<div class="tta-review-notice-logo"></div>',
-						"<h1><strong>Do you want trial of Text To Speech Pro?</strong></h1>", //phpcs:ignore
+						"<h1><strong>Text To Speech TTS Plugin Support</strong></h1>", //phpcs:ignore
 					);
 					?></p>
                 <p>
                     <a class="button button-primary" href="https://atlasaidev.com/contact-us/"
-                       target="_blank"><?php esc_html_e( 'Get Trial', TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       target="_blank"><?php esc_html_e( 'Get Support', TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
                 </p>
             </div>
 
