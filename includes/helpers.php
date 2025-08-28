@@ -160,7 +160,6 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
         if ( $backup_filters !== null ) {
             $wp_filter['get_the_excerpt'] = $backup_filters;
         }
-
         $excerpt_sanitized = tta_clean_content($excerpt);
         $excerpt_sanitized = tta_should_add_delimiter($excerpt_sanitized, $sentence_delimiter);
         $excerpt_sanitized = apply_filters('tta__content_excerpt', $excerpt_sanitized, $post);

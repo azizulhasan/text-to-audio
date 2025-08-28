@@ -786,7 +786,14 @@ class TTA_Helper
     {
         // Parse the URL to get the query string
         $urlComponents = parse_url($signedUrl);
+        if(!isset($urlComponents['query'])) {
+            return false;
+        }
         parse_str($urlComponents['query'], $queryParameters);
+
+        if(!isset($queryParameters['X-Goog-Date']) || !isset($queryParameters['X-Goog-Expires'])) {
+            return false;
+        }
 
         // Convert the expiration time to a Unix timestamp
         $expirationTimestamp = strtotime($queryParameters['X-Goog-Date']) + $queryParameters['X-Goog-Expires'];
