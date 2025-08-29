@@ -23,6 +23,7 @@ import {
 } from '../../context/utilities';
 import toast from '../../context/Notify';
 import UpgradeToPro from '../../UpgradeToPro';
+import {error} from "util";
 
 export default function Listening() {
     const [currentPlayerVoices, setCurrentPlayerVoices] = useState([]);
@@ -144,8 +145,11 @@ export default function Listening() {
         if (!stored_voices?.tta__voices) {
             getData(apiURL + 'voices')
                 .then((res) => {
+                    console.log(res?.voices?.voices)
                     if (res?.voices?.length) {
                         setLocalStorage({ tta__voices: JSON.stringify(res.voices) })
+                    }if (res?.voices?.voices?.length) {
+                        setLocalStorage({ tta__voices: JSON.stringify(res.voices.voices) })
                     } else {
                         setVoicesAndLanguages()
                     }
@@ -157,6 +161,13 @@ export default function Listening() {
             let voices = JSON.parse(stored_voices.tta__voices);
             let langs = []
             let langs2 = {}
+
+
+            try {
+                voices = JSON.parse(voices);
+            } catch (error) {
+                console.log({catch_voices: voices})
+            }
 
             if (voices?.voices) {
                 voices = voices.voices;
@@ -286,7 +297,7 @@ export default function Listening() {
             timer = setTimeout(handleTime, 1000)
             console.log({ customizationSettings, timer })
 
-            if (timer > 999 || customizationSettings?.buttonSettings == undefined) {
+            if (timer > 500 || customizationSettings?.buttonSettings == undefined) {
                 clearTimeout(timer)
                 timer = null;
             }
