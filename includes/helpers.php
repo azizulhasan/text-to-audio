@@ -191,10 +191,6 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     $content_read_time = apply_filters('tts_content_reading_time', 1, $content, $post);
     $text_arr = get_button_text($atts, $content_read_time);
 
-    // Speak Icon
-    $speakIcon = "<div class='tta_button'>";
-    $speakIcon .= apply_filters('tta__listening_button_icon', '<span class="dashicons dashicons-controls-play"></span> ');
-    $speakIcon .= '<span> ' . $text_arr['listen_text'] . '<span></div>'; // TODO: should remove this if unnecessary.
 
     // Button style.
     $backgroundColor = isset($customize['backgroundColor']) ? $customize['backgroundColor'] : '#184c53';
