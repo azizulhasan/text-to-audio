@@ -66,10 +66,7 @@ class TTA_Admin {
 
 		$this->plugin_name = $plugin_name;
 		$this->version     = $version;
-		$listening         = json_encode( TTA_Helper::tts_get_settings( 'listening' ) );
 		add_filter( 'script_loader_tag', [ $this, 'load_script_as_tag' ], 10, 3 );
-		global $is_iphone, $is_chrome, $is_safari,
-		       $is_NS4, $is_opera, $is_macIE, $is_winIE, $is_gecko, $is_lynx, $is_IE, $is_edge;
 
 		if ( ! function_exists( 'is_plugin_active' ) ) {
 			include ABSPATH . 'wp-admin/includes/plugin.php';
@@ -98,7 +95,6 @@ class TTA_Admin {
 		$this->localize_data = [
 			'json_url'                 => $rest_api_url,
 			'admin_url'                => admin_url( '/' ),
-			'classic_editor_is_active' => is_plugin_active( 'classic-editor/classic-editor.php' ),
 			'buttonTextArr'            => get_option( 'tta__button_text_arr' ),
 			'ajax_url'                 => admin_url( 'admin-ajax.php' ),
 			'api_url'                  => $rest_api_url,
@@ -111,20 +107,15 @@ class TTA_Admin {
 			'rest_nonce'               => wp_create_nonce( 'wp_rest' ),
 			'VERSION'                  => is_pro_active() ? get_option( 'TTA_PRO_VERSION' ) : TEXT_TO_AUDIO_VERSION,
 			'is_logged_in'             => is_user_logged_in(),
-			'is_admin'                 => current_user_can( 'administrator' ),
 			'user_id'                  => get_current_user_id(),
 			'is_dashboard'             => is_admin(),
-			'listeningSettings'        => $listening,
 			'is_pro_active'            => is_pro_active(),
 			'is_pro_license_active'    => is_pro_active(),
 			'is_admin_page'            => is_admin(),
-			'current_post'             => TTA_Helper::tts_post_type(),
 			"player_id"                => get_player_id(),
 			'compatible'               => TTA_Helper::get_compatible_plugins_data(),
-			'is_folder_writable'       => TTA_Helper::is_audio_folder_writable(),
 			'gctts_is_authenticated'   => get_player_id() == '4',
 			'settings'                 => $settings,
-			'post_type'                => TTA_Helper::tts_post_type(),
 			'player_customizations'    => apply_filters( 'tts_player_customizations', [
 				'1' => [
 					'play'   => "<svg width='15px' height='15px'   xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 8'><polygon fill='$color' points='0 0 0 8 7 4'/></svg>",
