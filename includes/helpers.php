@@ -134,7 +134,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     
 
 
-    $title = tta_clean_content($post->post_title);
+    $title = $post->post_title;
     $title = tta_should_add_delimiter($title, $sentence_delimiter);
     $title = apply_filters('tta__content_title', $title, $post);
 
@@ -172,9 +172,10 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     }
 
     $description = get_the_content();
-    $description_sanitized = tta_clean_content($description);
+//    $description_sanitized = tta_clean_content($description);
+    $description_sanitized = $description;
     $content .= apply_filters('tta__content_description', $description_sanitized, $description, get_the_ID(), $post);
-    $content = TTA_Helper::sazitize_content($content);
+//    $content = TTA_Helper::sazitize_content($content);
 
     // Button listen text.
     if ($atts || has_filter('tta__button_text_arr')) {
@@ -237,6 +238,9 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     $content = $text_before_content . $content;
     $content .=  ' '. $text_after_content;
     $content = trim($content);
+    $content = tta_clean_content($content);
+    $content = TTA_Helper::sazitize_content($content);
+
 
     // init button scripts
     do_action('tts_enqueue_button_scripts', $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content);
