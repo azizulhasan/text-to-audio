@@ -113,6 +113,7 @@ class TTA_Admin {
 			'is_pro_license_active'    => is_pro_active(),
 			'is_admin_page'            => is_admin(),
 			"player_id"                => get_player_id(),
+			"is_folder_writable"       => TTA_Helper::is_audio_folder_writable(),
 			'compatible'               => TTA_Helper::get_compatible_plugins_data(),
 			'gctts_is_authenticated'   => get_player_id() == '4',
 			'settings'                 => $settings,
