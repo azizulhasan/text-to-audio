@@ -102,9 +102,9 @@ function tta_should_add_delimiter($title, $delimiter)
 function tta_get_button_content($atts, $is_block = false, $tag_content = '')
 {
     
-    static $btn_no = 0;
+    static $player_number = 0;
     static $block_btn_no = 0;
-    $btn_no++;
+    $player_number++;
     global $post;
     /**
      * TTS-168
@@ -217,12 +217,12 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
         $custom_css = esc_attr($customize['custom_css']);
         $custom_css = str_replace("\n", '', $custom_css);
     }
-    $custom_css = compatibility_with_themes($custom_css, $customize, $btn_no);
+    $custom_css = compatibility_with_themes($custom_css, $customize, $player_number);
     // Custom class to button.
     $class = (isset($text_arr['class'])) && strlen($text_arr['class']) ? esc_attr($text_arr['class']) : "";
     $class .= (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
 
-    $button = "<tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
+    $button = "<tts-play-button data-id='$player_number' class='tts_play_button'></tts-play-button>";
 
     $text_before_content = isset($settings['tta__settings_text_before_content']) && $settings['tta__settings_text_before_content'] ? $settings['tta__settings_text_before_content'] : '';
     $text_before_content = tta_should_add_delimiter($text_before_content, $sentence_delimiter);
@@ -241,9 +241,9 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
 
 
     // init button scripts
-    do_action('tts_enqueue_button_scripts', $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content);
+    do_action('tts_enqueue_button_scripts', $content, $player_number, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content);
 
-    $data = apply_filters('tts__listening_button', $button, $btn_no, $class, $post);
+    $data = apply_filters('tts__listening_button', $button, $player_number, $class, $post);
 
     return $data;
 }
@@ -254,10 +254,10 @@ add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 15);
 /**
  * Enqueue button scripts
  */
-function tts_enqueue_button_scripts($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content)
+function tts_enqueue_button_scripts($content, $player_number, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content)
 {
     // enqueue footer script
-    add_action('wp_print_footer_scripts', function () use ($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content) {
+    add_action('wp_print_footer_scripts', function () use ($content, $player_number, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content) {
         $original_title = trim($title);
         $temp_title = trim(get_the_title());
         $temp_title = tta_clean_content($temp_title);
@@ -275,14 +275,14 @@ function tts_enqueue_button_scripts($content, $btn_no, $class, $btn_style, $text
 
 
         if (apply_filters('tts_ignore_match_80_percent', false) && tts_text_match_80_percent($original_title, $temp_title)) {
-            get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time, $plugin_all_settings, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content);
+            get_enqueued_js_object($content, $player_number, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time, $plugin_all_settings, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content);
         } else {
-            get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time, $plugin_all_settings, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content);
+            get_enqueued_js_object($content, $player_number, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $original_title, $date, $content_read_time, $plugin_all_settings, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content);
         }
     });
 }
 
-function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content)
+function get_enqueued_js_object($content, $player_number, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $plugin_all_settings, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content)
 {
 
 
@@ -292,16 +292,16 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
     $language = $language_and_voice['language'];
     $voice = $language_and_voice['voice'];
     $file_url_key = TTA_Helper::tts_get_file_url_key($language, $voice);
-    $file_name = TTA_Helper::tts_file_name($title, $language, $voice, $post->ID);
-    $mp3_file_urls = TTA_Helper::get_mp3_file_urls($file_url_key, $post, $date, $file_name);
+    $file_name = TTA_Helper::tts_file_name($title, $language, $voice, $post->ID, $player_number);
+    $mp3_file_urls = TTA_Helper::get_mp3_file_urls($file_url_key, $post, $date, $file_name, $player_number);
     $compatible_data = TTA_Helper::tts_get_settings('compatible');
     $compatible_content = apply_filters('tts_compatible_plugins_content', [], $compatible_data, $post);
 
     $object = ob_start();
     ?>
     <!-- Text To Speech TTS Settings  -->
-    <script id='tts_button_settings_<?php echo $btn_no; ?>'>
-        var ttsCurrentButtonNo = <?php echo $btn_no; ?>;
+    <script id='tts_button_settings_<?php echo $player_number; ?>'>
+        var ttsCurrentButtonNo = <?php echo $player_number; ?>;
         var ttsCurrentContent = "<?php echo $content; ?>";
         var ttsListening = <?php echo json_encode($plugin_all_settings['listening']); ?>;
         var ttsCSSClass = "<?php echo $class; ?>";
@@ -338,6 +338,7 @@ function get_enqueued_js_object($content, $btn_no, $class, $btn_style, $text_arr
             excerpt: "<?php echo $excerpt_sanitized; ?>",
             text_before_content: "<?php echo $text_before_content; ?>",
             text_after_content: "<?php echo $text_after_content; ?>",
+            fileURLs: fileURLs,
         }
 
         if (window.hasOwnProperty('TTS')) { // add content if a page have multiple button
@@ -723,14 +724,14 @@ function tta_is_rtl()
 }
 
 
-function compatibility_with_themes($custom_css, $customize, $btn_no = 1)
+function compatibility_with_themes($custom_css, $customize, $player_number = 1)
 {
 
     if (false !== strpos(get_option('stylesheet'), 'twenty')) {
         $selector = '';
-        for ($i = 1; $i <= $btn_no; $i++) {
+        for ($i = 1; $i <= $player_number; $i++) {
             $comma = '';
-            if ($i > 1 && $i < $btn_no) {
+            if ($i > 1 && $i < $player_number) {
                 $comma = ', ';
             }
             $selector .= '#tts__listent_content_' . $i . '.tts__listent_content, #tts__listent_content_' . $i . '.tts__listent_content:hover'. $comma;

@@ -50,7 +50,7 @@ class TTA_Helper
     public static function should_load_button($current_post = '')
     {
         $should_load_button = false;
-        if(!$current_post) {
+        if (!$current_post) {
             global $post;
             $current_post = $post;
         }
@@ -379,7 +379,7 @@ class TTA_Helper
         return $voice;
     }
 
-    public static function tts_file_name($title, $selectedLang, $voice = '', $post_id = '')
+    public static function tts_file_name($title, $selectedLang, $voice = '', $post_id = '', $player_number = '')
     {
         global $post;
         if (!$post_id && $post) { // TODO: must add post ID to file name.
@@ -394,6 +394,7 @@ class TTA_Helper
             $title = $post->post_title;
         }
         $title = trim($title);
+        $title .= '__player_number__' . $player_number;
 
         $lang_code = explode('-', str_replace(['_', ' '], '-', $selectedLang));
 
@@ -522,7 +523,7 @@ class TTA_Helper
         return false; // Return false if all properties are empty
     }
 
-    public static function get_mp3_file_urls($file_url_key, $post = '', $date = '', $file_name = '')
+    public static function get_mp3_file_urls($file_url_key, $post = '', $date = '', $file_name = '', $player_number = '')
     {
 
         if (!$post) {
@@ -540,11 +541,15 @@ class TTA_Helper
         if (isset($mp3_file_urls[0])) {
             $mp3_file_urls = $mp3_file_urls[0];
         }
+        if (isset($mp3_file_urls[$player_number])) {
+            $mp3_file_urls = $mp3_file_urls[$player_number];
+        }
         $final_mp3_file_ulrs = $mp3_file_urls;
         $should_update_urls = false;
-        if (get_post_meta($post->ID, 'tts_is_mp3_file_url_exists', true) && count($final_mp3_file_ulrs)) {
-            return apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls);
-        }
+//        return [];
+//        if (get_post_meta($post->ID, 'tts_is_mp3_file_url_exists', true) && count($final_mp3_file_ulrs)) {
+//            return apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls);
+//        }
 
         if (isset($mp3_file_urls[$file_url_key]) && $mp3_file_urls[$file_url_key]) {
             $url = $mp3_file_urls[$file_url_key];
@@ -732,7 +737,7 @@ class TTA_Helper
             $file_headers = curl_exec($ch);
             curl_close($ch);
         }
-                
+
 
         if (isset($file_headers[0])) {
             $file_headers = $file_headers[0];
@@ -752,7 +757,6 @@ class TTA_Helper
             return true;
         }
 
-       
 
         // Check if the file is exist in proper folder also check if the file name is same?
         if ($date && $file_name) {
@@ -786,12 +790,12 @@ class TTA_Helper
     {
         // Parse the URL to get the query string
         $urlComponents = parse_url($signedUrl);
-        if(!isset($urlComponents['query'])) {
+        if (!isset($urlComponents['query'])) {
             return false;
         }
         parse_str($urlComponents['query'], $queryParameters);
 
-        if(!isset($queryParameters['X-Goog-Date']) || !isset($queryParameters['X-Goog-Expires'])) {
+        if (!isset($queryParameters['X-Goog-Date']) || !isset($queryParameters['X-Goog-Expires'])) {
             return false;
         }
 
@@ -890,8 +894,9 @@ class TTA_Helper
 
     }
 
-    private static function tts_get_all_wc_categories($formatted_categories) {
-        if ( ! class_exists( 'WooCommerce' ) ) {
+    private static function tts_get_all_wc_categories($formatted_categories)
+    {
+        if (!class_exists('WooCommerce')) {
             return $formatted_categories;
         }
         $terms = get_terms([
@@ -910,8 +915,9 @@ class TTA_Helper
         return $formatted_categories + $categories;
     }
 
-    private static function tts_get_all_wc_tags($formatted_tags) {
-        if ( ! class_exists( 'WooCommerce' ) ) {
+    private static function tts_get_all_wc_tags($formatted_tags)
+    {
+        if (!class_exists('WooCommerce')) {
             return $formatted_tags;
         }
         $terms = get_terms([
@@ -1348,12 +1354,12 @@ class TTA_Helper
         $previous_data = get_option('tta_listening_settings');
 
 
-        if ( !is_object($previous_data) ) {
-            $previous_data = (object) $previous_data;
+        if (!is_object($previous_data)) {
+            $previous_data = (object)$previous_data;
         }
 
-        if ( !is_object($current_data) ) {
-            $current_data = (object) $current_data;
+        if (!is_object($current_data)) {
+            $current_data = (object)$current_data;
         }
 
         $keys_to_check = [
@@ -1385,13 +1391,13 @@ class TTA_Helper
         $current_data = (array)$current_data;
         $previous_data = (array)TTA_Helper::tts_get_settings('customize');
 
-        $previous_data['buttonSettings'] = (array) $previous_data['buttonSettings'];
-        $current_data['buttonSettings'] = (array) $current_data['buttonSettings'];
+        $previous_data['buttonSettings'] = (array)$previous_data['buttonSettings'];
+        $current_data['buttonSettings'] = (array)$current_data['buttonSettings'];
 
         $previous_player_id = isset($previous_data['buttonSettings']['id']) ? $previous_data['buttonSettings']['id'] : 1;
         $current_player_id = isset($current_data['buttonSettings']['id']) ? $current_data['buttonSettings']['id'] : 1;
 
-        return  $previous_player_id == $current_player_id ? false : true;
+        return $previous_player_id == $current_player_id ? false : true;
     }
 
     public static function delete_post_meta($meta_key = 'tts_is_mp3_file_url_exists')
@@ -1411,7 +1417,8 @@ class TTA_Helper
         return $deleted;
     }
 
-    public static function clean_content($content) {
+    public static function clean_content($content)
+    {
 
         $content = wp_strip_all_tags($content, true);
 
@@ -1426,23 +1433,25 @@ class TTA_Helper
         return $content;
     }
 
-    public static function remove_js_and_css_from_content($content) {
+    public static function remove_js_and_css_from_content($content)
+    {
         // Remove <script>...</script>
         $content = preg_replace('#<script\b[^>]*>(.*?)</script>#is', '', $content);
-    
+
         // Remove <style>...</style>
         $content = preg_replace('#<style\b[^>]*>(.*?)</style>#is', '', $content);
-    
+
         // Remove external CSS <link rel="stylesheet">
         $content = preg_replace('#<link\b[^>]*rel=["\']stylesheet["\'][^>]*>#i', '', $content);
-    
+
         // Remove external JS <script src="..."></script>
         $content = preg_replace('#<script\b[^>]*src=["\'].*?["\'][^>]*></script>#i', '', $content);
-    
+
         return $content;
     }
-    
-    public static function tts_has_shortcode($post) {
+
+    public static function tts_has_shortcode($post)
+    {
         return isset($post->post_content) && (has_shortcode($post->post_content, 'tta_listen_btn') || has_shortcode($post->post_content, 'atlasvoice'));
     }
 
