@@ -134,7 +134,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     
 
 
-    $title = tta_clean_content($post->post_title);
+    $title = $post->post_title;
     $title = tta_should_add_delimiter($title, $sentence_delimiter);
     $title = apply_filters('tta__content_title', $title, $post);
 
@@ -160,7 +160,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
         if ( $backup_filters !== null ) {
             $wp_filter['get_the_excerpt'] = $backup_filters;
         }
-        $excerpt_sanitized = tta_clean_content($excerpt);
+
         $excerpt_sanitized = tta_should_add_delimiter($excerpt_sanitized, $sentence_delimiter);
         $excerpt_sanitized = apply_filters('tta__content_excerpt', $excerpt_sanitized, $post);
     }
@@ -172,19 +172,18 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     }
 
     $description = get_the_content();
-    $description_sanitized = tta_clean_content($description);
+    $description_sanitized = $description;
     $content .= apply_filters('tta__content_description', $description_sanitized, $description, get_the_ID(), $post);
-    $content = TTA_Helper::sazitize_content($content);
 
     // Button listen text.
     if ($atts || has_filter('tta__button_text_arr')) {
         if (isset($atts['text_to_read']) && $atts['text_to_read']) {
-            $content = tta_clean_content($atts['text_to_read']);
+            $content = $atts['text_to_read'];
         }
     }
 
     if ($tag_content) {
-        $content = tta_clean_content($tag_content);
+        $content = $tag_content;
     }
 
     // Get content reading time.
@@ -226,17 +225,20 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     $button = "<tts-play-button data-id='$btn_no' class='tts_play_button'></tts-play-button>";
 
     $text_before_content = isset($settings['tta__settings_text_before_content']) && $settings['tta__settings_text_before_content'] ? $settings['tta__settings_text_before_content'] : '';
-    $text_before_content = TTA_Helper::clean_content($text_before_content);
     $text_before_content = tta_should_add_delimiter($text_before_content, $sentence_delimiter);
 
 
     $text_after_content = isset($settings['tta__settings_text_after_content']) && $settings['tta__settings_text_after_content'] ? $settings['tta__settings_text_after_content'] : '';
-    $text_after_content = TTA_Helper::clean_content($text_after_content);
     $text_after_content = tta_should_add_delimiter($text_after_content, $sentence_delimiter);
 
     $content = $text_before_content . $content;
     $content .=  ' '. $text_after_content;
+    $content = tta_clean_content($content);
+    $content = TTA_Helper::sazitize_content($content);
+    $content = TTA_Helper::clean_content($content);
     $content = trim($content);
+
+
 
     // init button scripts
     do_action('tts_enqueue_button_scripts', $content, $btn_no, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content);
