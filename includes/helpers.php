@@ -291,7 +291,7 @@ function get_enqueued_js_object($content, $player_number, $class, $btn_style, $t
     $language_and_voice = TTA_Helper::get_player_language_and_player_voice($language, $voice, $plugin_all_settings, $post);
     $language = $language_and_voice['language'];
     $voice = $language_and_voice['voice'];
-    $file_url_key = TTA_Helper::tts_get_file_url_key($language, $voice);
+    $file_url_key = TTA_Helper::tts_get_file_url_key($language, $voice, $player_number);
     $file_name = TTA_Helper::tts_file_name($title, $language, $voice, $post->ID, $player_number);
     $mp3_file_urls = TTA_Helper::get_mp3_file_urls($file_url_key, $post, $date, $file_name, $player_number);
     $compatible_data = TTA_Helper::tts_get_settings('compatible');
