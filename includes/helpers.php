@@ -101,7 +101,7 @@ function tta_should_add_delimiter($title, $delimiter)
  */
 function tta_get_button_content($atts, $is_block = false, $tag_content = '')
 {
-    
+
     static $player_number = 0;
     static $block_btn_no = 0;
     $player_number++;
@@ -109,7 +109,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     /**
      * TTS-168
      */
-    if(is_admin()) {
+    if (is_admin()) {
         return;
     }
 
@@ -128,52 +128,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
 
 
     $should_display_icon = isset($settings['tta__settings_display_btn_icon']) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
-
-    // TODO make it dynamic. now Recording it not available in UI.
-    $sentence_delimiter =  apply_filters('tts_sentence_delimiter', '. ' );
-    
-
-
-    $title = $post->post_title;
-    $title = tta_should_add_delimiter($title, $sentence_delimiter);
-    $title = apply_filters('tta__content_title', $title, $post);
-
     $date = TTA_Helper::get_post_date($post);
-
-    $excerpt_sanitized = '';
-    if (isset($settings['tta__settings_add_post_excerpt_to_read']) && $settings['tta__settings_add_post_excerpt_to_read']) {
-        /**
-         * Version 1.9.15
-         * When excerpt is empty is call this function wp_trim_excerpt
-         * and then it take unlimited time. some time memory exhausted.
-         * that is why this remove filter and backup then add it to
-         * wp_filter object.
-         */
-        global $wp_filter;
-        // Backup current filters
-        $backup_filters = $wp_filter['get_the_excerpt'] ?? null;
-        // Remove all filters
-        remove_all_filters('get_the_excerpt');
-        // Call excerpt without filters
-        $excerpt = get_the_excerpt($post);
-        // Restore filters
-        if ( $backup_filters !== null ) {
-            $wp_filter['get_the_excerpt'] = $backup_filters;
-        }
-
-        $excerpt_sanitized = tta_should_add_delimiter($excerpt_sanitized, $sentence_delimiter);
-        $excerpt_sanitized = apply_filters('tta__content_excerpt', $excerpt_sanitized, $post);
-    }
-
-
-    $content = $title;
-    if ($excerpt_sanitized) {
-        $content .= $excerpt_sanitized;
-    }
-
-    $description = get_the_content();
-    $description_sanitized = $description;
-    $content .= apply_filters('tta__content_description', $description_sanitized, $description, get_the_ID(), $post);
 
     // Button listen text.
     if ($atts || has_filter('tta__button_text_arr')) {
@@ -184,6 +139,48 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
 
     if ($tag_content) {
         $content = $tag_content;
+    }
+
+    // TODO make it dynamic. now Recording it not available in UI.
+    $sentence_delimiter = apply_filters('tts_sentence_delimiter', '. ');
+    $title = $post->post_title;
+    $title = tta_should_add_delimiter($title, $sentence_delimiter);
+    $title = apply_filters('tta__content_title', $title, $post);
+    $excerpt_sanitized = '';
+    if (empty($content)) {
+        if (isset($settings['tta__settings_add_post_excerpt_to_read']) && $settings['tta__settings_add_post_excerpt_to_read']) {
+            /**
+             * Version 1.9.15
+             * When excerpt is empty is call this function wp_trim_excerpt
+             * and then it take unlimited time. some time memory exhausted.
+             * that is why this remove filter and backup then add it to
+             * wp_filter object.
+             */
+            global $wp_filter;
+            // Backup current filters
+            $backup_filters = $wp_filter['get_the_excerpt'] ?? null;
+            // Remove all filters
+            remove_all_filters('get_the_excerpt');
+            // Call excerpt without filters
+            $excerpt = get_the_excerpt($post);
+            // Restore filters
+            if ($backup_filters !== null) {
+                $wp_filter['get_the_excerpt'] = $backup_filters;
+            }
+
+            $excerpt_sanitized = tta_should_add_delimiter($excerpt_sanitized, $sentence_delimiter);
+            $excerpt_sanitized = apply_filters('tta__content_excerpt', $excerpt_sanitized, $post);
+        }
+
+        $content = $title;
+        if ($excerpt_sanitized) {
+            $content .= $excerpt_sanitized;
+        }
+
+        $description = get_the_content();
+        $description_sanitized = $description;
+        $content .= apply_filters('tta__content_description', $description_sanitized, $description, get_the_ID(), $post);
+
     }
 
     // Get content reading time.
@@ -227,19 +224,16 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     $text_before_content = isset($settings['tta__settings_text_before_content']) && $settings['tta__settings_text_before_content'] ? $settings['tta__settings_text_before_content'] : '';
     $text_before_content = tta_should_add_delimiter($text_before_content, $sentence_delimiter);
 
-
     $text_after_content = isset($settings['tta__settings_text_after_content']) && $settings['tta__settings_text_after_content'] ? $settings['tta__settings_text_after_content'] : '';
     $text_after_content = tta_should_add_delimiter($text_after_content, $sentence_delimiter);
 
     $content = $text_before_content . $content;
-    $content .=  ' '. $text_after_content;
+    $content .= ' ' . $text_after_content;
     $content = tta_clean_content($content);
     $content = TTA_Helper::sazitize_content($content);
     $content = TTA_Helper::clean_content($content);
     $content = trim($content);
-
-
-
+    
     // init button scripts
     do_action('tts_enqueue_button_scripts', $content, $player_number, $class, $btn_style, $text_arr, $custom_css, $should_display_icon, $title, $date, $content_read_time, $atts, $post, $excerpt_sanitized, $text_before_content, $text_after_content);
 
@@ -734,7 +728,7 @@ function compatibility_with_themes($custom_css, $customize, $player_number = 1)
             if ($i > 1 && $i < $player_number) {
                 $comma = ', ';
             }
-            $selector .= '#tts__listent_content_' . $i . '.tts__listent_content, #tts__listent_content_' . $i . '.tts__listent_content:hover'. $comma;
+            $selector .= '#tts__listent_content_' . $i . '.tts__listent_content, #tts__listent_content_' . $i . '.tts__listent_content:hover' . $comma;
         }
         $custom_css .= $selector . '  {max-width:650px;';
         if (
@@ -744,10 +738,10 @@ function compatibility_with_themes($custom_css, $customize, $player_number = 1)
                 && isset($customize['marginBottom']) && $customize['marginBottom'] == '0'
             )
             ||
-            (!isset($customize['marginLeft']) )
+            (!isset($customize['marginLeft']))
         ) {
             $custom_css .= 'margin:auto;}';
-        }else{
+        } else {
             $custom_css .= '}';
         }
     }
