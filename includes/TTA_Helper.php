@@ -398,18 +398,23 @@ class TTA_Helper
             $title = $post->post_title;
         }
         $title = trim($title);
-        if($player_number) {
-            $title .= '__player_number__' . $player_number;
-        }
 
         $lang_code = explode('-', str_replace(['_', ' '], '-', $selectedLang));
+        $temp_lang_code = array_shift($lang_code);
+        $temp_lang_code = strtolower($temp_lang_code);
 
-        if (array_shift($lang_code) == 'en') {
+        if ($temp_lang_code == 'en') {
+            if($player_number) {
+                $title .= '__player_number__' . $player_number;
+            }
             $title .= "__lang__" . $selectedLang;
             $title = str_replace([' ', '-'], '_', $title);
             $title = preg_replace("/[^\p{L}a-z0-9_-]/ui", "", $title);
         } else {
             $md5_hash = md5($title);
+            if($player_number) {
+                $md5_hash .= '__player_number__' . $player_number;
+            }
             $title = $md5_hash . '__lang__' . $selectedLang;
         }
 
@@ -529,6 +534,23 @@ class TTA_Helper
         return false; // Return false if all properties are empty
     }
 
+    public  static  function get_old_file_url_key($file_url_key, $player_number) {
+        $file_key = false;
+        if($player_number && strpos($file_url_key, 'player_number__'.$player_number. '__lang__') !== false) {
+            $file_key = str_replace('player_number__'.$player_number. '__lang__', '', $file_url_key);
+        }
+
+        return $file_key;
+    }
+    public  static  function get_old_file_name($file_name, $player_number) {
+        $file = false;
+        if($player_number && strpos($file_name, 'player_number__'.$player_number. '__lang__') !== false) {
+            $file = str_replace('player_number__'.$player_number. '__lang__', '', $file_name);
+        }
+
+        return $file;
+    }
+
     public static function get_mp3_file_urls($file_url_key, $post = '', $date = '', $file_name = '', $player_number = '')
     {
 
@@ -554,9 +576,18 @@ class TTA_Helper
             return apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls);
         }
 
-        if (isset($mp3_file_urls[$file_url_key]) && $mp3_file_urls[$file_url_key]) {
-            $url = $mp3_file_urls[$file_url_key];
-            $language_code = $file_url_key;
+        $old_file_url_key = self::get_old_file_url_key($file_url_key, $player_number);
+        $old_file_url_name = self::get_old_file_name( $file_name, $player_number);
+        $old_url = '';
+        if($old_file_url_key && $old_file_url_name) {
+            if(isset($mp3_file_urls[$old_file_url_key]) && $mp3_file_urls[$old_file_url_key]) {
+                $old_url  = $mp3_file_urls[$old_file_url_key];
+            }
+        }
+
+        if ((isset($mp3_file_urls[$file_url_key]) && $mp3_file_urls[$file_url_key]) || $old_url) {
+            $url =  $old_url ? $old_url : $mp3_file_urls[$file_url_key];
+            $language_code = $old_file_url_key ? $old_file_url_key : $file_url_key;
             if (self::is_file_url_not_exists_and_is_file_empty($url, $date, $file_name)) {
                 $should_update_urls = true;
                 unset($final_mp3_file_ulrs[$file_url_key]);
