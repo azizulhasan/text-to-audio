@@ -6,9 +6,11 @@ import CSSSelectorsForPosts from "./css-selectors/CSSSelectorsForPosts";
  */
 
 let app = document.getElementById("tts-css-selectors")
-ReactDOM.render(
-    <React.StrictMode>
-        <CSSSelectorsForPosts/>
-    </React.StrictMode>,
-    app
-);
+if(app) {
+    ReactDOM.render(
+        <React.StrictMode>
+            <CSSSelectorsForPosts/>
+        </React.StrictMode>,
+        app
+    );
+}
