@@ -40,17 +40,17 @@ function loadProButton() {
                     clearInterval(timer);
                     timer = null;
 
-                    buttons.map(button => {
+                    buttons.map(async  button => {
                         let buttonId = button.getAttribute('data-id');
-                        let buttonContent = <TextToSpeechThree button={button} buttonId={buttonId} buttonCSS={buttonCSS}
+                        let buttonContent = await <TextToSpeechThree button={button} buttonId={buttonId} buttonCSS={buttonCSS}
                                                                cssStyle={''}/>;
 
                         if (playerId > 3) {
-                            buttonContent = <TextToSpeechFour button={button} buttonId={buttonId} buttonCSS={buttonCSS}
+                            buttonContent = await <TextToSpeechFour button={button} buttonId={buttonId} buttonCSS={buttonCSS}
                                                               cssStyle={''}/>;
                         }
 
-                        return ReactDOM.render(
+                        return await ReactDOM.render(
                             buttonContent,
                             button
                         );

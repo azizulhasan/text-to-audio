@@ -572,9 +572,9 @@ class TTA_Helper
 
         $final_mp3_file_ulrs = $mp3_file_urls;
         $should_update_urls = false;
-        if (get_post_meta($post->ID, 'tts_is_mp3_file_url_exists', true) && count($final_mp3_file_ulrs)) {
-            return apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls);
-        }
+//        if (get_post_meta($post->ID, 'tts_is_mp3_file_url_exists', true) && count($final_mp3_file_ulrs)) {
+//            return apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls);
+//        }
 
         $old_file_url_key = self::get_old_file_url_key($file_url_key, $player_number);
         $old_file_url_name = self::get_old_file_name( $file_name, $player_number);
