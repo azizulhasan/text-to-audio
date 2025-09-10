@@ -728,6 +728,7 @@ class TTA_Helper
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_NOBODY, true); // fetch headers only, no body
             curl_setopt($ch, CURLOPT_HEADER, true);
             $file_headers = curl_exec($ch);
             curl_close($ch);
@@ -741,12 +742,23 @@ class TTA_Helper
         // If file backup is not enabled then check if file exists and file has content.
         $backup_status = get_option('tts_is_backup_mp3_file');
 
+//        if (!$backup_status) {
+//            $full_path = self::get_path_from_url($url);
+//            if (!file_exists($full_path) || (file_exists($full_path) && filesize($full_path) == 0)) {
+//                return true;
+//            }
+//        }
+
+        /**
+         * TTS-184
+         */
         if (!$backup_status) {
             $full_path = self::get_path_from_url($url);
-            if (!file_exists($full_path) || (file_exists($full_path) && filesize($full_path) == 0)) {
-                return true;
+            if (file_exists($full_path) || (file_exists($full_path) && filesize($full_path) > 0)) {
+                return false;
             }
         }
+
 
         if (!$file_headers || strpos($file_headers, 'Not Found') !== false) {
             return true;
