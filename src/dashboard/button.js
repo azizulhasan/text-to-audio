@@ -42,12 +42,13 @@ function loadProButton() {
 
                     buttons.map(async  button => {
                         let buttonId = button.getAttribute('data-id');
-                        let buttonContent = await <TextToSpeechThree button={button} buttonId={buttonId} buttonCSS={buttonCSS}
-                                                               cssStyle={''}/>;
-
+                        let buttonContent = null
                         if (playerId > 3) {
                             buttonContent = await <TextToSpeechFour button={button} buttonId={buttonId} buttonCSS={buttonCSS}
                                                               cssStyle={''}/>;
+                        }else{
+                            buttonContent = await <TextToSpeechThree button={button} buttonId={buttonId} buttonCSS={buttonCSS}
+                                                                         cssStyle={''}/>;
                         }
 
                         return await ReactDOM.render(
