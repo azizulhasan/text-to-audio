@@ -296,7 +296,6 @@ register_deactivation_hook( __FILE__, function () {
 	TTA_Deactivator::deactivate();
 } );
 
-
 /**
  *
  * Create short code for qr code.
@@ -306,31 +305,33 @@ register_deactivation_hook( __FILE__, function () {
  *
  * @return string
  */
-function tta_create_shortcode( $atts ) {
-
-	return tta_get_button_content( $atts );
-
+function tta_create_shortcode( $atts, $content, $shortcode_tag ) {
+    return tta_get_button_content( $atts, false, $content );
 }
 
+
+//update_post_meta(8, 'tts_mp3_file_urls', []);
 add_shortcode( 'tta_listen_btn', 'tta_create_shortcode' );
 add_shortcode( 'atlasvoice', 'tta_create_shortcode' );
 
 // Filter to allow shortcodes in HTML tags
 add_filter( 'do_shortcode_tag', 'allow_shortcode_in_html_tag', 10, 4 );
 function allow_shortcode_in_html_tag( $output, $tag, $attr, $m ) {
-	if ( $tag == 'tta_listen_btn' || $tag == 'atlasvoice' && ! empty( $attr ) ) {
-		if ( isset( $attr['position'] ) && $attr['position'] == 'after' ) {
-			$content = tta_get_button_content( $attr, false, $m[5] ) . $m[5];
-		} else {
-			$content = $m[5] . tta_get_button_content( $attr, false, $m[5] );
-		}
 
-		//Get the content wrapped by the shortcode.
-		return $content;
-	}
+    if ( $tag == 'tta_listen_btn' || $tag == 'atlasvoice' && (! empty( $attr ) ||  isset( $m[5] ) ) ) {
+        if ( isset( $attr['position'] ) && $attr['position'] == 'before' ) {
+//			$content = tta_get_button_content( $attr, false, $m[5] ) . $m[5];
+            $content = $output . $m[5];
+        } else {
+//			$content = $m[5] . tta_get_button_content( $attr, false, $m[5] );
+            $content = $m[5] . $output;
+        }
 
-	return $output;
+
+
+        //Get the content wrapped by the shortcode.
+        return $content;
+    }
+
+    return $output;
 }
-
-
-
