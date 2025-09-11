@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.8.2
 Requires PHP: 7.4
-Stable tag: 1.9.18
+Stable tag: 1.9.19
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -215,6 +215,9 @@ Speed Optimizer – The All-In-One WordPress Performance-Boosting Plugin</a>
  * <a href='https://wordpress.org/plugins/duplicate-page/' target='_blank'>
   Duplicate Page:</a> Duplicate Posts, Pages and Custom Posts easily using single click.
 
+  * <a href='https://wordpress.org/plugins/easy-table-of-contents/' target='_blank'>
+   Easy Table of Contents:</a> A user friendly, featured focused Easy Table of Contents plugin which allows you to insert a table of contents into your posts, pages and custom post types.
+
 
 
 ### USAGE:
@@ -228,24 +231,24 @@ Here's how to use the Text to Speech button shortcode:
 2. **Customize Button Text:** You can customize the text displayed on the button by adding attributes to the shortcode. For example:
 
 	`
-	[atlasvoice listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay"]
+	[atlasvoice listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay"/]
 	`
 
 3. **Custom Text to Read:** To specify custom text for the button to read aloud, use the ‘text_to_read’ attribute in the shortcode. For example:
 
 	`
-	[atlasvoice text_to_read="Hello WordPress" ]
+	[atlasvoice text_to_read="Hello WordPress" /]
 	`
 
 4. **Add CSS Class:** You can also add a custom CSS class to the button by including the ‘class’ attribute in the shortcode. For example:
 
 	`
-	[atlasvoice class="custom_class"]
+	[atlasvoice class="custom_class"/]
 	`	
 5. **Change Language and Voice:** Alter the language and voice of the text-to-speech by using the `lang` and `voice` attributes in the shortcode. For example:
 
 	`
-	[atlasvoice lang="en-GB" voice="Google US English"]
+	[atlasvoice lang="en-GB" voice="Google US English"/]
 	`	
 
 6. **Adding Missing Content:** If there is missing content that you want to include, you can do so using a filter. Here's an example of how to add extra content via a filter:
@@ -440,6 +443,10 @@ You can customize the voice and language of the text-to-speech player using shor
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
+
+= 1.9.19  ( 11 September 2025 )  =
+Improved: shortcode functionality improved.
+updated: documentation updated.
 
 
 = 1.9.18  ( 04 September 2025 )  =
@@ -1005,251 +1012,8 @@ Added: Display button based on user login status.
 * Documentation for Google cloud text to speech added to integration menu.
 * Language selection for all players moved to the listening menu.
 
-= 1.5.30 ( 15 Apr 2024 ) =
-* Fixed Error: Exclude Posts By IDs To Speak.
-
-= 1.5.29 ( 15 Apr 2024 ) =
-* Exclude Posts By IDs To Speak.
-
-= 1.5.28 ( 09 Apr 2024 ) =
-* Dashboard Faq updated.
-* Feature card updated in the dashboard.
-* Features notice added.
-
-= 1.5.27 ( 08 Apr 2024 ) =
-* MP3 file size checked.
-
-= 1.5.26 ( 05 Apr 2024 ) =
-* Code refactor.
-* function documentation added.
-
-
-= 1.5.25 ( 02 Apr 2024 ) =
-* Filter added `tts_rest_route_access` for modifying the rest route create.
-* Filter added `tts_pro_rest_route_access` for modifying the rest route create.
-* Gtranslate plugin language selection issue solved in pro version.
-
-
-= 1.5.24 ( 28 Mar 2024 ) =
-* Filter added `tts_player_pro_customizations` for customizing "Default Pro" button.
-* Exclude content by CSS selectors added.
-* UI Improved.
-
-* By default settings update for button icon display.
-
-= 1.5.23 ( 26 Mar 2024 ) =
-* WordPress 6.5 tested.
-* By default settings update for button icon display.
-* Filter added `tts_player_customizations` for customizing button icon.
-
-
-= 1.5.22 ( 25 Mar 2024 ) =
-* [Button Icon Issue Solved](https://wordpress.org/support/topic/typo-errors/).
-* Add settings to display/hide button icon.
-
-= 1.5.21 ( 22 Mar 2024 ) =
-* Documentation updated.
-* Title and mp3 file name are same in pro version.
-
-= 1.5.20 ( 18 Mar 2024 ) =
-* Button rendering bug fix.
-* Dashboard UI improved.
-* `tts_clean_gtts_folder` filter added to delete all MP3 files delete in pro version.
-* If MP3 file is not existed, then regenerate file autometically. This functionality added in pro version.
-* Pro version button selection issue fixed.
-
-= 1.5.19 ( 12 Mar 2024 ) =
-* Minor error fix.
-
-= 1.5.18 ( 12 Mar 2024 ) =
-* Default listening language issue fixed at listening menu.
-* Faq improved.
-
-= 1.5.17 ( 08 Mar 2024 ) =
-* Shortcode attribute added for changing voice and language.
-* Button Default text issue solved.
-
-
-= 1.5.16 ( 04 Mar 2024 ) =
-* Faq menu is now Docs.
-* Multilingual notice added.
-
-= 1.5.15 ( 28 Feb 2024 ) =
-* Live preview for free version added.
-
-= 1.5.14 ( 22 Feb 2024 ) =
-* Change Button text from customization menu.
-* Freemius integration for free version.
-
-= 1.5.13 ( 19 Feb 2024 ) =
-* [WPML](https://wpml.org/) and [Gtranslate](https://wordpress.org/plugins/gtranslate/) plugin compatibility improved.
-* Save multiple url to database for generated mp3 file.
-* Documentation updated.
-
-= 1.5.12 ( 15 Feb 2024 ) =
-* ReadMe file improved.
-* Documentation updated.
-
-= 1.5.11 ( 10 Feb 2024 ) =
-* ReadMe file improved.
-* Documentation updated.
-
-
-= 1.5.10 ( 05 Feb 2024 ) =
-* Minor bug fix.
-
-= 1.5.9 ( 05 Feb 2024 ) =
-* Faq: Faq update.
-
-
-= 1.5.8 ( 02 Feb 2024 ) =
-* Fixed: On customization menu buttons live design issue fixed.
-* Fixed: Button responsiveness issue fixed.
-* Fixed: Custom CSS not working for buttons issue fixed.
-
-= 1.5.7 ( 29 Jan 2024 ) =
-* [WPML](https://wpml.org/) and [GTranslate](https://wordpress.org/plugins/gtranslate/) plugin notice added.
-* String remove system from reading content added.
-* Tags remove system from reading content added.
-
-
-= 1.5.6 ( 24 Jan 2024 ) =
-* Documentation Updated.
-
-= 1.5.5 ( 22 Jan 2024 ) =
-* Asset dependency issue fixed.
-* Default Pro button issue fixed.
-* MP3 file generation issue fixed in pro version
-
-= 1.5.4 ( 19 Jan 2024 ) =
-* Bug fix.
-
-
-= 1.5.3 ( 14 Jan 2024 ) =
-* Remove shortcode from content.
-* Option added to select any post type.
-* Add player to any post type.
-
-= 1.5.2 ( 7 Jan 2024 ) =
-* Strip HTML Tags from content.
-* Strip URL from content.
-* Updated Documentation.
-
-= 1.5.1 ( 6 Jan 2024 ) =
-* Bug fix
-
-
-= 1.5.0 ( 28 Dec 2023 ) =
-* Improved: UI design improved.
-* Google text to speech integration.
-
-
-= 1.4.23 ( 25 Dec 2023 ) =
-* added: [WPML](https://wpml.org/) support.
-
-
-= 1.4.22 ( 13 Dec 2023 ) =
-* added: `tts_ignore_match_80_percent` filter added.
-* Improved: button display logic improved.
-* Improved: `tta__button_text_arr` filter functionality improved.
-
-
-= 1.4.21 ( 13 Dec 2023 ) =
-* Minor  bug fix.
-
-
-= 1.4.20 ( 13 Dec 2023 ) =
-* [TTS Plugin conflicts with Themes and other plugins](https://wordpress.org/support/topic/tts-plugin-conflicts-with-themes-and-other-plugins/).
-
-= 1.4.19 ( 05 Dec 2023 ) =
-* Select selector functionality added.
-* [Issue with button placement in latest version](https://wordpress.org/support/topic/issue-with-button-placement-in-latest-version/).
-
-= 1.4.18 ( 02 Dec 2023 ) =
-* Unnecessary code removed
-
-= 1.4.17 ( 01 Dec 2023 ) =
-* Button puase issue fixed.
-
-
-= 1.4.16 ( 13 Nov 2023 ) =
-* Removed: setTimeout function removed.
-* Hooks file issue is fixed.
-
-= 1.4.15 ( 13 Nov 2023 ) =
-* CSS issue solved.
-
-= 1.4.14 ( 10 Nov 2023 ) =
-* Documentation updated
-* Get Pro button added
-
-
-= 1.4.13 ( 05 Nov 2023 ) =
-* Compatible: WordPress 6.4 tested
-* Add: Button width issue fixed.
-* Removed: Banner Removed.
-
-
-= 1.4.12 ( 30 Oct 2023 ) =
-* Compatible: [WP-Optimize - Clean, Compress, Cache](https://wordpress.org/plugins/wp-optimize/) plugin compatibility added.
-* Compatible: [Elementor Website Builder â€“ More than Just a Page Builder](https://wordpress.org/plugins/elementor/) plugin compatibility added.
-* Fixed: Initialized the button after ducument load.
-* Change button text by shortcode [attribute](https://wordpress.org/plugins/text-to-audio/#:~:text=TTS%20button%20text%20can%20be%20changed%20by%20providing%20attributes%20to%20shortcode%20like%20this)
-* Code refactor
-
-= 1.4.11 ( 26 Oct 2023 ) =
-* Added: Shortcode attribute ```text_to_read``` added. 
-* Added: Custom post type support for premium verison.
-* Added: [Advanced Custom Fields (ACF)](https://wordpress.org/plugins/advanced-custom-fields/) support for pro version.
-* Added: [Custom Post Type UI](https://wordpress.org/plugins/custom-post-type-ui/) support for pro version.
-* Added: [Toolset Types](https://toolset.com/home/types-manage-post-types-taxonomy-and-custom-fields/) support for pro version.
-
-= 1.4.10 ( 19 Oct 2023 ) =
-* Added: GTranslate plugin compatibility added for premium version.
-
-= 1.4.9 ( 17 Oct 2023 ) =
-* Added: Documentation link added.
-* Added: YouTube Link added.
-
-= 1.4.8 ( 09 Oct 2023 ) =
-* Added: Halloween banner added.
-
-= 1.4.7 ( 5 Oct 2023 ) =
-* Fixed: [Shortcode stop working](https://wordpress.org/support/topic/shortcode-stop-working-2/)
-* Fixed: Button hide issue fixed.
-* Fixed: Listeing language change issue solved.
-* Fixed: [change the button text](https://wordpress.org/support/topic/change-the-button-text-7/)
-* compatibility added for twentytwentythree theme
-
-= 1.4.6 ( Sep 30 , 2023) =
-* Fixed: [Error using quotes in customized CSS](https://wordpress.org/support/topic/error-using-quotes-in-customized-css/)
-* Fixed: [The custom labels for translating strings in button text issue](https://wordpress.org/support/topic/error-using-quotes-in-customized-css/)
-* Fixed: [Javascript errors](https://wordpress.org/support/topic/javascript-errors-61/)
-
-
-= 1.4.5 ( Sep 21 , 2023) =
-* Theme support: Divi, Enfold, Astra, Kadance, OceanWP, Hello Elementor, GeneratePress, Dynamic News, Kadance, Darknews theme supported.
-* Plugin support: Elementor builder supported.
-
-= 1.4.4 ( Sep 14 , 2023) =
-* Fixed: JS error fixed.
-* Tested: WordPress 6.3.1.
-* Improved: JS loading improved on front.
-
-= 1.4.3 ( Sep 10 , 2023) =
-* Fixed: CSS loaded properly.
-* Fixed: Short code text not displaying issue solved.
-* Added: Integrate with [Text To Speech Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) version.
-* Added: Plugin URI added.
-
-
-= 1.4.2 ( Sep 07 , 2023) =
-* Fixed: Fixed: button showing issue is solved.
-
-= 1.4.1 ( Sep 6 , 2023) =
-* Fixed: Custom css adding issue solved.
-
 == Upgrade Notice ==
 
-= 0.1 =
-Initial Realease
+= 1.9.19 =
+Improved: shortcode functionality improved.
+updated: documentation updated.
