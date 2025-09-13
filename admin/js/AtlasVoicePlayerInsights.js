@@ -233,13 +233,18 @@ class AtlasVoicePlayerInsights {
 
     displayInsights() {
         const tableContainer = document.getElementById('atlasVoice_analytics');
-        this.prependCSS(tableContainer);
         const table = this.createTable(this.insights);
-        tableContainer.appendChild(table);
+        if(tableContainer && table) {
+            this.prependCSS(tableContainer);
+            tableContainer.appendChild(table);
+        }
     }
 
     setAnalyticsTitle() {
         const tableContainer = document.getElementById('atlasVoice_analytics');
+        if(!tableContainer) {
+            return null;
+        }
         let title = document.createElement('h2')
         if (!this.shouldTrackAnalyticsData()) {
             title = document.createElement('h1')
@@ -255,12 +260,17 @@ class AtlasVoicePlayerInsights {
             // Extract the div element from the parsed document
             let headerElement = header.body.firstChild;
 
-            tableContainer.prepend(headerElement)
+            if(tableContainer) {
+                tableContainer.prepend(headerElement)
+            }
         }
     }
 
     createTable(data) {
         const table = document.createElement('table');
+        if(!table) {
+            return null
+        }
 
         const headers = ['Metric', 'Value'];
         const headerRow = document.createElement('tr');
