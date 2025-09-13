@@ -198,12 +198,17 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
 
         $content = $text_before_content. ' ' . $content;
         $content .= ' ' . $text_after_content;
-        $content = tta_clean_content($content);
-        $content = TTA_Helper::sazitize_content($content);
-        $content = TTA_Helper::clean_content($content);
-        $content = trim($content);
-
     }
+
+    /**
+     * Clean content, sanitize content. remove shortcode,
+     * and then trim content.
+     */
+
+    $content = tta_clean_content($content);
+    $content = TTA_Helper::sazitize_content($content);
+    $content = TTA_Helper::clean_content($content);
+    $content = trim($content);
     
     // Get content reading time.
     $content_read_time = apply_filters('tts_content_reading_time', 1, $content, $post);

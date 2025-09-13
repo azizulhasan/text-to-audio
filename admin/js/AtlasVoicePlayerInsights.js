@@ -234,7 +234,7 @@ class AtlasVoicePlayerInsights {
     displayInsights() {
         const tableContainer = document.getElementById('atlasVoice_analytics');
         const table = this.createTable(this.insights);
-        if(tableContainer) {
+        if(tableContainer && table) {
             this.prependCSS(tableContainer);
             tableContainer.appendChild(table);
         }
@@ -242,6 +242,9 @@ class AtlasVoicePlayerInsights {
 
     setAnalyticsTitle() {
         const tableContainer = document.getElementById('atlasVoice_analytics');
+        if(!tableContainer) {
+            return null;
+        }
         let title = document.createElement('h2')
         if (!this.shouldTrackAnalyticsData()) {
             title = document.createElement('h1')
