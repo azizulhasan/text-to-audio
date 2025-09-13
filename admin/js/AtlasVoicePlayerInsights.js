@@ -242,6 +242,9 @@ class AtlasVoicePlayerInsights {
 
     setAnalyticsTitle() {
         const tableContainer = document.getElementById('atlasVoice_analytics');
+        if(!tableContainer) {
+            return null;
+        }
         let title = document.createElement('h2')
         if (!this.shouldTrackAnalyticsData()) {
             title = document.createElement('h1')
