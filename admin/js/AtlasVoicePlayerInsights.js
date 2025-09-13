@@ -234,7 +234,7 @@ class AtlasVoicePlayerInsights {
     displayInsights() {
         const tableContainer = document.getElementById('atlasVoice_analytics');
         const table = this.createTable(this.insights);
-        if(tableContainer) {
+        if(tableContainer && table) {
             this.prependCSS(tableContainer);
             tableContainer.appendChild(table);
         }

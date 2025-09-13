@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.8.2
 Requires PHP: 7.4
-Stable tag: 1.9.19
+Stable tag: 1.9.20
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -442,6 +442,14 @@ You can customize the voice and language of the text-to-speech player using shor
 ### TRANSLATION REQUEST
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+
+= 1.9.20  ( 13 September 2025 )  =
+Fixed: MP3 file exist check function issue fixed.
+Fixed: Player adding function call multiple time issue fixed.
+Fixed: ShortCode position update issue fixed.
+Fixed: Edit page console error fixed.
+
 
 
 = 1.9.19  ( 11 September 2025 )  =
@@ -1014,6 +1022,8 @@ Added: Display button based on user login status.
 
 == Upgrade Notice ==
 
-= 1.9.19 =
-Improved: shortcode functionality improved.
-updated: documentation updated.
+= 1.9.20 =
+Fixed: MP3 file exist check function issue fixed.
+Fixed: Player adding function call multiple time issue fixed.
+Fixed: ShortCode position update issue fixed.
+Fixed: Edit page console error fixed.
