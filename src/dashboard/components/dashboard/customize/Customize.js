@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Col, Container, Row, Form, FloatingLabel } from 'react-bootstrap';
-import toast from '../../context/Notify';
+import notify, { toast } from '../../context/Notify';
 import { copyToClipBoard, postData, postWithoutImage } from '../../context/utilities';
 import TextToSpeech from '../../../buttons/components/TextToSpeech';
 import TextToSpeechThree from '../../../buttons/components/TextToSpeechThree';
 import TextToSpeechFour from '../../../buttons/components/TextToSpeechFour';
 import CustomizationTabs from './CustomizationTabs'
-import notify from "../../context/Notify";
 
 let speech = null;
 let TextToSpeechFree = null;
@@ -323,6 +322,20 @@ export default function Customize() {
         });
     };
 
+    const CTANotice = (text_content = '' ) => {
+        toast(<>
+            <h6>{text_content}</h6>
+            <button onClick={(e) => {
+                window.open('https://atlasaidev.com/plugins/text-to-speech-pro/pricing/')
+            }} className='tta_btn'>
+                Buy Now
+            </button>
+        </>, 'info', {
+            position: 'top-right',
+            autoClose: 10000,
+        });
+    }
+
 
     /**
      * Handle form Submit
@@ -360,36 +373,46 @@ export default function Customize() {
             formData.buttonSettings.id = 1;
         }
 
-        if (formData?.buttonSettings?.id == 4 && !isGCAuthenticated) {
-            notify('To select this player you have to authenticate first from Integration menu', 'error', {
-                autoClose: 8000,
-            });
-            return;
+        if (formData?.buttonSettings?.id == 4 ) {
+            if(ttsObj.is_pro_active && !isGCAuthenticated) {
+                notify('To select this player you have to authenticate first from Integration menu', 'error', {
+                    autoClose: 8000,
+                });
+                return;
+            }
+
+            if(!isGCAuthenticated){
+                CTANotice('Google Cloud TTS player is only in pro version.');
+                return;
+            }
+
         }
 
-        if (formData?.buttonSettings?.id == 5 && !isChatGPTAuthenticated) {
-            notify('To select this player you have to authenticate first from Integration menu', 'error', {
-                autoClose: 8000,
-            });
-            return;
+        if (formData?.buttonSettings?.id == 5) {
+
+            if(ttsObj.is_pro_active && !isChatGPTAuthenticated) {
+                notify('To select this player you have to authenticate first from Integration menu', 'error', {
+                    autoClose: 8000,
+                });
+                return;
+            }
+
+            if(!isChatGPTAuthenticated){
+                CTANotice('ChatGPT TTS player is only in pro version.');
+                return;
+            }
         }
 
         if (!ttsObj.is_pro_active && formData?.buttonSettings?.id > 1) {
-            toast('This player is only available for pro version.', 'error');
+            CTANotice('Default Pro player is only available for pro version.')
             return;
         }
 
-
-        if (formData?.buttonSettings?.id == 4 && (!isGCAuthenticated || !ttsObj.is_pro_active)) {
-            toast('To use Google Cloud Text To Speech you have to authenticate first from integrations menu', 'error');
-            return;
-        }
 
         if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_folder_writable && formData?.buttonSettings?.id > 2 && !isBackUpToGCS) {
             toast("Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.", 'error', { autoClose: 10000 })
             return
         }
-        ;
 
         let data = new FormData();
         data.append('fields', JSON.stringify(formData));
