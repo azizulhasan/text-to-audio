@@ -72,12 +72,6 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
             return;
         }
 
-
-        // if (isAuthenticated) {
-        //     toast('You are already authenticated. To add new service account please remove access first')
-        //     return
-        // }
-
         if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_license_active) {
             toast(<>
                 <h4>Google cloud text to speech feature is only in pro version.</h4>
@@ -180,7 +174,7 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
     const authenticateTTS = (e) => {
         e.preventDefault();
         if (isAuthenticated) {
-            toast('You are already athenticated');
+            toast('You are already authenticated');
             return;
         }
         postData(apiURL + 'authenticate', JSON.stringify({ file: authFile }))
@@ -188,7 +182,7 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
                 if (res.auth_url) {
                     window.open(res.auth_url);
                 } else if (res.access_token) {
-                    toast('You are already athenticated');
+                    toast('You are already authenticated');
                     setIsAuthenticated(true)
                 }
                 else {
@@ -205,7 +199,7 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
     const revokeAccessToken = (e) => {
         e.preventDefault();
         if (!isAuthenticated) {
-            toast('You have to be athenticated to revoke.');
+            toast('You have to be authenticated to revoke.');
             return;
         }
         let delete_file = false;
@@ -252,7 +246,7 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
         } else {
 
             if (storedBucketName && bucketName != storedBucketName) {
-                if (!confirm(`Are you sure that, you want to create a bucket with this name ${bucketName} . Even though you already have a bucket with the name ${storedBucketName}. Because once you create new bucket then all of the mp3 file will generate again. So decidee carefully.`)) {
+                if (!confirm(`Are you sure that, you want to create a bucket with this name ${bucketName} . Even though you already have a bucket with the name ${storedBucketName}. Because once you create new bucket then all of the mp3 file will generate again. So decide carefully.`)) {
                     return;
                 }
             }

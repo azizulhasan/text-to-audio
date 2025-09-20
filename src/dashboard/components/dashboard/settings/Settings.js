@@ -82,8 +82,6 @@ export default function Settings() {
 
                 setIsDataLoaded(true)
             });
-
-
     }, []);
 
 

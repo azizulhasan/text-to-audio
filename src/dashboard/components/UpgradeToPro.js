@@ -106,12 +106,13 @@ export default function UpgradeToPro({ promotionType = 'general' }) {
         {
             window.hasOwnProperty('ttsObj') ?
                 <div style={{ display: ttsObj.is_pro_active && promotionType !== 'youtube' ? 'none' : 'block' }} className="card p-0">
-                    <div className="card-header text-center tta_btn btn-center">
+                    <div className="card-header text-center btn-center">
                         {
-                            promotionType === 'youtube' ? <button
-                                className="tta_btn btn-center text-center text-white"><span className="dashicons dashicons-youtube text-danger"></span> Video Tutorials</button> :
+                            promotionType === 'youtube' ? <><button
+                                    className="tta_btn btn-center text-center text-white"><span className="dashicons dashicons-youtube text-danger"></span> Video Tutorials</button> {!ttsObj.is_pro_active && <a target='_blank' href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
+                                                                                                                                                                                                                 className="tta_btn btn-center text-center text-white">Buy Now</a>}</> :
                                 <a target='_blank' href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
-                                    className="tta_btn btn-center text-center text-white">Premium Features</a>
+                                    className="tta_btn btn-center text-center text-white">Buy Now</a>
 
                         }
                     </div>
@@ -155,12 +156,11 @@ export default function UpgradeToPro({ promotionType = 'general' }) {
                         </u>
                         {
                             !ttsObj.is_pro_active &&
-                            <a target='_blank' href="https://atlasaidev.com/plugins/text-to-speech-pro/"
-                                className="tta_btn text-white">Unlock Premium Features</a>
+                            <a target='_blank' href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
+                                className="tta_btn text-white">Buy Now</a>
                         }
                     </div>
                 </div> : null
         }
     </>
-
 }

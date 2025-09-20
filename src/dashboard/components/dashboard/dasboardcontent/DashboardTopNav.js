@@ -27,7 +27,7 @@ export default function DashboardTopNav() {
       {/* me-3 me-lg-4 */}
       {
         !ttsObj.is_pro_active && <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/" target="_blank">
-          See Pricing
+          Buy Now
         </a>
       }
       <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="http://atlasaidev.com/contact-us/" target="_blank">
@@ -42,16 +42,17 @@ export default function DashboardTopNav() {
       <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://atlasaidev.com/docs/" target="_blank">
         <span className="dashicons dashicons-media-document"></span> Documentation
       </a>
-      <a className="navbar-nav ms-auto  me-1 text-decoration-none    order-2 order-lg-1" href="https://www.youtube.com/@AtlasAiDev" target="_blank">
-        <span className="dashicons dashicons-youtube text-danger"></span>
-      </a>
-      <a className="navbar-nav ms-auto  me-1 text-decoration-none   order-2 order-lg-1" href="https://www.facebook.com/AtlasAiDev/" target="_blank">
-        {/* <span className="dashicons dashicons-facebook text-primary"></span> */}
-        <span className="dashicons dashicons-facebook-alt text-primary"></span>
-      </a>
-      <a className="navbar-nav ms-auto  me-1 text-decoration-none   order-2 order-lg-1" href="https://x.com/atlasaidev" target="_blank">
-        <span className="dashicons dashicons-twitter text-primary"></span>
-      </a>
+      <div className='navbar-nav ms-auto   order-2 order-lg-1'>
+          <a className="me-1 text-decoration-none" href="https://www.youtube.com/@AtlasAiDev" target="_blank">
+              <span className="dashicons dashicons-youtube text-danger"></span>
+          </a>
+          <a className="me-1 text-decoration-none" href="https://www.facebook.com/AtlasAiDev/" target="_blank">
+              <span className="dashicons dashicons-facebook-alt text-primary"></span>
+          </a>
+          <a className="me-1 text-decoration-none" href="https://x.com/atlasaidev" target="_blank">
+              <span className="dashicons dashicons-twitter text-primary"></span>
+          </a>
+      </div>
     </nav>
   );
 }
