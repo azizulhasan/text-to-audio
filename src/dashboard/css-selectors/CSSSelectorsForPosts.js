@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {__} from '@wordpress/i18n'
 import {
-    ToggleButton, Form, Row, Col, Container, Tooltip,
+     Form, Col, Container, Tooltip,
     OverlayTrigger,
     Button
 } from 'react-bootstrap';
@@ -33,10 +33,6 @@ export default function CSSSelectorsForPosts() {
 
 
     useEffect(() => {
-        /**
-         * Get data from and display to table.
-         */
-        const url = new URL(window.location.href);
 
         let url2 = new URLSearchParams(window.location.search);
 
@@ -52,10 +48,6 @@ export default function CSSSelectorsForPosts() {
 
             });
     }, []);
-
-    // useEffect(() => {
-    //     console.log({settings})
-    // }, [settings])
 
     /**
      * handle change
@@ -83,7 +75,6 @@ export default function CSSSelectorsForPosts() {
      */
     const handleSubmit = (e) => {
         e.preventDefault();
-
         if (!postID) {
             toast('Please save the post then try to add custom CSS selectors.');
             return;
@@ -390,6 +381,5 @@ export default function CSSSelectorsForPosts() {
                 </div>
             </Container>
         </React.Fragment> : <h1>Loading</h1>
-
     );
 }

@@ -1,10 +1,8 @@
 import React, { useEffect, useMemo, useState, } from 'react';
 import {
-	BrowserRouter as Router,
 	HashRouter,
 	Routes,
 	Route,
-
 } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 
@@ -15,7 +13,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import './assets/js/scripts.js';
-import { addScripts, getComponentName, isPro } from '../context/utilities';
+import {  getComponentName } from '../context/utilities';
 
 /**
  * Dashboard Components
@@ -23,7 +21,6 @@ import { addScripts, getComponentName, isPro } from '../context/utilities';
 import DashboardTopNav from './dasboardcontent/DashboardTopNav';
 import DashboardSideNav from './dasboardcontent/DashboardSideNav';
 import Settings from './settings/Settings';
-import Recording from './recording/Recording';
 import Listening from './listening/Listening';
 import Customize from './customize/Customize';
 import Docs from './docs/Docs';
