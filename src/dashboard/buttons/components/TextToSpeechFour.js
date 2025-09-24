@@ -10,13 +10,13 @@ let player = window?.wp ? wp.hooks.applyFilters('ttsProPlayerDesign', {
 }
 export default function TextToSpeechFour({ buttonId, button, buttonCSS, cssStyle = '' }) {
     const [shouldFloat, setShouldFloat] = useState(false)
-    useEffect(() => {
+    useEffect(async  () => {
         // TODO: after reload while I have in customization menu. the player is getting hide.
         if (window.TextToSpeechProPlayer) {
             let contents = window?.TTS?.contents;
             TextToSpeechProPlayer = window.TextToSpeechProPlayer;
             if(contents){
-                new TextToSpeechProPlayer(buttonId, contents[buttonId], button, window.TTS)
+                await new TextToSpeechProPlayer(buttonId, contents[buttonId], button, window.TTS)
             }
         }
     }, [window.TextToSpeechProPlayer, window?.TTS?.contents])
