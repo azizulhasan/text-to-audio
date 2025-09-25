@@ -223,7 +223,7 @@ export default class TextToSpeech {
                 this.speakButton.setAttribute('title', 'Text To Audio : ' + buttonHoverTitle);
             }
             if(isClicked) {
-                setSvgColorOnEvent(this.speakButton)
+                addHoverColor(this.speakButton)
             }
         }
     }
@@ -251,7 +251,10 @@ export default class TextToSpeech {
         window.sessionStorage.setItem('tts_paused_by_intention', false);
     }
 
-    speak(speech, content = this.content) {
+    speak(speech, content = this.content, isClicked = false) {
+        if(!content) {
+           content =  this.content
+        }
         if (!this.speech.hasBrowserSupport()) {
             this.displayApiMissing("tts__listent_content_" + this.buttonId)
             return;
@@ -304,7 +307,7 @@ export default class TextToSpeech {
             });
 
         this.listenStatus = 'pause';
-        this.displayButtonText(this.listenStatus)
+        this.displayButtonText(this.listenStatus, isClicked)
         this.analytics.trackPlay();
         if (!this.browser.isAndroid()) {
             let thisClass = this;
@@ -398,9 +401,10 @@ export default class TextToSpeech {
     /**
      * Callback function will need for pro version.
      * @param {*} callBackAfterEnd
+     * @param {*} isClicked
      * @returns
      */
-    _init(callBackAfterEnd = null) { // init speaking, 
+    _init(callBackAfterEnd = null, isClicked = false) { // init speaking,
         this.callBackAfterEnd = callBackAfterEnd
         if (this.ttsListeningSettings === undefined) return;
         this.speech
@@ -451,7 +455,7 @@ export default class TextToSpeech {
                 this.browser = new BrowserSupport(ttsObj, data.voices, this.ttsListeningSettings?.tta__listening_lang, this.ttsListeningSettings?.tta__listening_voice)
 
                 // }
-                this._prepareSpeakButton(this.speech);
+                this._prepareSpeakButton(this.speech, isClicked);
                 window.sessionStorage.setItem('tts_paused_by_intention', false);
             })
             .catch(e => {
@@ -460,15 +464,15 @@ export default class TextToSpeech {
 
     }
 
-    _prepareSpeakButton(speech) {
+    _prepareSpeakButton(speech, isClicked = false) {
         // Button click events
         // this.speakButton.addEventListener("click", () => {
         if (this.listenStatus == 'listen') {
-            this.speak(speech)
+            this.speak(speech, null, isClicked)
         } else if (this.listenStatus == 'pause') {
-            this.pause(speech)
+            this.pause(speech, isClicked)
         } else if (this.listenStatus == 'resume') {
-            this.resume(speech)
+            this.resume(speech, isClicked)
         }
         // });
 

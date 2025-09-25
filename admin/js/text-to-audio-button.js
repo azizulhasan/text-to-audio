@@ -43,7 +43,7 @@ class TTSPlayButton extends HTMLElement {
                         }
                         if (this.speech === null) {
                             let speech = new TextToSpeech(buttonId, contents[buttonId], button, window.TTS)
-                            speech._init()
+                            speech._init(null, true)
                             this.speech = speech.getData()
                             this.speech.callBackAfterEnd = this.callBackAfterEnd
                         } else {
