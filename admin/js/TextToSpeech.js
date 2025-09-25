@@ -205,8 +205,9 @@ export default class TextToSpeech {
     /**
      * Don't display this text in pro version.
      * @param {*} listenStatus
+     * @param {*} isClicked
      */
-    displayButtonText(listenStatus) {
+    displayButtonText(listenStatus, isClicked = false) {
         if (this?.playButtonNo == 1 && this?.speakButton?.innerHTML) {
             if ('listen' === listenStatus) {
                 this.speakButton.innerHTML = this.replayButtonContent();
@@ -221,7 +222,9 @@ export default class TextToSpeech {
                 let buttonHoverTitle = window?.ttsObj?.buttonTextArr?.resume_hover_title ?? this.resumeButtonText();
                 this.speakButton.setAttribute('title', 'Text To Audio : ' + buttonHoverTitle);
             }
-
+            if(isClicked) {
+                setSvgColorOnEvent(this.speakButton)
+            }
         }
     }
 
@@ -325,7 +328,7 @@ export default class TextToSpeech {
         }
     }
 
-    pause(speech) {
+    pause(speech, isClicked = false) {
         /**
          * If desktop then cancel after 7/8 second
          * If mobile cancel and restart again.
@@ -348,14 +351,15 @@ export default class TextToSpeech {
         this.content = this.splittedSentances.join(' ')
 
         this.listenStatus = 'resume';
-        this.displayButtonText(this.listenStatus)
+
+        this.displayButtonText(this.listenStatus, isClicked)
         this.analytics.trackPause();
         if (!this.browser.isAndroid()) {
             clearTimeout(this.timer);
         }
     }
 
-    resume(speech) {
+    resume(speech, isClicked = false) {
 
         if (this.isCanceled) {
             this.speak(speech, this.content)
@@ -369,7 +373,7 @@ export default class TextToSpeech {
         }
 
         this.listenStatus = 'pause';
-        this.displayButtonText(this.listenStatus)
+        this.displayButtonText(this.listenStatus, isClicked)
         if (!this.browser.isAndroid()) {
             let thisClass = this;
             this.timer = setTimeout(function pauseResumeTimer() {

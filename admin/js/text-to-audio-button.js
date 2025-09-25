@@ -49,10 +49,10 @@ class TTSPlayButton extends HTMLElement {
                         } else {
                             this.speech = this.speech.getData()
                             if (this.speech.listenStatus == 'pause') {
-                                this.speech.pause(this.speech.speech)
+                                this.speech.pause(this.speech.speech,  true)
                                 window.sessionStorage.setItem('tts_paused_by_intention', true);
                             } else if (this.speech.listenStatus == 'resume') {
-                                this.speech.resume(this.speech.speech)
+                                this.speech.resume(this.speech.speech, true)
                             }
                         }
                     })
