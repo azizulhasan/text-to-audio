@@ -77,14 +77,14 @@ export const getButtonSVGIcon = ()=> {
 
 export  const addHoverColor = (wrapper) => {
     // pick your hover color and default color
-    let hoverColor = "#ffffff";
-    let defaultColor = "#ffffff";
+    let hoverColor = "#000000";
+    let defaultColor = "#000000";
     const allSettings = ttsObj.settings;
     if (allSettings?.customize?.color) {
         defaultColor = allSettings.customize.color;
     }
 
-    if (allSettings?.customize?.color) {
+    if (allSettings?.customize?.hoverTextColor) {
         hoverColor = allSettings.customize.hoverTextColor;
     }else{
         hoverColor = defaultColor;
@@ -112,7 +112,7 @@ export  const addHoverColor = (wrapper) => {
 }
 
 export  const addDefaultColor = (wrapper) => {
-    let defaultColor = "#ffffff";
+    let defaultColor = "#000000";
     const allSettings = ttsObj.settings;
     if (allSettings?.customize?.color) {
         defaultColor = allSettings.customize.color;

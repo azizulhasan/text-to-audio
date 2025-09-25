@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.8.2
 Requires PHP: 7.4
-Stable tag: 1.9.21
+Stable tag: 1.9.23
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -442,6 +442,14 @@ You can customize the voice and language of the text-to-speech player using shor
 ### TRANSLATION REQUEST
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+
+
+
+= 1.9.23  ( 25 September 2025 )  =
+Added: Default Player Hover text color change UI option added.
+Fixed Minor bug fixed related to default player.
+
 
 
 = 1.9.21  ( 20 September 2025 )  =
@@ -1027,6 +1035,6 @@ Added: Display button based on user login status.
 
 == Upgrade Notice ==
 
-= 1.9.21   =
-Removed: Unnecessary code removed.
-Added: Notice added for SpeechSynthesis API
+= 1.9.23   =
+Added: Default Player Hover text color change UI option added.
+Fixed Minor bug fixed related to default player.
