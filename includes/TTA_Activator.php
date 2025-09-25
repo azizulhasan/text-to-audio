@@ -40,6 +40,7 @@ class TTA_Activator {
 			(
 				"backgroundColor"        => "#ffffff",
 				"color"                  => "#000000",
+				"hoverTextColor"         => "#000000",
 				"width"                  => "100",
 				'custom_css'             => '',
 				'tta_play_btn_shortcode' => '[atlasvoice]',
