@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.8.2
 Requires PHP: 7.4
-Stable tag: 1.9.23
+Stable tag: 1.9.24
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -446,7 +446,7 @@ Help us & the WordPress community to translate the plugin. You can [contact](htt
 
 
 
-= 1.9.23  ( 25 September 2025 )  =
+= 1.9.24  ( 25 September 2025 )  =
 Added: Default Player Hover text color change UI option added.
 Fixed Minor bug fixed related to default player.
 
@@ -1035,6 +1035,6 @@ Added: Display button based on user login status.
 
 == Upgrade Notice ==
 
-= 1.9.23   =
+= 1.9.24   =
 Added: Default Player Hover text color change UI option added.
 Fixed Minor bug fixed related to default player.
