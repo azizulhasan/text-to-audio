@@ -43,6 +43,19 @@ export default function TTSButtonDesign({ handleChange, customCSS, listeningBtnS
                         title='Choose your hover background color'
                     />
                 </div>
+                <div>
+                    <Form.Label className={'font-weight-bold'} htmlFor='hoverTextColor'>
+                        Hover Text Color
+                    </Form.Label>
+                    <Form.Control
+                        type='color'
+                        name='hoverTextColor'
+                        onChange={handleChange}
+                        id='hoverTextColor'
+                        value={listeningBtnStyle.hoverTextColor}
+                        title='Choose your hover text color'
+                    />
+                </div>
             </div>
             <div className="d-flex flex-row justify-content-between py-3 border-bottom border-dark ">
                 <div>

@@ -1,5 +1,5 @@
 import TextToSpeech from "./TextToSpeech.js";
-import { getButtonContent } from "./tts/utilities.js";
+import {getButtonContent, setSvgColorOnEvent} from "./tts/utilities.js";
 import AtlasVoiceAnalytics from "./AtlasVoiceAnalytics";
 
 // Create a class for the element
@@ -7,6 +7,7 @@ class TTSPlayButton extends HTMLElement {
     speech = null
     isProLicenseActive = false
     analytics = null
+
     constructor() {
         // Always call super first in constructor
         super();
@@ -21,7 +22,7 @@ class TTSPlayButton extends HTMLElement {
 
         this.isProLicenseActive = window?.ttsObj?.is_pro_active;
         // Create a shadow root
-        const shadow = this.attachShadow({ mode: 'open' });
+        const shadow = this.attachShadow({mode: 'open'});
         if (window.hasOwnProperty('TTS')) {
             let contents = window.TTS.contents;
             let settings = window.TTS.settings;
@@ -57,23 +58,31 @@ class TTSPlayButton extends HTMLElement {
                     })
                     // Create some CSS to apply to the shadow dom
                     const style = document.createElement('style');
+                    style.setAttribute('id', 'tts_style');
+
                     // CSS style for thsi button
                     style.textContent = `
                         #tts__listent_content_${buttonId}.tts__listent_content{ ${settings.btnStyle} transition: all 0.5s ease-in-out; }
                         #tts__listent_content_${buttonId}.tts__listent_content:hover{ ${settings.btnStyle} background-color:${ttsObj?.settings?.customize?.hoverBackgroundColor || '#f0f0f0'};}
-
                         #tts__listent_content_${buttonId}.tts__listent_content svg{ display:${settings.shouldDisplayIcon}; padding-right:7px !important;padding-top: 5px; }
-                        #tts__listent_content_${buttonId}.tts__listent_content:hover  svg{ display:${settings.shouldDisplayIcon}; padding-right:7px !important; padding-top: 5px; } 
-                    `;
+                        #tts__listent_content_${buttonId}.tts__listent_content:hover  svg{ display:${settings.shouldDisplayIcon}; padding-right:7px !important; padding-top: 5px; }
+                        #tts__listent_content_${buttonId}.tts__listent_content:hover span{ color: ${ ttsObj?.settings?.customize?.hoverTextColor || "#ffffff" } };
+
+                        `;
+
+
 
                     if (settings?.customCSS) {
                         style.textContent += `
                             ${this.#htmlDecode(settings.customCSS)}
                         `;
                     }
+
+                    setSvgColorOnEvent(wrapper);
                     // Attsch the created elements to the shadow dom
                     shadow.appendChild(style);
                     shadow.appendChild(wrapper);
+
 
                     break;
                 }
@@ -97,12 +106,13 @@ class TTSPlayButton extends HTMLElement {
 
     }
 }
+
 document.addEventListener('DOMContentLoaded', function () {
     // Define the new element
     if (!customElements.get('tts-play-button')) {
         // console.log({ notFoundcustomElements: customElements.get('tts-play-button') })
         customElements.define('tts-play-button', TTSPlayButton)
     } else {
-        console.log({ foundcustomElements: customElements.get('tts-play-button') })
+        console.log({foundcustomElements: customElements.get('tts-play-button')})
     }
 })
