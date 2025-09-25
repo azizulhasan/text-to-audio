@@ -15,6 +15,7 @@ export default function Customize() {
         backgroundColor: '#ffffff',
         color: '#000000',
         hoverBackgroundColor: '#f0f0f0',
+        hoverTextColor: '#000000',
         width: '100',
         height: '50',
         border: '2',
@@ -244,7 +245,7 @@ export default function Customize() {
 
         // ChatGPT TTS player button settings
         // && listeningBtnStyle?.buttonSettings?.id == 3
-        if (!['backgroundColor', 'width', 'color', 'height', 'border', 'border_color', 'fontSize', 'borderRadius', 'marginTop', 'marginBottom', 'marginRight', 'marginLeft', 'hoverBackgroundColor'].includes(e.target.name)) {
+        if (!['backgroundColor', 'width', 'color', 'height', 'border', 'border_color', 'fontSize', 'borderRadius', 'marginTop', 'marginBottom', 'marginRight', 'marginLeft', 'hoverBackgroundColor', 'hoverTextColor'].includes(e.target.name)) {
 
             if (e.target.name === 'button_position' && !['before_content', 'after_content'].includes(e.target.value) && !ttsObj.is_pro_active) {
                 toast('This option is only available for pro version.', 'error');
@@ -356,7 +357,7 @@ export default function Customize() {
                     return;
                 }
             }
-            if (!['backgroundColor', 'width', 'color', 'border', 'border_color', 'height', 'fontSize', 'borderRadius', 'marginTop', 'marginBottom', 'marginRight', 'marginLeft', 'hoverBackgroundColor'].includes(key)) {
+            if (!['backgroundColor', 'width', 'color', 'border', 'border_color', 'height', 'fontSize', 'borderRadius', 'marginTop', 'marginBottom', 'marginRight', 'marginLeft', 'hoverBackgroundColor', 'hoverTextColor'].includes(key)) {
                 continue;
             }
 

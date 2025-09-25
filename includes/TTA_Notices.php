@@ -103,32 +103,32 @@ class TTA_Notices {
 			 }
 		
 		 	// Display free version notice.
-//             $i = rand(0, (count($features_notice) -1));
-//             $feature1 = $features_notice[$i];
-//             $i++;
-//             $feature2 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[0];
-//	         $i++;
-//             $feature3 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[1];
-//			 $i++;
-//             $feature4 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[2];
-//			 $i++;
-//             $feature5 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[3];
-//             array_push($this->plugin_features, "<strong>1. $feature1</strong>");
-//             array_push($this->plugin_features, "<strong>2. $feature2</strong>");
-//             array_push($this->plugin_features, "<strong>3. $feature3</strong>");
-//			 array_push($this->plugin_features, "<strong>4. $feature4</strong>");
-//			 array_push($this->plugin_features, "<strong>5. $feature5</strong>");
+             $i = rand(0, (count($features_notice) -1));
+             $feature1 = $features_notice[$i];
+             $i++;
+             $feature2 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[0];
+	         $i++;
+             $feature3 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[1];
+			 $i++;
+             $feature4 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[2];
+			 $i++;
+             $feature5 = isset($features_notice[$i]) ? $features_notice[$i] : $features_notice[3];
+             array_push($this->plugin_features, "<strong>1. $feature1</strong>");
+             array_push($this->plugin_features, "<strong>2. $feature2</strong>");
+             array_push($this->plugin_features, "<strong>3. $feature3</strong>");
+			 array_push($this->plugin_features, "<strong>4. $feature4</strong>");
+			 array_push($this->plugin_features, "<strong>5. $feature5</strong>");
 
-//	          add_action( 'admin_notices', [ $this, 'plugin_features_notice_callback' ] );
+	          add_action( 'admin_notices', [ $this, 'plugin_features_notice_callback' ] );
 //		 	 add_action( 'admin_notices', [ $this, 'plugin_analytics_notice_callback' ] );
          }
 
 		
 
-
-		if ( ! is_pro_active() && version_compare( TEXT_TO_AUDIO_VERSION, TEXT_TO_AUDIO_VERSION, '>=' ) ) {
-			add_action( 'admin_notices', [ $this, 'tts_setup_notice' ] );
-		}
+//
+//		if ( ! is_pro_active() && version_compare( TEXT_TO_AUDIO_VERSION, TEXT_TO_AUDIO_VERSION, '>=' ) ) {
+//			add_action( 'admin_notices', [ $this, 'tts_setup_notice' ] );
+//		}
 
 //		add_action( 'admin_notices', [ $this, 'tta_review_notice' ] );
 
@@ -392,15 +392,13 @@ class TTA_Notices {
 	}
 
 	public function plugin_features_notice_callback() {
-		if(!is_pro_active()){
-			return;
-		}
-		$plugin_features_notice_displayed = \get_option( 'plugin_features_notice_1', false );
+
+		$plugin_features_notice_displayed = \get_option( 'plugin_features_notice_2', false );
 		if ( ! $plugin_features_notice_displayed ) {
 			delete_option( 'tta_plugin_features_notice_next_show_time' );
 			delete_user_meta( \get_current_user_id(), 'tta_plugin_features_notice_dismissed' );
 			update_option( 'tta_plugin_features_notice_next_show_time', 12 );
-			\update_option( 'plugin_features_notice_1', true );
+			\update_option( 'plugin_features_notice_2', true );
 		}
 
 		$pluginName    = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
@@ -427,7 +425,7 @@ class TTA_Notices {
 		// translation Notice.
 		if ( $show_notice ) {
 			$has_notice = true;
-			$learn_more = '<a href="https://atlasaidev.com/plugins/text-to-speech-pro/" target="_blank" style="color:blue">See more features</a>'
+			$learn_more = '<a href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/" target="_blank" style="color:blue">See more features</a>'
 
 			?>
             <div class="tta-notice notice notice-info is-dismissible" dir="<?php echo tta_is_rtl() ? 'ltr' : 'auto' ?>"
@@ -479,7 +477,7 @@ class TTA_Notices {
                                 let notice = self.attr('data-response');
 
                                 if ('features' === notice) {
-                                    window.open('http://atlasaidev.com/text-to-speech-pro/', '_blank');
+                                    window.open('https://atlasaidev.com/plugins/text-to-speech-pro/pricing/', '_blank');
                                 }
                             })
 
