@@ -3,7 +3,7 @@
  */
 import Speech from "./tts/speak-tts/lib/speak-tts.js";
 import BrowserSupport from './tts/BrowserSupport.js'
-import { splitSentences } from "./tts/utilities.js";
+import {addHoverColor, getButtonSVGIcon, setSvgColorOnEvent, splitSentences} from "./tts/utilities.js";
 import AtlasVoiceAnalytics from "./AtlasVoiceAnalytics";
 
 export default class TextToSpeech {
@@ -35,6 +35,7 @@ export default class TextToSpeech {
     splitSentences = null
     playButtonNo = 1
     analytics = null
+    playButtonIcon = null;
 
     constructor(buttonId, content = '', button = null, TTS = window.TTS) {
         this.TTS = TTS
@@ -48,7 +49,7 @@ export default class TextToSpeech {
         this.splitSentences = splitSentences
         this.playButtonNo = window?.TTS?.extra?.player_id ?? 1;
         this.analytics = new AtlasVoiceAnalytics(this.TTS.settings.postId)
-
+        this.playButtonIcon = getButtonSVGIcon();
 
         if (typeof NoSleep === 'function' && ttsObj?.is_mobile) {
             const noSleep = new NoSleep();
@@ -72,11 +73,11 @@ export default class TextToSpeech {
 
     playButtonContent() {
         let icon = '<div class="tts_button"><span class="dashicons dashicons-controls-play"></span> <span>';
-        if (ttsObj?.player_customizations?.[1]?.play) {
+        if (this.playButtonIcon?.[1]?.play) {
             const parser = new DOMParser();
             // convert html string into DOM
-            let document = parser.parseFromString(ttsObj?.player_customizations?.[1]?.play, "image/svg+xml");
-            icon = `<div className="tts_button">${document.documentElement.outerHTML}</div><span>`;
+            let document = parser.parseFromString(this.playButtonIcon?.[1]?.play, "image/svg+xml");
+            icon = `<div class="tts_button">${document.documentElement.outerHTML}</div><span>`;
         }
 
         return icon + ' ' + this.playButtonText() + '</span></span></div>'
@@ -88,11 +89,12 @@ export default class TextToSpeech {
 
     replayButtonContent() {
         let icon = '<div class="tts_button"><span class="dashicons dashicons-image-rotate"></span> <span>';
-        if (ttsObj?.player_customizations?.[1]?.replay) {
+        if (this.playButtonIcon?.[1]?.replay) {
             const parser = new DOMParser();
             // convert html string into DOM
-            let document = parser.parseFromString(ttsObj?.player_customizations?.[1]?.replay, "image/svg+xml");
-            icon = `<div className="tts_button">${document.documentElement.outerHTML}</div><span>`;
+            let document = parser.parseFromString(this.playButtonIcon?.[1]?.replay, "image/svg+xml");
+
+            icon = `<div class="tts_button">${document.documentElement.outerHTML}</div><span>`;
         }
 
         return icon + ' ' + this.replayButtonText() + '<span></span></span></div>'
@@ -105,11 +107,11 @@ export default class TextToSpeech {
 
     pauseButtonContent() {
         let icon = '<div class="tts_button"><span class="dashicons dashicons-controls-pause"></span> <span>';
-        if (ttsObj?.player_customizations?.[1]?.pause) {
+        if (this.playButtonIcon?.[1]?.pause) {
             const parser = new DOMParser();
             // convert html string into DOM
-            let document = parser.parseFromString(ttsObj?.player_customizations?.[1]?.pause, "image/svg+xml");
-            icon = `<div className="tts_button">${document.documentElement.outerHTML}</div><span>`;
+            let document = parser.parseFromString(this.playButtonIcon?.[1]?.pause, "image/svg+xml");
+            icon = `<div class="tts_button">${document.documentElement.outerHTML}</div><span>`;
         }
 
         return icon + ' ' + this.pauseButtonText() + '<span></span></span></div>'
@@ -123,14 +125,16 @@ export default class TextToSpeech {
 
     resumeButtonContent() {
         let icon = '<div class="tts_button"><span class="dashicons dashicons-controls-play"></span> <span>';
-        if (ttsObj?.player_customizations?.[1]?.resume) {
+
+        if (this.playButtonIcon?.[1]?.resume) {
             const parser = new DOMParser();
             // convert html string into DOM
-            let document = parser.parseFromString(ttsObj?.player_customizations?.[1]?.resume, "image/svg+xml");
-            icon = `<div className="tts_button">${document.documentElement.outerHTML}</div><span>`;
+            let document = parser.parseFromString(this.playButtonIcon?.[1]?.resume, "image/svg+xml");
+            icon = `<div class="tts_button">${document.documentElement.outerHTML}</div><span>`;
         }
+        icon =  icon + ' ' + this.resumeButtonText() + '<span></span></span></div>'
 
-        return icon + ' ' + this.resumeButtonText() + '<span></span></span></div>'
+        return icon;
     }
 
     recordStartButtonContent() {
@@ -201,8 +205,9 @@ export default class TextToSpeech {
     /**
      * Don't display this text in pro version.
      * @param {*} listenStatus
+     * @param {*} isClicked
      */
-    displayButtonText(listenStatus) {
+    displayButtonText(listenStatus, isClicked = false) {
         if (this?.playButtonNo == 1 && this?.speakButton?.innerHTML) {
             if ('listen' === listenStatus) {
                 this.speakButton.innerHTML = this.replayButtonContent();
@@ -216,6 +221,9 @@ export default class TextToSpeech {
                 this.speakButton.innerHTML = this.resumeButtonContent();
                 let buttonHoverTitle = window?.ttsObj?.buttonTextArr?.resume_hover_title ?? this.resumeButtonText();
                 this.speakButton.setAttribute('title', 'Text To Audio : ' + buttonHoverTitle);
+            }
+            if(isClicked) {
+                addHoverColor(this.speakButton)
             }
         }
     }
@@ -243,7 +251,10 @@ export default class TextToSpeech {
         window.sessionStorage.setItem('tts_paused_by_intention', false);
     }
 
-    speak(speech, content = this.content) {
+    speak(speech, content = this.content, isClicked = false) {
+        if(!content) {
+           content =  this.content
+        }
         if (!this.speech.hasBrowserSupport()) {
             this.displayApiMissing("tts__listent_content_" + this.buttonId)
             return;
@@ -296,7 +307,7 @@ export default class TextToSpeech {
             });
 
         this.listenStatus = 'pause';
-        this.displayButtonText(this.listenStatus)
+        this.displayButtonText(this.listenStatus, isClicked)
         this.analytics.trackPlay();
         if (!this.browser.isAndroid()) {
             let thisClass = this;
@@ -320,7 +331,7 @@ export default class TextToSpeech {
         }
     }
 
-    pause(speech) {
+    pause(speech, isClicked = false) {
         /**
          * If desktop then cancel after 7/8 second
          * If mobile cancel and restart again.
@@ -343,14 +354,15 @@ export default class TextToSpeech {
         this.content = this.splittedSentances.join(' ')
 
         this.listenStatus = 'resume';
-        this.displayButtonText(this.listenStatus)
+
+        this.displayButtonText(this.listenStatus, isClicked)
         this.analytics.trackPause();
         if (!this.browser.isAndroid()) {
             clearTimeout(this.timer);
         }
     }
 
-    resume(speech) {
+    resume(speech, isClicked = false) {
 
         if (this.isCanceled) {
             this.speak(speech, this.content)
@@ -364,7 +376,7 @@ export default class TextToSpeech {
         }
 
         this.listenStatus = 'pause';
-        this.displayButtonText(this.listenStatus)
+        this.displayButtonText(this.listenStatus, isClicked)
         if (!this.browser.isAndroid()) {
             let thisClass = this;
             this.timer = setTimeout(function pauseResumeTimer() {
@@ -389,9 +401,10 @@ export default class TextToSpeech {
     /**
      * Callback function will need for pro version.
      * @param {*} callBackAfterEnd
+     * @param {*} isClicked
      * @returns
      */
-    _init(callBackAfterEnd = null) { // init speaking, 
+    _init(callBackAfterEnd = null, isClicked = false) { // init speaking,
         this.callBackAfterEnd = callBackAfterEnd
         if (this.ttsListeningSettings === undefined) return;
         this.speech
@@ -442,7 +455,7 @@ export default class TextToSpeech {
                 this.browser = new BrowserSupport(ttsObj, data.voices, this.ttsListeningSettings?.tta__listening_lang, this.ttsListeningSettings?.tta__listening_voice)
 
                 // }
-                this._prepareSpeakButton(this.speech);
+                this._prepareSpeakButton(this.speech, isClicked);
                 window.sessionStorage.setItem('tts_paused_by_intention', false);
             })
             .catch(e => {
@@ -451,15 +464,15 @@ export default class TextToSpeech {
 
     }
 
-    _prepareSpeakButton(speech) {
+    _prepareSpeakButton(speech, isClicked = false) {
         // Button click events
         // this.speakButton.addEventListener("click", () => {
         if (this.listenStatus == 'listen') {
-            this.speak(speech)
+            this.speak(speech, null, isClicked)
         } else if (this.listenStatus == 'pause') {
-            this.pause(speech)
+            this.pause(speech, isClicked)
         } else if (this.listenStatus == 'resume') {
-            this.resume(speech)
+            this.resume(speech, isClicked)
         }
         // });
 
