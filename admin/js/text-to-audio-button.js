@@ -66,7 +66,7 @@ class TTSPlayButton extends HTMLElement {
                         #tts__listent_content_${buttonId}.tts__listent_content:hover{ ${settings.btnStyle} background-color:${ttsObj?.settings?.customize?.hoverBackgroundColor || '#f0f0f0'};}
                         #tts__listent_content_${buttonId}.tts__listent_content svg{ display:${settings.shouldDisplayIcon}; padding-right:7px !important;padding-top: 5px; }
                         #tts__listent_content_${buttonId}.tts__listent_content:hover  svg{ display:${settings.shouldDisplayIcon}; padding-right:7px !important; padding-top: 5px; }
-                        #tts__listent_content_${buttonId}.tts__listent_content:hover span{ color: ${ ttsObj?.settings?.customize?.hoverTextColor || "#000000" } };
+                        #tts__listent_content_${buttonId}.tts__listent_content:hover span{ color: ${ ttsObj?.settings?.customize?.hoverTextColor || "#000000" } }
                         
                         `;
 
