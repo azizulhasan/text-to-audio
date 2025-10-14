@@ -382,9 +382,6 @@ class TTA_Helper
     public static function tts_file_name($title, $selectedLang, $voice = '', $post_id = '')
     {
         global $post;
-        if (!$post_id && $post) { // TODO: must add post ID to file name.
-            $post_id = $post->ID;
-        }
         /**
          * When title is not added to readble content by UI
          * option of settings page. Then post title of the post
@@ -393,6 +390,17 @@ class TTA_Helper
         if (!$title) {
             $title = $post->post_title;
         }
+        /**
+         * TTS-191
+         * When title is empty file name will be post id
+         */
+        if (!$post_id && $post) { // TODO: must add post ID to file name.
+            $post_id = $post->ID;
+            if(!$title) {
+                $title = $post_id;
+            }
+        }
+
         $title = trim($title);
 
         $lang_code = explode('-', str_replace(['_', ' '], '-', $selectedLang));
