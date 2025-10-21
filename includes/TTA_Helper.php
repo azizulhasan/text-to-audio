@@ -379,9 +379,11 @@ class TTA_Helper
         return $voice;
     }
 
-    public static function tts_file_name($title, $selectedLang, $voice = '', $post_id = '')
+    public static function tts_file_name($title, $selectedLang, $voice = '', $post_id = '', $post = '')
     {
-        global $post;
+        if(!$post) {
+            global $post;
+        }
         /**
          * When title is not added to readble content by UI
          * option of settings page. Then post title of the post
@@ -396,9 +398,10 @@ class TTA_Helper
          */
         if (!$post_id && $post) { // TODO: must add post ID to file name.
             $post_id = $post->ID;
-            if(!$title) {
-                $title = $post_id;
-            }
+        }
+
+        if(!$title) {
+            $title = $post_id;
         }
 
         $title = trim($title);
