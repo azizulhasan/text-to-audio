@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Button, Col, Container, Form, OverlayTrigger, Row, Tooltip, Card, Table } from "react-bootstrap";
-import { __ } from "@wordpress/i18n";
+import React, {useEffect, useState} from "react";
+import {Button, Col, Container, Form, OverlayTrigger, Row, Tooltip, Card, Table} from "react-bootstrap";
+import {__} from "@wordpress/i18n";
 import UpgradeToPro from "../../UpgradeToPro";
 import {postData, postWithoutImage} from "../../context/utilities";
-import { MultiSelect } from "../../context/MultiSelect";
+import {MultiSelect} from "../../context/MultiSelect";
 import notify from "../../context/Notify";
 import toast from "../../context/Notify";
 import AtlasVoicePlayerInsights from "../../../../../admin/js/AtlasVoicePlayerInsights";
@@ -86,9 +86,9 @@ export default function Analitics() {
     function getPopularPosts(data) {
         return data
             .map(post => {
-                const { post_id, analytics } = post;
+                const {post_id, analytics} = post;
                 const totalScore = Object.values(analytics).reduce((sum, event) => sum + event.count, 0);
-                return { post_id, totalScore };
+                return {post_id, totalScore};
             })
             .sort((a, b) => b.totalScore - a.totalScore)
             .slice(0, 10);
@@ -136,7 +136,7 @@ export default function Analitics() {
                     return post;
                 })
 
-                console.log({ postsData })
+                console.log({postsData})
 
                 setMostPopularPosts(postsData)
 
@@ -182,7 +182,7 @@ export default function Analitics() {
 
         setAnalytics({
             ...analytics,
-            ...{ [e.target.name]: value },
+            ...{[e.target.name]: value},
         });
     };
 
@@ -215,23 +215,36 @@ export default function Analitics() {
 
     const handleSearchData = (e) => {
         e.preventDefault();
-        let searchedData  = structuredClone(analyticsSearch)
+        let searchedData = structuredClone(analyticsSearch)
         let tempData = {
             ...searchedData,
-            [e.target.name] :e.target.value
+            [e.target.name]: e.target.value
         }
-        console.log(tempData)
+
         setAnalyticsSearch(tempData)
     }
 
     const handleSearch = (e) => {
         e.preventDefault();
+        let error_message = '';
 
-        if(!analyticsSearch.post_id) {
-            notify('No post ID is pasted! Please write a post ID.', 'error');
-            return
+        // if both are missing
+        if (
+            !analyticsSearch.post_id &&
+            !(analyticsSearch.from_date && analyticsSearch.to_date)
+        ) {
+            error_message = 'Please provide either a Post ID or a date range.';
         }
-        let insight = new AtlasVoicePlayerInsights(analyticsSearch.post_id, 'dashboard')
+        console.log(analyticsSearch)
+        // if there's an error, show it
+        if (error_message) {
+            notify(error_message, 'error');
+            return; // stop further execution if needed
+        }
+
+
+
+        let insight = new AtlasVoicePlayerInsights({postId: analyticsSearch.post_id}, 'dashboard')
 
 
     }
@@ -265,24 +278,24 @@ export default function Analitics() {
                             <Col xs={12} sm={6} lg={4}>
                                 <Form.Label htmlFor='tta__settings_exclude_wp_tags'>
                                     {__('Track Post IDs For Analytics')} {ttsObj.is_pro_active ? "" : (<>
-                                        {['top'].map((placement) => (<OverlayTrigger
-                                            key={placement}
-                                            placement={placement}
-                                            overlay={<Tooltip id={`tooltip-${placement}`}>
-                                                {__('Tracking more than 5 post IDs is a pro feature')}
-                                            </Tooltip>}>
-                                            <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
-                                                className="fas fa-lock" /></Button>
-                                        </OverlayTrigger>))}
-                                    </>)}
+                                    {['top'].map((placement) => (<OverlayTrigger
+                                        key={placement}
+                                        placement={placement}
+                                        overlay={<Tooltip id={`tooltip-${placement}`}>
+                                            {__('Tracking more than 5 post IDs is a pro feature')}
+                                        </Tooltip>}>
+                                        <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
+                                            className="fas fa-lock"/></Button>
+                                    </OverlayTrigger>))}
+                                </>)}
                                 </Form.Label>
                             </Col>
                             <Col xs={11} sm={11} lg={7}>
                                 <MultiSelect toastMessage={'Tracking more than 5 post IDs is a pro feature'}
-                                    name={'tts_trackable_post_ids'}
-                                    id={'tts_trackable_post_ids'}
-                                    selectedItems={selectedIds}
-                                    selectionLimit={5} options={postIds} onChange={handleSelectionChange} />
+                                             name={'tts_trackable_post_ids'}
+                                             id={'tts_trackable_post_ids'}
+                                             selectedItems={selectedIds}
+                                             selectionLimit={5} options={postIds} onChange={handleSelectionChange}/>
 
                             </Col>
                             <Col xs={1} sm={1} lg={1} className='mt-4'>
@@ -294,7 +307,7 @@ export default function Analitics() {
                                             {__('Click To Know How It Works?')}
                                         </Tooltip>}>
                                         <a className={'text-danger'} target='_blank'
-                                            href='https://www.youtube.com/watch?v=amkrAtVQGBY&t=8s'>
+                                           href='https://www.youtube.com/watch?v=amkrAtVQGBY&t=8s'>
                                             <i className="fab fa-youtube"></i>
                                         </a>
                                     </OverlayTrigger>))}
@@ -310,17 +323,88 @@ export default function Analitics() {
                             </div>
                         </Row>
 
-                        <Row className='mt-3' >
-                            <Col xs={11} sm={11} lg={7}>
-                                <input onChange={event => handleSearchData(event)} name={'post_id'} id={'post_id'} value={analyticsSearch?.post_id || null} type={'number'} />
-                                <button  type='button' onClick={event => handleSearch(event) } className='tta_btn  btn-block'>
-                                    Search
-                                </button>
+                        {/*<Row className='mt-3'>*/}
+                        {/*    <Col xs={11} sm={11} lg={7}>*/}
+                        {/*        <input onChange={event => handleSearchData(event)} name={'post_id'} id={'post_id'}*/}
+                        {/*               value={analyticsSearch?.post_id || null} type={'number'}/>*/}
+                        {/*        <Form.Control*/}
+                        {/*            type='date'*/}
+                        {/*            name='from_date'*/}
+                        {/*            onChange={event => handleSearchData(event)}*/}
+                        {/*            id='from_date'*/}
+                        {/*            value={analyticsSearch?.from_date || ''}*/}
+                        {/*            title='Generate MP3 File Date From'*/}
+                        {/*        />*/}
+                        {/*        <Form.Control*/}
+                        {/*            type='date'*/}
+                        {/*            name='to_date'*/}
+                        {/*            onChange={event => handleSearchData(event)}*/}
+                        {/*            id='to_date'*/}
+                        {/*            value={analyticsSearch?.to_date || ''}*/}
+                        {/*            title='Generate MP3 File Date To'*/}
+                        {/*        />*/}
+                        {/*        <button type='button' onClick={event => handleSearch(event)}*/}
+                        {/*                className='tta_btn  btn-block'>*/}
+                        {/*            Search*/}
+                        {/*        </button>*/}
+                        {/*    </Col>*/}
+                        {/*    <Col xs={11} sm={11} lg={7}>*/}
+                        {/*        <div id="atlasVoice_analytics"></div>*/}
+                        {/*    </Col>*/}
+                        {/*</Row>*/}
+
+
+                        <Row className="mt-3">
+                            <Col xs={12} lg={12}>
+                                <div className="d-flex align-items-center flex-wrap gap-2">
+
+                                    {/* Post ID input */}
+                                    <Form.Control
+                                        type="number"
+                                        name="post_id"
+                                        placeholder="Post ID"
+                                        value={analyticsSearch?.post_id || ''}
+                                        onChange={handleSearchData}
+                                        className="w-auto"
+                                    />
+
+                                    {/* From date */}
+                                    <Form.Control
+                                        type="date"
+                                        name="from_date"
+                                        value={analyticsSearch?.from_date || ''}
+                                        onChange={handleSearchData}
+                                        title="Date From"
+                                        className="w-auto"
+                                    />
+
+                                    {/* To date */}
+                                    <Form.Control
+                                        type="date"
+                                        name="to_date"
+                                        value={analyticsSearch?.to_date || ''}
+                                        onChange={handleSearchData}
+                                        title="Date To"
+                                        className="w-auto"
+                                    />
+
+                                    {/* Search Button */}
+                                    <button
+                                        type="button"
+                                        onClick={handleSearch}
+                                        className="tta_btn "
+                                    >
+                                        Search
+                                    </button>
+                                </div>
                             </Col>
-                            <Col xs={11} sm={11} lg={7}>
+
+                            <Col xs={12} lg={5} className="mt-3 mt-lg-0">
                                 <div id="atlasVoice_analytics"></div>
                             </Col>
                         </Row>
+
+
 
                         {
                             Object.keys(summary).length && <Row>
@@ -328,26 +412,26 @@ export default function Analitics() {
                                     <h3 className="mb-3">📊 TTS Player Analytics Summary</h3>
                                     <Table striped bordered hover responsive>
                                         <thead className="atlasvoice-bg text-white">
-                                            <tr>
-                                                <th>Metric</th>
-                                                <th>Count</th>
-                                            </tr>
+                                        <tr>
+                                            <th>Metric</th>
+                                            <th>Count</th>
+                                        </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td><strong>Total Posts</strong></td>
-                                                <td>{summary.totalPosts}</td>
+                                        <tr>
+                                            <td><strong>Total Posts</strong></td>
+                                            <td>{summary.totalPosts}</td>
+                                        </tr>
+                                        {Object.entries(summary.totalCounts).map(([key, value]) => (
+                                            <tr key={key}>
+                                                <td><strong>{key.charAt(0).toUpperCase() + key.slice(1)}</strong></td>
+                                                <td>{value}</td>
                                             </tr>
-                                            {Object.entries(summary.totalCounts).map(([key, value]) => (
-                                                <tr key={key}>
-                                                    <td><strong>{key.charAt(0).toUpperCase() + key.slice(1)}</strong></td>
-                                                    <td>{value}</td>
-                                                </tr>
-                                            ))}
-                                            <tr className="table-success">
-                                                <td><strong>🔥 Total Interactions</strong></td>
-                                                <td><strong>{summary.totalInteractions}</strong></td>
-                                            </tr>
+                                        ))}
+                                        <tr className="table-success">
+                                            <td><strong>🔥 Total Interactions</strong></td>
+                                            <td><strong>{summary.totalInteractions}</strong></td>
+                                        </tr>
                                         </tbody>
                                     </Table>
                                 </Card>
@@ -357,23 +441,25 @@ export default function Analitics() {
                                         {
                                             ttsObj.is_pro_active ? <Table striped bordered hover responsive>
                                                 <thead className="atlasvoice-bg text-white">
-                                                    <tr>
-                                                        <th>Rank</th>
-                                                        <th>Post Title</th>
-                                                        <th>Total Interactions</th>
-                                                    </tr>
+                                                <tr>
+                                                    <th>Rank</th>
+                                                    <th>Post Title</th>
+                                                    <th>Total Interactions</th>
+                                                </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {mostPopularPosts.map((post, index) => (
-                                                        <tr key={post.post_id}>
-                                                            <td><strong>#{index + 1}</strong></td>
-                                                            <td>{post.title}</td>
-                                                            <td>{post.totalScore}</td>
-                                                        </tr>
-                                                    ))}
+                                                {mostPopularPosts.map((post, index) => (
+                                                    <tr key={post.post_id}>
+                                                        <td><strong>#{index + 1}</strong></td>
+                                                        <td>{post.title}</td>
+                                                        <td>{post.totalScore}</td>
+                                                    </tr>
+                                                ))}
                                                 </tbody>
                                             </Table> : <>
-                                                <h3> to see popular post analytics post you have to <a target={'_blank'} href={'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/'} > pro version.</a></h3>
+                                                <h3> to see popular post analytics post you have to <a target={'_blank'}
+                                                                                                       href={'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/'}> pro
+                                                    version.</a></h3>
                                             </>
                                         }
                                     </Card>
@@ -385,7 +471,7 @@ export default function Analitics() {
                     </Form>
                 </Col>
                 <Col xs={12} sm={12} lg={4}>
-                    <UpgradeToPro promotionType={'analytics'} />
+                    <UpgradeToPro promotionType={'analytics'}/>
                 </Col>
             </Row>
         </Container>

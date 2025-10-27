@@ -18,9 +18,10 @@ class AtlasVoicePlayerInsights {
         averagePausesPerPlay: __("Average number of pauses per play"),
     };
     proPage = 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/';
-
-    constructor(postId = '', place_to_display = 'post_edit') {
-        this.postId = postId
+    place_to_display = 'post_edit'
+    constructor(searchParams = {}, place_to_display = 'post_edit') {
+        this.searchParams = searchParams
+        this.place_to_display = place_to_display;
         this.apiUrl = ttsObj.api_url + ttsObj.api_namespace + '/' + ttsObj.api_version + '/insights'; // Replace with your backend API URL
         if(place_to_display === 'dashboard') {
             document.getElementById('atlasVoice_analytics').innerHTML = '';
@@ -193,33 +194,39 @@ class AtlasVoicePlayerInsights {
         if (!this.shouldTrackAnalyticsData()) {
             return;
         }
-        if (this.postId) {
-            this.apiUrl += '/' + this.postId
-            let response = await fetch(this.apiUrl, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-NONCE': window?.ttsObj?.rest_nonce,
-                }
-            });
-            let data = await response.json();
-            data = this.mergeAnalytics(data.data)
-            this.data = data;
-            this.insights = this.generateInsights()
-        } else {
-            console.log(ttsObj)
-            // let response = await fetch(this.apiUrl, {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //         'X-WP-NONCE': window?.ttsObj?.rest_nonce,
-            //     }
-            // });
-            // let data = await response.json();
-            // this.data = data.data;
-            // // this.insights = this.generateInsights()
-            // console.log(this.data)
+
+
+        if (
+            this.place_to_display === 'dashboard' &&
+            !this.searchParams?.postId &&
+            !(this.from_date && this.to_date)
+        ) {
+            return;
         }
+
+        if(this.searchParams?.postId) {
+            this.apiUrl += '/' + this.searchParams?.postId
+        }
+        if(this.searchParams.from_date && this.searchParams.data_to) {
+            this.apiUrl += '/' + this.searchParams.from_date
+            this.apiUrl += '/' + this.searchParams.data_to
+        }
+
+        console.log(this.apiUrl)
+
+        let response = await fetch(this.apiUrl, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-WP-NONCE': window?.ttsObj?.rest_nonce,
+            }
+        });
+        let data = await response.json();
+        data = this.mergeAnalytics(data.data)
+        this.data = data;
+        this.insights = this.generateInsights()
+
+
 
 
         if (Object.keys(this.insights).length) {
@@ -376,9 +383,9 @@ class AtlasVoicePlayerInsights {
         }
         if (window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids?.length) {
 
-            if ((window?.ttsObj.is_pro_active && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes('all')) || window?.ttsObj.is_pro_active && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.postId)) {
+            if ((window?.ttsObj.is_pro_active && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes('all')) || window?.ttsObj.is_pro_active && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.searchParams?.postId)) {
                 should_track = true;
-            } else if (!window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.postId)) {
+            } else if (!window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.searchParams?.postId)) {
                 should_track = false;
             }
         }
@@ -401,7 +408,7 @@ if (window?.ttsObj?.is_pro_active) {
 if (window?.ttsObj?.is_admin_page) {
     let postId = getPostIdFromUrl(window.location.href)
     if (postId) {
-        new AtlasVoicePlayerInsights(postId)
+        new AtlasVoicePlayerInsights({postId: postId})
     } else {
         new AtlasVoicePlayerInsights()
         // console.error('Post Id is not found:' + postId)
