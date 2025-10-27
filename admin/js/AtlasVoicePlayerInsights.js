@@ -19,9 +19,12 @@ class AtlasVoicePlayerInsights {
     };
     proPage = 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/';
 
-    constructor(postId = '') {
+    constructor(postId = '', place_to_display = 'post_edit') {
         this.postId = postId
         this.apiUrl = ttsObj.api_url + ttsObj.api_namespace + '/' + ttsObj.api_version + '/insights'; // Replace with your backend API URL
+        if(place_to_display === 'dashboard') {
+            document.getElementById('atlasVoice_analytics').innerHTML = '';
+        }
         this.setAnalyticsTitle();
         this.getInsights()
 

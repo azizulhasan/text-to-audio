@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Button, Col, Container, Form, OverlayTrigger, Row, Tooltip, Card, Table } from "react-bootstrap";
 import { __ } from "@wordpress/i18n";
 import UpgradeToPro from "../../UpgradeToPro";
-import { postWithoutImage } from "../../context/utilities";
+import {postData, postWithoutImage} from "../../context/utilities";
 import { MultiSelect } from "../../context/MultiSelect";
-import toast from '../../context/Notify';
+import notify from "../../context/Notify";
+import toast from "../../context/Notify";
+import AtlasVoicePlayerInsights from "../../../../../admin/js/AtlasVoicePlayerInsights";
 
 
 export default function Analitics() {
@@ -18,6 +20,7 @@ export default function Analitics() {
     const [summary, setSummary] = useState({})
     const [mostPopularPosts, setMostPopularPosts] = useState({})
     const [popularPostsIds, setPopularPostsIds] = useState([])
+    const [analyticsSearch, setAnalyticsSearch] = useState({})
 
     function getTotalTime(totalSeconds) {
 
@@ -210,6 +213,29 @@ export default function Analitics() {
             });
     };
 
+    const handleSearchData = (e) => {
+        e.preventDefault();
+        let searchedData  = structuredClone(analyticsSearch)
+        let tempData = {
+            ...searchedData,
+            [e.target.name] :e.target.value
+        }
+        console.log(tempData)
+        setAnalyticsSearch(tempData)
+    }
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+
+        if(!analyticsSearch.post_id) {
+            notify('No post ID is pasted! Please write a post ID.', 'error');
+            return
+        }
+        let insight = new AtlasVoicePlayerInsights(analyticsSearch.post_id, 'dashboard')
+
+
+    }
+
     return (isDataLoaded ? <React.Fragment>
         <Container>
             <Row>
@@ -282,6 +308,18 @@ export default function Analitics() {
                                     Save
                                 </button>
                             </div>
+                        </Row>
+
+                        <Row className='mt-3' >
+                            <Col xs={11} sm={11} lg={7}>
+                                <input onChange={event => handleSearchData(event)} name={'post_id'} id={'post_id'} value={analyticsSearch?.post_id || null} type={'number'} />
+                                <button  type='button' onClick={event => handleSearch(event) } className='tta_btn  btn-block'>
+                                    Search
+                                </button>
+                            </Col>
+                            <Col xs={11} sm={11} lg={7}>
+                                <div id="atlasVoice_analytics"></div>
+                            </Col>
                         </Row>
 
                         {

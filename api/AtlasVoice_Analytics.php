@@ -382,4 +382,19 @@ class AtlasVoice_Analytics {
 
 		return $merged;
 	}
+
+    /**
+     * @param $request
+     *
+     * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+     */
+    public function report( $request ) {
+        $body = [];
+        $body = $request->get_body();
+        $body = json_decode( $body, true );
+        $response['status'] = true;
+        $response['data']   = $body;
+
+        return rest_ensure_response( $response );
+    }
 }
