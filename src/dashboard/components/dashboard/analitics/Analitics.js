@@ -216,6 +216,22 @@ export default function Analitics() {
     const handleSearchData = (e) => {
         e.preventDefault();
         let searchedData = structuredClone(analyticsSearch)
+        if(!ttsObj.is_pro_active) {
+            if(e.target.name === 'from_date' || e.target.name === 'to_date') {
+                notify(<>
+                    <h6>Date Range is only available in pro version</h6>
+                    <button onClick={(e) => {
+                        window.open('https://atlasaidev.com/plugins/text-to-speech-pro/pricing/')
+                    }} className='tta_btn'>
+                        Buy Now
+                    </button>
+                </>, 'info', {
+                    position: 'top-right',
+                    autoClose: 10000,
+                });
+                return;
+            }
+        }
         let tempData = {
             ...searchedData,
             [e.target.name]: e.target.value
@@ -320,37 +336,6 @@ export default function Analitics() {
                                 </button>
                             </div>
                         </Row>
-
-                        {/*<Row className='mt-3'>*/}
-                        {/*    <Col xs={11} sm={11} lg={7}>*/}
-                        {/*        <input onChange={event => handleSearchData(event)} name={'post_id'} id={'post_id'}*/}
-                        {/*               value={analyticsSearch?.post_id || null} type={'number'}/>*/}
-                        {/*        <Form.Control*/}
-                        {/*            type='date'*/}
-                        {/*            name='from_date'*/}
-                        {/*            onChange={event => handleSearchData(event)}*/}
-                        {/*            id='from_date'*/}
-                        {/*            value={analyticsSearch?.from_date || ''}*/}
-                        {/*            title='Generate MP3 File Date From'*/}
-                        {/*        />*/}
-                        {/*        <Form.Control*/}
-                        {/*            type='date'*/}
-                        {/*            name='to_date'*/}
-                        {/*            onChange={event => handleSearchData(event)}*/}
-                        {/*            id='to_date'*/}
-                        {/*            value={analyticsSearch?.to_date || ''}*/}
-                        {/*            title='Generate MP3 File Date To'*/}
-                        {/*        />*/}
-                        {/*        <button type='button' onClick={event => handleSearch(event)}*/}
-                        {/*                className='tta_btn  btn-block'>*/}
-                        {/*            Search*/}
-                        {/*        </button>*/}
-                        {/*    </Col>*/}
-                        {/*    <Col xs={11} sm={11} lg={7}>*/}
-                        {/*        <div id="atlasVoice_analytics"></div>*/}
-                        {/*    </Col>*/}
-                        {/*</Row>*/}
-
 
                         <Row className="mt-3">
                             <Col xs={12} lg={12}>
