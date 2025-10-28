@@ -242,8 +242,6 @@ export default function Analitics() {
             return; // stop further execution if needed
         }
 
-
-
         let insight = new AtlasVoicePlayerInsights(analyticsSearch, 'dashboard')
 
 
