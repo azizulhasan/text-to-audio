@@ -231,7 +231,7 @@ export default function Analitics() {
         // if both are missing
         if (
             !analyticsSearch.post_id &&
-            !(analyticsSearch.from_date && analyticsSearch.to_date)
+            !(analyticsSearch.from_date || analyticsSearch.to_date)
         ) {
             error_message = 'Please provide either a Post ID or a date range.';
         }
@@ -244,7 +244,7 @@ export default function Analitics() {
 
 
 
-        let insight = new AtlasVoicePlayerInsights({postId: analyticsSearch.post_id}, 'dashboard')
+        let insight = new AtlasVoicePlayerInsights(analyticsSearch, 'dashboard')
 
 
     }
@@ -362,6 +362,7 @@ export default function Analitics() {
                                     <Form.Control
                                         type="number"
                                         name="post_id"
+                                        id="post_id"
                                         placeholder="Post ID"
                                         value={analyticsSearch?.post_id || ''}
                                         onChange={handleSearchData}

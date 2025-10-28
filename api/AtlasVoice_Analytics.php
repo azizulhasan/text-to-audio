@@ -155,13 +155,21 @@ class AtlasVoice_Analytics {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'atlasvoice_analytics';
 
-		$post_id         = $request->get_param( 'id' );
-		$args['post_id'] = $post_id;
+		$post_id         = $request->get_param( 'post_id' );
+		$from_date         = $request->get_param( 'from_date' );
+		$to_date         = $request->get_param( 'to_date' );
+        if(!$to_date) {
+            $to_date = current_time( 'mysql' );
+        }
+		$args['post_id']   = $post_id;
+		$args['from_date'] = $from_date;
+		$args['to_date']   = $to_date;
+
 		$defaults        = array(
-			'user_id'   => null,
-			'post_id'   => null,
-			'from_date' => null,
-			'to_date'   => current_time( 'mysql' ), // Default to today if 'to_date' is not provided
+            'user_id'   => null,
+            'post_id'   => null,
+            'from_date' => null,
+            'to_date'   => current_time( 'mysql' ), // Default to today if 'to_date' is not provided
 		);
 
 		$args       = wp_parse_args( $args, $defaults );
@@ -213,6 +221,12 @@ class AtlasVoice_Analytics {
 
 		$response['status'] = true;
 		$response['data']   = $total_results;
+		$response['extra']   = [
+            'args'       => $args,
+            'conditions' => $conditions,
+            '$total_results'    => $total_results,
+            '$where_clause'    => $where_clause,
+        ];
 
 		return rest_ensure_response( $response );
 	}
