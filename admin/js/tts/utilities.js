@@ -147,3 +147,105 @@ export  const setSvgColorOnEvent = (wrapper) => {
         addDefaultColor(wrapper)
     });
 }
+
+var errorCallback = function (error) {
+    var errorMessage = 'Unknown error';
+    switch (error.code) {
+        case 1:
+            errorMessage = 'Permission denied';
+            break;
+        case 2:
+            errorMessage = 'Position unavailable';
+            break;
+        case 3:
+            errorMessage = 'Timeout';
+            break;
+        default:
+            errorMessage = 'Timeout';
+    }
+};
+
+// options to pass in "getCurrentPosition" functions
+export const options = {
+    enableHighAccuracy: true,
+    timeout: 3000,
+    maximumAge: 0,
+};
+
+/**
+ * get location data of user.
+ * @param {window.navigator} navigator
+ */
+export const setUserAddress = (navigator) => {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            getLocationData,
+            errorCallback,
+            options
+        );
+    } else {
+        throw new Error('Geolocation is not supported by this browser.');
+    }
+};
+
+/**
+ * Current location data
+ * @param {position} position
+ */
+let userAddress = {};
+function getLocationData(position) {
+    var latitude = position.coords.latitude;
+    var longitude = position.coords.longitude;
+    var language = window.navigator.language ;
+    var request = new XMLHttpRequest();
+
+    var method = 'GET';
+    var url =
+        'https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' +
+        latitude +
+        '&longitude=' +
+        longitude +
+        '&localityLanguage=' + language;
+    var async = true;
+
+    request.open(method, url, async);
+    request.onreadystatechange = function () {
+        if (request.readyState === 4 && request.status === 200) {
+            let userData = JSON.parse(request.responseText);
+            userAddress['continent'] = userData.continent;
+            userAddress['countryName'] = userData.countryName;
+            userAddress['locality'] = userData.locality;
+            userAddress['principalSubdivision'] = userData.principalSubdivision;
+            userAddress['city'] = userData.city;
+        }
+    };
+
+    request.send();
+}
+/**
+ * Get user browser data. window.navigator object's data. loop throw the object and get all string
+ * and boolean data
+ * @param {navigator} navigator
+ * @returns
+ */
+export const getUserBrowserData = (navigator) => {
+    let browserData = {};
+    for (var key in navigator) {
+        if (
+            typeof navigator[key] === 'string' ||
+            typeof navigator[key] === 'boolean'
+        ) {
+            browserData[key] = navigator[key];
+        }
+    }
+
+    return browserData;
+};
+/**
+ * city, country, division, locality etc.
+ * @returns user location data
+ */
+ export const getUserAddress = async () => {
+    await setUserAddress(window.navigator)
+    return await  userAddress;
+};

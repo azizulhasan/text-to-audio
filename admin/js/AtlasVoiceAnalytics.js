@@ -1,4 +1,5 @@
 import * as FingerprintJS from './analytics/fingerprint.js';
+import {getUserAddress} from "./tts/utilities";
 
 class AtlasVoiceAnalytics {
     constructor(postId = '') {
@@ -15,6 +16,20 @@ class AtlasVoiceAnalytics {
         // Bind the event listeners for beforeunload and unload
         window.addEventListener('beforeunload', this.sendSessionData.bind(this));
 
+
+
+
+        // TODO: later this function will be implemented.
+        // this.getDemographicData();
+
+    }
+
+    async getDemographicData() {
+        // Example usage:
+        let info = await this.getDeviceData().then(info => info);
+
+        console.log(info)
+        // IMPORTANT: Do not send/store this without user consent in production — shows how to access the object.
     }
 
 
@@ -217,6 +232,221 @@ class AtlasVoiceAnalytics {
         };
         this.addEvent('device_info', deviceInfo);
     }
+
+    /**
+     * getDeviceData()
+     * Collects only information that does NOT require explicit user consent,
+     * and will collect geolocation ONLY if permission is already granted (no prompt).
+     *
+     * Returns: Promise resolving to an object with discovered properties.
+     *
+     * NOTE: It's impossible to read a user's "device name" (e.g., "John's iPhone")
+     * from standard browser APIs — browsers do not expose that for privacy reasons.
+     * This function infers device/OS/browser from available hints (userAgent / userAgentData).
+     *
+     * Usage:
+     *   getDeviceData().then(data => console.log(data));
+     */
+    async  getDeviceData() {
+        const result = {
+            // user agent / hints
+            userAgent: navigator.userAgent || null,
+            userAgentData: null, // will populate if available
+            browserName: null,
+            browserVersion: null,
+
+            // platform / OS / device type
+            platform: navigator.platform || null,
+            os: null,
+            isAndroid: false,
+            isIphone: false,
+            deviceType: null, // 'mobile' | 'tablet' | 'desktop' | 'unknown'
+
+            // hardware / capability info (if available)
+            screenWidth: (typeof screen !== 'undefined') ? screen.width : null,
+            screenHeight: (typeof screen !== 'undefined') ? screen.height : null,
+            deviceMemoryGB: navigator.deviceMemory || null, // may be undefined in some browsers
+            logicalCores: navigator.hardwareConcurrency || null,
+
+            // connection info (may be limited)
+            connection: null, // {effectiveType, downlink, rtt, saveData} or null
+
+            // language / timezone
+            language: navigator.language || null,
+            languages: navigator.languages || null,
+            timeZone: (typeof Intl === 'object' && Intl.DateTimeFormat) ? Intl.DateTimeFormat().resolvedOptions().timeZone : null,
+
+            // battery (if available, and no permission prompt)
+            battery: null, // {charging, level, chargingTime, dischargingTime} or null
+
+            // location (only if permission already granted; will NOT prompt)
+            location: null, // {latitude, longitude, accuracy, timestamp} or null
+
+            // timestamp when collected
+            collectedAt: new Date().toISOString()
+        };
+
+        // Helper: try to read userAgentData (client hints) if available
+        try {
+            if (navigator.userAgentData) {
+                // userAgentData is privacy-aware; may provide brands, platform, mobile flag
+                result.userAgentData = {
+                    brands: navigator.userAgentData.brands || null,
+                    mobile: navigator.userAgentData.mobile || false,
+                    platform: navigator.userAgentData.platform || null
+                };
+            }
+        } catch (e) {
+            // ignore
+        }
+
+        // Parse a best-effort browser name & version from userAgent or userAgentData
+        (function parseBrowser() {
+            // Prefer userAgentData.brands if available
+            if (result.userAgentData && Array.isArray(result.userAgentData.brands) && result.userAgentData.brands.length) {
+                // take the highest-ranking brand (best-effort)
+                const brand = result.userAgentData.brands[result.userAgentData.brands.length - 1];
+                if (brand) {
+                    result.browserName = brand.brand || null;
+                    result.browserVersion = brand.version || null;
+                }
+            }
+
+            // Fallback: simple regex-based UA parsing (best-effort; not perfect)
+            if (!result.browserName && result.userAgent) {
+                const ua = result.userAgent;
+                const browsers = [
+                    { name: 'Edge', re: /Edg\/([0-9._]+)/ },
+                    { name: 'Chrome', re: /Chrome\/([0-9._]+)/ },
+                    { name: 'Firefox', re: /Firefox\/([0-9._]+)/ },
+                    { name: 'Safari', re: /Version\/([0-9._]+).*Safari/ },
+                    { name: 'Opera', re: /OPR\/([0-9._]+)/ },
+                    { name: 'IE', re: /MSIE\s([0-9._]+)|Trident\/.*rv:([0-9._]+)/ }
+                ];
+                for (const b of browsers) {
+                    const m = ua.match(b.re);
+                    if (m) {
+                        result.browserName = b.name;
+                        result.browserVersion = m[1] || m[2] || null;
+                        break;
+                    }
+                }
+            }
+        })();
+
+        // Infer OS / device type
+        (function inferOSAndDevice() {
+            const ua = (result.userAgent || '').toLowerCase();
+            const platform = (result.platform || '').toLowerCase();
+            if (/android/.test(ua) || /android/.test(platform)) {
+                result.os = 'Android';
+                result.isAndroid = true;
+            } else if (/iphone|ipad|ipod/.test(ua) || /iphone|ipad|ipod/.test(platform)) {
+                result.os = 'iOS';
+                result.isIphone = /iphone/.test(ua) || /iphone/.test(platform);
+            } else if (/windows/.test(platform) || /win/.test(ua)) {
+                result.os = 'Windows';
+            } else if (/mac os x/.test(ua) || /macintosh/.test(platform)) {
+                result.os = 'macOS';
+            } else if (/linux/.test(platform)) {
+                result.os = 'Linux';
+            } else {
+                result.os = (platform || null) || null;
+            }
+
+            // simple device type inference
+            if (result.userAgentData && typeof result.userAgentData.mobile === 'boolean') {
+                result.deviceType = result.userAgentData.mobile ? 'mobile' : 'desktop';
+            } else if (/mobile/.test(result.userAgent || '')) {
+                result.deviceType = 'mobile';
+            } else if (/tablet|ipad/.test(result.userAgent || '')) {
+                result.deviceType = 'tablet';
+            } else {
+                result.deviceType = 'desktop';
+            }
+        })();
+
+        // Connection info (Network Information API) - may be undefined in some browsers
+        try {
+            // const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            // if (conn) {
+            //     result.connection = {
+            //         effectiveType: conn.effectiveType || null,
+            //         downlink: typeof conn.downlink !== 'undefined' ? conn.downlink : null,
+            //         rtt: typeof conn.rtt !== 'undefined' ? conn.rtt : null,
+            //         saveData: typeof conn.saveData !== 'undefined' ? conn.saveData : null
+            //     };
+            // }
+        } catch (e) {
+            // ignore
+        }
+
+        // Battery (non-prompting in most browsers, but may be unavailable)
+        try {
+            // if (navigator.getBattery && typeof navigator.getBattery === 'function') {
+            //     // don't await too long; battery promise usually resolves quickly
+            //     const battery = await navigator.getBattery();
+            //     result.battery = {
+            //         charging: battery.charging,
+            //         level: battery.level, // 0..1
+            //         chargingTime: battery.chargingTime,
+            //         dischargingTime: battery.dischargingTime
+            //     };
+            // }
+        } catch (e) {
+            // ignore if unavailable or blocked
+        }
+
+        // Geolocation: ONLY read if permission is already granted (do not prompt)
+        async function tryGetLocationIfAlreadyGranted() {
+            if (!('permissions' in navigator) || !('geolocation' in navigator)) {
+                return null;
+            }
+
+            try {
+                // Some browsers may not support query({name:'geolocation'}) — wrap in try/catch
+                const status = await navigator.permissions.query({ name: 'geolocation' });
+                if (status && status.state === 'granted') {
+                    // Safe to call getCurrentPosition — it will not prompt
+                    return new Promise((resolve) => {
+                        // set a reasonable short timeout in case of issues
+                        const options = { enableHighAccuracy: false, maximumAge: 5 * 60 * 1000, timeout: 5000 };
+                        navigator.geolocation.getCurrentPosition(
+                            pos => {
+                                resolve({
+                                    latitude: pos.coords.latitude,
+                                    longitude: pos.coords.longitude,
+                                    accuracy: pos.coords.accuracy,
+                                    timestamp: pos.timestamp
+                                });
+                            },
+                            err => {
+                                // If for some reason it fails, return null (but do NOT prompt)
+                                resolve(null);
+                            },
+                            options
+                        );
+                    });
+                } else {
+                    // permission not granted — do not prompt
+                    return null;
+                }
+            } catch (e) {
+                // Permissions API not available or blocked — do nothing
+                return null;
+            }
+        }
+
+        try {
+            const location = await tryGetLocationIfAlreadyGranted();
+            if (location) result.location = location;
+        } catch (e) {
+            // ignore
+        }
+
+        return result;
+    }
+
 
     getReport(period) {
         // Fetch aggregated data from the backend for the given period
