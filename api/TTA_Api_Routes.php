@@ -118,18 +118,35 @@ class TTA_Api_Routes {
 		);
 
 		// register insights for single post route.
-		register_rest_route(
-			$this->namespace,
-			'/insights/(?P<id>\d+)',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this->analytics, 'insights' ),
-					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
-				),
-			)
-		);
+        register_rest_route(
+            $this->namespace,
+            '/insights',
+            array(
+                array(
+                    'methods'             => \WP_REST_Server::READABLE,
+                    'callback'            => array( $this->analytics, 'insights' ),
+                    'permission_callback' => array( $this, 'get_route_access' ),
+                    'args'                => array(
+                        'id' => array(
+                            'type'        => 'number',
+                            'description' => 'post ID',
+                            'required'    => false,
+                        ),
+                        'from_date' => array(
+                            'type'        => 'string',
+                            'description' => 'Start date in Y-m-d format',
+                            'required'    => false,
+                        ),
+                        'to_date'   => array(
+                            'type'        => 'string',
+                            'description' => 'End date in Y-m-d format',
+                            'required'    => false,
+                        ),
+                    ),
+                ),
+            )
+        );
+
 
 		// register insights all post route.
 		register_rest_route(

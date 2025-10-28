@@ -18,10 +18,14 @@ class AtlasVoicePlayerInsights {
         averagePausesPerPlay: __("Average number of pauses per play"),
     };
     proPage = 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/';
-
-    constructor(postId = '') {
-        this.postId = postId
+    place_to_display = 'post_edit'
+    constructor(searchParams, place_to_display = 'post_edit') {
+        this.searchParams = searchParams
+        this.place_to_display = place_to_display;
         this.apiUrl = ttsObj.api_url + ttsObj.api_namespace + '/' + ttsObj.api_version + '/insights'; // Replace with your backend API URL
+        if(place_to_display === 'dashboard') {
+            document.getElementById('atlasVoice_analytics').innerHTML = '';
+        }
         this.setAnalyticsTitle();
         this.getInsights()
 
@@ -187,36 +191,42 @@ class AtlasVoicePlayerInsights {
 
 
     async getInsights() {
-        if (!this.shouldTrackAnalyticsData()) {
+        if ( this.place_to_display !== 'dashboard' && !this.shouldTrackAnalyticsData()) {
             return;
         }
-        if (this.postId) {
-            this.apiUrl += '/' + this.postId
-            let response = await fetch(this.apiUrl, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-NONCE': window?.ttsObj?.rest_nonce,
-                }
-            });
-            let data = await response.json();
-            data = this.mergeAnalytics(data.data)
-            this.data = data;
-            this.insights = this.generateInsights()
-        } else {
-            console.log(ttsObj)
-            // let response = await fetch(this.apiUrl, {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //         'X-WP-NONCE': window?.ttsObj?.rest_nonce,
-            //     }
-            // });
-            // let data = await response.json();
-            // this.data = data.data;
-            // // this.insights = this.generateInsights()
-            // console.log(this.data)
+
+
+        let params = new URLSearchParams();
+
+        if (this.searchParams?.post_id) {
+            params.append('post_id', this.searchParams.post_id);
         }
+
+        if (this.searchParams?.from_date) {
+            params.append('from_date', this.searchParams.from_date);
+        }
+
+        if (this.searchParams?.to_date) {
+            params.append('to_date', this.searchParams.to_date);
+        }
+        // Build the final URL
+        const param =  params.toString() ? `?${params.toString()}`: '';
+
+        this.apiUrl += param;
+
+        let response = await fetch(this.apiUrl, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-WP-NONCE': window?.ttsObj?.rest_nonce,
+            }
+        });
+        let data = await response.json();
+        data = this.mergeAnalytics(data.data)
+        this.data = data;
+        this.insights = this.generateInsights()
+
+
 
 
         if (Object.keys(this.insights).length) {
@@ -373,9 +383,9 @@ class AtlasVoicePlayerInsights {
         }
         if (window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids?.length) {
 
-            if ((window?.ttsObj.is_pro_active && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes('all')) || window?.ttsObj.is_pro_active && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.postId)) {
+            if ((window?.ttsObj.is_pro_active && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes('all')) || window?.ttsObj.is_pro_active && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.searchParams?.post_id)) {
                 should_track = true;
-            } else if (!window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.postId)) {
+            } else if (!window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.searchParams?.post_id)) {
                 should_track = false;
             }
         }
@@ -396,12 +406,12 @@ if (window?.ttsObj?.is_pro_active) {
 }
 
 if (window?.ttsObj?.is_admin_page) {
-    let postId = getPostIdFromUrl(window.location.href)
-    if (postId) {
-        new AtlasVoicePlayerInsights(postId)
+    let post_id = getPostIdFromUrl(window.location.href)
+    if (post_id) {
+        new AtlasVoicePlayerInsights({post_id: post_id})
     } else {
         new AtlasVoicePlayerInsights()
-        // console.error('Post Id is not found:' + postId)
+        // console.error('Post Id is not found:' + post_id)
     }
 
 }
@@ -413,9 +423,9 @@ function getPostIdFromUrl(url) {
         const urlObj = new URL(url);
 
         // Use URLSearchParams to get the value of the 'post' parameter
-        const postId = urlObj.searchParams.get('post');
+        const post_id = urlObj.searchParams.get('post');
 
-        return postId;
+        return post_id;
     } catch (error) {
         console.error('Invalid URL:', error);
         return null;
