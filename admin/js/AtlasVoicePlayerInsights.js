@@ -140,11 +140,11 @@ class AtlasVoicePlayerInsights {
             averageListenTillEndRatio: this.getAverageListenTillEndRatio().toFixed(2) + '%',
             averageListeningTimePerPlay: this.getAverageListeningTimePerPlay().toFixed(2) + ' seconds',
             averagePausesPerPlay: this.getAveragePausesPerPlay().toFixed(2),
-            country: this.getCountry(),
-            deviceType: this.pro,
-            timeZone: this.pro,
-            os: this.pro,
-            browser: this.pro,
+            // country: this.getCountry(),
+            // deviceType: this.pro,
+            // timeZone: this.pro,
+            // os: this.pro,
+            // browser: this.pro,
         }
 
 
@@ -180,11 +180,11 @@ class AtlasVoicePlayerInsights {
                 averageListenTillEndRatio: this.pro,
                 averageListeningTimePerPlay: this.pro,
                 averagePausesPerPlay: this.pro,
-                country: this.pro,
-                deviceType: this.pro,
-                timeZone: this.pro,
-                platform: this.pro,
-                browser: this.pro,
+                // country: this.pro,
+                // deviceType: this.pro,
+                // timeZone: this.pro,
+                // platform: this.pro,
+                // browser: this.pro,
             });
         }
 
@@ -193,17 +193,26 @@ class AtlasVoicePlayerInsights {
     mergeAnalytics(data) {
         const mergedAnalytics = {};
 
-        data.forEach(item => {
+        data.forEach((item, item_key) => {
             const analytics = item.analytics;
             for (const [key, value] of Object.entries(analytics)) {
-                if (!mergedAnalytics[key]) {
-                    mergedAnalytics[key] = {count: 0, timestamp: value.timestamp};
+                if(key === 'device_info') {
+                    if (!mergedAnalytics[key]) {
+                        mergedAnalytics[key] = {};
+                    }
+                    console.log(value)
+                    // mergedAnalytics[key] = value
+                }else {
+                    if (!mergedAnalytics[key]) {
+                        mergedAnalytics[key] = {count: 0, timestamp: value.timestamp};
+                    }
+                    mergedAnalytics[key].count += value.count;
+                    // Keep the latest timestamp
+                    if (new Date(value.timestamp) > new Date(mergedAnalytics[key].timestamp)) {
+                        mergedAnalytics[key].timestamp = value.timestamp;
+                    }
                 }
-                mergedAnalytics[key].count += value.count;
-                // Keep the latest timestamp
-                if (new Date(value.timestamp) > new Date(mergedAnalytics[key].timestamp)) {
-                    mergedAnalytics[key].timestamp = value.timestamp;
-                }
+
             }
         });
 

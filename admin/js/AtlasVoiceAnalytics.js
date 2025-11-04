@@ -16,7 +16,7 @@ class AtlasVoiceAnalytics {
         // Bind the event listeners for beforeunload and unload
         window.addEventListener('beforeunload', this.sendSessionData.bind(this));
 
-        this.trackDeviceInfo()
+        // this.trackDeviceInfo()
     }
 
 
@@ -96,7 +96,7 @@ class AtlasVoiceAnalytics {
         sessionStorage.setItem('atlasVoice_analytics_data', JSON.stringify(this.sessionData));
     }
 
-    sendSessionData() {
+    sendSessionData_old() {
         if (!this.shouldTrackAnalyticsData()) {
             return;
         }
@@ -121,6 +121,69 @@ class AtlasVoiceAnalytics {
         sessionStorage.removeItem('atlasVoice_analytics_is_initiated'); // Clear the session data after sending
         window.hasAtlasVoiceAnalyticsBeforeUnloadListener = false;
     }
+
+    sendSessionData() {
+        if (!this.shouldTrackAnalyticsData()) return;
+
+        const sessionData = this.getSessionData();
+        if (Object.keys(sessionData).length === 0) return;
+
+        const payload = {
+            analytics: sessionData,
+            post_id: this.postId,
+            user_id: this.userId,
+            other_data: {}
+        };
+
+        // Convert to JSON once
+        const jsonData = JSON.stringify(payload);
+
+        // --- Browser Detection ---
+        const userAgent = navigator.userAgent.toLowerCase();
+        const isFirefox = userAgent.includes('firefox');
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+        // --- 1️⃣ Use sendBeacon for Firefox/Safari ---
+        if (navigator.sendBeacon && (isFirefox || isSafari)) {
+            try {
+                const blob = new Blob([jsonData], { type: 'application/json' });
+                const success = navigator.sendBeacon(this.apiUrl, blob);
+
+                if (success) {
+                    sessionStorage.removeItem('atlasVoice_analytics_data');
+                    sessionStorage.removeItem('atlasVoice_analytics_is_initiated');
+                }
+            } catch (e) {
+                console.warn('sendBeacon failed, fallback to fetch()', e);
+                this._sendSessionDataWithFetch(jsonData); // fallback
+            }
+        }
+
+        // --- 2️⃣ Use normal fetch for Chrome / Edge / others ---
+        else {
+            this._sendSessionDataWithFetch(jsonData);
+        }
+
+        window.hasAtlasVoiceAnalyticsBeforeUnloadListener = false;
+    }
+
+// ✅ Helper: Fallback fetch sender
+    _sendSessionDataWithFetch(jsonData) {
+        fetch(this.apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-WP-NONCE': window?.ttsObj?.rest_nonce || ''
+            },
+            body: jsonData,
+            keepalive: true // 👈 ensures fetch tries to finish even during unload
+        }).catch(err => console.error('Fetch error:', err))
+            .finally(() => {
+                sessionStorage.removeItem('atlasVoice_analytics_data');
+                sessionStorage.removeItem('atlasVoice_analytics_is_initiated');
+            });
+    }
+
 
     async getUniqueUserId() {
         let userId = this.userId;

@@ -1460,4 +1460,24 @@ class TTA_Helper
         return isset($post->post_content) && (has_shortcode($post->post_content, 'tta_listen_btn') || has_shortcode($post->post_content, 'atlasvoice'));
     }
 
+    public  static  function detect_browser() {
+        $user_agent = strtolower( $_SERVER['HTTP_USER_AGENT'] );
+
+        $browser = 'unknown';
+        if (strpos($user_agent, 'firefox') !== false) {
+            $browser = 'firefox';
+        } elseif (strpos($user_agent, 'chrome') !== false) {
+            $browser = 'chrome';
+        } elseif (strpos($user_agent, 'safari') !== false) {
+            $browser = 'safari';
+        } elseif (strpos($user_agent, 'edge') !== false) {
+            $browser = 'edge';
+        } elseif (strpos($user_agent, 'opr') !== false || strpos($user_agent, 'opera') !== false) {
+            $browser = 'opera';
+        }
+
+        return $browser;
+    }
+
+
 }
