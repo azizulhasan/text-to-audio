@@ -294,6 +294,8 @@ class TTA_Admin {
 			);
 		}
 
+        wp_enqueue_script( 'atlasvoice-timezone' , 'https://cdn.jsdelivr.net/npm/countries-and-timezones/dist/index.min.js', [] ,$this->version, true);
+        array_push( $dependencies, 'atlasvoice-timezone' );
 		if ( $player_id > 1 ) {
 			wp_enqueue_script( 'TextToSpeech', plugin_dir_url( __FILE__ ) . 'js/build/TextToSpeech.min.js', $dependencies, $this->version, true );
 			wp_localize_script( 'TextToSpeech', 'ttsObj', $this->localize_data );
