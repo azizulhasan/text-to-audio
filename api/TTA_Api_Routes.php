@@ -522,10 +522,22 @@ class TTA_Api_Routes {
 	/*
 	 * Get route access if request is valid.
 	 */
-	public function get_route_access() {
-		if ( ! isset( $_SERVER['HTTP_X_WP_NONCE'] ) || ! $_SERVER['HTTP_X_WP_NONCE'] || ! wp_verify_nonce( $_SERVER['HTTP_X_WP_NONCE'], 'wp_rest' ) ) {
-			return apply_filters( 'tts_rest_route_access', false );
-		}
+	public function get_route_access($request) {
+        // Get the requested route
+        $route = $request->get_route(); // e.g., "/tta/v1/track"
+
+        // Check if current endpoint is "/track"
+        if ( $route === '/tta/v1/track' ) {
+            // Do Firefox/Safari-specific logic
+            $browser = TTA_Helper::detect_browser();
+            if ( $browser === 'firefox' || $browser === 'safari' ) {
+               return apply_filters( 'tts_rest_route_access', true );
+            }
+        }
+
+        if ( ! isset( $_SERVER['HTTP_X_WP_NONCE'] ) || ! $_SERVER['HTTP_X_WP_NONCE'] || ! wp_verify_nonce( $_SERVER['HTTP_X_WP_NONCE'], 'wp_rest' ) ) {
+            return apply_filters( 'tts_rest_route_access', false );
+        }
 
 		return apply_filters( 'tts_rest_route_access', true );
 	}

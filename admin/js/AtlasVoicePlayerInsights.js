@@ -4,7 +4,7 @@ class AtlasVoicePlayerInsights {
     data = {}
     insights = {}
     hooks = wp.hooks;
-    pro = __('Pro')
+    pro = 'Pro'
     tooltips = {
         totalInit: __("Number of times the player button was initiated"),
         totalPlay: __("Number of times the play button was clicked"),
@@ -16,6 +16,11 @@ class AtlasVoicePlayerInsights {
         averageListenTillEndRatio: __("Percentage of times users listened till the end"),
         averageListeningTimePerPlay: __("Average listening time per play"),
         averagePausesPerPlay: __("Average number of pauses per play"),
+        country: __("Country where the player is opened"),
+        deviceType: __("Device type where the player is opened"),
+        timeZone: __("Timezone where the player is opened"),
+        platform: __("Platform type"),
+        browser: __("Browser Name"),
     };
     proPage = 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/';
     place_to_display = 'post_edit'
@@ -120,6 +125,12 @@ class AtlasVoicePlayerInsights {
         return playCount > 0 ? pauseCount / playCount : 0;
     }
 
+    getCountry(){
+        console.log(this.data)
+
+        return 'abc'
+    }
+
     // Function to generate insights
     generateInsightsPro() {
         let result = {
@@ -129,6 +140,11 @@ class AtlasVoicePlayerInsights {
             averageListenTillEndRatio: this.getAverageListenTillEndRatio().toFixed(2) + '%',
             averageListeningTimePerPlay: this.getAverageListeningTimePerPlay().toFixed(2) + ' seconds',
             averagePausesPerPlay: this.getAveragePausesPerPlay().toFixed(2),
+            // country: this.getCountry(),
+            // deviceType: this.pro,
+            // timeZone: this.pro,
+            // os: this.pro,
+            // browser: this.pro,
         }
 
 
@@ -164,6 +180,11 @@ class AtlasVoicePlayerInsights {
                 averageListenTillEndRatio: this.pro,
                 averageListeningTimePerPlay: this.pro,
                 averagePausesPerPlay: this.pro,
+                // country: this.pro,
+                // deviceType: this.pro,
+                // timeZone: this.pro,
+                // platform: this.pro,
+                // browser: this.pro,
             });
         }
 
@@ -172,17 +193,26 @@ class AtlasVoicePlayerInsights {
     mergeAnalytics(data) {
         const mergedAnalytics = {};
 
-        data.forEach(item => {
+        data.forEach((item, item_key) => {
             const analytics = item.analytics;
             for (const [key, value] of Object.entries(analytics)) {
-                if (!mergedAnalytics[key]) {
-                    mergedAnalytics[key] = {count: 0, timestamp: value.timestamp};
+                if(key === 'device_info') {
+                    if (!mergedAnalytics[key]) {
+                        mergedAnalytics[key] = {};
+                    }
+                    console.log(value)
+                    // mergedAnalytics[key] = value
+                }else {
+                    if (!mergedAnalytics[key]) {
+                        mergedAnalytics[key] = {count: 0, timestamp: value.timestamp};
+                    }
+                    mergedAnalytics[key].count += value.count;
+                    // Keep the latest timestamp
+                    if (new Date(value.timestamp) > new Date(mergedAnalytics[key].timestamp)) {
+                        mergedAnalytics[key].timestamp = value.timestamp;
+                    }
                 }
-                mergedAnalytics[key].count += value.count;
-                // Keep the latest timestamp
-                if (new Date(value.timestamp) > new Date(mergedAnalytics[key].timestamp)) {
-                    mergedAnalytics[key].timestamp = value.timestamp;
-                }
+
             }
         });
 

@@ -16,20 +16,7 @@ class AtlasVoiceAnalytics {
         // Bind the event listeners for beforeunload and unload
         window.addEventListener('beforeunload', this.sendSessionData.bind(this));
 
-
-
-
-        // TODO: later this function will be implemented.
-        // this.getDemographicData();
-
-    }
-
-    async getDemographicData() {
-        // Example usage:
-        let info = await this.getDeviceData().then(info => info);
-
-        console.log(info)
-        // IMPORTANT: Do not send/store this without user consent in production — shows how to access the object.
+        // this.trackDeviceInfo()
     }
 
 
@@ -109,7 +96,7 @@ class AtlasVoiceAnalytics {
         sessionStorage.setItem('atlasVoice_analytics_data', JSON.stringify(this.sessionData));
     }
 
-    sendSessionData() {
+    sendSessionData_old() {
         if (!this.shouldTrackAnalyticsData()) {
             return;
         }
@@ -134,6 +121,69 @@ class AtlasVoiceAnalytics {
         sessionStorage.removeItem('atlasVoice_analytics_is_initiated'); // Clear the session data after sending
         window.hasAtlasVoiceAnalyticsBeforeUnloadListener = false;
     }
+
+    sendSessionData() {
+        if (!this.shouldTrackAnalyticsData()) return;
+
+        const sessionData = this.getSessionData();
+        if (Object.keys(sessionData).length === 0) return;
+
+        const payload = {
+            analytics: sessionData,
+            post_id: this.postId,
+            user_id: this.userId,
+            other_data: {}
+        };
+
+        // Convert to JSON once
+        const jsonData = JSON.stringify(payload);
+
+        // --- Browser Detection ---
+        const userAgent = navigator.userAgent.toLowerCase();
+        const isFirefox = userAgent.includes('firefox');
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+        // --- 1️⃣ Use sendBeacon for Firefox/Safari ---
+        if (navigator.sendBeacon && (isFirefox || isSafari)) {
+            try {
+                const blob = new Blob([jsonData], { type: 'application/json' });
+                const success = navigator.sendBeacon(this.apiUrl, blob);
+
+                if (success) {
+                    sessionStorage.removeItem('atlasVoice_analytics_data');
+                    sessionStorage.removeItem('atlasVoice_analytics_is_initiated');
+                }
+            } catch (e) {
+                console.warn('sendBeacon failed, fallback to fetch()', e);
+                this._sendSessionDataWithFetch(jsonData); // fallback
+            }
+        }
+
+        // --- 2️⃣ Use normal fetch for Chrome / Edge / others ---
+        else {
+            this._sendSessionDataWithFetch(jsonData);
+        }
+
+        window.hasAtlasVoiceAnalyticsBeforeUnloadListener = false;
+    }
+
+// ✅ Helper: Fallback fetch sender
+    _sendSessionDataWithFetch(jsonData) {
+        fetch(this.apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-WP-NONCE': window?.ttsObj?.rest_nonce || ''
+            },
+            body: jsonData,
+            keepalive: true // 👈 ensures fetch tries to finish even during unload
+        }).catch(err => console.error('Fetch error:', err))
+            .finally(() => {
+                sessionStorage.removeItem('atlasVoice_analytics_data');
+                sessionStorage.removeItem('atlasVoice_analytics_is_initiated');
+            });
+    }
+
 
     async getUniqueUserId() {
         let userId = this.userId;
@@ -214,22 +264,9 @@ class AtlasVoiceAnalytics {
     }
 
 
-    captureDemographics() {
-        // Use a service or API to get user demographics
-        // For example, you can use the IPinfo API to get the user's location
-        fetch('https://ipinfo.io/json?token=your_token')
-            .then(response => response.json())
-            .then(data => {
-                this.addEvent('demographics', data);
-            });
-    }
 
-    captureDeviceInfo() {
-        const deviceInfo = {
-            userAgent: navigator.userAgent,
-            platform: navigator.platform,
-            language: navigator.language,
-        };
+    async trackDeviceInfo() {
+        const deviceInfo = await this.getDeviceData().then(info => info);
         this.addEvent('device_info', deviceInfo);
     }
 
@@ -263,27 +300,23 @@ class AtlasVoiceAnalytics {
             deviceType: null, // 'mobile' | 'tablet' | 'desktop' | 'unknown'
 
             // hardware / capability info (if available)
-            screenWidth: (typeof screen !== 'undefined') ? screen.width : null,
-            screenHeight: (typeof screen !== 'undefined') ? screen.height : null,
-            deviceMemoryGB: navigator.deviceMemory || null, // may be undefined in some browsers
-            logicalCores: navigator.hardwareConcurrency || null,
+            // screenWidth: (typeof screen !== 'undefined') ? screen.width : null,
+            // screenHeight: (typeof screen !== 'undefined') ? screen.height : null,
+            // logicalCores: navigator.hardwareConcurrency || null,
 
             // connection info (may be limited)
-            connection: null, // {effectiveType, downlink, rtt, saveData} or null
+            // connection: null, // {effectiveType, downlink, rtt, saveData} or null
 
             // language / timezone
             language: navigator.language || null,
-            languages: navigator.languages || null,
+            // languages: navigator.languages || null,
             timeZone: (typeof Intl === 'object' && Intl.DateTimeFormat) ? Intl.DateTimeFormat().resolvedOptions().timeZone : null,
 
-            // battery (if available, and no permission prompt)
-            battery: null, // {charging, level, chargingTime, dischargingTime} or null
 
             // location (only if permission already granted; will NOT prompt)
             location: null, // {latitude, longitude, accuracy, timestamp} or null
 
-            // timestamp when collected
-            collectedAt: new Date().toISOString()
+            country: this.#country(),
         };
 
         // Helper: try to read userAgentData (client hints) if available
@@ -303,14 +336,14 @@ class AtlasVoiceAnalytics {
         // Parse a best-effort browser name & version from userAgent or userAgentData
         (function parseBrowser() {
             // Prefer userAgentData.brands if available
-            if (result.userAgentData && Array.isArray(result.userAgentData.brands) && result.userAgentData.brands.length) {
-                // take the highest-ranking brand (best-effort)
-                const brand = result.userAgentData.brands[result.userAgentData.brands.length - 1];
-                if (brand) {
-                    result.browserName = brand.brand || null;
-                    result.browserVersion = brand.version || null;
-                }
-            }
+            // if (result.userAgentData && Array.isArray(result.userAgentData.brands) && result.userAgentData.brands.length) {
+            //     // take the highest-ranking brand (best-effort)
+            //     const brand = result.userAgentData.brands[result.userAgentData.brands.length - 1];
+            //     if (brand) {
+            //         result.browserName = brand.brand || null;
+            //         result.browserVersion = brand.version || null;
+            //     }
+            // }
 
             // Fallback: simple regex-based UA parsing (best-effort; not perfect)
             if (!result.browserName && result.userAgent) {
@@ -445,6 +478,15 @@ class AtlasVoiceAnalytics {
         }
 
         return result;
+    }
+
+
+    #country(){
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const tzData = ct.getTimezone(timeZone);
+        const countryData = tzData ? ct.getCountry(tzData.countries[0]) : null;
+
+        return countryData ? countryData.name : 'Unknown';
     }
 
 
