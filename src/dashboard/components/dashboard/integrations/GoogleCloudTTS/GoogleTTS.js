@@ -315,12 +315,12 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
                                 <Row className=' mt-3'>
                                     <Col xs={12} sm={6} lg={4}>
                                         <Form.Label htmlFor='tta__integration_is_backup_to_gogole_drive'>
-                                            Backup MP3 Files To Google Cloud Storage.
+                                            Instead of storing MP3 file to uploads folder, Store MP3 Files To Google Cloud Storage.
                                         </Form.Label>
-                                        {/* {
+                                        {
                                             isBackUpToGCS && <Form.FloatingLabel className={'text-danger'} label={'You must give this service account read, write access. Otherwise may cause errors.'} >
                                             </Form.FloatingLabel>
-                                        } */}
+                                        }
                                     </Col>
                                     <Col xs={12} sm={12} lg={6}>
                                         <Form.Check // prettier-ignore
