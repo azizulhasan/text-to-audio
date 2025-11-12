@@ -80,6 +80,43 @@ class AtlasVoice_Analytics {
 			$existing_analytics = maybe_unserialize( $existing_entry->analytics );
 			// Sum the existing and new analytics data
 			foreach ( $new_analytics as $key => $value ) {
+                if($key === 'device_info' ) {
+                    "device_info": {
+//                    "userAgent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/141.0.0.0 Safari\/537.36 Edg\/141.0.0.0",
+//                    "userAgentData": {
+//                            "brands": [
+//                            {
+//                                "brand": "Microsoft Edge",
+//                                "version": "141"
+//                            },
+//                            {
+//                                "brand": "Not?A_Brand",
+//                                "version": "8"
+//                            },
+//                            {
+//                                "brand": "Chromium",
+//                                "version": "141"
+//                            }
+//                        ],
+//                        "mobile": false,
+//                        "platform": "Windows"
+//                    },
+//                    "browserName": "Edge",
+//                    "browserVersion": "141.0.0.0",
+//                    "platform": "Win32",
+//                    "os": "Windows",
+//                    "isAndroid": false,
+//                    "isIphone": false,
+//                    "deviceType": "desktop",
+//                    "language": "en-US",
+//                    "timeZone": "Asia\/Dhaka",
+//                    "location": null,
+//                    "country": "Bangladesh"
+                }
+
+                    // Write login for storing device information
+                    continue;
+                }
 				if ( isset( $existing_analytics[ $key ] ) ) {
 					$existing_analytics[ $key ]['count']     += $value['count'];
 					$existing_analytics[ $key ]['timestamp'] = $value['timestamp'];
@@ -222,10 +259,10 @@ class AtlasVoice_Analytics {
 		$response['status'] = true;
 		$response['data']   = $total_results;
 		$response['extra']   = [
-            'args'       => $args,
-            'conditions' => $conditions,
-            '$total_results'    => $total_results,
-            '$where_clause'    => $where_clause,
+//            'args'       => $args,
+//            'conditions' => $conditions,
+//            '$total_results'    => $total_results,
+//            '$where_clause'    => $where_clause,
         ];
 
 		return rest_ensure_response( $response );

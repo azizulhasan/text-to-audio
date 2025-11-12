@@ -126,6 +126,7 @@ class TTA_Admin {
 				]
 			] ),
 			'is_mobile'                => wp_is_mobile(),
+
 		];
 	}
 

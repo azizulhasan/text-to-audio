@@ -16,7 +16,7 @@ class AtlasVoiceAnalytics {
         // Bind the event listeners for beforeunload and unload
         window.addEventListener('beforeunload', this.sendSessionData.bind(this));
 
-        // this.trackDeviceInfo()
+        this.trackDeviceInfo()
     }
 
 
@@ -285,6 +285,7 @@ class AtlasVoiceAnalytics {
      *   getDeviceData().then(data => console.log(data));
      */
     async  getDeviceData() {
+
         const result = {
             // user agent / hints
             userAgent: navigator.userAgent || null,
@@ -309,8 +310,7 @@ class AtlasVoiceAnalytics {
 
             // language / timezone
             language: navigator.language || null,
-            // languages: navigator.languages || null,
-            timeZone: (typeof Intl === 'object' && Intl.DateTimeFormat) ? Intl.DateTimeFormat().resolvedOptions().timeZone : null,
+            timeZone: this.#getTimeZone(),
 
 
             // location (only if permission already granted; will NOT prompt)
@@ -480,9 +480,11 @@ class AtlasVoiceAnalytics {
         return result;
     }
 
-
+    #getTimeZone() {
+        return (typeof Intl === 'object' && Intl.DateTimeFormat) ? Intl.DateTimeFormat().resolvedOptions().timeZone : null;
+    }
     #country(){
-        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const timeZone = this.#getTimeZone();
         const tzData = ct.getTimezone(timeZone);
         const countryData = tzData ? ct.getCountry(tzData.countries[0]) : null;
 
