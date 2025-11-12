@@ -132,7 +132,8 @@ class AtlasVoiceAnalytics {
             analytics: sessionData,
             post_id: this.postId,
             user_id: this.userId,
-            other_data: {}
+            other_data: {},
+            rest_nonce: window?.ttsObj?.rest_nonce
         };
 
         // Convert to JSON once

@@ -46,7 +46,6 @@ export default function Listening() {
         tta__listening_voice_model: 'tts-1',
     });
 
-    const [listeningLang, setListeningLang] = useState('en-GB');
     const [baseMP3File, setBaseMP3File] = useState('https://cloud.google.com/text-to-speech/docs/audio/en-GB-Chirp-HD-F.wav')
     const apiURL = useMemo(() => {
         if (window.hasOwnProperty('ttsObj') && ttsObj.is_pro_active) {
@@ -195,18 +194,18 @@ export default function Listening() {
         } else {
             setVoicesAndLanguages()
         }
-        /**
-         * Set listening lang.
-         */
-        let data = new FormData();
-        data.append('method', 'get');
-        postWithoutImage(tta_obj.api_url + 'tta/v1/record', data)
-            .then((res) => {
-                setListeningLang(res.data.tta__recording__lang);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+        // /**
+        //  * Set listening lang.
+        //  */
+        // let data = new FormData();
+        // data.append('method', 'get');
+        // postWithoutImage(tta_obj.api_url + 'tta/v1/record', data)
+        //     .then((res) => {
+        //         setListeningLang(res.data.tta__recording__lang);
+        //     })
+        //     .catch((err) => {
+        //         console.log(err);
+        //     });
 
         /**
          * Set listening data.

@@ -33,20 +33,7 @@ class TTA_Api_Routes {
 	 * Register Routes
 	 */
 	public function tta_speech_register_routes() {
-		// Register record route.
-		register_rest_route(
-			$this->namespace,
-			'/record',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::ALLMETHODS,
-					'callback'            => array( $this, 'tta_manage_record_data' ),
-					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
-				),
 
-			)
-		);
 		// register listening route.
 		register_rest_route(
 			$this->namespace,
@@ -279,44 +266,6 @@ class TTA_Api_Routes {
 
 	}
 
-	/**
-	 * Manage record data.
-	 */
-	public function tta_manage_record_data( $request ) {
-		// $retrieved_nonce = isset( $request['rest_nonce'] ) ? sanitize_text_field( wp_unslash( $request['rest_nonce'] ) ) : '';
-		// if ( ! wp_verify_nonce( $retrieved_nonce, 'wp_rest' ) ) {
-		//     die( 'Failed security check' );
-		// }
-		$response['status'] = true;
-		// save data about recording.
-		if ( 'post' == $request['method'] ) {
-
-			$fields          = json_decode( $request['fields'] );
-			$listeningFields = get_option( 'tta_listening_settings' );
-			if ( is_array( $listeningFields ) ) {
-				$listeningFields['tta__listening_lang'] = $fields->tta__recording__lang;
-			} else {
-				$listeningFields->tta__listening_lang = $fields->tta__recording__lang;
-			}
-
-			update_option( 'tta_record_settings', $fields );
-			update_option( 'tta_listening_settings', $listeningFields );
-
-			$response['data'] = get_option( 'tta_record_settings' );
-
-			TTA_Cache::delete( 'all_settings' );
-
-			return rest_ensure_response( $response );
-		}
-
-		// get data about recording.
-		if ( 'get' == $request['method'] ) {
-
-			$response['data'] = get_option( 'tta_record_settings' );
-
-			return rest_ensure_response( $response );
-		}
-	}
 
 	/*
 	 * Manage listening data
@@ -523,22 +472,14 @@ class TTA_Api_Routes {
 	 * Get route access if request is valid.
 	 */
 	public function get_route_access($request) {
-        // Get the requested route
-        $route = $request->get_route(); // e.g., "/tta/v1/track"
 
-        // Check if current endpoint is "/track"
-        if ( $route === '/tta/v1/track' ) {
-            // Do Firefox/Safari-specific logic
-            $browser = TTA_Helper::detect_browser();
-            if ( $browser === 'firefox' || $browser === 'safari' ) {
-               return apply_filters( 'tts_rest_route_access', true );
-            }
+        $has_valid_nonce = false;
+        if ( isset( $_SERVER['HTTP_X_WP_NONCE'] ) && wp_verify_nonce( wp_unslash( $_SERVER['HTTP_X_WP_NONCE'] ), 'wp_rest' ) ) {
+            $has_valid_nonce = true;
+        } elseif ( isset( $request['rest_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $request['rest_nonce'] ) ), 'wp_rest' ) ) {
+            $has_valid_nonce = true;
         }
 
-        if ( ! isset( $_SERVER['HTTP_X_WP_NONCE'] ) || ! $_SERVER['HTTP_X_WP_NONCE'] || ! wp_verify_nonce( $_SERVER['HTTP_X_WP_NONCE'], 'wp_rest' ) ) {
-            return apply_filters( 'tts_rest_route_access', false );
-        }
-
-		return apply_filters( 'tts_rest_route_access', true );
+		return apply_filters( 'tts_rest_route_access', $has_valid_nonce );
 	}
 }
