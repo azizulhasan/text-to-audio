@@ -33,20 +33,7 @@ class TTA_Api_Routes {
 	 * Register Routes
 	 */
 	public function tta_speech_register_routes() {
-		// Register record route.
-		register_rest_route(
-			$this->namespace,
-			'/record',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::ALLMETHODS,
-					'callback'            => array( $this, 'tta_manage_record_data' ),
-					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
-				),
 
-			)
-		);
 		// register listening route.
 		register_rest_route(
 			$this->namespace,
@@ -148,7 +135,7 @@ class TTA_Api_Routes {
         );
 
 
-		// register insights all post route.
+		// register all_insights route.
 		register_rest_route(
 			$this->namespace,
 			'/all_insights',
@@ -162,7 +149,7 @@ class TTA_Api_Routes {
 			)
 		);
 
-		// register insights all post route.
+		// register latest_posts  route.
 		register_rest_route(
 			$this->namespace,
 			'/latest_posts',
@@ -176,7 +163,7 @@ class TTA_Api_Routes {
 			)
 		);
 
-		// register save_trackable_ids route.
+		// register save_analytics_settings route.
 		register_rest_route(
 			$this->namespace,
 			'/save_analytics_settings',
@@ -190,7 +177,7 @@ class TTA_Api_Routes {
 			)
 		);
 
-		// register get_trackable_ids route.
+		// register get_analytics_settings route.
 		register_rest_route(
 			$this->namespace,
 			'/get_analytics_settings',
@@ -204,7 +191,7 @@ class TTA_Api_Routes {
 			)
 		);
 
-		// register get_trackable_ids route.
+		// register compatible_data route.
 		register_rest_route(
 			$this->namespace,
 			'/compatible_data',
@@ -233,7 +220,7 @@ class TTA_Api_Routes {
 		);
 
 
-		// register text_alias route.
+		// register get_all_user_roles route.
 		register_rest_route(
 			$this->namespace,
 			'/get_all_user_roles',
@@ -247,7 +234,7 @@ class TTA_Api_Routes {
 			)
 		);
 
-		// register text_alias route.
+		// register acf_fields route.
 		register_rest_route(
 			$this->namespace,
 			'/acf_fields',
@@ -274,53 +261,12 @@ class TTA_Api_Routes {
 				),
 			)
 		);
-
-		
-
 	}
 
-	/**
-	 * Manage record data.
-	 */
-	public function tta_manage_record_data( $request ) {
-		// $retrieved_nonce = isset( $request['rest_nonce'] ) ? sanitize_text_field( wp_unslash( $request['rest_nonce'] ) ) : '';
-		// if ( ! wp_verify_nonce( $retrieved_nonce, 'wp_rest' ) ) {
-		//     die( 'Failed security check' );
-		// }
-		$response['status'] = true;
-		// save data about recording.
-		if ( 'post' == $request['method'] ) {
 
-			$fields          = json_decode( $request['fields'] );
-			$listeningFields = get_option( 'tta_listening_settings' );
-			if ( is_array( $listeningFields ) ) {
-				$listeningFields['tta__listening_lang'] = $fields->tta__recording__lang;
-			} else {
-				$listeningFields->tta__listening_lang = $fields->tta__recording__lang;
-			}
-
-			update_option( 'tta_record_settings', $fields );
-			update_option( 'tta_listening_settings', $listeningFields );
-
-			$response['data'] = get_option( 'tta_record_settings' );
-
-			TTA_Cache::delete( 'all_settings' );
-
-			return rest_ensure_response( $response );
-		}
-
-		// get data about recording.
-		if ( 'get' == $request['method'] ) {
-
-			$response['data'] = get_option( 'tta_record_settings' );
-
-			return rest_ensure_response( $response );
-		}
-	}
-
-	/*
-	 * Manage listening data
-	 */
+    /*
+     * Manage listening data
+     */
 	public function tta_manage_listening_data( $request ) {
 		$response['status'] = true;
 		// save data about recording.
@@ -522,23 +468,154 @@ class TTA_Api_Routes {
 	/*
 	 * Get route access if request is valid.
 	 */
-	public function get_route_access($request) {
-        // Get the requested route
-        $route = $request->get_route(); // e.g., "/tta/v1/track"
+	public function get_route_access_old($request) {
 
-        // Check if current endpoint is "/track"
-        if ( $route === '/tta/v1/track' ) {
-            // Do Firefox/Safari-specific logic
-            $browser = TTA_Helper::detect_browser();
-            if ( $browser === 'firefox' || $browser === 'safari' ) {
-               return apply_filters( 'tts_rest_route_access', true );
-            }
+        $has_valid_nonce = false;
+        if ( isset( $_SERVER['HTTP_X_WP_NONCE'] ) && wp_verify_nonce( wp_unslash( $_SERVER['HTTP_X_WP_NONCE'] ), 'wp_rest' ) ) {
+            $has_valid_nonce = true;
+        } elseif ( isset( $request['rest_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $request['rest_nonce'] ) ), 'wp_rest' ) ) {
+            $has_valid_nonce = true;
         }
 
-        if ( ! isset( $_SERVER['HTTP_X_WP_NONCE'] ) || ! $_SERVER['HTTP_X_WP_NONCE'] || ! wp_verify_nonce( $_SERVER['HTTP_X_WP_NONCE'], 'wp_rest' ) ) {
-            return apply_filters( 'tts_rest_route_access', false );
-        }
-
-		return apply_filters( 'tts_rest_route_access', true );
+		return apply_filters( 'tts_rest_route_access', $has_valid_nonce );
 	}
+
+    /**
+     * Permission check for REST routes.
+     *
+     * @param \WP_REST_Request $request
+     * @return true|\WP_Error
+     */
+    public function get_route_access_new( $request ) {
+        $route  = $request->get_route();
+        $method = strtoupper( $_SERVER['REQUEST_METHOD'] ?? 'GET' );
+        $has_valid_nonce = false;
+
+        // Admin-only routes: only users with manage_tts (or manage_options) can access.
+        $admin_only = array(
+            '/tta/v1/customize',
+            '/tta/v1/settings',
+            '/tta/v1/save_analytics_settings',
+            '/tta/v1/get_analytics_settings',
+            '/tta/v1/compatible_data',
+            '/tta/v1/text_alias',
+            '/tta/v1/insights',
+            '/tta/v1/all_insights',
+            '/tta/v1/latest_posts',
+            '/tta/v1/categories_and_tags',
+            '/tta/v1/acf_fields',
+            '/tta/v1/browser', // if this truly only returns non-sensitive info
+        );
+
+        // If route is admin-only -> enforce capability
+        if ( in_array( $route, $admin_only, true ) ) {
+            if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+                return new \WP_Error( 'rest_forbidden', __( 'You do not have permission to access this resource.', 'text-to-audio' ), array( 'status' => 403 ) );
+            }
+            $has_valid_nonce = true;
+        }
+
+        // Public read-only routes (allowed for GET without auth)
+        $public_get_routes = array(
+            '/tta/v1/track', // if this truly only returns non-sensitive info
+        );
+
+        // If route is read-only and method is GET -> allow public
+        if ( ! $has_valid_nonce && in_array( $route, $public_get_routes, true ) ) {
+            $has_valid_nonce = true;
+        }
+
+        if ( isset( $_SERVER['HTTP_X_WP_NONCE'] ) && wp_verify_nonce( wp_unslash( $_SERVER['HTTP_X_WP_NONCE'] ), 'wp_rest' ) ) {
+            $has_valid_nonce = true;
+        } elseif ( isset( $request['rest_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $request['rest_nonce'] ) ), 'wp_rest' ) ) {
+            $has_valid_nonce = true;
+        }
+
+        if ( $has_valid_nonce ) {
+            return true;
+        }
+
+        // Fallback: allow logged-in admins
+        if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
+            return true;
+        }
+
+
+        return new \WP_Error( 'rest_forbidden', __( 'Invalid nonce or insufficient permissions.', 'text-to-audio' ), array( 'status' => 403 ) );
+
+
+    }
+
+    /**
+     * Permission check for REST routes.
+     *
+     * @param \WP_REST_Request $request
+     * @return true|\WP_Error
+     */
+    public function get_route_access( $request ) {
+        $route  = $request->get_route();
+
+        // 1️⃣ Admin-only routes
+        $admin_only = array(
+            '/tta/v1/customize',
+            '/tta/v1/settings',
+            '/tta/v1/listening',
+            '/tta/v1/save_analytics_settings',
+            '/tta/v1/get_analytics_settings',
+            '/tta/v1/compatible_data',
+            '/tta/v1/text_alias',
+            '/tta/v1/insights',
+            '/tta/v1/all_insights',
+            '/tta/v1/latest_posts',
+            '/tta/v1/categories_and_tags',
+            '/tta/v1/acf_fields',
+            '/tta/v1/browser',
+            '/tta/v1/get_all_user_roles',
+        );
+
+        if ( in_array( $route, $admin_only, true ) ) {
+            if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+                return new \WP_Error(
+                    'rest_forbidden',
+                    __( 'You do not have permission to access this resource.', 'text-to-audio' ),
+                    array( 'status' => 403 )
+                );
+            }
+            return true;
+        }
+
+        // 3️⃣ Frontend POST routes that require nonce verification (e.g. analytics tracking)
+        $frontend_post_routes = array(
+            '/tta/v1/track',
+        );
+
+        if ( in_array( $route, $frontend_post_routes, true )  ) {
+            // Verify nonce from header or body
+            $nonce = '';
+            if ( isset( $_SERVER['HTTP_X_WP_NONCE'] ) ) {
+                $nonce = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_WP_NONCE'] ) );
+            } elseif ( isset( $request['rest_nonce'] ) ) {
+                $nonce = sanitize_text_field( wp_unslash( $request['rest_nonce'] ) );
+            }
+
+            if ( $nonce && wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+                return true;
+            }
+
+            return new \WP_Error(
+                'rest_forbidden',
+                __( 'Invalid or missing nonce for frontend POST request.', 'text-to-audio' ),
+                array( 'status' => 403 )
+            );
+        }
+
+        // 4️⃣ Default: deny all others
+        return new \WP_Error(
+            'rest_forbidden',
+            __( 'Invalid nonce or insufficient permissions.', 'text-to-audio' ),
+            array( 'status' => 403 )
+        );
+    }
+
+
 }
