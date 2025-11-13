@@ -1,0 +1,31 @@
+{
+
+  "browserName": {
+    "Chrome": 1,
+    "Firefox": 1,
+    "Edge": 1
+  },
+  "browserVersion": {
+    "142.0.0.0": 1,
+    "145.0": 1,
+    "141.0.0.0": 1
+  },
+  "platform": {
+    "Windows 10": 3
+  },
+  "deviceType": {
+    "Desktop": 3
+  },
+  "architecture": {
+    "64-bit": 3
+  },
+  "language": {
+    "en-US": 3
+  },
+  "timeZone": {
+    "Asia/Dhaka": 3
+  },
+  "country": {
+    "Bangladesh": 3
+  }
+}

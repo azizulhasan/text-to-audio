@@ -81,38 +81,8 @@ class AtlasVoice_Analytics {
 			// Sum the existing and new analytics data
 			foreach ( $new_analytics as $key => $value ) {
                 if($key === 'device_info' ) {
-
-                    //                    "device_info": {
-//                    "userAgent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/141.0.0.0 Safari\/537.36 Edg\/141.0.0.0",
-//                    "userAgentData": {
-//                            "brands": [
-//                            {
-//                                "brand": "Microsoft Edge",
-//                                "version": "141"
-//                            },
-//                            {
-//                                "brand": "Not?A_Brand",
-//                                "version": "8"
-//                            },
-//                            {
-//                                "brand": "Chromium",
-//                                "version": "141"
-//                            }
-//                        ],
-//                        "mobile": false,
-//                        "platform": "Windows"
-//                    },
-//                    "browserName": "Edge",
-//                    "browserVersion": "141.0.0.0",
-//                    "platform": "Win32",
-//                    "os": "Windows",
-//                    "isAndroid": false,
-//                    "isIphone": false,
-//                    "deviceType": "desktop",
-//                    "language": "en-US",
-//                    "timeZone": "Asia\/Dhaka",
-//                    "location": null,
-//                    "country": "Bangladesh"
+                    $existing_analytics += $value;
+                    continue;
                 }
 
 				if ( isset( $existing_analytics[ $key ] ) ) {
@@ -122,6 +92,7 @@ class AtlasVoice_Analytics {
 					$existing_analytics[ $key ] = $value;
 				}
 			}
+            error_log( print_r( $existing_analytics, true ) );
 
 			// Update the entry
 			$wpdb->update(
@@ -137,7 +108,13 @@ class AtlasVoice_Analytics {
 			);
 		} else {
 			// Create a new entry
-			$wpdb->insert(
+            if( isset( $new_analytics['device_info'] ) ) {
+                $new_analytics += $new_analytics['device_info'];
+                unset( $new_analytics['device_info'] );
+            }
+            error_log( print_r( $new_analytics, true ) );
+
+            $wpdb->insert(
 				$table_name,
 				array(
 					'user_id'    => $user_id,
