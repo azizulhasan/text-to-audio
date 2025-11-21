@@ -16,7 +16,7 @@ class AtlasVoiceAnalytics {
         // Bind the event listeners for beforeunload and unload
         window.addEventListener('beforeunload', this.sendSessionData.bind(this));
 
-        // this.trackDeviceInfo()
+        this.trackDeviceInfo()
     }
 
 
@@ -217,6 +217,12 @@ class AtlasVoiceAnalytics {
             return;
         }
         let eventData = {}
+
+        if(eventType === 'device_info') {
+            this.sessionData[eventType] = data;
+            this.saveSessionData();
+            return;
+        }
         if (this.sessionData?.[eventType]) {
             let eventCount = this.sessionData?.[eventType]?.count;
             eventData = {
@@ -286,33 +292,21 @@ class AtlasVoiceAnalytics {
      *   getDeviceData().then(data => console.log(data));
      */
     async  getDeviceData() {
+
         const result = {
             // user agent / hints
-            userAgent: navigator.userAgent || null,
-            userAgentData: null, // will populate if available
             browserName: null,
             browserVersion: null,
+            browser: null,
 
             // platform / OS / device type
             platform: navigator.platform || null,
-            os: null,
-            isAndroid: false,
-            isIphone: false,
             deviceType: null, // 'mobile' | 'tablet' | 'desktop' | 'unknown'
-
-            // hardware / capability info (if available)
-            // screenWidth: (typeof screen !== 'undefined') ? screen.width : null,
-            // screenHeight: (typeof screen !== 'undefined') ? screen.height : null,
-            // logicalCores: navigator.hardwareConcurrency || null,
-
-            // connection info (may be limited)
-            // connection: null, // {effectiveType, downlink, rtt, saveData} or null
+            architecture: null,
 
             // language / timezone
             language: navigator.language || null,
-            // languages: navigator.languages || null,
-            timeZone: (typeof Intl === 'object' && Intl.DateTimeFormat) ? Intl.DateTimeFormat().resolvedOptions().timeZone : null,
-
+            timeZone: this.#getTimeZone(),
 
             // location (only if permission already granted; will NOT prompt)
             location: null, // {latitude, longitude, accuracy, timestamp} or null
@@ -320,19 +314,7 @@ class AtlasVoiceAnalytics {
             country: this.#country(),
         };
 
-        // Helper: try to read userAgentData (client hints) if available
-        try {
-            if (navigator.userAgentData) {
-                // userAgentData is privacy-aware; may provide brands, platform, mobile flag
-                result.userAgentData = {
-                    brands: navigator.userAgentData.brands || null,
-                    mobile: navigator.userAgentData.mobile || false,
-                    platform: navigator.userAgentData.platform || null
-                };
-            }
-        } catch (e) {
-            // ignore
-        }
+
 
         // Parse a best-effort browser name & version from userAgent or userAgentData
         (function parseBrowser() {
@@ -347,8 +329,8 @@ class AtlasVoiceAnalytics {
             // }
 
             // Fallback: simple regex-based UA parsing (best-effort; not perfect)
-            if (!result.browserName && result.userAgent) {
-                const ua = result.userAgent;
+            if (!result.browserName ) {
+                const ua = window?.navigator?.userAgent;
                 const browsers = [
                     { name: 'Edge', re: /Edg\/([0-9._]+)/ },
                     { name: 'Chrome', re: /Chrome\/([0-9._]+)/ },
@@ -360,76 +342,13 @@ class AtlasVoiceAnalytics {
                 for (const b of browsers) {
                     const m = ua.match(b.re);
                     if (m) {
-                        result.browserName = b.name;
-                        result.browserVersion = m[1] || m[2] || null;
+                        result.browser = b.name + '_' + m[1] || m[2] || null;
                         break;
                     }
                 }
             }
         })();
 
-        // Infer OS / device type
-        (function inferOSAndDevice() {
-            const ua = (result.userAgent || '').toLowerCase();
-            const platform = (result.platform || '').toLowerCase();
-            if (/android/.test(ua) || /android/.test(platform)) {
-                result.os = 'Android';
-                result.isAndroid = true;
-            } else if (/iphone|ipad|ipod/.test(ua) || /iphone|ipad|ipod/.test(platform)) {
-                result.os = 'iOS';
-                result.isIphone = /iphone/.test(ua) || /iphone/.test(platform);
-            } else if (/windows/.test(platform) || /win/.test(ua)) {
-                result.os = 'Windows';
-            } else if (/mac os x/.test(ua) || /macintosh/.test(platform)) {
-                result.os = 'macOS';
-            } else if (/linux/.test(platform)) {
-                result.os = 'Linux';
-            } else {
-                result.os = (platform || null) || null;
-            }
-
-            // simple device type inference
-            if (result.userAgentData && typeof result.userAgentData.mobile === 'boolean') {
-                result.deviceType = result.userAgentData.mobile ? 'mobile' : 'desktop';
-            } else if (/mobile/.test(result.userAgent || '')) {
-                result.deviceType = 'mobile';
-            } else if (/tablet|ipad/.test(result.userAgent || '')) {
-                result.deviceType = 'tablet';
-            } else {
-                result.deviceType = 'desktop';
-            }
-        })();
-
-        // Connection info (Network Information API) - may be undefined in some browsers
-        try {
-            // const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-            // if (conn) {
-            //     result.connection = {
-            //         effectiveType: conn.effectiveType || null,
-            //         downlink: typeof conn.downlink !== 'undefined' ? conn.downlink : null,
-            //         rtt: typeof conn.rtt !== 'undefined' ? conn.rtt : null,
-            //         saveData: typeof conn.saveData !== 'undefined' ? conn.saveData : null
-            //     };
-            // }
-        } catch (e) {
-            // ignore
-        }
-
-        // Battery (non-prompting in most browsers, but may be unavailable)
-        try {
-            // if (navigator.getBattery && typeof navigator.getBattery === 'function') {
-            //     // don't await too long; battery promise usually resolves quickly
-            //     const battery = await navigator.getBattery();
-            //     result.battery = {
-            //         charging: battery.charging,
-            //         level: battery.level, // 0..1
-            //         chargingTime: battery.chargingTime,
-            //         dischargingTime: battery.dischargingTime
-            //     };
-            // }
-        } catch (e) {
-            // ignore if unavailable or blocked
-        }
 
         // Geolocation: ONLY read if permission is already granted (do not prompt)
         async function tryGetLocationIfAlreadyGranted() {
@@ -478,12 +397,92 @@ class AtlasVoiceAnalytics {
             // ignore
         }
 
+
+        function deviceOSInfo(userAgent = navigator.userAgent) {
+            userAgent = userAgent.toLowerCase();
+
+            let platform = 'Unknown';
+            let deviceType = 'Desktop'; // default
+            let architecture = '';
+
+            // ===== WINDOWS =====
+            if (userAgent.includes('windows')) {
+                if (userAgent.includes('windows nt 10.0')) platform = 'Windows 10';
+                else if (userAgent.includes('windows nt 11.0')) platform = 'Windows 11';
+                else if (userAgent.includes('windows nt 6.3')) platform = 'Windows 8.1';
+                else if (userAgent.includes('windows nt 6.2')) platform = 'Windows 8';
+                else if (userAgent.includes('windows nt 6.1')) platform = 'Windows 7';
+                else platform = 'Windows';
+
+                if (userAgent.includes('win64') || userAgent.includes('x64') || userAgent.includes('wow64')) {
+                    architecture = '64-bit';
+                } else if (userAgent.includes('win32') || userAgent.includes('x86')) {
+                    architecture = '32-bit';
+                }
+            }
+
+            // ===== MAC / iOS =====
+            else if (userAgent.includes('macintosh') || userAgent.includes('mac os')) {
+                platform = 'macOS';
+                if (userAgent.includes('arm') || userAgent.includes('apple')) {
+                    architecture = 'Apple Silicon';
+                } else {
+                    architecture = 'Intel';
+                }
+            } else if (/iphone|ipad|ipod/.test(userAgent)) {
+                platform = 'iOS';
+                deviceType = /ipad/.test(userAgent) ? 'Tablet' : 'Mobile';
+            }
+
+            // ===== ANDROID =====
+            else if (userAgent.includes('android')) {
+                const versionMatch = userAgent.match(/android\s([\d\.]+)/);
+                platform = versionMatch ? `Android ${versionMatch[1]}` : 'Android';
+                deviceType = userAgent.includes('mobile') ? 'Mobile' : 'Tablet';
+            }
+
+            // ===== LINUX =====
+            else if (userAgent.includes('linux')) {
+                platform = 'Linux';
+                if (userAgent.includes('x86_64')) architecture = '64-bit';
+                else if (userAgent.includes('i686')) architecture = '32-bit';
+            }
+
+            // ===== Detect device type generally =====
+            if (/mobi|android|iphone|ipod/i.test(userAgent)) {
+                deviceType = 'Mobile';
+            } else if (/ipad|tablet/i.test(userAgent)) {
+                deviceType = 'Tablet';
+            }
+
+            // ===== Return clean structured data =====
+            return {
+                platform,        // e.g. "Windows 10"
+                architecture,    // e.g. "64-bit"
+                deviceType,      // e.g. "Desktop"
+            };
+        }
+        const osIfo = deviceOSInfo()
+        if(osIfo?.deviceType) {
+            result.deviceType = osIfo.deviceType
+        }
+
+        if(osIfo?.platform) {
+            result.platform = osIfo.platform
+        }
+        if(osIfo?.architecture) {
+            result.architecture = osIfo.architecture
+        }
+
+
         return result;
     }
 
-
+    #getTimeZone() {
+        return (typeof Intl === 'object' && Intl.DateTimeFormat) ? Intl.DateTimeFormat().resolvedOptions().timeZone : null;
+    }
     #country(){
-        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const timeZone = this.#getTimeZone();
         const tzData = ct.getTimezone(timeZone);
         const countryData = tzData ? ct.getCountry(tzData.countries[0]) : null;
 

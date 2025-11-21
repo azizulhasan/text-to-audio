@@ -515,8 +515,11 @@ function add_listen_button($content)
 {
     static $button_no = 0;
     $button_no++;
-    TTA_Helper::set_default_settings();
     global $post;
+    if (!TTA_Helper::should_load_button($post) ) {
+       return $content;
+    }
+    TTA_Helper::set_default_settings();
     $button = '';
     $settings = TTA_Helper::tts_get_settings('settings');
     $customize = TTA_Helper::tts_get_settings('customize');
@@ -570,7 +573,6 @@ function add_listen_button($content)
     }
 
     return apply_filters('tts_button_with_content', $final_content, $button, $content, $button_position);
-
 
 }
 
@@ -880,3 +882,22 @@ function is_pro_active()
 
 
 }
+
+/**
+ * Write debug logs for Text-to-Audio plugin.
+ *
+ * @param string $message  The log message.
+ */
+function tts_debug( $message ) {
+
+    // Plugin directory
+    $log_file = WP_CONTENT_DIR . '/debug.log';
+
+    // Prepare log message with timestamp
+    $time = date( 'Y-m-d H:i:s' );
+    $formatted_message = "[$time] [atlasvoice] " . print_r( $message, true ) . PHP_EOL;
+
+    // Append to log file
+    file_put_contents( $log_file, $formatted_message, FILE_APPEND | LOCK_EX );
+}
+

@@ -80,6 +80,11 @@ class AtlasVoice_Analytics {
 			$existing_analytics = maybe_unserialize( $existing_entry->analytics );
 			// Sum the existing and new analytics data
 			foreach ( $new_analytics as $key => $value ) {
+                if($key === 'device_info' ) {
+                    $existing_analytics += $value;
+                    continue;
+                }
+
 				if ( isset( $existing_analytics[ $key ] ) ) {
 					$existing_analytics[ $key ]['count']     += $value['count'];
 					$existing_analytics[ $key ]['timestamp'] = $value['timestamp'];
@@ -87,7 +92,6 @@ class AtlasVoice_Analytics {
 					$existing_analytics[ $key ] = $value;
 				}
 			}
-
 			// Update the entry
 			$wpdb->update(
 				$table_name,
@@ -102,7 +106,12 @@ class AtlasVoice_Analytics {
 			);
 		} else {
 			// Create a new entry
-			$wpdb->insert(
+            if( isset( $new_analytics['device_info'] ) ) {
+                $new_analytics += $new_analytics['device_info'];
+                unset( $new_analytics['device_info'] );
+            }
+
+            $wpdb->insert(
 				$table_name,
 				array(
 					'user_id'    => $user_id,
@@ -221,12 +230,7 @@ class AtlasVoice_Analytics {
 
 		$response['status'] = true;
 		$response['data']   = $total_results;
-		$response['extra']   = [
-            'args'       => $args,
-            'conditions' => $conditions,
-            '$total_results'    => $total_results,
-            '$where_clause'    => $where_clause,
-        ];
+		$response['extra']   = [];
 
 		return rest_ensure_response( $response );
 	}

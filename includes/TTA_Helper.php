@@ -1479,5 +1479,31 @@ class TTA_Helper
         return $browser;
     }
 
+    public static  function get_user_ip_address() {
+        $ip_keys = [
+            'HTTP_CF_CONNECTING_IP', // Cloudflare
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_X_REAL_IP',
+            'HTTP_CLIENT_IP',
+            'REMOTE_ADDR'
+        ];
+
+        foreach ( $ip_keys as $key ) {
+            if ( ! empty( $_SERVER[ $key ] ) ) {
+                $ip = $_SERVER[ $key ];
+
+                // Handle multiple IPs (e.g. "116.206.88.143, 10.0.0.1")
+                if ( strpos( $ip, ',' ) !== false ) {
+                    $ip = explode( ',', $ip )[0];
+                }
+
+                return sanitize_text_field( trim( $ip ) );
+            }
+        }
+
+        return 'UNKNOWN';
+    }
+
+
 
 }
