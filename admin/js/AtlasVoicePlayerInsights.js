@@ -26,11 +26,12 @@ class AtlasVoicePlayerInsights {
     place_to_display = 'post_edit'
     chartInstance = null
     chartContainerId = 'atlasVoice_analytics_chart'
+
     constructor(searchParams, place_to_display = 'post_edit') {
         this.searchParams = searchParams
         this.place_to_display = place_to_display;
         this.apiUrl = ttsObj.api_url + ttsObj.api_namespace + '/' + ttsObj.api_version + '/insights'; // Replace with your backend API URL
-        if(place_to_display === 'dashboard') {
+        if (place_to_display === 'dashboard') {
             document.getElementById('atlasVoice_analytics').innerHTML = '';
         }
         this.setAnalyticsTitle();
@@ -127,7 +128,7 @@ class AtlasVoicePlayerInsights {
         return playCount > 0 ? pauseCount / playCount : 0;
     }
 
-    getCountry(){
+    getCountry() {
         return 'abc'
     }
 
@@ -186,18 +187,18 @@ class AtlasVoicePlayerInsights {
         data.forEach((item, item_key) => {
             const analytics = item.analytics;
             for (const [key, value] of Object.entries(analytics)) {
-                if( ! value?.count || ! value?.timestamp) {
-                    if(!value) {
+                if (!value?.count || !value?.timestamp) {
+                    if (!value) {
                         continue;
                     }
 
-                    if(!mergedAnalytics[key]) {
+                    if (!mergedAnalytics[key]) {
                         mergedAnalytics[key] = {}
                     }
 
-                    if(mergedAnalytics[key][value]) {
+                    if (mergedAnalytics[key][value]) {
                         mergedAnalytics[key][value] += 1;
-                    }else{
+                    } else {
                         mergedAnalytics[key][value] = 1
                     }
                     continue;
@@ -222,7 +223,7 @@ class AtlasVoicePlayerInsights {
 
 
     async getInsights() {
-        if ( this.place_to_display !== 'dashboard' && !this.shouldTrackAnalyticsData()) {
+        if (this.place_to_display !== 'dashboard' && !this.shouldTrackAnalyticsData()) {
             return;
         }
 
@@ -241,7 +242,7 @@ class AtlasVoicePlayerInsights {
             params.append('to_date', this.searchParams.to_date);
         }
         // Build the final URL
-        const param =  params.toString() ? `?${params.toString()}`: '';
+        const param = params.toString() ? `?${params.toString()}` : '';
 
         this.apiUrl += param;
 
@@ -256,8 +257,6 @@ class AtlasVoicePlayerInsights {
         data = this.mergeAnalytics(data.data)
         this.data = data;
         this.insights = this.generateInsights()
-
-
 
 
         if (Object.keys(this.insights).length) {
@@ -276,7 +275,7 @@ class AtlasVoicePlayerInsights {
         const tableContainer = document.getElementById('atlasVoice_analytics');
         const table = this.createTable(this.insights);
         let flextDiv = '';
-        if(tableContainer && table) {
+        if (tableContainer && table) {
             flextDiv = document.createElement('div')
             flextDiv.style.width = '100%'
             flextDiv.style.display = 'flex'
@@ -286,9 +285,9 @@ class AtlasVoicePlayerInsights {
             table.style.width = '50%'
             flextDiv.appendChild(table);
         }
-        if(flextDiv) {
+        if (flextDiv) {
             let chartDiv = document.createElement('div')
-            chartDiv.setAttribute('id', this.chartContainerId );
+            chartDiv.setAttribute('id', this.chartContainerId);
             chartDiv.style.width = '50%'
             chartDiv.style.height = '100%'
             flextDiv.appendChild(chartDiv);
@@ -298,7 +297,7 @@ class AtlasVoicePlayerInsights {
 
     setAnalyticsTitle() {
         const tableContainer = document.getElementById('atlasVoice_analytics');
-        if(!tableContainer) {
+        if (!tableContainer) {
             return null;
         }
         let title = document.createElement('h2')
@@ -316,7 +315,7 @@ class AtlasVoicePlayerInsights {
             // Extract the div element from the parsed document
             let headerElement = header.body.firstChild;
 
-            if(tableContainer) {
+            if (tableContainer) {
                 tableContainer.prepend(headerElement)
             }
         }
@@ -324,7 +323,7 @@ class AtlasVoicePlayerInsights {
 
     createTable(data) {
         const table = document.createElement('table');
-        if(!table) {
+        if (!table) {
             return null
         }
         table.style.width = '50%'
@@ -442,8 +441,7 @@ class AtlasVoicePlayerInsights {
         container.innerHTML = `
       <h2>Analytics Data Chart</h2>
       <select id="${this.chartContainerId}_filter">
-        <option value="browserName">Browser Name</option>
-        <option value="browserVersion">Browser Version</option>
+        <option value="browser">Browser</option>
         <option value="platform">Platform</option>
         <option value="deviceType">Device Type</option>
         <option value="architecture">Architecture</option>
@@ -470,13 +468,13 @@ class AtlasVoicePlayerInsights {
       #${this.chartContainerId} {
         font-family: system-ui, sans-serif;
         background: #f9fafb;
-        padding: 30px;
+        padding: 10px;
         text-align: center;
       }
       #${this.chartContainerId} .chart-container {
         min-width: 500px;
         max-width: 1000px;
-        margin: 20px auto;
+        margin: 10px auto;
         background: #fff;
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -484,11 +482,11 @@ class AtlasVoicePlayerInsights {
         min-height: 400px;
       }
       #${this.chartContainerId} select {
-        padding: 8px 12px;
+        padding: 2px 4px;
         border-radius: 6px;
         border: 1px solid #ccc;
         font-size: 16px;
-        margin-bottom: 15px;
+        margin-bottom: 5px;
       }
     `;
         document.getElementById(this.chartContainerId).appendChild(style);
@@ -498,7 +496,7 @@ class AtlasVoicePlayerInsights {
      * Initializes the chart for the first time
      */
     initChart() {
-        this.renderChart('browserName');
+        this.renderChart('browser');
     }
 
     /**
@@ -507,7 +505,7 @@ class AtlasVoicePlayerInsights {
     renderChart(filterKey) {
         const ctx = document.getElementById(`${this.chartContainerId}_canvas`);
         if (!ctx) return console.error('Chart canvas not found');
-
+        console.log(this.chartAnalyticsData)
         const dataObj = this.chartAnalyticsData[filterKey];
         if (!dataObj) return console.warn(`No data found for key: ${filterKey}`);
 
@@ -531,10 +529,18 @@ class AtlasVoicePlayerInsights {
             options: {
                 responsive: true,
                 plugins: {
-                    legend: { display: false },
-                    title: { display: true, text: `Analytics by ${filterKey}` }
+                    legend: {display: false},
+                    title: {display: true, text: `Analytics by ${filterKey}`}
                 },
-                scales: { y: { beginAtZero: true } }
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            // forces step size to be 10 units
+                            stepSize: 50
+                        }
+                    },
+                }
             }
         });
     }

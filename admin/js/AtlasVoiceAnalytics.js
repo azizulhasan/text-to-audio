@@ -297,6 +297,7 @@ class AtlasVoiceAnalytics {
             // user agent / hints
             browserName: null,
             browserVersion: null,
+            browser: null,
 
             // platform / OS / device type
             platform: navigator.platform || null,
@@ -341,8 +342,7 @@ class AtlasVoiceAnalytics {
                 for (const b of browsers) {
                     const m = ua.match(b.re);
                     if (m) {
-                        result.browserName = b.name;
-                        result.browserVersion = m[1] || m[2] || null;
+                        result.browser = b.name + '_' + m[1] || m[2] || null;
                         break;
                     }
                 }

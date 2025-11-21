@@ -92,8 +92,6 @@ class AtlasVoice_Analytics {
 					$existing_analytics[ $key ] = $value;
 				}
 			}
-            error_log( print_r( $existing_analytics, true ) );
-
 			// Update the entry
 			$wpdb->update(
 				$table_name,
@@ -112,7 +110,6 @@ class AtlasVoice_Analytics {
                 $new_analytics += $new_analytics['device_info'];
                 unset( $new_analytics['device_info'] );
             }
-            error_log( print_r( $new_analytics, true ) );
 
             $wpdb->insert(
 				$table_name,
@@ -233,12 +230,7 @@ class AtlasVoice_Analytics {
 
 		$response['status'] = true;
 		$response['data']   = $total_results;
-		$response['extra']   = [
-//            'args'       => $args,
-//            'conditions' => $conditions,
-//            '$total_results'    => $total_results,
-//            '$where_clause'    => $where_clause,
-        ];
+		$response['extra']   = [];
 
 		return rest_ensure_response( $response );
 	}
