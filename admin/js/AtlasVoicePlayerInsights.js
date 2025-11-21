@@ -24,11 +24,14 @@ class AtlasVoicePlayerInsights {
     };
     proPage = 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/';
     place_to_display = 'post_edit'
+    chartInstance = null
+    chartContainerId = 'atlasVoice_analytics_chart'
+
     constructor(searchParams, place_to_display = 'post_edit') {
         this.searchParams = searchParams
         this.place_to_display = place_to_display;
         this.apiUrl = ttsObj.api_url + ttsObj.api_namespace + '/' + ttsObj.api_version + '/insights'; // Replace with your backend API URL
-        if(place_to_display === 'dashboard') {
+        if (place_to_display === 'dashboard') {
             document.getElementById('atlasVoice_analytics').innerHTML = '';
         }
         this.setAnalyticsTitle();
@@ -125,9 +128,7 @@ class AtlasVoicePlayerInsights {
         return playCount > 0 ? pauseCount / playCount : 0;
     }
 
-    getCountry(){
-        console.log(this.data)
-
+    getCountry() {
         return 'abc'
     }
 
@@ -140,11 +141,6 @@ class AtlasVoicePlayerInsights {
             averageListenTillEndRatio: this.getAverageListenTillEndRatio().toFixed(2) + '%',
             averageListeningTimePerPlay: this.getAverageListeningTimePerPlay().toFixed(2) + ' seconds',
             averagePausesPerPlay: this.getAveragePausesPerPlay().toFixed(2),
-            // country: this.getCountry(),
-            // deviceType: this.pro,
-            // timeZone: this.pro,
-            // os: this.pro,
-            // browser: this.pro,
         }
 
 
@@ -180,11 +176,6 @@ class AtlasVoicePlayerInsights {
                 averageListenTillEndRatio: this.pro,
                 averageListeningTimePerPlay: this.pro,
                 averagePausesPerPlay: this.pro,
-                // country: this.pro,
-                // deviceType: this.pro,
-                // timeZone: this.pro,
-                // platform: this.pro,
-                // browser: this.pro,
             });
         }
 
@@ -196,32 +187,43 @@ class AtlasVoicePlayerInsights {
         data.forEach((item, item_key) => {
             const analytics = item.analytics;
             for (const [key, value] of Object.entries(analytics)) {
-                if(key === 'device_info') {
+                if (!value?.count || !value?.timestamp) {
+                    if (!value) {
+                        continue;
+                    }
+
                     if (!mergedAnalytics[key]) {
-                        mergedAnalytics[key] = {};
+                        mergedAnalytics[key] = {}
                     }
-                    console.log(value)
-                    // mergedAnalytics[key] = value
-                }else {
-                    if (!mergedAnalytics[key]) {
-                        mergedAnalytics[key] = {count: 0, timestamp: value.timestamp};
+
+                    if (mergedAnalytics[key][value]) {
+                        mergedAnalytics[key][value] += 1;
+                    } else {
+                        mergedAnalytics[key][value] = 1
                     }
-                    mergedAnalytics[key].count += value.count;
-                    // Keep the latest timestamp
-                    if (new Date(value.timestamp) > new Date(mergedAnalytics[key].timestamp)) {
-                        mergedAnalytics[key].timestamp = value.timestamp;
-                    }
+                    continue;
+                }
+
+                if (!mergedAnalytics[key]) {
+                    mergedAnalytics[key] = {count: 0, timestamp: value.timestamp};
+                }
+                mergedAnalytics[key].count += value.count;
+                // Keep the latest timestamp
+                if (new Date(value.timestamp) > new Date(mergedAnalytics[key].timestamp)) {
+                    mergedAnalytics[key].timestamp = value.timestamp;
                 }
 
             }
         });
+
+        console.log(mergedAnalytics)
 
         return mergedAnalytics;
     }
 
 
     async getInsights() {
-        if ( this.place_to_display !== 'dashboard' && !this.shouldTrackAnalyticsData()) {
+        if (this.place_to_display !== 'dashboard' && !this.shouldTrackAnalyticsData()) {
             return;
         }
 
@@ -240,7 +242,7 @@ class AtlasVoicePlayerInsights {
             params.append('to_date', this.searchParams.to_date);
         }
         // Build the final URL
-        const param =  params.toString() ? `?${params.toString()}`: '';
+        const param = params.toString() ? `?${params.toString()}` : '';
 
         this.apiUrl += param;
 
@@ -255,8 +257,6 @@ class AtlasVoicePlayerInsights {
         data = this.mergeAnalytics(data.data)
         this.data = data;
         this.insights = this.generateInsights()
-
-
 
 
         if (Object.keys(this.insights).length) {
@@ -274,15 +274,30 @@ class AtlasVoicePlayerInsights {
     displayInsights() {
         const tableContainer = document.getElementById('atlasVoice_analytics');
         const table = this.createTable(this.insights);
-        if(tableContainer && table) {
+        let flextDiv = '';
+        if (tableContainer && table) {
+            flextDiv = document.createElement('div')
+            flextDiv.style.width = '100%'
+            flextDiv.style.display = 'flex'
+            flextDiv.style.minHeight = '500px'
             this.prependCSS(tableContainer);
-            tableContainer.appendChild(table);
+            tableContainer.appendChild(flextDiv);
+            table.style.width = '50%'
+            flextDiv.appendChild(table);
+        }
+        if (flextDiv) {
+            let chartDiv = document.createElement('div')
+            chartDiv.setAttribute('id', this.chartContainerId);
+            chartDiv.style.width = '50%'
+            chartDiv.style.height = '100%'
+            flextDiv.appendChild(chartDiv);
+            this.igniteChart()
         }
     }
 
     setAnalyticsTitle() {
         const tableContainer = document.getElementById('atlasVoice_analytics');
-        if(!tableContainer) {
+        if (!tableContainer) {
             return null;
         }
         let title = document.createElement('h2')
@@ -292,7 +307,7 @@ class AtlasVoicePlayerInsights {
             tableContainer.appendChild(title);
         } else {
             let perser = new DOMParser();
-            let header = `<div style="margin-top:30px;font-size:20px;background-color:#184c53;color:#fff;padding:5px;" for="">
+            let header = `<div style="display:block;margin-top:30px;font-size:20px;background-color:#184c53;color:#fff;padding:5px;" for="">
                 Analytics Of The Post
             </div>`
             header = perser.parseFromString(header, 'text/html')
@@ -300,7 +315,7 @@ class AtlasVoicePlayerInsights {
             // Extract the div element from the parsed document
             let headerElement = header.body.firstChild;
 
-            if(tableContainer) {
+            if (tableContainer) {
                 tableContainer.prepend(headerElement)
             }
         }
@@ -308,10 +323,11 @@ class AtlasVoicePlayerInsights {
 
     createTable(data) {
         const table = document.createElement('table');
-        if(!table) {
+        if (!table) {
             return null
         }
-
+        table.style.width = '50%'
+        // table.style.display = 'flex'
         const headers = ['Metric', 'Value'];
         const headerRow = document.createElement('tr');
         headers.forEach(header => {
@@ -404,6 +420,129 @@ class AtlasVoicePlayerInsights {
         `;
 
         container.appendChild(style);
+    }
+
+
+    igniteChart() {
+
+        this.chartAnalyticsData = this.data;
+        this.renderLayout();
+        this.attachStyles();
+        this.initChart();
+    }
+
+    /**
+     * Creates and appends HTML structure inside the container
+     */
+    renderLayout() {
+        const container = document.getElementById(this.chartContainerId);
+        if (!container) return console.error(`Container #${this.chartContainerId} not found`);
+
+        container.innerHTML = `
+      <h2>Analytics Data Chart</h2>
+      <select id="${this.chartContainerId}_filter">
+        <option value="browser">Browser</option>
+        <option value="platform">Platform</option>
+        <option value="deviceType">Device Type</option>
+        <option value="architecture">Architecture</option>
+        <option value="language">Language</option>
+        <option value="timeZone">Time Zone</option>
+        <option value="country">Country</option>
+      </select>
+      <div class="chart-container">
+        <canvas id="${this.chartContainerId}_canvas"></canvas>
+      </div>
+    `;
+
+        // Bind change event
+        const filterSelect = document.getElementById(`${this.chartContainerId}_filter`);
+        filterSelect.addEventListener('change', (e) => this.renderChart(e.target.value));
+    }
+
+    /**
+     * Injects the necessary CSS styling dynamically
+     */
+    attachStyles() {
+        const style = document.createElement('style');
+        style.textContent = `
+      #${this.chartContainerId} {
+        font-family: system-ui, sans-serif;
+        background: #f9fafb;
+        padding: 10px;
+        text-align: center;
+      }
+      #${this.chartContainerId} .chart-container {
+        min-width: 500px;
+        max-width: 1000px;
+        margin: 10px auto;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 20px;
+        min-height: 400px;
+      }
+      #${this.chartContainerId} select {
+        padding: 2px 4px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        margin-bottom: 5px;
+      }
+    `;
+        document.getElementById(this.chartContainerId).appendChild(style);
+    }
+
+    /**
+     * Initializes the chart for the first time
+     */
+    initChart() {
+        this.renderChart('browser');
+    }
+
+    /**
+     * Renders or updates the chart for a given data key
+     */
+    renderChart(filterKey) {
+        const ctx = document.getElementById(`${this.chartContainerId}_canvas`);
+        if (!ctx) return console.error('Chart canvas not found');
+        console.log(this.chartAnalyticsData)
+        const dataObj = this.chartAnalyticsData[filterKey];
+        if (!dataObj) return console.warn(`No data found for key: ${filterKey}`);
+
+        const labels = Object.keys(dataObj);
+        const values = Object.values(dataObj);
+
+        // Destroy existing chart instance if any
+        if (this.chartInstance) this.chartInstance.destroy();
+
+        // Create a new chart
+        this.chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    label: filterKey,
+                    data: values,
+                    backgroundColor: labels.map(() => `hsl(${Math.random() * 360}, 70%, 60%)`)
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {display: false},
+                    title: {display: true, text: `Analytics by ${filterKey}`}
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            // forces step size to be 10 units
+                            stepSize: 50
+                        }
+                    },
+                }
+            }
+        });
     }
 
     shouldTrackAnalyticsData() {

@@ -13,35 +13,6 @@ namespace TTA_Api;
 use TTA\TTA_Cache;
 class AtlasVoice_Plugin_Compatibility {
 
-	/**
-	 * @param $request
-	 *
-	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
-	 */
-	public function get_compatible_data1111( $request ) {
-
-		$body = $request->get_body();
-		$body = json_decode( $body, 1 );
-
-		if ( isset( $body['post_id'], $body['analytics'] ) && count( $body['analytics'] ) ) {
-			$post_id = $body['post_id'];
-			//delete_post_meta( $post_id, 'atlasVoice_analytics' );
-			$analytics = get_post_meta( $body['post_id'], 'atlasVoice_analytics' );
-			if ( isset( $analytics[0] ) ) {
-				$analytics = $analytics[0];
-			}
-			$merged_analytics = self::merge_analytics_arrays( $analytics, $body['analytics'] );
-
-			update_post_meta( $post_id, 'atlasVoice_analytics', $merged_analytics );
-
-		}
-
-		$response['status'] = true;
-		$response['data']   = [];
-
-		return rest_ensure_response( $response );
-	}
-
 	/*
  * Manage settings data
  */

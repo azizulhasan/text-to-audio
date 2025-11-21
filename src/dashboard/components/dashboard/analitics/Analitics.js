@@ -87,7 +87,12 @@ export default function Analitics() {
         return data
             .map(post => {
                 const {post_id, analytics} = post;
-                const totalScore = Object.values(analytics).reduce((sum, event) => sum + event.count, 0);
+                const totalScore = Object.values(analytics).reduce((sum, event) => {
+                    if(event?.count) {
+                        return sum + event.count;
+                    }
+                    return  sum;
+                }, 0);
                 return {post_id, totalScore};
             })
             .sort((a, b) => b.totalScore - a.totalScore)

@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.8.3
 Requires PHP: 7.4
-Stable tag: 1.9.30
+Stable tag: 1.9.32
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -423,7 +423,12 @@ You can customize the voice and language of the text-to-speech player using shor
 
 	`
 	[atlasvoice lang="en-GB" voice="Google US English"]
-	`	
+	`
+
+= Where do I report security bugs found in this plugin? =
+
+Please report security bugs found in the source code of the Text To Speech TTS plugin through the [Patchstack Vulnerability Disclosure  Program](https://patchstack.com/database/vdp/e8df1af0-74f2-41c7-bb59-d72a3898e234). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
+
 
 == Screenshots ==
 1. Player 1.
@@ -444,6 +449,14 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+= 1.9.32  ( 21 November 2025 )  =
+Added :  Tracing Device information added.
+Improved: Analytics UI improved.
+Fixed: Unnecessary content wrapper removed.
+
+
+= 1.9.31  ( 12 November 2025 )  =
+Fixed :  Security issue fixed by patchstack.
 
 = 1.9.30  ( 10 November 2025 )  =
 Improved :  Backup MP3 file text improved
@@ -740,6 +753,7 @@ Improved: Pro version and free version performance issue improved.
 
 == Upgrade Notice ==
 
-= 1.9.28 =
-Added : Search analytics by post ID on analytics menu (free )
-Added : Search analytics by date range on analytics menu ( pro ).
+= 1.9.32  =
+Added :  Tracing Device information added.
+Improved: Analytics UI improved.
+Fixed: Unnecessary content wrapper removed.

@@ -126,6 +126,7 @@ class TTA_Admin {
 				]
 			] ),
 			'is_mobile'                => wp_is_mobile(),
+
 		];
 	}
 
@@ -224,10 +225,12 @@ class TTA_Admin {
 			echo $object;
 		}
 
-		if ( TTA_Helper::is_edit_page() || is_admin() && isset( $_REQUEST['page'] ) && ( 'text-to-audio' == $_REQUEST['page'] ) ) {
+		if ( TTA_Helper::is_edit_page() || isset( $_REQUEST['page'] ) && ( 'text-to-audio' == $_REQUEST['page'] ) ) {
+            wp_enqueue_script( 'AtlasVoice_chart', 'https://cdn.jsdelivr.net/npm/chart.js', [], $this->version, true );
 			wp_enqueue_script( 'AtlasVoicePlayerInsights', plugin_dir_url( __FILE__ ) . 'js/build/AtlasVoicePlayerInsights.min.js', array(
 				'wp-hooks',
-				'wp-i18n'
+				'wp-i18n',
+                'AtlasVoice_chart'
 			), $this->version, true );
 			wp_localize_script( 'AtlasVoicePlayerInsights', 'ttsObj', $this->localize_data );
 		}
