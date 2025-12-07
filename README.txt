@@ -3,9 +3,9 @@ Contributors: atlasaidev, hasanazizul, freemius
 Donate link: http://atlasaidev.com/
 Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
-Tested up to: 6.8.3
+Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.9.33
+Stable tag: 1.9.34
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -449,6 +449,11 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+= 1.9.34  ( 7 December 2025 )  =
+Fixed :  notice issue fixed.
+Checked :  WordPress 6.9 tested
+
+
 
 = 1.9.33  ( 27 November 2025 )  =
 Removed :  Plugin compatible notice removed.
@@ -758,6 +763,8 @@ Improved: Pro version and free version performance issue improved.
 
 == Upgrade Notice ==
 
-= 1.9.33  =
-Removed :  Plugin compatible notice removed.
-Added: Black Friday Banner Added.
+
+= 1.9.34   =
+Fixed :  notice issue fixed.
+Checked :  WordPress 6.9 tested
+
