@@ -158,81 +158,36 @@ export default function Settings() {
 
   // Custom Toggle Switch Component
   const ToggleSwitch = ({ checked, onChange, name, id, disabled }) => (
-    <label style={{
-      position: 'relative',
-      display: 'inline-block',
-      width: '48px',
-      height: '24px',
-      cursor: disabled ? 'not-allowed' : 'pointer'
-    }}>
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={onChange}
-        name={name}
-        id={id}
-        disabled={disabled}
-        style={{ opacity: 0, width: 0, height: 0 }}
-      />
-      <span style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: checked ? '#9EF01A' : '#e0e0e0',
-        borderRadius: '24px',
-        transition: '0.3s',
-        opacity: disabled ? 0.5 : 1
-      }}>
-        <span style={{
-          position: 'absolute',
-          content: '',
-          height: '18px',
-          width: '18px',
-          left: checked ? '27px' : '3px',
-          bottom: '3px',
-          background: 'white',
-          borderRadius: '50%',
-          transition: '0.3s',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-        }}></span>
-      </span>
-    </label>
+<label className={`custom-switch ${disabled ? "switch-disabled" : ""}`}>
+  <input
+    type="checkbox"
+    checked={checked}
+    onChange={onChange}
+    name={name}
+    id={id}
+    disabled={disabled}
+  />
+  <span className="switch-track">
+    <span className="switch-thumb"></span>
+  </span>
+</label>
+
   );
 
   // Setting Row Component
   const SettingRow = ({ label, children, helpIcon }) => (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: '16px 0',
-      borderBottom: '1px solid #f0f0f0'
-    }}>
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: '8px',
-        flex: 1
-      }}>
-        <span style={{ 
-          fontSize: '15px', 
-          color: '#333',
-          fontWeight: '500'
-        }}>
-          {label}
-        </span>
-        {helpIcon && (
-          <i className="fas fa-question-circle" style={{ 
-            color: '#999', 
-            fontSize: '14px',
-            cursor: 'help'
-          }}></i>
-        )}
-      </div>
-      <div>{children}</div>
-    </div>
+<div className="setting-row">
+  <div className="setting-label-area">
+    <span className="setting-label">{label}</span>
+
+    {helpIcon && (
+      <i className="fas fa-question-circle help-icon"></i>
+    )}
+  </div>
+
+  <div>{children}</div>
+</div>
+
   );
 
   return isDataLoaded ? (

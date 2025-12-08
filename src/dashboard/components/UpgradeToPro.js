@@ -1,5 +1,6 @@
 import { __ } from '@wordpress/i18n'
 import React, { useState } from "react";
+import { Accordion } from "react-bootstrap";
 
 export default function UpgradeToPro({ promotionType = 'general' }) {
     const [activeTab, setActiveTab] = useState('documentation');
@@ -38,7 +39,7 @@ export default function UpgradeToPro({ promotionType = 'general' }) {
                     thumbnail: 'https://i.ytimg.com/vi/uMJBdM24w_c/mqdefault.jpg'
                 },
             ],
-            [ // pro video
+            [ // pro video - same list for now
                 {
                     title: 'How To Setup Text To Speech Player Properly?',
                     id: 'h4VJxM-mh74?si=pmgy6TkvvppqtQV7',
@@ -89,91 +90,41 @@ export default function UpgradeToPro({ promotionType = 'general' }) {
             'Text Aliases',
             'Unlimited Characters',
         ],
-    }
+    };
 
     if (!window.hasOwnProperty('ttsObj')) return null;
 
-    // Video Card Component
-    const VideoCard = ({ video }) => (
-        <a 
-            href={'https://www.youtube.com/watch?v=' + video.id}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-                display: 'block',
-                textDecoration: 'none',
-                background: 'white',
-                borderRadius: '8px',
-                overflow: 'hidden',
-                marginBottom: '16px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                transition: 'all 0.2s'
-            }}
-            onMouseOver={(e) => {
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-            }}
-            onMouseOut={(e) => {
-                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-                e.currentTarget.style.transform = 'translateY(0)';
-            }}
-        >
-            <div style={{ 
-                position: 'relative',
-                paddingTop: '56.25%',
-                background: '#f0f0f0'
-            }}>
-                <img 
-                    src={video.thumbnail}
-                    alt={video.title}
-                    style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover'
-                    }}
-                />
-                <div style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: '48px',
-                    height: '48px',
-                    background: 'rgba(255, 0, 0, 0.9)',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                }}>
-                    <i className="fas fa-play" style={{ 
-                        color: 'white', 
-                        fontSize: '20px',
-                        marginLeft: '3px'
-                    }}></i>
-                </div>
-            </div>
-            <div style={{ padding: '12px 16px' }}>
-                <p style={{
-                    margin: 0,
-                    fontSize: '14px',
-                    color: '#333',
-                    fontWeight: '500',
-                    lineHeight: '1.4',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden'
-                }}>
-                    {video.title}
-                </p>
-            </div>
-        </a>
-    );
+    /** -------------------------------
+     * Video Card Component
+     * ------------------------------- */
+const VideoCard = ({ video }) => (
+    <a 
+        href={'https://www.youtube.com/watch?v=' + video.id}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="d-block text-decoration-none bg-white overflow-hidden mb-3 shadow-sm"
+    >
+        <div className="ratio ratio-16x9 position-relative bg-light">
+            <img 
+                src={video.thumbnail}
+                alt={video.title}
+                className="position-absolute top-0 start-0 w-100 h-100 object-fit-cover"
+            />
+{/* <div className="position-absolute top-50 start-50 translate-middle bg-danger bg-opacity-90 rounded-circle d-flex align-items-center justify-content-center p-1">
+                <i className="fas fa-play text-white fs-7"></i>
+            </div> */}
+        </div>
+        <div className="p-3">
+            <p className="m-0 small text-dark fw-medium lh-base">
+                {video.title}
+            </p>
+        </div>
+    </a>
+);
 
-    // Get appropriate videos based on pro status
+    /** -------------------------------
+     * Get Videos (Based on PRO)
+     * ------------------------------- */
     const getVideos = () => {
         if (promotionType === 'youtube') {
             const videoIndex = ttsObj.is_pro_active ? 1 : 0;
@@ -184,151 +135,94 @@ export default function UpgradeToPro({ promotionType = 'general' }) {
 
     const videos = getVideos();
 
+    /** -------------------------------
+     * Fake Documentation Q&A for Accordion
+     * (Replace with your real docs)
+     * ------------------------------- */
+    const documentationQA = [
+        {
+            q: "How to enable Text-to-Speech?",
+            a: "Go to Settings → Enable the TTS toggle and configure your API keys."
+        },
+        {
+            q: "Why is my MP3 not downloading?",
+            a: "Check file permissions or enable bulk MP3 generation from plugin settings."
+        },
+        {
+            q: "How to select content by CSS selector?",
+            a: "Use a CSS class or ID, for example: .entry-content or #post-body."
+        }
+    ];
+
     return (
         <div style={{ position: 'sticky', top: '20px' }}>
-            {/* Read Documentation Section */}
-            <div style={{
-                background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)',
-                borderRadius: '8px',
-                padding: '16px 20px',
-                marginBottom: '20px',
-                boxShadow: '0 2px 8px rgba(255, 107, 107, 0.3)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-            onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-            onClick={() => window.open('https://atlasaidev.com/docs/text-to-speech/', '_blank')}
-            >
-                <span style={{
-                    color: 'white',
-                    fontSize: '16px',
-                    fontWeight: '600'
-                }}>
-                    Read Documentation
-                </span>
-                <i className="fas fa-chevron-down" style={{ 
-                    color: 'white',
-                    fontSize: '16px'
-                }}></i>
-            </div>
+            
+            {/* Documentation Section → Accordion */}
+            <Accordion defaultActiveKey="" className='tta-custom-accordion'>
+                <Accordion.Item eventKey="0">
+                    <Accordion.Header className='tta-custom-orange-accordion'>
+                        Read Documentation
+                    </Accordion.Header>
+                    <Accordion.Body>
+                        {/* {documentationQA.map((item, index) => (
+                            <div key={index} style={{ marginBottom: "15px" }}>
+                                <h6 style={{ fontWeight: "600" }}>{item.q}</h6>
+                                <p style={{ margin: 0, color: "#555" }}>{item.a}</p>
+                            </div>
+                        ))} */}
+                    </Accordion.Body>
+                </Accordion.Item>
+            </Accordion>
 
-            {/* Watch Tutorials Section */}
+            {/* Watch Tutorials */}
             {promotionType === 'youtube' && (
-                <div style={{
-                    background: 'white',
-                    borderRadius: '8px',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                    overflow: 'hidden'
-                }}>
-                    {/* Header */}
-                    <div style={{
-                        background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)',
-                        padding: '16px 20px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between'
-                    }}>
-                        <span style={{
-                            color: 'white',
-                            fontSize: '16px',
-                            fontWeight: '600'
-                        }}>
-                            Watch Tutorials
-                        </span>
-                        <i className="fas fa-chevron-up" style={{ 
-                            color: 'white',
-                            fontSize: '16px'
-                        }}></i>
-                    </div>
-
-                    {/* Content */}
-                    <div style={{
-                        padding: '20px',
-                        maxHeight: '600px',
-                        overflowY: 'auto'
-                    }}>
-                        {videos.map((video, index) => (
-                            <VideoCard key={video.id} video={video} />
-                        ))}
-                    </div>
-                </div>
+                <Accordion defaultActiveKey="0" className='mt-2 tta-custom-accordion'>
+                    <Accordion.Item eventKey="0">
+                        <Accordion.Header className='tta-custom-orange-accordion'>Watch Tutorials</Accordion.Header>
+                        <Accordion.Body style={{ maxHeight: '600px', overflowY: 'auto' }}>
+                            {videos.map((video) => (
+                                <VideoCard key={video.id} video={video} />
+                            ))}
+                        </Accordion.Body>
+                    </Accordion.Item>
+                </Accordion>
             )}
 
-            {/* General Features List (for non-youtube promotion) */}
+            {/* General Promotion (Pro Features) */}
             {promotionType === 'general' && !ttsObj.is_pro_active && (
-                <div style={{
-                    background: 'white',
-                    borderRadius: '8px',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                    overflow: 'hidden',
-                    marginTop: '20px'
-                }}>
-                    <div style={{
-                        background: 'linear-gradient(135deg, #1a4d4d 0%, #2d6a6a 100%)',
-                        padding: '16px 20px',
-                        textAlign: 'center'
-                    }}>
-                        <h3 style={{
-                            color: 'white',
-                            fontSize: '18px',
-                            fontWeight: '600',
-                            margin: 0
-                        }}>
-                            Pro Features
-                        </h3>
-                    </div>
-                    <div style={{ padding: '20px' }}>
-                        <ul style={{
-                            listStyle: 'none',
-                            padding: 0,
-                            margin: 0
-                        }}>
-                            {proFeatures.general.map((feature, index) => (
-                                <li key={index} style={{
-                                    padding: '12px 0',
-                                    borderBottom: index < proFeatures.general.length - 1 ? '1px solid #f0f0f0' : 'none',
-                                    display: 'flex',
-                                    alignItems: 'flex-start',
-                                    gap: '10px',
-                                    fontSize: '14px',
-                                    color: '#333'
-                                }}>
-                                    <i className="fas fa-check-circle" style={{ 
-                                        color: '#9EF01A',
-                                        marginTop: '2px',
-                                        minWidth: '16px'
-                                    }}></i>
-                                    <span dangerouslySetInnerHTML={{ __html: feature }} />
-                                </li>
-                            ))}
-                        </ul>
-                        <a
-                            href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                                display: 'block',
-                                textAlign: 'center',
-                                background: 'linear-gradient(135deg, #1a4d4d 0%, #2d6a6a 100%)',
-                                color: 'white',
-                                padding: '12px 24px',
-                                borderRadius: '6px',
-                                textDecoration: 'none',
-                                fontWeight: '600',
-                                marginTop: '20px',
-                                transition: 'all 0.2s'
-                            }}
-                            onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                            onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                        >
-                            Upgrade to Pro
-                        </a>
-                    </div>
-                </div>
+                <Accordion style={{ marginTop: "20px" }}>
+                    <Accordion.Item eventKey="0">
+                        <Accordion.Header>⭐ Pro Features</Accordion.Header>
+                        <Accordion.Body>
+                            <ul style={{ paddingLeft: "15px" }}>
+                                {proFeatures.general.map((feature, index) => (
+                                    <li key={index} style={{ marginBottom: "8px" }}>
+                                        <span dangerouslySetInnerHTML={{ __html: feature }} />
+                                    </li>
+                                ))}
+                            </ul>
+
+                            <a
+                                href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                    display: 'block',
+                                    textAlign: 'center',
+                                    background: '#1a4d4d',
+                                    color: 'white',
+                                    padding: '12px',
+                                    borderRadius: '6px',
+                                    textDecoration: 'none',
+                                    fontWeight: '600',
+                                    marginTop: '20px'
+                                }}
+                            >
+                                Upgrade to Pro
+                            </a>
+                        </Accordion.Body>
+                    </Accordion.Item>
+                </Accordion>
             )}
         </div>
     );
