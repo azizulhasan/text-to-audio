@@ -1,57 +1,132 @@
 import React from "react";
 import { Link } from "react-router-dom";
+
 export default function DashboardTopNav() {
-
-  const style = {
-    head: {
-      width: "150px",
-      fontSize: '16px',
-    }
-  }
   return (
-    <nav className="sb-topnav navbar navbar-expand topnav_bg">
-      {/* <!-- Navbar Brand--> */}
-      <Link className="navbar-brand ps-3" style={style.head} to="/">
-        {tta_obj.plugin_name}<br></br>
-        <small>Version: {ttsObj.VERSION} </small>
-      </Link>
-      {/* <!-- Sidebar Toggle--> */}
-      <button
-        className="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0"
-        id="sidebarToggle"
-        href="#!"
+    <nav className="navbar navbar-expand" style={{
+      background: 'linear-gradient(135deg, #1a4d4d 0%, #2d6a6a 100%)',
+      padding: '1rem 1.5rem',
+      marginTop: '0.5rem',
+      borderRadius: '8px',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+    }}>
+      
+      {/* LEFT SIDE LOGO + VERSION */}
+      <Link 
+        className="navbar-brand d-flex align-items-center" 
+        to="/"
+        style={{ minWidth: '200px' }}
       >
-        <i className="fas fa-bars text-white"></i>
-      </button>
+        <div style={{
+          background: '#9EF01A',
+          borderRadius: '8px',
+          padding: '8px 10px',
+          marginRight: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <i className="fas fa-file-audio" style={{ fontSize: '24px', color: '#1a4d4d' }}></i>
+        </div>
+        <div>
+          <div style={{ 
+            color: 'white', 
+            fontSize: '18px', 
+            fontWeight: '600',
+            lineHeight: '1.2',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            {tta_obj.plugin_name}
+            <span style={{
+              background: '#9EF01A',
+              color: '#1a4d4d',
+              fontSize: '10px',
+              fontWeight: '700',
+              padding: '2px 8px',
+              borderRadius: '12px',
+              textTransform: 'uppercase'
+            }}>PRO</span>
+          </div>
+          <small style={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px' }}>
+            v {ttsObj.VERSION}
+          </small>
+        </div>
+      </Link>
 
-      {/* me-3 me-lg-4 */}
-      {
-        !ttsObj.is_pro_active && <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/" target="_blank">
-          Buy Now
+      {/* RIGHT SIDE BUTTONS */}
+      <div className="ms-auto d-flex align-items-center gap-2">
+        {/* What's New */}
+        <a
+          href="https://atlasaidev.com/"
+          target="_blank"
+          className="btn d-flex align-items-center gap-2"
+          style={{
+            background: 'rgba(255,255,255,0.1)',
+            color: 'white',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '6px',
+            fontSize: '14px',
+            fontWeight: '500',
+            textDecoration: 'none',
+            transition: 'all 0.2s'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+          onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+        >
+          <span style={{ fontSize: '18px' }}>🎉</span>
+          What's New
         </a>
-      }
-      <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="http://atlasaidev.com/contact-us/" target="_blank">
-        Support
-      </a>
 
-      {
-        !ttsObj.is_pro_active && <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://atlasaidev.com/text-to-speech-pro/demo/" target="_blank">
-          Pro Version Demo
+        {/* Upgrade to Pro */}
+        {!ttsObj.is_pro_active && (
+          <a
+            href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
+            target="_blank"
+            className="btn d-flex align-items-center gap-2"
+            style={{
+              background: 'rgba(255,255,255,0.1)',
+              color: 'white',
+              border: 'none',
+              padding: '8px 16px',
+              borderRadius: '6px',
+              fontSize: '14px',
+              fontWeight: '500',
+              textDecoration: 'none',
+              transition: 'all 0.2s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+          >
+            <span style={{ fontSize: '18px' }}>💎 </span>
+            Upgrade to Pro
+          </a>
+        )}
+
+        {/* Support */}
+        <a
+          href="http://atlasaidev.com/contact-us/"
+          target="_blank"
+          className="btn d-flex align-items-center gap-2"
+          style={{
+            background: 'rgba(255,255,255,0.1)',
+            color: 'white',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '6px',
+            fontSize: '14px',
+            fontWeight: '500',
+            textDecoration: 'none',
+            transition: 'all 0.2s'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+          onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+        >
+          <span style={{ fontSize: '18px' }}>📞</span>
+          Support
         </a>
-      }
-      <a className="navbar-nav ms-auto  me-2 text-decoration-none   order-2 order-lg-1" href="https://atlasaidev.com/docs/" target="_blank">
-        <span className="dashicons dashicons-media-document"></span> Documentation
-      </a>
-      <div className='navbar-nav ms-auto   order-2 order-lg-1'>
-          <a className="me-1 text-decoration-none" href="https://www.youtube.com/@AtlasAiDev" target="_blank">
-              <span className="dashicons dashicons-youtube text-danger"></span>
-          </a>
-          <a className="me-1 text-decoration-none" href="https://www.facebook.com/AtlasAiDev/" target="_blank">
-              <span className="dashicons dashicons-facebook-alt text-primary"></span>
-          </a>
-          <a className="me-1 text-decoration-none" href="https://x.com/atlasaidev" target="_blank">
-              <span className="dashicons dashicons-twitter text-primary"></span>
-          </a>
       </div>
     </nav>
   );

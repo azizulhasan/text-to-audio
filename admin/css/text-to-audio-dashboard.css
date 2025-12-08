@@ -53,6 +53,65 @@ My Custom css
 	background-color: #fbfaff;
 }
 
+.topnav{
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+}
+
+.top-group-buttons {
+  border: 1px solid #cfd4da;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(49, 201, 187, 0.16);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.top-nav-item {
+  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.top-nav-item + .top-nav-item {
+  border-left: 1px solid #cfd4da;
+}
+
+/* Hover effect (optional but looks good) */
+.top-nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+
+
+.tta-custom-orange-accordion .accordion-button {
+    background-color: rgba(255, 120, 83, 1) !important;
+    color: #fff !important;
+	box-shadow: none !important;
+    outline: none !important;
+
+}
+
+.tta-custom-orange-accordion .accordion-button:not(.collapsed) {
+    background-color: rgba(255, 120, 83, 1) !important;
+    color: #fff !important;
+	box-shadow: none !important;
+    outline: none !important;
+
+}
+
+.tta-custom-accordion .accordion-button::after {
+    background-image: url("data:image/svg+xml,\
+        <svg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 16 16'>\
+            <path fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/>\
+        </svg>"
+    );
+}
+
+
+
+
 .tta_btn {
 	display: inline-block;
 	font-weight: 400;

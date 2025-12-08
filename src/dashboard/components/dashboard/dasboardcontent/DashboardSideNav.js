@@ -23,7 +23,7 @@ export default function DashboardSideNav({ isProVersion }) {
 						{/* Settings menu */}
 						<NavLink className={getNavLinkClass} to={'/'}>
 							<div className='sb-nav-link-icon'>
-								<span className="dashicons dashicons-admin-settings"></span>
+								<span className="dashicons dashicons-admin-generic"></span>
 							</div>
 							Settings
 						</NavLink>
