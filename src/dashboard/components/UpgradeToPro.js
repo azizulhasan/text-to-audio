@@ -1,6 +1,7 @@
 import { __ } from '@wordpress/i18n'
 import React, { useState } from "react";
 import { Accordion } from "react-bootstrap";
+// import Docs from './dashboard/docs/Docs';
 
 export default function UpgradeToPro({ promotionType = 'general' }) {
     const [activeTab, setActiveTab] = useState('documentation');
@@ -110,9 +111,16 @@ const VideoCard = ({ video }) => (
                 alt={video.title}
                 className="position-absolute top-0 start-0 w-100 h-100 object-fit-cover"
             />
-{/* <div className="position-absolute top-50 start-50 translate-middle bg-danger bg-opacity-90 rounded-circle d-flex align-items-center justify-content-center p-1">
-                <i className="fas fa-play text-white fs-7"></i>
-            </div> */}
+            {/* YouTube-style red play button */}
+           <div className="tta-yt bg-danger">
+                <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    viewBox="0 0 24 24" 
+                >
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+            </div>
+
         </div>
         <div className="p-3">
             <p className="m-0 small text-dark fw-medium lh-base">
@@ -158,18 +166,48 @@ const VideoCard = ({ video }) => (
         <div style={{ position: 'sticky', top: '20px' }}>
             
             {/* Documentation Section → Accordion */}
+            {/* Documentation Section → Main Accordion */}
             <Accordion defaultActiveKey="" className='tta-custom-accordion'>
                 <Accordion.Item eventKey="0">
                     <Accordion.Header className='tta-custom-orange-accordion'>
                         Read Documentation
                     </Accordion.Header>
-                    <Accordion.Body>
-                        {/* {documentationQA.map((item, index) => (
-                            <div key={index} style={{ marginBottom: "15px" }}>
-                                <h6 style={{ fontWeight: "600" }}>{item.q}</h6>
-                                <p style={{ margin: 0, color: "#555" }}>{item.a}</p>
-                            </div>
-                        ))} */}
+                   <Accordion.Body className="p-2">
+                        {/* Nested Accordion for Q&A */}
+                        <Accordion flush className="tta-qa-accordion">
+                            {documentationQA.map((item, index) => (
+                                <Accordion.Item 
+                                    key={index} 
+                                    eventKey={index.toString()}
+                                    // style={{ 
+                                    //     border: 'none',
+                                    //     marginBottom: '5px'
+                                    // }}
+                                >
+                                    <Accordion.Header
+                                        // style={{
+                                        //     fontWeight: "600",
+                                        //     fontSize: "13px",
+                                        //     padding: "8px 10px",
+                                        //     backgroundColor: "transparent"
+                                        // }}
+                                    >
+                                        {item.q}
+                                    </Accordion.Header>
+                                    <Accordion.Body 
+                                        style={{ 
+                                            padding: "8px 10px 10px 10px",
+                                            color: "#555",
+                                            fontSize: "13px",
+                                            backgroundColor: "#fff"
+                                        }}
+                                    >
+                                        {item.a}
+                                    </Accordion.Body>
+                                </Accordion.Item>
+                            ))}
+                        </Accordion>
+                        {/* <Docs/> */}
                     </Accordion.Body>
                 </Accordion.Item>
             </Accordion>

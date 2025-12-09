@@ -175,62 +175,74 @@ export default function Settings() {
   );
 
   // Setting Row Component
-  const SettingRow = ({ label, children, helpIcon }) => (
+  const SettingRow = ({ label, children, helpIcon, tooltipText, youtubeLink }) => (
 <div className="setting-row">
   <div className="setting-label-area">
     <span className="setting-label">{label}</span>
 
     {helpIcon && (
-      <i className="fas fa-question-circle help-icon"></i>
+      <OverlayTrigger
+        placement="top"
+        overlay={
+          <Tooltip>
+            {tooltipText || __("Click To Know How It Works?")}
+          </Tooltip>
+        }
+      >
+        <a
+          className="text-danger ms-2"
+          target="_blank"
+          rel="noopener noreferrer"
+          href={youtubeLink || "#"}
+        >
+          <i className="fab fa-youtube"></i>
+        </a>
+      </OverlayTrigger>
     )}
   </div>
 
   <div>{children}</div>
 </div>
+  );
 
+  // Lock Icon with Tooltip for pro features
+  const ProLockIcon = ({ tooltipText }) => (
+    <OverlayTrigger
+      placement="top"
+      overlay={
+        <Tooltip>
+          {tooltipText}
+        </Tooltip>
+      }
+    >
+      <Button className="tta_btn m-0 p-0 text-dark bg-light border-0 ms-2">
+        <i className="fas fa-lock" />
+      </Button>
+    </OverlayTrigger>
   );
 
   return isDataLoaded ? (
     <React.Fragment>
-      <Container fluid style={{ padding: '2rem' }}>
+<Container fluid className="tta-container">
+
         <Row>
           <Col xs={12} lg={8}>
             {/* Header Card */}
-            <div style={{
-              background: 'white',
-              borderRadius: '8px',
-              padding: '20px 24px',
-              marginBottom: '20px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-            }}>
-              <h2 style={{ 
-                fontSize: '24px', 
-                fontWeight: '700', 
-                marginBottom: '8px',
-                color: '#1a1a1a'
-              }}>
+<div className="bg-white rounded p-3 mb-3 shadow-sm">
+  <h2 className="fs-3 fw-bold mb-2 text-dark">
                 Configure Settings
               </h2>
-              <p style={{ 
-                color: '#666', 
-                margin: 0,
-                fontSize: '14px'
-              }}>
+  <p className="text-secondary m-0 small">
                Configure text-to-speech player behavior and content selection
               </p>
             </div>
 
             {/* Main Settings Card */}
             <Form onSubmit={handleSubmit}>
-              <div style={{
-                background: 'white',
-                borderRadius: '8px',
-                padding: '24px',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-              }}>
+<div className="tta-card">
                 <SettingRow 
                   label="Add Button or Player Automatically" 
-                  helpIcon={true}
+                //   helpIcon={true}
                 >
                   <ToggleSwitch
                     checked={settings.tta__settings_enable_button_add}
@@ -244,7 +256,7 @@ export default function Settings() {
                   <>
                     <SettingRow 
                       label="Continue Reading After Switching To Another Tab" 
-                      helpIcon={true}
+                    //   helpIcon={true}
                     >
                       <ToggleSwitch
                         checked={settings.tta__settings_stop_auto_pause_after_switching_tab}
@@ -257,7 +269,7 @@ export default function Settings() {
                     {!settings.tta__settings_stop_auto_pause_after_switching_tab && (
                       <SettingRow 
                         label="Stop Auto Play After Switching To TTS Tab" 
-                        helpIcon={true}
+                        // helpIcon={true}
                       >
                         <ToggleSwitch
                           checked={settings.tta__settings_stop_auto_playing_after_switching_tab}
@@ -270,9 +282,40 @@ export default function Settings() {
                   </>
                 )}
 
+                {/* When Scroll Down Stop Floating Player - Missing from new */}
+                {window?.ttsObj?.player_id > 1 && (
+                  <SettingRow 
+                    label="When Scroll Down Stop Floating Player" 
+                    // helpIcon={true}
+                  >
+                    <ToggleSwitch
+                      checked={settings.tta__settings_stop_floating_button}
+                      onChange={(e) => handleChange(e)}
+                      name="tta__settings_stop_floating_button"
+                      id="tta__settings_stop_floating_button"
+                    />
+                  </SettingRow>
+                )}
+
+                {/* Apply number format with YouTube icon - Missing from new */}
+                {window?.ttsObj?.is_pro_active && (
+                  <SettingRow 
+                    label="Apply number format" 
+                    // helpIcon={true}
+                    youtubeLink="https://www.youtube.com/watch?v=xQCw7mJXrxo&t=46s"
+                  >
+                    <ToggleSwitch
+                      checked={settings.tta__settings_apply_number_format}
+                      onChange={(e) => handleChange(e)}
+                      name="tta__settings_apply_number_format"
+                      id="tta__settings_apply_number_format"
+                    />
+                  </SettingRow>
+                )}
+
                 <SettingRow 
                   label="Add Post Title To Read" 
-                  helpIcon={true}
+                //   helpIcon={true}
                 >
                   <ToggleSwitch
                     checked={settings.tta__settings_add_post_title_to_read}
@@ -284,7 +327,7 @@ export default function Settings() {
 
                 <SettingRow 
                   label="Add Post Excerpt To Read" 
-                  helpIcon={true}
+                //   helpIcon={true}
                 >
                   <ToggleSwitch
                     checked={settings.tta__settings_add_post_excerpt_to_read}
@@ -294,27 +337,13 @@ export default function Settings() {
                   />
                 </SettingRow>
 
-                {window?.ttsObj?.is_pro_active && (
-                  <SettingRow 
-                    label="Add Number Format" 
-                    helpIcon={true}
-                  >
-                    <ToggleSwitch
-                      checked={settings.tta__settings_apply_number_format}
-                      onChange={(e) => handleChange(e)}
-                      name="tta__settings_apply_number_format"
-                      id="tta__settings_apply_number_format"
-                    />
-                  </SettingRow>
-                )}
-
                 {/* Text Areas Section */}
-                <div style={{ paddingTop: '20px' }}>
+                <div className="pt-3">
                   <Row className="mb-4">
                     <Col md={6}>
-                      <Form.Label style={{ fontWeight: '500', color: '#333', marginBottom: '8px' }}>
+                     <Form.Label className="fw-medium text-dark mb-2">
                         Add Text Before Content(intro) 
-                        <i className="fas fa-question-circle ms-2" style={{ color: '#999', fontSize: '14px' }}></i>
+                        {/* <i className="fas fa-question-circle ms-2" style={{ color: '#999', fontSize: '14px' }}></i> */}
                       </Form.Label>
                       <Form.Control
                         as="textarea"
@@ -323,17 +352,13 @@ export default function Settings() {
                         value={settings.tta__settings_text_before_content}
                         onChange={(e) => handleChange(e)}
                         placeholder="Add Text Before Content"
-                        style={{
-                          borderRadius: '6px',
-                          border: '1px solid #e0e0e0',
-                          fontSize: '14px'
-                        }}
+                        className="tta-textarea"
                       />
                     </Col>
                     <Col md={6}>
-                      <Form.Label style={{ fontWeight: '500', color: '#333', marginBottom: '8px' }}>
+                   <Form.Label className="fw-medium text-dark mb-2">
                         Add Text After Content(outro)
-                        <i className="fas fa-question-circle ms-2" style={{ color: '#999', fontSize: '14px' }}></i>
+                        {/* <i className="fas fa-question-circle ms-2" style={{ color: '#999', fontSize: '14px' }}></i> */}
                       </Form.Label>
                       <Form.Control
                         as="textarea"
@@ -342,11 +367,7 @@ export default function Settings() {
                         value={settings.tta__settings_text_after_content}
                         onChange={(e) => handleChange(e)}
                         placeholder="Add Text After Content"
-                        style={{
-                          borderRadius: '6px',
-                          border: '1px solid #e0e0e0',
-                          fontSize: '14px'
-                        }}
+                        className="tta-textarea"
                       />
                     </Col>
                   </Row>
@@ -354,9 +375,9 @@ export default function Settings() {
                   {/* Multi-select fields */}
                   <Row className="mb-4">
                     <Col xs={12}>
-                      <Form.Label style={{ fontWeight: '500', color: '#333', marginBottom: '8px' }}>
+                     <Form.Label className="fw-medium text-dark mb-2">
                         Allow Listening For Post Type
-                        <i className="fas fa-question-circle ms-2" style={{ color: '#999', fontSize: '14px' }}></i>
+                        {/* <i className="fas fa-question-circle ms-2" style={{ color: '#999', fontSize: '14px' }}></i> */}
                       </Form.Label>
                       <MultiSelect
                         id="tta__settings_allow_listening_for_post_types"
@@ -370,9 +391,9 @@ export default function Settings() {
 
                   <Row className="mb-4">
                     <Col xs={12}>
-                      <Form.Label style={{ fontWeight: '500', color: '#333', marginBottom: '8px' }}>
+                      <Form.Label className="fw-medium text-dark mb-2">
                         Allow Listening For Post Status
-                        <i className="fas fa-question-circle ms-2" style={{ color: '#999', fontSize: '14px' }}></i>
+                        {/* <i className="fas fa-question-circle ms-2" style={{ color: '#999', fontSize: '14px' }}></i> */}
                       </Form.Label>
                       <MultiSelect
                         id="tta__settings_allow_listening_for_posts_status"
@@ -386,15 +407,36 @@ export default function Settings() {
                     </Col>
                   </Row>
 
-                  {/* Additional settings fields - keeping original logic */}
+                  {/* Additional settings fields with tooltips */}
                   <Row className="mb-4">
                     <Col xs={12}>
-                      <Form.Label style={{ fontWeight: '500', color: '#333', marginBottom: '8px' }}>
-                        Include Content By CSS Selectors
+   <div className="d-flex align-items-center mb-2">
+                    <Form.Label className="fw-medium text-dark m-0">
+                          Include Content By CSS Selectors
+                        </Form.Label>
                         {!ttsObj.is_pro_active && (
-                          <i className="fas fa-lock ms-2" style={{ color: '#999' }}></i>
+                          <ProLockIcon 
+                            tooltipText={__("Include Content By CSS Selectors feature is available in pro version")}
+                          />
                         )}
-                      </Form.Label>
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={
+                            <Tooltip>
+                              {__("Click To Know How It Works?")}
+                            </Tooltip>
+                          }
+                        >
+                          <a
+                            className="text-danger ms-2"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
+                          >
+                            <i className="fab fa-youtube"></i>
+                          </a>
+                        </OverlayTrigger>
+                      </div>
                       <Form.Control
                         as="textarea"
                         rows={3}
@@ -403,23 +445,40 @@ export default function Settings() {
                         onChange={(e) => handleChange(e)}
                         placeholder={ttsObj.is_pro_active ? "Multiple selector will be multiline." : "Some content may be missing, It can be found by css selectors"}
                         disabled={!ttsObj.is_pro_active}
-                        style={{
-                          borderRadius: '6px',
-                          border: '1px solid #e0e0e0',
-                          fontSize: '14px'
-                        }}
+                        className="tta-textarea"
                       />
                     </Col>
                   </Row>
 
                   <Row className="mb-4">
                     <Col xs={12}>
-                      <Form.Label style={{ fontWeight: '500', color: '#333', marginBottom: '8px' }}>
-                        Exclude Content By CSS Selectors
+   <div className="d-flex align-items-center mb-2">
+                    <Form.Label className="fw-medium text-dark m-0">
+                          Exclude Content By CSS Selectors
+                        </Form.Label>
                         {!ttsObj.is_pro_active && (
-                          <i className="fas fa-lock ms-2" style={{ color: '#999' }}></i>
+                          <ProLockIcon 
+                            tooltipText={__("Exclude Content By CSS Selectors feature is available in pro version")}
+                          />
                         )}
-                      </Form.Label>
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={
+                            <Tooltip>
+                              {__("Click To Know How It Works?")}
+                            </Tooltip>
+                          }
+                        >
+                          <a
+                            className="text-danger ms-2"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
+                          >
+                            <i className="fab fa-youtube"></i>
+                          </a>
+                        </OverlayTrigger>
+                      </div>
                       <Form.Control
                         as="textarea"
                         rows={3}
@@ -428,11 +487,7 @@ export default function Settings() {
                         onChange={(e) => handleChange(e)}
                         placeholder={ttsObj.is_pro_active ? "Multiple selector will be multiline." : "Exclude content by CSS selectors"}
                         disabled={!ttsObj.is_pro_active}
-                        style={{
-                          borderRadius: '6px',
-                          border: '1px solid #e0e0e0',
-                          fontSize: '14px'
-                        }}
+                        className="tta-textarea"
                       />
                       <small style={{ color: '#d32f2f', marginTop: '4px', display: 'block' }}>
                         You can add ".atlasvoice_no_read" class to exclude content.
@@ -442,12 +497,33 @@ export default function Settings() {
 
                   <Row className="mb-4">
                     <Col xs={12}>
-                      <Form.Label style={{ fontWeight: '500', color: '#333', marginBottom: '8px' }}>
-                        Exclude HTML Tags To Speak
+   <div className="d-flex align-items-center mb-2">
+                    <Form.Label className="fw-medium text-dark m-0">
+                          Exclude HTML Tags To Speak
+                        </Form.Label>
                         {!ttsObj.is_pro_active && (
-                          <i className="fas fa-lock ms-2" style={{ color: '#999' }}></i>
+                          <ProLockIcon 
+                            tooltipText={__("Exclude Tags. So that its content skiped. Like ( Subscript, Superscript etc.) This is a pro feature.")}
+                          />
                         )}
-                      </Form.Label>
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={
+                            <Tooltip>
+                              {__("Click To Know How It Works?")}
+                            </Tooltip>
+                          }
+                        >
+                          <a
+                            className="text-danger ms-2"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
+                          >
+                            <i className="fab fa-youtube"></i>
+                          </a>
+                        </OverlayTrigger>
+                      </div>
                       <Form.Control
                         as="textarea"
                         rows={3}
@@ -456,23 +532,40 @@ export default function Settings() {
                         onChange={(e) => handleChange(e)}
                         placeholder={ttsObj.is_pro_active ? "Multiple Tags Will Be Pipe(|) Separated." : "Exclude tags is a pro feature."}
                         disabled={!ttsObj.is_pro_active}
-                        style={{
-                          borderRadius: '6px',
-                          border: '1px solid #e0e0e0',
-                          fontSize: '14px'
-                        }}
+                        className="tta-textarea"
                       />
                     </Col>
                   </Row>
 
                   <Row className="mb-4">
                     <Col xs={12}>
-                      <Form.Label style={{ fontWeight: '500', color: '#333', marginBottom: '8px' }}>
-                        Exclude Texts To Speak
+                       <div className="d-flex align-items-center mb-2">
+                    <Form.Label className="fw-medium text-dark m-0">
+                          Exclude Texts To Speak
+                        </Form.Label>
                         {!ttsObj.is_pro_active && (
-                          <i className="fas fa-lock ms-2" style={{ color: '#999' }}></i>
+                          <ProLockIcon 
+                            tooltipText={__("Excluding texts to be spoken is a pro feature.")}
+                          />
                         )}
-                      </Form.Label>
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={
+                            <Tooltip>
+                              {__("Click To Know How It Works?")}
+                            </Tooltip>
+                          }
+                        >
+                          <a
+                            className="text-danger ms-2"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
+                          >
+                            <i className="fab fa-youtube"></i>
+                          </a>
+                        </OverlayTrigger>
+                      </div>
                       <Form.Control
                         as="textarea"
                         rows={3}
@@ -481,23 +574,40 @@ export default function Settings() {
                         onChange={(e) => handleChange(e)}
                         placeholder={ttsObj.is_pro_active ? "Multiple Texts Will Be Pipe(|) Separated." : "Exclude texts is a pro feature."}
                         disabled={!ttsObj.is_pro_active}
-                        style={{
-                          borderRadius: '6px',
-                          border: '1px solid #e0e0e0',
-                          fontSize: '14px'
-                        }}
+                        className="tta-textarea"
                       />
                     </Col>
                   </Row>
 
                   <Row className="mb-4">
                     <Col xs={12}>
-                      <Form.Label style={{ fontWeight: '500', color: '#333', marginBottom: '8px' }}>
-                        Exclude Posts By IDs To Speak
+            <div className="d-flex align-items-center mb-2">
+                    <Form.Label className="fw-medium text-dark m-0">
+                          Exclude Posts By IDs To Speak
+                        </Form.Label>
                         {!ttsObj.is_pro_active && (
-                          <i className="fas fa-lock ms-2" style={{ color: '#999' }}></i>
+                          <ProLockIcon 
+                            tooltipText={__("Exclude more than 5 IDs is a pro feature")}
+                          />
                         )}
-                      </Form.Label>
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={
+                            <Tooltip>
+                              {__("Click To Know How It Works?")}
+                            </Tooltip>
+                          }
+                        >
+                          <a
+                            className="text-danger ms-2"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
+                          >
+                            <i className="fab fa-youtube"></i>
+                          </a>
+                        </OverlayTrigger>
+                      </div>
                       <Form.Control
                         as="textarea"
                         rows={3}
@@ -505,23 +615,40 @@ export default function Settings() {
                         value={settings.tta__settings_exclude_post_ids}
                         onChange={(e) => handleChange(e)}
                         placeholder={ttsObj.is_pro_active ? "Multiple IDs Will Be Comma(,) Separated." : "Excluding more than 5 IDs is a pro feature. Multiple IDs Will Be Comma(,) Separated."}
-                        style={{
-                          borderRadius: '6px',
-                          border: '1px solid #e0e0e0',
-                          fontSize: '14px'
-                        }}
+                        className="tta-textarea"
                       />
                     </Col>
                   </Row>
 
                   <Row className="mb-4">
                     <Col xs={12}>
-                      <Form.Label style={{ fontWeight: '500', color: '#333', marginBottom: '8px' }}>
-                        Exclude Categories To Speak
+                <div className="d-flex align-items-center mb-2">
+                    <Form.Label className="fw-medium text-dark m-0">
+                          Exclude Categories To Speak
+                        </Form.Label>
                         {!ttsObj.is_pro_active && (
-                          <i className="fas fa-lock ms-2" style={{ color: '#999' }}></i>
+                          <ProLockIcon 
+                            tooltipText={__("Exclude more than 1 categories is a pro feature")}
+                          />
                         )}
-                      </Form.Label>
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={
+                            <Tooltip>
+                              {__("Click To Know How It Works?")}
+                            </Tooltip>
+                          }
+                        >
+                          <a
+                            className="text-danger ms-2"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href="https://www.youtube.com/watch?v=yanuoEBfG4A"
+                          >
+                            <i className="fab fa-youtube"></i>
+                          </a>
+                        </OverlayTrigger>
+                      </div>
                       <MultiSelect
                         id="tta__settings_exclude_categories"
                         name="tta__settings_exclude_categories"
@@ -536,12 +663,33 @@ export default function Settings() {
 
                   <Row className="mb-4">
                     <Col xs={12}>
-                      <Form.Label style={{ fontWeight: '500', color: '#333', marginBottom: '8px' }}>
-                        Exclude Tags To Speak
+                    <div className="d-flex align-items-center mb-2">
+                        <Form.Label className="fw-medium text-dark m-0">
+                          Exclude Tags To Speak
+                        </Form.Label>
                         {!ttsObj.is_pro_active && (
-                          <i className="fas fa-lock ms-2" style={{ color: '#999' }}></i>
+                          <ProLockIcon 
+                            tooltipText={__("Exclude more than 1 tags is a pro feature")}
+                          />
                         )}
-                      </Form.Label>
+                        <OverlayTrigger
+                          placement="top"
+                          overlay={
+                            <Tooltip>
+                              {__("Click To Know How It Works?")}
+                            </Tooltip>
+                          }
+                        >
+                          <a
+                            className="text-danger ms-2"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            href="https://www.youtube.com/watch?v=yanuoEBfG4A"
+                          >
+                            <i className="fab fa-youtube"></i>
+                          </a>
+                        </OverlayTrigger>
+                      </div>
                       <MultiSelect
                         id="tta__settings_exclude_wp_tags"
                         name="tta__settings_exclude_wp_tags"
@@ -580,30 +728,12 @@ export default function Settings() {
                 </div>
 
                 {/* Save Button */}
-                <div style={{ 
-                  marginTop: '24px', 
-                  paddingTop: '24px',
-                  borderTop: '1px solid #f0f0f0',
-                  textAlign: 'center'
-                }}>
+                <div className="mt-3 pt-3 text-center">
                   <button 
                     type="submit" 
-                    style={{
-                      background: 'linear-gradient(135deg, #1a4d4d 0%, #2d6a6a 100%)',
-                      color: 'white',
-                      border: 'none',
-                      padding: '12px 48px',
-                      borderRadius: '6px',
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                      transition: 'all 0.2s'
-                    }}
-                    onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-                    onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                    className="tta_btn w-100 rounded-3"
                   >
-                    Save
+                    Save All
                   </button>
                 </div>
               </div>
