@@ -47,7 +47,7 @@ class TTA_Helper
         return apply_filters('tts_is_exluded_by_terms', $is_exclude, $term_type);
     }
 
-    public static function should_load_button($current_post = '')
+    public static function should_load_button($current_post = '', $called_from = 'default')
     {
         $should_load_button = false;
         if(!$current_post) {
@@ -55,7 +55,7 @@ class TTA_Helper
             $current_post = $post;
         }
         // is_home() || is_archive() || is_front_page() || is_category()
-        if (\is_single() || \is_singular()) {
+        if (\is_single($current_post) ) {
             $should_load_button = true;
         }
 

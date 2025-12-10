@@ -114,7 +114,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     }
 
     // this is a pro feature to show button on blog main page with title and excerpt.
-    if (!TTA_Helper::should_load_button($post) || $block_btn_no > 0) {
+    if (!TTA_Helper::should_load_button($post, 'tta_get_button_content') || $block_btn_no > 0) {
         return;
     }
 
@@ -572,7 +572,7 @@ function add_listen_button($content)
         $final_content = $content . $button;
     }
 
-    return apply_filters('tts_button_with_content', $final_content, $button, $content, $button_position);
+    return apply_filters('tts_button_with_content', $final_content, $button, $content, $button_position, $post);
 
 }
 
