@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.9.34
+Stable tag: 1.9.35
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -218,6 +218,13 @@ Speed Optimizer – The All-In-One WordPress Performance-Boosting Plugin</a>
   * <a href='https://wordpress.org/plugins/easy-table-of-contents/' target='_blank'>
    Easy Table of Contents:</a> A user friendly, featured focused Easy Table of Contents plugin which allows you to insert a table of contents into your posts, pages and custom post types.
 
+**Support for Themes:** Our plugin seamlessly integrates with popular themes, including:
+
+  * <a href='https://avada.com/' target='_blank'>Avada Theme: The Ultimate Online Store Website Builder</a>
+
+  * <a href='https://wpbakery.com/' target='_blank'>WPBackery Theme : #1 Page Builder Plugin for WordPress Top Choice for 5,800,000+ Websites Worldwide</a>
+
+  * <a href='https://www.elegantthemes.com/' target='_blank'>Divi Theme : The Essential Site Building Framework For WordPress</a>
 
 
 ### USAGE:
@@ -447,6 +454,16 @@ Please report security bugs found in the source code of the Text To Speech TTS p
 ### TRANSLATION REQUEST
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+
+
+= 1.9.35  ( 11 December 2025 )  =
+Fixed :  Voice missing issue (free)
+Compatible :  Make plugin Compatible with Avada, Divi, WPBackery theme.
+Fixed: Long sentence issue fixed. (Pro)
+Support: PHP 7.4 support
+Fixed: Player Double issue fixed (pro)
+
 
 
 = 1.9.34  ( 7 December 2025 )  =
@@ -764,7 +781,10 @@ Improved: Pro version and free version performance issue improved.
 == Upgrade Notice ==
 
 
-= 1.9.34   =
-Fixed :  notice issue fixed.
-Checked :  WordPress 6.9 tested
+= 1.9.35   =
+Fixed :  Voice missing issue (free)
+Compatible :  Make plugin Compatible with Avada, Divi, WPBackery theme.
+Fixed: Long sentence issue fixed. (Pro)
+Support: PHP 7.4 support
+Fixed: Player Double issue fixed (pro)
 
