@@ -383,7 +383,7 @@ export default function Settings() {
                 <div className="pt-3">
                   <Row className="mb-4">
                     <Col md={6}>
-                      <Form.Label className="fw-medium text-dark mb-2">
+                      <Form.Label className="setting-label text-dark mb-2">
                         Add Text Before Content(intro)
                         <OverlayTrigger
                           placement="top"
@@ -415,7 +415,7 @@ export default function Settings() {
                       />
                     </Col>
                     <Col md={6}>
-                      <Form.Label className="fw-medium text-dark mb-2">
+                      <Form.Label className="setting-label text-dark mb-2">
                         Add Text After Content(outro)
                         <OverlayTrigger
                           placement="top"
@@ -450,7 +450,7 @@ export default function Settings() {
                   {/* Multi-select fields */}
                   <Row className="mb-4">
                     <Col xs={12}>
-                      <Form.Label className="fw-medium text-dark mb-2">
+                      <Form.Label className="setting-label text-dark mb-2">
                         Allow Listening For Post Type
                         {/* <i className="fas fa-question-circle ms-2" style={{ color: '#999', fontSize: '14px' }}></i> */}
                       </Form.Label>
@@ -468,7 +468,7 @@ export default function Settings() {
 
                   <Row className="mb-4">
                     <Col xs={12}>
-                      <Form.Label className="fw-medium text-dark mb-2">
+                      <Form.Label className="setting-label text-dark mb-2">
                         Allow Listening For Post Status
                         {/* <i className="fas fa-question-circle ms-2" style={{ color: '#999', fontSize: '14px' }}></i> */}
                       </Form.Label>
@@ -487,58 +487,61 @@ export default function Settings() {
                   </Row>
 
                   {/* Additional settings fields with tooltips */}
-                  <Row className="mb-4">
-                    <Col xs={12}>
-                      <div className="d-flex align-items-center mb-2">
-                        <Form.Label className="fw-medium text-dark m-0">
-                          Include Content By CSS Selectors
-                        </Form.Label>
-                        {!ttsObj.is_pro_active && (
-                          <ProLockIcon
-                            tooltipText={__(
-                              "Include Content By CSS Selectors feature is available in pro version"
-                            )}
-                          />
-                        )}
-                        <OverlayTrigger
-                          placement="top"
-                          overlay={
-                            <Tooltip>
-                              {__("Click To Know How It Works?")}
-                            </Tooltip>
-                          }
-                        >
-                          <a
-                            className="text-danger ms-2"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
-                          >
-                            <i className="fab fa-youtube"></i>
-                          </a>
-                        </OverlayTrigger>
-                      </div>
-                      <Form.Control
-                        as="textarea"
-                        rows={3}
-                        name="tta__settings_css_selectors"
-                        value={settings.tta__settings_css_selectors}
-                        onChange={(e) => handleChange(e)}
-                        placeholder={
-                          ttsObj.is_pro_active
-                            ? "Multiple selector will be multiline."
-                            : "Some content may be missing, It can be found by css selectors"
-                        }
-                        disabled={!ttsObj.is_pro_active}
-                        className="tta-textarea"
-                      />
-                    </Col>
-                  </Row>
+<Row className="mb-4">
+  <Col xs={12}>
+    <div className="d-flex align-items-center justify-content-between mb-2">
+      <div className="d-flex align-items-center">
+        <Form.Label className="setting-label text-dark m-0">
+          Include Content By CSS Selectors
+        </Form.Label>
+        {!ttsObj.is_pro_active && (
+          <ProLockIcon
+            tooltipText={__(
+              "Include Content By CSS Selectors feature is available in pro version"
+            )}
+          />
+        )}
+      </div>
+      <OverlayTrigger
+        placement="top"
+        overlay={
+          <Tooltip>
+            {__("Click To Know How It Works?")}
+          </Tooltip>
+        }
+      >
+        <a
+          className="text-danger"
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
+        >
+          <i className="fab fa-youtube"></i>
+        </a>
+      </OverlayTrigger>
+    </div>
+    <Form.Control
+      as="textarea"
+      rows={3}
+      name="tta__settings_css_selectors"
+      value={settings.tta__settings_css_selectors}
+      onChange={(e) => handleChange(e)}
+      placeholder={
+        ttsObj.is_pro_active
+          ? "Multiple selector will be multiline."
+          : "Some content may be missing, It can be found by css selectors"
+      }
+      disabled={!ttsObj.is_pro_active}
+      className="tta-textarea"
+    />
+  </Col>
+</Row>
 
                   <Row className="mb-4">
                     <Col xs={12}>
-                      <div className="d-flex align-items-center mb-2">
-                        <Form.Label className="fw-medium text-dark m-0">
+                        <div className="d-flex align-items-center justify-content-between mb-2">
+                      <div className="d-flex align-items-center">
+                        <Form.Label className="setting-label text-dark m-0">
                           Exclude Content By CSS Selectors
                         </Form.Label>
                         {!ttsObj.is_pro_active && (
@@ -548,6 +551,7 @@ export default function Settings() {
                             )}
                           />
                         )}
+                        </div>
                         <OverlayTrigger
                           placement="top"
                           overlay={
@@ -597,8 +601,9 @@ export default function Settings() {
 
                   <Row className="mb-4">
                     <Col xs={12}>
-                      <div className="d-flex align-items-center mb-2">
-                        <Form.Label className="fw-medium text-dark m-0">
+                      <div className="d-flex align-items-center justify-content-between mb-2">
+                      <div className="d-flex align-items-center">
+                        <Form.Label className="setting-label text-dark m-0">
                           Exclude HTML Tags To Speak
                         </Form.Label>
                         {!ttsObj.is_pro_active && (
@@ -608,6 +613,7 @@ export default function Settings() {
                             )}
                           />
                         )}
+                        </div>
                         <OverlayTrigger
                           placement="top"
                           overlay={
@@ -645,8 +651,9 @@ export default function Settings() {
 
                   <Row className="mb-4">
                     <Col xs={12}>
-                      <div className="d-flex align-items-center mb-2">
-                        <Form.Label className="fw-medium text-dark m-0">
+                      <div className="d-flex align-items-center justify-content-between mb-2">
+                      <div className="d-flex align-items-center">
+                        <Form.Label className="setting-label text-dark m-0">
                           Exclude Texts To Speak
                         </Form.Label>
                         {!ttsObj.is_pro_active && (
@@ -656,6 +663,7 @@ export default function Settings() {
                             )}
                           />
                         )}
+                        </div>
                         <OverlayTrigger
                           placement="top"
                           overlay={
@@ -693,8 +701,9 @@ export default function Settings() {
 
                   <Row className="mb-4">
                     <Col xs={12}>
-                      <div className="d-flex align-items-center mb-2">
-                        <Form.Label className="fw-medium text-dark m-0">
+                      <div className="d-flex align-items-center justify-content-between mb-2">
+                      <div className="d-flex align-items-center">
+                        <Form.Label className="setting-label text-dark m-0">
                           Exclude Posts By IDs To Speak
                         </Form.Label>
                         {!ttsObj.is_pro_active && (
@@ -704,6 +713,7 @@ export default function Settings() {
                             )}
                           />
                         )}
+                        </div>
                         <OverlayTrigger
                           placement="top"
                           overlay={
@@ -716,7 +726,7 @@ export default function Settings() {
                             className="text-danger ms-2"
                             target="_blank"
                             rel="noopener noreferrer"
-                            href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
+                            href="https://www.youtube.com/watch?v=ooxJkMU58KY&list=PLGdmFn36qCRIO6galQmEMoLVuNXSIvVuF&index=19"
                           >
                             <i className="fab fa-youtube"></i>
                           </a>
@@ -740,8 +750,9 @@ export default function Settings() {
 
                   <Row className="mb-4">
                     <Col xs={12}>
-                      <div className="d-flex align-items-center mb-2">
-                        <Form.Label className="fw-medium text-dark m-0">
+                      <div className="d-flex align-items-center justify-content-between mb-2">
+                      <div className="d-flex align-items-center">
+                        <Form.Label className="setting-label text-dark m-0">
                           Exclude Categories To Speak
                         </Form.Label>
                         {!ttsObj.is_pro_active && (
@@ -751,6 +762,7 @@ export default function Settings() {
                             )}
                           />
                         )}
+                        </div>
                         <OverlayTrigger
                           placement="top"
                           overlay={
@@ -785,8 +797,9 @@ export default function Settings() {
 
                   <Row className="mb-4">
                     <Col xs={12}>
-                      <div className="d-flex align-items-center mb-2">
-                        <Form.Label className="fw-medium text-dark m-0">
+                      <div className="d-flex align-items-center justify-content-between mb-2">
+                      <div className="d-flex align-items-center">
+                        <Form.Label className="setting-label text-dark m-0">
                           Exclude Tags To Speak
                         </Form.Label>
                         {!ttsObj.is_pro_active && (
@@ -796,6 +809,7 @@ export default function Settings() {
                             )}
                           />
                         )}
+                        </div>
                         <OverlayTrigger
                           placement="top"
                           overlay={
@@ -856,12 +870,12 @@ export default function Settings() {
                     <button
                       type="submit"
                       className="tta_btn rounded-3 shadow-lg"
-                      style={{
-                        padding: "12px 32px",
-                        fontSize: "16px",
-                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-                        minWidth: "200px",
-                      }}
+                    //   style={{
+                    //     padding: "12px 32px",
+                    //     fontSize: "16px",
+                    //     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                    //     minWidth: "200px",
+                    //   }}
                     >
                       Save All
                     </button>
@@ -879,14 +893,7 @@ export default function Settings() {
     </React.Fragment>
   ) : (
     <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-        fontSize: "24px",
-        color: "#666",
-      }}
+    className="tta-loading-spinner"
     >
       <div>
         <i className="fas fa-spinner fa-spin me-2"></i>

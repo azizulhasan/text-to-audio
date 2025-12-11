@@ -102,37 +102,37 @@ export default function UpgradeToPro({ promotionType = "general" }) {
         {
           title: "How To Setup Text To Speech Player Properly?",
           id: "h4VJxM-mh74?si=pmgy6TkvvppqtQV7",
-          thumbnail: "https://i.im.ge/2025/12/10/4zipy8.thumb1.png",
+          thumbnail: "https://i.ytimg.com/vi/h4VJxM-mh74/mqdefault.jpg",
         },
         {
           title:
             "How To Setup Settings Menu For AtlasVoice Text To Speech Pro WordPress Plugin?",
           id: "yanuoEBfG4A?si=WVJYL656B1LmrEVY",
-          thumbnail: "https://i.im.ge/2025/12/10/4ziHaX.thumb2.png",
+          thumbnail: "https://i.ytimg.com/vi/yanuoEBfG4A/mqdefault.jpg",
         },
         {
           title:
             "Text To Speech Pro ( AtlasVoice Pro ) : How To Generate Bulk MP3 File?",
           id: "HFoqlkPCP80?si=XVBvLEp2ATKT7EXz",
-          thumbnail: "https://i.im.ge/2025/12/10/4zin1M.thumb3.png",
+          thumbnail: "https://i.ytimg.com/vi/HFoqlkPCP80/mqdefault.jpg",
         },
         {
           title:
             "How To Enable Analytics In Text To Speech Free And Pro WordPress Plugin?",
           id: "amkrAtVQGBY?si=ZI1HfRBYaR60PVVx",
-          thumbnail: "https://i.im.ge/2025/12/10/4zifYK.thumb4.png",
+          thumbnail: "https://i.ytimg.com/vi/amkrAtVQGBY/mqdefault.jpg",
         },
         {
           title:
             "How To Use Text Alias In AtlasVoice Text To Speech Free And Pro WordPress Plugin?",
           id: "oeW652YKmG0?si=q97jAR0pTT3LhhH-",
-          thumbnail: "https://i.im.ge/2025/12/10/4ziVhF.thumb5.png",
+          thumbnail: "https://i.ytimg.com/vi/oeW652YKmG0/mqdefault.jpg",
         },
         {
           title:
             "How to Configure GTranslate And Text To Speech Pro ( AtlasVoice ) WordPress Plugin",
           id: "uMJBdM24w_c?si=XZ0hsLADaQiB2UN2",
-          thumbnail: "https://i.im.ge/2025/12/10/4ziBZD.thumb6.png",
+          thumbnail: "https://i.ytimg.com/vi/uMJBdM24w_c/mqdefault.jpg",
         },
       ],
       [
@@ -241,7 +241,6 @@ export default function UpgradeToPro({ promotionType = "general" }) {
 
   return (
     <div style={{ position: "sticky", top: "20px" }}>
-      {/* Documentation Section → Accordion with Docs.js content */}
       {/* Documentation Section → Accordion with Docs.js content */}
       <Accordion defaultActiveKey="" className="tta-custom-accordion">
         <Accordion.Item eventKey="0">

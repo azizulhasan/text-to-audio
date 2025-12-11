@@ -405,3 +405,90 @@ My Custom css
 .atlasvoice-bg {
 	background-color: #1a4548;
 }
+
+
+
+
+
+
+
+/* New custom css added on 11.12.2025 */
+
+/* Style any existing cross/close icon in item-pill */
+.item-pill::after,
+.item-pill::before {
+	cursor: pointer;
+    color: rgba(255, 120, 83, 1) !important;
+}
+
+.item-pill:hover::after,
+.item-pill:hover::before {
+    color: rgb(232, 62, 14) !important;
+}
+
+.navbar-style{
+    background: rgba(25, 69, 72, 1);
+    padding: 1rem 1.5rem;
+    margin-top: 0.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+
+.audio-style {
+    background: #9EF01A;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.tta-text-style {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+.tta-pro-badge-style {
+    background: #9EF01A;
+    color: #1a4d4d;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+}
+
+
+.tta-tab-style {
+    background: rgba(49, 201, 187, 0.16);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 0px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    border-right: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+
+.tta-loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 24px;
+    color: #666;
+}
