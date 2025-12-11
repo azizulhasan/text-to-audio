@@ -33,7 +33,7 @@ export default function DashboardSideNav({ isProVersion }) {
             </NavLink>
             <NavLink className={getNavLinkClass} to={"/integrations"}>
               <div className="sb-nav-link-icon">
-                <span className="dashicons dashicons-admin-plugins"></span>
+                <span className="dashicons dashicons-admin-links"></span>
               </div>
               Integrations
             </NavLink>
