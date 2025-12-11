@@ -49,15 +49,21 @@ export default class BrowserSupport {
 
         this.defineVoiceAndLang(selectedVoice, selectedLang)
 
+        console.log(this.voices)
+
 
         return this.#voice;
     }
 
     setLanguage(lang, callback) {
         let isSupported = false;
+        console.log(this.voices)
+
         if (this.voices.length) {
             Object.values(this.voices).map(voice => {
                 let regex = new RegExp(lang, "gi");
+                console.log(lang, voice.lang)
+                // new RegExp('^' + langCountryCode, 'i')
                 let matches = voice.lang.match(regex)
                 if (matches !== null && voice.name) {
                     this.#lang = voice.lang;
@@ -67,7 +73,7 @@ export default class BrowserSupport {
             return { lang: this.#lang, isSupported };
         }
 
-
+        console.log({ lang: this.#lang, isSupported })
         return { lang: this.#lang, isSupported };
 
 
@@ -149,7 +155,8 @@ export default class BrowserSupport {
         this.#filteredVoices = [];
 
         Object.values(this.voices).map(voice => {
-            let regex = new RegExp(langCountryCode, "gi");
+            // If you just need it at the beginning
+            let regex = new RegExp('^' + langCountryCode, 'i');
             let matches = voice.lang.match(regex)
             if (matches !== null && voice.name) {
                 this.#filteredVoices.push(voice)
