@@ -177,7 +177,7 @@ if (!defined('TTA_ADMIN_PATH')) {
 
 if (!defined('TTA_DEBUG_MODE')) {
 
-    define('TTA_DEBUG_MODE', 1);
+    define('TTA_DEBUG_MODE', 0);
 }
 
 
@@ -201,7 +201,7 @@ if (!defined('TTA_PLUGIN_PATH')) {
     define('TTA_PLUGIN_PATH', trailingslashit(plugin_dir_path(TEXT_TO_AUDIO_ROOT_FILE)));
 }
 
-if (TTA_DEBUG_MODE) {
+if (TTA_DEBUG_MODE  && WP_SITEURL) {
     $rest_url = WP_SITEURL . '/wp-json/';
     update_option('tts_rest_api_url', $rest_url);
     TTA_Cache::set('tts_rest_api_url', $rest_url);
