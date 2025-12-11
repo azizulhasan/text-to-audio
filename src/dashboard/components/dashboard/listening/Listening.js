@@ -794,7 +794,7 @@ export default function Listening() {
                                                             the pro version.
                                                         </Tooltip>
                                                     }>
-                                                    <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
+                                                    <Button className="m-0 p-0 text-dark bg-light border-0"><i
                                                         className="fas fa-lock" /></Button>
                                                 </OverlayTrigger>
                                             ))}
