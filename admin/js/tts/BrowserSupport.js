@@ -149,7 +149,8 @@ export default class BrowserSupport {
         this.#filteredVoices = [];
 
         Object.values(this.voices).map(voice => {
-            let regex = new RegExp(langCountryCode, "gi");
+            // If you just need it at the beginning
+            let regex = new RegExp('^' + langCountryCode, 'i');
             let matches = voice.lang.match(regex)
             if (matches !== null && voice.name) {
                 this.#filteredVoices.push(voice)
