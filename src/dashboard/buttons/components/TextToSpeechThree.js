@@ -101,6 +101,7 @@ export default function TextToSpeechThree({buttonId, button, buttonCSS, cssStyle
                         ${player?.isPlayerCustomizing ? `.plyr__control svg{margin-right:5px;}` : ''}
                         `
                     }
+
                     {
                         buttonCSS?.custom_css && buttonCSS?.custom_css
                     }
