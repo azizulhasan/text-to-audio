@@ -1,26 +1,17 @@
 import React, { useMemo } from 'react';
-import { Form, Row, Col, Container } from 'react-bootstrap';
+import { Form, Button } from 'react-bootstrap';
 import { postData } from '../../../context/utilities';
 import toast from '../../../context/Notify';
-import UpgradeToPro from '../../../UpgradeToPro';
 
 export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGPTAPIData }) {
-
     const apiURL = useMemo(() => {
         return ttsObj.api_url + ttsObj.api_namespace + "_pro" + "/" + ttsObj.api_version + "/";
     }, [window]);
 
-    /**
-     * handle change
-     * @param {*} e
-     */
     const handleChange = (e) => {
         setChatGPTAPIData({ ...chatGPTAPIData, ...{ [e.target.name]: e.target.value } });
     };
 
-    /**
-     * Handle form Submit
-     */
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -59,17 +50,9 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
             return
         };
 
-        /**
-         * Get full form data and modify them for saving to database.
-         */
         let form = new FormData(e.target);
-
         let formData = {};
         for (let [key, value] of form.entries()) {
-            // if (key === '' || value === '') {
-            //     toast('Please fill the  field : ' + key);
-            //     return;
-            // }
             formData[key] = value;
         }
         formData['currentTTSServic'] = currentTTSServic;
@@ -89,56 +72,58 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
                 } else {
                     toast('Something went wrong');
                 }
-
             })
             .catch((err) => {
                 console.log(err);
             });
     };
 
-
     return (
-        <Container>
-            <Row>
-                <Col xs={12} sm={12} lg={8}>
-                    <Form onSubmit={handleSubmit}>
-                        <Row className='border '>
-                            <Col xs={12} sm={12} lg={12} className=''>
-                                <Form.Label htmlFor='chatgpt_tts_api_key'>
-                                    How it works?
-                                    <a className={'text-danger'} target='_blank'
-                                        href='https://www.youtube.com/watch?v=6uGPboXW2Q8'>
-                                        <i className="fab fa-youtube"></i></a>
-                                </Form.Label>
+        <>
+            {/* Authentication Card */}
+            <div className="tta-card mb-3">
+                <div className="d-flex align-items-center justify-content-between mb-3">
+                    <h5 className="mb-0 fw-semibold">Authentication</h5>
+                    <Button 
+                        variant="link" 
+                        className="text-danger p-0 text-decoration-none"
+                        onClick={() => window.open('https://www.youtube.com/watch?v=6uGPboXW2Q8', '_blank')}
+                    >
+                        How it works? <i className="fab fa-youtube ms-1"></i>
+                    </Button>
+                </div>
 
+                <Form onSubmit={handleSubmit}>
+                    <Form.Group className="mb-3">
+                        <Form.Label className="setting-label text-dark">
+                            Paste here ChatGPT API key. How to get? Click{' '}
+                            <a 
+                                href="https://platform.openai.com/api-keys" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                            >
+                                here
+                            </a>
+                            .
+                        </Form.Label>
+                        <Form.Control
+                            type="password"
+                            id="chatgpt_tts_api_key"
+                            onChange={handleChange}
+                            value={chatGPTAPIData.chatgpt_tts_api_key}
+                            name="chatgpt_tts_api_key"
+                            placeholder="Enter your ChatGPT API key"
+                            className="tta-textarea"
+                        />
+                    </Form.Group>
 
-                                <Form.Group>
-                                    <Form.Label htmlFor='chatgpt_tts_api_key'>
-                                        Paste here ChatGPT API key. How to get? Click <a target='_blank' href='https://platform.openai.com/api-keys'>here</a>.
-                                    </Form.Label>
-                                    <Form.Control
-                                        type='password'
-                                        id='chatgpt_tts_api_key'
-                                        onChange={handleChange}
-                                        value={chatGPTAPIData.chatgpt_tts_api_key}
-                                        name='chatgpt_tts_api_key'
-                                        placeholder='chatgpt_tts_api_key'
-                                    />
-
-                                </Form.Group>
-                            </Col>
-                            <div className='mx-auto mt-5 mb-4'>
-                                <button type='submit' className='tta_btn'>
-                                    Submit
-                                </button>
-                            </div>
-                        </Row>
-                    </Form>
-                </Col>
-                <Col xs={12} sm={12} lg={4}>
-                    <UpgradeToPro />
-                </Col>
-            </Row >
-        </Container>
+                    <div className="text-center">
+                        <Button variant="primary" type="submit" className="tta_btn rounded-3">
+                            Submit
+                        </Button>
+                    </div>
+                </Form>
+            </div>
+        </>
     );
 }

@@ -522,6 +522,372 @@ My Custom css
 
 
 
+
+/* New custom css added on 12.12.2025 */
+
 /* Integrations custom css */
 
+/* Container */
+/* as same as settings */
+
+
+
+/* TTS Service Card Styles */
+.tts-service-card {
+  background: #fff;
+  border: 2px solid #e9ecef;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  height: 100%;
+}
+
+.tts-service-card:hover {
+  border-color: #4285f4;
+  box-shadow: 0 2px 8px rgba(66, 133, 244, 0.1);
+}
+
+/* Google Cloud TTS Active State */
+
+.tts-service-card.google-tts {
+  background-color: rgba(75, 203, 255, 0.1);
+}
+.tts-service-card.google-tts.active {
+  border: 2px solid rgba(75, 203, 255, 1);
+  /* background-color: rgba(75, 203, 255, 0.1); */
+}
+
+/* ChatGPT TTS Active State */
+.tts-service-card.chatgpt-tts {
+  background-color: rgba(255, 237, 250, 1); 
+}
+.tts-service-card.chatgpt-tts.active {
+  border: 2px solid rgba(216, 45, 168, 1);
+}
+
+/* Service Icon Styles */
+.tts-service-card .service-icon {
+  flex-shrink: 0;
+  border-radius: 8px;
+  padding: 4px;
+  display: inline-block;
+  transition: all 0.2s ease-in-out;
+  background-color: white !important;
+}
+
+/* Google Cloud Icon Border */
+.tts-service-card.google-tts .service-icon {
+  border: 2px solid rgba(75, 203, 255, 1);
+}
+
+
+/* ChatGPT Icon Border */
+.tts-service-card.chatgpt-tts .service-icon {
+  border: 2px solid rgba(255, 87, 157, 1); /* OpenAI pink color */
+}
+
+/* Active state for icons */
+.tts-service-card.google-tts.active .service-icon {
+  border-color: rgba(75, 203, 255, 1);
+  background-color: rgba(75, 203, 255, 0.1);
+}
+
+.tts-service-card.chatgpt-tts.active .service-icon {
+  border-color: rgba(255, 87, 157, 1);
+  background-color: rgba(255, 237, 250, 1);
+}
+
+/* Other styles remain the same */
+.tts-service-card h6 {
+  font-weight: 600;
+  color: #212529;
+  font-size: 1rem;
+}
+
+.tts-service-card p {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.tts-service-card .service-checkbox {
+  pointer-events: none;
+}
+
+.tts-service-card .service-checkbox .form-check-input {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 0.25rem;
+  border: 2px solid #dee2e6;
+  background-color: #fff;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* Remove ALL default Bootstrap checkbox styling - FORCE OVERRIDE */
+.tts-service-card .service-checkbox .form-check-input:checked[type="checkbox"] {
+  background-color: transparent !important;
+  background-image: none !important;
+  background-size: 0 !important;
+  background-position: 0 0 !important;
+  background-repeat: no-repeat !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  position: relative;
+}
+
+.tts-service-card .service-checkbox .form-check-input:checked[type="checkbox"]::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Google TTS active state */
+.tts-service-card.google-tts.active .service-checkbox .form-check-input {
+  background-color: rgba(25, 69, 72, 1) !important;
+  border-color: rgba(25, 69, 72, 1) !important;
+  background-image: none !important;
+}
+
+/* ChatGPT TTS active state */
+.tts-service-card.chatgpt-tts.active .service-checkbox .form-check-input {
+  background-color: rgba(216, 45, 168, 1) !important;
+  border-color: rgba(216, 45, 168, 1) !important;
+  background-image: none !important;
+}
+
+/* Add custom white checkmark - only visible element */
+.tts-service-card .service-checkbox .form-check-input:checked[type="checkbox"]::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1;
+  display: block;
+  z-index: 10;
+}
+
+/* Google Upload Button */
+.google-upload-btn {
+  border: 2px dashed black !important;
+  border-radius: 10px;
+  background-color: #fff !important;
+  color: #6c757d !important;
+  font-weight: 500;
+  padding: 0.75rem 0.15rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.google-upload-btn:hover {
+  border-color: #4285f4 !important;
+  background-color: #f8fbff !important;
+  color: #4285f4 !important;
+}
+
+.google-upload-btn i {
+  font-size: 1rem;
+}
+
+.google-upload-btn{
+	box-shadow: none !important;
+  outline: none !important;
+}
+
+.tta-yt-outline{
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+
+
+/* Textarea Styling (matching Settings.js) */
+.tta-textarea {
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.9rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.tta-textarea:focus {
+  border-color: #4285f4;
+  box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+  outline: 0;
+}
+
+.tta-textarea:disabled {
+  background-color: #f8f9fa;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Button Styles (matching .tta_btn from Settings) */
+/* .tta_btn {
+  background-color: #ff6b4a;
+  border-color: #ff6b4a;
+  color: #fff;
+  font-weight: 500;
+  padding: 0.625rem 2rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease-in-out;
+  border: none;
+} */
+
+.tta_btn:hover,
+.tta_btn:focus,
+.tta_btn:active {
+  background-color: #ff5533 !important;
+  border-color: #ff5533 !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(255, 107, 74, 0.3) !important;
+}
+
+/* Alert Customization */
+.alert {
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+/* Form Control */
+.form-control:focus {
+  border-color: #4285f4;
+  box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+}
+
+/* Link Styles */
+a {
+  color: #4285f4;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+a:hover {
+  color: #2a6bd4;
+}
+
+.btn-link {
+  color: #4285f4;
+  text-decoration: none;
+}
+
+.btn-link:hover {
+  color: #2a6bd4;
+}
+
+.btn-link.text-danger {
+  color: #dc3545 !important;
+}
+
+.btn-link.text-danger:hover {
+  color: #c82333 !important;
+}
+
+/* Button Variants */
+.btn-outline-secondary {
+  border-color: #dee2e6;
+  color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #f8f9fa;
+  border-color: #adb5bd;
+  color: #495057;
+}
+
+.btn-outline-danger {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: #fff;
+}
+
+/* Loading Spinner (matching Settings.js) */
+.tta-loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  font-size: 1.1rem;
+  color: #6c757d;
+}
+
+/* Header Styles */
+.fs-3 {
+  font-size: 1.75rem !important;
+}
+
+.fw-bold {
+  font-weight: 700 !important;
+}
+
+.fw-semibold {
+  font-weight: 600 !important;
+}
+
+.text-dark {
+  color: #212529 !important;
+}
+
+.text-secondary {
+  color: #6c757d !important;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 991.98px) {
+  .tta-container {
+    padding: 1rem 0.5rem;
+  }
+
+  .tta-card {
+    padding: 1rem;
+  }
+
+  .setting-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .setting-label-area {
+    width: 100%;
+  }
+
+  .tts-service-card {
+    margin-bottom: 1rem;
+  }
+
+  .tta_btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .fs-3 {
+    font-size: 1.5rem !important;
+  }
+}
 
