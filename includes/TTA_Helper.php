@@ -55,7 +55,7 @@ class TTA_Helper
             $current_post = $post;
         }
         // is_home() || is_archive() || is_front_page() || is_category()
-        if (\is_single($current_post) ) {
+        if (\is_single($current_post) || is_singular() ) {
             $should_load_button = true;
         }
 

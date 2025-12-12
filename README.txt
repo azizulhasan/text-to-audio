@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 1.9.35
+Stable tag: 1.9.36
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -456,6 +456,9 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+= 1.9.36  ( 12 December 2025 )  =
+Fixed :  Player disappearance issue solved.
+
 
 = 1.9.35  ( 11 December 2025 )  =
 Fixed :  Voice missing issue (free)
@@ -781,10 +784,6 @@ Improved: Pro version and free version performance issue improved.
 == Upgrade Notice ==
 
 
-= 1.9.35   =
-Fixed :  Voice missing issue (free)
-Compatible :  Make plugin Compatible with Avada, Divi, WPBackery theme.
-Fixed: Long sentence issue fixed. (Pro)
-Support: PHP 7.4 support
-Fixed: Player Double issue fixed (pro)
+= 1.9.36  =
+Fixed :  Player disappearance issue solved.
 
