@@ -533,7 +533,7 @@ export default function Listening() {
                                                     utterance.
                                                 </Tooltip>
                                             }>
-                                            <Button className='tta_btn'>?</Button>
+                                            <Button className='tta_question_btn'>?</Button>
                                         </OverlayTrigger>
                                     ))}
                                 </>
@@ -584,7 +584,7 @@ export default function Listening() {
                                                             used to speak
                                                         </Tooltip>
                                                     }>
-                                                    <Button className='tta_btn'>?</Button>
+                                                    <Button className='tta_question_btn'>?</Button>
                                                 </OverlayTrigger>
                                             ))}
                                         </>
@@ -640,7 +640,7 @@ export default function Listening() {
                                                         on your listening device and the individual person.
                                                     </Tooltip>
                                                 }>
-                                                <Button className='tta_btn'>?</Button>
+                                                <Button className='tta_question_btn'>?</Button>
                                             </OverlayTrigger>
                                         ))}
                                     </>
@@ -687,7 +687,7 @@ export default function Listening() {
                                                         }
                                                     </Tooltip>
                                                 }>
-                                                <Button className='tta_btn'>?</Button>
+                                                <Button className='tta_question_btn'>?</Button>
                                             </OverlayTrigger>
                                         ))}
                                     </>
@@ -732,7 +732,7 @@ export default function Listening() {
                                                             utterance will be spoken at.
                                                         </Tooltip>
                                                     }>
-                                                    <Button className='tta_btn'>?</Button>
+                                                    <Button className='tta_question_btn'>?</Button>
                                                 </OverlayTrigger>
                                             ))}
                                         </>
@@ -770,7 +770,7 @@ export default function Listening() {
                                                             From 0 to 1
                                                         </Tooltip>
                                                     }>
-                                                    <Button className='tta_btn'>?</Button>
+                                                    <Button className='tta_question_btn'>?</Button>
                                                 </OverlayTrigger>
                                             ))}
                                         </>
@@ -794,7 +794,7 @@ export default function Listening() {
                                                             the pro version.
                                                         </Tooltip>
                                                     }>
-                                                    <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
+                                                    <Button className="m-0 p-0 text-dark bg-light border-0"><i
                                                         className="fas fa-lock" /></Button>
                                                 </OverlayTrigger>
                                             ))}
