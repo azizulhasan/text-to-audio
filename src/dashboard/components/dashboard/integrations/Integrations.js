@@ -6,7 +6,8 @@ import { postData } from "../../context/utilities";
 import UpgradeToPro from "../../UpgradeToPro";
 
 export default function Integrations() {
-  const [currentTTSServic, setCurrentTTSServic] = useState("google_cloud_tts");
+  const [currentTTSServic, setCurrentTTSServic] = useState("");
+  const [authenticatedServices, setAuthenticatedServices] = useState([]);
 
   const apiURL = useMemo(() => {
     return (
@@ -18,6 +19,10 @@ export default function Integrations() {
       "/"
     );
   }, [window]);
+
+  useEffect(() => {
+    console.log({authenticatedServices})
+  }, [authenticatedServices])
 
   const [chatGPTAPIData, setChatGPTAPIData] = useState({
     chatgpt_tts_api_key: "",
@@ -53,6 +58,10 @@ export default function Integrations() {
             res?.data?.chatgpt_tts_api_key
           ) {
             getCurrentTTSService(res.data.currentTTSServic);
+            setAuthenticatedServices(prev => {
+              if (prev.includes('chat_gpt_tts')) return prev;
+              return [...prev, 'chat_gpt_tts'];
+            })
           }
         })
         .catch((err) => {
@@ -80,7 +89,7 @@ export default function Integrations() {
             <Row>
               <Col xs={12} md={6} className="mb-3 mb-md-0">
                 <div
-                  className={`tts-service-card google-tts ${currentTTSServic === "google_cloud_tts" ? "active" : ""}`}
+                  className={`tts-service-card google-tts ${authenticatedServices.includes('google_cloud_tts') ? "active" : ""}`}
                   onClick={() => setCurrentTTSServic("google_cloud_tts")}
                 >
                   <div className="d-flex align-items-start">
@@ -97,7 +106,7 @@ export default function Integrations() {
                         <h6 className="mb-1">Google Cloud TTS</h6>
                         <Form.Check
                           type="checkbox"
-                          checked={currentTTSServic === "google_cloud_tts"}
+                          checked={authenticatedServices.includes('google_cloud_tts')}
                           onChange={() => {}}
                           className="service-checkbox"
                         />
@@ -112,7 +121,7 @@ export default function Integrations() {
               </Col>
               <Col xs={12} md={6}>
                 <div
-                  className={`tts-service-card chatgpt-tts ${currentTTSServic === "chat_gpt_tts" ? "active" : ""}`}
+                  className={`tts-service-card chatgpt-tts ${authenticatedServices.includes('chat_gpt_tts') ? "active" : ""}`}
                   onClick={() => setCurrentTTSServic("chat_gpt_tts")}
                 >
                   <div className="d-flex align-items-start">
@@ -129,7 +138,7 @@ export default function Integrations() {
                         <h6 className="mb-1">ChatGPT TTS</h6>
                         <Form.Check
                           type="checkbox"
-                          checked={currentTTSServic === "chat_gpt_tts"}
+                          checked={authenticatedServices.includes('chat_gpt_tts')}
                           onChange={() => {}}
                           className="service-checkbox"
                         />
@@ -145,20 +154,30 @@ export default function Integrations() {
               </Col>
             </Row>
           </div>
-
-          {/* Dynamic Content Based on Selection */}
-          {currentTTSServic !== "chat_gpt_tts" ? (
-            <GoogleTTS
-              currentTTSServic={currentTTSServic}
+          <GoogleTTS
+              setCurrentTTSServic={setCurrentTTSServic}
               getShouldCheckChatGPT={getShouldCheckChatGPT}
-            />
-          ) : (
-            <ChatGPTTTS
+              setAuthenticatedServices={setAuthenticatedServices}
+          />
+          <ChatGPTTTS
               setChatGPTAPIData={setChatGPTAPIData}
               chatGPTAPIData={chatGPTAPIData}
               currentTTSServic={currentTTSServic}
-            />
-          )}
+              setAuthenticatedServices={setAuthenticatedServices}
+          />
+          {/* Dynamic Content Based on Selection */}
+          {/*{currentTTSServic !== "chat_gpt_tts" ? (*/}
+          {/*  <GoogleTTS*/}
+          {/*      setCurrentTTSServic={setCurrentTTSServic}*/}
+          {/*    getShouldCheckChatGPT={getShouldCheckChatGPT}*/}
+          {/*  />*/}
+          {/*) : (*/}
+          {/*  <ChatGPTTTS*/}
+          {/*    setChatGPTAPIData={setChatGPTAPIData}*/}
+          {/*    chatGPTAPIData={chatGPTAPIData}*/}
+          {/*    currentTTSServic={currentTTSServic}*/}
+          {/*  />*/}
+          {/*)}*/}
         </Col>
 
         <Col xs={12} lg={4}>

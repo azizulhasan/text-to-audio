@@ -3,7 +3,7 @@ import { Form, Button } from 'react-bootstrap';
 import { postData } from '../../../context/utilities';
 import toast from '../../../context/Notify';
 
-export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGPTAPIData }) {
+export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGPTAPIData, setAuthenticatedServices }) {
     const apiURL = useMemo(() => {
         return ttsObj.api_url + ttsObj.api_namespace + "_pro" + "/" + ttsObj.api_version + "/";
     }, [window]);
