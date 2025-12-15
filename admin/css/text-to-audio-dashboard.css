@@ -53,38 +53,308 @@ My Custom css
 	background-color: #fbfaff;
 }
 
-.tta_btn {
-	display: inline-block;
-	font-weight: 400;
-	line-height: 1.5;
-	color: #212529;
-	text-align: center;
-	text-decoration: none;
-	vertical-align: middle;
-	cursor: pointer;
-	-webkit-user-select: none;
-	user-select: none;
-	background-color: transparent;
-	border: 1px solid transparent;
-	padding: 0.375rem 0.75rem;
-	font-size: 1rem;
-	border-radius: 0.25rem;
-	transition:
-		color 0.15s ease-in-out,
-		background-color 0.15s ease-in-out,
-		border-color 0.15s ease-in-out,
-		box-shadow 0.15s ease-in-out;
+/* Default nav link */
+#ttaTtaLayoutSidenav_nav .nav-link {
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #ffffffc9;
+  background: transparent;
+  border-left: 4px solid transparent;
+  transition: all 0.2s ease;
+  font-size: 15px;
 }
 
+/* Active (selected) menu */
+#ttaTtaLayoutSidenav_nav .nav-link.active {
+  background: #2b4d4d;            /* Middle teal like in screenshot */
+  color: #ffffff;                 /* White text */
+  border-left: 4px solid #7fffd4; /* Left highlight (optional) */
+  font-weight: 600;
+  position: relative;
+}
+
+/* Dark bottom bar like your screenshot */
+#ttaTtaLayoutSidenav_nav .nav-link.active::after {
+  content: '';
+  width: 100%;
+  height: 8px;
+}
+
+/* Icon color inside active item */
+#ttaTtaLayoutSidenav_nav .nav-link.active .dashicons {
+  color: white;
+}
+
+/* Hover effect */
+#ttaTtaLayoutSidenav_nav .nav-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+
+
+
+
+
+
+.topnav{
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+}
+
+.top-group-buttons {
+  border: 1px solid #cfd4da;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(49, 201, 187, 0.16);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.top-nav-item {
+  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.top-nav-item + .top-nav-item {
+  border-left: 1px solid #cfd4da;
+}
+
+/* Hover effect (optional but looks good) */
+.top-nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+
+
+.tta-custom-accordion .accordion-button::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='white'%3E%3Cpath fill-rule='evenodd' d='M1.5 5.5l6 6 6-6'/%3E%3C/svg%3E");
+}
+
+.tta-custom-orange-accordion .accordion-button {
+    background-color: rgba(255, 120, 83, 1) !important;
+    color: #fff !important;
+	box-shadow: none !important;
+    outline: none !important;
+
+
+}
+
+.tta-custom-orange-accordion .accordion-button:not(.collapsed) {
+    background-color: rgba(255, 120, 83, 1) !important;
+    color: #fff !important;
+	box-shadow: none !important;
+    outline: none !important;
+
+
+}
+
+
+
+
+.custom-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.custom-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-track {
+  position: absolute;
+  inset: 0;
+  background-color: #e0e0e0;
+  border-radius: 24px;
+  transition: 0.3s;
+}
+
+.switch-thumb {
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: 0.3s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* When Checked */
+.custom-switch input:checked + .switch-track {
+  background-color: rgba(87, 209, 0, 1); /* your requested color */
+}
+
+.custom-switch input:checked + .switch-track .switch-thumb {
+  left: 27px;
+}
+
+/* Disabled */
+.switch-disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.setting-label-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.setting-label {
+  font-size: 15px;
+  color: #333;
+  font-weight: 500;
+}
+
+.help-icon {
+  color: #999;
+  font-size: 14px;
+  cursor: help;
+}
+
+
+
+
+.tta-qa-accordion .accordion-button:not(.collapsed)::after {
+     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+.tta-qa-accordion .accordion-button::after {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+.tta-qa-accordion .accordion-button:focus {
+      box-shadow: none;
+      border-color: rgba(0,0,0,.125);
+   }
+
+
+
+/* YouTube Play Button Style */
+.tta-yt {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* width: 50px;
+    height: 50px; */
+    /* background: #ff0000; */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+	background-color: rgba(253, 71, 96, 1);
+
+}
+
+.tta-yt:hover {
+    transform: translate(-50%, -50%) scale(1.05);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+}
+
+.tta-yt svg {
+    width: 30px;
+    height: 30px;
+    fill: white;
+    margin-left: 2px;
+}
+
+
+
+
+
 .tta_btn {
-	background-color: #1a4548;
-	color: #fff;
-	border-color: #1a4548;
-	border-radius: 2px;
+  display: inline-block;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  background-color: rgba(255, 120, 83, 1);
+  border: 1px solid transparent;
+  padding: 12px 32px;
+  font-size: 16px;
+  border-radius: 0.25rem;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    /* Keep your existing styles */
+	width: 100%;
+
+  position: sticky;
+  bottom: 1rem;
+  /* Add transition for smooth movement */
+  transition: transform 0.2s ease;
 }
+
+
+
+.tta_btn.sticky-active {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
 .tta_btn:hover {
-	background-color: #1a4548;
+  background-color: rgb(232, 62, 14);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
+
+.tta_btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tta-textarea {
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    font-size: 14px;
+}
+
+
+.tta-card {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+
+.tta-container {
+  padding: 2rem;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+
+
+
+
+
+
+
 
 .audio-time-start,
 .audio-time-end {
@@ -135,3 +405,542 @@ My Custom css
 .atlasvoice-bg {
 	background-color: #1a4548;
 }
+
+
+
+
+
+
+
+/* New custom css added on 11.12.2025 */
+
+/* Style any existing cross/close icon in item-pill */
+.item-pill::after,
+.item-pill::before {
+	cursor: pointer;
+    color: rgba(255, 120, 83, 1) !important;
+}
+
+.item-pill:hover::after,
+.item-pill:hover::before {
+    color: rgb(232, 62, 14) !important;
+}
+
+.navbar-style{
+    background: rgba(25, 69, 72, 1);
+    padding: 1rem 1.5rem;
+    margin-top: 0.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 999;
+}
+
+.audio-style {
+    background: #9EF01A;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.tta-text-style {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.2;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+
+.tta-pro-badge-style {
+    background: #9EF01A;
+    color: #1a4d4d;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+}
+
+
+.tta-tab-style {
+    background: rgba(49, 201, 187, 0.16);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 0px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    border-right: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+
+.tta-loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 24px;
+    color: #666;
+}
+
+
+
+.tta_question_btn{
+  background-color: rgba(255, 120, 83, 1);
+  border: none;
+}
+
+.tta_question_btn:hover{
+  background-color: rgb(232, 62, 14);
+}
+
+
+
+.tta_search_btn{
+  background-color: rgba(255, 120, 83, 1);
+    color: white;
+    border: none;
+      font-weight: 600;
+        font-size: 16px;
+  border-radius: 0.25rem;
+  padding: 12px 30px;
+}
+
+.tta_search_btn:hover{
+  background-color: rgb(232, 62, 14);
+}
+
+
+
+
+/* New custom css added on 12.12.2025 */
+
+/* Integrations custom css */
+
+/* Container */
+/* as same as settings */
+
+
+
+/* TTS Service Card Styles */
+.tts-service-card {
+  background: #fff;
+  border: 2px solid #e9ecef;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  height: 100%;
+}
+
+.tts-service-card:hover {
+  /* border-color: #4285f4; */
+  box-shadow: 0 2px 8px rgba(66, 133, 244, 0.1);
+}
+
+/* Google Cloud TTS Active State */
+
+.tts-service-card.google-tts {
+  background-color: rgba(75, 203, 255, 0.1);
+}
+.tts-service-card.google-tts.active {
+  border: 2px solid rgba(75, 203, 255, 1);
+  /* background-color: rgba(75, 203, 255, 0.1); */
+}
+
+/* ChatGPT TTS Active State */
+.tts-service-card.chatgpt-tts {
+  background-color: rgba(255, 237, 250, 1); 
+}
+.tts-service-card.chatgpt-tts.active {
+  border: 2px solid rgba(216, 45, 168, 1);
+}
+
+/* Service Icon Styles */
+.tts-service-card .service-icon {
+  flex-shrink: 0;
+  border-radius: 8px;
+  padding: 4px;
+  display: inline-block;
+  transition: all 0.2s ease-in-out;
+  background-color: white !important;
+}
+
+/* Google Cloud Icon Border */
+.tts-service-card.google-tts .service-icon {
+  border: 2px solid rgba(75, 203, 255, 1);
+}
+
+
+/* ChatGPT Icon Border */
+.tts-service-card.chatgpt-tts .service-icon {
+  border: 2px solid rgba(255, 87, 157, 1); /* OpenAI pink color */
+}
+
+/* Active state for icons */
+.tts-service-card.google-tts.active .service-icon {
+  border-color: rgba(75, 203, 255, 1);
+  background-color: rgba(75, 203, 255, 0.1);
+}
+
+.tts-service-card.chatgpt-tts.active .service-icon {
+  border-color: rgba(255, 87, 157, 1);
+  background-color: rgba(255, 237, 250, 1);
+}
+
+/* Other styles remain the same */
+.tts-service-card h6 {
+  font-weight: 600;
+  color: #212529;
+  font-size: 1rem;
+}
+
+.tts-service-card p {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.tts-service-card .service-checkbox {
+  pointer-events: none;
+}
+
+.tts-service-card .service-checkbox .form-check-input {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 0.25rem;
+  border: 2px solid #dee2e6;
+  background-color: #fff;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* Remove ALL default Bootstrap checkbox styling - FORCE OVERRIDE */
+.tts-service-card .service-checkbox .form-check-input:checked[type="checkbox"] {
+  background-color: transparent !important;
+  background-image: none !important;
+  background-size: 0 !important;
+  background-position: 0 0 !important;
+  background-repeat: no-repeat !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  position: relative;
+}
+
+.tts-service-card .service-checkbox .form-check-input:checked[type="checkbox"]::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Google TTS active state */
+.tts-service-card.google-tts.active .service-checkbox .form-check-input {
+  background-color: rgba(25, 69, 72, 1) !important;
+  border-color: rgba(25, 69, 72, 1) !important;
+  background-image: none !important;
+}
+
+/* ChatGPT TTS active state */
+.tts-service-card.chatgpt-tts.active .service-checkbox .form-check-input {
+  background-color: rgba(216, 45, 168, 1) !important;
+  border-color: rgba(216, 45, 168, 1) !important;
+  background-image: none !important;
+}
+
+/* Add custom white checkmark - only visible element */
+.tts-service-card .service-checkbox .form-check-input:checked[type="checkbox"]::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1;
+  display: block;
+  z-index: 10;
+}
+
+/* Google Upload Button */
+.google-upload-btn {
+  border: 2px dashed black !important;
+  border-radius: 10px;
+  background-color: #fff !important;
+  color: #6c757d !important;
+  font-weight: 500;
+  padding: 0.75rem 0.15rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.google-upload-btn:hover {
+  border-color: #4285f4 !important;
+  background-color: #f8fbff !important;
+  color: #4285f4 !important;
+}
+
+.google-upload-btn i {
+  font-size: 1rem;
+}
+
+.google-upload-btn{
+	box-shadow: none !important;
+  outline: none !important;
+}
+
+.tta-yt-outline{
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+
+
+/* Textarea Styling (matching Settings.js) */
+.tta-textarea {
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.9rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.tta-textarea:focus {
+  border-color: #4285f4;
+  box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+  outline: 0;
+}
+
+.tta-textarea:disabled {
+  background-color: #f8f9fa;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Button Styles (matching .tta_btn from Settings) */
+/* .tta_btn {
+  background-color: #ff6b4a;
+  border-color: #ff6b4a;
+  color: #fff;
+  font-weight: 500;
+  padding: 0.625rem 2rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease-in-out;
+  border: none;
+} */
+
+.tta_btn:hover,
+.tta_btn:focus,
+.tta_btn:active {
+  background-color: #ff5533 !important;
+  border-color: #ff5533 !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(255, 107, 74, 0.3) !important;
+}
+
+/* Alert Customization */
+.alert {
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+/* Form Control */
+.form-control:focus {
+  border-color: #4285f4;
+  box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+}
+
+/* Link Styles */
+a {
+  color: #4285f4;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+a:hover {
+  color: #2a6bd4;
+}
+
+.btn-link {
+  color: #4285f4;
+  text-decoration: none;
+}
+
+.btn-link:hover {
+  color: #2a6bd4;
+}
+
+.btn-link.text-danger {
+  color: #dc3545 !important;
+}
+
+.btn-link.text-danger:hover {
+  color: #c82333 !important;
+}
+
+/* Button Variants */
+.btn-outline-secondary {
+  border-color: #dee2e6;
+  color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #f8f9fa;
+  border-color: #adb5bd;
+  color: #495057;
+}
+
+.btn-outline-danger {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: #fff;
+}
+
+/* Loading Spinner (matching Settings.js) */
+.tta-loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  font-size: 1.1rem;
+  color: #6c757d;
+}
+
+/* Header Styles */
+.fs-3 {
+  font-size: 1.75rem !important;
+}
+
+.fw-bold {
+  font-weight: 700 !important;
+}
+
+.fw-semibold {
+  font-weight: 600 !important;
+}
+
+.text-dark {
+  color: #212529 !important;
+}
+
+.text-secondary {
+  color: #6c757d !important;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 991.98px) {
+  .tta-container {
+    padding: 1rem 0.5rem;
+  }
+
+  .tta-card {
+    padding: 1rem;
+  }
+
+  .setting-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .setting-label-area {
+    width: 100%;
+  }
+
+  .tts-service-card {
+    margin-bottom: 1rem;
+  }
+
+  .tta_btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .fs-3 {
+    font-size: 1.5rem !important;
+  }
+}
+
+/* New custom css added on 15.12.25 */
+
+
+
+.tta_gpt_btn {
+    background-color: rgba(255, 120, 83, 1) !important;
+    border: none !important;
+    font-weight: 500 !important;
+    font-size: 1.1rem !important;
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+    color: #fff !important;
+    cursor: pointer !important;
+    border-radius: 0.375rem !important;
+    transition: background-color 0.2s ease !important;
+    box-shadow: none !important;
+    outline: none !important;
+
+}
+
+.tta_gpt_btn:hover {
+  background-color: rgb(232, 62, 14) !important;
+
+}
+
+
+.tta_gpt_input {
+    background-color: #f8f9fa !important;
+    border: 1px solid #dee2e6 !important;
+    /* padding: 0.75rem 1rem !important; */
+    border-radius: 0.375rem !important;
+    color: #212529 !important;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.tta_gpt_input::placeholder {
+    color: #6c757d !important;
+    opacity: 1 !important;
+}
+
+.tta_gpt_input:disabled {
+    background-color: #e9ecef !important;
+    opacity: 0.65 !important;
+    cursor: not-allowed !important;
+}
+
+
+
+
