@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button, InputGroup } from 'react-bootstrap';
 import { postData } from '../../../context/utilities';
 import toast from '../../../context/Notify';
 
@@ -79,51 +79,53 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
     };
 
     return (
-        <>
-            {/* Authentication Card */}
-            <div className="tta-card mb-3">
-                <div className="d-flex align-items-center justify-content-between mb-3">
-                    <h5 className="mb-0 fw-semibold">Authentication</h5>
-                    <Button 
-                        variant="link" 
-                        className="text-danger p-0 text-decoration-none"
-                        onClick={() => window.open('https://www.youtube.com/watch?v=6uGPboXW2Q8', '_blank')}
-                    >
-                        How it works? <i className="fab fa-youtube ms-1"></i>
-                    </Button>
-                </div>
-
-                <Form onSubmit={handleSubmit}>
-                    <Form.Group className="mb-3">
-                        <Form.Label className="setting-label text-dark">
-                            Paste here ChatGPT API key. How to get? Click{' '}
-                            <a 
-                                href="https://platform.openai.com/api-keys" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                            >
-                                here
-                            </a>
-                            .
-                        </Form.Label>
-                        <Form.Control
-                            type="password"
-                            id="chatgpt_tts_api_key"
-                            onChange={handleChange}
-                            value={chatGPTAPIData.chatgpt_tts_api_key}
-                            name="chatgpt_tts_api_key"
-                            placeholder="Enter your ChatGPT API key"
-                            className="tta-textarea"
-                        />
-                    </Form.Group>
-
-                    <div className="text-center">
-                        <Button variant="primary" type="submit" className="tta_btn rounded-3">
-                            Submit
-                        </Button>
-                    </div>
-                </Form>
+        <div className="bg-white rounded-3 p-4 shadow-sm">
+            {/* Header with YouTube link */}
+            <div className="d-flex align-items-center justify-content-between mb-4">
+                <h4 className="mb-0 fw-bold">Set ChatGPT API key</h4>
+                <Button 
+                    variant="link" 
+                    className="text-danger p-0 text-decoration-none d-flex align-items-center"
+                    onClick={() => window.open('https://www.youtube.com/watch?v=6uGPboXW2Q8', '_blank')}
+                >
+                    <i className="fab fa-youtube fs-4"></i>
+                </Button>
             </div>
-        </>
+
+            <Form onSubmit={handleSubmit}>
+                {/* Input Group with Submit Button */}
+                <InputGroup className="mb-3 gap-3">
+                    <Form.Control
+                        type="password"
+                        id="chatgpt_tts_api_key"
+                        onChange={handleChange}
+                        value={chatGPTAPIData.chatgpt_tts_api_key}
+                        name="chatgpt_tts_api_key"
+                        placeholder="paste here chatgpt_tts_api_key"
+                        className="tta_gpt_input"
+                    />
+                    <Button 
+                        variant="primary" 
+                        type="submit"
+                        className="tta_gpt_btn"
+                    >
+                        Submit
+                    </Button>
+                </InputGroup>
+
+                {/* Help text */}
+                <p className="text-muted mb-0">
+                    How to get chatGPT API key?{' '}
+                    <a 
+                        href="https://platform.openai.com/api-keys" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-primary text-decoration-none"
+                    >
+                        Click here
+                    </a>
+                </p>
+            </Form>
+        </div>
     );
 }
