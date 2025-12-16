@@ -891,6 +891,7 @@ a:hover {
   }
 }
 
+
 /* New custom css added on 15.12.25 */
 
 
@@ -944,3 +945,241 @@ a:hover {
 
 
 
+/* New custom css added on 16.12.25 */
+
+/* Tab Selector Wrapper */
+.tta_tab-selector-wrapper {
+    display: flex;
+    gap: 0;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.tta_tab-option {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    border: 2px solid #e5e7eb;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #ffffff;
+    font-size: 16px;
+}
+
+.tta_tab-option:first-child {
+    border-radius: 8px 0 0 8px;
+    border-right-width: 1px;
+}
+
+.tta_tab-option:last-child {
+    border-radius: 0 8px 8px 0;
+    border-left-width: 1px;
+}
+
+.tta_tab-option:hover {
+    background: #f9fafb;
+}
+
+.tta_tab-option-active {
+    border-color: #ff6b6b;
+    background: #ffffff;
+    position: relative;
+    z-index: 1;
+}
+
+.tta_tab-option:first-child.tta_tab-option-active {
+    border-right-width: 2px;
+    border-right-color: #ff6b6b;
+}
+
+.tta_tab-option:last-child.tta_tab-option-active {
+    border-left-width: 2px;
+    border-left-color: #ff6b6b;
+}
+
+.tta_tab-radio {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #d1d5db;
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.tta_tab-option-active .tta_tab-radio {
+    border-color: #ff6b6b;
+}
+
+.tta_tab-option-active .tta_tab-radio::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    background: #ff6b6b;
+    border-radius: 50%;
+}
+
+.tta_tab-option span:last-child {
+    font-size: 16px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.tta_tab-option-active span:last-child {
+    color: #ff6b6b;
+}
+
+/* Custom Textarea */
+.tta_custom-textarea {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 14px;
+    resize: vertical;
+    transition: border-color 0.2s ease;
+}
+
+.tta_custom-textarea:focus {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+    outline: none;
+}
+
+/* Listen Button */
+.tta_listen-button {
+    background: #ff6b6b;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    width: 100%;
+}
+
+.tta_listen-button:hover {
+    background: #ff5252;
+}
+
+.tta_listen-button:active {
+    transform: scale(0.98);
+}
+
+/* Shortcode Textarea */
+.tta_shortcode-textarea {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    padding: 12px;
+    resize: none;
+}
+
+.tta_shortcode-textarea:focus {
+    background: #ffffff;
+    border-color: #ff6b6b;
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+    outline: none;
+}
+
+/* Card Customization */
+.tta-container .card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tta-container .card-body {
+    padding: 24px;
+}
+
+/* Button Customization */
+.tta-container .btn-primary {
+    background: #ff6b6b;
+    border-color: #ff6b6b;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.tta-container .btn-primary:hover {
+    background: #ff5252;
+    border-color: #ff5252;
+}
+
+.tta-container .btn-primary:focus,
+.tta-container .btn-primary:active {
+    background: #ff5252;
+    border-color: #ff5252;
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+}
+
+.tta-container .btn-link {
+    text-decoration: none;
+}
+
+.tta-container .btn-link:hover {
+    text-decoration: none;
+    opacity: 0.8;
+}
+
+/* Typography */
+.tta-container h4 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.tta-container h5 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.tta-container h6 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.tta-container .text-muted {
+    color: #6b7280 !important;
+}
+
+/* Icons */
+.tta-container .fa-question-circle,
+.tta-container .fa-youtube {
+    font-size: 16px;
+}
+
+.tta-container .fa-cog {
+    font-size: 18px;
+    color: #ff6b6b;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .tta_tab-selector-wrapper {
+        flex-direction: column;
+    }
+    
+    .tta-container .card-body {
+        padding: 16px;
+    }
+}

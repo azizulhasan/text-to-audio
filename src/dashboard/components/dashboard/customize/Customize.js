@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
-import { Col, Container, Row, Form, FloatingLabel } from 'react-bootstrap';
+import { Col, Container, Row, Form, Card, Button } from 'react-bootstrap';
 import notify, { toast } from '../../context/Notify';
 import { copyToClipBoard, postData, postWithoutImage } from '../../context/utilities';
 import TextToSpeech from '../../../buttons/components/TextToSpeech';
 import TextToSpeechThree from '../../../buttons/components/TextToSpeechThree';
 import TextToSpeechFour from '../../../buttons/components/TextToSpeechFour';
-import CustomizationTabs from './CustomizationTabs'
+import CustomizationTabs from './CustomizationTabs';
+import UpgradeToPro from '../../UpgradeToPro';
 
 let speech = null;
 let TextToSpeechFree = null;
+
 export default function Customize() {
     const defaultValue = {
         backgroundColor: '#ffffff',
@@ -58,12 +60,12 @@ export default function Customize() {
 
     const [shortCode, setShortCode] = useState('[atlasvoice]');
     const [customCSS, setCustomCSS] = useState('');
-
     const [speakingText, setSpeakingText] = useState('');
     const [listeningSettings, setListeningSettings] = useState({});
     const [isGCAuthenticated, setGCIsAuthenticated] = useState(false);
     const [isBackUpToGCS, setIsBackUpToGCS] = useState(false)
     const [isChatGPTAuthenticated, setIsChatGPTAuthenticated] = useState(false)
+    const [activeTab, setActiveTab] = useState('player');
 
     const setDefaultButtonSettingsIfNeeded = (res) => {
         if (!res.data?.buttonSettings) {
@@ -87,9 +89,6 @@ export default function Customize() {
     }
 
     useEffect(() => {
-        /**
-         * Get customize settings.
-         */
         let customize = new FormData();
         customize.append('method', 'get');
         postWithoutImage(tta_obj.api_url + 'tta/v1/customize', customize)
@@ -129,7 +128,6 @@ export default function Customize() {
                     ...{ tta_play_btn_shortcode: res.data?.tta_play_btn_shortcode || defaultValue.tta_play_btn_shortcode },
                     ...{ custom_css: res.data?.custom_css || defaultValue.custom_css }
                 }
-                console.log({ css, value })
 
                 setListeningStyle(value);
                 if (res.data.custom_css) {
@@ -142,9 +140,6 @@ export default function Customize() {
                 console.log(err);
             });
 
-        /**
-         * Get listening settings.
-         */
         let listening = new FormData();
         listening.append('method', 'get');
         postWithoutImage(tta_obj.api_url + 'tta/v1/listening', listening)
@@ -164,10 +159,7 @@ export default function Customize() {
             }
         }, 1000)
 
-
         if (window.hasOwnProperty('ttsObj') && ttsObj?.is_pro_active) {
-
-            // Check Google TTS API authentication.
             postData(ttsObj.api_url + 'tta_pro/v1/get_auth_file', {}, "GET")
                 .then((res) => {
                     if (res?.file && res?.is_authenticated) {
@@ -179,7 +171,6 @@ export default function Customize() {
                     console.log(err);
                 });
 
-            // check ChatGPT authentication.
             let data = new FormData();
             data.append('method', 'get');
             postData(ttsObj.api_url + 'tta_pro/v1/chat_gpt_tts', data)
@@ -192,77 +183,50 @@ export default function Customize() {
                     console.log(err);
                 });
         }
-
     }, []);
 
-
-    /**
-     * handle change
-     * @param {*} e
-     */
     const handleChange = (e, keyName = '') => {
-
         if (Array.isArray(e) && keyName) {
-
             let tempButtonSettings = structuredClone(listeningBtnStyle.buttonSettings)
-
             tempButtonSettings = {
                 ...tempButtonSettings,
-                ...{
-                    [keyName]: e
-                }
+                ...{ [keyName]: e }
             }
             setListeningStyle({
                 ...listeningBtnStyle,
-                ...{
-                    buttonSettings: tempButtonSettings
-                }
+                ...{ buttonSettings: tempButtonSettings }
             });
             return;
         }
-        if (
-            e.target.name === 'width' &&
-            (e.target.value > 100 || e.target.value < 0)
-        ) {
+        if (e.target.name === 'width' && (e.target.value > 100 || e.target.value < 0)) {
             toast('Value should between 0-100');
             return;
         }
-        /**
-         * setShortCode
-         */
+
         if (e.target.name == 'tta_play_btn_shortcode') {
             setShortCode(e.target.value);
             return;
         }
 
-        /**
-         * setCustomCSS
-         */
         if (e.target.name == 'custom_css') {
             setCustomCSS(e.target.value);
             return;
         }
 
-        // ChatGPT TTS player button settings
-        // && listeningBtnStyle?.buttonSettings?.id == 3
         if (!['backgroundColor', 'width', 'color', 'height', 'border', 'border_color', 'fontSize', 'borderRadius', 'marginTop', 'marginBottom', 'marginRight', 'marginLeft', 'hoverBackgroundColor', 'hoverTextColor'].includes(e.target.name)) {
-
             if (e.target.name === 'button_position' && !['before_content', 'after_content'].includes(e.target.value) && !ttsObj.is_pro_active) {
                 toast('This option is only available for pro version.', 'error');
                 return;
             }
 
             let tempButtonSettings = structuredClone(listeningBtnStyle.buttonSettings)
-
             tempButtonSettings = {
                 ...tempButtonSettings,
                 ...{ [e.target.name]: e.target.value }
             }
             setListeningStyle({
                 ...listeningBtnStyle,
-                ...{
-                    buttonSettings: tempButtonSettings
-                }
+                ...{ buttonSettings: tempButtonSettings }
             });
 
             if (e.target.name == 'id' && e.target.value > 2) {
@@ -270,21 +234,14 @@ export default function Customize() {
             } else {
                 document.getElementById('tta__demo_text_for_play').removeAttribute('disabled')
             }
-
-
             return;
         }
 
-        /**
-         * set button style for database.
-         */
         setListeningStyle({
             ...listeningBtnStyle,
             ...{ [e.target.name]: e.target.value },
         });
-        /**
-         * set button style for live preveiw.
-         */
+
         let value = '';
         if (e.target.name === 'width') {
             let arr = [e.target.value, '%'];
@@ -303,16 +260,11 @@ export default function Customize() {
                 value += ' solid ';
                 value += e.target.value;
             }
-            // e.target.name = 'border';
         } else if (e.target.name === 'fontSize') {
             value = e.target.value + 'px';
         } else if (e.target.name === 'marginLeft') {
             value = e.target.value + '%';
-        } else if (e.target.name === 'borderRadius'
-            || e.target.name === 'marginTop'
-            || e.target.name === 'marginBottom'
-            || e.target.name === 'marginRight'
-        ) {
+        } else if (e.target.name === 'borderRadius' || e.target.name === 'marginTop' || e.target.name === 'marginBottom' || e.target.name === 'marginRight') {
             value = e.target.value + 'px';
         } else {
             value = e.target.value;
@@ -323,7 +275,7 @@ export default function Customize() {
         });
     };
 
-    const CTANotice = (text_content = '' ) => {
+    const CTANotice = (text_content = '') => {
         toast(<>
             <h6>{text_content}</h6>
             <button onClick={(e) => {
@@ -337,21 +289,12 @@ export default function Customize() {
         });
     }
 
-
-    /**
-     * Handle form Submit
-     */
     const handleSubmit = (e) => {
         e.preventDefault();
-        /**
-         * Get full form data and modify them for saving to database.
-         */
         let form = new FormData(e.target);
-
         let formData = {};
         for (let [key, value] of form.entries()) {
             if (key !== 'custom_css' && key !== 'generate_mp3_date_to' && key !== 'generate_mp3_date_from') {
-
                 if (key === '' || value === '') {
                     toast('Please fill the  field : ' + key);
                     return;
@@ -360,7 +303,6 @@ export default function Customize() {
             if (!['backgroundColor', 'width', 'color', 'border', 'border_color', 'height', 'fontSize', 'borderRadius', 'marginTop', 'marginBottom', 'marginRight', 'marginLeft', 'hoverBackgroundColor', 'hoverTextColor'].includes(key)) {
                 continue;
             }
-
             formData[key] = value;
         }
 
@@ -374,31 +316,27 @@ export default function Customize() {
             formData.buttonSettings.id = 1;
         }
 
-        if (formData?.buttonSettings?.id == 4 ) {
-            if(ttsObj.is_pro_active && !isGCAuthenticated) {
+        if (formData?.buttonSettings?.id == 4) {
+            if (ttsObj.is_pro_active && !isGCAuthenticated) {
                 notify('To select this player you have to authenticate first from Integration menu', 'error', {
                     autoClose: 8000,
                 });
                 return;
             }
-
-            if(!isGCAuthenticated){
+            if (!isGCAuthenticated) {
                 CTANotice('Google Cloud TTS player is only in pro version.');
                 return;
             }
-
         }
 
         if (formData?.buttonSettings?.id == 5) {
-
-            if(ttsObj.is_pro_active && !isChatGPTAuthenticated) {
+            if (ttsObj.is_pro_active && !isChatGPTAuthenticated) {
                 notify('To select this player you have to authenticate first from Integration menu', 'error', {
                     autoClose: 8000,
                 });
                 return;
             }
-
-            if(!isChatGPTAuthenticated){
+            if (!isChatGPTAuthenticated) {
                 CTANotice('ChatGPT TTS player is only in pro version.');
                 return;
             }
@@ -409,7 +347,6 @@ export default function Customize() {
             return;
         }
 
-
         if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_folder_writable && formData?.buttonSettings?.id > 2 && !isBackUpToGCS) {
             toast("Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.", 'error', { autoClose: 10000 })
             return
@@ -418,8 +355,6 @@ export default function Customize() {
         let data = new FormData();
         data.append('fields', JSON.stringify(formData));
         data.append('method', 'post');
-        // console.log(formData)
-        // return;
         postWithoutImage(tta_obj.api_url + 'tta/v1/customize', data)
             .then((res) => {
                 setListeningStyle(res.data);
@@ -455,8 +390,8 @@ export default function Customize() {
                 speech.resume(speech.speech)
             }
         }
-
     };
+
     const setText = (e) => {
         setSpeakingText(e.target.value);
         localStorage.setItem('demo_listening_content', e.target.value);
@@ -474,31 +409,63 @@ export default function Customize() {
     ])
 
     return (
-        <Container>
-            <Row className='mt-5'>
-                <Col xs={12} sm={12} lg={8}>
-                    <Row>
-                        <Col xs={12} sm={12} lg={12} className='mb-3'>
-                            <>
-                                <FloatingLabel
-                                    controlId='tta__demo_text_for_play'
-                                    label='Write here something and click listen button.'>
-                                    <Form.Control
-                                        as='textarea'
-                                        onChange={(e) => setText(e)}
-                                        onFocus={(e) =>
-                                            toast('Write something here.')
-                                        }
-                                        value={speakingText ? speakingText : ''}
-                                        placeholder='Write here something and click listen button.'
-                                        style={{ height: '100px' }}
-                                    />
-                                </FloatingLabel>
-                            </>
-                        </Col>
-                        <Col xs={12} sm={12} lg={12} className='mb-3 mt-3'>
-                            {
-                                listeningBtnStyle?.buttonSettings?.id == 2 ?
+        <Container fluid className="tta-container">
+            <Row>
+                <Col xs={12} lg={8}>
+                    <div className="bg-white rounded p-3 mb-3 shadow-sm">
+                        <h2 className="fs-3 fw-bold mb-2 text-dark">Customization</h2>
+                        <p className="text-secondary m-0 small">Customize the player & design to match your brand and preferences.</p>
+                    </div>
+
+                    <div className="tta_tab-selector-wrapper mb-3">
+                        <div 
+                            className={`tta_tab-option ${activeTab === 'player' ? 'tta_tab-option-active' : ''}`}
+                            onClick={() => setActiveTab('player')}
+                        >
+                            <span className="tta_tab-radio"></span>
+                            <span>Player Customization</span>
+                        </div>
+                        <div 
+                            className={`tta_tab-option ${activeTab === 'design' ? 'tta_tab-option-active' : ''}`}
+                            onClick={() => setActiveTab('design')}
+                        >
+                            <span className="tta_tab-radio"></span>
+                            <span>Design Customization</span>
+                        </div>
+                    </div>
+
+                    <Card className="border-0 shadow-sm mb-3">
+                        <Card.Body className="p-4">
+                            <div className="d-flex align-items-center justify-content-between mb-3">
+                                <h5 className="mb-0">Player Customization</h5>
+                                <Button variant="link" className="text-danger p-0">
+                                    <i className="fas fa-cog"></i>
+                                </Button>
+                            </div>
+
+                            <div className="mb-3">
+                                <div className="d-flex align-items-center gap-2 mb-2">
+                                    <label className="mb-0 fw-semibold">Write here something and click listen button</label>
+                                    <Button variant="link" className="p-0 text-muted" size="sm">
+                                        <i className="fas fa-question-circle"></i>
+                                    </Button>
+                                    <Button variant="link" className="p-0 text-danger" size="sm">
+                                        <i className="fab fa-youtube"></i>
+                                    </Button>
+                                </div>
+                                <Form.Control
+                                    as='textarea'
+                                    id='tta__demo_text_for_play'
+                                    onChange={(e) => setText(e)}
+                                    value={speakingText ? speakingText : ''}
+                                    placeholder='Write here something and click listen button.'
+                                    rows={3}
+                                    className="tta_custom-textarea"
+                                />
+                            </div>
+
+                            <div className="d-grid mb-3">
+                                {listeningBtnStyle?.buttonSettings?.id == 2 ?
                                     <TextToSpeech buttonCSS={listeningBtnStyle}
                                         button={<div dataId="1" id="tts__listent_content_1"
                                             className='tts__listent_content'></div>} buttonId={2} /> :
@@ -522,49 +489,54 @@ export default function Customize() {
                                                         onClick={(e) => callListeningFunction(e)}
                                                         style={listeningBtnStyle2}
                                                         type='button'
+                                                        className="tta_listen-button"
                                                         title='Text To Audio:  Tap to listen post.'>
-                                                        <span style={{ fontSize: listeningBtnStyle2?.fontSize }}
-                                                            className='dashicons dashicons-controls-play'></span>{' '}
+                                                        <i className="fas fa-play-circle me-2"></i>
                                                         {tta_obj.buttonTextArr.listen_text}
                                                     </button>
                                                 )
-                            }
-                            <p className='pt-2 text-danger'>
-                                {
-                                    listeningBtnStyle?.buttonSettings?.id == 1 && ttsObj.is_pro_active ? __('If you\'re selecting this button then you may not get pro features. Suppose CSS selectors from settings page and WPML/GTranslate will not work with this button.') : __('Save this player then configure proper voice and language from listening menu. ')
                                 }
-                            </p>
-                        </Col>
+                            </div>
+                        </Card.Body>
+                    </Card>
 
-                        <Col xs={12} sm={12} lg={11} className='mt-3'>
-                            <Form.Label htmlFor='tta_play_btn_shortcode'>
-                                Short Code | Attributes value must be wrapped with double quotation ( " ).
-                            </Form.Label>
+                    <Card className="border-0 shadow-sm mb-3">
+                        <Card.Body className="p-4">
+                            <h6 className="mb-3">Short Code | Attributes value must be wrapped with double quotation ( " )</h6>
                             <Form.Control
-                                type='text'
+                                as='textarea'
                                 name='tta_play_btn_shortcode'
                                 onChange={handleChange}
                                 value={shortCode}
                                 id='tta_play_btn_shortcode'
-                                title='Short code'
+                                rows={2}
+                                className="mb-3 tta_shortcode-textarea"
                             />
-                        </Col>
-                        <Col xs={12} sm={12} lg={1} className='mt-5'>
-                            <button
-                                onClick={(e) => copyToClipBoard('tta_play_btn_shortcode', true, "Copied ShortCode", toast)}>
-                                <img
-                                    src={tta_obj.image_url + '/copy.svg'}
-                                    width='15px'
-                                    alt='Copy short code to clipboard'
-                                />
-                            </button>
-                        </Col>
-                    </Row>
+                            <Button 
+                                variant="primary"
+                                size="sm"
+                                onClick={(e) => copyToClipBoard('tta_play_btn_shortcode', true, "Copied ShortCode", toast)}
+                            >
+                                <i className="fas fa-copy me-2"></i>
+                                Copy Shortcode
+                            </Button>
+                        </Card.Body>
+                    </Card>
+
+                    <CustomizationTabs 
+                        buttonLists={buttonLists} 
+                        customCSS={customCSS} 
+                        handleSubmit={handleSubmit}
+                        listeningBtnStyle={listeningBtnStyle} 
+                        handleChange={handleChange}
+                        listeningSettings={listeningSettings}
+                        activeTab={activeTab}
+                        
+                    />
                 </Col>
-                <Col xs={12} sm={12} lg={4}>
-                    <CustomizationTabs buttonLists={buttonLists} customCSS={customCSS} handleSubmit={handleSubmit}
-                        listeningBtnStyle={listeningBtnStyle} handleChange={handleChange}
-                        listeningSettings={listeningSettings} />
+
+                <Col xs={12} lg={4}>
+                    <UpgradeToPro promotionType={"youtube"} />
                 </Col>
             </Row>
         </Container>
