@@ -24,14 +24,14 @@ function CustomizationTabs({ buttonLists, listeningSettings, handleChange, handl
             )}
 
             <div className="d-grid mt-4">
-                <Button
+                <button
                     type='submit'
-                    variant="primary"
-                    size="lg"
+                    // variant="primary"
+                    // size="lg"
                     className='tta_btn'
                 >
                     Save All
-                </Button>
+                </button>
             </div>
         </Form>
     );

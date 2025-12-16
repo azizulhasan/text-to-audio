@@ -512,14 +512,15 @@ export default function Customize() {
                                 rows={2}
                                 className="mb-3 tta_shortcode-textarea"
                             />
-                            <Button 
-                                variant="primary"
+                            <button 
+                                // variant="primary"
                                 size="sm"
                                 onClick={(e) => copyToClipBoard('tta_play_btn_shortcode', true, "Copied ShortCode", toast)}
+                                className='tta_shortcode_btn'
                             >
                                 <i className="fas fa-copy me-2"></i>
                                 Copy Shortcode
-                            </Button>
+                            </button>
                         </Card.Body>
                     </Card>
 

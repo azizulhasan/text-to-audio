@@ -1173,6 +1173,25 @@ a:hover {
     color: #ff6b6b;
 }
 
+.tta_shortcode_btn{
+  display: inline-block;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  background-color: rgba(255, 120, 83, 1);
+  border: 1px solid transparent;
+  padding: 12px 32px;
+  font-size: 16px;
+  border-radius: 0.25rem;
+
+
+}
+
 /* Responsive */
 @media (max-width: 991px) {
     .tta_tab-selector-wrapper {
