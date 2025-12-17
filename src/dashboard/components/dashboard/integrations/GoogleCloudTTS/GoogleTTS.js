@@ -522,13 +522,13 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                 style={{zIndex: 1030, marginTop: "20px"}}
             >
                 <div className="text-center">
-                    <Button
-                        variant="primary"
+                    <button
+                        // variant="primary"
                         onClick={handleSubmit}
                         className="tta_btn rounded-3"
                     >
                         Save
-                    </Button>
+                    </button>
                 </div>
 
                 {window.hasOwnProperty("ttsObjPro") &&

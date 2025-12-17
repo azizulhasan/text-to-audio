@@ -433,52 +433,57 @@ export default function Customize() {
                             <span>Design Customization</span>
                         </div>
                     </div>
+                    
+                    <CustomizationTabs 
+                        buttonLists={buttonLists} 
+                        customCSS={customCSS} 
+                        handleSubmit={handleSubmit}
+                        listeningBtnStyle={listeningBtnStyle} 
+                        handleChange={handleChange}
+                        listeningSettings={listeningSettings}
+                        activeTab={activeTab}
+                    />
 
-                    <Card className="border-0 shadow-sm mb-3">
-                        <Card.Body className="p-4">
-                            <div className="d-flex align-items-center justify-content-between mb-3">
-                                <h5 className="mb-0">Player Customization</h5>
-                                <Button variant="link" className="text-danger p-0">
-                                    <i className="fas fa-cog"></i>
-                                </Button>
-                            </div>
-
-                            <div className="mb-3">
-                                <div className="d-flex align-items-center gap-2 mb-2">
-                                    <label className="mb-0 fw-semibold">Write here something and click listen button</label>
-                                    <Button variant="link" className="p-0 text-muted" size="sm">
-                                        <i className="fas fa-question-circle"></i>
-                                    </Button>
-                                    <Button variant="link" className="p-0 text-danger" size="sm">
-                                        <i className="fab fa-youtube"></i>
-                                    </Button>
+                    {/* Only show these sections on player tab */}
+                    {activeTab === 'player' && (
+                        <>
+                            <div className="bg-white rounded p-3 mb-3 shadow-sm">
+                                <div className="mb-3">
+                                    <div className="d-flex align-items-center gap-2 mb-2">
+                                        <label className="mb-0 fw-semibold">Write here something and click listen button</label>
+                                        <Button variant="link" className="p-0 text-muted" size="sm">
+                                            <i className="fas fa-question-circle"></i>
+                                        </Button>
+                                        <Button variant="link" className="p-0 text-danger" size="sm">
+                                            <i className="fab fa-youtube"></i>
+                                        </Button>
+                                    </div>
+                                    <Form.Control
+                                        as='textarea'
+                                        id='tta__demo_text_for_play'
+                                        onChange={(e) => setText(e)}
+                                        value={speakingText ? speakingText : ''}
+                                        placeholder='Write here something and click listen button.'
+                                        rows={3}
+                                        className="tta_custom-textarea"
+                                    />
                                 </div>
-                                <Form.Control
-                                    as='textarea'
-                                    id='tta__demo_text_for_play'
-                                    onChange={(e) => setText(e)}
-                                    value={speakingText ? speakingText : ''}
-                                    placeholder='Write here something and click listen button.'
-                                    rows={3}
-                                    className="tta_custom-textarea"
-                                />
-                            </div>
 
-                            <div className="d-grid mb-3">
-                                {listeningBtnStyle?.buttonSettings?.id == 2 ?
-                                    <TextToSpeech buttonCSS={listeningBtnStyle}
-                                        button={<div dataId="1" id="tts__listent_content_1"
-                                            className='tts__listent_content'></div>} buttonId={2} /> :
-                                    listeningBtnStyle?.buttonSettings?.id == 3 ?
-                                        <TextToSpeechThree buttonCSS={listeningBtnStyle}
+                                <div className="d-grid mb-0">
+                                    {listeningBtnStyle?.buttonSettings?.id == 2 ?
+                                        <TextToSpeech buttonCSS={listeningBtnStyle}
                                             button={<div dataId="1" id="tts__listent_content_1"
-                                                className='tts__listent_content'></div>}
-                                            buttonId={3} cssStyle={''} /> :
-                                        listeningBtnStyle?.buttonSettings?.id == 4 ?
-                                            <TextToSpeechFour buttonCSS={listeningBtnStyle}
+                                                className='tts__listent_content'></div>} buttonId={2} /> :
+                                        listeningBtnStyle?.buttonSettings?.id == 3 ?
+                                            <TextToSpeechThree buttonCSS={listeningBtnStyle}
                                                 button={<div dataId="1" id="tts__listent_content_1"
                                                     className='tts__listent_content'></div>}
-                                                buttonId={4} cssStyle={''} /> :
+                                                buttonId={3} cssStyle={''} /> :
+                                            listeningBtnStyle?.buttonSettings?.id == 4 ?
+                                                <TextToSpeechFour buttonCSS={listeningBtnStyle}
+                                                    button={<div dataId="1" id="tts__listent_content_1"
+                                                        className='tts__listent_content'></div>}
+                                                    buttonId={4} cssStyle={''} /> :
                                             listeningBtnStyle?.buttonSettings?.id == 5 ?
                                                 <TextToSpeechThree buttonCSS={listeningBtnStyle}
                                                     button={<div dataId="1" id="tts__listent_content_1"
@@ -495,45 +500,32 @@ export default function Customize() {
                                                         {tta_obj.buttonTextArr.listen_text}
                                                     </button>
                                                 )
-                                }
+                                    }
+                                </div>
                             </div>
-                        </Card.Body>
-                    </Card>
 
-                    <Card className="border-0 shadow-sm mb-3">
-                        <Card.Body className="p-4">
-                            <h6 className="mb-3">Short Code | Attributes value must be wrapped with double quotation ( " )</h6>
-                            <Form.Control
-                                as='textarea'
-                                name='tta_play_btn_shortcode'
-                                onChange={handleChange}
-                                value={shortCode}
-                                id='tta_play_btn_shortcode'
-                                rows={2}
-                                className="mb-3 tta_shortcode-textarea"
-                            />
-                            <button 
-                                // variant="primary"
-                                size="sm"
-                                onClick={(e) => copyToClipBoard('tta_play_btn_shortcode', true, "Copied ShortCode", toast)}
-                                className='tta_shortcode_btn'
-                            >
-                                <i className="fas fa-copy me-2"></i>
-                                Copy Shortcode
-                            </button>
-                        </Card.Body>
-                    </Card>
-
-                    <CustomizationTabs 
-                        buttonLists={buttonLists} 
-                        customCSS={customCSS} 
-                        handleSubmit={handleSubmit}
-                        listeningBtnStyle={listeningBtnStyle} 
-                        handleChange={handleChange}
-                        listeningSettings={listeningSettings}
-                        activeTab={activeTab}
-                        
-                    />
+                            <div className="bg-white rounded p-3 mb-3 shadow-sm">
+                                <h6 className="mb-3">Short Code | Attributes value must be wrapped with double quotation ( " )</h6>
+                                <Form.Control
+                                    as='textarea'
+                                    name='tta_play_btn_shortcode'
+                                    onChange={handleChange}
+                                    value={shortCode}
+                                    id='tta_play_btn_shortcode'
+                                    rows={2}
+                                    className="mb-3 tta_shortcode-textarea"
+                                />
+                                <button 
+                                    size="sm"
+                                    onClick={(e) => copyToClipBoard('tta_play_btn_shortcode', true, "Copied ShortCode", toast)}
+                                    className='tta_shortcode_btn'
+                                >
+                                    <i className="fas fa-copy me-2"></i>
+                                    Copy Shortcode
+                                </button>
+                            </div>
+                        </>
+                    )}
                 </Col>
 
                 <Col xs={12} lg={4}>
