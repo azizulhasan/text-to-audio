@@ -1673,3 +1673,157 @@ a:hover {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
   border-color: #ff8a80;
 }
+
+
+
+/* new css added on 19.12.25 */
+
+
+/* Listening Page Styles */
+
+/* Language Selector */
+.tta-language-selector {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.tta-language-selector:hover {
+  border-color: #4285f4;
+  background-color: #f8fbff;
+}
+
+.tta-flag-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tta-flag-icon img {
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Search Button */
+.tta-search-btn {
+  color: #ff6b4a;
+  text-decoration: none;
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.tta-search-btn:hover {
+  background-color: #fff5f3;
+  color: #ff5533;
+}
+
+.tta-search-btn i {
+  font-size: 1rem;
+}
+
+/* Language Mapping Row */
+.tta-language-mapping-row {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.tta-language-mapping-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* Language Code Box */
+.tta-language-code-box {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 0.375rem;
+  padding: 0.625rem 1rem;
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+}
+
+.tta-language-code {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+}
+
+/* Language Select Dropdown */
+.tta-language-select {
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.9rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  background-color: #fff;
+}
+
+.tta-language-select:focus {
+  border-color: #4285f4;
+  box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+  outline: 0;
+}
+
+.tta-language-select option {
+  padding: 0.5rem;
+}
+
+/* Responsive Adjustments for Language Mapping */
+@media (max-width: 767.98px) {
+  .tta-language-mapping-row .col-md-4 {
+    margin-bottom: 0.75rem;
+  }
+
+  .tta-language-mapping-row .col-md-4:last-child {
+    margin-bottom: 0;
+  }
+
+  .tta-search-btn {
+    width: 100%;
+    text-align: center;
+    margin-top: 0.75rem;
+  }
+
+  .tta-language-selector {
+    margin-bottom: 0.75rem;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .tta-language-code-box {
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* Check Circle Icon Color */
+.text-primary.bi-check-circle-fill {
+  color: #4285f4 !important;
+}
+
+/* Enhanced Select Styling */
+.tta-language-select:hover {
+  border-color: #adb5bd;
+}
+
+.tta-language-select:disabled {
+  background-color: #f8f9fa;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Flag Icon Responsive */
+@media (max-width: 575.98px) {
+  .tta-flag-icon img {
+    width: 28px;
+    height: 21px;
+  }
+}
+
+
