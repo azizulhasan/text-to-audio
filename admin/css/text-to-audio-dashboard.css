@@ -1827,3 +1827,564 @@ a:hover {
 }
 
 
+/* css added on 23.12.25 */
+
+/* ======================================
+   Listening Component Styles
+   ====================================== */
+
+/* Header Section */
+.tta_listening_header {
+  margin-bottom: 2rem;
+}
+
+.tta_listening_title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.tta_listening_subtitle {
+  font-size: 0.9375rem;
+  color: #6b7280;
+  margin-bottom: 0;
+}
+
+/* Preference Section */
+.tta_preference_section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  transition: box-shadow 0.2s ease;
+}
+
+.tta_preference_section:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Section Header */
+.tta_section_header {
+  margin-bottom: 1rem;
+}
+
+.tta_section_label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tta_pro_badge {
+  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  color: #ffffff;
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Language Selector */
+.tta_language_selector_wrapper {
+  position: relative;
+}
+
+.tta_language_display {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tta_language_display:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.tta_language_flag {
+  width: 24px;
+  height: 18px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tta_language_name {
+  flex: 1;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.tta_language_check_btn {
+  background: #10b981;
+  color: #ffffff;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 0.75rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.tta_language_check_btn:hover {
+  background: #059669;
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+/* Search Input */
+.tta_search_wrapper {
+  margin-bottom: 0.75rem;
+}
+
+.tta_search_icon {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+  color: #9ca3af;
+}
+
+.tta_search_input {
+  border: 1px solid #e5e7eb;
+  border-left: none;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.875rem;
+  padding: 0.625rem 0.875rem;
+}
+
+.tta_search_input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Language Dropdown */
+.tta_language_dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.tta_language_option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.tta_language_option:hover {
+  background: #f3f4f6;
+}
+
+.tta_no_results {
+  padding: 1rem;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+.tta_hidden_select {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  height: 0;
+}
+
+/* Info Message */
+.tta_info_message {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  color: #1e40af;
+  margin-top: 0.75rem;
+}
+
+.tta_info_message i {
+  margin-top: 0.125rem;
+  font-size: 1rem;
+}
+
+/* Form Elements */
+.tta_form_label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.625rem;
+  display: block;
+}
+
+.tta_form_select {
+  font-size: 0.875rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.tta_form_select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Audio Player */
+.tta_audio_player_wrapper {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.tta_audio_player {
+  width: 100%;
+  height: 40px;
+}
+
+/* Slider Section */
+.tta_slider_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.tta_slider_value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #3b82f6;
+  padding: 0.25rem 0.75rem;
+  background: #eff6ff;
+  border-radius: 9999px;
+}
+
+.tta_slider_wrapper {
+  position: relative;
+}
+
+.tta_slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #e5e7eb;
+  outline: none;
+  transition: background 0.2s ease;
+}
+
+.tta_slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.tta_slider::-webkit-slider-thumb:hover {
+  background: #2563eb;
+  transform: scale(1.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.tta_slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.tta_slider::-moz-range-thumb:hover {
+  background: #2563eb;
+  transform: scale(1.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.tta_slider_labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+}
+
+.tta_slider_label_start,
+.tta_slider_label_end {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+/* Pitch Buttons */
+.tta_pitch_buttons {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.625rem;
+}
+
+.tta_pitch_btn {
+  flex: 1;
+  position: relative;
+  padding: 0.75rem 1rem;
+  background: #ffffff;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tta_pitch_btn:hover {
+  border-color: #d1d5db;
+  background: #f9fafb;
+  color: #374151;
+}
+
+.tta_pitch_btn_active {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #1e40af;
+}
+
+.tta_pitch_check {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  color: #3b82f6;
+  font-size: 0.625rem;
+}
+
+/* Language Mapping Section */
+.tta_mapping_section {
+  margin-top: 2rem;
+}
+
+.tta_mapping_header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.tta_mapping_title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.tta_lock_icon {
+  color: #9ca3af;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.tta_lock_icon:hover {
+  color: #6b7280;
+}
+
+/* Language Mapping Card */
+.tta_language_mapping_card {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+}
+
+.tta_language_mapping_card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-color: #d1d5db;
+}
+
+.tta_mapping_row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.tta_mapping_col {
+  display: flex;
+  flex-direction: column;
+}
+
+.tta_mapping_label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.tta_mapping_input_wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.tta_mapping_flag {
+  width: 20px;
+  height: 15px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.tta_mapping_select {
+  flex: 1;
+  font-size: 0.875rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.tta_mapping_select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.tta_delete_mapping_btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: #fee2e2;
+  border: none;
+  border-radius: 6px;
+  color: #ef4444;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tta_delete_mapping_btn:hover {
+  background: #fecaca;
+  color: #dc2626;
+  transform: scale(1.05);
+}
+
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .tta_listening_title {
+    font-size: 1.5rem;
+  }
+
+  .tta_preference_section {
+    padding: 1.25rem;
+  }
+
+  .tta_mapping_row {
+    grid-template-columns: 1fr;
+  }
+
+  .tta_pitch_buttons {
+    flex-direction: column;
+  }
+
+  .tta_delete_mapping_btn {
+    position: static;
+    margin-top: 1rem;
+    width: 100%;
+  }
+}
+
+/* Animations */
+@keyframes tta_fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tta_language_dropdown {
+  animation: tta_fadeIn 0.2s ease;
+}
+
+.tta_language_mapping_card {
+  animation: tta_fadeIn 0.3s ease;
+}
+
+/* Focus States */
+.tta_form_select:focus,
+.tta_search_input:focus,
+.tta_mapping_select:focus {
+  outline: none;
+}
+
+/* Custom Scrollbar for Dropdown */
+.tta_language_dropdown::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tta_language_dropdown::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 4px;
+}
+
+.tta_language_dropdown::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.tta_language_dropdown::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}

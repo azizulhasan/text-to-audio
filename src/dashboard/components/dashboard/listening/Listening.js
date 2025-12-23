@@ -5,9 +5,11 @@ import {
   Row,
   Form,
   Button,
-  OverlayTrigger,
   Tooltip,
+  OverlayTrigger,
+  InputGroup,
 } from "react-bootstrap";
+
 import {
   postWithoutImage,
   getData,
@@ -28,6 +30,7 @@ export default function Listening() {
   const [languageMissingMessage, setLanguageMissingMessage] = useState("");
   const [currentPlayerFilteredVoices, setCurrentPlayerFilteredVoices] =
     useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [listeningSettings, setListeningSettings] = useState({
     tta__listening_voice: "Google UK English Female",
@@ -45,7 +48,6 @@ export default function Listening() {
   const [baseMP3File, setBaseMP3File] = useState(
     "https://cloud.google.com/text-to-speech/docs/audio/en-GB-Chirp-HD-F.wav"
   );
-
   const apiURL = useMemo(() => {
     if (window.hasOwnProperty("ttsObj") && ttsObj.is_pro_active) {
       return (
@@ -56,12 +58,17 @@ export default function Listening() {
         "/"
       );
     }
+
     return (
       ttsObj.api_url + ttsObj.api_namespace + "/" + ttsObj.api_version + "/"
     );
   });
 
   useEffect(() => {
+    console.log({
+      pro: ttsObj.is_pro_active,
+      id: customizationSettings?.buttonSettings?.id,
+    });
     if (
       window.hasOwnProperty("ttsObj") &&
       ttsObj.is_pro_active &&
@@ -87,11 +94,16 @@ export default function Listening() {
     if (window?.ttsObjPro?.compatible?.["gtranslate/gtranslate.php"]) {
       let gtranslateActiveLanguages =
         ttsObjPro?.compatible?.["gtranslate/gtranslate.php"]?.allowed_languages;
+      // Initialize an empty object
       const languageObject = {};
+
+      // Populate the object using a loop
       for (const langCode of gtranslateActiveLanguages) {
         languageObject[langCode] = langCode;
       }
+
       setMultilingualActiveLanguages(languageObject);
+
       setListeningSettings({
         ...listeningSettings,
         ...{ tta__listening_activeLanguages_mapping: languageObject },
@@ -104,13 +116,19 @@ export default function Listening() {
       let gtranslateActiveLanguages =
         ttsObjPro?.compatible?.["sitepress-multilingual-cms/sitepress.php"]
           ?.active_languages;
+
+      // Initialize an empty object
       const languageObject = {};
       let active_languages = Object.keys(gtranslateActiveLanguages);
+
+      // Populate the object using a loop
       for (const langCode of active_languages) {
         languageObject[langCode] =
           gtranslateActiveLanguages[langCode].english_name;
       }
+
       setMultilingualActiveLanguages(languageObject);
+
       setListeningSettings({
         ...listeningSettings,
         ...{ tta__listening_activeLanguages_mapping: languageObject },
@@ -120,11 +138,18 @@ export default function Listening() {
     ) {
       let activeLanguages =
         ttsObjPro?.compatible?.["translatepress-multilingual/index.php"]?.data;
+
+      // Initialize an empty object
       const languageObject = {};
+
+      // Populate the object using a loop
       for (const langCode of activeLanguages) {
         languageObject[langCode] = langCode;
       }
+
       setMultilingualActiveLanguages(languageObject);
+
+      console.log(languageObject);
       setListeningSettings({
         ...listeningSettings,
         ...{ tta__listening_activeLanguages_mapping: languageObject },
@@ -141,6 +166,7 @@ export default function Listening() {
     if (!stored_voices?.tta__voices) {
       getData(apiURL + "voices")
         .then((res) => {
+          console.log(res?.voices?.voices);
           if (res?.voices?.length) {
             setLocalStorage({ tta__voices: JSON.stringify(res.voices) });
           }
@@ -193,6 +219,9 @@ export default function Listening() {
       setVoicesAndLanguages();
     }
 
+    /**
+     * Set listening data.
+     */
     let data2 = new FormData();
     data2.append("method", "get");
     postWithoutImage(tta_obj.api_url + "tta/v1/listening", data2)
@@ -205,6 +234,9 @@ export default function Listening() {
         console.log(err);
       });
 
+    /**
+     * Get customize settings.
+     */
     let customize = new FormData();
     customize.append("method", "get");
     postWithoutImage(tta_obj.api_url + "tta/v1/customize", customize)
@@ -212,6 +244,7 @@ export default function Listening() {
         if (!res.data?.buttonSettings?.id) {
           res.data.buttonSettings.id = 1;
         }
+        console.log({ dta: res.data.buttonSettings.id });
         setCustomizationSettings(res.data);
         setIsListeningSettingsLoaded(true);
       })
@@ -224,6 +257,7 @@ export default function Listening() {
     if (customizationSettings?.buttonSettings?.id < 3) {
       setVoicesAndLanguages();
     }
+
     if (customizationSettings?.buttonSettings?.id == 5) {
       setGPTVoicesAndLanguages();
     }
@@ -238,6 +272,7 @@ export default function Listening() {
       nova: "nova",
       shimmer: "shimmer",
     };
+
     setCurrentPlayerVoices(Object.keys(names));
     setCurrentPlayerFilteredVoices(Object.keys(names));
     setSpeechSynthesisVoices(Object.keys(names));
@@ -268,6 +303,7 @@ export default function Listening() {
 
     let timer = setTimeout(function handleTime() {
       timer = setTimeout(handleTime, 1000);
+      console.log({ customizationSettings, timer });
 
       if (timer > 500 || customizationSettings?.buttonSettings == undefined) {
         clearTimeout(timer);
@@ -315,8 +351,14 @@ export default function Listening() {
     }
   }, [customizationSettings]);
 
+  /**
+   * Handle form Submit
+   */
   const handleSubmit = (e) => {
     e.preventDefault();
+    /**
+     * Get full form data and modify them for saving to database.
+     */
     let form = new FormData(e.target);
 
     let formData = {};
@@ -360,7 +402,7 @@ export default function Listening() {
       ...listeningSettings.tta__multilingualActiveLanguages,
       ...formData.tta__multilingualActiveLanguages,
     };
-
+    console.log(formData);
     let data = new FormData();
     data.append("fields", JSON.stringify(formData));
     data.append("method", "post");
@@ -375,7 +417,10 @@ export default function Listening() {
         console.log(err);
       });
   };
-
+  /**
+   * handle change
+   * @param {*} e
+   */
   const handleChange = (e, index = "", player_id = "") => {
     if (
       e.target.name === "tta__listening_lang" &&
@@ -390,6 +435,7 @@ export default function Listening() {
           ...{ ["tta__listening_voice"]: filteredVoices[0].languageCodes[0] },
         });
       }
+
       setCurrentPlayerFilteredVoices(filteredVoices);
     }
 
@@ -459,16 +505,73 @@ export default function Listening() {
     return activePluginName;
   };
 
+  const getLanguageFlag = (langCode) => {
+    // Map language codes to country codes for flags
+    const flagMap = {
+      en: "us",
+      "en-US": "us",
+      "en-GB": "gb",
+      fr: "fr",
+      "fr-FR": "fr",
+      "fr-CA": "ca",
+      de: "de",
+      "de-DE": "de",
+      es: "es",
+      "es-ES": "es",
+      it: "it",
+      "it-IT": "it",
+      pt: "pt",
+      "pt-PT": "pt",
+      "pt-BR": "br",
+      nl: "nl",
+      "nl-NL": "nl",
+      "nl-BE": "be",
+      ru: "ru",
+      "ru-RU": "ru",
+      "zh-CN": "cn",
+      "zh-TW": "tw",
+      ja: "jp",
+      "ja-JP": "jp",
+      ko: "kr",
+      "ko-KR": "kr",
+      ar: "sa",
+    };
+
+    const countryCode =
+      flagMap[langCode] || langCode.toLowerCase().split("-")[0];
+    return `https://flagcdn.com/24x18/${countryCode}.png`;
+  };
+
+  const getCurrentLanguageName = () => {
+    const currentLang = listeningSettings.tta__listening_lang;
+    return currentPlayerLanguages[currentLang] || currentLang;
+  };
+
+  const filteredLanguages = useMemo(() => {
+    if (!searchQuery) return currentPlayerLanguages;
+
+    const query = searchQuery.toLowerCase();
+    const filtered = {};
+
+    Object.keys(currentPlayerLanguages).forEach((langKey) => {
+      const langName = currentPlayerLanguages[langKey].toLowerCase();
+      const langCode = langKey.toLowerCase();
+
+      if (langName.includes(query) || langCode.includes(query)) {
+        filtered[langKey] = currentPlayerLanguages[langKey];
+      }
+    });
+
+    return filtered;
+  }, [currentPlayerLanguages, searchQuery]);
+
   return (
-    <Container fluid className="tta-container">
+    <Container>
       <Row>
-        <Col xs={12} lg={8}>
-          {/* Header Card */}
-          <div className="bg-white rounded p-3 mb-3 shadow-sm">
-            <h2 className="fs-3 fw-bold mb-2 text-dark">
-              Listening Preferences
-            </h2>
-            <p className="text-secondary m-0 small">
+        <Col xs={12} sm={12} lg={8}>
+          <div className="tta_listening_header">
+            <h2 className="tta_listening_title">Listening Preferences</h2>
+            <p className="tta_listening_subtitle">
               Set your listening preferences with different voices and
               languages.
             </p>
@@ -476,107 +579,418 @@ export default function Listening() {
 
           <Form onSubmit={handleSubmit}>
             {/* Default Voice Language Section */}
-            <div className="tta-card mb-3">
-              <h5 className="mb-3 fw-semibold">Default Voice Language</h5>
-              <Row className="align-items-center">
-                <Col xs={12} md={10}>
-                  <div className="tta-language-selector">
-                    <div className="d-flex align-items-center">
-                      <div className="tta-flag-icon me-3">
-                        <img
-                          src="https://flagcdn.com/w40/us.png"
-                          alt="English"
-                          width="32"
-                          height="24"
-                        />
-                      </div>
-                      <div className="flex-grow-1">
-                        <span className="fw-medium">English (US)</span>
-                        <i className="bi bi-check-circle-fill text-primary ms-2"></i>
-                      </div>
-                    </div>
-                  </div>
-                </Col>
-                <Col xs={12} md={2} className="text-end">
+            <div className="tta_preference_section">
+              <div className="tta_section_header">
+                <label className="tta_section_label">
+                  Default Voice Language
+                  {customizationSettings?.buttonSettings?.id == 4 && (
+                    <span className="tta_pro_badge">PRO</span>
+                  )}
+                </label>
+              </div>
+
+              <div className="tta_language_selector_wrapper">
+                <div className="tta_language_display">
+                  <img
+                    src={getLanguageFlag(listeningSettings.tta__listening_lang)}
+                    alt="flag"
+                    className="tta_language_flag"
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                    }}
+                  />
+                  <span className="tta_language_name">
+                    {getCurrentLanguageName()}
+                  </span>
                   <Button
                     variant="link"
-                    className="tta-search-btn"
-                    onClick={() =>
-                      document.getElementById("tta__listening_lang").focus()
-                    }
+                    className="tta_language_check_btn"
+                    onClick={() => setSearchQuery("")}
                   >
-                    <i className="bi bi-search"></i>
-                    Search here to change it
+                    ✓
                   </Button>
-                </Col>
-              </Row>
-              <Form.Select
-                onChange={handleChange}
-                name="tta__listening_lang"
-                id="tta__listening_lang"
-                value={listeningSettings.tta__listening_lang}
-                className="mt-3 d-none"
-              >
-                <option disabled>Default Listening Language</option>
-                {Object.keys(currentPlayerLanguages).map((langKey, index) => {
-                  return (
-                    <option
-                      key={langKey}
-                      value={
-                        customizationSettings?.buttonSettings?.id < 3
-                          ? currentPlayerLanguages[langKey]
-                          : langKey
-                      }
-                    >
-                      {currentPlayerLanguages[langKey]}
-                    </option>
-                  );
-                })}
-              </Form.Select>
+                </div>
+
+                <InputGroup className="tta_search_wrapper">
+                  <InputGroup.Text className="tta_search_icon">
+                    <i className="fas fa-search"></i>
+                  </InputGroup.Text>
+                  <Form.Control
+                    type="text"
+                    placeholder="Search here to change it"
+                    className="tta_search_input"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </InputGroup>
+
+                {searchQuery && (
+                  <div className="tta_language_dropdown">
+                    {Object.keys(filteredLanguages).length > 0 ? (
+                      Object.keys(filteredLanguages).map((langKey, index) => (
+                        <div
+                          key={index}
+                          className="tta_language_option"
+                          onClick={() => {
+                            handleChange({
+                              target: {
+                                name: "tta__listening_lang",
+                                value:
+                                  customizationSettings?.buttonSettings?.id < 3
+                                    ? filteredLanguages[langKey]
+                                    : langKey,
+                              },
+                            });
+                            setSearchQuery("");
+                          }}
+                        >
+                          <img
+                            src={getLanguageFlag(langKey)}
+                            alt="flag"
+                            className="tta_language_flag"
+                            onError={(e) => {
+                              e.target.style.display = "none";
+                            }}
+                          />
+                          <span>{filteredLanguages[langKey]}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="tta_no_results">No languages found</div>
+                    )}
+                  </div>
+                )}
+
+                <Form.Select
+                  onChange={handleChange}
+                  name="tta__listening_lang"
+                  id="tta__listening_lang"
+                  value={listeningSettings.tta__listening_lang}
+                  className="tta_hidden_select"
+                >
+                  <option disabled>Default Listening Language</option>
+                  {Object.keys(currentPlayerLanguages).map((langKey, index) => {
+                    return (
+                      <option
+                        key={langKey}
+                        value={
+                          customizationSettings?.buttonSettings?.id < 3
+                            ? currentPlayerLanguages[langKey]
+                            : langKey
+                        }
+                      >
+                        {currentPlayerLanguages[langKey]}
+                      </option>
+                    );
+                  })}
+                </Form.Select>
+              </div>
+
               {languageMissingMessage && (
-                <p className="text-primary small mt-2 mb-0">
-                  <i className="fas fa-info-circle me-2"></i>
+                <div className="tta_info_message">
+                  <i className="fas fa-info-circle"></i>
                   {languageMissingMessage}
-                </p>
+                </div>
               )}
             </div>
 
-            {/* Language Mapping Section - Multilingual */}
+            {/* Voice to Speak Section */}
+            {customizationSettings?.buttonSettings?.id != 3 && (
+              <div className="tta_preference_section">
+                <Form.Group>
+                  <Form.Label className="tta_form_label">
+                    Voice to speak
+                  </Form.Label>
+                  <Form.Select
+                    onChange={handleChange}
+                    name="tta__listening_voice"
+                    id="tta__listening_voice"
+                    value={listeningSettings.tta__listening_voice}
+                    className="tta_form_select"
+                  >
+                    <option disabled>Default Listening Voice</option>
+                    {currentPlayerFilteredVoices.map((voice, index) =>
+                      window.hasOwnProperty("ttsObjPro") &&
+                      customizationSettings?.buttonSettings?.id == 4 ? (
+                        <option
+                          key={index}
+                          data-lang={voice?.languageCodes?.[0]}
+                          value={[voice.name, voice.ssmlGender].join("-")}
+                        >
+                          {voice.name} {"-"} {voice.ssmlGender}
+                        </option>
+                      ) : customizationSettings?.buttonSettings?.id == 5 ? (
+                        <option key={index} data-lang={voice} value={voice}>
+                          {voice}
+                        </option>
+                      ) : (
+                        <option
+                          key={index}
+                          data-lang={voice.lang}
+                          value={voice.name}
+                        >
+                          {voice.name}
+                        </option>
+                      )
+                    )}
+                  </Form.Select>
+                </Form.Group>
+
+                {customizationSettings?.buttonSettings?.id > 3 && (
+                  <div className="tta_audio_player_wrapper">
+                    <audio
+                      id="tts_audio_tag"
+                      controls
+                      className="tta_audio_player"
+                    >
+                      <source
+                        id="tts_audio_wav"
+                        src={baseMP3File}
+                        type="audio/wav"
+                      />
+                      <source
+                        id="tts_audio_mp3"
+                        src={baseMP3File}
+                        type="audio/mpeg"
+                      />
+                      Your browser does not support the audio element.
+                    </audio>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Voice Model Section for ChatGPT */}
+            {customizationSettings?.buttonSettings?.id == 5 && (
+              <div className="tta_preference_section">
+                <Form.Group>
+                  <Form.Label className="tta_form_label">
+                    Voice Model
+                  </Form.Label>
+                  <Form.Select
+                    onChange={handleChange}
+                    name="tta__listening_voice_model"
+                    id="tta__listening_voice_model"
+                    value={listeningSettings.tta__listening_voice_model}
+                    className="tta_form_select"
+                  >
+                    <option disabled>Default Listening Model</option>
+                    <option value="tts-1">TTS-1</option>
+                    <option value="tts-1-hd">TTS-1 HD</option>
+                  </Form.Select>
+                </Form.Group>
+              </div>
+            )}
+
+            {/* Voice Speed Slider */}
+            {(customizationSettings?.buttonSettings?.id < 3 ||
+              customizationSettings?.buttonSettings?.id == 5) && (
+              <div className="tta_preference_section">
+                <Form.Group>
+                  <div className="tta_slider_header">
+                    <Form.Label className="tta_form_label">
+                      Voice Speed
+                    </Form.Label>
+                    <span className="tta_slider_value">
+                      {listeningSettings.tta__listening_rate}
+                    </span>
+                  </div>
+                  <div className="tta_slider_wrapper">
+                    <Form.Range
+                      min={
+                        customizationSettings?.buttonSettings?.id == 5
+                          ? "0.25"
+                          : "0.1"
+                      }
+                      max={
+                        customizationSettings?.buttonSettings?.id == 5
+                          ? "4.0"
+                          : "10"
+                      }
+                      step="0.1"
+                      name="tta__listening_rate"
+                      id="tta__listening_rate"
+                      onChange={handleChange}
+                      value={listeningSettings.tta__listening_rate}
+                      className="tta_slider"
+                    />
+                    <div className="tta_slider_labels">
+                      <span className="tta_slider_label_start">
+                        {customizationSettings?.buttonSettings?.id == 5
+                          ? "0.25"
+                          : "0.1"}
+                      </span>
+                      <span className="tta_slider_label_end">
+                        {customizationSettings?.buttonSettings?.id == 5
+                          ? "4.0"
+                          : "10.0"}
+                      </span>
+                    </div>
+                  </div>
+                </Form.Group>
+              </div>
+            )}
+
+            {/* Voice Volume and Pitch for Default Player */}
+            {customizationSettings?.buttonSettings?.id < 3 && (
+              <>
+                <div className="tta_preference_section">
+                  <Form.Group>
+                    <div className="tta_slider_header">
+                      <Form.Label className="tta_form_label">
+                        Voice Volume
+                      </Form.Label>
+                      <span className="tta_slider_value">
+                        {listeningSettings.tta__listening_volume}
+                      </span>
+                    </div>
+                    <div className="tta_slider_wrapper">
+                      <Form.Range
+                        min="0"
+                        max="1"
+                        step="0.1"
+                        name="tta__listening_volume"
+                        id="tta__listening_volume"
+                        onChange={handleChange}
+                        value={listeningSettings.tta__listening_volume}
+                        className="tta_slider"
+                      />
+                      <div className="tta_slider_labels">
+                        <span className="tta_slider_label_start">0</span>
+                        <span className="tta_slider_label_end">1.0</span>
+                      </div>
+                    </div>
+                  </Form.Group>
+                </div>
+
+                <div className="tta_preference_section">
+                  <Form.Group>
+                    <Form.Label className="tta_form_label">
+                      Voice Pitch
+                    </Form.Label>
+                    <div className="tta_pitch_buttons">
+                      {["Lower", "Normal", "Higher"].map((label, idx) => (
+                        <Button
+                          key={idx}
+                          type="button"
+                          className={`tta_pitch_btn ${
+                            listeningSettings.tta__listening_pitch == idx
+                              ? "tta_pitch_btn_active"
+                              : ""
+                          }`}
+                          onClick={() =>
+                            handleChange({
+                              target: {
+                                name: "tta__listening_pitch",
+                                value: idx,
+                              },
+                            })
+                          }
+                        >
+                          {label}
+                          {listeningSettings.tta__listening_pitch == idx && (
+                            <span className="tta_pitch_check">
+                              <i className="fas fa-circle"></i>
+                            </span>
+                          )}
+                        </Button>
+                      ))}
+                    </div>
+                    <Form.Select
+                      onChange={handleChange}
+                      name="tta__listening_pitch"
+                      id="tta__listening_pitch"
+                      value={listeningSettings.tta__listening_pitch}
+                      className="tta_hidden_select"
+                    >
+                      <option disabled>Default Listening Pitch</option>
+                      {[0, 1, 2].map((pitch, index) => {
+                        return (
+                          <option key={index} value={pitch}>
+                            {pitch}
+                          </option>
+                        );
+                      })}
+                    </Form.Select>
+                  </Form.Group>
+                </div>
+              </>
+            )}
+
+            {/* Language Mapping Section */}
             {Object.keys(multilingualActiveLanguages).length > 0 && (
-              <div className="tta-card mb-3">
-                <div className="d-flex align-items-center justify-content-between mb-3">
-                  <h5 className="mb-0 fw-semibold">
+              <div className="tta_mapping_section">
+                <div className="tta_mapping_header">
+                  <h3 className="tta_mapping_title">
                     {getActiveMultingualPluginName()} Plugin Language Mapping
-                  </h5>
+                  </h3>
                   {!ttsObj.is_pro_active && (
                     <OverlayTrigger
                       placement="top"
                       overlay={
                         <Tooltip>
-                          Language mapping for WPML, GTranalate plugin is
+                          Language mapping for WPML, GTranslate plugin is
                           available in the pro version.
                         </Tooltip>
                       }
                     >
-                      <Button className="m-0 p-0 text-dark bg-light border-0">
+                      <span className="tta_lock_icon">
                         <i className="fas fa-lock" />
-                      </Button>
+                      </span>
                     </OverlayTrigger>
                   )}
                 </div>
 
                 {Object.keys(multilingualActiveLanguages).map(
                   (languageCode, index) => (
-                    <div key={index} className="tta-language-mapping-row">
-                      <Row className="align-items-center mb-3">
-                        <Col xs={12} md={4}>
-                          <div className="tta-language-code-box">
-                            <span className="tta-language-code">
-                              {languageCode}
-                            </span>
-                          </div>
-                        </Col>
-                        <Col xs={12} md={4}>
+                    <div key={index} className="tta_language_mapping_card">
+                      <div className="tta_mapping_row">
+                        <div className="tta_mapping_col">
+                          <Form.Group>
+                            <Form.Label className="tta_mapping_label">
+                              {multilingualActiveLanguages[languageCode]}
+                            </Form.Label>
+                            <div className="tta_mapping_input_wrapper">
+                              <img
+                                src={getLanguageFlag(languageCode)}
+                                alt="flag"
+                                className="tta_mapping_flag"
+                                onError={(e) => {
+                                  e.target.style.display = "none";
+                                }}
+                              />
+                              <Form.Select
+                                onChange={handleChange}
+                                name={"tta__multilingualActiveLanguages"}
+                                id={
+                                  "tta__multilingualActiveLanguages_index_" +
+                                  index
+                                }
+                                value={languageCode}
+                                className="tta_mapping_select"
+                              >
+                                <option disabled>
+                                  Default Listening Language
+                                </option>
+                                {Object.keys(multilingualActiveLanguages).map(
+                                  (langCode, idx) => {
+                                    return (
+                                      <option key={idx} value={langCode}>
+                                        {multilingualActiveLanguages[langCode]}
+                                      </option>
+                                    );
+                                  }
+                                )}
+                              </Form.Select>
+                            </div>
+                          </Form.Group>
+                        </div>
+
+                        <div className="tta_mapping_col">
+                          <Form.Label className="tta_mapping_label">
+                            Select Language For{" "}
+                            {multilingualActiveLanguages[languageCode]}
+                          </Form.Label>
                           <Form.Select
                             onChange={(e) =>
                               handleChange(
@@ -585,7 +999,8 @@ export default function Listening() {
                                 customizationSettings?.buttonSettings?.id
                               )
                             }
-                            name="tta__currentPlayerLanguages"
+                            name={"tta__currentPlayerLanguages"}
+                            id={"tta__currentPlayerLanguages_index_" + index}
                             value={
                               listeningSettings?.tta__currentPlayerLanguages?.[
                                 customizationSettings?.buttonSettings?.id
@@ -604,12 +1019,9 @@ export default function Listening() {
                                 }
                               )[0]
                             }
-                            className="tta-language-select"
+                            className="tta_mapping_select"
                           >
-                            <option disabled>
-                              Select Language for{" "}
-                              {multilingualActiveLanguages[languageCode]}
-                            </option>
+                            <option disabled>Default Listening Language</option>
                             {Object.keys(currentPlayerLanguages).map(
                               (langKey, idx) => {
                                 return (
@@ -628,10 +1040,15 @@ export default function Listening() {
                               }
                             )}
                           </Form.Select>
-                        </Col>
+                        </div>
+
                         {customizationSettings?.buttonSettings?.id != 3 &&
-                          Object.keys(currentPlayerLanguages).length > 0 && (
-                            <Col xs={12} md={4}>
+                          Object.keys(currentPlayerLanguages).length && (
+                            <div className="tta_mapping_col">
+                              <Form.Label className="tta_mapping_label">
+                                Select Voice For{" "}
+                                {multilingualActiveLanguages[languageCode]}
+                              </Form.Label>
                               <Form.Select
                                 onChange={(e) =>
                                   handleChange(
@@ -640,7 +1057,11 @@ export default function Listening() {
                                     customizationSettings?.buttonSettings?.id
                                   )
                                 }
-                                name="tta__available_currentPlayerVoices"
+                                name={"tta__available_currentPlayerVoices"}
+                                id={
+                                  "tta__available_currentPlayerVoices_index_" +
+                                  index
+                                }
                                 value={
                                   customizationSettings?.buttonSettings?.id == 5
                                     ? listeningSettings.tta__listening_voice
@@ -665,149 +1086,60 @@ export default function Listening() {
                                         }
                                       )[0]?.name)
                                 }
-                                className="tta-language-select"
+                                className="tta_mapping_select"
                               >
-                                <option disabled>Select Voice</option>
+                                <option disabled>Current Player Voice</option>
                                 {currentPlayerVoices.map((voice, idx) =>
                                   window.hasOwnProperty("ttsObjPro") &&
                                   customizationSettings?.buttonSettings?.id ==
                                     4 ? (
                                     <option
                                       key={idx}
+                                      data-lang={voice?.languageCodes?.[0]}
                                       value={[
                                         voice.name,
                                         voice.ssmlGender,
                                       ].join("-")}
                                     >
-                                      {voice.name} - {voice.ssmlGender}
+                                      {voice.name} {"-"} {voice.ssmlGender}
                                     </option>
                                   ) : (
-                                    <option key={idx} value={voice.name}>
+                                    <option
+                                      key={idx}
+                                      data-lang={voice.lang}
+                                      value={voice.name}
+                                    >
                                       {voice?.name || voice}
                                     </option>
                                   )
                                 )}
                               </Form.Select>
-                            </Col>
+                            </div>
                           )}
-                      </Row>
+                      </div>
+
+                      <Button variant="link" className="tta_delete_mapping_btn">
+                        <i className="fas fa-times"></i>
+                      </Button>
                     </div>
                   )
                 )}
               </div>
             )}
 
-            {/* Voice Settings (Hidden but functional) */}
-            <div className="d-none">
-              {customizationSettings?.buttonSettings?.id != 3 && (
-                <Form.Select
-                  onChange={handleChange}
-                  name="tta__listening_voice"
-                  id="tta__listening_voice"
-                  value={listeningSettings.tta__listening_voice}
-                >
-                  <option disabled>Default Listening Voice</option>
-                  {currentPlayerFilteredVoices.map((voice, index) =>
-                    window.hasOwnProperty("ttsObjPro") &&
-                    customizationSettings?.buttonSettings?.id == 4 ? (
-                      <option
-                        key={index}
-                        value={[voice.name, voice.ssmlGender].join("-")}
-                      >
-                        {voice.name} - {voice.ssmlGender}
-                      </option>
-                    ) : customizationSettings?.buttonSettings?.id == 5 ? (
-                      <option key={index} value={voice}>
-                        {voice}
-                      </option>
-                    ) : (
-                      <option key={index} value={voice.name}>
-                        {voice.name}
-                      </option>
-                    )
-                  )}
-                </Form.Select>
-              )}
-
-              {customizationSettings?.buttonSettings?.id == 5 && (
-                <Form.Select
-                  onChange={handleChange}
-                  name="tta__listening_voice_model"
-                  value={listeningSettings.tta__listening_voice_model}
-                >
-                  <option disabled>Default Listening Model</option>
-                  <option value="tts-1">TTS-1</option>
-                  <option value="tts-1-hd">TTS-1 HD</option>
-                </Form.Select>
-              )}
-
-              {(customizationSettings?.buttonSettings?.id < 3 ||
-                customizationSettings?.buttonSettings?.id == 5) && (
-                <Form.Control
-                  type="text"
-                  name="tta__listening_rate"
-                  onChange={handleChange}
-                  value={listeningSettings.tta__listening_rate}
-                />
-              )}
-
-              {customizationSettings?.buttonSettings?.id < 3 && (
-                <>
-                  <Form.Select
-                    onChange={handleChange}
-                    name="tta__listening_pitch"
-                    value={listeningSettings.tta__listening_pitch}
-                  >
-                    <option disabled>Default Listening Pitch</option>
-                    {[0, 1, 2].map((pitch, index) => {
-                      return (
-                        <option key={index} value={pitch}>
-                          {pitch}
-                        </option>
-                      );
-                    })}
-                  </Form.Select>
-                  <Form.Control
-                    type="text"
-                    name="tta__listening_volume"
-                    onChange={handleChange}
-                    value={listeningSettings.tta__listening_volume}
-                  />
-                </>
-              )}
-
-              {customizationSettings?.buttonSettings?.id > 3 && (
-                <audio id="tts_audio_tag" controls>
-                  <source
-                    id="tts_audio_wav"
-                    src={baseMP3File}
-                    type="audio/wav"
-                  />
-                  <source
-                    id="tts_audio_mp3"
-                    src={baseMP3File}
-                    type="audio/mpeg"
-                  />
-                  Your browser does not support the audio element.
-                </audio>
-              )}
-            </div>
-
-            {/* Save Button */}
             <div
               className="position-sticky bottom-0"
               style={{ zIndex: 1030, marginTop: "20px" }}
             >
-              <div className="text-center mt-4">
-                <button type="submit" className="tta_btn rounded-3">
+              <div className="">
+                <Button type="submit" className="tta_btn">
                   Save
-                </button>
+                </Button>
               </div>
             </div>
           </Form>
         </Col>
-
-        <Col xs={12} lg={4}>
+        <Col xs={12} sm={12} lg={4}>
           <UpgradeToPro />
         </Col>
       </Row>
