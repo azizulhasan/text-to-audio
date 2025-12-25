@@ -11,7 +11,7 @@ import {
 import {postData} from "../../../context/utilities";
 import toast from "../../../context/Notify";
 
-export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, setAuthenticatedServices}) {
+export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, setAuthenticatedServices, setGoogleTTSChecked}) {
     const [googTTSJsonFile, setGoogTTSJsonFile] = useState("");
     const [authFile, setAuthFile] = useState("");
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -19,6 +19,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
     const [bucketName, setBucketName] = useState("");
     const [isValidBucketName, setIsValidBucketName] = useState(false);
     const [storedBucketName, setStoredBucketName] = useState("");
+    const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
     const apiURL = useMemo(() => {
         return (
@@ -156,6 +157,12 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                     if (res?.bucket_name) {
                         setBucketName(res?.bucket_name || "");
                     }
+                    // Add to authenticated services and set as active
+                    setAuthenticatedServices(prev => {
+                        if (prev.includes('google_cloud_tts')) return prev;
+                        return [...prev, 'google_cloud_tts'];
+                    });
+                    setCurrentTTSServic('google_cloud_tts');
                 } else {
                     if (res?.bcmath) {
                         toast(bcmathNotice(), "error", {
@@ -181,12 +188,16 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                         setIsBackUpToGCS(res?.tts_is_backup_mp3_file || false);
                     }
                     if (res?.is_authenticated) {
-                        setCurrentTTSServic('google_cloud_tts')
+                        // Add to authenticated services
                         setAuthenticatedServices(prev => {
                             if (prev.includes('google_cloud_tts')) return prev;
-
-                            return [...prev, 'google_cloud_tts']; // add item
+                            return [...prev, 'google_cloud_tts'];
                         })
+                        
+                        // Only set as active on FIRST load, not subsequent re-renders
+                        if (!hasLoadedOnce && res?.currentTTSServic === 'google_cloud_tts') {
+                            setCurrentTTSServic('google_cloud_tts');
+                        }
                     }
                     getShouldCheckChatGPT(true);
 
@@ -194,10 +205,27 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                         setBucketName(res?.bucket_name || "");
                         setStoredBucketName(res?.bucket_name);
                     }
+                    
+                    // Signal that Google TTS check is complete
+                    if (setGoogleTTSChecked) {
+                        setGoogleTTSChecked(true);
+                    }
+                    setHasLoadedOnce(true);
                 })
                 .catch((err) => {
                     console.log(err);
+                    // Signal completion even on error
+                    if (setGoogleTTSChecked) {
+                        setGoogleTTSChecked(true);
+                    }
+                    setHasLoadedOnce(true);
                 });
+        } else {
+            // Not pro active, signal completion
+            if (setGoogleTTSChecked) {
+                setGoogleTTSChecked(true);
+            }
+            setHasLoadedOnce(true);
         }
     }, []);
 
@@ -247,6 +275,11 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                 if (res) {
                     toast("Authentication removed.");
                     setIsAuthenticated(false);
+                    // Remove from authenticated services
+                    setAuthenticatedServices(prev => 
+                        prev.filter(service => service !== 'google_cloud_tts')
+                    );
+                    setCurrentTTSServic("");
                 } else {
                     toast("Something went wrong");
                 }
@@ -521,27 +554,25 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                 className="position-sticky bottom-0"
                 style={{zIndex: 1030, marginTop: "20px"}}
             >
-                <div className="text-center">
+                <div className="d-flex justify-content-center gap-2">
                     <button
-                        // variant="primary"
                         onClick={handleSubmit}
                         className="tta_btn rounded-3"
                     >
                         Save
                     </button>
+                    {window.hasOwnProperty("ttsObjPro") &&
+                        ttsObjPro.is_pro_license_active &&
+                        isAuthenticated && (
+                            <Button
+                                variant="outline-danger"
+                                onClick={revokeAccessToken}
+                                className="rounded-3"
+                            >
+                                Remove Authentication
+                            </Button>
+                        )}
                 </div>
-
-                {window.hasOwnProperty("ttsObjPro") &&
-                    ttsObjPro.is_pro_license_active &&
-                    isAuthenticated && (
-                        <Button
-                            variant="outline-danger"
-                            onClick={revokeAccessToken}
-                            className="ms-2 rounded-3"
-                        >
-                            Remove Authentication
-                        </Button>
-                    )}
             </div>
         </>
     );

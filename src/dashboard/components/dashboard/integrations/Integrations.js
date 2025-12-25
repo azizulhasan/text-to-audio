@@ -8,6 +8,9 @@ import UpgradeToPro from "../../UpgradeToPro";
 export default function Integrations() {
   const [currentTTSServic, setCurrentTTSServic] = useState(""); // Empty by default
   const [authenticatedServices, setAuthenticatedServices] = useState([]);
+  const [googleTTSChecked, setGoogleTTSChecked] = useState(false);
+  const [chatGPTChecked, setChatGPTChecked] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   const apiURL = useMemo(() => {
     return (
@@ -21,8 +24,8 @@ export default function Integrations() {
   }, [window]);
 
   useEffect(() => {
-    console.log({authenticatedServices})
-  }, [authenticatedServices])
+    console.log({authenticatedServices, currentTTSServic})
+  }, [authenticatedServices, currentTTSServic])
 
   const [chatGPTAPIData, setChatGPTAPIData] = useState({
     chatgpt_tts_api_key: "",
@@ -30,6 +33,7 @@ export default function Integrations() {
   });
 
   const [shouldCheckChatGPT, setShouldCheckChatGPT] = useState(false);
+  const [chatGPTHasLoadedOnce, setChatGPTHasLoadedOnce] = useState(false);
 
   // Handle service selection - toggle behavior
   const handleServiceSelect = (service) => {
@@ -50,6 +54,26 @@ export default function Integrations() {
     setShouldCheckChatGPT(val);
   };
 
+  // Effect to set active service after both checks are complete - ONLY ON INITIAL LOAD
+  useEffect(() => {
+    if (googleTTSChecked && chatGPTChecked && !initialLoadComplete) {
+      // Both services have been checked, now determine which one should be active
+      // Priority: If both are authenticated, use the one from backend's currentTTSServic
+      // If only one is authenticated, use that one
+      // If neither is authenticated, keep empty
+      
+      if (authenticatedServices.length === 0) {
+        setCurrentTTSServic("");
+      } else if (authenticatedServices.length === 1) {
+        // Only one service is authenticated, make it active
+        setCurrentTTSServic(authenticatedServices[0]);
+      }
+      // If both are authenticated, the backend's currentTTSServic has already been set
+      
+      setInitialLoadComplete(true);
+    }
+  }, [googleTTSChecked, chatGPTChecked, authenticatedServices, initialLoadComplete]);
+
   useEffect(() => {
     if (
       (ttsObj.is_pro_active && currentTTSServic === "chat_gpt_tts") ||
@@ -64,15 +88,27 @@ export default function Integrations() {
             res.data?.currentTTSServic === "chat_gpt_tts" &&
             res?.data?.chatgpt_tts_api_key
           ) {
-            getCurrentTTSService(res.data.currentTTSServic);
+            // Only set as active on FIRST load, not subsequent re-renders
+            if (!chatGPTHasLoadedOnce) {
+              setCurrentTTSServic('chat_gpt_tts');
+            }
             setAuthenticatedServices(prev => {
               if (prev.includes('chat_gpt_tts')) return prev;
               return [...prev, 'chat_gpt_tts'];
             })
+          } else {
+            // ChatGPT is not authenticated or not active, remove from authenticated services
+            setAuthenticatedServices(prev => 
+              prev.filter(service => service !== 'chat_gpt_tts')
+            );
           }
+          setChatGPTChecked(true);
+          setChatGPTHasLoadedOnce(true);
         })
         .catch((err) => {
           console.log(err);
+          setChatGPTChecked(true);
+          setChatGPTHasLoadedOnce(true);
         });
     }
   }, [currentTTSServic, shouldCheckChatGPT]);
@@ -92,102 +128,102 @@ export default function Integrations() {
           </div>
 
           {/* TTS Service Selection Card */}
-{/* TTS Service Selection Card */}
-<div className="tta-card mb-3">
-  <h5 className="mb-3 fw-semibold">Select Text To Speech Service</h5>
-  <Row>
-    <Col xs={12} md={6} className="mb-3 mb-md-0">
-      <div
-        className={`tts-service-card google-tts ${currentTTSServic === 'google_cloud_tts' ? 'active' : ''}`}
-        onClick={() => handleServiceSelect('google_cloud_tts')}
-      >
-        <div className="d-flex align-items-start">
-          <div className="service-icon me-3">
-            <img
-              src="https://www.vectorlogo.zone/logos/google_cloud/google_cloud-icon.svg"
-              alt="Google Cloud"
-              width="32"
-              height="32"
-            />
+          <div className="tta-card mb-3">
+            <h5 className="mb-3 fw-semibold">Select Text To Speech Service</h5>
+            <Row>
+              <Col xs={12} md={6} className="mb-3 mb-md-0">
+                <div
+                  className={`tts-service-card google-tts ${currentTTSServic === 'google_cloud_tts' ? 'active' : ''}`}
+                  onClick={() => handleServiceSelect('google_cloud_tts')}
+                >
+                  <div className="d-flex align-items-start">
+                    <div className="service-icon me-3">
+                      <img
+                        src="https://www.vectorlogo.zone/logos/google_cloud/google_cloud-icon.svg"
+                        alt="Google Cloud"
+                        width="32"
+                        height="32"
+                      />
+                    </div>
+                    <div className="flex-grow-1">
+                      <div className="d-flex align-items-center justify-content-between">
+                        <h6 className="mb-1">Google Cloud TTS</h6>
+                        {/* Checkbox only appears when authenticated */}
+                        {authenticatedServices.includes('google_cloud_tts') && (
+                          <Form.Check
+                            type="checkbox"
+                            checked={currentTTSServic === 'google_cloud_tts'}
+                            onChange={() => {}}
+                            className="service-checkbox"
+                          />
+                        )}
+                      </div>
+                      <p className="mb-0 text-muted small">
+                        Google Cloud Text-to-Speech converts text into
+                        natural-sounding speech using Google's AI voices.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Col>
+              <Col xs={12} md={6}>
+                <div
+                  className={`tts-service-card chatgpt-tts ${currentTTSServic === 'chat_gpt_tts' ? 'active' : ''}`}
+                  onClick={() => handleServiceSelect('chat_gpt_tts')}
+                >
+                  <div className="d-flex align-items-start">
+                    <div className="service-icon me-3">
+                      <img
+                        src="https://upload.wikimedia.org/wikipedia/commons/6/66/OpenAI_logo_2025_%28symbol%29.svg"
+                        alt="ChatGPT"
+                        width="32"
+                        height="32"
+                      />
+                    </div>
+                    <div className="flex-grow-1">
+                      <div className="d-flex align-items-center justify-content-between">
+                        <h6 className="mb-1">ChatGPT TTS</h6>
+                        {/* Checkbox only appears when authenticated */}
+                        {authenticatedServices.includes('chat_gpt_tts') && (
+                          <Form.Check
+                            type="checkbox"
+                            checked={currentTTSServic === 'chat_gpt_tts'}
+                            onChange={() => {}}
+                            className="service-checkbox"
+                          />
+                        )}
+                      </div>
+                      <p className="mb-0 text-muted small">
+                        ChatGPT TTS converts written text into realistic,
+                        human-like voice using OpenAI's advanced speech
+                        technology.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Col>
+            </Row>
           </div>
-          <div className="flex-grow-1">
-            <div className="d-flex align-items-center justify-content-between">
-              <h6 className="mb-1">Google Cloud TTS</h6>
-              {/* Checkbox only appears when authenticated */}
-              {authenticatedServices.includes('google_cloud_tts') && (
-                <Form.Check
-                  type="checkbox"
-                  checked={true}
-                  onChange={() => {}}
-                  className="service-checkbox"
-                />
-              )}
-            </div>
-            <p className="mb-0 text-muted small">
-              Google Cloud Text-to-Speech converts text into
-              natural-sounding speech using Google's AI voices.
-            </p>
-          </div>
-        </div>
-      </div>
-    </Col>
-    <Col xs={12} md={6}>
-      <div
-        className={`tts-service-card chatgpt-tts ${currentTTSServic === 'chat_gpt_tts' ? 'active' : ''}`}
-        onClick={() => handleServiceSelect('chat_gpt_tts')}
-      >
-        <div className="d-flex align-items-start">
-          <div className="service-icon me-3">
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/6/66/OpenAI_logo_2025_%28symbol%29.svg"
-              alt="ChatGPT"
-              width="32"
-              height="32"
-            />
-          </div>
-          <div className="flex-grow-1">
-            <div className="d-flex align-items-center justify-content-between">
-              <h6 className="mb-1">ChatGPT TTS</h6>
-              {/* Checkbox only appears when authenticated */}
-              {authenticatedServices.includes('chat_gpt_tts') && (
-                <Form.Check
-                  type="checkbox"
-                  checked={true}
-                  onChange={() => {}}
-                  className="service-checkbox"
-                />
-              )}
-            </div>
-            <p className="mb-0 text-muted small">
-              ChatGPT TTS converts written text into realistic,
-              human-like voice using OpenAI's advanced speech
-              technology.
-            </p>
-          </div>
-        </div>
-      </div>
-    </Col>
-  </Row>
-</div>
 
           {/* Show Google TTS component when selected */}
-          {currentTTSServic === "google_cloud_tts" && (
+          <div style={{display: currentTTSServic === "google_cloud_tts" ? 'block' : 'none'}}>
             <GoogleTTS
               setCurrentTTSServic={setCurrentTTSServic}
               getShouldCheckChatGPT={getShouldCheckChatGPT}
               setAuthenticatedServices={setAuthenticatedServices}
+              setGoogleTTSChecked={setGoogleTTSChecked}
             />
-          )}
+          </div>
 
           {/* Show ChatGPT TTS component when selected */}
-          {currentTTSServic === "chat_gpt_tts" && (
+          <div style={{display: currentTTSServic === "chat_gpt_tts" ? 'block' : 'none'}}>
             <ChatGPTTTS
               setChatGPTAPIData={setChatGPTAPIData}
               chatGPTAPIData={chatGPTAPIData}
               currentTTSServic={currentTTSServic}
               setAuthenticatedServices={setAuthenticatedServices}
             />
-          )}
+          </div>
         </Col>
 
         <Col xs={12} lg={4}>
