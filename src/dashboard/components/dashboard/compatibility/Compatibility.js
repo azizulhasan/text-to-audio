@@ -119,7 +119,7 @@ export default function Compatibility() {
                                         overlay={<Tooltip id={`tooltip-${placement}`}>
                                             {__('Adding more than 1  ACF field is a pro feature')}
                                         </Tooltip>}>
-                                        <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
+                                        <Button className="m-0 p-0 text-dark bg-light border-0"><i
                                             className="fas fa-lock"/></Button>
                                     </OverlayTrigger>))}
                                 </>)}

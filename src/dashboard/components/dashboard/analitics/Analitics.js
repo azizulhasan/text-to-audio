@@ -303,7 +303,7 @@ export default function Analitics() {
                                         overlay={<Tooltip id={`tooltip-${placement}`}>
                                             {__('Tracking more than 5 post IDs is a pro feature')}
                                         </Tooltip>}>
-                                        <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
+                                        <Button className="m-0 p-0 text-dark bg-light border-0"><i
                                             className="fas fa-lock"/></Button>
                                     </OverlayTrigger>))}
                                 </>)}
@@ -381,7 +381,7 @@ export default function Analitics() {
                                     <button
                                         type="button"
                                         onClick={handleSearch}
-                                        className="tta_btn "
+                                        className="tta_search_btn"
                                     >
                                         Search
                                     </button>
