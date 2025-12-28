@@ -137,7 +137,7 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
                                                 Start Generating MP3 file from an specific post publish date. Select this only if you want to generate mp3 file based on date range.
                                             </Tooltip>
                                         }>
-                                        <Button className='tta_btn'>?</Button>
+                                        <Button className='tta_question_btn'>?</Button>
                                     </OverlayTrigger>
                                 ))}
                             </>
@@ -165,7 +165,7 @@ export default function TTSCustomizationButton({ listeningBtnStyle, handleChange
                                                 Start Generating MP3 file till an specific post publish date. Select this only if you want to generate mp3 file based on date range.
                                             </Tooltip>
                                         }>
-                                        <Button className='tta_btn'>?</Button>
+                                        <Button className='tta_question_btn'>?</Button>
                                     </OverlayTrigger>
                                 ))}
                             </>

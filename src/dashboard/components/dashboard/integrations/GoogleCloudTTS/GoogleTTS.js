@@ -345,7 +345,7 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
                                                     <Button onClick={(e) => {
                                                         e.preventDefault();
                                                         window.open('https://atlasaidev.com/docs/text-to-speech/usage-setup/how-to-enable-automatic-backup-to-google-cloud-storage-for-text-to-speech-pro-plugin/', '_blank')
-                                                    }} className='tta_btn'>?</Button>
+                                                    }} className='tta_question_btn'>?</Button>
                                                 </OverlayTrigger>
                                             ))}
                                         </>
@@ -405,8 +405,8 @@ export default function GoogleTTS({ getShouldCheckChatGPT, currentTTSServic }) {
                                     </Row>
                                 </Col>
                             }
-                            <div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
-                                <button type='submit' className='tta_btn btn-center'>
+                            <div className='mx-auto mt-5 mb-4'>
+                                <button type='submit' className='tta_btn'>
                                     Save
                                 </button>
                             </div>
