@@ -1676,7 +1676,7 @@ a:hover {
 
 
 
-/* new css added on 19.12.25 */
+/* new css added on 19.12.25  */
 
 
 /* Listening Page Styles */
@@ -1828,12 +1828,13 @@ a:hover {
 
 
 /* css added on 23.12.25 */
+/* and */
+/* css added on 29.12.25 */
 
 /* ======================================
    Listening Component Styles
    ====================================== */
 
-/* Header Section */
 .tta_listening_header {
   margin-bottom: 2rem;
 }
@@ -1850,6 +1851,306 @@ a:hover {
   color: #6b7280;
   margin-bottom: 0;
 }
+
+/* ======================================
+   NEW LAYOUT - Default & Default Pro Players
+   ====================================== */
+
+/* Voice Cards - Side by Side */
+.tta_voice_card {
+  background: #ffffff;
+  /* border: 2px solid #FF7853; */
+  border-radius: 12px;
+  padding: 1.5rem;
+  height: 100%;
+}
+
+.tta_voice_card_title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 1rem;
+}
+
+.tta_voice_select_wrapper {
+  position: relative;
+}
+
+.tta_voice_flag {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 18px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.tta_orange_voice_select,
+.tta_orange_speak_select {
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 3rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M15.375 0H4.125C1.465 0 0 1.465 0 4.125V15.375C0 18.035 1.465 19.5 4.125 19.5H15.375C18.035 19.5 19.5 18.035 19.5 15.375V4.125C19.5 1.465 18.035 0 15.375 0ZM18 15.375C18 17.215 17.215 18 15.375 18H4.125C2.285 18 1.5 17.215 1.5 15.375V4.125C1.5 2.285 2.285 1.5 4.125 1.5H15.375C17.215 1.5 18 2.285 18 4.125V15.375ZM13.28 8.21997C13.573 8.51297 13.573 8.98801 13.28 9.28101L10.28 12.281C10.134 12.427 9.942 12.501 9.75 12.501C9.558 12.501 9.36597 12.428 9.21997 12.281L6.21997 9.28101C5.92697 8.98801 5.92697 8.51297 6.21997 8.21997C6.51297 7.92697 6.98801 7.92697 7.28101 8.21997L9.75098 10.6899L12.2209 8.21997C12.5129 7.92697 12.987 7.92697 13.28 8.21997Z' fill='%23FF7853'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 20px;
+}
+
+.tta_orange_speak_select {
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+}
+
+.tta_orange_voice_select:focus,
+.tta_orange_speak_select:focus {
+  border-color: #FF7853;
+  box-shadow: 0 0 0 3px rgba(255, 120, 83, 0.1);
+  outline: none;
+}
+
+.tta_orange_voice_select:hover,
+.tta_orange_speak_select:hover {
+  border-color: #FF8555;
+}
+
+/* Sliders Card - Combined Speed and Volume with NEW DESIGN */
+.tta_sliders_card {
+  background: #ffffff;
+  /* border: 2px solid #FF7853; */
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.tta_slider_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.tta_slider_label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 0;
+}
+
+.tta_slider_value {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #ffffff;
+  padding: 0.375rem 0.875rem;
+  background: #FF7853;
+  border-radius: 6px;
+  min-width: 50px;
+  text-align: center;
+}
+
+/* NEW SLIDER DESIGN - with tick marks */
+.tta_slider_container {
+  position: relative;
+  margin-bottom: 0.75rem;
+}
+
+.tta_new_slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  position: relative;
+  z-index: 2;
+}
+
+.tta_new_slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  background: #1C87FF;
+  border-radius: 3px;
+}
+
+.tta_new_slider::-moz-range-track {
+  width: 100%;
+  height: 6px;
+  background: #1C87FF;
+  border-radius: 3px;
+}
+
+.tta_new_slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #FF7853;
+  cursor: pointer;
+  margin-top: -9px;
+  box-shadow: 0 2px 6px rgba(255, 120, 83, 0.4);
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 3;
+}
+
+.tta_new_slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 3px 10px rgba(255, 120, 83, 0.6);
+}
+
+.tta_new_slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #FF7853;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 6px rgba(255, 120, 83, 0.4);
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 3;
+}
+
+.tta_new_slider::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 3px 10px rgba(255, 120, 83, 0.6);
+}
+
+/* Tick marks container */
+.tta_slider_ticks {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.tta_slider_tick {
+  width: 2px;
+  height: 16px;
+  background: #015FC9;
+  border-radius: 1px;
+}
+
+/* Slider labels */
+.tta_slider_labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+  padding: 0 2px;
+}
+
+/* Pitch Card */
+.tta_pitch_card {
+  background: #ffffff;
+  /* border: 2px solid #FF7853; */
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.tta_pitch_label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.tta_pitch_buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.tta_pitch_btn {
+  position: relative;
+  padding: 0.875rem 1rem;
+  background: #ffffff;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.tta_pitch_btn:hover {
+  border-color: #FF7853;
+  background: #FFF5F2;
+  color: #000000;
+}
+
+.tta_pitch_btn_active {
+  background: #ffffff;
+  border-color: #FF7853;
+  color: #000000;
+}
+
+.tta_pitch_check {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #3b82f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tta_pitch_check i {
+  color: #ffffff;
+  font-size: 6px;
+}
+
+/* Hidden select */
+.tta_hidden_select {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .tta_pitch_buttons {
+    grid-template-columns: 1fr;
+  }
+  
+  .tta_slider_labels {
+    font-size: 0.75rem;
+  }
+  
+  .tta_slider_labels span:nth-child(even) {
+    display: none;
+  }
+}
+
+/* ======================================
+   ORIGINAL LAYOUT - For Other Players
+   ====================================== */
 
 /* Preference Section */
 .tta_preference_section {
@@ -2075,156 +2376,6 @@ a:hover {
   height: 40px;
 }
 
-/* Slider Section */
-.tta_slider_header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.tta_slider_value {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #3b82f6;
-  padding: 0.25rem 0.75rem;
-  background: #eff6ff;
-  border-radius: 9999px;
-}
-
-.tta_slider_wrapper {
-  position: relative;
-}
-
-.tta_slider {
-  width: 100%;
-  height: 6px;
-  border-radius: 3px;
-  background: #e5e7eb;
-  outline: none;
-  transition: background 0.2s ease;
-}
-
-.tta_slider::-webkit-slider-thumb {
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #3b82f6;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-}
-
-.tta_slider::-webkit-slider-thumb:hover {
-  background: #2563eb;
-  transform: scale(1.1);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
-}
-
-.tta_slider::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #3b82f6;
-  cursor: pointer;
-  border: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-}
-
-.tta_slider::-moz-range-thumb:hover {
-  background: #2563eb;
-  transform: scale(1.1);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
-}
-
-.tta_slider_labels {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 0.5rem;
-}
-
-.tta_slider_label_start,
-.tta_slider_label_end {
-  font-size: 0.75rem;
-  color: #9ca3af;
-}
-
-/* Pitch Buttons */
-.tta_pitch_buttons {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 0.625rem;
-}
-
-.tta_pitch_btn {
-  flex: 1;
-  position: relative;
-  padding: 0.75rem 1rem;
-  background: #ffffff;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #6b7280;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.tta_pitch_btn:hover {
-  border-color: #d1d5db;
-  background: #f9fafb;
-  color: #374151;
-}
-
-.tta_pitch_btn_active {
-  background: #eff6ff;
-  border-color: #3b82f6;
-  color: #1e40af;
-}
-
-.tta_pitch_check {
-  position: absolute;
-  top: 50%;
-  right: 0.75rem;
-  transform: translateY(-50%);
-  color: #3b82f6;
-  font-size: 0.625rem;
-}
-
-/* Language Mapping Section */
-.tta_mapping_section {
-  margin-top: 2rem;
-}
-
-.tta_mapping_header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #e5e7eb;
-}
-
-.tta_mapping_title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin: 0;
-}
-
-.tta_lock_icon {
-  color: #9ca3af;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.tta_lock_icon:hover {
-  color: #6b7280;
-}
-
 /* Language Mapping Card */
 .tta_language_mapping_card {
   position: relative;
@@ -2276,7 +2427,7 @@ a:hover {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.tta_mapping_select {
+/* .tta_mapping_select {
   flex: 1;
   font-size: 0.875rem;
   padding: 0.625rem 0.875rem;
@@ -2289,9 +2440,9 @@ a:hover {
 .tta_mapping_select:focus {
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
+} */
 
-.tta_delete_mapping_btn {
+/* .tta_delete_mapping_btn {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
@@ -2314,9 +2465,68 @@ a:hover {
   background: #fecaca;
   color: #dc2626;
   transform: scale(1.05);
+} */
+
+/* Orange styling for select dropdowns in language mapping */
+/* 
+.tta_orange_select_wrapper {
+  position: relative;
+} */
+
+.tta_orange_voice_select {
+  padding: 10px 35px 10px 40px !important;
+  font-size: 14px !important;
+  transition: all 0.3s ease !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M15.375 0H4.125C1.465 0 0 1.465 0 4.125V15.375C0 18.035 1.465 19.5 4.125 19.5H15.375C18.035 19.5 19.5 18.035 19.5 15.375V4.125C19.5 1.465 18.035 0 15.375 0ZM18 15.375C18 17.215 17.215 18 15.375 18H4.125C2.285 18 1.5 17.215 1.5 15.375V4.125C1.5 2.285 2.285 1.5 4.125 1.5H15.375C17.215 1.5 18 2.285 18 4.125V15.375ZM13.28 8.21997C13.573 8.51297 13.573 8.98801 13.28 9.28101L10.28 12.281C10.134 12.427 9.942 12.501 9.75 12.501C9.558 12.501 9.36597 12.428 9.21997 12.281L6.21997 9.28101C5.92697 8.98801 5.92697 8.51297 6.21997 8.21997C6.51297 7.92697 6.98801 7.92697 7.28101 8.21997L9.75098 10.6899L12.2209 8.21997C12.5129 7.92697 12.987 7.92697 13.28 8.21997Z' fill='%23FF7853'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
 }
 
 
+.tta_orange_select {
+  padding: 10px 35px 10px 12px !important;
+  font-size: 12px !important;
+  transition: all 0.3s ease !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M15.375 0H4.125C1.465 0 0 1.465 0 4.125V15.375C0 18.035 1.465 19.5 4.125 19.5H15.375C18.035 19.5 19.5 18.035 19.5 15.375V4.125C19.5 1.465 18.035 0 15.375 0ZM18 15.375C18 17.215 17.215 18 15.375 18H4.125C2.285 18 1.5 17.215 1.5 15.375V4.125C1.5 2.285 2.285 1.5 4.125 1.5H15.375C17.215 1.5 18 2.285 18 4.125V15.375ZM13.28 8.21997C13.573 8.51297 13.573 8.98801 13.28 9.28101L10.28 12.281C10.134 12.427 9.942 12.501 9.75 12.501C9.558 12.501 9.36597 12.428 9.21997 12.281L6.21997 9.28101C5.92697 8.98801 5.92697 8.51297 6.21997 8.21997C6.51297 7.92697 6.98801 7.92697 7.28101 8.21997L9.75098 10.6899L12.2209 8.21997C12.5129 7.92697 12.987 7.92697 13.28 8.21997Z' fill='%23FF7853'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+}
+
+.tta_orange_speak_select{
+  padding: 10px 35px 10px 12px !important;
+  font-size: 12px !important;
+  transition: all 0.3s ease !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M15.375 0H4.125C1.465 0 0 1.465 0 4.125V15.375C0 18.035 1.465 19.5 4.125 19.5H15.375C18.035 19.5 19.5 18.035 19.5 15.375V4.125C19.5 1.465 18.035 0 15.375 0ZM18 15.375C18 17.215 17.215 18 15.375 18H4.125C2.285 18 1.5 17.215 1.5 15.375V4.125C1.5 2.285 2.285 1.5 4.125 1.5H15.375C17.215 1.5 18 2.285 18 4.125V15.375ZM13.28 8.21997C13.573 8.51297 13.573 8.98801 13.28 9.28101L10.28 12.281C10.134 12.427 9.942 12.501 9.75 12.501C9.558 12.501 9.36597 12.428 9.21997 12.281L6.21997 9.28101C5.92697 8.98801 5.92697 8.51297 6.21997 8.21997C6.51297 7.92697 6.98801 7.92697 7.28101 8.21997L9.75098 10.6899L12.2209 8.21997C12.5129 7.92697 12.987 7.92697 13.28 8.21997Z' fill='%23FF7853'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+
+
+}
+/* .tta_orange_select:hover {
+  border-color: #ff8555 !important;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1) !important;
+}
+
+.tta_orange_select:focus {
+  border-color: #ff6b35 !important;
+  box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.2) !important;
+  outline: none !important;
+} */
+
+/* Optional: Style the dropdown arrow container */
+/* .tta_orange_select_wrapper::after {
+  content: '';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #ff6b35;
+} */
 
 /* Responsive Design */
 @media (max-width: 768px) {

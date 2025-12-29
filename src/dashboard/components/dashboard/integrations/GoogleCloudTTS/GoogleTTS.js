@@ -550,10 +550,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
             </div>
 
             {/* Action Buttons */}
-            <div
-                className="position-sticky bottom-0"
-                style={{zIndex: 1030, marginTop: "20px"}}
-            >
+
                 <div className="d-flex justify-content-center gap-2">
                     <button
                         onClick={handleSubmit}
@@ -573,7 +570,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                             </Button>
                         )}
                 </div>
-            </div>
+
         </>
     );
 }
