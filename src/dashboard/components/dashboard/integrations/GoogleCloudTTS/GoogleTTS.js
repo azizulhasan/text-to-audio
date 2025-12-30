@@ -156,6 +156,12 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                     if (res?.bucket_name) {
                         setBucketName(res?.bucket_name || "");
                     }
+                    
+                    // Update authenticated services
+                    setAuthenticatedServices(prev => {
+                        if (prev.includes('google_cloud_tts')) return prev;
+                        return [...prev, 'google_cloud_tts'];
+                    });
                 } else {
                     if (res?.bcmath) {
                         toast(bcmathNotice(), "error", {
@@ -181,11 +187,11 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                         setIsBackUpToGCS(res?.tts_is_backup_mp3_file || false);
                     }
                     if (res?.is_authenticated) {
-                        setCurrentTTSServic('google_cloud_tts')
+                        // Don't override parent's service selection
+                        // Parent will handle setting the active service
                         setAuthenticatedServices(prev => {
                             if (prev.includes('google_cloud_tts')) return prev;
-
-                            return [...prev, 'google_cloud_tts']; // add item
+                            return [...prev, 'google_cloud_tts'];
                         })
                     }
                     getShouldCheckChatGPT(true);
@@ -247,6 +253,10 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                 if (res) {
                     toast("Authentication removed.");
                     setIsAuthenticated(false);
+                    // Remove from authenticated services
+                    setAuthenticatedServices(prev => 
+                        prev.filter(service => service !== 'google_cloud_tts')
+                    );
                 } else {
                     toast("Something went wrong");
                 }

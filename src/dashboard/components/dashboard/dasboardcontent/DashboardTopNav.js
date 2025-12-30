@@ -58,12 +58,12 @@ export default function DashboardTopNav() {
             target="_blank"
             className="btn d-flex align-items-center gap-2 tta-tab-style"
 
-            onMouseOver={(e) =>
-              (e.currentTarget.style.background = "rgba(255,255,255,0.15)")
-            }
-            onMouseOut={(e) =>
-              (e.currentTarget.style.background = "rgba(255,255,255,0.1)")
-            }
+            // onMouseOver={(e) =>
+            //   (e.currentTarget.style.background = "rgba(255,255,255,0.15)")
+            // }
+            // onMouseOut={(e) =>
+            //   (e.currentTarget.style.background = "rgba(255,255,255,0.1)")
+            // }
           >
             <span>
               <svg
@@ -185,12 +185,12 @@ export default function DashboardTopNav() {
               target="_blank"
               className="btn d-flex align-items-center gap-2 tta-tab-style"
 
-              onMouseOver={(e) =>
-                (e.currentTarget.style.background = "rgba(255,255,255,0.15)")
-              }
-              onMouseOut={(e) =>
-                (e.currentTarget.style.background = "rgba(255,255,255,0.1)")
-              }
+              // onMouseOver={(e) =>
+              //   (e.currentTarget.style.background = "rgba(255,255,255,0.15)")
+              // }
+              // onMouseOut={(e) =>
+              //   (e.currentTarget.style.background = "rgba(255,255,255,0.1)")
+              // }
             >
               <span>
                 <svg
@@ -256,12 +256,12 @@ export default function DashboardTopNav() {
             target="_blank"
             className="btn d-flex align-items-center gap-2 tta-tab-style"
 
-            onMouseOver={(e) =>
-              (e.currentTarget.style.background = "rgba(255,255,255,0.15)")
-            }
-            onMouseOut={(e) =>
-              (e.currentTarget.style.background = "rgba(255,255,255,0.1)")
-            }
+            // onMouseOver={(e) =>
+            //   (e.currentTarget.style.background = "rgba(255,255,255,0.15)")
+            // }
+            // onMouseOut={(e) =>
+            //   (e.currentTarget.style.background = "rgba(255,255,255,0.1)")
+            // }
           >
             <span>
               <svg

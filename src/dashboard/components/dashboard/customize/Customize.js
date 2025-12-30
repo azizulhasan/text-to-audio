@@ -20,6 +20,7 @@ import TextToSpeech from "../../../buttons/components/TextToSpeech";
 import TextToSpeechThree from "../../../buttons/components/TextToSpeechThree";
 import TextToSpeechFour from "../../../buttons/components/TextToSpeechFour";
 import CustomizationTabs from "./CustomizationTabs";
+import TTSButtonDesign from "./design/TTSButtonDesign";
 import UpgradeToPro from "../../UpgradeToPro";
 
 let speech = null;
@@ -78,7 +79,6 @@ export default function Customize() {
   const [isGCAuthenticated, setGCIsAuthenticated] = useState(false);
   const [isBackUpToGCS, setIsBackUpToGCS] = useState(false);
   const [isChatGPTAuthenticated, setIsChatGPTAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState("player");
 
   const setDefaultButtonSettingsIfNeeded = (res) => {
     if (!res.data?.buttonSettings) {
@@ -581,196 +581,201 @@ export default function Customize() {
             </p>
           </div>
 
-          <div className="tta_tab-selector-wrapper mb-3">
-            <div
-              className={`tta_tab-option ${activeTab === "player" ? "tta_tab-option-active" : ""}`}
-              onClick={() => setActiveTab("player")}
-            >
-              <span className="tta_tab-radio"></span>
-              <span>Player Customization</span>
-            </div>
-            <div
-              className={`tta_tab-option ${activeTab === "design" ? "tta_tab-option-active" : ""}`}
-              onClick={() => setActiveTab("design")}
-            >
-              <span className="tta_tab-radio"></span>
-              <span>Design Customization</span>
-            </div>
-          </div>
+          {/* Single Form Wrapper for Everything */}
+          <Form onSubmit={handleSubmit}>
+            {/* Player Customization Accordion */}
+            <CustomizationTabs
+              buttonLists={buttonLists}
+              customCSS={customCSS}
+              listeningBtnStyle={listeningBtnStyle}
+              handleChange={handleChange}
+              listeningSettings={listeningSettings}
+            />
 
-          <CustomizationTabs
-            buttonLists={buttonLists}
-            customCSS={customCSS}
-            handleSubmit={handleSubmit}
-            listeningBtnStyle={listeningBtnStyle}
-            handleChange={handleChange}
-            listeningSettings={listeningSettings}
-            activeTab={activeTab}
-          />
+            {/* Demo Text Area Section */}
+            <div className="bg-white rounded p-3 mb-3 shadow-sm">
+              <div className="mb-3">
+                <div className="d-flex align-items-center gap-2 mb-2">
+                  <label className="mb-0 fw-semibold">
+                    Write here something and click listen button
+                  </label>
 
-          {/* Only show these sections on player tab */}
-          {activeTab === "player" && (
-            <>
-              <div className="bg-white rounded p-3 mb-3 shadow-sm">
-                <div className="mb-3">
-                  <div className="d-flex align-items-center gap-2 mb-2">
-                    <label className="mb-0 fw-semibold">
-                      Write here something and click listen button
-                    </label>
-
-                    {/* Question Icon with Tooltip */}
-                    <OverlayTrigger
-                      placement="top"
-                      overlay={
-                        <Tooltip id="tooltip-help">
-                          Enter your text here and click the listen button to
-                          hear it spoken aloud.
-                        </Tooltip>
-                      }
+                  {/* Question Icon with Tooltip */}
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={
+                      <Tooltip id="tooltip-help">
+                        Enter your text here and click the listen button to
+                        hear it spoken aloud.
+                      </Tooltip>
+                    }
+                  >
+                    <Button
+                      variant="link"
+                      className="p-0 text-muted"
+                      size="sm"
                     >
-                      <Button
-                        variant="link"
-                        className="p-0 text-muted"
-                        size="sm"
-                      >
-                        <i className="fas fa-question-circle"></i>
-                      </Button>
-                    </OverlayTrigger>
+                      <i className="fas fa-question-circle"></i>
+                    </Button>
+                  </OverlayTrigger>
 
-                    {/* YouTube Icon with Link */}
-                    <OverlayTrigger
-                      placement="top"
-                      overlay={
-                        <Tooltip id="tooltip-help">
-                          Click To Know How It Works?
-                        </Tooltip>
-                      }
+                  {/* YouTube Icon with Link */}
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={
+                      <Tooltip id="tooltip-help">
+                        Click To Know How It Works?
+                      </Tooltip>
+                    }
+                  >
+                    <Button
+                      variant="link"
+                      className="p-0 text-danger"
+                      size="sm"
+                      as="a"
+                      href="https://www.youtube.com/watch?v=h4VJxM-mh74&t=936s"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Watch Tutorial"
                     >
-                      <Button
-                        variant="link"
-                        className="p-0 text-danger"
-                        size="sm"
-                        as="a"
-                        href="https://www.youtube.com/watch?v=h4VJxM-mh74&t=936s"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title="Watch Tutorial"
-                      >
-                        <i className="fab fa-youtube"></i>
-                      </Button>
-                    </OverlayTrigger>
-                  </div>
-                  <Form.Control
-                    as="textarea"
-                    id="tta__demo_text_for_play"
-                    onChange={(e) => setText(e)}
-                    value={speakingText ? speakingText : ""}
-                    placeholder="Write here something and click listen button."
-                    rows={3}
-                    className="tta_custom-textarea"
-                  />
+                      <i className="fab fa-youtube"></i>
+                    </Button>
+                  </OverlayTrigger>
                 </div>
-
-                <div className="d-grid mb-0">
-                  {listeningBtnStyle?.buttonSettings?.id == 2 ? (
-                    <TextToSpeech
-                      buttonCSS={listeningBtnStyle}
-                      button={
-                        <div
-                          dataId="1"
-                          id="tts__listent_content_1"
-                          className="tts__listent_content"
-                        ></div>
-                      }
-                      buttonId={2}
-                    />
-                  ) : listeningBtnStyle?.buttonSettings?.id == 3 ? (
-                    <TextToSpeechThree
-                      buttonCSS={listeningBtnStyle}
-                      button={
-                        <div
-                          dataId="1"
-                          id="tts__listent_content_1"
-                          className="tts__listent_content"
-                        ></div>
-                      }
-                      buttonId={3}
-                      cssStyle={""}
-                    />
-                  ) : listeningBtnStyle?.buttonSettings?.id == 4 ? (
-                    <TextToSpeechFour
-                      buttonCSS={listeningBtnStyle}
-                      button={
-                        <div
-                          dataId="1"
-                          id="tts__listent_content_1"
-                          className="tts__listent_content"
-                        ></div>
-                      }
-                      buttonId={4}
-                      cssStyle={""}
-                    />
-                  ) : listeningBtnStyle?.buttonSettings?.id == 5 ? (
-                    <TextToSpeechThree
-                      buttonCSS={listeningBtnStyle}
-                      button={
-                        <div
-                          dataId="1"
-                          id="tts__listent_content_1"
-                          className="tts__listent_content"
-                        ></div>
-                      }
-                      buttonId={5}
-                      cssStyle={""}
-                    />
-                  ) : (
-                    <button
-                      id="tta__listen_content"
-                      onClick={(e) => callListeningFunction(e)}
-                      style={listeningBtnStyle2}
-                      type="button"
-                      className="tta_listen-button"
-                      title="Text To Audio:  Tap to listen post."
-                    >
-                      <i className="fas fa-play-circle me-2"></i>
-                      {tta_obj.buttonTextArr.listen_text}
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-white rounded p-3 mb-3 shadow-sm">
-                <h6 className="mb-3">
-                  Short Code | Attributes value must be wrapped with double
-                  quotation ( " )
-                </h6>
                 <Form.Control
                   as="textarea"
-                  name="tta_play_btn_shortcode"
-                  onChange={handleChange}
-                  value={shortCode}
-                  id="tta_play_btn_shortcode"
-                  rows={2}
-                  className="mb-3 tta_shortcode-textarea"
+                  id="tta__demo_text_for_play"
+                  onChange={(e) => setText(e)}
+                  value={speakingText ? speakingText : ""}
+                  placeholder="Write here something and click listen button."
+                  rows={3}
+                  className="tta_custom-textarea"
                 />
-                <button
-                  size="sm"
-                  onClick={(e) =>
-                    copyToClipBoard(
-                      "tta_play_btn_shortcode",
-                      true,
-                      "Copied ShortCode",
-                      toast
-                    )
-                  }
-                  className="tta_shortcode_btn"
-                >
-                  <i className="fas fa-copy me-2"></i>
-                  Copy Shortcode
+              </div>
+
+              <div className="d-grid mb-0">
+                {listeningBtnStyle?.buttonSettings?.id == 2 ? (
+                  <TextToSpeech
+                    buttonCSS={listeningBtnStyle}
+                    button={
+                      <div
+                        dataId="1"
+                        id="tts__listent_content_1"
+                        className="tts__listent_content"
+                      ></div>
+                    }
+                    buttonId={2}
+                  />
+                ) : listeningBtnStyle?.buttonSettings?.id == 3 ? (
+                  <TextToSpeechThree
+                    buttonCSS={listeningBtnStyle}
+                    button={
+                      <div
+                        dataId="1"
+                        id="tts__listent_content_1"
+                        className="tts__listent_content"
+                      ></div>
+                    }
+                    buttonId={3}
+                    cssStyle={""}
+                  />
+                ) : listeningBtnStyle?.buttonSettings?.id == 4 ? (
+                  <TextToSpeechFour
+                    buttonCSS={listeningBtnStyle}
+                    button={
+                      <div
+                        dataId="1"
+                        id="tts__listent_content_1"
+                        className="tts__listent_content"
+                      ></div>
+                    }
+                    buttonId={4}
+                    cssStyle={""}
+                  />
+                ) : listeningBtnStyle?.buttonSettings?.id == 5 ? (
+                  <TextToSpeechThree
+                    buttonCSS={listeningBtnStyle}
+                    button={
+                      <div
+                        dataId="1"
+                        id="tts__listent_content_1"
+                        className="tts__listent_content"
+                      ></div>
+                    }
+                    buttonId={5}
+                    cssStyle={""}
+                  />
+                ) : (
+                  <button
+                    id="tta__listen_content"
+                    onClick={(e) => callListeningFunction(e)}
+                    style={listeningBtnStyle2}
+                    type="button"
+                    className="tta_listen-button"
+                    title="Text To Audio:  Tap to listen post."
+                  >
+                    <i className="fas fa-play-circle me-2"></i>
+                    {tta_obj.buttonTextArr.listen_text}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Design Customization Section */}
+            <div className="bg-white rounded p-3 mb-3 shadow-sm">
+              <h5 className="mb-3 fw-semibold">Design Customization</h5>
+              <TTSButtonDesign
+                customCSS={customCSS}
+                listeningBtnStyle={listeningBtnStyle}
+                handleChange={handleChange}
+              />
+            </div>
+
+            {/* Shortcode Section */}
+            <div className="bg-white rounded p-3 mb-3 shadow-sm">
+              <h6 className="mb-3">
+                Short Code | Attributes value must be wrapped with double
+                quotation ( " )
+              </h6>
+              <Form.Control
+                as="textarea"
+                name="tta_play_btn_shortcode"
+                onChange={handleChange}
+                value={shortCode}
+                id="tta_play_btn_shortcode"
+                rows={2}
+                className="mb-3 tta_shortcode-textarea"
+              />
+              <button
+                type="button"
+                size="sm"
+                onClick={(e) =>
+                  copyToClipBoard(
+                    "tta_play_btn_shortcode",
+                    true,
+                    "Copied ShortCode",
+                    toast
+                  )
+                }
+                className="tta_shortcode_btn"
+              >
+                <i className="fas fa-copy me-2"></i>
+                Copy Shortcode
+              </button>
+            </div>
+
+            {/* Save Button - Sticky at Bottom */}
+            <div
+              className="position-sticky bottom-0"
+              style={{ zIndex: 1030, marginTop: "20px" }}
+            >
+              <div className="d-grid">
+                <button type="submit" className="btn tta_btn">
+                  Save
                 </button>
               </div>
-            </>
-          )}
+            </div>
+          </Form>
         </Col>
 
         <Col xs={12} lg={4}>

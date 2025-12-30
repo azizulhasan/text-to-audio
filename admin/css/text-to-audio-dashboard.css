@@ -119,9 +119,9 @@ My Custom css
 }
 
 /* Hover effect (optional but looks good) */
-.top-nav-item:hover {
+/* .top-nav-item:hover {
   background: rgba(255, 255, 255, 0.1);
-}
+} */
 
 .tta-custom-accordion .accordion-button::after {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='white'%3E%3Cpath fill-rule='evenodd' d='M1.5 5.5l6 6 6-6'/%3E%3C/svg%3E");
@@ -435,6 +435,10 @@ My Custom css
   text-decoration: none;
   transition: all 0.2s;
   border-right: 1px solid rgba(255, 255, 255, 0.3);
+}
+.tta-tab-style:hover {
+  background-color:  rgba(111, 214, 202, 0.42);
+  color: white;
 }
 
 .tta-loading-spinner {
