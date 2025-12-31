@@ -557,6 +557,7 @@ My Custom css
   line-height: 1.5;
 }
 
+/* Service Checkbox Base Styles */
 .tts-service-card .service-checkbox {
   pointer-events: none;
 }
@@ -584,31 +585,27 @@ My Custom css
   position: relative;
 }
 
-.tts-service-card
-  .service-checkbox
-  .form-check-input:checked[type="checkbox"]::before {
+.tts-service-card .service-checkbox .form-check-input:checked[type="checkbox"]::before {
   content: none !important;
   display: none !important;
 }
 
-/* Google TTS active state */
-.tts-service-card.google-tts.active .service-checkbox .form-check-input {
+/* Google TTS authenticated state - ALWAYS show when authenticated */
+.tts-service-card.google-tts.authenticated .service-checkbox .form-check-input {
   background-color: rgba(25, 69, 72, 1) !important;
   border-color: rgba(25, 69, 72, 1) !important;
   background-image: none !important;
 }
 
-/* ChatGPT TTS active state */
-.tts-service-card.chatgpt-tts.active .service-checkbox .form-check-input {
+/* ChatGPT TTS authenticated state - ALWAYS show when authenticated */
+.tts-service-card.chatgpt-tts.authenticated .service-checkbox .form-check-input {
   background-color: rgba(216, 45, 168, 1) !important;
   border-color: rgba(216, 45, 168, 1) !important;
   background-image: none !important;
 }
 
-/* Add custom white checkmark - only visible element */
-.tts-service-card
-  .service-checkbox
-  .form-check-input:checked[type="checkbox"]::after {
+/* Add custom white checkmark - visible when authenticated */
+.tts-service-card .service-checkbox .form-check-input:checked[type="checkbox"]::after {
   content: "✓";
   position: absolute;
   top: 50%;

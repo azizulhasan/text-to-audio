@@ -155,7 +155,7 @@ export default function Integrations() {
             <Row>
               <Col xs={12} md={6} className="mb-3 mb-md-0">
                 <div
-                  className={`tts-service-card google-tts ${currentTTSServic === 'google_cloud_tts' ? 'active' : ''}`}
+                  className={`tts-service-card google-tts ${currentTTSServic === 'google_cloud_tts' ? 'active' : ''} ${authenticatedServices.includes('google_cloud_tts') ? 'authenticated' : ''}`}
                   onClick={() => handleServiceSelect('google_cloud_tts')}
                 >
                   <div className="d-flex align-items-start">
@@ -170,14 +170,15 @@ export default function Integrations() {
                     <div className="flex-grow-1">
                       <div className="d-flex align-items-center justify-content-between">
                         <h6 className="mb-1">Google Cloud TTS</h6>
-                        {/* Checkbox only appears when authenticated */}
+                        {/* Checkbox - visible when authenticated */}
                         {authenticatedServices.includes('google_cloud_tts') && (
-                          <Form.Check
-                            type="checkbox"
-                            checked={true}
-                            onChange={() => {}}
-                            className="service-checkbox"
-                          />
+                          <div className="service-checkbox">
+                            <Form.Check
+                              type="checkbox"
+                              checked={true}
+                              readOnly
+                            />
+                          </div>
                         )}
                       </div>
                       <p className="mb-0 text-muted small">
@@ -190,7 +191,7 @@ export default function Integrations() {
               </Col>
               <Col xs={12} md={6}>
                 <div
-                  className={`tts-service-card chatgpt-tts ${currentTTSServic === 'chat_gpt_tts' ? 'active' : ''}`}
+                  className={`tts-service-card chatgpt-tts ${currentTTSServic === 'chat_gpt_tts' ? 'active' : ''} ${authenticatedServices.includes('chat_gpt_tts') ? 'authenticated' : ''}`}
                   onClick={() => handleServiceSelect('chat_gpt_tts')}
                 >
                   <div className="d-flex align-items-start">
@@ -205,14 +206,15 @@ export default function Integrations() {
                     <div className="flex-grow-1">
                       <div className="d-flex align-items-center justify-content-between">
                         <h6 className="mb-1">ChatGPT TTS</h6>
-                        {/* Checkbox only appears when authenticated */}
+                        {/* Checkbox - visible when authenticated */}
                         {authenticatedServices.includes('chat_gpt_tts') && (
-                          <Form.Check
-                            type="checkbox"
-                            checked={true}
-                            onChange={() => {}}
-                            className="service-checkbox"
-                          />
+                          <div className="service-checkbox">
+                            <Form.Check
+                              type="checkbox"
+                              checked={true}
+                              readOnly
+                            />
+                          </div>
                         )}
                       </div>
                       <p className="mb-0 text-muted small">

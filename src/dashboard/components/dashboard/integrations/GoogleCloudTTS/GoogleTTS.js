@@ -528,10 +528,10 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
 
             {/* Action Buttons */}
             <div
-                className="position-sticky bottom-0"
+                className="d-flex position-sticky bottom-0"
                 style={{zIndex: 1030, marginTop: "20px"}}
             >
-                <div className="text-center">
+                <div className="text-center w-100">
                     <button
                         // variant="primary"
                         onClick={handleSubmit}
