@@ -157,20 +157,15 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                     if (res?.bucket_name) {
                         setBucketName(res?.bucket_name || "");
                     }
-<<<<<<< HEAD
-                    // Add to authenticated services and set as active
-=======
-                    
+
                     // Update authenticated services
->>>>>>> feature/TTS-204
                     setAuthenticatedServices(prev => {
                         if (prev.includes('google_cloud_tts')) return prev;
                         return [...prev, 'google_cloud_tts'];
                     });
-<<<<<<< HEAD
+
                     setCurrentTTSServic('google_cloud_tts');
-=======
->>>>>>> feature/TTS-204
+
                 } else {
                     if (res?.bcmath) {
                         toast(bcmathNotice(), "error", {
@@ -196,12 +191,6 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                         setIsBackUpToGCS(res?.tts_is_backup_mp3_file || false);
                     }
                     if (res?.is_authenticated) {
-<<<<<<< HEAD
-                        // Add to authenticated services
-=======
-                        // Don't override parent's service selection
-                        // Parent will handle setting the active service
->>>>>>> feature/TTS-204
                         setAuthenticatedServices(prev => {
                             if (prev.includes('google_cloud_tts')) return prev;
                             return [...prev, 'google_cloud_tts'];
@@ -292,10 +281,9 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                     setAuthenticatedServices(prev => 
                         prev.filter(service => service !== 'google_cloud_tts')
                     );
-<<<<<<< HEAD
+
                     setCurrentTTSServic("");
-=======
->>>>>>> feature/TTS-204
+
                 } else {
                     toast("Something went wrong");
                 }
@@ -369,8 +357,8 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                 id={id}
             />
             <span className="switch-track">
-        <span className="switch-thumb"></span>
-      </span>
+                <span className="switch-thumb"></span>
+            </span>
         </label>
     );
 
@@ -481,9 +469,9 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                 {/* Backup Toggle */}
                 <div className="setting-row">
                     <div className="setting-label-area">
-            <span className="setting-label">
-              Backup MP3 Files To Google Cloud Storage
-            </span>
+                        <span className="setting-label">
+                            Backup MP3 Files To Google Cloud Storage
+                        </span>
                         <OverlayTrigger
                             placement="top"
                             overlay={
@@ -566,35 +554,32 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
             </div>
 
             {/* Action Buttons */}
-<<<<<<< HEAD
-
-                <div className="d-flex justify-content-center gap-2">
-=======
             <div
                 className="d-flex position-sticky bottom-0"
                 style={{zIndex: 1030, marginTop: "20px"}}
             >
                 <div className="text-center w-100">
->>>>>>> feature/TTS-204
-                    <button
-                        onClick={handleSubmit}
-                        className="tta_btn rounded-3"
-                    >
-                        Save
-                    </button>
-                    {window.hasOwnProperty("ttsObjPro") &&
-                        ttsObjPro.is_pro_license_active &&
-                        isAuthenticated && (
-                            <Button
-                                variant="outline-danger"
-                                onClick={revokeAccessToken}
-                                className="rounded-3"
-                            >
-                                Remove Authentication
-                            </Button>
-                        )}
+                    <div className="d-flex justify-content-center gap-2">
+                        <button
+                            onClick={handleSubmit}
+                            className="tta_btn rounded-3"
+                        >
+                            Save
+                        </button>
+                        {window.hasOwnProperty("ttsObjPro") &&
+                            ttsObjPro.is_pro_license_active &&
+                            isAuthenticated && (
+                                <Button
+                                    variant="outline-danger"
+                                    onClick={revokeAccessToken}
+                                    className="rounded-3"
+                                >
+                                    Remove Authentication
+                                </Button>
+                            )}
+                    </div>
                 </div>
-
+            </div>
         </>
     );
 }

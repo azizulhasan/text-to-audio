@@ -8,9 +8,6 @@ import UpgradeToPro from "../../UpgradeToPro";
 export default function Integrations() {
   const [currentTTSServic, setCurrentTTSServic] = useState(""); // Empty by default
   const [authenticatedServices, setAuthenticatedServices] = useState([]);
-  const [googleTTSChecked, setGoogleTTSChecked] = useState(false);
-  const [chatGPTChecked, setChatGPTChecked] = useState(false);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   const apiURL = useMemo(() => {
     return (
@@ -24,8 +21,8 @@ export default function Integrations() {
   }, [window]);
 
   useEffect(() => {
-    console.log({authenticatedServices, currentTTSServic})
-  }, [authenticatedServices, currentTTSServic])
+    console.log({authenticatedServices})
+  }, [authenticatedServices])
 
   const [chatGPTAPIData, setChatGPTAPIData] = useState({
     chatgpt_tts_api_key: "",
@@ -33,7 +30,6 @@ export default function Integrations() {
   });
 
   const [shouldCheckChatGPT, setShouldCheckChatGPT] = useState(false);
-  const [chatGPTHasLoadedOnce, setChatGPTHasLoadedOnce] = useState(false);
 
   // Handle service selection - toggle behavior
   const handleServiceSelect = (service) => {
@@ -54,28 +50,6 @@ export default function Integrations() {
     setShouldCheckChatGPT(val);
   };
 
-<<<<<<< HEAD
-  // Effect to set active service after both checks are complete - ONLY ON INITIAL LOAD
-  useEffect(() => {
-    if (googleTTSChecked && chatGPTChecked && !initialLoadComplete) {
-      // Both services have been checked, now determine which one should be active
-      // Priority: If both are authenticated, use the one from backend's currentTTSServic
-      // If only one is authenticated, use that one
-      // If neither is authenticated, keep empty
-      
-      if (authenticatedServices.length === 0) {
-        setCurrentTTSServic("");
-      } else if (authenticatedServices.length === 1) {
-        // Only one service is authenticated, make it active
-        setCurrentTTSServic(authenticatedServices[0]);
-      }
-      // If both are authenticated, the backend's currentTTSServic has already been set
-      
-      setInitialLoadComplete(true);
-    }
-  }, [googleTTSChecked, chatGPTChecked, authenticatedServices, initialLoadComplete]);
-
-=======
   // Check both services authentication status on mount
   useEffect(() => {
     if (ttsObj.is_pro_active) {
@@ -135,7 +109,6 @@ export default function Integrations() {
   }, []);
 
   // Additional check when service is selected or shouldCheckChatGPT changes
->>>>>>> feature/TTS-204
   useEffect(() => {
     if (
       (ttsObj.is_pro_active && currentTTSServic === "chat_gpt_tts") ||
@@ -150,34 +123,14 @@ export default function Integrations() {
             res.data?.currentTTSServic === "chat_gpt_tts" &&
             res?.data?.chatgpt_tts_api_key
           ) {
-<<<<<<< HEAD
-            // Only set as active on FIRST load, not subsequent re-renders
-            if (!chatGPTHasLoadedOnce) {
-              setCurrentTTSServic('chat_gpt_tts');
-            }
-            setAuthenticatedServices(prev => {
-              if (prev.includes('chat_gpt_tts')) return prev;
-              return [...prev, 'chat_gpt_tts'];
-            })
-          } else {
-            // ChatGPT is not authenticated or not active, remove from authenticated services
-            setAuthenticatedServices(prev => 
-              prev.filter(service => service !== 'chat_gpt_tts')
-            );
-=======
             setAuthenticatedServices(prev => {
               if (prev.includes('chat_gpt_tts')) return prev;
               return [...prev, 'chat_gpt_tts'];
             });
->>>>>>> feature/TTS-204
           }
-          setChatGPTChecked(true);
-          setChatGPTHasLoadedOnce(true);
         })
         .catch((err) => {
           console.log(err);
-          setChatGPTChecked(true);
-          setChatGPTHasLoadedOnce(true);
         });
     }
   }, [currentTTSServic, shouldCheckChatGPT]);
@@ -202,11 +155,7 @@ export default function Integrations() {
             <Row>
               <Col xs={12} md={6} className="mb-3 mb-md-0">
                 <div
-<<<<<<< HEAD
-                  className={`tts-service-card google-tts ${currentTTSServic === 'google_cloud_tts' ? 'active' : ''}`}
-=======
                   className={`tts-service-card google-tts ${currentTTSServic === 'google_cloud_tts' ? 'active' : ''} ${authenticatedServices.includes('google_cloud_tts') ? 'authenticated' : ''}`}
->>>>>>> feature/TTS-204
                   onClick={() => handleServiceSelect('google_cloud_tts')}
                 >
                   <div className="d-flex align-items-start">
@@ -221,16 +170,6 @@ export default function Integrations() {
                     <div className="flex-grow-1">
                       <div className="d-flex align-items-center justify-content-between">
                         <h6 className="mb-1">Google Cloud TTS</h6>
-<<<<<<< HEAD
-                        {/* Checkbox only appears when authenticated */}
-                        {authenticatedServices.includes('google_cloud_tts') && (
-                          <Form.Check
-                            type="checkbox"
-                            checked={currentTTSServic === 'google_cloud_tts'}
-                            onChange={() => {}}
-                            className="service-checkbox"
-                          />
-=======
                         {/* Checkbox - visible when authenticated */}
                         {authenticatedServices.includes('google_cloud_tts') && (
                           <div className="service-checkbox">
@@ -240,7 +179,6 @@ export default function Integrations() {
                               readOnly
                             />
                           </div>
->>>>>>> feature/TTS-204
                         )}
                       </div>
                       <p className="mb-0 text-muted small">
@@ -253,11 +191,7 @@ export default function Integrations() {
               </Col>
               <Col xs={12} md={6}>
                 <div
-<<<<<<< HEAD
-                  className={`tts-service-card chatgpt-tts ${currentTTSServic === 'chat_gpt_tts' ? 'active' : ''}`}
-=======
                   className={`tts-service-card chatgpt-tts ${currentTTSServic === 'chat_gpt_tts' ? 'active' : ''} ${authenticatedServices.includes('chat_gpt_tts') ? 'authenticated' : ''}`}
->>>>>>> feature/TTS-204
                   onClick={() => handleServiceSelect('chat_gpt_tts')}
                 >
                   <div className="d-flex align-items-start">
@@ -272,16 +206,6 @@ export default function Integrations() {
                     <div className="flex-grow-1">
                       <div className="d-flex align-items-center justify-content-between">
                         <h6 className="mb-1">ChatGPT TTS</h6>
-<<<<<<< HEAD
-                        {/* Checkbox only appears when authenticated */}
-                        {authenticatedServices.includes('chat_gpt_tts') && (
-                          <Form.Check
-                            type="checkbox"
-                            checked={currentTTSServic === 'chat_gpt_tts'}
-                            onChange={() => {}}
-                            className="service-checkbox"
-                          />
-=======
                         {/* Checkbox - visible when authenticated */}
                         {authenticatedServices.includes('chat_gpt_tts') && (
                           <div className="service-checkbox">
@@ -291,7 +215,6 @@ export default function Integrations() {
                               readOnly
                             />
                           </div>
->>>>>>> feature/TTS-204
                         )}
                       </div>
                       <p className="mb-0 text-muted small">
@@ -307,24 +230,23 @@ export default function Integrations() {
           </div>
 
           {/* Show Google TTS component when selected */}
-          <div style={{display: currentTTSServic === "google_cloud_tts" ? 'block' : 'none'}}>
+          {currentTTSServic === "google_cloud_tts" && (
             <GoogleTTS
               setCurrentTTSServic={setCurrentTTSServic}
               getShouldCheckChatGPT={getShouldCheckChatGPT}
               setAuthenticatedServices={setAuthenticatedServices}
-              setGoogleTTSChecked={setGoogleTTSChecked}
             />
-          </div>
+          )}
 
           {/* Show ChatGPT TTS component when selected */}
-          <div style={{display: currentTTSServic === "chat_gpt_tts" ? 'block' : 'none'}}>
+          {currentTTSServic === "chat_gpt_tts" && (
             <ChatGPTTTS
               setChatGPTAPIData={setChatGPTAPIData}
               chatGPTAPIData={chatGPTAPIData}
               currentTTSServic={currentTTSServic}
               setAuthenticatedServices={setAuthenticatedServices}
             />
-          </div>
+          )}
         </Col>
 
         <Col xs={12} lg={4}>

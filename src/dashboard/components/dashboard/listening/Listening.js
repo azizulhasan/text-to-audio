@@ -770,133 +770,84 @@ export default function Listening() {
               </>
             ) : (
               <>
-                {/* For other players - use original layout */}
-                <div className="tta_voice_card mb-3">
-                  <h3 className="tta_voice_card_title">
-                    Default Voice Language
+                {/* For AtlasVoice TTS Pro (id == 3) and Google Cloud TTS (id == 4) - use new layout */}
+                {(customizationSettings?.buttonSettings?.id == 3 || customizationSettings?.buttonSettings?.id == 4) ? (
+                  <>
+                    {/* Voice Language and Voice to Speak - Side by Side */}
+                    <Row className="mb-3">
+                      <Col xs={12} md={6}>
+                        <div className="tta_voice_card">
+                          <h3 className="tta_voice_card_title">
+                            Voice Language
+                            {customizationSettings?.buttonSettings?.id == 4 && (
+                              <span className="tta_pro_badge ml-2">PRO</span>
+                            )}
+                          </h3>
+                          <div className="tta_voice_select_wrapper">
+                            <img
+                              src={getLanguageFlag(
+                                Object.keys(currentPlayerLanguages).find(
+                                  key => key === listeningSettings.tta__listening_lang
+                                ) || listeningSettings.tta__listening_lang
+                              )}
+                              alt="flag"
+                              className="tta_voice_flag"
+                              onError={(e) => {
+                                e.target.style.display = "none";
+                              }}
+                            />
+                            <Form.Select
+                              onChange={handleChange}
+                              name="tta__listening_lang"
+                              id="tta__listening_lang"
+                              value={listeningSettings.tta__listening_lang}
+                              className="tta_orange_voice_select"
+                            >
+                              <option disabled>Default Listening Language</option>
+                              {Object.keys(currentPlayerLanguages).map((langKey) => (
+                                <option key={langKey} value={langKey}>
+                                  {currentPlayerLanguages[langKey]}
+                                </option>
+                              ))}
+                            </Form.Select>
+                          </div>
+                        </div>
+                      </Col>
+
+                      {customizationSettings?.buttonSettings?.id == 4 && (
+                        <Col xs={12} md={6}>
+                          <div className="tta_voice_card">
+                            <h3 className="tta_voice_card_title">Voice to speak</h3>
+                            <Form.Select
+                              onChange={handleChange}
+                              name="tta__listening_voice"
+                              id="tta__listening_voice"
+                              value={listeningSettings.tta__listening_voice}
+                              className="tta_orange_speak_select"
+                            >
+                              <option disabled>Default Listening Voice</option>
+                              {currentPlayerFilteredVoices.map((voice, index) => (
+                                <option
+                                  key={index}
+                                  data-lang={voice?.languageCodes?.[0]}
+                                  value={[voice.name, voice.ssmlGender].join("-")}
+                                >
+                                  {voice.name} {"-"} {voice.ssmlGender}
+                                </option>
+                              ))}
+                            </Form.Select>
+                          </div>
+                        </Col>
+                      )}
+                    </Row>
+
+                    {/* Audio Player - Blue styling for Google TTS */}
                     {customizationSettings?.buttonSettings?.id == 4 && (
-                      <span className="tta_pro_badge">PRO</span>
-                    )}
-                  </h3>
-<div className="tta_voice_select_wrapper">
-  <img
-    src={getLanguageFlag(
-      customizationSettings?.buttonSettings?.id < 3
-        ? listeningSettings.tta__listening_lang
-        : Object.keys(currentPlayerLanguages).find(
-            key => key === listeningSettings.tta__listening_lang
-          ) || listeningSettings.tta__listening_lang
-    )}
-    alt="flag"
-    className="tta_voice_flag"
-    onError={(e) => {
-      e.target.style.display = "none";
-    }}
-  />
-  <Form.Select
-    onChange={handleChange}
-    name="tta__listening_lang"
-    id="tta__listening_lang"
-    value={listeningSettings.tta__listening_lang}
-    className="tta_orange_voice_select"
-  >
-    <option disabled>Default Listening Language</option>
-    {Object.keys(currentPlayerLanguages).map((langKey) => (
-      <option 
-        key={langKey} 
-        value={
-          customizationSettings?.buttonSettings?.id < 3
-            ? currentPlayerLanguages[langKey]
-            : langKey
-        }
-      >
-        {currentPlayerLanguages[langKey]}
-      </option>
-    ))}
-  </Form.Select>
-</div>
-
-
-                    {/* <Form.Select
-                      onChange={handleChange}
-                      name="tta__listening_lang"
-                      id="tta__listening_lang"
-                      value={listeningSettings.tta__listening_lang}
-                      className="tta_hidden_select"
-                    >
-                      <option disabled>Default Listening Language</option>
-                      {Object.keys(currentPlayerLanguages).map((langKey, index) => {
-                        return (
-                          <option
-                            key={langKey}
-                            value={
-                              customizationSettings?.buttonSettings?.id < 3
-                                ? currentPlayerLanguages[langKey]
-                                : langKey
-                            }
-                          >
-                            {currentPlayerLanguages[langKey]}
-                          </option>
-                        );
-                      })}
-                    </Form.Select> */}
-                  </div>
-
-                {/* {languageMissingMessage && (
-                    <div className="tta_info_message">
-                      <i className="fas fa-info-circle"></i>
-                      {languageMissingMessage}
-                    </div>
-                  )}  */}
-   
-
-                {customizationSettings?.buttonSettings?.id != 3 && (
-                  <div className="tta_preference_section">
-                    <Form.Group>
-                      <Form.Label className="tta_form_label">
-                        Voice to speak
-                      </Form.Label>
-                      <Form.Select
-                        onChange={handleChange}
-                        name="tta__listening_voice"
-                        id="tta__listening_voice"
-                        value={listeningSettings.tta__listening_voice}
-                        className="tta_form_select"
-                      >
-                        <option disabled>Default Listening Voice</option>
-                        {currentPlayerFilteredVoices.map((voice, index) =>
-                          window.hasOwnProperty("ttsObjPro") &&
-                          customizationSettings?.buttonSettings?.id == 4 ? (
-                            <option
-                              key={index}
-                              data-lang={voice?.languageCodes?.[0]}
-                              value={[voice.name, voice.ssmlGender].join("-")}
-                            >
-                              {voice.name} {"-"} {voice.ssmlGender}
-                            </option>
-                          ) : customizationSettings?.buttonSettings?.id == 5 ? (
-                            <option key={index} data-lang={voice} value={voice}>
-                              {voice}
-                            </option>
-                          ) : (
-                            <option
-                              key={index}
-                              data-lang={voice.lang}
-                              value={voice.name}
-                            >
-                              {voice.name}
-                            </option>
-                          )
-                        )}
-                      </Form.Select>
-                    </Form.Group>
-
-                    {customizationSettings?.buttonSettings?.id > 3 && (
-                      <div className="tta_audio_player_wrapper">
+                      <div className="tta_google_audio_player_card">
                         <audio
                           id="tts_audio_tag"
                           controls
-                          className="tta_audio_player"
+                          className="tta_google_audio_player"
                         >
                           <source
                             id="tts_audio_wav"
@@ -912,64 +863,157 @@ export default function Listening() {
                         </audio>
                       </div>
                     )}
-                  </div>
-                )}
-
-                {customizationSettings?.buttonSettings?.id == 5 && (
-                  <div className="tta_preference_section">
-                    <Form.Group>
-                      <Form.Label className="tta_form_label">
-                        Voice Model
-                      </Form.Label>
-                      <Form.Select
-                        onChange={handleChange}
-                        name="tta__listening_voice_model"
-                        id="tta__listening_voice_model"
-                        value={listeningSettings.tta__listening_voice_model}
-                        className="tta_form_select"
-                      >
-                        <option disabled>Default Listening Model</option>
-                        <option value="tts-1">TTS-1</option>
-                        <option value="tts-1-hd">TTS-1 HD</option>
-                      </Form.Select>
-                    </Form.Group>
-                  </div>
-                )}
-
-                {customizationSettings?.buttonSettings?.id == 5 && (
-                  <div className="tta_preference_section">
-                    <Form.Group>
-                      <div className="tta_slider_header">
-                        <Form.Label className="tta_form_label">
-                          Voice Speed
-                        </Form.Label>
-                        <span className="tta_slider_value">
-                          {listeningSettings.tta__listening_rate}
-                        </span>
-                      </div>
-                      <div className="tta_slider_wrapper">
-                        <Form.Range
-                          min="0.25"
-                          max="4.0"
-                          step="0.1"
-                          name="tta__listening_rate"
-                          id="tta__listening_rate"
-                          onChange={handleChange}
-                          value={listeningSettings.tta__listening_rate}
-                          className="tta_slider"
+                  </>
+                ) : (
+                  <>
+                    {/* For ChatGPT TTS (id == 5) - use original layout */}
+                    <div className="tta_voice_card mb-3">
+                      <h3 className="tta_voice_card_title">
+                        Default Voice Language
+                      </h3>
+                      <div className="tta_voice_select_wrapper">
+                        <img
+                          src={getLanguageFlag(
+                            Object.keys(currentPlayerLanguages).find(
+                              key => key === listeningSettings.tta__listening_lang
+                            ) || listeningSettings.tta__listening_lang
+                          )}
+                          alt="flag"
+                          className="tta_voice_flag"
+                          onError={(e) => {
+                            e.target.style.display = "none";
+                          }}
                         />
-                        <div className="tta_slider_labels">
-                          <span className="tta_slider_label_start">0.25</span>
-                          <span className="tta_slider_label_end">4.0</span>
-                        </div>
+                        <Form.Select
+                          onChange={handleChange}
+                          name="tta__listening_lang"
+                          id="tta__listening_lang"
+                          value={listeningSettings.tta__listening_lang}
+                          className="tta_orange_voice_select"
+                        >
+                          <option disabled>Default Listening Language</option>
+                          {Object.keys(currentPlayerLanguages).map((langKey) => (
+                            <option key={langKey} value={langKey}>
+                              {currentPlayerLanguages[langKey]}
+                            </option>
+                          ))}
+                        </Form.Select>
                       </div>
-                    </Form.Group>
-                  </div>
+                    </div>
+
+                    {customizationSettings?.buttonSettings?.id != 3 && (
+                      <div className="tta_preference_section">
+                        <Form.Group>
+                          <Form.Label className="tta_form_label">
+                            Voice to speak
+                          </Form.Label>
+                          <Form.Select
+                            onChange={handleChange}
+                            name="tta__listening_voice"
+                            id="tta__listening_voice"
+                            value={listeningSettings.tta__listening_voice}
+                            className="tta_form_select"
+                          >
+                            <option disabled>Default Listening Voice</option>
+                            {currentPlayerFilteredVoices.map((voice, index) =>
+                              customizationSettings?.buttonSettings?.id == 5 ? (
+                                <option key={index} data-lang={voice} value={voice}>
+                                  {voice}
+                                </option>
+                              ) : (
+                                <option
+                                  key={index}
+                                  data-lang={voice.lang}
+                                  value={voice.name}
+                                >
+                                  {voice.name}
+                                </option>
+                              )
+                            )}
+                          </Form.Select>
+                        </Form.Group>
+
+                        {customizationSettings?.buttonSettings?.id > 3 && (
+                          <div className="tta_audio_player_wrapper">
+                            <audio
+                              id="tts_audio_tag"
+                              controls
+                              className="tta_audio_player"
+                            >
+                              <source
+                                id="tts_audio_wav"
+                                src={baseMP3File}
+                                type="audio/wav"
+                              />
+                              <source
+                                id="tts_audio_mp3"
+                                src={baseMP3File}
+                                type="audio/mpeg"
+                              />
+                              Your browser does not support the audio element.
+                            </audio>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {customizationSettings?.buttonSettings?.id == 5 && (
+                      <>
+                        <div className="tta_preference_section">
+                          <Form.Group>
+                            <Form.Label className="tta_form_label">
+                              Voice Model
+                            </Form.Label>
+                            <Form.Select
+                              onChange={handleChange}
+                              name="tta__listening_voice_model"
+                              id="tta__listening_voice_model"
+                              value={listeningSettings.tta__listening_voice_model}
+                              className="tta_form_select"
+                            >
+                              <option disabled>Default Listening Model</option>
+                              <option value="tts-1">TTS-1</option>
+                              <option value="tts-1-hd">TTS-1 HD</option>
+                            </Form.Select>
+                          </Form.Group>
+                        </div>
+
+                        <div className="tta_preference_section">
+                          <Form.Group>
+                            <div className="tta_slider_header">
+                              <Form.Label className="tta_form_label">
+                                Voice Speed
+                              </Form.Label>
+                              <span className="tta_slider_value">
+                                {listeningSettings.tta__listening_rate}
+                              </span>
+                            </div>
+                            <div className="tta_slider_wrapper">
+                              <Form.Range
+                                min="0.25"
+                                max="4.0"
+                                step="0.1"
+                                name="tta__listening_rate"
+                                id="tta__listening_rate"
+                                onChange={handleChange}
+                                value={listeningSettings.tta__listening_rate}
+                                className="tta_slider"
+                              />
+                              <div className="tta_slider_labels">
+                                <span className="tta_slider_label_start">0.25</span>
+                                <span className="tta_slider_label_end">4.0</span>
+                              </div>
+                            </div>
+                          </Form.Group>
+                        </div>
+                      </>
+                    )}
+                  </>
                 )}
               </>
             )}
 
-            {/* Language Mapping Section */}
+            {/* Language Mapping Section - unchanged */}
             {Object.keys(multilingualActiveLanguages).length > 0 && (
               <div className="tta_mapping_section">
                 <div className="tta_mapping_header">
