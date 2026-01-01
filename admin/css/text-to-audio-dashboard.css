@@ -119,9 +119,9 @@ My Custom css
 }
 
 /* Hover effect (optional but looks good) */
-.top-nav-item:hover {
+/* .top-nav-item:hover {
   background: rgba(255, 255, 255, 0.1);
-}
+} */
 
 .tta-custom-accordion .accordion-button::after {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='white'%3E%3Cpath fill-rule='evenodd' d='M1.5 5.5l6 6 6-6'/%3E%3C/svg%3E");
@@ -436,6 +436,10 @@ My Custom css
   transition: all 0.2s;
   border-right: 1px solid rgba(255, 255, 255, 0.3);
 }
+.tta-tab-style:hover {
+  background-color:  rgba(111, 214, 202, 0.42);
+  color: white;
+}
 
 .tta-loading-spinner {
   display: flex;
@@ -553,6 +557,7 @@ My Custom css
   line-height: 1.5;
 }
 
+/* Service Checkbox Base Styles */
 .tts-service-card .service-checkbox {
   pointer-events: none;
 }
@@ -580,31 +585,27 @@ My Custom css
   position: relative;
 }
 
-.tts-service-card
-  .service-checkbox
-  .form-check-input:checked[type="checkbox"]::before {
+.tts-service-card .service-checkbox .form-check-input:checked[type="checkbox"]::before {
   content: none !important;
   display: none !important;
 }
 
-/* Google TTS active state */
-.tts-service-card.google-tts.active .service-checkbox .form-check-input {
+/* Google TTS authenticated state - ALWAYS show when authenticated */
+.tts-service-card.google-tts.authenticated .service-checkbox .form-check-input {
   background-color: rgba(25, 69, 72, 1) !important;
   border-color: rgba(25, 69, 72, 1) !important;
   background-image: none !important;
 }
 
-/* ChatGPT TTS active state */
-.tts-service-card.chatgpt-tts.active .service-checkbox .form-check-input {
+/* ChatGPT TTS authenticated state - ALWAYS show when authenticated */
+.tts-service-card.chatgpt-tts.authenticated .service-checkbox .form-check-input {
   background-color: rgba(216, 45, 168, 1) !important;
   border-color: rgba(216, 45, 168, 1) !important;
   background-image: none !important;
 }
 
-/* Add custom white checkmark - only visible element */
-.tts-service-card
-  .service-checkbox
-  .form-check-input:checked[type="checkbox"]::after {
+/* Add custom white checkmark - visible when authenticated */
+.tts-service-card .service-checkbox .form-check-input:checked[type="checkbox"]::after {
   content: "✓";
   position: absolute;
   top: 50%;

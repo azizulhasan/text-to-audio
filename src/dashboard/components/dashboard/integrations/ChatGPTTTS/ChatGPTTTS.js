@@ -69,8 +69,14 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
                 if (res.status) {
                     toast('API key is saved successfully');
                     setChatGPTAPIData(res.data);
+<<<<<<< HEAD
                     // Add to authenticated services when successfully saved
                     if (res.data?.chatgpt_tts_api_key) {
+=======
+                    
+                    // Update authenticated services if API key is valid
+                    if (res.data?.chatgpt_tts_api_key && res.data?.currentTTSServic === 'chat_gpt_tts') {
+>>>>>>> feature/TTS-204
                         setAuthenticatedServices(prev => {
                             if (prev.includes('chat_gpt_tts')) return prev;
                             return [...prev, 'chat_gpt_tts'];
