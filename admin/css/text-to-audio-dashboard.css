@@ -2423,6 +2423,205 @@ a:hover {
 }
 
 
+/* ======================================
+   ChatGPT TTS Specific Styles
+   ====================================== */
+
+/* ChatGPT Voice Speed Card - Blue Design */
+.tta_chatgpt_speed_card {
+  /* background: #ffffff; */
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.tta_chatgpt_speed_card .tta_slider_header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.tta_chatgpt_speed_card .tta_slider_label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 0;
+}
+
+.tta_chatgpt_slider_value {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #ffffff;
+  padding: 0.375rem 0.875rem;
+  background: #FF7853;
+  border-radius: 6px;
+  min-width: 50px;
+  text-align: center;
+}
+
+/* ChatGPT Slider Container */
+.tta_chatgpt_speed_card .tta_slider_container {
+  position: relative;
+  margin-bottom: 0.75rem;
+}
+
+/* ChatGPT Blue Slider */
+.tta_chatgpt_slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  position: relative;
+  z-index: 2;
+}
+
+.tta_chatgpt_slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  background: #1C87FF;
+  border-radius: 3px;
+}
+
+.tta_chatgpt_slider::-moz-range-track {
+  width: 100%;
+  height: 6px;
+  background: #1C87FF;
+  border-radius: 3px;
+}
+
+.tta_chatgpt_slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #FF7853;
+  cursor: pointer;
+  margin-top: -9px;
+  box-shadow: 0 2px 6px rgba(255, 120, 83, 0.4);
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 3;
+}
+
+.tta_chatgpt_slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 3px 10px rgba(255, 120, 83, 0.6);
+}
+
+.tta_chatgpt_slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #FF7853;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 6px rgba(255, 120, 83, 0.4);
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 3;
+}
+
+.tta_chatgpt_slider::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 3px 10px rgba(255, 120, 83, 0.6);
+}
+
+/* ChatGPT Slider Tick Marks */
+.tta_chatgpt_slider_ticks {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.tta_chatgpt_slider_ticks .tta_slider_tick {
+  width: 2px;
+  height: 16px;
+  background: #015FC9;
+  border-radius: 1px;
+}
+
+/* ChatGPT Slider Labels */
+.tta_chatgpt_slider_labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+  padding: 0 2px;
+}
+
+/* ChatGPT Audio Player - Blue Styling */
+.tta_chatgpt_audio_player_card {
+  /* background: linear-gradient(135deg, #1C87FF 0%, #0066DD 100%);
+  border-radius: 12px;
+  padding: 0.5rem; */
+  
+  margin-bottom: 1.25rem;
+  /* box-shadow: 0 4px 12px rgba(28, 135, 255, 0.2); */
+}
+
+.tta_chatgpt_audio_player {
+  width: 100%;
+  height: 54px;
+  border-radius: 8px;
+  /* background: rgba(0, 38, 255, 0.1); */
+  
+  /* backdrop-filter: blur(10px); */
+}
+
+/* Custom audio player controls styling for ChatGPT TTS */
+.tta_chatgpt_audio_player::-webkit-media-controls-panel {
+  /* background: rgba(255, 255, 255, 0.95); */
+   background: rgba(28, 135, 255, 1);
+  border-radius: 8px;
+}
+
+.tta_chatgpt_audio_player::-webkit-media-controls-play-button,
+.tta_chatgpt_audio_player::-webkit-media-controls-pause-button {
+  /* background-color: #1C87FF; */
+  border-radius: 50%;
+}
+
+.tta_chatgpt_audio_player::-webkit-media-controls-current-time-display,
+.tta_chatgpt_audio_player::-webkit-media-controls-time-remaining-display {
+  /* color: #1C87FF; */
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.tta_chatgpt_audio_player::-webkit-media-controls-timeline {
+  /* background: #E5F0FF; */
+  border-radius: 4px;
+}
+
+.tta_chatgpt_audio_player::-webkit-media-controls-volume-slider {
+  /* background: #E5F0FF; */
+  border-radius: 4px;
+}
+
+/* Responsive adjustments for ChatGPT TTS */
+@media (max-width: 768px) {
+  .tta_chatgpt_slider_labels span:nth-child(even) {
+    display: none;
+  }
+  
+  .tta_chatgpt_slider_labels {
+    font-size: 0.75rem;
+  }
+}
+
 
 /* Language Mapping Card */
 .tta_language_mapping_card {

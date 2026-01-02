@@ -866,148 +866,147 @@ export default function Listening() {
                   </>
                 ) : (
                   <>
-                    {/* For ChatGPT TTS (id == 5) - use original layout */}
-                    <div className="tta_voice_card mb-3">
-                      <h3 className="tta_voice_card_title">
-                        Default Voice Language
-                      </h3>
-                      <div className="tta_voice_select_wrapper">
-                        <img
-                          src={getLanguageFlag(
-                            Object.keys(currentPlayerLanguages).find(
-                              key => key === listeningSettings.tta__listening_lang
-                            ) || listeningSettings.tta__listening_lang
-                          )}
-                          alt="flag"
-                          className="tta_voice_flag"
-                          onError={(e) => {
-                            e.target.style.display = "none";
-                          }}
-                        />
-                        <Form.Select
-                          onChange={handleChange}
-                          name="tta__listening_lang"
-                          id="tta__listening_lang"
-                          value={listeningSettings.tta__listening_lang}
-                          className="tta_orange_voice_select"
-                        >
-                          <option disabled>Default Listening Language</option>
-                          {Object.keys(currentPlayerLanguages).map((langKey) => (
-                            <option key={langKey} value={langKey}>
-                              {currentPlayerLanguages[langKey]}
-                            </option>
-                          ))}
-                        </Form.Select>
-                      </div>
-                    </div>
-
-                    {customizationSettings?.buttonSettings?.id != 3 && (
-                      <div className="tta_preference_section">
-                        <Form.Group>
-                          <Form.Label className="tta_form_label">
-                            Voice to speak
-                          </Form.Label>
-                          <Form.Select
-                            onChange={handleChange}
-                            name="tta__listening_voice"
-                            id="tta__listening_voice"
-                            value={listeningSettings.tta__listening_voice}
-                            className="tta_form_select"
-                          >
-                            <option disabled>Default Listening Voice</option>
-                            {currentPlayerFilteredVoices.map((voice, index) =>
-                              customizationSettings?.buttonSettings?.id == 5 ? (
-                                <option key={index} data-lang={voice} value={voice}>
-                                  {voice}
-                                </option>
-                              ) : (
-                                <option
-                                  key={index}
-                                  data-lang={voice.lang}
-                                  value={voice.name}
-                                >
-                                  {voice.name}
-                                </option>
-                              )
-                            )}
-                          </Form.Select>
-                        </Form.Group>
-
-                        {customizationSettings?.buttonSettings?.id > 3 && (
-                          <div className="tta_audio_player_wrapper">
-                            <audio
-                              id="tts_audio_tag"
-                              controls
-                              className="tta_audio_player"
-                            >
-                              <source
-                                id="tts_audio_wav"
-                                src={baseMP3File}
-                                type="audio/wav"
-                              />
-                              <source
-                                id="tts_audio_mp3"
-                                src={baseMP3File}
-                                type="audio/mpeg"
-                              />
-                              Your browser does not support the audio element.
-                            </audio>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {customizationSettings?.buttonSettings?.id == 5 && (
+                    {/* For ChatGPT TTS (id == 5) - use new 3-column layout */}
+                    {customizationSettings?.buttonSettings?.id == 5 ? (
                       <>
-                        <div className="tta_preference_section">
-                          <Form.Group>
-                            <Form.Label className="tta_form_label">
-                              Voice Model
-                            </Form.Label>
-                            <Form.Select
-                              onChange={handleChange}
-                              name="tta__listening_voice_model"
-                              id="tta__listening_voice_model"
-                              value={listeningSettings.tta__listening_voice_model}
-                              className="tta_form_select"
-                            >
-                              <option disabled>Default Listening Model</option>
-                              <option value="tts-1">TTS-1</option>
-                              <option value="tts-1-hd">TTS-1 HD</option>
-                            </Form.Select>
-                          </Form.Group>
-                        </div>
+                        {/* Voice Language, Voice to Speak, and Voice Model - Three Columns */}
+                        <Row className="mb-3">
+                          <Col xs={12} md={4}>
+                            <div className="tta_voice_card">
+                              <h3 className="tta_voice_card_title">Voice Language</h3>
+                              <div className="tta_voice_select_wrapper">
+                                <img
+                                  src={getLanguageFlag(
+                                    Object.keys(currentPlayerLanguages).find(
+                                      key => key === listeningSettings.tta__listening_lang
+                                    ) || listeningSettings.tta__listening_lang
+                                  )}
+                                  alt="flag"
+                                  className="tta_voice_flag"
+                                  onError={(e) => {
+                                    e.target.style.display = "none";
+                                  }}
+                                />
+                                <Form.Select
+                                  onChange={handleChange}
+                                  name="tta__listening_lang"
+                                  id="tta__listening_lang"
+                                  value={listeningSettings.tta__listening_lang}
+                                  className="tta_orange_voice_select"
+                                >
+                                  <option disabled>Default Listening Language</option>
+                                  {Object.keys(currentPlayerLanguages).map((langKey) => (
+                                    <option key={langKey} value={langKey}>
+                                      {currentPlayerLanguages[langKey]}
+                                    </option>
+                                  ))}
+                                </Form.Select>
+                              </div>
+                            </div>
+                          </Col>
 
-                        <div className="tta_preference_section">
+                          <Col xs={12} md={4}>
+                            <div className="tta_voice_card">
+                              <h3 className="tta_voice_card_title">Voice to speak</h3>
+                              <Form.Select
+                                onChange={handleChange}
+                                name="tta__listening_voice"
+                                id="tta__listening_voice"
+                                value={listeningSettings.tta__listening_voice}
+                                className="tta_orange_speak_select"
+                              >
+                                <option disabled>Default Listening Voice</option>
+                                {currentPlayerFilteredVoices.map((voice, index) => (
+                                  <option key={index} data-lang={voice} value={voice}>
+                                    {voice}
+                                  </option>
+                                ))}
+                              </Form.Select>
+                            </div>
+                          </Col>
+
+                          <Col xs={12} md={4}>
+                            <div className="tta_voice_card">
+                              <h3 className="tta_voice_card_title">Voice Model</h3>
+                              <Form.Select
+                                onChange={handleChange}
+                                name="tta__listening_voice_model"
+                                id="tta__listening_voice_model"
+                                value={listeningSettings.tta__listening_voice_model}
+                                className="tta_orange_speak_select"
+                              >
+                                <option disabled>Default Listening Model</option>
+                                <option value="tts-1">TTS-1</option>
+                                <option value="tts-1-hd">TTS-1 HD</option>
+                              </Form.Select>
+                            </div>
+                          </Col>
+                        </Row>
+
+                        {/* Voice Speed - Blue slider */}
+                        <div className="tta_chatgpt_speed_card">
                           <Form.Group>
                             <div className="tta_slider_header">
-                              <Form.Label className="tta_form_label">
+                              <Form.Label className="tta_slider_label">
                                 Voice Speed
                               </Form.Label>
-                              <span className="tta_slider_value">
+                              <span className="tta_chatgpt_slider_value">
                                 {listeningSettings.tta__listening_rate}
                               </span>
                             </div>
-                            <div className="tta_slider_wrapper">
+                            <div className="tta_slider_container">
                               <Form.Range
                                 min="0.25"
                                 max="4.0"
-                                step="0.1"
+                                step="0.25"
                                 name="tta__listening_rate"
                                 id="tta__listening_rate"
                                 onChange={handleChange}
                                 value={listeningSettings.tta__listening_rate}
-                                className="tta_slider"
+                                className="tta_chatgpt_slider"
                               />
-                              <div className="tta_slider_labels">
-                                <span className="tta_slider_label_start">0.25</span>
-                                <span className="tta_slider_label_end">4.0</span>
+                              <div className="tta_chatgpt_slider_ticks">
+                                {[0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0].map((tick, index) => (
+                                  <div key={index} className="tta_slider_tick"></div>
+                                ))}
                               </div>
+                            </div>
+                            <div className="tta_chatgpt_slider_labels">
+                              <span>0.25</span>
+                              <span>0.5</span>
+                              <span>1.0</span>
+                              <span>1.5</span>
+                              <span>2.0</span>
+                              <span>2.5</span>
+                              <span>3.0</span>
+                              <span>3.5</span>
+                              <span>4.0</span>
                             </div>
                           </Form.Group>
                         </div>
+
+                        {/* Audio Player - Blue styling for ChatGPT */}
+                        <div className="tta_chatgpt_audio_player_card">
+                          <audio
+                            id="tts_audio_tag"
+                            controls
+                            className="tta_chatgpt_audio_player"
+                          >
+                            <source
+                              id="tts_audio_wav"
+                              src={baseMP3File}
+                              type="audio/wav"
+                            />
+                            <source
+                              id="tts_audio_mp3"
+                              src={baseMP3File}
+                              type="audio/mpeg"
+                            />
+                            Your browser does not support the audio element.
+                          </audio>
+                        </div>
                       </>
-                    )}
+                    ) : null}
                   </>
                 )}
               </>
