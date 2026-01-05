@@ -2848,7 +2848,406 @@ a:hover {
 
 
 
+/* ======================================
+   Analytics Component Styles
+   ====================================== */
 
+/* Analytics Header Card */
+.tta_analytics_header_card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tta_analytics_title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.tta_analytics_subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.tta_date_badge {
+  font-size: 0.875rem;
+  color: #374151;
+  padding: 0.5rem 1rem;
+  background: #f3f4f6;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* Summary Card */
+.tta_summary_card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tta_summary_title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.tta_total_interactions_badge {
+  font-size: 0.875rem;
+  padding: 0.375rem 0.75rem;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.tta_timeframe_badge {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Stat Cards */
+.tta_stat_card {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.tta_stat_card:hover {
+  transform: translateY(-2px);
+}
+
+.tta_stat_label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.tta_stat_value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+/* Different colored stat cards */
+.tta_stat_posts {
+  background: #dbeafe;
+}
+
+.tta_stat_init {
+  background: #fef3c7;
+}
+
+.tta_stat_play {
+  background: #fce7f3;
+}
+
+.tta_stat_time {
+  background: #e0e7ff;
+}
+
+.tta_stat_pause {
+  background: #f3e8ff;
+}
+
+.tta_stat_download {
+  background: #fee2e2;
+}
+
+.tta_stat_end {
+  background: #fce7f3;
+}
+
+/* Track Posts Card */
+.tta_track_posts_card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tta_section_title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.tta_date_range_small {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.tta_form_label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Search Section */
+.tta_search_section {
+  margin-top: 1rem;
+}
+
+.tta_search_input {
+  font-size: 0.875rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.tta_search_input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+.tta_search_btn {
+  background: #FF7853;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.tta_search_btn:hover {
+  background: #ff6640;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(255, 120, 83, 0.2);
+}
+
+/* Metrics Table */
+.tta_metrics_table {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tta_table_header {
+  display: flex;
+  background: #3b82f6;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.tta_table_header .tta_table_cell {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tta_table_header .tta_table_cell:last-child {
+  border-right: none;
+}
+
+.tta_table_body {
+  background: #ffffff;
+}
+
+.tta_table_row {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tta_table_row:last-child {
+  border-bottom: none;
+}
+
+.tta_table_row:nth-child(even) {
+  background: #f9fafb;
+}
+
+.tta_table_cell {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: #374151;
+  border-right: 1px solid #e5e7eb;
+}
+
+.tta_table_cell:last-child {
+  border-right: none;
+}
+
+/* Popular Posts Card */
+.tta_popular_posts_card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Popular Posts Table */
+.tta_popular_table {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tta_popular_header {
+  display: grid;
+  grid-template-columns: 60px 1fr 150px;
+  background: #3b82f6;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.tta_popular_header .tta_popular_cell {
+  padding: 0.75rem 1rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tta_popular_header .tta_popular_cell:last-child {
+  border-right: none;
+}
+
+.tta_popular_body {
+  background: #ffffff;
+}
+
+.tta_popular_row {
+  display: grid;
+  grid-template-columns: 60px 1fr 150px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tta_popular_row:last-child {
+  border-bottom: none;
+}
+
+.tta_popular_row:nth-child(even) {
+  background: #f9fafb;
+}
+
+.tta_popular_cell {
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: #374151;
+  border-right: 1px solid #e5e7eb;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tta_popular_cell:last-child {
+  border-right: none;
+}
+
+/* Pro Notice */
+.tta_pro_notice {
+  text-align: center;
+  padding: 2rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 2px dashed #e5e7eb;
+}
+
+.tta_pro_notice p {
+  font-size: 0.9375rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.tta_pro_link {
+  color: #3b82f6;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.tta_pro_link:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+/* Loading Container */
+.tta_loading_container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.tta_loading_container h1 {
+  font-size: 1.5rem;
+  color: #6b7280;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .tta_analytics_header_card {
+    padding: 1rem;
+  }
+
+  .tta_analytics_header_card > div {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .tta_analytics_title {
+    font-size: 1.5rem;
+  }
+
+  .tta_summary_card {
+    padding: 1rem;
+  }
+
+  .tta_summary_title {
+    font-size: 1.125rem;
+  }
+
+  .tta_stat_card {
+    padding: 0.75rem;
+  }
+
+  .tta_stat_value {
+    font-size: 1.25rem;
+  }
+
+  .tta_popular_header,
+  .tta_popular_row {
+    grid-template-columns: 50px 1fr 100px;
+  }
+
+  .tta_popular_cell {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .tta_total_interactions_badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .tta_date_badge {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+  }
+
+  .tta_table_cell,
+  .tta_popular_cell {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+}
 
 
 
