@@ -401,6 +401,42 @@ export default function Listening() {
   };
 
   const handleChange = (e, index = "", player_id = "") => {
+    // NEW: Auto-extract language from voice for Google Cloud TTS
+    if (
+      e.target.name === "tta__listening_voice" &&
+      customizationSettings?.buttonSettings?.id == 4
+    ) {
+      const selectedVoice = e.target.value;
+      // Extract language code from voice name (e.g., "en-GB-Chirp-HD-F-FEMALE" -> "en-GB")
+      const languageMatch = selectedVoice.match(/^([a-z]{2}-[A-Z]{2})/);
+      if (languageMatch) {
+        const extractedLang = languageMatch[1];
+        
+        // Auto-play the audio
+        let currentVoice = selectedVoice;
+        let baseURL = "https://cloud.google.com/text-to-speech/docs/audio/";
+        currentVoice = currentVoice.replace(/-(MALE|FEMALE)$/, "");
+
+        let wavFileName = baseURL + currentVoice + ".wav";
+        let mp3FileName = baseURL + currentVoice + ".mp3";
+        const audio_wav = document.getElementById("tts_audio_wav");
+        const audio_mp3 = document.getElementById("tts_audio_mp3");
+        const audio_tag = document.getElementById("tts_audio_tag");
+
+        audio_wav.src = wavFileName;
+        audio_mp3.src = mp3FileName;
+        audio_tag.load();
+        audio_tag.play();
+
+        setListeningSettings({
+          ...listeningSettings,
+          tta__listening_voice: selectedVoice,
+          tta__listening_lang: extractedLang // Auto-set language from voice
+        });
+        return;
+      }
+    }
+
     if (
       e.target.name === "tta__listening_lang" &&
       customizationSettings?.buttonSettings?.id == 4
@@ -420,7 +456,8 @@ export default function Listening() {
 
     if (
       e.target.name === "tta__listening_voice" &&
-      customizationSettings?.buttonSettings?.id > 3
+      customizationSettings?.buttonSettings?.id > 3 &&
+      customizationSettings?.buttonSettings?.id != 4 // Skip for Google TTS as handled above
     ) {
       let currentVoice = e.target.value;
       let baseURL = "https://cloud.google.com/text-to-speech/docs/audio/";
@@ -520,6 +557,32 @@ export default function Listening() {
     return `https://flagcdn.com/24x18/${countryCode}.png`;
   };
 
+  const getLanguageFlagEmoji = (langCode) => {
+    const flagEmojiMap = {
+      'en': '🇺🇸', 'en-US': '🇺🇸', 'en-GB': '🇬🇧',
+      'fr': '🇫🇷', 'fr-FR': '🇫🇷', 'fr-CA': '🇨🇦',
+      'de': '🇩🇪', 'de-DE': '🇩🇪',
+      'es': '🇪🇸', 'es-ES': '🇪🇸', 'es-MX': '🇲🇽',
+      'it': '🇮🇹', 'it-IT': '🇮🇹',
+      'pt': '🇵🇹', 'pt-PT': '🇵🇹', 'pt-BR': '🇧🇷',
+      'nl': '🇳🇱', 'nl-NL': '🇳🇱', 'nl-BE': '🇧🇪',
+      'ru': '🇷🇺', 'ru-RU': '🇷🇺',
+      'zh-CN': '🇨🇳', 'zh-TW': '🇹🇼',
+      'ja': '🇯🇵', 'ja-JP': '🇯🇵',
+      'ko': '🇰🇷', 'ko-KR': '🇰🇷',
+      'ar': '🇸🇦', 'ar-SA': '🇸🇦',
+      'hi': '🇮🇳', 'tr': '🇹🇷', 'pl': '🇵🇱',
+      'sv': '🇸🇪', 'no': '🇳🇴', 'da': '🇩🇰',
+      'fi': '🇫🇮', 'el': '🇬🇷', 'he': '🇮🇱',
+      'id': '🇮🇩', 'ms': '🇲🇾', 'th': '🇹🇭',
+      'vi': '🇻🇳', 'cs': '🇨🇿', 'hu': '🇭🇺',
+      'ro': '🇷🇴', 'sk': '🇸🇰', 'uk': '🇺🇦',
+      'bg': '🇧🇬', 'hr': '🇭🇷', 'sr': '🇷🇸',
+    };
+
+    return flagEmojiMap[langCode] || flagEmojiMap[langCode.split('-')[0]] || '🌐';
+  };
+
   const getCurrentLanguageName = () => {
     const currentLang = listeningSettings.tta__listening_lang;
     return currentPlayerLanguages[currentLang] || currentLang;
@@ -603,7 +666,7 @@ export default function Listening() {
                           <option disabled>Default Listening Language</option>
                           {Object.keys(currentPlayerLanguages).map((langKey) => (
                             <option key={langKey} value={currentPlayerLanguages[langKey]}>
-                              {currentPlayerLanguages[langKey]}
+                              {getLanguageFlagEmoji(currentPlayerLanguages[langKey])} {currentPlayerLanguages[langKey]}
                             </option>
                           ))}
                         </Form.Select>
@@ -773,49 +836,47 @@ export default function Listening() {
                 {/* For AtlasVoice TTS Pro (id == 3) and Google Cloud TTS (id == 4) - use new layout */}
                 {(customizationSettings?.buttonSettings?.id == 3 || customizationSettings?.buttonSettings?.id == 4) ? (
                   <>
-                    {/* Voice Language and Voice to Speak - Side by Side */}
-                    <Row className="mb-3">
-                      <Col xs={12} md={6}>
-                        <div className="tta_voice_card">
-                          <h3 className="tta_voice_card_title">
-                            Voice Language
-                            {customizationSettings?.buttonSettings?.id == 4 && (
-                              <span className="tta_pro_badge ml-2">PRO</span>
-                            )}
-                          </h3>
-                          <div className="tta_voice_select_wrapper">
-                            <img
-                              src={getLanguageFlag(
-                                Object.keys(currentPlayerLanguages).find(
-                                  key => key === listeningSettings.tta__listening_lang
-                                ) || listeningSettings.tta__listening_lang
-                              )}
-                              alt="flag"
-                              className="tta_voice_flag"
-                              onError={(e) => {
-                                e.target.style.display = "none";
-                              }}
-                            />
-                            <Form.Select
-                              onChange={handleChange}
-                              name="tta__listening_lang"
-                              id="tta__listening_lang"
-                              value={listeningSettings.tta__listening_lang}
-                              className="tta_orange_voice_select"
-                            >
-                              <option disabled>Default Listening Language</option>
-                              {Object.keys(currentPlayerLanguages).map((langKey) => (
-                                <option key={langKey} value={langKey}>
-                                  {currentPlayerLanguages[langKey]}
-                                </option>
-                              ))}
-                            </Form.Select>
-                          </div>
-                        </div>
-                      </Col>
-
-                      {customizationSettings?.buttonSettings?.id == 4 && (
+                    {customizationSettings?.buttonSettings?.id == 3 ? (
+                      // AtlasVoice TTS Pro - Show Voice Language
+                      <Row className="mb-3">
                         <Col xs={12} md={6}>
+                          <div className="tta_voice_card">
+                            <h3 className="tta_voice_card_title">Voice Language</h3>
+                            <div className="tta_voice_select_wrapper">
+                              <img
+                                src={getLanguageFlag(
+                                  Object.keys(currentPlayerLanguages).find(
+                                    key => key === listeningSettings.tta__listening_lang
+                                  ) || listeningSettings.tta__listening_lang
+                                )}
+                                alt="flag"
+                                className="tta_voice_flag"
+                                onError={(e) => {
+                                  e.target.style.display = "none";
+                                }}
+                              />
+                              <Form.Select
+                                onChange={handleChange}
+                                name="tta__listening_lang"
+                                id="tta__listening_lang"
+                                value={listeningSettings.tta__listening_lang}
+                                className="tta_orange_voice_select"
+                              >
+                                <option disabled>Default Listening Language</option>
+                                {Object.keys(currentPlayerLanguages).map((langKey) => (
+                                  <option key={langKey} value={langKey}>
+                                    {getLanguageFlagEmoji(langKey)} {currentPlayerLanguages[langKey]}
+                                  </option>
+                                ))}
+                              </Form.Select>
+                            </div>
+                          </div>
+                        </Col>
+                      </Row>
+                    ) : (
+                      // Google Cloud TTS - Only Voice to Speak (Full Width)
+                      <Row className="mb-3">
+                        <Col xs={12}>
                           <div className="tta_voice_card">
                             <h3 className="tta_voice_card_title">Voice to speak</h3>
                             <Form.Select
@@ -836,10 +897,14 @@ export default function Listening() {
                                 </option>
                               ))}
                             </Form.Select>
+                            {/* <p className="text-muted small mt-2 mb-0">
+                              <i className="fas fa-info-circle me-1"></i>
+                              Language will be automatically detected from the selected voice
+                            </p> */}
                           </div>
                         </Col>
-                      )}
-                    </Row>
+                      </Row>
+                    )}
 
                     {/* Audio Player - Blue styling for Google TTS */}
                     {customizationSettings?.buttonSettings?.id == 4 && (
@@ -897,7 +962,7 @@ export default function Listening() {
                                   <option disabled>Default Listening Language</option>
                                   {Object.keys(currentPlayerLanguages).map((langKey) => (
                                     <option key={langKey} value={langKey}>
-                                      {currentPlayerLanguages[langKey]}
+                                      {getLanguageFlagEmoji(langKey)} {currentPlayerLanguages[langKey]}
                                     </option>
                                   ))}
                                 </Form.Select>
@@ -1012,7 +1077,7 @@ export default function Listening() {
               </>
             )}
 
-            {/* Language Mapping Section - unchanged */}
+            {/* Language Mapping Section */}
             {Object.keys(multilingualActiveLanguages).length > 0 && (
               <div className="tta_mapping_section">
                 <div className="tta_mapping_header">
@@ -1081,61 +1146,61 @@ export default function Listening() {
                           </Form.Group>
                         </div>
 
-                        <div className="tta_mapping_col">
-                          <Form.Label className="tta_mapping_label">
-                            Select Language For{" "}
-                            {multilingualActiveLanguages[languageCode]}
-                          </Form.Label>
-                          <Form.Select
-                            onChange={(e) =>
-                              handleChange(
-                                e,
-                                index,
-                                customizationSettings?.buttonSettings?.id
-                              )
-                            }
-                            name={"tta__currentPlayerLanguages"}
-                            id={"tta__currentPlayerLanguages_index_" + index}
-                            value={
-                              listeningSettings?.tta__currentPlayerLanguages?.[
-                                customizationSettings?.buttonSettings?.id
-                              ]?.[index] ??
-                              Object.keys(currentPlayerLanguages).filter(
-                                (lang) => {
-                                  if (
-                                    customizationSettings?.buttonSettings?.id <
-                                    3
-                                  ) {
-                                    return currentPlayerLanguages[
-                                      lang
-                                    ].startsWith(languageCode);
+                        {/* Hide "Select Language For" for Google Cloud TTS */}
+                        {customizationSettings?.buttonSettings?.id != 4 && (
+                          <div className="tta_mapping_col">
+                            <Form.Label className="tta_mapping_label">
+                              Select Language For{" "}
+                              {multilingualActiveLanguages[languageCode]}
+                            </Form.Label>
+                            <Form.Select
+                              onChange={(e) =>
+                                handleChange(
+                                  e,
+                                  index,
+                                  customizationSettings?.buttonSettings?.id
+                                )
+                              }
+                              name={"tta__currentPlayerLanguages"}
+                              id={"tta__currentPlayerLanguages_index_" + index}
+                              value={
+                                listeningSettings?.tta__currentPlayerLanguages?.[
+                                  customizationSettings?.buttonSettings?.id
+                                ]?.[index] ??
+                                Object.keys(currentPlayerLanguages).filter(
+                                  (lang) => {
+                                    if (
+                                      customizationSettings?.buttonSettings?.id <
+                                      3
+                                    ) {
+                                      return currentPlayerLanguages[
+                                        lang
+                                      ].startsWith(languageCode);
+                                    }
+                                    return lang.startsWith(languageCode);
                                   }
-                                  return lang.startsWith(languageCode);
-                                }
-                              )[0]
-                            }
-                            className="tta_orange_select"
-                          >
-                            <option disabled>Default Listening Language</option>
-                            {Object.keys(currentPlayerLanguages).map(
-                              (langKey, idx) => {
+                                )[0]
+                              }
+                              className="tta_orange_select"
+                            >
+                              <option disabled>Default Listening Language</option>
+                              {Object.keys(currentPlayerLanguages).map((langKey, idx) => {
                                 return (
                                   <option
                                     key={idx}
                                     value={
-                                      customizationSettings?.buttonSettings
-                                        ?.id < 3
+                                      customizationSettings?.buttonSettings?.id < 3
                                         ? currentPlayerLanguages[langKey]
                                         : langKey
                                     }
                                   >
-                                    {currentPlayerLanguages[langKey]}
+                                    {getLanguageFlagEmoji(langKey)} {currentPlayerLanguages[langKey]}
                                   </option>
                                 );
-                              }
-                            )}
-                          </Form.Select>
-                        </div>
+                              })}
+                            </Form.Select>
+                          </div>
+                        )}
 
                         {customizationSettings?.buttonSettings?.id != 3 &&
                           Object.keys(currentPlayerLanguages).length && (

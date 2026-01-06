@@ -470,7 +470,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                 <div className="setting-row">
                     <div className="setting-label-area">
                         <span className="setting-label">
-                            Backup MP3 Files To Google Cloud Storage
+                            Storage MP3 Files To Google Cloud Storage
                         </span>
                         <OverlayTrigger
                             placement="top"
