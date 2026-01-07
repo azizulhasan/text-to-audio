@@ -626,6 +626,61 @@ export default function Listening() {
     return ticks;
   };
 
+  // Show flags in dropdown, hide in selected display
+  useEffect(() => {
+    const handleSelectFocus = (select) => {
+      // When dropdown opens, add emojis back to ALL options
+      Array.from(select.options).forEach(option => {
+        const flagEmoji = option.getAttribute('data-flag');
+        const originalText = option.getAttribute('data-original-text') || option.text;
+        
+        if (flagEmoji) {
+          // Store original text if not already stored
+          if (!option.getAttribute('data-original-text')) {
+            option.setAttribute('data-original-text', originalText);
+          }
+          
+          // Add flag if it's not already there
+          if (!option.text.match(/[\u{1F1E6}-\u{1F1FF}]/u)) {
+            option.text = `${flagEmoji} ${originalText}`;
+          }
+        }
+      });
+    };
+
+    const handleSelectBlur = (select) => {
+      // When dropdown closes, remove emoji from selected option only
+      const selectedOption = select.options[select.selectedIndex];
+      if (selectedOption) {
+        const originalText = selectedOption.getAttribute('data-original-text');
+        if (originalText) {
+          selectedOption.text = originalText;
+        }
+      }
+    };
+
+    const selects = document.querySelectorAll('.tta_orange_voice_select, .tta_orange_select');
+    
+    selects.forEach(select => {
+      select.addEventListener('focus', () => handleSelectFocus(select));
+      select.addEventListener('blur', () => handleSelectBlur(select));
+      select.addEventListener('change', () => {
+        // Small delay to ensure the change is registered
+        setTimeout(() => handleSelectBlur(select), 10);
+      });
+      
+      // Initialize: remove emoji from currently selected
+      handleSelectBlur(select);
+    });
+
+    return () => {
+      selects.forEach(select => {
+        select.removeEventListener('focus', () => handleSelectFocus(select));
+        select.removeEventListener('blur', () => handleSelectBlur(select));
+      });
+    };
+  }, [currentPlayerLanguages, listeningSettings]);
+
   return (
     <Container>
       <Row>
@@ -665,8 +720,8 @@ export default function Listening() {
                         >
                           <option disabled>Default Listening Language</option>
                           {Object.keys(currentPlayerLanguages).map((langKey) => (
-                            <option key={langKey} value={currentPlayerLanguages[langKey]}>
-                              {getLanguageFlagEmoji(currentPlayerLanguages[langKey])} {currentPlayerLanguages[langKey]}
+                            <option key={langKey} value={currentPlayerLanguages[langKey]} data-flag={getLanguageFlagEmoji(currentPlayerLanguages[langKey])}>
+                              {currentPlayerLanguages[langKey]}
                             </option>
                           ))}
                         </Form.Select>
@@ -864,8 +919,8 @@ export default function Listening() {
                               >
                                 <option disabled>Default Listening Language</option>
                                 {Object.keys(currentPlayerLanguages).map((langKey) => (
-                                  <option key={langKey} value={langKey}>
-                                    {getLanguageFlagEmoji(langKey)} {currentPlayerLanguages[langKey]}
+                                  <option key={langKey} value={langKey} data-flag={getLanguageFlagEmoji(langKey)}>
+                                    {currentPlayerLanguages[langKey]}
                                   </option>
                                 ))}
                               </Form.Select>
@@ -897,10 +952,10 @@ export default function Listening() {
                                 </option>
                               ))}
                             </Form.Select>
-                            {/* <p className="text-muted small mt-2 mb-0">
+                            <p className="text-muted small mt-2 mb-0">
                               <i className="fas fa-info-circle me-1"></i>
                               Language will be automatically detected from the selected voice
-                            </p> */}
+                            </p>
                           </div>
                         </Col>
                       </Row>
@@ -961,8 +1016,8 @@ export default function Listening() {
                                 >
                                   <option disabled>Default Listening Language</option>
                                   {Object.keys(currentPlayerLanguages).map((langKey) => (
-                                    <option key={langKey} value={langKey}>
-                                      {getLanguageFlagEmoji(langKey)} {currentPlayerLanguages[langKey]}
+                                    <option key={langKey} value={langKey} data-flag={getLanguageFlagEmoji(langKey)}>
+                                      {currentPlayerLanguages[langKey]}
                                     </option>
                                   ))}
                                 </Form.Select>
@@ -1193,8 +1248,9 @@ export default function Listening() {
                                         ? currentPlayerLanguages[langKey]
                                         : langKey
                                     }
+                                    data-flag={getLanguageFlagEmoji(langKey)}
                                   >
-                                    {getLanguageFlagEmoji(langKey)} {currentPlayerLanguages[langKey]}
+                                    {currentPlayerLanguages[langKey]}
                                   </option>
                                 );
                               })}
