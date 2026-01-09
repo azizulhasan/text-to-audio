@@ -522,6 +522,11 @@ export default function Listening() {
   };
 
   const getLanguageFlag = (langCode) => {
+    // Handle undefined or null langCode
+    if (!langCode) {
+      return "https://flagcdn.com/24x18/us.png"; // Default flag
+    }
+
     const flagMap = {
       en: "us",
       "en-US": "us",
@@ -553,11 +558,16 @@ export default function Listening() {
     };
 
     const countryCode =
-      flagMap[langCode] || langCode.toLowerCase().split("-")[0];
+      flagMap[langCode] || (typeof langCode === 'string' ? langCode.toLowerCase().split("-")[0] : 'us');
     return `https://flagcdn.com/24x18/${countryCode}.png`;
   };
 
   const getLanguageFlagEmoji = (langCode) => {
+    // Handle undefined or null langCode
+    if (!langCode) {
+      return '🌐'; // Default globe emoji
+    }
+
     const flagEmojiMap = {
       'en': '🇺🇸', 'en-US': '🇺🇸', 'en-GB': '🇬🇧',
       'fr': '🇫🇷', 'fr-FR': '🇫🇷', 'fr-CA': '🇨🇦',
@@ -571,7 +581,7 @@ export default function Listening() {
       'ja': '🇯🇵', 'ja-JP': '🇯🇵',
       'ko': '🇰🇷', 'ko-KR': '🇰🇷',
       'ar': '🇸🇦', 'ar-SA': '🇸🇦',
-      'hi': '🇮🇳', 'tr': '🇹🇷', 'pl': '🇵🇱',
+      'hi': '🇮🇳', 'tr': '🇹🇷', 'pl': '🇵🇱', 
       'sv': '🇸🇪', 'no': '🇳🇴', 'da': '🇩🇰',
       'fi': '🇫🇮', 'el': '🇬🇷', 'he': '🇮🇱',
       'id': '🇮🇩', 'ms': '🇲🇾', 'th': '🇹🇭',
@@ -580,7 +590,14 @@ export default function Listening() {
       'bg': '🇧🇬', 'hr': '🇭🇷', 'sr': '🇷🇸',
     };
 
-    return flagEmojiMap[langCode] || flagEmojiMap[langCode.split('-')[0]] || '🌐';
+    // Try exact match first
+    if (flagEmojiMap[langCode]) {
+      return flagEmojiMap[langCode];
+    }
+
+    // Try base language code (e.g., "en" from "en-US")
+    const baseCode = typeof langCode === 'string' ? langCode.split('-')[0] : '';
+    return flagEmojiMap[baseCode] || '🌐';
   };
 
   const getCurrentLanguageName = () => {
@@ -628,55 +645,73 @@ export default function Listening() {
 
   // Show flags in dropdown, hide in selected display
   useEffect(() => {
-    const handleSelectFocus = (select) => {
-      // When dropdown opens, add emojis back to ALL options
+    const initializeOptions = (select) => {
+      // Store original text for all options on first load
       Array.from(select.options).forEach(option => {
-        const flagEmoji = option.getAttribute('data-flag');
-        const originalText = option.getAttribute('data-original-text') || option.text;
-        
-        if (flagEmoji) {
-          // Store original text if not already stored
-          if (!option.getAttribute('data-original-text')) {
-            option.setAttribute('data-original-text', originalText);
-          }
-          
-          // Add flag if it's not already there
-          if (!option.text.match(/[\u{1F1E6}-\u{1F1FF}]/u)) {
-            option.text = `${flagEmoji} ${originalText}`;
-          }
+        if (option.getAttribute('data-flag') && !option.getAttribute('data-text-initialized')) {
+          const currentText = option.text.replace(/[\u{1F1E6}-\u{1F1FF}]{2}\s*/gu, '').trim();
+          option.setAttribute('data-original-text', currentText);
+          option.setAttribute('data-text-initialized', 'true');
         }
       });
     };
 
-    const handleSelectBlur = (select) => {
-      // When dropdown closes, remove emoji from selected option only
-      const selectedOption = select.options[select.selectedIndex];
-      if (selectedOption) {
-        const originalText = selectedOption.getAttribute('data-original-text');
-        if (originalText) {
-          selectedOption.text = originalText;
+    const showAllFlags = (select) => {
+      // Add flags to ALL options when dropdown opens
+      Array.from(select.options).forEach(option => {
+        const flagEmoji = option.getAttribute('data-flag');
+        const originalText = option.getAttribute('data-original-text');
+        
+        if (flagEmoji && originalText) {
+          // Always set with flag when opening dropdown
+          option.text = `${flagEmoji} ${originalText}`;
         }
-      }
+      });
+    };
+
+    const hideSelectedFlag = (select) => {
+      // Remove flag from selected option only when dropdown closes
+      setTimeout(() => {
+        const selectedOption = select.options[select.selectedIndex];
+        if (selectedOption) {
+          const originalText = selectedOption.getAttribute('data-original-text');
+          if (originalText) {
+            selectedOption.text = originalText;
+          }
+        }
+      }, 0);
     };
 
     const selects = document.querySelectorAll('.tta_orange_voice_select, .tta_orange_select');
     
     selects.forEach(select => {
-      select.addEventListener('focus', () => handleSelectFocus(select));
-      select.addEventListener('blur', () => handleSelectBlur(select));
-      select.addEventListener('change', () => {
-        // Small delay to ensure the change is registered
-        setTimeout(() => handleSelectBlur(select), 10);
-      });
+      // Initialize all options
+      initializeOptions(select);
       
-      // Initialize: remove emoji from currently selected
-      handleSelectBlur(select);
+      // Hide flag from currently selected option on mount
+      hideSelectedFlag(select);
+      
+      // Add event listeners
+      const onFocus = () => showAllFlags(select);
+      const onBlur = () => hideSelectedFlag(select);
+      const onChange = () => hideSelectedFlag(select);
+      
+      select.addEventListener('focus', onFocus);
+      select.addEventListener('blur', onBlur);
+      select.addEventListener('change', onChange);
+      
+      // Store listeners for cleanup
+      select._flagListeners = { onFocus, onBlur, onChange };
     });
 
     return () => {
       selects.forEach(select => {
-        select.removeEventListener('focus', () => handleSelectFocus(select));
-        select.removeEventListener('blur', () => handleSelectBlur(select));
+        if (select._flagListeners) {
+          select.removeEventListener('focus', select._flagListeners.onFocus);
+          select.removeEventListener('blur', select._flagListeners.onBlur);
+          select.removeEventListener('change', select._flagListeners.onChange);
+          delete select._flagListeners;
+        }
       });
     };
   }, [currentPlayerLanguages, listeningSettings]);
@@ -708,7 +743,7 @@ export default function Listening() {
                           alt="flag"
                           className="tta_voice_flag"
                           onError={(e) => {
-                            e.target.style.display = "none";
+                            e.target.style.display = "show";
                           }}
                         />
                         <Form.Select
@@ -907,7 +942,7 @@ export default function Listening() {
                                 alt="flag"
                                 className="tta_voice_flag"
                                 onError={(e) => {
-                                  e.target.style.display = "none";
+                                  e.target.style.display = "show";
                                 }}
                               />
                               <Form.Select
@@ -1004,7 +1039,7 @@ export default function Listening() {
                                   alt="flag"
                                   className="tta_voice_flag"
                                   onError={(e) => {
-                                    e.target.style.display = "none";
+                                    e.target.style.display = "show";
                                   }}
                                 />
                                 <Form.Select
@@ -1171,7 +1206,7 @@ export default function Listening() {
                                 alt="flag"
                                 className="tta_mapping_flag"
                                 onError={(e) => {
-                                  e.target.style.display = "none";
+                                  e.target.style.display = "show";
                                 }}
                               />
                               <Form.Select
