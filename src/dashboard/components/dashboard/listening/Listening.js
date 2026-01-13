@@ -31,6 +31,7 @@ export default function Listening() {
   const [currentPlayerFilteredVoices, setCurrentPlayerFilteredVoices] =
     useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   const [listeningSettings, setListeningSettings] = useState({
     tta__listening_voice: "Google UK English Female",
@@ -79,9 +80,11 @@ export default function Listening() {
       const audio_mp3 = document.getElementById("tts_audio_mp3");
       const audio_tag = document.getElementById("tts_audio_tag");
 
-      audio_wav.src = "https://cdn.openai.com/API/docs/audio/alloy.wav";
-      audio_mp3.src = "https://cdn.openai.com/API/docs/audio/alloy.wav";
-      audio_tag.load();
+      if (audio_wav && audio_mp3 && audio_tag) {
+        audio_wav.src = "https://cdn.openai.com/API/docs/audio/alloy.wav";
+        audio_mp3.src = "https://cdn.openai.com/API/docs/audio/alloy.wav";
+        audio_tag.load();
+      }
     }
   }, [customizationSettings]);
 
@@ -204,6 +207,16 @@ export default function Listening() {
   };
 
   useEffect(() => {
+    let completedRequests = 0;
+    const totalRequests = 2;
+
+    const checkLoadingComplete = () => {
+      completedRequests++;
+      if (completedRequests === totalRequests) {
+        setIsDataLoaded(true);
+      }
+    };
+
     if (
       window.hasOwnProperty("ttsObj") &&
       ttsObj?.gctts_is_authenticated == 1
@@ -223,6 +236,9 @@ export default function Listening() {
       })
       .catch((err) => {
         console.log(err);
+      })
+      .finally(() => {
+        checkLoadingComplete();
       });
 
     let customize = new FormData();
@@ -238,6 +254,9 @@ export default function Listening() {
       })
       .catch((err) => {
         console.log(err);
+      })
+      .finally(() => {
+        checkLoadingComplete();
       });
   }, []);
 
@@ -423,10 +442,12 @@ export default function Listening() {
         const audio_mp3 = document.getElementById("tts_audio_mp3");
         const audio_tag = document.getElementById("tts_audio_tag");
 
-        audio_wav.src = wavFileName;
-        audio_mp3.src = mp3FileName;
-        audio_tag.load();
-        audio_tag.play();
+        if (audio_wav && audio_mp3 && audio_tag) {
+          audio_wav.src = wavFileName;
+          audio_mp3.src = mp3FileName;
+          audio_tag.load();
+          audio_tag.play();
+        }
 
         setListeningSettings({
           ...listeningSettings,
@@ -472,10 +493,12 @@ export default function Listening() {
       const audio_mp3 = document.getElementById("tts_audio_mp3");
       const audio_tag = document.getElementById("tts_audio_tag");
 
-      audio_wav.src = wavFileName;
-      audio_mp3.src = mp3FileName;
-      audio_tag.load();
-      audio_tag.play();
+      if (audio_wav && audio_mp3 && audio_tag) {
+        audio_wav.src = wavFileName;
+        audio_mp3.src = mp3FileName;
+        audio_tag.load();
+        audio_tag.play();
+      }
     }
 
     let listeningSettingsCloned = structuredClone(listeningSettings);
@@ -716,7 +739,7 @@ export default function Listening() {
     };
   }, [currentPlayerLanguages, listeningSettings]);
 
-  return (
+  return isDataLoaded ? (
     <Container>
       <Row>
         <Col xs={12} sm={12} lg={8}>
@@ -1168,7 +1191,7 @@ export default function Listening() {
             )}
 
             {/* Language Mapping Section */}
-            {Object.keys(multilingualActiveLanguages).length > 0 && (
+            {Object.keys(multilingualActiveLanguages).length > 0 && customizationSettings?.buttonSettings?.id && (
               <div className="tta_mapping_section">
                 <div className="tta_mapping_header">
                   <h3 className="tta_mapping_title">
@@ -1237,7 +1260,7 @@ export default function Listening() {
                         </div>
 
                         {/* Hide "Select Language For" for Google Cloud TTS */}
-                        {customizationSettings?.buttonSettings?.id != 4 && (
+                        {customizationSettings.buttonSettings.id != 4 && (
                           <div className="tta_mapping_col">
                             <Form.Label className="tta_mapping_label">
                               Select Language For{" "}
@@ -1293,7 +1316,7 @@ export default function Listening() {
                           </div>
                         )}
 
-                        {customizationSettings?.buttonSettings?.id != 3 &&
+                        {customizationSettings.buttonSettings.id != 3 &&
                           Object.keys(currentPlayerLanguages).length && (
                             <div className="tta_mapping_col">
                               <Form.Label className="tta_mapping_label">
@@ -1391,5 +1414,14 @@ export default function Listening() {
         </Col>
       </Row>
     </Container>
+  ) : (
+    <div
+      className="tta-loading-spinner"
+    >
+      <div>
+        <i className="fas fa-spinner fa-spin me-2"></i>
+        Loading...
+      </div>
+    </div>
   );
 }
