@@ -58,12 +58,12 @@ export default function DashboardTopNav() {
             target="_blank"
             className="btn d-flex align-items-center gap-2 tta-tab-style"
 
-            onMouseOver={(e) =>
-              (e.currentTarget.style.background = "rgba(255,255,255,0.15)")
-            }
-            onMouseOut={(e) =>
-              (e.currentTarget.style.background = "rgba(255,255,255,0.1)")
-            }
+            // onMouseOver={(e) =>
+            //   (e.currentTarget.style.background = "rgba(255,255,255,0.15)")
+            // }
+            // onMouseOut={(e) =>
+            //   (e.currentTarget.style.background = "rgba(255,255,255,0.1)")
+            // }
           >
             <span>
               <svg
@@ -185,12 +185,12 @@ export default function DashboardTopNav() {
               target="_blank"
               className="btn d-flex align-items-center gap-2 tta-tab-style"
 
-              onMouseOver={(e) =>
-                (e.currentTarget.style.background = "rgba(255,255,255,0.15)")
-              }
-              onMouseOut={(e) =>
-                (e.currentTarget.style.background = "rgba(255,255,255,0.1)")
-              }
+              // onMouseOver={(e) =>
+              //   (e.currentTarget.style.background = "rgba(255,255,255,0.15)")
+              // }
+              // onMouseOut={(e) =>
+              //   (e.currentTarget.style.background = "rgba(255,255,255,0.1)")
+              // }
             >
               <span>
                 <svg
@@ -256,12 +256,12 @@ export default function DashboardTopNav() {
             target="_blank"
             className="btn d-flex align-items-center gap-2 tta-tab-style"
 
-            onMouseOver={(e) =>
-              (e.currentTarget.style.background = "rgba(255,255,255,0.15)")
-            }
-            onMouseOut={(e) =>
-              (e.currentTarget.style.background = "rgba(255,255,255,0.1)")
-            }
+            // onMouseOver={(e) =>
+            //   (e.currentTarget.style.background = "rgba(255,255,255,0.15)")
+            // }
+            // onMouseOut={(e) =>
+            //   (e.currentTarget.style.background = "rgba(255,255,255,0.1)")
+            // }
           >
             <span>
               <svg
@@ -271,7 +271,7 @@ export default function DashboardTopNav() {
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <g clip-path="url(#clip0_2201_666)">
+                <g clipPath="url(#clip0_2201_666)">
                   <path
                     d="M20.7101 0H3.28958C1.90105 0 0.775391 1.12561 0.775391 2.51419V7.40756C0.775391 8.79609 1.901 9.92175 3.28958 9.92175H20.7102C22.0987 9.92175 23.2243 8.79614 23.2243 7.40756V2.51419C23.2243 1.12561 22.0986 0 20.7101 0Z"
                     fill="#D8401D"
