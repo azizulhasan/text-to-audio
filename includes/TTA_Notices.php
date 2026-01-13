@@ -30,7 +30,7 @@ class TTA_Notices {
 
 		// if (!is_pro_active() && in_array(admin_url(basename($_SERVER['REQUEST_URI'])), [ admin_url('index.php') , admin_url('plugins.php'), admin_url('update-core.php'), \admin_url('plugin-install.php'), \admin_url('admin.php?page=text-to-audio')] ) )  {
 //		 if ( ! is_pro_active() ) {
-			 add_action( 'admin_notices', [ $this, 'tta_free_promotion_notice' ] );
+//			 add_action( 'admin_notices', [ $this, 'tta_free_promotion_notice' ] );
 			 add_action( 'admin_notices', [ $this, 'tta_translation_request' ] );
 //		 }
 
@@ -110,7 +110,7 @@ class TTA_Notices {
 
              add_action( 'admin_notices', [ $this, 'plugin_voice_and_language_mismatch_callback' ] );
 
-//             add_action( 'admin_notices', [ $this, 'plugin_features_notice_callback' ] );
+             add_action( 'admin_notices', [ $this, 'plugin_features_notice_callback' ] );
 //		 	 add_action( 'admin_notices', [ $this, 'plugin_analytics_notice_callback' ] );
 
 //             foreach ( $plugins as $plugin_name =>  $data ){
@@ -290,9 +290,6 @@ class TTA_Notices {
 //        delete_option('tts_plugin_voice_and_language_mismatch_next_show_time');
 //        delete_user_meta(\get_current_user_id(), 'tts_plugin_voice_and_language_mismatch_dismissed');
 //        update_option('tts_plugin_voice_and_language_mismatch_next_show_time', 12);
-
-
-        $pluginName = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
 
         $has_notice              = false;
         $user_id                 = get_current_user_id();
@@ -629,13 +626,13 @@ class TTA_Notices {
 	 */
 	public function tta_translation_request() {
 
-//        delete_option('tts_is_displayed_force_notice_december_25');
-		if ( ! get_option( 'tts_is_displayed_force_notice_december_25' ) ) {
+//        delete_option('tts_is_displayed_force_notice_december_26');
+		if ( ! get_option( 'tts_is_displayed_force_notice_december_26' ) ) {
 			delete_option( 'tta_translation_notice_next_show_time' );
 			delete_user_meta( '1', 'tta_translation_notice_dismissed' );
 			update_option( 'tta_translation_notice_next_show_time', 12 );
 
-			update_option( 'tts_is_displayed_force_notice_december_25', true );
+			update_option( 'tts_is_displayed_force_notice_december_26', true );
 		}
 
 		$pluginName              = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
