@@ -8,6 +8,7 @@ import UpgradeToPro from "../../UpgradeToPro";
 export default function Integrations() {
   const [currentTTSServic, setCurrentTTSServic] = useState(""); // Empty by default
   const [authenticatedServices, setAuthenticatedServices] = useState([]);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   const apiURL = useMemo(() => {
     return (
@@ -53,6 +54,16 @@ export default function Integrations() {
   // Check both services authentication status on mount
   useEffect(() => {
     if (ttsObj.is_pro_active) {
+      let completedRequests = 0;
+      const totalRequests = 2;
+
+      const checkLoadingComplete = () => {
+        completedRequests++;
+        if (completedRequests === totalRequests) {
+          setIsDataLoaded(true);
+        }
+      };
+
       // Check Google Cloud TTS authentication
       postData(apiURL + "get_auth_file", {}, "GET")
         .then((res) => {
@@ -72,6 +83,9 @@ export default function Integrations() {
         })
         .catch((err) => {
           console.log('Google TTS Auth Error:', err);
+        })
+        .finally(() => {
+          checkLoadingComplete();
         });
 
       // Check ChatGPT TTS authentication  
@@ -104,7 +118,13 @@ export default function Integrations() {
         })
         .catch((err) => {
           console.log('ChatGPT TTS Auth Error:', err);
+        })
+        .finally(() => {
+          checkLoadingComplete();
         });
+    } else {
+      // If pro is not active, set loading as complete immediately
+      setIsDataLoaded(true);
     }
   }, []);
 
@@ -136,7 +156,7 @@ export default function Integrations() {
   }, [currentTTSServic, shouldCheckChatGPT]);
 
 
-  return (
+  return isDataLoaded ? (
     <Container fluid className="tta-container">
       <Row>
         <Col xs={12} lg={8}>
@@ -254,5 +274,14 @@ export default function Integrations() {
         </Col>
       </Row>
     </Container>
+  ) : (
+    <div
+      className="tta-loading-spinner"
+    >
+      <div>
+        <i className="fas fa-spinner fa-spin me-2"></i>
+        Loading...
+      </div>
+    </div>
   );
 }

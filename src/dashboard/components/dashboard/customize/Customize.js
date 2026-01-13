@@ -79,6 +79,7 @@ export default function Customize() {
   const [isGCAuthenticated, setGCIsAuthenticated] = useState(false);
   const [isBackUpToGCS, setIsBackUpToGCS] = useState(false);
   const [isChatGPTAuthenticated, setIsChatGPTAuthenticated] = useState(false);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   const setDefaultButtonSettingsIfNeeded = (res) => {
     if (!res.data?.buttonSettings) {
@@ -109,6 +110,16 @@ export default function Customize() {
   };
 
   useEffect(() => {
+    let completedRequests = 0;
+    const totalRequests = window.hasOwnProperty("ttsObj") && ttsObj?.is_pro_active ? 4 : 2;
+
+    const checkLoadingComplete = () => {
+      completedRequests++;
+      if (completedRequests === totalRequests) {
+        setIsDataLoaded(true);
+      }
+    };
+
     let customize = new FormData();
     customize.append("method", "get");
     postWithoutImage(tta_obj.api_url + "tta/v1/customize", customize)
@@ -190,6 +201,9 @@ export default function Customize() {
       })
       .catch((err) => {
         console.log(err);
+      })
+      .finally(() => {
+        checkLoadingComplete();
       });
 
     let listening = new FormData();
@@ -200,7 +214,11 @@ export default function Customize() {
       })
       .catch((err) => {
         console.log(err);
+      })
+      .finally(() => {
+        checkLoadingComplete();
       });
+
     let initialText =
       "The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!";
 
@@ -226,6 +244,9 @@ export default function Customize() {
         })
         .catch((err) => {
           console.log(err);
+        })
+        .finally(() => {
+          checkLoadingComplete();
         });
 
       let data = new FormData();
@@ -241,6 +262,9 @@ export default function Customize() {
         })
         .catch((err) => {
           console.log(err);
+        })
+        .finally(() => {
+          checkLoadingComplete();
         });
     }
   }, []);
@@ -570,7 +594,7 @@ export default function Customize() {
     { id: 5, name: "ChatGPT TTS", object: "TextToSpeechPro", disabled: false },
   ]);
 
-  return (
+  return isDataLoaded ? (
     <Container fluid className="tta-container">
       <Row>
         <Col xs={12} lg={8}>
@@ -783,5 +807,14 @@ export default function Customize() {
         </Col>
       </Row>
     </Container>
+  ) : (
+    <div
+      className="tta-loading-spinner"
+    >
+      <div>
+        <i className="fas fa-spinner fa-spin me-2"></i>
+        Loading...
+      </div>
+    </div>
   );
 }
