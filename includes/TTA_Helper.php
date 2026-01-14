@@ -1620,24 +1620,4 @@ class TTA_Helper
         // Allow filtering of final schema markup
         return apply_filters('tts_audio_schema_markup', $schema_markup, $schema_data, $params, $post);
     }
-    public  static function clean_unicode_text($text) {
-        if (empty($text)) {
-            return $text;
-        }
-
-        // Escape existing quotes to prevent JSON decode issues
-        $text = str_replace('"', '\\"', $text);
-
-        // Decode Unicode escape sequences
-        $text = json_decode('"' . $text . '"');
-
-        // Handle HTML entities
-        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-        // Remove any null bytes
-        $text = str_replace("\0", "", $text);
-
-        return trim($text);
-    }
-
 }
