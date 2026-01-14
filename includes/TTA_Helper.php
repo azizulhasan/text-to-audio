@@ -1541,9 +1541,9 @@ class TTA_Helper
         $audio_url = $mp3_file_urls[$file_url_key];
 
         // Sanitize data for JSON output
-        $title_sanitized = esc_js($title);
-        $excerpt_sanitized = esc_js($excerpt);
-        $audio_url_sanitized = esc_url($audio_url);
+        $title_sanitized = $title;
+        $excerpt_sanitized = $excerpt;
+        $audio_url_sanitized = $audio_url;
         $language_sanitized = esc_js($language);
         $voice_sanitized = esc_js($voice);
 
@@ -1556,16 +1556,19 @@ class TTA_Helper
         // Calculate duration in ISO 8601 format (PT#M#S)
         $duration = 'PT' . intval($content_read_time) . 'M';
 
+        $description = $excerpt_sanitized ?: $description;
+        $description = tta_clean_content($description);
         // Build schema data array
         $schema_data = [
             '@context' => 'https://schema.org',
             '@type' => 'AudioObject',
             'name' => $title_sanitized,
-            'description' => $excerpt_sanitized ?: $description,
+            'description' => $description,
             'contentUrl' => $audio_url_sanitized,
             'encodingFormat' => 'audio/mpeg',
             'duration' => $duration,
             'uploadDate' => $post_date,
+            'transcript' => $description,
         ];
 
         // Add language if available
@@ -1590,13 +1593,13 @@ class TTA_Helper
         }
 
         // Add associated web page
-        if (!empty($post_url)) {
-            $schema_data['associatedArticle'] = [
-                "@type" => "Article",
-                'url' => esc_url($post_url),
-                'headline' => $title_sanitized,
-            ];
-        }
+//        if (!empty($post_url)) {
+//            $schema_data['associatedArticle'] = [
+//                "@type" => "Article",
+//                'url' => esc_url($post_url),
+//                'headline' => $title_sanitized,
+//            ];
+//        }
 
         // Allow filtering of schema data
         $schema_data = apply_filters('tts_audio_schema_data', $schema_data, $params, $post);
@@ -1606,7 +1609,10 @@ class TTA_Helper
         ?>
 <!-- Text To Audio Schema -->
 <script type="application/ld+json">
-<?php echo wp_json_encode($schema_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES); ?>
+<?php echo wp_json_encode($schema_data, JSON_PRETTY_PRINT |           // Makes it readable
+        JSON_UNESCAPED_SLASHES |      // Keeps URLs clean (/ instead of \/)
+        JSON_UNESCAPED_UNICODE        // Converts \u2019 to actual characters
+    ); ?>
 </script>
         <?php
         $schema_markup = ob_get_clean();
@@ -1614,6 +1620,24 @@ class TTA_Helper
         // Allow filtering of final schema markup
         return apply_filters('tts_audio_schema_markup', $schema_markup, $schema_data, $params, $post);
     }
+    public  static function clean_unicode_text($text) {
+        if (empty($text)) {
+            return $text;
+        }
 
+        // Escape existing quotes to prevent JSON decode issues
+        $text = str_replace('"', '\\"', $text);
+
+        // Decode Unicode escape sequences
+        $text = json_decode('"' . $text . '"');
+
+        // Handle HTML entities
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        // Remove any null bytes
+        $text = str_replace("\0", "", $text);
+
+        return trim($text);
+    }
 
 }
