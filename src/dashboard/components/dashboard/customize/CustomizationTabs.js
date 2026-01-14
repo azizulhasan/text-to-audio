@@ -1,38 +1,50 @@
-import Tab from 'react-bootstrap/Tab';
-import Tabs from 'react-bootstrap/Tabs';
-import { Form } from 'react-bootstrap';
+import React, { useState } from "react";
+import TTSCustomizationButton from "./button/TTSCustomizationButton";
 
-import TTSButtonDesign from './design/TTSButtonDesign';
-import TTSCustomizationButton from './button/TTSCustomizationButton';
+function CustomizationTabs({
+  buttonLists,
+  listeningSettings,
+  handleChange,
+  customCSS,
+  listeningBtnStyle,
+}) {
+  const [isPlayerSectionOpen, setIsPlayerSectionOpen] = useState(true);
 
-function CustomizationTabs({ buttonLists, listeningSettings, handleChange, handleSubmit, customCSS, listeningBtnStyle }) {
-    return (
-        <>
-            <Form onSubmit={handleSubmit} >
-                <Tabs
-                    defaultActiveKey="design"
-                    id="customization-button"
-                    className="mb-3"
+  // Helper to handle toggle for player accordion
+  const togglePlayerAccordion = () => {
+    setIsPlayerSectionOpen((prevState) => !prevState);
+  };
 
-                >
-                    <Tab eventKey="button" title="Player" ><TTSCustomizationButton buttonLists={buttonLists} listeningBtnStyle={listeningBtnStyle} handleChange={handleChange} /></Tab>
-                    <Tab eventKey="design" title="Design" ><TTSButtonDesign customCSS={customCSS} handleSubmit={handleSubmit} listeningBtnStyle={listeningBtnStyle} handleChange={handleChange} /></Tab>
-                </Tabs >
-                <div
-                  className="position-sticky bottom-0"
-                  style={{ zIndex: 1030, marginTop: "20px" }}
-                >
-                <div className='d-grid gap-3 col-12 mx-auto mt-5 mb-4'>
-                    <button
-                        type='submit'
-                        className='tta_btn  btn-block tta_btn  btn-center btn-block'>
-                        Save
-                    </button>
-                </div>
-                </div>
-            </Form>
-        </>
-    );
+  return (
+    <div className="border-0 shadow-sm mb-3 tta_player-customization-card">
+      <div className="p-0">
+        <div
+          className="tta_player-header"
+          onClick={togglePlayerAccordion}
+          style={{ cursor: "pointer" }}
+        >
+          <h5 className="tta_player-title">Player Customization</h5>
+          <button
+            className="tta_player-toggle-btn"
+            type="button"
+            style={{ pointerEvents: "none" }}
+          >
+            {isPlayerSectionOpen ? "▲" : "▼"}
+          </button>
+        </div>
+        {isPlayerSectionOpen && (
+          <div className="tta_player-content">
+            {/* Player Selection */}
+            <TTSCustomizationButton
+              buttonLists={buttonLists}
+              listeningBtnStyle={listeningBtnStyle}
+              handleChange={handleChange}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default CustomizationTabs;
