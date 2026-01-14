@@ -3,6 +3,7 @@
 namespace TTA;
 
 use TTA_Admin\TTA_Admin;
+use TTA_Admin\TTA_Posts_List;
 
 /**
  * The file that defines the core plugin class
@@ -118,6 +119,11 @@ class TTA {
         $this->loader->add_action('init', $plugin_admin, 'engueue_block_scripts');
 
         $this->loader->add_action('wp_enqueue_scripts', $plugin_admin, 'enqueue_TTA', 99999);
+
+        // Initialize Posts List customization
+        if (is_admin()) {
+            new TTA_Posts_List();
+        }
 
     }
 
