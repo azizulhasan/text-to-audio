@@ -106,6 +106,9 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     static $block_btn_no = 0;
     $player_number++;
     global $post;
+    if(isset($atts['id']) && $atts['id']) {
+        $post = get_post($atts['id']);
+    }
     /**
      * TTS-168
      */
