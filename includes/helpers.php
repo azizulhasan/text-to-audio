@@ -390,8 +390,26 @@ function get_enqueued_js_object($params, $plugin_all_settings)
         }
     </script>
     <?php
+    // Generate audio schema markup (only if conditions are met)
+    $schema_params = [
+        'title' => $title,
+        'excerpt' => $excerpt_sanitized,
+        'description' => $content,
+        'post' => $post,
+        'content_read_time' => $content_read_time,
+        'mp3_file_urls' => $mp3_file_urls,
+        'file_url_key' => $file_url_key,
+        'language' => $language,
+        'voice' => $voice,
+    ];
+    echo TTA_Helper::generate_audio_schema($schema_params);
     $object = ob_get_contents();
+//    ob_end_clean();
 
+
+//    $audio_schema = TTA_Helper::generate_audio_schema($schema_params);
+//    error_log(print_r($audio_schema, true));
+    // Return JS object with schema if available
     return $object;
 }
 
