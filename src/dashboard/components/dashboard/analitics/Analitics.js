@@ -384,55 +384,7 @@ export default function Analytics() {
                       Dec 27, - Jan 03, 2025
                     </span>
                   </div>
-
-                  <div className="tta_multiselect_wrapper">
-                    <Form.Label className="tta_form_label">
-                      all{" "}
-                      <span className="tta_remove_tag">×</span>
-                    </Form.Label>
-                    <MultiSelect
-                      toastMessage="Tracking more than 5 post IDs is a pro feature"
-                      name="tts_trackable_post_ids"
-                      id="tts_trackable_post_ids"
-                      selectedItems={selectedIds}
-                      selectionLimit={5}
-                      options={postIds}
-                      onChange={handleSelectionChange}
-                    />
-                  </div>
-
-                  <div className="tta_search_section">
-                    <Form.Control
-                      type="number"
-                      name="post_id"
-                      placeholder="Post ID"
-                      value={analyticsSearch?.post_id || ""}
-                      onChange={handleSearchData}
-                      className="tta_search_input"
-                    />
-                    <div className="tta_date_inputs">
-                      <Form.Control
-                        type="date"
-                        name="from_date"
-                        value={analyticsSearch?.from_date || ""}
-                        onChange={handleSearchData}
-                        className="tta_search_input"
-                      />
-                      <Form.Control
-                        type="date"
-                        name="to_date"
-                        value={analyticsSearch?.to_date || ""}
-                        onChange={handleSearchData}
-                        className="tta_search_input"
-                      />
-                    </div>
-                    <Button onClick={handleSearch} className="tta_search_btn">
-                      Search
-                    </Button>
-                  </div>
-
-                  {/* Metrics Table */}
-                  <div className="tta_metrics_table">
+                                    <div className="tta_metrics_table">
                     <div className="tta_table_row tta_table_header_row">
                       <div className="tta_table_cell">Metric</div>
                       <div className="tta_table_cell">Value</div>
@@ -482,6 +434,104 @@ export default function Analytics() {
                       <div className="tta_table_cell">0.50</div>
                     </div>
                   </div>
+
+                  <div className="tta_multiselect_wrapper">
+                    <Form.Label className="tta_form_label">
+                      all{" "}
+                      <span className="tta_remove_tag">×</span>
+                    </Form.Label>
+                    <MultiSelect
+                      toastMessage="Tracking more than 5 post IDs is a pro feature"
+                      name="tts_trackable_post_ids"
+                      id="tts_trackable_post_ids"
+                      selectedItems={selectedIds}
+                      selectionLimit={5}
+                      options={postIds}
+                      onChange={handleSelectionChange}
+                    />
+                  </div>
+
+                  <div className="tta_search_section">
+                    <Form.Control
+                      type="number"
+                      name="post_id"
+                      placeholder="Post ID"
+                      value={analyticsSearch?.post_id || ""}
+                      onChange={handleSearchData}
+                      className="tta_search_input"
+                    />
+                    <div className="tta_date_inputs">
+                      <Form.Control
+                        type="date"
+                        name="from_date"
+                        value={analyticsSearch?.from_date || ""}
+                        onChange={handleSearchData}
+                        className="tta_search_input"
+                      />
+                      <Form.Control
+                        type="date"
+                        name="to_date"
+                        value={analyticsSearch?.to_date || ""}
+                        onChange={handleSearchData}
+                        className="tta_search_input"
+                      />
+                    </div>
+                    <Button onClick={handleSearch} className="tta_search_btn">
+                      Search
+                    </Button>
+                  </div>
+
+                  {/* Metrics Table */}
+                  {/* <div className="tta_metrics_table">
+                    <div className="tta_table_row tta_table_header_row">
+                      <div className="tta_table_cell">Metric</div>
+                      <div className="tta_table_cell">Value</div>
+                    </div>
+                    <div className="tta_table_row">
+                      <div className="tta_table_cell">totalinit</div>
+                      <div className="tta_table_cell">14</div>
+                    </div>
+                    <div className="tta_table_row">
+                      <div className="tta_table_cell">totalPlay</div>
+                      <div className="tta_table_cell">8</div>
+                    </div>
+                    <div className="tta_table_row">
+                      <div className="tta_table_cell">totalPause</div>
+                      <div className="tta_table_cell">4</div>
+                    </div>
+                    <div className="tta_table_row">
+                      <div className="tta_table_cell">totalTime</div>
+                      <div className="tta_table_cell">0.75 Minute</div>
+                    </div>
+                    <div className="tta_table_row">
+                      <div className="tta_table_cell">totalEnd</div>
+                      <div className="tta_table_cell">7</div>
+                    </div>
+                    <div className="tta_table_row">
+                      <div className="tta_table_cell">totalDownload</div>
+                      <div className="tta_table_cell">1</div>
+                    </div>
+                    <div className="tta_table_row">
+                      <div className="tta_table_cell">averagePlayClickRatio</div>
+                      <div className="tta_table_cell">57.4%</div>
+                    </div>
+                    <div className="tta_table_row">
+                      <div className="tta_table_cell">
+                        averageListenTillEndRatio
+                      </div>
+                      <div className="tta_table_cell">87.50%</div>
+                    </div>
+                    <div className="tta_table_row">
+                      <div className="tta_table_cell">
+                        averageListeningTimePerPlay
+                      </div>
+                      <div className="tta_table_cell">5.63 Seconds</div>
+                    </div>
+                    <div className="tta_table_row">
+                      <div className="tta_table_cell">averagePausesPerPlay</div>
+                      <div className="tta_table_cell">0.50</div>
+                    </div>
+                  </div> */}
                 </div>
 
                 <div className="tta_popular_posts_card">
