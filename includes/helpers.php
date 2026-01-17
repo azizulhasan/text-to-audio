@@ -131,7 +131,8 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     // TODO make it dynamic. now Recording it not available in UI.
     $sentence_delimiter =  apply_filters('tts_sentence_delimiter', '. ' );
 
-    $get_content_from_dom = true;
+    $get_content_from_dom = isset($settings['tta__settings_read_content_from_dom']) && $settings['tta__settings_read_content_from_dom'];
+
     $content = '';
     // Button listen text.
     if ($atts || has_filter('tta__button_text_arr')) {
