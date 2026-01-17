@@ -1,0 +1,54 @@
+{
+    "translation-revision-date": "2026-01-17T12:16:24+00:00",
+    "generator": "Custom JSON Generator",
+    "source": "src\/dashboard\/components\/dashboard\/integrations\/GoogleCloudTTS\/GoogleTTS.js",
+    "domain": "messages",
+    "locale_data": {
+        "messages": {
+            "": {
+                "domain": "messages",
+                "lang": "zh_CN",
+                "plural-forms": "nplurals=1; plural=0;"
+            },
+            "Buy Now": [
+                "立即购买"
+            ],
+            "Backup MP3 Files To Google Cloud Storage Can Be Enabled If Google Text To Speech Is Authenticated.": [
+                "如果Google文本转语音已认证，则可以启用将MP3文件备份到Google云存储。"
+            ],
+            "Google cloud text to speech feature is only in pro version.": [
+                "Google云文本转语音功能仅在专业版中可用。"
+            ],
+            "Learn More": [
+                "了解更多"
+            ],
+            "Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.": [
+                "Text To Speech插件将合成的内容存储到uploads文件夹中。您的uploads文件夹不可写。请使uploads文件夹可写以享受插件的全部功能。"
+            ],
+            "Please create a valid bucket name first": [
+                "请先创建一个有效的存储桶名称"
+            ],
+            "File uploaded successfully. Now go to the \"Customization\" menu.": [
+                "文件上传成功。现在转到\"自定义\"菜单。"
+            ],
+            "Something went wrong": [
+                "出错了"
+            ],
+            "You are already authenticated": [
+                "您已经认证"
+            ],
+            "You have to be authenticated to revoke.": [
+                "您必须先认证才能撤销。"
+            ],
+            "Do you want to revoke access and delete the file uploaded during authentication. If you delete the file you have to upload the file again. Make sure you have a backup otherwise, you have to crete another auth file from Google Cloud text to speech.": [
+                "您想撤销访问权限并删除认证期间上传的文件吗？如果您删除文件，则必须重新上传文件。请确保您有备份，否则您必须从Google Cloud文本转语音创建另一个认证文件。"
+            ],
+            "Authentication removed.": [
+                "认证已删除。"
+            ],
+            "This bucket is already have to your cloud storage.": [
+                "此存储桶已存在于您的云存储中。"
+            ]
+        }
+    }
+}

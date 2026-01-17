@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(msgfmt:*)",
+      "Bash(php compile-mo.php:*)",
+      "Bash(find:*)",
+      "Bash(where:*)",
+      "Bash(dir:*)",
+      "Bash(del \"D:\\\\xampp\\\\htdocs\\\\azizulhasan\\\\tts\\\\wp-content\\\\plugins\\\\text-to-audio\\\\languages\\\\compile-mo.php\")",
+      "Bash(grep:*)"
+    ]
+  }
+}

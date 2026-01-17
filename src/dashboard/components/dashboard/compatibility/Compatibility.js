@@ -93,7 +93,7 @@ export default function Compatibility() {
                     //     ...res.data
                     // })
                 }
-                toast('Successfully Saved.', 'info', {
+                toast(__('Successfully Saved.', 'text-to-audio'), 'info', {
                     autoClose: 2500
                 });
             })

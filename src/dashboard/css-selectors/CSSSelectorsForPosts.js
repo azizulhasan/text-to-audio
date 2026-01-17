@@ -76,11 +76,11 @@ export default function CSSSelectorsForPosts() {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!postID) {
-            toast('Please save the post then try to add custom CSS selectors.');
+            toast(__('Please save the post then try to add custom CSS selectors.', 'text-to-audio'));
             return;
         }
         if (settings.tta__settings_use_own_css_selectors && !checkAllPropertiesAreEmpty(settings)) {
-            toast('Empty value can not be saved. You can uncheck the "Use Own CSS Selectors" Option.', 'info', {
+            toast(__('Empty value can not be saved. You can uncheck the "Use Own CSS Selectors" Option.', 'text-to-audio'), 'info', {
                 autoClose: 10000
             });
             return;
@@ -96,7 +96,7 @@ export default function CSSSelectorsForPosts() {
         postWithoutImage(tta_obj.api_url + 'tta_pro/v1/css_selectors_for_posts', formData)
             .then((res) => {
                 setSettings(res.data);
-                toast('Settings Data Saved');
+                toast(__('Settings Data Saved', 'text-to-audio'));
                 setIsDataLoaded(true)
             })
             .catch((err) => {

@@ -1,0 +1,39 @@
+{
+    "translation-revision-date": "2026-01-17T12:16:24+00:00",
+    "generator": "Custom JSON Generator",
+    "source": "src\/dashboard\/components\/dashboard\/aliases\/Aliases.js",
+    "domain": "messages",
+    "locale_data": {
+        "messages": {
+            "": {
+                "domain": "messages",
+                "lang": "ko_KR",
+                "plural-forms": "nplurals=1; plural=0;"
+            },
+            "Save": [
+                "저장"
+            ],
+            "More than 1 alias is available in the pro version. Please": [
+                "프로 버전에서는 2개 이상의 별칭을 사용할 수 있습니다."
+            ],
+            "Buy Pro version": [
+                "프로 버전 구매"
+            ],
+            "All fields must be filled!": [
+                "모든 필드를 입력해야 합니다!"
+            ],
+            "Text to Speech Aliases": [
+                "음성 합성 별칭"
+            ],
+            "Actual Text": [
+                "실제 텍스트"
+            ],
+            "To Read": [
+                "읽기"
+            ],
+            "Add New Row": [
+                "새 행 추가"
+            ]
+        }
+    }
+}

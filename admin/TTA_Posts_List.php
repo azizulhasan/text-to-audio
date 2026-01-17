@@ -167,10 +167,10 @@ class TTA_Posts_List {
         $player_id = get_player_id();
 
         // Determine filter label based on player ID
-        $filter_label = $player_id > 2 ? 'Audio Status' : 'TTS Status';
-        $option_all = 'All Posts';
-        $option_with = $player_id > 2 ? 'Audio Generated' : 'TTS Enabled';
-        $option_without = $player_id > 2 ? 'Audio Not Generated' : 'TTS Not Enabled';
+        $filter_label = $player_id > 2 ? __('Audio Status', 'text-to-audio') : __('TTS Status', 'text-to-audio');
+        $option_all = __('All Posts', 'text-to-audio');
+        $option_with = $player_id > 2 ? __('Audio Generated', 'text-to-audio') : __('TTS Enabled', 'text-to-audio');
+        $option_without = $player_id > 2 ? __('Audio Not Generated', 'text-to-audio') : __('TTS Not Enabled', 'text-to-audio');
 
         ?>
         <select name="atlasvoice_filter" id="atlasvoice_filter">

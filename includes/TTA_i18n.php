@@ -33,10 +33,12 @@ class TTA_i18n {
      */
     public function load_plugin_textdomain() {
 
+        $plugin_rel_path = dirname(dirname(plugin_basename(__FILE__))) . '/languages/';
+//        error_log(print_r($plugin_rel_path, true));
 //        load_plugin_textdomain(
 //            'text-to-audio',
 //            false,
-//            dirname(dirname(plugin_basename(__FILE__))) . '/languages/'
+//            $plugin_rel_path
 //        );
 
     }

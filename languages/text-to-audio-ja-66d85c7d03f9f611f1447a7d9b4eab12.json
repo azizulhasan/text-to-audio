@@ -1,0 +1,54 @@
+{
+    "translation-revision-date": "2026-01-17T12:16:24+00:00",
+    "generator": "Custom JSON Generator",
+    "source": "src\/dashboard\/components\/dashboard\/integrations\/GoogleCloudTTS\/GoogleTTS.js",
+    "domain": "messages",
+    "locale_data": {
+        "messages": {
+            "": {
+                "domain": "messages",
+                "lang": "ja",
+                "plural-forms": "nplurals=1; plural=0;"
+            },
+            "Buy Now": [
+                "今すぐ購入"
+            ],
+            "Backup MP3 Files To Google Cloud Storage Can Be Enabled If Google Text To Speech Is Authenticated.": [
+                "Google Text To Speechが認証されている場合、MP3ファイルをGoogle Cloud Storageにバックアップできます。"
+            ],
+            "Google cloud text to speech feature is only in pro version.": [
+                "Googleクラウド音声合成機能はプロ版でのみ利用可能です。"
+            ],
+            "Learn More": [
+                "詳細を見る"
+            ],
+            "Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.": [
+                "Text To Speechプラグインは合成コンテンツをuploadsフォルダに保存します。uploadsフォルダが書き込み可能ではありません。プラグインのすべての機能を利用するには、uploadsフォルダを書き込み可能にしてください。"
+            ],
+            "Please create a valid bucket name first": [
+                "まず有効なバケット名を作成してください"
+            ],
+            "File uploaded successfully. Now go to the \"Customization\" menu.": [
+                "ファイルが正常にアップロードされました。「カスタマイズ」メニューに移動してください。"
+            ],
+            "Something went wrong": [
+                "エラーが発生しました"
+            ],
+            "You are already authenticated": [
+                "すでに認証されています"
+            ],
+            "You have to be authenticated to revoke.": [
+                "取り消すには認証が必要です。"
+            ],
+            "Do you want to revoke access and delete the file uploaded during authentication. If you delete the file you have to upload the file again. Make sure you have a backup otherwise, you have to crete another auth file from Google Cloud text to speech.": [
+                "アクセスを取り消し、認証中にアップロードされたファイルを削除しますか？ファイルを削除すると、再度アップロードする必要があります。バックアップがあることを確認してください。そうでない場合は、Google Cloud Text To Speechから別の認証ファイルを作成する必要があります。"
+            ],
+            "Authentication removed.": [
+                "認証が削除されました。"
+            ],
+            "This bucket is already have to your cloud storage.": [
+                "このバケットはすでにクラウドストレージに存在します。"
+            ]
+        }
+    }
+}

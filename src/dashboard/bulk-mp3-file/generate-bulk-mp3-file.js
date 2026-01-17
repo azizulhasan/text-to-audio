@@ -5,6 +5,7 @@ import {
     Button, Accordion
 } from 'react-bootstrap';
 import {ToastContainer} from 'react-toastify';
+import {__} from '@wordpress/i18n';
 /**
  * Scripts
  */
@@ -104,7 +105,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
         if (Object.keys(postContents).length) {
             let mp3FileGenerateCount = 0;
             if (settings.tts_regenerate_mp3_files) {
-                if (!confirm('Are you sure? You want to regenerate all MP3 files ?')) {
+                if (!confirm(__('Are you sure? You want to regenerate all MP3 files ?', 'text-to-audio'))) {
                     return;
                 }
             }
@@ -162,7 +163,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
 
         let postIDCount = Object.keys(postContents).length;
         if (mp3FileGenerateCount === postIDCount) {
-            alert('All MP3 File Generated')
+            alert(__('All MP3 File Generated', 'text-to-audio'))
             if (document.getElementById('tts_bulk_mp3_file_generate_save_button')) {
                 document.getElementById('tts_bulk_mp3_file_generate_save_button').innerHTML = 'Generate MP3 File'
                 setIsAllMP3FileGenerated(true)

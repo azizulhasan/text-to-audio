@@ -1,0 +1,21 @@
+{
+    "translation-revision-date": "2026-01-17T12:16:24+00:00",
+    "generator": "Custom JSON Generator",
+    "source": "src\/dashboard\/bulk-mp3-file\/generate-bulk-mp3-file.js",
+    "domain": "messages",
+    "locale_data": {
+        "messages": {
+            "": {
+                "domain": "messages",
+                "lang": "zh_CN",
+                "plural-forms": "nplurals=1; plural=0;"
+            },
+            "Are you sure? You want to regenerate all MP3 files ?": [
+                "您确定吗？您想重新生成所有MP3文件吗？"
+            ],
+            "All MP3 File Generated": [
+                "所有MP3文件已生成"
+            ]
+        }
+    }
+}

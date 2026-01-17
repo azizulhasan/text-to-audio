@@ -129,7 +129,7 @@ export default function Settings() {
     }
     let cache_clear_notice_text = "";
     if (settings?.tta__settings_clear_all_cache) {
-      cache_clear_notice_text = "All cache deleted";
+      cache_clear_notice_text = __("All cache deleted", 'text-to-audio');
     }
     let formData = new FormData();
     formData.append("fields", JSON.stringify(settings));
@@ -138,7 +138,7 @@ export default function Settings() {
       .then((res) => {
         setSettings(res.data);
         toast(
-          'Successfully Saved. Now go to the "Customization" menu.',
+          __('Successfully Saved. Now go to the "Customization" menu.', 'text-to-audio'),
           "info",
           {
             autoClose: 15000,

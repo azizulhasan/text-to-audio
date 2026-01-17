@@ -81,6 +81,7 @@ class TTA {
         $this->plugin_name = 'text-to-audio';
 
         $this->load_dependencies();
+        $this->set_locale();
         $this->define_hooks();
     }
 
@@ -101,6 +102,22 @@ class TTA {
 
     }
 
+    /**
+     * Define the locale for this plugin for internationalization.
+     *
+     * Uses the TTA_i18n class in order to set the domain and to register the hook
+     * with WordPress.
+     *
+     * @since    1.0.0
+     * @access   private
+     */
+    private function set_locale() {
+
+//        $plugin_i18n = new TTA_i18n();
+//        $plugin_i18n->load_plugin_textdomain();
+//        $this->loader->add_action('plugins_loaded', $plugin_i18n, 'load_plugin_textdomain', 10);
+
+    }
 
     /**
      * Register all of the hooks related to the admin area functionality

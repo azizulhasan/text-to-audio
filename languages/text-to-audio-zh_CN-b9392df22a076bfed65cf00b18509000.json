@@ -1,0 +1,27 @@
+{
+    "translation-revision-date": "2026-01-17T12:16:24+00:00",
+    "generator": "Custom JSON Generator",
+    "source": "admin\/js\/TextToSpeech.js",
+    "domain": "messages",
+    "locale_data": {
+        "messages": {
+            "": {
+                "domain": "messages",
+                "lang": "zh_CN",
+                "plural-forms": "nplurals=1; plural=0;"
+            },
+            "This browser does not support speechSynthesis API": [
+                "此浏览器不支持语音合成API"
+            ],
+            "Text To Audio: Please enable speechRecognition": [
+                "Text To Audio：请启用语音识别"
+            ],
+            "Text To Audio: Please enable speechSynthesis.": [
+                "Text To Audio：请启用语音合成。"
+            ],
+            "Click here to enable": [
+                "点击此处启用"
+            ]
+        }
+    }
+}

@@ -10,6 +10,7 @@ import {
 } from "react-bootstrap";
 import {postData} from "../../../context/utilities";
 import toast from "../../../context/Notify";
+import {__} from '@wordpress/i18n';
 
 export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, setAuthenticatedServices, setGoogleTTSChecked}) {
     const [googTTSJsonFile, setGoogTTSJsonFile] = useState("");
@@ -39,7 +40,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                 if (!isAuthenticated) {
                     if (!googTTSJsonFile) {
                         toast(
-                            "Backup MP3 Files To Google Cloud Storage Can Be Enabled If Google Text To Speech Is Authenticated.",
+                            __("Backup MP3 Files To Google Cloud Storage Can Be Enabled If Google Text To Speech Is Authenticated.", 'text-to-audio'),
                             "error",
                             {
                                 position: "top-center",
@@ -66,7 +67,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
         if (!window.hasOwnProperty("ttsObjPro")) {
             toast(
                 <>
-                    <h4>Google cloud text to speech feature is only in pro version.</h4>
+                    <h4>{__('Google cloud text to speech feature is only in pro version.', 'text-to-audio')}</h4>
                     <button
                         onClick={(e) => {
                             window.open(
@@ -75,7 +76,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                         }}
                         className="tta_btn"
                     >
-                        Learn More
+                        {__('Learn More', 'text-to-audio')}
                     </button>
                 </>,
                 "info",
@@ -93,7 +94,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
         ) {
             toast(
                 <>
-                    <h4>Google cloud text to speech feature is only in pro version.</h4>
+                    <h4>{__('Google cloud text to speech feature is only in pro version.', 'text-to-audio')}</h4>
                     <button
                         onClick={(e) => {
                             window.open(
@@ -102,7 +103,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                         }}
                         className="tta_btn"
                     >
-                        Buy Now
+                        {__('Buy Now', 'text-to-audio')}
                     </button>
                 </>,
                 "info",
@@ -120,7 +121,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
             !isBackUpToGCS
         ) {
             toast(
-                "Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.",
+                __("Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.", 'text-to-audio'),
                 "error",
                 {autoClose: 10000}
             );
@@ -128,7 +129,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
         }
 
         if (isBackUpToGCS && !bucketName) {
-            toast("Please create a valid bucket name first", "error", {
+            toast(__("Please create a valid bucket name first", 'text-to-audio'), "error", {
                 autoClose: 10000,
             });
             return;
@@ -144,7 +145,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
             .then((res) => {
                 if (res.status) {
                     toast(
-                        'File uploaded successfully. Now go to the "Customization" menu.',
+                        __('File uploaded successfully. Now go to the "Customization" menu.', 'text-to-audio'),
                         "info",
                         {
                             autoClose: 15000,
@@ -172,7 +173,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                             autoClose: 8000,
                         });
                     } else {
-                        toast(res?.message || "Something went wrong!");
+                        toast(res?.message || __("Something went wrong", 'text-to-audio'));
                     }
                 }
             })
@@ -234,7 +235,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
     const authenticateTTS = (e) => {
         e.preventDefault();
         if (isAuthenticated) {
-            toast("You are already authenticated");
+            toast(__("You are already authenticated", 'text-to-audio'));
             return;
         }
         postData(apiURL + "authenticate", JSON.stringify({file: authFile}))
@@ -242,10 +243,10 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                 if (res.auth_url) {
                     window.open(res.auth_url);
                 } else if (res.access_token) {
-                    toast("You are already authenticated");
+                    toast(__("You are already authenticated", 'text-to-audio'));
                     setIsAuthenticated(true);
                 } else {
-                    toast("Something went wrong");
+                    toast(__("Something went wrong", 'text-to-audio'));
                 }
             })
             .catch((err) => {
@@ -256,13 +257,13 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
     const revokeAccessToken = (e) => {
         e.preventDefault();
         if (!isAuthenticated) {
-            toast("You have to be authenticated to revoke.");
+            toast(__("You have to be authenticated to revoke.", 'text-to-audio'));
             return;
         }
         let delete_file = false;
         if (
             confirm(
-                "Do you want to revoke access and delete the file uploaded during authentication. If you delete the file you have to upload the file again. Make sure you have a backup otherwise, you have to crete another auth file from Google Cloud text to speech."
+                __("Do you want to revoke access and delete the file uploaded during authentication. If you delete the file you have to upload the file again. Make sure you have a backup otherwise, you have to crete another auth file from Google Cloud text to speech.", 'text-to-audio')
             )
         ) {
             delete_file = true;
@@ -275,7 +276,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
         postData(apiURL + "revoke_access_token", "", "GET")
             .then((res) => {
                 if (res) {
-                    toast("Authentication removed.");
+                    toast(__("Authentication removed.", 'text-to-audio'));
                     setIsAuthenticated(false);
                     // Remove from authenticated services
                     setAuthenticatedServices(prev => 
@@ -285,7 +286,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                     setCurrentTTSServic("");
 
                 } else {
-                    toast("Something went wrong");
+                    toast(__("Something went wrong", 'text-to-audio'));
                 }
             })
             .catch((err) => {
@@ -312,7 +313,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
         e.preventDefault();
 
         if (bucketName == storedBucketName) {
-            toast("This bucket is already have to your cloud storage.", "info", {
+            toast(__("This bucket is already have to your cloud storage.", 'text-to-audio'), "info", {
                 position: "top-center",
                 autoClose: 4000,
             });
@@ -321,7 +322,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
             if (storedBucketName && bucketName != storedBucketName) {
                 if (
                     !confirm(
-                        `Are you sure that, you want to create a bucket with this name ${bucketName} . Even though you already have a bucket with the name ${storedBucketName}. Because once you create new bucket then all of the mp3 file will generate again. So decide carefully.`
+                        __(`Are you sure that, you want to create a bucket with this name ${bucketName} . Even though you already have a bucket with the name ${storedBucketName}. Because once you create new bucket then all of the mp3 file will generate again. So decide carefully.`, 'text-to-audio')
                     )
                 ) {
                     return;
