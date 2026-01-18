@@ -4,6 +4,7 @@ namespace TTA_Admin;
 
 use TTA\TTA_Helper;
 use TTA\TTA_Cache;
+use TTA\TTA_i18n;
 
 /**
  * The admin-specific functionality of the plugin.
@@ -174,10 +175,11 @@ class TTA_Admin {
 			/* Load react js */
 			wp_enqueue_script( 'tts-font-awesome', plugin_dir_url( __FILE__ ) . 'js/build/font-awesome.min.js', array(), $this->version, true );
 			wp_enqueue_style( 'tts-bootstrap', plugin_dir_url( __FILE__ ) . 'css/bootstrap.css', [], $this->version, 'all' );
-			wp_enqueue_script( 'TextToSpeech', plugin_dir_url( __FILE__ ) . 'js/build/TextToSpeech.min.js', array( 'wp-hooks', ), $this->version, true );
+			wp_enqueue_script( 'TextToSpeech', plugin_dir_url( __FILE__ ) . 'js/build/TextToSpeech.min.js', array( 'wp-hooks',   ), $this->version, true );
 			wp_localize_script( 'TextToSpeech', 'ttsObj', $this->localize_data );
-			wp_enqueue_script( 'text-to-audio-dashboard-ui', plugin_dir_url( __FILE__ ) . 'js/build/text-to-audio-dashboard-ui.min.js', array( 'TextToSpeech', 'wp-i18n', 'wp-element', 'wp-components' ), $this->version, true );
+			wp_enqueue_script( 'text-to-audio-dashboard-ui', plugin_dir_url( __FILE__ ) . 'js/build/text-to-audio-dashboard-ui.min.js', array( 'TextToSpeech' ), $this->version, true );
 			wp_localize_script( 'text-to-audio-dashboard-ui', 'tta_obj', $this->localize_data );
+			wp_localize_script( 'text-to-audio-dashboard-ui', 'ttsTR', TTA_i18n::get_default_labels() );
             wp_set_script_translations( 'text-to-audio-dashboard-ui', 'text-to-audio', plugin_dir_path( dirname( __FILE__ ) ) . 'languages' );
 			wp_enqueue_style( 'dashicons' );
 

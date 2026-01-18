@@ -246,6 +246,8 @@ class TTA_Init
                 update_option('tts_rest_api_url', $rest_url);
                 TTA_Cache::set('tts_rest_api_url', $rest_url);
             }
+//            include_once 'includes/l10n.php';
+//            tts_load_textdomain();
 
             //Rest api init.
             new TTA_Api_Routes();
@@ -289,13 +291,13 @@ class TTA_Init
 
 
 // Load text domain early
-add_action('plugins_loaded', function () {
-    load_plugin_textdomain(
-        'text-to-audio',
-        false,
-        dirname(plugin_basename(__FILE__)) . '/languages/'
-    );
-}, 0);
+//add_action('plugins_loaded', function () {
+//    load_plugin_textdomain(
+//        'text-to-audio',
+//        false,
+//        dirname(plugin_basename(__FILE__)) . '/languages/'
+//    );
+//}, 0);
 
 add_action('plugins_loaded', function () {
     //Rest api init.

@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Button, Col, Container, Form, OverlayTrigger, Row, Tooltip} from "react-bootstrap";
-import {__} from "@wordpress/i18n";
+// import {__} from "@wordpress/i18n";
+const { __ } = wp.i18n;
 import UpgradeToPro from "../../UpgradeToPro";
 import {postWithoutImage} from "../../context/utilities";
 import {MultiSelect} from "../../context/MultiSelect";
@@ -8,6 +9,8 @@ import toast from '../../context/Notify';
 
 
 export default function Compatibility() {
+
+    console.log({in: wp})
     const [compatible, setCompatible] = useState({
         'tts_acf_fields': [],
     })
