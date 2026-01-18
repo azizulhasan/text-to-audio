@@ -1516,8 +1516,9 @@ class TTA_Helper
      */
     public static function generate_audio_schema($params = [])
     {
+        //TODO:: add UI for enabling schema
         // Check if pro version is active and player ID is greater than 2
-        if (!is_pro_active() || self::get_player_id() <= 2) {
+        if (!is_pro_active() || self::get_player_id() <= 2 || ! apply_filters('tts_enable_audio_schema_markup', true, $params)) {
             return '';
         }
 
