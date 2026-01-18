@@ -186,9 +186,9 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
             $content .= $excerpt_sanitized;
         }
 
-        $description = get_the_content();
+        $description = get_the_content(null, false, $post);
         $description_sanitized = $description;
-        $content .= apply_filters('tta__content_description', $description_sanitized, $description, get_the_ID(), $post);
+        $content .= apply_filters('tta__content_description', $description_sanitized, $description, $post->ID, $post);
 
 
         $text_before_content = isset($settings['tta__settings_text_before_content']) && $settings['tta__settings_text_before_content'] ? $settings['tta__settings_text_before_content'] : '';
@@ -291,7 +291,7 @@ function tts_enqueue_button_scripts($params)
     add_action('wp_print_footer_scripts', function () use ($params) {
         extract($params);
         $original_title = trim($title);
-        $temp_title = trim(get_the_title());
+        $temp_title = trim(get_the_title($post));
         $temp_title = tta_clean_content($temp_title);
 
         // Get plugin all settings and pass it to TTS javascript Object.
