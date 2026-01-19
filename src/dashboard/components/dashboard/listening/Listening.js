@@ -9,6 +9,7 @@ import {
   OverlayTrigger,
   InputGroup,
 } from "react-bootstrap";
+import {__} from "@wordpress/i18n";
 
 import {
   postWithoutImage,
@@ -1226,7 +1227,7 @@ export default function Listening() {
             >
               <div className="">
                 <Button type="submit" className="tta_btn">
-                  Save
+                  {__('Save', 'text-to-audio')}
                 </Button>
               </div>
             </div>

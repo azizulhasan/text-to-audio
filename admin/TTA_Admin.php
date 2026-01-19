@@ -185,9 +185,15 @@ class TTA_Admin {
 				$this->version,
 				true
 			);
+
 			wp_localize_script( 'text-to-audio-dashboard-ui', 'tta_obj', $this->localize_data );
 			wp_localize_script( 'text-to-audio-dashboard-ui', 'ttsTR', TTA_i18n::get_default_labels() );
 			wp_enqueue_script( 'text-to-audio-dashboard-ui' );
+            wp_set_script_translations(
+                'text-to-audio-dashboard-ui',
+                'text-to-audio',
+                plugin_dir_path( dirname( __FILE__ ) ) . 'languages'
+            );
 			wp_enqueue_style( 'dashicons' );
 
 
@@ -243,10 +249,12 @@ class TTA_Admin {
                 'AtlasVoice_chart'
 			), $this->version, true );
 			wp_localize_script( 'AtlasVoicePlayerInsights', 'ttsObj', $this->localize_data );
+		wp_set_script_translations( 'AtlasVoicePlayerInsights', 'text-to-audio', plugin_dir_path( dirname( __FILE__ ) ) . 'languages' );
 		}
 
         if ( TTA_Helper::is_edit_page() ) {
             wp_enqueue_script( 'AtlasVoiceCopyShortcode', plugin_dir_url( __FILE__ ) . 'js/AtlasVoiceCopyShortcode.js', array( 'wp-hooks', 'wp-i18n' ), $this->version, true );
+            wp_set_script_translations( 'AtlasVoiceCopyShortcode', 'text-to-audio', plugin_dir_path( dirname( __FILE__ ) ) . 'languages' );
         }
 
 	}
@@ -273,60 +281,12 @@ class TTA_Admin {
 			'editor_script' => 'tta-blocks',
 			'render_callback' => [ $this, 'render_button' ],
 		) );
-	}
 
-	/**
-	 * Set script translations for the block.
-	 * This must be called after the script is registered.
-	 */
-	public function set_block_script_translations() {
-		wp_set_script_translations(
-			'tta-blocks',
-			'text-to-audio',
-			plugin_dir_path( dirname( __FILE__ ) ) . 'languages'
-		);
-	}
-
-	/**
-	 * Set script translations for dashboard UI.
-	 * Following WordPress i18n best practices - must be called after script registration.
-	 */
-	public function set_dashboard_ui_script_translations() {
-		if ( is_admin() && isset( $_REQUEST['page'] ) && ( 'text-to-audio' == $_REQUEST['page'] ) ) {
-			wp_set_script_translations(
-				'text-to-audio-dashboard-ui',
-				'text-to-audio',
-				plugin_dir_path( dirname( __FILE__ ) ) . 'languages'
-			);
-		}
-	}
-
-	/**
-	 * Set script translations for player insights.
-	 * Following WordPress i18n best practices - must be called after script registration.
-	 */
-	public function set_player_insights_script_translations() {
-		if ( TTA_Helper::is_edit_page() || isset( $_REQUEST['page'] ) && ( 'text-to-audio' == $_REQUEST['page'] ) ) {
-			wp_set_script_translations(
-				'AtlasVoicePlayerInsights',
-				'text-to-audio',
-				plugin_dir_path( dirname( __FILE__ ) ) . 'languages'
-			);
-		}
-	}
-
-	/**
-	 * Set script translations for copy shortcode.
-	 * Following WordPress i18n best practices - must be called after script registration.
-	 */
-	public function set_copy_shortcode_script_translations() {
-		if ( TTA_Helper::is_edit_page() ) {
-			wp_set_script_translations(
-				'AtlasVoiceCopyShortcode',
-				'text-to-audio',
-				plugin_dir_path( dirname( __FILE__ ) ) . 'languages'
-			);
-		}
+        wp_set_script_translations(
+            'tta-blocks',
+            'text-to-audio',
+            plugin_dir_path( dirname( __FILE__ ) ) . 'languages'
+        );
 	}
 
 	/**

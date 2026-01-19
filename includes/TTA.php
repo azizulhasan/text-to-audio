@@ -81,7 +81,6 @@ class TTA {
         $this->plugin_name = 'text-to-audio';
 
         $this->load_dependencies();
-        $this->set_locale();
         $this->define_hooks();
     }
 
@@ -103,23 +102,6 @@ class TTA {
     }
 
     /**
-     * Define the locale for this plugin for internationalization.
-     *
-     * Uses the TTA_i18n class in order to set the domain and to register the hook
-     * with WordPress.
-     *
-     * @since    1.0.0
-     * @access   private
-     */
-    private function set_locale() {
-
-//        $plugin_i18n = new TTA_i18n();
-//        $plugin_i18n->load_plugin_textdomain();
-//        $this->loader->add_action('plugins_loaded', $plugin_i18n, 'load_plugin_textdomain', 10);
-
-    }
-
-    /**
      * Register all of the hooks related to the admin area functionality
      * of the plugin.
      *
@@ -131,20 +113,11 @@ class TTA {
         $plugin_admin = new TTA_Admin($this->get_plugin_name(), $this->get_version());
 
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles', 999999);
-//        $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts', 99999);
-        $this->loader->add_action('init', $plugin_admin, 'enqueue_scripts');
-        $this->loader->add_action('init', $plugin_admin, 'set_dashboard_ui_script_translations');
+        $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts', 99999);
         $this->loader->add_action('admin_menu', $plugin_admin, 'TTA_menu');
 
         // Block registration and translations (following i18n-block-demo pattern)
         $this->loader->add_action('init', $plugin_admin, 'engueue_block_scripts');
-        $this->loader->add_action('init', $plugin_admin, 'set_block_script_translations');
-
-        // Script translations for dashboard (following i18n-block-demo pattern)
-//        $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'set_dashboard_ui_script_translations', 999999);
-
-        $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'set_player_insights_script_translations', 999999);
-        $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'set_copy_shortcode_script_translations', 999999);
 
         $this->loader->add_action('wp_enqueue_scripts', $plugin_admin, 'enqueue_TTA', 99999);
 
