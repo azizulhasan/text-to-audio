@@ -1,5 +1,5 @@
 {
-  "translation-revision-date": "2026-01-19T11:32:07+01:00",
+  "translation-revision-date": "2026-01-19T16:32:43+01:00",
   "generator": "generate-translations.js",
   "source": "admin/js/build/text-to-audio-dashboard-ui.js",
   "domain": "messages",
@@ -9,9 +9,6 @@
         "domain": "messages",
         "plural": "nplurals=1; plural=0;"
       },
-      "Listen": [
-        "收听"
-      ],
       "Save": [
         "保存"
       ],
@@ -20,42 +17,6 @@
       ],
       "Click To Know How It Works?": [
         "点击了解如何使用？"
-      ],
-      "Customize Button": [
-        "自定义按钮"
-      ],
-      "Text to audio customize button.": [
-        "文本转音频自定义按钮。"
-      ],
-      "BackGround Color": [
-        "背景颜色"
-      ],
-      "Choose your color": [
-        "选择您的颜色"
-      ],
-      "Text Color": [
-        "文本颜色"
-      ],
-      "Button Width (%)": [
-        "按钮宽度（%）"
-      ],
-      "Button Width": [
-        "按钮宽度"
-      ],
-      "Custom CSS": [
-        "自定义CSS"
-      ],
-      "class selector .tta__listen_content": [
-        "类选择器 .tta__listen_content"
-      ],
-      "Text To Audio:  Tap to listen post.": [
-        "文本转音频：点击收听文章。"
-      ],
-      "Are you sure? You want to regenerate all MP3 files ?": [
-        "您确定吗？您要重新生成所有MP3文件吗？"
-      ],
-      "All MP3 File Generated": [
-        "所有MP3文件已生成"
       ],
       "Showing button to multiple post is not supported in free version.": [
         "免费版不支持在多个文章上显示按钮。"
@@ -116,15 +77,6 @@
       ],
       "Successfully Saved. Now go to the \\\"Customization\\\" menu.": [
         "保存成功。现在前往\\\"自定义\\\"菜单。"
-      ],
-      "Please save the post then try to add custom CSS selectors.": [
-        "请先保存文章，然后尝试添加自定义CSS选择器。"
-      ],
-      "Empty value can not be saved. You can uncheck the \\\"Use Own CSS Selectors\\\" Option.": [
-        "空值无法保存。您可以取消选中\\\"使用自定义CSS选择器\\\"选项。"
-      ],
-      "Settings Data Saved": [
-        "设置数据已保存"
       ]
     }
   }

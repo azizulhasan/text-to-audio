@@ -1,5 +1,5 @@
 {
-  "translation-revision-date": "2026-01-19T11:32:07+01:00",
+  "translation-revision-date": "2026-01-19T16:32:43+01:00",
   "generator": "generate-translations.js",
   "source": "admin/js/build/text-to-audio-dashboard-ui.js",
   "domain": "messages",
@@ -9,9 +9,6 @@
         "domain": "messages",
         "plural": "nplurals=1; plural=0;"
       },
-      "Listen": [
-        "듣기"
-      ],
       "Save": [
         "저장"
       ],
@@ -20,42 +17,6 @@
       ],
       "Click To Know How It Works?": [
         "작동 방식을 알아보려면 클릭하세요"
-      ],
-      "Customize Button": [
-        "버튼 사용자 정의"
-      ],
-      "Text to audio customize button.": [
-        "텍스트 음성 변환 사용자 정의 버튼"
-      ],
-      "BackGround Color": [
-        "배경색"
-      ],
-      "Choose your color": [
-        "색상 선택"
-      ],
-      "Text Color": [
-        "텍스트 색상"
-      ],
-      "Button Width (%)": [
-        "버튼 너비 (%)"
-      ],
-      "Button Width": [
-        "버튼 너비"
-      ],
-      "Custom CSS": [
-        "사용자 정의 CSS"
-      ],
-      "class selector .tta__listen_content": [
-        "클래스 선택자 .tta__listen_content"
-      ],
-      "Text To Audio:  Tap to listen post.": [
-        "텍스트 음성 변환: 게시물을 들으려면 탭하세요."
-      ],
-      "Are you sure? You want to regenerate all MP3 files ?": [
-        "확실합니까? 모든 MP3 파일을 다시 생성하시겠습니까?"
-      ],
-      "All MP3 File Generated": [
-        "모든 MP3 파일 생성됨"
       ],
       "Showing button to multiple post is not supported in free version.": [
         "무료 버전에서는 여러 게시물에 버튼 표시를 지원하지 않습니다."
@@ -116,15 +77,6 @@
       ],
       "Successfully Saved. Now go to the \\\"Customization\\\" menu.": [
         "성공적으로 저장되었습니다. 이제 \\\"사용자 정의\\\" 메뉴로 이동하세요."
-      ],
-      "Please save the post then try to add custom CSS selectors.": [
-        "게시물을 저장한 다음 사용자 정의 CSS 선택자를 추가해 보세요."
-      ],
-      "Empty value can not be saved. You can uncheck the \\\"Use Own CSS Selectors\\\" Option.": [
-        "빈 값은 저장할 수 없습니다. \\\"자체 CSS 선택자 사용\\\" 옵션을 선택 해제할 수 있습니다."
-      ],
-      "Settings Data Saved": [
-        "설정 데이터 저장됨"
       ]
     }
   }

@@ -1,0 +1,47 @@
+{
+  "translation-revision-date": "2026-01-19T16:32:43+01:00",
+  "generator": "generate-translations.js",
+  "source": "build/blocks.js",
+  "domain": "messages",
+  "locale_data": {
+    "messages": {
+      "": {
+        "domain": "messages",
+        "plural": "nplurals=1; plural=0;"
+      },
+      "Listen": [
+        "收听"
+      ],
+      "Customize Button": [
+        "自定义按钮"
+      ],
+      "Text to audio customize button.": [
+        "文本转音频自定义按钮。"
+      ],
+      "BackGround Color": [
+        "背景颜色"
+      ],
+      "Choose your color": [
+        "选择您的颜色"
+      ],
+      "Text Color": [
+        "文本颜色"
+      ],
+      "Button Width (%)": [
+        "按钮宽度（%）"
+      ],
+      "Button Width": [
+        "按钮宽度"
+      ],
+      "Custom CSS": [
+        "自定义CSS"
+      ],
+      "class selector .tta__listen_content": [
+        "类选择器 .tta__listen_content"
+      ],
+      "Text To Audio:  Tap to listen post.": [
+        "文本转音频：点击收听文章。"
+      ]
+    }
+  }
+}

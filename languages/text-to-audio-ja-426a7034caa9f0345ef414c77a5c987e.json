@@ -1,5 +1,5 @@
 {
-  "translation-revision-date": "2026-01-19T11:32:06+01:00",
+  "translation-revision-date": "2026-01-19T16:32:43+01:00",
   "generator": "generate-translations.js",
   "source": "admin/js/build/text-to-audio-dashboard-ui.js",
   "domain": "messages",
@@ -9,9 +9,6 @@
         "domain": "messages",
         "plural": "nplurals=1; plural=0;"
       },
-      "Listen": [
-        "聴く"
-      ],
       "Save": [
         "保存"
       ],
@@ -20,42 +17,6 @@
       ],
       "Click To Know How It Works?": [
         "使い方を知るにはクリック"
-      ],
-      "Customize Button": [
-        "ボタンをカスタマイズ"
-      ],
-      "Text to audio customize button.": [
-        "テキスト読み上げカスタマイズボタン"
-      ],
-      "BackGround Color": [
-        "背景色"
-      ],
-      "Choose your color": [
-        "色を選択"
-      ],
-      "Text Color": [
-        "テキストの色"
-      ],
-      "Button Width (%)": [
-        "ボタンの幅（%）"
-      ],
-      "Button Width": [
-        "ボタンの幅"
-      ],
-      "Custom CSS": [
-        "カスタムCSS"
-      ],
-      "class selector .tta__listen_content": [
-        "クラスセレクタ .tta__listen_content"
-      ],
-      "Text To Audio:  Tap to listen post.": [
-        "テキスト読み上げ：タップして投稿を聴く。"
-      ],
-      "Are you sure? You want to regenerate all MP3 files ?": [
-        "よろしいですか？すべてのMP3ファイルを再生成しますか？"
-      ],
-      "All MP3 File Generated": [
-        "すべてのMP3ファイルが生成されました"
       ],
       "Showing button to multiple post is not supported in free version.": [
         "無料版では複数の投稿にボタンを表示することはサポートされていません。"
@@ -116,15 +77,6 @@
       ],
       "Successfully Saved. Now go to the \\\"Customization\\\" menu.": [
         "正常に保存されました。\\\"カスタマイズ\\\"メニューに移動してください。"
-      ],
-      "Please save the post then try to add custom CSS selectors.": [
-        "投稿を保存してから、カスタムCSSセレクタを追加してください。"
-      ],
-      "Empty value can not be saved. You can uncheck the \\\"Use Own CSS Selectors\\\" Option.": [
-        "空の値は保存できません。\\\"独自のCSSセレクタを使用\\\"オプションのチェックを外すことができます。"
-      ],
-      "Settings Data Saved": [
-        "設定データが保存されました"
       ]
     }
   }

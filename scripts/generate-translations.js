@@ -16,20 +16,37 @@ const crypto = require('crypto');
 const { execSync } = require('child_process');
 
 const languagesDir = path.join(__dirname, '..', 'languages');
-const dashboardBuiltFile = 'admin/js/build/text-to-audio-dashboard-ui.js';
 
-// Calculate MD5 hash for dashboard file
+// Mapping from source paths to built files
+const sourceToBuiltMap = {
+    // Dashboard components map to dashboard UI build file
+    'src/dashboard/components/': 'admin/js/build/text-to-audio-dashboard-ui.js',
+    // Add more mappings as needed
+};
+
+// Map source file to its built file
+function mapSourceToBuilt(sourcePath) {
+    for (const [sourcePattern, builtFile] of Object.entries(sourceToBuiltMap)) {
+        if (sourcePath.startsWith(sourcePattern)) {
+            return builtFile;
+        }
+    }
+    // If no mapping found, return the original path
+    return sourcePath;
+}
+
+// Calculate MD5 hash for the primary dashboard file (for filename)
 function calculateHash(filepath) {
     return crypto.createHash('md5').update(filepath).digest('hex');
 }
 
-// Parse PO file and categorize strings
+// Parse PO file and categorize strings by their source files
 function parsePOFile(poFilePath) {
     const content = fs.readFileSync(poFilePath, 'utf8');
     const lines = content.split('\n');
 
     const phpStrings = { "": { domain: "messages", plural: "nplurals=1; plural=0;" } };
-    const jsStrings = { "": { domain: "messages", plural: "nplurals=1; plural=0;" } };
+    const fileToStrings = new Map(); // Map of built file -> strings
 
     let currentContext = {
         references: [],
@@ -64,9 +81,29 @@ function parsePOFile(poFilePath) {
                     (!ref.endsWith('.js') && !ref.includes('.js:'))
                 );
 
-                // Add to JSON if used in JS files
+                // Add to specific JS file's strings
                 if (hasJsReference) {
-                    jsStrings[currentContext.msgid] = [currentContext.msgstr];
+                    // Extract JS source file paths and map them to built files
+                    const builtFiles = new Set();
+                    currentContext.references.forEach(ref => {
+                        if (ref.endsWith('.js') || ref.includes('.js:')) {
+                            // Remove line number if present (e.g., "file.js:123" -> "file.js")
+                            const filePath = ref.split(':')[0];
+                            // Map source path to built file
+                            const builtFile = mapSourceToBuilt(filePath);
+                            builtFiles.add(builtFile);
+                        }
+                    });
+
+                    // Add this string to each built file it belongs to
+                    builtFiles.forEach(builtFile => {
+                        if (!fileToStrings.has(builtFile)) {
+                            fileToStrings.set(builtFile, {
+                                "": { domain: "messages", plural: "nplurals=1; plural=0;" }
+                            });
+                        }
+                        fileToStrings.get(builtFile)[currentContext.msgid] = [currentContext.msgstr];
+                    });
                 }
 
                 // Add to MO if used in PHP files
@@ -80,7 +117,7 @@ function parsePOFile(poFilePath) {
         }
     }
 
-    return { phpStrings, jsStrings };
+    return { phpStrings, fileToStrings };
 }
 
 // Get locale from PO file header
@@ -90,27 +127,40 @@ function getLocaleFromPO(poFilePath) {
     return match ? match[1] : null;
 }
 
-// Generate dashboard JSON file (only JS strings)
-function generateDashboardJSON(locale, jsStrings) {
-    const hash = calculateHash(dashboardBuiltFile);
-    const outputFile = path.join(languagesDir, `text-to-audio-${locale}-${hash}.json`);
+// Generate JSON files - one per source file with only its strings
+function generateDashboardJSON(locale, fileToStrings) {
+    const generatedFiles = [];
+    let totalStrings = 0;
 
-    const jsonContent = {
-        "translation-revision-date": new Date().toISOString().replace(/\.\d{3}Z$/, '+01:00'),
-        "generator": "generate-translations.js",
-        "source": dashboardBuiltFile,
-        "domain": "messages",
-        "locale_data": {
-            "messages": jsStrings
-        }
-    };
+    console.log(`  Generating JSON files for ${fileToStrings.size} source file(s)...`);
 
-    fs.writeFileSync(outputFile, JSON.stringify(jsonContent, null, 2), 'utf8');
+    // Generate a separate JSON file for each source file with only its strings
+    fileToStrings.forEach((strings, sourceFile) => {
+        const hash = calculateHash(sourceFile);
+        const outputFile = path.join(languagesDir, `text-to-audio-${locale}-${hash}.json`);
 
-    const jsCount = Object.keys(jsStrings).filter(k => k !== "").length;
-    console.log(`  ✅ Dashboard JSON: ${path.basename(outputFile)} (${jsCount} JS strings)`);
+        const stringCount = Object.keys(strings).filter(k => k !== "").length;
+        totalStrings += stringCount;
 
-    return outputFile;
+        const jsonContent = {
+            "translation-revision-date": new Date().toISOString().replace(/\.\d{3}Z$/, '+01:00'),
+            "generator": "generate-translations.js",
+            "source": sourceFile,
+            "domain": "messages",
+            "locale_data": {
+                "messages": strings
+            }
+        };
+
+        fs.writeFileSync(outputFile, JSON.stringify(jsonContent, null, 2), 'utf8');
+        generatedFiles.push(path.basename(outputFile));
+
+        console.log(`    ✅ ${path.basename(outputFile)} → ${sourceFile} (${stringCount} strings)`);
+    });
+
+    console.log(`  Total: ${generatedFiles.length} JSON file(s) with ${totalStrings} strings total`);
+
+    return generatedFiles;
 }
 
 // Generate PHP-only MO file
@@ -209,16 +259,19 @@ poFiles.forEach(poFile => {
     console.log(`Processing ${locale}...`);
 
     // Parse PO file and categorize strings
-    const { phpStrings, jsStrings } = parsePOFile(poFile);
+    const { phpStrings, fileToStrings } = parsePOFile(poFile);
 
-    // Count shared strings
-    const jsOnlyKeys = Object.keys(jsStrings).filter(k => k !== "");
+    // Calculate shared strings (strings in both JS and PHP)
+    const allJsStrings = new Set();
+    fileToStrings.forEach(strings => {
+        Object.keys(strings).filter(k => k !== "").forEach(k => allJsStrings.add(k));
+    });
     const phpOnlyKeys = Object.keys(phpStrings).filter(k => k !== "");
-    const sharedStrings = jsOnlyKeys.filter(k => phpOnlyKeys.includes(k));
+    const sharedStrings = [...allJsStrings].filter(k => phpOnlyKeys.includes(k));
 
-    // Generate dashboard JSON (JS strings)
-    const jsonFile = generateDashboardJSON(locale, jsStrings);
-    validJSONFiles.push(path.basename(jsonFile));
+    // Generate JSON files (JS strings per file)
+    const jsonFiles = generateDashboardJSON(locale, fileToStrings);
+    validJSONFiles.push(...jsonFiles);
 
     // Generate MO file (PHP strings)
     generatePHPMO(locale, phpStrings, poFile);
