@@ -1,7 +1,7 @@
 import "./multiselect.css";
 import toast from "./Notify";
 import { isObject } from "./utilities";
-
+import {__} from "@wordpress/i18n";
 class MultiSelect extends React.Component {
   constructor(props) {
     super(props);
@@ -16,7 +16,7 @@ class MultiSelect extends React.Component {
       multiselectIndex: props.multiselectIndex || 0,
       toastMessage:
         props.toastMessage ||
-        "Showing button to multiple post is not supported in free version.",
+        __("Showing button to multiple post is not supported in free version.", 'text-to-audio'),
       selectionLimit: props.selectionLimit || 1,
     };
 
@@ -380,7 +380,7 @@ class MultiSelect extends React.Component {
             {item}
           </span>
         ))
-      : "Select Items...";
+      : __("Select Items...", 'text-to-audio');
   }
 
   componentDidMount() {

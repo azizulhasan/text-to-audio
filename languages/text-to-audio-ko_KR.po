@@ -1,108 +1,45 @@
+# Copyright (C) 2026 AtlasAiDev
+# This file is distributed under the GPL-3.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Text To Speech TTS Accessibility 1.2.1\n"
+"Project-Id-Version: Text To Speech TTS Accessibility 2.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/text-to-audio\n"
 "Last-Translator: AtlasAiDev\n"
 "Language-Team: Korean\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-01-15T12:00:00+00:00\n"
-"PO-Revision-Date: 2024-01-15T12:00:00+00:00\n"
+"POT-Creation-Date: 2026-01-19T07:30:12+01:00\n"
+"PO-Revision-Date: 2026-01-19T07:30:12+01:00\n"
 "Language: ko_KR\n"
 "X-Generator: Manual Translation\n"
 "X-Domain: text-to-audio\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. Plugin Name of the plugin
+#: text-to-audio.php
 msgid "Text To Speech TTS Accessibility"
 msgstr "Text To Speech TTS Accessibility"
 
+#. Plugin URI of the plugin
+#: text-to-audio.php
+msgid "https://atlasaidev.com/"
+msgstr "https://atlasaidev.com/"
+
 #. Description of the plugin
-msgid "Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages."
-msgstr "30개 이상의 언어로 블로그를 소리 내어 읽고, 30개 이상의 언어로 음성으로 블로그를 작성할 수 있는 기능을 WordPress 사이트에 추가합니다."
+#: text-to-audio.php
+msgid "The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!"
+msgstr "가장 사용하기 쉬운 텍스트 음성 변환 접근성 플러그인입니다. 설치만 하면 자동으로 WordPress 사이트에 텍스트 음성 변환 플레이어가 추가됩니다!"
 
 #. Author of the plugin
-msgid "Azizul Hasan"
-msgstr "Azizul Hasan"
+#: text-to-audio.php
+msgid "AtlasAiDev"
+msgstr "AtlasAiDev"
 
 #. Author URI of the plugin
-msgid "http://azizulhasan.com"
-msgstr "http://azizulhasan.com"
-
-#: includes/helpers.php:150
-#: includes/TTA_Activator.php:80
-#: text-to-audio.php:108
-msgid "Listen"
-msgstr "듣기"
-
-#: includes/helpers.php:151
-#: includes/TTA_Activator.php:81
-#: text-to-audio.php:109
-msgid "Pause"
-msgstr "일시정지"
-
-#: includes/helpers.php:152
-#: includes/TTA_Activator.php:82
-#: text-to-audio.php:110
-msgid "Resume"
-msgstr "재개"
-
-#: includes/helpers.php:153
-#: includes/TTA_Activator.php:83
-#: text-to-audio.php:111
-msgid "Replay"
-msgstr "다시듣기"
-
-#: includes/helpers.php:154
-#: includes/helpers.php:155
-#: includes/TTA_Activator.php:84
-#: includes/TTA_Activator.php:85
-#: text-to-audio.php:112
-#: text-to-audio.php:113
-msgid "Start"
-msgstr "시작"
-
-#. translators: 1: Plugin name 2: SpeechRecognition  3: link to doc
-#: includes/helpers.php:190
-msgid "%1$s Please enable %2$s. Click here to %3$s."
-msgstr "%1$s %2$s을(를) 활성화하세요. %3$s하려면 여기를 클릭하세요."
-
-#: includes/helpers.php:193
-msgid "enable"
-msgstr "활성화"
-
-#: text-to-audio.php:137
-msgid "Settings"
-msgstr "설정"
-
-#: text-to-audio.php:138
-msgid "Docs"
-msgstr "문서"
-
-#: text-to-audio.php:139
-msgid "Support"
-msgstr "지원"
-
-#: text-to-audio.php:140
-msgid "Write a Review"
-msgstr "리뷰 작성"
-
-#: admin/TTA_Posts_List.php:119
-msgid "MP3 file generated"
-msgstr "MP3 파일이 생성되었습니다"
-
-#: admin/TTA_Posts_List.php:119
-msgid "MP3 file not generated"
-msgstr "MP3 파일이 생성되지 않았습니다"
-
-#: admin/TTA_Posts_List.php:123
-msgid "TTS enabled for this post"
-msgstr "이 게시물에 TTS가 활성화되었습니다"
-
-#: admin/TTA_Posts_List.php:123
-msgid "TTS not enabled for this post"
-msgstr "이 게시물에 TTS가 비활성화되었습니다"
+#: text-to-audio.php
+msgid "http://atlasaidev.com/"
+msgstr "http://atlasaidev.com/"
 
 #: admin/TTA_Posts_List.php:170
 msgid "Audio Status"
@@ -113,116 +50,287 @@ msgid "TTS Status"
 msgstr "TTS 상태"
 
 #: admin/TTA_Posts_List.php:171
+msgid "All Posts"
+msgstr "모든 게시물"
+
 #: admin/TTA_Posts_List.php:172
 msgid "Audio Generated"
 msgstr "오디오 생성됨"
 
-#: admin/TTA_Posts_List.php:171
 #: admin/TTA_Posts_List.php:172
 msgid "TTS Enabled"
 msgstr "TTS 활성화됨"
 
-#: admin/TTA_Posts_List.php:172
 #: admin/TTA_Posts_List.php:173
 msgid "Audio Not Generated"
-msgstr "오디오 생성 안됨"
+msgstr "오디오 생성 안 됨"
 
-#: admin/TTA_Posts_List.php:172
 #: admin/TTA_Posts_List.php:173
 msgid "TTS Not Enabled"
 msgstr "TTS 비활성화됨"
 
-#: admin/TTA_Admin.php:352
-msgid "AtlasVoice Pro : Bulk MP3 File Generate"
-msgstr "AtlasVoice Pro : 일괄 MP3 파일 생성"
+#: api/AtlasVoice_Analytics.php:201
+msgid "Post ID or User ID is missing"
+msgstr "게시물 ID 또는 사용자 ID가 누락되었습니다"
 
-#: admin/TTA_Admin.php:360
-msgid "No post ID found. Please select multiple posts from the post page. And apply <strong>AtlasVoice Generate MP3 File</strong> bulk action. <a href=\"%s\">Go to Posts Page</a>"
-msgstr "게시물 ID를 찾을 수 없습니다. 게시물 페이지에서 여러 게시물을 선택하고 <strong>AtlasVoice MP3 파일 생성</strong> 일괄 작업을 적용하세요. <a href=\"%s\">게시물 페이지로 이동</a>"
+#: api/TTA_Api_Routes.php:513
+#: api/TTA_Api_Routes.php:580
+msgid "You do not have permission to access this resource."
+msgstr "이 리소스에 액세스할 권한이 없습니다."
 
-#: admin/TTA_Admin.php:363
-msgid "How it works?"
-msgstr "사용 방법은?"
+#: api/TTA_Api_Routes.php:544
+#: api/TTA_Api_Routes.php:615
+msgid "Invalid nonce or insufficient permissions."
+msgstr "잘못된 nonce 또는 권한이 부족합니다."
 
-#: includes/TTA_Notices.php:159
-msgid "This browser doesn't support speechSynthesis API. Please use one of these browsers to use Text To Speech Free: Chrome, Firefox, Safari, Samsung, Edge, Opera. On our Pro version there is no browser-related issue."
-msgstr "이 브라우저는 음성 합성 API를 지원하지 않습니다. Text To Speech 무료 버전을 사용하려면 다음 브라우저 중 하나를 사용하세요: Chrome, Firefox, Safari, Samsung, Edge, Opera. 프로 버전에서는 브라우저 관련 문제가 없습니다."
+#: api/TTA_Api_Routes.php:607
+msgid "Invalid or missing nonce for frontend POST request."
+msgstr "프런트엔드 POST 요청에 대한 nonce가 잘못되었거나 누락되었습니다."
 
-#: includes/TTA_Notices.php:1292
-msgid "Coupon code copied to clipboard!"
-msgstr "쿠폰 코드가 클립보드에 복사되었습니다!"
+#: includes/helpers.php:816
+#: includes/TTA_Activator.php:128
+#: admin/js/blocks/customize-button/customize-button.js:161
+#: build/blocks.js:1
+msgid "Listen"
+msgstr "듣기"
 
-#: admin/TTA_Admin.php:130
-#: admin/js/AtlasVoiceCopyShortcode.js:11
-#: admin/js/AtlasVoiceCopyShortcode.js:34
-msgid "Copied"
-msgstr "복사됨"
+#: includes/helpers.php:817
+#: includes/TTA_Activator.php:129
+msgid "Pause"
+msgstr "일시정지"
 
-#: admin/TTA_Admin.php:131
-#: admin/js/AtlasVoiceCopyShortcode.js:37
-msgid "Something went wrong!"
-msgstr "오류가 발생했습니다!"
+#: includes/helpers.php:818
+#: includes/TTA_Activator.php:130
+msgid "Resume"
+msgstr "재개"
 
-#: admin/TTA_Admin.php:132
-#: admin/js/TextToSpeech.js:177
-msgid "This browser does not support speechSynthesis API"
-msgstr "이 브라우저는 음성 합성 API를 지원하지 않습니다"
+#: includes/helpers.php:819
+#: includes/TTA_Activator.php:131
+msgid "Replay"
+msgstr "다시 재생"
 
-#: admin/TTA_Admin.php:133
-#: admin/js/TextToSpeech.js:153
-msgid "Text To Audio: Please enable speechRecognition"
-msgstr "Text To Audio: 음성 인식을 활성화하세요"
+#: includes/helpers.php:820
+#: includes/TTA_Activator.php:132
+msgid "Start"
+msgstr "시작"
 
-#: admin/TTA_Admin.php:134
-#: admin/js/TextToSpeech.js:159
-msgid "Text To Audio: Please enable speechSynthesis."
-msgstr "Text To Audio: 음성 합성을 활성화하세요."
+#: includes/helpers.php:821
+#: includes/TTA_Activator.php:133
+msgid "Stop"
+msgstr "중지"
 
-#: admin/TTA_Admin.php:135
-#: admin/js/TextToSpeech.js:167
-msgid "Click here to enable"
-msgstr "여기를 클릭하여 활성화"
-
-#: admin/TTA_Posts_List.php:171
-msgid "All Posts"
-msgstr "모든 게시물"
-
-#: src/dashboard/components/dashboard/aliases/Aliases.js:126
-msgid "Add New Row"
-msgstr "새 행 추가"
-
-#: includes/TTA_i18n.php:50
+#: includes/TTA_i18n.php:49
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:156
 msgid "Save"
 msgstr "저장"
 
-#: includes/TTA_i18n.php:53
+#: includes/TTA_i18n.php:52
 msgid "Text to Speech Aliases"
 msgstr "텍스트 음성 변환 별칭"
 
-#: includes/TTA_i18n.php:55
+#: includes/TTA_i18n.php:53
+msgid "Add New Row"
+msgstr "새 행 추가"
+
+#: includes/TTA_i18n.php:54
 msgid "Actual Text"
 msgstr "실제 텍스트"
 
-#: includes/TTA_i18n.php:56
+#: includes/TTA_i18n.php:55
 msgid "To Read"
-msgstr "읽을 텍스트"
+msgstr "읽을 내용"
+
+#: includes/TTA_i18n.php:56
+msgid "All fields must be filled!"
+msgstr "모든 필드를 채워야 합니다!"
 
 #: includes/TTA_i18n.php:57
-msgid "All fields must be filled!"
-msgstr "모든 필드를 입력해야 합니다!"
-
-#: includes/TTA_i18n.php:58
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:98
 msgid "Successfully Saved."
 msgstr "성공적으로 저장되었습니다."
 
-#: includes/TTA_i18n.php:59
+#: includes/TTA_i18n.php:58
 msgid "More than 1 alias is available in the pro version. Please"
-msgstr "프로 버전에서는 1개 이상의 별칭을 사용할 수 있습니다. "
+msgstr "프로 버전에서는 1개 이상의 별칭을 사용할 수 있습니다."
 
-#: includes/TTA_i18n.php:60
+#: includes/TTA_i18n.php:59
 msgid "Buy Pro version"
 msgstr "프로 버전 구매"
 
-#: includes/TTA_i18n.php:61
+#: includes/TTA_i18n.php:60
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:144
 msgid "Click To Know How It Works?"
-msgstr "사용 방법을 알아보려면 클릭하세요"
+msgstr "작동 방식을 알아보려면 클릭하세요"
+
+#: text-to-audio.php:279
+msgid "Settings"
+msgstr "설정"
+
+#: text-to-audio.php:280
+msgid "Docs"
+msgstr "문서"
+
+#: text-to-audio.php:281
+msgid "Support"
+msgstr "지원"
+
+#: text-to-audio.php:282
+msgid "Write a Review"
+msgstr "리뷰 작성"
+
+#: admin/js/blocks/customize-button/customize-button.js:12
+#: admin/js/blocks/customize-button/customize-button.js:76
+#: build/blocks.js:1
+msgid "Customize Button"
+msgstr "버튼 사용자 정의"
+
+#: admin/js/blocks/customize-button/customize-button.js:13
+#: build/blocks.js:1
+msgid "Text to audio customize button."
+msgstr "텍스트 음성 변환 사용자 정의 버튼"
+
+#: admin/js/blocks/customize-button/customize-button.js:79
+#: build/blocks.js:1
+msgid "BackGround Color"
+msgstr "배경색"
+
+#: admin/js/blocks/customize-button/customize-button.js:87
+#: admin/js/blocks/customize-button/customize-button.js:98
+#: build/blocks.js:1
+msgid "Choose your color"
+msgstr "색상 선택"
+
+#: admin/js/blocks/customize-button/customize-button.js:91
+#: build/blocks.js:1
+msgid "Text Color"
+msgstr "텍스트 색상"
+
+#: admin/js/blocks/customize-button/customize-button.js:102
+#: build/blocks.js:1
+msgid "Button Width (%)"
+msgstr "버튼 너비 (%)"
+
+#: admin/js/blocks/customize-button/customize-button.js:111
+#: build/blocks.js:1
+msgid "Button Width"
+msgstr "버튼 너비"
+
+#: admin/js/blocks/customize-button/customize-button.js:115
+#: build/blocks.js:1
+msgid "Custom CSS"
+msgstr "사용자 정의 CSS"
+
+#: admin/js/blocks/customize-button/customize-button.js:120
+#: build/blocks.js:1
+msgid "class selector .tta__listen_content"
+msgstr "클래스 선택자 .tta__listen_content"
+
+#: admin/js/blocks/customize-button/customize-button.js:155
+#: build/blocks.js:1
+msgid "Text To Audio:  Tap to listen post."
+msgstr "텍스트 음성 변환: 게시물을 들으려면 탭하세요."
+
+#: src/dashboard/bulk-mp3-file/generate-bulk-mp3-file.js:108
+msgid "Are you sure? You want to regenerate all MP3 files ?"
+msgstr "확실합니까? 모든 MP3 파일을 다시 생성하시겠습니까?"
+
+#: src/dashboard/bulk-mp3-file/generate-bulk-mp3-file.js:166
+msgid "All MP3 File Generated"
+msgstr "모든 MP3 파일 생성됨"
+
+#: src/dashboard/components/context/MultiSelect.js:19
+msgid "Showing button to multiple post is not supported in free version."
+msgstr "무료 버전에서는 여러 게시물에 버튼 표시를 지원하지 않습니다."
+
+#: src/dashboard/components/context/MultiSelect.js:383
+msgid "Select Items..."
+msgstr "항목 선택..."
+
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:117
+msgid "Add ACF Fields To Posts"
+msgstr "게시물에 ACF 필드 추가"
+
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:122
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:131
+msgid "Adding more than 1  ACF field is a pro feature"
+msgstr "1개 이상의 ACF 필드 추가는 프로 기능입니다"
+
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:167
+msgid "Loading"
+msgstr "로딩 중"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:43
+msgid "Backup MP3 Files To Google Cloud Storage Can Be Enabled If Google Text To Speech Is Authenticated."
+msgstr "Google 텍스트 음성 변환이 인증되면 Google Cloud Storage에 MP3 파일 백업을 활성화할 수 있습니다."
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:70
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:97
+msgid "Google cloud text to speech feature is only in pro version."
+msgstr "Google 클라우드 텍스트 음성 변환 기능은 프로 버전에서만 사용할 수 있습니다."
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:79
+msgid "Learn More"
+msgstr "자세히 알아보기"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:106
+msgid "Buy Now"
+msgstr "지금 구매"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:124
+msgid "Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin."
+msgstr "Text To Speech 플러그인은 합성된 콘텐츠를 업로드 폴더에 저장합니다. 업로드 폴더를 쓸 수 없습니다. 플러그인의 모든 기능을 사용하려면 업로드 폴더를 쓰기 가능하게 만드세요."
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:132
+msgid "Please create a valid bucket name first"
+msgstr "먼저 유효한 버킷 이름을 만드세요"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:148
+msgid "File uploaded successfully. Now go to the \"Customization\" menu."
+msgstr "파일이 성공적으로 업로드되었습니다. 이제 \"사용자 정의\" 메뉴로 이동하세요."
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:176
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:249
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:289
+msgid "Something went wrong"
+msgstr "문제가 발생했습니다"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:238
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:246
+msgid "You are already authenticated"
+msgstr "이미 인증되었습니다"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:260
+msgid "You have to be authenticated to revoke."
+msgstr "해지하려면 인증되어야 합니다."
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:266
+msgid "Do you want to revoke access and delete the file uploaded during authentication. If you delete the file you have to upload the file again. Make sure you have a backup otherwise, you have to crete another auth file from Google Cloud text to speech."
+msgstr "액세스를 해지하고 인증 중에 업로드된 파일을 삭제하시겠습니까? 파일을 삭제하면 파일을 다시 업로드해야 합니다. 백업이 있는지 확인하세요. 그렇지 않으면 Google Cloud 텍스트 음성 변환에서 다른 인증 파일을 만들어야 합니다."
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:279
+msgid "Authentication removed."
+msgstr "인증이 제거되었습니다."
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:316
+msgid "This bucket is already have to your cloud storage."
+msgstr "이 버킷은 이미 클라우드 스토리지에 있습니다."
+
+#: src/dashboard/components/dashboard/settings/Settings.js:132
+msgid "All cache deleted"
+msgstr "모든 캐시 삭제됨"
+
+#: src/dashboard/components/dashboard/settings/Settings.js:141
+msgid "Successfully Saved. Now go to the \"Customization\" menu."
+msgstr "성공적으로 저장되었습니다. 이제 \"사용자 정의\" 메뉴로 이동하세요."
+
+#: src/dashboard/css-selectors/CSSSelectorsForPosts.js:79
+msgid "Please save the post then try to add custom CSS selectors."
+msgstr "게시물을 저장한 다음 사용자 정의 CSS 선택자를 추가해 보세요."
+
+#: src/dashboard/css-selectors/CSSSelectorsForPosts.js:83
+msgid "Empty value can not be saved. You can uncheck the \"Use Own CSS Selectors\" Option."
+msgstr "빈 값은 저장할 수 없습니다. \"자체 CSS 선택자 사용\" 옵션을 선택 해제할 수 있습니다."
+
+#: src/dashboard/css-selectors/CSSSelectorsForPosts.js:99
+msgid "Settings Data Saved"
+msgstr "설정 데이터 저장됨"

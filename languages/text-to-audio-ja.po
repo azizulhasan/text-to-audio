@@ -1,228 +1,336 @@
+# Copyright (C) 2026 AtlasAiDev
+# This file is distributed under the GPL-3.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Text To Speech TTS Accessibility 1.2.1\n"
+"Project-Id-Version: Text To Speech TTS Accessibility 2.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/text-to-audio\n"
 "Last-Translator: AtlasAiDev\n"
 "Language-Team: Japanese\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-01-15T12:00:00+00:00\n"
-"PO-Revision-Date: 2024-01-15T12:00:00+00:00\n"
+"POT-Creation-Date: 2026-01-19T07:30:12+01:00\n"
+"PO-Revision-Date: 2026-01-19T07:30:12+01:00\n"
 "Language: ja\n"
 "X-Generator: Manual Translation\n"
 "X-Domain: text-to-audio\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. Plugin Name of the plugin
+#: text-to-audio.php
 msgid "Text To Speech TTS Accessibility"
 msgstr "Text To Speech TTS Accessibility"
 
+#. Plugin URI of the plugin
+#: text-to-audio.php
+msgid "https://atlasaidev.com/"
+msgstr "https://atlasaidev.com/"
+
 #. Description of the plugin
-msgid "Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages."
-msgstr "30以上の言語でブログを音読し、30以上の言語で音声入力によってブログを書くことができる機能をWordPressサイトに追加します。"
+#: text-to-audio.php
+msgid "The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!"
+msgstr "最もユーザーフレンドリーなテキスト読み上げアクセシビリティプラグインです。インストールするだけで、自動的にWordPressサイトにテキスト読み上げプレーヤーが追加されます！"
 
 #. Author of the plugin
-msgid "Azizul Hasan"
-msgstr "Azizul Hasan"
+#: text-to-audio.php
+msgid "AtlasAiDev"
+msgstr "AtlasAiDev"
 
 #. Author URI of the plugin
-msgid "http://azizulhasan.com"
-msgstr "http://azizulhasan.com"
-
-#: includes/helpers.php:150
-#: includes/TTA_Activator.php:80
-#: text-to-audio.php:108
-msgid "Listen"
-msgstr "再生"
-
-#: includes/helpers.php:151
-#: includes/TTA_Activator.php:81
-#: text-to-audio.php:109
-msgid "Pause"
-msgstr "一時停止"
-
-#: includes/helpers.php:152
-#: includes/TTA_Activator.php:82
-#: text-to-audio.php:110
-msgid "Resume"
-msgstr "再開"
-
-#: includes/helpers.php:153
-#: includes/TTA_Activator.php:83
-#: text-to-audio.php:111
-msgid "Replay"
-msgstr "再生"
-
-#: includes/helpers.php:154
-#: includes/helpers.php:155
-#: includes/TTA_Activator.php:84
-#: includes/TTA_Activator.php:85
-#: text-to-audio.php:112
-#: text-to-audio.php:113
-msgid "Start"
-msgstr "開始"
-
-#. translators: 1: Plugin name 2: SpeechRecognition  3: link to doc
-#: includes/helpers.php:190
-msgid "%1$s Please enable %2$s. Click here to %3$s."
-msgstr "%1$s %2$sを有効にしてください。%3$sするにはここをクリックしてください。"
-
-#: includes/helpers.php:193
-msgid "enable"
-msgstr "有効化"
-
-#: text-to-audio.php:137
-msgid "Settings"
-msgstr "設定"
-
-#: text-to-audio.php:138
-msgid "Docs"
-msgstr "ドキュメント"
-
-#: text-to-audio.php:139
-msgid "Support"
-msgstr "サポート"
-
-#: text-to-audio.php:140
-msgid "Write a Review"
-msgstr "レビューを書く"
-
-#: admin/TTA_Posts_List.php:119
-msgid "MP3 file generated"
-msgstr "MP3ファイルが生成されました"
-
-#: admin/TTA_Posts_List.php:119
-msgid "MP3 file not generated"
-msgstr "MP3ファイルが生成されていません"
-
-#: admin/TTA_Posts_List.php:123
-msgid "TTS enabled for this post"
-msgstr "この投稿でTTSが有効です"
-
-#: admin/TTA_Posts_List.php:123
-msgid "TTS not enabled for this post"
-msgstr "この投稿でTTSが無効です"
+#: text-to-audio.php
+msgid "http://atlasaidev.com/"
+msgstr "http://atlasaidev.com/"
 
 #: admin/TTA_Posts_List.php:170
 msgid "Audio Status"
-msgstr "音声ステータス"
+msgstr "オーディオステータス"
 
 #: admin/TTA_Posts_List.php:170
 msgid "TTS Status"
 msgstr "TTSステータス"
 
 #: admin/TTA_Posts_List.php:171
+msgid "All Posts"
+msgstr "すべての投稿"
+
 #: admin/TTA_Posts_List.php:172
 msgid "Audio Generated"
-msgstr "音声生成済み"
+msgstr "オーディオ生成済み"
 
-#: admin/TTA_Posts_List.php:171
 #: admin/TTA_Posts_List.php:172
 msgid "TTS Enabled"
 msgstr "TTS有効"
 
-#: admin/TTA_Posts_List.php:172
 #: admin/TTA_Posts_List.php:173
 msgid "Audio Not Generated"
-msgstr "音声未生成"
+msgstr "オーディオ未生成"
 
-#: admin/TTA_Posts_List.php:172
 #: admin/TTA_Posts_List.php:173
 msgid "TTS Not Enabled"
 msgstr "TTS無効"
 
-#: admin/TTA_Admin.php:352
-msgid "AtlasVoice Pro : Bulk MP3 File Generate"
-msgstr "AtlasVoice Pro：一括MP3ファイル生成"
+#: api/AtlasVoice_Analytics.php:201
+msgid "Post ID or User ID is missing"
+msgstr "投稿IDまたはユーザーIDが不足しています"
 
-#: admin/TTA_Admin.php:360
-msgid "No post ID found. Please select multiple posts from the post page. And apply <strong>AtlasVoice Generate MP3 File</strong> bulk action. <a href=\"%s\">Go to Posts Page</a>"
-msgstr "投稿IDが見つかりません。投稿ページから複数の投稿を選択し、<strong>AtlasVoice MP3ファイル生成</strong>一括操作を適用してください。<a href=\"%s\">投稿ページへ移動</a>"
+#: api/TTA_Api_Routes.php:513
+#: api/TTA_Api_Routes.php:580
+msgid "You do not have permission to access this resource."
+msgstr "このリソースにアクセスする権限がありません。"
 
-#: admin/TTA_Admin.php:363
-msgid "How it works?"
-msgstr "使い方は？"
+#: api/TTA_Api_Routes.php:544
+#: api/TTA_Api_Routes.php:615
+msgid "Invalid nonce or insufficient permissions."
+msgstr "無効なnonceまたは権限が不足しています。"
 
-#: includes/TTA_Notices.php:159
-msgid "This browser doesn't support speechSynthesis API. Please use one of these browsers to use Text To Speech Free: Chrome, Firefox, Safari, Samsung, Edge, Opera. On our Pro version there is no browser-related issue."
-msgstr "このブラウザは音声合成APIをサポートしていません。Text To Speech無料版を使用するには、次のブラウザをご利用ください：Chrome、Firefox、Safari、Samsung、Edge、Opera。プロ版ではブラウザに関する問題はありません。"
+#: api/TTA_Api_Routes.php:607
+msgid "Invalid or missing nonce for frontend POST request."
+msgstr "フロントエンドPOSTリクエストのnonceが無効または欠落しています。"
 
-#: includes/TTA_Notices.php:1292
-msgid "Coupon code copied to clipboard!"
-msgstr "クーポンコードがクリップボードにコピーされました！"
+#: includes/helpers.php:816
+#: includes/TTA_Activator.php:128
+#: admin/js/blocks/customize-button/customize-button.js:161
+#: build/blocks.js:1
+msgid "Listen"
+msgstr "聴く"
 
-#: admin/TTA_Admin.php:130
-#: admin/js/AtlasVoiceCopyShortcode.js:11
-#: admin/js/AtlasVoiceCopyShortcode.js:34
-msgid "Copied"
-msgstr "コピーしました"
+#: includes/helpers.php:817
+#: includes/TTA_Activator.php:129
+msgid "Pause"
+msgstr "一時停止"
 
-#: admin/TTA_Admin.php:131
-#: admin/js/AtlasVoiceCopyShortcode.js:37
-msgid "Something went wrong!"
-msgstr "エラーが発生しました！"
+#: includes/helpers.php:818
+#: includes/TTA_Activator.php:130
+msgid "Resume"
+msgstr "再開"
 
-#: admin/TTA_Admin.php:132
-#: admin/js/TextToSpeech.js:177
-msgid "This browser does not support speechSynthesis API"
-msgstr "このブラウザは音声合成APIをサポートしていません"
+#: includes/helpers.php:819
+#: includes/TTA_Activator.php:131
+msgid "Replay"
+msgstr "リプレイ"
 
-#: admin/TTA_Admin.php:133
-#: admin/js/TextToSpeech.js:153
-msgid "Text To Audio: Please enable speechRecognition"
-msgstr "Text To Audio：音声認識を有効にしてください"
+#: includes/helpers.php:820
+#: includes/TTA_Activator.php:132
+msgid "Start"
+msgstr "開始"
 
-#: admin/TTA_Admin.php:134
-#: admin/js/TextToSpeech.js:159
-msgid "Text To Audio: Please enable speechSynthesis."
-msgstr "Text To Audio：音声合成を有効にしてください。"
+#: includes/helpers.php:821
+#: includes/TTA_Activator.php:133
+msgid "Stop"
+msgstr "停止"
 
-#: admin/TTA_Admin.php:135
-#: admin/js/TextToSpeech.js:167
-msgid "Click here to enable"
-msgstr "ここをクリックして有効化"
-
-#: admin/TTA_Posts_List.php:171
-msgid "All Posts"
-msgstr "すべての投稿"
-
-#: src/dashboard/components/dashboard/aliases/Aliases.js:126
-msgid "Add New Row"
-msgstr "新しい行を追加"
-
-#: includes/TTA_i18n.php:50
+#: includes/TTA_i18n.php:49
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:156
 msgid "Save"
 msgstr "保存"
 
-#: includes/TTA_i18n.php:53
+#: includes/TTA_i18n.php:52
 msgid "Text to Speech Aliases"
 msgstr "テキスト読み上げエイリアス"
 
-#: includes/TTA_i18n.php:55
+#: includes/TTA_i18n.php:53
+msgid "Add New Row"
+msgstr "新しい行を追加"
+
+#: includes/TTA_i18n.php:54
 msgid "Actual Text"
 msgstr "実際のテキスト"
 
-#: includes/TTA_i18n.php:56
+#: includes/TTA_i18n.php:55
 msgid "To Read"
 msgstr "読み上げるテキスト"
 
-#: includes/TTA_i18n.php:57
+#: includes/TTA_i18n.php:56
 msgid "All fields must be filled!"
 msgstr "すべてのフィールドを入力してください！"
 
-#: includes/TTA_i18n.php:58
+#: includes/TTA_i18n.php:57
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:98
 msgid "Successfully Saved."
 msgstr "正常に保存されました。"
 
-#: includes/TTA_i18n.php:59
+#: includes/TTA_i18n.php:58
 msgid "More than 1 alias is available in the pro version. Please"
-msgstr "プロバージョンでは1つ以上のエイリアスが利用可能です。"
+msgstr "プロバージョンでは2つ以上のエイリアスを使用できます。"
 
-#: includes/TTA_i18n.php:60
+#: includes/TTA_i18n.php:59
 msgid "Buy Pro version"
 msgstr "プロバージョンを購入"
 
-#: includes/TTA_i18n.php:61
+#: includes/TTA_i18n.php:60
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:144
 msgid "Click To Know How It Works?"
-msgstr "使い方を知るにはクリックしてください"
+msgstr "使い方を知るにはクリック"
+
+#: text-to-audio.php:279
+msgid "Settings"
+msgstr "設定"
+
+#: text-to-audio.php:280
+msgid "Docs"
+msgstr "ドキュメント"
+
+#: text-to-audio.php:281
+msgid "Support"
+msgstr "サポート"
+
+#: text-to-audio.php:282
+msgid "Write a Review"
+msgstr "レビューを書く"
+
+#: admin/js/blocks/customize-button/customize-button.js:12
+#: admin/js/blocks/customize-button/customize-button.js:76
+#: build/blocks.js:1
+msgid "Customize Button"
+msgstr "ボタンをカスタマイズ"
+
+#: admin/js/blocks/customize-button/customize-button.js:13
+#: build/blocks.js:1
+msgid "Text to audio customize button."
+msgstr "テキスト読み上げカスタマイズボタン"
+
+#: admin/js/blocks/customize-button/customize-button.js:79
+#: build/blocks.js:1
+msgid "BackGround Color"
+msgstr "背景色"
+
+#: admin/js/blocks/customize-button/customize-button.js:87
+#: admin/js/blocks/customize-button/customize-button.js:98
+#: build/blocks.js:1
+msgid "Choose your color"
+msgstr "色を選択"
+
+#: admin/js/blocks/customize-button/customize-button.js:91
+#: build/blocks.js:1
+msgid "Text Color"
+msgstr "テキストの色"
+
+#: admin/js/blocks/customize-button/customize-button.js:102
+#: build/blocks.js:1
+msgid "Button Width (%)"
+msgstr "ボタンの幅（%）"
+
+#: admin/js/blocks/customize-button/customize-button.js:111
+#: build/blocks.js:1
+msgid "Button Width"
+msgstr "ボタンの幅"
+
+#: admin/js/blocks/customize-button/customize-button.js:115
+#: build/blocks.js:1
+msgid "Custom CSS"
+msgstr "カスタムCSS"
+
+#: admin/js/blocks/customize-button/customize-button.js:120
+#: build/blocks.js:1
+msgid "class selector .tta__listen_content"
+msgstr "クラスセレクタ .tta__listen_content"
+
+#: admin/js/blocks/customize-button/customize-button.js:155
+#: build/blocks.js:1
+msgid "Text To Audio:  Tap to listen post."
+msgstr "テキスト読み上げ：タップして投稿を聴く。"
+
+#: src/dashboard/bulk-mp3-file/generate-bulk-mp3-file.js:108
+msgid "Are you sure? You want to regenerate all MP3 files ?"
+msgstr "よろしいですか？すべてのMP3ファイルを再生成しますか？"
+
+#: src/dashboard/bulk-mp3-file/generate-bulk-mp3-file.js:166
+msgid "All MP3 File Generated"
+msgstr "すべてのMP3ファイルが生成されました"
+
+#: src/dashboard/components/context/MultiSelect.js:19
+msgid "Showing button to multiple post is not supported in free version."
+msgstr "無料版では複数の投稿にボタンを表示することはサポートされていません。"
+
+#: src/dashboard/components/context/MultiSelect.js:383
+msgid "Select Items..."
+msgstr "アイテムを選択..."
+
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:117
+msgid "Add ACF Fields To Posts"
+msgstr "投稿にACFフィールドを追加"
+
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:122
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:131
+msgid "Adding more than 1  ACF field is a pro feature"
+msgstr "2つ以上のACFフィールドの追加はプロ機能です"
+
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:167
+msgid "Loading"
+msgstr "読み込み中"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:43
+msgid "Backup MP3 Files To Google Cloud Storage Can Be Enabled If Google Text To Speech Is Authenticated."
+msgstr "Googleテキスト読み上げが認証されている場合、Google Cloud StorageへのMP3ファイルのバックアップを有効にできます。"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:70
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:97
+msgid "Google cloud text to speech feature is only in pro version."
+msgstr "Googleクラウドテキスト読み上げ機能はプロバージョンでのみ利用できます。"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:79
+msgid "Learn More"
+msgstr "詳細を見る"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:106
+msgid "Buy Now"
+msgstr "今すぐ購入"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:124
+msgid "Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin."
+msgstr "テキスト読み上げプラグインは、合成されたコンテンツをuploadsフォルダに保存します。uploadsフォルダが書き込み可能ではありません。プラグインのすべての機能を利用するには、uploadsフォルダを書き込み可能にしてください。"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:132
+msgid "Please create a valid bucket name first"
+msgstr "まず有効なバケット名を作成してください"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:148
+msgid "File uploaded successfully. Now go to the \"Customization\" menu."
+msgstr "ファイルが正常にアップロードされました。\"カスタマイズ\"メニューに移動してください。"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:176
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:249
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:289
+msgid "Something went wrong"
+msgstr "問題が発生しました"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:238
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:246
+msgid "You are already authenticated"
+msgstr "すでに認証されています"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:260
+msgid "You have to be authenticated to revoke."
+msgstr "取り消すには認証が必要です。"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:266
+msgid "Do you want to revoke access and delete the file uploaded during authentication. If you delete the file you have to upload the file again. Make sure you have a backup otherwise, you have to crete another auth file from Google Cloud text to speech."
+msgstr "アクセスを取り消し、認証中にアップロードされたファイルを削除しますか？ファイルを削除する場合は、再度ファイルをアップロードする必要があります。バックアップがあることを確認してください。そうでない場合は、Googleクラウドテキスト読み上げから別の認証ファイルを作成する必要があります。"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:279
+msgid "Authentication removed."
+msgstr "認証が削除されました。"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:316
+msgid "This bucket is already have to your cloud storage."
+msgstr "このバケットはすでにクラウドストレージにあります。"
+
+#: src/dashboard/components/dashboard/settings/Settings.js:132
+msgid "All cache deleted"
+msgstr "すべてのキャッシュが削除されました"
+
+#: src/dashboard/components/dashboard/settings/Settings.js:141
+msgid "Successfully Saved. Now go to the \"Customization\" menu."
+msgstr "正常に保存されました。\"カスタマイズ\"メニューに移動してください。"
+
+#: src/dashboard/css-selectors/CSSSelectorsForPosts.js:79
+msgid "Please save the post then try to add custom CSS selectors."
+msgstr "投稿を保存してから、カスタムCSSセレクタを追加してください。"
+
+#: src/dashboard/css-selectors/CSSSelectorsForPosts.js:83
+msgid "Empty value can not be saved. You can uncheck the \"Use Own CSS Selectors\" Option."
+msgstr "空の値は保存できません。\"独自のCSSセレクタを使用\"オプションのチェックを外すことができます。"
+
+#: src/dashboard/css-selectors/CSSSelectorsForPosts.js:99
+msgid "Settings Data Saved"
+msgstr "設定データが保存されました"

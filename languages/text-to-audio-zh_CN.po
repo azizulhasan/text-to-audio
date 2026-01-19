@@ -1,108 +1,45 @@
+# Copyright (C) 2026 AtlasAiDev
+# This file is distributed under the GPL-3.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Text To Speech Ninja 1.2.1\n"
+"Project-Id-Version: Text To Speech TTS Accessibility 2.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/text-to-audio\n"
 "Last-Translator: AtlasAiDev\n"
 "Language-Team: Chinese (Simplified)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-01-15T12:00:00+00:00\n"
-"PO-Revision-Date: 2024-01-15T12:00:00+00:00\n"
+"POT-Creation-Date: 2026-01-19T07:30:12+01:00\n"
+"PO-Revision-Date: 2026-01-19T07:30:12+01:00\n"
 "Language: zh_CN\n"
 "X-Generator: Manual Translation\n"
 "X-Domain: text-to-audio\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
 #. Plugin Name of the plugin
-msgid "Text To Speech Ninja"
-msgstr "Text To Speech Ninja"
+#: text-to-audio.php
+msgid "Text To Speech TTS Accessibility"
+msgstr "Text To Speech TTS Accessibility"
+
+#. Plugin URI of the plugin
+#: text-to-audio.php
+msgid "https://atlasaidev.com/"
+msgstr "https://atlasaidev.com/"
 
 #. Description of the plugin
-msgid "Add functionality to WordPress site to read blogs out loud in more than 30 languages and write blogs by speech in more than 30 languages."
-msgstr "为WordPress网站添加功能，可以用30多种语言朗读博客，并用30多种语言通过语音写作博客。"
+#: text-to-audio.php
+msgid "The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!"
+msgstr "最友好的文本转语音无障碍插件。只需安装即可自动为您的WordPress网站添加文本转音频播放器！"
 
 #. Author of the plugin
-msgid "Azizul Hasan"
-msgstr "Azizul Hasan"
+#: text-to-audio.php
+msgid "AtlasAiDev"
+msgstr "AtlasAiDev"
 
 #. Author URI of the plugin
-msgid "http://azizulhasan.com"
-msgstr "http://azizulhasan.com"
-
-#: includes/helpers.php:150
-#: includes/TTA_Activator.php:80
-#: text-to-audio.php:108
-msgid "Listen"
-msgstr "收听"
-
-#: includes/helpers.php:151
-#: includes/TTA_Activator.php:81
-#: text-to-audio.php:109
-msgid "Pause"
-msgstr "暂停"
-
-#: includes/helpers.php:152
-#: includes/TTA_Activator.php:82
-#: text-to-audio.php:110
-msgid "Resume"
-msgstr "继续"
-
-#: includes/helpers.php:153
-#: includes/TTA_Activator.php:83
-#: text-to-audio.php:111
-msgid "Replay"
-msgstr "重播"
-
-#: includes/helpers.php:154
-#: includes/helpers.php:155
-#: includes/TTA_Activator.php:84
-#: includes/TTA_Activator.php:85
-#: text-to-audio.php:112
-#: text-to-audio.php:113
-msgid "Start"
-msgstr "开始"
-
-#. translators: 1: Plugin name 2: SpeechRecognition  3: link to doc
-#: includes/helpers.php:190
-msgid "%1$s Please enable %2$s. Click here to %3$s."
-msgstr "%1$s 请启用 %2$s。点击这里 %3$s。"
-
-#: includes/helpers.php:193
-msgid "enable"
-msgstr "启用"
-
-#: text-to-audio.php:137
-msgid "Settings"
-msgstr "设置"
-
-#: text-to-audio.php:138
-msgid "Docs"
-msgstr "文档"
-
-#: text-to-audio.php:139
-msgid "Support"
-msgstr "支持"
-
-#: text-to-audio.php:140
-msgid "Write a Review"
-msgstr "撰写评论"
-
-#: admin/TTA_Posts_List.php:119
-msgid "MP3 file generated"
-msgstr "MP3文件已生成"
-
-#: admin/TTA_Posts_List.php:119
-msgid "MP3 file not generated"
-msgstr "MP3文件未生成"
-
-#: admin/TTA_Posts_List.php:123
-msgid "TTS enabled for this post"
-msgstr "此文章已启用TTS"
-
-#: admin/TTA_Posts_List.php:123
-msgid "TTS not enabled for this post"
-msgstr "此文章未启用TTS"
+#: text-to-audio.php
+msgid "http://atlasaidev.com/"
+msgstr "http://atlasaidev.com/"
 
 #: admin/TTA_Posts_List.php:170
 msgid "Audio Status"
@@ -113,116 +50,287 @@ msgid "TTS Status"
 msgstr "TTS状态"
 
 #: admin/TTA_Posts_List.php:171
+msgid "All Posts"
+msgstr "所有文章"
+
 #: admin/TTA_Posts_List.php:172
 msgid "Audio Generated"
 msgstr "音频已生成"
 
-#: admin/TTA_Posts_List.php:171
 #: admin/TTA_Posts_List.php:172
 msgid "TTS Enabled"
 msgstr "TTS已启用"
 
-#: admin/TTA_Posts_List.php:172
 #: admin/TTA_Posts_List.php:173
 msgid "Audio Not Generated"
 msgstr "音频未生成"
 
-#: admin/TTA_Posts_List.php:172
 #: admin/TTA_Posts_List.php:173
 msgid "TTS Not Enabled"
 msgstr "TTS未启用"
 
-#: admin/TTA_Admin.php:352
-msgid "AtlasVoice Pro : Bulk MP3 File Generate"
-msgstr "AtlasVoice Pro：批量生成MP3文件"
+#: api/AtlasVoice_Analytics.php:201
+msgid "Post ID or User ID is missing"
+msgstr "文章ID或用户ID缺失"
 
-#: admin/TTA_Admin.php:360
-msgid "No post ID found. Please select multiple posts from the post page. And apply <strong>AtlasVoice Generate MP3 File</strong> bulk action. <a href=\"%s\">Go to Posts Page</a>"
-msgstr "未找到文章ID。请从文章页面选择多个文章，然后应用<strong>AtlasVoice生成MP3文件</strong>批量操作。<a href=\"%s\">前往文章页面</a>"
+#: api/TTA_Api_Routes.php:513
+#: api/TTA_Api_Routes.php:580
+msgid "You do not have permission to access this resource."
+msgstr "您无权访问此资源。"
 
-#: admin/TTA_Admin.php:363
-msgid "How it works?"
-msgstr "如何使用？"
+#: api/TTA_Api_Routes.php:544
+#: api/TTA_Api_Routes.php:615
+msgid "Invalid nonce or insufficient permissions."
+msgstr "无效的随机数或权限不足。"
 
-#: includes/TTA_Notices.php:159
-msgid "This browser doesn't support speechSynthesis API. Please use one of these browsers to use Text To Speech Free: Chrome, Firefox, Safari, Samsung, Edge, Opera. On our Pro version there is no browser-related issue."
-msgstr "此浏览器不支持语音合成API。请使用以下浏览器来使用Text To Speech免费版：Chrome、Firefox、Safari、Samsung、Edge、Opera。在我们的专业版中没有浏览器相关问题。"
+#: api/TTA_Api_Routes.php:607
+msgid "Invalid or missing nonce for frontend POST request."
+msgstr "前端POST请求的随机数无效或缺失。"
 
-#: includes/TTA_Notices.php:1292
-msgid "Coupon code copied to clipboard!"
-msgstr "优惠码已复制到剪贴板！"
+#: includes/helpers.php:816
+#: includes/TTA_Activator.php:128
+#: admin/js/blocks/customize-button/customize-button.js:161
+#: build/blocks.js:1
+msgid "Listen"
+msgstr "收听"
 
-#: admin/TTA_Admin.php:130
-#: admin/js/AtlasVoiceCopyShortcode.js:11
-#: admin/js/AtlasVoiceCopyShortcode.js:34
-msgid "Copied"
-msgstr "已复制"
+#: includes/helpers.php:817
+#: includes/TTA_Activator.php:129
+msgid "Pause"
+msgstr "暂停"
 
-#: admin/TTA_Admin.php:131
-#: admin/js/AtlasVoiceCopyShortcode.js:37
-msgid "Something went wrong!"
-msgstr "出错了！"
+#: includes/helpers.php:818
+#: includes/TTA_Activator.php:130
+msgid "Resume"
+msgstr "继续"
 
-#: admin/TTA_Admin.php:132
-#: admin/js/TextToSpeech.js:177
-msgid "This browser does not support speechSynthesis API"
-msgstr "此浏览器不支持语音合成API"
+#: includes/helpers.php:819
+#: includes/TTA_Activator.php:131
+msgid "Replay"
+msgstr "重播"
 
-#: admin/TTA_Admin.php:133
-#: admin/js/TextToSpeech.js:153
-msgid "Text To Audio: Please enable speechRecognition"
-msgstr "Text To Audio：请启用语音识别"
+#: includes/helpers.php:820
+#: includes/TTA_Activator.php:132
+msgid "Start"
+msgstr "开始"
 
-#: admin/TTA_Admin.php:134
-#: admin/js/TextToSpeech.js:159
-msgid "Text To Audio: Please enable speechSynthesis."
-msgstr "Text To Audio：请启用语音合成。"
+#: includes/helpers.php:821
+#: includes/TTA_Activator.php:133
+msgid "Stop"
+msgstr "停止"
 
-#: admin/TTA_Admin.php:135
-#: admin/js/TextToSpeech.js:167
-msgid "Click here to enable"
-msgstr "点击此处启用"
-
-#: admin/TTA_Posts_List.php:171
-msgid "All Posts"
-msgstr "所有文章"
-
-#: src/dashboard/components/dashboard/aliases/Aliases.js:126
-msgid "Add New Row"
-msgstr "添加新行"
-
-#: includes/TTA_i18n.php:50
+#: includes/TTA_i18n.php:49
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:156
 msgid "Save"
 msgstr "保存"
 
-#: includes/TTA_i18n.php:53
+#: includes/TTA_i18n.php:52
 msgid "Text to Speech Aliases"
 msgstr "文本转语音别名"
 
-#: includes/TTA_i18n.php:55
+#: includes/TTA_i18n.php:53
+msgid "Add New Row"
+msgstr "添加新行"
+
+#: includes/TTA_i18n.php:54
 msgid "Actual Text"
 msgstr "实际文本"
 
-#: includes/TTA_i18n.php:56
+#: includes/TTA_i18n.php:55
 msgid "To Read"
 msgstr "要朗读的文本"
 
-#: includes/TTA_i18n.php:57
+#: includes/TTA_i18n.php:56
 msgid "All fields must be filled!"
 msgstr "所有字段必须填写！"
 
-#: includes/TTA_i18n.php:58
+#: includes/TTA_i18n.php:57
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:98
 msgid "Successfully Saved."
 msgstr "保存成功。"
 
-#: includes/TTA_i18n.php:59
+#: includes/TTA_i18n.php:58
 msgid "More than 1 alias is available in the pro version. Please"
 msgstr "专业版支持超过1个别名。请"
 
-#: includes/TTA_i18n.php:60
+#: includes/TTA_i18n.php:59
 msgid "Buy Pro version"
 msgstr "购买专业版"
 
-#: includes/TTA_i18n.php:61
+#: includes/TTA_i18n.php:60
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:144
 msgid "Click To Know How It Works?"
 msgstr "点击了解如何使用？"
+
+#: text-to-audio.php:279
+msgid "Settings"
+msgstr "设置"
+
+#: text-to-audio.php:280
+msgid "Docs"
+msgstr "文档"
+
+#: text-to-audio.php:281
+msgid "Support"
+msgstr "支持"
+
+#: text-to-audio.php:282
+msgid "Write a Review"
+msgstr "撰写评论"
+
+#: admin/js/blocks/customize-button/customize-button.js:12
+#: admin/js/blocks/customize-button/customize-button.js:76
+#: build/blocks.js:1
+msgid "Customize Button"
+msgstr "自定义按钮"
+
+#: admin/js/blocks/customize-button/customize-button.js:13
+#: build/blocks.js:1
+msgid "Text to audio customize button."
+msgstr "文本转音频自定义按钮。"
+
+#: admin/js/blocks/customize-button/customize-button.js:79
+#: build/blocks.js:1
+msgid "BackGround Color"
+msgstr "背景颜色"
+
+#: admin/js/blocks/customize-button/customize-button.js:87
+#: admin/js/blocks/customize-button/customize-button.js:98
+#: build/blocks.js:1
+msgid "Choose your color"
+msgstr "选择您的颜色"
+
+#: admin/js/blocks/customize-button/customize-button.js:91
+#: build/blocks.js:1
+msgid "Text Color"
+msgstr "文本颜色"
+
+#: admin/js/blocks/customize-button/customize-button.js:102
+#: build/blocks.js:1
+msgid "Button Width (%)"
+msgstr "按钮宽度（%）"
+
+#: admin/js/blocks/customize-button/customize-button.js:111
+#: build/blocks.js:1
+msgid "Button Width"
+msgstr "按钮宽度"
+
+#: admin/js/blocks/customize-button/customize-button.js:115
+#: build/blocks.js:1
+msgid "Custom CSS"
+msgstr "自定义CSS"
+
+#: admin/js/blocks/customize-button/customize-button.js:120
+#: build/blocks.js:1
+msgid "class selector .tta__listen_content"
+msgstr "类选择器 .tta__listen_content"
+
+#: admin/js/blocks/customize-button/customize-button.js:155
+#: build/blocks.js:1
+msgid "Text To Audio:  Tap to listen post."
+msgstr "文本转音频：点击收听文章。"
+
+#: src/dashboard/bulk-mp3-file/generate-bulk-mp3-file.js:108
+msgid "Are you sure? You want to regenerate all MP3 files ?"
+msgstr "您确定吗？您要重新生成所有MP3文件吗？"
+
+#: src/dashboard/bulk-mp3-file/generate-bulk-mp3-file.js:166
+msgid "All MP3 File Generated"
+msgstr "所有MP3文件已生成"
+
+#: src/dashboard/components/context/MultiSelect.js:19
+msgid "Showing button to multiple post is not supported in free version."
+msgstr "免费版不支持在多个文章上显示按钮。"
+
+#: src/dashboard/components/context/MultiSelect.js:383
+msgid "Select Items..."
+msgstr "选择项目..."
+
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:117
+msgid "Add ACF Fields To Posts"
+msgstr "添加ACF字段到文章"
+
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:122
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:131
+msgid "Adding more than 1  ACF field is a pro feature"
+msgstr "添加超过1个ACF字段是专业版功能"
+
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:167
+msgid "Loading"
+msgstr "加载中"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:43
+msgid "Backup MP3 Files To Google Cloud Storage Can Be Enabled If Google Text To Speech Is Authenticated."
+msgstr "如果Google文本转语音已认证，可以启用将MP3文件备份到Google云存储。"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:70
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:97
+msgid "Google cloud text to speech feature is only in pro version."
+msgstr "Google云文本转语音功能仅在专业版中提供。"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:79
+msgid "Learn More"
+msgstr "了解更多"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:106
+msgid "Buy Now"
+msgstr "立即购买"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:124
+msgid "Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin."
+msgstr "Text To Speech插件将合成内容存储到uploads文件夹中。您的uploads文件夹不可写。请使uploads文件夹可写以享受插件的全部功能。"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:132
+msgid "Please create a valid bucket name first"
+msgstr "请先创建有效的存储桶名称"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:148
+msgid "File uploaded successfully. Now go to the \"Customization\" menu."
+msgstr "文件上传成功。现在前往\"自定义\"菜单。"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:176
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:249
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:289
+msgid "Something went wrong"
+msgstr "出错了"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:238
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:246
+msgid "You are already authenticated"
+msgstr "您已经通过认证"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:260
+msgid "You have to be authenticated to revoke."
+msgstr "您必须通过认证才能撤销。"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:266
+msgid "Do you want to revoke access and delete the file uploaded during authentication. If you delete the file you have to upload the file again. Make sure you have a backup otherwise, you have to crete another auth file from Google Cloud text to speech."
+msgstr "您要撤销访问权限并删除认证期间上传的文件吗？如果删除该文件，您必须再次上传文件。请确保有备份，否则您必须从Google云文本转语音创建另一个认证文件。"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:279
+msgid "Authentication removed."
+msgstr "认证已删除。"
+
+#: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:316
+msgid "This bucket is already have to your cloud storage."
+msgstr "此存储桶已存在于您的云存储中。"
+
+#: src/dashboard/components/dashboard/settings/Settings.js:132
+msgid "All cache deleted"
+msgstr "所有缓存已删除"
+
+#: src/dashboard/components/dashboard/settings/Settings.js:141
+msgid "Successfully Saved. Now go to the \"Customization\" menu."
+msgstr "保存成功。现在前往\"自定义\"菜单。"
+
+#: src/dashboard/css-selectors/CSSSelectorsForPosts.js:79
+msgid "Please save the post then try to add custom CSS selectors."
+msgstr "请先保存文章，然后尝试添加自定义CSS选择器。"
+
+#: src/dashboard/css-selectors/CSSSelectorsForPosts.js:83
+msgid "Empty value can not be saved. You can uncheck the \"Use Own CSS Selectors\" Option."
+msgstr "空值无法保存。您可以取消选中\"使用自定义CSS选择器\"选项。"
+
+#: src/dashboard/css-selectors/CSSSelectorsForPosts.js:99
+msgid "Settings Data Saved"
+msgstr "设置数据已保存"

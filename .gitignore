@@ -115,8 +115,3 @@ nul
 # Temporary files
 *.tmp
 *.temp
-
-# Translation compilation scripts
-compile-translations.js
-generate-json-translations.js
-generate-l10n-php.js

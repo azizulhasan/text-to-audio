@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-01-18T14:55:19+01:00\n"
+"POT-Creation-Date: 2026-01-19T07:30:12+01:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: text-to-audio\n"
@@ -87,6 +87,8 @@ msgstr ""
 
 #: includes/helpers.php:816
 #: includes/TTA_Activator.php:128
+#: admin/js/blocks/customize-button/customize-button.js:161
+#: build/blocks.js:1
 msgid "Listen"
 msgstr ""
 
@@ -116,6 +118,7 @@ msgid "Stop"
 msgstr ""
 
 #: includes/TTA_i18n.php:49
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:156
 msgid "Save"
 msgstr ""
 
@@ -140,7 +143,7 @@ msgid "All fields must be filled!"
 msgstr ""
 
 #: includes/TTA_i18n.php:57
-#: src/dashboard/components/dashboard/compatibility/Compatibility.js:99
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:98
 msgid "Successfully Saved."
 msgstr ""
 
@@ -153,6 +156,7 @@ msgid "Buy Pro version"
 msgstr ""
 
 #: includes/TTA_i18n.php:60
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:144
 msgid "Click To Know How It Works?"
 msgstr ""
 
@@ -172,12 +176,85 @@ msgstr ""
 msgid "Write a Review"
 msgstr ""
 
+#: admin/js/blocks/customize-button/customize-button.js:12
+#: admin/js/blocks/customize-button/customize-button.js:76
+#: build/blocks.js:1
+msgid "Customize Button"
+msgstr ""
+
+#: admin/js/blocks/customize-button/customize-button.js:13
+#: build/blocks.js:1
+msgid "Text to audio customize button."
+msgstr ""
+
+#: admin/js/blocks/customize-button/customize-button.js:79
+#: build/blocks.js:1
+msgid "BackGround Color"
+msgstr ""
+
+#: admin/js/blocks/customize-button/customize-button.js:87
+#: admin/js/blocks/customize-button/customize-button.js:98
+#: build/blocks.js:1
+msgid "Choose your color"
+msgstr ""
+
+#: admin/js/blocks/customize-button/customize-button.js:91
+#: build/blocks.js:1
+msgid "Text Color"
+msgstr ""
+
+#: admin/js/blocks/customize-button/customize-button.js:102
+#: build/blocks.js:1
+msgid "Button Width (%)"
+msgstr ""
+
+#: admin/js/blocks/customize-button/customize-button.js:111
+#: build/blocks.js:1
+msgid "Button Width"
+msgstr ""
+
+#: admin/js/blocks/customize-button/customize-button.js:115
+#: build/blocks.js:1
+msgid "Custom CSS"
+msgstr ""
+
+#: admin/js/blocks/customize-button/customize-button.js:120
+#: build/blocks.js:1
+msgid "class selector .tta__listen_content"
+msgstr ""
+
+#: admin/js/blocks/customize-button/customize-button.js:155
+#: build/blocks.js:1
+msgid "Text To Audio:  Tap to listen post."
+msgstr ""
+
 #: src/dashboard/bulk-mp3-file/generate-bulk-mp3-file.js:108
 msgid "Are you sure? You want to regenerate all MP3 files ?"
 msgstr ""
 
 #: src/dashboard/bulk-mp3-file/generate-bulk-mp3-file.js:166
 msgid "All MP3 File Generated"
+msgstr ""
+
+#: src/dashboard/components/context/MultiSelect.js:19
+msgid "Showing button to multiple post is not supported in free version."
+msgstr ""
+
+#: src/dashboard/components/context/MultiSelect.js:383
+msgid "Select Items..."
+msgstr ""
+
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:117
+msgid "Add ACF Fields To Posts"
+msgstr ""
+
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:122
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:131
+msgid "Adding more than 1  ACF field is a pro feature"
+msgstr ""
+
+#: src/dashboard/components/dashboard/compatibility/Compatibility.js:167
+msgid "Loading"
 msgstr ""
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:43

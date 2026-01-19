@@ -1,0 +1,131 @@
+{
+  "translation-revision-date": "2026-01-19T11:32:07+01:00",
+  "generator": "generate-translations.js",
+  "source": "admin/js/build/text-to-audio-dashboard-ui.js",
+  "domain": "messages",
+  "locale_data": {
+    "messages": {
+      "": {
+        "domain": "messages",
+        "plural": "nplurals=1; plural=0;"
+      },
+      "Listen": [
+        "收听"
+      ],
+      "Save": [
+        "保存"
+      ],
+      "Successfully Saved.": [
+        "保存成功。"
+      ],
+      "Click To Know How It Works?": [
+        "点击了解如何使用？"
+      ],
+      "Customize Button": [
+        "自定义按钮"
+      ],
+      "Text to audio customize button.": [
+        "文本转音频自定义按钮。"
+      ],
+      "BackGround Color": [
+        "背景颜色"
+      ],
+      "Choose your color": [
+        "选择您的颜色"
+      ],
+      "Text Color": [
+        "文本颜色"
+      ],
+      "Button Width (%)": [
+        "按钮宽度（%）"
+      ],
+      "Button Width": [
+        "按钮宽度"
+      ],
+      "Custom CSS": [
+        "自定义CSS"
+      ],
+      "class selector .tta__listen_content": [
+        "类选择器 .tta__listen_content"
+      ],
+      "Text To Audio:  Tap to listen post.": [
+        "文本转音频：点击收听文章。"
+      ],
+      "Are you sure? You want to regenerate all MP3 files ?": [
+        "您确定吗？您要重新生成所有MP3文件吗？"
+      ],
+      "All MP3 File Generated": [
+        "所有MP3文件已生成"
+      ],
+      "Showing button to multiple post is not supported in free version.": [
+        "免费版不支持在多个文章上显示按钮。"
+      ],
+      "Select Items...": [
+        "选择项目..."
+      ],
+      "Add ACF Fields To Posts": [
+        "添加ACF字段到文章"
+      ],
+      "Adding more than 1  ACF field is a pro feature": [
+        "添加超过1个ACF字段是专业版功能"
+      ],
+      "Loading": [
+        "加载中"
+      ],
+      "Backup MP3 Files To Google Cloud Storage Can Be Enabled If Google Text To Speech Is Authenticated.": [
+        "如果Google文本转语音已认证，可以启用将MP3文件备份到Google云存储。"
+      ],
+      "Google cloud text to speech feature is only in pro version.": [
+        "Google云文本转语音功能仅在专业版中提供。"
+      ],
+      "Learn More": [
+        "了解更多"
+      ],
+      "Buy Now": [
+        "立即购买"
+      ],
+      "Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.": [
+        "Text To Speech插件将合成内容存储到uploads文件夹中。您的uploads文件夹不可写。请使uploads文件夹可写以享受插件的全部功能。"
+      ],
+      "Please create a valid bucket name first": [
+        "请先创建有效的存储桶名称"
+      ],
+      "File uploaded successfully. Now go to the \\\"Customization\\\" menu.": [
+        "文件上传成功。现在前往\\\"自定义\\\"菜单。"
+      ],
+      "Something went wrong": [
+        "出错了"
+      ],
+      "You are already authenticated": [
+        "您已经通过认证"
+      ],
+      "You have to be authenticated to revoke.": [
+        "您必须通过认证才能撤销。"
+      ],
+      "Do you want to revoke access and delete the file uploaded during authentication. If you delete the file you have to upload the file again. Make sure you have a backup otherwise, you have to crete another auth file from Google Cloud text to speech.": [
+        "您要撤销访问权限并删除认证期间上传的文件吗？如果删除该文件，您必须再次上传文件。请确保有备份，否则您必须从Google云文本转语音创建另一个认证文件。"
+      ],
+      "Authentication removed.": [
+        "认证已删除。"
+      ],
+      "This bucket is already have to your cloud storage.": [
+        "此存储桶已存在于您的云存储中。"
+      ],
+      "All cache deleted": [
+        "所有缓存已删除"
+      ],
+      "Successfully Saved. Now go to the \\\"Customization\\\" menu.": [
+        "保存成功。现在前往\\\"自定义\\\"菜单。"
+      ],
+      "Please save the post then try to add custom CSS selectors.": [
+        "请先保存文章，然后尝试添加自定义CSS选择器。"
+      ],
+      "Empty value can not be saved. You can uncheck the \\\"Use Own CSS Selectors\\\" Option.": [
+        "空值无法保存。您可以取消选中\\\"使用自定义CSS选择器\\\"选项。"
+      ],
+      "Settings Data Saved": [
+        "设置数据已保存"
+      ]
+    }
+  }
+}

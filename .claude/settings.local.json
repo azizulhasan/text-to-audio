@@ -23,7 +23,13 @@
       "Bash(/c/wp-cli/wp.bat i18n make-json:*)",
       "Bash(/c/wp-cli/wp.bat i18n make-mo:*)",
       "Bash(node scripts/make-translations.js:*)",
-      "Bash(npm run translate:*)"
+      "Bash(npm run translate:*)",
+      "Bash(wp i18n make-json:*)",
+      "Bash(python3:*)",
+      "Bash(wp.bat i18n make-json:*)",
+      "Bash(npm run production:*)",
+      "Bash(node -e:*)",
+      "Bash(node scripts/generate-translations.js:*)"
     ]
   }
 }

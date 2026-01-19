@@ -1,7 +1,25 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App";
-import { isFreemiusActive, postData } from "./components/context/utilities";
+// import { isFreemiusActive, postData } from "./components/context/utilities";
+import { setLocaleData } from '@wordpress/i18n';
+
+/**
+ * Sync WordPress translations with bundled @wordpress/i18n
+ * This ensures React components use the translations loaded by WordPress
+ */
+if (window.wp && window.wp.i18n && window.wp.i18n.getLocaleData) {
+    try {
+        const wpLocaleData = window.wp.i18n.getLocaleData('text-to-audio');
+        if (wpLocaleData && Object.keys(wpLocaleData).length > 0) {
+            setLocaleData(wpLocaleData, 'text-to-audio');
+            console.log(wpLocaleData)
+            console.log('✅ Dashboard translations loaded:', Object.keys(wpLocaleData.messages || {}).length, 'strings');
+        }
+    } catch (error) {
+        console.error('Translation sync error:', error);
+    }
+}
 
 
 /**
