@@ -11,6 +11,7 @@ import {
 import UpgradeToPro from "../../UpgradeToPro";
 import { postWithoutImage } from "../../context/utilities";
 import { MultiSelect } from "../../context/MultiSelect";
+import {__} from "@wordpress/i18n";
 import notify from "../../context/Notify";
 import toast from "../../context/Notify";
 import AtlasVoicePlayerInsights from "../../../../../admin/js/AtlasVoicePlayerInsights";
@@ -378,7 +379,7 @@ export default function Analytics() {
             ...res.data,
           });
         }
-        toast("Successfully Saved.", "info", {
+        toast(__("Successfully Saved.", "text-to-audio"), "info", {
           autoClose: 2500,
         });
       })
@@ -392,7 +393,7 @@ export default function Analytics() {
     
     // Check if analytics is enabled before allowing input
     if (!analytics.tts_enable_analytics) {
-      notify("Please enable analytics first to use search functionality.", "error");
+      notify(__("Please enable analytics first to use search functionality.", "text-to-audio"), "error");
       return;
     }
 
@@ -435,7 +436,7 @@ export default function Analytics() {
     
     // Check if analytics is enabled
     if (!analytics.tts_enable_analytics) {
-      notify("Please enable analytics first to search posts.", "error");
+      notify(__("Please enable analytics first to search posts.", "text-to-audio"), "error");
       return;
     }
 
@@ -445,7 +446,7 @@ export default function Analytics() {
       !analyticsSearch.post_id &&
       !(analyticsSearch.from_date || analyticsSearch.to_date)
     ) {
-      error_message = "Please provide either a Post ID or a date range.";
+      error_message = __("Please provide either a Post ID or a date range.", "text-to-audio");
     }
 
     if (error_message) {
