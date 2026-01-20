@@ -60,6 +60,7 @@ class ComposerStaticInitd518cadaed440bd90dc9e4378262121d
         'TTA\\TTA_Notices' => __DIR__ . '/../..' . '/includes/TTA_Notices.php',
         'TTA\\TTA_i18n' => __DIR__ . '/../..' . '/includes/TTA_i18n.php',
         'TTA_Admin\\TTA_Admin' => __DIR__ . '/../..' . '/admin/TTA_Admin.php',
+        'TTA_Admin\\TTA_Posts_List' => __DIR__ . '/../..' . '/admin/TTA_Posts_List.php',
         'TTA_Api\\AtlasVoice_Analytics' => __DIR__ . '/../..' . '/api/AtlasVoice_Analytics.php',
         'TTA_Api\\AtlasVoice_Plugin_Compatibility' => __DIR__ . '/../..' . '/api/AtlasVoice_Plugin_Compatibility.php',
         'TTA_Api\\TTA_Api_Routes' => __DIR__ . '/../..' . '/api/TTA_Api_Routes.php',
