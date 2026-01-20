@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Container, Form, Row, Col, Card, Badge } from "react-bootstrap";
+import { __ } from "@wordpress/i18n";
 import GoogleTTS from "./GoogleCloudTTS/GoogleTTS";
 import ChatGPTTTS from "./ChatGPTTTS/ChatGPTTTS";
 import { postData } from "../../context/utilities";

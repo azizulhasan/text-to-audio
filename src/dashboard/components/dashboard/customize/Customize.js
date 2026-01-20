@@ -599,9 +599,9 @@ export default function Customize() {
       <Row>
         <Col xs={12} lg={8}>
           <div className="bg-white rounded p-3 mb-3 shadow-sm">
-            <h2 className="fs-3 fw-bold mb-2 text-dark">Customization</h2>
+            <h2 className="fs-3 fw-bold mb-2 text-dark">{__("Customization","text-to-audio")}</h2>
             <p className="text-secondary m-0 small">
-              Customize the player & design to match your brand and preferences.
+              {__("Customize the player & design to match your brand and preferences.","text-to-audio")}
             </p>
           </div>
 
@@ -621,7 +621,7 @@ export default function Customize() {
               <div className="mb-3">
                 <div className="d-flex align-items-center gap-2 mb-2">
                   <label className="mb-0 fw-semibold">
-                    Write here something and click listen button
+                    {__("Write here something and click listen button", "text-to-audio")}
                   </label>
 
                   {/* Question Icon with Tooltip */}
@@ -629,8 +629,7 @@ export default function Customize() {
                     placement="top"
                     overlay={
                       <Tooltip id="tooltip-help">
-                        Enter your text here and click the listen button to
-                        hear it spoken aloud.
+                       {__(" Enter your text here and click the listen button to hear it spoken aloud.", "text-to-audio")}
                       </Tooltip>
                     }
                   >
@@ -648,7 +647,7 @@ export default function Customize() {
                     placement="top"
                     overlay={
                       <Tooltip id="tooltip-help">
-                        Click To Know How It Works?
+                        {__("Click To Know How It Works?","text-to-audio")}
                       </Tooltip>
                     }
                   >
@@ -747,7 +746,7 @@ export default function Customize() {
 
             {/* Design Customization Section */}
             <div className="bg-white rounded p-3 mb-3 shadow-sm">
-              <h5 className="mb-3 fw-semibold">Design Customization</h5>
+              <h5 className="mb-3 fw-semibold">{__("Design Customization", "text-to-audio")}</h5>
               <TTSButtonDesign
                 customCSS={customCSS}
                 listeningBtnStyle={listeningBtnStyle}
@@ -758,8 +757,8 @@ export default function Customize() {
             {/* Shortcode Section */}
             <div className="bg-white rounded p-3 mb-3 shadow-sm">
               <h6 className="mb-3">
-                Short Code | Attributes value must be wrapped with double
-                quotation ( " )
+                {__('Short Code | Attributes value must be wrapped with double quotation ( " )',"text-to-audio")}
+
               </h6>
               <Form.Control
                 as="textarea"
@@ -775,16 +774,16 @@ export default function Customize() {
                 size="sm"
                 onClick={(e) =>
                   copyToClipBoard(
-                    "tta_play_btn_shortcode",
+                    __("tta_play_btn_shortcode", "text-to-audio"),
                     true,
-                    "Copied ShortCode",
+                    __("Copied ShortCode","text-to-audio"),
                     toast
                   )
                 }
                 className="tta_shortcode_btn"
               >
                 <i className="fas fa-copy me-2"></i>
-                Copy Shortcode
+                {__("Copy Shortcode", "text-to-audio")}
               </button>
             </div>
 
@@ -795,7 +794,7 @@ export default function Customize() {
             >
               <div className="d-grid">
                 <button type="submit" className="btn tta_btn">
-                  Save
+                  {__("Save", "text-to-audio")}
                 </button>
               </div>
             </div>
@@ -813,7 +812,7 @@ export default function Customize() {
     >
       <div>
         <i className="fas fa-spinner fa-spin me-2"></i>
-        Loading...
+        {__("Loading...","text-to-audio")}
       </div>
     </div>
   );

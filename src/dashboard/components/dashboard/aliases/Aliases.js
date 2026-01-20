@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from "react";
+import { __ } from "@wordpress/i18n";
 import {Button, Col, Container, Form, OverlayTrigger, Row, Tooltip} from "react-bootstrap";
 import UpgradeToPro from "../../UpgradeToPro";
 import toast from '../../context/Notify';
@@ -30,8 +31,8 @@ export default function Aliases() {
     const handleAddRow = () => {
         console.log(ttsTextAliases.length)
         if(!ttsObj.is_pro_active && ttsTextAliases.length >= 1 ) {
-            toast(<h6>{ttsTR.aliases.more_than_one_alias_pro} <a target='_blank'
-                                                          href='https://atlasaidev.com/plugins/text-to-speech-pro/'>{ttsTR.aliases.buy_pro_version}</a></h6>, 'info', {autoClose: 10000})
+            toast(<h6>{__( 'More than 1 alias is available in the pro version. Please', 'text-to-audio' )} <a target='_blank'
+                                                          href='https://atlasaidev.com/plugins/text-to-speech-pro/'>{__( 'Buy Pro version', 'text-to-audio' )}</a></h6>, 'info', {autoClose: 10000})
             return;
         }
         setTtsTextAliases([...ttsTextAliases, {actual_text: '', to_read: ''}]);
@@ -52,7 +53,7 @@ export default function Aliases() {
         e.preventDefault();
         for (const alias of ttsTextAliases) {
             if (alias.actual_text === '' || alias.to_read === '') {
-                toast(ttsTR.aliases.all_fields_required, 'error');
+                toast(__( 'All fields must be filled!', 'text-to-audio' ), 'error');
                 return;
             }
         }
@@ -67,7 +68,7 @@ export default function Aliases() {
                     console.log(res.data)
                     setTtsTextAliases(res.data)
                 }
-                toast(ttsTR.aliases.successfully_saved, 'info', {
+                toast(__( 'Successfully Saved.', 'text-to-audio' ), 'info', {
                     autoClose: 2500
                 });
             })
@@ -80,13 +81,13 @@ export default function Aliases() {
         <Container>
             <Row>
                 <Col xs={12} sm={12} lg={8}>
-                    <h2>{ttsTR.aliases.title}
+                    <h2>{__( 'Text to Speech Aliases', 'text-to-audio' )}
                         <>
                             {['top'].map((placement) => (<OverlayTrigger
                                 key={placement}
                                 placement={placement}
                                 overlay={<Tooltip id={`tooltip-${placement}`}>
-                                    {ttsTR.aliases.click_to_know_how_it_works}
+                                    {__( 'Click To Know How It Works?', 'text-to-audio' )}
                                 </Tooltip>}>
                                 <a className={'text-danger'} target='_blank'
                                    href='https://www.youtube.com/watch?v=oeW652YKmG0&t=9s'>
@@ -102,7 +103,7 @@ export default function Aliases() {
                                 <Col>
                                     <Form.Control
                                         type="text"
-                                        placeholder={ttsTR.aliases.actual_text}
+                                        placeholder={__( 'Actual Text', 'text-to-audio' )}
                                         value={alias.actual_text}
                                         onChange={(e) => handleInputChange(index, 'actual_text', e.target.value)}
                                     />
@@ -110,7 +111,7 @@ export default function Aliases() {
                                 <Col>
                                     <Form.Control
                                         type="text"
-                                        placeholder={ttsTR.aliases.to_read}
+                                        placeholder={__( 'To Read', 'text-to-audio' )}
                                         value={alias.to_read}
                                         onChange={(e) => handleInputChange(index, 'to_read', e.target.value)}
                                     />
@@ -122,13 +123,13 @@ export default function Aliases() {
                             </Row>
                         ))}
                         <Button variant="primary" type="button" onClick={handleAddRow}>
-                            {ttsTR.aliases.add_new_row}
+                            {__( 'Add New Row', 'text-to-audio' )}
                         </Button>
                         {/*Display Button Icon*/}
                         <Row className='mt-3'>
                             <div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
                                 <button type='submit' className='tta_btn  btn-block'>
-                                    {ttsTR.common.save}
+                                    {__( 'Save', 'text-to-audio' )}
                                 </button>
                             </div>
                         </Row>
