@@ -553,6 +553,10 @@ class TTA_Helper
         }
         $final_mp3_file_ulrs = $mp3_file_urls;
         $should_update_urls = false;
+        /**
+         * front count to empty function used.
+         * TTS-195: eric.corbett2@gmail.com TTA_Helper.php:556 issue fixed
+         */
         if (get_post_meta($post->ID, 'tts_is_mp3_file_url_exists', true) && !empty($final_mp3_file_ulrs)) {
             return apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls);
         }
