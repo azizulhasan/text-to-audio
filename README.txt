@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.1
+Stable tag: 2.1.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -456,6 +456,14 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+= 2.1.2  ( 20 Jan 2026 )  =
+Fixed :  count issue fixed in TTA_Helper class
+Added :  Filter system added in `edit.php` page.
+Added :  Weather mp3 is added or not column added. (pro)
+Added :  TTS enabled  or not column added
+
+
+
 = 2.1.1  ( 18 Jan 2026 )  =
 Added :  Add ID attribute to shortcode `[atlasvoice id='post_id']`
 Added :  Add audio schema for pro version
@@ -804,8 +812,9 @@ Improved: Pro version and free version performance issue improved.
 
 == Upgrade Notice ==
 
-= 2.1.1  =
-Added :  Add ID attribute to shortcode `[atlasvoice id='post_id']`
-Added :  Add audio schema for pro version
-Added :  Read Content from DOM (pro version)
+= 2.1.2  =
+Fixed :  count issue fixed in TTA_Helper class
+Added :  Filter system added in `edit.php` page.
+Added :  Weather mp3 is added or not column added. (pro)
+Added :  TTS enabled  or not column added
 
