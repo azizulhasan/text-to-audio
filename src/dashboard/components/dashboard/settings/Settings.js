@@ -247,10 +247,10 @@ export default function Settings() {
             {/* Header Card */}
             <div className="bg-white rounded p-3 mb-3 shadow-sm">
               <h2 className="fs-3 fw-bold mb-2 text-dark">
-                Configure Settings
+                {__("Configure Settings","text-to-audio")}
               </h2>
               <p className="text-secondary m-0 small">
-                Configure text-to-speech player behavior and content selection
+                {__("Configure text-to-speech player behavior and content selection","text-to-audio")}
               </p>
             </div>
 
@@ -384,7 +384,7 @@ export default function Settings() {
                   <Row className="mb-4">
                     <Col md={6}>
                       <Form.Label className="setting-label text-dark mb-2">
-                        Add Text Before Content(intro)
+                        {__("Add Text Before Content(intro)", "text-to-audio")}
                         <OverlayTrigger
                           placement="top"
                           overlay={
@@ -416,7 +416,7 @@ export default function Settings() {
                     </Col>
                     <Col md={6}>
                       <Form.Label className="setting-label text-dark mb-2">
-                        Add Text After Content(outro)
+                        {__("Add Text After Content(outro)","text-to-audio")}
                         <OverlayTrigger
                           placement="top"
                           overlay={
@@ -451,7 +451,7 @@ export default function Settings() {
                   <Row className="mb-4">
                     <Col xs={12}>
                       <Form.Label className="setting-label text-dark mb-2">
-                        Allow Listening For Post Type
+                        {__("Allow Listening For Post Type", "text-to-audio")}
                         {/* <i className="fas fa-question-circle ms-2" style={{ color: '#999', fontSize: '14px' }}></i> */}
                       </Form.Label>
                       <MultiSelect
@@ -469,7 +469,7 @@ export default function Settings() {
                   <Row className="mb-4">
                     <Col xs={12}>
                       <Form.Label className="setting-label text-dark mb-2">
-                        Allow Listening For Post Status
+                       {__("Allow Listening For Post Status", "text-to-audio")}
                         {/* <i className="fas fa-question-circle ms-2" style={{ color: '#999', fontSize: '14px' }}></i> */}
                       </Form.Label>
                       <MultiSelect
@@ -492,7 +492,7 @@ export default function Settings() {
     <div className="d-flex align-items-center justify-content-between mb-2">
       <div className="d-flex align-items-center">
         <Form.Label className="setting-label text-dark m-0">
-          Include Content By CSS Selectors
+          {__("Include Content By CSS Selectors","text-to-audio")}
         </Form.Label>
         {!ttsObj.is_pro_active && (
           <ProLockIcon
@@ -542,7 +542,7 @@ export default function Settings() {
                         <div className="d-flex align-items-center justify-content-between mb-2">
                       <div className="d-flex align-items-center">
                         <Form.Label className="setting-label text-dark m-0">
-                          Exclude Content By CSS Selectors
+                          {__("Exclude Content By CSS Selectors")}
                         </Form.Label>
                         {!ttsObj.is_pro_active && (
                           <ProLockIcon
@@ -593,8 +593,7 @@ export default function Settings() {
                           display: "block",
                         }}
                       >
-                        You can add ".atlasvoice_no_read" class to exclude
-                        content.
+                        {__('You can add ".atlasvoice_no_read" class to exclude content.', "text-to-audio")}
                       </small>
                     </Col>
                   </Row>
@@ -604,7 +603,7 @@ export default function Settings() {
                       <div className="d-flex align-items-center justify-content-between mb-2">
                       <div className="d-flex align-items-center">
                         <Form.Label className="setting-label text-dark m-0">
-                          Exclude HTML Tags To Speak
+                          {__('Exclude HTML Tags To Speak', "text-to-audio")}
                         </Form.Label>
                         {!ttsObj.is_pro_active && (
                           <ProLockIcon
@@ -654,7 +653,7 @@ export default function Settings() {
                       <div className="d-flex align-items-center justify-content-between mb-2">
                       <div className="d-flex align-items-center">
                         <Form.Label className="setting-label text-dark m-0">
-                          Exclude Texts To Speak
+                          {__("Exclude Texts To Speak", "text-to-audio")}
                         </Form.Label>
                         {!ttsObj.is_pro_active && (
                           <ProLockIcon
@@ -704,7 +703,7 @@ export default function Settings() {
                       <div className="d-flex align-items-center justify-content-between mb-2">
                       <div className="d-flex align-items-center">
                         <Form.Label className="setting-label text-dark m-0">
-                          Exclude Posts By IDs To Speak
+                          {__("Exclude Posts By IDs To Speak","text-to-audio")}
                         </Form.Label>
                         {!ttsObj.is_pro_active && (
                           <ProLockIcon
@@ -753,7 +752,7 @@ export default function Settings() {
                       <div className="d-flex align-items-center justify-content-between mb-2">
                       <div className="d-flex align-items-center">
                         <Form.Label className="setting-label text-dark m-0">
-                          Exclude Categories To Speak
+                          {__("Exclude Categories To Speak", "text-to-audio")}
                         </Form.Label>
                         {!ttsObj.is_pro_active && (
                           <ProLockIcon
@@ -800,7 +799,7 @@ export default function Settings() {
                       <div className="d-flex align-items-center justify-content-between mb-2">
                       <div className="d-flex align-items-center">
                         <Form.Label className="setting-label text-dark m-0">
-                          Exclude Tags To Speak
+                          {__("Exclude Tags To Speak", "text-to-audio")}
                         </Form.Label>
                         {!ttsObj.is_pro_active && (
                           <ProLockIcon
@@ -877,7 +876,7 @@ export default function Settings() {
                     //     minWidth: "200px",
                     //   }}
                     >
-                      Save All
+                      {__("Save All", "text-to-audio")}
                     </button>
                   </div>
                 </div>
@@ -897,7 +896,7 @@ export default function Settings() {
     >
       <div>
         <i className="fas fa-spinner fa-spin me-2"></i>
-        Loading...
+        {__("Loading...", "text-to-audio")}
       </div>
     </div>
   );
