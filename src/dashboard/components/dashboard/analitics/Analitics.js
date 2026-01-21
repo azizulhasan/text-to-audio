@@ -507,7 +507,7 @@ export default function Analytics() {
             <div className="tta_analytics_header_card">
               <div className="tta_analytics_header_content">
                 <div className="tta_analytics_header_left">
-                  <h2 className="tta_analytics_title">Analytics</h2>
+                  <h2 className="tta_analytics_title">{__('Analytics', 'text-to-audio')}</h2>
                   <ToggleSwitch
                     checked={analytics.tts_enable_analytics}
                     onChange={handleChange}
@@ -516,12 +516,11 @@ export default function Analytics() {
                   />
                 </div>
                 <div className="tta_analytics_header_right">
-                  <span className="tta_date_badge">Dec 02 - Dec 24, 2025</span>
+                  <span className="tta_date_badge">{__('Dec 02 - Dec 24, 2025', 'text-to-audio')}</span>
                 </div>
               </div>
               <p className="tta_analytics_subtitle">
-                Here a short text have to write to inform the user about this
-                feature purpose
+                {__('Here a short text have to write to inform the user about this feature purpose', 'text-to-audio')}
               </p>
             </div>
 
@@ -534,52 +533,52 @@ export default function Analytics() {
                     <div className="tta_summary_header">
                       <div className="tta_summary_header_left">
                         <h3 className="tta_summary_title">
-                          TTS Player Analytics Summary
+                          {__('TTS Player Analytics Summary', 'text-to-audio')}
                         </h3>
                         <span className="tta_total_interactions_badge">
-                          🔥 Total Interactions: {summary.totalInteractions}K
+                          🔥 {__('Total Interactions:', 'text-to-audio')} {summary.totalInteractions}K
                         </span>
                       </div>
-                      <span className="tta_timeframe_badge">Last 7 Days</span>
+                      <span className="tta_timeframe_badge">{__('Last 7 Days', 'text-to-audio')}</span>
                     </div>
 
                     <div className="tta_stat_cards_container">
                       <div className="tta_stat_card tta_stat_posts">
-                        <div className="tta_stat_label">Total Posts</div>
+                        <div className="tta_stat_label">{__('Total Posts', 'text-to-audio')}</div>
                         <div className="tta_stat_value">{summary.totalPosts}K</div>
                       </div>
                       <div className="tta_stat_card tta_stat_init">
-                        <div className="tta_stat_label">Init</div>
+                        <div className="tta_stat_label">{__('Init', 'text-to-audio')}</div>
                         <div className="tta_stat_value">
                           {summary.totalCounts.init}K
                         </div>
                       </div>
                       <div className="tta_stat_card tta_stat_play">
-                        <div className="tta_stat_label">Play</div>
+                        <div className="tta_stat_label">{__('Play', 'text-to-audio')}</div>
                         <div className="tta_stat_value">
                           {summary.totalCounts.play}K
                         </div>
                       </div>
                       <div className="tta_stat_card tta_stat_time">
-                        <div className="tta_stat_label">Time (Min)</div>
+                        <div className="tta_stat_label">{__('Time (Min)', 'text-to-audio')}</div>
                         <div className="tta_stat_value">
                           {summary.totalCounts.time}
                         </div>
                       </div>
                       <div className="tta_stat_card tta_stat_pause">
-                        <div className="tta_stat_label">Pause</div>
+                        <div className="tta_stat_label">{__('Pause', 'text-to-audio')}</div>
                         <div className="tta_stat_value">
                           {summary.totalCounts.pause}K
                         </div>
                       </div>
                       <div className="tta_stat_card tta_stat_download">
-                        <div className="tta_stat_label">Download</div>
+                        <div className="tta_stat_label">{__('Download', 'text-to-audio')}</div>
                         <div className="tta_stat_value">
                           {summary.totalCounts.download}K
                         </div>
                       </div>
                       <div className="tta_stat_card tta_stat_end">
-                        <div className="tta_stat_label">End</div>
+                        <div className="tta_stat_label">{__('End', 'text-to-audio')}</div>
                         <div className="tta_stat_value">
                           {summary.totalCounts.end}K
                         </div>
@@ -591,8 +590,8 @@ export default function Analytics() {
                 {/* Chart Section - Playing Trend Analysis */}
                 <div className="tta_chart_card">
                   <div className="tta_chart_header">
-                    <h3 className="tta_chart_title">Playing Trend Analysis</h3>
-                    <span className="tta_date_badge">Dec 02 - Dec 24, 2025</span>
+                    <h3 className="tta_chart_title">{__('Playing Trend Analysis', 'text-to-audio')}</h3>
+                    <span className="tta_date_badge">{__('Dec 02 - Dec 24, 2025', 'text-to-audio')}</span>
                   </div>
                   <div className="tta_chart_container" style={{ height: '400px', position: 'relative' }}>
                     <canvas ref={chartRef} id="playingTrendChart"></canvas>
@@ -603,60 +602,60 @@ export default function Analytics() {
                 <div className="tta_bottom_section">
                   <div className="tta_track_posts_card">
                     <div className="tta_card_header">
-                      <h3 className="tta_section_title">Track Post IDs</h3>
+                      <h3 className="tta_section_title">{__('Track Post IDs', 'text-to-audio')}</h3>
                       <span className="tta_date_range_small">
-                        Dec 27, - Jan 03, 2025
+                        {__('Dec 27, - Jan 03, 2025', 'text-to-audio')}
                       </span>
                     </div>
                    {/* Default Metrics Table - Only show when no search results */}
                     {!searchedMetrics && (
                       <div className="tta_metrics_table">
                         <div className="tta_table_row tta_table_header_row">
-                          <div className="tta_table_cell">Metric</div>
-                          <div className="tta_table_cell">Value</div>
+                          <div className="tta_table_cell">{__('Metric', 'text-to-audio')}</div>
+                          <div className="tta_table_cell">{__('Value', 'text-to-audio')}</div>
                         </div>
                         <div className="tta_table_row">
-                          <div className="tta_table_cell">totalinit</div>
+                          <div className="tta_table_cell">{__('totalinit', 'text-to-audio')}</div>
                           <div className="tta_table_cell">14</div>
                         </div>
                         <div className="tta_table_row">
-                          <div className="tta_table_cell">totalPlay</div>
+                          <div className="tta_table_cell">{__('totalPlay', 'text-to-audio')}</div>
                           <div className="tta_table_cell">8</div>
                         </div>
                         <div className="tta_table_row">
-                          <div className="tta_table_cell">totalPause</div>
+                          <div className="tta_table_cell">{__('totalPause', 'text-to-audio')}</div>
                           <div className="tta_table_cell">4</div>
                         </div>
                         <div className="tta_table_row">
-                          <div className="tta_table_cell">totalTime</div>
-                          <div className="tta_table_cell">0.75 Minute</div>
+                          <div className="tta_table_cell">{__('totalTime', 'text-to-audio')}</div>
+                          <div className="tta_table_cell">{__('0.75 Minute', 'text-to-audio')}</div>
                         </div>
                         <div className="tta_table_row">
-                          <div className="tta_table_cell">totalEnd</div>
+                          <div className="tta_table_cell">{__('totalEnd', 'text-to-audio')}</div>
                           <div className="tta_table_cell">7</div>
                         </div>
                         <div className="tta_table_row">
-                          <div className="tta_table_cell">totalDownload</div>
+                          <div className="tta_table_cell">{__('totalDownload', 'text-to-audio')}</div>
                           <div className="tta_table_cell">1</div>
                         </div>
                         <div className="tta_table_row">
-                          <div className="tta_table_cell">averagePlayClickRatio</div>
+                          <div className="tta_table_cell">{__('averagePlayClickRatio', 'text-to-audio')}</div>
                           <div className="tta_table_cell">57.4%</div>
                         </div>
                         <div className="tta_table_row">
                           <div className="tta_table_cell">
-                            averageListenTillEndRatio
+                            {__('averageListenTillEndRatio', 'text-to-audio')}
                           </div>
                           <div className="tta_table_cell">87.50%</div>
                         </div>
                         <div className="tta_table_row">
                           <div className="tta_table_cell">
-                            averageListeningTimePerPlay
+                            {__('averageListeningTimePerPlay', 'text-to-audio')}
                           </div>
-                          <div className="tta_table_cell">5.63 Seconds</div>
+                          <div className="tta_table_cell">{__('5.63 Seconds', 'text-to-audio')}</div>
                         </div>
                         <div className="tta_table_row">
-                          <div className="tta_table_cell">averagePausesPerPlay</div>
+                          <div className="tta_table_cell">{__('averagePausesPerPlay', 'text-to-audio')}</div>
                           <div className="tta_table_cell">0.50</div>
                         </div>
                       </div>
@@ -664,11 +663,11 @@ export default function Analytics() {
 
                     <div className="tta_multiselect_wrapper">
                       <Form.Label className="tta_form_label">
-                        all{" "}
+                        {__('all', 'text-to-audio')}{" "}
                         <span className="tta_remove_tag">×</span>
                       </Form.Label>
                       <MultiSelect
-                        toastMessage="Tracking more than 5 post IDs is a pro feature"
+                        toastMessage={__('Tracking more than 5 post IDs is a pro feature', 'text-to-audio')}
                         name="tts_trackable_post_ids"
                         id="tts_trackable_post_ids"
                         selectedItems={selectedIds}
@@ -682,7 +681,7 @@ export default function Analytics() {
                       <Form.Control
                         type="number"
                         name="post_id"
-                        placeholder="Post ID"
+                        placeholder={__('Post ID', 'text-to-audio')}
                         value={analyticsSearch?.post_id || ""}
                         onChange={handleSearchData}
                         className="tta_search_input"
@@ -711,7 +710,7 @@ export default function Analytics() {
                         className="tta_search_btn"
                         disabled={!analytics.tts_enable_analytics}
                       >
-                        Search
+                        {__('Search', 'text-to-audio')}
                       </Button>
                       {searchedMetrics && (
                         <Button 
@@ -720,7 +719,7 @@ export default function Analytics() {
                           variant="secondary"
                           style={{ marginLeft: '10px' }}
                         >
-                          Clear
+                          {__('Clear', 'text-to-audio')}
                         </Button>
                       )}
                     </div>
@@ -735,10 +734,10 @@ export default function Analytics() {
                         fontSize: '14px',
                         color: '#1e40af'
                       }}>
-                        <strong>Showing results for:</strong> 
-                        {searchedMetrics.post_id && ` Post ID: ${searchedMetrics.post_id}`}
-                        {searchedMetrics.from_date && ` | From: ${searchedMetrics.from_date}`}
-                        {searchedMetrics.to_date && ` | To: ${searchedMetrics.to_date}`}
+                        <strong>{__('Showing results for:', 'text-to-audio')}</strong> 
+                        {searchedMetrics.post_id && ` ${__('Post ID:', 'text-to-audio')} ${searchedMetrics.post_id}`}
+                        {searchedMetrics.from_date && ` | ${__('From:', 'text-to-audio')} ${searchedMetrics.from_date}`}
+                        {searchedMetrics.to_date && ` | ${__('To:', 'text-to-audio')} ${searchedMetrics.to_date}`}
                       </div>
                     )}
 
@@ -754,18 +753,18 @@ export default function Analytics() {
 
                   <div className="tta_popular_posts_card">
                     <div className="tta_card_header">
-                      <h3 className="tta_section_title">Popular Post</h3>
-                      <span className="tta_date_range_small">Last 30 Days</span>
+                      <h3 className="tta_section_title">{__('Popular Post', 'text-to-audio')}</h3>
+                      <span className="tta_date_range_small">{__('Last 30 Days', 'text-to-audio')}</span>
                     </div>
 
                     {ttsObj.is_pro_active ? (
                       mostPopularPosts.length > 0 && (
                         <div className="tta_popular_table">
                           <div className="tta_table_row tta_popular_header_row">
-                            <div className="tta_table_cell">Rank</div>
-                            <div className="tta_table_cell">Post Title</div>
+                            <div className="tta_table_cell">{__('Rank', 'text-to-audio')}</div>
+                            <div className="tta_table_cell">{__('Post Title', 'text-to-audio')}</div>
                             <div className="tta_table_cell">
-                              Total Interactions
+                              {__('Total Interactions', 'text-to-audio')}
                             </div>
                           </div>
                           {mostPopularPosts.map((post, index) => (
@@ -785,14 +784,14 @@ export default function Analytics() {
                     ) : (
                       <div className="tta_pro_notice">
                         <p>
-                          To see popular post analytics you have to upgrade to{" "}
+                          {__('To see popular post analytics you have to upgrade to', 'text-to-audio')}{" "}
                           <a
                             href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="tta_pro_link"
                           >
-                            pro version
+                            {__('pro version', 'text-to-audio')}
                           </a>
                         </p>
                       </div>
@@ -803,7 +802,7 @@ export default function Analytics() {
                 {/* Save Button */}
                 <div className="tta_save_button_wrapper">
                   <Button type="submit" className="tta_btn">
-                    Save
+                    {__('Save', 'text-to-audio')}
                   </Button>
                 </div>
               </Form>
@@ -822,14 +821,14 @@ export default function Analytics() {
                     marginBottom: '1rem',
                     fontSize: '1.5rem'
                   }}>
-                    Analytics is Currently Disabled
+                    {__('Analytics is Currently Disabled', 'text-to-audio')}
                   </h3>
                   <p style={{ 
                     color: '#6c757d', 
                     fontSize: '1rem',
                     marginBottom: '0'
                   }}>
-                    Enable analytics using the toggle above to start tracking your TTS player interactions and view detailed metrics.
+                    {__('Enable analytics using the toggle above to start tracking your TTS player interactions and view detailed metrics.', 'text-to-audio')}
                   </p>
                 </div>
               </div>
@@ -844,7 +843,7 @@ export default function Analytics() {
     </React.Fragment>
   ) : (
     <div className="tta_loading_container">
-      <h1>Loading...</h1>
+      <h1>{__('Loading...', 'text-to-audio')}</h1>
     </div>
   );
 }
