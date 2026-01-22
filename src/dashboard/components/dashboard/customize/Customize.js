@@ -288,7 +288,7 @@ export default function Customize() {
       e.target.name === "width" &&
       (e.target.value > 100 || e.target.value < 0)
     ) {
-      toast("Value should between 0-100");
+      toast(__("Value should between 0-100", "text-to-audio"));
       return;
     }
 
@@ -325,7 +325,7 @@ export default function Customize() {
         !["before_content", "after_content"].includes(e.target.value) &&
         !ttsObj.is_pro_active
       ) {
-        toast("This option is only available for pro version.", "error");
+        toast(__("This option is only available for pro version.", "text-to-audio"), "error");
         return;
       }
 
@@ -408,7 +408,7 @@ export default function Customize() {
           }}
           className="tta_btn"
         >
-          Buy Now
+          {__("Buy Now", "text-to-audio")}
         </button>
       </>,
       "info",
@@ -470,7 +470,7 @@ export default function Customize() {
     if (formData?.buttonSettings?.id == 4) {
       if (ttsObj.is_pro_active && !isGCAuthenticated) {
         notify(
-          "To select this player you have to authenticate first from Integration menu",
+          __("To select this player you have to authenticate first from Integration menu", "text-to-audio"),
           "error",
           {
             autoClose: 8000,
@@ -487,7 +487,7 @@ export default function Customize() {
     if (formData?.buttonSettings?.id == 5) {
       if (ttsObj.is_pro_active && !isChatGPTAuthenticated) {
         notify(
-          "To select this player you have to authenticate first from Integration menu",
+          __("To select this player you have to authenticate first from Integration menu", "text-to-audio"),
           "error",
           {
             autoClose: 8000,
@@ -513,7 +513,7 @@ export default function Customize() {
       !isBackUpToGCS
     ) {
       toast(
-        "Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.",
+        __("Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.", "text-to-audio"),
         "error",
         { autoClose: 10000 }
       );
@@ -528,7 +528,7 @@ export default function Customize() {
         setListeningStyle(res.data);
         toast("Customization saved.", "success");
         toast(
-          'Now go to the "Listening" menu to select proper language and voice.',
+          __('Now go to the "Listening" menu to select proper language and voice.', "text-to-audio"),
           "error",
           {
             autoClose: 15000,

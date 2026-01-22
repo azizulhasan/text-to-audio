@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import TTSCustomizationButton from "./button/TTSCustomizationButton";
+import { __ } from "@wordpress/i18n";
 
 function CustomizationTabs({
   buttonLists,
@@ -23,7 +24,7 @@ function CustomizationTabs({
           onClick={togglePlayerAccordion}
           style={{ cursor: "pointer" }}
         >
-          <h5 className="tta_player-title">Player Customization</h5>
+          <h5 className="tta_player-title">{__("Player Customization","text-to-audio")}</h5>
           <button
             className="tta_player-toggle-btn"
             type="button"

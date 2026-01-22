@@ -140,5 +140,5 @@ export default function Aliases() {
                 </Col>
             </Row>
         </Container>
-    </React.Fragment> : <h1>Loading</h1>);
+    </React.Fragment> : <h1>{__("Loading", "text-to-audio")}</h1>);
 };

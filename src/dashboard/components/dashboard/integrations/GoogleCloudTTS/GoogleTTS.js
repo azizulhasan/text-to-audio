@@ -297,13 +297,12 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
     const bcmathNotice = () => {
         return (
             <>
-                BCMath extension is not enabled. Please enable this extension. Learn
-                more how to enable.
+                {__("BCMath extension is not enabled. Please enable this extension. Learn more how to enable.", "text-to-audio")}
                 <a
                     target="_blank"
                     href="https://atlasaidev.com/docs/text-to-speech/usage-setup/bcmath/"
                 >
-                    Learn More
+                    {__("Learn More", "text-to-audio")}
                 </a>
             </>
         );
@@ -367,7 +366,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
         <>
             {/* Authentication Card */}
             <div className="tta-card mb-3">
-                <h5 className="mb-3 fw-semibold">Authentication</h5>
+                <h5 className="mb-3 fw-semibold">{__("Authentication", "text-to-audio")}</h5>
                 <Form onSubmit={handleSubmit}>
                     <Row className="align-items-center">
                         <Col xs={12} md={6} lg={5}>
@@ -410,7 +409,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                                             fill="#083863"
                                         />
                                     </svg>
-                                    Click here to Upload
+                                    {__("Click here to Upload", "text-to-audio")}
                                 </Button>
                                 <Form.Control
                                     type="file"
@@ -420,7 +419,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                                     className="d-none"
                                 />
                                 <p className="text-muted small mb-0">
-                                    Upload service account JSON file
+                                    {__("Upload service account JSON file", "text-to-audio")}
                                 </p>
                             </div>
                         </Col>
@@ -453,8 +452,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                                 </div>
                                 <div className="flex-grow-1">
                                     <h6 className="m-0 text-dark fw-normal">
-                                        Learn How To Integrate Google Text To Speech With AtlasVoice
-                                        Pro Plugin?
+                                        {__("Learn How To Integrate Google Text To Speech With AtlasVoice Pro Plugin?", "text-to-audio")}
                                     </h6>
                                 </div>
                             </a>
@@ -465,20 +463,19 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
 
             {/* Storage Configuration Card */}
             <div className="tta-card mb-3">
-                <h5 className="mb-3 fw-semibold">Storage Configuration</h5>
+                <h5 className="mb-3 fw-semibold">{__("Storage Configuration", "text-to-audio")}</h5>
 
                 {/* Backup Toggle */}
                 <div className="setting-row">
                     <div className="setting-label-area">
                         <span className="setting-label">
-                            Storage MP3 Files To Google Cloud Storage
+                            {__("Storage MP3 Files To Google Cloud Storage", "text-to-audio")}
                         </span>
                         <OverlayTrigger
                             placement="top"
                             overlay={
                                 <Tooltip>
-                                    Click To Know How To Enable Automatic Backup To Google Cloud
-                                    Storage
+                                    {__("Click To Know How To Enable Automatic Backup To Google Cloud Storage", "text-to-audio")}
                                 </Tooltip>
                             }
                         >
@@ -502,8 +499,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                     </div>
                 </div>
                 <p className="text-muted small mb-3">
-                    Automatically sync generated audio files in cloud storage for backup &
-                    easy access.
+                    {__("Automatically sync generated audio files in cloud storage for backup & easy access.", "text-to-audio")}
                 </p>
 
                 {/* Bucket Name Field - Only show when backup is enabled */}
@@ -511,12 +507,12 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                     <div className="mt-3">
                         <div className="d-flex align-items-center justify-content-between mb-2">
                             <Form.Label className="setting-label text-dark m-0">
-                                Google Cloud Storage Bucket Name
+                                {__("Google Cloud Storage Bucket Name", "text-to-audio")}
                             </Form.Label>
                             <OverlayTrigger
                                 placement="top"
                                 overlay={
-                                    <Tooltip>Click Here To Know Bucket Name Rules</Tooltip>
+                                    <Tooltip>{__("Click Here To Know Bucket Name Rules", "text-to-audio")}</Tooltip>
                                 }
                             >
                                 <a
@@ -539,7 +535,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                                 className="tta-textarea"
                             />
                             <Button variant="outline-secondary" onClick={validateBucketName}>
-                                Create
+                                {__("Create", "text-to-audio")}
                             </Button>
                         </div>
                         {isValidBucketName?.message && (
@@ -565,7 +561,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                             onClick={handleSubmit}
                             className="tta_btn rounded-3"
                         >
-                            Save
+                            {__("Save", "text-to-audio")}
                         </button>
                         {window.hasOwnProperty("ttsObjPro") &&
                             ttsObjPro.is_pro_license_active &&
@@ -575,7 +571,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                                     onClick={revokeAccessToken}
                                     className="rounded-3"
                                 >
-                                    Remove Authentication
+                                   {__("Remove Authentication")}
                                 </Button>
                             )}
                     </div>

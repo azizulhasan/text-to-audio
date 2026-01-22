@@ -212,14 +212,13 @@ export default function TTSCustomizationButton({
                       placement="top"
                       overlay={
                         <Tooltip id="tooltip-date-from">
-                          Start Generating MP3 file from an specific post
-                          publish date. Select this only if you want to generate
-                          mp3 file based on date range.
+                          {__("Start Generating MP3 file from an specific post publish date. Select this only if you want to generate mp3 file based on date range.", "text-to-audio")}
+
                         </Tooltip>
                       }
                     >
                       <Button variant="link" className="tta_question-icon">
-                        ?
+                        {__("?", "text-to-audio")}
                       </Button>
                     </OverlayTrigger>
                   </Form.Label>
@@ -246,14 +245,12 @@ export default function TTSCustomizationButton({
                       placement="top"
                       overlay={
                         <Tooltip id="tooltip-date-to">
-                          Start Generating MP3 file till an specific post
-                          publish date. Select this only if you want to generate
-                          mp3 file based on date range.
+                          {__("Start Generating MP3 file till an specific post publish date. Select this only if you want to generate mp3 file based on date range.", "text-to-audio")}
                         </Tooltip>
                       }
                     >
                       <Button variant="link" className="tta_question-icon">
-                        ?
+                         {__("?", "text-to-audio")}
                       </Button>
                     </OverlayTrigger>
                   </Form.Label>

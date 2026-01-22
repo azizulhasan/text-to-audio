@@ -1,4 +1,5 @@
 import { Form } from "react-bootstrap";
+import { __ } from "@wordpress/i18n";
 
 export default function TTSButtonDesign({
   handleChange,
@@ -10,7 +11,7 @@ export default function TTSButtonDesign({
       {/* Color Controls Section */}
       <div className="tta_colors_row">
         <div className="tta_color_item">
-          <div className="tta_color_label">Background Color</div>
+          <div className="tta_color_label">{__("Background Color")}</div>
           <div className="tta_color_input_wrapper">
             <div className="tta_color_picker_icon">
               <Form.Control
@@ -30,7 +31,7 @@ export default function TTSButtonDesign({
         </div>
 
         <div className="tta_color_item">
-          <div className="tta_color_label">Text Color</div>
+          <div className="tta_color_label">{__("Text Color", "text-to-audio")}</div>
           <div className="tta_color_input_wrapper">
             <div className="tta_color_picker_icon">
               <Form.Control
@@ -50,7 +51,7 @@ export default function TTSButtonDesign({
         </div>
 
         <div className="tta_color_item">
-          <div className="tta_color_label">Hover BG Color</div>
+          <div className="tta_color_label">{__("Hover BG Color", "text-to-audio")}</div>
           <div className="tta_color_input_wrapper">
             <div className="tta_color_picker_icon">
               <Form.Control
@@ -72,7 +73,7 @@ export default function TTSButtonDesign({
         </div>
 
         <div className="tta_color_item">
-          <div className="tta_color_label">Hover Text Color</div>
+          <div className="tta_color_label">{__("Hover Text Color", "text-to-audio")}</div>
           <div className="tta_color_input_wrapper">
             <div className="tta_color_picker_icon">
               <Form.Control
@@ -93,7 +94,7 @@ export default function TTSButtonDesign({
       </div>
 
       {/* Margin Size Section */}
-      <div className="tta_section_title">Margin Size (Px)</div>
+      <div className="tta_section_title">{__("Margin Size (Px)", "text-to-audio")}</div>
       <div className="tta_input_row">
         <div className="tta_input_group">
           <div className="tta_input_label">
@@ -157,7 +158,7 @@ export default function TTSButtonDesign({
       </div>
 
       {/* Button Properties Section */}
-      <div className="tta_section_title">Button Properties</div>
+      <div className="tta_section_title">{__("Button Properties", "text-to-audio")}</div>
       <div className="tta_input_row">
         <div className="tta_input_group">
           <div className="tta_input_label">
@@ -235,7 +236,7 @@ export default function TTSButtonDesign({
       {listeningBtnStyle?.buttonSettings?.id === 1 && (
         <>
           {/* Border Color Section */}
-          <div className="tta_section_title">Border Color</div>
+          <div className="tta_section_title">{__("Border Color", "text-to-audio")}</div>
           <div className="tta_color_palette">
             <div className="tta_color_palette_item">
               <Form.Control
@@ -296,7 +297,7 @@ export default function TTSButtonDesign({
       )}
 
       {/* Custom CSS Section */}
-      <div className="tta_section_title">Custom CSS</div>
+      <div className="tta_section_title">{__("Custom CSS", "text-to-audio")}</div>
       <Form.Control
         as="textarea"
         name="custom_css"

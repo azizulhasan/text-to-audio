@@ -347,7 +347,7 @@ export default function Listening() {
     let formData = {};
     for (let [key, value] of form.entries()) {
       if (key === "" || value === "") {
-        toast("Please fill the  field : " + key);
+        toast(__("Please fill the  field : ", "text-to-audio") + key);
         return;
       }
       if (
@@ -392,7 +392,7 @@ export default function Listening() {
     postWithoutImage(tta_obj.api_url + "tta/v1/listening", data)
       .then((res) => {
         setListeningSettings(res.data);
-        toast("Listening settings saved. Now all setup done. Enjoy", "info", {
+        toast(__("Listening settings saved. Now all setup done. Enjoy", "text-to-audio"), "info", {
           autoClose: 15000,
         });
       })
@@ -574,10 +574,9 @@ export default function Listening() {
       <Row>
         <Col xs={12} sm={12} lg={8}>
           <div className="bg-white rounded p-3 mb-3 mt-3 shadow-sm">
-            <h2 className="tta_listening_title">Listening Preferences</h2>
+            <h2 className="tta_listening_title">{__("Listening Preferences", "text-to-audio")}</h2>
             <p className="tta_listening_subtitle">
-              Set your listening preferences with different voices and
-              languages.
+              {__("Set your listening preferences with different voices and languages.", "text-to-audio")}
             </p>
           </div>
 
@@ -589,7 +588,7 @@ export default function Listening() {
                 <Row className="mb-3">
                   <Col xs={12} md={6}>
                     <div className="tta_voice_card">
-                      <h3 className="tta_voice_card_title">Voice Language</h3>
+                      <h3 className="tta_voice_card_title">{__("Voice Language", "text-to-audio")}</h3>
                       <div className="tta_voice_select_wrapper">
                         <img
                           src={getLanguageFlag(listeningSettings.tta__listening_lang)}
@@ -606,7 +605,7 @@ export default function Listening() {
                           value={listeningSettings.tta__listening_lang}
                           className="tta_orange_voice_select"
                         >
-                          <option disabled>Default Listening Language</option>
+                          <option disabled>{__("Default Listening Language", "text-to-audio")}</option>
                           {Object.keys(currentPlayerLanguages).map((langKey) => (
                             <option key={langKey} value={currentPlayerLanguages[langKey]}>
                               {currentPlayerLanguages[langKey]}
@@ -619,7 +618,7 @@ export default function Listening() {
 
                   <Col xs={12} md={6}>
                     <div className="tta_voice_card">
-                      <h3 className="tta_voice_card_title">Voice to speak</h3>
+                      <h3 className="tta_voice_card_title">{__("Voice to speak", "text-to-audio")}</h3>
                       <Form.Select
                         onChange={handleChange}
                         name="tta__listening_voice"
@@ -627,7 +626,7 @@ export default function Listening() {
                         value={listeningSettings.tta__listening_voice}
                         className="tta_orange_speak_select"
                       >
-                        <option disabled>Default Listening Voice</option>
+                        <option disabled>{__("Default Listening Voice", "text-to-audio")}</option>
                         {currentPlayerFilteredVoices.map((voice, index) => (
                           <option
                             key={index}
@@ -647,7 +646,7 @@ export default function Listening() {
                   <Form.Group className="mb-4">
                     <div className="tta_slider_header">
                       <Form.Label className="tta_slider_label">
-                        Voice Speed
+                        {__("Voice Speed", "text-to-audio")}
                       </Form.Label>
                       <span className="tta_slider_value">
                         {listeningSettings.tta__listening_rate}
@@ -688,7 +687,7 @@ export default function Listening() {
                   <Form.Group>
                     <div className="tta_slider_header">
                       <Form.Label className="tta_slider_label">
-                        Voice Volume
+                        {__("Voice Volume", "text-to-audio")}
                       </Form.Label>
                       <span className="tta_slider_value">
                         {listeningSettings.tta__listening_volume}
@@ -729,7 +728,7 @@ export default function Listening() {
 
                 {/* Voice Pitch */}
                 <div className="tta_pitch_card">
-                  <Form.Label className="tta_pitch_label">Voice Pitch</Form.Label>
+                  <Form.Label className="tta_pitch_label">{__("Voice Pitch", "text-to-audio")}</Form.Label>
                   <div className="tta_pitch_buttons">
                     {["Lower", "Normal", "Higher"].map((label, idx) => (
                       <Button
@@ -765,7 +764,7 @@ export default function Listening() {
                     value={listeningSettings.tta__listening_pitch}
                     className="tta_hidden_select"
                   >
-                    <option disabled>Default Listening Pitch</option>
+                    <option disabled>{__("Default Listening Pitch", "text-to-audio")}</option>
                     {[0, 1, 2].map((pitch, index) => (
                       <option key={index} value={pitch}>
                         {pitch}
@@ -784,7 +783,7 @@ export default function Listening() {
                       <Col xs={12} md={6}>
                         <div className="tta_voice_card">
                           <h3 className="tta_voice_card_title">
-                            Voice Language
+                            {__("Voice Language", "text-to-audio")}
                           </h3>
                           <div className="tta_voice_select_wrapper">
                             <img
@@ -806,7 +805,7 @@ export default function Listening() {
                               value={listeningSettings.tta__listening_lang}
                               className="tta_orange_voice_select"
                             >
-                              <option disabled>Default Listening Language</option>
+                              <option disabled>{__("Default Listening Language", "text-to-audio")}</option>
                               {Object.keys(currentPlayerLanguages).map((langKey) => (
                                 <option key={langKey} value={langKey}>
                                   {currentPlayerLanguages[langKey]}
@@ -820,7 +819,7 @@ export default function Listening() {
                       {customizationSettings?.buttonSettings?.id == 4 && (
                         <Col xs={12} md={6}>
                           <div className="tta_voice_card">
-                            <h3 className="tta_voice_card_title">Voice to speak</h3>
+                            <h3 className="tta_voice_card_title">{__("Voice to speak", "text-to-audio")}</h3>
                             <Form.Select
                               onChange={handleChange}
                               name="tta__listening_voice"
@@ -862,7 +861,7 @@ export default function Listening() {
                             src={baseMP3File}
                             type="audio/mpeg"
                           />
-                          Your browser does not support the audio element.
+                          {__("Your browser does not support the audio element.", "text-to-audio")}
                         </audio>
                       </div>
                     )}
@@ -876,7 +875,7 @@ export default function Listening() {
                         <Row className="mb-3">
                           <Col xs={12} md={4}>
                             <div className="tta_voice_card">
-                              <h3 className="tta_voice_card_title">Voice Language</h3>
+                              <h3 className="tta_voice_card_title">{__("Voice Language", "text-to-audio")}</h3>
                               <div className="tta_voice_select_wrapper">
                                 <img
                                   src={getLanguageFlag(
@@ -897,7 +896,7 @@ export default function Listening() {
                                   value={listeningSettings.tta__listening_lang}
                                   className="tta_orange_voice_select"
                                 >
-                                  <option disabled>Default Listening Language</option>
+                                  <option disabled>{__("Default Listening Language", "text-to-audio")}</option>
                                   {Object.keys(currentPlayerLanguages).map((langKey) => (
                                     <option key={langKey} value={langKey}>
                                       {currentPlayerLanguages[langKey]}
@@ -910,7 +909,7 @@ export default function Listening() {
 
                           <Col xs={12} md={4}>
                             <div className="tta_voice_card">
-                              <h3 className="tta_voice_card_title">Voice to speak</h3>
+                              <h3 className="tta_voice_card_title">{__("Voice to speak", "text-to-audio")}</h3>
                               <Form.Select
                                 onChange={handleChange}
                                 name="tta__listening_voice"
@@ -918,7 +917,7 @@ export default function Listening() {
                                 value={listeningSettings.tta__listening_voice}
                                 className="tta_orange_speak_select"
                               >
-                                <option disabled>Default Listening Voice</option>
+                                <option disabled>{__("Default Listening Voice", "text-to-audio")}</option>
                                 {currentPlayerFilteredVoices.map((voice, index) => (
                                   <option key={index} data-lang={voice} value={voice}>
                                     {voice}
@@ -930,7 +929,7 @@ export default function Listening() {
 
                           <Col xs={12} md={4}>
                             <div className="tta_voice_card">
-                              <h3 className="tta_voice_card_title">Voice Model</h3>
+                              <h3 className="tta_voice_card_title">{__("Voice Model", "text-to-audio")}</h3>
                               <Form.Select
                                 onChange={handleChange}
                                 name="tta__listening_voice_model"
@@ -938,9 +937,9 @@ export default function Listening() {
                                 value={listeningSettings.tta__listening_voice_model}
                                 className="tta_orange_speak_select"
                               >
-                                <option disabled>Default Listening Model</option>
-                                <option value="tts-1">TTS-1</option>
-                                <option value="tts-1-hd">TTS-1 HD</option>
+                                <option disabled>{__("Default Listening Model", "text-to-audio")}</option>
+                                <option value="tts-1">{__("TTS-1", "text-to-audio")}</option>
+                                <option value="tts-1-hd">{__("TTS-1 HD", "text-to-audio")}</option>
                               </Form.Select>
                             </div>
                           </Col>
@@ -951,7 +950,7 @@ export default function Listening() {
                           <Form.Group>
                             <div className="tta_slider_header">
                               <Form.Label className="tta_slider_label">
-                                Voice Speed
+                                {__("Voice Speed", "text-to-audio")}
                               </Form.Label>
                               <span className="tta_chatgpt_slider_value">
                                 {listeningSettings.tta__listening_rate}
@@ -1005,7 +1004,7 @@ export default function Listening() {
                               src={baseMP3File}
                               type="audio/mpeg"
                             />
-                            Your browser does not support the audio element.
+                            {__("Your browser does not support the audio element.", "text-to-audio")}
                           </audio>
                         </div>
                       </>
@@ -1027,8 +1026,7 @@ export default function Listening() {
                       placement="top"
                       overlay={
                         <Tooltip>
-                          Language mapping for WPML, GTranslate plugin is
-                          available in the pro version.
+                          {__("Language mapping for WPML, GTranslate plugin is available in the pro version.", "text-to-audio")}
                         </Tooltip>
                       }
                     >
@@ -1068,7 +1066,7 @@ export default function Listening() {
                                 className="tta_orange_select"
                               >
                                 <option disabled>
-                                  Default Listening Language
+                                  {__("Default Listening Language", "text-to-audio")}
                                 </option>
                                 {Object.keys(multilingualActiveLanguages).map(
                                   (langCode, idx) => {
@@ -1086,7 +1084,7 @@ export default function Listening() {
 
                         <div className="tta_mapping_col">
                           <Form.Label className="tta_mapping_label">
-                            Select Language For{" "}
+                            {__('Select Language For{" "}', "text-to-audio")}
                             {multilingualActiveLanguages[languageCode]}
                           </Form.Label>
                           <Form.Select
@@ -1119,7 +1117,7 @@ export default function Listening() {
                             }
                             className="tta_orange_select"
                           >
-                            <option disabled>Default Listening Language</option>
+                            <option disabled>{__("Default Listening Language", "text-to-audio")}</option>
                             {Object.keys(currentPlayerLanguages).map(
                               (langKey, idx) => {
                                 return (
@@ -1144,7 +1142,7 @@ export default function Listening() {
                           Object.keys(currentPlayerLanguages).length && (
                             <div className="tta_mapping_col">
                               <Form.Label className="tta_mapping_label">
-                                Select Voice For{" "}
+                                {__('Select Voice For{" "}', "text-to-audio")}
                                 {multilingualActiveLanguages[languageCode]}
                               </Form.Label>
                               <Form.Select
@@ -1186,7 +1184,7 @@ export default function Listening() {
                                 }
                                 className="tta_orange_select"
                               >
-                                <option disabled>Current Player Voice</option>
+                                <option disabled>{__("Current Player Voice", "text-to-audio")}</option>
                                 {currentPlayerVoices.map((voice, idx) =>
                                   window.hasOwnProperty("ttsObjPro") &&
                                   customizationSettings?.buttonSettings?.id ==
