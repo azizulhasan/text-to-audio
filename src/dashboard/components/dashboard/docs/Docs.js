@@ -1,4 +1,5 @@
 import React from 'react';
+import { __ } from '@wordpress/i18n';
 import { Accordion, Table, Container, Row, Col } from 'react-bootstrap';
 import toast from '../../context/Notify';
 import { copyToClipBoard } from '../../context/utilities';
@@ -100,106 +101,109 @@ export default function Docs() {
 						<Accordion>
 							<Accordion.Item eventKey='1'>
 								<Accordion.Header>
-									1. Browser support issue on android phone and desktop
+									{__("1. Browser support issue on android phone and desktop","text-to-audio")}
 								</Accordion.Header>
 								<Accordion.Body>
-									This plugin is built on browser API. No external API is used. Here is the API used <a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis' >speechSynthesis</a>
-									That is why it doesn’t support all android phones here you can check which android phone support this <a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility'>speechSynthesis</a> API
+									{__("This plugin is built on browser API. No external API is used. Here is the API used", "text-to-audio")} <a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis' >{__("speechSynthesis", "text-to-audio")}</a>
+									{__("That is why it doesn’t support all android phones here you can check which android phone support this", "text-to-audio")} <a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility'>{__("speechSynthesis", "text-to-audio")}</a> {__("API", "text-to-audio")}
 
 
 									<br /><br />
-									Another issue speechSynthesis API is differ browser to browser also divice to divice . So it changes the voices and languages based on browser. one language may available on desktop
-									It can be not available on mobile phone. One voice may available on desktop, it may be not available on android.
+									{__("Another issue speechSynthesis API is differ browser to browser also divice to divice . So it changes the voices and languages based on browser. one language may available on desktopIt can be not available on mobile phone. One voice may available on desktop, it may be not available on android.", "text-to-audio")}
 
-
-									<br /><br />If you still facing problems regarding browser issues please on a <a target='_blank' href='http://atlasaidev.com/contact-us/'>ticket</a>.
-									<br /><br /> There is no issue related to browser on <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>pro version.</a>
+									<br /><br />{__("If you still facing problems regarding browser issues please on a", "text-to-audio")} <a target='_blank' href='http://atlasaidev.com/contact-us/'>{__("ticket", "text-to-audio")}</a>.
+									<br /><br /> {__("There is no issue related to browser on", "text-to-audio")} <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>{__("pro version.", "text-to-audio")}</a>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='2'>
 								<Accordion.Header>
-									2. Another voice language on mobile
+									{__("2. Another voice language on mobile", "text-to-audio")}
 								</Accordion.Header>
 								<Accordion.Body>
-									This plugin is built on browser API <a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis' >speechSynthesis</a>.
-									<br />speechSynthesis API is differ browser to browser also divice to divice . So it changes the voices and languages based on browser. one language may available on desktop
-									It can be not available on mobile phone. One voice may available on desktop, it may be not available on android.
-									<br /><br /> There is no issue releated to voices on <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>pro version.</a>
+									{__("This plugin is built on browser API", "text-to-audio")} <a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis' >{__("speechSynthesis", "text-to-audio")}</a>.
+									<br />{__("speechSynthesis API is differ browser to browser also divice to divice . So it changes the voices and languages based on browser. one language may available on desktop It can be not available on mobile phone. One voice may available on desktop, it may be not available on android.", "text-to-domain")}
+									<br /><br /> {__("There is no issue releated to voices on", "text-to-audio")} <a target='_blank' href='https://atlasaidev.com/text-to-speech-pro/'>{__("pro version.", "text-to-audio")}</a>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='3'>
 								<Accordion.Header>
-									3. Can I Restrict/Exclude Certain Words From Playing?
+									{__("3. Can I Restrict/Exclude Certain Words From Playing?", "text-to-audio")}
 								</Accordion.Header>
 								<Accordion.Body>
 									<p>
-										Absolutely! You have the flexibility to exclude specific content from being read
-										aloud, and this feature is available in the <a target='_blank'
-											href='https://atlasaidev.com/text-to-speech-pro/'>pro
-											version.</a> of Text to Speech.
+										{__("Absolutely! You have the flexibility to exclude specific content from being read aloud, and this feature is available in the", "text-to-audio")} <a target='_blank'
+											href='https://atlasaidev.com/text-to-speech-pro/'>{__("pro version.", "text-to-audio")}</a> {__("of Text to Speech.", "text-to-audio")}
 									</p>
 									<p>
-										Here’s how to exclude words from playback:
+										{__("Here’s how to exclude words from playback:", "text-to-audio")}
 									</p>
 
-									<p>Navigate to the Settings tab of Text to Speech Pro.</p>
+									<p>{__("Navigate to the Settings tab of Text to Speech Pro.", "text-to-audio")}</p>
 
-									<p>Look for the “Exclude Texts To Speak” textarea.</p>
+									<p>{__("Look for the “Exclude Texts To Speak” textarea.", "text-to-audio")}</p>
 									<p>
-										In this field, you can list the words or phrases you wish to exclude from being read aloud.
+										{__("In this field, you can list the words or phrases you wish to exclude from being read aloud.", "text-to-audio")}
 									</p>
 									<p>
-										If you want to exclude multiple words or phrases, simply separate them using the pipe symbol (|).
+										{__("If you want to exclude multiple words or phrases, simply separate them using the pipe symbol (|).", "text-to-audio")}
 									</p>
 									<p>
-										With this capability, you can fine-tune the playback experience, ensuring that only the desired content is read aloud to your audience.
+										{__("With this capability, you can fine-tune the playback experience, ensuring that only the desired content is read aloud to your audience.", "text-to-audio")}
 									</p>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='4'>
 								<Accordion.Header>
-									4. Is it possible to exclude specific HTML tags from being read aloud by the Text to Speech plugin?
+									{__("4. Is it possible to exclude specific HTML tags from being read aloud by the Text to Speech plugin?", "text-to-audio")}
 								</Accordion.Header>
 								<Accordion.Body>
 									<p>
-										Of course! With the <a target='_blank'
-											href='https://atlasaidev.com/text-to-speech-pro/'>pro
-											version.</a> of Text to Speech, you gain the ability to skip the content
-										enclosed within certain HTML tags during playback.
+										{__("Of course! With the", "text-to-audio")} <a target='_blank'
+											href='https://atlasaidev.com/text-to-speech-pro/'>{__("pro version.", "text-to-audio")}</a> {__("of Text to Speech, you gain the ability to skip the content enclosed within certain HTML tags during playback.", "text-to-audio")}
 									</p>
 									<p>
-										**Here's how it works:**
+										{__("**Here's how it works:**", 'text-to-audio')}
 									</p>
 									<p>
-										*Navigate to the Settings tab of Text to Speech Pro.
+										{__('*Navigate to the Settings tab of Text to Speech Pro.', 'text-to-audio')}
 									</p>
 									<p>
-										*Locate the "Exclude Tag's Content" textarea.
+										{__('*Locate the "Exclude Tag\'s Content" textarea.', 'text-to-audio')}
 									</p>
 									<p>
-										*In this field, you can specify the HTML tags whose content you want to exclude from being read aloud.
+										  {__(
+    '*In this field, you can specify the HTML tags whose content you want to exclude from being read aloud.',
+    'text-to-audio'
+  )}
 									</p>
 									<p>
-										*If you need to skip multiple tags, simply separate them using the pipe symbol (|).
+										  {__(
+    '*If you need to skip multiple tags, simply separate them using the pipe symbol (|).',
+    'text-to-audio'
+  )}
 									</p>
 									<p>
-										By utilizing this feature, you can tailor the reading experience to your preferences, ensuring that specific HTML elements are omitted from the audio playback.
+										  {__(
+    'By utilizing this feature, you can tailor the reading experience to your preferences, ensuring that specific HTML elements are omitted from the audio playback.',
+    'text-to-audio'
+  )}
 									</p>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='5'>
 								<Accordion.Header>
-									5. How to change button text?
+									{__("5. How to change button text?", "text-to-audio")}
 								</Accordion.Header>
 								<Accordion.Body>
-									You can change button text 2 ways one is by shortcode attribute. Another way is
-									adding filter. But filter always overrides the shortcode attributes. Here is short
-									code Example :{' '}
+  {__(
+    'You can change button text 2 ways: one is by shortcode attribute. Another way is adding a filter. But filter always overrides the shortcode attributes. Here is a shortcode example:',
+    'text-to-audio'
+  )}
 									<pre>
 										<code>[atlasvoice listen_text="Listen" pause_text="Pause" resume_text="Resume"
 											replay_text="Replay" start_text="Start" stop_text="Stop"]</code>
 									</pre>
-									Also you can change it by filter. We prefer by filter.
+									{__('Also, you can change it by filter. We prefer by filter.', 'text-to-audio')}
 									<pre>
 										<code id='filter_hook'>
 											{`
@@ -224,25 +228,25 @@ export default function Docs() {
 							</Accordion.Item>
 							<Accordion.Item eventKey='6'>
 								<Accordion.Header>
-									6. How to add custom css class to button?
+									{__("6. How to add custom css class to button?", "text-to-audio")}
 								</Accordion.Header>
 								<Accordion.Body>
-									Add class on shortcode as an attribute. Example :{' '}
+									{__("Add class on shortcode as an attribute. Example :{' '}", "text-to-audio")}
 									<code>[atlasvoice className="custom_class"]</code>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='7'>
 								<Accordion.Header>
-									7. Apply Backend Filters and Actions ( Free Version )
+									{__("7. Apply Backend Filters and Actions ( Free Version )", "text-to-audio")}
 								</Accordion.Header>
 								<Accordion.Body>
 									<Table striped bordered hover size='sm'>
 										<thead>
 											<tr>
-												<th>Sr.</th>
+												<th>{__('Sr.', 'text-to-audio')}</th>
 
-												<th>Filter Name</th>
-												<th>Arguments</th>
+												<th>{__('Filter Name', 'text-to-audio')}</th>
+												<th>{__('Arguments', 'text-to-audio')}</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -262,11 +266,11 @@ export default function Docs() {
 												})}
 										</tbody>
 									</Table>
-									visit examples <a href={'https://atlasaidev.com/docs/text-to-speech/filters-actions/apply-backend-filters-and-actions/'} target={'_blank'}>here</a>
+									{__("visit examples", "text-to-audio")} <a href={'https://atlasaidev.com/docs/text-to-speech/filters-actions/apply-backend-filters-and-actions/'} target={'_blank'}>{__("here", "text-to-audio")}</a>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='8'>
-								<Accordion.Header>8. How to apply filters.</Accordion.Header>
+								<Accordion.Header>{__("8. How to apply filters.", "text-to-audio")}</Accordion.Header>
 								<Accordion.Body>
 									<button
 										className=''
@@ -278,9 +282,8 @@ export default function Docs() {
 										/>
 									</button>
 									<div>
-										Install the plugin <a href='https://wordpress.org/plugins/code-snippets/' target={'_blank'}>Code Snippets</a>
-										Then Select Snippet {'>'} Add New
-										Create a new snippet with this block of code
+										{__("Install the plugin", "text-to-audio")} <a href='https://wordpress.org/plugins/code-snippets/' target={'_blank'}>{__("Code Snippets", "text-to-audio")}</a>
+										{__("Then Select Snippet {'>'} Add New Create a new snippet with this block of code", "text-to-audio")}
 										<pre>
 											<code id='filter_hook'>
 												{`
@@ -306,65 +309,55 @@ export default function Docs() {
 
 							<Accordion.Item eventKey='9'>
 								<Accordion.Header>
-									9. What is the name of the block button?
+									{__("9. What is the name of the block button?", "text-to-audio")}
 								</Accordion.Header>
 								<Accordion.Body>
-									<strong>Customize Button</strong>
+									<strong>{__("Customize Button", "text-to-audio")}</strong>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='10'>
 								<Accordion.Header>
-									10. How many languages support in pro version?
+									{__("10. How many languages support in pro version?", "text-to-audio")}
 								</Accordion.Header>
 								<Accordion.Body>
-									<strong>PRO SUPPORTED LANGUAGES:</strong><br />
-									Text To Speech Pro TTS Accessibility plugin supports these languages.<br /><br />
+									<strong>{__("PRO SUPPORTED LANGUAGES:", "text-to-audio")}</strong><br />
+									{__("Text To Speech Pro TTS Accessibility plugin supports these languages.", "text-to-audio")}<br /><br />
 
-									Afrikaans, Albanian, Arabic, Armenian, Catalan, Chinese,
-									Chinese (Mandarin/China), Chinese (Mandarin/Taiwan),
-									Chinese (Cantonese), Croatian, Czech, Danish, Dutch,
-									English, English (Australia), English (United Kingdom),
-									English (United States), Esperanto, Finnish, French, German,
-									Greek, Haitian Creole, Hindi, Hungarian, Icelandic,
-									Indonesian, Italian, Japanese, Korean, Latin, Latvian,
-									Macedonian, Norwegian, Polish, Portuguese, Portuguese (Brazil),
-									Romanian, Russian, Serbian, Slovak, Spanish, Spanish (Spain),
-									Spanish (United States), Swahili, Swedish, Tamil, Thai,
-									Turkish, Vietnamese, Welsh
+{__('Afrikaans, Albanian, Arabic, Armenian, Catalan, Chinese, Chinese (Mandarin/China), Chinese (Mandarin/Taiwan), Chinese (Cantonese), Croatian, Czech, Danish, Dutch, English, English (Australia), English (United Kingdom), English (United States), Esperanto, Finnish, French, German, Greek, Haitian Creole, Hindi, Hungarian, Icelandic, Indonesian, Italian, Japanese, Korean, Latin, Latvian, Macedonian, Norwegian, Polish, Portuguese, Portuguese (Brazil), Romanian, Russian, Serbian, Slovak, Spanish, Spanish (Spain), Spanish (United States), Swahili, Swedish, Tamil, Thai, Turkish, Vietnamese, Welsh', 'text-to-audio')}
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='11'>
 								<Accordion.Header>
-									11. How many languages support in free version?
+									{__("11. How many languages support in free version?", "text-to-audio")}
 								</Accordion.Header>
 								<Accordion.Body>
-									<strong>Free SUPPORTED LANGUAGES:</strong><br />
-									Text To Speech TTS Accessibility plugin supports these languages.<br /><br />
+									<strong>{__("Free SUPPORTED LANGUAGES:", "text-to-audio")}</strong><br />
+									{__("Text To Speech TTS Accessibility plugin supports these languages.", "text-to-audio")}<br /><br />
 
-									<strong>Chrome Desktop:</strong> UK English, US English, Spanish ( Spain ), Spanish ( United States ), French, Deutsch, Italian, Russian, Dutch, Japanese, Korean, Chinese (China), Chinese (Hong Kong), Chinese (Taiwan) Hindi, Indonesian, Polish, Brazilian Portuguese.<br />
-									<strong>Chrome Mobile:</strong> English USA, English UK, German, Italian, Russian, French, Spanish<br />
+									<strong>{__("Chrome Desktop:", "text-to-audio")}</strong>{__("UK English, US English, Spanish ( Spain ), Spanish ( United States ), French, Deutsch, Italian, Russian, Dutch, Japanese, Korean, Chinese (China), Chinese (Hong Kong), Chinese (Taiwan) Hindi, Indonesian, Polish, Brazilian Portuguese.", "text-to-audio")}<br />
+									<strong>{__("Chrome Mobile:", "text-to-audio")}</strong>{__("English USA, English UK, German, Italian, Russian, French, Spanish", "text-to-audio")} <br />
 
-									<strong>Microsoft Edge Desktop :</strong> All Languages.<br />
+									<strong>{__("Microsoft Edge Desktop :", "text-to-audio")}</strong> {__("All Languages.", "text-to-audio")}<br />
 
-									<strong>Microsoft Edge Mobile :</strong> All Languages.<br />
+									<strong>{__("Microsoft Edge Mobile :", "text-to-audio")}</strong> {__("All Languages.", "text-to-audio")}<br />
 
-									<strong>FireFox Desktop:</strong> English.<br />
+									<strong>{__("FireFox Desktop:", "text-to-audio")}</strong> {__("English.", "text-to-audio")}<br />
 
-									<strong>FireFox Mobile:</strong> English USA, English UK, German, Italian, Russian, French, Spanish.<br />
+									<strong>{__("FireFox Mobile:", "text-to-audio")}</strong> {__("English USA, English UK, German, Italian, Russian, French, Spanish.", "text-to-audio")}<br />
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='12'>
 								<Accordion.Header>
-									12. Apply Backend Filters and Actions ( Pro Version )
+									{__("12. Apply Backend Filters and Actions ( Pro Version )", "text-to-audio")}
 								</Accordion.Header>
 								<Accordion.Body>
 									<Table striped bordered hover size='sm'>
 										<thead>
 											<tr>
-												<th>Sr.</th>
+												<th>{__('Sr.', 'text-to-audio')}</th>
 
-												<th>Filter Name</th>
-												<th>Arguments</th>
+												<th>{__('Filter Name', 'text-to-audio')}</th>
+												<th>{__('Arguments', 'text-to-audio')}</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -384,21 +377,21 @@ export default function Docs() {
 												})}
 										</tbody>
 									</Table>
-									visit examples <a href={'https://atlasaidev.com/docs/text-to-speech/filters-actions/apply-backend-filters-and-actions-pro-version/'} target={'_blank'}>here</a>
+										{__("visit examples", "text-to-audio")} <a href={'https://atlasaidev.com/docs/text-to-speech/filters-actions/apply-backend-filters-and-actions-pro-version/'} target={'_blank'}>{__("here", "text-to-audio")}</a>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='13'>
 								<Accordion.Header>
-									13. Apply Frontend Filters and Actions ( Free Version )
+									{__("13. Apply Frontend Filters and Actions ( Free Version )", "text-to-audio")}
 								</Accordion.Header>
 								<Accordion.Body>
 									<Table striped bordered hover size='sm'>
 										<thead>
 											<tr>
-												<th>Sr.</th>
+												<th>{__('Sr.', 'text-to-audio')}</th>
 
-												<th>Filter Name</th>
-												<th>Arguments</th>
+												<th>{__('Filter Name', 'text-to-audio')}</th>
+												<th>{__('Arguments', 'text-to-audio')}</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -418,21 +411,21 @@ export default function Docs() {
 												})}
 										</tbody>
 									</Table>
-									visit examples <a href={'https://atlasaidev.com/docs/text-to-speech/filters-actions/apply-frontend-filters-and-actions-free-version/'} target={'_blank'}>here</a>
+										{__("visit examples", "text-to-audio")} <a href={'https://atlasaidev.com/docs/text-to-speech/filters-actions/apply-frontend-filters-and-actions-free-version/'} target={'_blank'}>{__("here", "text-to-audio")}</a>
 								</Accordion.Body>
 							</Accordion.Item>
 							<Accordion.Item eventKey='14'>
 								<Accordion.Header>
-									14. Apply Frontend Filters and Actions ( Pro Version )
+									{__("14. Apply Frontend Filters and Actions ( Pro Version )", "text-to-audio")}
 								</Accordion.Header>
 								<Accordion.Body>
 									<Table striped bordered hover size='sm'>
 										<thead>
 											<tr>
-												<th>Sr.</th>
+												<th>{__('Sr.', 'text-to-audio')}</th>
 
-												<th>Filter Name</th>
-												<th>Arguments</th>
+												<th>{__('Filter Name', 'text-to-audio')}</th>
+												<th>{__('Arguments', 'text-to-audio')}</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -452,7 +445,7 @@ export default function Docs() {
 												})}
 										</tbody>
 									</Table>
-									visit examples <a href={'https://atlasaidev.com/docs/text-to-speech/filters-actions/apply-frontend-filters-and-actions-pro-version/'} target={'_blank'}>here</a>
+									{__("visit examples", "text-to-audio")} <a href={'https://atlasaidev.com/docs/text-to-speech/filters-actions/apply-frontend-filters-and-actions-pro-version/'} target={'_blank'}>{__("here", "text-to-audio")}</a>
 								</Accordion.Body>
 							</Accordion.Item>
 

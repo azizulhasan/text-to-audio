@@ -59,20 +59,20 @@ class TTA_Notices {
 		];
 
 		$features_notice = [
-			'Convert unlimited characters to MP3 in bulk.',
-			'WPML, GTranslate, TranslatePress Plugins Support',
-			'Works with ACF, SCF, and other popular plugins.',
-			'Google Cloud Text-to-Speech & ChatGPT Text-to-Speech (usage fees apply)',
-			'Live integration support + 14-day money-back guarantee (conditions apply).',
-			'50+ languages support in pro version.',
-			'Download the audio file for offline listening.',
-			'Improved UI and Responsive of the button.',
-			'Multiple Audio Player Support.',
-			'Customizable content selection with CSS selectors',
-			'Exclude content by categories, tags, IDs',
-			'Unlimited Download MP3 files',
-			'200+ Voices with Google Cloud Text To Speech',
-			'Advance analytics & Text Aliases support.'
+			__('Convert unlimited characters to MP3 in bulk.', 'text-to-audio'),
+			__('WPML, GTranslate, TranslatePress Plugins Support', 'text-to-audio'),
+			__('Works with ACF, SCF, and other popular plugins.', 'text-to-audio'),
+			__('Google Cloud Text-to-Speech & ChatGPT Text-to-Speech (usage fees apply)', 'text-to-audio'),
+			__('Live integration support + 14-day money-back guarantee (conditions apply).', 'text-to-audio'),
+			__('50+ languages support in pro version.', 'text-to-audio'),
+			__('Download the audio file for offline listening.', 'text-to-audio'),
+			__('Improved UI and Responsive of the button.', 'text-to-audio'),
+			__('Multiple Audio Player Support.', 'text-to-audio'),
+			__('Customizable content selection with CSS selectors', 'text-to-audio'),
+			__('Exclude content by categories, tags, IDs', 'text-to-audio'),
+			__('Unlimited Download MP3 files', 'text-to-audio'),
+			__('200+ Voices with Google Cloud Text To Speech', 'text-to-audio'),
+			__('Advance analytics & Text Aliases support.', 'text-to-audio')
 		];
 
 		$this->analytics_features = [
@@ -80,12 +80,12 @@ class TTA_Notices {
 			// __( "Number of times the play button was clicked" ),
 			// __( "Number of times the pause button was clicked" ),
 			// __( "Total time the player has played (in seconds)" ),
-			__( "Number of times the player reached the end. 🔒" ),
-			__( "Number of times the MP3 file downloaded. 🔒" ),
-			__( "Percentage of times the play button was clicked after initiation. 🔒" ),
-			__( "Percentage of times users listened till the end. 🔒" ),
-			__( "Average listening time per play. 🔒" ),
-			__( "Average number of pauses per play. 🔒" ),
+			__("Number of times the MP3 file downloaded. 🔒" , "text-to-audio"),
+			__("Number of times the player reached the end. 🔒" , "text-to-audio"),
+			__("Percentage of times the play button was clicked after initiation. 🔒" , "text-to-audio"),
+			__("Percentage of times users listened till the end. 🔒" , "text-to-audio"),
+			__("Average listening time per play. 🔒" , "text-to-audio"),
+			__("Average number of pauses per play. 🔒" , "text-to-audio"),
 		];
 
 
@@ -156,7 +156,7 @@ class TTA_Notices {
                             } else {
                                 if (wp.ajax) {
                                 } else {
-                                    alert('This browser don\'t support speechSynthesis API. Please use one of these browser to use Text To Speech Free.  Chrome, FireFox, Safari, Samsung, Edge, Opera. On our Pro version there is no issue releated to browser.')
+                                    alert(__('This browser don\'t support speechSynthesis API. Please use one of these browser to use Text To Speech Free.  Chrome, FireFox, Safari, Samsung, Edge, Opera. On our Pro version there is no issue releated to browser.', 'text-to-audio'));
                                 }
                             }
                         });
@@ -177,8 +177,8 @@ class TTA_Notices {
 			\update_option( 'wpml_and_gtranslate_notice_displayed_aug_25', true );
 		}
 
-		$pluginName    = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
-		$ProPluginName = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS Pro', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+		$pluginName    = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', "text-to-audio" ) );
+		$ProPluginName = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS Pro', "text-to-audio" ) );
 
 		$has_notice              = false;
 		$user_id                 = get_current_user_id();
@@ -208,7 +208,7 @@ class TTA_Notices {
                  data-which="compitable" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <p><?php
 					printf(
-						esc_html__( '%6$s %2$s %3$s %4$s plugin is compitable with  %5$s . %7$s', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
+						esc_html__( '%6$s %2$s %3$s %4$s plugin is compitable with  %5$s . %7$s', "text-to-audio" ),
 						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						'<div class="tta-review-notice-logo"></div>',
 						'<br/>',
@@ -221,7 +221,7 @@ class TTA_Notices {
                 <p>
                     <a class="button button-primary" data-response="compitable"
                        href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
-                       target="_blank"><?php esc_html_e( 'Buy Now', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       target="_blank"><?php esc_html_e( 'Buy Now', "text-to-audio" ); ?></a>
                 </p>
             </div>
 

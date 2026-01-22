@@ -469,7 +469,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                 <div className="setting-row">
                     <div className="setting-label-area">
                         <span className="setting-label">
-                            {__("Storage MP3 Files To Google Cloud Storage", "text-to-audio")}
+                            {__("Store MP3 Files To Google Cloud Storage", "text-to-audio")}
                         </span>
                         <OverlayTrigger
                             placement="top"
@@ -499,7 +499,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                     </div>
                 </div>
                 <p className="text-muted small mb-3">
-                    {__("Automatically sync generated audio files in cloud storage for backup & easy access.", "text-to-audio")}
+                    {__("Automatically sync generated audio files in cloud storage for store & easy access.", "text-to-audio")}
                 </p>
 
                 {/* Bucket Name Field - Only show when backup is enabled */}
