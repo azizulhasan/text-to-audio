@@ -345,15 +345,15 @@ class TTA_Admin {
 
 	public function TTA_menu() {
 		add_menu_page(
-			__( 'Text To Speech', "text-to-audio" ),
-			__( 'Text To Speech', "text-to-audio" ),
+            'Text To Speech',
+            'Text To Speech',
 			'manage_options',
 			TEXT_TO_AUDIO_TEXT_DOMAIN,
 			array( $this, "TTA_settings" ),
 			'dashicons-controls-volumeon',
 			20
 		);
-		add_submenu_page( "text-to-audio", __( 'Text To Speech', "text-to-audio" ), __( 'Text To Speech', "text-to-audio" ), 'manage_options', TEXT_TO_AUDIO_TEXT_DOMAIN, array(
+		add_submenu_page( TEXT_TO_AUDIO_TEXT_DOMAIN, 'Text To Speech' , 'Text To Speech', 'manage_options', TEXT_TO_AUDIO_TEXT_DOMAIN, array(
 			$this,
 			"TTA_settings"
 		), 21 );
