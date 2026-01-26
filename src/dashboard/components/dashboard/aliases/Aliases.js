@@ -11,7 +11,7 @@ export default function Aliases() {
         {actual_text: '', to_read: ''}
     ]);
     const [isDataLoaded, setIsDataLoaded] = useState(false)
-
+ 
     useEffect(() => {
         /**
          * Get data from and display to table.
@@ -24,10 +24,10 @@ export default function Aliases() {
                 setTtsTextAliases(res.data)
             }
             setIsDataLoaded(true)
-
+ 
         });
     }, []);
-
+ 
     const handleAddRow = () => {
         console.log(ttsTextAliases.length)
         if(!ttsObj.is_pro_active && ttsTextAliases.length >= 1 ) {
@@ -38,18 +38,18 @@ export default function Aliases() {
         }
         setTtsTextAliases([...ttsTextAliases, {actual_text: '', to_read: ''}]);
     };
-
+ 
     const handleDeleteRow = (index) => {
         const newAliases = ttsTextAliases.filter((_, idx) => idx !== index);
         setTtsTextAliases(newAliases);
     };
-
+ 
     const handleInputChange = (index, field, value) => {
         const newAliases = [...ttsTextAliases];
         newAliases[index][field] = value;
         setTtsTextAliases(newAliases);
     };
-
+ 
     const handleSubmit = (e) => {
         e.preventDefault();
         for (const alias of ttsTextAliases) {
@@ -77,69 +77,92 @@ export default function Aliases() {
                 console.log(err);
             });
     };
-
-    return (isDataLoaded ? <React.Fragment>
-        <Container>
-            <Row>
-                <Col xs={12} sm={12} lg={8}>
-                    <h2>Text to Speech Aliases
-                        <>
-                            {['top'].map((placement) => (<OverlayTrigger
-                                key={placement}
-                                placement={placement}
-                                overlay={<Tooltip id={`tooltip-${placement}`}>
-                                    {__('Click To Know How It Works?')}
-                                </Tooltip>}>
-                                <a className={'text-danger'} target='_blank'
-                                   href='https://www.youtube.com/watch?v=oeW652YKmG0&t=9s'>
-                                    <i className="fab fa-youtube"></i>
-                                </a>
-                            </OverlayTrigger>))}
-                        </>
-                    </h2>
-                    <Form onSubmit={handleSubmit}>
-                        {/* Add Button or Player Automatically */}
-                        {ttsTextAliases.map((alias, index) => (
-                            <Row key={index} className="mb-3">
-                                <Col>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Actual Text"
-                                        value={alias.actual_text}
-                                        onChange={(e) => handleInputChange(index, 'actual_text', e.target.value)}
-                                    />
-                                </Col>
-                                <Col>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="To Read"
-                                        value={alias.to_read}
-                                        onChange={(e) => handleInputChange(index, 'to_read', e.target.value)}
-                                    />
-                                </Col>
-                                <Col xs="auto">
-                                    <Button variant="danger" onClick={() => handleDeleteRow(index)}><span
-                                        className="dashicons dashicons-trash"></span></Button>
-                                </Col>
-                            </Row>
-                        ))}
-                        <Button variant="primary" type="button" onClick={handleAddRow}>
-                            Add New Row
-                        </Button>
-                        {/*Display Button Icon*/}
-                        <Row className='mt-3'>
-                            <div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
-                                <button type='submit' className='tta_btn  btn-block'>
-                                    Save
-                                </button>
+ 
+    return isDataLoaded ? (
+        <React.Fragment>
+            <Container fluid className="tta-container">
+                <Row>
+                    <Col xs={12} lg={8}>
+                        {/* Header Card */}
+                        <div className="tta_aliases_header_card">
+                            <h2 className="tta_aliases_title">
+                                Text to Speech Aliases
+                            </h2>
+                            <p className="tta_aliases_description">
+                                Here a short text have to write to inform the user about this feature purpose
+                            </p>
+                        </div>
+ 
+                        {/* Main Aliases Card */}
+                        <Form onSubmit={handleSubmit}>
+                            <div className="tta_aliases_card">
+                                <div className="tta_aliases_table_header">
+                                    <div className="tta_aliases_column_header">Actual Text</div>
+                                    <div className="tta_aliases_column_header">To Read</div>
+                                    <div className="tta_aliases_column_header_action"></div>
+                                </div>
+ 
+                                {ttsTextAliases.map((alias, index) => (
+                                    <div key={index} className="tta_aliases_row">
+                                        <div className="tta_aliases_input_wrapper">
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Write actual text"
+                                                value={alias.actual_text}
+                                                onChange={(e) => handleInputChange(index, 'actual_text', e.target.value)}
+                                                className="tta_aliases_input"
+                                            />
+                                        </div>
+                                        <div className="tta_aliases_input_wrapper">
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Write read aloud text"
+                                                value={alias.to_read}
+                                                onChange={(e) => handleInputChange(index, 'to_read', e.target.value)}
+                                                className="tta_aliases_input"
+                                            />
+                                        </div>
+                                        <div className="tta_aliases_action_wrapper">
+                                            <button
+                                                type="button"
+                                                className="tta_aliases_delete_btn"
+                                                onClick={() => handleDeleteRow(index)}
+                                            >
+                                                <span className="dashicons dashicons-trash"></span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+ 
+                                {/* Add New and Save Button Section */}
+                                <div className="tta_aliases_actions_section">
+                                    <button
+                                        type="button"
+                                        className="tta_aliases_add_btn"
+                                        onClick={handleAddRow}
+                                    >
+                                        <span className="tta_aliases_add_icon">⊕</span> Add New
+                                    </button>
+                                    <button type='submit' className='tta_aliases_save_btn'>
+                                        Save
+                                    </button>
+                                </div>
                             </div>
-                        </Row>
-                    </Form>
-                </Col>
-                <Col xs={12} sm={12} lg={4}>
-                    <UpgradeToPro promotionType={'analytics'}/>
-                </Col>
-            </Row>
-        </Container>
-    </React.Fragment> : <h1>Loading</h1>);
+                        </Form>
+                    </Col>
+ 
+                    <Col xs={12} lg={4}>
+                        <UpgradeToPro promotionType={'analytics'}/>
+                    </Col>
+                </Row>
+            </Container>
+        </React.Fragment>
+    ) : (
+        <div className="tta_aliases_loading">
+            <div>
+                <i className="fas fa-spinner fa-spin"></i>
+                <span className="tta_aliases_loading_text">Loading...</span>
+            </div>
+        </div>
+    );
 };
