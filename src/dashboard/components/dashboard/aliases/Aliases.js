@@ -32,7 +32,7 @@ export default function Aliases() {
         console.log(ttsTextAliases.length)
         if(!ttsObj.is_pro_active && ttsTextAliases.length >= 1 ) {
             toast(<h6>More than 1 alias is available in the pro version. Please <a target='_blank'
-                                                          href='https://atlasaidev.com/plugins/text-to-speech-pro/'>Buy Pro
+                                                          href='https://atlasaidev.com/plugins/text-to-speech-pro/pricing/'>Buy Pro
                 version</a></h6>, 'info', {autoClose: 10000})
             return;
         }
