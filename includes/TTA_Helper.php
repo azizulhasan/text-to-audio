@@ -1444,6 +1444,22 @@ class TTA_Helper
         return $content;
     }
 
+    public static function  delete_duplicate_post_ids_if_have( $post_id ){
+        $duplicate_post_ids = get_option('tts_duplicate_post_ids', array());
+        if(in_array($post_id, $duplicate_post_ids)) {
+            // Search for the index
+            $key = array_search($post_id, $duplicate_post_ids);
+
+            if(is_numeric($key)) {
+                unset($duplicate_post_ids[$key]);
+
+                update_option('tts_duplicate_post_ids', $duplicate_post_ids);
+
+                update_post_meta( $post_id, 'tts_mp3_file_urls', [] );
+            };
+        }
+    }
+
     public static function remove_js_and_css_from_content($content) {
         // Remove <script>...</script>
         $content = preg_replace('#<script\b[^>]*>(.*?)</script>#is', '', $content);

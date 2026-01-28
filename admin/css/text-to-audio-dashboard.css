@@ -2848,11 +2848,270 @@ a:hover {
 
 
 
-
-
-
-
-
-
-
-
+/* Aliases Component Styles - Following Settings Layout Structure */
+ 
+/* Header Card */
+.tta_aliases_header_card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+ 
+.tta_aliases_title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 8px;
+}
+ 
+.tta_aliases_description {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #6c757d;
+    margin: 0;
+}
+ 
+/* Main Aliases Card */
+.tta_aliases_card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+ 
+/* Table Header */
+.tta_aliases_table_header {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e9ecef;
+}
+ 
+.tta_aliases_column_header {
+    font-size: 14px;
+    font-weight: 600;
+    color: #212529;
+    padding-left: 4px;
+}
+ 
+.tta_aliases_column_header_action {
+    width: 50px;
+}
+ 
+/* Table Rows */
+.tta_aliases_row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 16px;
+    margin-bottom: 12px;
+    align-items: center;
+}
+ 
+.tta_aliases_input_wrapper {
+    flex: 1;
+}
+ 
+.tta_aliases_input {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+}
+ 
+.tta_aliases_input:focus {
+    outline: none;
+    border-color: #0d6efd;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+ 
+.tta_aliases_input::placeholder {
+    color: #adb5bd;
+    font-size: 14px;
+}
+ 
+.tta_aliases_action_wrapper {
+    width: 50px;
+    display: flex;
+    justify-content: center;
+}
+ 
+.tta_aliases_delete_btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 6px;
+    background-color: #ff8c61;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+ 
+.tta_aliases_delete_btn:hover {
+    background-color: #ff7a4d;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+ 
+.tta_aliases_delete_btn:active {
+    transform: translateY(0);
+}
+ 
+.tta_aliases_delete_btn .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+ 
+/* Actions Section (Add New and Save Buttons) */
+.tta_aliases_actions_section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+}
+ 
+.tta_aliases_add_btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #0d6efd;
+    background-color: #ffffff;
+    border: 2px solid #0d6efd;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+ 
+.tta_aliases_add_btn:hover {
+    background-color: #0d6efd;
+    color: #ffffff;
+}
+ 
+.tta_aliases_add_btn:active {
+    transform: scale(0.98);
+}
+ 
+.tta_aliases_add_icon {
+    font-size: 20px;
+    font-weight: 300;
+    line-height: 1;
+}
+ 
+.tta_aliases_save_btn {
+    min-width: 120px;
+    padding: 12px 32px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: #ff8c61;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(255, 140, 97, 0.3);
+}
+ 
+.tta_aliases_save_btn:hover {
+    background-color: #ff7a4d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 140, 97, 0.4);
+}
+ 
+.tta_aliases_save_btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(255, 140, 97, 0.3);
+}
+ 
+/* Loading State */
+.tta_aliases_loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    font-size: 18px;
+    color: #6c757d;
+}
+ 
+.tta_aliases_loading i {
+    margin-right: 8px;
+    font-size: 24px;
+}
+ 
+.tta_aliases_loading_text {
+    margin-left: 8px;
+}
+ 
+/* Responsive Design */
+@media (max-width: 768px) {
+    .tta_aliases_header_card {
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+ 
+    .tta_aliases_title {
+        font-size: 20px;
+    }
+ 
+    .tta_aliases_card {
+        padding: 16px;
+    }
+ 
+    .tta_aliases_row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding-bottom: 12px;
+        margin-bottom: 16px;
+        border-bottom: 1px solid #e9ecef;
+    }
+ 
+    .tta_aliases_table_header {
+        display: none;
+    }
+ 
+    .tta_aliases_action_wrapper {
+        width: 100%;
+        justify-content: flex-end;
+    }
+ 
+    .tta_aliases_actions_section {
+        flex-direction: column;
+        gap: 12px;
+    }
+ 
+    .tta_aliases_add_btn,
+    .tta_aliases_save_btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+ 
+/* Override Bootstrap form-control styles */
+.tta_aliases_input.form-control {
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background-color: #f8f9fa;
+}
+ 
+.tta_aliases_input.form-control:focus {
+    border-color: #0d6efd;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
