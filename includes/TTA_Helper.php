@@ -553,7 +553,11 @@ class TTA_Helper
         }
         $final_mp3_file_ulrs = $mp3_file_urls;
         $should_update_urls = false;
-        if (get_post_meta($post->ID, 'tts_is_mp3_file_url_exists', true) && count($final_mp3_file_ulrs)) {
+        /**
+         * front count to empty function used.
+         * TTS-195: eric.corbett2@gmail.com TTA_Helper.php:556 issue fixed
+         */
+        if (get_post_meta($post->ID, 'tts_is_mp3_file_url_exists', true) && !empty($final_mp3_file_ulrs)) {
             return apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls);
         }
 
@@ -1438,6 +1442,22 @@ class TTA_Helper
         $content = self::remove_js_and_css_from_content($content);
 
         return $content;
+    }
+
+    public static function  delete_duplicate_post_ids_if_have( $post_id ){
+        $duplicate_post_ids = get_option('tts_duplicate_post_ids', array());
+        if(in_array($post_id, $duplicate_post_ids)) {
+            // Search for the index
+            $key = array_search($post_id, $duplicate_post_ids);
+
+            if(is_numeric($key)) {
+                unset($duplicate_post_ids[$key]);
+
+                update_option('tts_duplicate_post_ids', $duplicate_post_ids);
+
+                update_post_meta( $post_id, 'tts_mp3_file_urls', [] );
+            };
+        }
     }
 
     public static function remove_js_and_css_from_content($content) {

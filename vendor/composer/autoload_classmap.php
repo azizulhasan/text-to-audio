@@ -22,6 +22,7 @@ return array(
     'TTA\\TTA_Notices' => $baseDir . '/includes/TTA_Notices.php',
     'TTA\\TTA_i18n' => $baseDir . '/includes/TTA_i18n.php',
     'TTA_Admin\\TTA_Admin' => $baseDir . '/admin/TTA_Admin.php',
+    'TTA_Admin\\TTA_Posts_List' => $baseDir . '/admin/TTA_Posts_List.php',
     'TTA_Api\\AtlasVoice_Analytics' => $baseDir . '/api/AtlasVoice_Analytics.php',
     'TTA_Api\\AtlasVoice_Plugin_Compatibility' => $baseDir . '/api/AtlasVoice_Plugin_Compatibility.php',
     'TTA_Api\\TTA_Api_Routes' => $baseDir . '/api/TTA_Api_Routes.php',
