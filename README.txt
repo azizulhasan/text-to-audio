@@ -456,11 +456,14 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
-= 2.1.2  ( 20 Jan 2026 )  =
+= 2.1.2  ( 28 Jan 2026 )  =
 Fixed :  count issue fixed in TTA_Helper class
 Added :  Filter system added in `edit.php` page.
 Added :  Weather mp3 is added or not column added. (pro)
 Added :  TTS enabled  or not column added
+Introduced :  New UI introduced for Aliases.
+Updated :  Freemius version update.
+Updated :  duplicate post issue fixed. `https://wordpress.org/plugins/duplicate-page/`
 
 
 
@@ -817,4 +820,7 @@ Fixed :  count issue fixed in TTA_Helper class
 Added :  Filter system added in `edit.php` page.
 Added :  Weather mp3 is added or not column added. (pro)
 Added :  TTS enabled  or not column added
+Introduced :  New UI introduced for Aliases.
+Updated :  Freemius version update.
+Updated :  duplicate post issue fixed. `https://wordpress.org/plugins/duplicate-page/`
 
