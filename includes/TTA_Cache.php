@@ -226,6 +226,8 @@ class TTA_Cache {
 		self::delete( $cache_key );
 		// Only proceed if the post type is valid
 		TTA_Helper::get_post_types();
+
+        TTA_Helper::delete_duplicate_post_ids_if_have( $post_id );
 	}
 
 	public static function update_transient_during_plugins_crud() {

@@ -553,7 +553,11 @@ class TTA_Helper
         }
         $final_mp3_file_ulrs = $mp3_file_urls;
         $should_update_urls = false;
-        if (get_post_meta($post->ID, 'tts_is_mp3_file_url_exists', true) && count($final_mp3_file_ulrs)) {
+        /**
+         * front count to empty function used.
+         * TTS-195: eric.corbett2@gmail.com TTA_Helper.php:556 issue fixed
+         */
+        if (get_post_meta($post->ID, 'tts_is_mp3_file_url_exists', true) && !empty($final_mp3_file_ulrs)) {
             return apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls);
         }
 
@@ -1440,6 +1444,22 @@ class TTA_Helper
         return $content;
     }
 
+    public static function  delete_duplicate_post_ids_if_have( $post_id ){
+        $duplicate_post_ids = get_option('tts_duplicate_post_ids', array());
+        if(in_array($post_id, $duplicate_post_ids)) {
+            // Search for the index
+            $key = array_search($post_id, $duplicate_post_ids);
+
+            if(is_numeric($key)) {
+                unset($duplicate_post_ids[$key]);
+
+                update_option('tts_duplicate_post_ids', $duplicate_post_ids);
+
+                update_post_meta( $post_id, 'tts_mp3_file_urls', [] );
+            };
+        }
+    }
+
     public static function remove_js_and_css_from_content($content) {
         // Remove <script>...</script>
         $content = preg_replace('#<script\b[^>]*>(.*?)</script>#is', '', $content);
@@ -1504,6 +1524,121 @@ class TTA_Helper
         return 'UNKNOWN';
     }
 
+    /**
+     * Generate Audio Schema markup for SEO
+     *
+     * This function generates JSON-LD schema markup for audio content when:
+     * - Pro version is active
+     * - Current player ID is greater than 2
+     *
+     * @param array $params Array containing title, excerpt, post, content_read_time, mp3_file_urls, file_url_key, language, voice
+     * @return string The JSON-LD schema markup or empty string if conditions not met
+     */
+    public static function generate_audio_schema($params = [])
+    {
+        //TODO:: add UI for enabling schema
+        // Check if pro version is active and player ID is greater than 2
+        if (!is_pro_active() || self::get_player_id() <= 2 || ! apply_filters('tts_enable_audio_schema_markup', true, $params)) {
+            return '';
+        }
 
+        // Extract parameters
+        $title = isset($params['title']) ? $params['title'] : '';
+        $excerpt = isset($params['excerpt']) ? $params['excerpt'] : '';
+        $description = isset($params['description']) ? $params['description'] : '';
+        $post = isset($params['post']) ? $params['post'] : null;
+        $content_read_time = isset($params['content_read_time']) ? $params['content_read_time'] : 0;
+        $mp3_file_urls = isset($params['mp3_file_urls']) ? $params['mp3_file_urls'] : [];
+        $file_url_key = isset($params['file_url_key']) ? $params['file_url_key'] : '';
+        $language = isset($params['language']) ? $params['language'] : '';
+        $voice = isset($params['voice']) ? $params['voice'] : '';
 
+        // Validate required parameters
+        if (!$post || empty($mp3_file_urls) || !isset($mp3_file_urls[$file_url_key])) {
+            return '';
+        }
+
+        // Get the audio file URL
+        $audio_url = $mp3_file_urls[$file_url_key];
+
+        // Sanitize data for JSON output
+        $title_sanitized = $title;
+        $excerpt_sanitized = $excerpt;
+        $audio_url_sanitized = $audio_url;
+        $language_sanitized = esc_js($language);
+        $voice_sanitized = esc_js($voice);
+
+        // Get post metadata
+        $post_date = get_the_date('c', $post->ID); // ISO 8601 format
+        $post_url = get_permalink($post->ID);
+        $post_author = get_the_author_meta('display_name', $post->post_author);
+        $site_name = get_bloginfo('name');
+
+        // Calculate duration in ISO 8601 format (PT#M#S)
+        $duration = 'PT' . intval($content_read_time) . 'M';
+
+        $description = $excerpt_sanitized ?: $description;
+        $description = tta_clean_content($description);
+        // Build schema data array
+        $schema_data = [
+            '@context' => 'https://schema.org',
+            '@type' => 'AudioObject',
+            'name' => $title_sanitized,
+            'description' => $description,
+            'contentUrl' => $audio_url_sanitized,
+            'encodingFormat' => 'audio/mpeg',
+            'duration' => $duration,
+            'uploadDate' => $post_date,
+            'transcript' => $description,
+        ];
+
+        // Add language if available
+        if (!empty($language_sanitized)) {
+            $schema_data['inLanguage'] = $language_sanitized;
+        }
+
+        // Add author information
+        if (!empty($post_author)) {
+            $schema_data['author'] = [
+                '@type' => 'Person',
+                'name' => esc_js($post_author)
+            ];
+        }
+
+        // Add publisher information
+        if (!empty($site_name)) {
+            $schema_data['publisher'] = [
+                '@type' => 'Organization',
+                'name' => esc_js($site_name)
+            ];
+        }
+
+        // Add associated web page
+//        if (!empty($post_url)) {
+//            $schema_data['associatedArticle'] = [
+//                "@type" => "Article",
+//                'url' => esc_url($post_url),
+//                'headline' => $title_sanitized,
+//            ];
+//        }
+
+        // Allow filtering of schema data
+        $schema_data = apply_filters('tts_audio_schema_data', $schema_data, $params, $post);
+
+        // Generate JSON-LD markup
+        ob_start();
+        ?>
+<!-- Text To Audio Schema -->
+<script type="application/ld+json">
+<?php echo wp_json_encode($schema_data, JSON_PRETTY_PRINT |           // Makes it readable
+        JSON_UNESCAPED_SLASHES |      // Keeps URLs clean (/ instead of \/)
+        JSON_UNESCAPED_UNICODE        // Converts \u2019 to actual characters
+    ); ?>
+</script>
+        <?php
+        $schema_markup = ob_get_clean();
+
+        // Allow filtering of final schema markup
+        return apply_filters('tts_audio_schema_markup', $schema_markup, $schema_data, $params, $post);
+    }
 }
