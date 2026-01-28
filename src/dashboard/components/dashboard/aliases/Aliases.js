@@ -31,8 +31,16 @@ export default function Aliases() {
     const handleAddRow = () => {
         console.log(ttsTextAliases.length)
         if(!ttsObj.is_pro_active && ttsTextAliases.length >= 1 ) {
-            toast(<h6>{__('More than 1 alias is available in the pro version. Please ', 'text-to-audio')}<a target='_blank'
-                                                          href='https://atlasaidev.com/plugins/text-to-speech-pro/pricing/'>{__('Buy Pro version', 'text-to-audio')}</a></h6>, 'info', {autoClose: 10000})
+            toast(
+                <h6>
+                    {__('More than 1 alias is available in the pro version. Please ', 'text-to-audio')}
+                    <a target='_blank' href='https://atlasaidev.com/plugins/text-to-speech-pro/pricing/'>
+                        {__('Buy Pro version', 'text-to-audio')}
+                    </a>
+                </h6>,
+                'info',
+                {autoClose: 10000}
+            );
             return;
         }
         setTtsTextAliases([...ttsTextAliases, {actual_text: '', to_read: ''}]);
@@ -57,7 +65,6 @@ export default function Aliases() {
                 return;
             }
         }
-        console.log('Submitted data:', ttsTextAliases);
         // return;
         let formData = new FormData();
         formData.append('aliases', JSON.stringify(ttsTextAliases));
@@ -106,7 +113,7 @@ export default function Aliases() {
                                         <div className="tta_aliases_input_wrapper">
                                             <Form.Control
                                                 type="text"
-                                                placeholder="Write actual text"
+                                                placeholder={__("Write actual text", 'text-to-audio')}
                                                 value={alias.actual_text}
                                                 onChange={(e) => handleInputChange(index, 'actual_text', e.target.value)}
                                                 className="tta_aliases_input"
@@ -115,7 +122,7 @@ export default function Aliases() {
                                         <div className="tta_aliases_input_wrapper">
                                             <Form.Control
                                                 type="text"
-                                                placeholder="Write read aloud text"
+                                                placeholder={__("Write read aloud text", 'text-to-audio')}
                                                 value={alias.to_read}
                                                 onChange={(e) => handleInputChange(index, 'to_read', e.target.value)}
                                                 className="tta_aliases_input"
