@@ -31,9 +31,8 @@ export default function Aliases() {
     const handleAddRow = () => {
         console.log(ttsTextAliases.length)
         if(!ttsObj.is_pro_active && ttsTextAliases.length >= 1 ) {
-            toast(<h6>More than 1 alias is available in the pro version. Please <a target='_blank'
-                                                          href='https://atlasaidev.com/plugins/text-to-speech-pro/pricing/'>Buy Pro
-                version</a></h6>, 'info', {autoClose: 10000})
+            toast(<h6>{__('More than 1 alias is available in the pro version. Please ', 'text-to-audio')}<a target='_blank'
+                                                          href='https://atlasaidev.com/plugins/text-to-speech-pro/pricing/'>{__('Buy Pro version', 'text-to-audio')}</a></h6>, 'info', {autoClose: 10000})
             return;
         }
         setTtsTextAliases([...ttsTextAliases, {actual_text: '', to_read: ''}]);
@@ -54,7 +53,7 @@ export default function Aliases() {
         e.preventDefault();
         for (const alias of ttsTextAliases) {
             if (alias.actual_text === '' || alias.to_read === '') {
-                toast('All fields must be filled!', 'error');
+                toast(__('All fields must be filled!', 'text-to-audio'), 'error');
                 return;
             }
         }
@@ -69,7 +68,7 @@ export default function Aliases() {
                     console.log(res.data)
                     setTtsTextAliases(res.data)
                 }
-                toast('Successfully Saved.', 'info', {
+                toast(__('Successfully Saved.', 'text-to-audio'), 'info', {
                     autoClose: 2500
                 });
             })
@@ -86,10 +85,10 @@ export default function Aliases() {
                         {/* Header Card */}
                         <div className="tta_aliases_header_card">
                             <h2 className="tta_aliases_title">
-                                Text to Speech Aliases
+                               {__('Text to Speech Aliases', 'text-to-audio')}
                             </h2>
                             <p className="tta_aliases_description">
-                                Here a short text have to write to inform the user about this feature purpose
+                               {__("Here a short text have to write to inform the user about this feature purpose", "text-to-audio")}
                             </p>
                         </div>
  
@@ -97,8 +96,8 @@ export default function Aliases() {
                         <Form onSubmit={handleSubmit}>
                             <div className="tta_aliases_card">
                                 <div className="tta_aliases_table_header">
-                                    <div className="tta_aliases_column_header">Actual Text</div>
-                                    <div className="tta_aliases_column_header">To Read</div>
+                                    <div className="tta_aliases_column_header"> {__('Actual Text', 'text-to-audio')}</div>
+                                    <div className="tta_aliases_column_header">{__('To Read', 'text-to-audio')}</div>
                                     <div className="tta_aliases_column_header_action"></div>
                                 </div>
  
@@ -141,10 +140,10 @@ export default function Aliases() {
                                         className="tta_aliases_add_btn"
                                         onClick={handleAddRow}
                                     >
-                                        <span className="tta_aliases_add_icon">⊕</span> Add New
+                                        <span className="tta_aliases_add_icon">⊕</span> {__('Add New', 'text-to-audio')}
                                     </button>
                                     <button type='submit' className='tta_aliases_save_btn'>
-                                        Save
+                                         {__('Save', 'text-to-audio')}
                                     </button>
                                 </div>
                             </div>
@@ -161,7 +160,7 @@ export default function Aliases() {
         <div className="tta_aliases_loading">
             <div>
                 <i className="fas fa-spinner fa-spin"></i>
-                <span className="tta_aliases_loading_text">Loading...</span>
+                <span className="tta_aliases_loading_text">{__('Loading...', 'text-to-audio')}</span>
             </div>
         </div>
     );
