@@ -156,7 +156,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     $excerpt_sanitized = '';
     $text_before_content = '';
     $text_after_content = '';
-    if(!$content) {
+    if(empty($content)) {
         if (isset($settings['tta__settings_add_post_excerpt_to_read']) && $settings['tta__settings_add_post_excerpt_to_read']) {
             /**
              * Version 1.9.15
