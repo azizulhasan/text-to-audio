@@ -1,0 +1,122 @@
+import React from "react";
+import { __ } from "@wordpress/i18n";
+import { Form } from "react-bootstrap";
+import ProFeatureOverlay from "./ProFeatureOverlay";
+
+/**
+ * OS icons mapping
+ */
+const OS_ICONS = {
+    android: "🤖",
+    windows: "🪟",
+    ios: "🍎",
+    mac: "🍏",
+    linux: "🐧",
+    other: "❓",
+};
+
+/**
+ * Format count with K/M suffix
+ */
+const formatCount = (num) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
+    if (num >= 1000) return (num / 1000).toFixed(1) + "K";
+    return num.toString();
+};
+
+/**
+ * Single OS item component
+ */
+const OSItem = ({ name, count, icon }) => (
+    <div className="tta_analytics_list_item">
+        <div className="tta_analytics_list_icon">{icon}</div>
+        <span className="tta_analytics_list_name">{name}</span>
+        <span className="tta_analytics_list_count">{formatCount(count)}</span>
+    </div>
+);
+
+/**
+ * OSAnalytics Component
+ * Shows operating system breakdown
+ *
+ * @param {Object} props
+ * @param {Object} props.data - OS analytics data { android: 100, windows: 200, ... }
+ * @param {string} props.dateRange - Selected date range
+ * @param {function} props.onDateRangeChange - Callback when date range changes
+ * @param {number} props.limit - Max items to show (3 for free, unlimited for pro)
+ */
+export default function OSAnalytics({ data = {}, dateRange = "Last 7 Days", onDateRangeChange, limit = 3 }) {
+    const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
+
+    // Demo data
+    const demoData = {
+        android: 18500,
+        windows: 69200,
+        ios: 12800,
+        mac: 25700,
+        other: 4600,
+    };
+
+    // Use real data if pro, otherwise demo
+    const displayData = isProActive && Object.keys(data).length > 0 ? data : demoData;
+
+    // Convert to array and sort by count
+    const osArray = Object.entries(displayData)
+        .map(([name, count]) => ({
+            name: name.charAt(0).toUpperCase() + name.slice(1),
+            count: count,
+            icon: OS_ICONS[name.toLowerCase()] || OS_ICONS.other,
+        }))
+        .sort((a, b) => b.count - a.count);
+
+    // Apply limit for free version
+    const displayLimit = isProActive ? osArray.length : limit;
+    const displayItems = osArray.slice(0, displayLimit);
+    const hasMore = osArray.length > displayLimit;
+
+    const content = (
+        <div className="tta_analytics_card tta_os_analytics_card">
+            <div className="tta_card_header">
+                <h3 className="tta_section_title">{__("OS", "text-to-audio")}</h3>
+                <Form.Select
+                    className="tta_date_select"
+                    value={dateRange}
+                    onChange={(e) => onDateRangeChange && onDateRangeChange(e.target.value)}
+                    size="sm"
+                >
+                    <option value="Yesterday">{__("Yesterday", "text-to-audio")}</option>
+                    <option value="Last 7 Days">{__("Last 7 Days", "text-to-audio")}</option>
+                    <option value="Last 30 Days">{__("Last 30 Days", "text-to-audio")}</option>
+                </Form.Select>
+            </div>
+
+            <div className="tta_analytics_list">
+                {displayItems.map((item, index) => (
+                    <OSItem
+                        key={`os-${index}`}
+                        name={item.name}
+                        count={item.count}
+                        icon={item.icon}
+                    />
+                ))}
+
+                {/* Show "more" indicator for free version */}
+                {hasMore && !isProActive && (
+                    <div className="tta_analytics_list_more">
+                        <a
+                            href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="tta_view_more_link"
+                        >
+                            +{osArray.length - displayLimit} {__("more", "text-to-audio")} ({__("Pro", "text-to-audio")})
+                        </a>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+
+    // No overlay needed for this component, but show limited data for free
+    return content;
+}

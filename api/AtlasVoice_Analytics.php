@@ -415,4 +415,1178 @@ class AtlasVoice_Analytics {
 
         return rest_ensure_response( $response );
     }
+
+    /**
+     * Get aggregated analytics data with date filtering
+     * Supports: Yesterday, Last 7 Days, Last 30 Days, Last 90 Days, Custom
+     *
+     * @param $request
+     * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+     */
+    public function aggregated_insights( $request ) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'atlasvoice_analytics';
+
+        // Get date range parameter
+        $date_range = $request->get_param( 'date_range' );
+        $from_date  = $request->get_param( 'from_date' );
+        $to_date    = $request->get_param( 'to_date' );
+
+        // Calculate date range
+        $dates = $this->calculate_date_range( $date_range, $from_date, $to_date );
+
+        // Build query with date filtering
+        $conditions = array();
+        $values     = array();
+
+        if ( $dates['from_date'] ) {
+            $conditions[] = 'created_at >= %s';
+            $values[]     = $dates['from_date'];
+        }
+
+        if ( $dates['to_date'] ) {
+            $conditions[] = 'updated_at <= %s';
+            $values[]     = $dates['to_date'];
+        }
+
+        $where_clause = '';
+        if ( ! empty( $conditions ) ) {
+            $where_clause = 'WHERE ' . implode( ' AND ', $conditions );
+        }
+
+        // Get all records within date range
+        if ( ! empty( $values ) ) {
+            $query   = "SELECT * FROM $table_name $where_clause";
+            $results = $wpdb->get_results( $wpdb->prepare( $query, ...$values ), ARRAY_A );
+        } else {
+            $results = $wpdb->get_results( "SELECT * FROM $table_name", ARRAY_A );
+        }
+
+        // Aggregate the data
+        $aggregated = $this->aggregate_analytics_data( $results );
+
+        // Get previous period data for comparison (Pro only)
+        $previous_aggregated = null;
+        if ( TTA_Helper::is_pro_active() ) {
+            $previous_dates = $this->get_previous_period_dates( $dates );
+            if ( $previous_dates['from_date'] && $previous_dates['to_date'] ) {
+                $prev_conditions = array(
+                    'created_at >= %s',
+                    'updated_at <= %s'
+                );
+                $prev_values = array( $previous_dates['from_date'], $previous_dates['to_date'] );
+                $prev_where  = 'WHERE ' . implode( ' AND ', $prev_conditions );
+                $prev_query  = "SELECT * FROM $table_name $prev_where";
+                $prev_results = $wpdb->get_results( $wpdb->prepare( $prev_query, ...$prev_values ), ARRAY_A );
+                $previous_aggregated = $this->aggregate_analytics_data( $prev_results );
+            }
+        }
+
+        $response['status']   = true;
+        $response['data']     = $aggregated;
+        $response['previous'] = $previous_aggregated;
+        $response['dates']    = $dates;
+
+        return rest_ensure_response( $response );
+    }
+
+    /**
+     * Calculate date range based on preset or custom dates
+     *
+     * @param string $date_range Preset date range
+     * @param string $from_date  Custom from date
+     * @param string $to_date    Custom to date
+     * @return array
+     */
+    private function calculate_date_range( $date_range, $from_date = null, $to_date = null ) {
+        $to   = current_time( 'mysql' );
+        $from = null;
+
+        switch ( $date_range ) {
+            case 'Yesterday':
+                $from = date( 'Y-m-d 00:00:00', strtotime( '-1 day' ) );
+                $to   = date( 'Y-m-d 23:59:59', strtotime( '-1 day' ) );
+                break;
+            case 'Last 7 Days':
+                $from = date( 'Y-m-d 00:00:00', strtotime( '-7 days' ) );
+                break;
+            case 'Last 30 Days':
+                $from = date( 'Y-m-d 00:00:00', strtotime( '-30 days' ) );
+                break;
+            case 'Last 90 Days':
+                $from = date( 'Y-m-d 00:00:00', strtotime( '-90 days' ) );
+                break;
+            case 'Custom':
+                if ( $from_date ) {
+                    $from = date( 'Y-m-d 00:00:00', strtotime( $from_date ) );
+                }
+                if ( $to_date ) {
+                    $to = date( 'Y-m-d 23:59:59', strtotime( $to_date ) );
+                }
+                break;
+            default:
+                // Default to last 7 days
+                $from = date( 'Y-m-d 00:00:00', strtotime( '-7 days' ) );
+                $number = preg_replace('/[^0-9]/', '', $date_range);
+                if(is_numeric($number)) {
+                    $from = date( 'Y-m-d 00:00:00', strtotime(  '-'.$from_date. ' days' ) );
+                }
+
+                break;
+        }
+
+        return array(
+            'from_date' => $from,
+            'to_date'   => $to,
+        );
+    }
+
+    /**
+     * Get previous period dates for comparison
+     *
+     * @param array $current_dates
+     * @return array
+     */
+    private function get_previous_period_dates( $current_dates ) {
+        if ( ! $current_dates['from_date'] || ! $current_dates['to_date'] ) {
+            return array( 'from_date' => null, 'to_date' => null );
+        }
+
+        $from_timestamp = strtotime( $current_dates['from_date'] );
+        $to_timestamp   = strtotime( $current_dates['to_date'] );
+        $period_length  = $to_timestamp - $from_timestamp;
+
+        return array(
+            'from_date' => date( 'Y-m-d H:i:s', $from_timestamp - $period_length - 1 ),
+            'to_date'   => date( 'Y-m-d H:i:s', $from_timestamp - 1 ),
+        );
+    }
+
+    /**
+     * Aggregate analytics data from raw results
+     *
+     * @param array $results Raw analytics results
+     * @return array
+     */
+    private function aggregate_analytics_data( $results ) {
+        $aggregated = array(
+            'summary' => array(
+                'total_posts'        => 0,
+                'total_users'        => 0,
+                'total_init'         => 0,
+                'total_play'         => 0,
+                'total_pause'        => 0,
+                'total_resume'       => 0,
+                'total_end'          => 0,
+                'total_time'         => 0,
+                'total_download'     => 0,
+                'total_25_percent'   => 0,
+                'total_50_percent'   => 0,
+                'total_75_percent'   => 0,
+                'total_interactions' => 0,
+            ),
+            'os'        => array(),
+            'device'    => array(),
+            'browser'   => array(),
+            'country'   => array(),
+            'city'      => array(),
+            'timezone'  => array(),
+            'language'  => array(),
+            'hourly'    => array(),
+            'daily'     => array(),
+            'posts'     => array(),
+            'users'     => array(),
+        );
+
+        $unique_posts = array();
+        $unique_users = array();
+
+        foreach ( $results as $result ) {
+            $analytics = maybe_unserialize( $result['analytics'] );
+            if ( ! is_array( $analytics ) ) {
+                continue;
+            }
+
+            // Track unique posts and users
+            $unique_posts[ $result['post_id'] ] = true;
+            $unique_users[ $result['user_id'] ] = true;
+
+            // Process event counts
+            $events = array( 'init', 'play', 'pause', 'resume', 'end', 'time', 'download', '25_percent', '50_percent', '75_percent' );
+            foreach ( $events as $event ) {
+                if ( isset( $analytics[ $event ]['count'] ) ) {
+                    $aggregated['summary'][ 'total_' . $event ] += intval( $analytics[ $event ]['count'] );
+                }
+            }
+
+            // Process device info (stored at top level of analytics)
+            $device_fields = array(
+                'platform' => 'os',
+                'deviceType' => 'device',
+                'browser' => 'browser',
+                'country' => 'country',
+                'city' => 'city',
+                'timeZone' => 'timezone',
+                'language' => 'language',
+            );
+
+            foreach ( $device_fields as $field => $category ) {
+                if ( isset( $analytics[ $field ] ) ) {
+                    $value = $analytics[ $field ];
+                    // Handle both direct value and value in 'value' key
+                    if ( is_array( $value ) && isset( $value['value'] ) ) {
+                        $value = $value['value'];
+                    }
+                    if ( is_string( $value ) && ! empty( $value ) ) {
+                        if ( ! isset( $aggregated[ $category ][ $value ] ) ) {
+                            $aggregated[ $category ][ $value ] = 0;
+                        }
+                        $aggregated[ $category ][ $value ]++;
+                    }
+                }
+            }
+
+            // Track hourly distribution from timestamps
+            if ( isset( $analytics['play']['timestamp'] ) ) {
+                $hour = date( 'H', strtotime( $analytics['play']['timestamp'] ) );
+                $day  = date( 'l', strtotime( $analytics['play']['timestamp'] ) );
+
+                if ( ! isset( $aggregated['hourly'][ $hour ] ) ) {
+                    $aggregated['hourly'][ $hour ] = 0;
+                }
+                $aggregated['hourly'][ $hour ]++;
+
+                if ( ! isset( $aggregated['daily'][ $day ] ) ) {
+                    $aggregated['daily'][ $day ] = 0;
+                }
+                $aggregated['daily'][ $day ]++;
+            }
+
+            // Track per-post statistics
+            $post_id = $result['post_id'];
+            if ( ! isset( $aggregated['posts'][ $post_id ] ) ) {
+                $aggregated['posts'][ $post_id ] = array(
+                    'post_id'      => $post_id,
+                    'title'        => get_the_title( $post_id ),
+                    'total_plays'  => 0,
+                    'total_time'   => 0,
+                    'total_end'    => 0,
+                    'interactions' => 0,
+                );
+            }
+
+            if ( isset( $analytics['play']['count'] ) ) {
+                $aggregated['posts'][ $post_id ]['total_plays'] += intval( $analytics['play']['count'] );
+            }
+            if ( isset( $analytics['time']['count'] ) ) {
+                $aggregated['posts'][ $post_id ]['total_time'] += intval( $analytics['time']['count'] );
+            }
+            if ( isset( $analytics['end']['count'] ) ) {
+                $aggregated['posts'][ $post_id ]['total_end'] += intval( $analytics['end']['count'] );
+            }
+
+            // Calculate interactions for this record
+            $record_interactions = 0;
+            foreach ( array( 'init', 'play', 'pause', 'end', 'download' ) as $event ) {
+                if ( isset( $analytics[ $event ]['count'] ) ) {
+                    $record_interactions += intval( $analytics[ $event ]['count'] );
+                }
+            }
+            $aggregated['posts'][ $post_id ]['interactions'] += $record_interactions;
+
+            // Track unique vs returning users
+            if ( ! isset( $aggregated['users'][ $result['user_id'] ] ) ) {
+                $aggregated['users'][ $result['user_id'] ] = array(
+                    'first_seen'  => $result['created_at'],
+                    'last_seen'   => $result['updated_at'],
+                    'visit_count' => 1,
+                );
+            } else {
+                $aggregated['users'][ $result['user_id'] ]['visit_count']++;
+                if ( $result['updated_at'] > $aggregated['users'][ $result['user_id'] ]['last_seen'] ) {
+                    $aggregated['users'][ $result['user_id'] ]['last_seen'] = $result['updated_at'];
+                }
+            }
+        }
+
+        // Calculate totals
+        $aggregated['summary']['total_posts'] = count( $unique_posts );
+        $aggregated['summary']['total_users'] = count( $unique_users );
+        $aggregated['summary']['total_interactions'] =
+            $aggregated['summary']['total_init'] +
+            $aggregated['summary']['total_play'] +
+            $aggregated['summary']['total_pause'] +
+            $aggregated['summary']['total_end'] +
+            $aggregated['summary']['total_download'];
+
+        // Calculate new vs returning users
+        $new_users = 0;
+        $returning_users = 0;
+        foreach ( $aggregated['users'] as $user_data ) {
+            if ( $user_data['visit_count'] > 1 || $user_data['first_seen'] !== $user_data['last_seen'] ) {
+                $returning_users++;
+            } else {
+                $new_users++;
+            }
+        }
+        $aggregated['segments'] = array(
+            'new_users'       => $new_users,
+            'returning_users' => $returning_users,
+        );
+
+        // Sort posts by interactions (descending) and limit to top 50
+        uasort( $aggregated['posts'], function( $a, $b ) {
+            return $b['interactions'] - $a['interactions'];
+        });
+        $aggregated['posts'] = array_slice( $aggregated['posts'], 0, 50, true );
+
+        // Sort OS, device, browser, country by count
+        arsort( $aggregated['os'] );
+        arsort( $aggregated['device'] );
+        arsort( $aggregated['browser'] );
+        arsort( $aggregated['country'] );
+        arsort( $aggregated['city'] );
+
+        // Remove raw user data from response (keep only segments)
+        unset( $aggregated['users'] );
+
+        return $aggregated;
+    }
+
+    /**
+     * Get trend data for charts (daily breakdown)
+     *
+     * @param $request
+     * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+     */
+    public function trend_data( $request ) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'atlasvoice_analytics';
+
+        $date_range = $request->get_param( 'date_range' );
+        $from_date  = $request->get_param( 'from_date' );
+        $to_date    = $request->get_param( 'to_date' );
+        $dates      = $this->calculate_date_range( $date_range, $from_date, $to_date );
+
+        $conditions = array();
+        $values     = array();
+
+        if ( $dates['from_date'] ) {
+            $conditions[] = 'created_at >= %s';
+            $values[]     = $dates['from_date'];
+        }
+        if ( $dates['to_date'] ) {
+            $conditions[] = 'updated_at <= %s';
+            $values[]     = $dates['to_date'];
+        }
+
+        $where_clause = '';
+        if ( ! empty( $conditions ) ) {
+            $where_clause = 'WHERE ' . implode( ' AND ', $conditions );
+        }
+
+        // Get data grouped by date
+        if ( ! empty( $values ) ) {
+            $query = "SELECT DATE(created_at) as date, analytics FROM $table_name $where_clause ORDER BY created_at ASC";
+            $results = $wpdb->get_results( $wpdb->prepare( $query, ...$values ), ARRAY_A );
+        } else {
+            $results = $wpdb->get_results( "SELECT DATE(created_at) as date, analytics FROM $table_name ORDER BY created_at ASC", ARRAY_A );
+        }
+
+        // Aggregate by date
+        $trend = array();
+        foreach ( $results as $result ) {
+            $date = $result['date'];
+            $analytics = maybe_unserialize( $result['analytics'] );
+
+            if ( ! isset( $trend[ $date ] ) ) {
+                $trend[ $date ] = array(
+                    'date'       => $date,
+                    'plays'      => 0,
+                    'time'       => 0,
+                    'init'       => 0,
+                    'end'        => 0,
+                    'downloads'  => 0,
+                );
+            }
+
+            if ( isset( $analytics['play']['count'] ) ) {
+                $trend[ $date ]['plays'] += intval( $analytics['play']['count'] );
+            }
+            if ( isset( $analytics['time']['count'] ) ) {
+                $trend[ $date ]['time'] += intval( $analytics['time']['count'] );
+            }
+            if ( isset( $analytics['init']['count'] ) ) {
+                $trend[ $date ]['init'] += intval( $analytics['init']['count'] );
+            }
+            if ( isset( $analytics['end']['count'] ) ) {
+                $trend[ $date ]['end'] += intval( $analytics['end']['count'] );
+            }
+            if ( isset( $analytics['download']['count'] ) ) {
+                $trend[ $date ]['downloads'] += intval( $analytics['download']['count'] );
+            }
+        }
+
+        $response['status'] = true;
+        $response['data']   = array_values( $trend );
+        $response['dates']  = $dates;
+
+        return rest_ensure_response( $response );
+    }
+
+    /**
+     * Get heatmap data for peak hours (Pro only)
+     *
+     * @param $request
+     * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+     */
+    public function heatmap_data( $request ) {
+        if ( ! TTA_Helper::is_pro_active() ) {
+            return rest_ensure_response( array(
+                'status'  => false,
+                'message' => __( 'This feature requires Pro version.', 'text-to-audio' ),
+            ) );
+        }
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'atlasvoice_analytics';
+
+        $date_range = $request->get_param( 'date_range' );
+        $from_date  = $request->get_param( 'from_date' );
+        $to_date    = $request->get_param( 'to_date' );
+        $dates      = $this->calculate_date_range( $date_range, $from_date, $to_date );
+
+        $conditions = array();
+        $values     = array();
+
+        if ( $dates['from_date'] ) {
+            $conditions[] = 'created_at >= %s';
+            $values[]     = $dates['from_date'];
+        }
+        if ( $dates['to_date'] ) {
+            $conditions[] = 'updated_at <= %s';
+            $values[]     = $dates['to_date'];
+        }
+
+        $where_clause = '';
+        if ( ! empty( $conditions ) ) {
+            $where_clause = 'WHERE ' . implode( ' AND ', $conditions );
+        }
+
+        if ( ! empty( $values ) ) {
+            $query = "SELECT created_at, analytics FROM $table_name $where_clause";
+            $results = $wpdb->get_results( $wpdb->prepare( $query, ...$values ), ARRAY_A );
+        } else {
+            $results = $wpdb->get_results( "SELECT created_at, analytics FROM $table_name", ARRAY_A );
+        }
+
+        // Build heatmap matrix (7 days x 24 hours)
+        $days = array( 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' );
+        $heatmap = array();
+
+        foreach ( $days as $day ) {
+            $heatmap[ $day ] = array_fill( 0, 24, 0 );
+        }
+
+        foreach ( $results as $result ) {
+            $analytics = maybe_unserialize( $result['analytics'] );
+
+            // Use play timestamp if available, otherwise created_at
+            $timestamp = $result['created_at'];
+            if ( isset( $analytics['play']['timestamp'] ) ) {
+                $timestamp = $analytics['play']['timestamp'];
+            }
+
+            $day_of_week = date( 'l', strtotime( $timestamp ) );
+            $hour        = intval( date( 'H', strtotime( $timestamp ) ) );
+
+            $play_count = isset( $analytics['play']['count'] ) ? intval( $analytics['play']['count'] ) : 1;
+            $heatmap[ $day_of_week ][ $hour ] += $play_count;
+        }
+
+        // Find peak hour
+        $peak_day  = '';
+        $peak_hour = 0;
+        $peak_value = 0;
+
+        foreach ( $heatmap as $day => $hours ) {
+            foreach ( $hours as $hour => $value ) {
+                if ( $value > $peak_value ) {
+                    $peak_value = $value;
+                    $peak_day   = $day;
+                    $peak_hour  = $hour;
+                }
+            }
+        }
+
+        $response['status'] = true;
+        $response['data']   = $heatmap;
+        $response['peak']   = array(
+            'day'   => $peak_day,
+            'hour'  => $peak_hour,
+            'value' => $peak_value,
+        );
+
+        return rest_ensure_response( $response );
+    }
+
+    /**
+     * Export analytics data as CSV (Pro only)
+     *
+     * @param $request
+     * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+     */
+    public function export_csv( $request ) {
+        if ( ! TTA_Helper::is_pro_active() ) {
+            return rest_ensure_response( array(
+                'status'  => false,
+                'message' => __( 'This feature requires Pro version.', 'text-to-audio' ),
+            ) );
+        }
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'atlasvoice_analytics';
+
+        $date_range = $request->get_param( 'date_range' );
+        $dates      = $this->calculate_date_range( $date_range );
+
+        $conditions = array();
+        $values     = array();
+
+        if ( $dates['from_date'] ) {
+            $conditions[] = 'created_at >= %s';
+            $values[]     = $dates['from_date'];
+        }
+        if ( $dates['to_date'] ) {
+            $conditions[] = 'updated_at <= %s';
+            $values[]     = $dates['to_date'];
+        }
+
+        $where_clause = '';
+        if ( ! empty( $conditions ) ) {
+            $where_clause = 'WHERE ' . implode( ' AND ', $conditions );
+        }
+
+        if ( ! empty( $values ) ) {
+            $query = "SELECT * FROM $table_name $where_clause ORDER BY created_at DESC";
+            $results = $wpdb->get_results( $wpdb->prepare( $query, ...$values ), ARRAY_A );
+        } else {
+            $results = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY created_at DESC", ARRAY_A );
+        }
+
+        // Build CSV data
+        $csv_data = array();
+        $csv_data[] = array(
+            'Post ID',
+            'Post Title',
+            'User ID',
+            'Init',
+            'Play',
+            'Pause',
+            'End',
+            'Time (seconds)',
+            'Download',
+            'Platform',
+            'Device',
+            'Browser',
+            'Country',
+            'Created At',
+            'Updated At',
+        );
+
+        foreach ( $results as $result ) {
+            $analytics = maybe_unserialize( $result['analytics'] );
+
+            $csv_data[] = array(
+                $result['post_id'],
+                get_the_title( $result['post_id'] ),
+                $result['user_id'],
+                isset( $analytics['init']['count'] ) ? $analytics['init']['count'] : 0,
+                isset( $analytics['play']['count'] ) ? $analytics['play']['count'] : 0,
+                isset( $analytics['pause']['count'] ) ? $analytics['pause']['count'] : 0,
+                isset( $analytics['end']['count'] ) ? $analytics['end']['count'] : 0,
+                isset( $analytics['time']['count'] ) ? $analytics['time']['count'] : 0,
+                isset( $analytics['download']['count'] ) ? $analytics['download']['count'] : 0,
+                isset( $analytics['platform'] ) ? $analytics['platform'] : '',
+                isset( $analytics['deviceType'] ) ? $analytics['deviceType'] : '',
+                isset( $analytics['browser'] ) ? $analytics['browser'] : '',
+                isset( $analytics['country'] ) ? $analytics['country'] : '',
+                $result['created_at'],
+                $result['updated_at'],
+            );
+        }
+
+        // Generate CSV string
+        $csv_string = '';
+        foreach ( $csv_data as $row ) {
+            $csv_string .= implode( ',', array_map( function( $field ) {
+                return '"' . str_replace( '"', '""', $field ) . '"';
+            }, $row ) ) . "\n";
+        }
+
+        $response['status']   = true;
+        $response['data']     = base64_encode( $csv_string );
+        $response['filename'] = 'tts-analytics-' . date( 'Y-m-d' ) . '.csv';
+
+        return rest_ensure_response( $response );
+    }
+
+    /**
+     * Save schedule report settings (Pro only)
+     *
+     * @param $request
+     * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+     */
+    public function save_schedule_report( $request ) {
+        if ( ! TTA_Helper::is_pro_active() ) {
+            return rest_ensure_response( array(
+                'status'  => false,
+                'message' => __( 'This feature requires Pro version.', 'text-to-audio' ),
+            ) );
+        }
+
+        $body = $request->get_body();
+        $settings = json_decode( $body, true );
+
+        if ( empty( $settings ) ) {
+            return rest_ensure_response( array(
+                'status'  => false,
+                'message' => __( 'Invalid settings data.', 'text-to-audio' ),
+            ) );
+        }
+
+        // Validate and sanitize settings
+        $sanitized = array(
+            'enabled'            => isset( $settings['enabled'] ) ? (bool) $settings['enabled'] : false,
+            'recipients'         => isset( $settings['recipients'] ) ? sanitize_text_field( $settings['recipients'] ) : '',
+            'frequency'          => isset( $settings['frequency'] ) ? sanitize_text_field( $settings['frequency'] ) : 'weekly',
+            'day'                => isset( $settings['day'] ) ? sanitize_text_field( $settings['day'] ) : 'monday',
+            'time'               => isset( $settings['time'] ) ? sanitize_text_field( $settings['time'] ) : '09:00',
+            'includeSummary'     => isset( $settings['includeSummary'] ) ? (bool) $settings['includeSummary'] : true,
+            'includeTopPosts'    => isset( $settings['includeTopPosts'] ) ? (bool) $settings['includeTopPosts'] : true,
+            'includeGeo'         => isset( $settings['includeGeo'] ) ? (bool) $settings['includeGeo'] : true,
+            'includeTrend'       => isset( $settings['includeTrend'] ) ? (bool) $settings['includeTrend'] : true,
+            'includeDevice'      => isset( $settings['includeDevice'] ) ? (bool) $settings['includeDevice'] : true,
+            'includeFullDetails' => isset( $settings['includeFullDetails'] ) ? (bool) $settings['includeFullDetails'] : false,
+        );
+
+        // Validate email addresses
+        if ( $sanitized['enabled'] && ! empty( $sanitized['recipients'] ) ) {
+            $emails = array_map( 'trim', explode( ',', $sanitized['recipients'] ) );
+            $valid_emails = array();
+            foreach ( $emails as $email ) {
+                if ( is_email( $email ) ) {
+                    $valid_emails[] = $email;
+                }
+            }
+            $sanitized['recipients'] = implode( ', ', $valid_emails );
+
+            if ( empty( $valid_emails ) ) {
+                return rest_ensure_response( array(
+                    'status'  => false,
+                    'message' => __( 'Please provide at least one valid email address.', 'text-to-audio' ),
+                ) );
+            }
+        }
+
+        // Save settings
+        update_option( 'tta_schedule_report_settings', $sanitized );
+
+        // Schedule or unschedule the cron event
+        $this->schedule_report_cron( $sanitized );
+
+        $response['status']  = true;
+        $response['data']    = $sanitized;
+        $response['message'] = __( 'Schedule report settings saved successfully.', 'text-to-audio' );
+
+        return rest_ensure_response( $response );
+    }
+
+    /**
+     * Get schedule report settings (Pro only)
+     *
+     * @param $request
+     * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+     */
+    public function get_schedule_report( $request ) {
+        if ( ! TTA_Helper::is_pro_active() ) {
+            return rest_ensure_response( array(
+                'status'  => false,
+                'message' => __( 'This feature requires Pro version.', 'text-to-audio' ),
+            ) );
+        }
+
+        $settings = get_option( 'tta_schedule_report_settings', array(
+            'enabled'            => false,
+            'recipients'         => '',
+            'frequency'          => 'weekly',
+            'day'                => 'monday',
+            'time'               => '09:00',
+            'includeSummary'     => true,
+            'includeTopPosts'    => true,
+            'includeGeo'         => true,
+            'includeTrend'       => true,
+            'includeDevice'      => true,
+            'includeFullDetails' => false,
+        ) );
+
+        // Get next scheduled run time
+        $next_run = wp_next_scheduled( 'tta_send_scheduled_report' );
+
+        $response['status']   = true;
+        $response['data']     = $settings;
+        $response['next_run'] = $next_run ? date( 'Y-m-d H:i:s', $next_run ) : null;
+
+        return rest_ensure_response( $response );
+    }
+
+    /**
+     * Send test report email (Pro only)
+     *
+     * @param $request
+     * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+     */
+    public function send_test_report( $request ) {
+        if ( ! TTA_Helper::is_pro_active() ) {
+            return rest_ensure_response( array(
+                'status'  => false,
+                'message' => __( 'This feature requires Pro version.', 'text-to-audio' ),
+            ) );
+        }
+
+        $settings = get_option( 'tta_schedule_report_settings' );
+
+        if ( empty( $settings['recipients'] ) ) {
+            return rest_ensure_response( array(
+                'status'  => false,
+                'message' => __( 'Please configure recipients first.', 'text-to-audio' ),
+            ) );
+        }
+
+        // Generate and send the report
+        $result = $this->generate_and_send_report( $settings, true );
+
+        if ( $result ) {
+            $response['status']  = true;
+            $response['message'] = __( 'Test report sent successfully.', 'text-to-audio' );
+        } else {
+            $response['status']  = false;
+            $response['message'] = __( 'Failed to send test report. Please check your email settings.', 'text-to-audio' );
+        }
+
+        return rest_ensure_response( $response );
+    }
+
+    /**
+     * Schedule or unschedule the report cron event
+     *
+     * @param array $settings Schedule settings
+     */
+    private function schedule_report_cron( $settings ) {
+        // Clear existing scheduled event
+        $timestamp = wp_next_scheduled( 'tta_send_scheduled_report' );
+        if ( $timestamp ) {
+            wp_unschedule_event( $timestamp, 'tta_send_scheduled_report' );
+        }
+
+        // If not enabled, don't schedule
+        if ( ! $settings['enabled'] ) {
+            return;
+        }
+
+        // Calculate next run time based on settings
+        $next_run = $this->calculate_next_run_time( $settings );
+
+        // Schedule the event
+        if ( $next_run ) {
+            wp_schedule_event( $next_run, $settings['frequency'], 'tta_send_scheduled_report' );
+        }
+    }
+
+    /**
+     * Calculate the next run time based on schedule settings
+     *
+     * @param array $settings Schedule settings
+     * @return int|false Unix timestamp or false on failure
+     */
+    private function calculate_next_run_time( $settings ) {
+        $frequency = $settings['frequency'];
+        $day       = $settings['day'];
+        $time      = $settings['time'];
+
+        // Parse time
+        $time_parts = explode( ':', $time );
+        $hour       = isset( $time_parts[0] ) ? intval( $time_parts[0] ) : 9;
+        $minute     = isset( $time_parts[1] ) ? intval( $time_parts[1] ) : 0;
+
+        $now = current_time( 'timestamp' );
+
+        switch ( $frequency ) {
+            case 'daily':
+                // Next occurrence at specified time
+                $next_run = strtotime( "today {$hour}:{$minute}", $now );
+                if ( $next_run <= $now ) {
+                    $next_run = strtotime( "tomorrow {$hour}:{$minute}", $now );
+                }
+                break;
+
+            case 'weekly':
+                // Next occurrence on specified day at specified time
+                $next_run = strtotime( "next {$day} {$hour}:{$minute}", $now );
+                // If today is the scheduled day and time hasn't passed
+                $today_at_time = strtotime( "{$day} {$hour}:{$minute}", $now );
+                if ( $today_at_time > $now && strtolower( date( 'l', $now ) ) === strtolower( $day ) ) {
+                    $next_run = $today_at_time;
+                }
+                break;
+
+            case 'monthly':
+                // Next occurrence on first of month at specified time
+                $next_run = strtotime( "first day of next month {$hour}:{$minute}", $now );
+                // If we're on the first and time hasn't passed
+                if ( date( 'j', $now ) === '1' ) {
+                    $today_at_time = strtotime( "today {$hour}:{$minute}", $now );
+                    if ( $today_at_time > $now ) {
+                        $next_run = $today_at_time;
+                    }
+                }
+                break;
+
+            default:
+                return false;
+        }
+
+        return $next_run;
+    }
+
+    /**
+     * Generate and send the analytics report email
+     *
+     * @param array $settings Schedule settings
+     * @param bool  $is_test  Whether this is a test email
+     * @return bool Success or failure
+     */
+    public function generate_and_send_report( $settings = null, $is_test = false ) {
+        if ( ! $settings ) {
+            $settings = get_option( 'tta_schedule_report_settings' );
+        }
+
+        if ( empty( $settings ) || empty( $settings['recipients'] ) ) {
+            return false;
+        }
+
+        // Get analytics data for the report period
+        $date_range = 'Last 7 Days';
+        switch ( $settings['frequency'] ) {
+            case 'daily':
+                $date_range = 'Yesterday';
+                break;
+            case 'weekly':
+                $date_range = 'Last 7 Days';
+                break;
+            case 'monthly':
+                $date_range = 'Last 30 Days';
+                break;
+        }
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'atlasvoice_analytics';
+
+        $dates = $this->calculate_date_range( $date_range );
+
+        $conditions = array();
+        $values     = array();
+
+        if ( $dates['from_date'] ) {
+            $conditions[] = 'created_at >= %s';
+            $values[]     = $dates['from_date'];
+        }
+        if ( $dates['to_date'] ) {
+            $conditions[] = 'updated_at <= %s';
+            $values[]     = $dates['to_date'];
+        }
+
+        $where_clause = '';
+        if ( ! empty( $conditions ) ) {
+            $where_clause = 'WHERE ' . implode( ' AND ', $conditions );
+        }
+
+        if ( ! empty( $values ) ) {
+            $query   = "SELECT * FROM $table_name $where_clause";
+            $results = $wpdb->get_results( $wpdb->prepare( $query, ...$values ), ARRAY_A );
+        } else {
+            $results = $wpdb->get_results( "SELECT * FROM $table_name", ARRAY_A );
+        }
+
+        // Aggregate the data
+        $aggregated = $this->aggregate_analytics_data( $results );
+
+        // Build email content
+        $site_name = get_bloginfo( 'name' );
+        $subject   = $is_test
+            ? sprintf( __( '[Test] %s - TTS Analytics Report', 'text-to-audio' ), $site_name )
+            : sprintf( __( '%s - TTS Analytics Report', 'text-to-audio' ), $site_name );
+
+        $email_content = $this->build_report_email( $aggregated, $settings, $date_range, $is_test );
+
+        // Send to all recipients
+        $recipients = array_map( 'trim', explode( ',', $settings['recipients'] ) );
+        $headers    = array( 'Content-Type: text/html; charset=UTF-8' );
+        $success = true;
+        foreach ( $recipients as $recipient ) {
+            if ( is_email( $recipient ) ) {
+                $sent = wp_mail( $recipient, $subject, $email_content, $headers );
+                error_log(print_r([$sent, $recipient], true));
+                if ( ! $sent ) {
+                    $success = false;
+                }
+            }
+        }
+
+        // Log the report send
+        update_option( 'tta_last_report_sent', array(
+            'timestamp' => current_time( 'mysql' ),
+            'recipients' => $settings['recipients'],
+            'success'    => $success,
+            'is_test'    => $is_test,
+        ) );
+
+        return $success;
+    }
+
+    /**
+     * Build the HTML email content for the report
+     *
+     * @param array  $data       Aggregated analytics data
+     * @param array  $settings   Schedule settings
+     * @param string $date_range Date range description
+     * @param bool   $is_test    Whether this is a test email
+     * @return string HTML email content
+     */
+    private function build_report_email( $data, $settings, $date_range, $is_test = false ) {
+        $site_name = get_bloginfo( 'name' );
+        $site_url  = get_bloginfo( 'url' );
+        $summary   = $data['summary'];
+
+        ob_start();
+        ?>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title><?php echo esc_html( $site_name ); ?> - TTS Analytics Report</title>
+            <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #1f2937; margin: 0; padding: 0; background-color: #f3f4f6; }
+                .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
+                .header { background: linear-gradient(135deg, #FF7853 0%, #FF9473 100%); color: white; padding: 32px 24px; text-align: center; }
+                .header h1 { margin: 0 0 8px 0; font-size: 24px; font-weight: 600; }
+                .header p { margin: 0; opacity: 0.9; font-size: 14px; }
+                .content { padding: 24px; }
+                .section { margin-bottom: 24px; }
+                .section-title { font-size: 16px; font-weight: 600; color: #374151; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #f3f4f6; }
+                .stats-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+                .stat-card { flex: 1 1 calc(50% - 6px); min-width: 120px; background: #f9fafb; border-radius: 8px; padding: 16px; text-align: center; }
+                .stat-value { font-size: 24px; font-weight: 700; color: #FF7853; }
+                .stat-label { font-size: 12px; color: #6b7280; margin-top: 4px; }
+                .post-list { list-style: none; padding: 0; margin: 0; }
+                .post-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
+                .post-item:last-child { border-bottom: none; }
+                .post-title { font-weight: 500; color: #1f2937; }
+                .post-plays { color: #6b7280; font-size: 14px; }
+                .device-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f3f4f6; }
+                .device-row:last-child { border-bottom: none; }
+                .footer { background: #f9fafb; padding: 24px; text-align: center; border-top: 1px solid #e5e7eb; }
+                .footer p { margin: 0; font-size: 12px; color: #6b7280; }
+                .test-badge { background: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 500; display: inline-block; margin-bottom: 8px; }
+                @media (max-width: 480px) { .stat-card { flex: 1 1 100%; } }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <?php if ( $is_test ) : ?>
+                        <span class="test-badge"><?php esc_html_e( 'TEST REPORT', 'text-to-audio' ); ?></span>
+                    <?php endif; ?>
+                    <h1><?php echo esc_html( $site_name ); ?></h1>
+                    <p><?php printf( esc_html__( 'TTS Analytics Report - %s', 'text-to-audio' ), esc_html( $date_range ) ); ?></p>
+                </div>
+
+                <div class="content">
+                    <?php if ( $settings['includeSummary'] ) : ?>
+                    <div class="section">
+                        <h2 class="section-title"><?php esc_html_e( 'Summary', 'text-to-audio' ); ?></h2>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value"><?php echo number_format( $summary['total_play'] ); ?></div>
+                                <div class="stat-label"><?php esc_html_e( 'Total Plays', 'text-to-audio' ); ?></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value"><?php echo number_format( $summary['total_users'] ); ?></div>
+                                <div class="stat-label"><?php esc_html_e( 'Unique Listeners', 'text-to-audio' ); ?></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value"><?php echo number_format( $summary['total_end'] ); ?></div>
+                                <div class="stat-label"><?php esc_html_e( 'Completions', 'text-to-audio' ); ?></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value"><?php echo number_format( round( $summary['total_time'] / 60 ) ); ?></div>
+                                <div class="stat-label"><?php esc_html_e( 'Minutes Played', 'text-to-audio' ); ?></div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if ( $settings['includeTopPosts'] && ! empty( $data['posts'] ) ) : ?>
+                    <div class="section">
+                        <h2 class="section-title"><?php esc_html_e( 'Top 10 Posts', 'text-to-audio' ); ?></h2>
+                        <ul class="post-list">
+                            <?php
+                            $count = 0;
+                            foreach ( $data['posts'] as $post ) :
+                                if ( $count >= 10 ) break;
+                                $count++;
+                            ?>
+                            <li class="post-item">
+                                <span class="post-title"><?php echo esc_html( $post['title'] ?: 'Post #' . $post['post_id'] ); ?></span>
+                                <span class="post-plays"><?php printf( esc_html__( '%d plays', 'text-to-audio' ), $post['total_plays'] ); ?></span>
+                            </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if ( $settings['includeDevice'] && ( ! empty( $data['device'] ) || ! empty( $data['browser'] ) ) ) : ?>
+                    <div class="section">
+                        <h2 class="section-title"><?php esc_html_e( 'Device & Browser Stats', 'text-to-audio' ); ?></h2>
+                        <?php if ( ! empty( $data['device'] ) ) : ?>
+                        <h3 style="font-size: 14px; color: #6b7280; margin: 0 0 8px 0;"><?php esc_html_e( 'Devices', 'text-to-audio' ); ?></h3>
+                        <?php
+                        $count = 0;
+                        foreach ( $data['device'] as $device => $plays ) :
+                            if ( $count >= 5 ) break;
+                            $count++;
+                        ?>
+                        <div class="device-row">
+                            <span><?php echo esc_html( ucfirst( $device ) ); ?></span>
+                            <span><?php echo number_format( $plays ); ?></span>
+                        </div>
+                        <?php endforeach; ?>
+                        <?php endif; ?>
+
+                        <?php if ( ! empty( $data['browser'] ) ) : ?>
+                        <h3 style="font-size: 14px; color: #6b7280; margin: 16px 0 8px 0;"><?php esc_html_e( 'Browsers', 'text-to-audio' ); ?></h3>
+                        <?php
+                        $count = 0;
+                        foreach ( $data['browser'] as $browser => $plays ) :
+                            if ( $count >= 5 ) break;
+                            $count++;
+                        ?>
+                        <div class="device-row">
+                            <span><?php echo esc_html( $browser ); ?></span>
+                            <span><?php echo number_format( $plays ); ?></span>
+                        </div>
+                        <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if ( $settings['includeGeo'] && ! empty( $data['country'] ) ) : ?>
+                    <div class="section">
+                        <h2 class="section-title"><?php esc_html_e( 'Geographic Distribution', 'text-to-audio' ); ?></h2>
+                        <?php
+                        $count = 0;
+                        foreach ( $data['country'] as $country => $plays ) :
+                            if ( $count >= 10 ) break;
+                            $count++;
+                        ?>
+                        <div class="device-row">
+                            <span><?php echo esc_html( $country ); ?></span>
+                            <span><?php echo number_format( $plays ); ?></span>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="footer">
+                    <p><?php printf( esc_html__( 'This report was generated by Text to Audio plugin on %s', 'text-to-audio' ), esc_html( $site_name ) ); ?></p>
+                    <p style="margin-top: 8px;"><a href="<?php echo esc_url( admin_url( 'admin.php?page=tts-dashboard#/analytics' ) ); ?>"><?php esc_html_e( 'View full analytics dashboard', 'text-to-audio' ); ?></a></p>
+                </div>
+            </div>
+        </body>
+        </html>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Get insights for specific post IDs with date filtering
+     *
+     * @param $request
+     * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+     */
+    public function filtered_insights( $request ) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'atlasvoice_analytics';
+
+        $post_ids   = $request->get_param( 'post_ids' );
+        $date_range = $request->get_param( 'date_range' );
+        $from_date  = $request->get_param( 'from_date' );
+        $to_date    = $request->get_param( 'to_date' );
+
+        $dates = $this->calculate_date_range( $date_range, $from_date, $to_date );
+
+        $conditions = array();
+        $values     = array();
+
+        // Handle post_ids filter
+        if ( ! empty( $post_ids ) ) {
+            if ( is_string( $post_ids ) ) {
+                $post_ids = json_decode( $post_ids, true );
+            }
+            if ( is_array( $post_ids ) && ! empty( $post_ids ) ) {
+                $placeholders = implode( ',', array_fill( 0, count( $post_ids ), '%d' ) );
+                $conditions[] = "post_id IN ($placeholders)";
+                $values       = array_merge( $values, $post_ids );
+            }
+        }
+
+        if ( $dates['from_date'] ) {
+            $conditions[] = 'created_at >= %s';
+            $values[]     = $dates['from_date'];
+        }
+        if ( $dates['to_date'] ) {
+            $conditions[] = 'updated_at <= %s';
+            $values[]     = $dates['to_date'];
+        }
+
+        $where_clause = '';
+        if ( ! empty( $conditions ) ) {
+            $where_clause = 'WHERE ' . implode( ' AND ', $conditions );
+        }
+
+        if ( ! empty( $values ) ) {
+            $query   = "SELECT * FROM $table_name $where_clause ORDER BY updated_at DESC";
+            $results = $wpdb->get_results( $wpdb->prepare( $query, ...$values ), ARRAY_A );
+        } else {
+            $results = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY updated_at DESC", ARRAY_A );
+        }
+
+        // Process results
+        $processed = array();
+        foreach ( $results as $result ) {
+            $result['analytics']  = maybe_unserialize( $result['analytics'] );
+            $result['other_data'] = maybe_unserialize( $result['other_data'] );
+            $result['post_title'] = get_the_title( $result['post_id'] );
+            $processed[] = $result;
+        }
+
+        $response['status'] = true;
+        $response['data']   = $processed;
+        $response['dates']  = $dates;
+        $response['count']  = count( $processed );
+
+        return rest_ensure_response( $response );
+    }
 }

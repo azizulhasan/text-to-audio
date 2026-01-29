@@ -13,6 +13,15 @@ class AtlasVoiceAnalytics {
         this._startTimeTracking = false;
         this.listeningLengthInterval = null;
 
+        // Progress milestone tracking
+        this._audioDuration = 0;
+        this._currentTime = 0;
+        this._milestones = {
+            '25_percent': false,
+            '50_percent': false,
+            '75_percent': false
+        };
+
         // Bind the event listeners for beforeunload and unload
         window.addEventListener('beforeunload', this.sendSessionData.bind(this));
 
@@ -58,6 +67,63 @@ class AtlasVoiceAnalytics {
     trackEnd() {
         this.startTimeTracking = false;
         this.addEvent('end');
+        // Reset milestones for next play
+        this.resetMilestones();
+    }
+
+    /**
+     * Set the total duration of the audio
+     * @param {number} duration - Duration in seconds
+     */
+    setAudioDuration(duration) {
+        this._audioDuration = duration;
+    }
+
+    /**
+     * Track progress and fire milestone events at 25%, 50%, 75%
+     * @param {number} currentTime - Current playback time in seconds
+     */
+    trackProgress(currentTime) {
+        if (!this._audioDuration || this._audioDuration <= 0) return;
+
+        this._currentTime = currentTime;
+        const progressPercent = (currentTime / this._audioDuration) * 100;
+
+        // Track 25% milestone
+        if (progressPercent >= 25 && !this._milestones['25_percent']) {
+            this._milestones['25_percent'] = true;
+            this.addEvent('25_percent');
+        }
+
+        // Track 50% milestone
+        if (progressPercent >= 50 && !this._milestones['50_percent']) {
+            this._milestones['50_percent'] = true;
+            this.addEvent('50_percent');
+        }
+
+        // Track 75% milestone
+        if (progressPercent >= 75 && !this._milestones['75_percent']) {
+            this._milestones['75_percent'] = true;
+            this.addEvent('75_percent');
+        }
+    }
+
+    /**
+     * Reset milestones for a new playback session
+     */
+    resetMilestones() {
+        this._milestones = {
+            '25_percent': false,
+            '50_percent': false,
+            '75_percent': false
+        };
+    }
+
+    /**
+     * Track download event
+     */
+    trackDownload() {
+        this.addEvent('download');
     }
 
 
