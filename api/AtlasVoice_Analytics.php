@@ -417,6 +417,164 @@ class AtlasVoice_Analytics {
     }
 
     /**
+     * Get geolocation data (city/country) based on client IP address.
+     * Uses free IP geolocation API services.
+     *
+     * @param $request
+     * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+     */
+    public function get_geolocation( $request ) {
+        $ip = $this->get_client_ip();
+        // Don't process local IPs
+        if ( $this->is_local_ip( $ip ) ) {
+            return rest_ensure_response( array(
+                'status'  => true,
+                'data'    => array(
+                    'city'    => 'Local',
+                    'country' => 'Local',
+                    'region'  => '',
+                ),
+            ) );
+        }
+
+        // Check transient cache first (cache for 24 hours)
+        $cache_key = 'tts_geo_' . md5( $ip );
+        $cached    = get_transient( $cache_key );
+
+        if ( false !== $cached ) {
+            return rest_ensure_response( array(
+                'status' => true,
+                'data'   => $cached,
+            ) );
+        }
+
+        // Try ip-api.com first (free, no API key required, 45 requests/minute limit)
+        $geo_data = $this->fetch_geolocation_ipapi( $ip );
+
+        // Fallback to ipinfo.io if ip-api fails
+        if ( ! $geo_data ) {
+            $geo_data = $this->fetch_geolocation_ipinfo( $ip );
+        }
+
+        // Default values if all APIs fail
+        if ( ! $geo_data ) {
+            $geo_data = array(
+                'city'    => 'Unknown',
+                'country' => 'Unknown',
+                'region'  => '',
+            );
+        }
+
+        // Cache the result for 24 hours
+        set_transient( $cache_key, $geo_data, DAY_IN_SECONDS );
+
+        return rest_ensure_response( array(
+            'status' => true,
+            'data'   => $geo_data,
+        ) );
+    }
+
+    private function get_client_ip() {
+        $response = wp_safe_remote_get( 'https://icanhazip.com/' );
+        if ( is_wp_error( $response ) ) {
+            return '';
+        }
+        $ip = trim( wp_remote_retrieve_body( $response ) );
+        if ( ! filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+            return '';
+        }
+
+        return $ip;
+    }
+
+    /**
+     * Check if IP is local/private
+     *
+     * @param string $ip
+     * @return bool
+     */
+    private function is_local_ip( $ip ) {
+        if ( empty( $ip ) ) {
+            return true;
+        }
+
+        // Check for localhost
+        if ( in_array( $ip, array( '127.0.0.1', '::1', 'localhost' ), true ) ) {
+            return true;
+        }
+
+        // Check for private IP ranges
+        return ! filter_var(
+            $ip,
+            FILTER_VALIDATE_IP,
+            FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+        );
+    }
+
+    /**
+     * Fetch geolocation from ip-api.com
+     *
+     * @param string $ip
+     * @return array|false
+     */
+    private function fetch_geolocation_ipapi( $ip ) {
+        $url = "http://ip-api.com/json/{$ip}?fields=status,country,regionName,city";
+
+        $response = wp_remote_get( $url, array(
+            'timeout' => 20,
+            'sslverify' => false,
+        ) );
+
+        if ( is_wp_error( $response ) ) {
+            return false;
+        }
+
+        $body = wp_remote_retrieve_body( $response );
+        $data = json_decode( $body, true );
+
+        if ( isset( $data['status'] ) && 'success' === $data['status'] ) {
+            return array(
+                'city'    => isset( $data['city'] ) ? $data['city'] : 'Unknown',
+                'country' => isset( $data['country'] ) ? $data['country'] : 'Unknown',
+                'region'  => isset( $data['regionName'] ) ? $data['regionName'] : '',
+            );
+        }
+
+        return false;
+    }
+
+    /**
+     * Fetch geolocation from ipinfo.io (fallback)
+     *
+     * @param string $ip
+     * @return array|false
+     */
+    private function fetch_geolocation_ipinfo( $ip ) {
+        $url = "https://ipinfo.io/{$ip}/json";
+
+        $response = wp_remote_get( $url, array(
+            'timeout' => 5,
+        ) );
+
+        if ( is_wp_error( $response ) ) {
+            return false;
+        }
+
+        $body = wp_remote_retrieve_body( $response );
+        $data = json_decode( $body, true );
+
+        if ( isset( $data['city'] ) || isset( $data['country'] ) ) {
+            return array(
+                'city'    => isset( $data['city'] ) ? $data['city'] : 'Unknown',
+                'country' => isset( $data['country'] ) ? $data['country'] : 'Unknown',
+                'region'  => isset( $data['region'] ) ? $data['region'] : '',
+            );
+        }
+
+        return false;
+    }
+
+    /**
      * Get aggregated analytics data with date filtering
      * Supports: Yesterday, Last 7 Days, Last 30 Days, Last 90 Days, Custom
      *
@@ -986,10 +1144,15 @@ class AtlasVoice_Analytics {
             'End',
             'Time (seconds)',
             'Download',
+            '25%',
+            '50%',
+            '75%',
             'Platform',
             'Device',
             'Browser',
             'Country',
+            'City',
+            'Region',
             'Created At',
             'Updated At',
         );
@@ -1007,10 +1170,15 @@ class AtlasVoice_Analytics {
                 isset( $analytics['end']['count'] ) ? $analytics['end']['count'] : 0,
                 isset( $analytics['time']['count'] ) ? $analytics['time']['count'] : 0,
                 isset( $analytics['download']['count'] ) ? $analytics['download']['count'] : 0,
+                isset( $analytics['25_percent']['count'] ) ? $analytics['25_percent']['count'] : 0,
+                isset( $analytics['50_percent']['count'] ) ? $analytics['50_percent']['count'] : 0,
+                isset( $analytics['75_percent']['count'] ) ? $analytics['75_percent']['count'] : 0,
                 isset( $analytics['platform'] ) ? $analytics['platform'] : '',
                 isset( $analytics['deviceType'] ) ? $analytics['deviceType'] : '',
                 isset( $analytics['browser'] ) ? $analytics['browser'] : '',
                 isset( $analytics['country'] ) ? $analytics['country'] : '',
+                isset( $analytics['city'] ) ? $analytics['city'] : '',
+                isset( $analytics['region'] ) ? $analytics['region'] : '',
                 $result['created_at'],
                 $result['updated_at'],
             );

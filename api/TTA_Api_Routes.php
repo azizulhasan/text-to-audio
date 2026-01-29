@@ -104,6 +104,20 @@ class TTA_Api_Routes {
 			)
 		);
 
+		// register geolocation route for IP-based city/country detection.
+		register_rest_route(
+			$this->namespace,
+			'/geolocation',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this->analytics, 'get_geolocation' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
 		// register insights for single post route.
         register_rest_route(
             $this->namespace,
@@ -779,9 +793,10 @@ class TTA_Api_Routes {
             return true;
         }
 
-        // 3️⃣ Frontend POST routes that require nonce verification (e.g. analytics tracking)
+        // 3️⃣ Frontend routes that require nonce verification (e.g. analytics tracking)
         $frontend_post_routes = array(
             '/tta/v1/track',
+            '/tta/v1/geolocation',
         );
 
         if ( in_array( $route, $frontend_post_routes, true )  ) {

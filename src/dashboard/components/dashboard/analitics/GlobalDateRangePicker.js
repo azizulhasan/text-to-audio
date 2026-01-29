@@ -28,6 +28,7 @@ export default function GlobalDateRangePicker({
     const presets = [
         { value: "Yesterday", label: __("Yesterday", "text-to-audio") },
         { value: "Last 7 Days", label: __("Last 7 Days", "text-to-audio") },
+        { value: "Last 14 Days", label: __("Last 14 Days", "text-to-audio") },
         { value: "Last 30 Days", label: __("Last 30 Days", "text-to-audio") },
         { value: "Last 90 Days", label: __("Last 90 Days", "text-to-audio") },
         { value: "Last 999 Days", label: __("All Time", "text-to-audio") },
@@ -90,6 +91,10 @@ export default function GlobalDateRangePicker({
         })}`;
     };
 
+    const  isNumeric = (value) => {
+        return !isNaN(value) && !isNaN(parseFloat(value));
+    }
+
     /**
      * Handle preset selection
      */
@@ -107,6 +112,20 @@ export default function GlobalDateRangePicker({
             }
         } else {
             setShowCustom(false);
+            const number = preset.replace(/[^0-9]/g, '');
+            if(isNumeric(number) && number > 30 && !ttsObj.is_pro_active){
+                toast(
+                    <h6>
+                        {__('Getting more than 30 days data is pro feature. Please ', 'text-to-audio')}
+                        <a target='_blank' href='https://atlasaidev.com/plugins/text-to-speech-pro/pricing/'>
+                            {__('Buy Pro version', 'text-to-audio')}
+                        </a>
+                    </h6>,
+                    'info',
+                    {autoClose: 10000}
+                );
+                return;
+            }
             if (onDateRangeChange) {
                 onDateRangeChange({
                     dateRange: preset,
