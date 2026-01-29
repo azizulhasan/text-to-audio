@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { __ } from "@wordpress/i18n";
 import { Form } from "react-bootstrap";
 
@@ -8,11 +8,22 @@ import { Form } from "react-bootstrap";
  *
  * @param {Object} props
  * @param {Array} props.data - Trend data array [{ date, playCount, playTime }]
+ * @param {Array} props.rawResults - Raw analytics results for client-side filtering
  * @param {Array} props.previousData - Previous period data for comparison (Pro only)
  * @param {string} props.dateRange - Selected date range
+ * @param {string} props.globalDateRange - Global date range from parent
  * @param {function} props.onDateRangeChange - Callback when date range changes
+ * @param {function} props.filterResultsByDateRange - Function to filter results by date
  */
-export default function PlayingTrendChart({ data = [], previousData = [], dateRange = "Dec 02 - Dec 24, 2025", onDateRangeChange }) {
+export default function PlayingTrendChart({
+    data = [],
+    rawResults = [],
+    previousData = [],
+    dateRange = "Dec 02 - Dec 24, 2025",
+    globalDateRange = "Last 30 Days",
+    onDateRangeChange,
+    filterResultsByDateRange
+}) {
     const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
     const chartRef = useRef(null);
     const chartInstanceRef = useRef(null);
@@ -38,15 +49,56 @@ export default function PlayingTrendChart({ data = [], previousData = [], dateRa
         ],
     };
 
+    // Filter and aggregate trend data based on component's date range
+    const filteredTrendData = useMemo(() => {
+        if (!isProActive) return null;
+
+        // If date range matches global, use the already fetched data
+        if (dateRange === globalDateRange) {
+            return data;
+        }
+
+        // Otherwise, filter and re-aggregate from raw results
+        if (filterResultsByDateRange && rawResults.length > 0) {
+            const filtered = filterResultsByDateRange(rawResults, dateRange);
+
+            // Group by date and aggregate
+            const dateGroups = {};
+            filtered.forEach((result) => {
+                const dateKey = result.created_at.split(" ")[0]; // Get just the date part
+                if (!dateGroups[dateKey]) {
+                    dateGroups[dateKey] = { plays: 0, time: 0 };
+                }
+                const analytics = result.analytics || {};
+                dateGroups[dateKey].plays += analytics.play?.count || 0;
+                dateGroups[dateKey].time += analytics.time?.count || 0;
+            });
+
+            // Convert to array and sort by date
+            return Object.entries(dateGroups)
+                .map(([date, counts]) => ({
+                    date,
+                    plays: counts.plays,
+                    time: counts.time,
+                }))
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+        }
+
+        return data;
+    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange, isProActive]);
+
+    // Use filtered data or original data
+    const displayTrendData = filteredTrendData || data;
+
     // Use real data if available, otherwise demo
-    const chartData = data.length > 0 ? {
-        labels: data.map(d => {
+    const chartData = displayTrendData.length > 0 ? {
+        labels: displayTrendData.map(d => {
             // Format date for display
             const dateObj = new Date(d.date);
             return dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" });
         }),
-        playingQuantity: data.map(d => d.plays || d.playCount || 0),
-        playingTime: data.map(d => Math.round((d.time || d.playTime || 0) / 60)), // Convert seconds to minutes
+        playingQuantity: displayTrendData.map(d => d.plays || d.playCount || 0),
+        playingTime: displayTrendData.map(d => Math.round((d.time || d.playTime || 0) / 60)), // Convert seconds to minutes
         previousQuantity: previousData.map(d => d.plays || d.playCount || 0),
     } : demoData;
 
@@ -199,7 +251,7 @@ export default function PlayingTrendChart({ data = [], previousData = [], dateRa
                 chartInstanceRef.current.destroy();
             }
         };
-    }, [showComparison, data, previousData, isProActive]);
+    }, [showComparison, displayTrendData, previousData, isProActive]);
 
     return (
         <div className="tta_analytics_card tta_trend_chart_card">

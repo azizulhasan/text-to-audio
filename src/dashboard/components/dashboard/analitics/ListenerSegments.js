@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import { __ } from "@wordpress/i18n";
 import { Form } from "react-bootstrap";
 import ProFeatureOverlay from "./ProFeatureOverlay";
@@ -9,17 +9,67 @@ import ProFeatureOverlay from "./ProFeatureOverlay";
  *
  * @param {Object} props
  * @param {Object} props.data - Listener segments data
+ * @param {Array} props.rawResults - Raw analytics results for client-side filtering
  * @param {string} props.dateRange - Selected date range
+ * @param {string} props.globalDateRange - Global date range from parent
  * @param {function} props.onDateRangeChange - Callback when date range changes
+ * @param {function} props.filterResultsByDateRange - Function to filter results by date
  */
-export default function ListenerSegments({ data = {}, dateRange = "Last 30 Days", onDateRangeChange }) {
+export default function ListenerSegments({
+    data = {},
+    rawResults = [],
+    dateRange = "Last 30 Days",
+    globalDateRange = "Last 30 Days",
+    onDateRangeChange,
+    filterResultsByDateRange
+}) {
     const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
     const chartRef = useRef(null);
     const chartInstanceRef = useRef(null);
 
+    // Filter and calculate segments data based on component's date range
+    const filteredSegmentsData = useMemo(() => {
+        if (!isProActive) return null;
+
+        // If date range matches global, use the already aggregated data
+        if (dateRange === globalDateRange) {
+            return data;
+        }
+
+        // Otherwise, filter and re-calculate from raw results
+        if (filterResultsByDateRange && rawResults.length > 0) {
+            const filtered = filterResultsByDateRange(rawResults, dateRange);
+            // Calculate new vs returning users from filtered results
+            const userIds = new Set();
+            const newUsers = new Set();
+            const returningUsers = new Set();
+
+            filtered.forEach((result) => {
+                const userId = result.user_id;
+                if (!userIds.has(userId)) {
+                    newUsers.add(userId);
+                    userIds.add(userId);
+                } else {
+                    returningUsers.add(userId);
+                }
+            });
+
+            return {
+                new_users: newUsers.size,
+                returning_users: returningUsers.size,
+                avgSessions: filtered.length / (newUsers.size + returningUsers.size) || 0,
+            };
+        }
+
+        return data;
+    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange, isProActive]);
+
+    // Use filtered data
+    const displaySegmentData = filteredSegmentsData || data;
+
     // Extract data - API returns { new_users, returning_users }
-    const newListeners = data.new_users || data.newListeners || 0;
-    const returningListeners = data.returning_users || data.returningListeners || 0;
+    const newListeners = displaySegmentData.new_users || displaySegmentData.newListeners || 0;
+    const returningListeners = displaySegmentData.returning_users || displaySegmentData.returningListeners || 0;
     const totalListeners = newListeners + returningListeners;
 
     // Calculate percentages
@@ -37,7 +87,7 @@ export default function ListenerSegments({ data = {}, dateRange = "Last 30 Days"
         ? {
             newListeners,
             returningListeners,
-            avgSessions: data.avgSessions || 0,
+            avgSessions: displaySegmentData.avgSessions || 0,
         }
         : demoData;
 

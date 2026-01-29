@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { __ } from "@wordpress/i18n";
 import { Form } from "react-bootstrap";
 import ProFeatureOverlay from "./ProFeatureOverlay";
@@ -9,11 +9,22 @@ import ProFeatureOverlay from "./ProFeatureOverlay";
  *
  * @param {Object} props
  * @param {Array} props.posts - Array of { post_id, title, totalScore }
+ * @param {Array} props.rawResults - Raw analytics results for client-side filtering
  * @param {string} props.dateRange - Selected date range
+ * @param {string} props.globalDateRange - Global date range from parent
  * @param {function} props.onDateRangeChange - Callback when date range changes
+ * @param {function} props.filterResultsByDateRange - Function to filter results by date
  * @param {number} props.limit - Max posts to show (3 for free, 50 for pro)
  */
-export default function PopularPosts({ posts = [], dateRange = "Last 30 Days", onDateRangeChange, limit = 3 }) {
+export default function PopularPosts({
+    posts = [],
+    rawResults = [],
+    dateRange = "Last 30 Days",
+    globalDateRange = "Last 30 Days",
+    onDateRangeChange,
+    filterResultsByDateRange,
+    limit = 3
+}) {
     const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
 
     // Demo data
@@ -30,8 +41,45 @@ export default function PopularPosts({ posts = [], dateRange = "Last 30 Days", o
         { post_id: 10, title: "Mastering the Art of Photography", totalScore: 3 },
     ];
 
-    // Use real data if available
-    const displayPosts = posts.length > 0 ? posts : demoPosts;
+    // Filter and calculate popular posts based on component's date range
+    const filteredPosts = useMemo(() => {
+        if (!isProActive) return posts.length > 0 ? posts : demoPosts;
+
+        // If date range matches global, use the already fetched posts
+        if (dateRange === globalDateRange) {
+            return posts.length > 0 ? posts : demoPosts;
+        }
+
+        // Otherwise, filter and re-calculate from raw results
+        if (filterResultsByDateRange && rawResults.length > 0) {
+            const filtered = filterResultsByDateRange(rawResults, dateRange);
+
+            // Aggregate by post_id
+            const postScores = {};
+            filtered.forEach((result) => {
+                const postId = result.post_id;
+                if (!postScores[postId]) {
+                    postScores[postId] = { post_id: postId, title: null, totalScore: 0 };
+                }
+                const analytics = result.analytics || {};
+                // Sum all interaction counts
+                Object.keys(analytics).forEach((key) => {
+                    if (analytics[key]?.count) {
+                        postScores[postId].totalScore += analytics[key].count;
+                    }
+                });
+            });
+
+            // Convert to array and sort by score
+            return Object.values(postScores)
+                .sort((a, b) => b.totalScore - a.totalScore);
+        }
+
+        return posts.length > 0 ? posts : demoPosts;
+    }, [posts, rawResults, dateRange, globalDateRange, filterResultsByDateRange, isProActive]);
+
+    // Use filtered posts
+    const displayPosts = filteredPosts;
 
     // Apply limit for free version (3 for free, 10 default for pro)
     const displayLimit = isProActive ? Math.min(limit, 50) : 3;

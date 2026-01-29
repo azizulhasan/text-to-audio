@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { __ } from "@wordpress/i18n";
 import { Form } from "react-bootstrap";
 
@@ -41,11 +41,24 @@ const DeviceItem = ({ name, count, icon }) => (
  *
  * @param {Object} props
  * @param {Object} props.data - Device analytics data
+ * @param {Array} props.rawResults - Raw analytics results for client-side filtering
  * @param {string} props.dateRange - Selected date range
+ * @param {string} props.globalDateRange - Global date range from parent
  * @param {function} props.onDateRangeChange - Callback when date range changes
+ * @param {function} props.filterResultsByDateRange - Function to filter results by date
+ * @param {function} props.aggregateFilteredData - Function to aggregate filtered data
  * @param {number} props.limit - Max items to show (3 for free, unlimited for pro)
  */
-export default function DeviceTypes({ data = {}, dateRange = "Yesterday", onDateRangeChange, limit = 3 }) {
+export default function DeviceTypes({
+    data = {},
+    rawResults = [],
+    dateRange = "Yesterday",
+    globalDateRange = "Last 30 Days",
+    onDateRangeChange,
+    filterResultsByDateRange,
+    aggregateFilteredData,
+    limit = 3
+}) {
     const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
 
     // Demo data
@@ -57,8 +70,27 @@ export default function DeviceTypes({ data = {}, dateRange = "Yesterday", onDate
         Other: 4600,
     };
 
-    // Use real data if pro, otherwise demo
-    const displayData = isProActive && Object.keys(data).length > 0 ? data : demoData;
+    // Filter and aggregate data based on component's date range
+    const filteredData = useMemo(() => {
+        if (!isProActive) return demoData;
+
+        // If date range matches global, use the already aggregated data
+        if (dateRange === globalDateRange) {
+            return Object.keys(data).length > 0 ? data : demoData;
+        }
+
+        // Otherwise, filter and re-aggregate from raw results
+        if (filterResultsByDateRange && aggregateFilteredData && rawResults.length > 0) {
+            const filtered = filterResultsByDateRange(rawResults, dateRange);
+            const aggregated = aggregateFilteredData(filtered, "device");
+            return Object.keys(aggregated).length > 0 ? aggregated : demoData;
+        }
+
+        return Object.keys(data).length > 0 ? data : demoData;
+    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange, aggregateFilteredData, isProActive]);
+
+    // Use filtered data
+    const displayData = filteredData;
 
     // Convert to array and sort by count
     const deviceArray = Object.entries(displayData)

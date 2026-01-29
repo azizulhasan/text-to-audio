@@ -49,6 +49,9 @@ export default function Analytics() {
     const [previousPeriodData, setPreviousPeriodData] = useState(null);
     const [isAggregatedLoading, setIsAggregatedLoading] = useState(false);
 
+    // Raw results for client-side filtering
+    const [rawResults, setRawResults] = useState([]);
+
     // Global date range state
     const [globalDateRange, setGlobalDateRange] = useState("Last 30 Days");
     const [globalFromDate, setGlobalFromDate] = useState(null);
@@ -75,6 +78,151 @@ export default function Analytics() {
     const [segmentsData, setSegmentsData] = useState({});
     const [trendData, setTrendData] = useState([]);
     const [heatmapData, setHeatmapData] = useState({});
+
+    /**
+     * Filter raw results by date range (client-side)
+     * @param {Array} results - Raw analytics results
+     * @param {string} dateRange - Date range preset (Yesterday, Last 7 Days, etc.)
+     * @returns {Array} Filtered results
+     */
+    const filterResultsByDateRange = useCallback((results, dateRange) => {
+        if (!results || results.length === 0) return [];
+
+        const now = new Date();
+        let fromDate = null;
+        let toDate = new Date(now);
+
+        switch (dateRange) {
+            case "Yesterday":
+                fromDate = new Date(now);
+                fromDate.setDate(fromDate.getDate() - 1);
+                fromDate.setHours(0, 0, 0, 0);
+                toDate = new Date(fromDate);
+                toDate.setHours(23, 59, 59, 999);
+                break;
+            case "Last 7 Days":
+                fromDate = new Date(now);
+                fromDate.setDate(fromDate.getDate() - 7);
+                fromDate.setHours(0, 0, 0, 0);
+                break;
+            case "Last 30 Days":
+                fromDate = new Date(now);
+                fromDate.setDate(fromDate.getDate() - 30);
+                fromDate.setHours(0, 0, 0, 0);
+                break;
+            case "Last 90 Days":
+                fromDate = new Date(now);
+                fromDate.setDate(fromDate.getDate() - 90);
+                fromDate.setHours(0, 0, 0, 0);
+                break;
+            default:
+                // Default to all data (Last 30 Days)
+                fromDate = new Date(now);
+                fromDate.setDate(fromDate.getDate() - 30);
+                fromDate.setHours(0, 0, 0, 0);
+        }
+
+        return results.filter((result) => {
+            const createdAt = new Date(result.created_at);
+            return createdAt >= fromDate && createdAt <= toDate;
+        });
+    }, []);
+
+    /**
+     * Re-aggregate filtered results for a specific data type
+     * @param {Array} filteredResults - Filtered raw results
+     * @param {string} dataType - Type of data to aggregate (os, device, browser, country, city, funnel, segments)
+     * @returns {Object} Aggregated data
+     */
+    const aggregateFilteredData = useCallback((filteredResults, dataType) => {
+        const aggregated = {};
+
+        filteredResults.forEach((result) => {
+            const analytics = result.analytics || {};
+
+            switch (dataType) {
+                case "os":
+                    if (analytics.platform) {
+                        const value = analytics.platform.value || analytics.platform;
+                        aggregated[value] = (aggregated[value] || 0) + 1;
+                    }
+                    break;
+                case "device":
+                    if (analytics.deviceType) {
+                        const value = analytics.deviceType.value || analytics.deviceType;
+                        aggregated[value] = (aggregated[value] || 0) + 1;
+                    }
+                    break;
+                case "browser":
+                    if (analytics.browser) {
+                        const value = analytics.browser.value || analytics.browser;
+                        aggregated[value] = (aggregated[value] || 0) + 1;
+                    }
+                    break;
+                case "country":
+                    if (analytics.country) {
+                        const value = analytics.country.value || analytics.country;
+                        aggregated[value] = (aggregated[value] || 0) + 1;
+                    }
+                    break;
+                case "city":
+                    if (analytics.city) {
+                        const value = analytics.city.value || analytics.city;
+                        aggregated[value] = (aggregated[value] || 0) + 1;
+                    }
+                    break;
+                case "funnel":
+                    ["init", "play", "25_percent", "50_percent", "75_percent", "end"].forEach((key) => {
+                        if (analytics[key]) {
+                            aggregated[key] = (aggregated[key] || 0) + (analytics[key].count || 0);
+                        }
+                    });
+                    break;
+                case "segments":
+                    // Track unique vs returning users based on visit patterns
+                    // This is simplified - real implementation would need user tracking
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        return aggregated;
+    }, []);
+
+    /**
+     * Get filtered and aggregated data for a component
+     * @param {string} dataType - Type of data
+     * @param {string} dateRange - Date range for filtering
+     * @returns {Object} Filtered and aggregated data
+     */
+    const getFilteredData = useCallback((dataType, dateRange) => {
+        if (dateRange === globalDateRange) {
+            // Use already aggregated data if date range matches global
+            switch (dataType) {
+                case "os":
+                    return osData;
+                case "device":
+                    return deviceData;
+                case "browser":
+                    return browserData;
+                case "country":
+                    return locationData.countries;
+                case "city":
+                    return locationData.cities;
+                case "funnel":
+                    return funnelData;
+                case "segments":
+                    return segmentsData;
+                default:
+                    return {};
+            }
+        }
+
+        // Filter and re-aggregate for different date range
+        const filteredResults = filterResultsByDateRange(rawResults, dateRange);
+        return aggregateFilteredData(filteredResults, dataType);
+    }, [globalDateRange, rawResults, osData, deviceData, browserData, locationData, funnelData, segmentsData, filterResultsByDateRange, aggregateFilteredData]);
 
     /**
      * Format time from seconds to readable string
@@ -162,6 +310,11 @@ export default function Analytics() {
             if (result.status && result.data) {
                 setAggregatedData(result.data);
                 setPreviousPeriodData(result.previous);
+
+                // Store raw results for client-side filtering
+                if (result.raw_results) {
+                    setRawResults(result.raw_results);
+                }
 
                 // Update individual state from aggregated data
                 setOsData(result.data.os || {});
@@ -621,15 +774,22 @@ export default function Analytics() {
                                     <Col xs={12} md={6}>
                                         <EngagementFunnel
                                             data={funnelData}
+                                            rawResults={rawResults}
                                             dateRange={funnelDateRange}
+                                            globalDateRange={globalDateRange}
                                             onDateRangeChange={setFunnelDateRange}
+                                            filterResultsByDateRange={filterResultsByDateRange}
+                                            aggregateFilteredData={aggregateFilteredData}
                                         />
                                     </Col>
                                     <Col xs={12} md={6}>
                                         <ListenerSegments
                                             data={segmentsData}
+                                            rawResults={rawResults}
                                             dateRange={segmentsDateRange}
+                                            globalDateRange={globalDateRange}
                                             onDateRangeChange={setSegmentsDateRange}
+                                            filterResultsByDateRange={filterResultsByDateRange}
                                         />
                                     </Col>
                                 </Row>
@@ -639,24 +799,36 @@ export default function Analytics() {
                                     <Col xs={12} md={4}>
                                         <OSAnalytics
                                             data={osData}
+                                            rawResults={rawResults}
                                             dateRange={osDateRange}
+                                            globalDateRange={globalDateRange}
                                             onDateRangeChange={setOsDateRange}
+                                            filterResultsByDateRange={filterResultsByDateRange}
+                                            aggregateFilteredData={aggregateFilteredData}
                                             limit={3}
                                         />
                                     </Col>
                                     <Col xs={12} md={4}>
                                         <DeviceTypes
                                             data={deviceData}
+                                            rawResults={rawResults}
                                             dateRange={deviceDateRange}
+                                            globalDateRange={globalDateRange}
                                             onDateRangeChange={setDeviceDateRange}
+                                            filterResultsByDateRange={filterResultsByDateRange}
+                                            aggregateFilteredData={aggregateFilteredData}
                                             limit={3}
                                         />
                                     </Col>
                                     <Col xs={12} md={4}>
                                         <BrowserAnalytics
                                             data={browserData}
+                                            rawResults={rawResults}
                                             dateRange={browserDateRange}
+                                            globalDateRange={globalDateRange}
                                             onDateRangeChange={setBrowserDateRange}
+                                            filterResultsByDateRange={filterResultsByDateRange}
+                                            aggregateFilteredData={aggregateFilteredData}
                                         />
                                     </Col>
                                 </Row>
@@ -666,8 +838,12 @@ export default function Analytics() {
                                     <Col xs={12}>
                                         <LocationAnalytics
                                             data={locationData}
+                                            rawResults={rawResults}
                                             dateRange={locationDateRange}
+                                            globalDateRange={globalDateRange}
                                             onDateRangeChange={setLocationDateRange}
+                                            filterResultsByDateRange={filterResultsByDateRange}
+                                            aggregateFilteredData={aggregateFilteredData}
                                             limit={3}
                                         />
                                     </Col>
@@ -678,10 +854,13 @@ export default function Analytics() {
                                     <Col xs={12}>
                                         <PlayingTrendChart
                                             data={trendData}
+                                            rawResults={rawResults}
                                             dateRange={trendDateRange}
+                                            globalDateRange={globalDateRange}
                                             onDateRangeChange={(range) => {
                                                 setTrendDateRange(range);
                                             }}
+                                            filterResultsByDateRange={filterResultsByDateRange}
                                         />
                                     </Col>
                                 </Row>
@@ -691,10 +870,13 @@ export default function Analytics() {
                                     <Col xs={12}>
                                         <PeakHoursHeatmap
                                             data={heatmapData}
+                                            rawResults={rawResults}
                                             dateRange={heatmapDateRange}
+                                            globalDateRange={globalDateRange}
                                             onDateRangeChange={(range) => {
                                                 setHeatmapDateRange(range);
                                             }}
+                                            filterResultsByDateRange={filterResultsByDateRange}
                                         />
                                     </Col>
                                 </Row>
@@ -712,8 +894,11 @@ export default function Analytics() {
                                     <Col xs={12} md={6}>
                                         <PopularPosts
                                             posts={mostPopularPosts}
+                                            rawResults={rawResults}
                                             dateRange={popularDateRange}
+                                            globalDateRange={globalDateRange}
                                             onDateRangeChange={setPopularDateRange}
+                                            filterResultsByDateRange={filterResultsByDateRange}
                                             limit={isProActive ? 10 : 3}
                                         />
                                     </Col>

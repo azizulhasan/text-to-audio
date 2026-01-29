@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { __ } from "@wordpress/i18n";
 import { Form } from "react-bootstrap";
 import ProFeatureOverlay from "./ProFeatureOverlay";
@@ -38,19 +38,52 @@ const FunnelStage = ({ label, count, percentage, color, maxWidth = 100 }) => {
  *
  * @param {Object} props
  * @param {Object} props.data - Analytics data containing funnel metrics
+ * @param {Array} props.rawResults - Raw analytics results for client-side filtering
  * @param {string} props.dateRange - Selected date range
+ * @param {string} props.globalDateRange - Global date range from parent
  * @param {function} props.onDateRangeChange - Callback when date range changes
+ * @param {function} props.filterResultsByDateRange - Function to filter results by date
+ * @param {function} props.aggregateFilteredData - Function to aggregate filtered data
  */
-export default function EngagementFunnel({ data = {}, dateRange = "Last 30 Days", onDateRangeChange }) {
+export default function EngagementFunnel({
+    data = {},
+    rawResults = [],
+    dateRange = "Last 30 Days",
+    globalDateRange = "Last 30 Days",
+    onDateRangeChange,
+    filterResultsByDateRange,
+    aggregateFilteredData
+}) {
     const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
 
+    // Filter and aggregate funnel data based on component's date range
+    const filteredFunnelData = useMemo(() => {
+        if (!isProActive) return null;
+
+        // If date range matches global, use the already aggregated data
+        if (dateRange === globalDateRange) {
+            return data;
+        }
+
+        // Otherwise, filter and re-aggregate from raw results
+        if (filterResultsByDateRange && aggregateFilteredData && rawResults.length > 0) {
+            const filtered = filterResultsByDateRange(rawResults, dateRange);
+            return aggregateFilteredData(filtered, "funnel");
+        }
+
+        return data;
+    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange, aggregateFilteredData, isProActive]);
+
+    // Use filtered data
+    const displayFunnelData = filteredFunnelData || data;
+
     // Extract funnel data
-    const totalInit = data.init || 0;
-    const totalPlay = data.play || 0;
-    const total25 = data["25_percent"] || data.quarter || 0;
-    const total50 = data["50_percent"] || data.half || 0;
-    const total75 = data["75_percent"] || data.threeQuarter || 0;
-    const totalEnd = data.end || 0;
+    const totalInit = displayFunnelData.init || 0;
+    const totalPlay = displayFunnelData.play || 0;
+    const total25 = displayFunnelData["25_percent"] || displayFunnelData.quarter || 0;
+    const total50 = displayFunnelData["50_percent"] || displayFunnelData.half || 0;
+    const total75 = displayFunnelData["75_percent"] || displayFunnelData.threeQuarter || 0;
+    const totalEnd = displayFunnelData.end || 0;
 
     // Calculate percentages based on init (100%)
     const calculatePercentage = (value) => {

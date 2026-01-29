@@ -342,7 +342,6 @@ class AtlasVoiceAnalytics {
 
         let storedDeviceInfo = localStorage.getItem('atlasVoice_stored_device_info');
         storedDeviceInfo = JSON.parse(storedDeviceInfo);
-        console.log('storedDeviceInfo', storedDeviceInfo);
         if(storedDeviceInfo) {
             this.addEvent('device_info', storedDeviceInfo);
             return;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { __ } from "@wordpress/i18n";
 import { Form } from "react-bootstrap";
 import ProFeatureOverlay from "./ProFeatureOverlay";
@@ -64,11 +64,24 @@ const LocationItem = ({ name, count, flag }) => (
  *
  * @param {Object} props
  * @param {Object} props.data - Location data { countries: {}, cities: {} }
+ * @param {Array} props.rawResults - Raw analytics results for client-side filtering
  * @param {string} props.dateRange - Selected date range
+ * @param {string} props.globalDateRange - Global date range from parent
  * @param {function} props.onDateRangeChange - Callback when date range changes
+ * @param {function} props.filterResultsByDateRange - Function to filter results by date
+ * @param {function} props.aggregateFilteredData - Function to aggregate filtered data
  * @param {number} props.limit - Max items to show (3 for free, unlimited for pro)
  */
-export default function LocationAnalytics({ data = {}, dateRange = "Last 7 Days", onDateRangeChange, limit = 3 }) {
+export default function LocationAnalytics({
+    data = {},
+    rawResults = [],
+    dateRange = "Last 7 Days",
+    globalDateRange = "Last 30 Days",
+    onDateRangeChange,
+    filterResultsByDateRange,
+    aggregateFilteredData,
+    limit = 3
+}) {
     const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
 
     // Demo country data
@@ -91,14 +104,36 @@ export default function LocationAnalytics({ data = {}, dateRange = "Last 7 Days"
         "Hanoi, Vietnam": 4100,
     };
 
-    // Use real data if available
-    const countryData = isProActive && data.countries && Object.keys(data.countries).length > 0
-        ? data.countries
-        : demoCountries;
+    // Filter and aggregate data based on component's date range
+    const { countryData, cityData } = useMemo(() => {
+        if (!isProActive) {
+            return { countryData: demoCountries, cityData: demoCities };
+        }
 
-    const cityData = isProActive && data.cities && Object.keys(data.cities).length > 0
-        ? data.cities
-        : demoCities;
+        // If date range matches global, use the already aggregated data
+        if (dateRange === globalDateRange) {
+            return {
+                countryData: data.countries && Object.keys(data.countries).length > 0 ? data.countries : demoCountries,
+                cityData: data.cities && Object.keys(data.cities).length > 0 ? data.cities : demoCities,
+            };
+        }
+
+        // Otherwise, filter and re-aggregate from raw results
+        if (filterResultsByDateRange && aggregateFilteredData && rawResults.length > 0) {
+            const filtered = filterResultsByDateRange(rawResults, dateRange);
+            const aggregatedCountries = aggregateFilteredData(filtered, "country");
+            const aggregatedCities = aggregateFilteredData(filtered, "city");
+            return {
+                countryData: Object.keys(aggregatedCountries).length > 0 ? aggregatedCountries : demoCountries,
+                cityData: Object.keys(aggregatedCities).length > 0 ? aggregatedCities : demoCities,
+            };
+        }
+
+        return {
+            countryData: data.countries && Object.keys(data.countries).length > 0 ? data.countries : demoCountries,
+            cityData: data.cities && Object.keys(data.cities).length > 0 ? data.cities : demoCities,
+        };
+    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange, aggregateFilteredData, isProActive]);
 
     // Convert countries to array and sort
     const countryArray = Object.entries(countryData)

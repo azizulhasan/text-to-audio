@@ -640,10 +640,24 @@ class AtlasVoice_Analytics {
             }
         }
 
-        $response['status']   = true;
-        $response['data']     = $aggregated;
-        $response['previous'] = $previous_aggregated;
-        $response['dates']    = $dates;
+        // Prepare raw results for client-side filtering (include created_at for date filtering)
+        $raw_results = array();
+        foreach ( $results as $result ) {
+            $raw_results[] = array(
+                'id'         => $result['id'],
+                'user_id'    => $result['user_id'],
+                'post_id'    => $result['post_id'],
+                'analytics'  => maybe_unserialize( $result['analytics'] ),
+                'created_at' => $result['created_at'],
+                'updated_at' => $result['updated_at'],
+            );
+        }
+
+        $response['status']      = true;
+        $response['data']        = $aggregated;
+        $response['previous']    = $previous_aggregated;
+        $response['dates']       = $dates;
+        $response['raw_results'] = $raw_results;
 
         return rest_ensure_response( $response );
     }
@@ -1200,6 +1214,70 @@ class AtlasVoice_Analytics {
     }
 
     /**
+     * Check if WordPress can send emails
+     * Tests the email configuration by checking common SMTP plugins and WordPress mail capability
+     *
+     * @return array Array with 'can_send' boolean and 'message' string
+     */
+    private function check_email_capability() {
+        $result = array(
+            'can_send'    => true,
+            'message'     => '',
+            'smtp_plugin' => null,
+        );
+
+        // Check for common SMTP plugins
+        $smtp_plugins = array(
+            'wp-mail-smtp/wp_mail_smtp.php'           => 'WP Mail SMTP',
+            'easy-wp-smtp/easy-wp-smtp.php'           => 'Easy WP SMTP',
+            'post-smtp/postman-smtp.php'              => 'Post SMTP',
+            'smtp-mailer/main.php'                    => 'SMTP Mailer',
+            'fluent-smtp/fluent-smtp.php'             => 'FluentSMTP',
+            'mailgun/mailgun.php'                     => 'Mailgun',
+            'sendgrid-email-delivery-simplified/wpsendgrid.php' => 'SendGrid',
+        );
+
+        $has_smtp_plugin = false;
+        foreach ( $smtp_plugins as $plugin_file => $plugin_name ) {
+            if ( is_plugin_active( $plugin_file ) ) {
+                $has_smtp_plugin = true;
+                $result['smtp_plugin'] = $plugin_name;
+                break;
+            }
+        }
+
+        // Check WP Mail SMTP specific configuration
+        if ( is_plugin_active( 'wp-mail-smtp/wp_mail_smtp.php' ) ) {
+            $wp_mail_smtp_options = get_option( 'wp_mail_smtp', array() );
+            if ( empty( $wp_mail_smtp_options ) || ( isset( $wp_mail_smtp_options['mail']['mailer'] ) && 'mail' === $wp_mail_smtp_options['mail']['mailer'] ) ) {
+                // Using default PHP mail which might not work
+                $result['can_send'] = true; // Still allow but warn
+                $result['message'] = __( 'WP Mail SMTP is using default PHP mail. Consider configuring an SMTP server for reliable email delivery.', 'text-to-audio' );
+                return $result;
+            }
+        }
+
+        // If no SMTP plugin found, check if hosting might block emails
+        if ( ! $has_smtp_plugin ) {
+            // Try to detect common hosting environments that block PHP mail
+            $server_software = isset( $_SERVER['SERVER_SOFTWARE'] ) ? sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : '';
+
+            // Check if we're on localhost (development environment)
+            $site_url = get_site_url();
+            if ( strpos( $site_url, 'localhost' ) !== false || strpos( $site_url, '127.0.0.1' ) !== false || strpos( $site_url, '.test' ) !== false || strpos( $site_url, '.local' ) !== false ) {
+                $result['can_send'] = false;
+                $result['message'] = __( 'Email sending may not work on localhost. Please install an SMTP plugin (like WP Mail SMTP) and configure it with a real email service (Gmail, SendGrid, Mailgun, etc.) for reliable email delivery.', 'text-to-audio' );
+                return $result;
+            }
+
+            // General warning for no SMTP plugin
+            $result['message'] = __( 'No SMTP plugin detected. Emails will be sent using PHP mail() which may be unreliable. Consider installing WP Mail SMTP for better deliverability.', 'text-to-audio' );
+        }
+
+        return $result;
+    }
+
+    /**
      * Save schedule report settings (Pro only)
      *
      * @param $request
@@ -1255,6 +1333,15 @@ class AtlasVoice_Analytics {
                     'message' => __( 'Please provide at least one valid email address.', 'text-to-audio' ),
                 ) );
             }
+
+            // Check email capability when enabling
+            $email_check = $this->check_email_capability();
+            if ( ! $email_check['can_send'] ) {
+                return rest_ensure_response( array(
+                    'status'  => false,
+                    'message' => $email_check['message'],
+                ) );
+            }
         }
 
         // Save settings
@@ -1263,9 +1350,23 @@ class AtlasVoice_Analytics {
         // Schedule or unschedule the cron event
         $this->schedule_report_cron( $sanitized );
 
-        $response['status']  = true;
-        $response['data']    = $sanitized;
-        $response['message'] = __( 'Schedule report settings saved successfully.', 'text-to-audio' );
+        // Prepare response with warning if applicable
+        $response = array(
+            'status'  => true,
+            'data'    => $sanitized,
+            'message' => __( 'Schedule report settings saved successfully.', 'text-to-audio' ),
+        );
+
+        // Add warning about email delivery if no SMTP plugin
+        if ( $sanitized['enabled'] && ! empty( $sanitized['recipients'] ) ) {
+            $email_check = $this->check_email_capability();
+            if ( ! empty( $email_check['message'] ) ) {
+                $response['warning'] = $email_check['message'];
+            }
+            if ( $email_check['smtp_plugin'] ) {
+                $response['smtp_plugin'] = $email_check['smtp_plugin'];
+            }
+        }
 
         return rest_ensure_response( $response );
     }
@@ -1331,15 +1432,59 @@ class AtlasVoice_Analytics {
             ) );
         }
 
+        // Check email capability first
+        $email_check = $this->check_email_capability();
+        if ( ! $email_check['can_send'] ) {
+            return rest_ensure_response( array(
+                'status'  => false,
+                'message' => $email_check['message'],
+            ) );
+        }
+
+        // Capture mail errors
+        $mail_error = null;
+        add_action( 'wp_mail_failed', function( $wp_error ) use ( &$mail_error ) {
+            $mail_error = $wp_error;
+        } );
+
         // Generate and send the report
         $result = $this->generate_and_send_report( $settings, true );
 
         if ( $result ) {
-            $response['status']  = true;
-            $response['message'] = __( 'Test report sent successfully.', 'text-to-audio' );
+            $response = array(
+                'status'  => true,
+                'message' => __( 'Test report sent successfully! Check your inbox.', 'text-to-audio' ),
+            );
+
+            // Add warning if there's a concern about email delivery
+            if ( ! empty( $email_check['message'] ) ) {
+                $response['warning'] = $email_check['message'];
+            }
         } else {
-            $response['status']  = false;
-            $response['message'] = __( 'Failed to send test report. Please check your email settings.', 'text-to-audio' );
+            // Determine the failure reason
+            $error_message = __( 'Failed to send test report.', 'text-to-audio' );
+
+            if ( $mail_error instanceof \WP_Error ) {
+                $error_data = $mail_error->get_error_message();
+                if ( ! empty( $error_data ) ) {
+                    $error_message .= ' ' . sprintf( __( 'Error: %s', 'text-to-audio' ), $error_data );
+                }
+            } else {
+                // Provide helpful troubleshooting info
+                if ( empty( $email_check['smtp_plugin'] ) ) {
+                    $error_message .= ' ' . __( 'No SMTP plugin is configured. Please install and configure WP Mail SMTP or a similar plugin for reliable email delivery.', 'text-to-audio' );
+                } else {
+                    $error_message .= ' ' . sprintf(
+                        __( 'Please check your %s plugin configuration and verify your SMTP credentials are correct.', 'text-to-audio' ),
+                        $email_check['smtp_plugin']
+                    );
+                }
+            }
+
+            $response = array(
+                'status'  => false,
+                'message' => $error_message,
+            );
         }
 
         return rest_ensure_response( $response );

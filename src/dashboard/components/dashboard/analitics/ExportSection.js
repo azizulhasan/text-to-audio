@@ -142,7 +142,21 @@ export default function ExportSection({ onExportCSV, onExportPDF, dateRange, fro
             const result = await response.json();
 
             if (result.status) {
+                // Show success message
                 notify(__("Report schedule saved successfully.", "text-to-audio"), "success");
+
+                // Show warning about email delivery if present
+                if (result.warning) {
+                    setTimeout(() => {
+                        notify(result.warning, "warning", { autoClose: 8000 });
+                    }, 1000);
+                }
+
+                // Show SMTP plugin info if detected
+                if (result.smtp_plugin) {
+                    console.log(`Using SMTP plugin: ${result.smtp_plugin}`);
+                }
+
                 setShowScheduleModal(false);
             } else {
                 notify(result.message || __("Failed to save schedule settings.", "text-to-audio"), "error");
@@ -179,13 +193,21 @@ export default function ExportSection({ onExportCSV, onExportPDF, dateRange, fro
             const result = await response.json();
 
             if (result.status) {
-                notify(__("Test report sent successfully! Check your inbox.", "text-to-audio"), "success");
+                notify(result.message || __("Test report sent successfully! Check your inbox.", "text-to-audio"), "success");
+
+                // Show warning about email delivery if present
+                if (result.warning) {
+                    setTimeout(() => {
+                        notify(result.warning, "warning", { autoClose: 8000 });
+                    }, 1000);
+                }
             } else {
-                notify(result.message || __("Failed to send test report.", "text-to-audio"), "error");
+                // Show detailed error message from server
+                notify(result.message || __("Failed to send test report.", "text-to-audio"), "error", { autoClose: 10000 });
             }
         } catch (error) {
             console.error("Error sending test report:", error);
-            notify(__("Failed to send test report.", "text-to-audio"), "error");
+            notify(__("Failed to send test report. Please check your network connection.", "text-to-audio"), "error");
         } finally {
             setIsSendingTest(false);
         }

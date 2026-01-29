@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { __ } from "@wordpress/i18n";
 import { Form } from "react-bootstrap";
 import ProFeatureOverlay from "./ProFeatureOverlay";
@@ -23,11 +23,21 @@ const getHeatColor = (value, max) => {
  * Shows listening activity by day/hour (Pro only)
  *
  * @param {Object} props
- * @param {Array} props.data - 2D array [day][hour] with counts
+ * @param {Object} props.data - Heatmap data { Monday: [...], Tuesday: [...], ... }
+ * @param {Array} props.rawResults - Raw analytics results for client-side filtering
  * @param {string} props.dateRange - Selected date range
+ * @param {string} props.globalDateRange - Global date range from parent
  * @param {function} props.onDateRangeChange - Callback when date range changes
+ * @param {function} props.filterResultsByDateRange - Function to filter results by date
  */
-export default function PeakHoursHeatmap({ data = {}, dateRange = "Last 7 Days", onDateRangeChange }) {
+export default function PeakHoursHeatmap({
+    data = {},
+    rawResults = [],
+    dateRange = "Last 7 Days",
+    globalDateRange = "Last 30 Days",
+    onDateRangeChange,
+    filterResultsByDateRange
+}) {
     const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
 
     // Day names matching the API response
@@ -57,12 +67,51 @@ export default function PeakHoursHeatmap({ data = {}, dateRange = "Last 7 Days",
         [180, 380, 240, 180, 350, 620, 350],  // Sun
     ];
 
+    // Filter and aggregate heatmap data based on component's date range
+    const filteredHeatmapData = useMemo(() => {
+        if (!isProActive) return null;
+
+        // If date range matches global, use the already fetched data
+        if (dateRange === globalDateRange) {
+            return data;
+        }
+
+        // Otherwise, filter and re-aggregate from raw results
+        if (filterResultsByDateRange && rawResults.length > 0) {
+            const filtered = filterResultsByDateRange(rawResults, dateRange);
+
+            // Build heatmap data from filtered results
+            const heatmap = {};
+            dayNames.forEach((day) => {
+                heatmap[day] = Array(24).fill(0);
+            });
+
+            filtered.forEach((result) => {
+                const createdAt = new Date(result.created_at);
+                const dayIndex = createdAt.getDay(); // 0 = Sunday, 1 = Monday, etc.
+                // Convert to Monday-first (0 = Monday, 6 = Sunday)
+                const adjustedDayIndex = dayIndex === 0 ? 6 : dayIndex - 1;
+                const dayName = dayNames[adjustedDayIndex];
+                const hour = createdAt.getHours();
+                const analytics = result.analytics || {};
+                heatmap[dayName][hour] += analytics.play?.count || 1;
+            });
+
+            return heatmap;
+        }
+
+        return data;
+    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange, isProActive, dayNames]);
+
+    // Use filtered data
+    const displayHeatmapData = filteredHeatmapData || data;
+
     // Transform API data to display format
     const transformApiData = () => {
-        if (!data || Object.keys(data).length === 0) return demoData;
+        if (!displayHeatmapData || Object.keys(displayHeatmapData).length === 0) return demoData;
 
         return dayNames.map((dayName) => {
-            const dayData = data[dayName] || Array(24).fill(0);
+            const dayData = displayHeatmapData[dayName] || Array(24).fill(0);
             // Aggregate hours into 7 time slots
             return hourMapping.map((startHour, idx) => {
                 // Sum 3 hours for each slot
@@ -76,7 +125,7 @@ export default function PeakHoursHeatmap({ data = {}, dateRange = "Last 7 Days",
         });
     };
 
-    const displayData = isProActive && Object.keys(data).length > 0 ? transformApiData() : demoData;
+    const displayData = isProActive && Object.keys(displayHeatmapData).length > 0 ? transformApiData() : demoData;
 
     // Find max value for color scaling
     const maxValue = Math.max(...displayData.flat());
