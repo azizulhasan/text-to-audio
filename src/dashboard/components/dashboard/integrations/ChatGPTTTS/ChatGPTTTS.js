@@ -110,7 +110,7 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
                         onChange={handleChange}
                         value={chatGPTAPIData.chatgpt_tts_api_key}
                         name="chatgpt_tts_api_key"
-                        placeholder="paste here chatgpt_tts_api_key"
+                        placeholder={__("paste here chatgpt_tts_api_key", 'text-to-audio')}
                         className="tta_gpt_input"
                     />
                     <Button 

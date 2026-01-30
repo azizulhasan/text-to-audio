@@ -10,7 +10,7 @@ import {
 } from "react-bootstrap";
 import {postData} from "../../../context/utilities";
 import toast from "../../../context/Notify";
-import {__} from '@wordpress/i18n';
+import {__, sprintf} from '@wordpress/i18n';
 
 export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, setAuthenticatedServices, setGoogleTTSChecked}) {
     const [googTTSJsonFile, setGoogTTSJsonFile] = useState("");
@@ -319,11 +319,16 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
             return;
         } else {
             if (storedBucketName && bucketName != storedBucketName) {
-                if (
-                    !confirm(
-                        __(`Are you sure that, you want to create a bucket with this name ${bucketName} . Even though you already have a bucket with the name ${storedBucketName}. Because once you create new bucket then all of the mp3 file will generate again. So decide carefully.`, 'text-to-audio')
-                    )
-                ) {
+                const message = sprintf(
+                    __(
+                        'Are you sure you want to create a bucket named "%1$s"? You already have a bucket named "%2$s". If you create a new bucket, all MP3 files will be generated again. Please decide carefully.',
+                        'text-to-audio'
+                    ),
+                    bucketName,
+                    storedBucketName
+                );
+
+                if ( ! confirm( message ) ) {
                     return;
                 }
             }
@@ -433,7 +438,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                                 <div className="flex-shrink-0 position-relative me-3">
                                     <img
                                         src="https://i.ytimg.com/vi/yIAnL7W9kr8/mqdefault.jpg"
-                                        alt="Video Tutorial"
+                                        alt={__("Video Tutorial",  'text-to-audio')}
                                         className="rounded"
                                         width="120"
                                         height="80"
@@ -475,7 +480,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                             placement="top"
                             overlay={
                                 <Tooltip>
-                                    {__("Click To Know How To Enable Automatic Backup To Google Cloud Storage", "text-to-audio")}
+                                    {__("Click To Know How To Enable Automatic Store To Google Cloud Storage", "text-to-audio")}
                                 </Tooltip>
                             }
                         >
