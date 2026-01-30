@@ -17,11 +17,11 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
     const [isSelectSpeed, setIsSelectedSpeed] = useState(false);
     const [isSelectVoice, setIsSelectedVoice] = useState(false);
     const [listenStatus, setListenStatus] = useState('listen')
-    const [decreamentInterval, setDecreamentInterval] = useState(null)
-    const [increamentInterval, setInreamentInterval] = useState(null)
-    const [increamentDeadline, setIncreamentDeadline] = useState(0)
-    const [increamentedTime, setIncreamentedTime] = useState(0)
-    const [decreamentDeadline, setDecreamentDeadline] = useState(0)
+    const [decrementInterval, setDecrementInterval] = useState(null)
+    const [incrementInterval, setIncrementInterval] = useState(null)
+    const [incrementDeadline, setIncrementDeadline] = useState(0)
+    const [incrementedTime, setIncrementedTime] = useState(0)
+    const [decrementDeadline, setDecrementDeadline] = useState(0)
     const [isPaused, setIsPaused] = useState(false)
     const [isResumed, setIsResumed] = useState(false)
     const [progressbarValue, setProgressbarValue] = useState(0)
@@ -447,12 +447,33 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             speech.content = newContent;
             speech.splittedSentances = sentences.slice(targetIndex);
 
+
+            // Clear existing intervals
+            clearInterval(decrementInterval);
+            clearInterval(incrementInterval);
+
+            // Calculate new times based on seek position
+            const readingTime = window?.TTS.settings?.readingTime;
+            const totalTimeMs = 1000 * 60 * parseInt(readingTime);
+            const seekTimeMs = (accumulatedPercentage / 100) * totalTimeMs;
+            const remainingTimeMs = totalTimeMs - seekTimeMs;
+
             // Restart speech
             setTimeout(() => {
                 speech.speak(speech.speech, newContent, true);
                 speech.listenStatus = 'pause';
                 setListenStatus('pause');
                 setIsApplyingSettings(false);
+
+
+                // Restart timers from seek position
+                const newDeadline = new Date().getTime() + remainingTimeMs;
+                setDecrementDeadline(newDeadline);
+                getDecreamentTime(newDeadline);
+                setIncrementedTime(seekTimeMs);
+                getIncrementTime(totalTimeMs, seekTimeMs);
+                console.log({accumulatedPercentage, newDeadline, totalTimeMs, seekTimeMs, remainingTimeMs, readingTime })
+
             }, 100);
         } else {
             setIsApplyingSettings(false);
@@ -478,6 +499,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
     const callBackAfterEnd = () => {
         speech = speech.getData()
         setListenStatus(speech.listenStatus)
+        setIsPlaying(false)
     }
 
     const pauseButton = (speech, finishIntentionally = false) => {
@@ -486,8 +508,8 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             speech.finishedSpeaking(speech.speech, {}, finishIntentionally);
         }
         setIsPlaying(!isPlaying);
-        clearInterval(decreamentInterval);
-        clearInterval(increamentInterval);
+        clearInterval(decrementInterval);
+        clearInterval(incrementInterval);
         setTimeout(() => {
             setListenStatus(speech.listenStatus)
         }, 100)
@@ -495,18 +517,18 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
 
     const resumeButton = (speech, finishIntentionally = false) => {
         speech.resume(speech.speech)
+        setIsPlaying(!isPlaying);
         if (finishIntentionally) {
             speech.finishedSpeaking(speech.speech, {}, finishIntentionally);
-            setIsPlaying(!isPlaying);
-            clearInterval(decreamentInterval);
-            clearInterval(increamentInterval);
+            clearInterval(decrementInterval);
+            clearInterval(incrementInterval);
             setTimeout(() => {
                 setListenStatus(speech.listenStatus)
             }, 100)
         }else{
-            let deadline = new Date(Date.parse(new Date()) + decreamentDeadline);
+            let deadline = new Date(Date.parse(new Date()) + decrementDeadline);
             getDecreamentTime(deadline)
-            getIncreamentTime(increamentDeadline, increamentedTime)
+            getIncrementTime(incrementDeadline, incrementedTime)
             setTimeout(() => {
                 setListenStatus(speech.listenStatus)
             }, 100)
@@ -527,7 +549,6 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
     }, [speech])
 
     // TODO modiy TextToSpeech functionality by action and filter hook
-    // TODO apply google text to speech for pro version.
     const handlePlayButtonClick = (e) => {
         e.preventDefault()
         let contents = window.TTS.contents;
@@ -567,9 +588,10 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
 
 
             speech._init(callBackAfterEnd)
+            setIsPlaying(true)
             setFirstPlayerPlay(false);
             setSecondPlayerPlay(true);
-            getIncreamentTime()
+            getIncrementTime()
             getDecreamentTime()
             setTimeout(() => {
                 speech = speech.getData()
@@ -593,25 +615,25 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
      * @param {*} time 
      * @returns 
      */
-    const getIncreamentTime = (increamentDeadline = null, increamentedTime = 0) => {
+    const getIncrementTime = (incrementDeadline = null, incrementedTime = 0) => {
         // The data/time we want to countdown to
         let deadline;
-        if (!increamentDeadline) {
+        if (!incrementDeadline) {
             let readingTime = window?.TTS.settings?.readingTime
             deadline = 1000 * 60 * parseInt(readingTime);
-            setIncreamentDeadline(deadline)
+            setIncrementDeadline(deadline)
 
         } else {
-            deadline = increamentDeadline
+            deadline = incrementDeadline
         }
         let t = increament_time_remaining(deadline)
-        setIncreamentDeadline(t.total)
+        setIncrementDeadline(t.total)
 
         let timer;
-        let now = increamentedTime;
+        let now = incrementedTime;
         let timeleft = 0;
         function updateIncreamentTime() {
-            setIncreamentedTime(now)
+            setIncrementedTime(now)
             setProgressbarProgress(now)
             timeleft = now + 1000
             if (document.getElementById(`audio_time_start_${buttonId}`)) {
@@ -630,7 +652,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
         updateIncreamentTime()
         // Run timer every second
         timer = setInterval(updateIncreamentTime, 1000);
-        setInreamentInterval(timer)
+        setIncrementInterval(timer)
     }
 
     const setProgressbarProgress = (now) => {
@@ -710,8 +732,8 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
         speech.splittedSentances = sentences.slice(targetIndex);
 
         // Clear existing intervals
-        clearInterval(decreamentInterval);
-        clearInterval(increamentInterval);
+        clearInterval(decrementInterval);
+        clearInterval(incrementInterval);
 
         // Calculate new times based on seek position
         const readingTime = window?.TTS.settings?.readingTime;
@@ -728,13 +750,16 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             speech.listenStatus = 'pause';
             setListenStatus('pause');
 
+
             // Restart timers from seek position
             const newDeadline = new Date().getTime() + remainingTimeMs;
-            setDecreamentDeadline(newDeadline);
+            setDecrementDeadline(newDeadline);
             getDecreamentTime(newDeadline);
 
-            setIncreamentedTime(seekTimeMs);
-            getIncreamentTime(totalTimeMs, seekTimeMs);
+            setIncrementedTime(seekTimeMs);
+            getIncrementTime(totalTimeMs, seekTimeMs);
+
+            console.log({clickPercentage, newDeadline, totalTimeMs, seekTimeMs, remainingTimeMs, readingTime })
 
             // Hide loading indicator
             setIsSeeking(false);
@@ -780,16 +805,16 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
      * @param {*} time 
      * @returns 
      */
-    const getDecreamentTime = (decreamentDeadline = null) => {
+    const getDecreamentTime = (decrementDeadline = null) => {
 
         // The data/time we want to countdown to
         let deadline;
-        if (!decreamentDeadline) {
+        if (!decrementDeadline) {
             let readingTime = window?.TTS.settings?.readingTime
             deadline = new Date().getTime() + (1000 * 60 * parseInt(readingTime));
-            setDecreamentDeadline(deadline)
+            setDecrementDeadline(deadline)
         } else {
-            deadline = decreamentDeadline
+            deadline = decrementDeadline
         }
 
         let timer;
@@ -797,7 +822,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             // Calculating the days, hours, minutes and seconds left
             let t = decreament_time_remaining(deadline)
             // console.log(t)
-            setDecreamentDeadline(t.total)
+            setDecrementDeadline(t.total)
             if (document.getElementById(`audio_time_end_${buttonId}`)) {
                 document.getElementById(`audio_time_end_${buttonId}`).innerHTML = t.formatted;
                 // Display the message when countdown is over
@@ -813,7 +838,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
         updateDecreamentTime()
         // Run timer every second
         timer = setInterval(updateDecreamentTime, 1000);
-        setDecreamentInterval(timer)
+        setDecrementInterval(timer)
 
     }
 
@@ -965,11 +990,11 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                     <Settings onClick={(e) => handleSetting(e)} />
                                 )}
                             </div>
-                            <SoundWave />
+                            <SoundWave isPlaying={isPlaying} />
                         </div>
                     ) : (
                         <div className="tts__ps-3">
-                            <SoundWave />
+                            <SoundWave isPlaying={isPlaying} />
                         </div>
                     )}
                 </div>
