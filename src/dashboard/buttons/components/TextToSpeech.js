@@ -23,6 +23,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
     const [isResumed, setIsResumed] = useState(false)
     const [progressbarValue, setProgressbarValue] = useState(0)
     const [shouldFloat, setShouldFloat] = useState(false)
+    const [isSeeking, setIsSeeking] = useState(false)
 
 
     const handleSetting = (e) => {
@@ -217,6 +218,118 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
     }
 
     /**
+     * Handle progress bar click for seek functionality.
+     * Calculates the clicked position and seeks to corresponding sentence.
+     *
+     * @param {Event} e - The click event
+     */
+    const handleProgressBarClick = (e) => {
+        e.preventDefault();
+
+        if (!speech || listenStatus === 'listen') {
+            return; // Don't seek if not playing
+        }
+
+        // Show loading indicator
+        setIsSeeking(true);
+
+        const progressBar = e.currentTarget;
+        const rect = progressBar.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const progressBarWidth = rect.width;
+
+        // Calculate click percentage (0-100)
+        const clickPercentage = Math.max(0, Math.min(100, (clickX / progressBarWidth) * 100));
+
+        // Get the original content and split into sentences
+        const originalContent = window.TTS.contents[buttonId];
+        const sentences = splitSentencesForSeek(originalContent);
+
+        if (sentences.length === 0) {
+            setIsSeeking(false);
+            return;
+        }
+
+        // Calculate total character count for weighting
+        const totalChars = sentences.reduce((sum, sentence) => sum + sentence.length, 0);
+
+        // Find the sentence index corresponding to click percentage
+        let accumulatedPercentage = 0;
+        let targetIndex = 0;
+
+        for (let i = 0; i < sentences.length; i++) {
+            const sentencePercentage = (sentences[i].length / totalChars) * 100;
+            accumulatedPercentage += sentencePercentage;
+
+            if (accumulatedPercentage >= clickPercentage) {
+                targetIndex = i;
+                break;
+            }
+        }
+
+        // Get content from target sentence onwards
+        const newContent = sentences.slice(targetIndex).join(' ');
+
+        // Cancel current speech
+        if (speech && speech.speech) {
+            speech.speech.cancel();
+        }
+
+        // Update speech content and splitted sentences
+        speech.content = newContent;
+        speech.splittedSentances = sentences.slice(targetIndex);
+
+        // Clear existing intervals
+        clearInterval(decreamentInterval);
+        clearInterval(increamentInterval);
+
+        // Calculate new times based on seek position
+        const readingTime = window?.TTS.settings?.readingTime;
+        const totalTimeMs = 1000 * 60 * parseInt(readingTime);
+        const seekTimeMs = (clickPercentage / 100) * totalTimeMs;
+        const remainingTimeMs = totalTimeMs - seekTimeMs;
+
+        // Update progress bar immediately
+        setProgressbarValue(clickPercentage);
+
+        // Restart speech from new position
+        setTimeout(() => {
+            speech.speak(speech.speech, newContent, true);
+            speech.listenStatus = 'pause';
+            setListenStatus('pause');
+
+            // Restart timers from seek position
+            const newDeadline = new Date().getTime() + remainingTimeMs;
+            setDecreamentDeadline(newDeadline);
+            getDecreamentTime(newDeadline);
+
+            setIncreamentedTime(seekTimeMs);
+            getIncreamentTime(totalTimeMs, seekTimeMs);
+
+            // Hide loading indicator
+            setIsSeeking(false);
+        }, 100);
+    }
+
+    /**
+     * Split content into sentences for seek functionality.
+     * Similar to splitSentences in utilities.js but returns array.
+     *
+     * @param {string} text - The content to split
+     * @returns {Array} Array of sentences
+     */
+    const splitSentencesForSeek = (text = '') => {
+        if (!text) return [];
+        return text
+            .replace(/\.+/g, '.|')
+            .replace(/\?/g, '?|')
+            .replace(/!/g, '!|')
+            .split('|')
+            .map(sentence => sentence.trim())
+            .filter(Boolean);
+    }
+
+    /**
      * 
      * @param {*} endtime date string
      * @returns 
@@ -356,12 +469,33 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                             <div
                                                 className="tts__progress tts__audio-progress"
                                                 role="progressbar"
-                                                aria-label="Success example"
-                                                aria-valuenow={0}
+                                                aria-label="Audio progress - click to seek"
+                                                aria-valuenow={progressbarValue}
                                                 aria-valuemin={0}
                                                 aria-valuemax={100}
-                                                style={{ height: '5px' }}
+                                                style={{ height: '5px', cursor: 'pointer', position: 'relative' }}
+                                                onClick={handleProgressBarClick}
+                                                title="Click to seek"
                                             >
+                                                {/* Loading indicator for seek operation */}
+                                                {isSeeking && (
+                                                    <div
+                                                        className="tts__seek-loader"
+                                                        style={{
+                                                            position: 'absolute',
+                                                            top: '50%',
+                                                            left: '50%',
+                                                            transform: 'translate(-50%, -50%)',
+                                                            width: '16px',
+                                                            height: '16px',
+                                                            border: `2px solid ${buttonCSS?.backgroundColor || '#184c53'}`,
+                                                            borderTop: `2px solid ${buttonCSS?.color || '#ffffff'}`,
+                                                            borderRadius: '50%',
+                                                            animation: 'tts-spin 0.8s linear infinite',
+                                                            zIndex: 10
+                                                        }}
+                                                    />
+                                                )}
                                                 <div
                                                     className="tts__progress-bar"
                                                     style={{ backgroundColor: buttonCSS.color, height: '5px', width: `${progressbarValue}%` }}
@@ -523,6 +657,12 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                         `#tts_button_should_float{ background-color: ${buttonCSS?.backgroundColor};color:${buttonCSS.color};width:${buttonCSS.width}%;margin-top:${buttonCSS.marginTop}px;margin-bottom:${buttonCSS.marginBottom}px;margin-right:${buttonCSS.marginRight}px;margin-left:${buttonCSS.marginLeft}%;}
                         #tts_button_should_float div:nth-child(1){ color:${buttonCSS.color};}
                         .atlasvoice_player_button svg {cursor:pointer;}
+                        .tts__progress.tts__audio-progress:hover { opacity: 0.8; }
+                        .tts__progress.tts__audio-progress { transition: opacity 0.2s ease; }
+                        @keyframes tts-spin {
+                            0% { transform: translate(-50%, -50%) rotate(0deg); }
+                            100% { transform: translate(-50%, -50%) rotate(360deg); }
+                        }
                         `
                     }
                     {
