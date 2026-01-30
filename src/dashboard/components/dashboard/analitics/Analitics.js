@@ -433,6 +433,9 @@ export default function Analytics() {
      */
     const handleExportCSV = useCallback(async (dateRange = "Last 999 Days") => {
         if (!isProActive) return;
+        if(globalDateRange){
+            dateRange = globalDateRange;
+        }
 
         try {
             const response = await fetch(
@@ -467,6 +470,77 @@ export default function Analytics() {
             toast(__("Error exporting CSV", "text-to-audio"), "error");
         }
     }, [isProActive]);
+
+    /**
+     * Export analytics as PDF (Pro only)
+     */
+    const handleExportPDF = useCallback(async (dateRange = "Last 999 Days") => {
+        if (!isProActive) return;
+        if (globalDateRange) {
+            dateRange = globalDateRange;
+        }
+
+        try {
+            let url = `${tta_obj.api_url}tta/v1/export_pdf?date_range=${encodeURIComponent(dateRange)}`;
+
+            // Add custom dates if provided
+            if (dateRange === "Custom" && globalFromDate && globalToDate) {
+                url += `&from_date=${encodeURIComponent(globalFromDate)}&to_date=${encodeURIComponent(globalToDate)}`;
+            }
+
+            const response = await fetch(url, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-WP-Nonce": window?.ttsObj?.rest_nonce ?? ttsObjPro?.rest_nonce,
+                },
+            });
+            const result = await response.json();
+
+            if (result.status && result.data) {
+                // Decode base64 HTML content
+                const htmlContent = atob(result.data);
+
+                // Create a new window for printing as PDF
+                const printWindow = window.open("", "_blank", "width=800,height=600");
+
+                if (printWindow) {
+                    printWindow.document.write(htmlContent);
+                    printWindow.document.close();
+
+                    // Wait for content to load then trigger print dialog
+                    printWindow.onload = function () {
+                        setTimeout(() => {
+                            printWindow.print();
+                            // Note: User can save as PDF from print dialog
+                        }, 250);
+                    };
+
+                    toast(__("PDF report opened. Use 'Save as PDF' in the print dialog.", "text-to-audio"), "success");
+                } else {
+                    // Fallback: download as HTML if popup is blocked
+                    const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8;" });
+                    const link = document.createElement("a");
+                    const blobUrl = URL.createObjectURL(blob);
+                    link.setAttribute("href", blobUrl);
+                    link.setAttribute("download", result.filename?.replace(".pdf", ".html") || "analytics-report.html");
+                    link.style.visibility = "hidden";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(blobUrl);
+
+                    toast(__("Report downloaded as HTML. Open in browser and print to save as PDF.", "text-to-audio"), "info");
+                }
+            } else {
+                toast(result.message || __("Failed to generate PDF report.", "text-to-audio"), "error");
+            }
+        } catch (error) {
+            console.error("Error exporting PDF:", error);
+            toast(__("Error exporting PDF", "text-to-audio"), "error");
+        }
+    }, [isProActive, globalDateRange, globalFromDate, globalToDate]);
+
 
     /**
      * Process analytics data for various charts (fallback for old data)
@@ -737,6 +811,7 @@ export default function Analytics() {
                                     {isProActive && analytics.tts_enable_analytics && (
                                         <ExportSection
                                             onExportCSV={handleExportCSV}
+                                            onExportPDF={handleExportPDF}
                                             dateRange={globalDateRange}
                                             fromDate={globalFromDate}
                                             toDate={globalToDate}
@@ -889,6 +964,8 @@ export default function Analytics() {
                                             selectedIds={selectedIds}
                                             onSelectionChange={handleSelectionChange}
                                             analyticsEnabled={analytics.tts_enable_analytics}
+                                            metrics={aggregatedData?.summary}
+                                            dateRange={globalDateRange}
                                         />
                                     </Col>
                                     <Col xs={12} md={6}>

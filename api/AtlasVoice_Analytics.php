@@ -1834,6 +1834,362 @@ class AtlasVoice_Analytics {
     }
 
     /**
+     * Export analytics data as PDF (Pro only)
+     *
+     * @param $request
+     * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+     */
+    public function export_pdf( $request ) {
+        if ( ! TTA_Helper::is_pro_active() ) {
+            return rest_ensure_response( array(
+                'status'  => false,
+                'message' => __( 'This feature requires Pro version.', 'text-to-audio' ),
+            ) );
+        }
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'atlasvoice_analytics';
+
+        $date_range = $request->get_param( 'date_range' );
+        $from_date  = $request->get_param( 'from_date' );
+        $to_date    = $request->get_param( 'to_date' );
+        $dates      = $this->calculate_date_range( $date_range, $from_date, $to_date );
+
+        $conditions = array();
+        $values     = array();
+
+        if ( $dates['from_date'] ) {
+            $conditions[] = 'created_at >= %s';
+            $values[]     = $dates['from_date'];
+        }
+        if ( $dates['to_date'] ) {
+            $conditions[] = 'updated_at <= %s';
+            $values[]     = $dates['to_date'];
+        }
+
+        $where_clause = '';
+        if ( ! empty( $conditions ) ) {
+            $where_clause = 'WHERE ' . implode( ' AND ', $conditions );
+        }
+
+        if ( ! empty( $values ) ) {
+            $query = "SELECT * FROM $table_name $where_clause ORDER BY created_at DESC";
+            $results = $wpdb->get_results( $wpdb->prepare( $query, ...$values ), ARRAY_A );
+        } else {
+            $results = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY created_at DESC", ARRAY_A );
+        }
+
+        // Aggregate the data for summary
+        $aggregated = $this->aggregate_analytics_data( $results );
+        $summary = $aggregated['summary'];
+        $site_name = get_bloginfo( 'name' );
+
+        // Build HTML content for PDF
+        $html_content = $this->build_pdf_html( $aggregated, $date_range, $results );
+
+        // Return HTML content that will be converted to PDF on frontend
+        $response['status']      = true;
+        $response['data']        = base64_encode( $html_content );
+        $response['filename']    = 'tts-analytics-' . date( 'Y-m-d' ) . '.pdf';
+        $response['aggregated']  = $aggregated;
+        $response['date_range']  = $date_range;
+        $response['dates']       = $dates;
+
+        return rest_ensure_response( $response );
+    }
+
+    /**
+     * Build HTML content for PDF export
+     *
+     * @param array  $data       Aggregated analytics data
+     * @param string $date_range Date range description
+     * @param array  $results    Raw results for detailed table
+     * @return string HTML content
+     */
+    private function build_pdf_html( $data, $date_range, $results ) {
+        $site_name = get_bloginfo( 'name' );
+        $summary = $data['summary'];
+
+        ob_start();
+        ?>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title><?php echo esc_html( $site_name ); ?> - TTS Analytics Report</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; line-height: 1.5; color: #1f2937; padding: 40px; }
+        .header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #FF7853; }
+        .header h1 { font-size: 24px; color: #FF7853; margin-bottom: 5px; }
+        .header p { color: #6b7280; font-size: 14px; }
+        .section { margin-bottom: 25px; }
+        .section-title { font-size: 16px; font-weight: 600; color: #374151; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid #e5e7eb; }
+        .summary-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
+        .summary-card { flex: 1 1 calc(25% - 15px); min-width: 120px; background: #f9fafb; border-radius: 8px; padding: 15px; text-align: center; border: 1px solid #e5e7eb; }
+        .summary-value { font-size: 20px; font-weight: 700; color: #FF7853; }
+        .summary-label { font-size: 11px; color: #6b7280; margin-top: 4px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f9fafb; font-weight: 600; color: #374151; font-size: 11px; text-transform: uppercase; }
+        td { font-size: 12px; color: #4b5563; }
+        tr:nth-child(even) { background: #fafafa; }
+        .two-col { display: flex; gap: 30px; }
+        .two-col > div { flex: 1; }
+        .bar-chart { margin-top: 10px; }
+        .bar-item { display: flex; align-items: center; margin-bottom: 8px; }
+        .bar-label { width: 100px; font-size: 11px; color: #4b5563; }
+        .bar-container { flex: 1; height: 20px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, #FF7853, #FF9473); border-radius: 4px; }
+        .bar-value { width: 50px; text-align: right; font-size: 11px; color: #6b7280; }
+        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; color: #9ca3af; font-size: 10px; }
+        .page-break { page-break-before: always; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><?php echo esc_html( $site_name ); ?></h1>
+        <p><?php printf( esc_html__( 'TTS Analytics Report - %s', 'text-to-audio' ), esc_html( $date_range ) ); ?></p>
+        <p style="font-size: 11px; margin-top: 5px;"><?php printf( esc_html__( 'Generated on %s', 'text-to-audio' ), date( 'F j, Y g:i A' ) ); ?></p>
+    </div>
+
+    <!-- Summary Section -->
+    <div class="section">
+        <h2 class="section-title"><?php esc_html_e( 'Summary Overview', 'text-to-audio' ); ?></h2>
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-value"><?php echo number_format( $summary['total_play'] ); ?></div>
+                <div class="summary-label"><?php esc_html_e( 'Total Plays', 'text-to-audio' ); ?></div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value"><?php echo number_format( $summary['total_users'] ); ?></div>
+                <div class="summary-label"><?php esc_html_e( 'Unique Listeners', 'text-to-audio' ); ?></div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value"><?php echo number_format( $summary['total_end'] ); ?></div>
+                <div class="summary-label"><?php esc_html_e( 'Completions', 'text-to-audio' ); ?></div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value"><?php echo number_format( round( $summary['total_time'] / 60 ) ); ?></div>
+                <div class="summary-label"><?php esc_html_e( 'Minutes Played', 'text-to-audio' ); ?></div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value"><?php echo number_format( $summary['total_init'] ); ?></div>
+                <div class="summary-label"><?php esc_html_e( 'Initializations', 'text-to-audio' ); ?></div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value"><?php echo number_format( $summary['total_pause'] ); ?></div>
+                <div class="summary-label"><?php esc_html_e( 'Pauses', 'text-to-audio' ); ?></div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value"><?php echo number_format( $summary['total_download'] ); ?></div>
+                <div class="summary-label"><?php esc_html_e( 'Downloads', 'text-to-audio' ); ?></div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value"><?php echo number_format( $summary['total_posts'] ); ?></div>
+                <div class="summary-label"><?php esc_html_e( 'Posts Tracked', 'text-to-audio' ); ?></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Engagement Milestones -->
+    <div class="section">
+        <h2 class="section-title"><?php esc_html_e( 'Engagement Milestones', 'text-to-audio' ); ?></h2>
+        <div class="bar-chart">
+            <?php
+            $milestones = array(
+                '25%' => $summary['total_25_percent'],
+                '50%' => $summary['total_50_percent'],
+                '75%' => $summary['total_75_percent'],
+                '100%' => $summary['total_end'],
+            );
+            $max_milestone = max( array_values( $milestones ) );
+            foreach ( $milestones as $label => $value ) :
+                $percentage = $max_milestone > 0 ? ( $value / $max_milestone ) * 100 : 0;
+            ?>
+            <div class="bar-item">
+                <span class="bar-label"><?php echo esc_html( $label ); ?> <?php esc_html_e( 'Reached', 'text-to-audio' ); ?></span>
+                <div class="bar-container">
+                    <div class="bar-fill" style="width: <?php echo esc_attr( $percentage ); ?>%;"></div>
+                </div>
+                <span class="bar-value"><?php echo number_format( $value ); ?></span>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <!-- Device & Browser Stats -->
+    <div class="section">
+        <div class="two-col">
+            <!-- Device Types -->
+            <div>
+                <h2 class="section-title"><?php esc_html_e( 'Device Types', 'text-to-audio' ); ?></h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th><?php esc_html_e( 'Device', 'text-to-audio' ); ?></th>
+                            <th><?php esc_html_e( 'Count', 'text-to-audio' ); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $count = 0;
+                        foreach ( $data['device'] as $device => $plays ) :
+                            if ( $count >= 10 ) break;
+                            $count++;
+                        ?>
+                        <tr>
+                            <td><?php echo esc_html( ucfirst( $device ) ); ?></td>
+                            <td><?php echo number_format( $plays ); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                        <?php if ( empty( $data['device'] ) ) : ?>
+                        <tr><td colspan="2"><?php esc_html_e( 'No data available', 'text-to-audio' ); ?></td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Browsers -->
+            <div>
+                <h2 class="section-title"><?php esc_html_e( 'Browsers', 'text-to-audio' ); ?></h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th><?php esc_html_e( 'Browser', 'text-to-audio' ); ?></th>
+                            <th><?php esc_html_e( 'Count', 'text-to-audio' ); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $count = 0;
+                        foreach ( $data['browser'] as $browser => $plays ) :
+                            if ( $count >= 10 ) break;
+                            $count++;
+                        ?>
+                        <tr>
+                            <td><?php echo esc_html( $browser ); ?></td>
+                            <td><?php echo number_format( $plays ); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                        <?php if ( empty( $data['browser'] ) ) : ?>
+                        <tr><td colspan="2"><?php esc_html_e( 'No data available', 'text-to-audio' ); ?></td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Operating Systems & Geographic Data -->
+    <div class="section">
+        <div class="two-col">
+            <!-- Operating Systems -->
+            <div>
+                <h2 class="section-title"><?php esc_html_e( 'Operating Systems', 'text-to-audio' ); ?></h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th><?php esc_html_e( 'OS', 'text-to-audio' ); ?></th>
+                            <th><?php esc_html_e( 'Count', 'text-to-audio' ); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $count = 0;
+                        foreach ( $data['os'] as $os => $plays ) :
+                            if ( $count >= 10 ) break;
+                            $count++;
+                        ?>
+                        <tr>
+                            <td><?php echo esc_html( $os ); ?></td>
+                            <td><?php echo number_format( $plays ); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                        <?php if ( empty( $data['os'] ) ) : ?>
+                        <tr><td colspan="2"><?php esc_html_e( 'No data available', 'text-to-audio' ); ?></td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Countries -->
+            <div>
+                <h2 class="section-title"><?php esc_html_e( 'Top Countries', 'text-to-audio' ); ?></h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th><?php esc_html_e( 'Country', 'text-to-audio' ); ?></th>
+                            <th><?php esc_html_e( 'Count', 'text-to-audio' ); ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $count = 0;
+                        foreach ( $data['country'] as $country => $plays ) :
+                            if ( $count >= 10 ) break;
+                            $count++;
+                        ?>
+                        <tr>
+                            <td><?php echo esc_html( $country ); ?></td>
+                            <td><?php echo number_format( $plays ); ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                        <?php if ( empty( $data['country'] ) ) : ?>
+                        <tr><td colspan="2"><?php esc_html_e( 'No data available', 'text-to-audio' ); ?></td></tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Posts -->
+    <div class="section">
+        <h2 class="section-title"><?php esc_html_e( 'Top 20 Posts by Interactions', 'text-to-audio' ); ?></h2>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 40px;">#</th>
+                    <th><?php esc_html_e( 'Post Title', 'text-to-audio' ); ?></th>
+                    <th style="width: 80px;"><?php esc_html_e( 'Plays', 'text-to-audio' ); ?></th>
+                    <th style="width: 100px;"><?php esc_html_e( 'Time (sec)', 'text-to-audio' ); ?></th>
+                    <th style="width: 100px;"><?php esc_html_e( 'Interactions', 'text-to-audio' ); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $rank = 0;
+                foreach ( $data['posts'] as $post ) :
+                    if ( $rank >= 20 ) break;
+                    $rank++;
+                ?>
+                <tr>
+                    <td><?php echo esc_html( $rank ); ?></td>
+                    <td><?php echo esc_html( $post['title'] ?: 'Post #' . $post['post_id'] ); ?></td>
+                    <td><?php echo number_format( $post['total_plays'] ); ?></td>
+                    <td><?php echo number_format( $post['total_time'] ); ?></td>
+                    <td><?php echo number_format( $post['interactions'] ); ?></td>
+                </tr>
+                <?php endforeach; ?>
+                <?php if ( empty( $data['posts'] ) ) : ?>
+                <tr><td colspan="5"><?php esc_html_e( 'No data available', 'text-to-audio' ); ?></td></tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p><?php printf( esc_html__( 'Generated by Text to Audio Plugin for %s', 'text-to-audio' ), esc_html( $site_name ) ); ?></p>
+        <p><?php echo esc_html( get_bloginfo( 'url' ) ); ?></p>
+    </div>
+</body>
+</html>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
      * Get insights for specific post IDs with date filtering
      *
      * @param $request

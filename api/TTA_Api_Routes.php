@@ -315,6 +315,36 @@ class TTA_Api_Routes {
 			)
 		);
 
+		// register export_pdf route (Pro only).
+		register_rest_route(
+			$this->namespace,
+			'/export_pdf',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this->analytics, 'export_pdf' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(
+						'date_range' => array(
+							'type'        => 'string',
+							'description' => 'Date range preset',
+							'required'    => false,
+						),
+						'from_date' => array(
+							'type'        => 'string',
+							'description' => 'Start date in Y-m-d format (for Custom range)',
+							'required'    => false,
+						),
+						'to_date' => array(
+							'type'        => 'string',
+							'description' => 'End date in Y-m-d format (for Custom range)',
+							'required'    => false,
+						),
+					),
+				),
+			)
+		);
+
 		// register filtered_insights route.
 		register_rest_route(
 			$this->namespace,
@@ -776,6 +806,7 @@ class TTA_Api_Routes {
             '/tta/v1/trend_data',
             '/tta/v1/heatmap_data',
             '/tta/v1/export_csv',
+            '/tta/v1/export_pdf',
             '/tta/v1/filtered_insights',
             '/tta/v1/save_schedule_report',
             '/tta/v1/get_schedule_report',

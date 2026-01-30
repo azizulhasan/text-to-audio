@@ -6,7 +6,7 @@ import notify from "../../context/Notify";
 import AtlasVoicePlayerInsights from "../../../../../admin/js/AtlasVoicePlayerInsights";
 
 /**
- * Format time value
+ * Format time value from seconds to readable string
  */
 const formatTime = (value) => {
     if (typeof value === "string") return value;
@@ -14,9 +14,18 @@ const formatTime = (value) => {
 
     const minutes = value / 60;
     if (minutes >= 60) {
-        return (minutes / 60).toFixed(2) + " Hours";
+        const hours = minutes / 60;
+        return hours.toFixed(2) + (hours > 1 ? " Hours" : " Hour");
     }
-    return minutes.toFixed(2) + " Min";
+    return minutes.toFixed(2) + (minutes > 1 ? " Minutes" : " Minute");
+};
+
+/**
+ * Calculate ratio percentage
+ */
+const calculateRatio = (numerator, denominator) => {
+    if (!denominator || denominator === 0) return "0%";
+    return ((numerator / denominator) * 100).toFixed(1) + "%";
 };
 
 /**
@@ -37,7 +46,7 @@ export default function TrackPostIds({
     selectedIds = [],
     onSelectionChange,
     metrics = null,
-    dateRange = "Dec 27 - Jan 03, 2025",
+    dateRange = "Last 30 Days",
     onDateRangeChange,
     analyticsEnabled = true,
 }) {
@@ -122,26 +131,44 @@ export default function TrackPostIds({
         }
     };
 
-    // Default metrics to display
+    // Calculate derived metrics from API summary data
+    const totalInit = metrics?.total_init || 0;
+    const totalPlay = metrics?.total_play || 0;
+    const totalPause = metrics?.total_pause || 0;
+    const totalTime = metrics?.total_time || 0;
+    const totalEnd = metrics?.total_end || 0;
+    const totalDownload = metrics?.total_download || 0;
+    const total25Percent = metrics?.total_25_percent || 0;
+    const total50Percent = metrics?.total_50_percent || 0;
+    const total75Percent = metrics?.total_75_percent || 0;
+
+    // Calculate ratios
+    const playClickRatio = calculateRatio(totalPlay, totalInit);
+    const listenTillEndRatio = calculateRatio(totalEnd, totalPlay);
+    const avgTimePerPlay = totalPlay > 0 ? (totalTime / totalPlay).toFixed(2) + " Seconds" : "0 Seconds";
+    const avgPausesPerPlay = totalPlay > 0 ? (totalPause / totalPlay).toFixed(2) : "0";
+    const bounceRate = calculateRatio(totalInit - totalPlay, totalInit);
+
+    // Default metrics to display (using real data from API)
     const defaultMetrics = [
-        { key: "totalInit", label: "totalInit", value: metrics?.totalInit || 14 },
-        { key: "totalPlay", label: "totalPlay", value: metrics?.totalPlay || 8 },
-        { key: "totalPause", label: "totalPause", value: metrics?.totalPause || 4 },
-        { key: "totalTime", label: "totalTime", value: formatTime(metrics?.totalTime) || "0.75 Minute" },
-        { key: "totalEnd", label: "totalEnd", value: metrics?.totalEnd || 7, isPro: true },
-        { key: "totalDownload", label: "totalDownload", value: metrics?.totalDownload || 1, isPro: true },
-        { key: "averagePlayClickRatio", label: "averagePlayClickRatio", value: metrics?.playClickRatio || "57.4%", isPro: true },
-        { key: "averageListenTillEndRatio", label: "averageListenTillEndRatio", value: metrics?.listenTillEndRatio || "87.50%", isPro: true },
-        { key: "averageListeningTimePerPlay", label: "averageListeningTimePerPlay", value: metrics?.avgTimePerPlay || "5.63 Seconds", isPro: true },
-        { key: "averagePausesPerPlay", label: "averagePausesPerPlay", value: metrics?.avgPauses || "0.50", isPro: true },
+        { key: "totalInit", label: "totalInit", value: totalInit },
+        { key: "totalPlay", label: "totalPlay", value: totalPlay },
+        { key: "totalPause", label: "totalPause", value: totalPause },
+        { key: "totalTime", label: "totalTime", value: formatTime(totalTime) },
+        { key: "totalEnd", label: "totalEnd", value: totalEnd, isPro: true },
+        { key: "totalDownload", label: "totalDownload", value: totalDownload, isPro: true },
+        { key: "averagePlayClickRatio", label: "averagePlayClickRatio", value: playClickRatio, isPro: true },
+        { key: "averageListenTillEndRatio", label: "averageListenTillEndRatio", value: listenTillEndRatio, isPro: true },
+        { key: "averageListeningTimePerPlay", label: "averageListeningTimePerPlay", value: avgTimePerPlay, isPro: true },
+        { key: "averagePausesPerPlay", label: "averagePausesPerPlay", value: avgPausesPerPlay, isPro: true },
     ];
 
-    // Pro-only milestone metrics
+    // Pro-only milestone metrics (using real data from API)
     const milestoneMetrics = [
-        { key: "25_percent", label: "25% milestone", value: metrics?.["25_percent"] || 12, isPro: true },
-        { key: "50_percent", label: "50% milestone", value: metrics?.["50_percent"] || 10, isPro: true },
-        { key: "75_percent", label: "75% milestone", value: metrics?.["75_percent"] || 8, isPro: true },
-        { key: "bounceRate", label: "bounceRate", value: metrics?.bounceRate || "8.2%", isPro: true },
+        { key: "25_percent", label: "25% milestone", value: total25Percent, isPro: true },
+        { key: "50_percent", label: "50% milestone", value: total50Percent, isPro: true },
+        { key: "75_percent", label: "75% milestone", value: total75Percent, isPro: true },
+        { key: "bounceRate", label: "bounceRate", value: bounceRate, isPro: true },
     ];
 
     // Combine metrics, filtering for free users
