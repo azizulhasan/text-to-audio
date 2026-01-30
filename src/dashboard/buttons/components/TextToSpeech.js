@@ -391,9 +391,6 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
 
         setIsApplyingSettings(true);
 
-        // Get current progress percentage
-        const currentProgress = progressbarValue;
-
         // Use overrides if provided, otherwise use state values
         const rate = overrides.rate !== undefined ? overrides.rate : currentRate;
         const pitch = overrides.pitch !== undefined ? overrides.pitch : currentPitch;
@@ -401,8 +398,45 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
         const language = overrides.language !== undefined ? overrides.language : currentLanguage;
         const voice = overrides.voice !== undefined ? overrides.voice : currentVoice;
 
+        // Use the current progress bar value as the seek percentage
+        // This is the same approach as handleProgressBarClick
+        const currentPercentage = progressbarValue;
+
+        // Get the original content and split into sentences
+        const originalContent = window.TTS.contents[buttonId];
+        const sentences = splitSentencesForSeek(originalContent);
+
+        if (sentences.length === 0) {
+            setIsApplyingSettings(false);
+            return;
+        }
+
+        // Calculate total character count for weighting
+        const totalChars = sentences.reduce((sum, sentence) => sum + sentence.length, 0);
+
+        // Find the sentence index corresponding to current percentage
+        let accumulatedPercentage = 0;
+        let targetIndex = 0;
+
+        for (let i = 0; i < sentences.length; i++) {
+            const sentencePercentage = (sentences[i].length / totalChars) * 100;
+            accumulatedPercentage += sentencePercentage;
+
+            if (accumulatedPercentage >= currentPercentage) {
+                targetIndex = i;
+                break;
+            }
+        }
+
+        // Get content from target sentence onwards
+        const newContent = sentences.slice(targetIndex).join(' ');
+
         // Cancel current speech
         speech.speech.cancel();
+
+        // Update speech content and splitted sentences
+        speech.content = newContent;
+        speech.splittedSentances = sentences.slice(targetIndex);
 
         // Update speech settings
         speech.speech.setRate(rate);
@@ -425,59 +459,35 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             window.TTS.settings.listening.tta__listening_voice = voice;
         }
 
-        // Recalculate position and restart from current sentence
-        const originalContent = window.TTS.contents[buttonId];
-        const sentences = splitSentencesForSeek(originalContent);
+        // Clear existing intervals
+        clearInterval(decrementInterval);
+        clearInterval(incrementInterval);
 
-        if (sentences.length > 0) {
-            const totalChars = sentences.reduce((sum, s) => sum + s.length, 0);
-            let accumulatedPercentage = 0;
-            let targetIndex = 0;
+        // Calculate new times based on current percentage (same as handleProgressBarClick)
+        const readingTime = window?.TTS.settings?.readingTime;
+        const totalTimeMs = 1000 * 60 * parseInt(readingTime);
+        const seekTimeMs = (currentPercentage / 100) * totalTimeMs;
+        const remainingTimeMs = totalTimeMs - seekTimeMs;
 
-            for (let i = 0; i < sentences.length; i++) {
-                const sentencePercentage = (sentences[i].length / totalChars) * 100;
-                accumulatedPercentage += sentencePercentage;
-                if (accumulatedPercentage >= currentProgress) {
-                    targetIndex = i;
-                    break;
-                }
-            }
+        // Update progress bar immediately
+        setProgressbarValue(currentPercentage);
 
-            const newContent = sentences.slice(targetIndex).join(' ');
-            speech.content = newContent;
-            speech.splittedSentances = sentences.slice(targetIndex);
-
-
-            // Clear existing intervals
-            clearInterval(decrementInterval);
-            clearInterval(incrementInterval);
-
-            // Calculate new times based on seek position
-            const readingTime = window?.TTS.settings?.readingTime;
-            const totalTimeMs = 1000 * 60 * parseInt(readingTime);
-            const seekTimeMs = (accumulatedPercentage / 100) * totalTimeMs;
-            const remainingTimeMs = totalTimeMs - seekTimeMs;
-
-            // Restart speech
-            setTimeout(() => {
-                speech.speak(speech.speech, newContent, true);
-                speech.listenStatus = 'pause';
-                setListenStatus('pause');
-                setIsApplyingSettings(false);
-
-
-                // Restart timers from seek position
-                const newDeadline = new Date().getTime() + remainingTimeMs;
-                setDecrementDeadline(newDeadline);
-                getDecreamentTime(newDeadline);
-                setIncrementedTime(seekTimeMs);
-                getIncrementTime(totalTimeMs, seekTimeMs);
-                console.log({accumulatedPercentage, newDeadline, totalTimeMs, seekTimeMs, remainingTimeMs, readingTime })
-
-            }, 100);
-        } else {
+        // Restart speech from new position
+        setTimeout(() => {
+            speech.speak(speech.speech, newContent, true);
+            speech.listenStatus = 'pause';
+            setListenStatus('pause');
             setIsApplyingSettings(false);
-        }
+
+            // Restart timers from seek position (exactly like handleProgressBarClick)
+            const newDeadline = new Date().getTime() + remainingTimeMs;
+            setDecrementDeadline(newDeadline);
+            getDecreamentTime(newDeadline);
+
+            setIncrementedTime(seekTimeMs);
+            getIncrementTime(totalTimeMs, seekTimeMs);
+
+        }, 100);
     };
 
     /**
