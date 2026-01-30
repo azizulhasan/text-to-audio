@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 //TODO : Need to apply onClick function to all icons and dynamic  custom class on demand
 import { Close, Play, Replay, Settings, SoundWave, Speed, VoiceOver, Pause } from "../assets/icons/TTSIcons";
@@ -6,6 +6,9 @@ import { shouldCallPositionFunction } from "../assets/buttonsHelper";
 
 let speech = null
 let TextToSpeechPro = null;
+
+// Auto-close timeout duration (15 seconds)
+const MODAL_AUTO_CLOSE_TIMEOUT = 15000;
 const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonLiveCSS = {} }) => {
     const [isFirstPlayerPlay, setFirstPlayerPlay] = useState(true);
     const [isSecondPlayerPlay, setSecondPlayerPlay] = useState(false);
@@ -25,11 +28,107 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
     const [shouldFloat, setShouldFloat] = useState(false)
     const [isSeeking, setIsSeeking] = useState(false)
 
+    // Settings panel states
+    const [availableVoices, setAvailableVoices] = useState([])
+    const [filteredVoices, setFilteredVoices] = useState([])
+    const [availableLanguages, setAvailableLanguages] = useState([])
+    const [currentLanguage, setCurrentLanguage] = useState('')
+    const [currentVoice, setCurrentVoice] = useState('')
+    const [currentRate, setCurrentRate] = useState(1)
+    const [currentPitch, setCurrentPitch] = useState(1)
+    const [currentVolume, setCurrentVolume] = useState(1)
+    const [isMuted, setIsMuted] = useState(false)
+    const [previousVolume, setPreviousVolume] = useState(1)
+    const [isApplyingSettings, setIsApplyingSettings] = useState(false)
+    const [isModalAnimating, setIsModalAnimating] = useState(false)
 
+    // Ref for auto-close timer
+    const modalAutoCloseTimer = useRef(null)
+
+
+    /**
+     * Open/close settings modal with animation
+     */
     const handleSetting = (e) => {
-        e.preventDefault()
-        setSettingOpen(!isSettingOpen);
+        if (e) e.preventDefault();
+
+        if (isSettingOpen) {
+            // Close modal with animation
+            closeSettingsModal();
+        } else {
+            // Open modal with animation
+            openSettingsModal();
+        }
     };
+
+    /**
+     * Open settings modal with scale animation
+     */
+    const openSettingsModal = () => {
+        setIsModalAnimating(true);
+        setSettingOpen(true);
+        startAutoCloseTimer();
+        // Animation completes after a short delay
+        setTimeout(() => setIsModalAnimating(false), 200);
+    };
+
+    /**
+     * Close settings modal with scale animation
+     */
+    const closeSettingsModal = () => {
+        setIsModalAnimating(true);
+        clearAutoCloseTimer();
+        // Wait for close animation before hiding
+        setTimeout(() => {
+            setSettingOpen(false);
+            setIsModalAnimating(false);
+        }, 150);
+    };
+
+    /**
+     * Start auto-close timer (15 seconds)
+     */
+    const startAutoCloseTimer = () => {
+        clearAutoCloseTimer();
+        modalAutoCloseTimer.current = setTimeout(() => {
+            if (isSettingOpen) {
+                closeSettingsModal();
+            }
+        }, MODAL_AUTO_CLOSE_TIMEOUT);
+    };
+
+    /**
+     * Clear auto-close timer
+     */
+    const clearAutoCloseTimer = () => {
+        if (modalAutoCloseTimer.current) {
+            clearTimeout(modalAutoCloseTimer.current);
+            modalAutoCloseTimer.current = null;
+        }
+    };
+
+    /**
+     * Reset auto-close timer on user interaction
+     */
+    const resetAutoCloseTimer = () => {
+        if (isSettingOpen) {
+            startAutoCloseTimer();
+        }
+    };
+
+    /**
+     * Handle backdrop click to close modal
+     */
+    const handleBackdropClick = (e) => {
+        if (e.target === e.currentTarget) {
+            closeSettingsModal();
+        }
+    };
+
+    // Cleanup timer on unmount
+    useEffect(() => {
+        return () => clearAutoCloseTimer();
+    }, []);
 
     const handleChangeSpeed = () => {
         setIsSelectedSpeed(!isSelectSpeed);
@@ -40,6 +139,337 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
         setIsSelectedVoice(!isSelectVoice);
         setIsSelectedSpeed(false); // Hide the speed button
     };
+
+    /**
+     * Load settings from localStorage on component mount
+     */
+    const loadSettingsFromStorage = () => {
+        const savedSettings = localStorage.getItem('tts_player_settings');
+        if (savedSettings) {
+            try {
+                const settings = JSON.parse(savedSettings);
+                if (settings.rate) setCurrentRate(parseFloat(settings.rate));
+                if (settings.pitch) setCurrentPitch(parseFloat(settings.pitch));
+                if (settings.volume) setCurrentVolume(parseFloat(settings.volume));
+                if (settings.language) setCurrentLanguage(settings.language);
+                if (settings.voice) setCurrentVoice(settings.voice);
+                if (settings.isMuted !== undefined) setIsMuted(settings.isMuted);
+                return settings;
+            } catch (e) {
+                console.error('Error loading TTS settings from localStorage:', e);
+            }
+        }
+        return null;
+    };
+
+    /**
+     * Save settings to localStorage
+     */
+    const saveSettingsToStorage = (settings) => {
+        try {
+            const currentSettings = JSON.parse(localStorage.getItem('tts_player_settings') || '{}');
+            const newSettings = { ...currentSettings, ...settings };
+            localStorage.setItem('tts_player_settings', JSON.stringify(newSettings));
+        } catch (e) {
+            console.error('Error saving TTS settings to localStorage:', e);
+        }
+    };
+
+    /**
+     * Load available voices from browser
+     */
+    const loadBrowserVoices = () => {
+        const loadVoices = () => {
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length > 0) {
+                setAvailableVoices(voices);
+
+                // Get admin-configured language from settings
+                const adminLang = window?.TTS?.settings?.listening?.tta__listening_lang || 'en';
+                const adminVoice = window?.TTS?.settings?.listening?.tta__listening_voice || '';
+
+                // Extract unique languages that match admin language
+                const langCode = getCountryCode(adminLang);
+                const matchingVoices = voices.filter(voice => {
+                    const voiceLangCode = getCountryCode(voice.lang);
+                    return voiceLangCode.toLowerCase() === langCode.toLowerCase();
+                });
+
+                // Get unique language codes from matching voices
+                const uniqueLangs = [...new Set(matchingVoices.map(v => v.lang))];
+                setAvailableLanguages(uniqueLangs);
+                setFilteredVoices(matchingVoices);
+
+                // Load saved settings or use defaults
+                const savedSettings = loadSettingsFromStorage();
+                if (savedSettings) {
+                    // Validate saved voice exists in current browser
+                    const savedVoiceExists = matchingVoices.some(v => v.name === savedSettings.voice);
+                    if (!savedVoiceExists && matchingVoices.length > 0) {
+                        setCurrentVoice(adminVoice || matchingVoices[0].name);
+                    }
+                    // Validate saved language exists
+                    const savedLangExists = uniqueLangs.includes(savedSettings.language);
+                    if (!savedLangExists && uniqueLangs.length > 0) {
+                        setCurrentLanguage(matchingVoices[0]?.lang || adminLang);
+                    }
+                } else {
+                    // Set defaults from admin settings
+                    if (matchingVoices.length > 0) {
+                        const defaultVoice = matchingVoices.find(v => v.name === adminVoice) || matchingVoices[0];
+                        setCurrentLanguage(defaultVoice.lang);
+                        setCurrentVoice(defaultVoice.name);
+                    }
+                    // Set default rate, pitch, volume from admin settings
+                    const listeningSettings = window?.TTS?.settings?.listening || {};
+                    setCurrentRate(parseFloat(listeningSettings.tta__listening_rate) || 1);
+                    setCurrentPitch(parseFloat(listeningSettings.tta__listening_pitch) || 1);
+                    setCurrentVolume(parseFloat(listeningSettings.tta__listening_volume) || 1);
+                }
+
+                return true;
+            }
+            return false;
+        };
+
+        // Try to load voices immediately
+        if (!loadVoices()) {
+            // If voices aren't loaded yet, wait for them
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+    };
+
+    /**
+     * Get country code from language string (e.g., 'en-US' -> 'en')
+     */
+    const getCountryCode = (lang) => {
+        if (!lang) return '';
+        if (lang.indexOf('-') !== -1) return lang.split('-')[0];
+        if (lang.indexOf('_') !== -1) return lang.split('_')[0];
+        return lang;
+    };
+
+    /**
+     * Filter voices when language changes
+     */
+    const filterVoicesByLanguage = (lang) => {
+        const langCode = getCountryCode(lang);
+        const matching = availableVoices.filter(voice => {
+            const voiceLangCode = getCountryCode(voice.lang);
+            return voiceLangCode.toLowerCase() === langCode.toLowerCase();
+        });
+        setFilteredVoices(matching);
+        return matching;
+    };
+
+    /**
+     * Handle language change
+     */
+    const handleLanguageChange = (e) => {
+        const newLang = e.target.value;
+        setCurrentLanguage(newLang);
+        saveSettingsToStorage({ language: newLang });
+        resetAutoCloseTimer();
+
+        // Filter voices for new language and select first one
+        const matching = filterVoicesByLanguage(newLang);
+        if (matching.length > 0) {
+            const newVoice = matching[0].name;
+            setCurrentVoice(newVoice);
+            saveSettingsToStorage({ voice: newVoice });
+        }
+
+        // Apply settings if currently playing
+        if (speech && listenStatus !== 'listen') {
+            applySettingsAndRestart();
+        }
+    };
+
+    /**
+     * Handle voice change
+     */
+    const handleVoiceChange = (e) => {
+        const newVoice = e.target.value;
+        setCurrentVoice(newVoice);
+        saveSettingsToStorage({ voice: newVoice });
+        resetAutoCloseTimer();
+
+        // Find the language for this voice
+        const voiceObj = availableVoices.find(v => v.name === newVoice);
+        if (voiceObj && voiceObj.lang !== currentLanguage) {
+            setCurrentLanguage(voiceObj.lang);
+            saveSettingsToStorage({ language: voiceObj.lang });
+        }
+
+        // Apply settings if currently playing
+        if (speech && listenStatus !== 'listen') {
+            applySettingsAndRestart();
+        }
+    };
+
+    /**
+     * Handle rate/speed change
+     */
+    const handleRateChange = (e) => {
+        const newRate = parseFloat(e.target.value);
+        setCurrentRate(newRate);
+        saveSettingsToStorage({ rate: newRate });
+        resetAutoCloseTimer();
+
+        // Apply settings if currently playing
+        if (speech && listenStatus !== 'listen') {
+            applySettingsAndRestart();
+        }
+    };
+
+    /**
+     * Handle pitch change
+     */
+    const handlePitchChange = (e) => {
+        const newPitch = parseFloat(e.target.value);
+        setCurrentPitch(newPitch);
+        saveSettingsToStorage({ pitch: newPitch });
+        resetAutoCloseTimer();
+
+        // Apply settings if currently playing
+        if (speech && listenStatus !== 'listen') {
+            applySettingsAndRestart();
+        }
+    };
+
+    /**
+     * Handle volume change - restarts speech from current position
+     */
+    const handleVolumeChange = (e) => {
+        const newVolume = parseFloat(e.target.value);
+        setCurrentVolume(newVolume);
+        setIsMuted(newVolume === 0);
+        saveSettingsToStorage({ volume: newVolume, isMuted: newVolume === 0 });
+        resetAutoCloseTimer();
+
+        // Apply settings and restart speech if currently playing
+        if (speech && listenStatus !== 'listen') {
+            applySettingsAndRestart({ volume: newVolume });
+        }
+    };
+
+    /**
+     * Toggle mute - restarts speech from current position
+     */
+    const handleMuteToggle = () => {
+        resetAutoCloseTimer();
+
+        let newVolume;
+        if (isMuted) {
+            // Unmute - restore previous volume
+            newVolume = previousVolume;
+            setCurrentVolume(previousVolume);
+            setIsMuted(false);
+            saveSettingsToStorage({ volume: previousVolume, isMuted: false });
+        } else {
+            // Mute - save current volume and set to 0
+            newVolume = 0;
+            setPreviousVolume(currentVolume);
+            setCurrentVolume(0);
+            setIsMuted(true);
+            saveSettingsToStorage({ volume: 0, isMuted: true });
+        }
+
+        // Apply settings and restart speech if currently playing
+        if (speech && listenStatus !== 'listen') {
+            // Pass volume override since state hasn't updated yet
+            applySettingsAndRestart({ volume: newVolume });
+        }
+    };
+
+    /**
+     * Apply new settings and restart speech from current position
+     * @param {Object} overrides - Optional overrides for settings (useful when state hasn't updated yet)
+     */
+    const applySettingsAndRestart = (overrides = {}) => {
+        if (!speech || !speech.speech) return;
+
+        setIsApplyingSettings(true);
+
+        // Get current progress percentage
+        const currentProgress = progressbarValue;
+
+        // Use overrides if provided, otherwise use state values
+        const rate = overrides.rate !== undefined ? overrides.rate : currentRate;
+        const pitch = overrides.pitch !== undefined ? overrides.pitch : currentPitch;
+        const volume = overrides.volume !== undefined ? overrides.volume : currentVolume;
+        const language = overrides.language !== undefined ? overrides.language : currentLanguage;
+        const voice = overrides.voice !== undefined ? overrides.voice : currentVoice;
+
+        // Cancel current speech
+        speech.speech.cancel();
+
+        // Update speech settings
+        speech.speech.setRate(rate);
+        speech.speech.setPitch(pitch);
+        speech.speech.setVolume(volume);
+        speech.speech.setLanguage(language);
+        speech.speech.setVoice(voice);
+
+        // Update browser support settings
+        if (speech.browser) {
+            speech.browser.defineVoiceAndLang(voice, language);
+        }
+
+        // Update TTS settings object
+        if (window.TTS && window.TTS.settings && window.TTS.settings.listening) {
+            window.TTS.settings.listening.tta__listening_rate = rate;
+            window.TTS.settings.listening.tta__listening_pitch = pitch;
+            window.TTS.settings.listening.tta__listening_volume = volume;
+            window.TTS.settings.listening.tta__listening_lang = language;
+            window.TTS.settings.listening.tta__listening_voice = voice;
+        }
+
+        // Recalculate position and restart from current sentence
+        const originalContent = window.TTS.contents[buttonId];
+        const sentences = splitSentencesForSeek(originalContent);
+
+        if (sentences.length > 0) {
+            const totalChars = sentences.reduce((sum, s) => sum + s.length, 0);
+            let accumulatedPercentage = 0;
+            let targetIndex = 0;
+
+            for (let i = 0; i < sentences.length; i++) {
+                const sentencePercentage = (sentences[i].length / totalChars) * 100;
+                accumulatedPercentage += sentencePercentage;
+                if (accumulatedPercentage >= currentProgress) {
+                    targetIndex = i;
+                    break;
+                }
+            }
+
+            const newContent = sentences.slice(targetIndex).join(' ');
+            speech.content = newContent;
+            speech.splittedSentances = sentences.slice(targetIndex);
+
+            // Restart speech
+            setTimeout(() => {
+                speech.speak(speech.speech, newContent, true);
+                speech.listenStatus = 'pause';
+                setListenStatus('pause');
+                setIsApplyingSettings(false);
+            }, 100);
+        } else {
+            setIsApplyingSettings(false);
+        }
+    };
+
+    /**
+     * Get speed label for display
+     */
+    const getSpeedLabel = (rate) => {
+        return `${rate}x`;
+    };
+
+    // Load voices on mount
+    useEffect(() => {
+        loadBrowserVoices();
+    }, []);
 
 
     /**
@@ -511,84 +941,37 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                         </div>
 
                     }
-                    {/* {isSettingOpen ? (
-                        <>
-                            <div className="d-flex gap-3 justify-content-between align-items-center" style={{ height: "55px" }} >
-                                <div className="tts__audio-player">
-                                    {!isSelectSpeed && !isSelectVoice && (
-                                        <div className="d-flex pl-3">
-                                            <div onClick={handleChangeSpeed} className="custom-hover d-block">
-                                                <div className="d-flex gap-2 border px-2 py-1 rounded-1">
-                                                    <Speed onClick={(e) => handleChangeSpeed(e)} />
-                                                    <span>Speed</span>
-                                                </div>
-                                            </div>
-                                            <div onClick={handleChangeVoice} className="custom-hover d-block ms-3">
-                                                <div className="d-flex gap-2 border px-2 py-1 rounded-1">
-                                                    < VoiceOver onClick={(e) => handleChangeVoice(e)} />
-                                                    <span>Voice</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {isSelectSpeed && (
-                                        <div className="d-flex gap-2">
-                                            <div className="d-block" onClick={handleChangeSpeed}>
-                                                <div className="border-0">
-                                                    <Speed onClick={(e) => handleChangeSpeed(e)} />
-                                                </div>
-                                            </div>
-                                            <div className="d-block" style={{ width: '200px' }}>
-                                                <select className="form-select">
-                                                    <option value="slow">speed 0.8x</option>
-                                                    <option value="normal">speed 1.0x</option>
-                                                    <option value="fast">speed 1.2x</option>
-                                                    <option value="more_fast">speed 1.5x</option>
-                                                    <option value="very_fast">speed 2.0x</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {isSelectVoice && (
-                                        <div className="d-flex gap-2">
-                                            <div onClick={handleChangeVoice}>
-                                                <div className="border-0 mt-1">
-                                                    < VoiceOver onClick={(e) => handleChangeVoice(e)} />
-                                                </div>
-                                            </div>
-                                            <div style={{ width: '200px' }}>
-                                                <select className="form-select">
-                                                    <option value="abir">Abir</option>
-                                                    <option value="sami">Sami</option>
-                                                    <option value="jami">Jami</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    )}
-                                    <div className="audio-volume"></div>
-                                </div>
-                            </div>
-                            <Close onClick={(e) => handleSetting(e)} />
-                        </>
-                    ) : <SoundWave />} */}
 
-                    {/**
-                    //TODO implement this in the future to change voice and reading speed.
-                       listenStatus !== 'listen' ? (
-                        <>
-                            <div className="ps-2">
-                                {listenStatus != 'listen' && !isSettingOpen && (
-                                    <div className="border rounded-pill px-2">
-                                        <Settings onClick={(e) => handleSetting(e)} />
-                                    </div>
+                    {/* Settings Icon - Show only when playing/paused */}
+                    {listenStatus !== 'listen' ? (
+                        <div className="tts__ps-3" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div
+                                onClick={handleSetting}
+                                style={{
+                                    cursor: 'pointer',
+                                    padding: '4px',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    backgroundColor: isSettingOpen ? `${buttonCSS?.color}20` : 'transparent',
+                                    transition: 'background-color 0.2s'
+                                }}
+                                title="Settings"
+                            >
+                                {isSettingOpen ? (
+                                    <Close onClick={(e) => handleSetting(e)} />
+                                ) : (
+                                    <Settings onClick={(e) => handleSetting(e)} />
                                 )}
                             </div>
-                        </>
-                    ) 
-                */}
-                    <div className="tts__ps-3">
-                        <SoundWave />
-                    </div>
+                            <SoundWave />
+                        </div>
+                    ) : (
+                        <div className="tts__ps-3">
+                            <SoundWave />
+                        </div>
+                    )}
                 </div>
             </div>
         )
@@ -663,6 +1046,189 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                             0% { transform: translate(-50%, -50%) rotate(0deg); }
                             100% { transform: translate(-50%, -50%) rotate(360deg); }
                         }
+
+                        /* Settings Modal Backdrop */
+                        .tts__settings-modal-backdrop {
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            background-color: rgba(0, 0, 0, 0.5);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            z-index: 9999;
+                            opacity: 0;
+                            transition: opacity 0.2s ease;
+                        }
+                        .tts__settings-modal-backdrop.tts__modal-visible {
+                            opacity: 1;
+                        }
+                        .tts__settings-modal-backdrop.tts__modal-closing {
+                            opacity: 0;
+                        }
+
+                        /* Settings Modal Container */
+                        .tts__settings-modal {
+                            width: 90%;
+                            max-width: 400px;
+                            background-color: ${buttonCSS?.backgroundColor || '#184c53'};
+                            color: ${buttonCSS?.color || '#ffffff'};
+                            border-radius: 12px;
+                            padding: 20px;
+                            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                            transform: scale(0.8);
+                            opacity: 0;
+                            transition: transform 0.2s ease, opacity 0.2s ease;
+                            position: relative;
+                        }
+                        .tts__settings-modal-backdrop.tts__modal-visible .tts__settings-modal {
+                            transform: scale(1);
+                            opacity: 1;
+                        }
+                        .tts__settings-modal-backdrop.tts__modal-closing .tts__settings-modal {
+                            transform: scale(0.8);
+                            opacity: 0;
+                        }
+
+                        /* Modal Header */
+                        .tts__settings-modal-header {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            margin-bottom: 20px;
+                            padding-bottom: 12px;
+                            border-bottom: 1px solid ${buttonCSS?.color || '#ffffff'}20;
+                        }
+                        .tts__settings-modal-title {
+                            font-size: 16px;
+                            font-weight: 600;
+                            margin: 0;
+                        }
+                        .tts__settings-modal-close {
+                            background: transparent;
+                            border: none;
+                            cursor: pointer;
+                            padding: 4px;
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            transition: background-color 0.2s ease;
+                        }
+                        .tts__settings-modal-close:hover {
+                            background-color: ${buttonCSS?.color || '#ffffff'}20;
+                        }
+
+                        /* Settings Select */
+                        .tts__settings-select {
+                            outline: none;
+                        }
+                        .tts__settings-select:focus {
+                            border-color: ${buttonCSS?.color || '#ffffff'}80 !important;
+                        }
+                        .tts__settings-select option {
+                            padding: 8px;
+                        }
+
+                        /* Custom Slider Styles */
+                        .tts__settings-slider {
+                            -webkit-appearance: none;
+                            appearance: none;
+                            height: 6px;
+                            background: ${buttonCSS?.color || '#ffffff'}30;
+                            border-radius: 3px;
+                            outline: none;
+                        }
+                        .tts__settings-slider::-webkit-slider-thumb {
+                            -webkit-appearance: none;
+                            appearance: none;
+                            width: 18px;
+                            height: 18px;
+                            background: ${buttonCSS?.color || '#ffffff'};
+                            border-radius: 50%;
+                            cursor: pointer;
+                            transition: transform 0.1s ease;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                        }
+                        .tts__settings-slider::-webkit-slider-thumb:hover {
+                            transform: scale(1.15);
+                        }
+                        .tts__settings-slider::-moz-range-thumb {
+                            width: 18px;
+                            height: 18px;
+                            background: ${buttonCSS?.color || '#ffffff'};
+                            border-radius: 50%;
+                            cursor: pointer;
+                            border: none;
+                            transition: transform 0.1s ease;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                        }
+                        .tts__settings-slider::-moz-range-thumb:hover {
+                            transform: scale(1.15);
+                        }
+                        .tts__settings-slider::-moz-range-track {
+                            background: ${buttonCSS?.color || '#ffffff'}30;
+                            height: 6px;
+                            border-radius: 3px;
+                        }
+
+                        /* Settings icon hover effect */
+                        .tts__ps-3 > div:first-child:hover {
+                            background-color: ${buttonCSS?.color || '#ffffff'}30 !important;
+                        }
+
+                        /* Setting row styles */
+                        .tts__setting-row {
+                            margin-bottom: 16px;
+                        }
+                        .tts__setting-row:last-child {
+                            margin-bottom: 0;
+                        }
+                        .tts__setting-label {
+                            display: block;
+                            font-size: 12px;
+                            margin-bottom: 6px;
+                            opacity: 0.85;
+                        }
+                        .tts__setting-header {
+                            display: flex;
+                            justify-content: space-between;
+                            align-items: center;
+                            margin-bottom: 6px;
+                        }
+                        .tts__setting-value {
+                            font-size: 12px;
+                            font-weight: 600;
+                        }
+
+                        /* Loader for settings */
+                        .tts__settings-loader-overlay {
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            right: 0;
+                            bottom: 0;
+                            background-color: rgba(0, 0, 0, 0.3);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            border-radius: 12px;
+                            z-index: 10;
+                        }
+                        .tts__settings-loader {
+                            width: 28px;
+                            height: 28px;
+                            border: 3px solid ${buttonCSS?.backgroundColor || '#184c53'};
+                            border-top: 3px solid ${buttonCSS?.color || '#ffffff'};
+                            border-radius: 50%;
+                            animation: tts-modal-spin 0.8s linear infinite;
+                        }
+                        @keyframes tts-modal-spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
                         `
                     }
                     {
@@ -673,6 +1239,154 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             {
                 shouldFloat ? <div className={'tts__custom-position_bottom_right'} >{getButtonHTML()}</div> : getButtonHTML()
             }
+
+            {/* Settings Modal Overlay - Centered on screen */}
+            {isSettingOpen && listenStatus !== 'listen' && (
+                <div
+                    className={`tts__settings-modal-backdrop ${isModalAnimating ? (isSettingOpen ? 'tts__modal-visible' : 'tts__modal-closing') : 'tts__modal-visible'}`}
+                    onClick={handleBackdropClick}
+                >
+                    <div className="tts__settings-modal" onClick={(e) => e.stopPropagation()}>
+                        {/* Loading overlay when applying settings */}
+                        {isApplyingSettings && (
+                            <div className="tts__settings-loader-overlay">
+                                <div className="tts__settings-loader" />
+                            </div>
+                        )}
+
+                        {/* Modal Header */}
+                        <div className="tts__settings-modal-header">
+                            <h3 className="tts__settings-modal-title">Player Settings</h3>
+                            <button
+                                className="tts__settings-modal-close"
+                                onClick={closeSettingsModal}
+                                title="Close"
+                            >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={buttonCSS?.color || '#ffffff'} strokeWidth="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+
+                        {/* Voice Selection */}
+                        <div className="tts__setting-row">
+                            <label className="tts__setting-label">Voice</label>
+                            <select
+                                value={currentVoice}
+                                onChange={handleVoiceChange}
+                                className="tts__settings-select"
+                                style={{
+                                    width: '100%',
+                                    padding: '10px 12px',
+                                    borderRadius: '6px',
+                                    border: `1px solid ${buttonCSS?.color || '#ffffff'}30`,
+                                    backgroundColor: `${buttonCSS?.backgroundColor || '#184c53'}`,
+                                    color: buttonCSS?.color || '#ffffff',
+                                    fontSize: '13px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                {filteredVoices.map((voice, index) => (
+                                    <option
+                                        key={index}
+                                        value={voice.name}
+                                        style={{
+                                            backgroundColor: buttonCSS?.backgroundColor || '#184c53',
+                                            color: buttonCSS?.color || '#ffffff'
+                                        }}
+                                    >
+                                        {voice.name} ({voice.lang})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Speed Control */}
+                        <div className="tts__setting-row">
+                            <div className="tts__setting-header">
+                                <label className="tts__setting-label" style={{ marginBottom: 0 }}>Speed</label>
+                                <span className="tts__setting-value">{getSpeedLabel(currentRate)}</span>
+                            </div>
+                            <input
+                                type="range"
+                                min="0.5"
+                                max="2"
+                                step="0.1"
+                                value={currentRate}
+                                onChange={handleRateChange}
+                                className="tts__settings-slider"
+                                style={{ width: '100%', cursor: 'pointer' }}
+                            />
+                        </div>
+
+                        {/* Pitch Control */}
+                        <div className="tts__setting-row">
+                            <div className="tts__setting-header">
+                                <label className="tts__setting-label" style={{ marginBottom: 0 }}>Pitch</label>
+                                <span className="tts__setting-value">{currentPitch.toFixed(1)}</span>
+                            </div>
+                            <input
+                                type="range"
+                                min="0"
+                                max="2"
+                                step="0.1"
+                                value={currentPitch}
+                                onChange={handlePitchChange}
+                                className="tts__settings-slider"
+                                style={{ width: '100%', cursor: 'pointer' }}
+                            />
+                        </div>
+
+                        {/* Volume Control with Mute Button */}
+                        <div className="tts__setting-row">
+                            <div className="tts__setting-header">
+                                <label className="tts__setting-label" style={{ marginBottom: 0 }}>Volume</label>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <span className="tts__setting-value">{Math.round(currentVolume * 100)}%</span>
+                                    <button
+                                        onClick={handleMuteToggle}
+                                        style={{
+                                            background: isMuted ? `${buttonCSS?.color || '#ffffff'}20` : 'transparent',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            padding: '4px',
+                                            borderRadius: '4px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            transition: 'background-color 0.2s ease'
+                                        }}
+                                        title={isMuted ? 'Unmute' : 'Mute'}
+                                    >
+                                        {isMuted ? (
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={buttonCSS?.color || '#ffffff'} strokeWidth="2">
+                                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                                <line x1="23" y1="9" x2="17" y2="15"></line>
+                                                <line x1="17" y1="9" x2="23" y2="15"></line>
+                                            </svg>
+                                        ) : (
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={buttonCSS?.color || '#ffffff'} strokeWidth="2">
+                                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                            </svg>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                            <input
+                                type="range"
+                                min="0"
+                                max="1"
+                                step="0.05"
+                                value={currentVolume}
+                                onChange={handleVolumeChange}
+                                className="tts__settings-slider"
+                                style={{ width: '100%', cursor: 'pointer' }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 };
