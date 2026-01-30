@@ -92,6 +92,7 @@ class TTA_Activator {
 				'tta__settings_add_post_excerpt_to_read'              => false,
 				'tta__settings_text_after_content'					  => '',
 				'tta__settings_text_before_content'					  => '',
+				'tta__settings_read_content_from_dom'				  => true,
 			) );
 		}
 

@@ -13,6 +13,15 @@ class AtlasVoiceAnalytics {
         this._startTimeTracking = false;
         this.listeningLengthInterval = null;
 
+        // Progress milestone tracking
+        this._audioDuration = 0;
+        this._currentTime = 0;
+        this._milestones = {
+            '25_percent': false,
+            '50_percent': false,
+            '75_percent': false
+        };
+
         // Bind the event listeners for beforeunload and unload
         window.addEventListener('beforeunload', this.sendSessionData.bind(this));
 
@@ -58,6 +67,63 @@ class AtlasVoiceAnalytics {
     trackEnd() {
         this.startTimeTracking = false;
         this.addEvent('end');
+        // Reset milestones for next play
+        this.resetMilestones();
+    }
+
+    /**
+     * Set the total duration of the audio
+     * @param {number} duration - Duration in seconds
+     */
+    setAudioDuration(duration) {
+        this._audioDuration = duration;
+    }
+
+    /**
+     * Track progress and fire milestone events at 25%, 50%, 75%
+     * @param {number} currentTime - Current playback time in seconds
+     */
+    trackProgress(currentTime) {
+        if (!this._audioDuration || this._audioDuration <= 0) return;
+
+        this._currentTime = currentTime;
+        const progressPercent = (currentTime / this._audioDuration) * 100;
+
+        // Track 25% milestone
+        if (progressPercent >= 25 && !this._milestones['25_percent']) {
+            this._milestones['25_percent'] = true;
+            this.addEvent('25_percent');
+        }
+
+        // Track 50% milestone
+        if (progressPercent >= 50 && !this._milestones['50_percent']) {
+            this._milestones['50_percent'] = true;
+            this.addEvent('50_percent');
+        }
+
+        // Track 75% milestone
+        if (progressPercent >= 75 && !this._milestones['75_percent']) {
+            this._milestones['75_percent'] = true;
+            this.addEvent('75_percent');
+        }
+    }
+
+    /**
+     * Reset milestones for a new playback session
+     */
+    resetMilestones() {
+        this._milestones = {
+            '25_percent': false,
+            '50_percent': false,
+            '75_percent': false
+        };
+    }
+
+    /**
+     * Track download event
+     */
+    trackDownload() {
+        this.addEvent('download');
     }
 
 
@@ -273,7 +339,33 @@ class AtlasVoiceAnalytics {
 
 
     async trackDeviceInfo() {
+
+        let storedDeviceInfo = localStorage.getItem('atlasVoice_stored_device_info');
+        storedDeviceInfo = JSON.parse(storedDeviceInfo);
+        if(storedDeviceInfo) {
+            this.addEvent('device_info', storedDeviceInfo);
+            return;
+        }
+
+
         const deviceInfo = await this.getDeviceData().then(info => info);
+
+        // Fetch accurate city/country from server-side geolocation API
+        const geoData = await this.#fetchGeolocation();
+        if (geoData) {
+            if (geoData.city && geoData.city !== 'Unknown') {
+                deviceInfo.city = geoData.city;
+            }
+            if (geoData.country && geoData.country !== 'Unknown') {
+                deviceInfo.country = geoData.country;
+            }
+            if (geoData.region) {
+                deviceInfo.region = geoData.region;
+            }
+        }
+
+        localStorage.setItem('atlasVoice_stored_device_info', JSON.stringify(deviceInfo))
+
         this.addEvent('device_info', deviceInfo);
     }
 
@@ -311,7 +403,10 @@ class AtlasVoiceAnalytics {
             // location (only if permission already granted; will NOT prompt)
             location: null, // {latitude, longitude, accuracy, timestamp} or null
 
+            // Country from timezone (fallback), city will be populated from server-side geolocation
             country: this.#country(),
+            city: null,
+            region: null,
         };
 
 
@@ -487,6 +582,45 @@ class AtlasVoiceAnalytics {
         const countryData = tzData ? ct.getCountry(tzData.countries[0]) : null;
 
         return countryData ? countryData.name : 'Unknown';
+    }
+
+    /**
+     * Fetch geolocation data (city/country) from server-side API
+     * This uses the user's IP address to get accurate location data
+     * @returns {Promise<{city: string, country: string, region: string}>}
+     */
+    async #fetchGeolocation() {
+        try {
+            const response = await fetch(
+                `${ttsObj.api_url}${ttsObj.api_namespace}/${ttsObj.api_version}/geolocation`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-WP-NONCE': window?.ttsObj?.rest_nonce || '',
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error('Geolocation API request failed');
+            }
+
+            const data = await response.json();
+
+            if (data.status && data.data) {
+                return data.data;
+            }
+        } catch (error) {
+            console.warn('Failed to fetch geolocation:', error);
+        }
+
+        // Return fallback values
+        return {
+            city: 'Unknown',
+            country: this.#country(),
+            region: '',
+        };
     }
 
 
