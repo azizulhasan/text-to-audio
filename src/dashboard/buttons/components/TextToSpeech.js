@@ -265,25 +265,25 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
     /**
      * Handle language change
      */
-    const handleLanguageChange = (e) => {
-        const newLang = e.target.value;
-        setCurrentLanguage(newLang);
-        saveSettingsToStorage({ language: newLang });
-        resetAutoCloseTimer();
-
-        // Filter voices for new language and select first one
-        const matching = filterVoicesByLanguage(newLang);
-        if (matching.length > 0) {
-            const newVoice = matching[0].name;
-            setCurrentVoice(newVoice);
-            saveSettingsToStorage({ voice: newVoice });
-        }
-
-        // Apply settings if currently playing
-        if (speech && listenStatus !== 'listen') {
-            applySettingsAndRestart();
-        }
-    };
+    // const handleLanguageChange = (e) => {
+    //     const newLang = e.target.value;
+    //     setCurrentLanguage(newLang);
+    //     saveSettingsToStorage({ language: newLang });
+    //     resetAutoCloseTimer();
+    //
+    //     // Filter voices for new language and select first one
+    //     const matching = filterVoicesByLanguage(newLang);
+    //     if (matching.length > 0) {
+    //         const newVoice = matching[0].name;
+    //         setCurrentVoice(newVoice);
+    //         saveSettingsToStorage({ voice: newVoice });
+    //     }
+    //
+    //     // Apply settings if currently playing
+    //     if (speech && listenStatus !== 'listen') {
+    //         applySettingsAndRestart();
+    //     }
+    // };
 
     /**
      * Handle voice change
@@ -642,12 +642,14 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
         let timer;
         let now = incrementedTime;
         let timeleft = 0;
+
         function updateIncreamentTime() {
             setIncrementedTime(now)
             setProgressbarProgress(now)
             timeleft = now + 1000
             if (document.getElementById(`audio_time_start_${buttonId}`)) {
                 document.getElementById(`audio_time_start_${buttonId}`).innerHTML = getFormattedTime(now).formatted;
+
                 // Display the message when countdown is over
                 if (timeleft > t.total) {
                     clearInterval(timer);
@@ -655,7 +657,9 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                     document.getElementById(`audio_time_start_${buttonId}`).innerHTML = '00:00'
                 }
             } else {
-                clearInterval(timer);
+                if(!isSettingOpen){
+                    clearInterval(timer);
+                }
             }
             now = timeleft
         }
@@ -769,8 +773,6 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             setIncrementedTime(seekTimeMs);
             getIncrementTime(totalTimeMs, seekTimeMs);
 
-            console.log({clickPercentage, newDeadline, totalTimeMs, seekTimeMs, remainingTimeMs, readingTime })
-
             // Hide loading indicator
             setIsSeeking(false);
         }, 100);
@@ -841,7 +843,9 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                     document.getElementById(`audio_time_end_${buttonId}`).innerHTML = decreament_time_remaining(readingTime, false, true).formatted
                 }
             } else {
-                clearInterval(timer);
+                if(!isSettingOpen){
+                    clearInterval(timer);
+                }
             }
         }
 
