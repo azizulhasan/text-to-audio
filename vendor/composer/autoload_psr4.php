@@ -6,6 +6,7 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'TTA_SDK\\' => array($baseDir . '/api/SDK'),
     'TTA_Public\\' => array($baseDir . '/public'),
     'TTA_Api\\' => array($baseDir . '/api'),
     'TTA_Admin\\' => array($baseDir . '/admin'),

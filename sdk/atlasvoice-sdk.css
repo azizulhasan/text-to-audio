@@ -1,0 +1,227 @@
+/**
+ * AtlasVoice SDK - Default Player Styles
+ * @version 1.0.0
+ * @license GPL-3.0+
+ * @see https://atlasaidev.com/
+ */
+
+/* =========================================================================
+   CSS Custom Properties for easy theming
+   ========================================================================= */
+:root {
+  --av-primary: #184c53;
+  --av-primary-hover: #0f363b;
+  --av-bg: #ffffff;
+  --av-text: #333333;
+  --av-text-light: #666666;
+  --av-border: #e0e0e0;
+  --av-radius: 8px;
+  --av-radius-sm: 4px;
+  --av-font-size: 14px;
+  --av-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --av-transition: 0.2s ease;
+  --av-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* =========================================================================
+   Player Container
+   ========================================================================= */
+.atlasvoice-player {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--av-bg);
+  border: 1px solid var(--av-border);
+  border-radius: var(--av-radius);
+  font-family: var(--av-font-family);
+  font-size: var(--av-font-size);
+  color: var(--av-text);
+  box-shadow: var(--av-shadow);
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.atlasvoice-player *,
+.atlasvoice-player *::before,
+.atlasvoice-player *::after {
+  box-sizing: border-box;
+}
+
+/* =========================================================================
+   Controls Row
+   ========================================================================= */
+.atlasvoice-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+/* =========================================================================
+   Play Button
+   ========================================================================= */
+.atlasvoice-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--av-primary);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--av-radius-sm);
+  cursor: pointer;
+  font-family: var(--av-font-family);
+  font-size: var(--av-font-size);
+  font-weight: 500;
+  line-height: 1;
+  transition: background var(--av-transition), transform var(--av-transition);
+  white-space: nowrap;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.atlasvoice-btn:hover {
+  background: var(--av-primary-hover);
+}
+
+.atlasvoice-btn:active {
+  transform: scale(0.97);
+}
+
+.atlasvoice-btn:focus-visible {
+  outline: 2px solid var(--av-primary);
+  outline-offset: 2px;
+}
+
+.atlasvoice-btn-active {
+  background: var(--av-primary-hover);
+}
+
+.atlasvoice-btn-text {
+  pointer-events: none;
+}
+
+/* =========================================================================
+   SVG Icons
+   ========================================================================= */
+.atlasvoice-icon {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* =========================================================================
+   Select Dropdowns
+   ========================================================================= */
+.atlasvoice-select-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.atlasvoice-label {
+  font-size: 12px;
+  color: var(--av-text-light);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.atlasvoice-select {
+  padding: 6px 8px;
+  border: 1px solid var(--av-border);
+  border-radius: var(--av-radius-sm);
+  background: var(--av-bg);
+  color: var(--av-text);
+  font-family: var(--av-font-family);
+  font-size: 12px;
+  line-height: 1.3;
+  cursor: pointer;
+  max-width: 200px;
+  min-width: 0;
+  transition: border-color var(--av-transition);
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23666'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px;
+}
+
+.atlasvoice-select:hover {
+  border-color: var(--av-primary);
+}
+
+.atlasvoice-select:focus {
+  border-color: var(--av-primary);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(24, 76, 83, 0.15);
+}
+
+/* =========================================================================
+   Status
+   ========================================================================= */
+.atlasvoice-status {
+  font-size: 12px;
+  color: var(--av-text-light);
+  padding: 2px 0;
+  min-height: 18px;
+}
+
+/* =========================================================================
+   Theme: Minimal
+   ========================================================================= */
+.atlasvoice-theme-minimal {
+  padding: 8px 12px;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
+
+.atlasvoice-theme-minimal .atlasvoice-controls {
+  gap: 8px;
+}
+
+.atlasvoice-theme-minimal .atlasvoice-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 3px;
+}
+
+.atlasvoice-theme-minimal .atlasvoice-select-group {
+  gap: 3px;
+}
+
+.atlasvoice-theme-minimal .atlasvoice-select {
+  font-size: 11px;
+  padding: 4px 6px;
+  padding-right: 20px;
+  max-width: 160px;
+}
+
+.atlasvoice-theme-minimal .atlasvoice-status {
+  font-size: 11px;
+}
+
+/* =========================================================================
+   Responsive
+   ========================================================================= */
+@media (max-width: 480px) {
+  .atlasvoice-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .atlasvoice-btn {
+    justify-content: center;
+  }
+
+  .atlasvoice-select-group {
+    flex: 1;
+  }
+
+  .atlasvoice-select {
+    flex: 1;
+    max-width: 100%;
+  }
+}

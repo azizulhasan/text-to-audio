@@ -53,7 +53,7 @@ class AtlasVoice_Analytics {
 		$post_id       = isset( $body['post_id'] ) ? $body['post_id'] : '';
 		$new_analytics = isset( $body['analytics'] ) ? $body['analytics'] : [];
 		$other_data    = isset( $body['other_data'] ) ? $body['other_data'] : null;
-
+        error_log(print_r( $body, true));
 		if ( ! $post_id || ! $user_id || empty( $new_analytics ) ) {
 			$response['status'] = false;
 			$response['data']   = [];

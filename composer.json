@@ -13,6 +13,7 @@
             "TTA_Admin\\": "admin",
             "TTA_Public\\": "public",
             "TTA_Api\\": "api",
+            "TTA_SDK\\": "api/SDK",
             "AtlasAiDev\\AppService\\": "libs/AtlasAiDev"
         }
     },

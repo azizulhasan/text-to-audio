@@ -9,6 +9,7 @@ class ComposerStaticInitd518cadaed440bd90dc9e4378262121d
     public static $prefixLengthsPsr4 = array (
         'T' => 
         array (
+            'TTA_SDK\\' => 8,
             'TTA_Public\\' => 11,
             'TTA_Api\\' => 8,
             'TTA_Admin\\' => 10,
@@ -21,6 +22,10 @@ class ComposerStaticInitd518cadaed440bd90dc9e4378262121d
     );
 
     public static $prefixDirsPsr4 = array (
+        'TTA_SDK\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/api/SDK',
+        ),
         'TTA_Public\\' => 
         array (
             0 => __DIR__ . '/../..' . '/public',
@@ -64,6 +69,7 @@ class ComposerStaticInitd518cadaed440bd90dc9e4378262121d
         'TTA_Api\\AtlasVoice_Analytics' => __DIR__ . '/../..' . '/api/AtlasVoice_Analytics.php',
         'TTA_Api\\AtlasVoice_Plugin_Compatibility' => __DIR__ . '/../..' . '/api/AtlasVoice_Plugin_Compatibility.php',
         'TTA_Api\\TTA_Api_Routes' => __DIR__ . '/../..' . '/api/TTA_Api_Routes.php',
+        'TTA_SDK\\AtlasVoice_SDK_Endpoint' => __DIR__ . '/../..' . '/api/SDK/AtlasVoice_SDK_Endpoint.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

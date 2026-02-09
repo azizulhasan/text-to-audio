@@ -26,4 +26,5 @@ return array(
     'TTA_Api\\AtlasVoice_Analytics' => $baseDir . '/api/AtlasVoice_Analytics.php',
     'TTA_Api\\AtlasVoice_Plugin_Compatibility' => $baseDir . '/api/AtlasVoice_Plugin_Compatibility.php',
     'TTA_Api\\TTA_Api_Routes' => $baseDir . '/api/TTA_Api_Routes.php',
+    'TTA_SDK\\AtlasVoice_SDK_Endpoint' => $baseDir . '/api/SDK/AtlasVoice_SDK_Endpoint.php',
 );

@@ -249,6 +249,11 @@ class TTA_Init
 
             //Rest api init.
             new TTA_Api_Routes();
+
+            // SDK Analytics endpoint for cross-domain tracking
+            if ( class_exists( \TTA_SDK\AtlasVoice_SDK_Endpoint::class ) ) {
+                new \TTA_SDK\AtlasVoice_SDK_Endpoint();
+            }
         }, 9999);
 
         //add plugins action links.
