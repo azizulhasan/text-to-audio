@@ -56,6 +56,7 @@ const productionSrc = [
 	'!package-lock.json',
 	'!mix-manifest.json',
 	'!webpack.mix.js',
+	'!uninstall.php',
 ]
 
 
