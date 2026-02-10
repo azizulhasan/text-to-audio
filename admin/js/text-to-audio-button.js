@@ -824,8 +824,7 @@ class TTSPlayButton extends HTMLElement {
             for (let buttonId of buttonIds) {
                 if (buttonId == this.getAttribute('data-id')) {
                     this.buttonId = buttonId;
-                    // this.useOldPlayer = !(window.wp?.hooks?.applyFilters('tts_player_use_old_player', true) || false);
-                    this.useOldPlayer = settings.use_new_player;
+                    this.useOldPlayer = settings.use_old_player;
 
                     if (this.useOldPlayer) {
                         this.initOldPlayer(shadow, buttonId, contents, settings);

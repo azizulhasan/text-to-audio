@@ -218,9 +218,9 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     $content_read_time = apply_filters('tts_content_reading_time', 1, $content, $post);
     $text_arr = get_button_text($atts, $content_read_time);
 
-
-    $use_new_player = apply_filters('tts_player_use_old_player', false, $post);
-    $justify_content_css = $use_new_player ?  ' center' : ' space-between' ;
+    $use_old_player = isset($settings['tta__settings_player_use_old_player']) && $settings['tta__settings_player_use_old_player'];
+    $use_old_player = apply_filters('tts_player_use_old_player', $use_old_player, $post);
+    $justify_content_css = $use_old_player ?  ' center' : ' space-between' ;
 
     // Button style.
     $backgroundColor = isset($customize['backgroundColor']) ? $customize['backgroundColor'] : '#184c53';
@@ -274,7 +274,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
         'text_before_content' => $text_before_content,
         'text_after_content'  => $text_after_content,
         'get_content_from_dom' => $get_content_from_dom,
-        'use_new_player' => $use_new_player,
+        'use_old_player' => $use_old_player,
     ];
 
     do_action('tts_enqueue_button_scripts', $params);
@@ -349,7 +349,7 @@ function get_enqueued_js_object($params, $plugin_all_settings)
         var postId = "<?php echo $post->ID; ?>";
         var fileURLs = <?php echo json_encode($mp3_file_urls); ?>;
         var get_content_from_dom = <?php echo json_encode($get_content_from_dom); ?>;
-        var use_new_player = "<?php echo $use_new_player; ?>";
+        var use_old_player = "<?php echo $use_old_player; ?>";
 
 
 
@@ -364,7 +364,7 @@ function get_enqueued_js_object($params, $plugin_all_settings)
             postId: postId,
             fileURLs: fileURLs,
             get_content_from_dom:get_content_from_dom,
-            use_new_player:use_new_player
+            use_old_player:use_old_player
         };
 
 
