@@ -45,6 +45,10 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
     // Ref for auto-close timer
     const modalAutoCloseTimer = useRef(null)
 
+    // Refs for interval timers (to ensure we can clear them reliably)
+    const incrementIntervalRef = useRef(null)
+    const decrementIntervalRef = useRef(null)
+
 
     /**
      * Open/close settings modal with animation
@@ -265,25 +269,25 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
     /**
      * Handle language change
      */
-    // const handleLanguageChange = (e) => {
-    //     const newLang = e.target.value;
-    //     setCurrentLanguage(newLang);
-    //     saveSettingsToStorage({ language: newLang });
-    //     resetAutoCloseTimer();
-    //
-    //     // Filter voices for new language and select first one
-    //     const matching = filterVoicesByLanguage(newLang);
-    //     if (matching.length > 0) {
-    //         const newVoice = matching[0].name;
-    //         setCurrentVoice(newVoice);
-    //         saveSettingsToStorage({ voice: newVoice });
-    //     }
-    //
-    //     // Apply settings if currently playing
-    //     if (speech && listenStatus !== 'listen') {
-    //         applySettingsAndRestart();
-    //     }
-    // };
+    const handleLanguageChange = (e) => {
+        const newLang = e.target.value;
+        setCurrentLanguage(newLang);
+        saveSettingsToStorage({ language: newLang });
+        resetAutoCloseTimer();
+
+        // Filter voices for new language and select first one
+        const matching = filterVoicesByLanguage(newLang);
+        if (matching.length > 0) {
+            const newVoice = matching[0].name;
+            setCurrentVoice(newVoice);
+            saveSettingsToStorage({ voice: newVoice });
+        }
+
+        // Apply settings if currently playing
+        if (speech && listenStatus !== 'listen') {
+            applySettingsAndRestart();
+        }
+    };
 
     /**
      * Handle voice change
@@ -459,7 +463,15 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             window.TTS.settings.listening.tta__listening_voice = voice;
         }
 
-        // Clear existing intervals
+        // Clear existing intervals using refs for immediate effect
+        if (incrementIntervalRef.current) {
+            clearInterval(incrementIntervalRef.current);
+            incrementIntervalRef.current = null;
+        }
+        if (decrementIntervalRef.current) {
+            clearInterval(decrementIntervalRef.current);
+            decrementIntervalRef.current = null;
+        }
         clearInterval(decrementInterval);
         clearInterval(incrementInterval);
 
@@ -518,6 +530,15 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
             speech.finishedSpeaking(speech.speech, {}, finishIntentionally);
         }
         setIsPlaying(!isPlaying);
+        // Clear intervals using refs
+        if (incrementIntervalRef.current) {
+            clearInterval(incrementIntervalRef.current);
+            incrementIntervalRef.current = null;
+        }
+        if (decrementIntervalRef.current) {
+            clearInterval(decrementIntervalRef.current);
+            decrementIntervalRef.current = null;
+        }
         clearInterval(decrementInterval);
         clearInterval(incrementInterval);
         setTimeout(() => {
@@ -530,6 +551,15 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
         setIsPlaying(!isPlaying);
         if (finishIntentionally) {
             speech.finishedSpeaking(speech.speech, {}, finishIntentionally);
+            // Clear intervals using refs
+            if (incrementIntervalRef.current) {
+                clearInterval(incrementIntervalRef.current);
+                incrementIntervalRef.current = null;
+            }
+            if (decrementIntervalRef.current) {
+                clearInterval(decrementIntervalRef.current);
+                decrementIntervalRef.current = null;
+            }
             clearInterval(decrementInterval);
             clearInterval(incrementInterval);
             setTimeout(() => {
@@ -621,26 +651,32 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
 
 
     /**
-     * 
-     * @param {*} time 
-     * @returns 
+     *
+     * @param {*} time
+     * @returns
      */
-    const getIncrementTime = (incrementDeadline = null, incrementedTime = 0) => {
+    const getIncrementTime = (incrementDeadlineParam = null, incrementedTimeParam = 0) => {
+        // Clear any existing interval first using ref
+        if (incrementIntervalRef.current) {
+            clearInterval(incrementIntervalRef.current);
+            incrementIntervalRef.current = null;
+        }
+
         // The data/time we want to countdown to
         let deadline;
-        if (!incrementDeadline) {
+        if (!incrementDeadlineParam) {
             let readingTime = window?.TTS.settings?.readingTime
             deadline = 1000 * 60 * parseInt(readingTime);
             setIncrementDeadline(deadline)
 
         } else {
-            deadline = incrementDeadline
+            deadline = incrementDeadlineParam
         }
         let t = increament_time_remaining(deadline)
         setIncrementDeadline(t.total)
 
         let timer;
-        let now = incrementedTime;
+        let now = incrementedTimeParam;
         let timeleft = 0;
 
         function updateIncreamentTime() {
@@ -653,12 +689,14 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                 // Display the message when countdown is over
                 if (timeleft > t.total) {
                     clearInterval(timer);
+                    incrementIntervalRef.current = null;
                     // TODO: match with settings if minute and second extension will be added.
                     document.getElementById(`audio_time_start_${buttonId}`).innerHTML = '00:00'
                 }
             } else {
                 if(!isSettingOpen){
                     clearInterval(timer);
+                    incrementIntervalRef.current = null;
                 }
             }
             now = timeleft
@@ -666,6 +704,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
         updateIncreamentTime()
         // Run timer every second
         timer = setInterval(updateIncreamentTime, 1000);
+        incrementIntervalRef.current = timer;
         setIncrementInterval(timer)
     }
 
@@ -745,7 +784,15 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
         speech.content = newContent;
         speech.splittedSentances = sentences.slice(targetIndex);
 
-        // Clear existing intervals
+        // Clear existing intervals using refs for immediate effect
+        if (incrementIntervalRef.current) {
+            clearInterval(incrementIntervalRef.current);
+            incrementIntervalRef.current = null;
+        }
+        if (decrementIntervalRef.current) {
+            clearInterval(decrementIntervalRef.current);
+            decrementIntervalRef.current = null;
+        }
         clearInterval(decrementInterval);
         clearInterval(incrementInterval);
 
@@ -813,20 +860,25 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
     }
 
     /**
-     * 
-     * @param {*} time 
-     * @returns 
+     *
+     * @param {*} time
+     * @returns
      */
-    const getDecreamentTime = (decrementDeadline = null) => {
+    const getDecreamentTime = (decrementDeadlineParam = null) => {
+        // Clear any existing interval first using ref
+        if (decrementIntervalRef.current) {
+            clearInterval(decrementIntervalRef.current);
+            decrementIntervalRef.current = null;
+        }
 
         // The data/time we want to countdown to
         let deadline;
-        if (!decrementDeadline) {
+        if (!decrementDeadlineParam) {
             let readingTime = window?.TTS.settings?.readingTime
             deadline = new Date().getTime() + (1000 * 60 * parseInt(readingTime));
             setDecrementDeadline(deadline)
         } else {
-            deadline = decrementDeadline
+            deadline = decrementDeadlineParam
         }
 
         let timer;
@@ -840,11 +892,13 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                 // Display the message when countdown is over
                 if (t.total <= 0) {
                     clearInterval(timer);
+                    decrementIntervalRef.current = null;
                     document.getElementById(`audio_time_end_${buttonId}`).innerHTML = decreament_time_remaining(readingTime, false, true).formatted
                 }
             } else {
                 if(!isSettingOpen){
                     clearInterval(timer);
+                    decrementIntervalRef.current = null;
                 }
             }
         }
@@ -852,6 +906,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
         updateDecreamentTime()
         // Run timer every second
         timer = setInterval(updateDecreamentTime, 1000);
+        decrementIntervalRef.current = timer;
         setDecrementInterval(timer)
 
     }
@@ -1306,6 +1361,39 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                     <line x1="6" y1="6" x2="18" y2="18"></line>
                                 </svg>
                             </button>
+                        </div>
+
+                        {/* Language Selection */}
+                        <div className="tts__setting-row">
+                            <label className="tts__setting-label">Language</label>
+                            <select
+                                value={currentLanguage}
+                                onChange={handleLanguageChange}
+                                className="tts__settings-select"
+                                style={{
+                                    width: '100%',
+                                    padding: '10px 12px',
+                                    borderRadius: '6px',
+                                    border: `1px solid ${buttonCSS?.color || '#ffffff'}30`,
+                                    backgroundColor: `${buttonCSS?.backgroundColor || '#184c53'}`,
+                                    color: buttonCSS?.color || '#ffffff',
+                                    fontSize: '13px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                {availableLanguages.map((lang, index) => (
+                                    <option
+                                        key={index}
+                                        value={lang}
+                                        style={{
+                                            backgroundColor: buttonCSS?.backgroundColor || '#184c53',
+                                            color: buttonCSS?.color || '#ffffff'
+                                        }}
+                                    >
+                                        {lang}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         {/* Voice Selection */}
