@@ -293,6 +293,37 @@ add_action('plugins_loaded', function () {
     new TTA_Init();
 }, 9999);
 
+/**
+ * Register custom cron schedule intervals
+ */
+add_filter('cron_schedules', function ($schedules) {
+    $schedules['weekly'] = array(
+        'interval' => 604800, // 7 days in seconds
+        'display'  => __('Once Weekly', 'text-to-audio'),
+    );
+    $schedules['monthly'] = array(
+        'interval' => 2592000, // 30 days in seconds
+        'display'  => __('Once Monthly', 'text-to-audio'),
+    );
+    return $schedules;
+});
+
+/**
+ * Hook for scheduled analytics report
+ */
+add_action('tta_send_scheduled_report', function () {
+    // Only run if Pro is active
+    if (!class_exists('TTA\TTA_Helper') || !\TTA\TTA_Helper::is_pro_active()) {
+        return;
+    }
+
+    // Initialize the analytics class and send the report
+    if (class_exists('TTA_Api\AtlasVoice_Analytics')) {
+        $analytics = new \TTA_Api\AtlasVoice_Analytics();
+        $analytics->generate_and_send_report();
+    }
+});
+
 
 /**
  * The code that runs during plugin activation.

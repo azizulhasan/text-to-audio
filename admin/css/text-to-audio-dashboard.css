@@ -1262,7 +1262,7 @@ a:hover {
   background-color: rgba(255, 120, 83, 1) !important;
   border: none;
   color: white;
-  padding: 20;
+  padding: 20px;
   margin-left: 4px;
   font-size: 14px;
   text-decoration: none;
@@ -2847,6 +2847,552 @@ a:hover {
 }
 
 
+/* ======================================
+   ANALYTICS PAGE - FIGMA EXACT MATCH
+   ====================================== */
+
+/* ===== ANALYTICS HEADER CARD ===== */
+.tta_analytics_header_card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tta_analytics_header_content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.tta_analytics_header_left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.tta_analytics_title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.tta_analytics_subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.tta_analytics_header_right {
+  display: flex;
+  align-items: center;
+}
+
+.tta_date_badge {
+  background: #f3f4f6;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* ===== SUMMARY CARD ===== */
+.tta_summary_card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tta_summary_header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.tta_summary_header_left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.tta_summary_title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.tta_total_interactions_badge {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.tta_timeframe_badge {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* ===== STAT CARDS - REDUCED HEIGHT ===== */
+.tta_stat_cards_container {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.625rem;
+}
+
+.tta_stat_card {
+  padding: 0.625rem 0.5rem;
+  border-radius: 8px;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 65px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.tta_stat_card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.tta_stat_label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 0.375rem;
+  text-transform: capitalize;
+  line-height: 1.2;
+}
+
+.tta_stat_value {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1;
+}
+
+/* Stat Card Colors - Match Figma */
+.tta_stat_posts {
+  background: #dbeafe;
+}
+
+.tta_stat_init {
+  background: #fef3c7;
+}
+
+.tta_stat_play {
+  background: #fce7f3;
+}
+
+.tta_stat_time {
+  background: #e0e7ff;
+}
+
+.tta_stat_pause {
+  background: #f3e8ff;
+}
+
+.tta_stat_download {
+  background: #fee2e2;
+}
+
+.tta_stat_end {
+  background: #fce7f3;
+}
+
+/* ===== CHART CARD STYLING ===== */
+.tta_chart_card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tta_chart_header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.tta_chart_title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.tta_chart_container {
+  position: relative;
+  height: 350px;
+  width: 100%;
+}
+
+#playingTrendChart {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ===== CHARTS SECTION ===== */
+.tta_charts_section {
+  margin-bottom: 1.25rem;
+}
+
+/* #atlasVoice_analytics {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+} */
+
+/* ===== BOTTOM SECTION (Track Posts + Popular Posts) ===== */
+.tta_bottom_section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.tta_track_posts_card,
+.tta_popular_posts_card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tta_card_header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.tta_section_title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.tta_date_range_small {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 0.25rem 0.625rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* ===== MULTISELECT & SEARCH SECTION ===== */
+.tta_multiselect_wrapper {
+  margin-bottom: 1.25rem;
+}
+
+.tta_form_label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.tta_remove_tag {
+  color: #ef4444;
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.tta_search_section {
+  margin-bottom: 1.25rem;
+}
+
+.tta_search_input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  margin-bottom: 0.625rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tta_search_input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.tta_date_inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.625rem;
+}
+
+.tta_search_btn {
+  width: 100%;
+  background: #FF7853;
+  color: white;
+  padding: 0.625rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.tta_search_btn:hover {
+  background: #e66943;
+  transform: translateY(-1px);
+}
+
+/* ===== METRICS TABLE ===== */
+.tta_metrics_table {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tta_table_row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tta_table_row:last-child {
+  border-bottom: none;
+}
+
+.tta_table_header_row {
+  background: #3b82f6;
+}
+
+.tta_table_header_row .tta_table_cell {
+  color: white;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.tta_table_row:nth-child(even):not(.tta_table_header_row) {
+  background: #f9fafb;
+}
+
+.tta_table_cell {
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: #374151;
+  border-right: 1px solid #e5e7eb;
+}
+
+.tta_table_cell:last-child {
+  border-right: none;
+}
+
+/* ===== POPULAR POSTS TABLE ===== */
+.tta_popular_table {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tta_popular_header_row {
+  background: #3b82f6;
+  display: grid;
+  grid-template-columns: 0.5fr 2fr 1fr;
+}
+
+.tta_popular_header_row .tta_table_cell {
+  color: white;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.tta_popular_table .tta_table_row:not(.tta_popular_header_row) {
+  display: grid;
+  grid-template-columns: 0.5fr 2fr 1fr;
+}
+
+/* ===== PRO NOTICE ===== */
+.tta_pro_notice {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.tta_pro_notice p {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.tta_pro_link {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.tta_pro_link:hover {
+  text-decoration: underline;
+}
+
+/* ===== SAVE BUTTON ===== */
+.tta_save_button_wrapper {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.tta_btn {
+  background: #FF7853;
+  color: white;
+  padding: 0.75rem 2.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tta_btn:hover {
+  background: #e66943;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255, 120, 83, 0.3);
+}
+
+.tta_btn:active {
+  transform: translateY(0);
+}
+
+/* ===== LOADING STATE ===== */
+.tta-loading-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  background: #ffffff;
+  border-radius: 12px;
+  margin: 1.25rem 0;
+}
+
+.tta-loading-spinner div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.125rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.tta-loading-spinner i {
+  font-size: 1.5rem;
+  color: #FF7853;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1200px) {
+  .tta_stat_cards_container {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .tta_bottom_section {
+    grid-template-columns: 1fr;
+  }
+  
+  .tta_chart_container {
+    height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tta_analytics_header_content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .tta_summary_header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .tta_stat_cards_container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .tta_stat_card {
+    min-height: 60px;
+    padding: 0.5rem;
+  }
+  
+  .tta_stat_label {
+    font-size: 0.65rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .tta_stat_value {
+    font-size: 1rem;
+  }
+  
+  .tta_date_inputs {
+    grid-template-columns: 1fr;
+  }
+  
+  .tta_popular_table .tta_table_row,
+  .tta_popular_header_row {
+    grid-template-columns: 0.5fr 1.5fr 1fr;
+  }
+  
+  .tta_chart_container {
+    height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tta_stat_cards_container {
+    grid-template-columns: 1fr;
+  }
+  
+  .tta_analytics_title {
+    font-size: 1.5rem;
+  }
+  
+  .tta_track_posts_card,
+  .tta_popular_posts_card {
+    padding: 1rem;
+  }
+  
+  .tta_stat_card {
+    min-height: 55px;
+  }
+  
+  .tta_chart_container {
+    height: 220px;
+  }
+}
+
+
 
 /* Aliases Component Styles - Following Settings Layout Structure */
  
@@ -3115,3 +3661,1361 @@ a:hover {
     background-color: #ffffff;
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
 }
+
+/* ======================================
+   Enhanced Analytics Dashboard Styles
+   Added on 28.01.2026
+   ====================================== */
+
+/* Analytics Header Card */
+.tta_analytics_header_card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tta_analytics_header_content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.tta_analytics_header_left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.tta_analytics_header_right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.tta_analytics_title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+.tta_analytics_subtitle {
+    color: #6b7280;
+    font-size: 14px;
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+.tta_date_badge {
+    background: #f3f4f6;
+    color: #374151;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Global Date Range Picker */
+.tta_global_date_picker {
+    position: relative;
+}
+
+.tta_date_badge_clickable {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.tta_date_badge_clickable:hover {
+    background: #e5e7eb;
+    border-color: #d1d5db;
+}
+
+.tta_date_icon {
+    flex-shrink: 0;
+}
+
+.tta_date_text {
+    white-space: nowrap;
+}
+
+.tta_dropdown_arrow {
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.tta_global_date_picker.show .tta_dropdown_arrow {
+    transform: rotate(180deg);
+}
+
+.tta_date_dropdown_menu {
+    min-width: 280px;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    margin-top: 8px !important;
+}
+
+.tta_date_presets_label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 12px 4px;
+    margin-bottom: 4px;
+}
+
+.tta_date_preset_item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 6px;
+    color: #374151;
+    font-size: 14px;
+    transition: all 0.15s ease;
+}
+
+.tta_date_preset_item:hover {
+    background: #f3f4f6;
+    color: #1f2937;
+}
+
+.tta_date_preset_item.active {
+    background: #fef3f0;
+    color: #FF7853;
+    font-weight: 500;
+}
+
+.tta_check_icon {
+    color: #FF7853;
+}
+
+/* Custom Date Range Styles */
+.tta_custom_date_divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 12px 0;
+}
+
+.tta_custom_date_label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0 12px 8px;
+}
+
+.tta_custom_date_inputs {
+    display: flex;
+    gap: 12px;
+    padding: 0 12px;
+    margin-bottom: 12px;
+}
+
+.tta_date_input_group {
+    flex: 1;
+}
+
+.tta_date_input_group label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.tta_date_input_group input[type="date"] {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 13px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    color: #374151;
+}
+
+.tta_date_input_group input[type="date"]:focus {
+    border-color: #FF7853;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 120, 83, 0.1);
+}
+
+.tta_apply_custom_btn {
+    width: calc(100% - 24px);
+    margin: 0 12px 8px;
+    padding: 10px 16px;
+    background: #FF7853;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tta_apply_custom_btn:hover {
+    background: #e6684a;
+}
+
+.tta_apply_custom_btn:disabled {
+    background: #d1d5db;
+    cursor: not-allowed;
+}
+
+/* Analytics Card Base */
+.tta_analytics_card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tta_card_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.tta_section_title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.tta_date_select {
+    width: auto;
+    min-width: 140px;
+    padding: 6px 12px;
+    font-size: 13px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background-color: #f9fafb;
+}
+
+.tta_date_select:focus {
+    border-color: #FF7853;
+    box-shadow: 0 0 0 2px rgba(255, 120, 83, 0.1);
+}
+
+/* Summary Cards */
+.tta_summary_card {
+    background: #1a4548;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    color: #ffffff;
+}
+
+.tta_summary_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.tta_summary_header_left {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tta_summary_title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+}
+
+.tta_total_interactions_badge {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tta_timeframe_badge {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #ffffff;
+}
+
+.tta_stat_cards_container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+}
+
+.tta_stat_card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    position: relative;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.tta_stat_card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.tta_stat_label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tta_stat_value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.tta_stat_change {
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 4px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.tta_stat_change_up {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+}
+
+.tta_stat_change_down {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+}
+
+.tta_stat_pro_badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #FF7853;
+    color: #fff;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Color classes for stat cards */
+.tta_stat_posts { border-left: 3px solid #3b82f6; }
+.tta_stat_init { border-left: 3px solid #8b5cf6; }
+.tta_stat_play { border-left: 3px solid #10b981; }
+.tta_stat_time { border-left: 3px solid #f59e0b; }
+.tta_stat_pause { border-left: 3px solid #ef4444; }
+.tta_stat_download { border-left: 3px solid #06b6d4; }
+.tta_stat_end { border-left: 3px solid #ec4899; }
+.tta_stat_bounce { border-left: 3px solid #f97316; }
+
+/* Pro Feature Overlay */
+.tta_pro_feature_wrapper {
+    position: relative;
+}
+
+.tta_pro_feature_content {
+    filter: blur(3px);
+    pointer-events: none;
+    user-select: none;
+}
+
+.tta_pro_feature_overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    z-index: 10;
+}
+
+.tta_pro_feature_notice {
+    text-align: center;
+    padding: 32px;
+    max-width: 320px;
+}
+
+.tta_pro_feature_icon {
+    width: 56px;
+    height: 56px;
+    background: #f3f4f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    color: #6b7280;
+}
+
+.tta_pro_feature_title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 8px;
+}
+
+.tta_pro_feature_description {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.tta_pro_feature_btn {
+    display: inline-block;
+    background: #FF7853;
+    color: #ffffff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.tta_pro_feature_btn:hover {
+    background: #e5683f;
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+/* Engagement Funnel */
+.tta_funnel_container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tta_funnel_stage {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tta_funnel_stage_label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+}
+
+.tta_funnel_stage_name {
+    font-weight: 500;
+    color: #374151;
+}
+
+.tta_funnel_stage_count {
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.tta_funnel_bar_container {
+    background: #f3f4f6;
+    border-radius: 4px;
+    height: 24px;
+    overflow: hidden;
+}
+
+.tta_funnel_bar {
+    height: 100%;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    min-width: 40px;
+    transition: width 0.5s ease;
+}
+
+.tta_funnel_percentage {
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.tta_funnel_insights {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.tta_funnel_insight_item {
+    display: flex;
+    gap: 6px;
+    font-size: 13px;
+}
+
+.tta_insight_label {
+    color: #6b7280;
+}
+
+.tta_insight_value {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.tta_insight_warning {
+    color: #f59e0b;
+}
+
+/* Listener Segments */
+.tta_segments_content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.tta_segments_chart_wrapper {
+    width: 180px;
+    height: 180px;
+}
+
+.tta_segments_demo_chart {
+    width: 100%;
+    height: 100%;
+}
+
+.tta_donut_chart {
+    width: 100%;
+    height: 100%;
+}
+
+.tta_segments_legend {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+}
+
+.tta_legend_item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.tta_legend_color {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+.tta_legend_label {
+    color: #6b7280;
+}
+
+.tta_legend_value {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.tta_segments_stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.tta_segment_stat {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+}
+
+.tta_segment_stat_label {
+    color: #6b7280;
+}
+
+.tta_segment_stat_value {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+/* Analytics List (OS, Device, Browser) */
+.tta_analytics_list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tta_analytics_list_item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.tta_analytics_list_item:hover {
+    background: #f3f4f6;
+}
+
+.tta_analytics_list_icon {
+    font-size: 18px;
+    width: 28px;
+    text-align: center;
+}
+
+.tta_analytics_list_name {
+    flex: 1;
+    font-size: 14px;
+    color: #374151;
+    font-weight: 500;
+}
+
+.tta_analytics_list_count {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.tta_analytics_list_more {
+    text-align: center;
+    padding-top: 12px;
+}
+
+.tta_view_more_link {
+    color: #FF7853;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.tta_view_more_link:hover {
+    color: #e5683f;
+    text-decoration: underline;
+}
+
+/* Browser Analytics */
+.tta_browser_list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tta_browser_list_item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+.tta_browser_info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tta_browser_icon {
+    font-size: 16px;
+}
+
+.tta_browser_name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.tta_browser_stats {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tta_browser_count {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.tta_browser_percentage {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* Location Analytics */
+.tta_location_section {
+    margin-bottom: 20px;
+}
+
+.tta_location_section:last-child {
+    margin-bottom: 0;
+}
+
+.tta_location_section_title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tta_location_list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tta_location_list_item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+.tta_location_flag {
+    font-size: 18px;
+}
+
+.tta_location_name {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.tta_location_count {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.tta_location_cities_list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.tta_location_cities_promo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: #fef3c7;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #92400e;
+}
+
+.tta_pro_badge_small {
+    background: #FF7853;
+    color: #ffffff;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Playing Trend Chart */
+.tta_trend_chart_card .tta_card_header {
+    flex-wrap: wrap;
+}
+
+.tta_chart_header_left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.tta_comparison_toggle {
+    display: flex;
+    align-items: center;
+}
+
+.tta_comparison_checkbox {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.tta_comparison_promo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #fef3c7;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #92400e;
+    margin-bottom: 16px;
+}
+
+.tta_chart_container {
+    margin-bottom: 16px;
+}
+
+.tta_chart_legend_info {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    padding-top: 12px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.tta_legend_info_item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.tta_legend_dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+/* Peak Hours Heatmap */
+.tta_heatmap_container {
+    overflow-x: auto;
+}
+
+.tta_heatmap_row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.tta_heatmap_header {
+    margin-bottom: 8px;
+}
+
+.tta_heatmap_label {
+    width: 50px;
+    font-size: 12px;
+    color: #6b7280;
+    flex-shrink: 0;
+}
+
+.tta_heatmap_day_label {
+    width: 40px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.tta_heatmap_hour_label {
+    text-align: right;
+    padding-right: 8px;
+}
+
+.tta_heatmap_cell {
+    width: 40px;
+    height: 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.tta_heatmap_cell:hover {
+    transform: scale(1.1);
+}
+
+.tta_heatmap_legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.tta_heatmap_legend_label {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.tta_heatmap_legend_scale {
+    display: flex;
+    gap: 2px;
+}
+
+.tta_heatmap_legend_color {
+    width: 20px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.tta_heatmap_insight {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 12px;
+    background: #f0fdf4;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #166534;
+}
+
+.tta_insight_icon {
+    font-size: 16px;
+}
+
+.tta_insight_text strong {
+    color: #15803d;
+}
+
+/* Track Post IDs */
+.tta_track_posts_card .tta_multiselect_wrapper {
+    margin-bottom: 16px;
+}
+
+.tta_form_label {
+    font-size: 14px;
+    color: #374151;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tta_remove_tag {
+    color: #ef4444;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.tta_search_section {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.tta_search_input {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.tta_search_input:focus {
+    border-color: #FF7853;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 120, 83, 0.1);
+}
+
+.tta_date_inputs {
+    display: flex;
+    gap: 8px;
+    flex: 2;
+}
+
+.tta_search_info {
+    padding: 12px 16px;
+    background: #e0f2fe;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #0369a1;
+    margin-bottom: 16px;
+}
+
+.tta_insights_container {
+    min-height: 20px;
+}
+
+/* Metrics Table */
+.tta_metrics_table {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.tta_table_row {
+    display: flex;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.tta_table_row:last-child {
+    border-bottom: none;
+}
+
+.tta_table_header_row {
+    background: #1a4548;
+    color: #ffffff;
+}
+
+.tta_table_header_row .tta_table_cell {
+    font-weight: 600;
+}
+
+.tta_table_cell {
+    flex: 1;
+    padding: 12px 16px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tta_table_cell:first-child {
+    flex: 2;
+}
+
+.tta_pro_badge_inline {
+    background: #FF7853;
+    color: #ffffff;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.tta_metrics_pro_upsell {
+    text-align: center;
+    padding: 16px;
+    background: #fef3c7;
+    border-top: 1px solid #fcd34d;
+}
+
+.tta_metrics_pro_upsell a {
+    color: #92400e;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.tta_metrics_pro_upsell a:hover {
+    text-decoration: underline;
+}
+
+/* Popular Posts */
+.tta_popular_table {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.tta_popular_header_row {
+    background: #1a4548;
+    color: #ffffff;
+}
+
+.tta_popular_header_row .tta_table_cell {
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.tta_rank_cell {
+    flex: 0 0 60px !important;
+}
+
+.tta_title_cell {
+    flex: 3 !important;
+}
+
+.tta_score_cell {
+    flex: 1 !important;
+    justify-content: flex-end;
+}
+
+.tta_rank_badge {
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.tta_rank_1 {
+    color: #f59e0b;
+}
+
+.tta_rank_2 {
+    color: #9ca3af;
+}
+
+.tta_rank_3 {
+    color: #cd7f32;
+}
+
+.tta_top_post {
+    background: #fefce8;
+}
+
+.tta_popular_more {
+    text-align: center;
+    padding: 12px;
+}
+
+.tta_view_all_btn {
+    background: none;
+    border: none;
+    color: #FF7853;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.tta_view_all_btn:hover {
+    text-decoration: underline;
+}
+
+.tta_empty_state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6b7280;
+}
+
+/* Export Section */
+.tta_export_section {
+    position: relative;
+}
+
+.tta_export_buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.tta_export_btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #374151;
+    transition: all 0.2s;
+}
+
+.tta_export_btn:hover {
+    border-color: #FF7853;
+    color: #FF7853;
+    background: #fff5f2;
+}
+
+.tta_export_btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.tta_export_pro_badge {
+    background: #FF7853;
+    color: #ffffff;
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+/* Analytics Row Spacing */
+.tta_analytics_row {
+    margin-bottom: 20px;
+}
+
+.tta_analytics_row > [class*="col-"] {
+    margin-bottom: 20px;
+}
+
+/* Analytics Disabled Message */
+.tta_analytics_disabled_message {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.tta_disabled_content {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 40px;
+    background: #f8f9fa;
+    border-radius: 12px;
+}
+
+.tta_disabled_icon {
+    color: #9ca3af;
+    margin-bottom: 20px;
+}
+
+.tta_disabled_content h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 12px;
+}
+
+.tta_disabled_content p {
+    font-size: 14px;
+    color: #6b7280;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Loading Spinner */
+.tta_loading_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+.tta_loading_spinner {
+    text-align: center;
+}
+
+.tta_spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f4f6;
+    border-top: 3px solid #FF7853;
+    border-radius: 50%;
+    animation: tta_spin 1s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes tta_spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Save Button Wrapper */
+.tta_save_button_wrapper {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+/* Pro Notice */
+.tta_pro_notice {
+    background: #fef3c7;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.tta_pro_notice p {
+    margin: 0;
+    font-size: 14px;
+    color: #92400e;
+}
+
+.tta_pro_link {
+    color: #FF7853;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.tta_pro_link:hover {
+    text-decoration: underline;
+}
+
+/* Responsive Styles */
+@media (max-width: 991px) {
+    .tta_analytics_header_content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .tta_stat_cards_container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .tta_location_cities_list {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 767px) {
+    .tta_analytics_header_card {
+        padding: 16px;
+    }
+
+    .tta_analytics_title {
+        font-size: 20px;
+    }
+
+    .tta_stat_cards_container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .tta_search_section {
+        flex-direction: column;
+    }
+
+    .tta_date_inputs {
+        flex: 1;
+    }
+
+    .tta_segments_legend {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .tta_heatmap_cell {
+        width: 30px;
+        height: 22px;
+    }
+
+    .tta_heatmap_day_label,
+    .tta_heatmap_label {
+        font-size: 10px;
+    }
+
+    .tta_table_cell {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 575px) {
+    .tta_stat_cards_container {
+        grid-template-columns: 1fr;
+    }
+
+    .tta_export_buttons {
+        flex-wrap: wrap;
+    }
+}
+

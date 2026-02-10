@@ -104,6 +104,20 @@ class TTA_Api_Routes {
 			)
 		);
 
+		// register geolocation route for IP-based city/country detection.
+		register_rest_route(
+			$this->namespace,
+			'/geolocation',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this->analytics, 'get_geolocation' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
 		// register insights for single post route.
         register_rest_route(
             $this->namespace,
@@ -185,6 +199,223 @@ class TTA_Api_Routes {
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this->analytics, 'get_analytics_settings' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
+		// register aggregated_insights route for dashboard.
+		register_rest_route(
+			$this->namespace,
+			'/aggregated_insights',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this->analytics, 'aggregated_insights' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(
+						'date_range' => array(
+							'type'        => 'string',
+							'description' => 'Date range preset (Yesterday, Last 7 Days, Last 30 Days, Last 90 Days, Custom)',
+							'required'    => false,
+						),
+						'from_date' => array(
+							'type'        => 'string',
+							'description' => 'Start date in Y-m-d format (for Custom range)',
+							'required'    => false,
+						),
+						'to_date' => array(
+							'type'        => 'string',
+							'description' => 'End date in Y-m-d format (for Custom range)',
+							'required'    => false,
+						),
+					),
+				),
+			)
+		);
+
+		// register trend_data route for charts.
+		register_rest_route(
+			$this->namespace,
+			'/trend_data',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this->analytics, 'trend_data' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(
+						'date_range' => array(
+							'type'        => 'string',
+							'description' => 'Date range preset',
+							'required'    => false,
+						),
+						'from_date' => array(
+							'type'        => 'string',
+							'description' => 'Start date in Y-m-d format (for Custom range)',
+							'required'    => false,
+						),
+						'to_date' => array(
+							'type'        => 'string',
+							'description' => 'End date in Y-m-d format (for Custom range)',
+							'required'    => false,
+						),
+					),
+				),
+			)
+		);
+
+		// register heatmap_data route (Pro only).
+		register_rest_route(
+			$this->namespace,
+			'/heatmap_data',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this->analytics, 'heatmap_data' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(
+						'date_range' => array(
+							'type'        => 'string',
+							'description' => 'Date range preset',
+							'required'    => false,
+						),
+						'from_date' => array(
+							'type'        => 'string',
+							'description' => 'Start date in Y-m-d format (for Custom range)',
+							'required'    => false,
+						),
+						'to_date' => array(
+							'type'        => 'string',
+							'description' => 'End date in Y-m-d format (for Custom range)',
+							'required'    => false,
+						),
+					),
+				),
+			)
+		);
+
+		// register export_csv route (Pro only).
+		register_rest_route(
+			$this->namespace,
+			'/export_csv',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this->analytics, 'export_csv' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(
+						'date_range' => array(
+							'type'        => 'string',
+							'description' => 'Date range preset',
+							'required'    => false,
+						),
+					),
+				),
+			)
+		);
+
+		// register export_pdf route (Pro only).
+		register_rest_route(
+			$this->namespace,
+			'/export_pdf',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this->analytics, 'export_pdf' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(
+						'date_range' => array(
+							'type'        => 'string',
+							'description' => 'Date range preset',
+							'required'    => false,
+						),
+						'from_date' => array(
+							'type'        => 'string',
+							'description' => 'Start date in Y-m-d format (for Custom range)',
+							'required'    => false,
+						),
+						'to_date' => array(
+							'type'        => 'string',
+							'description' => 'End date in Y-m-d format (for Custom range)',
+							'required'    => false,
+						),
+					),
+				),
+			)
+		);
+
+		// register filtered_insights route.
+		register_rest_route(
+			$this->namespace,
+			'/filtered_insights',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this->analytics, 'filtered_insights' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(
+						'post_ids' => array(
+							'type'        => 'string',
+							'description' => 'JSON array of post IDs to filter',
+							'required'    => false,
+						),
+						'date_range' => array(
+							'type'        => 'string',
+							'description' => 'Date range preset',
+							'required'    => false,
+						),
+						'from_date' => array(
+							'type'        => 'string',
+							'description' => 'Start date in Y-m-d format',
+							'required'    => false,
+						),
+						'to_date' => array(
+							'type'        => 'string',
+							'description' => 'End date in Y-m-d format',
+							'required'    => false,
+						),
+					),
+				),
+			)
+		);
+
+		// register save_schedule_report route (Pro only).
+		register_rest_route(
+			$this->namespace,
+			'/save_schedule_report',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this->analytics, 'save_schedule_report' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
+		// register get_schedule_report route (Pro only).
+		register_rest_route(
+			$this->namespace,
+			'/get_schedule_report',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this->analytics, 'get_schedule_report' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
+		// register send_test_report route (Pro only).
+		register_rest_route(
+			$this->namespace,
+			'/send_test_report',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this->analytics, 'send_test_report' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
 					'args'                => array(),
 				),
@@ -571,6 +802,15 @@ class TTA_Api_Routes {
             '/tta/v1/acf_fields',
             '/tta/v1/browser',
             '/tta/v1/get_all_user_roles',
+            '/tta/v1/aggregated_insights',
+            '/tta/v1/trend_data',
+            '/tta/v1/heatmap_data',
+            '/tta/v1/export_csv',
+            '/tta/v1/export_pdf',
+            '/tta/v1/filtered_insights',
+            '/tta/v1/save_schedule_report',
+            '/tta/v1/get_schedule_report',
+            '/tta/v1/send_test_report',
         );
 
         if ( in_array( $route, $admin_only, true ) ) {
@@ -584,9 +824,10 @@ class TTA_Api_Routes {
             return true;
         }
 
-        // 3️⃣ Frontend POST routes that require nonce verification (e.g. analytics tracking)
+        // 3️⃣ Frontend routes that require nonce verification (e.g. analytics tracking)
         $frontend_post_routes = array(
             '/tta/v1/track',
+            '/tta/v1/geolocation',
         );
 
         if ( in_array( $route, $frontend_post_routes, true )  ) {

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:gspeech.io)",
+      "WebFetch(domain:trinityaudio.ai)",
+      "WebFetch(domain:beyondwords.io)"
+    ]
+  }
+}
