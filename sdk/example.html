@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AtlasVoice SDK - Test Page</title>
-    <link rel="stylesheet" href="atlasvoice-sdk.css">
+    <link rel="stylesheet" href="text-to-speech-tts.css">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -156,7 +156,7 @@
 <!-- ============================================================ -->
 <!-- LOAD SDK -->
 <!-- ============================================================ -->
-<script src="atlasvoice-sdk.js"></script>
+<script src="text-to-speech-tts.js"></script>
 <script>
     var player, playerMinimal;
 
@@ -186,7 +186,7 @@
             rate: 1,
             pitch: 1,
             volume: 1,
-            theme: 'minimal',
+            theme: 'default',
             analytics: {
                 enabled: true,
                 wpRestUrl: 'http://localhost:6060/azizulhasan/tts/wp-json',
@@ -224,141 +224,9 @@
         log('Player initialized (default theme)', 'info');
     }
 
-    // ---- Initialize Minimal Theme Player ----
-    function initMinimalPlayer() {
-        playerMinimal = new AtlasVoice({
-            contentSelector: '#article-body',
-            playerSelector: '#tts-player-minimal',
-            lang: 'en-GB',
-            theme: 'minimal'
-        });
-        log('Player initialized (minimal theme)', 'info');
-    }
-
     // ---- Init on page load ----
     initPlayer();
-    initMinimalPlayer();
 
-    // ---- Programmatic API test functions ----
-    function testPlay() {
-        log('Calling player.play()', 'info');
-        player.play();
-    }
-    function testPause() {
-        log('Calling player.pause()', 'info');
-        player.pause();
-    }
-    function testResume() {
-        log('Calling player.resume()', 'info');
-        player.resume();
-    }
-    function testStop() {
-        log('Calling player.stop()', 'info');
-        player.stop();
-    }
-    function testSpeak() {
-        var text = 'Hello! This is a custom text spoken through the AtlasVoice SDK. Pretty cool, right?';
-        log('Calling player.speak("' + text.substring(0, 40) + '...")', 'info');
-        player.speak(text);
-    }
-    function testSetRate() {
-        log('Calling player.setRate(1.5)', 'info');
-        player.setRate(1.5);
-        log('Rate set to 1.5. Play again to hear the difference.', 'data');
-    }
-    function testSetRate1() {
-        log('Calling player.setRate(1)', 'info');
-        player.setRate(1);
-        log('Rate reset to 1.', 'data');
-    }
-    function testDestroy() {
-        log('Calling player.destroy()', 'info');
-        player.destroy();
-        log('Player destroyed. Click "Re-init" to create a new instance.', 'data');
-    }
-    function testReinit() {
-        // Clear the player container
-        document.getElementById('tts-player').innerHTML = '';
-        initPlayer();
-    }
-
-    // ---- Voice/Language display functions ----
-    function showVoices() {
-        var voices = player.getVoices();
-        log('getVoices() returned ' + voices.length + ' voices', 'data');
-        var output = document.getElementById('voice-output');
-        output.style.display = 'block';
-        output.innerHTML = '<strong>All Voices (' + voices.length + '):</strong><br>';
-        for (var i = 0; i < voices.length; i++) {
-            output.innerHTML += '<div class="voice-item">' +
-                (i + 1) + '. ' + voices[i].name + ' (' + voices[i].lang + ')' +
-                (voices[i].default ? ' [DEFAULT]' : '') +
-                (voices[i].localService ? ' [LOCAL]' : ' [REMOTE]') +
-                '</div>';
-        }
-    }
-    function showLanguages() {
-        var langs = player.getLanguages();
-        log('getLanguages() returned ' + langs.length + ' languages', 'data');
-        var output = document.getElementById('voice-output');
-        output.style.display = 'block';
-        output.innerHTML = '<strong>Languages (' + langs.length + '):</strong><br>';
-        for (var i = 0; i < langs.length; i++) {
-            output.innerHTML += '<div class="voice-item">' + (i + 1) + '. ' + langs[i] + '</div>';
-        }
-    }
-    function showVoicesByLang() {
-        var voices = player.getVoicesByLang('en');
-        log('getVoicesByLang("en") returned ' + voices.length + ' voices', 'data');
-        var output = document.getElementById('voice-output');
-        output.style.display = 'block';
-        output.innerHTML = '<strong>English Voices (' + voices.length + '):</strong><br>';
-        for (var i = 0; i < voices.length; i++) {
-            output.innerHTML += '<div class="voice-item">' +
-                (i + 1) + '. ' + voices[i].name + ' (' + voices[i].lang + ')' +
-                '</div>';
-        }
-    }
-
-    // ---- Analytics test functions ----
-    function flushAnalytics() {
-        if (player && player.analytics) {
-            log('Manually sending analytics data to WP...', 'info');
-            player.analytics.sendSessionData();
-            log('Analytics sent! Check your WP database table: wp_atlasvoice_analytics', 'data');
-        } else {
-            log('Analytics not enabled on this player instance.', 'error');
-        }
-    }
-
-    function viewSessionData() {
-        var output = document.getElementById('analytics-output');
-        output.style.display = 'block';
-        try {
-            var raw = sessionStorage.getItem('atlasvoice_sdk_analytics_data');
-            if (raw) {
-                var data = JSON.parse(raw);
-                output.textContent = JSON.stringify(data, null, 2);
-                log('Session analytics data displayed below', 'data');
-            } else {
-                output.textContent = '(empty — no analytics events recorded yet. Click Play first!)';
-                log('No session analytics data found', 'info');
-            }
-        } catch (e) {
-            output.textContent = 'Error reading session data: ' + e.message;
-        }
-    }
-
-    // Auto-send analytics every 30 seconds for easy testing
-    setInterval(function () {
-        if (player && player.analytics) {
-            var raw = sessionStorage.getItem('atlasvoice_sdk_analytics_data');
-            if (raw && Object.keys(JSON.parse(raw)).length > 0) {
-                player.analytics.sendSessionData();
-                log('Auto-sent analytics (every 30s)', 'info');
-            }
-        }
-    }, 30000);
 </script>
 
 </body>
