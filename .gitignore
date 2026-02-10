@@ -111,3 +111,5 @@ production/
 
 
 .DS_Store
+.claude/
+README.md
