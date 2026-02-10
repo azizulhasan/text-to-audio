@@ -28,6 +28,8 @@ const productionSrc = [
 	'!src/**',
 	'!admin/js/tts/**',
 	'!admin/js/blocks/**',
+	'!admin/js/build/*.LICENSE.txt',
+	'!.claude/**',
 	'!admin/js/text-to-audio-dashboard.js',
 	'!admin/js/text-to-audio-button.js',
 	'!admin/js/TextToSpeech.js',
