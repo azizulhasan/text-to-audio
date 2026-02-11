@@ -31,6 +31,26 @@ export default function PlayingTrendChart({
     const [previousTrendData, setPreviousTrendData] = useState([]);
     const [isLoadingPrevious, setIsLoadingPrevious] = useState(false);
 
+    // Standard date range options
+    const standardDateRangeOptions = [
+        { value: "Last 7 Days", label: __("Last 7 Days", "text-to-audio") },
+        { value: "Last 30 Days", label: __("Last 30 Days", "text-to-audio") },
+        { value: "Last 90 Days", label: __("Last 90 Days", "text-to-audio") },
+        { value: "Custom", label: __("Custom Range", "text-to-audio") },
+    ];
+
+    // Build dropdown options dynamically - add globalDateRange if not in standard options
+    const dateRangeOptions = useMemo(() => {
+        const options = [...standardDateRangeOptions];
+        const globalOptionExists = standardDateRangeOptions.some(
+            (option) => option.value === globalDateRange
+        );
+        if (!globalOptionExists && globalDateRange) {
+            options.unshift({ value: globalDateRange, label: globalDateRange });
+        }
+        return options;
+    }, [globalDateRange]);
+
     /**
      * Fetch previous period trend data when comparison is enabled
      */
@@ -368,10 +388,11 @@ export default function PlayingTrendChart({
                     onChange={(e) => onDateRangeChange && onDateRangeChange(e.target.value)}
                     size="sm"
                 >
-                    <option value="Last 7 Days">{__("Last 7 Days", "text-to-audio")}</option>
-                    <option value="Last 30 Days">{__("Last 30 Days", "text-to-audio")}</option>
-                    <option value="Last 90 Days">{__("Last 90 Days", "text-to-audio")}</option>
-                    <option value="Custom">{__("Custom Range", "text-to-audio")}</option>
+                    {dateRangeOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
                 </Form.Select>
             </div>
 

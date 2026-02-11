@@ -56,6 +56,33 @@ export default function EngagementFunnel({
 }) {
     const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
 
+    // Standard date range options
+    const standardDateRangeOptions = [
+        { value: "Last 7 Days", label: __("Last 7 Days", "text-to-audio") },
+        { value: "Last 30 Days", label: __("Last 30 Days", "text-to-audio") },
+        { value: "Last 90 Days", label: __("Last 90 Days", "text-to-audio") },
+    ];
+
+    // Build dropdown options dynamically - add globalDateRange if not in standard options
+    const dateRangeOptions = useMemo(() => {
+        const options = [...standardDateRangeOptions];
+
+        // Check if globalDateRange is already in standard options
+        const globalOptionExists = standardDateRangeOptions.some(
+            (option) => option.value === globalDateRange
+        );
+
+        // If globalDateRange is not in standard options, add it at the beginning
+        if (!globalOptionExists && globalDateRange) {
+            options.unshift({
+                value: globalDateRange,
+                label: globalDateRange, // Use the value as label (e.g., "All Time", "Last 999 Days")
+            });
+        }
+
+        return options;
+    }, [globalDateRange]);
+
     // Filter and aggregate funnel data based on component's date range
     const filteredFunnelData = useMemo(() => {
         if (!isProActive) return null;
@@ -153,9 +180,11 @@ export default function EngagementFunnel({
                     onChange={(e) => onDateRangeChange && onDateRangeChange(e.target.value)}
                     size="sm"
                 >
-                    <option value="Last 7 Days">{__("Last 7 Days", "text-to-audio")}</option>
-                    <option value="Last 30 Days">{__("Last 30 Days", "text-to-audio")}</option>
-                    <option value="Last 90 Days">{__("Last 90 Days", "text-to-audio")}</option>
+                    {dateRangeOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
                 </Form.Select>
             </div>
 
