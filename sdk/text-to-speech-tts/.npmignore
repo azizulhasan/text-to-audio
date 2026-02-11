@@ -1,10 +1,12 @@
 example.html
-example_Old.html
 example-commonjs.html
 example-commonjs.js
 example-esm.html
 example-esm.js
+webpack.config.js
+*.LICENSE.txt
 dist/
 node_modules/
 .git
 .gitignore
+text-to-speech-tts.js

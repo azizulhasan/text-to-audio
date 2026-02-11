@@ -25,7 +25,7 @@ npm install text-to-speech-tts
 
 ```html
 <link rel="stylesheet" href="node_modules/text-to-speech-tts/text-to-speech-tts.css">
-<script src="node_modules/text-to-speech-tts/text-to-speech-tts.js"></script>
+<script src="node_modules/text-to-speech-tts/text-to-speech-tts.min.js"></script>
 <script>
   var player = new AtlasVoice({
     contentSelector: '#article-body',

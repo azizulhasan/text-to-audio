@@ -122,54 +122,33 @@
     <div id="article-body" class="article">
         <h3>The Future of Web Accessibility</h3>
         <p>Web accessibility is not just a nice-to-have feature. It is a fundamental requirement for building an inclusive internet. According to the World Health Organization, over one billion people worldwide live with some form of disability. Making websites accessible means ensuring everyone can access information regardless of their abilities.</p>
+        <p>Web accessibility is not just a nice-to-have feature. It is a fundamental requirement for building an inclusive internet. According to the World Health Organization, over one billion people worldwide live with some form of disability. Making websites accessible means ensuring everyone can access information regardless of their abilities.</p>
+        <p>Text-to-speech technology plays a crucial role in web accessibility. It allows users who are visually impaired, have learning disabilities, or simply prefer audio content to consume information through their ears instead of their eyes. Modern browsers provide the Web Speech API, which includes the Speech Synthesis interface for converting text to spoken words.</p>
         <p>Text-to-speech technology plays a crucial role in web accessibility. It allows users who are visually impaired, have learning disabilities, or simply prefer audio content to consume information through their ears instead of their eyes. Modern browsers provide the Web Speech API, which includes the Speech Synthesis interface for converting text to spoken words.</p>
         <p>The AtlasVoice SDK makes it easy for any developer to add text-to-speech functionality to their website. With just a few lines of JavaScript, you can provide your users with a complete audio experience including play, pause, resume controls, voice selection, and language options. All powered by the voices available on the user's device!</p>
+        <p>The AtlasVoice SDK makes it easy for any developer to add text-to-speech functionality to their website. With just a few lines of JavaScript, you can provide your users with a complete audio experience including play, pause, resume controls, voice selection, and language options. All powered by the voices available on the user's device!</p>
     </div>
-
-    <!-- ============================================================ -->
-    <!-- PLAYER (Minimal Theme) -->
-    <!-- ============================================================ -->
-    <h2>2. Minimal Theme Player</h2>
-    <div id="tts-player-minimal"></div>
 
     <hr>
 
     <!-- ============================================================ -->
-    <!-- PROGRAMMATIC API TEST -->
+    <!-- ANALYTICS TEST -->
     <!-- ============================================================ -->
     <div class="api-section">
-        <h2>3. Programmatic API</h2>
+        <h2>2. Analytics</h2>
+        <p style="font-size:13px;color:#666;margin-bottom:12px;">Analytics tracks play, pause, resume, end, listening time, and device info. Data is sent to your WP site via the REST API.</p>
         <div class="btn-group">
-            <button class="btn btn-primary" onclick="testPlay()">play()</button>
-            <button class="btn" onclick="testPause()">pause()</button>
-            <button class="btn" onclick="testResume()">resume()</button>
-            <button class="btn" onclick="testStop()">stop()</button>
-            <button class="btn" onclick="testSpeak()">speak('Hello!')</button>
-            <button class="btn" onclick="testSetRate()">setRate(1.5)</button>
-            <button class="btn" onclick="testSetRate1()">setRate(1)</button>
-            <button class="btn" onclick="testDestroy()">destroy()</button>
-            <button class="btn" onclick="testReinit()">Re-init</button>
+            <button class="btn btn-primary" onclick="flushAnalytics()">Send Analytics Now</button>
+            <button class="btn" onclick="viewSessionData()">View Session Data</button>
         </div>
-    </div>
-
-    <!-- ============================================================ -->
-    <!-- VOICES & LANGUAGES -->
-    <!-- ============================================================ -->
-    <div class="api-section">
-        <h2>4. Available Voices</h2>
-        <div class="btn-group">
-            <button class="btn" onclick="showVoices()">getVoices()</button>
-            <button class="btn" onclick="showLanguages()">getLanguages()</button>
-            <button class="btn" onclick="showVoicesByLang()">getVoicesByLang('en')</button>
-        </div>
-        <div id="voice-output" class="voice-list" style="display:none;"></div>
+        <div id="analytics-output" style="display:none;background:#f8f9fa;padding:12px;border-radius:4px;border:1px solid #e0e0e0;font-size:12px;font-family:monospace;white-space:pre-wrap;max-height:250px;overflow-y:auto;margin-top:10px;"></div>
     </div>
 
     <!-- ============================================================ -->
     <!-- EVENT LOG CONSOLE -->
     <!-- ============================================================ -->
     <div class="api-section">
-        <h2>5. Event Console <button class="clear-btn" onclick="clearConsole()">Clear</button></h2>
+        <h2>3. Event Console <button class="clear-btn" onclick="clearConsole()">Clear</button></h2>
         <div id="console"></div>
     </div>
 </div>
@@ -177,7 +156,7 @@
 <!-- ============================================================ -->
 <!-- LOAD SDK -->
 <!-- ============================================================ -->
-<script src="text-to-speech-tts.js"></script>
+<script src="text-to-speech-tts.min.js"></script>
 <script>
     var player, playerMinimal;
 
@@ -207,7 +186,16 @@
             rate: 1,
             pitch: 1,
             volume: 1,
-            theme: 'default'
+            theme: 'default',
+            analytics: {
+                enabled: true,
+                wpRestUrl: 'http://localhost:6060/azizulhasan/tts/wp-json',
+                postId: 12321231,
+                credentials: {
+                    username: 'admin',
+                    password: 'fYcc H7hq xG4F BHmp CQTm zKL6'
+                }
+            }
         });
 
         // Register event listeners
@@ -236,101 +224,9 @@
         log('Player initialized (default theme)', 'info');
     }
 
-    // ---- Initialize Minimal Theme Player ----
-    function initMinimalPlayer() {
-        playerMinimal = new AtlasVoice({
-            contentSelector: '#article-body',
-            playerSelector: '#tts-player-minimal',
-            lang: 'en-GB',
-            theme: 'minimal'
-        });
-        log('Player initialized (minimal theme)', 'info');
-    }
-
     // ---- Init on page load ----
     initPlayer();
-    initMinimalPlayer();
 
-    // ---- Programmatic API test functions ----
-    function testPlay() {
-        log('Calling player.play()', 'info');
-        player.play();
-    }
-    function testPause() {
-        log('Calling player.pause()', 'info');
-        player.pause();
-    }
-    function testResume() {
-        log('Calling player.resume()', 'info');
-        player.resume();
-    }
-    function testStop() {
-        log('Calling player.stop()', 'info');
-        player.stop();
-    }
-    function testSpeak() {
-        var text = 'Hello! This is a custom text spoken through the AtlasVoice SDK. Pretty cool, right?';
-        log('Calling player.speak("' + text.substring(0, 40) + '...")', 'info');
-        player.speak(text);
-    }
-    function testSetRate() {
-        log('Calling player.setRate(1.5)', 'info');
-        player.setRate(1.5);
-        log('Rate set to 1.5. Play again to hear the difference.', 'data');
-    }
-    function testSetRate1() {
-        log('Calling player.setRate(1)', 'info');
-        player.setRate(1);
-        log('Rate reset to 1.', 'data');
-    }
-    function testDestroy() {
-        log('Calling player.destroy()', 'info');
-        player.destroy();
-        log('Player destroyed. Click "Re-init" to create a new instance.', 'data');
-    }
-    function testReinit() {
-        // Clear the player container
-        document.getElementById('tts-player').innerHTML = '';
-        initPlayer();
-    }
-
-    // ---- Voice/Language display functions ----
-    function showVoices() {
-        var voices = player.getVoices();
-        log('getVoices() returned ' + voices.length + ' voices', 'data');
-        var output = document.getElementById('voice-output');
-        output.style.display = 'block';
-        output.innerHTML = '<strong>All Voices (' + voices.length + '):</strong><br>';
-        for (var i = 0; i < voices.length; i++) {
-            output.innerHTML += '<div class="voice-item">' +
-                (i + 1) + '. ' + voices[i].name + ' (' + voices[i].lang + ')' +
-                (voices[i].default ? ' [DEFAULT]' : '') +
-                (voices[i].localService ? ' [LOCAL]' : ' [REMOTE]') +
-                '</div>';
-        }
-    }
-    function showLanguages() {
-        var langs = player.getLanguages();
-        log('getLanguages() returned ' + langs.length + ' languages', 'data');
-        var output = document.getElementById('voice-output');
-        output.style.display = 'block';
-        output.innerHTML = '<strong>Languages (' + langs.length + '):</strong><br>';
-        for (var i = 0; i < langs.length; i++) {
-            output.innerHTML += '<div class="voice-item">' + (i + 1) + '. ' + langs[i] + '</div>';
-        }
-    }
-    function showVoicesByLang() {
-        var voices = player.getVoicesByLang('en');
-        log('getVoicesByLang("en") returned ' + voices.length + ' voices', 'data');
-        var output = document.getElementById('voice-output');
-        output.style.display = 'block';
-        output.innerHTML = '<strong>English Voices (' + voices.length + '):</strong><br>';
-        for (var i = 0; i < voices.length; i++) {
-            output.innerHTML += '<div class="voice-item">' +
-                (i + 1) + '. ' + voices[i].name + ' (' + voices[i].lang + ')' +
-                '</div>';
-        }
-    }
 </script>
 
 </body>

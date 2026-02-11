@@ -2,12 +2,12 @@
  * AtlasVoice SDK — ES Modules Example
  *
  * Usage with modern bundlers (Vite, Rollup, esbuild) or browsers:
- *   1. Copy text-to-speech-tts.js into your project
- *   2. import AtlasVoice from 'text-to-speech-tts'
- *   3. Bundle or use <script type="module" src="example-esm.js">
+ *   1. Copy text-to-speech-tts.min.js and text-to-speech-tts.esm.js into your project
+ *   2. import AtlasVoice from './text-to-speech-tts.esm.js'
+ *   3. Use <script type="module" src="example-esm.js"> or bundle with Vite/Rollup
  */
 
-import AtlasVoice from 'text-to-speech-tts';
+import AtlasVoice from './text-to-speech-tts.esm.js';
 
 let player;
 

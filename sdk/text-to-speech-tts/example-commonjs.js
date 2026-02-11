@@ -2,13 +2,13 @@
  * AtlasVoice SDK — CommonJS Example
  *
  * Usage with bundlers like Webpack or Browserify:
- *   1. npm install (or copy text-to-speech-tts.js into your project)
+ *   1. npm install (or copy text-to-speech-tts.min.js into your project)
  *   2. require('text-to-speech-tts') in your code
  *   3. Bundle with: npx webpack example-commonjs.js -o dist/bundle.js
  *   4. Include dist/bundle.js in your HTML via <script> tag
  */
 
-const AtlasVoice = require('./text-to-speech-tts');
+const AtlasVoice = require('./text-to-speech-tts.min');
 
 var player;
 

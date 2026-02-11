@@ -1,17 +1,22 @@
 {
   "name": "text-to-speech-tts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A standalone JavaScript SDK for adding text-to-speech to any website using the browser's built-in speechSynthesis API.",
-  "main": "text-to-speech-tts.js",
-  "module": "text-to-speech-tts.js",
-  "browser": "text-to-speech-tts.js",
+  "main": "text-to-speech-tts.min.js",
+  "module": "text-to-speech-tts.esm.js",
+  "browser": "text-to-speech-tts.min.js",
   "types": "index.d.ts",
   "style": "text-to-speech-tts.css",
   "files": [
-    "text-to-speech-tts.js",
+    "text-to-speech-tts.min.js",
+    "text-to-speech-tts.esm.js",
     "text-to-speech-tts.css",
     "index.d.ts"
   ],
+  "scripts": {
+    "build": "webpack",
+    "prepublishOnly": "npm run build"
+  },
   "keywords": [
     "text-to-speech",
     "tts",
@@ -34,7 +39,9 @@
   "engines": {
     "node": ">=14"
   },
-  "dependencies": {
-    "text-to-speech-tts": "^1.0.0"
+  "devDependencies": {
+    "vite": "^7.3.1",
+    "webpack": "^5.105.1",
+    "webpack-cli": "^6.0.1"
   }
 }
