@@ -930,6 +930,7 @@ export default function Analytics() {
                                         <PlayingTrendChart
                                             data={trendData}
                                             rawResults={rawResults}
+                                            previousData={previousPeriodData?.trend || []}
                                             dateRange={trendDateRange}
                                             globalDateRange={globalDateRange}
                                             onDateRangeChange={(range) => {
