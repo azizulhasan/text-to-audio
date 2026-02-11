@@ -109,12 +109,5 @@ dist
 # production
 production/
 
-# Windows null device file
-nul
-
-# Temporary files
-*.tmp
-*.temp
-
 
 .DS_Store

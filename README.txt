@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.2
+Stable tag: 2.1.3
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -456,6 +456,13 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+= 2.1.3  ( 10 Feb 2026 )  =
+Fixed :  MP3 player loading issue fixed.
+Added :  Default Pro player progress bar clickable.
+Added :  Default Pro player UI improved.
+Added :  Select language, voice, pitch, mute option added in Default Pro player
+
+
 = 2.1.2  ( 28 Jan 2026 )  =
 Fixed :  count issue fixed in TTA_Helper class
 Added :  Filter system added in `edit.php` page.
@@ -815,12 +822,9 @@ Improved: Pro version and free version performance issue improved.
 
 == Upgrade Notice ==
 
-= 2.1.2  =
-Fixed :  count issue fixed in TTA_Helper class
-Added :  Filter system added in `edit.php` page.
-Added :  Weather mp3 is added or not column added. (pro)
-Added :  TTS enabled  or not column added
-Introduced :  New UI introduced for Aliases.
-Updated :  Freemius version update.
-Updated :  duplicate post issue fixed. `https://wordpress.org/plugins/duplicate-page/`
+= 2.1.3 =
+Fixed :  MP3 player loading issue fixed.
+Added :  Default Pro player progress bar clickable.
+Added :  Default Pro player UI improved.
+Added :  Select language, voice, pitch, mute option added in Default Pro player
 

@@ -27,6 +27,25 @@ export default function PopularPosts({
 }) {
     const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
 
+    // Standard date range options
+    const standardDateRangeOptions = [
+        { value: "Last 7 Days", label: __("Last 7 Days", "text-to-audio") },
+        { value: "Last 30 Days", label: __("Last 30 Days", "text-to-audio") },
+        { value: "Last 90 Days", label: __("Last 90 Days", "text-to-audio") },
+    ];
+
+    // Build dropdown options dynamically - add globalDateRange if not in standard options
+    const dateRangeOptions = useMemo(() => {
+        const options = [...standardDateRangeOptions];
+        const globalOptionExists = standardDateRangeOptions.some(
+            (option) => option.value === globalDateRange
+        );
+        if (!globalOptionExists && globalDateRange) {
+            options.unshift({ value: globalDateRange, label: globalDateRange });
+        }
+        return options;
+    }, [globalDateRange]);
+
     // Demo data
     const demoPosts = [
         { post_id: 1, title: "Exploring the Wonders of Nature", totalScore: 310 },
@@ -103,9 +122,11 @@ export default function PopularPosts({
                     onChange={(e) => onDateRangeChange && onDateRangeChange(e.target.value)}
                     size="sm"
                 >
-                    <option value="Last 7 Days">{__("Last 7 Days", "text-to-audio")}</option>
-                    <option value="Last 30 Days">{__("Last 30 Days", "text-to-audio")}</option>
-                    <option value="Last 90 Days">{__("Last 90 Days", "text-to-audio")}</option>
+                    {dateRangeOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
                 </Form.Select>
             </div>
 

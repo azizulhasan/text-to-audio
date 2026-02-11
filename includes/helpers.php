@@ -218,12 +218,15 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     $content_read_time = apply_filters('tts_content_reading_time', 1, $content, $post);
     $text_arr = get_button_text($atts, $content_read_time);
 
+    $use_old_player = isset($settings['tta__settings_player_use_old_player']) && $settings['tta__settings_player_use_old_player'];
+    $use_old_player = apply_filters('tts_player_use_old_player', $use_old_player, $post);
+    $justify_content_css = $use_old_player ?  ' center' : ' space-between' ;
 
     // Button style.
     $backgroundColor = isset($customize['backgroundColor']) ? $customize['backgroundColor'] : '#184c53';
     $color = isset($customize['color']) ? $customize['color'] : '#ffffff';
     $width = isset($customize['width']) ? $customize['width'] : '100';
-    $height = isset($customize['height']) ? $customize['height'] . 'px' : '30px';
+    $height = isset($customize['height']) ? $customize['height'] . 'px' : '50px';
     $border = isset($customize['border']) ? $customize['border'] . 'px' : '0px';
     $border_color = isset($customize['border_color']) ? $customize['border_color'] : '#000000';
     $border_radius = isset($customize['borderRadius']) ? $customize['borderRadius'] . 'px' : '4px';
@@ -234,9 +237,9 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     $margin_left = isset($customize['marginLeft']) ? $customize['marginLeft'] . '%' : '0%';
     $margin_right = isset($customize['marginRight']) ? $customize['marginRight'] . 'px' : '0px';
     if ($is_block) {
-        $btn_style = 'background-color:' . esc_attr($backgroundColor) . ' !important;color:' . esc_attr($color) . ' !important;width:' . esc_attr($width) . '%;height:' . esc_attr($height) . ';font-size:' . esc_attr($font_size) . ';border:' . esc_attr($border) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:' . esc_attr($border_radius) . ';text-decoration:none;cursor:pointer;margin-top:' . esc_attr($margin_top) . ';margin-bottom:' . esc_attr($margin_bottom) . ';margin-left:' . esc_attr($margin_left) . ';margin-right:' . esc_attr($margin_right) . ';';
+        $btn_style = 'background-color:' . esc_attr($backgroundColor) . ' !important;color:' . esc_attr($color) . ' !important;width:' . esc_attr($width) . '%;height:' . esc_attr($height) . ';font-size:' . esc_attr($font_size) . ';border:' . esc_attr($border) . ';display:flex;align-content:center;justify-content:'.$justify_content_css.';align-items:center;border-radius:' . esc_attr($border_radius) . ';text-decoration:none;cursor:pointer;margin-top:' . esc_attr($margin_top) . ';margin-bottom:' . esc_attr($margin_bottom) . ';margin-left:' . esc_attr($margin_left) . ';margin-right:' . esc_attr($margin_right) . ';';
     } else {
-        $btn_style = 'background-color:' . esc_attr($backgroundColor) . ';color:' . esc_attr($color) . ';width:' . esc_attr($width) . '%;height:' . esc_attr($height) . ';font-size:' . esc_attr($font_size) . ';border:' . esc_attr($border) . ';display:flex;align-content:center;justify-content:center;align-items:center;border-radius:' . esc_attr($border_radius) . ';text-decoration:none;cursor:pointer;margin-top:' . esc_attr($margin_top) . ';margin-bottom:' . esc_attr($margin_bottom) . ';margin-left:' . esc_attr($margin_left) . ';margin-right:' . esc_attr($margin_right) . ';';
+        $btn_style = 'background-color:' . esc_attr($backgroundColor) . ';color:' . esc_attr($color) . ';width:' . esc_attr($width) . '%;height:' . esc_attr($height) . ';font-size:' . esc_attr($font_size) . ';border:' . esc_attr($border) . ';display:flex;align-content:center;justify-content:'.$justify_content_css.';align-items:center;border-radius:' . esc_attr($border_radius) . ';text-decoration:none;cursor:pointer;margin-top:' . esc_attr($margin_top) . ';margin-bottom:' . esc_attr($margin_bottom) . ';margin-left:' . esc_attr($margin_left) . ';margin-right:' . esc_attr($margin_right) . ';';
     }
 
     //Custom Css
@@ -271,6 +274,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
         'text_before_content' => $text_before_content,
         'text_after_content'  => $text_after_content,
         'get_content_from_dom' => $get_content_from_dom,
+        'use_old_player' => $use_old_player,
     ];
 
     do_action('tts_enqueue_button_scripts', $params);
@@ -345,6 +349,7 @@ function get_enqueued_js_object($params, $plugin_all_settings)
         var postId = "<?php echo $post->ID; ?>";
         var fileURLs = <?php echo json_encode($mp3_file_urls); ?>;
         var get_content_from_dom = <?php echo json_encode($get_content_from_dom); ?>;
+        var use_old_player = "<?php echo $use_old_player; ?>";
 
 
 
@@ -358,7 +363,8 @@ function get_enqueued_js_object($params, $plugin_all_settings)
             readingTime: readingTime,
             postId: postId,
             fileURLs: fileURLs,
-            get_content_from_dom:get_content_from_dom
+            get_content_from_dom:get_content_from_dom,
+            use_old_player:use_old_player
         };
 
 

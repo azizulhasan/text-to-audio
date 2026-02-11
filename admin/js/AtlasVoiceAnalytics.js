@@ -578,7 +578,10 @@ class AtlasVoiceAnalytics {
     }
     #country(){
         const timeZone = this.#getTimeZone();
-        const tzData = ct.getTimezone(timeZone);
+        let tzData = null;
+        if(window?.ct) {
+            tzData = ct.getTimezone(timeZone);
+        }
         const countryData = tzData ? ct.getCountry(tzData.countries[0]) : null;
 
         return countryData ? countryData.name : 'Unknown';
