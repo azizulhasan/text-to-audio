@@ -309,7 +309,7 @@ class TTA_Notices {
                  data-which="voice_and_language" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <p><?php
                     /* translators: 1: Content message about speechSynthesis, 2: Heading */
-                    printf( esc_html__( '%2$s %1$s', "text-to-audio" ), '<p>This plugin uses the built-in <code>speechSynthesis</code> browser API — no external API is involved. Because support varies by browser and device, some Android phones or languages may not work as expected. We've improved compatibility programmatically, but browser-specific differences in voices and language availability may still occur. These issues are fully resolved in the <strong>Pro version</strong> using a different method.</p><p><a href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility" target="_blank">Check device support here →</a></p>', "<h3>Text To Speech TTS: Having Voice And Language Issues? Here's Why!</h3>" ); //phpcs:ignore
+                    printf( esc_html__( '%2$s %1$s', "text-to-audio" ), "<p>This plugin uses the built-in <code>speechSynthesis</code> browser API — no external API is involved. Because support varies by browser and device, some Android phones or languages may not work as expected. We've improved compatibility programmatically, but browser-specific differences in voices and language availability may still occur. These issues are fully resolved in the <strong>Pro version</strong> using a different method.</p><p><a href='https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility' target='_blank'>Check device support here →</a></p>", "<h3>Text To Speech TTS: Having Voice And Language Issues? Here's Why!</h3>" ); //phpcs:ignore
                     ?></p>
                 <?php
                 if ( ! is_pro_active() ) { ?>
@@ -645,7 +645,7 @@ class TTA_Notices {
                 <?php /* translators: 1: Plugin name, 2: Logo div, 3: Line break, 4: Language string, 5: Contact link, 6: Heading */ ?>
                 <p><?php
 					printf(
-						esc_html__( '%6$s %2$s  We are seeking contributors to help translate this plugin into %4$s. If you're interested in assisting, we'd love to hear from you! Please reach out to us %5$s, and we'll provide all the necessary guidance.. %3$s Thank you for choosing %1$s.', "text-to-audio" ),
+						esc_html__( " %6$s %2$s  We are seeking contributors to help translate this plugin into %4$s. If you're interested in assisting, we'd love to hear from you! Please reach out to us %5$s, and we'll provide all the necessary guidance.. %3$s Thank you for choosing %1$s.", "text-to-audio" ),
 						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						'<div class="tta-review-notice-logo"></div>',
 						'<br/>',
