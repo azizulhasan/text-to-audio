@@ -94,11 +94,14 @@ export default function OSAnalytics({
 
     // Convert to array and sort by count
     const osArray = Object.entries(displayData)
-        .map(([name, count]) => ({
-            name: name.charAt(0).toUpperCase() + name.slice(1),
-            count: count,
-            icon: OS_ICONS[name.toLowerCase()] || OS_ICONS.other,
-        }))
+        .map(([name, count]) => {
+            const strippedName = name.replace(/[0-9__. ]/g, "");
+            return {
+                name: name.charAt(0).toUpperCase() + name.slice(1),
+                count: count,
+                icon: OS_ICONS[strippedName.toLowerCase()] || OS_ICONS.other,
+            }
+        })
         .sort((a, b) => b.count - a.count);
 
     // Apply limit for free version

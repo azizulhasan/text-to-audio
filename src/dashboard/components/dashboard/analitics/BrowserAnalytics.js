@@ -109,12 +109,15 @@ export default function BrowserAnalytics({
 
     // Convert to array and sort by count
     const browserArray = Object.entries(displayData)
-        .map(([name, count]) => ({
-            name: name,
-            count: count,
-            percentage: calculatePercentage(count, total),
-            icon: BROWSER_ICONS[name.toLowerCase()] || BROWSER_ICONS.other,
-        }))
+        .map(([name, count]) => {
+            const strippedName = name.replace(/[0-9__.]/g, "");
+            return {
+                name: name,
+                count: count,
+                percentage: calculatePercentage(count, total),
+                icon: BROWSER_ICONS[strippedName.toLowerCase()] || BROWSER_ICONS.other,
+            }
+        })
         .sort((a, b) => b.count - a.count);
 
     const content = (
