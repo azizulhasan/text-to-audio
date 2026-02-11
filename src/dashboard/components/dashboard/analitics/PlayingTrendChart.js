@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { __ } from "@wordpress/i18n";
 import { Form } from "react-bootstrap";
 
@@ -28,6 +28,97 @@ export default function PlayingTrendChart({
     const chartRef = useRef(null);
     const chartInstanceRef = useRef(null);
     const [showComparison, setShowComparison] = useState(false);
+    const [previousTrendData, setPreviousTrendData] = useState([]);
+    const [isLoadingPrevious, setIsLoadingPrevious] = useState(false);
+
+    // Standard date range options
+    const standardDateRangeOptions = [
+        { value: "Last 7 Days", label: __("Last 7 Days", "text-to-audio") },
+        { value: "Last 30 Days", label: __("Last 30 Days", "text-to-audio") },
+        { value: "Last 90 Days", label: __("Last 90 Days", "text-to-audio") },
+        { value: "Custom", label: __("Custom Range", "text-to-audio") },
+    ];
+
+    // Build dropdown options dynamically - add globalDateRange if not in standard options
+    const dateRangeOptions = useMemo(() => {
+        const options = [...standardDateRangeOptions];
+        const globalOptionExists = standardDateRangeOptions.some(
+            (option) => option.value === globalDateRange
+        );
+        if (!globalOptionExists && globalDateRange) {
+            options.unshift({ value: globalDateRange, label: globalDateRange });
+        }
+        return options;
+    }, [globalDateRange]);
+
+    /**
+     * Fetch previous period trend data when comparison is enabled
+     */
+    const fetchPreviousPeriodData = useCallback(async () => {
+        if (!isProActive || !showComparison) return;
+
+        // Calculate previous period dates
+        const now = new Date();
+        let daysBack = 30;
+
+        switch (dateRange) {
+            case "Yesterday":
+                daysBack = 1;
+                break;
+            case "Last 7 Days":
+                daysBack = 7;
+                break;
+            case "Last 30 Days":
+                daysBack = 30;
+                break;
+            case "Last 90 Days":
+                daysBack = 90;
+                break;
+            default:
+                daysBack = 30;
+        }
+
+        const previousToDate = new Date(now);
+        previousToDate.setDate(previousToDate.getDate() - daysBack);
+        const previousFromDate = new Date(previousToDate);
+        previousFromDate.setDate(previousFromDate.getDate() - daysBack);
+
+        const fromDateStr = previousFromDate.toISOString().split("T")[0];
+        const toDateStr = previousToDate.toISOString().split("T")[0];
+
+        setIsLoadingPrevious(true);
+
+        try {
+            const response = await fetch(
+                `${tta_obj.api_url}tta/v1/trend_data?date_range=Custom&from_date=${fromDateStr}&to_date=${toDateStr}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-WP-Nonce": window?.ttsObj?.rest_nonce ?? ttsObjPro?.rest_nonce,
+                    },
+                }
+            );
+            const result = await response.json();
+
+            if (result.status && result.data) {
+                setPreviousTrendData(result.data);
+            }
+        } catch (error) {
+            console.error("Error fetching previous period data:", error);
+        } finally {
+            setIsLoadingPrevious(false);
+        }
+    }, [isProActive, showComparison, dateRange]);
+
+    // Fetch previous period data when comparison is toggled on
+    useEffect(() => {
+        if (showComparison && isProActive) {
+            fetchPreviousPeriodData();
+        } else {
+            setPreviousTrendData([]);
+        }
+    }, [showComparison, isProActive, dateRange, fetchPreviousPeriodData]);
 
     // Demo data
     const demoData = {
@@ -90,6 +181,23 @@ export default function PlayingTrendChart({
     // Use filtered data or original data
     const displayTrendData = filteredTrendData || data;
 
+    // Calculate previous period data based on fetched data or props
+    const previousPeriodData = useMemo(() => {
+        if (!isProActive || !showComparison) return [];
+
+        // Use fetched previous trend data first
+        if (previousTrendData && previousTrendData.length > 0) {
+            return previousTrendData.map(d => d.plays || d.playCount || 0);
+        }
+
+        // If previousData is provided from parent, use it
+        if (previousData && previousData.length > 0) {
+            return previousData.map(d => d.plays || d.playCount || 0);
+        }
+
+        return [];
+    }, [isProActive, showComparison, previousTrendData, previousData]);
+
     // Use real data if available, otherwise demo
     const chartData = displayTrendData.length > 0 ? {
         labels: displayTrendData.map(d => {
@@ -99,7 +207,7 @@ export default function PlayingTrendChart({
         }),
         playingQuantity: displayTrendData.map(d => d.plays || d.playCount || 0),
         playingTime: displayTrendData.map(d => Math.round((d.time || d.playTime || 0) / 60)), // Convert seconds to minutes
-        previousQuantity: previousData.map(d => d.plays || d.playCount || 0),
+        previousQuantity: previousPeriodData,
     } : demoData;
 
     // Initialize/Update Chart
@@ -251,7 +359,7 @@ export default function PlayingTrendChart({
                 chartInstanceRef.current.destroy();
             }
         };
-    }, [showComparison, displayTrendData, previousData, isProActive]);
+    }, [showComparison, displayTrendData, previousPeriodData, isProActive]);
 
     return (
         <div className="tta_analytics_card tta_trend_chart_card">
@@ -280,10 +388,11 @@ export default function PlayingTrendChart({
                     onChange={(e) => onDateRangeChange && onDateRangeChange(e.target.value)}
                     size="sm"
                 >
-                    <option value="Last 7 Days">{__("Last 7 Days", "text-to-audio")}</option>
-                    <option value="Last 30 Days">{__("Last 30 Days", "text-to-audio")}</option>
-                    <option value="Last 90 Days">{__("Last 90 Days", "text-to-audio")}</option>
-                    <option value="Custom">{__("Custom Range", "text-to-audio")}</option>
+                    {dateRangeOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
                 </Form.Select>
             </div>
 
