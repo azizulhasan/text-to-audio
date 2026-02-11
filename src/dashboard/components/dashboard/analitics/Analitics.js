@@ -990,21 +990,29 @@ export default function Analytics() {
                                 </div>
                             </Form>
                         ) : (
-                            /* Show message when analytics is disabled */
-                            <div className="tta_analytics_disabled_message">
-                                <div className="tta_disabled_content">
-                                    <div className="tta_disabled_icon">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="M3 3v18h18" />
-                                            <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
-                                        </svg>
+                            <>
+                                 {/*Show message when analytics is disabled */}
+                                <div className="tta_analytics_disabled_message">
+                                    <div className="tta_disabled_content">
+                                        <div className="tta_disabled_icon">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M3 3v18h18" />
+                                                <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
+                                            </svg>
+                                        </div>
+                                        <h3>{__("Analytics is Currently Disabled", "text-to-audio")}</h3>
+                                        <p>
+                                            {__("Enable analytics using the toggle above to start tracking your TTS player interactions and view detailed metrics.", "text-to-audio")}
+                                        </p>
                                     </div>
-                                    <h3>{__("Analytics is Currently Disabled", "text-to-audio")}</h3>
-                                    <p>
-                                        {__("Enable analytics using the toggle above to start tracking your TTS player interactions and view detailed metrics.", "text-to-audio")}
-                                    </p>
                                 </div>
-                            </div>
+                                {/* Save Button */}
+                                <div className="tta_save_button_wrapper">
+                                    <Button type="button" onClick={e=>{handleSubmit(e)}} className="tta_btn">
+                                        {__("Save", "text-to-audio")}
+                                    </Button>
+                                </div>
+                            </>
                         )}
                     </Col>
 
