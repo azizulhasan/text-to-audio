@@ -644,15 +644,15 @@ class TTA_Notices {
                  data-which="translate" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <?php /* translators: 1: Plugin name, 2: Logo div, 3: Line break, 4: Language string, 5: Contact link, 6: Heading */ ?>
                 <p><?php
-					printf(
-						esc_html__( " %6$s %2$s  We are seeking contributors to help translate this plugin into %4$s. If you're interested in assisting, we'd love to hear from you! Please reach out to us %5$s, and we'll provide all the necessary guidance.. %3$s Thank you for choosing %1$s.", "text-to-audio" ),
-						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-						'<div class="tta-review-notice-logo"></div>',
-						'<br/>',
-						$language_string, //phpcs:ignore
-						$contact_link, //phpcs:ignore
-						"<h3>$pluginName</h3>" //phpcs:ignore
-					);
+                    printf(
+                        esc_html__( "%6\$s%2\$s We are seeking contributors to help translate this plugin into %4\$s. If you're interested in assisting, we'd love to hear from you! Please reach out to us %5\$s, and we'll provide all the necessary guidance. %3\$s Thank you for choosing %1\$s.", "text-to-audio" ),
+                        $pluginName,
+                        '<div class="tta-review-notice-logo"></div>',
+                        '<br/>',
+                        $language_string,
+                        $contact_link,
+                        "<h3> $pluginName</h3>" // Space added here
+                    );
 					?></p>
                 <p>
                     <a class="button button-primary" data-response="translate" href="#"
