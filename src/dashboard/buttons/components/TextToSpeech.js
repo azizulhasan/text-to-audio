@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
+import { __ } from "@wordpress/i18n";
 
 //TODO : Need to apply onClick function to all icons and dynamic  custom class on demand
 import { Close, Play, Replay, Settings, SoundWave, Speed, VoiceOver, Pause } from "../assets/icons/TTSIcons";
-import { shouldCallPositionFunction } from "../assets/buttonsHelper";
 
 let speech = null
 let TextToSpeechPro = null;
@@ -26,6 +26,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
     const [isResumed, setIsResumed] = useState(false)
     const [progressbarValue, setProgressbarValue] = useState(0)
     const [shouldFloat, setShouldFloat] = useState(false)
+    const originalTopRef = useRef(null)
     const [isSeeking, setIsSeeking] = useState(false)
 
     // Settings panel states
@@ -999,7 +1000,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                                 aria-valuemax={100}
                                                 style={{ height: '5px', cursor: 'pointer', position: 'relative' }}
                                                 onClick={handleProgressBarClick}
-                                                title="Click to seek"
+                                                title={__("Click to seek", "text-to-audio")}
                                             >
                                                 {/* Loading indicator for seek operation */}
                                                 {isSeeking && (
@@ -1051,7 +1052,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                     backgroundColor: isSettingOpen ? `${buttonCSS?.color}20` : 'transparent',
                                     transition: 'background-color 0.2s'
                                 }}
-                                title="Settings"
+                                title={__("Settings", "text-to-audio")}
                             >
                                 {isSettingOpen ? (
                                     <Close onClick={(e) => handleSetting(e)} />
@@ -1074,54 +1075,28 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
 
     useEffect(() => {
         if(!window?.ttsObj?.settings?.settings?.tta__settings_stop_floating_button) {
-            const detectScroll = (e) => {
-                let button = document.getElementById('tts_button_should_float');
-                let postTitle = null;
-                let titlePosition = 0;
-                if (document.querySelector('.post-title')) {
-                    postTitle = document.querySelector('.post-title')
-                    if (shouldCallPositionFunction(postTitle)) {
-                        titlePosition = postTitle.getBoundingClientRect().top;
-                    }
-                } else if (document.querySelector('.entry-title')) {
-                    postTitle = document.querySelector('.entry-title')
-                    if (shouldCallPositionFunction(postTitle)) {
-                        titlePosition = postTitle.getBoundingClientRect().top;
-                    }
-                } else if (document.querySelector('.wp-block-post-title')) {
-                    postTitle = document.querySelector('.wp-block-post-title')
-                    if (shouldCallPositionFunction(postTitle)) {
-                        titlePosition = postTitle.getBoundingClientRect().top;
-                    }
-                }else if (document.querySelector('h1.elementor-heading-title')) {
-                    postTitle = document.querySelector('h1.elementor-heading-title')
-                    if (shouldCallPositionFunction(postTitle)) {
-                        titlePosition = postTitle.getBoundingClientRect().top;
-                    }
-                }
+            let buttonEl = document.getElementById('tts_button_should_float');
+            if (!buttonEl) return;
 
-                if (button) {
-                    if (shouldCallPositionFunction(button)) {
-                        let topPos = Math.floor(button.getBoundingClientRect().top);
-                        if (topPos < 1) {
-                            setShouldFloat(true)
-                        }
-                    }
+            // Save the player's original absolute position in the document.
+            // This is theme-independent — no CSS selectors needed.
+            originalTopRef.current = buttonEl.getBoundingClientRect().top + window.scrollY;
 
-                    if (titlePosition > 0) {
-                        setShouldFloat(false)
-                    }
+            const detectScroll = () => {
+                if (originalTopRef.current === null) return;
+                if (window.scrollY > originalTopRef.current) {
+                    setShouldFloat(true);
+                } else {
+                    setShouldFloat(false);
                 }
-            }
-            document.addEventListener('scroll', detectScroll, { passive: true })
-            document.addEventListener('wheel', detectScroll, { passive: true })
+            };
+
+            document.addEventListener('scroll', detectScroll, {passive: true})
 
             return () => {
-                document.removeEventListener('scroll', detectScroll, { passive: true })
-                document.removeEventListener('wheel', detectScroll, { passive: true })
+                document.removeEventListener('scroll', detectScroll)
             }
         }
-
 
     }, [])
 
@@ -1350,11 +1325,11 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
 
                         {/* Modal Header */}
                         <div className="tts__settings-modal-header">
-                            <h3 className="tts__settings-modal-title">Player Settings</h3>
+                            <h3 className="tts__settings-modal-title">{__("Player Settings", "text-to-audio")}</h3>
                             <button
                                 className="tts__settings-modal-close"
                                 onClick={closeSettingsModal}
-                                title="Close"
+                                title={__("Close", "text-to-audio")}
                             >
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={buttonCSS?.color || '#ffffff'} strokeWidth="2">
                                     <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -1365,7 +1340,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
 
                         {/* Language Selection */}
                         <div className="tts__setting-row">
-                            <label className="tts__setting-label">Language</label>
+                            <label className="tts__setting-label">{__("Language", "text-to-audio")}</label>
                             <select
                                 value={currentLanguage}
                                 onChange={handleLanguageChange}
@@ -1398,7 +1373,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
 
                         {/* Voice Selection */}
                         <div className="tts__setting-row">
-                            <label className="tts__setting-label">Voice</label>
+                            <label className="tts__setting-label">{__("Voice", "text-to-audio")}</label>
                             <select
                                 value={currentVoice}
                                 onChange={handleVoiceChange}
@@ -1432,7 +1407,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                         {/* Speed Control */}
                         <div className="tts__setting-row">
                             <div className="tts__setting-header">
-                                <label className="tts__setting-label" style={{ marginBottom: 0 }}>Speed</label>
+                                <label className="tts__setting-label" style={{ marginBottom: 0 }}>{__("Speed", "text-to-audio")}</label>
                                 <span className="tts__setting-value">{getSpeedLabel(currentRate)}</span>
                             </div>
                             <input
@@ -1450,7 +1425,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                         {/* Pitch Control */}
                         <div className="tts__setting-row">
                             <div className="tts__setting-header">
-                                <label className="tts__setting-label" style={{ marginBottom: 0 }}>Pitch</label>
+                                <label className="tts__setting-label" style={{ marginBottom: 0 }}>{__("Pitch", "text-to-audio")}</label>
                                 <span className="tts__setting-value">{currentPitch.toFixed(1)}</span>
                             </div>
                             <input
@@ -1468,7 +1443,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                         {/* Volume Control with Mute Button */}
                         <div className="tts__setting-row">
                             <div className="tts__setting-header">
-                                <label className="tts__setting-label" style={{ marginBottom: 0 }}>Volume</label>
+                                <label className="tts__setting-label" style={{ marginBottom: 0 }}>{__("Volume", "text-to-audio")}</label>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <span className="tts__setting-value">{Math.round(currentVolume * 100)}%</span>
                                     <button
@@ -1483,7 +1458,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                             alignItems: 'center',
                                             transition: 'background-color 0.2s ease'
                                         }}
-                                        title={isMuted ? 'Unmute' : 'Mute'}
+                                        title={isMuted ? __('Unmute', 'text-to-audio') : __('Mute', 'text-to-audio')}
                                     >
                                         {isMuted ? (
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={buttonCSS?.color || '#ffffff'} strokeWidth="2">

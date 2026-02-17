@@ -33,12 +33,12 @@ const AnalyticsMultiSelect = ({options, onChange}) => {
                         </Badge>
                     ))
                 ) : (
-                    <span>{__('No IDs selected')}</span>
+                    <span>{__('No IDs selected', 'text-to-audio')}</span>
                 )}
             </div>
             <Dropdown>
                 <Dropdown.Toggle variant="success" id="dropdown-basic">
-                    Select IDs
+                    {__('Select IDs', 'text-to-audio')}
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>

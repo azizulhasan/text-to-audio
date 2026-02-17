@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from "react";
+import { __ } from "@wordpress/i18n";
 import {Button, Col, Container, Form, OverlayTrigger, Row, Tooltip} from "react-bootstrap";
 import UpgradeToPro from "../../UpgradeToPro";
 import toast from '../../context/Notify';
 import {postWithoutImage} from "../../context/utilities";
-import {__} from "@wordpress/i18n";
 
 
 export default function Aliases() {
@@ -83,7 +83,7 @@ export default function Aliases() {
                 console.log(err);
             });
     };
- 
+
     return isDataLoaded ? (
         <React.Fragment>
             <Container fluid className="tta-container">

@@ -131,7 +131,7 @@ export default function Settings() {
         }
         let cache_clear_notice_text = "";
         if (settings?.tta__settings_clear_all_cache) {
-            cache_clear_notice_text = "All cache deleted";
+            cache_clear_notice_text = __("All cache deleted", "text-to-audio");
         }
         let formData = new FormData();
         formData.append("fields", JSON.stringify(settings));
@@ -140,7 +140,7 @@ export default function Settings() {
             .then((res) => {
                 setSettings(res.data);
                 toast(
-                    'Successfully Saved. Now go to the "Customization" menu.',
+                    __('Successfully Saved. Now go to the "Customization" menu.', "text-to-audio"),
                     "info",
                     {
                         autoClose: 15000,
@@ -194,7 +194,7 @@ export default function Settings() {
                         placement="top"
                         overlay={
                             <Tooltip>
-                                {questionTooltip || __("Help information about this setting")}
+                                {questionTooltip || __("Help information about this setting", "text-to-audio")}
                             </Tooltip>
                         }
                     >
@@ -212,7 +212,7 @@ export default function Settings() {
                         placement="top"
                         overlay={
                             <Tooltip>
-                                {tooltipText || __("Click To Know How It Works?")}
+                                {tooltipText || __("Click To Know How It Works?", "text-to-audio")}
                             </Tooltip>
                         }
                     >
@@ -249,10 +249,10 @@ export default function Settings() {
                         {/* Header Card */}
                         <div className="bg-white rounded p-3 mb-3 shadow-sm">
                             <h2 className="fs-3 fw-bold mb-2 text-dark">
-                                Configure Settings
+                                {__("Configure Settings", "text-to-audio")}
                             </h2>
                             <p className="text-secondary m-0 small">
-                                Configure text-to-speech player behavior and content selection
+                                {__("Configure text-to-speech player behavior and content selection", "text-to-audio")}
                             </p>
                         </div>
 
@@ -260,10 +260,10 @@ export default function Settings() {
                         <Form onSubmit={handleSubmit}>
                             <div className="tta-card">
                                 <SettingRow
-                                    label="Add Button or Player Automatically"
+                                    label={__("Add Button or Player Automatically", "text-to-audio")}
                                     questionIcon={true}
                                     questionTooltip={
-                                        "The “Add Button or Player Automatically” feature in a Text-to-Speech (TTS) plugin allows the plugin to automatically insert a play button or audio player into your posts or pages — without needing any manual setup."
+                                        __("The \"Add Button or Player Automatically\" feature in a Text-to-Speech (TTS) plugin allows the plugin to automatically insert a play button or audio player into your posts or pages — without needing any manual setup.", "text-to-audio")
                                     }
                                 >
                                     <ToggleSwitch
@@ -277,10 +277,10 @@ export default function Settings() {
                                 {window?.ttsObj?.player_id < 3 && (
                                     <>
                                         <SettingRow
-                                            label="Continue Reading After Switching To Another Tab"
+                                            label={__("Continue Reading After Switching To Another Tab", "text-to-audio")}
                                             questionIcon={true}
                                             questionTooltip={__(
-                                                "When enabled, text-to-speech will continue playing even if you navigate away from the current tab"
+                                                "When enabled, text-to-speech will continue playing even if you navigate away from the current tab", "text-to-audio"
                                             )}
                                         >
                                             <ToggleSwitch
@@ -295,10 +295,10 @@ export default function Settings() {
 
                                         {!settings.tta__settings_stop_auto_pause_after_switching_tab && (
                                             <SettingRow
-                                                label="Stop Auto Play After Switching To TTS Tab"
+                                                label={__("Stop Auto Play After Switching To TTS Tab", "text-to-audio")}
                                                 questionIcon={true}
                                                 questionTooltip={__(
-                                                    "Automatically pause playback when switching back to the TTS tab from another tab"
+                                                    "Automatically pause playback when switching back to the TTS tab from another tab", "text-to-audio"
                                                 )}
                                             >
                                                 <ToggleSwitch
@@ -317,10 +317,10 @@ export default function Settings() {
                                 {/* When Scroll Down Stop Floating Player - Missing from new */}
                                 {window?.ttsObj?.player_id > 1 && (
                                     <SettingRow
-                                        label="When Scroll Down Stop Floating Player"
+                                        label={__("When Scroll Down Stop Floating Player", "text-to-audio")}
                                         questionIcon={true}
                                         questionTooltip={__(
-                                            "Automatically pause the floating player when users scroll down the page"
+                                            "Automatically pause the floating player when users scroll down the page", "text-to-audio"
                                         )}
                                     >
                                         <ToggleSwitch
@@ -336,10 +336,10 @@ export default function Settings() {
                                 {window?.ttsObj?.is_pro_active && (
                                     <>
                                         <SettingRow
-                                            label="Apply number format"
+                                            label={__("Apply number format", "text-to-audio")}
                                             questionIcon={true}
                                             questionTooltip={__(
-                                                "Convert numbers to spoken words (e.g., '123' becomes 'one hundred twenty-three')"
+                                                "Convert numbers to spoken words (e.g., '123' becomes 'one hundred twenty-three')", "text-to-audio"
                                             )}
                                             youtubeLink="https://www.youtube.com/watch?v=xQCw7mJXrxo&t=46s"
                                         >
@@ -380,10 +380,10 @@ export default function Settings() {
                                 )}
 
                                 <SettingRow
-                                    label="Add Post Title To Read"
+                                    label={__("Add Post Title To Read", "text-to-audio")}
                                     questionIcon={true}
                                     questionTooltip={__(
-                                        "Include the post title in the audio playback before reading the main content"
+                                        "Include the post title in the audio playback before reading the main content", "text-to-audio"
                                     )}
                                 >
                                     <ToggleSwitch
@@ -395,10 +395,10 @@ export default function Settings() {
                                 </SettingRow>
 
                                 <SettingRow
-                                    label="Add Post Excerpt To Read"
+                                    label={__("Add Post Excerpt To Read", "text-to-audio")}
                                     questionIcon={true}
                                     questionTooltip={__(
-                                        "Include the post excerpt/summary in the audio playback before reading the main content"
+                                        "Include the post excerpt/summary in the audio playback before reading the main content", "text-to-audio"
                                     )}
                                 >
                                     <ToggleSwitch
@@ -414,13 +414,13 @@ export default function Settings() {
                                     <Row className="mb-4">
                                         <Col md={6}>
                                             <Form.Label className="setting-label text-dark mb-2">
-                                                Add Text Before Content(intro)
+                                                {__("Add Text Before Content(intro)", "text-to-audio")}
                                                 <OverlayTrigger
                                                     placement="top"
                                                     overlay={
                                                         <Tooltip>
                                                             {__(
-                                                                "Custom text that will be read aloud before the main content begins"
+                                                                "Custom text that will be read aloud before the main content begins", "text-to-audio"
                                                             )}
                                                         </Tooltip>
                                                     }
@@ -440,19 +440,19 @@ export default function Settings() {
                                                 name="tta__settings_text_before_content"
                                                 value={settings.tta__settings_text_before_content}
                                                 onChange={(e) => handleChange(e)}
-                                                placeholder="Add Text Before Content"
+                                                placeholder={__("Add Text Before Content", "text-to-audio")}
                                                 className="tta-textarea"
                                             />
                                         </Col>
                                         <Col md={6}>
                                             <Form.Label className="setting-label text-dark mb-2">
-                                                Add Text After Content(outro)
+                                                {__("Add Text After Content(outro)", "text-to-audio")}
                                                 <OverlayTrigger
                                                     placement="top"
                                                     overlay={
                                                         <Tooltip>
                                                             {__(
-                                                                "Custom text that will be read aloud after the main content finishes"
+                                                                "Custom text that will be read aloud after the main content finishes", "text-to-audio"
                                                             )}
                                                         </Tooltip>
                                                     }
@@ -471,7 +471,7 @@ export default function Settings() {
                                                 name="tta__settings_text_after_content"
                                                 value={settings.tta__settings_text_after_content}
                                                 onChange={(e) => handleChange(e)}
-                                                placeholder="Add Text After Content"
+                                                placeholder={__("Add Text After Content", "text-to-audio")}
                                                 className="tta-textarea"
                                             />
                                         </Col>
@@ -481,7 +481,7 @@ export default function Settings() {
                                     <Row className="mb-4">
                                         <Col xs={12}>
                                             <Form.Label className="setting-label text-dark mb-2">
-                                                Allow Listening For Post Type
+                                                {__("Allow Listening For Post Type", "text-to-audio")}
                                                 {/* <i className="fas fa-question-circle ms-2" style={{ color: '#999', fontSize: '14px' }}></i> */}
                                             </Form.Label>
                                             <MultiSelect
@@ -499,7 +499,7 @@ export default function Settings() {
                                     <Row className="mb-4">
                                         <Col xs={12}>
                                             <Form.Label className="setting-label text-dark mb-2">
-                                                Allow Listening For Post Status
+                                                {__("Allow Listening For Post Status", "text-to-audio")}
                                                 {/* <i className="fas fa-question-circle ms-2" style={{ color: '#999', fontSize: '14px' }}></i> */}
                                             </Form.Label>
                                             <MultiSelect
@@ -511,7 +511,7 @@ export default function Settings() {
                                                     settings.tta__settings_allow_listening_for_posts_status
                                                 }
                                                 options={postsStatus}
-                                                toastMessage="On Free Version You Can Select Only 1 post type."
+                                                toastMessage={__("On Free Version You Can Select Only 1 post type.", "text-to-audio")}
                                             />
                                         </Col>
                                     </Row>
@@ -522,12 +522,12 @@ export default function Settings() {
                                             <div className="d-flex align-items-center justify-content-between mb-2">
                                                 <div className="d-flex align-items-center">
                                                     <Form.Label className="setting-label text-dark m-0">
-                                                        Include Content By CSS Selectors
+                                                        {__("Include Content By CSS Selectors", "text-to-audio")}
                                                     </Form.Label>
                                                     {!ttsObj.is_pro_active && (
                                                         <ProLockIcon
                                                             tooltipText={__(
-                                                                "Include Content By CSS Selectors feature is available in pro version"
+                                                                "Include Content By CSS Selectors feature is available in pro version", "text-to-audio"
                                                             )}
                                                         />
                                                     )}
@@ -536,7 +536,7 @@ export default function Settings() {
                                                     placement="top"
                                                     overlay={
                                                         <Tooltip>
-                                                            {__("Click To Know How It Works?")}
+                                                            {__("Click To Know How It Works?", "text-to-audio")}
                                                         </Tooltip>
                                                     }
                                                 >
@@ -558,8 +558,8 @@ export default function Settings() {
                                                 onChange={(e) => handleChange(e)}
                                                 placeholder={
                                                     ttsObj.is_pro_active
-                                                        ? "Multiple selector will be multiline."
-                                                        : "Some content may be missing, It can be found by css selectors"
+                                                        ? __("Multiple selector will be multiline.", "text-to-audio")
+                                                        : __("Some content may be missing, It can be found by css selectors", "text-to-audio")
                                                 }
                                                 disabled={!ttsObj.is_pro_active}
                                                 className="tta-textarea"
@@ -572,12 +572,12 @@ export default function Settings() {
                                             <div className="d-flex align-items-center justify-content-between mb-2">
                                                 <div className="d-flex align-items-center">
                                                     <Form.Label className="setting-label text-dark m-0">
-                                                        Exclude Content By CSS Selectors
+                                                        {__("Exclude Content By CSS Selectors", "text-to-audio")}
                                                     </Form.Label>
                                                     {!ttsObj.is_pro_active && (
                                                         <ProLockIcon
                                                             tooltipText={__(
-                                                                "Exclude Content By CSS Selectors feature is available in pro version"
+                                                                "Exclude Content By CSS Selectors feature is available in pro version", "text-to-audio"
                                                             )}
                                                         />
                                                     )}
@@ -586,7 +586,7 @@ export default function Settings() {
                                                     placement="top"
                                                     overlay={
                                                         <Tooltip>
-                                                            {__("Click To Know How It Works?")}
+                                                            {__("Click To Know How It Works?", "text-to-audio")}
                                                         </Tooltip>
                                                     }
                                                 >
@@ -610,8 +610,8 @@ export default function Settings() {
                                                 onChange={(e) => handleChange(e)}
                                                 placeholder={
                                                     ttsObj.is_pro_active
-                                                        ? "Multiple selector will be multiline."
-                                                        : "Exclude content by CSS selectors"
+                                                        ? __("Multiple selector will be multiline.", "text-to-audio")
+                                                        : __("Exclude content by CSS selectors", "text-to-audio")
                                                 }
                                                 disabled={!ttsObj.is_pro_active}
                                                 className="tta-textarea"
@@ -623,8 +623,7 @@ export default function Settings() {
                                                     display: "block",
                                                 }}
                                             >
-                                                You can add ".atlasvoice_no_read" class to exclude
-                                                content.
+                                                {__('You can add ".atlasvoice_no_read" class to exclude content.', "text-to-audio")}
                                             </small>
                                         </Col>
                                     </Row>
@@ -634,12 +633,12 @@ export default function Settings() {
                                             <div className="d-flex align-items-center justify-content-between mb-2">
                                                 <div className="d-flex align-items-center">
                                                     <Form.Label className="setting-label text-dark m-0">
-                                                        Exclude HTML Tags To Speak
+                                                        {__("Exclude HTML Tags To Speak", "text-to-audio")}
                                                     </Form.Label>
                                                     {!ttsObj.is_pro_active && (
                                                         <ProLockIcon
                                                             tooltipText={__(
-                                                                "Exclude Tags. So that its content skiped. Like ( Subscript, Superscript etc.) This is a pro feature."
+                                                                "Exclude Tags. So that its content skipped. Like ( Subscript, Superscript etc.) This is a pro feature.", "text-to-audio"
                                                             )}
                                                         />
                                                     )}
@@ -648,7 +647,7 @@ export default function Settings() {
                                                     placement="top"
                                                     overlay={
                                                         <Tooltip>
-                                                            {__("Click To Know How It Works?")}
+                                                            {__("Click To Know How It Works?", "text-to-audio")}
                                                         </Tooltip>
                                                     }
                                                 >
@@ -670,8 +669,8 @@ export default function Settings() {
                                                 onChange={(e) => handleChange(e)}
                                                 placeholder={
                                                     ttsObj.is_pro_active
-                                                        ? "Multiple Tags Will Be Pipe(|) Separated."
-                                                        : "Exclude tags is a pro feature."
+                                                        ? __("Multiple Tags Will Be Pipe(|) Separated.", "text-to-audio")
+                                                        : __("Exclude tags is a pro feature.", "text-to-audio")
                                                 }
                                                 disabled={!ttsObj.is_pro_active}
                                                 className="tta-textarea"
@@ -684,12 +683,12 @@ export default function Settings() {
                                             <div className="d-flex align-items-center justify-content-between mb-2">
                                                 <div className="d-flex align-items-center">
                                                     <Form.Label className="setting-label text-dark m-0">
-                                                        Exclude Texts To Speak
+                                                        {__("Exclude Texts To Speak", "text-to-audio")}
                                                     </Form.Label>
                                                     {!ttsObj.is_pro_active && (
                                                         <ProLockIcon
                                                             tooltipText={__(
-                                                                "Excluding texts to be spoken is a pro feature."
+                                                                "Excluding texts to be spoken is a pro feature.", "text-to-audio"
                                                             )}
                                                         />
                                                     )}
@@ -698,7 +697,7 @@ export default function Settings() {
                                                     placement="top"
                                                     overlay={
                                                         <Tooltip>
-                                                            {__("Click To Know How It Works?")}
+                                                            {__("Click To Know How It Works?", "text-to-audio")}
                                                         </Tooltip>
                                                     }
                                                 >
@@ -720,8 +719,8 @@ export default function Settings() {
                                                 onChange={(e) => handleChange(e)}
                                                 placeholder={
                                                     ttsObj.is_pro_active
-                                                        ? "Multiple Texts Will Be Pipe(|) Separated."
-                                                        : "Exclude texts is a pro feature."
+                                                        ? __("Multiple Texts Will Be Pipe(|) Separated.", "text-to-audio")
+                                                        : __("Exclude texts is a pro feature.", "text-to-audio")
                                                 }
                                                 disabled={!ttsObj.is_pro_active}
                                                 className="tta-textarea"
@@ -734,12 +733,12 @@ export default function Settings() {
                                             <div className="d-flex align-items-center justify-content-between mb-2">
                                                 <div className="d-flex align-items-center">
                                                     <Form.Label className="setting-label text-dark m-0">
-                                                        Exclude Posts By IDs To Speak
+                                                        {__("Exclude Posts By IDs To Speak", "text-to-audio")}
                                                     </Form.Label>
                                                     {!ttsObj.is_pro_active && (
                                                         <ProLockIcon
                                                             tooltipText={__(
-                                                                "Exclude more than 5 IDs is a pro feature"
+                                                                "Exclude more than 5 IDs is a pro feature", "text-to-audio"
                                                             )}
                                                         />
                                                     )}
@@ -748,7 +747,7 @@ export default function Settings() {
                                                     placement="top"
                                                     overlay={
                                                         <Tooltip>
-                                                            {__("Click To Know How It Works?")}
+                                                            {__("Click To Know How It Works?", "text-to-audio")}
                                                         </Tooltip>
                                                     }
                                                 >
@@ -770,8 +769,8 @@ export default function Settings() {
                                                 onChange={(e) => handleChange(e)}
                                                 placeholder={
                                                     ttsObj.is_pro_active
-                                                        ? "Multiple IDs Will Be Comma(,) Separated."
-                                                        : "Excluding more than 5 IDs is a pro feature. Multiple IDs Will Be Comma(,) Separated."
+                                                        ? __("Multiple IDs Will Be Comma(,) Separated.", "text-to-audio")
+                                                        : __("Excluding more than 5 IDs is a pro feature. Multiple IDs Will Be Comma(,) Separated.", "text-to-audio")
                                                 }
                                                 className="tta-textarea"
                                             />
@@ -783,12 +782,12 @@ export default function Settings() {
                                             <div className="d-flex align-items-center justify-content-between mb-2">
                                                 <div className="d-flex align-items-center">
                                                     <Form.Label className="setting-label text-dark m-0">
-                                                        Exclude Categories To Speak
+                                                        {__("Exclude Categories To Speak", "text-to-audio")}
                                                     </Form.Label>
                                                     {!ttsObj.is_pro_active && (
                                                         <ProLockIcon
                                                             tooltipText={__(
-                                                                "Exclude more than 1 categories is a pro feature"
+                                                                "Exclude more than 1 categories is a pro feature", "text-to-audio"
                                                             )}
                                                         />
                                                     )}
@@ -797,7 +796,7 @@ export default function Settings() {
                                                     placement="top"
                                                     overlay={
                                                         <Tooltip>
-                                                            {__("Click To Know How It Works?")}
+                                                            {__("Click To Know How It Works?", "text-to-audio")}
                                                         </Tooltip>
                                                     }
                                                 >
@@ -816,7 +815,7 @@ export default function Settings() {
                                                 name="tta__settings_exclude_categories"
                                                 multiselectIndex={2}
                                                 onChange={handleChange}
-                                                toastMessage="On Free Version You Can Select Only 1 Category."
+                                                toastMessage={__("On Free Version You Can Select Only 1 Category.", "text-to-audio")}
                                                 selectedItems={
                                                     settings.tta__settings_exclude_categories
                                                 }
@@ -830,12 +829,12 @@ export default function Settings() {
                                             <div className="d-flex align-items-center justify-content-between mb-2">
                                                 <div className="d-flex align-items-center">
                                                     <Form.Label className="setting-label text-dark m-0">
-                                                        Exclude Tags To Speak
+                                                        {__("Exclude Tags To Speak", "text-to-audio")}
                                                     </Form.Label>
                                                     {!ttsObj.is_pro_active && (
                                                         <ProLockIcon
                                                             tooltipText={__(
-                                                                "Exclude more than 1 tags is a pro feature"
+                                                                "Exclude more than 1 tags is a pro feature", "text-to-audio"
                                                             )}
                                                         />
                                                     )}
@@ -844,7 +843,7 @@ export default function Settings() {
                                                     placement="top"
                                                     overlay={
                                                         <Tooltip>
-                                                            {__("Click To Know How It Works?")}
+                                                            {__("Click To Know How It Works?", "text-to-audio")}
                                                         </Tooltip>
                                                     }
                                                 >
@@ -863,7 +862,7 @@ export default function Settings() {
                                                 name="tta__settings_exclude_wp_tags"
                                                 multiselectIndex={3}
                                                 onChange={handleChange}
-                                                toastMessage="On Free Version You Can Select Only 1 Tag."
+                                                toastMessage={__("On Free Version You Can Select Only 1 Tag.", "text-to-audio")}
                                                 selectedItems={settings.tta__settings_exclude_wp_tags}
                                                 options={Object.keys(tags)}
                                             />
@@ -871,7 +870,7 @@ export default function Settings() {
                                     </Row>
 
                                     {!window?.ttsObjPro?.is_pro_active && (
-                                        <SettingRow label="Enable Button Icon">
+                                        <SettingRow label={__("Enable Button Icon", "text-to-audio")}>
                                             <ToggleSwitch
                                                 checked={settings.tta__settings_display_btn_icon}
                                                 onChange={(e) => handleChange(e)}
@@ -881,7 +880,7 @@ export default function Settings() {
                                         </SettingRow>
                                     )}
 
-                                    <SettingRow label="Clear all cache">
+                                    <SettingRow label={__("Clear all cache", "text-to-audio")}>
                                         <ToggleSwitch
                                             checked={settings.tta__settings_clear_all_cache}
                                             onChange={(e) => handleChange(e)}
@@ -901,14 +900,8 @@ export default function Settings() {
                                         <button
                                             type="submit"
                                             className="tta_btn rounded-3 shadow-lg"
-                                            //   style={{
-                                            //     padding: "12px 32px",
-                                            //     fontSize: "16px",
-                                            //     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-                                            //     minWidth: "200px",
-                                            //   }}
                                         >
-                                            Save All
+                                            {__("Save All", "text-to-audio")}
                                         </button>
                                     </div>
                                 </div>
@@ -928,7 +921,7 @@ export default function Settings() {
         >
             <div>
                 <i className="fas fa-spinner fa-spin me-2"></i>
-                Loading...
+                {__("Loading...", "text-to-audio")}
             </div>
         </div>
     );

@@ -72,7 +72,7 @@ function is_pro_plugin_exists()
     return false;
 }
 
-if (!is_pro_plugin_exists() && !function_exists('ttsp_fs')) {
+if (     !function_exists('ttsp_fs')) {
     // Create a helper function for easy SDK access.
     function ttsp_fs()
     {
@@ -236,7 +236,7 @@ class TTA_Init
     {
         $plugin = new TTA();
         $plugin->run();
-        new TTA_Notices();
+
         add_action('init', function () {
             if (!defined('TTA_PRO_PLUGIN_PATH')) {
                 TTA_Lib_AtlasAiDev::instance()->init();
@@ -246,7 +246,7 @@ class TTA_Init
                 update_option('tts_rest_api_url', $rest_url);
                 TTA_Cache::set('tts_rest_api_url', $rest_url);
             }
-
+            new TTA_Notices();
             //Rest api init.
             new TTA_Api_Routes();
         }, 9999);
@@ -287,6 +287,15 @@ class TTA_Init
 
 }
 
+
+// Load text domain early
+add_action('plugins_loaded', function () {
+    load_plugin_textdomain(
+        'text-to-audio',
+        false,
+        dirname(plugin_basename(__FILE__)) . '/languages'
+    );
+});
 
 add_action('plugins_loaded', function () {
     //Rest api init.

@@ -1,9 +1,41 @@
 {
   "permissions": {
     "allow": [
+<<<<<<< HEAD
+      "Bash(msgfmt:*)",
+      "Bash(php compile-mo.php:*)",
+      "Bash(find:*)",
+      "Bash(where:*)",
+      "Bash(dir:*)",
+      "Bash(del \"D:\\\\xampp\\\\htdocs\\\\azizulhasan\\\\tts\\\\wp-content\\\\plugins\\\\text-to-audio\\\\languages\\\\compile-mo.php\")",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(wp --version:*)",
+      "Bash(node compile-translations.js:*)",
+      "Bash(certutil:*)",
+      "Bash(findstr:*)",
+      "Bash(node generate-json-translations.js:*)",
+      "Bash(node generate-l10n-php.js:*)",
+      "Bash(test:*)",
+      "Bash(npm install)",
+      "Bash(npm run build:*)",
+      "Bash(wp i18n make-pot:*)",
+      "Bash(/c/wp-cli/wp.bat i18n make-pot:*)",
+      "Bash(/c/wp-cli/wp.bat i18n make-json:*)",
+      "Bash(/c/wp-cli/wp.bat i18n make-mo:*)",
+      "Bash(node scripts/make-translations.js:*)",
+      "Bash(npm run translate:*)",
+      "Bash(wp i18n make-json:*)",
+      "Bash(python3:*)",
+      "Bash(wp.bat i18n make-json:*)",
+      "Bash(npm run production:*)",
+      "Bash(node -e:*)",
+      "Bash(node scripts/generate-translations.js:*)"
+=======
       "WebFetch(domain:gspeech.io)",
       "WebFetch(domain:trinityaudio.ai)",
       "WebFetch(domain:beyondwords.io)"
+>>>>>>> feature/TTS-206
     ]
   }
 }

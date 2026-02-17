@@ -9,8 +9,8 @@ const { PanelBody } = wp.components;
 const customizeButton = {
 	namespace: 'tta/customize-button',
 	object: {
-		title: __('Customize Button'),
-		description: __('Text to audio customize button.'),
+		title: __('Customize Button', 'text-to-audio'),
+		description: __('Text to audio customize button.', 'text-to-audio'),
 		icon: 'controls-play',
 		category: 'design',
 		keywords: [
@@ -73,10 +73,10 @@ function Customize(props) {
 		<InspectorControls style={{ marginBottom: '40px' }}>
 			<PanelBody
 				className='tta_block_body'
-				title={__('Customize Button')}>
+				title={__('Customize Button', 'text-to-audio')}>
 				<div>
 					<label htmlFor='backgroundColor'>
-						{__('BackGround Color')}
+						{__('BackGround Color', 'text-to-audio')}
 					</label>
 					<input
 						type='color'
@@ -84,22 +84,22 @@ function Customize(props) {
 						onChange={setBackgroundColor}
 						id='backgroundColor'
 						value={backgroundColor}
-						title={__('Choose your color')}
+						title={__('Choose your color', 'text-to-audio')}
 					/>
 				</div>
 				<div>
-					<label htmlFor='color'> {__('Text Color')}</label>
+					<label htmlFor='color'> {__('Text Color', 'text-to-audio')}</label>
 					<input
 						type='color'
 						name='color'
 						onChange={setColor}
 						id='color'
 						value={color}
-						title={__('Choose your color')}
+						title={__('Choose your color', 'text-to-audio')}
 					/>
 				</div>
 				<div>
-					<label htmlFor='width'>{__('Button Width (%)')}</label>
+					<label htmlFor='width'>{__('Button Width (%)', 'text-to-audio')}</label>
 					<input
 						type='number'
 						name='width'
@@ -108,16 +108,16 @@ function Customize(props) {
 						min={'0'}
 						max='100'
 						value={width}
-						title={__('Button Width')}
+						title={__('Button Width', 'text-to-audio')}
 					/>
 				</div>
 				<div>
-					<label htmlFor='custom_css'>{__('Custom CSS')}</label>
+					<label htmlFor='custom_css'>{__('Custom CSS', 'text-to-audio')}</label>
 					<textarea
 						name='custom_css'
 						onChange={setcustom_css}
 						value={custom_css ? custom_css : ''}
-						placeholder={__('class selector .tta__listen_content')}
+						placeholder={__('class selector .tta__listen_content', 'text-to-audio')}
 					/>
 				</div>
 			</PanelBody>
@@ -152,13 +152,13 @@ function Customize(props) {
 					border: border,
 				}}
 				type='button'
-				title={__('Text To Audio:  Tap to listen post.')}>
+				title={__('Text To Audio:  Tap to listen post.', 'text-to-audio')}>
 				{/* <span
 					className='dashicons dashicons-controls-play'
 					style={{
 						lineHeight: '1.5;',
 					}}></span> */}
-				{__('Listen')}
+				{__('Listen', 'text-to-audio')}
 			</button>
 			<style
 				dangerouslySetInnerHTML={{

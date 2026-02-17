@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-
+import { __ } from '@wordpress/i18n';
 import { ToggleButton, Form, Row, Col, Container } from 'react-bootstrap';
 
 /**
@@ -118,7 +118,7 @@ function Recording() {
 		let formData = {};
 		for (let [key, value] of form.entries()) {
 			if (key === '' || value === '') {
-				toast('Please fill the  field : ' + key);
+				toast(__('Please fill the  field : ', 'text-to-audio') + key);
 				return;
 			}
 
@@ -134,7 +134,7 @@ function Recording() {
 			.then((res) => {
 				setSettings(res.data);
 				setChecked(res.data.is_record_continously);
-				toast('Recording Data Saved');
+				toast(__('Recording Data Saved', 'text-to-audio'));
 			})
 			.catch((err) => {
 				console.log(err);

@@ -418,7 +418,7 @@ export default function Customize() {
           }}
           className="tta_btn"
         >
-           {__('Buy Now', 'text-to-audio')}
+          {__("Buy Now", "text-to-audio")}
         </button>
       </>,
       "info",
@@ -440,7 +440,7 @@ export default function Customize() {
         key !== "generate_mp3_date_from"
       ) {
         if (key === "" || value === "") {
-          toast("Please fill the  field : " + key);
+          toast(__("Please fill the  field : ", "text-to-audio") + key);
           return;
         }
       }
@@ -479,6 +479,7 @@ export default function Customize() {
 
     if (formData?.buttonSettings?.id == 4) {
       if (ttsObj.is_pro_active && !isGCAuthenticated) {
+
       notify(
         __("To select this player, you must authenticate first from the Integration menu", "text-to-audio"),
         "error",
@@ -497,7 +498,7 @@ export default function Customize() {
     if (formData?.buttonSettings?.id == 5) {
       if (ttsObj.is_pro_active && !isChatGPTAuthenticated) {
         notify(
-          "To select this player you have to authenticate first from Integration menu",
+          __("To select this player you have to authenticate first from Integration menu", "text-to-audio"),
           "error",
           {
             autoClose: 8000,
@@ -609,9 +610,9 @@ export default function Customize() {
       <Row>
         <Col xs={12} lg={8}>
           <div className="bg-white rounded p-3 mb-3 shadow-sm">
-            <h2 className="fs-3 fw-bold mb-2 text-dark">{__('Customization', 'text-to-audio')}</h2>
+            <h2 className="fs-3 fw-bold mb-2 text-dark">{__("Customization","text-to-audio")}</h2>
             <p className="text-secondary m-0 small">
-                {__('Customize the player & design to match your brand and preferences.', 'text-to-audio')}
+              {__("Customize the player & design to match your brand and preferences.","text-to-audio")}
             </p>
           </div>
 
@@ -631,7 +632,7 @@ export default function Customize() {
               <div className="mb-3">
                 <div className="d-flex align-items-center gap-2 mb-2">
                   <label className="mb-0 fw-semibold">
-                     {__('Write here something and click listen button', 'text-to-audio')}
+                    {__("Write here something and click listen button", "text-to-audio")}
                   </label>
 
                   {/* Question Icon with Tooltip */}
@@ -639,7 +640,7 @@ export default function Customize() {
                     placement="top"
                     overlay={
                       <Tooltip id="tooltip-help">
-                    {__('Enter your text here and click the listen button to hear it spoken aloud.', 'text-to-audio')}
+                       {__(" Enter your text here and click the listen button to hear it spoken aloud.", "text-to-audio")}
                       </Tooltip>
                     }
                   >
@@ -657,7 +658,7 @@ export default function Customize() {
                     placement="top"
                     overlay={
                       <Tooltip id="tooltip-help">
-                         {__('Click To Know How It Works?', 'text-to-audio')}
+                        {__("Click To Know How It Works?","text-to-audio")}
                       </Tooltip>
                     }
                   >
@@ -669,7 +670,7 @@ export default function Customize() {
                       href="https://www.youtube.com/watch?v=h4VJxM-mh74&t=936s"
                       target="_blank"
                       rel="noopener noreferrer"
-                      title="Watch Tutorial"
+                      title={__("Watch Tutorial", "text-to-audio")}
                     >
                       <i className="fab fa-youtube"></i>
                     </Button>
@@ -745,7 +746,7 @@ export default function Customize() {
                     style={listeningBtnStyle2}
                     type="button"
                     className="tta_listen-button"
-                    title="Text To Audio:  Tap to listen post."
+                    title={__("Text To Audio:  Tap to listen post.", "text-to-audio")}
                   >
                     <i className="fas fa-play-circle me-2"></i>
                     {tta_obj.buttonTextArr.listen_text}
@@ -756,7 +757,7 @@ export default function Customize() {
 
             {/* Design Customization Section */}
             <div className="bg-white rounded p-3 mb-3 shadow-sm">
-              <h5 className="mb-3 fw-semibold">{__('Design Customization', 'text-to-audio')}</h5>
+              <h5 className="mb-3 fw-semibold">{__("Design Customization", "text-to-audio")}</h5>
               <TTSButtonDesign
                 customCSS={customCSS}
                 listeningBtnStyle={listeningBtnStyle}
@@ -766,9 +767,10 @@ export default function Customize() {
 
             {/* Shortcode Section */}
             <div className="bg-white rounded p-3 mb-3 shadow-sm">
-            <h6 className="mb-3">
-              {__('Short Code | Attributes value must be wrapped with double quotation ( " )', 'text-to-audio')}
-            </h6>
+              <h6 className="mb-3">
+                {__("Short Code | Attributes value must be wrapped with double quotation ( \" )","text-to-audio")}
+
+              </h6>
               <Form.Control
                 as="textarea"
                 name="tta_play_btn_shortcode"
@@ -783,9 +785,9 @@ export default function Customize() {
                 size="sm"
                 onClick={(e) =>
                   copyToClipBoard(
-                    "tta_play_btn_shortcode",
+                    __("tta_play_btn_shortcode", "text-to-audio"),
                     true,
-                    "Copied ShortCode",
+                    __("Copied ShortCode","text-to-audio"),
                     toast
                   )
                 }
