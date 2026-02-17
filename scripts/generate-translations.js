@@ -222,6 +222,11 @@ function generatePHPMO(locale, phpStrings, poFilePath) {
         if (fs.existsSync(tempPOFile)) {
             fs.unlinkSync(tempPOFile);
         }
+        // Clean up spurious 'nul' file created by wp-cli on Windows
+        const nulFile = path.join(languagesDir, 'nul');
+        if (fs.existsSync(nulFile)) {
+            fs.unlinkSync(nulFile);
+        }
     }
 }
 
