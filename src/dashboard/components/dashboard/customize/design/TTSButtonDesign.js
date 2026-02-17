@@ -317,68 +317,6 @@ export default function TTSButtonDesign({
           </>
         )} */}
             </div>
-            {listeningBtnStyle?.buttonSettings?.id === 1 && (
-                <>
-                    {/* Border Color Section */}
-                    <div className="tta_section_title">{__("Border Color", "text-to-audio")}</div>
-                    <div className="tta_color_palette">
-                        <div className="tta_color_palette_item">
-                            <Form.Control
-                                type="color"
-                                name="border_color"
-                                onChange={handleChange}
-                                id="border_color"
-                                value={listeningBtnStyle.border_color}
-                                title={__("Border Color", "text-to-audio")}
-                            />
-                        </div>
-
-
-                        {[
-                            "#E91E63",
-                            "#26C6DA",
-                            "#CDDC39",
-                            "#FFEB3B",
-                            "#FFAB91",
-                            "#EF9A9A",
-                            "#FF8A80",
-                            "#FF6E63",
-                            "#FF5252",
-                            "#E57373",
-                            "#EF5350",
-                        ].map((color) => (
-                            <div
-                                key={color}
-                                className="tta_color_display tta_color_swatch_clickable"
-                                style={{
-                                    backgroundColor: color,
-                                    width: "40px",
-                                    height: "40px",
-                                }}
-                                onClick={() =>
-                                    handleChange({
-                                        target: {name: "border_color", value: color},
-                                    })
-                                }
-                            />
-                        ))}
-                    </div>
-
-
-                    <div style={{display: "none"}}>
-                        <Form.Control
-                            type="number"
-                            name="fontSize"
-                            onChange={handleChange}
-                            id="fontSize"
-                            min="0"
-                            max="100"
-                            value={listeningBtnStyle.fontSize}
-                            title={__("Font size", "text-to-audio")}
-                        />
-                    </div>
-                </>
-            )}
 
             {/* Custom CSS Section */}
             <div className="tta_section_title">{__("Custom CSS", "text-to-audio")}</div>
