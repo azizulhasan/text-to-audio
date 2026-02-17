@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 
 //TODO : Need to apply onClick function to all icons and dynamic  custom class on demand
 import { Close, Play, Replay, Settings, SoundWave, Speed, VoiceOver, Pause } from "../assets/icons/TTSIcons";
-import { shouldCallPositionFunction } from "../assets/buttonsHelper";
 
 let speech = null
 let TextToSpeechPro = null;
@@ -26,6 +25,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
     const [isResumed, setIsResumed] = useState(false)
     const [progressbarValue, setProgressbarValue] = useState(0)
     const [shouldFloat, setShouldFloat] = useState(false)
+    const originalTopRef = useRef(null)
     const [isSeeking, setIsSeeking] = useState(false)
 
     // Settings panel states
@@ -1074,54 +1074,28 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
 
     useEffect(() => {
         if(!window?.ttsObj?.settings?.settings?.tta__settings_stop_floating_button) {
-            const detectScroll = (e) => {
-                let button = document.getElementById('tts_button_should_float');
-                let postTitle = null;
-                let titlePosition = 0;
-                if (document.querySelector('.post-title')) {
-                    postTitle = document.querySelector('.post-title')
-                    if (shouldCallPositionFunction(postTitle)) {
-                        titlePosition = postTitle.getBoundingClientRect().top;
-                    }
-                } else if (document.querySelector('.entry-title')) {
-                    postTitle = document.querySelector('.entry-title')
-                    if (shouldCallPositionFunction(postTitle)) {
-                        titlePosition = postTitle.getBoundingClientRect().top;
-                    }
-                } else if (document.querySelector('.wp-block-post-title')) {
-                    postTitle = document.querySelector('.wp-block-post-title')
-                    if (shouldCallPositionFunction(postTitle)) {
-                        titlePosition = postTitle.getBoundingClientRect().top;
-                    }
-                }else if (document.querySelector('h1.elementor-heading-title')) {
-                    postTitle = document.querySelector('h1.elementor-heading-title')
-                    if (shouldCallPositionFunction(postTitle)) {
-                        titlePosition = postTitle.getBoundingClientRect().top;
-                    }
-                }
+            let buttonEl = document.getElementById('tts_button_should_float');
+            if (!buttonEl) return;
 
-                if (button) {
-                    if (shouldCallPositionFunction(button)) {
-                        let topPos = Math.floor(button.getBoundingClientRect().top);
-                        if (topPos < 1) {
-                            setShouldFloat(true)
-                        }
-                    }
+            // Save the player's original absolute position in the document.
+            // This is theme-independent — no CSS selectors needed.
+            originalTopRef.current = buttonEl.getBoundingClientRect().top + window.scrollY;
 
-                    if (titlePosition > 0) {
-                        setShouldFloat(false)
-                    }
+            const detectScroll = () => {
+                if (originalTopRef.current === null) return;
+                if (window.scrollY > originalTopRef.current) {
+                    setShouldFloat(true);
+                } else {
+                    setShouldFloat(false);
                 }
-            }
-            document.addEventListener('scroll', detectScroll, { passive: true })
-            document.addEventListener('wheel', detectScroll, { passive: true })
+            };
+
+            document.addEventListener('scroll', detectScroll, {passive: true})
 
             return () => {
-                document.removeEventListener('scroll', detectScroll, { passive: true })
-                document.removeEventListener('wheel', detectScroll, { passive: true })
+                document.removeEventListener('scroll', detectScroll)
             }
         }
-
 
     }, [])
 
