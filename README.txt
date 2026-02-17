@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.3
+Stable tag: 2.1.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -456,6 +456,16 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+= 2.1.4  ( 17 Feb 2026 )  =
+Added :  New UI add for Default player.
+Added :  Old UI back option added for Default player.
+Added :  New Analytics UI introduced.
+Added :  Select language, voice, pitch, mute option added in Default player
+Fixed :  Missing Customization UI added.
+Fixed :  Content Split issue fixed. (Pro)
+Fixed :  Player floating issue for all themes. (Pro)
+
+
 = 2.1.3  ( 10 Feb 2026 )  =
 Fixed :  MP3 player loading issue fixed.
 Added :  Default Pro player progress bar clickable.
@@ -822,9 +832,12 @@ Improved: Pro version and free version performance issue improved.
 
 == Upgrade Notice ==
 
-= 2.1.3 =
-Fixed :  MP3 player loading issue fixed.
-Added :  Default Pro player progress bar clickable.
-Added :  Default Pro player UI improved.
-Added :  Select language, voice, pitch, mute option added in Default Pro player
+= 2.1.4   =
+Added :  New UI add for Default player.
+Added :  Old UI back option added for Default player.
+Added :  New Analytics UI introduced.
+Added :  Select language, voice, pitch, mute option added in Default player
+Fixed :  Missing Customization UI added.
+Fixed :  Content Split issue fixed. (Pro)
+Fixed :  Player floating issue for all themes. (Pro)
 
