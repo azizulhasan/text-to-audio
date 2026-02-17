@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { __ } from "@wordpress/i18n";
 
 //TODO : Need to apply onClick function to all icons and dynamic  custom class on demand
 import { Close, Play, Replay, Settings, SoundWave, Speed, VoiceOver, Pause } from "../assets/icons/TTSIcons";
@@ -999,7 +1000,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                                 aria-valuemax={100}
                                                 style={{ height: '5px', cursor: 'pointer', position: 'relative' }}
                                                 onClick={handleProgressBarClick}
-                                                title="Click to seek"
+                                                title={__("Click to seek", "text-to-audio")}
                                             >
                                                 {/* Loading indicator for seek operation */}
                                                 {isSeeking && (
@@ -1051,7 +1052,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                     backgroundColor: isSettingOpen ? `${buttonCSS?.color}20` : 'transparent',
                                     transition: 'background-color 0.2s'
                                 }}
-                                title="Settings"
+                                title={__("Settings", "text-to-audio")}
                             >
                                 {isSettingOpen ? (
                                     <Close onClick={(e) => handleSetting(e)} />
@@ -1324,11 +1325,11 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
 
                         {/* Modal Header */}
                         <div className="tts__settings-modal-header">
-                            <h3 className="tts__settings-modal-title">Player Settings</h3>
+                            <h3 className="tts__settings-modal-title">{__("Player Settings", "text-to-audio")}</h3>
                             <button
                                 className="tts__settings-modal-close"
                                 onClick={closeSettingsModal}
-                                title="Close"
+                                title={__("Close", "text-to-audio")}
                             >
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={buttonCSS?.color || '#ffffff'} strokeWidth="2">
                                     <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -1339,7 +1340,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
 
                         {/* Language Selection */}
                         <div className="tts__setting-row">
-                            <label className="tts__setting-label">Language</label>
+                            <label className="tts__setting-label">{__("Language", "text-to-audio")}</label>
                             <select
                                 value={currentLanguage}
                                 onChange={handleLanguageChange}
@@ -1372,7 +1373,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
 
                         {/* Voice Selection */}
                         <div className="tts__setting-row">
-                            <label className="tts__setting-label">Voice</label>
+                            <label className="tts__setting-label">{__("Voice", "text-to-audio")}</label>
                             <select
                                 value={currentVoice}
                                 onChange={handleVoiceChange}
@@ -1406,7 +1407,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                         {/* Speed Control */}
                         <div className="tts__setting-row">
                             <div className="tts__setting-header">
-                                <label className="tts__setting-label" style={{ marginBottom: 0 }}>Speed</label>
+                                <label className="tts__setting-label" style={{ marginBottom: 0 }}>{__("Speed", "text-to-audio")}</label>
                                 <span className="tts__setting-value">{getSpeedLabel(currentRate)}</span>
                             </div>
                             <input
@@ -1424,7 +1425,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                         {/* Pitch Control */}
                         <div className="tts__setting-row">
                             <div className="tts__setting-header">
-                                <label className="tts__setting-label" style={{ marginBottom: 0 }}>Pitch</label>
+                                <label className="tts__setting-label" style={{ marginBottom: 0 }}>{__("Pitch", "text-to-audio")}</label>
                                 <span className="tts__setting-value">{currentPitch.toFixed(1)}</span>
                             </div>
                             <input
@@ -1442,7 +1443,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                         {/* Volume Control with Mute Button */}
                         <div className="tts__setting-row">
                             <div className="tts__setting-header">
-                                <label className="tts__setting-label" style={{ marginBottom: 0 }}>Volume</label>
+                                <label className="tts__setting-label" style={{ marginBottom: 0 }}>{__("Volume", "text-to-audio")}</label>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                     <span className="tts__setting-value">{Math.round(currentVolume * 100)}%</span>
                                     <button
@@ -1457,7 +1458,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                             alignItems: 'center',
                                             transition: 'background-color 0.2s ease'
                                         }}
-                                        title={isMuted ? 'Unmute' : 'Mute'}
+                                        title={isMuted ? __('Unmute', 'text-to-audio') : __('Mute', 'text-to-audio')}
                                     >
                                         {isMuted ? (
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={buttonCSS?.color || '#ffffff'} strokeWidth="2">

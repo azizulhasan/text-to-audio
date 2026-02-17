@@ -20,7 +20,7 @@ export default function TTSButtonDesign({
                                 onChange={handleChange}
                                 id="backgroundColor"
                                 value={listeningBtnStyle.backgroundColor}
-                                title="Choose player background color"
+                                title={__("Choose player background color", "text-to-audio")}
                             />
                         </div>
                         <div
@@ -40,7 +40,7 @@ export default function TTSButtonDesign({
                                 onChange={handleChange}
                                 id="color"
                                 value={listeningBtnStyle.color}
-                                title="Choose your color"
+                                title={__("Choose your color", "text-to-audio")}
                             />
                         </div>
                         <div
@@ -60,7 +60,7 @@ export default function TTSButtonDesign({
                                 onChange={handleChange}
                                 id="hoverBackgroundColor"
                                 value={listeningBtnStyle.hoverBackgroundColor}
-                                title="Choose your hover background color"
+                                title={__("Choose your hover background color", "text-to-audio")}
                             />
                         </div>
                         <div
@@ -82,7 +82,7 @@ export default function TTSButtonDesign({
                                 onChange={handleChange}
                                 id="hoverTextColor"
                                 value={listeningBtnStyle.hoverTextColor}
-                                title="Choose your hover text color"
+                                title={__("Choose your hover text color", "text-to-audio")}
                             />
                         </div>
                         <div
@@ -105,7 +105,7 @@ export default function TTSButtonDesign({
                         onChange={handleChange}
                         id="marginTop"
                         value={listeningBtnStyle.marginTop}
-                        title="Margin Top"
+                        title={__("Margin Top", "text-to-audio")}
                         className="tta_number_input"
                     />
                 </div>
@@ -119,7 +119,7 @@ export default function TTSButtonDesign({
                         onChange={handleChange}
                         id="marginBottom"
                         value={listeningBtnStyle.marginBottom}
-                        title="Margin Bottom"
+                        title={__("Margin Bottom", "text-to-audio")}
                         className="tta_number_input"
                     />
                 </div>
@@ -133,7 +133,7 @@ export default function TTSButtonDesign({
                         onChange={handleChange}
                         id="marginLeft"
                         value={listeningBtnStyle.marginLeft}
-                        title="Margin Left"
+                        title={__("Margin Left", "text-to-audio")}
                         className="tta_number_input"
                     />
                 </div>
@@ -147,7 +147,7 @@ export default function TTSButtonDesign({
                         onChange={handleChange}
                         id="marginRight"
                         value={listeningBtnStyle.marginRight}
-                        title="Margin Right"
+                        title={__("Margin Right", "text-to-audio")}
                         className="tta_number_input"
                     />
                 </div>
@@ -166,7 +166,7 @@ export default function TTSButtonDesign({
                         min="0"
                         max="200"
                         value={listeningBtnStyle.height}
-                        title="Button Height"
+                        title={__("Button Height", "text-to-audio")}
                         className="tta_number_input"
                     />
                 </div>
@@ -183,7 +183,7 @@ export default function TTSButtonDesign({
                         min="0"
                         max="20"
                         value={listeningBtnStyle.border}
-                        title="Button Border"
+                        title={__("Button Border", "text-to-audio")}
                         className="tta_number_input"
                     />
                 </div>
@@ -198,7 +198,7 @@ export default function TTSButtonDesign({
                                 onChange={handleChange}
                                 id="border_color"
                                 value={listeningBtnStyle.border_color}
-                                title="Border Color"
+                                title={__("Border Color", "text-to-audio")}
                             />
                         </div>
                         <div
@@ -220,7 +220,7 @@ export default function TTSButtonDesign({
                         min="0"
                         max="100"
                         value={listeningBtnStyle.fontSize}
-                        title="Font Size"
+                        title={__("Font Size", "text-to-audio")}
                         className="tta_number_input"
                     />
                 </div>
@@ -237,7 +237,7 @@ export default function TTSButtonDesign({
                         min="0"
                         max="200"
                         value={listeningBtnStyle.borderRadius}
-                        title="Border Radius"
+                        title={__("Border Radius", "text-to-audio")}
                         className="tta_number_input"
                     />
                 </div>
@@ -257,7 +257,7 @@ export default function TTSButtonDesign({
                         min="0"
                         max="100"
                         value={listeningBtnStyle.width}
-                        title="Button Width"
+                        title={__("Button Width", "text-to-audio")}
                         className="tta_number_input"
                     />
                 </div>
@@ -329,7 +329,7 @@ export default function TTSButtonDesign({
                                 onChange={handleChange}
                                 id="border_color"
                                 value={listeningBtnStyle.border_color}
-                                title="Border Color"
+                                title={__("Border Color", "text-to-audio")}
                             />
                         </div>
 
@@ -374,7 +374,7 @@ export default function TTSButtonDesign({
                             min="0"
                             max="100"
                             value={listeningBtnStyle.fontSize}
-                            title="Font size"
+                            title={__("Font size", "text-to-audio")}
                         />
                     </div>
                 </>

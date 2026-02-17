@@ -570,7 +570,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                                     onClick={revokeAccessToken}
                                     className="rounded-3"
                                 >
-                                   {__("Remove Authentication")}
+                                   {__("Remove Authentication", "text-to-audio")}
                                 </Button>
                             )}
                     </div>

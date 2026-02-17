@@ -1,5 +1,5 @@
 {
-  "translation-revision-date": "2026-01-19T16:32:43+01:00",
+  "translation-revision-date": "2026-02-17T07:38:23+01:00",
   "generator": "generate-translations.js",
   "source": "admin/js/blocks/customize-button/customize-button.js",
   "domain": "messages",
@@ -10,37 +10,37 @@
         "plural": "nplurals=1; plural=0;"
       },
       "Listen": [
-        "聴く"
+        "Escuchar"
       ],
       "Customize Button": [
-        "ボタンをカスタマイズ"
+        "Personalizar botón"
       ],
       "Text to audio customize button.": [
-        "テキスト読み上げカスタマイズボタン"
+        "Botón de personalización de texto a audio."
       ],
       "BackGround Color": [
-        "背景色"
+        "Color de fondo"
       ],
       "Choose your color": [
-        "色を選択"
+        "Elige tu color"
       ],
       "Text Color": [
-        "テキストの色"
+        "Color del texto"
       ],
       "Button Width (%)": [
-        "ボタンの幅（%）"
+        "Ancho del botón (%)"
       ],
       "Button Width": [
-        "ボタンの幅"
+        "Ancho del botón"
       ],
       "Custom CSS": [
-        "カスタムCSS"
+        "CSS personalizado"
       ],
       "class selector .tta__listen_content": [
-        "クラスセレクタ .tta__listen_content"
+        "selector de clase .tta__listen_content"
       ],
       "Text To Audio:  Tap to listen post.": [
-        "テキスト読み上げ：タップして投稿を聴く。"
+        "Texto a Audio: Toca para escuchar la entrada."
       ]
     }
   }

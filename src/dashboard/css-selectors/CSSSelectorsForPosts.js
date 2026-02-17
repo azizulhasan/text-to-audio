@@ -139,7 +139,7 @@ export default function CSSSelectorsForPosts() {
                             <div className='atlasVoice-mt-3 atlasVoice-row'>
                                 <Col  xs={12} sm={6} lg={4}>
                                     <Form.Label htmlFor='tta__settings_use_own_css_selectors'>
-                                        Use Own CSS Selectors
+                                        {__('Use Own CSS Selectors', 'text-to-audio')}
                                     </Form.Label>
                                 </Col>
                                 <Col bsPrefix="atlasVoice" xs={12} sm={12} lg={8}>
@@ -158,7 +158,7 @@ export default function CSSSelectorsForPosts() {
                             <div className='atlasVoice-mt-4 atlasVoice-row'>
                                     <Col bsPrefix="atlasVoice" xs={12} sm={6} lg={4}>
                                         <Form.Label htmlFor='tta__settings_css_selectors'>
-                                            Include Content By CSS Selectors {ttsObj.is_pro_active ? "" : (
+                                            {__('Include Content By CSS Selectors', 'text-to-audio')} {ttsObj.is_pro_active ? "" : (
                                             <>
                                                 {['top'].map((placement) => (
                                                     <OverlayTrigger
@@ -166,7 +166,7 @@ export default function CSSSelectorsForPosts() {
                                                         placement={placement}
                                                         overlay={
                                                             <Tooltip id={`tooltip-${placement}`}>
-                                                                {__('Include Content By CSS Selectors feature is available in pro version')}
+                                                                {__('Include Content By CSS Selectors feature is available in pro version', 'text-to-audio')}
                                                             </Tooltip>
                                                         }>
                                                         <Button bsPrefix="atlasVoice"
@@ -186,7 +186,7 @@ export default function CSSSelectorsForPosts() {
                                             as='textarea'
                                             onChange={(e) => handleChange(e)}
                                             value={settings.tta__settings_css_selectors}
-                                            placeholder={ttsObj.is_pro_active ? __('Multiple selector will be multiline.') : 'Some content may be missing, It can be found by css selectors'}
+                                            placeholder={ttsObj.is_pro_active ? __('Multiple selector will be multiline.', 'text-to-audio') : __('Some content may be missing, It can be found by css selectors', 'text-to-audio')}
                                             disabled={ttsObj.is_pro_active ? false : true}
                                         />
                                     </Col>
@@ -198,7 +198,7 @@ export default function CSSSelectorsForPosts() {
                                                     placement={placement}
                                                     overlay={
                                                         <Tooltip id={`tooltip-${placement}`}>
-                                                            {__('Click To Know How It Works?')}
+                                                            {__('Click To Know How It Works?', 'text-to-audio')}
                                                         </Tooltip>
                                                     }>
                                                     <a style={{textDecoration: 'none'}} target='_blank'
@@ -213,7 +213,7 @@ export default function CSSSelectorsForPosts() {
                             <div className='atlasVoice-mt-4 atlasVoice-row'>
                                     <Col bsPrefix="atlasVoice" xs={12} sm={6} lg={4}>
                                         <Form.Label htmlFor='tta__settings_exclude_content_by_css_selectors'>
-                                            Exclude Content By CSS Selectors {ttsObj.is_pro_active ? "" : (
+                                            {__('Exclude Content By CSS Selectors', 'text-to-audio')} {ttsObj.is_pro_active ? "" : (
                                             <>
                                                 {['top'].map((placement) => (
                                                     <OverlayTrigger
@@ -221,7 +221,7 @@ export default function CSSSelectorsForPosts() {
                                                         placement={placement}
                                                         overlay={
                                                             <Tooltip id={`tooltip-${placement}`}>
-                                                                {__('Exclude Content By CSS Selectors feature is available in pro version')}
+                                                                {__('Exclude Content By CSS Selectors feature is available in pro version', 'text-to-audio')}
                                                             </Tooltip>
                                                         }>
                                                         <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
@@ -240,7 +240,7 @@ export default function CSSSelectorsForPosts() {
                                             as='textarea'
                                             onChange={(e) => handleChange(e)}
                                             value={settings.tta__settings_exclude_content_by_css_selectors}
-                                            placeholder={ttsObj.is_pro_active ? __('Multiple selector will be multiline.') : 'Exclude content by CSS selectors'}
+                                            placeholder={ttsObj.is_pro_active ? __('Multiple selector will be multiline.', 'text-to-audio') : __('Exclude content by CSS selectors', 'text-to-audio')}
                                             disabled={ttsObj.is_pro_active ? false : true}
                                         />
                                     </Col>
@@ -252,7 +252,7 @@ export default function CSSSelectorsForPosts() {
                                                     placement={placement}
                                                     overlay={
                                                         <Tooltip id={`tooltip-${placement}`}>
-                                                            {__('Click To Know How It Works?')}
+                                                            {__('Click To Know How It Works?', 'text-to-audio')}
                                                         </Tooltip>
                                                     }>
                                                     <a style={{textDecoration: 'none'}} target='_blank'
@@ -267,7 +267,7 @@ export default function CSSSelectorsForPosts() {
                             <div className='atlasVoice-mt-4 atlasVoice-row'>
                                 <Col bsPrefix="atlasVoice" xs={12} sm={6} lg={4}>
                                     <Form.Label htmlFor='tta__settings_exclude_tags'>
-                                        Exclude Tags To Speak {ttsObj.is_pro_active ? "" : (
+                                        {__('Exclude Tags To Speak', 'text-to-audio')} {ttsObj.is_pro_active ? "" : (
                                         <>
                                             {['top'].map((placement) => (
                                                 <OverlayTrigger
@@ -275,7 +275,7 @@ export default function CSSSelectorsForPosts() {
                                                     placement={placement}
                                                     overlay={
                                                         <Tooltip id={`tooltip-${placement}`}>
-                                                            {__('Exclude Tags. So that its content skiped. Like ( Subscript, Superscript etc.) This is a pro feature.')}
+                                                            {__('Exclude Tags. So that its content skiped. Like ( Subscript, Superscript etc.) This is a pro feature.', 'text-to-audio')}
                                                         </Tooltip>
                                                     }>
                                                     <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
@@ -294,7 +294,7 @@ export default function CSSSelectorsForPosts() {
                                         as='textarea'
                                         onChange={(e) => handleChange(e)}
                                         value={settings.tta__settings_exclude_tags}
-                                        placeholder={ttsObj.is_pro_active ? __('Multiple Tags Will Be Pipe(|) Separated.') : __('Exclude tags is a pro feature.')}
+                                        placeholder={ttsObj.is_pro_active ? __('Multiple Tags Will Be Pipe(|) Separated.', 'text-to-audio') : __('Exclude tags is a pro feature.', 'text-to-audio')}
                                         disabled={ttsObj.is_pro_active ? false : true}
                                     />
                                 </Col>
@@ -306,7 +306,7 @@ export default function CSSSelectorsForPosts() {
                                                 placement={placement}
                                                 overlay={
                                                     <Tooltip id={`tooltip-${placement}`}>
-                                                        {__('Click To Know How It Works?')}
+                                                        {__('Click To Know How It Works?', 'text-to-audio')}
                                                     </Tooltip>
                                                 }>
                                                 <a style={{textDecoration: 'none'}} target='_blank'
@@ -321,7 +321,7 @@ export default function CSSSelectorsForPosts() {
                             <div className='atlasVoice-mt-4 atlasVoice-row'>
                                 <Col bsPrefix="atlasVoice" xs={12} sm={6} lg={4}>
                                     <Form.Label htmlFor='tta__settings_exclude_texts'>
-                                        Exclude Texts To Speak {ttsObj.is_pro_active ? "" : (
+                                        {__('Exclude Texts To Speak', 'text-to-audio')} {ttsObj.is_pro_active ? "" : (
                                         <>
                                             {['top'].map((placement) => (
                                                 <OverlayTrigger
@@ -329,7 +329,7 @@ export default function CSSSelectorsForPosts() {
                                                     placement={placement}
                                                     overlay={
                                                         <Tooltip id={`tooltip-${placement}`}>
-                                                            {__('Excluding texts to be spoken is a pro feature.')}
+                                                            {__('Excluding texts to be spoken is a pro feature.', 'text-to-audio')}
                                                         </Tooltip>
                                                     }>
                                                     <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
@@ -348,7 +348,7 @@ export default function CSSSelectorsForPosts() {
                                         as='textarea'
                                         onChange={(e) => handleChange(e)}
                                         value={settings.tta__settings_exclude_texts}
-                                        placeholder={ttsObj.is_pro_active ? __('Multiple Texts Will Be Pipe(|) Separated.') : 'Exclude texts is a pro feature.'}
+                                        placeholder={ttsObj.is_pro_active ? __('Multiple Texts Will Be Pipe(|) Separated.', 'text-to-audio') : __('Exclude texts is a pro feature.', 'text-to-audio')}
                                         disabled={ttsObj.is_pro_active ? false : true}
                                     />
                                 </Col>
@@ -360,7 +360,7 @@ export default function CSSSelectorsForPosts() {
                                                 placement={placement}
                                                 overlay={
                                                     <Tooltip id={`tooltip-${placement}`}>
-                                                        {__('Click To Know How It Works?')}
+                                                        {__('Click To Know How It Works?', 'text-to-audio')}
                                                     </Tooltip>
                                                 }>
                                                 <a style={{textDecoration: 'none'}} target='_blank'
@@ -372,7 +372,7 @@ export default function CSSSelectorsForPosts() {
                                 </Col>
                                 <div  className='atlasVoice-d-grid atlasVoice-gap-3 catlasVoice-ol-2 atlasVoice-mx-auto atlasVoice-mt-4 atlasVoice-mb-4'>
                                     <button type='submit' className='tta_btn  btn-block'>
-                                        Save
+                                        {__('Save', 'text-to-audio')}
                                     </button>
                                 </div>
                             </div>
@@ -380,6 +380,6 @@ export default function CSSSelectorsForPosts() {
                     </Col>
                 </div>
             </Container>
-        </React.Fragment> : <h1>Loading</h1>
+        </React.Fragment> : <h1>{__('Loading', 'text-to-audio')}</h1>
     );
 }

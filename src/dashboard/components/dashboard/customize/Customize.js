@@ -440,7 +440,7 @@ export default function Customize() {
         key !== "generate_mp3_date_from"
       ) {
         if (key === "" || value === "") {
-          toast("Please fill the  field : " + key);
+          toast(__("Please fill the  field : ", "text-to-audio") + key);
           return;
         }
       }
@@ -670,7 +670,7 @@ export default function Customize() {
                       href="https://www.youtube.com/watch?v=h4VJxM-mh74&t=936s"
                       target="_blank"
                       rel="noopener noreferrer"
-                      title="Watch Tutorial"
+                      title={__("Watch Tutorial", "text-to-audio")}
                     >
                       <i className="fab fa-youtube"></i>
                     </Button>
@@ -746,7 +746,7 @@ export default function Customize() {
                     style={listeningBtnStyle2}
                     type="button"
                     className="tta_listen-button"
-                    title="Text To Audio:  Tap to listen post."
+                    title={__("Text To Audio:  Tap to listen post.", "text-to-audio")}
                   >
                     <i className="fas fa-play-circle me-2"></i>
                     {tta_obj.buttonTextArr.listen_text}
@@ -768,7 +768,7 @@ export default function Customize() {
             {/* Shortcode Section */}
             <div className="bg-white rounded p-3 mb-3 shadow-sm">
               <h6 className="mb-3">
-                {__('Short Code | Attributes value must be wrapped with double quotation ( " )',"text-to-audio")}
+                {__("Short Code | Attributes value must be wrapped with double quotation ( \" )","text-to-audio")}
 
               </h6>
               <Form.Control

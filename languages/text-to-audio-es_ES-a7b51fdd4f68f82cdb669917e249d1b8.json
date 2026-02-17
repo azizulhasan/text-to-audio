@@ -1,5 +1,5 @@
 {
-  "translation-revision-date": "2026-01-19T16:32:43+01:00",
+  "translation-revision-date": "2026-02-17T07:38:23+01:00",
   "generator": "generate-translations.js",
   "source": "src/dashboard/bulk-mp3-file/generate-bulk-mp3-file.js",
   "domain": "messages",
@@ -10,10 +10,10 @@
         "plural": "nplurals=1; plural=0;"
       },
       "Are you sure? You want to regenerate all MP3 files ?": [
-        "よろしいですか？すべてのMP3ファイルを再生成しますか？"
+        "¿Está seguro? ¿Desea regenerar todos los archivos MP3?"
       ],
       "All MP3 File Generated": [
-        "すべてのMP3ファイルが生成されました"
+        "Todos los archivos MP3 generados"
       ]
     }
   }

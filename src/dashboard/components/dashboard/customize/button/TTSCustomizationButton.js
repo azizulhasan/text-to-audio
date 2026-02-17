@@ -18,12 +18,12 @@ export default function TTSCustomizationButton({
 }) {
   const [userRoles, setUserRoles] = useState({});
   let buttonPositions = {
-    before_content: "Before Content",
-    after_content: "After Content",
-    bottom_fixed: "Bottom Fixed (Pro)",
-    bottom_left: "Bottom Left (Pro)",
-    bottom_right: "Bottom Right (Pro)",
-    bottom_center: "Bottom Center (Pro)",
+    before_content: __("Before Content", "text-to-audio"),
+    after_content: __("After Content", "text-to-audio"),
+    bottom_fixed: __("Bottom Fixed (Pro)", "text-to-audio"),
+    bottom_left: __("Bottom Left (Pro)", "text-to-audio"),
+    bottom_right: __("Bottom Right (Pro)", "text-to-audio"),
+    bottom_center: __("Bottom Center (Pro)", "text-to-audio"),
   };
 
   useEffect(() => {
@@ -44,12 +44,12 @@ export default function TTSCustomizationButton({
         <Col md={4}>
           <Form.Group className="tta_player-form-group">
             <Form.Label htmlFor="id" className="tta_player-label">
-              {__("Select Player")}
+              {__("Select Player", "text-to-audio")}
               <OverlayTrigger
                 placement="top"
                 overlay={
                   <Tooltip id="tooltip-player">
-                    {__("Click To Know How It Works?")}
+                    {__("Click To Know How It Works?", "text-to-audio")}
                   </Tooltip>
                 }
               >
@@ -67,10 +67,10 @@ export default function TTSCustomizationButton({
               name="id"
               id="id"
               value={listeningBtnStyle?.buttonSettings?.id || 1}
-              aria-label="Select Player"
+              aria-label={__("Select Player", "text-to-audio")}
               className="tta_player-select"
             >
-              <option disabled>{__("Select Player")}</option>
+              <option disabled>{__("Select Player", "text-to-audio")}</option>
               {buttonLists.map((button, index) => {
                 return (
                   <option
@@ -89,12 +89,12 @@ export default function TTSCustomizationButton({
         <Col md={4}>
           <Form.Group className="tta_player-form-group">
             <Form.Label htmlFor="button_position" className="tta_player-label">
-              {__("Select Button Position")}
+              {__("Select Button Position", "text-to-audio")}
               <OverlayTrigger
                 placement="top"
                 overlay={
                   <Tooltip id="tooltip-position">
-                    {__("Select where to display the player button")}
+                    {__("Select where to display the player button", "text-to-audio")}
                   </Tooltip>
                 }
               >
@@ -115,10 +115,10 @@ export default function TTSCustomizationButton({
                 listeningBtnStyle?.buttonSettings?.button_position ||
                 "before_content"
               }
-              aria-label="Select Button Position"
+              aria-label={__("Select Button Position", "text-to-audio")}
               className="tta_player-select"
             >
-              <option disabled>{__("Select Button Position")}</option>
+              <option disabled>{__("Select Button Position", "text-to-audio")}</option>
               {Object.keys(buttonPositions).map((positionKey, index) => {
                 return (
                   <option key={positionKey} value={positionKey}>
@@ -133,12 +133,12 @@ export default function TTSCustomizationButton({
         <Col md={4}>
           <Form.Group className="tta_player-form-group">
             <Form.Label className="tta_player-label">
-              {__("Display Player To")}
+              {__("Display Player To", "text-to-audio")}
               <OverlayTrigger
                 placement="top"
                 overlay={
                   <Tooltip id="tooltip-display">
-                    {__("Choose who can see the player")}
+                    {__("Choose who can see the player", "text-to-audio")}
                   </Tooltip>
                 }
               >
@@ -155,7 +155,7 @@ export default function TTSCustomizationButton({
               Object.keys(userRoles).length && (
                 <MultiSelect
                   toastMessage={
-                    "Player display restriction to multiple user type is available in the pro version"
+                    __("Player display restriction to multiple user type is available in the pro version", "text-to-audio")
                   }
                   name={"display_player_to"}
                   id={"display_player_to"}
@@ -182,11 +182,11 @@ export default function TTSCustomizationButton({
               <Col md={12}>
                 <Form.Group className="tta_player-form-group">
                   <Form.Label className="tta_player-label">
-                    {__("Who Can Download MP3 File")}
+                    {__("Who Can Download MP3 File", "text-to-audio")}
                   </Form.Label>
                   <MultiSelect
                     toastMessage={
-                      "Player display restriction to multiple user type is available in the pro version"
+                      __("Player display restriction to multiple user type is available in the pro version", "text-to-audio")
                     }
                     name={"who_can_download_mp3_file"}
                     id={"who_can_download_mp3_file"}
@@ -207,7 +207,7 @@ export default function TTSCustomizationButton({
               <Col md={6}>
                 <Form.Group className="tta_player-form-group">
                   <Form.Label className="tta_player-label">
-                    {__("MP3 Generation From Post's Publish Date")}
+                    {__("MP3 Generation From Post's Publish Date", "text-to-audio")}
                     <OverlayTrigger
                       placement="top"
                       overlay={
@@ -231,7 +231,7 @@ export default function TTSCustomizationButton({
                       listeningBtnStyle?.buttonSettings
                         ?.generate_mp3_date_from || ""
                     }
-                    title="Generate MP3 File Date From"
+                    title={__("Generate MP3 File Date From", "text-to-audio")}
                     className="tta_player-date-input"
                   />
                 </Form.Group>
@@ -240,7 +240,7 @@ export default function TTSCustomizationButton({
               <Col md={6}>
                 <Form.Group className="tta_player-form-group">
                   <Form.Label className="tta_player-label">
-                    {__("MP3 Generation Till Post's Publish Date")}
+                    {__("MP3 Generation Till Post's Publish Date", "text-to-audio")}
                     <OverlayTrigger
                       placement="top"
                       overlay={
@@ -263,7 +263,7 @@ export default function TTSCustomizationButton({
                       listeningBtnStyle?.buttonSettings?.generate_mp3_date_to ||
                       ""
                     }
-                    title="Generate MP3 File Date To"
+                    title={__("Generate MP3 File Date To", "text-to-audio")}
                     className="tta_player-date-input"
                   />
                 </Form.Group>

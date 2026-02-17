@@ -40,6 +40,37 @@ function calculateHash(filepath) {
     return crypto.createHash('md5').update(filepath).digest('hex');
 }
 
+// Escape a string for PO file format (reverse of unescapePO).
+// Converts literal characters back to PO escape sequences.
+function escapePO(str) {
+    return str
+        .replace(/\\/g, '\\\\')
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, '\\n')
+        .replace(/\t/g, '\\t');
+}
+
+// Unescape PO file escape sequences to get the actual string value.
+// PO files use C-style escapes: \" → ", \\ → \, \n → newline, \t → tab
+// Without this, a PO escaped quote \" would be stored as a literal backslash
+// + quote in JSON, causing key mismatches with what JS __() sends.
+function unescapePO(str) {
+    let result = '';
+    for (let i = 0; i < str.length; i++) {
+        if (str[i] === '\\' && i + 1 < str.length) {
+            const next = str[i + 1];
+            if (next === '"') { result += '"'; i++; }
+            else if (next === '\\') { result += '\\'; i++; }
+            else if (next === 'n') { result += '\n'; i++; }
+            else if (next === 't') { result += '\t'; i++; }
+            else { result += str[i]; } // Unknown escape, keep as-is
+        } else {
+            result += str[i];
+        }
+    }
+    return result;
+}
+
 // Parse PO file and categorize strings by their source files
 function parsePOFile(poFilePath) {
     const content = fs.readFileSync(poFilePath, 'utf8');
@@ -64,11 +95,11 @@ function parsePOFile(poFilePath) {
         }
         // msgid line
         else if (line.startsWith('msgid "') && !line.startsWith('msgid ""')) {
-            currentContext.msgid = line.substring(7, line.length - 1);
+            currentContext.msgid = unescapePO(line.substring(7, line.length - 1));
         }
         // msgstr line
         else if (line.startsWith('msgstr "')) {
-            currentContext.msgstr = line.substring(8, line.length - 1);
+            currentContext.msgstr = unescapePO(line.substring(8, line.length - 1));
 
             // Save the translation if we have both msgid and msgstr
             if (currentContext.msgid && currentContext.msgstr && currentContext.msgstr !== '') {
@@ -205,8 +236,8 @@ function generatePOContent(locale, strings, originalPOFile) {
     for (const [msgid, msgstr] of Object.entries(strings)) {
         if (msgid === "") continue; // Skip metadata
 
-        content += `msgid "${msgid}"\n`;
-        content += `msgstr "${msgstr[0]}"\n\n`;
+        content += `msgid "${escapePO(msgid)}"\n`;
+        content += `msgstr "${escapePO(msgstr[0])}"\n\n`;
     }
 
     return content;
