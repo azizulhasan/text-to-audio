@@ -4,6 +4,7 @@ namespace TTA_Admin;
 
 use TTA\TTA_Helper;
 use TTA\TTA_Cache;
+use TTA\TTA_i18n;
 
 /**
  * The admin-specific functionality of the plugin.
@@ -174,10 +175,25 @@ class TTA_Admin {
 			/* Load react js */
 			wp_enqueue_script( 'tts-font-awesome', plugin_dir_url( __FILE__ ) . 'js/build/font-awesome.min.js', array(), $this->version, true );
 			wp_enqueue_style( 'tts-bootstrap', plugin_dir_url( __FILE__ ) . 'css/bootstrap.css', [], $this->version, 'all' );
-			wp_enqueue_script( 'TextToSpeech', plugin_dir_url( __FILE__ ) . 'js/build/TextToSpeech.min.js', array( 'wp-hooks', ), $this->version, true );
+			wp_enqueue_script( 'TextToSpeech', plugin_dir_url( __FILE__ ) . 'js/build/TextToSpeech.min.js', array( 'wp-hooks',   ), $this->version, true );
 			wp_localize_script( 'TextToSpeech', 'ttsObj', $this->localize_data );
-			wp_enqueue_script( 'text-to-audio-dashboard-ui', plugin_dir_url( __FILE__ ) . 'js/build/text-to-audio-dashboard-ui.min.js', array( 'TextToSpeech' ), $this->version, true );
+			// Register dashboard UI script (following i18n best practices)
+			wp_register_script(
+				'text-to-audio-dashboard-ui',
+				plugin_dir_url( __FILE__ ) . 'js/build/text-to-audio-dashboard-ui.min.js',
+				array( 'TextToSpeech', 'wp-element', 'wp-i18n' ),
+				$this->version,
+				true
+			);
+
 			wp_localize_script( 'text-to-audio-dashboard-ui', 'tta_obj', $this->localize_data );
+			wp_localize_script( 'text-to-audio-dashboard-ui', 'ttsTR', TTA_i18n::get_default_labels() );
+			wp_enqueue_script( 'text-to-audio-dashboard-ui' );
+            wp_set_script_translations(
+                'text-to-audio-dashboard-ui',
+                'text-to-audio',
+                plugin_dir_path( dirname( __FILE__ ) ) . 'languages'
+            );
 			wp_enqueue_style( 'dashicons' );
 
 
@@ -233,29 +249,44 @@ class TTA_Admin {
                 'AtlasVoice_chart'
 			), $this->version, true );
 			wp_localize_script( 'AtlasVoicePlayerInsights', 'ttsObj', $this->localize_data );
+		wp_set_script_translations( 'AtlasVoicePlayerInsights', 'text-to-audio', plugin_dir_path( dirname( __FILE__ ) ) . 'languages' );
 		}
 
         if ( TTA_Helper::is_edit_page() ) {
-            wp_enqueue_script( 'AtlasVoiceCopyShortcode', plugin_dir_url( __FILE__ ) . 'js/AtlasVoiceCopyShortcode.js', array( 'wp-hooks' ), $this->version, true );
+            wp_enqueue_script( 'AtlasVoiceCopyShortcode', plugin_dir_url( __FILE__ ) . 'js/AtlasVoiceCopyShortcode.js', array( 'wp-hooks', 'wp-i18n' ), $this->version, true );
+            wp_set_script_translations( 'AtlasVoiceCopyShortcode', 'text-to-audio', plugin_dir_path( dirname( __FILE__ ) ) . 'languages' );
         }
 
 	}
 
+	/**
+	 * Register the block and enqueue scripts.
+	 * Following WordPress i18n best practices for block editor.
+	 */
 	public function engueue_block_scripts() {
-		if ( TTA_Helper::is_edit_page() || isset( $_REQUEST['page'] ) && ( 'text-to-audio' == $_REQUEST['page'] ) ) {
-			wp_enqueue_script( 'tta-blocks', plugin_dir_url( dirname( __FILE__ ) ) . 'build/blocks.js', array(
-				'wp-blocks',
-				'wp-i18n',
-				'wp-element',
-				'wp-editor'
-			), true, true );
-			wp_localize_script( 'tta-blocks', 'ttaBlocks', $this->localize_data );
-		}
+		// Register the block script
+		wp_register_script(
+			'tta-blocks',
+			plugin_dir_url( dirname( __FILE__ ) ) . 'build/blocks.js',
+			array( 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-block-editor' ),
+			filemtime( plugin_dir_path( dirname( __FILE__ ) ) . 'build/blocks.js' )
+		);
 
-		register_block_type( 'tta/customize-button', [
+		// Localize script data
+		wp_localize_script( 'tta-blocks', 'ttaBlocks', $this->localize_data );
+
+		// Register the block type
+		register_block_type( 'tta/customize-button', array(
+			'api_version' => 2,
+			'editor_script' => 'tta-blocks',
 			'render_callback' => [ $this, 'render_button' ],
-		] );
+		) );
 
+        wp_set_script_translations(
+            'tta-blocks',
+            'text-to-audio',
+            plugin_dir_path( dirname( __FILE__ ) ) . 'languages'
+        );
 	}
 
 	/**
@@ -314,15 +345,15 @@ class TTA_Admin {
 
 	public function TTA_menu() {
 		add_menu_page(
-			__( 'Text To Speech', TEXT_TO_AUDIO_TEXT_DOMAIN ),
-			__( 'Text To Speech', TEXT_TO_AUDIO_TEXT_DOMAIN ),
+            'Text To Speech',
+            'Text To Speech',
 			'manage_options',
 			TEXT_TO_AUDIO_TEXT_DOMAIN,
 			array( $this, "TTA_settings" ),
 			'dashicons-controls-volumeon',
 			20
 		);
-		add_submenu_page( TEXT_TO_AUDIO_TEXT_DOMAIN, __( 'Text To Speech', TEXT_TO_AUDIO_TEXT_DOMAIN ), __( 'Text To Speech', TEXT_TO_AUDIO_TEXT_DOMAIN ), 'manage_options', TEXT_TO_AUDIO_TEXT_DOMAIN, array(
+		add_submenu_page( TEXT_TO_AUDIO_TEXT_DOMAIN, 'Text To Speech' , 'Text To Speech', 'manage_options', TEXT_TO_AUDIO_TEXT_DOMAIN, array(
 			$this,
 			"TTA_settings"
 		), 21 );

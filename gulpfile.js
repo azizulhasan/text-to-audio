@@ -30,6 +30,11 @@ const productionSrc = [
 	'!admin/js/blocks/**',
 	'!admin/js/build/*.LICENSE.txt',
 	'!.claude/**',
+	'!languages/nul',
+	'!scripts/**',
+	'!sdk/**',
+	'!languages/text-to-audio.pot',
+	'!languages/*.po',
 	'!admin/js/text-to-audio-dashboard.js',
 	'!admin/js/text-to-audio-button.js',
 	'!admin/js/TextToSpeech.js',
@@ -57,6 +62,9 @@ const productionSrc = [
 	'!mix-manifest.json',
 	'!webpack.mix.js',
 	'!uninstall.php',
+	'!null',
+	'!nul',
+	'!languages/nul',
 ]
 
 

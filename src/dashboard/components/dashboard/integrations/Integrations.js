@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Container, Form, Row, Col, Card, Badge } from "react-bootstrap";
+import { __ } from "@wordpress/i18n";
 import GoogleTTS from "./GoogleCloudTTS/GoogleTTS";
 import ChatGPTTTS from "./ChatGPTTTS/ChatGPTTTS";
 import { postData } from "../../context/utilities";
@@ -162,16 +163,15 @@ export default function Integrations() {
         <Col xs={12} lg={8}>
           {/* Header Card */}
           <div className="bg-white rounded p-3 mb-3 shadow-sm">
-            <h2 className="fs-3 fw-bold mb-2 text-dark">Integration Setup</h2>
+            <h2 className="fs-3 fw-bold mb-2 text-dark">{__("Integration Setup", "text-to-audio")}</h2>
             <p className="text-secondary m-0 small">
-              AtlasVoice Pro works fully fine even without Google TTS/ChatGPT
-              integration.
+              {__("AtlasVoice Pro works fully fine even without Google TTS/ChatGPT integration.", "text-to-audio")}
             </p>
           </div>
 
           {/* TTS Service Selection Card */}
           <div className="tta-card mb-3">
-            <h5 className="mb-3 fw-semibold">Select Text To Speech Service</h5>
+            <h5 className="mb-3 fw-semibold">{__("Select Text To Speech Service", "text-to-audio")}</h5>
             <Row>
               <Col xs={12} md={6} className="mb-3 mb-md-0">
                 <div
@@ -189,7 +189,7 @@ export default function Integrations() {
                     </div>
                     <div className="flex-grow-1">
                       <div className="d-flex align-items-center justify-content-between">
-                        <h6 className="mb-1">Google Cloud TTS</h6>
+                        <h6 className="mb-1">{__("Google Cloud TTS", "text-to-audio")}</h6>
                         {/* Checkbox - visible when authenticated */}
                         {authenticatedServices.includes('google_cloud_tts') && (
                           <div className="service-checkbox">
@@ -202,8 +202,7 @@ export default function Integrations() {
                         )}
                       </div>
                       <p className="mb-0 text-muted small">
-                        Google Cloud Text-to-Speech converts text into
-                        natural-sounding speech using Google's AI voices.
+                        {__("Google Cloud Text-to-Speech converts text into natural-sounding speech using Google's AI voices.", "text-to-audio")}
                       </p>
                     </div>
                   </div>
@@ -225,7 +224,7 @@ export default function Integrations() {
                     </div>
                     <div className="flex-grow-1">
                       <div className="d-flex align-items-center justify-content-between">
-                        <h6 className="mb-1">ChatGPT TTS</h6>
+                        <h6 className="mb-1">{__("ChatGPT TTS", "text-to-audio")}</h6>
                         {/* Checkbox - visible when authenticated */}
                         {authenticatedServices.includes('chat_gpt_tts') && (
                           <div className="service-checkbox">
@@ -238,9 +237,7 @@ export default function Integrations() {
                         )}
                       </div>
                       <p className="mb-0 text-muted small">
-                        ChatGPT TTS converts written text into realistic,
-                        human-like voice using OpenAI's advanced speech
-                        technology.
+                        {__("ChatGPT TTS converts written text into realistic, human-like voice using OpenAI's advanced speech technology.", "text-to-audio")}
                       </p>
                     </div>
                   </div>
@@ -280,7 +277,7 @@ export default function Integrations() {
     >
       <div>
         <i className="fas fa-spinner fa-spin me-2"></i>
-        Loading...
+       {__("Loading...", "text-to-audio")}
       </div>
     </div>
   );

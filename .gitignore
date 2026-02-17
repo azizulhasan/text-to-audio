@@ -111,5 +111,7 @@ production/
 
 
 .DS_Store
-.claude/
-README.md
+languages/null
+null
+nul
+.claude

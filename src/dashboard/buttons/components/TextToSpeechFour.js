@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { shouldCallPositionFunction } from "../assets/buttonsHelper";
+import { useEffect, useState, useRef } from "react";
 let TextToSpeechProPlayer = null;
 let player = window?.wp ? wp.hooks.applyFilters('ttsProPlayerDesign', {
     isPlayerCustomizing: false,
@@ -10,6 +9,7 @@ let player = window?.wp ? wp.hooks.applyFilters('ttsProPlayerDesign', {
 }
 export default function TextToSpeechFour({ buttonId, button, buttonCSS, cssStyle = '' }) {
     const [shouldFloat, setShouldFloat] = useState(false)
+    const originalTopRef = useRef(null)
     useEffect(() => {
         // TODO: after reload while I have in customization menu. the player is getting hide.
         if (window.TextToSpeechProPlayer) {
@@ -24,52 +24,26 @@ export default function TextToSpeechFour({ buttonId, button, buttonCSS, cssStyle
 
     useEffect(() => {
         if(!window?.ttsObj?.settings?.settings?.tta__settings_stop_floating_button) {
-            const detectScroll = (e) => {
-                let button = document.getElementById('player_content_' + buttonId);
-                let postTitle = null;
-                let titlePosition = 0;
-                if (document.querySelector('.post-title')) {
-                    postTitle = document.querySelector('.post-title')
-                    if (shouldCallPositionFunction(postTitle)) {
-                        titlePosition = postTitle.getBoundingClientRect().top;
-                    }
-                } else if (document.querySelector('.entry-title')) {
-                    postTitle = document.querySelector('.entry-title')
-                    if (shouldCallPositionFunction(postTitle)) {
-                        titlePosition = postTitle.getBoundingClientRect().top;
-                    }
-                } else if (document.querySelector('.wp-block-post-title')) {
-                    postTitle = document.querySelector('.wp-block-post-title')
-                    if (shouldCallPositionFunction(postTitle)) {
-                        titlePosition = postTitle.getBoundingClientRect().top;
-                    }
-                }else if (document.querySelector('h1.elementor-heading-title')) {
-                    postTitle = document.querySelector('h1.elementor-heading-title')
-                    if (shouldCallPositionFunction(postTitle)) {
-                        titlePosition = postTitle.getBoundingClientRect().top;
-                    }
+            let buttonEl = document.getElementById('player_content_' + buttonId);
+            if (!buttonEl) return;
+
+            // Save the player's original absolute position in the document.
+            // This is theme-independent — no CSS selectors needed.
+            originalTopRef.current = buttonEl.getBoundingClientRect().top + window.scrollY;
+
+            const detectScroll = () => {
+                if (originalTopRef.current === null) return;
+                if (window.scrollY > originalTopRef.current) {
+                    setShouldFloat(true);
+                } else {
+                    setShouldFloat(false);
                 }
-    
-                if (button) {
-                    if (shouldCallPositionFunction(button)) {
-                        let topPos = Math.floor(button.getBoundingClientRect().top);
-                        if (topPos < 1) {
-                            setShouldFloat(true)
-                        }
-                    }
-    
-                    if (titlePosition > 0) {
-                        setShouldFloat(false)
-                    }
-                }
-            }
-            document.addEventListener('scroll', detectScroll, { passive: true })
-            document.addEventListener('wheel', detectScroll, { passive: true })
-    
-    
+            };
+
+            document.addEventListener('scroll', detectScroll, {passive: true})
+
             return () => {
-                document.removeEventListener('scroll', detectScroll, { passive: true })
-                document.removeEventListener('wheel', detectScroll, { passive: true })
+                document.removeEventListener('scroll', detectScroll)
             }
         }
 

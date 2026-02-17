@@ -15,7 +15,7 @@
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
  * Description:       The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
- * Version:           2.1.3
+ * Version:           2.1.4
  * Author:            AtlasAiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-3.0+
@@ -72,7 +72,7 @@ function is_pro_plugin_exists()
     return false;
 }
 
-if (!is_pro_plugin_exists() && !function_exists('ttsp_fs')) {
+if (     !function_exists('ttsp_fs')) {
     // Create a helper function for easy SDK access.
     function ttsp_fs()
     {
@@ -222,7 +222,7 @@ class TTA_Init
     public function __construct()
     {
         if (!defined('TEXT_TO_AUDIO_VERSION')) {
-            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', ' 2.1.3'));
+            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', ' 2.1.4'));
         }
 
         if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
@@ -236,7 +236,7 @@ class TTA_Init
     {
         $plugin = new TTA();
         $plugin->run();
-        new TTA_Notices();
+
         add_action('init', function () {
             if (!defined('TTA_PRO_PLUGIN_PATH')) {
                 TTA_Lib_AtlasAiDev::instance()->init();
@@ -246,7 +246,7 @@ class TTA_Init
                 update_option('tts_rest_api_url', $rest_url);
                 TTA_Cache::set('tts_rest_api_url', $rest_url);
             }
-
+            new TTA_Notices();
             //Rest api init.
             new TTA_Api_Routes();
         }, 9999);
@@ -288,10 +288,50 @@ class TTA_Init
 }
 
 
+// Load text domain early
+add_action('plugins_loaded', function () {
+    load_plugin_textdomain(
+        'text-to-audio',
+        false,
+        dirname(plugin_basename(__FILE__)) . '/languages'
+    );
+});
+
 add_action('plugins_loaded', function () {
     //Rest api init.
     new TTA_Init();
 }, 9999);
+
+/**
+ * Register custom cron schedule intervals
+ */
+add_filter('cron_schedules', function ($schedules) {
+    $schedules['weekly'] = array(
+        'interval' => 604800, // 7 days in seconds
+        'display'  => __('Once Weekly', 'text-to-audio'),
+    );
+    $schedules['monthly'] = array(
+        'interval' => 2592000, // 30 days in seconds
+        'display'  => __('Once Monthly', 'text-to-audio'),
+    );
+    return $schedules;
+});
+
+/**
+ * Hook for scheduled analytics report
+ */
+add_action('tta_send_scheduled_report', function () {
+    // Only run if Pro is active
+    if (!class_exists('TTA\TTA_Helper') || !\TTA\TTA_Helper::is_pro_active()) {
+        return;
+    }
+
+    // Initialize the analytics class and send the report
+    if (class_exists('TTA_Api\AtlasVoice_Analytics')) {
+        $analytics = new \TTA_Api\AtlasVoice_Analytics();
+        $analytics->generate_and_send_report();
+    }
+});
 
 
 /**

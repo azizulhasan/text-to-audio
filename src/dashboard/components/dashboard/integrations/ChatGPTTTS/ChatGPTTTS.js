@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Form, Button, InputGroup } from 'react-bootstrap';
 import { postData } from '../../../context/utilities';
 import toast from '../../../context/Notify';
+import { __ } from "@wordpress/i18n";
 
 export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGPTAPIData, setAuthenticatedServices }) {
     const apiURL = useMemo(() => {
@@ -17,11 +18,11 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
 
         if (!window.hasOwnProperty('ttsObjPro')) {
             toast(<>
-                <h4>ChatGPT TTS feature is only in pro version.</h4>
+                <h4>{__("ChatGPT TTS feature is only in pro version.", "text-to-audio")}</h4>
                 <button onClick={(e) => {
                     window.open('https://atlasaidev.com/plugins/text-to-speech-pro/pricing/')
                 }} className='tta_btn'>
-                    Learn More
+                    {__("Learn More", "text-to-audio")}
                 </button>
             </>, 'info', {
                 position: 'top-center',
@@ -32,11 +33,11 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
 
         if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_license_active) {
             toast(<>
-                <h4>ChatGPT text to speech feature is only in pro version.</h4>
+                <h4>{__("ChatGPT text to speech feature is only in pro version.","text-to-audio")}</h4>
                 <button onClick={(e) => {
                     window.open('https://atlasaidev.com/plugins/text-to-speech-pro/pricing/')
                 }} className='tta_btn'>
-                    Buy Now
+                    {__("Buy Now", "text-to-audio")}
                 </button>
             </>, 'info', {
                 position: 'top-center',
@@ -46,7 +47,7 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
         }
 
         if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_folder_writable) {
-            toast("Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.", 'error', { autoClose: 10000 })
+            toast(__("Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.", "text-to-audio"), 'error', { autoClose: 10000 })
             return
         };
 
@@ -67,7 +68,7 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
         postData(apiURL + 'chat_gpt_tts', data)
             .then((res) => {
                 if (res.status) {
-                    toast('API key is saved successfully');
+                    toast(__('API key is saved successfully', "text-to-audio"));
                     setChatGPTAPIData(res.data);
 
                     // Update authenticated services if API key is valid
@@ -78,7 +79,7 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
                         });
                     }
                 } else {
-                    toast('Something went wrong');
+                    toast(__('Something went wrong',"text-to-audio"));
                 }
             })
             .catch((err) => {
@@ -90,7 +91,7 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
         <div className="bg-white rounded-3 p-4 shadow-sm">
             {/* Header with YouTube link */}
             <div className="d-flex align-items-center justify-content-between mb-4">
-                <h4 className="mb-0 fw-bold">Set ChatGPT API key</h4>
+                <h4 className="mb-0 fw-bold">{__("Set ChatGPT API key","text-to-audio")}</h4>
                 <Button 
                     variant="link" 
                     className="text-danger p-0 text-decoration-none d-flex align-items-center"
@@ -109,7 +110,7 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
                         onChange={handleChange}
                         value={chatGPTAPIData.chatgpt_tts_api_key}
                         name="chatgpt_tts_api_key"
-                        placeholder="paste here chatgpt_tts_api_key"
+                        placeholder={__("paste here chatgpt_tts_api_key", 'text-to-audio')}
                         className="tta_gpt_input"
                     />
                     <Button 
@@ -117,20 +118,20 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
                         type="submit"
                         className="tta_gpt_btn"
                     >
-                        Submit
+                        {__("Submit", "text-to-audio")}
                     </Button>
                 </InputGroup>
 
                 {/* Help text */}
                 <p className="text-muted mb-0">
-                    How to get chatGPT API key?{' '}
+                    {__("How to get chatGPT API key?","text-to-audio")}{' '}
                     <a 
                         href="https://platform.openai.com/api-keys" 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="text-primary text-decoration-none"
                     >
-                        Click here
+                       {__("Click here", "text-to-audio")}
                     </a>
                 </p>
             </Form>

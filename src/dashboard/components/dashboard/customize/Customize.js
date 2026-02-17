@@ -288,7 +288,7 @@ export default function Customize() {
       e.target.name === "width" &&
       (e.target.value > 100 || e.target.value < 0)
     ) {
-      toast("Value should between 0-100");
+      toast(__("Value should be between 0-100", "text-to-audio"));
       return;
     }
 
@@ -325,7 +325,7 @@ export default function Customize() {
         !["before_content", "after_content"].includes(e.target.value) &&
         !ttsObj.is_pro_active
       ) {
-        toast("This option is only available for pro version.", "error");
+        toast(__("This option is only available for the pro version.", "text-to-audio"), "error");
         return;
       }
 
@@ -367,14 +367,15 @@ export default function Customize() {
     } else if (e.target.name == "border" || e.target.name == "border_color") {
       if (e.target.name == "border") {
         value = e.target.value + "px solid ";
-        value += listeningBtnStyle?.border_color ?? " black";
+        value += listeningBtnStyle?.border_color ?? "#000000";
       } else {
-        value = listeningBtnStyle?.border ?? "1px ";
-        if (value.indexOf("px") < 0) {
-          value += "px";
+        // When border_color changes, get the border width value from CURRENT state
+        let borderWidth = listeningBtnStyle?.border ?? "2";
+        // Ensure it's just a number (remove 'px' if present)
+        if (typeof borderWidth === 'string' && borderWidth.indexOf("px") >= 0) {
+          borderWidth = borderWidth.replace("px", "");
         }
-        value += " solid ";
-        value += e.target.value;
+        value = borderWidth + "px solid " + e.target.value;
       }
     } else if (e.target.name === "fontSize") {
       value = e.target.value + "px";
@@ -390,10 +391,19 @@ export default function Customize() {
     } else {
       value = e.target.value;
     }
-    setListeningStyle2({
-      ...listeningBtnStyle2,
-      ...{ [e.target.name]: value },
-    });
+    
+    // For border_color, we need to update the 'border' property in listeningBtnStyle2
+    if (e.target.name === "border_color") {
+      setListeningStyle2({
+        ...listeningBtnStyle2,
+        border: value,
+      });
+    } else {
+      setListeningStyle2({
+        ...listeningBtnStyle2,
+        ...{ [e.target.name]: value },
+      });
+    }
   };
 
   const CTANotice = (text_content = "") => {
@@ -408,7 +418,7 @@ export default function Customize() {
           }}
           className="tta_btn"
         >
-          Buy Now
+          {__("Buy Now", "text-to-audio")}
         </button>
       </>,
       "info",
@@ -430,7 +440,7 @@ export default function Customize() {
         key !== "generate_mp3_date_from"
       ) {
         if (key === "" || value === "") {
-          toast("Please fill the  field : " + key);
+          toast(__("Please fill the  field : ", "text-to-audio") + key);
           return;
         }
       }
@@ -469,17 +479,18 @@ export default function Customize() {
 
     if (formData?.buttonSettings?.id == 4) {
       if (ttsObj.is_pro_active && !isGCAuthenticated) {
-        notify(
-          "To select this player you have to authenticate first from Integration menu",
-          "error",
-          {
-            autoClose: 8000,
-          }
-        );
-        return;
+
+      notify(
+        __("To select this player, you must authenticate first from the Integration menu", "text-to-audio"),
+        "error",
+        {
+          autoClose: 8000,
+        }
+      );
+              return;
       }
       if (!isGCAuthenticated) {
-        CTANotice("Google Cloud TTS player is only in pro version.");
+        CTANotice(__("Google Cloud TTS player is only available in the pro version.", "text-to-audio"));
         return;
       }
     }
@@ -487,7 +498,7 @@ export default function Customize() {
     if (formData?.buttonSettings?.id == 5) {
       if (ttsObj.is_pro_active && !isChatGPTAuthenticated) {
         notify(
-          "To select this player you have to authenticate first from Integration menu",
+          __("To select this player you have to authenticate first from Integration menu", "text-to-audio"),
           "error",
           {
             autoClose: 8000,
@@ -496,13 +507,13 @@ export default function Customize() {
         return;
       }
       if (!isChatGPTAuthenticated) {
-        CTANotice("ChatGPT TTS player is only in pro version.");
+        CTANotice(__("ChatGPT TTS player is only available in the pro version.", "text-to-audio"));
         return;
       }
     }
 
     if (!ttsObj.is_pro_active && formData?.buttonSettings?.id > 1) {
-      CTANotice("Default Pro player is only available for pro version.");
+      CTANotice(__("Default Pro player is only available in the pro version.", "text-to-audio"));
       return;
     }
 
@@ -512,11 +523,11 @@ export default function Customize() {
       formData?.buttonSettings?.id > 2 &&
       !isBackUpToGCS
     ) {
-      toast(
-        "Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.",
-        "error",
-        { autoClose: 10000 }
-      );
+    toast(
+      __("Text To Speech plugin stores synthesized content in the uploads folder. Your uploads folder is not writable. Please make the uploads folder writable to enjoy all features of the plugin.", "text-to-audio"),
+      "error",
+      { autoClose: 10000 }
+    );
       return;
     }
 
@@ -526,9 +537,9 @@ export default function Customize() {
     postWithoutImage(tta_obj.api_url + "tta/v1/customize", data)
       .then((res) => {
         setListeningStyle(res.data);
-        toast("Customization saved.", "success");
+        toast(__("Customization saved.", "text-to-audio"), "success");
         toast(
-          'Now go to the "Listening" menu to select proper language and voice.',
+          __('Now go to the "Listening" menu to select proper language and voice.', "text-to-audio"),
           "error",
           {
             autoClose: 15000,
@@ -577,8 +588,8 @@ export default function Customize() {
   };
 
   const [buttonLists, setButtonLists] = useState([
-    { id: 1, name: "Default", object: "TextToSpeech", disabled: false },
-    { id: 2, name: "Default Pro", object: "TextToSpeechPro", disabled: false },
+    { id: 1, name: __("Default", "text-to-audio"), object: "TextToSpeech", disabled: false },
+    { id: 2, name: __("Default Pro", "text-to-audio"), object: "TextToSpeechPro", disabled: false },
     {
       id: 3,
       name: "AtlasVoice TTS Pro",
@@ -599,9 +610,9 @@ export default function Customize() {
       <Row>
         <Col xs={12} lg={8}>
           <div className="bg-white rounded p-3 mb-3 shadow-sm">
-            <h2 className="fs-3 fw-bold mb-2 text-dark">Customization</h2>
+            <h2 className="fs-3 fw-bold mb-2 text-dark">{__("Customization","text-to-audio")}</h2>
             <p className="text-secondary m-0 small">
-              Customize the player & design to match your brand and preferences.
+              {__("Customize the player & design to match your brand and preferences.","text-to-audio")}
             </p>
           </div>
 
@@ -621,7 +632,7 @@ export default function Customize() {
               <div className="mb-3">
                 <div className="d-flex align-items-center gap-2 mb-2">
                   <label className="mb-0 fw-semibold">
-                    Write here something and click listen button
+                    {__("Write here something and click listen button", "text-to-audio")}
                   </label>
 
                   {/* Question Icon with Tooltip */}
@@ -629,8 +640,7 @@ export default function Customize() {
                     placement="top"
                     overlay={
                       <Tooltip id="tooltip-help">
-                        Enter your text here and click the listen button to
-                        hear it spoken aloud.
+                       {__(" Enter your text here and click the listen button to hear it spoken aloud.", "text-to-audio")}
                       </Tooltip>
                     }
                   >
@@ -648,7 +658,7 @@ export default function Customize() {
                     placement="top"
                     overlay={
                       <Tooltip id="tooltip-help">
-                        Click To Know How It Works?
+                        {__("Click To Know How It Works?","text-to-audio")}
                       </Tooltip>
                     }
                   >
@@ -660,7 +670,7 @@ export default function Customize() {
                       href="https://www.youtube.com/watch?v=h4VJxM-mh74&t=936s"
                       target="_blank"
                       rel="noopener noreferrer"
-                      title="Watch Tutorial"
+                      title={__("Watch Tutorial", "text-to-audio")}
                     >
                       <i className="fab fa-youtube"></i>
                     </Button>
@@ -671,7 +681,7 @@ export default function Customize() {
                   id="tta__demo_text_for_play"
                   onChange={(e) => setText(e)}
                   value={speakingText ? speakingText : ""}
-                  placeholder="Write here something and click listen button."
+                  placeholder={__('Write here something and click listen button.', 'text-to-audio')}
                   rows={3}
                   className="tta_custom-textarea"
                 />
@@ -736,7 +746,7 @@ export default function Customize() {
                     style={listeningBtnStyle2}
                     type="button"
                     className="tta_listen-button"
-                    title="Text To Audio:  Tap to listen post."
+                    title={__("Text To Audio:  Tap to listen post.", "text-to-audio")}
                   >
                     <i className="fas fa-play-circle me-2"></i>
                     {tta_obj.buttonTextArr.listen_text}
@@ -747,7 +757,7 @@ export default function Customize() {
 
             {/* Design Customization Section */}
             <div className="bg-white rounded p-3 mb-3 shadow-sm">
-              <h5 className="mb-3 fw-semibold">Design Customization</h5>
+              <h5 className="mb-3 fw-semibold">{__("Design Customization", "text-to-audio")}</h5>
               <TTSButtonDesign
                 customCSS={customCSS}
                 listeningBtnStyle={listeningBtnStyle}
@@ -758,8 +768,8 @@ export default function Customize() {
             {/* Shortcode Section */}
             <div className="bg-white rounded p-3 mb-3 shadow-sm">
               <h6 className="mb-3">
-                Short Code | Attributes value must be wrapped with double
-                quotation ( " )
+                {__("Short Code | Attributes value must be wrapped with double quotation ( \" )","text-to-audio")}
+
               </h6>
               <Form.Control
                 as="textarea"
@@ -775,16 +785,16 @@ export default function Customize() {
                 size="sm"
                 onClick={(e) =>
                   copyToClipBoard(
-                    "tta_play_btn_shortcode",
+                    __("tta_play_btn_shortcode", "text-to-audio"),
                     true,
-                    "Copied ShortCode",
+                    __("Copied ShortCode","text-to-audio"),
                     toast
                   )
                 }
                 className="tta_shortcode_btn"
               >
                 <i className="fas fa-copy me-2"></i>
-                Copy Shortcode
+              {__('Copy Shortcode', 'text-to-audio')}
               </button>
             </div>
 
@@ -795,7 +805,7 @@ export default function Customize() {
             >
               <div className="d-grid">
                 <button type="submit" className="btn tta_btn">
-                  Save
+                    {__('Save', 'text-to-audio')}
                 </button>
               </div>
             </div>
@@ -813,7 +823,7 @@ export default function Customize() {
     >
       <div>
         <i className="fas fa-spinner fa-spin me-2"></i>
-        Loading...
+          {__('Loading...', 'text-to-audio')}
       </div>
     </div>
   );

@@ -59,20 +59,20 @@ class TTA_Notices {
 		];
 
 		$features_notice = [
-			'Convert unlimited characters to MP3 in bulk.',
-			'WPML, GTranslate, TranslatePress Plugins Support',
-			'Works with ACF, SCF, and other popular plugins.',
-			'Google Cloud Text-to-Speech & ChatGPT Text-to-Speech (usage fees apply)',
-			'Live integration support + 14-day money-back guarantee (conditions apply).',
-			'50+ languages support in pro version.',
-			'Download the audio file for offline listening.',
-			'Improved UI and Responsive of the button.',
-			'Multiple Audio Player Support.',
-			'Customizable content selection with CSS selectors',
-			'Exclude content by categories, tags, IDs',
-			'Unlimited Download MP3 files',
-			'200+ Voices with Google Cloud Text To Speech',
-			'Advance analytics & Text Aliases support.'
+			__('Convert unlimited characters to MP3 in bulk.', 'text-to-audio'),
+			__('WPML, GTranslate, TranslatePress Plugins Support', 'text-to-audio'),
+			__('Works with ACF, SCF, and other popular plugins.', 'text-to-audio'),
+			__('Google Cloud Text-to-Speech & ChatGPT Text-to-Speech (usage fees apply)', 'text-to-audio'),
+			__('Live integration support + 14-day money-back guarantee (conditions apply).', 'text-to-audio'),
+			__('50+ languages support in pro version.', 'text-to-audio'),
+			__('Download the audio file for offline listening.', 'text-to-audio'),
+			__('Improved UI and Responsive of the button.', 'text-to-audio'),
+			__('Multiple Audio Player Support.', 'text-to-audio'),
+			__('Customizable content selection with CSS selectors', 'text-to-audio'),
+			__('Exclude content by categories, tags, IDs', 'text-to-audio'),
+			__('Unlimited Download MP3 files', 'text-to-audio'),
+			__('200+ Voices with Google Cloud Text To Speech', 'text-to-audio'),
+			__('Advance analytics & Text Aliases support.', 'text-to-audio')
 		];
 
 		$this->analytics_features = [
@@ -80,12 +80,12 @@ class TTA_Notices {
 			// __( "Number of times the play button was clicked" ),
 			// __( "Number of times the pause button was clicked" ),
 			// __( "Total time the player has played (in seconds)" ),
-			__( "Number of times the player reached the end. 🔒" ),
-			__( "Number of times the MP3 file downloaded. 🔒" ),
-			__( "Percentage of times the play button was clicked after initiation. 🔒" ),
-			__( "Percentage of times users listened till the end. 🔒" ),
-			__( "Average listening time per play. 🔒" ),
-			__( "Average number of pauses per play. 🔒" ),
+			__("Number of times the MP3 file downloaded. 🔒" , "text-to-audio"),
+			__("Number of times the player reached the end. 🔒" , "text-to-audio"),
+			__("Percentage of times the play button was clicked after initiation. 🔒" , "text-to-audio"),
+			__("Percentage of times users listened till the end. 🔒" , "text-to-audio"),
+			__("Average listening time per play. 🔒" , "text-to-audio"),
+			__("Average number of pauses per play. 🔒" , "text-to-audio"),
 		];
 
 
@@ -156,7 +156,7 @@ class TTA_Notices {
                             } else {
                                 if (wp.ajax) {
                                 } else {
-                                    alert('This browser don\'t support speechSynthesis API. Please use one of these browser to use Text To Speech Free.  Chrome, FireFox, Safari, Samsung, Edge, Opera. On our Pro version there is no issue releated to browser.')
+                                    alert(__('This browser don\'t support speechSynthesis API. Please use one of these browser to use Text To Speech Free.  Chrome, FireFox, Safari, Samsung, Edge, Opera. On our Pro version there is no issue releated to browser.', 'text-to-audio'));
                                 }
                             }
                         });
@@ -177,8 +177,8 @@ class TTA_Notices {
 			\update_option( 'wpml_and_gtranslate_notice_displayed_aug_25', true );
 		}
 
-		$pluginName    = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
-		$ProPluginName = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS Pro', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+		$pluginName    = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', "text-to-audio" ) );
+		$ProPluginName = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS Pro', "text-to-audio" ) );
 
 		$has_notice              = false;
 		$user_id                 = get_current_user_id();
@@ -207,21 +207,13 @@ class TTA_Notices {
             <div class="tta-notice notice notice-info is-dismissible" dir="<?php echo tta_is_rtl() ? 'ltr' : 'auto' ?>"
                  data-which="compitable" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <p><?php
-					printf(
-						esc_html__( '%6$s %2$s %3$s %4$s plugin is compitable with  %5$s . %7$s', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
-						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-						'<div class="tta-review-notice-logo"></div>',
-						'<br/>',
-						$this->active_plugin_name, //phpcs:ignore
-						$ProPluginName, //phpcs:ignore
-						"<h3>$pluginName</h3>", //phpcs:ignore
-						"$learn_more" //phpcs:ignore
-					);
+					/* translators: 1: Plugin name, 2: Logo div, 3: Line break, 4: Active plugin name, 5: Pro plugin name, 6: Heading, 7: Learn more link */
+					printf( esc_html__( '%6$s %2$s %3$s %4$s plugin is compitable with  %5$s . %7$s', "text-to-audio" ), $pluginName, '<div class="tta-review-notice-logo"></div>', '<br/>', $this->active_plugin_name, $ProPluginName, "<h3>$pluginName</h3>", "$learn_more" ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					?></p>
                 <p>
                     <a class="button button-primary" data-response="compitable"
                        href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
-                       target="_blank"><?php esc_html_e( 'Buy Now', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       target="_blank"><?php esc_html_e( 'Buy Now', "text-to-audio" ); ?></a>
                 </p>
             </div>
 
@@ -316,22 +308,14 @@ class TTA_Notices {
             <div class="tta-notice notice notice-info is-dismissible" dir="<?php echo tta_is_rtl() ? 'ltr' : 'auto' ?>"
                  data-which="voice_and_language" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <p><?php
-                    printf(
-                        esc_html__( '%2$s %1$s', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
-                        '<p>This plugin uses the built-in <code>speechSynthesis</code> browser API — no external API is involved. 
-        Because support varies by browser and device, some Android phones or languages may not work as expected. 
-        We’ve improved compatibility programmatically, but browser-specific differences in voices and language availability may still occur. 
-        These issues are fully resolved in the <strong>Pro version</strong> using a different method.</p>
-        <p><a href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility" target="_blank">Check device support here →</a></p>
-    ',//phpcs:ignore
-                        "<h3>Text To Speech TTS: Having Voice And Language Issues? Here’s Why!</h3>", //phpcs:ignore
-                    );
+                    /* translators: 1: Content message about speechSynthesis, 2: Heading */
+                    printf( esc_html__( '%2$s %1$s', "text-to-audio" ), "<p>This plugin uses the built-in <code>speechSynthesis</code> browser API — no external API is involved. Because support varies by browser and device, some Android phones or languages may not work as expected. We've improved compatibility programmatically, but browser-specific differences in voices and language availability may still occur. These issues are fully resolved in the <strong>Pro version</strong> using a different method.</p><p><a href='https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility' target='_blank'>Check device support here →</a></p>", "<h3>Text To Speech TTS: Having Voice And Language Issues? Here's Why!</h3>" ); //phpcs:ignore
                     ?></p>
                 <?php
                 if ( ! is_pro_active() ) { ?>
                     <a class="button button-primary" data-response="voice_and_language"
                        href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
-                       target="_blank"><?php esc_html_e( 'Unlock The Premium Features', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a></p>
+                       target="_blank"><?php esc_html_e( 'Unlock The Premium Features', "text-to-audio" ); ?></a></p>
                 <?php } ?>
             </div>
 
@@ -399,7 +383,7 @@ class TTA_Notices {
 //        update_option('tts_plugin_analytics_notice_next_show_time', 12);
 
 
-		$pluginName = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+		$pluginName = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', "text-to-audio" ) );
 
 		$has_notice              = false;
 		$user_id                 = get_current_user_id();
@@ -429,22 +413,14 @@ class TTA_Notices {
             <div class="tta-notice notice notice-info is-dismissible" dir="<?php echo tta_is_rtl() ? 'ltr' : 'auto' ?>"
                  data-which="analytics" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <p><?php
-					printf(
-						esc_html__( '%6$s %2$s %3$s %4$s', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
-						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-						'<div class="tta-review-notice-logo"></div>',
-						'<br/><li/>',
-						implode( ' <li/> ', $this->analytics_features ), //phpcs:ignore
-						$pluginName, //phpcs:ignore
-						"<h3>Enhance Your Content with Text To Speech: Now Featuring Detailed Post Analytics!</h3>", //phpcs:ignore
-						"$learn_more" //phpcs:ignore
-					);
+					/* translators: 1: Plugin name, 2: Logo div, 3: Line break with list item, 4: Analytics features, 5: Plugin name, 6: Heading, 7: Learn more link */
+					printf( esc_html__( '%6$s %2$s %3$s %4$s', "text-to-audio" ), $pluginName, '<div class="tta-review-notice-logo"></div>', '<br/><li/>', implode( ' <li/> ', $this->analytics_features ), $pluginName, "<h3>Enhance Your Content with Text To Speech: Now Featuring Detailed Post Analytics!</h3>", "$learn_more" ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					?></p>
 				<?php
 				if ( ! is_pro_active() ) { ?>
                     <a class="button button-primary" data-response="analytics"
                        href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
-                       target="_blank"><?php esc_html_e( 'Unlock The Premium Features', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a></p>
+                       target="_blank"><?php esc_html_e( 'Unlock The Premium Features', "text-to-audio" ); ?></a></p>
 				<?php } ?>
             </div>
 
@@ -515,8 +491,8 @@ class TTA_Notices {
 			\update_option( 'plugin_features_notice_2', true );
 		}
 
-		$pluginName    = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
-		$ProPluginName = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS Pro', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+		$pluginName    = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', "text-to-audio" ) );
+		$ProPluginName = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS Pro', "text-to-audio" ) );
 
 		$has_notice              = false;
 		$user_id                 = get_current_user_id();
@@ -546,7 +522,7 @@ class TTA_Notices {
                  data-which="features" data-nonce="<?php echo esc_attr( $nonce ); ?>">
                 <p><?php
 					printf(
-						esc_html__( '%6$s %2$s %3$s %4$s', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
+						esc_html__( '%6$s %2$s %3$s %4$s', "text-to-audio" ),
 						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						'<div class="tta-review-notice-logo"></div>',
 						'<br/>',
@@ -559,7 +535,7 @@ class TTA_Notices {
                 <p>
                     <a class="button button-primary" data-response="features"
                        href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
-                       target="_blank"><?php esc_html_e( 'Sea More Features', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       target="_blank"><?php esc_html_e( 'Sea More Features', "text-to-audio" ); ?></a>
                 </p>
             </div>
 
@@ -635,7 +611,7 @@ class TTA_Notices {
 			update_option( 'tts_is_displayed_force_notice_december_26', true );
 		}
 
-		$pluginName              = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+		$pluginName              = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', "text-to-audio" ) );
 		$has_notice              = false;
 		$user_id                 = get_current_user_id();
 		$next_timestamp          = get_option( 'tta_translation_notice_next_show_time' );
@@ -666,20 +642,21 @@ class TTA_Notices {
 			?>
             <div class="tta-notice notice notice-info is-dismissible" dir="<?php echo tta_is_rtl() ? 'ltr' : 'auto' ?>"
                  data-which="translate" data-nonce="<?php echo esc_attr( $nonce ); ?>">
+                <?php /* translators: 1: Plugin name, 2: Logo div, 3: Line break, 4: Language string, 5: Contact link, 6: Heading */ ?>
                 <p><?php
-					printf(
-						esc_html__( '%6$s %2$s  We are seeking contributors to help translate this plugin into %4$s. If you’re interested in assisting, we’d love to hear from you! Please reach out to us %5$s, and we’ll provide all the necessary guidance.. %3$s Thank you for choosing %1$s.', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
-						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-						'<div class="tta-review-notice-logo"></div>',
-						'<br/>',
-						$language_string, //phpcs:ignore
-						$contact_link, //phpcs:ignore
-						"<h3>$pluginName</h3>" //phpcs:ignore
-					);
+                    printf(
+                        esc_html__( "%6\$s%2\$s We are seeking contributors to help translate this plugin into %4\$s. If you're interested in assisting, we'd love to hear from you! Please reach out to us %5\$s, and we'll provide all the necessary guidance. %3\$s Thank you for choosing %1\$s.", "text-to-audio" ),
+                        $pluginName,
+                        '<div class="tta-review-notice-logo"></div>',
+                        '<br/>',
+                        $language_string,
+                        $contact_link,
+                        "<h3> $pluginName</h3>" // Space added here
+                    );
 					?></p>
                 <p>
                     <a class="button button-primary" data-response="translate" href="#"
-                       target="_blank"><?php esc_html_e( 'Translate Here', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       target="_blank"><?php esc_html_e( 'Translate Here', "text-to-audio" ); ?></a>
                 </p>
             </div>
 
@@ -752,7 +729,7 @@ class TTA_Notices {
 			update_option( 'tts_is_displayed_ar_vr_plugin_notice', true );
 		}
 
-		$pluginName              = sprintf( '%s', esc_html__( 'AtlasVoice Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+		$pluginName              = sprintf( '%s', esc_html__( 'AtlasVoice Text To Speech TTS', "text-to-audio" ) );
 		$has_notice              = false;
 		$user_id                 = get_current_user_id();
 		$next_timestamp          = get_option( 'tta_ar_vr_plugin_notice_next_show_time' );
@@ -799,20 +776,19 @@ class TTA_Notices {
 					 href="<?php echo esc_url($install_url); ?>">Install 3D Model Viewer</a>
                     <a class="button button-primary" data-response="ar_vr_plugin"
                        href="#"
-                       target="_blank"><?php esc_html_e( 'Try It Now', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       target="_blank"><?php esc_html_e( 'Try It Now', "text-to-audio"); ?></a>
                     <a class="button button-primary" data-response="ar_vr_demo"
                        href="https://wpaugmentedreality.com/shop/"
-                       target="_blank"><?php esc_html_e( 'Real World Demo', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       target="_blank"><?php esc_html_e( 'Real World Demo', "text-to-audio" ); ?></a>
                     <a class="button button-primary" data-response="ar_vr_how_it_works"
                        href="https://wordpress.org/plugins/ar-vr-3d-model-try-on/"
-                       target="_blank"><?php esc_html_e( 'How To Use', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       target="_blank"><?php esc_html_e( 'How To Use', "text-to-audio" ); ?></a>
                     <a class="button button-primary" data-response="ar_vr_download"
                        href="https://downloads.wordpress.org/plugin/ar-vr-3d-model-try-on.zip"
-                       target="_blank"><?php esc_html_e( 'Download', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       target="_blank"><?php esc_html_e( 'Download', "text-to-audio" ); ?></a>
                     <a class="button button-primary" data-response="ar_vr_contact"
                        href="https://wpaugmentedreality.com/contact-us/"
-                       target="_blank"><?php esc_html_e( 'Contact Us', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
-
+                       target="_blank"><?php esc_html_e( 'Contact Us', "text-to-audio" ); ?></a>
                 </p>
             </div>
 
@@ -895,7 +871,7 @@ class TTA_Notices {
 //             delete_user_meta('1', 'tta_review_notice_dismissed');
 //          update_option('tta_review_notice_next_show_time', 12);
 
-		$pluginName              = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+		$pluginName              = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', "text-to-audio" ) );
 		$has_notice              = false;
 		$user_id                 = get_current_user_id();
 		$next_timestamp          = get_option( 'tta_review_notice_next_show_time' );
@@ -924,7 +900,7 @@ class TTA_Notices {
                 <p><?php
 					printf(
 					/* translators: 1: plugin name,2: Slightly Smiling Face (Emoji), 3: line break 'br' tag */
-						esc_html__( '%5$s %3$s %2$s We have spent countless hours developing this free plugin for you, and we would really appreciate it if you drop us a quick rating. Your opinion matters a lot to us.%4$s It helps us to get better. Thanks for using %1$s.', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
+						esc_html__( '%5$s %3$s %2$s We have spent countless hours developing this free plugin for you, and we would really appreciate it if you drop us a quick rating. Your opinion matters a lot to us.%4$s It helps us to get better. Thanks for using %1$s.', "text-to-audio" ),
 						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						'<span style="font-size: 16px;">&#128516</span>',
 						'<div class="tta-review-notice-logo"></div>',
@@ -934,13 +910,13 @@ class TTA_Notices {
 					?></p>
                 <p>
                     <a class="button button-primary" data-response="given" href="#"
-                       target="_blank"><?php esc_html_e( 'Review Now', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       target="_blank"><?php esc_html_e( 'Review Now', "text-to-audio" ); ?></a>
                     <a class="button button-secondary" data-response="later"
-                       href="#"><?php esc_html_e( 'Remind Me Later', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       href="#"><?php esc_html_e( 'Remind Me Later', "text-to-audio" ); ?></a>
                     <a class="button button-secondary" data-response="done" href="#"
-                       target="_blank"><?php esc_html_e( 'Already Done!', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       target="_blank"><?php esc_html_e( 'Already Done!', "text-to-audio" ); ?></a>
                     <a class="button button-secondary" data-response="never"
-                       href="#"><?php esc_html_e( 'Never Ask Again', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       href="#"><?php esc_html_e( 'Never Ask Again', "text-to-audio" ); ?></a>
                 </p>
             </div>
 			<?php
@@ -1027,7 +1003,7 @@ class TTA_Notices {
 					?></p>
                 <p>
                     <a class="button button-primary" href="https://atlasaidev.com/contact-us/"
-                       target="_blank"><?php esc_html_e( 'Get Support', TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       target="_blank"><?php esc_html_e( 'Get Support', "text-to-audio" ); ?></a>
                 </p>
             </div>
 
@@ -1090,7 +1066,7 @@ class TTA_Notices {
 		//     delete_user_meta('1', 'tta_feedback_notice_dismissed');
 		//  update_option('tta_feedback_notice_next_show_time', 12);
 
-		$pluginName              = sprintf( '<b>%s</b>', esc_html__( 'Asking Feedback For Text To Speech TTS', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+		$pluginName              = sprintf( '<b>%s</b>', esc_html__( 'Asking Feedback For Text To Speech TTS', "text-to-audio" ) );
 		$has_notice              = false;
 		$user_id                 = get_current_user_id();
 		$next_timestamp          = get_option( 'tta_feedback_notice_next_show_time' );
@@ -1119,7 +1095,7 @@ class TTA_Notices {
                 <p><?php
 					printf(
 					/* translators: 1: plugin name,2: Slightly Smiling Face (Emoji), 3: line break 'br' tag */
-						esc_html__( '%5$s %3$s %2$s We are looking your feedback to improve the product, and we would really appreciate it if you drop us a quick feedback. Your opinion matters a lot to us.%4$s It helps us to get better. Thanks for using Text To Speech.', \TEXT_TO_AUDIO_TEXT_DOMAIN ),
+						esc_html__( '%5$s %3$s %2$s We are looking your feedback to improve the product, and we would really appreciate it if you drop us a quick feedback. Your opinion matters a lot to us.%4$s It helps us to get better. Thanks for using Text To Speech.', "text-to-audio" ),
 						$pluginName, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						'<span style="font-size: 16px;">&#128516</span>',
 						'<div class="tta-review-notice-logo"></div>',
@@ -1129,13 +1105,13 @@ class TTA_Notices {
 					?></p>
                 <p>
                     <a class="button button-primary" data-response="given" href="#"
-                       target="_blank"><?php esc_html_e( 'Give Feedback Now', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       target="_blank"><?php esc_html_e( 'Give Feedback Now', "text-to-audio" ); ?></a>
                     <a class="button button-secondary" data-response="later"
-                       href="#"><?php esc_html_e( 'Remind Me Later', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       href="#"><?php esc_html_e( 'Remind Me Later', "text-to-audio" ); ?></a>
                     <a class="button button-secondary" data-response="done" href="#"
-                       target="_blank"><?php esc_html_e( 'Already Done!', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       target="_blank"><?php esc_html_e( 'Already Done!', "text-to-audio" ); ?></a>
                     <a class="button button-secondary" data-response="never"
-                       href="#"><?php esc_html_e( 'Never Ask Again', \TEXT_TO_AUDIO_TEXT_DOMAIN ); ?></a>
+                       href="#"><?php esc_html_e( 'Never Ask Again', "text-to-audio" ); ?></a>
                 </p>
             </div>
 			<?php
@@ -1331,7 +1307,7 @@ class TTA_Notices {
 			wp_send_json_success( $value );
 			wp_die();
 		}
-		wp_send_json_error( esc_html__( 'Invalid Request.', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+		wp_send_json_error( esc_html__( 'Invalid Request.', 'text-to-audio' ) );
 		wp_die();
 	}
 
@@ -1364,7 +1340,7 @@ class TTA_Notices {
 			wp_send_json_success( $value );
 			wp_die();
 		}
-		wp_send_json_error( esc_html__( 'Invalid Request.', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+		wp_send_json_error( esc_html__( 'Invalid Request.', 'text-to-audio' ) );
 		wp_die();
 	}
 
@@ -1425,14 +1401,14 @@ class TTA_Notices {
             }
 
 			if ( isset( $updated_user_meta ) && $updated_user_meta ) {
-				wp_send_json_success( esc_html__( 'Request Successful.', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+				wp_send_json_success( esc_html__( 'Request Successful.', 'text-to-audio' ) );
 			} else {
-				wp_send_json_error( esc_html__( 'Something is wrong.', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+				wp_send_json_error( esc_html__( 'Something is wrong.', 'text-to-audio' ) );
 			}
 			wp_die();
 		}
 
-		wp_send_json_error( esc_html__( 'Invalid Request.', \TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+		wp_send_json_error( esc_html__( 'Invalid Request.', 'text-to-audio' ) );
 		wp_die();
 	}
 

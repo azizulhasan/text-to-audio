@@ -1,0 +1,80 @@
+{
+  "translation-revision-date": "2026-02-17T12:48:17+01:00",
+  "generator": "generate-translations.js",
+  "source": "src/dashboard/css-selectors/CSSSelectorsForPosts.js",
+  "domain": "messages",
+  "locale_data": {
+    "messages": {
+      "": {
+        "domain": "messages",
+        "plural": "nplurals=1; plural=0;"
+      },
+      "Save": [
+        "Guardar"
+      ],
+      "Click To Know How It Works?": [
+        "¿Haga clic para saber cómo funciona?"
+      ],
+      "Loading": [
+        "Cargando"
+      ],
+      "Include Content By CSS Selectors": [
+        "Incluir contenido por selectores CSS"
+      ],
+      "Include Content By CSS Selectors feature is available in pro version": [
+        "La función de incluir contenido por selectores CSS está disponible en la versión Pro"
+      ],
+      "Multiple selector will be multiline.": [
+        "Múltiples selectores serán multilínea."
+      ],
+      "Some content may be missing, It can be found by css selectors": [
+        "Puede faltar algún contenido, se puede encontrar mediante selectores CSS"
+      ],
+      "Exclude Content By CSS Selectors": [
+        "Excluir contenido por selectores CSS"
+      ],
+      "Exclude Content By CSS Selectors feature is available in pro version": [
+        "La función de excluir contenido por selectores CSS está disponible en la versión Pro"
+      ],
+      "Exclude content by CSS selectors": [
+        "Excluir contenido por selectores CSS"
+      ],
+      "Multiple Tags Will Be Pipe(|) Separated.": [
+        "Múltiples etiquetas se separarán con barra vertical (|)."
+      ],
+      "Exclude tags is a pro feature.": [
+        "Excluir etiquetas es una función Pro."
+      ],
+      "Exclude Texts To Speak": [
+        "Excluir textos para leer"
+      ],
+      "Excluding texts to be spoken is a pro feature.": [
+        "Excluir textos para ser leídos es una función Pro."
+      ],
+      "Multiple Texts Will Be Pipe(|) Separated.": [
+        "Múltiples textos se separarán con barra vertical (|)."
+      ],
+      "Exclude texts is a pro feature.": [
+        "Excluir textos es una función Pro."
+      ],
+      "Exclude Tags To Speak": [
+        "Excluir etiquetas para leer"
+      ],
+      "Please save the post then try to add custom CSS selectors.": [
+        "Por favor, guarde la entrada y luego intente agregar selectores CSS personalizados."
+      ],
+      "Empty value can not be saved. You can uncheck the \"Use Own CSS Selectors\" Option.": [
+        "No se puede guardar un valor vacío. Puede desmarcar la opción \"Usar selectores CSS propios\"."
+      ],
+      "Settings Data Saved": [
+        "Datos de configuración guardados"
+      ],
+      "Use Own CSS Selectors": [
+        "Usar selectores CSS propios"
+      ],
+      "Exclude Tags. So that its content skiped. Like ( Subscript, Superscript etc.) This is a pro feature.": [
+        "Excluir etiquetas. Para que su contenido sea omitido. Como (Subíndice, Superíndice, etc.) Esta es una función Pro."
+      ]
+    }
+  }
+}

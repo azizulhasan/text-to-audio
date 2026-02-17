@@ -8,6 +8,8 @@ import toast from '../../context/Notify';
 
 
 export default function Compatibility() {
+
+    console.log({in: wp})
     const [compatible, setCompatible] = useState({
         'tts_acf_fields': [],
     })
@@ -93,7 +95,7 @@ export default function Compatibility() {
                     //     ...res.data
                     // })
                 }
-                toast('Successfully Saved.', 'info', {
+                toast(__('Successfully Saved.', 'text-to-audio'), 'info', {
                     autoClose: 2500
                 });
             })
@@ -112,12 +114,12 @@ export default function Compatibility() {
                         <Row className='mt-4'>
                             <Col xs={12} sm={6} lg={4}>
                                 <Form.Label htmlFor='tta__settings_exclude_wp_tags'>
-                                    {__('Add ACF Fields To Posts')} {ttsObj.is_pro_active ? "" : (<>
+                                    {__('Add ACF Fields To Posts', 'text-to-audio')} {ttsObj.is_pro_active ? "" : (<>
                                     {['top'].map((placement) => (<OverlayTrigger
                                         key={placement}
                                         placement={placement}
                                         overlay={<Tooltip id={`tooltip-${placement}`}>
-                                            {__('Adding more than 1  ACF field is a pro feature')}
+                                            {__('Adding more than 1  ACF field is a pro feature', 'text-to-audio')}
                                         </Tooltip>}>
                                         <Button className="m-0 p-0 text-dark bg-light border-0"><i
                                             className="fas fa-lock"/></Button>
@@ -126,7 +128,7 @@ export default function Compatibility() {
                                 </Form.Label>
                             </Col>
                             <Col xs={11} sm={11} lg={7}>
-                                <MultiSelect toastMessage={'Adding more than 1  ACF field is a pro feature'}
+                                <MultiSelect toastMessage={__('Adding more than 1  ACF field is a pro feature', 'text-to-audio')}
                                              name={'tts_trackable_post_ids'}
                                              id={'tts_trackable_post_ids'}
                                              selectedItems={selectedACFFields}
@@ -139,7 +141,7 @@ export default function Compatibility() {
                                         key={placement}
                                         placement={placement}
                                         overlay={<Tooltip id={`tooltip-${placement}`}>
-                                            {__('Click To Know How It Works?')}
+                                            {__('Click To Know How It Works?', 'text-to-audio')}
                                         </Tooltip>}>
                                         <a target='_blank' href='https://atlasaidev.com/docs/text-to-speech/'>
                                             <i className="fas fa-info-circle"></i></a>
@@ -151,7 +153,7 @@ export default function Compatibility() {
                         <Row className='mt-3'>
                             <div className='d-grid gap-3 col-2 mx-auto mt-5 mb-4'>
                                 <button type='submit' className='tta_btn  btn-block'>
-                                    Save
+                                    {__('Save', 'text-to-audio')}
                                 </button>
                             </div>
                         </Row>
@@ -162,5 +164,5 @@ export default function Compatibility() {
                 </Col>
             </Row>
         </Container>
-    </React.Fragment> : <h1>Loading</h1>);
+    </React.Fragment> : <h1>{__('Loading', 'text-to-audio')}</h1>);
 };
