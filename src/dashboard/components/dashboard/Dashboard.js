@@ -28,6 +28,7 @@ import Analitics from './analitics/Analitics.js';
 import Integrations from './integrations/Integrations.js'
 import Compatibility from './compatibility/Compatibility.js'
 import Aliases from './aliases/Aliases.js'
+import Plugins from './plugins/Plugins.js'
 
 function Dashboard() {
 	const [componentName, setComponentName] = useState(getComponentName());
@@ -87,6 +88,7 @@ function Dashboard() {
 								<Route path='/compatibility' element={<Compatibility />} />
 								<Route path='/aliases' element={<Aliases />} />
 								<Route path='/faq' element={<Docs />} />
+								<Route path='/plugins' element={<Plugins />} />
 
 							</Routes>
 
