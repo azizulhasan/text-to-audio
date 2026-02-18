@@ -82,6 +82,8 @@ export default function Settings() {
             }
             setIsDataLoaded(true);
         });
+
+        console.log({id: ttsObj.player_id})
     }, []);
 
     const handleChange = (
@@ -362,22 +364,22 @@ export default function Settings() {
                                                 id="tta__settings_read_content_from_dom"
                                             />
                                         </SettingRow>
-                                        {
-                                            ttsObj.player_id == 1 && <SettingRow
-                                                label={__("Use Old Player UI", 'text-to-audio')}
-                                                questionIcon={true}
-                                                questionTooltip={__("Use Old Player UI", 'text-to-audio')}
-                                            >
-                                                <ToggleSwitch
-                                                    checked={settings.tta__settings_player_use_old_player}
-                                                    onChange={(e) => handleChange(e)}
-                                                    name="tta__settings_player_use_old_player"
-                                                    id="tta__settings_player_use_old_player"
-                                                />
-                                            </SettingRow>
-                                        }
                                     </>
                                 )}
+                                {
+                                    ttsObj.player_id == 1 && <SettingRow
+                                        label={__("Use Old Player UI", 'text-to-audio')}
+                                        questionIcon={true}
+                                        questionTooltip={__("Use Old Player UI", 'text-to-audio')}
+                                    >
+                                        <ToggleSwitch
+                                            checked={settings.tta__settings_player_use_old_player}
+                                            onChange={(e) => handleChange(e)}
+                                            name="tta__settings_player_use_old_player"
+                                            id="tta__settings_player_use_old_player"
+                                        />
+                                    </SettingRow>
+                                }
 
                                 <SettingRow
                                     label={__("Add Post Title To Read", "text-to-audio")}
