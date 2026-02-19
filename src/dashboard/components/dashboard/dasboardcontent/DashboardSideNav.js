@@ -79,6 +79,12 @@ export default function DashboardSideNav({ isProVersion }) {
               </div>
               Docs
             </NavLink>
+            <NavLink className={getNavLinkClass} to={"/plugins"}>
+              <div className="sb-nav-link-icon">
+                <span className="dashicons dashicons-screenoptions"></span>
+              </div>
+              Plugins
+            </NavLink>
             {/* <NavLink className={getNavLinkClass} to={'/analitics'}>
 							<div className='sb-nav-link-icon'>
 								<span className="dashicons dashicons-chart-bar"></span>
