@@ -230,9 +230,12 @@ export default function Listening() {
     customize.append("method", "get");
     postWithoutImage(tta_obj.api_url + "tta/v1/customize", customize)
       .then((res) => {
-        if (!res.data?.buttonSettings?.id) {
+        if (!res.data.buttonSettings) {
+          res.data.buttonSettings = { id: 1 };
+        } else if (!res.data.buttonSettings.id) {
           res.data.buttonSettings.id = 1;
         }
+
         console.log({ dta: res.data.buttonSettings.id });
         setCustomizationSettings(res.data);
         setIsListeningSettingsLoaded(true);
