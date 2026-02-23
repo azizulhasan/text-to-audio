@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Container, Form, Row, Col, Card, Badge } from "react-bootstrap";
+import { Container, Form, Row, Col } from "react-bootstrap";
 import { __ } from "@wordpress/i18n";
 import GoogleTTS from "./GoogleCloudTTS/GoogleTTS";
 import ChatGPTTTS from "./ChatGPTTTS/ChatGPTTTS";
+import ElevenLabsTTS from "./ElevenLabsTTS/ElevenLabsTTS";
 import { postData } from "../../context/utilities";
 import UpgradeToPro from "../../UpgradeToPro";
 
@@ -31,17 +32,18 @@ export default function Integrations() {
     currentTTSServic: currentTTSServic,
   });
 
+  const [elevenLabsAPIData, setElevenLabsAPIData] = useState({
+    elevenlabs_api_key: "",
+    currentTTSServic: currentTTSServic,
+  });
+
+  const [elevenLabsUsage, setElevenLabsUsage] = useState(null);
+
   const [shouldCheckChatGPT, setShouldCheckChatGPT] = useState(false);
 
-  // Handle service selection - toggle behavior
-  const handleServiceSelect = (service) => {
-    if (currentTTSServic === service) {
-      // If clicking the already selected service, deselect it
-      setCurrentTTSServic("");
-    } else {
-      // Otherwise, select the new service
-      setCurrentTTSServic(service);
-    }
+  // Handle service selection via dropdown
+  const handleServiceSelect = (e) => {
+    setCurrentTTSServic(e.target.value);
   };
 
   const getCurrentTTSService = (ttsService) => {
@@ -52,11 +54,11 @@ export default function Integrations() {
     setShouldCheckChatGPT(val);
   };
 
-  // Check both services authentication status on mount
+  // Check all services authentication status on mount
   useEffect(() => {
     if (ttsObj.is_pro_active) {
       let completedRequests = 0;
-      const totalRequests = 2;
+      const totalRequests = 3;
 
       const checkLoadingComplete = () => {
         completedRequests++;
@@ -68,18 +70,14 @@ export default function Integrations() {
       // Check Google Cloud TTS authentication
       postData(apiURL + "get_auth_file", {}, "GET")
         .then((res) => {
-          console.log('Google TTS Auth Response:', res);
           if (res?.is_authenticated) {
-            console.log('Google TTS IS authenticated - adding checkmark');
             setAuthenticatedServices(prev => {
               const newServices = prev.includes('google_cloud_tts') ? prev : [...prev, 'google_cloud_tts'];
-              console.log('Updated authenticatedServices:', newServices);
               return newServices;
             });
-            // Set as active service if authenticated
-            setCurrentTTSServic('google_cloud_tts');
-          } else {
-            console.log('Google TTS NOT authenticated');
+            if (!currentTTSServic) {
+              setCurrentTTSServic('google_cloud_tts');
+            }
           }
         })
         .catch((err) => {
@@ -89,32 +87,23 @@ export default function Integrations() {
           checkLoadingComplete();
         });
 
-      // Check ChatGPT TTS authentication  
+      // Check ChatGPT TTS authentication
       let data = new FormData();
       data.append("method", "get");
       postData(apiURL + "chat_gpt_tts", data)
         .then((res) => {
-          console.log('ChatGPT TTS Auth Response:', res);
           setChatGPTAPIData(res.data);
-          
-          // Check if ChatGPT is authenticated - check for API key presence
           if (res?.data?.chatgpt_tts_api_key && res.data.chatgpt_tts_api_key !== '') {
-            console.log('ChatGPT TTS IS authenticated - adding checkmark');
             setAuthenticatedServices(prev => {
               const newServices = prev.includes('chat_gpt_tts') ? prev : [...prev, 'chat_gpt_tts'];
-              console.log('Updated authenticatedServices:', newServices);
               return newServices;
             });
-            // Set as active service if authenticated and no other service is active
             setCurrentTTSServic(prevService => {
-              // If Google TTS is already set, keep it, otherwise set ChatGPT
               if (prevService === '') {
                 return 'chat_gpt_tts';
               }
               return prevService;
             });
-          } else {
-            console.log('ChatGPT TTS NOT authenticated');
           }
         })
         .catch((err) => {
@@ -123,11 +112,57 @@ export default function Integrations() {
         .finally(() => {
           checkLoadingComplete();
         });
+
+      // Check ElevenLabs TTS authentication
+      let elevenLabsData = new FormData();
+      elevenLabsData.append("method", "get");
+      postData(apiURL + "elevenlabs_tts", elevenLabsData)
+        .then((res) => {
+          if (res?.data) {
+            setElevenLabsAPIData(res.data);
+            if (res?.data?.elevenlabs_api_key && res.data.elevenlabs_api_key !== '') {
+              setAuthenticatedServices(prev => {
+                const newServices = prev.includes('elevenlabs_tts') ? prev : [...prev, 'elevenlabs_tts'];
+                return newServices;
+              });
+              setCurrentTTSServic(prevService => {
+                if (prevService === '') {
+                  return 'elevenlabs_tts';
+                }
+                return prevService;
+              });
+            }
+          }
+        })
+        .catch((err) => {
+          console.log('ElevenLabs TTS Auth Error:', err);
+        })
+        .finally(() => {
+          checkLoadingComplete();
+        });
     } else {
-      // If pro is not active, set loading as complete immediately
       setIsDataLoaded(true);
     }
   }, []);
+
+  // Fetch ElevenLabs usage when authenticated and selected
+  useEffect(() => {
+    if (
+      ttsObj.is_pro_active &&
+      currentTTSServic === "elevenlabs_tts" &&
+      authenticatedServices.includes('elevenlabs_tts')
+    ) {
+      postData(apiURL + "elevenlabs_usage", {}, "GET")
+        .then((res) => {
+          if (res?.data) {
+            setElevenLabsUsage(res.data);
+          }
+        })
+        .catch((err) => {
+          console.log('ElevenLabs Usage Error:', err);
+        });
+    }
+  }, [currentTTSServic, authenticatedServices]);
 
   // Additional check when service is selected or shouldCheckChatGPT changes
   useEffect(() => {
@@ -156,6 +191,14 @@ export default function Integrations() {
     }
   }, [currentTTSServic, shouldCheckChatGPT]);
 
+  // Get authenticated label suffix
+  const getAuthLabel = (serviceKey) => {
+    if (authenticatedServices.includes(serviceKey)) {
+      return ' \u2713';
+    }
+    return '';
+  };
+
 
   return isDataLoaded ? (
     <Container fluid className="tta-container">
@@ -169,81 +212,81 @@ export default function Integrations() {
             </p>
           </div>
 
-          {/* TTS Service Selection Card */}
+          {/* TTS Service Selection Dropdown */}
           <div className="tta-card mb-3">
             <h5 className="mb-3 fw-semibold">{__("Select Text To Speech Service", "text-to-audio")}</h5>
-            <Row>
-              <Col xs={12} md={6} className="mb-3 mb-md-0">
-                <div
-                  className={`tts-service-card google-tts ${currentTTSServic === 'google_cloud_tts' ? 'active' : ''} ${authenticatedServices.includes('google_cloud_tts') ? 'authenticated' : ''}`}
-                  onClick={() => handleServiceSelect('google_cloud_tts')}
-                >
-                  <div className="d-flex align-items-start">
-                    <div className="service-icon me-3">
-                      <img
-                        src="https://www.vectorlogo.zone/logos/google_cloud/google_cloud-icon.svg"
-                        alt="Google Cloud"
-                        width="32"
-                        height="32"
-                      />
-                    </div>
-                    <div className="flex-grow-1">
-                      <div className="d-flex align-items-center justify-content-between">
-                        <h6 className="mb-1">{__("Google Cloud TTS", "text-to-audio")}</h6>
-                        {/* Checkbox - visible when authenticated */}
-                        {authenticatedServices.includes('google_cloud_tts') && (
-                          <div className="service-checkbox">
-                            <Form.Check
-                              type="checkbox"
-                              checked={true}
-                              readOnly
-                            />
-                          </div>
-                        )}
-                      </div>
-                      <p className="mb-0 text-muted small">
-                        {__("Google Cloud Text-to-Speech converts text into natural-sounding speech using Google's AI voices.", "text-to-audio")}
-                      </p>
-                    </div>
-                  </div>
+            <Form.Select
+              value={currentTTSServic}
+              onChange={handleServiceSelect}
+              className="mb-3"
+            >
+              <option value="">{__("-- Select a service --", "text-to-audio")}</option>
+              <option value="google_cloud_tts">
+                {__("Google Cloud TTS", "text-to-audio")}{getAuthLabel('google_cloud_tts')}
+              </option>
+              <option value="chat_gpt_tts">
+                {__("ChatGPT TTS", "text-to-audio")}{getAuthLabel('chat_gpt_tts')}
+              </option>
+              <option value="elevenlabs_tts">
+                {__("ElevenLabs TTS", "text-to-audio")}{getAuthLabel('elevenlabs_tts')}
+              </option>
+            </Form.Select>
+
+            {/* Token/Character Usage Section */}
+            {currentTTSServic === 'elevenlabs_tts' && authenticatedServices.includes('elevenlabs_tts') && elevenLabsUsage && (
+              <div className="p-3 mb-3 rounded" style={{ backgroundColor: '#f8f9fa', border: '1px solid #e9ecef' }}>
+                <h6 className="fw-semibold mb-2">{__("ElevenLabs Character Usage", "text-to-audio")}</h6>
+                <div className="d-flex justify-content-between mb-1">
+                  <span className="small text-muted">
+                    {elevenLabsUsage.character_count?.toLocaleString() || 0} / {elevenLabsUsage.character_limit?.toLocaleString() || 0} {__("characters", "text-to-audio")}
+                  </span>
+                  <span className="small text-muted">
+                    {elevenLabsUsage.character_limit > 0
+                      ? Math.round((elevenLabsUsage.character_count / elevenLabsUsage.character_limit) * 100)
+                      : 0}%
+                  </span>
                 </div>
-              </Col>
-              <Col xs={12} md={6}>
-                <div
-                  className={`tts-service-card chatgpt-tts ${currentTTSServic === 'chat_gpt_tts' ? 'active' : ''} ${authenticatedServices.includes('chat_gpt_tts') ? 'authenticated' : ''}`}
-                  onClick={() => handleServiceSelect('chat_gpt_tts')}
-                >
-                  <div className="d-flex align-items-start">
-                    <div className="service-icon me-3">
-                      <img
-                        src="https://upload.wikimedia.org/wikipedia/commons/6/66/OpenAI_logo_2025_%28symbol%29.svg"
-                        alt="ChatGPT"
-                        width="32"
-                        height="32"
-                      />
-                    </div>
-                    <div className="flex-grow-1">
-                      <div className="d-flex align-items-center justify-content-between">
-                        <h6 className="mb-1">{__("ChatGPT TTS", "text-to-audio")}</h6>
-                        {/* Checkbox - visible when authenticated */}
-                        {authenticatedServices.includes('chat_gpt_tts') && (
-                          <div className="service-checkbox">
-                            <Form.Check
-                              type="checkbox"
-                              checked={true}
-                              readOnly
-                            />
-                          </div>
-                        )}
-                      </div>
-                      <p className="mb-0 text-muted small">
-                        {__("ChatGPT TTS converts written text into realistic, human-like voice using OpenAI's advanced speech technology.", "text-to-audio")}
-                      </p>
-                    </div>
-                  </div>
+                <div className="progress" style={{ height: '8px' }}>
+                  <div
+                    className="progress-bar"
+                    role="progressbar"
+                    style={{
+                      width: `${elevenLabsUsage.character_limit > 0
+                        ? Math.min((elevenLabsUsage.character_count / elevenLabsUsage.character_limit) * 100, 100)
+                        : 0}%`,
+                      backgroundColor: '#6366f1'
+                    }}
+                  ></div>
                 </div>
-              </Col>
-            </Row>
+                {elevenLabsUsage.tier && (
+                  <p className="small text-muted mt-2 mb-0">
+                    {__("Plan:", "text-to-audio")} {elevenLabsUsage.tier}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {currentTTSServic === 'chat_gpt_tts' && authenticatedServices.includes('chat_gpt_tts') && (
+              <div className="p-3 mb-3 rounded" style={{ backgroundColor: '#f8f9fa', border: '1px solid #e9ecef' }}>
+                <p className="small text-muted mb-0">
+                  {__("Check your OpenAI usage and billing at", "text-to-audio")}{' '}
+                  <a href="https://platform.openai.com/usage" target="_blank" rel="noopener noreferrer">
+                    {__("OpenAI Dashboard", "text-to-audio")}
+                  </a>
+                </p>
+              </div>
+            )}
+
+            {currentTTSServic === 'google_cloud_tts' && authenticatedServices.includes('google_cloud_tts') && (
+              <div className="p-3 mb-3 rounded" style={{ backgroundColor: '#f8f9fa', border: '1px solid #e9ecef' }}>
+                <p className="small text-muted mb-0">
+                  {__("Check your Google Cloud usage and billing at", "text-to-audio")}{' '}
+                  <a href="https://console.cloud.google.com/billing" target="_blank" rel="noopener noreferrer">
+                    {__("Google Cloud Console", "text-to-audio")}
+                  </a>
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Show Google TTS component when selected */}
@@ -260,6 +303,16 @@ export default function Integrations() {
             <ChatGPTTTS
               setChatGPTAPIData={setChatGPTAPIData}
               chatGPTAPIData={chatGPTAPIData}
+              currentTTSServic={currentTTSServic}
+              setAuthenticatedServices={setAuthenticatedServices}
+            />
+          )}
+
+          {/* Show ElevenLabs TTS component when selected */}
+          {currentTTSServic === "elevenlabs_tts" && (
+            <ElevenLabsTTS
+              setElevenLabsAPIData={setElevenLabsAPIData}
+              elevenLabsAPIData={elevenLabsAPIData}
               currentTTSServic={currentTTSServic}
               setAuthenticatedServices={setAuthenticatedServices}
             />
