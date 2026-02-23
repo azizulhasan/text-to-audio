@@ -38,6 +38,8 @@ export default function Integrations() {
   });
 
   const [elevenLabsUsage, setElevenLabsUsage] = useState(null);
+  const [chatGPTUsage, setChatGPTUsage] = useState(null);
+  const [googleCloudUsage, setGoogleCloudUsage] = useState(null);
 
   const [shouldCheckChatGPT, setShouldCheckChatGPT] = useState(false);
 
@@ -145,10 +147,11 @@ export default function Integrations() {
     }
   }, []);
 
-  // Fetch ElevenLabs usage when authenticated and selected
+  // Fetch usage data when authenticated and selected
   useEffect(() => {
+    if (!ttsObj.is_pro_active) return;
+
     if (
-      ttsObj.is_pro_active &&
       currentTTSServic === "elevenlabs_tts" &&
       authenticatedServices.includes('elevenlabs_tts')
     ) {
@@ -160,6 +163,36 @@ export default function Integrations() {
         })
         .catch((err) => {
           console.log('ElevenLabs Usage Error:', err);
+        });
+    }
+
+    if (
+      currentTTSServic === "chat_gpt_tts" &&
+      authenticatedServices.includes('chat_gpt_tts')
+    ) {
+      postData(apiURL + "chatgpt_usage", {}, "GET")
+        .then((res) => {
+          if (res?.data) {
+            setChatGPTUsage(res.data);
+          }
+        })
+        .catch((err) => {
+          console.log('ChatGPT Usage Error:', err);
+        });
+    }
+
+    if (
+      currentTTSServic === "google_cloud_tts" &&
+      authenticatedServices.includes('google_cloud_tts')
+    ) {
+      postData(apiURL + "gcloud_usage", {}, "GET")
+        .then((res) => {
+          if (res?.data) {
+            setGoogleCloudUsage(res.data);
+          }
+        })
+        .catch((err) => {
+          console.log('Google Cloud Usage Error:', err);
         });
     }
   }, [currentTTSServic, authenticatedServices]);
@@ -235,7 +268,9 @@ export default function Integrations() {
             {/* Token/Character Usage Section */}
             {currentTTSServic === 'elevenlabs_tts' && authenticatedServices.includes('elevenlabs_tts') && elevenLabsUsage && (
               <div className="p-3 mb-3 rounded" style={{ backgroundColor: '#f8f9fa', border: '1px solid #e9ecef' }}>
-                <h6 className="fw-semibold mb-2">{__("ElevenLabs Character Usage", "text-to-audio")}</h6>
+                <h6 className="fw-semibold mb-2">{__("ElevenLabs Usage", "text-to-audio")} <span className="small fw-normal text-muted">({__("this month", "text-to-audio")})</span></h6>
+
+                {/* Character quota progress bar */}
                 <div className="d-flex justify-content-between mb-1">
                   <span className="small text-muted">
                     {elevenLabsUsage.character_count?.toLocaleString() || 0} / {elevenLabsUsage.character_limit?.toLocaleString() || 0} {__("characters", "text-to-audio")}
@@ -246,7 +281,7 @@ export default function Integrations() {
                       : 0}%
                   </span>
                 </div>
-                <div className="progress" style={{ height: '8px' }}>
+                <div className="progress mb-2" style={{ height: '8px' }}>
                   <div
                     className="progress-bar"
                     role="progressbar"
@@ -258,8 +293,33 @@ export default function Integrations() {
                     }}
                   ></div>
                 </div>
+
+                {/* Cost, minutes, requests summary */}
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <span className="small text-muted">
+                    {elevenLabsUsage.usage_count || 0} {__("requests", "text-to-audio")} &middot; {elevenLabsUsage.total_minutes?.toFixed(1) || '0.0'} {__("min", "text-to-audio")}
+                  </span>
+                  <span className="small fw-semibold" style={{ color: '#6366f1' }}>
+                    {__("Cost:", "text-to-audio")} ${elevenLabsUsage.total_cost?.toFixed(4) || '0.0000'}
+                  </span>
+                </div>
+
+                {/* Model breakdown */}
+                {elevenLabsUsage.model_breakdown && Object.keys(elevenLabsUsage.model_breakdown).length > 0 && (
+                  <div className="mb-2">
+                    {Object.entries(elevenLabsUsage.model_breakdown).map(([model, data]) => (
+                      data.usage_count > 0 && (
+                        <div key={model} className="d-flex justify-content-between small text-muted">
+                          <span>{model}</span>
+                          <span>{data.total_usage?.toLocaleString()} {__("credits", "text-to-audio")} &middot; {data.total_minutes?.toFixed(1)} {__("min", "text-to-audio")} &middot; ${data.total_cost?.toFixed(4)}</span>
+                        </div>
+                      )
+                    ))}
+                  </div>
+                )}
+
                 {elevenLabsUsage.tier && (
-                  <p className="small text-muted mt-2 mb-0">
+                  <p className="small text-muted mt-1 mb-0">
                     {__("Plan:", "text-to-audio")} {elevenLabsUsage.tier}
                   </p>
                 )}
@@ -268,6 +328,29 @@ export default function Integrations() {
 
             {currentTTSServic === 'chat_gpt_tts' && authenticatedServices.includes('chat_gpt_tts') && (
               <div className="p-3 mb-3 rounded" style={{ backgroundColor: '#f8f9fa', border: '1px solid #e9ecef' }}>
+                <h6 className="fw-semibold mb-2">{__("OpenAI TTS Usage", "text-to-audio")} <span className="small fw-normal text-muted">({__("this month", "text-to-audio")})</span></h6>
+                {chatGPTUsage && (
+                  <>
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <span className="small text-muted">
+                        {chatGPTUsage.character_count?.toLocaleString() || 0} {__("characters used", "text-to-audio")}
+                      </span>
+                      <span className="small fw-semibold" style={{ color: '#10a37f' }}>
+                        {__("Est. Cost:", "text-to-audio")} ${chatGPTUsage.estimated_cost?.toFixed(4) || '0.0000'}
+                      </span>
+                    </div>
+                    {chatGPTUsage.breakdown && Object.keys(chatGPTUsage.breakdown).length > 0 && (
+                      <div className="mb-2">
+                        {Object.entries(chatGPTUsage.breakdown).map(([model, chars]) => (
+                          <div key={model} className="d-flex justify-content-between small text-muted">
+                            <span>{model}</span>
+                            <span>{chars?.toLocaleString()} {__("chars", "text-to-audio")} &middot; ${chatGPTUsage.pricing?.[model] || 15}/{__("1M chars", "text-to-audio")}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
                 <p className="small text-muted mb-0">
                   {__("Check your OpenAI usage and billing at", "text-to-audio")}{' '}
                   <a href="https://platform.openai.com/usage" target="_blank" rel="noopener noreferrer">
@@ -279,6 +362,49 @@ export default function Integrations() {
 
             {currentTTSServic === 'google_cloud_tts' && authenticatedServices.includes('google_cloud_tts') && (
               <div className="p-3 mb-3 rounded" style={{ backgroundColor: '#f8f9fa', border: '1px solid #e9ecef' }}>
+                <h6 className="fw-semibold mb-2">{__("Google Cloud TTS Usage", "text-to-audio")} <span className="small fw-normal text-muted">({__("this month", "text-to-audio")})</span></h6>
+                {googleCloudUsage && (
+                  <>
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <span className="small text-muted">
+                        {googleCloudUsage.character_count?.toLocaleString() || 0} {__("total characters used", "text-to-audio")}
+                      </span>
+                      <span className="small fw-semibold" style={{ color: googleCloudUsage.estimated_cost > 0 ? '#ea4335' : '#34a853' }}>
+                        {googleCloudUsage.estimated_cost > 0
+                          ? <>{__("Est. Cost:", "text-to-audio")} ${googleCloudUsage.estimated_cost?.toFixed(4)}</>
+                          : __("Within Free Tier", "text-to-audio")
+                        }
+                      </span>
+                    </div>
+                    {googleCloudUsage.voice_types && Object.keys(googleCloudUsage.voice_types).length > 0 && (
+                      <div className="mb-2">
+                        {Object.entries(googleCloudUsage.voice_types).map(([type, data]) => {
+                          const pct = data.free_limit > 0 ? Math.min((data.character_count / data.free_limit) * 100, 100) : 0;
+                          return (
+                            <div key={type} className="mb-2">
+                              <div className="d-flex justify-content-between small mb-1">
+                                <span className="text-muted">{type}</span>
+                                <span className="text-muted">
+                                  {data.character_count?.toLocaleString()} / {data.free_limit?.toLocaleString()} {__("free", "text-to-audio")}
+                                </span>
+                              </div>
+                              <div className="progress" style={{ height: '6px' }}>
+                                <div
+                                  className="progress-bar"
+                                  role="progressbar"
+                                  style={{
+                                    width: `${pct}%`,
+                                    backgroundColor: pct >= 100 ? '#ea4335' : '#4285f4'
+                                  }}
+                                ></div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </>
+                )}
                 <p className="small text-muted mb-0">
                   {__("Check your Google Cloud usage and billing at", "text-to-audio")}{' '}
                   <a href="https://console.cloud.google.com/billing" target="_blank" rel="noopener noreferrer">
