@@ -189,6 +189,41 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
             return;
         }
 
+        // If already authenticated and no new file selected, just save settings
+        if (isAuthenticated && (!googTTSJsonFile || !googTTSJsonFile[0])) {
+            let data = new FormData();
+            data.append("tts_is_backup_mp3_file", isBackUpToGCS);
+            data.append("bucket_name", bucketName);
+            data.append("method", "post");
+
+            postData(apiURL + "upload_file", data)
+                .then((res) => {
+                    if (res.status) {
+                        toast(
+                            __('Settings saved successfully.', 'text-to-audio'),
+                            "info",
+                            { autoClose: 5000 }
+                        );
+                        if (res?.tts_is_backup_mp3_file == "true") {
+                            setIsBackUpToGCS(res?.tts_is_backup_mp3_file || false);
+                        }
+                        if (res?.bucket_name) {
+                            setBucketName(res?.bucket_name || "");
+                        }
+                    } else {
+                        if (res?.bcmath) {
+                            toast(bcmathNotice(), "error", { autoClose: 8000 });
+                        } else {
+                            toast(res?.message || __("Something went wrong", 'text-to-audio'));
+                        }
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+            return;
+        }
+
         if (!googTTSJsonFile || !googTTSJsonFile[0]) {
             toast(__("Please select a service account JSON file first.", 'text-to-audio'), "error", {
                 autoClose: 10000,
@@ -213,9 +248,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                     toast(
                         __('File uploaded successfully. You can now test the connection below.', 'text-to-audio'),
                         "info",
-                        {
-                            autoClose: 15000,
-                        }
+                        { autoClose: 15000 }
                     );
                     setIsAuthenticated(res.status);
                     if (res?.tts_is_backup_mp3_file == "true") {
@@ -243,9 +276,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                     setStorageTestResult(null);
                 } else {
                     if (res?.bcmath) {
-                        toast(bcmathNotice(), "error", {
-                            autoClose: 8000,
-                        });
+                        toast(bcmathNotice(), "error", { autoClose: 8000 });
                     } else {
                         toast(res?.message || __("Something went wrong", 'text-to-audio'));
                     }
