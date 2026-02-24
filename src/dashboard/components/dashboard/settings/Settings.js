@@ -38,6 +38,7 @@ export default function Settings() {
         tta__settings_text_before_content: "",
         tta__settings_read_content_from_dom: true,
         tta__settings_player_use_old_player: false,
+        tta__settings_enable_tts_status: true,
     });
     const [postTypes, setPostTypes] = useState([]);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
@@ -396,6 +397,7 @@ export default function Settings() {
                                     />
                                 </SettingRow>
 
+                                {/*tta__settings_add_post_excerpt_to_read*/}
                                 <SettingRow
                                     label={__("Add Post Excerpt To Read", "text-to-audio")}
                                     questionIcon={true}
@@ -408,6 +410,22 @@ export default function Settings() {
                                         onChange={(e) => handleChange(e)}
                                         name="tta__settings_add_post_excerpt_to_read"
                                         id="tta__settings_add_post_excerpt_to_read"
+                                    />
+                                </SettingRow>
+
+                                {/*tta__settings_enable_tts_status*/}
+                                <SettingRow
+                                    label={__("Enable TTS Status", "text-to-audio")}
+                                    questionIcon={true}
+                                    questionTooltip={__(
+                                        "Enable TTS Status In Post Page.", "text-to-audio"
+                                    )}
+                                >
+                                    <ToggleSwitch
+                                        checked={settings.tta__settings_enable_tts_status}
+                                        onChange={(e) => handleChange(e)}
+                                        name="tta__settings_enable_tts_status"
+                                        id="tta__settings_enable_tts_status"
                                     />
                                 </SettingRow>
 
