@@ -389,19 +389,88 @@ class TTA_Admin
     }
 
     // Callback function to display the content of the page
-    public function bulk_mp3_generate()
-    {
-        echo '<h1>AtlasVoice Pro : Bulk MP3 File Generate</h1>';
+public function bulk_mp3_generate()
+{
+    // Enqueue Google Font + our custom CSS
+    wp_enqueue_style(
+        'tta-bulk-ui',
+        plugin_dir_url(__FILE__) . 'css/text-to-audio-dashboard.css',
+        [],
+        $this->version,
+        'all'
+    );
+    ?>
+    <div class="tta_bulk_page_wrap">
+        <!-- ── Page Header ── -->
+        <div class="tta_bulk_header">
+            <h1 class="tta_bulk_title"><?php esc_html_e( 'AtlasVoice Pro : Bulk MP3 File Generate', 'text-to-audio' ); ?></h1>
+            <a class="tta_bulk_yt_btn"
+               href="https://www.youtube.com/watch?v=HFoqlkPCP80"
+               target="_blank"
+               rel="noreferrer">
+                <?php esc_html_e( 'How it works', 'text-to-audio' ); ?>
+                <span class="tta_bulk_yt_pill"></span>
+            </a>
+        </div>
 
-        if (!empty($_REQUEST['atlasvoice_mp3_file'])) {
-            echo '<div id="atlasvoice_generate_bulk_mp3_file"></div>';
-        } else {
-            $url = admin_url('edit.php');
-            echo '<p>No post ID found. Please select multiple posts from the post page. And apply <strong>AtlasVoice Generate MP3 File</strong> bulk action. <a href="' . $url . '">Go to Posts Page</a></p>';
-            echo 'How it works? <a style="text-decoration:none;color:red" target="_blank" href="https://www.youtube.com/watch?v=HFoqlkPCP80"><span class="fab fa-youtube"></span></a>';
-        }
+        <?php if ( ! empty( $_REQUEST['atlasvoice_mp3_file'] ) ) : ?>
+            <!-- ── React mounts here when posts are selected ── -->
+            <div id="atlasvoice_generate_bulk_mp3_file" class="tta_bulk_react_root"></div>
+        <?php else : ?>
+            <!-- ── Promo / empty-state banner ── -->
+            <div class="tta_bulk_banner">
+                <!-- Left: video mock panel -->
+                <div class="tta_bulk_video_panel">
+                    <div class="tta_bulk_browser_mock">
+                        <div class="tta_bulk_browser_bar">
+                            <span class="tta_bulk_dot tta_bulk_dot_r"></span>
+                            <span class="tta_bulk_dot tta_bulk_dot_y"></span>
+                            <span class="tta_bulk_dot tta_bulk_dot_g"></span>
+                        </div>
+                        <div class="tta_bulk_browser_body">
+                            <div class="tta_bulk_mock_bar"></div>
+                            <div class="tta_bulk_mock_bar tta_bulk_mock_short"></div>
+                            <div class="tta_bulk_mock_area"></div>
+                            <div class="tta_bulk_mock_btn"></div>
+                        </div>
+                    </div>
+                    <a class="tta_bulk_play_btn"
+                       href="https://www.youtube.com/watch?v=HFoqlkPCP80"
+                       target="_blank"
+                       rel="noreferrer"
+                       aria-label="<?php esc_attr_e( 'Watch tutorial', 'text-to-audio' ); ?>">
+                        <span class="tta_bulk_play_arrow"></span>
+                    </a>
+                </div>
 
-    }
+                <!-- Right: description -->
+                <div class="tta_bulk_promo_content">
+                    <h2><?php esc_html_e( 'Text To Speech Pro (AtlasVoice Pro)', 'text-to-audio' ); ?><br><?php esc_html_e( 'How To Generate Bulk MP3 File?', 'text-to-audio' ); ?></h2>
+                    <p><?php esc_html_e( 'Just install and automatically add a text to audio player to your WordPress site!', 'text-to-audio' ); ?></p>
+                    <div class="tta_bulk_promo_actions">
+                        <a class="tta_bulk_btn_orange"
+                           href="https://www.youtube.com/watch?v=HFoqlkPCP80"
+                           target="_blank"
+                           rel="noreferrer">
+                            <span class="fab fa-youtube"></span>
+                            <?php esc_html_e( 'How it works', 'text-to-audio' ); ?>
+                        </a>
+                        <a class="tta_bulk_btn_outline"
+                           href="<?php echo esc_url( admin_url( 'edit.php' ) ); ?>">
+                            <?php esc_html_e( 'Go to Posts', 'text-to-audio' ); ?>
+                        </a>
+                    </div>
+                    <p class="tta_bulk_hint">
+                        <?php esc_html_e( 'Select multiple posts on the Posts page, then apply the', 'text-to-audio' ); ?>
+                        <strong><?php esc_html_e( 'AtlasVoice Generate MP3 File', 'text-to-audio' ); ?></strong>
+                        <?php esc_html_e( 'bulk action.', 'text-to-audio' ); ?>
+                    </p>
+                </div>
+            </div><!-- /.tta_bulk_banner -->
+        <?php endif; ?>
+    </div><!-- /.tta_bulk_page_wrap -->
+    <?php
+}
 
     /**
      * Atlas Plugins page callback.
