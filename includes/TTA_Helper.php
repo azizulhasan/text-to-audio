@@ -359,7 +359,12 @@ class TTA_Helper
     {
         $file_url_key = $language;
         if ((get_player_id() > 3) && $voice) {
-            $file_url_key .= '--voice--' . $voice;
+            // For ElevenLabs (player 6), voice is "voice_id::FirstName" — use only FirstName.
+            $voice_for_key = $voice;
+            if (get_player_id() == 6 && strpos($voice, '::') !== false) {
+                $voice_for_key = explode('::', $voice)[1];
+            }
+            $file_url_key .= '--voice--' . $voice_for_key;
         }
 
         return apply_filters('tts_get_file_url_key', $file_url_key, $language, $voice);
@@ -368,7 +373,7 @@ class TTA_Helper
     public static function tts_get_voice($plugin_all_settings)
     {
         $default_voice = '';
-        if (isset($plugin_all_settings['listening']['tta__listening_voice']) && (get_player_id() == 4 || get_player_id() == 5)) {
+        if (isset($plugin_all_settings['listening']['tta__listening_voice']) && (get_player_id() == 4 || get_player_id() == 5 || get_player_id() == 6)) {
             $default_voice = $plugin_all_settings['listening']['tta__listening_voice'];
         }
 
@@ -417,10 +422,15 @@ class TTA_Helper
             $title = $md5_hash . '__lang__' . $selectedLang;
         }
 
-        if ((get_player_id() == 4 || get_player_id() == 5) && $voice) {
-            $voice = str_replace([' ', '(', ')', '%20'], '_', $voice);
+        if ((get_player_id() == 4 || get_player_id() == 5 || get_player_id() == 6) && $voice) {
+            // For ElevenLabs (player 6), voice is "voice_id::FirstName" — use only FirstName.
+            $voice_for_name = $voice;
+            if (get_player_id() == 6 && strpos($voice, '::') !== false) {
+                $voice_for_name = explode('::', $voice)[1];
+            }
+            $voice_for_name = str_replace([' ', '(', ')', '%20'], '_', $voice_for_name);
 
-            $title .= '__voice__' . $voice;
+            $title .= '__voice__' . $voice_for_name;
         }
 
         return apply_filters('tts_file_name', $title, $selectedLang, $voice, $post);

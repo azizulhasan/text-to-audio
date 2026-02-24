@@ -307,17 +307,34 @@ export default function Listening() {
 
   const setElevenLabsVoicesAndLanguages = () => {
     if (window.hasOwnProperty("ttsObj") && ttsObj.is_pro_active) {
+      let stored = getLocalStorage(["tts_elevenlabs_voices"]);
+      if (stored?.tts_elevenlabs_voices) {
+        try {
+          let voices = JSON.parse(stored.tts_elevenlabs_voices);
+          setElevenLabsVoices(voices);
+          const voiceNames = voices.map(v => v.name);
+          setCurrentPlayerVoices(voiceNames);
+          setCurrentPlayerFilteredVoices(voiceNames);
+          setSpeechSynthesisVoices(voiceNames);
+          let languages = chatGPTLanguages();
+          setCurrentPlayerLanguages(languages);
+          return;
+        } catch (e) {
+          console.log('Error parsing stored ElevenLabs voices:', e);
+        }
+      }
+
       const proApiURL = ttsObj.api_url + ttsObj.api_namespace + "_pro/" + ttsObj.api_version + "/";
       getData(proApiURL + "elevenlabs_voices")
         .then((res) => {
           if (res?.voices && res.voices.length) {
+            setLocalStorage({ tts_elevenlabs_voices: JSON.stringify(res.voices) });
             setElevenLabsVoices(res.voices);
             const voiceNames = res.voices.map(v => v.name);
             setCurrentPlayerVoices(voiceNames);
             setCurrentPlayerFilteredVoices(voiceNames);
             setSpeechSynthesisVoices(voiceNames);
 
-            // Set languages from ElevenLabs supported languages
             let languages = chatGPTLanguages();
             setCurrentPlayerLanguages(languages);
           }
@@ -490,7 +507,8 @@ export default function Listening() {
     ) {
       // ElevenLabs uses preview_url from the voice object
       if (customizationSettings?.buttonSettings?.id == 6) {
-        const selectedVoice = elevenLabsVoices.find(v => v.voice_id === e.target.value || v.name === e.target.value);
+        const voiceIdPart = e.target.value.split('::')[0];
+        const selectedVoice = elevenLabsVoices.find(v => v.voice_id === voiceIdPart);
         if (selectedVoice?.preview_url) {
           const audio_wav = document.getElementById("tts_audio_wav");
           const audio_mp3 = document.getElementById("tts_audio_mp3");
@@ -1140,11 +1158,15 @@ export default function Listening() {
                                 className="tta_orange_speak_select"
                               >
                                 <option disabled>{__("Default Listening Voice", "text-to-audio")}</option>
-                                {elevenLabsVoices.map((voice, index) => (
-                                  <option key={index} value={voice.voice_id}>
-                                    {voice.name} {voice.labels?.accent ? `(${voice.labels.accent})` : ''}
-                                  </option>
-                                ))}
+                                {elevenLabsVoices.map((voice, index) => {
+                                  const firstName = voice.name ? voice.name.split(/[\s\-]/)[0].trim() : '';
+                                  const optionValue = voice.voice_id + '::' + firstName;
+                                  return (
+                                    <option key={index} value={optionValue}>
+                                      {voice.name} {voice.labels?.accent ? `(${voice.labels.accent})` : ''}
+                                    </option>
+                                  );
+                                })}
                               </Form.Select>
                             </div>
                           </Col>
