@@ -3,6 +3,7 @@
 namespace TTA_Admin;
 
 use TTA\TTA_Helper;
+
 /**
  * Posts List Customization for Text-to-Audio Plugin
  *
@@ -29,14 +30,16 @@ use TTA\TTA_Helper;
  * @subpackage TTA/admin
  * @author     Azizul Hasan <azizulhasan.cr@gmail.com>
  */
-class TTA_Posts_List {
+class TTA_Posts_List
+{
 
     /**
      * Initialize the class and set up hooks
      *
      * @since 2.2.0
      */
-    public function __construct() {
+    public function __construct()
+    {
         // Add hooks for all post types
         add_action('init', array($this, 'setup_hooks'));
     }
@@ -46,8 +49,15 @@ class TTA_Posts_List {
      *
      * @since 2.2.0
      */
-    public function setup_hooks() {
+    public function setup_hooks()
+    {
         $settings = TTA_Helper::tts_get_settings('settings');
+        $tts_status = isset($settings['tta__settings_enable_tts_status'])
+            ? $settings['tta__settings_enable_tts_status']
+            : false;
+        if (!$tts_status) {
+            return false;
+        }
         $post_types = isset($settings['tta__settings_allow_listening_for_post_types'])
             ? $settings['tta__settings_allow_listening_for_post_types']
             : array('post');
@@ -78,11 +88,12 @@ class TTA_Posts_List {
     /**
      * Add AtlasVoice column before Date column
      *
-     * @since 2.2.0
      * @param array $columns Existing columns
      * @return array Modified columns
+     * @since 2.2.0
      */
-    public function add_atlasvoice_column($columns) {
+    public function add_atlasvoice_column($columns)
+    {
         $new_columns = array();
 
         foreach ($columns as $key => $value) {
@@ -99,11 +110,12 @@ class TTA_Posts_List {
     /**
      * Render AtlasVoice column content
      *
-     * @since 2.2.0
      * @param string $column_name Column name
      * @param int $post_id Post ID
+     * @since 2.2.0
      */
-    public function render_atlasvoice_column($column_name, $post_id) {
+    public function render_atlasvoice_column($column_name, $post_id)
+    {
         if ($column_name !== 'atlasvoice') {
             return;
         }
@@ -137,11 +149,12 @@ class TTA_Posts_List {
     /**
      * Make AtlasVoice column sortable
      *
-     * @since 2.2.0
      * @param array $columns Sortable columns
      * @return array Modified sortable columns
+     * @since 2.2.0
      */
-    public function make_atlasvoice_column_sortable($columns) {
+    public function make_atlasvoice_column_sortable($columns)
+    {
         $columns['atlasvoice'] = 'atlasvoice';
         return $columns;
     }
@@ -149,10 +162,11 @@ class TTA_Posts_List {
     /**
      * Add filter dropdown to posts list page
      *
-     * @since 2.2.0
      * @param string $post_type Current post type
+     * @since 2.2.0
      */
-    public function add_audio_filter_dropdown($post_type) {
+    public function add_audio_filter_dropdown($post_type)
+    {
         // Check if this post type is enabled for TTS
         $settings = TTA_Helper::tts_get_settings('settings');
         $enabled_post_types = isset($settings['tta__settings_allow_listening_for_post_types'])
@@ -188,10 +202,11 @@ class TTA_Posts_List {
     /**
      * Filter posts based on audio generation status
      *
-     * @since 2.2.0
      * @param WP_Query $query The WordPress query object
+     * @since 2.2.0
      */
-    public function filter_posts_by_audio_status($query) {
+    public function filter_posts_by_audio_status($query)
+    {
         global $pagenow;
 
         // Only apply on admin posts list page and main query
@@ -226,11 +241,12 @@ class TTA_Posts_List {
     /**
      * Filter by MP3 status using meta query (efficient)
      *
-     * @since 2.2.0
      * @param WP_Query $query WordPress query object
      * @param string $filter Filter type
+     * @since 2.2.0
      */
-    private function filter_by_mp3_status($query, $filter) {
+    private function filter_by_mp3_status($query, $filter)
+    {
         // Get the plugin settings
         $plugin_all_settings = TTA_Helper::tts_get_settings();
         $language = TTA_Helper::tts_site_language($plugin_all_settings);
@@ -271,12 +287,13 @@ class TTA_Posts_List {
     /**
      * Modify posts clauses for TTS filtering (for player <= 2)
      *
-     * @since 2.2.0
      * @param array $clauses SQL clauses
      * @param WP_Query $query WordPress query object
      * @return array Modified clauses
+     * @since 2.2.0
      */
-    public function modify_posts_clauses_for_tts($clauses, $query) {
+    public function modify_posts_clauses_for_tts($clauses, $query)
+    {
         global $wpdb;
 
         if (!isset($_GET['atlasvoice_filter']) || empty($_GET['atlasvoice_filter'])) {
@@ -318,11 +335,12 @@ class TTA_Posts_List {
     /**
      * Check if post has MP3 file generated
      *
-     * @since 2.2.0
      * @param WP_Post $post Post object
      * @return bool True if MP3 exists, false otherwise
+     * @since 2.2.0
      */
-    private function has_mp3_file($post) {
+    private function has_mp3_file($post)
+    {
         if (!$post) {
             return false;
         }
@@ -359,11 +377,12 @@ class TTA_Posts_List {
     /**
      * Check if post has TTS enabled
      *
-     * @since 2.2.0
      * @param WP_Post $post Post object
      * @return bool True if TTS is enabled, false otherwise
+     * @since 2.2.0
      */
-    private function has_tts_enabled($post) {
+    private function has_tts_enabled($post)
+    {
         if (!$post) {
             return false;
         }
@@ -402,7 +421,8 @@ class TTA_Posts_List {
      *
      * @since 2.2.0
      */
-    public function add_admin_styles() {
+    public function add_admin_styles()
+    {
         global $pagenow;
 
         if ($pagenow !== 'edit.php') {
@@ -415,10 +435,12 @@ class TTA_Posts_List {
                 width: 100px;
                 text-align: center;
             }
+
             .column-atlasvoice .dashicons {
                 vertical-align: middle;
                 cursor: help;
             }
+
             #atlasvoice_filter {
                 min-width: 150px;
             }

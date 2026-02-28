@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.5
+Stable tag: 2.1.6
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -456,6 +456,12 @@ We are looking for people to help in translating this amazing plugin. If you can
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
 
 
+
+= 2.1.6  ( 28 Feb 2026 )  =
+Added :  Enable TTS Status added in Settings.
+Improved :  AtlasVoice Gutenberg  block improved.
+
+
 = 2.1.5  ( 21 Feb 2026 )  =
 Added :  Plugins Menu added.
 Fixed :  License activation issue fixed.
@@ -840,9 +846,7 @@ Improved: Pro version and free version performance issue improved.
 
 == Upgrade Notice ==
 
-= 2.1.5   =
-Added :  Plugins Menu added.
-Fixed :  License activation issue fixed.
-Fixed :  Old UI for player option missing issue fixed.
-Fixed :  Listening menu UI missing issue fixed.
+= 2.1.6 =
+Added :  Enable TTS Status added in Settings.
+Improved :  AtlasVoice Gutenberg  block improved.
 
