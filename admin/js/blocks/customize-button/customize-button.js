@@ -91,12 +91,13 @@ const Edit = ({ attributes, setAttributes }) => {
 const customizeButton = {
 	namespace: 'tta/customize-button',
 	object: {
-		title: __('AtlasVoice', 'text-to-audio'),
+		title: 'AtlasVoice',
 		description: __('Text to audio customize button.', 'text-to-audio'),
 		icon: 'controls-play',
 		category: 'design',
 		keywords: [
 			'AtlasVoice',
+			'atlasvoice',
 			'text-to-audio',
 			'speech',
 			'audio',
