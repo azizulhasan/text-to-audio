@@ -29,7 +29,7 @@
       "Bash(wp.bat i18n make-json:*)",
       "Bash(npm run production:*)",
       "Bash(node -e:*)",
-      "Bash(node scripts/generate-translations.js:*)"
+      "Bash(node scripts/generate-translations.js:*)",
       "WebFetch(domain:gspeech.io)",
       "WebFetch(domain:trinityaudio.ai)",
       "WebFetch(domain:beyondwords.io)"

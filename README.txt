@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.6
+Stable tag: 2.1.7
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -86,9 +86,13 @@ Unlock additional features and support by upgrading to [Text To Speech TTS Pro](
 
 * **Unlimited Text Alias:** __AtlasVoice__ Support [Text Alias](https://www.youtube.com/watch?v=oeW652YKmG0&t=3s).
 
-* **Google Cloud Text To Speech:** You can integrate with [Google Cloud Text To Speech](https://cloud.google.com/text-to-speech). It is optional. [Learn more](https://www.youtube.com/watch?v=h4VJxM-mh74&t=200s)
+* **Google Cloud Text To Speech:** Integrate with [Google Cloud Text To Speech](https://cloud.google.com/text-to-speech) for high-quality, enterprise-grade voices. Access 300+ voices across 40+ languages including Neural2 and WaveNet voice types. Google Cloud TTS is a paid service — you will need a Google Cloud account and will be billed by Google based on your usage. After integration, select the **Google Cloud TTS** player from the **Customization** menu and choose your preferred voice and language from the **Listening** menu. [Learn more](https://www.youtube.com/watch?v=h4VJxM-mh74&t=200s)
 
-* **ChatGPT Text To Speech:** You can integrate with [ChatGPT Text To Speech](https://platform.openai.com/docs/guides/text-to-speech/overview). It is optional. [Learn more](https://www.youtube.com/watch?v=h4VJxM-mh74&t=200s)
+* **ChatGPT Text To Speech:** Integrate with [OpenAI Text To Speech](https://platform.openai.com/docs/guides/text-to-speech/overview) for natural-sounding audio. Choose from 6 distinct voices (Alloy, Echo, Fable, Nova, Onyx, Shimmer) with Standard (tts-1) and HD (tts-1-hd) model options. ChatGPT TTS is a paid service — you will need an OpenAI account and will be billed by OpenAI based on your usage. After integration, select the **ChatGPT TTS** player from the **Customization** menu and choose your preferred voice from the **Listening** menu. [Learn more](https://www.youtube.com/watch?v=h4VJxM-mh74&t=200s)
+
+* **ElevenLabs Text To Speech:** Integrate with [ElevenLabs](https://elevenlabs.io/) for ultra-realistic AI voices. Access 30+ premium voices with accent and style labels, plus real-time character usage tracking from your ElevenLabs subscription. ElevenLabs TTS is a paid service — you will need an ElevenLabs account and will be billed by ElevenLabs based on your usage. After integration, select the **ElevenLabs TTS** player from the **Customization** menu and choose your preferred voice from the **Listening** menu.
+
+* **Google Cloud Storage Backup:** Back up your generated MP3 files to [Google Cloud Storage](https://cloud.google.com/storage). This feature is available for **all TTS providers** — Google Cloud TTS, ChatGPT TTS, AtlasVoice TTS Pro and ElevenLabs TTS. To use cloud storage backup, you need to configure a Google Cloud service account JSON file with Storage Admin permissions from the **Integration** menu, even if you are using a non-Google TTS provider. For example, if you use ElevenLabs TTS for voice generation but want to store your MP3 files in the cloud, simply configure the Google Cloud service account and enable the cloud storage backup option.
 
 * **Unlimited Characters:** Convert unlimited text to speech.
 
@@ -454,6 +458,15 @@ Please report security bugs found in the source code of the Text To Speech TTS p
 ### TRANSLATION REQUEST
 We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
 Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+
+
+
+= 2.1.7  ( 4 Mar 2026 )  =
+Added :  ElevenLabs TTS integration added for pro version.
+Added :  Google Cloud Storage backup support for all TTS providers (Google Cloud TTS, ChatGPT TTS, ElevenLabs TTS, AtlasVoice TTS Pro).
+Added :  Real-time usage tracking for ElevenLabs TTS subscription.
+Fixed :  Gtranslate plugin translation issue solved.
+Fixed :  Improved Multilingual.
 
 
 
@@ -846,7 +859,9 @@ Improved: Pro version and free version performance issue improved.
 
 == Upgrade Notice ==
 
-= 2.1.6 =
-Added :  Enable TTS Status added in Settings.
-Improved :  AtlasVoice Gutenberg  block improved.
-
+= 2.1.7  =
+Added :  ElevenLabs TTS integration added for pro version.
+Added :  Google Cloud Storage backup support for all TTS providers (Google Cloud TTS, ChatGPT TTS, ElevenLabs TTS, AtlasVoice TTS Pro).
+Added :  Real-time usage tracking for ElevenLabs TTS subscription.
+Fixed :  Gtranslate plugin translation issue solved.
+Fixed :  Improved Multilingual.
