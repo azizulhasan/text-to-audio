@@ -19,7 +19,6 @@ export default class BrowserSupport {
 
         this.defineVoiceAndLang(selectedVoice, selectedLang)
 
-        console.log({ voice: this.getVoice(), lang: this.getLanguage() })
 
     }
     isAndroid() {
@@ -49,7 +48,6 @@ export default class BrowserSupport {
 
         this.defineVoiceAndLang(selectedVoice, selectedLang)
 
-        console.log(this.voices)
 
 
         return this.#voice;
@@ -57,12 +55,10 @@ export default class BrowserSupport {
 
     setLanguage(lang, callback) {
         let isSupported = false;
-        console.log(this.voices)
 
         if (this.voices.length) {
             Object.values(this.voices).map(voice => {
                 let regex = new RegExp(lang, "gi");
-                console.log(lang, voice.lang)
                 // new RegExp('^' + langCountryCode, 'i')
                 let matches = voice.lang.match(regex)
                 if (matches !== null && voice.name) {
@@ -73,7 +69,6 @@ export default class BrowserSupport {
             return { lang: this.#lang, isSupported };
         }
 
-        console.log({ lang: this.#lang, isSupported })
         return { lang: this.#lang, isSupported };
 
 
@@ -105,7 +100,6 @@ export default class BrowserSupport {
         let selectedLang = lang ? lang : this.#selectedLang
         let langCountryCode = this.#getCountryCode(selectedLang)
         let filteredVoices = this.#getFilteredVoices(langCountryCode)
-        console.log({ selectedLang, selectedVoice, langCountryCode, filteredVoices })
         if (filteredVoices.length > 1) {
             for (let j = 0; j < filteredVoices.length; j++) {
                 currentLang = filteredVoices[j].lang

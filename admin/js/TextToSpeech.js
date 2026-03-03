@@ -489,13 +489,11 @@ export default class TextToSpeech {
          * current TTS page.
          *
          */
-        console.log({ status: this.listenStatus, settings: this.ttsListeningSettings })
 
         document.addEventListener("visibilitychange", () => {
             // it could be either hidden or visible
             // TODO: when stop auto pause it's not reading the content properly. it stops for a few miliseconds. Fix it the release this new feature.
             let stop_autopause = window?.ttsObj?.settings?.settings?.tta__settings_stop_auto_pause_after_switching_tab ?? false;
-            console.log(stop_autopause)
             stop_autopause = wp.hooks.applyFilters('tta__settings_stop_auto_pause_after_switching_tab', stop_autopause);
 
             if ('hidden' === document.visibilityState && this.listenStatus === 'pause' && !stop_autopause) {
