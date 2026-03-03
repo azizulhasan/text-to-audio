@@ -65,6 +65,7 @@ const productionSrc = [
 	'!null',
 	'!nul',
 	'!languages/nul',
+	'!*.md',
 ]
 
 
