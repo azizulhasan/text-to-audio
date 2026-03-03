@@ -79,6 +79,7 @@ export default function Customize() {
   const [isGCAuthenticated, setGCIsAuthenticated] = useState(false);
   const [isBackUpToGCS, setIsBackUpToGCS] = useState(false);
   const [isChatGPTAuthenticated, setIsChatGPTAuthenticated] = useState(false);
+  const [isElevenLabsAuthenticated, setIsElevenLabsAuthenticated] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   const setDefaultButtonSettingsIfNeeded = (res) => {
@@ -111,7 +112,7 @@ export default function Customize() {
 
   useEffect(() => {
     let completedRequests = 0;
-    const totalRequests = window.hasOwnProperty("ttsObj") && ttsObj?.is_pro_active ? 4 : 2;
+    const totalRequests = window.hasOwnProperty("ttsObj") && ttsObj?.is_pro_active ? 5 : 2;
 
     const checkLoadingComplete = () => {
       completedRequests++;
@@ -258,6 +259,25 @@ export default function Customize() {
             res?.data?.chatgpt_tts_api_key
           ) {
             setIsChatGPTAuthenticated(true);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        })
+        .finally(() => {
+          checkLoadingComplete();
+        });
+
+      // Check ElevenLabs TTS authentication
+      let elevenLabsData = new FormData();
+      elevenLabsData.append("method", "get");
+      postData(ttsObj.api_url + "tta_pro/v1/elevenlabs_tts", elevenLabsData)
+        .then((res) => {
+          if (
+            res.data?.currentTTSServic === "elevenlabs_tts" &&
+            res?.data?.elevenlabs_api_key
+          ) {
+            setIsElevenLabsAuthenticated(true);
           }
         })
         .catch((err) => {
@@ -512,6 +532,23 @@ export default function Customize() {
       }
     }
 
+    if (formData?.buttonSettings?.id == 6) {
+      if (ttsObj.is_pro_active && !isElevenLabsAuthenticated) {
+        notify(
+          __("To select this player you have to authenticate first from Integration menu", "text-to-audio"),
+          "error",
+          {
+            autoClose: 8000,
+          }
+        );
+        return;
+      }
+      if (!isElevenLabsAuthenticated) {
+        CTANotice(__("ElevenLabs TTS player is only available in the pro version.", "text-to-audio"));
+        return;
+      }
+    }
+
     if (!ttsObj.is_pro_active && formData?.buttonSettings?.id > 1) {
       CTANotice(__("Default Pro player is only available in the pro version.", "text-to-audio"));
       return;
@@ -603,6 +640,7 @@ export default function Customize() {
       disabled: false,
     },
     { id: 5, name: "ChatGPT TTS", object: "TextToSpeechPro", disabled: false },
+    { id: 6, name: "ElevenLabs TTS", object: "TextToSpeechPro", disabled: false },
   ]);
 
   return isDataLoaded ? (
@@ -737,6 +775,19 @@ export default function Customize() {
                       ></div>
                     }
                     buttonId={5}
+                    cssStyle={""}
+                  />
+                ) : listeningBtnStyle?.buttonSettings?.id == 6 ? (
+                  <TextToSpeechThree
+                    buttonCSS={listeningBtnStyle}
+                    button={
+                      <div
+                        dataId="1"
+                        id="tts__listent_content_1"
+                        className="tts__listent_content"
+                      ></div>
+                    }
+                    buttonId={6}
                     cssStyle={""}
                   />
                 ) : (
