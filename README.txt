@@ -337,7 +337,13 @@ Please report security bugs through the [Patchstack Vulnerability Disclosure Pro
 11. Bulk MP3 generation from the WordPress posts list.
 12. Google Cloud Storage backup configuration.
 13. ElevenLabs usage tracking with character count and subscription details.
-14. Individual post TTS content customization.
+14. Multilingual support GTranslate/WPML/TranslatePress
+15. Analytics CSV, PDF, Email Schedule, Custom Search, Summery
+16. Analytics Location, Top Cities, Playing Trend.
+17. Analytics Peak Listening Hours, Popular Post.
+18. Text to Speech Aliases
+19. Add ACF Fields To Posts
+
 
 
 == Changelog ==
@@ -347,12 +353,13 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
-= 2.1.7  ( 4 Mar 2026 )  =
+= 2.1.7  ( 05 Mar 2026 )  =
 Added :  ElevenLabs TTS integration added for pro version.
 Added :  Google Cloud Storage backup support for all TTS providers (Google Cloud TTS, ChatGPT TTS, ElevenLabs TTS, AtlasVoice TTS Pro).
 Added :  Real-time usage tracking for ElevenLabs TTS subscription.
 Fixed :  Gtranslate plugin translation issue solved.
 Fixed :  Improved Multilingual.
+Fixed :  MP3 file delete issue solved.
 
 
 = 2.1.6  ( 28 Feb 2026 )  =

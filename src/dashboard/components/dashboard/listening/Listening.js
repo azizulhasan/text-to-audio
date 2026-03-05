@@ -1548,28 +1548,40 @@ export default function Listening() {
                                 className="tta_orange_select"
                               >
                                 <option disabled>{__("Current Player Voice", "text-to-audio")}</option>
-                                {currentPlayerVoices.map((voice, idx) =>
-                                  window.hasOwnProperty("ttsObjPro") &&
-                                  customizationSettings?.buttonSettings?.id ==
-                                    4 ? (
-                                    <option
-                                      key={idx}
-                                      data-lang={voice?.languageCodes?.[0]}
-                                      value={[
-                                        voice.name,
-                                        voice.ssmlGender,
-                                      ].join("-")}
-                                    >
-                                      {voice.name} {"-"} {voice.ssmlGender}
-                                    </option>
-                                  ) : (
-                                    <option
-                                      key={idx}
-                                      data-lang={voice.lang}
-                                      value={voice.name}
-                                    >
-                                      {voice?.name || voice}
-                                    </option>
+                                {customizationSettings?.buttonSettings?.id == 6 ? (
+                                  elevenLabsVoices.map((voice, idx) => {
+                                    const firstName = voice.name ? voice.name.split(/[\s\-]/)[0].trim() : '';
+                                    const optionValue = voice.voice_id + '::' + firstName;
+                                    return (
+                                      <option key={idx} value={optionValue}>
+                                        {voice.name} {voice.labels?.accent ? `(${voice.labels.accent})` : ''}
+                                      </option>
+                                    );
+                                  })
+                                ) : (
+                                  currentPlayerVoices.map((voice, idx) =>
+                                    window.hasOwnProperty("ttsObjPro") &&
+                                    customizationSettings?.buttonSettings?.id ==
+                                      4 ? (
+                                      <option
+                                        key={idx}
+                                        data-lang={voice?.languageCodes?.[0]}
+                                        value={[
+                                          voice.name,
+                                          voice.ssmlGender,
+                                        ].join("-")}
+                                      >
+                                        {voice.name} {"-"} {voice.ssmlGender}
+                                      </option>
+                                    ) : (
+                                      <option
+                                        key={idx}
+                                        data-lang={voice.lang}
+                                        value={voice.name}
+                                      >
+                                        {voice?.name || voice}
+                                      </option>
+                                    )
                                   )
                                 )}
                               </Form.Select>
