@@ -1,0 +1,536 @@
+<!-- wp:html -->
+<style>
+:root {
+  --ahp-primary: #6C63FF;
+  --ahp-primary-dark: #5548E0;
+  --ahp-accent: #10B981;
+  --ahp-accent-dark: #059669;
+  --ahp-dark: #0F172A;
+  --ahp-slate: #1E293B;
+  --ahp-gray: #64748B;
+  --ahp-light: #F1F5F9;
+  --ahp-white: #FFFFFF;
+  --ahp-border: #E2E8F0;
+}
+.ahp-landing * { box-sizing: border-box; margin: 0; padding: 0; }
+.ahp-landing { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #334155; line-height: 1.6; overflow-x: hidden; }
+.ahp-landing h1, .ahp-landing h2, .ahp-landing h3, .ahp-landing h4 { color: var(--ahp-dark); line-height: 1.25; }
+.ahp-container { max-width: 1140px; margin: 0 auto; padding: 0 20px; }
+.ahp-btn { display: inline-block; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; text-decoration: none !important; cursor: pointer; border: none; transition: all 0.2s; }
+.ahp-btn-primary { background: var(--ahp-primary); color: #fff; }
+.ahp-btn-primary:hover { background: var(--ahp-primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(108,99,255,0.35); color: #fff; }
+.ahp-btn-accent { background: var(--ahp-accent); color: #fff; }
+.ahp-btn-accent:hover { background: var(--ahp-accent-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16,185,129,0.35); color: #fff; }
+.ahp-btn-outline { background: transparent; color: var(--ahp-primary); border: 2px solid var(--ahp-primary); }
+.ahp-btn-outline:hover { background: var(--ahp-primary); color: #fff; }
+.ahp-btn-sm { padding: 10px 24px; font-size: 14px; }
+.ahp-btn-lg { padding: 16px 40px; font-size: 18px; }
+.ahp-badge { display: inline-block; background: #DBEAFE; color: #1D4ED8; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+.ahp-badge-green { background: #D1FAE5; color: #065F46; }
+.ahp-badge-amber { background: #FEF3C7; color: #92400E; }
+
+/* Hero */
+.ahp-hero { background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #312E81 100%); color: #fff; padding: 80px 0 60px; text-align: center; position: relative; overflow: hidden; }
+.ahp-hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 50%, rgba(108,99,255,0.12) 0%, transparent 50%); }
+.ahp-hero h1 { font-size: clamp(32px, 5vw, 52px); color: #fff; margin-bottom: 20px; position: relative; }
+.ahp-hero h1 span { background: linear-gradient(135deg, #A78BFA, #6C63FF, #38BDF8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.ahp-hero p { font-size: 18px; color: #CBD5E1; max-width: 680px; margin: 0 auto 32px; position: relative; }
+.ahp-hero-ctas { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; position: relative; }
+.ahp-hero-stats { display: flex; gap: 48px; justify-content: center; margin-top: 48px; position: relative; }
+.ahp-hero-stat { text-align: center; }
+.ahp-hero-stat strong { display: block; font-size: 28px; color: #fff; }
+.ahp-hero-stat span { font-size: 14px; color: #94A3B8; }
+
+/* Trust Bar */
+.ahp-trust { background: var(--ahp-white); border-bottom: 1px solid var(--ahp-border); padding: 24px 0; }
+.ahp-trust-inner { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; align-items: center; }
+.ahp-trust-item { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ahp-gray); font-weight: 500; }
+.ahp-trust-item svg { flex-shrink: 0; }
+
+/* Section */
+.ahp-section { padding: 72px 0; }
+.ahp-section-alt { background: var(--ahp-light); }
+.ahp-section-title { text-align: center; margin-bottom: 48px; }
+.ahp-section-title h2 { font-size: clamp(26px, 4vw, 38px); margin-bottom: 12px; }
+.ahp-section-title p { font-size: 17px; color: var(--ahp-gray); max-width: 620px; margin: 0 auto; }
+
+/* Features Grid */
+.ahp-features { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 28px; }
+.ahp-feature-card { background: var(--ahp-white); border: 1px solid var(--ahp-border); border-radius: 12px; padding: 32px; transition: all 0.2s; }
+.ahp-feature-card:hover { border-color: var(--ahp-primary); box-shadow: 0 4px 20px rgba(108,99,255,0.1); transform: translateY(-2px); }
+.ahp-feature-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 24px; }
+.ahp-feature-card h3 { font-size: 19px; margin-bottom: 8px; }
+.ahp-feature-card p { font-size: 15px; color: var(--ahp-gray); }
+.ahp-icon-purple { background: #EDE9FE; }
+.ahp-icon-blue { background: #DBEAFE; }
+.ahp-icon-green { background: #D1FAE5; }
+.ahp-icon-amber { background: #FEF3C7; }
+.ahp-icon-pink { background: #FCE7F3; }
+.ahp-icon-cyan { background: #CFFAFE; }
+
+/* Comparison Table */
+.ahp-compare-wrap { overflow-x: auto; }
+.ahp-compare { width: 100%; border-collapse: collapse; background: var(--ahp-white); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.ahp-compare thead th { background: var(--ahp-dark); color: #fff; padding: 16px 20px; text-align: left; font-size: 15px; }
+.ahp-compare thead th:nth-child(3) { background: var(--ahp-primary); }
+.ahp-compare tbody td { padding: 14px 20px; border-bottom: 1px solid var(--ahp-border); font-size: 14px; }
+.ahp-compare tbody tr:last-child td { border-bottom: none; }
+.ahp-compare tbody td:first-child { font-weight: 600; color: var(--ahp-dark); }
+.ahp-compare .ahp-check { color: var(--ahp-accent); font-weight: 700; font-size: 18px; }
+.ahp-compare .ahp-cross { color: #CBD5E1; font-size: 18px; }
+.ahp-compare tbody td:nth-child(3) { background: #F5F3FF; }
+
+/* Pricing */
+.ahp-pricing-toggle { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 40px; }
+.ahp-pricing-toggle span { font-size: 15px; font-weight: 500; color: var(--ahp-gray); cursor: pointer; }
+.ahp-pricing-toggle span.ahp-active { color: var(--ahp-dark); font-weight: 700; }
+.ahp-toggle-switch { width: 52px; height: 28px; background: var(--ahp-primary); border-radius: 14px; position: relative; cursor: pointer; transition: background 0.3s; }
+.ahp-toggle-switch::after { content: ''; position: absolute; width: 22px; height: 22px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.3s; }
+.ahp-toggle-switch.ahp-lifetime::after { transform: translateX(24px); }
+.ahp-save-badge { background: var(--ahp-accent); color: #fff; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; }
+
+.ahp-pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; max-width: 1000px; margin: 0 auto; }
+.ahp-price-card { background: var(--ahp-white); border: 2px solid var(--ahp-border); border-radius: 16px; padding: 36px 28px; text-align: center; position: relative; transition: all 0.2s; }
+.ahp-price-card:hover { border-color: var(--ahp-primary); box-shadow: 0 8px 30px rgba(108,99,255,0.12); }
+.ahp-price-card.ahp-popular { border-color: var(--ahp-primary); box-shadow: 0 8px 30px rgba(108,99,255,0.15); transform: scale(1.03); }
+.ahp-price-card.ahp-popular::before { content: 'Most Popular'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--ahp-primary); color: #fff; padding: 4px 20px; border-radius: 20px; font-size: 13px; font-weight: 700; }
+.ahp-price-card h3 { font-size: 20px; margin-bottom: 4px; }
+.ahp-price-card .ahp-price-sites { font-size: 14px; color: var(--ahp-gray); margin-bottom: 20px; }
+.ahp-price-amount { font-size: 48px; font-weight: 800; color: var(--ahp-dark); margin-bottom: 4px; }
+.ahp-price-amount span { font-size: 18px; font-weight: 400; color: var(--ahp-gray); }
+.ahp-price-period { font-size: 14px; color: var(--ahp-gray); margin-bottom: 24px; }
+.ahp-price-features { list-style: none; text-align: left; margin-bottom: 28px; }
+.ahp-price-features li { padding: 6px 0; font-size: 14px; color: #475569; display: flex; align-items: flex-start; gap: 8px; }
+.ahp-price-features li::before { content: '\2713'; color: var(--ahp-accent); font-weight: 700; flex-shrink: 0; }
+
+/* FAQ */
+.ahp-faq-list { max-width: 760px; margin: 0 auto; }
+.ahp-faq-item { border: 1px solid var(--ahp-border); border-radius: 10px; margin-bottom: 12px; overflow: hidden; background: var(--ahp-white); }
+.ahp-faq-q { padding: 18px 24px; font-weight: 600; font-size: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: var(--ahp-dark); }
+.ahp-faq-q:hover { color: var(--ahp-primary); }
+.ahp-faq-q::after { content: '+'; font-size: 22px; color: var(--ahp-gray); transition: transform 0.2s; }
+.ahp-faq-item.ahp-open .ahp-faq-q::after { content: '\2212'; color: var(--ahp-primary); }
+.ahp-faq-a { padding: 0 24px 18px; font-size: 15px; color: var(--ahp-gray); display: none; line-height: 1.7; }
+.ahp-faq-item.ahp-open .ahp-faq-a { display: block; }
+
+/* Final CTA */
+.ahp-cta-section { background: linear-gradient(135deg, #312E81, #6C63FF); color: #fff; padding: 72px 0; text-align: center; }
+.ahp-cta-section h2 { font-size: clamp(26px, 4vw, 36px); color: #fff; margin-bottom: 16px; }
+.ahp-cta-section p { font-size: 17px; color: #C7D2FE; max-width: 560px; margin: 0 auto 32px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ahp-hero { padding: 52px 0 40px; }
+  .ahp-hero-stats { gap: 24px; flex-wrap: wrap; }
+  .ahp-section { padding: 48px 0; }
+  .ahp-features { grid-template-columns: 1fr; }
+  .ahp-pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+  .ahp-price-card.ahp-popular { transform: none; }
+  .ahp-compare thead th, .ahp-compare tbody td { padding: 10px 12px; font-size: 13px; }
+}
+</style>
+
+<div class="ahp-landing">
+
+<!-- ==================== HERO ==================== -->
+<section class="ahp-hero">
+  <div class="ahp-container">
+    <span class="ahp-badge" style="margin-bottom:16px;">WordPress MCP Server Plugin</span>
+    <h1>Turn WordPress Into an <span>AI-Powered Powerhouse</span></h1>
+    <p>AI Agent Hub Pro gives your WordPress site 80+ AI abilities, an MCP server, workflow automation, and granular role-based access control. Connect Claude, Cursor, or any MCP client and manage your entire site with AI.</p>
+    <div class="ahp-hero-ctas">
+      <a href="#pricing" class="ahp-btn ahp-btn-accent ahp-btn-lg">Start 7-Day Free Trial</a>
+      <a href="#features" class="ahp-btn ahp-btn-outline ahp-btn-lg" style="border-color:#fff;color:#fff;">See Pro Features</a>
+    </div>
+    <div class="ahp-hero-stats">
+      <div class="ahp-hero-stat"><strong>80+</strong><span>AI Abilities</span></div>
+      <div class="ahp-hero-stat"><strong>10</strong><span>Module Categories</span></div>
+      <div class="ahp-hero-stat"><strong>6</strong><span>Workflow Prompts</span></div>
+      <div class="ahp-hero-stat"><strong>24</strong><span>WooCommerce Tools</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== TRUST BAR ==================== -->
+<section class="ahp-trust">
+  <div class="ahp-container">
+    <div class="ahp-trust-inner">
+      <div class="ahp-trust-item">
+        <svg width="18" height="18" fill="none" stroke="#6C63FF" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Secure JWT Authentication
+      </div>
+      <div class="ahp-trust-item">
+        <svg width="18" height="18" fill="none" stroke="#10B981" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
+        MCP Protocol 2025-06-18
+      </div>
+      <div class="ahp-trust-item">
+        <svg width="18" height="18" fill="none" stroke="#F59E0B" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 6.91-1.01z"/></svg>
+        WordPress 6.9+ Compatible
+      </div>
+      <div class="ahp-trust-item">
+        <svg width="18" height="18" fill="none" stroke="#6C63FF" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        7-Day Free Trial
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== WHAT YOU GET ==================== -->
+<section class="ahp-section" id="features">
+  <div class="ahp-container">
+    <div class="ahp-section-title">
+      <span class="ahp-badge ahp-badge-green">Pro Features</span>
+      <h2>Everything You Need to Automate WordPress with AI</h2>
+      <p>AI Agent Hub Pro unlocks the full potential of your WordPress site. Go beyond basic management with advanced AI workflows, granular access control, and enterprise-ready features.</p>
+    </div>
+    <div class="ahp-features">
+
+      <div class="ahp-feature-card">
+        <div class="ahp-feature-icon ahp-icon-purple">&#9879;</div>
+        <h3>Unlimited Workflows</h3>
+        <p>Build as many AI-powered MCP workflows as you need. Chain multiple abilities into automated sequences. Free version limits you to 3 workflows &mdash; Pro removes all limits.</p>
+      </div>
+
+      <div class="ahp-feature-card">
+        <div class="ahp-feature-icon ahp-icon-blue">&#128274;</div>
+        <h3>T/R/P Access Modes</h3>
+        <p>Fine-grained control over how each ability is exposed through your MCP server. Toggle Tool, Resource, and Prompt access independently per WordPress role for maximum security.</p>
+      </div>
+
+      <div class="ahp-feature-card">
+        <div class="ahp-feature-icon ahp-icon-green">&#127760;</div>
+        <h3>External Abilities</h3>
+        <p>Automatically discover and expose abilities from third-party plugins that implement the WordPress Abilities API. Extend your AI agent beyond the built-in 80+ abilities.</p>
+      </div>
+
+      <div class="ahp-feature-card">
+        <div class="ahp-feature-icon ahp-icon-amber">&#128221;</div>
+        <h3>6 Workflow Prompt Builders</h3>
+        <p>Pre-built multi-step prompts for MCP clients: SEO Audit, Content Brief, Publish Ready Check, Site Overview, Content Inventory, and Store Dashboard (WooCommerce).</p>
+      </div>
+
+      <div class="ahp-feature-card">
+        <div class="ahp-feature-icon ahp-icon-pink">&#128101;</div>
+        <h3>Per-Ability RBAC</h3>
+        <p>Assign individual abilities to each WordPress role. Control exactly which users can access which AI tools, resources, and prompts at a granular level.</p>
+      </div>
+
+      <div class="ahp-feature-card">
+        <div class="ahp-feature-icon ahp-icon-cyan">&#9889;</div>
+        <h3>Advanced AI Experiments</h3>
+        <p>Unlock Gutenberg editor superpowers: prompt templates, batch generation, generation history, "Explain This" insights, and keyboard shortcuts for all AI experiments.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ==================== HOW IT WORKS ==================== -->
+<section class="ahp-section ahp-section-alt">
+  <div class="ahp-container">
+    <div class="ahp-section-title">
+      <h2>How AI Agent Hub Works</h2>
+      <p>Connect any MCP-compatible AI client to your WordPress site in three simple steps.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:32px;max-width:920px;margin:0 auto;">
+      <div style="text-align:center;padding:24px;">
+        <div style="width:56px;height:56px;background:var(--ahp-primary);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;margin:0 auto 16px;">1</div>
+        <h3 style="font-size:18px;margin-bottom:8px;">Install &amp; Configure</h3>
+        <p style="font-size:14px;color:var(--ahp-gray);">Install the free plugin + Pro add-on. Enable the modules you need. Configure AI provider credentials.</p>
+      </div>
+      <div style="text-align:center;padding:24px;">
+        <div style="width:56px;height:56px;background:var(--ahp-primary);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;margin:0 auto 16px;">2</div>
+        <h3 style="font-size:18px;margin-bottom:8px;">Connect Your AI Client</h3>
+        <p style="font-size:14px;color:var(--ahp-gray);">Connect Claude Desktop, Cursor, Windsurf, or any MCP client using JWT auth or application passwords.</p>
+      </div>
+      <div style="text-align:center;padding:24px;">
+        <div style="width:56px;height:56px;background:var(--ahp-primary);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;margin:0 auto 16px;">3</div>
+        <h3 style="font-size:18px;margin-bottom:8px;">Automate Everything</h3>
+        <p style="font-size:14px;color:var(--ahp-gray);">Manage posts, pages, media, users, WooCommerce products, settings, and more &mdash; all through natural language AI.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== FREE vs PRO ==================== -->
+<section class="ahp-section" id="compare">
+  <div class="ahp-container">
+    <div class="ahp-section-title">
+      <h2>Free vs Pro Comparison</h2>
+      <p>See exactly what you unlock with AI Agent Hub Pro.</p>
+    </div>
+    <div class="ahp-compare-wrap">
+      <table class="ahp-compare">
+        <thead>
+          <tr>
+            <th style="width:40%;">Feature</th>
+            <th style="width:30%;text-align:center;">Free</th>
+            <th style="width:30%;text-align:center;">Pro</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>AI Abilities (Content, Posts, Pages, Media, Users, CPT, REST API, Site Info, Settings)</td><td style="text-align:center;"><span class="ahp-check">&#10003;</span> 80+</td><td style="text-align:center;"><span class="ahp-check">&#10003;</span> 80+</td></tr>
+          <tr><td>Built-in MCP Server</td><td style="text-align:center;"><span class="ahp-check">&#10003;</span></td><td style="text-align:center;"><span class="ahp-check">&#10003;</span></td></tr>
+          <tr><td>JWT Authentication</td><td style="text-align:center;"><span class="ahp-check">&#10003;</span></td><td style="text-align:center;"><span class="ahp-check">&#10003;</span></td></tr>
+          <tr><td>WooCommerce Tools (24 abilities)</td><td style="text-align:center;"><span class="ahp-check">&#10003;</span></td><td style="text-align:center;"><span class="ahp-check">&#10003;</span></td></tr>
+          <tr><td>AI Experiments (Gutenberg)</td><td style="text-align:center;"><span class="ahp-check">&#10003;</span> Basic</td><td style="text-align:center;"><span class="ahp-check">&#10003;</span> Advanced</td></tr>
+          <tr><td>Workflows</td><td style="text-align:center;">3 max</td><td style="text-align:center;"><strong>Unlimited</strong></td></tr>
+          <tr><td>T/R/P Access Modes</td><td style="text-align:center;"><span class="ahp-cross">&#10005;</span></td><td style="text-align:center;"><span class="ahp-check">&#10003;</span></td></tr>
+          <tr><td>External Abilities (3rd-party plugins)</td><td style="text-align:center;"><span class="ahp-cross">&#10005;</span></td><td style="text-align:center;"><span class="ahp-check">&#10003;</span></td></tr>
+          <tr><td>Workflow Prompt Builders (6)</td><td style="text-align:center;"><span class="ahp-cross">&#10005;</span></td><td style="text-align:center;"><span class="ahp-check">&#10003;</span></td></tr>
+          <tr><td>Per-Ability RBAC</td><td style="text-align:center;"><span class="ahp-cross">&#10005;</span></td><td style="text-align:center;"><span class="ahp-check">&#10003;</span></td></tr>
+          <tr><td>Prompt Templates &amp; History</td><td style="text-align:center;"><span class="ahp-cross">&#10005;</span></td><td style="text-align:center;"><span class="ahp-check">&#10003;</span></td></tr>
+          <tr><td>Batch Generation Mode</td><td style="text-align:center;"><span class="ahp-cross">&#10005;</span></td><td style="text-align:center;"><span class="ahp-check">&#10003;</span></td></tr>
+          <tr><td>Keyboard Shortcuts</td><td style="text-align:center;"><span class="ahp-cross">&#10005;</span></td><td style="text-align:center;"><span class="ahp-check">&#10003;</span></td></tr>
+          <tr><td>Priority Support</td><td style="text-align:center;"><span class="ahp-cross">&#10005;</span></td><td style="text-align:center;"><span class="ahp-check">&#10003;</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== PRICING ==================== -->
+<section class="ahp-section ahp-section-alt" id="pricing">
+  <div class="ahp-container">
+    <div class="ahp-section-title">
+      <span class="ahp-badge ahp-badge-amber">Simple Pricing</span>
+      <h2>Choose Your Plan</h2>
+      <p>Start with a 7-day free trial. No credit card required. Cancel anytime.</p>
+    </div>
+
+    <div class="ahp-pricing-toggle">
+      <span class="ahp-toggle-annual ahp-active" onclick="ahpTogglePricing('annual')">Annual</span>
+      <div class="ahp-toggle-switch" id="ahpToggle" onclick="ahpTogglePricing()"></div>
+      <span class="ahp-toggle-lifetime" onclick="ahpTogglePricing('lifetime')">Lifetime</span>
+      <span class="ahp-save-badge">Best Value</span>
+    </div>
+
+    <div class="ahp-pricing-grid">
+
+      <!-- Single Site -->
+      <div class="ahp-price-card">
+        <h3>Personal</h3>
+        <div class="ahp-price-sites">1 Site License</div>
+        <div class="ahp-price-amount ahp-annual-price">$49<span>/yr</span></div>
+        <div class="ahp-price-amount ahp-lifetime-price" style="display:none;">$149<span> once</span></div>
+        <div class="ahp-price-period ahp-annual-period">Billed annually</div>
+        <div class="ahp-price-period ahp-lifetime-period" style="display:none;">One-time payment, lifetime updates</div>
+        <ul class="ahp-price-features">
+          <li>All 80+ AI abilities</li>
+          <li>Unlimited workflows</li>
+          <li>T/R/P access modes</li>
+          <li>6 workflow prompt builders</li>
+          <li>Per-ability RBAC</li>
+          <li>Advanced AI experiments</li>
+          <li>1 year of updates &amp; support</li>
+        </ul>
+        <a href="#" id="1-annual" class="ahp-btn ahp-btn-outline purchase 1-annual" style="width:100%;" data-id="1">Buy Now</a>
+        <a href="#" id="1-lifetime" class="ahp-btn ahp-btn-outline purchase 1-lifetime" style="width:100%;display:none;" data-id="1">Buy Now</a>
+        <a href="https://checkout.freemius.com/plugin/25508/plan/42214/?trial=paid&licenses=1" class="ahp-btn ahp-btn-accent" style="width:100%;margin-top:10px;" target="_blank" rel="noopener">Start 7-Day Free Trial</a>
+      </div>
+
+      <!-- 5 Sites -->
+      <div class="ahp-price-card ahp-popular">
+        <h3>Professional</h3>
+        <div class="ahp-price-sites">5 Site License</div>
+        <div class="ahp-price-amount ahp-annual-price">$129<span>/yr</span></div>
+        <div class="ahp-price-amount ahp-lifetime-price" style="display:none;">$389<span> once</span></div>
+        <div class="ahp-price-period ahp-annual-period">$25.80 per site &middot; Save 47%</div>
+        <div class="ahp-price-period ahp-lifetime-period" style="display:none;">$77.80 per site &middot; One-time payment</div>
+        <ul class="ahp-price-features">
+          <li>Everything in Personal</li>
+          <li>5 site activations</li>
+          <li>External abilities support</li>
+          <li>Priority email support</li>
+          <li>Agency-friendly licensing</li>
+          <li>Multisite compatible</li>
+          <li>1 year of updates &amp; support</li>
+        </ul>
+        <a href="#" id="5-annual" class="ahp-btn ahp-btn-primary purchase 5-annual" style="width:100%;" data-id="5">Buy Now</a>
+        <a href="#" id="5-lifetime" class="ahp-btn ahp-btn-primary purchase 5-lifetime" style="width:100%;display:none;" data-id="5">Buy Now</a>
+        <a href="https://checkout.freemius.com/plugin/25508/plan/42214/?trial=paid&licenses=5" class="ahp-btn ahp-btn-accent" style="width:100%;margin-top:10px;" target="_blank" rel="noopener">Start 7-Day Free Trial</a>
+      </div>
+
+      <!-- 10 Sites -->
+      <div class="ahp-price-card">
+        <h3>Agency</h3>
+        <div class="ahp-price-sites">10 Site License</div>
+        <div class="ahp-price-amount ahp-annual-price">$219<span>/yr</span></div>
+        <div class="ahp-price-amount ahp-lifetime-price" style="display:none;">$659<span> once</span></div>
+        <div class="ahp-price-period ahp-annual-period">$21.90 per site &middot; Save 55%</div>
+        <div class="ahp-price-period ahp-lifetime-period" style="display:none;">$65.90 per site &middot; One-time payment</div>
+        <ul class="ahp-price-features">
+          <li>Everything in Professional</li>
+          <li>10 site activations</li>
+          <li>Bulk client management</li>
+          <li>Priority email support</li>
+          <li>White-label ready</li>
+          <li>Multisite compatible</li>
+          <li>1 year of updates &amp; support</li>
+        </ul>
+        <a href="#" id="10-annual" class="ahp-btn ahp-btn-outline purchase 10-annual" style="width:100%;" data-id="10">Buy Now</a>
+        <a href="#" id="10-lifetime" class="ahp-btn ahp-btn-outline purchase 10-lifetime" style="width:100%;display:none;" data-id="10">Buy Now</a>
+        <a href="https://checkout.freemius.com/plugin/25508/plan/42214/?trial=paid&licenses=10" class="ahp-btn ahp-btn-accent" style="width:100%;margin-top:10px;" target="_blank" rel="noopener">Start 7-Day Free Trial</a>
+      </div>
+
+    </div>
+
+    <p style="text-align:center;margin-top:28px;font-size:14px;color:var(--ahp-gray);">All plans include a <strong>7-day free trial</strong>. No credit card required. 30-day money-back guarantee.</p>
+  </div>
+</section>
+
+<!-- ==================== USE CASES ==================== -->
+<section class="ahp-section">
+  <div class="ahp-container">
+    <div class="ahp-section-title">
+      <h2>Built for Every WordPress Professional</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;">
+      <div style="padding:28px;border-left:4px solid var(--ahp-primary);background:#F8FAFC;border-radius:0 8px 8px 0;">
+        <h4 style="font-size:17px;margin-bottom:8px;">Content Teams</h4>
+        <p style="font-size:14px;color:var(--ahp-gray);">Generate excerpts, alt text, titles, and SEO content at scale with AI experiments and batch generation mode.</p>
+      </div>
+      <div style="padding:28px;border-left:4px solid var(--ahp-accent);background:#F8FAFC;border-radius:0 8px 8px 0;">
+        <h4 style="font-size:17px;margin-bottom:8px;">Developers &amp; Agencies</h4>
+        <p style="font-size:14px;color:var(--ahp-gray);">Connect Claude or Cursor to manage sites via MCP. Automate deployments, content updates, and client deliverables.</p>
+      </div>
+      <div style="padding:28px;border-left:4px solid #F59E0B;background:#F8FAFC;border-radius:0 8px 8px 0;">
+        <h4 style="font-size:17px;margin-bottom:8px;">Store Owners</h4>
+        <p style="font-size:14px;color:var(--ahp-gray);">Manage WooCommerce products, orders, and customers through AI. Use the Store Dashboard prompt for instant insights.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== FAQ ==================== -->
+<section class="ahp-section ahp-section-alt" id="faq">
+  <div class="ahp-container">
+    <div class="ahp-section-title">
+      <h2>Frequently Asked Questions</h2>
+    </div>
+    <div class="ahp-faq-list">
+
+      <div class="ahp-faq-item ahp-open">
+        <div class="ahp-faq-q" onclick="this.parentElement.classList.toggle('ahp-open')">Do I need the free plugin installed?</div>
+        <div class="ahp-faq-a">Yes. AI Agent Hub Pro is an add-on that extends the free AI Workflow Automation &ndash; AI Agent Hub plugin. The free plugin handles all the UI, abilities, and MCP server. Pro unlocks advanced features through WordPress filters &mdash; no code changes needed.</div>
+      </div>
+
+      <div class="ahp-faq-item">
+        <div class="ahp-faq-q" onclick="this.parentElement.classList.toggle('ahp-open')">What AI providers are supported?</div>
+        <div class="ahp-faq-a">AI Agent Hub works with OpenAI (GPT-4o, GPT-4o-mini), Google AI (Gemini 2.5 Flash, Gemini 2.5 Pro), and Anthropic (Claude Haiku, Claude Sonnet). You bring your own API keys &mdash; the plugin does not include API credits.</div>
+      </div>
+
+      <div class="ahp-faq-item">
+        <div class="ahp-faq-q" onclick="this.parentElement.classList.toggle('ahp-open')">What MCP clients can I connect?</div>
+        <div class="ahp-faq-a">Any client that supports the Model Context Protocol (MCP): Claude Desktop, Claude Code, Cursor, Windsurf, Cline, and more. The plugin implements the full MCP 2025-06-18 specification with Streamable HTTP transport.</div>
+      </div>
+
+      <div class="ahp-faq-item">
+        <div class="ahp-faq-q" onclick="this.parentElement.classList.toggle('ahp-open')">What happens if I cancel or deactivate Pro?</div>
+        <div class="ahp-faq-a">The free plugin continues to work normally with its default limits (3 workflows, basic access modes). Your settings are preserved and fully restored if you reactivate Pro later. No data is lost.</div>
+      </div>
+
+      <div class="ahp-faq-item">
+        <div class="ahp-faq-q" onclick="this.parentElement.classList.toggle('ahp-open')">Is there a money-back guarantee?</div>
+        <div class="ahp-faq-a">Yes. All plans come with a 30-day money-back guarantee processed through Freemius. If you're not satisfied, contact support for a full refund &mdash; no questions asked.</div>
+      </div>
+
+      <div class="ahp-faq-item">
+        <div class="ahp-faq-q" onclick="this.parentElement.classList.toggle('ahp-open')">What are Workflow Prompt Builders?</div>
+        <div class="ahp-faq-a">Prompt builders are pre-built, multi-step prompts designed for MCP clients. For example, the SEO Audit prompt orchestrates multiple abilities to analyze your content, check meta tags, evaluate readability, and generate a comprehensive report &mdash; all in one prompt.</div>
+      </div>
+
+      <div class="ahp-faq-item">
+        <div class="ahp-faq-q" onclick="this.parentElement.classList.toggle('ahp-open')">Does it work with WooCommerce?</div>
+        <div class="ahp-faq-a">Yes. The Store Manager module includes 24 WooCommerce-specific abilities for managing products, orders, customers, coupons, and more. Pro adds the Store Dashboard prompt builder for instant store performance summaries.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ==================== FINAL CTA ==================== -->
+<section class="ahp-cta-section">
+  <div class="ahp-container">
+    <h2>Ready to Supercharge Your WordPress with AI?</h2>
+    <p>Join the AI-first WordPress revolution. Start your free trial today and experience the full power of AI Agent Hub Pro.</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+      <a href="#pricing" class="ahp-btn ahp-btn-accent ahp-btn-lg">Start 7-Day Free Trial</a>
+      <a href="https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/" target="_blank" rel="noopener" class="ahp-btn ahp-btn-lg" style="background:rgba(255,255,255,0.15);color:#fff;">Download Free Version</a>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- Freemius Checkout (Legacy SDK) -->
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="https://checkout.freemius.com/checkout.min.js"></script>
+<script>
+var handler = FS.Checkout.configure({
+  plugin_id: '25508',
+  plan_id: '42214',
+  public_key: 'pk_563e25357046f5efe610f1c4dccaa',
+  image: 'https://atlasaidev.com/wp-content/uploads/2025/11/Adobe-Express-file-3.webp'
+});
+
+var purchaseClasses = [].slice.call(document.getElementsByClassName('purchase'));
+purchaseClasses.map(function(button) {
+  var buttonId = button.getAttribute('id');
+  if (button.classList.contains(buttonId)) {
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      var payment_billing_cycle = 'annual';
+      if (buttonId.includes('lifetime')) {
+        payment_billing_cycle = 'lifetime';
+      }
+      handler.open({
+        name: 'AI Workflow Automation \u2013 AI Agent Hub Pro',
+        licenses: button.dataset.id,
+        billing_cycle: payment_billing_cycle,
+        checkout_style: 'legacy',
+        purchaseCompleted: function(response) {
+          console.log('Purchase completed:', response);
+        },
+        success: function(response) {
+          window.location.href = 'https://atlasaidev.com/thank-you/';
+        }
+      });
+    });
+  }
+});
+
+/* Pricing Toggle */
+window.ahpTogglePricing = function(force) {
+  var toggle = document.getElementById('ahpToggle');
+  var currentCycle = toggle.classList.contains('ahp-lifetime') ? 'lifetime' : 'annual';
+  if (force === 'annual') currentCycle = 'annual';
+  else if (force === 'lifetime') currentCycle = 'lifetime';
+  else currentCycle = currentCycle === 'annual' ? 'lifetime' : 'annual';
+
+  var isLifetime = currentCycle === 'lifetime';
+  toggle.className = 'ahp-toggle-switch' + (isLifetime ? ' ahp-lifetime' : '');
+
+  document.querySelectorAll('.ahp-toggle-annual').forEach(function(el){ el.className = 'ahp-toggle-annual' + (isLifetime ? '' : ' ahp-active'); });
+  document.querySelectorAll('.ahp-toggle-lifetime').forEach(function(el){ el.className = 'ahp-toggle-lifetime' + (isLifetime ? ' ahp-active' : ''); });
+
+  document.querySelectorAll('.ahp-annual-price, .ahp-annual-period').forEach(function(el){ el.style.display = isLifetime ? 'none' : ''; });
+  document.querySelectorAll('.ahp-lifetime-price, .ahp-lifetime-period').forEach(function(el){ el.style.display = isLifetime ? '' : 'none'; });
+
+  /* Toggle annual/lifetime buttons */
+  document.querySelectorAll('.ahp-price-card').forEach(function(card) {
+    var annualBtn = card.querySelector('[id$="-annual"].purchase');
+    var lifetimeBtn = card.querySelector('[id$="-lifetime"].purchase');
+    if (annualBtn) annualBtn.style.display = isLifetime ? 'none' : '';
+    if (lifetimeBtn) lifetimeBtn.style.display = isLifetime ? '' : 'none';
+  });
+};
+
+/* FAQ accessibility */
+document.querySelectorAll('.ahp-faq-q').forEach(function(q){
+  q.setAttribute('role','button');
+  q.setAttribute('tabindex','0');
+  q.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){e.preventDefault();this.click();} });
+});
+</script>
+<!-- /wp:html -->
