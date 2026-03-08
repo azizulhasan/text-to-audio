@@ -32,7 +32,30 @@
       "Bash(node scripts/generate-translations.js:*)",
       "WebFetch(domain:gspeech.io)",
       "WebFetch(domain:trinityaudio.ai)",
-      "WebFetch(domain:beyondwords.io)"
+      "WebFetch(domain:beyondwords.io)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "mcp__Claude_in_Chrome__navigate",
+      "mcp__Claude_in_Chrome__computer",
+      "mcp__Claude_in_Chrome__find",
+      "mcp__Claude_in_Chrome__javascript_tool",
+      "mcp__Claude_in_Chrome__read_page",
+      "mcp__Claude_in_Chrome__get_page_text",
+      "mcp__Claude_in_Chrome__form_input",
+      "Bash(python /tmp/merge_csvs.py)",
+      "Bash(php -v)",
+      "Bash(node /tmp/merge_csvs.js)",
+      "Bash(node \"D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio/plan/data/merge_csvs.js\")",
+      "WebFetch(domain:track.atlasaidev.com)",
+      "Bash(echo \"=== Gross > 0 \\(paying\\): ===\")",
+      "WebFetch(domain:mailchimp.com)",
+      "WebFetch(domain:www.emailtooltester.com)",
+      "Bash(python -c \":*)",
+      "Bash(php -r \":*)",
+      "Bash(php validate_emails.php)",
+      "Bash(php \"D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio/plan/data/verify_csv.php\")",
+      "Bash(php \"D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio/plan/data/check_paying.php\")",
+      "Bash(php \"D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio/plan/data/check_removed_paying.php\")",
+      "Bash(php \"D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio/plan/data/debug_gross.php\")"
     ]
   }
 }

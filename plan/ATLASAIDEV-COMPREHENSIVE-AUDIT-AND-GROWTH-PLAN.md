@@ -49,11 +49,11 @@ AtlasAiDev's website traffic has collapsed **82%** — from ~3,000 monthly visit
 |---|---|---|
 | Blog completely dead (no posts in 8+ months) | 🔴 CRITICAL | Primary traffic driver eliminated |
 | Brand identity fragmented across 4 names | 🔴 CRITICAL | SEO authority split, user confusion |
-| Zero lead capture system | 🔴 CRITICAL | No way to nurture 315K free users |
+| ~~Zero lead capture system~~ | ✅ FIXED | ~~No way to nurture 315K free users~~ → Email capture live on blog posts, centralized tracking on track.atlasaidev.com |
 | Pricing pages show identical features across tiers | 🟡 HIGH | Confuses buyers, kills conversion |
 | No social proof on website | 🟡 HIGH | 315K downloads and 4.8★ hidden from visitors |
 | No competitor comparison pages | 🟡 HIGH | Losing search traffic to competitors |
-| No email marketing system | 🟡 HIGH | No retention or upsell mechanism |
+| ~~No email marketing system~~ | ✅ FIXED | ~~No retention or upsell mechanism~~ → Mailchimp Standard connected, 5-email "Convert to Pro" automation built (Welcome → Tips → Accessibility → Free vs Pro → Final Offer with ATLASTTS10P coupon). Freemius ↔ Mailchimp OAuth synced. GA4 connected to Mailchimp. |
 | Homepage talks about company, not customer pain | 🟠 MEDIUM | Poor first impression, high bounce |
 
 ### The Opportunity
@@ -957,7 +957,7 @@ These are actions that can be completed in under 4 hours each and will have imme
 | Organic search visits/month | Unknown (need GSC) | +100% | +400% |
 | Blog posts published | 0/month | 8-12 (month 1) | 4-6/month ongoing |
 | WP.org reviews | 83 | 95 | 130+ |
-| Email subscribers | 0 | 200 | 1,000+ |
+| Email subscribers | ✅ 3,216 contacts in Mailchimp (synced from Freemius + blog leads). Convert-to-Pro journey built (Draft). | 3,500 | 5,000+ |
 | Pricing page visits/month | Unknown (need GA) | +50% | +200% |
 | Free-to-Pro conversion rate | Unknown (need Freemius) | +20% relative | +50% relative |
 | Monthly revenue | Unknown (need Freemius) | +15% | +50% |
@@ -1238,7 +1238,7 @@ This is achievable within 2-4 weeks with zero new content — just optimizing ex
 
 ## IMPLEMENTATION TODO LIST
 
-> **Last Updated:** March 8, 2026
+> **Last Updated:** March 9, 2026 (Email Marketing Automation — Convert to Pro Journey)
 > **Status Key:** ✅ Done | 🔄 In Progress | ⬜ Not Started
 
 ---
@@ -1264,18 +1264,18 @@ This is achievable within 2-4 weeks with zero new content — just optimizing ex
 |---|------|--------|------|-------|
 | 2.1 | Publish 4 new blog posts targeting high-impression keywords | ✅ Done | Mar 8 | Published 4 posts: (1) Google Cloud TTS vs OpenAI vs ElevenLabs (ID 4154, targets AI voice comparison keywords), (2) TTS Accommodation Accessibility Guide (ID 4155, targets 46,876 impression keyword), (3) How to Add TTS to Any Website (ID 4156, targets 90,480 impression keyword), (4) Best WordPress TTS Plugin Comparison (ID 4160, targets plugin comparison keywords). All with Yoast meta, category "text-to-speech", featured images, SEO-friendly slugs. Scripts: `plan/scripts/create-blog-posts.js`, `plan/scripts/create-comparison-post.js` |
 | 2.2 | Fix 71.4% install abandon rate | ✅ Done | Mar 8 | Code Snippet #30 (ACTIVE): Auto-redirect to settings on first activation, "Getting Started" admin notice with "Configure Now" CTA, Settings link added to plugin action links. Script: `plan/scripts/install-abandon-fix.js` |
-| 2.3 | Set up email capture on blog posts | ✅ Done | Mar 8 | Code Snippet #29 (ACTIVE): Inline opt-in form after all "text-to-speech" category posts. REST API endpoint `/wp-json/atlasvoice/v1/subscribe`, emails stored in `wp_options(atlasvoice_subscribers)`. GA4 `generate_lead` event on subscribe. Script: `plan/scripts/email-capture-setup.js` |
+| 2.3 | Set up email capture on blog posts | ✅ Done | Mar 8 | **v2 — Centralized Tracking (Updated Mar 8 PM):** Code Snippet #29 (ACTIVE): Inline opt-in form after all "text-to-speech" category posts. Now POSTs to centralized tracking server: `https://track.atlasaidev.com/wp-json/atlasaidev_tracker/v1/tracker/subscribe`. Sends: email, page_url, page_title, post_category, source, plugin, referrer. **Tracking server** (`AtlasAiDev_Tracker_Api_Routes.php`) stores in `wpxr_plugin_subscribers` table (18 columns: email, name, page_url, page_title, post_category, source, plugin, ip_address, country, city, user_agent, referrer, status, subscribe_count, timestamps). **Security:** Rate limiting (5 req/min/IP via transients → 429), honeypot anti-bot field, `$wpdb->prepare()` parameterized queries, `sanitize_email()`/`sanitize_text_field()`/`esc_url_raw()` on all inputs, input length caps (email 255, URLs 2048, user_agent 500), dynamic format strings for `$wpdb->update()`. Auto-creates table via `dbDelta()`. Handles duplicates (updates existing + increments subscribe_count). Emoji fix: `&#x1F50A;` HTML entity for 🔊. |
 | 2.4 | Create comprehensive competitor comparison page | ✅ Done | Mar 8 | Post ID 4160: "Best WordPress TTS Plugin: 6 Top Plugins Compared". Covers AtlasVoice, GSpeech, ResponsiveVoice, Trinity Audio, BeyondWords, Play.ht. Includes pricing tables, feature comparison matrix, 3-year cost comparison. Script: `plan/scripts/create-comparison-post.js` |
 | 2.5 | Fix URL fragmentation | ✅ Done | Mar 8 | Verified proper 301 redirects: `/text-to-speech-pro/` → `/plugins/text-to-speech-pro/` and `/pricing/` → `/plugins/text-to-speech-pro/pricing/`. No action needed. |
 | 2.6 | Internal linking audit + fixes | ✅ Done | Mar 8 | Added "Related Articles" sections to 8 posts: 4 existing high-traffic posts (book-readers ID 3497, accommodation ID 3477, how-to-use ID 3085, best-plugin ID 1930) + all 4 new posts. Each links to 5 related articles + product page. Script: `plan/scripts/internal-links-v2.js` |
 
-### 🟢 PHASE 3 — IMPORTANT (Next 30 Days) — Sustainable Growth
+### 🟢 PHASE 3 — IMPORTANT (Next 30 Days) — Sustainable Growth  ⬅️ **YOU ARE HERE**
 
 | # | Task | Status | Date | Notes |
 |---|------|--------|------|-------|
-| 3.1 | Rebuild content calendar (2 posts/week) | ⬜ Not Started | — | Consistent publishing is #1 traffic driver. |
-| 3.2 | Launch email onboarding sequence for free users | ⬜ Not Started | — | Nurture 315K free installs toward paid. |
-| 3.3 | Restructure Google CPC with conversion tracking | ⬜ Not Started | — | Only after GA4 tracking is set up (1.6). |
+| 3.1 | Rebuild content calendar (2 posts/week) | ⬜ Not Started | — | **👈 RECOMMENDED NEXT** — Consistent publishing is #1 traffic driver. Phase 2 published 4 posts but need ongoing cadence. |
+| 3.2 | Launch email onboarding sequence for free users | 🔄 In Progress | Mar 9 | **Mailchimp Standard plan purchased.** Freemius ↔ Mailchimp OAuth connected (auto-syncs buyers). Google Analytics connected to Mailchimp. **"AtlasVoice - Convert to Pro" Customer Journey built** (5-email automation, Draft status): Email 1: Welcome (Day 0, subj: "Your website just got a voice"), Email 2: Quick Tips (Day 3, subj: "3 things most AtlasVoice users miss"), Email 3: Accessibility Story (Day 7, subj: "15% of your visitors can't read your content"), Email 4: Free vs Pro comparison (Day 12, subj: "Free vs Pro — here's what you're leaving on the table"), Email 5: Final Offer with ATLASTTS10P 10% coupon (Day 18, subj: "A little thank you from AtlasVoice"). All buttons have UTM-tagged URLs. **Remaining:** Fix Email 1 body (install instructions → existing user tips), review all emails via Send Test, activate journey. Plan file: `plan/email-journey-convert-to-pro.md` |
+| 3.3 | Restructure Google CPC with conversion tracking | ⬜ Not Started | — | GA4 tracking is set up (task 1.6 ✅). Can now build conversion-optimized campaigns. |
 | 3.4 | Confirm brand naming → consolidate to "AtlasVoice" | ⬜ Not Started | — | Currently fragmented: Text To Speech Pro, TTS Pro, Text to Audio, AtlasVoice. |
 | 3.5 | Add monthly billing option to Freemius | ⬜ Not Started | — | Currently only annual + lifetime. Monthly lowers barrier. |
 | 3.6 | Add free trial (7 or 14 days) | ⬜ Not Started | — | No trial currently. Increases conversion. |
@@ -1329,6 +1329,66 @@ Month 12: $2,000 MRR | ~5,000 visitors/mo | 6-8 new subs/week | 25% churn
 The data confirms the diagnosis: the product is solid, the marketing is broken. Every metric points to content starvation and conversion optimization as the two highest-leverage fixes.
 
 ---
+
+---
+
+## CENTRALIZED TRACKING SERVER INFRASTRUCTURE
+
+> **Added:** March 8, 2026 (Evening)
+
+### Server: track.atlasaidev.com
+
+| Component | Details |
+|-----------|---------|
+| **Plugin** | `atlasaidev-tracker` (custom plugin) |
+| **File Modified** | `/home/azizyzjn/track.atlasaidev.com/wp-content/plugins/atlasaidev-tracker/api/AtlasAiDev_Tracker_Api_Routes.php` |
+| **Endpoint** | `POST /wp-json/atlasaidev_tracker/v1/tracker/subscribe` |
+| **Auth** | Public (no auth required) — `get_public_route_access()` |
+| **Database** | `azizyzjn_tracker` → table `wpxr_plugin_subscribers` |
+| **Table Columns** | id, email (UNIQUE), first_name, last_name, page_url, page_title, post_category, source, plugin, ip_address, country, city, user_agent, referrer, status, subscribe_count, created_at, updated_at |
+| **phpMyAdmin** | Accessible via cPanel → azizyzjn_tracker database |
+
+### Security Measures Implemented
+
+| Protection | Implementation |
+|------------|----------------|
+| **SQL Injection** | `$wpdb->prepare()` for SELECT, `$wpdb->insert()` / `$wpdb->update()` with format arrays |
+| **Rate Limiting** | 5 requests/min per IP via WordPress transients → returns HTTP 429 |
+| **Honeypot Anti-Bot** | Hidden `website` field — if filled, silently "succeeds" but saves nothing |
+| **Input Sanitization** | `sanitize_email()`, `sanitize_text_field()`, `esc_url_raw()` on every field |
+| **Length Caps** | email: 255, names: 100, URLs: 2048, user_agent: 500, source: 100 |
+| **Email Validation** | WordPress `is_email()` + length check |
+| **Dynamic Format Strings** | `$wpdb->update()` format array matches actual columns dynamically |
+| **IP Detection** | Cloudflare (`HTTP_CF_CONNECTING_IP`), proxy (`HTTP_X_FORWARDED_FOR`, `HTTP_X_REAL_IP`), direct (`REMOTE_ADDR`) with `FILTER_VALIDATE_IP` |
+
+### New Methods Added to `AtlasAiDev_Tracker_Api_Routes` Class
+
+| Method | Purpose |
+|--------|---------|
+| `get_public_route_access()` | Returns true — allows unauthenticated access |
+| `get_client_ip()` | Detects real IP through CDN/proxy headers |
+| `is_rate_limited($ip, $limit, $window)` | Transient-based rate limiter |
+| `sanitize_input($value, $max_len)` | Sanitize + truncate to max length |
+| `maybe_create_subscribers_table()` | Auto-creates table via `dbDelta()` if not exists |
+| `save_subscriber($request)` | Main handler: validate → rate limit → honeypot → sanitize → insert/update |
+
+### Data Flow
+
+```
+atlasaidev.com (blog post)
+  → Snippet #29 renders inline form
+  → User enters email, clicks Subscribe
+  → JS fetch() POST → track.atlasaidev.com/wp-json/atlasaidev_tracker/v1/tracker/subscribe
+  → Rate limit check (5/min/IP)
+  → Honeypot check
+  → Email validation
+  → Input sanitization + length caps
+  → Check existing subscriber
+    → New: INSERT into wpxr_plugin_subscribers
+    → Existing: UPDATE (latest data + increment subscribe_count + re-activate)
+  → Return JSON { success, message, id, is_new }
+  → JS shows "Thank you" message
+```
 
 ---
 
@@ -1398,7 +1458,7 @@ All reusable scripts and reference files created during implementation are store
 | 26 | **GA4 Purchase Event Tracking (Freemius)** | **ACTIVE** ⚠️ |
 | 27 | Yoast meta for 3 new blog posts | Deactivated |
 | 28 | Yoast meta for comparison post | Deactivated |
-| 29 | **Email Lead Capture (Blog Posts)** | **ACTIVE** ⚠️ |
+| 29 | **Email Lead Capture (Blog Posts)** — POSTs to `track.atlasaidev.com/wp-json/atlasaidev_tracker/v1/tracker/subscribe` | **ACTIVE** ⚠️ |
 | 30 | **Activation Onboarding (Abandon Rate Fix)** | **ACTIVE** ⚠️ |
 
 ### New Blog Posts Published

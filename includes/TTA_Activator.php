@@ -33,6 +33,15 @@ class TTA_Activator {
 	 */
 	public static function activate( $renew_all_settings = false ) {
 		/**
+		 * Set activation redirect transient on first activation.
+		 * This triggers a one-time redirect to the settings page.
+		 */
+		if ( ! get_option( 'tta_has_been_activated_before', false ) ) {
+			set_transient( 'tta_activation_redirect', true, 60 );
+			update_option( 'tta_has_been_activated_before', true );
+		}
+
+		/**
 		 * Customization settings.
 		 */
 		if ( $renew_all_settings || ! get_option( 'tta_customize_settings' ) ) {
