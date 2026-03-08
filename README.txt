@@ -5,461 +5,366 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.6
+Stable tag: 2.1.7
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
-The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a __text to audio__ player to your WordPress site!
+Free text to speech with browser voices + premium AI voices from Google, OpenAI & ElevenLabs. Add an audio player to any WordPress post.
 
 == Description ==
 
-[Text To Speech TTS Accessibility](https://atlasaidev.com/plugins/text-to-speech-pro/) is the most user-friendly Text-to-Speech tts plugin. Just install and automatically add a __text to audio__ player to your WordPress site!
+**AtlasVoice — Text To Speech TTS Accessibility** is the most user-friendly text-to-speech plugin for WordPress and WooCommerce. Convert any post, page, or product description into natural-sounding audio with one click. The free version uses the browser's built-in speechSynthesis engine with 20–300+ voices across all major browsers. Upgrade to Pro for **AtlasVoice's own AI voice engine** (included with Pro — no extra API costs), or connect premium third-party providers like **Google Cloud TTS**, **OpenAI (ChatGPT) TTS**, and **ElevenLabs TTS**.
 
-**No Registration, No Account, No API installation required. Simply install and let your visitors listen.**
+**No Registration, No Account, No API required for the free version. Simply install and let your visitors listen.**
 
-Enhance your WordPress and WooCommerce website's accessibility and engage users with the Text To Speech TTS Accessibility Plugin. This free plugin empowers your site with text-to-speech functionality, making your content available in over 51 languages, catering to diverse audiences worldwide.
+Whether you run a blog, news site, online store, or educational platform, AtlasVoice makes your content accessible to everyone — including users with visual impairments, reading difficulties, or those who simply prefer listening. Support **51+ languages**, **300+ AI voices**, and reach a truly global audience.
 
-Right after you install this text to speech free plugin, it will automatically start displaying an easy-to-use player on selected post/page types, giving visitors the option to listen to your website's written content at their own pace.
+### How It Works — 3 Simple Steps
 
-== Text To Speech TTS Accessibility Plugin For WordPress How To Install ? ==
-[youtube https://www.youtube.com/watch?v=25xJtIwFM2U&ab_channel=AtlasAiDev]
-
-== How To Setup Text To Speech Player Properly? - Video Tutorial  ==
-[youtube https://www.youtube.com/watch?v=h4VJxM-mh74&t=4s&ab_channel=AtlasAiDev]
-
+1. **Install & Activate** — Install the plugin from the WordPress repository. The audio player appears automatically on your selected post types.
+2. **Choose Your Voice** — Pick a free browser voice, use AtlasVoice's own AI engine (included with Pro), or connect a third-party AI provider (Google Cloud, OpenAI, or ElevenLabs) from the **Integration** menu.
+3. **Customize & Publish** — Select your player style from the **Customization** menu, choose your preferred voice and language from the **Listening** menu, and you're live.
 
 ### SOME USEFUL LINKS:
-> * [Text To Speech Pro](https://atlasaidev.com/plugins/text-to-speech-pro/)
+> * [AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/)
 > * [Pricing](https://atlasaidev.com/pricing/)
 > * [Live Demo Pro Version](https://atlasaidev.com/plugins/text-to-speech-pro/demo/)
 > * [Live Demo Free Version](https://wordpress.org/plugins/text-to-audio/?preview=1)
-> * [Video Tutorial](https://www.youtube.com/@atlasaidev)
+> * [Video Tutorials](https://www.youtube.com/@atlasaidev)
 > * [Documentation](https://atlasaidev.com/docs/)
 
+### SUPPORT AND HAVE QUESTIONS?
+> * [Contact Us](http://atlasaidev.com/contact-us/) — We usually reply within 1 hour.
 
-### SUPPORT AND HAVE QUESTIONS ? VISIT HERE:
-> * [Contact Us](http://atlasaidev.com/contact-us/)
+
+### Who Is This For?
+
+* **Bloggers, News & Media Sites** — Let readers listen to articles while multitasking. Increase time-on-page and reduce bounce rate.
+* **WooCommerce & E-Learning Sites** — Make product descriptions and course materials listenable for shoppers and auditory learners.
+* **Multilingual & Accessibility-First Websites** — Serve a global audience in 51+ languages and meet WCAG 2.1 / ADA compliance.
 
 
-### Why Use The Text-to-Speech TTS Accessibility Plugin?
-1. **Accessibility:** Make your content accessible to users with disabilities, including those with visual impairments, by providing an audio option for consuming content.
+### Why Choose AtlasVoice?
 
-2. **User Experience Enhancement:** Improve user experience by offering an alternative way to engage with your content, especially for users who prefer listening over reading.
+1. **Accessibility & WCAG Compliance:** Help your site meet WCAG 2.1 and ADA requirements with audio alternatives for users with visual impairments, dyslexia, or reading difficulties.
 
-3. **Productivity and Efficiency:** Enable users to absorb information quickly, enhancing productivity and saving time for those with busy schedules.
+2. **Boost SEO & Engagement:** Audio increases dwell time and reduces bounce rate. Pro generates **Audio Schema markup** (JSON-LD) for rich results in Google Search.
+
+3. **Multiple AI Providers:** AtlasVoice's own AI engine (included with Pro), Google Cloud Neural2 voices, ElevenLabs ultra-realistic voices, and OpenAI ChatGPT voices.
+
+4. **Works Everywhere:** Compatible with all major browsers, mobile devices, page builders (Elementor, WPBakery, Divi), caching plugins, and multilingual plugins (WPML, GTranslate, TranslatePress).
+
 
 ### Text To Speech Plugin Free Version Features
 
-* **Simple Installation:** No account creation required; simply install the plugin to unlock its full functionality instantly. Upon activation, this free text to speech WordPress plugin will start displaying a player for your users to play your content on your selected pages.
+* **Zero Configuration Required:** No account, no API key, no registration. Install and the audio player starts working immediately on your selected post types using your browser's built-in speech synthesis engine.
 
-* **Easy Integration:** Utilize intuitive shortcodes to seamlessly add the text-to-speech button to any post or page on your site.
+* **Easy Shortcode Integration:** Add the `[atlasvoice]` shortcode to any post, page, or widget to place an audio player exactly where you want it.
 
-* **Analytics:** __AtlasVoice__ Support [Advance Analytics](https://www.youtube.com/watch?v=amkrAtVQGBY).
+* **20–300+ Browser Voices:** Depending on the browser and operating system, access a wide range of voices. Microsoft Edge supports all available system voices; Chrome offers 20+ voices; Firefox supports core languages.
 
-* **Text Alias:** __AtlasVoice__ Support [Text Alias](https://www.youtube.com/watch?v=oeW652YKmG0&t=3s).
+* **Analytics Dashboard:** Track how visitors interact with your audio content — play counts, pause events, engagement metrics, and more with the built-in [analytics dashboard](https://www.youtube.com/watch?v=amkrAtVQGBY).
 
-* **Unlimited Text-to-Speech:** Convert unlimited text to speech.
+* **Text Alias:** Replace abbreviations, acronyms, or complex words with their spoken equivalents using the [Text Alias](https://www.youtube.com/watch?v=oeW652YKmG0&t=3s) feature.
 
-* **Customization Options:** Easily customize the appearance and behavior of the text-to-speech button to match your website's design and user preferences. Customize button color, width, and text based on site language through filters and shortcodes. Preview changes in real-time for a seamless user experience.
+* **Unlimited Text-to-Speech:** Convert unlimited text to speech at no cost — no character limits, no monthly quotas.
 
-* **Language and Voice Selection:** Choose from over 20-300+ voices (depending on the browser) and change the listening language to cater to your audience's preferences.
+* **Full Customization:** Customize button color, width, border radius, hover effects, and text labels. Preview all changes in real-time from the dashboard.
 
-* **Device Compatibility:** The plugin leverages the browser's built-in speech synthesis API, ensuring broad functionality across various devices.
-Custom CSS: Apply custom styles to the text-to-speech button using CSS for seamless integration with your website's design.
+* **Language & Voice Selection:** Choose the default language and voice from the **Listening** menu. Adjust speed, pitch, and volume for browser-native players.
 
-* **Custom Post Type Compatibility:** Extend text to voice functionality to custom post types, ensuring consistency across your entire website. Integrate with popular custom post type plugins such as <a href='https://wordpress.org/plugins/advanced-custom-fields/' target='_blank'>Advanced Custom Fields (ACF)</a>, <a href='https://wordpress.org/plugins/custom-post-type-ui/' target='_blank'>Custom Post Type UI</a>
-, and <a href='https://toolset.com/home/types-manage-post-types-taxonomy-and-custom-fields/' target='_blank'>Toolset Types</a>.
+* **Cross-Device Compatibility:** The free version uses the browser's built-in [speechSynthesis API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis), ensuring compatibility across desktops, tablets, and mobile devices.
 
-* **Additional Functionality:** Remove special characters and URLs from content, enhancing the quality of the audio output.
+* **Custom CSS Support:** Apply custom styles to the audio player using your own CSS for pixel-perfect integration with your theme.
 
-### Upgrade to Text To Speech Pro for Advanced Features:
+* **Custom Post Type Support:** Extend text-to-speech to any custom post type — WooCommerce products, portfolios, testimonials, and more. Compatible with [Advanced Custom Fields (ACF)](https://wordpress.org/plugins/advanced-custom-fields/), [Custom Post Type UI](https://wordpress.org/plugins/custom-post-type-ui/), and [Toolset Types](https://toolset.com/home/types-manage-post-types-taxonomy-and-custom-fields/).
 
-Unlock additional features and support by upgrading to [Text To Speech TTS Pro](https://atlasaidev.com/plugins/text-to-speech-pro/). This premium version of the text-to-speech generator plugin offers enhanced features designed to take your content to the next level.
+* **Clean Audio Output:** Automatically removes special characters, URLs, shortcodes, and HTML tags from content before speaking, ensuring clean, professional audio.
+
+* **Gutenberg Block:** Add and customize the AtlasVoice player directly from the Gutenberg block editor — adjust colors, size, and styles visually.
+
+
+### Upgrade to AtlasVoice Pro for Advanced Features:
+
+Unlock premium AI voices, bulk operations, cloud backup, advanced analytics, and more by upgrading to [AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/). This premium add-on extends the free plugin with enterprise-grade capabilities.
 
 **Text To Speech TTS Accessibility Pro Features:**
 
-* **Live Support:** We usually reply with 1 hour.
+**AI Voice Providers (Pro):**
 
-* **Bulk MP3 File Generation:** [Text To Speech Pro ( AtlasVoice Pro ) : How To Generate Bulk MP3 File?](https://www.youtube.com/watch?v=HFoqlkPCP80).
+*For each provider: select its player from the **Customization** menu, then choose voice and language from the **Listening** menu.*
 
-* **Advance Analytics:** __AtlasVoice__ Support [Advance Analytics](https://www.youtube.com/watch?v=amkrAtVQGBY).
+* **AtlasVoice TTS Pro (Included with Pro):** AtlasVoice's own AI voice engine — **included with your Pro license at no extra API cost**. Access 63 languages with natural-sounding voices. No third-party account needed — just activate Pro and start generating MP3 files.
 
-* **Unlimited Text Alias:** __AtlasVoice__ Support [Text Alias](https://www.youtube.com/watch?v=oeW652YKmG0&t=3s).
+* **Google Cloud Text To Speech:** Integrate with [Google Cloud Text To Speech](https://cloud.google.com/text-to-speech) for enterprise-grade voices. 300+ voices across 90+ languages including **Neural2**, **WaveNet**, and **Standard** voice types. Paid service — billed by Google based on usage. [Learn more](https://www.youtube.com/watch?v=h4VJxM-mh74&t=200s)
 
-* **Google Cloud Text To Speech:** You can integrate with [Google Cloud Text To Speech](https://cloud.google.com/text-to-speech). It is optional. [Learn more](https://www.youtube.com/watch?v=h4VJxM-mh74&t=200s)
+* **ChatGPT Text To Speech (OpenAI):** Integrate with [OpenAI Text To Speech](https://platform.openai.com/docs/guides/text-to-speech/overview) for natural-sounding audio. 6 voices — **Alloy, Echo, Fable, Nova, Onyx, Shimmer** — with Standard (tts-1) and HD (tts-1-hd) models. Paid service — billed by OpenAI based on usage. [Learn more](https://www.youtube.com/watch?v=h4VJxM-mh74&t=200s)
 
-* **ChatGPT Text To Speech:** You can integrate with [ChatGPT Text To Speech](https://platform.openai.com/docs/guides/text-to-speech/overview). It is optional. [Learn more](https://www.youtube.com/watch?v=h4VJxM-mh74&t=200s)
+* **ElevenLabs Text To Speech:** Integrate with [ElevenLabs](https://elevenlabs.io/) for ultra-realistic AI voices. **100+ premium voices** with accent labels, plus **stability**, **similarity boost**, **style**, and **speed** controls. Real-time character usage tracking in your dashboard. Paid service — billed by ElevenLabs based on usage.
 
-* **Unlimited Characters:** Convert unlimited text to speech.
+**Cloud Storage & Backup (Pro):**
 
-* **Enhanced Productivity:** Listen to content while multitasking or performing other tasks, saving time and increasing efficiency.
+* **Google Cloud Storage Backup:** Back up generated MP3 files to [Google Cloud Storage](https://cloud.google.com/storage). Available for **all TTS providers** — Google Cloud TTS, ChatGPT TTS, AtlasVoice TTS Pro, and ElevenLabs TTS. Configure a Google Cloud service account JSON file from the **Integration** menu, even if using a non-Google TTS provider.
 
-* **Interactive Engagement:** Engage with customers more interactively by providing audio options for content consumption.
+**Content & Playback Control (Pro):**
 
-* **Improved User Interface:** Enjoy an enhanced UI for the player, offering a smoother and more intuitive experience.
+* **Bulk MP3 File Generation:** Generate MP3 files for hundreds of posts at once using the bulk action from the WordPress posts list. Select your posts, choose "AtlasVoice Generate MP3 File", and the plugin processes each post automatically. [Watch tutorial](https://www.youtube.com/watch?v=HFoqlkPCP80).
 
-* **Multilingual Support:** Access support for multiple languages, catering to diverse audiences.
+* **Downloadable MP3 Audio:** Allow visitors to download MP3 files for offline listening. Unlimited downloads. Also upload your own pre-recorded MP3 files for any post.
 
-* **Responsive Button:** Benefit from a responsive speaking button that adapts to different screen sizes and devices.
+* **Read Content from DOM:** Capture dynamically rendered content by reading directly from the page DOM instead of the database.
 
-* **Customizable Content Selection:** Specify speaking content using CSS selectors, allowing for precise customization.
+* **Audio Schema Markup (SEO):** Generates JSON-LD structured data for audio content, enabling rich audio results in Google Search.
 
-* **Translation Capabilities:** Translate content into any language using the plugin, expanding your reach to global audiences.
-Support for Custom Post Types: Ensure compatibility with all custom post types on your WordPress WooCommerce site.
+* **Content Splitting:** Long articles are automatically split into chunks, then seamlessly combined into a single MP3 file.
 
-* **Add CSS Selector:** Users can target specific elements within their content to control inclusion in the text-to-speech playback, offering enhanced customization options.
+* **Content Controls:** Add text before/after content for intros and outros. Include or exclude post title and excerpt from the audio output.
 
-* **Exclude Texts To Speak:** Users can exclude specific words or phrases from being vocalized, ensuring only relevant content is heard.
+**Content Filtering (Pro):**
 
-* **Exclude Tag's Content:** Content enclosed within specified HTML tags can be excluded from the text-to-speech playback, providing greater control over the auditory presentation.
+* **Add CSS Selector:** Target specific elements within your content to include in the text-to-speech playback using CSS selectors. Read content from sidebars, footers, or any DOM element.
 
-* **Downloadable Audio:** Allow users to download MP3 files for offline listening, enhancing accessibility and convenience.
+* **Exclude Texts To Speak:** Exclude specific words, phrases, or sentences from being vocalized. Separate multiple entries with the pipe symbol (|).
 
-* **Multiple Audio Player Support:** Enjoy support for multiple audio players, providing flexibility in implementation.
+* **Exclude Tag's Content:** Skip content inside specific HTML tags (e.g., `code`, `blockquote`, `figcaption`). Separate multiple tags with the pipe symbol (|).
 
-* **Unlimited Downloads:** Benefit from unlimited downloads of audio files, ensuring no limitations on content accessibility.
+* **Exclude by Post ID, Category, or Tag:** Precisely control which content gets audio by excluding specific posts, categories, or WordPress tags.
 
-With the Text To Speech Pro text-to-voice generator plugin, you can empower your website with cutting-edge features that cater to a diverse audience. Upgrade now to unlock the full potential of your content delivery strategy.
+* **Unlimited Text Alias:** Replace unlimited abbreviations, acronyms, or domain-specific terms with their spoken equivalents using the [Text Alias](https://www.youtube.com/watch?v=oeW652YKmG0&t=3s) system.
 
-**Try [Text To Speech Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) version.**
+**Analytics & Insights (Pro):**
+
+* **Advanced Analytics Dashboard:** Comprehensive analytics with engagement funnels, browser breakdown, device type analysis, OS distribution, location tracking, popular posts ranking, peak hours heatmap, listening trends, and listener segments. [Watch demo](https://www.youtube.com/watch?v=amkrAtVQGBY).
+
+* **Usage Tracking:** Monitor your AI provider usage directly from the WordPress dashboard — track ElevenLabs character usage with real-time subscription data, or access Google Cloud and OpenAI usage dashboards with one click.
+
+* **Search by Post ID & Date Range:** Filter analytics data by specific posts or custom date ranges to measure content performance.
+
+**Player & Customization (Pro):**
+
+* **6 Player Styles:** Default (free browser voices), Default Pro, AtlasVoice TTS Pro (own AI engine), Google Cloud TTS, ChatGPT TTS, and ElevenLabs TTS. Pro players use a modern, responsive HTML5 audio player with progress bar, volume, speed, and download button.
+
+* **Floating Player & Display Controls:** Optional sticky player, display by date range, custom margin control, and full CSS customization.
+
+**Translation & Multilingual (Pro):**
+
+* **51+ Languages with WPML, GTranslate & TranslatePress:** Full multilingual support. The player automatically detects language changes and adjusts the voice accordingly.
+
+**Developer-Friendly (Pro):**
+
+* **50+ Filters & Hooks, REST API:** Extensive WordPress filter/action API and full REST API (`tta_pro/v1`) for programmatic audio generation. Priority live support within 1 hour.
+
+**Try [AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) today and transform your content into audio.**
 
 
 ### AtlasVoice: Text To Speech Pro Review by Experts
 
 [youtube https://www.youtube.com/watch?v=Nzph8h8zH8o&t=788s]
 
+### Video Tutorials
+
+[youtube https://www.youtube.com/watch?v=25xJtIwFM2U&ab_channel=AtlasAiDev]
+
+[youtube https://www.youtube.com/watch?v=h4VJxM-mh74&t=4s&ab_channel=AtlasAiDev]
+
+
 ### Text To Speech Pro Supported Languages:
 
-Text To Speech Pro TTS Accessibility plugin supports these languages.
+AtlasVoice Pro supports **51+ languages** with premium AI voices:
 
-Afrikaans, Albanian, Arabic, Armenian, Bulgarian, Bulgarian ( Bulgarian ), Catalan, Chinese,
-Chinese (Mandarin/China), Chinese (Mandarin/Taiwan),
-Chinese (Cantonese), Croatian, Czech, Danish, Dutch,
-English, English (Australia), English (United Kingdom),
-English (United States), Esperanto, Finnish, French, German,
-Greek, Haitian Creole, Hebrew, Hindi, Hungarian, Icelandic,
-Indonesian, Italian, Japanese, Korean, Latin, Latvian,
-Macedonian, Norwegian, Polish, Portuguese, Portuguese (Brazil),
-Romanian, Russian, Serbian, Slovak, Spanish, Spanish (Spain),
-Spanish (United States), Swahili, Swedish, Tamil, Thai,
-Turkish, Vietnamese, Welsh. Bengali, Urdu, Portuguese ( Portuguese ), Hebrew
+Afrikaans, Albanian, Arabic, Armenian, Bengali, Bulgarian, Catalan, Chinese (Mandarin/China), Chinese (Mandarin/Taiwan), Chinese (Cantonese), Croatian, Czech, Danish, Dutch, English, English (Australia), English (United Kingdom), English (United States), Esperanto, Finnish, French, German, Greek, Haitian Creole, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Italian, Japanese, Korean, Latin, Latvian, Macedonian, Norwegian, Polish, Portuguese, Portuguese (Brazil), Portuguese (Portugal), Romanian, Russian, Serbian, Slovak, Spanish, Spanish (Spain), Spanish (United States), Swahili, Swedish, Tamil, Thai, Turkish, Urdu, Vietnamese, Welsh
+
+*Google Cloud TTS supports 90+ languages. ElevenLabs supports 29+ languages with multilingual models. Exact availability varies by provider.*
+
 
 ### Text To Speech TTS Free Supported Languages:
 
-Our Text To Speech TTS plugin operates on the browser's speechSynthesis API, ensuring seamless integration without relying on external APIs. Thanks to this API, our plugin is compatible with almost all Android phones and languages.
+The free version uses the browser's [speechSynthesis API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis), so available voices and languages depend on the user's browser and operating system:
 
-However, the speechSynthesis API behaves differently across browsers and devices, leading to variations in available voices and supported languages. While a particular language or voice may be accessible on desktop platforms, it might not be available on mobile devices.
+* **Chrome Desktop:** UK English, US English, Spanish (Spain), Spanish (US), French, German, Italian, Russian, Dutch, Japanese, Korean, Chinese (China, Hong Kong, Taiwan), Hindi, Indonesian, Polish, Brazilian Portuguese — **18+ languages**.
 
-Here's a glimpse of the languages supported by popular browsers on different devices:
+* **Chrome Mobile:** English (US/UK), German, Italian, Russian, French, Spanish — **7 languages**.
 
-**Supported Languages for Text To Speech Free:**
+* **Microsoft Edge (Desktop & Mobile):** **All available system voices** — the widest selection of any browser.
 
-* **Chrome Desktop:** UK English, US English, Spanish (Spain), Spanish (United States), French, Deutsch, Italian, Russian, Dutch, Japanese, Korean, Chinese (China), Chinese (Hong Kong), Chinese (Taiwan), Hindi, Indonesian, Polish, Brazilian Portuguese.
+* **Firefox Desktop:** English (US/UK) — additional voices with OS speech packs installed.
 
-* **Chrome Mobile:** English USA, English UK, German, Italian, Russian, French, Spanish.
+* **Firefox Mobile:** English (US/UK), German, Italian, Russian, French, Spanish — **7 languages**.
 
-* **Microsoft Edge Desktop:** All Languages.
- 
-* **Microsoft Edge Mobile:** All Languages.
+*Tip: For the widest voice selection on the free version, recommend Microsoft Edge to your visitors. For consistent, high-quality voices across all browsers and devices, upgrade to [AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) with premium AI voices.*
 
-* **Firefox Desktop:** English US, English UK.
-
-* **Firefox Mobile:** English USA, English UK, German, Italian, Russian, French, Spanish.
-
-Please keep these factors in mind when implementing our plugin to ensure optimal compatibility and performance.
 
 ### Compatibility
 
-**Unlock Multilingual Capabilities:** Text To Speech TTS Pro is the best text to speech WordPress plugin when it comes to multilingual support. Break language barriers with ease using our supported plugins:
+**Multilingual:** [WPML](https://wpml.org/), [GTranslate](https://wordpress.org/plugins/gtranslate/), [TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/) — auto-detects language and adjusts voice.
 
-* <a href='https://wpml.org/' target='_blank' rel='ugc' >WPML WordPress Multilingual Plugin</a>.
-* <a href='https://wordpress.org/plugins/gtranslate/' target='_blank'>Translate WordPress with __Gtranslate__ Plugin</a>.
-* <a href='https://wordpress.org/plugins/translatepress-multilingual/' target='_blank'>Translate Multilingual sites – TranslatePress</a>.
+**Page Builders & Themes:** [Elementor](https://wordpress.org/plugins/elementor/), [Avada](https://avada.com/), [WPBakery](https://wpbakery.com/), [Divi](https://www.elegantthemes.com/)
 
-**How WPML Works:** Translate content seamlessly with the __WPML__ by __text to audio__ Accessibility plugin. It automatically detects the language of your content and translates it accordingly, ensuring a smooth user experience.
+**Caching:** [WP-Optimize](https://wordpress.org/plugins/wp-optimize/), [LiteSpeed Cache](https://wordpress.org/plugins/litespeed-cache/), [Autoptimize](https://wordpress.org/plugins/autoptimize/), [W3 Total Cache](https://wordpress.org/plugins/w3-total-cache/), [Speed Optimizer](https://wordpress.org/plugins/sg-cachepress/)
 
-**How GTranslate Works:** With our __Text To Audio Accessibility__ plugin, translating content is a breeze when using __Gtranslate__. Whether pages or posts, it adapts to changes made by GTranslate's language switching wizard, ensuring content remains accessible across languages.
+**Custom Post Types:** [ACF](https://wordpress.org/plugins/advanced-custom-fields/), [Custom Post Type UI](https://wordpress.org/plugins/custom-post-type-ui/), [Toolset Types](https://toolset.com/home/types-manage-post-types-taxonomy-and-custom-fields/)
 
-**Support for Custom Post Types:** Our plugin seamlessly integrates with popular custom post type plugins, including:
-
-* <a href='https://wordpress.org/plugins/advanced-custom-fields/' target='_blank'>Advanced Custom Fields (ACF)</a>.
-* <a href='https://wordpress.org/plugins/custom-post-type-ui/' target='_blank'>Custom Post Type UI</a>.
-* <a href='https://toolset.com/home/types-manage-post-types-taxonomy-and-custom-fields/' target='_blank'>Toolset Types</a>.
-
-**Additional Supported Plugins:** Boost your website's functionality with our support for:
-
-* <a href='https://wordpress.org/plugins/wp-optimize/' target='_blank'>
-WP-Optimize – Cache, Compress images, Minify & Clean database to boost page speed & performance</a> 
-
-* <a href='https://wordpress.org/plugins/litespeed-cache/' target='_blank'>
- LiteSpeed Cache Plugin</a>
-
-* <a href='https://wordpress.org/plugins/autoptimize/' target='_blank'>
-Autoptimize Plugin</a> 
-
-* <a href='https://wordpress.org/plugins/w3-total-cache/' target='_blank'>
- W3 Total Cache Plugin</a> 
-
-* <a href='https://wordpress.org/plugins/sg-cachepress/' target='_blank'>
-Speed Optimizer – The All-In-One WordPress Performance-Boosting Plugin</a> 
-
-* <a href='https://wordpress.org/plugins/elementor/' target='_blank'>
- Elementor Website Builder:</a> Elevate your website design and functionality with more than just a page builder.
-
-* <a href='https://wordpress.org/plugins/duplicate-post/' target='_blank'>
-  Yoast Duplicate Post:</a> This plugin allows users to clone posts of any type, or copy them to new drafts for further editing.
-
-* <a href='https://wordpress.org/plugins/copy-delete-posts/' target='_blank'>
-  Duplicate Post:</a> Massively increase your WordPress productivity!
-
- * <a href='https://wordpress.org/plugins/duplicate-page/' target='_blank'>
-  Duplicate Page:</a> Duplicate Posts, Pages and Custom Posts easily using single click.
-
-  * <a href='https://wordpress.org/plugins/easy-table-of-contents/' target='_blank'>
-   Easy Table of Contents:</a> A user friendly, featured focused Easy Table of Contents plugin which allows you to insert a table of contents into your posts, pages and custom post types.
-
-**Support for Themes:** Our plugin seamlessly integrates with popular themes, including:
-
-  * <a href='https://avada.com/' target='_blank'>Avada Theme: The Ultimate Online Store Website Builder</a>
-
-  * <a href='https://wpbakery.com/' target='_blank'>WPBackery Theme : #1 Page Builder Plugin for WordPress Top Choice for 5,800,000+ Websites Worldwide</a>
-
-  * <a href='https://www.elegantthemes.com/' target='_blank'>Divi Theme : The Essential Site Building Framework For WordPress</a>
+**Other:** [Yoast Duplicate Post](https://wordpress.org/plugins/duplicate-post/), [Duplicate Post](https://wordpress.org/plugins/copy-delete-posts/), [Duplicate Page](https://wordpress.org/plugins/duplicate-page/), [Easy Table of Contents](https://wordpress.org/plugins/easy-table-of-contents/)
 
 
 ### USAGE:
 
-Here's how to use the Text to Speech button shortcode:
+Use the `[atlasvoice]` shortcode to add the audio player anywhere:
 
-1. **Basic Usage:** Simply add the following shortcode anywhere in the content of your page or post to insert the text-to-audio button.
-	
-	`[atlasvoice]`
-
-2. **Customize Button Text:** You can customize the text displayed on the button by adding attributes to the shortcode. For example:
-
-	`
-	[atlasvoice listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay"/]
-	`
-
-3. **Custom Text to Read:** To specify custom text for the button to read aloud, use the ‘text_to_read’ attribute in the shortcode. For example:
-
-	`
-	[atlasvoice text_to_read="Hello WordPress" /]
-	`
-
-4. **Add CSS Class:** You can also add a custom CSS class to the button by including the ‘class’ attribute in the shortcode. For example:
-
-	`
-	[atlasvoice class="custom_class"/]
-	`	
-5. **Change Language and Voice:** Alter the language and voice of the text-to-speech by using the `lang` and `voice` attributes in the shortcode. For example:
-
-	`
-	[atlasvoice lang="en-GB" voice="Google US English"/]
-	`	
-
-6. **Adding Missing Content:** If there is missing content that you want to include, you can do so using a filter. Here's an example of how to add extra content via a filter:
-
-	`
-    add_filter( 'tta__content_description', 'tta__content_description_callback', 10, 3 );
-    function tta__content_description_callback ( $output, $description, $post_id ) {
-
-		$output .=" extra content here";
-		
-		return $output;
-    }
-	` 
-
-7. **Use ShortCode As Tag:** You can use `atlasvoice` as tag. Like
-
-	`[atlasvoice ]This is example content [/atlasvoice]`
-	
-
-
-These shortcodes and attributes provide flexibility in customizing the text-to-audio functionality on your WordPress and WooCommerce sites.
+`[atlasvoice]` — Basic player.
+`[atlasvoice listen_text="Listen" pause_text="Pause" resume_text="Resume" replay_text="Replay"]` — Custom button text.
+`[atlasvoice text_to_read="Welcome to our website."]` — Custom text to read.
+`[atlasvoice class="my-custom-player"]` — Add CSS class.
+`[atlasvoice lang="en-GB" voice="Google UK English"]` — Change language and voice.
+`[atlasvoice id="42"]` — Read a specific post by ID.
+`[atlasvoice]This content will be read aloud.[/atlasvoice]` — Container tag.
 
 **Get Started Today!**
 
-Boost engagement, accessibility, and productivity on your WordPress and WooCommerce site with Text To Speech TTS Plugin. Implement Web Content Accessibility Guidelines (WCAG) easily and cater to a broader audience base. Try the free version today and upgrade to [Text To Speech Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) for advanced features and support.
+Boost engagement, accessibility, and SEO on your WordPress and WooCommerce site with AtlasVoice Text To Speech. Meet WCAG 2.1 accessibility standards, increase time-on-page, reduce bounce rate, and cater to a global audience in 51+ languages.
+
+[Try AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) for premium AI voices, bulk MP3 generation, cloud storage backup, advanced analytics, and priority support.
 
 
-
-### CHECK OUT OUR OTHER ADDONS 👑:
-> * [Augmented Reality and 3D Model Viewer for WordPress and WooCommerce – AR VR Try-On](https://wordpress.org/plugins/ar-vr-3d-model-try-on/) – Turn your WooCommerce store into an immersive 3D experience. Let customers explore products in detail using interactive 3D viewers and Augmented Reality (AR) on both iOS and Android—no apps needed.
+### CHECK OUT OUR OTHER PLUGINS:
+> * [Augmented Reality and 3D Model Viewer for WordPress and WooCommerce – AR VR Try-On](https://wordpress.org/plugins/ar-vr-3d-model-try-on/) – Turn your WooCommerce store into an immersive 3D experience. Let customers explore products in detail using interactive 3D viewers and Augmented Reality (AR) on both iOS and Android — no apps needed.
+> * [AI Workflow Automation – MCP ](https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/) – AI-powered WordPress hub with 70+ abilities, built-in MCP server, role-based access control, JWT auth, workflow builder, and WooCommerce support.
 
 
 == Installation ==
-1. From your WordPress admin go to Plugins>> Add New. Search for the plugin Text To Speech TTS Accessibility. Install and Activate.
-2. Alternatively download the plugin from WordPress Plugin repository.
-3. Go to Plugins > Add New and Upload the plugin zip file you downloaded and activate it.
-4. Go to "Text To Speech" menu and configure your settings
+
+1. From your WordPress admin, go to **Plugins > Add New**. Search for "Text To Speech TTS Accessibility". Click **Install Now** and then **Activate**.
+2. Alternatively, download the plugin from the WordPress Plugin Repository, go to **Plugins > Add New > Upload Plugin**, upload the zip file, and activate it.
+3. Go to the **Text To Speech** menu in your admin sidebar and configure your settings.
+4. The audio player will appear automatically on your selected post types.
+
+**For Pro version:**
+
+5. Purchase [AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) and install it as an add-on alongside the free version.
+6. Go to **Integration** menu to connect your preferred AI voice provider (Google Cloud TTS, OpenAI, or ElevenLabs).
+7. Go to **Customization** menu to select your preferred player style.
+8. Go to **Listening** menu to choose your voice, language, speed, and pitch settings.
 
 
 == Frequently Asked Questions ==
 
-= Does Text To Speech Support All Android Phones ? =
-Yes, Text To Speech supports all Android phones. However, full support is exclusively available in the [pro version](https://atlasaidev.com/plugins/text-to-speech-pro/). The free version has certain limitations. Here's what you need to know:
-Text To Speech TTS plugin relies on the browser's API, with no external API used. The [speechSynthesis](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis) API varies from browser to browser and device to device. Consequently, voices and languages may differ based on the browser used.
-For example, a language available on a desktop may not be available on a mobile phone, and a voice available on a desktop may not be available on Android. In that case, the browser will play the default voice it supports.
-Overall, your users will still be able to listen to the content from almost all devices despite the voice change. If you encounter any browser-related issues, please submit a [ticket](https://atlasaidev.com/contact-us/) for assistance.
+= Does Text To Speech support all Android phones? =
+Yes, Text To Speech supports all Android phones. The free version uses the browser's [speechSynthesis API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis), which varies by browser and device. Voices and languages may differ depending on the browser used. The [Pro version](https://atlasaidev.com/plugins/text-to-speech-pro/) eliminates this limitation by using server-side AI voice providers (Google Cloud, OpenAI, ElevenLabs), delivering consistent, high-quality audio across all devices and browsers.
 
-= Does Text To Speech Support My Language? =
-Text To Speech Pro TTS Accessibility supports these [languages](https://wordpress.org/plugins/text-to-audio/#:~:text=PRO%20SUPPORTED%20LANGUAGES%3A).
+= Does Text To Speech support my language? =
+The Pro version supports [51+ languages](https://wordpress.org/plugins/text-to-audio/#:~:text=PRO%20SUPPORTED%20LANGUAGES%3A) with premium AI voices. Google Cloud TTS supports 90+ languages, and ElevenLabs offers multilingual voice models. The free version supports languages available through your [browser's speech synthesis engine](https://wordpress.org/plugins/text-to-audio/#:~:text=based%20on%20device.-,SUPPORTED%20LANGUAGES,-%3A).
 
-Text To Speech Free TTS Accessibility supports these [languages](https://wordpress.org/plugins/text-to-audio/#:~:text=based%20on%20device.-,SUPPORTED%20LANGUAGES,-%3A).
+= Does it work with WooCommerce? =
+Yes! AtlasVoice works on all WooCommerce pages — product pages, shop pages, and any page with WooCommerce content. Product descriptions, custom fields (via ACF), and any visible text can be converted to audio. Bulk MP3 generation also works for WooCommerce products.
 
-= Does Text To Speech Support Multilingual Plugins ? =
-Yes, the [pro version](https://atlasaidev.com/plugins/text-to-speech-pro/) of the Text To Speech plugin currently supports __WPML__, __TranslatePress__ and __Gtranslate__. We plan to extend support to
-[Loco Translate](https://wordpress.org/plugins/loco-translate/), and [Polylang](https://wordpress.org/plugins/polylang/) soon.
+= What is Google Cloud Text To Speech and how do I set it up? =
+[Google Cloud Text To Speech](https://cloud.google.com/text-to-speech) is Google's premium AI voice service offering 300+ voices across 90+ languages, including Neural2 and WaveNet voice types. To set it up: (1) Create a Google Cloud account, (2) Enable the Text-to-Speech API, (3) Create a service account and download the JSON key file, (4) Upload the JSON file in **AtlasVoice > Integration > Google Cloud TTS**. Google Cloud TTS is a paid service — you will be billed by Google based on the number of characters processed.
 
+= What is ChatGPT (OpenAI) Text To Speech? =
+[OpenAI Text To Speech](https://platform.openai.com/docs/guides/text-to-speech/overview) offers natural-sounding AI voices powered by the same technology behind ChatGPT. Choose from 6 voices (Alloy, Echo, Fable, Nova, Onyx, Shimmer) with Standard (tts-1) or HD (tts-1-hd) quality. To set it up: (1) Create an OpenAI account, (2) Generate an API key, (3) Enter the API key in **AtlasVoice > Integration > ChatGPT TTS**. OpenAI TTS is a paid service — you will be billed by OpenAI based on usage.
 
-= Does Text To Speech Support Custom Post Types ? =
-Yes, [pro version](https://atlasaidev.com/plugins/text-to-speech-pro/) of Text To Speech plugin supports custom post types.
+= What is ElevenLabs Text To Speech? =
+[ElevenLabs](https://elevenlabs.io/) offers the most realistic AI voices available, with human-like intonation, emotion, and expression. Access 100+ premium voices with fine-tuning controls for stability, similarity boost, style exaggeration, and speed. To set it up: (1) Create an ElevenLabs account, (2) Get your API key from your profile, (3) Enter the API key in **AtlasVoice > Integration > ElevenLabs TTS**. ElevenLabs TTS is a paid service — you will be billed by ElevenLabs based on character usage.
 
+= Can I back up MP3 files to Google Cloud Storage? =
+Yes! The Google Cloud Storage backup feature works with **all** TTS providers — Google Cloud TTS, ChatGPT TTS, AtlasVoice TTS Pro, and ElevenLabs TTS. Even if you use ElevenLabs for voice generation, you can store the MP3 files in Google Cloud Storage. You need to configure a Google Cloud service account JSON file with Storage Admin permissions from the **Integration** menu.
 
-= Content Missing From Post =
-If content is missing from your post, you have multiple options to add it dynamically. In the pro version, you can utilize CSS Selectors, which allow you to target specific elements on your pages and posts.
+= Does audio content help with SEO? =
+Yes! Audio content improves SEO in several ways: (1) **Increased dwell time** — visitors stay longer on pages with audio, which is a positive Google ranking signal. (2) **Reduced bounce rate** — audio engagement keeps users on your site. (3) **Audio Schema markup** (Pro) — AtlasVoice generates JSON-LD structured data that helps search engines understand your audio content, potentially enabling rich results in Google Search. (4) **Accessibility compliance** — Google increasingly favors accessible websites in its rankings.
 
-To use CSS Selectors, navigate to the Settings menu of the plugin and add the relevant selectors under **Add CSS Selector**. These selectors can span across multiple pages, offering dynamic content addition. This method offers flexibility compared to filters, which are static in nature.
+= Is this plugin WCAG / ADA compliant? =
+AtlasVoice helps your website meet WCAG 2.1 (Web Content Accessibility Guidelines) and ADA (Americans with Disabilities Act) requirements by providing audio alternatives to text content. This is a key component of web accessibility, especially for users with visual impairments, dyslexia, or cognitive disabilities.
 
-Additionally, you can add missing content through filters. Here's an example of how to do it:
-1. Install the plugin [Code Snippets](https://wordpress.org/plugins/code-snippets/)
-2. Select "Snippets" and then "Add New."
-3. Create a new snippet with the following code:
+= Can I use different AI voices on different posts? =
+The voice and language settings from the **Listening** menu apply globally. However, you can override the voice and language for individual posts using the shortcode: `[atlasvoice lang="en-GB" voice="Google UK English"]`. This gives you the flexibility to use different voices for different content.
 
+= Does Text To Speech support multilingual plugins? =
+Yes, the [Pro version](https://atlasaidev.com/plugins/text-to-speech-pro/) fully supports **WPML**, **TranslatePress**, and **GTranslate**. The audio player automatically detects language changes and adjusts the voice accordingly.
+
+= Does Text To Speech support custom post types? =
+Yes, both the free and [Pro version](https://atlasaidev.com/plugins/text-to-speech-pro/) support custom post types. The plugin integrates with ACF (Advanced Custom Fields), Custom Post Type UI, and Toolset Types.
+
+= Content is missing from the audio playback. How do I fix it? =
+You have several options: (1) **Enable "Read Content from DOM"** in Settings — this reads content directly from the page, capturing dynamically generated content. (2) **Add CSS Selectors** (Pro) — target specific elements to include in playback. (3) **Use filters** — add content programmatically via the `tta__content_description` filter. (4) **Use the shortcode** — wrap specific content with `[atlasvoice]Your content here[/atlasvoice]`.
+
+= Can I exclude certain words or HTML tags from being read aloud? =
+Yes! In the [Pro version](https://atlasaidev.com/plugins/text-to-speech-pro/): (1) Go to **Settings > Exclude Texts To Speak** to exclude specific words or phrases (separate with pipe |). (2) Go to **Settings > Exclude Tag's Content** to skip content inside specific HTML tags like `code` or `blockquote` (separate with pipe |). (3) Exclude by post ID, category, or tag for broader content control.
+
+= How do I add a button in the Gutenberg block editor? =
+Open the Gutenberg block editor, search for the "Customize Button" block, add it to your content, and customize the appearance (color, background, width, CSS).
+
+= How do I change the button text? =
+**Method 1 — Shortcode:** `[atlasvoice listen_text="Listen" pause_text="Pause" resume_text="Resume" replay_text="Replay"]`
+
+**Method 2 — Filter (overrides shortcode):**
 `
-add_filter( 'tta__content_description', 'tta__content_description_callback', 10, 3 );
-function tta__content_description_callback ( $output, $description, $post_id ) {
-
-	$output .=" extra content here";
-	
-	return $output;
+add_filter('tta__button_text_arr', 'tta__button_text_arr_callback');
+function tta__button_text_arr_callback($text_arr) {
+	return [
+		'listen_text' => 'Listen',
+		'pause_text'  => 'Pause',
+		'resume_text' => 'Resume',
+		'replay_text' => 'Replay',
+		'listen_hover_title' => 'Click to listen',
+		'pause_hover_title' => 'Click to pause',
+		'resume_hover_title' => 'Click to resume',
+		'replay_hover_title' => 'Click to replay',
+	];
 }
-
-` 
-
-This filter allows you to append extra content to your posts dynamically.
-
-= Can I Restrict/Exclude Certain Words From Playing? =
-Absolutely! You have the flexibility to exclude specific content from being read aloud, and this feature is available in the [pro version](https://atlasaidev.com/plugins/text-to-speech-pro/) of Text to Speech.
-
-Here's how to exclude words from playback:
-
-1. Navigate to the Settings tab of Text to Speech Pro.
-
-2. Look for the "Exclude Texts To Speak" textarea.
-
-3. In this field, you can list the words or phrases you wish to exclude from being read aloud.
-
-4. If you want to exclude multiple words or phrases, simply separate them using the pipe symbol (|).
-
-With this capability, you can fine-tune the playback experience, ensuring that only the desired content is read aloud to your audience.
-
-= Is it possible to exclude specific HTML tags from being read aloud by the Text to Speech plugin? =
-Of course! With the [pro](https://atlasaidev.com/plugins/text-to-speech-pro/) version of Text to Speech, you gain the ability to skip the content enclosed within certain HTML tags during playback.
-
-**Here's how it works:**
-
-*Navigate to the Settings tab of Text to Speech Pro.
-
-*Locate the "Exclude Tag's Content" textarea.
-
-*In this field, you can specify the HTML tags whose content you want to exclude from being read aloud.
-
-*If you need to skip multiple tags, simply separate them using the pipe symbol (|).
-
-By utilizing this feature, you can tailor the reading experience to your preferences, ensuring that specific HTML elements are omitted from the audio playback.
-
-= How to add a button in the Gutenberg block? =
-To incorporate a listening button via the Gutenberg block editor, follow these simple steps:
-
-1. Open the Gutenberg block editor for your page or post.
-2. Search for the "Customize Button" block.
-3. Add the block to your content.
-4. Customize the button by adjusting parameters such as color, background color, and width.
-5. Optionally, apply custom CSS to further tailor the button to your preferences.
-
-
-= How to change button text? =
-You have two methods to modify the button text. One is by utilizing shortcode attributes, and the other is by adding a filter. However, please note that filters always take precedence over shortcode attributes.
-Shortcode Example:
-
-	`
-	[atlasvoice listen_text="Listen" pause_text="Pause"  resume_text="Resume" replay_text="Replay"]
-	
-	`
-
-Filter Example:
-Install the plugin [Code Snippets](https://wordpress.org/plugins/code-snippets/), then navigate to Snippets > Add New. Create a new snippet with the following code block:
-
-`
-	add_filter('tta__button_text_arr', 'tta__button_text_arr_callback');
-	function tta__button_text_arr_callback($text_arr) {
-		return [
-			'listen_text' => 'Listen',
-			'pause_text'  => 'Pause',
-			'resume_text' => 'Resume',
-			'replay_text' => 'Replay',
-			'listen_hover_title' => 'listen title',
-			'pause_hover_title' => 'pause title',
-			'resume_hover_title' => 'resume title',
-			'replay_hover_title' => 'replay title',
-		];
-	}
-
-`
-  
-Replace 'Listen', 'Pause', 'Resume', and 'Replay' with your desired custom text.
-            
-= How to add custom CSS class to button? =
-You can add a custom CSS class to the button by including it as an attribute in the shortcode. Here's an example:
-
-`
-[atlasvoice class="custom_class"]
-
 `
 
-Replace "custom_class" with the name of your desired CSS class. This allows you to apply specific styling to the button using your custom CSS rules.
+= How do I change the button background and text color? =
+Go to the **Customization** menu in the plugin dashboard to adjust button background color, text color, hover effects, and border radius. You can also customize these via the Gutenberg "Customize Button" block.
 
-
-= How to  change button background and text color? =
-You can easily customize the button background and text color directly from the plugin's dashboard customization menu. Additionally, you have the option to modify these settings using the customization button block in the block editor.
-
-= How to change voice and language by shortcode? =
-You can customize the voice and language of the text-to-speech player using shortcode. Here's how:
-
-	`
-	[atlasvoice lang="en-GB" voice="Google US English"]
-	`
+= How do I change voice and language via shortcode? =
+Use the `lang` and `voice` attributes: `[atlasvoice lang="en-GB" voice="Google UK English"]`
 
 = Where do I report security bugs found in this plugin? =
-
-Please report security bugs found in the source code of the Text To Speech TTS plugin through the [Patchstack Vulnerability Disclosure  Program](https://patchstack.com/database/vdp/e8df1af0-74f2-41c7-bb59-d72a3898e234). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
+Please report security bugs through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com/database/vdp/e8df1af0-74f2-41c7-bb59-d72a3898e234). The Patchstack team will assist with verification, CVE assignment, and notify the developers.
 
 
 == Screenshots ==
-1. Player 1.
-2. Player 2.
-3. Player 3.
-4. Settings Page.
-5. Post Content Customization.
-6. Integrate Google Cloud Text To Speech In Pro Version.
-7. Choose Multiple Player.
-8. Player Customization.
-9. Individual Post Content Customization.
+1. Default audio player on a blog post.
+2. Default Pro audio player with enhanced controls.
+3. AtlasVoice TTS Pro modern audio player with progress bar and download.
+4. Settings page with content controls, exclusions, and post type selection.
+5. Post editor with individual TTS content customization.
+6. Integration menu — Google Cloud TTS, ChatGPT TTS, and ElevenLabs TTS setup.
+7. Customization menu — choose from 6 player styles.
+8. Listening menu — voice, language, speed, pitch, and ElevenLabs advanced controls.
+9. Player customization — colors, width, border radius, and margin settings.
+10. Analytics dashboard — engagement funnel, device types, and listening trends.
+11. Bulk MP3 generation from the WordPress posts list.
+12. Google Cloud Storage backup configuration.
+13. ElevenLabs usage tracking with character count and subscription details.
+14. Multilingual support GTranslate/WPML/TranslatePress
+15. Analytics CSV, PDF, Email Schedule, Custom Search, Summery
+16. Analytics Location, Top Cities, Playing Trend.
+17. Analytics Peak Listening Hours, Popular Post.
+18. Text to Speech Aliases
+19. Add ACF Fields To Posts
+
 
 
 == Changelog ==
 
 ### TRANSLATION REQUEST
-We are looking for people to help in translating this amazing plugin. If you can help we would love here from you.
-Help us & the WordPress community to translate the plugin. You can [contact](http://atlasaidev.com/contact-us/) with us. We'll guide you how to translate.
+We are looking for people to help translate this plugin. If you can help, we would love to hear from you.
+Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
+
+= 2.1.7  ( 05 Mar 2026 )  =
+Added :  ElevenLabs TTS integration added for pro version.
+Added :  Google Cloud Storage backup support for all TTS providers (Google Cloud TTS, ChatGPT TTS, ElevenLabs TTS, AtlasVoice TTS Pro).
+Added :  Real-time usage tracking for ElevenLabs TTS subscription.
+Fixed :  Gtranslate plugin translation issue solved.
+Fixed :  Improved Multilingual.
+Fixed :  MP3 file delete issue solved.
 
 
 = 2.1.6  ( 28 Feb 2026 )  =
 Added :  Enable TTS Status added in Settings.
-Improved :  AtlasVoice Gutenberg  block improved.
+Improved :  AtlasVoice Gutenberg block improved.
 
 
 = 2.1.5  ( 21 Feb 2026 )  =
@@ -469,14 +374,13 @@ Fixed :  Old UI for player option missing issue fixed.
 Fixed :  Listening menu UI missing issue fixed.
 
 
-
 = 2.1.4  ( 17 Feb 2026 )  =
-Added :  New UI add for Default player.
+Added :  New UI for Default player.
 Added :  Old UI back option added for Default player.
 Added :  New Analytics UI introduced.
-Added :  Select language, voice, pitch, mute option added in Default player
+Added :  Select language, voice, pitch, mute option added in Default player.
 Fixed :  Missing Customization UI added.
-Fixed :  Content Split issue fixed. (Pro)
+Fixed :  Content split issue fixed. (Pro)
 Fixed :  Player floating issue for all themes. (Pro)
 
 
@@ -484,24 +388,24 @@ Fixed :  Player floating issue for all themes. (Pro)
 Fixed :  MP3 player loading issue fixed.
 Added :  Default Pro player progress bar clickable.
 Added :  Default Pro player UI improved.
-Added :  Select language, voice, pitch, mute option added in Default Pro player
+Added :  Select language, voice, pitch, mute option added in Default Pro player.
 
 
 = 2.1.2  ( 28 Jan 2026 )  =
-Fixed :  count issue fixed in TTA_Helper class
-Added :  Filter system added in `edit.php` page.
-Added :  Weather mp3 is added or not column added. (pro)
-Added :  TTS enabled  or not column added
+Fixed :  Count issue fixed in TTA_Helper class.
+Added :  Filter system added in posts list page.
+Added :  Whether MP3 is generated column added. (Pro)
+Added :  TTS enabled or not column added.
 Introduced :  New UI introduced for Aliases.
 Updated :  Freemius version update.
-Updated :  duplicate post issue fixed. `https://wordpress.org/plugins/duplicate-page/`
-
+Fixed :  Duplicate post issue fixed.
 
 
 = 2.1.1  ( 18 Jan 2026 )  =
-Added :  Add ID attribute to shortcode `[atlasvoice id='post_id']`
-Added :  Add audio schema for pro version
-Added :  Read Content from DOM (pro version)
+Added :  ID attribute support for shortcode `[atlasvoice id='post_id']`.
+Added :  Audio Schema markup for pro version (SEO).
+Added :  Read Content from DOM feature. (Pro)
+
 
 = 2.1.0  ( 13 Jan 2026 )  =
 Improved :  Integration menu UI improved.
@@ -509,14 +413,13 @@ Improved :  Customization menu UI improved.
 Improved :  Listening menu UI improved.
 
 
-
 = 2.0.1  ( 28 December 2025 )  =
-Notice added :  Notice add for translation
-Notice added :  Notice add for holiday deal
+Notice added :  Translation help notice.
+Notice added :  Holiday deal notice.
 
 
 = 2.0.0  ( 13 December 2025 )  =
-Introduced :  New UI introduced
+Introduced :  Complete new UI introduced.
 
 
 = 1.9.36  ( 12 December 2025 )  =
@@ -524,329 +427,345 @@ Fixed :  Player disappearance issue solved.
 
 
 = 1.9.35  ( 11 December 2025 )  =
-Fixed :  Voice missing issue (free)
-Compatible :  Make plugin Compatible with Avada, Divi, WPBackery theme.
-Fixed: Long sentence issue fixed. (Pro)
-Support: PHP 7.4 support
-Fixed: Player Double issue fixed (pro)
-
+Fixed :  Voice missing issue. (Free)
+Compatible :  Avada, Divi, WPBakery theme compatibility added.
+Fixed :  Long sentence issue fixed. (Pro)
+Support :  PHP 7.4 support.
+Fixed :  Player duplication issue fixed. (Pro)
 
 
 = 1.9.34  ( 7 December 2025 )  =
-Fixed :  notice issue fixed.
-Checked :  WordPress 6.9 tested
-
+Fixed :  Notice issue fixed.
+Checked :  WordPress 6.9 tested.
 
 
 = 1.9.33  ( 27 November 2025 )  =
 Removed :  Plugin compatible notice removed.
-Added: Black Friday Banner Added.
+Added :  Black Friday promotion banner.
+
 
 = 1.9.32  ( 21 November 2025 )  =
-Added :  Tracing Device information added.
-Improved: Analytics UI improved.
-Fixed: Unnecessary content wrapper removed.
+Added :  Device information tracing added.
+Improved :  Analytics UI improved.
+Fixed :  Unnecessary content wrapper removed.
 
 
 = 1.9.31  ( 12 November 2025 )  =
-Fixed :  Security issue fixed by patchstack.
+Fixed :  Security issue fixed by Patchstack.
+
 
 = 1.9.30  ( 10 November 2025 )  =
-Improved :  Backup MP3 file text improved
-Removed : Unnecessary code removed
+Improved :  Backup MP3 file text improved.
+Removed :  Unnecessary code removed.
+
 
 = 1.9.29  ( 04 November 2025 )  =
-Fixed: MP3 player duplicate issue solved.
-Fixed: Analytics data tract problem on firefox and safari browser.
+Fixed :  MP3 player duplicate issue solved.
+Fixed :  Analytics data tracking on Firefox and Safari browsers.
 
 
-= 1.9.28 ( 28 October 2025 )   =
-Added : Search analytics by post ID on analytics menu (free )
-Added : Search analytics by date range on analytics menu ( pro ).
+= 1.9.28 ( 28 October 2025 )  =
+Added :  Search analytics by post ID on analytics menu. (Free)
+Added :  Search analytics by date range on analytics menu. (Pro)
 
 
-= 1.9.27 ( 21 October 2025 )   =
-Added : Voice and language missing in free version notice added.
-Fixed: MP3 file name mismatch issue fixed (pro)
+= 1.9.27 ( 21 October 2025 )  =
+Added :  Voice and language missing in free version notice added.
+Fixed :  MP3 file name mismatch issue fixed. (Pro)
 
 
-= 1.9.26 ( 14 October 2025 )   =
-Added : When MP3 file name is empty post ID will be file name.
+= 1.9.26 ( 14 October 2025 )  =
+Added :  When MP3 file name is empty, post ID will be used as file name.
 
 
 = 1.9.25  ( 01 October 2025 )  =
-Fixed : Custom CCS not working issue fixed.
+Fixed :  Custom CSS not working issue fixed.
 
 
 = 1.9.24  ( 25 September 2025 )  =
-Added: Default Player Hover text color change UI option added.
-Fixed Minor bug fixed related to default player.
-
+Added :  Default Player hover text color change option added.
+Fixed :  Minor bug fixed related to default player.
 
 
 = 1.9.21  ( 20 September 2025 )  =
-Removed: Unnecessary code removed.
-Added: Notice added for SpeechSynthesis API
+Removed :  Unnecessary code removed.
+Added :  Notice added for SpeechSynthesis API.
 
 
 = 1.9.20  ( 13 September 2025 )  =
-Fixed: MP3 file exist check function issue fixed.
-Fixed: Player adding function call multiple time issue fixed.
-Fixed: ShortCode position update issue fixed.
-Fixed: Edit page console error fixed.
-
+Fixed :  MP3 file existence check function issue fixed.
+Fixed :  Player adding function call multiple times issue fixed.
+Fixed :  Shortcode position update issue fixed.
+Fixed :  Edit page console error fixed.
 
 
 = 1.9.19  ( 11 September 2025 )  =
-Improved: shortcode functionality improved.
-updated: documentation updated.
+Improved :  Shortcode functionality improved.
+Updated :  Documentation updated.
 
 
 = 1.9.18  ( 04 September 2025 )  =
-Fixed: Player select issue solved.
+Fixed :  Player select issue solved.
 
 
 = 1.9.17  ( 31 August 2025 )  =
-Removed: Unnecessary code removed.
+Removed :  Unnecessary code removed.
+
 
 = 1.9.16  ( 28 August 2025 )  =
-Fixed: Pro version GTranslate Translation issue fixed.
-Fixed: Google Cloud Text To Speech Voice issue on "listening menu" fixed.
-Updated: Google cloud Text To Speech , Cloud Storage, Protobuf package update.
-
-Improved: performance improved.
-Updated: freemius version update to 2.121
+Fixed :  Pro version GTranslate translation issue fixed.
+Fixed :  Google Cloud Text To Speech voice issue on Listening menu fixed.
+Updated :  Google Cloud Text To Speech, Cloud Storage, Protobuf package updated.
+Improved :  Performance improved.
+Updated :  Freemius version update.
 
 
 = 1.9.15  ( 21 August 2025 )  =
-Fixed: post excerpt issue solved.
-Improved: performance improved.
-Updated: freemius version update to 2.121
+Fixed :  Post excerpt issue solved.
+Improved :  Performance improved.
+
 
 = 1.9.14  ( 18 August 2025 )  =
-Fixed: Google cloud text to speech voice and language issue solved.
-Fixed: ShortCode not working issue solved.
+Fixed :  Google Cloud Text To Speech voice and language issue solved.
+Fixed :  Shortcode not working issue solved.
 
 
 = 1.9.13  ( 17 August 2025 )  =
-Fixed: Google Cloud Backup issue solved.
-Added: UI added to create Google Cloud Storage Bucket Name.
-Renamed: "Google TTS Pro" Player name changed to "AtlasVoice TTS Pro"
-Fixed: Eidit page console error fixed.
-Fixed: Minor issue fixed.
-Improvement: performance improvement
+Fixed :  Google Cloud Backup issue solved.
+Added :  UI added to create Google Cloud Storage Bucket Name.
+Renamed :  "Google TTS Pro" player renamed to "AtlasVoice TTS Pro".
+Fixed :  Edit page console error fixed.
+Improved :  Performance improved.
 
 
 = 1.9.12  ( 13 August 2025 )  =
-Fixed: missing categories issue fixed.
-Fixed: missing tags issue fixed.
-Fixed: missing post type issue fixed.
-Fixed: missing post status issue fixed.
-Added: Custom listeners added during mp3 file download.
+Fixed :  Missing categories issue fixed.
+Fixed :  Missing tags issue fixed.
+Fixed :  Missing post type issue fixed.
+Fixed :  Missing post status issue fixed.
+Added :  Custom listeners added during MP3 file download.
+
 
 = 1.9.11  ( 08 August 2025 )  =
-Fixed: Customization menu player demo issue fixed.
+Fixed :  Customization menu player demo issue fixed.
+
 
 = 1.9.10  ( 05 August 2025 )  =
-Improved: Player loading performance improved.
-Fixed: UI releated bug fixed.
-
+Improved :  Player loading performance improved.
+Fixed :  UI related bug fixed.
 
 
 = 1.9.9  ( 31 July 2025 )  =
-Fixed: Post Edit page Category hieght issue fixed.
-Fixed: Player not on working on mobile or tab issue fixed.
-Improved: Pro version performance improved.
+Fixed :  Post edit page category height issue fixed.
+Fixed :  Player not working on mobile or tablet issue fixed.
+Improved :  Pro version performance improved.
+
 
 = 1.9.8  ( 27 July 2025 )  =
-Improved: Settings page UI functionality and readability Improved.
-Added: "Continue Reading After Switching To Another Tab" settings option introduced.
+Improved :  Settings page UI functionality and readability improved.
+Added :  "Continue Reading After Switching To Another Tab" settings option introduced.
 
 
 = 1.9.7  ( 22 July 2025 )  =
-Fixed: API related bug fixed.
+Fixed :  API related bug fixed.
 
 
 = 1.9.6  ( 21 July 2025 )  =
-Improved: Player UI improved.
+Improved :  Player UI improved.
 
 
 = 1.9.5  ( 17 July 2025 )  =
-Improved: UI improvement done.
-Fixed: bug fixed.
-Added: [How to install text to speech plugin?](https://www.youtube.com/watch?v=25xJtIwFM2U&ab_channel=AtlasAiDev) added.
+Improved :  UI improvement.
+Fixed :  Bug fixed.
+Added :  [How to install text to speech plugin?](https://www.youtube.com/watch?v=25xJtIwFM2U&ab_channel=AtlasAiDev) video added.
 
 
 = 1.9.4  ( 15 July 2025 )  =
-Fixed: Dynamic voice selection issue fixed.
+Fixed :  Dynamic voice selection issue fixed.
 
 
 = 1.9.3  ( 15 July 2025 )  =
-Fixed: Issue with start playing issue solved.
-Fixed: Issue with other languages like Italian fixed.
+Fixed :  Start playing issue solved.
+Fixed :  Other languages (Italian, etc.) issue fixed.
+
 
 = 1.9.2  ( 09 July 2025 )  =
-Analytics Enable default value change.
+Changed :  Analytics enable default value changed.
+
 
 = 1.9.1  ( 03 July 2025 )  =
-minor change
+Fixed :  Minor changes.
+
 
 = 1.9.0  ( 17 June 2025 )  =
-Improved: Performance improved.
-Removed: Unnecessary code removed.
-Fixed: minor bug fixed.
+Improved :  Performance improved.
+Removed :  Unnecessary code removed.
+Fixed :  Minor bug fixed.
+
 
 = 1.8.31  ( 13 June 2025 )  =
-Fixed: Listening voice saving issue solved.
-Added: (Augmented Reality)[https://wordpress.org/plugins/ar-vr-3d-model-try-on/] plugin introduced.
+Fixed :  Listening voice saving issue solved.
+Added :  [Augmented Reality](https://wordpress.org/plugins/ar-vr-3d-model-try-on/) plugin introduced.
 
 
 = 1.8.30  ( 01 June 2025 )  =
-Added: Option added for text before content.
-Added: Option added for text after content.
+Added :  Text before content option added.
+Added :  Text after content option added.
 
 
 = 1.8.29  ( 28 May 2025 )  =
-Added: MP3 file load improved.
-Added: "tts_pro_change_post_by_force" action added.
+Improved :  MP3 file loading improved.
+Added :  `tts_pro_change_post_by_force` action added.
+
 
 = 1.8.28 ( 21 May 2025 ) =
-Added: Player margin adding UI added to the "Customization" menu.
+Added :  Player margin adding UI added to the Customization menu.
 
 
 = 1.8.27 ( 15 May 2025 ) =
-Added: Post excerpt adding UI included in settings page.
+Added :  Post excerpt adding UI included in Settings page.
 
 
 = 1.8.26 ( 12 May 2025 ) =
-Added: Google Cloud Text To Speech Demo audio added.
-Added: ChatGPT Text To Speech Demo audio added.
-
+Added :  Google Cloud Text To Speech demo audio added.
+Added :  ChatGPT Text To Speech demo audio added.
 
 
 = 1.8.25 ( 08 May 2025 ) =
-Added: Bengali, Urdu, Portuguese ( Portuguese) Languages added to pro version.
+Added :  Bengali, Urdu, Portuguese (Portugal) languages added to pro version.
+
 
 = 1.8.24 ( 06 May 2025 ) =
-Added: Post Title add or remove UI added to settings page.
+Added :  Post title add/remove UI added to Settings page.
+
 
 = 1.8.23 ( 29 April 2025 ) =
-Fixed: MP3 file generate and delete issue solved.
+Fixed :  MP3 file generate and delete issue solved.
 
 
 = 1.8.22 ( 24 April 2025 ) =
-Fixed: content not reading in english is solved.
+Fixed :  Content not reading in English issue solved.
 
 
 = 1.8.21 ( 14 April 2025 ) =
-Fixed: GTranslate pro version support given in pro version.
-Fixed: When title is removed by filter mp3 file is same in all pages.
-Fixed: Who Can Download MP3 File issue
+Fixed :  GTranslate pro version support given.
+Fixed :  MP3 filename uniqueness when title is removed by filter.
+Fixed :  "Who Can Download MP3 File" permission issue.
 
 
 = 1.8.20 ( 08 April 2025 ) =
-Added: Compatibility with 6.8
-Removed: Unnecessary notices.
+Added :  WordPress 6.8 compatibility.
+Removed :  Unnecessary notices.
+
 
 = 1.8.19 ( 25 Mar 2025 ) =
-Added: Documentation update to "Doc" menu
+Added :  Documentation update to Docs menu.
+
 
 = 1.8.18 ( 14 Mar 2025 ) =
-Introduced: Analytics summery added.
-Fixed: API URL issue fixed.
-Fixed: Analytics time issue fixed for single post.
+Introduced :  Analytics summary added.
+Fixed :  API URL issue fixed.
+Fixed :  Analytics time issue fixed for single post.
 
 
 = 1.8.17 ( 07 Mar 2025 ) =
-Introduced: MP3 file upload manually.
-Fixed: GTranslate plugin selector issue solved.
-Added: `ttsProLink` filter added.
-Added: Pro version MP3 file loader text translation system added.
-Fixed: minor bug fixed.
-
+Introduced :  Manual MP3 file upload.
+Fixed :  GTranslate plugin selector issue solved.
+Added :  `ttsProLink` filter added.
+Added :  Pro version MP3 file loader text translation system added.
+Fixed :  Minor bug fixed.
 
 
 = 1.8.16 ( 26 Feb 2025 ) =
-Fixed: Speed option is hidden on listening menu.
-Fixed: MP3 file generating issue fixed.
-Fixed: Bulk mp3 file generate with google cloud tts issue fixed.
-Added: compatibility added [Yoast Duplicate Post](https://wordpress.org/plugins/duplicate-post/),
-[Duplicate Post](https://wordpress.org/plugins/copy-delete-posts/),
-[Duplicate Page](https://wordpress.org/plugins/duplicate-page/)
+Fixed :  Speed option hidden on Listening menu.
+Fixed :  MP3 file generating issue fixed.
+Fixed :  Bulk MP3 file generation with Google Cloud TTS issue fixed.
+Added :  Compatibility with [Yoast Duplicate Post](https://wordpress.org/plugins/duplicate-post/), [Duplicate Post](https://wordpress.org/plugins/copy-delete-posts/), [Duplicate Page](https://wordpress.org/plugins/duplicate-page/).
+
 
 = 1.8.15 ( 13 Feb 2025 ) =
-Updated: Documentation update of the plugin. on "Docs" menu
+Updated :  Documentation updated on Docs menu.
 
 
 = 1.8.14 ( 12 Feb 2025 ) =
-Fixed: Error issue fixed.
+Fixed :  Error issue fixed.
 
 
 = 1.8.13 ( 10 Feb 2025 ) =
-Added: Display player based on date range in pro version.
+Added :  Display player based on date range in pro version.
+
 
 = 1.8.12 ( 27 Jan 2025 ) =
-Updated: Freemius version updated.
+Updated :  Freemius version updated.
+
 
 = 1.8.11 ( 26 Jan 2025 ) =
-Fixed: Default Player default value issue solved.
-Fixed: Pro version mp3 file load issue solved.
-Fixed: Default player voice pitch issue solved.
-Fixed: GTranslate plugin allowed language issue solved.
-Added: `ttsSetSelectedLanguageFromDom` JS Filter added.
-Fixed: Generate Bulk MP3 page font family change issue solved.
+Fixed :  Default Player default value issue solved.
+Fixed :  Pro version MP3 file load issue solved.
+Fixed :  Default player voice pitch issue solved.
+Fixed :  GTranslate plugin allowed language issue solved.
+Added :  `ttsSetSelectedLanguageFromDom` JS filter added.
+Fixed :  Generate Bulk MP3 page font family issue solved.
+
 
 = 1.8.10 ( 16 Jan 2025 ) =
-Fixed: ACF/ACF Pro plugin error with Text To Speech Plugin issue solved.
+Fixed :  ACF/ACF Pro plugin compatibility issue solved.
+
 
 = 1.8.9 ( 15 Jan 2025 ) =
-Added: Border Radius for "Default Player" added.
-Improved: Pro version features list UI improved.
-Improved: Customization menu design section UI improved .
-Fixed: Block CSS and dashboard CSS combination issue solved.
-Fixed: Plugins page documentation url issue fixed.
+Added :  Border radius for Default Player added.
+Improved :  Pro version features list UI improved.
+Improved :  Customization menu design section UI improved.
+Fixed :  Block CSS and dashboard CSS combination issue solved.
+Fixed :  Plugins page documentation URL issue fixed.
+
 
 = 1.8.8 ( 11 Jan 2025 ) =
-Fixed: Tagging version issue fixed.
+Fixed :  Tagging version issue fixed.
+
 
 = 1.8.7 ( 10 Jan 2025 ) =
-Fixed: default player design improved.
+Improved :  Default player design improved.
+
 
 = 1.8.6 ( 07 Jan 2025 ) =
-Fixed: Font family issue fixed.
+Fixed :  Font family issue fixed.
+
 
 = 1.8.5 ( 05 Jan 2025 ) =
-Fixed: Customize Button block issue fixed.
-Improved: Bulk MP3 feature improved.
-Unnecessary code removed
+Fixed :  Customize Button block issue fixed.
+Improved :  Bulk MP3 feature improved.
+Removed :  Unnecessary code removed.
 
 
 = 1.8.4 ( 19 Dec 2024 ) =
-Fixed: Autoload issue fixed.
-Fixed: Absolute issue fixed.
+Fixed :  Autoload issue fixed.
+Fixed :  Absolute positioning issue fixed.
+
 
 = 1.8.3 ( 19 Dec 2024 ) =
-Fixed: Pro version notice issue fixed.
+Fixed :  Pro version notice issue fixed.
+
 
 = 1.8.2 ( 19 Dec 2024 ) =
-Improved: Pro version and free version performance issue improved.
-Improved: Dashboard documentation link improved.
-Improved: Pro version player scroll issue with elementor solved.
+Improved :  Pro and free version performance improved.
+Improved :  Dashboard documentation link improved.
+Improved :  Pro version player scroll issue with Elementor solved.
+
 
 = 1.8.1 ( 08 Dec 2024 ) =
-Fix:  emergency bug fix.
-Fix:  pro license activation issue solved.
+Fixed :  Emergency bug fix.
+Fixed :  Pro license activation issue solved.
+
 
 = 1.8.0 ( 08 Dec 2024 ) =
-Removed: Unnecessary Code removed.
-Fixed: Pro version license activation issue solved.
-Improved: Pro version and free version performance issue improved.
+Removed :  Unnecessary code removed.
+Fixed :  Pro version license activation issue solved.
+Improved :  Pro and free version performance improved.
 
 
 
 == Upgrade Notice ==
 
-= 2.1.6 =
-Added :  Enable TTS Status added in Settings.
-Improved :  AtlasVoice Gutenberg  block improved.
-
+= 2.1.7 =
+New: ElevenLabs TTS integration with 100+ ultra-realistic AI voices. Google Cloud Storage backup now works with all TTS providers. Real-time ElevenLabs usage tracking. GTranslate and multilingual improvements.

@@ -825,7 +825,6 @@ class TTSPlayButton extends HTMLElement {
                 if (buttonId == this.getAttribute('data-id')) {
                     this.buttonId = buttonId;
                     this.useOldPlayer = settings.use_old_player;
-
                     if (this.useOldPlayer) {
                         this.initOldPlayer(shadow, buttonId, contents, settings);
                     } else {

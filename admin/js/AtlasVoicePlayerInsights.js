@@ -216,7 +216,6 @@ class AtlasVoicePlayerInsights {
             }
         });
 
-        console.log(mergedAnalytics)
 
         return mergedAnalytics;
     }
@@ -505,7 +504,6 @@ class AtlasVoicePlayerInsights {
     renderChart(filterKey) {
         const ctx = document.getElementById(`${this.chartContainerId}_canvas`);
         if (!ctx) return console.error('Chart canvas not found');
-        console.log(this.chartAnalyticsData)
         const dataObj = this.chartAnalyticsData[filterKey];
         if (!dataObj) return console.warn(`No data found for key: ${filterKey}`);
 

@@ -22,6 +22,16 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
     const [storedBucketName, setStoredBucketName] = useState("");
     const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
+    // New states for improved UX
+    const [isTestingConnection, setIsTestingConnection] = useState(false);
+    const [testResult, setTestResult] = useState(null);
+    const [isTestingStorage, setIsTestingStorage] = useState(false);
+    const [storageTestResult, setStorageTestResult] = useState(null);
+    const [envChecks, setEnvChecks] = useState(null);
+    const [serviceAccountEmail, setServiceAccountEmail] = useState("");
+    const [projectId, setProjectId] = useState("");
+    const [showGuide, setShowGuide] = useState(false);
+
     const apiURL = useMemo(() => {
         return (
             ttsObj.api_url +
@@ -59,6 +69,50 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
         } else {
             setGoogTTSJsonFile(e.target.files);
         }
+    };
+
+    /**
+     * Client-side JSON validation before upload.
+     */
+    const validateJsonFile = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const json = JSON.parse(event.target.result);
+
+                    if (json.type !== 'service_account') {
+                        reject(__('This is not a service account file. The "type" field must be "service_account". You may have downloaded the wrong file type.', 'text-to-audio'));
+                        return;
+                    }
+
+                    const requiredFields = [
+                        'project_id', 'private_key_id', 'private_key',
+                        'client_email', 'client_id', 'auth_uri', 'token_uri',
+                        'auth_provider_x509_cert_url', 'client_x509_cert_url'
+                    ];
+                    const missingFields = requiredFields.filter(f => !json[f]);
+
+                    if (missingFields.length > 0) {
+                        reject(
+                            sprintf(
+                                __('Invalid service account file. Missing required fields: %s', 'text-to-audio'),
+                                missingFields.join(', ')
+                            )
+                        );
+                        return;
+                    }
+
+                    resolve(json);
+                } catch (e) {
+                    reject(__('The uploaded file is not valid JSON. Please make sure you downloaded the correct service account key file.', 'text-to-audio'));
+                }
+            };
+            reader.onerror = () => {
+                reject(__('Could not read the file. Please try again.', 'text-to-audio'));
+            };
+            reader.readAsText(file);
+        });
     };
 
     const handleSubmit = (e) => {
@@ -135,21 +189,66 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
             return;
         }
 
-        let data = new FormData();
-        data.append("auth_file", googTTSJsonFile[0]);
-        data.append("tts_is_backup_mp3_file", isBackUpToGCS);
-        data.append("bucket_name", bucketName);
-        data.append("method", "post");
+        // If already authenticated and no new file selected, just save settings
+        if (isAuthenticated && (!googTTSJsonFile || !googTTSJsonFile[0])) {
+            let data = new FormData();
+            data.append("tts_is_backup_mp3_file", isBackUpToGCS);
+            data.append("bucket_name", bucketName);
+            data.append("method", "post");
 
-        postData(apiURL + "upload_file", data)
+            postData(apiURL + "upload_file", data)
+                .then((res) => {
+                    if (res.status) {
+                        toast(
+                            __('Settings saved successfully.', 'text-to-audio'),
+                            "info",
+                            { autoClose: 5000 }
+                        );
+                        if (res?.tts_is_backup_mp3_file == "true") {
+                            setIsBackUpToGCS(res?.tts_is_backup_mp3_file || false);
+                        }
+                        if (res?.bucket_name) {
+                            setBucketName(res?.bucket_name || "");
+                        }
+                    } else {
+                        if (res?.bcmath) {
+                            toast(bcmathNotice(), "error", { autoClose: 8000 });
+                        } else {
+                            toast(res?.message || __("Something went wrong", 'text-to-audio'));
+                        }
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+            return;
+        }
+
+        if (!googTTSJsonFile || !googTTSJsonFile[0]) {
+            toast(__("Please select a service account JSON file first.", 'text-to-audio'), "error", {
+                autoClose: 10000,
+            });
+            return;
+        }
+
+        // Client-side validation first
+        validateJsonFile(googTTSJsonFile[0])
+            .then(() => {
+                // Validation passed, proceed with upload
+                let data = new FormData();
+                data.append("auth_file", googTTSJsonFile[0]);
+                data.append("tts_is_backup_mp3_file", isBackUpToGCS);
+                data.append("bucket_name", bucketName);
+                data.append("method", "post");
+
+                return postData(apiURL + "upload_file", data);
+            })
             .then((res) => {
                 if (res.status) {
                     toast(
-                        __('File uploaded successfully. Now go to the "Customization" menu.', 'text-to-audio'),
+                        __('File uploaded successfully. You can now test the connection below.', 'text-to-audio'),
                         "info",
-                        {
-                            autoClose: 15000,
-                        }
+                        { autoClose: 15000 }
                     );
                     setIsAuthenticated(res.status);
                     if (res?.tts_is_backup_mp3_file == "true") {
@@ -157,6 +256,12 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                     }
                     if (res?.bucket_name) {
                         setBucketName(res?.bucket_name || "");
+                    }
+                    if (res?.service_account_email) {
+                        setServiceAccountEmail(res.service_account_email);
+                    }
+                    if (res?.project_id) {
+                        setProjectId(res.project_id);
                     }
 
                     // Update authenticated services
@@ -166,19 +271,24 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                     });
 
                     setCurrentTTSServic('google_cloud_tts');
-
+                    // Reset test results
+                    setTestResult(null);
+                    setStorageTestResult(null);
                 } else {
                     if (res?.bcmath) {
-                        toast(bcmathNotice(), "error", {
-                            autoClose: 8000,
-                        });
+                        toast(bcmathNotice(), "error", { autoClose: 8000 });
                     } else {
                         toast(res?.message || __("Something went wrong", 'text-to-audio'));
                     }
                 }
             })
             .catch((err) => {
-                console.log(err);
+                if (typeof err === 'string') {
+                    // Validation error
+                    toast(err, "error", {autoClose: 10000});
+                } else {
+                    console.log(err);
+                }
             });
     };
 
@@ -196,7 +306,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                             if (prev.includes('google_cloud_tts')) return prev;
                             return [...prev, 'google_cloud_tts'];
                         })
-                        
+
                         // Only set as active on FIRST load, not subsequent re-renders
                         if (!hasLoadedOnce && res?.currentTTSServic === 'google_cloud_tts') {
                             setCurrentTTSServic('google_cloud_tts');
@@ -208,7 +318,21 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                         setBucketName(res?.bucket_name || "");
                         setStoredBucketName(res?.bucket_name);
                     }
-                    
+
+                    // New: environment checks and service account info
+                    if (res?.environment_checks) {
+                        setEnvChecks(res.environment_checks);
+                    }
+                    if (res?.service_account_email) {
+                        setServiceAccountEmail(res.service_account_email);
+                    }
+                    if (res?.project_id) {
+                        setProjectId(res.project_id);
+                    }
+                    if (!res?.is_authenticated) {
+                        setShowGuide(true);
+                    }
+
                     // Signal that Google TTS check is complete
                     if (setGoogleTTSChecked) {
                         setGoogleTTSChecked(true);
@@ -278,8 +402,13 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                 if (res) {
                     toast(__("Authentication removed.", 'text-to-audio'));
                     setIsAuthenticated(false);
+                    setServiceAccountEmail("");
+                    setProjectId("");
+                    setTestResult(null);
+                    setStorageTestResult(null);
+                    setShowGuide(true);
                     // Remove from authenticated services
-                    setAuthenticatedServices(prev => 
+                    setAuthenticatedServices(prev =>
                         prev.filter(service => service !== 'google_cloud_tts')
                     );
 
@@ -291,6 +420,48 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
             })
             .catch((err) => {
                 console.log(err);
+            });
+    };
+
+    const handleTestConnection = (e) => {
+        e.preventDefault();
+        setIsTestingConnection(true);
+        setTestResult(null);
+
+        postData(apiURL + "test_gcloud_connection", JSON.stringify({}))
+            .then((res) => {
+                setTestResult(res);
+                if (res.status && res.audio) {
+                    try {
+                        const audio = new Audio(res.audio);
+                        audio.play();
+                    } catch (err) {
+                        // Audio playback not critical
+                    }
+                }
+            })
+            .catch((err) => {
+                setTestResult({status: false, message: __('Network error. Please try again.', 'text-to-audio')});
+            })
+            .finally(() => {
+                setIsTestingConnection(false);
+            });
+    };
+
+    const handleTestStorage = (e) => {
+        e.preventDefault();
+        setIsTestingStorage(true);
+        setStorageTestResult(null);
+
+        postData(apiURL + "test_gcloud_storage", JSON.stringify({}))
+            .then((res) => {
+                setStorageTestResult(res);
+            })
+            .catch((err) => {
+                setStorageTestResult({status: false, message: __('Network error. Please try again.', 'text-to-audio')});
+            })
+            .finally(() => {
+                setIsTestingStorage(false);
             });
     };
 
@@ -361,15 +532,138 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
         </label>
     );
 
+    // Build dynamic IAM console link
+    const iamConsoleLink = projectId
+        ? `https://console.cloud.google.com/iam-admin/iam?project=${projectId}`
+        : 'https://console.cloud.google.com/iam-admin/iam';
+
     return (
         <>
+            {/* Environment Warnings */}
+            {envChecks && !envChecks.bcmath_loaded && (
+                <Alert variant="warning" className="mb-3">
+                    <strong>{__("BCMath Extension Missing", "text-to-audio")}</strong>
+                    <p className="mb-0 small">
+                        {__("The BCMath PHP extension is required for Google Cloud TTS. ", "text-to-audio")}
+                        <a target="_blank" rel="noopener noreferrer" href="https://atlasaidev.com/docs/text-to-speech/usage-setup/bcmath/">
+                            {__("Learn how to enable it", "text-to-audio")}
+                        </a>
+                    </p>
+                </Alert>
+            )}
+            {envChecks && !envChecks.folder_writable && (
+                <Alert variant="warning" className="mb-3">
+                    <strong>{__("Uploads Folder Not Writable", "text-to-audio")}</strong>
+                    <p className="mb-0 small">
+                        {__("The uploads folder must be writable to store generated audio files. Please check your server file permissions.", "text-to-audio")}
+                    </p>
+                </Alert>
+            )}
+
+            {/* Setup Guide Card */}
+            <div className="tta-card mb-3">
+                <div className="d-flex align-items-center justify-content-between mb-2">
+                    <h5 className="mb-0 fw-semibold">{__("Setup Guide", "text-to-audio")}</h5>
+                    <Button
+                        variant="link"
+                        size="sm"
+                        className="p-0 text-decoration-none"
+                        onClick={() => setShowGuide(!showGuide)}
+                    >
+                        {showGuide ? __("Hide", "text-to-audio") : __("Show", "text-to-audio")}
+                    </Button>
+                </div>
+
+                {showGuide && (
+                    <div className="p-3 rounded mb-3" style={{backgroundColor: '#f8f9fa', border: '1px solid #e9ecef'}}>
+                        <ol className="mb-0 small" style={{paddingLeft: '1.2rem'}}>
+                            <li className="mb-2">
+                                {__("Go to", "text-to-audio")}{' '}
+                                <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer">
+                                    {__("Google Cloud Console", "text-to-audio")}
+                                </a>
+                                {' '}{__("and create a project (or select an existing one).", "text-to-audio")}
+                            </li>
+                            <li className="mb-2">
+                                {__("Enable the", "text-to-audio")}{' '}
+                                <a href="https://console.cloud.google.com/apis/library/texttospeech.googleapis.com" target="_blank" rel="noopener noreferrer">
+                                    {__("Cloud Text-to-Speech API", "text-to-audio")}
+                                </a>.
+                            </li>
+                            <li className="mb-2">
+                                <span className="text-muted">({__("Optional, for Cloud Storage backup", "text-to-audio")})</span>{' '}
+                                {__("Enable the", "text-to-audio")}{' '}
+                                <a href="https://console.cloud.google.com/apis/library/storage.googleapis.com" target="_blank" rel="noopener noreferrer">
+                                    {__("Cloud Storage API", "text-to-audio")}
+                                </a>.
+                            </li>
+                            <li className="mb-2">
+                                {__("Go to", "text-to-audio")}{' '}
+                                <a href="https://console.cloud.google.com/iam-admin/serviceaccounts" target="_blank" rel="noopener noreferrer">
+                                    {__("IAM & Admin > Service Accounts", "text-to-audio")}
+                                </a>
+                                {' '}{__("and create a new service account.", "text-to-audio")}
+                            </li>
+                            <li className="mb-2">
+                                {__("Assign roles:", "text-to-audio")}{' '}
+                                <strong>{__("Cloud Text-to-Speech User", "text-to-audio")}</strong>{' '}
+                                {__("(required)", "text-to-audio")}
+                                {' + '}
+                                <strong>{__("Storage Admin", "text-to-audio")}</strong>{' '}
+                                <span className="text-muted">({__("only if using Cloud Storage backup", "text-to-audio")})</span>.
+                            </li>
+                            <li className="mb-2">
+                                {__('Click on the service account > "Keys" tab > "Add Key" > "Create new key" > select "JSON".', "text-to-audio")}
+                            </li>
+                            <li className="mb-0">
+                                {__("Upload the downloaded JSON file below.", "text-to-audio")}
+                            </li>
+                        </ol>
+                    </div>
+                )}
+
+                {/* YouTube Tutorial */}
+                <a
+                    href="https://www.youtube.com/watch?v=yIAnL7W9kr8"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="d-flex align-items-center text-decoration-none bg-white p-2 rounded tta-yt-outline"
+                >
+                    <div className="flex-shrink-0 position-relative me-3">
+                        <img
+                            src="https://i.ytimg.com/vi/yIAnL7W9kr8/mqdefault.jpg"
+                            alt={__("Video Tutorial", 'text-to-audio')}
+                            className="rounded"
+                            width="120"
+                            height="80"
+                        />
+                        <div className="tta-yt position-absolute top-50 start-50 translate-middle">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                width="40"
+                                height="40"
+                                fill="#ff0000"
+                            >
+                                <path d="M8 5v14l11-7z" fill="white"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div className="flex-grow-1">
+                        <h6 className="m-0 text-dark fw-normal">
+                            {__("Learn How To Integrate Google Text To Speech With AtlasVoice Pro Plugin?", "text-to-audio")}
+                        </h6>
+                    </div>
+                </a>
+            </div>
+
             {/* Authentication Card */}
             <div className="tta-card mb-3">
                 <h5 className="mb-3 fw-semibold">{__("Authentication", "text-to-audio")}</h5>
                 <Form onSubmit={handleSubmit}>
                     <Row className="align-items-center">
-                        <Col xs={12} md={6} lg={5}>
-                            <div className="mb-3 mb-md-0">
+                        <Col xs={12}>
+                            <div className="mb-3">
                                 <Button
                                     variant="outline-primary"
                                     className="google-upload-btn w-100 mb-2 d-flex align-items-center justify-content-center"
@@ -416,49 +710,71 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                                     onChange={handleChange}
                                     name="googTTSJsonFile"
                                     className="d-none"
+                                    accept=".json"
                                 />
                                 <p className="text-muted small mb-0">
                                     {__("Upload service account JSON file", "text-to-audio")}
                                 </p>
                             </div>
                         </Col>
-                        <Col xs={12} md={6} lg={7}>
-                            <a
-                                href="https://www.youtube.com/watch?v=yIAnL7W9kr8"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="d-flex align-items-center text-decoration-none bg-white p-2 rounded tta-yt-outline"
-                            >
-                                <div className="flex-shrink-0 position-relative me-3">
-                                    <img
-                                        src="https://i.ytimg.com/vi/yIAnL7W9kr8/mqdefault.jpg"
-                                        alt={__("Video Tutorial",  'text-to-audio')}
-                                        className="rounded"
-                                        width="120"
-                                        height="80"
-                                    />
-                                    <div className="tta-yt position-absolute top-50 start-50 translate-middle">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 24 24"
-                                            width="40"
-                                            height="40"
-                                            fill="#ff0000"
-                                        >
-                                            <path d="M8 5v14l11-7z" fill="white"/>
-                                        </svg>
-                                    </div>
-                                </div>
-                                <div className="flex-grow-1">
-                                    <h6 className="m-0 text-dark fw-normal">
-                                        {__("Learn How To Integrate Google Text To Speech With AtlasVoice Pro Plugin?", "text-to-audio")}
-                                    </h6>
-                                </div>
-                            </a>
-                        </Col>
                     </Row>
                 </Form>
+
+                {/* Service Account Info (shown when authenticated) */}
+                {isAuthenticated && serviceAccountEmail && (
+                    <div className="p-3 rounded mt-2" style={{backgroundColor: '#f0f9ff', border: '1px solid #bae6fd'}}>
+                        <div className="small">
+                            <div className="mb-1">
+                                <strong>{__("Service Account:", "text-to-audio")}</strong>{' '}
+                                <code className="text-break">{serviceAccountEmail}</code>
+                            </div>
+                            {projectId && (
+                                <div className="mb-1">
+                                    <strong>{__("Project:", "text-to-audio")}</strong>{' '}
+                                    <code>{projectId}</code>
+                                    {' '}
+                                    <a href={iamConsoleLink} target="_blank" rel="noopener noreferrer" className="small">
+                                        ({__("IAM Console", "text-to-audio")})
+                                    </a>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
+
+            {/* Test Connection Card (shown when authenticated) */}
+            {isAuthenticated && (
+                <div className="tta-card mb-3">
+                    <h5 className="mb-3 fw-semibold">{__("Connection Test", "text-to-audio")}</h5>
+                    <p className="text-muted small mb-3">
+                        {__("Verify that your service account can connect to Google Cloud Text-to-Speech API.", "text-to-audio")}
+                    </p>
+                    <div className="d-flex align-items-center gap-3 flex-wrap">
+                        <Button
+                            variant="outline-success"
+                            onClick={handleTestConnection}
+                            disabled={isTestingConnection}
+                            size="sm"
+                        >
+                            {isTestingConnection
+                                ? <><span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>{__("Testing...", "text-to-audio")}</>
+                                : __("Test TTS Connection", "text-to-audio")
+                            }
+                        </Button>
+                        {testResult && (
+                            <Alert variant={testResult.status ? 'success' : 'danger'} className="mb-0 py-1 px-3 flex-grow-1">
+                                <small>
+                                    {testResult.message}
+                                    {testResult.guidance && (
+                                        <div className="mt-1 text-muted">{testResult.guidance}</div>
+                                    )}
+                                </small>
+                            </Alert>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Storage Configuration Card */}
             <div className="tta-card mb-3">
@@ -501,51 +817,103 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                     {__("Automatically sync generated audio files in cloud storage for store & easy access.", "text-to-audio")}
                 </p>
 
-                {/* Bucket Name Field - Only show when backup is enabled */}
+                {/* Storage Permissions Guidance & Test (shown when backup enabled) */}
                 {isBackUpToGCS && (
-                    <div className="mt-3">
-                        <div className="d-flex align-items-center justify-content-between mb-2">
-                            <Form.Label className="setting-label text-dark m-0">
-                                {__("Google Cloud Storage Bucket Name", "text-to-audio")}
-                            </Form.Label>
-                            <OverlayTrigger
-                                placement="top"
-                                overlay={
-                                    <Tooltip>{__("Click Here To Know Bucket Name Rules", "text-to-audio")}</Tooltip>
-                                }
-                            >
-                                <a
-                                    className="text-danger"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    href="https://cloud.google.com/storage/docs/buckets#naming"
+                    <>
+                        <Alert variant="info" className="small mb-3">
+                            <strong>{__("Required:", "text-to-audio")}</strong>{' '}
+                            {__('Your service account needs the "Storage Admin" role to use Cloud Storage.', "text-to-audio")}
+                            {serviceAccountEmail && (
+                                <div className="mt-1">
+                                    {__("Assign it to", "text-to-audio")}{' '}
+                                    <code className="text-break">{serviceAccountEmail}</code>{' '}
+                                    {__("in", "text-to-audio")}{' '}
+                                    <a href={iamConsoleLink} target="_blank" rel="noopener noreferrer">
+                                        {__("IAM Console", "text-to-audio")}
+                                    </a>.
+                                </div>
+                            )}
+                            {!serviceAccountEmail && (
+                                <div className="mt-1">
+                                    <a href="https://console.cloud.google.com/iam-admin/iam" target="_blank" rel="noopener noreferrer">
+                                        {__("Open IAM Console", "text-to-audio")}
+                                    </a>
+                                </div>
+                            )}
+                        </Alert>
+
+                        {/* Test Storage Button */}
+                        {isAuthenticated && (
+                            <div className="d-flex align-items-center gap-3 flex-wrap mb-3">
+                                <Button
+                                    variant="outline-info"
+                                    onClick={handleTestStorage}
+                                    disabled={isTestingStorage}
+                                    size="sm"
                                 >
-                                    <i className="bi bi-question-circle"></i>
-                                </a>
-                            </OverlayTrigger>
-                        </div>
-                        <div className="d-flex gap-2">
-                            <Form.Control
-                                type="text"
-                                value={bucketName}
-                                onChange={handleChange}
-                                name="tta__integration_google_storage_folder_name"
-                                placeholder="atlas_voice_gtts_1757007369"
-                                className="tta-textarea"
-                            />
-                            <Button variant="outline-secondary" onClick={validateBucketName}>
-                                {__("Create", "text-to-audio")}
-                            </Button>
-                        </div>
-                        {isValidBucketName?.message && (
-                            <Alert
-                                variant={isValidBucketName.status ? "success" : "danger"}
-                                className="mt-2 mb-0 py-2"
-                            >
-                                <small>{isValidBucketName.message}</small>
-                            </Alert>
+                                    {isTestingStorage
+                                        ? <><span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>{__("Testing...", "text-to-audio")}</>
+                                        : __("Test Storage Access", "text-to-audio")
+                                    }
+                                </Button>
+                                {storageTestResult && (
+                                    <Alert variant={storageTestResult.status ? 'success' : 'danger'} className="mb-0 py-1 px-3 flex-grow-1">
+                                        <small>
+                                            {storageTestResult.message}
+                                            {storageTestResult.guidance && (
+                                                <div className="mt-1 text-muted">{storageTestResult.guidance}</div>
+                                            )}
+                                        </small>
+                                    </Alert>
+                                )}
+                            </div>
                         )}
-                    </div>
+
+                        {/* Bucket Name Field */}
+                        <div className="mt-3">
+                            <div className="d-flex align-items-center justify-content-between mb-2">
+                                <Form.Label className="setting-label text-dark m-0">
+                                    {__("Google Cloud Storage Bucket Name", "text-to-audio")}
+                                </Form.Label>
+                                <OverlayTrigger
+                                    placement="top"
+                                    overlay={
+                                        <Tooltip>{__("Click Here To Know Bucket Name Rules", "text-to-audio")}</Tooltip>
+                                    }
+                                >
+                                    <a
+                                        className="text-danger"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        href="https://cloud.google.com/storage/docs/buckets#naming"
+                                    >
+                                        <i className="bi bi-question-circle"></i>
+                                    </a>
+                                </OverlayTrigger>
+                            </div>
+                            <div className="d-flex gap-2">
+                                <Form.Control
+                                    type="text"
+                                    value={bucketName}
+                                    onChange={handleChange}
+                                    name="tta__integration_google_storage_folder_name"
+                                    placeholder="atlas_voice_gtts_1757007369"
+                                    className="tta-textarea"
+                                />
+                                <Button variant="outline-secondary" onClick={validateBucketName}>
+                                    {__("Create", "text-to-audio")}
+                                </Button>
+                            </div>
+                            {isValidBucketName?.message && (
+                                <Alert
+                                    variant={isValidBucketName.status ? "success" : "danger"}
+                                    className="mt-2 mb-0 py-2"
+                                >
+                                    <small>{isValidBucketName.message}</small>
+                                </Alert>
+                            )}
+                        </div>
+                    </>
                 )}
             </div>
 
