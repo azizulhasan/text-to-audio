@@ -246,7 +246,7 @@ class TTA_Init
                 update_option('tts_rest_api_url', $rest_url);
                 TTA_Cache::set('tts_rest_api_url', $rest_url);
             }
-            new TTA_Notices();
+            TTA_Notices::instance();
             //Rest api init.
             new TTA_Api_Routes();
         }, 9999);
@@ -341,6 +341,27 @@ add_action('tta_send_scheduled_report', function () {
 register_activation_hook(__FILE__, function () {
     TTA_Activator::activate();
 });
+
+/**
+ * Redirect to settings page on first activation.
+ * Uses a transient set in TTA_Activator::activate() to detect first-time activation.
+ *
+ * @since 2.1.8
+ */
+add_action('admin_init', function () {
+    if ( get_transient('tta_activation_redirect') ) {
+        delete_transient('tta_activation_redirect');
+
+        // Don't redirect during bulk activation or if user can't manage options.
+        if ( isset($_GET['activate-multi']) || ! current_user_can('manage_options') ) {
+            return;
+        }
+
+        wp_safe_redirect( admin_url('admin.php?page=text-to-audio&welcome=1') );
+        exit;
+    }
+});
+
 /**
  * The code that runs during plugin deactivation.
  * This action is documented in includes/TTA_Deactivator.php
