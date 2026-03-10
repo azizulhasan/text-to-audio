@@ -10,160 +10,160 @@
         "plural": "nplurals=1; plural=0;"
       },
       "Test report sent successfully! Check your inbox.": [
-        "¡Informe de prueba enviado correctamente! Revise su bandeja de entrada."
+        "Rapporto di prova inviato con successo! Controlla la tua casella di posta."
       ],
       "Failed to send test report.": [
-        "Error al enviar el informe de prueba."
+        "Invio del rapporto di prova non riuscito."
       ],
       "Device Types": [
-        "Tipos de dispositivo"
+        "Tipi di Dispositivo"
       ],
       "Browser": [
-        "Navegador"
+        "Browser"
       ],
       "OS": [
         "SO"
       ],
       "Top Countries": [
-        "Principales países"
+        "Principali Paesi"
       ],
       "Post Title": [
-        "Título de la entrada"
+        "Titolo Articolo"
       ],
       "Pause": [
         "Pausa"
       ],
       "Save": [
-        "Guardar"
+        "Salva"
       ],
       "Text to Speech Aliases": [
-        "Alias de texto a voz"
+        "Alias Testo in Voce"
       ],
       "Actual Text": [
-        "Texto real"
+        "Testo Reale"
       ],
       "To Read": [
-        "Para leer"
+        "Da Leggere"
       ],
       "All fields must be filled!": [
-        "¡Todos los campos deben estar completos!"
+        "Tutti i campi devono essere compilati!"
       ],
       "Successfully Saved.": [
-        "Guardado correctamente."
+        "Salvato con successo."
       ],
       "Buy Pro version": [
-        "Comprar versión Pro"
+        "Acquista versione Pro"
       ],
       "Click To Know How It Works?": [
-        "¿Haga clic para saber cómo funciona?"
+        "Clicca per sapere come funziona?"
       ],
       "Buy Now": [
-        "Comprar ahora"
+        "Acquista Ora"
       ],
       "Download": [
-        "Descargar"
+        "Scarica"
       ],
       "Learn More": [
-        "Más información"
+        "Scopri di Più"
       ],
       "Background Color": [
-        "Color de fondo"
+        "Colore di Sfondo"
       ],
       "Text Color": [
-        "Color del texto"
+        "Colore del Testo"
       ],
       "Custom CSS": [
-        "CSS personalizado"
+        "CSS Personalizzato"
       ],
       "Speed": [
-        "Velocidad"
+        "Velocità"
       ],
       "No IDs selected": [
-        "Ningún ID seleccionado"
+        "Nessun ID selezionato"
       ],
       "Select IDs": [
-        "Seleccionar IDs"
+        "Seleziona ID"
       ],
       "Showing button to multiple post is not supported in free version.": [
-        "Mostrar el botón en múltiples entradas no es compatible con la versión gratuita."
+        "Mostrare il pulsante su più articoli non è supportato nella versione gratuita."
       ],
       "Select Items...": [
-        "Seleccionar elementos..."
+        "Seleziona Elementi..."
       ],
       "More than 1 alias is available in the pro version. Please ": [
-        "Más de 1 alias está disponible en la versión Pro. Por favor "
+        "Più di 1 alias è disponibile nella versione pro. Per favore "
       ],
       "Here a short text have to write to inform the user about this feature purpose": [
-        "Aquí se debe escribir un texto breve para informar al usuario sobre el propósito de esta función"
+        "Qui deve essere scritto un breve testo per informare l'utente sullo scopo di questa funzionalità"
       ],
       "Write actual text": [
-        "Escribir texto real"
+        "Scrivi testo reale"
       ],
       "Write read aloud text": [
-        "Escribir texto para leer en voz alta"
+        "Scrivi testo da leggere ad alta voce"
       ],
       "Add New": [
-        "Agregar nuevo"
+        "Aggiungi Nuovo"
       ],
       "Loading...": [
-        "Cargando..."
+        "Caricamento..."
       ],
       "CSV exported successfully!": [
-        "¡CSV exportado correctamente!"
+        "CSV esportato con successo!"
       ],
       "Error exporting CSV": [
-        "Error al exportar CSV"
+        "Errore nell'esportazione CSV"
       ],
       "PDF report opened. Use 'Save as PDF' in the print dialog.": [
-        "Informe PDF abierto. Use 'Guardar como PDF' en el diálogo de impresión."
+        "Rapporto PDF aperto. Usa 'Salva come PDF' nella finestra di stampa."
       ],
       "Report downloaded as HTML. Open in browser and print to save as PDF.": [
-        "Informe descargado como HTML. Ábralo en el navegador e imprima para guardar como PDF."
+        "Rapporto scaricato come HTML. Apri nel browser e stampa per salvare come PDF."
       ],
       "Failed to generate PDF report.": [
-        "Error al generar el informe PDF."
+        "Generazione del rapporto PDF non riuscita."
       ],
       "Error exporting PDF": [
-        "Error al exportar PDF"
+        "Errore nell'esportazione PDF"
       ],
       "Analytics": [
-        "Analíticas"
+        "Analisi"
       ],
       "Track and analyze your TTS player engagement to understand listener behavior.": [
-        "Rastree y analice la interacción de su reproductor TTS para comprender el comportamiento de los oyentes."
+        "Traccia e analizza il coinvolgimento del tuo lettore TTS per comprendere il comportamento degli ascoltatori."
       ],
       "Analytics is Currently Disabled": [
-        "Las analíticas están actualmente desactivadas"
+        "L'Analisi è Attualmente Disattivata"
       ],
       "Enable analytics using the toggle above to start tracking your TTS player interactions and view detailed metrics.": [
-        "Active las analíticas usando el interruptor de arriba para comenzar a rastrear las interacciones de su reproductor TTS y ver métricas detalladas."
+        "Attiva l'analisi usando l'interruttore sopra per iniziare a tracciare le interazioni del tuo lettore TTS e visualizzare metriche dettagliate."
       ],
       "Yesterday": [
-        "Ayer"
+        "Ieri"
       ],
       "Last 7 Days": [
-        "Últimos 7 días"
+        "Ultimi 7 Giorni"
       ],
       "Last 30 Days": [
-        "Últimos 30 días"
+        "Ultimi 30 Giorni"
       ],
       "Browser Analytics": [
-        "Analíticas de navegador"
+        "Analisi Browser"
       ],
       "more": [
-        "más"
+        "altro"
       ],
       "Pro": [
         "Pro"
       ],
       "Last 90 Days": [
-        "Últimos 90 días"
+        "Ultimi 90 Giorni"
       ],
       "Init": [
-        "Inicio"
+        "Inizio"
       ],
       "Play": [
-        "Reproducir"
+        "Riproduci"
       ],
       "25%": [
         "25%"
@@ -175,46 +175,46 @@
         "75%"
       ],
       "End": [
-        "Fin"
+        "Fine"
       ],
       "Engagement Funnel": [
-        "Embudo de interacción"
+        "Imbuto di Coinvolgimento"
       ],
       "Play Rate:": [
-        "Tasa de reproducción:"
+        "Tasso di Riproduzione:"
       ],
       "Completion Rate:": [
-        "Tasa de finalización:"
+        "Tasso di Completamento:"
       ],
       "Biggest Drop:": [
-        "Mayor caída:"
+        "Calo Maggiore:"
       ],
       "50% → 75%": [
         "50% → 75%"
       ],
       "CSV export initiated. Check your downloads.": [
-        "Exportación CSV iniciada. Revise sus descargas."
+        "Esportazione CSV avviata. Controlla i tuoi download."
       ],
       "Export failed. Please try again.": [
-        "Error en la exportación. Por favor, inténtelo de nuevo."
+        "Esportazione fallita. Riprova."
       ],
       "PDF export initiated. Check your downloads.": [
-        "Exportación PDF iniciada. Revise sus descargas."
+        "Esportazione PDF avviata. Controlla i tuoi download."
       ],
       "Please enter at least one recipient email address.": [
-        "Por favor, ingrese al menos una dirección de correo electrónico de destinatario."
+        "Inserisci almeno un indirizzo email destinatario."
       ],
       "Report schedule saved successfully.": [
-        "Programación del informe guardada correctamente."
+        "Programmazione rapporto salvata con successo."
       ],
       "Failed to save schedule settings.": [
-        "Error al guardar la configuración de programación."
+        "Salvataggio impostazioni di programmazione non riuscito."
       ],
       "Please enter recipient email addresses first.": [
-        "Por favor, ingrese primero las direcciones de correo electrónico de los destinatarios."
+        "Inserisci prima gli indirizzi email dei destinatari."
       ],
       "Failed to send test report. Please check your network connection.": [
-        "Error al enviar el informe de prueba. Por favor, verifique su conexión de red."
+        "Invio del rapporto di prova non riuscito. Controlla la tua connessione di rete."
       ],
       "CSV": [
         "CSV"
@@ -223,148 +223,148 @@
         "PDF"
       ],
       "Schedule Report": [
-        "Programar informe"
+        "Programma Rapporto"
       ],
       "Schedule Email Reports": [
-        "Programar informes por correo"
+        "Programma Rapporti Email"
       ],
       "Enable automated reports": [
-        "Activar informes automatizados"
+        "Attiva rapporti automatici"
       ],
       "Recipients (comma separated)": [
-        "Destinatarios (separados por coma)"
+        "Destinatari (separati da virgola)"
       ],
       "Frequency": [
-        "Frecuencia"
+        "Frequenza"
       ],
       "Daily": [
-        "Diario"
+        "Giornaliero"
       ],
       "Weekly": [
-        "Semanal"
+        "Settimanale"
       ],
       "Monthly": [
-        "Mensual"
+        "Mensile"
       ],
       "Day": [
-        "Día"
+        "Giorno"
       ],
       "Monday": [
-        "Lunes"
+        "Lunedì"
       ],
       "Tuesday": [
-        "Martes"
+        "Martedì"
       ],
       "Wednesday": [
-        "Miércoles"
+        "Mercoledì"
       ],
       "Thursday": [
-        "Jueves"
+        "Giovedì"
       ],
       "Friday": [
-        "Viernes"
+        "Venerdì"
       ],
       "Saturday": [
-        "Sábado"
+        "Sabato"
       ],
       "Sunday": [
-        "Domingo"
+        "Domenica"
       ],
       "Time": [
-        "Hora"
+        "Ora"
       ],
       "Include in report:": [
-        "Incluir en el informe:"
+        "Includi nel rapporto:"
       ],
       "Summary statistics": [
-        "Estadísticas resumidas"
+        "Statistiche riepilogative"
       ],
       "Top 10 posts": [
-        "Las 10 entradas principales"
+        "Top 10 articoli"
       ],
       "Geographic breakdown": [
-        "Desglose geográfico"
+        "Distribuzione geografica"
       ],
       "Trend chart": [
-        "Gráfico de tendencias"
+        "Grafico di tendenza"
       ],
       "Device stats": [
-        "Estadísticas de dispositivos"
+        "Statistiche dispositivo"
       ],
       "Next scheduled report:": [
-        "Próximo informe programado:"
+        "Prossimo rapporto programmato:"
       ],
       "Sending...": [
-        "Enviando..."
+        "Invio in corso..."
       ],
       "Send Test Report": [
-        "Enviar informe de prueba"
+        "Invia Rapporto di Prova"
       ],
       "Saving...": [
-        "Guardando..."
+        "Salvataggio in corso..."
       ],
       "Save Settings": [
-        "Guardar ajustes"
+        "Salva Impostazioni"
       ],
       "Export & Reports": [
-        "Exportar e informes"
+        "Esportazione e Rapporti"
       ],
       "Last 14 Days": [
-        "Últimos 14 días"
+        "Ultimi 14 Giorni"
       ],
       "All Time": [
-        "Todo el tiempo"
+        "Tutto il Periodo"
       ],
       "Custom Range": [
-        "Rango personalizado"
+        "Intervallo Personalizzato"
       ],
       "Getting more than 30 days data is pro feature. Please ": [
-        "Obtener datos de más de 30 días es una función Pro. Por favor "
+        "Ottenere dati per più di 30 giorni è una funzionalità pro. Per favore "
       ],
       "Custom date select is only available in pro version. Please ": [
-        "La selección de fecha personalizada solo está disponible en la versión Pro. Por favor "
+        "La selezione data personalizzata è disponibile solo nella versione pro. Per favore "
       ],
       "Quick Select": [
-        "Selección rápida"
+        "Selezione Rapida"
       ],
       "From": [
-        "Desde"
+        "Da"
       ],
       "To": [
-        "Hasta"
+        "A"
       ],
       "Apply": [
-        "Aplicar"
+        "Applica"
       ],
       "New Listeners": [
-        "Nuevos oyentes"
+        "Nuovi Ascoltatori"
       ],
       "Returning": [
-        "Recurrentes"
+        "Ricorrenti"
       ],
       "Listener Segments": [
-        "Segmentos de oyentes"
+        "Segmenti Ascoltatori"
       ],
       "New:": [
-        "Nuevos:"
+        "Nuovi:"
       ],
       "Returning:": [
-        "Recurrentes:"
+        "Ricorrenti:"
       ],
       "New Listeners:": [
-        "Nuevos oyentes:"
+        "Nuovi Ascoltatori:"
       ],
       "Avg Sessions/User:": [
-        "Sesiones promedio/Usuario:"
+        "Sessioni Medie/Utente:"
       ],
       "Location": [
-        "Ubicación"
+        "Posizione"
       ],
       "Top Cities": [
-        "Principales ciudades"
+        "Principali Città"
       ],
       "Unlock city-level analytics": [
-        "Desbloquear analíticas a nivel de ciudad"
+        "Sblocca analisi a livello di città"
       ],
       "Mon": [
         "Lun"
@@ -373,733 +373,733 @@
         "Mar"
       ],
       "Wed": [
-        "Mié"
+        "Mer"
       ],
       "Thu": [
-        "Jue"
+        "Gio"
       ],
       "Fri": [
-        "Vie"
+        "Ven"
       ],
       "Sat": [
-        "Sáb"
+        "Sab"
       ],
       "Sun": [
         "Dom"
       ],
       "Peak Listening Hours": [
-        "Horas pico de escucha"
+        "Ore di Punta dell'Ascolto"
       ],
       "Low": [
-        "Bajo"
+        "Basso"
       ],
       "Peak": [
-        "Pico"
+        "Punta"
       ],
       "Insight:": [
-        "Información:"
+        "Approfondimento:"
       ],
       "Your peak listening time is": [
-        "Su hora pico de escucha es"
+        "Il tuo orario di punta per l'ascolto è"
       ],
       "Peak Hours Heatmap": [
-        "Mapa de calor de horas pico"
+        "Mappa di Calore Ore di Punta"
       ],
       "Playing Quantity": [
-        "Cantidad de reproducciones"
+        "Quantità Riproduzioni"
       ],
       "Playing Time (min)": [
-        "Tiempo de reproducción (min)"
+        "Tempo di Riproduzione (min)"
       ],
       "Previous Period": [
-        "Período anterior"
+        "Periodo Precedente"
       ],
       "Playing Trend Analysis": [
-        "Análisis de tendencias de reproducción"
+        "Analisi Tendenza Riproduzioni"
       ],
       "Compare with Previous Period": [
-        "Comparar con período anterior"
+        "Confronta con Periodo Precedente"
       ],
       "Enable comparison with previous period": [
-        "Activar comparación con período anterior"
+        "Attiva confronto con periodo precedente"
       ],
       "Quantity vs Date": [
-        "Cantidad vs Fecha"
+        "Quantità vs Data"
       ],
       "Playing Time(min)": [
-        "Tiempo de reproducción (min)"
+        "Tempo di Riproduzione(min)"
       ],
       "Popular Post": [
-        "Entrada popular"
+        "Articolo Popolare"
       ],
       "Rank": [
-        "Posición"
+        "Posizione"
       ],
       "Total Interactions": [
-        "Interacciones totales"
+        "Interazioni Totali"
       ],
       "No data available yet. Start tracking posts to see analytics.": [
-        "Aún no hay datos disponibles. Comience a rastrear entradas para ver analíticas."
+        "Nessun dato disponibile. Inizia a tracciare gli articoli per vedere le analisi."
       ],
       "View all": [
-        "Ver todas"
+        "Vedi tutti"
       ],
       "posts": [
-        "entradas"
+        "articoli"
       ],
       "View All Posts": [
-        "Ver todas las entradas"
+        "Vedi Tutti gli Articoli"
       ],
       "Pro Feature": [
-        "Función Pro"
+        "Funzionalità Pro"
       ],
       "Upgrade to Pro to unlock this feature and get access to advanced analytics.": [
-        "Actualice a Pro para desbloquear esta función y obtener acceso a analíticas avanzadas."
+        "Aggiorna a Pro per sbloccare questa funzionalità e accedere alle analisi avanzate."
       ],
       "Upgrade to Pro": [
-        "Actualizar a Pro"
+        "Aggiorna a Pro"
       ],
       "Total Posts": [
-        "Entradas totales"
+        "Articoli Totali"
       ],
       "Total posts with TTS player": [
-        "Total de entradas con reproductor TTS"
+        "Articoli totali con lettore TTS"
       ],
       "Player initialization count": [
-        "Conteo de inicialización del reproductor"
+        "Conteggio inizializzazioni lettore"
       ],
       "Total play button clicks": [
-        "Total de clics en el botón de reproducción"
+        "Clic totali sul pulsante di riproduzione"
       ],
       "Time (Min)": [
-        "Tiempo (Min)"
+        "Tempo (Min)"
       ],
       "Total listening time": [
-        "Tiempo total de escucha"
+        "Tempo totale di ascolto"
       ],
       "Total pause actions": [
-        "Total de acciones de pausa"
+        "Azioni di pausa totali"
       ],
       "Total MP3 downloads": [
-        "Total de descargas MP3"
+        "Download MP3 totali"
       ],
       "Total completions": [
-        "Total de finalizaciones"
+        "Completamenti totali"
       ],
       "Bounce Rate": [
-        "Tasa de rebote"
+        "Frequenza di Rimbalzo"
       ],
       "Users who didn't complete the audio": [
-        "Usuarios que no completaron el audio"
+        "Utenti che non hanno completato l'audio"
       ],
       "TTS Player Analytics Summary": [
-        "Resumen de analíticas del reproductor TTS"
+        "Riepilogo Analisi Lettore TTS"
       ],
       "Total Interactions:": [
-        "Interacciones totales:"
+        "Interazioni Totali:"
       ],
       "Please enable analytics first.": [
-        "Por favor, active primero las analíticas."
+        "Attiva prima l'analisi."
       ],
       "Date Range is only available in Pro version": [
-        "El rango de fechas solo está disponible en la versión Pro"
+        "L'Intervallo di Date è disponibile solo nella versione Pro"
       ],
       "Please provide a Post ID or date range.": [
-        "Por favor, proporcione un ID de entrada o un rango de fechas."
+        "Fornisci un ID articolo o un intervallo di date."
       ],
       "Track Post IDs": [
-        "Rastrear IDs de entradas"
+        "Traccia ID Articoli"
       ],
       "Tracking more than 5 post IDs is a Pro feature": [
-        "Rastrear más de 5 IDs de entradas es una función Pro"
+        "Tracciare più di 5 ID articolo è una funzionalità Pro"
       ],
       "Post ID": [
-        "ID de entrada"
+        "ID Articolo"
       ],
       "Search": [
-        "Buscar"
+        "Cerca"
       ],
       "Clear": [
-        "Limpiar"
+        "Cancella"
       ],
       "Showing results for:": [
-        "Mostrando resultados para:"
+        "Risultati per:"
       ],
       "Post ID:": [
-        "ID de entrada:"
+        "ID Articolo:"
       ],
       "From:": [
-        "Desde:"
+        "Da:"
       ],
       "To:": [
-        "Hasta:"
+        "A:"
       ],
       "Metric": [
-        "Métrica"
+        "Metrica"
       ],
       "Value": [
-        "Valor"
+        "Valore"
       ],
       "Unlock 10+ more metrics with Pro": [
-        "Desbloquee más de 10 métricas adicionales con Pro"
+        "Sblocca più di 10 metriche con Pro"
       ],
       "Add ACF Fields To Posts": [
-        "Agregar campos ACF a las entradas"
+        "Aggiungi Campi ACF agli Articoli"
       ],
       "Adding more than 1  ACF field is a pro feature": [
-        "Agregar más de 1 campo ACF es una función Pro"
+        "Aggiungere più di 1 campo ACF è una funzionalità pro"
       ],
       "Loading": [
-        "Cargando"
+        "Caricamento"
       ],
       "Before Content": [
-        "Antes del contenido"
+        "Prima del Contenuto"
       ],
       "After Content": [
-        "Después del contenido"
+        "Dopo il Contenuto"
       ],
       "Bottom Fixed (Pro)": [
-        "Fijo inferior (Pro)"
+        "Fondo Fisso (Pro)"
       ],
       "Bottom Left (Pro)": [
-        "Inferior izquierda (Pro)"
+        "Fondo Sinistra (Pro)"
       ],
       "Bottom Right (Pro)": [
-        "Inferior derecha (Pro)"
+        "Fondo Destra (Pro)"
       ],
       "Bottom Center (Pro)": [
-        "Inferior centro (Pro)"
+        "Fondo Centro (Pro)"
       ],
       "Select Player": [
-        "Seleccionar reproductor"
+        "Seleziona Lettore"
       ],
       "Select Button Position": [
-        "Seleccionar posición del botón"
+        "Seleziona Posizione Pulsante"
       ],
       "Select where to display the player button": [
-        "Seleccionar dónde mostrar el botón del reproductor"
+        "Seleziona dove visualizzare il pulsante del lettore"
       ],
       "Display Player To": [
-        "Mostrar reproductor a"
+        "Mostra Lettore A"
       ],
       "Choose who can see the player": [
-        "Elegir quién puede ver el reproductor"
+        "Scegli chi può vedere il lettore"
       ],
       "Player display restriction to multiple user type is available in the pro version": [
-        "La restricción de visualización del reproductor para múltiples tipos de usuario está disponible en la versión Pro"
+        "La restrizione di visualizzazione del lettore per più tipi di utente è disponibile nella versione pro"
       ],
       "Who Can Download MP3 File": [
-        "Quién puede descargar el archivo MP3"
+        "Chi Può Scaricare il File MP3"
       ],
       "MP3 Generation From Post's Publish Date": [
-        "Generación de MP3 desde la fecha de publicación de la entrada"
+        "Generazione MP3 dalla Data di Pubblicazione dell'Articolo"
       ],
       "Start Generating MP3 file from an specific post publish date. Select this only if you want to generate mp3 file based on date range.": [
-        "Comenzar a generar archivos MP3 desde una fecha de publicación específica. Seleccione esto solo si desea generar archivos MP3 basados en un rango de fechas."
+        "Inizia a generare file MP3 da una data specifica di pubblicazione dell'articolo. Seleziona questo solo se vuoi generare file MP3 in base a un intervallo di date."
       ],
       "?": [
         "?"
       ],
       "Generate MP3 File Date From": [
-        "Generar archivo MP3 desde la fecha"
+        "Genera File MP3 dalla Data"
       ],
       "MP3 Generation Till Post's Publish Date": [
-        "Generación de MP3 hasta la fecha de publicación de la entrada"
+        "Generazione MP3 Fino alla Data di Pubblicazione dell'Articolo"
       ],
       "Start Generating MP3 file till an specific post publish date. Select this only if you want to generate mp3 file based on date range.": [
-        "Generar archivos MP3 hasta una fecha de publicación específica. Seleccione esto solo si desea generar archivos MP3 basados en un rango de fechas."
+        "Genera file MP3 fino a una data specifica di pubblicazione dell'articolo. Seleziona questo solo se vuoi generare file MP3 in base a un intervallo di date."
       ],
       "Generate MP3 File Date To": [
-        "Generar archivo MP3 hasta la fecha"
+        "Genera File MP3 Fino alla Data"
       ],
       "Player Customization": [
-        "Personalización del reproductor"
+        "Personalizzazione del Lettore"
       ],
       "Value should be between 0-100": [
-        "El valor debe estar entre 0 y 100"
+        "Il valore deve essere compreso tra 0-100"
       ],
       "This option is only available for the pro version.": [
-        "Esta opción solo está disponible para la versión Pro."
+        "Questa opzione è disponibile solo per la versione pro."
       ],
       "Please fill the  field : ": [
-        "Por favor, complete el campo: "
+        "Compila il campo: "
       ],
       "To select this player, you must authenticate first from the Integration menu": [
-        "Para seleccionar este reproductor, primero debe autenticarse desde el menú de Integración"
+        "Per selezionare questo lettore, devi prima autenticarti dal menu Integrazione"
       ],
       "Google Cloud TTS player is only available in the pro version.": [
-        "El reproductor Google Cloud TTS solo está disponible en la versión Pro."
+        "Il lettore Google Cloud TTS è disponibile solo nella versione pro."
       ],
       "To select this player you have to authenticate first from Integration menu": [
-        "Para seleccionar este reproductor debe autenticarse primero desde el menú de Integración"
+        "Per selezionare questo lettore devi prima autenticarti dal menu Integrazione"
       ],
       "ChatGPT TTS player is only available in the pro version.": [
-        "El reproductor ChatGPT TTS solo está disponible en la versión Pro."
+        "Il lettore ChatGPT TTS è disponibile solo nella versione pro."
       ],
       "ElevenLabs TTS player is only available in the pro version.": [
-        "El reproductor ElevenLabs TTS solo está disponible en la versión Pro."
+        "Il lettore ElevenLabs TTS è disponibile solo nella versione pro."
       ],
       "Default Pro player is only available in the pro version.": [
-        "El reproductor Pro predeterminado solo está disponible en la versión Pro."
+        "Il lettore Pro Predefinito è disponibile solo nella versione pro."
       ],
       "Text To Speech plugin stores synthesized content in the uploads folder. Your uploads folder is not writable. Please make the uploads folder writable to enjoy all features of the plugin.": [
-        "El plugin de texto a voz almacena el contenido sintetizado en la carpeta de subidas. Su carpeta de subidas no es escribible. Por favor, haga que la carpeta de subidas sea escribible para disfrutar de todas las funciones del plugin."
+        "Il plugin Text To Speech memorizza il contenuto sintetizzato nella cartella uploads. La tua cartella uploads non è scrivibile. Rendi la cartella uploads scrivibile per usufruire di tutte le funzionalità del plugin."
       ],
       "Customization saved.": [
-        "Personalización guardada."
+        "Personalizzazione salvata."
       ],
       "Now go to the \"Listening\" menu to select proper language and voice.": [
-        "Ahora vaya al menú \"Escucha\" para seleccionar el idioma y la voz adecuados."
+        "Ora vai al menu \"Ascolto\" per selezionare la lingua e la voce appropriate."
       ],
       "Default": [
-        "Predeterminado"
+        "Predefinito"
       ],
       "Default Pro": [
-        "Pro predeterminado"
+        "Pro Predefinito"
       ],
       "Customization": [
-        "Personalización"
+        "Personalizzazione"
       ],
       "Customize the player & design to match your brand and preferences.": [
-        "Personalice el reproductor y el diseño para que coincida con su marca y preferencias."
+        "Personalizza il lettore e il design per adattarli al tuo marchio e alle tue preferenze."
       ],
       "Write here something and click listen button": [
-        "Escriba algo aquí y haga clic en el botón de escuchar"
+        "Scrivi qualcosa qui e clicca il pulsante ascolta"
       ],
       " Enter your text here and click the listen button to hear it spoken aloud.": [
-        " Ingrese su texto aquí y haga clic en el botón de escuchar para oírlo en voz alta."
+        " Inserisci il tuo testo qui e clicca il pulsante ascolta per sentirlo letto ad alta voce."
       ],
       "Watch Tutorial": [
-        "Ver tutorial"
+        "Guarda il Tutorial"
       ],
       "Write here something and click listen button.": [
-        "Escriba algo aquí y haga clic en el botón de escuchar."
+        "Scrivi qualcosa qui e clicca il pulsante ascolta."
       ],
       "Text To Audio:  Tap to listen post.": [
-        "Texto a Audio: Toca para escuchar la entrada."
+        "Testo in Audio: Tocca per ascoltare l'articolo."
       ],
       "Design Customization": [
-        "Personalización del diseño"
+        "Personalizzazione del Design"
       ],
       "Short Code | Attributes value must be wrapped with double quotation ( \" )": [
-        "Código corto | Los valores de los atributos deben estar entre comillas dobles ( \" )"
+        "Shortcode | I valori degli attributi devono essere racchiusi tra virgolette doppie ( \" )"
       ],
       "tta_play_btn_shortcode": [
         "tta_play_btn_shortcode"
       ],
       "Copied ShortCode": [
-        "Código corto copiado"
+        "Shortcode Copiato"
       ],
       "Copy Shortcode": [
-        "Copiar código corto"
+        "Copia Shortcode"
       ],
       "Choose player background color": [
-        "Elegir color de fondo del reproductor"
+        "Scegli il colore di sfondo del lettore"
       ],
       "Choose your color": [
-        "Elige tu color"
+        "Scegli il tuo colore"
       ],
       "Hover BG Color": [
-        "Color de fondo al pasar"
+        "Colore Sfondo al Passaggio"
       ],
       "Choose your hover background color": [
-        "Elige tu color de fondo al pasar el cursor"
+        "Scegli il colore di sfondo al passaggio del mouse"
       ],
       "Hover Text Color": [
-        "Color del texto al pasar"
+        "Colore Testo al Passaggio"
       ],
       "Choose your hover text color": [
-        "Elige tu color de texto al pasar el cursor"
+        "Scegli il colore del testo al passaggio del mouse"
       ],
       "Margin Size (Px)": [
-        "Tamaño del margen (Px)"
+        "Dimensione Margine (Px)"
       ],
       "Top": [
-        "Superior"
+        "Alto"
       ],
       "Margin Top": [
-        "Margen superior"
+        "Margine Superiore"
       ],
       "Bottom": [
-        "Inferior"
+        "Basso"
       ],
       "Margin Bottom": [
-        "Margen inferior"
+        "Margine Inferiore"
       ],
       "Left": [
-        "Izquierda"
+        "Sinistra"
       ],
       "Margin Left": [
-        "Margen izquierdo"
+        "Margine Sinistro"
       ],
       "Right": [
-        "Derecha"
+        "Destra"
       ],
       "Margin Right": [
-        "Margen derecho"
+        "Margine Destro"
       ],
       "Button Style": [
-        "Estilo del botón"
+        "Stile Pulsante"
       ],
       "Height": [
-        "Altura"
+        "Altezza"
       ],
       "Button Height": [
-        "Altura del botón"
+        "Altezza Pulsante"
       ],
       "Border": [
-        "Borde"
+        "Bordo"
       ],
       "Button Border": [
-        "Borde del botón"
+        "Bordo Pulsante"
       ],
       "Border Color": [
-        "Color del borde"
+        "Colore Bordo"
       ],
       "Font Size": [
-        "Tamaño de fuente"
+        "Dimensione Carattere"
       ],
       "Radius": [
-        "Radio"
+        "Raggio"
       ],
       "Border Radius": [
-        "Radio del borde"
+        "Raggio Bordo"
       ],
       "Button Properties": [
-        "Propiedades del botón"
+        "Proprietà Pulsante"
       ],
       "Width": [
-        "Ancho"
+        "Larghezza"
       ],
       "Button Width": [
-        "Ancho del botón"
+        "Larghezza Pulsante"
       ],
       "Enter Custom CSS here": [
-        "Ingrese CSS personalizado aquí"
+        "Inserisci CSS personalizzato qui"
       ],
       "1. Browser support issues on Android and desktop": [
-        "1. Problemas de compatibilidad del navegador en Android y escritorio"
+        "1. Problemi di supporto browser su Android e desktop"
       ],
       "This plugin is built using the browser SpeechSynthesis API. No external API is used.": [
-        "Este plugin está construido usando la API SpeechSynthesis del navegador. No se utiliza ninguna API externa."
+        "Questo plugin è costruito usando l'API SpeechSynthesis del browser. Nessuna API esterna viene utilizzata."
       ],
       "View SpeechSynthesis documentation": [
-        "Ver documentación de SpeechSynthesis"
+        "Visualizza documentazione SpeechSynthesis"
       ],
       "Browser and device support varies, so available voices and languages may differ between desktop and mobile devices.": [
-        "La compatibilidad de navegadores y dispositivos varía, por lo que las voces e idiomas disponibles pueden diferir entre dispositivos de escritorio y móviles."
+        "Il supporto browser e dispositivo varia, quindi le voci e le lingue disponibili possono differire tra desktop e dispositivi mobili."
       ],
       "Submit a support ticket": [
-        "Enviar un ticket de soporte"
+        "Invia un ticket di supporto"
       ],
       "There are no browser limitations in the Pro version.": [
-        "No hay limitaciones de navegador en la versión Pro."
+        "Non ci sono limitazioni del browser nella versione Pro."
       ],
       "2. Different voices or languages on mobile": [
-        "2. Diferentes voces o idiomas en dispositivos móviles"
+        "2. Voci o lingue diverse su dispositivi mobili"
       ],
       "SpeechSynthesis support varies between browsers and devices. Some voices may be available on desktop but not on mobile.": [
-        "La compatibilidad de SpeechSynthesis varía entre navegadores y dispositivos. Algunas voces pueden estar disponibles en escritorio pero no en dispositivos móviles."
+        "Il supporto SpeechSynthesis varia tra browser e dispositivi. Alcune voci potrebbero essere disponibili su desktop ma non su dispositivi mobili."
       ],
       "The Pro version does not have these limitations.": [
-        "La versión Pro no tiene estas limitaciones."
+        "La versione Pro non ha queste limitazioni."
       ],
       "3. Can I exclude certain words from playback?": [
-        "3. ¿Puedo excluir ciertas palabras de la reproducción?"
+        "3. Posso escludere determinate parole dalla riproduzione?"
       ],
       "Yes. You can exclude specific words or phrases in the Pro version.": [
-        "Sí. Puede excluir palabras o frases específicas en la versión Pro."
+        "Sì. Puoi escludere parole o frasi specifiche nella versione Pro."
       ],
       "Use the pipe (|) symbol to separate multiple words or phrases.": [
-        "Use el símbolo de barra vertical (|) para separar múltiples palabras o frases."
+        "Usa il simbolo pipe (|) per separare più parole o frasi."
       ],
       "4. Can I exclude specific HTML tags from playback?": [
-        "4. ¿Puedo excluir etiquetas HTML específicas de la reproducción?"
+        "4. Posso escludere specifici tag HTML dalla riproduzione?"
       ],
       "The Pro version allows excluding content wrapped in specific HTML tags.": [
-        "La versión Pro permite excluir contenido envuelto en etiquetas HTML específicas."
+        "La versione Pro permette di escludere contenuto racchiuso in specifici tag HTML."
       ],
       "Use the pipe (|) symbol to exclude multiple tags.": [
-        "Use el símbolo de barra vertical (|) para excluir múltiples etiquetas."
+        "Usa il simbolo pipe (|) per escludere più tag."
       ],
       "5. How can I change button text?": [
-        "5. ¿Cómo puedo cambiar el texto del botón?"
+        "5. Come posso cambiare il testo del pulsante?"
       ],
       "Button text can be changed using shortcode attributes or filters. Filters always override shortcode values.": [
-        "El texto del botón se puede cambiar usando atributos de código corto o filtros. Los filtros siempre anulan los valores del código corto."
+        "Il testo del pulsante può essere cambiato usando gli attributi dello shortcode o i filtri. I filtri sovrascrivono sempre i valori dello shortcode."
       ],
       "6. How do I add a custom CSS class to the button?": [
-        "6. ¿Cómo agrego una clase CSS personalizada al botón?"
+        "6. Come aggiungo una classe CSS personalizzata al pulsante?"
       ],
       "7. Backend filters (Free version)": [
-        "7. Filtros del backend (versión gratuita)"
+        "7. Filtri backend (versione Gratuita)"
       ],
       "Filter": [
         "Filtro"
       ],
       "Arguments": [
-        "Argumentos"
+        "Argomenti"
       ],
       "ChatGPT TTS feature is only in pro version.": [
-        "La función ChatGPT TTS solo está en la versión Pro."
+        "La funzionalità ChatGPT TTS è disponibile solo nella versione pro."
       ],
       "ChatGPT text to speech feature is only in pro version.": [
-        "La función de texto a voz de ChatGPT solo está en la versión Pro."
+        "La funzionalità testo in voce ChatGPT è disponibile solo nella versione pro."
       ],
       "Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.": [
-        "El plugin de Texto a Voz almacena el contenido sintetizado en la carpeta de subidas. Su carpeta de subidas no tiene permisos de escritura. Por favor, haga que la carpeta de subidas sea escribible para disfrutar de todas las funciones del plugin."
+        "Il plugin Text To Speech memorizza il contenuto sintetizzato nella cartella uploads. La tua cartella uploads non è scrivibile. Rendi la cartella uploads scrivibile per usufruire di tutte le funzionalità del plugin."
       ],
       "API key is saved successfully": [
-        "Clave API guardada correctamente"
+        "Chiave API salvata con successo"
       ],
       "Something went wrong": [
-        "Algo salió mal"
+        "Qualcosa è andato storto"
       ],
       "Set ChatGPT API key": [
-        "Configurar clave API de ChatGPT"
+        "Imposta chiave API ChatGPT"
       ],
       "paste here chatgpt_tts_api_key": [
-        "pegue aquí chatgpt_tts_api_key"
+        "incolla qui chatgpt_tts_api_key"
       ],
       "Submit": [
-        "Enviar"
+        "Invia"
       ],
       "How to get chatGPT API key?": [
-        "¿Cómo obtener la clave API de ChatGPT?"
+        "Come ottenere la chiave API ChatGPT?"
       ],
       "Click here": [
-        "Haga clic aquí"
+        "Clicca qui"
       ],
       "ElevenLabs TTS feature is only in pro version.": [
-        "La función ElevenLabs TTS solo está en la versión Pro."
+        "La funzionalità ElevenLabs TTS è disponibile solo nella versione pro."
       ],
       "ElevenLabs text to speech feature is only in pro version.": [
-        "La función de texto a voz de ElevenLabs solo está en la versión Pro."
+        "La funzionalità testo in voce ElevenLabs è disponibile solo nella versione pro."
       ],
       "Set ElevenLabs API key": [
-        "Configurar clave API de ElevenLabs"
+        "Imposta chiave API ElevenLabs"
       ],
       "paste here elevenlabs_api_key": [
-        "pegue aquí elevenlabs_api_key"
+        "incolla qui elevenlabs_api_key"
       ],
       "How to get ElevenLabs API key?": [
-        "¿Cómo obtener la clave API de ElevenLabs?"
+        "Come ottenere la chiave API ElevenLabs?"
       ],
       "Backup MP3 Files To Google Cloud Storage Can Be Enabled If Google Text To Speech Is Authenticated.": [
-        "La copia de seguridad de archivos MP3 en Google Cloud Storage se puede activar si Google Text To Speech está autenticado."
+        "Il Backup dei File MP3 su Google Cloud Storage può essere attivato se Google Text To Speech è autenticato."
       ],
       "This is not a service account file. The \"type\" field must be \"service_account\". You may have downloaded the wrong file type.": [
-        "Este no es un archivo de cuenta de servicio. El campo \"type\" debe ser \"service_account\". Es posible que haya descargado el tipo de archivo incorrecto."
+        "Questo non è un file di account di servizio. Il campo \"type\" deve essere \"service_account\". Potresti aver scaricato il tipo di file sbagliato."
       ],
       "Invalid service account file. Missing required fields: %s": [
-        "Archivo de cuenta de servicio no válido. Faltan campos requeridos: %s"
+        "File account di servizio non valido. Campi obbligatori mancanti: %s"
       ],
       "The uploaded file is not valid JSON. Please make sure you downloaded the correct service account key file.": [
-        "El archivo subido no es un JSON válido. Por favor, asegúrese de haber descargado el archivo de clave de cuenta de servicio correcto."
+        "Il file caricato non è un JSON valido. Assicurati di aver scaricato il file chiave dell'account di servizio corretto."
       ],
       "Could not read the file. Please try again.": [
-        "No se pudo leer el archivo. Por favor, inténtelo de nuevo."
+        "Impossibile leggere il file. Riprova."
       ],
       "Google cloud text to speech feature is only in pro version.": [
-        "La función de Google Cloud Text to Speech solo está en la versión Pro."
+        "La funzionalità Google Cloud testo in voce è disponibile solo nella versione pro."
       ],
       "Please create a valid bucket name first": [
-        "Por favor, cree primero un nombre de bucket válido"
+        "Crea prima un nome bucket valido"
       ],
       "Settings saved successfully.": [
-        "Configuración guardada correctamente."
+        "Impostazioni salvate con successo."
       ],
       "Please select a service account JSON file first.": [
-        "Por favor, seleccione primero un archivo JSON de cuenta de servicio."
+        "Seleziona prima un file JSON dell'account di servizio."
       ],
       "File uploaded successfully. You can now test the connection below.": [
-        "Archivo subido correctamente. Ahora puede probar la conexión a continuación."
+        "File caricato con successo. Ora puoi testare la connessione qui sotto."
       ],
       "You are already authenticated": [
-        "Ya está autenticado"
+        "Sei già autenticato"
       ],
       "You have to be authenticated to revoke.": [
-        "Debe estar autenticado para revocar."
+        "Devi essere autenticato per revocare."
       ],
       "Do you want to revoke access and delete the file uploaded during authentication. If you delete the file you have to upload the file again. Make sure you have a backup otherwise, you have to crete another auth file from Google Cloud text to speech.": [
-        "¿Desea revocar el acceso y eliminar el archivo subido durante la autenticación? Si elimina el archivo, tendrá que subirlo de nuevo. Asegúrese de tener una copia de seguridad, de lo contrario tendrá que crear otro archivo de autenticación desde Google Cloud Text to Speech."
+        "Vuoi revocare l'accesso ed eliminare il file caricato durante l'autenticazione? Se elimini il file dovrai caricarlo di nuovo. Assicurati di avere un backup, altrimenti dovrai creare un altro file di autenticazione da Google Cloud text to speech."
       ],
       "Authentication removed.": [
-        "Autenticación eliminada."
+        "Autenticazione rimossa."
       ],
       "Network error. Please try again.": [
-        "Error de red. Por favor, inténtelo de nuevo."
+        "Errore di rete. Riprova."
       ],
       "BCMath extension is not enabled. Please enable this extension. Learn more how to enable.": [
-        "La extensión BCMath no está habilitada. Por favor, habilite esta extensión. Más información sobre cómo habilitarla."
+        "L'estensione BCMath non è attivata. Attiva questa estensione. Scopri come attivarla."
       ],
       "This bucket is already have to your cloud storage.": [
-        "Este bucket ya existe en su almacenamiento en la nube."
+        "Questo bucket esiste già nel tuo cloud storage."
       ],
       "Are you sure you want to create a bucket named \"%1$s\"? You already have a bucket named \"%2$s\". If you create a new bucket, all MP3 files will be generated again. Please decide carefully.": [
-        "¿Está seguro de que desea crear un bucket llamado \"%1$s\"? Ya tiene un bucket llamado \"%2$s\". Si crea un nuevo bucket, todos los archivos MP3 se generarán de nuevo. Por favor, decida con cuidado."
+        "Sei sicuro di voler creare un bucket chiamato \"%1$s\"? Hai già un bucket chiamato \"%2$s\". Se crei un nuovo bucket, tutti i file MP3 saranno rigenerati. Decidi con attenzione."
       ],
       "BCMath Extension Missing": [
-        "Falta la extensión BCMath"
+        "Estensione BCMath Mancante"
       ],
       "The BCMath PHP extension is required for Google Cloud TTS. ": [
-        "La extensión PHP BCMath es necesaria para Google Cloud TTS. "
+        "L'estensione PHP BCMath è richiesta per Google Cloud TTS. "
       ],
       "Learn how to enable it": [
-        "Aprenda cómo habilitarla"
+        "Scopri come attivarla"
       ],
       "Uploads Folder Not Writable": [
-        "Carpeta de subidas sin permisos de escritura"
+        "Cartella Uploads Non Scrivibile"
       ],
       "The uploads folder must be writable to store generated audio files. Please check your server file permissions.": [
-        "La carpeta de subidas debe tener permisos de escritura para almacenar los archivos de audio generados. Por favor, verifique los permisos de archivo de su servidor."
+        "La cartella uploads deve essere scrivibile per memorizzare i file audio generati. Controlla i permessi dei file del tuo server."
       ],
       "Setup Guide": [
-        "Guía de configuración"
+        "Guida alla Configurazione"
       ],
       "Hide": [
-        "Ocultar"
+        "Nascondi"
       ],
       "Show": [
-        "Mostrar"
+        "Mostra"
       ],
       "Go to": [
-        "Ir a"
+        "Vai a"
       ],
       "Google Cloud Console": [
-        "Google Cloud Console"
+        "Console Google Cloud"
       ],
       "and create a project (or select an existing one).": [
-        "y cree un proyecto (o seleccione uno existente)."
+        "e crea un progetto (o selezionane uno esistente)."
       ],
       "Enable the": [
-        "Habilitar el"
+        "Attiva il"
       ],
       "Cloud Text-to-Speech API": [
         "API Cloud Text-to-Speech"
       ],
       "Optional, for Cloud Storage backup": [
-        "Opcional, para copia de seguridad en Cloud Storage"
+        "Opzionale, per backup Cloud Storage"
       ],
       "Cloud Storage API": [
         "API Cloud Storage"
       ],
       "IAM & Admin > Service Accounts": [
-        "IAM y administración > Cuentas de servicio"
+        "IAM e Admin > Account di Servizio"
       ],
       "and create a new service account.": [
-        "y cree una nueva cuenta de servicio."
+        "e crea un nuovo account di servizio."
       ],
       "Assign roles:": [
-        "Asignar roles:"
+        "Assegna ruoli:"
       ],
       "Cloud Text-to-Speech User": [
-        "Usuario de Cloud Text-to-Speech"
+        "Utente Cloud Text-to-Speech"
       ],
       "(required)": [
-        "(requerido)"
+        "(richiesto)"
       ],
       "Storage Admin": [
-        "Administrador de almacenamiento"
+        "Admin Archiviazione"
       ],
       "only if using Cloud Storage backup": [
-        "solo si usa copia de seguridad en Cloud Storage"
+        "solo se si usa il backup Cloud Storage"
       ],
       "Click on the service account > \"Keys\" tab > \"Add Key\" > \"Create new key\" > select \"JSON\".": [
-        "Haga clic en la cuenta de servicio > pestaña \"Claves\" > \"Agregar clave\" > \"Crear nueva clave\" > seleccione \"JSON\"."
+        "Clicca sull'account di servizio > scheda \"Chiavi\" > \"Aggiungi Chiave\" > \"Crea nuova chiave\" > seleziona \"JSON\"."
       ],
       "Upload the downloaded JSON file below.": [
-        "Suba el archivo JSON descargado a continuación."
+        "Carica il file JSON scaricato qui sotto."
       ],
       "Video Tutorial": [
-        "Tutorial en video"
+        "Video Tutorial"
       ],
       "Learn How To Integrate Google Text To Speech With AtlasVoice Pro Plugin?": [
-        "¿Aprenda cómo integrar Google Text To Speech con el plugin AtlasVoice Pro?"
+        "Scopri Come Integrare Google Text To Speech con il Plugin AtlasVoice Pro?"
       ],
       "Authentication": [
-        "Autenticación"
+        "Autenticazione"
       ],
       "Click here to Upload": [
-        "Haga clic aquí para subir"
+        "Clicca qui per Caricare"
       ],
       "Upload service account JSON file": [
-        "Subir archivo JSON de cuenta de servicio"
+        "Carica file JSON account di servizio"
       ],
       "Service Account:": [
-        "Cuenta de servicio:"
+        "Account di Servizio:"
       ],
       "Project:": [
-        "Proyecto:"
+        "Progetto:"
       ],
       "IAM Console": [
-        "Consola IAM"
+        "Console IAM"
       ],
       "Connection Test": [
-        "Prueba de conexión"
+        "Test di Connessione"
       ],
       "Verify that your service account can connect to Google Cloud Text-to-Speech API.": [
-        "Verifique que su cuenta de servicio pueda conectarse a la API Google Cloud Text-to-Speech."
+        "Verifica che il tuo account di servizio possa connettersi all'API Google Cloud Text-to-Speech."
       ],
       "Testing...": [
-        "Probando..."
+        "Test in corso..."
       ],
       "Test TTS Connection": [
-        "Probar conexión TTS"
+        "Testa Connessione TTS"
       ],
       "Storage Configuration": [
-        "Configuración de almacenamiento"
+        "Configurazione Archiviazione"
       ],
       "Store MP3 Files To Google Cloud Storage": [
-        "Almacenar archivos MP3 en Google Cloud Storage"
+        "Archivia File MP3 su Google Cloud Storage"
       ],
       "Click To Know How To Enable Automatic Store To Google Cloud Storage": [
-        "Haga clic para saber cómo activar el almacenamiento automático en Google Cloud Storage"
+        "Clicca per Sapere Come Attivare l'Archiviazione Automatica su Google Cloud Storage"
       ],
       "Automatically sync generated audio files in cloud storage for store & easy access.": [
-        "Sincronice automáticamente los archivos de audio generados en el almacenamiento en la nube para guardar y acceder fácilmente."
+        "Sincronizza automaticamente i file audio generati nel cloud storage per archiviazione e accesso facile."
       ],
       "Required:": [
-        "Requerido:"
+        "Richiesto:"
       ],
       "Your service account needs the \"Storage Admin\" role to use Cloud Storage.": [
-        "Su cuenta de servicio necesita el rol \"Administrador de almacenamiento\" para usar Cloud Storage."
+        "Il tuo account di servizio necessita del ruolo \"Admin Archiviazione\" per usare Cloud Storage."
       ],
       "Assign it to": [
-        "Asígnelo a"
+        "Assegnalo a"
       ],
       "in": [
-        "en"
+        "in"
       ],
       "Open IAM Console": [
-        "Abrir consola IAM"
+        "Apri Console IAM"
       ],
       "Test Storage Access": [
-        "Probar acceso al almacenamiento"
+        "Testa Accesso Archiviazione"
       ],
       "Google Cloud Storage Bucket Name": [
-        "Nombre del bucket de Google Cloud Storage"
+        "Nome Bucket Google Cloud Storage"
       ],
       "Click Here To Know Bucket Name Rules": [
-        "Haga clic aquí para conocer las reglas de nombres de bucket"
+        "Clicca Qui per Conoscere le Regole del Nome Bucket"
       ],
       "Create": [
-        "Crear"
+        "Crea"
       ],
       "Remove Authentication": [
-        "Eliminar autenticación"
+        "Rimuovi Autenticazione"
       ],
       "Integration Setup": [
-        "Configuración de integración"
+        "Configurazione Integrazione"
       ],
       "AtlasVoice Pro works fully fine even without Google TTS/ChatGPT integration.": [
-        "AtlasVoice Pro funciona perfectamente incluso sin la integración de Google TTS/ChatGPT."
+        "AtlasVoice Pro funziona perfettamente anche senza integrazione Google TTS/ChatGPT."
       ],
       "Select Text To Speech Service": [
-        "Seleccionar servicio de texto a voz"
+        "Seleziona Servizio Text To Speech"
       ],
       "-- Select a service --": [
-        "-- Seleccionar un servicio --"
+        "-- Seleziona un servizio --"
       ],
       "Google Cloud TTS": [
         "Google Cloud TTS"
@@ -1111,67 +1111,67 @@
         "ElevenLabs TTS"
       ],
       "ElevenLabs Usage": [
-        "Uso de ElevenLabs"
+        "Utilizzo ElevenLabs"
       ],
       "characters": [
-        "caracteres"
+        "caratteri"
       ],
       "Plan:": [
-        "Plan:"
+        "Piano:"
       ],
       "Resets:": [
-        "Se restablece:"
+        "Si reimposta:"
       ],
       "View detailed usage and billing at": [
-        "Ver uso detallado y facturación en"
+        "Visualizza utilizzo dettagliato e fatturazione su"
       ],
       "OpenAI TTS Usage": [
-        "Uso de OpenAI TTS"
+        "Utilizzo OpenAI TTS"
       ],
       "Google Cloud TTS Usage": [
-        "Uso de Google Cloud TTS"
+        "Utilizzo Google Cloud TTS"
       ],
       "Listening settings saved. Now all setup done. Enjoy": [
-        "Configuración de escucha guardada. Toda la configuración está lista. Disfrute"
+        "Impostazioni di ascolto salvate. Configurazione completata. Buon ascolto"
       ],
       "Listening Preferences": [
-        "Preferencias de escucha"
+        "Preferenze di Ascolto"
       ],
       "Set your listening preferences with different voices and languages.": [
-        "Configure sus preferencias de escucha con diferentes voces e idiomas."
+        "Imposta le tue preferenze di ascolto con diverse voci e lingue."
       ],
       "Voice Language": [
-        "Idioma de la voz"
+        "Lingua della Voce"
       ],
       "Default Listening Language": [
-        "Idioma de escucha predeterminado"
+        "Lingua di Ascolto Predefinita"
       ],
       "Voice to speak": [
-        "Voz para hablar"
+        "Voce per parlare"
       ],
       "Default Listening Voice": [
-        "Voz de escucha predeterminada"
+        "Voce di Ascolto Predefinita"
       ],
       "Voice Speed": [
-        "Velocidad de la voz"
+        "Velocità della Voce"
       ],
       "Voice Volume": [
-        "Volumen de la voz"
+        "Volume della Voce"
       ],
       "Voice Pitch": [
-        "Tono de la voz"
+        "Tonalità della Voce"
       ],
       "Default Listening Pitch": [
-        "Tono de escucha predeterminado"
+        "Tonalità di Ascolto Predefinita"
       ],
       "Your browser does not support the audio element.": [
-        "Su navegador no soporta el elemento de audio."
+        "Il tuo browser non supporta l'elemento audio."
       ],
       "Voice Model": [
-        "Modelo de voz"
+        "Modello di Voce"
       ],
       "Default Listening Model": [
-        "Modelo de escucha predeterminado"
+        "Modello di Ascolto Predefinito"
       ],
       "TTS-1": [
         "TTS-1"
@@ -1180,10 +1180,10 @@
         "TTS-1 HD"
       ],
       "Model": [
-        "Modelo"
+        "Modello"
       ],
       "Multilingual v2": [
-        "Multilingüe v2"
+        "Multilingue v2"
       ],
       "Turbo v2.5": [
         "Turbo v2.5"
@@ -1195,10 +1195,10 @@
         "Eleven v3"
       ],
       "Output Format": [
-        "Formato de salida"
+        "Formato di Uscita"
       ],
       "MP3 44100Hz 128kbps (Default)": [
-        "MP3 44100Hz 128kbps (Predeterminado)"
+        "MP3 44100Hz 128kbps (Predefinito)"
       ],
       "MP3 44100Hz 192kbps": [
         "MP3 44100Hz 192kbps"
@@ -1213,229 +1213,229 @@
         "MP3 22050Hz 32kbps"
       ],
       "Stability": [
-        "Estabilidad"
+        "Stabilità"
       ],
       "More variable": [
-        "Más variable"
+        "Più variabile"
       ],
       "More stable": [
-        "Más estable"
+        "Più stabile"
       ],
       "Similarity Boost": [
-        "Impulso de similitud"
+        "Incremento Somiglianza"
       ],
       "High": [
         "Alto"
       ],
       "Style Exaggeration": [
-        "Exageración de estilo"
+        "Esagerazione Stile"
       ],
       "None": [
-        "Ninguno"
+        "Nessuno"
       ],
       "Exaggerated": [
-        "Exagerado"
+        "Esagerato"
       ],
       "Speaker Boost": [
-        "Impulso del hablante"
+        "Incremento Voce"
       ],
       "Language mapping for WPML, GTranslate plugin is available in the pro version.": [
-        "El mapeo de idiomas para los plugins WPML y GTranslate está disponible en la versión Pro."
+        "La mappatura linguistica per i plugin WPML, GTranslate è disponibile nella versione pro."
       ],
       "Select Language For{\" \"}": [
-        "Seleccionar idioma para{\" \"}"
+        "Seleziona Lingua Per{\" \"}"
       ],
       "Select Voice For{\" \"}": [
-        "Seleccionar voz para{\" \"}"
+        "Seleziona Voce Per{\" \"}"
       ],
       "Current Player Voice": [
-        "Voz actual del reproductor"
+        "Voce Attuale del Lettore"
       ],
       "Recording Data Saved": [
-        "Datos de grabación guardados"
+        "Dati Registrazione Salvati"
       ],
       "All cache deleted": [
-        "Toda la caché eliminada"
+        "Tutta la cache eliminata"
       ],
       "Successfully Saved. Now go to the \"Customization\" menu.": [
-        "Guardado correctamente. Ahora vaya al menú \"Personalización\"."
+        "Salvato con successo. Ora vai al menu \"Personalizzazione\"."
       ],
       "Help information about this setting": [
-        "Información de ayuda sobre este ajuste"
+        "Informazioni di aiuto su questa impostazione"
       ],
       "Configure Settings": [
-        "Configurar ajustes"
+        "Configura Impostazioni"
       ],
       "Configure text-to-speech player behavior and content selection": [
-        "Configurar el comportamiento del reproductor de texto a voz y la selección de contenido"
+        "Configura il comportamento del lettore text-to-speech e la selezione del contenuto"
       ],
       "Add Button or Player Automatically": [
-        "Agregar botón o reproductor automáticamente"
+        "Aggiungi Pulsante o Lettore Automaticamente"
       ],
       "The \"Add Button or Player Automatically\" feature in a Text-to-Speech (TTS) plugin allows the plugin to automatically insert a play button or audio player into your posts or pages — without needing any manual setup.": [
-        "La función \"Agregar botón o reproductor automáticamente\" en un plugin de texto a voz (TTS) permite al plugin insertar automáticamente un botón de reproducción o reproductor de audio en tus entradas o páginas, sin necesidad de configuración manual."
+        "La funzionalità \"Aggiungi Pulsante o Lettore Automaticamente\" in un plugin Text-to-Speech (TTS) permette al plugin di inserire automaticamente un pulsante di riproduzione o lettore audio nei tuoi articoli o pagine — senza bisogno di configurazione manuale."
       ],
       "Continue Reading After Switching To Another Tab": [
-        "Continuar leyendo después de cambiar a otra pestaña"
+        "Continua la Lettura Dopo il Passaggio a un Altro Tab"
       ],
       "When enabled, text-to-speech will continue playing even if you navigate away from the current tab": [
-        "Cuando está habilitado, el texto a voz seguirá reproduciéndose incluso si navega fuera de la pestaña actual"
+        "Quando attivato, il text-to-speech continuerà a riprodurre anche se navighi via dal tab corrente"
       ],
       "Stop Auto Play After Switching To TTS Tab": [
-        "Detener reproducción automática al volver a la pestaña TTS"
+        "Ferma Riproduzione Automatica Dopo il Ritorno al Tab TTS"
       ],
       "Automatically pause playback when switching back to the TTS tab from another tab": [
-        "Pausar automáticamente la reproducción al volver a la pestaña TTS desde otra pestaña"
+        "Metti automaticamente in pausa la riproduzione quando torni al tab TTS da un altro tab"
       ],
       "When Scroll Down Stop Floating Player": [
-        "Al desplazarse hacia abajo detener el reproductor flotante"
+        "Quando Scorri Giù Ferma il Lettore Flottante"
       ],
       "Automatically pause the floating player when users scroll down the page": [
-        "Pausar automáticamente el reproductor flotante cuando los usuarios se desplazan hacia abajo en la página"
+        "Metti automaticamente in pausa il lettore flottante quando gli utenti scorrono verso il basso nella pagina"
       ],
       "Apply number format": [
-        "Aplicar formato de número"
+        "Applica formato numerico"
       ],
       "Convert numbers to spoken words (e.g., '123' becomes 'one hundred twenty-three')": [
-        "Convertir números a palabras habladas (ej., '123' se convierte en 'ciento veintitrés')"
+        "Converti numeri in parole (es.: '123' diventa 'centoventitré')"
       ],
       "Read Content From Dom": [
-        "Leer contenido desde el DOM"
+        "Leggi Contenuto dal DOM"
       ],
       "Use Old Player UI": [
-        "Usar interfaz antigua del reproductor"
+        "Usa Vecchia Interfaccia Lettore"
       ],
       "Add Post Title To Read": [
-        "Agregar título de la entrada para leer"
+        "Aggiungi Titolo Articolo da Leggere"
       ],
       "Include the post title in the audio playback before reading the main content": [
-        "Incluir el título de la entrada en la reproducción de audio antes de leer el contenido principal"
+        "Includi il titolo dell'articolo nella riproduzione audio prima di leggere il contenuto principale"
       ],
       "Add Post Excerpt To Read": [
-        "Agregar extracto de la entrada para leer"
+        "Aggiungi Estratto Articolo da Leggere"
       ],
       "Include the post excerpt/summary in the audio playback before reading the main content": [
-        "Incluir el extracto/resumen de la entrada en la reproducción de audio antes de leer el contenido principal"
+        "Includi l'estratto/riassunto dell'articolo nella riproduzione audio prima di leggere il contenuto principale"
       ],
       "Enable TTS Status": [
-        "Habilitar estado TTS"
+        "Attiva Stato TTS"
       ],
       "Enable TTS Status In Post Page.": [
-        "Habilitar estado TTS en la página de la entrada."
+        "Attiva Stato TTS nella Pagina Articolo."
       ],
       "Add Text Before Content(intro)": [
-        "Agregar texto antes del contenido (intro)"
+        "Aggiungi Testo Prima del Contenuto (introduzione)"
       ],
       "Custom text that will be read aloud before the main content begins": [
-        "Texto personalizado que se leerá en voz alta antes de que comience el contenido principal"
+        "Testo personalizzato che verrà letto ad alta voce prima dell'inizio del contenuto principale"
       ],
       "Add Text Before Content": [
-        "Agregar texto antes del contenido"
+        "Aggiungi Testo Prima del Contenuto"
       ],
       "Add Text After Content(outro)": [
-        "Agregar texto después del contenido (outro)"
+        "Aggiungi Testo Dopo il Contenuto (conclusione)"
       ],
       "Custom text that will be read aloud after the main content finishes": [
-        "Texto personalizado que se leerá en voz alta después de que termine el contenido principal"
+        "Testo personalizzato che verrà letto ad alta voce dopo la fine del contenuto principale"
       ],
       "Add Text After Content": [
-        "Agregar texto después del contenido"
+        "Aggiungi Testo Dopo il Contenuto"
       ],
       "Allow Listening For Post Type": [
-        "Permitir escucha para tipo de entrada"
+        "Consenti Ascolto per Tipo di Articolo"
       ],
       "Allow Listening For Post Status": [
-        "Permitir escucha para estado de la entrada"
+        "Consenti Ascolto per Stato Articolo"
       ],
       "On Free Version You Can Select Only 1 post type.": [
-        "En la versión gratuita solo puede seleccionar 1 tipo de entrada."
+        "Nella Versione Gratuita puoi selezionare solo 1 tipo di articolo."
       ],
       "Include Content By CSS Selectors": [
-        "Incluir contenido por selectores CSS"
+        "Includi Contenuto per Selettori CSS"
       ],
       "Include Content By CSS Selectors feature is available in pro version": [
-        "La función de incluir contenido por selectores CSS está disponible en la versión Pro"
+        "La funzionalità Includi Contenuto per Selettori CSS è disponibile nella versione pro"
       ],
       "Multiple selector will be multiline.": [
-        "Múltiples selectores serán multilínea."
+        "I selettori multipli saranno su più righe."
       ],
       "Some content may be missing, It can be found by css selectors": [
-        "Puede faltar algún contenido, se puede encontrar mediante selectores CSS"
+        "Alcuni contenuti potrebbero mancare, possono essere trovati tramite selettori CSS"
       ],
       "Exclude Content By CSS Selectors": [
-        "Excluir contenido por selectores CSS"
+        "Escludi Contenuto per Selettori CSS"
       ],
       "Exclude Content By CSS Selectors feature is available in pro version": [
-        "La función de excluir contenido por selectores CSS está disponible en la versión Pro"
+        "La funzionalità Escludi Contenuto per Selettori CSS è disponibile nella versione pro"
       ],
       "Exclude content by CSS selectors": [
-        "Excluir contenido por selectores CSS"
+        "Escludi contenuto per selettori CSS"
       ],
       "You can add \".atlasvoice_no_read\" class to exclude content.": [
-        "Puede agregar la clase \".atlasvoice_no_read\" para excluir contenido."
+        "Puoi aggiungere la classe \".atlasvoice_no_read\" per escludere il contenuto."
       ],
       "Exclude HTML Tags To Speak": [
-        "Excluir etiquetas HTML para leer"
+        "Escludi Tag HTML dalla Lettura"
       ],
       "Exclude Tags. So that its content skipped. Like ( Subscript, Superscript etc.) This is a pro feature.": [
-        "Excluir etiquetas. Para que su contenido sea omitido. Como (Subíndice, Superíndice, etc.) Esta es una función Pro."
+        "Escludi Tag. In modo che il loro contenuto venga saltato. Come (Subscript, Superscript ecc.) Questa è una funzionalità pro."
       ],
       "Multiple Tags Will Be Pipe(|) Separated.": [
-        "Múltiples etiquetas se separarán con barra vertical (|)."
+        "I Tag multipli saranno separati da Pipe(|)."
       ],
       "Exclude tags is a pro feature.": [
-        "Excluir etiquetas es una función Pro."
+        "Escludere tag è una funzionalità pro."
       ],
       "Exclude Texts To Speak": [
-        "Excluir textos para leer"
+        "Escludi Testi dalla Lettura"
       ],
       "Excluding texts to be spoken is a pro feature.": [
-        "Excluir textos para ser leídos es una función Pro."
+        "Escludere testi dalla lettura è una funzionalità pro."
       ],
       "Multiple Texts Will Be Pipe(|) Separated.": [
-        "Múltiples textos se separarán con barra vertical (|)."
+        "I Testi multipli saranno separati da Pipe(|)."
       ],
       "Exclude texts is a pro feature.": [
-        "Excluir textos es una función Pro."
+        "Escludere testi è una funzionalità pro."
       ],
       "Exclude Posts By IDs To Speak": [
-        "Excluir entradas por IDs para leer"
+        "Escludi Articoli per ID dalla Lettura"
       ],
       "Exclude more than 5 IDs is a pro feature": [
-        "Excluir más de 5 IDs es una función Pro"
+        "Escludere più di 5 ID è una funzionalità pro"
       ],
       "Multiple IDs Will Be Comma(,) Separated.": [
-        "Múltiples IDs se separarán con coma (,)."
+        "Gli ID multipli saranno separati da Virgola(,)."
       ],
       "Excluding more than 5 IDs is a pro feature. Multiple IDs Will Be Comma(,) Separated.": [
-        "Excluir más de 5 IDs es una función Pro. Múltiples IDs se separarán con coma (,)."
+        "Escludere più di 5 ID è una funzionalità pro. Gli ID multipli saranno separati da Virgola(,)."
       ],
       "Exclude Categories To Speak": [
-        "Excluir categorías para leer"
+        "Escludi Categorie dalla Lettura"
       ],
       "Exclude more than 1 categories is a pro feature": [
-        "Excluir más de 1 categoría es una función Pro"
+        "Escludere più di 1 categoria è una funzionalità pro"
       ],
       "On Free Version You Can Select Only 1 Category.": [
-        "En la versión gratuita solo puede seleccionar 1 categoría."
+        "Nella Versione Gratuita puoi selezionare solo 1 Categoria."
       ],
       "Exclude Tags To Speak": [
-        "Excluir etiquetas para leer"
+        "Escludi Etichette dalla Lettura"
       ],
       "Exclude more than 1 tags is a pro feature": [
-        "Excluir más de 1 etiqueta es una función Pro"
+        "Escludere più di 1 etichetta è una funzionalità pro"
       ],
       "On Free Version You Can Select Only 1 Tag.": [
-        "En la versión gratuita solo puede seleccionar 1 etiqueta."
+        "Nella Versione Gratuita puoi selezionare solo 1 Etichetta."
       ],
       "Enable Button Icon": [
-        "Habilitar icono del botón"
+        "Attiva Icona Pulsante"
       ],
       "Clear all cache": [
-        "Borrar toda la caché"
+        "Cancella tutta la cache"
       ],
       "Save All": [
-        "Guardar todo"
+        "Salva Tutto"
       ]
     }
   }

@@ -1,80 +1,82 @@
-# Copyright (C) 2026 AtlasAiDev
+# Translation of Text To Speech TTS Accessibility into Portuguese (Portugal)
 # This file is distributed under the GPL-3.0+.
 msgid ""
 msgstr ""
 "Project-Id-Version: Text To Speech TTS Accessibility 2.1.8\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/text-to-audio\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Last-Translator: AtlasAiDev <support@atlasaidev.com>\n"
+"Language-Team: Portuguese (Portugal) <support@atlasaidev.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: pt_PT\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "POT-Creation-Date: 2026-03-10T17:35:33+01:00\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2026-03-10 12:00+0000\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: text-to-audio\n"
 
 #. Plugin Name of the plugin
 #: text-to-audio.php
 msgid "Text To Speech TTS Accessibility"
-msgstr ""
+msgstr "Texto Para Voz TTS Acessibilidade"
 
 #. Plugin URI of the plugin
 #: text-to-audio.php
 msgid "https://atlasaidev.com/"
-msgstr ""
+msgstr "https://atlasaidev.com/"
 
 #. Description of the plugin
 #: text-to-audio.php
 msgid "The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!"
-msgstr ""
+msgstr "O plugin de Acessibilidade Texto-para-Voz mais fácil de usar. Basta instalar e adicionar automaticamente um leitor de Texto para Áudio ao seu site WordPress!"
 
 #. Author of the plugin
 #: text-to-audio.php
 msgid "AtlasAiDev"
-msgstr ""
+msgstr "AtlasAiDev"
 
 #. Author URI of the plugin
 #: text-to-audio.php
 msgid "http://atlasaidev.com/"
-msgstr ""
+msgstr "http://atlasaidev.com/"
 
 #: admin/TTA_Admin.php:475
 #: admin/TTA_Admin.php:476
 msgid "Plugins"
-msgstr ""
+msgstr "Plugins"
 
 #: admin/TTA_Posts_List.php:184
 msgid "Audio Status"
-msgstr ""
+msgstr "Estado do Áudio"
 
 #: admin/TTA_Posts_List.php:184
 msgid "TTS Status"
-msgstr ""
+msgstr "Estado TTS"
 
 #: admin/TTA_Posts_List.php:185
 msgid "All Posts"
-msgstr ""
+msgstr "Todas as Publicações"
 
 #: admin/TTA_Posts_List.php:186
 msgid "Audio Generated"
-msgstr ""
+msgstr "Áudio Gerado"
 
 #: admin/TTA_Posts_List.php:186
 msgid "TTS Enabled"
-msgstr ""
+msgstr "TTS Ativado"
 
 #: admin/TTA_Posts_List.php:187
 msgid "Audio Not Generated"
-msgstr ""
+msgstr "Áudio Não Gerado"
 
 #: admin/TTA_Posts_List.php:187
 msgid "TTS Not Enabled"
-msgstr ""
+msgstr "TTS Não Ativado"
 
 #: api/AtlasVoice_Analytics.php:201
 msgid "Post ID or User ID is missing"
-msgstr ""
+msgstr "Falta o ID da publicação ou o ID do utilizador"
 
 #: api/AtlasVoice_Analytics.php:1019
 #: api/AtlasVoice_Analytics.php:1115
@@ -83,195 +85,195 @@ msgstr ""
 #: api/AtlasVoice_Analytics.php:1422
 #: api/AtlasVoice_Analytics.php:1847
 msgid "This feature requires Pro version."
-msgstr ""
+msgstr "Esta funcionalidade requer a versão Pro."
 
 #: api/AtlasVoice_Analytics.php:1255
 msgid "WP Mail SMTP is using default PHP mail. Consider configuring an SMTP server for reliable email delivery."
-msgstr ""
+msgstr "O WP Mail SMTP está a usar o PHP mail padrão. Considere configurar um servidor SMTP para entrega fiável de e-mail."
 
 #: api/AtlasVoice_Analytics.php:1269
 msgid "Email sending may not work on localhost. Please install an SMTP plugin (like WP Mail SMTP) and configure it with a real email service (Gmail, SendGrid, Mailgun, etc.) for reliable email delivery."
-msgstr ""
+msgstr "O envio de e-mail pode não funcionar em localhost. Por favor, instale um plugin SMTP (como WP Mail SMTP) e configure-o com um serviço de e-mail real (Gmail, SendGrid, Mailgun, etc.) para entrega fiável."
 
 #: api/AtlasVoice_Analytics.php:1274
 msgid "No SMTP plugin detected. Emails will be sent using PHP mail() which may be unreliable. Consider installing WP Mail SMTP for better deliverability."
-msgstr ""
+msgstr "Nenhum plugin SMTP detetado. Os e-mails serão enviados usando PHP mail() que pode ser pouco fiável. Considere instalar o WP Mail SMTP para melhor entregabilidade."
 
 #: api/AtlasVoice_Analytics.php:1300
 msgid "Invalid settings data."
-msgstr ""
+msgstr "Dados de configuração inválidos."
 
 #: api/AtlasVoice_Analytics.php:1333
 msgid "Please provide at least one valid email address."
-msgstr ""
+msgstr "Por favor, forneça pelo menos um endereço de e-mail válido."
 
 #: api/AtlasVoice_Analytics.php:1357
 msgid "Schedule report settings saved successfully."
-msgstr ""
+msgstr "Configurações do relatório agendado guardadas com sucesso."
 
 #: api/AtlasVoice_Analytics.php:1431
 msgid "Please configure recipients first."
-msgstr ""
+msgstr "Por favor, configure primeiro os destinatários."
 
 #: api/AtlasVoice_Analytics.php:1456
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:196
 msgid "Test report sent successfully! Check your inbox."
-msgstr ""
+msgstr "Relatório de teste enviado com sucesso! Verifique a sua caixa de entrada."
 
 #: api/AtlasVoice_Analytics.php:1465
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:206
 msgid "Failed to send test report."
-msgstr ""
+msgstr "Falha ao enviar relatório de teste."
 
 #. translators: %s: Error message from WP_Error
 #: api/AtlasVoice_Analytics.php:1471
 #, php-format
 msgid "Error: %s"
-msgstr ""
+msgstr "Erro: %s"
 
 #: api/AtlasVoice_Analytics.php:1476
 msgid "No SMTP plugin is configured. Please install and configure WP Mail SMTP or a similar plugin for reliable email delivery."
-msgstr ""
+msgstr "Nenhum plugin SMTP está configurado. Por favor, instale e configure o WP Mail SMTP ou um plugin semelhante para entrega fiável de e-mail."
 
 #. translators: %s: SMTP plugin name
 #: api/AtlasVoice_Analytics.php:1479
 #, php-format
 msgid "Please check your %s plugin configuration and verify your SMTP credentials are correct."
-msgstr ""
+msgstr "Por favor, verifique a configuração do plugin %s e confirme que as suas credenciais SMTP estão corretas."
 
 #. translators: %s: Site name
 #: api/AtlasVoice_Analytics.php:1639
 #, php-format
 msgid "[Test] %s - TTS Analytics Report"
-msgstr ""
+msgstr "[Teste] %s - Relatório de Análise TTS"
 
 #. translators: %s: Site name
 #: api/AtlasVoice_Analytics.php:1639
 #, php-format
 msgid "%s - TTS Analytics Report"
-msgstr ""
+msgstr "%s - Relatório de Análise TTS"
 
 #: api/AtlasVoice_Analytics.php:1720
 msgid "TEST REPORT"
-msgstr ""
+msgstr "RELATÓRIO DE TESTE"
 
 #. translators: %s: Date range for the analytics report
 #: api/AtlasVoice_Analytics.php:1724
 #: api/AtlasVoice_Analytics.php:1954
 #, php-format
 msgid "TTS Analytics Report - %s"
-msgstr ""
+msgstr "Relatório de Análise TTS - %s"
 
 #: api/AtlasVoice_Analytics.php:1730
 msgid "Summary"
-msgstr ""
+msgstr "Resumo"
 
 #: api/AtlasVoice_Analytics.php:1734
 #: api/AtlasVoice_Analytics.php:1965
 msgid "Total Plays"
-msgstr ""
+msgstr "Total de Reproduções"
 
 #: api/AtlasVoice_Analytics.php:1738
 #: api/AtlasVoice_Analytics.php:1969
 msgid "Unique Listeners"
-msgstr ""
+msgstr "Ouvintes Únicos"
 
 #: api/AtlasVoice_Analytics.php:1742
 #: api/AtlasVoice_Analytics.php:1973
 msgid "Completions"
-msgstr ""
+msgstr "Conclusões"
 
 #: api/AtlasVoice_Analytics.php:1746
 #: api/AtlasVoice_Analytics.php:1977
 msgid "Minutes Played"
-msgstr ""
+msgstr "Minutos Reproduzidos"
 
 #: api/AtlasVoice_Analytics.php:1754
 msgid "Top 10 Posts"
-msgstr ""
+msgstr "Top 10 Publicações"
 
 #. translators: %d: Number of plays
 #: api/AtlasVoice_Analytics.php:1765
 #, php-format
 msgid "%d plays"
-msgstr ""
+msgstr "%d reproduções"
 
 #: api/AtlasVoice_Analytics.php:1774
 msgid "Device & Browser Stats"
-msgstr ""
+msgstr "Estatísticas de Dispositivo e Navegador"
 
 #: api/AtlasVoice_Analytics.php:1776
 msgid "Devices"
-msgstr ""
+msgstr "Dispositivos"
 
 #: api/AtlasVoice_Analytics.php:1791
 #: api/AtlasVoice_Analytics.php:2058
 msgid "Browsers"
-msgstr ""
+msgstr "Navegadores"
 
 #: api/AtlasVoice_Analytics.php:1809
 msgid "Geographic Distribution"
-msgstr ""
+msgstr "Distribuição Geográfica"
 
 #. translators: %s: Site name
 #: api/AtlasVoice_Analytics.php:1827
 #, php-format
 msgid "This report was generated by Text to Audio plugin on %s"
-msgstr ""
+msgstr "Este relatório foi gerado pelo plugin Texto para Áudio em %s"
 
 #: api/AtlasVoice_Analytics.php:1828
 msgid "View full analytics dashboard"
-msgstr ""
+msgstr "Ver painel completo de análise"
 
 #. translators: %s: Generated date and time
 #: api/AtlasVoice_Analytics.php:1956
 #, php-format
 msgid "Generated on %s"
-msgstr ""
+msgstr "Gerado em %s"
 
 #: api/AtlasVoice_Analytics.php:1961
 msgid "Summary Overview"
-msgstr ""
+msgstr "Visão Geral"
 
 #: api/AtlasVoice_Analytics.php:1981
 msgid "Initializations"
-msgstr ""
+msgstr "Inicializações"
 
 #: api/AtlasVoice_Analytics.php:1985
 msgid "Pauses"
-msgstr ""
+msgstr "Pausas"
 
 #: api/AtlasVoice_Analytics.php:1989
 msgid "Downloads"
-msgstr ""
+msgstr "Transferências"
 
 #: api/AtlasVoice_Analytics.php:1993
 msgid "Posts Tracked"
-msgstr ""
+msgstr "Publicações Rastreadas"
 
 #: api/AtlasVoice_Analytics.php:2000
 msgid "Engagement Milestones"
-msgstr ""
+msgstr "Marcos de Envolvimento"
 
 #: api/AtlasVoice_Analytics.php:2014
 msgid "Reached"
-msgstr ""
+msgstr "Alcançado"
 
 #: api/AtlasVoice_Analytics.php:2029
 #: src/dashboard/components/dashboard/analitics/DeviceTypes.js:131
 msgid "Device Types"
-msgstr ""
+msgstr "Tipos de Dispositivo"
 
 #: api/AtlasVoice_Analytics.php:2033
 msgid "Device"
-msgstr ""
+msgstr "Dispositivo"
 
 #: api/AtlasVoice_Analytics.php:2034
 #: api/AtlasVoice_Analytics.php:2063
 #: api/AtlasVoice_Analytics.php:2097
 #: api/AtlasVoice_Analytics.php:2126
 msgid "Count"
-msgstr ""
+msgstr "Contagem"
 
 #: api/AtlasVoice_Analytics.php:2050
 #: api/AtlasVoice_Analytics.php:2079
@@ -279,104 +281,104 @@ msgstr ""
 #: api/AtlasVoice_Analytics.php:2142
 #: api/AtlasVoice_Analytics.php:2179
 msgid "No data available"
-msgstr ""
+msgstr "Sem dados disponíveis"
 
 #: api/AtlasVoice_Analytics.php:2062
 #: src/dashboard/components/dashboard/analitics/BrowserAnalytics.js:145
 msgid "Browser"
-msgstr ""
+msgstr "Navegador"
 
 #: api/AtlasVoice_Analytics.php:2092
 msgid "Operating Systems"
-msgstr ""
+msgstr "Sistemas Operativos"
 
 #: api/AtlasVoice_Analytics.php:2096
 #: src/dashboard/components/dashboard/analitics/OSAnalytics.js:134
 msgid "OS"
-msgstr ""
+msgstr "SO"
 
 #: api/AtlasVoice_Analytics.php:2121
 #: src/dashboard/components/dashboard/analitics/LocationAnalytics.js:200
 msgid "Top Countries"
-msgstr ""
+msgstr "Principais Países"
 
 #: api/AtlasVoice_Analytics.php:2125
 msgid "Country"
-msgstr ""
+msgstr "País"
 
 #: api/AtlasVoice_Analytics.php:2152
 msgid "Top 20 Posts by Interactions"
-msgstr ""
+msgstr "Top 20 Publicações por Interações"
 
 #: api/AtlasVoice_Analytics.php:2157
 #: src/dashboard/components/dashboard/analitics/PopularPosts.js:137
 msgid "Post Title"
-msgstr ""
+msgstr "Título da Publicação"
 
 #: api/AtlasVoice_Analytics.php:2158
 msgid "Plays"
-msgstr ""
+msgstr "Reproduções"
 
 #: api/AtlasVoice_Analytics.php:2159
 msgid "Time (sec)"
-msgstr ""
+msgstr "Tempo (seg)"
 
 #: api/AtlasVoice_Analytics.php:2160
 msgid "Interactions"
-msgstr ""
+msgstr "Interações"
 
 #. translators: %s: Site name
 #: api/AtlasVoice_Analytics.php:2187
 #, php-format
 msgid "Generated by Text to Audio Plugin for %s"
-msgstr ""
+msgstr "Gerado pelo Plugin Texto para Áudio para %s"
 
 #: api/TTA_Api_Routes.php:744
 #: api/TTA_Api_Routes.php:820
 msgid "You do not have permission to access this resource."
-msgstr ""
+msgstr "Não tem permissão para aceder a este recurso."
 
 #: api/TTA_Api_Routes.php:775
 #: api/TTA_Api_Routes.php:856
 msgid "Invalid nonce or insufficient permissions."
-msgstr ""
+msgstr "Nonce inválido ou permissões insuficientes."
 
 #: api/TTA_Api_Routes.php:848
 msgid "Invalid or missing nonce for frontend POST request."
-msgstr ""
+msgstr "Nonce inválido ou em falta para pedido POST do frontend."
 
 #: includes/helpers.php:823
 #: includes/TTA_Activator.php:131
 #: admin/js/blocks/customize-button/customize-button.js:83
 #: build/blocks.js:1
 msgid "Listen"
-msgstr ""
+msgstr "Ouvir"
 
 #: includes/helpers.php:824
 #: includes/TTA_Activator.php:132
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:160
 msgid "Pause"
-msgstr ""
+msgstr "Pausa"
 
 #: includes/helpers.php:825
 #: includes/TTA_Activator.php:133
 msgid "Resume"
-msgstr ""
+msgstr "Retomar"
 
 #: includes/helpers.php:826
 #: includes/TTA_Activator.php:134
 msgid "Replay"
-msgstr ""
+msgstr "Repetir"
 
 #: includes/helpers.php:827
 #: includes/TTA_Activator.php:135
 msgid "Start"
-msgstr ""
+msgstr "Iniciar"
 
 #: includes/helpers.php:828
 #: includes/TTA_Activator.php:136
 msgid "Stop"
-msgstr ""
+msgstr "Parar"
 
 #: includes/TTA_i18n.php:49
 #: src/dashboard/components/dashboard/aliases/Aliases.js:153
@@ -388,49 +390,49 @@ msgstr ""
 #: src/dashboard/components/dashboard/listening/Listening.js:1603
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:375
 msgid "Save"
-msgstr ""
+msgstr "Guardar"
 
 #: includes/TTA_i18n.php:52
 #: src/dashboard/components/dashboard/aliases/Aliases.js:95
 msgid "Text to Speech Aliases"
-msgstr ""
+msgstr "Aliases de Texto para Voz"
 
 #: includes/TTA_i18n.php:53
 msgid "Add New Row"
-msgstr ""
+msgstr "Adicionar Nova Linha"
 
 #: includes/TTA_i18n.php:54
 #: src/dashboard/components/dashboard/aliases/Aliases.js:106
 msgid "Actual Text"
-msgstr ""
+msgstr "Texto Real"
 
 #: includes/TTA_i18n.php:55
 #: src/dashboard/components/dashboard/aliases/Aliases.js:107
 msgid "To Read"
-msgstr ""
+msgstr "Para Ler"
 
 #: includes/TTA_i18n.php:56
 #: src/dashboard/components/dashboard/aliases/Aliases.js:64
 msgid "All fields must be filled!"
-msgstr ""
+msgstr "Todos os campos devem ser preenchidos!"
 
 #: includes/TTA_i18n.php:57
 #: src/dashboard/components/dashboard/aliases/Aliases.js:78
 #: src/dashboard/components/dashboard/analitics/Analitics.js:735
 #: src/dashboard/components/dashboard/compatibility/Compatibility.js:98
 msgid "Successfully Saved."
-msgstr ""
+msgstr "Guardado com sucesso."
 
 #: includes/TTA_i18n.php:58
 msgid "More than 1 alias is available in the pro version. Please"
-msgstr ""
+msgstr "Mais de 1 alias está disponível na versão pro. Por favor"
 
 #: includes/TTA_i18n.php:59
 #: src/dashboard/components/dashboard/aliases/Aliases.js:38
 #: src/dashboard/components/dashboard/analitics/GlobalDateRangePicker.js:121
 #: src/dashboard/components/dashboard/analitics/GlobalDateRangePicker.js:148
 msgid "Buy Pro version"
-msgstr ""
+msgstr "Comprar versão Pro"
 
 #: includes/TTA_i18n.php:60
 #: src/dashboard/components/dashboard/compatibility/Compatibility.js:144
@@ -449,87 +451,87 @@ msgstr ""
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:309
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:363
 msgid "Click To Know How It Works?"
-msgstr ""
+msgstr "Clique para saber como funciona?"
 
 #: includes/TTA_Notices.php:62
 msgid "Convert unlimited characters to MP3 in bulk."
-msgstr ""
+msgstr "Converta caracteres ilimitados para MP3 em massa."
 
 #: includes/TTA_Notices.php:63
 msgid "WPML, GTranslate, TranslatePress Plugins Support"
-msgstr ""
+msgstr "Suporte para plugins WPML, GTranslate, TranslatePress"
 
 #: includes/TTA_Notices.php:64
 msgid "Works with ACF, SCF, and other popular plugins."
-msgstr ""
+msgstr "Funciona com ACF, SCF e outros plugins populares."
 
 #: includes/TTA_Notices.php:65
 msgid "Google Cloud Text-to-Speech & ChatGPT Text-to-Speech (usage fees apply)"
-msgstr ""
+msgstr "Google Cloud Texto-para-Voz e ChatGPT Texto-para-Voz (taxas de utilização aplicáveis)"
 
 #: includes/TTA_Notices.php:66
 msgid "Live integration support + 14-day money-back guarantee (conditions apply)."
-msgstr ""
+msgstr "Suporte de integração ao vivo + garantia de reembolso de 14 dias (condições aplicáveis)."
 
 #: includes/TTA_Notices.php:67
 msgid "50+ languages support in pro version."
-msgstr ""
+msgstr "Suporte para mais de 50 idiomas na versão pro."
 
 #: includes/TTA_Notices.php:68
 msgid "Download the audio file for offline listening."
-msgstr ""
+msgstr "Transfira o ficheiro de áudio para ouvir offline."
 
 #: includes/TTA_Notices.php:69
 msgid "Improved UI and Responsive of the button."
-msgstr ""
+msgstr "Interface e responsividade do botão melhoradas."
 
 #: includes/TTA_Notices.php:70
 msgid "Multiple Audio Player Support."
-msgstr ""
+msgstr "Suporte para Múltiplos Leitores de Áudio."
 
 #: includes/TTA_Notices.php:71
 msgid "Customizable content selection with CSS selectors"
-msgstr ""
+msgstr "Seleção de conteúdo personalizável com seletores CSS"
 
 #: includes/TTA_Notices.php:72
 msgid "Exclude content by categories, tags, IDs"
-msgstr ""
+msgstr "Excluir conteúdo por categorias, etiquetas, IDs"
 
 #: includes/TTA_Notices.php:73
 msgid "Unlimited Download MP3 files"
-msgstr ""
+msgstr "Transferências ilimitadas de ficheiros MP3"
 
 #: includes/TTA_Notices.php:74
 msgid "200+ Voices with Google Cloud Text To Speech"
-msgstr ""
+msgstr "Mais de 200 vozes com Google Cloud Texto para Voz"
 
 #: includes/TTA_Notices.php:75
 msgid "Advance analytics & Text Aliases support."
-msgstr ""
+msgstr "Análise avançada e suporte a Aliases de Texto."
 
 #: includes/TTA_Notices.php:83
 msgid "Number of times the MP3 file downloaded. 🔒"
-msgstr ""
+msgstr "Número de vezes que o ficheiro MP3 foi transferido. 🔒"
 
 #: includes/TTA_Notices.php:84
 msgid "Number of times the player reached the end. 🔒"
-msgstr ""
+msgstr "Número de vezes que o leitor chegou ao fim. 🔒"
 
 #: includes/TTA_Notices.php:85
 msgid "Percentage of times the play button was clicked after initiation. 🔒"
-msgstr ""
+msgstr "Percentagem de vezes que o botão de reprodução foi clicado após a iniciação. 🔒"
 
 #: includes/TTA_Notices.php:86
 msgid "Percentage of times users listened till the end. 🔒"
-msgstr ""
+msgstr "Percentagem de vezes que os utilizadores ouviram até ao fim. 🔒"
 
 #: includes/TTA_Notices.php:87
 msgid "Average listening time per play. 🔒"
-msgstr ""
+msgstr "Tempo médio de escuta por reprodução. 🔒"
 
 #: includes/TTA_Notices.php:88
 msgid "Average number of pauses per play. 🔒"
-msgstr ""
+msgstr "Número médio de pausas por reprodução. 🔒"
 
 #: includes/TTA_Notices.php:180
 #: includes/TTA_Notices.php:386
@@ -537,18 +539,18 @@ msgstr ""
 #: includes/TTA_Notices.php:614
 #: includes/TTA_Notices.php:874
 msgid "Text To Speech TTS"
-msgstr ""
+msgstr "Texto Para Voz TTS"
 
 #: includes/TTA_Notices.php:181
 #: includes/TTA_Notices.php:495
 msgid "Text To Speech TTS Pro"
-msgstr ""
+msgstr "Texto Para Voz TTS Pro"
 
 #. translators: 1: Plugin name, 2: Logo div, 3: Line break, 4: Active plugin name, 5: Pro plugin name, 6: Heading, 7: Learn more link
 #: includes/TTA_Notices.php:211
 #, php-format
 msgid "%6$s %2$s %3$s %4$s plugin is compitable with  %5$s . %7$s"
-msgstr ""
+msgstr "%6$s %2$s %3$s O plugin %4$s é compatível com %5$s. %7$s"
 
 #: includes/TTA_Notices.php:216
 #: src/dashboard/components/dashboard/analitics/TrackPostIds.js:78
@@ -557,253 +559,253 @@ msgstr ""
 #: src/dashboard/components/dashboard/integrations/ElevenLabsTTS/ElevenLabsTTS.js:40
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:160
 msgid "Buy Now"
-msgstr ""
+msgstr "Comprar Agora"
 
 #. translators: 1: Content message about speechSynthesis, 2: Heading
 #: includes/TTA_Notices.php:312
 #, php-format
 msgid "%2$s %1$s"
-msgstr ""
+msgstr "%2$s %1$s"
 
 #: includes/TTA_Notices.php:318
 #: includes/TTA_Notices.php:423
 msgid "Unlock The Premium Features"
-msgstr ""
+msgstr "Desbloquear as Funcionalidades Premium"
 
 #. translators: 1: Plugin name, 2: Logo div, 3: Line break with list item, 4: Analytics features, 5: Plugin name, 6: Heading, 7: Learn more link
 #: includes/TTA_Notices.php:417
 #: includes/TTA_Notices.php:525
 #, php-format
 msgid "%6$s %2$s %3$s %4$s"
-msgstr ""
+msgstr "%6$s %2$s %3$s %4$s"
 
 #: includes/TTA_Notices.php:538
 msgid "Sea More Features"
-msgstr ""
+msgstr "Ver Mais Funcionalidades"
 
 #: includes/TTA_Notices.php:648
 #, php-format
 msgid "%6$s%2$s We are seeking contributors to help translate this plugin into %4$s. If you're interested in assisting, we'd love to hear from you! Please reach out to us %5$s, and we'll provide all the necessary guidance. %3$s Thank you for choosing %1$s."
-msgstr ""
+msgstr "%6$s%2$s Estamos à procura de contribuidores para ajudar a traduzir este plugin para %4$s. Se estiver interessado em ajudar, adoraríamos ouvir de si! Por favor, contacte-nos %5$s e forneceremos toda a orientação necessária. %3$s Obrigado por escolher %1$s."
 
 #: includes/TTA_Notices.php:659
 msgid "Translate Here"
-msgstr ""
+msgstr "Traduzir Aqui"
 
 #: includes/TTA_Notices.php:732
 msgid "AtlasVoice Text To Speech TTS"
-msgstr ""
+msgstr "AtlasVoice Texto Para Voz TTS"
 
 #: includes/TTA_Notices.php:779
 msgid "Try It Now"
-msgstr ""
+msgstr "Experimente Agora"
 
 #: includes/TTA_Notices.php:782
 msgid "Real World Demo"
-msgstr ""
+msgstr "Demonstração Real"
 
 #: includes/TTA_Notices.php:785
 msgid "How To Use"
-msgstr ""
+msgstr "Como Usar"
 
 #: includes/TTA_Notices.php:788
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:172
 msgid "Download"
-msgstr ""
+msgstr "Transferir"
 
 #: includes/TTA_Notices.php:791
 msgid "Contact Us"
-msgstr ""
+msgstr "Contacte-nos"
 
 #. translators: 1: plugin name,2: Slightly Smiling Face (Emoji), 3: line break 'br' tag
 #: includes/TTA_Notices.php:903
 #, php-format
 msgid "%5$s %3$s %2$s We have spent countless hours developing this free plugin for you, and we would really appreciate it if you drop us a quick rating. Your opinion matters a lot to us.%4$s It helps us to get better. Thanks for using %1$s."
-msgstr ""
+msgstr "%5$s %3$s %2$s Passámos inúmeras horas a desenvolver este plugin gratuito para si, e agradeceríamos muito se nos deixasse uma avaliação rápida. A sua opinião é muito importante para nós.%4$s Ajuda-nos a melhorar. Obrigado por usar %1$s."
 
 #: includes/TTA_Notices.php:913
 msgid "Review Now"
-msgstr ""
+msgstr "Avaliar Agora"
 
 #: includes/TTA_Notices.php:915
 #: includes/TTA_Notices.php:1110
 msgid "Remind Me Later"
-msgstr ""
+msgstr "Lembrar-me Mais Tarde"
 
 #: includes/TTA_Notices.php:917
 #: includes/TTA_Notices.php:1112
 msgid "Already Done!"
-msgstr ""
+msgstr "Já Feito!"
 
 #: includes/TTA_Notices.php:919
 #: includes/TTA_Notices.php:1114
 msgid "Never Ask Again"
-msgstr ""
+msgstr "Nunca Perguntar Novamente"
 
 #: includes/TTA_Notices.php:1006
 msgid "Get Support"
-msgstr ""
+msgstr "Obter Suporte"
 
 #: includes/TTA_Notices.php:1069
 msgid "Asking Feedback For Text To Speech TTS"
-msgstr ""
+msgstr "A Pedir Feedback para Texto Para Voz TTS"
 
 #. translators: 1: plugin name,2: Slightly Smiling Face (Emoji), 3: line break 'br' tag
 #: includes/TTA_Notices.php:1098
 #, php-format
 msgid "%5$s %3$s %2$s We are looking your feedback to improve the product, and we would really appreciate it if you drop us a quick feedback. Your opinion matters a lot to us.%4$s It helps us to get better. Thanks for using Text To Speech."
-msgstr ""
+msgstr "%5$s %3$s %2$s Estamos à procura do seu feedback para melhorar o produto, e agradeceríamos muito se nos deixasse um feedback rápido. A sua opinião é muito importante para nós.%4$s Ajuda-nos a melhorar. Obrigado por usar Texto Para Voz."
 
 #: includes/TTA_Notices.php:1108
 msgid "Give Feedback Now"
-msgstr ""
+msgstr "Dar Feedback Agora"
 
 #: includes/TTA_Notices.php:1310
 #: includes/TTA_Notices.php:1343
 #: includes/TTA_Notices.php:1411
 msgid "Invalid Request."
-msgstr ""
+msgstr "Pedido Inválido."
 
 #: includes/TTA_Notices.php:1404
 msgid "Request Successful."
-msgstr ""
+msgstr "Pedido Bem-sucedido."
 
 #: includes/TTA_Notices.php:1406
 msgid "Something is wrong."
-msgstr ""
+msgstr "Algo está errado."
 
 #: text-to-audio.php:277
 #: src/dashboard/buttons/components/TextToSpeech.js:1055
 msgid "Settings"
-msgstr ""
+msgstr "Definições"
 
 #: text-to-audio.php:278
 msgid "Docs"
-msgstr ""
+msgstr "Documentação"
 
 #: text-to-audio.php:279
 msgid "Support"
-msgstr ""
+msgstr "Suporte"
 
 #: text-to-audio.php:280
 msgid "Write a Review"
-msgstr ""
+msgstr "Escrever uma Avaliação"
 
 #: text-to-audio.php:311
 msgid "Once Weekly"
-msgstr ""
+msgstr "Uma Vez por Semana"
 
 #: text-to-audio.php:315
 msgid "Once Monthly"
-msgstr ""
+msgstr "Uma Vez por Mês"
 
 #: admin/js/atlas-plugins.js:12
 msgid "The most user-friendly Text-to-Speech accessibility plugin for WordPress. Automatically adds an audio player with no API required."
-msgstr ""
+msgstr "O plugin de acessibilidade Texto-para-Voz mais fácil de usar para WordPress. Adiciona automaticamente um leitor de áudio sem necessidade de API."
 
 #: admin/js/atlas-plugins.js:14
 msgid "Unlimited text-to-speech conversion"
-msgstr ""
+msgstr "Conversão ilimitada de texto para voz"
 
 #: admin/js/atlas-plugins.js:15
 msgid "51+ languages, 20-300+ voices"
-msgstr ""
+msgstr "Mais de 51 idiomas, 20-300+ vozes"
 
 #: admin/js/atlas-plugins.js:16
 msgid "Customizable player design"
-msgstr ""
+msgstr "Design do leitor personalizável"
 
 #: admin/js/atlas-plugins.js:17
 msgid "Shortcode support with flexible attributes"
-msgstr ""
+msgstr "Suporte a shortcode com atributos flexíveis"
 
 #: admin/js/atlas-plugins.js:18
 msgid "Custom Post Type & ACF compatibility"
-msgstr ""
+msgstr "Compatibilidade com Tipos de Publicação Personalizados e ACF"
 
 #: admin/js/atlas-plugins.js:19
 msgid "No external API required (browser SpeechSynthesis)"
-msgstr ""
+msgstr "Sem necessidade de API externa (SpeechSynthesis do navegador)"
 
 #: admin/js/atlas-plugins.js:20
 msgid "Multilingual support (WPML, GTranslate)"
-msgstr ""
+msgstr "Suporte multilingue (WPML, GTranslate)"
 
 #: admin/js/atlas-plugins.js:21
 msgid "Analytics & engagement tracking"
-msgstr ""
+msgstr "Análise e rastreamento de envolvimento"
 
 #: admin/js/atlas-plugins.js:29
 msgid "Display interactive 3D models and augmented reality on your WordPress & WooCommerce site for enhanced product visualization."
-msgstr ""
+msgstr "Exiba modelos 3D interativos e realidade aumentada no seu site WordPress e WooCommerce para visualização melhorada de produtos."
 
 #: admin/js/atlas-plugins.js:31
 msgid "Interactive 3D model display"
-msgstr ""
+msgstr "Exibição interativa de modelos 3D"
 
 #: admin/js/atlas-plugins.js:32
 msgid "Augmented Reality (AR) support"
-msgstr ""
+msgstr "Suporte a Realidade Aumentada (RA)"
 
 #: admin/js/atlas-plugins.js:33
 msgid "WordPress & WooCommerce integration"
-msgstr ""
+msgstr "Integração WordPress e WooCommerce"
 
 #: admin/js/atlas-plugins.js:34
 msgid "Mobile-optimized viewing"
-msgstr ""
+msgstr "Visualização otimizada para telemóvel"
 
 #: admin/js/atlas-plugins.js:35
 msgid "Customizable display options"
-msgstr ""
+msgstr "Opções de exibição personalizáveis"
 
 #: admin/js/atlas-plugins.js:36
 msgid "Reduces return rates with realistic visualization"
-msgstr ""
+msgstr "Reduz taxas de devolução com visualização realista"
 
 #: admin/js/atlas-plugins.js:37
 msgid "Easy product page embedding"
-msgstr ""
+msgstr "Incorporação fácil em páginas de produto"
 
 #: admin/js/atlas-plugins.js:45
 msgid "Transform WordPress into an AI-powered control center with 70+ abilities, MCP server support, and workflow builder."
-msgstr ""
+msgstr "Transforme o WordPress num centro de controlo com IA com mais de 70 capacidades, suporte a servidor MCP e construtor de fluxos de trabalho."
 
 #: admin/js/atlas-plugins.js:47
 msgid "70+ abilities across 9 modules"
-msgstr ""
+msgstr "Mais de 70 capacidades em 9 módulos"
 
 #: admin/js/atlas-plugins.js:48
 msgid "Built-in MCP Server (JSON-RPC 2.0)"
-msgstr ""
+msgstr "Servidor MCP integrado (JSON-RPC 2.0)"
 
 #: admin/js/atlas-plugins.js:49
 msgid "JWT authentication"
-msgstr ""
+msgstr "Autenticação JWT"
 
 #: admin/js/atlas-plugins.js:50
 msgid "Drag-and-drop workflow builder"
-msgstr ""
+msgstr "Construtor de fluxos de trabalho arrastar e soltar"
 
 #: admin/js/atlas-plugins.js:51
 msgid "Multi-provider AI support (OpenAI, Gemini, Claude)"
-msgstr ""
+msgstr "Suporte multi-fornecedor de IA (OpenAI, Gemini, Claude)"
 
 #: admin/js/atlas-plugins.js:52
 msgid "WooCommerce AI Store Manager"
-msgstr ""
+msgstr "Gestor de Loja IA WooCommerce"
 
 #: admin/js/atlas-plugins.js:53
 msgid "Post editor AI integration"
-msgstr ""
+msgstr "Integração de IA no editor de publicações"
 
 #: admin/js/atlas-plugins.js:144
 msgid "Active"
-msgstr ""
+msgstr "Ativo"
 
 #: admin/js/atlas-plugins.js:157
 msgid "Activate"
-msgstr ""
+msgstr "Ativar"
 
 #: admin/js/atlas-plugins.js:176
 #: src/dashboard/components/dashboard/integrations/ChatGPTTTS/ChatGPTTTS.js:25
@@ -811,165 +813,165 @@ msgstr ""
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:133
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:476
 msgid "Learn More"
-msgstr ""
+msgstr "Saber Mais"
 
 #: admin/js/atlas-plugins.js:210
 msgid "Features"
-msgstr ""
+msgstr "Funcionalidades"
 
 #: admin/js/atlas-plugins.js:271
 #: admin/js/atlas-plugins.js:302
 msgid "Install Now"
-msgstr ""
+msgstr "Instalar Agora"
 
 #: admin/js/atlas-plugins.js:280
 msgid "Installing..."
-msgstr ""
+msgstr "A instalar..."
 
 #: admin/js/atlas-plugins.js:306
 msgid "Installation failed. Please try again."
-msgstr ""
+msgstr "Instalação falhou. Por favor, tente novamente."
 
 #: admin/js/atlas-plugins.js:338
 msgid "AtlasAiDev Plugins"
-msgstr ""
+msgstr "Plugins AtlasAiDev"
 
 #: admin/js/atlas-plugins.js:342
 msgid "Discover and install plugins by AtlasAiDev to enhance your WordPress site."
-msgstr ""
+msgstr "Descubra e instale plugins da AtlasAiDev para melhorar o seu site WordPress."
 
 #: admin/js/blocks/customize-button/customize-button.js:21
 #: build/blocks.js:1
 msgid "Color Settings"
-msgstr ""
+msgstr "Definições de Cor"
 
 #: admin/js/blocks/customize-button/customize-button.js:29
 #: build/blocks.js:1
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:14
 msgid "Background Color"
-msgstr ""
+msgstr "Cor de Fundo"
 
 #: admin/js/blocks/customize-button/customize-button.js:40
 #: build/blocks.js:1
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:34
 msgid "Text Color"
-msgstr ""
+msgstr "Cor do Texto"
 
 #: admin/js/blocks/customize-button/customize-button.js:44
 #: build/blocks.js:1
 msgid "Button Settings"
-msgstr ""
+msgstr "Definições do Botão"
 
 #: admin/js/blocks/customize-button/customize-button.js:46
 #: build/blocks.js:1
 msgid "Button Width (%)"
-msgstr ""
+msgstr "Largura do Botão (%)"
 
 #: admin/js/blocks/customize-button/customize-button.js:55
 #: build/blocks.js:1
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:322
 msgid "Custom CSS"
-msgstr ""
+msgstr "CSS Personalizado"
 
 #: admin/js/blocks/customize-button/customize-button.js:60
 #: build/blocks.js:1
 msgid "class selector .tta__listen_content"
-msgstr ""
+msgstr "seletor de classe .tta__listen_content"
 
 #: admin/js/blocks/customize-button/customize-button.js:78
 #: build/blocks.js:1
 msgid "Text To Audio: Tap to listen post."
-msgstr ""
+msgstr "Texto Para Áudio: Toque para ouvir a publicação."
 
 #: admin/js/blocks/customize-button/customize-button.js:95
 #: build/blocks.js:1
 msgid "Text to audio customize button."
-msgstr ""
+msgstr "Botão de personalização texto para áudio."
 
 #: src/dashboard/bulk-mp3-file/generate-bulk-mp3-file.js:108
 msgid "Are you sure? You want to regenerate all MP3 files ?"
-msgstr ""
+msgstr "Tem a certeza? Quer regenerar todos os ficheiros MP3?"
 
 #: src/dashboard/bulk-mp3-file/generate-bulk-mp3-file.js:166
 msgid "All MP3 File Generated"
-msgstr ""
+msgstr "Todos os Ficheiros MP3 Gerados"
 
 #: src/dashboard/buttons/components/TextToSpeech.js:1003
 msgid "Click to seek"
-msgstr ""
+msgstr "Clique para procurar"
 
 #: src/dashboard/buttons/components/TextToSpeech.js:1328
 msgid "Player Settings"
-msgstr ""
+msgstr "Definições do Leitor"
 
 #: src/dashboard/buttons/components/TextToSpeech.js:1332
 msgid "Close"
-msgstr ""
+msgstr "Fechar"
 
 #: src/dashboard/buttons/components/TextToSpeech.js:1343
 msgid "Language"
-msgstr ""
+msgstr "Idioma"
 
 #: src/dashboard/buttons/components/TextToSpeech.js:1376
 msgid "Voice"
-msgstr ""
+msgstr "Voz"
 
 #: src/dashboard/buttons/components/TextToSpeech.js:1410
 #: src/dashboard/components/dashboard/listening/Listening.js:1304
 msgid "Speed"
-msgstr ""
+msgstr "Velocidade"
 
 #: src/dashboard/buttons/components/TextToSpeech.js:1428
 msgid "Pitch"
-msgstr ""
+msgstr "Tom"
 
 #: src/dashboard/buttons/components/TextToSpeech.js:1446
 msgid "Volume"
-msgstr ""
+msgstr "Volume"
 
 #: src/dashboard/buttons/components/TextToSpeech.js:1461
 msgid "Unmute"
-msgstr ""
+msgstr "Ativar som"
 
 #: src/dashboard/buttons/components/TextToSpeech.js:1461
 msgid "Mute"
-msgstr ""
+msgstr "Silenciar"
 
 #: src/dashboard/components/context/AnalyticsMultiSelect.js:36
 msgid "No IDs selected"
-msgstr ""
+msgstr "Nenhum ID selecionado"
 
 #: src/dashboard/components/context/AnalyticsMultiSelect.js:41
 msgid "Select IDs"
-msgstr ""
+msgstr "Selecionar IDs"
 
 #: src/dashboard/components/context/MultiSelect.js:19
 msgid "Showing button to multiple post is not supported in free version."
-msgstr ""
+msgstr "Mostrar o botão em múltiplas publicações não é suportado na versão gratuita."
 
 #: src/dashboard/components/context/MultiSelect.js:383
 msgid "Select Items..."
-msgstr ""
+msgstr "Selecionar Itens..."
 
 #: src/dashboard/components/dashboard/aliases/Aliases.js:36
 msgid "More than 1 alias is available in the pro version. Please "
-msgstr ""
+msgstr "Mais de 1 alias está disponível na versão pro. Por favor "
 
 #: src/dashboard/components/dashboard/aliases/Aliases.js:98
 msgid "Here a short text have to write to inform the user about this feature purpose"
-msgstr ""
+msgstr "Aqui deve ser escrito um breve texto para informar o utilizador sobre o propósito desta funcionalidade"
 
 #: src/dashboard/components/dashboard/aliases/Aliases.js:116
 msgid "Write actual text"
-msgstr ""
+msgstr "Escrever texto real"
 
 #: src/dashboard/components/dashboard/aliases/Aliases.js:125
 msgid "Write read aloud text"
-msgstr ""
+msgstr "Escrever texto para leitura em voz alta"
 
 #: src/dashboard/components/dashboard/aliases/Aliases.js:150
 msgid "Add New"
-msgstr ""
+msgstr "Adicionar Novo"
 
 #: src/dashboard/components/dashboard/aliases/Aliases.js:170
 #: src/dashboard/components/dashboard/analitics/Analitics.js:1029
@@ -978,47 +980,47 @@ msgstr ""
 #: src/dashboard/components/dashboard/integrations/Integrations.js:356
 #: src/dashboard/components/dashboard/settings/Settings.js:944
 msgid "Loading..."
-msgstr ""
+msgstr "A carregar..."
 
 #: src/dashboard/components/dashboard/analitics/Analitics.js:466
 msgid "CSV exported successfully!"
-msgstr ""
+msgstr "CSV exportado com sucesso!"
 
 #: src/dashboard/components/dashboard/analitics/Analitics.js:470
 msgid "Error exporting CSV"
-msgstr ""
+msgstr "Erro ao exportar CSV"
 
 #: src/dashboard/components/dashboard/analitics/Analitics.js:519
 msgid "PDF report opened. Use 'Save as PDF' in the print dialog."
-msgstr ""
+msgstr "Relatório PDF aberto. Use 'Guardar como PDF' no diálogo de impressão."
 
 #: src/dashboard/components/dashboard/analitics/Analitics.js:533
 msgid "Report downloaded as HTML. Open in browser and print to save as PDF."
-msgstr ""
+msgstr "Relatório transferido como HTML. Abra no navegador e imprima para guardar como PDF."
 
 #: src/dashboard/components/dashboard/analitics/Analitics.js:536
 msgid "Failed to generate PDF report."
-msgstr ""
+msgstr "Falha ao gerar relatório PDF."
 
 #: src/dashboard/components/dashboard/analitics/Analitics.js:540
 msgid "Error exporting PDF"
-msgstr ""
+msgstr "Erro ao exportar PDF"
 
 #: src/dashboard/components/dashboard/analitics/Analitics.js:801
 msgid "Analytics"
-msgstr ""
+msgstr "Análise"
 
 #: src/dashboard/components/dashboard/analitics/Analitics.js:829
 msgid "Track and analyze your TTS player engagement to understand listener behavior."
-msgstr ""
+msgstr "Rastreie e analise o envolvimento do seu leitor TTS para compreender o comportamento dos ouvintes."
 
 #: src/dashboard/components/dashboard/analitics/Analitics.js:1003
 msgid "Analytics is Currently Disabled"
-msgstr ""
+msgstr "A Análise Está Atualmente Desativada"
 
 #: src/dashboard/components/dashboard/analitics/Analitics.js:1005
 msgid "Enable analytics using the toggle above to start tracking your TTS player interactions and view detailed metrics."
-msgstr ""
+msgstr "Ative a análise usando o botão acima para começar a rastrear as interações do seu leitor TTS e ver métricas detalhadas."
 
 #: src/dashboard/components/dashboard/analitics/BrowserAnalytics.js:78
 #: src/dashboard/components/dashboard/analitics/DeviceTypes.js:66
@@ -1026,7 +1028,7 @@ msgstr ""
 #: src/dashboard/components/dashboard/analitics/LocationAnalytics.js:89
 #: src/dashboard/components/dashboard/analitics/OSAnalytics.js:66
 msgid "Yesterday"
-msgstr ""
+msgstr "Ontem"
 
 #: src/dashboard/components/dashboard/analitics/BrowserAnalytics.js:79
 #: src/dashboard/components/dashboard/analitics/DeviceTypes.js:67
@@ -1040,7 +1042,7 @@ msgstr ""
 #: src/dashboard/components/dashboard/analitics/PlayingTrendChart.js:36
 #: src/dashboard/components/dashboard/analitics/PopularPosts.js:32
 msgid "Last 7 Days"
-msgstr ""
+msgstr "Últimos 7 Dias"
 
 #: src/dashboard/components/dashboard/analitics/BrowserAnalytics.js:80
 #: src/dashboard/components/dashboard/analitics/DeviceTypes.js:68
@@ -1053,17 +1055,17 @@ msgstr ""
 #: src/dashboard/components/dashboard/analitics/PlayingTrendChart.js:37
 #: src/dashboard/components/dashboard/analitics/PopularPosts.js:33
 msgid "Last 30 Days"
-msgstr ""
+msgstr "Últimos 30 Dias"
 
 #: src/dashboard/components/dashboard/analitics/BrowserAnalytics.js:177
 msgid "Browser Analytics"
-msgstr ""
+msgstr "Análise de Navegador"
 
 #: src/dashboard/components/dashboard/analitics/DeviceTypes.js:165
 #: src/dashboard/components/dashboard/analitics/LocationAnalytics.js:219
 #: src/dashboard/components/dashboard/analitics/OSAnalytics.js:168
 msgid "more"
-msgstr ""
+msgstr "mais"
 
 #: src/dashboard/components/dashboard/analitics/DeviceTypes.js:165
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:260
@@ -1075,7 +1077,7 @@ msgstr ""
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:58
 #: src/dashboard/components/dashboard/analitics/TrackPostIds.js:282
 msgid "Pro"
-msgstr ""
+msgstr "Pro"
 
 #: src/dashboard/components/dashboard/analitics/EngagementFunnel.js:63
 #: src/dashboard/components/dashboard/analitics/GlobalDateRangePicker.js:33
@@ -1084,967 +1086,967 @@ msgstr ""
 #: src/dashboard/components/dashboard/analitics/PlayingTrendChart.js:38
 #: src/dashboard/components/dashboard/analitics/PopularPosts.js:34
 msgid "Last 90 Days"
-msgstr ""
+msgstr "Últimos 90 Dias"
 
 #: src/dashboard/components/dashboard/analitics/EngagementFunnel.js:124
 #: src/dashboard/components/dashboard/analitics/EngagementFunnel.js:163
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:130
 msgid "Init"
-msgstr ""
+msgstr "Início"
 
 #: src/dashboard/components/dashboard/analitics/EngagementFunnel.js:130
 #: src/dashboard/components/dashboard/analitics/EngagementFunnel.js:164
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:138
 msgid "Play"
-msgstr ""
+msgstr "Reproduzir"
 
 #: src/dashboard/components/dashboard/analitics/EngagementFunnel.js:136
 #: src/dashboard/components/dashboard/analitics/EngagementFunnel.js:165
 msgid "25%"
-msgstr ""
+msgstr "25%"
 
 #: src/dashboard/components/dashboard/analitics/EngagementFunnel.js:142
 #: src/dashboard/components/dashboard/analitics/EngagementFunnel.js:166
 msgid "50%"
-msgstr ""
+msgstr "50%"
 
 #: src/dashboard/components/dashboard/analitics/EngagementFunnel.js:148
 #: src/dashboard/components/dashboard/analitics/EngagementFunnel.js:167
 msgid "75%"
-msgstr ""
+msgstr "75%"
 
 #: src/dashboard/components/dashboard/analitics/EngagementFunnel.js:154
 #: src/dashboard/components/dashboard/analitics/EngagementFunnel.js:168
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:181
 msgid "End"
-msgstr ""
+msgstr "Fim"
 
 #: src/dashboard/components/dashboard/analitics/EngagementFunnel.js:176
 #: src/dashboard/components/dashboard/analitics/EngagementFunnel.js:229
 msgid "Engagement Funnel"
-msgstr ""
+msgstr "Funil de Envolvimento"
 
 #: src/dashboard/components/dashboard/analitics/EngagementFunnel.js:204
 msgid "Play Rate:"
-msgstr ""
+msgstr "Taxa de Reprodução:"
 
 #: src/dashboard/components/dashboard/analitics/EngagementFunnel.js:210
 msgid "Completion Rate:"
-msgstr ""
+msgstr "Taxa de Conclusão:"
 
 #: src/dashboard/components/dashboard/analitics/EngagementFunnel.js:216
 msgid "Biggest Drop:"
-msgstr ""
+msgstr "Maior Queda:"
 
 #: src/dashboard/components/dashboard/analitics/EngagementFunnel.js:218
 msgid "50% → 75%"
-msgstr ""
+msgstr "50% → 75%"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:86
 msgid "CSV export initiated. Check your downloads."
-msgstr ""
+msgstr "Exportação CSV iniciada. Verifique as suas transferências."
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:89
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:106
 msgid "Export failed. Please try again."
-msgstr ""
+msgstr "Exportação falhou. Por favor, tente novamente."
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:103
 msgid "PDF export initiated. Check your downloads."
-msgstr ""
+msgstr "Exportação PDF iniciada. Verifique as suas transferências."
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:125
 msgid "Please enter at least one recipient email address."
-msgstr ""
+msgstr "Por favor, introduza pelo menos um endereço de e-mail de destinatário."
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:146
 msgid "Report schedule saved successfully."
-msgstr ""
+msgstr "Agendamento de relatório guardado com sucesso."
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:162
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:166
 msgid "Failed to save schedule settings."
-msgstr ""
+msgstr "Falha ao guardar definições de agendamento."
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:177
 msgid "Please enter recipient email addresses first."
-msgstr ""
+msgstr "Por favor, introduza primeiro os endereços de e-mail dos destinatários."
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:210
 msgid "Failed to send test report. Please check your network connection."
-msgstr ""
+msgstr "Falha ao enviar relatório de teste. Por favor, verifique a sua ligação de rede."
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:229
 msgid "CSV"
-msgstr ""
+msgstr "CSV"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:244
 msgid "PDF"
-msgstr ""
+msgstr "PDF"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:256
 msgid "Schedule Report"
-msgstr ""
+msgstr "Agendar Relatório"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:267
 msgid "Schedule Email Reports"
-msgstr ""
+msgstr "Agendar Relatórios por E-mail"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:282
 msgid "Enable automated reports"
-msgstr ""
+msgstr "Ativar relatórios automáticos"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:289
 msgid "Recipients (comma separated)"
-msgstr ""
+msgstr "Destinatários (separados por vírgula)"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:301
 msgid "Frequency"
-msgstr ""
+msgstr "Frequência"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:307
 msgid "Daily"
-msgstr ""
+msgstr "Diário"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:308
 msgid "Weekly"
-msgstr ""
+msgstr "Semanal"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:309
 msgid "Monthly"
-msgstr ""
+msgstr "Mensal"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:314
 msgid "Day"
-msgstr ""
+msgstr "Dia"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:320
 msgid "Monday"
-msgstr ""
+msgstr "Segunda-feira"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:321
 msgid "Tuesday"
-msgstr ""
+msgstr "Terça-feira"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:322
 msgid "Wednesday"
-msgstr ""
+msgstr "Quarta-feira"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:323
 msgid "Thursday"
-msgstr ""
+msgstr "Quinta-feira"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:324
 msgid "Friday"
-msgstr ""
+msgstr "Sexta-feira"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:325
 msgid "Saturday"
-msgstr ""
+msgstr "Sábado"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:326
 msgid "Sunday"
-msgstr ""
+msgstr "Domingo"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:331
 msgid "Time"
-msgstr ""
+msgstr "Hora"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:342
 msgid "Include in report:"
-msgstr ""
+msgstr "Incluir no relatório:"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:347
 msgid "Summary statistics"
-msgstr ""
+msgstr "Estatísticas resumidas"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:355
 msgid "Top 10 posts"
-msgstr ""
+msgstr "Top 10 publicações"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:363
 msgid "Geographic breakdown"
-msgstr ""
+msgstr "Distribuição geográfica"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:371
 msgid "Trend chart"
-msgstr ""
+msgstr "Gráfico de tendência"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:379
 msgid "Device stats"
-msgstr ""
+msgstr "Estatísticas de dispositivo"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:390
 msgid "Next scheduled report:"
-msgstr ""
+msgstr "Próximo relatório agendado:"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:407
 msgid "Sending..."
-msgstr ""
+msgstr "A enviar..."
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:410
 msgid "Send Test Report"
-msgstr ""
+msgstr "Enviar Relatório de Teste"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:422
 msgid "Saving..."
-msgstr ""
+msgstr "A guardar..."
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:425
 msgid "Save Settings"
-msgstr ""
+msgstr "Guardar Definições"
 
 #: src/dashboard/components/dashboard/analitics/ExportSection.js:436
 msgid "Export & Reports"
-msgstr ""
+msgstr "Exportação e Relatórios"
 
 #: src/dashboard/components/dashboard/analitics/GlobalDateRangePicker.js:31
 msgid "Last 14 Days"
-msgstr ""
+msgstr "Últimos 14 Dias"
 
 #: src/dashboard/components/dashboard/analitics/GlobalDateRangePicker.js:34
 #: src/dashboard/components/dashboard/analitics/GlobalDateRangePicker.js:78
 msgid "All Time"
-msgstr ""
+msgstr "Todo o Período"
 
 #: src/dashboard/components/dashboard/analitics/GlobalDateRangePicker.js:35
 #: src/dashboard/components/dashboard/analitics/GlobalDateRangePicker.js:255
 #: src/dashboard/components/dashboard/analitics/PlayingTrendChart.js:39
 msgid "Custom Range"
-msgstr ""
+msgstr "Intervalo Personalizado"
 
 #: src/dashboard/components/dashboard/analitics/GlobalDateRangePicker.js:119
 msgid "Getting more than 30 days data is pro feature. Please "
-msgstr ""
+msgstr "Obter dados de mais de 30 dias é uma funcionalidade pro. Por favor "
 
 #: src/dashboard/components/dashboard/analitics/GlobalDateRangePicker.js:146
 msgid "Custom date select is only available in pro version. Please "
-msgstr ""
+msgstr "A seleção de data personalizada só está disponível na versão pro. Por favor "
 
 #: src/dashboard/components/dashboard/analitics/GlobalDateRangePicker.js:220
 msgid "Quick Select"
-msgstr ""
+msgstr "Seleção Rápida"
 
 #: src/dashboard/components/dashboard/analitics/GlobalDateRangePicker.js:259
 msgid "From"
-msgstr ""
+msgstr "De"
 
 #: src/dashboard/components/dashboard/analitics/GlobalDateRangePicker.js:268
 msgid "To"
-msgstr ""
+msgstr "Até"
 
 #: src/dashboard/components/dashboard/analitics/GlobalDateRangePicker.js:283
 msgid "Apply"
-msgstr ""
+msgstr "Aplicar"
 
 #: src/dashboard/components/dashboard/analitics/ListenerSegments.js:131
 msgid "New Listeners"
-msgstr ""
+msgstr "Novos Ouvintes"
 
 #: src/dashboard/components/dashboard/analitics/ListenerSegments.js:132
 msgid "Returning"
-msgstr ""
+msgstr "Recorrentes"
 
 #: src/dashboard/components/dashboard/analitics/ListenerSegments.js:172
 #: src/dashboard/components/dashboard/analitics/ListenerSegments.js:272
 msgid "Listener Segments"
-msgstr ""
+msgstr "Segmentos de Ouvintes"
 
 #: src/dashboard/components/dashboard/analitics/ListenerSegments.js:234
 msgid "New:"
-msgstr ""
+msgstr "Novos:"
 
 #: src/dashboard/components/dashboard/analitics/ListenerSegments.js:239
 #: src/dashboard/components/dashboard/analitics/ListenerSegments.js:253
 msgid "Returning:"
-msgstr ""
+msgstr "Recorrentes:"
 
 #: src/dashboard/components/dashboard/analitics/ListenerSegments.js:247
 msgid "New Listeners:"
-msgstr ""
+msgstr "Novos Ouvintes:"
 
 #: src/dashboard/components/dashboard/analitics/ListenerSegments.js:259
 msgid "Avg Sessions/User:"
-msgstr ""
+msgstr "Sessões Médias/Utilizador:"
 
 #: src/dashboard/components/dashboard/analitics/LocationAnalytics.js:183
 msgid "Location"
-msgstr ""
+msgstr "Localização"
 
 #: src/dashboard/components/dashboard/analitics/LocationAnalytics.js:229
 msgid "Top Cities"
-msgstr ""
+msgstr "Principais Cidades"
 
 #: src/dashboard/components/dashboard/analitics/LocationAnalytics.js:247
 msgid "Unlock city-level analytics"
-msgstr ""
+msgstr "Desbloquear análise ao nível de cidade"
 
 #: src/dashboard/components/dashboard/analitics/PeakHoursHeatmap.js:65
 msgid "Mon"
-msgstr ""
+msgstr "Seg"
 
 #: src/dashboard/components/dashboard/analitics/PeakHoursHeatmap.js:66
 msgid "Tue"
-msgstr ""
+msgstr "Ter"
 
 #: src/dashboard/components/dashboard/analitics/PeakHoursHeatmap.js:67
 msgid "Wed"
-msgstr ""
+msgstr "Qua"
 
 #: src/dashboard/components/dashboard/analitics/PeakHoursHeatmap.js:68
 msgid "Thu"
-msgstr ""
+msgstr "Qui"
 
 #: src/dashboard/components/dashboard/analitics/PeakHoursHeatmap.js:69
 msgid "Fri"
-msgstr ""
+msgstr "Sex"
 
 #: src/dashboard/components/dashboard/analitics/PeakHoursHeatmap.js:70
 msgid "Sat"
-msgstr ""
+msgstr "Sáb"
 
 #: src/dashboard/components/dashboard/analitics/PeakHoursHeatmap.js:71
 msgid "Sun"
-msgstr ""
+msgstr "Dom"
 
 #: src/dashboard/components/dashboard/analitics/PeakHoursHeatmap.js:170
 msgid "Peak Listening Hours"
-msgstr ""
+msgstr "Horas de Pico de Escuta"
 
 #: src/dashboard/components/dashboard/analitics/PeakHoursHeatmap.js:219
 #: src/dashboard/components/dashboard/listening/Listening.js:1267
 msgid "Low"
-msgstr ""
+msgstr "Baixo"
 
 #: src/dashboard/components/dashboard/analitics/PeakHoursHeatmap.js:227
 msgid "Peak"
-msgstr ""
+msgstr "Pico"
 
 #: src/dashboard/components/dashboard/analitics/PeakHoursHeatmap.js:234
 msgid "Insight:"
-msgstr ""
+msgstr "Informação:"
 
 #: src/dashboard/components/dashboard/analitics/PeakHoursHeatmap.js:234
 msgid "Your peak listening time is"
-msgstr ""
+msgstr "O seu horário de pico de escuta é"
 
 #: src/dashboard/components/dashboard/analitics/PeakHoursHeatmap.js:243
 msgid "Peak Hours Heatmap"
-msgstr ""
+msgstr "Mapa de Calor das Horas de Pico"
 
 #: src/dashboard/components/dashboard/analitics/PlayingTrendChart.js:226
 #: src/dashboard/components/dashboard/analitics/PlayingTrendChart.js:419
 msgid "Playing Quantity"
-msgstr ""
+msgstr "Quantidade de Reproduções"
 
 #: src/dashboard/components/dashboard/analitics/PlayingTrendChart.js:240
 msgid "Playing Time (min)"
-msgstr ""
+msgstr "Tempo de Reprodução (min)"
 
 #: src/dashboard/components/dashboard/analitics/PlayingTrendChart.js:258
 msgid "Previous Period"
-msgstr ""
+msgstr "Período Anterior"
 
 #: src/dashboard/components/dashboard/analitics/PlayingTrendChart.js:368
 msgid "Playing Trend Analysis"
-msgstr ""
+msgstr "Análise de Tendência de Reprodução"
 
 #: src/dashboard/components/dashboard/analitics/PlayingTrendChart.js:376
 msgid "Compare with Previous Period"
-msgstr ""
+msgstr "Comparar com Período Anterior"
 
 #: src/dashboard/components/dashboard/analitics/PlayingTrendChart.js:403
 msgid "Enable comparison with previous period"
-msgstr ""
+msgstr "Ativar comparação com período anterior"
 
 #: src/dashboard/components/dashboard/analitics/PlayingTrendChart.js:415
 msgid "Quantity vs Date"
-msgstr ""
+msgstr "Quantidade vs Data"
 
 #: src/dashboard/components/dashboard/analitics/PlayingTrendChart.js:423
 msgid "Playing Time(min)"
-msgstr ""
+msgstr "Tempo de Reprodução(min)"
 
 #: src/dashboard/components/dashboard/analitics/PopularPosts.js:118
 msgid "Popular Post"
-msgstr ""
+msgstr "Publicação Popular"
 
 #: src/dashboard/components/dashboard/analitics/PopularPosts.js:136
 msgid "Rank"
-msgstr ""
+msgstr "Posição"
 
 #: src/dashboard/components/dashboard/analitics/PopularPosts.js:138
 msgid "Total Interactions"
-msgstr ""
+msgstr "Total de Interações"
 
 #: src/dashboard/components/dashboard/analitics/PopularPosts.js:164
 msgid "No data available yet. Start tracking posts to see analytics."
-msgstr ""
+msgstr "Sem dados disponíveis ainda. Comece a rastrear publicações para ver análises."
 
 #: src/dashboard/components/dashboard/analitics/PopularPosts.js:178
 msgid "View all"
-msgstr ""
+msgstr "Ver tudo"
 
 #: src/dashboard/components/dashboard/analitics/PopularPosts.js:178
 msgid "posts"
-msgstr ""
+msgstr "publicações"
 
 #: src/dashboard/components/dashboard/analitics/PopularPosts.js:190
 msgid "View All Posts"
-msgstr ""
+msgstr "Ver Todas as Publicações"
 
 #: src/dashboard/components/dashboard/analitics/ProFeatureOverlay.js:34
 msgid "Pro Feature"
-msgstr ""
+msgstr "Funcionalidade Pro"
 
 #: src/dashboard/components/dashboard/analitics/ProFeatureOverlay.js:37
 msgid "Upgrade to Pro to unlock this feature and get access to advanced analytics."
-msgstr ""
+msgstr "Atualize para Pro para desbloquear esta funcionalidade e ter acesso a análises avançadas."
 
 #: src/dashboard/components/dashboard/analitics/ProFeatureOverlay.js:45
 msgid "Upgrade to Pro"
-msgstr ""
+msgstr "Atualizar para Pro"
 
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:124
 msgid "Total Posts"
-msgstr ""
+msgstr "Total de Publicações"
 
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:127
 msgid "Total posts with TTS player"
-msgstr ""
+msgstr "Total de publicações com leitor TTS"
 
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:135
 msgid "Player initialization count"
-msgstr ""
+msgstr "Contagem de inicialização do leitor"
 
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:143
 msgid "Total play button clicks"
-msgstr ""
+msgstr "Total de cliques no botão de reprodução"
 
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:146
 msgid "Time (Min)"
-msgstr ""
+msgstr "Tempo (Min)"
 
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:157
 msgid "Total listening time"
-msgstr ""
+msgstr "Tempo total de escuta"
 
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:165
 msgid "Total pause actions"
-msgstr ""
+msgstr "Total de ações de pausa"
 
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:177
 msgid "Total MP3 downloads"
-msgstr ""
+msgstr "Total de transferências MP3"
 
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:186
 msgid "Total completions"
-msgstr ""
+msgstr "Total de conclusões"
 
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:190
 msgid "Bounce Rate"
-msgstr ""
+msgstr "Taxa de Rejeição"
 
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:195
 msgid "Users who didn't complete the audio"
-msgstr ""
+msgstr "Utilizadores que não completaram o áudio"
 
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:209
 msgid "TTS Player Analytics Summary"
-msgstr ""
+msgstr "Resumo da Análise do Leitor TTS"
 
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:212
 msgid "Total Interactions:"
-msgstr ""
+msgstr "Total de Interações:"
 
 #: src/dashboard/components/dashboard/analitics/TrackPostIds.js:62
 #: src/dashboard/components/dashboard/analitics/TrackPostIds.js:98
 msgid "Please enable analytics first."
-msgstr ""
+msgstr "Por favor, ative primeiro a análise."
 
 #: src/dashboard/components/dashboard/analitics/TrackPostIds.js:70
 msgid "Date Range is only available in Pro version"
-msgstr ""
+msgstr "O Intervalo de Datas só está disponível na versão Pro"
 
 #: src/dashboard/components/dashboard/analitics/TrackPostIds.js:103
 msgid "Please provide a Post ID or date range."
-msgstr ""
+msgstr "Por favor, forneça um ID de publicação ou intervalo de datas."
 
 #: src/dashboard/components/dashboard/analitics/TrackPostIds.js:182
 msgid "Track Post IDs"
-msgstr ""
+msgstr "Rastrear IDs de Publicações"
 
 #: src/dashboard/components/dashboard/analitics/TrackPostIds.js:195
 msgid "Tracking more than 5 post IDs is a Pro feature"
-msgstr ""
+msgstr "Rastrear mais de 5 IDs de publicação é uma funcionalidade Pro"
 
 #: src/dashboard/components/dashboard/analitics/TrackPostIds.js:210
 msgid "Post ID"
-msgstr ""
+msgstr "ID da Publicação"
 
 #: src/dashboard/components/dashboard/analitics/TrackPostIds.js:239
 msgid "Search"
-msgstr ""
+msgstr "Pesquisar"
 
 #: src/dashboard/components/dashboard/analitics/TrackPostIds.js:248
 msgid "Clear"
-msgstr ""
+msgstr "Limpar"
 
 #: src/dashboard/components/dashboard/analitics/TrackPostIds.js:256
 msgid "Showing results for:"
-msgstr ""
+msgstr "A mostrar resultados para:"
 
 #: src/dashboard/components/dashboard/analitics/TrackPostIds.js:257
 msgid "Post ID:"
-msgstr ""
+msgstr "ID da Publicação:"
 
 #: src/dashboard/components/dashboard/analitics/TrackPostIds.js:258
 msgid "From:"
-msgstr ""
+msgstr "De:"
 
 #: src/dashboard/components/dashboard/analitics/TrackPostIds.js:259
 msgid "To:"
-msgstr ""
+msgstr "Até:"
 
 #: src/dashboard/components/dashboard/analitics/TrackPostIds.js:274
 msgid "Metric"
-msgstr ""
+msgstr "Métrica"
 
 #: src/dashboard/components/dashboard/analitics/TrackPostIds.js:275
 msgid "Value"
-msgstr ""
+msgstr "Valor"
 
 #: src/dashboard/components/dashboard/analitics/TrackPostIds.js:299
 msgid "Unlock 10+ more metrics with Pro"
-msgstr ""
+msgstr "Desbloqueie mais de 10 métricas com o Pro"
 
 #: src/dashboard/components/dashboard/compatibility/Compatibility.js:117
 msgid "Add ACF Fields To Posts"
-msgstr ""
+msgstr "Adicionar Campos ACF às Publicações"
 
 #: src/dashboard/components/dashboard/compatibility/Compatibility.js:122
 #: src/dashboard/components/dashboard/compatibility/Compatibility.js:131
 msgid "Adding more than 1  ACF field is a pro feature"
-msgstr ""
+msgstr "Adicionar mais de 1 campo ACF é uma funcionalidade pro"
 
 #: src/dashboard/components/dashboard/compatibility/Compatibility.js:167
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:383
 msgid "Loading"
-msgstr ""
+msgstr "A carregar"
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:21
 msgid "Before Content"
-msgstr ""
+msgstr "Antes do Conteúdo"
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:22
 msgid "After Content"
-msgstr ""
+msgstr "Depois do Conteúdo"
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:23
 msgid "Bottom Fixed (Pro)"
-msgstr ""
+msgstr "Fundo Fixo (Pro)"
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:24
 msgid "Bottom Left (Pro)"
-msgstr ""
+msgstr "Fundo Esquerdo (Pro)"
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:25
 msgid "Bottom Right (Pro)"
-msgstr ""
+msgstr "Fundo Direito (Pro)"
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:26
 msgid "Bottom Center (Pro)"
-msgstr ""
+msgstr "Fundo Centro (Pro)"
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:47
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:70
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:73
 msgid "Select Player"
-msgstr ""
+msgstr "Selecionar Leitor"
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:92
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:118
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:121
 msgid "Select Button Position"
-msgstr ""
+msgstr "Selecionar Posição do Botão"
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:97
 msgid "Select where to display the player button"
-msgstr ""
+msgstr "Selecione onde exibir o botão do leitor"
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:136
 msgid "Display Player To"
-msgstr ""
+msgstr "Exibir Leitor Para"
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:141
 msgid "Choose who can see the player"
-msgstr ""
+msgstr "Escolha quem pode ver o leitor"
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:158
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:189
 msgid "Player display restriction to multiple user type is available in the pro version"
-msgstr ""
+msgstr "A restrição de exibição do leitor para múltiplos tipos de utilizador está disponível na versão pro"
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:185
 msgid "Who Can Download MP3 File"
-msgstr ""
+msgstr "Quem Pode Transferir o Ficheiro MP3"
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:210
 msgid "MP3 Generation From Post's Publish Date"
-msgstr ""
+msgstr "Geração de MP3 Desde a Data de Publicação"
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:215
 msgid "Start Generating MP3 file from an specific post publish date. Select this only if you want to generate mp3 file based on date range."
-msgstr ""
+msgstr "Começar a gerar ficheiro MP3 a partir de uma data específica de publicação. Selecione isto apenas se quiser gerar ficheiros MP3 com base num intervalo de datas."
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:221
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:253
 msgid "?"
-msgstr ""
+msgstr "?"
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:234
 msgid "Generate MP3 File Date From"
-msgstr ""
+msgstr "Gerar Ficheiro MP3 Desde a Data"
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:243
 msgid "MP3 Generation Till Post's Publish Date"
-msgstr ""
+msgstr "Geração de MP3 Até à Data de Publicação"
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:248
 msgid "Start Generating MP3 file till an specific post publish date. Select this only if you want to generate mp3 file based on date range."
-msgstr ""
+msgstr "Gerar ficheiro MP3 até uma data específica de publicação. Selecione isto apenas se quiser gerar ficheiros MP3 com base num intervalo de datas."
 
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:266
 msgid "Generate MP3 File Date To"
-msgstr ""
+msgstr "Gerar Ficheiro MP3 Até à Data"
 
 #: src/dashboard/components/dashboard/customize/CustomizationTabs.js:27
 msgid "Player Customization"
-msgstr ""
+msgstr "Personalização do Leitor"
 
 #: src/dashboard/components/dashboard/customize/Customize.js:311
 msgid "Value should be between 0-100"
-msgstr ""
+msgstr "O valor deve estar entre 0-100"
 
 #: src/dashboard/components/dashboard/customize/Customize.js:348
 msgid "This option is only available for the pro version."
-msgstr ""
+msgstr "Esta opção só está disponível para a versão pro."
 
 #: src/dashboard/components/dashboard/customize/Customize.js:463
 #: src/dashboard/components/dashboard/listening/Listening.js:432
 #: src/dashboard/components/dashboard/recording/Recording.js:121
 msgid "Please fill the  field : "
-msgstr ""
+msgstr "Por favor, preencha o campo: "
 
 #: src/dashboard/components/dashboard/customize/Customize.js:504
 msgid "To select this player, you must authenticate first from the Integration menu"
-msgstr ""
+msgstr "Para selecionar este leitor, deve autenticar-se primeiro no menu de Integração"
 
 #: src/dashboard/components/dashboard/customize/Customize.js:513
 msgid "Google Cloud TTS player is only available in the pro version."
-msgstr ""
+msgstr "O leitor Google Cloud TTS só está disponível na versão pro."
 
 #: src/dashboard/components/dashboard/customize/Customize.js:521
 #: src/dashboard/components/dashboard/customize/Customize.js:538
 msgid "To select this player you have to authenticate first from Integration menu"
-msgstr ""
+msgstr "Para selecionar este leitor tem de se autenticar primeiro no menu de Integração"
 
 #: src/dashboard/components/dashboard/customize/Customize.js:530
 msgid "ChatGPT TTS player is only available in the pro version."
-msgstr ""
+msgstr "O leitor ChatGPT TTS só está disponível na versão pro."
 
 #: src/dashboard/components/dashboard/customize/Customize.js:547
 msgid "ElevenLabs TTS player is only available in the pro version."
-msgstr ""
+msgstr "O leitor ElevenLabs TTS só está disponível na versão pro."
 
 #: src/dashboard/components/dashboard/customize/Customize.js:553
 msgid "Default Pro player is only available in the pro version."
-msgstr ""
+msgstr "O leitor Pro Padrão só está disponível na versão pro."
 
 #: src/dashboard/components/dashboard/customize/Customize.js:564
 msgid "Text To Speech plugin stores synthesized content in the uploads folder. Your uploads folder is not writable. Please make the uploads folder writable to enjoy all features of the plugin."
-msgstr ""
+msgstr "O plugin Texto Para Voz armazena conteúdo sintetizado na pasta de uploads. A sua pasta de uploads não tem permissão de escrita. Por favor, torne a pasta de uploads gravável para desfrutar de todas as funcionalidades do plugin."
 
 #: src/dashboard/components/dashboard/customize/Customize.js:577
 msgid "Customization saved."
-msgstr ""
+msgstr "Personalização guardada."
 
 #: src/dashboard/components/dashboard/customize/Customize.js:579
 msgid "Now go to the \"Listening\" menu to select proper language and voice."
-msgstr ""
+msgstr "Agora vá ao menu \"Escuta\" para selecionar o idioma e a voz adequados."
 
 #: src/dashboard/components/dashboard/customize/Customize.js:628
 msgid "Default"
-msgstr ""
+msgstr "Padrão"
 
 #: src/dashboard/components/dashboard/customize/Customize.js:629
 msgid "Default Pro"
-msgstr ""
+msgstr "Pro Padrão"
 
 #: src/dashboard/components/dashboard/customize/Customize.js:651
 msgid "Customization"
-msgstr ""
+msgstr "Personalização"
 
 #: src/dashboard/components/dashboard/customize/Customize.js:653
 msgid "Customize the player & design to match your brand and preferences."
-msgstr ""
+msgstr "Personalize o leitor e o design para combinar com a sua marca e preferências."
 
 #: src/dashboard/components/dashboard/customize/Customize.js:673
 msgid "Write here something and click listen button"
-msgstr ""
+msgstr "Escreva algo aqui e clique no botão ouvir"
 
 #: src/dashboard/components/dashboard/customize/Customize.js:681
 msgid " Enter your text here and click the listen button to hear it spoken aloud."
-msgstr ""
+msgstr " Introduza o seu texto aqui e clique no botão ouvir para o ouvir em voz alta."
 
 #: src/dashboard/components/dashboard/customize/Customize.js:711
 msgid "Watch Tutorial"
-msgstr ""
+msgstr "Ver Tutorial"
 
 #: src/dashboard/components/dashboard/customize/Customize.js:722
 msgid "Write here something and click listen button."
-msgstr ""
+msgstr "Escreva algo aqui e clique no botão ouvir."
 
 #: src/dashboard/components/dashboard/customize/Customize.js:800
 msgid "Text To Audio:  Tap to listen post."
-msgstr ""
+msgstr "Texto Para Áudio: Toque para ouvir a publicação."
 
 #: src/dashboard/components/dashboard/customize/Customize.js:811
 msgid "Design Customization"
-msgstr ""
+msgstr "Personalização do Design"
 
 #: src/dashboard/components/dashboard/customize/Customize.js:822
 msgid "Short Code | Attributes value must be wrapped with double quotation ( \" )"
-msgstr ""
+msgstr "Shortcode | Os valores dos atributos devem ser envolvidos com aspas duplas ( \" )"
 
 #: src/dashboard/components/dashboard/customize/Customize.js:839
 msgid "tta_play_btn_shortcode"
-msgstr ""
+msgstr "tta_play_btn_shortcode"
 
 #: src/dashboard/components/dashboard/customize/Customize.js:841
 msgid "Copied ShortCode"
-msgstr ""
+msgstr "Shortcode Copiado"
 
 #: src/dashboard/components/dashboard/customize/Customize.js:848
 msgid "Copy Shortcode"
-msgstr ""
+msgstr "Copiar Shortcode"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:23
 msgid "Choose player background color"
-msgstr ""
+msgstr "Escolha a cor de fundo do leitor"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:43
 msgid "Choose your color"
-msgstr ""
+msgstr "Escolha a sua cor"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:54
 msgid "Hover BG Color"
-msgstr ""
+msgstr "Cor de Fundo ao Passar"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:63
 msgid "Choose your hover background color"
-msgstr ""
+msgstr "Escolha a cor de fundo ao passar o rato"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:76
 msgid "Hover Text Color"
-msgstr ""
+msgstr "Cor do Texto ao Passar"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:85
 msgid "Choose your hover text color"
-msgstr ""
+msgstr "Escolha a cor do texto ao passar o rato"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:97
 msgid "Margin Size (Px)"
-msgstr ""
+msgstr "Tamanho da Margem (Px)"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:101
 msgid "Top"
-msgstr ""
+msgstr "Topo"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:108
 msgid "Margin Top"
-msgstr ""
+msgstr "Margem Superior"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:115
 msgid "Bottom"
-msgstr ""
+msgstr "Fundo"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:122
 msgid "Margin Bottom"
-msgstr ""
+msgstr "Margem Inferior"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:129
 msgid "Left"
-msgstr ""
+msgstr "Esquerda"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:136
 msgid "Margin Left"
-msgstr ""
+msgstr "Margem Esquerda"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:143
 msgid "Right"
-msgstr ""
+msgstr "Direita"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:150
 msgid "Margin Right"
-msgstr ""
+msgstr "Margem Direita"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:156
 msgid "Button Style"
-msgstr ""
+msgstr "Estilo do Botão"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:160
 msgid "Height"
-msgstr ""
+msgstr "Altura"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:169
 msgid "Button Height"
-msgstr ""
+msgstr "Altura do Botão"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:176
 msgid "Border"
-msgstr ""
+msgstr "Borda"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:186
 msgid "Button Border"
-msgstr ""
+msgstr "Borda do Botão"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:192
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:201
 msgid "Border Color"
-msgstr ""
+msgstr "Cor da Borda"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:213
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:223
 msgid "Font Size"
-msgstr ""
+msgstr "Tamanho da Fonte"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:230
 msgid "Radius"
-msgstr ""
+msgstr "Raio"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:240
 msgid "Border Radius"
-msgstr ""
+msgstr "Raio da Borda"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:247
 msgid "Button Properties"
-msgstr ""
+msgstr "Propriedades do Botão"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:250
 msgid "Width"
-msgstr ""
+msgstr "Largura"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:260
 msgid "Button Width"
-msgstr ""
+msgstr "Largura do Botão"
 
 #: src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js:330
 msgid "Enter Custom CSS here"
-msgstr ""
+msgstr "Introduza CSS personalizado aqui"
 
 #: src/dashboard/components/dashboard/docs/Docs.js:46
 msgid "1. Browser support issues on Android and desktop"
-msgstr ""
+msgstr "1. Problemas de suporte de navegador no Android e desktop"
 
 #: src/dashboard/components/dashboard/docs/Docs.js:50
 msgid "This plugin is built using the browser SpeechSynthesis API. No external API is used."
-msgstr ""
+msgstr "Este plugin é construído usando a API SpeechSynthesis do navegador. Nenhuma API externa é utilizada."
 
 #: src/dashboard/components/dashboard/docs/Docs.js:54
 msgid "View SpeechSynthesis documentation"
-msgstr ""
+msgstr "Ver documentação do SpeechSynthesis"
 
 #: src/dashboard/components/dashboard/docs/Docs.js:58
 msgid "Browser and device support varies, so available voices and languages may differ between desktop and mobile devices."
-msgstr ""
+msgstr "O suporte de navegador e dispositivo varia, por isso as vozes e idiomas disponíveis podem diferir entre dispositivos desktop e móveis."
 
 #: src/dashboard/components/dashboard/docs/Docs.js:62
 msgid "Submit a support ticket"
-msgstr ""
+msgstr "Enviar um pedido de suporte"
 
 #: src/dashboard/components/dashboard/docs/Docs.js:66
 msgid "There are no browser limitations in the Pro version."
-msgstr ""
+msgstr "Não existem limitações de navegador na versão Pro."
 
 #: src/dashboard/components/dashboard/docs/Docs.js:73
 msgid "2. Different voices or languages on mobile"
-msgstr ""
+msgstr "2. Vozes ou idiomas diferentes no telemóvel"
 
 #: src/dashboard/components/dashboard/docs/Docs.js:77
 msgid "SpeechSynthesis support varies between browsers and devices. Some voices may be available on desktop but not on mobile."
-msgstr ""
+msgstr "O suporte SpeechSynthesis varia entre navegadores e dispositivos. Algumas vozes podem estar disponíveis no desktop mas não no telemóvel."
 
 #: src/dashboard/components/dashboard/docs/Docs.js:80
 msgid "The Pro version does not have these limitations."
-msgstr ""
+msgstr "A versão Pro não tem estas limitações."
 
 #: src/dashboard/components/dashboard/docs/Docs.js:87
 msgid "3. Can I exclude certain words from playback?"
-msgstr ""
+msgstr "3. Posso excluir certas palavras da reprodução?"
 
 #: src/dashboard/components/dashboard/docs/Docs.js:91
 msgid "Yes. You can exclude specific words or phrases in the Pro version."
-msgstr ""
+msgstr "Sim. Pode excluir palavras ou frases específicas na versão Pro."
 
 #: src/dashboard/components/dashboard/docs/Docs.js:94
 msgid "Use the pipe (|) symbol to separate multiple words or phrases."
-msgstr ""
+msgstr "Use o símbolo pipe (|) para separar múltiplas palavras ou frases."
 
 #: src/dashboard/components/dashboard/docs/Docs.js:101
 msgid "4. Can I exclude specific HTML tags from playback?"
-msgstr ""
+msgstr "4. Posso excluir tags HTML específicas da reprodução?"
 
 #: src/dashboard/components/dashboard/docs/Docs.js:105
 msgid "The Pro version allows excluding content wrapped in specific HTML tags."
-msgstr ""
+msgstr "A versão Pro permite excluir conteúdo envolvido em tags HTML específicas."
 
 #: src/dashboard/components/dashboard/docs/Docs.js:108
 msgid "Use the pipe (|) symbol to exclude multiple tags."
-msgstr ""
+msgstr "Use o símbolo pipe (|) para excluir múltiplas tags."
 
 #: src/dashboard/components/dashboard/docs/Docs.js:115
 msgid "5. How can I change button text?"
-msgstr ""
+msgstr "5. Como posso alterar o texto do botão?"
 
 #: src/dashboard/components/dashboard/docs/Docs.js:119
 msgid "Button text can be changed using shortcode attributes or filters. Filters always override shortcode values."
-msgstr ""
+msgstr "O texto do botão pode ser alterado usando atributos de shortcode ou filtros. Os filtros substituem sempre os valores do shortcode."
 
 #: src/dashboard/components/dashboard/docs/Docs.js:131
 msgid "6. How do I add a custom CSS class to the button?"
-msgstr ""
+msgstr "6. Como adiciono uma classe CSS personalizada ao botão?"
 
 #: src/dashboard/components/dashboard/docs/Docs.js:140
 msgid "7. Backend filters (Free version)"
-msgstr ""
+msgstr "7. Filtros de backend (versão Gratuita)"
 
 #: src/dashboard/components/dashboard/docs/Docs.js:146
 msgid "Filter"
-msgstr ""
+msgstr "Filtro"
 
 #: src/dashboard/components/dashboard/docs/Docs.js:147
 msgid "Arguments"
-msgstr ""
+msgstr "Argumentos"
 
 #: src/dashboard/components/dashboard/integrations/ChatGPTTTS/ChatGPTTTS.js:21
 msgid "ChatGPT TTS feature is only in pro version."
-msgstr ""
+msgstr "A funcionalidade ChatGPT TTS só está disponível na versão pro."
 
 #: src/dashboard/components/dashboard/integrations/ChatGPTTTS/ChatGPTTTS.js:36
 msgid "ChatGPT text to speech feature is only in pro version."
-msgstr ""
+msgstr "A funcionalidade texto para voz ChatGPT só está disponível na versão pro."
 
 #: src/dashboard/components/dashboard/integrations/ChatGPTTTS/ChatGPTTTS.js:50
 #: src/dashboard/components/dashboard/integrations/ElevenLabsTTS/ElevenLabsTTS.js:50
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:178
 msgid "Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin."
-msgstr ""
+msgstr "O plugin Texto Para Voz armazena conteúdo sintetizado na pasta de uploads. A sua pasta de uploads não tem permissão de escrita. Por favor, torne a pasta de uploads gravável para desfrutar de todas as funcionalidades do plugin."
 
 #: src/dashboard/components/dashboard/integrations/ChatGPTTTS/ChatGPTTTS.js:71
 #: src/dashboard/components/dashboard/integrations/ElevenLabsTTS/ElevenLabsTTS.js:71
 msgid "API key is saved successfully"
-msgstr ""
+msgstr "Chave API guardada com sucesso"
 
 #: src/dashboard/components/dashboard/integrations/ChatGPTTTS/ChatGPTTTS.js:82
 #: src/dashboard/components/dashboard/integrations/ElevenLabsTTS/ElevenLabsTTS.js:82
@@ -2053,408 +2055,408 @@ msgstr ""
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:373
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:418
 msgid "Something went wrong"
-msgstr ""
+msgstr "Algo correu mal"
 
 #: src/dashboard/components/dashboard/integrations/ChatGPTTTS/ChatGPTTTS.js:94
 msgid "Set ChatGPT API key"
-msgstr ""
+msgstr "Definir chave API ChatGPT"
 
 #: src/dashboard/components/dashboard/integrations/ChatGPTTTS/ChatGPTTTS.js:113
 msgid "paste here chatgpt_tts_api_key"
-msgstr ""
+msgstr "cole aqui chatgpt_tts_api_key"
 
 #: src/dashboard/components/dashboard/integrations/ChatGPTTTS/ChatGPTTTS.js:121
 #: src/dashboard/components/dashboard/integrations/ElevenLabsTTS/ElevenLabsTTS.js:114
 msgid "Submit"
-msgstr ""
+msgstr "Enviar"
 
 #: src/dashboard/components/dashboard/integrations/ChatGPTTTS/ChatGPTTTS.js:127
 msgid "How to get chatGPT API key?"
-msgstr ""
+msgstr "Como obter a chave API do ChatGPT?"
 
 #: src/dashboard/components/dashboard/integrations/ChatGPTTTS/ChatGPTTTS.js:134
 #: src/dashboard/components/dashboard/integrations/ElevenLabsTTS/ElevenLabsTTS.js:127
 msgid "Click here"
-msgstr ""
+msgstr "Clique aqui"
 
 #: src/dashboard/components/dashboard/integrations/ElevenLabsTTS/ElevenLabsTTS.js:21
 msgid "ElevenLabs TTS feature is only in pro version."
-msgstr ""
+msgstr "A funcionalidade ElevenLabs TTS só está disponível na versão pro."
 
 #: src/dashboard/components/dashboard/integrations/ElevenLabsTTS/ElevenLabsTTS.js:36
 msgid "ElevenLabs text to speech feature is only in pro version."
-msgstr ""
+msgstr "A funcionalidade texto para voz ElevenLabs só está disponível na versão pro."
 
 #: src/dashboard/components/dashboard/integrations/ElevenLabsTTS/ElevenLabsTTS.js:94
 msgid "Set ElevenLabs API key"
-msgstr ""
+msgstr "Definir chave API ElevenLabs"
 
 #: src/dashboard/components/dashboard/integrations/ElevenLabsTTS/ElevenLabsTTS.js:106
 msgid "paste here elevenlabs_api_key"
-msgstr ""
+msgstr "cole aqui elevenlabs_api_key"
 
 #: src/dashboard/components/dashboard/integrations/ElevenLabsTTS/ElevenLabsTTS.js:120
 msgid "How to get ElevenLabs API key?"
-msgstr ""
+msgstr "Como obter a chave API da ElevenLabs?"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:53
 msgid "Backup MP3 Files To Google Cloud Storage Can Be Enabled If Google Text To Speech Is Authenticated."
-msgstr ""
+msgstr "O Backup de Ficheiros MP3 para Google Cloud Storage pode ser ativado se o Google Texto para Voz estiver autenticado."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:85
 msgid "This is not a service account file. The \"type\" field must be \"service_account\". You may have downloaded the wrong file type."
-msgstr ""
+msgstr "Este não é um ficheiro de conta de serviço. O campo \"type\" deve ser \"service_account\". Pode ter transferido o tipo de ficheiro errado."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:99
 #, js-format
 msgid "Invalid service account file. Missing required fields: %s"
-msgstr ""
+msgstr "Ficheiro de conta de serviço inválido. Campos obrigatórios em falta: %s"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:108
 msgid "The uploaded file is not valid JSON. Please make sure you downloaded the correct service account key file."
-msgstr ""
+msgstr "O ficheiro carregado não é JSON válido. Por favor, certifique-se de que transferiu o ficheiro de chave de conta de serviço correto."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:112
 msgid "Could not read the file. Please try again."
-msgstr ""
+msgstr "Não foi possível ler o ficheiro. Por favor, tente novamente."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:124
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:151
 msgid "Google cloud text to speech feature is only in pro version."
-msgstr ""
+msgstr "A funcionalidade Google Cloud texto para voz só está disponível na versão pro."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:186
 msgid "Please create a valid bucket name first"
-msgstr ""
+msgstr "Por favor, crie primeiro um nome de bucket válido"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:203
 msgid "Settings saved successfully."
-msgstr ""
+msgstr "Definições guardadas com sucesso."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:228
 msgid "Please select a service account JSON file first."
-msgstr ""
+msgstr "Por favor, selecione primeiro um ficheiro JSON de conta de serviço."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:249
 msgid "File uploaded successfully. You can now test the connection below."
-msgstr ""
+msgstr "Ficheiro carregado com sucesso. Agora pode testar a ligação abaixo."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:362
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:370
 msgid "You are already authenticated"
-msgstr ""
+msgstr "Já está autenticado"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:384
 msgid "You have to be authenticated to revoke."
-msgstr ""
+msgstr "Tem de estar autenticado para revogar."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:390
 msgid "Do you want to revoke access and delete the file uploaded during authentication. If you delete the file you have to upload the file again. Make sure you have a backup otherwise, you have to crete another auth file from Google Cloud text to speech."
-msgstr ""
+msgstr "Quer revogar o acesso e eliminar o ficheiro carregado durante a autenticação? Se eliminar o ficheiro, terá de o carregar novamente. Certifique-se de que tem uma cópia de segurança, caso contrário terá de criar outro ficheiro de autenticação no Google Cloud texto para voz."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:403
 msgid "Authentication removed."
-msgstr ""
+msgstr "Autenticação removida."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:444
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:461
 msgid "Network error. Please try again."
-msgstr ""
+msgstr "Erro de rede. Por favor, tente novamente."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:471
 msgid "BCMath extension is not enabled. Please enable this extension. Learn more how to enable."
-msgstr ""
+msgstr "A extensão BCMath não está ativada. Por favor, ative esta extensão. Saiba mais sobre como ativar."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:486
 msgid "This bucket is already have to your cloud storage."
-msgstr ""
+msgstr "Este bucket já existe no seu armazenamento na nuvem."
 
 #. translators: 1: New bucket name, 2: Existing bucket name
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:494
 #, js-format
 msgid "Are you sure you want to create a bucket named \"%1$s\"? You already have a bucket named \"%2$s\". If you create a new bucket, all MP3 files will be generated again. Please decide carefully."
-msgstr ""
+msgstr "Tem a certeza de que quer criar um bucket chamado \"%1$s\"? Já tem um bucket chamado \"%2$s\". Se criar um novo bucket, todos os ficheiros MP3 serão gerados novamente. Por favor, decida com cuidado."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:545
 msgid "BCMath Extension Missing"
-msgstr ""
+msgstr "Extensão BCMath em Falta"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:547
 msgid "The BCMath PHP extension is required for Google Cloud TTS. "
-msgstr ""
+msgstr "A extensão PHP BCMath é necessária para o Google Cloud TTS. "
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:549
 msgid "Learn how to enable it"
-msgstr ""
+msgstr "Saiba como ativá-la"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:556
 msgid "Uploads Folder Not Writable"
-msgstr ""
+msgstr "Pasta de Uploads Sem Permissão de Escrita"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:558
 msgid "The uploads folder must be writable to store generated audio files. Please check your server file permissions."
-msgstr ""
+msgstr "A pasta de uploads deve ter permissão de escrita para armazenar ficheiros de áudio gerados. Por favor, verifique as permissões de ficheiro do seu servidor."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:566
 msgid "Setup Guide"
-msgstr ""
+msgstr "Guia de Configuração"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:573
 msgid "Hide"
-msgstr ""
+msgstr "Ocultar"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:573
 msgid "Show"
-msgstr ""
+msgstr "Mostrar"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:581
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:601
 msgid "Go to"
-msgstr ""
+msgstr "Ir para"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:583
 msgid "Google Cloud Console"
-msgstr ""
+msgstr "Consola Google Cloud"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:585
 msgid "and create a project (or select an existing one)."
-msgstr ""
+msgstr "e crie um projeto (ou selecione um existente)."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:588
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:595
 msgid "Enable the"
-msgstr ""
+msgstr "Ative o"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:590
 msgid "Cloud Text-to-Speech API"
-msgstr ""
+msgstr "API Cloud Texto-para-Voz"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:594
 msgid "Optional, for Cloud Storage backup"
-msgstr ""
+msgstr "Opcional, para backup no Cloud Storage"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:597
 msgid "Cloud Storage API"
-msgstr ""
+msgstr "API Cloud Storage"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:603
 msgid "IAM & Admin > Service Accounts"
-msgstr ""
+msgstr "IAM e Admin > Contas de Serviço"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:605
 msgid "and create a new service account."
-msgstr ""
+msgstr "e crie uma nova conta de serviço."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:608
 msgid "Assign roles:"
-msgstr ""
+msgstr "Atribuir funções:"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:609
 msgid "Cloud Text-to-Speech User"
-msgstr ""
+msgstr "Utilizador Cloud Texto-para-Voz"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:610
 msgid "(required)"
-msgstr ""
+msgstr "(obrigatório)"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:612
 msgid "Storage Admin"
-msgstr ""
+msgstr "Admin de Armazenamento"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:613
 msgid "only if using Cloud Storage backup"
-msgstr ""
+msgstr "apenas se usar backup Cloud Storage"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:616
 msgid "Click on the service account > \"Keys\" tab > \"Add Key\" > \"Create new key\" > select \"JSON\"."
-msgstr ""
+msgstr "Clique na conta de serviço > separador \"Chaves\" > \"Adicionar Chave\" > \"Criar nova chave\" > selecione \"JSON\"."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:619
 msgid "Upload the downloaded JSON file below."
-msgstr ""
+msgstr "Carregue o ficheiro JSON transferido abaixo."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:635
 msgid "Video Tutorial"
-msgstr ""
+msgstr "Tutorial em Vídeo"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:654
 msgid "Learn How To Integrate Google Text To Speech With AtlasVoice Pro Plugin?"
-msgstr ""
+msgstr "Saiba Como Integrar o Google Texto Para Voz com o Plugin AtlasVoice Pro?"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:662
 msgid "Authentication"
-msgstr ""
+msgstr "Autenticação"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:705
 msgid "Click here to Upload"
-msgstr ""
+msgstr "Clique aqui para Carregar"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:716
 msgid "Upload service account JSON file"
-msgstr ""
+msgstr "Carregar ficheiro JSON de conta de serviço"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:728
 msgid "Service Account:"
-msgstr ""
+msgstr "Conta de Serviço:"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:733
 msgid "Project:"
-msgstr ""
+msgstr "Projeto:"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:737
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:832
 msgid "IAM Console"
-msgstr ""
+msgstr "Consola IAM"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:749
 msgid "Connection Test"
-msgstr ""
+msgstr "Teste de Ligação"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:751
 msgid "Verify that your service account can connect to Google Cloud Text-to-Speech API."
-msgstr ""
+msgstr "Verifique se a sua conta de serviço consegue ligar-se à API Google Cloud Texto-para-Voz."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:761
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:855
 msgid "Testing..."
-msgstr ""
+msgstr "A testar..."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:762
 msgid "Test TTS Connection"
-msgstr ""
+msgstr "Testar Ligação TTS"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:781
 msgid "Storage Configuration"
-msgstr ""
+msgstr "Configuração de Armazenamento"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:787
 msgid "Store MP3 Files To Google Cloud Storage"
-msgstr ""
+msgstr "Armazenar Ficheiros MP3 no Google Cloud Storage"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:793
 msgid "Click To Know How To Enable Automatic Store To Google Cloud Storage"
-msgstr ""
+msgstr "Clique Para Saber Como Ativar o Armazenamento Automático no Google Cloud Storage"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:817
 msgid "Automatically sync generated audio files in cloud storage for store & easy access."
-msgstr ""
+msgstr "Sincronize automaticamente ficheiros de áudio gerados no armazenamento na nuvem para guardar e aceder facilmente."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:824
 msgid "Required:"
-msgstr ""
+msgstr "Obrigatório:"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:825
 msgid "Your service account needs the \"Storage Admin\" role to use Cloud Storage."
-msgstr ""
+msgstr "A sua conta de serviço precisa da função \"Admin de Armazenamento\" para usar o Cloud Storage."
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:828
 msgid "Assign it to"
-msgstr ""
+msgstr "Atribua-a a"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:830
 msgid "in"
-msgstr ""
+msgstr "em"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:839
 msgid "Open IAM Console"
-msgstr ""
+msgstr "Abrir Consola IAM"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:856
 msgid "Test Storage Access"
-msgstr ""
+msgstr "Testar Acesso ao Armazenamento"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:876
 msgid "Google Cloud Storage Bucket Name"
-msgstr ""
+msgstr "Nome do Bucket Google Cloud Storage"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:881
 msgid "Click Here To Know Bucket Name Rules"
-msgstr ""
+msgstr "Clique Aqui Para Saber as Regras de Nome do Bucket"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:904
 msgid "Create"
-msgstr ""
+msgstr "Criar"
 
 #: src/dashboard/components/dashboard/integrations/GoogleCloudTTS/GoogleTTS.js:941
 msgid "Remove Authentication"
-msgstr ""
+msgstr "Remover Autenticação"
 
 #: src/dashboard/components/dashboard/integrations/Integrations.js:213
 msgid "Integration Setup"
-msgstr ""
+msgstr "Configuração de Integração"
 
 #: src/dashboard/components/dashboard/integrations/Integrations.js:215
 msgid "AtlasVoice Pro works fully fine even without Google TTS/ChatGPT integration."
-msgstr ""
+msgstr "O AtlasVoice Pro funciona perfeitamente mesmo sem integração Google TTS/ChatGPT."
 
 #: src/dashboard/components/dashboard/integrations/Integrations.js:221
 msgid "Select Text To Speech Service"
-msgstr ""
+msgstr "Selecionar Serviço de Texto para Voz"
 
 #: src/dashboard/components/dashboard/integrations/Integrations.js:227
 msgid "-- Select a service --"
-msgstr ""
+msgstr "-- Selecionar um serviço --"
 
 #: src/dashboard/components/dashboard/integrations/Integrations.js:229
 msgid "Google Cloud TTS"
-msgstr ""
+msgstr "Google Cloud TTS"
 
 #: src/dashboard/components/dashboard/integrations/Integrations.js:232
 msgid "ChatGPT TTS"
-msgstr ""
+msgstr "ChatGPT TTS"
 
 #: src/dashboard/components/dashboard/integrations/Integrations.js:235
 msgid "ElevenLabs TTS"
-msgstr ""
+msgstr "ElevenLabs TTS"
 
 #: src/dashboard/components/dashboard/integrations/Integrations.js:242
 msgid "ElevenLabs Usage"
-msgstr ""
+msgstr "Utilização ElevenLabs"
 
 #: src/dashboard/components/dashboard/integrations/Integrations.js:247
 msgid "characters"
-msgstr ""
+msgstr "caracteres"
 
 #: src/dashboard/components/dashboard/integrations/Integrations.js:271
 msgid "Plan:"
-msgstr ""
+msgstr "Plano:"
 
 #: src/dashboard/components/dashboard/integrations/Integrations.js:276
 msgid "Resets:"
-msgstr ""
+msgstr "Reinicia em:"
 
 #: src/dashboard/components/dashboard/integrations/Integrations.js:282
 #: src/dashboard/components/dashboard/integrations/Integrations.js:294
 #: src/dashboard/components/dashboard/integrations/Integrations.js:306
 msgid "View detailed usage and billing at"
-msgstr ""
+msgstr "Ver utilização detalhada e faturação em"
 
 #: src/dashboard/components/dashboard/integrations/Integrations.js:292
 msgid "OpenAI TTS Usage"
-msgstr ""
+msgstr "Utilização OpenAI TTS"
 
 #: src/dashboard/components/dashboard/integrations/Integrations.js:304
 msgid "Google Cloud TTS Usage"
-msgstr ""
+msgstr "Utilização Google Cloud TTS"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:477
 msgid "Listening settings saved. Now all setup done. Enjoy"
-msgstr ""
+msgstr "Definições de escuta guardadas. Configuração completa. Desfrute"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:677
 msgid "Listening Preferences"
-msgstr ""
+msgstr "Preferências de Escuta"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:679
 msgid "Set your listening preferences with different voices and languages."
-msgstr ""
+msgstr "Defina as suas preferências de escuta com diferentes vozes e idiomas."
 
 #: src/dashboard/components/dashboard/listening/Listening.js:691
 #: src/dashboard/components/dashboard/listening/Listening.js:886
 #: src/dashboard/components/dashboard/listening/Listening.js:978
 #: src/dashboard/components/dashboard/listening/Listening.js:1118
 msgid "Voice Language"
-msgstr ""
+msgstr "Idioma da Voz"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:708
 #: src/dashboard/components/dashboard/listening/Listening.js:908
@@ -2463,438 +2465,438 @@ msgstr ""
 #: src/dashboard/components/dashboard/listening/Listening.js:1432
 #: src/dashboard/components/dashboard/listening/Listening.js:1483
 msgid "Default Listening Language"
-msgstr ""
+msgstr "Idioma de Escuta Padrão"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:721
 #: src/dashboard/components/dashboard/listening/Listening.js:922
 #: src/dashboard/components/dashboard/listening/Listening.js:1012
 #: src/dashboard/components/dashboard/listening/Listening.js:1152
 msgid "Voice to speak"
-msgstr ""
+msgstr "Voz para falar"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:729
 #: src/dashboard/components/dashboard/listening/Listening.js:1020
 #: src/dashboard/components/dashboard/listening/Listening.js:1160
 msgid "Default Listening Voice"
-msgstr ""
+msgstr "Voz de Escuta Padrão"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:749
 #: src/dashboard/components/dashboard/listening/Listening.js:1053
 msgid "Voice Speed"
-msgstr ""
+msgstr "Velocidade da Voz"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:790
 msgid "Voice Volume"
-msgstr ""
+msgstr "Volume da Voz"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:831
 msgid "Voice Pitch"
-msgstr ""
+msgstr "Tom da Voz"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:867
 msgid "Default Listening Pitch"
-msgstr ""
+msgstr "Tom de Escuta Padrão"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:964
 #: src/dashboard/components/dashboard/listening/Listening.js:1107
 #: src/dashboard/components/dashboard/listening/Listening.js:1370
 msgid "Your browser does not support the audio element."
-msgstr ""
+msgstr "O seu navegador não suporta o elemento de áudio."
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1032
 msgid "Voice Model"
-msgstr ""
+msgstr "Modelo de Voz"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1040
 msgid "Default Listening Model"
-msgstr ""
+msgstr "Modelo de Escuta Padrão"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1041
 msgid "TTS-1"
-msgstr ""
+msgstr "TTS-1"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1042
 msgid "TTS-1 HD"
-msgstr ""
+msgstr "TTS-1 HD"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1176
 msgid "Model"
-msgstr ""
+msgstr "Modelo"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1184
 msgid "Multilingual v2"
-msgstr ""
+msgstr "Multilingue v2"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1185
 msgid "Turbo v2.5"
-msgstr ""
+msgstr "Turbo v2.5"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1186
 msgid "Flash v2.5"
-msgstr ""
+msgstr "Flash v2.5"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1187
 msgid "Eleven v3"
-msgstr ""
+msgstr "Eleven v3"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1197
 msgid "Output Format"
-msgstr ""
+msgstr "Formato de Saída"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1205
 msgid "MP3 44100Hz 128kbps (Default)"
-msgstr ""
+msgstr "MP3 44100Hz 128kbps (Padrão)"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1206
 msgid "MP3 44100Hz 192kbps"
-msgstr ""
+msgstr "MP3 44100Hz 192kbps"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1207
 msgid "MP3 44100Hz 96kbps"
-msgstr ""
+msgstr "MP3 44100Hz 96kbps"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1208
 msgid "MP3 44100Hz 64kbps"
-msgstr ""
+msgstr "MP3 44100Hz 64kbps"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1209
 msgid "MP3 22050Hz 32kbps"
-msgstr ""
+msgstr "MP3 22050Hz 32kbps"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1220
 msgid "Stability"
-msgstr ""
+msgstr "Estabilidade"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1239
 msgid "More variable"
-msgstr ""
+msgstr "Mais variável"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1240
 msgid "More stable"
-msgstr ""
+msgstr "Mais estável"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1248
 msgid "Similarity Boost"
-msgstr ""
+msgstr "Impulso de Semelhança"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1268
 msgid "High"
-msgstr ""
+msgstr "Alto"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1276
 msgid "Style Exaggeration"
-msgstr ""
+msgstr "Exagero de Estilo"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1295
 msgid "None"
-msgstr ""
+msgstr "Nenhum"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1296
 msgid "Exaggerated"
-msgstr ""
+msgstr "Exagerado"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1333
 msgid "Speaker Boost"
-msgstr ""
+msgstr "Impulso de Voz"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1392
 msgid "Language mapping for WPML, GTranslate plugin is available in the pro version."
-msgstr ""
+msgstr "O mapeamento de idiomas para os plugins WPML, GTranslate está disponível na versão pro."
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1450
 msgid "Select Language For{\" \"}"
-msgstr ""
+msgstr "Selecionar Idioma Para{\" \"}"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1508
 msgid "Select Voice For{\" \"}"
-msgstr ""
+msgstr "Selecionar Voz Para{\" \"}"
 
 #: src/dashboard/components/dashboard/listening/Listening.js:1550
 msgid "Current Player Voice"
-msgstr ""
+msgstr "Voz Atual do Leitor"
 
 #: src/dashboard/components/dashboard/recording/Recording.js:137
 msgid "Recording Data Saved"
-msgstr ""
+msgstr "Dados de Gravação Guardados"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:137
 msgid "All cache deleted"
-msgstr ""
+msgstr "Toda a cache eliminada"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:146
 msgid "Successfully Saved. Now go to the \"Customization\" menu."
-msgstr ""
+msgstr "Guardado com sucesso. Agora vá ao menu \"Personalização\"."
 
 #: src/dashboard/components/dashboard/settings/Settings.js:200
 msgid "Help information about this setting"
-msgstr ""
+msgstr "Informação de ajuda sobre esta definição"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:255
 msgid "Configure Settings"
-msgstr ""
+msgstr "Configurar Definições"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:258
 msgid "Configure text-to-speech player behavior and content selection"
-msgstr ""
+msgstr "Configure o comportamento do leitor texto-para-voz e a seleção de conteúdo"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:266
 msgid "Add Button or Player Automatically"
-msgstr ""
+msgstr "Adicionar Botão ou Leitor Automaticamente"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:269
 msgid "The \"Add Button or Player Automatically\" feature in a Text-to-Speech (TTS) plugin allows the plugin to automatically insert a play button or audio player into your posts or pages — without needing any manual setup."
-msgstr ""
+msgstr "A funcionalidade \"Adicionar Botão ou Leitor Automaticamente\" num plugin Texto-para-Voz (TTS) permite ao plugin inserir automaticamente um botão de reprodução ou leitor de áudio nas suas publicações ou páginas — sem necessidade de configuração manual."
 
 #: src/dashboard/components/dashboard/settings/Settings.js:283
 msgid "Continue Reading After Switching To Another Tab"
-msgstr ""
+msgstr "Continuar a Ler Após Mudar para Outro Separador"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:285
 msgid "When enabled, text-to-speech will continue playing even if you navigate away from the current tab"
-msgstr ""
+msgstr "Quando ativado, o texto-para-voz continuará a reproduzir mesmo que navegue para fora do separador atual"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:301
 msgid "Stop Auto Play After Switching To TTS Tab"
-msgstr ""
+msgstr "Parar Reprodução Automática Após Voltar ao Separador TTS"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:303
 msgid "Automatically pause playback when switching back to the TTS tab from another tab"
-msgstr ""
+msgstr "Pausar automaticamente a reprodução ao voltar ao separador TTS a partir de outro separador"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:323
 msgid "When Scroll Down Stop Floating Player"
-msgstr ""
+msgstr "Ao Descer Parar o Leitor Flutuante"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:325
 msgid "Automatically pause the floating player when users scroll down the page"
-msgstr ""
+msgstr "Pausar automaticamente o leitor flutuante quando os utilizadores descem na página"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:342
 msgid "Apply number format"
-msgstr ""
+msgstr "Aplicar formato numérico"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:344
 msgid "Convert numbers to spoken words (e.g., '123' becomes 'one hundred twenty-three')"
-msgstr ""
+msgstr "Converter números em palavras faladas (ex.: '123' torna-se 'cento e vinte e três')"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:357
 #: src/dashboard/components/dashboard/settings/Settings.js:359
 msgid "Read Content From Dom"
-msgstr ""
+msgstr "Ler Conteúdo do DOM"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:372
 #: src/dashboard/components/dashboard/settings/Settings.js:374
 msgid "Use Old Player UI"
-msgstr ""
+msgstr "Usar Interface Antiga do Leitor"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:386
 msgid "Add Post Title To Read"
-msgstr ""
+msgstr "Adicionar Título da Publicação para Ler"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:388
 msgid "Include the post title in the audio playback before reading the main content"
-msgstr ""
+msgstr "Incluir o título da publicação na reprodução de áudio antes de ler o conteúdo principal"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:402
 msgid "Add Post Excerpt To Read"
-msgstr ""
+msgstr "Adicionar Excerto da Publicação para Ler"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:404
 msgid "Include the post excerpt/summary in the audio playback before reading the main content"
-msgstr ""
+msgstr "Incluir o excerto/resumo da publicação na reprodução de áudio antes de ler o conteúdo principal"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:418
 msgid "Enable TTS Status"
-msgstr ""
+msgstr "Ativar Estado TTS"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:420
 msgid "Enable TTS Status In Post Page."
-msgstr ""
+msgstr "Ativar Estado TTS na Página da Publicação."
 
 #: src/dashboard/components/dashboard/settings/Settings.js:437
 msgid "Add Text Before Content(intro)"
-msgstr ""
+msgstr "Adicionar Texto Antes do Conteúdo (introdução)"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:442
 msgid "Custom text that will be read aloud before the main content begins"
-msgstr ""
+msgstr "Texto personalizado que será lido em voz alta antes do conteúdo principal começar"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:463
 msgid "Add Text Before Content"
-msgstr ""
+msgstr "Adicionar Texto Antes do Conteúdo"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:469
 msgid "Add Text After Content(outro)"
-msgstr ""
+msgstr "Adicionar Texto Depois do Conteúdo (conclusão)"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:474
 msgid "Custom text that will be read aloud after the main content finishes"
-msgstr ""
+msgstr "Texto personalizado que será lido em voz alta depois do conteúdo principal terminar"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:494
 msgid "Add Text After Content"
-msgstr ""
+msgstr "Adicionar Texto Depois do Conteúdo"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:504
 msgid "Allow Listening For Post Type"
-msgstr ""
+msgstr "Permitir Escuta para Tipo de Publicação"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:522
 msgid "Allow Listening For Post Status"
-msgstr ""
+msgstr "Permitir Escuta para Estado da Publicação"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:534
 msgid "On Free Version You Can Select Only 1 post type."
-msgstr ""
+msgstr "Na Versão Gratuita pode selecionar apenas 1 tipo de publicação."
 
 #: src/dashboard/components/dashboard/settings/Settings.js:545
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:161
 msgid "Include Content By CSS Selectors"
-msgstr ""
+msgstr "Incluir Conteúdo por Seletores CSS"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:549
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:169
 msgid "Include Content By CSS Selectors feature is available in pro version"
-msgstr ""
+msgstr "A funcionalidade Incluir Conteúdo por Seletores CSS está disponível na versão pro"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:581
 #: src/dashboard/components/dashboard/settings/Settings.js:633
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:189
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:243
 msgid "Multiple selector will be multiline."
-msgstr ""
+msgstr "Múltiplos seletores serão em várias linhas."
 
 #: src/dashboard/components/dashboard/settings/Settings.js:582
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:189
 msgid "Some content may be missing, It can be found by css selectors"
-msgstr ""
+msgstr "Algum conteúdo pode estar em falta, pode ser encontrado por seletores CSS"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:595
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:216
 msgid "Exclude Content By CSS Selectors"
-msgstr ""
+msgstr "Excluir Conteúdo por Seletores CSS"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:599
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:224
 msgid "Exclude Content By CSS Selectors feature is available in pro version"
-msgstr ""
+msgstr "A funcionalidade Excluir Conteúdo por Seletores CSS está disponível na versão pro"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:634
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:243
 msgid "Exclude content by CSS selectors"
-msgstr ""
+msgstr "Excluir conteúdo por seletores CSS"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:646
 msgid "You can add \".atlasvoice_no_read\" class to exclude content."
-msgstr ""
+msgstr "Pode adicionar a classe \".atlasvoice_no_read\" para excluir conteúdo."
 
 #: src/dashboard/components/dashboard/settings/Settings.js:656
 msgid "Exclude HTML Tags To Speak"
-msgstr ""
+msgstr "Excluir Tags HTML para Falar"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:660
 msgid "Exclude Tags. So that its content skipped. Like ( Subscript, Superscript etc.) This is a pro feature."
-msgstr ""
+msgstr "Excluir Tags. Para que o seu conteúdo seja saltado. Como (Subscript, Superscript, etc.) Esta é uma funcionalidade pro."
 
 #: src/dashboard/components/dashboard/settings/Settings.js:692
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:297
 msgid "Multiple Tags Will Be Pipe(|) Separated."
-msgstr ""
+msgstr "Múltiplas Tags serão separadas por Pipe(|)."
 
 #: src/dashboard/components/dashboard/settings/Settings.js:693
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:297
 msgid "Exclude tags is a pro feature."
-msgstr ""
+msgstr "Excluir tags é uma funcionalidade pro."
 
 #: src/dashboard/components/dashboard/settings/Settings.js:706
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:324
 msgid "Exclude Texts To Speak"
-msgstr ""
+msgstr "Excluir Textos para Falar"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:710
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:332
 msgid "Excluding texts to be spoken is a pro feature."
-msgstr ""
+msgstr "Excluir textos a serem falados é uma funcionalidade pro."
 
 #: src/dashboard/components/dashboard/settings/Settings.js:742
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:351
 msgid "Multiple Texts Will Be Pipe(|) Separated."
-msgstr ""
+msgstr "Múltiplos Textos serão separados por Pipe(|)."
 
 #: src/dashboard/components/dashboard/settings/Settings.js:743
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:351
 msgid "Exclude texts is a pro feature."
-msgstr ""
+msgstr "Excluir textos é uma funcionalidade pro."
 
 #: src/dashboard/components/dashboard/settings/Settings.js:756
 msgid "Exclude Posts By IDs To Speak"
-msgstr ""
+msgstr "Excluir Publicações por IDs para Falar"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:760
 msgid "Exclude more than 5 IDs is a pro feature"
-msgstr ""
+msgstr "Excluir mais de 5 IDs é uma funcionalidade pro"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:792
 msgid "Multiple IDs Will Be Comma(,) Separated."
-msgstr ""
+msgstr "Múltiplos IDs serão separados por Vírgula(,)."
 
 #: src/dashboard/components/dashboard/settings/Settings.js:793
 msgid "Excluding more than 5 IDs is a pro feature. Multiple IDs Will Be Comma(,) Separated."
-msgstr ""
+msgstr "Excluir mais de 5 IDs é uma funcionalidade pro. Múltiplos IDs serão separados por Vírgula(,)."
 
 #: src/dashboard/components/dashboard/settings/Settings.js:805
 msgid "Exclude Categories To Speak"
-msgstr ""
+msgstr "Excluir Categorias para Falar"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:809
 msgid "Exclude more than 1 categories is a pro feature"
-msgstr ""
+msgstr "Excluir mais de 1 categoria é uma funcionalidade pro"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:838
 msgid "On Free Version You Can Select Only 1 Category."
-msgstr ""
+msgstr "Na Versão Gratuita pode selecionar apenas 1 Categoria."
 
 #: src/dashboard/components/dashboard/settings/Settings.js:852
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:270
 msgid "Exclude Tags To Speak"
-msgstr ""
+msgstr "Excluir Etiquetas para Falar"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:856
 msgid "Exclude more than 1 tags is a pro feature"
-msgstr ""
+msgstr "Excluir mais de 1 etiqueta é uma funcionalidade pro"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:885
 msgid "On Free Version You Can Select Only 1 Tag."
-msgstr ""
+msgstr "Na Versão Gratuita pode selecionar apenas 1 Etiqueta."
 
 #: src/dashboard/components/dashboard/settings/Settings.js:893
 msgid "Enable Button Icon"
-msgstr ""
+msgstr "Ativar Ícone do Botão"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:903
 msgid "Clear all cache"
-msgstr ""
+msgstr "Limpar toda a cache"
 
 #: src/dashboard/components/dashboard/settings/Settings.js:924
 msgid "Save All"
-msgstr ""
+msgstr "Guardar Tudo"
 
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:79
 msgid "Please save the post then try to add custom CSS selectors."
-msgstr ""
+msgstr "Por favor, guarde a publicação e depois tente adicionar seletores CSS personalizados."
 
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:83
 msgid "Empty value can not be saved. You can uncheck the \"Use Own CSS Selectors\" Option."
-msgstr ""
+msgstr "Valor vazio não pode ser guardado. Pode desmarcar a opção \"Usar Seletores CSS Próprios\"."
 
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:99
 msgid "Settings Data Saved"
-msgstr ""
+msgstr "Dados das Definições Guardados"
 
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:142
 msgid "Use Own CSS Selectors"
-msgstr ""
+msgstr "Usar Seletores CSS Próprios"
 
 #: src/dashboard/css-selectors/CSSSelectorsForPosts.js:278
 msgid "Exclude Tags. So that its content skiped. Like ( Subscript, Superscript etc.) This is a pro feature."
-msgstr ""
+msgstr "Excluir Tags. Para que o seu conteúdo seja saltado. Como (Subscript, Superscript, etc.) Esta é uma funcionalidade pro."
