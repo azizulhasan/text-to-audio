@@ -47,13 +47,13 @@ AtlasAiDev's website traffic has collapsed **82%** — from ~3,000 monthly visit
 ### Root Causes Identified
 | Root Cause | Severity | Impact |
 |---|---|---|
-| Blog completely dead (no posts in 8+ months) | 🔴 CRITICAL | Primary traffic driver eliminated |
+| ~~Blog completely dead (no posts in 8+ months)~~ | ✅ FIXING | ~~Primary traffic driver eliminated~~ → 12 new blog posts created (4 Phase 2 + 4 Week 1-2 + 4 Week 3-4). Content calendar active: 2 posts/week scheduled through Apr 7. Topics: competitor comparisons, accessibility, AI voice, multilingual TTS, e-commerce, how-to guides. |
 | Brand identity fragmented across 4 names | 🔴 CRITICAL | SEO authority split, user confusion |
 | ~~Zero lead capture system~~ | ✅ FIXED | ~~No way to nurture 315K free users~~ → Email capture live on blog posts, centralized tracking on track.atlasaidev.com |
 | Pricing pages show identical features across tiers | 🟡 HIGH | Confuses buyers, kills conversion |
 | No social proof on website | 🟡 HIGH | 315K downloads and 4.8★ hidden from visitors |
-| No competitor comparison pages | 🟡 HIGH | Losing search traffic to competitors |
-| ~~No email marketing system~~ | ✅ FIXED | ~~No retention or upsell mechanism~~ → Mailchimp Standard connected, 5-email "Convert to Pro" automation built (Welcome → Tips → Accessibility → Free vs Pro → Final Offer with ATLASTTS10P coupon). Freemius ↔ Mailchimp OAuth synced. GA4 connected to Mailchimp. |
+| ~~No competitor comparison pages~~ | ✅ FIXED | ~~Losing search traffic to competitors~~ → 3 comparison posts live: 6-plugin comparison (ID 4160), AtlasVoice vs GSpeech (ID 4173), AtlasVoice vs Trinity Audio (ID 4176). Targeting top competitor brand keywords. |
+| ~~No email marketing system~~ | ✅ FIXED | ~~No retention or upsell mechanism~~ → Mailchimp Standard connected, 5-email "Convert to Pro" automation built & **ACTIVATED** (Mar 9). All 5 emails: white bg, centered CTAs, UTM tracking, GA link tracking enabled. Journey trigger: "Contact signs up to Atlas AiDev" with "Include imported contacts" ON. **3,215 existing subscribers re-imported** (Mar 10) to trigger the automation for all existing contacts. Freemius ↔ Mailchimp OAuth synced. GA4 connected to Mailchimp. |
 | Homepage talks about company, not customer pain | 🟠 MEDIUM | Poor first impression, high bounce |
 
 ### The Opportunity
@@ -1238,7 +1238,7 @@ This is achievable within 2-4 weeks with zero new content — just optimizing ex
 
 ## IMPLEMENTATION TODO LIST
 
-> **Last Updated:** March 9, 2026 (Email Marketing Automation — Convert to Pro Journey)
+> **Last Updated:** March 10, 2026 (Week 3-4 Content Calendar Created — 8 Total New Posts Scheduled)
 > **Status Key:** ✅ Done | 🔄 In Progress | ⬜ Not Started
 
 ---
@@ -1273,8 +1273,8 @@ This is achievable within 2-4 weeks with zero new content — just optimizing ex
 
 | # | Task | Status | Date | Notes |
 |---|------|--------|------|-------|
-| 3.1 | Rebuild content calendar (2 posts/week) | ⬜ Not Started | — | **👈 RECOMMENDED NEXT** — Consistent publishing is #1 traffic driver. Phase 2 published 4 posts but need ongoing cadence. |
-| 3.2 | Launch email onboarding sequence for free users | 🔄 In Progress | Mar 9 | **Mailchimp Standard plan purchased.** Freemius ↔ Mailchimp OAuth connected (auto-syncs buyers). Google Analytics connected to Mailchimp. **"AtlasVoice - Convert to Pro" Customer Journey built** (5-email automation, Draft status): Email 1: Welcome (Day 0, subj: "Your website just got a voice"), Email 2: Quick Tips (Day 3, subj: "3 things most AtlasVoice users miss"), Email 3: Accessibility Story (Day 7, subj: "15% of your visitors can't read your content"), Email 4: Free vs Pro comparison (Day 12, subj: "Free vs Pro — here's what you're leaving on the table"), Email 5: Final Offer with ATLASTTS10P 10% coupon (Day 18, subj: "A little thank you from AtlasVoice"). All buttons have UTM-tagged URLs. **Remaining:** Fix Email 1 body (install instructions → existing user tips), review all emails via Send Test, activate journey. Plan file: `plan/email-journey-convert-to-pro.md` |
+| 3.1 | Rebuild content calendar (2 posts/week) | ✅ Done (Week 1-4) | Mar 10 | **Week 1-2: 4 posts SCHEDULED (Mar 15-25).** (1) "AtlasVoice vs GSpeech" — ID 4173, Mar 15, featured_media=4183, focus: "atlasvoice vs gspeech"; (2) "WordPress ADA & WCAG Guide" — ID 4175, Mar 18, featured_media=4184, focus: "wordpress accessibility guide"; (3) "AtlasVoice vs Trinity Audio" — ID 4176, Mar 22, featured_media=4185, focus: "atlasvoice vs trinity audio"; (4) "ChatGPT TTS WordPress" — ID 4177, Mar 25, featured_media=4186, focus: "chatgpt tts wordpress". **Week 3-4: 4 posts SCHEDULED (Mar 29-Apr 7).** (5) "How to Make Your WordPress Blog Posts Read Aloud Automatically" — ID 4188, Mar 29, featured_media=4192, focus: "read aloud WordPress"; (6) "Best TTS Voices for Hindi, Tagalog, Bahasa & South Asian Languages" — ID 4189, Apr 1, featured_media=4193, focus: "text to speech Hindi"; (7) "How E-Commerce Stores Use TTS to Increase Conversions" — ID 4190, Apr 3, featured_media=4194, focus: "text to speech ecommerce"; (8) "Amazon Polly vs AtlasVoice: WordPress TTS Compared" — ID 4191, Apr 7, featured_media=4195, focus: "Amazon Polly WordPress". **All 8 posts** have: Yoast SEO meta, featured images, category "text-to-speech" (ID 35), comparison tables, FAQ sections. Scripts: `plan/scripts/content-calendar-week1-2.js`, `plan/scripts/week3-4-create-posts.js`, `plan/scripts/set-yoast-meta.js`. **Total blog posts: 29** (21 existing + 8 new). |
+| 3.2 | Launch email onboarding sequence for free users | ✅ Done | Mar 10 | **Mailchimp Standard plan purchased.** Freemius ↔ Mailchimp OAuth connected (auto-syncs buyers). GA4 connected to Mailchimp. **"AtlasVoice - Convert to Pro" Customer Journey — ACTIVE since Mar 9.** 5-email automation: Email 1: Welcome (Day 0), Email 2: Quick Tips (Day 3), Email 3: Accessibility Story (Day 7), Email 4: Free vs Pro (Day 12), Email 5: Final Offer with ATLASTTS10P coupon (Day 18). All emails: white backgrounds, centered CTAs, UTM-tagged URLs, GA link tracking with all 4 UTM params. **Email corrections applied:** Email 1 rewritten for existing users (not install guide), Email 2 Tip 1 path fixed (Aliases tab), Email 4 comparison table corrected (added missing rows, fixed AtlasVoice AI/Audio intros accuracy), all signatures → "The AtlasAiDev Team", mailing address fixed to "AtlasAiDev", permission reminder updated. **Journey activated** Mar 9 (all review checkmarks green). **3,215 existing subscribers re-imported** Mar 10 (CSV export → re-import with "Update existing contacts" + "Include imported contacts" trigger) so all existing contacts enter the automation. Tracking: open/click/unsubscribe built-in + GA UTM tracking on all 5 emails. Plan file: `plan/email-corrections-for-approval.md` |
 | 3.3 | Restructure Google CPC with conversion tracking | ⬜ Not Started | — | GA4 tracking is set up (task 1.6 ✅). Can now build conversion-optimized campaigns. |
 | 3.4 | Confirm brand naming → consolidate to "AtlasVoice" | ⬜ Not Started | — | Currently fragmented: Text To Speech Pro, TTS Pro, Text to Audio, AtlasVoice. |
 | 3.5 | Add monthly billing option to Freemius | ⬜ Not Started | — | Currently only annual + lifetime. Monthly lowers barrier. |

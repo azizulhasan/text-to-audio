@@ -55,7 +55,24 @@
       "Bash(php \"D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio/plan/data/verify_csv.php\")",
       "Bash(php \"D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio/plan/data/check_paying.php\")",
       "Bash(php \"D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio/plan/data/check_removed_paying.php\")",
-      "Bash(php \"D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio/plan/data/debug_gross.php\")"
+      "Bash(php \"D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio/plan/data/debug_gross.php\")",
+      "WebFetch(domain:atlasaidev.com)",
+      "mcp__Claude_in_Chrome__tabs_create_mcp",
+      "Bash(unzip -o audience_export_837b5e659f.zip -d audience_export_temp)",
+      "Bash(cygpath -w ~/Downloads/audience_export_temp/subscribed_email_audience_export_837b5e659f.csv)",
+      "Bash(node -e \":*)",
+      "Bash(node plan/scripts/content-calendar-week1-2.js)",
+      "Bash(node plan/scripts/publish-posts.js)",
+      "Bash(node plan/scripts/publish-posts-v2.js)",
+      "Bash(node plan/scripts/publish-posts-v3.js)",
+      "Bash(node plan/scripts/publish-posts-v4.js)",
+      "Bash(node plan/scripts/publish-posts-direct.js)",
+      "Bash(node plan/scripts/fix-site.js)",
+      "Bash(node plan/scripts/publish-final.js)",
+      "Bash(node plan/scripts/set-yoast-meta.js)",
+      "Bash(node plan/scripts/reschedule-and-images.js)",
+      "Bash(node plan/scripts/attach-images-schedule.js)",
+      "Bash(node plan/scripts/week3-4-create-posts.js)"
     ]
   }
 }
