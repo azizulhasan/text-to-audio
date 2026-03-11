@@ -1279,7 +1279,7 @@ This is achievable within 2-4 weeks with zero new content — just optimizing ex
 | 3.4 | Confirm brand naming → consolidate to "AtlasVoice" | ⬜ Not Started | — | Currently fragmented: Text To Speech Pro, TTS Pro, Text to Audio, AtlasVoice. |
 | 3.5 | Add monthly billing option to Freemius | ⬜ Not Started | — | Currently only annual + lifetime. Monthly lowers barrier. |
 | 3.6 | Add free trial (7 or 14 days) | ⬜ Not Started | — | No trial currently. Increases conversion. |
-| 3.7 | Localization (Spanish, Portuguese, Italian) | ⬜ Not Started | — | 435+ installs from these languages. High demand. |
+| 3.7 | Localization (Spanish, Portuguese, Italian) | ✅ Done | Mar 11 | All 3 languages completed: es_ES (653/653), it_IT (653/653), pt_PT (653/653). Reusable generation scripts in `scripts/` folder. Released in v2.1.8. |
 | 3.8 | Churn prevention — cancellation survey + win-back emails | ⬜ Not Started | — | 56.7% cancellation rate is critical. |
 
 ### 🔵 PHASE 4 — OPTIMIZATION (Month 2-3)

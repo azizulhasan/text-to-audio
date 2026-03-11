@@ -72,7 +72,9 @@
       "Bash(node plan/scripts/set-yoast-meta.js)",
       "Bash(node plan/scripts/reschedule-and-images.js)",
       "Bash(node plan/scripts/attach-images-schedule.js)",
-      "Bash(node plan/scripts/week3-4-create-posts.js)"
+      "Bash(node plan/scripts/week3-4-create-posts.js)",
+      "mcp__Claude_in_Chrome__read_network_requests",
+      "Read(//d/xampp/htdocs/azizulhasan/tts/**)"
     ]
   }
 }
