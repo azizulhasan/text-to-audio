@@ -176,6 +176,91 @@ class TTA_Admin
 
         do_action('tta_enqueue_pro_dashboard_scripts');
 
+        // Welcome wizard (separate bundle, only on first activation).
+        if ( is_admin()
+            && isset( $_REQUEST['page'] ) && 'text-to-audio' === $_REQUEST['page']
+            && isset( $_REQUEST['welcome'] ) && '1' === $_REQUEST['welcome']
+            && ! get_option( 'tta_onboarding_completed' )
+        ) {
+            $post_types      = get_post_types( array( 'public' => true ), 'objects' );
+            $post_types_data = array();
+            foreach ( $post_types as $pt ) {
+                if ( 'attachment' === $pt->name ) {
+                    continue;
+                }
+                $counts            = wp_count_posts( $pt->name );
+                $post_types_data[] = array(
+                    'slug'  => $pt->name,
+                    'label' => $pt->label,
+                    'count' => isset( $counts->publish ) ? (int) $counts->publish : 0,
+                );
+            }
+
+            $current_settings = get_option( 'tta_settings_data', array() );
+            // Settings may be stored as stdClass (from json_decode), cast to array.
+            if ( is_object( $current_settings ) ) {
+                $current_settings = (array) $current_settings;
+            }
+            // Fetch recent posts for ALL public post types (keyed by slug).
+            // StepAnalytics filters client-side by the post type selected in Step 1.
+            $recent_posts_by_type = array();
+            $first_post_url       = home_url();
+            foreach ( $post_types_data as $pt_data ) {
+                $pt_slug  = $pt_data['slug'];
+                $pt_posts = get_posts( array(
+                    'numberposts' => 20,
+                    'post_status' => 'publish',
+                    'post_type'   => $pt_slug,
+                    'orderby'     => 'date',
+                    'order'       => 'DESC',
+                ) );
+                $recent_posts_by_type[ $pt_slug ] = array();
+                foreach ( $pt_posts as $rp ) {
+                    $recent_posts_by_type[ $pt_slug ][] = array(
+                        'id'    => $rp->ID,
+                        'title' => $rp->post_title,
+                    );
+                }
+            }
+            // Get latest post URL from the currently selected (or default) post type.
+            $default_type    = isset( $current_settings['tta__settings_allow_listening_for_post_types'][0] )
+                ? $current_settings['tta__settings_allow_listening_for_post_types'][0]
+                : 'post';
+            $latest_post_url = home_url();
+            if ( ! empty( $recent_posts_by_type[ $default_type ] ) ) {
+                $latest_post_url = get_permalink( $recent_posts_by_type[ $default_type ][0]['id'] );
+            }
+
+            wp_register_script(
+                'tts-welcome-wizard',
+                plugin_dir_url( __FILE__ ) . 'js/build/tts-welcome-wizard.min.js',
+                array( 'wp-element', 'wp-i18n' ),
+                $this->version,
+                true
+            );
+
+            wp_localize_script( 'tts-welcome-wizard', 'ttsWizardData', array(
+                'post_types'        => $post_types_data,
+                'recent_posts_by_type' => $recent_posts_by_type,
+                'current_settings'  => $current_settings,
+                'current_customize' => get_option( 'tta_customize_settings', array() ),
+                'current_listening' => get_option( 'tta_listening_settings', array() ),
+                'latest_post_url'   => $latest_post_url,
+                'is_pro_active'     => TTA_Helper::is_pro_active(),
+                'nonce'             => wp_create_nonce( 'wp_rest' ),
+                'api_url'           => esc_url_raw( rest_url( 'tta/v1/' ) ),
+                'pro_url'           => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
+                'dashboard_url'     => admin_url( 'admin.php?page=text-to-audio' ),
+            ) );
+
+            wp_enqueue_script( 'tts-welcome-wizard' );
+            wp_set_script_translations(
+                'tts-welcome-wizard',
+                'text-to-audio',
+                plugin_dir_path( dirname( __FILE__ ) ) . 'languages'
+            );
+            return; // Don't load dashboard scripts when wizard is active.
+        }
 
         if (is_admin() && isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
             /* Load react js */
@@ -413,6 +498,17 @@ class TTA_Admin
 
     public function TTA_settings()
     {
+        // Allow resetting onboarding state for testing/re-running wizard.
+        if ( isset( $_GET['reset_onboard'] ) && 'true' === $_GET['reset_onboard'] && current_user_can( 'manage_options' ) ) {
+            delete_option( 'tta_onboarding_completed' );
+            wp_safe_redirect( admin_url( 'admin.php?page=text-to-audio&welcome=1' ) );
+            exit;
+        }
+
+        if ( isset( $_GET['welcome'] ) && '1' === $_GET['welcome'] && ! get_option( 'tta_onboarding_completed' ) ) {
+            echo "<div class='wpwrap'><div id='tts_welcome_wizard'></div></div>";
+            return;
+        }
         echo "<div class='wpwrap'><div id='tts_dashboard_ui'></div></div>";
     }
 

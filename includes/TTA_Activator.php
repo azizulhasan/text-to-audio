@@ -110,15 +110,37 @@ class TTA_Activator {
 
 		/**
 		 * Listening settings.
+		 * Auto-detect voice/language based on WordPress locale.
 		 */
 		if ( $renew_all_settings || ! get_option( 'tta_listening_settings' ) ) {
-			update_option( 'tta_listening_settings', array
-			(
-				"tta__listening_voice"  => "Google UK English Female",
-				"tta__listening_pitch"  => 1,
-				"tta__listening_rate"   => 1,
-				"tta__listening_volume" => 1,
-				"tta__listening_lang"   => "en-GB",
+			$locale    = get_locale();
+			$voice_map = array(
+				'en_US' => array( 'Google US English', 'en-US' ),
+				'en_GB' => array( 'Google UK English Female', 'en-GB' ),
+				'en_AU' => array( 'Google UK English Female', 'en-GB' ),
+				'fr_FR' => array( 'Google français', 'fr-FR' ),
+				'de_DE' => array( 'Google Deutsch', 'de-DE' ),
+				'es_ES' => array( 'Google español', 'es-ES' ),
+				'it_IT' => array( 'Google italiano', 'it-IT' ),
+				'pt_BR' => array( 'Google português do Brasil', 'pt-BR' ),
+				'ja'    => array( 'Google 日本語', 'ja-JP' ),
+				'ko_KR' => array( 'Google 한국의', 'ko-KR' ),
+				'zh_CN' => array( 'Google 普通话（中国大陆）', 'zh-CN' ),
+				'zh_TW' => array( 'Google 國語（臺灣）', 'zh-TW' ),
+				'nl_NL' => array( 'Google Nederlands', 'nl-NL' ),
+				'ru_RU' => array( 'Google русский', 'ru-RU' ),
+				'hi_IN' => array( 'Google हिन्दी', 'hi-IN' ),
+				'id_ID' => array( 'Google Bahasa Indonesia', 'id-ID' ),
+				'pl_PL' => array( 'Google polski', 'pl-PL' ),
+			);
+			$voice_defaults = isset( $voice_map[ $locale ] ) ? $voice_map[ $locale ] : array( 'Google UK English Female', 'en-GB' );
+
+			update_option( 'tta_listening_settings', array(
+				'tta__listening_voice'  => $voice_defaults[0],
+				'tta__listening_pitch'  => 1,
+				'tta__listening_rate'   => 1,
+				'tta__listening_volume' => 1,
+				'tta__listening_lang'   => $voice_defaults[1],
 			) );
 		}
 
@@ -165,8 +187,8 @@ class TTA_Activator {
 		if ( $renew_all_settings || ! get_option( 'tta_analytics_settings' ) ) {
 			update_option( 'tta_analytics_settings', array
 			(
-				"tts_enable_analytics"   => false,
-				"tts_trackable_post_ids" => []
+				"tts_enable_analytics"   => true,
+				"tts_trackable_post_ids" => "all"
 			) );
 		}
 
