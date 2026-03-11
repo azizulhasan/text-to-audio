@@ -575,6 +575,11 @@ class TTA_Api_Routes {
 
 			update_option( 'tta_settings_data', $fields );
 
+			// Mark onboarding as completed if flag is present.
+			if ( isset( $fields->tta_onboarding_completed ) && $fields->tta_onboarding_completed ) {
+				update_option( 'tta_onboarding_completed', true );
+			}
+
 			$response['data'] = get_option( 'tta_settings_data' );
 
 

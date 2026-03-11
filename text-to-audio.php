@@ -72,7 +72,7 @@ function is_pro_plugin_exists()
     return false;
 }
 
-if ( !is_pro_plugin_exists() &&  !function_exists('ttsp_fs')) {
+if (   !function_exists('ttsp_fs')) {
     // Create a helper function for easy SDK access.
     function ttsp_fs()
     {
@@ -137,6 +137,118 @@ if (function_exists('ttsp_fs')) {
     ttsp_fs()->add_filter('connect_message_on_update', 'ttsp_fs_custom_connect_message_on_update', 10, 6);
 }
 
+/**
+ * Deactivation confirmation message with usage stats.
+ * Shows users what they'll lose when deactivating.
+ *
+ * @since 2.1.9
+ */
+if ( function_exists( 'ttsp_fs' ) ) {
+    ttsp_fs()->add_filter( 'deactivation_confirmation_message', function ( $message ) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'atlasvoice_analytics';
+
+        // Check table exists before querying.
+        if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) ) !== $table ) {
+            return $message;
+        }
+
+        // Use cached stats if available.
+        $cached = get_transient( 'tta_deactivation_stats' );
+        if ( false === $cached ) {
+            $rows        = $wpdb->get_col( "SELECT analytics FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $total_plays = 0;
+            $total_posts = 0;
+            $post_ids    = array();
+            foreach ( $rows as $row ) {
+                $data = maybe_unserialize( $row );
+                if ( is_array( $data ) && isset( $data['play']['count'] ) ) {
+                    $total_plays += (int) $data['play']['count'];
+                }
+            }
+            $total_posts = (int) $wpdb->get_var( "SELECT COUNT(DISTINCT post_id) FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $cached      = array( 'plays' => $total_plays, 'posts' => $total_posts );
+            set_transient( 'tta_deactivation_stats', $cached, HOUR_IN_SECONDS );
+        }
+
+        $msg = '';
+        if ( $cached['plays'] > 0 ) {
+            /* translators: %d: total number of audio plays */
+            $msg .= sprintf( __( 'Your audio player has been used %d times by your visitors. ', 'text-to-audio' ), $cached['plays'] );
+        }
+        if ( $cached['posts'] > 0 ) {
+            /* translators: %d: number of posts with audio players */
+            $msg .= sprintf( __( '%d of your posts currently have audio players. ', 'text-to-audio' ), $cached['posts'] );
+        }
+        $msg .= __( 'Deactivating will remove audio from all posts immediately.', 'text-to-audio' );
+
+        return $msg ?: $message;
+    });
+
+    /**
+     * Custom TTS-specific deactivation reasons.
+     *
+     * @since 2.1.9
+     */
+    ttsp_fs()->add_filter( 'uninstall_reasons', function ( $reasons ) {
+        return array(
+            array(
+                'id'                => 'voice-quality',
+                'text'              => __( 'Voice quality is not good enough', 'text-to-audio' ),
+                'input_type'        => '',
+                'input_placeholder' => '',
+            ),
+            array(
+                'id'                => 'no-visitors',
+                'text'              => __( 'My visitors are not using the audio player', 'text-to-audio' ),
+                'input_type'        => '',
+                'input_placeholder' => '',
+            ),
+            array(
+                'id'                => 'too-complex',
+                'text'              => __( 'Too difficult to set up or configure', 'text-to-audio' ),
+                'input_type'        => '',
+                'input_placeholder' => '',
+            ),
+            array(
+                'id'                => 'wrong-language',
+                'text'              => __( 'My language is not supported well', 'text-to-audio' ),
+                'input_type'        => 'textfield',
+                'input_placeholder' => __( 'Which language do you need?', 'text-to-audio' ),
+            ),
+            array(
+                'id'                => 'performance',
+                'text'              => __( 'It slowed down my website', 'text-to-audio' ),
+                'input_type'        => '',
+                'input_placeholder' => '',
+            ),
+            array(
+                'id'                => 'found-better',
+                'text'              => __( 'I found a better alternative', 'text-to-audio' ),
+                'input_type'        => 'textfield',
+                'input_placeholder' => __( 'Which plugin?', 'text-to-audio' ),
+            ),
+            array(
+                'id'                => 'temporary',
+                'text'              => __( 'Temporary deactivation, I plan to reactivate', 'text-to-audio' ),
+                'input_type'        => '',
+                'input_placeholder' => '',
+            ),
+            array(
+                'id'                => 'pro-expensive',
+                'text'              => __( 'Pro version is too expensive', 'text-to-audio' ),
+                'input_type'        => '',
+                'input_placeholder' => '',
+            ),
+            array(
+                'id'                => 'other',
+                'text'              => __( 'Other', 'text-to-audio' ),
+                'input_type'        => 'textfield',
+                'input_placeholder' => __( 'Please share the reason...', 'text-to-audio' ),
+            ),
+        );
+    });
+}
 
 /**
  * Currently plugin version.
@@ -349,6 +461,16 @@ register_activation_hook(__FILE__, function () {
  * @since 2.1.8
  */
 add_action('admin_init', function () {
+    // Allow resetting onboarding via ?page=text-to-audio&reset_onboard=true
+    if ( isset( $_GET['page'] ) && 'text-to-audio' === $_GET['page']
+        && isset( $_GET['reset_onboard'] ) && 'true' === $_GET['reset_onboard']
+        && current_user_can( 'manage_options' )
+    ) {
+        delete_option( 'tta_onboarding_completed' );
+        wp_safe_redirect( admin_url( 'admin.php?page=text-to-audio&welcome=1' ) );
+        exit;
+    }
+
     if ( get_transient('tta_activation_redirect') ) {
         delete_transient('tta_activation_redirect');
 
@@ -357,7 +479,12 @@ add_action('admin_init', function () {
             return;
         }
 
-        wp_safe_redirect( admin_url('admin.php?page=text-to-audio&welcome=1') );
+        // Skip wizard if onboarding was already completed (e.g. reactivation).
+        if ( get_option( 'tta_onboarding_completed' ) ) {
+            wp_safe_redirect( admin_url( 'admin.php?page=text-to-audio' ) );
+        } else {
+            wp_safe_redirect( admin_url( 'admin.php?page=text-to-audio&welcome=1' ) );
+        }
         exit;
     }
 });

@@ -5,94 +5,225 @@
 71.4% of users who install Text-to-Audio abandon it. The root cause is a **value gap** — users never experience the plugin working before they leave.
 
 **Current flow:** Install → Settings form → Confusion → Deactivate
-**Target flow:** Install → Hear it work → See it on their site → Keep it
+**Target flow:** Install → Guided Onboarding → Hear it work → See it on their site → Keep it
 
 ---
 
-## PHASE 1: First 60 Seconds (The Critical Window)
+## PHASE 1: First 60 Seconds — Guided Onboarding Session
 
-> Goal: Get users to their "aha moment" — hearing their content read aloud — within 60 seconds of activation.
+> Goal: Walk new users through 3 key decisions in a friendly wizard, delivering the "aha moment" — hearing their content read aloud — within 60 seconds of activation.
 
-### 1.1 Welcome Experience Page (Replace Raw Settings Redirect)
+### 1.1 Onboarding Wizard (3-Step Welcome Experience)
 
 **Current:** Redirect to `admin.php?page=text-to-audio&welcome=1` → lands on Settings tab (form fields)
-**Proposed:** Redirect to a dedicated **Welcome page** with 3 sections:
+**Proposed:** Redirect to a **3-step onboarding wizard** inside the existing dashboard.
+
+---
+
+#### Step 1: Post Type Selection
+
+> "Where should the audio player appear?"
 
 ```
-┌─────────────────────────────────────────────────────┐
-│  🔊 AtlasVoice is Active!                          │
-│                                                     │
-│  Your site now has text-to-speech. Here's a preview:│
-│                                                     │
-│  ┌───────────────────────────────────────┐          │
-│  │  [▶ Listen]  "Welcome to your site.   │          │
-│  │   Your visitors can now listen to     │          │
-│  │   your content with one click."       │          │
-│  └───────────────────────────────────────┘          │
-│                                                     │
-│  ✅ Audio player added to all your Posts            │
-│  ✅ Works immediately — no API key needed           │
-│  ✅ 50+ languages supported                         │
-│                                                     │
-│  ┌──────────────┐  ┌──────────────────────┐         │
-│  │ Customize ▶  │  │ Skip, I'll explore   │         │
-│  │  Player      │  │  later               │         │
-│  └──────────────┘  └──────────────────────┘         │
-│                                                     │
-│  📄 View a post with the player → [Your Latest Post]│
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│  Step 1 of 3                                                    │
+│                                                                 │
+│  🔊 Where should the audio player appear?                      │
+│                                                                 │
+│  By default, the player is added to all your Posts.             │
+│  You can change it to any single post type:                     │
+│                                                                 │
+│  ┌─────────────────────────────────────────────┐                │
+│  │  ● Posts  (24 published)      ← default     │                │
+│  │  ○ Pages  (8 published)                      │                │
+│  │  ○ Products  (156 published)                 │                │
+│  │  ○ [Custom Post Type Name]                   │                │
+│  └─────────────────────────────────────────────┘                │
+│                                                                 │
+│  ℹ️ Free version supports 1 post type.                          │
+│     Need multiple post types? AtlasVoice Pro supports           │
+│     unlimited post types plus AI-powered voices.                │
+│     [Learn about Pro →]                                         │
+│                                                                 │
+│                                    [Next: Choose Voice →]       │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 **Key elements:**
-- **Auto-playing demo** — The player renders with sample text and the user can click to hear it immediately
-- **"View a post with the player"** — Direct link to their most recent published post so they can see it live
-- **"Customize Player"** — Goes to Customize tab (not Settings)
-- **"Skip"** — Goes to dashboard normally
+- Radio buttons (single select) — free version only allows 1 post type
+- Show published count next to each post type (social proof / helps user decide)
+- Auto-detect available post types with published content (post, page, product, custom CPTs)
+- Default selected: `post`
+- Subtle Pro upsell: "Need multiple post types? AtlasVoice Pro supports unlimited..."
+- Setting saves to `tta_settings_data → tta__settings_allow_listening_for_post_types`
 
-**Files to modify:**
-- `src/dashboard/components/dashboard/Dashboard.js` — Add `/welcome` route
-- `src/dashboard/components/dashboard/welcome/Welcome.js` — New component
-- `text-to-audio.php` line 358 — Redirect to `#/welcome` instead of bare `welcome=1`
-
-**Impact:** HIGH — Bridges the gap between "installed" and "heard it work"
+**Pro upsell features to mention:**
+- Multiple post types simultaneously
+- AI-powered voices (Google Cloud, ElevenLabs, ChatGPT TTS)
+- 200+ premium voices across 50+ languages
+- Bulk MP3 file generation
 
 ---
 
-### 1.2 Smart Post Type Auto-Detection
+#### Step 2: Voice & Language Selection
 
-**Current:** Default post type is `['post']` only. Users with Pages or WooCommerce products never see the player.
+> "Choose your voice and language"
 
-**Proposed:** On first activation, auto-detect which post types have published content and pre-enable them.
-
-```php
-// In TTA_Activator::activate()
-$post_types = ['post']; // always include
-$candidates = ['page', 'product']; // check these
-foreach ($candidates as $pt) {
-    if (post_type_exists($pt)) {
-        $count = wp_count_posts($pt);
-        if ($count && $count->publish > 0) {
-            $post_types[] = $pt;
-        }
-    }
-}
-// Use $post_types as default for tta__settings_allow_listening_for_post_types
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Step 2 of 3                                                    │
+│                                                                 │
+│  🎙 Choose your voice and language                              │
+│                                                                 │
+│  Currently selected:                                            │
+│  ┌─────────────────────────────────────────────┐                │
+│  │  Voice:    [Google UK English Female  ▾]     │                │
+│  │  Language: [English (UK)              ▾]     │                │
+│  └─────────────────────────────────────────────┘                │
+│                                                                 │
+│  [▶ Preview Voice] ← plays sample text with selected voice      │
+│                                                                 │
+│  "Welcome to your site. Your visitors can now listen            │
+│   to your content with one click."                              │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────┐        │
+│  │  🔊 Browser Voices (Free) — Currently Active        │        │
+│  │     Good for basic accessibility. Quality varies     │        │
+│  │     by visitor's browser/device.                     │        │
+│  │                                                      │        │
+│  │  🎙 AI Voices (Pro) — Natural & Consistent           │        │
+│  │     Google Cloud TTS · ElevenLabs · ChatGPT TTS      │        │
+│  │     200+ premium voices. Same quality for every      │        │
+│  │     visitor on every device.                         │        │
+│  │     [Upgrade to Pro →]                               │        │
+│  └─────────────────────────────────────────────────────┘        │
+│                                                                 │
+│  [← Back]                      [Next: Customize Player →]       │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-**Files to modify:**
-- `includes/TTA_Activator.php` line 85
+**Key elements:**
+- Show current voice and language in dropdowns (auto-detected from `get_locale()`)
+- "Preview Voice" button — plays sample text so user hears it immediately (THE aha moment)
+- Voice quality tier labels: "Browser Voices (Free)" vs "AI Voices (Pro)"
+- No "[Try Free for 7 Days]" — not offered
+- Setting saves to `tta_listening_settings`
 
-**Impact:** MEDIUM — Prevents "I activated it but nothing happened on my pages" abandon
+**Voice auto-detection on activation** (in `TTA_Activator::activate()`):
+```php
+$locale = get_locale(); // e.g., 'fr_FR', 'de_DE', 'ja'
+$voice_map = [
+    'en_US' => ['Google US English', 'en-US'],
+    'en_GB' => ['Google UK English Female', 'en-GB'],
+    'fr_FR' => ['Google français', 'fr-FR'],
+    'de_DE' => ['Google Deutsch', 'de-DE'],
+    'es_ES' => ['Google español', 'es-ES'],
+    'it_IT' => ['Google italiano', 'it-IT'],
+    'pt_BR' => ['Google português do Brasil', 'pt-BR'],
+    'ja'    => ['Google 日本語', 'ja-JP'],
+    'ko_KR' => ['Google 한국의', 'ko-KR'],
+    'zh_CN' => ['Google 普通话（中国大陆）', 'zh-CN'],
+    // ... more mappings
+];
+$default_voice = $voice_map[$locale] ?? ['Google UK English Female', 'en-GB'];
+```
+
+**Pro upsell features to mention:**
+- 200+ AI voices (Google Cloud, ElevenLabs, ChatGPT)
+- Consistent quality across all browsers and devices
+- Generate downloadable MP3 files
+- Bulk MP3 generation for entire site
 
 ---
 
-### 1.3 Improve Onboarding Notice (Already Exists, Needs Refinement)
+#### Step 3: Player Customization
+
+> "Match the player to your site's theme"
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Step 3 of 3                                                    │
+│                                                                 │
+│  🎨 Customize the player to match your theme                   │
+│                                                                 │
+│  ┌──────────────────────────────────────────────┐               │
+│  │  Background: [#ffffff ■]  Text: [#000000 ■]  │               │
+│  │  Border:     [#000000 ■]  Radius: [10px]     │               │
+│  └──────────────────────────────────────────────┘               │
+│                                                                 │
+│  Live Preview:                                                  │
+│  ┌──────────────────────────────────────────────┐               │
+│  │  [▶ Listen]  "Welcome to your site. Your     │               │
+│  │   visitors can now listen to your content     │               │
+│  │   with one click."                            │               │
+│  └──────────────────────────────────────────────┘               │
+│                                                                 │
+│  ℹ️ You can fully customize the player anytime from the         │
+│     Customize tab — including size, position, margins,          │
+│     and custom CSS.                                             │
+│                                                                 │
+│  💡 Pro Tip: AtlasVoice Pro unlocks additional player           │
+│     designs, floating player positions (bottom, left, right),   │
+│     and the ability to let visitors download MP3 files.         │
+│     [See Pro Player Designs →]                                  │
+│                                                                 │
+│  [← Back]                         [Finish Setup ✓]              │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Key elements:**
+- Color pickers for: background, text color, border color, border radius
+- **Live preview** with actual player component (reuse existing Customize preview)
+- "Finish Setup" saves to `tta_customize_settings` and redirects to dashboard
+- Mention: full customization available in Customize tab anytime
+
+**Pro upsell features to mention:**
+- Multiple player designs (4 additional player UIs)
+- Floating player positions (bottom fixed, left, right, center)
+- MP3 download button for visitors
+- Advanced CSS selector targeting
+
+---
+
+#### Finish: Success State
+
+After clicking "Finish Setup":
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│  ✅ AtlasVoice is ready!                                       │
+│                                                                 │
+│  Your audio player is now live on all your [Posts].             │
+│                                                                 │
+│  [🔗 View Player on Your Site →]     [Go to Dashboard]         │
+│     (opens most recent published post)                          │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+- "View Player on Your Site" links to most recent published post of selected post type
+- "Go to Dashboard" goes to main plugin page
+
+---
+
+**Files to create/modify:**
+- `src/dashboard/components/dashboard/welcome/Welcome.js` — New 3-step wizard component
+- `src/dashboard/components/dashboard/Dashboard.js` — Add `/welcome` route
+- `text-to-audio.php` line 358 — Redirect to `#/welcome` instead of bare `welcome=1`
+- `includes/TTA_Activator.php` — Voice locale auto-detection on activation
+
+**Impact:** HIGH — Users configure AND hear the player working before they can abandon
+
+---
+
+### 1.2 Improve Onboarding Notice (Already Exists, Needs Refinement)
 
 **Current notice:** "AtlasVoice is Active — Let's Set It Up!" → Points to Settings
 **Proposed notice:**
 
 ```
-🔊 AtlasVoice is ready! Your posts now have an audio player.
+🔊 AtlasVoice is ready! Your [posts] now have an audio player.
    [Hear a Preview]  [Customize Player]  [View on Your Site →]
 ```
 
@@ -115,38 +246,77 @@ foreach ($candidates as $pt) {
 
 ### 2.1 Enable Lightweight Analytics by Default
 
-**Current:** Analytics disabled by default. Users never see usage data.
-**Proposed:** Enable basic analytics (init + play counts) by default for all enabled post types.
+**Current:** Analytics disabled by default (`tts_enable_analytics => false`). Free version limited to 5 tracked posts.
+**Proposed:** Enable analytics by default for new installs. Increase free limit from 5 to 20 posts.
 
 ```php
-// In TTA_Activator::activate()
+// In TTA_Activator::activate() — for NEW installs only
 $analytics_settings = [
     'tts_enable_analytics' => true,       // ON by default
-    'tts_trackable_post_ids' => 'all',    // Track all posts
+    'tts_trackable_post_ids' => 'all',    // Track all posts (up to free limit)
 ];
 ```
 
-**Privacy consideration:** The analytics are anonymous (FingerprintJS-based), on-site only, no PII. Add a one-line note in the onboarding: "Anonymous usage stats are collected on your site to show you how visitors use the player. [Disable in Settings]"
+**Why enable by default:**
+1. Users who never see data never know the plugin is providing value
+2. Analytics is the #1 proof that the plugin is working — "12 plays today" is convincing
+3. Without analytics, the dashboard widget (2.2) and admin bar (2.3) have nothing to show
+4. Anonymous on-site tracking — no PII, no external calls, minimal performance impact
+5. Users can disable in Settings if they prefer
+
+**Why increase from 5 to 20:**
+1. 5 posts is too limiting — most blogs have 20+ posts, so only 25% get tracked
+2. Users see incomplete data and think analytics is broken
+3. 20 gives meaningful coverage while still leaving "unlimited" as a Pro upgrade reason
+4. Pro stays unlimited (999) — clear value gap remains
+
+**Privacy note in onboarding:** "Anonymous usage stats are collected on your site to show you how visitors use the player. No personal data is collected. [Disable in Settings]"
 
 **Files to modify:**
-- `includes/TTA_Activator.php` — Default analytics settings
+- `includes/TTA_Activator.php` — Default analytics settings (line ~168)
+- `src/dashboard/components/dashboard/analitics/TrackPostIds.js` — Change free limit from 5 to 20
 
-**Impact:** HIGH — Creates the foundation for showing value
+**Impact:** HIGH — Creates the foundation for showing ongoing value
 
 ---
 
 ### 2.2 WordPress Dashboard Widget ("AtlasVoice Quick Stats")
 
 **Current:** No dashboard widget. Users only see analytics if they navigate to the plugin's Analytics tab.
-**Proposed:** Add a WordPress admin dashboard widget showing:
+**Proposed:** Add a WordPress admin dashboard widget showing tiered data:
 
+#### Free Version Widget:
+```
+┌─ AtlasVoice Quick Stats ──────────────────────┐
+│                                                │
+│  🎧 12 plays today  │  👁 48 player views      │
+│                                                │
+│  ── This Week ─────────────────────────        │
+│  Mon ██████████ 18                             │
+│  Tue ████████ 14                               │
+│  Wed ████████████████ 31                       │
+│  Thu ██████ 11                                 │
+│  Fri (today)                                   │
+│                                                │
+│  [View Analytics]   [Customize Player →]       │
+│                                                │
+│  🔓 Unlock: Listening time, top posts,         │
+│     device breakdown, location analytics       │
+│     [Upgrade to Pro →]                         │
+└────────────────────────────────────────────────┘
+```
+
+**Free data shown:**
+- Total plays today
+- Total player views (inits) today
+- Weekly trend bar chart (plays per day)
+
+#### Pro Version Widget:
 ```
 ┌─ AtlasVoice Quick Stats ──────────────────────┐
 │                                                │
 │  🎧 12 plays today  │  👁 48 player views      │
 │  ⏱ 23 min listened  │  📊 Top: "My Best Post" │
-│                                                │
-│  [View Full Analytics]   [Customize Player →]  │
 │                                                │
 │  ── This Week ─────────────────────────        │
 │  Mon ██████████ 18                             │
@@ -157,15 +327,16 @@ $analytics_settings = [
 │                                                │
 │  💡 Tip: 67% of your listeners are on mobile.  │
 │     Your player is mobile-optimized! ✓         │
+│                                                │
+│  [View Full Analytics]   [Customize Player →]  │
 └────────────────────────────────────────────────┘
 ```
 
-**Key elements:**
-- Shows real-time value ("12 plays today")
-- Mini bar chart for weekly trend (text-based, lightweight)
-- Contextual tip based on actual data
-- Links to full analytics and customization
-- Dismissible but re-appears if there's new data
+**Pro-only data added:**
+- Total listening time
+- Top post by plays
+- Contextual tip based on actual data (device %, peak hours, etc.)
+- Full analytics link (includes location, segments, heatmap, export)
 
 **Files to create:**
 - `admin/TTA_Dashboard_Widget.php` — WordPress dashboard widget class
@@ -175,7 +346,7 @@ $analytics_settings = [
 
 ---
 
-### 2.3 Admin Bar Quick Indicator
+### 2.3 Admin Bar Quick Indicator (Toggle in Settings)
 
 **Current:** No presence in admin bar.
 **Proposed:** Add a subtle admin bar item when viewing a post on the front-end:
@@ -186,12 +357,15 @@ $analytics_settings = [
 
 - Only shows on singular posts where the player is active
 - Clicking it opens the plugin's Analytics tab for that post
-- Non-intrusive, informational only
+- **Disabled by default** — user can enable in Settings tab
+- Setting: `tta__settings_show_admin_bar_indicator` (default: `false`)
 
 **Files to modify:**
-- `admin/TTA_Admin.php` — Add `admin_bar_menu` hook
+- `admin/TTA_Admin.php` — Add `admin_bar_menu` hook (conditional on setting)
+- `includes/TTA_Activator.php` — Add default setting
+- `src/dashboard/components/dashboard/settings/Settings.js` — Add toggle in UI
 
-**Impact:** LOW-MEDIUM — Passive value reminder
+**Impact:** LOW-MEDIUM — Passive value reminder for those who enable it
 
 ---
 
@@ -275,9 +449,9 @@ ttsp_fs()->add_filter('uninstall_reasons', function($reasons) {
 │  Many issues can be fixed in under 2 mins:  │
 │  • Voice not working → [Quick Fix Guide]    │
 │  • Player not showing → [Troubleshoot]      │
-│  • Need better voices → [Try Pro Free]      │
+│  • Need better voices → [See Pro Voices]    │
 │                                             │
-│  [💬 Chat with Support]  or  [Continue →]   │
+│  [💬 Contact Support]  or  [Continue →]     │
 └─────────────────────────────────────────────┘
 ```
 
@@ -297,7 +471,7 @@ ttsp_fs()->add_filter('uninstall_reasons', function($reasons) {
 ### 4.1 Voice Quality Expectation Setting
 
 **Current:** Users hear browser TTS and think the plugin sounds bad.
-**Proposed:** In the Welcome page and Listening tab, clearly label voice tiers:
+**Proposed:** In the Onboarding Wizard (Step 2) and Listening tab, clearly label voice tiers:
 
 ```
 ┌─ Voice Quality ────────────────────────────────┐
@@ -308,9 +482,9 @@ ttsp_fs()->add_filter('uninstall_reasons', function($reasons) {
 │     [▶ Preview]                                │
 │                                                │
 │  🎙 AI Voices (Pro) — Natural & Consistent     │
-│     Google Cloud, ElevenLabs, ChatGPT TTS.     │
-│     Same quality for every visitor.            │
-│     [▶ Preview]  [Try Free for 7 Days]         │
+│     Google Cloud TTS · ElevenLabs · ChatGPT    │
+│     200+ voices. Same quality everywhere.      │
+│     [▶ Preview]  [Upgrade to Pro →]            │
 │                                                │
 └────────────────────────────────────────────────┘
 ```
@@ -318,7 +492,7 @@ ttsp_fs()->add_filter('uninstall_reasons', function($reasons) {
 **Key insight:** Don't hide that browser TTS is limited — frame it as "free tier" with a clear upgrade path. Users who know what to expect are less disappointed.
 
 **Files to modify:**
-- `src/dashboard/components/dashboard/welcome/Welcome.js` (new)
+- `src/dashboard/components/dashboard/welcome/Welcome.js` (new — Step 2)
 - `src/dashboard/components/dashboard/listening/Listening.js`
 
 **Impact:** MEDIUM — Reduces voice-quality-driven abandonment
@@ -330,20 +504,7 @@ ttsp_fs()->add_filter('uninstall_reasons', function($reasons) {
 **Current:** Default voice is "Google UK English Female" regardless of site language.
 **Proposed:** On activation, detect `get_locale()` and auto-select the best matching voice.
 
-```php
-// In TTA_Activator::activate()
-$locale = get_locale(); // e.g., 'fr_FR', 'de_DE', 'ja'
-$voice_map = [
-    'en_US' => ['Google US English', 'en-US'],
-    'en_GB' => ['Google UK English Female', 'en-GB'],
-    'fr_FR' => ['Google français', 'fr-FR'],
-    'de_DE' => ['Google Deutsch', 'de-DE'],
-    'es_ES' => ['Google español', 'es-ES'],
-    'ja'    => ['Google 日本語', 'ja-JP'],
-    // ... more mappings
-];
-$default_voice = $voice_map[$locale] ?? ['Google UK English Female', 'en-GB'];
-```
+(See implementation code in Phase 1, Step 2 above)
 
 **Files to modify:**
 - `includes/TTA_Activator.php` — Voice default logic
@@ -360,7 +521,7 @@ $default_voice = $voice_map[$locale] ?? ['Google UK English Female', 'en-GB'];
 
 | Milestone | Notice |
 |-----------|--------|
-| First play | "Your first visitor just used the audio player! 🎉" |
+| First play | "Your first visitor just used the audio player!" |
 | 10 plays | "10 visitors have listened to your content this week." |
 | 100 plays | "100 plays! Your accessibility efforts are paying off." |
 | 1,000 plays | "1,000 plays! You're making a real impact. [Share your story]" |
@@ -379,7 +540,7 @@ $default_voice = $voice_map[$locale] ?? ['Google UK English Female', 'en-GB'];
 
 ---
 
-### 5.2 Weekly Email Digest (via Freemius or Mailchimp)
+### 5.2 Weekly Email Digest (via WP-Cron)
 
 **Proposed:** Optional weekly email for site admins:
 
@@ -389,11 +550,11 @@ Subject: Your AtlasVoice Weekly Report
 Hi [Name],
 
 This week on [Site Name]:
-• 34 visitors listened to your content (+12% vs last week)
-• Most popular: "How to Bake Sourdough" (8 plays)
-• Top device: Mobile (67%)
+- 34 visitors listened to your content (+12% vs last week)
+- Most popular: "How to Bake Sourdough" (8 plays)
+- Top device: Mobile (67%)
 
-Keep it up! 🎧
+Keep it up!
 ```
 
 **Implementation:**
@@ -453,21 +614,44 @@ $latest = get_posts(['numberposts' => 1, 'post_status' => 'publish', 'post_type'
 
 | # | Item | Effort | Impact | Priority |
 |---|------|--------|--------|----------|
-| 1.1 | Welcome Experience Page | Medium | HIGH | 🔴 P0 |
-| 2.1 | Enable Analytics by Default | Low | HIGH | 🔴 P0 |
-| 2.2 | Dashboard Widget | Medium | HIGH | 🔴 P0 |
-| 3.1 | Deactivation Warning (stats) | Low | HIGH | 🔴 P0 |
-| 1.2 | Smart Post Type Auto-Detection | Low | MEDIUM | 🟡 P1 |
-| 1.3 | Improve Onboarding Notice | Low | MEDIUM | 🟡 P1 |
-| 3.2 | Custom Deactivation Reasons | Low | MEDIUM | 🟡 P1 |
-| 4.2 | Voice Locale Auto-Detection | Low | MEDIUM | 🟡 P1 |
-| 4.1 | Voice Quality Expectation | Medium | MEDIUM | 🟡 P1 |
-| 3.3 | "Need Help?" Rescue Offer | Medium | MEDIUM | 🟢 P2 |
-| 5.1 | Usage Milestone Notices | Medium | MEDIUM | 🟢 P2 |
-| 2.3 | Admin Bar Indicator | Low | LOW | 🟢 P2 |
-| 6.1 | Conflict Auto-Detection | Low | LOW | 🟢 P2 |
-| 6.2 | "View on Site" Link | Low | LOW | 🟢 P2 |
-| 5.2 | Weekly Email Digest | High | LOW-MED | 🔵 P3 |
+| 1.1 | Onboarding Wizard (3-step) | Medium | HIGH | P0 |
+| 2.1 | Enable Analytics by Default (20 posts free) | Low | HIGH | P0 |
+| 2.2 | Dashboard Widget (free/pro tiered) | Medium | HIGH | P0 |
+| 3.1 | Deactivation Warning (stats) | Low | HIGH | P0 |
+| 4.2 | Voice Locale Auto-Detection | Low | MEDIUM | P1 |
+| 1.2 | Improve Onboarding Notice | Low | MEDIUM | P1 |
+| 3.2 | Custom Deactivation Reasons | Low | MEDIUM | P1 |
+| 4.1 | Voice Quality Expectation Labels | Medium | MEDIUM | P1 |
+| 3.3 | "Need Help?" Rescue Offer | Medium | MEDIUM | P2 |
+| 5.1 | Usage Milestone Notices | Medium | MEDIUM | P2 |
+| 2.3 | Admin Bar Indicator (off by default, toggle) | Low | LOW | P2 |
+| 6.1 | Conflict Auto-Detection | Low | LOW | P2 |
+| 6.2 | "View on Site" Link | Low | LOW | P2 |
+| 5.2 | Weekly Email Digest | High | LOW-MED | P3 |
+
+---
+
+## Pro Upsell Strategy (Woven Into Onboarding)
+
+The onboarding wizard naturally introduces Pro features at each decision point without being pushy:
+
+| Step | Free Capability | Pro Upsell |
+|------|----------------|------------|
+| Post Type | 1 post type | Unlimited post types |
+| Voice | Browser voices (quality varies) | 200+ AI voices (Google Cloud, ElevenLabs, ChatGPT) |
+| Player Design | Standard player, before/after content | 4 additional designs, floating positions, MP3 download |
+| Analytics | 20 tracked posts, basic metrics | Unlimited posts, listening time, device/location/segments, export |
+| Dashboard Widget | Plays + views + weekly trend | + listening time, top posts, device tips |
+
+**Pro features to highlight (picked for highest conversion impact):**
+1. **AI Voices** — #1 reason users upgrade. Browser TTS quality is the top complaint.
+2. **MP3 Download** — Visitors can download audio. High-value for content creators.
+3. **Bulk MP3 Generation** — Generate MP3 for entire site at once.
+4. **Advanced Analytics** — Location, device, listening time, engagement funnel.
+5. **Multiple Post Types** — Cover entire site, not just posts.
+6. **Google Cloud Storage** — Backup all MP3 files to cloud.
+7. **Floating Player** — Bottom fixed, left, right, center positions.
+8. **ElevenLabs Integration** — Most natural-sounding AI voices available.
 
 ---
 
@@ -487,55 +671,23 @@ $latest = get_posts(['numberposts' => 1, 'post_status' => 'publish', 'post_type'
 Track these metrics via Freemius + custom analytics:
 
 1. **Activation-to-first-play time** — How long until user hears the preview?
-2. **Welcome page completion rate** — % who click "Customize" vs "Skip"
+2. **Onboarding wizard completion rate** — % who finish all 3 steps vs skip
 3. **7-day retention rate** — % still active after 1 week
 4. **30-day retention rate** — % still active after 1 month
 5. **Deactivation reason distribution** — Which custom reasons dominate?
 6. **Dashboard widget engagement** — Clicks on "View Full Analytics"
 7. **Deactivation rescue rate** — % who cancel deactivation after seeing stats
+8. **Pro conversion from onboarding** — % who click Pro upsell links during wizard
 
 ---
 
 ## Notes
 
 - All changes should be backward-compatible (existing users unaffected)
-- Welcome page only shows for NEW activations (check `tta_has_been_activated_before`)
+- Onboarding wizard only shows for NEW activations (check `tta_has_been_activated_before`)
 - Analytics default change only applies to new installs
+- Admin bar indicator is OFF by default, toggled from Settings
 - Milestone notices respect existing dismissal system
 - All email communications must have opt-out
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-you're proposing to add multiple post type in free version. this is only for pro version. I can change it if you recommend with reason. my plan is during intsalltion I want to tell user that you can change post type. from post to any other post , but only 1 post can be selected.
-
-
-
-2.1 Enable Lightweight Analytics by Default this : current system is by default it is disabled and if enabled then in free version only 5 post can be selected. I can change to default is enabled. should I track all posts or should icrease from 5 to 10/20 etc. why I should follow your recommendation
-
-
-
-2.2 WordPress Dashboard Widget ("AtlasVoice Quick Stats"): this one is great. but some data is for free and full analytics is for pro. I can show free data to dashboard widget and all data for pro users. if you suggest to modify tell me what can be done and why?
-
-
-
-2.3 Admin Bar Quick Indicator this one should be disable/enable from UI/settings
-
-
-
-4.1 Voice Quality Expectation Setting: here remove this [Try Free for 7 Days] as we're not offering it
-
-
-
-
-
+- Free version: 1 post type only (radio select in onboarding)
+- Pro upsells are informational, not blocking — user can always proceed with free features

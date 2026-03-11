@@ -251,12 +251,23 @@ export default function Settings() {
                     <Col xs={12} lg={8}>
                         {/* Header Card */}
                         <div className="bg-white rounded p-3 mb-3 shadow-sm">
-                            <h2 className="fs-3 fw-bold mb-2 text-dark">
-                                {__("Configure Settings", "text-to-audio")}
-                            </h2>
-                            <p className="text-secondary m-0 small">
-                                {__("Configure text-to-speech player behavior and content selection", "text-to-audio")}
-                            </p>
+                            <div className="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h2 className="fs-3 fw-bold mb-2 text-dark">
+                                        {__("Configure Settings", "text-to-audio")}
+                                    </h2>
+                                    <p className="text-secondary m-0 small">
+                                        {__("Configure text-to-speech player behavior and content selection", "text-to-audio")}
+                                    </p>
+                                </div>
+                                <a
+                                    href={window.location.pathname + "?page=text-to-audio&reset_onboard=true"}
+                                    className="btn btn-outline-secondary btn-sm"
+                                    style={{ whiteSpace: 'nowrap' }}
+                                >
+                                    ⚙️ {__("Run Setup Wizard", "text-to-audio")}
+                                </a>
+                            </div>
                         </div>
 
                         {/* Main Settings Card */}

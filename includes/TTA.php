@@ -126,6 +126,9 @@ class TTA {
             new TTA_Posts_List();
         }
 
+        // Initialize Dashboard Widget
+        new \TTA_Admin\TTA_Dashboard_Widget();
+
     }
 
     /**
