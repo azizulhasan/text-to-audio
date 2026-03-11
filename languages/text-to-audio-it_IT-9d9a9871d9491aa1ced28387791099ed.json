@@ -10,70 +10,70 @@
         "plural": "nplurals=1; plural=0;"
       },
       "Save": [
-        "Guardar"
+        "Salva"
       ],
       "Click To Know How It Works?": [
-        "¿Haga clic para saber cómo funciona?"
+        "Clicca per sapere come funziona?"
       ],
       "Loading": [
-        "Cargando"
+        "Caricamento"
       ],
       "Include Content By CSS Selectors": [
-        "Incluir contenido por selectores CSS"
+        "Includi Contenuto per Selettori CSS"
       ],
       "Include Content By CSS Selectors feature is available in pro version": [
-        "La función de incluir contenido por selectores CSS está disponible en la versión Pro"
+        "La funzionalità Includi Contenuto per Selettori CSS è disponibile nella versione pro"
       ],
       "Multiple selector will be multiline.": [
-        "Múltiples selectores serán multilínea."
+        "I selettori multipli saranno su più righe."
       ],
       "Some content may be missing, It can be found by css selectors": [
-        "Puede faltar algún contenido, se puede encontrar mediante selectores CSS"
+        "Alcuni contenuti potrebbero mancare, possono essere trovati tramite selettori CSS"
       ],
       "Exclude Content By CSS Selectors": [
-        "Excluir contenido por selectores CSS"
+        "Escludi Contenuto per Selettori CSS"
       ],
       "Exclude Content By CSS Selectors feature is available in pro version": [
-        "La función de excluir contenido por selectores CSS está disponible en la versión Pro"
+        "La funzionalità Escludi Contenuto per Selettori CSS è disponibile nella versione pro"
       ],
       "Exclude content by CSS selectors": [
-        "Excluir contenido por selectores CSS"
+        "Escludi contenuto per selettori CSS"
       ],
       "Multiple Tags Will Be Pipe(|) Separated.": [
-        "Múltiples etiquetas se separarán con barra vertical (|)."
+        "I Tag multipli saranno separati da Pipe(|)."
       ],
       "Exclude tags is a pro feature.": [
-        "Excluir etiquetas es una función Pro."
+        "Escludere tag è una funzionalità pro."
       ],
       "Exclude Texts To Speak": [
-        "Excluir textos para leer"
+        "Escludi Testi dalla Lettura"
       ],
       "Excluding texts to be spoken is a pro feature.": [
-        "Excluir textos para ser leídos es una función Pro."
+        "Escludere testi dalla lettura è una funzionalità pro."
       ],
       "Multiple Texts Will Be Pipe(|) Separated.": [
-        "Múltiples textos se separarán con barra vertical (|)."
+        "I Testi multipli saranno separati da Pipe(|)."
       ],
       "Exclude texts is a pro feature.": [
-        "Excluir textos es una función Pro."
+        "Escludere testi è una funzionalità pro."
       ],
       "Exclude Tags To Speak": [
-        "Excluir etiquetas para leer"
+        "Escludi Etichette dalla Lettura"
       ],
       "Please save the post then try to add custom CSS selectors.": [
-        "Por favor, guarde la entrada y luego intente agregar selectores CSS personalizados."
+        "Salva l'articolo e poi prova ad aggiungere selettori CSS personalizzati."
       ],
       "Empty value can not be saved. You can uncheck the \"Use Own CSS Selectors\" Option.": [
-        "No se puede guardar un valor vacío. Puede desmarcar la opción \"Usar selectores CSS propios\"."
+        "Il valore vuoto non può essere salvato. Puoi deselezionare l'opzione \"Usa Selettori CSS Propri\"."
       ],
       "Settings Data Saved": [
-        "Datos de configuración guardados"
+        "Dati Impostazioni Salvati"
       ],
       "Use Own CSS Selectors": [
-        "Usar selectores CSS propios"
+        "Usa Selettori CSS Propri"
       ],
       "Exclude Tags. So that its content skiped. Like ( Subscript, Superscript etc.) This is a pro feature.": [
-        "Excluir etiquetas. Para que su contenido sea omitido. Como (Subíndice, Superíndice, etc.) Esta es una función Pro."
+        "Escludi Tag. In modo che il loro contenuto venga saltato. Come (Subscript, Superscript ecc.) Questa è una funzionalità pro."
       ]
     }
   }

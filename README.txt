@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.7
+Stable tag: 2.1.8
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -351,6 +351,11 @@ Please report security bugs through the [Patchstack Vulnerability Disclosure Pro
 ### TRANSLATION REQUEST
 We are looking for people to help translate this plugin. If you can help, we would love to hear from you.
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
+
+= 2.1.8  ( 10 Mar 2026 )  =
+Added : Plugin translation for Portuguese.
+Added : Plugin translation for Italian.
+Added : Pro version activation issue fixed.
 
 
 = 2.1.7  ( 05 Mar 2026 )  =
@@ -767,5 +772,7 @@ Improved :  Pro and free version performance improved.
 
 == Upgrade Notice ==
 
-= 2.1.7 =
-New: ElevenLabs TTS integration with 100+ ultra-realistic AI voices. Google Cloud Storage backup now works with all TTS providers. Real-time ElevenLabs usage tracking. GTranslate and multilingual improvements.
+= 2.1.8  =
+Added : Plugin translation for Portuguese.
+Added : Plugin translation for Italian.
+Added : Pro version activation issue fixed.
