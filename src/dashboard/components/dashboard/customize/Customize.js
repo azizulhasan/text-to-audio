@@ -22,6 +22,7 @@ import TextToSpeechFour from "../../../buttons/components/TextToSpeechFour";
 import CustomizationTabs from "./CustomizationTabs";
 import TTSButtonDesign from "./design/TTSButtonDesign";
 import UpgradeToPro from "../../UpgradeToPro";
+import Icon from "../../Icon";
 
 let speech = null;
 let TextToSpeechFree = null;
@@ -718,7 +719,7 @@ export default function Customize() {
                       className="p-0 text-muted"
                       size="sm"
                     >
-                      <i className="fas fa-question-circle"></i>
+                      <Icon name="question-circle" />
                     </Button>
                   </OverlayTrigger>
 
@@ -741,7 +742,7 @@ export default function Customize() {
                       rel="noopener noreferrer"
                       title={__("Watch Tutorial", "text-to-audio")}
                     >
-                      <i className="fab fa-youtube"></i>
+                      <Icon name="youtube" />
                     </Button>
                   </OverlayTrigger>
                 </div>
@@ -830,7 +831,7 @@ export default function Customize() {
                     className="tta_listen-button"
                     title={__("Text To Audio:  Tap to listen post.", "text-to-audio")}
                   >
-                    <i className="fas fa-play-circle me-2"></i>
+                    <Icon name="play-circle" className="me-2" />
                     {tta_obj.buttonTextArr.listen_text}
                   </button>
                 )}
@@ -875,7 +876,7 @@ export default function Customize() {
                 }
                 className="tta_shortcode_btn"
               >
-                <i className="fas fa-copy me-2"></i>
+                <Icon name="copy" className="me-2" />
               {__('Copy Shortcode', 'text-to-audio')}
               </button>
             </div>
@@ -904,7 +905,7 @@ export default function Customize() {
       className="tta-loading-spinner"
     >
       <div>
-        <i className="fas fa-spinner fa-spin me-2"></i>
+        <Icon name="spinner" spin className="me-2" />
           {__('Loading...', 'text-to-audio')}
       </div>
     </div>

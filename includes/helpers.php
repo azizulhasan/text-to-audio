@@ -253,7 +253,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     $class = (isset($text_arr['class'])) && strlen($text_arr['class']) ? esc_attr($text_arr['class']) : "";
     $class .= (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
 
-    $button = "<tts-play-button data-id='$player_number' class='tts_play_button'></tts-play-button>";
+    $button = "<tts-play-button data-id='$player_number' class='tts_play_button' role='region' aria-label='" . esc_attr__('Text to speech player', 'text-to-audio') . "'></tts-play-button>";
 
 
     // init button scripts

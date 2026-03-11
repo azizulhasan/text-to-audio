@@ -115,7 +115,7 @@ const StepPostType = ({ data, onChange }) => {
                 )}
             </p>
 
-            <ul style={styles.list}>
+            <ul style={styles.list} role="radiogroup" aria-label={__('Post type selection', 'text-to-audio')}>
                 {postTypes.map((pt) => {
                     const isSelected = data.postType === pt.slug;
                     return (
@@ -123,6 +123,15 @@ const StepPostType = ({ data, onChange }) => {
                             key={pt.slug}
                             style={styles.radioItem(isSelected)}
                             onClick={() => handleSelect(pt.slug)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    handleSelect(pt.slug);
+                                }
+                            }}
+                            tabIndex={0}
+                            role="radio"
+                            aria-checked={isSelected}
                             onMouseEnter={(e) => {
                                 if (!isSelected) {
                                     e.currentTarget.style.backgroundColor =

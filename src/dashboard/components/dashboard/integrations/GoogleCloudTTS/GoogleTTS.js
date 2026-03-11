@@ -11,6 +11,7 @@ import {
 import {postData} from "../../../context/utilities";
 import toast from "../../../context/Notify";
 import {__, sprintf} from '@wordpress/i18n';
+import Icon from "../../../Icon";
 
 export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, setAuthenticatedServices, setGoogleTTSChecked}) {
     const [googTTSJsonFile, setGoogTTSJsonFile] = useState("");
@@ -800,7 +801,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                                 rel="noopener noreferrer"
                                 href="https://atlasaidev.com/docs/text-to-speech/usage-setup/how-to-enable-automatic-backup-to-google-cloud-storage-for-text-to-speech-pro-plugin/"
                             >
-                                <i className="fab fa-youtube"></i>
+                                <Icon name="youtube" />
                             </a>
                         </OverlayTrigger>
                     </div>

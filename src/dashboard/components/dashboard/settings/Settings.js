@@ -13,6 +13,7 @@ import {postWithoutImage} from "../../context/utilities";
 import toast from "../../context/Notify";
 import UpgradeToPro from "../../UpgradeToPro";
 import {MultiSelect} from "../../context/MultiSelect";
+import Icon from "../../Icon";
 
 export default function Settings() {
     const [settings, setSettings] = useState({
@@ -202,10 +203,7 @@ export default function Settings() {
                         }
                     >
             <span className="ms-2" style={{cursor: "pointer"}}>
-              <i
-                  className="fas fa-question-circle"
-                  style={{color: "#999", fontSize: "14px"}}
-              ></i>
+              <Icon name="question-circle" style={{color: "#999", fontSize: "14px"}} />
             </span>
                     </OverlayTrigger>
                 )}
@@ -225,7 +223,7 @@ export default function Settings() {
                             rel="noopener noreferrer"
                             href={youtubeLink || "#"}
                         >
-                            <i className="fab fa-youtube"></i>
+                            <Icon name="youtube" />
                         </a>
                     </OverlayTrigger>
                 )}
@@ -239,7 +237,7 @@ export default function Settings() {
     const ProLockIcon = ({tooltipText}) => (
         <OverlayTrigger placement="top" overlay={<Tooltip>{tooltipText}</Tooltip>}>
             <Button className="m-0 p-0 text-dark bg-light border-0 ms-2">
-                <i className="fas fa-lock"/>
+                <Icon name="lock" />
             </Button>
         </OverlayTrigger>
     );
@@ -457,10 +455,7 @@ export default function Settings() {
                                                     }
                                                 >
                           <span className="ms-2" style={{cursor: "pointer"}}>
-                            <i
-                                className="fas fa-question-circle"
-                                style={{color: "#999", fontSize: "14px"}}
-                            ></i>
+                            <Icon name="question-circle" style={{color: "#999", fontSize: "14px"}} />
                           </span>
                                                 </OverlayTrigger>
                                             </Form.Label>
@@ -489,10 +484,7 @@ export default function Settings() {
                                                     }
                                                 >
                           <span className="ms-2" style={{cursor: "pointer"}}>
-                            <i
-                                className="fas fa-question-circle"
-                                style={{color: "#999", fontSize: "14px"}}
-                            ></i>
+                            <Icon name="question-circle" style={{color: "#999", fontSize: "14px"}} />
                           </span>
                                                 </OverlayTrigger>
                                             </Form.Label>
@@ -577,7 +569,7 @@ export default function Settings() {
                                                         rel="noopener noreferrer"
                                                         href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
                                                     >
-                                                        <i className="fab fa-youtube"></i>
+                                                        <Icon name="youtube" />
                                                     </a>
                                                 </OverlayTrigger>
                                             </div>
@@ -627,7 +619,7 @@ export default function Settings() {
                                                         rel="noopener noreferrer"
                                                         href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
                                                     >
-                                                        <i className="fab fa-youtube"></i>
+                                                        <Icon name="youtube" />
                                                     </a>
                                                 </OverlayTrigger>
                                             </div>
@@ -688,7 +680,7 @@ export default function Settings() {
                                                         rel="noopener noreferrer"
                                                         href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
                                                     >
-                                                        <i className="fab fa-youtube"></i>
+                                                        <Icon name="youtube" />
                                                     </a>
                                                 </OverlayTrigger>
                                             </div>
@@ -738,7 +730,7 @@ export default function Settings() {
                                                         rel="noopener noreferrer"
                                                         href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
                                                     >
-                                                        <i className="fab fa-youtube"></i>
+                                                        <Icon name="youtube" />
                                                     </a>
                                                 </OverlayTrigger>
                                             </div>
@@ -788,7 +780,7 @@ export default function Settings() {
                                                         rel="noopener noreferrer"
                                                         href="https://www.youtube.com/watch?v=ooxJkMU58KY&list=PLGdmFn36qCRIO6galQmEMoLVuNXSIvVuF&index=19"
                                                     >
-                                                        <i className="fab fa-youtube"></i>
+                                                        <Icon name="youtube" />
                                                     </a>
                                                 </OverlayTrigger>
                                             </div>
@@ -837,7 +829,7 @@ export default function Settings() {
                                                         rel="noopener noreferrer"
                                                         href="https://www.youtube.com/watch?v=yanuoEBfG4A"
                                                     >
-                                                        <i className="fab fa-youtube"></i>
+                                                        <Icon name="youtube" />
                                                     </a>
                                                 </OverlayTrigger>
                                             </div>
@@ -884,7 +876,7 @@ export default function Settings() {
                                                         rel="noopener noreferrer"
                                                         href="https://www.youtube.com/watch?v=yanuoEBfG4A"
                                                     >
-                                                        <i className="fab fa-youtube"></i>
+                                                        <Icon name="youtube" />
                                                     </a>
                                                 </OverlayTrigger>
                                             </div>
@@ -951,7 +943,7 @@ export default function Settings() {
             className="tta-loading-spinner"
         >
             <div>
-                <i className="fas fa-spinner fa-spin me-2"></i>
+                <Icon name="spinner" spin className="me-2" />
                 {__("Loading...", "text-to-audio")}
             </div>
         </div>

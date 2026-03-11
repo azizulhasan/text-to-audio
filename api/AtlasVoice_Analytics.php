@@ -340,7 +340,7 @@ class AtlasVoice_Analytics {
 			return rest_ensure_response( $response );
 		}
 
-		update_option( 'tta_analytics_settings', $body );
+		update_option( 'tta_analytics_settings', $body, false );
 
 		$saved_data = get_option( 'tta_analytics_settings' );
 
@@ -1345,7 +1345,7 @@ class AtlasVoice_Analytics {
         }
 
         // Save settings
-        update_option( 'tta_schedule_report_settings', $sanitized );
+        update_option( 'tta_schedule_report_settings', $sanitized, false );
 
         // Schedule or unschedule the cron event
         $this->schedule_report_cron( $sanitized );
@@ -1660,7 +1660,7 @@ class AtlasVoice_Analytics {
             'recipients' => $settings['recipients'],
             'success'    => $success,
             'is_test'    => $is_test,
-        ) );
+        ), false );
 
         return $success;
     }

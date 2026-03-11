@@ -23,6 +23,7 @@ import {
 } from "../../context/utilities";
 import toast from "../../context/Notify";
 import UpgradeToPro from "../../UpgradeToPro";
+import Icon from "../../Icon";
 
 export default function Listening() {
   const [currentPlayerVoices, setCurrentPlayerVoices] = useState([]);
@@ -851,7 +852,7 @@ export default function Listening() {
                         {label}
                         {listeningSettings.tta__listening_pitch == idx && (
                           <span className="tta_pitch_check">
-                            <i className="fas fa-circle"></i>
+                            <Icon name="circle" />
                           </span>
                         )}
                       </Button>
@@ -1394,7 +1395,7 @@ export default function Listening() {
                       }
                     >
                       <span className="tta_lock_icon">
-                        <i className="fas fa-lock" />
+                        <Icon name="lock" />
                       </span>
                     </OverlayTrigger>
                   )}

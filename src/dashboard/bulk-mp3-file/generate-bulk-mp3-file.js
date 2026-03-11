@@ -6,6 +6,7 @@ import {
 } from 'react-bootstrap';
 import {ToastContainer} from 'react-toastify';
 import {__} from '@wordpress/i18n';
+import Icon from '../components/Icon';
 /**
  * Scripts
  */
@@ -207,8 +208,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                         <Col bsPrefix="atlasVoice" xs={12} sm={12} lg={8}>
                             How it works? <a style={{textDecoration: 'none',}} className={'text-danger'} target='_blank'
                                              href='https://www.youtube.com/watch?v=HFoqlkPCP80'>
-                                                            <span
-                                                                className="fab fa-youtube"></span></a>
+                                                            <Icon name="youtube" /></a>
                         </Col>
                         <Col bsPrefix="atlasVoice" xs={12} sm={12} lg={8}>
                             <div id={"player_content_1"}></div>
@@ -253,8 +253,8 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                                                             <Accordion.Header>
                                                                 <div className={'pe-2'}> {
                                                                     Object.keys(urls).length && Object.keys(urls).includes(file_url_key) ?
-                                                                        <i className="fa fa-check-circle"></i> :
-                                                                        <i className="fa fa-times"></i>
+                                                                        <Icon name="check-circle" /> :
+                                                                        <Icon name="times" />
                                                                 }
                                                                 </div>
                                                                 {title}
@@ -275,8 +275,7 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                                                     </Accordion>
                                                     {
                                                         Object.keys(urls).length && Object.keys(urls).includes(file_url_key) ?
-                                                        <a className={'px-2'} href={postURL} target={'_blank'}><i className="fa fa-eye"
-                                                                                               aria-hidden="true"></i></a>: ''
+                                                        <a className={'px-2'} href={postURL} target={'_blank'}><Icon name="eye" /></a>: ''
                                                     }
 
                                                 </div>

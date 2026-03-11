@@ -536,7 +536,7 @@ class TTA_Api_Routes {
                 TTA_Helper::delete_post_meta();
             }
 
-			update_option( 'tta_listening_settings', $fields );
+			update_option( 'tta_listening_settings', $fields, false );
 
 			$response['data'] = get_option( 'tta_listening_settings' );
 			TTA_Cache::delete( 'all_settings' );
@@ -605,7 +605,7 @@ class TTA_Api_Routes {
 
 			// Mark onboarding as completed if flag is present.
 			if ( isset( $fields->tta_onboarding_completed ) && $fields->tta_onboarding_completed ) {
-				update_option( 'tta_onboarding_completed', true );
+				update_option( 'tta_onboarding_completed', true, false );
 			}
 
 			$response['data'] = get_option( 'tta_settings_data' );
@@ -637,7 +637,7 @@ class TTA_Api_Routes {
 			'browser'           => $browser,
 			'SpeechRecognition' => $SpeechRecognition,
 			'speechSynthesis'   => $speechSynthesis,
-		] );
+		], false );
 
 		return rest_ensure_response( get_option( 'tta_current_browser_info' ) );
 	}
@@ -648,7 +648,7 @@ class TTA_Api_Routes {
 		if ( 'post' == $request['method'] ) {
 			$fields = json_decode( $request['aliases'] );
 
-			update_option( 'tts_text_aliases', $fields );
+			update_option( 'tts_text_aliases', $fields, false );
 
 			$response['data'] = get_option( 'tts_text_aliases' );
 

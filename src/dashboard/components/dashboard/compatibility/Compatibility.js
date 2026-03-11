@@ -5,6 +5,7 @@ import UpgradeToPro from "../../UpgradeToPro";
 import {postWithoutImage} from "../../context/utilities";
 import {MultiSelect} from "../../context/MultiSelect";
 import toast from '../../context/Notify';
+import Icon from "../../Icon";
 
 
 export default function Compatibility() {
@@ -195,8 +196,7 @@ export default function Compatibility() {
                                         overlay={<Tooltip id={`tooltip-${placement}`}>
                                             {__('Adding more than 1  ACF field is a pro feature', 'text-to-audio')}
                                         </Tooltip>}>
-                                        <Button className="m-0 p-0 text-dark bg-light border-0"><i
-                                            className="fas fa-lock"/></Button>
+                                        <Button className="m-0 p-0 text-dark bg-light border-0"><Icon name="lock" /></Button>
                                     </OverlayTrigger>))}
                                 </>)}
                                 </Form.Label>
@@ -218,7 +218,7 @@ export default function Compatibility() {
                                             {__('Click To Know How It Works?', 'text-to-audio')}
                                         </Tooltip>}>
                                         <a target='_blank' href='https://atlasaidev.com/docs/text-to-speech/'>
-                                            <i className="fas fa-info-circle"></i></a>
+                                            <Icon name="info-circle" /></a>
                                     </OverlayTrigger>))}
                                 </>
                             </Col>
