@@ -74,7 +74,12 @@
       "Bash(node plan/scripts/attach-images-schedule.js)",
       "Bash(node plan/scripts/week3-4-create-posts.js)",
       "mcp__Claude_in_Chrome__read_network_requests",
-      "Read(//d/xampp/htdocs/azizulhasan/tts/**)"
+      "Read(//d/xampp/htdocs/azizulhasan/tts/**)",
+      "WebSearch",
+      "WebFetch(domain:freemius.com)",
+      "WebFetch(domain:wearnhardt.com)",
+      "WebFetch(domain:cmljnelson.blog)",
+      "WebFetch(domain:www.mattcromwell.com)"
     ]
   }
 }
