@@ -640,10 +640,373 @@ $latest = get_posts(['numberposts' => 1, 'post_status' => 'publish', 'post_type'
 | — | Onboarding Analytics (wizard tracking) | Medium | MEDIUM | P2 | ✅ DONE |
 | — | WP 6.7 textdomain compat fix | Low | HIGH | P2 | ✅ DONE |
 | — | Pro Onboarding Wizard | High | MEDIUM | P2 | ⬜ SKIPPED (needs Pro plugin) |
-| 5.2 | Weekly Email Digest | High | LOW-MED | P3 | ⬜ TODO |
-| — | Unit Tests | High | MEDIUM | P3 | ⬜ TODO |
-| — | Code Splitting (lazy load tabs) | Medium | LOW | P3 | ⬜ TODO |
-| — | Accessibility Audit (WCAG 2.1 AA) | Medium | MEDIUM | P3 | ⬜ TODO |
+| — | JS Exclusion List Audit + SG Optimizer fix | Low | MEDIUM | P2 | ✅ DONE |
+| 7.1 | Accessibility Audit (WCAG 2.1 AA) | Medium | HIGH | P3 | ⬜ TODO |
+| 7.2 | Unit Tests (PHP + JS) | High | MEDIUM | P3 | ⬜ SKIPPED |
+| 7.3 | Code Splitting (lazy load dashboard tabs) | Medium | MEDIUM | P3 | ⬜ TODO |
+| 7.4 | Weekly Email Digest | High | LOW-MED | P3 | ⬜ TODO |
+| 7.5 | Performance Audit & Optimization | Medium | MEDIUM | P3 | ⬜ TODO |
+
+---
+
+## PHASE 7: Quality, Performance & Maintainability (P3)
+
+> Goal: Harden the codebase with tests, improve accessibility compliance, optimize bundle sizes, and add the weekly email engagement feature. These items don't directly reduce abandon rate but ensure long-term plugin quality and WordPress.org review compliance.
+
+---
+
+### 7.1 Accessibility Audit (WCAG 2.1 AA Compliance)
+
+> Priority: HIGH within P3 — WordPress.org guidelines require accessibility, and this is a TTS/accessibility plugin.
+
+**Scope:** Audit all user-facing UI for WCAG 2.1 AA compliance:
+
+#### 7.1.1 Frontend Player (`TextToSpeech.min.js`)
+- Ensure play/pause/stop buttons have proper `aria-label` attributes
+- Add `role="region"` and `aria-live="polite"` for playback status announcements
+- Keyboard navigation: all controls must be reachable via Tab, activatable via Enter/Space
+- Focus indicators: visible focus ring on all interactive elements
+- Color contrast: verify all player color combinations meet 4.5:1 ratio (especially user-customized colors)
+- Screen reader: announce track progress, play state changes
+
+#### 7.1.2 Onboarding Wizard (`tts-welcome-wizard.min.js`)
+- Step indicators need `aria-current="step"` for active step
+- Radio buttons in StepPostType need proper `role="radiogroup"` with `aria-labelledby`
+- Color pickers in StepCustomize need keyboard support and `aria-label`
+- Voice preview button needs `aria-label="Preview selected voice"`
+- Progress: announce step changes to screen readers via `aria-live`
+- Focus management: auto-focus first interactive element on each step
+
+#### 7.1.3 Admin Dashboard
+- Dashboard widget: data visualization (bar chart) needs text alternative
+- Milestone notices: ensure dismiss button has `aria-label="Dismiss notice"`
+- Admin bar toggle: announce state change ("Audio enabled/disabled") via `aria-live`
+- Rescue modal: trap focus inside modal when open, return focus on close
+
+#### 7.1.4 React Dashboard (`text-to-audio-dashboard-ui.min.js`)
+- Tab navigation: verify `role="tablist"`, `role="tab"`, `role="tabpanel"` structure
+- Form inputs: all fields need associated `<label>` or `aria-label`
+- Toast notifications: should use `role="alert"` or `aria-live="assertive"`
+- Loading states: announce via `aria-busy="true"` on containers
+
+**Testing tools:**
+- axe-core browser extension for automated checks
+- Manual keyboard-only navigation test
+- NVDA or VoiceOver screen reader testing
+- Color contrast checker for all player color presets
+
+**Files to modify:**
+- `admin/js/TextToSpeech.js` — Frontend player accessibility
+- `src/dashboard/welcome/` — Wizard step components
+- `src/dashboard/components/` — Dashboard tab components
+- `admin/TTA_Dashboard_Widget.php` — Widget HTML output
+- `admin/TTA_Admin.php` — Admin bar, rescue modal markup
+
+**Impact:** HIGH — This is literally an accessibility plugin; it must be accessible itself
+
+---
+
+### 7.2 Unit Tests (PHP + JS)
+
+> Priority: MEDIUM — No tests exist currently. Start with critical paths.
+
+#### 7.2.1 PHP Tests (PHPUnit + WP Test Framework)
+
+**Setup:**
+```bash
+# Install WordPress test suite
+composer require --dev phpunit/phpunit yoast/wp-test-utils
+# Bootstrap file: tests/bootstrap.php
+# Config: phpunit.xml.dist
+```
+
+**Test categories (priority order):**
+
+| Category | Class/Function | Tests | Priority |
+|----------|---------------|-------|----------|
+| Settings Save/Load | `TTA_Helper::get_settings()`, `TTA_Api_Routes::settings()` | Save/load roundtrip, default values, stdClass cast | HIGH |
+| Content Cleaning | `tta_clean_content()` | Shortcode stripping, HTML entity handling, script removal | HIGH |
+| Button Visibility | `TTA_Helper::should_load_button()` | Post type check, exclusion by ID/tag/category, filter override | HIGH |
+| Activation Defaults | `TTA_Activator::activate()` | Analytics defaults, voice locale detection for 16 languages | MEDIUM |
+| Cache Layer | `TTA_Cache::get/set/delete()` | Transient get/set, expiry, `delete('all_settings')` | MEDIUM |
+| REST API Auth | `TTA_Api_Routes::get_route_access()` | Valid nonce passes, invalid nonce fails, capability check | MEDIUM |
+| Schema Markup | `TTA_Helper::output_audio_schema_head()` | Valid JSON-LD output, correct AudioObject properties | LOW |
+| Milestone Notices | `TTA_Notices::register_milestone_notices()` | Correct milestone thresholds, dismissal tracking, transient cache | LOW |
+| Onboarding Analytics | `TTA_Api_Routes::handle_onboarding_event()` | Event storage, summary aggregation, invalid event rejection | LOW |
+| Caching Exclusions | `TTA_Hooks` | All 6 plugin filters return correct exclusion arrays | LOW |
+
+**File structure:**
+```
+tests/
+├── bootstrap.php
+├── php/
+│   ├── test-settings.php
+│   ├── test-content-cleaning.php
+│   ├── test-button-visibility.php
+│   ├── test-activation.php
+│   ├── test-cache.php
+│   ├── test-rest-api.php
+│   ├── test-schema-markup.php
+│   ├── test-milestone-notices.php
+│   ├── test-onboarding-analytics.php
+│   └── test-caching-hooks.php
+├── js/
+│   ├── wizard.test.js
+│   └── dashboard.test.js
+└── fixtures/
+    └── sample-post-content.html
+```
+
+#### 7.2.2 JavaScript Tests (Jest)
+
+**Setup:**
+```bash
+npm install --save-dev jest @testing-library/react @testing-library/jest-dom babel-jest
+```
+
+**Test categories:**
+
+| Component | Tests | Priority |
+|-----------|-------|----------|
+| `WelcomeWizard.js` | Step navigation, settings save calls, analytics tracking fires | HIGH |
+| `StepPostType.js` | Radio selection, published count display, single-select enforcement | MEDIUM |
+| `StepVoice.js` | Voice dropdown population, preview button click, language filter | MEDIUM |
+| `StepCustomize.js` | Color picker changes, live preview update, border radius slider | MEDIUM |
+| `StepAnalytics.js` | Toggle state, post list filtered by selected type | MEDIUM |
+| `wizardApi.js` | FormData construction, nonce header, error handling | HIGH |
+| `Compatibility.js` | Plugin list rendering, status icons, empty state | LOW |
+| `Customize.js` | "Preview on Your Site" link present with correct URL | LOW |
+
+**Scripts to add to `package.json`:**
+```json
+{
+  "test": "jest",
+  "test:watch": "jest --watch",
+  "test:php": "vendor/bin/phpunit",
+  "test:all": "npm run test && npm run test:php"
+}
+```
+
+**Files to create/modify:**
+- `phpunit.xml.dist` — PHPUnit config
+- `tests/bootstrap.php` — WP test framework bootstrap
+- `tests/php/*.php` — PHP test classes
+- `tests/js/*.test.js` — Jest test files
+- `jest.config.js` — Jest configuration
+- `package.json` — Add test scripts
+- `composer.json` — Add dev dependencies
+
+**Impact:** MEDIUM — No user-facing change, but prevents regressions as codebase grows
+
+---
+
+### 7.3 Code Splitting (Lazy Load Dashboard Tabs)
+
+> Priority: MEDIUM — The dashboard bundle is 691 KiB. Users only see 1 tab at a time.
+
+**Current bundle sizes:**
+| Bundle | Size | Loaded On |
+|--------|------|-----------|
+| `text-to-audio-dashboard-ui.min.js` | **691 KiB** | Every admin page load |
+| `tts-welcome-wizard.min.js` | 195 KiB | Welcome page only |
+| `tts-css-selectors.min.js` | 245 KiB | CSS selectors page only |
+| `tts-bulk-mp3-file.min.js` | 218 KiB | Bulk MP3 page only |
+| `TextToSpeech.min.js` | 92 KiB | Frontend (every post) |
+| `font-awesome.min.js` | **1.18 MiB** | Admin pages |
+
+**Strategy: React.lazy() + Suspense for dashboard tabs**
+
+```jsx
+// src/dashboard/index.js — lazy load each tab
+const Settings = React.lazy(() => import('./components/dashboard/settings/Settings'));
+const Customize = React.lazy(() => import('./components/dashboard/customize/Customize'));
+const Listening = React.lazy(() => import('./components/dashboard/listening/Listening'));
+const Analytics = React.lazy(() => import('./components/dashboard/analitics/Analytics'));
+const Compatibility = React.lazy(() => import('./components/dashboard/compatibility/Compatibility'));
+const Aliases = React.lazy(() => import('./components/dashboard/alias/AliasSettings'));
+const Docs = React.lazy(() => import('./components/dashboard/docs/Docs'));
+
+// Wrap routes in Suspense
+<Suspense fallback={<LoadingSpinner />}>
+  <Routes>
+    <Route path="/" element={<Settings />} />
+    <Route path="/customize" element={<Customize />} />
+    ...
+  </Routes>
+</Suspense>
+```
+
+**Webpack config change (`webpack.mix.js`):**
+```js
+// Enable chunk splitting
+mix.webpackConfig({
+    output: {
+        chunkFilename: 'admin/js/build/chunks/[name].[contenthash:8].js',
+    },
+});
+```
+
+**Expected savings:**
+| Scenario | Current | After Split | Savings |
+|----------|---------|-------------|---------|
+| Initial load (Settings tab) | 691 KiB | ~200 KiB + chunks on demand | ~70% smaller initial load |
+| Navigate to Customize | 0 (already loaded) | ~80 KiB chunk | Loaded on demand |
+| Total if all tabs visited | 691 KiB | ~691 KiB (same total) | No change in total |
+
+**Additional optimizations:**
+1. **Font Awesome tree-shaking** — Import only used icons instead of full 1.18 MiB bundle
+2. **React Bootstrap tree-shaking** — Import individual components: `import Button from 'react-bootstrap/Button'` instead of `import { Button } from 'react-bootstrap'`
+3. **Shared vendor chunk** — Extract React, React-DOM, React-Router into a shared chunk loaded once
+
+**Files to modify:**
+- `webpack.mix.js` — Chunk splitting config
+- `src/dashboard/index.js` — React.lazy imports
+- `src/dashboard/components/` — Individual tab components (ensure default exports)
+- `admin/TTA_Admin.php` — Update script enqueue to handle chunked output
+- All components importing Font Awesome — Switch to individual icon imports
+
+**Impact:** MEDIUM — Faster admin page loads, especially on slow connections
+
+---
+
+### 7.4 Weekly Email Digest
+
+> Priority: LOW-MED — Engagement feature. Only implement after tests are in place.
+
+**Implementation:**
+
+#### 7.4.1 WP-Cron Scheduled Job
+
+```php
+// includes/TTA_Weekly_Digest.php
+class TTA_Weekly_Digest {
+
+    public function __construct() {
+        add_action( 'tta_send_weekly_digest', [ $this, 'send_digest' ] );
+    }
+
+    public function schedule() {
+        if ( ! wp_next_scheduled( 'tta_send_weekly_digest' ) ) {
+            wp_schedule_event( strtotime( 'next monday 9:00' ), 'weekly', 'tta_send_weekly_digest' );
+        }
+    }
+
+    public function send_digest() {
+        $opt_in = get_option( 'tta_weekly_digest_enabled', false );
+        if ( ! $opt_in ) return;
+
+        $stats = $this->compile_weekly_stats();
+        if ( $stats['total_plays'] === 0 && $stats['total_views'] === 0 ) return; // No data, skip
+
+        $admin_email = get_option( 'admin_email' );
+        $site_name   = get_bloginfo( 'name' );
+
+        $subject = sprintf( 'Your AtlasVoice Weekly Report — %s', $site_name );
+        $body    = $this->render_email_template( $stats, $site_name );
+
+        $headers = [ 'Content-Type: text/html; charset=UTF-8' ];
+        wp_mail( $admin_email, $subject, $body, $headers );
+    }
+}
+```
+
+#### 7.4.2 Email Template Content
+
+```
+Subject: Your AtlasVoice Weekly Report — [Site Name]
+
+Hi [Admin Name],
+
+Here's how your audio player performed this week on [Site Name]:
+
+📊 This Week's Highlights
+   • [X] total plays (+Y% vs last week)
+   • [X] player views
+   • Top post: "[Post Title]" ([N] plays)
+
+📈 7-Day Trend
+   Mon ██████ 12
+   Tue ████████ 16
+   Wed ████ 8
+   Thu ██████████ 20
+   Fri ██████ 12
+   Sat ████ 8
+   Sun ██ 4
+
+💡 Quick Actions
+   [View Full Analytics →]
+   [Customize Player →]
+
+---
+You're receiving this because you enabled weekly reports in AtlasVoice settings.
+[Unsubscribe] | [Manage Preferences]
+```
+
+#### 7.4.3 Settings Integration
+
+Add toggle to Settings tab:
+```
+Weekly Email Report
+[ ] Send me a weekly summary of player analytics every Monday at 9 AM
+    Includes: total plays, top posts, weekly trend
+```
+
+**Setting stored:** `tta_weekly_digest_enabled` (default: `false`)
+**Opt-out:** Link in every email that sets option to `false` via signed URL token
+
+#### 7.4.4 Pro Version Enhancement
+
+Free email: plays, views, top post, weekly trend
+Pro email adds: listening time, device breakdown, location summary, engagement funnel, CSV attachment
+
+**Files to create/modify:**
+- `includes/TTA_Weekly_Digest.php` — New class
+- `includes/TTA.php` — Register hooks
+- `includes/TTA_Activator.php` — Schedule cron on activation
+- `includes/TTA_Deactivator.php` — Clear cron on deactivation
+- `src/dashboard/components/dashboard/settings/Settings.js` — Add toggle
+- `api/TTA_Api_Routes.php` — Unsubscribe endpoint
+
+**Impact:** LOW-MED — Keeps plugin top-of-mind for site owners between logins
+
+---
+
+### 7.5 Performance Audit & Optimization
+
+> Priority: MEDIUM — Ensure all new features haven't degraded page load performance.
+
+#### 7.5.1 Frontend Performance
+
+- **Audit font-awesome.min.js (1.18 MiB)** — This is the single largest file. Options:
+  - Replace with individual SVG icon imports (only ~5 icons used)
+  - Use WordPress Dashicons (already loaded in admin)
+  - Lazy-load Font Awesome only on pages that need it
+- **Audit TextToSpeech.min.js (92 KiB)** on frontend posts — Ensure it's loaded only on posts where player is active (check `should_load_button()` is gating properly)
+- **Verify NoSleep.min.js** is only loaded when needed (mobile playback)
+
+#### 7.5.2 Admin Performance
+
+- **Dashboard widget query optimization** — Verify the `atlasvoice_analytics` table has proper indexes on `created_at`, `post_id`
+- **Transient caching audit** — Ensure all expensive queries use transients:
+  - Dashboard widget: 5-min cache ✅ (already done)
+  - Milestone notice: 1-hour cache ✅ (already done)
+  - Settings load: via TTA_Cache ✅ (already done)
+- **REST API response times** — Benchmark each endpoint, identify any >500ms responses
+
+#### 7.5.3 Database
+
+- Verify `atlasvoice_analytics` table has index on `(created_at, action)` for widget queries
+- Verify `tta_onboarding_events` option doesn't grow unbounded (cap at 1000 events)
+- Check `autoload` flag on all plugin options — only settings that are needed on every page load should be autoloaded
+
+**Files to audit:**
+- `admin/js/TextToSpeech.js` — Frontend loading conditions
+- `admin/TTA_Admin.php` — Script enqueue conditions
+- `admin/TTA_Dashboard_Widget.php` — Query performance
+- `includes/TTA_Activator.php` — Table creation with indexes
+- All files using `get_option()` / `update_option()` — Check autoload flags
+
+**Impact:** MEDIUM — Prevents performance complaints which are a deactivation reason (#5 in custom reasons)
 
 ---
 
