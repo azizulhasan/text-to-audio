@@ -49,7 +49,6 @@ class TTA_Hooks {
 			'tts_button_settings_3',
 			'tts_button_settings_4',
 			'NoSleep.min.js',
-			'font-awesome.min.js',
 		] );
 
 		$strings = implode( ',', self::$excludable_js_arr );

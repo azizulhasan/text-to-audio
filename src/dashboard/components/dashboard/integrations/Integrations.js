@@ -6,6 +6,7 @@ import ChatGPTTTS from "./ChatGPTTTS/ChatGPTTTS";
 import ElevenLabsTTS from "./ElevenLabsTTS/ElevenLabsTTS";
 import { postData } from "../../context/utilities";
 import UpgradeToPro from "../../UpgradeToPro";
+import Icon from "../../Icon";
 
 export default function Integrations() {
   const [currentTTSServic, setCurrentTTSServic] = useState(""); // Empty by default
@@ -352,7 +353,7 @@ export default function Integrations() {
       className="tta-loading-spinner"
     >
       <div>
-        <i className="fas fa-spinner fa-spin me-2"></i>
+        <Icon name="spinner" spin className="me-2" />
        {__("Loading...", "text-to-audio")}
       </div>
     </div>

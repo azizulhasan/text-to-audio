@@ -243,12 +243,24 @@ const WelcomeWizard = () => {
     /* ------------------------------------------------------------------ */
     /*  Progress dots                                                      */
     /* ------------------------------------------------------------------ */
+    const stepLabels = [
+        __('Post Type', 'text-to-audio'),
+        __('Voice', 'text-to-audio'),
+        __('Customize', 'text-to-audio'),
+        __('Analytics', 'text-to-audio'),
+    ];
+
     const renderDots = () => {
         const dots = [];
         for (let i = 1; i <= TOTAL_STEPS; i++) {
+            const isCurrent = i === step;
+            const isCompleted = i < step;
             dots.push(
                 <span
                     key={i}
+                    role="listitem"
+                    aria-label={stepLabels[i - 1]}
+                    aria-current={isCurrent ? 'step' : undefined}
                     style={{
                         width: 10,
                         height: 10,
@@ -396,15 +408,15 @@ const WelcomeWizard = () => {
                 </div>
 
                 {/* Step indicator */}
-                <div style={styles.stepIndicator}>
-                    <div style={styles.stepText}>
+                <nav style={styles.stepIndicator} aria-label={__('Setup progress', 'text-to-audio')}>
+                    <div style={styles.stepText} aria-live="polite">
                         {__('Step', 'text-to-audio')}{' '}
                         {step}{' '}
                         {__('of', 'text-to-audio')}{' '}
                         {TOTAL_STEPS}
                     </div>
-                    <div>{renderDots()}</div>
-                </div>
+                    <div role="list" aria-label={__('Setup steps', 'text-to-audio')}>{renderDots()}</div>
+                </nav>
 
                 {/* Content */}
                 <div>{renderStep()}</div>

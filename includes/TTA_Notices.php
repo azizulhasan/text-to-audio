@@ -526,7 +526,7 @@ class TTA_Notices {
 			}
 			// Ensure version flag is set.
 			if ( empty( $stored_version ) || $stored_version !== $notice['version'] ) {
-				update_option( $notice['version_option'], $notice['version'] );
+				update_option( $notice['version_option'], $notice['version'], false );
 			}
 		}
 
@@ -833,11 +833,11 @@ class TTA_Notices {
 		// Save timed re-show option if configured.
 		if ( $notice && $notice['reshow_after_days'] > 0 ) {
 			$next_time = time() + ( DAY_IN_SECONDS * $notice['reshow_after_days'] );
-			update_option( 'tta_reshow_' . $notice_id, $next_time );
+			update_option( 'tta_reshow_' . $notice_id, $next_time, false );
 
 			// Also save to legacy option key.
 			if ( ! empty( $notice['legacy_option_key'] ) ) {
-				update_option( $notice['legacy_option_key'], $next_time );
+				update_option( $notice['legacy_option_key'], $next_time, false );
 			}
 		}
 
@@ -910,7 +910,7 @@ class TTA_Notices {
 			$already_clicked = get_user_meta( $user_id, 'tta_clicked_' . $notice_id, true );
 
 			if ( ! $already_clicked ) {
-				update_option( 'tta_clicks_' . $notice_id, $total_clicks + 1 );
+				update_option( 'tta_clicks_' . $notice_id, $total_clicks + 1, false );
 				update_user_meta( $user_id, 'tta_clicked_' . $notice_id, true );
 			}
 		}
@@ -1106,7 +1106,7 @@ class TTA_Notices {
 			case 'given':
 				update_user_meta( $user_id, 'tta_dismiss_' . $notice_id, true );
 				update_user_meta( $user_id, 'tta_review_notice_dismissed', true );
-				update_option( 'tta_review_notice_next_show_time', 0 );
+				update_option( 'tta_review_notice_next_show_time', 0, false );
 				$result['redirect_url'] = 'https://wordpress.org/support/plugin/text-to-audio/reviews/?rate=5#new-post';
 				break;
 
@@ -1114,15 +1114,15 @@ class TTA_Notices {
 				update_user_meta( $user_id, 'tta_dismiss_' . $notice_id, true );
 				update_user_meta( $user_id, 'tta_review_notice_dismissed', true );
 				$next_time = time() + ( DAY_IN_SECONDS * 30 );
-				update_option( 'tta_review_notice_next_show_time', $next_time );
-				update_option( 'tta_reshow_' . $notice_id, $next_time );
+				update_option( 'tta_review_notice_next_show_time', $next_time, false );
+				update_option( 'tta_reshow_' . $notice_id, $next_time, false );
 				break;
 
 			case 'done':
 			case 'never':
 				update_user_meta( $user_id, 'tta_dismiss_' . $notice_id, true );
 				update_user_meta( $user_id, 'tta_review_notice_dismissed', true );
-				update_option( 'tta_review_notice_next_show_time', 0 );
+				update_option( 'tta_review_notice_next_show_time', 0, false );
 				break;
 		}
 
@@ -1145,7 +1145,7 @@ class TTA_Notices {
 			case 'given':
 				update_user_meta( $user_id, 'tta_dismiss_' . $notice_id, true );
 				update_user_meta( $user_id, 'tta_feedback_notice_dismissed', true );
-				update_option( 'tta_feedback_notice_next_show_time', 0 );
+				update_option( 'tta_feedback_notice_next_show_time', 0, false );
 				$result['redirect_url'] = 'https://atlasaidev.com/contact-us/';
 				break;
 
@@ -1153,15 +1153,15 @@ class TTA_Notices {
 				update_user_meta( $user_id, 'tta_dismiss_' . $notice_id, true );
 				update_user_meta( $user_id, 'tta_feedback_notice_dismissed', true );
 				$next_time = time() + ( DAY_IN_SECONDS * 30 );
-				update_option( 'tta_feedback_notice_next_show_time', $next_time );
-				update_option( 'tta_reshow_' . $notice_id, $next_time );
+				update_option( 'tta_feedback_notice_next_show_time', $next_time, false );
+				update_option( 'tta_reshow_' . $notice_id, $next_time, false );
 				break;
 
 			case 'done':
 			case 'never':
 				update_user_meta( $user_id, 'tta_dismiss_' . $notice_id, true );
 				update_user_meta( $user_id, 'tta_feedback_notice_dismissed', true );
-				update_option( 'tta_feedback_notice_next_show_time', 0 );
+				update_option( 'tta_feedback_notice_next_show_time', 0, false );
 				break;
 		}
 
@@ -1327,7 +1327,7 @@ class TTA_Notices {
 		$reached = (array) get_option( 'tta_milestones_reached', array() );
 		if ( ! in_array( $milestone_id, $reached, true ) ) {
 			$reached[] = $milestone_id;
-			update_option( 'tta_milestones_reached', $reached );
+			update_option( 'tta_milestones_reached', $reached, false );
 		}
 
 		// Also set per-user dismiss meta (standard notice system).

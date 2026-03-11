@@ -326,7 +326,7 @@ if (!defined('TTA_PLUGIN_PATH')) {
 
 if (TTA_DEBUG_MODE  && WP_SITEURL) {
     $rest_url = WP_SITEURL . '/wp-json/';
-    update_option('tts_rest_api_url', $rest_url);
+    update_option('tts_rest_api_url', $rest_url, false);
     TTA_Cache::set('tts_rest_api_url', $rest_url);
 }
 
@@ -366,7 +366,7 @@ class TTA_Init
             }
             if (!TTA_Cache::get('tts_rest_api_url')) {
                 $rest_url = esc_url_raw(rest_url());
-                update_option('tts_rest_api_url', $rest_url);
+                update_option('tts_rest_api_url', $rest_url, false);
                 TTA_Cache::set('tts_rest_api_url', $rest_url);
             }
             TTA_Notices::instance();

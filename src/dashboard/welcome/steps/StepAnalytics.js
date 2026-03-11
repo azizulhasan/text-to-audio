@@ -342,7 +342,7 @@ const StepAnalytics = ({ data, onChange, selectedPostType }) => {
                             </div>
 
                             {/* Scrollable post list */}
-                            <ul style={styles.postList}>
+                            <ul style={styles.postList} role="listbox" aria-label={__('Posts to track', 'text-to-audio')} aria-multiselectable="true">
                                 {recentPosts.map((post) => {
                                     const isChecked =
                                         data.trackablePostIds.includes(
@@ -360,8 +360,18 @@ const StepAnalytics = ({ data, onChange, selectedPostType }) => {
                                                     ? 'not-allowed'
                                                     : 'pointer',
                                             }}
+                                            role="option"
+                                            aria-selected={isChecked}
+                                            aria-disabled={isDisabled}
+                                            tabIndex={isDisabled ? -1 : 0}
                                             onClick={() => {
                                                 if (!isDisabled) {
+                                                    handlePostToggle(post.id);
+                                                }
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if ((e.key === 'Enter' || e.key === ' ') && !isDisabled) {
+                                                    e.preventDefault();
                                                     handlePostToggle(post.id);
                                                 }
                                             }}

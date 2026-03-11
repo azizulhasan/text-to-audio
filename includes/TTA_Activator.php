@@ -38,7 +38,7 @@ class TTA_Activator {
 		 */
 		if ( ! get_option( 'tta_has_been_activated_before', false ) ) {
 			set_transient( 'tta_activation_redirect', true, 60 );
-			update_option( 'tta_has_been_activated_before', true );
+			update_option( 'tta_has_been_activated_before', true, false );
 		}
 
 		/**
@@ -141,7 +141,7 @@ class TTA_Activator {
 				'tta__listening_rate'   => 1,
 				'tta__listening_volume' => 1,
 				'tta__listening_lang'   => $voice_defaults[1],
-			) );
+			), false );
 		}
 
 
@@ -154,7 +154,7 @@ class TTA_Activator {
 				"is_record_continously"   => true,
 				"tta__recording__lang"    => "en-US",
 				"tta__sentence_delimiter" => ".",
-			) );
+			), false );
 		}
 
 
@@ -189,10 +189,11 @@ class TTA_Activator {
 			(
 				"tts_enable_analytics"   => true,
 				"tts_trackable_post_ids" => "all"
-			) );
+			), false );
 		}
 
 		self::create_analytics_table_if_not_exists();
+		self::maybe_add_analytics_indexes();
 	}
 
 
@@ -212,14 +213,64 @@ class TTA_Activator {
 	        other_data longtext DEFAULT NULL,
 	        created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	        updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
-	        UNIQUE KEY id (id)
+	        UNIQUE KEY id (id),
+	        KEY idx_post_id (post_id),
+	        KEY idx_created_at (created_at),
+	        KEY idx_updated_at (updated_at)
 	    ) $charset_collate;";
 
 			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 			dbDelta( $sql );
-			update_option( 'atlasvoice_analytics_table_is_created', true );
+			update_option( 'atlasvoice_analytics_table_is_created', true, false );
 		}
 
+	}
+
+	/**
+	 * Add indexes to the analytics table for existing installations.
+	 *
+	 * Uses CREATE INDEX IF NOT EXISTS (MySQL 8.0+ / MariaDB 10.1.4+).
+	 * Falls back silently on older versions where the index already exists.
+	 *
+	 * @since 2.2.0
+	 */
+	public static function maybe_add_analytics_indexes() {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'atlasvoice_analytics';
+
+		if ( ! self::is_table_exists() ) {
+			return;
+		}
+
+		// Check if indexes have already been added to avoid running on every activation.
+		if ( get_option( 'tta_analytics_indexes_added', false ) ) {
+			return;
+		}
+
+		// Retrieve existing indexes on the table.
+		$existing_indexes = array();
+		$index_results    = $wpdb->get_results( "SHOW INDEX FROM `{$table_name}`", ARRAY_A );
+		if ( is_array( $index_results ) ) {
+			foreach ( $index_results as $row ) {
+				$existing_indexes[] = $row['Key_name'];
+			}
+		}
+
+		$indexes_to_add = array(
+			'idx_post_id'    => 'post_id',
+			'idx_created_at' => 'created_at',
+			'idx_updated_at' => 'updated_at',
+		);
+
+		foreach ( $indexes_to_add as $index_name => $column_name ) {
+			if ( ! in_array( $index_name, $existing_indexes, true ) ) {
+				$wpdb->query(
+					"ALTER TABLE `{$table_name}` ADD INDEX `{$index_name}` (`{$column_name}`)"
+				);
+			}
+		}
+
+		update_option( 'tta_analytics_indexes_added', true, false );
 	}
 
 	private static function is_table_exists() {

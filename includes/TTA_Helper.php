@@ -1464,7 +1464,7 @@ class TTA_Helper
             if(is_numeric($key)) {
                 unset($duplicate_post_ids[$key]);
 
-                update_option('tts_duplicate_post_ids', $duplicate_post_ids);
+                update_option('tts_duplicate_post_ids', $duplicate_post_ids, false);
 
                 update_post_meta( $post_id, 'tts_mp3_file_urls', [] );
             };

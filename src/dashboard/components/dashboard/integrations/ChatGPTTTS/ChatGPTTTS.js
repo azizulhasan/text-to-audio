@@ -3,6 +3,7 @@ import { Form, Button, InputGroup } from 'react-bootstrap';
 import { postData } from '../../../context/utilities';
 import toast from '../../../context/Notify';
 import { __ } from "@wordpress/i18n";
+import Icon from "../../../Icon";
 
 export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGPTAPIData, setAuthenticatedServices }) {
     const apiURL = useMemo(() => {
@@ -97,7 +98,7 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
                     className="text-danger p-0 text-decoration-none d-flex align-items-center"
                     onClick={() => window.open('https://www.youtube.com/watch?v=6uGPboXW2Q8', '_blank')}
                 >
-                    <i className="fab fa-youtube fs-4"></i>
+                    <Icon name="youtube" style={{ fontSize: '1.5rem' }} />
                 </Button>
             </div>
 
