@@ -629,10 +629,10 @@ $latest = get_posts(['numberposts' => 1, 'post_status' => 'publish', 'post_type'
 | 3.2 | Custom Deactivation Reasons | Low | MEDIUM | P0 | ✅ DONE |
 | 4.2 | Voice Locale Auto-Detection | Low | MEDIUM | P0 | ✅ DONE |
 | — | Finish Page Upsell (Pro + AI Agent Hub) | Low | MEDIUM | P0 | ✅ DONE |
-| 1.2 | Brand Naming Consolidation → "AtlasVoice" | Low | MEDIUM | P1 | 🔄 IN PROGRESS |
-| 4.1 | TTA_Notices Refactor (remove spam) | Medium | MEDIUM | P1 | 🔄 IN PROGRESS |
-| — | Schema Markup for Audio (SEO) | Low | MEDIUM | P1 | 🔄 IN PROGRESS |
-| 2.3 | Admin Bar Quick Toggle | Low | LOW-MED | P2 | 🔄 IN PROGRESS |
+| 1.2 | Brand Naming Consolidation → "AtlasVoice" | Low | MEDIUM | P1 | ✅ DONE |
+| 4.1 | TTA_Notices Refactor (remove spam) | Medium | MEDIUM | P1 | ✅ DONE |
+| — | Schema Markup for Audio (SEO) | Low | MEDIUM | P1 | ✅ DONE |
+| 2.3 | Admin Bar Quick Toggle | Low | LOW-MED | P2 | ✅ DONE |
 | 3.3 | "Need Help?" Rescue Offer | Medium | MEDIUM | P2 | ⬜ TODO |
 | 5.1 | Usage Milestone Notices | Medium | MEDIUM | P2 | ⬜ TODO |
 | 6.1 | Conflict Auto-Detection | Low | LOW | P2 | ⬜ TODO |

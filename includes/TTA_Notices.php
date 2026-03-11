@@ -50,6 +50,7 @@ class TTA_Notices {
 		add_action( 'admin_notices', array( $this, 'display_notices' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 		add_action( 'wp_ajax_tta_dismiss_notice', array( $this, 'ajax_dismiss_notice' ) );
+		add_action( 'wp_ajax_tta_dismiss_milestone', array( $this, 'ajax_dismiss_milestone' ) );
 		add_action( 'wp_ajax_tta_track_notice_action', array( $this, 'ajax_track_notice_action' ) );
 
 		// Backward compat: keep old AJAX action name working.
@@ -462,6 +463,9 @@ class TTA_Notices {
 		// 	'legacy_dismiss_meta' => 'tts_plugin_analytics_notice_dismissed',
 		// 	'legacy_option_key'   => 'tts_plugin_analytics_notice_next_show_time',
 		// ) );
+
+		// ── 13. Usage Milestone Celebrations ──
+		$this->register_milestone_notices();
 	}
 
 	// =========================================================================
@@ -1167,6 +1171,171 @@ class TTA_Notices {
 	// =========================================================================
 	// Auto-Dismiss Condition Callbacks
 	// =========================================================================
+
+	// =========================================================================
+	// Usage Milestone Celebrations
+	// =========================================================================
+
+	/**
+	 * Milestone definitions: threshold => notice config.
+	 *
+	 * @return array
+	 */
+	private function get_milestones() {
+		return array(
+			1    => array(
+				'id'      => 'milestone_1',
+				'message' => __( 'Your first visitor just used the audio player! Your content is now accessible to more people.', 'text-to-audio' ),
+			),
+			10   => array(
+				'id'      => 'milestone_10',
+				'message' => __( '10 visitors have listened to your content this week. AtlasVoice is making a difference!', 'text-to-audio' ),
+			),
+			100  => array(
+				'id'      => 'milestone_100',
+				'message' => __( '100 plays! Your accessibility efforts are paying off. Your visitors love listening.', 'text-to-audio' ),
+			),
+			1000 => array(
+				'id'      => 'milestone_1000',
+				'message' => __( '1,000 plays! You\'re making a real impact with audio content.', 'text-to-audio' ),
+			),
+		);
+	}
+
+	/**
+	 * Register milestone notices.
+	 *
+	 * Only registers the next unreached milestone to ensure max 1 is visible.
+	 */
+	private function register_milestone_notices() {
+		$milestones      = $this->get_milestones();
+		$reached         = (array) get_option( 'tta_milestones_reached', array() );
+		$total_plays     = $this->get_cached_total_plays();
+		$analytics_title = __( 'AtlasVoice', 'text-to-audio' );
+
+		// Find the next unreached milestone that qualifies.
+		foreach ( $milestones as $threshold => $config ) {
+			if ( in_array( $config['id'], $reached, true ) ) {
+				continue;
+			}
+
+			if ( $total_plays >= $threshold ) {
+				// Register only this one milestone notice (max 1 at a time).
+				$milestone_id = $config['id'];
+				$message      = $config['message'];
+
+				$this->register_notice( array(
+					'id'          => $milestone_id,
+					'title'       => '<h3>' . esc_html( $analytics_title ) . '</h3>',
+					'message'     => '<p>' . esc_html( $message ) . '</p>',
+					'type'        => 'success',
+					'icon'        => '',
+					'dismissible' => true,
+					'condition'   => function() {
+						return current_user_can( 'manage_options' );
+					},
+					'buttons'     => array(
+						array(
+							'text' => __( 'View Analytics', 'text-to-audio' ),
+							'url'  => admin_url( 'admin.php?page=text-to-audio#/analytics' ),
+							'type' => 'primary',
+						),
+					),
+				) );
+
+				// Only show one milestone at a time.
+				break;
+			}
+		}
+	}
+
+	/**
+	 * Get total play count with 1-hour transient cache.
+	 *
+	 * @return int
+	 */
+	private function get_cached_total_plays() {
+		$cache_key = 'tta_milestone_total_plays';
+		$cached    = get_transient( $cache_key );
+
+		if ( false !== $cached ) {
+			return (int) $cached;
+		}
+
+		$total = $this->query_total_plays();
+		set_transient( $cache_key, $total, HOUR_IN_SECONDS );
+
+		return $total;
+	}
+
+	/**
+	 * Query total plays from the atlasvoice_analytics table.
+	 *
+	 * The analytics column stores serialized arrays with play.count values.
+	 *
+	 * @return int
+	 */
+	private function query_total_plays() {
+		global $wpdb;
+
+		$table_name = $wpdb->prefix . 'atlasvoice_analytics';
+
+		// Check if table exists.
+		$table_exists = $wpdb->get_var(
+			$wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table_name ) )
+		);
+
+		if ( $table_exists !== $table_name ) {
+			return 0;
+		}
+
+		// The analytics column stores serialized data; we need to unserialize
+		// and sum play counts in PHP (same approach as TTA_Dashboard_Widget).
+		$rows = $wpdb->get_col(
+			"SELECT analytics FROM {$table_name}"
+		);
+
+		$total = 0;
+		if ( $rows ) {
+			foreach ( $rows as $raw ) {
+				$analytics = maybe_unserialize( $raw );
+				if ( is_array( $analytics ) && isset( $analytics['play']['count'] ) ) {
+					$total += (int) $analytics['play']['count'];
+				}
+			}
+		}
+
+		return $total;
+	}
+
+	/**
+	 * AJAX handler for dismissing milestone notices.
+	 *
+	 * Adds the milestone ID to the tta_milestones_reached option
+	 * in addition to the standard per-user dismiss behavior.
+	 */
+	public function ajax_dismiss_milestone() {
+		check_ajax_referer( 'tta_notice_nonce', 'nonce' );
+
+		$milestone_id = isset( $_POST['milestone_id'] ) ? sanitize_text_field( wp_unslash( $_POST['milestone_id'] ) ) : '';
+
+		if ( empty( $milestone_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid milestone ID.', 'text-to-audio' ) ) );
+		}
+
+		// Add to global milestones reached list.
+		$reached = (array) get_option( 'tta_milestones_reached', array() );
+		if ( ! in_array( $milestone_id, $reached, true ) ) {
+			$reached[] = $milestone_id;
+			update_option( 'tta_milestones_reached', $reached );
+		}
+
+		// Also set per-user dismiss meta (standard notice system).
+		$user_id = get_current_user_id();
+		update_user_meta( $user_id, 'tta_dismiss_' . $milestone_id, true );
+
+		wp_send_json_success( array( 'message' => __( 'Milestone dismissed.', 'text-to-audio' ) ) );
+	}
 
 	/**
 	 * Check if user has customized the plugin (auto-dismiss onboarding).

@@ -104,10 +104,84 @@ export default function Compatibility() {
             });
     };
 
+    const detectedPlugins = (typeof tta_obj !== 'undefined' && tta_obj.detected_caching_plugins) ? tta_obj.detected_caching_plugins : [];
+
+    const getPluginStatusIcon = (plugin) => {
+        if (plugin.active && plugin.handled) {
+            return { icon: "\u2705", text: __('JS exclusion active', 'text-to-audio') };
+        }
+        if (plugin.active && !plugin.handled) {
+            return { icon: "\u26A0\uFE0F", text: __('Detected but not handled — may cause conflicts', 'text-to-audio') };
+        }
+        if (plugin.installed && !plugin.active) {
+            return { icon: "\u26AA", text: __('Installed but not active', 'text-to-audio') };
+        }
+        return { icon: "\u26AA", text: __('Not installed', 'text-to-audio') };
+    };
+
     return (isDataLoaded ? <React.Fragment>
         <Container>
             <Row>
                 <Col xs={12} sm={12} lg={8}>
+                    {/* Detected Caching Plugins */}
+                    {detectedPlugins.length > 0 && (
+                        <div style={{
+                            background: '#fff',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '8px',
+                            padding: '20px',
+                            marginBottom: '24px',
+                        }}>
+                            <h5 style={{
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                color: '#1e293b',
+                                marginBottom: '4px',
+                            }}>
+                                {__('Compatibility Status', 'text-to-audio')}
+                            </h5>
+                            <p style={{
+                                fontSize: '13px',
+                                color: '#64748b',
+                                marginBottom: '16px',
+                            }}>
+                                {__('AtlasVoice automatically excludes its scripts from caching and optimization plugins to prevent conflicts.', 'text-to-audio')}
+                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {detectedPlugins.map((plugin, index) => {
+                                    const status = getPluginStatusIcon(plugin);
+                                    return (
+                                        <div key={index} style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '10px',
+                                            padding: '8px 12px',
+                                            borderRadius: '6px',
+                                            background: plugin.active ? '#f0fdf4' : '#f8fafc',
+                                            border: plugin.active && !plugin.handled ? '1px solid #fbbf24' : '1px solid transparent',
+                                        }}>
+                                            <span style={{ fontSize: '16px', lineHeight: '1' }}>{status.icon}</span>
+                                            <span style={{
+                                                fontWeight: '500',
+                                                color: '#1e293b',
+                                                fontSize: '14px',
+                                                minWidth: '140px',
+                                            }}>
+                                                {plugin.name}
+                                            </span>
+                                            <span style={{
+                                                fontSize: '13px',
+                                                color: plugin.active && !plugin.handled ? '#92400e' : '#64748b',
+                                            }}>
+                                                {'\u2014 ' + status.text}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
                     <Form onSubmit={handleSubmit}>
 
                         {/*ACF Fields */}
