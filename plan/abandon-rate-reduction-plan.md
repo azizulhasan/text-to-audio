@@ -246,7 +246,7 @@ After clicking "Finish Setup":
 
 > Goal: Show users their plugin is actively working and delivering value to their visitors.
 >
-> **STATUS:** Analytics enabled by default (new installs), free limit 5→20 posts, dashboard widget live with 7-day chart + Pro upsell. Admin bar toggle 🔄 in progress.
+> **STATUS:** Analytics enabled by default (new installs), free limit 5→20 posts, dashboard widget live with 7-day chart + Pro upsell. Admin bar AJAX toggle implemented.
 
 ### 2.1 Enable Lightweight Analytics by Default ✅
 
@@ -443,7 +443,7 @@ ttsp_fs()->add_filter('uninstall_reasons', function($reasons) {
 
 ---
 
-### 3.3 "Need Help?" Rescue Offer
+### 3.3 "Need Help?" Rescue Offer ✅
 
 **Current:** Nothing. User deactivates and is gone.
 **Proposed:** In the deactivation form, add a prominent rescue CTA:
@@ -521,9 +521,9 @@ ttsp_fs()->add_filter('uninstall_reasons', function($reasons) {
 
 ---
 
-## PHASE 5: Ongoing Engagement (Keep Them Beyond Day 1)
+## PHASE 5: Ongoing Engagement (Keep Them Beyond Day 1) ✅ COMPLETED
 
-### 5.1 Usage Milestone Celebrations
+### 5.1 Usage Milestone Celebrations ✅
 
 **Proposed:** Show contextual admin notices when users hit milestones:
 
@@ -578,9 +578,9 @@ Keep it up!
 
 ---
 
-## PHASE 6: Technical Quick Wins
+## PHASE 6: Technical Quick Wins ✅ COMPLETED
 
-### 6.1 Plugin Conflict Auto-Detection
+### 6.1 Plugin Conflict Auto-Detection ✅
 
 **Current:** `TTA_Hooks` adds compatibility filters but user doesn't know if conflicts exist.
 **Proposed:** On activation, detect known conflicting plugins and show targeted guidance:
@@ -600,7 +600,7 @@ if (is_plugin_active('litespeed-cache/litespeed-cache.php')) {
 
 ---
 
-### 6.2 "View Player on Your Site" Persistent Link
+### 6.2 "View Player on Your Site" Persistent Link ✅
 
 **Current:** No easy way to preview the player on an actual post from admin.
 **Proposed:** Add a "Preview on site" button in the Customize tab that links to the user's most recent published post:
@@ -633,12 +633,13 @@ $latest = get_posts(['numberposts' => 1, 'post_status' => 'publish', 'post_type'
 | 4.1 | TTA_Notices Refactor (remove spam) | Medium | MEDIUM | P1 | ✅ DONE |
 | — | Schema Markup for Audio (SEO) | Low | MEDIUM | P1 | ✅ DONE |
 | 2.3 | Admin Bar Quick Toggle | Low | LOW-MED | P2 | ✅ DONE |
-| 3.3 | "Need Help?" Rescue Offer | Medium | MEDIUM | P2 | ⬜ TODO |
-| 5.1 | Usage Milestone Notices | Medium | MEDIUM | P2 | ⬜ TODO |
-| 6.1 | Conflict Auto-Detection | Low | LOW | P2 | ⬜ TODO |
-| 6.2 | "View on Site" Link | Low | LOW | P2 | ⬜ TODO |
-| — | Onboarding Analytics (wizard tracking) | Medium | MEDIUM | P2 | ⬜ TODO |
-| — | Pro Onboarding Wizard | High | MEDIUM | P2 | ⬜ TODO |
+| 3.3 | "Need Help?" Rescue Offer | Medium | MEDIUM | P2 | ✅ DONE |
+| 5.1 | Usage Milestone Notices | Medium | MEDIUM | P2 | ✅ DONE |
+| 6.1 | Conflict Auto-Detection | Low | LOW | P2 | ✅ DONE |
+| 6.2 | "View on Site" Link | Low | LOW | P2 | ✅ DONE |
+| — | Onboarding Analytics (wizard tracking) | Medium | MEDIUM | P2 | ✅ DONE |
+| — | WP 6.7 textdomain compat fix | Low | HIGH | P2 | ✅ DONE |
+| — | Pro Onboarding Wizard | High | MEDIUM | P2 | ⬜ SKIPPED (needs Pro plugin) |
 | 5.2 | Weekly Email Digest | High | LOW-MED | P3 | ⬜ TODO |
 | — | Unit Tests | High | MEDIUM | P3 | ⬜ TODO |
 | — | Code Splitting (lazy load tabs) | Medium | LOW | P3 | ⬜ TODO |
