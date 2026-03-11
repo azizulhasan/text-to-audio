@@ -218,7 +218,7 @@ export default function Integrations() {
 
           {/* TTS Service Selection Dropdown */}
           <div className="tta-card mb-3">
-            <h5 className="mb-3 fw-semibold">{__("Select Text To Speech Service", "text-to-audio")}</h5>
+            <h5 className="mb-3 fw-semibold">{__("Select Voice Service", "text-to-audio")}</h5>
             <Form.Select
               value={currentTTSServic}
               onChange={handleServiceSelect}

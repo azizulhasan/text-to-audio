@@ -439,15 +439,15 @@ class TTA_Admin
     public function TTA_menu()
     {
         add_menu_page(
-            'Text To Speech',
-            'Text To Speech',
+            __('AtlasVoice', 'text-to-audio'),
+            __('AtlasVoice', 'text-to-audio'),
             'manage_options',
             TEXT_TO_AUDIO_TEXT_DOMAIN,
             array($this, "TTA_settings"),
             'dashicons-controls-volumeon',
             20
         );
-        add_submenu_page(TEXT_TO_AUDIO_TEXT_DOMAIN, 'Text To Speech', 'Text To Speech', 'manage_options', TEXT_TO_AUDIO_TEXT_DOMAIN, array(
+        add_submenu_page(TEXT_TO_AUDIO_TEXT_DOMAIN, __('AtlasVoice', 'text-to-audio'), __('AtlasVoice', 'text-to-audio'), 'manage_options', TEXT_TO_AUDIO_TEXT_DOMAIN, array(
             $this,
             "TTA_settings"
         ), 21);
@@ -575,6 +575,200 @@ class TTA_Admin
             array($this, 'atlas_plugins_page'),
             34
         );
+    }
+
+    /**
+     * Add AtlasVoice quick-toggle item to the WordPress admin bar on front-end singular pages.
+     *
+     * @param \WP_Admin_Bar $admin_bar The WP_Admin_Bar instance.
+     *
+     * @since 2.2.0
+     */
+    public function add_admin_bar_toggle( $admin_bar ) {
+        if ( is_admin() || ! is_singular() || ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+
+        global $post;
+        if ( ! $post ) {
+            return;
+        }
+
+        $settings   = TTA_Helper::tts_get_settings( 'settings' );
+        $post_types = isset( $settings['tta__settings_allow_listening_for_post_types'] ) ? (array) $settings['tta__settings_allow_listening_for_post_types'] : [];
+
+        if ( empty( $post_types ) || ! in_array( $post->post_type, $post_types, true ) ) {
+            return;
+        }
+
+        $excluded_ids = isset( $settings['tta__settings_exclude_post_ids'] ) ? (array) $settings['tta__settings_exclude_post_ids'] : [];
+        $is_active    = ! in_array( (string) $post->ID, $excluded_ids, true ) && ! in_array( (int) $post->ID, $excluded_ids, true );
+
+        $label = $is_active
+            ? __( 'AtlasVoice: On', 'text-to-audio' )
+            : __( 'AtlasVoice: Off', 'text-to-audio' );
+
+        $admin_bar->add_node( [
+            'id'    => 'tta-audio-toggle',
+            'title' => '<span class="ab-icon dashicons dashicons-megaphone"></span>'
+                     . '<span class="tta-ab-indicator ' . ( $is_active ? 'tta-ab-on' : 'tta-ab-off' ) . '"></span> '
+                     . esc_html( $label ),
+            'href'  => '#',
+            'meta'  => [
+                'class' => 'tta-admin-bar-toggle',
+                'title' => __( 'Toggle AtlasVoice audio player for this post', 'text-to-audio' ),
+            ],
+        ] );
+    }
+
+    /**
+     * Print inline CSS for the admin bar AtlasVoice toggle (front-end only).
+     *
+     * @since 2.2.0
+     */
+    public function admin_bar_inline_css() {
+        if ( is_admin() || ! is_admin_bar_showing() || ! is_singular() || ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+        ?>
+        <style id="tta-admin-bar-toggle-css">
+            #wp-admin-bar-tta-audio-toggle .ab-icon.dashicons {
+                font-family: dashicons !important;
+                font-size: 20px !important;
+                line-height: 1 !important;
+                position: relative;
+                top: 3px;
+                margin-right: 2px;
+            }
+            .tta-ab-indicator {
+                display: inline-block;
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                margin-right: 4px;
+                vertical-align: middle;
+            }
+            .tta-ab-indicator.tta-ab-on {
+                background-color: #46b450;
+            }
+            .tta-ab-indicator.tta-ab-off {
+                background-color: #dc3232;
+            }
+            #wp-admin-bar-tta-audio-toggle a.ab-item {
+                cursor: pointer;
+            }
+        </style>
+        <?php
+    }
+
+    /**
+     * Print inline JS for the admin bar AtlasVoice AJAX toggle (front-end only).
+     *
+     * @since 2.2.0
+     */
+    public function admin_bar_inline_js() {
+        if ( is_admin() || ! is_admin_bar_showing() || ! is_singular() || ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+
+        global $post;
+        if ( ! $post ) {
+            return;
+        }
+        ?>
+        <script id="tta-admin-bar-toggle-js">
+        (function(){
+            var node = document.getElementById('wp-admin-bar-tta-audio-toggle');
+            if (!node) return;
+
+            var link = node.querySelector('a.ab-item');
+            if (!link) return;
+
+            link.addEventListener('click', function(e){
+                e.preventDefault();
+
+                var data = new FormData();
+                data.append('action', 'tta_toggle_audio');
+                data.append('post_id', <?php echo (int) $post->ID; ?>);
+                data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'tta_toggle_audio_nonce' ) ); ?>');
+
+                fetch('<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    body: data
+                })
+                .then(function(r){ return r.json(); })
+                .then(function(resp){
+                    if (!resp.success) return;
+
+                    var indicator = node.querySelector('.tta-ab-indicator');
+                    var textNode  = link.lastChild;
+
+                    if (resp.data.is_active) {
+                        indicator.className = 'tta-ab-indicator tta-ab-on';
+                        textNode.textContent = ' <?php echo esc_js( __( 'AtlasVoice: On', 'text-to-audio' ) ); ?>';
+                    } else {
+                        indicator.className = 'tta-ab-indicator tta-ab-off';
+                        textNode.textContent = ' <?php echo esc_js( __( 'AtlasVoice: Off', 'text-to-audio' ) ); ?>';
+                    }
+                });
+            });
+        })();
+        </script>
+        <?php
+    }
+
+    /**
+     * AJAX handler to toggle audio player on/off for a specific post.
+     *
+     * @since 2.2.0
+     */
+    public static function ajax_toggle_audio() {
+        check_ajax_referer( 'tta_toggle_audio_nonce' );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permission denied.', 'text-to-audio' ) ] );
+        }
+
+        $post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+        if ( ! $post_id || ! get_post( $post_id ) ) {
+            wp_send_json_error( [ 'message' => __( 'Invalid post.', 'text-to-audio' ) ] );
+        }
+
+        $settings     = get_option( 'tta_settings_data', [] );
+        if ( is_object( $settings ) ) {
+            $settings = (array) $settings;
+        }
+        $excluded_ids = isset( $settings['tta__settings_exclude_post_ids'] ) ? (array) $settings['tta__settings_exclude_post_ids'] : [];
+
+        // Check if post ID is currently excluded (compare as strings since stored values may be strings).
+        $found_key = false;
+        foreach ( $excluded_ids as $key => $id ) {
+            if ( (int) $id === $post_id ) {
+                $found_key = $key;
+                break;
+            }
+        }
+
+        if ( false !== $found_key ) {
+            // Currently excluded -- remove to turn ON.
+            unset( $excluded_ids[ $found_key ] );
+            $excluded_ids = array_values( $excluded_ids );
+            $is_active    = true;
+        } else {
+            // Currently active -- add to turn OFF.
+            $excluded_ids[] = (string) $post_id;
+            $is_active      = false;
+        }
+
+        $settings['tta__settings_exclude_post_ids'] = $excluded_ids;
+        update_option( 'tta_settings_data', $settings );
+
+        // Invalidate the settings cache so the change takes effect immediately.
+        $cache_key = TTA_Cache::get_key( 'tts_get_settings' );
+        TTA_Cache::delete( $cache_key );
+
+        wp_send_json_success( [ 'is_active' => $is_active, 'post_id' => $post_id ] );
     }
 
 }

@@ -50,7 +50,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                 if (!isAuthenticated) {
                     if (!googTTSJsonFile) {
                         toast(
-                            __("Backup MP3 Files To Google Cloud Storage Can Be Enabled If Google Text To Speech Is Authenticated.", 'text-to-audio'),
+                            __("Backup MP3 Files To Google Cloud Storage Can Be Enabled If Google Cloud TTS Is Authenticated.", 'text-to-audio'),
                             "error",
                             {
                                 position: "top-center",
@@ -175,7 +175,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
             !isBackUpToGCS
         ) {
             toast(
-                __("Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.", 'text-to-audio'),
+                __("AtlasVoice stores synthesized content in the uploads folder. Your uploads folder is not writable. Please make the uploads folder writable to enjoy all features of the plugin.", 'text-to-audio'),
                 "error",
                 {autoClose: 10000}
             );
@@ -651,7 +651,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                     </div>
                     <div className="flex-grow-1">
                         <h6 className="m-0 text-dark fw-normal">
-                            {__("Learn How To Integrate Google Text To Speech With AtlasVoice Pro Plugin?", "text-to-audio")}
+                            {__("Learn How To Integrate Google Cloud TTS With AtlasVoice Pro Plugin?", "text-to-audio")}
                         </h6>
                     </div>
                 </a>

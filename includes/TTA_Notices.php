@@ -187,7 +187,7 @@ class TTA_Notices {
 		// ── 3. Translation Request ──
 		$this->register_notice( array(
 			'id'                  => 'translation',
-			'title'               => sprintf( '<h3>%s</h3>', sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', 'text-to-audio' ) ) ),
+			'title'               => sprintf( '<h3>%s</h3>', sprintf( '<b>%s</b>', esc_html__( 'AtlasVoice', 'text-to-audio' ) ) ),
 			'message_callback'    => array( $this, 'get_translation_message' ),
 			'type'                => 'info',
 			'dismissible'         => true,
@@ -209,19 +209,19 @@ class TTA_Notices {
 		// ── 4. Voice & Language Mismatch (free only) ──
 		$this->register_notice( array(
 			'id'                  => 'voice_language_mismatch',
-			'title'               => '<h3>' . esc_html__( 'Text To Speech TTS: Having Voice And Language Issues? Here\'s Why!', 'text-to-audio' ) . '</h3>',
-			'message'             => '<p>' . esc_html__( 'This plugin uses the built-in speechSynthesis browser API — no external API is involved. Because support varies by browser and device, some Android phones or languages may not work as expected. We\'ve improved compatibility programmatically, but browser-specific differences in voices and language availability may still occur. These issues are fully resolved in the Pro version using a different method.', 'text-to-audio' ) . '</p><p><a href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility" target="_blank">' . esc_html__( 'Check device support here', 'text-to-audio' ) . ' &rarr;</a></p>',
+			'title'               => '<h3>' . esc_html__( 'AtlasVoice: Voice & Language Compatibility', 'text-to-audio' ) . '</h3>',
+			'message'             => '<p>' . esc_html__( 'The free version uses the browser\'s built-in speechSynthesis API. Voice and language support varies by browser and device, so some combinations may not work as expected. The Pro version uses server-side audio generation for consistent results across all browsers.', 'text-to-audio' ) . '</p><p><a href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility" target="_blank">' . esc_html__( 'Check browser compatibility', 'text-to-audio' ) . ' &rarr;</a></p>',
 			'type'                => 'info',
 			'dismissible'         => true,
-			'reshow_after_days'   => 30,
+			'reshow_after_days'   => 90,
 			'condition'           => function() {
 				return ! is_pro_active();
 			},
 			'buttons'             => array(
 				array(
-					'text'    => __( 'Unlock The Premium Features', 'text-to-audio' ),
+					'text'    => __( 'Learn About Pro', 'text-to-audio' ),
 					'url'     => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
-					'type'    => 'primary',
+					'type'    => 'secondary',
 					'new_tab' => true,
 				),
 			),
@@ -232,19 +232,19 @@ class TTA_Notices {
 		// ── 5. Pro Features (free only, random features) ──
 		$this->register_notice( array(
 			'id'                  => 'features',
-			'title'               => sprintf( '<h3>%s ' . esc_html__( 'Features', 'text-to-audio' ) . '</h3>', sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS Pro', 'text-to-audio' ) ) ),
+			'title'               => sprintf( '<h3>%s ' . esc_html__( 'Features', 'text-to-audio' ) . '</h3>', sprintf( '<b>%s</b>', esc_html__( 'AtlasVoice Pro', 'text-to-audio' ) ) ),
 			'message_callback'    => array( $this, 'get_features_message' ),
 			'type'                => 'info',
 			'dismissible'         => true,
-			'reshow_after_days'   => 30,
+			'reshow_after_days'   => 90,
 			'condition'           => function() {
 				return ! is_pro_active();
 			},
 			'buttons'             => array(
 				array(
-					'text'    => __( 'See More Features', 'text-to-audio' ),
+					'text'    => __( 'View Pro Features', 'text-to-audio' ),
 					'url'     => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
-					'type'    => 'primary',
+					'type'    => 'secondary',
 					'new_tab' => true,
 				),
 			),
@@ -624,27 +624,9 @@ class TTA_Notices {
 					</div>
 					<?php endif; ?>
 
-					<?php if ( $notice['track_clicks'] && $notice['max_clicks'] > 0 ) : ?>
-					<div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
-						<?php
-						$spots_left = max( 0, $notice['max_clicks'] - $total_clicks );
-						if ( $spots_left > 0 ) :
-						?>
-						<div style="background: #fff3cd; padding: 8px 15px; border-radius: 5px; border-left: 3px solid #ffc107;">
-							<strong style="color: #856404;">&#9200; <?php printf( esc_html__( 'Only %d spot%s left!', 'text-to-audio' ), $spots_left, $spots_left !== 1 ? 's' : '' ); ?></strong>
-						</div>
-						<?php endif; ?>
-						<?php if ( $total_clicks > 0 ) : ?>
-						<div style="color: #666; font-size: 13px;">
-							&#10004; <?php printf( esc_html__( '%d user%s already claimed', 'text-to-audio' ), $total_clicks, $total_clicks !== 1 ? 's' : '' ); ?>
-						</div>
-						<?php endif; ?>
-					</div>
-					<?php endif; ?>
-
 					<?php if ( $user_clicked ) : ?>
 					<div style="background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 4px; padding: 10px 15px; margin-bottom: 10px;">
-						<strong style="color: #0c5460;"><?php esc_html_e( "You've already taken action on this!", 'text-to-audio' ); ?></strong>
+						<strong style="color: #0c5460;"><?php esc_html_e( 'You have already responded to this notice.', 'text-to-audio' ); ?></strong>
 					</div>
 					<?php endif; ?>
 
@@ -918,7 +900,7 @@ class TTA_Notices {
 			$total_clicks = (int) get_option( 'tta_clicks_' . $notice_id, 0 );
 
 			if ( $notice['max_clicks'] > 0 && $total_clicks >= $notice['max_clicks'] ) {
-				wp_send_json_error( array( 'message' => __( 'Sorry, all spots have been claimed!', 'text-to-audio' ) ) );
+				wp_send_json_error( array( 'message' => __( 'This action is no longer available.', 'text-to-audio' ) ) );
 			}
 
 			$already_clicked = get_user_meta( $user_id, 'tta_clicked_' . $notice_id, true );
@@ -968,7 +950,7 @@ class TTA_Notices {
 					notice.className = 'notice notice-warning tta-admin-notice';
 					notice.setAttribute('data-notice-id', '<?php echo esc_js( $notice_id ); ?>');
 					notice.style.padding = '12px 20px';
-					notice.innerHTML = '<p><strong><?php echo esc_js( __( 'Text To Speech TTS:', 'text-to-audio' ) ); ?></strong> ' +
+					notice.innerHTML = '<p><strong><?php echo esc_js( __( 'AtlasVoice:', 'text-to-audio' ) ); ?></strong> ' +
 						'<?php echo esc_js( __( 'This browser does not support the speechSynthesis API. Please use Chrome, Firefox, Safari, Samsung, Edge, or Opera. The Pro version works in all browsers.', 'text-to-audio' ) ); ?></p>';
 					var wpbody = document.querySelector('.wrap') || document.querySelector('#wpbody-content');
 					if ( wpbody ) {
@@ -981,15 +963,13 @@ class TTA_Notices {
 	}
 
 	/**
-	 * Render promotion / sale banner (custom HTML with countdown).
+	 * Render promotion / sale banner.
 	 *
 	 * @param string $notice_id Notice ID.
 	 * @param array  $notice    Notice configuration.
 	 */
 	public function render_promotion_notice( $notice_id, $notice ) {
-		$nonce    = wp_create_nonce( 'tta_notice_nonce' );
-		$rtl_dir  = function_exists( 'tta_is_rtl' ) && tta_is_rtl() ? 'ltr' : 'auto';
-		$user_id  = get_current_user_id();
+		$rtl_dir = function_exists( 'tta_is_rtl' ) && tta_is_rtl() ? 'ltr' : 'auto';
 
 		// Check dismissed.
 		if ( $this->is_dismissed( $notice_id, $notice ) ) {
@@ -999,64 +979,27 @@ class TTA_Notices {
 		<div class="notice notice-info is-dismissible tta-admin-notice"
 		     data-notice-id="<?php echo esc_attr( $notice_id ); ?>"
 		     dir="<?php echo esc_attr( $rtl_dir ); ?>"
-		     style="line-height: 1.5; padding: 0;">
-			<div id="tta-promo-banner"
-			     style="background-color: #ffcc00; color: #333; text-align: center; padding: 5px; font-family: Arial, sans-serif; width: 100%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
-				<h2 style="margin: 0; font-size: 24px; font-weight: bold;">
-					<?php echo esc_html__( 'Text To Speech', 'text-to-audio' ); ?> &#128293; <?php echo esc_html__( 'Holiday & New Year Sale - 30% OFF!', 'text-to-audio' ); ?> &#128293;
-				</h2>
-				<p style="margin: 10px 0; font-size: 16px;">
-					<?php esc_html_e( 'Get 30% off on AtlasVoice Pro in all packages. Use the coupon code below and save big!', 'text-to-audio' ); ?>
-				</p>
-				<p style="margin: 10px 0; font-size: 18px; font-weight: bold;">
-					<?php esc_html_e( 'Offer Ends In:', 'text-to-audio' ); ?>
-					<span id="tta-promo-countdown" style="color: #d9534f;"></span>
-				</p>
-				<button id="tta-copy-coupon-btn"
-				        style="background-color: #333; color: #fff; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; border-radius: 5px;">
-					<?php esc_html_e( 'Copy Coupon Code:', 'text-to-audio' ); ?> <strong>ATLASNEWYEAR26</strong>
-				</button>
-			</div>
-			<p style="padding: 0 20px;">
+		     style="line-height: 1.5; padding: 20px;">
+
+			<button type="button" class="notice-dismiss tta-notice-dismiss" data-notice-id="<?php echo esc_attr( $notice_id ); ?>">
+				<span class="screen-reader-text"><?php esc_html_e( 'Dismiss this notice.', 'text-to-audio' ); ?></span>
+			</button>
+
+			<h3 style="margin: 0 0 8px 0;">
+				<?php esc_html_e( 'AtlasVoice Pro — Limited-Time Discount', 'text-to-audio' ); ?>
+			</h3>
+			<p style="margin: 0 0 12px 0; font-size: 14px;">
+				<?php esc_html_e( 'Save 30% on AtlasVoice Pro with the coupon code below.', 'text-to-audio' ); ?>
+			</p>
+			<p style="margin: 0 0 12px 0;">
+				<code style="font-size: 14px; padding: 4px 8px;">ATLASNEWYEAR26</code>
+			</p>
+			<p>
 				<a href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/?utm_source=plugin&utm_medium=user_dashboard&utm_campaign=new_year_26"
 				   class="button button-primary tta-notice-url-btn" data-notice-id="<?php echo esc_attr( $notice_id ); ?>" data-dismiss-on-click="true" data-new-tab="true"
-				   target="_blank"><?php esc_html_e( 'Upgrade Now', 'text-to-audio' ); ?></a>
+				   target="_blank"><?php esc_html_e( 'View Pricing', 'text-to-audio' ); ?></a>
 			</p>
 		</div>
-		<script>
-			(function() {
-				// Countdown Timer
-				function ttaPromoCountdown() {
-					var endDate = new Date("January 10, 2026 23:59:59").getTime();
-					var now = new Date().getTime();
-					var timeLeft = endDate - now;
-					var el = document.getElementById("tta-promo-countdown");
-					if ( ! el ) return;
-					if ( timeLeft < 0 ) {
-						var banner = document.getElementById("tta-promo-banner");
-						if ( banner ) banner.innerHTML = "<h2 style='color: #d9534f;'>&#127881; Holiday & New Year Offer Has Ended!</h2>";
-						return;
-					}
-					var d = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-					var h = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-					var m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-					var s = Math.floor((timeLeft % (1000 * 60)) / 1000);
-					el.innerText = d + "d " + h + "h " + m + "m " + s + "s";
-				}
-				setInterval(ttaPromoCountdown, 1000);
-				ttaPromoCountdown();
-
-				// Copy Coupon
-				var copyBtn = document.getElementById("tta-copy-coupon-btn");
-				if ( copyBtn ) {
-					copyBtn.addEventListener("click", function() {
-						navigator.clipboard.writeText("ATLASNEWYEAR26").then(function() {
-							alert("Coupon code copied to clipboard!");
-						}).catch(function() {});
-					});
-				}
-			})();
-		</script>
 		<?php
 	}
 
@@ -1076,7 +1019,7 @@ class TTA_Notices {
 		$language        = isset( $languages[ $locale ] ) ? $languages[ $locale ] : __( 'your local language', 'text-to-audio' );
 		$language_string = ' in <b>' . esc_html( $language ) . '</b>.';
 		$contact_link    = '<a href="https://atlasaidev.com/contact-us/" target="_blank" style="color:blue">' . esc_html__( 'here', 'text-to-audio' ) . '</a>';
-		$plugin_name     = sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', 'text-to-audio' ) );
+		$plugin_name     = sprintf( '<b>%s</b>', esc_html__( 'AtlasVoice', 'text-to-audio' ) );
 
 		return sprintf(
 			/* translators: 1: Language string, 2: Contact link, 3: Plugin name */
@@ -1106,7 +1049,7 @@ class TTA_Notices {
 			__( 'Customizable content selection with CSS selectors', 'text-to-audio' ),
 			__( 'Exclude content by categories, tags, IDs', 'text-to-audio' ),
 			__( 'Unlimited Download MP3 files', 'text-to-audio' ),
-			__( '200+ Voices with Google Cloud Text To Speech', 'text-to-audio' ),
+			__( '200+ Voices with Google Cloud TTS', 'text-to-audio' ),
 			__( 'Advance analytics & Text Aliases support.', 'text-to-audio' ),
 		);
 

@@ -270,9 +270,9 @@ class TTA_Hooks {
 	 * Register MetaBox to add PDF Download Button
 	 */
 	public function add_custom_meta_box() {
-		$plugin_name = 'Text To Speech TTS';
+		$plugin_name = __( 'AtlasVoice', 'text-to-audio' );
 		if ( \is_pro_active() ) {
-			$plugin_name = 'Text To Speech Pro';
+			$plugin_name = __( 'AtlasVoice Pro', 'text-to-audio' );
 		}
 
 		// TODO: make UI for this to display matabox widget.

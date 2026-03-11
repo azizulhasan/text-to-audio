@@ -221,7 +221,7 @@ export default function Customize() {
       });
 
     let initialText =
-      "The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!";
+      "The most user-friendly text-to-speech accessibility plugin. Just install and automatically add an AtlasVoice player to your WordPress site!";
 
     localStorage.setItem("demo_listening_content", initialText);
     setSpeakingText(initialText);
@@ -561,7 +561,7 @@ export default function Customize() {
       !isBackUpToGCS
     ) {
     toast(
-      __("Text To Speech plugin stores synthesized content in the uploads folder. Your uploads folder is not writable. Please make the uploads folder writable to enjoy all features of the plugin.", "text-to-audio"),
+      __("AtlasVoice stores synthesized content in the uploads folder. Your uploads folder is not writable. Please make the uploads folder writable to enjoy all features of the plugin.", "text-to-audio"),
       "error",
       { autoClose: 10000 }
     );
