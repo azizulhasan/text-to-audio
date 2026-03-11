@@ -277,7 +277,7 @@ export default function Settings() {
                                     label={__("Add Button or Player Automatically", "text-to-audio")}
                                     questionIcon={true}
                                     questionTooltip={
-                                        __("The \"Add Button or Player Automatically\" feature in a Text-to-Speech (TTS) plugin allows the plugin to automatically insert a play button or audio player into your posts or pages — without needing any manual setup.", "text-to-audio")
+                                        __("The \"Add Button or Player Automatically\" feature allows AtlasVoice to automatically insert a play button or audio player into your posts or pages — without needing any manual setup.", "text-to-audio")
                                     }
                                 >
                                     <ToggleSwitch

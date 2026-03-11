@@ -9,9 +9,11 @@
 
 ---
 
-## PHASE 1: First 60 Seconds — Guided Onboarding Session
+## PHASE 1: First 60 Seconds — Guided Onboarding Session ✅ COMPLETED
 
 > Goal: Walk new users through 3 key decisions in a friendly wizard, delivering the "aha moment" — hearing their content read aloud — within 60 seconds of activation.
+>
+> **STATUS:** Implemented as 4-step wizard (Post Type → Voice → Customize → Analytics → Finish) with Pro upsell + AI Agent Hub cross-promo on finish page. Separate webpack bundle (188 KiB). Browser-tested and verified.
 
 ### 1.1 Onboarding Wizard (3-Step Welcome Experience)
 
@@ -240,11 +242,13 @@ After clicking "Finish Setup":
 
 ---
 
-## PHASE 2: First 24 Hours (Proving Ongoing Value)
+## PHASE 2: First 24 Hours (Proving Ongoing Value) ✅ COMPLETED
 
 > Goal: Show users their plugin is actively working and delivering value to their visitors.
+>
+> **STATUS:** Analytics enabled by default (new installs), free limit 5→20 posts, dashboard widget live with 7-day chart + Pro upsell. Admin bar toggle 🔄 in progress.
 
-### 2.1 Enable Lightweight Analytics by Default
+### 2.1 Enable Lightweight Analytics by Default ✅
 
 **Current:** Analytics disabled by default (`tts_enable_analytics => false`). Free version limited to 5 tracked posts.
 **Proposed:** Enable analytics by default for new installs. Increase free limit from 5 to 20 posts.
@@ -280,7 +284,7 @@ $analytics_settings = [
 
 ---
 
-### 2.2 WordPress Dashboard Widget ("AtlasVoice Quick Stats")
+### 2.2 WordPress Dashboard Widget ("AtlasVoice Quick Stats") ✅
 
 **Current:** No dashboard widget. Users only see analytics if they navigate to the plugin's Analytics tab.
 **Proposed:** Add a WordPress admin dashboard widget showing tiered data:
@@ -369,11 +373,13 @@ $analytics_settings = [
 
 ---
 
-## PHASE 3: Deactivation Intervention (Save At-Risk Users)
+## PHASE 3: Deactivation Intervention (Save At-Risk Users) ✅ COMPLETED
 
 > Goal: When a user decides to deactivate, show them what they're giving up and offer help.
+>
+> **STATUS:** Custom deactivation warning with real usage stats + 9 TTS-specific uninstall reasons implemented via Freemius filters.
 
-### 3.1 Custom Deactivation Warning Message
+### 3.1 Custom Deactivation Warning Message ✅
 
 **Current:** Default Freemius deactivation feedback form (generic reasons).
 **Proposed:** Add a custom message BEFORE the Freemius form using Freemius filter:
@@ -409,7 +415,7 @@ ttsp_fs()->add_filter('deactivation_confirmation_message', function() {
 
 ---
 
-### 3.2 Custom Deactivation Reasons (TTS-Specific)
+### 3.2 Custom Deactivation Reasons (TTS-Specific) ✅
 
 **Current:** Generic Freemius deactivation reasons.
 **Proposed:** Customize with TTS-specific reasons to get better data:
@@ -464,11 +470,13 @@ ttsp_fs()->add_filter('uninstall_reasons', function($reasons) {
 
 ---
 
-## PHASE 4: Voice Quality Gap (Address #1 Disappointment)
+## PHASE 4: Voice Quality Gap (Address #1 Disappointment) ✅ COMPLETED
 
 > Goal: Set correct expectations about browser TTS and create a clear upgrade path.
+>
+> **STATUS:** Voice quality tiers shown in onboarding wizard Step 2 (Browser Voices Free vs AI Voices Pro). Locale auto-detection for 16 languages implemented in TTA_Activator.
 
-### 4.1 Voice Quality Expectation Setting
+### 4.1 Voice Quality Expectation Setting ✅
 
 **Current:** Users hear browser TTS and think the plugin sounds bad.
 **Proposed:** In the Onboarding Wizard (Step 2) and Listening tab, clearly label voice tiers:
@@ -499,7 +507,7 @@ ttsp_fs()->add_filter('uninstall_reasons', function($reasons) {
 
 ---
 
-### 4.2 Voice Recommendation Based on Site Language
+### 4.2 Voice Recommendation Based on Site Language ✅
 
 **Current:** Default voice is "Google UK English Female" regardless of site language.
 **Proposed:** On activation, detect `get_locale()` and auto-select the best matching voice.
@@ -612,22 +620,29 @@ $latest = get_posts(['numberposts' => 1, 'post_status' => 'publish', 'post_type'
 
 ## Implementation Priority & Effort Matrix
 
-| # | Item | Effort | Impact | Priority |
-|---|------|--------|--------|----------|
-| 1.1 | Onboarding Wizard (3-step) | Medium | HIGH | P0 |
-| 2.1 | Enable Analytics by Default (20 posts free) | Low | HIGH | P0 |
-| 2.2 | Dashboard Widget (free/pro tiered) | Medium | HIGH | P0 |
-| 3.1 | Deactivation Warning (stats) | Low | HIGH | P0 |
-| 4.2 | Voice Locale Auto-Detection | Low | MEDIUM | P1 |
-| 1.2 | Improve Onboarding Notice | Low | MEDIUM | P1 |
-| 3.2 | Custom Deactivation Reasons | Low | MEDIUM | P1 |
-| 4.1 | Voice Quality Expectation Labels | Medium | MEDIUM | P1 |
-| 3.3 | "Need Help?" Rescue Offer | Medium | MEDIUM | P2 |
-| 5.1 | Usage Milestone Notices | Medium | MEDIUM | P2 |
-| 2.3 | Admin Bar Indicator (off by default, toggle) | Low | LOW | P2 |
-| 6.1 | Conflict Auto-Detection | Low | LOW | P2 |
-| 6.2 | "View on Site" Link | Low | LOW | P2 |
-| 5.2 | Weekly Email Digest | High | LOW-MED | P3 |
+| # | Item | Effort | Impact | Priority | Status |
+|---|------|--------|--------|----------|--------|
+| 1.1 | Onboarding Wizard (4-step + Finish upsell) | Medium | HIGH | P0 | ✅ DONE |
+| 2.1 | Enable Analytics by Default (20 posts free) | Low | HIGH | P0 | ✅ DONE |
+| 2.2 | Dashboard Widget (free/pro tiered) | Medium | HIGH | P0 | ✅ DONE |
+| 3.1 | Deactivation Warning (stats) | Low | HIGH | P0 | ✅ DONE |
+| 3.2 | Custom Deactivation Reasons | Low | MEDIUM | P0 | ✅ DONE |
+| 4.2 | Voice Locale Auto-Detection | Low | MEDIUM | P0 | ✅ DONE |
+| — | Finish Page Upsell (Pro + AI Agent Hub) | Low | MEDIUM | P0 | ✅ DONE |
+| 1.2 | Brand Naming Consolidation → "AtlasVoice" | Low | MEDIUM | P1 | 🔄 IN PROGRESS |
+| 4.1 | TTA_Notices Refactor (remove spam) | Medium | MEDIUM | P1 | 🔄 IN PROGRESS |
+| — | Schema Markup for Audio (SEO) | Low | MEDIUM | P1 | 🔄 IN PROGRESS |
+| 2.3 | Admin Bar Quick Toggle | Low | LOW-MED | P2 | 🔄 IN PROGRESS |
+| 3.3 | "Need Help?" Rescue Offer | Medium | MEDIUM | P2 | ⬜ TODO |
+| 5.1 | Usage Milestone Notices | Medium | MEDIUM | P2 | ⬜ TODO |
+| 6.1 | Conflict Auto-Detection | Low | LOW | P2 | ⬜ TODO |
+| 6.2 | "View on Site" Link | Low | LOW | P2 | ⬜ TODO |
+| — | Onboarding Analytics (wizard tracking) | Medium | MEDIUM | P2 | ⬜ TODO |
+| — | Pro Onboarding Wizard | High | MEDIUM | P2 | ⬜ TODO |
+| 5.2 | Weekly Email Digest | High | LOW-MED | P3 | ⬜ TODO |
+| — | Unit Tests | High | MEDIUM | P3 | ⬜ TODO |
+| — | Code Splitting (lazy load tabs) | Medium | LOW | P3 | ⬜ TODO |
+| — | Accessibility Audit (WCAG 2.1 AA) | Medium | MEDIUM | P3 | ⬜ TODO |
 
 ---
 

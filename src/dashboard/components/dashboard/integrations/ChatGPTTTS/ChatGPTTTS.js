@@ -47,7 +47,7 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
         }
 
         if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_folder_writable) {
-            toast(__("Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.", "text-to-audio"), 'error', { autoClose: 10000 })
+            toast(__("AtlasVoice stores synthesized content in the uploads folder. Your uploads folder is not writable. Please make the uploads folder writable to enjoy all features of the plugin.", "text-to-audio"), 'error', { autoClose: 10000 })
             return
         };
 

@@ -338,7 +338,7 @@ class TTA_Init
         }
 
         if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
-            define('TEXT_TO_AUDIO_PLUGIN_NAME', apply_filters('tts_plugin_name', 'Text To Speech TTS'));
+            define('TEXT_TO_AUDIO_PLUGIN_NAME', apply_filters('tts_plugin_name', 'AtlasVoice'));
         }
 
         $this->run();
