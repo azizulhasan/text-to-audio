@@ -127,6 +127,9 @@ class TTA {
         $this->loader->add_action('wp_footer', $plugin_admin, 'admin_bar_inline_js', 999);
         $this->loader->add_action('wp_ajax_tta_toggle_audio', $plugin_admin, 'ajax_toggle_audio');
 
+        // Deactivation rescue modal on plugins.php (shows before Freemius modal).
+        $this->loader->add_action('admin_footer', $plugin_admin, 'render_deactivation_rescue_modal');
+
         // Output AudioObject JSON-LD schema in <head> for singular posts with audio player
         add_action('wp_head', [TTA_Helper::class, 'output_audio_schema_head'], 99);
 

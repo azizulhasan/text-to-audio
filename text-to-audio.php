@@ -42,6 +42,17 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
 }
 
+// Suppress WordPress 6.7+ "textdomain loaded too early" notice.
+// Freemius SDK calls __() during fs_dynamic_init() at file-load time,
+// which triggers _load_textdomain_just_in_time before init. This is
+// harmless but the notice corrupts REST API JSON responses when WP_DEBUG is on.
+add_filter( 'doing_it_wrong_trigger_error', function ( $trigger, $function_name ) {
+    if ( '_load_textdomain_just_in_time' === $function_name ) {
+        return false;
+    }
+    return $trigger;
+}, 10, 2 );
+
 use TTA\TTA;
 use TTA\TTA_Activator;
 use TTA\TTA_Deactivator;
@@ -400,14 +411,14 @@ class TTA_Init
 }
 
 
-// Load text domain early
-add_action('plugins_loaded', function () {
+// Load text domain at init (WordPress 6.7+ requires init or later).
+add_action('init', function () {
     load_plugin_textdomain(
         'text-to-audio',
         false,
         dirname(plugin_basename(__FILE__)) . '/languages'
     );
-});
+}, 0);
 
 add_action('plugins_loaded', function () {
     //Rest api init.
@@ -420,11 +431,11 @@ add_action('plugins_loaded', function () {
 add_filter('cron_schedules', function ($schedules) {
     $schedules['weekly'] = array(
         'interval' => 604800, // 7 days in seconds
-        'display'  => __('Once Weekly', 'text-to-audio'),
+        'display'  => 'Once Weekly',
     );
     $schedules['monthly'] = array(
         'interval' => 2592000, // 30 days in seconds
-        'display'  => __('Once Monthly', 'text-to-audio'),
+        'display'  => 'Once Monthly',
     );
     return $schedules;
 });

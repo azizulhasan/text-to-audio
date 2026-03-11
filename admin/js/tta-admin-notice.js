@@ -45,6 +45,15 @@
 					});
 				}
 			});
+
+			// Also track milestone dismissal if this is a milestone notice.
+			if ( noticeId && noticeId.indexOf('milestone_') === 0 ) {
+				$.post(ttaNoticeData.ajaxurl, {
+					action:       'tta_dismiss_milestone',
+					nonce:        ttaNoticeData.nonce,
+					milestone_id: noticeId
+				});
+			}
 		});
 
 		/**

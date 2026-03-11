@@ -648,10 +648,41 @@ export default function Customize() {
       <Row>
         <Col xs={12} lg={8}>
           <div className="bg-white rounded p-3 mb-3 shadow-sm">
-            <h2 className="fs-3 fw-bold mb-2 text-dark">{__("Customization","text-to-audio")}</h2>
-            <p className="text-secondary m-0 small">
-              {__("Customize the player & design to match your brand and preferences.","text-to-audio")}
-            </p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h2 className="fs-3 fw-bold mb-2 text-dark">{__("Customization","text-to-audio")}</h2>
+                <p className="text-secondary m-0 small">
+                  {__("Customize the player & design to match your brand and preferences.","text-to-audio")}
+                </p>
+              </div>
+              {typeof tta_obj !== 'undefined' && tta_obj.latest_post_preview_url && (
+                <a
+                  href={tta_obj.latest_post_preview_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 16px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    color: '#fff',
+                    backgroundColor: '#184c53',
+                    border: 'none',
+                    borderRadius: '6px',
+                    textDecoration: 'none',
+                    whiteSpace: 'nowrap',
+                    cursor: 'pointer',
+                    transition: 'opacity 0.2s',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.85'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                >
+                  {__("Preview on Your Site", "text-to-audio")} {"\u2197"}
+                </a>
+              )}
+            </div>
           </div>
 
           {/* Single Form Wrapper for Everything */}

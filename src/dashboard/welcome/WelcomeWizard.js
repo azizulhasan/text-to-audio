@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { __ } from '@wordpress/i18n';
 import { wizardFetch } from './wizardApi';
 import StepPostType from './steps/StepPostType';
@@ -10,6 +10,29 @@ import StepFinish from './steps/StepFinish';
 const TOTAL_STEPS = 4;
 
 const wizardData = window.ttsWizardData || {};
+
+/**
+ * Fire-and-forget onboarding analytics event.
+ * Never throws or blocks the wizard flow.
+ */
+const trackOnboardingEvent = (event, step = null, data = null) => {
+    try {
+        const body = { event };
+        if (step !== null) body.step = step;
+        if (data !== null) body.data = data;
+
+        fetch(wizardData.api_url + 'onboarding-event', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-WP-Nonce': wizardData.nonce,
+            },
+            body: JSON.stringify(body),
+        }).catch(() => {}); // silently ignore errors
+    } catch {
+        // never block the wizard
+    }
+};
 
 /**
  * Main WelcomeWizard container.
@@ -77,6 +100,14 @@ const WelcomeWizard = () => {
 
     const [saving, setSaving] = useState(false);
 
+    /** Track wizard start time for duration calculation. */
+    const startTimeRef = useRef(Date.now());
+
+    /** Fire wizard_started event on mount (fire-and-forget). */
+    useEffect(() => {
+        trackOnboardingEvent('wizard_started');
+    }, []);
+
     /* ------------------------------------------------------------------ */
     /*  Finish handler — save all endpoints in parallel                    */
     /* ------------------------------------------------------------------ */
@@ -128,6 +159,12 @@ const WelcomeWizard = () => {
 
             await Promise.all(requests);
 
+            // Track wizard completion with duration (fire-and-forget).
+            const timeSpent = Math.round((Date.now() - startTimeRef.current) / 1000);
+            trackOnboardingEvent('wizard_completed', null, {
+                time_spent_seconds: String(timeSpent),
+            });
+
             setStep(TOTAL_STEPS + 1); // Go to finish step
         } catch (err) {
             // eslint-disable-next-line no-console
@@ -141,6 +178,9 @@ const WelcomeWizard = () => {
     /*  Navigation                                                        */
     /* ------------------------------------------------------------------ */
     const goNext = () => {
+        // Track step completion (fire-and-forget).
+        trackOnboardingEvent('step_completed', step);
+
         if (step === TOTAL_STEPS) {
             handleFinish();
         } else {

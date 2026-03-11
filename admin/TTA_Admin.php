@@ -130,6 +130,8 @@ class TTA_Admin
             ]),
             'is_mobile' => wp_is_mobile(),
             'current_plugin_slug' => 'text-to-audio',
+            'detected_caching_plugins' => TTA_Helper::get_detected_caching_plugins(),
+            'latest_post_preview_url'  => TTA_Helper::get_latest_post_preview_url(),
 
         ];
     }
@@ -711,6 +713,115 @@ class TTA_Admin
                         indicator.className = 'tta-ab-indicator tta-ab-off';
                         textNode.textContent = ' <?php echo esc_js( __( 'AtlasVoice: Off', 'text-to-audio' ) ); ?>';
                     }
+                });
+            });
+        })();
+        </script>
+        <?php
+    }
+
+    /**
+     * Render a "Need Help?" rescue modal on the plugins.php page.
+     *
+     * Intercepts the deactivation click for text-to-audio and shows
+     * quick-fix links before passing through to the Freemius modal.
+     *
+     * @since 2.2.0
+     */
+    public function render_deactivation_rescue_modal() {
+        global $pagenow;
+        if ( 'plugins.php' !== $pagenow ) {
+            return;
+        }
+
+        $admin_url    = admin_url( 'admin.php?page=text-to-audio' );
+        $docs_url     = esc_url( $admin_url . '#/docs' );
+        $compat_url   = esc_url( $admin_url . '#/compatibility' );
+        $integrations_url = esc_url( $admin_url . '#/integrations' );
+        $support_url  = 'https://wordpress.org/support/plugin/text-to-audio/';
+        ?>
+        <div id="tta-rescue-modal-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:100100;align-items:center;justify-content:center;">
+            <div style="background:#fff;border-radius:8px;max-width:480px;width:90%;padding:28px 32px;box-shadow:0 4px 24px rgba(0,0,0,.25);position:relative;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen-Sans,Ubuntu,Cantarell,'Helvetica Neue',sans-serif;">
+                <h2 style="margin:0 0 8px;font-size:20px;color:#1d2327;">
+                    <?php echo esc_html__( 'Having trouble? We can help!', 'text-to-audio' ); ?>
+                </h2>
+                <p style="margin:0 0 16px;color:#50575e;font-size:14px;">
+                    <?php echo esc_html__( 'Many issues can be fixed in under 2 minutes:', 'text-to-audio' ); ?>
+                </p>
+                <ul style="margin:0 0 20px;padding:0;list-style:none;">
+                    <li style="margin-bottom:10px;font-size:14px;color:#1d2327;">
+                        <?php echo esc_html__( 'Voice not working', 'text-to-audio' ); ?> &rarr;
+                        <a href="<?php echo $docs_url; ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
+                            <?php echo esc_html__( 'Quick Fix Guide', 'text-to-audio' ); ?>
+                        </a>
+                    </li>
+                    <li style="margin-bottom:10px;font-size:14px;color:#1d2327;">
+                        <?php echo esc_html__( 'Player not showing', 'text-to-audio' ); ?> &rarr;
+                        <a href="<?php echo $compat_url; ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
+                            <?php echo esc_html__( 'Troubleshoot', 'text-to-audio' ); ?>
+                        </a>
+                    </li>
+                    <li style="margin-bottom:10px;font-size:14px;color:#1d2327;">
+                        <?php echo esc_html__( 'Need better voices', 'text-to-audio' ); ?> &rarr;
+                        <a href="<?php echo $integrations_url; ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
+                            <?php echo esc_html__( 'See AI Voices', 'text-to-audio' ); ?>
+                        </a>
+                    </li>
+                </ul>
+                <div style="display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap;">
+                    <a href="<?php echo esc_url( $support_url ); ?>" target="_blank" rel="noopener noreferrer"
+                       class="button button-primary"
+                       style="text-decoration:none;">
+                        <?php echo esc_html__( 'Contact Support', 'text-to-audio' ); ?>
+                    </a>
+                    <button id="tta-rescue-continue-deactivate" class="button" type="button">
+                        <?php echo esc_html__( 'Continue to Deactivate', 'text-to-audio' ); ?> &rarr;
+                    </button>
+                </div>
+            </div>
+        </div>
+        <script>
+        (function(){
+            document.addEventListener('DOMContentLoaded', function(){
+                var pluginRow = document.querySelector('tr[data-plugin="text-to-audio/text-to-audio.php"]');
+                if (!pluginRow) return;
+
+                var deactivateLink = pluginRow.querySelector('.deactivate a');
+                if (!deactivateLink) return;
+
+                var overlay   = document.getElementById('tta-rescue-modal-overlay');
+                var continueBtn = document.getElementById('tta-rescue-continue-deactivate');
+                if (!overlay || !continueBtn) return;
+
+                var originalHref = deactivateLink.getAttribute('href');
+
+                deactivateLink.addEventListener('click', function(e){
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    overlay.style.display = 'flex';
+                });
+
+                // Close modal when clicking the overlay background.
+                overlay.addEventListener('click', function(e){
+                    if (e.target === overlay) {
+                        overlay.style.display = 'none';
+                    }
+                });
+
+                // Close on Escape key.
+                document.addEventListener('keydown', function(e){
+                    if (e.key === 'Escape' && overlay.style.display === 'flex') {
+                        overlay.style.display = 'none';
+                    }
+                });
+
+                // "Continue to Deactivate" — hide rescue modal, trigger original link.
+                continueBtn.addEventListener('click', function(){
+                    overlay.style.display = 'none';
+                    // Temporarily remove our intercept so the click passes through to Freemius.
+                    var clone = deactivateLink.cloneNode(true);
+                    deactivateLink.parentNode.replaceChild(clone, deactivateLink);
+                    clone.click();
                 });
             });
         })();

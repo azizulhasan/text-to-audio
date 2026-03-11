@@ -276,7 +276,8 @@ class TTA_Helper
         if (class_exists('TRP_Settings')) {
             $TRP_languages = new \TRP_Settings();
             // Get the available languages
-            $trp_languages = $TRP_languages->get_settings()['translation-languages'];
+            $trp_settings = $TRP_languages->get_settings();
+            $trp_languages = ( is_array( $trp_settings ) && isset( $trp_settings['translation-languages'] ) ) ? $trp_settings['translation-languages'] : [];
         }
 
         $datas = \apply_filters('tts_pro_plugins_data', [
@@ -1675,5 +1676,115 @@ class TTA_Helper
     {
         // Schema is now output via wp_head hook to avoid duplicate markup.
         return '';
+    }
+
+    /**
+     * Detect caching/optimization plugins and their compatibility status.
+     *
+     * Returns an array of known caching plugins with:
+     *  - name: Human-readable plugin name
+     *  - slug: Plugin directory slug
+     *  - installed: Whether the plugin is installed
+     *  - active: Whether the plugin is currently active
+     *  - handled: Whether TTA_Hooks has JS exclusion filters for it
+     *
+     * @since 2.2.0
+     * @return array
+     */
+    public static function get_detected_caching_plugins() {
+        if ( ! function_exists( 'is_plugin_active' ) ) {
+            include_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+        if ( ! function_exists( 'get_plugins' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        $all_plugins = array_keys( get_plugins() );
+
+        $known_plugins = [
+            [
+                'name'     => __( 'Autoptimize', 'text-to-audio' ),
+                'slug'     => 'autoptimize',
+                'basename' => 'autoptimize/autoptimize.php',
+                'handled'  => true,
+            ],
+            [
+                'name'     => __( 'LiteSpeed Cache', 'text-to-audio' ),
+                'slug'     => 'litespeed-cache',
+                'basename' => 'litespeed-cache/litespeed-cache.php',
+                'handled'  => true,
+            ],
+            [
+                'name'     => __( 'WP Rocket', 'text-to-audio' ),
+                'slug'     => 'wp-rocket',
+                'basename' => 'wp-rocket/wp-rocket.php',
+                'handled'  => true,
+            ],
+            [
+                'name'     => __( 'W3 Total Cache', 'text-to-audio' ),
+                'slug'     => 'w3-total-cache',
+                'basename' => 'w3-total-cache/w3-total-cache.php',
+                'handled'  => true,
+            ],
+            [
+                'name'     => __( 'WP-Optimize', 'text-to-audio' ),
+                'slug'     => 'wp-optimize',
+                'basename' => 'wp-optimize/wp-optimize.php',
+                'handled'  => true,
+            ],
+            [
+                'name'     => __( 'SG Optimizer', 'text-to-audio' ),
+                'slug'     => 'sg-cachepress',
+                'basename' => 'sg-cachepress/sg-cachepress.php',
+                'handled'  => true,
+            ],
+        ];
+
+        $result = [];
+        foreach ( $known_plugins as $plugin ) {
+            $installed = in_array( $plugin['basename'], $all_plugins, true );
+            $active    = $installed && \is_plugin_active( $plugin['basename'] );
+
+            $result[] = [
+                'name'      => $plugin['name'],
+                'slug'      => $plugin['slug'],
+                'installed' => $installed,
+                'active'    => $active,
+                'handled'   => $plugin['handled'],
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get the URL of the most recently published post for the enabled post types.
+     *
+     * @since 2.2.0
+     * @return string The permalink of the most recent post, or home_url() as fallback.
+     */
+    public static function get_latest_post_preview_url() {
+        $settings   = self::tts_get_settings( 'settings' );
+        $post_types = isset( $settings['tta__settings_allow_listening_for_post_types'] )
+            ? (array) $settings['tta__settings_allow_listening_for_post_types']
+            : [ 'post' ];
+
+        if ( empty( $post_types ) ) {
+            $post_types = [ 'post' ];
+        }
+
+        $recent = get_posts( [
+            'numberposts' => 1,
+            'post_status' => 'publish',
+            'post_type'   => $post_types,
+            'orderby'     => 'date',
+            'order'       => 'DESC',
+        ] );
+
+        if ( ! empty( $recent ) ) {
+            return get_permalink( $recent[0]->ID );
+        }
+
+        return home_url();
     }
 }
