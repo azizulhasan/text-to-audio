@@ -1,7 +1,7 @@
 {
   "translation-revision-date": "2026-03-10T17:18:39+01:00",
   "generator": "generate-translations.js",
-  "source": "build/blocks.js",
+  "source": "admin/js/blocks/customize-button/customize-button.js",
   "domain": "messages",
   "locale_data": {
     "messages": {
@@ -10,34 +10,34 @@
         "plural": "nplurals=1; plural=0;"
       },
       "Listen": [
-        "Escuchar"
+        "Ascolta"
       ],
       "Color Settings": [
-        "Configuración de colores"
+        "Impostazioni Colore"
       ],
       "Background Color": [
-        "Color de fondo"
+        "Colore di Sfondo"
       ],
       "Text Color": [
-        "Color del texto"
+        "Colore del Testo"
       ],
       "Button Settings": [
-        "Configuración del botón"
+        "Impostazioni Pulsante"
       ],
       "Button Width (%)": [
-        "Ancho del botón (%)"
+        "Larghezza Pulsante (%)"
       ],
       "Custom CSS": [
-        "CSS personalizado"
+        "CSS Personalizzato"
       ],
       "class selector .tta__listen_content": [
-        "selector de clase .tta__listen_content"
+        "selettore di classe .tta__listen_content"
       ],
       "Text To Audio: Tap to listen post.": [
-        "Text To Audio: Toca para escuchar la entrada."
+        "Testo in Audio: Tocca per ascoltare l'articolo."
       ],
       "Text to audio customize button.": [
-        "Botón de personalización de texto a audio."
+        "Pulsante personalizzazione testo in audio."
       ]
     }
   }

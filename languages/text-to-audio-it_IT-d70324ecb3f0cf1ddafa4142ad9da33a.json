@@ -1,0 +1,116 @@
+{
+  "translation-revision-date": "2026-03-10T17:18:39+01:00",
+  "generator": "generate-translations.js",
+  "source": "admin/js/atlas-plugins.js",
+  "domain": "messages",
+  "locale_data": {
+    "messages": {
+      "": {
+        "domain": "messages",
+        "plural": "nplurals=1; plural=0;"
+      },
+      "The most user-friendly Text-to-Speech accessibility plugin for WordPress. Automatically adds an audio player with no API required.": [
+        "Il plugin di accessibilità Text-to-Speech più facile da usare per WordPress. Aggiunge automaticamente un lettore audio senza bisogno di API."
+      ],
+      "Unlimited text-to-speech conversion": [
+        "Conversione testo in voce illimitata"
+      ],
+      "51+ languages, 20-300+ voices": [
+        "Oltre 51 lingue, 20-300+ voci"
+      ],
+      "Customizable player design": [
+        "Design del lettore personalizzabile"
+      ],
+      "Shortcode support with flexible attributes": [
+        "Supporto shortcode con attributi flessibili"
+      ],
+      "Custom Post Type & ACF compatibility": [
+        "Compatibilità con Tipi di Post Personalizzati e ACF"
+      ],
+      "No external API required (browser SpeechSynthesis)": [
+        "Nessuna API esterna richiesta (SpeechSynthesis del browser)"
+      ],
+      "Multilingual support (WPML, GTranslate)": [
+        "Supporto multilingue (WPML, GTranslate)"
+      ],
+      "Analytics & engagement tracking": [
+        "Analisi e tracciamento del coinvolgimento"
+      ],
+      "Display interactive 3D models and augmented reality on your WordPress & WooCommerce site for enhanced product visualization.": [
+        "Mostra modelli 3D interattivi e realtà aumentata sul tuo sito WordPress e WooCommerce per una visualizzazione dei prodotti migliorata."
+      ],
+      "Interactive 3D model display": [
+        "Visualizzazione interattiva di modelli 3D"
+      ],
+      "Augmented Reality (AR) support": [
+        "Supporto Realtà Aumentata (AR)"
+      ],
+      "WordPress & WooCommerce integration": [
+        "Integrazione WordPress e WooCommerce"
+      ],
+      "Mobile-optimized viewing": [
+        "Visualizzazione ottimizzata per dispositivi mobili"
+      ],
+      "Customizable display options": [
+        "Opzioni di visualizzazione personalizzabili"
+      ],
+      "Reduces return rates with realistic visualization": [
+        "Riduce i tassi di reso con visualizzazione realistica"
+      ],
+      "Easy product page embedding": [
+        "Incorporamento facile nelle pagine prodotto"
+      ],
+      "Transform WordPress into an AI-powered control center with 70+ abilities, MCP server support, and workflow builder.": [
+        "Trasforma WordPress in un centro di controllo potenziato dall'IA con oltre 70 funzionalità, supporto server MCP e costruttore di workflow."
+      ],
+      "70+ abilities across 9 modules": [
+        "Oltre 70 funzionalità in 9 moduli"
+      ],
+      "Built-in MCP Server (JSON-RPC 2.0)": [
+        "Server MCP integrato (JSON-RPC 2.0)"
+      ],
+      "JWT authentication": [
+        "Autenticazione JWT"
+      ],
+      "Drag-and-drop workflow builder": [
+        "Costruttore di workflow drag-and-drop"
+      ],
+      "Multi-provider AI support (OpenAI, Gemini, Claude)": [
+        "Supporto IA multi-fornitore (OpenAI, Gemini, Claude)"
+      ],
+      "WooCommerce AI Store Manager": [
+        "Gestore Negozio IA WooCommerce"
+      ],
+      "Post editor AI integration": [
+        "Integrazione IA nell'editor articoli"
+      ],
+      "Active": [
+        "Attivo"
+      ],
+      "Activate": [
+        "Attiva"
+      ],
+      "Learn More": [
+        "Scopri di Più"
+      ],
+      "Features": [
+        "Funzionalità"
+      ],
+      "Install Now": [
+        "Installa Ora"
+      ],
+      "Installing...": [
+        "Installazione in corso..."
+      ],
+      "Installation failed. Please try again.": [
+        "Installazione fallita. Riprova."
+      ],
+      "AtlasAiDev Plugins": [
+        "Plugin AtlasAiDev"
+      ],
+      "Discover and install plugins by AtlasAiDev to enhance your WordPress site.": [
+        "Scopri e installa i plugin di AtlasAiDev per migliorare il tuo sito WordPress."
+      ]
+    }
+  }
+}

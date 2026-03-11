@@ -13,67 +13,67 @@
         "Guardar"
       ],
       "Click To Know How It Works?": [
-        "¿Haga clic para saber cómo funciona?"
+        "Clique para saber como funciona?"
       ],
       "Loading": [
-        "Cargando"
+        "A carregar"
       ],
       "Include Content By CSS Selectors": [
-        "Incluir contenido por selectores CSS"
+        "Incluir Conteúdo por Seletores CSS"
       ],
       "Include Content By CSS Selectors feature is available in pro version": [
-        "La función de incluir contenido por selectores CSS está disponible en la versión Pro"
+        "A funcionalidade Incluir Conteúdo por Seletores CSS está disponível na versão pro"
       ],
       "Multiple selector will be multiline.": [
-        "Múltiples selectores serán multilínea."
+        "Múltiplos seletores serão em várias linhas."
       ],
       "Some content may be missing, It can be found by css selectors": [
-        "Puede faltar algún contenido, se puede encontrar mediante selectores CSS"
+        "Algum conteúdo pode estar em falta, pode ser encontrado por seletores CSS"
       ],
       "Exclude Content By CSS Selectors": [
-        "Excluir contenido por selectores CSS"
+        "Excluir Conteúdo por Seletores CSS"
       ],
       "Exclude Content By CSS Selectors feature is available in pro version": [
-        "La función de excluir contenido por selectores CSS está disponible en la versión Pro"
+        "A funcionalidade Excluir Conteúdo por Seletores CSS está disponível na versão pro"
       ],
       "Exclude content by CSS selectors": [
-        "Excluir contenido por selectores CSS"
+        "Excluir conteúdo por seletores CSS"
       ],
       "Multiple Tags Will Be Pipe(|) Separated.": [
-        "Múltiples etiquetas se separarán con barra vertical (|)."
+        "Múltiplas Tags serão separadas por Pipe(|)."
       ],
       "Exclude tags is a pro feature.": [
-        "Excluir etiquetas es una función Pro."
+        "Excluir tags é uma funcionalidade pro."
       ],
       "Exclude Texts To Speak": [
-        "Excluir textos para leer"
+        "Excluir Textos para Falar"
       ],
       "Excluding texts to be spoken is a pro feature.": [
-        "Excluir textos para ser leídos es una función Pro."
+        "Excluir textos a serem falados é uma funcionalidade pro."
       ],
       "Multiple Texts Will Be Pipe(|) Separated.": [
-        "Múltiples textos se separarán con barra vertical (|)."
+        "Múltiplos Textos serão separados por Pipe(|)."
       ],
       "Exclude texts is a pro feature.": [
-        "Excluir textos es una función Pro."
+        "Excluir textos é uma funcionalidade pro."
       ],
       "Exclude Tags To Speak": [
-        "Excluir etiquetas para leer"
+        "Excluir Etiquetas para Falar"
       ],
       "Please save the post then try to add custom CSS selectors.": [
-        "Por favor, guarde la entrada y luego intente agregar selectores CSS personalizados."
+        "Por favor, guarde a publicação e depois tente adicionar seletores CSS personalizados."
       ],
       "Empty value can not be saved. You can uncheck the \"Use Own CSS Selectors\" Option.": [
-        "No se puede guardar un valor vacío. Puede desmarcar la opción \"Usar selectores CSS propios\"."
+        "Valor vazio não pode ser guardado. Pode desmarcar a opção \"Usar Seletores CSS Próprios\"."
       ],
       "Settings Data Saved": [
-        "Datos de configuración guardados"
+        "Dados das Definições Guardados"
       ],
       "Use Own CSS Selectors": [
-        "Usar selectores CSS propios"
+        "Usar Seletores CSS Próprios"
       ],
       "Exclude Tags. So that its content skiped. Like ( Subscript, Superscript etc.) This is a pro feature.": [
-        "Excluir etiquetas. Para que su contenido sea omitido. Como (Subíndice, Superíndice, etc.) Esta es una función Pro."
+        "Excluir Tags. Para que o seu conteúdo seja saltado. Como (Subscript, Superscript, etc.) Esta é uma funcionalidade pro."
       ]
     }
   }

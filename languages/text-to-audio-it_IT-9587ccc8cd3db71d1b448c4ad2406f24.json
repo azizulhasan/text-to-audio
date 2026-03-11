@@ -10,37 +10,37 @@
         "plural": "nplurals=1; plural=0;"
       },
       "Settings": [
-        "Ajustes"
+        "Impostazioni"
       ],
       "Click to seek": [
-        "Haga clic para buscar"
+        "Clicca per cercare"
       ],
       "Player Settings": [
-        "Configuración del reproductor"
+        "Impostazioni del Lettore"
       ],
       "Close": [
-        "Cerrar"
+        "Chiudi"
       ],
       "Language": [
-        "Idioma"
+        "Lingua"
       ],
       "Voice": [
-        "Voz"
+        "Voce"
       ],
       "Speed": [
-        "Velocidad"
+        "Velocità"
       ],
       "Pitch": [
-        "Tono"
+        "Tonalità"
       ],
       "Volume": [
-        "Volumen"
+        "Volume"
       ],
       "Unmute": [
-        "Activar sonido"
+        "Riattiva audio"
       ],
       "Mute": [
-        "Silenciar"
+        "Disattiva audio"
       ]
     }
   }

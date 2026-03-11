@@ -1,5 +1,5 @@
 {
-  "translation-revision-date": "2026-02-17T12:48:17+01:00",
+  "translation-revision-date": "2026-03-10T17:18:39+01:00",
   "generator": "generate-translations.js",
   "source": "admin/js/blocks/customize-button/customize-button.js",
   "domain": "messages",
@@ -12,26 +12,20 @@
       "Listen": [
         "Escuchar"
       ],
-      "Customize Button": [
-        "Personalizar botón"
+      "Color Settings": [
+        "Configuración de colores"
       ],
-      "Text to audio customize button.": [
-        "Botón de personalización de texto a audio."
-      ],
-      "BackGround Color": [
+      "Background Color": [
         "Color de fondo"
-      ],
-      "Choose your color": [
-        "Elige tu color"
       ],
       "Text Color": [
         "Color del texto"
       ],
+      "Button Settings": [
+        "Configuración del botón"
+      ],
       "Button Width (%)": [
         "Ancho del botón (%)"
-      ],
-      "Button Width": [
-        "Ancho del botón"
       ],
       "Custom CSS": [
         "CSS personalizado"
@@ -39,8 +33,11 @@
       "class selector .tta__listen_content": [
         "selector de clase .tta__listen_content"
       ],
-      "Text To Audio:  Tap to listen post.": [
-        "Texto a Audio: Toca para escuchar la entrada."
+      "Text To Audio: Tap to listen post.": [
+        "Text To Audio: Toca para escuchar la entrada."
+      ],
+      "Text to audio customize button.": [
+        "Botón de personalización de texto a audio."
       ]
     }
   }

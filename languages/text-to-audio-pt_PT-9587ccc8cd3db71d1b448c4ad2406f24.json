@@ -10,16 +10,16 @@
         "plural": "nplurals=1; plural=0;"
       },
       "Settings": [
-        "Ajustes"
+        "Definições"
       ],
       "Click to seek": [
-        "Haga clic para buscar"
+        "Clique para procurar"
       ],
       "Player Settings": [
-        "Configuración del reproductor"
+        "Definições do Leitor"
       ],
       "Close": [
-        "Cerrar"
+        "Fechar"
       ],
       "Language": [
         "Idioma"
@@ -28,16 +28,16 @@
         "Voz"
       ],
       "Speed": [
-        "Velocidad"
+        "Velocidade"
       ],
       "Pitch": [
-        "Tono"
+        "Tom"
       ],
       "Volume": [
-        "Volumen"
+        "Volume"
       ],
       "Unmute": [
-        "Activar sonido"
+        "Ativar som"
       ],
       "Mute": [
         "Silenciar"
