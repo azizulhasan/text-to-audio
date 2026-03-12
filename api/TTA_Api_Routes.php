@@ -408,19 +408,7 @@ class TTA_Api_Routes {
 			)
 		);
 
-		// register send_test_report route (Pro only).
-		register_rest_route(
-			$this->namespace,
-			'/send_test_report',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( $this->analytics, 'send_test_report' ),
-					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
-				),
-			)
-		);
+		// send_test_report moved to Pro plugin (tta_pro/v1/send_test_report).
 
 		// register compatible_data route.
 		register_rest_route(
@@ -919,7 +907,6 @@ class TTA_Api_Routes {
             '/tta/v1/filtered_insights',
             '/tta/v1/save_schedule_report',
             '/tta/v1/get_schedule_report',
-            '/tta/v1/send_test_report',
             '/tta/v1/onboarding-event',
         );
 
