@@ -140,9 +140,9 @@ const StepAnalytics = ({ data, onChange, selectedPostType }) => {
             padding: '6px 12px',
             fontSize: 13,
             fontWeight: 500,
-            color: '#2271b1',
-            backgroundColor: '#f0f6fc',
-            border: '1px solid #2271b1',
+            color: '#FF7853',
+            backgroundColor: '#fff5f2',
+            border: '1px solid #FF7853',
             borderRadius: 4,
             cursor: 'pointer',
             transition: 'all 0.15s',
@@ -163,15 +163,15 @@ const StepAnalytics = ({ data, onChange, selectedPostType }) => {
             padding: '10px 14px',
             borderBottom: '1px solid #f0f0f1',
             cursor: 'pointer',
-            backgroundColor: isChecked ? '#f0f6fc' : '#ffffff',
+            backgroundColor: isChecked ? '#fff5f2' : '#ffffff',
             transition: 'background-color 0.1s',
         }),
         checkbox: (isChecked) => ({
             width: 18,
             height: 18,
             borderRadius: 4,
-            border: isChecked ? '2px solid #2271b1' : '2px solid #8c8f94',
-            backgroundColor: isChecked ? '#2271b1' : '#ffffff',
+            border: isChecked ? '2px solid #FF7853' : '2px solid #8c8f94',
+            backgroundColor: isChecked ? '#FF7853' : '#ffffff',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -214,15 +214,15 @@ const StepAnalytics = ({ data, onChange, selectedPostType }) => {
         infoBox: {
             marginTop: 28,
             padding: '16px 20px',
-            backgroundColor: '#f0f6fc',
+            backgroundColor: '#fff5f2',
             borderRadius: 8,
-            borderLeft: '4px solid #2271b1',
+            borderLeft: '4px solid #FF7853',
             fontSize: 13,
             color: '#50575e',
             lineHeight: 1.6,
         },
         link: {
-            color: '#2271b1',
+            color: '#FF7853',
             textDecoration: 'none',
             fontWeight: 500,
         },
@@ -311,13 +311,13 @@ const StepAnalytics = ({ data, onChange, selectedPostType }) => {
                                     onClick={handleSelectAll}
                                     onMouseEnter={(e) => {
                                         e.currentTarget.style.backgroundColor =
-                                            '#2271b1';
+                                            '#FF7853';
                                         e.currentTarget.style.color = '#ffffff';
                                     }}
                                     onMouseLeave={(e) => {
                                         e.currentTarget.style.backgroundColor =
-                                            '#f0f6fc';
-                                        e.currentTarget.style.color = '#2271b1';
+                                            '#fff5f2';
+                                        e.currentTarget.style.color = '#FF7853';
                                     }}
                                 >
                                     {__('Select All', 'text-to-audio')}
@@ -328,13 +328,13 @@ const StepAnalytics = ({ data, onChange, selectedPostType }) => {
                                     onClick={handleDeselectAll}
                                     onMouseEnter={(e) => {
                                         e.currentTarget.style.backgroundColor =
-                                            '#2271b1';
+                                            '#FF7853';
                                         e.currentTarget.style.color = '#ffffff';
                                     }}
                                     onMouseLeave={(e) => {
                                         e.currentTarget.style.backgroundColor =
-                                            '#f0f6fc';
-                                        e.currentTarget.style.color = '#2271b1';
+                                            '#fff5f2';
+                                        e.currentTarget.style.color = '#FF7853';
                                     }}
                                 >
                                     {__('Deselect All', 'text-to-audio')}
@@ -384,7 +384,7 @@ const StepAnalytics = ({ data, onChange, selectedPostType }) => {
                                             onMouseLeave={(e) => {
                                                 e.currentTarget.style.backgroundColor =
                                                     isChecked
-                                                        ? '#f0f6fc'
+                                                        ? '#fff5f2'
                                                         : '#ffffff';
                                             }}
                                         >

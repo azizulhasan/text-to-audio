@@ -50,7 +50,7 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
             display: 'inline-flex',
             alignItems: 'center',
             gap: 8,
-            backgroundColor: '#2271b1',
+            backgroundColor: '#FF7853',
             color: '#ffffff',
             border: 'none',
             padding: '12px 28px',
@@ -66,8 +66,8 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
             alignItems: 'center',
             gap: 8,
             backgroundColor: 'transparent',
-            color: '#2271b1',
-            border: '1px solid #2271b1',
+            color: '#FF7853',
+            border: '1px solid #FF7853',
             padding: '12px 28px',
             borderRadius: 4,
             fontSize: 15,
@@ -160,7 +160,7 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
             flex: '1 1 0',
             minWidth: 170,
             padding: '18px 16px',
-            backgroundColor: '#f0f6fc',
+            backgroundColor: '#fff5f2',
             borderRadius: 8,
             border: '1px solid #c5d9ed',
             textAlign: 'center',
@@ -189,7 +189,7 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
             display: 'inline-flex',
             alignItems: 'center',
             gap: 6,
-            backgroundColor: '#2271b1',
+            backgroundColor: '#FF7853',
             color: '#ffffff',
             border: 'none',
             padding: '10px 24px',
@@ -236,7 +236,7 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
             lineHeight: 1.5,
         },
         crossLink: {
-            color: '#2271b1',
+            color: '#FF7853',
             textDecoration: 'none',
             fontWeight: 500,
             fontSize: 13,
@@ -308,10 +308,10 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
                             rel="noopener noreferrer"
                             style={styles.btnPrimary}
                             onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = '#135e96';
+                                e.currentTarget.style.backgroundColor = '#ff5533';
                             }}
                             onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = '#2271b1';
+                                e.currentTarget.style.backgroundColor = '#FF7853';
                             }}
                         >
                             {__('View Player on Your Site', 'text-to-audio')}
@@ -323,7 +323,7 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
                         href={wizardData.dashboard_url || '#'}
                         style={styles.btnSecondary}
                         onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = '#f0f6fc';
+                            e.currentTarget.style.backgroundColor = '#fff5f2';
                         }}
                         onMouseLeave={(e) => {
                             e.currentTarget.style.backgroundColor = 'transparent';
@@ -443,10 +443,10 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
                             rel="noopener noreferrer"
                             style={styles.proBtn}
                             onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = '#135e96';
+                                e.currentTarget.style.backgroundColor = '#ff5533';
                             }}
                             onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = '#2271b1';
+                                e.currentTarget.style.backgroundColor = '#FF7853';
                             }}
                         >
                             {__('Explore Pro Plans', 'text-to-audio')}

@@ -131,7 +131,7 @@ class TTA_Admin
             'is_mobile' => wp_is_mobile(),
             'current_plugin_slug' => 'text-to-audio',
             'detected_caching_plugins' => TTA_Helper::get_detected_caching_plugins(),
-            'latest_post_preview_url'  => TTA_Helper::get_latest_post_preview_url(),
+            'latest_post_preview_url'  => '', // populated lazily in enqueue to avoid early get_permalink() call
 
         ];
     }
@@ -176,14 +176,20 @@ class TTA_Admin
             include ABSPATH . 'wp-admin/includes/plugin.php';
         }
 
+        // Populate latest_post_preview_url lazily here (not in constructor)
+        // because get_permalink() needs $wp_rewrite which isn't available during plugins_loaded.
+        if ( empty( $this->localize_data['latest_post_preview_url'] ) ) {
+            $this->localize_data['latest_post_preview_url'] = TTA_Helper::get_latest_post_preview_url();
+        }
+
         do_action('tta_enqueue_pro_dashboard_scripts');
 
         // Welcome wizard (separate bundle, only on first activation).
-        if ( is_admin()
+        $is_wizard_page = is_admin()
             && isset( $_REQUEST['page'] ) && 'text-to-audio' === $_REQUEST['page']
             && isset( $_REQUEST['welcome'] ) && '1' === $_REQUEST['welcome']
-            && ! get_option( 'tta_onboarding_completed' )
-        ) {
+            && ( ! get_option( 'tta_onboarding_completed' ) || ( TTA_Helper::is_pro_active() && ! get_option( 'tta_pro_onboarding_completed' ) ) );
+        if ( $is_wizard_page ) {
             $post_types      = get_post_types( array( 'public' => true ), 'objects' );
             $post_types_data = array();
             foreach ( $post_types as $pt ) {
@@ -249,6 +255,7 @@ class TTA_Admin
                 'current_listening' => get_option( 'tta_listening_settings', array() ),
                 'latest_post_url'   => $latest_post_url,
                 'is_pro_active'     => TTA_Helper::is_pro_active(),
+                'is_pro_wizard'     => TTA_Helper::is_pro_active() && ! get_option( 'tta_pro_onboarding_completed' ),
                 'nonce'             => wp_create_nonce( 'wp_rest' ),
                 'api_url'           => esc_url_raw( rest_url( 'tta/v1/' ) ),
                 'pro_url'           => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
@@ -498,14 +505,9 @@ class TTA_Admin
 
     public function TTA_settings()
     {
-        // Allow resetting onboarding state for testing/re-running wizard.
-        if ( isset( $_GET['reset_onboard'] ) && 'true' === $_GET['reset_onboard'] && current_user_can( 'manage_options' ) ) {
-            delete_option( 'tta_onboarding_completed' );
-            wp_safe_redirect( admin_url( 'admin.php?page=text-to-audio&welcome=1' ) );
-            exit;
-        }
-
-        if ( isset( $_GET['welcome'] ) && '1' === $_GET['welcome'] && ! get_option( 'tta_onboarding_completed' ) ) {
+        $show_wizard = ( isset( $_GET['welcome'] ) && '1' === $_GET['welcome'] )
+            && ( ! get_option( 'tta_onboarding_completed' ) || ( TTA_Helper::is_pro_active() && ! get_option( 'tta_pro_onboarding_completed' ) ) );
+        if ( $show_wizard ) {
             echo "<div class='wpwrap'><div id='tts_welcome_wizard'></div></div>";
             return;
         }

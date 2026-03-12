@@ -478,6 +478,7 @@ add_action('admin_init', function () {
         && current_user_can( 'manage_options' )
     ) {
         delete_option( 'tta_onboarding_completed' );
+        delete_option( 'tta_pro_onboarding_completed' );
         wp_safe_redirect( admin_url( 'admin.php?page=text-to-audio&welcome=1' ) );
         exit;
     }

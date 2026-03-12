@@ -669,7 +669,7 @@ export default function Customize() {
                     fontSize: '13px',
                     fontWeight: '500',
                     color: '#fff',
-                    backgroundColor: '#184c53',
+                    backgroundColor: '#FF7853',
                     border: 'none',
                     borderRadius: '6px',
                     textDecoration: 'none',

@@ -166,7 +166,7 @@ const StepVoice = ({ data, onChange }) => {
             display: 'inline-flex',
             alignItems: 'center',
             gap: 8,
-            backgroundColor: isSpeaking ? '#d63638' : '#2271b1',
+            backgroundColor: isSpeaking ? '#d63638' : '#FF7853',
             color: '#ffffff',
             border: 'none',
             padding: '10px 20px',
@@ -187,9 +187,9 @@ const StepVoice = ({ data, onChange }) => {
             padding: '20px',
             borderRadius: 8,
             border: isActive
-                ? '2px solid #2271b1'
+                ? '2px solid #FF7853'
                 : '2px solid #c3c4c7',
-            backgroundColor: isActive ? '#f0f6fc' : '#ffffff',
+            backgroundColor: isActive ? '#fff5f2' : '#ffffff',
         }),
         cardTitle: {
             fontSize: 15,
@@ -202,7 +202,7 @@ const StepVoice = ({ data, onChange }) => {
             display: 'inline-block',
             fontSize: 11,
             fontWeight: 600,
-            color: isActive ? '#2271b1' : '#50575e',
+            color: isActive ? '#FF7853' : '#50575e',
             backgroundColor: isActive ? '#dce8f4' : '#f0f0f1',
             padding: '2px 8px',
             borderRadius: 3,
@@ -217,7 +217,7 @@ const StepVoice = ({ data, onChange }) => {
             margin: 0,
         },
         link: {
-            color: '#2271b1',
+            color: '#FF7853',
             textDecoration: 'none',
             fontWeight: 500,
         },
@@ -288,13 +288,13 @@ const StepVoice = ({ data, onChange }) => {
                 onClick={speaking ? handleStop : handlePreview}
                 onMouseEnter={(e) => {
                     if (!speaking) {
-                        e.currentTarget.style.backgroundColor = '#135e96';
+                        e.currentTarget.style.backgroundColor = '#ff5533';
                     }
                 }}
                 onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = speaking
                         ? '#d63638'
-                        : '#2271b1';
+                        : '#FF7853';
                 }}
             >
                 <span style={{ fontSize: 16 }}>

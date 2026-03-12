@@ -79,7 +79,7 @@ const StepCustomize = ({ data, onChange }) => {
         },
         rangeInput: {
             flex: 1,
-            accentColor: '#2271b1',
+            accentColor: '#FF7853',
         },
         rangeValue: {
             fontSize: 13,
@@ -139,15 +139,15 @@ const StepCustomize = ({ data, onChange }) => {
         },
         proBox: {
             padding: '16px 20px',
-            backgroundColor: '#f0f6fc',
+            backgroundColor: '#fff5f2',
             borderRadius: 8,
-            borderLeft: '4px solid #2271b1',
+            borderLeft: '4px solid #FF7853',
             fontSize: 13,
             color: '#50575e',
             lineHeight: 1.6,
         },
         link: {
-            color: '#2271b1',
+            color: '#FF7853',
             textDecoration: 'none',
             fontWeight: 500,
         },
