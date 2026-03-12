@@ -72,12 +72,12 @@ export default class TextToSpeech {
     }
 
     playButtonContent() {
-        let icon = '<div class="tts_button"><span class="dashicons dashicons-controls-play"></span> <span>';
+        let icon = '<div class="tts_button" aria-hidden="true"><span class="dashicons dashicons-controls-play"></span> <span>';
         if (this.playButtonIcon?.[1]?.play) {
             const parser = new DOMParser();
             // convert html string into DOM
             let document = parser.parseFromString(this.playButtonIcon?.[1]?.play, "image/svg+xml");
-            icon = `<div class="tts_button">${document.documentElement.outerHTML}</div><span>`;
+            icon = `<div class="tts_button" aria-hidden="true">${document.documentElement.outerHTML}</div><span>`;
         }
 
         return icon + ' ' + this.playButtonText() + '</span></span></div>'
@@ -88,13 +88,13 @@ export default class TextToSpeech {
     }
 
     replayButtonContent() {
-        let icon = '<div class="tts_button"><span class="dashicons dashicons-image-rotate"></span> <span>';
+        let icon = '<div class="tts_button" aria-hidden="true"><span class="dashicons dashicons-image-rotate"></span> <span>';
         if (this.playButtonIcon?.[1]?.replay) {
             const parser = new DOMParser();
             // convert html string into DOM
             let document = parser.parseFromString(this.playButtonIcon?.[1]?.replay, "image/svg+xml");
 
-            icon = `<div class="tts_button">${document.documentElement.outerHTML}</div><span>`;
+            icon = `<div class="tts_button" aria-hidden="true">${document.documentElement.outerHTML}</div><span>`;
         }
 
         return icon + ' ' + this.replayButtonText() + '<span></span></span></div>'
@@ -106,12 +106,12 @@ export default class TextToSpeech {
     }
 
     pauseButtonContent() {
-        let icon = '<div class="tts_button"><span class="dashicons dashicons-controls-pause"></span> <span>';
+        let icon = '<div class="tts_button" aria-hidden="true"><span class="dashicons dashicons-controls-pause"></span> <span>';
         if (this.playButtonIcon?.[1]?.pause) {
             const parser = new DOMParser();
             // convert html string into DOM
             let document = parser.parseFromString(this.playButtonIcon?.[1]?.pause, "image/svg+xml");
-            icon = `<div class="tts_button">${document.documentElement.outerHTML}</div><span>`;
+            icon = `<div class="tts_button" aria-hidden="true">${document.documentElement.outerHTML}</div><span>`;
         }
 
         return icon + ' ' + this.pauseButtonText() + '<span></span></span></div>'
@@ -124,13 +124,13 @@ export default class TextToSpeech {
     }
 
     resumeButtonContent() {
-        let icon = '<div class="tts_button"><span class="dashicons dashicons-controls-play"></span> <span>';
+        let icon = '<div class="tts_button" aria-hidden="true"><span class="dashicons dashicons-controls-play"></span> <span>';
 
         if (this.playButtonIcon?.[1]?.resume) {
             const parser = new DOMParser();
             // convert html string into DOM
             let document = parser.parseFromString(this.playButtonIcon?.[1]?.resume, "image/svg+xml");
-            icon = `<div class="tts_button">${document.documentElement.outerHTML}</div><span>`;
+            icon = `<div class="tts_button" aria-hidden="true">${document.documentElement.outerHTML}</div><span>`;
         }
         icon =  icon + ' ' + this.resumeButtonText() + '<span></span></span></div>'
 
@@ -181,7 +181,7 @@ export default class TextToSpeech {
             if (is_dashboard) {
                 link +=
                     ttsObj.admin_url +
-                    'admin.php?page=text-to-audio#/docs';
+                    'admin.php?page=text-to-audio#/faq';
             } else {
                 if (
                     location.search === '?page=text-to-audio' &&
@@ -189,7 +189,7 @@ export default class TextToSpeech {
                 ) {
                     link +=
                         ttsObj.admin_url +
-                        'admin.php?page=text-to-audio#/docs';
+                        'admin.php?page=text-to-audio#/faq';
                 } else {
                     link +=
                         'https://wordpress.org/plugins/text-to-audio/#how%20to%20enable%20%60%60speechsynthesis%60%60%20on%20firefox%3F';

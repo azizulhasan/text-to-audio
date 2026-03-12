@@ -253,7 +253,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     $class = (isset($text_arr['class'])) && strlen($text_arr['class']) ? esc_attr($text_arr['class']) : "";
     $class .= (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
 
-    $button = "<tts-play-button data-id='$player_number' class='tts_play_button'></tts-play-button>";
+    $button = "<tts-play-button data-id='$player_number' class='tts_play_button' role='region' aria-label='" . esc_attr__('Text to speech player', 'text-to-audio') . "'></tts-play-button>";
 
 
     // init button scripts
@@ -335,7 +335,7 @@ function get_enqueued_js_object($params, $plugin_all_settings)
 
     $object = ob_start();
     ?>
-    <!-- Text To Speech TTS Settings  -->
+    <!-- AtlasVoice Settings  -->
     <script id='tts_button_settings_<?php echo $player_number; ?>'>
         var ttsCurrentButtonNo = <?php echo $player_number; ?>;
         var ttsCurrentContent = "<?php echo $content; ?>";
@@ -400,26 +400,9 @@ function get_enqueued_js_object($params, $plugin_all_settings)
         }
     </script>
     <?php
-    // Generate audio schema markup (only if conditions are met)
-    $schema_params = [
-        'title' => $title,
-        'excerpt' => $excerpt_sanitized,
-        'description' => $content,
-        'post' => $post,
-        'content_read_time' => $content_read_time,
-        'mp3_file_urls' => $mp3_file_urls,
-        'file_url_key' => $file_url_key,
-        'language' => $language,
-        'voice' => $voice,
-    ];
-    echo TTA_Helper::generate_audio_schema($schema_params);
+    // Audio schema is now output via wp_head hook (TTA_Helper::output_audio_schema_head)
     $object = ob_get_contents();
-//    ob_end_clean();
 
-
-//    $audio_schema = TTA_Helper::generate_audio_schema($schema_params);
-//    error_log(print_r($audio_schema, true));
-    // Return JS object with schema if available
     return $object;
 }
 

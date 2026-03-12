@@ -3,6 +3,7 @@ import { Form, Button, InputGroup } from 'react-bootstrap';
 import { postData } from '../../../context/utilities';
 import toast from '../../../context/Notify';
 import { __ } from "@wordpress/i18n";
+import Icon from "../../../Icon";
 
 export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGPTAPIData, setAuthenticatedServices }) {
     const apiURL = useMemo(() => {
@@ -47,7 +48,7 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
         }
 
         if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_folder_writable) {
-            toast(__("Text To Speech plugin store's synthesized content into uploads folder. Your uploads folder is not writable. Please make uploads folder writable to enjoy the whole features of the plugin.", "text-to-audio"), 'error', { autoClose: 10000 })
+            toast(__("AtlasVoice stores synthesized content in the uploads folder. Your uploads folder is not writable. Please make the uploads folder writable to enjoy all features of the plugin.", "text-to-audio"), 'error', { autoClose: 10000 })
             return
         };
 
@@ -97,7 +98,7 @@ export default function ChatGPTTTS({ chatGPTAPIData, currentTTSServic, setChatGP
                     className="text-danger p-0 text-decoration-none d-flex align-items-center"
                     onClick={() => window.open('https://www.youtube.com/watch?v=6uGPboXW2Q8', '_blank')}
                 >
-                    <i className="fab fa-youtube fs-4"></i>
+                    <Icon name="youtube" style={{ fontSize: '1.5rem' }} />
                 </Button>
             </div>
 
