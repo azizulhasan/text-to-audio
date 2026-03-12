@@ -26,8 +26,25 @@ const StepVoice = ({ data, onChange }) => {
 
                 // Set defaults if not already configured
                 if (!data.voice && available.length > 0) {
-                    const defaultVoice =
-                        available.find((v) => v.default) || available[0];
+                    // Try to match site locale (e.g. "de_DE" → "de-DE")
+                    const siteLocale = (wizardData.site_locale || '').replace('_', '-');
+                    let defaultVoice = null;
+                    if (siteLocale) {
+                        defaultVoice = available.find((v) => v.lang === siteLocale);
+                        if (!defaultVoice) {
+                            // Try matching just the language part (e.g. "de")
+                            const langShort = siteLocale.split('-')[0].toLowerCase();
+                            defaultVoice = available.find((v) => v.lang.toLowerCase().startsWith(langShort + '-'));
+                        }
+                    }
+                    if (!defaultVoice) {
+                        // Fall back to English, then browser default, then first voice
+                        defaultVoice =
+                            available.find((v) => v.lang === 'en-US') ||
+                            available.find((v) => v.lang.startsWith('en')) ||
+                            available.find((v) => v.default) ||
+                            available[0];
+                    }
                     onChange({
                         ...data,
                         voice: defaultVoice.name,
