@@ -258,13 +258,26 @@ export default function Settings() {
                                         {__("Configure text-to-speech player behavior and content selection", "text-to-audio")}
                                     </p>
                                 </div>
-                                <a
-                                    href={window.location.pathname + "?page=text-to-audio&reset_onboard=true"}
-                                    className="btn btn-outline-secondary btn-sm"
-                                    style={{ whiteSpace: 'nowrap' }}
-                                >
-                                    ⚙️ {__("Run Setup Wizard", "text-to-audio")}
-                                </a>
+                                <div className="d-flex gap-2 align-items-center" style={{ flexShrink: 0 }}>
+                                    {typeof tta_obj !== 'undefined' && tta_obj.latest_post_preview_url && (
+                                        <a
+                                            href={tta_obj.latest_post_preview_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="btn btn-sm"
+                                            style={{ whiteSpace: 'nowrap', backgroundColor: '#FF7853', color: '#fff', borderColor: '#FF7853' }}
+                                        >
+                                            {__("Preview on Your Site", "text-to-audio")} &#8599;
+                                        </a>
+                                    )}
+                                    <a
+                                        href={window.location.pathname + "?page=text-to-audio&reset_onboard=true"}
+                                        className="btn btn-sm"
+                                        style={{ whiteSpace: 'nowrap', backgroundColor: '#fff', color: '#FF7853', border: '1px solid #FF7853' }}
+                                    >
+                                        {__("Run Setup Wizard", "text-to-audio")}
+                                    </a>
+                                </div>
                             </div>
                         </div>
 

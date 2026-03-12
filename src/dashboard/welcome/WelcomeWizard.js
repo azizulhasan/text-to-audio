@@ -37,6 +37,7 @@ const trackOnboardingEvent = (event, step = null, data = null) => {
 /**
  * Main WelcomeWizard container.
  * Manages step navigation, aggregated state, and final save.
+ * UI matches the Pro wizard layout: sticky header + progress bar + sticky footer.
  */
 const WelcomeWizard = () => {
     const [step, setStep] = useState(1);
@@ -169,10 +170,27 @@ const WelcomeWizard = () => {
         } catch (err) {
             // eslint-disable-next-line no-console
             console.error('Wizard save error:', err);
+            alert(__('There was an error saving your settings. Please try again.', 'text-to-audio'));
         } finally {
             setSaving(false);
         }
     }, [settings, listening, customize, analytics]);
+
+    /* ------------------------------------------------------------------ */
+    /*  Skip handler — mark onboarding complete and redirect               */
+    /* ------------------------------------------------------------------ */
+    const handleSkip = async () => {
+        try {
+            const currentSettings = wizardData.current_settings || {};
+            await wizardFetch('settings', {
+                ...currentSettings,
+                tta_onboarding_completed: true,
+            });
+        } catch {
+            // Even if save fails, redirect to dashboard
+        }
+        window.location.href = wizardData.dashboard_url || (wizardData.admin_url + '?page=text-to-audio');
+    };
 
     /* ------------------------------------------------------------------ */
     /*  Navigation                                                        */
@@ -190,6 +208,23 @@ const WelcomeWizard = () => {
 
     const goBack = () => {
         if (step > 1) setStep((s) => s - 1);
+    };
+
+    /* ------------------------------------------------------------------ */
+    /*  Next button label — descriptive per step                           */
+    /* ------------------------------------------------------------------ */
+    const getNextLabel = () => {
+        if (step === TOTAL_STEPS) {
+            return saving
+                ? __('Saving...', 'text-to-audio')
+                : __('Finish Setup', 'text-to-audio');
+        }
+        const labels = {
+            1: __('Next: Choose Voice', 'text-to-audio'),
+            2: __('Next: Customize', 'text-to-audio'),
+            3: __('Next: Analytics', 'text-to-audio'),
+        };
+        return labels[step] || __('Next', 'text-to-audio');
     };
 
     /* ------------------------------------------------------------------ */
@@ -241,236 +276,186 @@ const WelcomeWizard = () => {
     };
 
     /* ------------------------------------------------------------------ */
-    /*  Progress dots                                                      */
-    /* ------------------------------------------------------------------ */
-    const stepLabels = [
-        __('Post Type', 'text-to-audio'),
-        __('Voice', 'text-to-audio'),
-        __('Customize', 'text-to-audio'),
-        __('Analytics', 'text-to-audio'),
-    ];
-
-    const renderDots = () => {
-        const dots = [];
-        for (let i = 1; i <= TOTAL_STEPS; i++) {
-            const isCurrent = i === step;
-            const isCompleted = i < step;
-            dots.push(
-                <span
-                    key={i}
-                    role="listitem"
-                    aria-label={stepLabels[i - 1]}
-                    aria-current={isCurrent ? 'step' : undefined}
-                    style={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: '50%',
-                        backgroundColor:
-                            i <= step ? '#2271b1' : '#c3c4c7',
-                        display: 'inline-block',
-                        margin: '0 4px',
-                        transition: 'background-color 0.2s',
-                    }}
-                />
-            );
-        }
-        return dots;
-    };
-
-    /* ------------------------------------------------------------------ */
-    /*  Inline styles                                                      */
-    /* ------------------------------------------------------------------ */
-    const styles = {
-        overlay: {
-            minHeight: '100vh',
-            backgroundColor: '#f0f0f1',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'flex-start',
-            paddingTop: 60,
-            paddingBottom: 60,
-            fontFamily:
-                '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif',
-        },
-        card: {
-            width: '100%',
-            maxWidth: 700,
-            backgroundColor: '#ffffff',
-            borderRadius: 8,
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-            padding: 40,
-            boxSizing: 'border-box',
-        },
-        header: {
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: 32,
-            flexWrap: 'wrap',
-            gap: 12,
-        },
-        logoWrap: {
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-        },
-        logoText: {
-            fontSize: 20,
-            fontWeight: 600,
-            color: '#1d2327',
-            margin: 0,
-        },
-        badge: {
-            fontSize: 13,
-            color: '#50575e',
-            backgroundColor: '#f0f6fc',
-            padding: '4px 12px',
-            borderRadius: 4,
-        },
-        stepIndicator: {
-            textAlign: 'center',
-            marginBottom: 24,
-        },
-        stepText: {
-            fontSize: 13,
-            color: '#50575e',
-            marginBottom: 8,
-        },
-        footer: {
-            display: 'flex',
-            justifyContent: 'space-between',
-            marginTop: 32,
-            paddingTop: 24,
-            borderTop: '1px solid #e0e0e0',
-        },
-        btnPrimary: {
-            backgroundColor: '#2271b1',
-            color: '#ffffff',
-            border: 'none',
-            padding: '10px 24px',
-            borderRadius: 4,
-            fontSize: 14,
-            fontWeight: 500,
-            cursor: 'pointer',
-            transition: 'background-color 0.15s',
-        },
-        btnSecondary: {
-            backgroundColor: 'transparent',
-            color: '#50575e',
-            border: '1px solid #c3c4c7',
-            padding: '10px 24px',
-            borderRadius: 4,
-            fontSize: 14,
-            fontWeight: 500,
-            cursor: 'pointer',
-            transition: 'background-color 0.15s',
-        },
-    };
-
-    /* ------------------------------------------------------------------ */
     /*  Render                                                             */
     /* ------------------------------------------------------------------ */
-    if (step === TOTAL_STEPS + 1) {
-        return (
-            <div style={styles.overlay}>
-                <div style={styles.card}>
-                    <StepFinish
-                        selectedPostType={settings.postType}
-                        listening={listening}
-                        customize={customize}
-                        analytics={analytics}
-                    />
-                </div>
-            </div>
-        );
-    }
-
     return (
-        <div style={styles.overlay}>
-            <div style={styles.card}>
-                {/* Header */}
-                <div style={styles.header}>
-                    <div style={styles.logoWrap}>
-                        {wizardData.logo_url && (
-                            <img
-                                src={wizardData.logo_url}
-                                alt="AtlasVoice"
-                                style={{ width: 32, height: 32 }}
-                            />
+        <div style={styles.wrapper}>
+            {/* Header */}
+            <div style={styles.header}>
+                <div style={styles.headerInner}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={styles.logo}>
+                            {wizardData.logo_url ? (
+                                <img
+                                    src={wizardData.logo_url}
+                                    alt="AtlasVoice"
+                                    style={{ width: 24, height: 24 }}
+                                />
+                            ) : (
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 3C7.03 3 3 7.03 3 12s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16.2c-3.97 0-7.2-3.23-7.2-7.2S8.03 4.8 12 4.8s7.2 3.23 7.2 7.2-3.23 7.2-7.2 7.2zm-1.5-3.6l5.1-3.6-5.1-3.6v7.2z" fill="#FF7853"/>
+                                </svg>
+                            )}
+                        </span>
+                        <span style={styles.headerTitle}>
+                            {__('AtlasVoice Setup', 'text-to-audio')}
+                        </span>
+                        {step <= TOTAL_STEPS && (
+                            <span style={styles.stepBadge}>
+                                {__('Step', 'text-to-audio')} {step} {__('of', 'text-to-audio')} {TOTAL_STEPS}
+                            </span>
                         )}
-                        <h1 style={styles.logoText}>
-                            {__('AtlasVoice', 'text-to-audio')}
-                        </h1>
                     </div>
-                    <span style={styles.badge}>
-                        {__('Setup Wizard', 'text-to-audio')}
-                    </span>
+                    {step <= TOTAL_STEPS && (
+                        <button onClick={handleSkip} style={styles.skipBtn}>
+                            {__('Skip Setup', 'text-to-audio')}
+                        </button>
+                    )}
                 </div>
-
-                {/* Step indicator */}
-                <nav style={styles.stepIndicator} aria-label={__('Setup progress', 'text-to-audio')}>
-                    <div style={styles.stepText} aria-live="polite">
-                        {__('Step', 'text-to-audio')}{' '}
-                        {step}{' '}
-                        {__('of', 'text-to-audio')}{' '}
-                        {TOTAL_STEPS}
+                {/* Progress bar */}
+                {step <= TOTAL_STEPS && (
+                    <div style={styles.progressTrack}>
+                        <div style={{ ...styles.progressBar, width: `${(step / TOTAL_STEPS) * 100}%` }} />
                     </div>
-                    <div role="list" aria-label={__('Setup steps', 'text-to-audio')}>{renderDots()}</div>
-                </nav>
+                )}
+            </div>
 
-                {/* Content */}
-                <div>{renderStep()}</div>
-
-                {/* Footer */}
-                <div style={styles.footer}>
-                    <div>
-                        {step > 1 && (
-                            <button
-                                type="button"
-                                style={styles.btnSecondary}
-                                onClick={goBack}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor =
-                                        '#f6f7f7';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor =
-                                        'transparent';
-                                }}
-                            >
-                                {__('Back', 'text-to-audio')}
-                            </button>
-                        )}
-                    </div>
-                    <button
-                        type="button"
-                        style={{
-                            ...styles.btnPrimary,
-                            opacity: saving ? 0.7 : 1,
-                            cursor: saving ? 'not-allowed' : 'pointer',
-                        }}
-                        onClick={goNext}
-                        disabled={saving}
-                        onMouseEnter={(e) => {
-                            if (!saving)
-                                e.currentTarget.style.backgroundColor =
-                                    '#135e96';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor =
-                                '#2271b1';
-                        }}
-                    >
-                        {saving
-                            ? __('Saving...', 'text-to-audio')
-                            : step === TOTAL_STEPS
-                            ? __('Finish Setup', 'text-to-audio')
-                            : __('Next', 'text-to-audio')}
-                    </button>
+            {/* Content */}
+            <div style={styles.content}>
+                <div style={styles.contentInner}>
+                    {renderStep()}
                 </div>
             </div>
+
+            {/* Footer (not shown on finish screen) */}
+            {step <= TOTAL_STEPS && (
+                <div style={styles.footer}>
+                    <div style={styles.footerInner}>
+                        {step > 1 ? (
+                            <button onClick={goBack} style={styles.backBtn}>
+                                &larr; {__('Back', 'text-to-audio')}
+                            </button>
+                        ) : <div />}
+                        <button
+                            onClick={goNext}
+                            disabled={saving}
+                            style={{
+                                ...styles.nextBtn,
+                                opacity: saving ? 0.6 : 1,
+                            }}
+                            onMouseEnter={(e) => { if (!saving) e.currentTarget.style.background = '#ff5533'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = '#FF7853'; }}
+                        >
+                            {getNextLabel()} &rarr;
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
+};
+
+const styles = {
+    wrapper: {
+        minHeight: '100vh',
+        background: '#f0f0f1',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif',
+        display: 'flex',
+        flexDirection: 'column',
+    },
+    header: {
+        background: '#fff',
+        borderBottom: '1px solid #dcdcde',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+    },
+    headerInner: {
+        maxWidth: '800px',
+        margin: '0 auto',
+        padding: '16px 24px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    headerTitle: {
+        fontSize: '18px',
+        fontWeight: 600,
+        color: '#1d2327',
+    },
+    stepBadge: {
+        fontSize: '13px',
+        color: '#787c82',
+        background: '#f0f0f1',
+        padding: '4px 10px',
+        borderRadius: '12px',
+    },
+    skipBtn: {
+        background: 'none',
+        border: 'none',
+        color: '#787c82',
+        cursor: 'pointer',
+        fontSize: '13px',
+        textDecoration: 'underline',
+    },
+    progressTrack: {
+        height: '3px',
+        background: '#dcdcde',
+    },
+    progressBar: {
+        height: '100%',
+        background: '#FF7853',
+        transition: 'width 0.3s ease',
+    },
+    content: {
+        flex: 1,
+        padding: '40px 24px',
+    },
+    contentInner: {
+        maxWidth: '720px',
+        margin: '0 auto',
+        background: '#fff',
+        borderRadius: '8px',
+        border: '1px solid #dcdcde',
+        padding: '32px',
+    },
+    footer: {
+        background: '#fff',
+        borderTop: '1px solid #dcdcde',
+        padding: '16px 24px',
+        position: 'sticky',
+        bottom: 0,
+    },
+    footerInner: {
+        maxWidth: '720px',
+        margin: '0 auto',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    backBtn: {
+        background: '#fff',
+        border: '1px solid #dcdcde',
+        borderRadius: '4px',
+        padding: '8px 20px',
+        cursor: 'pointer',
+        fontSize: '14px',
+        color: '#1d2327',
+    },
+    nextBtn: {
+        background: '#FF7853',
+        color: '#fff',
+        border: 'none',
+        borderRadius: '4px',
+        padding: '10px 24px',
+        cursor: 'pointer',
+        fontSize: '14px',
+        fontWeight: 500,
+    },
+    logo: {
+        display: 'flex',
+        alignItems: 'center',
+    },
 };
 
 export default WelcomeWizard;

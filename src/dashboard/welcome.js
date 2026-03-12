@@ -19,10 +19,18 @@ if (window.wp && window.wp.i18n && window.wp.i18n.getLocaleData) {
 
 const app = document.getElementById("tts_welcome_wizard");
 if (app) {
-    ReactDOM.render(
-        <React.StrictMode>
-            <WelcomeWizard />
-        </React.StrictMode>,
-        app
-    );
+    const wizardData = window.ttsWizardData || {};
+    if (wizardData.is_pro_wizard) {
+        // Pro wizard mounts here via separate Pro plugin bundle
+        const proRoot = document.createElement('div');
+        proRoot.id = 'pro-wizard-root';
+        app.appendChild(proRoot);
+    } else {
+        ReactDOM.render(
+            <React.StrictMode>
+                <WelcomeWizard />
+            </React.StrictMode>,
+            app
+        );
+    }
 }

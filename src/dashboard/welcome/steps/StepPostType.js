@@ -51,9 +51,9 @@ const StepPostType = ({ data, onChange }) => {
             padding: '14px 16px',
             borderRadius: 8,
             border: isSelected
-                ? '2px solid #2271b1'
+                ? '2px solid #FF7853'
                 : '2px solid #c3c4c7',
-            backgroundColor: isSelected ? '#f0f6fc' : '#ffffff',
+            backgroundColor: isSelected ? '#fff5f2' : '#ffffff',
             cursor: 'pointer',
             transition: 'all 0.15s',
         }),
@@ -62,7 +62,7 @@ const StepPostType = ({ data, onChange }) => {
             height: 20,
             borderRadius: '50%',
             border: isSelected
-                ? '2px solid #2271b1'
+                ? '2px solid #FF7853'
                 : '2px solid #8c8f94',
             display: 'flex',
             alignItems: 'center',
@@ -73,7 +73,7 @@ const StepPostType = ({ data, onChange }) => {
             width: 10,
             height: 10,
             borderRadius: '50%',
-            backgroundColor: '#2271b1',
+            backgroundColor: '#FF7853',
         },
         labelText: {
             fontSize: 15,
@@ -89,15 +89,15 @@ const StepPostType = ({ data, onChange }) => {
         infoBox: {
             marginTop: 28,
             padding: '16px 20px',
-            backgroundColor: '#f0f6fc',
+            backgroundColor: '#fff5f2',
             borderRadius: 8,
-            borderLeft: '4px solid #2271b1',
+            borderLeft: '4px solid #FF7853',
             fontSize: 13,
             color: '#50575e',
             lineHeight: 1.6,
         },
         link: {
-            color: '#2271b1',
+            color: '#FF7853',
             textDecoration: 'none',
             fontWeight: 500,
         },
@@ -140,7 +140,7 @@ const StepPostType = ({ data, onChange }) => {
                             }}
                             onMouseLeave={(e) => {
                                 e.currentTarget.style.backgroundColor =
-                                    isSelected ? '#f0f6fc' : '#ffffff';
+                                    isSelected ? '#fff5f2' : '#ffffff';
                             }}
                         >
                             {/* Hidden native radio for accessibility */}
