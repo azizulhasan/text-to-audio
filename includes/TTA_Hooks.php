@@ -37,6 +37,10 @@ class TTA_Hooks {
 			'TextToSpeech.min.js',
 			'text-to-audio-button.min.js',
 			'text-to-audio-dashboard-ui.min.js',
+			'text-to-audio-pro-button.min.js',
+			'tts-welcome-wizard.min.js',
+			'tts-bulk-mp3-file.min.js',
+			'tts-css-selectors.min.js',
 			'AtlasVoiceAnalytics.min.js',
 			'AtlasVoicePlayerInsights.min.js',
 			'tts_button_settings',
@@ -44,7 +48,7 @@ class TTA_Hooks {
 			'tts_button_settings_2',
 			'tts_button_settings_3',
 			'tts_button_settings_4',
-			'NoSleep.min.js'
+			'NoSleep.min.js',
 		] );
 
 		$strings = implode( ',', self::$excludable_js_arr );
@@ -270,9 +274,9 @@ class TTA_Hooks {
 	 * Register MetaBox to add PDF Download Button
 	 */
 	public function add_custom_meta_box() {
-		$plugin_name = 'Text To Speech TTS';
+		$plugin_name = __( 'AtlasVoice', 'text-to-audio' );
 		if ( \is_pro_active() ) {
-			$plugin_name = 'Text To Speech Pro';
+			$plugin_name = __( 'AtlasVoice Pro', 'text-to-audio' );
 		}
 
 		// TODO: make UI for this to display matabox widget.
@@ -416,16 +420,7 @@ class TTA_Hooks {
 			return $excluded_js;
 		}
 
-		global $wp_scripts;
-		$registered_handles = array_keys( $wp_scripts->registered );
-		// foreach($registered_handles as $handle) {
-		// 	if(in_array($handle, self::$excludable_js_arr)) {
-		// 		$excluded_js[] = $handle;
-		// 	}
-
-		// }
-
-		return $excluded_js;
+		return array_merge( $excluded_js, self::$excludable_js_arr );
 	}
 
 

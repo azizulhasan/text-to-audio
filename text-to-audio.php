@@ -42,6 +42,17 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
 }
 
+// Suppress WordPress 6.7+ "textdomain loaded too early" notice.
+// Freemius SDK calls __() during fs_dynamic_init() at file-load time,
+// which triggers _load_textdomain_just_in_time before init. This is
+// harmless but the notice corrupts REST API JSON responses when WP_DEBUG is on.
+add_filter( 'doing_it_wrong_trigger_error', function ( $trigger, $function_name ) {
+    if ( '_load_textdomain_just_in_time' === $function_name ) {
+        return false;
+    }
+    return $trigger;
+}, 10, 2 );
+
 use TTA\TTA;
 use TTA\TTA_Activator;
 use TTA\TTA_Deactivator;
@@ -72,7 +83,7 @@ function is_pro_plugin_exists()
     return false;
 }
 
-if ( !is_pro_plugin_exists() &&  !function_exists('ttsp_fs')) {
+if (   !function_exists('ttsp_fs')) {
     // Create a helper function for easy SDK access.
     function ttsp_fs()
     {
@@ -137,6 +148,118 @@ if (function_exists('ttsp_fs')) {
     ttsp_fs()->add_filter('connect_message_on_update', 'ttsp_fs_custom_connect_message_on_update', 10, 6);
 }
 
+/**
+ * Deactivation confirmation message with usage stats.
+ * Shows users what they'll lose when deactivating.
+ *
+ * @since 2.1.9
+ */
+if ( function_exists( 'ttsp_fs' ) ) {
+    ttsp_fs()->add_filter( 'deactivation_confirmation_message', function ( $message ) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'atlasvoice_analytics';
+
+        // Check table exists before querying.
+        if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) ) !== $table ) {
+            return $message;
+        }
+
+        // Use cached stats if available.
+        $cached = get_transient( 'tta_deactivation_stats' );
+        if ( false === $cached ) {
+            $rows        = $wpdb->get_col( "SELECT analytics FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $total_plays = 0;
+            $total_posts = 0;
+            $post_ids    = array();
+            foreach ( $rows as $row ) {
+                $data = maybe_unserialize( $row );
+                if ( is_array( $data ) && isset( $data['play']['count'] ) ) {
+                    $total_plays += (int) $data['play']['count'];
+                }
+            }
+            $total_posts = (int) $wpdb->get_var( "SELECT COUNT(DISTINCT post_id) FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+            $cached      = array( 'plays' => $total_plays, 'posts' => $total_posts );
+            set_transient( 'tta_deactivation_stats', $cached, HOUR_IN_SECONDS );
+        }
+
+        $msg = '';
+        if ( $cached['plays'] > 0 ) {
+            /* translators: %d: total number of audio plays */
+            $msg .= sprintf( __( 'Your audio player has been used %d times by your visitors. ', 'text-to-audio' ), $cached['plays'] );
+        }
+        if ( $cached['posts'] > 0 ) {
+            /* translators: %d: number of posts with audio players */
+            $msg .= sprintf( __( '%d of your posts currently have audio players. ', 'text-to-audio' ), $cached['posts'] );
+        }
+        $msg .= __( 'Deactivating will remove audio from all posts immediately.', 'text-to-audio' );
+
+        return $msg ?: $message;
+    });
+
+    /**
+     * Custom TTS-specific deactivation reasons.
+     *
+     * @since 2.1.9
+     */
+    ttsp_fs()->add_filter( 'uninstall_reasons', function ( $reasons ) {
+        return array(
+            array(
+                'id'                => 'voice-quality',
+                'text'              => __( 'Voice quality is not good enough', 'text-to-audio' ),
+                'input_type'        => '',
+                'input_placeholder' => '',
+            ),
+            array(
+                'id'                => 'no-visitors',
+                'text'              => __( 'My visitors are not using the audio player', 'text-to-audio' ),
+                'input_type'        => '',
+                'input_placeholder' => '',
+            ),
+            array(
+                'id'                => 'too-complex',
+                'text'              => __( 'Too difficult to set up or configure', 'text-to-audio' ),
+                'input_type'        => '',
+                'input_placeholder' => '',
+            ),
+            array(
+                'id'                => 'wrong-language',
+                'text'              => __( 'My language is not supported well', 'text-to-audio' ),
+                'input_type'        => 'textfield',
+                'input_placeholder' => __( 'Which language do you need?', 'text-to-audio' ),
+            ),
+            array(
+                'id'                => 'performance',
+                'text'              => __( 'It slowed down my website', 'text-to-audio' ),
+                'input_type'        => '',
+                'input_placeholder' => '',
+            ),
+            array(
+                'id'                => 'found-better',
+                'text'              => __( 'I found a better alternative', 'text-to-audio' ),
+                'input_type'        => 'textfield',
+                'input_placeholder' => __( 'Which plugin?', 'text-to-audio' ),
+            ),
+            array(
+                'id'                => 'temporary',
+                'text'              => __( 'Temporary deactivation, I plan to reactivate', 'text-to-audio' ),
+                'input_type'        => '',
+                'input_placeholder' => '',
+            ),
+            array(
+                'id'                => 'pro-expensive',
+                'text'              => __( 'Pro version is too expensive', 'text-to-audio' ),
+                'input_type'        => '',
+                'input_placeholder' => '',
+            ),
+            array(
+                'id'                => 'other',
+                'text'              => __( 'Other', 'text-to-audio' ),
+                'input_type'        => 'textfield',
+                'input_placeholder' => __( 'Please share the reason...', 'text-to-audio' ),
+            ),
+        );
+    });
+}
 
 /**
  * Currently plugin version.
@@ -203,7 +326,7 @@ if (!defined('TTA_PLUGIN_PATH')) {
 
 if (TTA_DEBUG_MODE  && WP_SITEURL) {
     $rest_url = WP_SITEURL . '/wp-json/';
-    update_option('tts_rest_api_url', $rest_url);
+    update_option('tts_rest_api_url', $rest_url, false);
     TTA_Cache::set('tts_rest_api_url', $rest_url);
 }
 
@@ -226,7 +349,7 @@ class TTA_Init
         }
 
         if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
-            define('TEXT_TO_AUDIO_PLUGIN_NAME', apply_filters('tts_plugin_name', 'Text To Speech TTS'));
+            define('TEXT_TO_AUDIO_PLUGIN_NAME', apply_filters('tts_plugin_name', 'AtlasVoice'));
         }
 
         $this->run();
@@ -243,10 +366,10 @@ class TTA_Init
             }
             if (!TTA_Cache::get('tts_rest_api_url')) {
                 $rest_url = esc_url_raw(rest_url());
-                update_option('tts_rest_api_url', $rest_url);
+                update_option('tts_rest_api_url', $rest_url, false);
                 TTA_Cache::set('tts_rest_api_url', $rest_url);
             }
-            new TTA_Notices();
+            TTA_Notices::instance();
             //Rest api init.
             new TTA_Api_Routes();
         }, 9999);
@@ -288,14 +411,14 @@ class TTA_Init
 }
 
 
-// Load text domain early
-add_action('plugins_loaded', function () {
+// Load text domain at init (WordPress 6.7+ requires init or later).
+add_action('init', function () {
     load_plugin_textdomain(
         'text-to-audio',
         false,
         dirname(plugin_basename(__FILE__)) . '/languages'
     );
-});
+}, 0);
 
 add_action('plugins_loaded', function () {
     //Rest api init.
@@ -308,11 +431,11 @@ add_action('plugins_loaded', function () {
 add_filter('cron_schedules', function ($schedules) {
     $schedules['weekly'] = array(
         'interval' => 604800, // 7 days in seconds
-        'display'  => __('Once Weekly', 'text-to-audio'),
+        'display'  => 'Once Weekly',
     );
     $schedules['monthly'] = array(
         'interval' => 2592000, // 30 days in seconds
-        'display'  => __('Once Monthly', 'text-to-audio'),
+        'display'  => 'Once Monthly',
     );
     return $schedules;
 });
@@ -321,15 +444,10 @@ add_filter('cron_schedules', function ($schedules) {
  * Hook for scheduled analytics report
  */
 add_action('tta_send_scheduled_report', function () {
-    // Only run if Pro is active
-    if (!class_exists('TTA\TTA_Helper') || !\TTA\TTA_Helper::is_pro_active()) {
-        return;
-    }
-
-    // Initialize the analytics class and send the report
-    if (class_exists('TTA_Api\AtlasVoice_Analytics')) {
-        $analytics = new \TTA_Api\AtlasVoice_Analytics();
-        $analytics->generate_and_send_report();
+    // Email sending is a Pro feature — delegate to Pro Report Email class.
+    if (class_exists('TTA_Pro\TTA_Pro_Report_Email')) {
+        $reporter = new \TTA_Pro\TTA_Pro_Report_Email();
+        $reporter->generate_and_send_report();
     }
 });
 
@@ -341,6 +459,43 @@ add_action('tta_send_scheduled_report', function () {
 register_activation_hook(__FILE__, function () {
     TTA_Activator::activate();
 });
+
+/**
+ * Redirect to settings page on first activation.
+ * Uses a transient set in TTA_Activator::activate() to detect first-time activation.
+ *
+ * @since 2.1.8
+ */
+add_action('admin_init', function () {
+    // Allow resetting onboarding via ?page=text-to-audio&reset_onboard=true
+    if ( isset( $_GET['page'] ) && 'text-to-audio' === $_GET['page']
+        && isset( $_GET['reset_onboard'] ) && 'true' === $_GET['reset_onboard']
+        && current_user_can( 'manage_options' )
+    ) {
+        delete_option( 'tta_onboarding_completed' );
+        delete_option( 'tta_pro_onboarding_completed' );
+        wp_safe_redirect( admin_url( 'admin.php?page=text-to-audio&welcome=1' ) );
+        exit;
+    }
+
+    if ( get_transient('tta_activation_redirect') ) {
+        delete_transient('tta_activation_redirect');
+
+        // Don't redirect during bulk activation or if user can't manage options.
+        if ( isset($_GET['activate-multi']) || ! current_user_can('manage_options') ) {
+            return;
+        }
+
+        // Skip wizard if onboarding was already completed (e.g. reactivation).
+        if ( get_option( 'tta_onboarding_completed' ) ) {
+            wp_safe_redirect( admin_url( 'admin.php?page=text-to-audio' ) );
+        } else {
+            wp_safe_redirect( admin_url( 'admin.php?page=text-to-audio&welcome=1' ) );
+        }
+        exit;
+    }
+});
+
 /**
  * The code that runs during plugin deactivation.
  * This action is documented in includes/TTA_Deactivator.php

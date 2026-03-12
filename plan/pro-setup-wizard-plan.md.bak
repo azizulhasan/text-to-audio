@@ -1,0 +1,723 @@
+# Pro Setup Wizard — Implementation Plan
+
+## Overview
+
+A guided setup wizard that launches on first Pro plugin activation (or when "Run Setup Wizard" is clicked with Pro active). Lives in the **Pro plugin codebase** (`text-to-audio-pro`). The free plugin keeps its own wizard unchanged. The Pro wizard is a separate React entry point bundled and enqueued by the Pro plugin.
+
+---
+
+## Trigger Logic
+
+| Scenario | Behavior |
+|----------|----------|
+| Free plugin activated (fresh install) | Free wizard (existing 4-step flow) |
+| Pro plugin activated for first time | Pro wizard (new 4-step flow below) |
+| "Run Setup Wizard" clicked, Pro active | Pro wizard |
+| "Run Setup Wizard" clicked, Pro inactive | Free wizard (existing) |
+
+### Implementation
+
+- New option: `tta_pro_onboarding_completed` (boolean, autoload=false)
+- On Pro activation (`TTA_Pro_Activator::activate()`), set `tta_pro_onboarding_completed = false`
+- In `TTA_Admin.php`, when `welcome=1` detected:
+  - If `is_pro_active()` AND `!get_option('tta_pro_onboarding_completed')` → render Pro wizard
+  - Else → render existing free wizard
+- `reset_onboard=true` deletes both `tta_onboarding_completed` and `tta_pro_onboarding_completed`
+- Pass `is_pro_active` flag via `ttsWizardData` localized object (already exists)
+
+---
+
+## Pro Wizard Steps (5 Steps + Finish)
+
+### Step 1: Post Type Selection
+
+> "Where should the audio player appear?"
+
+**Purpose:** Pro supports multiple post types simultaneously. Let users pick all the content types they want audio on.
+
+**UI Layout:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Step 1 of 5                                                    │
+│                                                                 │
+│  Where should the audio player appear?                          │
+│                                                                 │
+│  With Pro, you can enable audio on multiple post types          │
+│  at the same time.                                              │
+│                                                                 │
+│  ☑ Posts  (24 published)                                        │
+│  ☐ Pages  (8 published)                                         │
+│  ☐ Products  (156 published)                                    │
+│  ☐ [Custom Post Type Name]  (12 published)                      │
+│                                                                 │
+│  ℹ  You can change this anytime from the Settings tab.          │
+│                                                                 │
+│                                    [Next: Choose AI Provider →] │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Key differences from free wizard:**
+- **Multi-select checkboxes** instead of radio buttons (Pro supports multiple)
+- Pre-populated from free wizard's existing selection
+- No "Pro upsell" card (they already have Pro)
+
+**State saved:** `postTypes` (array of slugs)
+**Settings updated:** `tta_settings_data.tta__settings_allow_listening_for_post_types`
+
+---
+
+### Step 2: AI Voice Provider Selection
+
+> "Choose your AI voice provider"
+
+**Purpose:** This is the #1 reason users upgrade to Pro. Get them connected to an AI voice provider and hearing the difference immediately.
+
+**UI Layout:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Step 2 of 5                                                    │
+│                                                                 │
+│  Choose your AI voice provider                                  │
+│                                                                 │
+│  AtlasVoice TTS Pro generates natural-sounding MP3 audio        │
+│  files using industry-leading AI providers.                     │
+│                                                                 │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐│
+│  │  Pro Player       │  │  AtlasVoice GTTS │  │  Google Cloud TTS││
+│  │  (Player 2)       │  │  (Player 3)      │  │  (Player 4)      ││
+│  │                   │  │                   │  │                   ││
+│  │  WebSpeech API    │  │  Free tier avail. │  │  300+ voices      ││
+│  │  Multilingual     │  │  40+ languages    │  │  40+ languages    ││
+│  │  No API key needed│  │  No API key needed│  │  Requires API key ││
+│  │                   │  │                   │  │                   ││
+│  │  [○ Select]       │  │  [● Selected]     │  │  [○ Select]       ││
+│  └──────────────────┘  └──────────────────┘  └──────────────────┘│
+│  ┌──────────────────┐  ┌──────────────────┐                     │
+│  │  ChatGPT TTS     │  │  ElevenLabs      │                     │
+│  │  (Player 5)      │  │  (Player 6)      │                     │
+│  │                   │  │                   │                     │
+│  │  6 HD voices      │  │  1000+ voices     │                     │
+│  │  57 languages     │  │  29 languages     │                     │
+│  │  Requires API key │  │  Requires API key │                     │
+│  │                   │  │                   │                     │
+│  │  [○ Select]       │  │  [○ Select]       │                     │
+│  └──────────────────┘  └──────────────────┘                     │
+│                                                                 │
+│  ℹ  You can change providers anytime from the Listening tab.    │
+│                                                                 │
+│  "Will you use this in production?"                             │
+│  [Yes, set as my default player] [No, just exploring]           │
+│                                                                 │
+│                    [← Back]  [Next: Voice & Language →]         │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Provider Cards Data:**
+
+| Provider | Player ID | Voice Count | Languages | API Key Required | Badge |
+|----------|-----------|-------------|-----------|-----------------|-------|
+| Pro Player (WebSpeech) | 2 | Browser voices | Multilingual | No | Default Pro |
+| AtlasVoice GTTS | 3 | 200+ | 40+ | No (built-in) | Recommended |
+| Google Cloud TTS | 4 | 300+ | 40+ | Yes (JSON file) | Popular |
+| ChatGPT TTS | 5 | 6 HD voices | 57 | Yes (OpenAI key) | Premium |
+| ElevenLabs | 6 | 1000+ | 29 | Yes (API key) | Most Natural |
+
+**Note:** Don't mention "multilingual support" to users on this step. Multilingual language mapping is handled separately via the Listening tab (shown on Finish screen only if a multilingual plugin is detected).
+
+**Production Toggle Logic:**
+- "Yes, set as my default player" → Directly updates `tta_customize_settings.buttonSettings.id` to selected player ID
+- "No, just exploring" → Does NOT change `buttonSettings.id` (keeps current)
+
+**No extra state saved.** The wizard only reads/writes `tta_customize_settings.buttonSettings.id` directly. No intermediate `selectedProvider` or `useInProduction` options are stored.
+
+---
+
+### Step 3: Voice & Language Configuration
+
+> "Pick your voice and language"
+
+**Purpose:** Select language and voice for the chosen provider. Includes audio preview so users hear the AI quality immediately — the "aha moment."
+
+**UI Layout (adapts per provider):**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Step 3 of 5                                                    │
+│                                                                 │
+│  Pick your voice and language                                   │
+│                                                                 │
+│  Preview how your content will sound with [ProviderName].       │
+│                                                                 │
+│  ┌─────────────────────┐  ┌─────────────────────┐              │
+│  │  🇬🇧 Voice Language   │  │  Voice to Speak      │              │
+│  │  [English (US)    ▾] │  │  [en-US-Standard-A ▾] │              │
+│  └─────────────────────┘  └─────────────────────┘              │
+│                                                                 │
+│  [▶ Preview AI Voice]                                           │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────┐            │
+│  │  🔊 Audio Preview Player                        │            │
+│  │  ────●─────────────────── 0:03 / 0:05           │            │
+│  └─────────────────────────────────────────────────┘            │
+│                                                                 │
+│  Comparison:                                                    │
+│  ┌──────────────────────┐  ┌──────────────────────┐            │
+│  │  Browser Voice (Free) │  │  AI Voice (Pro) ✓    │            │
+│  │  [▶ Preview]          │  │  [▶ Preview]          │            │
+│  │  Varies by device     │  │  Consistent quality   │            │
+│  │  No MP3 files         │  │  Generates MP3        │            │
+│  └──────────────────────┘  └──────────────────────┘            │
+│                                                                 │
+│                    [← Back]  [Next: Player Settings →]          │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Provider-specific preview rendering (auto-switches when player is selected in Step 2):**
+
+The preview UI adapts per provider — reference patterns from `Listening.js` (voice selection + audio player) and `Customize.js` (live player demo). Remove multilingual-specific code when adapting.
+
+| Player Selected | Preview Component | UI Elements |
+|----------------|-------------------|-------------|
+| Player 2 (Pro Player) | `TextToSpeech` | Language + Voice dropdowns (browser voices via `speechSynthesis`) |
+| Player 3 (AtlasVoice GTTS) | `TextToSpeechThree` | Language dropdown only (no voice selector). Live demo area with demo text + play button (pattern from `Customize.js`) |
+| Player 4 (Google Cloud TTS) | `TextToSpeechFour` | Language + Voice dropdowns + HTML5 audio player. Preview URLs: `https://cloud.google.com/text-to-speech/docs/audio/{voice}.wav` |
+| Player 5 (ChatGPT TTS) | `TextToSpeechThree` | Language + Voice (6: alloy/echo/fable/onyx/nova/shimmer) + Model (tts-1/tts-1-hd). Preview URLs: `https://cdn.openai.com/API/docs/audio/{voice}.wav` |
+| Player 6 (ElevenLabs) | `TextToSpeechThree` | Language + Voice (with accent) + Model. Preview via `preview_url` from ElevenLabs API voice object |
+
+**Key behavior:** When user selects a player in Step 2 and arrives at Step 3, the correct preview UI is already loaded. Selecting a voice auto-plays the preview audio (same pattern as `Listening.js` `handleChange()`).
+
+**Settings written directly to `tta_listening_settings`** (same option the Listening tab uses — no new options):
+- `tta_listening_settings.tta__listening_lang` → selected language
+- `tta_listening_settings.tta__listening_voice` → selected voice
+- `tta_listening_settings.tta__listening_voice_model` → model (ChatGPT: "tts-1"/"tts-1-hd")
+- `tta_listening_settings.tta__elevenlabs_model` → model (ElevenLabs: "eleven_multilingual_v2" etc.)
+
+**Saved via:** `POST /tta/v1/listening` with FormData `{ fields: JSON.stringify(listeningSettings), method: "post" }` — the exact same endpoint and format `Listening.js` uses.
+
+---
+
+### Step 4: Player Settings
+
+> "Configure your audio player"
+
+**Purpose:** Set MP3 date range and download permissions. Keep it simple — only the settings the user specified.
+
+**UI Layout:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Step 4 of 5                                                    │
+│                                                                 │
+│  Configure your audio player                                    │
+│                                                                 │
+│  Set when MP3 files should be generated and who can             │
+│  download them.                                                 │
+│                                                                 │
+│  ── MP3 Generation Date Range ──────────────────────────────    │
+│                                                                 │
+│  Generate MP3 for posts published between:                      │
+│                                                                 │
+│  ┌────────────────┐        ┌────────────────┐                   │
+│  │  From Date      │        │  To Date        │                   │
+│  │  [2024-01-01 📅]│  to    │  [2026-03-12 📅]│                   │
+│  └────────────────┘        └────────────────┘                   │
+│                                                                 │
+│  ℹ  Leave empty to generate for all posts regardless of date.  │
+│                                                                 │
+│  ── MP3 Download Permission ────────────────────────────────    │
+│                                                                 │
+│  Who can download MP3 files?                                    │
+│                                                                 │
+│  ☑ All Visitors (public download button)                        │
+│  ☐ Logged-in Users Only                                         │
+│  ☐ Specific Roles:                                              │
+│     ☐ Administrator  ☐ Editor  ☐ Author                         │
+│     ☐ Contributor    ☐ Subscriber                               │
+│                                                                 │
+│                    [← Back]  [Next: Analytics →]                │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**No extra state saved.** Values are read from and written directly to `tta_customize_settings`:
+- `buttonSettings.generate_mp3_date_from` → From date input
+- `buttonSettings.generate_mp3_date_to` → To date input
+- `buttonSettings.who_can_download_mp3_file` → Role checkbox array
+
+---
+
+### Step 5: Analytics & Reports
+
+> "Set up analytics and reports"
+
+**Purpose:** Configure tracking and optional email digest.
+
+**UI Layout:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Step 5 of 5                                                    │
+│                                                                 │
+│  Set up analytics and reports                                   │
+│                                                                 │
+│  Track how visitors interact with your audio content.           │
+│                                                                 │
+│  ── Analytics ──────────────────────────────────────────────    │
+│                                                                 │
+│  Enable Analytics  [━━━━● ON]                                   │
+│                                                                 │
+│  Track posts:                                                   │
+│  (●) All Posts (unlimited with Pro)                             │
+│  ( ) Select specific posts                                      │
+│                                                                 │
+│  ── Email Digest (Optional) ────────────────────────────────    │
+│                                                                 │
+│  Receive automated reports with listening stats.                │
+│                                                                 │
+│  Enable Email Digest  [━━━━○ OFF]                               │
+│                                                                 │
+│  Frequency:  (●) Weekly  ( ) Monthly                            │
+│                                                                 │
+│  Send to:    [admin@example.com                ]                │
+│                                                                 │
+│                    [← Back]  [Finish Setup →]                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**No extra state saved.** Values are read from and written directly to existing options:
+- `tta_analytics_settings.tts_enable_analytics` → Analytics toggle
+- `tta_analytics_settings.tts_trackable_post_ids` → `['all']` or specific IDs
+- `tta_schedule_report_settings` → Email digest settings (enabled, frequency, email) — **existing Pro option, update directly**
+
+**Note:** Email digest is saved to `tta_schedule_report_settings` which is an existing Pro option. The wizard reads/writes the same option the Pro dashboard uses.
+
+---
+
+### Step 6: Finish (informational only — all settings already saved)
+
+> "AtlasVoice Pro is ready!"
+
+**IMPORTANT:** All API calls and `tta_pro_onboarding_completed = true` are saved when the user clicks "Finish Setup" on Step 5 — BEFORE this screen renders. Step 6 is purely a summary/next-steps screen with no save actions. This means clicking any link (Language Mapping, Bulk MP3, Analytics, cross-promo) is safe — the wizard is already complete and won't re-trigger.
+
+**UI Layout:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│                     ✓ (green checkmark)                         │
+│                                                                 │
+│              AtlasVoice Pro is ready!                            │
+│                                                                 │
+│  Your AI-powered audio player is configured and ready to go.    │
+│                                                                 │
+│  [View Player on Your Site ↗]    [Go to Dashboard]              │
+│                                                                 │
+│  ── Your Pro Setup ─────────────────────────────────────────    │
+│                                                                 │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐       │
+│  │ Provider  │  │  Voice   │  │ Download │  │ Analytics│       │
+│  │ Google    │  │ en-US-A  │  │ Public   │  │ All Posts│       │
+│  │ Cloud TTS │  │          │  │          │  │          │       │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘       │
+│                                                                 │
+│  ── What's Next ────────────────────────────────────────────    │
+│                                                                 │
+│  ┌──────────────────┐  ┌──────────────────┐                     │
+│  │ 📦 Bulk MP3       │  │ 📊 Analytics      │                     │
+│  │ Generate MP3 for  │  │ View listening    │                     │
+│  │ all your posts    │  │ stats & insights  │                     │
+│  │ [Generate Now →]  │  │ [View Analytics →]│                     │
+│  └──────────────────┘  └──────────────────┘                     │
+│                                                                 │
+│  ── 🌐 Multilingual Site Detected (conditional) ──────────────  │
+│  │                                                               │
+│  │  We noticed [WPML / GTranslate / TranslatePress] is active   │
+│  │  on your site. Map a voice for each language so visitors      │
+│  │  hear audio in the correct language.                          │
+│  │                                                               │
+│  │  [Set Up Language Mapping →]                                  │
+│  │  (Opens Listening tab → scrolls to mapping section)           │
+│  │                                                               │
+│  └───────────────────────────────────────────────────────────    │
+│                                                                 │
+│  ── More from AtlasAiDev ───────────────────────────────────    │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │ 🤖 AI Workflow Automation — AI Agent Hub                 │    │
+│  │ Turn WordPress into an AI-powered hub with 80+ abilities │    │
+│  │                                            [Learn More →]│    │
+│  └─────────────────────────────────────────────────────────┘    │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │ 🥽 AR/VR 3D Model & Try-On                              │    │
+│  │ Add immersive 3D product try-on experiences to your shop │    │
+│  │                                            [Learn More →]│    │
+│  └─────────────────────────────────────────────────────────┘    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Cross-promo plugins:**
+- AI Workflow Automation: `https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/`
+- AR/VR 3D Model: `https://wordpress.org/plugins/ar-vr-3d-model-try-on/`
+
+Only shown on the Finish step — subtle, non-intrusive, presented as "More from AtlasAiDev" section.
+
+**Multilingual detection on Finish screen:**
+- Only shown when `window.ttsObjPro.compatible` detects one of: WPML (`sitepress-multilingual-cms/sitepress.php`), GTranslate (`gtranslate/gtranslate.php`), or TranslatePress (`translatepress-multilingual/index.php`)
+- Does NOT mention "multilingual support" — only says "We noticed [plugin name] is active on your site"
+- Button links to `admin.php?page=text-to-audio#/listening` (Listening tab where the full mapping UI already exists)
+- **Safe to click:** By the time Step 6 renders, all settings are saved and `tta_pro_onboarding_completed = true` is already set. Navigating away won't re-trigger the wizard.
+- Multilingual mapping is NOT included as a wizard step — it's too complex (3 fields × N languages) and the Listening tab already has a polished card-based UI for it
+
+---
+
+## Technical Architecture
+
+### File Structure
+
+**Pro plugin** (`text-to-audio-pro/`):
+```
+text-to-audio-pro/
+  src/
+    pro-wizard/
+      index.js                        ← NEW: Entry point (webpack bundle)
+      ProWelcomeWizard.js             ← NEW: Pro wizard container
+      wizardApi.js                    ← NEW: REST API helper
+      steps/
+        StepProPostType.js            ← NEW: Multi-select post types
+        StepProvider.js               ← NEW: AI provider selection
+        StepProVoice.js               ← NEW: Voice & language for AI provider
+        StepPlayerSettings.js         ← NEW: Date range + download permissions
+        StepProAnalytics.js           ← NEW: Analytics + email digest
+        StepProFinish.js              ← NEW: Pro finish screen
+```
+
+**Free plugin** (`text-to-audio/`) — minimal changes:
+```
+src/dashboard/
+  welcome.js                          ← Existing, add: if is_pro_wizard → render Pro wizard root div
+```
+
+### Data Flow
+
+```
+Free plugin: welcome.js
+  └─ if (is_pro_wizard) → render <div id="pro-wizard-root"> (Pro JS takes over)
+  └─ else               → <WelcomeWizard />  (existing free wizard)
+
+Pro plugin: pro-wizard/index.js  (separate bundle, enqueued by Pro)
+  └─ <ProWelcomeWizard />
+        ├─ Reads existing settings from ttsProWizardData (localized by PHP)
+        ├─ Step 1: StepProPostType → POST /tta/v1/settings → tta_settings_data
+        ├─ Step 2: StepProvider → POST /tta/v1/customize → tta_customize_settings.buttonSettings.id (if production=yes)
+        ├─ Step 3: StepProVoice → POST /tta/v1/listening → tta_listening_settings (lang, voice, model)
+        ├─ Step 4: StepPlayerSettings → POST /tta/v1/customize → tta_customize_settings (date range, download perms)
+        ├─ Step 5: StepProAnalytics → analytics endpoint + POST /tta/v1/save_schedule_report
+        └─ Step 6: StepProFinish → summary + actions + cross-promo
+```
+
+### API Calls (triggered on "Finish Setup" click — Step 5 → Step 6 transition)
+
+All calls fire **before** the Finish screen renders. Step 6 is purely informational — the user can safely navigate away from it.
+
+All calls use the **exact same API endpoints and payload formats** the existing dashboard tabs use. No new endpoints or options created.
+
+**CRITICAL: Merge-only updates.** Each API call must spread the full existing option and only override the specific keys the wizard touches. Never remove or overwrite keys the wizard doesn't manage.
+
+```javascript
+// 1. Save post types → POST /tta/v1/settings (same as Settings tab)
+// Option: tta_settings_data
+wizardFetch('settings', {
+    ...currentSettings,                                    // preserve all existing keys
+    tta__settings_allow_listening_for_post_types: selectedPostTypes,  // only this changes
+});
+
+// 2. Save player ID + date range + download perms → POST /tta/v1/customize (same as Customize tab)
+// Option: tta_customize_settings
+wizardFetch('customize', {
+    ...currentCustomize,                                   // preserve all existing keys (colors, borders, etc.)
+    buttonSettings: {
+        ...currentCustomize.buttonSettings,                // preserve ALL existing buttonSettings keys
+        ...(useInProduction && { id: selectedPlayerId }),  // only update id if "Yes, use in production"
+        generate_mp3_date_from: dateFrom,
+        generate_mp3_date_to: dateTo,
+        who_can_download_mp3_file: downloadPermission,
+        // DO NOT touch: button_position, display_player_to, colors, size, etc.
+    }
+});
+
+// 3. Save voice & language → POST /tta/v1/listening (same as Listening tab)
+// Option: tta_listening_settings
+// Uses FormData format: { fields: JSON.stringify(data), method: "post" }
+let listeningData = new FormData();
+listeningData.append("fields", JSON.stringify({
+    ...currentListening,                                   // preserve ALL existing keys (pitch, rate, volume, elevenlabs_*, etc.)
+    tta__listening_lang: selectedLanguage,
+    tta__listening_voice: selectedVoice,
+    ...(selectedPlayerId == 5 && { tta__listening_voice_model: selectedModel }),
+    ...(selectedPlayerId == 6 && { tta__elevenlabs_model: selectedModel }),
+}));
+listeningData.append("method", "post");
+postWithoutImage(apiURL + "tta/v1/listening", listeningData);
+
+// 4. Save analytics → existing analytics save endpoint
+// Option: tta_analytics_settings
+wizardFetch('save_analytics_settings', {
+    ...currentAnalytics,                                   // preserve all existing keys
+    tts_enable_analytics: enableAnalytics,
+    tts_trackable_post_ids: trackAll ? ['all'] : specificIds,
+});
+
+// 5. Save schedule report → POST /tta/v1/save_schedule_report (same as ExportSection)
+// Option: tta_schedule_report_settings
+wizardFetch('save_schedule_report', {
+    ...currentScheduleReport,                              // preserve all existing keys (day, time, include* flags, etc.)
+    enabled: digestEnabled,
+    frequency: digestFrequency,
+    recipients: digestEmail,
+});
+
+// 6. Mark Pro onboarding complete
+update_option('tta_pro_onboarding_completed', true);
+```
+
+**Existing options used (no new ones):**
+
+| Option Name | API Endpoint | Step | Keys Wizard Touches |
+|-------------|-------------|------|---------------------|
+| `tta_settings_data` | `POST /tta/v1/settings` | Step 1 | `tta__settings_allow_listening_for_post_types` |
+| `tta_customize_settings` | `POST /tta/v1/customize` | Step 2, 4 | `buttonSettings.id`, `.generate_mp3_date_from`, `.generate_mp3_date_to`, `.who_can_download_mp3_file` |
+| `tta_listening_settings` | `POST /tta/v1/listening` | Step 3 | `tta__listening_lang`, `tta__listening_voice`, `tta__listening_voice_model`, `tta__elevenlabs_model` |
+| `tta_analytics_settings` | analytics save endpoint | Step 5 | `tts_enable_analytics`, `tts_trackable_post_ids` |
+| `tta_schedule_report_settings` | `POST /tta/v1/save_schedule_report` | Step 5 | `enabled`, `frequency`, `recipients` |
+
+### PHP Changes
+
+**Free plugin — `admin/TTA_Admin.php`:**
+- In `enqueue_scripts()`: Add `is_pro_wizard` flag to `ttsWizardData`:
+```php
+'is_pro_wizard' => TTA_Helper::is_pro_active() && !get_option('tta_pro_onboarding_completed'),
+```
+- When `is_pro_wizard` is true, `welcome.js` renders a `<div id="pro-wizard-root">` instead of free wizard
+
+**Pro plugin — `TTA_Pro_Admin.php` (or equivalent):**
+- Enqueue Pro wizard JS bundle (`pro-wizard.min.js`) when `welcome=1` and Pro is active
+- Localize `ttsProWizardData` with:
+  - `provider_cards`: Array of provider info (name, ID, voice count, languages, requires_api_key)
+  - `current_settings`: Current `tta_settings_data`
+  - `current_customize`: Current `tta_customize_settings` (full buttonSettings)
+  - `current_listening`: Current `tta_listening_settings` (voice, lang, model, elevenlabs_* etc.)
+  - `current_analytics`: Current `tta_analytics_settings`
+  - `current_schedule_report`: Current `tta_schedule_report_settings`
+  - `admin_email`: `get_option('admin_email')` for email digest default
+  - `post_types`: Available post types with published counts
+  - `nonce`, `api_url`, `dashboard_url`
+
+**Pro plugin — `TTA_Pro_Activator.php`:**
+- On activation: `update_option('tta_pro_onboarding_completed', false, false);`
+- Delete `tta_onboarding_completed` to trigger wizard redirect
+
+### Webpack Bundle
+
+The Pro wizard is a **separate bundle** in the Pro plugin's build system:
+- Entry: `text-to-audio-pro/src/pro-wizard/index.js`
+- Output: `text-to-audio-pro/admin/js/build/pro-wizard.min.js`
+- Enqueued only when `welcome=1` and Pro is active
+- Mounts to `#pro-wizard-root` div rendered by free plugin's `welcome.js`
+
+---
+
+## Voice Loading Strategy (Per Provider)
+
+| Provider | How Voices Load | Preview Method |
+|----------|----------------|----------------|
+| AtlasVoice GTTS (3) | No voice list needed (language only) | N/A (generates on server) |
+| Google Cloud TTS (4) | Fetch from `tta/v1/voices` → cache localStorage | Google CDN audio URL |
+| ChatGPT TTS (5) | Hardcoded 6 voices | OpenAI CDN audio URL |
+| ElevenLabs (6) | Fetch from `tta_pro/v1/elevenlabs_voices` → cache localStorage | `preview_url` from API |
+
+**Browser voice comparison:** StepProVoice includes a "Compare with Browser Voice" button that uses `window.speechSynthesis` (same as free wizard) so users can hear the difference.
+
+---
+
+## Edge Cases
+
+1. **User hasn't set up API keys yet:** Skip voice preview, show message "Connect your API key in Integrations to hear a preview." Provider selection still works.
+2. **User already completed free wizard:** Pre-populate voice/language from existing settings. Don't reset customization colors.
+3. **User clicks "Back" from Step 1:** No back button on Step 1 (it's the first step).
+4. **User skips wizard:** Add "Skip Setup" link in header. Sets `tta_pro_onboarding_completed = true` without changing any settings.
+5. **Pro deactivated then reactivated:** Check `tta_pro_onboarding_completed` — if already true, don't show wizard again unless reset.
+
+---
+
+## Implementation Order
+
+**Phase A: Free plugin changes (minimal)**
+1. **welcome.js** — Add `is_pro_wizard` check, render `<div id="pro-wizard-root">` when Pro wizard is active
+2. **TTA_Admin.php** — Add `is_pro_wizard` flag to `ttsWizardData`
+
+**Phase B: Pro plugin — React components**
+3. **index.js** — Pro wizard entry point, mounts to `#pro-wizard-root`
+4. **ProWelcomeWizard.js** — Container with step navigation (reads existing settings, no extra state)
+5. **StepProPostType.js** — Multi-select post type checkboxes
+6. **StepProvider.js** — Provider cards (Player 2/3/4/5/6) + "Use in production?" toggle
+7. **StepProVoice.js** — Voice/language selection with provider-specific UI + preview
+8. **StepPlayerSettings.js** — Date range + download permissions (read/write `tta_customize_settings`)
+9. **StepProAnalytics.js** — Analytics toggle + email digest (read/write `tta_schedule_report_settings`)
+10. **StepProFinish.js** — Summary + cross-promo
+11. **wizardApi.js** — REST API helper
+
+**Phase C: Pro plugin — PHP backend**
+12. **TTA_Pro_Admin.php** — Enqueue Pro wizard bundle, localize `ttsProWizardData`
+13. **TTA_Pro_Activator.php** — Set Pro onboarding flag on activation
+14. **Pro webpack config** — Add `pro-wizard` entry point
+
+**Phase D: Testing**
+15. **Browser testing** — Verify all 5 steps + finish, data saving, edge cases
+16. **UI/UX review** — Check responsiveness, visual polish, accessibility
+
+---
+
+## Blueprint: Reusable Setup Wizard Pattern for AtlasAiDev Plugins
+
+This section documents the **generic wizard pattern** so the same architecture can be reused for any AtlasAiDev plugin (AI Agent Hub, AR/VR 3D Model, future plugins).
+
+### Core Pattern
+
+```
+[PluginSlug]/
+  src/dashboard/
+    welcome.js                    ← Entry: renders wizard or dashboard
+    welcome/
+      WelcomeWizard.js            ← Free wizard container
+      ProWelcomeWizard.js         ← Pro wizard container (if Pro exists)
+      wizardApi.js                ← REST API helper (shared)
+      steps/
+        Step[Name].js             ← Each step is a self-contained component
+```
+
+### Step Component Contract
+
+Every step component follows this interface:
+
+```jsx
+const StepExample = ({ data, onChange, wizardData }) => {
+    // data: current step's state slice
+    // onChange: callback to update parent state
+    // wizardData: localized PHP data (post types, settings, etc.)
+
+    return (
+        <div>
+            <h2>{heading}</h2>
+            <p>{description}</p>
+            {/* Step-specific form fields */}
+        </div>
+    );
+};
+```
+
+### Wizard Container Contract
+
+```jsx
+const WizardContainer = () => {
+    const [step, setStep] = useState(1);
+    const [stepData, setStepData] = useState({/* per-step state */});
+
+    const totalSteps = N;
+    const goNext = () => step < totalSteps ? setStep(step + 1) : handleFinish();
+    const goBack = () => step > 1 && setStep(step - 1);
+
+    const handleFinish = async () => {
+        // 1. Save all settings via REST API
+        // 2. Mark onboarding complete
+        // 3. Track completion event
+        setStep(totalSteps + 1); // Show finish screen
+    };
+
+    return (
+        <WizardShell step={step} totalSteps={totalSteps} onBack={goBack}>
+            {renderStep()}
+            <WizardNav onBack={goBack} onNext={goNext} />
+        </WizardShell>
+    );
+};
+```
+
+### PHP Backend Contract
+
+```php
+// 1. Localize wizard data
+wp_localize_script('plugin-wizard', 'wizardData', [
+    'post_types'       => $post_types,
+    'current_settings' => get_option('plugin_settings', []),
+    'is_pro_active'    => Helper::is_pro_active(),
+    'nonce'            => wp_create_nonce('wp_rest'),
+    'api_url'          => rest_url('plugin/v1/'),
+    'dashboard_url'    => admin_url('admin.php?page=plugin-slug'),
+    'is_pro_wizard'    => $is_pro && !get_option('plugin_pro_onboarding_completed'),
+]);
+
+// 2. REST endpoint saves settings + onboarding flag
+// 3. Activation hook resets onboarding flag
+// 4. reset_onboard=true URL deletes flag and redirects to welcome=1
+```
+
+### Applying to Other Plugins
+
+**AI Agent Hub:**
+- Step 1: Choose AI Provider (OpenAI, Anthropic, Google, Local)
+- Step 2: Enter API Key + Test Connection
+- Step 3: Enable Abilities (select from 80+)
+- Step 4: Configure Workflow (optional first workflow)
+- Finish: Summary + cross-promo (Text-to-Speech, AR/VR)
+
+**AR/VR 3D Model:**
+- Step 1: Choose Display Mode (AR, VR, 3D Viewer)
+- Step 2: Upload First Model or Connect Provider
+- Step 3: Product Integration (WooCommerce mapping)
+- Step 4: Customize Viewer (colors, controls, placement)
+- Finish: Summary + cross-promo (Text-to-Speech, AI Agent Hub)
+
+### Cross-Promo Strategy
+
+Every plugin's Finish step includes a "More from AtlasAiDev" section with cards for sibling plugins. The card data is centralized:
+
+```javascript
+const atlasPlugins = {
+    'text-to-speech': {
+        name: 'Text-to-Speech TTS Accessibility',
+        description: 'Add AI-powered audio players to your content',
+        url: 'https://wordpress.org/plugins/text-to-audio/',
+        icon: '🔊',
+    },
+    'ai-agent-hub': {
+        name: 'AI Workflow Automation — AI Agent Hub',
+        description: 'Turn WordPress into an AI-powered hub with 80+ abilities',
+        url: 'https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/',
+        icon: '🤖',
+    },
+    'ar-vr-3d': {
+        name: 'AR/VR 3D Model & Try-On',
+        description: 'Add immersive 3D product experiences to your shop',
+        url: 'https://wordpress.org/plugins/ar-vr-3d-model-try-on/',
+        icon: '🥽',
+    },
+};
+// Each plugin's finish screen shows the OTHER two plugins
+```
+
+---
+
+## Design Principles
+
+1. **Simple over complete** — Only ask what's necessary. Advanced settings go in the dashboard.
+2. **Show value fast** — Voice preview in Step 3 is the "aha moment." Make it work without API keys if possible.
+3. **Pre-populate from free wizard** — Don't re-ask what the user already configured.
+4. **Production toggle is key** — Step 2 asks "use in production?" to avoid surprising users by changing their active player.
+5. **No extra state** — Wizard reads/writes existing WordPress options directly. No intermediate wizard-specific options.
+6. **Skip is always available** — "Skip Setup" link visible on every step.
+7. **Mobile-friendly** — Cards stack vertically on narrow screens.
+8. **Consistent with free wizard** — Same visual language (card styles, button styles, color scheme).
+9. **Lives in Pro plugin** — All wizard code is in `text-to-audio-pro`. Free plugin only provides the mount point.
+10. **Cross-promo is subtle** — Only on Finish screen, presented as "More from AtlasAiDev" not as ads.

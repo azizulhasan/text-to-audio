@@ -4,6 +4,7 @@ import {Button, Col, Container, Form, OverlayTrigger, Row, Tooltip} from "react-
 import UpgradeToPro from "../../UpgradeToPro";
 import toast from '../../context/Notify';
 import {postWithoutImage} from "../../context/utilities";
+import Icon from "../../Icon";
 
 
 export default function Aliases() {
@@ -166,7 +167,7 @@ export default function Aliases() {
     ) : (
         <div className="tta_aliases_loading">
             <div>
-                <i className="fas fa-spinner fa-spin"></i>
+                <Icon name="spinner" spin />
                 <span className="tta_aliases_loading_text">{__('Loading...', 'text-to-audio')}</span>
             </div>
         </div>

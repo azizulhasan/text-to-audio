@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import Icon from "../../Icon";
 
 export default function DashboardTopNav() {
   return (
@@ -18,10 +19,7 @@ export default function DashboardTopNav() {
         className="audio-style"
 
         >
-          <i
-            className="fas fa-file-audio"
-            style={{ fontSize: "24px", color: "#1a4d4d" }}
-          ></i>
+          <Icon name="file-audio" style={{ fontSize: "24px", color: "#1a4d4d" }} />
         </div>
         <div>
           <div

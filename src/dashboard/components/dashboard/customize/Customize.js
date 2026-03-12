@@ -22,6 +22,7 @@ import TextToSpeechFour from "../../../buttons/components/TextToSpeechFour";
 import CustomizationTabs from "./CustomizationTabs";
 import TTSButtonDesign from "./design/TTSButtonDesign";
 import UpgradeToPro from "../../UpgradeToPro";
+import Icon from "../../Icon";
 
 let speech = null;
 let TextToSpeechFree = null;
@@ -221,7 +222,7 @@ export default function Customize() {
       });
 
     let initialText =
-      "The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!";
+      "The most user-friendly text-to-speech accessibility plugin. Just install and automatically add an AtlasVoice player to your WordPress site!";
 
     localStorage.setItem("demo_listening_content", initialText);
     setSpeakingText(initialText);
@@ -561,7 +562,7 @@ export default function Customize() {
       !isBackUpToGCS
     ) {
     toast(
-      __("Text To Speech plugin stores synthesized content in the uploads folder. Your uploads folder is not writable. Please make the uploads folder writable to enjoy all features of the plugin.", "text-to-audio"),
+      __("AtlasVoice stores synthesized content in the uploads folder. Your uploads folder is not writable. Please make the uploads folder writable to enjoy all features of the plugin.", "text-to-audio"),
       "error",
       { autoClose: 10000 }
     );
@@ -648,10 +649,41 @@ export default function Customize() {
       <Row>
         <Col xs={12} lg={8}>
           <div className="bg-white rounded p-3 mb-3 shadow-sm">
-            <h2 className="fs-3 fw-bold mb-2 text-dark">{__("Customization","text-to-audio")}</h2>
-            <p className="text-secondary m-0 small">
-              {__("Customize the player & design to match your brand and preferences.","text-to-audio")}
-            </p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+              <div>
+                <h2 className="fs-3 fw-bold mb-2 text-dark">{__("Customization","text-to-audio")}</h2>
+                <p className="text-secondary m-0 small">
+                  {__("Customize the player & design to match your brand and preferences.","text-to-audio")}
+                </p>
+              </div>
+              {typeof tta_obj !== 'undefined' && tta_obj.latest_post_preview_url && (
+                <a
+                  href={tta_obj.latest_post_preview_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 16px',
+                    fontSize: '13px',
+                    fontWeight: '500',
+                    color: '#fff',
+                    backgroundColor: '#FF7853',
+                    border: 'none',
+                    borderRadius: '6px',
+                    textDecoration: 'none',
+                    whiteSpace: 'nowrap',
+                    cursor: 'pointer',
+                    transition: 'opacity 0.2s',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.85'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                >
+                  {__("Preview on Your Site", "text-to-audio")} {"\u2197"}
+                </a>
+              )}
+            </div>
           </div>
 
           {/* Single Form Wrapper for Everything */}
@@ -687,7 +719,7 @@ export default function Customize() {
                       className="p-0 text-muted"
                       size="sm"
                     >
-                      <i className="fas fa-question-circle"></i>
+                      <Icon name="question-circle" />
                     </Button>
                   </OverlayTrigger>
 
@@ -710,7 +742,7 @@ export default function Customize() {
                       rel="noopener noreferrer"
                       title={__("Watch Tutorial", "text-to-audio")}
                     >
-                      <i className="fab fa-youtube"></i>
+                      <Icon name="youtube" />
                     </Button>
                   </OverlayTrigger>
                 </div>
@@ -799,7 +831,7 @@ export default function Customize() {
                     className="tta_listen-button"
                     title={__("Text To Audio:  Tap to listen post.", "text-to-audio")}
                   >
-                    <i className="fas fa-play-circle me-2"></i>
+                    <Icon name="play-circle" className="me-2" />
                     {tta_obj.buttonTextArr.listen_text}
                   </button>
                 )}
@@ -844,7 +876,7 @@ export default function Customize() {
                 }
                 className="tta_shortcode_btn"
               >
-                <i className="fas fa-copy me-2"></i>
+                <Icon name="copy" className="me-2" />
               {__('Copy Shortcode', 'text-to-audio')}
               </button>
             </div>
@@ -873,7 +905,7 @@ export default function Customize() {
       className="tta-loading-spinner"
     >
       <div>
-        <i className="fas fa-spinner fa-spin me-2"></i>
+        <Icon name="spinner" spin className="me-2" />
           {__('Loading...', 'text-to-audio')}
       </div>
     </div>

@@ -408,19 +408,7 @@ class TTA_Api_Routes {
 			)
 		);
 
-		// register send_test_report route (Pro only).
-		register_rest_route(
-			$this->namespace,
-			'/send_test_report',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( $this->analytics, 'send_test_report' ),
-					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
-				),
-			)
-		);
+		// send_test_report moved to Pro plugin (tta_pro/v1/send_test_report).
 
 		// register compatible_data route.
 		register_rest_route(
@@ -432,6 +420,34 @@ class TTA_Api_Routes {
 					'callback'            => array( $this->compatibility, 'compatible_data' ),
 					'permission_callback' => array( $this, 'get_route_access' ),
 					'args'                => array(),
+				),
+			)
+		);
+
+		// register onboarding-event route (wizard analytics).
+		register_rest_route(
+			$this->namespace,
+			'/onboarding-event',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'handle_onboarding_event' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(
+						'event' => array(
+							'type'        => 'string',
+							'required'    => true,
+							'enum'        => array( 'wizard_started', 'step_completed', 'wizard_completed', 'wizard_skipped' ),
+						),
+						'step' => array(
+							'type'        => 'integer',
+							'required'    => false,
+						),
+						'data' => array(
+							'type'        => 'object',
+							'required'    => false,
+						),
+					),
 				),
 			)
 		);
@@ -508,7 +524,7 @@ class TTA_Api_Routes {
                 TTA_Helper::delete_post_meta();
             }
 
-			update_option( 'tta_listening_settings', $fields );
+			update_option( 'tta_listening_settings', $fields, false );
 
 			$response['data'] = get_option( 'tta_listening_settings' );
 			TTA_Cache::delete( 'all_settings' );
@@ -575,6 +591,11 @@ class TTA_Api_Routes {
 
 			update_option( 'tta_settings_data', $fields );
 
+			// Mark onboarding as completed if flag is present.
+			if ( isset( $fields->tta_onboarding_completed ) && $fields->tta_onboarding_completed ) {
+				update_option( 'tta_onboarding_completed', true, false );
+			}
+
 			$response['data'] = get_option( 'tta_settings_data' );
 
 
@@ -604,7 +625,7 @@ class TTA_Api_Routes {
 			'browser'           => $browser,
 			'SpeechRecognition' => $SpeechRecognition,
 			'speechSynthesis'   => $speechSynthesis,
-		] );
+		], false );
 
 		return rest_ensure_response( get_option( 'tta_current_browser_info' ) );
 	}
@@ -615,7 +636,7 @@ class TTA_Api_Routes {
 		if ( 'post' == $request['method'] ) {
 			$fields = json_decode( $request['aliases'] );
 
-			update_option( 'tts_text_aliases', $fields );
+			update_option( 'tts_text_aliases', $fields, false );
 
 			$response['data'] = get_option( 'tts_text_aliases' );
 
@@ -695,6 +716,82 @@ class TTA_Api_Routes {
 		return rest_ensure_response( $response );
 	}
 
+
+	/**
+	 * Handle onboarding wizard analytics events.
+	 *
+	 * Stores individual events in tta_onboarding_events and maintains
+	 * a quick-access summary in tta_onboarding_summary.
+	 *
+	 * @param \WP_REST_Request $request
+	 * @return \WP_REST_Response
+	 */
+	public function handle_onboarding_event( $request ) {
+		$event = sanitize_text_field( $request->get_param( 'event' ) );
+		$step  = $request->get_param( 'step' );
+		$data  = $request->get_param( 'data' );
+
+		// Build the event record.
+		$record = array(
+			'event'     => $event,
+			'step'      => $step ? absint( $step ) : null,
+			'timestamp' => time(),
+		);
+		if ( ! empty( $data ) && is_array( $data ) ) {
+			$record['data'] = array_map( 'sanitize_text_field', $data );
+		}
+
+		// Append to the events log (cap at 200 entries to avoid unbounded growth).
+		$events   = get_option( 'tta_onboarding_events', array() );
+		$events[] = $record;
+		if ( count( $events ) > 200 ) {
+			$events = array_slice( $events, -200 );
+		}
+		update_option( 'tta_onboarding_events', $events, false );
+
+		// Update the summary option.
+		$summary = get_option( 'tta_onboarding_summary', array(
+			'wizard_started'     => false,
+			'steps_completed'    => array(),
+			'wizard_completed'   => false,
+			'wizard_skipped'     => false,
+			'completed_at'       => null,
+			'time_spent_seconds' => null,
+		) );
+
+		switch ( $event ) {
+			case 'wizard_started':
+				$summary['wizard_started'] = true;
+				break;
+
+			case 'step_completed':
+				if ( $step ) {
+					$completed = (array) ( $summary['steps_completed'] ?? array() );
+					if ( ! in_array( absint( $step ), $completed, true ) ) {
+						$completed[] = absint( $step );
+						sort( $completed );
+					}
+					$summary['steps_completed'] = $completed;
+				}
+				break;
+
+			case 'wizard_completed':
+				$summary['wizard_completed'] = true;
+				$summary['completed_at']     = gmdate( 'c' );
+				if ( ! empty( $data['time_spent_seconds'] ) ) {
+					$summary['time_spent_seconds'] = absint( $data['time_spent_seconds'] );
+				}
+				break;
+
+			case 'wizard_skipped':
+				$summary['wizard_skipped'] = true;
+				break;
+		}
+
+		update_option( 'tta_onboarding_summary', $summary, false );
+
+		return rest_ensure_response( array( 'status' => true ) );
+	}
 
 	/*
 	 * Get route access if request is valid.
@@ -810,7 +907,7 @@ class TTA_Api_Routes {
             '/tta/v1/filtered_insights',
             '/tta/v1/save_schedule_report',
             '/tta/v1/get_schedule_report',
-            '/tta/v1/send_test_report',
+            '/tta/v1/onboarding-event',
         );
 
         if ( in_array( $route, $admin_only, true ) ) {

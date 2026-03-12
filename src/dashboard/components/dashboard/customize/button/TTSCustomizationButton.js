@@ -10,6 +10,7 @@ import {
 import { __ } from "@wordpress/i18n";
 import { postData } from "../../../context/utilities";
 import { MultiSelect } from "../../../context/MultiSelect";
+import Icon from "../../../Icon";
 
 export default function TTSCustomizationButton({
   listeningBtnStyle,
@@ -58,7 +59,7 @@ export default function TTSCustomizationButton({
                   target="_blank"
                   href="https://www.youtube.com/watch?v=h4VJxM-mh74&t=936s"
                 >
-                  <i className="fab fa-youtube"></i>
+                  <Icon name="youtube" />
                 </a>
               </OverlayTrigger>
             </Form.Label>
@@ -103,7 +104,7 @@ export default function TTSCustomizationButton({
                   target="_blank"
                   href="https://www.youtube.com/watch?v=h4VJxM-mh74&t=936s"
                 >
-                  <i className="fab fa-youtube"></i>
+                  <Icon name="youtube" />
                 </a>
               </OverlayTrigger>
             </Form.Label>
@@ -147,7 +148,7 @@ export default function TTSCustomizationButton({
                   target="_blank"
                   href="https://www.youtube.com/watch?v=h4VJxM-mh74&t=936s"
                 >
-                  <i className="fab fa-youtube"></i>
+                  <Icon name="youtube" />
                 </a>
               </OverlayTrigger>
             </Form.Label>
