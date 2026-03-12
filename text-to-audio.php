@@ -467,6 +467,25 @@ register_activation_hook(__FILE__, function () {
  * @since 2.1.8
  */
 add_action('admin_init', function () {
+    // One-time migration (2.1.9): enable analytics with latest 20 posts for existing free users.
+    if ( ! get_option( 'tta_analytics_migrated_2_1_9' ) ) {
+        $analytics = (array) get_option( 'tta_analytics_settings' );
+        if ( empty( $analytics['tts_enable_analytics'] ) && empty( $analytics['tts_trackable_post_ids'] ) ) {
+            $latest_ids = get_posts( array(
+                'posts_per_page' => 20,
+                'post_type'      => 'post',
+                'post_status'    => 'publish',
+                'fields'         => 'ids',
+                'orderby'        => 'date',
+                'order'          => 'DESC',
+            ) );
+            $analytics['tts_enable_analytics']   = true;
+            $analytics['tts_trackable_post_ids'] = $latest_ids;
+            update_option( 'tta_analytics_settings', $analytics, false );
+        }
+        update_option( 'tta_analytics_migrated_2_1_9', true, false );
+    }
+
     // Allow resetting onboarding via ?page=text-to-audio&reset_onboard=true
     if ( isset( $_GET['page'] ) && 'text-to-audio' === $_GET['page']
         && isset( $_GET['reset_onboard'] ) && 'true' === $_GET['reset_onboard']
