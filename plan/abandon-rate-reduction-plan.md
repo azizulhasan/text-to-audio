@@ -639,7 +639,7 @@ $latest = get_posts(['numberposts' => 1, 'post_status' => 'publish', 'post_type'
 | 6.2 | "View on Site" Link | Low | LOW | P2 | ✅ DONE |
 | — | Onboarding Analytics (wizard tracking) | Medium | MEDIUM | P2 | ✅ DONE |
 | — | WP 6.7 textdomain compat fix | Low | HIGH | P2 | ✅ DONE |
-| — | Pro Onboarding Wizard | High | MEDIUM | P2 | ⬜ SKIPPED (needs Pro plugin) |
+| — | Pro Onboarding Wizard (dynamic 4/5 steps, brand colors) | High | MEDIUM | P2 | ✅ DONE |
 | — | JS Exclusion List Audit + SG Optimizer fix | Low | MEDIUM | P2 | ✅ DONE |
 | 7.1 | Accessibility Audit (WCAG 2.1 AA) | Medium | HIGH | P3 | ✅ DONE |
 | 7.2 | Unit Tests (PHP + JS) | High | MEDIUM | P3 | ⬜ SKIPPED |
