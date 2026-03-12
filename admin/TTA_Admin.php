@@ -736,7 +736,7 @@ class TTA_Admin
         }
 
         $admin_url    = admin_url( 'admin.php?page=text-to-audio' );
-        $docs_url     = esc_url( $admin_url . '#/docs' );
+        $docs_url     = esc_url( $admin_url . '#/faq' );
         $compat_url   = esc_url( $admin_url . '#/compatibility' );
         $integrations_url = esc_url( $admin_url . '#/integrations' );
         $support_url  = 'https://wordpress.org/support/plugin/text-to-audio/';

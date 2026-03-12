@@ -41,6 +41,11 @@ class TTA_Activator {
 			update_option( 'tta_has_been_activated_before', true, false );
 		}
 
+		// Store activation timestamp for smart review notice timing.
+		if ( ! get_option( 'tta_activated_at' ) ) {
+			update_option( 'tta_activated_at', time(), false );
+		}
+
 		/**
 		 * Customization settings.
 		 */

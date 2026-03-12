@@ -336,48 +336,86 @@ class TTA_Notices {
 		// 	'version_option'      => 'wpml_and_gtranslate_notice_displayed_aug_25',
 		// ) );
 
-		// ── 9. Review (commented out) ──
-		// $this->register_notice( array(
-		// 	'id'                  => 'review',
-		// 	'title'               => sprintf( '<h3>%s</h3>', sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', 'text-to-audio' ) ) ),
-		// 	'message'             => sprintf(
-		// 		esc_html__( '%1$s We have spent countless hours developing this free plugin for you, and we would really appreciate it if you drop us a quick rating. Your opinion matters a lot to us. It helps us to get better. Thanks for using %2$s.', 'text-to-audio' ),
-		// 		'<span style="font-size: 16px;">&#128516;</span>',
-		// 		sprintf( '<b>%s</b>', esc_html__( 'Text To Speech TTS', 'text-to-audio' ) )
-		// 	),
-		// 	'type'                => 'info',
-		// 	'dismissible'         => true,
-		// 	'reshow_after_days'   => 30,
-		// 	'buttons'             => array(
-		// 		array(
-		// 			'text'   => __( 'Review Now', 'text-to-audio' ),
-		// 			'type'   => 'primary',
-		// 			'action' => 'given',
-		// 			'track'  => true,
-		// 		),
-		// 		array(
-		// 			'text'   => __( 'Remind Me Later', 'text-to-audio' ),
-		// 			'type'   => 'secondary',
-		// 			'action' => 'later',
-		// 			'track'  => true,
-		// 		),
-		// 		array(
-		// 			'text'   => __( 'Already Done!', 'text-to-audio' ),
-		// 			'type'   => 'secondary',
-		// 			'action' => 'done',
-		// 			'track'  => true,
-		// 		),
-		// 		array(
-		// 			'text'   => __( 'Never Ask Again', 'text-to-audio' ),
-		// 			'type'   => 'secondary',
-		// 			'action' => 'never',
-		// 			'track'  => true,
-		// 		),
-		// 	),
-		// 	'click_action'        => array( $this, 'handle_review_action' ),
-		// 	'legacy_dismiss_meta' => 'tta_review_notice_dismissed',
-		// 	'legacy_option_key'   => 'tta_review_notice_next_show_time',
-		// ) );
+		// ── 9. Smart Review Prompt ──
+		// Backfill activation timestamp for existing users.
+		if ( ! get_option( 'tta_activated_at' ) && get_option( 'tta_has_been_activated_before', false ) ) {
+			update_option( 'tta_activated_at', time() - ( DAY_IN_SECONDS * 30 ), false );
+		}
+
+		$total_plays    = $this->get_cached_total_plays();
+		$activated_at   = (int) get_option( 'tta_activated_at', 0 );
+		$days_active    = $activated_at ? ( time() - $activated_at ) / DAY_IN_SECONDS : 0;
+		$wizard_done    = (bool) get_option( 'tta_onboarding_completed', false );
+
+		// Build dynamic message with play count.
+		$review_message = sprintf(
+			/* translators: %1$s: emoji, %2$s: play count, %3$s: plugin name */
+			__( '%1$s Your audio player has reached %2$s plays! If you\'re enjoying %3$s, would you consider leaving a quick review? It really helps us improve and reach more users.', 'text-to-audio' ),
+			'<span style="font-size: 16px;">🎉</span>',
+			'<strong>' . number_format_i18n( $total_plays ) . '</strong>',
+			'<strong>' . esc_html__( 'AtlasVoice', 'text-to-audio' ) . '</strong>'
+		);
+
+		$this->register_notice( array(
+			'id'                  => 'review',
+			'title'               => sprintf( '<h3>%s</h3>', esc_html__( 'AtlasVoice — Your Listeners Love It!', 'text-to-audio' ) ),
+			'message'             => $review_message,
+			'type'                => 'info',
+			'dismissible'         => true,
+			'reshow_after_days'   => 14,
+			'condition'           => function() use ( $total_plays, $days_active, $wizard_done ) {
+				// 1. Must be an admin.
+				if ( ! current_user_can( 'manage_options' ) ) {
+					return false;
+				}
+				// 2. Never show to Pro users.
+				if ( TTA_Helper::is_pro_active() ) {
+					return false;
+				}
+				// 3. Must be active for at least 7 days.
+				if ( $days_active < 7 ) {
+					return false;
+				}
+				// 4. Wizard completed OR active for 14+ days (existing users).
+				if ( ! $wizard_done && $days_active < 14 ) {
+					return false;
+				}
+				// 5. Must have at least 10 plays.
+				if ( $total_plays < 10 ) {
+					return false;
+				}
+				return true;
+			},
+			'buttons'             => array(
+				array(
+					'text'   => __( '⭐ Leave a Review', 'text-to-audio' ),
+					'type'   => 'primary',
+					'action' => 'given',
+					'track'  => true,
+				),
+				array(
+					'text'   => __( 'Remind Me Later', 'text-to-audio' ),
+					'type'   => 'secondary',
+					'action' => 'later',
+					'track'  => true,
+				),
+				array(
+					'text'   => __( 'Already Done!', 'text-to-audio' ),
+					'type'   => 'secondary',
+					'action' => 'done',
+					'track'  => true,
+				),
+				array(
+					'text'   => __( 'Never Ask Again', 'text-to-audio' ),
+					'type'   => 'secondary',
+					'action' => 'never',
+					'track'  => true,
+				),
+			),
+			'click_action'        => array( $this, 'handle_review_action' ),
+			'legacy_dismiss_meta' => 'tta_review_notice_dismissed',
+			'legacy_option_key'   => 'tta_review_notice_next_show_time',
+		) );
 
 		// ── 10. Feedback (commented out) ──
 		// $this->register_notice( array(
@@ -1113,7 +1151,7 @@ class TTA_Notices {
 			case 'later':
 				update_user_meta( $user_id, 'tta_dismiss_' . $notice_id, true );
 				update_user_meta( $user_id, 'tta_review_notice_dismissed', true );
-				$next_time = time() + ( DAY_IN_SECONDS * 30 );
+				$next_time = time() + ( DAY_IN_SECONDS * 14 );
 				update_option( 'tta_review_notice_next_show_time', $next_time, false );
 				update_option( 'tta_reshow_' . $notice_id, $next_time, false );
 				break;

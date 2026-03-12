@@ -444,15 +444,10 @@ add_filter('cron_schedules', function ($schedules) {
  * Hook for scheduled analytics report
  */
 add_action('tta_send_scheduled_report', function () {
-    // Only run if Pro is active
-    if (!class_exists('TTA\TTA_Helper') || !\TTA\TTA_Helper::is_pro_active()) {
-        return;
-    }
-
-    // Initialize the analytics class and send the report
-    if (class_exists('TTA_Api\AtlasVoice_Analytics')) {
-        $analytics = new \TTA_Api\AtlasVoice_Analytics();
-        $analytics->generate_and_send_report();
+    // Email sending is a Pro feature — delegate to Pro Report Email class.
+    if (class_exists('TTA_Pro\TTA_Pro_Report_Email')) {
+        $reporter = new \TTA_Pro\TTA_Pro_Report_Email();
+        $reporter->generate_and_send_report();
     }
 });
 

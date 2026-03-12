@@ -181,7 +181,7 @@ export default class TextToSpeech {
             if (is_dashboard) {
                 link +=
                     ttsObj.admin_url +
-                    'admin.php?page=text-to-audio#/docs';
+                    'admin.php?page=text-to-audio#/faq';
             } else {
                 if (
                     location.search === '?page=text-to-audio' &&
@@ -189,7 +189,7 @@ export default class TextToSpeech {
                 ) {
                     link +=
                         ttsObj.admin_url +
-                        'admin.php?page=text-to-audio#/docs';
+                        'admin.php?page=text-to-audio#/faq';
                 } else {
                     link +=
                         'https://wordpress.org/plugins/text-to-audio/#how%20to%20enable%20%60%60speechsynthesis%60%60%20on%20firefox%3F';
