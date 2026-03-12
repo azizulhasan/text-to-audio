@@ -12,5 +12,16 @@
         "LOG_FILE": "D:\\xampp\\htdocs\\azizulhasan\\tts\\wp-content\\atlasaidev.log"
       }
     }
+  },
+  "awfah_local_jwt": {
+    "command": "node",
+    "args": [
+      "C:\\Users\\ASUS\\AppData\\Roaming\\npm\\node_modules\\@automattic\\mcp-wordpress-remote\\dist\\proxy.js"
+    ],
+    "env": {
+      "WP_API_URL": "http://localhost:6060/azizulhasan/tts/wp-json/awfah_mcp/mcp",
+      "JWT_TOKEN": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjYwNjAvYXppenVsaGFzYW4vdHRzIiwiaWF0IjoxNzcyMTE0Nzk3LCJleHAiOjE3NzQ3MDY3OTcsInVzZXJfaWQiOjEsImp0aSI6IjN5Ym5KMDYzS3hPZzUyamppcGx1M1FXcjVCdUZydUE4In0.tKVf7bFnyAanKSUknko9UfprNOd6PzM_W2KU2mcDB-4",
+      "LOG_FILE": "D:\\xampp\\htdocs\\azizulhasan\\tts\\wp-content\\ai-debug.log"
+    }
   }
 }
