@@ -22,7 +22,7 @@ class AtlasVoice_Plugin_Compatibility {
 		if ( 'post' == $request['method'] ) {
 			$fields = json_decode( $request['fields'] );
 
-			update_option( 'tta_compatible_data', $fields );
+			update_option( 'tta_compatible_data', $fields, false );
 
 			$response['data'] = get_option( 'tta_compatible_data' );
 

@@ -2,6 +2,7 @@ const mix = require('laravel-mix');
 
 
 mix.js('src/dashboard/index.js', 'admin/js/build/text-to-audio-dashboard-ui.min.js').react();
+mix.js('src/dashboard/welcome.js', 'admin/js/build/tts-welcome-wizard.min.js').react();
 
 /**
  * Demos Assets

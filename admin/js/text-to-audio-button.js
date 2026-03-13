@@ -123,8 +123,13 @@ class TTSSettingsModalManager {
                 justify-content: center;
                 transition: background-color 0.2s ease;
             }
-            .tts__settings-modal-close:hover {
+            .tts__settings-modal-close:hover,
+            .tts__settings-modal-close:focus-visible {
                 background-color: rgba(255, 255, 255, 0.12);
+            }
+            .tts__settings-modal-close:focus-visible {
+                outline: 2px solid currentColor;
+                outline-offset: 2px;
             }
 
             /* Settings Select */
@@ -242,8 +247,21 @@ class TTSSettingsModalManager {
             .tts__mute-btn:hover {
                 background-color: rgba(255, 255, 255, 0.12);
             }
+            .tts__mute-btn:focus-visible {
+                outline: 2px solid currentColor;
+                outline-offset: 2px;
+                background-color: rgba(255, 255, 255, 0.12);
+            }
             .tts__mute-btn.muted {
                 background-color: rgba(255, 255, 255, 0.12);
+            }
+            .tts__settings-slider:focus-visible {
+                outline: 2px solid currentColor;
+                outline-offset: 2px;
+            }
+            .tts__settings-select:focus-visible {
+                outline: 2px solid currentColor;
+                outline-offset: 2px;
             }
         `;
         document.head.appendChild(style);
@@ -364,9 +382,13 @@ class TTSSettingsModalManager {
         return matching;
     }
 
+    static _keyHandler = null;
+    static _previousFocus = null;
+
     static openModal(buttonInstance) {
         this.currentButtonInstance = buttonInstance;
         this.isOpen = true;
+        this._previousFocus = document.activeElement;
         this.renderModal();
         this.startAutoCloseTimer();
 
@@ -376,7 +398,39 @@ class TTSSettingsModalManager {
             if (backdrop) {
                 backdrop.classList.add('tts__modal-visible');
             }
+            // Focus the close button for keyboard users
+            const closeBtn = this.modalContainer.querySelector('.tts__settings-modal-close');
+            if (closeBtn) closeBtn.focus();
         });
+
+        // Keyboard handler: Escape to close + focus trap
+        this._keyHandler = (e) => {
+            if (e.key === 'Escape' && this.isOpen) {
+                this.closeModal();
+                return;
+            }
+            // Focus trap within modal
+            if (e.key === 'Tab' && this.isOpen) {
+                const modal = this.modalContainer.querySelector('.tts__settings-modal');
+                if (!modal) return;
+                const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                if (focusable.length === 0) return;
+                const first = focusable[0];
+                const last = focusable[focusable.length - 1];
+                if (e.shiftKey) {
+                    if (document.activeElement === first) {
+                        e.preventDefault();
+                        last.focus();
+                    }
+                } else {
+                    if (document.activeElement === last) {
+                        e.preventDefault();
+                        first.focus();
+                    }
+                }
+            }
+        };
+        document.addEventListener('keydown', this._keyHandler);
     }
 
     static closeModal() {
@@ -392,6 +446,18 @@ class TTSSettingsModalManager {
             }, 200);
         }
         this.clearAutoCloseTimer();
+
+        // Remove keyboard handler
+        if (this._keyHandler) {
+            document.removeEventListener('keydown', this._keyHandler);
+            this._keyHandler = null;
+        }
+
+        // Return focus to the button that opened the modal
+        if (this._previousFocus) {
+            this._previousFocus.focus();
+            this._previousFocus = null;
+        }
     }
 
     static startAutoCloseTimer() {
@@ -669,17 +735,17 @@ class TTSSettingsModalManager {
 
         this.modalContainer.innerHTML = `
             <div class="tts__settings-modal-backdrop" onclick="TTSSettingsModalManager.handleBackdropClick(event)">
-                <div class="tts__settings-modal" onclick="event.stopPropagation()">
+                <div class="tts__settings-modal" role="dialog" aria-modal="true" aria-labelledby="tts-settings-modal-title" onclick="event.stopPropagation()">
                     <!-- Loading overlay -->
-                    <div class="tts__settings-loader-overlay" style="display: none;">
+                    <div class="tts__settings-loader-overlay" style="display: none;" role="status" aria-label="Loading">
                         <div class="tts__settings-loader"></div>
                     </div>
 
                     <!-- Modal Header -->
                     <div class="tts__settings-modal-header">
-                        <h3 class="tts__settings-modal-title">Player Settings</h3>
-                        <button class="tts__settings-modal-close" onclick="TTSSettingsModalManager.closeModal()" title="Close">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${colors.color}" stroke-width="2">
+                        <h3 id="tts-settings-modal-title" class="tts__settings-modal-title">Player Settings</h3>
+                        <button class="tts__settings-modal-close" onclick="TTSSettingsModalManager.closeModal()" title="Close" aria-label="Close settings">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${colors.color}" stroke-width="2" aria-hidden="true">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
                             </svg>
@@ -688,7 +754,7 @@ class TTSSettingsModalManager {
 
                     <!-- Language Selection -->
                     <div class="tts__setting-row">
-                        <label class="tts__setting-label">Language</label>
+                        <label class="tts__setting-label" for="tts-language-select">Language</label>
                         <select id="tts-language-select" class="tts__settings-select" onchange="TTSSettingsModalManager.handleLanguageChange(event)" style="
                             width: 100%;
                             padding: 10px 12px;
@@ -709,7 +775,7 @@ class TTSSettingsModalManager {
 
                     <!-- Voice Selection -->
                     <div class="tts__setting-row">
-                        <label class="tts__setting-label">Voice</label>
+                        <label class="tts__setting-label" for="tts-voice-select">Voice</label>
                         <select id="tts-voice-select" class="tts__settings-select" onchange="TTSSettingsModalManager.handleVoiceChange(event)" style="
                             width: 100%;
                             padding: 10px 12px;
@@ -731,28 +797,28 @@ class TTSSettingsModalManager {
                     <!-- Speed Control -->
                     <div class="tts__setting-row">
                         <div class="tts__setting-header">
-                            <label class="tts__setting-label" style="margin-bottom: 0;">Speed</label>
+                            <label class="tts__setting-label" for="tts-rate-slider" style="margin-bottom: 0;">Speed</label>
                             <span id="tts-rate-value" class="tts__setting-value">${this.currentRate}x</span>
                         </div>
-                        <input type="range" id="tts-rate-slider" class="tts__settings-slider" min="0.5" max="2" step="0.1" value="${this.currentRate}" oninput="TTSSettingsModalManager.handleRateChange(event)" style="width: 100%; cursor: pointer;" />
+                        <input type="range" id="tts-rate-slider" class="tts__settings-slider" min="0.5" max="2" step="0.1" value="${this.currentRate}" aria-label="Playback speed" aria-valuemin="0.5" aria-valuemax="2" aria-valuenow="${this.currentRate}" aria-valuetext="${this.currentRate}x" oninput="TTSSettingsModalManager.handleRateChange(event)" style="width: 100%; cursor: pointer;" />
                     </div>
 
                     <!-- Pitch Control -->
                     <div class="tts__setting-row">
                         <div class="tts__setting-header">
-                            <label class="tts__setting-label" style="margin-bottom: 0;">Pitch</label>
+                            <label class="tts__setting-label" for="tts-pitch-slider" style="margin-bottom: 0;">Pitch</label>
                             <span id="tts-pitch-value" class="tts__setting-value">${this.currentPitch.toFixed(1)}</span>
                         </div>
-                        <input type="range" id="tts-pitch-slider" class="tts__settings-slider" min="0" max="2" step="0.1" value="${this.currentPitch}" oninput="TTSSettingsModalManager.handlePitchChange(event)" style="width: 100%; cursor: pointer;" />
+                        <input type="range" id="tts-pitch-slider" class="tts__settings-slider" min="0" max="2" step="0.1" value="${this.currentPitch}" aria-label="Voice pitch" aria-valuemin="0" aria-valuemax="2" aria-valuenow="${this.currentPitch}" aria-valuetext="${this.currentPitch.toFixed(1)}" oninput="TTSSettingsModalManager.handlePitchChange(event)" style="width: 100%; cursor: pointer;" />
                     </div>
 
                     <!-- Volume Control with Mute Button -->
                     <div class="tts__setting-row">
                         <div class="tts__setting-header">
-                            <label class="tts__setting-label" style="margin-bottom: 0;">Volume</label>
+                            <label class="tts__setting-label" for="tts-volume-slider" style="margin-bottom: 0;">Volume</label>
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <span id="tts-volume-value" class="tts__setting-value">${Math.round(this.currentVolume * 100)}%</span>
-                                <button class="tts__mute-btn ${this.isMuted ? 'muted' : ''}" onclick="TTSSettingsModalManager.handleMuteToggle()" title="${this.isMuted ? 'Unmute' : 'Mute'}">
+                                <button class="tts__mute-btn ${this.isMuted ? 'muted' : ''}" onclick="TTSSettingsModalManager.handleMuteToggle()" title="${this.isMuted ? 'Unmute' : 'Mute'}" aria-label="${this.isMuted ? 'Unmute audio' : 'Mute audio'}" aria-pressed="${this.isMuted}">
                                     ${this.isMuted ? `
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${colors.color}" stroke-width="2">
                                             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
@@ -768,7 +834,7 @@ class TTSSettingsModalManager {
                                 </button>
                             </div>
                         </div>
-                        <input type="range" id="tts-volume-slider" class="tts__settings-slider" min="0" max="1" step="0.05" value="${this.currentVolume}" oninput="TTSSettingsModalManager.handleVolumeChange(event)" style="width: 100%; cursor: pointer;" />
+                        <input type="range" id="tts-volume-slider" class="tts__settings-slider" min="0" max="1" step="0.05" value="${this.currentVolume}" aria-label="Volume" aria-valuemin="0" aria-valuemax="1" aria-valuenow="${this.currentVolume}" aria-valuetext="${Math.round(this.currentVolume * 100)}%" oninput="TTSSettingsModalManager.handleVolumeChange(event)" style="width: 100%; cursor: pointer;" />
                     </div>
                 </div>
             </div>
@@ -880,6 +946,7 @@ class TTSPlayButton extends HTMLElement {
             #tts__listent_content_${buttonId}.tts__listent_content svg{ display:${settings.shouldDisplayIcon}; padding-right:7px !important;padding-top: 5px; }
             #tts__listent_content_${buttonId}.tts__listent_content:hover  svg{ display:${settings.shouldDisplayIcon}; padding-right:7px !important; padding-top: 5px; }
             #tts__listent_content_${buttonId}.tts__listent_content:hover span{ color: ${ ttsObj?.settings?.customize?.hoverTextColor || "#000000" } }
+            #tts__listent_content_${buttonId}.tts__listent_content:focus-visible{ outline: 2px solid ${ ttsObj?.settings?.customize?.color || "#ffffff" }; outline-offset: 2px; }
         `;
 
         if (settings?.customCSS) {
@@ -1014,6 +1081,26 @@ class TTSPlayButton extends HTMLElement {
             .tts-settings-icon:hover {
                 background-color: rgba(255, 255, 255, 0.2);
             }
+            .tts-settings-icon:focus-visible {
+                outline: 2px solid ${textColor};
+                outline-offset: 2px;
+                background-color: rgba(255, 255, 255, 0.2);
+            }
+            #tts__listent_content_${buttonId}.tts__listent_content:focus-visible {
+                outline: 2px solid ${textColor};
+                outline-offset: 2px;
+            }
+            .tts-sr-only {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border: 0;
+            }
         `;
 
         if (settings?.customCSS) {
@@ -1098,20 +1185,37 @@ class TTSPlayButton extends HTMLElement {
             </svg>
         `;
 
+        // Determine aria-label based on status
+        let ariaLabel = buttonText;
+        if (status === 'listen') {
+            if (this.speech && this.speech.listenStatus === 'listen') {
+                ariaLabel = buttonText; // Replay
+            } else {
+                ariaLabel = buttonText; // Listen / Play
+            }
+        } else if (status === 'pause') {
+            ariaLabel = buttonText; // Pause
+        } else if (status === 'resume') {
+            ariaLabel = buttonText; // Resume
+        }
+
         return `
-            <button id="tts__listent_content_${buttonId}" class="tts__listent_content ${settings.cssClass}" type="button" title="${buttonHoverTitle}">
-                <div class="tts-button-left">
-                    ${iconSVG}
-                    <span>${buttonText}</span>
-                </div>
-                <div class="tts-button-right">
-                    ${showSettingsIcon ? `
-                        <div class="tts-settings-icon" title="Settings" data-button-id="${buttonId}">
-                            ${settingsIconSVG}
-                        </div>
-                    ` : ''}
-                </div>
-            </button>
+            <div role="region" aria-label="Text to speech player">
+                <button id="tts__listent_content_${buttonId}" class="tts__listent_content ${settings.cssClass}" type="button" title="${buttonHoverTitle}" aria-label="${ariaLabel} audio">
+                    <div class="tts-button-left" aria-hidden="true">
+                        ${iconSVG}
+                        <span>${buttonText}</span>
+                    </div>
+                    <div class="tts-button-right">
+                        ${showSettingsIcon ? `
+                            <div class="tts-settings-icon" role="button" tabindex="0" aria-label="Player settings" title="Settings" data-button-id="${buttonId}">
+                                ${settingsIconSVG}
+                            </div>
+                        ` : ''}
+                    </div>
+                </button>
+                <div class="tts-sr-only tts-live-region" role="status" aria-live="polite" aria-atomic="true"></div>
+            </div>
         `;
     }
 
@@ -1125,12 +1229,35 @@ class TTSPlayButton extends HTMLElement {
         const newHTML = this.getNewButtonContent(buttonId, settings, this.listenStatus);
         wrapper.innerHTML = newHTML;
 
-        // Re-attach settings icon click handler
+        // Announce state change to screen readers
+        const liveRegion = wrapper.querySelector('.tts-live-region');
+        if (liveRegion) {
+            let announcement = '';
+            if (this.listenStatus === 'pause') {
+                announcement = 'Audio playing';
+            } else if (this.listenStatus === 'resume') {
+                announcement = 'Audio paused';
+            } else if (this.listenStatus === 'listen') {
+                announcement = 'Audio stopped';
+            }
+            // Clear and set to trigger announcement
+            liveRegion.textContent = '';
+            setTimeout(() => { liveRegion.textContent = announcement; }, 50);
+        }
+
+        // Re-attach settings icon click handler with keyboard support
         const settingsIcon = wrapper.querySelector('.tts-settings-icon');
         if (settingsIcon) {
             settingsIcon.addEventListener('click', (e) => {
                 e.stopPropagation();
                 this.openSettingsModal();
+            });
+            settingsIcon.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.openSettingsModal();
+                }
             });
         }
     }

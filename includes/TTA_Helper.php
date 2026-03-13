@@ -276,7 +276,8 @@ class TTA_Helper
         if (class_exists('TRP_Settings')) {
             $TRP_languages = new \TRP_Settings();
             // Get the available languages
-            $trp_languages = $TRP_languages->get_settings()['translation-languages'];
+            $trp_settings = $TRP_languages->get_settings();
+            $trp_languages = ( is_array( $trp_settings ) && isset( $trp_settings['translation-languages'] ) ) ? $trp_settings['translation-languages'] : [];
         }
 
         $datas = \apply_filters('tts_pro_plugins_data', [
@@ -1463,7 +1464,7 @@ class TTA_Helper
             if(is_numeric($key)) {
                 unset($duplicate_post_ids[$key]);
 
-                update_option('tts_duplicate_post_ids', $duplicate_post_ids);
+                update_option('tts_duplicate_post_ids', $duplicate_post_ids, false);
 
                 update_post_meta( $post_id, 'tts_mp3_file_urls', [] );
             };
@@ -1535,120 +1536,255 @@ class TTA_Helper
     }
 
     /**
-     * Generate Audio Schema markup for SEO
+     * Output AudioObject JSON-LD schema markup in wp_head for the current post.
      *
-     * This function generates JSON-LD schema markup for audio content when:
-     * - Pro version is active
-     * - Current player ID is greater than 2
+     * Hooked to wp_head at priority 99. Only outputs on singular posts/pages
+     * where the audio player is enabled.
      *
-     * @param array $params Array containing title, excerpt, post, content_read_time, mp3_file_urls, file_url_key, language, voice
-     * @return string The JSON-LD schema markup or empty string if conditions not met
+     * @since 2.2.0
+     * @return void
      */
-    public static function generate_audio_schema($params = [])
+    public static function output_audio_schema_head()
     {
-        //TODO:: add UI for enabling schema
-        // Check if pro version is active and player ID is greater than 2
-        if (!is_pro_active() || self::get_player_id() <= 2 || ! apply_filters('tts_enable_audio_schema_markup', true, $params)) {
-            return '';
+        if (!is_singular()) {
+            return;
         }
 
-        // Extract parameters
-        $title = isset($params['title']) ? $params['title'] : '';
-        $excerpt = isset($params['excerpt']) ? $params['excerpt'] : '';
-        $description = isset($params['description']) ? $params['description'] : '';
-        $post = isset($params['post']) ? $params['post'] : null;
-        $content_read_time = isset($params['content_read_time']) ? $params['content_read_time'] : 0;
-        $mp3_file_urls = isset($params['mp3_file_urls']) ? $params['mp3_file_urls'] : [];
-        $file_url_key = isset($params['file_url_key']) ? $params['file_url_key'] : '';
-        $language = isset($params['language']) ? $params['language'] : '';
-        $voice = isset($params['voice']) ? $params['voice'] : '';
-
-        // Validate required parameters
-        if (!$post || empty($mp3_file_urls) || !isset($mp3_file_urls[$file_url_key])) {
-            return '';
+        global $post;
+        if (!$post || !self::should_load_button($post, 'audio_schema')) {
+            return;
         }
 
-        // Get the audio file URL
-        $audio_url = $mp3_file_urls[$file_url_key];
+        // Allow disabling schema output entirely
+        if (!apply_filters('tts_enable_audio_schema_markup', true, $post)) {
+            return;
+        }
 
-        // Sanitize data for JSON output
-        $title_sanitized = $title;
-        $excerpt_sanitized = $excerpt;
-        $audio_url_sanitized = $audio_url;
-        $language_sanitized = esc_js($language);
-        $voice_sanitized = esc_js($voice);
+        $post_title = get_the_title($post);
+        $post_url   = get_permalink($post);
 
-        // Get post metadata
-        $post_date = get_the_date('c', $post->ID); // ISO 8601 format
-        $post_url = get_permalink($post->ID);
-        $post_author = get_the_author_meta('display_name', $post->post_author);
-        $site_name = get_bloginfo('name');
+        // Determine contentUrl: use MP3 if available (Pro), otherwise fall back to post URL (browser TTS)
+        $content_url     = $post_url;
+        $encoding_format = '';
 
-        // Calculate duration in ISO 8601 format (PT#M#S)
-        $duration = 'PT' . intval($content_read_time) . 'M';
+        if (is_pro_active()) {
+            $settings  = self::tts_get_settings('', $post->ID);
+            $language  = self::tts_site_language($settings);
+            $voice     = self::tts_get_voice($settings);
+            $lang_voice = self::get_player_language_and_player_voice($language, $voice, $settings, $post);
+            $language  = $lang_voice['language'];
+            $voice     = $lang_voice['voice'];
+            $file_url_key = self::tts_get_file_url_key($language, $voice);
 
-        $description = $excerpt_sanitized ?: $description;
-        $description = tta_clean_content($description);
+            $mp3_file_urls = get_post_meta($post->ID, 'tts_mp3_file_urls');
+            if (isset($mp3_file_urls[0])) {
+                $mp3_file_urls = $mp3_file_urls[0];
+            }
+            if (!empty($mp3_file_urls) && isset($mp3_file_urls[$file_url_key]) && $mp3_file_urls[$file_url_key]) {
+                $content_url     = $mp3_file_urls[$file_url_key];
+                $encoding_format = 'audio/mpeg';
+            }
+        }
+
+        // Estimate duration from word count at 150 wpm, format as ISO 8601 (PT5M30S)
+        $content       = get_the_content(null, false, $post);
+        $content       = wp_strip_all_tags($content);
+        $word_count    = str_word_count($content);
+        $total_seconds = ($word_count > 0) ? intval(ceil(($word_count / 150) * 60)) : 0;
+        $minutes       = intval(floor($total_seconds / 60));
+        $seconds       = $total_seconds % 60;
+        $duration      = 'PT';
+        if ($minutes > 0) {
+            $duration .= $minutes . 'M';
+        }
+        if ($seconds > 0 || $minutes === 0) {
+            $duration .= $seconds . 'S';
+        }
+
         // Build schema data array
         $schema_data = [
-            '@context' => 'https://schema.org',
-            '@type' => 'AudioObject',
-            'name' => $title_sanitized,
-            'description' => $description,
-            'contentUrl' => $audio_url_sanitized,
-            'encodingFormat' => 'audio/mpeg',
-            'duration' => $duration,
-            'uploadDate' => $post_date,
-            'transcript' => $description,
+            '@context'            => 'https://schema.org',
+            '@type'               => 'AudioObject',
+            'name'                => 'Listen to: ' . $post_title,
+            'description'         => 'Audio version of ' . $post_title,
+            'contentUrl'          => esc_url($content_url),
+            'duration'            => $duration,
+            'inLanguage'          => get_locale(),
+            'isAccessibleForFree' => true,
+            'uploadDate'          => get_the_date('c', $post->ID),
+            'associatedArticle'   => [
+                '@type'    => 'Article',
+                'headline' => $post_title,
+                'url'      => esc_url($post_url),
+            ],
         ];
 
-        // Add language if available
-        if (!empty($language_sanitized)) {
-            $schema_data['inLanguage'] = $language_sanitized;
+        if (!empty($encoding_format)) {
+            $schema_data['encodingFormat'] = $encoding_format;
         }
 
         // Add author information
+        $post_author = get_the_author_meta('display_name', $post->post_author);
         if (!empty($post_author)) {
             $schema_data['author'] = [
                 '@type' => 'Person',
-                'name' => esc_js($post_author)
+                'name'  => $post_author,
             ];
         }
 
         // Add publisher information
+        $site_name = get_bloginfo('name');
         if (!empty($site_name)) {
             $schema_data['publisher'] = [
                 '@type' => 'Organization',
-                'name' => esc_js($site_name)
+                'name'  => $site_name,
             ];
         }
 
-        // Add associated web page
-//        if (!empty($post_url)) {
-//            $schema_data['associatedArticle'] = [
-//                "@type" => "Article",
-//                'url' => esc_url($post_url),
-//                'headline' => $title_sanitized,
-//            ];
-//        }
+        /**
+         * Filter the AudioObject schema data before JSON-LD output.
+         *
+         * @since 2.2.0
+         * @param array   $schema_data The schema data array.
+         * @param WP_Post $post        The current post object.
+         */
+        $schema_data = apply_filters('tta_audio_schema', $schema_data, $post);
 
-        // Allow filtering of schema data
-        $schema_data = apply_filters('tts_audio_schema_data', $schema_data, $params, $post);
+        // Legacy filter for backward compatibility
+        $schema_data = apply_filters('tts_audio_schema_data', $schema_data, [], $post);
 
         // Generate JSON-LD markup
-        ob_start();
-        ?>
-<!-- Text To Audio Schema -->
-<script type="application/ld+json">
-<?php echo wp_json_encode($schema_data, JSON_PRETTY_PRINT |           // Makes it readable
-        JSON_UNESCAPED_SLASHES |      // Keeps URLs clean (/ instead of \/)
-        JSON_UNESCAPED_UNICODE        // Converts \u2019 to actual characters
-    ); ?>
-</script>
-        <?php
-        $schema_markup = ob_get_clean();
+        $json = wp_json_encode($schema_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+        $schema_markup = "<!-- Text To Audio Schema -->\n<script type=\"application/ld+json\">\n" . $json . "\n</script>\n";
 
         // Allow filtering of final schema markup
-        return apply_filters('tts_audio_schema_markup', $schema_markup, $schema_data, $params, $post);
+        $schema_markup = apply_filters('tts_audio_schema_markup', $schema_markup, $schema_data, [], $post);
+
+        echo $schema_markup;
+    }
+
+    /**
+     * Generate AudioObject JSON-LD schema markup string.
+     *
+     * @deprecated 2.2.0 Use TTA_Helper::output_audio_schema_head() instead.
+     *             Schema is now output via the wp_head hook automatically.
+     * @param array $params Legacy parameters (no longer used).
+     * @return string Empty string. Schema is output via wp_head hook.
+     */
+    public static function generate_audio_schema($params = [])
+    {
+        // Schema is now output via wp_head hook to avoid duplicate markup.
+        return '';
+    }
+
+    /**
+     * Detect caching/optimization plugins and their compatibility status.
+     *
+     * Returns an array of known caching plugins with:
+     *  - name: Human-readable plugin name
+     *  - slug: Plugin directory slug
+     *  - installed: Whether the plugin is installed
+     *  - active: Whether the plugin is currently active
+     *  - handled: Whether TTA_Hooks has JS exclusion filters for it
+     *
+     * @since 2.2.0
+     * @return array
+     */
+    public static function get_detected_caching_plugins() {
+        if ( ! function_exists( 'is_plugin_active' ) ) {
+            include_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+        if ( ! function_exists( 'get_plugins' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        $all_plugins = array_keys( get_plugins() );
+
+        $known_plugins = [
+            [
+                'name'     => __( 'Autoptimize', 'text-to-audio' ),
+                'slug'     => 'autoptimize',
+                'basename' => 'autoptimize/autoptimize.php',
+                'handled'  => true,
+            ],
+            [
+                'name'     => __( 'LiteSpeed Cache', 'text-to-audio' ),
+                'slug'     => 'litespeed-cache',
+                'basename' => 'litespeed-cache/litespeed-cache.php',
+                'handled'  => true,
+            ],
+            [
+                'name'     => __( 'WP Rocket', 'text-to-audio' ),
+                'slug'     => 'wp-rocket',
+                'basename' => 'wp-rocket/wp-rocket.php',
+                'handled'  => true,
+            ],
+            [
+                'name'     => __( 'W3 Total Cache', 'text-to-audio' ),
+                'slug'     => 'w3-total-cache',
+                'basename' => 'w3-total-cache/w3-total-cache.php',
+                'handled'  => true,
+            ],
+            [
+                'name'     => __( 'WP-Optimize', 'text-to-audio' ),
+                'slug'     => 'wp-optimize',
+                'basename' => 'wp-optimize/wp-optimize.php',
+                'handled'  => true,
+            ],
+            [
+                'name'     => __( 'SG Optimizer', 'text-to-audio' ),
+                'slug'     => 'sg-cachepress',
+                'basename' => 'sg-cachepress/sg-cachepress.php',
+                'handled'  => true,
+            ],
+        ];
+
+        $result = [];
+        foreach ( $known_plugins as $plugin ) {
+            $installed = in_array( $plugin['basename'], $all_plugins, true );
+            $active    = $installed && \is_plugin_active( $plugin['basename'] );
+
+            $result[] = [
+                'name'      => $plugin['name'],
+                'slug'      => $plugin['slug'],
+                'installed' => $installed,
+                'active'    => $active,
+                'handled'   => $plugin['handled'],
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get the URL of the most recently published post for the enabled post types.
+     *
+     * @since 2.2.0
+     * @return string The permalink of the most recent post, or home_url() as fallback.
+     */
+    public static function get_latest_post_preview_url() {
+        $settings   = self::tts_get_settings( 'settings' );
+        $post_types = isset( $settings['tta__settings_allow_listening_for_post_types'] )
+            ? (array) $settings['tta__settings_allow_listening_for_post_types']
+            : [ 'post' ];
+
+        if ( empty( $post_types ) ) {
+            $post_types = [ 'post' ];
+        }
+
+        $recent = get_posts( [
+            'numberposts' => 1,
+            'post_status' => 'publish',
+            'post_type'   => $post_types,
+            'orderby'     => 'date',
+            'order'       => 'DESC',
+        ] );
+
+        if ( ! empty( $recent ) ) {
+            return get_permalink( $recent[0]->ID );
+        }
+
+        return home_url();
     }
 }

@@ -340,7 +340,7 @@ class AtlasVoice_Analytics {
 			return rest_ensure_response( $response );
 		}
 
-		update_option( 'tta_analytics_settings', $body );
+		update_option( 'tta_analytics_settings', $body, false );
 
 		$saved_data = get_option( 'tta_analytics_settings' );
 
@@ -670,7 +670,7 @@ class AtlasVoice_Analytics {
      * @param string $to_date    Custom to date
      * @return array
      */
-    private function calculate_date_range( $date_range, $from_date = null, $to_date = null ) {
+    public function calculate_date_range( $date_range, $from_date = null, $to_date = null ) {
         $to   = current_time( 'mysql' );
         $from = null;
 
@@ -740,7 +740,7 @@ class AtlasVoice_Analytics {
      * @param array $results Raw analytics results
      * @return array
      */
-    private function aggregate_analytics_data( $results ) {
+    public function aggregate_analytics_data( $results ) {
         $aggregated = array(
             'summary' => array(
                 'total_posts'        => 0,
@@ -1219,7 +1219,7 @@ class AtlasVoice_Analytics {
      *
      * @return array Array with 'can_send' boolean and 'message' string
      */
-    private function check_email_capability() {
+    public function check_email_capability() {
         $result = array(
             'can_send'    => true,
             'message'     => '',
@@ -1345,7 +1345,7 @@ class AtlasVoice_Analytics {
         }
 
         // Save settings
-        update_option( 'tta_schedule_report_settings', $sanitized );
+        update_option( 'tta_schedule_report_settings', $sanitized, false );
 
         // Schedule or unschedule the cron event
         $this->schedule_report_cron( $sanitized );
@@ -1410,83 +1410,15 @@ class AtlasVoice_Analytics {
     }
 
     /**
-     * Send test report email (Pro only)
+     * Send test report email — delegated to Pro plugin.
      *
-     * @param $request
-     * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+     * @deprecated 2.3.0 Use TTA_Pro\TTA_Pro_Report_Email::send_test_report() via tta_pro/v1/send_test_report route.
      */
     public function send_test_report( $request ) {
-        if ( ! TTA_Helper::is_pro_active() ) {
-            return rest_ensure_response( array(
-                'status'  => false,
-                'message' => __( 'This feature requires Pro version.', 'text-to-audio' ),
-            ) );
-        }
-
-        $settings = get_option( 'tta_schedule_report_settings' );
-
-        if ( empty( $settings['recipients'] ) ) {
-            return rest_ensure_response( array(
-                'status'  => false,
-                'message' => __( 'Please configure recipients first.', 'text-to-audio' ),
-            ) );
-        }
-
-        // Check email capability first
-        $email_check = $this->check_email_capability();
-        if ( ! $email_check['can_send'] ) {
-            return rest_ensure_response( array(
-                'status'  => false,
-                'message' => $email_check['message'],
-            ) );
-        }
-
-        // Capture mail errors
-        $mail_error = null;
-        add_action( 'wp_mail_failed', function( $wp_error ) use ( &$mail_error ) {
-            $mail_error = $wp_error;
-        } );
-
-        // Generate and send the report
-        $result = $this->generate_and_send_report( $settings, true );
-
-        if ( $result ) {
-            $response = array(
-                'status'  => true,
-                'message' => __( 'Test report sent successfully! Check your inbox.', 'text-to-audio' ),
-            );
-
-            // Add warning if there's a concern about email delivery
-            if ( ! empty( $email_check['message'] ) ) {
-                $response['warning'] = $email_check['message'];
-            }
-        } else {
-            // Determine the failure reason
-            $error_message = __( 'Failed to send test report.', 'text-to-audio' );
-
-            if ( $mail_error instanceof \WP_Error ) {
-                $error_data = $mail_error->get_error_message();
-                if ( ! empty( $error_data ) ) {
-                    /* translators: %s: Error message from WP_Error */
-                    $error_message .= ' ' . sprintf( __( 'Error: %s', 'text-to-audio' ), $error_data );
-                }
-            } else {
-                // Provide helpful troubleshooting info
-                if ( empty( $email_check['smtp_plugin'] ) ) {
-                    $error_message .= ' ' . __( 'No SMTP plugin is configured. Please install and configure WP Mail SMTP or a similar plugin for reliable email delivery.', 'text-to-audio' );
-                } else {
-                    /* translators: %s: SMTP plugin name */
-                    $error_message .= ' ' . sprintf( __( 'Please check your %s plugin configuration and verify your SMTP credentials are correct.', 'text-to-audio' ), $email_check['smtp_plugin'] );
-                }
-            }
-
-            $response = array(
-                'status'  => false,
-                'message' => $error_message,
-            );
-        }
-
-        return rest_ensure_response( $response );
+        return rest_ensure_response( array(
+            'status'  => false,
+            'message' => __( 'This feature requires Pro version. Please use the Pro API endpoint.', 'text-to-audio' ),
+        ) );
     }
 
     /**
@@ -1531,36 +1463,38 @@ class AtlasVoice_Analytics {
         $hour       = isset( $time_parts[0] ) ? intval( $time_parts[0] ) : 9;
         $minute     = isset( $time_parts[1] ) ? intval( $time_parts[1] ) : 0;
 
-        $now = current_time( 'timestamp' );
+        // Use DateTime with site timezone for proper UTC conversion.
+        // wp_schedule_event() expects UTC timestamps — DateTime::getTimestamp() always returns UTC.
+        $tz  = wp_timezone();
+        $now = new \DateTime( 'now', $tz );
 
         switch ( $frequency ) {
             case 'daily':
-                // Next occurrence at specified time
-                $next_run = strtotime( "today {$hour}:{$minute}", $now );
-                if ( $next_run <= $now ) {
-                    $next_run = strtotime( "tomorrow {$hour}:{$minute}", $now );
+                $next = new \DateTime( "today {$hour}:{$minute}", $tz );
+                if ( $next <= $now ) {
+                    $next->modify( '+1 day' );
                 }
                 break;
 
             case 'weekly':
-                // Next occurrence on specified day at specified time
-                $next_run = strtotime( "next {$day} {$hour}:{$minute}", $now );
-                // If today is the scheduled day and time hasn't passed
-                $today_at_time = strtotime( "{$day} {$hour}:{$minute}", $now );
-                if ( $today_at_time > $now && strtolower( date( 'l', $now ) ) === strtolower( $day ) ) {
-                    $next_run = $today_at_time;
+                $next = new \DateTime( "today {$hour}:{$minute}", $tz );
+                // Find the next occurrence of the specified day.
+                $target_day = ucfirst( strtolower( $day ) );
+                $current_day = $now->format( 'l' );
+                if ( strtolower( $current_day ) === strtolower( $day ) && $next > $now ) {
+                    // Today is the day and time hasn't passed.
+                } else {
+                    $next = new \DateTime( "next {$target_day} {$hour}:{$minute}", $tz );
                 }
                 break;
 
             case 'monthly':
-                // Next occurrence on first of month at specified time
-                $next_run = strtotime( "first day of next month {$hour}:{$minute}", $now );
-                // If we're on the first and time hasn't passed
-                if ( date( 'j', $now ) === '1' ) {
-                    $today_at_time = strtotime( "today {$hour}:{$minute}", $now );
-                    if ( $today_at_time > $now ) {
-                        $next_run = $today_at_time;
-                    }
+                // First day of this month at specified time.
+                $next = new \DateTime( $now->format( 'Y-m-01' ) . " {$hour}:{$minute}", $tz );
+                if ( $next <= $now ) {
+                    // Move to first day of next month.
+                    $next->modify( 'first day of next month' );
+                    $next->setTime( $hour, $minute, 0 );
                 }
                 break;
 
@@ -1568,111 +1502,27 @@ class AtlasVoice_Analytics {
                 return false;
         }
 
-        return $next_run;
+        // getTimestamp() always returns UTC — exactly what wp_schedule_event() expects.
+        return $next->getTimestamp();
     }
 
     /**
-     * Generate and send the analytics report email
+     * Generate and send report — delegated to Pro plugin.
      *
-     * @param array $settings Schedule settings
-     * @param bool  $is_test  Whether this is a test email
-     * @return bool Success or failure
+     * @deprecated 2.3.0 Use TTA_Pro\TTA_Pro_Report_Email::generate_and_send_report().
      */
     public function generate_and_send_report( $settings = null, $is_test = false ) {
-        if ( ! $settings ) {
-            $settings = get_option( 'tta_schedule_report_settings' );
+        if ( class_exists( 'TTA_Pro\\TTA_Pro_Report_Email' ) ) {
+            $reporter = new \TTA_Pro\TTA_Pro_Report_Email();
+            return $reporter->generate_and_send_report( $settings, $is_test );
         }
-
-        if ( empty( $settings ) || empty( $settings['recipients'] ) ) {
-            return false;
-        }
-
-        // Get analytics data for the report period
-        $date_range = 'Last 7 Days';
-        switch ( $settings['frequency'] ) {
-            case 'daily':
-                $date_range = 'Yesterday';
-                break;
-            case 'weekly':
-                $date_range = 'Last 7 Days';
-                break;
-            case 'monthly':
-                $date_range = 'Last 30 Days';
-                break;
-        }
-
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'atlasvoice_analytics';
-
-        $dates = $this->calculate_date_range( $date_range );
-
-        $conditions = array();
-        $values     = array();
-
-        if ( $dates['from_date'] ) {
-            $conditions[] = 'created_at >= %s';
-            $values[]     = $dates['from_date'];
-        }
-        if ( $dates['to_date'] ) {
-            $conditions[] = 'updated_at <= %s';
-            $values[]     = $dates['to_date'];
-        }
-
-        $where_clause = '';
-        if ( ! empty( $conditions ) ) {
-            $where_clause = 'WHERE ' . implode( ' AND ', $conditions );
-        }
-
-        if ( ! empty( $values ) ) {
-            $query   = "SELECT * FROM $table_name $where_clause";
-            $results = $wpdb->get_results( $wpdb->prepare( $query, ...$values ), ARRAY_A );
-        } else {
-            $results = $wpdb->get_results( "SELECT * FROM $table_name", ARRAY_A );
-        }
-
-        // Aggregate the data
-        $aggregated = $this->aggregate_analytics_data( $results );
-
-        // Build email content
-        $site_name = get_bloginfo( 'name' );
-        /* translators: %s: Site name */
-        $subject = $is_test ? sprintf( __( '[Test] %s - TTS Analytics Report', 'text-to-audio' ), $site_name ) : sprintf( __( '%s - TTS Analytics Report', 'text-to-audio' ), $site_name );
-
-        $email_content = $this->build_report_email( $aggregated, $settings, $date_range, $is_test );
-
-        // Send to all recipients
-        $recipients = array_map( 'trim', explode( ',', $settings['recipients'] ) );
-        $headers    = array( 'Content-Type: text/html; charset=UTF-8' );
-        $success = true;
-        foreach ( $recipients as $recipient ) {
-            if ( is_email( $recipient ) ) {
-                $sent = wp_mail( $recipient, $subject, $email_content, $headers );
-                error_log(print_r([$sent, $recipient], true));
-                if ( ! $sent ) {
-                    $success = false;
-                }
-            }
-        }
-
-        // Log the report send
-        update_option( 'tta_last_report_sent', array(
-            'timestamp' => current_time( 'mysql' ),
-            'recipients' => $settings['recipients'],
-            'success'    => $success,
-            'is_test'    => $is_test,
-        ) );
-
-        return $success;
+        return false;
     }
 
     /**
-     * Build the HTML email content for the report
+     * Build the HTML email content for the report.
      *
-     * @param array  $data       Aggregated analytics data
-     * @param array  $settings   Schedule settings
-     * @param string $date_range Date range description
-     * @param bool   $is_test    Whether this is a test email
-     * @return string HTML email content
+     * @deprecated 2.3.0 Moved to TTA_Pro\TTA_Pro_Report_Email::build_report_email().
      */
     private function build_report_email( $data, $settings, $date_range, $is_test = false ) {
         $site_name = get_bloginfo( 'name' );
@@ -1824,7 +1674,7 @@ class AtlasVoice_Analytics {
 
                 <div class="footer">
                     <?php /* translators: %s: Site name */ ?>
-                    <p><?php printf( esc_html__( 'This report was generated by Text to Audio plugin on %s', 'text-to-audio' ), esc_html( $site_name ) ); ?></p>
+                    <p><?php printf( esc_html__( 'This report was generated by AtlasVoice on %s', 'text-to-audio' ), esc_html( $site_name ) ); ?></p>
                     <p style="margin-top: 8px;"><a href="<?php echo esc_url( admin_url( 'admin.php?page=tts-dashboard#/analytics' ) ); ?>"><?php esc_html_e( 'View full analytics dashboard', 'text-to-audio' ); ?></a></p>
                 </div>
             </div>
@@ -2184,7 +2034,7 @@ class AtlasVoice_Analytics {
 
     <div class="footer">
         <?php /* translators: %s: Site name */ ?>
-        <p><?php printf( esc_html__( 'Generated by Text to Audio Plugin for %s', 'text-to-audio' ), esc_html( $site_name ) ); ?></p>
+        <p><?php printf( esc_html__( 'Generated by AtlasVoice for %s', 'text-to-audio' ), esc_html( $site_name ) ); ?></p>
         <p><?php echo esc_html( get_bloginfo( 'url' ) ); ?></p>
     </div>
 </body>

@@ -181,7 +181,7 @@ export default function ExportSection({ onExportCSV, onExportPDF, dateRange, fro
         setIsSendingTest(true);
         try {
             const response = await fetch(
-                `${tta_obj.api_url}tta/v1/send_test_report`,
+                `${tta_obj.api_url}tta_pro/v1/send_test_report`,
                 {
                     method: "POST",
                     headers: {

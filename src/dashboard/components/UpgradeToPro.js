@@ -100,37 +100,37 @@ export default function UpgradeToPro({ promotionType = "general" }) {
       [
         // free video
         {
-          title: "How To Setup Text To Speech Player Properly?",
+          title: "How To Setup AtlasVoice Player Properly?",
           id: "h4VJxM-mh74?si=pmgy6TkvvppqtQV7",
           thumbnail: "https://i.ytimg.com/vi/h4VJxM-mh74/mqdefault.jpg",
         },
         {
           title:
-            "How To Setup Settings Menu For AtlasVoice Text To Speech Pro WordPress Plugin?",
+            "How To Setup Settings Menu For AtlasVoice Pro WordPress Plugin?",
           id: "yanuoEBfG4A?si=WVJYL656B1LmrEVY",
           thumbnail: "https://i.ytimg.com/vi/yanuoEBfG4A/mqdefault.jpg",
         },
         {
           title:
-            "Text To Speech Pro ( AtlasVoice Pro ) : How To Generate Bulk MP3 File?",
+            "AtlasVoice Pro: How To Generate Bulk MP3 File?",
           id: "HFoqlkPCP80?si=XVBvLEp2ATKT7EXz",
           thumbnail: "https://i.ytimg.com/vi/HFoqlkPCP80/mqdefault.jpg",
         },
         {
           title:
-            "How To Enable Analytics In Text To Speech Free And Pro WordPress Plugin?",
+            "How To Enable Analytics In AtlasVoice Free And Pro WordPress Plugin?",
           id: "amkrAtVQGBY?si=ZI1HfRBYaR60PVVx",
           thumbnail: "https://i.ytimg.com/vi/amkrAtVQGBY/mqdefault.jpg",
         },
         {
           title:
-            "How To Use Text Alias In AtlasVoice Text To Speech Free And Pro WordPress Plugin?",
+            "How To Use Text Alias In AtlasVoice Free And Pro WordPress Plugin?",
           id: "oeW652YKmG0?si=q97jAR0pTT3LhhH-",
           thumbnail: "https://i.ytimg.com/vi/oeW652YKmG0/mqdefault.jpg",
         },
         {
           title:
-            "How to Configure GTranslate And Text To Speech Pro ( AtlasVoice ) WordPress Plugin",
+            "How to Configure GTranslate And AtlasVoice Pro WordPress Plugin",
           id: "uMJBdM24w_c?si=XZ0hsLADaQiB2UN2",
           thumbnail: "https://i.ytimg.com/vi/uMJBdM24w_c/mqdefault.jpg",
         },
@@ -138,37 +138,37 @@ export default function UpgradeToPro({ promotionType = "general" }) {
       [
         // pro video - same list for now
         {
-          title: "How To Setup Text To Speech Player Properly?",
+          title: "How To Setup AtlasVoice Player Properly?",
           id: "h4VJxM-mh74?si=pmgy6TkvvppqtQV7",
           thumbnail: "https://i.ytimg.com/vi/h4VJxM-mh74/mqdefault.jpg",
         },
         {
           title:
-            "How To Setup Settings Menu For AtlasVoice Text To Speech Pro WordPress Plugin?",
+            "How To Setup Settings Menu For AtlasVoice Pro WordPress Plugin?",
           id: "yanuoEBfG4A?si=WVJYL656B1LmrEVY",
           thumbnail: "https://i.ytimg.com/vi/yanuoEBfG4A/mqdefault.jpg",
         },
         {
           title:
-            "Text To Speech Pro ( AtlasVoice Pro ) : How To Generate Bulk MP3 File?",
+            "AtlasVoice Pro: How To Generate Bulk MP3 File?",
           id: "HFoqlkPCP80?si=XVBvLEp2ATKT7EXz",
           thumbnail: "https://i.ytimg.com/vi/HFoqlkPCP80/mqdefault.jpg",
         },
         {
           title:
-            "How To Enable Analytics In Text To Speech Free And Pro WordPress Plugin?",
+            "How To Enable Analytics In AtlasVoice Free And Pro WordPress Plugin?",
           id: "amkrAtVQGBY?si=ZI1HfRBYaR60PVVx",
           thumbnail: "https://i.ytimg.com/vi/amkrAtVQGBY/mqdefault.jpg",
         },
         {
           title:
-            "How To Use Text Alias In AtlasVoice Text To Speech Free And Pro WordPress Plugin?",
+            "How To Use Text Alias In AtlasVoice Free And Pro WordPress Plugin?",
           id: "oeW652YKmG0?si=q97jAR0pTT3LhhH-",
           thumbnail: "https://i.ytimg.com/vi/oeW652YKmG0/mqdefault.jpg",
         },
         {
           title:
-            "How to Configure GTranslate And Text To Speech Pro ( AtlasVoice ) WordPress Plugin",
+            "How to Configure GTranslate And AtlasVoice Pro WordPress Plugin",
           id: "uMJBdM24w_c?si=XZ0hsLADaQiB2UN2",
           thumbnail: "https://i.ytimg.com/vi/uMJBdM24w_c/mqdefault.jpg",
         },
@@ -184,7 +184,7 @@ export default function UpgradeToPro({ promotionType = "general" }) {
       'Live integration support + 14-day money-back guarantee (<a target="_blank" href="https://atlasaidev.com/refund-policy/">conditions apply</a>).',
       "Multiple audio player support",
       "Unlimited Download MP3 files",
-      "200+ Voices with Google Cloud Text To Speech",
+      "200+ Voices with Google Cloud TTS",
       "Customizable content selection with CSS selectors",
       "Exclude content by categories, tags, IDs",
       "Advance analytics",
@@ -668,7 +668,7 @@ function tta__button_text_arr_callback($text_arr) {
                 >
                   <strong>PRO SUPPORTED LANGUAGES:</strong>
                   <br />
-                  Text To Speech Pro TTS Accessibility plugin supports these
+                  AtlasVoice Pro plugin supports these
                   languages.
                   <br />
                   <br />
@@ -699,7 +699,7 @@ function tta__button_text_arr_callback($text_arr) {
                 >
                   <strong>Free SUPPORTED LANGUAGES:</strong>
                   <br />
-                  Text To Speech TTS Accessibility plugin supports these
+                  AtlasVoice plugin supports these
                   languages.
                   <br />
                   <br />

@@ -33,6 +33,20 @@ class TTA_Activator {
 	 */
 	public static function activate( $renew_all_settings = false ) {
 		/**
+		 * Set activation redirect transient on first activation.
+		 * This triggers a one-time redirect to the settings page.
+		 */
+		if ( ! get_option( 'tta_has_been_activated_before', false ) ) {
+			set_transient( 'tta_activation_redirect', true, 60 );
+			update_option( 'tta_has_been_activated_before', true, false );
+		}
+
+		// Store activation timestamp for smart review notice timing.
+		if ( ! get_option( 'tta_activated_at' ) ) {
+			update_option( 'tta_activated_at', time(), false );
+		}
+
+		/**
 		 * Customization settings.
 		 */
 		if ( $renew_all_settings || ! get_option( 'tta_customize_settings' ) ) {
@@ -101,16 +115,38 @@ class TTA_Activator {
 
 		/**
 		 * Listening settings.
+		 * Auto-detect voice/language based on WordPress locale.
 		 */
 		if ( $renew_all_settings || ! get_option( 'tta_listening_settings' ) ) {
-			update_option( 'tta_listening_settings', array
-			(
-				"tta__listening_voice"  => "Google UK English Female",
-				"tta__listening_pitch"  => 1,
-				"tta__listening_rate"   => 1,
-				"tta__listening_volume" => 1,
-				"tta__listening_lang"   => "en-GB",
-			) );
+			$locale    = get_locale();
+			$voice_map = array(
+				'en_US' => array( 'Google US English', 'en-US' ),
+				'en_GB' => array( 'Google UK English Female', 'en-GB' ),
+				'en_AU' => array( 'Google UK English Female', 'en-GB' ),
+				'fr_FR' => array( 'Google français', 'fr-FR' ),
+				'de_DE' => array( 'Google Deutsch', 'de-DE' ),
+				'es_ES' => array( 'Google español', 'es-ES' ),
+				'it_IT' => array( 'Google italiano', 'it-IT' ),
+				'pt_BR' => array( 'Google português do Brasil', 'pt-BR' ),
+				'ja'    => array( 'Google 日本語', 'ja-JP' ),
+				'ko_KR' => array( 'Google 한국의', 'ko-KR' ),
+				'zh_CN' => array( 'Google 普通话（中国大陆）', 'zh-CN' ),
+				'zh_TW' => array( 'Google 國語（臺灣）', 'zh-TW' ),
+				'nl_NL' => array( 'Google Nederlands', 'nl-NL' ),
+				'ru_RU' => array( 'Google русский', 'ru-RU' ),
+				'hi_IN' => array( 'Google हिन्दी', 'hi-IN' ),
+				'id_ID' => array( 'Google Bahasa Indonesia', 'id-ID' ),
+				'pl_PL' => array( 'Google polski', 'pl-PL' ),
+			);
+			$voice_defaults = isset( $voice_map[ $locale ] ) ? $voice_map[ $locale ] : array( 'Google UK English Female', 'en-GB' );
+
+			update_option( 'tta_listening_settings', array(
+				'tta__listening_voice'  => $voice_defaults[0],
+				'tta__listening_pitch'  => 1,
+				'tta__listening_rate'   => 1,
+				'tta__listening_volume' => 1,
+				'tta__listening_lang'   => $voice_defaults[1],
+			), false );
 		}
 
 
@@ -123,7 +159,7 @@ class TTA_Activator {
 				"is_record_continously"   => true,
 				"tta__recording__lang"    => "en-US",
 				"tta__sentence_delimiter" => ".",
-			) );
+			), false );
 		}
 
 
@@ -154,14 +190,24 @@ class TTA_Activator {
 		 * analytics settings.
 		 */
 		if ( $renew_all_settings || ! get_option( 'tta_analytics_settings' ) ) {
-			update_option( 'tta_analytics_settings', array
-			(
-				"tts_enable_analytics"   => false,
-				"tts_trackable_post_ids" => []
+			$latest_post_ids = get_posts( array(
+				'posts_per_page' => 20,
+				'post_type'      => 'post',
+				'post_status'    => 'publish',
+				'fields'         => 'ids',
+				'orderby'        => 'date',
+				'order'          => 'DESC',
 			) );
+
+			update_option( 'tta_analytics_settings', array(
+				"tts_enable_analytics"   => true,
+				"tts_trackable_post_ids" => $latest_post_ids,
+			), false );
 		}
 
+
 		self::create_analytics_table_if_not_exists();
+		self::maybe_add_analytics_indexes();
 	}
 
 
@@ -181,14 +227,64 @@ class TTA_Activator {
 	        other_data longtext DEFAULT NULL,
 	        created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	        updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
-	        UNIQUE KEY id (id)
+	        UNIQUE KEY id (id),
+	        KEY idx_post_id (post_id),
+	        KEY idx_created_at (created_at),
+	        KEY idx_updated_at (updated_at)
 	    ) $charset_collate;";
 
 			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 			dbDelta( $sql );
-			update_option( 'atlasvoice_analytics_table_is_created', true );
+			update_option( 'atlasvoice_analytics_table_is_created', true, false );
 		}
 
+	}
+
+	/**
+	 * Add indexes to the analytics table for existing installations.
+	 *
+	 * Uses CREATE INDEX IF NOT EXISTS (MySQL 8.0+ / MariaDB 10.1.4+).
+	 * Falls back silently on older versions where the index already exists.
+	 *
+	 * @since 2.2.0
+	 */
+	public static function maybe_add_analytics_indexes() {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'atlasvoice_analytics';
+
+		if ( ! self::is_table_exists() ) {
+			return;
+		}
+
+		// Check if indexes have already been added to avoid running on every activation.
+		if ( get_option( 'tta_analytics_indexes_added', false ) ) {
+			return;
+		}
+
+		// Retrieve existing indexes on the table.
+		$existing_indexes = array();
+		$index_results    = $wpdb->get_results( "SHOW INDEX FROM `{$table_name}`", ARRAY_A );
+		if ( is_array( $index_results ) ) {
+			foreach ( $index_results as $row ) {
+				$existing_indexes[] = $row['Key_name'];
+			}
+		}
+
+		$indexes_to_add = array(
+			'idx_post_id'    => 'post_id',
+			'idx_created_at' => 'created_at',
+			'idx_updated_at' => 'updated_at',
+		);
+
+		foreach ( $indexes_to_add as $index_name => $column_name ) {
+			if ( ! in_array( $index_name, $existing_indexes, true ) ) {
+				$wpdb->query(
+					"ALTER TABLE `{$table_name}` ADD INDEX `{$index_name}` (`{$column_name}`)"
+				);
+			}
+		}
+
+		update_option( 'tta_analytics_indexes_added', true, false );
 	}
 
 	private static function is_table_exists() {
