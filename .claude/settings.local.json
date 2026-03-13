@@ -108,7 +108,10 @@
       "Bash(cmd //c \"cd /d D:\\\\xampp\\\\htdocs\\\\azizulhasan\\\\tts && wp option get tta_pro_onboarding_completed\")",
       "Bash(cmd //c \"cd /d D:\\\\xampp\\\\htdocs\\\\azizulhasan\\\\tts && wp option get tta_customize_settings --format=json\")",
       "Bash(cmd //c \"cd /d D:\\\\xampp\\\\htdocs\\\\azizulhasan\\\\tts && wp option get tta_onboarding_completed\")",
-      "Bash(curl -s -X POST \"http://localhost:6060/azizulhasan/tts/wp-json/tta_pro/v1/gtts_preview\" -H \"Content-Type: application/json\" -d '{\"\"\"\"lang\"\"\"\":\"\"\"\"en\"\"\"\"}')"
+      "Bash(curl -s -X POST \"http://localhost:6060/azizulhasan/tts/wp-json/tta_pro/v1/gtts_preview\" -H \"Content-Type: application/json\" -d '{\"\"\"\"lang\"\"\"\":\"\"\"\"en\"\"\"\"}')",
+      "WebFetch(domain:playground.wordpress.net)",
+      "WebFetch(domain:wordpress.github.io)",
+      "WebFetch(domain:developer.wordpress.org)"
     ]
   }
 }

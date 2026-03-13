@@ -15,7 +15,7 @@
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
  * Description:       The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
- * Version:           2.1.9
+ * Version:           2.1.10
  * Author:            AtlasAiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-3.0+
@@ -83,8 +83,8 @@ function is_pro_plugin_exists()
     return false;
 }
 
-//if (! is_pro_plugin_exists()  && !function_exists('ttsp_fs')) {
-if (!function_exists('ttsp_fs')) {
+if (! is_pro_plugin_exists()  && !function_exists('ttsp_fs')) {
+//if (!function_exists('ttsp_fs')) {
     // Create a helper function for easy SDK access.
     function ttsp_fs()
     {
@@ -153,7 +153,7 @@ if (function_exists('ttsp_fs')) {
  * Deactivation confirmation message with usage stats.
  * Shows users what they'll lose when deactivating.
  *
- * @since 2.1.9
+ * @since 2.1.10
  */
 if ( function_exists( 'ttsp_fs' ) ) {
     ttsp_fs()->add_filter( 'deactivation_confirmation_message', function ( $message ) {
@@ -200,7 +200,7 @@ if ( function_exists( 'ttsp_fs' ) ) {
     /**
      * Custom TTS-specific deactivation reasons.
      *
-     * @since 2.1.9
+     * @since 2.1.10
      */
     ttsp_fs()->add_filter( 'uninstall_reasons', function ( $reasons ) {
         return array(
@@ -325,7 +325,7 @@ if (!defined('TTA_PLUGIN_PATH')) {
     define('TTA_PLUGIN_PATH', trailingslashit(plugin_dir_path(TEXT_TO_AUDIO_ROOT_FILE)));
 }
 
-if (TTA_DEBUG_MODE  && WP_SITEURL) {
+if (TTA_DEBUG_MODE  && defined('WP_SITEURL') && WP_SITEURL) {
     $rest_url = WP_SITEURL . '/wp-json/';
     update_option('tts_rest_api_url', $rest_url, false);
     TTA_Cache::set('tts_rest_api_url', $rest_url);
@@ -346,7 +346,7 @@ class TTA_Init
     public function __construct()
     {
         if (!defined('TEXT_TO_AUDIO_VERSION')) {
-            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', ' 2.1.9'));
+            define('TEXT_TO_AUDIO_VERSION', value: apply_filters('tts_version', ' 2.1.10'));
         }
 
         if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
@@ -468,8 +468,8 @@ register_activation_hook(__FILE__, function () {
  * @since 2.1.8
  */
 add_action('admin_init', function () {
-    // One-time migration (2.1.9): enable analytics with latest 20 posts for existing free users.
-    if ( ! get_option( 'tta_analytics_migrated_2_1_9' ) ) {
+    // One-time migration (2.1.10): enable analytics with latest 20 posts for existing free users.
+    if ( ! get_option( 'tta_analytics_migrated_2_1_10' ) ) {
         $analytics = (array) get_option( 'tta_analytics_settings' );
         if ( empty( $analytics['tts_enable_analytics'] ) && empty( $analytics['tts_trackable_post_ids'] ) ) {
             $latest_ids = get_posts( array(
@@ -484,7 +484,7 @@ add_action('admin_init', function () {
             $analytics['tts_trackable_post_ids'] = $latest_ids;
             update_option( 'tta_analytics_settings', $analytics, false );
         }
-        update_option( 'tta_analytics_migrated_2_1_9', true, false );
+        update_option( 'tta_analytics_migrated_2_1_10', true, false );
     }
 
     // Allow resetting onboarding via ?page=text-to-audio&reset_onboard=true
