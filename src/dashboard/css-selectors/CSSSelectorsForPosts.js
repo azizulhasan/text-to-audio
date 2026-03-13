@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {__} from '@wordpress/i18n'
+import Icon from '../components/Icon';
 import {
      Form, Col, Container, Tooltip,
     OverlayTrigger,
@@ -170,8 +171,7 @@ export default function CSSSelectorsForPosts() {
                                                             </Tooltip>
                                                         }>
                                                         <Button bsPrefix="atlasVoice"
-                                                                className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
-                                                            className="fas fa-lock"/></Button>
+                                                                className="tta_btn m-0 p-0 text-dark bg-light border-0"><Icon name="lock" /></Button>
                                                     </OverlayTrigger>
                                                 ))}
                                             </>
@@ -224,8 +224,7 @@ export default function CSSSelectorsForPosts() {
                                                                 {__('Exclude Content By CSS Selectors feature is available in pro version', 'text-to-audio')}
                                                             </Tooltip>
                                                         }>
-                                                        <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
-                                                            className="fas fa-lock"/></Button>
+                                                        <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><Icon name="lock" /></Button>
                                                     </OverlayTrigger>
                                                 ))}
                                             </>
@@ -278,8 +277,7 @@ export default function CSSSelectorsForPosts() {
                                                             {__('Exclude Tags. So that its content skiped. Like ( Subscript, Superscript etc.) This is a pro feature.', 'text-to-audio')}
                                                         </Tooltip>
                                                     }>
-                                                    <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
-                                                        className="fas fa-lock"/></Button>
+                                                    <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><Icon name="lock" /></Button>
                                                 </OverlayTrigger>
                                             ))}
                                         </>
@@ -332,8 +330,7 @@ export default function CSSSelectorsForPosts() {
                                                             {__('Excluding texts to be spoken is a pro feature.', 'text-to-audio')}
                                                         </Tooltip>
                                                     }>
-                                                    <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><i
-                                                        className="fas fa-lock"/></Button>
+                                                    <Button className="tta_btn m-0 p-0 text-dark bg-light border-0"><Icon name="lock" /></Button>
                                                 </OverlayTrigger>
                                             ))}
                                         </>

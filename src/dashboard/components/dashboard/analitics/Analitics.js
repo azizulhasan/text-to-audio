@@ -807,7 +807,7 @@ export default function Analytics() {
                                     />
                                 </div>
                                 <div className="tta_analytics_header_right">
-                                    {/* Export buttons - visible only for Pro */}
+                                    {/* Export buttons - inline for Pro users only */}
                                     {isProActive && analytics.tts_enable_analytics && (
                                         <ExportSection
                                             onExportCSV={handleExportCSV}
@@ -829,6 +829,48 @@ export default function Analytics() {
                                 {__("Track and analyze your TTS player engagement to understand listener behavior.", "text-to-audio")}
                             </p>
                         </div>
+
+                        {/* Export & Reports upsell for free users */}
+                        {!isProActive && analytics.tts_enable_analytics && (
+                            <div style={{
+                                background: '#f8f9fa',
+                                border: '1px dashed #dee2e6',
+                                borderRadius: '8px',
+                                padding: '16px 24px',
+                                marginBottom: '16px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                flexWrap: 'wrap',
+                                gap: '12px',
+                            }}>
+                                <div>
+                                    <strong style={{ fontSize: '14px', color: '#1f2937' }}>
+                                        {__("Export & Schedule Reports", "text-to-audio")}
+                                    </strong>
+                                    <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#6b7280' }}>
+                                        {__("Export CSV/PDF reports and schedule automated email digests.", "text-to-audio")}
+                                    </p>
+                                </div>
+                                <a
+                                    href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        background: '#FF7853',
+                                        color: '#fff',
+                                        padding: '8px 20px',
+                                        borderRadius: '6px',
+                                        textDecoration: 'none',
+                                        fontSize: '13px',
+                                        fontWeight: '600',
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                >
+                                    {__("Upgrade to Pro", "text-to-audio")}
+                                </a>
+                            </div>
+                        )}
 
                         {/* Show content only when analytics is enabled */}
                         {analytics.tts_enable_analytics ? (

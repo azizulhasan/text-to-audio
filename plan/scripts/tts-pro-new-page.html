@@ -1,0 +1,725 @@
+<!-- wp:html -->
+<style>
+:root {
+  --tts-primary: #2563EB;
+  --tts-primary-dark: #1D4ED8;
+  --tts-primary-light: #3B82F6;
+  --tts-accent: #10B981;
+  --tts-accent-dark: #059669;
+  --tts-dark: #0F172A;
+  --tts-slate: #1E293B;
+  --tts-gray: #64748B;
+  --tts-light: #F1F5F9;
+  --tts-white: #FFFFFF;
+  --tts-border: #E2E8F0;
+}
+.tts-landing * { box-sizing: border-box; margin: 0; padding: 0; }
+.tts-landing { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #334155; line-height: 1.6; overflow-x: hidden; }
+.tts-landing h1, .tts-landing h2, .tts-landing h3, .tts-landing h4 { color: var(--tts-dark); line-height: 1.25; }
+.tts-container { max-width: 1140px; margin: 0 auto; padding: 0 20px; }
+.tts-btn { display: inline-block; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; text-decoration: none !important; cursor: pointer; border: none; transition: all 0.2s; }
+.tts-btn-primary { background: var(--tts-primary); color: #fff !important; }
+.tts-btn-primary:hover { background: var(--tts-primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.35); color: #fff !important; }
+.tts-btn-accent { background: var(--tts-accent); color: #fff !important; }
+.tts-btn-accent:hover { background: var(--tts-accent-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16,185,129,0.35); color: #fff !important; }
+.tts-btn-outline { background: transparent; color: var(--tts-primary) !important; border: 2px solid var(--tts-primary); }
+.tts-btn-outline:hover { background: var(--tts-primary); color: #fff !important; }
+.tts-btn-sm { padding: 10px 24px; font-size: 14px; }
+.tts-btn-lg { padding: 16px 40px; font-size: 18px; }
+.tts-badge { display: inline-block; background: #DBEAFE; color: #1D4ED8; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+.tts-badge-green { background: #D1FAE5; color: #065F46; }
+.tts-badge-amber { background: #FEF3C7; color: #92400E; }
+
+/* Hero */
+.tts-hero { background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #1E3A5F 100%); color: #fff; padding: 80px 0 60px; text-align: center; position: relative; overflow: hidden; }
+.tts-hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 50%, rgba(37,99,235,0.12) 0%, transparent 50%); }
+.tts-hero h1 { font-size: clamp(32px, 5vw, 52px); color: #fff; margin-bottom: 20px; position: relative; }
+.tts-hero h1 span { background: linear-gradient(135deg, #60A5FA, #2563EB, #38BDF8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.tts-hero .tts-hero-sub { font-size: 18px; color: #CBD5E1; max-width: 700px; margin: 0 auto 32px; position: relative; line-height: 1.7; }
+.tts-hero-ctas { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; position: relative; }
+.tts-hero-badges { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 28px; position: relative; }
+.tts-hero-badges .tts-hb { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #94A3B8; background: rgba(255,255,255,0.06); padding: 6px 14px; border-radius: 20px; }
+.tts-hero-badges .tts-hb-icon { font-size: 15px; }
+
+/* Social Proof Stats */
+.tts-stats-bar { background: var(--tts-white); border-bottom: 1px solid var(--tts-border); padding: 32px 0; }
+.tts-stats-inner { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+.tts-stat-item { text-align: center; padding: 0 28px; border-right: 1px solid var(--tts-border); }
+.tts-stat-item:last-child { border-right: none; }
+.tts-stat-num { font-size: 30px; font-weight: 800; color: var(--tts-primary); display: block; line-height: 1.2; }
+.tts-stat-label { font-size: 13px; color: var(--tts-gray); font-weight: 500; }
+
+/* Trust Bar */
+.tts-trust { background: var(--tts-light); padding: 20px 0; }
+.tts-trust-inner { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; align-items: center; }
+.tts-trust-item { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--tts-gray); font-weight: 500; }
+
+/* Section */
+.tts-section { padding: 72px 0; }
+.tts-section-alt { background: var(--tts-light); }
+.tts-section-title { text-align: center; margin-bottom: 48px; }
+.tts-section-title h2 { font-size: clamp(26px, 4vw, 38px); margin-bottom: 12px; }
+.tts-section-title p { font-size: 17px; color: var(--tts-gray); max-width: 640px; margin: 0 auto; }
+
+/* Features Grid */
+.tts-features { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 28px; }
+.tts-feature-card { background: var(--tts-white); border: 1px solid var(--tts-border); border-radius: 12px; padding: 32px; transition: all 0.2s; }
+.tts-feature-card:hover { border-color: var(--tts-primary); box-shadow: 0 4px 20px rgba(37,99,235,0.1); transform: translateY(-2px); }
+.tts-feature-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 24px; }
+.tts-feature-card h3 { font-size: 19px; margin-bottom: 8px; }
+.tts-feature-card p { font-size: 15px; color: var(--tts-gray); line-height: 1.6; }
+.tts-icon-blue { background: #DBEAFE; }
+.tts-icon-green { background: #D1FAE5; }
+.tts-icon-amber { background: #FEF3C7; }
+.tts-icon-purple { background: #EDE9FE; }
+.tts-icon-pink { background: #FCE7F3; }
+.tts-icon-cyan { background: #CFFAFE; }
+
+/* How It Works */
+.tts-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; max-width: 960px; margin: 0 auto; }
+.tts-step { text-align: center; padding: 28px 20px; position: relative; }
+.tts-step-num { width: 56px; height: 56px; background: var(--tts-primary); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 800; margin: 0 auto 16px; }
+.tts-step h3 { font-size: 18px; margin-bottom: 8px; }
+.tts-step p { font-size: 14px; color: var(--tts-gray); line-height: 1.7; }
+.tts-step-connector { display: none; }
+@media (min-width: 769px) {
+  .tts-step-connector { display: block; position: absolute; top: 48px; right: -16px; width: 32px; height: 2px; background: var(--tts-border); }
+  .tts-step:last-child .tts-step-connector { display: none; }
+}
+
+/* Comparison Table */
+.tts-compare-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.tts-compare { width: 100%; border-collapse: collapse; background: var(--tts-white); border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.tts-compare thead th { background: var(--tts-dark); color: #fff; padding: 16px 20px; text-align: left; font-size: 15px; }
+.tts-compare thead th:nth-child(3) { background: var(--tts-primary); }
+.tts-compare tbody td { padding: 14px 20px; border-bottom: 1px solid var(--tts-border); font-size: 14px; }
+.tts-compare tbody tr:last-child td { border-bottom: none; }
+.tts-compare tbody td:first-child { font-weight: 600; color: var(--tts-dark); }
+.tts-check { color: var(--tts-accent); font-weight: 700; font-size: 18px; }
+.tts-cross { color: #CBD5E1; font-size: 18px; }
+.tts-compare tbody td:nth-child(3) { background: #EFF6FF; }
+
+/* Testimonials */
+.tts-testimonials { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px; }
+.tts-testimonial-card { background: var(--tts-white); border: 1px solid var(--tts-border); border-radius: 12px; padding: 32px; position: relative; }
+.tts-testimonial-card::before { content: '\201C'; position: absolute; top: 16px; left: 24px; font-size: 48px; color: var(--tts-primary); opacity: 0.15; line-height: 1; font-family: Georgia, serif; }
+.tts-testimonial-card blockquote { font-size: 15px; color: #475569; line-height: 1.7; font-style: italic; margin-bottom: 20px; padding-top: 8px; }
+.tts-testimonial-author { display: flex; align-items: center; gap: 12px; }
+.tts-testimonial-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--tts-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+.tts-testimonial-info strong { display: block; font-size: 14px; color: var(--tts-dark); }
+.tts-testimonial-info span { font-size: 13px; color: var(--tts-gray); }
+.tts-stars { color: #F59E0B; font-size: 14px; letter-spacing: 2px; margin-bottom: 12px; }
+
+/* Pricing */
+.tts-pricing-toggle { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 40px; }
+.tts-pricing-toggle span { font-size: 15px; font-weight: 500; color: var(--tts-gray); cursor: pointer; transition: color 0.2s; }
+.tts-pricing-toggle span.tts-active { color: var(--tts-dark); font-weight: 700; }
+.tts-toggle-switch { width: 52px; height: 28px; background: var(--tts-primary); border-radius: 14px; position: relative; cursor: pointer; transition: background 0.3s; flex-shrink: 0; }
+.tts-toggle-switch::after { content: ''; position: absolute; width: 22px; height: 22px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.3s; }
+.tts-toggle-switch.tts-lifetime::after { transform: translateX(24px); }
+.tts-save-badge { background: var(--tts-accent); color: #fff; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; }
+
+.tts-pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; max-width: 1000px; margin: 0 auto; }
+.tts-price-card { background: var(--tts-white); border: 2px solid var(--tts-border); border-radius: 16px; padding: 36px 28px; text-align: center; position: relative; transition: all 0.2s; }
+.tts-price-card:hover { border-color: var(--tts-primary); box-shadow: 0 8px 30px rgba(37,99,235,0.12); }
+.tts-price-card.tts-popular { border-color: var(--tts-primary); box-shadow: 0 8px 30px rgba(37,99,235,0.15); transform: scale(1.03); }
+.tts-price-card.tts-popular::before { content: 'Most Popular'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--tts-primary); color: #fff; padding: 4px 20px; border-radius: 20px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+.tts-price-card h3 { font-size: 20px; margin-bottom: 4px; }
+.tts-price-card .tts-price-sites { font-size: 14px; color: var(--tts-gray); margin-bottom: 20px; }
+.tts-price-amount { font-size: 48px; font-weight: 800; color: var(--tts-dark); margin-bottom: 4px; }
+.tts-price-amount sup { font-size: 18px; font-weight: 400; color: var(--tts-gray); vertical-align: super; }
+.tts-price-period { font-size: 14px; color: var(--tts-gray); margin-bottom: 24px; }
+.tts-price-features { list-style: none; text-align: left; margin-bottom: 28px; }
+.tts-price-features li { padding: 6px 0; font-size: 14px; color: #475569; display: flex; align-items: flex-start; gap: 8px; }
+.tts-price-features li::before { content: '\2713'; color: var(--tts-accent); font-weight: 700; flex-shrink: 0; }
+.tts-pricing-note { text-align: center; margin-top: 28px; font-size: 14px; color: var(--tts-gray); }
+
+/* FAQ */
+.tts-faq-list { max-width: 760px; margin: 0 auto; }
+.tts-faq-item { border: 1px solid var(--tts-border); border-radius: 10px; margin-bottom: 12px; overflow: hidden; background: var(--tts-white); }
+.tts-faq-q { padding: 18px 24px; font-weight: 600; font-size: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: var(--tts-dark); transition: color 0.2s; }
+.tts-faq-q:hover { color: var(--tts-primary); }
+.tts-faq-q::after { content: '+'; font-size: 22px; color: var(--tts-gray); transition: transform 0.2s; flex-shrink: 0; margin-left: 16px; }
+.tts-faq-item.tts-open .tts-faq-q::after { content: '\2212'; color: var(--tts-primary); }
+.tts-faq-a { padding: 0 24px 18px; font-size: 15px; color: var(--tts-gray); display: none; line-height: 1.7; }
+.tts-faq-item.tts-open .tts-faq-a { display: block; }
+
+/* Final CTA */
+.tts-cta-section { background: linear-gradient(135deg, #1E3A5F, #2563EB); color: #fff; padding: 72px 0; text-align: center; }
+.tts-cta-section h2 { font-size: clamp(26px, 4vw, 36px); color: #fff; margin-bottom: 16px; }
+.tts-cta-section p { font-size: 17px; color: #BFDBFE; max-width: 580px; margin: 0 auto 32px; }
+
+/* Voice Provider Logos (inline mini-badges in hero) */
+.tts-provider-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 20px; position: relative; }
+.tts-provider-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); padding: 6px 14px; border-radius: 8px; font-size: 13px; color: #E2E8F0; font-weight: 500; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tts-hero { padding: 52px 0 40px; }
+  .tts-section { padding: 48px 0; }
+  .tts-features { grid-template-columns: 1fr; }
+  .tts-steps { grid-template-columns: 1fr; gap: 16px; }
+  .tts-pricing-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+  .tts-price-card.tts-popular { transform: none; }
+  .tts-compare thead th, .tts-compare tbody td { padding: 10px 12px; font-size: 13px; }
+  .tts-testimonials { grid-template-columns: 1fr; }
+  .tts-stat-item { border-right: none; padding: 8px 20px; }
+  .tts-stats-inner { gap: 8px; }
+  .tts-hero-badges { gap: 10px; }
+}
+
+@media (max-width: 480px) {
+  .tts-btn-lg { padding: 14px 28px; font-size: 16px; }
+  .tts-price-amount { font-size: 40px; }
+}
+</style>
+
+<div class="tts-landing">
+
+<!-- ==================== HERO ==================== -->
+<section class="tts-hero">
+  <div class="tts-container">
+    <span class="tts-badge" style="margin-bottom:16px;">WordPress Text to Speech Plugin</span>
+    <h1>Turn Your Content Into<br><span>Lifelike Audio</span> Instantly</h1>
+    <p class="tts-hero-sub">AtlasVoice Text to Speech Pro adds natural AI-powered audio narration to every page and post. 4 voice providers, 51+ languages, MP3 downloads, analytics, and SEO-optimized audio schema &mdash; all from your WordPress dashboard.</p>
+    <div class="tts-hero-ctas">
+      <a href="#pricing" class="tts-btn tts-btn-accent tts-btn-lg">Buy Now &mdash; From $59/yr</a>
+      <a href="https://wordpress.org/plugins/text-to-audio/" target="_blank" rel="noopener" class="tts-btn tts-btn-lg" style="background:rgba(255,255,255,0.12);color:#fff !important;border:1px solid rgba(255,255,255,0.2);">Try Free Version</a>
+    </div>
+    <div class="tts-hero-badges">
+      <span class="tts-hb"><span class="tts-hb-icon">&#9733;</span> 4.8/5 Rating (83 Reviews)</span>
+      <span class="tts-hb"><span class="tts-hb-icon">&#128274;</span> 30-Day Money-Back Guarantee</span>
+      <span class="tts-hb"><span class="tts-hb-icon">&#9889;</span> No Coding Required</span>
+    </div>
+    <div class="tts-provider-row">
+      <span class="tts-provider-chip">&#127911; AtlasVoice AI</span>
+      <span class="tts-provider-chip">&#9729; Google Cloud TTS</span>
+      <span class="tts-provider-chip">&#128172; OpenAI / ChatGPT</span>
+      <span class="tts-provider-chip">&#127908; ElevenLabs</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SOCIAL PROOF STATS ==================== -->
+<section class="tts-stats-bar">
+  <div class="tts-container">
+    <div class="tts-stats-inner">
+      <div class="tts-stat-item">
+        <span class="tts-stat-num">315,000+</span>
+        <span class="tts-stat-label">Downloads</span>
+      </div>
+      <div class="tts-stat-item">
+        <span class="tts-stat-num">4.8/5</span>
+        <span class="tts-stat-label">Star Rating</span>
+      </div>
+      <div class="tts-stat-item">
+        <span class="tts-stat-num">4,000+</span>
+        <span class="tts-stat-label">Active Websites</span>
+      </div>
+      <div class="tts-stat-item">
+        <span class="tts-stat-num">51+</span>
+        <span class="tts-stat-label">Languages</span>
+      </div>
+      <div class="tts-stat-item">
+        <span class="tts-stat-num">4</span>
+        <span class="tts-stat-label">AI Voice Providers</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== TRUST BAR ==================== -->
+<section class="tts-trust">
+  <div class="tts-container">
+    <div class="tts-trust-inner">
+      <div class="tts-trust-item">
+        <svg width="18" height="18" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        ADA &amp; WCAG Accessibility
+      </div>
+      <div class="tts-trust-item">
+        <svg width="18" height="18" fill="none" stroke="#10B981" stroke-width="2" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
+        WPML &amp; GTranslate Compatible
+      </div>
+      <div class="tts-trust-item">
+        <svg width="18" height="18" fill="none" stroke="#F59E0B" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 6.91-1.01z"/></svg>
+        Works With All Page Builders
+      </div>
+      <div class="tts-trust-item">
+        <svg width="18" height="18" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        Caching Plugin Compatible
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== KEY FEATURES ==================== -->
+<section class="tts-section" id="features">
+  <div class="tts-container">
+    <div class="tts-section-title">
+      <span class="tts-badge tts-badge-green">Pro Features</span>
+      <h2>Everything You Need for Professional Audio on WordPress</h2>
+      <p>AtlasVoice Text to Speech Pro gives you the most complete audio experience available for WordPress &mdash; from AI voice providers to analytics and SEO.</p>
+    </div>
+    <div class="tts-features">
+
+      <div class="tts-feature-card">
+        <div class="tts-feature-icon tts-icon-blue">&#127911;</div>
+        <h3>4 AI Voice Providers</h3>
+        <p>Choose from AtlasVoice AI (included free, 63 languages), Google Cloud TTS (300+ voices, 90+ languages), OpenAI ChatGPT TTS (6 HD voices), or ElevenLabs (100+ ultra-realistic voices). Mix and match per post type.</p>
+      </div>
+
+      <div class="tts-feature-card">
+        <div class="tts-feature-icon tts-icon-green">&#128229;</div>
+        <h3>MP3 Generation &amp; Downloads</h3>
+        <p>Bulk generate MP3 files for hundreds of posts in a single click. Let visitors download audio files directly. Serve cached MP3s for instant playback without re-generating audio.</p>
+      </div>
+
+      <div class="tts-feature-card">
+        <div class="tts-feature-icon tts-icon-purple">&#128202;</div>
+        <h3>Advanced Analytics</h3>
+        <p>Track listener engagement with detailed funnels, audio heatmaps, device breakdowns, peak listening hours, and completion rates. Understand exactly how visitors interact with your audio.</p>
+      </div>
+
+      <div class="tts-feature-card">
+        <div class="tts-feature-icon tts-icon-amber">&#128269;</div>
+        <h3>Audio Schema for SEO</h3>
+        <p>Automatically add structured data (AudioObject schema) to your pages. Help Google display rich audio results in search, increasing your click-through rate and organic visibility.</p>
+      </div>
+
+      <div class="tts-feature-card">
+        <div class="tts-feature-icon tts-icon-pink">&#127912;</div>
+        <h3>6 Player Styles + Floating Player</h3>
+        <p>Choose from 6 customizable audio player designs to match your brand. Enable a floating sticky player so visitors can keep listening while they scroll through your content.</p>
+      </div>
+
+      <div class="tts-feature-card">
+        <div class="tts-feature-icon tts-icon-cyan">&#127919;</div>
+        <h3>CSS Selector Targeting + Content Control</h3>
+        <p>Target specific page elements for audio conversion using CSS selectors. Exclude headers, footers, or ads. Add custom audio intros and outros for a polished listening experience.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ==================== HOW IT WORKS ==================== -->
+<section class="tts-section tts-section-alt">
+  <div class="tts-container">
+    <div class="tts-section-title">
+      <h2>Up and Running in 3 Simple Steps</h2>
+      <p>Add professional AI audio narration to your WordPress site in under 5 minutes.</p>
+    </div>
+    <div class="tts-steps">
+      <div class="tts-step">
+        <div class="tts-step-num">1</div>
+        <h3>Install &amp; Activate</h3>
+        <p>Install the free Text to Audio plugin from WordPress.org, then upload and activate the Pro add-on from your WordPress dashboard. No coding needed.</p>
+        <span class="tts-step-connector"></span>
+      </div>
+      <div class="tts-step">
+        <div class="tts-step-num">2</div>
+        <h3>Choose Your Voice</h3>
+        <p>Pick from free browser voices right away, or connect Google Cloud TTS, OpenAI, or ElevenLabs for premium AI voices. Select your language, speed, and pitch.</p>
+        <span class="tts-step-connector"></span>
+      </div>
+      <div class="tts-step">
+        <div class="tts-step-num">3</div>
+        <h3>Publish &amp; Listen</h3>
+        <p>An audio player appears automatically on your posts and pages. Visitors click play and hear your content read aloud instantly. No extra work required.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== FREE vs PRO COMPARISON ==================== -->
+<section class="tts-section" id="compare">
+  <div class="tts-container">
+    <div class="tts-section-title">
+      <h2>Free vs Pro Comparison</h2>
+      <p>See exactly what you unlock when you upgrade to AtlasVoice Text to Speech Pro.</p>
+    </div>
+    <div class="tts-compare-wrap">
+      <table class="tts-compare">
+        <thead>
+          <tr>
+            <th style="width:44%;">Feature</th>
+            <th style="width:28%;text-align:center;">Free</th>
+            <th style="width:28%;text-align:center;">Pro</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Browser-Based Voices (Web Speech API)</td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>AtlasVoice AI Voices (63 Languages)</td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>Basic Audio Player</td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>Gutenberg Block &amp; Shortcode</td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>Post Type Selection</td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>Google Cloud TTS (300+ Voices, 90+ Langs)</td>
+            <td style="text-align:center;"><span class="tts-cross">&#10005;</span></td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>OpenAI / ChatGPT TTS (6 HD Voices)</td>
+            <td style="text-align:center;"><span class="tts-cross">&#10005;</span></td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>ElevenLabs (100+ Ultra-Realistic Voices)</td>
+            <td style="text-align:center;"><span class="tts-cross">&#10005;</span></td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>MP3 Generation &amp; Bulk Export</td>
+            <td style="text-align:center;"><span class="tts-cross">&#10005;</span></td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>Visitor MP3 Downloads</td>
+            <td style="text-align:center;"><span class="tts-cross">&#10005;</span></td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>Advanced Analytics &amp; Heatmaps</td>
+            <td style="text-align:center;"><span class="tts-cross">&#10005;</span></td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>Audio Schema (SEO Rich Results)</td>
+            <td style="text-align:center;"><span class="tts-cross">&#10005;</span></td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>6 Player Styles + Floating Player</td>
+            <td style="text-align:center;"><span class="tts-cross">&#10005;</span></td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>CSS Selector Targeting</td>
+            <td style="text-align:center;"><span class="tts-cross">&#10005;</span></td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>Audio Intros &amp; Outros</td>
+            <td style="text-align:center;"><span class="tts-cross">&#10005;</span></td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+          </tr>
+          <tr>
+            <td>Priority Support</td>
+            <td style="text-align:center;"><span class="tts-cross">&#10005;</span></td>
+            <td style="text-align:center;"><span class="tts-check">&#10003;</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== TESTIMONIALS ==================== -->
+<section class="tts-section tts-section-alt">
+  <div class="tts-container">
+    <div class="tts-section-title">
+      <h2>Trusted by 4,000+ WordPress Sites</h2>
+      <p>Hear what our users have to say about AtlasVoice Text to Speech.</p>
+    </div>
+    <div class="tts-testimonials">
+
+      <div class="tts-testimonial-card">
+        <div class="tts-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <blockquote>&ldquo;Great plugin for WordPress, allows for more accessibility. Enabling the page content reading feature, thus helping users with low vision.&rdquo;</blockquote>
+        <div class="tts-testimonial-author">
+          <div class="tts-testimonial-avatar">R</div>
+          <div class="tts-testimonial-info">
+            <strong>Rhuan Souza</strong>
+            <span>@rhuandevops</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tts-testimonial-card">
+        <div class="tts-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <blockquote>&ldquo;A text to speech plugin that is automatically added to the articles where you can add Google and Microsoft voiceovers, I love the interface.&rdquo;</blockquote>
+        <div class="tts-testimonial-author">
+          <div class="tts-testimonial-avatar">H</div>
+          <div class="tts-testimonial-info">
+            <strong>Huseyin Yilmazer</strong>
+            <span>@huseyinyilmazer</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tts-testimonial-card">
+        <div class="tts-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <blockquote>&ldquo;I've just gone through 4 or 5 text-to-speech plugins for WordPress. Either they don't work or they make it too hard to set up.&rdquo;</blockquote>
+        <div class="tts-testimonial-author">
+          <div class="tts-testimonial-avatar">R</div>
+          <div class="tts-testimonial-info">
+            <strong>Remo Campopiano</strong>
+            <span>Remo Campopiano Studios</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ==================== PRICING ==================== -->
+<section class="tts-section" id="pricing">
+  <div class="tts-container">
+    <div class="tts-section-title">
+      <span class="tts-badge tts-badge-amber">Simple Pricing</span>
+      <h2>Choose Your Plan</h2>
+      <p>Upgrade today with a 30-day money-back guarantee. No risk, all reward.</p>
+    </div>
+
+    <div class="tts-pricing-toggle">
+      <span class="tts-toggle-annual tts-active" onclick="ttsTogglePricing('annual')">Annual</span>
+      <div class="tts-toggle-switch" id="ttsToggle" onclick="ttsTogglePricing()"></div>
+      <span class="tts-toggle-lifetime" onclick="ttsTogglePricing('lifetime')">Lifetime</span>
+      <span class="tts-save-badge">Best Value</span>
+    </div>
+
+    <div class="tts-pricing-grid">
+
+      <!-- Starter: 1 Site -->
+      <div class="tts-price-card">
+        <h3>Starter</h3>
+        <div class="tts-price-sites">1 Site License</div>
+        <div class="tts-price-amount tts-annual-price">$59<sup>/yr</sup></div>
+        <div class="tts-price-amount tts-lifetime-price" style="display:none;">$199<sup> once</sup></div>
+        <div class="tts-price-period tts-annual-period">Billed annually &middot; Renews yearly</div>
+        <div class="tts-price-period tts-lifetime-period" style="display:none;">One-time payment &middot; Lifetime updates</div>
+        <ul class="tts-price-features">
+          <li>All 4 AI voice providers</li>
+          <li>MP3 generation &amp; downloads</li>
+          <li>6 player styles + floating player</li>
+          <li>Audio schema for SEO</li>
+          <li>CSS selector targeting</li>
+          <li>Basic analytics</li>
+          <li>1 year of updates &amp; support</li>
+        </ul>
+        <a href="#" id="purchase-annual-1" class="tts-btn tts-btn-outline purchase" style="width:100%;" data-id="1">Buy Now</a>
+        <a href="#" id="purchase-lifetime-1" class="tts-btn tts-btn-outline purchase" style="width:100%;display:none;" data-id="1">Buy Now</a>
+      </div>
+
+      <!-- Professional: 5 Sites -->
+      <div class="tts-price-card tts-popular">
+        <h3>Professional</h3>
+        <div class="tts-price-sites">5 Site License</div>
+        <div class="tts-price-amount tts-annual-price">$149<sup>/yr</sup></div>
+        <div class="tts-price-amount tts-lifetime-price" style="display:none;">$249<sup> once</sup></div>
+        <div class="tts-price-period tts-annual-period">$29.80 per site &middot; Save 49%</div>
+        <div class="tts-price-period tts-lifetime-period" style="display:none;">$49.80 per site &middot; One-time payment</div>
+        <ul class="tts-price-features">
+          <li>Everything in Starter</li>
+          <li>5 site activations</li>
+          <li>Advanced analytics &amp; heatmaps</li>
+          <li>Priority email support</li>
+          <li>Agency-friendly licensing</li>
+          <li>Multisite compatible</li>
+          <li>1 year of updates &amp; support</li>
+        </ul>
+        <a href="#" id="purchase-annual-5" class="tts-btn tts-btn-primary purchase" style="width:100%;" data-id="5">Buy Now</a>
+        <a href="#" id="purchase-lifetime-5" class="tts-btn tts-btn-primary purchase" style="width:100%;display:none;" data-id="5">Buy Now</a>
+      </div>
+
+      <!-- Enterprise: 10 Sites -->
+      <div class="tts-price-card">
+        <h3>Enterprise</h3>
+        <div class="tts-price-sites">10 Site License</div>
+        <div class="tts-price-amount tts-annual-price">$199<sup>/yr</sup></div>
+        <div class="tts-price-amount tts-lifetime-price" style="display:none;">$299<sup> once</sup></div>
+        <div class="tts-price-period tts-annual-period">$19.90 per site &middot; Save 66%</div>
+        <div class="tts-price-period tts-lifetime-period" style="display:none;">$29.90 per site &middot; One-time payment</div>
+        <ul class="tts-price-features">
+          <li>Everything in Professional</li>
+          <li>10 site activations</li>
+          <li>Bulk MP3 generation</li>
+          <li>Priority email support</li>
+          <li>White-label ready</li>
+          <li>Multisite compatible</li>
+          <li>1 year of updates &amp; support</li>
+        </ul>
+        <a href="#" id="purchase-annual-10" class="tts-btn tts-btn-outline purchase" style="width:100%;" data-id="10">Buy Now</a>
+        <a href="#" id="purchase-lifetime-10" class="tts-btn tts-btn-outline purchase" style="width:100%;display:none;" data-id="10">Buy Now</a>
+      </div>
+
+    </div>
+
+    <p class="tts-pricing-note">All plans include a <strong>30-day money-back guarantee</strong>. Secure checkout powered by Freemius.</p>
+  </div>
+</section>
+
+<!-- ==================== FAQ ==================== -->
+<section class="tts-section tts-section-alt" id="faq">
+  <div class="tts-container">
+    <div class="tts-section-title">
+      <h2>Frequently Asked Questions</h2>
+    </div>
+    <div class="tts-faq-list">
+
+      <div class="tts-faq-item tts-open">
+        <div class="tts-faq-q" onclick="this.parentElement.classList.toggle('tts-open')">What voice providers are supported?</div>
+        <div class="tts-faq-a">AtlasVoice Pro supports 4 AI voice providers: <strong>AtlasVoice AI</strong> (included free with 63 languages), <strong>Google Cloud Text-to-Speech</strong> (300+ voices across 90+ languages), <strong>OpenAI / ChatGPT TTS</strong> (6 HD natural voices), and <strong>ElevenLabs</strong> (100+ ultra-realistic voices). The free version also includes browser-based Web Speech API voices. You can assign different providers to different post types.</div>
+      </div>
+
+      <div class="tts-faq-item">
+        <div class="tts-faq-q" onclick="this.parentElement.classList.toggle('tts-open')">Do I need API keys for voice providers?</div>
+        <div class="tts-faq-a">AtlasVoice AI voices and browser-based voices work immediately with no API key required. For Google Cloud TTS, OpenAI, and ElevenLabs, you will need to create an account with each provider and enter your API key in the plugin settings. Each provider offers generous free tiers to get started.</div>
+      </div>
+
+      <div class="tts-faq-item">
+        <div class="tts-faq-q" onclick="this.parentElement.classList.toggle('tts-open')">What's included with the AtlasVoice AI voices?</div>
+        <div class="tts-faq-a">AtlasVoice AI is our built-in voice engine that comes completely free with both the free and Pro versions of the plugin. It supports 63 languages with natural-sounding voices and does not require any external API key or account. It is the fastest way to add audio to your content.</div>
+      </div>
+
+      <div class="tts-faq-item">
+        <div class="tts-faq-q" onclick="this.parentElement.classList.toggle('tts-open')">Does it work with page builders?</div>
+        <div class="tts-faq-a">Yes. AtlasVoice works seamlessly with all major WordPress page builders including Elementor, Divi, Beaver Builder, WPBakery, Oxygen, Bricks, and the native Gutenberg block editor. The audio player can be placed using our Gutenberg block, shortcode <code>[tta_listen_btn]</code>, or automatic insertion. The CSS selector targeting feature in Pro lets you specify exactly which content gets converted to audio regardless of your page builder.</div>
+      </div>
+
+      <div class="tts-faq-item">
+        <div class="tts-faq-q" onclick="this.parentElement.classList.toggle('tts-open')">Is there a free version?</div>
+        <div class="tts-faq-a">Yes. The free version of <a href="https://wordpress.org/plugins/text-to-audio/" target="_blank" rel="noopener">Text to Audio</a> is available on WordPress.org with over 315,000 downloads. It includes browser-based voices, AtlasVoice AI voices, a basic audio player, Gutenberg block, shortcode support, and post type selection. Pro adds premium voice providers, MP3 generation, analytics, audio schema, additional player styles, and CSS selector targeting.</div>
+      </div>
+
+      <div class="tts-faq-item">
+        <div class="tts-faq-q" onclick="this.parentElement.classList.toggle('tts-open')">What's the refund policy?</div>
+        <div class="tts-faq-a">All plans come with a <strong>30-day money-back guarantee</strong> processed through Freemius. If you are not satisfied with the plugin for any reason, contact our support team within 30 days of purchase for a full refund &mdash; no questions asked.</div>
+      </div>
+
+      <div class="tts-faq-item">
+        <div class="tts-faq-q" onclick="this.parentElement.classList.toggle('tts-open')">How many languages are supported?</div>
+        <div class="tts-faq-a">AtlasVoice Pro supports <strong>51+ languages</strong> across its voice providers. AtlasVoice AI alone covers 63 languages. Google Cloud TTS adds 90+ languages with 300+ voices. The plugin integrates with popular multilingual WordPress plugins including WPML, GTranslate, and TranslatePress, so your audio automatically matches the visitor's language.</div>
+      </div>
+
+      <div class="tts-faq-item">
+        <div class="tts-faq-q" onclick="this.parentElement.classList.toggle('tts-open')">Does it affect site performance?</div>
+        <div class="tts-faq-a">No. AtlasVoice is built with performance in mind. Audio is generated on demand or cached as MP3 files, so there is no impact on initial page load. The plugin is compatible with all major caching plugins including WP Rocket, LiteSpeed Cache, W3 Total Cache, Autoptimize, and SiteGround SG Optimizer. Our JavaScript files are automatically excluded from minification and deferral to prevent conflicts.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ==================== FINAL CTA ==================== -->
+<section class="tts-cta-section">
+  <div class="tts-container">
+    <h2>Ready to Give Your Content a Voice?</h2>
+    <p>Join 4,000+ WordPress sites using AtlasVoice to make their content more accessible, engaging, and SEO-friendly.</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+      <a href="#pricing" class="tts-btn tts-btn-accent tts-btn-lg">Buy Pro &mdash; From $59/yr</a>
+      <a href="https://wordpress.org/plugins/text-to-audio/" target="_blank" rel="noopener" class="tts-btn tts-btn-lg" style="background:rgba(255,255,255,0.15);color:#fff !important;">Download Free Version</a>
+    </div>
+  </div>
+</section>
+
+</div>
+<!-- /wp:html -->
+
+<!-- wp:html -->
+<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script src="https://checkout.freemius.com/checkout.min.js"></script>
+<script>
+var handler = FS.Checkout.configure({
+    plugin_id: '13388',
+    plan_id: '24893',
+    public_key: 'pk_937e16238dbdbc42dc1d7a4ead3b7',
+    image: 'http://atlasaidev.com/wp-content/uploads/2023/08/texttospeech1.png'
+});
+
+/* Purchase button click handlers */
+var purchaseButtons = [].slice.call(document.getElementsByClassName('purchase'));
+purchaseButtons.forEach(function(button) {
+  button.addEventListener('click', function(e) {
+    e.preventDefault();
+    var buttonId = button.getAttribute('id') || '';
+    var billingCycle = 'annual';
+    if (buttonId.indexOf('lifetime') !== -1) {
+      billingCycle = 'lifetime';
+    }
+    handler.open({
+      name: 'AtlasVoice Text to Speech Pro',
+      licenses: button.dataset.id,
+      billing_cycle: billingCycle,
+      checkout_style: 'legacy',
+      purchaseCompleted: function(response) {
+        console.log('Purchase completed:', response);
+      },
+      success: function(response) {
+        window.location.href = 'https://atlasaidev.com/thank-you/';
+      }
+    });
+  });
+});
+
+/* Pricing toggle: Annual / Lifetime */
+window.ttsTogglePricing = function(force) {
+  var toggle = document.getElementById('ttsToggle');
+  var currentCycle = toggle.classList.contains('tts-lifetime') ? 'lifetime' : 'annual';
+
+  if (force === 'annual') currentCycle = 'annual';
+  else if (force === 'lifetime') currentCycle = 'lifetime';
+  else currentCycle = currentCycle === 'annual' ? 'lifetime' : 'annual';
+
+  var isLifetime = currentCycle === 'lifetime';
+  toggle.className = 'tts-toggle-switch' + (isLifetime ? ' tts-lifetime' : '');
+
+  /* Toggle label active states */
+  document.querySelectorAll('.tts-toggle-annual').forEach(function(el) {
+    el.className = 'tts-toggle-annual' + (isLifetime ? '' : ' tts-active');
+  });
+  document.querySelectorAll('.tts-toggle-lifetime').forEach(function(el) {
+    el.className = 'tts-toggle-lifetime' + (isLifetime ? ' tts-active' : '');
+  });
+
+  /* Toggle price display */
+  document.querySelectorAll('.tts-annual-price, .tts-annual-period').forEach(function(el) {
+    el.style.display = isLifetime ? 'none' : '';
+  });
+  document.querySelectorAll('.tts-lifetime-price, .tts-lifetime-period').forEach(function(el) {
+    el.style.display = isLifetime ? '' : 'none';
+  });
+
+  /* Toggle buy buttons */
+  document.querySelectorAll('.tts-price-card').forEach(function(card) {
+    var annualBtn = card.querySelector('[id^="purchase-annual"]');
+    var lifetimeBtn = card.querySelector('[id^="purchase-lifetime"]');
+    if (annualBtn) annualBtn.style.display = isLifetime ? 'none' : '';
+    if (lifetimeBtn) lifetimeBtn.style.display = isLifetime ? '' : 'none';
+  });
+};
+
+/* FAQ accordion accessibility */
+document.querySelectorAll('.tts-faq-q').forEach(function(q) {
+  q.setAttribute('role', 'button');
+  q.setAttribute('tabindex', '0');
+  q.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      this.click();
+    }
+  });
+});
+</script>
+<!-- /wp:html -->

@@ -5,11 +5,11 @@
 
     var atlasPlugins = [
         {
-            name: 'Text To Speech TTS \u2013 AtlasVoice',
+            name: 'AtlasVoice',
             slug: 'text-to-audio',
             basename: 'text-to-audio/text-to-audio.php',
             learnMoreUrl: 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
-            description: __('The most user-friendly Text-to-Speech accessibility plugin for WordPress. Automatically adds an audio player with no API required.', 'text-to-audio'),
+            description: __('The most user-friendly text-to-speech accessibility plugin for WordPress. Automatically adds an audio player with no API required.', 'text-to-audio'),
             features: [
                 __('Unlimited text-to-speech conversion', 'text-to-audio'),
                 __('51+ languages, 20-300+ voices', 'text-to-audio'),

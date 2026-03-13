@@ -13,6 +13,7 @@ import {postWithoutImage} from "../../context/utilities";
 import toast from "../../context/Notify";
 import UpgradeToPro from "../../UpgradeToPro";
 import {MultiSelect} from "../../context/MultiSelect";
+import Icon from "../../Icon";
 
 export default function Settings() {
     const [settings, setSettings] = useState({
@@ -202,10 +203,7 @@ export default function Settings() {
                         }
                     >
             <span className="ms-2" style={{cursor: "pointer"}}>
-              <i
-                  className="fas fa-question-circle"
-                  style={{color: "#999", fontSize: "14px"}}
-              ></i>
+              <Icon name="question-circle" style={{color: "#999", fontSize: "14px"}} />
             </span>
                     </OverlayTrigger>
                 )}
@@ -225,7 +223,7 @@ export default function Settings() {
                             rel="noopener noreferrer"
                             href={youtubeLink || "#"}
                         >
-                            <i className="fab fa-youtube"></i>
+                            <Icon name="youtube" />
                         </a>
                     </OverlayTrigger>
                 )}
@@ -239,7 +237,7 @@ export default function Settings() {
     const ProLockIcon = ({tooltipText}) => (
         <OverlayTrigger placement="top" overlay={<Tooltip>{tooltipText}</Tooltip>}>
             <Button className="m-0 p-0 text-dark bg-light border-0 ms-2">
-                <i className="fas fa-lock"/>
+                <Icon name="lock" />
             </Button>
         </OverlayTrigger>
     );
@@ -251,12 +249,36 @@ export default function Settings() {
                     <Col xs={12} lg={8}>
                         {/* Header Card */}
                         <div className="bg-white rounded p-3 mb-3 shadow-sm">
-                            <h2 className="fs-3 fw-bold mb-2 text-dark">
-                                {__("Configure Settings", "text-to-audio")}
-                            </h2>
-                            <p className="text-secondary m-0 small">
-                                {__("Configure text-to-speech player behavior and content selection", "text-to-audio")}
-                            </p>
+                            <div className="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h2 className="fs-3 fw-bold mb-2 text-dark">
+                                        {__("Configure Settings", "text-to-audio")}
+                                    </h2>
+                                    <p className="text-secondary m-0 small">
+                                        {__("Configure text-to-speech player behavior and content selection", "text-to-audio")}
+                                    </p>
+                                </div>
+                                <div className="d-flex gap-2 align-items-center" style={{ flexShrink: 0 }}>
+                                    {typeof tta_obj !== 'undefined' && tta_obj.latest_post_preview_url && (
+                                        <a
+                                            href={tta_obj.latest_post_preview_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="btn btn-sm"
+                                            style={{ whiteSpace: 'nowrap', backgroundColor: '#FF7853', color: '#fff', borderColor: '#FF7853' }}
+                                        >
+                                            {__("Preview on Your Site", "text-to-audio")} &#8599;
+                                        </a>
+                                    )}
+                                    <a
+                                        href={window.location.pathname + "?page=text-to-audio&reset_onboard=true"}
+                                        className="btn btn-sm"
+                                        style={{ whiteSpace: 'nowrap', backgroundColor: '#fff', color: '#FF7853', border: '1px solid #FF7853' }}
+                                    >
+                                        {__("Run Setup Wizard", "text-to-audio")}
+                                    </a>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Main Settings Card */}
@@ -266,7 +288,7 @@ export default function Settings() {
                                     label={__("Add Button or Player Automatically", "text-to-audio")}
                                     questionIcon={true}
                                     questionTooltip={
-                                        __("The \"Add Button or Player Automatically\" feature in a Text-to-Speech (TTS) plugin allows the plugin to automatically insert a play button or audio player into your posts or pages — without needing any manual setup.", "text-to-audio")
+                                        __("The \"Add Button or Player Automatically\" feature allows AtlasVoice to automatically insert a play button or audio player into your posts or pages — without needing any manual setup.", "text-to-audio")
                                     }
                                 >
                                     <ToggleSwitch
@@ -446,10 +468,7 @@ export default function Settings() {
                                                     }
                                                 >
                           <span className="ms-2" style={{cursor: "pointer"}}>
-                            <i
-                                className="fas fa-question-circle"
-                                style={{color: "#999", fontSize: "14px"}}
-                            ></i>
+                            <Icon name="question-circle" style={{color: "#999", fontSize: "14px"}} />
                           </span>
                                                 </OverlayTrigger>
                                             </Form.Label>
@@ -478,10 +497,7 @@ export default function Settings() {
                                                     }
                                                 >
                           <span className="ms-2" style={{cursor: "pointer"}}>
-                            <i
-                                className="fas fa-question-circle"
-                                style={{color: "#999", fontSize: "14px"}}
-                            ></i>
+                            <Icon name="question-circle" style={{color: "#999", fontSize: "14px"}} />
                           </span>
                                                 </OverlayTrigger>
                                             </Form.Label>
@@ -566,7 +582,7 @@ export default function Settings() {
                                                         rel="noopener noreferrer"
                                                         href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
                                                     >
-                                                        <i className="fab fa-youtube"></i>
+                                                        <Icon name="youtube" />
                                                     </a>
                                                 </OverlayTrigger>
                                             </div>
@@ -616,7 +632,7 @@ export default function Settings() {
                                                         rel="noopener noreferrer"
                                                         href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
                                                     >
-                                                        <i className="fab fa-youtube"></i>
+                                                        <Icon name="youtube" />
                                                     </a>
                                                 </OverlayTrigger>
                                             </div>
@@ -677,7 +693,7 @@ export default function Settings() {
                                                         rel="noopener noreferrer"
                                                         href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
                                                     >
-                                                        <i className="fab fa-youtube"></i>
+                                                        <Icon name="youtube" />
                                                     </a>
                                                 </OverlayTrigger>
                                             </div>
@@ -727,7 +743,7 @@ export default function Settings() {
                                                         rel="noopener noreferrer"
                                                         href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
                                                     >
-                                                        <i className="fab fa-youtube"></i>
+                                                        <Icon name="youtube" />
                                                     </a>
                                                 </OverlayTrigger>
                                             </div>
@@ -777,7 +793,7 @@ export default function Settings() {
                                                         rel="noopener noreferrer"
                                                         href="https://www.youtube.com/watch?v=ooxJkMU58KY&list=PLGdmFn36qCRIO6galQmEMoLVuNXSIvVuF&index=19"
                                                     >
-                                                        <i className="fab fa-youtube"></i>
+                                                        <Icon name="youtube" />
                                                     </a>
                                                 </OverlayTrigger>
                                             </div>
@@ -826,7 +842,7 @@ export default function Settings() {
                                                         rel="noopener noreferrer"
                                                         href="https://www.youtube.com/watch?v=yanuoEBfG4A"
                                                     >
-                                                        <i className="fab fa-youtube"></i>
+                                                        <Icon name="youtube" />
                                                     </a>
                                                 </OverlayTrigger>
                                             </div>
@@ -873,7 +889,7 @@ export default function Settings() {
                                                         rel="noopener noreferrer"
                                                         href="https://www.youtube.com/watch?v=yanuoEBfG4A"
                                                     >
-                                                        <i className="fab fa-youtube"></i>
+                                                        <Icon name="youtube" />
                                                     </a>
                                                 </OverlayTrigger>
                                             </div>
@@ -940,7 +956,7 @@ export default function Settings() {
             className="tta-loading-spinner"
         >
             <div>
-                <i className="fas fa-spinner fa-spin me-2"></i>
+                <Icon name="spinner" spin className="me-2" />
                 {__("Loading...", "text-to-audio")}
             </div>
         </div>

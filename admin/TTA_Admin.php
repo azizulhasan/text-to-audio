@@ -130,6 +130,8 @@ class TTA_Admin
             ]),
             'is_mobile' => wp_is_mobile(),
             'current_plugin_slug' => 'text-to-audio',
+            'detected_caching_plugins' => TTA_Helper::get_detected_caching_plugins(),
+            'latest_post_preview_url'  => '', // populated lazily in enqueue to avoid early get_permalink() call
 
         ];
     }
@@ -174,12 +176,104 @@ class TTA_Admin
             include ABSPATH . 'wp-admin/includes/plugin.php';
         }
 
+        // Populate latest_post_preview_url lazily here (not in constructor)
+        // because get_permalink() needs $wp_rewrite which isn't available during plugins_loaded.
+        if ( empty( $this->localize_data['latest_post_preview_url'] ) ) {
+            $this->localize_data['latest_post_preview_url'] = TTA_Helper::get_latest_post_preview_url();
+        }
+
         do_action('tta_enqueue_pro_dashboard_scripts');
 
+        // Welcome wizard (separate bundle, only on first activation).
+        $is_wizard_page = is_admin()
+            && isset( $_REQUEST['page'] ) && 'text-to-audio' === $_REQUEST['page']
+            && isset( $_REQUEST['welcome'] ) && '1' === $_REQUEST['welcome']
+            && ( ! get_option( 'tta_onboarding_completed' ) || ( TTA_Helper::is_pro_active() && ! get_option( 'tta_pro_onboarding_completed' ) ) );
+        if ( $is_wizard_page ) {
+            $post_types      = get_post_types( array( 'public' => true ), 'objects' );
+            $post_types_data = array();
+            foreach ( $post_types as $pt ) {
+                if ( 'attachment' === $pt->name ) {
+                    continue;
+                }
+                $counts            = wp_count_posts( $pt->name );
+                $post_types_data[] = array(
+                    'slug'  => $pt->name,
+                    'label' => $pt->label,
+                    'count' => isset( $counts->publish ) ? (int) $counts->publish : 0,
+                );
+            }
+
+            $current_settings = get_option( 'tta_settings_data', array() );
+            // Settings may be stored as stdClass (from json_decode), cast to array.
+            if ( is_object( $current_settings ) ) {
+                $current_settings = (array) $current_settings;
+            }
+            // Fetch recent posts for ALL public post types (keyed by slug).
+            // StepAnalytics filters client-side by the post type selected in Step 1.
+            $recent_posts_by_type = array();
+            $first_post_url       = home_url();
+            foreach ( $post_types_data as $pt_data ) {
+                $pt_slug  = $pt_data['slug'];
+                $pt_posts = get_posts( array(
+                    'numberposts' => 20,
+                    'post_status' => 'publish',
+                    'post_type'   => $pt_slug,
+                    'orderby'     => 'date',
+                    'order'       => 'DESC',
+                ) );
+                $recent_posts_by_type[ $pt_slug ] = array();
+                foreach ( $pt_posts as $rp ) {
+                    $recent_posts_by_type[ $pt_slug ][] = array(
+                        'id'    => $rp->ID,
+                        'title' => $rp->post_title,
+                    );
+                }
+            }
+            // Get latest post URL from the currently selected (or default) post type.
+            $default_type    = isset( $current_settings['tta__settings_allow_listening_for_post_types'][0] )
+                ? $current_settings['tta__settings_allow_listening_for_post_types'][0]
+                : 'post';
+            $latest_post_url = home_url();
+            if ( ! empty( $recent_posts_by_type[ $default_type ] ) ) {
+                $latest_post_url = get_permalink( $recent_posts_by_type[ $default_type ][0]['id'] );
+            }
+
+            wp_register_script(
+                'tts-welcome-wizard',
+                plugin_dir_url( __FILE__ ) . 'js/build/tts-welcome-wizard.min.js',
+                array( 'wp-element', 'wp-i18n' ),
+                $this->version,
+                true
+            );
+
+            wp_localize_script( 'tts-welcome-wizard', 'ttsWizardData', array(
+                'post_types'        => $post_types_data,
+                'recent_posts_by_type' => $recent_posts_by_type,
+                'current_settings'  => $current_settings,
+                'current_customize' => get_option( 'tta_customize_settings', array() ),
+                'current_listening' => get_option( 'tta_listening_settings', array() ),
+                'latest_post_url'   => $latest_post_url,
+                'is_pro_active'     => TTA_Helper::is_pro_active(),
+                'is_pro_wizard'     => TTA_Helper::is_pro_active() && ! get_option( 'tta_pro_onboarding_completed' ),
+                'nonce'             => wp_create_nonce( 'wp_rest' ),
+                'api_url'           => esc_url_raw( rest_url( 'tta/v1/' ) ),
+                'pro_url'           => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
+                'dashboard_url'     => admin_url( 'admin.php?page=text-to-audio' ),
+                'site_locale'       => get_locale(),
+            ) );
+
+            wp_enqueue_script( 'tts-welcome-wizard' );
+            wp_set_script_translations(
+                'tts-welcome-wizard',
+                'text-to-audio',
+                plugin_dir_path( dirname( __FILE__ ) ) . 'languages'
+            );
+            return; // Don't load dashboard scripts when wizard is active.
+        }
 
         if (is_admin() && isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
             /* Load react js */
-            wp_enqueue_script('tts-font-awesome', plugin_dir_url(__FILE__) . 'js/build/font-awesome.min.js', array(), $this->version, true);
             wp_enqueue_style('tts-bootstrap', plugin_dir_url(__FILE__) . 'css/bootstrap.css', [], $this->version, 'all');
             wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', array('wp-hooks',), $this->version, true);
             wp_localize_script('TextToSpeech', 'ttsObj', $this->localize_data);
@@ -354,15 +448,15 @@ class TTA_Admin
     public function TTA_menu()
     {
         add_menu_page(
-            'Text To Speech',
-            'Text To Speech',
+            __('AtlasVoice', 'text-to-audio'),
+            __('AtlasVoice', 'text-to-audio'),
             'manage_options',
             TEXT_TO_AUDIO_TEXT_DOMAIN,
             array($this, "TTA_settings"),
             'dashicons-controls-volumeon',
             20
         );
-        add_submenu_page(TEXT_TO_AUDIO_TEXT_DOMAIN, 'Text To Speech', 'Text To Speech', 'manage_options', TEXT_TO_AUDIO_TEXT_DOMAIN, array(
+        add_submenu_page(TEXT_TO_AUDIO_TEXT_DOMAIN, __('AtlasVoice', 'text-to-audio'), __('AtlasVoice', 'text-to-audio'), 'manage_options', TEXT_TO_AUDIO_TEXT_DOMAIN, array(
             $this,
             "TTA_settings"
         ), 21);
@@ -370,7 +464,6 @@ class TTA_Admin
 
         if (get_player_id() > 2) {
             if (!empty($_REQUEST['page']) && $_REQUEST['page'] == 'bulk-mp3-generate') {
-                wp_enqueue_script('tts-font-awesome', plugin_dir_url(__FILE__) . 'js/build/font-awesome.min.js', array(), $this->version, true);
                 wp_enqueue_style('tts-bootstrap', plugin_dir_url(__FILE__) . 'css/bootstrap.css', [], $this->version, 'all');
             }
             // Register a new admin page under "Bulk MP3 Generate" menu
@@ -398,7 +491,7 @@ class TTA_Admin
         } else {
             $url = admin_url('edit.php');
             echo '<p>No post ID found. Please select multiple posts from the post page. And apply <strong>AtlasVoice Generate MP3 File</strong> bulk action. <a href="' . $url . '">Go to Posts Page</a></p>';
-            echo 'How it works? <a style="text-decoration:none;color:red" target="_blank" href="https://www.youtube.com/watch?v=HFoqlkPCP80"><span class="fab fa-youtube"></span></a>';
+            echo 'How it works? <a style="text-decoration:none;color:red" target="_blank" href="https://www.youtube.com/watch?v=HFoqlkPCP80"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 576 512" fill="currentColor" style="vertical-align:-0.125em"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg></a>';
         }
 
     }
@@ -413,6 +506,12 @@ class TTA_Admin
 
     public function TTA_settings()
     {
+        $show_wizard = ( isset( $_GET['welcome'] ) && '1' === $_GET['welcome'] )
+            && ( ! get_option( 'tta_onboarding_completed' ) || ( TTA_Helper::is_pro_active() && ! get_option( 'tta_pro_onboarding_completed' ) ) );
+        if ( $show_wizard ) {
+            echo "<div class='wpwrap'><div id='tts_welcome_wizard'></div></div>";
+            return;
+        }
         echo "<div class='wpwrap'><div id='tts_dashboard_ui'></div></div>";
     }
 
@@ -479,6 +578,309 @@ class TTA_Admin
             array($this, 'atlas_plugins_page'),
             34
         );
+    }
+
+    /**
+     * Add AtlasVoice quick-toggle item to the WordPress admin bar on front-end singular pages.
+     *
+     * @param \WP_Admin_Bar $admin_bar The WP_Admin_Bar instance.
+     *
+     * @since 2.2.0
+     */
+    public function add_admin_bar_toggle( $admin_bar ) {
+        if ( is_admin() || ! is_singular() || ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+
+        global $post;
+        if ( ! $post ) {
+            return;
+        }
+
+        $settings   = TTA_Helper::tts_get_settings( 'settings' );
+        $post_types = isset( $settings['tta__settings_allow_listening_for_post_types'] ) ? (array) $settings['tta__settings_allow_listening_for_post_types'] : [];
+
+        if ( empty( $post_types ) || ! in_array( $post->post_type, $post_types, true ) ) {
+            return;
+        }
+
+        $excluded_ids = isset( $settings['tta__settings_exclude_post_ids'] ) ? (array) $settings['tta__settings_exclude_post_ids'] : [];
+        $is_active    = ! in_array( (string) $post->ID, $excluded_ids, true ) && ! in_array( (int) $post->ID, $excluded_ids, true );
+
+        $label = $is_active
+            ? __( 'AtlasVoice: On', 'text-to-audio' )
+            : __( 'AtlasVoice: Off', 'text-to-audio' );
+
+        $admin_bar->add_node( [
+            'id'    => 'tta-audio-toggle',
+            'title' => '<span class="ab-icon dashicons dashicons-megaphone"></span>'
+                     . '<span class="tta-ab-indicator ' . ( $is_active ? 'tta-ab-on' : 'tta-ab-off' ) . '"></span> '
+                     . esc_html( $label ),
+            'href'  => '#',
+            'meta'  => [
+                'class' => 'tta-admin-bar-toggle',
+                'title' => __( 'Toggle AtlasVoice audio player for this post', 'text-to-audio' ),
+            ],
+        ] );
+    }
+
+    /**
+     * Print inline CSS for the admin bar AtlasVoice toggle (front-end only).
+     *
+     * @since 2.2.0
+     */
+    public function admin_bar_inline_css() {
+        if ( is_admin() || ! is_admin_bar_showing() || ! is_singular() || ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+        ?>
+        <style id="tta-admin-bar-toggle-css">
+            #wp-admin-bar-tta-audio-toggle .ab-icon.dashicons {
+                font-family: dashicons !important;
+                font-size: 20px !important;
+                line-height: 1 !important;
+                position: relative;
+                top: 3px;
+                margin-right: 2px;
+            }
+            .tta-ab-indicator {
+                display: inline-block;
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                margin-right: 4px;
+                vertical-align: middle;
+            }
+            .tta-ab-indicator.tta-ab-on {
+                background-color: #46b450;
+            }
+            .tta-ab-indicator.tta-ab-off {
+                background-color: #dc3232;
+            }
+            #wp-admin-bar-tta-audio-toggle a.ab-item {
+                cursor: pointer;
+            }
+        </style>
+        <?php
+    }
+
+    /**
+     * Print inline JS for the admin bar AtlasVoice AJAX toggle (front-end only).
+     *
+     * @since 2.2.0
+     */
+    public function admin_bar_inline_js() {
+        if ( is_admin() || ! is_admin_bar_showing() || ! is_singular() || ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+
+        global $post;
+        if ( ! $post ) {
+            return;
+        }
+        ?>
+        <script id="tta-admin-bar-toggle-js">
+        (function(){
+            var node = document.getElementById('wp-admin-bar-tta-audio-toggle');
+            if (!node) return;
+
+            var link = node.querySelector('a.ab-item');
+            if (!link) return;
+
+            link.addEventListener('click', function(e){
+                e.preventDefault();
+
+                var data = new FormData();
+                data.append('action', 'tta_toggle_audio');
+                data.append('post_id', <?php echo (int) $post->ID; ?>);
+                data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'tta_toggle_audio_nonce' ) ); ?>');
+
+                fetch('<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    body: data
+                })
+                .then(function(r){ return r.json(); })
+                .then(function(resp){
+                    if (!resp.success) return;
+
+                    var indicator = node.querySelector('.tta-ab-indicator');
+                    var textNode  = link.lastChild;
+
+                    if (resp.data.is_active) {
+                        indicator.className = 'tta-ab-indicator tta-ab-on';
+                        textNode.textContent = ' <?php echo esc_js( __( 'AtlasVoice: On', 'text-to-audio' ) ); ?>';
+                    } else {
+                        indicator.className = 'tta-ab-indicator tta-ab-off';
+                        textNode.textContent = ' <?php echo esc_js( __( 'AtlasVoice: Off', 'text-to-audio' ) ); ?>';
+                    }
+                });
+            });
+        })();
+        </script>
+        <?php
+    }
+
+    /**
+     * Render a "Need Help?" rescue modal on the plugins.php page.
+     *
+     * Intercepts the deactivation click for text-to-audio and shows
+     * quick-fix links before passing through to the Freemius modal.
+     *
+     * @since 2.2.0
+     */
+    public function render_deactivation_rescue_modal() {
+        global $pagenow;
+        if ( 'plugins.php' !== $pagenow ) {
+            return;
+        }
+
+        $admin_url    = admin_url( 'admin.php?page=text-to-audio' );
+        $docs_url     = esc_url( $admin_url . '#/faq' );
+        $compat_url   = esc_url( $admin_url . '#/compatibility' );
+        $integrations_url = esc_url( $admin_url . '#/integrations' );
+        $support_url  = 'https://atlasaidev.com/contact-us/';
+        ?>
+        <div id="tta-rescue-modal-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:100100;align-items:center;justify-content:center;">
+            <div style="background:#fff;border-radius:8px;max-width:480px;width:90%;padding:28px 32px;box-shadow:0 4px 24px rgba(0,0,0,.25);position:relative;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen-Sans,Ubuntu,Cantarell,'Helvetica Neue',sans-serif;">
+                <h2 style="margin:0 0 8px;font-size:20px;color:#1d2327;">
+                    <?php echo esc_html__( 'Having trouble? We can help!', 'text-to-audio' ); ?>
+                </h2>
+                <p style="margin:0 0 16px;color:#50575e;font-size:14px;">
+                    <?php echo esc_html__( 'Many issues can be fixed in under 2 minutes:', 'text-to-audio' ); ?>
+                </p>
+                <ul style="margin:0 0 20px;padding:0;list-style:none;">
+                    <li style="margin-bottom:10px;font-size:14px;color:#1d2327;">
+                        <?php echo esc_html__( 'Voice not working', 'text-to-audio' ); ?> &rarr;
+                        <a href="<?php echo $docs_url; ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
+                            <?php echo esc_html__( 'Quick Fix Guide', 'text-to-audio' ); ?>
+                        </a>
+                    </li>
+                    <li style="margin-bottom:10px;font-size:14px;color:#1d2327;">
+                        <?php echo esc_html__( 'Player not showing', 'text-to-audio' ); ?> &rarr;
+                        <a href="<?php echo $compat_url; ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
+                            <?php echo esc_html__( 'Troubleshoot', 'text-to-audio' ); ?>
+                        </a>
+                    </li>
+                    <li style="margin-bottom:10px;font-size:14px;color:#1d2327;">
+                        <?php echo esc_html__( 'Need better voices', 'text-to-audio' ); ?> &rarr;
+                        <a href="<?php echo $integrations_url; ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
+                            <?php echo esc_html__( 'See AI Voices', 'text-to-audio' ); ?>
+                        </a>
+                    </li>
+                </ul>
+                <div style="display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap;">
+                    <a href="<?php echo esc_url( $support_url ); ?>" target="_blank" rel="noopener noreferrer"
+                       class="button button-primary"
+                       style="text-decoration:none;">
+                        <?php echo esc_html__( 'Contact Support', 'text-to-audio' ); ?>
+                    </a>
+                    <button id="tta-rescue-continue-deactivate" class="button" type="button">
+                        <?php echo esc_html__( 'Continue to Deactivate', 'text-to-audio' ); ?> &rarr;
+                    </button>
+                </div>
+            </div>
+        </div>
+        <script>
+        (function(){
+            document.addEventListener('DOMContentLoaded', function(){
+                var pluginRow = document.querySelector('tr[data-plugin="text-to-audio/text-to-audio.php"]');
+                if (!pluginRow) return;
+
+                var deactivateLink = pluginRow.querySelector('.deactivate a');
+                if (!deactivateLink) return;
+
+                var overlay   = document.getElementById('tta-rescue-modal-overlay');
+                var continueBtn = document.getElementById('tta-rescue-continue-deactivate');
+                if (!overlay || !continueBtn) return;
+
+                var originalHref = deactivateLink.getAttribute('href');
+
+                deactivateLink.addEventListener('click', function(e){
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    overlay.style.display = 'flex';
+                });
+
+                // Close modal when clicking the overlay background.
+                overlay.addEventListener('click', function(e){
+                    if (e.target === overlay) {
+                        overlay.style.display = 'none';
+                    }
+                });
+
+                // Close on Escape key.
+                document.addEventListener('keydown', function(e){
+                    if (e.key === 'Escape' && overlay.style.display === 'flex') {
+                        overlay.style.display = 'none';
+                    }
+                });
+
+                // "Continue to Deactivate" — hide rescue modal, trigger original link.
+                continueBtn.addEventListener('click', function(){
+                    overlay.style.display = 'none';
+                    // Temporarily remove our intercept so the click passes through to Freemius.
+                    var clone = deactivateLink.cloneNode(true);
+                    deactivateLink.parentNode.replaceChild(clone, deactivateLink);
+                    clone.click();
+                });
+            });
+        })();
+        </script>
+        <?php
+    }
+
+    /**
+     * AJAX handler to toggle audio player on/off for a specific post.
+     *
+     * @since 2.2.0
+     */
+    public static function ajax_toggle_audio() {
+        check_ajax_referer( 'tta_toggle_audio_nonce' );
+
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => __( 'Permission denied.', 'text-to-audio' ) ] );
+        }
+
+        $post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+        if ( ! $post_id || ! get_post( $post_id ) ) {
+            wp_send_json_error( [ 'message' => __( 'Invalid post.', 'text-to-audio' ) ] );
+        }
+
+        $settings     = get_option( 'tta_settings_data', [] );
+        if ( is_object( $settings ) ) {
+            $settings = (array) $settings;
+        }
+        $excluded_ids = isset( $settings['tta__settings_exclude_post_ids'] ) ? (array) $settings['tta__settings_exclude_post_ids'] : [];
+
+        // Check if post ID is currently excluded (compare as strings since stored values may be strings).
+        $found_key = false;
+        foreach ( $excluded_ids as $key => $id ) {
+            if ( (int) $id === $post_id ) {
+                $found_key = $key;
+                break;
+            }
+        }
+
+        if ( false !== $found_key ) {
+            // Currently excluded -- remove to turn ON.
+            unset( $excluded_ids[ $found_key ] );
+            $excluded_ids = array_values( $excluded_ids );
+            $is_active    = true;
+        } else {
+            // Currently active -- add to turn OFF.
+            $excluded_ids[] = (string) $post_id;
+            $is_active      = false;
+        }
+
+        $settings['tta__settings_exclude_post_ids'] = $excluded_ids;
+        update_option( 'tta_settings_data', $settings );
+
+        // Invalidate the settings cache so the change takes effect immediately.
+        $cache_key = TTA_Cache::get_key( 'tts_get_settings' );
+        TTA_Cache::delete( $cache_key );
+
+        wp_send_json_success( [ 'is_active' => $is_active, 'post_id' => $post_id ] );
     }
 
 }
