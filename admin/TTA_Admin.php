@@ -739,7 +739,7 @@ class TTA_Admin
         $docs_url     = esc_url( $admin_url . '#/faq' );
         $compat_url   = esc_url( $admin_url . '#/compatibility' );
         $integrations_url = esc_url( $admin_url . '#/integrations' );
-        $support_url  = 'https://wordpress.org/support/plugin/text-to-audio/';
+        $support_url  = 'https://atlasaidev.com/contact-us/';
         ?>
         <div id="tta-rescue-modal-overlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:100100;align-items:center;justify-content:center;">
             <div style="background:#fff;border-radius:8px;max-width:480px;width:90%;padding:28px 32px;box-shadow:0 4px 24px rgba(0,0,0,.25);position:relative;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen-Sans,Ubuntu,Cantarell,'Helvetica Neue',sans-serif;">

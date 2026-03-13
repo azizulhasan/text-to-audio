@@ -83,7 +83,8 @@ function is_pro_plugin_exists()
     return false;
 }
 
-if (   !function_exists('ttsp_fs')) {
+//if (! is_pro_plugin_exists()  && !function_exists('ttsp_fs')) {
+if (!function_exists('ttsp_fs')) {
     // Create a helper function for easy SDK access.
     function ttsp_fs()
     {
