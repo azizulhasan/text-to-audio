@@ -150,6 +150,26 @@ final class TTA_Lib_AtlasAiDev {
             },
             10
         );
+
+        // Enrich tracking payload with plugin-specific usage telemetry.
+        add_filter( $projectSlug . '_tracker_data', array( $this, 'get_plugin_telemetry' ), 10, 1 );
+
+        // Provide Freemius AJAX credentials to the AtlasAiDev deactivation JS.
+        add_filter(
+            "AtlasAiDev_{$projectSlug}_freemius_deactivation_data",
+            function () {
+                if ( function_exists( 'ttsp_fs' ) ) {
+                    $fs = ttsp_fs();
+                    return array(
+                        'action'    => $fs->get_ajax_action( 'submit_uninstall_reason' ),
+                        'security'  => $fs->get_ajax_security( 'submit_uninstall_reason' ),
+                        'module_id' => $fs->get_id(),
+                    );
+                }
+                return array();
+            }
+        );
+
         $this->insights->init();
     }
 
@@ -228,8 +248,114 @@ final class TTA_Lib_AtlasAiDev {
                 esc_html__( 'Site name, language and url.', TEXT_TO_AUDIO_TEXT_DOMAIN ),
                 esc_html__( 'Number of active and inactive plugins.', TEXT_TO_AUDIO_TEXT_DOMAIN ),
                 esc_html__( 'Your name and email address.', TEXT_TO_AUDIO_TEXT_DOMAIN ),
+                esc_html__( 'Which text-to-speech engine and voice settings are selected.', TEXT_TO_AUDIO_TEXT_DOMAIN ),
+                esc_html__( 'Feature usage flags (analytics, aliases, download, CSS selectors — no content data).', TEXT_TO_AUDIO_TEXT_DOMAIN ),
             )
         );
+
+        return $data;
+    }
+
+    /**
+     * Enrich tracking payload with plugin-specific usage telemetry.
+     *
+     * All fields are opt-in (user must allow tracking) and contain no personal
+     * or content data — only anonymized counts, boolean flags, and setting values.
+     *
+     * @param array $data Existing tracking data from AtlasAiDev Insights.
+     *
+     * @return array
+     */
+    public function get_plugin_telemetry( $data ) {
+        $settings   = (array) get_option( 'tta_settings_data', array() );
+        $customize  = (array) get_option( 'tta_customize_settings', array() );
+        $listening  = (array) get_option( 'tta_listening_settings', array() );
+        $analytics  = (array) get_option( 'tta_analytics_settings', array() );
+        $aliases    = (array) get_option( 'tts_text_aliases', array() );
+        $btn        = isset( $customize['buttonSettings'] ) ? (array) $customize['buttonSettings'] : array();
+
+        /*
+         * ─── Group 1: Core Engagement ────────────────────────────────────
+         * "Is the plugin actually working for users?"
+         *
+         * Business benefit: Identifies silent failures (installed but never
+         * used) and measures real adoption depth. If av_has_audio_plays is
+         * false for most sites, the onboarding or default config is broken.
+         */
+        $player_id = 1; // Default free browser TTS.
+        if ( function_exists( 'get_player_id' ) ) {
+            $player_id = get_player_id();
+        }
+
+        // Which TTS engine is active (1=free default, 2=Pro Browser, 3=GTTS,
+        // 4=Google Cloud, 5=OpenAI, 6=ElevenLabs). Reveals provider popularity.
+        $data['av_player_id'] = (int) $player_id;
+
+        // Whether any listening event has been recorded. Detects "installed but
+        // never used" — the most important signal for onboarding improvements.
+        $data['av_has_audio_plays'] = ! empty( $analytics['tts_enable_analytics'] );
+
+        // Count of post types where the button is enabled. Measures content coverage.
+        $post_types = isset( $settings['tta__settings_allow_listening_for_post_types'] )
+            ? (array) $settings['tta__settings_allow_listening_for_post_types']
+            : array();
+        $data['av_total_posts_with_btn'] = count( $post_types );
+
+        // Whether the analytics dashboard is turned on. Measures analytics feature adoption.
+        $data['av_analytics_enabled'] = ! empty( $analytics['tts_enable_analytics'] );
+
+        /*
+         * ─── Group 2: Feature Adoption ───────────────────────────────────
+         * "Which features matter?"
+         *
+         * Business benefit: Drives roadmap prioritization. If 80% of sites
+         * use aliases, invest in a better alias UI. If nobody uses CSS
+         * selectors, don't spend time improving that feature.
+         */
+
+        // Comma-separated list of enabled post types (e.g. "post,page,product").
+        // Shows which content types use TTS — helps target documentation and demos.
+        $data['av_enabled_post_types'] = implode( ',', $post_types );
+
+        // Button placement preference. Reveals whether users prefer above or below content.
+        $data['av_button_position'] = isset( $btn['button_position'] ) ? $btn['button_position'] : 'after_content';
+
+        // Whether text aliases (pronunciation corrections) are configured.
+        // Measures how many users need custom pronunciation — drives alias UX investment.
+        $data['av_has_aliases'] = ! empty( $aliases );
+
+        // Whether custom CSS selectors are set for content targeting.
+        // Measures advanced usage — high adoption means the default content
+        // detection needs improvement.
+        $data['av_uses_css_selectors'] = ! empty( $settings['tta__settings_css_selectors'] );
+
+        // Whether any exclude rules are set (excluded posts, categories, or tags).
+        // High adoption means users need granular control over where TTS appears.
+        $has_excluded_posts = ! empty( $settings['tta__settings_exclude_post_ids'] );
+        $has_excluded_cats  = ! empty( $settings['tta__settings_exclude_categories'] );
+        $has_excluded_tags  = ! empty( $settings['tta__settings_exclude_wp_tags'] );
+        $data['av_uses_exclude_rules'] = $has_excluded_posts || $has_excluded_cats || $has_excluded_tags;
+
+        // "Read content from DOM" setting. When true, content is parsed client-side
+        // instead of server-side. Affects compatibility with page builders.
+        $data['av_reads_from_dom'] = ! empty( $settings['tta__settings_read_content_from_dom'] );
+
+        // "Add post title to read" setting. Measures whether users want the title
+        // included in audio playback.
+        $data['av_includes_title'] = ! empty( $settings['tta__settings_add_post_title_to_read'] );
+
+        // Whether MP3 download is allowed for visitors. Measures demand for
+        // downloadable audio — influences Pro upsell and feature gating.
+        $download_roles = isset( $btn['who_can_download_mp3_file'] ) ? (array) $btn['who_can_download_mp3_file'] : array();
+        $data['av_download_enabled'] = ! empty( $download_roles );
+
+        // Whether custom CSS is added to the button. High adoption means
+        // the default button design doesn't meet user needs.
+        $data['av_has_custom_css'] = ! empty( $customize['custom_css'] );
+
+        // Whether the onboarding setup wizard was completed. Low completion
+        // rate signals the wizard is too long or confusing.
+        $data['av_onboarding_completed'] = (bool) get_option( 'tta_onboarding_completed', false );
 
         return $data;
     }

@@ -40,6 +40,7 @@ export default function Settings() {
         tta__settings_read_content_from_dom: true,
         tta__settings_player_use_old_player: false,
         tta__settings_enable_tts_status: true,
+        tta__settings_delete_data_on_uninstall: false,
     });
     const [postTypes, setPostTypes] = useState([]);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
@@ -914,6 +915,34 @@ export default function Settings() {
                                                 id="tta__settings_display_btn_icon"
                                             />
                                         </SettingRow>
+                                    )}
+
+                                    <SettingRow
+                                        label={__("Delete all data on uninstall", "text-to-audio")}
+                                        questionIcon={true}
+                                        questionTooltip={__("When enabled, all plugin data (settings, analytics, generated audio files) will be permanently deleted when the plugin is uninstalled. Keep this OFF if you plan to reinstall or are debugging.", "text-to-audio")}
+                                    >
+                                        <ToggleSwitch
+                                            checked={settings.tta__settings_delete_data_on_uninstall}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    if (!window.confirm(
+                                                        __("⚠️ WARNING: Enabling this will permanently delete ALL plugin data (settings, analytics, generated audio files) when you uninstall the plugin. This action cannot be undone.\n\nAre you sure you want to enable this?", "text-to-audio")
+                                                    )) {
+                                                        return;
+                                                    }
+                                                }
+                                                handleChange(e);
+                                            }}
+                                            name="tta__settings_delete_data_on_uninstall"
+                                            id="tta__settings_delete_data_on_uninstall"
+                                        />
+                                    </SettingRow>
+                                    {settings.tta__settings_delete_data_on_uninstall && (
+                                        <div className="mb-3 p-2 rounded" style={{backgroundColor: "#fff3cd", border: "1px solid #ffc107", color: "#856404", fontSize: "13px"}}>
+                                            <strong>{__("⚠ Warning:", "text-to-audio")}</strong>{" "}
+                                            {__("All plugin data will be permanently deleted when you uninstall. Turn this OFF if you plan to reinstall, debug, or switch versions.", "text-to-audio")}
+                                        </div>
                                     )}
 
                                     <SettingRow label={__("Clear all cache", "text-to-audio")}>
