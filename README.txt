@@ -784,7 +784,14 @@ Improved :  Pro and free version performance improved.
 
 == Upgrade Notice ==
 
-= 2.1.8  =
-Added : Plugin translation for Portuguese.
-Added : Plugin translation for Italian.
-Added : Pro version activation issue fixed.
+= 2.1.9  =
+Added : Welcome setup wizard with 5 steps (post types, voice, customize, analytics, finish) for new users.
+Added : Setup wizard voice step auto-selects the language matching your WordPress site locale.
+Added : Smart WordPress.org review prompt for free users after 10+ plays and 7+ days of active usage.
+Added : Export/Reports UI exposed in free version with Pro upsell banner.
+Improved : Replaced 1.2 MB Font Awesome bundle with a lightweight 3 KB inline SVG icon system.
+Improved : Added focus trap and focus restoration to settings modal for WCAG 2.1 AA accessibility.
+Improved : Added database indexes on analytics table for faster query performance.
+Improved : Optimized autoload flags across all plugin options to reduce memory usage on every page load.
+Fixed : Scheduled email reports not firing due to timezone mismatch in cron scheduling.
+Changed : Email report sending moved to Pro plugin for better architecture separation.
