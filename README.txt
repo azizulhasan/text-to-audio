@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.9
+Stable tag: 2.1.10
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -351,6 +351,11 @@ Please report security bugs through the [Patchstack Vulnerability Disclosure Pro
 ### TRANSLATION REQUEST
 We are looking for people to help translate this plugin. If you can help, we would love to hear from you.
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
+
+
+= 2.1.10 ( 13 Mar 2026 ) =
+Fixed: pro activation issue fixed.
+
 
 = 2.1.9  ( 12 Mar 2026 )  =
 Added : Welcome setup wizard with 5 steps (post types, voice, customize, analytics, finish) for new users.
@@ -784,14 +789,6 @@ Improved :  Pro and free version performance improved.
 
 == Upgrade Notice ==
 
-= 2.1.9  =
-Added : Welcome setup wizard with 5 steps (post types, voice, customize, analytics, finish) for new users.
-Added : Setup wizard voice step auto-selects the language matching your WordPress site locale.
-Added : Smart WordPress.org review prompt for free users after 10+ plays and 7+ days of active usage.
-Added : Export/Reports UI exposed in free version with Pro upsell banner.
-Improved : Replaced 1.2 MB Font Awesome bundle with a lightweight 3 KB inline SVG icon system.
-Improved : Added focus trap and focus restoration to settings modal for WCAG 2.1 AA accessibility.
-Improved : Added database indexes on analytics table for faster query performance.
-Improved : Optimized autoload flags across all plugin options to reduce memory usage on every page load.
-Fixed : Scheduled email reports not firing due to timezone mismatch in cron scheduling.
-Changed : Email report sending moved to Pro plugin for better architecture separation.
+= 2.1.10  =
+Fixed: pro activation issue fixed.
+
