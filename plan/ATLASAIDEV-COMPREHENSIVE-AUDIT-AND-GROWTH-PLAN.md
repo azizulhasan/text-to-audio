@@ -1280,7 +1280,196 @@ This is achievable within 2-4 weeks with zero new content — just optimizing ex
 | 3.5 | Add monthly billing option to Freemius | ❌ Skipped | Mar 13 | **Skipped intentionally.** 71% of annual subscribers don't renew — product is "set and forget." Monthly billing would drop LTV from ~$59 to $5-12 per project user. Focus on retention (3.8) and trial (3.6) instead. |
 | 3.6 | Add free trial (7 or 14 days) | ⬜ Not Started | — | No trial currently. Increases conversion. |
 | 3.7 | Localization (Spanish, Portuguese, Italian) | ✅ Done | Mar 11 | es_ES, it_IT, pt_PT all 653/653 strings. Released in v2.1.8. |
-| 3.8 | Churn prevention — cancellation survey + win-back emails | ⬜ Not Started | — | 56.7% cancellation rate is critical. |
+| 3.8 | Churn prevention — cancellation survey + win-back emails | ✅ Done | Mar 13 | See detailed notes below. Plan: `plan/single-deactivation-form-dual-submission.md`. |
+
+**Task 3.8 — Detailed Notes:**
+
+> **Business Impact:** 314 subscriptions × 56.7% cancel rate = ~178 cancellations/year × ~$59/year = **~$10,500/year lost revenue**. Even 20% churn reduction = **~$2,100/year recovered**.
+
+**Part A — Cancellation Survey (Single Deactivation Form with Dual Submission)**
+
+*Problem:* Previously, the AtlasAiDev library and Freemius SDK both showed separate deactivation feedback modals, creating a confusing multi-modal experience. Pro plugin had no rescue modal at all — clicking Deactivate instantly deactivated with zero feedback capture.
+
+*Solution:* Single AtlasAiDev deactivation modal that replaces both the AtlasAiDev and Freemius default modals. One form sends data to BOTH trackers simultaneously.
+
+*Complete Deactivation UX Flow (Production):*
+```
+User clicks "Deactivate"
+  → Step 1: Rescue Modal (custom, per-plugin)
+      Free: "Your visitors won't hear your content anymore" + usage stats
+      Pro: "You'll lose access to premium AI voices" + usage stats + priority support mention
+      Buttons: "Keep Plugin Active" (close) | "Continue to Deactivate" (proceed)
+  → Step 2: AtlasAiDev Feedback Modal
+      Inline support banner: "Having trouble? Get help before you go." [Open Support Ticket]
+      8 deactivation reasons (radio buttons):
+        1. "I couldn't understand how to make it work" (text field: "What was the issue?")
+        2. "I found a better plugin" (text field: "What's the plugin's name?")
+        3. "The plugin is great, but I need specific feature that you don't support" (text field: "Could you tell us more about that feature?")
+        4. "The plugin is not working" (text field: "Could you tell us what is not working?")
+        5. "It's not what I was looking for" (no text field)
+        6. "The plugin didn't work as expected" (text field: "What did you expect?")
+        7. "This is a temporary deactivation. I'm just debugging an issue." (no text field)
+        8. "Other" (text field: "Could you tell us a bit more?")
+      Footer: [I rather wouldn't say] [Submit & Deactivate] [Cancel]
+  → Step 3: Dual Submission (simultaneous)
+      1. AtlasAiDev tracker: Standard AJAX POST to track.atlasaidev.com
+      2. Freemius API: navigator.sendBeacon() POST to /api/v1/plugins/{id}/events/deactivation.json
+  → Plugin deactivates
+```
+
+*Why sendBeacon():* When WordPress deactivates a plugin, the page reloads immediately. Regular AJAX/fetch requests get cancelled during navigation. `navigator.sendBeacon()` is a browser API specifically designed to survive page unloads — the browser guarantees delivery even after the page navigates away. This ensures Freemius always receives the deactivation data.
+
+*Freemius Reason ID Mapping (AtlasAiDev → Freemius):*
+| AtlasAiDev Reason | Freemius ID | Freemius Constant |
+|---|---|---|
+| could-not-understand | 10 | REASON_COULDNT_MAKE_IT_WORK |
+| found-better-plugin | 2 | REASON_FOUND_A_BETTER_PLUGIN |
+| not-have-that-feature | 11 | REASON_GREAT_BUT_NEED_SPECIFIC_FEATURE |
+| is-not-working | 12 | REASON_NOT_WORKING |
+| looking-for-other | 13 | REASON_NOT_WHAT_I_WAS_LOOKING_FOR |
+| did-not-work-as-expected | 14 | REASON_DIDNT_WORK_AS_EXPECTED |
+| debugging | 15 | REASON_TEMPORARY_DEACTIVATION |
+| other / no-comment | 7 | REASON_OTHER |
+
+*Freemius Modal Suppression:* `tts_fs()->add_filter('show_deactivation_feedback_form', '__return_false')` (free) and `ttsp_fs()->add_filter('show_deactivation_feedback_form', '__return_false')` (pro) — prevents Freemius from showing its own modal since AtlasAiDev modal handles everything.
+
+*Freemius Data Bridge:* AtlasAiDev's `Insights.php` doesn't have access to the Freemius instance. Solution: filter hook `AtlasAiDev_{slug}_freemius_deactivation_data` provides Freemius AJAX credentials (action, security nonce, module_id) from the plugin wrapper classes (`TTA_Lib_AtlasAiDev` / `TTA_Pro_Lib_AtlasAiDev`). Output as `window._fsDeactivationData` JS variable.
+
+*Clone Bug Fix (Critical):* The original rescue modal's "Continue to Deactivate" button used `cloneNode(true)` to replace the deactivate link, but cloned nodes carry ALL event listeners in modern browsers — including the rescue modal's own click handler. This caused an infinite loop: click → rescue modal → click clone → rescue modal again. **Fix:** `removeEventListener` pattern with a `rescueShown` flag + re-click the original element.
+
+*Pro Rescue Modal Addition:* Pro plugin previously had NO rescue modal — deactivation was instant with zero feedback. Added `render_pro_deactivation_rescue_modal()` method in `TTA_Pro` class, hooked to `admin_footer`. Shows Pro-specific messaging: premium AI voices, priority support, usage stats from `wp_atlasvoice_analytics` table (total plays, posts with audio). Stats cached via `tta_deactivation_stats` transient (1 hour TTL).
+
+*Localhost Behavior:* AtlasAiDev library skips deactivation scripts on localhost — `__is_local_server()` checks `REMOTE_ADDR` for `127.0.0.1`. Overridable via `AtlasAiDev_is_local` filter returning `false`. Freemius SDK also skips on localhost — `WP_FS__IS_LOCALHOST` checks `REMOTE_ADDR` starts with `127.` or equals `::1`. On production sites with Freemius registration, both modals appear correctly.
+
+*9 TTS-Specific Uninstall Reasons (Freemius):* In addition to the AtlasAiDev modal reasons, the Freemius `uninstall_reasons` filter provides 9 TTS-specific reasons that replace Freemius's generic ones: voice-quality, no-visitors, too-complex, wrong-language, performance, found-better, temporary, pro-expensive, other. Some include optional text fields for details.
+
+*Deactivation Confirmation Message:* Before the modal chain, Freemius shows a confirmation dialog with dynamic usage stats: total audio plays and posts with audio from `wp_atlasvoice_analytics` table. Hook: `deactivation_confirmation_message` (free) / `deactivation_confirmation_message_pro` (pro). Stats cached via `tta_deactivation_stats` transient.
+
+*Data Flow:* Deactivation reasons aggregate in both AtlasAiDev dashboard (track.atlasaidev.com — for product analytics, aggregated by reason) and Freemius dashboard (dashboard.freemius.com — tied to specific license/site). Combined data identifies top churn drivers to prioritize fixes.
+
+*Files Modified (Part A):*
+| File | Change |
+|---|---|
+| `text-to-audio/libs/AtlasAiDev/Insights.php` | Replaced overlay with inline support banner, added Freemius parallel JS submission via sendBeacon, reason mapping |
+| `text-to-audio-pro/Libs/AtlasAiDev/Insights.php` | Same changes as free plugin's Insights.php |
+| `text-to-audio/includes/TTA_Lib_AtlasAiDev.php` | Hooked `AtlasAiDev_{slug}_freemius_deactivation_data` filter to provide Freemius AJAX credentials |
+| `text-to-audio-pro/Includes/TTA_Pro_Lib_AtlasAiDev.php` | Same filter hook for Pro's Freemius instance |
+| `text-to-audio/text-to-audio.php` | `tts_fs()->add_filter('show_deactivation_feedback_form', '__return_false')` |
+| `text-to-audio-pro/text-to-audio-pro.php` | `ttsp_fs()->add_filter('show_deactivation_feedback_form', '__return_false')` + Pro rescue modal added |
+| `text-to-audio/admin/TTA_Admin.php` | Fixed clone bug with removeEventListener + rescueShown flag pattern |
+| `text-to-audio-pro/Includes/TTA_Pro.php` | Added `render_pro_deactivation_rescue_modal()` method hooked to `admin_footer` |
+
+*Git:* Branch `feature/TTS-231` in both free and pro plugins.
+
+---
+
+**Part B — Win-back Email Automation (Mailchimp Customer Journey)**
+
+*Architecture:* Freemius → Mailchimp → Automated Email Sequence
+
+*Step 1 — Freemius Integration Rule:*
+- **Rule ID:** 2657
+- **Dashboard URL:** `https://dashboard.freemius.com/#!/live/stores/5993/plugins/13388/integrations/mailchimp/rules/2657/`
+- **Event:** `subscription.cancelled` (fires when a Pro user cancels their subscription)
+- **Action:** "Add email" to Mailchimp audience
+- **Target List:** "AtlasVoice Churned Users" (dedicated list, separate from main "Atlas AiDev" audience — prevents mixing churned users with active subscribers)
+- **How it works:** When Freemius detects a subscription cancellation, it calls Mailchimp's API to add the user's email to the "AtlasVoice Churned Users" audience. This triggers the Customer Journey automation.
+
+*Step 2 — Mailchimp Audience Configuration:*
+- **Audience Name:** AtlasVoice Churned Users
+- **Audience ID:** 903624
+- **From Email:** `founder@atlasaidev.com`
+- **From Name:** AtlasVoice
+- **Reminder Text:** "You're receiving this email because you previously used AtlasVoice Pro for your WordPress site."
+- **Contact Info:** Atlas AiDev, 54/2 Shekhertek 4, Dhaka, Bangladesh, 1207
+- **Why separate list:** Keeps churned users isolated from active subscribers. Different messaging strategy — win-back vs. onboarding/engagement. Prevents accidental cross-contamination of email sequences.
+
+*Step 3 — Mailchimp Customer Journey Automation:*
+- **Flow Name:** "AtlasVoice Pro Win-Back"
+- **Flow ID:** 43
+- **Status:** Draft (not yet activated)
+- **Audience:** AtlasVoice Churned Users
+- **Trigger:** "Contact signs up to AtlasVoice Churned Users"
+  - **Critical setting:** "Include imported contacts" = ON. Freemius adds contacts via API (which Mailchimp treats as imports, not signups). Without this setting ON, the automation would never trigger.
+
+*Complete Flow Structure:*
+```
+Trigger: Contact added to "AtlasVoice Churned Users"
+  → Email 1 (Day 1, immediate)
+  → Time Delay: 1 week
+  → Email 2 (Day 7)
+  → Time Delay: 3 weeks
+  → Email 3 (Day 30)
+  → Contact exits journey
+```
+
+*Email 1 — Day 1 (Immediate after cancellation):*
+- **Mailchimp ID:** 2752053
+- **Subject:** "Your visitors are losing audio access"
+- **Preview Text:** "AI voices, analytics, and MP3 exports - here's what you'll miss without AtlasVoice Pro"
+- **Template:** Minimal (clean, white background)
+- **Content:**
+  - Heading: "We noticed you left" (centered)
+  - Body: Explains what changes without Pro subscription
+  - Bullet points (left-aligned, clean HTML with `<ul>` styling):
+    - No more AI-powered voices (Google, Amazon, Azure, OpenAI)
+    - No analytics to track listener engagement
+    - No MP3 export for podcast distribution
+    - No priority support
+  - Closing: "Your content deserves to be heard. Re-activate today and keep your site accessible to every visitor."
+  - CTA Button: "Re-activate AtlasVoice Pro" → `https://atlasaidev.com/plugins/text-to-speech-pro/pricing/`
+- **Strategy:** Loss aversion — remind users what they're losing, not what they had. Focus on visitor impact, not plugin features.
+
+*Email 2 — Day 7 (1 week after cancellation):*
+- **Mailchimp ID:** 2752054
+- **Subject:** "Come back and save 30% on AtlasVoice Pro"
+- **Preview Text:** "Limited time offer: Use code COMEBACK30 to get 30% off your renewal"
+- **Template:** Minimal
+- **Content:**
+  - Heading: "Save 30% - Limited Time" (centered)
+  - Body: "It's been a week since you canceled AtlasVoice Pro, and we'd love to have you back."
+  - Offer highlight: "Use code COMEBACK30 for 30% off" (centered, red #e74c3c color, H2)
+  - Feature reminder bullets:
+    - Premium AI Voices — Google, Amazon, Azure, and OpenAI text-to-speech
+    - Analytics Dashboard — Track plays, listeners, and engagement
+    - MP3 Export — Download audio for podcasts and offline use
+    - Priority Support — Fast, dedicated help when you need it
+  - Urgency: "This offer expires in 7 days. Don't miss out!"
+  - CTA Button: "Claim 30% Off Now" → `https://atlasaidev.com/plugins/text-to-speech-pro/pricing/`
+- **Strategy:** Financial incentive + scarcity. The 30% discount (code: COMEBACK30) provides a concrete reason to return. 7-day expiry creates urgency.
+
+*Email 3 — Day 30 (1 month after cancellation):*
+- **Mailchimp ID:** 2752055
+- **Subject:** "See what's new in AtlasVoice Pro"
+- **Preview Text:** "New AI voices, improved analytics, and features you haven't tried yet - your site's accessibility is waiting"
+- **Template:** Minimal
+- **Content:**
+  - Heading: "A lot has changed" (centered)
+  - Body: "It's been a month since you left AtlasVoice Pro, and we've been busy building new features."
+  - What's new bullets:
+    - New AI Voice Providers — More natural-sounding voices than ever
+    - Enhanced Analytics — Deeper insights into how visitors engage with audio
+    - Improved Performance — Faster audio loading and smoother playback
+    - Better WordPress Compatibility — Works seamlessly with more themes and plugins
+  - Closing: "Your free plugin is still active, but your visitors are missing out on the premium experience that keeps them engaged and coming back."
+  - Final ask: "Ready to give AtlasVoice Pro another try? We'd love to have you back."
+  - CTA Button: "Explore AtlasVoice Pro" → `https://atlasaidev.com/plugins/text-to-speech-pro/pricing/`
+- **Strategy:** FOMO + product improvement. After 30 days, price sensitivity fades — focus on what's new and improved since they left. No discount; appeal to curiosity and missed value.
+
+*Email Template Technical Details:*
+- All 3 emails use Mailchimp's "Minimal" template (clean, no heavy graphics)
+- Bullet points rendered as clean flat `<ul>` HTML (not nested) with `text-align: left` and `padding-left: 40px` inline styles
+- CTA buttons are Mailchimp button blocks with centered alignment
+- Image blocks removed from all 3 templates (text-only for deliverability)
+- All emails use left-aligned body text for readability
+
+*Pending Action Items (Part B):*
+1. **COMEBACK30 coupon** — Needs to be created in Freemius dashboard (Settings → Coupons). Should be: 30% off, single-use per user, applicable to all Pro plans (monthly + annual), with appropriate expiration.
+2. **Activate the flow** — Currently in Draft status. Activate after: (a) COMEBACK30 coupon is created and tested, (b) all 3 email templates are given a final review, (c) Email 2 & 3 button URLs are verified as correct in Mailchimp.
+3. **Email 2 & 3 URL correction** — Button URLs were initially set to `/pricing/` instead of `/plugins/text-to-speech-pro/pricing/`. Email 1 was corrected; Email 2 & 3 may still need URL updates in the Mailchimp editor.
+4. **Test the full pipeline** — Cancel a test subscription in Freemius, verify email appears in "AtlasVoice Churned Users" audience, verify all 3 emails are sent at correct intervals.
+
+*Connection between Part A and Part B:* The deactivation survey (Part A) captures WHY users leave. The win-back emails (Part B) attempt to bring them back. Together, they form a complete churn prevention system: survey data identifies which problems to fix first (e.g., if "too expensive" is the #1 reason, the 30% discount email becomes more critical), while the email sequence provides multiple touchpoints to re-engage churned users with different strategies (loss aversion → financial incentive → FOMO).
 
 ### 🟣 PHASE 5 — PLUGIN DEVELOPMENT (Mar 11-13) — Abandon Rate + Pro Features
 
@@ -1364,7 +1553,7 @@ This is achievable within 2-4 weeks with zero new content — just optimizing ex
 | 3.5 | Add monthly billing (Freemius) | P3 | ❌ Skipped | master |
 | 3.6 | Add free trial (7 or 14 days) | P3 | ⬜ Not Started | master |
 | 3.7 | Localization (es, it, pt) | P3 | ✅ Done | master |
-| 3.8 | Churn prevention — survey + win-back | P3 | ⬜ Not Started | master |
+| 3.8 | Churn prevention — survey + win-back | P3 | ✅ Done | `plan/single-deactivation-form-dual-submission.md` |
 | 5.1 | P0-1: Free Onboarding Wizard | P5 | ✅ Done | abandon-rate, p0-implementation |
 | 5.2 | P0-2: Enable Analytics by Default | P5 | ✅ Done | abandon-rate, p0-implementation |
 | 5.3 | P0-3: Dashboard Widget | P5 | ✅ Done | abandon-rate, p0-implementation |
@@ -1402,7 +1591,7 @@ This is achievable within 2-4 weeks with zero new content — just optimizing ex
 | 7.12 | Code Splitting (dashboard lazy load) | P7 | ⬜ Not Started | abandon-rate |
 | 7.13 | Accessibility Audit (WCAG 2.1 AA) | P7 | ⬜ Not Started | abandon-rate |
 
-**Summary: 56 total tasks — 41 Done ✅ | 1 In Progress 🔄 | 14 Not Started ⬜**
+**Summary: 56 total tasks — 42 Done ✅ | 1 In Progress 🔄 | 13 Not Started ⬜**
 
 ---
 
