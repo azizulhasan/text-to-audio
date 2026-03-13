@@ -190,12 +190,21 @@ class TTA_Activator {
 		 * analytics settings.
 		 */
 		if ( $renew_all_settings || ! get_option( 'tta_analytics_settings' ) ) {
-			update_option( 'tta_analytics_settings', array
-			(
+			$latest_post_ids = get_posts( array(
+				'posts_per_page' => 20,
+				'post_type'      => 'post',
+				'post_status'    => 'publish',
+				'fields'         => 'ids',
+				'orderby'        => 'date',
+				'order'          => 'DESC',
+			) );
+
+			update_option( 'tta_analytics_settings', array(
 				"tts_enable_analytics"   => true,
-				"tts_trackable_post_ids" => "all"
+				"tts_trackable_post_ids" => $latest_post_ids,
 			), false );
 		}
+
 
 		self::create_analytics_table_if_not_exists();
 		self::maybe_add_analytics_indexes();
