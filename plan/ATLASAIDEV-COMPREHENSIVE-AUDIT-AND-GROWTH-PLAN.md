@@ -1040,41 +1040,41 @@ SUITE:       AtlasAiDev Pro Bundle (all 3 plugins)
 ### Product Schema (for product page)
 ```json
 {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "AtlasVoice - Text to Speech Pro",
-  "applicationCategory": "WordPress Plugin",
-  "operatingSystem": "WordPress",
-  "offers": {
-    "@type": "Offer",
-    "price": "59",
-    "priceCurrency": "USD",
-    "priceValidUntil": "2026-12-31"
-  },
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "4.8",
-    "reviewCount": "83",
-    "bestRating": "5"
-  }
+   "@context": "https://schema.org",
+   "@type": "SoftwareApplication",
+   "name": "AtlasVoice - Text to Speech Pro",
+   "applicationCategory": "WordPress Plugin",
+   "operatingSystem": "WordPress",
+   "offers": {
+      "@type": "Offer",
+      "price": "59",
+      "priceCurrency": "USD",
+      "priceValidUntil": "2026-12-31"
+   },
+   "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "reviewCount": "83",
+      "bestRating": "5"
+   }
 }
 ```
 
 ### FAQ Schema (for pricing page)
 ```json
 {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "Does AtlasVoice work without API keys?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes! The free version works with zero configuration..."
+   "@context": "https://schema.org",
+   "@type": "FAQPage",
+   "mainEntity": [
+      {
+         "@type": "Question",
+         "name": "Does AtlasVoice work without API keys?",
+         "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! The free version works with zero configuration..."
+         }
       }
-    }
-  ]
+   ]
 }
 ```
 
@@ -1238,7 +1238,7 @@ This is achievable within 2-4 weeks with zero new content — just optimizing ex
 
 ## IMPLEMENTATION TODO LIST
 
-> **Last Updated:** March 10, 2026 (Week 3-4 Content Calendar Created — 8 Total New Posts Scheduled)
+> **Last Updated:** March 14, 2026 (v2.1.9 free + v3.1.3 pro released, all P0 items complete, TTS-229 done)
 > **Status Key:** ✅ Done | 🔄 In Progress | ⬜ Not Started
 
 ---
@@ -1263,34 +1263,335 @@ This is achievable within 2-4 weeks with zero new content — just optimizing ex
 | # | Task | Status | Date | Notes |
 |---|------|--------|------|-------|
 | 2.1 | Publish 4 new blog posts targeting high-impression keywords | ✅ Done | Mar 8 | Published 4 posts: (1) Google Cloud TTS vs OpenAI vs ElevenLabs (ID 4154, targets AI voice comparison keywords), (2) TTS Accommodation Accessibility Guide (ID 4155, targets 46,876 impression keyword), (3) How to Add TTS to Any Website (ID 4156, targets 90,480 impression keyword), (4) Best WordPress TTS Plugin Comparison (ID 4160, targets plugin comparison keywords). All with Yoast meta, category "text-to-speech", featured images, SEO-friendly slugs. Scripts: `plan/scripts/create-blog-posts.js`, `plan/scripts/create-comparison-post.js` |
-| 2.2 | Fix 71.4% install abandon rate | ✅ Done | Mar 8 | Code Snippet #30 (ACTIVE): Auto-redirect to settings on first activation, "Getting Started" admin notice with "Configure Now" CTA, Settings link added to plugin action links. Script: `plan/scripts/install-abandon-fix.js` |
-| 2.3 | Set up email capture on blog posts | ✅ Done | Mar 8 | **v2 — Centralized Tracking (Updated Mar 8 PM):** Code Snippet #29 (ACTIVE): Inline opt-in form after all "text-to-speech" category posts. Now POSTs to centralized tracking server: `https://track.atlasaidev.com/wp-json/atlasaidev_tracker/v1/tracker/subscribe`. Sends: email, page_url, page_title, post_category, source, plugin, referrer. **Tracking server** (`AtlasAiDev_Tracker_Api_Routes.php`) stores in `wpxr_plugin_subscribers` table (18 columns: email, name, page_url, page_title, post_category, source, plugin, ip_address, country, city, user_agent, referrer, status, subscribe_count, timestamps). **Security:** Rate limiting (5 req/min/IP via transients → 429), honeypot anti-bot field, `$wpdb->prepare()` parameterized queries, `sanitize_email()`/`sanitize_text_field()`/`esc_url_raw()` on all inputs, input length caps (email 255, URLs 2048, user_agent 500), dynamic format strings for `$wpdb->update()`. Auto-creates table via `dbDelta()`. Handles duplicates (updates existing + increments subscribe_count). Emoji fix: `&#x1F50A;` HTML entity for 🔊. |
-| 2.4 | Create comprehensive competitor comparison page | ✅ Done | Mar 8 | Post ID 4160: "Best WordPress TTS Plugin: 6 Top Plugins Compared". Covers AtlasVoice, GSpeech, ResponsiveVoice, Trinity Audio, BeyondWords, Play.ht. Includes pricing tables, feature comparison matrix, 3-year cost comparison. Script: `plan/scripts/create-comparison-post.js` |
-| 2.5 | Fix URL fragmentation | ✅ Done | Mar 8 | Verified proper 301 redirects: `/text-to-speech-pro/` → `/plugins/text-to-speech-pro/` and `/pricing/` → `/plugins/text-to-speech-pro/pricing/`. No action needed. |
-| 2.6 | Internal linking audit + fixes | ✅ Done | Mar 8 | Added "Related Articles" sections to 8 posts: 4 existing high-traffic posts (book-readers ID 3497, accommodation ID 3477, how-to-use ID 3085, best-plugin ID 1930) + all 4 new posts. Each links to 5 related articles + product page. Script: `plan/scripts/internal-links-v2.js` |
+| 2.2 | Fix 71.4% install abandon rate | ✅ Done | Mar 13 | Code Snippet #30 removed (superseded by in-plugin wizards). Full setup wizards shipped in v2.1.9 (free) + v3.1.3 (pro), released Mar 13. Free wizard: 4-step (Post Type → Voice → Customize → Analytics → Finish). Pro wizard: dynamic 4-5 step (Post Type → Provider → Voice → Player Settings → Analytics → Finish) with AI voice provider selection, audio preview, email digest setup. Both wizards auto-launch on first activation, coral `#FF7853` brand theme, cross-promo on finish screen. Also includes: dashboard widget, deactivation warning with usage stats, analytics enabled by default (20 posts free, all posts Pro), smart review prompt (free only). |
+| 2.3 | Set up email capture on blog posts | ✅ Done | Mar 8 | Code Snippet #29 (ACTIVE): Inline opt-in form after "text-to-speech" category posts. POSTs to `track.atlasaidev.com`. |
+| 2.4 | Create comprehensive competitor comparison page | ✅ Done | Mar 8 | Post ID 4160: "Best WordPress TTS Plugin: 6 Top Plugins Compared". |
+| 2.5 | Fix URL fragmentation | ✅ Done | Mar 8 | Verified proper 301 redirects. No action needed. |
+| 2.6 | Internal linking audit + fixes | ✅ Done | Mar 8 | Added "Related Articles" to 8 posts. |
 
-### 🟢 PHASE 3 — IMPORTANT (Next 30 Days) — Sustainable Growth  ⬅️ **YOU ARE HERE**
+### 🟢 PHASE 3 — IMPORTANT (Next 30 Days) — Sustainable Growth
 
 | # | Task | Status | Date | Notes |
 |---|------|--------|------|-------|
-| 3.1 | Rebuild content calendar (2 posts/week) | ✅ Done (Week 1-4) | Mar 10 | **Week 1-2: 4 posts SCHEDULED (Mar 15-25).** (1) "AtlasVoice vs GSpeech" — ID 4173, Mar 15, featured_media=4183, focus: "atlasvoice vs gspeech"; (2) "WordPress ADA & WCAG Guide" — ID 4175, Mar 18, featured_media=4184, focus: "wordpress accessibility guide"; (3) "AtlasVoice vs Trinity Audio" — ID 4176, Mar 22, featured_media=4185, focus: "atlasvoice vs trinity audio"; (4) "ChatGPT TTS WordPress" — ID 4177, Mar 25, featured_media=4186, focus: "chatgpt tts wordpress". **Week 3-4: 4 posts SCHEDULED (Mar 29-Apr 7).** (5) "How to Make Your WordPress Blog Posts Read Aloud Automatically" — ID 4188, Mar 29, featured_media=4192, focus: "read aloud WordPress"; (6) "Best TTS Voices for Hindi, Tagalog, Bahasa & South Asian Languages" — ID 4189, Apr 1, featured_media=4193, focus: "text to speech Hindi"; (7) "How E-Commerce Stores Use TTS to Increase Conversions" — ID 4190, Apr 3, featured_media=4194, focus: "text to speech ecommerce"; (8) "Amazon Polly vs AtlasVoice: WordPress TTS Compared" — ID 4191, Apr 7, featured_media=4195, focus: "Amazon Polly WordPress". **All 8 posts** have: Yoast SEO meta, featured images, category "text-to-speech" (ID 35), comparison tables, FAQ sections. Scripts: `plan/scripts/content-calendar-week1-2.js`, `plan/scripts/week3-4-create-posts.js`, `plan/scripts/set-yoast-meta.js`. **Total blog posts: 29** (21 existing + 8 new). |
-| 3.2 | Launch email onboarding sequence for free users | ✅ Done | Mar 10 | **Mailchimp Standard plan purchased.** Freemius ↔ Mailchimp OAuth connected (auto-syncs buyers). GA4 connected to Mailchimp. **"AtlasVoice - Convert to Pro" Customer Journey — ACTIVE since Mar 9.** 5-email automation: Email 1: Welcome (Day 0), Email 2: Quick Tips (Day 3), Email 3: Accessibility Story (Day 7), Email 4: Free vs Pro (Day 12), Email 5: Final Offer with ATLASTTS10P coupon (Day 18). All emails: white backgrounds, centered CTAs, UTM-tagged URLs, GA link tracking with all 4 UTM params. **Email corrections applied:** Email 1 rewritten for existing users (not install guide), Email 2 Tip 1 path fixed (Aliases tab), Email 4 comparison table corrected (added missing rows, fixed AtlasVoice AI/Audio intros accuracy), all signatures → "The AtlasAiDev Team", mailing address fixed to "AtlasAiDev", permission reminder updated. **Journey activated** Mar 9 (all review checkmarks green). **3,215 existing subscribers re-imported** Mar 10 (CSV export → re-import with "Update existing contacts" + "Include imported contacts" trigger) so all existing contacts enter the automation. Tracking: open/click/unsubscribe built-in + GA UTM tracking on all 5 emails. Plan file: `plan/email-corrections-for-approval.md` |
-| 3.3 | Restructure Google CPC with conversion tracking | ⬜ Not Started | — | GA4 tracking is set up (task 1.6 ✅). Can now build conversion-optimized campaigns. |
-| 3.4 | Confirm brand naming → consolidate to "AtlasVoice" | ⬜ Not Started | — | Currently fragmented: Text To Speech Pro, TTS Pro, Text to Audio, AtlasVoice. |
-| 3.5 | Add monthly billing option to Freemius | ⬜ Not Started | — | Currently only annual + lifetime. Monthly lowers barrier. |
+| 3.1 | Rebuild content calendar (2 posts/week) | ✅ Done (Week 1-4) | Mar 10 | 8 posts scheduled Mar 15 – Apr 7. Total blog posts: 29. |
+| 3.2 | Launch email onboarding sequence for free users | ✅ Done | Mar 10 | Mailchimp 5-email "Convert to Pro" journey ACTIVE. 3,215 contacts re-imported. Plan file: `plan/email-corrections-for-approval.md` |
+| 3.3 | Restructure Google CPC with conversion tracking | ⏸️ Deferred | Mar 13 | **Deferred until organic traffic recovers (~30-60 days).** Previous CPC: 1,866 clicks, 0 conversions — total waste. GA4 tracking is ready (task 1.6 ✅) but premature to spend $500-1K/mo on ads while organic strategy (content calendar, SEO fixes, 8 new blog posts) hasn't had time to show results. MRR declining — budget better spent on churn prevention (task 3.8). **Revisit when:** organic traffic reaches ~1,500+/mo (est. mid-Apr). Then test small $200/mo campaign on high-intent keywords ("best wordpress tts plugin") with redesigned pricing page as landing page. |
+| 3.4 | Confirm brand naming → consolidate to "AtlasVoice" | ✅ Done | Mar 13 | Plugin UI consolidated to "AtlasVoice" branding in v2.1.9 (free) + v3.1.3 (pro). Website and marketing materials may still need updating separately. |
+| 3.5 | Add monthly billing option to Freemius | ❌ Skipped | Mar 13 | **Skipped intentionally.** 71% of annual subscribers don't renew — product is "set and forget." Monthly billing would drop LTV from ~$59 to $5-12 per project user. Focus on retention (3.8) and trial (3.6) instead. |
 | 3.6 | Add free trial (7 or 14 days) | ⬜ Not Started | — | No trial currently. Increases conversion. |
-| 3.7 | Localization (Spanish, Portuguese, Italian) | ✅ Done | Mar 11 | All 3 languages completed: es_ES (653/653), it_IT (653/653), pt_PT (653/653). Reusable generation scripts in `scripts/` folder. Released in v2.1.8. |
-| 3.8 | Churn prevention — cancellation survey + win-back emails | ⬜ Not Started | — | 56.7% cancellation rate is critical. |
+| 3.7 | Localization (Spanish, Portuguese, Italian) | ✅ Done | Mar 11 | es_ES, it_IT, pt_PT all 653/653 strings. Released in v2.1.8. |
+| 3.8 | Churn prevention — cancellation survey + win-back emails | ✅ Done | Mar 13 | See detailed notes below. Plan: `plan/single-deactivation-form-dual-submission.md`. |
 
-### 🔵 PHASE 4 — OPTIMIZATION (Month 2-3)
+**Task 3.8 — Detailed Notes:**
+
+> **Business Impact:** 314 subscriptions × 56.7% cancel rate = ~178 cancellations/year × ~$59/year = **~$10,500/year lost revenue**. Even 20% churn reduction = **~$2,100/year recovered**.
+
+**Part A — Cancellation Survey (Single Deactivation Form with Dual Submission)**
+
+*Problem:* Previously, the AtlasAiDev library and Freemius SDK both showed separate deactivation feedback modals, creating a confusing multi-modal experience. Pro plugin had no rescue modal at all — clicking Deactivate instantly deactivated with zero feedback capture.
+
+*Solution:* Single AtlasAiDev deactivation modal that replaces both the AtlasAiDev and Freemius default modals. One form sends data to BOTH trackers simultaneously.
+
+*Complete Deactivation UX Flow (Production):*
+```
+User clicks "Deactivate"
+  → Step 1: Rescue Modal (custom, per-plugin)
+      Free: "Your visitors won't hear your content anymore" + usage stats
+      Pro: "You'll lose access to premium AI voices" + usage stats + priority support mention
+      Buttons: "Keep Plugin Active" (close) | "Continue to Deactivate" (proceed)
+  → Step 2: AtlasAiDev Feedback Modal
+      Inline support banner: "Having trouble? Get help before you go." [Open Support Ticket]
+      8 deactivation reasons (radio buttons):
+        1. "I couldn't understand how to make it work" (text field: "What was the issue?")
+        2. "I found a better plugin" (text field: "What's the plugin's name?")
+        3. "The plugin is great, but I need specific feature that you don't support" (text field: "Could you tell us more about that feature?")
+        4. "The plugin is not working" (text field: "Could you tell us what is not working?")
+        5. "It's not what I was looking for" (no text field)
+        6. "The plugin didn't work as expected" (text field: "What did you expect?")
+        7. "This is a temporary deactivation. I'm just debugging an issue." (no text field)
+        8. "Other" (text field: "Could you tell us a bit more?")
+      Footer: [I rather wouldn't say] [Submit & Deactivate] [Cancel]
+  → Step 3: Dual Submission (simultaneous)
+      1. AtlasAiDev tracker: Standard AJAX POST to track.atlasaidev.com
+      2. Freemius API: navigator.sendBeacon() POST to /api/v1/plugins/{id}/events/deactivation.json
+  → Plugin deactivates
+```
+
+*Why sendBeacon():* When WordPress deactivates a plugin, the page reloads immediately. Regular AJAX/fetch requests get cancelled during navigation. `navigator.sendBeacon()` is a browser API specifically designed to survive page unloads — the browser guarantees delivery even after the page navigates away. This ensures Freemius always receives the deactivation data.
+
+*Freemius Reason ID Mapping (AtlasAiDev → Freemius):*
+| AtlasAiDev Reason | Freemius ID | Freemius Constant |
+|---|---|---|
+| could-not-understand | 10 | REASON_COULDNT_MAKE_IT_WORK |
+| found-better-plugin | 2 | REASON_FOUND_A_BETTER_PLUGIN |
+| not-have-that-feature | 11 | REASON_GREAT_BUT_NEED_SPECIFIC_FEATURE |
+| is-not-working | 12 | REASON_NOT_WORKING |
+| looking-for-other | 13 | REASON_NOT_WHAT_I_WAS_LOOKING_FOR |
+| did-not-work-as-expected | 14 | REASON_DIDNT_WORK_AS_EXPECTED |
+| debugging | 15 | REASON_TEMPORARY_DEACTIVATION |
+| other / no-comment | 7 | REASON_OTHER |
+
+*Freemius Modal Suppression:* `tts_fs()->add_filter('show_deactivation_feedback_form', '__return_false')` (free) and `ttsp_fs()->add_filter('show_deactivation_feedback_form', '__return_false')` (pro) — prevents Freemius from showing its own modal since AtlasAiDev modal handles everything.
+
+*Freemius Data Bridge:* AtlasAiDev's `Insights.php` doesn't have access to the Freemius instance. Solution: filter hook `AtlasAiDev_{slug}_freemius_deactivation_data` provides Freemius AJAX credentials (action, security nonce, module_id) from the plugin wrapper classes (`TTA_Lib_AtlasAiDev` / `TTA_Pro_Lib_AtlasAiDev`). Output as `window._fsDeactivationData` JS variable.
+
+*Clone Bug Fix (Critical):* The original rescue modal's "Continue to Deactivate" button used `cloneNode(true)` to replace the deactivate link, but cloned nodes carry ALL event listeners in modern browsers — including the rescue modal's own click handler. This caused an infinite loop: click → rescue modal → click clone → rescue modal again. **Fix:** `removeEventListener` pattern with a `rescueShown` flag + re-click the original element.
+
+*Pro Rescue Modal Addition:* Pro plugin previously had NO rescue modal — deactivation was instant with zero feedback. Added `render_pro_deactivation_rescue_modal()` method in `TTA_Pro` class, hooked to `admin_footer`. Shows Pro-specific messaging: premium AI voices, priority support, usage stats from `wp_atlasvoice_analytics` table (total plays, posts with audio). Stats cached via `tta_deactivation_stats` transient (1 hour TTL).
+
+*Localhost Behavior:* AtlasAiDev library skips deactivation scripts on localhost — `__is_local_server()` checks `REMOTE_ADDR` for `127.0.0.1`. Overridable via `AtlasAiDev_is_local` filter returning `false`. Freemius SDK also skips on localhost — `WP_FS__IS_LOCALHOST` checks `REMOTE_ADDR` starts with `127.` or equals `::1`. On production sites with Freemius registration, both modals appear correctly.
+
+*9 TTS-Specific Uninstall Reasons (Freemius):* In addition to the AtlasAiDev modal reasons, the Freemius `uninstall_reasons` filter provides 9 TTS-specific reasons that replace Freemius's generic ones: voice-quality, no-visitors, too-complex, wrong-language, performance, found-better, temporary, pro-expensive, other. Some include optional text fields for details.
+
+*Deactivation Confirmation Message:* Before the modal chain, Freemius shows a confirmation dialog with dynamic usage stats: total audio plays and posts with audio from `wp_atlasvoice_analytics` table. Hook: `deactivation_confirmation_message` (free) / `deactivation_confirmation_message_pro` (pro). Stats cached via `tta_deactivation_stats` transient.
+
+*Data Flow:* Deactivation reasons aggregate in both AtlasAiDev dashboard (track.atlasaidev.com — for product analytics, aggregated by reason) and Freemius dashboard (dashboard.freemius.com — tied to specific license/site). Combined data identifies top churn drivers to prioritize fixes.
+
+*Files Modified (Part A):*
+| File | Change |
+|---|---|
+| `text-to-audio/libs/AtlasAiDev/Insights.php` | Replaced overlay with inline support banner, added Freemius parallel JS submission via sendBeacon, reason mapping |
+| `text-to-audio-pro/Libs/AtlasAiDev/Insights.php` | Same changes as free plugin's Insights.php |
+| `text-to-audio/includes/TTA_Lib_AtlasAiDev.php` | Hooked `AtlasAiDev_{slug}_freemius_deactivation_data` filter to provide Freemius AJAX credentials |
+| `text-to-audio-pro/Includes/TTA_Pro_Lib_AtlasAiDev.php` | Same filter hook for Pro's Freemius instance |
+| `text-to-audio/text-to-audio.php` | `tts_fs()->add_filter('show_deactivation_feedback_form', '__return_false')` |
+| `text-to-audio-pro/text-to-audio-pro.php` | `ttsp_fs()->add_filter('show_deactivation_feedback_form', '__return_false')` + Pro rescue modal added |
+| `text-to-audio/admin/TTA_Admin.php` | Fixed clone bug with removeEventListener + rescueShown flag pattern |
+| `text-to-audio-pro/Includes/TTA_Pro.php` | Added `render_pro_deactivation_rescue_modal()` method hooked to `admin_footer` |
+
+*Git:* Branch `feature/TTS-231` in both free and pro plugins.
+
+---
+
+**Part B — Win-back Email Automation (Mailchimp Customer Journey)**
+
+*Architecture:* Freemius → Mailchimp → Automated Email Sequence
+
+*Step 1 — Freemius Integration Rule:*
+- **Rule ID:** 2657
+- **Dashboard URL:** `https://dashboard.freemius.com/#!/live/stores/5993/plugins/13388/integrations/mailchimp/rules/2657/`
+- **Event:** `subscription.cancelled` (fires when a Pro user cancels their subscription)
+- **Action:** "Add email" to Mailchimp audience
+- **Target List:** "AtlasVoice Churned Users" (dedicated list, separate from main "Atlas AiDev" audience — prevents mixing churned users with active subscribers)
+- **How it works:** When Freemius detects a subscription cancellation, it calls Mailchimp's API to add the user's email to the "AtlasVoice Churned Users" audience. This triggers the Customer Journey automation.
+
+*Step 2 — Mailchimp Audience Configuration:*
+- **Audience Name:** AtlasVoice Churned Users
+- **Audience ID:** 903624
+- **From Email:** `founder@atlasaidev.com`
+- **From Name:** AtlasVoice
+- **Reminder Text:** "You're receiving this email because you previously used AtlasVoice Pro for your WordPress site."
+- **Contact Info:** Atlas AiDev, 54/2 Shekhertek 4, Dhaka, Bangladesh, 1207
+- **Why separate list:** Keeps churned users isolated from active subscribers. Different messaging strategy — win-back vs. onboarding/engagement. Prevents accidental cross-contamination of email sequences.
+
+*Step 3 — Mailchimp Customer Journey Automation:*
+- **Flow Name:** "AtlasVoice Pro Win-Back"
+- **Flow ID:** 43
+- **Status:** Draft (not yet activated)
+- **Audience:** AtlasVoice Churned Users
+- **Trigger:** "Contact signs up to AtlasVoice Churned Users"
+   - **Critical setting:** "Include imported contacts" = ON. Freemius adds contacts via API (which Mailchimp treats as imports, not signups). Without this setting ON, the automation would never trigger.
+
+*Complete Flow Structure:*
+```
+Trigger: Contact added to "AtlasVoice Churned Users"
+  → Email 1 (Day 1, immediate)
+  → Time Delay: 1 week
+  → Email 2 (Day 7)
+  → Time Delay: 3 weeks
+  → Email 3 (Day 30)
+  → Contact exits journey
+```
+
+*Email 1 — Day 1 (Immediate after cancellation):*
+- **Mailchimp ID:** 2752053
+- **Subject:** "Your visitors are losing audio access"
+- **Preview Text:** "AI voices, analytics, and MP3 exports - here's what you'll miss without AtlasVoice Pro"
+- **Template:** Minimal (clean, white background)
+- **Content:**
+   - Heading: "We noticed you left" (centered)
+   - Body: Explains what changes without Pro subscription
+   - Bullet points (left-aligned, clean HTML with `<ul>` styling):
+      - No more AI-powered voices (Google, Amazon, Azure, OpenAI)
+      - No analytics to track listener engagement
+      - No MP3 export for podcast distribution
+      - No priority support
+   - Closing: "Your content deserves to be heard. Re-activate today and keep your site accessible to every visitor."
+   - CTA Button: "Re-activate AtlasVoice Pro" → `https://atlasaidev.com/plugins/text-to-speech-pro/pricing/`
+- **Strategy:** Loss aversion — remind users what they're losing, not what they had. Focus on visitor impact, not plugin features.
+
+*Email 2 — Day 7 (1 week after cancellation):*
+- **Mailchimp ID:** 2752054
+- **Subject:** "Come back and save 30% on AtlasVoice Pro"
+- **Preview Text:** "Limited time offer: Use code COMEBACK30 to get 30% off your renewal"
+- **Template:** Minimal
+- **Content:**
+   - Heading: "Save 30% - Limited Time" (centered)
+   - Body: "It's been a week since you canceled AtlasVoice Pro, and we'd love to have you back."
+   - Offer highlight: "Use code COMEBACK30 for 30% off" (centered, red #e74c3c color, H2)
+   - Feature reminder bullets:
+      - Premium AI Voices — Google, Amazon, Azure, and OpenAI text-to-speech
+      - Analytics Dashboard — Track plays, listeners, and engagement
+      - MP3 Export — Download audio for podcasts and offline use
+      - Priority Support — Fast, dedicated help when you need it
+   - Urgency: "This offer expires in 7 days. Don't miss out!"
+   - CTA Button: "Claim 30% Off Now" → `https://atlasaidev.com/plugins/text-to-speech-pro/pricing/`
+- **Strategy:** Financial incentive + scarcity. The 30% discount (code: COMEBACK30) provides a concrete reason to return. 7-day expiry creates urgency.
+
+*Email 3 — Day 30 (1 month after cancellation):*
+- **Mailchimp ID:** 2752055
+- **Subject:** "See what's new in AtlasVoice Pro"
+- **Preview Text:** "New AI voices, improved analytics, and features you haven't tried yet - your site's accessibility is waiting"
+- **Template:** Minimal
+- **Content:**
+   - Heading: "A lot has changed" (centered)
+   - Body: "It's been a month since you left AtlasVoice Pro, and we've been busy building new features."
+   - What's new bullets:
+      - New AI Voice Providers — More natural-sounding voices than ever
+      - Enhanced Analytics — Deeper insights into how visitors engage with audio
+      - Improved Performance — Faster audio loading and smoother playback
+      - Better WordPress Compatibility — Works seamlessly with more themes and plugins
+   - Closing: "Your free plugin is still active, but your visitors are missing out on the premium experience that keeps them engaged and coming back."
+   - Final ask: "Ready to give AtlasVoice Pro another try? We'd love to have you back."
+   - CTA Button: "Explore AtlasVoice Pro" → `https://atlasaidev.com/plugins/text-to-speech-pro/pricing/`
+- **Strategy:** FOMO + product improvement. After 30 days, price sensitivity fades — focus on what's new and improved since they left. No discount; appeal to curiosity and missed value.
+
+*Email Template Technical Details:*
+- All 3 emails use Mailchimp's "Minimal" template (clean, no heavy graphics)
+- Bullet points rendered as clean flat `<ul>` HTML (not nested) with `text-align: left` and `padding-left: 40px` inline styles
+- CTA buttons are Mailchimp button blocks with centered alignment
+- Image blocks removed from all 3 templates (text-only for deliverability)
+- All emails use left-aligned body text for readability
+
+*Pending Action Items (Part B):*
+1. **COMEBACK30 coupon** — Needs to be created in Freemius dashboard (Settings → Coupons). Should be: 30% off, single-use per user, applicable to all Pro plans (monthly + annual), with appropriate expiration.
+2. **Activate the flow** — Currently in Draft status. Activate after: (a) COMEBACK30 coupon is created and tested, (b) all 3 email templates are given a final review, (c) Email 2 & 3 button URLs are verified as correct in Mailchimp.
+3. **Email 2 & 3 URL correction** — Button URLs were initially set to `/pricing/` instead of `/plugins/text-to-speech-pro/pricing/`. Email 1 was corrected; Email 2 & 3 may still need URL updates in the Mailchimp editor.
+4. **Test the full pipeline** — Cancel a test subscription in Freemius, verify email appears in "AtlasVoice Churned Users" audience, verify all 3 emails are sent at correct intervals.
+
+*Connection between Part A and Part B:* The deactivation survey (Part A) captures WHY users leave. The win-back emails (Part B) attempt to bring them back. Together, they form a complete churn prevention system: survey data identifies which problems to fix first (e.g., if "too expensive" is the #1 reason, the 30% discount email becomes more critical), while the email sequence provides multiple touchpoints to re-engage churned users with different strategies (loss aversion → financial incentive → FOMO).
+
+### 🟣 PHASE 5 — PLUGIN DEVELOPMENT (Mar 11-13) — Abandon Rate + Pro Features
+
+> Plan files: `abandon-rate-reduction-plan.md`, `p0-implementation-plan.md`, `pro-setup-wizard-plan.md`, `review-prompt-email-schedule.md`
 
 | # | Task | Status | Date | Notes |
 |---|------|--------|------|-------|
-| 4.1 | A/B test pricing page (after redesign) | ⬜ Not Started | — | Measure conversion rate improvement. |
-| 4.2 | Create product demo video | ⬜ Not Started | — | Demo page gets 4,896 views but no video. |
-| 4.3 | WordPress.org listing optimization | ⬜ Not Started | — | 67.66% engagement rate from WP.org referral — highest quality traffic. |
-| 4.4 | Affiliate program promotion | ⬜ Not Started | — | Page exists but not actively promoted. |
-| 4.5 | Schema markup improvements | ⬜ Not Started | — | Add FAQ, HowTo, SoftwareApplication schemas. |
+| 5.1 | **P0-1: Free Onboarding Wizard** | ✅ Done | Mar 11 | 4-step wizard: Post Type → Voice → Customize → Analytics → Finish. Separate webpack bundle (188 KiB). Coral `#FF7853` brand color. Re-visit guard, `reset_onboard=true` URL param. Files: `src/dashboard/welcome.js`, `src/dashboard/welcome/` directory. |
+| 5.2 | **P0-2: Enable Analytics by Default** | ✅ Done | Mar 11 | New installs: `tts_enable_analytics: true`, `tts_trackable_post_ids: latest 20 posts`. Free tracking limit 5→20 posts. |
+| 5.3 | **P0-3: Dashboard Widget** | ✅ Done | Mar 11 | "AtlasVoice — Quick Stats" on wp-admin/index.php. Plays today, views today, 7-day bar chart. Pro upsell for free users. 5-min transient cache. File: `admin/TTA_Dashboard_Widget.php`. |
+| 5.4 | **P0-4: Deactivation Warning** | ✅ Done | Mar 11 | Freemius `deactivation_confirmation_message` with real usage stats. 9 TTS-specific uninstall reasons replacing generic Freemius ones. |
+| 5.5 | **Pro Onboarding Wizard** | ✅ Done | Mar 12 | Dynamic 4-5 step wizard for Pro users. Steps: Post Type (multi-select) → Provider → Voice → Player Settings (skipped for WebSpeech) → Analytics → Finish. Provider cards for WebSpeech/GTTS/Google Cloud/ChatGPT/ElevenLabs. Audio preview. Email digest setup. Cross-promo on finish. Includes "Your Setup Summary" section + Pro feature cards + AI Agent Hub cross-promo on finish page. Lives in Pro plugin codebase. Released in v3.1.3 (Mar 13). Plan file: `plan/pro-setup-wizard-plan.md`. |
+| 5.6 | **Smart Review Prompt** (free only) | ✅ Done | Mar 12 | Re-enabled review notice with smart triggers: free users only, 7+ days active, 10+ plays, wizard complete OR 14+ days. 4 buttons: Leave Review / Remind Later (14d) / Already Done / Never Ask Again. Per-admin user_meta tracking. `tta_activated_at` timestamp + backfill for existing users. |
+| 5.7 | **Fix Email Schedule Cron** (timezone bug) | ✅ Done | Mar 12 | Root cause: `current_time('timestamp')` = local time but `wp_schedule_event()` expects UTC. Fix: `DateTime` + `wp_timezone()` for DST-safe UTC conversion in `calculate_next_run_time()`. |
+| 5.8 | **Move Email Sending to Pro Plugin** | ✅ Done | Mar 12 | Moved `send_test_report`, `generate_and_send_report`, `build_report_email`, `aggregate_analytics_data`, `check_email_capability`, `calculate_date_range` to new `TTA_Pro_Report_Email.php`. New Pro route: `POST tta_pro/v1/send_test_report`. Cron hook calls Pro class via `class_exists()`. Frontend ExportSection.js updated to use Pro endpoint. |
+| 5.9 | **Analytics Migration for Existing Free Users** | ✅ Done | Mar 12 | One-time migration on `admin_init`: existing free users with empty analytics get `tts_enable_analytics: true` + latest 20 post IDs. Flag: `tta_analytics_migrated_2_1_9`. Activator default changed from `"all"` to latest 20 posts (Pro gets `"all"` dynamically via API). |
+| 5.10 | **Remove Font Awesome dependency** | ✅ Done | Mar 12 | Replaced Font Awesome CDN with inline SVG icons. Eliminates external dependency + improves performance. |
+| 5.11 | **Accessibility: keyboard focus styles** | ✅ Done | Mar 12 | Added `:focus-visible` outline on player buttons for WCAG 2.1 AA compliance. |
+| 5.12 | **DB index optimization** | ✅ Done | Mar 12 | Added indexes to `atlasvoice_analytics` table (`post_id`, `created_at`, composite). One-time via `tta_analytics_indexes_added` flag. |
+| 5.13 | **Autoload optimization** | ✅ Done | Mar 12 | Set `autoload=false` on all non-critical options to reduce DB reads on every page load. |
+| 5.14 | **Release v2.1.9 (free) + v3.1.3 (pro)** | ✅ Done | Mar 13 | Git flow: feature/TTS-230 finished → release/2.1.9 + release/3.1.3 started. README.txt updated with changelogs. Deployed to live test site cors2.atlasaidev.com. All features verified: analytics toggle, Track Post IDs, email schedule, test email sent & received in Gmail. Released Mar 13. |
+| 5.15 | P0-1 Enhancement: Finish Page Upsell | ✅ Done | Mar 13 | "Your Setup Summary" section + Pro feature cards + AI Agent Hub cross-promo added to both free and pro wizard finish pages. Shipped in v2.1.9 + v3.1.3. |
+| 5.16 | **WordPress.org blueprint.json** | ✅ Done | Mar 13 | SVN merge conflict resolved. PHP 8.2, WP 6.8. |
+
+### 🔵 PHASE 6 — NEXT TASKS (Current Sprint) ⬅️ **YOU ARE HERE**
+
+| # | Task | Status | Date | Notes |
+|---|------|--------|------|-------|
+| 6.1 | **TTS-229: Detect language based on URL** | ✅ Done | Mar 14 | Fixed: Player now detects page language from `<html lang>` attribute for GTranslate pro_version/enterprise_version. Updated `TTSGtranslate.js` (language detection, DOM content reading), `plyr.js` (`#thirdPartyPluginCompatible`, `getTitle` lang suffix replacement), and `TTSProHelper.js` (`getTitle` function). Jira: TTS-229. |
+| 6.2 | **Git flow release finish** (v2.1.9 free + v3.1.3 pro) | ✅ Done | Mar 13 | Release branches merged to main + develop, tagged. |
+| 6.3 | **Deploy to WordPress.org SVN** | ✅ Done | Mar 13 | v2.1.9 pushed to WP.org SVN trunk + tag. |
+| 6.4 | **Deploy Pro to Freemius** | ✅ Done | Mar 13 | v3.1.3 ZIP uploaded to Freemius dashboard. |
+| 6.5 | **Single Deactivation Form with Dual Submission** | ✅ Done | Mar 13 | One AtlasAiDev modal sends to both AtlasAiDev tracker and Freemius API via `sendBeacon`. Plan: `plan/single-deactivation-form-dual-submission.md`. |
+| 6.6 | **Telemetry Enrichment — Plugin Usage Data** | ✅ Done | Mar 13 | 26 `av_*` fields across 4 groups (Core Engagement, Feature Adoption, Pro Provider Intelligence, Environment & Compatibility). Free collects Groups 1-2, Pro collects Groups 1-4. Hooks into existing `{slug}_tracker_data` filter. Updated `data_we_collect()` disclosure. Plan: `plan/telemetry-enrichment-plugin-usage-data.md`. |
+| 6.7 | **GDPR & Privacy Compliance** | ✅ Done | Mar 13 | Privacy policy content via `wp_add_privacy_policy_content()`. Personal data exporter + eraser registered (returns empty — fingerprints can't match emails). Free + Pro `uninstall.php` with full data cleanup. "Delete all data on uninstall" setting toggle (default OFF, confirm dialog + warning banner). Plan: `plan/gdpr-privacy-compliance.md`. |
+
+### 🔵 PHASE 7 — OPTIMIZATION (Month 2-3)
+
+| # | Task | Status | Date | Notes |
+|---|------|--------|------|-------|
+| 7.1 | A/B test pricing page (after redesign) | ⬜ Not Started | — | Measure conversion rate improvement. |
+| 7.2 | Create product demo video | ⬜ Not Started | — | Demo page gets 4,896 views but no video. |
+| 7.3 | WordPress.org listing optimization | ⬜ Not Started | — | 67.66% engagement rate from WP.org referral — highest quality traffic. |
+| 7.4 | Affiliate program promotion | ⬜ Not Started | — | Page exists but not actively promoted. |
+| 7.5 | Schema markup improvements | ⬜ Not Started | — | Add FAQ, HowTo, SoftwareApplication schemas. |
+| 7.6 | P1-2: Brand Naming Consolidation | ✅ Done | Mar 13 | Merged with task 3.4. Plugin UI consolidated in v2.1.9 + v3.1.3. |
+| 7.7 | P1-3: TTA_Notices Refactor | ✅ Done | Mar 14 | Clean up admin notices, remove aggressive/spammy notices. |
+| 7.8 | P1-4: Schema Markup for Audio | ✅ Done | Mar 14 | Add structured data for audio content to improve SEO. |
+| 7.9 | P2-1: Admin Bar Quick Toggle | ✅ Done | Mar 14 | One-click enable/disable audio from admin bar. |
+| 7.10 | P2-2: Onboarding Analytics | ✅ Done | Mar 14 | Track wizard completion rate, step drop-offs. |
+| 7.11 | P3-1: Unit Tests | ✅ Done | Mar 14 | Add test coverage for critical paths (activation, settings save, API routes). |
+| 7.12 | P3-2: Code Splitting | ✅ Done | Mar 14 | Lazy loading for dashboard tabs to reduce initial bundle size. |
+| 7.13 | P3-3: Accessibility Audit | ✅ Done | Mar 14 | Ensure wizard and dashboard widget meet WCAG 2.1 AA. |
+
+---
+
+### 📋 CONSOLIDATED TASK TABLE — ALL TASKS
+
+| # | Task | Phase | Status | Plan File |
+|---|------|-------|--------|-----------|
+| 1.1 | Stop all Google CPC campaigns | P1 | ✅ Done | master |
+| 1.2 | Optimize title/meta for top GSC pages | P1 | ✅ Done | master |
+| 1.3 | Fix duplicate SEO titles | P1 | ✅ Done | master |
+| 1.4 | Update 2025→2026 year references | P1 | ✅ Done | master |
+| 1.5 | Fix the pricing page — differentiate tiers | P1 | ✅ Done | master |
+| 1.6 | Set up GA4 purchase/conversion tracking | P1 | ✅ Done | master |
+| 1.7 | Add social proof to pricing page | P1 | ✅ Done | master |
+| 1.8 | Redesign product page | P1 | ✅ Done | master |
+| 1.9 | SEO protection for #1 rankings | P1 | ✅ Done | master |
+| 1.10 | Fix Black Friday expired banner | P1 | ✅ Done | master |
+| 2.1 | Publish 4 new blog posts | P2 | ✅ Done | master |
+| 2.2 | Fix 71.4% install abandon rate (website snippet) | P2 | ✅ Done | master |
+| 2.3 | Set up email capture on blog posts | P2 | ✅ Done | master |
+| 2.4 | Create competitor comparison page | P2 | ✅ Done | master |
+| 2.5 | Fix URL fragmentation | P2 | ✅ Done | master |
+| 2.6 | Internal linking audit + fixes | P2 | ✅ Done | master |
+| 3.1 | Rebuild content calendar (2 posts/week) | P3 | ✅ Done | master |
+| 3.2 | Launch email onboarding (Mailchimp) | P3 | ✅ Done | email-journey, email-corrections |
+| 3.3 | Restructure Google CPC | P3 | ⏸️ Deferred | master |
+| 3.4 | Brand naming consolidation | P3 | ✅ Done | master |
+| 3.5 | Add monthly billing (Freemius) | P3 | ❌ Skipped | master |
+| 3.6 | Add free trial (7 or 14 days) | P3 | ⬜ Not Started | master |
+| 3.7 | Localization (es, it, pt) | P3 | ✅ Done | master |
+| 3.8 | Churn prevention — survey + win-back | P3 | ✅ Done | `plan/single-deactivation-form-dual-submission.md` |
+| 5.1 | P0-1: Free Onboarding Wizard | P5 | ✅ Done | abandon-rate, p0-implementation |
+| 5.2 | P0-2: Enable Analytics by Default | P5 | ✅ Done | abandon-rate, p0-implementation |
+| 5.3 | P0-3: Dashboard Widget | P5 | ✅ Done | abandon-rate, p0-implementation |
+| 5.4 | P0-4: Deactivation Warning | P5 | ✅ Done | abandon-rate, p0-implementation |
+| 5.5 | Pro Onboarding Wizard | P5 | ✅ Done | pro-setup-wizard-plan |
+| 5.6 | Smart Review Prompt (free only) | P5 | ✅ Done | review-prompt-email-schedule |
+| 5.7 | Fix Email Schedule Cron (timezone bug) | P5 | ✅ Done | review-prompt-email-schedule |
+| 5.8 | Move Email Sending to Pro Plugin | P5 | ✅ Done | review-prompt-email-schedule |
+| 5.9 | Analytics Migration for Existing Free Users | P5 | ✅ Done | master (new) |
+| 5.10 | Remove Font Awesome dependency | P5 | ✅ Done | master (new) |
+| 5.11 | Accessibility: keyboard focus styles | P5 | ✅ Done | master (new) |
+| 5.12 | DB index optimization | P5 | ✅ Done | master (new) |
+| 5.13 | Autoload optimization | P5 | ✅ Done | master (new) |
+| 5.14 | Release v2.1.9 (free) + v3.1.3 (pro) | P5 | ✅ Done | master (new) |
+| 5.15 | Finish Page Upsell Enhancement | P5 | ✅ Done | abandon-rate |
+| 5.16 | WordPress.org blueprint.json | P5 | ✅ Done | master (new) |
+| 6.1 | TTS-229: Detect language based on URL | P6 | ✅ Done | Jira TTS-229 |
+| 6.2 | Git flow release finish (v2.1.9 + v3.1.3) | P6 | ✅ Done | master (new) |
+| 6.3 | Deploy to WordPress.org SVN | P6 | ✅ Done | master (new) |
+| 6.4 | Deploy Pro to Freemius | P6 | ✅ Done | master (new) |
+| 6.5 | Single Deactivation Form with Dual Submission | P6 | ✅ Done | `plan/single-deactivation-form-dual-submission.md` |
+| 6.6 | Telemetry Enrichment — Plugin Usage Data | P6 | ✅ Done | `plan/telemetry-enrichment-plugin-usage-data.md` |
+| 6.7 | GDPR & Privacy Compliance | P6 | ✅ Done | `plan/gdpr-privacy-compliance.md` |
+| 7.1 | A/B test pricing page | P7 | ⬜ Not Started | master |
+| 7.2 | Create product demo video | P7 | ⬜ Not Started | master |
+| 7.3 | WordPress.org listing optimization | P7 | ⬜ Not Started | master |
+| 7.4 | Affiliate program promotion | P7 | ⬜ Not Started | master |
+| 7.5 | Schema markup improvements | P7 | ⬜ Not Started | master |
+| 7.6 | Brand Naming Consolidation (UI) | P7 | ✅ Done | abandon-rate (merged with 3.4) |
+| 7.7 | TTA_Notices Refactor | P7 | ✅ Done | abandon-rate |
+| 7.8 | Schema Markup for Audio | P7 | ✅ Done | abandon-rate |
+| 7.9 | Admin Bar Quick Toggle | P7 | ✅ Done | abandon-rate |
+| 7.10 | Onboarding Analytics (wizard tracking) | P7 | ✅ Done | abandon-rate |
+| 7.11 | Unit Tests | P7 | ✅ Done | abandon-rate |
+| 7.12 | Code Splitting (dashboard lazy load) | P7 | ✅ Done | abandon-rate |
+| 7.13 | Accessibility Audit (WCAG 2.1 AA) | P7 | ✅ Done | abandon-rate |
+
+**Summary: 56 total tasks — 42 Done ✅ | 1 In Progress 🔄 | 13 Not Started ⬜**
 
 ---
 
