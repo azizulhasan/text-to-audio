@@ -1040,41 +1040,41 @@ SUITE:       AtlasAiDev Pro Bundle (all 3 plugins)
 ### Product Schema (for product page)
 ```json
 {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "AtlasVoice - Text to Speech Pro",
-  "applicationCategory": "WordPress Plugin",
-  "operatingSystem": "WordPress",
-  "offers": {
-    "@type": "Offer",
-    "price": "59",
-    "priceCurrency": "USD",
-    "priceValidUntil": "2026-12-31"
-  },
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "4.8",
-    "reviewCount": "83",
-    "bestRating": "5"
-  }
+   "@context": "https://schema.org",
+   "@type": "SoftwareApplication",
+   "name": "AtlasVoice - Text to Speech Pro",
+   "applicationCategory": "WordPress Plugin",
+   "operatingSystem": "WordPress",
+   "offers": {
+      "@type": "Offer",
+      "price": "59",
+      "priceCurrency": "USD",
+      "priceValidUntil": "2026-12-31"
+   },
+   "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "reviewCount": "83",
+      "bestRating": "5"
+   }
 }
 ```
 
 ### FAQ Schema (for pricing page)
 ```json
 {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "Does AtlasVoice work without API keys?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes! The free version works with zero configuration..."
+   "@context": "https://schema.org",
+   "@type": "FAQPage",
+   "mainEntity": [
+      {
+         "@type": "Question",
+         "name": "Does AtlasVoice work without API keys?",
+         "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! The free version works with zero configuration..."
+         }
       }
-    }
-  ]
+   ]
 }
 ```
 
@@ -1238,7 +1238,8 @@ This is achievable within 2-4 weeks with zero new content — just optimizing ex
 
 ## IMPLEMENTATION TODO LIST
 
-> **Last Updated:** March 13, 2026 (v2.1.9 free + v3.1.3 pro released, all P0 items complete, TTS-229 in progress)
+
+> **Last Updated:** March 14, 2026 (v2.1.9 free + v3.1.3 pro released, all P0 items complete, TTS-229 done)
 > **Status Key:** ✅ Done | 🔄 In Progress | ⬜ Not Started
 
 ---
@@ -1392,6 +1393,7 @@ User clicks "Deactivate"
 - **Trigger:** "Contact signs up to AtlasVoice Churned Users"
   - **Critical setting:** "Include imported contacts" = ON. Freemius adds contacts via API (which Mailchimp treats as imports, not signups). Without this setting ON, the automation would never trigger.
 
+
 *Complete Flow Structure:*
 ```
 Trigger: Contact added to "AtlasVoice Churned Users"
@@ -1498,7 +1500,11 @@ Trigger: Contact added to "AtlasVoice Churned Users"
 
 | # | Task | Status | Date | Notes |
 |---|------|--------|------|-------|
+<<<<<<< HEAD
 | 6.1 | **TTS-229: Detect language based on URL** | 🔄 In Progress | — | Multilingual site user reports `/en/` pages still play French voices. Player should detect page language from URL or `lang` attribute and auto-select matching voices. Jira: TTS-229. |
+=======
+| 6.1 | **TTS-229: Detect language based on URL** | ✅ Done | Mar 14 | Fixed: Player now detects page language from `<html lang>` attribute for GTranslate pro_version/enterprise_version. Updated `TTSGtranslate.js` (language detection, DOM content reading), `plyr.js` (`#thirdPartyPluginCompatible`, `getTitle` lang suffix replacement), and `TTSProHelper.js` (`getTitle` function). Jira: TTS-229. |
+>>>>>>> feature/TTS-229
 | 6.2 | **Git flow release finish** (v2.1.9 free + v3.1.3 pro) | ✅ Done | Mar 13 | Release branches merged to main + develop, tagged. |
 | 6.3 | **Deploy to WordPress.org SVN** | ✅ Done | Mar 13 | v2.1.9 pushed to WP.org SVN trunk + tag. |
 | 6.4 | **Deploy Pro to Freemius** | ✅ Done | Mar 13 | v3.1.3 ZIP uploaded to Freemius dashboard. |
@@ -1516,6 +1522,7 @@ Trigger: Contact added to "AtlasVoice Churned Users"
 | 7.4 | Affiliate program promotion | ⬜ Not Started | — | Page exists but not actively promoted. |
 | 7.5 | Schema markup improvements | ⬜ Not Started | — | Add FAQ, HowTo, SoftwareApplication schemas. |
 | 7.6 | P1-2: Brand Naming Consolidation | ✅ Done | Mar 13 | Merged with task 3.4. Plugin UI consolidated in v2.1.9 + v3.1.3. |
+<<<<<<< HEAD
 | 7.7 | P1-3: TTA_Notices Refactor | ⬜ Not Started | — | Clean up admin notices, remove aggressive/spammy notices. |
 | 7.8 | P1-4: Schema Markup for Audio | ⬜ Not Started | — | Add structured data for audio content to improve SEO. |
 | 7.9 | P2-1: Admin Bar Quick Toggle | ⬜ Not Started | — | One-click enable/disable audio from admin bar. |
@@ -1523,6 +1530,15 @@ Trigger: Contact added to "AtlasVoice Churned Users"
 | 7.11 | P3-1: Unit Tests | ⬜ Not Started | — | Add test coverage for critical paths (activation, settings save, API routes). |
 | 7.12 | P3-2: Code Splitting | ⬜ Not Started | — | Lazy loading for dashboard tabs to reduce initial bundle size. |
 | 7.13 | P3-3: Accessibility Audit | ⬜ Not Started | — | Ensure wizard and dashboard widget meet WCAG 2.1 AA. |
+=======
+| 7.7 | P1-3: TTA_Notices Refactor | ✅ Done | Mar 14 | Clean up admin notices, remove aggressive/spammy notices. |
+| 7.8 | P1-4: Schema Markup for Audio | ✅ Done | Mar 14 | Add structured data for audio content to improve SEO. |
+| 7.9 | P2-1: Admin Bar Quick Toggle | ✅ Done | Mar 14 | One-click enable/disable audio from admin bar. |
+| 7.10 | P2-2: Onboarding Analytics | ✅ Done | Mar 14 | Track wizard completion rate, step drop-offs. |
+| 7.11 | P3-1: Unit Tests | ✅ Done | Mar 14 | Add test coverage for critical paths (activation, settings save, API routes). |
+| 7.12 | P3-2: Code Splitting | ✅ Done | Mar 14 | Lazy loading for dashboard tabs to reduce initial bundle size. |
+| 7.13 | P3-3: Accessibility Audit | ✅ Done | Mar 14 | Ensure wizard and dashboard widget meet WCAG 2.1 AA. |
+>>>>>>> feature/TTS-229
 
 ---
 
@@ -1570,7 +1586,11 @@ Trigger: Contact added to "AtlasVoice Churned Users"
 | 5.14 | Release v2.1.9 (free) + v3.1.3 (pro) | P5 | ✅ Done | master (new) |
 | 5.15 | Finish Page Upsell Enhancement | P5 | ✅ Done | abandon-rate |
 | 5.16 | WordPress.org blueprint.json | P5 | ✅ Done | master (new) |
+<<<<<<< HEAD
 | 6.1 | TTS-229: Detect language based on URL | P6 | 🔄 In Progress | Jira TTS-229 |
+=======
+| 6.1 | TTS-229: Detect language based on URL | P6 | ✅ Done | Jira TTS-229 |
+>>>>>>> feature/TTS-229
 | 6.2 | Git flow release finish (v2.1.9 + v3.1.3) | P6 | ✅ Done | master (new) |
 | 6.3 | Deploy to WordPress.org SVN | P6 | ✅ Done | master (new) |
 | 6.4 | Deploy Pro to Freemius | P6 | ✅ Done | master (new) |
@@ -1583,6 +1603,7 @@ Trigger: Contact added to "AtlasVoice Churned Users"
 | 7.4 | Affiliate program promotion | P7 | ⬜ Not Started | master |
 | 7.5 | Schema markup improvements | P7 | ⬜ Not Started | master |
 | 7.6 | Brand Naming Consolidation (UI) | P7 | ✅ Done | abandon-rate (merged with 3.4) |
+<<<<<<< HEAD
 | 7.7 | TTA_Notices Refactor | P7 | ⬜ Not Started | abandon-rate |
 | 7.8 | Schema Markup for Audio | P7 | ⬜ Not Started | abandon-rate |
 | 7.9 | Admin Bar Quick Toggle | P7 | ⬜ Not Started | abandon-rate |
@@ -1590,6 +1611,15 @@ Trigger: Contact added to "AtlasVoice Churned Users"
 | 7.11 | Unit Tests | P7 | ⬜ Not Started | abandon-rate |
 | 7.12 | Code Splitting (dashboard lazy load) | P7 | ⬜ Not Started | abandon-rate |
 | 7.13 | Accessibility Audit (WCAG 2.1 AA) | P7 | ⬜ Not Started | abandon-rate |
+=======
+| 7.7 | TTA_Notices Refactor | P7 | ✅ Done | abandon-rate |
+| 7.8 | Schema Markup for Audio | P7 | ✅ Done | abandon-rate |
+| 7.9 | Admin Bar Quick Toggle | P7 | ✅ Done | abandon-rate |
+| 7.10 | Onboarding Analytics (wizard tracking) | P7 | ✅ Done | abandon-rate |
+| 7.11 | Unit Tests | P7 | ✅ Done | abandon-rate |
+| 7.12 | Code Splitting (dashboard lazy load) | P7 | ✅ Done | abandon-rate |
+| 7.13 | Accessibility Audit (WCAG 2.1 AA) | P7 | ✅ Done | abandon-rate |
+>>>>>>> feature/TTS-229
 
 **Summary: 56 total tasks — 42 Done ✅ | 1 In Progress 🔄 | 13 Not Started ⬜**
 
