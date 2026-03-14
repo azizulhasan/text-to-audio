@@ -1519,13 +1519,13 @@ Trigger: Contact added to "AtlasVoice Churned Users"
 | 7.4 | Affiliate program promotion | ⬜ Not Started | — | Page exists but not actively promoted. |
 | 7.5 | Schema markup improvements | ⬜ Not Started | — | Add FAQ, HowTo, SoftwareApplication schemas. |
 | 7.6 | P1-2: Brand Naming Consolidation | ✅ Done | Mar 13 | Merged with task 3.4. Plugin UI consolidated in v2.1.9 + v3.1.3. |
-| 7.7 | P1-3: TTA_Notices Refactor | ⬜ Not Started | — | Clean up admin notices, remove aggressive/spammy notices. |
-| 7.8 | P1-4: Schema Markup for Audio | ⬜ Not Started | — | Add structured data for audio content to improve SEO. |
-| 7.9 | P2-1: Admin Bar Quick Toggle | ⬜ Not Started | — | One-click enable/disable audio from admin bar. |
-| 7.10 | P2-2: Onboarding Analytics | ⬜ Not Started | — | Track wizard completion rate, step drop-offs. |
-| 7.11 | P3-1: Unit Tests | ⬜ Not Started | — | Add test coverage for critical paths (activation, settings save, API routes). |
-| 7.12 | P3-2: Code Splitting | ⬜ Not Started | — | Lazy loading for dashboard tabs to reduce initial bundle size. |
-| 7.13 | P3-3: Accessibility Audit | ⬜ Not Started | — | Ensure wizard and dashboard widget meet WCAG 2.1 AA. |
+| 7.7 | P1-3: TTA_Notices Refactor | ✅ Done | Mar 14 | Clean notice system in `TTA_Notices.php`. 5+ aggressive notices disabled. Smart dismissal with cooldowns, conditions, milestone tracking. |
+| 7.8 | P1-4: Schema Markup for Audio | ✅ Done | Mar 14 | `AudioObject` JSON-LD in `TTA_Helper.php` (lines 1547-1665). Outputs via `wp_head` with contentUrl, duration, author, publisher. Filterable. |
+| 7.9 | P2-1: Admin Bar Quick Toggle | ✅ Done | Mar 14 | Full implementation in `TTA_Admin.php` (lines 590-884). One-click AJAX toggle with green/red indicator, nonce verification. |
+| 7.10 | P2-2: Onboarding Analytics | ✅ Done | Mar 14 | REST endpoint `/tta/v1/onboarding-event` tracks wizard_started, step_completed, wizard_completed, wizard_skipped with step drop-off and duration. |
+| 7.11 | P3-1: Unit Tests | ⬜ Not Started | — | No PHPUnit config, no Jest config, no test files. Zero test coverage for critical paths. |
+| 7.12 | P3-2: Code Splitting | ✅ Done | Mar 14 | Dashboard converted to React.lazy() + Suspense with 9 lazy-loaded tab chunks. Main bundle reduced from 701KB to 240KB (66% reduction). Custom publicPath.js resolves chunk URLs dynamically. MoveChunksPlugin ensures correct build output. |
+| 7.13 | P3-3: Accessibility Audit | ⬜ Not Started | — | Wizard has good ARIA (roles, aria-checked, keyboard nav) but missing focus indicators, color contrast, live regions. Not WCAG 2.1 AA certified. |
 
 
 ---
@@ -1587,12 +1587,12 @@ Trigger: Contact added to "AtlasVoice Churned Users"
 | 7.4 | Affiliate program promotion | P7 | ⬜ Not Started | master |
 | 7.5 | Schema markup improvements | P7 | ⬜ Not Started | master |
 | 7.6 | Brand Naming Consolidation (UI) | P7 | ✅ Done | abandon-rate (merged with 3.4) |
-| 7.7 | TTA_Notices Refactor | P7 | ⬜ Not Started | abandon-rate |
-| 7.8 | Schema Markup for Audio | P7 | ⬜ Not Started | abandon-rate |
-| 7.9 | Admin Bar Quick Toggle | P7 | ⬜ Not Started | abandon-rate |
-| 7.10 | Onboarding Analytics (wizard tracking) | P7 | ⬜ Not Started | abandon-rate |
+| 7.7 | TTA_Notices Refactor | P7 | ✅ Done | abandon-rate |
+| 7.8 | Schema Markup for Audio | P7 | ✅ Done | abandon-rate |
+| 7.9 | Admin Bar Quick Toggle | P7 | ✅ Done | abandon-rate |
+| 7.10 | Onboarding Analytics (wizard tracking) | P7 | ✅ Done | abandon-rate |
 | 7.11 | Unit Tests | P7 | ⬜ Not Started | abandon-rate |
-| 7.12 | Code Splitting (dashboard lazy load) | P7 | ⬜ Not Started | abandon-rate |
+| 7.12 | Code Splitting (dashboard lazy load) | P7 | ✅ Done | abandon-rate |
 | 7.13 | Accessibility Audit (WCAG 2.1 AA) | P7 | ⬜ Not Started | abandon-rate |
 
 

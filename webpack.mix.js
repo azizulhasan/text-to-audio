@@ -26,4 +26,34 @@ mix.js('admin/js/AtlasVoicePlayerInsights.js', 'admin/js/build/AtlasVoicePlayerI
 
 
 
-mix.webpackConfig({});
+const path = require('path');
+const fs = require('fs');
+
+mix.webpackConfig({
+    output: {
+        chunkFilename: 'chunks/[name].chunk.js',
+    },
+    plugins: [
+        {
+            apply(compiler) {
+                compiler.hooks.afterEmit.tap('MoveChunksPlugin', () => {
+                    const srcDir = path.resolve(__dirname, 'chunks');
+                    const destDir = path.resolve(__dirname, 'admin/js/build/chunks');
+                    if (!fs.existsSync(srcDir)) return;
+                    if (!fs.existsSync(destDir)) {
+                        fs.mkdirSync(destDir, { recursive: true });
+                    }
+                    fs.readdirSync(srcDir).forEach(file => {
+                        fs.copyFileSync(
+                            path.join(srcDir, file),
+                            path.join(destDir, file)
+                        );
+                        fs.unlinkSync(path.join(srcDir, file));
+                    });
+                    // Remove empty source directory.
+                    try { fs.rmdirSync(srcDir); } catch (e) { /* ignore */ }
+                });
+            },
+        },
+    ],
+});
