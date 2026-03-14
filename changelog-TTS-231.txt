@@ -1,0 +1,87 @@
+TTS-231 Changelog
+=================
+Branch: feature/TTS-231
+Date: 2026-03-14
+
+──────────────────────────────────────────────────
+1. GDPR Privacy Compliance & Data Collection
+──────────────────────────────────────────────────
+- Added "Delete Data on Uninstall" toggle in Settings UI
+- Enhanced uninstall.php to clean up all plugin options, post meta,
+  transients, cron jobs, and uploaded audio files when enabled
+- Implemented telemetry enrichment (4 data groups) for both
+  free and pro plugins via TTA_Lib_AtlasAiDev / TTA_Pro_Lib_AtlasAiDev
+- Built single deactivation form with dual submission to both
+  Freemius and AtlasAiDev tracking endpoints
+- Created GDPR compliance plan document
+
+Files changed (free):
+  - admin/TTA_Admin.php
+  - includes/TTA.php
+  - includes/TTA_Lib_AtlasAiDev.php
+  - libs/AtlasAiDev/Insights.php
+  - src/dashboard/components/dashboard/settings/Settings.js
+  - text-to-audio.php
+  - uninstall.php
+
+Files changed (pro):
+  - Includes/TTA_Pro_Lib_AtlasAiDev.php
+  - Libs/AtlasAiDev/Insights.php
+  - text-to-audio-pro.php
+  - uninstall.php
+
+──────────────────────────────────────────────────
+2. TTS-229: GTranslate Pro Version Language Fix
+──────────────────────────────────────────────────
+- Fixed GTranslate pro_version language detection using <html lang>
+  attribute instead of cookie/URL-based detection
+- Updated TTSGtranslate.js with proper pro_version flow for
+  language switching, audio file key mapping, and title updates
+- Fixed plyr.js #thirdPartyPluginCompatible() to set language,
+  call #setTitle(), and set file_url_key for player_id 3
+- Updated TTSProHelper.js getTitle() with __lang__ suffix
+  replacement logic for translated content
+
+Files changed (pro):
+  - Assets/js/compatibality/plugins/TTSGtranslate.js
+  - Assets/js/plyr.js
+  - Assets/js/TTSProHelper.js
+  - Assets/js/build/TextToSpeechPro.min.js
+  - Assets/js/build/plyr.min.js
+  - Assets/js/build/bulk-mp3-file.min.js
+
+──────────────────────────────────────────────────
+3. Dashboard Code Splitting (React.lazy + Suspense)
+──────────────────────────────────────────────────
+- Split monolithic 701KB dashboard bundle into 240KB main bundle
+  + 9 lazy-loaded tab chunks (66% reduction in initial load)
+- Implemented React.lazy() with Suspense and DashboardLoader
+  spinner for all 9 dashboard tabs:
+    Settings, Integrations, Customize, Listening,
+    Analytics, Compatibility, Aliases, Docs, Plugins
+- Created publicPath.js for runtime webpack chunk URL resolution
+  using document.currentScript.src
+- Added MoveChunksPlugin to webpack.mix.js to auto-copy chunks
+  to admin/js/build/chunks/ after build
+- Removed unused font-awesome.min.js
+- Updated gulpfile.js to include chunks/ in production builds
+
+Files changed (free):
+  - webpack.mix.js
+  - gulpfile.js
+  - src/dashboard/index.js
+  - src/dashboard/publicPath.js (new)
+  - src/dashboard/components/dashboard/Dashboard.js
+  - src/dashboard/components/dashboard/DashboardLoader.js (new)
+  - admin/js/build/text-to-audio-dashboard-ui.min.js
+  - admin/js/build/chunks/ (9 chunk files, new)
+  - admin/js/build/font-awesome.min.js (deleted)
+  - mix-manifest.json
+
+──────────────────────────────────────────────────
+4. Audit Plan Updates
+──────────────────────────────────────────────────
+- Marked TTS-229 as completed in audit plan
+- Marked tasks 7.7-7.10 as completed (Notices, Schema,
+  Admin Bar, Onboarding Analytics)
+- Updated task 7.12 Code Splitting status
