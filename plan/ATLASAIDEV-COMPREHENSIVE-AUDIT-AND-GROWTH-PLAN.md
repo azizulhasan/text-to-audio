@@ -1500,11 +1500,8 @@ Trigger: Contact added to "AtlasVoice Churned Users"
 
 | # | Task | Status | Date | Notes |
 |---|------|--------|------|-------|
-<<<<<<< HEAD
 | 6.1 | **TTS-229: Detect language based on URL** | 🔄 In Progress | — | Multilingual site user reports `/en/` pages still play French voices. Player should detect page language from URL or `lang` attribute and auto-select matching voices. Jira: TTS-229. |
-=======
 | 6.1 | **TTS-229: Detect language based on URL** | ✅ Done | Mar 14 | Fixed: Player now detects page language from `<html lang>` attribute for GTranslate pro_version/enterprise_version. Updated `TTSGtranslate.js` (language detection, DOM content reading), `plyr.js` (`#thirdPartyPluginCompatible`, `getTitle` lang suffix replacement), and `TTSProHelper.js` (`getTitle` function). Jira: TTS-229. |
->>>>>>> feature/TTS-229
 | 6.2 | **Git flow release finish** (v2.1.9 free + v3.1.3 pro) | ✅ Done | Mar 13 | Release branches merged to main + develop, tagged. |
 | 6.3 | **Deploy to WordPress.org SVN** | ✅ Done | Mar 13 | v2.1.9 pushed to WP.org SVN trunk + tag. |
 | 6.4 | **Deploy Pro to Freemius** | ✅ Done | Mar 13 | v3.1.3 ZIP uploaded to Freemius dashboard. |
@@ -1522,7 +1519,6 @@ Trigger: Contact added to "AtlasVoice Churned Users"
 | 7.4 | Affiliate program promotion | ⬜ Not Started | — | Page exists but not actively promoted. |
 | 7.5 | Schema markup improvements | ⬜ Not Started | — | Add FAQ, HowTo, SoftwareApplication schemas. |
 | 7.6 | P1-2: Brand Naming Consolidation | ✅ Done | Mar 13 | Merged with task 3.4. Plugin UI consolidated in v2.1.9 + v3.1.3. |
-<<<<<<< HEAD
 | 7.7 | P1-3: TTA_Notices Refactor | ⬜ Not Started | — | Clean up admin notices, remove aggressive/spammy notices. |
 | 7.8 | P1-4: Schema Markup for Audio | ⬜ Not Started | — | Add structured data for audio content to improve SEO. |
 | 7.9 | P2-1: Admin Bar Quick Toggle | ⬜ Not Started | — | One-click enable/disable audio from admin bar. |
@@ -1530,15 +1526,7 @@ Trigger: Contact added to "AtlasVoice Churned Users"
 | 7.11 | P3-1: Unit Tests | ⬜ Not Started | — | Add test coverage for critical paths (activation, settings save, API routes). |
 | 7.12 | P3-2: Code Splitting | ⬜ Not Started | — | Lazy loading for dashboard tabs to reduce initial bundle size. |
 | 7.13 | P3-3: Accessibility Audit | ⬜ Not Started | — | Ensure wizard and dashboard widget meet WCAG 2.1 AA. |
-=======
-| 7.7 | P1-3: TTA_Notices Refactor | ✅ Done | Mar 14 | Clean up admin notices, remove aggressive/spammy notices. |
-| 7.8 | P1-4: Schema Markup for Audio | ✅ Done | Mar 14 | Add structured data for audio content to improve SEO. |
-| 7.9 | P2-1: Admin Bar Quick Toggle | ✅ Done | Mar 14 | One-click enable/disable audio from admin bar. |
-| 7.10 | P2-2: Onboarding Analytics | ✅ Done | Mar 14 | Track wizard completion rate, step drop-offs. |
-| 7.11 | P3-1: Unit Tests | ✅ Done | Mar 14 | Add test coverage for critical paths (activation, settings save, API routes). |
-| 7.12 | P3-2: Code Splitting | ✅ Done | Mar 14 | Lazy loading for dashboard tabs to reduce initial bundle size. |
-| 7.13 | P3-3: Accessibility Audit | ✅ Done | Mar 14 | Ensure wizard and dashboard widget meet WCAG 2.1 AA. |
->>>>>>> feature/TTS-229
+
 
 ---
 
