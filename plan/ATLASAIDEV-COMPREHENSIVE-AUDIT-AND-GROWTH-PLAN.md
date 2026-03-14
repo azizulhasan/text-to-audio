@@ -1586,11 +1586,7 @@ Trigger: Contact added to "AtlasVoice Churned Users"
 | 5.14 | Release v2.1.9 (free) + v3.1.3 (pro) | P5 | ✅ Done | master (new) |
 | 5.15 | Finish Page Upsell Enhancement | P5 | ✅ Done | abandon-rate |
 | 5.16 | WordPress.org blueprint.json | P5 | ✅ Done | master (new) |
-<<<<<<< HEAD
-| 6.1 | TTS-229: Detect language based on URL | P6 | 🔄 In Progress | Jira TTS-229 |
-=======
 | 6.1 | TTS-229: Detect language based on URL | P6 | ✅ Done | Jira TTS-229 |
->>>>>>> feature/TTS-229
 | 6.2 | Git flow release finish (v2.1.9 + v3.1.3) | P6 | ✅ Done | master (new) |
 | 6.3 | Deploy to WordPress.org SVN | P6 | ✅ Done | master (new) |
 | 6.4 | Deploy Pro to Freemius | P6 | ✅ Done | master (new) |
@@ -1603,7 +1599,6 @@ Trigger: Contact added to "AtlasVoice Churned Users"
 | 7.4 | Affiliate program promotion | P7 | ⬜ Not Started | master |
 | 7.5 | Schema markup improvements | P7 | ⬜ Not Started | master |
 | 7.6 | Brand Naming Consolidation (UI) | P7 | ✅ Done | abandon-rate (merged with 3.4) |
-<<<<<<< HEAD
 | 7.7 | TTA_Notices Refactor | P7 | ⬜ Not Started | abandon-rate |
 | 7.8 | Schema Markup for Audio | P7 | ⬜ Not Started | abandon-rate |
 | 7.9 | Admin Bar Quick Toggle | P7 | ⬜ Not Started | abandon-rate |
@@ -1611,15 +1606,7 @@ Trigger: Contact added to "AtlasVoice Churned Users"
 | 7.11 | Unit Tests | P7 | ⬜ Not Started | abandon-rate |
 | 7.12 | Code Splitting (dashboard lazy load) | P7 | ⬜ Not Started | abandon-rate |
 | 7.13 | Accessibility Audit (WCAG 2.1 AA) | P7 | ⬜ Not Started | abandon-rate |
-=======
-| 7.7 | TTA_Notices Refactor | P7 | ✅ Done | abandon-rate |
-| 7.8 | Schema Markup for Audio | P7 | ✅ Done | abandon-rate |
-| 7.9 | Admin Bar Quick Toggle | P7 | ✅ Done | abandon-rate |
-| 7.10 | Onboarding Analytics (wizard tracking) | P7 | ✅ Done | abandon-rate |
-| 7.11 | Unit Tests | P7 | ✅ Done | abandon-rate |
-| 7.12 | Code Splitting (dashboard lazy load) | P7 | ✅ Done | abandon-rate |
-| 7.13 | Accessibility Audit (WCAG 2.1 AA) | P7 | ✅ Done | abandon-rate |
->>>>>>> feature/TTS-229
+
 
 **Summary: 56 total tasks — 42 Done ✅ | 1 In Progress 🔄 | 13 Not Started ⬜**
 
