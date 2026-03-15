@@ -796,6 +796,10 @@ Improved :  Pro and free version performance improved.
 
 == Upgrade Notice ==
 
-= 2.1.10  =
-Fixed: pro activation issue fixed.
+= 2.1.11  =
+Added : "Hear the Difference" wizard step with audio previews for all 5 TTS providers (Browser, GTTS, Google Cloud, ChatGPT, ElevenLabs).
+Added : Language-specific preview text for 68 languages in the setup wizard voice step.
+Added : ElevenLabs demo audio support in Customize tab.
+Added : "Delete Data on Uninstall" toggle with enhanced uninstall cleanup.
+Improved : Dashboard code splitting — 66% bundle size reduction using React.lazy() and Suspense.
 
