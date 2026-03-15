@@ -6,8 +6,9 @@ import StepVoice from './steps/StepVoice';
 import StepCustomize from './steps/StepCustomize';
 import StepAnalytics from './steps/StepAnalytics';
 import StepFinish from './steps/StepFinish';
+import StepHearDifference from './steps/StepHearDifference';
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 
 const wizardData = window.ttsWizardData || {};
 
@@ -221,8 +222,9 @@ const WelcomeWizard = () => {
         }
         const labels = {
             1: __('Next: Choose Voice', 'text-to-audio'),
-            2: __('Next: Customize', 'text-to-audio'),
-            3: __('Next: Analytics', 'text-to-audio'),
+            2: __('Next: Hear the Difference', 'text-to-audio'),
+            3: __('Next: Customize', 'text-to-audio'),
+            4: __('Next: Analytics', 'text-to-audio'),
         };
         return labels[step] || __('Next', 'text-to-audio');
     };
@@ -248,12 +250,20 @@ const WelcomeWizard = () => {
                 );
             case 3:
                 return (
+                    <StepHearDifference
+                        listening={listening}
+                        pluginUrl={wizardData.plugin_url}
+                        proUrl={wizardData.pro_url}
+                    />
+                );
+            case 4:
+                return (
                     <StepCustomize
                         data={customize}
                         onChange={setCustomize}
                     />
                 );
-            case 4:
+            case 5:
                 return (
                     <StepAnalytics
                         data={analytics}

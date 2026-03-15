@@ -29,6 +29,7 @@ const productionSrc = [
 	'!admin/js/tts/**',
 	'!admin/js/blocks/**',
 	'!admin/js/build/*.LICENSE.txt',
+	'!admin/js/build/chunks/*.LICENSE.txt',
 	'!.claude/**',
 	'!languages/nul',
 	'!scripts/**',

@@ -9,5 +9,14 @@
     "/admin/js/build/TextToSpeech.min.js": "/admin/js/build/TextToSpeech.min.js",
     "/admin/js/build/text-to-audio-button.min.js": "/admin/js/build/text-to-audio-button.min.js",
     "/admin/js/build/AtlasVoiceAnalytics.min.js": "/admin/js/build/AtlasVoiceAnalytics.min.js",
-    "/admin/js/build/AtlasVoicePlayerInsights.min.js": "/admin/js/build/AtlasVoicePlayerInsights.min.js"
+    "/admin/js/build/AtlasVoicePlayerInsights.min.js": "/admin/js/build/AtlasVoicePlayerInsights.min.js",
+    "/chunks/tab-settings.chunk.js": "/chunks/tab-settings.chunk.js",
+    "/chunks/tab-listening.chunk.js": "/chunks/tab-listening.chunk.js",
+    "/chunks/tab-customize.chunk.js": "/chunks/tab-customize.chunk.js",
+    "/chunks/tab-docs.chunk.js": "/chunks/tab-docs.chunk.js",
+    "/chunks/tab-analytics.chunk.js": "/chunks/tab-analytics.chunk.js",
+    "/chunks/tab-integrations.chunk.js": "/chunks/tab-integrations.chunk.js",
+    "/chunks/tab-compatibility.chunk.js": "/chunks/tab-compatibility.chunk.js",
+    "/chunks/tab-aliases.chunk.js": "/chunks/tab-aliases.chunk.js",
+    "/chunks/tab-plugins.chunk.js": "/chunks/tab-plugins.chunk.js"
 }

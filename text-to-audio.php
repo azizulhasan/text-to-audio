@@ -147,6 +147,9 @@ if (function_exists('ttsp_fs')) {
     }
 
     ttsp_fs()->add_filter('connect_message_on_update', 'ttsp_fs_custom_connect_message_on_update', 10, 6);
+
+    // Disable Freemius deactivation feedback modal — AtlasAiDev modal handles it.
+    ttsp_fs()->add_filter('show_deactivation_feedback_form', '__return_false');
 }
 
 /**

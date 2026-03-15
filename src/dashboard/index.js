@@ -1,3 +1,6 @@
+// Must be first import — sets __webpack_public_path__ for lazy-loaded chunks.
+import './publicPath';
+
 import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App";

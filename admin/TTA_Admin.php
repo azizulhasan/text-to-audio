@@ -261,6 +261,7 @@ class TTA_Admin
                 'pro_url'           => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
                 'dashboard_url'     => admin_url( 'admin.php?page=text-to-audio' ),
                 'site_locale'       => get_locale(),
+                'plugin_url'        => WP_PLUGIN_URL . '/text-to-audio',
             ) );
 
             wp_enqueue_script( 'tts-welcome-wizard' );
@@ -795,12 +796,16 @@ class TTA_Admin
                 if (!overlay || !continueBtn) return;
 
                 var originalHref = deactivateLink.getAttribute('href');
+                var rescueShown = false;
 
-                deactivateLink.addEventListener('click', function(e){
+                function rescueHandler(e) {
+                    if (rescueShown) return; // Already shown once, let other handlers (Freemius/AtlasAiDev) take over.
                     e.preventDefault();
                     e.stopImmediatePropagation();
                     overlay.style.display = 'flex';
-                });
+                }
+
+                deactivateLink.addEventListener('click', rescueHandler, true);
 
                 // Close modal when clicking the overlay background.
                 overlay.addEventListener('click', function(e){
@@ -816,13 +821,12 @@ class TTA_Admin
                     }
                 });
 
-                // "Continue to Deactivate" — hide rescue modal, trigger original link.
+                // "Continue to Deactivate" — hide rescue modal, re-click so Freemius/AtlasAiDev can intercept.
                 continueBtn.addEventListener('click', function(){
                     overlay.style.display = 'none';
-                    // Temporarily remove our intercept so the click passes through to Freemius.
-                    var clone = deactivateLink.cloneNode(true);
-                    deactivateLink.parentNode.replaceChild(clone, deactivateLink);
-                    clone.click();
+                    rescueShown = true;
+                    deactivateLink.removeEventListener('click', rescueHandler, true);
+                    deactivateLink.click();
                 });
             });
         })();
