@@ -111,7 +111,15 @@
       "Bash(curl -s -X POST \"http://localhost:6060/azizulhasan/tts/wp-json/tta_pro/v1/gtts_preview\" -H \"Content-Type: application/json\" -d '{\"\"\"\"lang\"\"\"\":\"\"\"\"en\"\"\"\"}')",
       "WebFetch(domain:playground.wordpress.net)",
       "WebFetch(domain:wordpress.github.io)",
-      "WebFetch(domain:developer.wordpress.org)"
+      "WebFetch(domain:developer.wordpress.org)",
+      "WebFetch(domain:yoast.com)",
+      "WebFetch(domain:woocommerce.com)",
+      "WebFetch(domain:woocommerce.github.io)",
+      "WebFetch(domain:developer.woocommerce.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl -s https://api.github.com/search/code?q=wp_add_privacy_policy_content+repo:Yoast/wordpress-seo -H 'Accept: application/vnd.github.v3+json')",
+      "Bash(curl -sL \"http://localhost:6060/azizulhasan/tts/wp-admin/?tta_test_telemetry=1\")"
     ]
   }
 }
