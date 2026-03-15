@@ -141,6 +141,121 @@ class TTA {
         // Initialize Dashboard Widget
         new \TTA_Admin\TTA_Dashboard_Widget();
 
+        // ─── GDPR / WordPress Privacy API integration ───
+        $this->loader->add_action( 'admin_init', $this, 'register_privacy_policy_content' );
+        add_filter( 'wp_privacy_personal_data_exporters', array( $this, 'register_data_exporter' ) );
+        add_filter( 'wp_privacy_personal_data_erasers', array( $this, 'register_data_eraser' ) );
+    }
+
+    /**
+     * Register suggested privacy policy content for AtlasVoice.
+     *
+     * Appears under Settings > Privacy > Privacy Policy page as suggested text.
+     */
+    public function register_privacy_policy_content() {
+        $content = __(
+            'This site uses the AtlasVoice plugin to provide text-to-speech audio playback. ' .
+            'When listening analytics are enabled, the plugin collects the following data:' .
+            "\n\n" .
+            '<strong>Analytics data (per visitor):</strong>' .
+            "\n" .
+            '<ul>' .
+            '<li>A pseudonymous browser fingerprint identifier (not your name, email, or IP address)</li>' .
+            '<li>Which posts or pages you listened to</li>' .
+            '<li>Playback events (play, pause, resume, completion)</li>' .
+            '<li>Device type, browser, and operating system</li>' .
+            '<li>Listening duration and timestamps</li>' .
+            '</ul>' .
+            "\n" .
+            'This data is stored in your site\'s database and is used solely to understand how visitors ' .
+            'interact with the audio player. Because the identifier is a browser fingerprint (not tied to ' .
+            'your email or account), it cannot be linked to you personally.' .
+            "\n\n" .
+            '<strong>Optional telemetry (opt-in only):</strong>' .
+            "\n" .
+            'If the site administrator opts in to usage telemetry, anonymized plugin configuration data ' .
+            '(e.g., which text-to-speech engine is selected, feature flags, active post types) is sent ' .
+            'weekly to AtlasAiDev. No visitor data, post content, or personal information is included.' .
+            "\n\n" .
+            '<strong>Data retention:</strong>' .
+            "\n" .
+            'Analytics data is stored indefinitely until the site administrator clears it via the plugin ' .
+            'settings or uninstalls the plugin. All plugin data is permanently deleted on uninstall.',
+            TEXT_TO_AUDIO_TEXT_DOMAIN
+        );
+
+        wp_add_privacy_policy_content(
+            'AtlasVoice – Text to Speech',
+            wp_kses_post( wpautop( $content ) )
+        );
+    }
+
+    /**
+     * Register the personal data exporter for AtlasVoice.
+     *
+     * Analytics data uses pseudonymous browser fingerprints that cannot be
+     * matched to an email address, so this exporter returns no items.
+     *
+     * @param array $exporters Registered exporters.
+     * @return array
+     */
+    public function register_data_exporter( $exporters ) {
+        $exporters['atlasvoice'] = array(
+            'exporter_friendly_name' => __( 'AtlasVoice Analytics Data', TEXT_TO_AUDIO_TEXT_DOMAIN ),
+            'callback'               => array( $this, 'export_personal_data' ),
+        );
+        return $exporters;
+    }
+
+    /**
+     * Export personal data callback.
+     *
+     * Returns empty because analytics uses browser fingerprints (not email).
+     *
+     * @param string $email_address The user's email address.
+     * @param int    $page          Page number for batched exports.
+     * @return array
+     */
+    public function export_personal_data( $email_address, $page = 1 ) {
+        return array(
+            'data' => array(),
+            'done' => true,
+        );
+    }
+
+    /**
+     * Register the personal data eraser for AtlasVoice.
+     *
+     * @param array $erasers Registered erasers.
+     * @return array
+     */
+    public function register_data_eraser( $erasers ) {
+        $erasers['atlasvoice'] = array(
+            'eraser_friendly_name' => __( 'AtlasVoice Analytics Data', TEXT_TO_AUDIO_TEXT_DOMAIN ),
+            'callback'             => array( $this, 'erase_personal_data' ),
+        );
+        return $erasers;
+    }
+
+    /**
+     * Erase personal data callback.
+     *
+     * Returns "no items found" because analytics uses pseudonymous browser
+     * fingerprints that cannot be matched to an email address.
+     *
+     * @param string $email_address The user's email address.
+     * @param int    $page          Page number for batched erasures.
+     * @return array
+     */
+    public function erase_personal_data( $email_address, $page = 1 ) {
+        return array(
+            'items_removed'  => false,
+            'items_retained' => false,
+            'messages'       => array(
+                __( 'AtlasVoice analytics uses pseudonymous browser fingerprints that cannot be linked to email addresses. No matching data found.', TEXT_TO_AUDIO_TEXT_DOMAIN ),
+            ),
+            'done'           => true,
+        );
     }
 
     /**
