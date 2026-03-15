@@ -261,6 +261,7 @@ class TTA_Admin
                 'pro_url'           => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
                 'dashboard_url'     => admin_url( 'admin.php?page=text-to-audio' ),
                 'site_locale'       => get_locale(),
+                'plugin_url'        => WP_PLUGIN_URL . '/text-to-audio',
             ) );
 
             wp_enqueue_script( 'tts-welcome-wizard' );
