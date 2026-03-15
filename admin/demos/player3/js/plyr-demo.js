@@ -27,6 +27,10 @@ class TextToSpeechProPlayer {
             demo_file = 'https://cdn.openai.com/API/docs/audio/alloy.wav'
             this.#setUpPlayer(demo_file, 1)
         }
+        if (this.buttonId == 6) {
+            demo_file = '/admin/demos/elevenlabs/demo.mp3';
+            this.#setUpPlayer(ttsObj.plugin_url + demo_file, 1)
+        }
 
     }
 

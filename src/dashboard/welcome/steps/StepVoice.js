@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { __ } from '@wordpress/i18n';
+import { getDemoText } from '../demoTexts';
 
 const wizardData = window.ttsWizardData || {};
 
@@ -103,10 +104,7 @@ const StepVoice = ({ data, onChange }) => {
         window.speechSynthesis.cancel();
 
         const utterance = new SpeechSynthesisUtterance(
-            __(
-                'Welcome to your site. Your visitors can now listen to your content with one click.',
-                'text-to-audio'
-            )
+            getDemoText(data.lang)
         );
 
         const selectedVoice = voices.find((v) => v.name === data.voice);

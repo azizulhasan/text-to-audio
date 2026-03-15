@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, } from 'react';
+import React, { lazy, Suspense, useEffect, useState, } from 'react';
 import {
 	HashRouter,
 	Routes,
@@ -16,19 +16,25 @@ import './assets/js/scripts.js';
 import {  getComponentName } from '../context/utilities';
 
 /**
- * Dashboard Components
+ * Dashboard Components (always loaded)
  */
 import DashboardTopNav from './dasboardcontent/DashboardTopNav';
 import DashboardSideNav from './dasboardcontent/DashboardSideNav';
-import Settings from './settings/Settings';
-import Listening from './listening/Listening';
-import Customize from './customize/Customize';
-import Docs from './docs/Docs';
-import Analitics from './analitics/Analitics.js';
-import Integrations from './integrations/Integrations.js'
-import Compatibility from './compatibility/Compatibility.js'
-import Aliases from './aliases/Aliases.js'
-import Plugins from './plugins/Plugins.js'
+import DashboardLoader from './DashboardLoader';
+
+/**
+ * Lazy-loaded tab components — each tab is loaded on-demand
+ * when the user navigates to it, reducing the initial bundle size.
+ */
+const Settings = lazy(() => import(/* webpackChunkName: "tab-settings" */ './settings/Settings'));
+const Listening = lazy(() => import(/* webpackChunkName: "tab-listening" */ './listening/Listening'));
+const Customize = lazy(() => import(/* webpackChunkName: "tab-customize" */ './customize/Customize'));
+const Docs = lazy(() => import(/* webpackChunkName: "tab-docs" */ './docs/Docs'));
+const Analitics = lazy(() => import(/* webpackChunkName: "tab-analytics" */ './analitics/Analitics.js'));
+const Integrations = lazy(() => import(/* webpackChunkName: "tab-integrations" */ './integrations/Integrations.js'));
+const Compatibility = lazy(() => import(/* webpackChunkName: "tab-compatibility" */ './compatibility/Compatibility.js'));
+const Aliases = lazy(() => import(/* webpackChunkName: "tab-aliases" */ './aliases/Aliases.js'));
+const Plugins = lazy(() => import(/* webpackChunkName: "tab-plugins" */ './plugins/Plugins.js'));
 
 function Dashboard() {
 	const [componentName, setComponentName] = useState(getComponentName());
@@ -62,36 +68,33 @@ function Dashboard() {
 				<div id='ttaLayoutSidenav_content'>
 					<main>
 						<div className='container-fluid'>
-							<Routes>
-								<Route
-									path='/'
-									element={useMemo(() => (
-										<Settings />
-									))}
-								/>
-								<Route path='/integrations' element={<Integrations />} />
-								<Route
-									path={'/customize'}
-									element={<Customize />}
-								/>
-								<Route
-									path={'/listening'}
-									element={useMemo(() => (
-										<Listening />
-									))}
-								/>
-								{/* <Route
-									path={'/recording'}
-									element={<Recording />}
-								/> */}
-								<Route path='/analytics' element={<Analitics />} />
-								<Route path='/compatibility' element={<Compatibility />} />
-								<Route path='/aliases' element={<Aliases />} />
-								<Route path='/faq' element={<Docs />} />
-								<Route path='/plugins' element={<Plugins />} />
+							<Suspense fallback={<DashboardLoader />}>
+								<Routes>
+									<Route
+										path='/'
+										element={<Settings />}
+									/>
+									<Route path='/integrations' element={<Integrations />} />
+									<Route
+										path={'/customize'}
+										element={<Customize />}
+									/>
+									<Route
+										path={'/listening'}
+										element={<Listening />}
+									/>
+									{/* <Route
+										path={'/recording'}
+										element={<Recording />}
+									/> */}
+									<Route path='/analytics' element={<Analitics />} />
+									<Route path='/compatibility' element={<Compatibility />} />
+									<Route path='/aliases' element={<Aliases />} />
+									<Route path='/faq' element={<Docs />} />
+									<Route path='/plugins' element={<Plugins />} />
 
-							</Routes>
-
+								</Routes>
+							</Suspense>
 						</div>
 					</main>
 					<footer className='py-4 mt-auto footer_bg'>
