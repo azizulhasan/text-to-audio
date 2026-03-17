@@ -429,7 +429,7 @@ class TTA_Init
     public function __construct()
     {
         if (!defined('TEXT_TO_AUDIO_VERSION')) {
-            define('TEXT_TO_AUDIO_VERSION', value: apply_filters('tts_version', ' 2.1.11'));
+            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', ' 2.1.11'));
         }
 
         if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
