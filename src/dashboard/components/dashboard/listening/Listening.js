@@ -760,7 +760,7 @@ export default function Listening() {
                         name="tta__listening_rate"
                         id="tta__listening_rate"
                         onChange={handleChange}
-                        value={listeningSettings.tta__listening_rate}
+                        value={listeningSettings.tta__listening_rate || 1}
                         className="tta_new_slider"
                       />
                       <div className="tta_slider_ticks">
@@ -801,7 +801,7 @@ export default function Listening() {
                         name="tta__listening_volume"
                         id="tta__listening_volume"
                         onChange={handleChange}
-                        value={listeningSettings.tta__listening_volume}
+                        value={listeningSettings.tta__listening_volume || 1}
                         className="tta_new_slider"
                       />
                       <div className="tta_slider_ticks">
@@ -861,7 +861,7 @@ export default function Listening() {
                     onChange={handleChange}
                     name="tta__listening_pitch"
                     id="tta__listening_pitch"
-                    value={listeningSettings.tta__listening_pitch}
+                    value={listeningSettings.tta__listening_pitch || 1}
                     className="tta_hidden_select"
                   >
                     <option disabled>{__("Default Listening Pitch", "text-to-audio")}</option>
