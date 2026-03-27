@@ -124,7 +124,7 @@
       "WebFetch(domain:community.openai.com)",
       "WebFetch(domain:developers.openai.com)",
       "WebFetch(domain:localhost)",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
       "Bash(grep -r '\"\"name\"\": \"\"google/gax\"\"' composer.lock)",
       "mcp__Claude_Preview__preview_start",
       "mcp__mcp-registry__search_mcp_registry"
