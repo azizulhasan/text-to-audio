@@ -32,6 +32,7 @@ class TTA_Translation_Downloader {
 	const AVAILABLE_LOCALES = array(
 		'es_ES',
 		'it_IT',
+		'pt_BR',
 		'pt_PT',
 	);
 
