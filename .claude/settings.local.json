@@ -119,7 +119,10 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(curl -s https://api.github.com/search/code?q=wp_add_privacy_policy_content+repo:Yoast/wordpress-seo -H 'Accept: application/vnd.github.v3+json')",
-      "Bash(curl -sL \"http://localhost:6060/azizulhasan/tts/wp-admin/?tta_test_telemetry=1\")"
+      "Bash(curl -sL \"http://localhost:6060/azizulhasan/tts/wp-admin/?tta_test_telemetry=1\")",
+      "Bash(grep -r '\"\"name\"\": \"\"google/gax\"\"' composer.lock)",
+      "mcp__Claude_Preview__preview_start",
+      "mcp__mcp-registry__search_mcp_registry"
     ]
   }
 }
