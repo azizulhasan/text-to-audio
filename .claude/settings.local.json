@@ -127,7 +127,9 @@
       "mcp__Claude_Preview__preview_start",
       "Bash(grep -r '\"\"name\"\": \"\"google/gax\"\"' composer.lock)",
       "mcp__Claude_Preview__preview_start",
-      "mcp__mcp-registry__search_mcp_registry"
+      "mcp__mcp-registry__search_mcp_registry",
+      "Bash(php -l \"D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio/includes/TTA_Notices.php\")",
+      "Bash(php -l \"D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio/includes/TTA_Translation_Downloader.php\")"
     ]
   }
 }
