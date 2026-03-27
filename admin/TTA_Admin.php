@@ -599,6 +599,12 @@ class TTA_Admin
         }
 
         $settings   = TTA_Helper::tts_get_settings( 'settings' );
+
+        // Check if admin bar toggle is disabled in settings.
+        $show_toggle = isset( $settings['tta__settings_show_admin_bar_toggle'] ) ? $settings['tta__settings_show_admin_bar_toggle'] : true;
+        if ( ! $show_toggle ) {
+            return;
+        }
         $post_types = isset( $settings['tta__settings_allow_listening_for_post_types'] ) ? (array) $settings['tta__settings_allow_listening_for_post_types'] : [];
 
         if ( empty( $post_types ) || ! in_array( $post->post_type, $post_types, true ) ) {
@@ -632,6 +638,12 @@ class TTA_Admin
      */
     public function admin_bar_inline_css() {
         if ( is_admin() || ! is_admin_bar_showing() || ! is_singular() || ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+
+        $settings    = TTA_Helper::tts_get_settings( 'settings' );
+        $show_toggle = isset( $settings['tta__settings_show_admin_bar_toggle'] ) ? $settings['tta__settings_show_admin_bar_toggle'] : true;
+        if ( ! $show_toggle ) {
             return;
         }
         ?>
@@ -672,6 +684,12 @@ class TTA_Admin
      */
     public function admin_bar_inline_js() {
         if ( is_admin() || ! is_admin_bar_showing() || ! is_singular() || ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+            return;
+        }
+
+        $settings    = TTA_Helper::tts_get_settings( 'settings' );
+        $show_toggle = isset( $settings['tta__settings_show_admin_bar_toggle'] ) ? $settings['tta__settings_show_admin_bar_toggle'] : true;
+        if ( ! $show_toggle ) {
             return;
         }
 

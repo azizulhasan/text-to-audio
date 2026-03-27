@@ -1221,21 +1221,25 @@ class TTA_Notices {
 	 */
 	private function get_milestones() {
 		return array(
-			1    => array(
-				'id'      => 'milestone_1',
-				'message' => __( 'Your first visitor just used the audio player! Your content is now accessible to more people.', 'text-to-audio' ),
-			),
-			10   => array(
-				'id'      => 'milestone_10',
-				'message' => __( '10 visitors have listened to your content this week. AtlasVoice is making a difference!', 'text-to-audio' ),
-			),
-			100  => array(
+			100   => array(
 				'id'      => 'milestone_100',
 				'message' => __( '100 plays! Your accessibility efforts are paying off. Your visitors love listening.', 'text-to-audio' ),
 			),
-			1000 => array(
+			500   => array(
+				'id'      => 'milestone_500',
+				'message' => __( '500 plays! Your audio content is making a real difference for your audience.', 'text-to-audio' ),
+			),
+			1000  => array(
 				'id'      => 'milestone_1000',
 				'message' => __( '1,000 plays! You\'re making a real impact with audio content.', 'text-to-audio' ),
+			),
+			5000  => array(
+				'id'      => 'milestone_5000',
+				'message' => __( '5,000 plays! Your content is reaching thousands of listeners. Amazing!', 'text-to-audio' ),
+			),
+			10000 => array(
+				'id'      => 'milestone_10000',
+				'message' => __( '10,000 plays! You\'re a true audio content champion. Incredible milestone!', 'text-to-audio' ),
 			),
 		);
 	}

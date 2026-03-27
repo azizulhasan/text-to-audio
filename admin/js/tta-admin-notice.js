@@ -22,14 +22,21 @@
 
 		/**
 		 * Handle notice dismissal via X button.
+		 *
+		 * Uses stopImmediatePropagation to prevent WordPress core's
+		 * dismiss handler from removing the DOM element before we
+		 * can read the notice ID and fire the AJAX request.
 		 */
 		$(document).on('click', '.tta-admin-notice .notice-dismiss, .tta-admin-notice .tta-notice-dismiss', function(e) {
 			e.preventDefault();
+			e.stopImmediatePropagation();
 
-			var $notice  = $(this).closest('.tta-admin-notice');
-			var noticeId = $notice.data('notice-id');
+			var $button  = $(this);
+			var $notice  = $button.closest('.tta-admin-notice');
+			var noticeId = $button.data('notice-id') || $notice.data('notice-id');
 
 			if ( ! noticeId ) {
+				$notice.fadeOut(300, function() { $(this).remove(); });
 				return;
 			}
 
@@ -38,22 +45,19 @@
 				action:    'tta_dismiss_notice',
 				nonce:     ttaNoticeData.nonce,
 				notice_id: noticeId
-			}, function(response) {
-				if ( response.success ) {
-					$notice.fadeOut(300, function() {
-						$(this).remove();
-					});
-				}
 			});
 
 			// Also track milestone dismissal if this is a milestone notice.
-			if ( noticeId && noticeId.indexOf('milestone_') === 0 ) {
+			if ( noticeId.indexOf('milestone_') === 0 ) {
 				$.post(ttaNoticeData.ajaxurl, {
 					action:       'tta_dismiss_milestone',
 					nonce:        ttaNoticeData.nonce,
 					milestone_id: noticeId
 				});
 			}
+
+			// Remove the notice from the DOM.
+			$notice.fadeOut(300, function() { $(this).remove(); });
 		});
 
 		/**

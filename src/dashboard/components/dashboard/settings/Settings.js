@@ -32,6 +32,7 @@ export default function Settings() {
         tta__settings_stop_floating_button: true,
         tta__settings_exclude_categories: [],
         tta__settings_exclude_wp_tags: [],
+        tta__settings_show_admin_bar_toggle: true,
         tta__settings_clear_all_cache: false,
         tta__settings_add_post_title_to_read: true,
         tta__settings_add_post_excerpt_to_read: false,
@@ -917,6 +918,24 @@ export default function Settings() {
                                         </SettingRow>
                                     )}
 
+                                    <SettingRow label={__("Show admin bar toggle", "text-to-audio")} tooltip={__("Show AtlasVoice on/off toggle in the WordPress admin bar on front-end pages.", "text-to-audio")}>
+                                        <ToggleSwitch
+                                            checked={settings.tta__settings_show_admin_bar_toggle}
+                                            onChange={(e) => handleChange(e)}
+                                            name="tta__settings_show_admin_bar_toggle"
+                                            id="tta__settings_show_admin_bar_toggle"
+                                        />
+                                    </SettingRow>
+
+                                    <SettingRow label={__("Clear all cache", "text-to-audio")}>
+                                        <ToggleSwitch
+                                            checked={settings.tta__settings_clear_all_cache}
+                                            onChange={(e) => handleChange(e)}
+                                            name="tta__settings_clear_all_cache"
+                                            id="tta__settings_clear_all_cache"
+                                        />
+                                    </SettingRow>
+
                                     <SettingRow
                                         label={__("Delete all data on uninstall", "text-to-audio")}
                                         questionIcon={true}
@@ -944,15 +963,6 @@ export default function Settings() {
                                             {__("All plugin data will be permanently deleted when you uninstall. Turn this OFF if you plan to reinstall, debug, or switch versions.", "text-to-audio")}
                                         </div>
                                     )}
-
-                                    <SettingRow label={__("Clear all cache", "text-to-audio")}>
-                                        <ToggleSwitch
-                                            checked={settings.tta__settings_clear_all_cache}
-                                            onChange={(e) => handleChange(e)}
-                                            name="tta__settings_clear_all_cache"
-                                            id="tta__settings_clear_all_cache"
-                                        />
-                                    </SettingRow>
 
                                 </div>
 
