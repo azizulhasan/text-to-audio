@@ -34,6 +34,9 @@ class TTA_Translation_Downloader {
 		'it_IT',
 		'pt_BR',
 		'pt_PT',
+		'de_DE',
+		'fr_FR',
+		'nl_NL',
 	);
 
 	/**
