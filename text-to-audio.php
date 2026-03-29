@@ -60,7 +60,6 @@ use TTA_Api\TTA_Api_Routes;
 use TTA\TTA_Notices;
 use TTA\TTA_Lib_AtlasAiDev;
 use TTA\TTA_Cache;
-use TTA\TTA_Translation_Downloader;
 
 /**
  * Is plugin active
@@ -505,9 +504,6 @@ add_action('init', function () {
     );
 }, 0);
 
-// Download translations from remote repo when site language changes.
-TTA_Translation_Downloader::init();
-
 add_action('plugins_loaded', function () {
     //Rest api init.
     new TTA_Init();
@@ -546,7 +542,6 @@ add_action('tta_send_scheduled_report', function () {
  */
 register_activation_hook(__FILE__, function () {
     TTA_Activator::activate();
-    TTA_Translation_Downloader::on_activation();
 });
 
 /**
