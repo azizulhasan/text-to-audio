@@ -58,6 +58,7 @@ class ComposerStaticInitd518cadaed440bd90dc9e4378262121d
         'TTA\\TTA_Lib_AtlasAiDev' => __DIR__ . '/../..' . '/includes/TTA_Lib_AtlasAiDev.php',
         'TTA\\TTA_Loader' => __DIR__ . '/../..' . '/includes/TTA_Loader.php',
         'TTA\\TTA_Notices' => __DIR__ . '/../..' . '/includes/TTA_Notices.php',
+        'TTA\\TTA_Translation_Downloader' => __DIR__ . '/../..' . '/includes/TTA_Translation_Downloader.php',
         'TTA\\TTA_i18n' => __DIR__ . '/../..' . '/includes/TTA_i18n.php',
         'TTA_Admin\\TTA_Admin' => __DIR__ . '/../..' . '/admin/TTA_Admin.php',
         'TTA_Admin\\TTA_Dashboard_Widget' => __DIR__ . '/../..' . '/admin/TTA_Dashboard_Widget.php',

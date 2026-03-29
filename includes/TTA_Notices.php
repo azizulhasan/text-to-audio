@@ -55,6 +55,7 @@ class TTA_Notices {
 
 		// Backward compat: keep old AJAX action name working.
 		add_action( 'wp_ajax_tta_hide_notice', array( $this, 'ajax_dismiss_notice_legacy' ) );
+		add_action( 'wp_ajax_tta_download_translations', array( $this, 'ajax_download_translations' ) );
 
 		$this->register_notices();
 	}
@@ -362,7 +363,7 @@ class TTA_Notices {
 			'message'             => $review_message,
 			'type'                => 'info',
 			'dismissible'         => true,
-			'reshow_after_days'   => 14,
+			'reshow_after_days'   => 30,
 			'condition'           => function() use ( $total_plays, $days_active, $wizard_done ) {
 				// 1. Must be an admin.
 				if ( ! current_user_can( 'manage_options' ) ) {
@@ -380,8 +381,8 @@ class TTA_Notices {
 				if ( ! $wizard_done && $days_active < 14 ) {
 					return false;
 				}
-				// 5. Must have at least 10 plays.
-				if ( $total_plays < 10 ) {
+				// 5. Must have at least 100 plays.
+				if ( $total_plays < 100 ) {
 					return false;
 				}
 				return true;
@@ -504,6 +505,9 @@ class TTA_Notices {
 
 		// ── 13. Usage Milestone Celebrations ──
 		$this->register_milestone_notices();
+
+		// ── 14. Translation Download ──
+		$this->register_translation_download_notice();
 	}
 
 	// =========================================================================
@@ -1221,21 +1225,25 @@ class TTA_Notices {
 	 */
 	private function get_milestones() {
 		return array(
-			1    => array(
-				'id'      => 'milestone_1',
-				'message' => __( 'Your first visitor just used the audio player! Your content is now accessible to more people.', 'text-to-audio' ),
-			),
-			10   => array(
-				'id'      => 'milestone_10',
-				'message' => __( '10 visitors have listened to your content this week. AtlasVoice is making a difference!', 'text-to-audio' ),
-			),
-			100  => array(
+			100   => array(
 				'id'      => 'milestone_100',
 				'message' => __( '100 plays! Your accessibility efforts are paying off. Your visitors love listening.', 'text-to-audio' ),
 			),
-			1000 => array(
+			500   => array(
+				'id'      => 'milestone_500',
+				'message' => __( '500 plays! Your audio content is making a real difference for your audience.', 'text-to-audio' ),
+			),
+			1000  => array(
 				'id'      => 'milestone_1000',
 				'message' => __( '1,000 plays! You\'re making a real impact with audio content.', 'text-to-audio' ),
+			),
+			5000  => array(
+				'id'      => 'milestone_5000',
+				'message' => __( '5,000 plays! Your content is reaching thousands of listeners. Amazing!', 'text-to-audio' ),
+			),
+			10000 => array(
+				'id'      => 'milestone_10000',
+				'message' => __( '10,000 plays! You\'re a true audio content champion. Incredible milestone!', 'text-to-audio' ),
 			),
 		);
 	}
@@ -1397,5 +1405,187 @@ class TTA_Notices {
 		}
 
 		return false;
+	}
+
+	// =========================================================================
+	// Translation Download Notice
+	// =========================================================================
+
+	/**
+	 * Register a notice prompting users to download translations for their locale.
+	 *
+	 * Only shows on the plugin settings page when the current locale has
+	 * translations available on GitHub but not yet downloaded locally.
+	 */
+	private function register_translation_download_notice() {
+		$locale = get_locale();
+
+		// English doesn't need translation files.
+		if ( 'en_US' === $locale ) {
+			return;
+		}
+
+		// Check against hardcoded available locales — no API call needed.
+		if ( ! TTA_Translation_Downloader::is_locale_available( $locale ) ) {
+			return;
+		}
+
+		// Check if translation files already exist locally.
+		$languages_dir = TTA_PLUGIN_PATH . 'languages/';
+		$mo_file       = $languages_dir . 'text-to-audio-' . $locale . '.mo';
+		if ( file_exists( $mo_file ) ) {
+			return;
+		}
+
+		$this->register_notice( array(
+			'id'              => 'translation_download',
+			'type'            => 'info',
+			'dismissible'     => true,
+			'screens'         => array( 'toplevel_page_text-to-audio' ),
+			'condition'       => function () {
+				return current_user_can( 'manage_options' );
+			},
+			'render_callback' => array( $this, 'render_translation_download_notice' ),
+		) );
+	}
+
+	/**
+	 * Render the translation download notice with a download button.
+	 *
+	 * @param array $notice The notice configuration.
+	 */
+	/**
+	 * Get human-readable label for a locale.
+	 *
+	 * @param string $locale The locale code.
+	 *
+	 * @return string The locale label.
+	 */
+	private function get_locale_label( $locale ) {
+		$labels = array(
+			'es_ES' => 'Español (España)',
+			'it_IT' => 'Italiano',
+			'pt_PT' => 'Português (Portugal)',
+			'pt_BR' => 'Português (Brasil)',
+			'ja'    => '日本語',
+			'ko_KR' => '한국어',
+			'zh_CN' => '中文 (简体)',
+			'fr_FR' => 'Français',
+			'de_DE' => 'Deutsch',
+			'nl_NL' => 'Nederlands',
+		);
+
+		return isset( $labels[ $locale ] ) ? $labels[ $locale ] : $locale;
+	}
+
+	public function render_translation_download_notice( $notice ) {
+		$locale       = get_locale();
+		$locale_label = $this->get_locale_label( $locale );
+		?>
+		<div class="notice notice-info is-dismissible tta-notice" data-notice-id="translation_download" style="padding: 15px 20px; border-left-color: #2271b1;">
+			<div style="display: flex; align-items: center; gap: 15px;">
+				<span style="font-size: 32px;">🌐</span>
+				<div style="flex: 1;">
+					<h3 style="margin: 0 0 5px;">
+						<?php esc_html_e( 'AtlasVoice — Translation Available', 'text-to-audio' ); ?>
+					</h3>
+					<p style="margin: 0 0 10px; font-size: 14px;">
+						<?php
+						printf(
+							/* translators: %s: language name with locale code */
+							esc_html__( 'Your site language is set to %s. A translation pack is available for AtlasVoice. Click the button below to download and activate it.', 'text-to-audio' ),
+							'<strong>' . esc_html( $locale_label ) . ' (' . esc_html( $locale ) . ')</strong>'
+						);
+						?>
+					</p>
+					<button type="button" class="button button-primary" id="tta-download-translations" data-locale="<?php echo esc_attr( $locale ); ?>">
+						<?php
+						printf(
+							/* translators: %s: language name */
+							esc_html__( 'Download %s Translation', 'text-to-audio' ),
+							esc_html( $locale_label )
+						);
+						?>
+					</button>
+					<span id="tta-download-status" style="margin-left: 10px; display: none;"></span>
+				</div>
+			</div>
+		</div>
+		<script>
+		(function($) {
+			$('#tta-download-translations').on('click', function(e) {
+				e.preventDefault();
+				var $btn    = $(this);
+				var $status = $('#tta-download-status');
+				var locale  = $btn.data('locale');
+
+				$btn.prop('disabled', true).text('<?php esc_html_e( 'Downloading...', 'text-to-audio' ); ?>');
+				$status.show().html('<span class="spinner is-active" style="float: none; margin: 0;"></span>');
+
+				$.ajax({
+					url: ttaNoticeData.ajaxurl,
+					type: 'POST',
+					data: {
+						action: 'tta_download_translations',
+						locale: locale,
+						nonce: ttaNoticeData.nonce
+					},
+					success: function(response) {
+						if (response.success) {
+							$status.html('<span style="color: #00a32a; font-weight: 600;">&#10003; <?php esc_html_e( 'Downloaded! Reloading...', 'text-to-audio' ); ?></span>');
+							$btn.text('<?php esc_html_e( 'Downloaded!', 'text-to-audio' ); ?>');
+							setTimeout(function() {
+								window.location.reload();
+							}, 1000);
+						} else {
+							$status.html('<span style="color: #d63638;">' + response.data.message + '</span>');
+							$btn.prop('disabled', false).text('<?php esc_html_e( 'Retry Download', 'text-to-audio' ); ?>');
+						}
+					},
+					error: function() {
+						$status.html('<span style="color: #d63638;"><?php esc_html_e( 'Network error. Please try again.', 'text-to-audio' ); ?></span>');
+						$btn.prop('disabled', false).text('<?php esc_html_e( 'Retry Download', 'text-to-audio' ); ?>');
+					}
+				});
+			});
+		})(jQuery);
+		</script>
+		<?php
+	}
+
+	/**
+	 * AJAX handler: download translation files for the requested locale.
+	 */
+	public function ajax_download_translations() {
+		check_ajax_referer( 'tta_notice_nonce', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'text-to-audio' ) ) );
+		}
+
+		$locale = isset( $_POST['locale'] ) ? sanitize_text_field( wp_unslash( $_POST['locale'] ) ) : '';
+
+		if ( empty( $locale ) || 'en_US' === $locale ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid locale.', 'text-to-audio' ) ) );
+		}
+
+		$result = TTA_Translation_Downloader::download_locale( $locale );
+
+		if ( $result ) {
+			// Clear the file list cache.
+			TTA_Cache::delete( 'translation_files_' . $locale );
+
+			wp_send_json_success( array(
+				'message' => sprintf(
+					/* translators: %s: locale code */
+					__( 'Translation files for %s downloaded successfully.', 'text-to-audio' ),
+					$locale
+				),
+			) );
+		} else {
+			wp_send_json_error( array(
+				'message' => __( 'Failed to download translation files. Please try again later.', 'text-to-audio' ),
+			) );
+		}
 	}
 }
