@@ -1515,7 +1515,7 @@ Trigger: Contact added to "AtlasVoice Churned Users"
 |---|------|--------|------|-------|
 | 7.1 | A/B test pricing page (after redesign) | ⬜ Not Started | — | Measure conversion rate improvement. |
 | 7.2 | Create product demo video | ⬜ Not Started | — | Demo page gets 4,896 views but no video. |
-| 7.3 | WordPress.org listing optimization | ⬜ Not Started | — | 67.66% engagement rate from WP.org referral — highest quality traffic. |
+| 7.3 | WordPress.org listing optimization | ✅ Done | Mar 26 | Listing already 90% optimized: 19 screenshots, 17 FAQs, expert review video, 4.8★/84 reviews, 325K downloads. Minor typo fixes needed (Summery→Summary). Remaining growth lever: more reviews (84→150+). |
 | 7.4 | Affiliate program promotion | ⬜ Not Started | — | Page exists but not actively promoted. |
 | 7.5 | Schema markup improvements | ⬜ Not Started | — | Add FAQ, HowTo, SoftwareApplication schemas. |
 | 7.6 | P1-2: Brand Naming Consolidation | ✅ Done | Mar 13 | Merged with task 3.4. Plugin UI consolidated in v2.1.9 + v3.1.3. |
@@ -1583,7 +1583,7 @@ Trigger: Contact added to "AtlasVoice Churned Users"
 | 6.7 | GDPR & Privacy Compliance | P6 | ✅ Done | `plan/gdpr-privacy-compliance.md` |
 | 7.1 | A/B test pricing page | P7 | ⬜ Not Started | master |
 | 7.2 | Create product demo video | P7 | ⬜ Not Started | master |
-| 7.3 | WordPress.org listing optimization | P7 | ⬜ Not Started | master |
+| 7.3 | WordPress.org listing optimization | P7 | ✅ Done | master |
 | 7.4 | Affiliate program promotion | P7 | ⬜ Not Started | master |
 | 7.5 | Schema markup improvements | P7 | ⬜ Not Started | master |
 | 7.6 | Brand Naming Consolidation (UI) | P7 | ✅ Done | abandon-rate (merged with 3.4) |

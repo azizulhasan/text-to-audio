@@ -20,6 +20,7 @@ return array(
     'TTA\\TTA_Lib_AtlasAiDev' => $baseDir . '/includes/TTA_Lib_AtlasAiDev.php',
     'TTA\\TTA_Loader' => $baseDir . '/includes/TTA_Loader.php',
     'TTA\\TTA_Notices' => $baseDir . '/includes/TTA_Notices.php',
+    'TTA\\TTA_Translation_Downloader' => $baseDir . '/includes/TTA_Translation_Downloader.php',
     'TTA\\TTA_i18n' => $baseDir . '/includes/TTA_i18n.php',
     'TTA_Admin\\TTA_Admin' => $baseDir . '/admin/TTA_Admin.php',
     'TTA_Admin\\TTA_Dashboard_Widget' => $baseDir . '/admin/TTA_Dashboard_Widget.php',

@@ -119,7 +119,27 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(curl -s https://api.github.com/search/code?q=wp_add_privacy_policy_content+repo:Yoast/wordpress-seo -H 'Accept: application/vnd.github.v3+json')",
-      "Bash(curl -sL \"http://localhost:6060/azizulhasan/tts/wp-admin/?tta_test_telemetry=1\")"
+      "Bash(curl -sL \"http://localhost:6060/azizulhasan/tts/wp-admin/?tta_test_telemetry=1\")",
+      "WebFetch(domain:platform.openai.com)",
+      "WebFetch(domain:community.openai.com)",
+      "WebFetch(domain:developers.openai.com)",
+      "WebFetch(domain:localhost)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(grep -r '\"\"name\"\": \"\"google/gax\"\"' composer.lock)",
+      "mcp__Claude_Preview__preview_start",
+      "mcp__mcp-registry__search_mcp_registry",
+      "Bash(php -l \"D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio/includes/TTA_Notices.php\")",
+      "Bash(php -l \"D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio/includes/TTA_Translation_Downloader.php\")",
+      "Bash(node scripts/generate-de-po.js)",
+      "Bash(node scripts/generate-fr-po.js)",
+      "Bash(node scripts/generate-nl-po.js)",
+      "Bash(cp text-to-audio-de_DE* \"D:\\\\xampp\\\\htdocs\\\\azizulhasan\\\\atlasaidev-translations\\\\atlasvoice\\\\de_DE/\")",
+      "Bash(cp text-to-audio-fr_FR* \"D:\\\\xampp\\\\htdocs\\\\azizulhasan\\\\atlasaidev-translations\\\\atlasvoice\\\\fr_FR/\")",
+      "Bash(cp text-to-audio-nl_NL* \"D:\\\\xampp\\\\htdocs\\\\azizulhasan\\\\atlasaidev-translations\\\\atlasvoice\\\\nl_NL/\")",
+      "WebFetch(domain:docs.litespeedtech.com)",
+      "WebFetch(domain:www.siteground.com)",
+      "WebFetch(domain:perfmatters.io)",
+      "Bash(grep -A2 '\"\"finish\"\"' package.json)"
     ]
   }
 }
