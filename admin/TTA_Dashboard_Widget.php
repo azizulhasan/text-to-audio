@@ -39,6 +39,12 @@ class TTA_Dashboard_Widget {
 			return;
 		}
 
+		$settings     = TTA_Helper::tts_get_settings( 'settings' );
+		$show_widget  = isset( $settings['tta__settings_show_dashboard_widget'] ) ? $settings['tta__settings_show_dashboard_widget'] : true;
+		if ( ! $show_widget ) {
+			return;
+		}
+
 		wp_add_dashboard_widget(
 			'atlasvoice_quick_stats',
 			__( 'AtlasVoice — Quick Stats', 'text-to-audio' ),

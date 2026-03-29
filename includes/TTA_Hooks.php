@@ -26,12 +26,57 @@ class TTA_Hooks {
 	private static $excludable_js_arr = [];
 	private static $excludable_js_string = '';
 	private static $excludable_css_arr = [];
+	private static $excludable_css_string = '';
 
 	public function __construct() {
 		// TODO it should work with new functionality
 		add_action( 'add_meta_boxes', array( $this, 'add_custom_meta_box' ) );
 		// Update hook
 		add_action( 'upgrader_process_complete', [ $this, 'update_tts_default_data' ], 10, 2 );
+
+		add_filter( 'tta_before_clean_content', [ $this, 'tta_before_clean_content_callback' ], 10 );
+		add_filter( 'tta_after_clean_content', [ $this, 'tta_after_clean_content_callback' ], 10 );
+		add_filter( 'tta__content_description', [ $this, 'tta__content_description_callback' ], 99, 4 );
+		add_filter( 'tta_clean_content', [ $this, 'tta_clean_content_callback' ], 99 );
+
+		// Cache data update.
+		// Hook into category create, update, and delete actions
+		add_action( 'create_category', [ 'TTA\TTA_Cache', 'update_cached_categories' ] );
+		add_action( 'edit_category', [ 'TTA\TTA_Cache', 'update_cached_categories' ] );
+		add_action( 'delete_category', [ 'TTA\TTA_Cache', 'update_cached_categories' ] );
+		// Hook into tag create, update, and delete actions
+		add_action( 'create_post_tag', [ 'TTA\TTA_Cache', 'update_cached_tags' ] );
+		add_action( 'edit_post_tag', [ 'TTA\TTA_Cache', 'update_cached_tags' ] );
+		add_action( 'delete_post_tag', [ 'TTA\TTA_Cache', 'update_cached_tags' ] );
+
+		// Hook to update cache when any post is created or updated
+		add_action( 'save_post', [ 'TTA\TTA_Cache', 'update_post_type_cache' ] );
+
+		// Hook to update cache when any post is deleted
+		add_action( 'delete_post', [ 'TTA\TTA_Cache', 'update_post_type_cache' ] );
+
+		// Hook after any plugin is activated
+		add_action( 'activated_plugin', [ $this, 'clear_necessary_cache' ], 10, 2 );
+
+		// Hook after any plugin is deactivated
+		add_action( 'deactivated_plugin', [ $this, 'clear_necessary_cache' ], 10, 2 );
+
+		add_filter( 'tta__content_title', [ $this, 'tta__content_title_callback' ], 9999, 2 );
+
+		// Cache/optimization plugin compatibility — single source for free + pro.
+		$this->init_cache_compatibility();
+	}
+
+	/**
+	 * Register exclusion filters for all known cache/optimization plugins.
+	 *
+	 * Pro plugin extends the exclusion arrays via 'tts_excludable_js_arr'
+	 * and 'tts_excludable_css_arr' filters — no cache filters in Pro.
+	 *
+	 * @since 2.2.1
+	 */
+	private function init_cache_compatibility() {
+		// ----- Build exclusion arrays (extensible by Pro via add_filter) -----
 
 		self::$excludable_js_arr = apply_filters( 'tts_excludable_js_arr', [
 			'TextToSpeech.min.js',
@@ -51,108 +96,102 @@ class TTA_Hooks {
 			'NoSleep.min.js',
 		] );
 
-		$strings = implode( ',', self::$excludable_js_arr );
-
-		self::$excludable_js_string = apply_filters( 'tts_excludable_js_string', $strings );
-
-		// Autoptimize Plugin
-		add_filter( 'autoptimize_filter_js_exclude', [ $this, 'autoptimize_filter_js_exclude_callback' ] );
-
-		// LiteSpeed Cache
-		add_filter( 'litespeed_optimize_js_excludes', [ $this, 'cache_exclude_js_text_to_speech' ] );
-
-		// WP Rocket
-		add_filter( 'rocket_exclude_js', [ $this, 'cache_exclude_js_text_to_speech' ] );
-		add_filter( 'rocket_minify_excluded_external_js', [ $this, 'cache_exclude_js_text_to_speech' ] );
-
-		// WP Rocket inline script exclusions
-		add_filter( 'rocket_defer_inline_exclusions', [ $this, 'rocket_defer_inline_exclusions_callback' ], 1000, 1 );
-		add_filter( 'rocket_exclude_defer_js', [ $this, 'rocket_defer_inline_exclusions_callback' ], 1000, 1 );
-		add_filter( 'rocket_excluded_inline_js_content', [
-			$this,
-			'rocket_defer_inline_exclusions_callback'
-		], 1000, 1 );
-
-		// W3 Total Cache
-		add_filter( 'w3tc_minify_js_do_tag_minification', [
-			$this,
-			'w3tc_minify_js_do_tag_minification_callback'
-		], 10, 3 );
-
-		// WP Optimize
-		add_filter( 'wp-optimize-minify-default-exclusions', [ $this, 'cache_exclude_js_text_to_speech' ], 10, 1 );
-
-		// Siteground SG Optimize
-		add_filter( 'sgo_js_minify_exclude', [ $this, 'sgo_js_minify_exclude_callback' ], 10, 1 );
-		add_filter( 'sgo_javascript_combine_exclude', [ $this, 'sgo_js_minify_exclude_callback' ], 10, 1 );
-		add_filter( 'sgo_javascript_combine_excluded_external_paths', [
-			$this,
-			'sgo_js_minify_exclude_callback'
-		], 10, 1 );
-
-		add_filter( 'tta_before_clean_content', [ $this, 'tta_before_clean_content_callback' ], 10 );
-
-		add_filter( 'tta_after_clean_content', [ $this, 'tta_after_clean_content_callback' ], 10 );
-
-		add_filter( 'tta__content_description', [ $this, 'tta__content_description_callback' ], 99, 4 );
-
-
-		add_filter( 'tta_clean_content', [ $this, 'tta_clean_content_callback' ], 99 );
-
+		self::$excludable_js_string = apply_filters(
+			'tts_excludable_js_string',
+			implode( ',', self::$excludable_js_arr )
+		);
 
 		self::$excludable_css_arr = apply_filters( 'tts_excludable_css_arr', [
 			'plyr.min.css',
 			'text-to-audio-pro.css',
 		] );
 
-		// WP Rocket
+		self::$excludable_css_string = apply_filters(
+			'tts_excludable_css_string',
+			implode( ',', self::$excludable_css_arr )
+		);
+
+		// ----- LiteSpeed Cache -----
+		// @see https://docs.litespeedtech.com/lscache/lscwp/api/
+		add_filter( 'litespeed_optimize_js_excludes', [ $this, 'cache_exclude_js_text_to_speech' ] );
+		add_filter( 'litespeed_optimize_css_excludes', [ $this, 'cache_exclude_css_text_to_speech' ] );
+		add_filter( 'litespeed_optm_js_defer_exc', [ $this, 'cache_exclude_js_text_to_speech' ] );
+
+		// ----- WP Rocket -----
+		// @see https://docs.wp-rocket.me/
+		add_filter( 'rocket_exclude_js', [ $this, 'cache_exclude_js_text_to_speech' ] );
+		add_filter( 'rocket_minify_excluded_external_js', [ $this, 'cache_exclude_js_text_to_speech' ] );
+		add_filter( 'rocket_delay_js_exclusions', [ $this, 'cache_exclude_js_text_to_speech' ] );
+		add_filter( 'rocket_exclude_defer_js', [ $this, 'rocket_defer_inline_exclusions_callback' ], 1000, 1 );
+		add_filter( 'rocket_defer_inline_exclusions', [ $this, 'rocket_defer_inline_exclusions_callback' ], 1000, 1 );
+		add_filter( 'rocket_excluded_inline_js_content', [ $this, 'rocket_defer_inline_exclusions_callback' ], 1000, 1 );
 		add_filter( 'rocket_exclude_css', [ $this, 'cache_exclude_css_text_to_speech' ] );
 
+		// ----- Autoptimize -----
+		// @see https://wordpress.org/plugins/autoptimize/
+		add_filter( 'autoptimize_filter_js_exclude', [ $this, 'autoptimize_filter_js_exclude_callback' ] );
+		add_filter( 'autoptimize_filter_css_exclude', [ $this, 'autoptimize_filter_css_exclude_callback' ] );
 
-		// Cache data update.
-		// Hook into category create, update, and delete actions
-		add_action( 'create_category', [ 'TTA\TTA_Cache', 'update_cached_categories' ] );
-		add_action( 'edit_category', [ 'TTA\TTA_Cache', 'update_cached_categories' ] );
-		add_action( 'delete_category', [ 'TTA\TTA_Cache', 'update_cached_categories' ] );
-		// Hook into tag create, update, and delete actions
-		add_action( 'create_post_tag', [ 'TTA\TTA_Cache', 'update_cached_tags' ] );
-		add_action( 'edit_post_tag', [ 'TTA\TTA_Cache', 'update_cached_tags' ] );
-		add_action( 'delete_post_tag', [ 'TTA\TTA_Cache', 'update_cached_tags' ] );
+		// ----- W3 Total Cache -----
+		// @see https://wordpress.org/plugins/w3-total-cache/
+		add_filter( 'w3tc_minify_js_do_tag_minification', [ $this, 'w3tc_minify_js_do_tag_minification_callback' ], 10, 3 );
 
-		// Hook to update cache when any post is created or updated
-		add_action( 'save_post', [ 'TTA\TTA_Cache', 'update_post_type_cache' ] );
+		// ----- WP-Optimize -----
+		// @see https://wordpress.org/plugins/wp-optimize/
+		add_filter( 'wp-optimize-minify-default-exclusions', [ $this, 'cache_exclude_js_text_to_speech' ], 10, 1 );
 
-		// Hook to update cache when any post is deleted
-		add_action( 'delete_post', [ 'TTA\TTA_Cache', 'update_post_type_cache' ] );
+		// ----- SiteGround SG Optimizer -----
+		// @see https://www.siteground.com/tutorials/wordpress/speed-optimizer/custom-filters/
+		add_filter( 'sgo_js_minify_exclude', [ $this, 'sgo_js_minify_exclude_callback' ], 10, 1 );
+		add_filter( 'sgo_javascript_combine_exclude', [ $this, 'sgo_js_minify_exclude_callback' ], 10, 1 );
+		add_filter( 'sgo_javascript_combine_excluded_external_paths', [ $this, 'sgo_js_minify_exclude_callback' ], 10, 1 );
+		add_filter( 'sgo_js_async_exclude', [ $this, 'sgo_js_minify_exclude_callback' ], 10, 1 );
+		add_filter( 'sgo_css_minify_exclude', [ $this, 'sgo_css_minify_exclude_callback' ], 10, 1 );
+		add_filter( 'sgo_css_combine_exclude', [ $this, 'sgo_css_minify_exclude_callback' ], 10, 1 );
 
-		// Hook to update cache when any post is created or updated
-		add_action( 'save_post', [ 'TTA\TTA_Cache', 'update_post_type_cache' ] );
+		// ----- Perfmatters -----
+		// @see https://perfmatters.io/docs/filters/
+		add_filter( 'perfmatters_minify_js_exclusions', [ $this, 'cache_exclude_js_text_to_speech' ] );
+		add_filter( 'perfmatters_defer_js_exclusions', [ $this, 'cache_exclude_js_text_to_speech' ] );
+		add_filter( 'perfmatters_delay_js_exclusions', [ $this, 'cache_exclude_js_text_to_speech' ] );
+		add_filter( 'perfmatters_minify_css_exclusions', [ $this, 'cache_exclude_css_text_to_speech' ] );
 
-		// Hook to update cache when any post is deleted
-		add_action( 'delete_post', [ 'TTA\TTA_Cache', 'update_post_type_cache' ] );
-
-		// Hook after any plugin is activated
-		add_action('activated_plugin', [$this, 'clear_necessary_cache'], 10, 2);
-
-		// Hook after any plugin is deactivated
-		add_action('deactivated_plugin', [$this, 'clear_necessary_cache'], 10, 2);
-
-
-		add_filter('tta__content_title', [$this, 'tta__content_title_callback'], 9999, 2);
+		// ----- Flying Press -----
+		// @see https://docs.flyingpress.com/
+		add_filter( 'flying_press_delay_js_exclude', [ $this, 'cache_exclude_js_text_to_speech' ] );
+		add_filter( 'flying_press_defer_js_exclude', [ $this, 'cache_exclude_js_text_to_speech' ] );
 	}
 
 	/**
-	 * @param $excluded_css_files
+	 * Exclude JS files from cache/optimization (array-based).
+	 * Used by: LiteSpeed, WP Rocket, WP-Optimize, Perfmatters, Flying Press.
 	 *
-	 * @return mixed
+	 * @param array|mixed $excluded_js_files Existing exclusions.
+	 *
+	 * @return array Merged exclusions.
 	 */
-	public function cache_exclude_css_text_to_speech( $excluded_css_files ) {
-		$new_arr = self::$excludable_css_arr;
-		if ( is_array( $excluded_css_files ) ) {
-			$new_arr = array_merge( $excluded_css_files, self::$excludable_css_arr );
+	public function cache_exclude_js_text_to_speech( $excluded_js_files ) {
+		if ( is_array( $excluded_js_files ) ) {
+			return array_merge( $excluded_js_files, self::$excludable_js_arr );
 		}
 
-		return $new_arr;
+		return self::$excludable_js_arr;
+	}
+
+	/**
+	 * Exclude CSS files from cache/optimization (array-based).
+	 * Used by: LiteSpeed, WP Rocket, Perfmatters.
+	 *
+	 * @param array|mixed $excluded_css_files Existing exclusions.
+	 *
+	 * @return array Merged exclusions.
+	 */
+	public function cache_exclude_css_text_to_speech( $excluded_css_files ) {
+		if ( is_array( $excluded_css_files ) ) {
+			return array_merge( $excluded_css_files, self::$excludable_css_arr );
+		}
+
+		return self::$excludable_css_arr;
 	}
 
 
@@ -338,67 +377,54 @@ class TTA_Hooks {
 
 
 	/**
-	 * Autoptimize Plugin
+	 * Autoptimize JS exclusion (comma-separated string).
 	 *
-	 * @param $excluded_js_files
+	 * @param string $excluded_js_files Existing comma-separated exclusions.
 	 *
 	 * @return string
-	 * @see: https://wordpress.org/plugins/autoptimize/
 	 */
 	public function autoptimize_filter_js_exclude_callback( $excluded_js_files ) {
-
 		$excluded_js_files .= ', ' . self::$excludable_js_string;
 
 		return $excluded_js_files;
 	}
 
 	/**
-	 * @param $excluded_js_files
+	 * Autoptimize CSS exclusion (comma-separated string).
 	 *
-	 * @return mixed
+	 * @param string $excluded_css_files Existing comma-separated exclusions.
 	 *
-	 * @see: https://wordpress.org/plugins/litespeed-cache/
-	 * @see: https://wordpress.org/plugins/wp-optimize/
+	 * @return string
 	 */
-	public function cache_exclude_js_text_to_speech( $excluded_js_files ) {
-		$new_arr = [];
-		if ( is_array( $excluded_js_files ) ) {
-			$new_arr = array_merge( $excluded_js_files, self::$excludable_js_arr );
-		} else {
-			$new_arr = self::$excludable_js_arr;
-		}
+	public function autoptimize_filter_css_exclude_callback( $excluded_css_files ) {
+		$excluded_css_files .= ', ' . self::$excludable_css_string;
 
-		return $new_arr;
+		return $excluded_css_files;
 	}
 
 	/**
-	 * WP Rocket inline script exclusions
+	 * WP Rocket inline script exclusions (array-based).
 	 *
-	 * @param $excluded_patterns
+	 * @param array|mixed $excluded_patterns Existing exclusions.
 	 *
-	 * @return string[]
+	 * @return array Merged exclusions.
 	 */
 	public function rocket_defer_inline_exclusions_callback( $excluded_patterns ) {
-		$new_arr = [];
 		if ( is_array( $excluded_patterns ) ) {
-			$new_arr = array_merge( $excluded_patterns, self::$excludable_js_arr );
-		} else {
-			$new_arr = self::$excludable_js_arr;
+			return array_merge( $excluded_patterns, self::$excludable_js_arr );
 		}
 
-		return $new_arr;
-
+		return self::$excludable_js_arr;
 	}
 
-
 	/**
-	 * @param $do_tag_minification
-	 * @param $script_tag
-	 * @param $file
+	 * W3 Total Cache — skip minification for our JS files.
 	 *
-	 * @return false|mixed
+	 * @param bool   $do_tag_minification Whether to minify.
+	 * @param string $script_tag          The script tag.
+	 * @param string $file                The file path.
 	 *
-	 * @see: https://wordpress.org/plugins/w3-total-cache/
+	 * @return bool|mixed
 	 */
 	public function w3tc_minify_js_do_tag_minification_callback( $do_tag_minification, $script_tag, $file ) {
 		$basename = basename( $file );
@@ -410,10 +436,11 @@ class TTA_Hooks {
 	}
 
 	/**
-	 * @param $excluded_js
+	 * SG Optimizer JS exclusion (handle-based).
+	 *
+	 * @param array|mixed $excluded_js Existing exclusions.
 	 *
 	 * @return array|mixed
-	 * @see: https://wordpress.org/plugins/sg-cachepress/
 	 */
 	public function sgo_js_minify_exclude_callback( $excluded_js ) {
 		if ( ! is_array( $excluded_js ) ) {
@@ -423,9 +450,19 @@ class TTA_Hooks {
 		return array_merge( $excluded_js, self::$excludable_js_arr );
 	}
 
+	/**
+	 * SG Optimizer CSS exclusion (handle-based).
+	 *
+	 * @param array|mixed $excluded_css Existing exclusions.
+	 *
+	 * @return array|mixed
+	 */
+	public function sgo_css_minify_exclude_callback( $excluded_css ) {
+		if ( ! is_array( $excluded_css ) ) {
+			return $excluded_css;
+		}
 
-	public function test() {
-
+		return array_merge( $excluded_css, self::$excludable_css_arr );
 	}
 
 	/**

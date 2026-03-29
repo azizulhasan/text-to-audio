@@ -101,6 +101,8 @@ class TTA_Activator {
 				'tta__settings_exclude_categories'                    => [],
 				'tta__settings_exclude_wp_tags'                       => [],
 				'tta__settings_clear_cache'                           => [],
+				'tta__settings_show_admin_bar_toggle'                 => true,
+				'tta__settings_show_dashboard_widget'                 => true,
 				'tta__settings_clear_all_cache'                       => true,
 				'tta__settings_add_post_title_to_read'                => true,
 				'tta__settings_add_post_excerpt_to_read'              => false,

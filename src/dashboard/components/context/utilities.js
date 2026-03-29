@@ -681,6 +681,50 @@ export const chatGPTLanguages = () => {
     };
 }
 
+export const CHATGPT_CLASSIC_VOICES = ['alloy', 'echo', 'fable', 'nova', 'onyx', 'shimmer'];
+
+export const GPT4O_MINI_TTS_VOICES = [
+    'alloy', 'ash', 'ballad', 'cedar', 'coral', 'echo',
+    'fable', 'marin', 'nova', 'onyx', 'sage', 'shimmer', 'verse'
+];
+
+export const chatGPTInstructionPresets = (languageName) => {
+    const { __ } = wp.i18n;
+    return [
+        {
+            key: 'native',
+            /* translators: %s: language name e.g. "Italian" */
+            label: __('Native speaker', 'text-to-audio'),
+            value: `Speak as a native ${languageName} speaker with natural pronunciation and intonation.`,
+        },
+        {
+            key: 'slow',
+            label: __('Slow and clear', 'text-to-audio'),
+            value: `Speak slowly and clearly in ${languageName}, enunciating each word distinctly.`,
+        },
+        {
+            key: 'warm',
+            label: __('Warm and friendly', 'text-to-audio'),
+            value: `Speak in a warm, friendly tone as a native ${languageName} speaker.`,
+        },
+        {
+            key: 'newsreader',
+            label: __('Professional newsreader', 'text-to-audio'),
+            value: `Read like a professional ${languageName} news anchor with clear, authoritative delivery.`,
+        },
+        {
+            key: 'storyteller',
+            label: __('Storyteller', 'text-to-audio'),
+            value: `Narrate like a ${languageName} storyteller with expressive, engaging delivery.`,
+        },
+        {
+            key: 'custom',
+            label: __('Custom', 'text-to-audio'),
+            value: '',
+        },
+    ];
+};
+
 
 export const getMultilingualActiveLanguages = (ttsObjPro) => {
     // Initialize an empty object

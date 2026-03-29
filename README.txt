@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 2.1.12
+Stable tag: 2.1.13
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -352,6 +352,21 @@ Please report security bugs through the [Patchstack Vulnerability Disclosure Pro
 We are looking for people to help translate this plugin. If you can help, we would love to hear from you.
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
+
+= 2.1.13 ( 29 Mar 2026 ) =
+Added : GPT-4o-mini-TTS voice provider integration with ChatGPT settings UI.
+Added : Admin bar toggle setting to show/hide AtlasVoice on/off toggle on front-end pages.
+Added : Dashboard widget toggle setting to show/hide Quick Stats widget on the admin dashboard.
+Added : Translation support for German (de_DE), French (fr_FR), and Dutch (nl_NL).
+Added : On-demand translation download system from GitHub.
+Added : Cache compatibility for Perfmatters and Flying Press optimization plugins.
+Improved : Centralized cache plugin compatibility into a single method supporting 9 plugins.
+Improved : LiteSpeed Cache compatibility — added CSS exclusion and JS defer exclusion filters.
+Improved : SG Optimizer compatibility — added CSS minify/combine and JS async exclusion filters.
+Improved : Autoptimize compatibility — added CSS exclusion filter.
+Improved : WP Rocket compatibility — added delay JS exclusion filter.
+Fixed : Milestone notice dismiss not working properly.
+Fixed : Duplicate save_post/delete_post hook registrations removed.
 
 = 2.1.12 ( 17 Mar 2026 ) =
 Fixed : PHP 7.x parse error caused by named argument syntax in define() call.
@@ -798,6 +813,10 @@ Improved :  Pro and free version performance improved.
 
 
 == Upgrade Notice ==
+
+= 2.1.13  =
+Added : GPT-4o-mini-TTS voice provider, admin bar toggle, dashboard widget toggle, 3 new translations.
+Improved : Cache plugin compatibility expanded to 9 plugins including LiteSpeed, Perfmatters, Flying Press.
 
 = 2.1.12  =
 Fixed : PHP 7.x parse error caused by named argument syntax in define() call.
