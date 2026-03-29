@@ -33,6 +33,7 @@ export default function Settings() {
         tta__settings_exclude_categories: [],
         tta__settings_exclude_wp_tags: [],
         tta__settings_show_admin_bar_toggle: true,
+        tta__settings_show_dashboard_widget: true,
         tta__settings_clear_all_cache: false,
         tta__settings_add_post_title_to_read: true,
         tta__settings_add_post_excerpt_to_read: false,
@@ -924,6 +925,15 @@ export default function Settings() {
                                             onChange={(e) => handleChange(e)}
                                             name="tta__settings_show_admin_bar_toggle"
                                             id="tta__settings_show_admin_bar_toggle"
+                                        />
+                                    </SettingRow>
+
+                                    <SettingRow label={__("Show dashboard widget", "text-to-audio")} tooltip={__("Display the AtlasVoice Quick Stats widget on the WordPress admin dashboard.", "text-to-audio")}>
+                                        <ToggleSwitch
+                                            checked={settings.tta__settings_show_dashboard_widget}
+                                            onChange={(e) => handleChange(e)}
+                                            name="tta__settings_show_dashboard_widget"
+                                            id="tta__settings_show_dashboard_widget"
                                         />
                                     </SettingRow>
 

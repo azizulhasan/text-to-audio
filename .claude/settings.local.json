@@ -129,7 +129,17 @@
       "mcp__Claude_Preview__preview_start",
       "mcp__mcp-registry__search_mcp_registry",
       "Bash(php -l \"D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio/includes/TTA_Notices.php\")",
-      "Bash(php -l \"D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio/includes/TTA_Translation_Downloader.php\")"
+      "Bash(php -l \"D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio/includes/TTA_Translation_Downloader.php\")",
+      "Bash(node scripts/generate-de-po.js)",
+      "Bash(node scripts/generate-fr-po.js)",
+      "Bash(node scripts/generate-nl-po.js)",
+      "Bash(cp text-to-audio-de_DE* \"D:\\\\xampp\\\\htdocs\\\\azizulhasan\\\\atlasaidev-translations\\\\atlasvoice\\\\de_DE/\")",
+      "Bash(cp text-to-audio-fr_FR* \"D:\\\\xampp\\\\htdocs\\\\azizulhasan\\\\atlasaidev-translations\\\\atlasvoice\\\\fr_FR/\")",
+      "Bash(cp text-to-audio-nl_NL* \"D:\\\\xampp\\\\htdocs\\\\azizulhasan\\\\atlasaidev-translations\\\\atlasvoice\\\\nl_NL/\")",
+      "WebFetch(domain:docs.litespeedtech.com)",
+      "WebFetch(domain:www.siteground.com)",
+      "WebFetch(domain:perfmatters.io)",
+      "Bash(grep -A2 '\"\"finish\"\"' package.json)"
     ]
   }
 }
