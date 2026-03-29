@@ -40,36 +40,6 @@ class TTA_Translation_Downloader {
 	);
 
 	/**
-	 * Register hooks for automatic translation download.
-	 */
-	public static function init() {
-		// Download translations when site language changes.
-		add_action( 'update_option_WPLANG', array( __CLASS__, 'on_language_change' ), 10, 2 );
-	}
-
-	/**
-	 * Run on plugin activation — download translations for current locale.
-	 */
-	public static function on_activation() {
-		$locale = get_locale();
-		if ( 'en_US' !== $locale ) {
-			self::download_locale( $locale );
-		}
-	}
-
-	/**
-	 * Triggered when WordPress site language option changes.
-	 *
-	 * @param string $old_value Previous locale.
-	 * @param string $new_value New locale.
-	 */
-	public static function on_language_change( $old_value, $new_value ) {
-		if ( ! empty( $new_value ) && 'en_US' !== $new_value ) {
-			self::download_locale( $new_value );
-		}
-	}
-
-	/**
 	 * Download all translation files for a given locale.
 	 *
 	 * @param string $locale The WordPress locale (e.g., 'es_ES', 'it_IT').
