@@ -48,6 +48,20 @@ export default function ChatGPTSettings({
 
   const presets = chatGPTInstructionPresets(currentLanguageName);
 
+  // Derive the effective preset from the actual instructions text.
+  // If no preset key is saved, check whether the instructions match a known
+  // preset value. When they don't (and are non-empty) fall back to "custom".
+  const effectivePreset = (() => {
+    const savedPreset = listeningSettings.tta__listening_instruction_preset;
+    if (savedPreset) return savedPreset;
+
+    const currentInstructions = (listeningSettings.tta__listening_instructions || "").trim();
+    if (!currentInstructions) return "native";
+
+    const matched = presets.find((p) => p.key !== "custom" && p.value === currentInstructions);
+    return matched ? matched.key : "custom";
+  })();
+
   const handleModelSelect = (modelValue) => {
     handleChange({
       target: {
@@ -219,7 +233,7 @@ export default function ChatGPTSettings({
               {__("Instruction Preset", "text-to-audio")}
             </Form.Label>
             <Form.Select
-              value={listeningSettings.tta__listening_instruction_preset || "native"}
+              value={effectivePreset}
               onChange={handlePresetChange}
               className="tta_orange_speak_select"
             >
