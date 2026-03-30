@@ -669,7 +669,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                                     variant="outline-primary"
                                     className="google-upload-btn w-100 mb-2 d-flex align-items-center justify-content-center"
                                     onClick={() =>
-                                        document.getElementById("googTTSJsonFile").click()
+                                        document.getElementById("googTTSJsonFile")?.click()
                                     }
                                     type="button"
                                 >
