@@ -1075,6 +1075,10 @@ class TTA_Helper
                 // Attempt to get fields for the current field group
                 $fields = acf_get_fields($field_group);
                 foreach ($fields as $field) {
+                    // Skip fields with empty name
+                    if ( empty( $field['name'] ) ) {
+                        continue;
+                    }
                     // Add the field to the result array
                     $all_acf_fields[$field['name']] = $field['name'] . '::' . $field['label'];
 
