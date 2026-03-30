@@ -603,6 +603,9 @@ export default function Settings() {
                                                 disabled={!ttsObj.is_pro_active}
                                                 className="tta-textarea"
                                             />
+                                            <Form.Text className="text-muted">
+                                                {__("Add CSS selectors for the content areas the player should read. One selector per line. Only target post/page body content. If left empty, the player automatically detects the content area.", "text-to-audio")}
+                                            </Form.Text>
                                         </Col>
                                     </Row>
 
@@ -664,6 +667,9 @@ export default function Settings() {
                                             >
                                                 {__('You can add ".atlasvoice_no_read" class to exclude content.', "text-to-audio")}
                                             </small>
+                                            <Form.Text className="text-muted">
+                                                {__("Remove specific elements within the included content areas above. One selector per line. Example: .social-share, .related-posts, .author-bio", "text-to-audio")}
+                                            </Form.Text>
                                         </Col>
                                     </Row>
 
@@ -714,6 +720,9 @@ export default function Settings() {
                                                 disabled={!ttsObj.is_pro_active}
                                                 className="tta-textarea"
                                             />
+                                            <Form.Text className="text-muted">
+                                                {__("HTML tags to skip within the included content. Pipe-separated. script, style, figure, and figcaption are always excluded automatically. Example: sub|sup|blockquote", "text-to-audio")}
+                                            </Form.Text>
                                         </Col>
                                     </Row>
 
@@ -764,6 +773,9 @@ export default function Settings() {
                                                 disabled={!ttsObj.is_pro_active}
                                                 className="tta-textarea"
                                             />
+                                            <Form.Text className="text-muted">
+                                                {__("Exact text patterns to remove from the spoken content. Pipe-separated. Applied after all CSS and tag exclusions. Example: Read more...|Advertisement|Sponsored Content", "text-to-audio")}
+                                            </Form.Text>
                                         </Col>
                                     </Row>
 
