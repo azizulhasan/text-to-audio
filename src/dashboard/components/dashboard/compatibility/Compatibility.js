@@ -207,7 +207,9 @@ export default function Compatibility() {
                                              id={'tts_trackable_post_ids'}
                                              selectedItems={selectedACFFields}
                                              selectionLimit={1} options={acfFields} onChange={handleSelectionChange}/>
-
+                                <Form.Text className="text-muted">
+                                    {__('Selected fields are read after the main article content, in the order you select them. If a field is already visible in your post content area, it may be read twice. For visible fields, use "Include Content By CSS Selectors" in Settings instead to control reading order.', 'text-to-audio')}
+                                </Form.Text>
                             </Col>
                             <Col xs={1} sm={1} lg={1} className='mt-4'>
                                 <>

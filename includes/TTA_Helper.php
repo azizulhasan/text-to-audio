@@ -502,10 +502,21 @@ class TTA_Helper
 
                 if (self::check_all_properties_are_empty($post_css_selectors)) {
                     $settings = $all_settings_data['settings'];
-                    $settings['tta__settings_css_selectors'] = $post_css_selectors['tta__settings_css_selectors'];
-                    $settings['tta__settings_exclude_content_by_css_selectors'] = $post_css_selectors['tta__settings_exclude_content_by_css_selectors'];
-                    $settings['tta__settings_exclude_texts'] = $post_css_selectors['tta__settings_exclude_texts'];
-                    $settings['tta__settings_exclude_tags'] = $post_css_selectors['tta__settings_exclude_tags'];
+
+                    // Merge field-by-field: only override if per-post value is non-empty.
+                    // This allows users to override just one field while keeping global values for the rest.
+                    $css_fields = array(
+                        'tta__settings_css_selectors',
+                        'tta__settings_exclude_content_by_css_selectors',
+                        'tta__settings_exclude_texts',
+                        'tta__settings_exclude_tags',
+                    );
+
+                    foreach ( $css_fields as $field ) {
+                        if ( isset( $post_css_selectors[ $field ] ) && ! empty( $post_css_selectors[ $field ] ) ) {
+                            $settings[ $field ] = $post_css_selectors[ $field ];
+                        }
+                    }
 
                     $all_settings_data['settings'] = $settings;
                 }

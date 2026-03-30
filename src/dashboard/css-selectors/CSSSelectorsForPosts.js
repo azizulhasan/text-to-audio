@@ -189,6 +189,9 @@ export default function CSSSelectorsForPosts() {
                                             placeholder={ttsObj.is_pro_active ? __('Multiple selector will be multiline.', 'text-to-audio') : __('Some content may be missing, It can be found by css selectors', 'text-to-audio')}
                                             disabled={ttsObj.is_pro_active ? false : true}
                                         />
+                                        <Form.Text className="text-muted">
+                                            {__("Add CSS selectors for the content areas the player should read. One selector per line. Only target post/page body content. If left empty, the player automatically detects the content area.", "text-to-audio")}
+                                        </Form.Text>
                                     </Col>
                                     <Col bsPrefix="atlasVoice" xs={1} sm={1} lg={1} className='mt-4'>
                                         <>
@@ -242,6 +245,9 @@ export default function CSSSelectorsForPosts() {
                                             placeholder={ttsObj.is_pro_active ? __('Multiple selector will be multiline.', 'text-to-audio') : __('Exclude content by CSS selectors', 'text-to-audio')}
                                             disabled={ttsObj.is_pro_active ? false : true}
                                         />
+                                        <Form.Text className="text-muted">
+                                            {__("Remove specific elements within the included content areas above. One selector per line. Example: .social-share, .related-posts, .author-bio", "text-to-audio")}
+                                        </Form.Text>
                                     </Col>
                                     <Col bsPrefix="atlasVoice" xs={1} sm={1} lg={1} className='mt-4'>
                                         <>
@@ -295,6 +301,9 @@ export default function CSSSelectorsForPosts() {
                                         placeholder={ttsObj.is_pro_active ? __('Multiple Tags Will Be Pipe(|) Separated.', 'text-to-audio') : __('Exclude tags is a pro feature.', 'text-to-audio')}
                                         disabled={ttsObj.is_pro_active ? false : true}
                                     />
+                                    <Form.Text className="text-muted">
+                                        {__("HTML tags to skip within the included content. Pipe-separated. script, style, figure, and figcaption are always excluded automatically. Example: sub|sup|blockquote", "text-to-audio")}
+                                    </Form.Text>
                                 </Col>
                                 <Col bsPrefix="atlasVoice" xs={1} sm={1} lg={1} className='mt-4'>
                                     <>
@@ -348,6 +357,9 @@ export default function CSSSelectorsForPosts() {
                                         placeholder={ttsObj.is_pro_active ? __('Multiple Texts Will Be Pipe(|) Separated.', 'text-to-audio') : __('Exclude texts is a pro feature.', 'text-to-audio')}
                                         disabled={ttsObj.is_pro_active ? false : true}
                                     />
+                                    <Form.Text className="text-muted">
+                                        {__("Exact text patterns to remove from the spoken content. Pipe-separated. Applied after all CSS and tag exclusions. Example: Read more...|Advertisement|Sponsored Content", "text-to-audio")}
+                                    </Form.Text>
                                 </Col>
                                 <Col bsPrefix="atlasVoice" xs={1} sm={1} lg={1} className='mt-4'>
                                     <>
