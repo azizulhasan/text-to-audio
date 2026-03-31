@@ -74,7 +74,7 @@ One CSS selector per line:
 - Matching elements are removed before the text is extracted
 - Use this for widgets, CTAs, or sections you don't want read aloud
 
-### Common Exclude Selectors
+### Example Selectors (not applied by default)
 - `.social-share`, `.share-buttons` — social sharing widgets
 - `.related-posts`, `.yarpp-related` — related posts sections
 - `.author-bio`, `.author-box` — author information
@@ -103,7 +103,7 @@ sub|sup|blockquote|code|pre
 - `script`, `style`, `figure`, and `figcaption` are **always excluded automatically**
 - Only add tags you specifically want to skip
 
-### Common Tags to Exclude
+### Example Tags (not applied by default)
 - `sub` — subscript text
 - `sup` — superscript text (footnote markers)
 - `blockquote` — quoted text
@@ -191,7 +191,9 @@ add_filter( 'tts_pro_compatible_plugins_content', function( $data, $compatible_d
 }, 10, 3 );
 ```
 
-You can also customize the automatic content detection selectors using a JavaScript filter:
+### JavaScript Filters
+
+**Custom content area selectors** — add your theme's content selector to the automatic detection chain. This filter runs when no "Include Content By CSS Selectors" are configured in Settings AND the `.tts_content_wrapper_X` div is not found (shortcode mode, custom themes, page builders). It does NOT run when the user has configured explicit include selectors — those take priority.
 
 ```javascript
 wp.hooks.addFilter( 'ttsCommonContentSelectors', 'my-theme', function( selectors ) {
@@ -199,6 +201,36 @@ wp.hooks.addFilter( 'ttsCommonContentSelectors', 'my-theme', function( selectors
     selectors.unshift( '.my-theme-content-area' );
     return selectors;
 } );
+```
+
+**Custom title selectors** — add your theme's title selector to the title detection chain. This filter runs every time the player extracts content from the DOM to find the post title. It is used for title prepending and title deduplication. It does NOT run when DOM reading is disabled (`Read Content From Dom` is off) — in that case the title comes from the PHP variable.
+
+```javascript
+wp.hooks.addFilter( 'ttsTitleSelectors', 'my-theme', function( selectors ) {
+    // Add your theme's title selector at the beginning (highest priority)
+    selectors.unshift( '.my-theme-post-title' );
+    return selectors;
+} );
+```
+
+Default title selectors (in priority order):
+`.entry-title`, `.post-title`, `.wp-block-post-title`, `.elementor-heading-title`, `.elementor-page-title`, `.page-title`, `.ast-single-post-title`, `.oceanwp-single-title`, `article h1`, `.hentry h1`, `.post h1`, `h1`
+
+### PHP Filters
+
+**Control content wrapper** — enable or disable the `.tts_content_wrapper_X` div that wraps post content:
+
+```php
+// Disable the content wrapper globally
+add_filter( 'tts_should_add_content_wrapper', '__return_false' );
+
+// Disable for a specific post
+add_filter( 'tts_should_add_content_wrapper', function( $should_add, $content, $btn_no, $post ) {
+    if ( $post && $post->ID === 123 ) {
+        return false;
+    }
+    return $should_add;
+}, 10, 4 );
 ```
 
 ---
@@ -213,3 +245,5 @@ wp.hooks.addFilter( 'ttsCommonContentSelectors', 'my-theme', function( selectors
 | Player reads sidebar/footer | Selector is too broad | Use a more specific selector (e.g., `.entry-content` instead of `article`) |
 | Reading time is wrong | Content was extracted differently than expected | Fixed automatically — reading time recalculates on the frontend |
 | ACF field read twice | Field is visible on page AND selected in Compatibility | Remove from Compatibility, use CSS selectors instead |
+| Smart quotes read as codes | HTML entities not decoded | Fixed automatically — `decodeHTMLEntities()` handles `&#8217;` etc. |
+| Per-post CSS selectors not applied | Cache not cleared | Clear browser sessionStorage or wait for cache invalidation |
