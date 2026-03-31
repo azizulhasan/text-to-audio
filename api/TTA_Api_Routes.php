@@ -408,7 +408,6 @@ class TTA_Api_Routes {
 			)
 		);
 
-		// send_test_report moved to Pro plugin (tta_pro/v1/send_test_report).
 
 		// register compatible_data route.
 		register_rest_route(

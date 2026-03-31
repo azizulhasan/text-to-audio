@@ -200,8 +200,31 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
         $text_after_content = TTA_Helper::clean_content($text_after_content);
         $text_after_content = tta_should_add_delimiter($text_after_content, $sentence_delimiter);
 
-        $content = $text_before_content. ' ' . $content;
-        $content .= ' ' . $text_after_content;
+        // Append ACF/compatible plugin content to $content (before intro/outro).
+        // This ensures ACF content is always in ttsCurrentContent regardless of DOM reading mode.
+        $compatible_data = TTA_Helper::tts_get_settings('compatible');
+        $compatible_content = apply_filters('tts_compatible_plugins_content', [], $compatible_data, $post);
+        if (!empty($compatible_content)) {
+            $acf_texts = [];
+            if (isset($compatible_content['tts_acf_fields']) && is_array($compatible_content['tts_acf_fields'])) {
+                foreach ($compatible_content['tts_acf_fields'] as $field_value) {
+                    if (is_string($field_value) && !empty(trim($field_value))) {
+                        $acf_texts[] = trim($field_value);
+                    }
+                }
+            }
+            if (!empty($acf_texts)) {
+                $content .= ' ' . implode('. ', $acf_texts);
+            }
+        }
+
+        // Pro plugin JS handles intro/outro in getContent() to ensure correct order:
+        // intro + title + excerpt + body + ACF + outro
+        // Free plugin reads ttsCurrentContent directly, so bake intro/outro into PHP content.
+        if ( ! function_exists( 'is_pro_active' ) || ! is_pro_active() ) {
+            $content = $text_before_content . ' ' . $content;
+            $content .= ' ' . $text_after_content;
+        }
     }
 
     /**
