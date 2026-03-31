@@ -368,6 +368,13 @@ function get_enqueued_js_object($params, $plugin_all_settings)
         };
 
 
+        // Override global ttsObj.settings.settings with per-post aware settings.
+        // ttsObj is built in TTA_Admin.__construct() without post ID (global only).
+        // This inline script runs after post context is available, so per-post CSS selector overrides are included.
+        if (window.ttsObj && window.ttsObj.settings) {
+            window.ttsObj.settings.settings = <?php echo json_encode(isset($plugin_all_settings['settings']) ? $plugin_all_settings['settings'] : new \stdClass()); ?>;
+        }
+
         var dateTitle = {
             title: "<?php echo $title; ?>",
             file_name: "<?php echo $file_name; ?>",

@@ -605,7 +605,7 @@ class TTA_Api_Routes {
 		// get data about recording.
 		if ( 'get' == $request['method'] ) {
 
-			$response['data'] = get_option( 'tta_settings_data' );
+			$response['data'] = TTA_Helper::tts_get_settings( 'settings' );
 
 			return rest_ensure_response( $response );
 		}
