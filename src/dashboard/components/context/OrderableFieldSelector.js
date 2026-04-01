@@ -1,5 +1,6 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { __ } from "@wordpress/i18n";
+
 
 const styles = {
   container: {
@@ -45,26 +46,31 @@ const styles = {
   item: {
     display: "flex",
     alignItems: "center",
-    padding: "8px 12px",
+    padding: "6px 12px",
     fontSize: "13px",
     color: "#333",
     cursor: "pointer",
     borderBottom: "1px solid #f5f5f5",
     transition: "background-color 0.1s",
-    gap: "8px",
+    gap: "6px",
   },
   itemHover: {
     backgroundColor: "#f8f9fa",
   },
-  dragHandle: {
-    cursor: "grab",
-    color: "#999",
-    fontSize: "14px",
-    userSelect: "none",
+  moveBtn: {
+    background: "none",
+    border: "1px solid #ddd",
+    color: "#666",
+    cursor: "pointer",
+    fontSize: "11px",
+    padding: "1px 5px",
+    borderRadius: "3px",
+    lineHeight: 1.2,
     flexShrink: 0,
   },
-  dragOver: {
-    borderTop: "2px solid #FF7853",
+  moveBtnDisabled: {
+    opacity: 0.3,
+    cursor: "default",
   },
   removeBtn: {
     background: "none",
@@ -101,10 +107,18 @@ const styles = {
     flexShrink: 0,
     accentColor: "#FF7853",
   },
+  orderNum: {
+    fontSize: "11px",
+    color: "#999",
+    fontWeight: 600,
+    flexShrink: 0,
+    minWidth: "16px",
+    textAlign: "center",
+  },
 };
 
 /**
- * OrderableFieldSelector — dual-panel field picker with drag-to-reorder.
+ * OrderableFieldSelector — dual-panel field picker with up/down reorder buttons.
  *
  * Props:
  *   options        {object}   { field_name: "field_name::Field Label", ... }
@@ -122,28 +136,20 @@ export default function OrderableFieldSelector({
   toastMessage = "",
   isPro = false,
 }) {
-  const [dragIndex, setDragIndex] = useState(null);
-  const [dragOverIndex, setDragOverIndex] = useState(null);
   const [hoveredItem, setHoveredItem] = useState(null);
 
-  // Get display label from option value (e.g., "field_name::Field Label" → "Field Label")
   const getLabel = (fieldName) => {
     const raw = options[fieldName] || fieldName;
     const parts = raw.split("::");
     return parts.length > 1 ? parts[parts.length - 1] : raw;
   };
 
-  // Available fields = all options minus selected
   const availableFields = Object.keys(options).filter(
     (key) => !selectedItems.includes(key)
   );
 
   const handleSelect = (fieldName) => {
     if (!isPro && selectedItems.length >= selectionLimit) {
-      if (typeof window !== "undefined" && window.toast) {
-        window.toast(toastMessage, "info", { autoClose: 5000 });
-      }
-      // For free: replace the single selection
       onChange([fieldName]);
       return;
     }
@@ -163,41 +169,18 @@ export default function OrderableFieldSelector({
     onChange([]);
   };
 
-  // Drag & drop reordering
-  const handleDragStart = (e, index) => {
-    setDragIndex(index);
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", index.toString());
-  };
-
-  const handleDragOver = (e, index) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-    setDragOverIndex(index);
-  };
-
-  const handleDragLeave = () => {
-    setDragOverIndex(null);
-  };
-
-  const handleDrop = (e, dropIndex) => {
-    e.preventDefault();
-    if (dragIndex === null || dragIndex === dropIndex) {
-      setDragIndex(null);
-      setDragOverIndex(null);
-      return;
-    }
+  const handleMoveUp = (index) => {
+    if (index === 0) return;
     const updated = [...selectedItems];
-    const [moved] = updated.splice(dragIndex, 1);
-    updated.splice(dropIndex, 0, moved);
+    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
     onChange(updated);
-    setDragIndex(null);
-    setDragOverIndex(null);
   };
 
-  const handleDragEnd = () => {
-    setDragIndex(null);
-    setDragOverIndex(null);
+  const handleMoveDown = (index) => {
+    if (index >= selectedItems.length - 1) return;
+    const updated = [...selectedItems];
+    [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
+    onChange(updated);
   };
 
   return (
@@ -229,9 +212,7 @@ export default function OrderableFieldSelector({
                 key={fieldName}
                 style={{
                   ...styles.item,
-                  ...(hoveredItem === `avail-${fieldName}`
-                    ? styles.itemHover
-                    : {}),
+                  ...(hoveredItem === `avail-${fieldName}` ? styles.itemHover : {}),
                 }}
                 onClick={() => handleSelect(fieldName)}
                 onMouseEnter={() => setHoveredItem(`avail-${fieldName}`)}
@@ -250,7 +231,7 @@ export default function OrderableFieldSelector({
         </ul>
       </div>
 
-      {/* Right: Selected Fields (ordered, draggable) */}
+      {/* Right: Selected Fields (ordered, with move buttons) */}
       <div style={styles.panel}>
         <div style={styles.panelHeader}>
           <span>{__("Selected (read order)", "text-to-audio")}</span>
@@ -273,32 +254,47 @@ export default function OrderableFieldSelector({
             selectedItems.map((fieldName, index) => (
               <li
                 key={fieldName}
-                draggable={isPro}
-                onDragStart={(e) => handleDragStart(e, index)}
-                onDragOver={(e) => handleDragOver(e, index)}
-                onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, index)}
-                onDragEnd={handleDragEnd}
                 style={{
                   ...styles.item,
-                  ...(dragOverIndex === index ? styles.dragOver : {}),
-                  ...(hoveredItem === `sel-${fieldName}`
-                    ? styles.itemHover
-                    : {}),
-                  opacity: dragIndex === index ? 0.4 : 1,
+                  ...(hoveredItem === `sel-${fieldName}` ? styles.itemHover : {}),
                 }}
                 onMouseEnter={() => setHoveredItem(`sel-${fieldName}`)}
                 onMouseLeave={() => setHoveredItem(null)}
               >
-                {isPro && <span style={styles.dragHandle}>&#x2630;</span>}
+                <span style={styles.orderNum}>{index + 1}.</span>
+                {isPro && selectedItems.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      style={{
+                        ...styles.moveBtn,
+                        ...(index === 0 ? styles.moveBtnDisabled : {}),
+                      }}
+                      onClick={(e) => { e.stopPropagation(); handleMoveUp(index); }}
+                      disabled={index === 0}
+                      title={__("Move up", "text-to-audio")}
+                    >
+                      ▲
+                    </button>
+                    <button
+                      type="button"
+                      style={{
+                        ...styles.moveBtn,
+                        ...(index >= selectedItems.length - 1 ? styles.moveBtnDisabled : {}),
+                      }}
+                      onClick={(e) => { e.stopPropagation(); handleMoveDown(index); }}
+                      disabled={index >= selectedItems.length - 1}
+                      title={__("Move down", "text-to-audio")}
+                    >
+                      ▼
+                    </button>
+                  </>
+                )}
                 <span style={styles.fieldLabel}>{getLabel(fieldName)}</span>
                 <button
                   type="button"
                   style={styles.removeBtn}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemove(fieldName);
-                  }}
+                  onClick={(e) => { e.stopPropagation(); handleRemove(fieldName); }}
                   title={__("Remove", "text-to-audio")}
                 >
                   &times;
@@ -309,7 +305,7 @@ export default function OrderableFieldSelector({
         </ul>
         {isPro && selectedItems.length > 1 && (
           <div style={styles.orderHint}>
-            ↕ {__("Drag to reorder", "text-to-audio")}
+            {__("Use ▲ ▼ to reorder. Fields are read top to bottom.", "text-to-audio")}
           </div>
         )}
       </div>
