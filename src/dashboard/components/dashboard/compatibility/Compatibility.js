@@ -13,6 +13,7 @@ export default function Compatibility() {
     console.log({in: wp})
     const [compatible, setCompatible] = useState({
         'tts_acf_fields': [],
+        'tts_acf_custom_order': false,
     })
 
     const [acfFields, setAcfFields] = useState([])
@@ -50,6 +51,12 @@ export default function Compatibility() {
                 if(res?.data?.tts_acf_fields) {
                     console.log(res?.data?.tts_acf_fields)
                     setSelectedACFFields(res?.data?.tts_acf_fields)
+                }
+                if(res?.data) {
+                    setCompatible(prev => ({
+                        ...prev,
+                        tts_acf_custom_order: res?.data?.tts_acf_custom_order || false,
+                    }))
                 }
                 setIsDataLoaded(true)
             });
@@ -210,8 +217,21 @@ export default function Compatibility() {
                                     toastMessage={__('Adding more than 1 ACF field is a pro feature', 'text-to-audio')}
                                     isPro={ttsObj.is_pro_active}
                                 />
+                                <div className="mt-2 mb-2">
+                                    <Form.Check
+                                        type="checkbox"
+                                        id="tts_acf_custom_order"
+                                        name="tts_acf_custom_order"
+                                        label={__('Use custom reading order', 'text-to-audio')}
+                                        checked={compatible.tts_acf_custom_order}
+                                        onChange={(e) => setCompatible({...compatible, tts_acf_custom_order: e.target.checked})}
+                                    />
+                                    <Form.Text className="text-muted">
+                                        {__('When enabled, ACF fields are read in the order shown above. When disabled, fields are read in ACF\'s default field group order.', 'text-to-audio')}
+                                    </Form.Text>
+                                </div>
                                 <Form.Text className="text-muted">
-                                    {__('Selected fields are read after the main article content, in the order shown above. If a field is already visible in your post content area, it may be read twice. For visible fields, use "Include Content By CSS Selectors" in Settings instead to control reading order.', 'text-to-audio')}
+                                    {__('Selected fields are read after the main article content. If a field is already visible in your post content area, it may be read twice. For visible fields, use "Include Content By CSS Selectors" in Settings instead to control reading order.', 'text-to-audio')}
                                 </Form.Text>
                             </Col>
                             <Col xs={1} sm={1} lg={1} className='mt-4'>

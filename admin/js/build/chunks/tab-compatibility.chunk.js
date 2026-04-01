@@ -11380,26 +11380,31 @@ var styles = {
   item: {
     display: "flex",
     alignItems: "center",
-    padding: "8px 12px",
+    padding: "6px 12px",
     fontSize: "13px",
     color: "#333",
     cursor: "pointer",
     borderBottom: "1px solid #f5f5f5",
     transition: "background-color 0.1s",
-    gap: "8px"
+    gap: "6px"
   },
   itemHover: {
     backgroundColor: "#f8f9fa"
   },
-  dragHandle: {
-    cursor: "grab",
-    color: "#999",
-    fontSize: "14px",
-    userSelect: "none",
+  moveBtn: {
+    background: "none",
+    border: "1px solid #ddd",
+    color: "#666",
+    cursor: "pointer",
+    fontSize: "11px",
+    padding: "1px 5px",
+    borderRadius: "3px",
+    lineHeight: 1.2,
     flexShrink: 0
   },
-  dragOver: {
-    borderTop: "2px solid #FF7853"
+  moveBtnDisabled: {
+    opacity: 0.3,
+    cursor: "default"
   },
   removeBtn: {
     background: "none",
@@ -11435,11 +11440,19 @@ var styles = {
   checkbox: {
     flexShrink: 0,
     accentColor: "#FF7853"
+  },
+  orderNum: {
+    fontSize: "11px",
+    color: "#999",
+    fontWeight: 600,
+    flexShrink: 0,
+    minWidth: "16px",
+    textAlign: "center"
   }
 };
 
 /**
- * OrderableFieldSelector — dual-panel field picker with drag-to-reorder.
+ * OrderableFieldSelector — dual-panel field picker with up/down reorder buttons.
  *
  * Props:
  *   options        {object}   { field_name: "field_name::Field Label", ... }
@@ -11463,36 +11476,18 @@ function OrderableFieldSelector(_ref) {
     isPro = _ref$isPro === void 0 ? false : _ref$isPro;
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
     _useState2 = _slicedToArray(_useState, 2),
-    dragIndex = _useState2[0],
-    setDragIndex = _useState2[1];
-  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
-    _useState4 = _slicedToArray(_useState3, 2),
-    dragOverIndex = _useState4[0],
-    setDragOverIndex = _useState4[1];
-  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
-    _useState6 = _slicedToArray(_useState5, 2),
-    hoveredItem = _useState6[0],
-    setHoveredItem = _useState6[1];
-
-  // Get display label from option value (e.g., "field_name::Field Label" → "Field Label")
+    hoveredItem = _useState2[0],
+    setHoveredItem = _useState2[1];
   var getLabel = function getLabel(fieldName) {
     var raw = options[fieldName] || fieldName;
     var parts = raw.split("::");
     return parts.length > 1 ? parts[parts.length - 1] : raw;
   };
-
-  // Available fields = all options minus selected
   var availableFields = Object.keys(options).filter(function (key) {
     return !selectedItems.includes(key);
   });
   var handleSelect = function handleSelect(fieldName) {
     if (!isPro && selectedItems.length >= selectionLimit) {
-      if (typeof window !== "undefined" && window.toast) {
-        window.toast(toastMessage, "info", {
-          autoClose: 5000
-        });
-      }
-      // For free: replace the single selection
       onChange([fieldName]);
       return;
     }
@@ -11510,40 +11505,21 @@ function OrderableFieldSelector(_ref) {
   var handleClearAll = function handleClearAll() {
     onChange([]);
   };
-
-  // Drag & drop reordering
-  var handleDragStart = function handleDragStart(e, index) {
-    setDragIndex(index);
-    e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", index.toString());
-  };
-  var handleDragOver = function handleDragOver(e, index) {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-    setDragOverIndex(index);
-  };
-  var handleDragLeave = function handleDragLeave() {
-    setDragOverIndex(null);
-  };
-  var handleDrop = function handleDrop(e, dropIndex) {
-    e.preventDefault();
-    if (dragIndex === null || dragIndex === dropIndex) {
-      setDragIndex(null);
-      setDragOverIndex(null);
-      return;
-    }
+  var handleMoveUp = function handleMoveUp(index) {
+    if (index === 0) return;
     var updated = _toConsumableArray(selectedItems);
-    var _updated$splice = updated.splice(dragIndex, 1),
-      _updated$splice2 = _slicedToArray(_updated$splice, 1),
-      moved = _updated$splice2[0];
-    updated.splice(dropIndex, 0, moved);
+    var _ref2 = [updated[index], updated[index - 1]];
+    updated[index - 1] = _ref2[0];
+    updated[index] = _ref2[1];
     onChange(updated);
-    setDragIndex(null);
-    setDragOverIndex(null);
   };
-  var handleDragEnd = function handleDragEnd() {
-    setDragIndex(null);
-    setDragOverIndex(null);
+  var handleMoveDown = function handleMoveDown(index) {
+    if (index >= selectedItems.length - 1) return;
+    var updated = _toConsumableArray(selectedItems);
+    var _ref3 = [updated[index + 1], updated[index]];
+    updated[index] = _ref3[0];
+    updated[index + 1] = _ref3[1];
+    onChange(updated);
   };
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
     style: styles.container,
@@ -11607,30 +11583,38 @@ function OrderableFieldSelector(_ref) {
           children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Click fields on the left to add", "text-to-audio")
         }) : selectedItems.map(function (fieldName, index) {
           return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("li", {
-            draggable: isPro,
-            onDragStart: function onDragStart(e) {
-              return handleDragStart(e, index);
-            },
-            onDragOver: function onDragOver(e) {
-              return handleDragOver(e, index);
-            },
-            onDragLeave: handleDragLeave,
-            onDrop: function onDrop(e) {
-              return handleDrop(e, index);
-            },
-            onDragEnd: handleDragEnd,
-            style: _objectSpread(_objectSpread(_objectSpread(_objectSpread({}, styles.item), dragOverIndex === index ? styles.dragOver : {}), hoveredItem === "sel-".concat(fieldName) ? styles.itemHover : {}), {}, {
-              opacity: dragIndex === index ? 0.4 : 1
-            }),
+            style: _objectSpread(_objectSpread({}, styles.item), hoveredItem === "sel-".concat(fieldName) ? styles.itemHover : {}),
             onMouseEnter: function onMouseEnter() {
               return setHoveredItem("sel-".concat(fieldName));
             },
             onMouseLeave: function onMouseLeave() {
               return setHoveredItem(null);
             },
-            children: [isPro && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
-              style: styles.dragHandle,
-              children: "\u2630"
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("span", {
+              style: styles.orderNum,
+              children: [index + 1, "."]
+            }), isPro && selectedItems.length > 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.Fragment, {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("button", {
+                type: "button",
+                style: _objectSpread(_objectSpread({}, styles.moveBtn), index === 0 ? styles.moveBtnDisabled : {}),
+                onClick: function onClick(e) {
+                  e.stopPropagation();
+                  handleMoveUp(index);
+                },
+                disabled: index === 0,
+                title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Move up", "text-to-audio"),
+                children: "\u25B2"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("button", {
+                type: "button",
+                style: _objectSpread(_objectSpread({}, styles.moveBtn), index >= selectedItems.length - 1 ? styles.moveBtnDisabled : {}),
+                onClick: function onClick(e) {
+                  e.stopPropagation();
+                  handleMoveDown(index);
+                },
+                disabled: index >= selectedItems.length - 1,
+                title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Move down", "text-to-audio"),
+                children: "\u25BC"
+              })]
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
               style: styles.fieldLabel,
               children: getLabel(fieldName)
@@ -11646,9 +11630,9 @@ function OrderableFieldSelector(_ref) {
             })]
           }, fieldName);
         })
-      }), isPro && selectedItems.length > 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+      }), isPro && selectedItems.length > 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
         style: styles.orderHint,
-        children: ["\u2195 ", (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Drag to reorder", "text-to-audio")]
+        children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Use ▲ ▼ to reorder. Fields are read top to bottom.", "text-to-audio")
       })]
     })]
   });
@@ -11708,7 +11692,8 @@ function Compatibility() {
     "in": wp
   });
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({
-      'tts_acf_fields': []
+      'tts_acf_fields': [],
+      'tts_acf_custom_order': false
     }),
     _useState2 = _slicedToArray(_useState, 2),
     compatible = _useState2[0],
@@ -11757,6 +11742,14 @@ function Compatibility() {
           var _res$data2, _res$data3;
           console.log(res === null || res === void 0 || (_res$data2 = res.data) === null || _res$data2 === void 0 ? void 0 : _res$data2.tts_acf_fields);
           setSelectedACFFields(res === null || res === void 0 || (_res$data3 = res.data) === null || _res$data3 === void 0 ? void 0 : _res$data3.tts_acf_fields);
+        }
+        if (res !== null && res !== void 0 && res.data) {
+          setCompatible(function (prev) {
+            var _res$data4;
+            return _objectSpread(_objectSpread({}, prev), {}, {
+              tts_acf_custom_order: (res === null || res === void 0 || (_res$data4 = res.data) === null || _res$data4 === void 0 ? void 0 : _res$data4.tts_acf_custom_order) || false
+            });
+          });
         }
         setIsDataLoaded(true);
       });
@@ -11939,9 +11932,26 @@ function Compatibility() {
                   selectionLimit: 1,
                   toastMessage: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Adding more than 1 ACF field is a pro feature', 'text-to-audio'),
                   isPro: ttsObj.is_pro_active
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+                  className: "mt-2 mb-2",
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_11__["default"].Check, {
+                    type: "checkbox",
+                    id: "tts_acf_custom_order",
+                    name: "tts_acf_custom_order",
+                    label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Use custom reading order', 'text-to-audio'),
+                    checked: compatible.tts_acf_custom_order,
+                    onChange: function onChange(e) {
+                      return setCompatible(_objectSpread(_objectSpread({}, compatible), {}, {
+                        tts_acf_custom_order: e.target.checked
+                      }));
+                    }
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_11__["default"].Text, {
+                    className: "text-muted",
+                    children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('When enabled, ACF fields are read in the order shown above. When disabled, fields are read in ACF\'s default field group order.', 'text-to-audio')
+                  })]
                 }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_11__["default"].Text, {
                   className: "text-muted",
-                  children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Selected fields are read after the main article content, in the order shown above. If a field is already visible in your post content area, it may be read twice. For visible fields, use "Include Content By CSS Selectors" in Settings instead to control reading order.', 'text-to-audio')
+                  children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Selected fields are read after the main article content. If a field is already visible in your post content area, it may be read twice. For visible fields, use "Include Content By CSS Selectors" in Settings instead to control reading order.', 'text-to-audio')
                 })]
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_10__["default"], {
                 xs: 1,
