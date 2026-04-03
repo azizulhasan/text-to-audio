@@ -30,6 +30,13 @@ function tta_clean_content($text)
         '&ldquo;' => '\"',
         '&rdquo;' => '\"',
         '&quot;' => '\"',
+        // ADD these — actual Unicode characters (decoded by wp_strip_all_tags before replacements run)
+        "\u{201C}" => '\"',  // " LEFT DOUBLE QUOTATION MARK
+        "\u{201D}" => '\"',  // " RIGHT DOUBLE QUOTATION MARK
+        "\u{2018}" => "\'",  // ' LEFT SINGLE QUOTATION MARK
+        "\u{2019}" => "\'",  // ' RIGHT SINGLE QUOTATION MARK
+        "\u{201A}" => "\'",  // ‚ SINGLE LOW-9 QUOTATION MARK
+        "\u{201E}" => '\"',  // „ DOUBLE LOW-9 QUOTATION MARK
     );
 
     $otherMarks = array(
