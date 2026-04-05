@@ -280,6 +280,20 @@ class TTA_Helper
             $trp_languages = ( is_array( $trp_settings ) && isset( $trp_settings['translation-languages'] ) ) ? $trp_settings['translation-languages'] : [];
         }
 
+        // Polylang multilingual plugin.
+        $polylang_languages = array();
+        if ( function_exists( 'pll_languages_list' ) ) {
+            $pll_langs = pll_languages_list( array( 'fields' => '' ) );
+            if ( is_array( $pll_langs ) ) {
+                foreach ( $pll_langs as $lang ) {
+                    $polylang_languages[ $lang->slug ] = array(
+                        'english_name' => $lang->name,
+                        'locale'       => $lang->locale,
+                    );
+                }
+            }
+        }
+
         $datas = \apply_filters('tts_pro_plugins_data', [
             'gtranslate/gtranslate.php' => [
                 'type' => 'class',
@@ -310,7 +324,13 @@ class TTA_Helper
                 'type' => 'class',
                 'data' => $trp_languages,
                 'plugin' => 'translatepress',
-            ]
+            ],
+            'polylang/polylang.php' => array(
+                'type'             => 'class',
+                'data'             => array(),
+                'plugin'           => 'polylang',
+                'active_languages' => $polylang_languages,
+            ),
         ]);
 
         if (!function_exists('is_plugin_active')) {
