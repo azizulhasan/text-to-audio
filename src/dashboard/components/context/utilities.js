@@ -543,63 +543,152 @@ export const isFreemiusActive = (res) => {
 
 export const gttsSupportedLanguages = () => {
     return {
-        'af': 'Afrikaans',
-        'sq': 'Albanian',
-        'ar': 'Arabic',
-        'hy': 'Armenian',
-        'bn': 'Bengali',
-        'bg': 'Bulgarian',
-        'bg-bg': 'Bulgarian ( Bulgarian )',
-        'ca': 'Catalan',
-        'zh': 'Chinese',
-        'zh-cn': 'Chinese (Mandarin/China)',
-        'zh-tw': 'Chinese (Mandarin/Taiwan)',
-        'zh-yue': 'Chinese (Cantonese)',
-        'hr': 'Croatian',
-        'cs': 'Czech',
-        'da': 'Danish',
-        'nl': 'Dutch',
-        'en': 'English',
+        // ── African ─────────────────────────────────────────────────────────
+        'af':    'Afrikaans',
+        'am':    'Amharic',
+        'sw':    'Swahili',
+
+        // ── Arabic ──────────────────────────────────────────────────────────
+        'ar':    'Arabic',
+
+        // ── Armenian ────────────────────────────────────────────────────────
+        'hy':    'Armenian',
+
+        // ── Basque / Catalan / Galician ─────────────────────────────────────
+        'eu':    'Basque',
+        'ca':    'Catalan',
+        'gl':    'Galician',
+
+        // ── Chinese ─────────────────────────────────────────────────────────
+        'zh':        'Chinese',
+        'zh-cn':     'Chinese (Mandarin/China)',
+        'zh-tw':     'Chinese (Mandarin/Taiwan)',
+        'zh-yue':    'Chinese (Cantonese)',
+        'yue-hant-hk': 'Chinese Cantonese (Hong Kong)',
+
+        // ── Dutch ───────────────────────────────────────────────────────────
+        'nl':    'Dutch',
+
+        // ── English ─────────────────────────────────────────────────────────
+        'en':    'English',
         'en-au': 'English (Australia)',
+        'en-in': 'English (India)',
+        'en-ng': 'English (Nigeria)',
         'en-uk': 'English (United Kingdom)',
         'en-us': 'English (United States)',
-        'eo': 'Esperanto',
-        'fi': 'Finnish',
-        'fr': 'French',
-        'de': 'German',
-        'el': 'Greek',
-        'he': 'Hebrew',
-        'ht': 'Haitian Creole',
-        'hi': 'Hindi',
-        'hu': 'Hungarian',
-        'is': 'Icelandic',
-        'id': 'Indonesian',
-        'it': 'Italian',
-        'ja': 'Japanese',
-        'ko': 'Korean',
-        'la': 'Latin',
-        'lv': 'Latvian',
-        'mk': 'Macedonian',
-        'no': 'Norwegian',
-        'pl': 'Polish',
-        'pt': 'Portuguese',
+
+        // ── French ──────────────────────────────────────────────────────────
+        'fr':    'French',
+        'fr-ca': 'French (Canada)',
+
+        // ── German ──────────────────────────────────────────────────────────
+        'de':    'German',
+
+        // ── Greek ───────────────────────────────────────────────────────────
+        'el':    'Greek',
+
+        // ── Hebrew ──────────────────────────────────────────────────────────
+        'he':    'Hebrew',
+
+        // ── Hungarian ───────────────────────────────────────────────────────
+        'hu':    'Hungarian',
+
+        // ── Icelandic ───────────────────────────────────────────────────────
+        'is':    'Icelandic',
+
+        // ── Indonesian / Malay ──────────────────────────────────────────────
+        'id':    'Indonesian',
+        'ms':    'Malay',
+
+        // ── Italian ─────────────────────────────────────────────────────────
+        'it':    'Italian',
+
+        // ── Japanese ────────────────────────────────────────────────────────
+        'ja':    'Japanese',
+
+        // ── Korean ──────────────────────────────────────────────────────────
+        'ko':    'Korean',
+
+        // ── Latin ───────────────────────────────────────────────────────────
+        'la':    'Latin',
+
+        // ── Macedonian ──────────────────────────────────────────────────────
+        'mk':    'Macedonian',
+
+        // ── Portuguese ──────────────────────────────────────────────────────
+        'pt':    'Portuguese',
         'pt-br': 'Portuguese (Brazil)',
-        'pt-pt': 'Portuguese (Portuguese)',
-        'ro': 'Romanian',
-        'ru': 'Russian',
-        'sr': 'Serbian',
-        'sk': 'Slovak',
-        'es': 'Spanish',
+        'pt-pt': 'Portuguese (Portugal)',
+
+        // ── Romanian ────────────────────────────────────────────────────────
+        'ro':    'Romanian',
+
+        // ── Russian ─────────────────────────────────────────────────────────
+        'ru':    'Russian',
+
+        // ── Scandinavian ────────────────────────────────────────────────────
+        'da':    'Danish',
+        'fi':    'Finnish',
+        'no':    'Norwegian',
+        'sv':    'Swedish',
+
+        // ── Slavic ──────────────────────────────────────────────────────────
+        'bg':    'Bulgarian',
+        'bg-bg': 'Bulgarian (Bulgaria)',
+        'bs':    'Bosnian',
+        'hr':    'Croatian',
+        'cs':    'Czech',
+        'lv':    'Latvian',
+        'lt':    'Lithuanian',
+        'pl':    'Polish',
+        'sr':    'Serbian',
+        'sk':    'Slovak',
+        'uk':    'Ukrainian',
+
+        // ── South Asian ─────────────────────────────────────────────────────
+        'bn':    'Bengali',
+        'gu':    'Gujarati',
+        'hi':    'Hindi',
+        'kn':    'Kannada',
+        'ml':    'Malayalam',
+        'mr':    'Marathi',
+        'ne':    'Nepali',
+        'pa':    'Punjabi',
+        'si':    'Sinhala',
+        'ta':    'Tamil',
+        'te':    'Telugu',
+        'ur':    'Urdu',
+
+        // ── Southeast Asian ─────────────────────────────────────────────────
+        'fil-ph': 'Filipino (Philippines)',
+        'jv':    'Javanese',
+        'km':    'Khmer',
+        'my':    'Burmese',
+        'su':    'Sundanese',
+
+        // ── Spanish ─────────────────────────────────────────────────────────
+        'es':    'Spanish',
+        'es-ar': 'Spanish (Argentina)',
         'es-es': 'Spanish (Spain)',
         'es-us': 'Spanish (United States)',
-        'sw': 'Swahili',
-        'sv': 'Swedish',
-        'ta': 'Tamil',
-        'th': 'Thai',
-        'tr': 'Turkish',
-        'ur': "Urdu",
-        'vi': 'Vietnamese',
-        'cy': 'Welsh',
+
+        // ── Thai ────────────────────────────────────────────────────────────
+        'th':    'Thai',
+
+        // ── Turkish ─────────────────────────────────────────────────────────
+        'tr':    'Turkish',
+
+        // ── Vietnamese ──────────────────────────────────────────────────────
+        'vi':    'Vietnamese',
+
+        // ── Welsh ───────────────────────────────────────────────────────────
+        'cy':    'Welsh',
+
+        // ── Estonian ────────────────────────────────────────────────────────
+        'et':    'Estonian',
+
+        // ── Albanian ────────────────────────────────────────────────────────
+        'sq':    'Albanian',
     }
 }
 

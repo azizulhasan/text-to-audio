@@ -423,6 +423,13 @@ class TTA_Helper
             $title = $md5_hash . '__lang__' . $selectedLang;
         }
 
+        // Player 3 (gTTS): truncate long filenames to avoid ENAMETOOLONG error on Linux (255 byte limit).
+        // Keep first 100 chars + md5 hash for uniqueness.
+        if (get_player_id() == 3 && strlen($title) > 200) {
+            $hash = md5($title);
+            $title = substr($title, 0, 100) . '_' . $hash;
+        }
+
         if ((get_player_id() == 4 || get_player_id() == 5 || get_player_id() == 6) && $voice) {
             // For ElevenLabs (player 6), voice is "voice_id::FirstName" — use only FirstName.
             $voice_for_name = $voice;
