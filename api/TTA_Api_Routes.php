@@ -408,7 +408,6 @@ class TTA_Api_Routes {
 			)
 		);
 
-		// send_test_report moved to Pro plugin (tta_pro/v1/send_test_report).
 
 		// register compatible_data route.
 		register_rest_route(
@@ -605,7 +604,7 @@ class TTA_Api_Routes {
 		// get data about recording.
 		if ( 'get' == $request['method'] ) {
 
-			$response['data'] = get_option( 'tta_settings_data' );
+			$response['data'] = TTA_Helper::tts_get_settings( 'settings' );
 
 			return rest_ensure_response( $response );
 		}
