@@ -280,6 +280,20 @@ class TTA_Helper
             $trp_languages = ( is_array( $trp_settings ) && isset( $trp_settings['translation-languages'] ) ) ? $trp_settings['translation-languages'] : [];
         }
 
+        // Polylang multilingual plugin.
+        $polylang_languages = array();
+        if ( function_exists( 'pll_languages_list' ) ) {
+            $pll_langs = pll_languages_list( array( 'fields' => '' ) );
+            if ( is_array( $pll_langs ) ) {
+                foreach ( $pll_langs as $lang ) {
+                    $polylang_languages[ $lang->slug ] = array(
+                        'english_name' => $lang->name,
+                        'locale'       => $lang->locale,
+                    );
+                }
+            }
+        }
+
         $datas = \apply_filters('tts_pro_plugins_data', [
             'gtranslate/gtranslate.php' => [
                 'type' => 'class',
@@ -310,7 +324,13 @@ class TTA_Helper
                 'type' => 'class',
                 'data' => $trp_languages,
                 'plugin' => 'translatepress',
-            ]
+            ],
+            'polylang/polylang.php' => array(
+                'type'             => 'class',
+                'data'             => array(),
+                'plugin'           => 'polylang',
+                'active_languages' => $polylang_languages,
+            ),
         ]);
 
         if (!function_exists('is_plugin_active')) {
@@ -423,6 +443,13 @@ class TTA_Helper
             $title = $md5_hash . '__lang__' . $selectedLang;
         }
 
+        // Player 3 (gTTS): truncate long filenames to avoid ENAMETOOLONG error on Linux (255 byte limit).
+        // Keep first 100 chars + md5 hash for uniqueness.
+        if (get_player_id() == 3 && strlen($title) > 200) {
+            $hash = md5($title);
+            $title = substr($title, 0, 100) . '_' . $hash;
+        }
+
         if ((get_player_id() == 4 || get_player_id() == 5 || get_player_id() == 6) && $voice) {
             // For ElevenLabs (player 6), voice is "voice_id::FirstName" — use only FirstName.
             $voice_for_name = $voice;
@@ -502,10 +529,21 @@ class TTA_Helper
 
                 if (self::check_all_properties_are_empty($post_css_selectors)) {
                     $settings = $all_settings_data['settings'];
-                    $settings['tta__settings_css_selectors'] = $post_css_selectors['tta__settings_css_selectors'];
-                    $settings['tta__settings_exclude_content_by_css_selectors'] = $post_css_selectors['tta__settings_exclude_content_by_css_selectors'];
-                    $settings['tta__settings_exclude_texts'] = $post_css_selectors['tta__settings_exclude_texts'];
-                    $settings['tta__settings_exclude_tags'] = $post_css_selectors['tta__settings_exclude_tags'];
+
+                    // Merge field-by-field: only override if per-post value is non-empty.
+                    // This allows users to override just one field while keeping global values for the rest.
+                    $css_fields = array(
+                        'tta__settings_css_selectors',
+                        'tta__settings_exclude_content_by_css_selectors',
+                        'tta__settings_exclude_texts',
+                        'tta__settings_exclude_tags',
+                    );
+
+                    foreach ( $css_fields as $field ) {
+                        if ( isset( $post_css_selectors[ $field ] ) && ! empty( $post_css_selectors[ $field ] ) ) {
+                            $settings[ $field ] = $post_css_selectors[ $field ];
+                        }
+                    }
 
                     $all_settings_data['settings'] = $settings;
                 }
@@ -1075,6 +1113,10 @@ class TTA_Helper
                 // Attempt to get fields for the current field group
                 $fields = acf_get_fields($field_group);
                 foreach ($fields as $field) {
+                    // Skip fields with empty name
+                    if ( empty( $field['name'] ) ) {
+                        continue;
+                    }
                     // Add the field to the result array
                     $all_acf_fields[$field['name']] = $field['name'] . '::' . $field['label'];
 

@@ -523,8 +523,19 @@ class TTA_Hooks {
 				foreach ( $fields as $field_name => $field ) {
 					if ( in_array( $field_name, $selected_acf_fields ) ) {
 						if ( is_string( $field['value'] ) ) {
-							$description_sanitized .= ' ' . $field['value'];
+							$description_sanitized .= ' ' . wp_strip_all_tags( $field['value'] );
 							$counter ++;
+						} elseif ( is_array( $field['value'] ) ) {
+							$texts = array();
+							array_walk_recursive( $field['value'], function( $value ) use ( &$texts ) {
+								if ( is_string( $value ) && ! empty( trim( $value ) ) ) {
+									$texts[] = wp_strip_all_tags( $value );
+								}
+							} );
+							if ( ! empty( $texts ) ) {
+								$description_sanitized .= ' ' . implode( '. ', $texts );
+								$counter ++;
+							}
 						}
 					}
 					if ( $counter > 0 ) {
