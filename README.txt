@@ -227,8 +227,9 @@ Boost engagement, accessibility, and SEO on your WordPress and WooCommerce site 
 
 
 ### CHECK OUT OUR OTHER PLUGINS:
+> * [AI Workflow Automation – MCP ](https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/) – AI-powered WordPress hub with 80+ abilities, built-in MCP server, role-based access control, JWT auth, workflow builder, and WooCommerce support.
+> * [Smart Local AI – Browser-Based Private AI Tools ](https://wordpress.org/plugins/smart-local-ai/) – Privacy-first browser ML suite. Client-side AI for content recommendations, personalized suggestions, and image alt text — no cloud APIs needed.
 > * [Augmented Reality and 3D Model Viewer for WordPress and WooCommerce – AR VR Try-On](https://wordpress.org/plugins/ar-vr-3d-model-try-on/) – Turn your WooCommerce store into an immersive 3D experience. Let customers explore products in detail using interactive 3D viewers and Augmented Reality (AR) on both iOS and Android — no apps needed.
-> * [AI Workflow Automation – MCP ](https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/) – AI-powered WordPress hub with 70+ abilities, built-in MCP server, role-based access control, JWT auth, workflow builder, and WooCommerce support.
 
 
 == Installation ==
@@ -354,19 +355,16 @@ Help us and the WordPress community translate the plugin. [Contact us](http://at
 
 
 = 2.1.14 ( 06 Apr 2026 ) =
-Added : Expanded AtlasVoice TTS Pro player language support from 51 to 81 languages.
-Added : Polylang multilingual plugin compatibility (alongside WPML, GTranslate, TranslatePress).
-Added : Per-post CSS selector override with field-by-field merge (empty fields keep global values).
-Added : ACF custom reading order with OrderableFieldSelector component.
-Added : Content extraction fallback chain with 16+ common WordPress/builder CSS selectors.
-Added : Settings API GET now uses tts_get_settings() for consistent data with defaults.
-Added : Long filename truncation for gTTS player (prevents ENAMETOOLONG on Linux).
-Improved : Listening.js split into 9 modular files for better maintainability.
-Improved : ACF repeater field support with array_walk_recursive.
-Improved : Per-post CSS selectors meta box redesigned with clean UI.
-Improved : MultiSelect component null safety fixes.
-Fixed : Unicode smart quote truncation on PHP 8.4+ (curly quotes no longer break content).
-Fixed : Content extraction when shortcode is used without auto-button (TTS-232 core fix).
+Added : Expanded language support to 81 languages for AtlasVoice TTS Pro player.
+Added : Polylang multilingual plugin compatibility.
+Added : Per-post CSS selector override for custom content selection.
+Added : ACF custom field reading order with drag-and-drop reordering.
+Added : Automatic content detection for popular themes and page builders.
+Improved : Listening settings page split into organized sections.
+Improved : Per-post CSS selectors meta box with cleaner design.
+Fixed : Content not reading full article when using shortcode mode.
+Fixed : Smart quote characters breaking content on PHP 8.4+.
+Tested : WordPress 7.0 compatibility.
 
 = 2.1.13 ( 29 Mar 2026 ) =
 Added : GPT-4o-mini-TTS voice provider integration with ChatGPT settings UI.
@@ -829,10 +827,6 @@ Improved :  Pro and free version performance improved.
 
 == Upgrade Notice ==
 
-= 2.1.13  =
-Added : GPT-4o-mini-TTS voice provider, admin bar toggle, dashboard widget toggle, 3 new translations.
-Improved : Cache plugin compatibility expanded to 9 plugins including LiteSpeed, Perfmatters, Flying Press.
-
-= 2.1.12  =
-Fixed : PHP 7.x parse error caused by named argument syntax in define() call.
+= 2.1.14 =
+81 language support, Polylang compatibility, content extraction fixes, and improved ACF field ordering.
 
