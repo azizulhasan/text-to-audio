@@ -30,6 +30,13 @@ function tta_clean_content($text)
         '&ldquo;' => '\"',
         '&rdquo;' => '\"',
         '&quot;' => '\"',
+        // ADD these — actual Unicode characters (decoded by wp_strip_all_tags before replacements run)
+        "\u{201C}" => '\"',  // " LEFT DOUBLE QUOTATION MARK
+        "\u{201D}" => '\"',  // " RIGHT DOUBLE QUOTATION MARK
+        "\u{2018}" => "\'",  // ' LEFT SINGLE QUOTATION MARK
+        "\u{2019}" => "\'",  // ' RIGHT SINGLE QUOTATION MARK
+        "\u{201A}" => "\'",  // ‚ SINGLE LOW-9 QUOTATION MARK
+        "\u{201E}" => '\"',  // „ DOUBLE LOW-9 QUOTATION MARK
     );
 
     $otherMarks = array(
@@ -200,8 +207,31 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
         $text_after_content = TTA_Helper::clean_content($text_after_content);
         $text_after_content = tta_should_add_delimiter($text_after_content, $sentence_delimiter);
 
-        $content = $text_before_content. ' ' . $content;
-        $content .= ' ' . $text_after_content;
+        // Append ACF/compatible plugin content to $content (before intro/outro).
+        // This ensures ACF content is always in ttsCurrentContent regardless of DOM reading mode.
+        $compatible_data = TTA_Helper::tts_get_settings('compatible');
+        $compatible_content = apply_filters('tts_compatible_plugins_content', [], $compatible_data, $post);
+        if (!empty($compatible_content)) {
+            $acf_texts = [];
+            if (isset($compatible_content['tts_acf_fields']) && is_array($compatible_content['tts_acf_fields'])) {
+                foreach ($compatible_content['tts_acf_fields'] as $field_value) {
+                    if (is_string($field_value) && !empty(trim($field_value))) {
+                        $acf_texts[] = trim($field_value);
+                    }
+                }
+            }
+            if (!empty($acf_texts)) {
+                $content .= ' ' . implode('. ', $acf_texts);
+            }
+        }
+
+        // Pro plugin JS handles intro/outro in getContent() to ensure correct order:
+        // intro + title + excerpt + body + ACF + outro
+        // Free plugin reads ttsCurrentContent directly, so bake intro/outro into PHP content.
+        if ( ! function_exists( 'is_pro_active' ) || ! is_pro_active() || get_player_id() == 1 ) {
+            $content = $text_before_content . ' ' . $content;
+            $content .= ' ' . $text_after_content;
+        }
     }
 
     /**
@@ -367,6 +397,13 @@ function get_enqueued_js_object($params, $plugin_all_settings)
             use_old_player:use_old_player
         };
 
+
+        // Override global ttsObj.settings.settings with per-post aware settings.
+        // ttsObj is built in TTA_Admin.__construct() without post ID (global only).
+        // This inline script runs after post context is available, so per-post CSS selector overrides are included.
+        if (window.ttsObj && window.ttsObj.settings) {
+            window.ttsObj.settings.settings = <?php echo json_encode(isset($plugin_all_settings['settings']) ? $plugin_all_settings['settings'] : new \stdClass()); ?>;
+        }
 
         var dateTitle = {
             title: "<?php echo $title; ?>",

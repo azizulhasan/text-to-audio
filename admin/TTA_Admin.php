@@ -82,8 +82,10 @@ class TTA_Admin
         if (!function_exists('wp_create_nonce')) {
             include_once ABSPATH . 'wp-includes/pluggable.php';
         }
+        global $post;
+        $post_id = ($post && isset($post->ID)) ? $post->ID : 0;
+        $settings = TTA_Helper::tts_get_settings('', $post_id);
 
-        $settings = TTA_Helper::tts_get_settings();
 
         $color = '#ffffff';
         if (isset($settings['customize']['color'])) {
