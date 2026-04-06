@@ -228,7 +228,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
         // Pro plugin JS handles intro/outro in getContent() to ensure correct order:
         // intro + title + excerpt + body + ACF + outro
         // Free plugin reads ttsCurrentContent directly, so bake intro/outro into PHP content.
-        if ( ! function_exists( 'is_pro_active' ) || ! is_pro_active() ) {
+        if ( ! function_exists( 'is_pro_active' ) || ! is_pro_active() || get_player_id() == 1 ) {
             $content = $text_before_content . ' ' . $content;
             $content .= ' ' . $text_after_content;
         }

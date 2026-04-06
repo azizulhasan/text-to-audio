@@ -259,8 +259,8 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
 
     const trackingText = (analytics && analytics.enableAnalytics)
         ? sprintf(
-              /* translators: %d: number of posts being tracked */
-              __('%d %s', 'text-to-audio'),
+              /* translators: 1: number of posts being tracked, 2: post type label (e.g. "Posts") */
+              __('%1$d %2$s', 'text-to-audio'),
               trackingCount,
               postTypeLabel
           )
@@ -295,6 +295,7 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
 
                 <p style={styles.subheading}>
                     {sprintf(
+                        /* translators: %s: post type label (e.g. "Posts", "Pages") */
                         __('Your audio player is now live on all your %s.', 'text-to-audio'),
                         postTypeLabel
                     )}
