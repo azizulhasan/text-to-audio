@@ -3,9 +3,9 @@ Contributors: atlasaidev, hasanazizul, freemius
 Donate link: http://atlasaidev.com/
 Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1.13
+Stable tag: 2.1.14
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -17,7 +17,7 @@ Free text to speech with browser voices + premium AI voices from Google, OpenAI 
 
 **No Registration, No Account, No API required for the free version. Simply install and let your visitors listen.**
 
-Whether you run a blog, news site, online store, or educational platform, AtlasVoice makes your content accessible to everyone — including users with visual impairments, reading difficulties, or those who simply prefer listening. Support **51+ languages**, **300+ AI voices**, and reach a truly global audience.
+Whether you run a blog, news site, online store, or educational platform, AtlasVoice makes your content accessible to everyone — including users with visual impairments, reading difficulties, or those who simply prefer listening. Support **81+ languages**, **300+ AI voices**, and reach a truly global audience.
 
 ### How It Works — 3 Simple Steps
 
@@ -41,7 +41,7 @@ Whether you run a blog, news site, online store, or educational platform, AtlasV
 
 * **Bloggers, News & Media Sites** — Let readers listen to articles while multitasking. Increase time-on-page and reduce bounce rate.
 * **WooCommerce & E-Learning Sites** — Make product descriptions and course materials listenable for shoppers and auditory learners.
-* **Multilingual & Accessibility-First Websites** — Serve a global audience in 51+ languages and meet WCAG 2.1 / ADA compliance.
+* **Multilingual & Accessibility-First Websites** — Serve a global audience in 81+ languages and meet WCAG 2.1 / ADA compliance.
 
 
 ### Why Choose AtlasVoice?
@@ -52,7 +52,7 @@ Whether you run a blog, news site, online store, or educational platform, AtlasV
 
 3. **Multiple AI Providers:** AtlasVoice's own AI engine (included with Pro), Google Cloud Neural2 voices, ElevenLabs ultra-realistic voices, and OpenAI ChatGPT voices.
 
-4. **Works Everywhere:** Compatible with all major browsers, mobile devices, page builders (Elementor, WPBakery, Divi), caching plugins, and multilingual plugins (WPML, GTranslate, TranslatePress).
+4. **Works Everywhere:** Compatible with all major browsers, mobile devices, page builders (Elementor, WPBakery, Divi), caching plugins, and multilingual plugins (WPML, GTranslate, TranslatePress, Polylang).
 
 
 ### Text To Speech Plugin Free Version Features
@@ -94,7 +94,7 @@ Unlock premium AI voices, bulk operations, cloud backup, advanced analytics, and
 
 *For each provider: select its player from the **Customization** menu, then choose voice and language from the **Listening** menu.*
 
-* **AtlasVoice TTS Pro (Included with Pro):** AtlasVoice's own AI voice engine — **included with your Pro license at no extra API cost**. Access 63 languages with natural-sounding voices. No third-party account needed — just activate Pro and start generating MP3 files.
+* **AtlasVoice TTS Pro (Included with Pro):** AtlasVoice's own AI voice engine — **included with your Pro license at no extra API cost**. Access **81 languages** with natural-sounding voices, smart sentence splitting, and seamless audio without mid-sentence pauses. No third-party account needed — just activate Pro and start generating MP3 files.
 
 * **Google Cloud Text To Speech:** Integrate with [Google Cloud Text To Speech](https://cloud.google.com/text-to-speech) for enterprise-grade voices. 300+ voices across 90+ languages including **Neural2**, **WaveNet**, and **Standard** voice types. Paid service — billed by Google based on usage. [Learn more](https://www.youtube.com/watch?v=h4VJxM-mh74&t=200s)
 
@@ -148,7 +148,7 @@ Unlock premium AI voices, bulk operations, cloud backup, advanced analytics, and
 
 **Translation & Multilingual (Pro):**
 
-* **51+ Languages with WPML, GTranslate & TranslatePress:** Full multilingual support. The player automatically detects language changes and adjusts the voice accordingly.
+* **81+ Languages with WPML, GTranslate, TranslatePress & Polylang:** Full multilingual support. The player automatically detects language changes and adjusts the voice accordingly.
 
 **Developer-Friendly (Pro):**
 
@@ -170,7 +170,7 @@ Unlock premium AI voices, bulk operations, cloud backup, advanced analytics, and
 
 ### Text To Speech Pro Supported Languages:
 
-AtlasVoice Pro supports **51+ languages** with premium AI voices:
+AtlasVoice Pro supports **81+ languages** with premium AI voices:
 
 Afrikaans, Albanian, Arabic, Armenian, Bengali, Bulgarian, Catalan, Chinese (Mandarin/China), Chinese (Mandarin/Taiwan), Chinese (Cantonese), Croatian, Czech, Danish, Dutch, English, English (Australia), English (United Kingdom), English (United States), Esperanto, Finnish, French, German, Greek, Haitian Creole, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Italian, Japanese, Korean, Latin, Latvian, Macedonian, Norwegian, Polish, Portuguese, Portuguese (Brazil), Portuguese (Portugal), Romanian, Russian, Serbian, Slovak, Spanish, Spanish (Spain), Spanish (United States), Swahili, Swedish, Tamil, Thai, Turkish, Urdu, Vietnamese, Welsh
 
@@ -196,7 +196,7 @@ The free version uses the browser's [speechSynthesis API](https://developer.mozi
 
 ### Compatibility
 
-**Multilingual:** [WPML](https://wpml.org/), [GTranslate](https://wordpress.org/plugins/gtranslate/), [TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/) — auto-detects language and adjusts voice.
+**Multilingual:** [WPML](https://wpml.org/), [GTranslate](https://wordpress.org/plugins/gtranslate/), [TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/), [Polylang](https://wordpress.org/plugins/polylang/) — auto-detects language and adjusts voice.
 
 **Page Builders & Themes:** [Elementor](https://wordpress.org/plugins/elementor/), [Avada](https://avada.com/), [WPBakery](https://wpbakery.com/), [Divi](https://www.elegantthemes.com/)
 
@@ -221,7 +221,7 @@ Use the `[atlasvoice]` shortcode to add the audio player anywhere:
 
 **Get Started Today!**
 
-Boost engagement, accessibility, and SEO on your WordPress and WooCommerce site with AtlasVoice Text To Speech. Meet WCAG 2.1 accessibility standards, increase time-on-page, reduce bounce rate, and cater to a global audience in 51+ languages.
+Boost engagement, accessibility, and SEO on your WordPress and WooCommerce site with AtlasVoice Text To Speech. Meet WCAG 2.1 accessibility standards, increase time-on-page, reduce bounce rate, and cater to a global audience in 81+ languages.
 
 [Try AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) for premium AI voices, bulk MP3 generation, cloud storage backup, advanced analytics, and priority support.
 
@@ -252,7 +252,7 @@ Boost engagement, accessibility, and SEO on your WordPress and WooCommerce site 
 Yes, Text To Speech supports all Android phones. The free version uses the browser's [speechSynthesis API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis), which varies by browser and device. Voices and languages may differ depending on the browser used. The [Pro version](https://atlasaidev.com/plugins/text-to-speech-pro/) eliminates this limitation by using server-side AI voice providers (Google Cloud, OpenAI, ElevenLabs), delivering consistent, high-quality audio across all devices and browsers.
 
 = Does Text To Speech support my language? =
-The Pro version supports [51+ languages](https://wordpress.org/plugins/text-to-audio/#:~:text=PRO%20SUPPORTED%20LANGUAGES%3A) with premium AI voices. Google Cloud TTS supports 90+ languages, and ElevenLabs offers multilingual voice models. The free version supports languages available through your [browser's speech synthesis engine](https://wordpress.org/plugins/text-to-audio/#:~:text=based%20on%20device.-,SUPPORTED%20LANGUAGES,-%3A).
+The Pro version supports [81+ languages](https://wordpress.org/plugins/text-to-audio/#:~:text=PRO%20SUPPORTED%20LANGUAGES%3A) with premium AI voices. Google Cloud TTS supports 90+ languages, and ElevenLabs offers multilingual voice models. The free version supports languages available through your [browser's speech synthesis engine](https://wordpress.org/plugins/text-to-audio/#:~:text=based%20on%20device.-,SUPPORTED%20LANGUAGES,-%3A).
 
 = Does it work with WooCommerce? =
 Yes! AtlasVoice works on all WooCommerce pages — product pages, shop pages, and any page with WooCommerce content. Product descriptions, custom fields (via ACF), and any visible text can be converted to audio. Bulk MP3 generation also works for WooCommerce products.
@@ -279,7 +279,7 @@ AtlasVoice helps your website meet WCAG 2.1 (Web Content Accessibility Guideline
 The voice and language settings from the **Listening** menu apply globally. However, you can override the voice and language for individual posts using the shortcode: `[atlasvoice lang="en-GB" voice="Google UK English"]`. This gives you the flexibility to use different voices for different content.
 
 = Does Text To Speech support multilingual plugins? =
-Yes, the [Pro version](https://atlasaidev.com/plugins/text-to-speech-pro/) fully supports **WPML**, **TranslatePress**, and **GTranslate**. The audio player automatically detects language changes and adjusts the voice accordingly.
+Yes, the [Pro version](https://atlasaidev.com/plugins/text-to-speech-pro/) fully supports **WPML**, **TranslatePress**, **GTranslate**, and **Polylang**. The audio player automatically detects language changes and adjusts the voice accordingly.
 
 = Does Text To Speech support custom post types? =
 Yes, both the free and [Pro version](https://atlasaidev.com/plugins/text-to-speech-pro/) support custom post types. The plugin integrates with ACF (Advanced Custom Fields), Custom Post Type UI, and Toolset Types.
@@ -352,6 +352,21 @@ Please report security bugs through the [Patchstack Vulnerability Disclosure Pro
 We are looking for people to help translate this plugin. If you can help, we would love to hear from you.
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
+
+= 2.1.14 ( 06 Apr 2026 ) =
+Added : Expanded AtlasVoice TTS Pro player language support from 51 to 81 languages.
+Added : Polylang multilingual plugin compatibility (alongside WPML, GTranslate, TranslatePress).
+Added : Per-post CSS selector override with field-by-field merge (empty fields keep global values).
+Added : ACF custom reading order with OrderableFieldSelector component.
+Added : Content extraction fallback chain with 16+ common WordPress/builder CSS selectors.
+Added : Settings API GET now uses tts_get_settings() for consistent data with defaults.
+Added : Long filename truncation for gTTS player (prevents ENAMETOOLONG on Linux).
+Improved : Listening.js split into 9 modular files for better maintainability.
+Improved : ACF repeater field support with array_walk_recursive.
+Improved : Per-post CSS selectors meta box redesigned with clean UI.
+Improved : MultiSelect component null safety fixes.
+Fixed : Unicode smart quote truncation on PHP 8.4+ (curly quotes no longer break content).
+Fixed : Content extraction when shortcode is used without auto-button (TTS-232 core fix).
 
 = 2.1.13 ( 29 Mar 2026 ) =
 Added : GPT-4o-mini-TTS voice provider integration with ChatGPT settings UI.
