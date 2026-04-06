@@ -97,6 +97,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                     if (missingFields.length > 0) {
                         reject(
                             sprintf(
+                                /* translators: %s: comma-separated list of missing JSON field names */
                                 __('Invalid service account file. Missing required fields: %s', 'text-to-audio'),
                                 missingFields.join(', ')
                             )
