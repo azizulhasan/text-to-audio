@@ -51,7 +51,9 @@ function tta_clean_content($text)
         '&copy;' => '©',
         '&trade;' => '™',
         '&reg;' => '®',
-        '&nbsp;' => '',
+        // TTS-235: Convert &nbsp; to a regular space instead of removing it.
+        // Removing it joins words: "releasing&nbsp;nearly" became "releasingnearly".
+        '&nbsp;' => ' ',
         '&mdash;' => '—',
         '&amp;' => '&',
         '&gt;' => 'greater than',
@@ -62,9 +64,36 @@ function tta_clean_content($text)
 
     $text = apply_filters('tta_before_clean_content', $text);
 
+    // TTS-235: Remove elements matching exclude CSS selectors before stripping tags.
+    // When DOM reading is on, the JS path handles this via querySelectorAll().remove().
+    // When DOM reading is off, we convert CSS selectors to regex and strip matching
+    // elements from the HTML here. Supports .class, #id, and tag.class selectors.
+    $text = TTA_Helper::strip_elements_by_css_selectors($text);
+
+    // TTS-235: Add a space before tags only when preceded by a word character.
+    // This prevents joining words when tags are stripped: "on<a>Kharg</a>" → "on Kharg"
+    // But avoids adding space after punctuation: "diseases.</strong>" stays "diseases."
+    $text = preg_replace('/(?<=\w)</', ' <', $text);
+
     $text = wp_strip_all_tags($text, true);
 
+    // TTS-235: Ensure valid UTF-8 encoding after tag stripping.
+    // Prevents multibyte characters (Hebrew, Arabic, etc.) from becoming corrupted (�).
+    $text = mb_convert_encoding($text, 'UTF-8', 'UTF-8');
+
     $text = apply_filters('tta_after_clean_content', $text);
+
+    // TTS-235: Convert Unicode special chars to ASCII equivalents.
+    // wp_strip_all_tags decodes HTML entities (&#8211; → –, &nbsp; → \xC2\xA0),
+    // so we must handle the actual Unicode characters here.
+    $unicodeChars = array(
+        "\u{2013}" => '-',  // – EN DASH
+        "\u{2014}" => '-',  // — EM DASH
+        "\u{2015}" => '-',  // ― HORIZONTAL BAR
+        "\u{2012}" => '-',  // ‒ FIGURE DASH
+        "\u{00A0}" => ' ',  // NON-BREAKING SPACE (decoded from &nbsp;)
+    );
+    $text = str_replace(array_keys($unicodeChars), array_values($unicodeChars), $text);
 
     $text = str_replace(array_keys($quotationMarks), array_values($quotationMarks), $text);
     $text = str_replace(array_keys($otherMarks), array_values($otherMarks), $text);
