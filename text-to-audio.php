@@ -310,6 +310,11 @@ if ( function_exists( 'ttsp_fs' ) ) {
             'tta_milestones_reached',
             'tta_review_notice_next_show_time',
             'tta_feedback_notice_next_show_time',
+            // TTS-236: analytics memory exhaustion fix options
+            'tta_total_plays_counter',
+            'tta_total_plays_fallback',
+            'tta_play_count_migration_last_id',
+            'tta_play_count_migration_done',
         );
         foreach ( $options as $option ) {
             delete_option( $option );
@@ -335,7 +340,11 @@ if ( function_exists( 'ttsp_fs' ) ) {
         $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_text-to-audio\_%' OR option_name LIKE '_transient_timeout_text-to-audio\_%'" );
 
         // 6. Unschedule cron jobs.
-        $cron_hooks = array( 'tta_send_scheduled_report', 'text-to-audio_tracker_send_event' );
+        $cron_hooks = array(
+            'tta_send_scheduled_report',
+            'text-to-audio_tracker_send_event',
+            'tta_migrate_play_count_column', // TTS-236
+        );
         foreach ( $cron_hooks as $hook ) {
             $timestamp = wp_next_scheduled( $hook );
             if ( $timestamp ) {
@@ -534,6 +543,13 @@ add_action('tta_send_scheduled_report', function () {
         $reporter->generate_and_send_report();
     }
 });
+
+/**
+ * TTS-236: Register cron hook for the chunked play_count migration.
+ * Scheduled by TTA_Activator::create_analytics_table_if_not_exists() on upgrade,
+ * and by TTA_Notices::query_total_plays() if the large-table guard trips.
+ */
+add_action('tta_migrate_play_count_column', array('\TTA\TTA_Activator', 'migrate_play_count_batch'));
 
 
 /**
