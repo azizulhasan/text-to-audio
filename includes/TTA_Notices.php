@@ -90,7 +90,7 @@ class TTA_Notices {
 		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
 			return;
 		}
-		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+		if ( defined( 'WP_CLI' ) && \WP_CLI ) {
 			return;
 		}
 
@@ -231,7 +231,7 @@ class TTA_Notices {
 			'message_callback'    => array( $this, 'get_translation_message' ),
 			'type'                => 'info',
 			'dismissible'         => true,
-			'reshow_after_days'   => 30,
+			'reshow_after_days'   => 90,
 			'buttons'             => array(
 				array(
 					'text'    => __( 'Translate Here', 'text-to-audio' ),
@@ -401,7 +401,7 @@ class TTA_Notices {
 			'message'             => $review_message,
 			'type'                => 'info',
 			'dismissible'         => true,
-			'reshow_after_days'   => 30,
+			'reshow_after_days'   => 90,
 			'condition'           => function() use ( $total_plays, $days_active, $wizard_done ) {
 				// 1. Must be an admin.
 				if ( ! current_user_can( 'manage_options' ) ) {
