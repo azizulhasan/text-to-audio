@@ -61,6 +61,21 @@ class AtlasVoice_Analytics {
 			return rest_ensure_response( $response );
 		}
 
+		// TTS-236: Server-side dedup safety net. If the same payload arrives
+		// from the same user/post within a 2-second window, ignore the duplicate.
+		// This protects against any JS-side bug that might still cause duplicate
+		// fetch/sendBeacon calls on page unload (multi-listener leak, racing
+		// fetch + beacon, single-page-app navigation, etc).
+		$dedup_hash = md5( $user_id . '|' . $post_id . '|' . wp_json_encode( $new_analytics ) );
+		$dedup_key  = 'tta_track_dedup_' . $dedup_hash;
+		if ( get_transient( $dedup_key ) ) {
+			return rest_ensure_response( array(
+				'status' => true,
+				'data'   => array( 'deduped' => true ),
+			) );
+		}
+		set_transient( $dedup_key, 1, 2 );
+
 		if ( ! get_option( 'atlasvoice_analytics_table_is_created' ) ) {
 			TTA_Activator::create_analytics_table_if_not_exists();
 		}
@@ -78,6 +93,12 @@ class AtlasVoice_Analytics {
 		if ( $existing_entry ) {
 			// Unserialize the existing analytics data
 			$existing_analytics = maybe_unserialize( $existing_entry->analytics );
+
+			// TTS-236: Capture old play count before merge so we can compute delta.
+			$old_play_count = ( is_array( $existing_analytics ) && isset( $existing_analytics['play']['count'] ) )
+				? (int) $existing_analytics['play']['count']
+				: 0;
+
 			// Sum the existing and new analytics data
 			foreach ( $new_analytics as $key => $value ) {
                 if($key === 'device_info' ) {
@@ -92,18 +113,38 @@ class AtlasVoice_Analytics {
 					$existing_analytics[ $key ] = $value;
 				}
 			}
+
+			// TTS-236: New play count after merge.
+			$new_play_count = ( is_array( $existing_analytics ) && isset( $existing_analytics['play']['count'] ) )
+				? (int) $existing_analytics['play']['count']
+				: 0;
+
+			// TTS-236: Build update args. Include play_count column only if it exists.
+			$update_data   = array(
+				'analytics'  => maybe_serialize( $existing_analytics ),
+				'other_data' => maybe_serialize( $other_data ),
+				'updated_at' => current_time( 'mysql' ),
+			);
+			$update_format = array( '%s', '%s', '%s' );
+			if ( class_exists( '\\TTA\\TTA_Activator' ) && TTA_Activator::play_count_column_exists() ) {
+				$update_data['play_count'] = $new_play_count;
+				$update_format[]           = '%d';
+			}
+
 			// Update the entry
 			$wpdb->update(
 				$table_name,
-				array(
-					'analytics'  => maybe_serialize( $existing_analytics ),
-					'other_data' => maybe_serialize( $other_data ),
-					'updated_at' => current_time( 'mysql' ),
-				),
+				$update_data,
 				array( 'id' => $existing_entry->id ),
-				array( '%s', '%s', '%s' ),
+				$update_format,
 				array( '%d' )
 			);
+
+			// TTS-236: Increment running total by the delta.
+			$delta = $new_play_count - $old_play_count;
+			if ( $delta > 0 && class_exists( '\\TTA\\TTA_Helper' ) ) {
+				TTA_Helper::increment_total_plays_counter( $delta );
+			}
 		} else {
 			// Create a new entry
             if( isset( $new_analytics['device_info'] ) ) {
@@ -111,18 +152,36 @@ class AtlasVoice_Analytics {
                 unset( $new_analytics['device_info'] );
             }
 
+			// TTS-236: New play count for insert.
+			$new_play_count = isset( $new_analytics['play']['count'] )
+				? (int) $new_analytics['play']['count']
+				: 0;
+
+			// TTS-236: Build insert args. Include play_count column only if it exists.
+			$insert_data   = array(
+				'user_id'    => $user_id,
+				'post_id'    => $post_id,
+				'analytics'  => maybe_serialize( $new_analytics ),
+				'other_data' => maybe_serialize( $other_data ),
+				'created_at' => current_time( 'mysql' ),
+				'updated_at' => current_time( 'mysql' ),
+			);
+			$insert_format = array( '%s', '%d', '%s', '%s', '%s', '%s' );
+			if ( class_exists( '\\TTA\\TTA_Activator' ) && TTA_Activator::play_count_column_exists() ) {
+				$insert_data['play_count'] = $new_play_count;
+				$insert_format[]           = '%d';
+			}
+
             $wpdb->insert(
 				$table_name,
-				array(
-					'user_id'    => $user_id,
-					'post_id'    => $post_id,
-					'analytics'  => maybe_serialize( $new_analytics ),
-					'other_data' => maybe_serialize( $other_data ),
-					'created_at' => current_time( 'mysql' ),
-					'updated_at' => current_time( 'mysql' ),
-				),
-				array( '%s', '%d', '%s', '%s', '%s', '%s' )
+				$insert_data,
+				$insert_format
 			);
+
+			// TTS-236: Increment running total by the full new count.
+			if ( $new_play_count > 0 && class_exists( '\\TTA\\TTA_Helper' ) ) {
+				TTA_Helper::increment_total_plays_counter( $new_play_count );
+			}
 		}
 
 		$response['status'] = true;
