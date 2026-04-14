@@ -919,6 +919,15 @@ class TTA_Notices {
 			if ( ! empty( $notice['legacy_option_key'] ) ) {
 				update_option( $notice['legacy_option_key'], $next_time, false );
 			}
+		} elseif ( ! $notice ) {
+			// Notices are not registered during AJAX (lazy_register_notices skips them
+			// to prevent memory exhaustion). Without the notice config we can't read
+			// reshow_after_days, so write a 90-day fallback to tta_reshow_{id}.
+			// This prevents any stale legacy option timestamp (e.g.
+			// tta_translation_notice_next_show_time) from being treated as
+			// "cooldown expired" by is_dismissed() on the very next page load,
+			// which would silently clear the dismiss meta and re-show the notice.
+			update_option( 'tta_reshow_' . $notice_id, time() + ( 90 * DAY_IN_SECONDS ), false );
 		}
 
 		wp_send_json_success( array( 'message' => __( 'Notice dismissed.', 'text-to-audio' ) ) );
