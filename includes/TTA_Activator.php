@@ -215,31 +215,186 @@ class TTA_Activator {
 
 	public static function create_analytics_table_if_not_exists() {
 
-		if ( ! self::is_table_exists() ) {
-			global $wpdb;
-			$table_name = $wpdb->prefix . 'atlasvoice_analytics';
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'atlasvoice_analytics';
+		$charset_collate = $wpdb->get_charset_collate();
 
-			$charset_collate = $wpdb->get_charset_collate();
-
-			$sql = "CREATE TABLE $table_name (
+		// TTS-236: Table schema now includes play_count column + index.
+		// dbDelta will ADD the column to existing tables without dropping data.
+		$sql = "CREATE TABLE $table_name (
 	        id mediumint(9) NOT NULL AUTO_INCREMENT,
 	        user_id VARCHAR(50) NOT NULL,
 	        post_id bigint(20) NOT NULL,
 	        analytics longtext NOT NULL,
 	        other_data longtext DEFAULT NULL,
+	        play_count int unsigned NOT NULL DEFAULT 0,
 	        created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	        updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
 	        UNIQUE KEY id (id),
 	        KEY idx_post_id (post_id),
 	        KEY idx_created_at (created_at),
-	        KEY idx_updated_at (updated_at)
+	        KEY idx_updated_at (updated_at),
+	        KEY idx_play_count (play_count)
 	    ) $charset_collate;";
 
-			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-			dbDelta( $sql );
-			update_option( 'atlasvoice_analytics_table_is_created', true, false );
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		dbDelta( $sql );
+		update_option( 'atlasvoice_analytics_table_is_created', true, false );
+
+		// TTS-236: dbDelta is inconsistent about adding columns to existing tables.
+		// As a safety net, explicitly ALTER the table to add play_count if missing.
+		// Also add the index.
+		if ( ! self::play_count_column_exists( true ) ) {
+			// Suppress errors — we'll re-check below.
+			$wpdb->hide_errors();
+			$wpdb->query( "ALTER TABLE $table_name ADD COLUMN play_count INT UNSIGNED NOT NULL DEFAULT 0" );
+			$wpdb->query( "ALTER TABLE $table_name ADD INDEX idx_play_count (play_count)" );
+			$wpdb->show_errors();
+			// Bust the cache so the next check re-reads from the DB.
+			self::play_count_column_exists( true );
 		}
 
+		// TTS-236: Schedule background migration to populate play_count column
+		// for existing rows (only if not already done).
+		if ( ! get_option( 'tta_play_count_migration_done' ) ) {
+			if ( ! wp_next_scheduled( 'tta_migrate_play_count_column' ) ) {
+				wp_schedule_single_event( time() + 60, 'tta_migrate_play_count_column' );
+			}
+		}
+	}
+
+	/**
+	 * TTS-236: Check if the play_count column exists in the analytics table.
+	 *
+	 * Uses a per-request cache. Pass $refresh=true to force a re-check
+	 * (e.g., after dbDelta has run).
+	 *
+	 * @param bool $refresh Force a fresh SHOW COLUMNS query.
+	 * @return bool
+	 */
+	public static function play_count_column_exists( $refresh = false ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'atlasvoice_analytics';
+
+		// Use a static cache per-request to avoid repeated SHOW COLUMNS queries.
+		static $exists = null;
+		if ( $exists !== null && ! $refresh ) {
+			return $exists;
+		}
+
+		if ( ! self::is_table_exists() ) {
+			$exists = false;
+			return false;
+		}
+
+		$column = $wpdb->get_results( $wpdb->prepare(
+			"SHOW COLUMNS FROM {$table} LIKE %s",
+			'play_count'
+		) );
+		$exists = ! empty( $column );
+		return $exists;
+	}
+
+	/**
+	 * TTS-236: Run one batch of the play_count migration.
+	 *
+	 * Reads 500 rows at a time via WHERE id > $last_id (index-based pagination).
+	 * For each row: unserialize analytics, extract play.count, update the
+	 * play_count column, increment the running counter.
+	 *
+	 * Scheduled via WP-Cron. Each batch schedules the next until done.
+	 *
+	 * @return void
+	 */
+	public static function migrate_play_count_batch() {
+		global $wpdb;
+		$table = $wpdb->prefix . 'atlasvoice_analytics';
+
+		if ( ! self::is_table_exists() ) {
+			update_option( 'tta_play_count_migration_done', true, false );
+			return;
+		}
+
+		// If the column doesn't exist, try to create it once more via dbDelta + ALTER.
+		if ( ! self::play_count_column_exists() ) {
+			self::create_analytics_table_if_not_exists();
+			// Re-check (force refresh — the static cache may have stale false).
+			if ( ! self::play_count_column_exists( true ) ) {
+				// Migration impossible without the column. Still populate the
+				// counter via PHP scan (guarded by size).
+				$row_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+				$max_rows  = (int) apply_filters( 'tta_total_plays_scan_row_limit', 5000 );
+				if ( $row_count <= $max_rows ) {
+					$rows  = $wpdb->get_col( "SELECT analytics FROM {$table}" );
+					$total = 0;
+					if ( $rows ) {
+						foreach ( $rows as $raw ) {
+							$data = maybe_unserialize( $raw );
+							if ( is_array( $data ) && isset( $data['play']['count'] ) ) {
+								$total += (int) $data['play']['count'];
+							}
+						}
+					}
+					update_option( 'tta_total_plays_counter', $total, false );
+					update_option( 'tta_total_plays_fallback', $total, false );
+				}
+				update_option( 'tta_play_count_migration_done', true, false );
+				return;
+			}
+		}
+
+		$last_id    = (int) get_option( 'tta_play_count_migration_last_id', 0 );
+		$batch_size = (int) apply_filters( 'tta_play_count_migration_batch_size', 500 );
+
+		// Read next chunk by ID (not OFFSET — OFFSET is O(N) on large tables).
+		$rows = $wpdb->get_results( $wpdb->prepare(
+			"SELECT id, analytics FROM {$table} WHERE id > %d AND play_count = 0 ORDER BY id ASC LIMIT %d",
+			$last_id,
+			$batch_size
+		) );
+
+		if ( empty( $rows ) ) {
+			// Done. Reconcile the running counter with the column sum.
+			$total = (int) $wpdb->get_var( "SELECT COALESCE(SUM(play_count), 0) FROM {$table}" );
+			update_option( 'tta_total_plays_counter', $total, false );
+			update_option( 'tta_total_plays_fallback', $total, false );
+			update_option( 'tta_play_count_migration_done', true, false );
+			delete_option( 'tta_play_count_migration_last_id' );
+			delete_transient( 'tta_milestone_total_plays' );
+			return;
+		}
+
+		$batch_total     = 0;
+		$max_id_in_batch = $last_id;
+		foreach ( $rows as $row ) {
+			$data  = maybe_unserialize( $row->analytics );
+			$count = ( is_array( $data ) && isset( $data['play']['count'] ) )
+				? (int) $data['play']['count']
+				: 0;
+
+			$wpdb->update(
+				$table,
+				array( 'play_count' => $count ),
+				array( 'id' => $row->id ),
+				array( '%d' ),
+				array( '%d' )
+			);
+
+			$batch_total += $count;
+			$max_id_in_batch = max( $max_id_in_batch, (int) $row->id );
+		}
+
+		update_option( 'tta_play_count_migration_last_id', $max_id_in_batch, false );
+
+		// Increment the running counter by this batch's total.
+		if ( class_exists( '\\TTA\\TTA_Helper' ) && $batch_total > 0 ) {
+			TTA_Helper::increment_total_plays_counter( $batch_total );
+		}
+
+		// Schedule the next batch.
+		if ( ! wp_next_scheduled( 'tta_migrate_play_count_column' ) ) {
+			wp_schedule_single_event( time() + 30, 'tta_migrate_play_count_column' );
+		}
 	}
 
 	/**

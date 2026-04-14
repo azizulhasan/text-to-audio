@@ -22,8 +22,19 @@ class AtlasVoiceAnalytics {
             '75_percent': false
         };
 
-        // Bind the event listeners for beforeunload and unload
-        window.addEventListener('beforeunload', this.sendSessionData.bind(this));
+        // TTS-236: Idempotent beforeunload listener.
+        // Multiple analytics instances used to attach their own listeners,
+        // causing N parallel POSTs to /track on page unload. Now we attach
+        // exactly ONE global listener that fires the most recent active instance.
+        window.__tta_active_analytics = this;
+        if (!window.__tta_beforeunload_attached) {
+            window.__tta_beforeunload_attached = true;
+            window.addEventListener('beforeunload', function () {
+                if (window.__tta_active_analytics) {
+                    window.__tta_active_analytics.sendSessionData();
+                }
+            });
+        }
 
         this.trackDeviceInfo()
     }
