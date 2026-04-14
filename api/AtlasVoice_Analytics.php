@@ -61,6 +61,21 @@ class AtlasVoice_Analytics {
 			return rest_ensure_response( $response );
 		}
 
+		// TTS-236: Server-side dedup safety net. If the same payload arrives
+		// from the same user/post within a 2-second window, ignore the duplicate.
+		// This protects against any JS-side bug that might still cause duplicate
+		// fetch/sendBeacon calls on page unload (multi-listener leak, racing
+		// fetch + beacon, single-page-app navigation, etc).
+		$dedup_hash = md5( $user_id . '|' . $post_id . '|' . wp_json_encode( $new_analytics ) );
+		$dedup_key  = 'tta_track_dedup_' . $dedup_hash;
+		if ( get_transient( $dedup_key ) ) {
+			return rest_ensure_response( array(
+				'status' => true,
+				'data'   => array( 'deduped' => true ),
+			) );
+		}
+		set_transient( $dedup_key, 1, 2 );
+
 		if ( ! get_option( 'atlasvoice_analytics_table_is_created' ) ) {
 			TTA_Activator::create_analytics_table_if_not_exists();
 		}
