@@ -32,6 +32,13 @@ class TTA_Notices {
 	private $notices = array();
 
 	/**
+	 * TTS-236: Flag to prevent double registration.
+	 *
+	 * @var bool
+	 */
+	private $notices_registered = false;
+
+	/**
 	 * Get singleton instance.
 	 *
 	 * @return TTA_Notices
@@ -57,7 +64,38 @@ class TTA_Notices {
 		add_action( 'wp_ajax_tta_hide_notice', array( $this, 'ajax_dismiss_notice_legacy' ) );
 		add_action( 'wp_ajax_tta_download_translations', array( $this, 'ajax_download_translations' ) );
 
+		// TTS-236: Lazy-register notices on admin_init so REST/AJAX/cron requests
+		// don't trigger expensive analytics queries they don't need. This dramatically
+		// reduces the scan trigger rate on large sites with many analytics rows.
+		add_action( 'admin_init', array( $this, 'lazy_register_notices' ), 20 );
+	}
+
+	/**
+	 * TTS-236: Lazily register notices only on actual HTML admin page loads.
+	 *
+	 * Notices are not needed on AJAX, REST, or cron requests — but the previous
+	 * code ran the full analytics scan on every single admin request, which
+	 * caused memory exhaustion on sites with large analytics tables
+	 * (reported by expose-news.com with ~50k+ analytics rows).
+	 */
+	public function lazy_register_notices() {
+		if ( $this->notices_registered ) {
+			return;
+		}
+
+		// Skip on any request type that doesn't render admin notices.
+		if ( wp_doing_ajax() || wp_doing_cron() ) {
+			return;
+		}
+		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+			return;
+		}
+		if ( defined( 'WP_CLI' ) && \WP_CLI ) {
+			return;
+		}
+
 		$this->register_notices();
+		$this->notices_registered = true;
 	}
 
 	/**
@@ -193,7 +231,7 @@ class TTA_Notices {
 			'message_callback'    => array( $this, 'get_translation_message' ),
 			'type'                => 'info',
 			'dismissible'         => true,
-			'reshow_after_days'   => 30,
+			'reshow_after_days'   => 90,
 			'buttons'             => array(
 				array(
 					'text'    => __( 'Translate Here', 'text-to-audio' ),
@@ -363,7 +401,7 @@ class TTA_Notices {
 			'message'             => $review_message,
 			'type'                => 'info',
 			'dismissible'         => true,
-			'reshow_after_days'   => 30,
+			'reshow_after_days'   => 90,
 			'condition'           => function() use ( $total_plays, $days_active, $wizard_done ) {
 				// 1. Must be an admin.
 				if ( ! current_user_can( 'manage_options' ) ) {
@@ -881,6 +919,15 @@ class TTA_Notices {
 			if ( ! empty( $notice['legacy_option_key'] ) ) {
 				update_option( $notice['legacy_option_key'], $next_time, false );
 			}
+		} elseif ( ! $notice ) {
+			// Notices are not registered during AJAX (lazy_register_notices skips them
+			// to prevent memory exhaustion). Without the notice config we can't read
+			// reshow_after_days, so write a 90-day fallback to tta_reshow_{id}.
+			// This prevents any stale legacy option timestamp (e.g.
+			// tta_translation_notice_next_show_time) from being treated as
+			// "cooldown expired" by is_dismissed() on the very next page load,
+			// which would silently clear the dismiss meta and re-show the notice.
+			update_option( 'tta_reshow_' . $notice_id, time() + ( 90 * DAY_IN_SECONDS ), false );
 		}
 
 		wp_send_json_success( array( 'message' => __( 'Notice dismissed.', 'text-to-audio' ) ) );
@@ -1296,7 +1343,13 @@ class TTA_Notices {
 	}
 
 	/**
-	 * Get total play count with 1-hour transient cache.
+	 * Get total play count with a day-long transient cache.
+	 *
+	 * TTS-236: Falls through a chain of increasingly expensive strategies:
+	 *   1. Running counter (O(1) option read, updated on every play write)
+	 *   2. SUM(play_count) via indexed column (O(rows) DB-side aggregation)
+	 *   3. Row-count-guarded PHP scan (only on small tables)
+	 *   4. Last-known fallback value (always safe, never crashes)
 	 *
 	 * @return int
 	 */
@@ -1308,16 +1361,54 @@ class TTA_Notices {
 			return (int) $cached;
 		}
 
+		// TTS-236: Skip the expensive query entirely if every notice that
+		// depends on the play count has already been dismissed or reached.
+		if ( $this->all_play_count_notices_dismissed() ) {
+			set_transient( $cache_key, 0, DAY_IN_SECONDS );
+			return 0;
+		}
+
 		$total = $this->query_total_plays();
-		set_transient( $cache_key, $total, HOUR_IN_SECONDS );
+		// TTS-236: Longer TTL — counter writes invalidate it explicitly,
+		// so we don't need hourly refresh.
+		set_transient( $cache_key, $total, DAY_IN_SECONDS );
 
 		return $total;
 	}
 
 	/**
+	 * TTS-236: Check if all notices that depend on play count are already dismissed.
+	 * If yes, we can skip the expensive total-plays query entirely.
+	 *
+	 * @return bool
+	 */
+	private function all_play_count_notices_dismissed() {
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			return false;
+		}
+
+		// Review notice — check per-user dismiss (the review notice is dismissible).
+		$review_dismissed = (bool) get_user_meta( $user_id, 'tta_dismiss_review', true );
+		if ( ! $review_dismissed ) {
+			return false;
+		}
+
+		// All milestones reached or dismissed globally?
+		$milestones = $this->get_milestones();
+		$reached    = (array) get_option( 'tta_milestones_reached', array() );
+		foreach ( $milestones as $config ) {
+			if ( ! in_array( $config['id'], $reached, true ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Query total plays from the atlasvoice_analytics table.
 	 *
-	 * The analytics column stores serialized arrays with play.count values.
+	 * TTS-236: Uses multiple strategies with progressive fallback. Never crashes.
 	 *
 	 * @return int
 	 */
@@ -1335,12 +1426,39 @@ class TTA_Notices {
 			return 0;
 		}
 
-		// The analytics column stores serialized data; we need to unserialize
-		// and sum play counts in PHP (same approach as TTA_Dashboard_Widget).
-		$rows = $wpdb->get_col(
-			"SELECT analytics FROM {$table_name}"
-		);
+		// TTS-236 Priority 1: running counter (O(1) option read).
+		if ( class_exists( '\\TTA\\TTA_Helper' ) ) {
+			$running = TTA_Helper::get_total_plays_counter();
+			if ( $running !== null ) {
+				return (int) $running;
+			}
+		}
 
+		// TTS-236 Priority 2: SUM(play_count) via indexed column (DB-side).
+		if ( class_exists( '\\TTA\\TTA_Activator' ) && TTA_Activator::play_count_column_exists() ) {
+			$total = (int) $wpdb->get_var( "SELECT COALESCE(SUM(play_count), 0) FROM {$table_name}" );
+			// Cache it as the running counter so next call is O(1).
+			update_option( 'tta_total_plays_counter', $total, false );
+			update_option( 'tta_total_plays_fallback', $total, false );
+			return $total;
+		}
+
+		// TTS-236 Priority 3: Row-count-guarded PHP scan.
+		// On large tables we skip the scan entirely to prevent memory exhaustion.
+		$row_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table_name}" );
+		$max_rows  = (int) apply_filters( 'tta_total_plays_scan_row_limit', 5000 );
+
+		if ( $row_count > $max_rows ) {
+			// Schedule background migration to populate the counter/column.
+			if ( ! wp_next_scheduled( 'tta_migrate_play_count_column' ) ) {
+				wp_schedule_single_event( time() + 60, 'tta_migrate_play_count_column' );
+			}
+			// TTS-236 Priority 4: Last-known fallback value.
+			return (int) get_option( 'tta_total_plays_fallback', 0 );
+		}
+
+		// Small site — safe to scan in PHP.
+		$rows  = $wpdb->get_col( "SELECT analytics FROM {$table_name}" );
 		$total = 0;
 		if ( $rows ) {
 			foreach ( $rows as $raw ) {
@@ -1350,6 +1468,10 @@ class TTA_Notices {
 				}
 			}
 		}
+
+		// Persist for future fallbacks.
+		update_option( 'tta_total_plays_counter', $total, false );
+		update_option( 'tta_total_plays_fallback', $total, false );
 
 		return $total;
 	}
