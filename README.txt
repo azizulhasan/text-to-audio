@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1.14
+Stable tag: 2.1.15
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -352,6 +352,11 @@ Please report security bugs through the [Patchstack Vulnerability Disclosure Pro
 ### TRANSLATION REQUEST
 We are looking for people to help translate this plugin. If you can help, we would love to hear from you.
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
+
+
+= 2.1.15 ( 15 Apr 2026 ) =
+Fixed : Memory exhausted issue fixed.
+Fixed : Double track issue fixed.
 
 
 = 2.1.14 ( 06 Apr 2026 ) =
@@ -827,6 +832,7 @@ Improved :  Pro and free version performance improved.
 
 == Upgrade Notice ==
 
-= 2.1.14 =
-81 language support, Polylang compatibility, content extraction fixes, and improved ACF field ordering.
+= 2.1.15 =
+Fixed : Memory exhausted issue fixed.
+Fixed : Double track issue fixed.
 
