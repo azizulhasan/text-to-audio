@@ -25,6 +25,103 @@ namespace TTA;
 class TTA_Helper
 {
 
+    /**
+     * TTS-236: Atomically increment the running total plays counter.
+     *
+     * Used as the source of truth for notices/dashboards instead of scanning
+     * the analytics table. Uses direct SQL for atomicity under concurrent writes.
+     *
+     * @param int $delta Number of new plays to add to the total.
+     * @return void
+     */
+    public static function increment_total_plays_counter( $delta ) {
+        $delta = (int) $delta;
+        if ( $delta <= 0 ) {
+            return;
+        }
+
+        global $wpdb;
+        $option_name = 'tta_total_plays_counter';
+
+        // Check if the option exists.
+        $exists = $wpdb->get_var( $wpdb->prepare(
+            "SELECT option_id FROM {$wpdb->options} WHERE option_name = %s LIMIT 1",
+            $option_name
+        ) );
+
+        if ( $exists === null ) {
+            // First write — initialize. Migration will reconcile later.
+            add_option( $option_name, (string) $delta, '', 'no' );
+        } else {
+            // Atomic increment via direct SQL. This is safe under concurrent writes
+            // because MySQL guarantees atomicity of a single UPDATE statement.
+            $wpdb->query( $wpdb->prepare(
+                "UPDATE {$wpdb->options} SET option_value = CAST(option_value AS UNSIGNED) + %d WHERE option_name = %s",
+                $delta,
+                $option_name
+            ) );
+            // Bust the WP object cache so get_option() reads the fresh value.
+            wp_cache_delete( $option_name, 'options' );
+            wp_cache_delete( 'alloptions', 'options' );
+        }
+
+        // Invalidate the notice transient so the next admin load sees the fresh value.
+        delete_transient( 'tta_milestone_total_plays' );
+    }
+
+    /**
+     * TTS-236: Read the current running total plays counter.
+     *
+     * @return int|null Counter value, or null if not initialized yet.
+     */
+    public static function get_total_plays_counter() {
+        $value = get_option( 'tta_total_plays_counter', null );
+        if ( $value === null || $value === false ) {
+            return null;
+        }
+        return (int) $value;
+    }
+
+    /**
+     * TTS-236: Run a potentially-expensive query with memory and row-count guards.
+     *
+     * If the table is larger than $max_rows, or PHP is already using > 50% of its
+     * memory limit, returns $fallback instead of running $callback.
+     *
+     * @param string   $table    Full table name (with prefix).
+     * @param callable $callback Function that runs the actual query.
+     * @param mixed    $fallback Value to return if guards trip.
+     * @param int      $max_rows Maximum row count allowed before skipping.
+     * @return mixed
+     */
+    public static function safe_large_query( $table, $callback, $fallback = null, $max_rows = 10000 ) {
+        global $wpdb;
+
+        // Memory guard — don't start if we're already at 50% of the limit.
+        $limit_raw = ini_get( 'memory_limit' );
+        if ( $limit_raw && function_exists( 'wp_convert_hr_to_bytes' ) ) {
+            $limit_bytes = wp_convert_hr_to_bytes( $limit_raw );
+            if ( $limit_bytes > 0 && memory_get_usage( true ) > ( $limit_bytes * 0.5 ) ) {
+                return $fallback;
+            }
+        }
+
+        // Row-count guard.
+        $count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+        if ( $count > $max_rows ) {
+            return $fallback;
+        }
+
+        try {
+            return $callback();
+        } catch ( \Throwable $e ) {
+            if ( function_exists( 'error_log' ) ) {
+                error_log( 'TTA safe_large_query failed: ' . $e->getMessage() );
+            }
+            return $fallback;
+        }
+    }
+
     public static function is_exluded_by_terms($post_terms, $excluded_terms, $term_type = 'tag')
     {
         $terms = [];

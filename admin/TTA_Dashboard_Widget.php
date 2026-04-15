@@ -164,80 +164,177 @@ class TTA_Dashboard_Widget {
 		$today      = current_time( 'Y-m-d' );
 		$is_pro     = TTA_Helper::is_pro_active();
 
-		// --- Today's stats ---
-		$today_rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT post_id, analytics FROM {$table_name} WHERE DATE(updated_at) = %s",
-				$today
-			)
-		);
-
 		$plays_today          = 0;
 		$views_today          = 0;
 		$listen_seconds_today = 0;
-		$post_plays           = []; // post_id => total plays
+		$top_post_title       = '';
+		$chart                = [];
 
-		if ( $today_rows ) {
-			foreach ( $today_rows as $row ) {
-				$analytics = maybe_unserialize( $row->analytics );
-				if ( ! is_array( $analytics ) ) {
-					continue;
-				}
+		// TTS-236: Prefer DB-side aggregation via the indexed play_count column.
+		// Falls back to the old PHP scan only on small tables where it's safe.
+		$has_play_count_column = class_exists( '\\TTA\\TTA_Activator' )
+			&& \TTA\TTA_Activator::play_count_column_exists();
 
-				$play_count = isset( $analytics['play']['count'] ) ? (int) $analytics['play']['count'] : 0;
-				$init_count = isset( $analytics['init']['count'] ) ? (int) $analytics['init']['count'] : 0;
-				$time_count = isset( $analytics['time']['count'] ) ? (int) $analytics['time']['count'] : 0;
+		if ( $has_play_count_column ) {
+			// Plays today — one query, one value, zero PHP memory.
+			$plays_today = (int) $wpdb->get_var( $wpdb->prepare(
+				"SELECT COALESCE(SUM(play_count), 0) FROM {$table_name} WHERE DATE(updated_at) = %s",
+				$today
+			) );
 
-				$plays_today          += $play_count;
-				$views_today          += $init_count;
-				$listen_seconds_today += $time_count;
-
-				$pid = (int) $row->post_id;
-				if ( ! isset( $post_plays[ $pid ] ) ) {
-					$post_plays[ $pid ] = 0;
-				}
-				$post_plays[ $pid ] += $play_count;
-			}
-		}
-
-		// Top post (Pro only)
-		$top_post_title = '';
-		if ( $is_pro && ! empty( $post_plays ) ) {
-			arsort( $post_plays );
-			$top_post_id    = key( $post_plays );
-			$top_post_title = get_the_title( $top_post_id );
-			if ( empty( $top_post_title ) ) {
-				$top_post_title = '#' . $top_post_id;
-			}
-		}
-
-		// --- 7-day chart ---
-		$chart = [];
-		for ( $i = 6; $i >= 0; $i-- ) {
-			$date  = gmdate( 'Y-m-d', strtotime( "-{$i} days", strtotime( current_time( 'Y-m-d' ) ) ) );
-			$label = date_i18n( 'D', strtotime( $date ) );
-
-			$day_rows = $wpdb->get_results(
-				$wpdb->prepare(
-					"SELECT analytics FROM {$table_name} WHERE DATE(updated_at) = %s",
-					$date
-				)
-			);
-
-			$day_plays = 0;
-			if ( $day_rows ) {
-				foreach ( $day_rows as $row ) {
-					$analytics = maybe_unserialize( $row->analytics );
-					if ( is_array( $analytics ) && isset( $analytics['play']['count'] ) ) {
-						$day_plays += (int) $analytics['play']['count'];
+			// Top post today (Pro only) — DB-side GROUP BY.
+			if ( $is_pro ) {
+				$top = $wpdb->get_row( $wpdb->prepare(
+					"SELECT post_id, SUM(play_count) AS total_plays
+					 FROM {$table_name}
+					 WHERE DATE(updated_at) = %s
+					 GROUP BY post_id
+					 ORDER BY total_plays DESC
+					 LIMIT 1",
+					$today
+				) );
+				if ( $top && $top->total_plays > 0 ) {
+					$top_post_title = get_the_title( (int) $top->post_id );
+					if ( empty( $top_post_title ) ) {
+						$top_post_title = '#' . (int) $top->post_id;
 					}
 				}
 			}
 
-			$chart[] = [
-				'label' => $label,
-				'plays' => $day_plays,
-			];
+			// 7-day chart — one query, GROUP BY date.
+			$chart_start = gmdate( 'Y-m-d', strtotime( '-6 days', strtotime( current_time( 'Y-m-d' ) ) ) );
+			$chart_rows  = $wpdb->get_results( $wpdb->prepare(
+				"SELECT DATE(updated_at) AS day, SUM(play_count) AS plays
+				 FROM {$table_name}
+				 WHERE DATE(updated_at) >= %s
+				 GROUP BY DATE(updated_at)
+				 ORDER BY day ASC",
+				$chart_start
+			) );
+			$chart_map = [];
+			if ( $chart_rows ) {
+				foreach ( $chart_rows as $r ) {
+					$chart_map[ $r->day ] = (int) $r->plays;
+				}
+			}
+			for ( $i = 6; $i >= 0; $i-- ) {
+				$date  = gmdate( 'Y-m-d', strtotime( "-{$i} days", strtotime( current_time( 'Y-m-d' ) ) ) );
+				$label = date_i18n( 'D', strtotime( $date ) );
+				$chart[] = [
+					'label' => $label,
+					'plays' => isset( $chart_map[ $date ] ) ? (int) $chart_map[ $date ] : 0,
+				];
+			}
+
+			// views_today and listen_seconds_today are still in the serialized column.
+			// Guard with a row-count check to prevent memory exhaustion.
+			$today_row_count = (int) $wpdb->get_var( $wpdb->prepare(
+				"SELECT COUNT(*) FROM {$table_name} WHERE DATE(updated_at) = %s",
+				$today
+			) );
+			$max_rows = (int) apply_filters( 'tta_dashboard_widget_row_limit', 5000 );
+			if ( $today_row_count <= $max_rows ) {
+				$today_rows = $wpdb->get_results( $wpdb->prepare(
+					"SELECT analytics FROM {$table_name} WHERE DATE(updated_at) = %s",
+					$today
+				) );
+				if ( $today_rows ) {
+					foreach ( $today_rows as $row ) {
+						$analytics = maybe_unserialize( $row->analytics );
+						if ( ! is_array( $analytics ) ) {
+							continue;
+						}
+						$views_today          += isset( $analytics['init']['count'] ) ? (int) $analytics['init']['count'] : 0;
+						$listen_seconds_today += isset( $analytics['time']['count'] ) ? (int) $analytics['time']['count'] : 0;
+					}
+				}
+			}
+		} else {
+			// TTS-236: Fallback for pre-migration tables — row-count guarded PHP scan.
+			$today_row_count = (int) $wpdb->get_var( $wpdb->prepare(
+				"SELECT COUNT(*) FROM {$table_name} WHERE DATE(updated_at) = %s",
+				$today
+			) );
+			$max_rows = (int) apply_filters( 'tta_dashboard_widget_row_limit', 5000 );
+
+			if ( $today_row_count > $max_rows ) {
+				// Too many rows — skip the scan to prevent memory exhaustion.
+				// Schedule migration so the column becomes available next time.
+				if ( ! wp_next_scheduled( 'tta_migrate_play_count_column' ) ) {
+					wp_schedule_single_event( time() + 60, 'tta_migrate_play_count_column' );
+				}
+			} else {
+				$today_rows = $wpdb->get_results( $wpdb->prepare(
+					"SELECT post_id, analytics FROM {$table_name} WHERE DATE(updated_at) = %s",
+					$today
+				) );
+
+				$post_plays = [];
+
+				if ( $today_rows ) {
+					foreach ( $today_rows as $row ) {
+						$analytics = maybe_unserialize( $row->analytics );
+						if ( ! is_array( $analytics ) ) {
+							continue;
+						}
+
+						$play_count = isset( $analytics['play']['count'] ) ? (int) $analytics['play']['count'] : 0;
+						$init_count = isset( $analytics['init']['count'] ) ? (int) $analytics['init']['count'] : 0;
+						$time_count = isset( $analytics['time']['count'] ) ? (int) $analytics['time']['count'] : 0;
+
+						$plays_today          += $play_count;
+						$views_today          += $init_count;
+						$listen_seconds_today += $time_count;
+
+						$pid = (int) $row->post_id;
+						if ( ! isset( $post_plays[ $pid ] ) ) {
+							$post_plays[ $pid ] = 0;
+						}
+						$post_plays[ $pid ] += $play_count;
+					}
+				}
+
+				if ( $is_pro && ! empty( $post_plays ) ) {
+					arsort( $post_plays );
+					$top_post_id    = key( $post_plays );
+					$top_post_title = get_the_title( $top_post_id );
+					if ( empty( $top_post_title ) ) {
+						$top_post_title = '#' . $top_post_id;
+					}
+				}
+			}
+
+			// 7-day chart (old path) — skip on large tables.
+			for ( $i = 6; $i >= 0; $i-- ) {
+				$date  = gmdate( 'Y-m-d', strtotime( "-{$i} days", strtotime( current_time( 'Y-m-d' ) ) ) );
+				$label = date_i18n( 'D', strtotime( $date ) );
+
+				$day_plays = 0;
+				$day_row_count = (int) $wpdb->get_var( $wpdb->prepare(
+					"SELECT COUNT(*) FROM {$table_name} WHERE DATE(updated_at) = %s",
+					$date
+				) );
+
+				if ( $day_row_count <= $max_rows ) {
+					$day_rows = $wpdb->get_results( $wpdb->prepare(
+						"SELECT analytics FROM {$table_name} WHERE DATE(updated_at) = %s",
+						$date
+					) );
+					if ( $day_rows ) {
+						foreach ( $day_rows as $row ) {
+							$analytics = maybe_unserialize( $row->analytics );
+							if ( is_array( $analytics ) && isset( $analytics['play']['count'] ) ) {
+								$day_plays += (int) $analytics['play']['count'];
+							}
+						}
+					}
+				}
+
+				$chart[] = [
+					'label' => $label,
+					'plays' => $day_plays,
+				];
+			}
 		}
 
 		$data = [

@@ -901,8 +901,6 @@ function set_initial_button_texts($content_read_time)
 function get_player_id()
 {
 
-    global $post;
-
     $customize_settings = (array)TTA_Helper::tts_get_settings('customize');
     $customize_settings['buttonSettings'] = isset($customize_settings['buttonSettings']) ? (array)$customize_settings['buttonSettings'] : [
         'id' => 1,
