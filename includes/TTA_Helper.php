@@ -512,7 +512,7 @@ class TTA_Helper
          * option of settings page. Then post title of the post
          * will be the file name.
          */
-        if (!$title) {
+        if (!$title && $post) {
             $title = $post->post_title;
         }
         /**
