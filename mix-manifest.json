@@ -5,7 +5,7 @@
     "/admin/demos/player2/js/TextToSpeechProDemo.min.js": "/admin/demos/player2/js/TextToSpeechProDemo.min.js",
     "/admin/js/build/text-to-audio-pro-button.min.js": "/admin/js/build/text-to-audio-pro-button.min.js",
     "/admin/js/build/tts-css-selectors.min.js": "/admin/js/build/tts-css-selectors.min.js",
-    "/admin/js/build/tts-bulk-mp3-file.min.js": "/admin/js/build/tts-bulk-mp3-file.min.js",
+    "/admin/js/build/tts-bulk-mp3-file-ui.min.js": "/admin/js/build/tts-bulk-mp3-file-ui.min.js",
     "/admin/js/build/TextToSpeech.min.js": "/admin/js/build/TextToSpeech.min.js",
     "/admin/js/build/text-to-audio-button.min.js": "/admin/js/build/text-to-audio-button.min.js",
     "/admin/js/build/AtlasVoiceAnalytics.min.js": "/admin/js/build/AtlasVoiceAnalytics.min.js",
