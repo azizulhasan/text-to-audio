@@ -736,7 +736,7 @@ class TTA_Helper
                             $url = $gcs_new_signed_url;
                         }
                     }
-                } elseif (get_option('tts_is_backup_mp3_file') == 'false' && strtolower($language_code) == strtolower($file_url_key) && strpos($url, 'https://storage.googleapis.com') !== false) {
+                } elseif (get_option('tts_is_backup_mp3_file') == 'false' && strtolower($language_code) == strtolower($file_url_key) && strpos($url, 'storage.googleapis.com') !== false) {
                     $should_update_urls = true;
                 }
 
