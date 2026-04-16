@@ -13,7 +13,7 @@ mix.js('admin/demos/player2/js/TextToSpeechProDemo.js', 'admin/demos/player2/js/
 
 mix.js('src/dashboard/button.js', 'admin/js/build/text-to-audio-pro-button.min.js').react();
 mix.js('src/dashboard/css-selectors.js', 'admin/js/build/tts-css-selectors.min.js').react();
-mix.js('src/dashboard/bulk-mp3-file.js', 'admin/js/build/tts-bulk-mp3-file.min.js').react();
+mix.js('src/dashboard/bulk-mp3-file-ui.js', 'admin/js/build/tts-bulk-mp3-file-ui.min.js').react();
 
 
 
