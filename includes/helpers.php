@@ -64,6 +64,13 @@ function tta_clean_content($text)
 
     $text = apply_filters('tta_before_clean_content', $text);
 
+    /**
+     * TTS-239: Strip <figure>, <figcaption>, <aside> (with inner text) before
+     * wp_strip_all_tags, which would otherwise keep caption/aside text and bake
+     * it into generated audio for cloud providers (ChatGPT/GCTTS/ElevenLabs).
+     */
+    $text = preg_replace('#<(figure|figcaption|aside)\b[^>]*>.*?</\1>#is', '', $text);
+
     // TTS-235: Remove elements matching exclude CSS selectors before stripping tags.
     // When DOM reading is on, the JS path handles this via querySelectorAll().remove().
     // When DOM reading is off, we convert CSS selectors to regex and strip matching

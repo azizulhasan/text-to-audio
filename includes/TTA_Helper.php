@@ -704,7 +704,8 @@ class TTA_Helper
          * TTS-195: eric.corbett2@gmail.com TTA_Helper.php:556 issue fixed
          */
         if (get_post_meta($post->ID, 'tts_is_mp3_file_url_exists', true) && !empty($final_mp3_file_ulrs)) {
-            return apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls);
+            // TTS-239: append ?v={filemtime} so Cloudflare / CDN edge caches re-fetch after regeneration.
+            return self::append_cache_buster_to_urls(apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls));
         }
 
         if (isset($mp3_file_urls[$file_url_key]) && $mp3_file_urls[$file_url_key]) {
@@ -736,7 +737,7 @@ class TTA_Helper
                             $url = $gcs_new_signed_url;
                         }
                     }
-                } elseif (get_option('tts_is_backup_mp3_file') == 'false' && strtolower($language_code) == strtolower($file_url_key) && strpos($url, 'https://storage.googleapis.com') !== false) {
+                } elseif (get_option('tts_is_backup_mp3_file') == 'false' && strtolower($language_code) == strtolower($file_url_key) && strpos($url, 'storage.googleapis.com') !== false) {
                     $should_update_urls = true;
                 }
 
@@ -788,7 +789,57 @@ class TTA_Helper
             update_post_meta($post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs);
         }
 
-        return apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls);
+        // TTS-239: append ?v={filemtime} so Cloudflare / CDN edge caches re-fetch after regeneration.
+        return self::append_cache_buster_to_urls(apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls));
+    }
+
+    /**
+     * TTS-239: Append a `?v={filemtime}` cache-busting query to local MP3 URLs
+     * so CDNs (e.g. Cloudflare) re-fetch when the plugin regenerates the file
+     * at the same path. Without this, Cloudflare can serve a stale edge-cached
+     * copy for up to a year (origin Cache-Control: max-age=31536000), producing
+     * the symptom where the in-page player and the file-manager download differ.
+     * Remote URLs (GCS signed URLs and anything outside wp-uploads) pass through
+     * unchanged since they manage their own cache/expiry.
+     *
+     * @param mixed $urls
+     *
+     * @return mixed
+     */
+    public static function append_cache_buster_to_urls($urls)
+    {
+        if (!is_array($urls) || empty($urls)) {
+            return $urls;
+        }
+        $upload  = wp_upload_dir();
+        $baseurl = isset($upload['baseurl']) ? $upload['baseurl'] : '';
+        $basedir = isset($upload['basedir']) ? $upload['basedir'] : '';
+        if (!$baseurl || !$basedir) {
+            return $urls;
+        }
+        foreach ($urls as $key => $url) {
+            if (!is_string($url) || !$url) {
+                continue;
+            }
+            if (strpos($url, 'storage.googleapis.com') !== false) {
+                continue;
+            }
+            if (strpos($url, $baseurl) !== 0) {
+                continue;
+            }
+            $clean_url = strtok($url, '?');
+            $path      = str_replace($baseurl, $basedir, $clean_url);
+            if (!file_exists($path)) {
+                continue;
+            }
+            $mtime = @filemtime($path);
+            if (!$mtime) {
+                continue;
+            }
+            $sep        = (strpos($url, '?') !== false) ? '&' : '?';
+            $urls[$key] = $url . $sep . 'v=' . $mtime;
+        }
+        return $urls;
     }
 
     /**
