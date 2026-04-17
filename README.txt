@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1.15
+Stable tag: 2.1.16
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -353,6 +353,12 @@ Please report security bugs through the [Patchstack Vulnerability Disclosure Pro
 We are looking for people to help translate this plugin. If you can help, we would love to hear from you.
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
+
+= 2.1.16 ( 17 Apr 2026 ) =
+Fixed : Figure / figcaption / aside text no longer leaks into generated audio.
+Fixed : Stale Cloudflare MP3 cache — audio URLs now include filemtime cache-buster.
+Fixed : Cloudflare Rocket Loader breaking lazy-loaded dashboard chunks.
+Added : Maintenance tab (Pro-only) for cleaning up orphan per-batch temp MP3 files.
 
 = 2.1.15 ( 15 Apr 2026 ) =
 Fixed : Memory exhausted issue fixed.
@@ -831,6 +837,9 @@ Improved :  Pro and free version performance improved.
 
 
 == Upgrade Notice ==
+
+= 2.1.16 =
+Fixes figure/figcaption text leaking into audio, Cloudflare stale MP3 cache, and Rocket Loader breaking dashboard chunks. Adds Maintenance tab (Pro) for orphan temp-file cleanup.
 
 = 2.1.15 =
 Fixed : Memory exhausted issue fixed.
