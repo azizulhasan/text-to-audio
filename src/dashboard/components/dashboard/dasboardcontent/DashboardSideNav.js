@@ -73,6 +73,15 @@ export default function DashboardSideNav({ isProVersion }) {
               </div>
               Aliases
             </NavLink>
+            {/* TTS-239: Maintenance tab — Pro-only orphan temp-file cleanup. */}
+            {isProVersion && (
+              <NavLink className={getNavLinkClass} to={"/maintenance"}>
+                <div className="sb-nav-link-icon">
+                  <span className="dashicons dashicons-admin-tools"></span>
+                </div>
+                Maintenance
+              </NavLink>
+            )}
             <NavLink className={getNavLinkClass} to={"/faq"}>
               <div className="sb-nav-link-icon">
                 <span className="dashicons dashicons-media-document"></span>

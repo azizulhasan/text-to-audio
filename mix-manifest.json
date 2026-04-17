@@ -18,5 +18,6 @@
     "/chunks/tab-integrations.chunk.js": "/chunks/tab-integrations.chunk.js",
     "/chunks/tab-compatibility.chunk.js": "/chunks/tab-compatibility.chunk.js",
     "/chunks/tab-aliases.chunk.js": "/chunks/tab-aliases.chunk.js",
-    "/chunks/tab-plugins.chunk.js": "/chunks/tab-plugins.chunk.js"
+    "/chunks/tab-plugins.chunk.js": "/chunks/tab-plugins.chunk.js",
+    "/chunks/tab-maintenance.chunk.js": "/chunks/tab-maintenance.chunk.js"
 }
