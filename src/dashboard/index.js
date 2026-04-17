@@ -1,3 +1,22 @@
+// TTS-239: Cloudflare Rocket Loader intercepts dynamically-injected <script>
+// tags, which breaks webpack's JSONP chunk loading ("ChunkLoadError: Loading
+// chunk X failed"). Tagging every script element with data-cfasync="false"
+// tells Rocket Loader to skip them, so webpack's load callback fires normally.
+// Must run BEFORE any lazy import / publicPath resolution.
+(function () {
+    if (typeof document === 'undefined' || !document.createElement) return;
+    const origCreateElement = document.createElement.bind(document);
+    document.createElement = function (tagName, options) {
+        const el = options ? origCreateElement(tagName, options) : origCreateElement(tagName);
+        try {
+            if (typeof tagName === 'string' && tagName.toLowerCase() === 'script') {
+                el.setAttribute('data-cfasync', 'false');
+            }
+        } catch (e) { /* noop */ }
+        return el;
+    };
+})();
+
 // Must be first import — sets __webpack_public_path__ for lazy-loaded chunks.
 import './publicPath';
 
