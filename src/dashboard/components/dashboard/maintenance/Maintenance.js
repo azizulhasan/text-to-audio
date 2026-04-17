@@ -15,6 +15,14 @@ import { __ } from "@wordpress/i18n";
 import { toast } from "react-toastify";
 
 const PER_PAGE_OPTIONS = [25, 50, 100, 200];
+// TTS-239: age-threshold options — "safe" default hides files < 1h old so that
+// any in-flight batch is never deleted. Shorter values are opt-in with a warning.
+const AGE_THRESHOLD_OPTIONS = [
+    { value: 3600, label: "1 hour (safe)" },
+    { value: 600, label: "10 minutes" },
+    { value: 60, label: "1 minute (include recent)" },
+];
+const SAFE_THRESHOLD = 3600;
 const API_BASE = (window.ttsObj && window.ttsObj.api_url) || "/wp-json/";
 
 function formatBytes(bytes) {
@@ -48,6 +56,9 @@ export default function Maintenance() {
     const [totalSize, setTotalSize] = useState(0);
     const [selected, setSelected] = useState({});
     const [hasScanned, setHasScanned] = useState(false);
+    // TTS-239: age threshold — server-side filter for "file older than X seconds".
+    // Defaults to 3600 (safe). Shorter values show a warning banner.
+    const [ageThreshold, setAgeThreshold] = useState(SAFE_THRESHOLD);
 
     const [confirmStep, setConfirmStep] = useState(0); // 0 = closed, 1 = first confirm, 2 = type DELETE
     const [confirmText, setConfirmText] = useState("");
@@ -69,11 +80,11 @@ export default function Maintenance() {
         return items.every((it) => selected[it.file]);
     }, [items, selected, selectAllPages]);
 
-    async function scan(nextPage = 1, nextPerPage = perPage) {
+    async function scan(nextPage = 1, nextPerPage = perPage, nextAge = ageThreshold) {
         if (!isProActive) return;
         setIsScanning(true);
         try {
-            const url = `${API_BASE}tta_pro/v1/scan_orphan_temp_files?page=${nextPage}&per_page=${nextPerPage}`;
+            const url = `${API_BASE}tta_pro/v1/scan_orphan_temp_files?page=${nextPage}&per_page=${nextPerPage}&min_age_seconds=${nextAge}`;
             const res = await fetch(url, {
                 method: "GET",
                 headers: {
@@ -174,6 +185,8 @@ export default function Maintenance() {
             // TTS-239: "Delete all" OR "selected across all pages" both use the
             // server-side all=1 path so we don't ship thousands of paths over
             // the wire.
+            // TTS-239: pass age threshold so server-side re-scan/re-validate uses the same cutoff.
+            body.append("min_age_seconds", String(ageThreshold));
             if (deleteMode === "all" || (deleteMode === "selected" && selectAllPages)) {
                 body.append("all", "1");
             } else {
@@ -204,7 +217,7 @@ export default function Maintenance() {
                 setSelectAllPages(false);
                 setConfirmStep(0);
                 setConfirmText("");
-                scan(1, perPage);
+                scan(1, perPage, ageThreshold);
             } else {
                 toast.error(
                     (data && data.message) ||
@@ -295,15 +308,49 @@ export default function Maintenance() {
                         </ul>
                     </div>
 
+                    {ageThreshold < SAFE_THRESHOLD && (
+                        <div
+                            className="alert alert-danger"
+                            role="alert"
+                            style={{ marginBottom: 16 }}
+                        >
+                            <strong>{__("⚠ Reduced safety margin.", "text-to-audio")}</strong>{" "}
+                            {__(
+                                "You have lowered the age threshold below the 1-hour safe default. Files created by an in-flight batch could match. Only use this if no generation is currently running.",
+                                "text-to-audio"
+                            )}
+                        </div>
+                    )}
+
                     <div
                         className="d-flex align-items-center"
                         style={{ gap: 10, flexWrap: "wrap" }}
                     >
+                        <span>
+                            {__("Include files older than:", "text-to-audio")}
+                        </span>
+                        <select
+                            className="form-select"
+                            style={{ width: "auto" }}
+                            value={ageThreshold}
+                            disabled={isScanning || isDeleting}
+                            onChange={(e) => {
+                                const v = Number(e.target.value);
+                                setAgeThreshold(v);
+                                if (hasScanned) scan(1, perPage, v);
+                            }}
+                        >
+                            {AGE_THRESHOLD_OPTIONS.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                    {__(opt.label, "text-to-audio")}
+                                </option>
+                            ))}
+                        </select>
                         <button
                             type="button"
                             className="btn btn-primary"
                             disabled={isScanning || isDeleting}
-                            onClick={() => scan(1, perPage)}
+                            onClick={() => scan(1, perPage, ageThreshold)}
                         >
                             {isScanning
                                 ? __("Scanning…", "text-to-audio")
@@ -322,7 +369,7 @@ export default function Maintenance() {
                                     onChange={(e) => {
                                         const v = Number(e.target.value);
                                         setPerPage(v);
-                                        scan(1, v);
+                                        scan(1, v, ageThreshold);
                                     }}
                                 >
                                     {PER_PAGE_OPTIONS.map((n) => (
@@ -543,7 +590,7 @@ export default function Maintenance() {
                                                 type="button"
                                                 className="btn btn-sm btn-outline-secondary"
                                                 disabled={page <= 1 || isScanning}
-                                                onClick={() => scan(page - 1, perPage)}
+                                                onClick={() => scan(page - 1, perPage, ageThreshold)}
                                             >
                                                 {__("Previous", "text-to-audio")}
                                             </button>
@@ -557,7 +604,7 @@ export default function Maintenance() {
                                                 disabled={
                                                     page >= totalPages || isScanning
                                                 }
-                                                onClick={() => scan(page + 1, perPage)}
+                                                onClick={() => scan(page + 1, perPage, ageThreshold)}
                                             >
                                                 {__("Next", "text-to-audio")}
                                             </button>
