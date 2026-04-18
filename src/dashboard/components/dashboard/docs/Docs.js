@@ -159,6 +159,64 @@ export default function Docs() {
 							</Accordion.Body>
 						</Accordion.Item>
 
+						<Accordion.Item eventKey="8">
+							<Accordion.Header>
+								{__('8. Scripts blocked by CORS policy when using a CDN (WP Rocket / RocketCDN / Cloudflare / BunnyCDN)', 'text-to-audio')}
+							</Accordion.Header>
+							<Accordion.Body>
+								<p>
+									<strong>{__('Symptom:', 'text-to-audio')}</strong>{' '}
+									{__("The browser console shows errors like “Access to script at '…rocketcdn.me/…/text-to-audio-pro-button.min.js' from origin '…' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.” The player never loads.", 'text-to-audio')}
+								</p>
+								<p>
+									<strong>{__('Why this happens:', 'text-to-audio')}</strong>{' '}
+									{__("Your CDN is serving our plugin's JavaScript files, but your origin server isn't sending an Access-Control-Allow-Origin header. CDNs are pull caches — they only return what the origin gives them. When WP Rocket's Delay JavaScript (or a similar optimizer) adds a crossorigin attribute to the script tag, the browser then enforces CORS and blocks the load. This is a server configuration on your site, not a plugin bug.", 'text-to-audio')}
+								</p>
+								<p>
+									<strong>{__('Fix — Apache (.htaccess):', 'text-to-audio')}</strong>{' '}
+									{__('Add the block below to the .htaccess in your WordPress root (same folder as wp-config.php), above the # BEGIN WP Rocket and # BEGIN WordPress sections.', 'text-to-audio')}
+								</p>
+								<pre>
+									<code>{`<IfModule mod_headers.c>
+  <FilesMatch "\\.(js|css|woff2?|ttf|eot|svg|otf)$">
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, OPTIONS"
+  </FilesMatch>
+</IfModule>`}</code>
+								</pre>
+								<p>
+									<strong>{__('Fix — nginx:', 'text-to-audio')}</strong>{' '}
+									{__('Add this location block inside your server {} block, then reload nginx (sudo nginx -s reload).', 'text-to-audio')}
+								</p>
+								<pre>
+									<code>{`location ~* \\.(js|css|woff2?|ttf|eot|svg|otf)$ {
+  add_header Access-Control-Allow-Origin "*" always;
+  add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
+}`}</code>
+								</pre>
+								<p>
+									<strong>{__('Then — purge your CDN cache:', 'text-to-audio')}</strong>{' '}
+									{__('WP Rocket → Settings → CDN → Clear all cache files. (Or purge from your CDN dashboard directly.) Until you purge, the CDN keeps serving the old response without the new header.', 'text-to-audio')}
+								</p>
+								<p>
+									<strong>{__('Verify:', 'text-to-audio')}</strong>{' '}
+									{__('Run this in a terminal and confirm access-control-allow-origin: * appears in the response headers:', 'text-to-audio')}
+								</p>
+								<pre>
+									<code>{`curl -I https://your-site.com/wp-content/plugins/text-to-audio/admin/js/build/TextToSpeech.min.js`}</code>
+								</pre>
+								<p>
+									<strong>{__('Optional:', 'text-to-audio')}</strong>{' '}
+									{__('If you\'d rather avoid CORS altogether, exclude our plugin\'s script handles (text-to-audio-*, plyr) from WP Rocket → File Optimization → Delay JavaScript execution. That prevents the crossorigin attribute from being added in the first place. Fixing the header is still the more durable solution.', 'text-to-audio')}
+								</p>
+								<p>
+									<a href="https://atlasaidev.com/docs/text-to-speech/faq/cors-cdn-errors/" target="_blank" rel="noreferrer">
+										{__('Read the full guide on atlasaidev.com →', 'text-to-audio')}
+									</a>
+								</p>
+							</Accordion.Body>
+						</Accordion.Item>
+
 					</Accordion>
 				</Col>
 
