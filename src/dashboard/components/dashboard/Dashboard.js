@@ -35,6 +35,8 @@ const Integrations = lazy(() => import(/* webpackChunkName: "tab-integrations" *
 const Compatibility = lazy(() => import(/* webpackChunkName: "tab-compatibility" */ './compatibility/Compatibility.js'));
 const Aliases = lazy(() => import(/* webpackChunkName: "tab-aliases" */ './aliases/Aliases.js'));
 const Plugins = lazy(() => import(/* webpackChunkName: "tab-plugins" */ './plugins/Plugins.js'));
+// TTS-239: Maintenance tab — orphan temp-file cleanup (Pro-only).
+const Maintenance = lazy(() => import(/* webpackChunkName: "tab-maintenance" */ './maintenance/Maintenance.js'));
 
 function Dashboard() {
 	const [componentName, setComponentName] = useState(getComponentName());
@@ -90,6 +92,10 @@ function Dashboard() {
 									<Route path='/analytics' element={<Analitics />} />
 									<Route path='/compatibility' element={<Compatibility />} />
 									<Route path='/aliases' element={<Aliases />} />
+									{/* TTS-239: Maintenance tab is Pro-only; route is registered only when Pro is active. */}
+									{isProVersion && (
+										<Route path='/maintenance' element={<Maintenance />} />
+									)}
 									<Route path='/faq' element={<Docs />} />
 									<Route path='/plugins' element={<Plugins />} />
 

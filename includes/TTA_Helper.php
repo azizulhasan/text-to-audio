@@ -512,7 +512,7 @@ class TTA_Helper
          * option of settings page. Then post title of the post
          * will be the file name.
          */
-        if (!$title) {
+        if (!$title && $post) {
             $title = $post->post_title;
         }
         /**
@@ -704,7 +704,8 @@ class TTA_Helper
          * TTS-195: eric.corbett2@gmail.com TTA_Helper.php:556 issue fixed
          */
         if (get_post_meta($post->ID, 'tts_is_mp3_file_url_exists', true) && !empty($final_mp3_file_ulrs)) {
-            return apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls);
+            // TTS-239: append ?v={filemtime} so Cloudflare / CDN edge caches re-fetch after regeneration.
+            return self::append_cache_buster_to_urls(apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls));
         }
 
         if (isset($mp3_file_urls[$file_url_key]) && $mp3_file_urls[$file_url_key]) {
@@ -736,7 +737,7 @@ class TTA_Helper
                             $url = $gcs_new_signed_url;
                         }
                     }
-                } elseif (get_option('tts_is_backup_mp3_file') == 'false' && strtolower($language_code) == strtolower($file_url_key) && strpos($url, 'https://storage.googleapis.com') !== false) {
+                } elseif (get_option('tts_is_backup_mp3_file') == 'false' && strtolower($language_code) == strtolower($file_url_key) && strpos($url, 'storage.googleapis.com') !== false) {
                     $should_update_urls = true;
                 }
 
@@ -788,7 +789,57 @@ class TTA_Helper
             update_post_meta($post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs);
         }
 
-        return apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls);
+        // TTS-239: append ?v={filemtime} so Cloudflare / CDN edge caches re-fetch after regeneration.
+        return self::append_cache_buster_to_urls(apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls));
+    }
+
+    /**
+     * TTS-239: Append a `?v={filemtime}` cache-busting query to local MP3 URLs
+     * so CDNs (e.g. Cloudflare) re-fetch when the plugin regenerates the file
+     * at the same path. Without this, Cloudflare can serve a stale edge-cached
+     * copy for up to a year (origin Cache-Control: max-age=31536000), producing
+     * the symptom where the in-page player and the file-manager download differ.
+     * Remote URLs (GCS signed URLs and anything outside wp-uploads) pass through
+     * unchanged since they manage their own cache/expiry.
+     *
+     * @param mixed $urls
+     *
+     * @return mixed
+     */
+    public static function append_cache_buster_to_urls($urls)
+    {
+        if (!is_array($urls) || empty($urls)) {
+            return $urls;
+        }
+        $upload  = wp_upload_dir();
+        $baseurl = isset($upload['baseurl']) ? $upload['baseurl'] : '';
+        $basedir = isset($upload['basedir']) ? $upload['basedir'] : '';
+        if (!$baseurl || !$basedir) {
+            return $urls;
+        }
+        foreach ($urls as $key => $url) {
+            if (!is_string($url) || !$url) {
+                continue;
+            }
+            if (strpos($url, 'storage.googleapis.com') !== false) {
+                continue;
+            }
+            if (strpos($url, $baseurl) !== 0) {
+                continue;
+            }
+            $clean_url = strtok($url, '?');
+            $path      = str_replace($baseurl, $basedir, $clean_url);
+            if (!file_exists($path)) {
+                continue;
+            }
+            $mtime = @filemtime($path);
+            if (!$mtime) {
+                continue;
+            }
+            $sep        = (strpos($url, '?') !== false) ? '&' : '?';
+            $urls[$key] = $url . $sep . 'v=' . $mtime;
+        }
+        return $urls;
     }
 
     /**
@@ -1102,23 +1153,177 @@ class TTA_Helper
      *
      * @return string The cleaned-up string.
      */
+    /**
+     * TTS-235: Strip HTML elements matching the exclude CSS selectors setting.
+     * Supports .class, #id, and tag.class selectors.
+     * Uses balanced tag matching to correctly handle nested elements of the same tag type.
+     * Works in the PHP path (DOM reading off) to match JS behavior (DOM reading on).
+     *
+     * @param string $html The HTML content to process.
+     * @return string The HTML with matching elements removed.
+     */
+    public static function strip_elements_by_css_selectors($html)
+    {
+        $settings = self::tts_get_settings('settings');
+        $selectors_raw = isset($settings['tta__settings_exclude_content_by_css_selectors'])
+            ? $settings['tta__settings_exclude_content_by_css_selectors']
+            : '';
+
+        if (empty($selectors_raw)) {
+            return $html;
+        }
+
+        // Split by newline — selectors are newline-separated in the setting.
+        $selectors = preg_split('/[\r\n]+/', $selectors_raw);
+
+        foreach ($selectors as $selector) {
+            $selector = trim($selector);
+            if (empty($selector)) {
+                continue;
+            }
+
+            $attr_pattern = '';
+
+            if (strpos($selector, '#') === 0) {
+                // ID selector: #some-id
+                $id = preg_quote(substr($selector, 1), '/');
+                $attr_pattern = 'id=["\'][^"\']*' . $id . '[^"\']*["\']';
+            } elseif (strpos($selector, '.') !== false) {
+                // Class selector: .some-class or tag.some-class
+                $parts = explode('.', $selector, 2);
+                $class = preg_quote($parts[1], '/');
+                $attr_pattern = 'class=["\'][^"\']*' . $class . '[^"\']*["\']';
+            }
+
+            if ($attr_pattern) {
+                $html = self::remove_elements_by_attribute($html, $attr_pattern);
+            }
+        }
+
+        return $html;
+    }
+
+    /**
+     * TTS-235: Remove all HTML elements whose opening tag matches the given attribute pattern.
+     * Handles nested tags by counting open/close pairs to find the correct closing tag.
+     *
+     * @param string $html            The HTML string.
+     * @param string $attr_pattern    Regex pattern to match the attribute (e.g., class="...").
+     * @return string The HTML with matched elements removed.
+     */
+    private static function remove_elements_by_attribute($html, $attr_pattern)
+    {
+        // Find all opening tags that match the attribute pattern.
+        // We process from last to first so that removing content doesn't shift positions
+        // of earlier matches.
+        $open_pattern = '/<([a-z][a-z0-9]*)\b[^>]*' . $attr_pattern . '[^>]*>/is';
+        $matches = [];
+        preg_match_all($open_pattern, $html, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+
+        // Process in reverse order to maintain correct offsets.
+        $matches = array_reverse($matches);
+
+        foreach ($matches as $match) {
+            $tag_name  = strtolower($match[1][0]); // The tag name (e.g., "div")
+            $start_pos = $match[0][1];              // Position of the opening tag
+            $open_tag  = $match[0][0];              // Full opening tag string
+
+            // Self-closing tags — just remove the tag itself.
+            if (preg_match('/\/\s*>$/', $open_tag)) {
+                $html = substr_replace($html, '', $start_pos, strlen($open_tag));
+                continue;
+            }
+
+            // Walk forward from after the opening tag, counting nested open/close of same tag.
+            $search_start = $start_pos + strlen($open_tag);
+            $depth = 1;
+            $pos = $search_start;
+
+            while ($depth > 0 && $pos < strlen($html)) {
+                // Find next opening or closing tag of the same name.
+                $next_open  = stripos($html, '<' . $tag_name, $pos);
+                $next_close = stripos($html, '</' . $tag_name, $pos);
+
+                if ($next_close === false) {
+                    // No closing tag found — malformed HTML, stop.
+                    break;
+                }
+
+                if ($next_open !== false && $next_open < $next_close) {
+                    // Check it's actually an opening tag (not a different tag starting with same letters)
+                    $char_after = isset($html[$next_open + strlen($tag_name) + 1]) ? $html[$next_open + strlen($tag_name) + 1] : '';
+                    if ($char_after === ' ' || $char_after === '>' || $char_after === '/' || $char_after === "\n" || $char_after === "\r" || $char_after === "\t") {
+                        $depth++;
+                    }
+                    $pos = $next_open + 1;
+                } else {
+                    $depth--;
+                    if ($depth === 0) {
+                        // Found the matching closing tag. Find its end (after ">").
+                        $close_end = strpos($html, '>', $next_close);
+                        if ($close_end !== false) {
+                            $close_end++; // Include the ">"
+                            $html = substr_replace($html, '', $start_pos, $close_end - $start_pos);
+                        }
+                        break;
+                    }
+                    $pos = $next_close + 1;
+                }
+            }
+        }
+
+        return $html;
+    }
+
     public static function clean_string($inputString)
     {
         $delimiter = \apply_filters('tts_sentence_delimiter', '.');
-        // Remove double delimiters separated by space
-//		$spaceSeparatedDoubleDelimiterPattern = '/' . preg_quote( $delimiter ) . '\s+' . preg_quote( $delimiter ) . '/';
-//		$cleanedString                        = preg_replace( $spaceSeparatedDoubleDelimiterPattern, $delimiter, $inputString );
 
-        // Remove double delimiters (without space separation)
-//		$doubleDelimiterPattern = '/' . preg_quote( $delimiter ) . '{2,}/';
-//		$cleanedString          = preg_replace( $doubleDelimiterPattern, $delimiter, $cleanedString );
+        // TTS-235: Ensure valid UTF-8 before applying Unicode-aware regex.
+        // Invalid byte sequences cause preg_replace with /u flag to return null.
+        if (!$inputString) {
+            return '';
+        }
+        $cleanedString = mb_convert_encoding($inputString, 'UTF-8', 'UTF-8');
+
+        // TTS-235: Remove non-speech special characters that TTS engines cannot pronounce.
+        // These are visual formatting symbols (e.g., "§ Footnotes §") that produce
+        // gibberish or errors in audio output. The /u flag ensures multibyte chars
+        // (Hebrew, Arabic, etc.) are treated as whole characters, not individual bytes.
+        $cleanedString = preg_replace('/[§†‡※♦♣♠♥◆●■▲►☆★]+/u', '', $cleanedString);
+
+        // TTS-235: Remove multiple consecutive delimiters with optional spaces between them.
+        // Handles patterns like "..", ".?" etc. Uses /u flag for multibyte delimiter chars.
+        $delimiterChars = preg_quote('.', '/') . preg_quote(',', '/') . preg_quote('?', '/') . '!'
+            . preg_quote('|', '/') . ';:' . preg_quote('¿', '/') . preg_quote('¡', '/')
+            . preg_quote('،', '/') . preg_quote('؟', '/');
+        $cleanedString = preg_replace(
+            '/([' . $delimiterChars . '])\s*[' . $delimiterChars . ']+\s*/u',
+            '$1 ',
+            $cleanedString
+        );
+
+        // TTS-235: Remove visual spacer dots — standalone dots separated by spaces that
+        // authors use as section dividers (e.g., '. . . Matthew 8:17. . .').
+        // These cause TTS to say "dot dot" or produce awkward pauses.
+        // Process from longest pattern to shortest to avoid partial matches.
+        $cleanedString = preg_replace('/\s+\.\s+\.\s+\.\s+/', ' ', $cleanedString);  // ". . . "
+        $cleanedString = preg_replace('/\s+\.\s+\.\s+/', ' ', $cleanedString);        // ". . "
+        $cleanedString = preg_replace('/\s+\.\s+(?=[A-Z])/', ' ', $cleanedString);    // ". " before capital
+
+        // TTS-235: Remove dot after closing quote+dot: ."." or ." . → ."
+        $cleanedString = preg_replace('/([.!?])(["\'""])\s*\.\s*/', '$1$2 ', $cleanedString);
+
+        // TTS-235: Remove standalone dot before a letter (visual separator, not sentence ender):
+        // " .American" → " American"
+        $cleanedString = preg_replace('/\s+\.(?=[A-Za-z])/', ' ', $cleanedString);
+
+        // TTS-235: Remove space before punctuation caused by tag stripping.
+        // "diseases ." → "diseases.", "suffering ," → "suffering,"
+        $cleanedString = preg_replace('/\s+([.,!?;:])/', '$1', $cleanedString);
 
         // Remove extra spaces (more than one space)
-        $cleanedString = preg_replace('/\s{2,}/', ' ', $inputString);
-
-        // Remove spaces before the delimiter and ensure one space after
-        $spaceAroundDelimiterPattern = '/\s*' . preg_quote($delimiter) . '\s*/';
-//		$cleanedString               = preg_replace( $spaceAroundDelimiterPattern, $delimiter . ' ', $inputString );
+        $cleanedString = preg_replace('/\s{2,}/', ' ', $cleanedString);
 
         // Remove extra newlines (more than one newline)
         $cleanedString = preg_replace('/\n{2,}/', "\n", $cleanedString);
@@ -1894,6 +2099,41 @@ class TTA_Helper
         }
 
         return $result;
+    }
+
+    /**
+     * TTS-240: Is a CDN/optimizer likely active on this site?
+     *
+     * Used to gate the front-end CORS detector — no point running it on
+     * sites that don't have a CDN rewriting asset URLs. Filterable for
+     * hosts/plugins we don't detect natively.
+     *
+     * @since 2.1.16
+     * @return bool
+     */
+    public static function is_cdn_likely_active() {
+        if ( ! function_exists( 'is_plugin_active' ) ) {
+            include_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        $triggers = array(
+            defined( 'WP_ROCKET_VERSION' ),
+            defined( 'LSCWP_V' ),
+            defined( 'W3TC' ),
+            defined( 'AUTOPTIMIZE_PLUGIN_VERSION' ),
+            \is_plugin_active( 'wp-rocket/wp-rocket.php' ),
+            \is_plugin_active( 'cloudflare/cloudflare.php' ),
+            \is_plugin_active( 'bunnycdn/bunnycdn.php' ),
+            \is_plugin_active( 'cdn-enabler/cdn-enabler.php' ),
+            \is_plugin_active( 'sg-cachepress/sg-cachepress.php' ),
+            \is_plugin_active( 'litespeed-cache/litespeed-cache.php' ),
+            \is_plugin_active( 'w3-total-cache/w3-total-cache.php' ),
+            \is_plugin_active( 'wp-optimize/wp-optimize.php' ),
+        );
+
+        $active = in_array( true, $triggers, true );
+
+        return (bool) apply_filters( 'tts_is_cdn_active', $active );
     }
 
     /**

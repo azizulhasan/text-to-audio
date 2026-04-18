@@ -216,6 +216,48 @@ wp.hooks.addFilter( 'ttsTitleSelectors', 'my-theme', function( selectors ) {
 Default title selectors (in priority order):
 `.entry-title`, `.post-title`, `.wp-block-post-title`, `.elementor-heading-title`, `.elementor-page-title`, `.page-title`, `.ast-single-post-title`, `.oceanwp-single-title`, `article h1`, `.hentry h1`, `.post h1`, `h1`
 
+**Filter DOM content before text extraction** — modify the cloned DOM element before AtlasVoice extracts text from it. This filter runs when DOM reading is enabled. Use it to remove specific elements that the exclude CSS selectors setting can't target (e.g., elements that follow a specific text pattern rather than having a unique class).
+
+```javascript
+wp.hooks.addFilter( 'tts_before_dom_content_extract', 'my-plugin', function( dom, buttonId ) {
+    // Example: Remove all elements with a specific data attribute
+    dom.querySelectorAll( '[data-no-tts]' ).forEach( function( el ) { el.remove(); } );
+    return dom;
+} );
+```
+
+**Example: Remove "Read also:" blocks and their link paragraphs** — this is a real-world example used by a news site. The "Read also:" label is followed by `<p><a>` link paragraphs that should not be read. Add this as a JS snippet via a code snippets plugin:
+
+```javascript
+(function checkWpHooks() {
+    if (window.wp && wp.hooks) {
+        wp.hooks.addFilter("tts_before_dom_content_extract", "tts/remove-read-also", function(dom) {
+            var paragraphs = Array.from(dom.querySelectorAll("p"));
+            for (var i = 0; i < paragraphs.length; i++) {
+                var text = paragraphs[i].textContent.trim().toLowerCase();
+                if (text === "read also:" || text === "read also") {
+                    var nextSibling = paragraphs[i].nextElementSibling;
+                    paragraphs[i].remove();
+                    while (nextSibling) {
+                        var current = nextSibling;
+                        nextSibling = current.nextElementSibling;
+                        if (current.tagName === "P" && current.children.length === 1 && current.children[0].tagName === "A") {
+                            current.remove();
+                        } else {
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            return dom;
+        });
+    } else {
+        setTimeout(checkWpHooks, 50);
+    }
+})();
+```
+
 ### PHP Filters
 
 **Control content wrapper** — enable or disable the `.tts_content_wrapper_X` div that wraps post content:
@@ -233,6 +275,34 @@ add_filter( 'tts_should_add_content_wrapper', function( $should_add, $content, $
 }, 10, 4 );
 ```
 
+**Filter content before HTML is stripped** — modify the raw HTML content before `wp_strip_all_tags()` runs. This filter works when DOM reading is off (PHP content path). Use it to remove specific HTML patterns like "Read also:" blocks that can't be targeted by CSS selectors because they're plain `<p>` tags without unique classes.
+
+```php
+// Example: Remove "Read also:" label and its following link paragraphs.
+// Handles WordPress block comments (<!-- wp:paragraph -->) between paragraphs.
+add_filter( 'tta_before_clean_content', function ( $content ) {
+    $pattern = '/<p[^>]*>\s*<strong>\s*Read also:\s*<\/strong>\s*<\/p>(\s*(?:<!--.*?-->\s*)*<p[^>]*>\s*<a\s[^>]*>[^<]*<\/a>\s*<\/p>)*/is';
+    return preg_replace( $pattern, '', $content );
+} );
+```
+
+> **Note:** The `tta_before_clean_content` filter receives the raw HTML with tags intact. The `tta_clean_content` filter receives the cleaned plain text after all processing is done. Use `tta_before_clean_content` to remove HTML elements, and `tta_clean_content` to modify the final text.
+
+---
+
+## Exclude Content: DOM On vs DOM Off
+
+The "Exclude Content By CSS Selectors" setting works in **both** paths:
+
+| Path | How It Works |
+|------|-------------|
+| **DOM reading on** (JS) | Uses `querySelectorAll(selector).remove()` on the cloned DOM — full CSS selector support |
+| **DOM reading off** (PHP) | Converts selectors to balanced HTML tag matching — supports `.class`, `#id`, and `tag.class` selectors |
+
+When DOM reading is off, the PHP path strips matching elements from the raw HTML before `wp_strip_all_tags()` runs. This ensures the same content is excluded regardless of which path is active.
+
+The `.atlasvoice_no_read` class works in both paths — add it to any HTML element to exclude it from TTS reading.
+
 ---
 
 ## Troubleshooting
@@ -247,3 +317,9 @@ add_filter( 'tts_should_add_content_wrapper', function( $should_add, $content, $
 | ACF field read twice | Field is visible on page AND selected in Compatibility | Remove from Compatibility, use CSS selectors instead |
 | Smart quotes read as codes | HTML entities not decoded | Fixed automatically — `decodeHTMLEntities()` handles `&#8217;` etc. |
 | Per-post CSS selectors not applied | Cache not cleared | Clear browser sessionStorage or wait for cache invalidation |
+| Exclude selector doesn't work with DOM off | PHP can't parse CSS selectors like JS | Only `.class`, `#id`, and `tag.class` selectors work in PHP path. Complex selectors (`:nth-child`, `>`, `+`) require DOM reading on |
+| "Read also:" or link previews still read | Not excluded by CSS selectors | Use `tta_before_clean_content` PHP filter or `tts_before_dom_content_extract` JS filter (see examples above) |
+| Words joined together (e.g., "onKharg") | HTML tags stripped without spaces | Fixed in TTS-235 — `wp_strip_all_tags` now adds spaces before tags |
+| Hebrew/Arabic text shows as `�` | Non-UTF-8 regex corrupting multibyte chars | Fixed in TTS-235 — all regex patterns use `/u` flag for Unicode safety |
+| `&nbsp;` causes joined words | Non-breaking space removed instead of converted | Fixed in TTS-235 — `&nbsp;` now converts to regular space |
+| Visual spacer dots read as "dot dot" | Authors use `. . .` as section dividers | Fixed in TTS-235 — visual spacer dots automatically cleaned from content |

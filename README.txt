@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1.15
+Stable tag: 2.1.16
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -353,6 +353,22 @@ Please report security bugs through the [Patchstack Vulnerability Disclosure Pro
 We are looking for people to help translate this plugin. If you can help, we would love to hear from you.
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
+
+= 2.1.16 ( 18 Apr 2026 ) =
+Improved : Content extraction with better special character and whitespace handling.
+Improved : CSS selector exclusion for more precise content selection.
+Improved : UTF-8 and multilingual content safety in text processing.
+Improved : Bulk MP3 generation reliability and script loading.
+Added : AtlasAiDev plugins discovery page.
+Added : Maintenance tab (Pro-only) for cleaning up orphan per-batch temp MP3 files.
+Added : CDN / CORS troubleshooting guide in the Docs tab with Apache and nginx snippets.
+Added : Automatic CDN/CORS detector — warns you in the dashboard when a visitor's browser blocks our scripts on your CDN.
+Added : ElevenLabs support in Bulk MP3 generation.
+Fixed : Figure / figcaption / aside text no longer leaks into generated audio.
+Fixed : Stale Cloudflare MP3 cache — audio URLs now include filemtime cache-buster.
+Fixed : Cloudflare Rocket Loader breaking lazy-loaded dashboard chunks.
+Fixed : Dashboard crash when switching between players with different voice schemas.
+Fixed : CORS-alert endpoint now validates URL before throttle check, returning proper 400 errors.
 
 = 2.1.15 ( 15 Apr 2026 ) =
 Fixed : Memory exhausted issue fixed.
@@ -831,6 +847,13 @@ Improved :  Pro and free version performance improved.
 
 
 == Upgrade Notice ==
+
+= 2.1.16 =
+Improved : Content extraction with better special character and whitespace handling.
+Improved : Bulk MP3 generation reliability and script loading.
+Added : AtlasAiDev plugins discovery page and Maintenance tab (Pro) for orphan temp-file cleanup.
+Added : CDN / CORS troubleshooting guide and automatic in-dashboard detection.
+Fixed : Figure/figcaption text leaking into audio, Cloudflare stale MP3 cache, and Rocket Loader breaking dashboard chunks.
 
 = 2.1.15 =
 Fixed : Memory exhausted issue fixed.
