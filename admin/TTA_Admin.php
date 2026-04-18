@@ -921,6 +921,51 @@ class TTA_Admin
     }
 
     /**
+     * TTS-240: Print inline CORS detector on front-end so CDN-blocked script
+     * loads get reported back to WordPress. Runs before our bundles so the
+     * listener exists even if our first bundle is what CORS blocks.
+     *
+     * @since 2.1.16
+     */
+    public function print_cors_detector_script() {
+        if ( is_admin() ) { return; }
+        if ( ! TTA_Helper::should_load_button() ) { return; }
+        if ( ! TTA_Helper::is_cdn_likely_active() ) { return; }
+
+        $endpoint  = esc_url_raw( rest_url( 'tta/v1/cors-alert' ) );
+        $site_host = wp_parse_url( home_url(), PHP_URL_HOST );
+        if ( ! $site_host || ! $endpoint ) { return; }
+        ?>
+        <script data-cfasync="false" id="tta-cors-detector">
+        (function () {
+            var endpoint = <?php echo wp_json_encode( $endpoint ); ?>;
+            var siteHost = <?php echo wp_json_encode( $site_host ); ?>;
+            var reported = false;
+            window.addEventListener('error', function (e) {
+                if (reported || !e || !e.target || e.target.tagName !== 'SCRIPT') return;
+                var src = e.target.src || '';
+                if (!/\/plugins\/text-to-(audio|speech)/.test(src)) return;
+                var host = '';
+                try { host = new URL(src).host; } catch (_) { return; }
+                if (!host || host === siteHost) return;
+                fetch(src, { method: 'HEAD' }).then(function (r) {
+                    if (!r || !r.ok) return;
+                    reported = true;
+                    var payload = JSON.stringify({ url: src });
+                    if (navigator.sendBeacon) {
+                        var blob = new Blob([payload], { type: 'application/json' });
+                        navigator.sendBeacon(endpoint, blob);
+                    } else {
+                        fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: true }).catch(function(){});
+                    }
+                }).catch(function(){});
+            }, true);
+        })();
+        </script>
+        <?php
+    }
+
+    /**
      * Print inline CSS for the admin bar AtlasVoice toggle (front-end only).
      *
      * @since 2.2.0

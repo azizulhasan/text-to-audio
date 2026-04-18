@@ -507,6 +507,61 @@ class TTA_Api_Routes {
 				),
 			)
 		);
+
+		// TTS-240: CORS alert (public, rate-limited). Front-end posts here when
+		// one of our scripts fails to load from a CDN due to missing CORS header.
+		register_rest_route(
+			$this->namespace,
+			'/cors-alert',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'cors_alert' ),
+					'permission_callback' => '__return_true',
+					'args'                => array(),
+				),
+			)
+		);
+
+	}
+
+	/**
+	 * TTS-240: Record a CORS failure reported by the front-end detector.
+	 *
+	 * Rate-limited to one write per hour via transient to prevent abuse.
+	 * Only accepts URLs pointing at our own plugin directories.
+	 */
+	public function cors_alert( $request ) {
+		$body = $request->get_body();
+		$data = json_decode( $body, true );
+		$url  = is_array( $data ) && isset( $data['url'] ) ? (string) $data['url'] : '';
+		$url  = esc_url_raw( $url );
+
+		if ( ! $url || ! preg_match( '#/plugins/text-to-(audio|speech)[a-z0-9\-]*/#i', $url ) ) {
+			return new \WP_Error( 'invalid_url', 'Invalid URL', array( 'status' => 400 ) );
+		}
+
+		$site_host   = wp_parse_url( home_url(), PHP_URL_HOST );
+		$script_host = wp_parse_url( $url, PHP_URL_HOST );
+		if ( ! $script_host || $script_host === $site_host ) {
+			return new \WP_Error( 'not_cross_origin', 'Not a cross-origin URL', array( 'status' => 400 ) );
+		}
+
+		if ( get_transient( 'tta_cors_alert_lock' ) ) {
+			return \rest_ensure_response( array( 'status' => true, 'throttled' => true ) );
+		}
+
+		set_transient( 'tta_cors_alert_lock', 1, HOUR_IN_SECONDS );
+		update_option( 'tta_cors_detected', array(
+			'url'         => $url,
+			'script_host' => $script_host,
+			'detected_at' => time(),
+		), false );
+
+		// Reset any prior dismissal so the banner reappears for new failures.
+		delete_user_meta( get_current_user_id() ?: 0, 'tta_dismiss_cors_cdn_issue' );
+
+		return \rest_ensure_response( array( 'status' => true ) );
 	}
 
 

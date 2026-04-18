@@ -125,6 +125,9 @@ class TTA {
         $this->loader->add_action('admin_bar_menu', $plugin_admin, 'add_admin_bar_toggle', 999);
         $this->loader->add_action('wp_head', $plugin_admin, 'admin_bar_inline_css', 999);
         $this->loader->add_action('wp_footer', $plugin_admin, 'admin_bar_inline_js', 999);
+
+        // TTS-240: CORS/CDN failure detector — must run before our bundles.
+        $this->loader->add_action('wp_head', $plugin_admin, 'print_cors_detector_script', 1);
         $this->loader->add_action('wp_ajax_tta_toggle_audio', $plugin_admin, 'ajax_toggle_audio');
 
         // Deactivation rescue modal on plugins.php (shows before Freemius modal).
