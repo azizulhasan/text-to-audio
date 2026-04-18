@@ -114,6 +114,19 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                 let postSettings = postContents[postId];
                 postSettings.settings.is_regenerate_file = settings.tts_regenerate_mp3_files;
                 console.log(postSettings)
+
+                // TTS-237: Clear the shared #player_content_1 container before
+                // instantiating the next BulkMP3File. The parent class's
+                // #ttsLoader() APPENDS a loader node into this container, so
+                // without clearing between iterations, loaders from previous
+                // posts pile up in the DOM (bug: 4 loaders visible at once).
+                // Clearing here keeps exactly one loader visible at a time and
+                // makes the sequential generation obvious to the user.
+                let playerContent = document.getElementById('player_content_1');
+                if (playerContent) {
+                    playerContent.innerHTML = '';
+                }
+
                 let bulkMP3File = await new BulkMP3File(postSettings)
                 console.log({mp3file: bulkMP3File.fileURL})
                 if (!bulkMP3File.fileURL) {
@@ -136,6 +149,12 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                             mp3FileGenerateCount++;
                             setPostURL(mp3File, mp3FileGenerateCount, postId)
                         }
+                    } else if (ttsObjPro.player_id == 6) {
+                        let mp3File = await bulkMP3File.init_elevenlabs(1)
+                        if (mp3File) {
+                            mp3FileGenerateCount++;
+                            setPostURL(mp3File, mp3FileGenerateCount, postId)
+                        }
                     }
                 } else {
                     mp3FileGenerateCount++;
@@ -148,22 +167,39 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
     };
 
     function setPostURL(mp3File, mp3FileGenerateCount, postId) {
-        let parsedContents = structuredClone(postContents)
-        let postSettings = parsedContents[postId]
-        console.log(postSettings)
-        let urls = postSettings.settings.fileURLs;
-        let file_url_key = postSettings.extra[1].file_url_key;
-        postSettings.settings.fileURLs = {
-            ...{
-                [file_url_key]: mp3File
-            },
-            ...urls
-        };
-        parsedContents[postId] = postSettings;
-        setPostContents(parsedContents)
+        // TTS-237: Use functional setState so each iteration merges into the
+        // LATEST state instead of the stale closure snapshot of `postContents`
+        // captured at handleSubmit time. Previous code did
+        // `structuredClone(postContents)` which always cloned the initial
+        // snapshot, so every setPostContents() call wiped the previous
+        // iteration's URL — end result: only one accordion showed the eye
+        // icon. Functional form guarantees prev === latest committed state.
+        setPostContents(prev => {
+            let parsedContents = structuredClone(prev);
+            let postSettings = parsedContents[postId];
+            let urls = postSettings.settings.fileURLs || {};
+            let file_url_key = postSettings.extra[1].file_url_key;
+            // TTS-237: Spread order fix. Previously `...urls` came AFTER the
+            // new key, so an existing URL for this language would shadow the
+            // freshly generated one. New key must win → spread `...urls`
+            // first, then override with the new key.
+            postSettings.settings.fileURLs = {
+                ...urls,
+                [file_url_key]: mp3File,
+            };
+            parsedContents[postId] = postSettings;
+            return parsedContents;
+        });
 
         let postIDCount = Object.keys(postContents).length;
         if (mp3FileGenerateCount === postIDCount) {
+            // TTS-237: Clear the shared loader container one final time once
+            // all posts are done. The accordion eye icons (driven by state)
+            // take over as the "done" indicator per-row.
+            let playerContent = document.getElementById('player_content_1');
+            if (playerContent) {
+                playerContent.innerHTML = '';
+            }
             alert(__('All MP3 File Generated', 'text-to-audio'))
             if (document.getElementById('tts_bulk_mp3_file_generate_save_button')) {
                 document.getElementById('tts_bulk_mp3_file_generate_save_button').innerHTML = 'Generate MP3 File'
