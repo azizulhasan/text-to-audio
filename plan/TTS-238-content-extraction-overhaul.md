@@ -507,3 +507,63 @@ Each phase is independently shippable in this single feature branch — phases c
 - "Diagnose URL" returns a usable report for any URL on the user's own domain.
 - All 15 builder/theme combinations in §9 pass auto-button + shortcode + PHP-echo cases.
 - No new external dependencies in free plugin.
+
+---
+
+## 14. Player init method unification (Pattern A)
+
+**Status:** ✅ Implemented in `feature/TTS-238`. Shipping in 2.1.16.
+
+### 14.1 Goal
+
+Collapse all four `init_*` methods on `TextToSpeechProPlayer` (players 3/4/5/6) to a single contract:
+
+```
+async init_X(shouldReturnURL = false, shouldAddLoader = false, changeLoaderText = true)
+→ if shouldReturnURL: return result.data.url
+→ else: call this.#setUpPlayer(result.data.url, 1)
+```
+
+Removes the asymmetry where `init_gctts` had a different first param (`shouldReplacePreviousPlayer`) and never returned a URL — which is why Bulk MP3 for Google Cloud TTS (player 4) silently produced no eye icon in the accordion.
+
+### 14.2 Changes shipped
+
+**File:** [text-to-audio-pro/Assets/js/plyr.js](../text-to-audio-pro/Assets/js/plyr.js)
+
+1. **`init_gctts` signature** — first param renamed `shouldReplacePreviousPlayer` → `shouldReturnURL`; gate updated to `if (!this.#shouldStartFileGenerating() && !shouldReturnURL)`; URL-return branch added at the end mirroring `init_gtts`.
+
+2. **Lock-retry inside `init_gctts`** — now forwards `shouldReturnURL` so the retry path also returns the URL when the caller wanted it.
+
+3. **`'waiting'` event handler** (only the live one; the duplicate inside `#setUpPlayer_old` was deleted — see #5). All 4 branches now `await` the URL and do an in-place `<source src>` swap:
+    ```js
+    if (ttsObjPro.player_id == 3)      url = await playClass.init_gtts(true, true);
+    else if (ttsObjPro.player_id == 4) url = await playClass.init_gctts(true, true);
+    else if (ttsObjPro.player_id == 5) url = await playClass.init_chat_gpt(true, true);
+    else if (ttsObjPro.player_id == 6) url = await playClass.init_elevenlabs(true, true);
+    ```
+    Also fixed a copy-paste bug where player 5 was calling `init_elevenlabs` instead of `init_chat_gpt`.
+
+4. **Frontend initial-setup calls** at [:133, :174, :209](../text-to-audio-pro/Assets/js/plyr.js:133) — `this.init_gctts()` with no args, default `false` → internal `#setUpPlayer` path preserved. No change.
+
+5. **`#setUpPlayer_old` removed** — 190-line dead method with zero callers deleted.
+
+**File:** [text-to-audio/src/dashboard/bulk-mp3-file/generate-bulk-mp3-file.js](../src/dashboard/bulk-mp3-file/generate-bulk-mp3-file.js)
+
+6. **Bulk call for player 4** — simplified to `init_gctts(1)`, matching the shape used for players 3/5/6. All four branches now share the identical `init_X(1)` pattern.
+
+### 14.3 Risks to validate in release testing
+
+| Risk | Test |
+|---|---|
+| Player 4 `'waiting'` recovery loses duration/metadata after in-place `source.src` swap (was previously full player rebuild via `#setUpPlayer`) | Post with >30s audio across multiple batches → pause mid-playback → resume → confirm seek bar updates and playback continues seamlessly |
+| Player 5 / 6 `'waiting'` behavior change (were fire-and-forget before) | Same test on ChatGPT and ElevenLabs posts |
+| Plyr version differences in source-swap handling | Verify across browsers and major theme/caching-plugin combinations |
+| Analytics `trackPlay` event count regression | Check analytics dashboard for ±1 playCount per listen session |
+| Lock-retry semantics for bulk | Trigger locked state on gctts in bulk → confirm retry completes and accordion eye icon appears |
+
+### 14.4 Acceptance criteria
+
+- Bulk MP3 accordion eye icon appears for all 4 players (3, 4, 5, 6).
+- Frontend `'waiting'` recovers playback without blank player or lost duration for all 4 players.
+- No regression in initial-load MP3 generation for any player.
+- No regression in lock-retry path (`result.data.message === 'locked'` branch).
