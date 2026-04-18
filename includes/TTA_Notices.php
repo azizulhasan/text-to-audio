@@ -546,6 +546,38 @@ class TTA_Notices {
 
 		// ── 14. Translation Download ──
 		$this->register_translation_download_notice();
+
+		// ── 15. CORS / CDN issue (TTS-240) ──
+		// Triggered only when the front-end detector has reported a cross-origin
+		// script load failure. Scoped to the AtlasVoice dashboard page.
+		$cors = get_option( 'tta_cors_detected' );
+		if ( is_array( $cors ) && ! empty( $cors['url'] ) ) {
+			$script_host = isset( $cors['script_host'] ) ? $cors['script_host'] : '';
+			$message = '<p>' . esc_html__( "A visitor's browser blocked one of our scripts because your CDN is not sending the Access-Control-Allow-Origin header. Fix your server's CORS headers and purge your CDN cache.", 'text-to-audio' ) . '</p>';
+			if ( $script_host ) {
+				$message .= '<p><code>' . esc_html( $script_host ) . '</code></p>';
+			}
+
+			$this->register_notice( array(
+				'id'          => 'cors_cdn_issue',
+				'title'       => '<h3>' . esc_html__( 'AtlasVoice: CDN / CORS issue detected', 'text-to-audio' ) . '</h3>',
+				'message'     => $message,
+				'type'        => 'warning',
+				'dismissible' => true,
+				'screens'     => array( 'toplevel_page_text-to-audio' ),
+				'condition'   => function () {
+					return current_user_can( 'manage_options' );
+				},
+				'buttons'     => array(
+					array(
+						'text'    => __( 'Read the fix guide', 'text-to-audio' ),
+						'url'     => 'https://atlasaidev.com/docs/text-to-speech/faq/cors-cdn-errors/',
+						'type'    => 'primary',
+						'new_tab' => true,
+					),
+				),
+			) );
+		}
 	}
 
 	// =========================================================================

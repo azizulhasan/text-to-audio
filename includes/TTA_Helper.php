@@ -2102,6 +2102,41 @@ class TTA_Helper
     }
 
     /**
+     * TTS-240: Is a CDN/optimizer likely active on this site?
+     *
+     * Used to gate the front-end CORS detector — no point running it on
+     * sites that don't have a CDN rewriting asset URLs. Filterable for
+     * hosts/plugins we don't detect natively.
+     *
+     * @since 2.1.16
+     * @return bool
+     */
+    public static function is_cdn_likely_active() {
+        if ( ! function_exists( 'is_plugin_active' ) ) {
+            include_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        $triggers = array(
+            defined( 'WP_ROCKET_VERSION' ),
+            defined( 'LSCWP_V' ),
+            defined( 'W3TC' ),
+            defined( 'AUTOPTIMIZE_PLUGIN_VERSION' ),
+            \is_plugin_active( 'wp-rocket/wp-rocket.php' ),
+            \is_plugin_active( 'cloudflare/cloudflare.php' ),
+            \is_plugin_active( 'bunnycdn/bunnycdn.php' ),
+            \is_plugin_active( 'cdn-enabler/cdn-enabler.php' ),
+            \is_plugin_active( 'sg-cachepress/sg-cachepress.php' ),
+            \is_plugin_active( 'litespeed-cache/litespeed-cache.php' ),
+            \is_plugin_active( 'w3-total-cache/w3-total-cache.php' ),
+            \is_plugin_active( 'wp-optimize/wp-optimize.php' ),
+        );
+
+        $active = in_array( true, $triggers, true );
+
+        return (bool) apply_filters( 'tts_is_cdn_active', $active );
+    }
+
+    /**
      * Get the URL of the most recently published post for the enabled post types.
      *
      * @since 2.2.0
