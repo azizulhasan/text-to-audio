@@ -363,9 +363,12 @@ Added : AtlasAiDev plugins discovery page.
 Added : Maintenance tab (Pro-only) for cleaning up orphan per-batch temp MP3 files.
 Added : CDN / CORS troubleshooting guide in the Docs tab with Apache and nginx snippets.
 Added : Automatic CDN/CORS detector — warns you in the dashboard when a visitor's browser blocks our scripts on your CDN.
+Added : ElevenLabs support in Bulk MP3 generation.
 Fixed : Figure / figcaption / aside text no longer leaks into generated audio.
 Fixed : Stale Cloudflare MP3 cache — audio URLs now include filemtime cache-buster.
 Fixed : Cloudflare Rocket Loader breaking lazy-loaded dashboard chunks.
+Fixed : Dashboard crash when switching between players with different voice schemas.
+Fixed : CORS-alert endpoint now validates URL before throttle check, returning proper 400 errors.
 
 = 2.1.15 ( 15 Apr 2026 ) =
 Fixed : Memory exhausted issue fixed.

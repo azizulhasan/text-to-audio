@@ -199,29 +199,35 @@ export default function LanguageMapping({
                           );
                         })
                       ) : (
-                        currentPlayerVoices.map((voice, idx) =>
-                          window.hasOwnProperty("ttsObjPro") &&
-                          playerId == 4 ? (
-                            <option
-                              key={idx}
-                              data-lang={voice?.languageCodes?.[0]}
-                              value={[
-                                voice.name,
-                                voice.ssmlGender,
-                              ].join("-")}
-                            >
-                              {voice.name} {"-"} {voice.ssmlGender}
-                            </option>
-                          ) : (
-                            <option
-                              key={idx}
-                              data-lang={voice.lang}
-                              value={voice.name}
-                            >
-                              {voice?.name || voice}
-                            </option>
+                        currentPlayerVoices
+                          .filter((voice) =>
+                            window.hasOwnProperty("ttsObjPro") && playerId == 4
+                              ? voice && typeof voice === "object" && voice.ssmlGender
+                              : typeof voice === "string" || (voice && !voice.ssmlGender)
                           )
-                        )
+                          .map((voice, idx) =>
+                            window.hasOwnProperty("ttsObjPro") &&
+                            playerId == 4 ? (
+                              <option
+                                key={idx}
+                                data-lang={voice?.languageCodes?.[0]}
+                                value={[
+                                  voice.name,
+                                  voice.ssmlGender,
+                                ].join("-")}
+                              >
+                                {voice.name} {"-"} {voice.ssmlGender}
+                              </option>
+                            ) : (
+                              <option
+                                key={idx}
+                                data-lang={voice?.lang}
+                                value={typeof voice === "string" ? voice : (voice?.name || "")}
+                              >
+                                {typeof voice === "string" ? voice : (voice?.name || "")}
+                              </option>
+                            )
+                          )
                       )}
                     </Form.Select>
                   </div>

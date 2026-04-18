@@ -532,10 +532,6 @@ class TTA_Api_Routes {
 	 * Only accepts URLs pointing at our own plugin directories.
 	 */
 	public function cors_alert( $request ) {
-		if ( get_transient( 'tta_cors_alert_lock' ) ) {
-			return \rest_ensure_response( array( 'status' => true, 'throttled' => true ) );
-		}
-
 		$body = $request->get_body();
 		$data = json_decode( $body, true );
 		$url  = is_array( $data ) && isset( $data['url'] ) ? (string) $data['url'] : '';
@@ -549,6 +545,10 @@ class TTA_Api_Routes {
 		$script_host = wp_parse_url( $url, PHP_URL_HOST );
 		if ( ! $script_host || $script_host === $site_host ) {
 			return new \WP_Error( 'not_cross_origin', 'Not a cross-origin URL', array( 'status' => 400 ) );
+		}
+
+		if ( get_transient( 'tta_cors_alert_lock' ) ) {
+			return \rest_ensure_response( array( 'status' => true, 'throttled' => true ) );
 		}
 
 		set_transient( 'tta_cors_alert_lock', 1, HOUR_IN_SECONDS );
