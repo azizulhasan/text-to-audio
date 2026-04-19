@@ -948,17 +948,20 @@ class TTA_Admin
                 var host = '';
                 try { host = new URL(src).host; } catch (_) { return; }
                 if (!host || host === siteHost) return;
-                fetch(src, { method: 'HEAD' }).then(function (r) {
-                    if (!r || !r.ok) return;
-                    reported = true;
-                    var payload = JSON.stringify({ url: src });
-                    if (navigator.sendBeacon) {
-                        var blob = new Blob([payload], { type: 'application/json' });
-                        navigator.sendBeacon(endpoint, blob);
-                    } else {
-                        fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: true }).catch(function(){});
-                    }
-                }).catch(function(){});
+                // A script 'error' event + our plugin-path + cross-origin host is
+                // already strong proof of a CORS/CDN load failure. The previous
+                // HEAD verification was itself CORS-blocked (no ACAO on the CDN
+                // response), which suppressed the beacon on the exact failure
+                // mode we need to detect. Send directly; server re-validates and
+                // rate-limits to 1 alert/hour.
+                reported = true;
+                var payload = JSON.stringify({ url: src });
+                if (navigator.sendBeacon) {
+                    var blob = new Blob([payload], { type: 'application/json' });
+                    navigator.sendBeacon(endpoint, blob);
+                } else {
+                    fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: true }).catch(function(){});
+                }
             }, true);
         })();
         </script>
