@@ -145,7 +145,22 @@ class TTA_Admin
             return $tag;
         }
 
-        $tag = '<script  type="module" src="' . esc_url($src) . '"  ></script>';
+        // Intentionally NOT emitting `type="module"`.
+        //
+        // Module scripts are always fetched in CORS mode per the HTML spec, so
+        // the CDN response must carry `Access-Control-Allow-Origin`. When users
+        // serve these bundles through a CDN (WP Rocket CDN, BunnyCDN, KeyCDN,
+        // etc.) that doesn't add that header, module loading fails silently —
+        // the player breaks with only a console CORS message.
+        //
+        // Our source uses `import`/`export`, but Laravel Mix (webpack) bundles
+        // everything into a single self-contained IIFE at build time, so there
+        // is no runtime module graph for the browser to resolve. Classic
+        // script semantics work identically without the CORS requirement.
+        //
+        // Only re-enable if the bundle starts relying on top-level await,
+        // `import.meta`, or native cross-file ES module resolution.
+        // $tag = '<script  type="module" src="' . esc_url($src) . '"  ></script>';
 
         return $tag;
 
