@@ -24,6 +24,10 @@ mix.js('admin/js/text-to-audio-button.js', 'admin/js/build/text-to-audio-button.
 mix.js('admin/js/AtlasVoiceAnalytics.js', 'admin/js/build/AtlasVoiceAnalytics.min.js');
 mix.js('admin/js/AtlasVoicePlayerInsights.js', 'admin/js/build/AtlasVoicePlayerInsights.min.js');
 
+// TTS-238: AtlasVoice content extractor engine + visual picker.
+mix.js('src/extractor/tts-extractor-engine.js', 'admin/js/build/tts-extractor-engine.min.js');
+mix.js('src/picker/tts-picker.js', 'admin/js/build/tts-picker.min.js');
+
 
 
 const path = require('path');

@@ -523,6 +523,84 @@ class TTA_Api_Routes {
 			)
 		);
 
+		// TTS-238: AtlasVoiceSelector — save the stable CSS selector chosen by
+		// the user. Free plugin stores a single global selector; Pro overrides
+		// with a per-post-type map keyed under 'per_post_type' in the same option.
+		register_rest_route(
+			$this->namespace,
+			'/save-selector',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'save_selector' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(
+						'selector' => array(
+							'type'        => 'string',
+							'required'    => true,
+							'description' => 'Stable CSS selector picked via AtlasVoiceSelector.',
+						),
+						'post_type' => array(
+							'type'        => 'string',
+							'required'    => false,
+							'description' => 'Post type to scope the selector to (Pro only).',
+						),
+					),
+				),
+			)
+		);
+
+	}
+
+	/**
+	 * TTS-238: Persist a selector chosen via AtlasVoiceSelector.
+	 *
+	 * Storage model:
+	 *   option 'tta_atlasvoice_selectors' = array(
+	 *     'global'        => '#main-content',           // used by Free (and by Pro as fallback)
+	 *     'per_post_type' => array( 'post' => '…', 'product' => '…' )  // Pro-only
+	 *   )
+	 *
+	 * @param \WP_REST_Request $request
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function save_selector( $request ) {
+		$selector  = trim( (string) $request->get_param( 'selector' ) );
+		$post_type = sanitize_key( (string) $request->get_param( 'post_type' ) );
+
+		if ( $selector === '' || strlen( $selector ) > 512 ) {
+			return new \WP_Error( 'invalid_selector', __( 'Selector is empty or too long.', 'text-to-audio' ), array( 'status' => 400 ) );
+		}
+		// Basic shape check — allow only characters valid in CSS selectors + escaped unicode.
+		if ( ! preg_match( '#^[A-Za-z0-9_\-\s\.\#\[\]\=\"\'\>\,\:\(\)\*\^\$\|\\\\]+$#', $selector ) ) {
+			return new \WP_Error( 'invalid_selector_chars', __( 'Selector contains invalid characters.', 'text-to-audio' ), array( 'status' => 400 ) );
+		}
+
+		$store = get_option( 'tta_atlasvoice_selectors', array(
+			'global'        => '',
+			'per_post_type' => array(),
+		) );
+		if ( ! is_array( $store ) ) {
+			$store = array( 'global' => '', 'per_post_type' => array() );
+		}
+		if ( ! isset( $store['per_post_type'] ) || ! is_array( $store['per_post_type'] ) ) {
+			$store['per_post_type'] = array();
+		}
+
+		$is_pro = function_exists( 'is_pro_active' ) && is_pro_active();
+		if ( $is_pro && $post_type !== '' ) {
+			$store['per_post_type'][ $post_type ] = $selector;
+		} else {
+			$store['global'] = $selector;
+		}
+
+		update_option( 'tta_atlasvoice_selectors', $store, false );
+		\TTA\TTA_Cache::delete( 'all_settings' );
+
+		return rest_ensure_response( array(
+			'status' => true,
+			'data'   => $store,
+		) );
 	}
 
 	/**
@@ -962,6 +1040,7 @@ class TTA_Api_Routes {
             '/tta/v1/save_schedule_report',
             '/tta/v1/get_schedule_report',
             '/tta/v1/onboarding-event',
+            '/tta/v1/save-selector',
         );
 
         if ( in_array( $route, $admin_only, true ) ) {
