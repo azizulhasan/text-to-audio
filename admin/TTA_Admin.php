@@ -135,6 +135,8 @@ class TTA_Admin
             'current_plugin_slug' => 'text-to-audio',
             'detected_caching_plugins' => TTA_Helper::get_detected_caching_plugins(),
             'latest_post_preview_url'  => '', // populated lazily in enqueue to avoid early get_permalink() call
+            // TTS-238: AtlasVoiceSelector storage — engine uses this to resolve Tier 2 selector.
+            'atlasvoice_selectors' => get_option('tta_atlasvoice_selectors', [ 'global' => '', 'per_post_type' => [] ]),
 
         ];
     }
@@ -451,6 +453,17 @@ class TTA_Admin
 
         wp_enqueue_script('atlasvoice-timezone', 'https://cdn.jsdelivr.net/npm/countries-and-timezones/dist/index.min.js', [], $this->version, true);
         array_push($dependencies, 'atlasvoice-timezone');
+
+        // TTS-238: AtlasVoice extractor engine + visual picker.
+        // Engine loads on every page that has the player (used by getContent).
+        // Picker loads only for logged-in users with edit capability (UI tool for admins/editors).
+        wp_enqueue_script('tts-extractor-engine', plugin_dir_url(__FILE__) . 'js/build/tts-extractor-engine.min.js', [], $this->version, true);
+        array_push($dependencies, 'tts-extractor-engine');
+
+        if (is_user_logged_in() && current_user_can('edit_posts')) {
+            wp_enqueue_script('tts-picker', plugin_dir_url(__FILE__) . 'js/build/tts-picker.min.js', [], $this->version, true);
+        }
+
         if ($player_id > 1) {
             wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', $dependencies, $this->version, true);
             wp_localize_script('TextToSpeech', 'ttsObj', $this->localize_data);
@@ -933,6 +946,19 @@ class TTA_Admin
                 'title' => __( 'Toggle AtlasVoice audio player for this post', 'text-to-audio' ),
             ],
         ] );
+
+        // TTS-238: AtlasVoiceSelector launcher — opens the visual content picker
+        // on the front-end so admins can point at the right region.
+        $admin_bar->add_node( [
+            'parent' => 'tta-audio-toggle',
+            'id'     => 'tta-atlasvoice-picker',
+            'title'  => esc_html__( 'Pick content area…', 'text-to-audio' ),
+            'href'   => '#',
+            'meta'   => [
+                'class' => 'tta-atlasvoice-picker',
+                'title' => __( 'Visually select which region AtlasVoice should read on this post type', 'text-to-audio' ),
+            ],
+        ] );
     }
 
     /**
@@ -1087,6 +1113,42 @@ class TTA_Admin
                     }
                 });
             });
+
+            // TTS-238: AtlasVoiceSelector launcher — start the visual picker.
+            function startAtlasVoicePicker(){
+                if (!window.AtlasVoiceSelector) {
+                    alert('<?php echo esc_js( __( 'AtlasVoiceSelector not loaded on this page. Make sure the player is enabled for this post type.', 'text-to-audio' ) ); ?>');
+                    return;
+                }
+                window.AtlasVoiceSelector.start({
+                    postType: '<?php echo esc_js( $post->post_type ); ?>',
+                    onSave: function(result){
+                        if (result && result.selector) {
+                            alert('<?php echo esc_js( __( 'Saved selector:', 'text-to-audio' ) ); ?> ' + result.selector);
+                        }
+                    }
+                });
+            }
+
+            var pickerNode = document.getElementById('wp-admin-bar-tta-atlasvoice-picker');
+            if (pickerNode) {
+                var pickerLink = pickerNode.querySelector('a.ab-item');
+                if (pickerLink) {
+                    pickerLink.addEventListener('click', function(e){
+                        e.preventDefault();
+                        startAtlasVoicePicker();
+                    });
+                }
+            }
+
+            // Auto-launch when the dashboard opened this post with ?atlasvoice-picker=1.
+            try {
+                var qs = new URLSearchParams(window.location.search);
+                if (qs.get('atlasvoice-picker') === '1') {
+                    // Wait a tick so the extractor/picker bundles have finished loading.
+                    setTimeout(startAtlasVoicePicker, 300);
+                }
+            } catch (_) { /* IE — ignore */ }
         })();
         </script>
         <?php

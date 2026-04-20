@@ -606,6 +606,40 @@ export default function Settings() {
                                             <Form.Text className="text-muted">
                                                 {__("Add CSS selectors for the content areas the player should read. One selector per line. Only target post/page body content. If left empty, the player automatically detects the content area.", "text-to-audio")}
                                             </Form.Text>
+
+                                            {/* TTS-238: AtlasVoiceSelector launcher. Opens the latest post in a new
+                                                tab with ?atlasvoice-picker=1 so the front-end auto-starts the
+                                                visual picker. */}
+                                            <div className="mt-3 p-3 rounded" style={{ background: "#f0f7f8", border: "1px solid #d6e7ea" }}>
+                                                <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                                    <div>
+                                                        <strong className="d-block mb-1">{__("AtlasVoiceSelector — Visual Content Picker", "text-to-audio")}</strong>
+                                                        <small className="text-muted d-block">
+                                                            {__("Click the button, then point at the text region on your live post. We'll learn a stable selector automatically — no CSS knowledge needed.", "text-to-audio")}
+                                                        </small>
+                                                        {settings.atlasvoice_saved_selector && (
+                                                            <small className="d-block mt-1">
+                                                                <strong>{__("Saved:", "text-to-audio")}</strong> <code>{settings.atlasvoice_saved_selector}</code>
+                                                            </small>
+                                                        )}
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-primary btn-sm"
+                                                        onClick={() => {
+                                                            const url = ttsObj.latest_post_preview_url;
+                                                            if (!url) {
+                                                                alert(__("No preview URL available. Publish a post first.", "text-to-audio"));
+                                                                return;
+                                                            }
+                                                            const sep = url.indexOf("?") === -1 ? "?" : "&";
+                                                            window.open(url + sep + "atlasvoice-picker=1", "_blank", "noopener");
+                                                        }}
+                                                    >
+                                                        {__("Pick content area on live post", "text-to-audio")}
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </Col>
                                     </Row>
 
