@@ -296,6 +296,13 @@
         var savedSelector = resolveSavedSelector(opts);
 
         var text, node;
+        // PR-C (C1a) — when the saved-selector tier fails health-check we set
+        // `healedFrom` to the broken selector. It threads through every lower
+        // tier's return value so firstVisitAutoDetect can tell "this post is
+        // running on a fallback because your saved selector is broken" apart
+        // from "this post has never had a selector". Caller uses it to POST
+        // /save-selector?reason=heal.
+        var healedFrom = '';
 
         // Tier 1 — comment markers.
         try {
@@ -303,22 +310,38 @@
             if (node) {
                 text = (node.textContent || '').replace(/\s+/g, ' ').trim();
                 if (text.length > 0) {
-                    return { text: text, tier: 'markers', node: node, confidence: CONFIDENCE_MARKERS };
+                    return { text: text, tier: 'markers', node: node, confidence: CONFIDENCE_MARKERS, healedFrom: '' };
                 }
             }
         } catch (_) { /* fall through */ }
 
-        // Tier 2 — user-saved stable selector.
+        // Tier 2 — user-saved stable selector. PR-C (C1a): beyond "does it
+        // match anything", we also require the live element to still score
+        // above zero. Common failure mode after a theme update is that the
+        // saved class is reused on a nav-like region, so querySelector still
+        // hits but the target is junk — scoreCandidate returns 0 for nav/
+        // header/footer/aside ancestors so that check catches it.
         if (savedSelector) {
             try {
-                node = extractFromSelector(savedSelector);
-                if (node) {
+                var liveEl = global.document.querySelector(savedSelector);
+                var liveScore = liveEl ? scoreCandidate(liveEl) : 0;
+                if (liveEl && liveScore > 0) {
+                    node = liveEl.cloneNode(true);
                     text = (node.textContent || '').replace(/\s+/g, ' ').trim();
                     if (text.length > 0) {
-                        return { text: text, tier: 'saved', node: node, confidence: CONFIDENCE_SAVED };
+                        return {
+                            text: text, tier: 'saved', node: node, liveNode: liveEl,
+                            confidence: CONFIDENCE_SAVED, healedFrom: ''
+                        };
                     }
                 }
-            } catch (_) { /* fall through — self-heal path handles this in Phase B3 */ }
+                // Miss: record which selector needs healing. Still fall through
+                // so the player gets real content this request; the heal POST
+                // persists the new winner for next page load.
+                healedFrom = savedSelector;
+            } catch (_) {
+                healedFrom = savedSelector;
+            }
         }
 
         // Tier 3 — legacy .tts_content_wrapper_N.
@@ -327,7 +350,10 @@
             if (node) {
                 text = (node.textContent || '').replace(/\s+/g, ' ').trim();
                 if (text.length > 0) {
-                    return { text: text, tier: 'wrapper', node: node, confidence: CONFIDENCE_WRAPPER };
+                    return {
+                        text: text, tier: 'wrapper', node: node,
+                        confidence: CONFIDENCE_WRAPPER, healedFrom: healedFrom
+                    };
                 }
             }
         } catch (_) { /* fall through */ }
@@ -352,7 +378,8 @@
                         tier: heuristicTiers[i].name,
                         node: best.node,
                         liveNode: best.liveNode || null,
-                        confidence: best.confidence
+                        confidence: best.confidence,
+                        healedFrom: healedFrom
                     };
                 }
             }
@@ -363,7 +390,8 @@
             tier: 'php-fallback',
             node: null,
             liveNode: null,
-            confidence: 0
+            confidence: 0,
+            healedFrom: healedFrom
         };
     }
 
