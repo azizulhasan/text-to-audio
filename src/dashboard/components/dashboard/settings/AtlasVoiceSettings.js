@@ -20,6 +20,7 @@ import React from "react";
 import {__} from "@wordpress/i18n";
 import {SettingRow, ToggleSwitch} from "./SettingsPrimitives";
 import AtlasVoiceHealLog from "./AtlasVoiceHealLog";
+import AtlasVoiceBoilerplate from "./AtlasVoiceBoilerplate";
 
 export default function AtlasVoiceSettings({settings, handleChange}) {
     return (
@@ -111,6 +112,13 @@ export default function AtlasVoiceSettings({settings, handleChange}) {
                 any row. Forward-only history: reverts are themselves logged. */}
             {settings.tta__settings_use_atlasvoice_extractor && (
                 <AtlasVoiceHealLog />
+            )}
+
+            {/* Boilerplate suggestions (TTS-238 C3c) — also opt-in-gated.
+                Shows sentences the nightly detector flagged as repeating
+                across posts, with per-chip Exclude / Remove toggle. */}
+            {settings.tta__settings_use_atlasvoice_extractor && (
+                <AtlasVoiceBoilerplate />
             )}
         </>
     );

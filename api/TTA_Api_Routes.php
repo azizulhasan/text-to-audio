@@ -563,6 +563,32 @@ class TTA_Api_Routes {
 			)
 		);
 
+		// TTS-238 PR-C (C3c): Exclude / un-exclude a boilerplate fragment.
+		// POST { text, action: "add"|"remove" }. The fragment is stored in
+		// tta_atlasvoice_boilerplate_excluded (autoload=false) and consumed
+		// by the content cleaner so the player skips that sentence.
+		register_rest_route(
+			$this->namespace,
+			'/boilerplate-exclude',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'toggle_boilerplate_exclusion' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(
+						'text' => array(
+							'type'     => 'string',
+							'required' => true,
+						),
+						'action' => array(
+							'type'    => 'string',
+							'default' => 'add',
+						),
+					),
+				),
+			)
+		);
+
 		// TTS-238: AtlasVoiceSelector — save the stable CSS selector chosen by
 		// the user. Free plugin stores a single global selector; Pro overrides
 		// with a per-post-type map keyed under 'per_post_type' in the same option.
@@ -761,12 +787,15 @@ class TTA_Api_Routes {
 		if ( class_exists( '\\TTA\\TTA_BoilerplateDetector' ) ) {
 			$data = \TTA\TTA_BoilerplateDetector::get_cached();
 		}
+		$excluded = get_option( 'tta_atlasvoice_boilerplate_excluded', array() );
+		if ( ! is_array( $excluded ) ) { $excluded = array(); }
 		return rest_ensure_response( array(
 			'status'       => true,
 			'generated_at' => isset( $data['generated_at'] ) ? (int) $data['generated_at'] : 0,
 			'sample_size'  => isset( $data['sample_size'] ) ? (int) $data['sample_size'] : 0,
 			'post_types'   => isset( $data['post_types'] ) ? (array) $data['post_types'] : array(),
 			'suggestions'  => isset( $data['suggestions'] ) ? array_values( (array) $data['suggestions'] ) : array(),
+			'excluded'     => array_values( $excluded ),
 		) );
 	}
 
@@ -788,12 +817,54 @@ class TTA_Api_Routes {
 		}
 		\TTA\TTA_BoilerplateDetector::run();
 		$data = \TTA\TTA_BoilerplateDetector::get_cached();
+		$excluded = get_option( 'tta_atlasvoice_boilerplate_excluded', array() );
+		if ( ! is_array( $excluded ) ) { $excluded = array(); }
 		return rest_ensure_response( array(
 			'status'       => true,
 			'generated_at' => isset( $data['generated_at'] ) ? (int) $data['generated_at'] : 0,
 			'sample_size'  => isset( $data['sample_size'] ) ? (int) $data['sample_size'] : 0,
 			'post_types'   => isset( $data['post_types'] ) ? (array) $data['post_types'] : array(),
 			'suggestions'  => isset( $data['suggestions'] ) ? array_values( (array) $data['suggestions'] ) : array(),
+			'excluded'     => array_values( $excluded ),
+		) );
+	}
+
+	/**
+	 * TTS-238 PR-C (C3c): Add/remove a fragment from the player's boilerplate
+	 * exclusion list. The list is stored in tta_atlasvoice_boilerplate_excluded
+	 * (autoload=false) and is consumed by the content cleaner in a follow-up
+	 * change — this route just owns the add/remove plumbing.
+	 *
+	 * Dedupes on the raw text (already lower-cased + trimmed by the detector
+	 * tokeniser). Caps at 200 entries to keep option size bounded.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function toggle_boilerplate_exclusion( $request ) {
+		$text   = trim( (string) $request->get_param( 'text' ) );
+		$action = (string) $request->get_param( 'action' );
+		if ( $text === '' ) {
+			return rest_ensure_response( array( 'status' => false, 'message' => 'Empty text.' ) );
+		}
+		$list = get_option( 'tta_atlasvoice_boilerplate_excluded', array() );
+		if ( ! is_array( $list ) ) { $list = array(); }
+
+		if ( $action === 'remove' ) {
+			$list = array_values( array_filter( $list, function ( $item ) use ( $text ) {
+				return (string) $item !== $text;
+			} ) );
+		} else {
+			if ( ! in_array( $text, $list, true ) ) {
+				$list[] = $text;
+			}
+			if ( count( $list ) > 200 ) {
+				$list = array_slice( $list, -200 );
+			}
+		}
+		update_option( 'tta_atlasvoice_boilerplate_excluded', $list, false );
+		return rest_ensure_response( array(
+			'status'   => true,
+			'excluded' => array_values( $list ),
 		) );
 	}
 
@@ -1237,6 +1308,7 @@ class TTA_Api_Routes {
             '/tta/v1/save-selector',
             '/tta/v1/heal-log',
             '/tta/v1/boilerplate-suggestions',
+            '/tta/v1/boilerplate-exclude',
         );
 
         if ( in_array( $route, $admin_only, true ) ) {
