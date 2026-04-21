@@ -143,6 +143,13 @@ class TTA_Admin
             // flags live under the 'settings' sub-key.
             'use_atlasvoice_extractor' => ! empty( $settings['settings']['tta__settings_use_atlasvoice_extractor'] ),
 
+            // TTS-238 PR-B: First-visit auto-detect needs the current post type and
+            // the viewer's capability to decide whether to silently save a scored
+            // selector. Only admins (manage_options) can hit /save-selector, so we
+            // lift that check into the bundle to avoid a speculative 403.
+            'can_save_selector' => current_user_can( 'manage_options' ),
+            'current_post_type' => is_singular() ? (string) get_post_type() : '',
+
         ];
     }
 
