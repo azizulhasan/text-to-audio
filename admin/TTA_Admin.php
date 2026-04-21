@@ -137,6 +137,13 @@ class TTA_Admin
             'latest_post_preview_url'  => '', // populated lazily in enqueue to avoid early get_permalink() call
             // TTS-238: AtlasVoiceSelector storage — engine uses this to resolve Tier 2 selector.
             'atlasvoice_selectors' => get_option('tta_atlasvoice_selectors', [ 'global' => '', 'per_post_type' => [] ]),
+            // TTS-238 PR-C (C5b): current multilingual-plugin language code so the
+            // client-side resolver picks the language-scoped selector first. Empty
+            // string on non-multilingual sites — resolveSavedSelector falls through
+            // the per_language slot entirely in that case.
+            'atlasvoice_language_code' => class_exists('\\TTA\\TTA_LanguagePlugins')
+                ? \TTA\TTA_LanguagePlugins::current_language_code()
+                : '',
             // TTS-238: Opt-in flag. When false (default), the new JS extractor stays dormant
             // and the legacy extraction path runs unchanged. `$settings` here is the
             // nested map returned by `tts_get_settings('')`, so the `tta_settings_data`

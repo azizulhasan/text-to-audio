@@ -201,6 +201,12 @@
         var body = { selector: selector, post_type: postType || '' };
         if (extra && extra.reason) { body.reason = extra.reason; }
         if (extra && extra.old_selector) { body.old_selector = extra.old_selector; }
+        // PR-C (C5b): tag the save with the current language so multilingual
+        // sites key storage per-language. An explicit extra.language wins;
+        // otherwise we fall back to the bootstrap-exposed language code.
+        // Empty string is fine — the server treats it as "no language".
+        var lang = (extra && extra.language) || tts.atlasvoice_language_code || '';
+        if (lang) { body.language = lang; }
         return fetch(base + 'tta/v1/save-selector', {
             method: 'POST',
             credentials: 'same-origin',
