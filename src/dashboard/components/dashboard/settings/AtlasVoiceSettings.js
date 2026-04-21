@@ -19,6 +19,7 @@
 import React from "react";
 import {__} from "@wordpress/i18n";
 import {SettingRow, ToggleSwitch} from "./SettingsPrimitives";
+import AtlasVoiceHealLog from "./AtlasVoiceHealLog";
 
 export default function AtlasVoiceSettings({settings, handleChange}) {
     return (
@@ -103,6 +104,13 @@ export default function AtlasVoiceSettings({settings, handleChange}) {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Heal log — only rendered when opt-in is ON. Pulls the last 50
+                selector replacements from /heal-log and lets the user revert
+                any row. Forward-only history: reverts are themselves logged. */}
+            {settings.tta__settings_use_atlasvoice_extractor && (
+                <AtlasVoiceHealLog />
             )}
         </>
     );
