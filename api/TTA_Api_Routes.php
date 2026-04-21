@@ -523,6 +523,23 @@ class TTA_Api_Routes {
 			)
 		);
 
+		// TTS-238 PR-C (C2a): Read the heal log for the dashboard audit UI.
+		// Returns up to the last 50 heal events (ts / scope / old / new / user).
+		// Guarded by manage_options via get_route_access (inherited from
+		// /save-selector below, same capability).
+		register_rest_route(
+			$this->namespace,
+			'/heal-log',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_heal_log' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
 		// TTS-238: AtlasVoiceSelector — save the stable CSS selector chosen by
 		// the user. Free plugin stores a single global selector; Pro overrides
 		// with a per-post-type map keyed under 'per_post_type' in the same option.
@@ -620,17 +637,24 @@ class TTA_Api_Routes {
 		update_option( 'tta_atlasvoice_selectors', $store, false );
 		\TTA\TTA_Cache::delete( 'all_settings' );
 
-		// PR-C (C1c): record the heal event so the admin dashboard can show
-		// an audit trail + one-click revert. Ring buffer capped at 50 entries
-		// so this option never grows unbounded. Only records when reason
-		// explicitly says 'heal' — user-initiated saves don't pollute the log.
-		if ( $reason === 'heal' && $old_selector !== '' && $old_selector !== $selector ) {
+		// PR-C (C1c + C2a): record heal / revert events so the admin dashboard
+		// can show an audit trail. Ring buffer capped at 50 entries so the
+		// option never grows unbounded. Only records when reason explicitly
+		// says 'heal' or 'revert' — plain user-initiated saves don't pollute
+		// the log.
+		//   heal   — picker silently rewrote a broken saved selector.
+		//   revert — admin clicked "Revert" in the dashboard log. We record
+		//            this too so the log reads forward-only and the user can
+		//            see exactly what happened in order.
+		if ( ( $reason === 'heal' || $reason === 'revert' )
+			 && $old_selector !== '' && $old_selector !== $selector ) {
 			$scope = ( $is_pro && $post_type !== '' ) ? ( 'post_type:' . $post_type ) : 'global';
 			$log = get_option( 'tta_atlasvoice_heal_log', array() );
 			if ( ! is_array( $log ) ) { $log = array(); }
 			$log[] = array(
 				'ts'           => time(),
 				'scope'        => $scope,
+				'reason'       => $reason,
 				'old_selector' => $old_selector,
 				'new_selector' => $selector,
 				'user_id'      => get_current_user_id(),
@@ -645,6 +669,39 @@ class TTA_Api_Routes {
 			'status' => true,
 			'data'   => $store,
 			'reason' => $reason ?: null,
+		) );
+	}
+
+	/**
+	 * PR-C (C2a): Read the heal log for the dashboard audit UI.
+	 *
+	 * Returns the most-recent events first (reverse chrono) so the dashboard
+	 * can render them without sorting client-side. Also normalises older
+	 * entries written before C2a — they lack the `reason` field, so fill it
+	 * in as 'heal' for display purposes.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function get_heal_log( $request ) {
+		$log = get_option( 'tta_atlasvoice_heal_log', array() );
+		if ( ! is_array( $log ) ) { $log = array(); }
+		$out = array();
+		for ( $i = count( $log ) - 1; $i >= 0; $i-- ) {
+			$row = $log[ $i ];
+			if ( ! is_array( $row ) ) { continue; }
+			$out[] = array(
+				'index'        => $i,
+				'ts'           => isset( $row['ts'] ) ? (int) $row['ts'] : 0,
+				'scope'        => isset( $row['scope'] ) ? (string) $row['scope'] : 'global',
+				'reason'       => isset( $row['reason'] ) ? (string) $row['reason'] : 'heal',
+				'old_selector' => isset( $row['old_selector'] ) ? (string) $row['old_selector'] : '',
+				'new_selector' => isset( $row['new_selector'] ) ? (string) $row['new_selector'] : '',
+				'user_id'      => isset( $row['user_id'] ) ? (int) $row['user_id'] : 0,
+			);
+		}
+		return rest_ensure_response( array(
+			'status' => true,
+			'log'    => $out,
 		) );
 	}
 
@@ -1086,6 +1143,7 @@ class TTA_Api_Routes {
             '/tta/v1/get_schedule_report',
             '/tta/v1/onboarding-event',
             '/tta/v1/save-selector',
+            '/tta/v1/heal-log',
         );
 
         if ( in_array( $route, $admin_only, true ) ) {
