@@ -1,14 +1,144 @@
 # TTS-238 — Content Extraction Overhaul
 
-**Status:** Plan v3 (JS-only collapse + comment-marker wrapper). §19 Player init unification already shipped in 2.1.16 — see below.
-**Plan date:** 2026-04-17 · **Revised:** 2026-04-20 (v3: architectural collapse)
+**Status:** Plan v4 (three-layer architecture — opt-in / mode / rules — with hook-based integration, content-hash short-circuit, and lazy visitor-load invalidation). §19 Player init unification already shipped in 2.1.16 — see below. **PR-A (opt-in gating + UI split) shipped on the feature branch.** PR-B (picker wizard + lazy loading) and PR-C (Pro rules + staging/production + lazy regen) pending.
+**Plan date:** 2026-04-17 · **Revised:** 2026-04-21 (v4: three-layer + cost-sensitivity + hook-based integration) · 2026-04-20 (v3: architectural collapse)
 **Branches:** `feature/TTS-238` in both `text-to-audio` (free) and `text-to-audio-pro` (pro)
 **Jira:** https://atlasaidev.atlassian.net/browse/TTS-238
 **Related:** [research-competitor-content-extraction.md](research-competitor-content-extraction.md) · [TTS-future-content-extraction-improvements.md](TTS-future-content-extraction-improvements.md)
 
 ---
 
-## 0. What changed in this revision (v3)
+## 0. What changed in this revision (v4)
+
+v4 does **not** revise the extraction engine — v3's "one JS engine + one dumb PHP fallback" still stands. v4 layers the **runtime control plane** on top: how the new system is turned on, how users pick their content area, when MP3s are regenerated, and how the new system stays out of the legacy path's way until a user explicitly opts in.
+
+The v4 decisions, distilled:
+
+### 0.1 Three-layer runtime architecture (new)
+
+| Layer | Setting key | Values | Default | Who sees it |
+|---|---|---|---|---|
+| **1. Opt-in** | `tta__settings_use_atlasvoice_extractor` | `bool` | `false` | All users. When OFF the legacy extraction pipeline runs unchanged — zero new assets on the frontend, zero new UI beyond the toggle. |
+| **2. Mode** | `tta__settings_atlasvoice_mode` | `staging` \| `production` | `staging` | Pro. **Staging** = new engine runs, MP3s are regenerated lazily per visitor, legacy output is still available as fallback ("Option X" dual-pipeline). **Production** = new engine is authoritative, legacy path is archived. |
+| **3. Rules** | `tta__settings_atlasvoice_rules` | per-scope saved selectors | `{}` | Free = one global include selector. Pro = per-post-type + per-post overrides. Filled by the visual picker (§4.3) — users never write CSS. |
+
+Each layer is independent and orthogonal: a user can opt in but stay in staging forever (the safest mode); Pro can flip the mode per site; rules accumulate from picker use regardless of mode.
+
+### 0.2 Hook-based integration / maximum code isolation
+
+Per the user's architectural directive, **no existing extraction file is edited** by the new system. The new pipeline plugs in via `template_redirect` and its own filters:
+
+- New helpers live in **new files** (`src/extractor/…`, `src/picker/…`, `includes/AtlasVoice/…`). Any method the new system needs from the legacy code is **copied-with-rename**, not reused. This guarantees the legacy `getModifiedContent` / `TTA_Pro_Helper::acf_plugin_content` / `helpers.php::tta_get_button_content` call graphs stay byte-identical when opt-in is OFF.
+- The only edits to existing files are **gates**: a short `if ($extractor_opt_in)` around script enqueue in `TTA_Admin.php`, an analogous gate around the admin-bar "Pick content area…" submenu, and one `if (tts.use_atlasvoice_extractor)` short-circuit at the top of `TTSProHelper.js::getModifiedContent` that delegates to the new engine and otherwise falls through to the untouched legacy body.
+- Downstream integration with MP3 regeneration, block-opt-out, and custom-field append is done via new WordPress actions/filters fired from the `template_redirect` hook — not by monkey-patching existing functions.
+
+This is a Strangler Fig pattern (Martin Fowler): the new system grows next to the old one until it can take over, then the old system is removed in a single PR. No dual-maintenance window.
+
+### 0.3 Content-hash short-circuit + lazy visitor-load invalidation (Pro cost optimization)
+
+v3 had fingerprints but still regenerated eagerly on `save_post` when the fingerprint changed. v4 adds two cost optimizations that matter only for **Pro** (AI voice providers cost per character; Free uses browser `speechSynthesis` and has no per-generation cost):
+
+- **Content-hash short-circuit.** After the new extractor runs, compute `md5(extracted_text)`. If it matches the last-known `_tta_extracted_text_hash` for that post + settings, skip regen even if settings changed. Typical case: user toggles an unrelated setting like "Add post excerpt" on a post where the excerpt is empty — extracted text is identical, so the existing MP3 is still valid.
+- **Lazy visitor-load invalidation.** On setting changes that *do* change the hash, v4 **does not** mass-delete MP3s upfront. Instead the dirty flag is written; the next visitor to each post triggers delete-then-regen for that post on first listen via `template_redirect`. A 500-post site doesn't pay 500× regen upfront — it pays only for the posts that are actually listened to.
+
+Both optimizations are **invisible to Free**: Free has no MP3 cache, so there is nothing to short-circuit or lazily invalidate. Only Pro reads these fields.
+
+### 0.4 Visual picker is a fallback UI, not a primary workflow (zero-click philosophy)
+
+**Core principle:** every mandatory UI step is a new ticket vector. The goal is to eliminate user-facing decisions whenever the engine can make them. The 4-step wizard from earlier drafts is kept **only as the low-confidence fallback** — the common case is zero clicks.
+
+**Happy path (expected ~85–90% of opt-ins, zero clicks):**
+
+1. User turns Layer 1 opt-in ON.
+2. First visitor (or admin preview) loads a post of each active post type.
+3. The engine runs scoring (§4.5). If `confidence ≥ 0.8`, the selector is **auto-saved** silently to the per-CPT scope via first-visit auto-save (§4.4).
+4. A non-blocking toast appears in the admin preview: *"Content area detected automatically for Posts. [▶ Listen sample] [Change]"*. Dismissible. Ignoring it is the right default.
+5. Auto-detected excludes (nav-like children — see §0.7) are applied silently. Auto-detected boilerplate text excludes (cross-post substring analysis) are suggested as dismissible chips.
+
+No picker. No wizard. No CSS.
+
+**Low-confidence path (~10–15%, one click):**
+
+When `confidence < 0.8` or auto-scoring has no clear winner (e.g. Oxygen Builder with generic class names), the toast changes to a prompt: *"We need your help picking the content area. [Pick visually]"*. Clicking opens the picker overlay. User points at the text, clicks "Use this", done. Everything else is auto-detected around the chosen container.
+
+**Power-user / edge-case path (opt-in only):**
+
+A collapsed **"Advanced refinement"** panel exposes, for users who need it:
+
+- Scope override (`this post only` vs `this post type` vs `all post types`).
+- Tag-exclude chip editor (`sub`, `sup`, `blockquote` suggested; custom accepted).
+- Text-exclude chip editor (with "suggested from your site" chips populated by the boilerplate detector of §0.7).
+- Per-post overrides (Pro).
+
+This panel is **never shown by default** and the engine works without anyone opening it.
+
+**What this means for PR-B scope:**
+
+- PR-B does NOT build a 4-step wizard as a primary flow.
+- PR-B builds: (1) the auto-detection toast, (2) the one-click picker fallback, (3) the collapsed Advanced panel, (4) the listen-sample button inside each.
+- Settings.js hides the "Include Content By CSS Selectors" textarea when Layer 1 is ON (replaced by the auto-detect flow); the three legacy excludes stay visible because they still solve orthogonal skip-cruft cases.
+
+### 0.5 Settings UI split (shipped in PR-A)
+
+`src/dashboard/components/dashboard/settings/Settings.js` split into three files so the new system's UI can evolve independently of the legacy fields:
+
+- `SettingsPrimitives.js` — shared `ToggleSwitch`, `SettingRow`, `ProLockIcon` components.
+- `AtlasVoiceSettings.js` — opt-in toggle + picker launcher card (the picker card is gated on opt-in; PR-B will replace it with the wizard).
+- `LegacyExtractionSettings.js` — the four pre-AtlasVoice CSS-based fields, mechanical lift, identical behavior.
+
+### 0.6 Dropped from earlier thinking
+
+Several ideas from mid-session brainstorming were dropped:
+
+- **"Skip low-traffic posts" for lazy regen** — dropped because Free has no analytics surface that defines "low-traffic" consistently.
+- **Differential voice cost optimization** (pick cheapest voice for bulk regen) — out of scope; not essential for v4.
+- **Free cost-surface gating on migration dialog** — dropped; Free has no MP3 generation, so there is no cost surface to gate.
+
+### 0.7 Runtime self-healing + auto-detection (the real ticket-killers)
+
+Auto-picking once is not enough. The persistent ticket surface is sites where **a selector that worked yesterday stops working today** (theme update, builder rebuild changing auto-increment IDs, cache serving a different DOM variant). To close that gap, PR-C adds two runtime systems that run without user involvement:
+
+**1. Self-healing selectors.** Every extraction attempt checks:
+
+```
+result = tryResolve(saved_selector)
+if (!result || result.text.length < 40 || result.linkRatio > 0.6):
+    // saved selector no longer produces usable content
+    rescored = runScoringPass()
+    if (rescored.confidence >= 0.8):
+        saveSelector(scope, rescored.selector)    // silent heal
+        emit telemetry: { event: 'selector_auto_healed', old, new }
+        logToAdminBadge(post_id)
+    else:
+        fall through to tier 7 (PHP dumb fallback)  // site still works, degraded
+```
+
+No modal, no email, no blocking prompt. The admin sees a dashboard badge: *"3 posts auto-healed last 7 days. [Review]"*. Clicking opens a table that shows old → new selectors with listen samples for each, so the admin can revert a heal if it went wrong (one click per post).
+
+**2. Boilerplate text auto-detection.** Runs as a daily WP-Cron job over the 20 most-recently-extracted posts (or all posts if < 20 exist). Finds text patterns that appear in > 50% of extracted bodies — these are almost always CTAs, share-button labels, related-post titles, or author-bio boilerplate that leaked through CSS exclusion. Surfaces them as **suggested text-exclude chips** in the Advanced panel and in the post-edit meta box:
+
+```
+"We noticed 'Share this post' appears on 87% of your posts.
+ [Add as exclude] [Ignore]"
+```
+
+Users who never open Advanced see nothing. The suggestion list persists until actioned or dismissed. Dismissed patterns are remembered per-site (stored in `tta__atlasvoice_boilerplate_dismissed`).
+
+**Why these two matter for ticket volume:** per the research in this thread, ~50% of the remaining tickets after a good wizard are caused by (a) saved selectors breaking after theme/builder updates and (b) boilerplate leakage the user doesn't know how to exclude. Both are solved by code, not UI.
+
+### 0.8 PR breakdown (supersedes v3 Phase 1-4)
+
+| PR | Scope | Status |
+|---|---|---|
+| **PR-A** | Opt-in flag plumbed end-to-end, engine + picker gated on opt-in, legacy path 100% unchanged when OFF, Settings.js UI split. | ✅ Shipped on `feature/TTS-238`. |
+| **PR-B** | Picker promoted to stepwise wizard (scope → include → exclude → refine), listen sample, lazy on-demand loading of picker/engine bundles, diff preview vs legacy. | Next. |
+| **PR-C** | Pro rules (per-post-type + per-post), staging/production mode toggle, content-hash short-circuit, lazy visitor-load MP3 invalidation, snapshot/rollback per scope, custom-field reader behind opt-in. | After PR-B. |
+
+See §16 for the updated rollout table.
+
+---
+
+## 0 (historical). What changed in v3
 
 The prior revision (v2) described a **three-layer architecture** — Layer A (PHP smart extraction with DOMDocument + XPath + Readability + scoring), Layer B (JS hardening), Layer C (diagnostics). Two weeks of follow-up conversation with the user and additional production incidents made it clear that the three-layer design was the wrong shape:
 
@@ -166,6 +296,54 @@ The pattern from v2 still holds — no single CSS-selector list solves this. The
 | PHP (REST) | `POST /tts/v1/save-selector` / `POST /tts/v1/extraction-report` / `POST /tts/v1/preview-text` | JSON | §8. |
 
 The PHP side knows nothing about HTML parsing. The JS engine knows nothing about intro/outro or fingerprint comparison (it only reports what it found). Each side does one job.
+
+### 3.1 Runtime control plane (v4)
+
+On top of the extraction engine, v4 adds three runtime layers that decide **whether** and **how** the engine runs. The engine itself is unchanged; these layers are pure gates.
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Layer 1: Opt-in (tta__settings_use_atlasvoice_extractor)                │
+│   OFF  → engine, picker, markers, new UI ALL dormant.                   │
+│          Legacy pipeline runs byte-identical to 2.1.17.                 │
+│   ON   → engine assets loaded; picker available; markers emitted.       │
+└─────────────────────────────────────────────────────────────────────────┘
+                                  │ (only if ON)
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Layer 2: Mode (tta__settings_atlasvoice_mode)                           │
+│   staging    → new engine runs, writes MP3s, keeps legacy output        │
+│                available as diff baseline. Safe default.                │
+│   production → new engine is sole source of truth. Legacy code path     │
+│                is bypassed at the TTSProHelper.js opt-in gate.          │
+└─────────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Layer 3: Rules (tta__settings_atlasvoice_rules)                         │
+│   { scope: { include: selector, exclude: [selectors],                   │
+│              tag_excludes: [tag|tag], text_excludes: [text|text] } }    │
+│   Free  → single entry, scope='global'.                                 │
+│   Pro   → multiple entries, scopes=['global', 'cpt:post',               │
+│           'cpt:product', 'post:123', …]. Resolution: most-specific wins.│
+│   Filled exclusively by the visual picker (§4.3). No textarea fallback  │
+│   for Include when opt-in ON.                                           │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Layers are orthogonal:** opt-in ON + staging + zero rules is a valid state (the engine runs with default scoring). Layer 3 only refines what Layer 2 already decided to run.
+
+**Integration via `template_redirect` (hook-based, zero existing-file edits):**
+
+The v4 runtime is plumbed by a new `AtlasVoice\Bootstrap` class registered on `template_redirect` priority 9. It inspects Layer 1; if OFF, it does nothing (the class simply returns). If ON, it:
+
+1. Enqueues `tts-extractor-engine.min.js` and (for logged-in editors) `tts-picker.min.js`.
+2. Fires the `atlasvoice_pre_listen` action on a visitor's first listen for a post, which computes the content hash and short-circuits or lazily invalidates the MP3 (§5, §6).
+3. Registers the `atlasvoice_extractor_result` filter that `TTSProHelper.js::getModifiedContent` consumes via the opt-in gate.
+
+Existing files (`TTSProHelper.js`, `helpers.php`, `TTA_Pro_Filters.php`, `TTA_Pro_Helper.php`) receive **at most** a single opt-in gate — a top-of-function `if (tts.use_atlasvoice_extractor) { try new path; return if succeeded; }` short-circuit. The body of those functions is untouched.
+
+Any method the new system needs from existing code is **copied with rename** into the new module (e.g. `TTA_Pro_Helper::acf_plugin_content` → `AtlasVoice\Readers\ACFReader::read`). Never shared. This isolates the new system's evolution from the legacy path completely.
 
 ---
 
@@ -675,6 +853,8 @@ Documented in `plan/docs-content-extraction-guide.md` and in the Docs tab bundle
 
 ## 5. MP3 regeneration policy
 
+**Scope clarification (v4):** this section is **Pro-only**. Free uses the browser `speechSynthesis` API at listen time and has no MP3 cache; regeneration as a concept does not apply. Every key in this section is read only when `TTA_Helper::is_pro_active()` returns true.
+
 Carried over from v2 with one adjustment: the fingerprint source is now the **JS-reported extracted text**, not a PHP-side DOMDocument result.
 
 New setting `tta__settings_mp3_regeneration_mode`:
@@ -723,6 +903,53 @@ Trade-off accepted: in `auto` mode a brand-new post whose content JS hasn't insp
 - Classic `save_post` fires twice (autosave + save). `static` guard dedupes per-request.
 - Bulk / Quick Edit: always `auto` — no per-post modal surface.
 - `ask` mode only shows modal when `get_current_screen()->base === 'post'` and combined fingerprint changed.
+
+### 5.5 Content-hash short-circuit (v4)
+
+Even in `auto` mode, v4 does **not** immediately call "regen" when the combined fingerprint changes. It first compares `md5(current_extracted_text)` against the stored `_tta_extracted_text_hash`:
+
+```
+on settings change that flips combined fingerprint:
+    new_hash = md5(run_extractor_on_stored_sample_or_queued_visitor_load())
+    if new_hash == post_meta('_tta_extracted_text_hash'):
+        // output text is identical — MP3 is still valid
+        update post_meta('_tta_last_mp3_fingerprint', new combined)   // resync
+        skip regen
+    else:
+        mark post as dirty (not delete yet — see §5.6)
+```
+
+Typical short-circuit cases:
+- User toggles "Add post excerpt" on a post whose excerpt is empty.
+- User adds a CSS exclusion that doesn't match any element in this post.
+- User adds a text pattern to the "Exclude Texts" list that doesn't appear in this post.
+- User adds an include selector that matches the same body the scorer would have auto-picked.
+
+In each case, the extracted text is byte-identical and the existing MP3 is still the correct output. Skipping regen saves the per-character API cost of whichever voice provider is configured (ChatGPT TTS, ElevenLabs, Google Cloud TTS, gTTS-Pro).
+
+### 5.6 Lazy visitor-load invalidation (v4)
+
+When the hash *does* change, v4 **does not** immediately delete all affected MP3s. It marks the post dirty and defers the delete+regen until a real visitor loads the post:
+
+```
+settings change detected on save (admin):
+    for each affected_post:
+        post_meta('_tta_regen_dirty', true)
+        // NO file deletion here
+
+template_redirect on frontend visit:
+    if post_meta('_tta_regen_dirty') && is_singular():
+        on atlasvoice_pre_listen action (fires when listener actually clicks Play):
+            delete_stale_mp3(post_id, player_id)
+            queue regen (existing path)
+            delete post_meta('_tta_regen_dirty')
+```
+
+**Why lazy:** a 500-post site that changes its "Exclude Content By CSS Selectors" setting should not pay 500× regen cost upfront. The bill should scale with actual listener demand. Posts no one listens to never cost anything.
+
+**Bulk MP3 interaction:** the admin's "Bulk MP3" generator treats `_tta_regen_dirty = true` the same as "never generated" — it regenerates during the bulk run. So admins who want to pre-warm the cache after a settings change can click Bulk MP3 once; admins who prefer pay-per-play can skip it entirely.
+
+**Free users:** `_tta_regen_dirty` is never written because Free does not generate MP3s. The entire lazy-invalidation path is a Pro code branch.
 
 ---
 
@@ -873,12 +1100,27 @@ New helper text for the auto-selector / per-CPT fields:
 - Custom-field opt-in semantics.
 - Troubleshooting: "player reads only the title" → scoring confidence low → open AtlasVoiceSelector.
 
+**v4 addition — "When the player reads the wrong thing" troubleshooting tree.** Mirrors §11.1 exactly. Six guided flows, each with screenshots and a one-line "try this first" action:
+
+1. *"My saved selector worked yesterday but doesn't now"* → explain self-heal badge + how to revert a bad heal.
+2. *"The player misses content that appears after the page loads"* → explain `data-atlasvoice-wait-for` opt-in; show where to add it (theme template / functions.php snippet).
+3. *"Logged-in users hear something different"* → explain MP3 variant keying; show the post-edit radio.
+4. *"I changed the selector but listeners hear the old content"* → cache purge: deep-links to LiteSpeed / WP Rocket / W3TC / SG Optimizer + manual steps.
+5. *"The player misses text inside tabs or accordions"* → explain why clones work, what to do if theme strips `display:none` text via JS.
+6. *"My Spanish / French / etc. posts extract wrongly"* → explain per-language keying; show the "Pick for Spanish" CTA.
+
+Each flow is also linked from the exact in-UI surface that detects the symptom (§11.1 last column), so users don't have to hunt for it.
+
 ---
 
 ## 9. Free vs Pro split (locked)
 
 | Feature | Free | Pro | Notes |
 |---|:-:|:-:|---|
+| **v4 Layer 1 — Opt-in toggle** | ✅ | ✅ | `tta__settings_use_atlasvoice_extractor`. When OFF legacy is untouched. |
+| **v4 Layer 2 — Staging / Production mode** | — | ✅ | `tta__settings_atlasvoice_mode`. Free stays in staging semantics implicitly. |
+| **v4 Layer 3 — Rules (scoped)** | ✅ global only | ✅ global + per-CPT + per-post | Free = 1 entry; Pro = N entries, most-specific wins. |
+| **v4 Picker wizard (scope → include → exclude → refine)** | ✅ 2 steps | ✅ 4 steps | Free locked to "this post only" scope + 1 include; Pro gets full wizard with tag/text chips and listen sample. |
 | JS extraction engine (tiers 1-6) | ✅ | ✅ | Same code path both tiers. |
 | Comment-marker wrapper (`<!--atlasvoice:start:X-->`) | ✅ | ✅ | |
 | Legacy `<div class="tts_content_wrapper_X">` dual-emit (Phases 1-3) | ✅ | ✅ | Removed in Phase 4. |
@@ -894,9 +1136,11 @@ New helper text for the auto-selector / per-CPT fields:
 | Preview audio text (alternatives + suggested excludes) | — | ✅ | |
 | Diagnose URL | — | ✅ | Same-origin, manage_options. |
 | Dry-run preview diff | ✅ | ✅ | |
-| MP3 regeneration modes (manual / auto / ask) | ✅ | ✅ | |
-| Content fingerprint | ✅ | ✅ | |
-| Bulk MP3 skip-unchanged | ✅ (player 1) | ✅ (all players) | |
+| MP3 regeneration modes (manual / auto / ask) | — | ✅ | Free uses browser `speechSynthesis` — no MP3 to regenerate. |
+| Content fingerprint | ✅ (extractor hash only) | ✅ (full) | Free stores extracted-text hash for dry-run diff; Pro uses it for MP3 short-circuit. |
+| Content-hash short-circuit (v4) | — | ✅ | Skips regen when extracted text is byte-identical. Pro-only cost optimization. |
+| Lazy visitor-load MP3 invalidation (v4) | — | ✅ | Dirty-flag now, delete+regen on first listen. Pro-only. |
+| Bulk MP3 skip-unchanged | — | ✅ | Free has no Bulk MP3 surface. |
 | Custom-field readers (opt-in) | ✅ hook + ACF UI | ✅ full UI | |
 | Auto-suggest selectors | — | ✅ | Surfaces scoring alternatives. |
 | Inline help text | ✅ basic | ✅ extended | |
@@ -992,6 +1236,30 @@ No new Free feature hidden behind Freemius premium checks. Pro features gated vi
 | **UTF-8 / emoji / RTL** | JS reads `innerText` (already decoded). Sent to TTS backends via existing pipeline. |
 | **Infinite-scroll / lazy DOM** | Tier 1 walks from comment start to comment end at extraction-start time. If content hasn't loaded yet, we retry after a 250ms idle window, bounded by 1.5s total. |
 | **Single-page app theme** | `ttsExtractContent` is re-runnable; the Pro player re-extracts on `popstate` / custom route-change events. |
+
+### 11.1 The "six hard cases" — self-heal + in-UI guidance (v4)
+
+Six situations were called out as the realistic residual ticket surface even after zero-click auto-detection. Each is mitigated by a combination of **runtime self-healing** (§0.7) and **in-UI guidance** surfaced at the exact spot the user hits the symptom — never in a separate docs page they'd have to find.
+
+| # | Case | Automatic mitigation | In-UI guidance surface | Where guidance lives |
+|---|---|---|---|---|
+| 1 | **Theme/builder DOM change** — saved `.fl-builder-content-1234` stops matching after Beaver Builder rebuilds. | Self-healing selector (§0.8) re-scores silently on first match-failure. Dashboard badge lists healed posts for one-click revert. | On the **Settings → AtlasVoice** panel: green/orange status pill *"Selector status: Healthy / Auto-healed N posts last 7 days — [Review]"*. On post-edit meta box: *"Selector last verified: Apr 18. [Re-verify now]"* button. | §8.4 inline help + badge in `AtlasVoiceSettings.js` + meta-box row (PR-C). |
+| 2 | **AJAX-loaded content** — reviews, comments, related posts appear after initial DOM. | Engine retries extraction once after a 250ms idle window (bounded 1.5s total). For persistently-late content, a `data-atlasvoice-wait-for="selector"` opt-in attribute on the container tells the engine to observe for mutations up to 3s. | When scoring confidence is borderline AND `IntersectionObserver` detects mutations inside the picked container post-extraction, toast: *"Some content loads after the page — listen sample may be incomplete. [Learn how to fix]"*. Link opens a modal, not an external docs page. | New `src/dashboard/components/dashboard/docs/guidance-ajax.js` inline modal (PR-C). |
+| 3 | **Logged-in vs logged-out DOM** — members-only sections, price visibility, hidden fields. | Extractor runs once per cache bucket (logged-out/logged-in). MP3s are keyed by the same buckets via a new `_tta_mp3_variant` post meta when logged-in-only content is detected in the picked container. | Post-edit meta box row: *"Logged-in users see extra content on this post. Read: [logged-out version] (default) / [logged-in version] / [both separately]."* Radio, saved per post. | Meta-box row + guidance tooltip (PR-C). |
+| 4 | **CDN / page cache** — picker learns against uncached output; visitor hits stale HTML. | Comment markers survive caching (plain-text HTML comments are rarely stripped). Self-healer catches stale-cache match-failures and re-scores. | On first save of a selector, banner: *"If you use a CDN or full-page cache, purge it now so your next listeners get the updated content. [Purge in LiteSpeed] [Purge in WP Rocket] [Manual steps]"*. Detects active cache plugin and shows its purge link. | New `AtlasVoice\CachePurgeHints.php` registered with PR-C; existing `TTA_Hooks.php` already lists supported cache plugins. |
+| 5 | **Tabs / accordions / collapsed regions** — picker sees only the visible panel. | Engine reads `innerText` on the full chosen container — `display:none` children are included only if their text content is non-empty in the live DOM. For `aria-hidden="true"` / `hidden` attributes, extracted; for CSS-only `display:none`, DOM text is still in the tree. The chosen container is `cloneNode(true)` before extraction so collapsed content is not missed. | If the picked container has descendants with `[aria-expanded="false"]` or `.collapsed` classes, picker shows chip: *"Includes N tab panels — [preview all] / [exclude hidden]"*. | Picker toolbar addendum (PR-B). |
+| 6 | **Multi-language sites** — picker done in English, Spanish DOM different after TranslatePress/Polylang. | Selector storage is keyed per-language when WPML / Polylang / TranslatePress / GTranslate is active. First-visit auto-save runs once per `(post_type, language_code)`. Fallback: if no selector for current language, try `global` → `per_cpt` language-agnostic keys. | When a multi-language plugin is detected, Settings shows: *"Multi-language detected. Selectors are saved separately per language. [Pick for Spanish now]"* if Spanish has no saved selector yet. | `AtlasVoiceSettings.js` addendum (PR-C); detection hook lives in `AtlasVoice\LanguagePlugins.php`. |
+
+**Philosophy:** guidance is co-located with the symptom (not buried in a docs page). The user never has to know the jargon "saved selector" — they see "3 posts auto-healed" as a simple badge, click it if curious, revert if wrong. The Docs page (§8.5) keeps the long-form explanation for power users who want the full picture.
+
+### 11.2 Edge cases that remain explicitly out of scope
+
+Even with self-heal + in-UI guidance, these produce extraction surprises and users will need to hand-tune. Each is called out with its escape hatch:
+
+- **A/B tested content** (Google Optimize, LaunchDarkly cookie-driven variants): extractor reads whatever variant the extractor's page load happened to get. Escape: lock extraction to the control variant via `ttsBeforeExtract` JS filter.
+- **Highly dynamic SPAs** (Vue/React hydration of post content): engine re-extracts on `popstate` but won't catch framework-internal route changes. Escape: expose `window.ttsReExtract()` for themes to call.
+- **Shadow DOM encapsulated content** (web components): engine cannot pierce shadow roots by default. Escape: opt-in via `data-atlasvoice-shadow="true"` on the host element.
+- **Custom fonts replaced as icons** (Font Awesome ligatures that render as icons but contain real text like "facebook" in the DOM): default text-exclude list extended to include common icon-font Unicode private-use ranges.
 
 ---
 
@@ -1124,16 +1392,23 @@ For each builder/theme below, test: (a) auto-button mode, (b) shortcode `[atlasv
 
 ---
 
-## 16. Rollout — 4 phases
+## 16. Rollout — PR-based (v4)
 
-| Phase | Scope | Free version | Pro version |
-|---|---|---|---|
-| **Phase 1** | Comment-marker wrapper **dual-emit** (`<!--atlasvoice:start:X-->` + legacy div). JS tier 1 walk. No scoring yet. No per-CPT storage. No picker. | 2.2.0 (TBD) | 2.2.0 (TBD) |
-| **Phase 2** | JS tiers 5-6 (scoring + `BUILDER_BODY_SELECTORS` with commerce / LMS). Per-post-type storage (Pro). AtlasVoiceSelector. First-visit auto-save. Gutenberg block opt-out. | 2.3.0 (TBD) | 2.3.0 (TBD) |
-| **Phase 3** | MP3 regeneration policy (manual / auto / ask). Fingerprint storage and Bulk MP3 skip-unchanged. Dry-run preview diff. Opt-in banner. Preview audio text (free basic, Pro enhanced). Diagnose URL (Pro). Inline help text, docs page. | 2.4.0 (TBD) | 2.4.0 (TBD) |
-| **Phase 4** | Remove legacy `<div class="tts_content_wrapper_X">`. Tune `BUILDER_BODY_SELECTORS` and scoring weights from telemetry. Default `tta__settings_new_extraction_opt_in = true` for all installs. | 2.5.0 (TBD) | 2.5.0 (TBD) |
+v4 replaces v3's Phase 1-4 cadence with three independent PRs. Each PR is independently shippable; the system works (with reduced functionality) if the later PRs never land.
 
-Each phase independently shippable. Phases merge in order without coupling.
+| PR | Status | Scope | Free version | Pro version |
+|---|---|---|---|---|
+| **PR-A — Opt-in gating + UI split** | ✅ **Shipped on `feature/TTS-238`** | Layer 1 toggle plumbed end-to-end. Engine + picker assets + admin-bar entry gated on opt-in. Legacy pipeline byte-identical when OFF. `TTSProHelper.js::getModifiedContent` gains a single opt-in short-circuit that delegates to `window.AtlasVoiceExtractor.getContentForPlayer` when ON. Settings UI split into `SettingsPrimitives.js` / `AtlasVoiceSettings.js` / `LegacyExtractionSettings.js`. Comment-marker dual-emit in Pro filter. Picker button on dashboard + admin bar. | 2.2.0 (TBD) | 2.2.0 (TBD) |
+| **PR-B — Auto-detection toast + fallback picker + lazy loading** | Next | **Primary flow is zero clicks (§0.4):** scorer + first-visit auto-save + auto-detected excludes + non-blocking toast with listen sample. **Fallback flow (low-confidence only):** one-click picker overlay. **Advanced panel (collapsed by default):** scope override, tag/text exclude chips, per-post overrides. Dry-run diff modal vs legacy output. Lazy on-demand bundle loading (picker + engine bundles only fetched when the auto-detect toast or Advanced panel is opened — no page-load cost for users whose site the engine auto-handles). Block-opt-out toggle in Gutenberg inspector. Preview audio text modal (Free basic, Pro enhanced). | 2.3.0 (TBD) | 2.3.0 (TBD) |
+| **PR-C — Pro rules + staging/production + lazy regen + self-heal** | After PR-B | Layer 2 mode toggle (staging / production). Layer 3 rules promoted to per-CPT + per-post scopes (Pro). Content-hash short-circuit (§5.5). Lazy visitor-load MP3 invalidation via `template_redirect` (§5.6). Snapshot/rollback per scope (one click reverts a rule to the previous saved value). Custom-field reader behind opt-in (§7), with `AtlasVoice\Readers\*Reader::read` copy-with-rename from existing `TTA_Pro_Helper::acf_plugin_content`. Diagnose URL (Pro). **NEW v4.1 ticket-killers (§0.7, §11.1):** (a) self-healing selectors with dashboard "N posts auto-healed" badge and one-click revert; (b) boilerplate text auto-detection via daily WP-Cron with suggested-chip UI; (c) cache-purge hints on selector save (detects active cache plugin and deep-links to its purge UI); (d) per-language selector keying for WPML/Polylang/TranslatePress/GTranslate; (e) logged-in/logged-out MP3 variant keying; (f) AJAX-late-content mutation-observer opt-in via `data-atlasvoice-wait-for`. | 2.4.0 (TBD) | 2.4.0 (TBD) |
+| **Post-PR-C** | Deferred | Remove legacy `<div class="tts_content_wrapper_X">`. Tune `BUILDER_BODY_SELECTORS` and scoring weights from telemetry. Default opt-in = true for fresh installs. | 2.5.0 (TBD) | 2.5.0 (TBD) |
+
+**Safety invariants across all three PRs:**
+
+1. Opt-in OFF (the default for every existing user) → zero new frontend assets, zero new DOM markers, zero behavioral change from 2.1.17. Verified in PR-A via manual QA in Chrome.
+2. No edits to the body of existing extraction functions — only top-of-function opt-in gates. Verified by `git diff` review on PR-A.
+3. MP3 files on disk are only deleted inside the `template_redirect` lazy-regen path, never upfront from settings saves. Free never triggers deletion because Free has no MP3s.
+4. Every rollback is one toggle: flip Layer 1 OFF → legacy runs on next page load. No MP3 cache is touched by toggling layers; it becomes stale but remains the same bytes it was before.
 
 ---
 
@@ -1156,7 +1431,20 @@ Each phase independently shippable. Phases merge in order without coupling.
 | `src/picker/tts-picker.js` | — | **NEW.** AtlasVoiceSelector overlay (SelectorGadget port), stable-selector algorithm, admin-bar wiring, REST save. | ✅ |
 | `src/block-editor/tts-block-opt-out.js` | — | **NEW.** Block inspector toggle. | ✅ |
 | `src/editor/tts-regen-confirm.js` | — | **NEW.** `ask` mode confirm modal. | ✅ |
-| `src/dashboard/components/dashboard/settings/Settings.js` | — | Add auto-selector + per-CPT rows + inline help + "Pick visually" button. | — |
+| `src/dashboard/components/dashboard/settings/Settings.js` | — | **PR-A (shipped):** Split extraction UI out into sub-components. Removed inline opt-in toggle + 4 legacy extraction `<Row>` blocks; renders `<AtlasVoiceSettings>` + `<LegacyExtractionSettings>` instead. PR-B will add inline diff modal trigger. | — |
+| `src/dashboard/components/dashboard/settings/SettingsPrimitives.js` | — | **NEW (PR-A shipped).** Shared UI primitives (`ToggleSwitch`, `SettingRow`, `ProLockIcon`) shared between the new and legacy settings sub-components. | ✅ |
+| `src/dashboard/components/dashboard/settings/AtlasVoiceSettings.js` | — | **NEW (PR-A shipped).** Layer 1 opt-in toggle + picker launcher card. PR-B will replace the launcher card with the stepwise wizard modal. | ✅ |
+| `src/dashboard/components/dashboard/settings/LegacyExtractionSettings.js` | — | **NEW (PR-A shipped).** The four pre-AtlasVoice CSS-based extraction fields, mechanical lift from Settings.js. Zero behavioral change. PR-B will hide the "Include Content By CSS Selectors" textarea when Layer 1 is ON (replaced by picker); the three legacy excludes stay visible because they solve an orthogonal problem. | ✅ |
+| `includes/AtlasVoice/Bootstrap.php` | — | **NEW (PR-C).** Registered on `template_redirect` priority 9. Inspects Layer 1; when ON, fires `atlasvoice_pre_listen` on visitor's first listen and triggers lazy-regen (§5.6). Zero existing-file edits required to wire this up. | ✅ |
+| `includes/AtlasVoice/Rules.php` | — | **NEW (PR-C).** Reader/writer for Layer 3 scoped rules. `resolve($post_id, $post_type)` returns the most-specific rule (post → cpt → global). | ✅ |
+| `includes/AtlasVoice/ContentHash.php` | — | **NEW (PR-C).** `md5_of_extracted_text()`, `short_circuit_or_dirty()`. Writes `_tta_extracted_text_hash` and `_tta_regen_dirty` post meta. | ✅ |
+| `includes/AtlasVoice/Readers/ACFReader.php` (+ MetaBox, Pods, JetEngine, Toolset, CarbonFields) | — | **NEW (PR-C).** Copy-with-rename from existing `TTA_Pro_Helper::acf_plugin_content` and friends. No shared code with the legacy path. | ✅ |
+| `includes/AtlasVoice/SelfHealer.php` | — | **NEW (PR-C, v4.1).** Runs on every extractor invocation; detects match-failures of saved selectors, rescores, saves the new selector, logs the heal event for the dashboard badge. Supports one-click revert via a stored 5-deep history per scope. | ✅ |
+| `includes/AtlasVoice/BoilerplateDetector.php` | — | **NEW (PR-C, v4.1).** WP-Cron daily job. Cross-post substring analysis across the last 20 extracted bodies; surfaces 3+ char phrases appearing in > 50% of posts as suggested text-exclude chips. Respects `tta__atlasvoice_boilerplate_dismissed`. | ✅ |
+| `includes/AtlasVoice/CachePurgeHints.php` | — | **NEW (PR-C, v4.1).** On selector save, detects active cache plugin (LiteSpeed / WP Rocket / W3TC / SG Optimizer / Autoptimize) and returns the deep-link to that plugin's purge UI + step-by-step for manual purge. Reuses the detection already in `TTA_Hooks.php`. | ✅ |
+| `includes/AtlasVoice/LanguagePlugins.php` | — | **NEW (PR-C, v4.1).** Detects WPML / Polylang / TranslatePress / GTranslate. Keys selector storage as `{scope}:{lang_code}`. Exposes `current_language_code()` to JS. | ✅ |
+| `includes/AtlasVoice/AuthVariants.php` | — | **NEW (PR-C, v4.1).** Tags MP3 storage with `_tta_mp3_variant` (`logged_out` / `logged_in` / `both`) when the picked container yields meaningfully different text between auth states. Meta-box radio lets admin pin a variant per post. | ✅ |
+| `src/extractor/tts-extractor-engine.js` (v4.1 addendum) | — | Adds `data-atlasvoice-wait-for` mutation-observer opt-in (3s bounded) for AJAX-late content; exposes `window.ttsReExtract()` for SPA themes. | — |
 | `src/dashboard/components/dashboard/compatibility/Compatibility.js` | — | Drag-sort field order + opt-in header text. | — |
 | `src/dashboard/components/dashboard/docs/Docs.js` | — | New section "How content extraction works". | — |
 | `src/dashboard/components/dashboard/dry-run/DryRunModal.js` | — | **NEW.** Dry-run diff UI. | ✅ |
@@ -1173,7 +1461,7 @@ Each phase independently shippable. Phases merge in order without coupling.
 | File | Line anchor | Change |
 |---|---|---|
 | `Includes/TTA_Pro_Filters.php` | [L244-270](../../text-to-audio-pro/Includes/TTA_Pro_Filters.php) | `tts_button_with_content_callback` — emit `<!--atlasvoice:start:$btn_no-->` / `<!--atlasvoice:end:$btn_no-->` around content. Keep legacy div under `tts_emit_legacy_wrapper` filter (Phase 1-3), remove in Phase 4. |
-| `Assets/js/TTSProHelper.js` | [L609-665](../../text-to-audio-pro/Assets/js/TTSProHelper.js) | Replace `getContentsFromDom` tail. First call `window.ttsExtractContent(buttonId, { postType })` (from free's new engine). Use the result as source of truth. Include/exclude selectors still applied **inside** the returned element. |
+| `Assets/js/TTSProHelper.js` | [L609-665](../../text-to-audio-pro/Assets/js/TTSProHelper.js) | **PR-A (shipped):** top-of-`getModifiedContent` opt-in short-circuit — if `tts.use_atlasvoice_extractor` and `window.AtlasVoiceExtractor` present, delegate to `getContentForPlayer(opts)` and return if it succeeds; otherwise fall through to the **unmodified** legacy body. The legacy path stays byte-identical. Do NOT replace `getContentsFromDom`'s body — it continues to serve opt-in-OFF users. |
 | `Assets/js/TTSProHelper.js` | [L1119-1140](../../text-to-audio-pro/Assets/js/TTSProHelper.js) | Extend `getContentSettingsFingerprint` to include `window.TTS.contents_fingerprint[buttonId]` as `phpHash` (already in v2 plan — carried forward). |
 | `Assets/js/plyr.js` | [L250](../../text-to-audio-pro/Assets/js/plyr.js) | `document.querySelector('.tts_content_wrapper_' + buttonId)` — replace with a helper that prefers comment-marker walk, falls back to the old selector. |
 | `Assets/js/compatibality/plugins/TTSGtranslate.js` | [L310, L417](../../text-to-audio-pro/Assets/js/compatibality/plugins/TTSGtranslate.js) | Same helper switch. |
@@ -1221,6 +1509,10 @@ Bundles added in Phase 1-3:
 18. **No new external PHP dep** in the free plugin ZIP (no Readability, no CSS-to-XPath vendor, no DOMDocument wrapper).
 19. **P50 ≤ 50ms** JS extraction measured on a 5k-word real post (`extractor_ms` telemetry median).
 20. **Telemetry `extractor_path_used` distribution** — after 30 days in Phase 3, `comment` ≥ 80%, `php_fallback` ≤ 2%.
+21. **(v4.1) Zero-click opt-in rate** — of users who turn Layer 1 ON, at least **85%** never need to open the picker (measured via `picker_opened=false && opt_in=true` telemetry bucket at 30d post-enable).
+22. **(v4.1) Self-heal coverage** — on a corpus of 200 sites with simulated theme/builder updates, ≥ **70%** of broken selectors are silently healed without manual admin intervention; remaining ≤ 30% fall back to tier 7 PHP without user-visible errors.
+23. **(v4.1) Support ticket reduction target** — **80–90%** reduction in "player reads wrong content" tickets in the 90 days following PR-C vs the 90 days preceding PR-A (baseline captured in the TTS-238 Jira epic). Zero is not a target; 80–90% is.
+24. **(v4.1) In-UI guidance attach rate** — the six hard-case flows (§11.1) are linked from at least one admin UI surface each, validated by click-through telemetry > 0 for each flow within 30 days of PR-C release.
 
 ---
 
@@ -1297,7 +1589,33 @@ Removes the asymmetry where `init_gctts` had a different first param (`shouldRep
 
 ## Revision log
 
-### 2026-04-20 — v3 rewrite (this revision)
+### 2026-04-21 — v4.1 addendum (this revision)
+
+Focus: **shift effort from UI to code** to avoid trading old tickets for new ones. Key changes:
+
+- **§0.4 rewritten.** The 4-step wizard from the first v4 draft is demoted to a **low-confidence fallback**. Happy path is zero clicks: engine auto-picks, auto-excludes, auto-detects boilerplate. Wizard appears only when scoring confidence < 0.8. Advanced panel is always collapsed by default.
+- **§0.7 added — self-healing + boilerplate auto-detection.** Saved selectors that stop matching are silently re-scored; admins see a "N posts auto-healed" dashboard badge with one-click revert. Daily WP-Cron job surfaces cross-post boilerplate text as dismissible chips.
+- **§11.1 added — "six hard cases".** Explicit playbook for theme/builder DOM change, AJAX-late content, logged-in vs logged-out DOM, CDN/cache staleness, tabs/accordions, multi-language. Each case has (a) automatic mitigation and (b) in-UI guidance co-located with the symptom — never buried in a separate docs page. Docs page (§8.5) still carries the long-form explanation for power users.
+- **§11.2 added — explicitly-out-of-scope cases** (A/B tests, shadow DOM, hydration, icon fonts) with their escape hatches documented.
+- **PR-C scope expanded** to include 6 new ticket-killers: self-healer, boilerplate detector, cache purge hints, language plugin keying, auth variants, AJAX mutation-observer opt-in. §16 and §17.1 updated accordingly.
+- **§18 acceptance criteria 21-24 added** — zero-click opt-in rate ≥ 85%, self-heal coverage ≥ 70%, 80-90% ticket reduction target (not zero), in-UI guidance attach rate validated.
+- **Philosophy clarified**: every mandatory UI step is a new ticket vector; user-facing decisions are minimized; the wizard exists so users who need it can find it, not so the happy-path user has to walk through it.
+
+### 2026-04-21 — v4 revision
+
+- **Three-layer runtime control plane added** (§0.1, §3.1). Layer 1 opt-in (`tta__settings_use_atlasvoice_extractor`), Layer 2 mode (`tta__settings_atlasvoice_mode` = `staging` | `production`; Pro-only), Layer 3 scoped rules (`tta__settings_atlasvoice_rules` = global | per-CPT | per-post; Pro-only scopes). Layers are orthogonal and independently togglable. v3's "new_extraction_opt_in" key is the same idea as Layer 1 and is unified under the v4 name.
+- **Hook-based integration / max code isolation directive** (§0.2, §3.1). New system plumbs in via a `template_redirect`-registered `AtlasVoice\Bootstrap`. No existing extraction function body is rewritten — only top-of-function opt-in gates are added. Methods the new system needs from existing code are **copied-with-rename** into `AtlasVoice\Readers\*Reader` rather than shared. Strangler Fig pattern.
+- **Content-hash short-circuit** (§0.3, §5.5). When settings change but extracted text is byte-identical (e.g. user adds an exclusion that doesn't match anything in this post), Pro skips MP3 regen and resyncs the combined fingerprint. Saves per-character API cost on ChatGPT TTS / ElevenLabs / Google Cloud TTS / gTTS-Pro.
+- **Lazy visitor-load MP3 invalidation** (§0.3, §5.6). On hash-changing settings changes, Pro does not mass-delete MP3s upfront. Posts are marked `_tta_regen_dirty`; delete+regen happens on first visitor listen via `template_redirect`. A 500-post site pays only for posts that are actually listened to. Admins can still trigger pre-warm via the existing Bulk MP3 surface.
+- **Free = no MP3 clarification** (§0.3, §5 scope note, §9 table). Free uses browser `speechSynthesis` at listen time and has no MP3 cache. All MP3 regeneration, content-hash short-circuit, and lazy-invalidation logic is a Pro-only code branch. Free only stores the extracted-text hash for dry-run diff purposes.
+- **Picker promoted to stepwise wizard** (§0.4). PR-B turns the current single button into a 4-step wizard (scope → include → exclude → refine) with chip UI and 5s listen sample. Free gets a 2-step subset (current-post scope + one include); Pro gets the full flow with tag/text excludes as chips instead of textareas.
+- **Settings.js UI split shipped in PR-A** (§0.5, §17.1). Split into `SettingsPrimitives.js` (shared ToggleSwitch/SettingRow/ProLockIcon), `AtlasVoiceSettings.js` (Layer 1 + picker launcher), `LegacyExtractionSettings.js` (four pre-AtlasVoice CSS fields). The two sub-components can evolve independently; legacy fields stay visible when opt-in is ON because the three Excludes solve an orthogonal "skip cruft inside an already-correct include" problem.
+- **Rollout re-phased from Phase 1-4 to PR-A / PR-B / PR-C** (§16). PR-A (opt-in + UI split) shipped on the feature branch. PR-B adds the wizard + lazy bundle loading. PR-C adds Pro rules, staging/production mode, content-hash short-circuit, and lazy regen. Legacy wrapper div removal is deferred to post-PR-C.
+- **Dropped from mid-session brainstorming** (§0.6): "skip low-traffic posts for lazy regen" (Free has no analytics surface to define low-traffic); "differential voice cost per-post" (not essential for v4); "Free cost-surface gating on migration dialog" (Free has no cost surface).
+- **§17 file list updated** to mark PR-A additions (✅ shipped) and PR-C `AtlasVoice\*` classes (✅ new). `TTSProHelper.js` change in §17.2 restated as "top-of-function opt-in short-circuit" rather than "replace getContentsFromDom body" — the legacy body stays byte-identical for opt-in-OFF users.
+- **v3 extraction engine (tiers 1-7, comment markers, scoring, BUILDER_BODY_SELECTORS, AtlasVoiceSelector) carried forward unchanged.** v4 does not revise the engine; it wraps it in a control plane.
+
+### 2026-04-20 — v3 rewrite
 
 - **Architectural collapse.** Three-layer design (Layer A PHP smart extractor, Layer B JS, Layer C diagnostics) replaced by a single JS engine with a dumb PHP fallback. Dropped: `TTA\TTA_Content_Extractor`, `fivefilters/readability.php` vendoring, CSS-to-XPath translator, PHP libxml/XXE hardening, and the `tta_extractor_*` filter surface. Rationale: one engine reads the rendered DOM (source of truth), matches the user's "never read anything not on the UI, except intro/outro" constraint, halves the code surface, and eliminates the parallel-system bug class.
 - **Wrapper change.** Replaced `<div class="tts_content_wrapper_X">` with HTML comment markers (`<!--atlasvoice:start:X-->` / `<!--atlasvoice:end:X-->`) emitted at the same call site in [TTA_Pro_Filters.php:244-270](../../text-to-audio-pro/Includes/TTA_Pro_Filters.php). Dual-emit for Phases 1-3, legacy div removed in Phase 4. Comments are invisible to CSS, layout, flex/grid, `:nth-child`, a11y, and AMP sanitizer.

@@ -11781,6 +11781,343 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 
 /***/ }),
 
+/***/ "./src/dashboard/components/dashboard/settings/AtlasVoiceSettings.js":
+/*!***************************************************************************!*\
+  !*** ./src/dashboard/components/dashboard/settings/AtlasVoiceSettings.js ***!
+  \***************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ AtlasVoiceSettings)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "./node_modules/@wordpress/i18n/build-module/index.js");
+/* harmony import */ var _SettingsPrimitives__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./SettingsPrimitives */ "./src/dashboard/components/dashboard/settings/SettingsPrimitives.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/**
+ * AtlasVoice Settings (TTS-238 — new system).
+ *
+ * All new-system (post-opt-in) settings UI lives here. This sub-component
+ * is intentionally isolated from the legacy extraction fields so the two
+ * systems can evolve independently:
+ *
+ *   - Opt-in is OFF (default): legacy extraction runs unchanged. This
+ *     component still renders the opt-in toggle itself (so the user can
+ *     turn it on), but nothing else.
+ *   - Opt-in is ON: the visual content picker launcher appears. PR-B will
+ *     grow this block into the full wizard (scope chooser, rule chips,
+ *     diff preview, 5s listen sample). PR-C will add the staging /
+ *     production mode toggle and the migration flow.
+ *
+ * Legacy extraction controls (Include / Exclude CSS, Exclude HTML Tags,
+ * Exclude Texts) stay in LegacyExtractionSettings.js.
+ */
+
+
+
+
+function AtlasVoiceSettings(_ref) {
+  var settings = _ref.settings,
+    handleChange = _ref.handleChange;
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.Fragment, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_2__.SettingRow, {
+      label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Use AtlasVoice Extractor (Beta)", 'text-to-audio'),
+      questionIcon: true,
+      questionTooltip: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Opt-in to the new JS-based content extractor with a visual picker. Leave off to keep the current extraction behavior unchanged.", 'text-to-audio'),
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_2__.ToggleSwitch, {
+        checked: settings.tta__settings_use_atlasvoice_extractor,
+        onChange: function onChange(e) {
+          return handleChange(e);
+        },
+        name: "tta__settings_use_atlasvoice_extractor",
+        id: "tta__settings_use_atlasvoice_extractor"
+      })
+    }), settings.tta__settings_use_atlasvoice_extractor && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+      className: "mt-3 mb-4 p-3 rounded",
+      style: {
+        background: "#f0f7f8",
+        border: "1px solid #d6e7ea"
+      },
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+        className: "d-flex align-items-center justify-content-between flex-wrap gap-2",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("strong", {
+            className: "d-block mb-1",
+            children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("AtlasVoiceSelector — Visual Content Picker", "text-to-audio")
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("small", {
+            className: "text-muted d-block",
+            children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Click the button, then point at the text region on your live post. We'll learn a stable selector automatically — no CSS knowledge needed.", "text-to-audio")
+          }), settings.atlasvoice_saved_selector && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("small", {
+            className: "d-block mt-1",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("strong", {
+              children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Saved:", "text-to-audio")
+            }), " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("code", {
+              children: settings.atlasvoice_saved_selector
+            })]
+          })]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
+          type: "button",
+          className: "btn btn-primary btn-sm",
+          onClick: function onClick() {
+            var url = ttsObj.latest_post_preview_url;
+            if (!url) {
+              alert((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("No preview URL available. Publish a post first.", "text-to-audio"));
+              return;
+            }
+            var sep = url.indexOf("?") === -1 ? "?" : "&";
+            window.open(url + sep + "atlasvoice-picker=1", "_blank", "noopener");
+          },
+          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Pick content area on live post", "text-to-audio")
+        })]
+      })
+    })]
+  });
+}
+
+/***/ }),
+
+/***/ "./src/dashboard/components/dashboard/settings/LegacyExtractionSettings.js":
+/*!*********************************************************************************!*\
+  !*** ./src/dashboard/components/dashboard/settings/LegacyExtractionSettings.js ***!
+  \*********************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ LegacyExtractionSettings)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "./node_modules/@wordpress/i18n/build-module/index.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Row.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Col.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Form.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/OverlayTrigger.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Tooltip.js");
+/* harmony import */ var _Icon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../Icon */ "./src/dashboard/components/Icon.js");
+/* harmony import */ var _SettingsPrimitives__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./SettingsPrimitives */ "./src/dashboard/components/dashboard/settings/SettingsPrimitives.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/**
+ * Legacy Extraction Settings (TTS-238 — old system).
+ *
+ * The four pre-AtlasVoice CSS-based extraction fields:
+ *   1. Include Content By CSS Selectors
+ *   2. Exclude Content By CSS Selectors
+ *   3. Exclude HTML Tags To Speak
+ *   4. Exclude Texts To Speak
+ *
+ * Kept exactly as they were before the TTS-238 split. These fields drive
+ * the legacy extraction pipeline (TTSProHelper.js getModifiedContent) and
+ * continue to work untouched when opt-in is OFF.
+ *
+ * New-system equivalents live in AtlasVoiceSettings.js and will be built
+ * out into a visual wizard in PR-B / PR-C.
+ */
+
+
+
+
+
+
+function LegacyExtractionSettings(_ref) {
+  var settings = _ref.settings,
+    handleChange = _ref.handleChange;
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
+      className: "mb-4",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"], {
+        xs: 12,
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+          className: "d-flex align-items-center justify-content-between mb-2",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+            className: "d-flex align-items-center",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Label, {
+              className: "setting-label text-dark m-0",
+              children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Include Content By CSS Selectors", "text-to-audio")
+            }), !ttsObj.is_pro_active && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_3__.ProLockIcon, {
+              tooltipText: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Include Content By CSS Selectors feature is available in pro version", "text-to-audio")
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"], {
+            placement: "top",
+            overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_9__["default"], {
+              children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Click To Know How It Works?", "text-to-audio")
+            }),
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
+              className: "text-danger",
+              target: "_blank",
+              rel: "noopener noreferrer",
+              href: "https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
+                name: "youtube"
+              })
+            })
+          })]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Control, {
+          as: "textarea",
+          rows: 3,
+          name: "tta__settings_css_selectors",
+          value: settings.tta__settings_css_selectors,
+          onChange: function onChange(e) {
+            return handleChange(e);
+          },
+          placeholder: ttsObj.is_pro_active ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Multiple selector will be multiline.", "text-to-audio") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Some content may be missing, It can be found by css selectors", "text-to-audio"),
+          disabled: !ttsObj.is_pro_active,
+          className: "tta-textarea"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Text, {
+          className: "text-muted",
+          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Add CSS selectors for the content areas the player should read. One selector per line. Only target post/page body content. If left empty, the player automatically detects the content area.", "text-to-audio")
+        })]
+      })
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
+      className: "mb-4",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"], {
+        xs: 12,
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+          className: "d-flex align-items-center justify-content-between mb-2",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+            className: "d-flex align-items-center",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Label, {
+              className: "setting-label text-dark m-0",
+              children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude Content By CSS Selectors", "text-to-audio")
+            }), !ttsObj.is_pro_active && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_3__.ProLockIcon, {
+              tooltipText: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude Content By CSS Selectors feature is available in pro version", "text-to-audio")
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"], {
+            placement: "top",
+            overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_9__["default"], {
+              children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Click To Know How It Works?", "text-to-audio")
+            }),
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
+              className: "text-danger ms-2",
+              target: "_blank",
+              rel: "noopener noreferrer",
+              href: "https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
+                name: "youtube"
+              })
+            })
+          })]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Control, {
+          as: "textarea",
+          rows: 3,
+          name: "tta__settings_exclude_content_by_css_selectors",
+          value: settings.tta__settings_exclude_content_by_css_selectors,
+          onChange: function onChange(e) {
+            return handleChange(e);
+          },
+          placeholder: ttsObj.is_pro_active ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Multiple selector will be multiline.", "text-to-audio") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude content by CSS selectors", "text-to-audio"),
+          disabled: !ttsObj.is_pro_active,
+          className: "tta-textarea"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("small", {
+          style: {
+            color: "#d32f2f",
+            marginTop: "4px",
+            display: "block"
+          },
+          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('You can add ".atlasvoice_no_read" class to exclude content.', "text-to-audio")
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Text, {
+          className: "text-muted",
+          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Remove specific elements within the included content areas above. One selector per line. Example: .social-share, .related-posts, .author-bio", "text-to-audio")
+        })]
+      })
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
+      className: "mb-4",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"], {
+        xs: 12,
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+          className: "d-flex align-items-center justify-content-between mb-2",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+            className: "d-flex align-items-center",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Label, {
+              className: "setting-label text-dark m-0",
+              children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude HTML Tags To Speak", "text-to-audio")
+            }), !ttsObj.is_pro_active && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_3__.ProLockIcon, {
+              tooltipText: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude Tags. So that its content skipped. Like ( Subscript, Superscript etc.) This is a pro feature.", "text-to-audio")
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"], {
+            placement: "top",
+            overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_9__["default"], {
+              children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Click To Know How It Works?", "text-to-audio")
+            }),
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
+              className: "text-danger ms-2",
+              target: "_blank",
+              rel: "noopener noreferrer",
+              href: "https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
+                name: "youtube"
+              })
+            })
+          })]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Control, {
+          as: "textarea",
+          rows: 3,
+          name: "tta__settings_exclude_tags",
+          value: settings.tta__settings_exclude_tags,
+          onChange: function onChange(e) {
+            return handleChange(e);
+          },
+          placeholder: ttsObj.is_pro_active ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Multiple Tags Will Be Pipe(|) Separated.", "text-to-audio") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude tags is a pro feature.", "text-to-audio"),
+          disabled: !ttsObj.is_pro_active,
+          className: "tta-textarea"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Text, {
+          className: "text-muted",
+          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("HTML tags to skip within the included content. Pipe-separated. script, style, figure, and figcaption are always excluded automatically. Example: sub|sup|blockquote", "text-to-audio")
+        })]
+      })
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
+      className: "mb-4",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"], {
+        xs: 12,
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+          className: "d-flex align-items-center justify-content-between mb-2",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+            className: "d-flex align-items-center",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Label, {
+              className: "setting-label text-dark m-0",
+              children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude Texts To Speak", "text-to-audio")
+            }), !ttsObj.is_pro_active && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_3__.ProLockIcon, {
+              tooltipText: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Excluding texts to be spoken is a pro feature.", "text-to-audio")
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"], {
+            placement: "top",
+            overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_9__["default"], {
+              children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Click To Know How It Works?", "text-to-audio")
+            }),
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("a", {
+              className: "text-danger ms-2",
+              target: "_blank",
+              rel: "noopener noreferrer",
+              href: "https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
+                name: "youtube"
+              })
+            })
+          })]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Control, {
+          as: "textarea",
+          rows: 3,
+          name: "tta__settings_exclude_texts",
+          value: settings.tta__settings_exclude_texts,
+          onChange: function onChange(e) {
+            return handleChange(e);
+          },
+          placeholder: ttsObj.is_pro_active ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Multiple Texts Will Be Pipe(|) Separated.", "text-to-audio") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude texts is a pro feature.", "text-to-audio"),
+          disabled: !ttsObj.is_pro_active,
+          className: "tta-textarea"
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Text, {
+          className: "text-muted",
+          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exact text patterns to remove from the spoken content. Pipe-separated. Applied after all CSS and tag exclusions. Example: Read more...|Advertisement|Sponsored Content", "text-to-audio")
+        })]
+      })
+    })]
+  });
+}
+
+/***/ }),
+
 /***/ "./src/dashboard/components/dashboard/settings/Settings.js":
 /*!*****************************************************************!*\
   !*** ./src/dashboard/components/dashboard/settings/Settings.js ***!
@@ -11794,19 +12131,21 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "./node_modules/@wordpress/i18n/build-module/index.js");
-/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/OverlayTrigger.js");
-/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Tooltip.js");
-/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Button.js");
 /* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Container.js");
 /* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Row.js");
 /* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Col.js");
 /* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Form.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/OverlayTrigger.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Tooltip.js");
 /* harmony import */ var _context_utilities__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../context/utilities */ "./src/dashboard/components/context/utilities.js");
 /* harmony import */ var _context_Notify__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../context/Notify */ "./src/dashboard/components/context/Notify.js");
 /* harmony import */ var _UpgradeToPro__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../UpgradeToPro */ "./src/dashboard/components/UpgradeToPro.js");
 /* harmony import */ var _context_MultiSelect__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../context/MultiSelect */ "./src/dashboard/components/context/MultiSelect.js");
 /* harmony import */ var _Icon__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../Icon */ "./src/dashboard/components/Icon.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var _SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./SettingsPrimitives */ "./src/dashboard/components/dashboard/settings/SettingsPrimitives.js");
+/* harmony import */ var _AtlasVoiceSettings__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./AtlasVoiceSettings */ "./src/dashboard/components/dashboard/settings/AtlasVoiceSettings.js");
+/* harmony import */ var _LegacyExtractionSettings__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./LegacyExtractionSettings */ "./src/dashboard/components/dashboard/settings/LegacyExtractionSettings.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
@@ -11824,6 +12163,12 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
+
+
+
+// TTS-238: UI split — legacy extraction fields and AtlasVoice (new system)
+// settings live in their own modules so the two systems can evolve
+// independently without stepping on each other.
 
 
 
@@ -11972,128 +12317,35 @@ function Settings() {
     });
   };
 
-  // Custom Toggle Switch Component
-  var ToggleSwitch = function ToggleSwitch(_ref) {
-    var checked = _ref.checked,
-      onChange = _ref.onChange,
-      name = _ref.name,
-      id = _ref.id,
-      disabled = _ref.disabled;
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("label", {
-      className: "custom-switch ".concat(disabled ? "switch-disabled" : ""),
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("input", {
-        type: "checkbox",
-        checked: checked,
-        onChange: onChange,
-        name: name,
-        id: id,
-        disabled: disabled
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("span", {
-        className: "switch-track",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("span", {
-          className: "switch-thumb"
-        })
-      })]
-    });
-  };
+  // TTS-238: ToggleSwitch, SettingRow, ProLockIcon now come from
+  // ./SettingsPrimitives so both split sub-components can share them.
 
-  // Setting Row Component
-  var SettingRow = function SettingRow(_ref2) {
-    var label = _ref2.label,
-      children = _ref2.children,
-      helpIcon = _ref2.helpIcon,
-      tooltipText = _ref2.tooltipText,
-      questionIcon = _ref2.questionIcon,
-      questionTooltip = _ref2.questionTooltip,
-      youtubeLink = _ref2.youtubeLink;
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
-      className: "setting-row",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
-        className: "setting-label-area",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("span", {
-          className: "setting-label",
-          children: label
-        }), questionIcon && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"], {
-          placement: "top",
-          overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_9__["default"], {
-            children: questionTooltip || (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Help information about this setting", "text-to-audio")
-          }),
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("span", {
-            className: "ms-2",
-            style: {
-              cursor: "pointer"
-            },
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
-              name: "question-circle",
-              style: {
-                color: "#999",
-                fontSize: "14px"
-              }
-            })
-          })
-        }), helpIcon && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"], {
-          placement: "top",
-          overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_9__["default"], {
-            children: tooltipText || (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Click To Know How It Works?", "text-to-audio")
-          }),
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("a", {
-            className: "text-danger ms-2",
-            target: "_blank",
-            rel: "noopener noreferrer",
-            href: youtubeLink || "#",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
-              name: "youtube"
-            })
-          })
-        })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
-        children: children
-      })]
-    });
-  };
-
-  // Lock Icon with Tooltip for pro features
-  var ProLockIcon = function ProLockIcon(_ref3) {
-    var tooltipText = _ref3.tooltipText;
-    return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"], {
-      placement: "top",
-      overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_9__["default"], {
-        children: tooltipText
-      }),
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_10__["default"], {
-        className: "m-0 p-0 text-dark bg-light border-0 ms-2",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
-          name: "lock"
-        })
-      })
-    });
-  };
-  return isDataLoaded ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, {
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_11__["default"], {
+  return isDataLoaded ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react__WEBPACK_IMPORTED_MODULE_0__.Fragment, {
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_11__["default"], {
       fluid: true,
       className: "tta-container",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_12__["default"], {
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_12__["default"], {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
           xs: 12,
           lg: 8,
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("div", {
             className: "bg-white rounded p-3 mb-3 shadow-sm",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
               className: "d-flex justify-content-between align-items-start",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("h2", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("h2", {
                   className: "fs-3 fw-bold mb-2 text-dark",
                   children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Configure Settings", "text-to-audio")
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("p", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("p", {
                   className: "text-secondary m-0 small",
                   children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Configure text-to-speech player behavior and content selection", "text-to-audio")
                 })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
                 className: "d-flex gap-2 align-items-center",
                 style: {
                   flexShrink: 0
                 },
-                children: [typeof tta_obj !== 'undefined' && tta_obj.latest_post_preview_url && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("a", {
+                children: [typeof tta_obj !== 'undefined' && tta_obj.latest_post_preview_url && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("a", {
                   href: tta_obj.latest_post_preview_url,
                   target: "_blank",
                   rel: "noopener noreferrer",
@@ -12105,7 +12357,7 @@ function Settings() {
                     borderColor: '#FF7853'
                   },
                   children: [(0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Preview on Your Site", "text-to-audio"), " \u2197"]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("a", {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("a", {
                   href: window.location.pathname + "?page=text-to-audio&reset_onboard=true",
                   className: "btn btn-sm",
                   style: {
@@ -12118,15 +12370,15 @@ function Settings() {
                 })]
               })]
             })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"], {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"], {
             onSubmit: handleSubmit,
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
               className: "tta-card",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.SettingRow, {
                 label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Add Button or Player Automatically", "text-to-audio"),
                 questionIcon: true,
                 questionTooltip: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("The \"Add Button or Player Automatically\" feature allows AtlasVoice to automatically insert a play button or audio player into your posts or pages — without needing any manual setup.", "text-to-audio"),
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ToggleSwitch, {
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.ToggleSwitch, {
                   checked: settings.tta__settings_enable_button_add,
                   onChange: function onChange(e) {
                     return handleChange(e);
@@ -12134,12 +12386,12 @@ function Settings() {
                   name: "tta__settings_enable_button_add",
                   id: "tta__settings_enable_button_add"
                 })
-              }), ((_window = window) === null || _window === void 0 || (_window = _window.ttsObj) === null || _window === void 0 ? void 0 : _window.player_id) < 3 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.Fragment, {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
+              }), ((_window = window) === null || _window === void 0 || (_window = _window.ttsObj) === null || _window === void 0 ? void 0 : _window.player_id) < 3 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.Fragment, {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.SettingRow, {
                   label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Continue Reading After Switching To Another Tab", "text-to-audio"),
                   questionIcon: true,
                   questionTooltip: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("When enabled, text-to-speech will continue playing even if you navigate away from the current tab", "text-to-audio"),
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ToggleSwitch, {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.ToggleSwitch, {
                     checked: settings.tta__settings_stop_auto_pause_after_switching_tab,
                     onChange: function onChange(e) {
                       return handleChange(e);
@@ -12147,11 +12399,11 @@ function Settings() {
                     name: "tta__settings_stop_auto_pause_after_switching_tab",
                     id: "tta__settings_stop_auto_pause_after_switching_tab"
                   })
-                }), !settings.tta__settings_stop_auto_pause_after_switching_tab && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
+                }), !settings.tta__settings_stop_auto_pause_after_switching_tab && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.SettingRow, {
                   label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Stop Auto Play After Switching To TTS Tab", "text-to-audio"),
                   questionIcon: true,
                   questionTooltip: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Automatically pause playback when switching back to the TTS tab from another tab", "text-to-audio"),
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ToggleSwitch, {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.ToggleSwitch, {
                     checked: settings.tta__settings_stop_auto_playing_after_switching_tab,
                     onChange: function onChange(e) {
                       return handleChange(e);
@@ -12160,11 +12412,11 @@ function Settings() {
                     id: "tta__settings_stop_auto_playing_after_switching_tab"
                   })
                 })]
-              }), ((_window2 = window) === null || _window2 === void 0 || (_window2 = _window2.ttsObj) === null || _window2 === void 0 ? void 0 : _window2.player_id) > 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
+              }), ((_window2 = window) === null || _window2 === void 0 || (_window2 = _window2.ttsObj) === null || _window2 === void 0 ? void 0 : _window2.player_id) > 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.SettingRow, {
                 label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("When Scroll Down Stop Floating Player", "text-to-audio"),
                 questionIcon: true,
                 questionTooltip: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Automatically pause the floating player when users scroll down the page", "text-to-audio"),
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ToggleSwitch, {
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.ToggleSwitch, {
                   checked: settings.tta__settings_stop_floating_button,
                   onChange: function onChange(e) {
                     return handleChange(e);
@@ -12172,13 +12424,13 @@ function Settings() {
                   name: "tta__settings_stop_floating_button",
                   id: "tta__settings_stop_floating_button"
                 })
-              }), ((_window3 = window) === null || _window3 === void 0 || (_window3 = _window3.ttsObj) === null || _window3 === void 0 ? void 0 : _window3.is_pro_active) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.Fragment, {
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
+              }), ((_window3 = window) === null || _window3 === void 0 || (_window3 = _window3.ttsObj) === null || _window3 === void 0 ? void 0 : _window3.is_pro_active) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.Fragment, {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.SettingRow, {
                   label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Apply number format", "text-to-audio"),
                   questionIcon: true,
                   questionTooltip: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Convert numbers to spoken words (e.g., '123' becomes 'one hundred twenty-three')", "text-to-audio"),
                   youtubeLink: "https://www.youtube.com/watch?v=xQCw7mJXrxo&t=46s",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ToggleSwitch, {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.ToggleSwitch, {
                     checked: settings.tta__settings_apply_number_format,
                     onChange: function onChange(e) {
                       return handleChange(e);
@@ -12186,11 +12438,11 @@ function Settings() {
                     name: "tta__settings_apply_number_format",
                     id: "tta__settings_apply_number_format"
                   })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.SettingRow, {
                   label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Read Content From Dom", 'text-to-audio'),
                   questionIcon: true,
                   questionTooltip: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Read Content From Dom", 'text-to-audio'),
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ToggleSwitch, {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.ToggleSwitch, {
                     checked: settings.tta__settings_read_content_from_dom,
                     onChange: function onChange(e) {
                       return handleChange(e);
@@ -12198,24 +12450,12 @@ function Settings() {
                     name: "tta__settings_read_content_from_dom",
                     id: "tta__settings_read_content_from_dom"
                   })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
-                  label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Use AtlasVoice Extractor (Beta)", 'text-to-audio'),
-                  questionIcon: true,
-                  questionTooltip: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Opt-in to the new JS-based content extractor with a visual picker. Leave off to keep the current extraction behavior unchanged.", 'text-to-audio'),
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ToggleSwitch, {
-                    checked: settings.tta__settings_use_atlasvoice_extractor,
-                    onChange: function onChange(e) {
-                      return handleChange(e);
-                    },
-                    name: "tta__settings_use_atlasvoice_extractor",
-                    id: "tta__settings_use_atlasvoice_extractor"
-                  })
                 })]
-              }), ttsObj.player_id == 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
+              }), ttsObj.player_id == 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.SettingRow, {
                 label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Use Old Player UI", 'text-to-audio'),
                 questionIcon: true,
                 questionTooltip: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Use Old Player UI", 'text-to-audio'),
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ToggleSwitch, {
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.ToggleSwitch, {
                   checked: settings.tta__settings_player_use_old_player,
                   onChange: function onChange(e) {
                     return handleChange(e);
@@ -12223,11 +12463,11 @@ function Settings() {
                   name: "tta__settings_player_use_old_player",
                   id: "tta__settings_player_use_old_player"
                 })
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.SettingRow, {
                 label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Add Post Title To Read", "text-to-audio"),
                 questionIcon: true,
                 questionTooltip: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Include the post title in the audio playback before reading the main content", "text-to-audio"),
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ToggleSwitch, {
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.ToggleSwitch, {
                   checked: settings.tta__settings_add_post_title_to_read,
                   onChange: function onChange(e) {
                     return handleChange(e);
@@ -12235,11 +12475,11 @@ function Settings() {
                   name: "tta__settings_add_post_title_to_read",
                   id: "tta__settings_add_post_title_to_read"
                 })
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.SettingRow, {
                 label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Add Post Excerpt To Read", "text-to-audio"),
                 questionIcon: true,
                 questionTooltip: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Include the post excerpt/summary in the audio playback before reading the main content", "text-to-audio"),
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ToggleSwitch, {
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.ToggleSwitch, {
                   checked: settings.tta__settings_add_post_excerpt_to_read,
                   onChange: function onChange(e) {
                     return handleChange(e);
@@ -12247,11 +12487,11 @@ function Settings() {
                   name: "tta__settings_add_post_excerpt_to_read",
                   id: "tta__settings_add_post_excerpt_to_read"
                 })
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.SettingRow, {
                 label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Enable TTS Status", "text-to-audio"),
                 questionIcon: true,
                 questionTooltip: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Enable TTS Status In Post Page.", "text-to-audio"),
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ToggleSwitch, {
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.ToggleSwitch, {
                   checked: settings.tta__settings_enable_tts_status,
                   onChange: function onChange(e) {
                     return handleChange(e);
@@ -12259,25 +12499,25 @@ function Settings() {
                   name: "tta__settings_enable_tts_status",
                   id: "tta__settings_enable_tts_status"
                 })
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
                 className: "pt-3",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_12__["default"], {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_12__["default"], {
                   className: "mb-4",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
                     md: 6,
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Label, {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Label, {
                       className: "setting-label text-dark mb-2",
-                      children: [(0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Add Text Before Content(intro)", "text-to-audio"), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"], {
+                      children: [(0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Add Text Before Content(intro)", "text-to-audio"), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_15__["default"], {
                         placement: "top",
-                        overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_9__["default"], {
+                        overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_16__["default"], {
                           children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Custom text that will be read aloud before the main content begins", "text-to-audio")
                         }),
-                        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("span", {
+                        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
                           className: "ms-2",
                           style: {
                             cursor: "pointer"
                           },
-                          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
+                          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
                             name: "question-circle",
                             style: {
                               color: "#999",
@@ -12286,7 +12526,7 @@ function Settings() {
                           })
                         })
                       })]
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Control, {
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Control, {
                       as: "textarea",
                       rows: 3,
                       name: "tta__settings_text_before_content",
@@ -12297,21 +12537,21 @@ function Settings() {
                       placeholder: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Add Text Before Content", "text-to-audio"),
                       className: "tta-textarea"
                     })]
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
+                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
                     md: 6,
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Label, {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Label, {
                       className: "setting-label text-dark mb-2",
-                      children: [(0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Add Text After Content(outro)", "text-to-audio"), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"], {
+                      children: [(0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Add Text After Content(outro)", "text-to-audio"), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_15__["default"], {
                         placement: "top",
-                        overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_9__["default"], {
+                        overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_16__["default"], {
                           children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Custom text that will be read aloud after the main content finishes", "text-to-audio")
                         }),
-                        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("span", {
+                        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("span", {
                           className: "ms-2",
                           style: {
                             cursor: "pointer"
                           },
-                          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
+                          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
                             name: "question-circle",
                             style: {
                               color: "#999",
@@ -12320,7 +12560,7 @@ function Settings() {
                           })
                         })
                       })]
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Control, {
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Control, {
                       as: "textarea",
                       rows: 3,
                       name: "tta__settings_text_after_content",
@@ -12332,14 +12572,14 @@ function Settings() {
                       className: "tta-textarea"
                     })]
                   })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_12__["default"], {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_12__["default"], {
                   className: "mb-4",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
                     xs: 12,
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Label, {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Label, {
                       className: "setting-label text-dark mb-2",
                       children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Allow Listening For Post Type", "text-to-audio")
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_context_MultiSelect__WEBPACK_IMPORTED_MODULE_5__.MultiSelect, {
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_context_MultiSelect__WEBPACK_IMPORTED_MODULE_5__.MultiSelect, {
                       id: "tta__settings_allow_listening_for_post_types",
                       name: "tta__settings_allow_listening_for_post_types",
                       onChange: handleChange,
@@ -12347,14 +12587,14 @@ function Settings() {
                       options: postTypes
                     })]
                   })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_12__["default"], {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_12__["default"], {
                   className: "mb-4",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
                     xs: 12,
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Label, {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Label, {
                       className: "setting-label text-dark mb-2",
                       children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Allow Listening For Post Status", "text-to-audio")
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_context_MultiSelect__WEBPACK_IMPORTED_MODULE_5__.MultiSelect, {
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_context_MultiSelect__WEBPACK_IMPORTED_MODULE_5__.MultiSelect, {
                       id: "tta__settings_allow_listening_for_posts_status",
                       name: "tta__settings_allow_listening_for_posts_status",
                       multiselectIndex: 1,
@@ -12364,261 +12604,42 @@ function Settings() {
                       toastMessage: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("On Free Version You Can Select Only 1 post type.", "text-to-audio")
                     })]
                   })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_12__["default"], {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_AtlasVoiceSettings__WEBPACK_IMPORTED_MODULE_8__["default"], {
+                  settings: settings,
+                  handleChange: handleChange
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_LegacyExtractionSettings__WEBPACK_IMPORTED_MODULE_9__["default"], {
+                  settings: settings,
+                  handleChange: handleChange
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_12__["default"], {
                   className: "mb-4",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
                     xs: 12,
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
                       className: "d-flex align-items-center justify-content-between mb-2",
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
                         className: "d-flex align-items-center",
-                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Label, {
-                          className: "setting-label text-dark m-0",
-                          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Include Content By CSS Selectors", "text-to-audio")
-                        }), !ttsObj.is_pro_active && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ProLockIcon, {
-                          tooltipText: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Include Content By CSS Selectors feature is available in pro version", "text-to-audio")
-                        })]
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"], {
-                        placement: "top",
-                        overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_9__["default"], {
-                          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Click To Know How It Works?", "text-to-audio")
-                        }),
-                        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("a", {
-                          className: "text-danger",
-                          target: "_blank",
-                          rel: "noopener noreferrer",
-                          href: "https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev",
-                          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
-                            name: "youtube"
-                          })
-                        })
-                      })]
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Control, {
-                      as: "textarea",
-                      rows: 3,
-                      name: "tta__settings_css_selectors",
-                      value: settings.tta__settings_css_selectors,
-                      onChange: function onChange(e) {
-                        return handleChange(e);
-                      },
-                      placeholder: ttsObj.is_pro_active ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Multiple selector will be multiline.", "text-to-audio") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Some content may be missing, It can be found by css selectors", "text-to-audio"),
-                      disabled: !ttsObj.is_pro_active,
-                      className: "tta-textarea"
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Text, {
-                      className: "text-muted",
-                      children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Add CSS selectors for the content areas the player should read. One selector per line. Only target post/page body content. If left empty, the player automatically detects the content area.", "text-to-audio")
-                    }), settings.tta__settings_use_atlasvoice_extractor && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
-                      className: "mt-3 p-3 rounded",
-                      style: {
-                        background: "#f0f7f8",
-                        border: "1px solid #d6e7ea"
-                      },
-                      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
-                        className: "d-flex align-items-center justify-content-between flex-wrap gap-2",
-                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
-                          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("strong", {
-                            className: "d-block mb-1",
-                            children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("AtlasVoiceSelector — Visual Content Picker", "text-to-audio")
-                          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("small", {
-                            className: "text-muted d-block",
-                            children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Click the button, then point at the text region on your live post. We'll learn a stable selector automatically — no CSS knowledge needed.", "text-to-audio")
-                          }), settings.atlasvoice_saved_selector && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("small", {
-                            className: "d-block mt-1",
-                            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("strong", {
-                              children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Saved:", "text-to-audio")
-                            }), " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("code", {
-                              children: settings.atlasvoice_saved_selector
-                            })]
-                          })]
-                        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("button", {
-                          type: "button",
-                          className: "btn btn-primary btn-sm",
-                          onClick: function onClick() {
-                            var url = ttsObj.latest_post_preview_url;
-                            if (!url) {
-                              alert((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("No preview URL available. Publish a post first.", "text-to-audio"));
-                              return;
-                            }
-                            var sep = url.indexOf("?") === -1 ? "?" : "&";
-                            window.open(url + sep + "atlasvoice-picker=1", "_blank", "noopener");
-                          },
-                          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Pick content area on live post", "text-to-audio")
-                        })]
-                      })
-                    })]
-                  })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_12__["default"], {
-                  className: "mb-4",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
-                    xs: 12,
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
-                      className: "d-flex align-items-center justify-content-between mb-2",
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
-                        className: "d-flex align-items-center",
-                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Label, {
-                          className: "setting-label text-dark m-0",
-                          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude Content By CSS Selectors", "text-to-audio")
-                        }), !ttsObj.is_pro_active && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ProLockIcon, {
-                          tooltipText: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude Content By CSS Selectors feature is available in pro version", "text-to-audio")
-                        })]
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"], {
-                        placement: "top",
-                        overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_9__["default"], {
-                          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Click To Know How It Works?", "text-to-audio")
-                        }),
-                        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("a", {
-                          className: "text-danger ms-2",
-                          target: "_blank",
-                          rel: "noopener noreferrer",
-                          href: "https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev",
-                          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
-                            name: "youtube"
-                          })
-                        })
-                      })]
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Control, {
-                      as: "textarea",
-                      rows: 3,
-                      name: "tta__settings_exclude_content_by_css_selectors",
-                      value: settings.tta__settings_exclude_content_by_css_selectors,
-                      onChange: function onChange(e) {
-                        return handleChange(e);
-                      },
-                      placeholder: ttsObj.is_pro_active ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Multiple selector will be multiline.", "text-to-audio") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude content by CSS selectors", "text-to-audio"),
-                      disabled: !ttsObj.is_pro_active,
-                      className: "tta-textarea"
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("small", {
-                      style: {
-                        color: "#d32f2f",
-                        marginTop: "4px",
-                        display: "block"
-                      },
-                      children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('You can add ".atlasvoice_no_read" class to exclude content.', "text-to-audio")
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Text, {
-                      className: "text-muted",
-                      children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Remove specific elements within the included content areas above. One selector per line. Example: .social-share, .related-posts, .author-bio", "text-to-audio")
-                    })]
-                  })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_12__["default"], {
-                  className: "mb-4",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
-                    xs: 12,
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
-                      className: "d-flex align-items-center justify-content-between mb-2",
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
-                        className: "d-flex align-items-center",
-                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Label, {
-                          className: "setting-label text-dark m-0",
-                          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude HTML Tags To Speak", "text-to-audio")
-                        }), !ttsObj.is_pro_active && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ProLockIcon, {
-                          tooltipText: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude Tags. So that its content skipped. Like ( Subscript, Superscript etc.) This is a pro feature.", "text-to-audio")
-                        })]
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"], {
-                        placement: "top",
-                        overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_9__["default"], {
-                          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Click To Know How It Works?", "text-to-audio")
-                        }),
-                        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("a", {
-                          className: "text-danger ms-2",
-                          target: "_blank",
-                          rel: "noopener noreferrer",
-                          href: "https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev",
-                          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
-                            name: "youtube"
-                          })
-                        })
-                      })]
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Control, {
-                      as: "textarea",
-                      rows: 3,
-                      name: "tta__settings_exclude_tags",
-                      value: settings.tta__settings_exclude_tags,
-                      onChange: function onChange(e) {
-                        return handleChange(e);
-                      },
-                      placeholder: ttsObj.is_pro_active ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Multiple Tags Will Be Pipe(|) Separated.", "text-to-audio") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude tags is a pro feature.", "text-to-audio"),
-                      disabled: !ttsObj.is_pro_active,
-                      className: "tta-textarea"
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Text, {
-                      className: "text-muted",
-                      children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("HTML tags to skip within the included content. Pipe-separated. script, style, figure, and figcaption are always excluded automatically. Example: sub|sup|blockquote", "text-to-audio")
-                    })]
-                  })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_12__["default"], {
-                  className: "mb-4",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
-                    xs: 12,
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
-                      className: "d-flex align-items-center justify-content-between mb-2",
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
-                        className: "d-flex align-items-center",
-                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Label, {
-                          className: "setting-label text-dark m-0",
-                          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude Texts To Speak", "text-to-audio")
-                        }), !ttsObj.is_pro_active && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ProLockIcon, {
-                          tooltipText: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Excluding texts to be spoken is a pro feature.", "text-to-audio")
-                        })]
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"], {
-                        placement: "top",
-                        overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_9__["default"], {
-                          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Click To Know How It Works?", "text-to-audio")
-                        }),
-                        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("a", {
-                          className: "text-danger ms-2",
-                          target: "_blank",
-                          rel: "noopener noreferrer",
-                          href: "https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev",
-                          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
-                            name: "youtube"
-                          })
-                        })
-                      })]
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Control, {
-                      as: "textarea",
-                      rows: 3,
-                      name: "tta__settings_exclude_texts",
-                      value: settings.tta__settings_exclude_texts,
-                      onChange: function onChange(e) {
-                        return handleChange(e);
-                      },
-                      placeholder: ttsObj.is_pro_active ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Multiple Texts Will Be Pipe(|) Separated.", "text-to-audio") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude texts is a pro feature.", "text-to-audio"),
-                      disabled: !ttsObj.is_pro_active,
-                      className: "tta-textarea"
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Text, {
-                      className: "text-muted",
-                      children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exact text patterns to remove from the spoken content. Pipe-separated. Applied after all CSS and tag exclusions. Example: Read more...|Advertisement|Sponsored Content", "text-to-audio")
-                    })]
-                  })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_12__["default"], {
-                  className: "mb-4",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
-                    xs: 12,
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
-                      className: "d-flex align-items-center justify-content-between mb-2",
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
-                        className: "d-flex align-items-center",
-                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Label, {
+                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Label, {
                           className: "setting-label text-dark m-0",
                           children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude Posts By IDs To Speak", "text-to-audio")
-                        }), !ttsObj.is_pro_active && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ProLockIcon, {
+                        }), !ttsObj.is_pro_active && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.ProLockIcon, {
                           tooltipText: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude more than 5 IDs is a pro feature", "text-to-audio")
                         })]
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"], {
+                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_15__["default"], {
                         placement: "top",
-                        overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_9__["default"], {
+                        overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_16__["default"], {
                           children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Click To Know How It Works?", "text-to-audio")
                         }),
-                        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("a", {
+                        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("a", {
                           className: "text-danger ms-2",
                           target: "_blank",
                           rel: "noopener noreferrer",
                           href: "https://www.youtube.com/watch?v=ooxJkMU58KY&list=PLGdmFn36qCRIO6galQmEMoLVuNXSIvVuF&index=19",
-                          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
+                          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
                             name: "youtube"
                           })
                         })
                       })]
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Control, {
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Control, {
                       as: "textarea",
                       rows: 3,
                       name: "tta__settings_exclude_post_ids",
@@ -12630,36 +12651,36 @@ function Settings() {
                       className: "tta-textarea"
                     })]
                   })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_12__["default"], {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_12__["default"], {
                   className: "mb-4",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
                     xs: 12,
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
                       className: "d-flex align-items-center justify-content-between mb-2",
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
                         className: "d-flex align-items-center",
-                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Label, {
+                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Label, {
                           className: "setting-label text-dark m-0",
                           children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude Categories To Speak", "text-to-audio")
-                        }), !ttsObj.is_pro_active && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ProLockIcon, {
+                        }), !ttsObj.is_pro_active && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.ProLockIcon, {
                           tooltipText: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude more than 1 categories is a pro feature", "text-to-audio")
                         })]
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"], {
+                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_15__["default"], {
                         placement: "top",
-                        overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_9__["default"], {
+                        overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_16__["default"], {
                           children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Click To Know How It Works?", "text-to-audio")
                         }),
-                        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("a", {
+                        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("a", {
                           className: "text-danger ms-2",
                           target: "_blank",
                           rel: "noopener noreferrer",
                           href: "https://www.youtube.com/watch?v=yanuoEBfG4A",
-                          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
+                          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
                             name: "youtube"
                           })
                         })
                       })]
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_context_MultiSelect__WEBPACK_IMPORTED_MODULE_5__.MultiSelect, {
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_context_MultiSelect__WEBPACK_IMPORTED_MODULE_5__.MultiSelect, {
                       id: "tta__settings_exclude_categories",
                       name: "tta__settings_exclude_categories",
                       multiselectIndex: 2,
@@ -12669,36 +12690,36 @@ function Settings() {
                       options: Object.keys(categories)
                     })]
                   })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_12__["default"], {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_12__["default"], {
                   className: "mb-4",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
                     xs: 12,
-                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
                       className: "d-flex align-items-center justify-content-between mb-2",
-                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+                      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
                         className: "d-flex align-items-center",
-                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Label, {
+                        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Label, {
                           className: "setting-label text-dark m-0",
                           children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude Tags To Speak", "text-to-audio")
-                        }), !ttsObj.is_pro_active && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ProLockIcon, {
+                        }), !ttsObj.is_pro_active && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.ProLockIcon, {
                           tooltipText: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude more than 1 tags is a pro feature", "text-to-audio")
                         })]
-                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_8__["default"], {
+                      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_15__["default"], {
                         placement: "top",
-                        overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_9__["default"], {
+                        overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_16__["default"], {
                           children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Click To Know How It Works?", "text-to-audio")
                         }),
-                        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("a", {
+                        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("a", {
                           className: "text-danger ms-2",
                           target: "_blank",
                           rel: "noopener noreferrer",
                           href: "https://www.youtube.com/watch?v=yanuoEBfG4A",
-                          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
+                          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
                             name: "youtube"
                           })
                         })
                       })]
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_context_MultiSelect__WEBPACK_IMPORTED_MODULE_5__.MultiSelect, {
+                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_context_MultiSelect__WEBPACK_IMPORTED_MODULE_5__.MultiSelect, {
                       id: "tta__settings_exclude_wp_tags",
                       name: "tta__settings_exclude_wp_tags",
                       multiselectIndex: 3,
@@ -12708,9 +12729,9 @@ function Settings() {
                       options: Object.keys(tags)
                     })]
                   })
-                }), !((_window4 = window) !== null && _window4 !== void 0 && (_window4 = _window4.ttsObjPro) !== null && _window4 !== void 0 && _window4.is_pro_active) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
+                }), !((_window4 = window) !== null && _window4 !== void 0 && (_window4 = _window4.ttsObjPro) !== null && _window4 !== void 0 && _window4.is_pro_active) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.SettingRow, {
                   label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Enable Button Icon", "text-to-audio"),
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ToggleSwitch, {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.ToggleSwitch, {
                     checked: settings.tta__settings_display_btn_icon,
                     onChange: function onChange(e) {
                       return handleChange(e);
@@ -12718,10 +12739,10 @@ function Settings() {
                     name: "tta__settings_display_btn_icon",
                     id: "tta__settings_display_btn_icon"
                   })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.SettingRow, {
                   label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Show admin bar toggle", "text-to-audio"),
                   tooltip: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Show AtlasVoice on/off toggle in the WordPress admin bar on front-end pages.", "text-to-audio"),
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ToggleSwitch, {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.ToggleSwitch, {
                     checked: settings.tta__settings_show_admin_bar_toggle,
                     onChange: function onChange(e) {
                       return handleChange(e);
@@ -12729,10 +12750,10 @@ function Settings() {
                     name: "tta__settings_show_admin_bar_toggle",
                     id: "tta__settings_show_admin_bar_toggle"
                   })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.SettingRow, {
                   label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Show dashboard widget", "text-to-audio"),
                   tooltip: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Display the AtlasVoice Quick Stats widget on the WordPress admin dashboard.", "text-to-audio"),
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ToggleSwitch, {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.ToggleSwitch, {
                     checked: settings.tta__settings_show_dashboard_widget,
                     onChange: function onChange(e) {
                       return handleChange(e);
@@ -12740,9 +12761,9 @@ function Settings() {
                     name: "tta__settings_show_dashboard_widget",
                     id: "tta__settings_show_dashboard_widget"
                   })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.SettingRow, {
                   label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Clear all cache", "text-to-audio"),
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ToggleSwitch, {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.ToggleSwitch, {
                     checked: settings.tta__settings_clear_all_cache,
                     onChange: function onChange(e) {
                       return handleChange(e);
@@ -12750,11 +12771,11 @@ function Settings() {
                     name: "tta__settings_clear_all_cache",
                     id: "tta__settings_clear_all_cache"
                   })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.SettingRow, {
                   label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Delete all data on uninstall", "text-to-audio"),
                   questionIcon: true,
                   questionTooltip: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("When enabled, all plugin data (settings, analytics, generated audio files) will be permanently deleted when the plugin is uninstalled. Keep this OFF if you plan to reinstall or are debugging.", "text-to-audio"),
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ToggleSwitch, {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_7__.ToggleSwitch, {
                     checked: settings.tta__settings_delete_data_on_uninstall,
                     onChange: function onChange(e) {
                       if (e.target.checked) {
@@ -12767,7 +12788,7 @@ function Settings() {
                     name: "tta__settings_delete_data_on_uninstall",
                     id: "tta__settings_delete_data_on_uninstall"
                   })
-                }), settings.tta__settings_delete_data_on_uninstall && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
+                }), settings.tta__settings_delete_data_on_uninstall && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
                   className: "mb-3 p-2 rounded",
                   style: {
                     backgroundColor: "#fff3cd",
@@ -12775,19 +12796,19 @@ function Settings() {
                     color: "#856404",
                     fontSize: "13px"
                   },
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("strong", {
+                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("strong", {
                     children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("⚠ Warning:", "text-to-audio")
                   }), " ", (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("All plugin data will be permanently deleted when you uninstall. Turn this OFF if you plan to reinstall, debug, or switch versions.", "text-to-audio")]
                 })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("div", {
                 className: "position-sticky bottom-0",
                 style: {
                   zIndex: 1030,
                   marginTop: "20px"
                 },
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("div", {
                   className: "text-center",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("button", {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("button", {
                     type: "submit",
                     className: "tta_btn rounded-3 shadow-lg",
                     children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Save All", "text-to-audio")
@@ -12796,19 +12817,19 @@ function Settings() {
               })]
             })
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
           xs: 12,
           lg: 4,
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_UpgradeToPro__WEBPACK_IMPORTED_MODULE_4__["default"], {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_UpgradeToPro__WEBPACK_IMPORTED_MODULE_4__["default"], {
             promotionType: "youtube"
           })
         })]
       })
     })
-  }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+  }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)("div", {
     className: "tta-loading-spinner",
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsxs)("div", {
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsxs)("div", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_10__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_6__["default"], {
         name: "spinner",
         spin: true,
         className: "me-2"
@@ -12816,6 +12837,132 @@ function Settings() {
     })
   });
 }
+
+/***/ }),
+
+/***/ "./src/dashboard/components/dashboard/settings/SettingsPrimitives.js":
+/*!***************************************************************************!*\
+  !*** ./src/dashboard/components/dashboard/settings/SettingsPrimitives.js ***!
+  \***************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   ProLockIcon: () => (/* binding */ ProLockIcon),
+/* harmony export */   SettingRow: () => (/* binding */ SettingRow),
+/* harmony export */   ToggleSwitch: () => (/* binding */ ToggleSwitch)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "./node_modules/@wordpress/i18n/build-module/index.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/OverlayTrigger.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Tooltip.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Button.js");
+/* harmony import */ var _Icon__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../Icon */ "./src/dashboard/components/Icon.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/**
+ * Shared Settings UI primitives (TTS-238 split).
+ *
+ * Kept in a dedicated module so both the main Settings container and the
+ * split sub-components (AtlasVoiceSettings, LegacyExtractionSettings) can
+ * import without duplicating component definitions.
+ */
+
+
+
+
+
+var ToggleSwitch = function ToggleSwitch(_ref) {
+  var checked = _ref.checked,
+    onChange = _ref.onChange,
+    name = _ref.name,
+    id = _ref.id,
+    disabled = _ref.disabled;
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("label", {
+    className: "custom-switch ".concat(disabled ? "switch-disabled" : ""),
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("input", {
+      type: "checkbox",
+      checked: checked,
+      onChange: onChange,
+      name: name,
+      id: id,
+      disabled: disabled
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+      className: "switch-track",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+        className: "switch-thumb"
+      })
+    })]
+  });
+};
+var SettingRow = function SettingRow(_ref2) {
+  var label = _ref2.label,
+    children = _ref2.children,
+    helpIcon = _ref2.helpIcon,
+    tooltipText = _ref2.tooltipText,
+    questionIcon = _ref2.questionIcon,
+    questionTooltip = _ref2.questionTooltip,
+    youtubeLink = _ref2.youtubeLink;
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+    className: "setting-row",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+      className: "setting-label-area",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+        className: "setting-label",
+        children: label
+      }), questionIcon && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_4__["default"], {
+        placement: "top",
+        overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
+          children: questionTooltip || (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Help information about this setting", "text-to-audio")
+        }),
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+          className: "ms-2",
+          style: {
+            cursor: "pointer"
+          },
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
+            name: "question-circle",
+            style: {
+              color: "#999",
+              fontSize: "14px"
+            }
+          })
+        })
+      }), helpIcon && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_4__["default"], {
+        placement: "top",
+        overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
+          children: tooltipText || (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Click To Know How It Works?", "text-to-audio")
+        }),
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("a", {
+          className: "text-danger ms-2",
+          target: "_blank",
+          rel: "noopener noreferrer",
+          href: youtubeLink || "#",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
+            name: "youtube"
+          })
+        })
+      })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+      children: children
+    })]
+  });
+};
+var ProLockIcon = function ProLockIcon(_ref3) {
+  var tooltipText = _ref3.tooltipText;
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    placement: "top",
+    overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
+      children: tooltipText
+    }),
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"], {
+      className: "m-0 p-0 text-dark bg-light border-0 ms-2",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_2__["default"], {
+        name: "lock"
+      })
+    })
+  });
+};
 
 /***/ })
 
