@@ -211,8 +211,12 @@
 
     /**
      * Rank every node matched by any of the given selector strings, returning
-     * { node, score, confidence } for the winner. When nothing scores above 0
-     * returns null. Confidence is clamped to [0, 1].
+     * { node, liveNode, score, confidence } for the winner. When nothing scores
+     * above 0 returns null. Confidence is clamped to [0, 1].
+     *
+     *   - `node`     : cloneNode(true) — safe to mutate without touching DOM.
+     *   - `liveNode` : the original, in-DOM reference — needed by first-visit
+     *                  auto-save to compute a stable CSS selector.
      */
     function pickBestCandidate(selectors) {
         var seen = [];
@@ -245,6 +249,7 @@
         if (confidence < 0) { confidence = 0; }
         return {
             node: winner.node.cloneNode(true),
+            liveNode: winner.node,
             score: winner.score,
             confidence: confidence
         };
@@ -346,6 +351,7 @@
                         text: text,
                         tier: heuristicTiers[i].name,
                         node: best.node,
+                        liveNode: best.liveNode || null,
                         confidence: best.confidence
                     };
                 }
@@ -356,6 +362,7 @@
             text: (opts.fallbackText || '').trim(),
             tier: 'php-fallback',
             node: null,
+            liveNode: null,
             confidence: 0
         };
     }

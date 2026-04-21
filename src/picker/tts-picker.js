@@ -258,9 +258,132 @@
         global.document.removeEventListener('click', onClick, true);
     }
 
+    // ---------- First-visit auto-detect (PR-B Phase B2) ----------
+    //
+    // On the first admin visit to a post-type that has no saved selector, run
+    // the engine's scored resolver and:
+    //   confidence >= 0.65 → silently POST the stable selector to save-selector
+    //                        (per-CPT when Pro, global when Free).
+    //   confidence <  0.35 → surface a dismissable "need help?" toast that
+    //                        opens the picker on click.
+    //   otherwise           → no-op (engine picks fine, no need to persist).
+    //
+    // This is the zero-click path from plan §0.4. Runs only when:
+    //   - extractor opt-in is ON
+    //   - ttsObj.can_save_selector is true (user has manage_options)
+    //   - no selector is already saved for the current post-type (or global in Free)
+    //   - not inside the dashboard/admin
+    //   - not a session-dismissed post (one toast per admin/session is enough)
+
+    var TOAST_DISMISS_KEY = 'atlasvoice_lowconf_dismissed_v1';
+    var AUTO_SAVE_THRESHOLD = 0.65;
+    var LOW_CONFIDENCE_THRESHOLD = 0.35;
+
+    function hasSavedSelectorForCurrentContext(tts, postType) {
+        var store = tts.atlasvoice_selectors || {};
+        var perType = store.per_post_type || {};
+        if (tts.is_pro_active && postType && perType[postType]) { return true; }
+        return !!(store.global && String(store.global).trim());
+    }
+
+    function buildLowConfidenceToast(onPick, onDismiss) {
+        var bar = global.document.createElement('div');
+        bar.className = 'atlasvoice-picker-toolbar';
+        bar.style.cssText = (bar.style.cssText || '') +
+            'max-width:480px;background:#8a3b00;'; // amber tint — "attention, not error"
+        bar.innerHTML = '' +
+            '<span>AtlasVoice isn\u2019t sure which region is the article.</span>' +
+            '<button class="av-save av-pick" type="button">Pick content area</button>' +
+            '<button class="av-cancel av-dismiss" type="button">Dismiss</button>';
+        bar.querySelector('.av-pick').addEventListener('click', function () {
+            if (bar.parentNode) { bar.parentNode.removeChild(bar); }
+            if (typeof onPick === 'function') { onPick(); }
+        });
+        bar.querySelector('.av-dismiss').addEventListener('click', function () {
+            if (bar.parentNode) { bar.parentNode.removeChild(bar); }
+            if (typeof onDismiss === 'function') { onDismiss(); }
+        });
+        return bar;
+    }
+
+    function firstVisitAutoDetect() {
+        var tts = global.ttsObj || global.tta_obj || {};
+        if (!tts.use_atlasvoice_extractor) { return; }
+        if (!tts.can_save_selector) { return; }
+
+        var postType = tts.current_post_type || '';
+
+        // Already saved? Nothing to auto-detect.
+        if (hasSavedSelectorForCurrentContext(tts, postType)) { return; }
+
+        if (!global.AtlasVoiceExtractor || typeof global.AtlasVoiceExtractor.resolveContent !== 'function') {
+            return;
+        }
+
+        var resolution;
+        try {
+            resolution = global.AtlasVoiceExtractor.resolveContent({
+                buttonId: 1,
+                postType: postType || null
+            });
+        } catch (_) { return; }
+        if (!resolution) { return; }
+
+        // High confidence → silently save the winning node's stable selector.
+        // Only heuristic tiers (schema / builder / article) trigger auto-save:
+        // markers/saved are already authoritative, wrapper is a legacy anchor
+        // we don't want to freeze as a per-CPT rule, php-fallback has no DOM.
+        var isHeuristicTier = (
+            resolution.tier === 'schema' ||
+            resolution.tier === 'builder' ||
+            resolution.tier === 'article'
+        );
+        if (resolution.confidence >= AUTO_SAVE_THRESHOLD && isHeuristicTier && resolution.liveNode) {
+            var stable = computeStableSelector(resolution.liveNode);
+            if (!stable) { return; }
+            persistSelector(stable, postType).then(function (res) {
+                try {
+                    if (tts && res && res.data) {
+                        tts.atlasvoice_selectors = res.data;
+                    }
+                } catch (_) { /* non-fatal */ }
+            }).catch(function () { /* silent — retry on next visit */ });
+            return;
+        }
+
+        // Low confidence → show the one-shot toast (admins only).
+        if (resolution.confidence < LOW_CONFIDENCE_THRESHOLD) {
+            try {
+                if (global.sessionStorage && global.sessionStorage.getItem(TOAST_DISMISS_KEY) === '1') {
+                    return;
+                }
+            } catch (_) { /* storage blocked — show anyway */ }
+
+            createOverlayStyles();
+            var toast = buildLowConfidenceToast(
+                function onPick() { start({ postType: postType, persist: true }); },
+                function onDismiss() {
+                    try { global.sessionStorage.setItem(TOAST_DISMISS_KEY, '1'); } catch (_) {}
+                }
+            );
+            global.document.body.appendChild(toast);
+        }
+    }
+
+    // Kick off after the engine has loaded. The engine is enqueued right before
+    // the picker, so AtlasVoiceExtractor is defined by the time this runs.
+    if (global.document.readyState === 'loading') {
+        global.document.addEventListener('DOMContentLoaded', firstVisitAutoDetect);
+    } else {
+        // DOM is already parsed — defer one tick so the engine has a chance to
+        // register its globals in script-order.
+        setTimeout(firstVisitAutoDetect, 0);
+    }
+
     global.AtlasVoiceSelector = {
         start: start,
         stop: stop,
-        computeStableSelector: computeStableSelector
+        computeStableSelector: computeStableSelector,
+        firstVisitAutoDetect: firstVisitAutoDetect
     };
 })(typeof window !== 'undefined' ? window : this);
