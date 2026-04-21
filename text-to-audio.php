@@ -465,6 +465,12 @@ class TTA_Init
             TTA_Notices::instance();
             //Rest api init.
             new TTA_Api_Routes();
+
+            // TTS-238 C3a: register the nightly boilerplate detector.
+            // Idempotent — wp_next_scheduled gate prevents double-booking.
+            if ( class_exists( '\\TTA\\TTA_BoilerplateDetector' ) ) {
+                \TTA\TTA_BoilerplateDetector::register_cron();
+            }
         }, 9999);
 
         //add plugins action links.
