@@ -161,6 +161,13 @@ class TTA_Admin
             // is too early. Same pattern as `latest_post_preview_url` below.
             'can_save_selector' => current_user_can( 'manage_options' ),
             'current_post_type' => '',
+            // TTS-238 PR-C (C6c): current singular post id so the engine can
+            // fire auth-variant sample reports to /tta/v1/auth-variant?action=record.
+            // 0 when we're off a singular context — the engine skips reporting
+            // in that case. Populated lazily like current_post_type because
+            // is_singular()/get_queried_object_id() are not safe before the
+            // main query runs.
+            'current_post_id'   => 0,
 
         ];
     }
@@ -234,6 +241,13 @@ class TTA_Admin
         if ( empty( $this->localize_data['current_post_type'] ) ) {
             if ( function_exists( 'is_singular' ) && did_action( 'wp' ) && is_singular() ) {
                 $this->localize_data['current_post_type'] = (string) get_post_type();
+            }
+        }
+        // TTS-238 PR-C (C6c): same lazy pattern for current_post_id — the
+        // engine needs it for /auth-variant?action=record.
+        if ( empty( $this->localize_data['current_post_id'] ) ) {
+            if ( function_exists( 'is_singular' ) && did_action( 'wp' ) && is_singular() ) {
+                $this->localize_data['current_post_id'] = (int) get_the_ID();
             }
         }
 
@@ -476,6 +490,12 @@ class TTA_Admin
         if ( empty( $this->localize_data['current_post_type'] ) ) {
             if ( function_exists( 'is_singular' ) && did_action( 'wp' ) && is_singular() ) {
                 $this->localize_data['current_post_type'] = (string) get_post_type();
+            }
+        }
+        // TTS-238 PR-C (C6c): same lazy pattern for current_post_id on frontend.
+        if ( empty( $this->localize_data['current_post_id'] ) ) {
+            if ( function_exists( 'is_singular' ) && did_action( 'wp' ) && is_singular() ) {
+                $this->localize_data['current_post_id'] = (int) get_the_ID();
             }
         }
 
