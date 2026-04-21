@@ -222,6 +222,15 @@
         onSaveCallback = function (result) {
             if (persist) {
                 persistSelector(result.selector, postType).then(function (res) {
+                    // Hot-update in-memory ttsObj so the engine picks up the
+                    // new selector immediately without requiring a reload.
+                    // The server returns the full store shape { global, per_post_type }.
+                    try {
+                        var tts = global.ttsObj || global.tta_obj;
+                        if (tts && res && res.data) {
+                            tts.atlasvoice_selectors = res.data;
+                        }
+                    } catch (_) { /* non-fatal */ }
                     if (userOnSave) { userOnSave(Object.assign({}, result, { saved: res })); }
                 }).catch(function (err) {
                     if (userOnSave) { userOnSave(Object.assign({}, result, { saved: null, error: err })); }
