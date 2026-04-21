@@ -11781,6 +11781,289 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 
 /***/ }),
 
+/***/ "./src/dashboard/components/dashboard/settings/AtlasVoiceBoilerplate.js":
+/*!******************************************************************************!*\
+  !*** ./src/dashboard/components/dashboard/settings/AtlasVoiceBoilerplate.js ***!
+  \******************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ AtlasVoiceBoilerplate)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "./node_modules/@wordpress/i18n/build-module/index.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+/**
+ * AtlasVoice Boilerplate Suggestions (TTS-238 C3c).
+ *
+ * Renders the output of the nightly BoilerplateDetector as a list of
+ * action chips. Each chip shows the detected sentence, the frequency
+ * badge (e.g. "7/20 posts"), and a toggle to add/remove it from the
+ * player's exclusion list.
+ *
+ * Data flow:
+ *   - GET /boilerplate-suggestions on mount → { suggestions, excluded, generated_at }
+ *   - "Re-scan now" button → POST /boilerplate-suggestions (inline detector run)
+ *   - Exclude / Un-exclude button → POST /boilerplate-exclude
+ *
+ * Chips marked as already-excluded (present in `excluded[]`) render with
+ * a muted style and a "Remove" button instead of "Exclude". This keeps
+ * the UI coherent after a re-scan where previously-excluded phrases may
+ * re-appear in the suggestion list.
+ */
+
+
+
+function fmtWhen(ts) {
+  if (!ts) {
+    return (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("never", "text-to-audio");
+  }
+  try {
+    var d = new Date(ts * 1000);
+    return d.toLocaleString();
+  } catch (_) {
+    return String(ts);
+  }
+}
+function getApiBase() {
+  return window.tta_obj && window.tta_obj.api_url || window.ttsObj && window.ttsObj.api_url || "";
+}
+function getNonce() {
+  return window.tta_obj && window.tta_obj.rest_nonce || window.ttsObj && window.ttsObj.rest_nonce || "";
+}
+function AtlasVoiceBoilerplate() {
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true),
+    _useState2 = _slicedToArray(_useState, 2),
+    loading = _useState2[0],
+    setLoading = _useState2[1];
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState4 = _slicedToArray(_useState3, 2),
+    refreshing = _useState4[0],
+    setRefreshing = _useState4[1];
+  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
+    _useState6 = _slicedToArray(_useState5, 2),
+    suggestions = _useState6[0],
+    setSuggestions = _useState6[1];
+  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)([]),
+    _useState8 = _slicedToArray(_useState7, 2),
+    excluded = _useState8[0],
+    setExcluded = _useState8[1];
+  var _useState9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0),
+    _useState0 = _slicedToArray(_useState9, 2),
+    generatedAt = _useState0[0],
+    setGeneratedAt = _useState0[1];
+  var _useState1 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(0),
+    _useState10 = _slicedToArray(_useState1, 2),
+    sampleSize = _useState10[0],
+    setSampleSize = _useState10[1];
+  var _useState11 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    _useState12 = _slicedToArray(_useState11, 2),
+    busyText = _useState12[0],
+    setBusyText = _useState12[1];
+  var _useState13 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(""),
+    _useState14 = _slicedToArray(_useState13, 2),
+    error = _useState14[0],
+    setError = _useState14[1];
+  var applyResponse = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function (data) {
+    if (!data) {
+      return;
+    }
+    setSuggestions(data.suggestions || []);
+    setExcluded(data.excluded || []);
+    setGeneratedAt(data.generated_at || 0);
+    setSampleSize(data.sample_size || 0);
+  }, []);
+  var fetchSuggestions = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
+    var base = getApiBase();
+    if (!base) {
+      setError((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("REST API base URL not available.", "text-to-audio"));
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    fetch(base + "tta/v1/boilerplate-suggestions", {
+      headers: {
+        "X-WP-Nonce": getNonce()
+      }
+    }).then(function (r) {
+      return r.json();
+    }).then(function (data) {
+      applyResponse(data);
+      setError("");
+      setLoading(false);
+    })["catch"](function (err) {
+      setError(String(err && err.message ? err.message : err));
+      setLoading(false);
+    });
+  }, [applyResponse]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    fetchSuggestions();
+  }, [fetchSuggestions]);
+  var refreshNow = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
+    var base = getApiBase();
+    if (!base) {
+      return;
+    }
+    setRefreshing(true);
+    fetch(base + "tta/v1/boilerplate-suggestions", {
+      method: "POST",
+      headers: {
+        "X-WP-Nonce": getNonce()
+      }
+    }).then(function (r) {
+      return r.json();
+    }).then(function (data) {
+      applyResponse(data);
+      setRefreshing(false);
+    })["catch"](function () {
+      setRefreshing(false);
+    });
+  }, [applyResponse]);
+  var toggleExclude = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function (text, alreadyExcluded) {
+    var base = getApiBase();
+    if (!base) {
+      return;
+    }
+    setBusyText(text);
+    var body = new FormData();
+    body.append("text", text);
+    body.append("action", alreadyExcluded ? "remove" : "add");
+    fetch(base + "tta/v1/boilerplate-exclude", {
+      method: "POST",
+      headers: {
+        "X-WP-Nonce": getNonce()
+      },
+      body: body
+    }).then(function (r) {
+      return r.json();
+    }).then(function (data) {
+      if (data && data.excluded) {
+        setExcluded(data.excluded);
+      }
+      setBusyText(null);
+    })["catch"](function () {
+      setBusyText(null);
+    });
+  }, []);
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+    className: "mt-3 mb-4 p-3 rounded",
+    style: {
+      background: "#fff",
+      border: "1px solid #d6e7ea"
+    },
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+      className: "d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("strong", {
+          className: "d-block mb-1",
+          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Detected boilerplate (beta)", "text-to-audio")
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("small", {
+          className: "text-muted d-block",
+          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Sentences that repeat across your posts — usually newsletter CTAs, related-posts intros, share buttons. Exclude the ones you don't want the player to read aloud.", "text-to-audio")
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("small", {
+          className: "text-muted d-block mt-1",
+          children: [(0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Last scanned:", "text-to-audio"), " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("strong", {
+            children: fmtWhen(generatedAt)
+          }), sampleSize > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.Fragment, {
+            children: [" · ", (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Sampled", "text-to-audio"), " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("strong", {
+              children: sampleSize
+            }), " ", (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("posts", "text-to-audio")]
+          })]
+        })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+        className: "d-flex gap-2 flex-wrap",
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("button", {
+          type: "button",
+          className: "btn btn-outline-primary btn-sm",
+          onClick: refreshNow,
+          disabled: refreshing || loading,
+          children: refreshing ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Scanning…", "text-to-audio") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Re-scan now", "text-to-audio")
+        })
+      })]
+    }), error && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+      className: "alert alert-danger py-2 px-3 mb-2",
+      style: {
+        fontSize: "12px"
+      },
+      children: error
+    }), !loading && !error && suggestions.length === 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+      className: "text-muted",
+      style: {
+        fontSize: "13px"
+      },
+      children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("No repeating boilerplate detected yet. The detector runs nightly — or click Re-scan now to try immediately.", "text-to-audio")
+    }), suggestions.length > 0 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+      className: "d-flex flex-column gap-2",
+      style: {
+        fontSize: "13px"
+      },
+      children: suggestions.map(function (s, idx) {
+        var isExcluded = excluded.indexOf(s.text) !== -1;
+        var pct = s.frequency ? Math.round(s.frequency * 100) : 0;
+        return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+          className: "d-flex align-items-start gap-2 p-2 rounded",
+          style: {
+            background: isExcluded ? "#e9ecef" : "#f8f9fa",
+            border: "1px solid #dee2e6",
+            opacity: isExcluded ? 0.7 : 1
+          },
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+            style: {
+              flex: "0 0 auto",
+              minWidth: "72px",
+              textAlign: "center",
+              padding: "2px 6px",
+              fontSize: "11px",
+              fontWeight: 600,
+              color: "#fff",
+              background: pct >= 50 ? "#b02a37" : pct >= 40 ? "#b8860b" : "#0d6efd",
+              borderRadius: "4px"
+            },
+            title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Posts where this sentence appeared", "text-to-audio"),
+            children: [s.post_count, "/", s.sample_total, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+              style: {
+                fontSize: "9px",
+                opacity: 0.85
+              },
+              children: [pct, "%"]
+            })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+            style: {
+              flex: "1 1 auto",
+              minWidth: 0
+            },
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+              style: {
+                wordBreak: "break-word",
+                textDecoration: isExcluded ? "line-through" : "none"
+              },
+              children: s.text
+            })
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("button", {
+            type: "button",
+            className: "btn btn-sm ".concat(isExcluded ? "btn-outline-secondary" : "btn-outline-danger"),
+            onClick: function onClick() {
+              toggleExclude(s.text, isExcluded);
+            },
+            disabled: busyText === s.text,
+            children: busyText === s.text ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Saving…", "text-to-audio") : isExcluded ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Remove", "text-to-audio") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exclude", "text-to-audio")
+          })]
+        }, idx + "-" + (s.text || "").slice(0, 20));
+      })
+    })]
+  });
+}
+
+/***/ }),
+
 /***/ "./src/dashboard/components/dashboard/settings/AtlasVoiceHealLog.js":
 /*!**************************************************************************!*\
   !*** ./src/dashboard/components/dashboard/settings/AtlasVoiceHealLog.js ***!
@@ -12115,7 +12398,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "./node_modules/@wordpress/i18n/build-module/index.js");
 /* harmony import */ var _SettingsPrimitives__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./SettingsPrimitives */ "./src/dashboard/components/dashboard/settings/SettingsPrimitives.js");
 /* harmony import */ var _AtlasVoiceHealLog__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./AtlasVoiceHealLog */ "./src/dashboard/components/dashboard/settings/AtlasVoiceHealLog.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var _AtlasVoiceBoilerplate__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./AtlasVoiceBoilerplate */ "./src/dashboard/components/dashboard/settings/AtlasVoiceBoilerplate.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 /**
  * AtlasVoice Settings (TTS-238 — new system).
  *
@@ -12139,15 +12423,16 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 function AtlasVoiceSettings(_ref) {
   var settings = _ref.settings,
     handleChange = _ref.handleChange;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_2__.SettingRow, {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.Fragment, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_2__.SettingRow, {
       label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Use AtlasVoice Extractor (Beta)", 'text-to-audio'),
       questionIcon: true,
       questionTooltip: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Opt-in to the new JS-based content extractor with a visual picker. Leave off to keep the current extraction behavior unchanged.", 'text-to-audio'),
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_2__.ToggleSwitch, {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_SettingsPrimitives__WEBPACK_IMPORTED_MODULE_2__.ToggleSwitch, {
         checked: settings.tta__settings_use_atlasvoice_extractor,
         onChange: function onChange(e) {
           return handleChange(e);
@@ -12155,32 +12440,32 @@ function AtlasVoiceSettings(_ref) {
         name: "tta__settings_use_atlasvoice_extractor",
         id: "tta__settings_use_atlasvoice_extractor"
       })
-    }), settings.tta__settings_use_atlasvoice_extractor && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
+    }), settings.tta__settings_use_atlasvoice_extractor && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("div", {
       className: "mt-3 mb-4 p-3 rounded",
       style: {
         background: "#f0f7f8",
         border: "1px solid #d6e7ea"
       },
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
         className: "d-flex align-items-center justify-content-between flex-wrap gap-2",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("strong", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("strong", {
             className: "d-block mb-1",
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("AtlasVoiceSelector — Visual Content Picker", "text-to-audio")
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("small", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("small", {
             className: "text-muted d-block",
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Click the button, then point at the text region on your live post. We'll learn a stable selector automatically — no CSS knowledge needed.", "text-to-audio")
-          }), settings.atlasvoice_saved_selector && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("small", {
+          }), settings.atlasvoice_saved_selector && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("small", {
             className: "d-block mt-1",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("strong", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("strong", {
               children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Saved:", "text-to-audio")
-            }), " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("code", {
+            }), " ", /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("code", {
               children: settings.atlasvoice_saved_selector
             })]
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsxs)("div", {
           className: "d-flex gap-2 flex-wrap",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("button", {
             type: "button",
             className: "btn btn-outline-primary btn-sm",
             onClick: function onClick() {
@@ -12194,7 +12479,7 @@ function AtlasVoiceSettings(_ref) {
             },
             title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Open the latest post and compare the new AtlasVoice extraction against the legacy wrapper output side by side.", "text-to-audio"),
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Preview extraction (new vs old)", "text-to-audio")
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)("button", {
             type: "button",
             className: "btn btn-primary btn-sm",
             onClick: function onClick() {
@@ -12210,7 +12495,7 @@ function AtlasVoiceSettings(_ref) {
           })]
         })]
       })
-    }), settings.tta__settings_use_atlasvoice_extractor && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_AtlasVoiceHealLog__WEBPACK_IMPORTED_MODULE_3__["default"], {})]
+    }), settings.tta__settings_use_atlasvoice_extractor && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_AtlasVoiceHealLog__WEBPACK_IMPORTED_MODULE_3__["default"], {}), settings.tta__settings_use_atlasvoice_extractor && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_5__.jsx)(_AtlasVoiceBoilerplate__WEBPACK_IMPORTED_MODULE_4__["default"], {})]
   });
 }
 
