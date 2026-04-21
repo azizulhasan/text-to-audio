@@ -81,12 +81,12 @@ export default function AtlasVoiceHealLog() {
         })
             .then(function (r) { return r.json(); })
             .then(function (data) {
-                if (data && data.entries) {
-                    setEntries(data.entries);
-                    setError("");
-                } else {
-                    setEntries([]);
-                }
+                // Server returns { status: true, log: [...] } (reverse-chrono,
+                // each row has an `index` field). Fall back to `entries` for
+                // forward-compat in case the payload shape changes.
+                var rows = (data && (data.log || data.entries)) || [];
+                setEntries(Array.isArray(rows) ? rows : []);
+                setError("");
                 setLoading(false);
             })
             .catch(function (err) {
