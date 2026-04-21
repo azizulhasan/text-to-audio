@@ -14,6 +14,16 @@
  *
  * Returns plain text ready for TTS. Does NOT include intro/outro — those are
  * stitched by the player (Pro) or baked into ttsCurrentContent (Free).
+ *
+ * PR-B (TTS-238 v4.1): Every result now carries a `confidence` number in [0, 1]
+ * alongside `tier`. Deterministic tiers (markers / saved / wrapper) return a
+ * fixed high confidence; heuristic tiers (schema / builder / article) compute
+ * confidence from scored candidate competition per plan §4.5:
+ *   confidence = winner_score / (winner_score + second_score)
+ * This enables:
+ *   - low-confidence toast (engine signals "not sure, open picker")
+ *   - self-heal rescoring on saved-selector match-failure (§0.7)
+ *   - UI diff preview coloring by confidence
  */
 
 (function (global) {
@@ -135,6 +145,119 @@
         return extractFromSelectorList(selectors);
     }
 
+    // ---------- Scoring (PR-B Phase B1) ----------
+    //
+    // Implements the plan §4.5 heuristic: score each candidate by text density,
+    // then penalize link-heavy / nav-like regions and boost known-good markers
+    // (itemprop=articleBody, .entry-content, builder classes). Confidence is a
+    // head-to-head ratio between the winner and the runner-up so that a clear
+    // winner lands near 1.0 while a three-way tie lands near 0.34.
+
+    var EXCLUDE_ANCESTORS_SELECTOR =
+        'nav,header,footer,aside,' +
+        '[role="navigation"],[role="banner"],[role="contentinfo"],' +
+        '.menu,.sidebar,.widget,.comments-area,' +
+        '.social-share,.related-posts,.yarpp-related';
+
+    // Flattened list of every builder selector substring so we can test an
+    // element's class list against them cheaply in scoreCandidate.
+    var BUILDER_CLASS_HINTS = (function () {
+        var hints = [];
+        Object.keys(BUILDER_BODY_SELECTORS).forEach(function (k) {
+            var parts = BUILDER_BODY_SELECTORS[k].split(',');
+            for (var i = 0; i < parts.length; i++) {
+                var p = parts[i].trim();
+                // Strip leading ".", attribute brackets, pseudo-selectors.
+                if (p.charAt(0) === '.') { hints.push(p.slice(1).split(' ')[0]); }
+            }
+        });
+        return hints;
+    })();
+
+    function matchesBuilderKnown(el) {
+        if (!el || !el.className || typeof el.className !== 'string') { return false; }
+        for (var i = 0; i < BUILDER_CLASS_HINTS.length; i++) {
+            if (el.className.indexOf(BUILDER_CLASS_HINTS[i]) !== -1) { return true; }
+        }
+        return false;
+    }
+
+    function scoreCandidate(el) {
+        if (!el || el.nodeType !== 1) { return 0; }
+        var text = (el.innerText || el.textContent || '').trim();
+        var T = text.length;
+        if (T < 80) { return 0; }
+        try {
+            if (el.closest && el.closest(EXCLUDE_ANCESTORS_SELECTOR)) { return 0; }
+        } catch (_) { /* invalid selector in some old browsers — keep scoring */ }
+
+        var descendants = el.querySelectorAll ? el.querySelectorAll('*') : [];
+        var E = descendants.length;
+        var links = el.querySelectorAll ? el.querySelectorAll('a') : [];
+        var L = 0;
+        for (var i = 0; i < links.length; i++) {
+            L += ((links[i].innerText || links[i].textContent || '').length);
+        }
+        var LR = T ? (L / T) : 1;
+        var density = T / (E + 1);
+        var s = T * density;
+
+        if (LR > 0.5) { s *= 0.3; }                               // nav-ish
+        if (matchesBuilderKnown(el)) { s *= 2.0; }                // Elementor/Divi/etc.
+        if (el.matches && el.matches('[itemprop="articleBody"]')) { s *= 1.5; }
+        if (/(^|\s)entry-content(\s|$)/.test(el.className || '')) { s *= 1.5; }
+        return s;
+    }
+
+    /**
+     * Rank every node matched by any of the given selector strings, returning
+     * { node, score, confidence } for the winner. When nothing scores above 0
+     * returns null. Confidence is clamped to [0, 1].
+     */
+    function pickBestCandidate(selectors) {
+        var seen = [];
+        var nodes = [];
+        for (var i = 0; i < selectors.length; i++) {
+            try {
+                var list = global.document.querySelectorAll(selectors[i]);
+                for (var j = 0; j < list.length; j++) {
+                    if (seen.indexOf(list[j]) === -1) {
+                        seen.push(list[j]);
+                        nodes.push(list[j]);
+                    }
+                }
+            } catch (_) { /* invalid selector — skip */ }
+        }
+        if (!nodes.length) { return null; }
+
+        var scored = [];
+        for (var k = 0; k < nodes.length; k++) {
+            var sc = scoreCandidate(nodes[k]);
+            if (sc > 0) { scored.push({ node: nodes[k], score: sc }); }
+        }
+        if (!scored.length) { return null; }
+        scored.sort(function (a, b) { return b.score - a.score; });
+
+        var winner = scored[0];
+        var second = scored.length > 1 ? scored[1].score : 0;
+        var confidence = winner.score / (winner.score + second);
+        if (confidence > 1) { confidence = 1; }
+        if (confidence < 0) { confidence = 0; }
+        return {
+            node: winner.node.cloneNode(true),
+            score: winner.score,
+            confidence: confidence
+        };
+    }
+
+    function allBuilderSelectorStrings() {
+        var out = [];
+        Object.keys(BUILDER_BODY_SELECTORS).forEach(function (k) {
+            out.push(BUILDER_BODY_SELECTORS[k]);
+        });
+        return out;
+    }
+
     /**
      * Public API: resolve content for a given buttonId.
      *
@@ -142,7 +265,10 @@
      * @param {number|string} opts.buttonId      Player/button id (1-based).
      * @param {string=}       opts.savedSelector User-saved stable selector (Tier 2).
      * @param {string=}       opts.fallbackText  PHP-baked ttsCurrentContent (Tier 7).
-     * @returns {{ text: string, tier: string, node: (Node|null) }}
+     * @returns {{ text: string, tier: string, node: (Node|null), confidence: number }}
+     *          confidence is in [0, 1]: 1 = deterministic hit (markers/saved/wrapper),
+     *          0 = php-fallback, otherwise a head-to-head ratio of the top two
+     *          scored candidates per plan §4.5.
      */
     function resolveSavedSelector(opts) {
         if (opts.savedSelector) { return opts.savedSelector; }
@@ -153,27 +279,75 @@
         return store.global || '';
     }
 
+    // Deterministic-tier confidence floors. These are anchors the user (or the
+    // system as a whole) has opted into, so we trust them over any heuristic.
+    var CONFIDENCE_MARKERS = 1.0;   // author-authored markers — gold standard
+    var CONFIDENCE_SAVED   = 0.95;  // user picked via AtlasVoiceSelector
+    var CONFIDENCE_WRAPPER = 0.85;  // legacy .tts_content_wrapper_N
+
     function resolveContent(opts) {
         opts = opts || {};
         var buttonId = opts.buttonId || 1;
         var savedSelector = resolveSavedSelector(opts);
 
-        var tiers = [
-            { name: 'markers',  run: function () { return extractFromMarkers(buttonId); } },
-            { name: 'saved',    run: function () { return extractFromSelector(savedSelector); } },
-            { name: 'wrapper',  run: function () { return extractFromLegacyWrapper(buttonId); } },
-            { name: 'schema',   run: function () { return extractFromSelectorList(SCHEMA_ARIA_SELECTORS); } },
-            { name: 'builder',  run: function () { return extractFromBuilders(); } },
-            { name: 'article',  run: function () { return extractFromSelectorList(GENERIC_ARTICLE_SELECTORS); } }
-        ];
+        var text, node;
 
-        for (var i = 0; i < tiers.length; i++) {
-            var node = null;
-            try { node = tiers[i].run(); } catch (_) { node = null; }
+        // Tier 1 — comment markers.
+        try {
+            node = extractFromMarkers(buttonId);
             if (node) {
-                var text = (node.textContent || '').replace(/\s+/g, ' ').trim();
+                text = (node.textContent || '').replace(/\s+/g, ' ').trim();
                 if (text.length > 0) {
-                    return { text: text, tier: tiers[i].name, node: node };
+                    return { text: text, tier: 'markers', node: node, confidence: CONFIDENCE_MARKERS };
+                }
+            }
+        } catch (_) { /* fall through */ }
+
+        // Tier 2 — user-saved stable selector.
+        if (savedSelector) {
+            try {
+                node = extractFromSelector(savedSelector);
+                if (node) {
+                    text = (node.textContent || '').replace(/\s+/g, ' ').trim();
+                    if (text.length > 0) {
+                        return { text: text, tier: 'saved', node: node, confidence: CONFIDENCE_SAVED };
+                    }
+                }
+            } catch (_) { /* fall through — self-heal path handles this in Phase B3 */ }
+        }
+
+        // Tier 3 — legacy .tts_content_wrapper_N.
+        try {
+            node = extractFromLegacyWrapper(buttonId);
+            if (node) {
+                text = (node.textContent || '').replace(/\s+/g, ' ').trim();
+                if (text.length > 0) {
+                    return { text: text, tier: 'wrapper', node: node, confidence: CONFIDENCE_WRAPPER };
+                }
+            }
+        } catch (_) { /* fall through */ }
+
+        // Tier 4 / 5 / 6 — heuristic scoring. Collect candidates from every
+        // known selector set, score them, and let the best-scoring node win.
+        // Tier name on the return value reports which family the winner came
+        // from so downstream analytics (§10.1) can still classify events.
+        var heuristicTiers = [
+            { name: 'schema',  selectors: SCHEMA_ARIA_SELECTORS },
+            { name: 'builder', selectors: allBuilderSelectorStrings() },
+            { name: 'article', selectors: GENERIC_ARTICLE_SELECTORS }
+        ];
+        for (var i = 0; i < heuristicTiers.length; i++) {
+            var best = null;
+            try { best = pickBestCandidate(heuristicTiers[i].selectors); } catch (_) { best = null; }
+            if (best && best.node) {
+                text = (best.node.textContent || '').replace(/\s+/g, ' ').trim();
+                if (text.length > 0) {
+                    return {
+                        text: text,
+                        tier: heuristicTiers[i].name,
+                        node: best.node,
+                        confidence: best.confidence
+                    };
                 }
             }
         }
@@ -181,7 +355,8 @@
         return {
             text: (opts.fallbackText || '').trim(),
             tier: 'php-fallback',
-            node: null
+            node: null,
+            confidence: 0
         };
     }
 
@@ -219,9 +394,30 @@
         return result.text;
     }
 
+    /**
+     * Full-result wrapper — like getContentForPlayer but returns the whole
+     * { text, tier, node, confidence } shape so UI paths (diff preview, listen
+     * sample, self-heal badge) can inspect confidence without re-running the
+     * resolver. Same opt-in gate as getContentForPlayer.
+     *
+     * @returns {{ text: string, tier: string, node: Node|null, confidence: number }|null}
+     */
+    function getResolutionForPlayer(opts) {
+        opts = opts || {};
+        var tts = global.ttsObj || global.tta_obj || {};
+        if (!tts.use_atlasvoice_extractor) { return null; }
+        var result = resolveContent(opts);
+        if (!result || !result.text || result.text.length < 40) { return null; }
+        if (result.tier === 'php-fallback') { return null; }
+        return result;
+    }
+
     global.AtlasVoiceExtractor = {
         resolveContent: resolveContent,
         getContentForPlayer: getContentForPlayer,
+        getResolutionForPlayer: getResolutionForPlayer,
+        scoreCandidate: scoreCandidate,
+        pickBestCandidate: pickBestCandidate,
         BUILDER_BODY_SELECTORS: BUILDER_BODY_SELECTORS,
         MARKER_START: ATLASVOICE_MARKER_START,
         MARKER_END: ATLASVOICE_MARKER_END
