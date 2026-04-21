@@ -665,10 +665,26 @@ class TTA_Api_Routes {
 			update_option( 'tta_atlasvoice_heal_log', $log, false );
 		}
 
+		// PR-C (C4a): attach cache purge hints to every successful save. The
+		// detector returns `needs_purge=false` quietly when no known cache is
+		// active, so users without a page cache never see the toast. Kept
+		// as a small structured payload instead of a pre-rendered string so
+		// the client can decide whether to show a link or a plain toast.
+		$cache_hint = array(
+			'needs_purge' => false,
+			'detected'    => array(),
+			'host_hints'  => array(),
+			'message'     => '',
+		);
+		if ( class_exists( '\\TTA\\TTA_CachePurgeHints' ) ) {
+			$cache_hint = \TTA\TTA_CachePurgeHints::get_hint();
+		}
+
 		return rest_ensure_response( array(
-			'status' => true,
-			'data'   => $store,
-			'reason' => $reason ?: null,
+			'status'     => true,
+			'data'       => $store,
+			'reason'     => $reason ?: null,
+			'cache_hint' => $cache_hint,
 		) );
 	}
 
