@@ -545,6 +545,17 @@ class TTA_Api_Routes {
 							'required'    => false,
 							'description' => 'Post type to scope the selector to (Pro only).',
 						),
+						// PR-C (C1c): heal audit fields.
+						'reason' => array(
+							'type'        => 'string',
+							'required'    => false,
+							'description' => 'Origin of the save. "heal" means the picker is rewriting a broken saved selector; anything else is a user-initiated save.',
+						),
+						'old_selector' => array(
+							'type'        => 'string',
+							'required'    => false,
+							'description' => 'When reason="heal", the selector being replaced. Recorded in the heal log for audit + one-click revert.',
+						),
 					),
 				),
 			)
@@ -565,8 +576,11 @@ class TTA_Api_Routes {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function save_selector( $request ) {
-		$selector  = trim( (string) $request->get_param( 'selector' ) );
-		$post_type = sanitize_key( (string) $request->get_param( 'post_type' ) );
+		$selector     = trim( (string) $request->get_param( 'selector' ) );
+		$post_type    = sanitize_key( (string) $request->get_param( 'post_type' ) );
+		// PR-C (C1c): heal audit fields.
+		$reason       = sanitize_key( (string) $request->get_param( 'reason' ) );
+		$old_selector = trim( (string) $request->get_param( 'old_selector' ) );
 
 		if ( $selector === '' || strlen( $selector ) > 512 ) {
 			return new \WP_Error( 'invalid_selector', __( 'Selector is empty or too long.', 'text-to-audio' ), array( 'status' => 400 ) );
@@ -574,6 +588,15 @@ class TTA_Api_Routes {
 		// Basic shape check — allow only characters valid in CSS selectors + escaped unicode.
 		if ( ! preg_match( '#^[A-Za-z0-9_\-\s\.\#\[\]\=\"\'\>\,\:\(\)\*\^\$\|\\\\]+$#', $selector ) ) {
 			return new \WP_Error( 'invalid_selector_chars', __( 'Selector contains invalid characters.', 'text-to-audio' ), array( 'status' => 400 ) );
+		}
+
+		// Same validation for old_selector when provided — we never store
+		// arbitrary attacker-controlled text in the heal log.
+		if ( $old_selector !== '' ) {
+			if ( strlen( $old_selector ) > 512 ||
+				 ! preg_match( '#^[A-Za-z0-9_\-\s\.\#\[\]\=\"\'\>\,\:\(\)\*\^\$\|\\\\]+$#', $old_selector ) ) {
+				$old_selector = '';
+			}
 		}
 
 		$store = get_option( 'tta_atlasvoice_selectors', array(
@@ -597,9 +620,31 @@ class TTA_Api_Routes {
 		update_option( 'tta_atlasvoice_selectors', $store, false );
 		\TTA\TTA_Cache::delete( 'all_settings' );
 
+		// PR-C (C1c): record the heal event so the admin dashboard can show
+		// an audit trail + one-click revert. Ring buffer capped at 50 entries
+		// so this option never grows unbounded. Only records when reason
+		// explicitly says 'heal' — user-initiated saves don't pollute the log.
+		if ( $reason === 'heal' && $old_selector !== '' && $old_selector !== $selector ) {
+			$scope = ( $is_pro && $post_type !== '' ) ? ( 'post_type:' . $post_type ) : 'global';
+			$log = get_option( 'tta_atlasvoice_heal_log', array() );
+			if ( ! is_array( $log ) ) { $log = array(); }
+			$log[] = array(
+				'ts'           => time(),
+				'scope'        => $scope,
+				'old_selector' => $old_selector,
+				'new_selector' => $selector,
+				'user_id'      => get_current_user_id(),
+			);
+			if ( count( $log ) > 50 ) {
+				$log = array_slice( $log, -50 );
+			}
+			update_option( 'tta_atlasvoice_heal_log', $log, false );
+		}
+
 		return rest_ensure_response( array(
 			'status' => true,
 			'data'   => $store,
+			'reason' => $reason ?: null,
 		) );
 	}
 
