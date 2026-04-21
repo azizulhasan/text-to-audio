@@ -458,6 +458,11 @@
         if (result.text.length < 40) { return null; }
         // php-fallback means nothing DOM-side matched; let the legacy path handle it.
         if (result.tier === 'php-fallback') { return null; }
+        // TTS-238 PR-C (C6c): record this extraction as an auth-variant sample.
+        // The server bucket is derived from is_user_logged_in() so we do not
+        // send the auth state — just the post_id + hash + length. Fire-and-
+        // forget, errors swallowed; it must not interfere with playback.
+        reportAuthSample(result.text, opts);
         return result.text;
     }
 
@@ -633,8 +638,109 @@
                 callback(null, meta);
                 return;
             }
+            // TTS-238 PR-C (C6c): same fire-and-forget auth-variant sample as
+            // the sync path. Mutation-observer resolutions are equally valid
+            // signals for deciding whether the post renders differently
+            // between auth states.
+            reportAuthSample(res.text, opts);
             callback(res.text, meta);
         }, timeoutMs);
+    }
+
+    // ---------- auth-variant sample reporter (PR-C C6c) ----------
+    //
+    // When the extractor resolves content for the player, we tell the server
+    // "on this post, this auth state (derived server-side from the request)
+    // produced text with this hash". The server stores up to 10 samples per
+    // post and collapses them into a `same` / `differs` / `unknown` verdict
+    // which the post-edit meta box surfaces and the MP3 cache uses to decide
+    // whether to key by auth bucket.
+    //
+    // Fire-and-forget: failures never block extraction / playback. We de-dupe
+    // per page load by (post_id, hash) so repeated resolver calls during a
+    // session don't hammer the endpoint — the server also rate-limits to
+    // 1 record per IP+post per minute, but client-side dedup is cheaper.
+    //
+    // Hash is a short fnv-1a-like 32-bit fingerprint, base36-encoded. It's
+    // not cryptographic — purely a fingerprint to tell "same text" from
+    // "different text". Two identical bodies always produce the same value.
+
+    var REPORTED_SAMPLES = {}; // post_id + ':' + hash -> true
+
+    function fnv1aHash(s) {
+        var h = 0x811c9dc5;
+        for (var i = 0; i < s.length; i++) {
+            h ^= s.charCodeAt(i);
+            // 32-bit FNV prime multiply via shifts to avoid float precision loss
+            h = (h + ((h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24))) >>> 0;
+        }
+        return h.toString(36);
+    }
+
+    function normaliseForHash(s) {
+        return String(s || '').replace(/\s+/g, ' ').trim();
+    }
+
+    /**
+     * Fire a sample report to /tta/v1/auth-variant?action=record.
+     * Safe to call from any resolver path; silently no-ops when we don't
+     * have a post_id, nonce, REST URL, or when the opt-in flag is off.
+     *
+     * @param {string} text Extracted content text (full body, we hash+length it).
+     * @param {Object=} opts Extractor options — may carry a postId override.
+     */
+    function reportAuthSample(text, opts) {
+        try {
+            var tts = global.ttsObj || global.tta_obj || {};
+            if (!tts.use_atlasvoice_extractor) { return; }
+            var postId = (opts && opts.postId) || tts.current_post_id || 0;
+            postId = parseInt(postId, 10) || 0;
+            if (postId <= 0) { return; }
+
+            var normalised = normaliseForHash(text);
+            if (normalised.length < 40) { return; }
+            var hash = fnv1aHash(normalised);
+            var cacheKey = postId + ':' + hash;
+            if (REPORTED_SAMPLES[cacheKey]) { return; }
+            REPORTED_SAMPLES[cacheKey] = true;
+
+            // ttsObj localises the REST base under `api_url` (e.g.
+            // "https://site.com/wp-json/"). Fall back to json_url or a derived
+            // `<origin>/wp-json/` as a last resort so the engine remains usable
+            // even if some theme strips keys.
+            var restUrl = tts.api_url || tts.json_url || tts.rest_url || '';
+            if (!restUrl && global.location) {
+                restUrl = global.location.origin + '/wp-json/';
+            }
+            if (!restUrl) { return; }
+            var url = restUrl.replace(/\/+$/, '') + '/tta/v1/auth-variant';
+            var body = JSON.stringify({
+                action:    'record',
+                post_id:   postId,
+                text_hash: hash,
+                text_len:  normalised.length
+            });
+
+            // We use fetch with keepalive so reports survive navigation (the
+            // user hitting Listen then scrolling away mid-flight). The record
+            // verb allows anonymous (rate-limited by IP+post), but logged-in
+            // sessions MUST send X-WP-Nonce — WP's cookie-auth filter treats
+            // REST requests without the nonce as unauthenticated even when
+            // a valid auth cookie is present. Without the nonce the bucket
+            // would always resolve to `logged_out` for admins on the
+            // frontend, which defeats the whole detector.
+            var headers = { 'Content-Type': 'application/json' };
+            if (tts.rest_nonce) { headers['X-WP-Nonce'] = tts.rest_nonce; }
+            if (typeof global.fetch === 'function') {
+                global.fetch(url, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: headers,
+                    keepalive: true,
+                    body: body
+                }).catch(function () { /* swallow — best-effort */ });
+            }
+        } catch (e) { /* never throw from the reporter */ }
     }
 
     global.AtlasVoiceExtractor = {
@@ -643,6 +749,7 @@
         getContentForPlayerAsync: getContentForPlayerAsync,
         getResolutionForPlayer: getResolutionForPlayer,
         waitForResolution: waitForResolution,
+        reportAuthSample: reportAuthSample,
         scoreCandidate: scoreCandidate,
         pickBestCandidate: pickBestCandidate,
         BUILDER_BODY_SELECTORS: BUILDER_BODY_SELECTORS,
