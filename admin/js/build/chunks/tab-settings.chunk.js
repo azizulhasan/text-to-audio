@@ -11873,6 +11873,13 @@ function AtlasVoiceHealLog() {
     _useState8 = _slicedToArray(_useState7, 2),
     reverting = _useState8[0],
     setReverting = _useState8[1];
+  // C4b: cache purge hint banner, populated from the /save-selector
+  // response after a successful revert. Dismissable; auto-clears when
+  // the user reverts again (we just overwrite it).
+  var _useState9 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(null),
+    _useState0 = _slicedToArray(_useState9, 2),
+    cacheHint = _useState0[0],
+    setCacheHint = _useState0[1];
   var fetchLog = (0,react__WEBPACK_IMPORTED_MODULE_0__.useCallback)(function () {
     var apiBase = window.tta_obj && window.tta_obj.api_url || window.ttsObj && window.ttsObj.api_url || "";
     var nonce = window.tta_obj && window.tta_obj.rest_nonce || window.ttsObj && window.ttsObj.rest_nonce || "";
@@ -11937,8 +11944,15 @@ function AtlasVoiceHealLog() {
       body: body
     }).then(function (r) {
       return r.json();
-    }).then(function () {
+    }).then(function (res) {
       setReverting(null);
+      // C4b: surface cache purge hint when server detected a
+      // page cache. No-op when needs_purge=false.
+      if (res && res.cache_hint && res.cache_hint.needs_purge) {
+        setCacheHint(res.cache_hint);
+      } else {
+        setCacheHint(null);
+      }
       fetchLog();
     })["catch"](function () {
       setReverting(null);
@@ -11969,6 +11983,31 @@ function AtlasVoiceHealLog() {
           disabled: loading,
           children: loading ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Loading…", "text-to-audio") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Refresh", "text-to-audio")
         })
+      })]
+    }), cacheHint && cacheHint.needs_purge && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+      className: "alert alert-info py-2 px-3 mb-2 d-flex align-items-center gap-2",
+      style: {
+        fontSize: "12px",
+        flexWrap: "wrap"
+      },
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
+        style: {
+          flex: "1 1 auto"
+        },
+        children: cacheHint.message
+      }), cacheHint.detected && cacheHint.detected.length === 1 && cacheHint.detected[0].settings_url && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("a", {
+        href: cacheHint.detected[0].settings_url,
+        target: "_blank",
+        rel: "noopener noreferrer",
+        className: "btn btn-sm btn-outline-primary",
+        children: [(0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Open", "text-to-audio"), " ", cacheHint.detected[0].label]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("button", {
+        type: "button",
+        className: "btn-close",
+        "aria-label": "Dismiss",
+        onClick: function onClick() {
+          setCacheHint(null);
+        }
       })]
     }), error && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
       className: "alert alert-danger py-2 px-3 mb-2",
