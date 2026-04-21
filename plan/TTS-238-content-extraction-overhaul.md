@@ -131,8 +131,8 @@ Users who never open Advanced see nothing. The suggestion list persists until ac
 | PR | Scope | Status |
 |---|---|---|
 | **PR-A** | Opt-in flag plumbed end-to-end, engine + picker gated on opt-in, legacy path 100% unchanged when OFF, Settings.js UI split. | ✅ Shipped on `feature/TTS-238`. |
-| **PR-B** | Picker promoted to stepwise wizard (scope → include → exclude → refine), listen sample, lazy on-demand loading of picker/engine bundles, diff preview vs legacy. | Next. |
-| **PR-C** | Pro rules (per-post-type + per-post), staging/production mode toggle, content-hash short-circuit, lazy visitor-load MP3 invalidation, snapshot/rollback per scope, custom-field reader behind opt-in. | After PR-B. |
+| **PR-B** | Confidence-scored resolver (B1), first-visit auto-save + low-confidence picker toast (B2), side-by-side diff preview with 5s listen sample (B3+B4). Lazy on-demand loading of picker/engine bundles deferred to PR-C. | ✅ Shipping on `feature/TTS-238`: B1 commit `296f223`, B2 commit `08b295c`, B3+B4 pending in-flight commit. |
+| **PR-C** | Pro rules (per-post-type + per-post), staging/production mode toggle, content-hash short-circuit, lazy visitor-load MP3 invalidation, snapshot/rollback per scope, custom-field reader behind opt-in, lazy bundle loading (picker only fetched when dashboard button clicked / admin-bar item opened). | After PR-B. |
 
 See §16 for the updated rollout table.
 

@@ -42,8 +42,9 @@ export default function AtlasVoiceSettings({settings, handleChange}) {
                 />
             </SettingRow>
 
-            {/* Visual Content Picker launcher — gated on opt-in so it only
-                appears for users who have chosen to use the new system. */}
+            {/* Visual Content Picker launcher + Diff preview launcher — both
+                gated on opt-in so they only appear for users who have chosen
+                to use the new system. */}
             {settings.tta__settings_use_atlasvoice_extractor && (
                 <div
                     className="mt-3 mb-4 p-3 rounded"
@@ -67,21 +68,39 @@ export default function AtlasVoiceSettings({settings, handleChange}) {
                                 </small>
                             )}
                         </div>
-                        <button
-                            type="button"
-                            className="btn btn-primary btn-sm"
-                            onClick={() => {
-                                const url = ttsObj.latest_post_preview_url;
-                                if (!url) {
-                                    alert(__("No preview URL available. Publish a post first.", "text-to-audio"));
-                                    return;
-                                }
-                                const sep = url.indexOf("?") === -1 ? "?" : "&";
-                                window.open(url + sep + "atlasvoice-picker=1", "_blank", "noopener");
-                            }}
-                        >
-                            {__("Pick content area on live post", "text-to-audio")}
-                        </button>
+                        <div className="d-flex gap-2 flex-wrap">
+                            <button
+                                type="button"
+                                className="btn btn-outline-primary btn-sm"
+                                onClick={() => {
+                                    const url = ttsObj.latest_post_preview_url;
+                                    if (!url) {
+                                        alert(__("No preview URL available. Publish a post first.", "text-to-audio"));
+                                        return;
+                                    }
+                                    const sep = url.indexOf("?") === -1 ? "?" : "&";
+                                    window.open(url + sep + "atlasvoice-diff=1", "_blank", "noopener");
+                                }}
+                                title={__("Open the latest post and compare the new AtlasVoice extraction against the legacy wrapper output side by side.", "text-to-audio")}
+                            >
+                                {__("Preview extraction (new vs old)", "text-to-audio")}
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-primary btn-sm"
+                                onClick={() => {
+                                    const url = ttsObj.latest_post_preview_url;
+                                    if (!url) {
+                                        alert(__("No preview URL available. Publish a post first.", "text-to-audio"));
+                                        return;
+                                    }
+                                    const sep = url.indexOf("?") === -1 ? "?" : "&";
+                                    window.open(url + sep + "atlasvoice-picker=1", "_blank", "noopener");
+                                }}
+                            >
+                                {__("Pick content area on live post", "text-to-audio")}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

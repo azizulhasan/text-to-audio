@@ -11857,19 +11857,36 @@ function AtlasVoiceSettings(_ref) {
               children: settings.atlasvoice_saved_selector
             })]
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
-          type: "button",
-          className: "btn btn-primary btn-sm",
-          onClick: function onClick() {
-            var url = ttsObj.latest_post_preview_url;
-            if (!url) {
-              alert((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("No preview URL available. Publish a post first.", "text-to-audio"));
-              return;
-            }
-            var sep = url.indexOf("?") === -1 ? "?" : "&";
-            window.open(url + sep + "atlasvoice-picker=1", "_blank", "noopener");
-          },
-          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Pick content area on live post", "text-to-audio")
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+          className: "d-flex gap-2 flex-wrap",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
+            type: "button",
+            className: "btn btn-outline-primary btn-sm",
+            onClick: function onClick() {
+              var url = ttsObj.latest_post_preview_url;
+              if (!url) {
+                alert((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("No preview URL available. Publish a post first.", "text-to-audio"));
+                return;
+              }
+              var sep = url.indexOf("?") === -1 ? "?" : "&";
+              window.open(url + sep + "atlasvoice-diff=1", "_blank", "noopener");
+            },
+            title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Open the latest post and compare the new AtlasVoice extraction against the legacy wrapper output side by side.", "text-to-audio"),
+            children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Preview extraction (new vs old)", "text-to-audio")
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
+            type: "button",
+            className: "btn btn-primary btn-sm",
+            onClick: function onClick() {
+              var url = ttsObj.latest_post_preview_url;
+              if (!url) {
+                alert((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("No preview URL available. Publish a post first.", "text-to-audio"));
+                return;
+              }
+              var sep = url.indexOf("?") === -1 ? "?" : "&";
+              window.open(url + sep + "atlasvoice-picker=1", "_blank", "noopener");
+            },
+            children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Pick content area on live post", "text-to-audio")
+          })]
         })]
       })
     })]

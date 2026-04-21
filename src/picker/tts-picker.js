@@ -380,10 +380,198 @@
         setTimeout(firstVisitAutoDetect, 0);
     }
 
+    // ---------- Diff preview modal (PR-B Phase B3) ----------
+    //
+    // Opens via `?atlasvoice-diff=1` on the live post. Side-by-side modal:
+    //   left  = AtlasVoice extraction (new)  — AtlasVoiceExtractor.resolveContent
+    //   right = legacy extraction (old)      — .tts_content_wrapper_N innerText
+    // When the legacy wrapper is missing (e.g. Free without Pro's wrapper),
+    // the right pane shows the full <article>/<main> innerText as a best-effort
+    // baseline and notes "approximate — legacy wrapper not rendered".
+    //
+    // The modal also hosts the 5-second listen sample (Phase B4).
+
+    function truncateForPreview(s, n) {
+        if (!s) { return ''; }
+        if (s.length <= n) { return s; }
+        return s.slice(0, n - 1) + '\u2026';
+    }
+
+    function getLegacyText(buttonId) {
+        var wrapper = global.document.querySelector('.tts_content_wrapper_' + buttonId);
+        if (wrapper) {
+            return {
+                text: (wrapper.innerText || wrapper.textContent || '').replace(/\s+/g, ' ').trim(),
+                source: '.tts_content_wrapper_' + buttonId
+            };
+        }
+        var article = global.document.querySelector('article, main, [role="main"]');
+        if (article) {
+            return {
+                text: (article.innerText || '').replace(/\s+/g, ' ').trim(),
+                source: '(approximate — legacy wrapper not rendered; showing <' +
+                    (article.tagName || 'article').toLowerCase() + '> innerText)'
+            };
+        }
+        return { text: '', source: '(no legacy wrapper; no <article>/<main>)' };
+    }
+
+    function buildDiffModal(newInfo, oldInfo) {
+        var shell = global.document.createElement('div');
+        shell.id = 'atlasvoice-diff-shell';
+        shell.style.cssText = [
+            'position:fixed', 'inset:0', 'z-index:2147483647',
+            'background:rgba(0,0,0,0.55)', 'display:flex',
+            'align-items:center', 'justify-content:center',
+            'font-family:-apple-system,BlinkMacSystemFont,sans-serif', 'font-size:14px'
+        ].join(';');
+
+        var box = global.document.createElement('div');
+        box.style.cssText = [
+            'background:#fff', 'color:#222', 'width:min(1100px,92vw)',
+            'max-height:86vh', 'border-radius:10px', 'overflow:hidden',
+            'box-shadow:0 10px 40px rgba(0,0,0,0.3)', 'display:flex',
+            'flex-direction:column'
+        ].join(';');
+
+        var header = global.document.createElement('div');
+        header.style.cssText = 'padding:14px 18px;background:#184c53;color:#fff;display:flex;align-items:center;justify-content:space-between';
+        header.innerHTML =
+            '<strong>AtlasVoice Extraction Preview</strong>' +
+            '<div>' +
+                '<button id="av-diff-listen" type="button" style="background:#fff;color:#184c53;border:0;padding:6px 10px;border-radius:4px;font-weight:600;cursor:pointer;margin-right:8px">Listen 5s</button>' +
+                '<button id="av-diff-close" type="button" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);padding:6px 10px;border-radius:4px;cursor:pointer">Close</button>' +
+            '</div>';
+        box.appendChild(header);
+
+        var body = global.document.createElement('div');
+        body.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#e5e7eb;overflow:auto;flex:1';
+
+        function column(title, meta, text) {
+            var col = global.document.createElement('div');
+            col.style.cssText = 'background:#fff;padding:14px 16px;overflow:auto;min-height:260px';
+            var h = global.document.createElement('div');
+            h.style.cssText = 'font-weight:700;margin-bottom:6px';
+            h.textContent = title;
+            var m = global.document.createElement('div');
+            m.style.cssText = 'color:#6b7280;font-size:12px;margin-bottom:10px';
+            m.textContent = meta;
+            var pre = global.document.createElement('pre');
+            pre.style.cssText = 'white-space:pre-wrap;word-break:break-word;margin:0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.5;color:#111';
+            pre.textContent = text || '(empty)';
+            col.appendChild(h);
+            col.appendChild(m);
+            col.appendChild(pre);
+            return col;
+        }
+
+        var newMeta = 'tier: ' + (newInfo.tier || '?') +
+            '  ·  confidence: ' + (typeof newInfo.confidence === 'number' ? newInfo.confidence.toFixed(2) : 'n/a') +
+            '  ·  ' + (newInfo.text ? newInfo.text.length : 0) + ' chars';
+        var oldMeta = (oldInfo.source || '') +
+            '  ·  ' + (oldInfo.text ? oldInfo.text.length : 0) + ' chars';
+
+        body.appendChild(column('New (AtlasVoice extractor)', newMeta, truncateForPreview(newInfo.text, 8000)));
+        body.appendChild(column('Old (legacy wrapper path)', oldMeta, truncateForPreview(oldInfo.text, 8000)));
+        box.appendChild(body);
+
+        var footer = global.document.createElement('div');
+        footer.style.cssText = 'padding:10px 16px;background:#f8fafc;color:#334155;font-size:12px;border-top:1px solid #e5e7eb';
+        var delta = (newInfo.text ? newInfo.text.length : 0) - (oldInfo.text ? oldInfo.text.length : 0);
+        var sign = delta > 0 ? '+' : '';
+        footer.textContent = 'Character delta (new − old): ' + sign + delta +
+            '  ·  Preview truncated to 8000 chars per column.';
+        box.appendChild(footer);
+
+        shell.appendChild(box);
+        shell.addEventListener('click', function (e) {
+            if (e.target === shell) { shell.remove(); stopListenSample(); }
+        });
+        return shell;
+    }
+
+    var sampleUtterance = null;
+    var sampleTimer = null;
+    function stopListenSample() {
+        if (sampleTimer) { clearTimeout(sampleTimer); sampleTimer = null; }
+        try {
+            if (global.speechSynthesis && global.speechSynthesis.speaking) {
+                global.speechSynthesis.cancel();
+            }
+        } catch (_) {}
+        sampleUtterance = null;
+    }
+    function playListenSample(text) {
+        stopListenSample();
+        if (!text || !global.speechSynthesis || typeof global.SpeechSynthesisUtterance !== 'function') {
+            alert('Speech synthesis is unavailable in this browser.');
+            return;
+        }
+        // Sample the *start* of the extracted text — that's where
+        // misextraction (nav text, breadcrumbs, share-buttons) shows up first.
+        var sample = text.slice(0, 500);
+        sampleUtterance = new global.SpeechSynthesisUtterance(sample);
+        sampleUtterance.rate = 1;
+        global.speechSynthesis.speak(sampleUtterance);
+        // Hard cut at 5s — that's the point of a "sample".
+        sampleTimer = setTimeout(stopListenSample, 5000);
+    }
+
+    function maybeRunDiffPreview() {
+        try {
+            var qs = new URLSearchParams(global.location.search);
+            if (qs.get('atlasvoice-diff') !== '1') { return; }
+        } catch (_) { return; }
+
+        var tts = global.ttsObj || global.tta_obj || {};
+        if (!tts.use_atlasvoice_extractor || !global.AtlasVoiceExtractor) {
+            alert('Enable the AtlasVoice extractor in settings first, then reload this preview.');
+            return;
+        }
+
+        var newResult = null;
+        try {
+            newResult = global.AtlasVoiceExtractor.resolveContent({
+                buttonId: 1,
+                postType: tts.current_post_type || null
+            });
+        } catch (_) {}
+        if (!newResult) {
+            newResult = { text: '', tier: 'n/a', confidence: 0 };
+        }
+        var oldResult = getLegacyText(1);
+
+        var modal = buildDiffModal(newResult, oldResult);
+        global.document.body.appendChild(modal);
+
+        var listenBtn = modal.querySelector('#av-diff-listen');
+        if (listenBtn) {
+            listenBtn.addEventListener('click', function () {
+                playListenSample(newResult.text);
+            });
+        }
+        var closeBtn = modal.querySelector('#av-diff-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function () {
+                stopListenSample();
+                modal.remove();
+            });
+        }
+    }
+
+    if (global.document.readyState === 'loading') {
+        global.document.addEventListener('DOMContentLoaded', maybeRunDiffPreview);
+    } else {
+        setTimeout(maybeRunDiffPreview, 50);
+    }
+
     global.AtlasVoiceSelector = {
         start: start,
         stop: stop,
         computeStableSelector: computeStableSelector,
-        firstVisitAutoDetect: firstVisitAutoDetect
+        firstVisitAutoDetect: firstVisitAutoDetect,
+        openDiffPreview: maybeRunDiffPreview,
+        playListenSample: playListenSample,
+        stopListenSample: stopListenSample
     };
 })(typeof window !== 'undefined' ? window : this);
