@@ -62,6 +62,10 @@ export default function AtlasVoiceHealLog() {
     var [loading, setLoading] = useState(true);
     var [error, setError] = useState("");
     var [reverting, setReverting] = useState(null);
+    // C4b: cache purge hint banner, populated from the /save-selector
+    // response after a successful revert. Dismissable; auto-clears when
+    // the user reverts again (we just overwrite it).
+    var [cacheHint, setCacheHint] = useState(null);
 
     var fetchLog = useCallback(function () {
         var apiBase = (window.tta_obj && window.tta_obj.api_url)
@@ -133,8 +137,15 @@ export default function AtlasVoiceHealLog() {
             body: body,
         })
             .then(function (r) { return r.json(); })
-            .then(function () {
+            .then(function (res) {
                 setReverting(null);
+                // C4b: surface cache purge hint when server detected a
+                // page cache. No-op when needs_purge=false.
+                if (res && res.cache_hint && res.cache_hint.needs_purge) {
+                    setCacheHint(res.cache_hint);
+                } else {
+                    setCacheHint(null);
+                }
                 fetchLog();
             })
             .catch(function () {
@@ -172,6 +183,31 @@ export default function AtlasVoiceHealLog() {
                     </button>
                 </div>
             </div>
+
+            {cacheHint && cacheHint.needs_purge && (
+                <div
+                    className="alert alert-info py-2 px-3 mb-2 d-flex align-items-center gap-2"
+                    style={{fontSize: "12px", flexWrap: "wrap"}}
+                >
+                    <span style={{flex: "1 1 auto"}}>{cacheHint.message}</span>
+                    {cacheHint.detected && cacheHint.detected.length === 1 && cacheHint.detected[0].settings_url && (
+                        <a
+                            href={cacheHint.detected[0].settings_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-sm btn-outline-primary"
+                        >
+                            {__("Open", "text-to-audio")} {cacheHint.detected[0].label}
+                        </a>
+                    )}
+                    <button
+                        type="button"
+                        className="btn-close"
+                        aria-label="Dismiss"
+                        onClick={function () { setCacheHint(null); }}
+                    />
+                </div>
+            )}
 
             {error && (
                 <div className="alert alert-danger py-2 px-3 mb-2" style={{fontSize: "12px"}}>
