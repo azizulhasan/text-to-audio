@@ -540,6 +540,29 @@ class TTA_Api_Routes {
 			)
 		);
 
+		// TTS-238 PR-C (C3b): Boilerplate suggestions — the nightly detector
+		// output surfaced to the dashboard chip UI. GET returns the cached
+		// list; POST (with ?refresh=1) re-runs the detector on demand. Both
+		// guarded by admin capability.
+		register_rest_route(
+			$this->namespace,
+			'/boilerplate-suggestions',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_boilerplate_suggestions' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'refresh_boilerplate_suggestions' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
 		// TTS-238: AtlasVoiceSelector — save the stable CSS selector chosen by
 		// the user. Free plugin stores a single global selector; Pro overrides
 		// with a per-post-type map keyed under 'per_post_type' in the same option.
@@ -718,6 +741,59 @@ class TTA_Api_Routes {
 		return rest_ensure_response( array(
 			'status' => true,
 			'log'    => $out,
+		) );
+	}
+
+	/**
+	 * TTS-238 PR-C (C3b): Expose the cached boilerplate suggestions to the
+	 * dashboard. The list is populated by the nightly cron. Returns the
+	 * generated_at timestamp so the UI can show freshness ("Last scanned:
+	 * 2 hours ago").
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function get_boilerplate_suggestions( $request ) {
+		$data = array(
+			'generated_at' => 0,
+			'sample_size'  => 0,
+			'suggestions'  => array(),
+		);
+		if ( class_exists( '\\TTA\\TTA_BoilerplateDetector' ) ) {
+			$data = \TTA\TTA_BoilerplateDetector::get_cached();
+		}
+		return rest_ensure_response( array(
+			'status'       => true,
+			'generated_at' => isset( $data['generated_at'] ) ? (int) $data['generated_at'] : 0,
+			'sample_size'  => isset( $data['sample_size'] ) ? (int) $data['sample_size'] : 0,
+			'post_types'   => isset( $data['post_types'] ) ? (array) $data['post_types'] : array(),
+			'suggestions'  => isset( $data['suggestions'] ) ? array_values( (array) $data['suggestions'] ) : array(),
+		) );
+	}
+
+	/**
+	 * TTS-238 PR-C (C3b): Re-run the detector on demand. Intended for the
+	 * dashboard "Re-scan now" button. Runs inline (not queued) since the
+	 * detector is capped by SAMPLE_SIZE * num_post_types and completes in
+	 * a few seconds on normal sites. Returns the fresh suggestions.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function refresh_boilerplate_suggestions( $request ) {
+		if ( ! class_exists( '\\TTA\\TTA_BoilerplateDetector' ) ) {
+			return rest_ensure_response( array(
+				'status'      => false,
+				'message'     => 'BoilerplateDetector class not loaded.',
+				'suggestions' => array(),
+			) );
+		}
+		\TTA\TTA_BoilerplateDetector::run();
+		$data = \TTA\TTA_BoilerplateDetector::get_cached();
+		return rest_ensure_response( array(
+			'status'       => true,
+			'generated_at' => isset( $data['generated_at'] ) ? (int) $data['generated_at'] : 0,
+			'sample_size'  => isset( $data['sample_size'] ) ? (int) $data['sample_size'] : 0,
+			'post_types'   => isset( $data['post_types'] ) ? (array) $data['post_types'] : array(),
+			'suggestions'  => isset( $data['suggestions'] ) ? array_values( (array) $data['suggestions'] ) : array(),
 		) );
 	}
 
@@ -1160,6 +1236,7 @@ class TTA_Api_Routes {
             '/tta/v1/onboarding-event',
             '/tta/v1/save-selector',
             '/tta/v1/heal-log',
+            '/tta/v1/boilerplate-suggestions',
         );
 
         if ( in_array( $route, $admin_only, true ) ) {
