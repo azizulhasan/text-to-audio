@@ -1,7 +1,7 @@
 # TTS-238 — Content Extraction Overhaul
 
-**Status:** Plan v4 (three-layer architecture — opt-in / mode / rules — with hook-based integration, content-hash short-circuit, and lazy visitor-load invalidation). §19 Player init unification already shipped in 2.1.16 — see below. **PR-A (opt-in gating + UI split) shipped on the feature branch.** PR-B (picker wizard + lazy loading) and PR-C (Pro rules + staging/production + lazy regen) pending.
-**Plan date:** 2026-04-17 · **Revised:** 2026-04-21 (v4: three-layer + cost-sensitivity + hook-based integration) · 2026-04-20 (v3: architectural collapse)
+**Status:** Plan v4.2 (three-layer architecture — opt-in / mode / rules — with hook-based integration, content-hash short-circuit, lazy visitor-load invalidation, zero-click auto-detection as the primary flow, and a formally-specified step-rail + iframe preview fallback-UI layout). §19 Player init unification already shipped in 2.1.16 — see below. **PR-A (opt-in gating + UI split) shipped.** **PR-B phases B1–B4 shipped** (confidence scoring, first-visit auto-save, low-confidence toast, diff preview, 5s listen sample). **PR-C §0.7 ticket-killers shipped** (self-healer, heal-log + revert, cache purge hints, boilerplate detector + suggestion chips, language-plugin keying, auth-variants + meta-box + engine reporter, mutation-observer async-content opt-in). Remaining PR-C scope: Pro per-post-type / per-post rules, staging/production mode toggle, content-hash short-circuit, lazy visitor-load MP3 invalidation, snapshot/rollback per scope, custom-field reader opt-in, lazy bundle loading, step-rail + iframe fallback-UI (§0.4.1).
+**Plan date:** 2026-04-17 · **Revised:** 2026-04-21 (v4.2: fallback-UI layout spec) · 2026-04-21 (v4.1: zero-click philosophy + self-healing ticket-killers) · 2026-04-21 (v4: three-layer + cost-sensitivity + hook-based integration) · 2026-04-20 (v3: architectural collapse)
 **Branches:** `feature/TTS-238` in both `text-to-audio` (free) and `text-to-audio-pro` (pro)
 **Jira:** https://atlasaidev.atlassian.net/browse/TTS-238
 **Related:** [research-competitor-content-extraction.md](research-competitor-content-extraction.md) · [TTS-future-content-extraction-improvements.md](TTS-future-content-extraction-improvements.md)
@@ -77,6 +77,55 @@ This panel is **never shown by default** and the engine works without anyone ope
 - PR-B does NOT build a 4-step wizard as a primary flow.
 - PR-B builds: (1) the auto-detection toast, (2) the one-click picker fallback, (3) the collapsed Advanced panel, (4) the listen-sample button inside each.
 - Settings.js hides the "Include Content By CSS Selectors" textarea when Layer 1 is ON (replaced by the auto-detect flow); the three legacy excludes stay visible because they still solve orthogonal skip-cruft cases.
+
+### 0.4.1 Fallback-UI layout: step rail + iframe preview pane (spec)
+
+When the one-click fallback or Advanced panel opens, the layout is a **two-column workspace**: a fixed 280px step rail on the left, a sandboxed iframe preview on the right. The iframe loads the current post URL (or a user-supplied URL for testing across posts) and isolates live-page JS — popups, analytics, autoscroll, accidental form submits — from the picker chrome. The step rail accumulates rules; the preview reflects them immediately.
+
+```
+┌────────────────────────────────────┬──────────────────────────────┐
+│ STEP RAIL (left, 280px)            │ PREVIEW PANE (right, iframe) │
+│ ┌───────────────────────────────┐  │                              │
+│ │ ① Scope: [Global ▾]           │  │  [Live page, click elements  │
+│ │ ② Post type: [post ▾]         │  │   to pick/reject]            │
+│ │ ③ Content region              │  │                              │
+│ │    ✔ .entry-content [edit]    │  │                              │
+│ │ ④ Skip these areas      🔒 Pro│  │                              │
+│ │ ⑤ Skip these tag types  🔒 Pro│  │                              │
+│ │ ⑥ Skip these phrases    🔒 Pro│  │                              │
+│ └───────────────────────────────┘  │                              │
+│                                    │                              │
+│ [Before: 1,240 → After: 980 ch]    │                              │
+│ [▶ Listen 5s preview]  [Save]      │                              │
+└────────────────────────────────────┴──────────────────────────────┘
+```
+
+**Step rail mechanics:**
+
+- **① Scope** — dropdown: `Global` / `This post type` / `This post (Pro)`. Default = *this post type* (the step is present but not surfaced in the zero-click happy path; visible only when Advanced is expanded or when scoring confidence < 0.8 forced the picker open).
+- **② Post type** — dropdown of active CPTs from Layer 1 settings. Hidden when scope = `This post`.
+- **③ Content region** — the `Include` selector. Shows the current saved selector as an editable chip (`✔ .entry-content [edit]`). Clicking `edit` re-arms pick mode in the iframe. First visit with no saved selector shows `[Pick content area]` button.
+- **④ Skip these areas** (Pro) — `Exclude` selectors. SelectorGadget-style reject mode: re-clicking an element in the iframe toggles include→reject (green → red). Saved excludes render as dismissible chips (`.share-btns ×` `.related ×` `+ add`). Free tier shows the step locked with a Pro upsell modal on click.
+- **⑤ Skip these tag types** (Pro) — checkbox list: `code`, `figure`, `blockquote`, `pre`, `table`. Clicking a tag in the iframe preview auto-checks its box. Free tier locked with upsell.
+- **⑥ Skip these phrases** (Pro) — string-level chip editor. User highlights text in the iframe → "Exclude this phrase" chip appears. Boilerplate detector (§0.7) pre-populates this list with dismissible suggestions. Free tier locked with upsell.
+
+**Preview pane mechanics:**
+
+- Runs inside an iframe sandbox with `allow-same-origin allow-scripts`; the picker overlay chrome is drawn in the parent frame and projected over the iframe via absolute-positioned overlay. This keeps the iframe's own JS / popups / subscribe modals contained.
+- Hover highlights the hovered element with a blue outline; click = include (green), re-click = reject (red). Undo stack (`Cmd/Ctrl+Z`) reverts the last include/reject action.
+- Below the iframe: **diff counter** (`Before: 1,240 → After: 980 ch`) updates after every rule change. This is the dopamine loop — users watch the preview shrink.
+- **▶ Listen 5s preview** button renders a 5-second TTS sample of the current text through the browser `speechSynthesis` API (free path — no MP3 cost). Clickable on every step.
+- **Save** commits the rule set to the active scope (`_atlasvoice_rules_{scope}` storage). Dialog confirms the scope target if it just changed.
+
+**Zero-click relationship:** the step rail is **pre-populated** by the scorer and boilerplate detector before the user sees it. In the happy path the user opens Advanced, sees every row already checked, and closes it — the workspace serves as *transparency UI*, not a configuration funnel. The row-level edit affordances exist for the low-confidence / power-user case.
+
+**Mobile:** the layout targets desktop admins only. Narrow-viewport loaders show a "Please use a desktop to configure content extraction" message with the auto-detected selector read-only. No mobile picker affordances.
+
+**Rule chips everywhere:** any rule shown on the step rail is rendered as a chip with a remove (`×`) affordance. Editing a rule never re-launches a separate picker; the chip's `[edit]` affordance re-arms pick mode scoped to that row. Chips also surface in the post-edit meta box (Pro per-post scope) and in the dashboard Rules table for bulk management.
+
+**Precedence breadcrumbs (Pro):** when multiple scopes apply (e.g. this post overrides its post type which overrides global), the rail shows the active-rule chain at the top: `Global (#main) › Post type: post (.entry-content) › This post (custom)`. The most-specific wins; parent scopes are shown greyed to remind the admin why their post's player reads what it reads.
+
+**Verify across posts (Pro, step ⑦.5):** before "Go Live", a `Test on 3 random posts` button runs the saved rules against three random posts of the active scope in a hidden iframe fleet and summarizes match/extracted-char counts per post. This catches fragile selectors before they ship.
 
 ### 0.5 Settings UI split (shipped in PR-A)
 
@@ -1589,7 +1638,18 @@ Removes the asymmetry where `init_gctts` had a different first param (`shouldRep
 
 ## Revision log
 
-### 2026-04-21 — v4.1 addendum (this revision)
+### 2026-04-21 — v4.2 fallback-UI layout spec (this revision)
+
+Captures the step-rail + iframe preview layout that was agreed in mid-session design review but never written into the plan until now (acknowledged omission).
+
+- **§0.4.1 added — Fallback-UI layout.** Documents the two-column workspace (280px step rail left, sandboxed iframe preview right) with the full ASCII diagram of the 6 numbered rows (Scope → Post type → Content region → Skip areas → Skip tag types → Skip phrases), diff counter, 5s listen button, Save action.
+- **Picker mechanics documented**: iframe sandbox isolation of live-page JS, overlay chrome in parent frame, SelectorGadget-style reject mode (green include → red reject), Cmd/Ctrl+Z undo stack, chip-based rule editing everywhere.
+- **Pro vs Free lock states** explicit on rows ④ ⑤ ⑥ with upsell modal pattern.
+- **Precedence breadcrumbs (Pro)** and **Verify across posts step ⑦.5 (Pro)** specified.
+- **Zero-click relationship preserved**: the step rail is pre-populated by scorer + boilerplate detector; in the happy path the workspace is transparency UI, not a configuration funnel. The rail exists so low-confidence / power-user flows have one consistent home — it does not become the primary flow.
+- **Mobile scope closed**: desktop-admin only; narrow-viewport shows a "use a desktop" message with the auto-detected selector read-only.
+
+### 2026-04-21 — v4.1 addendum
 
 Focus: **shift effort from UI to code** to avoid trading old tickets for new ones. Key changes:
 
