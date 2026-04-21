@@ -187,11 +187,20 @@
     /**
      * Persist a selector to the plugin via REST.
      * Resolves with the full store ({ global, per_post_type }).
+     *
+     * PR-C (C1b) — optional `extra` bag:
+     *   - reason      : 'heal' when rewriting a broken saved selector. The
+     *                   server uses this to append an entry to the heal log.
+     *   - old_selector: the selector being replaced. Only meaningful when
+     *                   reason === 'heal'.
      */
-    function persistSelector(selector, postType) {
+    function persistSelector(selector, postType, extra) {
         var tts = global.ttsObj || global.tta_obj || {};
         var base = (tts.api_url || '/wp-json/').replace(/\/$/, '/');
         var nonce = tts.rest_nonce || tts.nonce || '';
+        var body = { selector: selector, post_type: postType || '' };
+        if (extra && extra.reason) { body.reason = extra.reason; }
+        if (extra && extra.old_selector) { body.old_selector = extra.old_selector; }
         return fetch(base + 'tta/v1/save-selector', {
             method: 'POST',
             credentials: 'same-origin',
@@ -199,7 +208,7 @@
                 'Content-Type': 'application/json',
                 'X-WP-Nonce': nonce
             },
-            body: JSON.stringify({ selector: selector, post_type: postType || '' })
+            body: JSON.stringify(body)
         }).then(function (r) { return r.json(); });
     }
 
@@ -312,9 +321,7 @@
         if (!tts.can_save_selector) { return; }
 
         var postType = tts.current_post_type || '';
-
-        // Already saved? Nothing to auto-detect.
-        if (hasSavedSelectorForCurrentContext(tts, postType)) { return; }
+        var hasSaved = hasSavedSelectorForCurrentContext(tts, postType);
 
         if (!global.AtlasVoiceExtractor || typeof global.AtlasVoiceExtractor.resolveContent !== 'function') {
             return;
@@ -328,6 +335,43 @@
             });
         } catch (_) { return; }
         if (!resolution) { return; }
+
+        // PR-C (C1b) — self-heal path. When a saved selector exists but
+        // `healedFrom` is set, the engine already verified the saved selector
+        // no longer points at valid content (no match OR matched a score-0
+        // nav/header/footer region). If the heuristic winner this turn is
+        // solid (heuristic tier + confidence >= 0.65 + liveNode), silently
+        // rewrite the saved selector to the new winner and mark this as a
+        // `heal`. The server appends an audit entry to the heal log so the
+        // admin can see & revert from the dashboard.
+        if (hasSaved && resolution.healedFrom && resolution.tier !== 'saved') {
+            var healHeuristic = (
+                resolution.tier === 'schema' ||
+                resolution.tier === 'builder' ||
+                resolution.tier === 'article'
+            );
+            if (healHeuristic && resolution.confidence >= AUTO_SAVE_THRESHOLD && resolution.liveNode) {
+                var healStable = computeStableSelector(resolution.liveNode);
+                if (!healStable || healStable === resolution.healedFrom) { return; }
+                persistSelector(healStable, postType, {
+                    reason: 'heal',
+                    old_selector: resolution.healedFrom
+                }).then(function (res) {
+                    try {
+                        if (tts && res && res.data) {
+                            tts.atlasvoice_selectors = res.data;
+                        }
+                    } catch (_) { /* non-fatal */ }
+                }).catch(function () { /* silent — retry on next visit */ });
+            }
+            // Even if healing didn't fire (low confidence, wrong tier), we
+            // don't fall through to first-visit auto-save. A saved selector
+            // exists; heal-or-wait is the right policy.
+            return;
+        }
+
+        // Already saved and healthy? Nothing else to do.
+        if (hasSaved) { return; }
 
         // High confidence → silently save the winning node's stable selector.
         // Only heuristic tiers (schema / builder / article) trigger auto-save:
