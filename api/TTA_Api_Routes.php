@@ -589,6 +589,24 @@ class TTA_Api_Routes {
 			)
 		);
 
+		// TTS-238 PR-C (C5a): Language context — exposes which multilingual
+		// plugin (WPML / Polylang / TranslatePress / GTranslate) is active
+		// and the current / default / all-languages list. Admin-only so it
+		// can surface in the settings panel without leaking plugin topology
+		// to the public. Consumed by C5b to key selectors per language.
+		register_rest_route(
+			$this->namespace,
+			'/language-context',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_language_context' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
 		// TTS-238: AtlasVoiceSelector — save the stable CSS selector chosen by
 		// the user. Free plugin stores a single global selector; Pro overrides
 		// with a per-post-type map keyed under 'per_post_type' in the same option.
@@ -865,6 +883,33 @@ class TTA_Api_Routes {
 		return rest_ensure_response( array(
 			'status'   => true,
 			'excluded' => array_values( $list ),
+		) );
+	}
+
+	/**
+	 * TTS-238 PR-C (C5a): Return the current multilingual-plugin context.
+	 *
+	 * Used by the dashboard settings panel to explain to the user that
+	 * selectors will be stored per language, and by Pro to drive the
+	 * language-picker dropdown in the visual picker overlay. Never 500s
+	 * even if detection misfires — worst case returns empty active_plugin
+	 * and the caller keys everything globally.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function get_language_context( $request ) {
+		$ctx = array(
+			'active_plugin'    => '',
+			'current_language' => '',
+			'default_language' => '',
+			'all_languages'    => array(),
+		);
+		if ( class_exists( '\\TTA\\TTA_LanguagePlugins' ) ) {
+			$ctx = \TTA\TTA_LanguagePlugins::detect();
+		}
+		return rest_ensure_response( array(
+			'status'  => true,
+			'context' => $ctx,
 		) );
 	}
 
@@ -1309,6 +1354,7 @@ class TTA_Api_Routes {
             '/tta/v1/heal-log',
             '/tta/v1/boilerplate-suggestions',
             '/tta/v1/boilerplate-exclude',
+            '/tta/v1/language-context',
         );
 
         if ( in_array( $route, $admin_only, true ) ) {
