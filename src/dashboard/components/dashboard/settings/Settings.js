@@ -40,6 +40,7 @@ export default function Settings() {
         tta__settings_text_after_content: "",
         tta__settings_text_before_content: "",
         tta__settings_read_content_from_dom: true,
+        tta__settings_use_atlasvoice_extractor: false,
         tta__settings_player_use_old_player: false,
         tta__settings_enable_tts_status: true,
         tta__settings_delete_data_on_uninstall: false,
@@ -390,6 +391,21 @@ export default function Settings() {
                                                 id="tta__settings_read_content_from_dom"
                                             />
                                         </SettingRow>
+                                        {/* TTS-238: Opt-in flag for the new AtlasVoice content extractor.
+                                            When OFF (default), nothing changes — existing extraction runs as-is.
+                                            When ON, markers are emitted and the JS engine resolves content. */}
+                                        <SettingRow
+                                            label={__("Use AtlasVoice Extractor (Beta)", 'text-to-audio')}
+                                            questionIcon={true}
+                                            questionTooltip={__("Opt-in to the new JS-based content extractor with a visual picker. Leave off to keep the current extraction behavior unchanged.", 'text-to-audio')}
+                                        >
+                                            <ToggleSwitch
+                                                checked={settings.tta__settings_use_atlasvoice_extractor}
+                                                onChange={(e) => handleChange(e)}
+                                                name="tta__settings_use_atlasvoice_extractor"
+                                                id="tta__settings_use_atlasvoice_extractor"
+                                            />
+                                        </SettingRow>
                                     </>
                                 )}
                                 {
@@ -607,39 +623,41 @@ export default function Settings() {
                                                 {__("Add CSS selectors for the content areas the player should read. One selector per line. Only target post/page body content. If left empty, the player automatically detects the content area.", "text-to-audio")}
                                             </Form.Text>
 
-                                            {/* TTS-238: AtlasVoiceSelector launcher. Opens the latest post in a new
-                                                tab with ?atlasvoice-picker=1 so the front-end auto-starts the
-                                                visual picker. */}
-                                            <div className="mt-3 p-3 rounded" style={{ background: "#f0f7f8", border: "1px solid #d6e7ea" }}>
-                                                <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                                                    <div>
-                                                        <strong className="d-block mb-1">{__("AtlasVoiceSelector — Visual Content Picker", "text-to-audio")}</strong>
-                                                        <small className="text-muted d-block">
-                                                            {__("Click the button, then point at the text region on your live post. We'll learn a stable selector automatically — no CSS knowledge needed.", "text-to-audio")}
-                                                        </small>
-                                                        {settings.atlasvoice_saved_selector && (
-                                                            <small className="d-block mt-1">
-                                                                <strong>{__("Saved:", "text-to-audio")}</strong> <code>{settings.atlasvoice_saved_selector}</code>
+                                            {/* TTS-238: AtlasVoiceSelector launcher. Gated on the opt-in
+                                                toggle — the picker only feeds the new engine, so it stays
+                                                hidden while users are on the legacy extraction path. */}
+                                            {settings.tta__settings_use_atlasvoice_extractor && (
+                                                <div className="mt-3 p-3 rounded" style={{ background: "#f0f7f8", border: "1px solid #d6e7ea" }}>
+                                                    <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                                        <div>
+                                                            <strong className="d-block mb-1">{__("AtlasVoiceSelector — Visual Content Picker", "text-to-audio")}</strong>
+                                                            <small className="text-muted d-block">
+                                                                {__("Click the button, then point at the text region on your live post. We'll learn a stable selector automatically — no CSS knowledge needed.", "text-to-audio")}
                                                             </small>
-                                                        )}
+                                                            {settings.atlasvoice_saved_selector && (
+                                                                <small className="d-block mt-1">
+                                                                    <strong>{__("Saved:", "text-to-audio")}</strong> <code>{settings.atlasvoice_saved_selector}</code>
+                                                                </small>
+                                                            )}
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-primary btn-sm"
+                                                            onClick={() => {
+                                                                const url = ttsObj.latest_post_preview_url;
+                                                                if (!url) {
+                                                                    alert(__("No preview URL available. Publish a post first.", "text-to-audio"));
+                                                                    return;
+                                                                }
+                                                                const sep = url.indexOf("?") === -1 ? "?" : "&";
+                                                                window.open(url + sep + "atlasvoice-picker=1", "_blank", "noopener");
+                                                            }}
+                                                        >
+                                                            {__("Pick content area on live post", "text-to-audio")}
+                                                        </button>
                                                     </div>
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-primary btn-sm"
-                                                        onClick={() => {
-                                                            const url = ttsObj.latest_post_preview_url;
-                                                            if (!url) {
-                                                                alert(__("No preview URL available. Publish a post first.", "text-to-audio"));
-                                                                return;
-                                                            }
-                                                            const sep = url.indexOf("?") === -1 ? "?" : "&";
-                                                            window.open(url + sep + "atlasvoice-picker=1", "_blank", "noopener");
-                                                        }}
-                                                    >
-                                                        {__("Pick content area on live post", "text-to-audio")}
-                                                    </button>
                                                 </div>
-                                            </div>
+                                            )}
                                         </Col>
                                     </Row>
 

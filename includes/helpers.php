@@ -983,3 +983,48 @@ function tts_debug( $message ) {
     file_put_contents( $log_file, $formatted_message, FILE_APPEND | LOCK_EX );
 }
 
+/**
+ * TTS-238: Emit AtlasVoice comment markers around post content for Free sites.
+ *
+ * Strictly opt-in. Runs ONLY when:
+ *   - Setting `tta__settings_use_atlasvoice_extractor` is ON
+ *   - Pro plugin is NOT active (Pro emits markers in its own filter so we skip
+ *     here to avoid double-wrapping)
+ *   - We're in the main query on a singular post the plugin should handle
+ *
+ * Additive-only: never modifies content when opt-in is off. Filter-gated
+ * so integrators can fine-tune (tts_free_emit_atlasvoice_markers).
+ */
+function tta_free_emit_atlasvoice_markers( $content ) {
+    // Pro handles its own emission — don't double-wrap.
+    if ( function_exists( 'is_pro_active' ) && is_pro_active() ) {
+        return $content;
+    }
+
+    if ( is_admin() || ! in_the_loop() || ! is_main_query() ) {
+        return $content;
+    }
+
+    if ( ! is_singular() ) {
+        return $content;
+    }
+
+    $settings = \TTA\TTA_Helper::tts_get_settings( 'settings' );
+    if ( empty( $settings['tta__settings_use_atlasvoice_extractor'] ) ) {
+        return $content;
+    }
+
+    // Let integrators opt out selectively.
+    if ( ! apply_filters( 'tts_free_emit_atlasvoice_markers', true, get_the_ID() ) ) {
+        return $content;
+    }
+
+    static $btn_no = 0;
+    $btn_no++;
+
+    return '<!--atlasvoice:start:' . intval( $btn_no ) . '-->'
+         . $content
+         . '<!--atlasvoice:end:' . intval( $btn_no ) . '-->';
+}
+add_filter( 'the_content', 'tta_free_emit_atlasvoice_markers', 20 );
+

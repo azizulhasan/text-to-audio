@@ -185,8 +185,43 @@
         };
     }
 
+    /**
+     * Player-facing wrapper. Opt-in only — the player calls this and, if it
+     * returns a non-empty string, uses it in place of the legacy DOM scrape.
+     * If it returns null the player falls through to its existing code path
+     * unchanged (zero risk to users who haven't opted in).
+     *
+     * Gating:
+     *   - ttsObj.use_atlasvoice_extractor must be truthy (mirrors the PHP opt-in)
+     *   - Resolver must return text past a minimum length (avoid replacing a
+     *     real scrape with a one-word schema stub)
+     *
+     * @param {Object} opts
+     * @param {number|string} opts.buttonId
+     * @param {string=}       opts.postType
+     * @param {string=}       opts.fallbackText  Legacy ttsCurrentContent, used
+     *                                           only to satisfy Tier 7; the
+     *                                           player still owns the final
+     *                                           decision on what to read.
+     * @returns {string|null} Plain text, or null when opt-in is off / no match.
+     */
+    function getContentForPlayer(opts) {
+        opts = opts || {};
+        var tts = global.ttsObj || global.tta_obj || {};
+        if (!tts.use_atlasvoice_extractor) { return null; }
+
+        var result = resolveContent(opts);
+        if (!result || !result.text) { return null; }
+        // Refuse tiny fragments — those are almost always wrong-target hits.
+        if (result.text.length < 40) { return null; }
+        // php-fallback means nothing DOM-side matched; let the legacy path handle it.
+        if (result.tier === 'php-fallback') { return null; }
+        return result.text;
+    }
+
     global.AtlasVoiceExtractor = {
         resolveContent: resolveContent,
+        getContentForPlayer: getContentForPlayer,
         BUILDER_BODY_SELECTORS: BUILDER_BODY_SELECTORS,
         MARKER_START: ATLASVOICE_MARKER_START,
         MARKER_END: ATLASVOICE_MARKER_END

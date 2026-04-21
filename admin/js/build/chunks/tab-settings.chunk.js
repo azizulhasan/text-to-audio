@@ -11854,6 +11854,7 @@ function Settings() {
       tta__settings_text_after_content: "",
       tta__settings_text_before_content: "",
       tta__settings_read_content_from_dom: true,
+      tta__settings_use_atlasvoice_extractor: false,
       tta__settings_player_use_old_player: false,
       tta__settings_enable_tts_status: true,
       tta__settings_delete_data_on_uninstall: false
@@ -12197,6 +12198,18 @@ function Settings() {
                     name: "tta__settings_read_content_from_dom",
                     id: "tta__settings_read_content_from_dom"
                   })
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
+                  label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Use AtlasVoice Extractor (Beta)", 'text-to-audio'),
+                  questionIcon: true,
+                  questionTooltip: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Opt-in to the new JS-based content extractor with a visual picker. Leave off to keep the current extraction behavior unchanged.", 'text-to-audio'),
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ToggleSwitch, {
+                    checked: settings.tta__settings_use_atlasvoice_extractor,
+                    onChange: function onChange(e) {
+                      return handleChange(e);
+                    },
+                    name: "tta__settings_use_atlasvoice_extractor",
+                    id: "tta__settings_use_atlasvoice_extractor"
+                  })
                 })]
               }), ttsObj.player_id == 1 && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
                 label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Use Old Player UI", 'text-to-audio'),
@@ -12394,7 +12407,7 @@ function Settings() {
                     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"].Text, {
                       className: "text-muted",
                       children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Add CSS selectors for the content areas the player should read. One selector per line. Only target post/page body content. If left empty, the player automatically detects the content area.", "text-to-audio")
-                    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
+                    }), settings.tta__settings_use_atlasvoice_extractor && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)("div", {
                       className: "mt-3 p-3 rounded",
                       style: {
                         background: "#f0f7f8",
