@@ -589,6 +589,67 @@ class TTA_Api_Routes {
 			)
 		);
 
+		// TTS-238 PR-C (C6a): Auth-variant storage + sample recorder.
+		//
+		// GET /auth-variant?post_id=NN          → describe(post_id)
+		// POST /auth-variant { post_id, action: "set", variant: ... }
+		//                                        → admin pin (admin-only)
+		// POST /auth-variant { post_id, action: "record",
+		//                      text_hash, text_len }
+		//                                        → frontend engine sample
+		//                                          (permission_callback
+		//                                          allows any logged-in /
+		//                                          logged-out because the
+		//                                          bucket is deduced from
+		//                                          is_user_logged_in, not
+		//                                          from the caller's claim)
+		register_rest_route(
+			$this->namespace,
+			'/auth-variant',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_auth_variant' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(
+						'post_id' => array(
+							'type'     => 'integer',
+							'required' => true,
+						),
+					),
+				),
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					// Public access so logged-out visitors can also report
+					// samples; the callback does the action-specific gating.
+					'callback'            => array( $this, 'post_auth_variant' ),
+					'permission_callback' => '__return_true',
+					'args'                => array(
+						'post_id' => array(
+							'type'     => 'integer',
+							'required' => true,
+						),
+						'action' => array(
+							'type'    => 'string',
+							'default' => 'record',
+						),
+						'variant' => array(
+							'type'     => 'string',
+							'required' => false,
+						),
+						'text_hash' => array(
+							'type'     => 'string',
+							'required' => false,
+						),
+						'text_len' => array(
+							'type'     => 'integer',
+							'required' => false,
+						),
+					),
+				),
+			)
+		);
+
 		// TTS-238 PR-C (C5a): Language context — exposes which multilingual
 		// plugin (WPML / Polylang / TranslatePress / GTranslate) is active
 		// and the current / default / all-languages list. Admin-only so it
@@ -937,6 +998,106 @@ class TTA_Api_Routes {
 			'status'   => true,
 			'excluded' => array_values( $list ),
 		) );
+	}
+
+	/**
+	 * TTS-238 PR-C (C6a): GET /auth-variant — describe a post's variant
+	 * state. Returns the admin-pinned variant (may be ''), the detection
+	 * verdict derived from stored samples, and the raw sample list so
+	 * the meta-box can show a friendly summary ("logged-in users see 34
+	 * more characters"). Admin-only — the variant pin is surfaced only
+	 * in the post-edit screen where the admin already has `edit_post`.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function get_auth_variant( $request ) {
+		$post_id = (int) $request->get_param( 'post_id' );
+		if ( $post_id <= 0 ) {
+			return new \WP_Error( 'invalid_post', __( 'Missing post_id.', 'text-to-audio' ), array( 'status' => 400 ) );
+		}
+		if ( ! class_exists( '\\TTA\\TTA_AuthVariants' ) ) {
+			return rest_ensure_response( array(
+				'status'  => false,
+				'message' => 'AuthVariants class not loaded.',
+			) );
+		}
+		return rest_ensure_response( array(
+			'status' => true,
+			'data'   => \TTA\TTA_AuthVariants::describe( $post_id ),
+		) );
+	}
+
+	/**
+	 * TTS-238 PR-C (C6a): POST /auth-variant — either pin the variant
+	 * (action=set, admin-only) or record a sample reported by the
+	 * frontend extractor (action=record, public — the caller's auth
+	 * state is determined server-side).
+	 *
+	 * We split the permission check inside the callback rather than
+	 * registering two routes because the sample-reporter MUST remain
+	 * reachable for anonymous visitors (that's the whole point — they
+	 * are the "logged_out" bucket). Keeping both under one route lets
+	 * us use a single CSRF/rate-limit story.
+	 *
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function post_auth_variant( $request ) {
+		$post_id = (int) $request->get_param( 'post_id' );
+		$action  = sanitize_key( (string) $request->get_param( 'action' ) );
+		if ( $post_id <= 0 ) {
+			return new \WP_Error( 'invalid_post', __( 'Missing post_id.', 'text-to-audio' ), array( 'status' => 400 ) );
+		}
+		if ( ! class_exists( '\\TTA\\TTA_AuthVariants' ) ) {
+			return new \WP_Error( 'not_available', 'AuthVariants class not loaded.', array( 'status' => 500 ) );
+		}
+
+		if ( $action === 'set' ) {
+			// Admin pin — require capability. `edit_post` is the right
+			// gate because the variant is a property of the post,
+			// not a site-wide setting.
+			if ( ! current_user_can( 'edit_post', $post_id ) ) {
+				return new \WP_Error( 'forbidden', __( 'You cannot edit this post.', 'text-to-audio' ), array( 'status' => 403 ) );
+			}
+			$variant = (string) $request->get_param( 'variant' );
+			$ok = \TTA\TTA_AuthVariants::set_variant( $post_id, $variant );
+			if ( ! $ok ) {
+				return new \WP_Error( 'invalid_variant', __( 'Invalid variant value.', 'text-to-audio' ), array( 'status' => 400 ) );
+			}
+			return rest_ensure_response( array(
+				'status' => true,
+				'data'   => \TTA\TTA_AuthVariants::describe( $post_id ),
+			) );
+		}
+
+		if ( $action === 'record' ) {
+			// Rate-limit: one record per (post_id, session) per 60s via
+			// a lightweight transient keyed on IP+post. Prevents a noisy
+			// theme from filling the samples ring-buffer every pageload.
+			$ip  = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : 'unknown';
+			$key = 'tta_av_' . md5( $ip . '|' . $post_id . '|' . ( is_user_logged_in() ? 'i' : 'o' ) );
+			if ( get_transient( $key ) ) {
+				return rest_ensure_response( array(
+					'status'    => true,
+					'throttled' => true,
+				) );
+			}
+			set_transient( $key, 1, MINUTE_IN_SECONDS );
+
+			$text_hash = (string) $request->get_param( 'text_hash' );
+			$text_len  = (int) $request->get_param( 'text_len' );
+			$samples   = \TTA\TTA_AuthVariants::record_sample(
+				$post_id,
+				is_user_logged_in(),
+				$text_hash,
+				$text_len
+			);
+			return rest_ensure_response( array(
+				'status'  => true,
+				'samples' => $samples,
+			) );
+		}
+
+		return new \WP_Error( 'unknown_action', __( 'Unknown action.', 'text-to-audio' ), array( 'status' => 400 ) );
 	}
 
 	/**
@@ -1408,6 +1569,10 @@ class TTA_Api_Routes {
             '/tta/v1/boilerplate-suggestions',
             '/tta/v1/boilerplate-exclude',
             '/tta/v1/language-context',
+            // /auth-variant GET needs admin. The POST verb has a custom
+            // gate because anonymous visitors must be able to report
+            // samples for the logged_out bucket.
+            '/tta/v1/auth-variant',
         );
 
         if ( in_array( $route, $admin_only, true ) ) {
