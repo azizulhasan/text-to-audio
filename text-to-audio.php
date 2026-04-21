@@ -471,6 +471,13 @@ class TTA_Init
             if ( class_exists( '\\TTA\\TTA_BoilerplateDetector' ) ) {
                 \TTA\TTA_BoilerplateDetector::register_cron();
             }
+
+            // TTS-238 C6b: wire the Audio-variant radio row into the post-edit
+            // AtlasVoice meta box. Self-gated — the renderer hooks into
+            // `tts_after_metabox_content` and only prints on edit screens.
+            if ( class_exists( '\\TTA\\TTA_AuthVariantsMetaBox' ) ) {
+                \TTA\TTA_AuthVariantsMetaBox::register();
+            }
         }, 9999);
 
         //add plugins action links.
