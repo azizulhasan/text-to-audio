@@ -147,8 +147,13 @@ class TTA_Admin
             // the viewer's capability to decide whether to silently save a scored
             // selector. Only admins (manage_options) can hit /save-selector, so we
             // lift that check into the bundle to avoid a speculative 403.
+            //
+            // `current_post_type` is populated lazily in enqueue_scripts() because
+            // `is_singular()` must not be called before the main query runs (WP
+            // throws _doing_it_wrong for that). The constructor on plugins_loaded
+            // is too early. Same pattern as `latest_post_preview_url` below.
             'can_save_selector' => current_user_can( 'manage_options' ),
-            'current_post_type' => is_singular() ? (string) get_post_type() : '',
+            'current_post_type' => '',
 
         ];
     }
@@ -212,6 +217,17 @@ class TTA_Admin
         // because get_permalink() needs $wp_rewrite which isn't available during plugins_loaded.
         if ( empty( $this->localize_data['latest_post_preview_url'] ) ) {
             $this->localize_data['latest_post_preview_url'] = TTA_Helper::get_latest_post_preview_url();
+        }
+
+        // TTS-238 PR-B: Populate current_post_type lazily — is_singular() must
+        // not be called before the main query runs (WP _doing_it_wrong). By the
+        // time wp_enqueue_scripts fires, the main query is resolved so this is
+        // safe. Used by the engine + picker bundles to key the auto-detected
+        // selector to the right CPT.
+        if ( empty( $this->localize_data['current_post_type'] ) ) {
+            if ( function_exists( 'is_singular' ) && did_action( 'wp' ) && is_singular() ) {
+                $this->localize_data['current_post_type'] = (string) get_post_type();
+            }
         }
 
         do_action('tta_enqueue_pro_dashboard_scripts');
@@ -441,6 +457,19 @@ class TTA_Admin
 
         if (!TTA_Helper::should_load_button()) {
             return;
+        }
+
+        // TTS-238 PR-B: Populate current_post_type lazily here too — this is
+        // the frontend entry (hooked to wp_enqueue_scripts). The constructor
+        // runs on plugins_loaded which is too early for is_singular(), and
+        // the admin-side enqueue_scripts() does not fire on frontend hits,
+        // so without this second call ttsObj.current_post_type would stay
+        // empty on the live post and the first-visit auto-detect could not
+        // key saved selectors to the right CPT.
+        if ( empty( $this->localize_data['current_post_type'] ) ) {
+            if ( function_exists( 'is_singular' ) && did_action( 'wp' ) && is_singular() ) {
+                $this->localize_data['current_post_type'] = (string) get_post_type();
+            }
         }
 
         $player_id = get_player_id();
