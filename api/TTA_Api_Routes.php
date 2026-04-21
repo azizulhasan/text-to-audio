@@ -629,6 +629,15 @@ class TTA_Api_Routes {
 							'required'    => false,
 							'description' => 'Post type to scope the selector to (Pro only).',
 						),
+						// PR-C (C5b): language scoping. When present we store the
+						// selector under the per-language slot so multilingual
+						// sites can pick different DOM regions for each language
+						// without overwriting each other. Empty/absent → global.
+						'language' => array(
+							'type'        => 'string',
+							'required'    => false,
+							'description' => 'Language code (e.g. "en", "fr") to scope the selector to. Omit to store globally.',
+						),
 						// PR-C (C1c): heal audit fields.
 						'reason' => array(
 							'type'        => 'string',
@@ -665,6 +674,16 @@ class TTA_Api_Routes {
 		// PR-C (C1c): heal audit fields.
 		$reason       = sanitize_key( (string) $request->get_param( 'reason' ) );
 		$old_selector = trim( (string) $request->get_param( 'old_selector' ) );
+		// PR-C (C5b): language scoping. Normalise via the detector so "en_US"
+		// from a client becomes "en" and we don't fragment storage across
+		// casing/locale-form variants. Empty language = store globally.
+		$language_raw = (string) $request->get_param( 'language' );
+		$language     = '';
+		if ( $language_raw !== '' && class_exists( '\\TTA\\TTA_LanguagePlugins' ) ) {
+			$language = \TTA\TTA_LanguagePlugins::normalise_code( $language_raw );
+		} elseif ( $language_raw !== '' ) {
+			$language = sanitize_key( $language_raw );
+		}
 
 		if ( $selector === '' || strlen( $selector ) > 512 ) {
 			return new \WP_Error( 'invalid_selector', __( 'Selector is empty or too long.', 'text-to-audio' ), array( 'status' => 400 ) );
@@ -693,9 +712,30 @@ class TTA_Api_Routes {
 		if ( ! isset( $store['per_post_type'] ) || ! is_array( $store['per_post_type'] ) ) {
 			$store['per_post_type'] = array();
 		}
+		// PR-C (C5b): lazy-init per-language slots so we don't bloat the option
+		// for sites that aren't multilingual.
+		if ( ! isset( $store['per_language'] ) || ! is_array( $store['per_language'] ) ) {
+			$store['per_language'] = array();
+		}
+		if ( ! isset( $store['per_post_type_per_language'] ) || ! is_array( $store['per_post_type_per_language'] ) ) {
+			$store['per_post_type_per_language'] = array();
+		}
 
 		$is_pro = function_exists( 'is_pro_active' ) && is_pro_active();
-		if ( $is_pro && $post_type !== '' ) {
+		// Routing table (most-specific wins):
+		//   Pro + post_type + language → per_post_type_per_language[pt][lang]
+		//   *   + language              → per_language[lang]
+		//   Pro + post_type             → per_post_type[pt]
+		//   else                        → global
+		if ( $is_pro && $post_type !== '' && $language !== '' ) {
+			if ( ! isset( $store['per_post_type_per_language'][ $post_type ] )
+				 || ! is_array( $store['per_post_type_per_language'][ $post_type ] ) ) {
+				$store['per_post_type_per_language'][ $post_type ] = array();
+			}
+			$store['per_post_type_per_language'][ $post_type ][ $language ] = $selector;
+		} elseif ( $language !== '' ) {
+			$store['per_language'][ $language ] = $selector;
+		} elseif ( $is_pro && $post_type !== '' ) {
 			$store['per_post_type'][ $post_type ] = $selector;
 		} else {
 			$store['global'] = $selector;
@@ -715,7 +755,20 @@ class TTA_Api_Routes {
 		//            see exactly what happened in order.
 		if ( ( $reason === 'heal' || $reason === 'revert' )
 			 && $old_selector !== '' && $old_selector !== $selector ) {
-			$scope = ( $is_pro && $post_type !== '' ) ? ( 'post_type:' . $post_type ) : 'global';
+			// PR-C (C5b): compose the scope label so multilingual heals are
+			// distinguishable in the log. Format:
+			//   global                    — Free, no language
+			//   global:lang=fr            — Free + language
+			//   post_type:post            — Pro, no language
+			//   post_type:post:lang=fr    — Pro + post type + language
+			if ( $is_pro && $post_type !== '' ) {
+				$scope = 'post_type:' . $post_type;
+			} else {
+				$scope = 'global';
+			}
+			if ( $language !== '' ) {
+				$scope .= ':lang=' . $language;
+			}
 			$log = get_option( 'tta_atlasvoice_heal_log', array() );
 			if ( ! is_array( $log ) ) { $log = array(); }
 			$log[] = array(
