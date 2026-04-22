@@ -9,6 +9,7 @@ return array(
     'TTA_Public\\' => array($baseDir . '/public'),
     'TTA_Api\\' => array($baseDir . '/api'),
     'TTA_Admin\\' => array($baseDir . '/admin'),
+    'TTA\\AtlasVoice\\' => array($baseDir . '/includes/atlasvoice'),
     'TTA\\' => array($baseDir . '/includes'),
     'AtlasAiDev\\AppService\\' => array($baseDir . '/libs/AtlasAiDev'),
 );

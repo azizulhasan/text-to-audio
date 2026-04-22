@@ -9,6 +9,7 @@
     ],
     "autoload": {
         "psr-4": {
+            "TTA\\AtlasVoice\\": "includes/atlasvoice",
             "TTA\\": "includes",
             "TTA_Admin\\": "admin",
             "TTA_Public\\": "public",

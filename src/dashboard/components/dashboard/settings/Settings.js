@@ -497,14 +497,15 @@ export default function Settings() {
                                     />
 
                                     {/* TTS-238 (legacy system): the four pre-AtlasVoice CSS-based
-                                        extraction fields. These continue to drive the legacy
-                                        extraction pipeline when the opt-in toggle above is OFF,
-                                        and are kept here unchanged to guarantee zero behavior
-                                        drift for existing users. */}
-                                    <LegacyExtractionSettings
-                                        settings={settings}
-                                        handleChange={handleChange}
-                                    />
+                                        extraction fields. Hidden when AtlasVoice extractor is ON
+                                        because the visual chip editor in AtlasVoiceSettings
+                                        replaces them. Remain functional when opt-in is OFF. */}
+                                    {!settings.tta__settings_use_atlasvoice_extractor && (
+                                        <LegacyExtractionSettings
+                                            settings={settings}
+                                            handleChange={handleChange}
+                                        />
+                                    )}
 
                                     {/* Additional settings fields with tooltips */}
                                     <Row className="mb-4">

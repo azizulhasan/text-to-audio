@@ -1,65 +1,70 @@
-/* AtlasVoice step-rail shell (TTS-238 D9).
+/* AtlasVoice Step Rail — front-end live DOM picker (TTS-238 v5 rebuilt).
  *
- * Inlined by StepRail::shell_bootstrap_js() via wp_add_inline_script.
- * Framework-free IIFE — exposes window.AtlasVoiceStepRail with:
+ * Inlined by StepRail::shell_js() via wp_add_inline_script.
+ * Framework-free IIFE. Operates directly on the post page DOM — no iframe.
  *
- *   open({ post_id?, scope?, post_type?, language?, selector? })
- *   close()
- *   isOpen()
+ * Two floating UIs (IDs from StepRail::render_shell):
+ *   #av-rail-panel     — left sliding 300 px panel (scope + rule config)
+ *   #av-preview-panel  — right draggable overlay (extracted text preview)
  *
- * Rail state lives in a single object inside the IIFE; re-opening
- * the rail with different args resets the visible fields but reuses
- * the same DOM shell + iframe element for snappy open → pick → save.
- *
- * The rail talks to three REST endpoints (registered in RestRoutes):
- *   GET  /tta/v1/step-rail/scopes
- *   GET  /tta/v1/step-rail/sample-url
- *   POST /tta/v1/save-selector          (existing)
- *   POST /tta/v1/post-rules             (existing, Pro-only)
- *
- * No build step: the file is read with file_get_contents and emitted
- * inline so the only runtime dependency is the picker bundle (which
- * is itself lazy-loaded by the D8 ttsLoadPicker stub).
+ * Picker modes:
+ *   'pick'  — mouseover → .av-picker-hover (teal),
+ *             click     → toggle .av-picker-selected, sets content selector.
+ *   'excl'  — mouseover → .av-picker-exclude-hover (red),
+ *             click     → adds CSS-exclude chip (.av-picker-excluded).
  */
 (function (w, d) {
     'use strict';
 
     if (w.AtlasVoiceStepRail) { return; }
 
+    /* ─── state ─────────────────────────────────────────────────── */
+
     var state = {
         shell:       null,
+        postId:      0,
         rest:        '',
         nonce:       '',
-        iframeFlag:  'atlasvoice_iframe',
         pro:         false,
-        open:        false,
-        scopes:      null,      // REST /step-rail/scopes cache
+        scopes:      null,
         selection:   makeEmptySelection(),
-        pickMode:    'pick',    // 'pick' | 'reject'
-        undoStack:   [],        // ring buffer of pre-change selection snapshots
+        pickMode:    null,        // null | 'pick' | 'excl'
+        exclKind:    'excl_css',
+        userEdited:  false,       // false = show active-system content; true = show live rule preview
+        undoStack:   [],
         UNDO_MAX:    20,
-        iframeReady: false,
-        parentOrigin: (typeof w.location !== 'undefined' && w.location.origin) || ''
+        leftOpen:    false,
+        rightOpen:   false,
+        hoveredEl:   null,
+        selectedEl:  null,
+        excludedEls: [],
+        postType:    '',          // post's actual post type (cached from /active-rule on init)
+        postLang:    ''           // post's actual language  (cached from /active-rule on init)
     };
 
-    // Canonical chip kinds — order matches the UI rows ④⑤⑥.
     var CHIP_KINDS = ['excl_css', 'excl_texts', 'excl_tags'];
+
+    var SCOPE_OPTIONS = [
+        { value: 'global',             label: 'Global',               needsPt: false, needsLang: false },
+        { value: 'post_type',          label: 'Post type',            needsPt: true,  needsLang: false },
+        { value: 'language',           label: 'Language',             needsPt: false, needsLang: true  },
+        { value: 'post_type_language', label: 'Post type + language', needsPt: true,  needsLang: true  },
+        { value: 'post',               label: 'This post',            needsPt: false, needsLang: false }
+    ];
 
     function makeEmptySelection() {
         return {
-            scope:       '',
-            post_type:   '',
-            language:    '',
-            post_id:     0,
-            selector:    '',
-            excl_css:    [],
-            excl_texts:  [],
-            excl_tags:   []
+            scope:      'post',
+            post_type:  '',
+            language:   '',
+            post_id:    0,
+            selector:   '',
+            excl_css:   [],
+            excl_texts: [],
+            excl_tags:  []
         };
     }
 
-    // Shallow clone the selection for the undo snapshot. Array-of-strings
-    // fields get their own copies; scalar fields are copied by value.
     function cloneSelection(sel) {
         return {
             scope:      sel.scope,
@@ -73,343 +78,886 @@
         };
     }
 
-    // Snapshot the current selection onto the undo stack BEFORE a
-    // destructive change. Caps at state.UNDO_MAX entries — older
-    // snapshots are dropped silently. Called from every chip add /
-    // remove + every reject-mode accept.
+    /* ─── undo ──────────────────────────────────────────────────── */
+
     function pushUndo(label) {
         state.undoStack.push({ label: label || '', snap: cloneSelection(state.selection) });
-        if (state.undoStack.length > state.UNDO_MAX) {
-            state.undoStack.shift();
-        }
+        if (state.undoStack.length > state.UNDO_MAX) { state.undoStack.shift(); }
     }
 
     function popUndo() {
         var entry = state.undoStack.pop();
-        if (!entry) { return false; }
+        if (!entry) { status('Nothing to undo.'); return false; }
+        // Remove old selected/excluded highlights before restoring state.
+        if (state.selectedEl) { state.selectedEl.classList.remove('av-picker-selected'); state.selectedEl = null; }
+        state.excludedEls.forEach(function (el) { el.classList.remove('av-picker-excluded'); });
+        state.excludedEls = [];
         state.selection = entry.snap;
+        // Re-apply highlights for restored selection.
+        if (state.selection.selector) {
+            try {
+                var el = d.querySelector(state.selection.selector);
+                if (el) { state.selectedEl = el; el.classList.add('av-picker-selected'); }
+            } catch (e) {}
+        }
         renderAllChips();
-        var input = $('.atlasvoice-step-rail__selector-input');
-        if (input) { input.value = state.selection.selector || ''; }
-        $('.atlasvoice-step-rail__save').disabled = !state.selection.selector;
-        status('Undid: ' + (entry.label || 'last change') + '  (' + state.undoStack.length + ' more)');
+        syncTagCheckboxes();
+        updateSelectorDisplay();
+        updateWordCount();
+        updatePreview();
+        saveBtn().disabled = !state.selection.selector;
+        status('Undid: ' + (entry.label || 'last change') + (state.undoStack.length ? ' (' + state.undoStack.length + ' more)' : ''));
         return true;
     }
 
-    // ---- util ----
+    /* ─── util ──────────────────────────────────────────────────── */
 
-    function $(sel, root) {
-        return (root || state.shell).querySelector(sel);
-    }
-    function $$(sel, root) {
-        return Array.prototype.slice.call((root || state.shell).querySelectorAll(sel));
-    }
+    function $(sel, root) { return (root || state.shell).querySelector(sel); }
+
     function status(msg) {
-        var el = $('.atlasvoice-step-rail__status');
+        var el = state.shell && state.shell.querySelector('.av-status');
         if (el) { el.textContent = msg || ''; }
     }
-    function setRowState(rowKey, stateName) {
-        $$('.atlasvoice-step-rail__row').forEach(function (li) {
-            if (li.getAttribute('data-row') === rowKey) {
-                li.classList.toggle('is-active', stateName === 'active');
-                li.classList.toggle('is-done',   stateName === 'done');
-                li.classList.toggle('is-disabled', stateName === 'disabled');
-            }
-        });
-    }
+
+    function saveBtn() { return state.shell && state.shell.querySelector('.av-btn--save'); }
+
+    /* ─── REST ──────────────────────────────────────────────────── */
 
     function restFetch(path, opts) {
         opts = opts || {};
-        var url = state.rest.replace(/\/$/, '') + path;
+        var url = (state.rest || '').replace(/\/$/, '') + path;
         var headers = { 'X-WP-Nonce': state.nonce, 'Accept': 'application/json' };
-        if (opts.body && !(opts.body instanceof FormData)) {
-            headers['Content-Type'] = 'application/json';
-        }
+        if (opts.body) { headers['Content-Type'] = 'application/json'; }
         return fetch(url, {
-            method: opts.method || 'GET',
+            method:      opts.method || 'GET',
             credentials: 'same-origin',
-            headers: headers,
-            body: opts.body ? (typeof opts.body === 'string' ? opts.body : JSON.stringify(opts.body)) : undefined
+            headers:     headers,
+            body:        opts.body ? JSON.stringify(opts.body) : undefined
         }).then(function (r) {
             if (!r.ok) { return r.text().then(function (t) { throw new Error('HTTP ' + r.status + ': ' + t); }); }
             return r.json();
         });
     }
 
-    // ---- row ① scope ----
+    /* ─── CSS selector generation ───────────────────────────────── */
 
-    var SCOPE_OPTIONS = [
-        { value: 'global',              label: 'Global',               needsPt: false, needsLang: false },
-        { value: 'post_type',           label: 'Post type',            needsPt: true,  needsLang: false },
-        { value: 'language',            label: 'Language',             needsPt: false, needsLang: true  },
-        { value: 'post_type_language',  label: 'Post type + language', needsPt: true,  needsLang: true  },
-        { value: 'post',                label: 'This post',            needsPt: false, needsLang: false }
-    ];
+    // For EXCLUDE chips: generate a selector that works inside the content
+    // clone (which IS the content element, not its parent). Never reference
+    // the content container itself as a parent context — that would break
+    // clone.querySelectorAll(). Falls back to tag+class or plain tag.
+    function generateExcludeSelector(el) {
+        if (el.id && !/^\d/.test(el.id) && d.getElementById(el.id) === el) {
+            return '#' + el.id;
+        }
+        var tag = el.tagName.toLowerCase();
+        var cls = cleanClasses(el).split(/\s+/).filter(Boolean);
+        var nth = nthChild(el);
+        var nthSfx = nth > 0 ? ':nth-child(' + nth + ')' : '';
+
+        // Try unique class inside the selected content container.
+        if (state.selectedEl && cls.length) {
+            for (var i = 0; i < cls.length; i++) {
+                var cand = tag + '.' + cls[i];
+                try {
+                    if (state.selectedEl.querySelectorAll(cand).length === 1) { return cand; }
+                } catch (e) {}
+            }
+        }
+
+        // Build parent-context selector with nth-child for uniqueness inside clone.
+        var parent = el.parentElement;
+        if (parent) {
+            var ptag = parent.tagName.toLowerCase();
+            var pcls = cleanClasses(parent).split(/\s+/).filter(Boolean);
+            if (parent.id && !/^\d/.test(parent.id)) {
+                return '#' + parent.id + ' > ' + tag + (cls.length ? '.' + cls[0] : '') + nthSfx;
+            }
+            return ptag + (pcls.length ? '.' + pcls[0] : '') + ' > ' + tag + (cls.length ? '.' + cls[0] : '') + nthSfx;
+        }
+        return tag + (cls.length ? '.' + cls[0] : '') + nthSfx;
+    }
+
+    var PICKER_CLASSES = /\bav-picker-(hover|selected|exclude-hover|excluded)\b/g;
+
+    function cleanClasses(el) {
+        // Temporarily strip picker classes so they don't pollute the selector.
+        var orig = (typeof el.className === 'string') ? el.className : (el.className.baseVal || '');
+        return orig.replace(PICKER_CLASSES, '').trim().replace(/\s{2,}/g, ' ');
+    }
+
+    // Returns 1-based position of el among its parent's element children.
+    function nthChild(el) {
+        var n = 0;
+        var sib = el.parentElement && el.parentElement.firstElementChild;
+        while (sib) { n++; if (sib === el) { return n; } sib = sib.nextElementSibling; }
+        return 0;
+    }
+
+    function generateSelector(el) {
+        if (el.id && !/^\d/.test(el.id) && d.getElementById(el.id) === el) {
+            return '#' + el.id;
+        }
+        var tag = el.tagName.toLowerCase();
+        var cls = cleanClasses(el).split(/\s+/).filter(Boolean);
+        var nth = nthChild(el);
+        var nthSfx = nth > 0 ? ':nth-child(' + nth + ')' : '';
+
+        // Try each class for global uniqueness (no nth-child needed).
+        for (var i = 0; i < cls.length; i++) {
+            var cand = tag + '.' + cls[i];
+            try { if (d.querySelectorAll(cand).length === 1) { return cand; } } catch (e) {}
+        }
+
+        // Add nth-child to distinguish from siblings; prefix with parent for context.
+        var base = tag + (cls.length ? '.' + cls[0] : '') + nthSfx;
+        var parent = el.parentElement;
+        if (parent) {
+            if (parent.id && !/^\d/.test(parent.id)) {
+                return '#' + parent.id + ' > ' + base;
+            }
+            var ptag = parent.tagName.toLowerCase();
+            var pcls = cleanClasses(parent).split(/\s+/).filter(Boolean);
+            return ptag + (pcls.length ? '.' + pcls[0] : '') + ' > ' + base;
+        }
+        return base;
+    }
+
+    /* ─── DOM picker ────────────────────────────────────────────── */
+
+    function isRailElement(el) {
+        return !!(el && (el.id === 'av-steprail-root' || (el.closest && el.closest('#av-steprail-root'))));
+    }
+
+    function startPickMode(mode, kind) {
+        stopPickMode();
+        state.pickMode = mode;
+        state.exclKind = kind || 'excl_css';
+        d.addEventListener('mouseover', onPickHover,    true);
+        d.addEventListener('mouseout',  onPickHoverOut, true);
+        d.addEventListener('click',     onPickClick,    true);
+        d.addEventListener('keydown',   onPickEscape);
+        // Visual feedback on button.
+        if (mode === 'pick') {
+            var pb = $('.av-btn--pick');
+            if (pb) { pb.setAttribute('data-state', 'picking'); pb.classList.add('is-active'); }
+            status('Click any element on the page to select it. Press Esc to cancel.');
+        } else {
+            var eb = state.shell && state.shell.querySelector('.av-btn--pick-excl[data-kind="' + state.exclKind + '"]');
+            if (eb) { eb.classList.add('is-active'); }
+            status('Click any element to exclude it. Press Esc to cancel.');
+        }
+    }
+
+    function stopPickMode() {
+        if (!state.pickMode) { return; }
+        d.removeEventListener('mouseover', onPickHover,    true);
+        d.removeEventListener('mouseout',  onPickHoverOut, true);
+        d.removeEventListener('click',     onPickClick,    true);
+        d.removeEventListener('keydown',   onPickEscape);
+        if (state.hoveredEl) {
+            state.hoveredEl.classList.remove('av-picker-hover', 'av-picker-exclude-hover');
+            state.hoveredEl = null;
+        }
+        state.pickMode = null;
+        var pb = $('.av-btn--pick');
+        if (pb) { pb.setAttribute('data-state', 'idle'); pb.classList.remove('is-active'); }
+        var ebs = state.shell && state.shell.querySelectorAll('.av-btn--pick-excl');
+        if (ebs) { Array.prototype.forEach.call(ebs, function (b) { b.classList.remove('is-active'); }); }
+    }
+
+    function onPickHover(e) {
+        if (isRailElement(e.target)) { return; }
+        if (state.hoveredEl && state.hoveredEl !== e.target) {
+            state.hoveredEl.classList.remove('av-picker-hover', 'av-picker-exclude-hover');
+        }
+        state.hoveredEl = e.target;
+        e.target.classList.add(state.pickMode === 'excl' ? 'av-picker-exclude-hover' : 'av-picker-hover');
+    }
+
+    function onPickHoverOut(e) {
+        if (state.hoveredEl === e.target) {
+            e.target.classList.remove('av-picker-hover', 'av-picker-exclude-hover');
+            state.hoveredEl = null;
+        }
+    }
+
+    function onPickClick(e) {
+        if (isRailElement(e.target)) { return; }
+        e.preventDefault();
+        e.stopPropagation();
+
+        var el = e.target;
+
+        if (state.pickMode === 'pick') {
+            if (state.selectedEl === el) {
+                // Toggle off — deselect.
+                el.classList.remove('av-picker-selected');
+                state.selectedEl = null;
+                pushUndo('clear selector');
+                state.selection.selector = '';
+                state.userEdited = true;
+                updateSelectorDisplay();
+                updateWordCount();
+                updatePreview();
+                if (saveBtn()) { saveBtn().disabled = true; }
+                stopPickMode();
+                status('Deselected. Click another element or pick again.');
+                return;
+            }
+            if (state.selectedEl) { state.selectedEl.classList.remove('av-picker-selected'); }
+            state.selectedEl = el;
+            el.classList.add('av-picker-selected');
+            var sel = generateSelector(el);
+            pushUndo('set selector "' + sel + '"');
+            state.selection.selector = sel;
+            state.userEdited = true;
+            updateSelectorDisplay();
+            updateWordCount();
+            updatePreview();
+            if (saveBtn()) { saveBtn().disabled = false; }
+            stopPickMode();
+            status('Selected: ' + sel + ' — review the preview and Save.');
+
+        } else if (state.pickMode === 'excl') {
+            if (!state.pro) {
+                stopPickMode();
+                status('Exclude chips require Pro. Upgrade to unlock this feature.');
+                return;
+            }
+            var exclSel = generateExcludeSelector(el);
+            if (addChip(state.exclKind, exclSel)) {
+                el.classList.add('av-picker-excluded');
+                state.excludedEls.push(el);
+                updatePreview();
+                status('Excluded: ' + exclSel + ' (Ctrl+Z to undo)');
+            }
+            stopPickMode();
+        }
+    }
+
+    function onPickEscape(e) {
+        if (e.key === 'Escape') { stopPickMode(); status('Picker cancelled.'); }
+    }
+
+    /* ─── selector display ──────────────────────────────────────── */
+
+    function updateSelectorDisplay() {
+        var disp = $('.av-selector-display');
+        var inp  = $('.av-selector-input');
+        if (!disp || !inp) { return; }
+        if (state.selection.selector) {
+            inp.value = state.selection.selector;
+            disp.hidden = false;
+        } else {
+            inp.value = '';
+            disp.hidden = true;
+        }
+    }
+
+    /* ─── word count ─────────────────────────────────────────────── */
+
+    function updateWordCount() {
+        var slot = $('.av-word-count');
+        if (!slot) { return; }
+        if (!state.selection.selector) { slot.hidden = true; slot.textContent = ''; return; }
+        try {
+            var el = d.querySelector(state.selection.selector);
+            if (!el) { slot.hidden = true; return; }
+            var text = (el.innerText || el.textContent || '').trim();
+            var words = text ? text.split(/\s+/).filter(Boolean).length : 0;
+            slot.textContent = '~' + words + ' words';
+            slot.hidden = false;
+        } catch (e) { slot.hidden = true; }
+    }
+
+    /* ─── content extraction + preview ──────────────────────────── */
+
+    // Mirrors extractor engine tier 1: walk comment nodes for atlasvoice markers.
+    function extractFromCommentMarkers(buttonId) {
+        if (!d.body) { return null; }
+        var startText = 'atlasvoice:start:' + (buttonId || 1);
+        var endText   = 'atlasvoice:end:'   + (buttonId || 1);
+        var walker = d.createTreeWalker(d.body, NodeFilter.SHOW_COMMENT, null, false);
+        var startNode = null, endNode = null, node;
+        while ((node = walker.nextNode())) {
+            var val = (node.nodeValue || '').trim();
+            if (!startNode && val === startText)  { startNode = node; }
+            else if (startNode && val === endText) { endNode   = node; break; }
+        }
+        if (!startNode || !endNode) { return null; }
+        var frag = d.createDocumentFragment();
+        var cursor = startNode.nextSibling;
+        while (cursor && cursor !== endNode) {
+            frag.appendChild(cursor.cloneNode(true));
+            cursor = cursor.nextSibling;
+        }
+        return frag;
+    }
+
+    function nodeToText(node) {
+        var div = d.createElement('div');
+        div.appendChild(node.cloneNode(true));
+        return (div.textContent || '').trim();
+    }
+
+    // State A: what the active system (new or legacy) currently reads on this page.
+    // Returns { text, source } where source is 'markers' | 'selector' | 'legacy' | ''.
+    function extractFromActiveSystem() {
+        // Tier 1 — AtlasVoice comment markers (new system active).
+        var frag = extractFromCommentMarkers(1);
+        if (frag) {
+            var t = nodeToText(frag);
+            if (t) { return { text: applyContentMeta(t), source: 'AtlasVoice markers' }; }
+        }
+        // Tier 2 — saved selector with current exclude rules.
+        if (state.selection.selector) {
+            var t2 = extractWithRules();
+            if (t2) { return { text: t2, source: 'Saved selector' }; } // applyContentMeta already called inside
+        }
+        // Tier 3 — legacy wrapper div (.tts_content_wrapper_1).
+        var legacy = d.querySelector('.tts_content_wrapper_1');
+        if (legacy) {
+            var t3 = (legacy.textContent || '').trim();
+            if (t3) { return { text: applyContentMeta(t3), source: 'Legacy wrapper' }; }
+        }
+        return { text: '', source: '' };
+    }
+
+    // State B: live preview using whatever rules are currently in state.selection.
+    function extractWithRules() {
+        if (!state.selection.selector) { return ''; }
+        var el;
+        try { el = d.querySelector(state.selection.selector); } catch (e) { return ''; }
+        if (!el) { return ''; }
+
+        var clone = el.cloneNode(true);
+
+        Array.prototype.forEach.call(clone.querySelectorAll('[class]'), function (n) {
+            n.className = (n.className || '').replace(PICKER_CLASSES, '').trim();
+        });
+
+        (state.selection.excl_css || []).forEach(function (sel) {
+            try {
+                Array.prototype.forEach.call(clone.querySelectorAll(sel), function (n) {
+                    if (n.parentNode) { n.parentNode.removeChild(n); }
+                });
+            } catch (e) {}
+        });
+
+        (state.selection.excl_tags || []).forEach(function (tag) {
+            try {
+                Array.prototype.forEach.call(clone.querySelectorAll(tag), function (n) {
+                    if (n.parentNode) { n.parentNode.removeChild(n); }
+                });
+            } catch (e) {}
+        });
+
+        var raw  = clone.textContent || '';
+        var excl = state.selection.excl_texts || [];
+
+        // Text-level removal: strip each exact phrase string from the raw text.
+        excl.forEach(function (phrase) {
+            if (phrase) { raw = raw.split(phrase).join(''); }
+        });
+
+        var body = raw.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).join('\n');
+
+        return applyContentMeta(body);
+    }
+
+    // Mirrors PHP tta_should_add_delimiter(): appends delimiter only when the
+    // text doesn't already end with a recognised punctuation character.
+    // Delimiter is language-aware — resolved server-side via tts_sentence_delimiter filter.
+    var DELIM_PUNCT = ['.', ',', '?', '!', '|', ';', ':', '\u00bf', '\u00a1', '\u060c', '\u061f'];
+    function addDelimiter(text, delimiter) {
+        if (!text) { return text; }
+        var last = text.charAt(text.length - 1);
+        if (DELIM_PUNCT.indexOf(last) !== -1) { return text + ' '; }
+        return text + delimiter + ' ';
+    }
+
+    // Prepend/append title, excerpt, intro, outro per active settings.
+    // Order + delimiter logic mirrors helpers.php assembly exactly:
+    //   textBefore → title → excerpt → body → textAfter
+    function applyContentMeta(body) {
+        var m = state.contentMeta;
+        if (!m) { return body; }
+        var delim = m.delimiter || '. ';
+        var parts = [];
+        if (m.textBefore)                  { parts.push(addDelimiter(m.textBefore,  delim)); }
+        if (m.addTitle && m.postTitle)      { parts.push(addDelimiter(m.postTitle,   delim)); }
+        if (m.addExcerpt && m.postExcerpt) { parts.push(addDelimiter(m.postExcerpt, delim)); }
+        if (body)                           { parts.push(body); }
+        if (m.textAfter)                   { parts.push(addDelimiter(m.textAfter,   delim)); }
+        return parts.join('');
+    }
+
+    // Keep extractText as alias used by updateWordCount and other callers.
+    function extractText() { return extractWithRules(); }
+
+    function updatePreview() {
+        if (!state.rightOpen) { return; }
+        var panel = d.getElementById('av-preview-panel');
+        var body  = panel && panel.querySelector('.av-preview-panel__body');
+        var meta  = panel && panel.querySelector('.av-preview-panel__meta');
+        if (!body) { return; }
+
+        var text, source;
+        if (state.selection.selector) {
+            // Selector known — always apply exclusion rules so the preview
+            // reflects what the TTS engine will actually read.
+            text   = extractWithRules();
+            source = state.userEdited ? 'Rule preview' : 'Active rules';
+        } else {
+            // No selector yet — show what the active system reads unfiltered.
+            var active = extractFromActiveSystem();
+            text   = active.text;
+            source = active.source;
+        }
+
+        if (!text) {
+            body.innerHTML = '<p class="av-preview-panel__empty">Pick a content region on the left \u2014 the extracted text will appear here.</p>';
+            if (meta) { meta.textContent = source || ''; }
+            return;
+        }
+
+        var words = text.split(/\s+/).filter(Boolean).length;
+        if (meta) { meta.textContent = (source ? source + ' \u00b7 ' : '') + '\u223c' + words + ' words'; }
+
+        body.innerHTML = '';
+        text.split('\n').forEach(function (line) {
+            line = line.trim();
+            if (!line) { return; }
+            var p = d.createElement('p');
+            p.style.cssText = 'margin:0 0 8px;';
+            p.textContent = line;
+            body.appendChild(p);
+        });
+    }
+
+    /* ─── scope radiogroup ──────────────────────────────────────── */
 
     function renderScopeRow() {
-        var wrap = $('.atlasvoice-step-rail__scope-group');
+        var wrap = $('.av-scope-group');
         if (!wrap) { return; }
         wrap.innerHTML = '';
+        var scopes = state.scopes || { post_types: [], languages: [] };
+
         SCOPE_OPTIONS.forEach(function (opt) {
             var id = 'av-scope-' + opt.value;
             var label = d.createElement('label');
             label.setAttribute('for', id);
-            if (state.selection.scope === opt.value) { label.classList.add('is-checked'); }
-            if (opt.value === 'post' && !state.selection.post_id) { label.style.opacity = '0.5'; label.title = 'Open from a specific post to enable.'; }
+            if (state.selection.scope === opt.value) { label.className = 'is-checked'; }
+
             var input = d.createElement('input');
             input.type = 'radio'; input.name = 'av-scope'; input.id = id; input.value = opt.value;
-            if (state.selection.scope === opt.value) { input.checked = true; }
-            if (opt.value === 'post' && !state.selection.post_id) { input.disabled = true; }
+            input.checked = (state.selection.scope === opt.value);
+
+            if (opt.needsLang && !(scopes.languages || []).length) {
+                return; // no language plugin active — omit this scope option
+            }
+            // Per-post scope requires Pro (uses post meta that Free can't read back).
+            if (opt.value === 'post' && !state.pro) { return; }
+
             input.addEventListener('change', function () {
-                state.selection.scope = opt.value;
+                state.selection.scope     = opt.value;
+                state.selection.post_type = opt.needsPt   ? state.postType : '';
+                state.selection.language  = opt.needsLang ? state.postLang : '';
                 renderScopeRow();
-                renderTargetRow();
-                setRowState('scope', 'done');
-                setRowState('target', 'active');
-                maybeResolveSample();
+                loadRulesForScope();
             });
+
             label.appendChild(input);
-            label.appendChild(d.createTextNode(' ' + opt.label));
+            label.appendChild(d.createTextNode('\u00a0' + opt.label));
             wrap.appendChild(label);
         });
     }
 
-    // ---- row ② post-type / language ----
+    /* ─── load rules for a selected scope ──────────────────────── */
 
-    function renderTargetRow() {
-        var wrap = $('.atlasvoice-step-rail__target-fields');
+    function loadRulesForScope() {
+        var scope  = state.selection.scope;
+        var params = '?post_id=' + state.postId + '&scope=' + encodeURIComponent(scope);
+        if (state.selection.post_type) { params += '&post_type=' + encodeURIComponent(state.selection.post_type); }
+        if (state.selection.language)  { params += '&language='  + encodeURIComponent(state.selection.language);  }
+        status('Loading\u2026');
+        restFetch('/step-rail/scope-rule' + params).then(function (resp) {
+            if (state.selectedEl) { state.selectedEl.classList.remove('av-picker-selected'); state.selectedEl = null; }
+            state.selection.selector = resp.selector || '';
+            state.userEdited = false;
+            if (resp.excl_set) {
+                state.selection.excl_css   = Array.isArray(resp.excl_css)   ? resp.excl_css   : [];
+                state.selection.excl_texts = Array.isArray(resp.excl_texts) ? resp.excl_texts : [];
+                state.selection.excl_tags  = Array.isArray(resp.excl_tags)  ? resp.excl_tags  : [];
+            } else {
+                state.selection.excl_css   = [];
+                state.selection.excl_texts = [];
+                state.selection.excl_tags  = [];
+                if (state.shell) {
+                    Array.prototype.forEach.call(
+                        state.shell.querySelectorAll('.av-tag-check input[type=checkbox]'),
+                        function (cb) {
+                            if (cb.defaultChecked && (state.selection.excl_tags || []).indexOf(cb.value) === -1) {
+                                state.selection.excl_tags.push(cb.value);
+                            }
+                        }
+                    );
+                }
+            }
+            updateSelectorDisplay();
+            updateWordCount();
+            renderAllChips();
+            syncTagCheckboxes();
+            if (state.selection.selector) {
+                try {
+                    var el = d.querySelector(state.selection.selector);
+                    if (el) { state.selectedEl = el; el.classList.add('av-picker-selected'); }
+                } catch (e) {}
+            }
+            var sb = saveBtn();
+            if (sb) { sb.disabled = !state.selection.selector; }
+            status(resp.selector ? 'Rule loaded for scope: ' + scope + '.' : 'No saved rule for scope: ' + scope + '.');
+            if (state.rightOpen) { updatePreview(); }
+        }).catch(function () {
+            status('Could not load rule for scope: ' + scope + '.');
+        });
+    }
+
+    /* ─── chips ─────────────────────────────────────────────────── */
+
+    function validateChipValue(kind, val) {
+        val = (val || '').toString().trim();
+        if (!val) { return ''; }
+        if (kind === 'excl_tags') {
+            val = val.replace(/^<+|>+$/g, '').toLowerCase();
+            if (!/^[a-z][a-z0-9]*$/.test(val)) { return ''; }
+        }
+        if (val.length > 512) { val = val.slice(0, 512); }
+        return val;
+    }
+
+    function renderChipRow(kind) {
+        var step = state.shell && state.shell.querySelector('.av-step[data-chip-kind="' + kind + '"]');
+        if (!step) { return; }
+        var wrap = step.querySelector('.av-chips');
         if (!wrap) { return; }
         wrap.innerHTML = '';
-        var scope = SCOPE_OPTIONS.filter(function (o) { return o.value === state.selection.scope; })[0];
-        if (!scope) {
-            wrap.innerHTML = '<em style="color:#9ca3af;">' + 'Select a scope above.'.replace(/&/g, '&amp;') + '</em>';
+        var items = state.selection[kind] || [];
+        if (!items.length) {
+            var empty = d.createElement('span');
+            empty.style.cssText = 'color:#9ca3af;font-size:12px;font-style:italic;';
+            empty.textContent = 'None added yet.';
+            wrap.appendChild(empty);
             return;
         }
-
-        if (!scope.needsPt && !scope.needsLang) {
-            // Global or post — nothing to pick in this row; advance.
-            wrap.innerHTML = '<em style="color:#059669;">No further target needed.</em>';
-            setRowState('target', 'done');
-            setRowState('region', 'active');
-            maybeResolveSample();
-            return;
-        }
-
-        if (scope.needsPt) {
-            var ptLabel = d.createElement('label');
-            ptLabel.appendChild(d.createTextNode('Post type'));
-            var ptSelect = d.createElement('select');
-            var blank = d.createElement('option'); blank.value = ''; blank.textContent = '— choose —'; ptSelect.appendChild(blank);
-            (state.scopes && state.scopes.post_types ? state.scopes.post_types : []).forEach(function (pt) {
-                var o = d.createElement('option'); o.value = pt.slug; o.textContent = pt.label + ' (' + pt.slug + ')';
-                if (state.selection.post_type === pt.slug) { o.selected = true; }
-                ptSelect.appendChild(o);
+        items.forEach(function (val, idx) {
+            var chip = d.createElement('span');
+            chip.className = 'av-chip';
+            chip.setAttribute('role', 'listitem');
+            chip.appendChild(d.createTextNode(val));
+            var x = d.createElement('button');
+            x.type = 'button'; x.setAttribute('aria-label', 'Remove ' + val); x.textContent = '\u00D7';
+            x.addEventListener('click', function () {
+                pushUndo('remove ' + kind + ' "' + val + '"');
+                state.selection[kind].splice(idx, 1);
+                state.userEdited = true;
+                renderChipRow(kind);
+                syncTagCheckboxes();
+                updatePreview();
+                status('Removed ' + val + '.');
             });
-            ptSelect.addEventListener('change', function () {
-                state.selection.post_type = ptSelect.value;
-                maybeResolveSample();
-            });
-            ptLabel.appendChild(ptSelect);
-            wrap.appendChild(ptLabel);
-        }
-
-        if (scope.needsLang) {
-            var langs = (state.scopes && state.scopes.languages) ? state.scopes.languages : [];
-            if (!langs.length) {
-                var warn = d.createElement('em');
-                warn.style.color = '#b91c1c';
-                warn.textContent = 'No multilingual plugin detected.';
-                wrap.appendChild(warn);
-            } else {
-                var langLabel = d.createElement('label');
-                langLabel.appendChild(d.createTextNode('Language'));
-                var langSelect = d.createElement('select');
-                var lb = d.createElement('option'); lb.value = ''; lb.textContent = '— choose —'; langSelect.appendChild(lb);
-                langs.forEach(function (code) {
-                    var o = d.createElement('option'); o.value = code; o.textContent = code;
-                    if (state.selection.language === code) { o.selected = true; }
-                    langSelect.appendChild(o);
-                });
-                langSelect.addEventListener('change', function () {
-                    state.selection.language = langSelect.value;
-                    maybeResolveSample();
-                });
-                langLabel.appendChild(langSelect);
-                wrap.appendChild(langLabel);
-            }
-        }
-    }
-
-    // ---- row ③ iframe sandbox ----
-
-    function maybeResolveSample() {
-        var scope = SCOPE_OPTIONS.filter(function (o) { return o.value === state.selection.scope; })[0];
-        if (!scope) { return; }
-        if (scope.needsPt  && !state.selection.post_type) { return; }
-        if (scope.needsLang && !state.selection.language)  { return; }
-        if (scope.value === 'post' && !state.selection.post_id) { return; }
-
-        status('Locating sample post…');
-        var qs = [
-            'scope=' + encodeURIComponent(state.selection.scope),
-            'post_type=' + encodeURIComponent(state.selection.post_type || ''),
-            'language=' + encodeURIComponent(state.selection.language || ''),
-            'post_id=' + encodeURIComponent(state.selection.post_id || 0)
-        ].join('&');
-
-        restFetch('/step-rail/sample-url?' + qs).then(function (resp) {
-            if (!resp || !resp.url) {
-                status(resp && resp.reason ? resp.reason : 'No sample post available for this scope.');
-                setIframe('');
-                return;
-            }
-            status('Sample: ' + (resp.post_title || resp.url));
-            setIframe(resp.url);
-            setRowState('target', 'done');
-            setRowState('region', 'active');
-        }).catch(function (err) {
-            status('Could not resolve sample: ' + err.message);
-            setIframe('');
+            chip.appendChild(x);
+            wrap.appendChild(chip);
         });
     }
 
-    function setIframe(url) {
-        var wrap = $('.atlasvoice-step-rail__iframe-wrap');
-        var iframe = $('.atlasvoice-step-rail__iframe');
-        if (!wrap || !iframe) { return; }
-        if (!url) {
-            wrap.classList.remove('is-live');
-            iframe.removeAttribute('src');
-            state.iframeReady = false;
-            return;
+    function renderAllChips() {
+        CHIP_KINDS.forEach(renderChipRow);
+        CHIP_KINDS.forEach(function (kind) {
+            var step = state.shell && state.shell.querySelector('.av-step[data-chip-kind="' + kind + '"]');
+            if (!step) { return; }
+            step.classList.toggle('is-locked', !state.pro);
+            var pill = step.querySelector('.av-pro-pill');
+            if (pill) { pill.hidden = !!state.pro; }
+        });
+    }
+
+    function addChip(kind, rawVal, opts) {
+        opts = opts || {};
+        var val = validateChipValue(kind, rawVal);
+        if (!val) {
+            status('Invalid ' + kind.replace('excl_', '') + ' value: "' + rawVal + '"');
+            return false;
         }
-        wrap.classList.add('is-live');
-        state.iframeReady = false;
-        iframe.src = url;
-    }
-
-    // ---- parent ← iframe bridge ----
-
-    function onIframeMessage(event) {
-        if (!state.open) { return; }
-        if (state.parentOrigin && event.origin !== state.parentOrigin) { return; }
-        var m = event.data || {};
-        if (!m || m.source !== 'atlasvoice-iframe') { return; }
-        if (m.type === 'ready') {
-            state.iframeReady = true;
-            status('Pick mode ready. Click any element in the preview.');
-            // auto-kick the picker so admins don't need an extra button press
-            postToIframe('pick:start');
-        } else if (m.type === 'pick:selected') {
-            var picked = (m.payload && m.payload.selector) || '';
-            if (!picked) { return; }
-            // D10 — if the payload flags `rejected` (Alt-click from the
-            // iframe) OR the parent is in reject mode, the selector
-            // becomes an excl_css chip instead of the content target.
-            var rejected = !!(m.payload && m.payload.rejected) || state.pickMode === 'reject';
-            if (rejected) {
-                if (!state.pro) {
-                    status('Exclude chips require Pro — switch back to Pick mode or upgrade.');
-                    return;
-                }
-                if (addChip('excl_css', picked)) {
-                    status('Excluded: ' + picked + '  (Cmd/Ctrl+Z to undo)');
-                }
-                return;
-            }
-            pushUndo('set selector "' + picked + '"');
-            state.selection.selector = picked;
-            var input = $('.atlasvoice-step-rail__selector-input');
-            if (input) { input.value = state.selection.selector; }
-            $('.atlasvoice-step-rail__save').disabled = !state.selection.selector;
-            setRowState('region', 'done');
-            status('Selector picked — review and Save.');
-            // D11 — request word count badge for the picked selector.
-            requestWordCount();
-        } else if (m.type === 'pick:reject') {
-            // Legacy / explicit reject message. Treat identically to
-            // pick:selected with rejected=true.
-            var rej = (m.payload && m.payload.selector) || '';
-            if (!rej) { return; }
-            if (!state.pro) {
-                status('Exclude chips require Pro.');
-                return;
-            }
-            if (addChip('excl_css', rej)) {
-                status('Excluded: ' + rej + '  (Cmd/Ctrl+Z to undo)');
-            }
-        } else if (m.type === 'count:result') {
-            renderWordCount((m.payload && m.payload.words) || 0);
-        } else if (m.type === 'error') {
-            status('Iframe error: ' + (m.payload && m.payload.code));
+        if ((state.selection[kind] || []).indexOf(val) !== -1) {
+            status('Already in list: "' + val + '"');
+            return false;
         }
+        if (!opts.skipUndo) { pushUndo('add ' + kind + ' "' + val + '"'); }
+        state.selection[kind] = (state.selection[kind] || []).concat([val]);
+        state.userEdited = true;
+        renderChipRow(kind);
+        var sb = saveBtn();
+        if (sb) { sb.disabled = !state.selection.selector; }
+        return true;
     }
 
-    function postToIframe(type, payload) {
-        var iframe = $('.atlasvoice-step-rail__iframe');
-        if (!iframe || !iframe.contentWindow) { return; }
-        try {
-            iframe.contentWindow.postMessage(
-                { source: 'atlasvoice-parent', type: type, payload: payload || {} },
-                state.parentOrigin || '*'
-            );
-        } catch (e) {}
+    /* ─── tag checkboxes ────────────────────────────────────────── */
+
+    function attachTagCheckboxes() {
+        if (!state.shell) { return; }
+        Array.prototype.forEach.call(state.shell.querySelectorAll('.av-tag-check input[type=checkbox]'), function (cb) {
+            cb.addEventListener('change', function () {
+                var tag = cb.value;
+                if (cb.checked) {
+                    if (addChip('excl_tags', tag)) { updatePreview(); }
+                } else {
+                    var idx = (state.selection.excl_tags || []).indexOf(tag);
+                    if (idx !== -1) {
+                        pushUndo('remove excl_tags "' + tag + '"');
+                        state.selection.excl_tags.splice(idx, 1);
+                        renderChipRow('excl_tags');
+                        updatePreview();
+                    }
+                }
+            });
+        });
     }
 
-    // ---- D11: listen sample + diff counter ----
-
-    // Request a word-count badge update from the iframe for the currently-
-    // picked selector. Called automatically on pick:selected.
-    function requestWordCount() {
-        if (!state.selection.selector || !state.iframeReady) { return; }
-        postToIframe('count:request', { selector: state.selection.selector });
+    function syncTagCheckboxes() {
+        if (!state.shell) { return; }
+        Array.prototype.forEach.call(state.shell.querySelectorAll('.av-tag-check input[type=checkbox]'), function (cb) {
+            cb.checked = (state.selection.excl_tags || []).indexOf(cb.value) !== -1;
+        });
     }
 
-    // Render a word-count badge in the region row body. Slot lives between
-    // the picked selector input and the listen/diff action row.
-    function renderWordCount(words) {
-        var slot = $('.atlasvoice-step-rail__word-count');
-        if (!slot) { return; }
-        slot.textContent = words > 0 ? '~' + words + ' words' : '';
-        slot.hidden = words <= 0;
+    /* ─── chip add buttons ──────────────────────────────────────── */
+
+    function attachChipAddButtons() {
+        CHIP_KINDS.forEach(function (kind) {
+            var step = state.shell && state.shell.querySelector('.av-step[data-chip-kind="' + kind + '"]');
+            if (!step) { return; }
+
+            // Pick-to-exclude button (only on excl_css step).
+            var pickExcl = step.querySelector('.av-btn--pick-excl');
+            if (pickExcl) {
+                pickExcl.addEventListener('click', function () {
+                    if (!state.pro) { status('Exclude picker requires Pro.'); return; }
+                    if (state.pickMode === 'excl' && state.exclKind === kind) {
+                        stopPickMode(); status('Exclude picker stopped.');
+                    } else {
+                        startPickMode('excl', kind);
+                    }
+                });
+            }
+
+            var inp    = step.querySelector('.av-chip-input');
+            var addBtn = step.querySelector('.av-btn--add-chip');
+            if (inp && addBtn) {
+                addBtn.addEventListener('click', function () {
+                    if (!state.pro) { status('Exclude chips require Pro.'); return; }
+                    if (addChip(kind, inp.value)) { inp.value = ''; inp.focus(); updatePreview(); }
+                });
+                inp.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') { e.preventDefault(); addBtn.click(); }
+                });
+            }
+        });
     }
 
-    function attachDiffButton() {
-        var btn = $('.atlasvoice-step-rail__diff');
+    /* ─── pick button (content region) ──────────────────────────── */
+
+    function attachPickButton() {
+        var btn = $('.av-btn--pick');
         if (!btn) { return; }
         btn.addEventListener('click', function () {
-            if (!state.selection.selector || !state.iframeReady) {
-                status('Pick a selector first to preview the diff.');
-                return;
+            if (state.pickMode === 'pick') {
+                stopPickMode(); status('Picker cancelled.');
+            } else {
+                startPickMode('pick');
             }
-            postToIframe('diff:open', { selector: state.selection.selector });
-            status('Diff preview opened in the sandbox.');
         });
+
+        var clearBtn = $('.av-btn--clear-selector');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function () {
+                if (state.selectedEl) { state.selectedEl.classList.remove('av-picker-selected'); state.selectedEl = null; }
+                pushUndo('clear selector');
+                state.selection.selector = '';
+                state.userEdited = true;
+                updateSelectorDisplay();
+                updateWordCount();
+                updatePreview();
+                var sb = saveBtn();
+                if (sb) { sb.disabled = true; }
+                status('Selector cleared.');
+            });
+        }
+
+        // Allow manual editing of the picked selector string.
+        var selectorInput = $('.av-selector-input');
+        if (selectorInput) {
+            selectorInput.addEventListener('input', function () {
+                var val = selectorInput.value.trim();
+                state.selection.selector = val;
+                state.userEdited = true;
+                updateWordCount();
+                updatePreview();
+                if (saveBtn()) { saveBtn().disabled = !val; }
+            });
+            // Prevent typing in the input from propagating to page pick-mode listeners.
+            selectorInput.addEventListener('click',   function (e) { e.stopPropagation(); });
+            selectorInput.addEventListener('keydown', function (e) { e.stopPropagation(); });
+        }
     }
 
-    // ---- save ----
+    /* ─── draggable panels ──────────────────────────────────────── */
+
+    // Generic draggable — works for both the left rail panel and the right
+    // preview panel. Once dragged, the panel switches to free-float mode:
+    // the CSS slide/transition is disabled and position is fully controlled
+    // by inline left/top. Closing + re-opening stays at the dragged position.
+    function makeDraggable(panel, handle) {
+        if (!panel || !handle) { return; }
+        var dragging = false, startX, startY, startLeft, startTop;
+
+        handle.addEventListener('mousedown', function (e) {
+            if (e.button !== 0) { return; }
+
+            // Capture the current visual position BEFORE altering any styles.
+            var rect   = panel.getBoundingClientRect();
+            startLeft  = rect.left;
+            startTop   = rect.top;
+            startX     = e.clientX;
+            startY     = e.clientY;
+
+            // Switch to free-float: kill transition + transform, clear any
+            // CSS-side right/bottom offsets, pin with explicit left/top.
+            panel.style.transition = 'none';
+            panel.style.transform  = 'none';
+            panel.style.right      = 'auto';
+            panel.style.bottom     = 'auto';
+            panel.style.left       = startLeft + 'px';
+            panel.style.top        = startTop  + 'px';
+            panel.classList.add('av-panel--floating');
+
+            dragging = true;
+            e.preventDefault();
+        });
+
+        d.addEventListener('mousemove', function (e) {
+            if (!dragging) { return; }
+            var nx = Math.max(0, startLeft + (e.clientX - startX));
+            var ny = Math.max(0, startTop  + (e.clientY - startY));
+            panel.style.left = nx + 'px';
+            panel.style.top  = ny + 'px';
+        });
+
+        d.addEventListener('mouseup', function () { dragging = false; });
+    }
+
+    // Generic resizer — drag a handle element to change panel width and/or height.
+    // dir: 'x' = width only, 'y' = height only, 'both' = both (default).
+    function makeResizable(panel, handle, opts) {
+        if (!panel || !handle) { return; }
+        opts = opts || {};
+        var minW = opts.minW || 200, minH = opts.minH || 120;
+        var dir  = opts.dir  || 'both';
+        var resizing = false, startX, startY, startW, startH;
+
+        handle.addEventListener('mousedown', function (e) {
+            if (e.button !== 0) { return; }
+            var rect = panel.getBoundingClientRect();
+            startW = rect.width;  startH = rect.height;
+            startX = e.clientX;   startY = e.clientY;
+            resizing = true;
+            panel.style.transition = 'none';
+            e.preventDefault();
+            e.stopPropagation(); // don't trigger parent drag handle
+        });
+
+        d.addEventListener('mousemove', function (e) {
+            if (!resizing) { return; }
+            if (dir !== 'y') {
+                var dx = opts.reverseX ? (startX - e.clientX) : (e.clientX - startX);
+                panel.style.width = Math.max(minW, startW + dx) + 'px';
+            }
+            if (dir !== 'x') {
+                panel.style.maxHeight = 'none';
+                panel.style.height    = Math.max(minH, startH + (e.clientY - startY)) + 'px';
+            }
+        });
+
+        d.addEventListener('mouseup', function () { resizing = false; });
+    }
+
+    function attachDraggable() {
+        // Right preview panel — drag by header, resize width via right edge, height via bottom edge.
+        var previewPanel        = d.getElementById('av-preview-panel');
+        var previewHandle       = previewPanel && previewPanel.querySelector('.av-preview-panel__handle');
+        var previewResizeLeft   = previewPanel && previewPanel.querySelector('.av-resize-handle--left-edge');
+        var previewResizeBottom = previewPanel && previewPanel.querySelector('.av-resize-handle--bottom');
+        makeDraggable(previewPanel, previewHandle);
+        makeResizable(previewPanel, previewResizeLeft,  { dir: 'x', minW: 220, reverseX: true });
+        makeResizable(previewPanel, previewResizeBottom, { dir: 'y', minH: 120 });
+
+        // Left rail panel — drag by its own header, resize width via right-edge handle.
+        var railPanel  = d.getElementById('av-rail-panel');
+        var railHandle = railPanel && railPanel.querySelector('.av-rail-panel__header');
+        var railResize = railPanel && railPanel.querySelector('.av-resize-handle--edge');
+        makeDraggable(railPanel, railHandle);
+        makeResizable(railPanel, railResize, { dir: 'x', minW: 220 });
+    }
+
+    /* ─── panel open/close ──────────────────────────────────────── */
+
+    function toggleLeft(forceOpen) {
+        var panel = d.getElementById('av-rail-panel');
+        var tab   = state.shell && state.shell.querySelector('.av-tab--left');
+        if (!panel || !tab) { return; }
+        var open = (typeof forceOpen === 'boolean') ? forceOpen : panel.hasAttribute('hidden');
+        if (open) {
+            panel.hidden = false;
+            tab.setAttribute('aria-expanded', 'true');
+            state.leftOpen = true;
+        } else {
+            panel.hidden = true;
+            tab.setAttribute('aria-expanded', 'false');
+            state.leftOpen = false;
+            stopPickMode();
+        }
+    }
+
+    function toggleRight(forceOpen) {
+        var panel = d.getElementById('av-preview-panel');
+        var tab   = state.shell && state.shell.querySelector('.av-tab--right');
+        if (!panel || !tab) { return; }
+        var open = (typeof forceOpen === 'boolean') ? forceOpen : panel.hasAttribute('hidden');
+        if (open) {
+            panel.hidden = false;
+            tab.setAttribute('aria-expanded', 'true');
+            state.rightOpen = true;
+            updatePreview();
+        } else {
+            panel.hidden = true;
+            tab.setAttribute('aria-expanded', 'false');
+            state.rightOpen = false;
+        }
+    }
+
+    /* ─── save ──────────────────────────────────────────────────── */
 
     function save() {
-        if (!state.selection.selector) { return; }
-        var btn = $('.atlasvoice-step-rail__save');
+        if (!state.selection.selector) { status('Pick a content region first.'); return; }
+        var btn = saveBtn();
+        if (!btn) { return; }
         btn.disabled = true;
-        status('Saving…');
+        status('Saving\u2026');
 
-        var body;
-        var path;
+        var path, body;
         if (state.selection.scope === 'post') {
             path = '/post-rules';
-            body = {
-                action:   'set',
-                post_id:  state.selection.post_id,
-                selector: state.selection.selector
-            };
-            // D10 — post-scope saves ship the chip arrays in the same
-            // payload. PerPostRules::set() sanitises unknown keys so
-            // this is safe even if the server predates D10.
-            if ((state.selection.excl_css   || []).length) { body.excl_css   = state.selection.excl_css.slice(); }
-            if ((state.selection.excl_texts || []).length) { body.excl_texts = state.selection.excl_texts.slice(); }
-            if ((state.selection.excl_tags  || []).length) { body.excl_tags  = state.selection.excl_tags.slice(); }
+            body = { action: 'set', post_id: state.selection.post_id, selector: state.selection.selector };
         } else {
             path = '/save-selector';
             body = { selector: state.selection.selector };
@@ -420,278 +968,232 @@
                 body.language = state.selection.language;
             }
         }
+        // Always send all excl_* for every scope so clearing chips is persisted.
+        body.excl_css   = (state.selection.excl_css   || []).slice();
+        body.excl_texts = (state.selection.excl_texts || []).slice();
+        body.excl_tags  = (state.selection.excl_tags  || []).slice();
 
         restFetch(path, { method: 'POST', body: body }).then(function (resp) {
-            status('Saved ✓');
+            status('Saved \u2713 — content selector updated.');
+            state.userEdited = false; // revert preview to "active system" view
+            btn.disabled = false;
             try {
                 w.dispatchEvent(new CustomEvent('atlasvoice:steprail:saved', {
                     detail: { scope: state.selection.scope, selector: state.selection.selector, response: resp }
                 }));
             } catch (e) {}
-            setTimeout(api.close, 500);
         }).catch(function (err) {
             status('Save failed: ' + err.message);
             btn.disabled = false;
         });
     }
 
-    // ---- open / close ----
+    /* ─── active-system selector detection ─────────────────────── */
 
-    function attachOnce() {
-        var shell = d.getElementById('atlasvoice-step-rail');
-        if (!shell) { return false; }
-        state.shell     = shell;
-        state.rest      = shell.getAttribute('data-rest') || '';
-        state.nonce     = shell.getAttribute('data-nonce') || '';
-        state.iframeFlag = shell.getAttribute('data-iframe-flag') || 'atlasvoice_iframe';
-        state.pro       = shell.getAttribute('data-pro') === '1';
-
-        shell.addEventListener('click', function (e) {
-            if (e.target.getAttribute('data-close') === '1') { api.close(); }
-        });
-        $('.atlasvoice-step-rail__save').addEventListener('click', save);
-        var selInput = $('.atlasvoice-step-rail__selector-input');
-        if (selInput) {
-            selInput.addEventListener('input', function () {
-                state.selection.selector = selInput.value.trim();
-                $('.atlasvoice-step-rail__save').disabled = !state.selection.selector;
-            });
-        }
-        w.addEventListener('message', onIframeMessage);
-        w.addEventListener('keydown', onKeyDown);
-
-        // D10 — wire chip add/remove forms + pick/reject mode toggle.
-        // Both are cheap to attach once; the row DOM is rendered by the
-        // server so the forms already exist when we land here.
-        attachChipHandlers();
-        attachModeToggle();
-
-        // D11 — diff preview button.
-        attachDiffButton();
-        return true;
-    }
-
-    function resetSelection(init) {
-        var sel = makeEmptySelection();
-        if (init) {
-            sel.scope      = init.scope      || '';
-            sel.post_type  = init.post_type  || '';
-            sel.language   = init.language   || '';
-            sel.post_id    = init.post_id    || 0;
-            sel.selector   = init.selector   || '';
-            if (Array.isArray(init.excl_css))   { sel.excl_css   = init.excl_css.slice();   }
-            if (Array.isArray(init.excl_texts)) { sel.excl_texts = init.excl_texts.slice(); }
-            if (Array.isArray(init.excl_tags))  { sel.excl_tags  = init.excl_tags.slice();  }
-        }
-        state.selection = sel;
-        state.undoStack = [];
-        state.pickMode  = 'pick';
-    }
-
-    // ---- rule chips (rows ④⑤⑥) ----
-
-    // Per-kind validation — keeps the post-side sanitiser in the
-    // driver's seat, but rejects obvious nonsense client-side so
-    // admins get immediate feedback.
-    function validateChipValue(kind, val) {
-        val = (val || '').toString().trim();
-        if (!val) { return ''; }
-        if (kind === 'excl_tags') {
-            // Single tag name — lowercase alphanumerics only.
-            val = val.replace(/^<|>$/g, '').toLowerCase();
-            if (!/^[a-z][a-z0-9]*$/.test(val)) { return ''; }
-        }
-        // excl_css + excl_texts accept almost anything printable; cap length.
-        if (val.length > 512) { val = val.slice(0, 512); }
-        return val;
-    }
-
-    function renderChipRow(kind) {
-        var row = state.shell.querySelector('.atlasvoice-step-rail__row[data-chip-kind="' + kind + '"]');
-        if (!row) { return; }
-        var chipsWrap = row.querySelector('.atlasvoice-step-rail__chips');
-        if (!chipsWrap) { return; }
-        chipsWrap.innerHTML = '';
-        var items = state.selection[kind] || [];
-        if (!items.length) {
-            var empty = d.createElement('span');
-            empty.style.color = '#9ca3af';
-            empty.style.fontSize = '12px';
-            empty.textContent = 'No ' + kind.replace('excl_', '') + ' excludes yet.';
-            chipsWrap.appendChild(empty);
-            return;
-        }
-        items.forEach(function (val, idx) {
-            var chip = d.createElement('span');
-            chip.className = 'atlasvoice-step-rail__chip';
-            chip.setAttribute('role', 'listitem');
-            chip.appendChild(d.createTextNode(val));
-            var x = d.createElement('button');
-            x.type = 'button';
-            x.setAttribute('aria-label', 'Remove');
-            x.textContent = '\u00D7';
-            x.addEventListener('click', function () {
-                pushUndo('remove ' + kind + ' "' + val + '"');
-                state.selection[kind].splice(idx, 1);
-                renderChipRow(kind);
-                $('.atlasvoice-step-rail__save').disabled = !state.selection.selector;
-                status('Removed ' + kind + ' chip.');
-            });
-            chip.appendChild(x);
-            chipsWrap.appendChild(chip);
-        });
-    }
-
-    function renderAllChips() {
-        CHIP_KINDS.forEach(renderChipRow);
-        CHIP_KINDS.forEach(function (kind) {
-            var row = state.shell.querySelector('.atlasvoice-step-rail__row[data-chip-kind="' + kind + '"]');
-            if (!row) { return; }
-            var wasLocked = row.classList.contains('is-locked');
-            row.classList.toggle('is-locked', !state.pro);
-
-            // D12 — inject (or remove) the Pro upsell pill inside the row
-            // header. Only mutates the DOM when the locked state changes so
-            // repeated renderAllChips calls on a Pro install are a no-op.
-            var existing = row.querySelector('.atlasvoice-step-rail__pro-pill');
-            if (!state.pro && !existing) {
-                var strong = row.querySelector('strong');
-                if (strong) {
-                    var pill = d.createElement('span');
-                    pill.className = 'atlasvoice-step-rail__pro-pill';
-                    pill.setAttribute('aria-label', 'Pro feature');
-                    pill.textContent = 'Pro';
-                    strong.appendChild(d.createTextNode('\u00a0'));  // nbsp
-                    strong.appendChild(pill);
+    // Mirrors extractFromActiveSystem tier waterfall but returns a CSS selector
+    // string instead of text, so the Content Region field can be pre-filled on load.
+    function detectActiveSelector() {
+        // Tier 1 — AtlasVoice comment markers: find parent element of start comment.
+        if (d.body) {
+            var startText = 'atlasvoice:start:1';
+            var walker = d.createTreeWalker(d.body, NodeFilter.SHOW_COMMENT, null, false);
+            var node;
+            while ((node = walker.nextNode())) {
+                if ((node.nodeValue || '').trim() === startText) {
+                    var parent = node.parentElement;
+                    if (parent && parent.tagName.toLowerCase() !== 'body') {
+                        return generateSelector(parent);
+                    }
                 }
-            } else if (state.pro && existing) {
-                existing.parentNode.removeChild(existing);
             }
-        });
-    }
-
-    function addChip(kind, rawVal, opts) {
-        opts = opts || {};
-        var val = validateChipValue(kind, rawVal);
-        if (!val) {
-            status('Rejected: "' + rawVal + '" is not a valid ' + kind.replace('excl_', '') + ' entry.');
-            return false;
         }
-        if ((state.selection[kind] || []).indexOf(val) !== -1) {
-            status('Already present: "' + val + '".');
-            return false;
-        }
-        if (!opts.skipUndo) { pushUndo('add ' + kind + ' "' + val + '"'); }
-        state.selection[kind] = (state.selection[kind] || []).concat([val]);
-        renderChipRow(kind);
-        // Saving the chip set requires a selector too; if none picked
-        // yet, keep Save disabled so admins don't accidentally ship a
-        // scope row with no body rule.
-        $('.atlasvoice-step-rail__save').disabled = !state.selection.selector;
-        return true;
+        // Tier 3 — Legacy wrapper.
+        if (d.querySelector('.tts_content_wrapper_1')) { return '.tts_content_wrapper_1'; }
+        return '';
     }
 
-    function attachChipHandlers() {
-        CHIP_KINDS.forEach(function (kind) {
-            var row = state.shell.querySelector('.atlasvoice-step-rail__row[data-chip-kind="' + kind + '"]');
-            if (!row) { return; }
-            var form = row.querySelector('.atlasvoice-step-rail__chip-add');
-            if (!form) { return; }
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-                if (!state.pro) { status('Rule chips require Pro.'); return; }
-                var inp = form.querySelector('input');
-                if (addChip(kind, inp.value)) { inp.value = ''; inp.focus(); }
-            });
+    // Called when no saved rules exist for this post. Detects the active
+    // extraction selector and pre-fills the Content Region field so the admin
+    // immediately sees what the TTS system is already reading.
+    function autoFillActiveSelector() {
+        if (state.selection.selector) { return; } // already set by loadExistingRules
+        var sel = detectActiveSelector();
+        if (!sel) { return; }
+        state.selection.selector = sel;
+        state.userEdited = false;
+        updateSelectorDisplay();
+        updateWordCount();
+        try {
+            var el = d.querySelector(sel);
+            if (el) { state.selectedEl = el; el.classList.add('av-picker-selected'); }
+        } catch (e) {}
+        var sb = saveBtn();
+        if (sb) { sb.disabled = false; }
+        status('Content region auto-detected: ' + sel);
+        if (state.rightOpen) { updatePreview(); }
+    }
+
+    /* ─── load existing rules ───────────────────────────────────── */
+
+    function loadExistingRules() {
+        if (!state.postId) { return; }
+        // /step-rail/active-rule resolves the full precedence walk (per-post →
+        // post_type_language → language → post_type → global) and returns the
+        // winning rule + the scope it came from so the UI reflects reality.
+        restFetch('/step-rail/active-rule?post_id=' + state.postId).then(function (resp) {
+            if (!resp || !resp.selector) {
+                autoFillActiveSelector();
+                return;
+            }
+            state.selection.selector  = resp.selector  || '';
+            state.selection.scope     = resp.scope      || 'post';
+            state.selection.post_type = resp.post_type  || '';
+            state.selection.language  = resp.language   || '';
+            state.postType            = resp.post_type  || '';
+            state.postLang            = resp.language   || '';
+            // excl_set=true means the server has explicit excl_* data for this
+            // scope (new array storage format). Restore them, even if empty —
+            // empty means the user explicitly cleared all exclusions.
+            // excl_set=false means a legacy string-format entry: keep the
+            // pre-populated defaults from the HTML checkboxes.
+            if (resp.excl_set) {
+                state.selection.excl_css   = Array.isArray(resp.excl_css)   ? resp.excl_css   : [];
+                state.selection.excl_texts = Array.isArray(resp.excl_texts) ? resp.excl_texts : [];
+                state.selection.excl_tags  = Array.isArray(resp.excl_tags)  ? resp.excl_tags  : [];
+            }
+            state.userEdited = false;
+            renderScopeRow();
+            updateSelectorDisplay();
+            updateWordCount();
+            renderAllChips();
+            syncTagCheckboxes();
+            try {
+                var el = d.querySelector(resp.selector);
+                if (el) { state.selectedEl = el; el.classList.add('av-picker-selected'); }
+            } catch (e) {}
+            var sb = saveBtn();
+            if (sb) { sb.disabled = false; }
+            status('Active rule loaded (' + (resp.scope || 'post') + ').');
+            if (state.rightOpen) { updatePreview(); }
+        }).catch(function () {
+            autoFillActiveSelector();
         });
     }
 
-    // ---- mode toggle ----
+    /* ─── keyboard ──────────────────────────────────────────────── */
 
-    function attachModeToggle() {
-        $$('input[name="av-pick-mode"]').forEach(function (radio) {
-            radio.addEventListener('change', function () {
-                setPickMode(radio.value);
-            });
-        });
-    }
-
-    function setPickMode(mode) {
-        state.pickMode = (mode === 'reject') ? 'reject' : 'pick';
-        var wrap = $('.atlasvoice-step-rail__iframe-wrap');
-        if (wrap) { wrap.classList.toggle('is-reject-mode', state.pickMode === 'reject'); }
-        $$('input[name="av-pick-mode"]').forEach(function (r) {
-            r.checked = (r.value === state.pickMode);
-        });
-        status(state.pickMode === 'reject'
-            ? 'Reject mode: clicks add the target\u2019s selector to CSS excludes.'
-            : 'Pick mode: clicks set the content selector.');
-    }
-
-    // ---- keyboard undo ----
-
-    function onKeyDown(ev) {
-        if (!state.open) { return; }
-        var mod = ev.metaKey || ev.ctrlKey;
-        if (mod && !ev.shiftKey && (ev.key === 'z' || ev.key === 'Z')) {
-            ev.preventDefault();
+    function onKeyDown(e) {
+        if (!state.leftOpen) { return; }
+        var mod = e.metaKey || e.ctrlKey;
+        if (mod && !e.shiftKey && (e.key === 'z' || e.key === 'Z')) {
+            e.preventDefault();
             popUndo();
         }
     }
 
-    var api = {
-        open: function (init) {
-            if (!state.shell && !attachOnce()) { return false; }
-            // Re-read Pro status on every open so a PHP flag change
-            // (e.g. toggling Pro mid-session) is picked up without a reload.
-            state.pro = state.shell.getAttribute('data-pro') === '1';
-            resetSelection(init);
-            state.open = true;
-            state.shell.hidden = false;
-            state.shell.setAttribute('aria-hidden', 'false');
-            setRowState('scope', 'active');
-            setRowState('target', '');
-            setRowState('region', '');
-            setIframe('');
-            // D10 — paint the chip rows + sync the mode toggle back to
-            // pick after resetSelection wiped the picker mode.
-            renderAllChips();
-            setPickMode('pick');
-            status('Loading scopes…');
+    /* ─── init ──────────────────────────────────────────────────── */
 
-            restFetch('/step-rail/scopes').then(function (resp) {
-                state.scopes = resp || { post_types: [], languages: [] };
-                renderScopeRow();
-                renderTargetRow();
-                status(state.selection.scope ? 'Scope preselected.' : 'Choose a scope to continue.');
-                if (state.selection.scope) {
-                    setRowState('scope', 'done');
-                    setRowState('target', 'active');
-                    maybeResolveSample();
+    function init() {
+        var shell = d.getElementById('av-steprail-root');
+        if (!shell) { return; }
+
+        state.shell  = shell;
+        state.postId      = parseInt(shell.getAttribute('data-post-id') || '0', 10);
+        state.rest        = shell.getAttribute('data-rest')  || '';
+        state.nonce       = shell.getAttribute('data-nonce') || '';
+        state.pro         = shell.getAttribute('data-pro') === '1';
+        state.contentMeta = {
+            addTitle:    shell.getAttribute('data-add-title')    === '1',
+            addExcerpt:  shell.getAttribute('data-add-excerpt')  === '1',
+            textBefore:  shell.getAttribute('data-text-before')  || '',
+            textAfter:   shell.getAttribute('data-text-after')   || '',
+            postTitle:   shell.getAttribute('data-post-title')   || '',
+            postExcerpt: shell.getAttribute('data-post-excerpt') || '',
+            delimiter:   shell.getAttribute('data-delimiter')    || '. '
+        };
+        state.selection.post_id = state.postId;
+        // Per-post rules are Pro-only. Free sites default to global scope so
+        // saves go to the selector store (readable by RuleResolver on Free).
+        state.selection.scope   = state.pro ? 'post' : 'global';
+
+        // Tab toggles.
+        var leftTab  = shell.querySelector('.av-tab--left');
+        var rightTab = shell.querySelector('.av-tab--right');
+        if (leftTab)  { leftTab.addEventListener('click',  function () { toggleLeft();  }); }
+        if (rightTab) { rightTab.addEventListener('click', function () { toggleRight(); }); }
+
+        // Panel close buttons.
+        var railPanel = d.getElementById('av-rail-panel');
+        if (railPanel) {
+            var closeBtn = railPanel.querySelector('.av-rail-panel__close');
+            if (closeBtn) { closeBtn.addEventListener('click', function () { toggleLeft(false); }); }
+        }
+        var previewPanel = d.getElementById('av-preview-panel');
+        if (previewPanel) {
+            var previewClose = previewPanel.querySelector('.av-preview-panel__close');
+            if (previewClose) { previewClose.addEventListener('click', function () { toggleRight(false); }); }
+        }
+
+        // Save.
+        var sb = saveBtn();
+        if (sb) { sb.addEventListener('click', save); }
+
+        // Keyboard undo.
+        d.addEventListener('keydown', onKeyDown);
+
+        // Draggable preview.
+        attachDraggable();
+
+        // Scope radiogroup — fetch dynamic data (post types / languages).
+        restFetch('/step-rail/scopes').then(function (resp) {
+            state.scopes = resp || { post_types: [], languages: [] };
+        }).catch(function () {
+            state.scopes = { post_types: [], languages: [] };
+        }).then(function () {
+            renderScopeRow();
+        });
+
+        // Wire pickers + chips.
+        attachPickButton();
+        attachChipAddButtons();
+        attachTagCheckboxes();
+
+        // Pre-populate excl_tags from the default-checked tag checkboxes.
+        // loadExistingRules() will overwrite when this post already has saved rules.
+        Array.prototype.forEach.call(
+            state.shell.querySelectorAll('.av-tag-check input[type=checkbox]'),
+            function (cb) {
+                if (cb.checked && (state.selection.excl_tags || []).indexOf(cb.value) === -1) {
+                    state.selection.excl_tags.push(cb.value);
                 }
-            }).catch(function (err) { status('Failed to load scopes: ' + err.message); });
+            }
+        );
 
-            return true;
-        },
-        close: function () {
-            if (!state.shell) { return; }
-            state.open = false;
-            state.shell.hidden = true;
-            state.shell.setAttribute('aria-hidden', 'true');
-            setIframe('');
-            $('.atlasvoice-step-rail__save').disabled = true;
-            try {
-                w.dispatchEvent(new CustomEvent('atlasvoice:steprail:closed', { detail: { selection: state.selection } }));
-            } catch (e) {}
-        },
-        isOpen: function () { return !!state.open; }
+        // Initial Pro gate render.
+        renderAllChips();
+
+        // Pre-load any saved rules for this post.
+        loadExistingRules();
+
+        // Auto-open left panel if ?atlasvoice_picker=1 is present.
+        if (shell.getAttribute('data-auto-open') === '1') {
+            toggleLeft(true);
+            status('Picker ready \u2014 click any element to set the content region.');
+        }
+    }
+
+    /* ─── public API ────────────────────────────────────────────── */
+
+    w.AtlasVoiceStepRail = {
+        open:   function () { toggleLeft(true);  },
+        close:  function () { toggleLeft(false); },
+        isOpen: function () { return state.leftOpen; }
     };
 
-    w.AtlasVoiceStepRail = api;
-
     if (d.readyState === 'loading') {
-        d.addEventListener('DOMContentLoaded', attachOnce);
+        d.addEventListener('DOMContentLoaded', init);
     } else {
-        attachOnce();
+        init();
     }
+
 })(window, document);

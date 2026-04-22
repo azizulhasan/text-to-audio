@@ -30,10 +30,12 @@ class TTA_Deactivator {
      * @since    1.0.0
      */
     public static function deactivate() {
-        // TTS-238 C3a: tear down the nightly boilerplate cron so we don't
-        // leave orphan hooks pointing at a class that's no longer loaded.
-        if ( class_exists( '\\TTA\\TTA_BoilerplateDetector' ) ) {
-            \TTA\TTA_BoilerplateDetector::unregister_cron();
+        // TTS-238 C3a / v5 §14.1: tear down the nightly boilerplate cron
+        // so we don't leave orphan hooks pointing at a class that's no
+        // longer loaded. Post-refactor the detector lives under
+        // TTA\AtlasVoice\BoilerplateDetector.
+        if ( class_exists( '\\TTA\\AtlasVoice\\BoilerplateDetector' ) ) {
+            \TTA\AtlasVoice\BoilerplateDetector::unregister_cron();
         }
         if(!function_exists('is_plugin_active') ){
             include_once ABSPATH . 'wp-admin/includes/plugin.php';

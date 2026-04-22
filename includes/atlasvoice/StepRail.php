@@ -3,610 +3,577 @@
 namespace TTA\AtlasVoice;
 
 /**
- * AtlasVoice step-rail shell (TTS-238 v5 §5.9 / D9).
+ * AtlasVoice Step Rail — front-end content picker (TTS-238 v5 rebuilt).
  *
- * The step rail is the guided UI that walks an admin through the three
- * foundational decisions needed to extract audio content cleanly:
+ * Renders two floating tabs on the actual post page when an admin visits:
  *
- *   ① Scope — which layer of the precedence chain we're editing
- *              (global / post type / language / post type + language / post).
- *   ② Post type (+ language) — populated only when ① selects a scope that
- *              needs them. The list comes from REST `/step-rail/scopes`
- *              so registered CPTs + detected language plugins stay in sync.
- *   ③ Content region — the sandboxed iframe where the admin actually picks
- *              the CSS selector for the chosen scope. Loads a sample post
- *              with `?atlasvoice_iframe=1` + nonce, which flips the
- *              front-end into pick mode (admin bar suppressed, picker
- *              bundle auto-boots, postMessage bridge handshake).
+ *   LEFT  — "AtlasVoiceSelector" tab → 280 px sliding panel
+ *           Step rail: scope → content region (include CSS) → excludes.
+ *           Picker works directly on the live DOM (no iframe).
  *
- * D9 delivers only the **shell**: the three rows, the iframe orchestration,
- * the pick-mode handshake, and the persistence glue. Rows ④⑤⑥ (rule-chip
- * editor, reject mode, Cmd/Ctrl+Z undo) are D10. The 5-second listen
- * sample + diff counter are D11. The Pro-lock overlays are D12.
+ *   RIGHT — "Preview Content" tab → draggable overlay
+ *           Shows extracted TTS text, updates on every rule change.
  *
- * Integration surface:
+ * Trigger: any singular post where the post type has listening enabled,
+ * viewed by a user with manage_options. No manual activation needed.
  *
- *   - Loaded automatically on AtlasVoice dashboard screens and on
- *     `post` / `post-new` screens (same scope as the picker-loader stub,
- *     so `ttsLoadPicker()` is guaranteed to be reachable).
- *
- *   - `window.AtlasVoiceStepRail.open({ post_id, scope, post_type, language })`
- *     opens the rail with whichever fields the caller can provide —
- *     the meta-box "Pick…" button passes `{ post_id }` and `scope='post'`;
- *     the Rules table links pass `{ scope, post_type, language }`.
- *
- *   - `atlasvoice:steprail:closed` / `atlasvoice:steprail:saved` custom
- *     events let callers react without polling.
- *
- *   - On the front end, `?atlasvoice_iframe=1&_wpnonce=<rest nonce>` +
- *     `manage_options` gates activate pick mode. The nonce path prevents
- *     a logged-out visitor from ever seeing a picker bar even if they
- *     stumble onto a crafted URL.
+ * Dashboard convenience: plugin dashboard page has an "Open & Pick"
+ * button that navigates to a post URL with ?atlasvoice_picker=1, which
+ * auto-opens the left panel.
  */
 class StepRail {
 
-	/** Script / style handle shared by the inline shell bundle. */
-	const HANDLE = 'tta-atlasvoice-step-rail';
+	const HANDLE      = 'tta-atlasvoice-step-rail';
+	const AUTO_PARAM  = 'atlasvoice_picker';
 
-	/** Query var that flips the front end into iframe pick-mode. */
-	const IFRAME_FLAG = 'atlasvoice_iframe';
+	private static $registered   = false;
+	private static $front_active = false;
 
-	/** Per-request guard so multiple enqueue calls don't double-print. */
-	private static $shell_enqueued = false;
-
-	/** Per-request guard for iframe mode activation. */
-	private static $iframe_active = false;
-
-	/**
-	 * Wire admin enqueue + footer shell + front-end iframe detection.
-	 * Idempotent via Bootstrap::register()'s static flag.
-	 *
-	 * @return void
-	 */
 	public static function register() {
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_admin_assets' ), 15 );
-		add_action( 'admin_footer',          array( __CLASS__, 'render_shell' ),          50 );
+		// Front-end: show picker tabs on eligible singular posts.
+		add_action( 'template_redirect', array( __CLASS__, 'maybe_activate' ), 5 );
 
-		add_action( 'template_redirect',     array( __CLASS__, 'maybe_activate_iframe' ),   1 );
+		// Admin dashboard: "Open & Pick" convenience URL builder.
+		add_action( 'admin_footer', array( __CLASS__, 'maybe_render_dashboard_launcher' ), 99 );
 	}
 
-	// -----------------------------------------------------------------
-	// Admin-side: shell assets
-	// -----------------------------------------------------------------
+	// -----------------------------------------------------------------------
+	// Front-end activation
+	// -----------------------------------------------------------------------
+
+	public static function maybe_activate() {
+		if ( ! is_singular() ) { return; }
+		if ( ! current_user_can( 'manage_options' ) ) { return; }
+		if ( ! self::post_has_listening( get_the_ID() ) ) { return; }
+
+		// Gate on the AtlasVoice opt-in. When the extractor is OFF the step-rail
+		// has nothing to do — selectors saved here feed the new engine only.
+		$settings = class_exists( '\\TTA\\TTA_Helper' )
+			? \TTA\TTA_Helper::tts_get_settings( 'settings' )
+			: array();
+		if ( empty( $settings['tta__settings_use_atlasvoice_extractor'] ) ) { return; }
+
+		self::$front_active = true;
+
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ), 20 );
+		add_action( 'wp_footer',          array( __CLASS__, 'render_shell' ),   99 );
+	}
 
 	/**
-	 * Enqueue the inline shell CSS + JS on pages where the rail is
-	 * reachable. Same scope as PickerLoader::emit_stub so the two
-	 * stubs land together.
-	 *
-	 * @return void
+	 * Check whether listening is enabled for this post's post type.
+	 * Mirrors TTA_Helper::should_load_button() without the full helper dep.
 	 */
-	public static function enqueue_admin_assets() {
-		if ( self::$shell_enqueued ) { return; }
-		if ( ! self::should_load_admin() ) { return; }
-		self::$shell_enqueued = true;
+	protected static function post_has_listening( $post_id ) {
+		if ( ! $post_id ) { return false; }
+		if ( class_exists( '\\TTA\\TTA_Helper' ) ) {
+			return (bool) \TTA\TTA_Helper::should_load_button( $post_id );
+		}
+		// Fallback: trust that the post type is enabled.
+		return true;
+	}
 
-		// Inline-only handle — no external JS file yet. A dedicated
-		// webpack entry (`src/step-rail/`) can land in a future
-		// milestone without breaking this bootstrap.
+	public static function enqueue_assets() {
 		wp_register_script( self::HANDLE, '', array(), self::version(), true );
 		wp_register_style(  self::HANDLE, false, array(), self::version() );
-
 		wp_enqueue_script(  self::HANDLE );
 		wp_enqueue_style(   self::HANDLE );
-
 		wp_add_inline_style(  self::HANDLE, self::shell_css() );
-		wp_add_inline_script( self::HANDLE, self::shell_bootstrap_js(), 'after' );
+		wp_add_inline_script( self::HANDLE, self::shell_js(), 'after' );
 	}
 
-	/**
-	 * Render the (hidden) DOM shell once per admin page in the
-	 * admin_footer slot. The shell is inert until JS flips
-	 * `.is-open` on the outer container.
-	 *
-	 * @return void
-	 */
 	public static function render_shell() {
-		if ( ! self::should_load_admin() ) { return; }
+		if ( ! self::$front_active ) { return; }
 
-		// Namespace is `tts/v1` (see RestRoutes::NAMESPACE_PREFIX).
+		$post_id   = get_the_ID();
 		$rest_base = esc_url_raw( rest_url( RestRoutes::NAMESPACE_PREFIX ) );
 		$nonce     = wp_create_nonce( 'wp_rest' );
 		$pro       = ( class_exists( '\\TTA\\AtlasVoice\\PerPostRules' ) && PerPostRules::available() ) ? '1' : '0';
+		$auto_open = isset( $_GET[ self::AUTO_PARAM ] ) ? '1' : '0'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
+		$settings     = class_exists( '\\TTA\\TTA_Helper' ) ? \TTA\TTA_Helper::tts_get_settings( 'settings' ) : array();
+		$add_title    = ! empty( $settings['tta__settings_add_post_title_to_read'] )    ? '1' : '0';
+		$add_excerpt  = ! empty( $settings['tta__settings_add_post_excerpt_to_read'] )  ? '1' : '0';
+		$text_before  = isset( $settings['tta__settings_text_before_content'] ) ? (string) $settings['tta__settings_text_before_content'] : '';
+		$text_after   = isset( $settings['tta__settings_text_after_content'] )  ? (string) $settings['tta__settings_text_after_content']  : '';
+		$post_title   = $post_id ? get_the_title( $post_id ) : '';
+		$post_excerpt = '';
+		if ( $add_excerpt === '1' && $post_id ) {
+			// Mirrors helpers.php: strip excerpt filters to avoid memory exhaustion.
+			global $wp_filter;
+			$_backup = $wp_filter['get_the_excerpt'] ?? null;
+			remove_all_filters( 'get_the_excerpt' );
+			$post_excerpt = get_the_excerpt( $post_id );
+			if ( $_backup !== null ) { $wp_filter['get_the_excerpt'] = $_backup; }
+			$post_excerpt = wp_strip_all_tags( $post_excerpt );
+		}
+		// Resolve the sentence delimiter after language-plugin filters have run.
+		// Language plugins (WPML, Polylang, etc.) hook tts_sentence_delimiter to
+		// return a locale-appropriate separator (e.g. '。' for Japanese).
+		$delimiter = (string) apply_filters( 'tts_sentence_delimiter', '. ' );
 		?>
 		<div
-			id="atlasvoice-step-rail"
-			class="atlasvoice-step-rail"
+			id="av-steprail-root"
+			data-post-id="<?php echo esc_attr( $post_id ); ?>"
 			data-rest="<?php echo esc_attr( $rest_base ); ?>"
 			data-nonce="<?php echo esc_attr( $nonce ); ?>"
-			data-iframe-flag="<?php echo esc_attr( self::IFRAME_FLAG ); ?>"
 			data-pro="<?php echo esc_attr( $pro ); ?>"
-			role="dialog"
-			aria-modal="true"
+			data-auto-open="<?php echo esc_attr( $auto_open ); ?>"
+			data-add-title="<?php echo esc_attr( $add_title ); ?>"
+			data-add-excerpt="<?php echo esc_attr( $add_excerpt ); ?>"
+			data-text-before="<?php echo esc_attr( $text_before ); ?>"
+			data-text-after="<?php echo esc_attr( $text_after ); ?>"
+			data-post-title="<?php echo esc_attr( $post_title ); ?>"
+			data-post-excerpt="<?php echo esc_attr( $post_excerpt ); ?>"
+			data-delimiter="<?php echo esc_attr( $delimiter ); ?>"
 			aria-hidden="true"
-			aria-labelledby="atlasvoice-step-rail-title"
-			hidden
 		>
-			<div class="atlasvoice-step-rail__backdrop" data-close="1"></div>
-			<div class="atlasvoice-step-rail__panel" role="document">
-				<header class="atlasvoice-step-rail__header">
-					<h2 id="atlasvoice-step-rail-title">
-						<?php echo esc_html__( 'AtlasVoice — Pick content region', 'text-to-audio' ); ?>
-					</h2>
-					<button
-						type="button"
-						class="atlasvoice-step-rail__close"
-						data-close="1"
-						aria-label="<?php echo esc_attr__( 'Close step rail', 'text-to-audio' ); ?>"
-					>&times;</button>
-				</header>
+			<!-- LEFT: floating tab -->
+			<button
+				type="button"
+				class="av-tab av-tab--left"
+				aria-expanded="false"
+				aria-controls="av-rail-panel"
+				title="<?php echo esc_attr__( 'AtlasVoice — pick content region', 'text-to-audio' ); ?>"
+			><span><?php echo esc_html__( 'AtlasVoiceSelector', 'text-to-audio' ); ?></span></button>
 
-				<ol class="atlasvoice-step-rail__rows" aria-live="polite">
-					<li class="atlasvoice-step-rail__row is-active" data-row="scope">
-						<span class="atlasvoice-step-rail__bullet">&#9312;</span>
-						<div class="atlasvoice-step-rail__row-body">
+			<!-- LEFT: sliding step rail panel -->
+			<div id="av-rail-panel" class="av-rail-panel" role="dialog" aria-modal="false" aria-label="<?php echo esc_attr__( 'AtlasVoice content selector', 'text-to-audio' ); ?>" hidden>
+				<div class="av-rail-panel__header">
+					<span class="av-rail-panel__title"><?php echo esc_html__( 'Content Selector', 'text-to-audio' ); ?></span>
+					<button type="button" class="av-rail-panel__close" aria-label="<?php echo esc_attr__( 'Close', 'text-to-audio' ); ?>">&times;</button>
+				</div>
+
+				<div class="av-rail-panel__body">
+					<!-- Step ① Scope -->
+					<section class="av-step" data-step="scope">
+						<div class="av-step__head">
+							<span class="av-step__num">&#9312;</span>
 							<strong><?php echo esc_html__( 'Scope', 'text-to-audio' ); ?></strong>
-							<p class="atlasvoice-step-rail__hint">
-								<?php echo esc_html__( 'Which layer should this selector apply to? Higher rows beat lower rows.', 'text-to-audio' ); ?>
-							</p>
-							<div
-								class="atlasvoice-step-rail__scope-group"
-								role="radiogroup"
-								aria-label="<?php echo esc_attr__( 'Selector scope', 'text-to-audio' ); ?>"
-							></div>
 						</div>
-					</li>
-
-					<li class="atlasvoice-step-rail__row" data-row="target">
-						<span class="atlasvoice-step-rail__bullet">&#9313;</span>
-						<div class="atlasvoice-step-rail__row-body">
-							<strong><?php echo esc_html__( 'Post type &amp; language', 'text-to-audio' ); ?></strong>
-							<p class="atlasvoice-step-rail__hint">
-								<?php echo esc_html__( 'Used to locate a representative sample post for the region picker.', 'text-to-audio' ); ?>
-							</p>
-							<div class="atlasvoice-step-rail__target-fields"></div>
+						<div class="av-step__body">
+							<div class="av-scope-group" role="radiogroup"></div>
 						</div>
-					</li>
+					</section>
 
-					<li class="atlasvoice-step-rail__row" data-row="region">
-						<span class="atlasvoice-step-rail__bullet">&#9314;</span>
-						<div class="atlasvoice-step-rail__row-body">
+					<!-- Step ③ Content region (include) -->
+					<section class="av-step" data-step="region">
+						<div class="av-step__head">
+							<span class="av-step__num">&#9313;</span>
 							<strong><?php echo esc_html__( 'Content region', 'text-to-audio' ); ?></strong>
-							<p class="atlasvoice-step-rail__hint">
-								<?php echo esc_html__( 'Click any element in the preview to learn a stable selector for it.', 'text-to-audio' ); ?>
-							</p>
-							<div class="atlasvoice-step-rail__mode-toggle">
-								<label><input type="radio" name="av-pick-mode" value="pick" checked /> <?php echo esc_html__( 'Pick content', 'text-to-audio' ); ?></label>
-								<label><input type="radio" name="av-pick-mode" value="reject" /> <?php echo esc_html__( 'Reject (add to CSS excludes)', 'text-to-audio' ); ?></label>
-								<span class="atlasvoice-step-rail__mode-hint"><?php echo esc_html__( 'Tip: Alt-click in the preview to reject without flipping modes.', 'text-to-audio' ); ?></span>
+						</div>
+						<div class="av-step__body">
+							<p class="av-hint"><?php echo esc_html__( 'Click any element on the page to set its selector. Click again to deselect.', 'text-to-audio' ); ?></p>
+							<div class="av-region-actions">
+								<button type="button" class="av-btn av-btn--pick" data-state="idle">
+									&#11040; <?php echo esc_html__( 'Pick element', 'text-to-audio' ); ?>
+								</button>
+								<span class="av-word-count" hidden></span>
 							</div>
-							<div class="atlasvoice-step-rail__iframe-wrap">
-								<iframe
-									class="atlasvoice-step-rail__iframe"
-									title="<?php echo esc_attr__( 'Sample post sandbox', 'text-to-audio' ); ?>"
-									sandbox="allow-scripts allow-same-origin allow-forms"
-								></iframe>
-								<div class="atlasvoice-step-rail__iframe-empty">
-									<?php echo esc_html__( 'Pick a scope and target above, then the sandbox loads a sample post.', 'text-to-audio' ); ?>
-								</div>
-								<div class="atlasvoice-step-rail__picked">
-									<label>
-										<?php echo esc_html__( 'Selector', 'text-to-audio' ); ?>
-										<input type="text" class="atlasvoice-step-rail__selector-input" />
-									</label>
-									<!-- D11 — word-count badge + diff action -->
-									<div class="atlasvoice-step-rail__d11-actions">
-										<span
-											class="atlasvoice-step-rail__word-count"
-											aria-live="polite"
-											hidden
-										></span>
-										<button
-											type="button"
-											class="button atlasvoice-step-rail__diff"
-											title="<?php echo esc_attr__( 'Compare extracted text from new selector vs. legacy extraction.', 'text-to-audio' ); ?>"
-										>&#128220; <?php echo esc_html__( 'Diff preview', 'text-to-audio' ); ?></button>
-									</div>
-								</div>
+							<div class="av-selector-display" hidden>
+								<input type="text" class="av-selector-value av-selector-input" placeholder="<?php echo esc_attr__( 'e.g. div.entry-content', 'text-to-audio' ); ?>" />
+								<button type="button" class="av-btn av-btn--clear-selector" title="<?php echo esc_attr__( 'Clear selector', 'text-to-audio' ); ?>">&times;</button>
 							</div>
 						</div>
-					</li>
+					</section>
 
-					<li class="atlasvoice-step-rail__row atlasvoice-step-rail__row--chips" data-row="excl_css" data-chip-kind="excl_css">
-						<span class="atlasvoice-step-rail__bullet">&#9315;</span>
-						<div class="atlasvoice-step-rail__row-body">
-							<strong><?php echo esc_html__( 'CSS excludes', 'text-to-audio' ); ?></strong>
-							<p class="atlasvoice-step-rail__hint">
-								<?php echo esc_html__( 'Elements matching these selectors are stripped before reading (e.g. .related-posts, nav.share).', 'text-to-audio' ); ?>
-							</p>
-							<div class="atlasvoice-step-rail__chips" role="list"></div>
-							<form class="atlasvoice-step-rail__chip-add">
-								<input type="text" placeholder="<?php echo esc_attr__( 'Add CSS selector…', 'text-to-audio' ); ?>" />
-								<button type="submit" class="button"><?php echo esc_html__( 'Add', 'text-to-audio' ); ?></button>
-							</form>
+					<!-- Step ④ Skip areas (CSS excludes) — Pro -->
+					<section class="av-step av-step--chips" data-step="excl_css" data-chip-kind="excl_css">
+						<div class="av-step__head">
+							<span class="av-step__num">&#9314;</span>
+							<strong><?php echo esc_html__( 'Skip these areas', 'text-to-audio' ); ?></strong>
+							<span class="av-pro-pill" hidden>Pro</span>
 						</div>
-					</li>
-
-					<li class="atlasvoice-step-rail__row atlasvoice-step-rail__row--chips" data-row="excl_texts" data-chip-kind="excl_texts">
-						<span class="atlasvoice-step-rail__bullet">&#9316;</span>
-						<div class="atlasvoice-step-rail__row-body">
-							<strong><?php echo esc_html__( 'Text excludes', 'text-to-audio' ); ?></strong>
-							<p class="atlasvoice-step-rail__hint">
-								<?php echo esc_html__( 'Any paragraph containing one of these substrings is skipped (e.g. "Share this article", "Read more").', 'text-to-audio' ); ?>
-							</p>
-							<div class="atlasvoice-step-rail__chips" role="list"></div>
-							<form class="atlasvoice-step-rail__chip-add">
-								<input type="text" placeholder="<?php echo esc_attr__( 'Add text substring…', 'text-to-audio' ); ?>" />
-								<button type="submit" class="button"><?php echo esc_html__( 'Add', 'text-to-audio' ); ?></button>
-							</form>
+						<div class="av-step__body">
+							<p class="av-hint"><?php echo esc_html__( 'Elements matching these selectors are removed before reading (e.g. .sidebar, .share-bar).', 'text-to-audio' ); ?></p>
+							<div class="av-chips" role="list"></div>
+							<div class="av-chip-add">
+								<button type="button" class="av-btn av-btn--pick-excl" data-kind="excl_css">
+									&#11040; <?php echo esc_html__( 'Pick to exclude', 'text-to-audio' ); ?>
+								</button>
+								<span class="av-chip-sep"><?php echo esc_html__( 'or', 'text-to-audio' ); ?></span>
+								<input type="text" class="av-chip-input" placeholder="<?php echo esc_attr__( 'Type selector…', 'text-to-audio' ); ?>" />
+								<button type="button" class="av-btn av-btn--add-chip"><?php echo esc_html__( 'Add', 'text-to-audio' ); ?></button>
+							</div>
 						</div>
-					</li>
+					</section>
 
-					<li class="atlasvoice-step-rail__row atlasvoice-step-rail__row--chips" data-row="excl_tags" data-chip-kind="excl_tags">
-						<span class="atlasvoice-step-rail__bullet">&#9317;</span>
-						<div class="atlasvoice-step-rail__row-body">
-							<strong><?php echo esc_html__( 'Tag excludes', 'text-to-audio' ); ?></strong>
-							<p class="atlasvoice-step-rail__hint">
-								<?php echo esc_html__( 'Any element with this tag name is skipped (e.g. aside, footer, form).', 'text-to-audio' ); ?>
-							</p>
-							<div class="atlasvoice-step-rail__chips" role="list"></div>
-							<form class="atlasvoice-step-rail__chip-add">
-								<input type="text" placeholder="<?php echo esc_attr__( 'Add tag name…', 'text-to-audio' ); ?>" />
-								<button type="submit" class="button"><?php echo esc_html__( 'Add', 'text-to-audio' ); ?></button>
-							</form>
+					<!-- Step ⑤ Skip tags — Pro -->
+					<section class="av-step av-step--chips" data-step="excl_tags" data-chip-kind="excl_tags">
+						<div class="av-step__head">
+							<span class="av-step__num">&#9315;</span>
+							<strong><?php echo esc_html__( 'Skip these tag types', 'text-to-audio' ); ?></strong>
+							<span class="av-pro-pill" hidden>Pro</span>
 						</div>
-					</li>
-				</ol>
+						<div class="av-step__body">
+							<p class="av-hint"><?php echo esc_html__( 'Elements with these tag names are skipped (e.g. aside, figure, blockquote).', 'text-to-audio' ); ?></p>
+							<div class="av-tags-checkboxes"><?php echo self::render_common_tag_checkboxes(); ?></div>
+							<div class="av-chips" role="list"></div>
+							<div class="av-chip-add">
+								<input type="text" class="av-chip-input" placeholder="<?php echo esc_attr__( 'Tag name (e.g. aside)…', 'text-to-audio' ); ?>" />
+								<button type="button" class="av-btn av-btn--add-chip"><?php echo esc_html__( 'Add', 'text-to-audio' ); ?></button>
+							</div>
+						</div>
+					</section>
 
-				<footer class="atlasvoice-step-rail__footer">
-					<span class="atlasvoice-step-rail__status" aria-live="polite"></span>
-					<span class="atlasvoice-step-rail__spacer"></span>
-					<button type="button" class="button atlasvoice-step-rail__cancel" data-close="1">
-						<?php echo esc_html__( 'Cancel', 'text-to-audio' ); ?>
+					<!-- Step ⑥ Skip phrases — Pro -->
+					<section class="av-step av-step--chips" data-step="excl_texts" data-chip-kind="excl_texts">
+						<div class="av-step__head">
+							<span class="av-step__num">&#9316;</span>
+							<strong><?php echo esc_html__( 'Skip these phrases', 'text-to-audio' ); ?></strong>
+							<span class="av-pro-pill" hidden>Pro</span>
+						</div>
+						<div class="av-step__body">
+							<p class="av-hint"><?php echo esc_html__( 'Exact phrases stripped from the extracted text wherever they appear (e.g. "Share this", "Read more").', 'text-to-audio' ); ?></p>
+							<div class="av-chips" role="list"></div>
+							<div class="av-chip-add">
+								<input type="text" class="av-chip-input" placeholder="<?php echo esc_attr__( 'Add phrase…', 'text-to-audio' ); ?>" />
+								<button type="button" class="av-btn av-btn--add-chip"><?php echo esc_html__( 'Add', 'text-to-audio' ); ?></button>
+							</div>
+						</div>
+					</section>
+				</div><!-- /.av-rail-panel__body -->
+
+				<div class="av-rail-panel__footer">
+					<span class="av-status" aria-live="polite"></span>
+					<button type="button" class="av-btn av-btn--save" disabled>
+						<?php echo esc_html__( 'Save', 'text-to-audio' ); ?>
 					</button>
-					<button
-						type="button"
-						class="button button-primary atlasvoice-step-rail__save"
-						disabled
-					>
-						<?php echo esc_html__( 'Save selector', 'text-to-audio' ); ?>
-					</button>
-				</footer>
-			</div>
-		</div>
+				</div>
+				<div class="av-resize-handle av-resize-handle--edge"></div>
+			</div><!-- /#av-rail-panel -->
+
+			<!-- RIGHT: floating tab -->
+			<button
+				type="button"
+				class="av-tab av-tab--right"
+				aria-expanded="false"
+				aria-controls="av-preview-panel"
+				title="<?php echo esc_attr__( 'Preview extracted TTS content', 'text-to-audio' ); ?>"
+			><span><?php echo esc_html__( 'Preview Content', 'text-to-audio' ); ?></span></button>
+
+			<!-- RIGHT: draggable preview overlay -->
+			<div id="av-preview-panel" class="av-preview-panel" hidden>
+				<div class="av-preview-panel__handle" title="<?php echo esc_attr__( 'Drag to move', 'text-to-audio' ); ?>">
+					<span class="av-preview-panel__title"><?php echo esc_html__( 'Content Preview', 'text-to-audio' ); ?></span>
+					<span class="av-preview-panel__meta"></span>
+					<button type="button" class="av-preview-panel__close" aria-label="<?php echo esc_attr__( 'Close preview', 'text-to-audio' ); ?>">&times;</button>
+				</div>
+				<div class="av-preview-panel__body">
+					<p class="av-preview-panel__empty"><?php echo esc_html__( 'Pick a content region first — the extracted text will appear here.', 'text-to-audio' ); ?></p>
+				</div>
+				<div class="av-resize-handle av-resize-handle--left-edge"></div>
+				<div class="av-resize-handle av-resize-handle--bottom"></div>
+			</div><!-- /#av-preview-panel -->
+		</div><!-- /#av-steprail-root -->
 		<?php
 	}
 
-	/**
-	 * Inline CSS for the shell. Scoped under `.atlasvoice-step-rail`
-	 * so it can't leak into admin screens that don't open the rail.
-	 *
-	 * @return string
-	 */
-	protected static function shell_css() {
-		return '
-			.atlasvoice-step-rail[hidden]{display:none!important;}
-			.atlasvoice-step-rail{position:fixed;inset:0;z-index:100050;}
-			.atlasvoice-step-rail__backdrop{position:absolute;inset:0;background:rgba(15,23,42,0.55);}
-			.atlasvoice-step-rail__panel{position:absolute;inset:4vh 4vw;background:#fff;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,0.35);display:flex;flex-direction:column;overflow:hidden;}
-			.atlasvoice-step-rail__header{padding:14px 20px;background:#184c53;color:#fff;display:flex;align-items:center;justify-content:space-between;}
-			.atlasvoice-step-rail__header h2{margin:0;color:#fff;font-size:16px;line-height:1.3;}
-			.atlasvoice-step-rail__close{background:transparent;color:#fff;border:0;font-size:22px;line-height:1;cursor:pointer;padding:4px 10px;}
-			.atlasvoice-step-rail__rows{list-style:none;margin:0;padding:16px 20px;overflow:auto;flex:1;}
-			.atlasvoice-step-rail__row{display:flex;gap:14px;padding:14px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;margin-bottom:12px;transition:box-shadow 0.15s;}
-			.atlasvoice-step-rail__row.is-active{background:#fff;border-color:#184c53;box-shadow:0 2px 8px rgba(24,76,83,0.08);}
-			.atlasvoice-step-rail__row.is-done{background:#f0f7ed;border-color:#00a32a;}
-			.atlasvoice-step-rail__row.is-disabled{opacity:0.55;}
-			.atlasvoice-step-rail__bullet{font-size:20px;line-height:1;width:26px;text-align:center;color:#184c53;flex:none;}
-			.atlasvoice-step-rail__row.is-done .atlasvoice-step-rail__bullet{color:#00a32a;}
-			.atlasvoice-step-rail__row-body{flex:1;min-width:0;}
-			.atlasvoice-step-rail__row-body strong{display:block;margin-bottom:2px;}
-			.atlasvoice-step-rail__hint{margin:0 0 8px;color:#4b5563;font-size:12px;}
-			.atlasvoice-step-rail__scope-group{display:flex;flex-wrap:wrap;gap:8px;}
-			.atlasvoice-step-rail__scope-group label{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid #d1d5db;border-radius:999px;background:#fff;cursor:pointer;font-size:13px;}
-			.atlasvoice-step-rail__scope-group label.is-checked{border-color:#184c53;background:#eaf3f4;}
-			.atlasvoice-step-rail__target-fields{display:flex;flex-wrap:wrap;gap:12px;}
-			.atlasvoice-step-rail__target-fields label{display:flex;flex-direction:column;font-size:12px;color:#4b5563;gap:4px;}
-			.atlasvoice-step-rail__target-fields select{min-width:180px;}
-			.atlasvoice-step-rail__iframe-wrap{position:relative;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;background:#f3f4f6;min-height:260px;}
-			.atlasvoice-step-rail__iframe{display:none;width:100%;height:52vh;border:0;background:#fff;}
-			.atlasvoice-step-rail__iframe-wrap.is-live .atlasvoice-step-rail__iframe{display:block;}
-			.atlasvoice-step-rail__iframe-wrap.is-live .atlasvoice-step-rail__iframe-empty{display:none;}
-			.atlasvoice-step-rail__iframe-empty{padding:48px 24px;text-align:center;color:#6b7280;font-size:13px;}
-			.atlasvoice-step-rail__picked{padding:10px 12px;background:#fff;border-top:1px solid #e5e7eb;}
-			.atlasvoice-step-rail__picked label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#374151;}
-			.atlasvoice-step-rail__selector-input{width:100%;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;}
-			.atlasvoice-step-rail__footer{padding:12px 20px;background:#f9fafb;border-top:1px solid #e5e7eb;display:flex;align-items:center;gap:10px;}
-			.atlasvoice-step-rail__status{flex:1;font-size:12px;color:#4b5563;}
-			.atlasvoice-step-rail__spacer{flex:1;}
-			.atlasvoice-step-rail__mode-toggle{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:6px 0 10px;font-size:12px;color:#374151;}
-			.atlasvoice-step-rail__mode-toggle label{display:inline-flex;align-items:center;gap:4px;}
-			.atlasvoice-step-rail__mode-hint{color:#6b7280;font-style:italic;margin-left:auto;}
-			.atlasvoice-step-rail__iframe-wrap.is-reject-mode{outline:2px dashed #b91c1c;outline-offset:-2px;}
-			.atlasvoice-step-rail__row--chips.is-locked{opacity:0.6;pointer-events:none;}
-			.atlasvoice-step-rail__chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;min-height:22px;}
-			.atlasvoice-step-rail__chip{display:inline-flex;align-items:center;gap:4px;padding:3px 4px 3px 10px;border-radius:999px;background:#eef2ff;border:1px solid #c7d2fe;font-size:12px;color:#312e81;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
-			.atlasvoice-step-rail__row[data-chip-kind="excl_texts"] .atlasvoice-step-rail__chip{background:#fef3c7;border-color:#fde68a;color:#78350f;font-family:inherit;}
-			.atlasvoice-step-rail__row[data-chip-kind="excl_tags"]  .atlasvoice-step-rail__chip{background:#ecfdf5;border-color:#a7f3d0;color:#065f46;}
-			.atlasvoice-step-rail__chip button{background:transparent;border:0;cursor:pointer;color:inherit;font-size:14px;line-height:1;padding:0 4px;}
-			.atlasvoice-step-rail__chip button:hover{color:#b91c1c;}
-			.atlasvoice-step-rail__chip-add{display:flex;gap:6px;margin-top:4px;}
-			.atlasvoice-step-rail__chip-add input{flex:1;font-family:inherit;font-size:13px;}
-			.atlasvoice-step-rail__undo-hint{font-size:11px;color:#6b7280;padding-left:10px;}
-			.atlasvoice-step-rail__d11-actions{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
-			.atlasvoice-step-rail__word-count{font-size:12px;color:#6b7280;font-style:italic;flex:1;}
-			.atlasvoice-step-rail__diff{font-size:12px!important;padding:4px 10px!important;height:auto!important;}
-			.atlasvoice-step-rail__pro-pill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:#7c3aed;color:#fff;border-radius:3px;padding:1px 6px;vertical-align:middle;line-height:1.6;}
-		';
-	}
+	// -----------------------------------------------------------------------
+	// Common tag checkboxes for excl_tags step
+	// -----------------------------------------------------------------------
 
-	/**
-	 * Inline JS bootstrap. Exposes `window.AtlasVoiceStepRail` with
-	 * `open / close` + event names. Intentionally framework-free so
-	 * the rail works in both the React dashboard and the classic
-	 * post-edit meta box.
-	 *
-	 * @return string
-	 */
-	protected static function shell_bootstrap_js() {
-		return file_get_contents( self::shell_js_path() );
-	}
-
-	/**
-	 * Absolute filesystem path to the shell JS template. Split into a
-	 * file so Git diffs stay readable and we don't have to escape
-	 * every brace in a PHP heredoc.
-	 *
-	 * @return string
-	 */
-	protected static function shell_js_path() {
-		if ( defined( 'TTA_PLUGIN_PATH' ) ) {
-			return TTA_PLUGIN_PATH . 'includes/atlasvoice/step-rail.shell.js';
+	protected static function render_common_tag_checkboxes() {
+		$tags = array( 'aside', 'figure', 'blockquote', 'pre', 'code', 'table', 'form', 'nav', 'footer', 'header' );
+		$out  = '';
+		foreach ( $tags as $tag ) {
+			$id   = 'av-tag-' . $tag;
+			$out .= '<label class="av-tag-check" for="' . esc_attr( $id ) . '">'
+				. '<input type="checkbox" id="' . esc_attr( $id ) . '" value="' . esc_attr( $tag ) . '" checked />'
+				. ' <code>' . esc_html( $tag ) . '</code></label>';
 		}
-		return dirname( __FILE__ ) . '/step-rail.shell.js';
+		return $out;
 	}
 
-	// -----------------------------------------------------------------
-	// Front-end: iframe pick-mode
-	// -----------------------------------------------------------------
+	// -----------------------------------------------------------------------
+	// Admin dashboard launcher
+	// -----------------------------------------------------------------------
 
-	/**
-	 * When `?atlasvoice_iframe=1` is on the URL AND the caller has a
-	 * valid admin nonce AND they can `manage_options`, flip the front
-	 * end into pick mode: hide admin bar, preload extractor + picker,
-	 * emit the postMessage bridge + pick banner.
-	 *
-	 * The three-gate guard (flag + cap + nonce) means a hostile link
-	 * can't put a logged-out visitor into pick mode, and it can't
-	 * even put a lower-privilege user (author/editor) into pick mode
-	 * since the rail is a `manage_options` tool.
-	 *
-	 * @return void
-	 */
-	public static function maybe_activate_iframe() {
-		if ( empty( $_GET[ self::IFRAME_FLAG ] ) ) { return; } // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( ! is_singular() ) { return; }
-		if ( ! current_user_can( 'manage_options' ) ) { return; }
-
-		$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
-		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) { return; }
-
-		self::$iframe_active = true;
-		show_admin_bar( false );
-
-		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'iframe_enqueue' ), 5 );
-		add_action( 'wp_head',            array( __CLASS__, 'iframe_style' ),   1 );
-		add_action( 'wp_footer',          array( __CLASS__, 'iframe_footer' ), 99 );
-	}
-
-	/**
-	 * Force-register extractor + picker so `ttsLoadPicker()` can pull
-	 * the bundle. On the front-end the PickerLoader's `emit_stub` is
-	 * gated on `is_singular()` + opt-in, so the iframe-mode gate
-	 * guarantees the stub is already present when this runs.
-	 *
-	 * @return void
-	 */
-	public static function iframe_enqueue() {
-		// Nothing to do here right now — PickerLoader already emits
-		// the lazy stub on singular views. Method kept so future
-		// eager preload (e.g. `<link rel="preload">`) slots in here.
-	}
-
-	/**
-	 * Emit iframe-specific CSS: pull the theme chrome tight against
-	 * the viewport so the sandbox doesn't waste vertical space on
-	 * sticky headers / cookie banners that visitors see but admins
-	 * don't need while picking.
-	 *
-	 * @return void
-	 */
-	public static function iframe_style() {
-		if ( ! self::$iframe_active ) { return; }
+	public static function maybe_render_dashboard_launcher() {
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || strpos( (string) $screen->id, 'text-to-audio' ) === false ) { return; }
 		?>
-		<style id="atlasvoice-iframe-mode">
-			html, body { background:#fff !important; }
-			#wpadminbar { display:none !important; }
-			html { margin-top:0 !important; }
-			body { padding-top:40px !important; }
-			.atlasvoice-iframe-banner {
-				position:fixed; top:0; left:0; right:0; z-index:2147483646;
-				height:40px; background:#184c53; color:#fff;
-				display:flex; align-items:center; padding:0 14px;
-				font:600 13px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-				box-shadow:0 2px 6px rgba(0,0,0,.15);
-			}
-			.atlasvoice-iframe-banner .av-dot{
-				width:8px; height:8px; border-radius:50%;
-				background:#facc15; margin-right:8px; flex:none;
-				animation:av-pulse 1.4s infinite;
-			}
-			@keyframes av-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-		</style>
-		<?php
-	}
-
-	/**
-	 * Emit the iframe-mode footer glue: the pick banner + the
-	 * postMessage bridge. The bridge translates parent commands
-	 * (`pick:start`, `pick:cancel`) into picker API calls and
-	 * relays the picker's selector result back to the parent.
-	 *
-	 * @return void
-	 */
-	public static function iframe_footer() {
-		if ( ! self::$iframe_active ) { return; }
-		$origin = esc_js( self::expected_parent_origin() );
-		?>
-		<div class="atlasvoice-iframe-banner" role="status">
-			<span class="av-dot" aria-hidden="true"></span>
-			<span><?php echo esc_html__( 'AtlasVoice pick mode — click an element in the page to learn its selector.', 'text-to-audio' ); ?></span>
+		<div id="av-dashboard-launcher" style="display:none;">
+			<input type="url" id="av-launcher-url" placeholder="<?php echo esc_attr__( 'Paste post URL to open picker…', 'text-to-audio' ); ?>" style="width:320px;" />
+			<button type="button" id="av-launcher-go" class="button button-primary"><?php echo esc_html__( 'Open &amp; Pick', 'text-to-audio' ); ?></button>
 		</div>
 		<script>
-		(function(w,d){
-			var PARENT_ORIGIN = '<?php echo $origin; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>';
-			function send(type, payload){
-				try { w.parent.postMessage({ source:'atlasvoice-iframe', type:type, payload:payload||{} }, PARENT_ORIGIN || '*'); } catch(e){}
-			}
-
-			// D10 — Alt-click shortcut. Skips the picker API entirely
-			// and sends a reject-flavoured selector straight to the
-			// parent, so power users can build their exclude list
-			// without flipping the pick/reject radio every time.
-			// Walks up the DOM one level if the target is a text
-			// node to keep selectors stable.
-			function altClickSelector(target){
-				if (!target) { return ''; }
-				if (target.nodeType && target.nodeType !== 1) { target = target.parentElement; }
-				if (!target) { return ''; }
-				var pickApi = w.AtlasVoiceSelector;
-				if (pickApi && typeof pickApi.computeStableSelector === 'function') {
-					try { return pickApi.computeStableSelector(target) || ''; } catch(e) {}
-				}
-				// Framework-free fallback if the picker bundle never
-				// exposed computeStableSelector (shouldn't happen
-				// post-D8 but keep us useful if it does).
-				if (target.id) { return '#' + target.id; }
-				var parts = [];
-				var el = target;
-				while (el && el.nodeType === 1 && parts.length < 4) {
-					var tag = el.tagName.toLowerCase();
-					if (el.className && typeof el.className === 'string') {
-						tag += '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.');
-					}
-					parts.unshift(tag);
-					el = el.parentElement;
-				}
-				return parts.join(' > ');
-			}
-			d.addEventListener('click', function(e){
-				if (!e.altKey) { return; }
-				var altSel = altClickSelector(e.target);
-				if (!altSel) { return; }
-				e.preventDefault();
-				e.stopPropagation();
-				send('pick:reject', { selector: altSel });
-			}, true);
-
-			function booted(api){
-				send('ready', { hasApi: !!api });
-				w.addEventListener('message', function(e){
-					if (PARENT_ORIGIN && e.origin !== PARENT_ORIGIN) { return; }
-					var m = e.data || {};
-					if (!m || m.source !== 'atlasvoice-parent') { return; }
-					if (m.type === 'pick:start' && api && api.start) {
-						api.start(function(result){
-							send('pick:selected', result || {});
-						});
-					}
-					if (m.type === 'pick:cancel' && api && api.stop) {
-						api.stop();
-					}
-					// D11 — diff preview: open the picker's built-in diff modal.
-					if (m.type === 'diff:open' && api && api.openDiffPreview) {
-						api.openDiffPreview();
-					}
-					// D11 — word-count probe: parent requests element + word count
-					// for the badge shown in the region row.
-					if (m.type === 'count:request') {
-						var cSel = (m.payload && m.payload.selector) ? m.payload.selector : '';
-						var cEl  = cSel ? d.querySelector(cSel) : null;
-						var cTxt = cEl ? (cEl.innerText || cEl.textContent || '').trim().replace(/\s+/g, ' ') : '';
-						var cWords = cTxt ? cTxt.split(' ').length : 0;
-						var cChars = cTxt.length;
-						send('count:result', { selector: cSel, words: cWords, chars: cChars });
-					}
-				});
-			}
-			function boot(){
-				if (typeof w.ttsLoadPicker !== 'function') { send('error', { code:'picker-stub-missing' }); return; }
-				w.ttsLoadPicker().then(booted).catch(function(err){ send('error', { code:'picker-load-failed', message:String(err) }); });
-			}
-			if (d.readyState === 'loading') { d.addEventListener('DOMContentLoaded', boot); }
-			else { boot(); }
-		})(window, document);
+		(function(){
+			var wrap = document.getElementById('av-dashboard-launcher');
+			var inp  = document.getElementById('av-launcher-url');
+			var btn  = document.getElementById('av-launcher-go');
+			if (!wrap || !btn) { return; }
+			// Expose so dashboard React can mount it in the right slot.
+			window.avLauncherEl = wrap;
+			btn.addEventListener('click', function(){
+				var url = (inp.value || '').trim();
+				if (!url) { return; }
+				var sep = url.indexOf('?') >= 0 ? '&' : '?';
+				window.open(url + sep + '<?php echo esc_js( self::AUTO_PARAM ); ?>=1', '_blank');
+			});
+		})();
 		</script>
 		<?php
 	}
 
-	// -----------------------------------------------------------------
-	// Helpers
-	// -----------------------------------------------------------------
+	// -----------------------------------------------------------------------
+	// Inline JS
+	// -----------------------------------------------------------------------
 
-	/**
-	 * Deciding whether to load the admin shell. Mirrors
-	 * PickerLoader::emit_on_admin so the two boot together.
-	 *
-	 * @return bool
-	 */
-	protected static function should_load_admin() {
-		if ( wp_doing_ajax() ) { return false; }
-		if ( defined( 'DOING_CRON' ) && DOING_CRON ) { return false; }
-		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) { return false; }
-		if ( ! function_exists( 'get_current_screen' ) ) { return false; }
-		$screen = get_current_screen();
-		if ( ! $screen instanceof \WP_Screen ) { return false; }
-		if ( $screen->base === 'post' ) { return true; }
-		if ( strpos( (string) $screen->id, 'text-to-audio' ) !== false ) { return true; }
-		return false;
+	protected static function shell_js() {
+		$path = defined( 'TTA_PLUGIN_PATH' )
+			? TTA_PLUGIN_PATH . 'includes/atlasvoice/step-rail.shell.js'
+			: dirname( __FILE__ ) . '/step-rail.shell.js';
+		return file_exists( $path ) ? file_get_contents( $path ) : '/* step-rail.shell.js not found */';
 	}
 
-	/**
-	 * Version string for cache-busting the inline bundles.
-	 *
-	 * @return string
-	 */
+	// -----------------------------------------------------------------------
+	// CSS
+	// -----------------------------------------------------------------------
+
+	protected static function shell_css() {
+		return '
+/* AtlasVoice Step Rail — front-end floating UI */
+#av-steprail-root *{box-sizing:border-box;}
+
+/* ── Floating tabs ─────────────────────────────────────────── */
+.av-tab{
+  position:fixed;top:50%;transform:translateY(-50%);
+  z-index:2147483640;
+  display:flex;align-items:center;justify-content:center;
+  writing-mode:vertical-lr;text-orientation:mixed;
+  padding:14px 8px;
+  background:#184c53;color:#fff;
+  border:0;border-radius:0;
+  font:600 12px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  cursor:pointer;letter-spacing:.06em;
+  transition:background .15s,box-shadow .15s;
+  box-shadow:0 2px 12px rgba(0,0,0,.25);
+}
+.av-tab:hover{background:#1d6370;}
+.av-tab--left{
+  left:0;
+  border-radius:0 6px 6px 0;
+  transform:translateY(-50%);
+}
+.av-tab--right{
+  right:0;
+  border-radius:6px 0 0 6px;
+  writing-mode:vertical-rl;
+}
+.av-tab[aria-expanded="true"]{background:#0d3038;}
+
+/* ── Left sliding panel ─────────────────────────────────────── */
+.av-rail-panel{
+  position:fixed;left:0;top:0;height:100vh;width:300px;
+  z-index:2147483641;
+  background:#fff;
+  box-shadow:4px 0 24px rgba(0,0,0,.18);
+  display:flex;flex-direction:column;
+  transform:translateX(-100%);
+  transition:transform .25s cubic-bezier(.4,0,.2,1);
+  overflow:hidden;
+}
+.av-rail-panel:not([hidden]){transform:translateX(0);}
+.av-rail-panel[hidden]{display:flex!important;transform:translateX(-100%);}
+
+.av-rail-panel__header{
+  padding:12px 14px;
+  background:#184c53;color:#fff;
+  display:flex;align-items:center;justify-content:space-between;
+  flex:none;
+}
+.av-rail-panel__title{font:600 14px/1.3 inherit;}
+.av-rail-panel__close{
+  background:transparent;border:0;color:#fff;font-size:20px;
+  line-height:1;cursor:pointer;padding:2px 8px;
+}
+
+.av-rail-panel__body{
+  flex:1;overflow-y:auto;padding:12px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.av-rail-panel__footer{
+  padding:10px 12px;
+  border-top:1px solid #e5e7eb;
+  background:#f9fafb;
+  display:flex;align-items:center;gap:8px;flex:none;
+}
+
+/* ── Steps ──────────────────────────────────────────────────── */
+.av-step{
+  border:1px solid #e5e7eb;border-radius:8px;
+  background:#f9fafb;padding:10px 12px;
+}
+.av-step.is-active{background:#fff;border-color:#184c53;box-shadow:0 2px 8px rgba(24,76,83,.08);}
+.av-step.is-done{background:#f0f7ed;border-color:#00a32a;}
+.av-step.is-locked{opacity:.6;pointer-events:none;}
+.av-step__head{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.av-step__num{font-size:18px;color:#184c53;line-height:1;}
+.av-step.is-done .av-step__num{color:#00a32a;}
+.av-step__head strong{flex:1;font-size:13px;}
+.av-hint{margin:0 0 8px;font-size:12px;color:#6b7280;}
+.av-status{flex:1;font-size:12px;color:#4b5563;}
+
+/* ── Scope pills ─────────────────────────────────────────────── */
+.av-scope-group{display:flex;flex-wrap:wrap;gap:6px;}
+.av-scope-group label{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 10px;border:1px solid #d1d5db;border-radius:999px;
+  background:#fff;cursor:pointer;font-size:12px;
+}
+.av-scope-group label.is-checked{border-color:#184c53;background:#eaf3f4;}
+.av-scope-group label.is-disabled{opacity:.45;cursor:not-allowed;}
+
+/* ── Region ──────────────────────────────────────────────────── */
+.av-region-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+.av-word-count{font-size:11px;color:#6b7280;font-style:italic;}
+.av-selector-display{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 10px;background:#f3f4f6;border-radius:6px;font-size:12px;
+}
+.av-selector-value{flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all;}
+.av-selector-input{border:0;background:transparent;outline:none;min-width:0;padding:0;font-size:12px;color:inherit;width:100%;}
+.av-selector-input:focus{outline:1px dashed #184c53;border-radius:2px;}
+.av-btn--clear-selector{background:transparent;border:0;cursor:pointer;color:#6b7280;font-size:16px;padding:0 4px;flex-shrink:0;}
+.av-btn--clear-selector:hover{color:#b91c1c;}
+
+/* ── Chips ──────────────────────────────────────────────────── */
+.av-chips{display:flex;flex-wrap:wrap;gap:5px;margin:5px 0;min-height:18px;}
+.av-chip{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:2px 4px 2px 8px;border-radius:999px;font-size:11px;
+  background:#eef2ff;border:1px solid #c7d2fe;color:#312e81;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+[data-chip-kind="excl_texts"] .av-chip{background:#fef3c7;border-color:#fde68a;color:#78350f;font-family:inherit;}
+[data-chip-kind="excl_tags"]  .av-chip{background:#ecfdf5;border-color:#a7f3d0;color:#065f46;}
+.av-chip button{background:transparent;border:0;cursor:pointer;color:inherit;font-size:13px;padding:0 3px;line-height:1;}
+.av-chip button:hover{color:#b91c1c;}
+.av-chip-add{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;}
+.av-chip-add .av-chip-input{flex:1;min-width:80px;font-size:12px;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;}
+.av-chip-sep{font-size:11px;color:#9ca3af;}
+
+/* ── Tag checkboxes ─────────────────────────────────────────── */
+.av-tags-checkboxes{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;}
+.av-tag-check{display:inline-flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;}
+.av-tag-check code{font-size:11px;background:#f3f4f6;padding:1px 4px;border-radius:3px;}
+
+/* ── Pro pill ───────────────────────────────────────────────── */
+.av-pro-pill{
+  display:inline-block;font-size:10px;font-weight:700;
+  letter-spacing:.04em;text-transform:uppercase;
+  background:#7c3aed;color:#fff;border-radius:3px;
+  padding:1px 6px;line-height:1.6;vertical-align:middle;
+}
+
+/* ── Buttons ────────────────────────────────────────────────── */
+.av-btn{
+  font-size:12px;padding:5px 12px;border-radius:5px;border:1px solid #d1d5db;
+  background:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:5px;
+  transition:background .12s,border-color .12s;white-space:nowrap;
+}
+.av-btn:hover{background:#f3f4f6;}
+.av-btn--save{
+  background:#184c53;color:#fff;border-color:#184c53;margin-left:auto;
+  font-size:13px;padding:6px 18px;
+}
+.av-btn--save:hover:not(:disabled){background:#1d6370;}
+.av-btn--save:disabled{opacity:.45;cursor:not-allowed;}
+.av-btn--pick.is-active,.av-btn--pick-excl.is-active{
+  background:#184c53;color:#fff;border-color:#184c53;
+}
+
+/* ── Right preview panel ────────────────────────────────────── */
+.av-preview-panel{
+  position:fixed;right:44px;top:80px;
+  width:340px;max-height:70vh;
+  z-index:2147483641;
+  background:#fff;border-radius:10px;
+  box-shadow:0 8px 32px rgba(0,0,0,.22);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  user-select:none;
+}
+.av-preview-panel[hidden]{display:none!important;}
+.av-preview-panel__handle{
+  padding:10px 14px;
+  background:#184c53;color:#fff;
+  display:flex;align-items:center;gap:8px;
+  cursor:grab;flex:none;
+}
+.av-preview-panel__handle:active{cursor:grabbing;}
+.av-preview-panel__title{font:600 13px/1.3 inherit;flex:1;}
+.av-preview-panel__meta{font-size:11px;color:rgba(255,255,255,.7);}
+.av-preview-panel__close{
+  background:transparent;border:0;color:#fff;font-size:18px;
+  line-height:1;cursor:pointer;padding:0 4px;
+}
+.av-preview-panel__body{
+  flex:1;overflow-y:auto;padding:14px;
+  font-size:13px;line-height:1.65;color:#374151;
+  user-select:text;
+}
+.av-preview-panel__empty{color:#9ca3af;font-style:italic;margin:0;}
+
+/* ── Resize handles ─────────────────────────────────────────── */
+.av-resize-handle{position:absolute;z-index:10;background:transparent;}
+/* Right-edge handle — width resize (rail panel, left-anchored) */
+.av-resize-handle--edge{
+  top:0;right:0;bottom:0;
+  width:5px;height:100%;
+  cursor:ew-resize;
+}
+.av-resize-handle--edge:hover{background:rgba(24,76,83,.12);}
+/* Left-edge handle — width resize (preview panel, right-anchored; expands leftward) */
+.av-resize-handle--left-edge{
+  top:0;left:0;right:auto;bottom:0;
+  width:5px;height:100%;
+  cursor:ew-resize;
+}
+.av-resize-handle--left-edge:hover{background:rgba(24,76,83,.12);}
+/* Bottom-edge handle — height resize (preview panel) */
+.av-resize-handle--bottom{
+  left:0;right:0;bottom:0;
+  width:100%;height:5px;
+  cursor:ns-resize;
+}
+.av-resize-handle--bottom:hover{background:rgba(24,76,83,.12);}
+
+/* ── Floating (dragged) panel state ────────────────────────── */
+/* Once dragged, the panel is free-floating — no slide transition,
+   no edge-anchor. Hidden state uses display:none instead of
+   the transform-based off-screen trick. */
+.av-panel--floating{transition:none!important;transform:none!important;}
+.av-panel--floating[hidden]{display:none!important;}
+/* Make both panel headers feel grab-able */
+.av-rail-panel__header{cursor:grab;}
+.av-rail-panel__header:active{cursor:grabbing;}
+
+/* ── Picker highlight on page elements ─────────────────────── */
+.av-picker-hover{
+  outline:2px solid #184c53!important;
+  outline-offset:2px!important;
+  cursor:crosshair!important;
+}
+.av-picker-selected{
+  outline:3px solid #00a32a!important;
+  outline-offset:2px!important;
+  background:rgba(0,163,42,.06)!important;
+}
+.av-picker-exclude-hover{
+  outline:2px solid #b91c1c!important;
+  outline-offset:2px!important;
+  cursor:crosshair!important;
+}
+.av-picker-excluded{
+  outline:3px solid #b91c1c!important;
+  outline-offset:2px!important;
+  background:rgba(185,28,28,.06)!important;
+}
+';
+	}
+
 	protected static function version() {
 		return defined( 'TEXT_TO_AUDIO_VERSION' ) ? (string) TEXT_TO_AUDIO_VERSION : '1.0.0';
-	}
-
-	/**
-	 * Expected origin of the parent window. The iframe trusts
-	 * messages only from the site's own `home_url()` — same-origin
-	 * by design, but we pin it explicitly so a future proxy / CDN
-	 * host mismatch can't inject fake pick commands.
-	 *
-	 * @return string
-	 */
-	protected static function expected_parent_origin() {
-		$url  = home_url();
-		$host = wp_parse_url( $url, PHP_URL_HOST );
-		if ( ! $host ) { return ''; }
-		$scheme = wp_parse_url( $url, PHP_URL_SCHEME );
-		$scheme = $scheme ? $scheme : ( is_ssl() ? 'https' : 'http' );
-		$port   = wp_parse_url( $url, PHP_URL_PORT );
-		return $scheme . '://' . $host . ( $port ? ':' . $port : '' );
-	}
-
-	/**
-	 * Is the current front-end request in iframe pick mode? Used by
-	 * tests + by the front-end iframe_footer callback to avoid
-	 * double-initialising the bridge on non-iframe views.
-	 *
-	 * @return bool
-	 */
-	public static function is_iframe_active() {
-		return (bool) self::$iframe_active;
 	}
 }

@@ -135,41 +135,23 @@ class TTA_Admin
             'current_plugin_slug' => 'text-to-audio',
             'detected_caching_plugins' => TTA_Helper::get_detected_caching_plugins(),
             'latest_post_preview_url'  => '', // populated lazily in enqueue to avoid early get_permalink() call
-            // TTS-238: AtlasVoiceSelector storage — engine uses this to resolve Tier 2 selector.
-            'atlasvoice_selectors' => get_option('tta_atlasvoice_selectors', [ 'global' => '', 'per_post_type' => [] ]),
-            // TTS-238 PR-C (C5b): current multilingual-plugin language code so the
-            // client-side resolver picks the language-scoped selector first. Empty
-            // string on non-multilingual sites — resolveSavedSelector falls through
-            // the per_language slot entirely in that case.
-            'atlasvoice_language_code' => class_exists('\\TTA\\TTA_LanguagePlugins')
-                ? \TTA\TTA_LanguagePlugins::current_language_code()
-                : '',
-            // TTS-238: Opt-in flag. When false (default), the new JS extractor stays dormant
-            // and the legacy extraction path runs unchanged. `$settings` here is the
-            // nested map returned by `tts_get_settings('')`, so the `tta_settings_data`
-            // flags live under the 'settings' sub-key.
-            'use_atlasvoice_extractor' => ! empty( $settings['settings']['tta__settings_use_atlasvoice_extractor'] ),
-
-            // TTS-238 PR-B: First-visit auto-detect needs the current post type and
-            // the viewer's capability to decide whether to silently save a scored
-            // selector. Only admins (manage_options) can hit /save-selector, so we
-            // lift that check into the bundle to avoid a speculative 403.
-            //
-            // `current_post_type` is populated lazily in enqueue_scripts() because
-            // `is_singular()` must not be called before the main query runs (WP
-            // throws _doing_it_wrong for that). The constructor on plugins_loaded
-            // is too early. Same pattern as `latest_post_preview_url` below.
-            'can_save_selector' => current_user_can( 'manage_options' ),
-            'current_post_type' => '',
-            // TTS-238 PR-C (C6c): current singular post id so the engine can
-            // fire auth-variant sample reports to /tta/v1/auth-variant?action=record.
-            // 0 when we're off a singular context — the engine skips reporting
-            // in that case. Populated lazily like current_post_type because
-            // is_singular()/get_queried_object_id() are not safe before the
-            // main query runs.
-            'current_post_id'   => 0,
 
         ];
+
+        // TTS-238 v5 §14.2 (D0d) — AtlasVoice-specific localisation fields
+        // are injected via a dedicated filter so legacy TTA_Admin stays
+        // free of AtlasVoice-surface additions (P1). The callback lives
+        // in `\TTA\AtlasVoice\LocalizeData::inject` and handles the
+        // opt-in flag, selector store, language code, capability, and
+        // lazy-seeded post context fields.
+        $this->localize_data = apply_filters(
+            'atlasvoice_localize_data',
+            $this->localize_data,
+            array(
+                'post_id'  => $post_id,
+                'settings' => $settings,
+            )
+        );
     }
 
     public function load_script_as_tag($tag, $handle, $src)
@@ -233,23 +215,11 @@ class TTA_Admin
             $this->localize_data['latest_post_preview_url'] = TTA_Helper::get_latest_post_preview_url();
         }
 
-        // TTS-238 PR-B: Populate current_post_type lazily — is_singular() must
-        // not be called before the main query runs (WP _doing_it_wrong). By the
-        // time wp_enqueue_scripts fires, the main query is resolved so this is
-        // safe. Used by the engine + picker bundles to key the auto-detected
-        // selector to the right CPT.
-        if ( empty( $this->localize_data['current_post_type'] ) ) {
-            if ( function_exists( 'is_singular' ) && did_action( 'wp' ) && is_singular() ) {
-                $this->localize_data['current_post_type'] = (string) get_post_type();
-            }
-        }
-        // TTS-238 PR-C (C6c): same lazy pattern for current_post_id — the
-        // engine needs it for /auth-variant?action=record.
-        if ( empty( $this->localize_data['current_post_id'] ) ) {
-            if ( function_exists( 'is_singular' ) && did_action( 'wp' ) && is_singular() ) {
-                $this->localize_data['current_post_id'] = (int) get_the_ID();
-            }
-        }
+        // TTS-238 v5 §14.2 (D0d) — lazy pass for AtlasVoice fields that
+        // can't be computed until the main query resolves (current_post_type,
+        // current_post_id). The filter callback is in
+        // `\TTA\AtlasVoice\LocalizeData::inject_lazy`.
+        $this->localize_data = apply_filters( 'atlasvoice_localize_data_lazy', $this->localize_data );
 
         do_action('tta_enqueue_pro_dashboard_scripts');
 
@@ -480,24 +450,13 @@ class TTA_Admin
             return;
         }
 
-        // TTS-238 PR-B: Populate current_post_type lazily here too — this is
-        // the frontend entry (hooked to wp_enqueue_scripts). The constructor
-        // runs on plugins_loaded which is too early for is_singular(), and
-        // the admin-side enqueue_scripts() does not fire on frontend hits,
-        // so without this second call ttsObj.current_post_type would stay
-        // empty on the live post and the first-visit auto-detect could not
-        // key saved selectors to the right CPT.
-        if ( empty( $this->localize_data['current_post_type'] ) ) {
-            if ( function_exists( 'is_singular' ) && did_action( 'wp' ) && is_singular() ) {
-                $this->localize_data['current_post_type'] = (string) get_post_type();
-            }
-        }
-        // TTS-238 PR-C (C6c): same lazy pattern for current_post_id on frontend.
-        if ( empty( $this->localize_data['current_post_id'] ) ) {
-            if ( function_exists( 'is_singular' ) && did_action( 'wp' ) && is_singular() ) {
-                $this->localize_data['current_post_id'] = (int) get_the_ID();
-            }
-        }
+        // TTS-238 v5 §14.2 (D0d) — frontend lazy pass for AtlasVoice
+        // post-context fields. The admin-side enqueue_scripts() does not
+        // fire on frontend hits, so without this second pass ttsObj would
+        // have empty current_post_type/current_post_id on the live post
+        // and the first-visit auto-detect couldn't key saved selectors
+        // to the right CPT. Same filter, same callback — idempotent.
+        $this->localize_data = apply_filters( 'atlasvoice_localize_data_lazy', $this->localize_data );
 
         $player_id = get_player_id();
 
@@ -530,11 +489,14 @@ class TTA_Admin
         // Picker: loads only for logged-in users with edit capability (admin UI).
         $extractor_opt_in = ! empty( $this->localize_data['use_atlasvoice_extractor'] );
         if ( $extractor_opt_in ) {
-            wp_enqueue_script('tts-extractor-engine', plugin_dir_url(__FILE__) . 'js/build/tts-extractor-engine.min.js', [], $this->version, true);
+            $extractor_ver = ( defined('WP_DEBUG') && WP_DEBUG )
+                ? filemtime( plugin_dir_path(__FILE__) . 'js/build/tts-extractor-engine.min.js' )
+                : $this->version;
+            wp_enqueue_script('tts-extractor-engine', plugin_dir_url(__FILE__) . 'js/build/tts-extractor-engine.min.js', [], $extractor_ver, true);
             array_push($dependencies, 'tts-extractor-engine');
 
             if (is_user_logged_in() && current_user_can('edit_posts')) {
-                wp_enqueue_script('tts-picker', plugin_dir_url(__FILE__) . 'js/build/tts-picker.min.js', [], $this->version, true);
+                wp_enqueue_script('tts-picker');
             }
         }
 
@@ -1021,24 +983,6 @@ class TTA_Admin
             ],
         ] );
 
-        // TTS-238: AtlasVoiceSelector launcher — opens the visual content picker
-        // on the front-end so admins can point at the right region.
-        // Gated on opt-in: the picker only saves selectors that the new engine
-        // consumes, so it has nothing to do while the legacy pipeline is active.
-        $all_settings = TTA_Helper::tts_get_settings( '' );
-        $extractor_opt_in = ! empty( $all_settings['settings']['tta__settings_use_atlasvoice_extractor'] );
-        if ( $extractor_opt_in ) {
-            $admin_bar->add_node( [
-                'parent' => 'tta-audio-toggle',
-                'id'     => 'tta-atlasvoice-picker',
-                'title'  => esc_html__( 'Pick content area…', 'text-to-audio' ),
-                'href'   => '#',
-                'meta'   => [
-                    'class' => 'tta-atlasvoice-picker',
-                    'title' => __( 'Visually select which region AtlasVoice should read on this post type', 'text-to-audio' ),
-                ],
-            ] );
-        }
     }
 
     /**
@@ -1194,41 +1138,6 @@ class TTA_Admin
                 });
             });
 
-            // TTS-238: AtlasVoiceSelector launcher — start the visual picker.
-            function startAtlasVoicePicker(){
-                if (!window.AtlasVoiceSelector) {
-                    alert('<?php echo esc_js( __( 'AtlasVoiceSelector not loaded on this page. Make sure the player is enabled for this post type.', 'text-to-audio' ) ); ?>');
-                    return;
-                }
-                window.AtlasVoiceSelector.start({
-                    postType: '<?php echo esc_js( $post->post_type ); ?>',
-                    onSave: function(result){
-                        if (result && result.selector) {
-                            alert('<?php echo esc_js( __( 'Saved selector:', 'text-to-audio' ) ); ?> ' + result.selector);
-                        }
-                    }
-                });
-            }
-
-            var pickerNode = document.getElementById('wp-admin-bar-tta-atlasvoice-picker');
-            if (pickerNode) {
-                var pickerLink = pickerNode.querySelector('a.ab-item');
-                if (pickerLink) {
-                    pickerLink.addEventListener('click', function(e){
-                        e.preventDefault();
-                        startAtlasVoicePicker();
-                    });
-                }
-            }
-
-            // Auto-launch when the dashboard opened this post with ?atlasvoice-picker=1.
-            try {
-                var qs = new URLSearchParams(window.location.search);
-                if (qs.get('atlasvoice-picker') === '1') {
-                    // Wait a tick so the extractor/picker bundles have finished loading.
-                    setTimeout(startAtlasVoicePicker, 300);
-                }
-            } catch (_) { /* IE — ignore */ }
         })();
         </script>
         <?php

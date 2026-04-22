@@ -69,25 +69,40 @@ class RuleResolver {
 		$post_override = self::load_post_rules( $post_id );
 
 		// Walk from most-specific to least-specific.
+		// $resolved_entry tracks the raw store value of the winning scope so
+		// entry_excl() can extract excl_* from it (array format) or return
+		// null (legacy string format → excl_set=false, keep UI defaults).
 		$resolved_selector = '';
 		$selector_source   = 'none';
+		$resolved_entry    = null;
 
 		if ( isset( $post_override['selector'] ) && (string) $post_override['selector'] !== '' ) {
 			$resolved_selector = (string) $post_override['selector'];
 			$selector_source   = 'post';
-		} elseif ( $post_type !== '' && $lang !== '' && isset( $per_pt_lang[ $post_type ][ $lang ] ) && $per_pt_lang[ $post_type ][ $lang ] !== '' ) {
-			$resolved_selector = (string) $per_pt_lang[ $post_type ][ $lang ];
+			$resolved_entry    = $post_override;
+		} elseif ( $post_type !== '' && $lang !== '' && isset( $per_pt_lang[ $post_type ][ $lang ] ) && self::entry_sel( $per_pt_lang[ $post_type ][ $lang ] ) !== '' ) {
+			$resolved_selector = self::entry_sel( $per_pt_lang[ $post_type ][ $lang ] );
 			$selector_source   = 'post_type_language';
-		} elseif ( $lang !== '' && isset( $per_lang[ $lang ] ) && $per_lang[ $lang ] !== '' ) {
-			$resolved_selector = (string) $per_lang[ $lang ];
+			$resolved_entry    = $per_pt_lang[ $post_type ][ $lang ];
+		} elseif ( $lang !== '' && isset( $per_lang[ $lang ] ) && self::entry_sel( $per_lang[ $lang ] ) !== '' ) {
+			$resolved_selector = self::entry_sel( $per_lang[ $lang ] );
 			$selector_source   = 'language';
-		} elseif ( $post_type !== '' && isset( $per_pt[ $post_type ] ) && $per_pt[ $post_type ] !== '' ) {
-			$resolved_selector = (string) $per_pt[ $post_type ];
+			$resolved_entry    = $per_lang[ $lang ];
+		} elseif ( $post_type !== '' && isset( $per_pt[ $post_type ] ) && self::entry_sel( $per_pt[ $post_type ] ) !== '' ) {
+			$resolved_selector = self::entry_sel( $per_pt[ $post_type ] );
 			$selector_source   = 'post_type';
-		} elseif ( isset( $selectors['global'] ) && $selectors['global'] !== '' ) {
-			$resolved_selector = (string) $selectors['global'];
+			$resolved_entry    = $per_pt[ $post_type ];
+		} elseif ( isset( $selectors['global'] ) && self::entry_sel( $selectors['global'] ) !== '' ) {
+			$resolved_selector = self::entry_sel( $selectors['global'] );
 			$selector_source   = 'global';
+			$resolved_entry    = $selectors['global'];
 		}
+
+		$excl       = self::entry_excl( $resolved_entry );
+		$excl_set   = $excl !== null;
+		$excl_css   = $excl_set && isset( $excl['excl_css'] )   ? $excl['excl_css']   : array();
+		$excl_texts = $excl_set && isset( $excl['excl_texts'] ) ? $excl['excl_texts'] : array();
+		$excl_tags  = $excl_set && isset( $excl['excl_tags'] )  ? $excl['excl_tags']  : array();
 
 		return array(
 			'selector'         => $resolved_selector,
@@ -96,6 +111,10 @@ class RuleResolver {
 			'language'         => $lang,
 			'selector_store'   => $selectors,
 			'post_override'    => $post_override,
+			'excl_set'         => $excl_set,
+			'excl_css'         => $excl_css,
+			'excl_texts'       => $excl_texts,
+			'excl_tags'        => $excl_tags,
 		);
 	}
 
@@ -137,7 +156,7 @@ class RuleResolver {
 
 		// Layer 2 — per-post-type + per-language
 		if ( $pt !== '' && $lang !== '' ) {
-			$val = isset( $sel['per_post_type_per_language'][ $pt ][ $lang ] ) ? (string) $sel['per_post_type_per_language'][ $pt ][ $lang ] : '';
+			$val = isset( $sel['per_post_type_per_language'][ $pt ][ $lang ] ) ? self::entry_sel( $sel['per_post_type_per_language'][ $pt ][ $lang ] ) : '';
 			$trail[] = self::crumb(
 				'pt:' . $pt . ':lang:' . $lang,
 				sprintf( /* translators: 1: post type, 2: language */
@@ -152,7 +171,7 @@ class RuleResolver {
 
 		// Layer 3 — per-language
 		if ( $lang !== '' ) {
-			$val = isset( $sel['per_language'][ $lang ] ) ? (string) $sel['per_language'][ $lang ] : '';
+			$val = isset( $sel['per_language'][ $lang ] ) ? self::entry_sel( $sel['per_language'][ $lang ] ) : '';
 			$trail[] = self::crumb(
 				'lang:' . $lang,
 				sprintf( /* translators: %s: language */ __( 'Language "%s"', 'text-to-audio' ), $lang ),
@@ -164,7 +183,7 @@ class RuleResolver {
 
 		// Layer 4 — per-post-type
 		if ( $pt !== '' ) {
-			$val = isset( $sel['per_post_type'][ $pt ] ) ? (string) $sel['per_post_type'][ $pt ] : '';
+			$val = isset( $sel['per_post_type'][ $pt ] ) ? self::entry_sel( $sel['per_post_type'][ $pt ] ) : '';
 			$trail[] = self::crumb(
 				'pt:' . $pt,
 				sprintf( /* translators: %s: post type */ __( 'Post type "%s"', 'text-to-audio' ), $pt ),
@@ -175,7 +194,7 @@ class RuleResolver {
 		}
 
 		// Layer 5 — global
-		$global_val = isset( $sel['global'] ) ? (string) $sel['global'] : '';
+		$global_val = isset( $sel['global'] ) ? self::entry_sel( $sel['global'] ) : '';
 		$trail[] = self::crumb(
 			'global',
 			__( 'Global default', 'text-to-audio' ),
@@ -206,6 +225,40 @@ class RuleResolver {
 			'selector'   => (string) $selector,
 			'applies'    => (bool) $applies,
 			'overridden' => (bool) $overridden,
+		);
+	}
+
+	/**
+	 * Extract the selector string from a store entry that may be either
+	 * a legacy plain string (old /save-selector format) or the new rule
+	 * array { selector, excl_css, excl_texts, excl_tags }.
+	 *
+	 * @param mixed $val
+	 * @return string
+	 */
+	protected static function entry_sel( $val ) {
+		if ( is_array( $val ) ) {
+			return isset( $val['selector'] ) ? (string) $val['selector'] : '';
+		}
+		return (string) $val;
+	}
+
+	/**
+	 * Extract excl_* from a store entry. Returns null for legacy string
+	 * entries so callers can distinguish "no data saved" (keep UI defaults)
+	 * from "data was saved but all arrays are empty" (user cleared all chips).
+	 *
+	 * @param mixed $val
+	 * @return array|null
+	 */
+	protected static function entry_excl( $val ) {
+		if ( ! is_array( $val ) ) {
+			return null;
+		}
+		return array(
+			'excl_css'   => isset( $val['excl_css'] )   && is_array( $val['excl_css'] )   ? array_values( $val['excl_css'] )   : array(),
+			'excl_texts' => isset( $val['excl_texts'] ) && is_array( $val['excl_texts'] ) ? array_values( $val['excl_texts'] ) : array(),
+			'excl_tags'  => isset( $val['excl_tags'] )  && is_array( $val['excl_tags'] )  ? array_values( $val['excl_tags'] )  : array(),
 		);
 	}
 

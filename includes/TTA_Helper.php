@@ -151,6 +151,9 @@ class TTA_Helper
             global $post;
             $current_post = $post;
         }
+        if (is_numeric($current_post) && $current_post > 0) {
+            $current_post = get_post((int) $current_post);
+        }
         // is_home() || is_archive() || is_front_page() || is_category()
         if (\is_single($current_post) || apply_filters('tts_force_check_is_singular', is_singular() , $current_post)) {
             $should_load_button = true;

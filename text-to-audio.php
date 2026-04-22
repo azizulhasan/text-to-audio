@@ -450,6 +450,22 @@ class TTA_Init
 
     public function run()
     {
+        // TTS-238 v5 §14 D0c — single hook-based entry into the
+        // AtlasVoice subsystem. Wires cron, meta boxes, REST routes,
+        // localise-data filters, and (later) the regen-guard. All
+        // individual feature modules self-gate on Layer 1 opt-in so
+        // this call is safe even when the admin has not opted in.
+        //
+        // CRITICAL ORDERING: must run BEFORE `new TTA()` below, because
+        // TTA::run() → TTA_Admin::__construct() invokes the
+        // `atlasvoice_localize_data` filter during construction. The
+        // LocalizeData::inject callback must already be registered by
+        // then, otherwise the filter fires against an empty hook chain
+        // and no AtlasVoice fields make it into ttsObj.
+        if ( class_exists( '\\TTA\\AtlasVoice\\Bootstrap' ) ) {
+            \TTA\AtlasVoice\Bootstrap::register();
+        }
+
         $plugin = new TTA();
         $plugin->run();
 
@@ -465,19 +481,6 @@ class TTA_Init
             TTA_Notices::instance();
             //Rest api init.
             new TTA_Api_Routes();
-
-            // TTS-238 C3a: register the nightly boilerplate detector.
-            // Idempotent — wp_next_scheduled gate prevents double-booking.
-            if ( class_exists( '\\TTA\\TTA_BoilerplateDetector' ) ) {
-                \TTA\TTA_BoilerplateDetector::register_cron();
-            }
-
-            // TTS-238 C6b: wire the Audio-variant radio row into the post-edit
-            // AtlasVoice meta box. Self-gated — the renderer hooks into
-            // `tts_after_metabox_content` and only prints on edit screens.
-            if ( class_exists( '\\TTA\\TTA_AuthVariantsMetaBox' ) ) {
-                \TTA\TTA_AuthVariantsMetaBox::register();
-            }
         }, 9999);
 
         //add plugins action links.

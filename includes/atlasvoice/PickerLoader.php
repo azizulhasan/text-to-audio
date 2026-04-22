@@ -218,6 +218,10 @@ class PickerLoader {
 	 * @return string
 	 */
 	protected static function version() {
+		if ( defined( 'TTA_PLUGIN_PATH' ) ) {
+			$ft = @filemtime( TTA_PLUGIN_PATH . 'admin/js/build/tts-picker.min.js' );
+			if ( $ft ) { return (string) $ft; }
+		}
 		return defined( 'TEXT_TO_AUDIO_VERSION' ) ? (string) TEXT_TO_AUDIO_VERSION : '1.0.0';
 	}
 
