@@ -197,7 +197,7 @@ class Mode {
 		$bar->add_node( array(
 			'id'    => self::BAR_NODE_ID,
 			'title' => $title,
-			'href'  => admin_url( 'admin.php?page=text-to-audio#/atlasvoice' ),
+			'href'  => admin_url( 'admin.php?page=text-to-audio' ),
 			'meta'  => array(
 				'title' => $status['label'],
 				'class' => 'atlasvoice-bar-node atlasvoice-bar-state-' . $status['state'],
@@ -242,7 +242,7 @@ class Mode {
 			'parent' => self::BAR_NODE_ID,
 			'id'     => self::BAR_NODE_ID . '-settings',
 			'title'  => esc_html__( 'Open AtlasVoice settings', 'text-to-audio' ),
-			'href'   => admin_url( 'admin.php?page=text-to-audio#/atlasvoice' ),
+			'href'   => admin_url( 'admin.php?page=text-to-audio' ),
 		) );
 	}
 

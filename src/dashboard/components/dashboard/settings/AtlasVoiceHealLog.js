@@ -228,6 +228,7 @@ export default function AtlasVoiceHealLog() {
                             <tr>
                                 <th style={{whiteSpace: "nowrap"}}>{__("When", "text-to-audio")}</th>
                                 <th>{__("Scope", "text-to-audio")}</th>
+                                <th>{__("Post", "text-to-audio")}</th>
                                 <th>{__("Event", "text-to-audio")}</th>
                                 <th>{__("Old selector", "text-to-audio")}</th>
                                 <th>{__("New selector", "text-to-audio")}</th>
@@ -242,6 +243,15 @@ export default function AtlasVoiceHealLog() {
                                             {formatTs(entry.ts)}
                                         </td>
                                         <td>{scopeLabel(entry.scope)}</td>
+                                        <td style={{whiteSpace: "nowrap"}}>
+                                            {entry.post_url ? (
+                                                <a href={entry.post_url} target="_blank" rel="noopener noreferrer" style={{fontSize: "12px"}}>
+                                                    {entry.post_title || "#" + entry.post_id}
+                                                </a>
+                                            ) : (
+                                                <span style={{color: "#9ca3af", fontSize: "12px"}}>—</span>
+                                            )}
+                                        </td>
                                         <td>{reasonBadge(entry.reason)}</td>
                                         <td>
                                             <code style={{fontSize: "11px", wordBreak: "break-all"}}>

@@ -97,7 +97,7 @@ export default function AtlasVoiceSettings({settings, handleChange}) {
                                         return;
                                     }
                                     const sep = url.indexOf("?") === -1 ? "?" : "&";
-                                    window.open(url + sep + "atlasvoice-picker=1", "_blank", "noopener");
+                                    window.open(url + sep + "atlasvoice_picker=1", "_blank", "noopener");
                                 }}
                             >
                                 {__("Pick content area on live post", "text-to-audio")}

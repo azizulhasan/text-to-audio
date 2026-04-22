@@ -546,7 +546,6 @@
         header.innerHTML =
             '<strong>AtlasVoice Extraction Preview</strong>' +
             '<div>' +
-                '<button id="av-diff-listen" type="button" style="background:#fff;color:#184c53;border:0;padding:6px 10px;border-radius:4px;font-weight:600;cursor:pointer;margin-right:8px">Listen 5s</button>' +
                 '<button id="av-diff-close" type="button" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4);padding:6px 10px;border-radius:4px;cursor:pointer">Close</button>' +
             '</div>';
         box.appendChild(header);
@@ -592,37 +591,11 @@
 
         shell.appendChild(box);
         shell.addEventListener('click', function (e) {
-            if (e.target === shell) { shell.remove(); stopListenSample(); }
+            if (e.target === shell) { shell.remove(); }
         });
         return shell;
     }
 
-    var sampleUtterance = null;
-    var sampleTimer = null;
-    function stopListenSample() {
-        if (sampleTimer) { clearTimeout(sampleTimer); sampleTimer = null; }
-        try {
-            if (global.speechSynthesis && global.speechSynthesis.speaking) {
-                global.speechSynthesis.cancel();
-            }
-        } catch (_) {}
-        sampleUtterance = null;
-    }
-    function playListenSample(text) {
-        stopListenSample();
-        if (!text || !global.speechSynthesis || typeof global.SpeechSynthesisUtterance !== 'function') {
-            alert('Speech synthesis is unavailable in this browser.');
-            return;
-        }
-        // Sample the *start* of the extracted text — that's where
-        // misextraction (nav text, breadcrumbs, share-buttons) shows up first.
-        var sample = text.slice(0, 500);
-        sampleUtterance = new global.SpeechSynthesisUtterance(sample);
-        sampleUtterance.rate = 1;
-        global.speechSynthesis.speak(sampleUtterance);
-        // Hard cut at 5s — that's the point of a "sample".
-        sampleTimer = setTimeout(stopListenSample, 5000);
-    }
 
     function maybeRunDiffPreview() {
         try {
@@ -651,18 +624,9 @@
         var modal = buildDiffModal(newResult, oldResult);
         global.document.body.appendChild(modal);
 
-        var listenBtn = modal.querySelector('#av-diff-listen');
-        if (listenBtn) {
-            listenBtn.addEventListener('click', function () {
-                playListenSample(newResult.text);
-            });
-        }
         var closeBtn = modal.querySelector('#av-diff-close');
         if (closeBtn) {
-            closeBtn.addEventListener('click', function () {
-                stopListenSample();
-                modal.remove();
-            });
+            closeBtn.addEventListener('click', function () { modal.remove(); });
         }
     }
 
@@ -678,7 +642,5 @@
         computeStableSelector: computeStableSelector,
         firstVisitAutoDetect: firstVisitAutoDetect,
         openDiffPreview: maybeRunDiffPreview,
-        playListenSample: playListenSample,
-        stopListenSample: stopListenSample
     };
 })(typeof window !== 'undefined' ? window : this);

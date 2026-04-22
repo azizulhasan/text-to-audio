@@ -59,14 +59,6 @@ class Bootstrap {
 			BoilerplateDetector::register_cron();
 		}
 
-		// C6b — post-edit meta box row for auth-variant pinning. Wires
-		// into `tts_after_metabox_content` (already emitted by the
-		// legacy TTA_Hooks::atlasVoice_meta_box renderer) so no edit to
-		// the legacy meta-box class is required.
-		if ( class_exists( '\\TTA\\AtlasVoice\\AuthVariantsMetaBox' ) ) {
-			AuthVariantsMetaBox::register();
-		}
-
 		// REST routes live in a dedicated registrar (D0b). Hooks on
 		// `rest_api_init`, so it's safe to register here during the
 		// plugin's `init` phase.
@@ -140,11 +132,11 @@ class Bootstrap {
 			PickerLoader::register();
 		}
 
-		// D9 — step-rail shell + iframe sandbox. Admin side renders the
-		// hidden overlay + `window.AtlasVoiceStepRail.open()` API.
-		// Front-end detects `?atlasvoice_iframe=1` (gated on
-		// manage_options + REST nonce) and flips singular views into
-		// pick-mode with a postMessage bridge back to the parent rail.
+		// D9 (v5 rebuilt) — front-end floating step-rail. Renders two
+		// floating tabs on the actual post page (live DOM picker — no
+		// iframe). Left tab → sliding config panel; Right tab → draggable
+		// content preview. Dashboard admin_footer emits the "Open & Pick"
+		// URL builder.
 		if ( class_exists( '\\TTA\\AtlasVoice\\StepRail' ) ) {
 			StepRail::register();
 		}

@@ -44,7 +44,7 @@ class RestRoutes {
 	 *
 	 * @var string
 	 */
-	const NAMESPACE_PREFIX = 'tts/v1';
+	const NAMESPACE_PREFIX = 'tta/v1';
 
 	/**
 	 * Wire into `rest_api_init`. Called from Bootstrap::register().
@@ -107,36 +107,6 @@ class RestRoutes {
 					'args'                => array(
 						'text'   => array( 'type' => 'string', 'required' => true ),
 						'action' => array( 'type' => 'string', 'default'  => 'add' ),
-					),
-				),
-			)
-		);
-
-		// PR-C (C6a) — auth-variant describe + set + record-sample.
-		register_rest_route(
-			$ns,
-			'/auth-variant',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( __CLASS__, 'get_auth_variant' ),
-					'permission_callback' => array( __CLASS__, 'admin_guard' ),
-					'args'                => array(
-						'post_id' => array( 'type' => 'integer', 'required' => true ),
-					),
-				),
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( __CLASS__, 'post_auth_variant' ),
-					// Public — sample-record is reachable to logged-out
-					// visitors. The callback splits action-level gating.
-					'permission_callback' => '__return_true',
-					'args'                => array(
-						'post_id'   => array( 'type' => 'integer', 'required' => true ),
-						'action'    => array( 'type' => 'string', 'default' => 'record' ),
-						'variant'   => array( 'type' => 'string', 'required' => false ),
-						'text_hash' => array( 'type' => 'string', 'required' => false ),
-						'text_len'  => array( 'type' => 'integer', 'required' => false ),
 					),
 				),
 			)
@@ -321,6 +291,48 @@ class RestRoutes {
 							'required'    => false,
 							'description' => 'When reason="heal", the selector being replaced. Recorded in the heal log for audit + one-click revert.',
 						),
+						'post_id' => array(
+							'type'        => 'integer',
+							'required'    => false,
+							'description' => 'Post that triggered the heal/revert, recorded in the heal log for the post-link column.',
+						),
+						// Chip exclusions. Stored alongside the selector so
+						// non-post scopes persist the full rule, not just selector.
+						'excl_css' => array(
+							'type'     => 'array',
+							'required' => false,
+							'items'    => array( 'type' => 'string' ),
+						),
+						'excl_texts' => array(
+							'type'     => 'array',
+							'required' => false,
+							'items'    => array( 'type' => 'string' ),
+						),
+						'excl_tags' => array(
+							'type'     => 'array',
+							'required' => false,
+							'items'    => array( 'type' => 'string' ),
+						),
+					),
+				),
+			)
+		);
+
+		// D9 — step-rail active-rule resolver. Returns the winning rule for a
+		// given post across all scopes (per-post → post_type_language →
+		// language → post_type → global) including the scope label, so the
+		// picker shell can pre-fill scope radio, selector field, and chips
+		// without duplicating RuleResolver precedence logic on the client.
+		register_rest_route(
+			$ns,
+			'/step-rail/active-rule',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( __CLASS__, 'get_step_rail_active_rule' ),
+					'permission_callback' => array( __CLASS__, 'admin_guard' ),
+					'args'                => array(
+						'post_id' => array( 'type' => 'integer', 'required' => true ),
 					),
 				),
 			)
@@ -340,6 +352,27 @@ class RestRoutes {
 				),
 			)
 		);
+		// D13 — scope-rule reader: returns the saved rule at exactly the
+		// requested scope (no precedence walk) so the picker can repopulate
+		// the UI when the admin changes the scope radio.
+		register_rest_route(
+			$ns,
+			'/step-rail/scope-rule',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( __CLASS__, 'get_step_rail_scope_rule' ),
+					'permission_callback' => array( __CLASS__, 'admin_guard' ),
+					'args'                => array(
+						'post_id'   => array( 'type' => 'integer', 'required' => true ),
+						'scope'     => array( 'type' => 'string',  'required' => true ),
+						'post_type' => array( 'type' => 'string',  'required' => false ),
+						'language'  => array( 'type' => 'string',  'required' => false ),
+					),
+				),
+			)
+		);
+
 		register_rest_route(
 			$ns,
 			'/step-rail/sample-url',
@@ -357,6 +390,76 @@ class RestRoutes {
 				),
 			)
 		);
+	}
+
+	/**
+	 * D9 — Return the winning AtlasVoice rule for a given post across all
+	 * scopes. Delegates to RuleResolver::resolve() and maps selector_source
+	 * to the scope key the picker shell uses for its scope radio group.
+	 *
+	 * Response shape:
+	 *   scope      string  'post'|'post_type_language'|'language'|'post_type'|'global'|''
+	 *   selector   string  CSS selector of the winning rule, '' when none
+	 *   post_type  string  post type of the queried post
+	 *   language   string  resolved language code ('' on non-multilingual sites)
+	 *   excl_css   array   CSS exclusion selectors (only populated for scope=post)
+	 *   excl_texts array   phrase exclusions      (only populated for scope=post)
+	 *   excl_tags  array   tag exclusions          (only populated for scope=post)
+	 *
+	 * @param \WP_REST_Request $request
+	 * @return \WP_REST_Response
+	 */
+	public static function get_step_rail_active_rule( $request ) {
+		$post_id = (int) $request->get_param( 'post_id' );
+		$empty   = array( 'scope' => '', 'selector' => '', 'post_type' => '', 'language' => '',
+		                   'excl_css' => array(), 'excl_texts' => array(), 'excl_tags' => array() );
+
+		if ( $post_id <= 0 || ! class_exists( '\\TTA\\AtlasVoice\\RuleResolver' ) ) {
+			return new \WP_REST_Response( $empty, 200 );
+		}
+
+		$resolved = RuleResolver::resolve( $post_id );
+		$source   = isset( $resolved['selector_source'] ) ? (string) $resolved['selector_source'] : 'none';
+		$selector = isset( $resolved['selector'] )        ? (string) $resolved['selector']         : '';
+
+		// Map RuleResolver source keys to the scope values the JS shell uses.
+		$scope_map = array(
+			'post'               => 'post',
+			'post_type_language' => 'post_type_language',
+			'language'           => 'language',
+			'post_type'          => 'post_type',
+			'global'             => 'global',
+		);
+		$scope = isset( $scope_map[ $source ] ) ? $scope_map[ $source ] : '';
+
+		// excl_* and excl_set come directly from RuleResolver::resolve().
+		// excl_set=true  → stored as array format; JS should use these values.
+		// excl_set=false → legacy string format; JS keeps its pre-checked defaults.
+		$excl_set   = ! empty( $resolved['excl_set'] );
+		$excl_css   = isset( $resolved['excl_css'] )   && is_array( $resolved['excl_css'] )   ? array_values( $resolved['excl_css'] )   : array();
+		$excl_texts = isset( $resolved['excl_texts'] ) && is_array( $resolved['excl_texts'] ) ? array_values( $resolved['excl_texts'] ) : array();
+		$excl_tags  = isset( $resolved['excl_tags'] )  && is_array( $resolved['excl_tags'] )  ? array_values( $resolved['excl_tags'] )  : array();
+
+		// For post scope: excl_* come from the post_override, which is always
+		// in array format — so excl_set is always true for per-post rules.
+		if ( $source === 'post' && isset( $resolved['post_override'] ) && is_array( $resolved['post_override'] ) ) {
+			$po = $resolved['post_override'];
+			$excl_set   = true;
+			$excl_css   = isset( $po['excl_css'] )   && is_array( $po['excl_css'] )   ? array_values( $po['excl_css'] )   : array();
+			$excl_texts = isset( $po['excl_texts'] ) && is_array( $po['excl_texts'] ) ? array_values( $po['excl_texts'] ) : array();
+			$excl_tags  = isset( $po['excl_tags'] )  && is_array( $po['excl_tags'] )  ? array_values( $po['excl_tags'] )  : array();
+		}
+
+		return new \WP_REST_Response( array(
+			'scope'      => $scope,
+			'selector'   => $selector,
+			'post_type'  => isset( $resolved['post_type'] ) ? (string) $resolved['post_type'] : '',
+			'language'   => isset( $resolved['language'] )  ? (string) $resolved['language']  : '',
+			'excl_set'   => $excl_set,
+			'excl_css'   => $excl_css,
+			'excl_texts' => $excl_texts,
+			'excl_tags'  => $excl_tags,
+		), 200 );
 	}
 
 	/**
@@ -461,9 +564,12 @@ class RestRoutes {
 			), 200 );
 		}
 
-		$flag = class_exists( '\\TTA\\AtlasVoice\\StepRail' ) ? StepRail::IFRAME_FLAG : 'atlasvoice_iframe';
+		// v5 front-end picker uses AUTO_PARAM (?atlasvoice_picker=1).
+		$flag = class_exists( '\\TTA\\AtlasVoice\\StepRail' )
+			? \TTA\AtlasVoice\StepRail::AUTO_PARAM
+			: 'atlasvoice_picker';
 		$url  = add_query_arg( array(
-			$flag     => 1,
+			$flag      => 1,
 			'_wpnonce' => wp_create_nonce( 'wp_rest' ),
 		), $url );
 
@@ -632,19 +738,40 @@ class RestRoutes {
 			$store['per_post_type_per_language'] = array();
 		}
 
+		// Build rule array: selector + excl_* so non-post scopes persist the
+		// full rule, not just the selector string (backwards-compatible with the
+		// old string-only format via RuleResolver::entry_sel / entry_excl).
+		$req_excl_css   = $request->get_param( 'excl_css' );
+		$req_excl_texts = $request->get_param( 'excl_texts' );
+		$req_excl_tags  = $request->get_param( 'excl_tags' );
+
+		$rule = array(
+			'selector'   => $selector,
+			'excl_css'   => is_array( $req_excl_css )   ? array_values( array_filter( array_map( 'sanitize_text_field', $req_excl_css ) ) )   : array(),
+			'excl_texts' => is_array( $req_excl_texts ) ? array_values( array_filter( array_map( 'sanitize_text_field', $req_excl_texts ) ) ) : array(),
+			// Accept any valid HTML element name (letter + alphanumeric, max 32 chars).
+			// Not limited to the predefined checkbox set so custom tags like "span" persist.
+			'excl_tags'  => is_array( $req_excl_tags )
+				? array_values( array_filter(
+					array_map( 'sanitize_key', $req_excl_tags ),
+					function ( $t ) { return $t !== '' && strlen( $t ) <= 32 && preg_match( '/^[a-z][a-z0-9]*$/', $t ); }
+				) )
+				: array(),
+		);
+
 		$is_pro = function_exists( 'is_pro_active' ) && is_pro_active();
 		if ( $is_pro && $post_type !== '' && $language !== '' ) {
 			if ( ! isset( $store['per_post_type_per_language'][ $post_type ] )
 				 || ! is_array( $store['per_post_type_per_language'][ $post_type ] ) ) {
 				$store['per_post_type_per_language'][ $post_type ] = array();
 			}
-			$store['per_post_type_per_language'][ $post_type ][ $language ] = $selector;
+			$store['per_post_type_per_language'][ $post_type ][ $language ] = $rule;
 		} elseif ( $language !== '' ) {
-			$store['per_language'][ $language ] = $selector;
+			$store['per_language'][ $language ] = $rule;
 		} elseif ( $is_pro && $post_type !== '' ) {
-			$store['per_post_type'][ $post_type ] = $selector;
+			$store['per_post_type'][ $post_type ] = $rule;
 		} else {
-			$store['global'] = $selector;
+			$store['global'] = $rule;
 		}
 
 		update_option( 'tta_atlasvoice_selectors', $store, false );
@@ -665,6 +792,7 @@ class RestRoutes {
 			}
 			$log = get_option( 'tta_atlasvoice_heal_log', array() );
 			if ( ! is_array( $log ) ) { $log = array(); }
+			$log_post_id = (int) $request->get_param( 'post_id' );
 			$log[] = array(
 				'ts'           => time(),
 				'scope'        => $scope,
@@ -672,6 +800,7 @@ class RestRoutes {
 				'old_selector' => $old_selector,
 				'new_selector' => $selector,
 				'user_id'      => get_current_user_id(),
+				'post_id'      => $log_post_id > 0 ? $log_post_id : 0,
 			);
 			if ( count( $log ) > 50 ) {
 				$log = array_slice( $log, -50 );
@@ -711,6 +840,14 @@ class RestRoutes {
 		for ( $i = count( $log ) - 1; $i >= 0; $i-- ) {
 			$row = $log[ $i ];
 			if ( ! is_array( $row ) ) { continue; }
+			$log_pid   = isset( $row['post_id'] ) ? (int) $row['post_id'] : 0;
+			$post_url  = '';
+			$post_title = '';
+			if ( $log_pid > 0 ) {
+				$permalink  = get_permalink( $log_pid );
+				$post_url   = $permalink ? esc_url_raw( $permalink ) : '';
+				$post_title = html_entity_decode( (string) get_the_title( $log_pid ), ENT_QUOTES );
+			}
 			$out[] = array(
 				'index'        => $i,
 				'ts'           => isset( $row['ts'] ) ? (int) $row['ts'] : 0,
@@ -719,6 +856,9 @@ class RestRoutes {
 				'old_selector' => isset( $row['old_selector'] ) ? (string) $row['old_selector'] : '',
 				'new_selector' => isset( $row['new_selector'] ) ? (string) $row['new_selector'] : '',
 				'user_id'      => isset( $row['user_id'] ) ? (int) $row['user_id'] : 0,
+				'post_id'      => $log_pid,
+				'post_url'     => $post_url,
+				'post_title'   => $post_title,
 			);
 		}
 		return rest_ensure_response( array( 'status' => true, 'log' => $out ) );
@@ -812,94 +952,6 @@ class RestRoutes {
 			'status'   => true,
 			'excluded' => array_values( $list ),
 		) );
-	}
-
-	/**
-	 * GET /auth-variant — describe a post's variant state.
-	 *
-	 * @param \WP_REST_Request $request
-	 * @return \WP_REST_Response|\WP_Error
-	 */
-	public static function get_auth_variant( $request ) {
-		$post_id = (int) $request->get_param( 'post_id' );
-		if ( $post_id <= 0 ) {
-			return new \WP_Error( 'invalid_post', __( 'Missing post_id.', 'text-to-audio' ), array( 'status' => 400 ) );
-		}
-		if ( ! class_exists( '\\TTA\\AtlasVoice\\AuthVariants' ) ) {
-			return rest_ensure_response( array(
-				'status'  => false,
-				'message' => 'AuthVariants class not loaded.',
-			) );
-		}
-		return rest_ensure_response( array(
-			'status' => true,
-			'data'   => AuthVariants::describe( $post_id ),
-		) );
-	}
-
-	/**
-	 * POST /auth-variant — pin variant (admin, action=set) OR record
-	 * extraction sample (public, action=record).
-	 *
-	 * @param \WP_REST_Request $request
-	 * @return \WP_REST_Response|\WP_Error
-	 */
-	public static function post_auth_variant( $request ) {
-		$post_id = (int) $request->get_param( 'post_id' );
-		$action  = sanitize_key( (string) $request->get_param( 'action' ) );
-		if ( $post_id <= 0 ) {
-			return new \WP_Error( 'invalid_post', __( 'Missing post_id.', 'text-to-audio' ), array( 'status' => 400 ) );
-		}
-		if ( ! class_exists( '\\TTA\\AtlasVoice\\AuthVariants' ) ) {
-			return new \WP_Error( 'not_available', 'AuthVariants class not loaded.', array( 'status' => 500 ) );
-		}
-
-		if ( $action === 'set' ) {
-			// Admin pin — edit_post is the right cap because variant is
-			// a per-post property, not a site-wide setting.
-			if ( ! current_user_can( 'edit_post', $post_id ) ) {
-				return new \WP_Error( 'forbidden', __( 'You cannot edit this post.', 'text-to-audio' ), array( 'status' => 403 ) );
-			}
-			$variant = (string) $request->get_param( 'variant' );
-			$ok = AuthVariants::set_variant( $post_id, $variant );
-			if ( ! $ok ) {
-				return new \WP_Error( 'invalid_variant', __( 'Invalid variant value.', 'text-to-audio' ), array( 'status' => 400 ) );
-			}
-			return rest_ensure_response( array(
-				'status' => true,
-				'data'   => AuthVariants::describe( $post_id ),
-			) );
-		}
-
-		if ( $action === 'record' ) {
-			// Rate-limit: one record per (IP+post+auth-state) per 60s so
-			// a chatty theme doesn't fill the samples ring buffer on
-			// every visitor pageload.
-			$ip  = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : 'unknown';
-			$key = 'tta_av_' . md5( $ip . '|' . $post_id . '|' . ( is_user_logged_in() ? 'i' : 'o' ) );
-			if ( get_transient( $key ) ) {
-				return rest_ensure_response( array(
-					'status'    => true,
-					'throttled' => true,
-				) );
-			}
-			set_transient( $key, 1, MINUTE_IN_SECONDS );
-
-			$text_hash = (string) $request->get_param( 'text_hash' );
-			$text_len  = (int) $request->get_param( 'text_len' );
-			$samples   = AuthVariants::record_sample(
-				$post_id,
-				is_user_logged_in(),
-				$text_hash,
-				$text_len
-			);
-			return rest_ensure_response( array(
-				'status'  => true,
-				'samples' => $samples,
-			) );
-		}
-
-		return new \WP_Error( 'unknown_action', __( 'Unknown action.', 'text-to-audio' ), array( 'status' => 400 ) );
 	}
 
 	/**
@@ -1233,6 +1285,116 @@ class RestRoutes {
 		}
 
 		return new \WP_Error( 'unknown_action', __( 'Unknown post-rules action.', 'text-to-audio' ), array( 'status' => 400 ) );
+	}
+
+	/**
+	 * GET /step-rail/scope-rule — return the rule saved at a specific scope
+	 * without a precedence walk. Used by the picker shell when the admin
+	 * changes the scope radio so the UI can show what is actually stored
+	 * at that scope (not just the current winning rule).
+	 *
+	 * Response: { selector, excl_set, excl_css, excl_texts, excl_tags }
+	 * excl_set=false → legacy string entry or no data saved at this scope.
+	 *
+	 * @param \WP_REST_Request $request
+	 * @return \WP_REST_Response
+	 */
+	public static function get_step_rail_scope_rule( $request ) {
+		$post_id   = (int) $request->get_param( 'post_id' );
+		$scope     = sanitize_key( (string) $request->get_param( 'scope' ) );
+		$post_type = sanitize_key( (string) $request->get_param( 'post_type' ) );
+		$language  = sanitize_key( (string) $request->get_param( 'language' ) );
+
+		$empty = array(
+			'selector' => '', 'excl_set' => false,
+			'excl_css' => array(), 'excl_texts' => array(), 'excl_tags' => array(),
+		);
+
+		if ( $post_id <= 0 ) {
+			return new \WP_REST_Response( $empty, 200 );
+		}
+
+		// Per-post scope — delegate to PerPostRules.
+		if ( $scope === 'post' ) {
+			if ( ! class_exists( '\\TTA\\AtlasVoice\\PerPostRules' ) || ! PerPostRules::available() ) {
+				return new \WP_REST_Response( $empty, 200 );
+			}
+			$rule = PerPostRules::get( $post_id );
+			if ( ! is_array( $rule ) || ! isset( $rule['selector'] ) || (string) $rule['selector'] === '' ) {
+				return new \WP_REST_Response( $empty, 200 );
+			}
+			return new \WP_REST_Response( array(
+				'selector'   => (string) $rule['selector'],
+				'excl_set'   => true,
+				'excl_css'   => isset( $rule['excl_css'] )   && is_array( $rule['excl_css'] )   ? array_values( $rule['excl_css'] )   : array(),
+				'excl_texts' => isset( $rule['excl_texts'] ) && is_array( $rule['excl_texts'] ) ? array_values( $rule['excl_texts'] ) : array(),
+				'excl_tags'  => isset( $rule['excl_tags'] )  && is_array( $rule['excl_tags'] )  ? array_values( $rule['excl_tags'] )  : array(),
+			), 200 );
+		}
+
+		// Derive post_type / language from the post when the client omits them.
+		if ( $post_type === '' && in_array( $scope, array( 'post_type', 'post_type_language' ), true ) ) {
+			$post_type = (string) get_post_type( $post_id );
+		}
+		if ( $language === '' && in_array( $scope, array( 'language', 'post_type_language' ), true ) ) {
+			if ( class_exists( '\\TTA\\AtlasVoice\\LanguagePlugins' ) ) {
+				$language = (string) LanguagePlugins::current_language_code();
+			}
+		}
+
+		$store = get_option( 'tta_atlasvoice_selectors', array() );
+		if ( ! is_array( $store ) ) { $store = array(); }
+
+		$entry = null;
+		switch ( $scope ) {
+			case 'global':
+				$entry = isset( $store['global'] ) ? $store['global'] : null;
+				break;
+			case 'post_type':
+				if ( $post_type !== '' && isset( $store['per_post_type'][ $post_type ] ) ) {
+					$entry = $store['per_post_type'][ $post_type ];
+				}
+				break;
+			case 'language':
+				if ( $language !== '' && isset( $store['per_language'][ $language ] ) ) {
+					$entry = $store['per_language'][ $language ];
+				}
+				break;
+			case 'post_type_language':
+				if ( $post_type !== '' && $language !== ''
+					 && isset( $store['per_post_type_per_language'][ $post_type ][ $language ] ) ) {
+					$entry = $store['per_post_type_per_language'][ $post_type ][ $language ];
+				}
+				break;
+		}
+
+		if ( $entry === null ) {
+			return new \WP_REST_Response( $empty, 200 );
+		}
+
+		// Inline RuleResolver::entry_sel / entry_excl (protected methods).
+		$selector = is_array( $entry )
+			? ( isset( $entry['selector'] ) ? (string) $entry['selector'] : '' )
+			: (string) $entry;
+
+		if ( $selector === '' ) {
+			return new \WP_REST_Response( $empty, 200 );
+		}
+
+		if ( ! is_array( $entry ) ) {
+			return new \WP_REST_Response( array(
+				'selector' => $selector, 'excl_set' => false,
+				'excl_css' => array(), 'excl_texts' => array(), 'excl_tags' => array(),
+			), 200 );
+		}
+
+		return new \WP_REST_Response( array(
+			'selector'   => $selector,
+			'excl_set'   => true,
+			'excl_css'   => isset( $entry['excl_css'] )   && is_array( $entry['excl_css'] )   ? array_values( $entry['excl_css'] )   : array(),
+			'excl_texts' => isset( $entry['excl_texts'] ) && is_array( $entry['excl_texts'] ) ? array_values( $entry['excl_texts'] ) : array(),
+			'excl_tags'  => isset( $entry['excl_tags'] )  && is_array( $entry['excl_tags'] )  ? array_values( $entry['excl_tags'] )  : array(),
+		), 200 );
 	}
 
 	/**
