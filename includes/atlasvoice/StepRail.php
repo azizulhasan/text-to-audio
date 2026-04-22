@@ -195,6 +195,19 @@ class StepRail {
 										<?php echo esc_html__( 'Selector', 'text-to-audio' ); ?>
 										<input type="text" class="atlasvoice-step-rail__selector-input" />
 									</label>
+									<!-- D11 — word-count badge + diff action -->
+									<div class="atlasvoice-step-rail__d11-actions">
+										<span
+											class="atlasvoice-step-rail__word-count"
+											aria-live="polite"
+											hidden
+										></span>
+										<button
+											type="button"
+											class="button atlasvoice-step-rail__diff"
+											title="<?php echo esc_attr__( 'Compare extracted text from new selector vs. legacy extraction.', 'text-to-audio' ); ?>"
+										>&#128220; <?php echo esc_html__( 'Diff preview', 'text-to-audio' ); ?></button>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -321,6 +334,9 @@ class StepRail {
 			.atlasvoice-step-rail__chip-add{display:flex;gap:6px;margin-top:4px;}
 			.atlasvoice-step-rail__chip-add input{flex:1;font-family:inherit;font-size:13px;}
 			.atlasvoice-step-rail__undo-hint{font-size:11px;color:#6b7280;padding-left:10px;}
+			.atlasvoice-step-rail__d11-actions{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
+			.atlasvoice-step-rail__word-count{font-size:12px;color:#6b7280;font-style:italic;flex:1;}
+			.atlasvoice-step-rail__diff{font-size:12px!important;padding:4px 10px!important;height:auto!important;}
 		';
 	}
 
@@ -505,6 +521,20 @@ class StepRail {
 					}
 					if (m.type === 'pick:cancel' && api && api.stop) {
 						api.stop();
+					}
+					// D11 — diff preview: open the picker's built-in diff modal.
+					if (m.type === 'diff:open' && api && api.openDiffPreview) {
+						api.openDiffPreview();
+					}
+					// D11 — word-count probe: parent requests element + word count
+					// for the badge shown in the region row.
+					if (m.type === 'count:request') {
+						var cSel = (m.payload && m.payload.selector) ? m.payload.selector : '';
+						var cEl  = cSel ? d.querySelector(cSel) : null;
+						var cTxt = cEl ? (cEl.innerText || cEl.textContent || '').trim().replace(/\s+/g, ' ') : '';
+						var cWords = cTxt ? cTxt.split(' ').length : 0;
+						var cChars = cTxt.length;
+						send('count:result', { selector: cSel, words: cWords, chars: cChars });
 					}
 				});
 			}
