@@ -547,7 +547,26 @@
         CHIP_KINDS.forEach(function (kind) {
             var row = state.shell.querySelector('.atlasvoice-step-rail__row[data-chip-kind="' + kind + '"]');
             if (!row) { return; }
+            var wasLocked = row.classList.contains('is-locked');
             row.classList.toggle('is-locked', !state.pro);
+
+            // D12 — inject (or remove) the Pro upsell pill inside the row
+            // header. Only mutates the DOM when the locked state changes so
+            // repeated renderAllChips calls on a Pro install are a no-op.
+            var existing = row.querySelector('.atlasvoice-step-rail__pro-pill');
+            if (!state.pro && !existing) {
+                var strong = row.querySelector('strong');
+                if (strong) {
+                    var pill = d.createElement('span');
+                    pill.className = 'atlasvoice-step-rail__pro-pill';
+                    pill.setAttribute('aria-label', 'Pro feature');
+                    pill.textContent = 'Pro';
+                    strong.appendChild(d.createTextNode('\u00a0'));  // nbsp
+                    strong.appendChild(pill);
+                }
+            } else if (state.pro && existing) {
+                existing.parentNode.removeChild(existing);
+            }
         });
     }
 
@@ -623,6 +642,9 @@
     var api = {
         open: function (init) {
             if (!state.shell && !attachOnce()) { return false; }
+            // Re-read Pro status on every open so a PHP flag change
+            // (e.g. toggling Pro mid-session) is picked up without a reload.
+            state.pro = state.shell.getAttribute('data-pro') === '1';
             resetSelection(init);
             state.open = true;
             state.shell.hidden = false;

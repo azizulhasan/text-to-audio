@@ -337,6 +337,7 @@ class StepRail {
 			.atlasvoice-step-rail__d11-actions{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
 			.atlasvoice-step-rail__word-count{font-size:12px;color:#6b7280;font-style:italic;flex:1;}
 			.atlasvoice-step-rail__diff{font-size:12px!important;padding:4px 10px!important;height:auto!important;}
+			.atlasvoice-step-rail__pro-pill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:#7c3aed;color:#fff;border-radius:3px;padding:1px 6px;vertical-align:middle;line-height:1.6;}
 		';
 	}
 
