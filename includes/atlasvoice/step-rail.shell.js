@@ -324,6 +324,8 @@
             $('.atlasvoice-step-rail__save').disabled = !state.selection.selector;
             setRowState('region', 'done');
             status('Selector picked — review and Save.');
+            // D11 — request word count badge for the picked selector.
+            requestWordCount();
         } else if (m.type === 'pick:reject') {
             // Legacy / explicit reject message. Treat identically to
             // pick:selected with rejected=true.
@@ -336,6 +338,8 @@
             if (addChip('excl_css', rej)) {
                 status('Excluded: ' + rej + '  (Cmd/Ctrl+Z to undo)');
             }
+        } else if (m.type === 'count:result') {
+            renderWordCount((m.payload && m.payload.words) || 0);
         } else if (m.type === 'error') {
             status('Iframe error: ' + (m.payload && m.payload.code));
         }
@@ -350,6 +354,37 @@
                 state.parentOrigin || '*'
             );
         } catch (e) {}
+    }
+
+    // ---- D11: listen sample + diff counter ----
+
+    // Request a word-count badge update from the iframe for the currently-
+    // picked selector. Called automatically on pick:selected.
+    function requestWordCount() {
+        if (!state.selection.selector || !state.iframeReady) { return; }
+        postToIframe('count:request', { selector: state.selection.selector });
+    }
+
+    // Render a word-count badge in the region row body. Slot lives between
+    // the picked selector input and the listen/diff action row.
+    function renderWordCount(words) {
+        var slot = $('.atlasvoice-step-rail__word-count');
+        if (!slot) { return; }
+        slot.textContent = words > 0 ? '~' + words + ' words' : '';
+        slot.hidden = words <= 0;
+    }
+
+    function attachDiffButton() {
+        var btn = $('.atlasvoice-step-rail__diff');
+        if (!btn) { return; }
+        btn.addEventListener('click', function () {
+            if (!state.selection.selector || !state.iframeReady) {
+                status('Pick a selector first to preview the diff.');
+                return;
+            }
+            postToIframe('diff:open', { selector: state.selection.selector });
+            status('Diff preview opened in the sandbox.');
+        });
     }
 
     // ---- save ----
@@ -430,6 +465,9 @@
         // server so the forms already exist when we land here.
         attachChipHandlers();
         attachModeToggle();
+
+        // D11 — diff preview button.
+        attachDiffButton();
         return true;
     }
 
