@@ -759,16 +759,21 @@ class RestRoutes {
 				: array(),
 		);
 
-		$is_pro = function_exists( 'is_pro_active' ) && is_pro_active();
-		if ( $is_pro && $post_type !== '' && $language !== '' ) {
+		// Language-keyed buckets only apply when a multilingual plugin is
+		// actually active. Ignoring the param otherwise prevents stale data
+		// from being written by a crafted request with no real language context.
+		$lang_plugin = class_exists( '\\TTA\\AtlasVoice\\LanguagePlugins' )
+			&& LanguagePlugins::is_multilingual();
+
+		if ( $post_type !== '' && $language !== '' && $lang_plugin ) {
 			if ( ! isset( $store['per_post_type_per_language'][ $post_type ] )
 				 || ! is_array( $store['per_post_type_per_language'][ $post_type ] ) ) {
 				$store['per_post_type_per_language'][ $post_type ] = array();
 			}
 			$store['per_post_type_per_language'][ $post_type ][ $language ] = $rule;
-		} elseif ( $language !== '' ) {
+		} elseif ( $language !== '' && $lang_plugin ) {
 			$store['per_language'][ $language ] = $rule;
-		} elseif ( $is_pro && $post_type !== '' ) {
+		} elseif ( $post_type !== '' ) {
 			$store['per_post_type'][ $post_type ] = $rule;
 		} else {
 			$store['global'] = $rule;
