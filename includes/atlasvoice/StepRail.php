@@ -406,7 +406,7 @@ class StepRail {
 }
 .av-step.is-active{background:#fff;border-color:#184c53;box-shadow:0 2px 8px rgba(24,76,83,.08);}
 .av-step.is-done{background:#f0f7ed;border-color:#00a32a;}
-.av-step.is-locked{opacity:.6;pointer-events:none;}
+.av-step.is-locked{opacity:.6;}
 .av-step__head{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
 .av-step__num{font-size:18px;color:#184c53;line-height:1;}
 .av-step.is-done .av-step__num{color:#00a32a;}

@@ -44,6 +44,12 @@
 
     var CHIP_KINDS = ['excl_css', 'excl_texts', 'excl_tags'];
 
+    var CHIP_FEATURE_NAMES = {
+        excl_css:   'Skip these areas',
+        excl_texts: 'Skip these phrases',
+        excl_tags:  'Skip these tag types'
+    };
+
     var SCOPE_OPTIONS = [
         { value: 'global',             label: 'Global',               needsPt: false, needsLang: false, proOnly: false },
         { value: 'post_type',          label: 'Post type',            needsPt: true,  needsLang: false, proOnly: true  },
@@ -726,9 +732,26 @@
         CHIP_KINDS.forEach(function (kind) {
             var step = state.shell && state.shell.querySelector('.av-step[data-chip-kind="' + kind + '"]');
             if (!step) { return; }
-            step.classList.toggle('is-locked', !state.pro);
+            var locked = !state.pro;
+            step.classList.toggle('is-locked', locked);
             var pill = step.querySelector('.av-pro-pill');
-            if (pill) { pill.hidden = !!state.pro; }
+            if (pill) { pill.hidden = !locked; }
+            // Transparent overlay catches all clicks on locked steps and shows
+            // the promo modal. Created once; removed if Pro activates later.
+            if (locked && !step._promoOverlay) {
+                step.style.position = 'relative';
+                var overlay = d.createElement('div');
+                overlay.style.cssText = 'position:absolute;inset:0;z-index:10;cursor:not-allowed;';
+                overlay.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    showProPromo(CHIP_FEATURE_NAMES[kind] || kind);
+                });
+                step._promoOverlay = overlay;
+                step.appendChild(overlay);
+            } else if (!locked && step._promoOverlay) {
+                step._promoOverlay.remove();
+                step._promoOverlay = null;
+            }
         });
     }
 
