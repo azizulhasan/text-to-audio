@@ -1,18 +1,177 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Col, Row, Form } from "react-bootstrap";
 import { __ } from "@wordpress/i18n";
+import { getData } from "../../../context/utilities";
 import { getLanguageFlag } from "../utils";
+
+const MODEL_LABELS = {
+  eleven_multilingual_v2: "Multilingual v2",
+  eleven_turbo_v2_5: "Turbo v2.5",
+  eleven_turbo_v2: "Turbo v2",
+  eleven_flash_v2_5: "Flash v2.5",
+  eleven_flash_v2: "Flash v2",
+  eleven_v2_flash: "v2 Flash",
+  eleven_v2_5_flash: "v2.5 Flash",
+  eleven_v3: "Eleven v3",
+};
+
+const FALLBACK_MODELS = [
+  "eleven_multilingual_v2",
+  "eleven_turbo_v2_5",
+  "eleven_flash_v2_5",
+  "eleven_v3",
+];
+
+const playPreview = (url) => {
+  if (!url) return;
+  const audio_wav = document.getElementById("tts_audio_wav");
+  const audio_mp3 = document.getElementById("tts_audio_mp3");
+  const audio_tag = document.getElementById("tts_audio_tag");
+  if (!audio_wav || !audio_mp3 || !audio_tag) return;
+  audio_wav.src = url;
+  audio_mp3.src = url;
+  audio_tag.load();
+  audio_tag.play().catch(() => {});
+};
 
 export default function ElevenLabsSettings({
   listeningSettings,
+  setListeningSettings,
   currentPlayerLanguages,
   elevenLabsVoices,
+  addElevenLabsVoice,
   handleChange,
   baseMP3File,
 }) {
   const [voiceSearch, setVoiceSearch] = useState("");
   const [manualVoiceId, setManualVoiceId] = useState("");
+  const [manualError, setManualError] = useState("");
+  const [manualLoading, setManualLoading] = useState(false);
 
+  // Track which voice-tuning sliders the user has touched in this session.
+  // Once touched we stop auto-seeding from voice.settings on voice change.
+  const editedRef = useRef({ stability: false, similarity_boost: false, style: false });
+
+  const proApiURL = useMemo(() => {
+    if (
+      typeof window !== "undefined" &&
+      window.hasOwnProperty("ttsObj") &&
+      window.ttsObj?.is_pro_active
+    ) {
+      return (
+        window.ttsObj.api_url +
+        window.ttsObj.api_namespace +
+        "_pro/" +
+        window.ttsObj.api_version +
+        "/"
+      );
+    }
+    return "";
+  }, []);
+
+  // Resolve selected voice object from listeningSettings.tta__listening_voice
+  // (stored as `voice_id::FirstName`).
+  const selectedVoiceId = useMemo(() => {
+    const raw = listeningSettings.tta__listening_voice || "";
+    return raw.split("::")[0] || "";
+  }, [listeningSettings.tta__listening_voice]);
+
+  const selectedVoice = useMemo(
+    () => elevenLabsVoices.find((v) => v.voice_id === selectedVoiceId),
+    [elevenLabsVoices, selectedVoiceId]
+  );
+
+  const langIso = useMemo(
+    () =>
+      (listeningSettings.tta__listening_lang || "")
+        .toLowerCase()
+        .split(/[-_]/)[0] || "",
+    [listeningSettings.tta__listening_lang]
+  );
+
+  // verified_languages filtered by selected language.
+  const verifiedForLang = useMemo(() => {
+    const entries = selectedVoice?.verified_languages || [];
+    if (!langIso) return entries;
+    return entries.filter((v) => (v.language || "").toLowerCase() === langIso);
+  }, [selectedVoice, langIso]);
+
+  // Available models for this voice+language (unique model_ids).
+  const availableModels = useMemo(() => {
+    const ids = Array.from(
+      new Set(verifiedForLang.map((v) => v.model_id).filter(Boolean))
+    );
+    return ids.length ? ids : FALLBACK_MODELS;
+  }, [verifiedForLang]);
+
+  // Available accents/locales for this voice+language.
+  const availableAccents = useMemo(() => {
+    const seen = new Set();
+    const out = [];
+    for (const v of verifiedForLang) {
+      const key = `${v.accent || ""}|${v.locale || ""}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({
+        accent: v.accent || "",
+        locale: v.locale || "",
+        preview_url: v.preview_url || "",
+      });
+    }
+    return out;
+  }, [verifiedForLang]);
+
+  // ── Sync: if current model isn't in availableModels, switch to first ──
+  useEffect(() => {
+    if (!selectedVoice) return;
+    if (!availableModels.includes(listeningSettings.tta__elevenlabs_model)) {
+      handleChange({
+        target: {
+          name: "tta__elevenlabs_model",
+          value: availableModels[0],
+        },
+      });
+    }
+  }, [availableModels, selectedVoice]);
+
+  // ── Sync: if current accent isn't available, default to first ────────
+  useEffect(() => {
+    if (!availableAccents.length) return;
+    const current = listeningSettings.tta__elevenlabs_accent || "";
+    const stillValid = availableAccents.some((a) => a.locale === current);
+    if (!stillValid) {
+      handleChange({
+        target: {
+          name: "tta__elevenlabs_accent",
+          value: availableAccents[0].locale,
+        },
+      });
+    }
+  }, [availableAccents]);
+
+  // ── Seed voice-tuning sliders from voice.settings (if user hasn't edited) ──
+  useEffect(() => {
+    const vs = selectedVoice?.settings;
+    if (!vs || !setListeningSettings) return;
+    setListeningSettings((prev) => {
+      const next = { ...prev };
+      if (vs.stability !== undefined && !editedRef.current.stability) {
+        next.tta__elevenlabs_stability = vs.stability;
+      }
+      if (
+        vs.similarity_boost !== undefined &&
+        !editedRef.current.similarity_boost
+      ) {
+        next.tta__elevenlabs_similarity_boost = vs.similarity_boost;
+      }
+      if (vs.style !== undefined && !editedRef.current.style) {
+        next.tta__elevenlabs_style = vs.style;
+      }
+      return next;
+    });
+  }, [selectedVoiceId]);
+
+  // ── Voice search ─────────────────────────────────────────────────────
   const filteredElevenLabsVoices = useMemo(() => {
     const q = voiceSearch.trim().toLowerCase();
     if (!q) return elevenLabsVoices;
@@ -32,20 +191,71 @@ export default function ElevenLabsSettings({
     });
   }, [elevenLabsVoices, voiceSearch]);
 
+  // ── Manual voice-ID: fetch, inject, select, preview ──────────────────
   const applyManualVoiceId = () => {
     const trimmed = manualVoiceId.trim();
-    if (!trimmed) return;
-    handleChange({
-      target: {
-        name: "tta__listening_voice",
-        value: trimmed + "::Custom",
-      },
-    });
+    if (!trimmed || !proApiURL) return;
+    setManualError("");
+    setManualLoading(true);
+
+    getData(
+      `${proApiURL}elevenlabs_voice?voice_id=${encodeURIComponent(trimmed)}`
+    )
+      .then((res) => {
+        if (!res?.status || !res?.voice?.voice_id) {
+          setManualError(
+            res?.message || __("Voice not found.", "text-to-audio")
+          );
+          return;
+        }
+        const voice = res.voice;
+        if (typeof addElevenLabsVoice === "function") {
+          addElevenLabsVoice(voice, listeningSettings.tta__listening_lang);
+        }
+        const firstName = (voice.name || "Custom").split(/[\s\-]/)[0].trim();
+        handleChange({
+          target: {
+            name: "tta__listening_voice",
+            value: `${voice.voice_id}::${firstName || "Custom"}`,
+          },
+        });
+        playPreview(voice.preview_url);
+        setManualVoiceId("");
+      })
+      .catch((err) => {
+        console.log("elevenlabs_voice error:", err);
+        setManualError(__("Failed to fetch voice.", "text-to-audio"));
+      })
+      .finally(() => setManualLoading(false));
   };
+
+  // ── Accent change: update state + play accent-specific preview ───────
+  const handleAccentChange = (e) => {
+    const locale = e.target.value;
+    handleChange({
+      target: { name: "tta__elevenlabs_accent", value: locale },
+    });
+    const match = availableAccents.find((a) => a.locale === locale);
+    if (match?.preview_url) {
+      playPreview(match.preview_url);
+    }
+  };
+
+  // ── Slider change: mark edited so we stop re-seeding ─────────────────
+  const handleSliderChange = (e) => {
+    const key = e.target.name;
+    if (key === "tta__elevenlabs_stability") editedRef.current.stability = true;
+    if (key === "tta__elevenlabs_similarity_boost")
+      editedRef.current.similarity_boost = true;
+    if (key === "tta__elevenlabs_style") editedRef.current.style = true;
+    handleChange(e);
+  };
+
+  const voiceHas = (key) => selectedVoice?.settings?.[key] !== undefined;
 
   return (
     <>
-      {/* Voice Language, Voice to Speak, and Model - Three Columns */}
+      {/* Voice Language, Voice to Speak, and Model */}
       <Row className="mb-3">
         <Col xs={12} md={4}>
           <div className="tta_voice_card">
@@ -54,7 +264,7 @@ export default function ElevenLabsSettings({
               <img
                 src={getLanguageFlag(
                   Object.keys(currentPlayerLanguages).find(
-                    key => key === listeningSettings.tta__listening_lang
+                    (key) => key === listeningSettings.tta__listening_lang
                   ) || listeningSettings.tta__listening_lang
                 )}
                 alt="flag"
@@ -100,11 +310,11 @@ export default function ElevenLabsSettings({
             >
               <option disabled>{__("Default Listening Voice", "text-to-audio")}</option>
               {filteredElevenLabsVoices.map((voice, index) => {
-                const firstName = voice.name ? voice.name.split(/[\s\-]/)[0].trim() : '';
-                const optionValue = voice.voice_id + '::' + firstName;
+                const firstName = voice.name ? voice.name.split(/[\s\-]/)[0].trim() : "";
+                const optionValue = voice.voice_id + "::" + firstName;
                 return (
-                  <option key={index} value={optionValue}>
-                    {voice.name} {voice.labels?.accent ? `(${voice.labels.accent})` : ''}
+                  <option key={voice.voice_id || index} value={optionValue}>
+                    {voice.name} {voice.labels?.accent ? `(${voice.labels.accent})` : ""}
                   </option>
                 );
               })}
@@ -125,15 +335,20 @@ export default function ElevenLabsSettings({
                       applyManualVoiceId();
                     }
                   }}
+                  disabled={manualLoading}
                 />
                 <button
                   type="button"
                   className="btn btn-outline-secondary"
                   onClick={applyManualVoiceId}
+                  disabled={manualLoading || !manualVoiceId.trim()}
                 >
-                  {__("Use", "text-to-audio")}
+                  {manualLoading ? __("Loading…", "text-to-audio") : __("Use", "text-to-audio")}
                 </button>
               </div>
+              {manualError ? (
+                <div className="text-danger small mt-1">{manualError}</div>
+              ) : null}
             </div>
           </div>
         </Col>
@@ -148,14 +363,52 @@ export default function ElevenLabsSettings({
               value={listeningSettings.tta__elevenlabs_model}
               className="tta_orange_speak_select"
             >
-              <option value="eleven_multilingual_v2">{__("Multilingual v2", "text-to-audio")}</option>
-              <option value="eleven_turbo_v2_5">{__("Turbo v2.5", "text-to-audio")}</option>
-              <option value="eleven_flash_v2_5">{__("Flash v2.5", "text-to-audio")}</option>
-              <option value="eleven_v3">{__("Eleven v3", "text-to-audio")}</option>
+              {availableModels.map((id) => (
+                <option key={id} value={id}>
+                  {MODEL_LABELS[id] || id}
+                </option>
+              ))}
             </Form.Select>
           </div>
         </Col>
       </Row>
+
+      {/* Accent (only when voice has >1 accent for this language) */}
+      {availableAccents.length > 1 ? (
+        <Row className="mb-3">
+          <Col xs={12} md={6}>
+            <div className="tta_voice_card">
+              <h3 className="tta_voice_card_title">{__("Accent", "text-to-audio")}</h3>
+              <Form.Select
+                onChange={handleAccentChange}
+                name="tta__elevenlabs_accent"
+                id="tta__elevenlabs_accent"
+                value={listeningSettings.tta__elevenlabs_accent || ""}
+                className="tta_orange_speak_select"
+              >
+                {availableAccents.map((a) => (
+                  <option key={a.locale} value={a.locale}>
+                    {a.accent ? `${a.accent} (${a.locale})` : a.locale}
+                  </option>
+                ))}
+              </Form.Select>
+            </div>
+          </Col>
+        </Row>
+      ) : availableAccents.length === 1 && availableAccents[0].locale ? (
+        <Row className="mb-3">
+          <Col xs={12} md={6}>
+            <div className="tta_voice_card">
+              <h3 className="tta_voice_card_title">{__("Accent", "text-to-audio")}</h3>
+              <div className="small text-muted">
+                {availableAccents[0].accent
+                  ? `${availableAccents[0].accent} (${availableAccents[0].locale})`
+                  : availableAccents[0].locale}
+              </div>
+            </div>
+          </Col>
+        </Row>
+      ) : null}
 
       {/* Output Format */}
       <Row className="mb-3">
@@ -179,97 +432,93 @@ export default function ElevenLabsSettings({
         </Col>
       </Row>
 
-      {/* Stability Slider */}
+      {/* Voice-tuning sliders — rendered only if the selected voice defines them */}
       <div className="tta_chatgpt_speed_card">
-        <Form.Group className="mb-4">
-          <div className="tta_slider_header">
-            <Form.Label className="tta_slider_label">
-              {__("Stability", "text-to-audio")}
-            </Form.Label>
-            <span className="tta_chatgpt_slider_value">
-              {listeningSettings.tta__elevenlabs_stability}
-            </span>
-          </div>
-          <div className="tta_slider_container">
-            <Form.Range
-              min="0"
-              max="1"
-              step="0.05"
-              name="tta__elevenlabs_stability"
-              id="tta__elevenlabs_stability"
-              onChange={handleChange}
-              value={listeningSettings.tta__elevenlabs_stability}
-              className="tta_chatgpt_slider"
-            />
-          </div>
-          <div className="tta_chatgpt_slider_labels">
-            <span>{__("More variable", "text-to-audio")}</span>
-            <span>{__("More stable", "text-to-audio")}</span>
-          </div>
-        </Form.Group>
+        {voiceHas("stability") ? (
+          <Form.Group className="mb-4">
+            <div className="tta_slider_header">
+              <Form.Label className="tta_slider_label">{__("Stability", "text-to-audio")}</Form.Label>
+              <span className="tta_chatgpt_slider_value">
+                {listeningSettings.tta__elevenlabs_stability}
+              </span>
+            </div>
+            <div className="tta_slider_container">
+              <Form.Range
+                min="0"
+                max="1"
+                step="0.05"
+                name="tta__elevenlabs_stability"
+                id="tta__elevenlabs_stability"
+                onChange={handleSliderChange}
+                value={listeningSettings.tta__elevenlabs_stability}
+                className="tta_chatgpt_slider"
+              />
+            </div>
+            <div className="tta_chatgpt_slider_labels">
+              <span>{__("More variable", "text-to-audio")}</span>
+              <span>{__("More stable", "text-to-audio")}</span>
+            </div>
+          </Form.Group>
+        ) : null}
 
-        {/* Similarity Boost Slider */}
-        <Form.Group className="mb-4">
-          <div className="tta_slider_header">
-            <Form.Label className="tta_slider_label">
-              {__("Similarity Boost", "text-to-audio")}
-            </Form.Label>
-            <span className="tta_chatgpt_slider_value">
-              {listeningSettings.tta__elevenlabs_similarity_boost}
-            </span>
-          </div>
-          <div className="tta_slider_container">
-            <Form.Range
-              min="0"
-              max="1"
-              step="0.05"
-              name="tta__elevenlabs_similarity_boost"
-              id="tta__elevenlabs_similarity_boost"
-              onChange={handleChange}
-              value={listeningSettings.tta__elevenlabs_similarity_boost}
-              className="tta_chatgpt_slider"
-            />
-          </div>
-          <div className="tta_chatgpt_slider_labels">
-            <span>{__("Low", "text-to-audio")}</span>
-            <span>{__("High", "text-to-audio")}</span>
-          </div>
-        </Form.Group>
+        {voiceHas("similarity_boost") ? (
+          <Form.Group className="mb-4">
+            <div className="tta_slider_header">
+              <Form.Label className="tta_slider_label">{__("Similarity Boost", "text-to-audio")}</Form.Label>
+              <span className="tta_chatgpt_slider_value">
+                {listeningSettings.tta__elevenlabs_similarity_boost}
+              </span>
+            </div>
+            <div className="tta_slider_container">
+              <Form.Range
+                min="0"
+                max="1"
+                step="0.05"
+                name="tta__elevenlabs_similarity_boost"
+                id="tta__elevenlabs_similarity_boost"
+                onChange={handleSliderChange}
+                value={listeningSettings.tta__elevenlabs_similarity_boost}
+                className="tta_chatgpt_slider"
+              />
+            </div>
+            <div className="tta_chatgpt_slider_labels">
+              <span>{__("Low", "text-to-audio")}</span>
+              <span>{__("High", "text-to-audio")}</span>
+            </div>
+          </Form.Group>
+        ) : null}
 
-        {/* Style Exaggeration Slider */}
-        <Form.Group className="mb-4">
-          <div className="tta_slider_header">
-            <Form.Label className="tta_slider_label">
-              {__("Style Exaggeration", "text-to-audio")}
-            </Form.Label>
-            <span className="tta_chatgpt_slider_value">
-              {listeningSettings.tta__elevenlabs_style}
-            </span>
-          </div>
-          <div className="tta_slider_container">
-            <Form.Range
-              min="0"
-              max="1"
-              step="0.05"
-              name="tta__elevenlabs_style"
-              id="tta__elevenlabs_style"
-              onChange={handleChange}
-              value={listeningSettings.tta__elevenlabs_style}
-              className="tta_chatgpt_slider"
-            />
-          </div>
-          <div className="tta_chatgpt_slider_labels">
-            <span>{__("None", "text-to-audio")}</span>
-            <span>{__("Exaggerated", "text-to-audio")}</span>
-          </div>
-        </Form.Group>
+        {voiceHas("style") ? (
+          <Form.Group className="mb-4">
+            <div className="tta_slider_header">
+              <Form.Label className="tta_slider_label">{__("Style Exaggeration", "text-to-audio")}</Form.Label>
+              <span className="tta_chatgpt_slider_value">
+                {listeningSettings.tta__elevenlabs_style}
+              </span>
+            </div>
+            <div className="tta_slider_container">
+              <Form.Range
+                min="0"
+                max="1"
+                step="0.05"
+                name="tta__elevenlabs_style"
+                id="tta__elevenlabs_style"
+                onChange={handleSliderChange}
+                value={listeningSettings.tta__elevenlabs_style}
+                className="tta_chatgpt_slider"
+              />
+            </div>
+            <div className="tta_chatgpt_slider_labels">
+              <span>{__("None", "text-to-audio")}</span>
+              <span>{__("Exaggerated", "text-to-audio")}</span>
+            </div>
+          </Form.Group>
+        ) : null}
 
-        {/* Speed Slider */}
+        {/* Speed is a user-level preference — always render */}
         <Form.Group className="mb-4">
           <div className="tta_slider_header">
-            <Form.Label className="tta_slider_label">
-              {__("Speed", "text-to-audio")}
-            </Form.Label>
+            <Form.Label className="tta_slider_label">{__("Speed", "text-to-audio")}</Form.Label>
             <span className="tta_chatgpt_slider_value">
               {listeningSettings.tta__elevenlabs_speed}
             </span>
@@ -293,7 +542,7 @@ export default function ElevenLabsSettings({
           </div>
         </Form.Group>
 
-        {/* Speaker Boost Toggle */}
+        {/* Speaker Boost is a user-level preference — always render */}
         <Form.Group className="mb-3">
           <div className="d-flex align-items-center justify-content-between">
             <Form.Label className="tta_slider_label mb-0">
@@ -303,7 +552,10 @@ export default function ElevenLabsSettings({
               type="switch"
               id="tta__elevenlabs_speaker_boost"
               name="tta__elevenlabs_speaker_boost"
-              checked={listeningSettings.tta__elevenlabs_speaker_boost === true || listeningSettings.tta__elevenlabs_speaker_boost === 'true'}
+              checked={
+                listeningSettings.tta__elevenlabs_speaker_boost === true ||
+                listeningSettings.tta__elevenlabs_speaker_boost === "true"
+              }
               onChange={(e) => {
                 handleChange({
                   target: {
@@ -319,21 +571,9 @@ export default function ElevenLabsSettings({
 
       {/* Audio Player */}
       <div className="tta_chatgpt_audio_player_card">
-        <audio
-          id="tts_audio_tag"
-          controls
-          className="tta_chatgpt_audio_player"
-        >
-          <source
-            id="tts_audio_wav"
-            src={baseMP3File}
-            type="audio/wav"
-          />
-          <source
-            id="tts_audio_mp3"
-            src={baseMP3File}
-            type="audio/mpeg"
-          />
+        <audio id="tts_audio_tag" controls className="tta_chatgpt_audio_player">
+          <source id="tts_audio_wav" src={baseMP3File} type="audio/wav" />
+          <source id="tts_audio_mp3" src={baseMP3File} type="audio/mpeg" />
           {__("Your browser does not support the audio element.", "text-to-audio")}
         </audio>
       </div>
