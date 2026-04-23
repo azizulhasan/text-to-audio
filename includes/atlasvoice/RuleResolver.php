@@ -76,19 +76,21 @@ class RuleResolver {
 		$selector_source   = 'none';
 		$resolved_entry    = null;
 
-		if ( isset( $post_override['selector'] ) && (string) $post_override['selector'] !== '' ) {
+		$is_pro = class_exists( '\\TTA\\TTA_Helper' ) && \TTA\TTA_Helper::is_pro_active();
+
+		if ( $is_pro && isset( $post_override['selector'] ) && (string) $post_override['selector'] !== '' ) {
 			$resolved_selector = (string) $post_override['selector'];
 			$selector_source   = 'post';
 			$resolved_entry    = $post_override;
-		} elseif ( $post_type !== '' && $lang !== '' && isset( $per_pt_lang[ $post_type ][ $lang ] ) && self::entry_sel( $per_pt_lang[ $post_type ][ $lang ] ) !== '' ) {
+		} elseif ( $is_pro && $post_type !== '' && $lang !== '' && isset( $per_pt_lang[ $post_type ][ $lang ] ) && self::entry_sel( $per_pt_lang[ $post_type ][ $lang ] ) !== '' ) {
 			$resolved_selector = self::entry_sel( $per_pt_lang[ $post_type ][ $lang ] );
 			$selector_source   = 'post_type_language';
 			$resolved_entry    = $per_pt_lang[ $post_type ][ $lang ];
-		} elseif ( $lang !== '' && isset( $per_lang[ $lang ] ) && self::entry_sel( $per_lang[ $lang ] ) !== '' ) {
+		} elseif ( $is_pro && $lang !== '' && isset( $per_lang[ $lang ] ) && self::entry_sel( $per_lang[ $lang ] ) !== '' ) {
 			$resolved_selector = self::entry_sel( $per_lang[ $lang ] );
 			$selector_source   = 'language';
 			$resolved_entry    = $per_lang[ $lang ];
-		} elseif ( $post_type !== '' && isset( $per_pt[ $post_type ] ) && self::entry_sel( $per_pt[ $post_type ] ) !== '' ) {
+		} elseif ( $is_pro && $post_type !== '' && isset( $per_pt[ $post_type ] ) && self::entry_sel( $per_pt[ $post_type ] ) !== '' ) {
 			$resolved_selector = self::entry_sel( $per_pt[ $post_type ] );
 			$selector_source   = 'post_type';
 			$resolved_entry    = $per_pt[ $post_type ];
