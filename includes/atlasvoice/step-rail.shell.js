@@ -541,7 +541,7 @@
         var existing = d.getElementById('av-pro-promo-modal');
         if (existing) { existing.remove(); }
 
-        var upgradeUrl = (typeof ttsObj !== 'undefined' && ttsObj.upgrade_url) ? ttsObj.upgrade_url : '#';
+        var upgradeUrl = (typeof ttsObj !== 'undefined' && ttsObj.upgrade_url) ? ttsObj.upgrade_url : 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/';
 
         var overlay = d.createElement('div');
         overlay.id = 'av-pro-promo-modal';
