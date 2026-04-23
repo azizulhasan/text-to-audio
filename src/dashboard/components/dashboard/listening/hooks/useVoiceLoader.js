@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import {
   getData,
   setLocalStorage,
@@ -25,6 +25,11 @@ export default function useVoiceLoader(customizationSettings, listeningVoiceMode
   const [speechSynthesisVoices, setSpeechSynthesisVoices] = useState([]);
   const [elevenLabsVoices, setElevenLabsVoices] = useState([]);
   const [languageMissingMessage, setLanguageMissingMessage] = useState("");
+
+  // Track which ElevenLabs cacheKey was most recently applied, so repeat
+  // calls with the same language don't re-apply state (and don't re-fire
+  // network requests if the cache is already hot).
+  const lastElevenLabsCacheKeyRef = useRef("");
 
   const apiURL = useMemo(() => {
     if (window.hasOwnProperty("ttsObj") && ttsObj.is_pro_active) {
@@ -119,7 +124,14 @@ export default function useVoiceLoader(customizationSettings, listeningVoiceMode
       ? `tts_elevenlabs_voices_${langCode}`
       : "tts_elevenlabs_voices";
 
+    // Skip if the same cacheKey was just applied — prevents duplicate
+    // state writes (and duplicate fetches) when multiple effects call this.
+    if (lastElevenLabsCacheKeyRef.current === cacheKey) {
+      return;
+    }
+
     const applyVoices = (voices) => {
+      lastElevenLabsCacheKeyRef.current = cacheKey;
       setElevenLabsVoices(voices);
       const voiceNames = voices.map((v) => v.name);
       setCurrentPlayerVoices(voiceNames);
@@ -269,9 +281,8 @@ export default function useVoiceLoader(customizationSettings, listeningVoiceMode
       setGPTVoicesAndLanguages(listeningVoiceModel);
     }
 
-    if (customizationSettings?.buttonSettings?.id == 6) {
-      setElevenLabsVoicesAndLanguages();
-    }
+    // Player 6 (ElevenLabs) voices are loaded by Listening.js with the
+    // current listening language so the cacheKey is language-scoped.
   }, [customizationSettings]);
 
   return {

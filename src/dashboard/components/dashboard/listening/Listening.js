@@ -48,7 +48,6 @@ export default function Listening() {
     tta__elevenlabs_style: "",
     tta__elevenlabs_speed: 1.0,
     tta__elevenlabs_speaker_boost: true,
-    tta__elevenlabs_accent: "",
   });
 
   const [baseMP3File, setBaseMP3File] = useState(

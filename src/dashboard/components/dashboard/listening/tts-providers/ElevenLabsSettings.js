@@ -104,23 +104,6 @@ export default function ElevenLabsSettings({
     return ids.length ? ids : FALLBACK_MODELS;
   }, [verifiedForLang]);
 
-  // Available accents/locales for this voice+language.
-  const availableAccents = useMemo(() => {
-    const seen = new Set();
-    const out = [];
-    for (const v of verifiedForLang) {
-      const key = `${v.accent || ""}|${v.locale || ""}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      out.push({
-        accent: v.accent || "",
-        locale: v.locale || "",
-        preview_url: v.preview_url || "",
-      });
-    }
-    return out;
-  }, [verifiedForLang]);
-
   // ── Sync: if current model isn't in availableModels, switch to first ──
   useEffect(() => {
     if (!selectedVoice) return;
@@ -133,21 +116,6 @@ export default function ElevenLabsSettings({
       });
     }
   }, [availableModels, selectedVoice]);
-
-  // ── Sync: if current accent isn't available, default to first ────────
-  useEffect(() => {
-    if (!availableAccents.length) return;
-    const current = listeningSettings.tta__elevenlabs_accent || "";
-    const stillValid = availableAccents.some((a) => a.locale === current);
-    if (!stillValid) {
-      handleChange({
-        target: {
-          name: "tta__elevenlabs_accent",
-          value: availableAccents[0].locale,
-        },
-      });
-    }
-  }, [availableAccents]);
 
   // ── Seed voice-tuning sliders from voice.settings (if user hasn't edited) ──
   useEffect(() => {
@@ -191,21 +159,19 @@ export default function ElevenLabsSettings({
     });
   }, [elevenLabsVoices, voiceSearch]);
 
-  // ── Manual voice-ID: fetch, inject, select, preview ──────────────────
-  const applyManualVoiceId = () => {
-    const trimmed = manualVoiceId.trim();
-    if (!trimmed || !proApiURL) return;
-    setManualError("");
-    setManualLoading(true);
-
+  // ── Fetch a voice by ID, inject into list, select, and play preview ──
+  const resolveAndSelectVoiceId = (voiceId, { onError, onDone } = {}) => {
+    const trimmed = (voiceId || "").trim();
+    if (!trimmed || !proApiURL) {
+      onDone && onDone();
+      return;
+    }
     getData(
       `${proApiURL}elevenlabs_voice?voice_id=${encodeURIComponent(trimmed)}`
     )
       .then((res) => {
         if (!res?.status || !res?.voice?.voice_id) {
-          setManualError(
-            res?.message || __("Voice not found.", "text-to-audio")
-          );
+          onError && onError(res?.message || __("Voice not found.", "text-to-audio"));
           return;
         }
         const voice = res.voice;
@@ -220,26 +186,62 @@ export default function ElevenLabsSettings({
           },
         });
         playPreview(voice.preview_url);
-        setManualVoiceId("");
       })
       .catch((err) => {
         console.log("elevenlabs_voice error:", err);
-        setManualError(__("Failed to fetch voice.", "text-to-audio"));
+        onError && onError(__("Failed to fetch voice.", "text-to-audio"));
       })
-      .finally(() => setManualLoading(false));
+      .finally(() => onDone && onDone());
   };
 
-  // ── Accent change: update state + play accent-specific preview ───────
-  const handleAccentChange = (e) => {
-    const locale = e.target.value;
-    handleChange({
-      target: { name: "tta__elevenlabs_accent", value: locale },
+  // ── Manual voice-ID form: "Use" button ───────────────────────────────
+  const applyManualVoiceId = () => {
+    const trimmed = manualVoiceId.trim();
+    if (!trimmed) return;
+    setManualError("");
+    setManualLoading(true);
+    resolveAndSelectVoiceId(trimmed, {
+      onError: (msg) => setManualError(msg),
+      onDone: () => {
+        setManualLoading(false);
+        setManualVoiceId("");
+      },
     });
-    const match = availableAccents.find((a) => a.locale === locale);
-    if (match?.preview_url) {
-      playPreview(match.preview_url);
-    }
   };
+
+  // ── Auto-resolve: if the user pastes a 20-char voice ID into the
+  //    search box, fetch it so preview plays even when the voice isn't
+  //    in the current language-filtered shared-voice list (or lacks a
+  //    preview_url). Debounced to avoid spamming the API. ─────────────
+  const autoResolvedRef = useRef(new Set());
+  useEffect(() => {
+    const q = voiceSearch.trim();
+    if (!/^[A-Za-z0-9]{20}$/.test(q)) return;
+    if (autoResolvedRef.current.has(q)) return;
+
+    const existing = elevenLabsVoices.find((v) => v.voice_id === q);
+    if (existing && existing.preview_url) {
+      // Already have full data for this voice — just select + play it.
+      autoResolvedRef.current.add(q);
+      const firstName = (existing.name || "Custom")
+        .split(/[\s\-]/)[0]
+        .trim();
+      handleChange({
+        target: {
+          name: "tta__listening_voice",
+          value: `${existing.voice_id}::${firstName || "Custom"}`,
+        },
+      });
+      playPreview(existing.preview_url);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      autoResolvedRef.current.add(q);
+      resolveAndSelectVoiceId(q);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [voiceSearch, elevenLabsVoices]);
 
   // ── Slider change: mark edited so we stop re-seeding ─────────────────
   const handleSliderChange = (e) => {
@@ -372,43 +374,6 @@ export default function ElevenLabsSettings({
           </div>
         </Col>
       </Row>
-
-      {/* Accent (only when voice has >1 accent for this language) */}
-      {availableAccents.length > 1 ? (
-        <Row className="mb-3">
-          <Col xs={12} md={6}>
-            <div className="tta_voice_card">
-              <h3 className="tta_voice_card_title">{__("Accent", "text-to-audio")}</h3>
-              <Form.Select
-                onChange={handleAccentChange}
-                name="tta__elevenlabs_accent"
-                id="tta__elevenlabs_accent"
-                value={listeningSettings.tta__elevenlabs_accent || ""}
-                className="tta_orange_speak_select"
-              >
-                {availableAccents.map((a) => (
-                  <option key={a.locale} value={a.locale}>
-                    {a.accent ? `${a.accent} (${a.locale})` : a.locale}
-                  </option>
-                ))}
-              </Form.Select>
-            </div>
-          </Col>
-        </Row>
-      ) : availableAccents.length === 1 && availableAccents[0].locale ? (
-        <Row className="mb-3">
-          <Col xs={12} md={6}>
-            <div className="tta_voice_card">
-              <h3 className="tta_voice_card_title">{__("Accent", "text-to-audio")}</h3>
-              <div className="small text-muted">
-                {availableAccents[0].accent
-                  ? `${availableAccents[0].accent} (${availableAccents[0].locale})`
-                  : availableAccents[0].locale}
-              </div>
-            </div>
-          </Col>
-        </Row>
-      ) : null}
 
       {/* Output Format */}
       <Row className="mb-3">
