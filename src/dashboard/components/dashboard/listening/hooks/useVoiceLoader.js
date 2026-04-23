@@ -106,44 +106,54 @@ export default function useVoiceLoader(customizationSettings, listeningVoiceMode
   };
 
   // ── ElevenLabs voices ───────────────────────────────────────────────
-  const setElevenLabsVoicesAndLanguages = () => {
-    if (window.hasOwnProperty("ttsObj") && ttsObj.is_pro_active) {
-      let stored = getLocalStorage(["tts_elevenlabs_voices"]);
-      if (stored?.tts_elevenlabs_voices) {
-        try {
-          let voices = JSON.parse(stored.tts_elevenlabs_voices);
-          setElevenLabsVoices(voices);
-          const voiceNames = voices.map(v => v.name);
-          setCurrentPlayerVoices(voiceNames);
-          setCurrentPlayerFilteredVoices(voiceNames);
-          setSpeechSynthesisVoices(voiceNames);
-          let languages = chatGPTLanguages();
-          setCurrentPlayerLanguages(languages);
-          return;
-        } catch (e) {
-          console.log('Error parsing stored ElevenLabs voices:', e);
-        }
-      }
-
-      const proApiURL = ttsObj.api_url + ttsObj.api_namespace + "_pro/" + ttsObj.api_version + "/";
-      getData(proApiURL + "elevenlabs_voices")
-        .then((res) => {
-          if (res?.voices && res.voices.length) {
-            setLocalStorage({ tts_elevenlabs_voices: JSON.stringify(res.voices) });
-            setElevenLabsVoices(res.voices);
-            const voiceNames = res.voices.map(v => v.name);
-            setCurrentPlayerVoices(voiceNames);
-            setCurrentPlayerFilteredVoices(voiceNames);
-            setSpeechSynthesisVoices(voiceNames);
-
-            let languages = chatGPTLanguages();
-            setCurrentPlayerLanguages(languages);
-          }
-        })
-        .catch((err) => {
-          console.log('ElevenLabs voices error:', err);
-        });
+  // Cache is language-keyed so switching the listening language triggers
+  // a fresh fetch of `/v1/shared-voices` for that language (capped at 100).
+  const setElevenLabsVoicesAndLanguages = (language = "") => {
+    if (!(window.hasOwnProperty("ttsObj") && ttsObj.is_pro_active)) {
+      return;
     }
+
+    // Normalize to 2-letter ISO language code (e.g. "en-GB" → "en").
+    const langCode = (language || "").toLowerCase().split(/[-_]/)[0] || "";
+    const cacheKey = langCode
+      ? `tts_elevenlabs_voices_${langCode}`
+      : "tts_elevenlabs_voices";
+
+    const applyVoices = (voices) => {
+      setElevenLabsVoices(voices);
+      const voiceNames = voices.map((v) => v.name);
+      setCurrentPlayerVoices(voiceNames);
+      setCurrentPlayerFilteredVoices(voiceNames);
+      setSpeechSynthesisVoices(voiceNames);
+      setCurrentPlayerLanguages(chatGPTLanguages());
+    };
+
+    const stored = getLocalStorage([cacheKey]);
+    if (stored?.[cacheKey]) {
+      try {
+        applyVoices(JSON.parse(stored[cacheKey]));
+        return;
+      } catch (e) {
+        console.log("Error parsing stored ElevenLabs voices:", e);
+      }
+    }
+
+    const proApiURL =
+      ttsObj.api_url + ttsObj.api_namespace + "_pro/" + ttsObj.api_version + "/";
+    const endpoint = langCode
+      ? `${proApiURL}elevenlabs_voices?language=${encodeURIComponent(langCode)}`
+      : `${proApiURL}elevenlabs_voices`;
+
+    getData(endpoint)
+      .then((res) => {
+        if (res?.voices && res.voices.length) {
+          setLocalStorage({ [cacheKey]: JSON.stringify(res.voices) });
+          applyVoices(res.voices);
+        }
+      })
+      .catch((err) => {
+        console.log("ElevenLabs voices error:", err);
+      });
   };
 
   // ── Browser speech synthesis / fallback ─────────────────────────────
@@ -211,6 +221,8 @@ export default function useVoiceLoader(customizationSettings, listeningVoiceMode
         setCurrentPlayerLanguages(languages);
         setLanguageMissingMessage("");
       } else if (customizationSettings?.buttonSettings?.id == 6) {
+        // Languages shown in the UI dropdown are the same chatGPTLanguages set;
+        // the actual voice filtering happens server-side via `/v1/shared-voices`.
         let languages = chatGPTLanguages();
         setCurrentPlayerLanguages(languages);
         setLanguageMissingMessage("");
@@ -251,5 +263,6 @@ export default function useVoiceLoader(customizationSettings, listeningVoiceMode
     setGPTVoicesAndLanguages,
     setGoogleVoicesAndLanguages,
     setVoicesAndLanguages,
+    setElevenLabsVoicesAndLanguages,
   };
 }

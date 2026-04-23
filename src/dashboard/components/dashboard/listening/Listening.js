@@ -68,6 +68,7 @@ export default function Listening() {
     setGPTVoicesAndLanguages,
     setGoogleVoicesAndLanguages,
     setVoicesAndLanguages,
+    setElevenLabsVoicesAndLanguages,
   } = useVoiceLoader(customizationSettings, listeningSettings.tta__listening_voice_model);
 
   const { multilingualActiveLanguages, activePluginName } =
@@ -157,6 +158,21 @@ export default function Listening() {
         console.log(err);
       });
   }, []);
+
+  // ── Refetch ElevenLabs voices when listening language changes ──────
+  useEffect(() => {
+    if (
+      window.hasOwnProperty("ttsObj") &&
+      ttsObj.is_pro_active &&
+      customizationSettings?.buttonSettings?.id == 6 &&
+      listeningSettings.tta__listening_lang
+    ) {
+      setElevenLabsVoicesAndLanguages(listeningSettings.tta__listening_lang);
+    }
+  }, [
+    customizationSettings?.buttonSettings?.id,
+    listeningSettings.tta__listening_lang,
+  ]);
 
   // ── Sync multilingual languages to listening settings ──────────────
   useEffect(() => {

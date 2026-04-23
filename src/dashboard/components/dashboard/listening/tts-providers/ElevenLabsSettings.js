@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { Col, Row, Form } from "react-bootstrap";
 import { __ } from "@wordpress/i18n";
 import { getLanguageFlag } from "../utils";
@@ -10,6 +10,39 @@ export default function ElevenLabsSettings({
   handleChange,
   baseMP3File,
 }) {
+  const [voiceSearch, setVoiceSearch] = useState("");
+  const [manualVoiceId, setManualVoiceId] = useState("");
+
+  const filteredElevenLabsVoices = useMemo(() => {
+    const q = voiceSearch.trim().toLowerCase();
+    if (!q) return elevenLabsVoices;
+    return elevenLabsVoices.filter((v) => {
+      const name = (v.name || "").toLowerCase();
+      const accent = (v.labels?.accent || "").toLowerCase();
+      const gender = (v.labels?.gender || "").toLowerCase();
+      const desc = (v.labels?.description || "").toLowerCase();
+      const id = (v.voice_id || "").toLowerCase();
+      return (
+        name.includes(q) ||
+        accent.includes(q) ||
+        gender.includes(q) ||
+        desc.includes(q) ||
+        id.includes(q)
+      );
+    });
+  }, [elevenLabsVoices, voiceSearch]);
+
+  const applyManualVoiceId = () => {
+    const trimmed = manualVoiceId.trim();
+    if (!trimmed) return;
+    handleChange({
+      target: {
+        name: "tta__listening_voice",
+        value: trimmed + "::Custom",
+      },
+    });
+  };
+
   return (
     <>
       {/* Voice Language, Voice to Speak, and Model - Three Columns */}
@@ -51,6 +84,13 @@ export default function ElevenLabsSettings({
         <Col xs={12} md={4}>
           <div className="tta_voice_card">
             <h3 className="tta_voice_card_title">{__("Voice to speak", "text-to-audio")}</h3>
+            <Form.Control
+              type="search"
+              className="mb-2"
+              placeholder={__("Search voices by name, accent, gender…", "text-to-audio")}
+              value={voiceSearch}
+              onChange={(e) => setVoiceSearch(e.target.value)}
+            />
             <Form.Select
               onChange={handleChange}
               name="tta__listening_voice"
@@ -59,7 +99,7 @@ export default function ElevenLabsSettings({
               className="tta_orange_speak_select"
             >
               <option disabled>{__("Default Listening Voice", "text-to-audio")}</option>
-              {elevenLabsVoices.map((voice, index) => {
+              {filteredElevenLabsVoices.map((voice, index) => {
                 const firstName = voice.name ? voice.name.split(/[\s\-]/)[0].trim() : '';
                 const optionValue = voice.voice_id + '::' + firstName;
                 return (
@@ -69,6 +109,32 @@ export default function ElevenLabsSettings({
                 );
               })}
             </Form.Select>
+            <div className="mt-2">
+              <Form.Label className="small text-muted mb-1">
+                {__("Or paste a voice ID (overrides selection)", "text-to-audio")}
+              </Form.Label>
+              <div className="d-flex gap-2">
+                <Form.Control
+                  type="text"
+                  placeholder={__("e.g. 21m00Tcm4TlvDq8ikWAM", "text-to-audio")}
+                  value={manualVoiceId}
+                  onChange={(e) => setManualVoiceId(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      applyManualVoiceId();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={applyManualVoiceId}
+                >
+                  {__("Use", "text-to-audio")}
+                </button>
+              </div>
+            </div>
           </div>
         </Col>
 
