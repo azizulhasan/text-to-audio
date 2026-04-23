@@ -43,11 +43,12 @@ export default function Listening() {
     tta__listening_instruction_preset: "native",
     tta__elevenlabs_model: "eleven_multilingual_v2",
     tta__elevenlabs_output_format: "mp3_44100_128",
-    tta__elevenlabs_stability: 0.5,
-    tta__elevenlabs_similarity_boost: 0.75,
-    tta__elevenlabs_style: 0.0,
+    tta__elevenlabs_stability: "",
+    tta__elevenlabs_similarity_boost: "",
+    tta__elevenlabs_style: "",
     tta__elevenlabs_speed: 1.0,
     tta__elevenlabs_speaker_boost: true,
+    tta__elevenlabs_accent: "",
   });
 
   const [baseMP3File, setBaseMP3File] = useState(
@@ -69,6 +70,7 @@ export default function Listening() {
     setGoogleVoicesAndLanguages,
     setVoicesAndLanguages,
     setElevenLabsVoicesAndLanguages,
+    addElevenLabsVoice,
   } = useVoiceLoader(customizationSettings, listeningSettings.tta__listening_voice_model);
 
   const { multilingualActiveLanguages, activePluginName } =
@@ -378,8 +380,10 @@ export default function Listening() {
             ) : playerId == 6 ? (
               <ElevenLabsSettings
                 listeningSettings={listeningSettings}
+                setListeningSettings={setListeningSettings}
                 currentPlayerLanguages={currentPlayerLanguages}
                 elevenLabsVoices={elevenLabsVoices}
+                addElevenLabsVoice={addElevenLabsVoice}
                 handleChange={handleChange}
                 baseMP3File={baseMP3File}
               />

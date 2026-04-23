@@ -156,6 +156,28 @@ export default function useVoiceLoader(customizationSettings, listeningVoiceMode
       });
   };
 
+  // Append or replace a single voice in the ElevenLabs voice list (used
+  // when the user resolves a manual voice ID). Keeps localStorage cache
+  // in sync so reloads remember the injected voice.
+  const addElevenLabsVoice = (voice, language = "") => {
+    if (!voice || !voice.voice_id) return;
+    const langCode = (language || "").toLowerCase().split(/[-_]/)[0] || "";
+    const cacheKey = langCode
+      ? `tts_elevenlabs_voices_${langCode}`
+      : "tts_elevenlabs_voices";
+
+    setElevenLabsVoices((prev) => {
+      const existingIdx = prev.findIndex((v) => v.voice_id === voice.voice_id);
+      const next = existingIdx >= 0
+        ? prev.map((v, i) => (i === existingIdx ? { ...v, ...voice } : v))
+        : [voice, ...prev];
+      try {
+        setLocalStorage({ [cacheKey]: JSON.stringify(next) });
+      } catch (e) {}
+      return next;
+    });
+  };
+
   // ── Browser speech synthesis / fallback ─────────────────────────────
   const setVoicesAndLanguages = (voices = [], langs = []) => {
     if (Array.isArray(voices) && voices.length) {
@@ -264,5 +286,6 @@ export default function useVoiceLoader(customizationSettings, listeningVoiceMode
     setGoogleVoicesAndLanguages,
     setVoicesAndLanguages,
     setElevenLabsVoicesAndLanguages,
+    addElevenLabsVoice,
   };
 }
