@@ -157,8 +157,8 @@
         }
         var tag = el.tagName.toLowerCase();
         var cls = cleanClasses(el).split(/\s+/).filter(Boolean);
-        var nth = nthChild(el);
-        var nthSfx = nth > 0 ? ':nth-child(' + nth + ')' : '';
+        var nth = nthOfType(el);
+        var nthSfx = nth > 0 ? ':nth-of-type(' + nth + ')' : '';
 
         // Try unique class inside the selected content container.
         if (state.selectedEl && cls.length) {
@@ -170,15 +170,15 @@
             }
         }
 
-        // Build parent-context selector with nth-child for uniqueness inside clone.
+        // Use descendant combinator so the selector works regardless of nesting depth.
         var parent = el.parentElement;
         if (parent) {
             var ptag = parent.tagName.toLowerCase();
             var pcls = cleanClasses(parent).split(/\s+/).filter(Boolean);
             if (parent.id && !/^\d/.test(parent.id)) {
-                return '#' + parent.id + ' > ' + tag + (cls.length ? '.' + cls[0] : '') + nthSfx;
+                return '#' + parent.id + ' ' + tag + (cls.length ? '.' + cls[0] : '') + nthSfx;
             }
-            return ptag + (pcls.length ? '.' + pcls[0] : '') + ' > ' + tag + (cls.length ? '.' + cls[0] : '') + nthSfx;
+            return ptag + (pcls.length ? '.' + pcls[0] : '') + ' ' + tag + (cls.length ? '.' + cls[0] : '') + nthSfx;
         }
         return tag + (cls.length ? '.' + cls[0] : '') + nthSfx;
     }
@@ -189,6 +189,19 @@
         // Temporarily strip picker classes so they don't pollute the selector.
         var orig = (typeof el.className === 'string') ? el.className : (el.className.baseVal || '');
         return orig.replace(PICKER_CLASSES, '').trim().replace(/\s{2,}/g, ' ');
+    }
+
+    // Returns 1-based position of el among its parent's children of the SAME tag.
+    function nthOfType(el) {
+        var tag = el.tagName;
+        var n = 0;
+        var sib = el.parentElement && el.parentElement.firstElementChild;
+        while (sib) {
+            if (sib.tagName === tag) { n++; }
+            if (sib === el) { return n; }
+            sib = sib.nextElementSibling;
+        }
+        return 0;
     }
 
     // Returns 1-based position of el among its parent's element children.
@@ -205,25 +218,26 @@
         }
         var tag = el.tagName.toLowerCase();
         var cls = cleanClasses(el).split(/\s+/).filter(Boolean);
-        var nth = nthChild(el);
-        var nthSfx = nth > 0 ? ':nth-child(' + nth + ')' : '';
+        var nth = nthOfType(el);
+        var nthSfx = nth > 0 ? ':nth-of-type(' + nth + ')' : '';
 
-        // Try each class for global uniqueness (no nth-child needed).
+        // Try each class for global uniqueness (no positional suffix needed).
         for (var i = 0; i < cls.length; i++) {
             var cand = tag + '.' + cls[i];
             try { if (d.querySelectorAll(cand).length === 1) { return cand; } } catch (e) {}
         }
 
-        // Add nth-child to distinguish from siblings; prefix with parent for context.
+        // Use descendant combinator (space) so the selector works regardless of
+        // how many elements sit between the parent and the target in the DOM.
         var base = tag + (cls.length ? '.' + cls[0] : '') + nthSfx;
         var parent = el.parentElement;
         if (parent) {
             if (parent.id && !/^\d/.test(parent.id)) {
-                return '#' + parent.id + ' > ' + base;
+                return '#' + parent.id + ' ' + base;
             }
             var ptag = parent.tagName.toLowerCase();
             var pcls = cleanClasses(parent).split(/\s+/).filter(Boolean);
-            return ptag + (pcls.length ? '.' + pcls[0] : '') + ' > ' + base;
+            return ptag + (pcls.length ? '.' + pcls[0] : '') + ' ' + base;
         }
         return base;
     }
