@@ -45,11 +45,11 @@
     var CHIP_KINDS = ['excl_css', 'excl_texts', 'excl_tags'];
 
     var SCOPE_OPTIONS = [
-        { value: 'global',             label: 'Global',               needsPt: false, needsLang: false },
-        { value: 'post_type',          label: 'Post type',            needsPt: true,  needsLang: false },
-        { value: 'language',           label: 'Language',             needsPt: false, needsLang: true  },
-        { value: 'post_type_language', label: 'Post type + language', needsPt: true,  needsLang: true  },
-        { value: 'post',               label: 'This post',            needsPt: false, needsLang: false }
+        { value: 'global',             label: 'Global',               needsPt: false, needsLang: false, proOnly: false },
+        { value: 'post_type',          label: 'Post type',            needsPt: true,  needsLang: false, proOnly: true  },
+        { value: 'language',           label: 'Language',             needsPt: false, needsLang: true,  proOnly: true  },
+        { value: 'post_type_language', label: 'Post type + language', needsPt: true,  needsLang: true,  proOnly: true  },
+        { value: 'post',               label: 'This post',            needsPt: false, needsLang: false, proOnly: true  }
     ];
 
     function makeEmptySelection() {
@@ -321,7 +321,7 @@
         } else if (state.pickMode === 'excl') {
             if (!state.pro) {
                 stopPickMode();
-                status('Exclude chips require Pro. Upgrade to unlock this feature.');
+                showProPromo('Exclude areas');
                 return;
             }
             var exclSel = generateExcludeSelector(el);
@@ -535,6 +535,36 @@
         });
     }
 
+    /* ─── Pro upgrade prompt ────────────────────────────────────── */
+
+    function showProPromo(featureName) {
+        var existing = d.getElementById('av-pro-promo-modal');
+        if (existing) { existing.remove(); }
+
+        var upgradeUrl = (typeof ttsObj !== 'undefined' && ttsObj.upgrade_url) ? ttsObj.upgrade_url : '#';
+
+        var overlay = d.createElement('div');
+        overlay.id = 'av-pro-promo-modal';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2147483647;display:flex;align-items:center;justify-content:center;';
+
+        var box = d.createElement('div');
+        box.style.cssText = 'background:#fff;border-radius:12px;padding:28px 32px;max-width:360px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25);font-family:inherit;';
+        box.innerHTML =
+            '<div style="font-size:36px;margin-bottom:10px;">&#9889;</div>' +
+            '<h3 style="margin:0 0 8px;font-size:17px;color:#111;font-weight:700;">' + featureName + ' requires Pro</h3>' +
+            '<p style="margin:0 0 20px;font-size:13px;color:#6b7280;line-height:1.5;">Upgrade to AtlasVoice Pro to unlock per-scope content extraction rules and advanced targeting.</p>' +
+            '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">' +
+                '<button id="av-promo-close" style="padding:8px 18px;border:1px solid #d1d5db;background:#fff;border-radius:6px;cursor:pointer;font-size:13px;">Maybe later</button>' +
+                '<a href="' + upgradeUrl + '" target="_blank" rel="noopener" style="padding:8px 18px;background:#7c3aed;color:#fff;border-radius:6px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-block;">Upgrade to Pro &#8594;</a>' +
+            '</div>';
+
+        overlay.appendChild(box);
+        d.body.appendChild(overlay);
+
+        overlay.addEventListener('click', function (e) { if (e.target === overlay) { overlay.remove(); } });
+        d.getElementById('av-promo-close').addEventListener('click', function () { overlay.remove(); });
+    }
+
     /* ─── scope radiogroup ──────────────────────────────────────── */
 
     function renderScopeRow() {
@@ -544,31 +574,51 @@
         var scopes = state.scopes || { post_types: [], languages: [] };
 
         SCOPE_OPTIONS.forEach(function (opt) {
-            var id = 'av-scope-' + opt.value;
+            // Language-based scopes: only render when a language plugin is active.
+            if (opt.needsLang && !(scopes.languages || []).length) { return; }
+
+            var id       = 'av-scope-' + opt.value;
+            var isGated  = opt.proOnly && !state.pro;
+            var isActive = (state.selection.scope === opt.value);
+
             var label = d.createElement('label');
             label.setAttribute('for', id);
-            if (state.selection.scope === opt.value) { label.className = 'is-checked'; }
+            var cls = [];
+            if (isActive)  { cls.push('is-checked'); }
+            if (isGated)   { cls.push('is-disabled'); }
+            if (cls.length) { label.className = cls.join(' '); }
 
             var input = d.createElement('input');
             input.type = 'radio'; input.name = 'av-scope'; input.id = id; input.value = opt.value;
-            input.checked = (state.selection.scope === opt.value);
+            input.checked = isActive;
 
-            if (opt.needsLang && !(scopes.languages || []).length) {
-                return; // no language plugin active — omit this scope option
+            if (isGated) {
+                input.disabled = true;
+                label.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    showProPromo(opt.label);
+                });
+            } else {
+                input.addEventListener('change', function () {
+                    state.selection.scope     = opt.value;
+                    state.selection.post_type = opt.needsPt   ? state.postType : '';
+                    state.selection.language  = opt.needsLang ? state.postLang : '';
+                    renderScopeRow();
+                    loadRulesForScope();
+                });
             }
-            // Per-post scope requires Pro (uses post meta that Free can't read back).
-            if (opt.value === 'post' && !state.pro) { return; }
-
-            input.addEventListener('change', function () {
-                state.selection.scope     = opt.value;
-                state.selection.post_type = opt.needsPt   ? state.postType : '';
-                state.selection.language  = opt.needsLang ? state.postLang : '';
-                renderScopeRow();
-                loadRulesForScope();
-            });
 
             label.appendChild(input);
             label.appendChild(d.createTextNode('\u00a0' + opt.label));
+
+            if (isGated) {
+                var pill = d.createElement('span');
+                pill.className = 'av-pro-pill';
+                pill.textContent = 'Pro';
+                label.appendChild(d.createTextNode('\u00a0'));
+                label.appendChild(pill);
+            }
+
             wrap.appendChild(label);
         });
     }
@@ -742,7 +792,7 @@
             var pickExcl = step.querySelector('.av-btn--pick-excl');
             if (pickExcl) {
                 pickExcl.addEventListener('click', function () {
-                    if (!state.pro) { status('Exclude picker requires Pro.'); return; }
+                    if (!state.pro) { showProPromo('Exclude areas'); return; }
                     if (state.pickMode === 'excl' && state.exclKind === kind) {
                         stopPickMode(); status('Exclude picker stopped.');
                     } else {
@@ -755,7 +805,7 @@
             var addBtn = step.querySelector('.av-btn--add-chip');
             if (inp && addBtn) {
                 addBtn.addEventListener('click', function () {
-                    if (!state.pro) { status('Exclude chips require Pro.'); return; }
+                    if (!state.pro) { showProPromo('Exclude chips'); return; }
                     if (addChip(kind, inp.value)) { inp.value = ''; inp.focus(); updatePreview(); }
                 });
                 inp.addEventListener('keydown', function (e) {
@@ -1046,7 +1096,7 @@
                 return;
             }
             state.selection.selector  = resp.selector  || '';
-            state.selection.scope     = resp.scope      || 'post';
+            state.selection.scope     = resp.scope      || 'global';
             state.selection.post_type = resp.post_type  || '';
             state.selection.language  = resp.language   || '';
             state.postType            = resp.post_type  || '';
