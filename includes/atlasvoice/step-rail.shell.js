@@ -450,18 +450,40 @@
         try { el = d.querySelector(state.selection.selector); } catch (e) { return ''; }
         if (!el) { return ''; }
 
+        // Resolve excl_css selectors against the LIVE DOM before cloning so
+        // positional pseudos (:nth-of-type, :nth-child) reflect the actual
+        // page structure — not the detached clone's shifted sibling context.
+        // Tag each live match with a one-shot data attribute; after cloning
+        // we strip the same-attribute nodes out of the clone by reference,
+        // guaranteeing preview removal matches the red highlight 1:1.
+        var EXCL_MARK = 'data-av-excl-match';
+        (state.selection.excl_css || []).forEach(function (sel) {
+            if (!sel) { return; }
+            try {
+                // Match document-wide (same scope as reapplyExcludeHighlights)
+                // but only mark nodes that are actually inside the content
+                // region, since nothing outside `el` ends up in the clone.
+                Array.prototype.forEach.call(d.querySelectorAll(sel), function (n) {
+                    if (n === el || el.contains(n)) { n.setAttribute(EXCL_MARK, '1'); }
+                });
+            } catch (e) {}
+        });
+
         var clone = el.cloneNode(true);
+
+        // Clean up live markers immediately — extract side-effects must not
+        // leak into the live DOM beyond the clone step.
+        Array.prototype.forEach.call(el.querySelectorAll('[' + EXCL_MARK + ']'), function (n) {
+            n.removeAttribute(EXCL_MARK);
+        });
+        if (el.hasAttribute && el.hasAttribute(EXCL_MARK)) { el.removeAttribute(EXCL_MARK); }
 
         Array.prototype.forEach.call(clone.querySelectorAll('[class]'), function (n) {
             n.className = (n.className || '').replace(PICKER_CLASSES, '').trim();
         });
 
-        (state.selection.excl_css || []).forEach(function (sel) {
-            try {
-                Array.prototype.forEach.call(clone.querySelectorAll(sel), function (n) {
-                    if (n.parentNode) { n.parentNode.removeChild(n); }
-                });
-            } catch (e) {}
+        Array.prototype.forEach.call(clone.querySelectorAll('[' + EXCL_MARK + ']'), function (n) {
+            if (n.parentNode) { n.parentNode.removeChild(n); }
         });
 
         (state.selection.excl_tags || []).forEach(function (tag) {
@@ -695,6 +717,41 @@
 
     /* ─── chips ─────────────────────────────────────────────────── */
 
+    // Re-apply red .av-picker-excluded highlight to every element matching a
+    // saved excl_css selector. Called after loadExistingRules so reloads keep
+    // the visual state, and after any chip mutation so live edits track the DOM.
+    function reapplyExcludeHighlights() {
+        state.excludedEls.forEach(function (el) { el.classList.remove('av-picker-excluded'); });
+        state.excludedEls = [];
+        (state.selection.excl_css || []).forEach(function (exclSel) {
+            if (!exclSel) { return; }
+            try {
+                Array.prototype.forEach.call(d.querySelectorAll(exclSel), function (el) {
+                    if (isRailElement(el)) { return; }
+                    el.classList.add('av-picker-excluded');
+                    state.excludedEls.push(el);
+                });
+            } catch (e) {}
+        });
+    }
+
+    // Refresh the .av-picker-selected highlight after the Content region
+    // selector changes (typing in the input or programmatic update).
+    function reapplySelectedHighlight() {
+        if (state.selectedEl) {
+            state.selectedEl.classList.remove('av-picker-selected');
+            state.selectedEl = null;
+        }
+        if (!state.selection.selector) { return; }
+        try {
+            var el = d.querySelector(state.selection.selector);
+            if (el && !isRailElement(el)) {
+                state.selectedEl = el;
+                el.classList.add('av-picker-selected');
+            }
+        } catch (e) {}
+    }
+
     function validateChipValue(kind, val) {
         val = (val || '').toString().trim();
         if (!val) { return ''; }
@@ -724,7 +781,18 @@
             var chip = d.createElement('span');
             chip.className = 'av-chip';
             chip.setAttribute('role', 'listitem');
-            chip.appendChild(d.createTextNode(val));
+
+            var text = d.createElement('span');
+            text.className = 'av-chip__text';
+            text.textContent = val;
+            text.title = 'Click to edit';
+            text.style.cssText = 'cursor:text;';
+            text.addEventListener('click', function (e) {
+                e.stopPropagation();
+                beginChipEdit(kind, idx, chip, text);
+            });
+            chip.appendChild(text);
+
             var x = d.createElement('button');
             x.type = 'button'; x.setAttribute('aria-label', 'Remove ' + val); x.textContent = '\u00D7';
             x.addEventListener('click', function () {
@@ -733,12 +801,101 @@
                 state.userEdited = true;
                 renderChipRow(kind);
                 syncTagCheckboxes();
+                if (kind === 'excl_css') { reapplyExcludeHighlights(); }
                 updatePreview();
                 status('Removed ' + val + '.');
             });
             chip.appendChild(x);
             wrap.appendChild(chip);
         });
+    }
+
+    // Swap a chip's text span for an <input> so the value can be edited in
+    // place. Every keystroke writes the provisional value into the selection
+    // and refreshes highlights + preview — the page reacts live as the admin
+    // types. Enter / blur finalize (push undo, re-render the chip row);
+    // Escape reverts to the original value. Invalid / duplicate values are
+    // skipped on the live update (kept as-is) so malformed strings never
+    // clobber the DOM state mid-edit.
+    function beginChipEdit(kind, idx, chip, textEl) {
+        if (!state.pro) { showProPromo(CHIP_FEATURE_NAMES[kind] || kind); return; }
+        var original = state.selection[kind][idx];
+        var input = d.createElement('input');
+        input.type = 'text';
+        input.value = original;
+        input.className = 'av-chip__edit';
+        input.style.cssText = 'font:inherit;padding:0 2px;border:1px solid #93c5fd;border-radius:3px;min-width:120px;';
+        chip.replaceChild(input, textEl);
+        input.focus();
+        input.select();
+
+        // Live-apply each keystroke: validate, dedupe, update state in place,
+        // then refresh highlights + preview. We intentionally do NOT call
+        // renderChipRow here — that would rip the input out of the DOM.
+        function liveApply() {
+            var next = validateChipValue(kind, input.value);
+            if (!next) { return; }
+            var list = state.selection[kind] || [];
+            var dupIdx = list.indexOf(next);
+            if (dupIdx !== -1 && dupIdx !== idx) { return; }
+            if (state.selection[kind][idx] === next) { return; }
+            state.selection[kind][idx] = next;
+            state.userEdited = true;
+            if (kind === 'excl_css') { reapplyExcludeHighlights(); }
+            updatePreview();
+        }
+
+        var done = false;
+        function commit() {
+            if (done) { return; } done = true;
+            var finalVal = validateChipValue(kind, input.value);
+            if (!finalVal) {
+                // Invalid — revert to original.
+                state.selection[kind][idx] = original;
+                if (kind === 'excl_css') { reapplyExcludeHighlights(); }
+                updatePreview();
+                renderChipRow(kind);
+                status('Invalid value — reverted.');
+                return;
+            }
+            var list = state.selection[kind] || [];
+            var dupIdx = list.indexOf(finalVal);
+            if (dupIdx !== -1 && dupIdx !== idx) {
+                state.selection[kind][idx] = original;
+                if (kind === 'excl_css') { reapplyExcludeHighlights(); }
+                updatePreview();
+                renderChipRow(kind);
+                status('Already in list: "' + finalVal + '" — reverted.');
+                return;
+            }
+            if (finalVal !== original) {
+                pushUndo('edit ' + kind + ' "' + original + '" → "' + finalVal + '"');
+                state.selection[kind][idx] = finalVal;
+                state.userEdited = true;
+                syncTagCheckboxes();
+                if (kind === 'excl_css') { reapplyExcludeHighlights(); }
+                updatePreview();
+                status('Updated: ' + finalVal);
+            }
+            renderChipRow(kind);
+        }
+        function cancel() {
+            if (done) { return; } done = true;
+            // Restore original value + visuals.
+            state.selection[kind][idx] = original;
+            if (kind === 'excl_css') { reapplyExcludeHighlights(); }
+            updatePreview();
+            renderChipRow(kind);
+        }
+
+        input.addEventListener('input', liveApply);
+        input.addEventListener('keydown', function (e) {
+            e.stopPropagation();
+            if (e.key === 'Enter')  { e.preventDefault(); commit(); }
+            if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+        });
+        input.addEventListener('blur', commit);
+        input.addEventListener('click', function (e) { e.stopPropagation(); });
     }
 
     function renderAllChips() {
@@ -767,6 +924,33 @@
                 step._promoOverlay = null;
             }
         });
+    }
+
+    // Temporarily splice `rawVal` into the chip list so the page highlights and
+    // right-panel preview show what adding this chip WOULD do — but without
+    // persisting. Paired with clearChipAddPreview(); nothing is committed until
+    // the admin clicks Add.
+    function previewChipAdd(kind, rawVal) {
+        clearChipAddPreview(kind);
+        var val = validateChipValue(kind, rawVal);
+        if (!val) { return; }
+        if ((state.selection[kind] || []).indexOf(val) !== -1) { return; }
+        state._addPreview = { kind: kind, val: val };
+        state.selection[kind] = (state.selection[kind] || []).concat([val]);
+        if (kind === 'excl_css') { reapplyExcludeHighlights(); }
+        updatePreview();
+    }
+
+    function clearChipAddPreview(kind) {
+        if (!state._addPreview) { return; }
+        var k = state._addPreview.kind;
+        var v = state._addPreview.val;
+        state._addPreview = null;
+        var list = state.selection[k] || [];
+        var idx  = list.lastIndexOf(v);
+        if (idx !== -1) { list.splice(idx, 1); }
+        if (k === 'excl_css') { reapplyExcludeHighlights(); }
+        updatePreview();
     }
 
     function addChip(kind, rawVal, opts) {
@@ -843,10 +1027,22 @@
             if (inp && addBtn) {
                 addBtn.addEventListener('click', function () {
                     if (!state.pro) { showProPromo('Exclude chips'); return; }
-                    if (addChip(kind, inp.value)) { inp.value = ''; inp.focus(); updatePreview(); }
+                    clearChipAddPreview(kind);
+                    if (addChip(kind, inp.value)) { inp.value = ''; inp.focus(); reapplyExcludeHighlights(); updatePreview(); }
                 });
                 inp.addEventListener('keydown', function (e) {
                     if (e.key === 'Enter') { e.preventDefault(); addBtn.click(); }
+                });
+                // Live-preview a candidate selector as the user types: temporarily
+                // inject the value into state.selection[kind] so highlights +
+                // preview reflect what Add would do, then revert so nothing is
+                // saved until the button is clicked.
+                inp.addEventListener('input', function () {
+                    if (!state.pro) { return; }
+                    previewChipAdd(kind, inp.value);
+                });
+                inp.addEventListener('blur', function () {
+                    clearChipAddPreview(kind);
                 });
             }
         });
@@ -888,6 +1084,7 @@
                 var val = selectorInput.value.trim();
                 state.selection.selector = val;
                 state.userEdited = true;
+                reapplySelectedHighlight();
                 updateWordCount();
                 updatePreview();
                 if (saveBtn()) { saveBtn().disabled = !val; }
@@ -1158,6 +1355,7 @@
                 var el = d.querySelector(resp.selector);
                 if (el) { state.selectedEl = el; el.classList.add('av-picker-selected'); }
             } catch (e) {}
+            reapplyExcludeHighlights();
             var sb = saveBtn();
             if (sb) { sb.disabled = false; }
             status('Active rule loaded (' + (resp.scope || 'post') + ').');

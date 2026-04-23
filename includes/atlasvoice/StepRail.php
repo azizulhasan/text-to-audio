@@ -465,6 +465,7 @@ class StepRail {
   background:#7c3aed;color:#fff;border-radius:3px;
   padding:1px 6px;line-height:1.6;vertical-align:middle;
 }
+.av-pro-pill[hidden]{display:none !important;}
 
 /* ── Buttons ────────────────────────────────────────────────── */
 .av-btn{
