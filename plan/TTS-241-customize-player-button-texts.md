@@ -1,7 +1,72 @@
 # Player Button Text & Icon Customization
 
-Branch: `feature/TTS-241` (suggested) — phase 1 covers Default + Default Pro only.
-Status: PLAN — no code changes yet.
+Branch: rolled into `feature/TTS-239` (alongside TTS-239 + TTS-240 work) — phase 1 covers Default + Default Pro only.
+Status: **PHASE 1 SHIPPED** — verified on production (`https://cors2.atlasaidev.com`) on 2026-04-26.
+Release: Free `2.1.18`, Pro `3.2.3`.
+
+---
+
+## ✅ COMPLETED (Phase 1)
+
+### Backend (PHP)
+- `includes/TTA_Player_Icons.php` — new class with 8 curated SVG presets (`play / pause / stop / replay / headphones / ear / volume-up / volume-mute`) using `currentColor` so icons inherit the button's color/hover-color. Sanitizes user-pasted SVG via `wp_kses` whitelist. Provides `default_players()` for ids 1 & 2 and `sanitize_players()` for the REST POST path.
+- `includes/helpers.php → get_button_text()` reads `players[id]` first and falls back to flat keys; surfaces hover titles per state and exposes the full `players` map to JS.
+- `includes/helpers.php → set_initial_button_texts()` seeds `players[1]` and `players[2]` from `TTA_Player_Icons::default_players()`.
+- `admin/TTA_Admin.php` — new `build_player_customizations()` derives the icon map for ids 1 and 2 from the saved option (resolves `preset:` / `custom:` descriptors).
+- `api/TTA_Api_Routes.php → tta_manage_customize_data()` accepts `button_texts` on POST (sanitized via `TTA_Player_Icons::sanitize_players`) and returns merged-with-defaults map on GET, plus `presets` and `preset_svgs` for the React picker.
+
+### Frontend JS
+- `admin/js/TextToSpeech.js` — `getStateText` / `getStateHover` helpers; `_renderStateContent` produces a single normalized DOM shape for all four states; `displayButtonText` gated to **player 1 only** (player 2 is React-driven and would be destroyed by innerHTML swap); `playButtonIcon` lookup uses the active `playButtonNo`.
+- `admin/js/tts/utilities.js → getButtonContent` rewritten to emit identical structure to `_renderStateContent` and read per-player overrides.
+- `admin/js/text-to-audio-button.js → initNewPlayer` + `getNewButtonContent` honor per-player text/icon, suppress the host-element focus outline (`:host(:focus)` rule that fixes the right-click "border expansion"), drop the outline-offset focus ring, set hover `color` so SVGs using `currentColor` inherit, and force `box-sizing: border-box`.
+
+### React Dashboard
+- `src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js` — section gated to `playerId === 1 || 2`, hidden for 3/4/5/6.
+- `src/dashboard/components/dashboard/customize/design/ButtonStateEditor.js` — orchestrator: dynamic title (`Default` / `Default Pro`), 4 state cards, `Reset all to defaults`.
+- `src/dashboard/components/dashboard/customize/design/PlayerStateCard.js` — per-state card with text input, icon-picker swatch, per-state reset, hover-title behind "Show advanced".
+- `src/dashboard/components/dashboard/customize/design/IconPicker.js` — popover with 4×2 preset grid + Custom SVG paste tab and live preview swatch.
+- `src/dashboard/components/dashboard/customize/design/ButtonPreview.js` — Default-player live preview that renders the **same DOM as the front-end web component** (`tts__listent_content` button with `.tts-button-left` / `.tts-button-right` / settings gear) and is **functional via `speechSynthesis`** (idle → playing → paused → finished states).
+- `src/dashboard/components/dashboard/customize/Customize.js` — wires `buttonTexts` state from `/customize` GET, posts back under `formData.button_texts`, routes player 2 preview to `<TextToSpeech>` (passing `buttonTexts` + `playerId`), routes player 1 preview to `<ButtonPreview>`.
+- `src/dashboard/buttons/components/TextToSpeech.js` — accepts `buttonTexts` and `playerId` props, resolves listen text via `resolveStateText`, wraps `<Play>/<Pause>/<Replay>` so per-player custom SVG overrides them, applies user's `border / border-radius / height / fontSize` from `buttonCSS` with `!important` to defeat Bootstrap's default border, sets `box-sizing: border-box` on `.tts__player` to stop soundwave overflow.
+- `src/dashboard/components/dashboard/settings/Settings.js` — "Enable Button Icon" toggle gated to `[1, 2].includes(player_id)`.
+
+### Pro plugin
+- `Assets/js/build/text-to-audio-pro-button.min.js` rebuilt and shipped (this is bundled from free's `src/dashboard/button.js`). No source changes in pro for TTS-241.
+
+---
+
+## ❌ DEFERRED (Phase 2 — separate ticket)
+
+### Plyr-based players (4, 5, 6)
+- Per-control labels (`i18n` map for play/pause/restart/rewind/seek/fastForward/captions/download/volume/mute/settings).
+- Visible-controls multi-select (already partially exposed via `wp.hooks.addFilter('ttsProPlayerDesign', ...)`, but not wired to a UI).
+- "Now playing…" caption template with `{title}` / `{voice}` / `{language}` placeholders.
+- Speed presets list customization.
+- Section title would become "Button Texts & Icons — ChatGPT TTS" / "ElevenLabs TTS" etc., reading a new `players[4..6]` shape distinct from the speechSynthesis players' shape.
+
+### Icons in Default Pro factory fallback
+- Today the fallback for player 2 still uses the `<Play>/<Pause>/<Replay>` React components from `TTSIcons` when no per-player override is saved. Custom SVGs DO override them. Defaults could be replaced with the same heroicons-style preset set used in Default to make defaults visually consistent across both players.
+
+### Width-vs-customCSS interaction (documented, not changed)
+- `width` setting respects user's `customCSS` `max-width` clamps (intentional — user's custom CSS wins).
+- Optional follow-up: add `!important` to width if we decide the slider should always win.
+
+### Optional
+- Loading and error states for Default-style players (currently only listen/pause/resume/replay).
+- Consolidate `ButtonPreview.js` into `<TextToSpeech>` so there's one preview path. Today `ButtonPreview.js` exists only for player 1 to match the web-component look; player 2 already uses `<TextToSpeech>`. Consolidation would require rendering the `<tts-play-button>` web component in the dashboard preview, which needs a full `window.TTS` bootstrap.
+- Per-post overrides via meta box.
+
+---
+
+## VERIFIED ON PRODUCTION (2026-04-26)
+
+`https://cors2.atlasaidev.com` — see QA report in commit history. Highlights:
+
+- Section visibility rule: PASS for all 6 players (1/2 visible, 3/4/5/6 hidden).
+- Save → reload round-trip: PASS — `players[1].listen.text = "PROD-Listen"` with `icon = custom:<svg…>` persisted.
+- Frontend Default rendered the saved custom text + custom star SVG.
+- Frontend Default Pro rendered with `border-radius: 10px`, `height: 50px`, `fontSize: 20px`, sound-wave inside the border (no overflow).
+- ElevenLabs (TTS-240): accent dropdown removed, search-box auto-resolve via `/elevenlabs_voice` works, language change fires exactly 1 fetch, hot cache reload fires 0 fetches.
 
 ---
 
