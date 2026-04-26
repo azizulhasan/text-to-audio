@@ -243,6 +243,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
         $text_after_content = TTA_Helper::clean_content($text_after_content);
         $text_after_content = tta_should_add_delimiter($text_after_content, $sentence_delimiter);
 
+
         // Append ACF/compatible plugin content to $content (before intro/outro).
         // This ensures ACF content is always in ttsCurrentContent regardless of DOM reading mode.
         $compatible_data = TTA_Helper::tts_get_settings('compatible');
@@ -404,7 +405,7 @@ function get_enqueued_js_object($params, $plugin_all_settings)
     <!-- AtlasVoice Settings  -->
     <script id='tts_button_settings_<?php echo $player_number; ?>'>
         var ttsCurrentButtonNo = <?php echo $player_number; ?>;
-        var ttsCurrentContent = "<?php echo $content; ?>";
+        var ttsCurrentContent = "<?php echo apply_filters('atlasvoice_player_content', $content, $post, $language, $voice, $player_number); ?>";
         var ttsListening = <?php echo json_encode($plugin_all_settings['listening']); ?>;
         var ttsCSSClass = "<?php echo $class; ?>";
         var ttsBtnStyle = "<?php echo $btn_style; ?>";
@@ -450,8 +451,8 @@ function get_enqueued_js_object($params, $plugin_all_settings)
             file_url_key: "<?php echo $file_url_key; ?>",
             compatible_contents: <?php echo json_encode($compatible_content); ?>,
             excerpt: "<?php echo $excerpt_sanitized; ?>",
-            text_before_content: "<?php echo $text_before_content; ?>",
-            text_after_content: "<?php echo $text_after_content; ?>",
+            text_before_content: "<?php echo apply_filters('atlasvoice__text_before_content', $text_before_content, $post, $language, $voice, $player_number); ?>",
+            text_after_content: "<?php echo apply_filters('atlasvoice__text_after_content', $text_after_content, $post, $language, $voice, $player_number); ?>",
         }
 
         if (window.hasOwnProperty('TTS')) { // add content if a page have multiple button
