@@ -517,13 +517,28 @@ function get_button_text($atts, $content_read_time)
         $saved_texts = set_initial_button_texts($content_read_time);
     }
 
-    // Example usage
-    $listen_text = TTA_Helper::get_text_value($atts, $saved_texts, 'listen_text', 'Listen', 'text-to-audio');
-    $pause_text = TTA_Helper::get_text_value($atts, $saved_texts, 'pause_text', 'Pause', 'text-to-audio');
-    $resume_text = TTA_Helper::get_text_value($atts, $saved_texts, 'resume_text', 'Resume', 'text-to-audio');
-    $replay_text = TTA_Helper::get_text_value($atts, $saved_texts, 'replay_text', 'Replay', 'text-to-audio');
-    $start_text = TTA_Helper::get_text_value($atts, $saved_texts, 'start_text', 'Start', 'text-to-audio');
-    $stop_text = TTA_Helper::get_text_value($atts, $saved_texts, 'stop_text', 'Stop', 'text-to-audio');
+    // Per-player overrides take precedence when present (TTS-241).
+    $player_id = (int) get_player_id();
+    if ($player_id < 1) {
+        $player_id = 1;
+    }
+    $player_states = isset($saved_texts['players'][$player_id]) && is_array($saved_texts['players'][$player_id])
+        ? $saved_texts['players'][$player_id]
+        : [];
+
+    $resolve = function ($state, $flat_key, $fallback) use ($atts, $saved_texts, $player_states) {
+        if (!empty($player_states[$state]['text'])) {
+            return $player_states[$state]['text'];
+        }
+        return TTA_Helper::get_text_value($atts, $saved_texts, $flat_key, $fallback, 'text-to-audio');
+    };
+
+    $listen_text = $resolve('listen', 'listen_text', 'Listen');
+    $pause_text  = $resolve('pause',  'pause_text',  'Pause');
+    $resume_text = $resolve('resume', 'resume_text', 'Resume');
+    $replay_text = $resolve('replay', 'replay_text', 'Replay');
+    $start_text  = TTA_Helper::get_text_value($atts, $saved_texts, 'start_text', 'Start', 'text-to-audio');
+    $stop_text   = TTA_Helper::get_text_value($atts, $saved_texts, 'stop_text',  'Stop',  'text-to-audio');
 
     $text_arr = [
         'listen_text' => $listen_text,
@@ -532,6 +547,13 @@ function get_button_text($atts, $content_read_time)
         'replay_text' => $replay_text,
         'start_text' => $start_text,
         'stop_text' => $stop_text,
+        // Hover titles per state (resolved per-player; falls back to flat keys).
+        'listen_hover_title' => $player_states['listen']['hover'] ?? ($saved_texts['listen_hover_title'] ?? ''),
+        'pause_hover_title'  => $player_states['pause']['hover']  ?? ($saved_texts['pause_hover_title']  ?? ''),
+        'resume_hover_title' => $player_states['resume']['hover'] ?? ($saved_texts['resume_hover_title'] ?? ''),
+        'replay_hover_title' => $player_states['replay']['hover'] ?? ($saved_texts['replay_hover_title'] ?? ''),
+        // Pass through the full per-player map so the JS layer can read it directly.
+        'players' => isset($saved_texts['players']) && is_array($saved_texts['players']) ? $saved_texts['players'] : [],
     ];
 
 
@@ -891,6 +913,7 @@ function set_initial_button_texts($content_read_time)
             'replay_text' => $replay_text,
             'start_text' => $start_text,
             'stop_text' => $stop_text,
+            'players' => \TTA\TTA_Player_Icons::default_players(),
         ]);
 
     }
