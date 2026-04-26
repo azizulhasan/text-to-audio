@@ -12657,7 +12657,7 @@ function Settings() {
                       options: Object.keys(tags)
                     })]
                   })
-                }), !((_window4 = window) !== null && _window4 !== void 0 && (_window4 = _window4.ttsObjPro) !== null && _window4 !== void 0 && _window4.is_pro_active) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
+                }), [1, 2].includes(Number((_window4 = window) === null || _window4 === void 0 || (_window4 = _window4.ttsObj) === null || _window4 === void 0 ? void 0 : _window4.player_id)) && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(SettingRow, {
                   label: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Enable Button Icon", "text-to-audio"),
                   children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_7__.jsx)(ToggleSwitch, {
                     checked: settings.tta__settings_display_btn_icon,
