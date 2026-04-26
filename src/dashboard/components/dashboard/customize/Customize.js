@@ -861,7 +861,7 @@ export default function Customize() {
                   <ButtonPreview
                     buttonTexts={buttonTexts}
                     playerId={parseInt(listeningBtnStyle?.buttonSettings?.id || 1, 10)}
-                    buttonStyle={listeningBtnStyle2}
+                    buttonStyle={listeningBtnStyle}
                   />
                 )}
               </div>

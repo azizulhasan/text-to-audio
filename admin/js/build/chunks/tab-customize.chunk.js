@@ -14895,7 +14895,7 @@ function Customize() {
               (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_design_ButtonPreview__WEBPACK_IMPORTED_MODULE_9__["default"], {
                 buttonTexts: buttonTexts,
                 playerId: parseInt((listeningBtnStyle === null || listeningBtnStyle === void 0 || (_listeningBtnStyle$bu6 = listeningBtnStyle.buttonSettings) === null || _listeningBtnStyle$bu6 === void 0 ? void 0 : _listeningBtnStyle$bu6.id) || 1, 10),
-                buttonStyle: listeningBtnStyle2
+                buttonStyle: listeningBtnStyle
               })
             })]
           }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
@@ -15253,15 +15253,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* binding */ ButtonPreview)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Form.js");
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "./node_modules/@wordpress/i18n/build-module/index.js");
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
@@ -15271,94 +15264,155 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
-
-var STATE_KEYS = ["listen", "pause", "resume", "replay"];
-
 /**
  * ButtonPreview — TTS-241
  *
- * Live, in-memory preview of the Default / Default Pro player button. Reads
- * the user's current draft (`buttonTexts.players[playerId][state]`) so the
- * label and icon update immediately as they edit, and offers a state
- * selector so the user can flip through Listen / Pause / Resume / Replay
- * without having to actually run the synthesizer.
+ * Renders the SAME DOM structure that the front-end web-component
+ * (`text-to-audio-button.js → initNewPlayer + getNewButtonContent`) outputs
+ * on the post page, so the dashboard preview is pixel-identical to what
+ * the visitor sees. The component also wires up the SpeechSynthesis API
+ * directly so clicking the preview actually plays / pauses / resumes the
+ * sample text — the user gets a true round-trip preview.
  */
+
+var FALLBACK_PLAY_SVG = function FALLBACK_PLAY_SVG(color) {
+  return "<svg width=\"15\" height=\"15\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 7 8\" aria-hidden=\"true\"><polygon fill=\"".concat(color, "\" points=\"0 0 0 8 7 4\"/></svg>");
+};
+var FALLBACK_PAUSE_SVG = function FALLBACK_PAUSE_SVG(color) {
+  return "<svg width=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M14 9L14 15\" stroke=\"".concat(color, "\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M10 9L10 15\" stroke=\"").concat(color, "\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><path d=\"M3 12C3 4.5885 4.5885 3 12 3C19.4115 3 21 4.5885 21 12C21 19.4115 19.4115 21 12 21C4.5885 21 3 19.4115 3 12Z\" stroke=\"").concat(color, "\" stroke-width=\"2\"></path></svg>");
+};
+var FALLBACK_REPLAY_SVG = function FALLBACK_REPLAY_SVG(color) {
+  return "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" stroke=\"".concat(color, "\" stroke-width=\"2\"><polyline points=\"1 4 1 10 7 10\"/><path d=\"M3.51 15a9 9 0 1 0 2.13-9.36L1 10\"/></svg>");
+};
+var SETTINGS_ICON_SVG = function SETTINGS_ICON_SVG(color) {
+  return "<svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"".concat(color, "\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"3\"></circle><path d=\"M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z\"></path></svg>");
+};
+var resolveIcon = function resolveIcon(descriptor, presetSvgs) {
+  if (!descriptor) return "";
+  if (descriptor.startsWith("preset:")) return (presetSvgs === null || presetSvgs === void 0 ? void 0 : presetSvgs[descriptor.slice(7)]) || "";
+  if (descriptor.startsWith("custom:")) return descriptor.slice(7);
+  return descriptor;
+};
 function ButtonPreview(_ref) {
   var _buttonTexts$defaults;
   var buttonTexts = _ref.buttonTexts,
     playerId = _ref.playerId,
     buttonStyle = _ref.buttonStyle;
-  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)("listen"),
+  // Lifecycle: 'idle' (hasn't played) → 'playing' → 'paused' → 'finished'.
+  // Maps to user-state keys: idle=listen, playing=pause, paused=resume,
+  // finished=replay.
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)("idle"),
     _useState2 = _slicedToArray(_useState, 2),
-    state = _useState2[0],
-    setState = _useState2[1];
+    phase = _useState2[0],
+    setPhase = _useState2[1];
+  var utterRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
   var players = (buttonTexts === null || buttonTexts === void 0 ? void 0 : buttonTexts.players) || {};
   var defaults = (buttonTexts === null || buttonTexts === void 0 || (_buttonTexts$defaults = buttonTexts.defaults) === null || _buttonTexts$defaults === void 0 ? void 0 : _buttonTexts$defaults[playerId]) || {};
   var presetSvgs = (buttonTexts === null || buttonTexts === void 0 ? void 0 : buttonTexts.preset_svgs) || {};
-  var stateData = players[playerId] && players[playerId][state] || defaults[state] || {
-    text: "",
-    icon: ""
-  };
+  var stateKey = phase === "idle" ? "listen" : phase === "playing" ? "pause" : phase === "paused" ? "resume" : "replay";
+  var state = players[playerId] && players[playerId][stateKey] || defaults[stateKey] || {};
+  var colors = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    var _buttonStyle$color, _buttonStyle$color$re;
+    var bg = (buttonStyle === null || buttonStyle === void 0 ? void 0 : buttonStyle.backgroundColor) || "#184c53";
+    var color = buttonStyle !== null && buttonStyle !== void 0 && (_buttonStyle$color = buttonStyle.color) !== null && _buttonStyle$color !== void 0 && (_buttonStyle$color$re = _buttonStyle$color.replace) !== null && _buttonStyle$color$re !== void 0 && _buttonStyle$color$re.call(_buttonStyle$color, /[#"]/g, "") ? buttonStyle.color : "#ffffff";
+    var hoverBg = (buttonStyle === null || buttonStyle === void 0 ? void 0 : buttonStyle.hoverBackgroundColor) || "#f0f0f0";
+    var hoverText = (buttonStyle === null || buttonStyle === void 0 ? void 0 : buttonStyle.hoverTextColor) || "#000000";
+    return {
+      bg: bg,
+      color: color,
+      hoverBg: hoverBg,
+      hoverText: hoverText
+    };
+  }, [buttonStyle]);
   var iconHtml = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
-    var desc = stateData.icon || "";
-    if (desc.startsWith("preset:")) {
-      return presetSvgs[desc.slice(7)] || "";
+    var custom = resolveIcon(state.icon, presetSvgs).replace(/\$color/g, "currentColor");
+    if (custom) return custom;
+    if (stateKey === "pause") return FALLBACK_PAUSE_SVG(colors.color);
+    if (stateKey === "replay") return FALLBACK_REPLAY_SVG(colors.color);
+    return FALLBACK_PLAY_SVG(colors.color);
+  }, [state.icon, stateKey, presetSvgs, colors.color]);
+  var showSettingsGear = phase === "playing" || phase === "paused";
+
+  // Stop any ongoing speech if the component unmounts or player changes.
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    return function () {
+      var _window;
+      if ((_window = window) !== null && _window !== void 0 && _window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, [playerId]);
+  var handleClick = function handleClick() {
+    var _window2, _document$getElementB;
+    if (!((_window2 = window) !== null && _window2 !== void 0 && _window2.speechSynthesis)) return;
+    var synth = window.speechSynthesis;
+    var sampleText = (typeof document !== "undefined" ? (_document$getElementB = document.getElementById("tta__demo_text_for_play")) === null || _document$getElementB === void 0 ? void 0 : _document$getElementB.value : "") || (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("This is a preview of the player.", "text-to-audio");
+    if (phase === "idle" || phase === "finished") {
+      synth.cancel();
+      var u = new SpeechSynthesisUtterance(sampleText);
+      utterRef.current = u;
+      u.onstart = function () {
+        return setPhase("playing");
+      };
+      u.onend = function () {
+        return setPhase("finished");
+      };
+      u.onerror = function () {
+        return setPhase("finished");
+      };
+      synth.speak(u);
+    } else if (phase === "playing") {
+      synth.pause();
+      setPhase("paused");
+    } else if (phase === "paused") {
+      synth.resume();
+      setPhase("playing");
     }
-    if (desc.startsWith("custom:")) {
-      return desc.slice(7);
-    }
-    return desc;
-  }, [stateData.icon, presetSvgs]);
+  };
+  var buttonId = "tts__listent_content_preview_" + playerId;
+
+  // Inline CSS that mirrors `initNewPlayer`'s shadow-root <style> exactly,
+  // applied at the document level via a generated id so the preview looks
+  // identical to the live web-component output.
+  var css = "\n    #".concat(buttonId, ".tts__listent_content {\n      background-color: ").concat(colors.bg, ";\n      color: ").concat(colors.color, ";\n      width: ").concat(buttonStyle !== null && buttonStyle !== void 0 && buttonStyle.width ? buttonStyle.width + "%" : "100%", ";\n      height: ").concat(buttonStyle !== null && buttonStyle !== void 0 && buttonStyle.height ? buttonStyle.height + "px" : "auto", ";\n      font-size: ").concat(buttonStyle !== null && buttonStyle !== void 0 && buttonStyle.fontSize ? buttonStyle.fontSize + "px" : "inherit", ";\n      border: ").concat(buttonStyle !== null && buttonStyle !== void 0 && buttonStyle.border ? buttonStyle.border + "px solid " + (buttonStyle.border_color || "#000000") : "none", ";\n      border-radius: ").concat(buttonStyle !== null && buttonStyle !== void 0 && buttonStyle.borderRadius ? buttonStyle.borderRadius + "px" : "0", ";\n      cursor: pointer;\n      display: flex;\n      align-items: center;\n      justify-content: space-between;\n      padding: 8px 12px;\n      box-sizing: border-box;\n      transition: all 0.3s ease;\n    }\n    #").concat(buttonId, ".tts__listent_content:hover {\n      background-color: ").concat(colors.hoverBg, ";\n      color: ").concat(colors.hoverText, ";\n    }\n    #").concat(buttonId, ".tts__listent_content:hover .tts-button-left span,\n    #").concat(buttonId, ".tts__listent_content:hover svg polygon,\n    #").concat(buttonId, ".tts__listent_content:hover svg path {\n      color: ").concat(colors.hoverText, ";\n    }\n    #").concat(buttonId, ".tts__listent_content:focus,\n    #").concat(buttonId, ".tts__listent_content:focus-visible {\n      outline: none;\n      box-shadow: none;\n    }\n    #").concat(buttonId, " .tts-button-left {\n      display: flex;\n      align-items: center;\n      gap: 8px;\n    }\n    #").concat(buttonId, " .tts-button-right {\n      display: flex;\n      align-items: center;\n    }\n    #").concat(buttonId, " .tts-settings-icon {\n      cursor: pointer;\n      padding: 4px;\n      border-radius: 50%;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n    }\n  ");
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-    className: "tta-button-preview",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-      className: "d-flex align-items-center justify-content-end mb-2 gap-2",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
-        className: "small text-muted",
-        children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Preview state:", "text-to-audio")
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_3__["default"].Select, {
-        size: "sm",
-        value: state,
-        onChange: function onChange(e) {
-          return setState(e.target.value);
-        },
-        style: {
-          width: "auto"
-        },
-        children: STATE_KEYS.map(function (sk) {
-          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("option", {
-            value: sk,
-            children: sk[0].toUpperCase() + sk.slice(1)
-          }, sk);
-        })
-      })]
+    role: "region",
+    "aria-label": (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Default player preview", "text-to-audio"),
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("style", {
+      dangerouslySetInnerHTML: {
+        __html: css
+      }
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("button", {
+      id: buttonId,
       type: "button",
-      className: "tta_listen-button",
-      style: _objectSpread(_objectSpread({}, buttonStyle), {}, {
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 8,
-        boxSizing: "border-box",
-        cursor: "default"
-      }),
-      title: stateData.hover || "",
-      onClick: function onClick(e) {
-        return e.preventDefault();
-      },
-      children: [iconHtml ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
-        className: "tta-preview-icon",
-        style: {
-          display: "inline-flex",
-          alignItems: "center"
-        },
-        dangerouslySetInnerHTML: {
-          __html: iconHtml
-        }
-      }) : null, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
-        className: "tta-preview-label",
-        children: stateData.text || ""
+      className: "tts__listent_content",
+      title: state.hover || "",
+      "aria-label": state.text || "",
+      onClick: handleClick,
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("span", {
+        className: "tts-button-left",
+        "aria-hidden": "true",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
+          dangerouslySetInnerHTML: {
+            __html: iconHtml
+          }
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
+          className: "tts_button_label",
+          children: state.text || ""
+        })]
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
+        className: "tts-button-right",
+        children: showSettingsGear ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
+          className: "tts-settings-icon",
+          role: "button",
+          "aria-label": (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Player settings", "text-to-audio"),
+          onClick: function onClick(e) {
+            e.stopPropagation();
+          },
+          dangerouslySetInnerHTML: {
+            __html: SETTINGS_ICON_SVG(colors.color)
+          }
+        }) : null
       })]
     })]
   });
