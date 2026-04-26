@@ -1006,11 +1006,16 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                     custom paste) when it's set; otherwise fall back to the
                                     factory <Play>/<Replay>/<Pause> components. */}
                                 {(() => {
-                                    const stateForIcon = (!speech || listenStatus === 'resume')
-                                        ? 'listen'
-                                        : (listenStatus === 'listen'
-                                            ? 'replay'
-                                            : (listenStatus === 'pause' ? 'pause' : null));
+                                    // Map React lifecycle to TTS-241 state keys:
+                                    //   no speech yet              → 'listen'
+                                    //   listenStatus === 'pause'   → 'pause'  (speaking)
+                                    //   listenStatus === 'resume'  → 'resume' (paused; click to resume)
+                                    //   listenStatus === 'listen'  → 'replay' (finished; click to replay)
+                                    let stateForIcon;
+                                    if (!speech) stateForIcon = 'listen';
+                                    else if (listenStatus === 'pause')  stateForIcon = 'pause';
+                                    else if (listenStatus === 'resume') stateForIcon = 'resume';
+                                    else if (listenStatus === 'listen') stateForIcon = 'replay';
                                     if (!stateForIcon) return null;
                                     const customSvg = renderResolvedIcon(resolveStateIcon(buttonTexts, _resolvedPlayerId, stateForIcon));
                                     if (customSvg) {
@@ -1024,10 +1029,11 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                             />
                                         );
                                     }
-                                    if (!speech || listenStatus === 'resume') return <Play ttsObjPro={ttsObjPro} onClick={(e) => handlePlayButtonClick(e)} />;
-                                    if (listenStatus === 'listen')           return <Replay ttsObjPro={ttsObjPro} onClick={(e) => handlePlayButtonClick(e)} />;
-                                    if (listenStatus === 'pause')            return <Pause ttsObjPro={ttsObjPro} onClick={(e) => handlePlayButtonClick(e)} />;
-                                    return null;
+                                    // Factory fallback (no per-player override saved):
+                                    //   listen + resume both use <Play> (factory has no Resume icon).
+                                    if (stateForIcon === 'pause')  return <Pause ttsObjPro={ttsObjPro} onClick={(e) => handlePlayButtonClick(e)} />;
+                                    if (stateForIcon === 'replay') return <Replay ttsObjPro={ttsObjPro} onClick={(e) => handlePlayButtonClick(e)} />;
+                                    return <Play ttsObjPro={ttsObjPro} onClick={(e) => handlePlayButtonClick(e)} />;
                                 })()}
 
                                 {/* {isPlaying && (
@@ -1181,6 +1187,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                             margin-right: ${buttonCSS.marginRight}px;
                             margin-left: ${buttonCSS.marginLeft}%;
                             box-sizing: border-box;
+                            overflow: hidden;
                         }
                         #tts_button_should_float .tts__player{
                             border: 0 !important;
@@ -1189,6 +1196,10 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                             width: 100% !important;
                             height: 100% !important;
                             border-radius: inherit !important;
+                            /* TTS-241 — without border-box the player's
+                               padding spills 32px past the parent's right
+                               edge, clipping half of the soundwave icon. */
+                            box-sizing: border-box !important;
                         }
                         #tts_button_should_float div:nth-child(1){ color:${buttonCSS.color};}
                         .atlasvoice_player_button svg {cursor:pointer;}
