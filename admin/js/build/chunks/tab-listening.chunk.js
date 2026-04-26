@@ -11550,7 +11550,7 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 function Listening() {
-  var _customizationSetting0;
+  var _customizationSetting5, _customizationSetting10;
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({}),
     _useState2 = _slicedToArray(_useState, 2),
     customizationSettings = _useState2[0],
@@ -11570,9 +11570,9 @@ function Listening() {
       tta__listening_instruction_preset: "native",
       tta__elevenlabs_model: "eleven_multilingual_v2",
       tta__elevenlabs_output_format: "mp3_44100_128",
-      tta__elevenlabs_stability: 0.5,
-      tta__elevenlabs_similarity_boost: 0.75,
-      tta__elevenlabs_style: 0.0,
+      tta__elevenlabs_stability: "",
+      tta__elevenlabs_similarity_boost: "",
+      tta__elevenlabs_style: "",
       tta__elevenlabs_speed: 1.0,
       tta__elevenlabs_speaker_boost: true
     }),
@@ -11599,7 +11599,9 @@ function Listening() {
     setCurrentPlayerFilteredVoices = _useVoiceLoader.setCurrentPlayerFilteredVoices,
     setGPTVoicesAndLanguages = _useVoiceLoader.setGPTVoicesAndLanguages,
     setGoogleVoicesAndLanguages = _useVoiceLoader.setGoogleVoicesAndLanguages,
-    setVoicesAndLanguages = _useVoiceLoader.setVoicesAndLanguages;
+    setVoicesAndLanguages = _useVoiceLoader.setVoicesAndLanguages,
+    setElevenLabsVoicesAndLanguages = _useVoiceLoader.setElevenLabsVoicesAndLanguages,
+    addElevenLabsVoice = _useVoiceLoader.addElevenLabsVoice;
   var _useMultilingualDetec = (0,_hooks_useMultilingualDetection__WEBPACK_IMPORTED_MODULE_6__["default"])(),
     multilingualActiveLanguages = _useMultilingualDetec.multilingualActiveLanguages,
     activePluginName = _useMultilingualDetec.activePluginName;
@@ -11671,6 +11673,14 @@ function Listening() {
     });
   }, []);
 
+  // ── Refetch ElevenLabs voices when listening language changes ──────
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    var _customizationSetting4;
+    if (window.hasOwnProperty("ttsObj") && ttsObj.is_pro_active && (customizationSettings === null || customizationSettings === void 0 || (_customizationSetting4 = customizationSettings.buttonSettings) === null || _customizationSetting4 === void 0 ? void 0 : _customizationSetting4.id) == 6 && listeningSettings.tta__listening_lang) {
+      setElevenLabsVoicesAndLanguages(listeningSettings.tta__listening_lang);
+    }
+  }, [customizationSettings === null || customizationSettings === void 0 || (_customizationSetting5 = customizationSettings.buttonSettings) === null || _customizationSetting5 === void 0 ? void 0 : _customizationSetting5.id, listeningSettings.tta__listening_lang]);
+
   // ── Sync multilingual languages to listening settings ──────────────
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     if (Object.keys(multilingualActiveLanguages).length) {
@@ -11699,7 +11709,7 @@ function Listening() {
           return;
         }
         if (key === "tta__available_currentPlayerVoices" || "tta__currentPlayerLanguages" === key || "tta__multilingualActiveLanguages" === key) {
-          var _customizationSetting5;
+          var _customizationSetting7;
           if (!ttsObj.is_pro_active) {
             formData[key] = {};
             continue;
@@ -11708,10 +11718,10 @@ function Listening() {
             formData[key] = {};
           }
           if (!Object.keys(formData === null || formData === void 0 ? void 0 : formData[key]).length) {
-            var _customizationSetting4;
-            formData[key][customizationSettings === null || customizationSettings === void 0 || (_customizationSetting4 = customizationSettings.buttonSettings) === null || _customizationSetting4 === void 0 ? void 0 : _customizationSetting4.id] = [];
+            var _customizationSetting6;
+            formData[key][customizationSettings === null || customizationSettings === void 0 || (_customizationSetting6 = customizationSettings.buttonSettings) === null || _customizationSetting6 === void 0 ? void 0 : _customizationSetting6.id] = [];
           }
-          formData[key][customizationSettings === null || customizationSettings === void 0 || (_customizationSetting5 = customizationSettings.buttonSettings) === null || _customizationSetting5 === void 0 ? void 0 : _customizationSetting5.id].push(value);
+          formData[key][customizationSettings === null || customizationSettings === void 0 || (_customizationSetting7 = customizationSettings.buttonSettings) === null || _customizationSetting7 === void 0 ? void 0 : _customizationSetting7.id].push(value);
         } else {
           formData[key] = value;
         }
@@ -11740,10 +11750,10 @@ function Listening() {
 
   // ── Field change handler ───────────────────────────────────────────
   var handleChange = function handleChange(e) {
-    var _customizationSetting6, _customizationSetting7;
+    var _customizationSetting8, _customizationSetting9;
     var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
     var player_id = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "";
-    if (e.target.name === "tta__listening_lang" && (customizationSettings === null || customizationSettings === void 0 || (_customizationSetting6 = customizationSettings.buttonSettings) === null || _customizationSetting6 === void 0 ? void 0 : _customizationSetting6.id) == 4) {
+    if (e.target.name === "tta__listening_lang" && (customizationSettings === null || customizationSettings === void 0 || (_customizationSetting8 = customizationSettings.buttonSettings) === null || _customizationSetting8 === void 0 ? void 0 : _customizationSetting8.id) == 4) {
       var filteredVoices = speechSynthesisVoices.filter(function (voice) {
         return voice.languageCodes[0] == e.target.value;
       });
@@ -11752,10 +11762,10 @@ function Listening() {
       }
       setCurrentPlayerFilteredVoices(filteredVoices);
     }
-    if (e.target.name === "tta__listening_voice" && (customizationSettings === null || customizationSettings === void 0 || (_customizationSetting7 = customizationSettings.buttonSettings) === null || _customizationSetting7 === void 0 ? void 0 : _customizationSetting7.id) > 3) {
-      var _customizationSetting8;
+    if (e.target.name === "tta__listening_voice" && (customizationSettings === null || customizationSettings === void 0 || (_customizationSetting9 = customizationSettings.buttonSettings) === null || _customizationSetting9 === void 0 ? void 0 : _customizationSetting9.id) > 3) {
+      var _customizationSetting0;
       // ElevenLabs uses preview_url from the voice object
-      if ((customizationSettings === null || customizationSettings === void 0 || (_customizationSetting8 = customizationSettings.buttonSettings) === null || _customizationSetting8 === void 0 ? void 0 : _customizationSetting8.id) == 6) {
+      if ((customizationSettings === null || customizationSettings === void 0 || (_customizationSetting0 = customizationSettings.buttonSettings) === null || _customizationSetting0 === void 0 ? void 0 : _customizationSetting0.id) == 6) {
         var voiceIdPart = e.target.value.split('::')[0];
         var selectedVoice = elevenLabsVoices.find(function (v) {
           return v.voice_id === voiceIdPart;
@@ -11772,10 +11782,10 @@ function Listening() {
           }
         }
       } else {
-        var _customizationSetting9;
+        var _customizationSetting1;
         var currentVoice = e.target.value;
         var baseURL = "https://cloud.google.com/text-to-speech/docs/audio/";
-        if ((customizationSettings === null || customizationSettings === void 0 || (_customizationSetting9 = customizationSettings.buttonSettings) === null || _customizationSetting9 === void 0 ? void 0 : _customizationSetting9.id) == 5) {
+        if ((customizationSettings === null || customizationSettings === void 0 || (_customizationSetting1 = customizationSettings.buttonSettings) === null || _customizationSetting1 === void 0 ? void 0 : _customizationSetting1.id) == 5) {
           baseURL = "https://cdn.openai.com/API/docs/audio/";
         }
         currentVoice = currentVoice.replace(/-(MALE|FEMALE)$/, "");
@@ -11809,7 +11819,7 @@ function Listening() {
   };
 
   // ── Derived values ─────────────────────────────────────────────────
-  var playerId = customizationSettings === null || customizationSettings === void 0 || (_customizationSetting0 = customizationSettings.buttonSettings) === null || _customizationSetting0 === void 0 ? void 0 : _customizationSetting0.id;
+  var playerId = customizationSettings === null || customizationSettings === void 0 || (_customizationSetting10 = customizationSettings.buttonSettings) === null || _customizationSetting10 === void 0 ? void 0 : _customizationSetting10.id;
   var isDefaultPlayer = playerId < 3;
 
   // ── Render ─────────────────────────────────────────────────────────
@@ -11855,8 +11865,10 @@ function Listening() {
             }
           }) : playerId == 6 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_tts_providers_ElevenLabsSettings__WEBPACK_IMPORTED_MODULE_10__["default"], {
             listeningSettings: listeningSettings,
+            setListeningSettings: setListeningSettings,
             currentPlayerLanguages: currentPlayerLanguages,
             elevenLabsVoices: elevenLabsVoices,
+            addElevenLabsVoice: addElevenLabsVoice,
             handleChange: handleChange,
             baseMP3File: baseMP3File
           }) : null, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_13__.jsx)(_LanguageMapping__WEBPACK_IMPORTED_MODULE_11__["default"], {
@@ -12017,7 +12029,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var _context_utilities__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../context/utilities */ "./src/dashboard/components/context/utilities.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
@@ -12059,6 +12081,11 @@ function useVoiceLoader(customizationSettings, listeningVoiceModel) {
     _useState10 = _slicedToArray(_useState1, 2),
     languageMissingMessage = _useState10[0],
     setLanguageMissingMessage = _useState10[1];
+
+  // Track which ElevenLabs cacheKey was most recently applied, so repeat
+  // calls with the same language don't re-apply state (and don't re-fire
+  // network requests if the cache is already hot).
+  var lastElevenLabsCacheKeyRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)("");
   var apiURL = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
     if (window.hasOwnProperty("ttsObj") && ttsObj.is_pro_active) {
       return ttsObj.api_url + ttsObj.api_namespace + "_pro/" + ttsObj.api_version + "/";
@@ -12130,46 +12157,75 @@ function useVoiceLoader(customizationSettings, listeningVoiceModel) {
   };
 
   // ── ElevenLabs voices ───────────────────────────────────────────────
+  // Cache is language-keyed so switching the listening language triggers
+  // a fresh fetch of `/v1/shared-voices` for that language (capped at 100).
   var setElevenLabsVoicesAndLanguages = function setElevenLabsVoicesAndLanguages() {
-    if (window.hasOwnProperty("ttsObj") && ttsObj.is_pro_active) {
-      var stored = (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.getLocalStorage)(["tts_elevenlabs_voices"]);
-      if (stored !== null && stored !== void 0 && stored.tts_elevenlabs_voices) {
-        try {
-          var voices = JSON.parse(stored.tts_elevenlabs_voices);
-          setElevenLabsVoices(voices);
-          var voiceNames = voices.map(function (v) {
-            return v.name;
-          });
-          setCurrentPlayerVoices(voiceNames);
-          setCurrentPlayerFilteredVoices(voiceNames);
-          setSpeechSynthesisVoices(voiceNames);
-          var languages = (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.chatGPTLanguages)();
-          setCurrentPlayerLanguages(languages);
-          return;
-        } catch (e) {
-          console.log('Error parsing stored ElevenLabs voices:', e);
-        }
-      }
-      var proApiURL = ttsObj.api_url + ttsObj.api_namespace + "_pro/" + ttsObj.api_version + "/";
-      (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.getData)(proApiURL + "elevenlabs_voices").then(function (res) {
-        if (res !== null && res !== void 0 && res.voices && res.voices.length) {
-          (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.setLocalStorage)({
-            tts_elevenlabs_voices: JSON.stringify(res.voices)
-          });
-          setElevenLabsVoices(res.voices);
-          var _voiceNames = res.voices.map(function (v) {
-            return v.name;
-          });
-          setCurrentPlayerVoices(_voiceNames);
-          setCurrentPlayerFilteredVoices(_voiceNames);
-          setSpeechSynthesisVoices(_voiceNames);
-          var _languages = (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.chatGPTLanguages)();
-          setCurrentPlayerLanguages(_languages);
-        }
-      })["catch"](function (err) {
-        console.log('ElevenLabs voices error:', err);
-      });
+    var language = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+    if (!(window.hasOwnProperty("ttsObj") && ttsObj.is_pro_active)) {
+      return;
     }
+
+    // Normalize to 2-letter ISO language code (e.g. "en-GB" → "en").
+    var langCode = (language || "").toLowerCase().split(/[-_]/)[0] || "";
+    var cacheKey = langCode ? "tts_elevenlabs_voices_".concat(langCode) : "tts_elevenlabs_voices";
+
+    // Skip if the same cacheKey was just applied — prevents duplicate
+    // state writes (and duplicate fetches) when multiple effects call this.
+    if (lastElevenLabsCacheKeyRef.current === cacheKey) {
+      return;
+    }
+    var applyVoices = function applyVoices(voices) {
+      lastElevenLabsCacheKeyRef.current = cacheKey;
+      setElevenLabsVoices(voices);
+      var voiceNames = voices.map(function (v) {
+        return v.name;
+      });
+      setCurrentPlayerVoices(voiceNames);
+      setCurrentPlayerFilteredVoices(voiceNames);
+      setSpeechSynthesisVoices(voiceNames);
+      setCurrentPlayerLanguages((0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.chatGPTLanguages)());
+    };
+    var stored = (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.getLocalStorage)([cacheKey]);
+    if (stored !== null && stored !== void 0 && stored[cacheKey]) {
+      try {
+        applyVoices(JSON.parse(stored[cacheKey]));
+        return;
+      } catch (e) {
+        console.log("Error parsing stored ElevenLabs voices:", e);
+      }
+    }
+    var proApiURL = ttsObj.api_url + ttsObj.api_namespace + "_pro/" + ttsObj.api_version + "/";
+    var endpoint = langCode ? "".concat(proApiURL, "elevenlabs_voices?language=").concat(encodeURIComponent(langCode)) : "".concat(proApiURL, "elevenlabs_voices");
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.getData)(endpoint).then(function (res) {
+      if (res !== null && res !== void 0 && res.voices && res.voices.length) {
+        (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.setLocalStorage)(_defineProperty({}, cacheKey, JSON.stringify(res.voices)));
+        applyVoices(res.voices);
+      }
+    })["catch"](function (err) {
+      console.log("ElevenLabs voices error:", err);
+    });
+  };
+
+  // Append or replace a single voice in the ElevenLabs voice list (used
+  // when the user resolves a manual voice ID). Keeps localStorage cache
+  // in sync so reloads remember the injected voice.
+  var addElevenLabsVoice = function addElevenLabsVoice(voice) {
+    var language = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "";
+    if (!voice || !voice.voice_id) return;
+    var langCode = (language || "").toLowerCase().split(/[-_]/)[0] || "";
+    var cacheKey = langCode ? "tts_elevenlabs_voices_".concat(langCode) : "tts_elevenlabs_voices";
+    setElevenLabsVoices(function (prev) {
+      var existingIdx = prev.findIndex(function (v) {
+        return v.voice_id === voice.voice_id;
+      });
+      var next = existingIdx >= 0 ? prev.map(function (v, i) {
+        return i === existingIdx ? _objectSpread(_objectSpread({}, v), voice) : v;
+      }) : [voice].concat(_toConsumableArray(prev));
+      try {
+        (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.setLocalStorage)(_defineProperty({}, cacheKey, JSON.stringify(next)));
+      } catch (e) {}
+      return next;
+    });
   };
 
   // ── Browser speech synthesis / fallback ─────────────────────────────
@@ -12246,8 +12302,10 @@ function useVoiceLoader(customizationSettings, listeningVoiceModel) {
         setCurrentPlayerLanguages(languages);
         setLanguageMissingMessage("");
       } else if ((customizationSettings === null || customizationSettings === void 0 || (_customizationSetting4 = customizationSettings.buttonSettings) === null || _customizationSetting4 === void 0 ? void 0 : _customizationSetting4.id) == 6) {
-        var _languages2 = (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.chatGPTLanguages)();
-        setCurrentPlayerLanguages(_languages2);
+        // Languages shown in the UI dropdown are the same chatGPTLanguages set;
+        // the actual voice filtering happens server-side via `/v1/shared-voices`.
+        var _languages = (0,_context_utilities__WEBPACK_IMPORTED_MODULE_1__.chatGPTLanguages)();
+        setCurrentPlayerLanguages(_languages);
         setLanguageMissingMessage("");
       } else if ((customizationSettings === null || customizationSettings === void 0 || (_customizationSetting5 = customizationSettings.buttonSettings) === null || _customizationSetting5 === void 0 ? void 0 : _customizationSetting5.id) < 3) {
         setLanguageMissingMessage("Looking for another language? Please select the another player from customization menu. Your language may be appear.");
@@ -12260,16 +12318,16 @@ function useVoiceLoader(customizationSettings, listeningVoiceModel) {
 
   // ── Re-load voices on player change ─────────────────────────────────
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    var _customizationSetting7, _customizationSetting8, _customizationSetting9;
+    var _customizationSetting7, _customizationSetting8;
     if ((customizationSettings === null || customizationSettings === void 0 || (_customizationSetting7 = customizationSettings.buttonSettings) === null || _customizationSetting7 === void 0 ? void 0 : _customizationSetting7.id) < 3) {
       setVoicesAndLanguages();
     }
     if ((customizationSettings === null || customizationSettings === void 0 || (_customizationSetting8 = customizationSettings.buttonSettings) === null || _customizationSetting8 === void 0 ? void 0 : _customizationSetting8.id) == 5) {
       setGPTVoicesAndLanguages(listeningVoiceModel);
     }
-    if ((customizationSettings === null || customizationSettings === void 0 || (_customizationSetting9 = customizationSettings.buttonSettings) === null || _customizationSetting9 === void 0 ? void 0 : _customizationSetting9.id) == 6) {
-      setElevenLabsVoicesAndLanguages();
-    }
+
+    // Player 6 (ElevenLabs) voices are loaded by Listening.js with the
+    // current listening language so the cacheKey is language-scoped.
   }, [customizationSettings]);
   return {
     currentPlayerVoices: currentPlayerVoices,
@@ -12281,7 +12339,9 @@ function useVoiceLoader(customizationSettings, listeningVoiceModel) {
     setCurrentPlayerFilteredVoices: setCurrentPlayerFilteredVoices,
     setGPTVoicesAndLanguages: setGPTVoicesAndLanguages,
     setGoogleVoicesAndLanguages: setGoogleVoicesAndLanguages,
-    setVoicesAndLanguages: setVoicesAndLanguages
+    setVoicesAndLanguages: setVoicesAndLanguages,
+    setElevenLabsVoicesAndLanguages: setElevenLabsVoicesAndLanguages,
+    addElevenLabsVoice: addElevenLabsVoice
   };
 }
 
@@ -12910,38 +12970,286 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* binding */ ElevenLabsSettings)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Row.js");
-/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Col.js");
-/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Form.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Row.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Col.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Form.js");
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "./node_modules/@wordpress/i18n/build-module/index.js");
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils */ "./src/dashboard/components/dashboard/listening/utils.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var _context_utilities__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../context/utilities */ "./src/dashboard/components/context/utilities.js");
+/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils */ "./src/dashboard/components/dashboard/listening/utils.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
 
 
+
+var MODEL_LABELS = {
+  eleven_multilingual_v2: "Multilingual v2",
+  eleven_turbo_v2_5: "Turbo v2.5",
+  eleven_turbo_v2: "Turbo v2",
+  eleven_flash_v2_5: "Flash v2.5",
+  eleven_flash_v2: "Flash v2",
+  eleven_v2_flash: "v2 Flash",
+  eleven_v2_5_flash: "v2.5 Flash",
+  eleven_v3: "Eleven v3"
+};
+var FALLBACK_MODELS = ["eleven_multilingual_v2", "eleven_turbo_v2_5", "eleven_flash_v2_5", "eleven_v3"];
+var playPreview = function playPreview(url) {
+  if (!url) return;
+  var audio_wav = document.getElementById("tts_audio_wav");
+  var audio_mp3 = document.getElementById("tts_audio_mp3");
+  var audio_tag = document.getElementById("tts_audio_tag");
+  if (!audio_wav || !audio_mp3 || !audio_tag) return;
+  audio_wav.src = url;
+  audio_mp3.src = url;
+  audio_tag.load();
+  audio_tag.play()["catch"](function () {});
+};
 function ElevenLabsSettings(_ref) {
   var listeningSettings = _ref.listeningSettings,
+    setListeningSettings = _ref.setListeningSettings,
     currentPlayerLanguages = _ref.currentPlayerLanguages,
     elevenLabsVoices = _ref.elevenLabsVoices,
+    addElevenLabsVoice = _ref.addElevenLabsVoice,
     handleChange = _ref.handleChange,
     baseMP3File = _ref.baseMP3File;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.Fragment, {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_4__["default"], {
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(""),
+    _useState2 = _slicedToArray(_useState, 2),
+    voiceSearch = _useState2[0],
+    setVoiceSearch = _useState2[1];
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(""),
+    _useState4 = _slicedToArray(_useState3, 2),
+    manualVoiceId = _useState4[0],
+    setManualVoiceId = _useState4[1];
+  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(""),
+    _useState6 = _slicedToArray(_useState5, 2),
+    manualError = _useState6[0],
+    setManualError = _useState6[1];
+  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+    _useState8 = _slicedToArray(_useState7, 2),
+    manualLoading = _useState8[0],
+    setManualLoading = _useState8[1];
+
+  // Track which voice-tuning sliders the user has touched in this session.
+  // Once touched we stop auto-seeding from voice.settings on voice change.
+  var editedRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)({
+    stability: false,
+    similarity_boost: false,
+    style: false
+  });
+  var proApiURL = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    var _window$ttsObj;
+    if (typeof window !== "undefined" && window.hasOwnProperty("ttsObj") && (_window$ttsObj = window.ttsObj) !== null && _window$ttsObj !== void 0 && _window$ttsObj.is_pro_active) {
+      return window.ttsObj.api_url + window.ttsObj.api_namespace + "_pro/" + window.ttsObj.api_version + "/";
+    }
+    return "";
+  }, []);
+
+  // Resolve selected voice object from listeningSettings.tta__listening_voice
+  // (stored as `voice_id::FirstName`).
+  var selectedVoiceId = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    var raw = listeningSettings.tta__listening_voice || "";
+    return raw.split("::")[0] || "";
+  }, [listeningSettings.tta__listening_voice]);
+  var selectedVoice = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    return elevenLabsVoices.find(function (v) {
+      return v.voice_id === selectedVoiceId;
+    });
+  }, [elevenLabsVoices, selectedVoiceId]);
+  var langIso = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    return (listeningSettings.tta__listening_lang || "").toLowerCase().split(/[-_]/)[0] || "";
+  }, [listeningSettings.tta__listening_lang]);
+
+  // verified_languages filtered by selected language.
+  var verifiedForLang = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    var entries = (selectedVoice === null || selectedVoice === void 0 ? void 0 : selectedVoice.verified_languages) || [];
+    if (!langIso) return entries;
+    return entries.filter(function (v) {
+      return (v.language || "").toLowerCase() === langIso;
+    });
+  }, [selectedVoice, langIso]);
+
+  // Available models for this voice+language (unique model_ids).
+  var availableModels = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    var ids = Array.from(new Set(verifiedForLang.map(function (v) {
+      return v.model_id;
+    }).filter(Boolean)));
+    return ids.length ? ids : FALLBACK_MODELS;
+  }, [verifiedForLang]);
+
+  // ── Sync: if current model isn't in availableModels, switch to first ──
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    if (!selectedVoice) return;
+    if (!availableModels.includes(listeningSettings.tta__elevenlabs_model)) {
+      handleChange({
+        target: {
+          name: "tta__elevenlabs_model",
+          value: availableModels[0]
+        }
+      });
+    }
+  }, [availableModels, selectedVoice]);
+
+  // ── Seed voice-tuning sliders from voice.settings (if user hasn't edited) ──
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    var vs = selectedVoice === null || selectedVoice === void 0 ? void 0 : selectedVoice.settings;
+    if (!vs || !setListeningSettings) return;
+    setListeningSettings(function (prev) {
+      var next = _objectSpread({}, prev);
+      if (vs.stability !== undefined && !editedRef.current.stability) {
+        next.tta__elevenlabs_stability = vs.stability;
+      }
+      if (vs.similarity_boost !== undefined && !editedRef.current.similarity_boost) {
+        next.tta__elevenlabs_similarity_boost = vs.similarity_boost;
+      }
+      if (vs.style !== undefined && !editedRef.current.style) {
+        next.tta__elevenlabs_style = vs.style;
+      }
+      return next;
+    });
+  }, [selectedVoiceId]);
+
+  // ── Voice search ─────────────────────────────────────────────────────
+  var filteredElevenLabsVoices = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    var q = voiceSearch.trim().toLowerCase();
+    if (!q) return elevenLabsVoices;
+    return elevenLabsVoices.filter(function (v) {
+      var _v$labels, _v$labels2, _v$labels3;
+      var name = (v.name || "").toLowerCase();
+      var accent = (((_v$labels = v.labels) === null || _v$labels === void 0 ? void 0 : _v$labels.accent) || "").toLowerCase();
+      var gender = (((_v$labels2 = v.labels) === null || _v$labels2 === void 0 ? void 0 : _v$labels2.gender) || "").toLowerCase();
+      var desc = (((_v$labels3 = v.labels) === null || _v$labels3 === void 0 ? void 0 : _v$labels3.description) || "").toLowerCase();
+      var id = (v.voice_id || "").toLowerCase();
+      return name.includes(q) || accent.includes(q) || gender.includes(q) || desc.includes(q) || id.includes(q);
+    });
+  }, [elevenLabsVoices, voiceSearch]);
+
+  // ── Fetch a voice by ID, inject into list, select, and play preview ──
+  var resolveAndSelectVoiceId = function resolveAndSelectVoiceId(voiceId) {
+    var _ref2 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      onError = _ref2.onError,
+      onDone = _ref2.onDone;
+    var trimmed = (voiceId || "").trim();
+    if (!trimmed || !proApiURL) {
+      onDone && onDone();
+      return;
+    }
+    (0,_context_utilities__WEBPACK_IMPORTED_MODULE_2__.getData)("".concat(proApiURL, "elevenlabs_voice?voice_id=").concat(encodeURIComponent(trimmed))).then(function (res) {
+      var _res$voice;
+      if (!(res !== null && res !== void 0 && res.status) || !(res !== null && res !== void 0 && (_res$voice = res.voice) !== null && _res$voice !== void 0 && _res$voice.voice_id)) {
+        onError && onError((res === null || res === void 0 ? void 0 : res.message) || (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Voice not found.", "text-to-audio"));
+        return;
+      }
+      var voice = res.voice;
+      if (typeof addElevenLabsVoice === "function") {
+        addElevenLabsVoice(voice, listeningSettings.tta__listening_lang);
+      }
+      var firstName = (voice.name || "Custom").split(/[\s\-]/)[0].trim();
+      handleChange({
+        target: {
+          name: "tta__listening_voice",
+          value: "".concat(voice.voice_id, "::").concat(firstName || "Custom")
+        }
+      });
+      playPreview(voice.preview_url);
+    })["catch"](function (err) {
+      console.log("elevenlabs_voice error:", err);
+      onError && onError((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Failed to fetch voice.", "text-to-audio"));
+    })["finally"](function () {
+      return onDone && onDone();
+    });
+  };
+
+  // ── Manual voice-ID form: "Use" button ───────────────────────────────
+  var applyManualVoiceId = function applyManualVoiceId() {
+    var trimmed = manualVoiceId.trim();
+    if (!trimmed) return;
+    setManualError("");
+    setManualLoading(true);
+    resolveAndSelectVoiceId(trimmed, {
+      onError: function onError(msg) {
+        return setManualError(msg);
+      },
+      onDone: function onDone() {
+        setManualLoading(false);
+        setManualVoiceId("");
+      }
+    });
+  };
+
+  // ── Auto-resolve: if the user pastes a 20-char voice ID into the
+  //    search box, fetch it so preview plays even when the voice isn't
+  //    in the current language-filtered shared-voice list (or lacks a
+  //    preview_url). Debounced to avoid spamming the API. ─────────────
+  var autoResolvedRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(new Set());
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    var q = voiceSearch.trim();
+    if (!/^[A-Za-z0-9]{20}$/.test(q)) return;
+    if (autoResolvedRef.current.has(q)) return;
+    var existing = elevenLabsVoices.find(function (v) {
+      return v.voice_id === q;
+    });
+    if (existing && existing.preview_url) {
+      // Already have full data for this voice — just select + play it.
+      autoResolvedRef.current.add(q);
+      var firstName = (existing.name || "Custom").split(/[\s\-]/)[0].trim();
+      handleChange({
+        target: {
+          name: "tta__listening_voice",
+          value: "".concat(existing.voice_id, "::").concat(firstName || "Custom")
+        }
+      });
+      playPreview(existing.preview_url);
+      return;
+    }
+    var timer = setTimeout(function () {
+      autoResolvedRef.current.add(q);
+      resolveAndSelectVoiceId(q);
+    }, 400);
+    return function () {
+      return clearTimeout(timer);
+    };
+  }, [voiceSearch, elevenLabsVoices]);
+
+  // ── Slider change: mark edited so we stop re-seeding ─────────────────
+  var handleSliderChange = function handleSliderChange(e) {
+    var key = e.target.name;
+    if (key === "tta__elevenlabs_stability") editedRef.current.stability = true;
+    if (key === "tta__elevenlabs_similarity_boost") editedRef.current.similarity_boost = true;
+    if (key === "tta__elevenlabs_style") editedRef.current.style = true;
+    handleChange(e);
+  };
+  var voiceHas = function voiceHas(key) {
+    var _selectedVoice$settin;
+    return (selectedVoice === null || selectedVoice === void 0 || (_selectedVoice$settin = selectedVoice.settings) === null || _selectedVoice$settin === void 0 ? void 0 : _selectedVoice$settin[key]) !== undefined;
+  };
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.Fragment, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
       className: "mb-3",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"], {
         xs: 12,
         md: 4,
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
           className: "tta_voice_card",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("h3", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h3", {
             className: "tta_voice_card_title",
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Voice Language", "text-to-audio")
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
             className: "tta_voice_select_wrapper",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("img", {
-              src: (0,_utils__WEBPACK_IMPORTED_MODULE_2__.getLanguageFlag)(Object.keys(currentPlayerLanguages).find(function (key) {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("img", {
+              src: (0,_utils__WEBPACK_IMPORTED_MODULE_3__.getLanguageFlag)(Object.keys(currentPlayerLanguages).find(function (key) {
                 return key === listeningSettings.tta__listening_lang;
               }) || listeningSettings.tta__listening_lang),
               alt: "flag",
@@ -12949,17 +13257,17 @@ function ElevenLabsSettings(_ref) {
               onError: function onError(e) {
                 e.target.style.display = "none";
               }
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Select, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Select, {
               onChange: handleChange,
               name: "tta__listening_lang",
               id: "tta__listening_lang",
               value: listeningSettings.tta__listening_lang,
               className: "tta_orange_voice_select",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("option", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
                 disabled: true,
                 children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Default Listening Language", "text-to-audio")
               }), Object.keys(currentPlayerLanguages).map(function (langKey) {
-                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("option", {
+                return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
                   value: langKey,
                   children: currentPlayerLanguages[langKey]
                 }, langKey);
@@ -12967,208 +13275,241 @@ function ElevenLabsSettings(_ref) {
             })]
           })]
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"], {
         xs: 12,
         md: 4,
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
           className: "tta_voice_card",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("h3", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h3", {
             className: "tta_voice_card_title",
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Voice to speak", "text-to-audio")
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Select, {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Control, {
+            type: "search",
+            className: "mb-2",
+            placeholder: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Search voices by name, accent, gender…", "text-to-audio"),
+            value: voiceSearch,
+            onChange: function onChange(e) {
+              return setVoiceSearch(e.target.value);
+            }
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Select, {
             onChange: handleChange,
             name: "tta__listening_voice",
             id: "tta__listening_voice",
             value: listeningSettings.tta__listening_voice,
             className: "tta_orange_speak_select",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("option", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
               disabled: true,
               children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Default Listening Voice", "text-to-audio")
-            }), elevenLabsVoices.map(function (voice, index) {
+            }), filteredElevenLabsVoices.map(function (voice, index) {
               var _voice$labels;
-              var firstName = voice.name ? voice.name.split(/[\s\-]/)[0].trim() : '';
-              var optionValue = voice.voice_id + '::' + firstName;
-              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("option", {
+              var firstName = voice.name ? voice.name.split(/[\s\-]/)[0].trim() : "";
+              var optionValue = voice.voice_id + "::" + firstName;
+              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("option", {
                 value: optionValue,
-                children: [voice.name, " ", (_voice$labels = voice.labels) !== null && _voice$labels !== void 0 && _voice$labels.accent ? "(".concat(voice.labels.accent, ")") : '']
-              }, index);
+                children: [voice.name, " ", (_voice$labels = voice.labels) !== null && _voice$labels !== void 0 && _voice$labels.accent ? "(".concat(voice.labels.accent, ")") : ""]
+              }, voice.voice_id || index);
             })]
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+            className: "mt-2",
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Label, {
+              className: "small text-muted mb-1",
+              children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Or paste a voice ID (overrides selection)", "text-to-audio")
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
+              className: "d-flex gap-2",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Control, {
+                type: "text",
+                placeholder: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("e.g. 21m00Tcm4TlvDq8ikWAM", "text-to-audio"),
+                value: manualVoiceId,
+                onChange: function onChange(e) {
+                  return setManualVoiceId(e.target.value);
+                },
+                onKeyDown: function onKeyDown(e) {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    applyManualVoiceId();
+                  }
+                },
+                disabled: manualLoading
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("button", {
+                type: "button",
+                className: "btn btn-outline-secondary",
+                onClick: applyManualVoiceId,
+                disabled: manualLoading || !manualVoiceId.trim(),
+                children: manualLoading ? (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Loading…", "text-to-audio") : (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Use", "text-to-audio")
+              })]
+            }), manualError ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
+              className: "text-danger small mt-1",
+              children: manualError
+            }) : null]
           })]
         })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"], {
         xs: 12,
         md: 4,
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
           className: "tta_voice_card",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("h3", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h3", {
             className: "tta_voice_card_title",
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Model", "text-to-audio")
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Select, {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Select, {
             onChange: handleChange,
             name: "tta__elevenlabs_model",
             id: "tta__elevenlabs_model",
             value: listeningSettings.tta__elevenlabs_model,
             className: "tta_orange_speak_select",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("option", {
-              value: "eleven_multilingual_v2",
-              children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Multilingual v2", "text-to-audio")
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("option", {
-              value: "eleven_turbo_v2_5",
-              children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Turbo v2.5", "text-to-audio")
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("option", {
-              value: "eleven_flash_v2_5",
-              children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Flash v2.5", "text-to-audio")
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("option", {
-              value: "eleven_v3",
-              children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Eleven v3", "text-to-audio")
-            })]
+            children: availableModels.map(function (id) {
+              return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
+                value: id,
+                children: MODEL_LABELS[id] || id
+              }, id);
+            })
           })]
         })
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_4__["default"], {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
       className: "mb-3",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_5__["default"], {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"], {
         xs: 12,
         md: 6,
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
           className: "tta_voice_card",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("h3", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("h3", {
             className: "tta_voice_card_title",
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Output Format", "text-to-audio")
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Select, {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Select, {
             onChange: handleChange,
             name: "tta__elevenlabs_output_format",
             id: "tta__elevenlabs_output_format",
             value: listeningSettings.tta__elevenlabs_output_format,
             className: "tta_orange_speak_select",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("option", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
               value: "mp3_44100_128",
               children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("MP3 44100Hz 128kbps (Default)", "text-to-audio")
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("option", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
               value: "mp3_44100_192",
               children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("MP3 44100Hz 192kbps", "text-to-audio")
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("option", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
               value: "mp3_44100_96",
               children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("MP3 44100Hz 96kbps", "text-to-audio")
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("option", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
               value: "mp3_44100_64",
               children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("MP3 44100Hz 64kbps", "text-to-audio")
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("option", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("option", {
               value: "mp3_22050_32",
               children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("MP3 22050Hz 32kbps", "text-to-audio")
             })]
           })]
         })
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
       className: "tta_chatgpt_speed_card",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Group, {
+      children: [voiceHas("stability") ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Group, {
         className: "mb-4",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
           className: "tta_slider_header",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Label, {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Label, {
             className: "tta_slider_label",
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Stability", "text-to-audio")
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
             className: "tta_chatgpt_slider_value",
             children: listeningSettings.tta__elevenlabs_stability
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
           className: "tta_slider_container",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Range, {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Range, {
             min: "0",
             max: "1",
             step: "0.05",
             name: "tta__elevenlabs_stability",
             id: "tta__elevenlabs_stability",
-            onChange: handleChange,
+            onChange: handleSliderChange,
             value: listeningSettings.tta__elevenlabs_stability,
             className: "tta_chatgpt_slider"
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
           className: "tta_chatgpt_slider_labels",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("More variable", "text-to-audio")
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("More stable", "text-to-audio")
           })]
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Group, {
+      }) : null, voiceHas("similarity_boost") ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Group, {
         className: "mb-4",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
           className: "tta_slider_header",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Label, {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Label, {
             className: "tta_slider_label",
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Similarity Boost", "text-to-audio")
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
             className: "tta_chatgpt_slider_value",
             children: listeningSettings.tta__elevenlabs_similarity_boost
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
           className: "tta_slider_container",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Range, {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Range, {
             min: "0",
             max: "1",
             step: "0.05",
             name: "tta__elevenlabs_similarity_boost",
             id: "tta__elevenlabs_similarity_boost",
-            onChange: handleChange,
+            onChange: handleSliderChange,
             value: listeningSettings.tta__elevenlabs_similarity_boost,
             className: "tta_chatgpt_slider"
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
           className: "tta_chatgpt_slider_labels",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Low", "text-to-audio")
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("High", "text-to-audio")
           })]
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Group, {
+      }) : null, voiceHas("style") ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Group, {
         className: "mb-4",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
           className: "tta_slider_header",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Label, {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Label, {
             className: "tta_slider_label",
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Style Exaggeration", "text-to-audio")
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
             className: "tta_chatgpt_slider_value",
             children: listeningSettings.tta__elevenlabs_style
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
           className: "tta_slider_container",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Range, {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Range, {
             min: "0",
             max: "1",
             step: "0.05",
             name: "tta__elevenlabs_style",
             id: "tta__elevenlabs_style",
-            onChange: handleChange,
+            onChange: handleSliderChange,
             value: listeningSettings.tta__elevenlabs_style,
             className: "tta_chatgpt_slider"
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
           className: "tta_chatgpt_slider_labels",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("None", "text-to-audio")
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Exaggerated", "text-to-audio")
           })]
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Group, {
+      }) : null, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Group, {
         className: "mb-4",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
           className: "tta_slider_header",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Label, {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Label, {
             className: "tta_slider_label",
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Speed", "text-to-audio")
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
             className: "tta_chatgpt_slider_value",
             children: listeningSettings.tta__elevenlabs_speed
           })]
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
           className: "tta_slider_container",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Range, {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Range, {
             min: "0.7",
             max: "1.2",
             step: "0.05",
@@ -13178,28 +13519,28 @@ function ElevenLabsSettings(_ref) {
             value: listeningSettings.tta__elevenlabs_speed,
             className: "tta_chatgpt_slider"
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
           className: "tta_chatgpt_slider_labels",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
             children: "0.7"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
             children: "1.0"
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("span", {
             children: "1.2"
           })]
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Group, {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Group, {
         className: "mb-3",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("div", {
           className: "d-flex align-items-center justify-content-between",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Label, {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Label, {
             className: "tta_slider_label mb-0",
             children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Speaker Boost", "text-to-audio")
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_6__["default"].Check, {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_7__["default"].Check, {
             type: "switch",
             id: "tta__elevenlabs_speaker_boost",
             name: "tta__elevenlabs_speaker_boost",
-            checked: listeningSettings.tta__elevenlabs_speaker_boost === true || listeningSettings.tta__elevenlabs_speaker_boost === 'true',
+            checked: listeningSettings.tta__elevenlabs_speaker_boost === true || listeningSettings.tta__elevenlabs_speaker_boost === "true",
             onChange: function onChange(e) {
               handleChange({
                 target: {
@@ -13211,17 +13552,17 @@ function ElevenLabsSettings(_ref) {
           })]
         })
       })]
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("div", {
       className: "tta_chatgpt_audio_player_card",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("audio", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)("audio", {
         id: "tts_audio_tag",
         controls: true,
         className: "tta_chatgpt_audio_player",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("source", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("source", {
           id: "tts_audio_wav",
           src: baseMP3File,
           type: "audio/wav"
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("source", {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)("source", {
           id: "tts_audio_mp3",
           src: baseMP3File,
           type: "audio/mpeg"
