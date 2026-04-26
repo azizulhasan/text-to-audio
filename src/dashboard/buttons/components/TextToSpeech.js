@@ -1002,15 +1002,33 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                             style={{ height: "55px" }}
                         >
 
-                                {
-                                    (!speech || listenStatus === 'resume') && <Play ttsObjPro={ttsObjPro}  onClick={(e) => handlePlayButtonClick(e)} />
-                                }
-                                {
-                                    speech && listenStatus === 'listen' && <Replay ttsObjPro={ttsObjPro} onClick={(e) => handlePlayButtonClick(e)} />
-                                }
-                                {
-                                    speech && listenStatus === 'pause' && <Pause ttsObjPro={ttsObjPro} onClick={(e) => handlePlayButtonClick(e)} />
-                                }
+                                {/* TTS-241 — render the user's custom-svg icon (preset or
+                                    custom paste) when it's set; otherwise fall back to the
+                                    factory <Play>/<Replay>/<Pause> components. */}
+                                {(() => {
+                                    const stateForIcon = (!speech || listenStatus === 'resume')
+                                        ? 'listen'
+                                        : (listenStatus === 'listen'
+                                            ? 'replay'
+                                            : (listenStatus === 'pause' ? 'pause' : null));
+                                    if (!stateForIcon) return null;
+                                    const customSvg = renderResolvedIcon(resolveStateIcon(buttonTexts, _resolvedPlayerId, stateForIcon));
+                                    if (customSvg) {
+                                        return (
+                                            <span
+                                                role="button"
+                                                aria-label="play"
+                                                onClick={(e) => handlePlayButtonClick(e)}
+                                                style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+                                                dangerouslySetInnerHTML={{ __html: customSvg }}
+                                            />
+                                        );
+                                    }
+                                    if (!speech || listenStatus === 'resume') return <Play ttsObjPro={ttsObjPro} onClick={(e) => handlePlayButtonClick(e)} />;
+                                    if (listenStatus === 'listen')           return <Replay ttsObjPro={ttsObjPro} onClick={(e) => handlePlayButtonClick(e)} />;
+                                    if (listenStatus === 'pause')            return <Pause ttsObjPro={ttsObjPro} onClick={(e) => handlePlayButtonClick(e)} />;
+                                    return null;
+                                })()}
 
                                 {/* {isPlaying && (
                                     <div
@@ -1156,7 +1174,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                             width: ${buttonCSS.width}%;
                             height: ${buttonCSS.height ? buttonCSS.height + 'px' : 'auto'};
                             font-size: ${buttonCSS.fontSize ? buttonCSS.fontSize + 'px' : 'inherit'};
-                            border: ${buttonCSS.border ? buttonCSS.border + 'px solid ' + (buttonCSS.border_color || '#000000') : 'none'};
+                            border: ${buttonCSS.border ? buttonCSS.border + 'px solid ' + (buttonCSS.border_color || '#000000') : 'none'} !important;
                             border-radius: ${buttonCSS.borderRadius ? buttonCSS.borderRadius + 'px' : '0'};
                             margin-top: ${buttonCSS.marginTop}px;
                             margin-bottom: ${buttonCSS.marginBottom}px;
