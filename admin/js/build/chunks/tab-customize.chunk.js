@@ -10872,7 +10872,50 @@ var TextToSpeechPro = null;
 
 // Auto-close timeout duration (15 seconds)
 var MODAL_AUTO_CLOSE_TIMEOUT = 15000;
+// TTS-241 — resolve text + icon for a state, preferring buttonTexts
+// per-player overrides, falling back to the legacy textArr flat keys
+// (used on the front-end where the prop isn't passed).
+var resolveStateText = function resolveStateText(buttonTexts, playerId, state, flatKey) {
+  var _buttonTexts$players, _window, _flat$players;
+  var perPlayer = buttonTexts === null || buttonTexts === void 0 || (_buttonTexts$players = buttonTexts.players) === null || _buttonTexts$players === void 0 || (_buttonTexts$players = _buttonTexts$players[playerId]) === null || _buttonTexts$players === void 0 || (_buttonTexts$players = _buttonTexts$players[state]) === null || _buttonTexts$players === void 0 ? void 0 : _buttonTexts$players.text;
+  if (perPlayer) return perPlayer;
+  var flat = (typeof window !== 'undefined' ? (_window = window) === null || _window === void 0 || (_window = _window.TTS) === null || _window === void 0 || (_window = _window.settings) === null || _window === void 0 ? void 0 : _window.textArr : null) || {};
+  var flatPlayers = (_flat$players = flat.players) === null || _flat$players === void 0 || (_flat$players = _flat$players[playerId]) === null || _flat$players === void 0 || (_flat$players = _flat$players[state]) === null || _flat$players === void 0 ? void 0 : _flat$players.text;
+  if (flatPlayers) return flatPlayers;
+  return flat[flatKey];
+};
+var resolveStateIcon = function resolveStateIcon(buttonTexts, playerId, state) {
+  var _buttonTexts$players2, _window2, _flat$players2;
+  var perPlayer = buttonTexts === null || buttonTexts === void 0 || (_buttonTexts$players2 = buttonTexts.players) === null || _buttonTexts$players2 === void 0 || (_buttonTexts$players2 = _buttonTexts$players2[playerId]) === null || _buttonTexts$players2 === void 0 || (_buttonTexts$players2 = _buttonTexts$players2[state]) === null || _buttonTexts$players2 === void 0 ? void 0 : _buttonTexts$players2.icon;
+  if (perPlayer) return perPlayer;
+  var flat = (typeof window !== 'undefined' ? (_window2 = window) === null || _window2 === void 0 || (_window2 = _window2.TTS) === null || _window2 === void 0 || (_window2 = _window2.settings) === null || _window2 === void 0 ? void 0 : _window2.textArr : null) || {};
+  return ((_flat$players2 = flat.players) === null || _flat$players2 === void 0 || (_flat$players2 = _flat$players2[playerId]) === null || _flat$players2 === void 0 || (_flat$players2 = _flat$players2[state]) === null || _flat$players2 === void 0 ? void 0 : _flat$players2.icon) || '';
+};
+var renderResolvedIcon = function renderResolvedIcon(descriptor) {
+  if (!descriptor) return null;
+  var svg = '';
+  if (descriptor.startsWith('preset:')) {
+    var _window3;
+    var key = descriptor.slice(7);
+    var presets = (typeof window !== 'undefined' ? (_window3 = window) === null || _window3 === void 0 || (_window3 = _window3.ttsObj) === null || _window3 === void 0 ? void 0 : _window3.player_customizations : null) || {};
+    // preset_svgs aren't shipped to frontend — use first player_customizations entry as best-effort
+    for (var _i = 0, _Object$keys = Object.keys(presets); _i < _Object$keys.length; _i++) {
+      var pid = _Object$keys[_i];
+      if (presets[pid] && presets[pid][key]) {
+        svg = presets[pid][key];
+        break;
+      }
+    }
+  } else if (descriptor.startsWith('custom:')) {
+    svg = descriptor.slice(7);
+  } else {
+    svg = descriptor;
+  }
+  if (!svg) return null;
+  return svg.replace(/\$color/g, 'currentColor');
+};
 var TextToSpeech = function TextToSpeech(_ref) {
+  var _window4;
   var buttonId = _ref.buttonId,
     button = _ref.button,
     _ref$cssStyle = _ref.cssStyle,
@@ -10880,7 +10923,12 @@ var TextToSpeech = function TextToSpeech(_ref) {
     _ref$buttonCSS = _ref.buttonCSS,
     buttonCSS = _ref$buttonCSS === void 0 ? {} : _ref$buttonCSS,
     _ref$buttonLiveCSS = _ref.buttonLiveCSS,
-    buttonLiveCSS = _ref$buttonLiveCSS === void 0 ? {} : _ref$buttonLiveCSS;
+    buttonLiveCSS = _ref$buttonLiveCSS === void 0 ? {} : _ref$buttonLiveCSS,
+    _ref$buttonTexts = _ref.buttonTexts,
+    buttonTexts = _ref$buttonTexts === void 0 ? null : _ref$buttonTexts,
+    _ref$playerId = _ref.playerId,
+    playerId = _ref$playerId === void 0 ? null : _ref$playerId;
+  var _resolvedPlayerId = playerId || (typeof window !== 'undefined' ? Number((_window4 = window) === null || _window4 === void 0 || (_window4 = _window4.ttsObj) === null || _window4 === void 0 ? void 0 : _window4.player_id) : 1) || 1;
   var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(true),
     _useState2 = _slicedToArray(_useState, 2),
     isFirstPlayerPlay = _useState2[0],
@@ -11145,12 +11193,12 @@ var TextToSpeech = function TextToSpeech(_ref) {
     var loadVoices = function loadVoices() {
       var voices = window.speechSynthesis.getVoices();
       if (voices.length > 0) {
-        var _window, _window2;
+        var _window5, _window6;
         setAvailableVoices(voices);
 
         // Get admin-configured language from settings
-        var adminLang = ((_window = window) === null || _window === void 0 || (_window = _window.TTS) === null || _window === void 0 || (_window = _window.settings) === null || _window === void 0 || (_window = _window.listening) === null || _window === void 0 ? void 0 : _window.tta__listening_lang) || 'en';
-        var adminVoice = ((_window2 = window) === null || _window2 === void 0 || (_window2 = _window2.TTS) === null || _window2 === void 0 || (_window2 = _window2.settings) === null || _window2 === void 0 || (_window2 = _window2.listening) === null || _window2 === void 0 ? void 0 : _window2.tta__listening_voice) || '';
+        var adminLang = ((_window5 = window) === null || _window5 === void 0 || (_window5 = _window5.TTS) === null || _window5 === void 0 || (_window5 = _window5.settings) === null || _window5 === void 0 || (_window5 = _window5.listening) === null || _window5 === void 0 ? void 0 : _window5.tta__listening_lang) || 'en';
+        var adminVoice = ((_window6 = window) === null || _window6 === void 0 || (_window6 = _window6.TTS) === null || _window6 === void 0 || (_window6 = _window6.settings) === null || _window6 === void 0 || (_window6 = _window6.listening) === null || _window6 === void 0 ? void 0 : _window6.tta__listening_voice) || '';
 
         // Extract unique languages that match admin language
         var langCode = getCountryCode(adminLang);
@@ -11183,7 +11231,7 @@ var TextToSpeech = function TextToSpeech(_ref) {
             setCurrentLanguage(((_matchingVoices$ = matchingVoices[0]) === null || _matchingVoices$ === void 0 ? void 0 : _matchingVoices$.lang) || adminLang);
           }
         } else {
-          var _window3;
+          var _window7;
           // Set defaults from admin settings
           if (matchingVoices.length > 0) {
             var defaultVoice = matchingVoices.find(function (v) {
@@ -11193,7 +11241,7 @@ var TextToSpeech = function TextToSpeech(_ref) {
             setCurrentVoice(defaultVoice.name);
           }
           // Set default rate, pitch, volume from admin settings
-          var listeningSettings = ((_window3 = window) === null || _window3 === void 0 || (_window3 = _window3.TTS) === null || _window3 === void 0 || (_window3 = _window3.settings) === null || _window3 === void 0 ? void 0 : _window3.listening) || {};
+          var listeningSettings = ((_window7 = window) === null || _window7 === void 0 || (_window7 = _window7.TTS) === null || _window7 === void 0 || (_window7 = _window7.settings) === null || _window7 === void 0 ? void 0 : _window7.listening) || {};
           setCurrentRate(parseFloat(listeningSettings.tta__listening_rate) || 1);
           setCurrentPitch(parseFloat(listeningSettings.tta__listening_pitch) || 1);
           setCurrentVolume(parseFloat(listeningSettings.tta__listening_volume) || 1);
@@ -11384,7 +11432,7 @@ var TextToSpeech = function TextToSpeech(_ref) {
    * @param {Object} overrides - Optional overrides for settings (useful when state hasn't updated yet)
    */
   var applySettingsAndRestart = function applySettingsAndRestart() {
-    var _window4;
+    var _window8;
     var overrides = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
     if (!speech || !speech.speech) return;
     setIsApplyingSettings(true);
@@ -11469,7 +11517,7 @@ var TextToSpeech = function TextToSpeech(_ref) {
     clearInterval(incrementInterval);
 
     // Calculate new times based on current percentage (same as handleProgressBarClick)
-    var readingTime = (_window4 = window) === null || _window4 === void 0 || (_window4 = _window4.TTS.settings) === null || _window4 === void 0 ? void 0 : _window4.readingTime;
+    var readingTime = (_window8 = window) === null || _window8 === void 0 || (_window8 = _window8.TTS.settings) === null || _window8 === void 0 ? void 0 : _window8.readingTime;
     var totalTimeMs = 1000 * 60 * parseInt(readingTime);
     var seekTimeMs = currentPercentage / 100 * totalTimeMs;
     var remainingTimeMs = totalTimeMs - seekTimeMs;
@@ -11653,8 +11701,8 @@ var TextToSpeech = function TextToSpeech(_ref) {
     // The data/time we want to countdown to
     var deadline;
     if (!incrementDeadlineParam) {
-      var _window5;
-      var _readingTime = (_window5 = window) === null || _window5 === void 0 || (_window5 = _window5.TTS.settings) === null || _window5 === void 0 ? void 0 : _window5.readingTime;
+      var _window9;
+      var _readingTime = (_window9 = window) === null || _window9 === void 0 || (_window9 = _window9.TTS.settings) === null || _window9 === void 0 ? void 0 : _window9.readingTime;
       deadline = 1000 * 60 * parseInt(_readingTime);
       setIncrementDeadline(deadline);
     } else {
@@ -11694,8 +11742,8 @@ var TextToSpeech = function TextToSpeech(_ref) {
     setIncrementInterval(timer);
   };
   var setProgressbarProgress = function setProgressbarProgress(now) {
-    var _window6;
-    var time = (_window6 = window) === null || _window6 === void 0 || (_window6 = _window6.TTS.settings) === null || _window6 === void 0 ? void 0 : _window6.readingTime;
+    var _window0;
+    var time = (_window0 = window) === null || _window0 === void 0 || (_window0 = _window0.TTS.settings) === null || _window0 === void 0 ? void 0 : _window0.readingTime;
     var totalTime = 1000 * 60 * parseInt(time);
     if (now) {
       var progressbarPercent = getPercentage(now, totalTime);
@@ -11713,7 +11761,7 @@ var TextToSpeech = function TextToSpeech(_ref) {
    * @param {Event} e - The click event
    */
   var handleProgressBarClick = function handleProgressBarClick(e) {
-    var _window7;
+    var _window1;
     e.preventDefault();
     if (!speech || listenStatus === 'listen') {
       return; // Don't seek if not playing
@@ -11779,7 +11827,7 @@ var TextToSpeech = function TextToSpeech(_ref) {
     clearInterval(incrementInterval);
 
     // Calculate new times based on seek position
-    var readingTime = (_window7 = window) === null || _window7 === void 0 || (_window7 = _window7.TTS.settings) === null || _window7 === void 0 ? void 0 : _window7.readingTime;
+    var readingTime = (_window1 = window) === null || _window1 === void 0 || (_window1 = _window1.TTS.settings) === null || _window1 === void 0 ? void 0 : _window1.readingTime;
     var totalTimeMs = 1000 * 60 * parseInt(readingTime);
     var seekTimeMs = clickPercentage / 100 * totalTimeMs;
     var remainingTimeMs = totalTimeMs - seekTimeMs;
@@ -11852,8 +11900,8 @@ var TextToSpeech = function TextToSpeech(_ref) {
     // The data/time we want to countdown to
     var deadline;
     if (!decrementDeadlineParam) {
-      var _window8;
-      var _readingTime2 = (_window8 = window) === null || _window8 === void 0 || (_window8 = _window8.TTS.settings) === null || _window8 === void 0 ? void 0 : _window8.readingTime;
+      var _window10;
+      var _readingTime2 = (_window10 = window) === null || _window10 === void 0 || (_window10 = _window10.TTS.settings) === null || _window10 === void 0 ? void 0 : _window10.readingTime;
       deadline = new Date().getTime() + 1000 * 60 * parseInt(_readingTime2);
       setDecrementDeadline(deadline);
     } else {
@@ -11955,7 +12003,7 @@ var TextToSpeech = function TextToSpeech(_ref) {
           }), listenStatus === 'listen' && window.hasOwnProperty('TTS') && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
             className: "tts__align-items-center",
             children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
-              children: window.TTS.settings.textArr.listen_text
+              children: resolveStateText(buttonTexts, _resolvedPlayerId, 'listen', 'listen_text')
             })
           }), listenStatus !== 'listen' && window.hasOwnProperty('TTS') && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
             className: "tts__d-flex tts__gap-3  tts__justify-content-between tts__align-items-center",
@@ -12056,8 +12104,8 @@ var TextToSpeech = function TextToSpeech(_ref) {
     });
   };
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    var _window9;
-    if (!((_window9 = window) !== null && _window9 !== void 0 && (_window9 = _window9.ttsObj) !== null && _window9 !== void 0 && (_window9 = _window9.settings) !== null && _window9 !== void 0 && (_window9 = _window9.settings) !== null && _window9 !== void 0 && _window9.tta__settings_stop_floating_button)) {
+    var _window11;
+    if (!((_window11 = window) !== null && _window11 !== void 0 && (_window11 = _window11.ttsObj) !== null && _window11 !== void 0 && (_window11 = _window11.settings) !== null && _window11 !== void 0 && (_window11 = _window11.settings) !== null && _window11 !== void 0 && _window11.tta__settings_stop_floating_button)) {
       var buttonEl = document.getElementById('tts_button_should_float');
       if (!buttonEl) return;
 
@@ -12082,7 +12130,13 @@ var TextToSpeech = function TextToSpeech(_ref) {
   }, []);
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.Fragment, {
     children: [buttonCSS && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("style", {
-      children: ["#tts_button_should_float{ background-color: ".concat(buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.backgroundColor, ";color:").concat(buttonCSS.color, ";width:").concat(buttonCSS.width, "%;margin-top:").concat(buttonCSS.marginTop, "px;margin-bottom:").concat(buttonCSS.marginBottom, "px;margin-right:").concat(buttonCSS.marginRight, "px;margin-left:").concat(buttonCSS.marginLeft, "%;}\n                        #tts_button_should_float div:nth-child(1){ color:").concat(buttonCSS.color, ";}\n                        .atlasvoice_player_button svg {cursor:pointer;}\n                        .tts__progress.tts__audio-progress:hover { opacity: 0.8; }\n                        .tts__progress.tts__audio-progress { transition: opacity 0.2s ease; }\n                        @keyframes tts-spin {\n                            0% { transform: translate(-50%, -50%) rotate(0deg); }\n                            100% { transform: translate(-50%, -50%) rotate(360deg); }\n                        }\n\n                        /* Settings Modal Backdrop */\n                        .tts__settings-modal-backdrop {\n                            position: fixed;\n                            top: 0;\n                            left: 0;\n                            right: 0;\n                            bottom: 0;\n                            background-color: rgba(0, 0, 0, 0.5);\n                            display: flex;\n                            align-items: center;\n                            justify-content: center;\n                            z-index: 9999;\n                            opacity: 0;\n                            transition: opacity 0.2s ease;\n                        }\n                        .tts__settings-modal-backdrop.tts__modal-visible {\n                            opacity: 1;\n                        }\n                        .tts__settings-modal-backdrop.tts__modal-closing {\n                            opacity: 0;\n                        }\n\n                        /* Settings Modal Container */\n                        .tts__settings-modal {\n                            width: 90%;\n                            max-width: 400px;\n                            background-color: ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.backgroundColor) || '#184c53', ";\n                            color: ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', ";\n                            border-radius: 12px;\n                            padding: 20px;\n                            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n                            transform: scale(0.8);\n                            opacity: 0;\n                            transition: transform 0.2s ease, opacity 0.2s ease;\n                            position: relative;\n                        }\n                        .tts__settings-modal-backdrop.tts__modal-visible .tts__settings-modal {\n                            transform: scale(1);\n                            opacity: 1;\n                        }\n                        .tts__settings-modal-backdrop.tts__modal-closing .tts__settings-modal {\n                            transform: scale(0.8);\n                            opacity: 0;\n                        }\n\n                        /* Modal Header */\n                        .tts__settings-modal-header {\n                            display: flex;\n                            justify-content: space-between;\n                            align-items: center;\n                            margin-bottom: 20px;\n                            padding-bottom: 12px;\n                            border-bottom: 1px solid ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', "20;\n                        }\n                        .tts__settings-modal-title {\n                            font-size: 16px;\n                            font-weight: 600;\n                            margin: 0;\n                        }\n                        .tts__settings-modal-close {\n                            background: transparent;\n                            border: none;\n                            cursor: pointer;\n                            padding: 4px;\n                            border-radius: 50%;\n                            display: flex;\n                            align-items: center;\n                            justify-content: center;\n                            transition: background-color 0.2s ease;\n                        }\n                        .tts__settings-modal-close:hover {\n                            background-color: ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', "20;\n                        }\n\n                        /* Settings Select */\n                        .tts__settings-select {\n                            outline: none;\n                        }\n                        .tts__settings-select:focus {\n                            border-color: ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', "80 !important;\n                        }\n                        .tts__settings-select option {\n                            padding: 8px;\n                        }\n\n                        /* Custom Slider Styles */\n                        .tts__settings-slider {\n                            -webkit-appearance: none;\n                            appearance: none;\n                            height: 6px;\n                            background: ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', "30;\n                            border-radius: 3px;\n                            outline: none;\n                        }\n                        .tts__settings-slider::-webkit-slider-thumb {\n                            -webkit-appearance: none;\n                            appearance: none;\n                            width: 18px;\n                            height: 18px;\n                            background: ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', ";\n                            border-radius: 50%;\n                            cursor: pointer;\n                            transition: transform 0.1s ease;\n                            box-shadow: 0 2px 4px rgba(0,0,0,0.2);\n                        }\n                        .tts__settings-slider::-webkit-slider-thumb:hover {\n                            transform: scale(1.15);\n                        }\n                        .tts__settings-slider::-moz-range-thumb {\n                            width: 18px;\n                            height: 18px;\n                            background: ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', ";\n                            border-radius: 50%;\n                            cursor: pointer;\n                            border: none;\n                            transition: transform 0.1s ease;\n                            box-shadow: 0 2px 4px rgba(0,0,0,0.2);\n                        }\n                        .tts__settings-slider::-moz-range-thumb:hover {\n                            transform: scale(1.15);\n                        }\n                        .tts__settings-slider::-moz-range-track {\n                            background: ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', "30;\n                            height: 6px;\n                            border-radius: 3px;\n                        }\n\n                        /* Settings icon hover effect */\n                        .tts__ps-3 > div:first-child:hover {\n                            background-color: ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', "30 !important;\n                        }\n\n                        /* Setting row styles */\n                        .tts__setting-row {\n                            margin-bottom: 16px;\n                        }\n                        .tts__setting-row:last-child {\n                            margin-bottom: 0;\n                        }\n                        .tts__setting-label {\n                            display: block;\n                            font-size: 12px;\n                            margin-bottom: 6px;\n                            opacity: 0.85;\n                        }\n                        .tts__setting-header {\n                            display: flex;\n                            justify-content: space-between;\n                            align-items: center;\n                            margin-bottom: 6px;\n                        }\n                        .tts__setting-value {\n                            font-size: 12px;\n                            font-weight: 600;\n                        }\n\n                        /* Loader for settings */\n                        .tts__settings-loader-overlay {\n                            position: absolute;\n                            top: 0;\n                            left: 0;\n                            right: 0;\n                            bottom: 0;\n                            background-color: rgba(0, 0, 0, 0.3);\n                            display: flex;\n                            align-items: center;\n                            justify-content: center;\n                            border-radius: 12px;\n                            z-index: 10;\n                        }\n                        .tts__settings-loader {\n                            width: 28px;\n                            height: 28px;\n                            border: 3px solid ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.backgroundColor) || '#184c53', ";\n                            border-top: 3px solid ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', ";\n                            border-radius: 50%;\n                            animation: tts-modal-spin 0.8s linear infinite;\n                        }\n                        @keyframes tts-modal-spin {\n                            0% { transform: rotate(0deg); }\n                            100% { transform: rotate(360deg); }\n                        }\n                        "), (buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.custom_css) && (buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.custom_css)]
+      children: [
+      /* TTS-241 — apply the user's full button-style set
+         (border, border-radius, height, font-size, padding)
+         so Default Pro reflects the same customizations as
+         Default. Previously these were dropped, making the
+         player look "broken" relative to the saved CSS. */
+      "#tts_button_should_float{\n                            background-color: ".concat(buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.backgroundColor, ";\n                            color: ").concat(buttonCSS.color, ";\n                            width: ").concat(buttonCSS.width, "%;\n                            height: ").concat(buttonCSS.height ? buttonCSS.height + 'px' : 'auto', ";\n                            font-size: ").concat(buttonCSS.fontSize ? buttonCSS.fontSize + 'px' : 'inherit', ";\n                            border: ").concat(buttonCSS.border ? buttonCSS.border + 'px solid ' + (buttonCSS.border_color || '#000000') : 'none', ";\n                            border-radius: ").concat(buttonCSS.borderRadius ? buttonCSS.borderRadius + 'px' : '0', ";\n                            margin-top: ").concat(buttonCSS.marginTop, "px;\n                            margin-bottom: ").concat(buttonCSS.marginBottom, "px;\n                            margin-right: ").concat(buttonCSS.marginRight, "px;\n                            margin-left: ").concat(buttonCSS.marginLeft, "%;\n                            box-sizing: border-box;\n                        }\n                        #tts_button_should_float .tts__player{\n                            border: 0 !important;\n                            box-shadow: none !important;\n                            background: transparent !important;\n                            width: 100% !important;\n                            height: 100% !important;\n                            border-radius: inherit !important;\n                        }\n                        #tts_button_should_float div:nth-child(1){ color:").concat(buttonCSS.color, ";}\n                        .atlasvoice_player_button svg {cursor:pointer;}\n                        .tts__progress.tts__audio-progress:hover { opacity: 0.8; }\n                        .tts__progress.tts__audio-progress { transition: opacity 0.2s ease; }\n                        @keyframes tts-spin {\n                            0% { transform: translate(-50%, -50%) rotate(0deg); }\n                            100% { transform: translate(-50%, -50%) rotate(360deg); }\n                        }\n\n                        /* Settings Modal Backdrop */\n                        .tts__settings-modal-backdrop {\n                            position: fixed;\n                            top: 0;\n                            left: 0;\n                            right: 0;\n                            bottom: 0;\n                            background-color: rgba(0, 0, 0, 0.5);\n                            display: flex;\n                            align-items: center;\n                            justify-content: center;\n                            z-index: 9999;\n                            opacity: 0;\n                            transition: opacity 0.2s ease;\n                        }\n                        .tts__settings-modal-backdrop.tts__modal-visible {\n                            opacity: 1;\n                        }\n                        .tts__settings-modal-backdrop.tts__modal-closing {\n                            opacity: 0;\n                        }\n\n                        /* Settings Modal Container */\n                        .tts__settings-modal {\n                            width: 90%;\n                            max-width: 400px;\n                            background-color: ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.backgroundColor) || '#184c53', ";\n                            color: ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', ";\n                            border-radius: 12px;\n                            padding: 20px;\n                            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);\n                            transform: scale(0.8);\n                            opacity: 0;\n                            transition: transform 0.2s ease, opacity 0.2s ease;\n                            position: relative;\n                        }\n                        .tts__settings-modal-backdrop.tts__modal-visible .tts__settings-modal {\n                            transform: scale(1);\n                            opacity: 1;\n                        }\n                        .tts__settings-modal-backdrop.tts__modal-closing .tts__settings-modal {\n                            transform: scale(0.8);\n                            opacity: 0;\n                        }\n\n                        /* Modal Header */\n                        .tts__settings-modal-header {\n                            display: flex;\n                            justify-content: space-between;\n                            align-items: center;\n                            margin-bottom: 20px;\n                            padding-bottom: 12px;\n                            border-bottom: 1px solid ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', "20;\n                        }\n                        .tts__settings-modal-title {\n                            font-size: 16px;\n                            font-weight: 600;\n                            margin: 0;\n                        }\n                        .tts__settings-modal-close {\n                            background: transparent;\n                            border: none;\n                            cursor: pointer;\n                            padding: 4px;\n                            border-radius: 50%;\n                            display: flex;\n                            align-items: center;\n                            justify-content: center;\n                            transition: background-color 0.2s ease;\n                        }\n                        .tts__settings-modal-close:hover {\n                            background-color: ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', "20;\n                        }\n\n                        /* Settings Select */\n                        .tts__settings-select {\n                            outline: none;\n                        }\n                        .tts__settings-select:focus {\n                            border-color: ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', "80 !important;\n                        }\n                        .tts__settings-select option {\n                            padding: 8px;\n                        }\n\n                        /* Custom Slider Styles */\n                        .tts__settings-slider {\n                            -webkit-appearance: none;\n                            appearance: none;\n                            height: 6px;\n                            background: ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', "30;\n                            border-radius: 3px;\n                            outline: none;\n                        }\n                        .tts__settings-slider::-webkit-slider-thumb {\n                            -webkit-appearance: none;\n                            appearance: none;\n                            width: 18px;\n                            height: 18px;\n                            background: ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', ";\n                            border-radius: 50%;\n                            cursor: pointer;\n                            transition: transform 0.1s ease;\n                            box-shadow: 0 2px 4px rgba(0,0,0,0.2);\n                        }\n                        .tts__settings-slider::-webkit-slider-thumb:hover {\n                            transform: scale(1.15);\n                        }\n                        .tts__settings-slider::-moz-range-thumb {\n                            width: 18px;\n                            height: 18px;\n                            background: ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', ";\n                            border-radius: 50%;\n                            cursor: pointer;\n                            border: none;\n                            transition: transform 0.1s ease;\n                            box-shadow: 0 2px 4px rgba(0,0,0,0.2);\n                        }\n                        .tts__settings-slider::-moz-range-thumb:hover {\n                            transform: scale(1.15);\n                        }\n                        .tts__settings-slider::-moz-range-track {\n                            background: ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', "30;\n                            height: 6px;\n                            border-radius: 3px;\n                        }\n\n                        /* Settings icon hover effect */\n                        .tts__ps-3 > div:first-child:hover {\n                            background-color: ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', "30 !important;\n                        }\n\n                        /* Setting row styles */\n                        .tts__setting-row {\n                            margin-bottom: 16px;\n                        }\n                        .tts__setting-row:last-child {\n                            margin-bottom: 0;\n                        }\n                        .tts__setting-label {\n                            display: block;\n                            font-size: 12px;\n                            margin-bottom: 6px;\n                            opacity: 0.85;\n                        }\n                        .tts__setting-header {\n                            display: flex;\n                            justify-content: space-between;\n                            align-items: center;\n                            margin-bottom: 6px;\n                        }\n                        .tts__setting-value {\n                            font-size: 12px;\n                            font-weight: 600;\n                        }\n\n                        /* Loader for settings */\n                        .tts__settings-loader-overlay {\n                            position: absolute;\n                            top: 0;\n                            left: 0;\n                            right: 0;\n                            bottom: 0;\n                            background-color: rgba(0, 0, 0, 0.3);\n                            display: flex;\n                            align-items: center;\n                            justify-content: center;\n                            border-radius: 12px;\n                            z-index: 10;\n                        }\n                        .tts__settings-loader {\n                            width: 28px;\n                            height: 28px;\n                            border: 3px solid ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.backgroundColor) || '#184c53', ";\n                            border-top: 3px solid ").concat((buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.color) || '#ffffff', ";\n                            border-radius: 50%;\n                            animation: tts-modal-spin 0.8s linear infinite;\n                        }\n                        @keyframes tts-modal-spin {\n                            0% { transform: rotate(0deg); }\n                            100% { transform: rotate(360deg); }\n                        }\n                        "), (buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.custom_css) && (buttonCSS === null || buttonCSS === void 0 ? void 0 : buttonCSS.custom_css)]
     }), shouldFloat ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
       className: 'tts__custom-position_bottom_right',
       children: getButtonHTML()
@@ -14063,13 +14117,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "./node_modules/@wordpress/i18n/build-module/index.js");
-/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Container.js");
-/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Row.js");
-/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Col.js");
-/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Form.js");
-/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/OverlayTrigger.js");
-/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Tooltip.js");
-/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Button.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Container.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Row.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Col.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Form.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/OverlayTrigger.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Tooltip.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Button.js");
 /* harmony import */ var _context_Notify__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../context/Notify */ "./src/dashboard/components/context/Notify.js");
 /* harmony import */ var _context_utilities__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../context/utilities */ "./src/dashboard/components/context/utilities.js");
 /* harmony import */ var _buttons_components_TextToSpeech__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../buttons/components/TextToSpeech */ "./src/dashboard/buttons/components/TextToSpeech.js");
@@ -14077,9 +14131,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _buttons_components_TextToSpeechFour__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../../buttons/components/TextToSpeechFour */ "./src/dashboard/buttons/components/TextToSpeechFour.js");
 /* harmony import */ var _CustomizationTabs__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./CustomizationTabs */ "./src/dashboard/components/dashboard/customize/CustomizationTabs.js");
 /* harmony import */ var _design_TTSButtonDesign__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./design/TTSButtonDesign */ "./src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js");
-/* harmony import */ var _UpgradeToPro__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../UpgradeToPro */ "./src/dashboard/components/UpgradeToPro.js");
-/* harmony import */ var _Icon__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../Icon */ "./src/dashboard/components/Icon.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var _design_ButtonPreview__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./design/ButtonPreview */ "./src/dashboard/components/dashboard/customize/design/ButtonPreview.js");
+/* harmony import */ var _UpgradeToPro__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../UpgradeToPro */ "./src/dashboard/components/UpgradeToPro.js");
+/* harmony import */ var _Icon__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../../Icon */ "./src/dashboard/components/Icon.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _createForOfIteratorHelper(r, e) { var t = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (!t) { if (Array.isArray(r) || (t = _unsupportedIterableToArray(r)) || e && r && "number" == typeof r.length) { t && (r = t); var _n = 0, F = function F() {}; return { s: F, n: function n() { return _n >= r.length ? { done: !0 } : { done: !1, value: r[_n++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var o, a = !0, u = !1; return { s: function s() { t = t.call(r); }, n: function n() { var r = t.next(); return a = r.done, r; }, e: function e(r) { u = !0, o = r; }, f: function f() { try { a || null == t["return"] || t["return"](); } finally { if (u) throw o; } } }; }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
@@ -14106,10 +14161,11 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
 
+
 var speech = null;
 var TextToSpeechFree = null;
 function Customize() {
-  var _listeningBtnStyle$bu, _listeningBtnStyle$bu2, _listeningBtnStyle$bu3, _listeningBtnStyle$bu4, _listeningBtnStyle$bu5;
+  var _listeningBtnStyle$bu, _listeningBtnStyle$bu2, _listeningBtnStyle$bu3, _listeningBtnStyle$bu4, _listeningBtnStyle$bu5, _listeningBtnStyle$bu6;
   var defaultValue = {
     backgroundColor: "#ffffff",
     color: "#000000",
@@ -14458,10 +14514,10 @@ function Customize() {
   };
   var CTANotice = function CTANotice() {
     var text_content = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
-    (0,_context_Notify__WEBPACK_IMPORTED_MODULE_2__.toast)(/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.Fragment, {
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("h6", {
+    (0,_context_Notify__WEBPACK_IMPORTED_MODULE_2__.toast)(/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.Fragment, {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("h6", {
         children: text_content
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("button", {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("button", {
         onClick: function onClick(e) {
           window.open("https://atlasaidev.com/plugins/text-to-speech-pro/pricing/");
         },
@@ -14636,16 +14692,16 @@ function Customize() {
     _useState24 = _slicedToArray(_useState23, 2),
     buttonLists = _useState24[0],
     setButtonLists = _useState24[1];
-  return isDataLoaded ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_12__["default"], {
+  return isDataLoaded ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
     fluid: true,
     className: "tta-container",
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_13__["default"], {
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"], {
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"], {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_15__["default"], {
         xs: 12,
         lg: 8,
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("div", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
           className: "bg-white rounded p-3 mb-3 shadow-sm",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
             style: {
               display: 'flex',
               justifyContent: 'space-between',
@@ -14653,15 +14709,15 @@ function Customize() {
               flexWrap: 'wrap',
               gap: '12px'
             },
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("h2", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("h2", {
                 className: "fs-3 fw-bold mb-2 text-dark",
                 children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Customization", "text-to-audio")
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("p", {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("p", {
                 className: "text-secondary m-0 small",
                 children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Customize the player & design to match your brand and preferences.", "text-to-audio")
               })]
-            }), typeof tta_obj !== 'undefined' && tta_obj.latest_post_preview_url && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("a", {
+            }), typeof tta_obj !== 'undefined' && tta_obj.latest_post_preview_url && /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("a", {
               href: tta_obj.latest_post_preview_url,
               target: "_blank",
               rel: "noopener noreferrer",
@@ -14690,44 +14746,44 @@ function Customize() {
               children: [(0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Preview on Your Site", "text-to-audio"), " ", "\u2197"]
             })]
           })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_15__["default"], {
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)(react_bootstrap__WEBPACK_IMPORTED_MODULE_16__["default"], {
           onSubmit: handleSubmit,
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_CustomizationTabs__WEBPACK_IMPORTED_MODULE_7__["default"], {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_CustomizationTabs__WEBPACK_IMPORTED_MODULE_7__["default"], {
             buttonLists: buttonLists,
             customCSS: customCSS,
             listeningBtnStyle: listeningBtnStyle,
             handleChange: handleChange,
             listeningSettings: listeningSettings
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
             className: "bg-white rounded p-3 mb-3 shadow-sm",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
               className: "mb-3",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
                 className: "d-flex align-items-center gap-2 mb-2",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("label", {
+                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("label", {
                   className: "mb-0 fw-semibold",
                   children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Write here something and click listen button", "text-to-audio")
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_16__["default"], {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_17__["default"], {
                   placement: "top",
-                  overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_17__["default"], {
+                  overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_18__["default"], {
                     id: "tooltip-help",
                     children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)(" Enter your text here and click the listen button to hear it spoken aloud.", "text-to-audio")
                   }),
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_18__["default"], {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_19__["default"], {
                     variant: "link",
                     className: "p-0 text-muted",
                     size: "sm",
-                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_10__["default"], {
+                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_11__["default"], {
                       name: "question-circle"
                     })
                   })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_16__["default"], {
+                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_17__["default"], {
                   placement: "top",
-                  overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_17__["default"], {
+                  overlay: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_18__["default"], {
                     id: "tooltip-help",
                     children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Click To Know How It Works?", "text-to-audio")
                   }),
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_18__["default"], {
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_19__["default"], {
                     variant: "link",
                     className: "p-0 text-danger",
                     size: "sm",
@@ -14736,12 +14792,12 @@ function Customize() {
                     target: "_blank",
                     rel: "noopener noreferrer",
                     title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Watch Tutorial", "text-to-audio"),
-                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_10__["default"], {
+                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_11__["default"], {
                       name: "youtube"
                     })
                   })
                 })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_15__["default"].Control, {
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_16__["default"].Control, {
                 as: "textarea",
                 id: "tta__demo_text_for_play",
                 onChange: function onChange(e) {
@@ -14752,85 +14808,82 @@ function Customize() {
                 rows: 3,
                 className: "tta_custom-textarea"
               })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("div", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
               className: "d-grid mb-0",
-              children: (listeningBtnStyle === null || listeningBtnStyle === void 0 || (_listeningBtnStyle$bu = listeningBtnStyle.buttonSettings) === null || _listeningBtnStyle$bu === void 0 ? void 0 : _listeningBtnStyle$bu.id) == 2 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_buttons_components_TextToSpeech__WEBPACK_IMPORTED_MODULE_4__["default"], {
+              children: (listeningBtnStyle === null || listeningBtnStyle === void 0 || (_listeningBtnStyle$bu = listeningBtnStyle.buttonSettings) === null || _listeningBtnStyle$bu === void 0 ? void 0 : _listeningBtnStyle$bu.id) == 2 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_buttons_components_TextToSpeech__WEBPACK_IMPORTED_MODULE_4__["default"], {
                 buttonCSS: listeningBtnStyle,
-                button: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("div", {
+                button: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
                   dataId: "1",
                   id: "tts__listent_content_1",
                   className: "tts__listent_content"
                 }),
-                buttonId: 2
-              }) : (listeningBtnStyle === null || listeningBtnStyle === void 0 || (_listeningBtnStyle$bu2 = listeningBtnStyle.buttonSettings) === null || _listeningBtnStyle$bu2 === void 0 ? void 0 : _listeningBtnStyle$bu2.id) == 3 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_buttons_components_TextToSpeechThree__WEBPACK_IMPORTED_MODULE_5__["default"], {
+                buttonId: 2,
+                buttonTexts: buttonTexts,
+                playerId: 2
+              }) : (listeningBtnStyle === null || listeningBtnStyle === void 0 || (_listeningBtnStyle$bu2 = listeningBtnStyle.buttonSettings) === null || _listeningBtnStyle$bu2 === void 0 ? void 0 : _listeningBtnStyle$bu2.id) == 3 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_buttons_components_TextToSpeechThree__WEBPACK_IMPORTED_MODULE_5__["default"], {
                 buttonCSS: listeningBtnStyle,
-                button: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("div", {
+                button: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
                   dataId: "1",
                   id: "tts__listent_content_1",
                   className: "tts__listent_content"
                 }),
                 buttonId: 3,
                 cssStyle: ""
-              }) : (listeningBtnStyle === null || listeningBtnStyle === void 0 || (_listeningBtnStyle$bu3 = listeningBtnStyle.buttonSettings) === null || _listeningBtnStyle$bu3 === void 0 ? void 0 : _listeningBtnStyle$bu3.id) == 4 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_buttons_components_TextToSpeechFour__WEBPACK_IMPORTED_MODULE_6__["default"], {
+              }) : (listeningBtnStyle === null || listeningBtnStyle === void 0 || (_listeningBtnStyle$bu3 = listeningBtnStyle.buttonSettings) === null || _listeningBtnStyle$bu3 === void 0 ? void 0 : _listeningBtnStyle$bu3.id) == 4 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_buttons_components_TextToSpeechFour__WEBPACK_IMPORTED_MODULE_6__["default"], {
                 buttonCSS: listeningBtnStyle,
-                button: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("div", {
+                button: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
                   dataId: "1",
                   id: "tts__listent_content_1",
                   className: "tts__listent_content"
                 }),
                 buttonId: 4,
                 cssStyle: ""
-              }) : (listeningBtnStyle === null || listeningBtnStyle === void 0 || (_listeningBtnStyle$bu4 = listeningBtnStyle.buttonSettings) === null || _listeningBtnStyle$bu4 === void 0 ? void 0 : _listeningBtnStyle$bu4.id) == 5 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_buttons_components_TextToSpeechThree__WEBPACK_IMPORTED_MODULE_5__["default"], {
+              }) : (listeningBtnStyle === null || listeningBtnStyle === void 0 || (_listeningBtnStyle$bu4 = listeningBtnStyle.buttonSettings) === null || _listeningBtnStyle$bu4 === void 0 ? void 0 : _listeningBtnStyle$bu4.id) == 5 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_buttons_components_TextToSpeechThree__WEBPACK_IMPORTED_MODULE_5__["default"], {
                 buttonCSS: listeningBtnStyle,
-                button: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("div", {
+                button: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
                   dataId: "1",
                   id: "tts__listent_content_1",
                   className: "tts__listent_content"
                 }),
                 buttonId: 5,
                 cssStyle: ""
-              }) : (listeningBtnStyle === null || listeningBtnStyle === void 0 || (_listeningBtnStyle$bu5 = listeningBtnStyle.buttonSettings) === null || _listeningBtnStyle$bu5 === void 0 ? void 0 : _listeningBtnStyle$bu5.id) == 6 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_buttons_components_TextToSpeechThree__WEBPACK_IMPORTED_MODULE_5__["default"], {
+              }) : (listeningBtnStyle === null || listeningBtnStyle === void 0 || (_listeningBtnStyle$bu5 = listeningBtnStyle.buttonSettings) === null || _listeningBtnStyle$bu5 === void 0 ? void 0 : _listeningBtnStyle$bu5.id) == 6 ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_buttons_components_TextToSpeechThree__WEBPACK_IMPORTED_MODULE_5__["default"], {
                 buttonCSS: listeningBtnStyle,
-                button: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("div", {
+                button: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
                   dataId: "1",
                   id: "tts__listent_content_1",
                   className: "tts__listent_content"
                 }),
                 buttonId: 6,
                 cssStyle: ""
-              }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("button", {
-                id: "tta__listen_content",
-                onClick: function onClick(e) {
-                  return callListeningFunction(e);
-                },
-                style: listeningBtnStyle2,
-                type: "button",
-                className: "tta_listen-button",
-                title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Text To Audio:  Tap to listen post.", "text-to-audio"),
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_10__["default"], {
-                  name: "play-circle",
-                  className: "me-2"
-                }), tta_obj.buttonTextArr.listen_text]
+              }) :
+              /*#__PURE__*/
+              // TTS-241 — live preview that mirrors the in-memory
+              // ButtonStateEditor draft for Default / Default Pro.
+              (0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_design_ButtonPreview__WEBPACK_IMPORTED_MODULE_9__["default"], {
+                buttonTexts: buttonTexts,
+                playerId: parseInt((listeningBtnStyle === null || listeningBtnStyle === void 0 || (_listeningBtnStyle$bu6 = listeningBtnStyle.buttonSettings) === null || _listeningBtnStyle$bu6 === void 0 ? void 0 : _listeningBtnStyle$bu6.id) || 1, 10),
+                buttonStyle: listeningBtnStyle2
               })
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
             className: "bg-white rounded p-3 mb-3 shadow-sm",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("h5", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("h5", {
               className: "mb-3 fw-semibold",
               children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Design Customization", "text-to-audio")
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_design_TTSButtonDesign__WEBPACK_IMPORTED_MODULE_8__["default"], {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_design_TTSButtonDesign__WEBPACK_IMPORTED_MODULE_8__["default"], {
               customCSS: customCSS,
               listeningBtnStyle: listeningBtnStyle,
               handleChange: handleChange,
               buttonTexts: buttonTexts,
               setButtonTexts: setButtonTexts
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
             className: "bg-white rounded p-3 mb-3 shadow-sm",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("h6", {
+            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("h6", {
               className: "mb-3",
               children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Short Code | Attributes value must be wrapped with double quotation ( \" )", "text-to-audio")
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_15__["default"].Control, {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_16__["default"].Control, {
               as: "textarea",
               name: "tta_play_btn_shortcode",
               onChange: handleChange,
@@ -14838,27 +14891,27 @@ function Customize() {
               id: "tta_play_btn_shortcode",
               rows: 2,
               className: "mb-3 tta_shortcode-textarea"
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("button", {
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("button", {
               type: "button",
               size: "sm",
               onClick: function onClick(e) {
                 return (0,_context_utilities__WEBPACK_IMPORTED_MODULE_3__.copyToClipBoard)((0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("tta_play_btn_shortcode", "text-to-audio"), true, (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Copied ShortCode", "text-to-audio"), _context_Notify__WEBPACK_IMPORTED_MODULE_2__.toast);
               },
               className: "tta_shortcode_btn",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_10__["default"], {
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_11__["default"], {
                 name: "copy",
                 className: "me-2"
               }), (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Copy Shortcode', 'text-to-audio')]
             })]
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("div", {
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
             className: "position-sticky bottom-0",
             style: {
               zIndex: 1030,
               marginTop: "20px"
             },
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("div", {
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
               className: "d-grid",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("button", {
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("button", {
                 type: "submit",
                 className: "btn tta_btn",
                 children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Save', 'text-to-audio')
@@ -14866,18 +14919,18 @@ function Customize() {
             })
           })]
         })]
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_14__["default"], {
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_15__["default"], {
         xs: 12,
         lg: 4,
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_UpgradeToPro__WEBPACK_IMPORTED_MODULE_9__["default"], {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_UpgradeToPro__WEBPACK_IMPORTED_MODULE_10__["default"], {
           promotionType: "youtube"
         })
       })]
     })
-  }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)("div", {
+  }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)("div", {
     className: "tta-loading-spinner",
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsxs)("div", {
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_11__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_10__["default"], {
+    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsxs)("div", {
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_12__.jsx)(_Icon__WEBPACK_IMPORTED_MODULE_11__["default"], {
         name: "spinner",
         spin: true,
         className: "me-2"
@@ -15149,6 +15202,131 @@ function TTSCustomizationButton(_ref) {
             })]
           })
         })]
+      })]
+    })]
+  });
+}
+
+/***/ }),
+
+/***/ "./src/dashboard/components/dashboard/customize/design/ButtonPreview.js":
+/*!******************************************************************************!*\
+  !*** ./src/dashboard/components/dashboard/customize/design/ButtonPreview.js ***!
+  \******************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ ButtonPreview)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react_bootstrap__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-bootstrap */ "./node_modules/react-bootstrap/esm/Form.js");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "./node_modules/@wordpress/i18n/build-module/index.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+
+
+
+
+var STATE_KEYS = ["listen", "pause", "resume", "replay"];
+
+/**
+ * ButtonPreview — TTS-241
+ *
+ * Live, in-memory preview of the Default / Default Pro player button. Reads
+ * the user's current draft (`buttonTexts.players[playerId][state]`) so the
+ * label and icon update immediately as they edit, and offers a state
+ * selector so the user can flip through Listen / Pause / Resume / Replay
+ * without having to actually run the synthesizer.
+ */
+function ButtonPreview(_ref) {
+  var _buttonTexts$defaults;
+  var buttonTexts = _ref.buttonTexts,
+    playerId = _ref.playerId,
+    buttonStyle = _ref.buttonStyle;
+  var _useState = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)("listen"),
+    _useState2 = _slicedToArray(_useState, 2),
+    state = _useState2[0],
+    setState = _useState2[1];
+  var players = (buttonTexts === null || buttonTexts === void 0 ? void 0 : buttonTexts.players) || {};
+  var defaults = (buttonTexts === null || buttonTexts === void 0 || (_buttonTexts$defaults = buttonTexts.defaults) === null || _buttonTexts$defaults === void 0 ? void 0 : _buttonTexts$defaults[playerId]) || {};
+  var presetSvgs = (buttonTexts === null || buttonTexts === void 0 ? void 0 : buttonTexts.preset_svgs) || {};
+  var stateData = players[playerId] && players[playerId][state] || defaults[state] || {
+    text: "",
+    icon: ""
+  };
+  var iconHtml = (0,react__WEBPACK_IMPORTED_MODULE_0__.useMemo)(function () {
+    var desc = stateData.icon || "";
+    if (desc.startsWith("preset:")) {
+      return presetSvgs[desc.slice(7)] || "";
+    }
+    if (desc.startsWith("custom:")) {
+      return desc.slice(7);
+    }
+    return desc;
+  }, [stateData.icon, presetSvgs]);
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+    className: "tta-button-preview",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+      className: "d-flex align-items-center justify-content-end mb-2 gap-2",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
+        className: "small text-muted",
+        children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)("Preview state:", "text-to-audio")
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_bootstrap__WEBPACK_IMPORTED_MODULE_3__["default"].Select, {
+        size: "sm",
+        value: state,
+        onChange: function onChange(e) {
+          return setState(e.target.value);
+        },
+        style: {
+          width: "auto"
+        },
+        children: STATE_KEYS.map(function (sk) {
+          return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("option", {
+            value: sk,
+            children: sk[0].toUpperCase() + sk.slice(1)
+          }, sk);
+        })
+      })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("button", {
+      type: "button",
+      className: "tta_listen-button",
+      style: _objectSpread(_objectSpread({}, buttonStyle), {}, {
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+        boxSizing: "border-box",
+        cursor: "default"
+      }),
+      title: stateData.hover || "",
+      onClick: function onClick(e) {
+        return e.preventDefault();
+      },
+      children: [iconHtml ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
+        className: "tta-preview-icon",
+        style: {
+          display: "inline-flex",
+          alignItems: "center"
+        },
+        dangerouslySetInnerHTML: {
+          __html: iconHtml
+        }
+      }) : null, /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
+        className: "tta-preview-label",
+        children: stateData.text || ""
       })]
     })]
   });

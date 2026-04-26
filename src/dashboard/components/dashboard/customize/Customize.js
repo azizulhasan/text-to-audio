@@ -21,6 +21,7 @@ import TextToSpeechThree from "../../../buttons/components/TextToSpeechThree";
 import TextToSpeechFour from "../../../buttons/components/TextToSpeechFour";
 import CustomizationTabs from "./CustomizationTabs";
 import TTSButtonDesign from "./design/TTSButtonDesign";
+import ButtonPreview from "./design/ButtonPreview";
 import UpgradeToPro from "../../UpgradeToPro";
 import Icon from "../../Icon";
 
@@ -784,6 +785,10 @@ export default function Customize() {
               </div>
 
               <div className="d-grid mb-0">
+                {/* TTS-241 — player 2 (Default Pro) keeps its dedicated
+                    TextToSpeech preview component (matching the production
+                    front-end UI), but receives buttonTexts + playerId so
+                    its label and icons honor the per-player draft. */}
                 {listeningBtnStyle?.buttonSettings?.id == 2 ? (
                   <TextToSpeech
                     buttonCSS={listeningBtnStyle}
@@ -795,6 +800,8 @@ export default function Customize() {
                       ></div>
                     }
                     buttonId={2}
+                    buttonTexts={buttonTexts}
+                    playerId={2}
                   />
                 ) : listeningBtnStyle?.buttonSettings?.id == 3 ? (
                   <TextToSpeechThree
@@ -849,17 +856,13 @@ export default function Customize() {
                     cssStyle={""}
                   />
                 ) : (
-                  <button
-                    id="tta__listen_content"
-                    onClick={(e) => callListeningFunction(e)}
-                    style={listeningBtnStyle2}
-                    type="button"
-                    className="tta_listen-button"
-                    title={__("Text To Audio:  Tap to listen post.", "text-to-audio")}
-                  >
-                    <Icon name="play-circle" className="me-2" />
-                    {tta_obj.buttonTextArr.listen_text}
-                  </button>
+                  // TTS-241 — live preview that mirrors the in-memory
+                  // ButtonStateEditor draft for Default / Default Pro.
+                  <ButtonPreview
+                    buttonTexts={buttonTexts}
+                    playerId={parseInt(listeningBtnStyle?.buttonSettings?.id || 1, 10)}
+                    buttonStyle={listeningBtnStyle2}
+                  />
                 )}
               </div>
             </div>

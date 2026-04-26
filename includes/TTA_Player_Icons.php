@@ -30,7 +30,10 @@ class TTA_Player_Icons {
 	 * @return array<string,string>
 	 */
 	public static function presets() {
-		$c = '$color'; // placeholder for back-compat with TTA_Admin payload.
+		// `currentColor` is a valid CSS keyword that inherits from the parent
+		// button's `color` property — picks up `color` and `hoverTextColor`
+		// automatically without runtime attribute rewriting (TTS-241).
+		$c = 'currentColor';
 		return [
 			'play'        => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="' . $c . '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4" fill="' . $c . '"/></svg>',
 			'pause'       => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="' . $c . '" stroke="' . $c . '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>',
