@@ -220,11 +220,13 @@ export default class TextToSpeech {
      * @param {*} isClicked
      */
     displayButtonText(listenStatus, isClicked = false) {
-        // TTS-241: lifecycle text/icon swap now applies to all
-        // speechSynthesis-style players (1 = Default, 2 = Default Pro).
-        // Plyr-based players (4/5/6) own their own chrome and are skipped.
-        const speechSynthPlayers = [1, 2];
-        if (!speechSynthPlayers.includes(Number(this?.playButtonNo))) {
+        // TTS-241 NOTE: gated to player 1 (Default) only. Player 2 (Default
+        // Pro) renders via the React `TextToSpeech` component, whose
+        // listen/pause/resume/replay UI is driven by React state — calling
+        // innerHTML swap here would destroy the React tree that owns the
+        // player. Player 2's lifecycle label/icon swap is handled inside
+        // that React component instead.
+        if (Number(this?.playButtonNo) !== 1) {
             return;
         }
         if (!this?.speakButton?.innerHTML) {
