@@ -939,14 +939,31 @@ class TTSPlayButton extends HTMLElement {
         const style = document.createElement('style');
         style.setAttribute('id', 'tts_style');
 
-        // CSS style for this button
+        // CSS style for this button.
+        // TTS-241 — locked metrics:
+        //   * `box-sizing: border-box` so the border lives inside the box
+        //     and click-driven content swaps don't shift the border.
+        //   * `.tts_button` is inline-flex with a fixed gap so icon + label
+        //     stay aligned regardless of which state is rendered.
+        //   * Focus ring uses an `inset box-shadow` (no `outline-offset`)
+        //     so it overlays the border instead of growing the visual size.
         style.textContent = `
-            #tts__listent_content_${buttonId}.tts__listent_content{ ${settings.btnStyle} transition: all 0.5s ease-in-out; }
-            #tts__listent_content_${buttonId}.tts__listent_content:hover{ ${settings.btnStyle} background-color:${ttsObj?.settings?.customize?.hoverBackgroundColor || '#f0f0f0'};}
-            #tts__listent_content_${buttonId}.tts__listent_content svg{ display:${settings.shouldDisplayIcon}; padding-right:7px !important;padding-top: 5px; }
-            #tts__listent_content_${buttonId}.tts__listent_content:hover  svg{ display:${settings.shouldDisplayIcon}; padding-right:7px !important; padding-top: 5px; }
-            #tts__listent_content_${buttonId}.tts__listent_content:hover span{ color: ${ ttsObj?.settings?.customize?.hoverTextColor || "#000000" } }
-            #tts__listent_content_${buttonId}.tts__listent_content:focus-visible{ outline: 2px solid ${ ttsObj?.settings?.customize?.color || "#ffffff" }; outline-offset: 2px; }
+            /* TTS-241 — suppress focus outline on the custom-element host
+               (right-click / contextmenu would otherwise paint a thin
+               rectangle around the wrapper that reads as a border). */
+            :host(:focus), :host(:focus-visible), :host(:focus-within) {
+                outline: none !important;
+                box-shadow: none !important;
+            }
+            #tts__listent_content_${buttonId}.tts__listent_content{ ${settings.btnStyle} box-sizing: border-box; transition: all 0.5s ease-in-out; }
+            #tts__listent_content_${buttonId}.tts__listent_content:hover{ ${settings.btnStyle} box-sizing: border-box; background-color:${ttsObj?.settings?.customize?.hoverBackgroundColor || '#f0f0f0'};}
+            #tts__listent_content_${buttonId}.tts__listent_content .tts_button{ display: inline-flex; align-items: center; gap: 8px; }
+            #tts__listent_content_${buttonId}.tts__listent_content .tts_button_label{ display: inline-block; }
+            #tts__listent_content_${buttonId}.tts__listent_content svg{ display:${settings.shouldDisplayIcon}; flex: 0 0 auto; }
+            #tts__listent_content_${buttonId}.tts__listent_content:hover svg{ display:${settings.shouldDisplayIcon}; flex: 0 0 auto; }
+            #tts__listent_content_${buttonId}.tts__listent_content:hover .tts_button_label{ color: ${ ttsObj?.settings?.customize?.hoverTextColor || "#000000" } }
+            #tts__listent_content_${buttonId}.tts__listent_content:focus,
+            #tts__listent_content_${buttonId}.tts__listent_content:focus-visible{ outline: none; box-shadow: none; }
         `;
 
         if (settings?.customCSS) {
@@ -1028,6 +1045,16 @@ class TTSPlayButton extends HTMLElement {
         style.setAttribute('id', 'tts_style');
 
         style.textContent = `
+            /* TTS-241 — suppress the focus ring that browsers (and some
+               accessibility heuristics) put on the custom-element HOST
+               when it gains focus on right-click / contextmenu. The
+               wrapping rectangle that read as "border expanding" was the
+               UA outline on <tts-play-button>, which lives in the light
+               DOM and isn't reachable by inner-element rules. */
+            :host(:focus), :host(:focus-visible), :host(:focus-within) {
+                outline: none !important;
+                box-shadow: none !important;
+            }
             .wrapper {
                 display: inline-block;
                 width: 100%;
@@ -1043,6 +1070,9 @@ class TTSPlayButton extends HTMLElement {
             #tts__listent_content_${buttonId}.tts__listent_content:hover {
                 ${settings.btnStyle}
                 background-color: ${hoverBgColor};
+                /* TTS-241 — set color on the button itself so SVG presets
+                   using currentColor inherit the hover color too. */
+                color: ${hoverTextColor};
             }
             #tts__listent_content_${buttonId}.tts__listent_content:hover span {
                 color: ${hoverTextColor};
@@ -1086,9 +1116,19 @@ class TTSPlayButton extends HTMLElement {
                 outline-offset: 2px;
                 background-color: rgba(255, 255, 255, 0.2);
             }
+            /* TTS-241 — no focus ring on this button. The earlier
+               outline-offset version pushed a stripe 2px outside the
+               border (read as "border expanding on click"); the inset
+               box-shadow version stacked a 2px stripe inside the border
+               (read as "border getting thicker on right-click"). The
+               existing hover background change already provides clear
+               visual feedback for both mouse and touch. Keyboard
+               accessibility is preserved by browsers' default focus ring
+               on the gear icon and by the SR-only live region. */
+            #tts__listent_content_${buttonId}.tts__listent_content:focus,
             #tts__listent_content_${buttonId}.tts__listent_content:focus-visible {
-                outline: 2px solid ${textColor};
-                outline-offset: 2px;
+                outline: none;
+                box-shadow: none;
             }
             .tts-sr-only {
                 position: absolute;
@@ -1120,41 +1160,57 @@ class TTSPlayButton extends HTMLElement {
         const colors = ttsObj?.settings?.customize || {};
         const textColor = colors.color || '#ffffff';
 
-        let buttonText = window?.ttsObj?.buttonTextArr?.listen_text ?? 'Listen';
-        let buttonHoverTitle = window?.ttsObj?.buttonTextArr?.listen_hover_title
-            ? 'Text To Audio : ' + window?.ttsObj?.buttonTextArr?.listen_hover_title
-            : 'Text To Audio: Click to listen post.';
+        // TTS-241 — resolve text + icon from per-player overrides first.
+        const playerId = window?.ttsObj?.player_id || 1;
+        const players = window?.ttsObj?.buttonTextArr?.players || {};
+        const stateForPlayer = (s) => (players[playerId] && players[playerId][s]) || null;
+        const resolveText = (s, flatKey, fallback) => {
+            const ps = stateForPlayer(s);
+            if (ps && ps.text) return ps.text;
+            return window?.ttsObj?.buttonTextArr?.[flatKey] || fallback;
+        };
+        const resolveHover = (s, flatKey, fallback) => {
+            const ps = stateForPlayer(s);
+            if (ps && ps.hover) return 'Text To Audio : ' + ps.hover;
+            const flat = window?.ttsObj?.buttonTextArr?.[flatKey];
+            return flat ? 'Text To Audio : ' + flat : fallback;
+        };
+        const resolveIcon = (iconKey) => window?.ttsObj?.player_customizations?.[playerId]?.[iconKey]
+            || window?.ttsObj?.player_customizations?.[1]?.[iconKey]
+            || null;
+
+        let buttonText = resolveText('listen', 'listen_text', 'Listen');
+        let buttonHoverTitle = resolveHover('listen', 'listen_hover_title', 'Text To Audio: Click to listen post.');
 
         // Get icon based on status
         let iconSVG = '';
-        if (window?.ttsObj?.player_customizations?.[1]?.play) {
+        const playSvg = resolveIcon('play');
+        if (playSvg) {
             const parser = new DOMParser();
-            const doc = parser.parseFromString(ttsObj?.player_customizations?.[1]?.play, "image/svg+xml");
+            const doc = parser.parseFromString(playSvg, "image/svg+xml");
             iconSVG = doc.documentElement.outerHTML;
         } else {
             iconSVG = `<svg width='15px' height='15px' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 8'><polygon fill='${textColor}' points='0 0 0 8 7 4'/></svg>`;
         }
 
         if (status === 'pause') {
-            buttonText = window?.ttsObj?.buttonTextArr?.pause_text ?? 'Pause';
-            buttonHoverTitle = window?.ttsObj?.buttonTextArr?.pause_hover_title
-                ? 'Text To Audio : ' + window?.ttsObj?.buttonTextArr?.pause_hover_title
-                : 'Text To Audio: Click to pause.';
-            if (window?.ttsObj?.player_customizations?.[1]?.pause) {
+            buttonText = resolveText('pause', 'pause_text', 'Pause');
+            buttonHoverTitle = resolveHover('pause', 'pause_hover_title', 'Text To Audio: Click to pause.');
+            const pauseSvg = resolveIcon('pause');
+            if (pauseSvg) {
                 const parser = new DOMParser();
-                const doc = parser.parseFromString(ttsObj?.player_customizations?.[1]?.pause, "image/svg+xml");
+                const doc = parser.parseFromString(pauseSvg, "image/svg+xml");
                 iconSVG = doc.documentElement.outerHTML;
             } else {
                 iconSVG = `<svg width='20' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M14 9L14 15' stroke='${textColor}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'></path><path d='M10 9L10 15' stroke='${textColor}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'></path><path d='M3 12C3 4.5885 4.5885 3 12 3C19.4115 3 21 4.5885 21 12C21 19.4115 19.4115 21 12 21C4.5885 21 3 19.4115 3 12Z' stroke='${textColor}' stroke-width='2'></path></svg>`;
             }
         } else if (status === 'resume') {
-            buttonText = window?.ttsObj?.buttonTextArr?.resume_text ?? 'Resume';
-            buttonHoverTitle = window?.ttsObj?.buttonTextArr?.resume_hover_title
-                ? 'Text To Audio : ' + window?.ttsObj?.buttonTextArr?.resume_hover_title
-                : 'Text To Audio: Click to resume.';
-            if (window?.ttsObj?.player_customizations?.[1]?.resume) {
+            buttonText = resolveText('resume', 'resume_text', 'Resume');
+            buttonHoverTitle = resolveHover('resume', 'resume_hover_title', 'Text To Audio: Click to resume.');
+            const resumeSvg = resolveIcon('resume');
+            if (resumeSvg) {
                 const parser = new DOMParser();
-                const doc = parser.parseFromString(ttsObj?.player_customizations?.[1]?.resume, "image/svg+xml");
+                const doc = parser.parseFromString(resumeSvg, "image/svg+xml");
                 iconSVG = doc.documentElement.outerHTML;
             } else {
                 iconSVG = `<svg width='20px' height='20px' viewBox='0 0 24.00 24.00' fill='none' xmlns='http://www.w3.org/2000/svg' stroke='${textColor}' stroke-width='1'><path d='M12 20.75C10.078 20.7474 8.23546 19.9827 6.8764 18.6236C5.51733 17.2645 4.75265 15.422 4.75 13.5C4.75 13.3011 4.82902 13.1103 4.96967 12.9697C5.11032 12.829 5.30109 12.75 5.5 12.75C5.69891 12.75 5.88968 12.829 6.03033 12.9697C6.17098 13.1103 6.25 13.3011 6.25 13.5C6.25 14.6372 6.58723 15.7489 7.21905 16.6945C7.85087 17.6401 8.74889 18.3771 9.79957 18.8123C10.8502 19.2475 12.0064 19.3614 13.1218 19.1395C14.2372 18.9177 15.2617 18.37 16.0659 17.5659C16.87 16.7617 17.4177 15.7372 17.6395 14.6218C17.8614 13.5064 17.7475 12.3502 17.3123 11.2996C16.8771 10.2489 16.1401 9.35087 15.1945 8.71905C14.2489 8.08723 13.1372 7.75 12 7.75H9.5C9.30109 7.75 9.11032 7.67098 8.96967 7.53033C8.82902 7.38968 8.75 7.19891 8.75 7C8.75 6.80109 8.82902 6.61032 8.96967 6.46967C9.11032 6.32902 9.30109 6.25 9.5 6.25H12C13.9228 6.25 15.7669 7.01384 17.1265 8.37348C18.4862 9.73311 19.25 11.5772 19.25 13.5C19.25 15.4228 18.4862 17.2669 17.1265 18.6265C15.7669 19.9862 13.9228 20.75 12 20.75Z' fill='${textColor}'></path><path d='M12 10.75C11.9015 10.7505 11.8038 10.7313 11.7128 10.6935C11.6218 10.6557 11.5392 10.6001 11.47 10.53L8.47 7.53003C8.32955 7.38941 8.25066 7.19878 8.25066 7.00003C8.25066 6.80128 8.32955 6.61066 8.47 6.47003L11.47 3.47003C11.5387 3.39634 11.6215 3.33724 11.7135 3.29625C11.8055 3.25526 11.9048 3.23322 12.0055 3.23144C12.1062 3.22966 12.2062 3.24819 12.2996 3.28591C12.393 3.32363 12.4778 3.37977 12.549 3.45099C12.6203 3.52221 12.6764 3.60705 12.7141 3.70043C12.7518 3.79382 12.7704 3.89385 12.7686 3.99455C12.7668 4.09526 12.7448 4.19457 12.7038 4.28657C12.6628 4.37857 12.6037 4.46137 12.53 4.53003L10.06 7.00003L12.53 9.47003C12.6704 9.61066 12.7493 9.80128 12.7493 10C12.7493 10.1988 12.6704 10.3894 12.53 10.53C12.4608 10.6001 12.3782 10.6557 12.2872 10.6935C12.1962 10.7313 12.0985 10.7505 12 10.75Z' fill='${textColor}'></path></svg>`;
@@ -1162,13 +1218,12 @@ class TTSPlayButton extends HTMLElement {
         } else if (status === 'listen') {
             // After finished - show replay
             if (this.speech && this.speech.listenStatus === 'listen') {
-                buttonText = window?.ttsObj?.buttonTextArr?.replay_text ?? 'Replay';
-                buttonHoverTitle = window?.ttsObj?.buttonTextArr?.replay_hover_title
-                    ? 'Text To Audio : ' + window?.ttsObj?.buttonTextArr?.replay_hover_title
-                    : 'Text To Audio: Click to replay.';
-                if (window?.ttsObj?.player_customizations?.[1]?.replay) {
+                buttonText = resolveText('replay', 'replay_text', 'Replay');
+                buttonHoverTitle = resolveHover('replay', 'replay_hover_title', 'Text To Audio: Click to replay.');
+                const replaySvg = resolveIcon('replay');
+                if (replaySvg) {
                     const parser = new DOMParser();
-                    const doc = parser.parseFromString(ttsObj?.player_customizations?.[1]?.replay, "image/svg+xml");
+                    const doc = parser.parseFromString(replaySvg, "image/svg+xml");
                     iconSVG = doc.documentElement.outerHTML;
                 } else {
                     iconSVG = `<svg width='20px' height='20px' viewBox='0 0 24.00 24.00' fill='none' xmlns='http://www.w3.org/2000/svg' stroke='${textColor}' stroke-width='1'><path d='M12 20.75C10.078 20.7474 8.23546 19.9827 6.8764 18.6236C5.51733 17.2645 4.75265 15.422 4.75 13.5C4.75 13.3011 4.82902 13.1103 4.96967 12.9697C5.11032 12.829 5.30109 12.75 5.5 12.75C5.69891 12.75 5.88968 12.829 6.03033 12.9697C6.17098 13.1103 6.25 13.3011 6.25 13.5C6.25 14.6372 6.58723 15.7489 7.21905 16.6945C7.85087 17.6401 8.74889 18.3771 9.79957 18.8123C10.8502 19.2475 12.0064 19.3614 13.1218 19.1395C14.2372 18.9177 15.2617 18.37 16.0659 17.5659C16.87 16.7617 17.4177 15.7372 17.6395 14.6218C17.8614 13.5064 17.7475 12.3502 17.3123 11.2996C16.8771 10.2489 16.1401 9.35087 15.1945 8.71905C14.2489 8.08723 13.1372 7.75 12 7.75H9.5C9.30109 7.75 9.11032 7.67098 8.96967 7.53033C8.82902 7.38968 8.75 7.19891 8.75 7C8.75 6.80109 8.82902 6.61032 8.96967 6.46967C9.11032 6.32902 9.30109 6.25 9.5 6.25H12C13.9228 6.25 15.7669 7.01384 17.1265 8.37348C18.4862 9.73311 19.25 11.5772 19.25 13.5C19.25 15.4228 18.4862 17.2669 17.1265 18.6265C15.7669 19.9862 13.9228 20.75 12 20.75Z' fill='${textColor}'></path><path d='M12 10.75C11.9015 10.7505 11.8038 10.7313 11.7128 10.6935C11.6218 10.6557 11.5392 10.6001 11.47 10.53L8.47 7.53003C8.32955 7.38941 8.25066 7.19878 8.25066 7.00003C8.25066 6.80128 8.32955 6.61066 8.47 6.47003L11.47 3.47003C11.5387 3.39634 11.6215 3.33724 11.7135 3.29625C11.8055 3.25526 11.9048 3.23322 12.0055 3.23144C12.1062 3.22966 12.2062 3.24819 12.2996 3.28591C12.393 3.32363 12.4778 3.37977 12.549 3.45099C12.6203 3.52221 12.6764 3.60705 12.7141 3.70043C12.7518 3.79382 12.7704 3.89385 12.7686 3.99455C12.7668 4.09526 12.7448 4.19457 12.7038 4.28657C12.6628 4.37857 12.6037 4.46137 12.53 4.53003L10.06 7.00003L12.53 9.47003C12.6704 9.61066 12.7493 9.80128 12.7493 10C12.7493 10.1988 12.6704 10.3894 12.53 10.53C12.4608 10.6001 12.3782 10.6557 12.2872 10.6935C12.1962 10.7313 12.0985 10.7505 12 10.75Z' fill='${textColor}'></path></svg>`;

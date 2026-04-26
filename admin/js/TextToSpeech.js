@@ -67,74 +67,86 @@ export default class TextToSpeech {
         return this;
     }
 
+    /**
+     * Resolve a per-state label, preferring the per-player override stored
+     * under buttonTextArr.players[playerId].<state>.text and falling back to
+     * the legacy flat key (TTS-241).
+     */
+    getStateText(state, fallback) {
+        const pid = this?.playButtonNo;
+        const perPlayer = this?.buttonTextArr?.players?.[pid]?.[state]?.text;
+        if (perPlayer && perPlayer.length) {
+            return perPlayer;
+        }
+        const flatKey = state + '_text';
+        return this?.buttonTextArr?.[flatKey] ?? fallback;
+    }
+
+    getStateHover(state, fallback) {
+        const pid = this?.playButtonNo;
+        const perPlayer = this?.buttonTextArr?.players?.[pid]?.[state]?.hover;
+        if (perPlayer && perPlayer.length) {
+            return perPlayer;
+        }
+        const flatKey = state + '_hover_title';
+        return this?.buttonTextArr?.[flatKey] ?? fallback;
+    }
+
     playButtonText() {
-        return this?.buttonTextArr?.listen_text ?? 'Listen';
+        return this.getStateText('listen', 'Listen');
+    }
+
+    /**
+     * Build the inner HTML for a single state. All four states (listen,
+     * pause, resume, replay) share an identical wrapper structure so swap-
+     * ping innerHTML on lifecycle events doesn't shift the button's metrics
+     * (TTS-241 — fixes the "border expands on click" issue).
+     *
+     *   <div class="tts_button" aria-hidden="true">
+     *     [icon-wrapper]
+     *     <span class="tts_button_label">{text}</span>
+     *   </div>
+     */
+    _renderStateContent(iconKey, dashicon, label) {
+        const playerId = this?.playButtonNo ?? 1;
+        const customSvg = this.playButtonIcon?.[playerId]?.[iconKey];
+        let iconHtml = '';
+        if (customSvg) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(customSvg, "image/svg+xml");
+            iconHtml = doc.documentElement.outerHTML;
+        } else if (dashicon) {
+            iconHtml = `<span class="dashicons ${dashicon}"></span>`;
+        }
+        return `<div class="tts_button" aria-hidden="true">${iconHtml}<span class="tts_button_label">${label}</span></div>`;
     }
 
     playButtonContent() {
-        let icon = '<div class="tts_button" aria-hidden="true"><span class="dashicons dashicons-controls-play"></span> <span>';
-        if (this.playButtonIcon?.[1]?.play) {
-            const parser = new DOMParser();
-            // convert html string into DOM
-            let document = parser.parseFromString(this.playButtonIcon?.[1]?.play, "image/svg+xml");
-            icon = `<div class="tts_button" aria-hidden="true">${document.documentElement.outerHTML}</div><span>`;
-        }
-
-        return icon + ' ' + this.playButtonText() + '</span></span></div>'
+        return this._renderStateContent('play', 'dashicons-controls-play', this.playButtonText());
     }
 
     replayButtonText() {
-        return this?.buttonTextArr?.replay_text ?? 'Replay';
+        return this.getStateText('replay', 'Replay');
     }
 
     replayButtonContent() {
-        let icon = '<div class="tts_button" aria-hidden="true"><span class="dashicons dashicons-image-rotate"></span> <span>';
-        if (this.playButtonIcon?.[1]?.replay) {
-            const parser = new DOMParser();
-            // convert html string into DOM
-            let document = parser.parseFromString(this.playButtonIcon?.[1]?.replay, "image/svg+xml");
-
-            icon = `<div class="tts_button" aria-hidden="true">${document.documentElement.outerHTML}</div><span>`;
-        }
-
-        return icon + ' ' + this.replayButtonText() + '<span></span></span></div>'
-
+        return this._renderStateContent('replay', 'dashicons-image-rotate', this.replayButtonText());
     }
 
     pauseButtonText() {
-        return this?.buttonTextArr?.pause_text ?? 'Pause';
+        return this.getStateText('pause', 'Pause');
     }
 
     pauseButtonContent() {
-        let icon = '<div class="tts_button" aria-hidden="true"><span class="dashicons dashicons-controls-pause"></span> <span>';
-        if (this.playButtonIcon?.[1]?.pause) {
-            const parser = new DOMParser();
-            // convert html string into DOM
-            let document = parser.parseFromString(this.playButtonIcon?.[1]?.pause, "image/svg+xml");
-            icon = `<div class="tts_button" aria-hidden="true">${document.documentElement.outerHTML}</div><span>`;
-        }
-
-        return icon + ' ' + this.pauseButtonText() + '<span></span></span></div>'
-
-
+        return this._renderStateContent('pause', 'dashicons-controls-pause', this.pauseButtonText());
     }
 
     resumeButtonText() {
-        return this?.buttonTextArr?.resume_text ?? 'Resume';
+        return this.getStateText('resume', 'Resume');
     }
 
     resumeButtonContent() {
-        let icon = '<div class="tts_button" aria-hidden="true"><span class="dashicons dashicons-controls-play"></span> <span>';
-
-        if (this.playButtonIcon?.[1]?.resume) {
-            const parser = new DOMParser();
-            // convert html string into DOM
-            let document = parser.parseFromString(this.playButtonIcon?.[1]?.resume, "image/svg+xml");
-            icon = `<div class="tts_button" aria-hidden="true">${document.documentElement.outerHTML}</div><span>`;
-        }
-        icon =  icon + ' ' + this.resumeButtonText() + '<span></span></span></div>'
-
-        return icon;
+        return this._renderStateContent('resume', 'dashicons-controls-play', this.resumeButtonText());
     }
 
     recordStartButtonContent() {
@@ -208,23 +220,30 @@ export default class TextToSpeech {
      * @param {*} isClicked
      */
     displayButtonText(listenStatus, isClicked = false) {
-        if (this?.playButtonNo == 1 && this?.speakButton?.innerHTML) {
-            if ('listen' === listenStatus) {
-                this.speakButton.innerHTML = this.replayButtonContent();
-                let buttonHoverTitle = window?.ttsObj?.buttonTextArr?.replay_hover_title ?? 'Click to listen post.';
-                this.speakButton.setAttribute('title', 'Text To Audio : ' + buttonHoverTitle);
-            } else if ('pause' === listenStatus) {
-                this.speakButton.innerHTML = this.pauseButtonContent();
-                let buttonHoverTitle = window?.ttsObj?.buttonTextArr?.pause_hover_title ?? this.pauseButtonText();
-                this.speakButton.setAttribute('title', 'Text To Audio : ' + buttonHoverTitle);
-            } else if ('resume' === listenStatus) {
-                this.speakButton.innerHTML = this.resumeButtonContent();
-                let buttonHoverTitle = window?.ttsObj?.buttonTextArr?.resume_hover_title ?? this.resumeButtonText();
-                this.speakButton.setAttribute('title', 'Text To Audio : ' + buttonHoverTitle);
-            }
-            if(isClicked) {
-                addHoverColor(this.speakButton)
-            }
+        // TTS-241 NOTE: gated to player 1 (Default) only. Player 2 (Default
+        // Pro) renders via the React `TextToSpeech` component, whose
+        // listen/pause/resume/replay UI is driven by React state — calling
+        // innerHTML swap here would destroy the React tree that owns the
+        // player. Player 2's lifecycle label/icon swap is handled inside
+        // that React component instead.
+        if (Number(this?.playButtonNo) !== 1) {
+            return;
+        }
+        if (!this?.speakButton?.innerHTML) {
+            return;
+        }
+        if ('listen' === listenStatus) {
+            this.speakButton.innerHTML = this.replayButtonContent();
+            this.speakButton.setAttribute('title', 'Text To Audio : ' + this.getStateHover('replay', 'Click to listen post.'));
+        } else if ('pause' === listenStatus) {
+            this.speakButton.innerHTML = this.pauseButtonContent();
+            this.speakButton.setAttribute('title', 'Text To Audio : ' + this.getStateHover('pause', this.pauseButtonText()));
+        } else if ('resume' === listenStatus) {
+            this.speakButton.innerHTML = this.resumeButtonContent();
+            this.speakButton.setAttribute('title', 'Text To Audio : ' + this.getStateHover('resume', this.resumeButtonText()));
+        }
+        if (isClicked) {
+            addHoverColor(this.speakButton);
         }
     }
 
