@@ -6,26 +6,5 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'AtlasAiDev\\AppService\\Client' => $baseDir . '/libs/AtlasAiDev/Client.php',
-    'AtlasAiDev\\AppService\\Insights' => $baseDir . '/libs/AtlasAiDev/Insights.php',
-    'AtlasAiDev\\AppService\\Promotions' => $baseDir . '/libs/AtlasAiDev/Promotions.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
-    'TTA\\TTA' => $baseDir . '/includes/TTA.php',
-    'TTA\\TTA_Activator' => $baseDir . '/includes/TTA_Activator.php',
-    'TTA\\TTA_Cache' => $baseDir . '/includes/TTA_Cache.php',
-    'TTA\\TTA_Deactivator' => $baseDir . '/includes/TTA_Deactivator.php',
-    'TTA\\TTA_Error_Handler' => $baseDir . '/includes/TTA_Error_Handler.php',
-    'TTA\\TTA_Helper' => $baseDir . '/includes/TTA_Helper.php',
-    'TTA\\TTA_Hooks' => $baseDir . '/includes/TTA_Hooks.php',
-    'TTA\\TTA_Lib_AtlasAiDev' => $baseDir . '/includes/TTA_Lib_AtlasAiDev.php',
-    'TTA\\TTA_Loader' => $baseDir . '/includes/TTA_Loader.php',
-    'TTA\\TTA_Notices' => $baseDir . '/includes/TTA_Notices.php',
-    'TTA\\TTA_Translation_Downloader' => $baseDir . '/includes/TTA_Translation_Downloader.php',
-    'TTA\\TTA_i18n' => $baseDir . '/includes/TTA_i18n.php',
-    'TTA_Admin\\TTA_Admin' => $baseDir . '/admin/TTA_Admin.php',
-    'TTA_Admin\\TTA_Dashboard_Widget' => $baseDir . '/admin/TTA_Dashboard_Widget.php',
-    'TTA_Admin\\TTA_Posts_List' => $baseDir . '/admin/TTA_Posts_List.php',
-    'TTA_Api\\AtlasVoice_Analytics' => $baseDir . '/api/AtlasVoice_Analytics.php',
-    'TTA_Api\\AtlasVoice_Plugin_Compatibility' => $baseDir . '/api/AtlasVoice_Plugin_Compatibility.php',
-    'TTA_Api\\TTA_Api_Routes' => $baseDir . '/api/TTA_Api_Routes.php',
 );
