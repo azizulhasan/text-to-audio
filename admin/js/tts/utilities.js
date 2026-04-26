@@ -30,19 +30,27 @@ export const splitSentences = function splitSentences(text = '') {
 
 
 export const getButtonContent = (buttonId, cssClass, isProLicenseActive) => {
-    // return wp.hooks.applyFilters('tts__listening_button', `<button id="tts__listent_content_${buttonId}" class="tts__listent_content  ${cssClass}" type="button" title="Text To Audio:  Tap to listen post."><div class="tts_button"><span class="dashicons dashicons-controls-play"></span><span>Listen<span></div> </button>`, buttonId)
-    let buttonText = window?.ttsObj?.buttonTextArr?.listen_text ?? 'Listen';
-    let buttonHoverTitle = window?.ttsObj?.buttonTextArr?.listen_hover_title ? 'Text To Audio : ' + window?.ttsObj?.buttonTextArr?.listen_hover_title : 'Text To Audio: Click to listen post.';
+    // TTS-241 — emit identical structure for the initial render and for all
+    // subsequent state swaps in TextToSpeech._renderStateContent so the
+    // button metrics never shift (fixes "border expands on click").
+    const playerId = window?.ttsObj?.player_id || 1;
+    const players = window?.ttsObj?.buttonTextArr?.players || {};
+    const perPlayer = (players[playerId] && players[playerId].listen) || {};
+    const buttonText = perPlayer.text || window?.ttsObj?.buttonTextArr?.listen_text || 'Listen';
+    const hoverRaw = perPlayer.hover
+        || window?.ttsObj?.buttonTextArr?.listen_hover_title
+        || 'Click to listen post.';
+    const buttonHoverTitle = 'Text To Audio: ' + hoverRaw;
 
-    if (window?.ttsObj?.player_customizations?.[1]?.play) {
+    let iconHtml = '<span class="dashicons dashicons-controls-play"></span>';
+    const customSvg = window?.ttsObj?.player_customizations?.[playerId]?.play;
+    if (customSvg) {
         const parser = new DOMParser();
-        // convert html string into DOM
-        let document = parser.parseFromString(ttsObj?.player_customizations?.[1]?.play, "image/svg+xml");
-        let icon = `<button id="tts__listent_content_${buttonId}" class="tts__listent_content  ${cssClass}" type="button" title="${buttonHoverTitle}" aria-label="${buttonText} audio"><div className="tts_button" aria-hidden="true">${document.documentElement.outerHTML}</div> <span>`;
-        return icon + ' ' + buttonText + '<span></span></span></div>';
+        const doc = parser.parseFromString(customSvg, "image/svg+xml");
+        iconHtml = doc.documentElement.outerHTML;
     }
 
-    return `<button id="tts__listent_content_${buttonId}" class="tts__listent_content  ${cssClass}" type="button" title="${buttonHoverTitle}" aria-label="${buttonText} audio"><div class="tts_button" aria-hidden="true"><span class="dashicons dashicons-controls-play"></span></div><span>${buttonText}</span> </button>`;
+    return `<button id="tts__listent_content_${buttonId}" class="tts__listent_content ${cssClass}" type="button" title="${buttonHoverTitle}" aria-label="${buttonText} audio"><div class="tts_button" aria-hidden="true">${iconHtml}<span class="tts_button_label">${buttonText}</span></div></button>`;
 }
 
 

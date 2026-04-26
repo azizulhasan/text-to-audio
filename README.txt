@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1.16
+Stable tag: 2.1.17
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -353,6 +353,20 @@ Please report security bugs through the [Patchstack Vulnerability Disclosure Pro
 We are looking for people to help translate this plugin. If you can help, we would love to hear from you.
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
+
+= 2.1.17 ( 26 Apr 2026 ) =
+Added : Customize → "Button Texts & Icons" section for Default and Default Pro players — edit per-state text (Listen / Pause / Resume / Replay), pick from 8 icon presets or paste custom SVG, set hover tooltips, and reset per-state or all at once.
+Added : Live preview on the Customize page now renders the same DOM and CSS as the front-end button and is functional via the SpeechSynthesis API for the Default player.
+Added : ElevenLabs voice search auto-resolves a 20-character voice ID typed into the search box (fetches `/elevenlabs_voice` and selects/previews the result).
+Improved : ElevenLabs voice list is now language-scoped (cache key `tts_elevenlabs_voices_{lang}`); switching language fires exactly one fetch, reloads with hot cache fire none.
+Improved : Default Pro front-end button now honors user-customized `border`, `border-radius`, `height` and `font-size` from the Design Customization settings (previously fell back to defaults).
+Improved : Per-player icon swap on lifecycle events (Listen → Pause → Resume → Replay) honors saved per-player custom SVGs on both front-end and dashboard preview.
+Fixed : Right-click on the Default-player button no longer renders a thin black rectangle around the wrapper (host-element focus outline suppressed via `:host(:focus)` rule).
+Fixed : Sound-wave icon on Default Pro no longer overflows past the button's right border (`box-sizing: border-box` on `.tts__player`).
+Fixed : Clicking the Default Pro front-end button no longer destroys the React-rendered player tree (`displayButtonText` gated to player 1 only — player 2 swaps state via React).
+Fixed : Default Pro icons now render correctly across all four lifecycle states (resume state was previously aliased to listen).
+Fixed : CDN/CORS detector now reports script failures correctly — the previous HEAD verification was itself CORS-blocked on the exact failure mode we needed to detect, suppressing the admin notice.
+Removed : Accent dropdown from the Listening tab (ElevenLabs voice library has at most one accent per language; `accent_locale` no longer needed).
 
 = 2.1.16 ( 18 Apr 2026 ) =
 Improved : Content extraction with better special character and whitespace handling.
@@ -847,6 +861,14 @@ Improved :  Pro and free version performance improved.
 
 
 == Upgrade Notice ==
+
+= 2.1.17 =
+Added : Customize → Button Texts & Icons section (Listen/Pause/Resume/Replay text + icon presets + custom SVG paste) for Default and Default Pro.
+Added : Live, functional Default-player preview using SpeechSynthesis API.
+Added : ElevenLabs search box now auto-resolves pasted 20-character voice IDs.
+Improved : ElevenLabs voices cached per language; Default Pro front-end honors all design settings.
+Fixed : Right-click "border expansion" gone; soundwave overflow on Default Pro fixed; Default Pro click no longer destroys the player.
+Fixed : CDN/CORS detector now correctly reports cross-origin script failures so the admin notice actually appears.
 
 = 2.1.16 =
 Improved : Content extraction with better special character and whitespace handling.

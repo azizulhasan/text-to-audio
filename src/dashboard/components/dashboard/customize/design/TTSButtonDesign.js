@@ -1,11 +1,16 @@
 import {Form} from "react-bootstrap";
 import {__} from "@wordpress/i18n";
+import ButtonStateEditor from "./ButtonStateEditor";
 
 export default function TTSButtonDesign({
                                             handleChange,
                                             customCSS,
                                             listeningBtnStyle,
+                                            buttonTexts,
+                                            setButtonTexts,
                                         }) {
+    const playerId = parseInt(listeningBtnStyle?.buttonSettings?.id || 1, 10);
+    const supportsButtonStates = playerId === 1 || playerId === 2;
     return (
         <>
             {/* Color Controls Section */}
@@ -317,6 +322,15 @@ export default function TTSButtonDesign({
           </>
         )} */}
             </div>
+
+            {/* Button Texts & Icons (TTS-241) — only for speechSynthesis players (1, 2) */}
+            {supportsButtonStates && setButtonTexts ? (
+                <ButtonStateEditor
+                    playerId={playerId}
+                    buttonTexts={buttonTexts}
+                    setButtonTexts={setButtonTexts}
+                />
+            ) : null}
 
             {/* Custom CSS Section */}
             <div className="tta_section_title">{__("Custom CSS", "text-to-audio")}</div>

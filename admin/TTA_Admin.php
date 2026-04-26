@@ -123,14 +123,7 @@ class TTA_Admin
             'compatible' => TTA_Helper::get_compatible_plugins_data(),
             'gctts_is_authenticated' => get_player_id() == '4',
             'settings' => $settings,
-            'player_customizations' => apply_filters('tts_player_customizations', [
-                '1' => [
-                    'play' => "<svg width='15px' height='15px'   xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 8'><polygon fill='$color' points='0 0 0 8 7 4'/></svg>",
-                    'pause' => "<svg width='20' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'><g id='SVGRepo_bgCarrier' stroke-width='1.5'></g><g id='SVGRepo_tracerCarrier' stroke-linecap='round' stroke-linejoin='round'></g><g id='SVGRepo_iconCarrier'> <path opacity='0.1' d='M3 12C3 4.5885 4.5885 3 12 3C19.4115 3 21 4.5885 21 12C21 19.4115 19.4115 21 12 21C4.5885 21 3 19.4115 3 12Z' fill='none'></path> <path d='M14 9L14 15' stroke='$color' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'></path> <path d='M10 9L10 15' stroke='$color' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'></path> <path d='M3 12C3 4.5885 4.5885 3 12 3C19.4115 3 21 4.5885 21 12C21 19.4115 19.4115 21 12 21C4.5885 21 3 19.4115 3 12Z' stroke='$color' stroke-width='2'></path> </g></svg>",
-                    'replay' => "<svg width='20px' height='20px' viewBox='0 0 24.00 24.00' fill='none' xmlns='http://www.w3.org/2000/svg' stroke='$color' stroke-width='1'><g id='SVGRepo_bgCarrier' stroke-width='0'></g><g id='SVGRepo_tracerCarrier' stroke-linecap='round' stroke-linejoin='round'></g><g id='SVGRepo_iconCarrier'> <path d='M12 20.75C10.078 20.7474 8.23546 19.9827 6.8764 18.6236C5.51733 17.2645 4.75265 15.422 4.75 13.5C4.75 13.3011 4.82902 13.1103 4.96967 12.9697C5.11032 12.829 5.30109 12.75 5.5 12.75C5.69891 12.75 5.88968 12.829 6.03033 12.9697C6.17098 13.1103 6.25 13.3011 6.25 13.5C6.25 14.6372 6.58723 15.7489 7.21905 16.6945C7.85087 17.6401 8.74889 18.3771 9.79957 18.8123C10.8502 19.2475 12.0064 19.3614 13.1218 19.1395C14.2372 18.9177 15.2617 18.37 16.0659 17.5659C16.87 16.7617 17.4177 15.7372 17.6395 14.6218C17.8614 13.5064 17.7475 12.3502 17.3123 11.2996C16.8771 10.2489 16.1401 9.35087 15.1945 8.71905C14.2489 8.08723 13.1372 7.75 12 7.75H9.5C9.30109 7.75 9.11032 7.67098 8.96967 7.53033C8.82902 7.38968 8.75 7.19891 8.75 7C8.75 6.80109 8.82902 6.61032 8.96967 6.46967C9.11032 6.32902 9.30109 6.25 9.5 6.25H12C13.9228 6.25 15.7669 7.01384 17.1265 8.37348C18.4862 9.73311 19.25 11.5772 19.25 13.5C19.25 15.4228 18.4862 17.2669 17.1265 18.6265C15.7669 19.9862 13.9228 20.75 12 20.75Z' fill='$color'></path> <path d='M12 10.75C11.9015 10.7505 11.8038 10.7313 11.7128 10.6935C11.6218 10.6557 11.5392 10.6001 11.47 10.53L8.47 7.53003C8.32955 7.38941 8.25066 7.19878 8.25066 7.00003C8.25066 6.80128 8.32955 6.61066 8.47 6.47003L11.47 3.47003C11.5387 3.39634 11.6215 3.33724 11.7135 3.29625C11.8055 3.25526 11.9048 3.23322 12.0055 3.23144C12.1062 3.22966 12.2062 3.24819 12.2996 3.28591C12.393 3.32363 12.4778 3.37977 12.549 3.45099C12.6203 3.52221 12.6764 3.60705 12.7141 3.70043C12.7518 3.79382 12.7704 3.89385 12.7686 3.99455C12.7668 4.09526 12.7448 4.19457 12.7038 4.28657C12.6628 4.37857 12.6037 4.46137 12.53 4.53003L10.06 7.00003L12.53 9.47003C12.6704 9.61066 12.7493 9.80128 12.7493 10C12.7493 10.1988 12.6704 10.3894 12.53 10.53C12.4608 10.6001 12.3782 10.6557 12.2872 10.6935C12.1962 10.7313 12.0985 10.7505 12 10.75Z' fill='$color'></path> </g></svg>",
-                    'resume' => "<svg width='20px' height='20px' viewBox='0 0 24.00 24.00' fill='none' xmlns='http://www.w3.org/2000/svg' stroke='$color' stroke-width='1'><g id='SVGRepo_bgCarrier' stroke-width='0'></g><g id='SVGRepo_tracerCarrier' stroke-linecap='round' stroke-linejoin='round'></g><g id='SVGRepo_iconCarrier'> <path d='M12 20.75C10.078 20.7474 8.23546 19.9827 6.8764 18.6236C5.51733 17.2645 4.75265 15.422 4.75 13.5C4.75 13.3011 4.82902 13.1103 4.96967 12.9697C5.11032 12.829 5.30109 12.75 5.5 12.75C5.69891 12.75 5.88968 12.829 6.03033 12.9697C6.17098 13.1103 6.25 13.3011 6.25 13.5C6.25 14.6372 6.58723 15.7489 7.21905 16.6945C7.85087 17.6401 8.74889 18.3771 9.79957 18.8123C10.8502 19.2475 12.0064 19.3614 13.1218 19.1395C14.2372 18.9177 15.2617 18.37 16.0659 17.5659C16.87 16.7617 17.4177 15.7372 17.6395 14.6218C17.8614 13.5064 17.7475 12.3502 17.3123 11.2996C16.8771 10.2489 16.1401 9.35087 15.1945 8.71905C14.2489 8.08723 13.1372 7.75 12 7.75H9.5C9.30109 7.75 9.11032 7.67098 8.96967 7.53033C8.82902 7.38968 8.75 7.19891 8.75 7C8.75 6.80109 8.82902 6.61032 8.96967 6.46967C9.11032 6.32902 9.30109 6.25 9.5 6.25H12C13.9228 6.25 15.7669 7.01384 17.1265 8.37348C18.4862 9.73311 19.25 11.5772 19.25 13.5C19.25 15.4228 18.4862 17.2669 17.1265 18.6265C15.7669 19.9862 13.9228 20.75 12 20.75Z' fill='$color'></path> <path d='M12 10.75C11.9015 10.7505 11.8038 10.7313 11.7128 10.6935C11.6218 10.6557 11.5392 10.6001 11.47 10.53L8.47 7.53003C8.32955 7.38941 8.25066 7.19878 8.25066 7.00003C8.25066 6.80128 8.32955 6.61066 8.47 6.47003L11.47 3.47003C11.5387 3.39634 11.6215 3.33724 11.7135 3.29625C11.8055 3.25526 11.9048 3.23322 12.0055 3.23144C12.1062 3.22966 12.2062 3.24819 12.2996 3.28591C12.393 3.32363 12.4778 3.37977 12.549 3.45099C12.6203 3.52221 12.6764 3.60705 12.7141 3.70043C12.7518 3.79382 12.7704 3.89385 12.7686 3.99455C12.7668 4.09526 12.7448 4.19457 12.7038 4.28657C12.6628 4.37857 12.6037 4.46137 12.53 4.53003L10.06 7.00003L12.53 9.47003C12.6704 9.61066 12.7493 9.80128 12.7493 10C12.7493 10.1988 12.6704 10.3894 12.53 10.53C12.4608 10.6001 12.3782 10.6557 12.2872 10.6935C12.1962 10.7313 12.0985 10.7505 12 10.75Z' fill='$color'></path> </g></svg>",
-                ]
-            ]),
+            'player_customizations' => apply_filters('tts_player_customizations', $this->build_player_customizations()),
             'is_mobile' => wp_is_mobile(),
             'current_plugin_slug' => 'text-to-audio',
             'detected_caching_plugins' => TTA_Helper::get_detected_caching_plugins(),
@@ -139,13 +132,59 @@ class TTA_Admin
         ];
     }
 
+    /**
+     * Build the per-player icon map (TTS-241).
+     *
+     * Reads from the saved option `tta__button_text_arr.players[id].<state>.icon`,
+     * resolves preset/custom descriptors to actual SVG markup, and falls back
+     * to factory defaults when nothing is saved. Only ids 1 and 2 (the
+     * speechSynthesis players) are populated in phase 1.
+     *
+     * @return array<string,array<string,string>>
+     */
+    public function build_player_customizations()
+    {
+        $saved   = get_option('tta__button_text_arr');
+        $players = is_array($saved) && isset($saved['players']) && is_array($saved['players'])
+            ? $saved['players']
+            : \TTA\TTA_Player_Icons::default_players();
+
+        $defaults = \TTA\TTA_Player_Icons::default_players();
+        $out      = [];
+        foreach ([1, 2] as $pid) {
+            $states = $players[$pid] ?? $defaults[$pid];
+            $out[(string) $pid] = [
+                'play'   => \TTA\TTA_Player_Icons::resolve($states['listen']['icon'] ?? 'preset:play'),
+                'pause'  => \TTA\TTA_Player_Icons::resolve($states['pause']['icon']  ?? 'preset:pause'),
+                'resume' => \TTA\TTA_Player_Icons::resolve($states['resume']['icon'] ?? 'preset:play'),
+                'replay' => \TTA\TTA_Player_Icons::resolve($states['replay']['icon'] ?? 'preset:replay'),
+            ];
+        }
+        return $out;
+    }
+
     public function load_script_as_tag($tag, $handle, $src)
     {
         if (!in_array($handle, ['text-to-audio-button', 'TextToSpeech', 'AtlasVoiceAnalytics'])) {
             return $tag;
         }
 
-        $tag = '<script  type="module" src="' . esc_url($src) . '"  ></script>';
+        // Intentionally NOT emitting `type="module"`.
+        //
+        // Module scripts are always fetched in CORS mode per the HTML spec, so
+        // the CDN response must carry `Access-Control-Allow-Origin`. When users
+        // serve these bundles through a CDN (WP Rocket CDN, BunnyCDN, KeyCDN,
+        // etc.) that doesn't add that header, module loading fails silently —
+        // the player breaks with only a console CORS message.
+        //
+        // Our source uses `import`/`export`, but Laravel Mix (webpack) bundles
+        // everything into a single self-contained IIFE at build time, so there
+        // is no runtime module graph for the browser to resolve. Classic
+        // script semantics work identically without the CORS requirement.
+        //
+        // Only re-enable if the bundle starts relying on top-level await,
+        // `import.meta`, or native cross-file ES module resolution.
+        // $tag = '<script  type="module" src="' . esc_url($src) . '"  ></script>';
 
         return $tag;
 
@@ -948,17 +987,20 @@ class TTA_Admin
                 var host = '';
                 try { host = new URL(src).host; } catch (_) { return; }
                 if (!host || host === siteHost) return;
-                fetch(src, { method: 'HEAD' }).then(function (r) {
-                    if (!r || !r.ok) return;
-                    reported = true;
-                    var payload = JSON.stringify({ url: src });
-                    if (navigator.sendBeacon) {
-                        var blob = new Blob([payload], { type: 'application/json' });
-                        navigator.sendBeacon(endpoint, blob);
-                    } else {
-                        fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: true }).catch(function(){});
-                    }
-                }).catch(function(){});
+                // A script 'error' event + our plugin-path + cross-origin host is
+                // already strong proof of a CORS/CDN load failure. The previous
+                // HEAD verification was itself CORS-blocked (no ACAO on the CDN
+                // response), which suppressed the beacon on the exact failure
+                // mode we need to detect. Send directly; server re-validates and
+                // rate-limits to 1 alert/hour.
+                reported = true;
+                var payload = JSON.stringify({ url: src });
+                if (navigator.sendBeacon) {
+                    var blob = new Blob([payload], { type: 'application/json' });
+                    navigator.sendBeacon(endpoint, blob);
+                } else {
+                    fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: true }).catch(function(){});
+                }
             }, true);
         })();
         </script>

@@ -608,6 +608,24 @@ class TTA_Api_Routes {
                 TTA_Helper::delete_post_meta();
             }
 
+			// Extract & save per-player button texts (TTS-241).
+			// They travel under the same /customize payload to keep one round-trip.
+			if ( is_object( $fields ) && property_exists( $fields, 'button_texts' ) ) {
+				$button_texts_raw = $fields->button_texts;
+				unset( $fields->button_texts );
+
+				$incoming = json_decode( wp_json_encode( $button_texts_raw ), true );
+				if ( is_array( $incoming ) ) {
+					$existing = get_option( 'tta__button_text_arr' );
+					if ( ! is_array( $existing ) ) {
+						$existing = [];
+					}
+					$players          = isset( $incoming['players'] ) ? $incoming['players'] : [];
+					$existing['players'] = \TTA\TTA_Player_Icons::sanitize_players( $players );
+					update_option( 'tta__button_text_arr', $existing );
+				}
+			}
+
 			update_option( 'tta_customize_settings', $fields );
 
 			$response['data'] = get_option( 'tta_customize_settings' );
@@ -622,6 +640,29 @@ class TTA_Api_Routes {
 		if ( 'get' == $request['method'] ) {
 
 			$response['data'] = get_option( 'tta_customize_settings' );
+
+			// Surface the per-player button-text settings under the same
+			// /customize GET so the React form can hydrate in one fetch (TTS-241).
+			$button_text_arr = get_option( 'tta__button_text_arr' );
+			$saved_players   = is_array( $button_text_arr ) && isset( $button_text_arr['players'] ) && is_array( $button_text_arr['players'] )
+				? $button_text_arr['players']
+				: [];
+			// Merge defaults with whatever's saved so the UI always has a
+			// fully-populated map for both ids 1 and 2 (TTS-241).
+			$defaults = \TTA\TTA_Player_Icons::default_players();
+			$players  = $defaults;
+			foreach ( $saved_players as $pid => $states ) {
+				if ( ! isset( $players[ $pid ] ) || ! is_array( $states ) ) {
+					continue;
+				}
+				$players[ $pid ] = array_replace_recursive( $players[ $pid ], $states );
+			}
+			$response['button_texts'] = [
+				'players'  => $players,
+				'presets'  => array_keys( \TTA\TTA_Player_Icons::presets() ),
+				'preset_svgs' => \TTA\TTA_Player_Icons::presets(),
+				'defaults' => \TTA\TTA_Player_Icons::default_players(),
+			];
 
 			return rest_ensure_response( $response );
 		}

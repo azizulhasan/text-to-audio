@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import {
   getData,
   setLocalStorage,
@@ -25,6 +25,11 @@ export default function useVoiceLoader(customizationSettings, listeningVoiceMode
   const [speechSynthesisVoices, setSpeechSynthesisVoices] = useState([]);
   const [elevenLabsVoices, setElevenLabsVoices] = useState([]);
   const [languageMissingMessage, setLanguageMissingMessage] = useState("");
+
+  // Track which ElevenLabs cacheKey was most recently applied, so repeat
+  // calls with the same language don't re-apply state (and don't re-fire
+  // network requests if the cache is already hot).
+  const lastElevenLabsCacheKeyRef = useRef("");
 
   const apiURL = useMemo(() => {
     if (window.hasOwnProperty("ttsObj") && ttsObj.is_pro_active) {
@@ -106,44 +111,83 @@ export default function useVoiceLoader(customizationSettings, listeningVoiceMode
   };
 
   // ── ElevenLabs voices ───────────────────────────────────────────────
-  const setElevenLabsVoicesAndLanguages = () => {
-    if (window.hasOwnProperty("ttsObj") && ttsObj.is_pro_active) {
-      let stored = getLocalStorage(["tts_elevenlabs_voices"]);
-      if (stored?.tts_elevenlabs_voices) {
-        try {
-          let voices = JSON.parse(stored.tts_elevenlabs_voices);
-          setElevenLabsVoices(voices);
-          const voiceNames = voices.map(v => v.name);
-          setCurrentPlayerVoices(voiceNames);
-          setCurrentPlayerFilteredVoices(voiceNames);
-          setSpeechSynthesisVoices(voiceNames);
-          let languages = chatGPTLanguages();
-          setCurrentPlayerLanguages(languages);
-          return;
-        } catch (e) {
-          console.log('Error parsing stored ElevenLabs voices:', e);
-        }
-      }
-
-      const proApiURL = ttsObj.api_url + ttsObj.api_namespace + "_pro/" + ttsObj.api_version + "/";
-      getData(proApiURL + "elevenlabs_voices")
-        .then((res) => {
-          if (res?.voices && res.voices.length) {
-            setLocalStorage({ tts_elevenlabs_voices: JSON.stringify(res.voices) });
-            setElevenLabsVoices(res.voices);
-            const voiceNames = res.voices.map(v => v.name);
-            setCurrentPlayerVoices(voiceNames);
-            setCurrentPlayerFilteredVoices(voiceNames);
-            setSpeechSynthesisVoices(voiceNames);
-
-            let languages = chatGPTLanguages();
-            setCurrentPlayerLanguages(languages);
-          }
-        })
-        .catch((err) => {
-          console.log('ElevenLabs voices error:', err);
-        });
+  // Cache is language-keyed so switching the listening language triggers
+  // a fresh fetch of `/v1/shared-voices` for that language (capped at 100).
+  const setElevenLabsVoicesAndLanguages = (language = "") => {
+    if (!(window.hasOwnProperty("ttsObj") && ttsObj.is_pro_active)) {
+      return;
     }
+
+    // Normalize to 2-letter ISO language code (e.g. "en-GB" → "en").
+    const langCode = (language || "").toLowerCase().split(/[-_]/)[0] || "";
+    const cacheKey = langCode
+      ? `tts_elevenlabs_voices_${langCode}`
+      : "tts_elevenlabs_voices";
+
+    // Skip if the same cacheKey was just applied — prevents duplicate
+    // state writes (and duplicate fetches) when multiple effects call this.
+    if (lastElevenLabsCacheKeyRef.current === cacheKey) {
+      return;
+    }
+
+    const applyVoices = (voices) => {
+      lastElevenLabsCacheKeyRef.current = cacheKey;
+      setElevenLabsVoices(voices);
+      const voiceNames = voices.map((v) => v.name);
+      setCurrentPlayerVoices(voiceNames);
+      setCurrentPlayerFilteredVoices(voiceNames);
+      setSpeechSynthesisVoices(voiceNames);
+      setCurrentPlayerLanguages(chatGPTLanguages());
+    };
+
+    const stored = getLocalStorage([cacheKey]);
+    if (stored?.[cacheKey]) {
+      try {
+        applyVoices(JSON.parse(stored[cacheKey]));
+        return;
+      } catch (e) {
+        console.log("Error parsing stored ElevenLabs voices:", e);
+      }
+    }
+
+    const proApiURL =
+      ttsObj.api_url + ttsObj.api_namespace + "_pro/" + ttsObj.api_version + "/";
+    const endpoint = langCode
+      ? `${proApiURL}elevenlabs_voices?language=${encodeURIComponent(langCode)}`
+      : `${proApiURL}elevenlabs_voices`;
+
+    getData(endpoint)
+      .then((res) => {
+        if (res?.voices && res.voices.length) {
+          setLocalStorage({ [cacheKey]: JSON.stringify(res.voices) });
+          applyVoices(res.voices);
+        }
+      })
+      .catch((err) => {
+        console.log("ElevenLabs voices error:", err);
+      });
+  };
+
+  // Append or replace a single voice in the ElevenLabs voice list (used
+  // when the user resolves a manual voice ID). Keeps localStorage cache
+  // in sync so reloads remember the injected voice.
+  const addElevenLabsVoice = (voice, language = "") => {
+    if (!voice || !voice.voice_id) return;
+    const langCode = (language || "").toLowerCase().split(/[-_]/)[0] || "";
+    const cacheKey = langCode
+      ? `tts_elevenlabs_voices_${langCode}`
+      : "tts_elevenlabs_voices";
+
+    setElevenLabsVoices((prev) => {
+      const existingIdx = prev.findIndex((v) => v.voice_id === voice.voice_id);
+      const next = existingIdx >= 0
+        ? prev.map((v, i) => (i === existingIdx ? { ...v, ...voice } : v))
+        : [voice, ...prev];
+      try {
+        setLocalStorage({ [cacheKey]: JSON.stringify(next) });
+      } catch (e) {}
+      return next;
+    });
   };
 
   // ── Browser speech synthesis / fallback ─────────────────────────────
@@ -211,6 +255,8 @@ export default function useVoiceLoader(customizationSettings, listeningVoiceMode
         setCurrentPlayerLanguages(languages);
         setLanguageMissingMessage("");
       } else if (customizationSettings?.buttonSettings?.id == 6) {
+        // Languages shown in the UI dropdown are the same chatGPTLanguages set;
+        // the actual voice filtering happens server-side via `/v1/shared-voices`.
         let languages = chatGPTLanguages();
         setCurrentPlayerLanguages(languages);
         setLanguageMissingMessage("");
@@ -235,9 +281,8 @@ export default function useVoiceLoader(customizationSettings, listeningVoiceMode
       setGPTVoicesAndLanguages(listeningVoiceModel);
     }
 
-    if (customizationSettings?.buttonSettings?.id == 6) {
-      setElevenLabsVoicesAndLanguages();
-    }
+    // Player 6 (ElevenLabs) voices are loaded by Listening.js with the
+    // current listening language so the cacheKey is language-scoped.
   }, [customizationSettings]);
 
   return {
@@ -251,5 +296,7 @@ export default function useVoiceLoader(customizationSettings, listeningVoiceMode
     setGPTVoicesAndLanguages,
     setGoogleVoicesAndLanguages,
     setVoicesAndLanguages,
+    setElevenLabsVoicesAndLanguages,
+    addElevenLabsVoice,
   };
 }
