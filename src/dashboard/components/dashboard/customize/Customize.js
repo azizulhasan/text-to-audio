@@ -75,6 +75,14 @@ export default function Customize() {
 
   const [shortCode, setShortCode] = useState("[atlasvoice]");
   const [customCSS, setCustomCSS] = useState("");
+  // TTS-241 — per-player button text/icon state. Hydrated from
+  // /customize GET (res.button_texts) and posted back under formData.button_texts.
+  const [buttonTexts, setButtonTexts] = useState({
+    players: {},
+    presets: [],
+    preset_svgs: {},
+    defaults: {},
+  });
   const [speakingText, setSpeakingText] = useState("");
   const [listeningSettings, setListeningSettings] = useState({});
   const [isGCAuthenticated, setGCIsAuthenticated] = useState(false);
@@ -192,6 +200,22 @@ export default function Customize() {
         };
 
         setListeningStyle(value);
+        if (res.button_texts) {
+          // Merge defaults so initial state is fully populated even when
+          // nothing has been saved yet (TTS-241).
+          const defaults = res.button_texts.defaults || {};
+          const saved = res.button_texts.players || {};
+          const players = {};
+          Object.keys(defaults).forEach((pid) => {
+            players[pid] = { ...(defaults[pid] || {}), ...(saved[pid] || {}) };
+          });
+          setButtonTexts({
+            players,
+            presets: res.button_texts.presets || [],
+            preset_svgs: res.button_texts.preset_svgs || {},
+            defaults,
+          });
+        }
         if (res.data.custom_css) {
           setCustomCSS(res.data.custom_css || "");
         }
@@ -491,6 +515,8 @@ export default function Customize() {
     formData["custom_css"] = customCSS;
     formData["tta_play_btn_shortcode"] = shortCode;
     formData["buttonSettings"] = listeningBtnStyle.buttonSettings;
+    // TTS-241 — ride along with the same /customize round-trip.
+    formData["button_texts"] = { players: buttonTexts.players || {} };
     if (!formData?.buttonSettings?.button_position) {
       formData.buttonSettings.button_position = "before_content";
     }
@@ -845,6 +871,8 @@ export default function Customize() {
                 customCSS={customCSS}
                 listeningBtnStyle={listeningBtnStyle}
                 handleChange={handleChange}
+                buttonTexts={buttonTexts}
+                setButtonTexts={setButtonTexts}
               />
             </div>
 
