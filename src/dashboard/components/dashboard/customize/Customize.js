@@ -21,6 +21,7 @@ import TextToSpeechThree from "../../../buttons/components/TextToSpeechThree";
 import TextToSpeechFour from "../../../buttons/components/TextToSpeechFour";
 import CustomizationTabs from "./CustomizationTabs";
 import TTSButtonDesign from "./design/TTSButtonDesign";
+import ButtonPreview from "./design/ButtonPreview";
 import UpgradeToPro from "../../UpgradeToPro";
 import Icon from "../../Icon";
 
@@ -75,6 +76,14 @@ export default function Customize() {
 
   const [shortCode, setShortCode] = useState("[atlasvoice]");
   const [customCSS, setCustomCSS] = useState("");
+  // TTS-241 — per-player button text/icon state. Hydrated from
+  // /customize GET (res.button_texts) and posted back under formData.button_texts.
+  const [buttonTexts, setButtonTexts] = useState({
+    players: {},
+    presets: [],
+    preset_svgs: {},
+    defaults: {},
+  });
   const [speakingText, setSpeakingText] = useState("");
   const [listeningSettings, setListeningSettings] = useState({});
   const [isGCAuthenticated, setGCIsAuthenticated] = useState(false);
@@ -192,6 +201,22 @@ export default function Customize() {
         };
 
         setListeningStyle(value);
+        if (res.button_texts) {
+          // Merge defaults so initial state is fully populated even when
+          // nothing has been saved yet (TTS-241).
+          const defaults = res.button_texts.defaults || {};
+          const saved = res.button_texts.players || {};
+          const players = {};
+          Object.keys(defaults).forEach((pid) => {
+            players[pid] = { ...(defaults[pid] || {}), ...(saved[pid] || {}) };
+          });
+          setButtonTexts({
+            players,
+            presets: res.button_texts.presets || [],
+            preset_svgs: res.button_texts.preset_svgs || {},
+            defaults,
+          });
+        }
         if (res.data.custom_css) {
           setCustomCSS(res.data.custom_css || "");
         }
@@ -491,6 +516,8 @@ export default function Customize() {
     formData["custom_css"] = customCSS;
     formData["tta_play_btn_shortcode"] = shortCode;
     formData["buttonSettings"] = listeningBtnStyle.buttonSettings;
+    // TTS-241 — ride along with the same /customize round-trip.
+    formData["button_texts"] = { players: buttonTexts.players || {} };
     if (!formData?.buttonSettings?.button_position) {
       formData.buttonSettings.button_position = "before_content";
     }
@@ -758,6 +785,10 @@ export default function Customize() {
               </div>
 
               <div className="d-grid mb-0">
+                {/* TTS-241 — player 2 (Default Pro) keeps its dedicated
+                    TextToSpeech preview component (matching the production
+                    front-end UI), but receives buttonTexts + playerId so
+                    its label and icons honor the per-player draft. */}
                 {listeningBtnStyle?.buttonSettings?.id == 2 ? (
                   <TextToSpeech
                     buttonCSS={listeningBtnStyle}
@@ -769,6 +800,8 @@ export default function Customize() {
                       ></div>
                     }
                     buttonId={2}
+                    buttonTexts={buttonTexts}
+                    playerId={2}
                   />
                 ) : listeningBtnStyle?.buttonSettings?.id == 3 ? (
                   <TextToSpeechThree
@@ -823,17 +856,13 @@ export default function Customize() {
                     cssStyle={""}
                   />
                 ) : (
-                  <button
-                    id="tta__listen_content"
-                    onClick={(e) => callListeningFunction(e)}
-                    style={listeningBtnStyle2}
-                    type="button"
-                    className="tta_listen-button"
-                    title={__("Text To Audio:  Tap to listen post.", "text-to-audio")}
-                  >
-                    <Icon name="play-circle" className="me-2" />
-                    {tta_obj.buttonTextArr.listen_text}
-                  </button>
+                  // TTS-241 — live preview that mirrors the in-memory
+                  // ButtonStateEditor draft for Default / Default Pro.
+                  <ButtonPreview
+                    buttonTexts={buttonTexts}
+                    playerId={parseInt(listeningBtnStyle?.buttonSettings?.id || 1, 10)}
+                    buttonStyle={listeningBtnStyle}
+                  />
                 )}
               </div>
             </div>
@@ -845,6 +874,8 @@ export default function Customize() {
                 customCSS={customCSS}
                 listeningBtnStyle={listeningBtnStyle}
                 handleChange={handleChange}
+                buttonTexts={buttonTexts}
+                setButtonTexts={setButtonTexts}
               />
             </div>
 

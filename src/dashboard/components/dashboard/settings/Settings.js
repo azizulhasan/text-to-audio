@@ -649,7 +649,8 @@ export default function Settings() {
                                         </Col>
                                     </Row>
 
-                                    {!window?.ttsObjPro?.is_pro_active && (
+                                    {/* TTS-241: only relevant for speechSynthesis-style players (Default + Default Pro). */}
+                                    {[1, 2].includes(Number(window?.ttsObj?.player_id)) && (
                                         <SettingRow label={__("Enable Button Icon", "text-to-audio")}>
                                             <ToggleSwitch
                                                 checked={settings.tta__settings_display_btn_icon}
