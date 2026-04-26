@@ -9,7 +9,46 @@ let TextToSpeechPro = null;
 
 // Auto-close timeout duration (15 seconds)
 const MODAL_AUTO_CLOSE_TIMEOUT = 15000;
-const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonLiveCSS = {} }) => {
+// TTS-241 — resolve text + icon for a state, preferring buttonTexts
+// per-player overrides, falling back to the legacy textArr flat keys
+// (used on the front-end where the prop isn't passed).
+const resolveStateText = (buttonTexts, playerId, state, flatKey) => {
+    const perPlayer = buttonTexts?.players?.[playerId]?.[state]?.text;
+    if (perPlayer) return perPlayer;
+    const flat = (typeof window !== 'undefined' ? window?.TTS?.settings?.textArr : null) || {};
+    const flatPlayers = flat.players?.[playerId]?.[state]?.text;
+    if (flatPlayers) return flatPlayers;
+    return flat[flatKey];
+};
+
+const resolveStateIcon = (buttonTexts, playerId, state) => {
+    const perPlayer = buttonTexts?.players?.[playerId]?.[state]?.icon;
+    if (perPlayer) return perPlayer;
+    const flat = (typeof window !== 'undefined' ? window?.TTS?.settings?.textArr : null) || {};
+    return flat.players?.[playerId]?.[state]?.icon || '';
+};
+
+const renderResolvedIcon = (descriptor) => {
+    if (!descriptor) return null;
+    let svg = '';
+    if (descriptor.startsWith('preset:')) {
+        const key = descriptor.slice(7);
+        const presets = (typeof window !== 'undefined' ? window?.ttsObj?.player_customizations : null) || {};
+        // preset_svgs aren't shipped to frontend — use first player_customizations entry as best-effort
+        for (const pid of Object.keys(presets)) {
+            if (presets[pid] && presets[pid][key]) { svg = presets[pid][key]; break; }
+        }
+    } else if (descriptor.startsWith('custom:')) {
+        svg = descriptor.slice(7);
+    } else {
+        svg = descriptor;
+    }
+    if (!svg) return null;
+    return svg.replace(/\$color/g, 'currentColor');
+};
+
+const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonLiveCSS = {}, buttonTexts = null, playerId = null }) => {
+    const _resolvedPlayerId = playerId || (typeof window !== 'undefined' ? Number(window?.ttsObj?.player_id) : 1) || 1;
     const [isFirstPlayerPlay, setFirstPlayerPlay] = useState(true);
     const [isSecondPlayerPlay, setSecondPlayerPlay] = useState(false);
     const [isSettingOpen, setSettingOpen] = useState(false);
@@ -983,7 +1022,7 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
                                 )} */}
                             {
                                 listenStatus === 'listen' && window.hasOwnProperty('TTS') && <div className="tts__align-items-center">
-                                    <span>{window.TTS.settings.textArr.listen_text}</span>
+                                    <span>{resolveStateText(buttonTexts, _resolvedPlayerId, 'listen', 'listen_text')}</span>
                                 </div>
                             }
                             {
@@ -1106,7 +1145,33 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
 
                 buttonCSS && <style>
                     {
-                        `#tts_button_should_float{ background-color: ${buttonCSS?.backgroundColor};color:${buttonCSS.color};width:${buttonCSS.width}%;margin-top:${buttonCSS.marginTop}px;margin-bottom:${buttonCSS.marginBottom}px;margin-right:${buttonCSS.marginRight}px;margin-left:${buttonCSS.marginLeft}%;}
+                        /* TTS-241 — apply the user's full button-style set
+                           (border, border-radius, height, font-size, padding)
+                           so Default Pro reflects the same customizations as
+                           Default. Previously these were dropped, making the
+                           player look "broken" relative to the saved CSS. */
+                        `#tts_button_should_float{
+                            background-color: ${buttonCSS?.backgroundColor};
+                            color: ${buttonCSS.color};
+                            width: ${buttonCSS.width}%;
+                            height: ${buttonCSS.height ? buttonCSS.height + 'px' : 'auto'};
+                            font-size: ${buttonCSS.fontSize ? buttonCSS.fontSize + 'px' : 'inherit'};
+                            border: ${buttonCSS.border ? buttonCSS.border + 'px solid ' + (buttonCSS.border_color || '#000000') : 'none'};
+                            border-radius: ${buttonCSS.borderRadius ? buttonCSS.borderRadius + 'px' : '0'};
+                            margin-top: ${buttonCSS.marginTop}px;
+                            margin-bottom: ${buttonCSS.marginBottom}px;
+                            margin-right: ${buttonCSS.marginRight}px;
+                            margin-left: ${buttonCSS.marginLeft}%;
+                            box-sizing: border-box;
+                        }
+                        #tts_button_should_float .tts__player{
+                            border: 0 !important;
+                            box-shadow: none !important;
+                            background: transparent !important;
+                            width: 100% !important;
+                            height: 100% !important;
+                            border-radius: inherit !important;
+                        }
                         #tts_button_should_float div:nth-child(1){ color:${buttonCSS.color};}
                         .atlasvoice_player_button svg {cursor:pointer;}
                         .tts__progress.tts__audio-progress:hover { opacity: 0.8; }

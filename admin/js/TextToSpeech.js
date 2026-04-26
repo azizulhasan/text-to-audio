@@ -96,16 +96,33 @@ export default class TextToSpeech {
         return this.getStateText('listen', 'Listen');
     }
 
-    playButtonContent() {
-        let icon = '<div class="tts_button" aria-hidden="true"><span class="dashicons dashicons-controls-play"></span> <span>';
-        if (this.playButtonIcon?.[this?.playButtonNo ?? 1]?.play) {
+    /**
+     * Build the inner HTML for a single state. All four states (listen,
+     * pause, resume, replay) share an identical wrapper structure so swap-
+     * ping innerHTML on lifecycle events doesn't shift the button's metrics
+     * (TTS-241 — fixes the "border expands on click" issue).
+     *
+     *   <div class="tts_button" aria-hidden="true">
+     *     [icon-wrapper]
+     *     <span class="tts_button_label">{text}</span>
+     *   </div>
+     */
+    _renderStateContent(iconKey, dashicon, label) {
+        const playerId = this?.playButtonNo ?? 1;
+        const customSvg = this.playButtonIcon?.[playerId]?.[iconKey];
+        let iconHtml = '';
+        if (customSvg) {
             const parser = new DOMParser();
-            // convert html string into DOM
-            let document = parser.parseFromString(this.playButtonIcon?.[this?.playButtonNo ?? 1]?.play, "image/svg+xml");
-            icon = `<div class="tts_button" aria-hidden="true">${document.documentElement.outerHTML}</div><span>`;
+            const doc = parser.parseFromString(customSvg, "image/svg+xml");
+            iconHtml = doc.documentElement.outerHTML;
+        } else if (dashicon) {
+            iconHtml = `<span class="dashicons ${dashicon}"></span>`;
         }
+        return `<div class="tts_button" aria-hidden="true">${iconHtml}<span class="tts_button_label">${label}</span></div>`;
+    }
 
-        return icon + ' ' + this.playButtonText() + '</span></span></div>'
+    playButtonContent() {
+        return this._renderStateContent('play', 'dashicons-controls-play', this.playButtonText());
     }
 
     replayButtonText() {
@@ -113,17 +130,7 @@ export default class TextToSpeech {
     }
 
     replayButtonContent() {
-        let icon = '<div class="tts_button" aria-hidden="true"><span class="dashicons dashicons-image-rotate"></span> <span>';
-        if (this.playButtonIcon?.[this?.playButtonNo ?? 1]?.replay) {
-            const parser = new DOMParser();
-            // convert html string into DOM
-            let document = parser.parseFromString(this.playButtonIcon?.[this?.playButtonNo ?? 1]?.replay, "image/svg+xml");
-
-            icon = `<div class="tts_button" aria-hidden="true">${document.documentElement.outerHTML}</div><span>`;
-        }
-
-        return icon + ' ' + this.replayButtonText() + '<span></span></span></div>'
-
+        return this._renderStateContent('replay', 'dashicons-image-rotate', this.replayButtonText());
     }
 
     pauseButtonText() {
@@ -131,17 +138,7 @@ export default class TextToSpeech {
     }
 
     pauseButtonContent() {
-        let icon = '<div class="tts_button" aria-hidden="true"><span class="dashicons dashicons-controls-pause"></span> <span>';
-        if (this.playButtonIcon?.[this?.playButtonNo ?? 1]?.pause) {
-            const parser = new DOMParser();
-            // convert html string into DOM
-            let document = parser.parseFromString(this.playButtonIcon?.[this?.playButtonNo ?? 1]?.pause, "image/svg+xml");
-            icon = `<div class="tts_button" aria-hidden="true">${document.documentElement.outerHTML}</div><span>`;
-        }
-
-        return icon + ' ' + this.pauseButtonText() + '<span></span></span></div>'
-
-
+        return this._renderStateContent('pause', 'dashicons-controls-pause', this.pauseButtonText());
     }
 
     resumeButtonText() {
@@ -149,17 +146,7 @@ export default class TextToSpeech {
     }
 
     resumeButtonContent() {
-        let icon = '<div class="tts_button" aria-hidden="true"><span class="dashicons dashicons-controls-play"></span> <span>';
-
-        if (this.playButtonIcon?.[this?.playButtonNo ?? 1]?.resume) {
-            const parser = new DOMParser();
-            // convert html string into DOM
-            let document = parser.parseFromString(this.playButtonIcon?.[this?.playButtonNo ?? 1]?.resume, "image/svg+xml");
-            icon = `<div class="tts_button" aria-hidden="true">${document.documentElement.outerHTML}</div><span>`;
-        }
-        icon =  icon + ' ' + this.resumeButtonText() + '<span></span></span></div>'
-
-        return icon;
+        return this._renderStateContent('resume', 'dashicons-controls-play', this.resumeButtonText());
     }
 
     recordStartButtonContent() {
