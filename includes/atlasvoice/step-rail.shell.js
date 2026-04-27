@@ -627,8 +627,10 @@
                 updatePreview();
                 renderBrittleScopeWarning('excl_css', multi && brittleScope);
                 status('Excluded: ' + selector + (multi && brittleScope ? ' (scope-brittle, see warning)' : ''));
-                // Stay in mode so admin can drag another exclusion.
-                state._selectTouched = [];
+                // Auto-exit so the body text-cursor class is cleared and the
+                // admin gets default cursor everywhere again. Matches the
+                // include-mode behavior — one click, one selection, mode off.
+                stopSelectMode();
             }
         }, 0);
     }
