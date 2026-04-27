@@ -479,10 +479,124 @@
         if (e.key === 'Escape') { stopSelectMode(); status('Drag cancelled.'); }
     }
 
-    // Stubs filled in by D16.3 — defined here so the listener wiring above
-    // doesn't blow up if the next commit hasn't landed yet.
-    function onSelectChange()  { /* D16.3 */ }
-    function onSelectMouseUp() { /* D16.3 */ }
+    // Resolve the current text-Selection to the touched Element set.
+    // Always called against the active mode — exclude mode constrains to
+    // the current content region, include mode ranges over <body>.
+    function currentTouched() {
+        var sel;
+        try { sel = w.getSelection(); } catch (e) { return []; }
+        if (!sel || sel.rangeCount === 0) { return []; }
+        var range = sel.getRangeAt(0);
+        if (!range || range.collapsed) { return []; }
+        var raw = elementsInRange(range);
+        var contained = null;
+        if (state.pickMode === 'select-excl' && state.selection.selector) {
+            try { contained = d.querySelector(state.selection.selector); } catch (e) {}
+        }
+        return filterTouched(raw, { containedIn: contained });
+    }
+
+    // Live preview while dragging — paint the dashed transient highlight on
+    // every currently-touched element, removing it from anything that left
+    // the selection. This is what makes the gesture WYSIWYG.
+    function onSelectChange() {
+        var touched = currentTouched();
+        var cls = state.pickMode === 'select-excl' ? 'av-picker-touch-exclude' : 'av-picker-touch-include';
+        // Remove from previous set first so leaving an element un-highlights.
+        (state._selectTouched || []).forEach(function (el) {
+            if (touched.indexOf(el) === -1) {
+                el.classList.remove('av-picker-touch-include', 'av-picker-touch-exclude');
+            }
+        });
+        touched.forEach(function (el) { el.classList.add(cls); });
+        state._selectTouched = touched;
+    }
+
+    // Commit on mouseup. Native text-selection completes here, so this is
+    // the last point we know exactly what the admin meant.
+    function onSelectMouseUp() {
+        // Defer one tick so the final selection is reflected in the
+        // Selection API (some browsers fire mouseup before update).
+        setTimeout(function () {
+            if (state.pickMode !== 'select' && state.pickMode !== 'select-excl') { return; }
+            var touched = currentTouched();
+            if (!touched.length) {
+                clearTouchedHighlights();
+                status('Empty selection — drag across at least one element.');
+                return;
+            }
+            var selector = selectorsFromTouched(touched);
+            if (!selector) {
+                clearTouchedHighlights();
+                status('Could not generate a selector for that selection.');
+                return;
+            }
+            var multi = selector.indexOf(',') !== -1;
+            var brittleScope = state.selection.scope && state.selection.scope !== 'post' && state.selection.scope !== 'post_type';
+
+            if (state.pickMode === 'select') {
+                // Replace any currently-selected element's highlight.
+                if (state.selectedEl) {
+                    state.selectedEl.classList.remove('av-picker-selected');
+                    state.selectedEl = null;
+                }
+                clearTouchedHighlights();
+                pushUndo('select to include "' + selector + '"');
+                state.selection.selector = selector;
+                state.userEdited = true;
+                updateSelectorDisplay();
+                reapplySelectedHighlight();
+                updateWordCount();
+                updatePreview();
+                if (saveBtn()) { saveBtn().disabled = !selector; }
+                renderBrittleScopeWarning('region', multi && brittleScope);
+                status('Content region set: ' + selector + (multi && brittleScope ? ' (scope-brittle, see warning)' : ''));
+                stopSelectMode();
+            } else if (state.pickMode === 'select-excl') {
+                clearTouchedHighlights();
+                if (!state.pro) {
+                    stopSelectMode();
+                    showProPromo('Exclude areas');
+                    return;
+                }
+                // addChip is single-value; for a comma-list we want the
+                // whole string saved as one chip (same shape produced by
+                // typing it manually). Skip validation reuse and push raw.
+                if ((state.selection.excl_css || []).indexOf(selector) !== -1) {
+                    status('Already in list: "' + selector + '"');
+                    return;
+                }
+                pushUndo('select to exclude "' + selector + '"');
+                state.selection.excl_css = (state.selection.excl_css || []).concat([selector]);
+                state.userEdited = true;
+                renderChipRow('excl_css');
+                reapplyExcludeHighlights();
+                updatePreview();
+                renderBrittleScopeWarning('excl_css', multi && brittleScope);
+                status('Excluded: ' + selector + (multi && brittleScope ? ' (scope-brittle, see warning)' : ''));
+                // Stay in mode so admin can drag another exclusion.
+                state._selectTouched = [];
+            }
+        }, 0);
+    }
+
+    // Inline yellow note shown when a multi-element comma-list is committed
+    // under a scope broader than per-post / per-post-type. Re-rendered on
+    // each commit; one warning per step.
+    function renderBrittleScopeWarning(stepKey, show) {
+        if (!state.shell) { return; }
+        var step = state.shell.querySelector('.av-step[data-step="' + stepKey + '"]');
+        if (!step) { return; }
+        var existing = step.querySelector('.av-scope-warn');
+        if (!show) { if (existing) { existing.remove(); } return; }
+        if (existing) { return; }
+        var warn = d.createElement('p');
+        warn.className = 'av-scope-warn';
+        warn.style.cssText = 'margin:6px 0 0;padding:6px 8px;background:#fef3c7;border:1px solid #f59e0b;border-radius:4px;font-size:11px;color:#78350f;line-height:1.4;';
+        warn.textContent = 'This selector targets specific positions; it may not match all posts in this scope.';
+        var body = step.querySelector('.av-step__body');
+        if (body) { body.appendChild(warn); }
+    }
 
     /* ─── selector display ──────────────────────────────────────── */
 
