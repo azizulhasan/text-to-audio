@@ -856,7 +856,10 @@
     function extractText() { return extractWithRules(); }
 
     function updatePreview() {
-        if (!state.rightOpen) { return; }
+        // No state.rightOpen gate — body element exists in the DOM whether
+        // the panel is hidden or visible, so writing to it when closed is
+        // harmless and means opening the panel just reveals already-prepared
+        // content (no race against async rule loading, no stale body).
         var panel = d.getElementById('av-preview-panel');
         var body  = panel && panel.querySelector('.av-preview-panel__body');
         var meta  = panel && panel.querySelector('.av-preview-panel__meta');
@@ -1027,7 +1030,7 @@
             var sb = saveBtn();
             if (sb) { sb.disabled = !state.selection.selector; }
             status(resp.selector ? 'Rule loaded for scope: ' + scope + '.' : 'No saved rule for scope: ' + scope + '.');
-            if (state.rightOpen) { updatePreview(); }
+            updatePreview();
         }).catch(function () {
             status('Could not load rule for scope: ' + scope + '.');
         });
@@ -1665,7 +1668,7 @@
         var sb = saveBtn();
         if (sb) { sb.disabled = false; }
         status('Content region auto-detected: ' + sel);
-        if (state.rightOpen) { updatePreview(); }
+        updatePreview();
     }
 
     /* ─── load existing rules ───────────────────────────────────── */
@@ -1710,7 +1713,7 @@
             var sb = saveBtn();
             if (sb) { sb.disabled = false; }
             status('Active rule loaded (' + (resp.scope || 'post') + ').');
-            if (state.rightOpen) { updatePreview(); }
+            updatePreview();
         }).catch(function () {
             autoFillActiveSelector();
         });
