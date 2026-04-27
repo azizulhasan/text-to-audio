@@ -509,12 +509,18 @@
         if (state.pickMode === 'select-excl' && state.selection.selector) {
             try { contained = d.querySelector(state.selection.selector); } catch (e) {}
         }
-        // Find the closest Element for each endpoint so filterTouched can
-        // discard ancestors that merely contain the whole selection.
-        function elOf(node) { return node && (node.nodeType === 1 ? node : node.parentElement); }
-        var startEl = elOf(range.startContainer);
-        var endEl   = elOf(range.endContainer);
-        return filterTouched(raw, { containedIn: contained, startEl: startEl, endEl: endEl });
+        // Endpoint-containing-ancestor drop is exclude-only. In include mode
+        // we want the cleaner topmost-rolled-up result (e.g. the wrapper)
+        // because that's what the admin almost always means when they drag
+        // over a region — and excludes need leaf precision so they don't
+        // wipe the whole content area.
+        var opts = { containedIn: contained };
+        if (state.pickMode === 'select-excl') {
+            function elOf(node) { return node && (node.nodeType === 1 ? node : node.parentElement); }
+            opts.startEl = elOf(range.startContainer);
+            opts.endEl   = elOf(range.endContainer);
+        }
+        return filterTouched(raw, opts);
     }
 
     // Live preview while dragging — paint the dashed transient highlight on
