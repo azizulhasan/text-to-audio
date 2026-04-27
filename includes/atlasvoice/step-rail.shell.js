@@ -183,7 +183,7 @@
         return tag + (cls.length ? '.' + cls[0] : '') + nthSfx;
     }
 
-    var PICKER_CLASSES = /\bav-picker-(hover|selected|exclude-hover|excluded)\b/g;
+    var PICKER_CLASSES = /\bav-picker-(hover|selected|exclude-hover|excluded|touch-include|touch-exclude)\b/g;
 
     function cleanClasses(el) {
         // Temporarily strip picker classes so they don't pollute the selector.
@@ -541,6 +541,12 @@
         setTimeout(function () {
             if (state.pickMode !== 'select' && state.pickMode !== 'select-excl') { return; }
             var touched = currentTouched();
+            // Strip transient highlight classes BEFORE generateSelector reads
+            // each element's className — otherwise av-picker-touch-* leaks
+            // into the saved selector string.
+            touched.forEach(function (el) {
+                el.classList.remove('av-picker-touch-include', 'av-picker-touch-exclude');
+            });
             if (!touched.length) {
                 clearTouchedHighlights();
                 status('Empty selection — drag across at least one element.');
