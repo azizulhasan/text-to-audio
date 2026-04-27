@@ -167,6 +167,9 @@ class StepRail {
 								<button type="button" class="av-btn av-btn--pick" data-state="idle">
 									&#11040; <?php echo esc_html__( 'Pick element', 'text-to-audio' ); ?>
 								</button>
+								<button type="button" class="av-btn av-btn--select" data-state="idle" title="<?php echo esc_attr__( 'Drag across the page to mark the content region.', 'text-to-audio' ); ?>">
+									&#9112; <?php echo esc_html__( 'Select to include', 'text-to-audio' ); ?>
+								</button>
 								<span class="av-word-count" hidden></span>
 							</div>
 							<div class="av-selector-display" hidden>
@@ -189,6 +192,9 @@ class StepRail {
 							<div class="av-chip-add">
 								<button type="button" class="av-btn av-btn--pick-excl" data-kind="excl_css">
 									&#11040; <?php echo esc_html__( 'Pick to exclude', 'text-to-audio' ); ?>
+								</button>
+								<button type="button" class="av-btn av-btn--select-excl" data-kind="excl_css" title="<?php echo esc_attr__( 'Drag across the page to mark areas to exclude.', 'text-to-audio' ); ?>">
+									&#9112; <?php echo esc_html__( 'Select to exclude', 'text-to-audio' ); ?>
 								</button>
 								<span class="av-chip-sep"><?php echo esc_html__( 'or', 'text-to-audio' ); ?></span>
 								<input type="text" class="av-chip-input" placeholder="<?php echo esc_attr__( 'Type selector…', 'text-to-audio' ); ?>" />
@@ -483,6 +489,17 @@ class StepRail {
 .av-btn--pick.is-active,.av-btn--pick-excl.is-active{
   background:#184c53;color:#fff;border-color:#184c53;
 }
+.av-btn--select.is-active{
+  background:#184c53;color:#fff;border-color:#184c53;
+}
+.av-btn--select-excl.is-active{
+  background:#b91c1c;color:#fff;border-color:#b91c1c;
+}
+/* While drag-mode is on, hint at it via the page cursor. */
+body.av-select-mode,
+body.av-select-mode * {cursor:text!important;}
+body.av-select-mode-excl,
+body.av-select-mode-excl * {cursor:text!important;}
 
 /* ── Right preview panel ────────────────────────────────────── */
 .av-preview-panel{
@@ -570,6 +587,19 @@ class StepRail {
   outline:3px solid #b91c1c!important;
   outline-offset:2px!important;
   background:rgba(185,28,28,.06)!important;
+}
+/* Transient highlights shown WHILE the admin is dragging in select-mode.
+   Lighter than the committed selected/excluded styles so they read as
+   "preview, will commit on release". Removed on mouseup or on Esc. */
+.av-picker-touch-include{
+  outline:2px dashed #00a32a!important;
+  outline-offset:2px!important;
+  background:rgba(0,163,42,.04)!important;
+}
+.av-picker-touch-exclude{
+  outline:2px dashed #b91c1c!important;
+  outline-offset:2px!important;
+  background:rgba(185,28,28,.04)!important;
 }
 ';
 	}
