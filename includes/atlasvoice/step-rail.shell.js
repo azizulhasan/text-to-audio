@@ -185,6 +185,26 @@
 
     var PICKER_CLASSES = /\bav-picker-(hover|selected|exclude-hover|excluded|touch-include|touch-exclude)\b/g;
 
+    // Built-in extraction defaults — always stripped before reading the
+    // content, even when the admin hasn't added them as chips. Mirrors what
+    // wp_strip_all_tags($text, true) and the legacy wrapper-based extractor
+    // already remove server-side, so the picker preview stays in sync with
+    // what the TTS engine will actually voice.
+    //
+    //   BUILTIN_EXCL_TAGS — element tag names to remove (with their content).
+    //                       script/style cover what wp_strip_all_tags's
+    //                       second-arg=true takes out.
+    //   BUILTIN_EXCL_CSS  — CSS selectors that target this plugin's own
+    //                       player chrome so the listen button + float
+    //                       wrapper never end up in the read-aloud text.
+    var BUILTIN_EXCL_TAGS = ['script', 'style'];
+    var BUILTIN_EXCL_CSS  = [
+        '[id^="tts__listent_content_"]',
+        '.tts__listent_content',
+        '#tts_button_should_float',
+        '[class*="tts__custom-position_"]'
+    ];
+
     function cleanClasses(el) {
         // Temporarily strip picker classes so they don't pollute the selector.
         var orig = (typeof el.className === 'string') ? el.className : (el.className.baseVal || '');
@@ -796,12 +816,39 @@
         });
         if (el.hasAttribute && el.hasAttribute(EXCL_MARK)) { el.removeAttribute(EXCL_MARK); }
 
+        // Strip picker highlight classes from every element with a class.
+        // SVG elements expose .className as an SVGAnimatedString (object),
+        // not a string — calling .replace on that throws. Use the raw
+        // class attribute for write-back so both HTML and SVG nodes work.
         Array.prototype.forEach.call(clone.querySelectorAll('[class]'), function (n) {
-            n.className = (n.className || '').replace(PICKER_CLASSES, '').trim();
+            var raw = (typeof n.className === 'string') ? n.className : (n.getAttribute('class') || '');
+            var cleaned = raw.replace(PICKER_CLASSES, '').trim();
+            if (cleaned) { n.setAttribute('class', cleaned); }
+            else { n.removeAttribute('class'); }
         });
 
         Array.prototype.forEach.call(clone.querySelectorAll('[' + EXCL_MARK + ']'), function (n) {
             if (n.parentNode) { n.parentNode.removeChild(n); }
+        });
+
+        // Built-in tag excludes (script, style). Always applied — the legacy
+        // PHP path strips these via wp_strip_all_tags($text, true) and the
+        // picker preview must match.
+        BUILTIN_EXCL_TAGS.forEach(function (tag) {
+            Array.prototype.forEach.call(clone.querySelectorAll(tag), function (n) {
+                if (n.parentNode) { n.parentNode.removeChild(n); }
+            });
+        });
+
+        // Built-in CSS excludes — strip this plugin's own player chrome so it
+        // doesn't end up read aloud. Quietly skip selectors the browser
+        // rejects so a future addition can't take down the whole extractor.
+        BUILTIN_EXCL_CSS.forEach(function (sel) {
+            try {
+                Array.prototype.forEach.call(clone.querySelectorAll(sel), function (n) {
+                    if (n.parentNode) { n.parentNode.removeChild(n); }
+                });
+            } catch (e) {}
         });
 
         (state.selection.excl_tags || []).forEach(function (tag) {
