@@ -392,12 +392,20 @@
     }
 
     // Drop rail UI, invisible nodes, and (for excludes) anything outside the
-    // active content region. Then dedupe to topmost — if both a parent and
-    // its descendant are touched, drop the descendant so the resulting
-    // comma-list is minimal.
+    // active content region. Then drop strict ancestors of both range
+    // endpoints — elements that merely *contain* the selection rather than
+    // being cut across by it (e.g. the wrapper div the admin happens to be
+    // dragging inside). Finally dedupe to topmost so a parent of touched
+    // descendants doesn't bloat the comma-list.
+    //
+    // The "drop endpoint-containing ancestors" step is the difference
+    // between "I selected the wrapper" and "I selected the 4 paragraphs
+    // I dragged across" — the latter is what an admin actually means.
     function filterTouched(els, opts) {
         opts = opts || {};
         var contained = opts.containedIn || null;
+        var startEl   = opts.startEl     || null;
+        var endEl     = opts.endEl       || null;
         // Visibility + rail filter.
         var pass = [];
         for (var i = 0; i < els.length; i++) {
@@ -408,6 +416,14 @@
             // Skip elements with no layout box (script, style, hidden).
             if (!el.getClientRects || el.getClientRects().length === 0) { continue; }
             pass.push(el);
+        }
+        // Drop strict ancestors of BOTH endpoints — they are the "container
+        // of the selection", not the selection itself.
+        if (startEl && endEl) {
+            pass = pass.filter(function (el) {
+                if (el === startEl || el === endEl) { return true; }
+                return !(el.contains(startEl) && el.contains(endEl));
+            });
         }
         // Topmost-only dedupe.
         var set = pass;
@@ -493,7 +509,12 @@
         if (state.pickMode === 'select-excl' && state.selection.selector) {
             try { contained = d.querySelector(state.selection.selector); } catch (e) {}
         }
-        return filterTouched(raw, { containedIn: contained });
+        // Find the closest Element for each endpoint so filterTouched can
+        // discard ancestors that merely contain the whole selection.
+        function elOf(node) { return node && (node.nodeType === 1 ? node : node.parentElement); }
+        var startEl = elOf(range.startContainer);
+        var endEl   = elOf(range.endContainer);
+        return filterTouched(raw, { containedIn: contained, startEl: startEl, endEl: endEl });
     }
 
     // Live preview while dragging — paint the dashed transient highlight on
