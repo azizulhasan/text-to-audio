@@ -250,6 +250,9 @@
 
     function startPickMode(mode, kind) {
         stopPickMode();
+        // If select-mode is active, kill it so click-pick and drag-mark
+        // don't trample each other's listeners.
+        if (state.pickMode === 'select' || state.pickMode === 'select-excl') { stopSelectMode(); }
         state.pickMode = mode;
         state.exclKind = kind || 'excl_css';
         d.addEventListener('mouseover', onPickHover,    true);
@@ -358,6 +361,128 @@
     function onPickEscape(e) {
         if (e.key === 'Escape') { stopPickMode(); status('Picker cancelled.'); }
     }
+
+    /* ─── select (drag-to-mark) mode ────────────────────────────── */
+
+    // Block-style elements that look like "regions" to a human reading the
+    // page. Used to short-circuit the touched-set when the only difference
+    // is an inline ancestor (we'd rather generate a selector for the <p>
+    // than the <a> the cursor happened to release on).
+    var SELECT_TOUCH_CLASSES = 'av-picker-touch-include av-picker-touch-exclude';
+
+    // Walk every element under `range.commonAncestorContainer` and return
+    // those the range actually touches. Using TreeWalker keeps this O(n) on
+    // the visible subtree instead of querying the whole document.
+    function elementsInRange(range) {
+        if (!range || range.collapsed) { return []; }
+        var root = range.commonAncestorContainer;
+        if (root && root.nodeType === 3 /* TEXT_NODE */) { root = root.parentNode; }
+        if (!root || root.nodeType !== 1) { return []; }
+        var result = [];
+        if (range.intersectsNode(root)) { result.push(root); }
+        var walker = d.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, {
+            acceptNode: function (n) {
+                try { return range.intersectsNode(n) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT; }
+                catch (e) { return NodeFilter.FILTER_REJECT; }
+            }
+        });
+        var n;
+        while ((n = walker.nextNode())) { result.push(n); }
+        return result;
+    }
+
+    // Drop rail UI, invisible nodes, and (for excludes) anything outside the
+    // active content region. Then dedupe to topmost — if both a parent and
+    // its descendant are touched, drop the descendant so the resulting
+    // comma-list is minimal.
+    function filterTouched(els, opts) {
+        opts = opts || {};
+        var contained = opts.containedIn || null;
+        // Visibility + rail filter.
+        var pass = [];
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
+            if (!el || el.nodeType !== 1) { continue; }
+            if (isRailElement(el)) { continue; }
+            if (contained && !(el === contained || contained.contains(el))) { continue; }
+            // Skip elements with no layout box (script, style, hidden).
+            if (!el.getClientRects || el.getClientRects().length === 0) { continue; }
+            pass.push(el);
+        }
+        // Topmost-only dedupe.
+        var set = pass;
+        var topmost = pass.filter(function (el) {
+            for (var p = el.parentElement; p; p = p.parentElement) {
+                if (set.indexOf(p) !== -1) { return false; }
+            }
+            return true;
+        });
+        return topmost;
+    }
+
+    // Build a CSS selector string covering every element. Single → bare
+    // selector. Many → comma-list. Reuses generateSelector for each so the
+    // output matches what click-pick would produce.
+    function selectorsFromTouched(els) {
+        if (!els.length) { return ''; }
+        var parts = els.map(function (el) { return generateSelector(el); }).filter(Boolean);
+        // De-dupe identical strings (rare, but happens if two siblings
+        // share a unique-class shortcut path).
+        var seen = {};
+        parts = parts.filter(function (s) { if (seen[s]) { return false; } seen[s] = true; return true; });
+        return parts.join(', ');
+    }
+
+    function startSelectMode(kind) {
+        stopPickMode();
+        stopSelectMode();
+        state.pickMode = (kind === 'select-excl') ? 'select-excl' : 'select';
+        state._selectTouched = [];
+        d.body.classList.add(state.pickMode === 'select-excl' ? 'av-select-mode-excl' : 'av-select-mode');
+        // Live update during drag + commit on mouseup.
+        d.addEventListener('selectionchange', onSelectChange);
+        d.addEventListener('mouseup',         onSelectMouseUp, true);
+        d.addEventListener('keydown',         onSelectEscape);
+        // Visual feedback on button.
+        var btn = state.shell && state.shell.querySelector(state.pickMode === 'select-excl' ? '.av-btn--select-excl' : '.av-btn--select');
+        if (btn) { btn.classList.add('is-active'); }
+        if (state.pickMode === 'select-excl') {
+            status('Drag across any element(s) to exclude. Press Esc to cancel.');
+        } else {
+            status('Drag across any element(s) to mark as content. Press Esc to cancel.');
+        }
+    }
+
+    function stopSelectMode() {
+        if (state.pickMode !== 'select' && state.pickMode !== 'select-excl') { return; }
+        d.removeEventListener('selectionchange', onSelectChange);
+        d.removeEventListener('mouseup',         onSelectMouseUp, true);
+        d.removeEventListener('keydown',         onSelectEscape);
+        d.body.classList.remove('av-select-mode', 'av-select-mode-excl');
+        clearTouchedHighlights();
+        state._selectTouched = [];
+        state.pickMode = null;
+        var btns = state.shell && state.shell.querySelectorAll('.av-btn--select, .av-btn--select-excl');
+        if (btns) { Array.prototype.forEach.call(btns, function (b) { b.classList.remove('is-active'); }); }
+        // Don't leave a dangling text selection on the page.
+        try { var sel = w.getSelection(); if (sel) { sel.removeAllRanges(); } } catch (e) {}
+    }
+
+    function clearTouchedHighlights() {
+        (state._selectTouched || []).forEach(function (el) {
+            el.classList.remove('av-picker-touch-include', 'av-picker-touch-exclude');
+        });
+        state._selectTouched = [];
+    }
+
+    function onSelectEscape(e) {
+        if (e.key === 'Escape') { stopSelectMode(); status('Drag cancelled.'); }
+    }
+
+    // Stubs filled in by D16.3 — defined here so the listener wiring above
+    // doesn't blow up if the next commit hasn't landed yet.
+    function onSelectChange()  { /* D16.3 */ }
+    function onSelectMouseUp() { /* D16.3 */ }
 
     /* ─── selector display ──────────────────────────────────────── */
 
@@ -1022,6 +1147,19 @@
                 });
             }
 
+            // Drag-to-exclude button (loose-snap selection → excl_css chip).
+            var selectExcl = step.querySelector('.av-btn--select-excl');
+            if (selectExcl && kind === 'excl_css') {
+                selectExcl.addEventListener('click', function () {
+                    if (!state.pro) { showProPromo('Exclude areas'); return; }
+                    if (state.pickMode === 'select-excl') {
+                        stopSelectMode(); status('Drag exclude stopped.');
+                    } else {
+                        startSelectMode('select-excl');
+                    }
+                });
+            }
+
             var inp    = step.querySelector('.av-chip-input');
             var addBtn = step.querySelector('.av-btn--add-chip');
             if (inp && addBtn) {
@@ -1060,6 +1198,18 @@
                 startPickMode('pick');
             }
         });
+
+        // Drag-to-include — loose-snap selection becomes the content region.
+        var selBtn = $('.av-btn--select');
+        if (selBtn) {
+            selBtn.addEventListener('click', function () {
+                if (state.pickMode === 'select') {
+                    stopSelectMode(); status('Drag include stopped.');
+                } else {
+                    startSelectMode('select');
+                }
+            });
+        }
 
         var clearBtn = $('.av-btn--clear-selector');
         if (clearBtn) {
