@@ -664,11 +664,52 @@
 
     /* ─── content extraction + preview ──────────────────────────── */
 
+    // Walk comment nodes once and collect every atlasvoice:start:N id present
+    // on the page. Pages can render multiple Listen buttons, each emitting
+    // its own marker pair (atlasvoice:start:1 / :2 / …) and its own wrapper
+    // div.tts_content_wrapper_N — so the picker can't assume id=1.
+    function findAtlasVoiceMarkerIds() {
+        var ids = [];
+        if (!d.body) { return ids; }
+        var walker = d.createTreeWalker(d.body, NodeFilter.SHOW_COMMENT, null, false);
+        var node, m, seen = {};
+        while ((node = walker.nextNode())) {
+            m = /^\s*atlasvoice:start:(\d+)\s*$/.exec(node.nodeValue || '');
+            if (m) {
+                var id = parseInt(m[1], 10);
+                if (id && !seen[id]) { seen[id] = true; ids.push(id); }
+            }
+        }
+        return ids.sort(function (a, b) { return a - b; });
+    }
+
+    // Find every legacy wrapper element on the page (matches any
+    // .tts_content_wrapper_N for N=1..). Returns elements in document order.
+    function findLegacyWrappers() {
+        if (!d.body) { return []; }
+        var nodes = d.body.querySelectorAll('[class*="tts_content_wrapper_"]');
+        var out = [];
+        Array.prototype.forEach.call(nodes, function (n) {
+            // Match-then-filter: rule out classes like tts_content_wrapper_inner.
+            if (/(?:^|\s)tts_content_wrapper_\d+(?:\s|$)/.test(n.className || '')) {
+                out.push(n);
+            }
+        });
+        return out;
+    }
+
     // Mirrors extractor engine tier 1: walk comment nodes for atlasvoice markers.
+    // buttonId may be omitted — in that case the FIRST present marker pair
+    // (smallest id) is used. Pass an explicit id to extract a specific button.
     function extractFromCommentMarkers(buttonId) {
         if (!d.body) { return null; }
-        var startText = 'atlasvoice:start:' + (buttonId || 1);
-        var endText   = 'atlasvoice:end:'   + (buttonId || 1);
+        if (buttonId == null) {
+            var ids = findAtlasVoiceMarkerIds();
+            if (!ids.length) { return null; }
+            buttonId = ids[0];
+        }
+        var startText = 'atlasvoice:start:' + buttonId;
+        var endText   = 'atlasvoice:end:'   + buttonId;
         var walker = d.createTreeWalker(d.body, NodeFilter.SHOW_COMMENT, null, false);
         var startNode = null, endNode = null, node;
         while ((node = walker.nextNode())) {
@@ -695,21 +736,26 @@
     // State A: what the active system (new or legacy) currently reads on this page.
     // Returns { text, source } where source is 'markers' | 'selector' | 'legacy' | ''.
     function extractFromActiveSystem() {
-        // Tier 1 — AtlasVoice comment markers (new system active).
-        var frag = extractFromCommentMarkers(1);
-        if (frag) {
-            var t = nodeToText(frag);
-            if (t) { return { text: applyContentMeta(t), source: 'AtlasVoice markers' }; }
+        // Tier 1 — AtlasVoice comment markers. Iterate every marker pair on
+        // the page (atlasvoice:start:1, :2, …) and use the first that yields
+        // non-empty text. Multi-button posts get handled correctly.
+        var ids = findAtlasVoiceMarkerIds();
+        for (var i = 0; i < ids.length; i++) {
+            var frag = extractFromCommentMarkers(ids[i]);
+            if (frag) {
+                var t = nodeToText(frag);
+                if (t) { return { text: applyContentMeta(t), source: 'AtlasVoice markers' }; }
+            }
         }
         // Tier 2 — saved selector with current exclude rules.
         if (state.selection.selector) {
             var t2 = extractWithRules();
             if (t2) { return { text: t2, source: 'Saved selector' }; } // applyContentMeta already called inside
         }
-        // Tier 3 — legacy wrapper div (.tts_content_wrapper_1).
-        var legacy = d.querySelector('.tts_content_wrapper_1');
-        if (legacy) {
-            var t3 = (legacy.textContent || '').trim();
+        // Tier 3 — legacy wrapper div. Match any .tts_content_wrapper_N.
+        var legacies = findLegacyWrappers();
+        for (var j = 0; j < legacies.length; j++) {
+            var t3 = (legacies[j].textContent || '').trim();
             if (t3) { return { text: applyContentMeta(t3), source: 'Legacy wrapper' }; }
         }
         return { text: '', source: '' };
@@ -1574,13 +1620,14 @@
     // Mirrors extractFromActiveSystem tier waterfall but returns a CSS selector
     // string instead of text, so the Content Region field can be pre-filled on load.
     function detectActiveSelector() {
-        // Tier 1 — AtlasVoice comment markers: find parent element of start comment.
+        // Tier 1 — AtlasVoice comment markers: find parent element of any
+        // atlasvoice:start:N comment on the page (smallest id wins). Walk
+        // once and match the first start-marker rather than hardcoding id=1.
         if (d.body) {
-            var startText = 'atlasvoice:start:1';
             var walker = d.createTreeWalker(d.body, NodeFilter.SHOW_COMMENT, null, false);
             var node;
             while ((node = walker.nextNode())) {
-                if ((node.nodeValue || '').trim() === startText) {
+                if (/^\s*atlasvoice:start:\d+\s*$/.test(node.nodeValue || '')) {
                     var parent = node.parentElement;
                     if (parent && parent.tagName.toLowerCase() !== 'body') {
                         return generateSelector(parent);
@@ -1588,8 +1635,15 @@
                 }
             }
         }
-        // Tier 3 — Legacy wrapper.
-        if (d.querySelector('.tts_content_wrapper_1')) { return '.tts_content_wrapper_1'; }
+        // Tier 3 — Legacy wrapper. Match any .tts_content_wrapper_N rather
+        // than only id=1; return a selector targeting whichever exists.
+        var legacies = findLegacyWrappers();
+        if (legacies.length) {
+            // Pull the actual numeric id off the first wrapper's class so the
+            // emitted selector is exact (.tts_content_wrapper_3, not _1).
+            var m = /(?:^|\s)(tts_content_wrapper_\d+)(?:\s|$)/.exec(legacies[0].className || '');
+            if (m) { return '.' + m[1]; }
+        }
         return '';
     }
 
