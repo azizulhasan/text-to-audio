@@ -5,11 +5,35 @@ namespace TTA\AtlasVoice\Readers;
 /**
  * Registry + dispatcher for all D13 custom-field readers (TTS-238 D13).
  *
- * Usage (called by the extractor engine after the main selector text
- * has been collected):
+ * --- DORMANT BY DESIGN ----------------------------------------------
+ *
+ * As of 2026-04-28 (D13 finalisation) this registry is intentionally
+ * NOT wired into the extractor. The step-rail (D9–D11, D15, D16) lets
+ * admins pick any rendered custom-field value through the same DOM
+ * picker they use for body content, and the project commits to
+ * voicing what visitors actually see — reading aloud unrendered field
+ * values would silently override editorial decisions made by the
+ * theme. A separate "always voice every ACF field" pipeline competes
+ * with that promise, so the readers ship loadable but unused.
+ *
+ * The classes remain available for developers who genuinely need an
+ * out-of-DOM read (headless pipelines, server-side warmers). The
+ * canonical opt-in path is the `atlasvoice_extra_field_text` filter
+ * (declared in `helpers.php::tta_clean_content`); plug into it and
+ * return `ReaderRegistry::read_all( $post_id )` to enable readers
+ * site-wide. Full snippet + rationale in `docs/atlasvoice-readers.md`.
+ *
+ * Direct usage (when you only want readers in one specific code path):
  *
  *   $extra = ReaderRegistry::read_all( $post_id );
  *   // $extra = [ 'Field A text', 'Field B text', ... ]
+ *
+ * If you're considering wiring this into core extraction by default,
+ * re-read v5 plan §13 D13 and §18 revision log entry (2026-04-28)
+ * before doing so — the dormancy is a deliberate design choice, not
+ * an oversight.
+ *
+ * --------------------------------------------------------------------
  *
  * Readers are registered in order of specificity — more opinionated
  * plugins (ACF, MetaBox) before generic ones (Pods, JetEngine, etc.).
