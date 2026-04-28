@@ -947,6 +947,149 @@
         });
     }
 
+    /* ─── verify across posts (D14) ─────────────────────────────── */
+
+    // Run the current state's selector + exclude rules against N random
+    // posts of the same scope, in a hidden-iframe fleet. Each iframe
+    // measurement reflects the live rendered DOM exactly the way a
+    // visitor sees it, including JS-injected content that a server-side
+    // approximation would miss.
+    //
+    // Returns a Promise resolving with
+    //   { ok:true,  posts: [{id,url,title,matched,charCount,error}, ...] }
+    // or
+    //   { ok:false, error: '...' }
+    // Never rejects — per-post errors land in the result row so the UI
+    // can render a partial result instead of failing the whole batch.
+    function runVerifyAcrossPosts(opts) {
+        opts = opts || {};
+        var sampleSize = Math.max(1, Math.min(20, parseInt(opts.sampleSize, 10) || 3));
+        var perTimeout = parseInt(opts.timeoutMs, 10) || 12000;
+        var sel        = (state.selection.selector || '').toString().trim();
+        if (!sel) { return Promise.resolve({ ok: false, error: 'No selector set.' }); }
+
+        var qs = '?sample_size=' + sampleSize +
+                 '&exclude_post_id=' + (state.postId || 0);
+        if (state.selection.post_type) { qs += '&post_type=' + encodeURIComponent(state.selection.post_type); }
+        if (state.selection.language)  { qs += '&language='  + encodeURIComponent(state.selection.language);  }
+
+        return restFetch('/step-rail/verify-sample' + qs).then(function (resp) {
+            var posts = (resp && Array.isArray(resp.posts)) ? resp.posts : [];
+            if (!posts.length) {
+                return { ok: true, posts: [] };
+            }
+            return Promise.all(posts.map(function (p) { return verifyOnePost(p, sel, perTimeout); }))
+                .then(function (results) { return { ok: true, posts: results }; });
+        }).catch(function (e) {
+            return { ok: false, error: (e && e.message) || 'Sample fetch failed.' };
+        });
+    }
+
+    // Load a single post in a hidden iframe and report whether the saved
+    // selector matches and how many chars of text would survive the full
+    // exclude pass (user excl_css + excl_tags + BUILTIN_EXCL_*). Iframes
+    // are removed after measurement; per-load timeout guards against pages
+    // that never fire `load` (CMP popups, infinite redirects).
+    function verifyOnePost(post, selector, timeoutMs) {
+        return new Promise(function (resolve) {
+            var iframe = d.createElement('iframe');
+            iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:1280px;height:800px;visibility:hidden;border:0;';
+            iframe.setAttribute('aria-hidden', 'true');
+            iframe.setAttribute('tabindex', '-1');
+            iframe.src = post.url;
+
+            var done = false;
+            var timer = setTimeout(function () { finish('timeout'); }, timeoutMs);
+
+            function finish(err) {
+                if (done) { return; } done = true;
+                clearTimeout(timer);
+                var m = err ? null : measureInIframe(iframe, selector);
+                try { if (iframe.parentNode) { iframe.parentNode.removeChild(iframe); } } catch (e) {}
+                resolve({
+                    id:        post.id,
+                    url:       post.url,
+                    title:     post.title,
+                    matched:   !!(m && m.matched),
+                    charCount: (m && m.charCount) || 0,
+                    error:     err || (m && m.error) || null
+                });
+            }
+
+            iframe.addEventListener('load', function () {
+                // Defer one tick so theme JS that mutates content (lazy
+                // render, comment-marker emit, CMP popups) has settled
+                // before we read the DOM.
+                setTimeout(function () { finish(null); }, 80);
+            });
+            iframe.addEventListener('error', function () { finish('iframe load error'); });
+
+            d.body.appendChild(iframe);
+        });
+    }
+
+    // Mirrors extractWithRules's exclusion pipeline against an iframe doc:
+    // user excl_css (resolved against live iframe DOM, then removed from
+    // clone), built-in script/style + player-chrome excludes, user
+    // excl_tags. Returns { matched, charCount, error? }.
+    function measureInIframe(iframe, selector) {
+        var idoc;
+        try { idoc = iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document); }
+        catch (e) { return { matched: false, charCount: 0, error: 'cross-origin' }; }
+        if (!idoc || !idoc.body) { return { matched: false, charCount: 0, error: 'no document' }; }
+
+        var el;
+        try { el = idoc.querySelector(selector); }
+        catch (e) { return { matched: false, charCount: 0, error: 'invalid selector' }; }
+        if (!el) { return { matched: false, charCount: 0 }; }
+
+        var EXCL_MARK = 'data-av-excl-match';
+        (state.selection.excl_css || []).forEach(function (s) {
+            if (!s) { return; }
+            try {
+                Array.prototype.forEach.call(idoc.querySelectorAll(s), function (n) {
+                    if (n === el || el.contains(n)) { n.setAttribute(EXCL_MARK, '1'); }
+                });
+            } catch (e) {}
+        });
+
+        var clone = el.cloneNode(true);
+
+        // Clean up live markers — measurement must not mutate the iframe DOM
+        // beyond the clone moment, in case the iframe is reused (it isn't,
+        // but defensive).
+        Array.prototype.forEach.call(el.querySelectorAll('[' + EXCL_MARK + ']'), function (n) {
+            n.removeAttribute(EXCL_MARK);
+        });
+
+        Array.prototype.forEach.call(clone.querySelectorAll('[' + EXCL_MARK + ']'), function (n) {
+            if (n.parentNode) { n.parentNode.removeChild(n); }
+        });
+
+        BUILTIN_EXCL_TAGS.forEach(function (tag) {
+            Array.prototype.forEach.call(clone.querySelectorAll(tag), function (n) {
+                if (n.parentNode) { n.parentNode.removeChild(n); }
+            });
+        });
+        BUILTIN_EXCL_CSS.forEach(function (s) {
+            try {
+                Array.prototype.forEach.call(clone.querySelectorAll(s), function (n) {
+                    if (n.parentNode) { n.parentNode.removeChild(n); }
+                });
+            } catch (e) {}
+        });
+        (state.selection.excl_tags || []).forEach(function (tag) {
+            try {
+                Array.prototype.forEach.call(clone.querySelectorAll(tag), function (n) {
+                    if (n.parentNode) { n.parentNode.removeChild(n); }
+                });
+            } catch (e) {}
+        });
+
+        var raw = (clone.textContent || '').trim();
+        return { matched: true, charCount: raw.length };
+    }
+
     /* ─── Pro upgrade prompt ────────────────────────────────────── */
 
     function showProPromo(featureName) {
