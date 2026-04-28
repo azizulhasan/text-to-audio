@@ -1090,6 +1090,108 @@
         return { matched: true, charCount: raw.length };
     }
 
+    // Wire the "Test rule across N posts" button. Click → runs the engine,
+    // renders a per-post pass/fail table inside .av-verify-results. Disables
+    // itself while the run is in flight; the size <input> is read live so
+    // changing it then clicking re-uses the new value without a save step.
+    function attachVerifyButton() {
+        var btn = state.shell && state.shell.querySelector('.av-btn--verify');
+        if (!btn) { return; }
+        btn.addEventListener('click', function () {
+            if (btn.classList.contains('is-running')) { return; }
+            if (!state.selection.selector) {
+                renderVerifyResults({ ok: false, error: 'Pick a content region first.' });
+                return;
+            }
+            var sizeInp = state.shell.querySelector('.av-verify-size');
+            var size    = sizeInp ? Math.max(1, Math.min(20, parseInt(sizeInp.value, 10) || 3)) : 3;
+            btn.classList.add('is-running');
+            setVerifyStatus('Loading ' + size + ' post' + (size === 1 ? '' : 's') + '…');
+            runVerifyAcrossPosts({ sampleSize: size }).then(function (res) {
+                renderVerifyResults(res);
+            }).catch(function (e) {
+                renderVerifyResults({ ok: false, error: (e && e.message) || 'Verify failed.' });
+            }).then(function () {
+                btn.classList.remove('is-running');
+            });
+        });
+    }
+
+    function setVerifyStatus(msg) {
+        var slot = state.shell && state.shell.querySelector('.av-verify-status');
+        if (slot) { slot.textContent = msg || ''; }
+    }
+
+    // Render the verify result. Pass/fail icon per row, char count, link
+    // to open the post in a new tab. A summary line at the bottom totals
+    // matches and average char count so brittle rules stand out at a glance.
+    function renderVerifyResults(res) {
+        var box = state.shell && state.shell.querySelector('.av-verify-results');
+        if (!box) { return; }
+        box.innerHTML = '';
+        if (!res || !res.ok) {
+            box.hidden = false;
+            var err = d.createElement('p');
+            err.className = 'av-verify-row';
+            err.style.color = '#b91c1c';
+            err.textContent = (res && res.error) || 'Verify failed.';
+            box.appendChild(err);
+            setVerifyStatus('');
+            return;
+        }
+        var posts = res.posts || [];
+        if (!posts.length) {
+            box.hidden = false;
+            var none = d.createElement('p');
+            none.className = 'av-verify-row';
+            none.style.color = '#6b7280';
+            none.textContent = 'No matching published posts found for this scope.';
+            box.appendChild(none);
+            setVerifyStatus('');
+            return;
+        }
+        var passed = 0, totalChars = 0;
+        posts.forEach(function (p) {
+            var row = d.createElement('div');
+            row.className = 'av-verify-row';
+
+            var icon = d.createElement('span');
+            icon.className = 'av-verify-row__icon ' + (p.matched ? 'is-pass' : 'is-fail');
+            icon.textContent = p.matched ? '✓' : '✗';
+            row.appendChild(icon);
+
+            var title = d.createElement('span');
+            title.className = 'av-verify-row__title';
+            var a = d.createElement('a');
+            a.href = p.url; a.target = '_blank'; a.rel = 'noopener';
+            a.textContent = p.title || ('Post #' + p.id);
+            a.title = p.error ? ('Error: ' + p.error) : (p.url || '');
+            title.appendChild(a);
+            row.appendChild(title);
+
+            var count = d.createElement('span');
+            count.className = 'av-verify-row__count';
+            count.textContent = p.error ? p.error : (p.charCount + ' chars');
+            row.appendChild(count);
+
+            box.appendChild(row);
+            if (p.matched) { passed++; totalChars += (p.charCount || 0); }
+        });
+        var summary = d.createElement('div');
+        summary.className = 'av-verify-summary';
+        var matchedCount = d.createElement('span');
+        matchedCount.textContent = passed + ' / ' + posts.length + ' matched';
+        var avg = passed > 0 ? Math.round(totalChars / passed) : 0;
+        var avgEl = d.createElement('span');
+        avgEl.textContent = passed > 0 ? ('avg ' + avg + ' chars') : 'no matches';
+        summary.appendChild(matchedCount);
+        summary.appendChild(avgEl);
+        box.appendChild(summary);
+
+        box.hidden = false;
+        setVerifyStatus(passed === posts.length ? 'All ' + posts.length + ' matched.' : (passed + ' of ' + posts.length + ' matched.'));
+    }
+
     /* ─── Pro upgrade prompt ────────────────────────────────────── */
 
     function showProPromo(featureName) {
@@ -1988,6 +2090,7 @@
         attachPickButton();
         attachChipAddButtons();
         attachTagCheckboxes();
+        attachVerifyButton();
 
         // Pre-populate excl_tags from the default-checked tag checkboxes.
         // loadExistingRules() will overwrite when this post already has saved rules.
