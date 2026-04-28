@@ -298,8 +298,8 @@ class Mode {
 			return;
 		}
 
-		$endpoint    = esc_url_raw( rest_url( 'tts/v1/mode' ) );
-		$sample_url  = esc_url_raw( rest_url( 'tts/v1/step-rail/sample-url' ) );
+		$endpoint    = esc_url_raw( rest_url( 'tta/v1/mode' ) );
+		$sample_url  = esc_url_raw( rest_url( 'tta/v1/step-rail/sample-url' ) );
 		$nonce       = wp_create_nonce( 'wp_rest' );
 
 		// Multi-line confirm body. Each line is its own translatable string
