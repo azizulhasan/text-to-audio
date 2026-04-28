@@ -373,6 +373,28 @@ class RestRoutes {
 			)
 		);
 
+		// D14 — step-rail /verify-sample. Returns N random published posts
+		// matching the given scope so the picker can load each in a hidden
+		// iframe and measure whether the saved rule still matches. Used by
+		// the "Test rule across N posts" button and as a Go Live prereq.
+		register_rest_route(
+			$ns,
+			'/step-rail/verify-sample',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( __CLASS__, 'get_step_rail_verify_sample' ),
+					'permission_callback' => array( __CLASS__, 'admin_guard' ),
+					'args'                => array(
+						'post_type'       => array( 'type' => 'string',  'required' => false ),
+						'language'        => array( 'type' => 'string',  'required' => false ),
+						'sample_size'     => array( 'type' => 'integer', 'required' => false ),
+						'exclude_post_id' => array( 'type' => 'integer', 'required' => false ),
+					),
+				),
+			)
+		);
+
 		register_rest_route(
 			$ns,
 			'/step-rail/sample-url',
@@ -579,6 +601,31 @@ class RestRoutes {
 			'post_title' => html_entity_decode( (string) get_the_title( $post_id ), ENT_QUOTES ),
 			'post_type'  => (string) get_post_type( $post_id ),
 		), 200 );
+	}
+
+	/**
+	 * D14 — Return N random published posts matching the given filters so
+	 * the step-rail "Verify across posts" button can load each in a hidden
+	 * iframe, run the saved selector, and report match-rate.
+	 *
+	 * Response shape:
+	 *   posts  array  list of { id, url, title, post_type, language }
+	 *
+	 * @param \WP_REST_Request $request
+	 * @return \WP_REST_Response
+	 */
+	public static function get_step_rail_verify_sample( $request ) {
+		$pt    = (string) $request->get_param( 'post_type' );
+		$lang  = (string) $request->get_param( 'language' );
+		$size  = (int) $request->get_param( 'sample_size' );
+		$exid  = (int) $request->get_param( 'exclude_post_id' );
+		if ( $size <= 0 ) { $size = 3; }
+
+		$posts = class_exists( '\\TTA\\AtlasVoice\\VerifyAcrossPosts' )
+			? \TTA\AtlasVoice\VerifyAcrossPosts::pick_sample_posts( $pt, $lang, $size, $exid )
+			: array();
+
+		return new \WP_REST_Response( array( 'posts' => $posts ), 200 );
 	}
 
 	/**
