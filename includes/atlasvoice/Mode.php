@@ -298,23 +298,27 @@ class Mode {
 			return;
 		}
 
-		$endpoint = esc_url_raw( rest_url( 'tts/v1/mode' ) );
-		$nonce    = wp_create_nonce( 'wp_rest' );
-		$l10n     = array(
-			'prompt'   => __( 'Type GO LIVE (in capitals) to switch AtlasVoice to production. This drives visitor audio through the new extractor.', 'text-to-audio' ),
-			'revert'   => __( 'Revert AtlasVoice to staging? Visitor audio will switch back to the legacy pipeline on the next page load.', 'text-to-audio' ),
-			'mismatch' => __( 'Confirmation phrase did not match. No changes made.', 'text-to-audio' ),
-			'done_go'  => __( 'AtlasVoice is now live. Reload to see the production dot.', 'text-to-audio' ),
-			'done_rev' => __( 'AtlasVoice reverted to staging. Reload to see the staging dot.', 'text-to-audio' ),
-			'fail'     => __( 'AtlasVoice mode change failed: ', 'text-to-audio' ),
+		$endpoint    = esc_url_raw( rest_url( 'tts/v1/mode' ) );
+		$sample_url  = esc_url_raw( rest_url( 'tts/v1/step-rail/sample-url' ) );
+		$nonce       = wp_create_nonce( 'wp_rest' );
+		$l10n        = array(
+			'prompt'        => __( 'Type GO LIVE (in capitals) to switch AtlasVoice to production. This drives visitor audio through the new extractor.', 'text-to-audio' ),
+			'revert'        => __( 'Revert AtlasVoice to staging? Visitor audio will switch back to the legacy pipeline on the next page load.', 'text-to-audio' ),
+			'mismatch'      => __( 'Confirmation phrase did not match. No changes made.', 'text-to-audio' ),
+			'done_go'       => __( 'AtlasVoice is now live. Reload to see the production dot.', 'text-to-audio' ),
+			'done_rev'      => __( 'AtlasVoice reverted to staging. Reload to see the staging dot.', 'text-to-audio' ),
+			'fail'          => __( 'AtlasVoice mode change failed: ', 'text-to-audio' ),
+			'verify_prompt' => __( 'Recommended: run "Verify across posts" on a sample post first to confirm your rules still match before visitor audio switches.\n\nOK = open a sample post in a new tab (picker auto-opens; click "Test rule across N posts").\nCancel = skip Verify and go straight to the Go Live confirmation.', 'text-to-audio' ),
+			'no_sample'     => __( 'Could not find a sample post to verify against. Proceeding to confirmation…', 'text-to-audio' ),
 		);
 
 		?>
 		<script id="atlasvoice-bar-actions">
 		(function () {
-			var ENDPOINT = <?php echo wp_json_encode( $endpoint ); ?>;
-			var NONCE    = <?php echo wp_json_encode( $nonce ); ?>;
-			var L10N     = <?php echo wp_json_encode( $l10n ); ?>;
+			var ENDPOINT   = <?php echo wp_json_encode( $endpoint ); ?>;
+			var SAMPLE_URL = <?php echo wp_json_encode( $sample_url ); ?>;
+			var NONCE      = <?php echo wp_json_encode( $nonce ); ?>;
+			var L10N       = <?php echo wp_json_encode( $l10n ); ?>;
 
 			function call(payload, successMsg) {
 				return fetch(ENDPOINT, {
@@ -343,14 +347,48 @@ class Mode {
 				});
 			}
 
+			// D5/D14 — soft prereq. Offer to open a sample post (with the
+			// picker auto-armed) so the admin can run Verify-across-posts
+			// before flipping to production. OK opens the sample in a new
+			// tab and short-circuits this round (admin clicks Go Live again
+			// after they're satisfied). Cancel falls through to the
+			// existing typed-confirm flow — soft, not hard, so admins who
+			// already verified elsewhere aren't blocked by the dialog.
+			function verifyFirstOrSkip() {
+				return new Promise(function (resolve) {
+					var wantsVerify = window.confirm(L10N.verify_prompt);
+					if (!wantsVerify) { resolve('skip'); return; }
+					fetch(SAMPLE_URL, {
+						credentials: 'same-origin',
+						headers: { 'X-WP-Nonce': NONCE }
+					}).then(function (r) { return r.json(); })
+					  .then(function (j) {
+						if (j && j.url) {
+							window.open(j.url, '_blank');
+							resolve('opened');
+						} else {
+							window.alert(L10N.no_sample);
+							resolve('skip');
+						}
+					})
+					  .catch(function () {
+						window.alert(L10N.no_sample);
+						resolve('skip');
+					});
+				});
+			}
+
 			window.atlasvoiceGoLive = function () {
-				var answer = window.prompt(L10N.prompt, '');
-				if (answer === null) { return false; }
-				if (answer !== 'GO LIVE') {
-					window.alert(L10N.mismatch);
-					return false;
-				}
-				call({ action: 'go-live', confirm: 'GO LIVE' }, L10N.done_go);
+				verifyFirstOrSkip().then(function (decision) {
+					if (decision === 'opened') { return; } // admin verifies in new tab
+					var answer = window.prompt(L10N.prompt, '');
+					if (answer === null) { return; }
+					if (answer !== 'GO LIVE') {
+						window.alert(L10N.mismatch);
+						return;
+					}
+					call({ action: 'go-live', confirm: 'GO LIVE' }, L10N.done_go);
+				});
 				return false;
 			};
 
