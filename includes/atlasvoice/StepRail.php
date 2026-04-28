@@ -237,6 +237,26 @@ class StepRail {
 							</div>
 						</div>
 					</section>
+
+					<!-- Step ⑦ Verify across posts — D14 -->
+					<section class="av-step" data-step="verify">
+						<div class="av-step__head">
+							<span class="av-step__num">&#9317;</span>
+							<strong><?php echo esc_html__( 'Verify across posts', 'text-to-audio' ); ?></strong>
+						</div>
+						<div class="av-step__body">
+							<p class="av-hint"><?php echo esc_html__( 'Run the saved rule against a few random posts in the same scope. Catches brittle selectors before visitors hit a bad page.', 'text-to-audio' ); ?></p>
+							<div class="av-verify-actions">
+								<button type="button" class="av-btn av-btn--verify">
+									&#9654; <?php echo esc_html__( 'Test rule across', 'text-to-audio' ); ?>
+									<input type="number" class="av-verify-size" min="1" max="20" step="1" value="3" aria-label="<?php echo esc_attr__( 'Sample size', 'text-to-audio' ); ?>" />
+									<?php echo esc_html__( 'posts', 'text-to-audio' ); ?>
+								</button>
+								<span class="av-verify-status" aria-live="polite"></span>
+							</div>
+							<div class="av-verify-results" hidden></div>
+						</div>
+					</section>
 				</div><!-- /.av-rail-panel__body -->
 
 				<div class="av-rail-panel__footer">
@@ -600,6 +620,36 @@ body.av-select-mode-excl * {cursor:text!important;}
   outline:2px dashed #b91c1c!important;
   outline-offset:2px!important;
   background:rgba(185,28,28,.04)!important;
+}
+
+/* ── Verify across posts (D14) ──────────────────────────────── */
+.av-verify-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.av-verify-size{
+  width:48px;font:inherit;padding:1px 4px;border:1px solid #d1d5db;
+  border-radius:3px;background:#fff;text-align:center;
+}
+.av-btn--verify.is-running{opacity:.6;cursor:progress;}
+.av-verify-status{font-size:11px;color:#6b7280;}
+.av-verify-results{
+  margin-top:10px;border:1px solid #e5e7eb;border-radius:5px;overflow:hidden;
+}
+.av-verify-row{
+  display:grid;grid-template-columns:18px 1fr auto;gap:8px;align-items:center;
+  padding:6px 8px;font-size:12px;border-bottom:1px solid #f3f4f6;
+}
+.av-verify-row:last-child{border-bottom:0;}
+.av-verify-row__icon{font-size:14px;line-height:1;}
+.av-verify-row__icon.is-pass{color:#15803d;}
+.av-verify-row__icon.is-fail{color:#b91c1c;}
+.av-verify-row__title{
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#111;
+}
+.av-verify-row__title a{color:inherit;text-decoration:none;}
+.av-verify-row__title a:hover{text-decoration:underline;}
+.av-verify-row__count{color:#6b7280;font-variant-numeric:tabular-nums;}
+.av-verify-summary{
+  padding:6px 8px;background:#f9fafb;font-size:11px;color:#374151;
+  border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;
 }
 ';
 	}
