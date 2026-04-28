@@ -301,15 +301,26 @@ class Mode {
 		$endpoint    = esc_url_raw( rest_url( 'tts/v1/mode' ) );
 		$sample_url  = esc_url_raw( rest_url( 'tts/v1/step-rail/sample-url' ) );
 		$nonce       = wp_create_nonce( 'wp_rest' );
-		$l10n        = array(
+
+		// Multi-line confirm body. Each line is its own translatable string
+		// (translators don't have to remember \n placeholders) and we use
+		// PHP double-quoted "\n" so the linebreaks reach the browser as
+		// real newlines, not literal backslash-n.
+		$verify_lines = array(
+			__( 'Recommended: run "Verify across posts" on a sample post first to confirm your rules still match before visitor audio switches.', 'text-to-audio' ),
+			'',
+			__( 'OK     — open a sample post in a new tab (picker auto-opens; click "Test rule across N posts").', 'text-to-audio' ),
+			__( 'Cancel — skip Verify and go straight to the Go Live confirmation.', 'text-to-audio' ),
+		);
+
+		$l10n = array(
 			'prompt'        => __( 'Type GO LIVE (in capitals) to switch AtlasVoice to production. This drives visitor audio through the new extractor.', 'text-to-audio' ),
 			'revert'        => __( 'Revert AtlasVoice to staging? Visitor audio will switch back to the legacy pipeline on the next page load.', 'text-to-audio' ),
 			'mismatch'      => __( 'Confirmation phrase did not match. No changes made.', 'text-to-audio' ),
 			'done_go'       => __( 'AtlasVoice is now live. Reload to see the production dot.', 'text-to-audio' ),
 			'done_rev'      => __( 'AtlasVoice reverted to staging. Reload to see the staging dot.', 'text-to-audio' ),
 			'fail'          => __( 'AtlasVoice mode change failed: ', 'text-to-audio' ),
-			'verify_prompt' => __( 'Recommended: run "Verify across posts" on a sample post first to confirm your rules still match before visitor audio switches.\n\nOK = open a sample post in a new tab (picker auto-opens; click "Test rule across N posts").\nCancel = skip Verify and go straight to the Go Live confirmation.', 'text-to-audio' ),
-			'no_sample'     => __( 'Could not find a sample post to verify against. Proceeding to confirmation…', 'text-to-audio' ),
+			'verify_prompt' => implode( "\n", $verify_lines ),
 		);
 
 		?>
@@ -367,14 +378,14 @@ class Mode {
 							window.open(j.url, '_blank');
 							resolve('opened');
 						} else {
-							window.alert(L10N.no_sample);
+							// No sample post — fall through silently to the
+							// typed-confirm prompt. No alarming alert: the
+							// admin already chose to proceed by clicking OK,
+							// and this prereq is advisory not mandatory.
 							resolve('skip');
 						}
 					})
-					  .catch(function () {
-						window.alert(L10N.no_sample);
-						resolve('skip');
-					});
+					  .catch(function () { resolve('skip'); });
 				});
 			}
 
