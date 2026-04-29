@@ -252,6 +252,14 @@ class StepRail {
 									<input type="number" class="av-verify-size" min="1" max="20" step="1" value="3" aria-label="<?php echo esc_attr__( 'Sample size', 'text-to-audio' ); ?>" />
 									<?php echo esc_html__( 'posts', 'text-to-audio' ); ?>
 								</button>
+								<label class="av-verify-orderby-label">
+									<?php echo esc_html__( 'Order:', 'text-to-audio' ); ?>
+									<select class="av-verify-orderby" aria-label="<?php echo esc_attr__( 'Sample order', 'text-to-audio' ); ?>">
+										<option value="rand"      selected><?php echo esc_html__( 'Random',       'text-to-audio' ); ?></option>
+										<option value="date_desc"          ><?php echo esc_html__( 'Newest first', 'text-to-audio' ); ?></option>
+										<option value="date_asc"           ><?php echo esc_html__( 'Oldest first', 'text-to-audio' ); ?></option>
+									</select>
+								</label>
 								<span class="av-verify-status" aria-live="polite"></span>
 							</div>
 							<div class="av-verify-results" hidden></div>
@@ -266,6 +274,7 @@ class StepRail {
 					</button>
 				</div>
 				<div class="av-resize-handle av-resize-handle--edge"></div>
+				<div class="av-resize-handle av-resize-handle--bottom"></div>
 			</div><!-- /#av-rail-panel -->
 
 			<!-- RIGHT: floating tab -->
@@ -583,6 +592,13 @@ body.av-select-mode-excl * {cursor:text!important;}
    the transform-based off-screen trick. */
 .av-panel--floating{transition:none!important;transform:none!important;}
 .av-panel--floating[hidden]{display:none!important;}
+/* Snap-to-edge hint while dragging near the close edge. Visual cue that
+   releasing now will collapse the panel to its floating tab. */
+.av-panel--snap-hint{
+  outline:3px dashed #f59e0b!important;
+  outline-offset:-3px!important;
+  opacity:.78;
+}
 /* Make both panel headers feel grab-able */
 .av-rail-panel__header{cursor:grab;}
 .av-rail-panel__header:active{cursor:grabbing;}
@@ -627,6 +643,11 @@ body.av-select-mode-excl * {cursor:text!important;}
 .av-verify-size{
   width:48px;font:inherit;padding:1px 4px;border:1px solid #d1d5db;
   border-radius:3px;background:#fff;text-align:center;
+}
+.av-verify-orderby-label{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#374151;}
+.av-verify-orderby{
+  font:inherit;padding:1px 4px;border:1px solid #d1d5db;
+  border-radius:3px;background:#fff;font-size:12px;
 }
 .av-btn--verify.is-running{opacity:.6;cursor:progress;}
 .av-verify-status{font-size:11px;color:#6b7280;}

@@ -28,6 +28,14 @@ namespace TTA\AtlasVoice;
 class VerifyAcrossPosts {
 
 	/**
+	 * Allowed `orderby` values exposed through the REST API. Anything
+	 * else falls back to 'rand' silently — the route validates too,
+	 * but defending in depth means a hand-crafted call can't poke the
+	 * underlying WP_Query with arbitrary SQL fragments.
+	 */
+	const ALLOWED_ORDERBY = array( 'rand', 'date_desc', 'date_asc' );
+
+	/**
 	 * Pick a random sample of published posts matching the given filters.
 	 *
 	 * @param string $post_type        Post type slug. '' for any public,
@@ -37,15 +45,32 @@ class VerifyAcrossPosts {
 	 * @param int    $size             Sample size, clamped to [1, 20].
 	 * @param int    $exclude_post_id  Post id to omit (typically the post
 	 *                                 the admin is currently editing).
+	 * @param string $orderby          One of self::ALLOWED_ORDERBY:
+	 *                                 'rand' (default — random sample),
+	 *                                 'date_desc' (newest first),
+	 *                                 'date_asc' (oldest first).
 	 * @return array<int, array{id:int,url:string,title:string,post_type:string,language:string}>
 	 */
-	public static function pick_sample_posts( $post_type, $language, $size = 3, $exclude_post_id = 0 ) {
+	public static function pick_sample_posts( $post_type, $language, $size = 3, $exclude_post_id = 0, $orderby = 'rand' ) {
 		$size = max( 1, min( 20, (int) $size ) );
+
+		// Map our public orderby tokens to actual WP_Query args. Random
+		// stays random (catches brittle rules across templates); date
+		// orderings let admins sanity-check against recent / legacy posts
+		// when they want to reproduce a specific report.
+		if ( ! in_array( $orderby, self::ALLOWED_ORDERBY, true ) ) {
+			$orderby = 'rand';
+		}
+		$wp_orderby = 'rand';
+		$wp_order   = 'DESC';
+		if ( $orderby === 'date_desc' ) { $wp_orderby = 'date'; $wp_order = 'DESC'; }
+		if ( $orderby === 'date_asc'  ) { $wp_orderby = 'date'; $wp_order = 'ASC';  }
 
 		$args = array(
 			'post_status'    => 'publish',
 			'posts_per_page' => $size,
-			'orderby'        => 'rand',
+			'orderby'        => $wp_orderby,
+			'order'          => $wp_order,
 			'fields'         => 'ids',
 			'no_found_rows'  => true,
 			// Re-run multilingual plugin filters so `lang` below works.

@@ -390,6 +390,13 @@ class RestRoutes {
 						'language'        => array( 'type' => 'string',  'required' => false ),
 						'sample_size'     => array( 'type' => 'integer', 'required' => false ),
 						'exclude_post_id' => array( 'type' => 'integer', 'required' => false ),
+						'orderby'         => array(
+							'type'        => 'string',
+							'required'    => false,
+							'enum'        => array( 'rand', 'date_desc', 'date_asc' ),
+							'default'     => 'rand',
+							'description' => 'Sort order for the sample. rand = random, date_desc = newest first, date_asc = oldest first.',
+						),
 					),
 				),
 			)
@@ -615,14 +622,16 @@ class RestRoutes {
 	 * @return \WP_REST_Response
 	 */
 	public static function get_step_rail_verify_sample( $request ) {
-		$pt    = (string) $request->get_param( 'post_type' );
-		$lang  = (string) $request->get_param( 'language' );
-		$size  = (int) $request->get_param( 'sample_size' );
-		$exid  = (int) $request->get_param( 'exclude_post_id' );
-		if ( $size <= 0 ) { $size = 3; }
+		$pt      = (string) $request->get_param( 'post_type' );
+		$lang    = (string) $request->get_param( 'language' );
+		$size    = (int) $request->get_param( 'sample_size' );
+		$exid    = (int) $request->get_param( 'exclude_post_id' );
+		$orderby = (string) $request->get_param( 'orderby' );
+		if ( $size <= 0 )    { $size = 3; }
+		if ( $orderby === '' ) { $orderby = 'rand'; }
 
 		$posts = class_exists( '\\TTA\\AtlasVoice\\VerifyAcrossPosts' )
-			? \TTA\AtlasVoice\VerifyAcrossPosts::pick_sample_posts( $pt, $lang, $size, $exid )
+			? \TTA\AtlasVoice\VerifyAcrossPosts::pick_sample_posts( $pt, $lang, $size, $exid, $orderby )
 			: array();
 
 		return new \WP_REST_Response( array( 'posts' => $posts ), 200 );
