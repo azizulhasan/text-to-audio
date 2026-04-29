@@ -927,6 +927,27 @@
             source = active.source;
         }
 
+        // Stale-rule fallback. When a saved selector returns no text AND
+        // doesn't match anything in the current DOM (typical after a
+        // theme swap — e.g. .entry-content disappears once the site
+        // moves to Avada's .post-content), fall through to the active-
+        // system tier waterfall so the preview surfaces the marker-
+        // bracketed content instead of going blank. Source label is
+        // prefixed so the meta line makes the rescue obvious to the
+        // admin: their saved rule still needs updating, but the picker
+        // shows what's available instead of looking dead.
+        if (!text && state.selection.selector) {
+            var stillMatches = false;
+            try { stillMatches = !!d.querySelector(state.selection.selector); } catch (e) {}
+            if (!stillMatches) {
+                var fallback = extractFromActiveSystem();
+                if (fallback && fallback.text) {
+                    text   = fallback.text;
+                    source = 'Saved rule misses DOM — fallback: ' + fallback.source;
+                }
+            }
+        }
+
         if (!text) {
             body.innerHTML = '<p class="av-preview-panel__empty">Pick a content region on the left \u2014 the extracted text will appear here.</p>';
             if (meta) { meta.textContent = source || ''; }
@@ -968,10 +989,24 @@
         var sel        = (state.selection.selector || '').toString().trim();
         if (!sel) { return Promise.resolve({ ok: false, error: 'No selector set.' }); }
 
+        // Validate orderby against the same allowlist the server enforces.
+        var orderby = (opts.orderby || '').toString();
+        if (['rand', 'date_desc', 'date_asc'].indexOf(orderby) === -1) {
+            orderby = 'rand';
+        }
+
+        // Smart post-type fallback: prefer the rule's own post-type scope
+        // (so a post-type-scoped rule is tested against its actual audience),
+        // fall back to the post the admin is on (so global / language /
+        // per-post rules still test against a sensible default), only fall
+        // through to "any public type" when both are missing.
+        var pt = (state.selection.post_type || state.postType || '').toString();
+
         var qs = '?sample_size=' + sampleSize +
-                 '&exclude_post_id=' + (state.postId || 0);
-        if (state.selection.post_type) { qs += '&post_type=' + encodeURIComponent(state.selection.post_type); }
-        if (state.selection.language)  { qs += '&language='  + encodeURIComponent(state.selection.language);  }
+                 '&exclude_post_id=' + (state.postId || 0) +
+                 '&orderby=' + encodeURIComponent(orderby);
+        if (pt)                       { qs += '&post_type=' + encodeURIComponent(pt); }
+        if (state.selection.language) { qs += '&language='  + encodeURIComponent(state.selection.language); }
 
         return restFetch('/step-rail/verify-sample' + qs).then(function (resp) {
             var posts = (resp && Array.isArray(resp.posts)) ? resp.posts : [];
@@ -1103,11 +1138,13 @@
                 renderVerifyResults({ ok: false, error: 'Pick a content region first.' });
                 return;
             }
-            var sizeInp = state.shell.querySelector('.av-verify-size');
+            var sizeInp    = state.shell.querySelector('.av-verify-size');
+            var orderbyInp = state.shell.querySelector('.av-verify-orderby');
             var size    = sizeInp ? Math.max(1, Math.min(20, parseInt(sizeInp.value, 10) || 3)) : 3;
+            var orderby = orderbyInp ? orderbyInp.value : 'rand';
             btn.classList.add('is-running');
             setVerifyStatus('Loading ' + size + ' post' + (size === 1 ? '' : 's') + '…');
-            runVerifyAcrossPosts({ sampleSize: size }).then(function (res) {
+            runVerifyAcrossPosts({ sampleSize: size, orderby: orderby }).then(function (res) {
                 renderVerifyResults(res);
             }).catch(function (e) {
                 renderVerifyResults({ ok: false, error: (e && e.message) || 'Verify failed.' });
@@ -1741,8 +1778,18 @@
     // preview panel. Once dragged, the panel switches to free-float mode:
     // the CSS slide/transition is disabled and position is fully controlled
     // by inline left/top. Closing + re-opening stays at the dragged position.
-    function makeDraggable(panel, handle) {
+    function makeDraggable(panel, handle, opts) {
         if (!panel || !handle) { return; }
+        opts = opts || {};
+        // snapEdge: when the admin releases the panel within `threshold`
+        // pixels of this screen edge, fire onSnapClose() so the panel
+        // closes and collapses to the floating tab. Allows the rail
+        // panel to drag-off-left and the preview panel to drag-off-right
+        // without hunting for the small × button.
+        var snapEdge    = opts.snapEdge    || null;   // 'left' | 'right' | null
+        var threshold   = opts.threshold   || 50;
+        var onSnapClose = opts.onSnapClose || null;
+
         var dragging = false, startX, startY, startLeft, startTop;
 
         handle.addEventListener('mousedown', function (e) {
@@ -1775,17 +1822,40 @@
             var ny = Math.max(0, startTop  + (e.clientY - startY));
             panel.style.left = nx + 'px';
             panel.style.top  = ny + 'px';
+
+            // Snap-hint feedback while approaching the snap edge so the
+            // admin sees the panel "wants" to close before they release.
+            if (snapEdge && onSnapClose) {
+                var near = false;
+                if (snapEdge === 'left') { near = nx < threshold; }
+                if (snapEdge === 'right') {
+                    near = (w.innerWidth - (nx + panel.offsetWidth)) < threshold;
+                }
+                panel.classList.toggle('av-panel--snap-hint', near);
+            }
         });
 
-        d.addEventListener('mouseup', function () { dragging = false; });
+        d.addEventListener('mouseup', function () {
+            if (!dragging) { return; }
+            dragging = false;
+            panel.classList.remove('av-panel--snap-hint');
+            if (!snapEdge || !onSnapClose) { return; }
+            var rect = panel.getBoundingClientRect();
+            var nearEdge = false;
+            if (snapEdge === 'left'  && rect.left < threshold) { nearEdge = true; }
+            if (snapEdge === 'right' && (w.innerWidth - rect.right) < threshold) { nearEdge = true; }
+            if (nearEdge) { onSnapClose(); }
+        });
     }
 
     // Generic resizer — drag a handle element to change panel width and/or height.
     // dir: 'x' = width only, 'y' = height only, 'both' = both (default).
+    // Defaults dropped to 30/30 so admins can shrink either panel down to a
+    // nub if they want it parked out of the way without fully closing.
     function makeResizable(panel, handle, opts) {
         if (!panel || !handle) { return; }
         opts = opts || {};
-        var minW = opts.minW || 200, minH = opts.minH || 120;
+        var minW = opts.minW || 30, minH = opts.minH || 30;
         var dir  = opts.dir  || 'both';
         var resizing = false, startX, startY, startW, startH;
 
@@ -1816,21 +1886,33 @@
     }
 
     function attachDraggable() {
-        // Right preview panel — drag by header, resize width via right edge, height via bottom edge.
+        // Right preview panel — drag by header, resize width via right edge,
+        // height via bottom edge. Drag-to-right-edge snap-closes the panel.
         var previewPanel        = d.getElementById('av-preview-panel');
         var previewHandle       = previewPanel && previewPanel.querySelector('.av-preview-panel__handle');
         var previewResizeLeft   = previewPanel && previewPanel.querySelector('.av-resize-handle--left-edge');
         var previewResizeBottom = previewPanel && previewPanel.querySelector('.av-resize-handle--bottom');
-        makeDraggable(previewPanel, previewHandle);
-        makeResizable(previewPanel, previewResizeLeft,  { dir: 'x', minW: 220, reverseX: true });
-        makeResizable(previewPanel, previewResizeBottom, { dir: 'y', minH: 120 });
+        makeDraggable(previewPanel, previewHandle, {
+            snapEdge:    'right',
+            threshold:   50,
+            onSnapClose: function () { toggleRight(false); }
+        });
+        makeResizable(previewPanel, previewResizeLeft,  { dir: 'x', minW: 30, reverseX: true });
+        makeResizable(previewPanel, previewResizeBottom, { dir: 'y', minH: 30 });
 
-        // Left rail panel — drag by its own header, resize width via right-edge handle.
-        var railPanel  = d.getElementById('av-rail-panel');
-        var railHandle = railPanel && railPanel.querySelector('.av-rail-panel__header');
-        var railResize = railPanel && railPanel.querySelector('.av-resize-handle--edge');
-        makeDraggable(railPanel, railHandle);
-        makeResizable(railPanel, railResize, { dir: 'x', minW: 220 });
+        // Left rail panel — drag by header, resize width via right-edge,
+        // height via bottom edge (D21). Drag-to-left-edge snap-closes.
+        var railPanel        = d.getElementById('av-rail-panel');
+        var railHandle       = railPanel && railPanel.querySelector('.av-rail-panel__header');
+        var railResize       = railPanel && railPanel.querySelector('.av-resize-handle--edge');
+        var railResizeBottom = railPanel && railPanel.querySelector('.av-resize-handle--bottom');
+        makeDraggable(railPanel, railHandle, {
+            snapEdge:    'left',
+            threshold:   50,
+            onSnapClose: function () { toggleLeft(false); }
+        });
+        makeResizable(railPanel, railResize,       { dir: 'x', minW: 30 });
+        makeResizable(railPanel, railResizeBottom, { dir: 'y', minH: 30 });
     }
 
     /* ─── panel open/close ──────────────────────────────────────── */
