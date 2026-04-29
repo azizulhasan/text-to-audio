@@ -780,6 +780,22 @@
             var t3 = (legacies[j].textContent || '').trim();
             if (t3) { return { text: applyContentMeta(t3), source: 'Legacy wrapper' }; }
         }
+        // Tier 4 — window.TTS.contents[N]. Server-cooked audio text injected
+        // by helpers.php::tta_get_button_content. This is the ground-truth
+        // text the player will speak; if every DOM tier above missed (page
+        // builder bypassed the_content, theme stripped the wrapper, etc.)
+        // the player itself still has content sitting here. Last-resort
+        // surfacing so the preview matches what visitors actually hear.
+        try {
+            var bag = (w.TTS && w.TTS.contents) ? w.TTS.contents : null;
+            if (bag) {
+                for (var k in bag) {
+                    if (!bag.hasOwnProperty(k)) { continue; }
+                    var t4 = (bag[k] || '').toString().trim();
+                    if (t4) { return { text: t4, source: 'TTS.contents[' + k + '] (player payload)' }; }
+                }
+            }
+        } catch (e) {}
         return { text: '', source: '' };
     }
 
