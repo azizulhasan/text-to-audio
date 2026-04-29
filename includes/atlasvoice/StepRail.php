@@ -376,15 +376,16 @@ class StepRail {
   z-index:2147483640;
   display:flex;align-items:center;justify-content:center;
   writing-mode:vertical-lr;text-orientation:mixed;
-  padding:14px 8px;
-  background:#184c53;color:#fff;
-  border:0;border-radius:0;
-  font:600 12px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  cursor:pointer;letter-spacing:.06em;
+  padding:14px 8px!important;
+  background:#184c53!important;color:#fff!important;
+  border:0!important;border-radius:0;
+  font:600 12px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+  cursor:pointer!important;letter-spacing:.06em!important;
+  text-transform:none!important;text-shadow:none!important;text-decoration:none!important;
   transition:background .15s,box-shadow .15s;
   box-shadow:0 2px 12px rgba(0,0,0,.25);
 }
-.av-tab:hover{background:#1d6370;}
+.av-tab:hover{background:#1d6370!important;color:#fff!important;}
 .av-tab--left{
   left:0;
   border-radius:0 6px 6px 0;
@@ -419,8 +420,10 @@ class StepRail {
 }
 .av-rail-panel__title{font:600 14px/1.3 inherit;}
 .av-rail-panel__close{
-  background:transparent;border:0;color:#fff;font-size:20px;
-  line-height:1;cursor:pointer;padding:2px 8px;
+  background:transparent!important;border:0!important;color:#fff!important;
+  font-size:20px!important;line-height:1!important;
+  cursor:pointer!important;padding:2px 8px!important;
+  text-shadow:none!important;font-family:inherit!important;
 }
 
 .av-rail-panel__body{
@@ -469,8 +472,8 @@ class StepRail {
 .av-selector-value{flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all;}
 .av-selector-input{border:0;background:transparent;outline:none;min-width:0;padding:0;font-size:12px;color:inherit;width:100%;}
 .av-selector-input:focus{outline:1px dashed #184c53;border-radius:2px;}
-.av-btn--clear-selector{background:transparent;border:0;cursor:pointer;color:#6b7280;font-size:16px;padding:0 4px;flex-shrink:0;}
-.av-btn--clear-selector:hover{color:#b91c1c;}
+.av-btn--clear-selector{background:transparent!important;border:0!important;cursor:pointer!important;color:#6b7280!important;font-size:16px!important;padding:0 4px!important;flex-shrink:0;text-shadow:none!important;}
+.av-btn--clear-selector:hover{color:#b91c1c!important;background:transparent!important;}
 
 /* ── Chips ──────────────────────────────────────────────────── */
 .av-chips{display:flex;flex-wrap:wrap;gap:5px;margin:5px 0;min-height:18px;}
@@ -482,8 +485,8 @@ class StepRail {
 }
 [data-chip-kind="excl_texts"] .av-chip{background:#fef3c7;border-color:#fde68a;color:#78350f;font-family:inherit;}
 [data-chip-kind="excl_tags"]  .av-chip{background:#ecfdf5;border-color:#a7f3d0;color:#065f46;}
-.av-chip button{background:transparent;border:0;cursor:pointer;color:inherit;font-size:13px;padding:0 3px;line-height:1;}
-.av-chip button:hover{color:#b91c1c;}
+.av-chip button{background:transparent!important;border:0!important;cursor:pointer!important;color:inherit!important;font-size:13px!important;padding:0 3px!important;line-height:1!important;text-shadow:none!important;}
+.av-chip button:hover{color:#b91c1c!important;background:transparent!important;}
 .av-chip-add{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;}
 .av-chip-add .av-chip-input{flex:1;min-width:80px;font-size:12px;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;}
 .av-chip-sep{font-size:11px;color:#9ca3af;}
@@ -503,26 +506,37 @@ class StepRail {
 .av-pro-pill[hidden]{display:none !important;}
 
 /* ── Buttons ────────────────────────────────────────────────── */
+/* Theme-defensive: aggressive themes (Avada, Divi, etc.) ship rules
+   like `button { color:#fff !important }` that bleed into our buttons
+   and turn text white-on-white. Override the bleed-prone properties
+   with !important so the rail UI stays legible across themes.
+   The dark-bg variants below also use !important on color so they
+   are not dragged back to the default by the rule above. */
 .av-btn{
-  font-size:12px;padding:5px 12px;border-radius:5px;border:1px solid #d1d5db;
-  background:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:5px;
-  transition:background .12s,border-color .12s;white-space:nowrap;
+  font-size:12px!important;padding:5px 12px!important;
+  border-radius:5px!important;border:1px solid #d1d5db!important;
+  background:#fff!important;color:#111!important;
+  cursor:pointer!important;display:inline-flex!important;
+  align-items:center!important;gap:5px!important;
+  transition:background .12s,border-color .12s;white-space:nowrap!important;
+  text-transform:none!important;letter-spacing:0!important;
+  text-shadow:none!important;font-family:inherit!important;
+  font-weight:500!important;line-height:1.4!important;
+  text-decoration:none!important;
 }
-.av-btn:hover{background:#f3f4f6;}
+.av-btn:hover{background:#f3f4f6!important;color:#111!important;}
 .av-btn--save{
-  background:#184c53;color:#fff;border-color:#184c53;margin-left:auto;
-  font-size:13px;padding:6px 18px;
+  background:#184c53!important;color:#fff!important;border-color:#184c53!important;
+  margin-left:auto;font-size:13px!important;padding:6px 18px!important;
 }
-.av-btn--save:hover:not(:disabled){background:#1d6370;}
-.av-btn--save:disabled{opacity:.45;cursor:not-allowed;}
-.av-btn--pick.is-active,.av-btn--pick-excl.is-active{
-  background:#184c53;color:#fff;border-color:#184c53;
-}
+.av-btn--save:hover:not(:disabled){background:#1d6370!important;color:#fff!important;}
+.av-btn--save:disabled{opacity:.45;cursor:not-allowed!important;}
+.av-btn--pick.is-active,.av-btn--pick-excl.is-active,
 .av-btn--select.is-active{
-  background:#184c53;color:#fff;border-color:#184c53;
+  background:#184c53!important;color:#fff!important;border-color:#184c53!important;
 }
 .av-btn--select-excl.is-active{
-  background:#b91c1c;color:#fff;border-color:#b91c1c;
+  background:#b91c1c!important;color:#fff!important;border-color:#b91c1c!important;
 }
 /* While drag-mode is on, hint at it via the page cursor. */
 body.av-select-mode,
@@ -552,8 +566,10 @@ body.av-select-mode-excl * {cursor:text!important;}
 .av-preview-panel__title{font:600 13px/1.3 inherit;flex:1;}
 .av-preview-panel__meta{font-size:11px;color:rgba(255,255,255,.7);}
 .av-preview-panel__close{
-  background:transparent;border:0;color:#fff;font-size:18px;
-  line-height:1;cursor:pointer;padding:0 4px;
+  background:transparent!important;border:0!important;color:#fff!important;
+  font-size:18px!important;line-height:1!important;
+  cursor:pointer!important;padding:0 4px!important;
+  text-shadow:none!important;font-family:inherit!important;
 }
 .av-preview-panel__body{
   flex:1;overflow-y:auto;padding:14px;
