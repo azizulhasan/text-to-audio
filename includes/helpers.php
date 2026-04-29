@@ -279,35 +279,12 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     $content = tta_clean_content($content);
 
     /**
-     * AtlasVoice D13 — dormant custom-field reader hook.
-     *
-     * Filter `atlasvoice_extra_field_text` lets developers append text
-     * pulled from custom-field plugins (ACF, MetaBox, Pods, JetEngine,
-     * Toolset, Carbon Fields) to the spoken output without touching
-     * core. The default value is an empty array, so this hook is a
-     * no-op until a third party opts in.
-     *
-     * @see docs/atlasvoice-readers.md for the canonical opt-in snippet
-     *      and rationale for shipping the readers dormant.
-     *
-     * @param string[] $extra_texts Flat list of strings to append.
-     * @param int      $post_id     ID of the post whose audio is being assembled.
+     * AtlasVoice integration hook (TTS-238 v5 §1 P1). One-line emission
+     * point — keeps the legacy code path byte-identical when no AtlasVoice
+     * listener is attached. Real logic lives in
+     * `includes/atlasvoice/ReadersIntegration.php`.
      */
-    $reader_post_id = ( $post instanceof \WP_Post )
-        ? (int) $post->ID
-        : (int) ( is_numeric( $post ) ? $post : 0 );
-    if ( $reader_post_id > 0 ) {
-        $extra_texts = apply_filters( 'atlasvoice_extra_field_text', array(), $reader_post_id );
-        if ( is_array( $extra_texts ) && ! empty( $extra_texts ) ) {
-            $delim   = apply_filters( 'tts_sentence_delimiter', '. ' );
-            $cleaned = array_filter( array_map( function ( $t ) {
-                return trim( wp_strip_all_tags( (string) $t ) );
-            }, $extra_texts ) );
-            if ( ! empty( $cleaned ) ) {
-                $content = trim( $content ) . $delim . implode( $delim, $cleaned );
-            }
-        }
-    }
+    $content = apply_filters( 'atlasvoice_after_clean_content', $content, $post );
 
     $content = TTA_Helper::sazitize_content($content);
     $content = TTA_Helper::clean_content($content);
