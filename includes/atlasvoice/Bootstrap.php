@@ -141,11 +141,18 @@ class Bootstrap {
 			StepRail::register();
 		}
 
-		// Future D10–D14 registrations slot in below. Every new feature
-		// module exposes a `register()` static so the sequence stays
-		// readable and feature toggles are obvious.
+		// D13 — Readers integration glue. Registers the legacy-side
+		// `atlasvoice_after_clean_content` listener so all reader-append
+		// logic stays inside `includes/atlasvoice/` (P1 isolation).
+		// Dormant unless a third party hooks `atlasvoice_extra_field_text`.
+		if ( class_exists( '\\TTA\\AtlasVoice\\ReadersIntegration' ) ) {
+			ReadersIntegration::register();
+		}
+
+		// Future feature registrations slot in below. Every new module
+		// exposes a `register()` static so the sequence stays readable
+		// and feature toggles are obvious.
 		//
 		//   SelfHealer::register();        // heal-on-miss
-		//   RuleChipEditor::register();    // D10 — rule-chip editor
 	}
 }

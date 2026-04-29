@@ -58,6 +58,13 @@ fields with the rail and you'll get more predictable output.
 
 ## Filter contract
 
+There are two filters, layered. You only need to know about the
+**developer-facing** one (`atlasvoice_extra_field_text`); the other
+exists for plugin-internal isolation (P1 — keeps the legacy code path
+byte-identical when AtlasVoice is uninstalled).
+
+### Developer-facing filter
+
 ```php
 /**
  * @param string[] $extra_texts Default empty array. Each string is
@@ -72,14 +79,26 @@ fields with the rail and you'll get more predictable output.
 apply_filters( 'atlasvoice_extra_field_text', array(), $post_id );
 ```
 
-The hook fires inside `tta_clean_content()` (free plugin
-`includes/helpers.php`) right after the main body has been cleaned and
-*before* the final `tta_clean_content` filter runs, so anything you
-return here still goes through the existing sanitiser.
-
 If `$post_id` is `0` (no post context, e.g. a shortcode reading raw
 text), the filter does **not** fire — there's no post to query for
 custom fields.
+
+### Plumbing (informational)
+
+The free plugin emits a single one-line filter inside `tta_get_button_content()`
+(`includes/helpers.php`):
+
+```php
+$content = apply_filters( 'atlasvoice_after_clean_content', $content, $post );
+```
+
+`TTA\AtlasVoice\ReadersIntegration::append_extras()` (in
+`includes/atlasvoice/ReadersIntegration.php`) listens on that hook,
+calls `atlasvoice_extra_field_text` for the dev opt-in payload, and
+appends each returned string to `$content` joined by
+`tts_sentence_delimiter`. Deleting `includes/atlasvoice/` cleanly
+removes the listener; the legacy filter call returns its first arg
+unchanged when no listener is attached.
 
 ---
 
