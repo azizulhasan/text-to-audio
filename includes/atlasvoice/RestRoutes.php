@@ -504,11 +504,28 @@ class RestRoutes {
 	 * @return \WP_REST_Response
 	 */
 	public static function get_step_rail_scopes() {
+		// Honor the admin's "Allow Listening For Post Type" setting.
+		// Only types that have been explicitly enabled for listening
+		// should appear as scope-chooser options — otherwise the picker
+		// surfaces post types that can't even play audio (Floating
+		// Element, Elementor Template, etc.).
+		$allowed = array();
+		if ( class_exists( '\\TTA\\TTA_Helper' ) ) {
+			$settings = \TTA\TTA_Helper::tts_get_settings( 'settings' );
+			if ( is_array( $settings )
+				&& isset( $settings['tta__settings_allow_listening_for_post_types'] )
+				&& is_array( $settings['tta__settings_allow_listening_for_post_types'] )
+			) {
+				$allowed = array_map( 'strval', $settings['tta__settings_allow_listening_for_post_types'] );
+			}
+		}
+
 		$post_types = array();
 		$candidates = get_post_types( array( 'public' => true ), 'objects' );
 		if ( is_array( $candidates ) ) {
 			foreach ( $candidates as $slug => $obj ) {
 				if ( $slug === 'attachment' ) { continue; }
+				if ( ! empty( $allowed ) && ! in_array( (string) $slug, $allowed, true ) ) { continue; }
 				$label = isset( $obj->labels->singular_name ) ? (string) $obj->labels->singular_name : $slug;
 				$post_types[] = array( 'slug' => (string) $slug, 'label' => $label );
 			}

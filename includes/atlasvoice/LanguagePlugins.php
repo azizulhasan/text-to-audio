@@ -212,10 +212,15 @@ class LanguagePlugins {
 	// -----------------------------------------------------------------
 	private static function is_gtranslate_active() {
 		// GTranslate ships a function named `gtranslate` and stores its
-		// settings under the `GTranslate` option. It's a JS-only translator
-		// so PHP detection is coarse — we only care that it exists so we
-		// key selectors by the site's default locale.
-		return function_exists( 'gtranslate' ) || get_option( 'GTranslate' ) !== false;
+		// settings under the `GTranslate` option. The function only
+		// exists when the plugin is loaded — that's the authoritative
+		// "is the plugin active right now?" check.
+		//
+		// Older revisions also accepted `get_option('GTranslate') !== false`
+		// as a fallback, but the option row survives deactivation +
+		// uninstall, so a once-installed-then-removed GTranslate would
+		// keep reporting active forever. Dropped that branch.
+		return function_exists( 'gtranslate' );
 	}
 
 	private static function read_gtranslate() {
