@@ -331,18 +331,73 @@ checkbox to that filter.
 
 ---
 
-## 4. What gets deleted
+## 4. What changed in the storage / class graph
 
-- `tta_atlasvoice_selectors` option write path — gone.
-- `RuleResolver` class — gone (legacy `tts_get_settings` already
-  implements the cascade).
-- `PerPostRules` + `PerPostRulesMetaBox` — gone (existing
-  `CSSSelectorsForPosts.js` covers the same surface).
-- `_atlasvoice_post_rules` post meta — gone (existing
-  `tts_pro_custom_css_selectors` covers the same need).
-- `/wp-json/tta/v1/save-selector` REST route — gone.
-- `/wp-json/tta/v1/post-rules` REST route — gone.
-- Step rail's `ScopeRow` component / scope radio markup — gone.
+> §4 was rewritten 2026-05-01 to record what actually shipped.
+> The original v4 list (below, struck through) called for
+> wholesale deletion of `RuleResolver` / `PerPostRules*` / the
+> legacy REST routes. When v5 hit reality those classes turned
+> out to be too entangled (SelectorHash, /active-rule REST,
+> breadcrumb metabox UI) to remove without rewriting their
+> callers. The smaller, safer move was to **refactor in place**
+> so they all read the new collapsed storage instead of the dead
+> `tta_atlasvoice_selectors` option. The picker→dashboard→runtime
+> parity goal is met (verified live — see §13).
+
+### 4.1 What actually shipped
+
+  * **`tta_atlasvoice_selectors` option** — no longer written by
+    any code path (D26.9 removed the writer). Reads removed from
+    `RuleResolver::resolve()` (D27.21) and from
+    `/step-rail/scope-rule` (D27.12). Stale data may still exist
+    on installs; no migration was run.
+  * **`RuleResolver`** — kept, repointed to the new storage in
+    D27.21:
+    - layer 1 = `tts_pro_custom_css_selectors` post meta, gated on
+      `tta__settings_use_own_css_selectors`
+    - layer 2 = `tta_settings_data['tta__settings_atlasvoice_per_type_overrides'][<slug>]`
+    - layer 3 = flat `tta_settings_data['tta__settings_*']` keys
+    Per-language and per-post-type+language layers retired.
+    `breadcrumbs()` collapsed to the same 3-layer view; the
+    per-post crumb labels itself "(disabled)" when the meta has
+    data but the master toggle is off.
+  * **`PerPostRules` + `PerPostRulesMetaBox`** — kept. The metabox
+    renders the rule-scope breadcrumb on the post-edit screen and
+    feeds off `RuleResolver::breadcrumbs()`, so it inherits the
+    new storage automatically. `PerPostRules` itself is no longer
+    consulted by the resolver (D27.21 reads the post meta
+    directly), but the class is left alone to avoid breaking
+    callers we can't see from here.
+  * **`_atlasvoice_post_rules` post meta** — no migration done.
+    The picker save endpoint and the per-post UI both write to
+    `tts_pro_custom_css_selectors` instead, so any existing
+    `_atlasvoice_post_rules` payload is now dead data.
+  * **`/wp-json/tta/v1/save-selector` and `/post-rules` REST
+    routes** — left registered. Neither is called by the picker,
+    the dashboard, or the per-post UI any longer (D26.2 moved
+    every save target onto `/atlasvoice/save-rule` +
+    `/css_selectors_for_posts`). Routes stay for backward
+    compatibility with any external integrators.
+  * **Step rail's `ScopeRow` / scope radio markup** — gone (D26.1).
+    Scope is driven entirely by URL params now.
+
+### 4.2 Original v4 deletion list (superseded)
+
+> The list below was the v4 prediction. Refactor-in-place beat
+> wholesale-delete in v5. Kept here so the audit trail stays
+> intact.
+
+  * ~~`tta_atlasvoice_selectors` option write path — gone.~~ (Done.)
+  * ~~`RuleResolver` class — gone.~~ Refactored to read the new
+    storage instead.
+  * ~~`PerPostRules` + `PerPostRulesMetaBox` — gone.~~ Kept; the
+    metabox is the breadcrumb UI on the post-edit screen.
+  * ~~`_atlasvoice_post_rules` post meta — gone.~~ Stranded as
+    dead data; no migration ran.
+  * ~~`/wp-json/tta/v1/save-selector` REST route — gone.~~ Left
+    registered, no longer called.
+  * ~~`/wp-json/tta/v1/post-rules` REST route — gone.~~ Same.
+  * Step rail's `ScopeRow` component / scope radio markup — gone. ✓
 
 ## 5. What stays untouched
 
@@ -690,4 +745,80 @@ Save → reload renders correctly for all three scopes on
     preserved** (regression that originally split the phrase into
     two chunks).
 
+## 12. D27.21–D27.22 — Runtime resolver + no-scope-URL parity
 
+The wire-format collapse in §11 left one gap: while the picker UI
+read from the new storage (via `/step-rail/scope-rule`), the
+**runtime extractor** still resolved rules through `RuleResolver`,
+which was reading the dead `tta_atlasvoice_selectors` option. So
+on a post that had a per-type rule saved through the dashboard,
+the picker showed the new rule but the player at page render time
+applied a different (stale) rule from the legacy store.
+
+D27.21 closes the gap. D27.22 fixes a related UX bug: opening the
+picker on a post URL with no `?scope=…` was defaulting to
+`scope=post` on Pro and fast-pathing through `/scope-rule?scope=post`
+— which returns empty when the per-post toggle is off, even when a
+per-type rule is winning at runtime.
+
+### 12.1 D27.21 — RuleResolver repointed
+
+  * `RuleResolver::resolve()` rewritten to walk the new 3-layer
+    cascade against the live storage:
+    - per-post → `tts_pro_custom_css_selectors` post meta, gated
+      on `tta__settings_use_own_css_selectors`
+    - per-post-type → `tta_settings_data['tta__settings_atlasvoice_per_type_overrides'][<slug>]`
+    - global → flat `tta_settings_data['tta__settings_*']` keys
+  * `settings_to_entry()` helper added: converts a flat
+    `{tta__settings_*: ...}` bag into the resolver's internal
+    `{selector, excl_css[], excl_texts[], excl_tags[]}` shape with
+    the same pipe / newline / whitespace splitting rules as the
+    picker reader (tags split aggressively, texts only on pipe /
+    newline so commas inside phrases survive).
+  * `load_post_rules()` reads `tts_pro_custom_css_selectors` and
+    surfaces the master `use_own` flag the resolver now gates on.
+  * `breadcrumbs()` collapsed to 3 layers. Per-post crumb label
+    flips to "This post (override, disabled)" when the meta has
+    data but the master toggle is OFF — the metabox UI now
+    explains why a saved rule isn't winning.
+
+`SelectorHash::resolve_rules` and the `/active-rule` REST handler
+both consume `RuleResolver::resolve()`, so they inherit the new
+storage automatically. No call-site changes needed.
+
+### 12.2 D27.22 — Picker no-scope-URL falls back to the live winner
+
+  * `state.scopeFromUrl` flag added: true only when the URL
+    actually contained `?scope=…`. The Pro/Free default fallback
+    no longer counts as "URL pinned".
+  * `loadExistingRules()` only fast-paths through `/scope-rule`
+    when `state.scopeFromUrl` is true. Otherwise it goes through
+    `/active-rule` (the precedence walk) so the picker UI shows
+    whatever is winning at runtime.
+  * After `/active-rule` lands, the picker syncs `state.scope` to
+    the resolved layer. Now the readout label, the chips on
+    screen, and the eventual Save target all agree on one scope.
+
+## 13. Final parity verification
+
+After D27.21 + D27.22 (commits `919f8c6` + `f9cdbe0`), opening
+`http://localhost/tts/mcp-10-simple-daily-habits-for-better-health-and-wellness/?atlasvoice_picker=1`
+on post 175 (per-post toggle OFF, per-type rule saved):
+
+| Layer | Selector | Match |
+|---|---|---|
+| `/step-rail/scope-rule?scope=post_type` | `div.elementor-element-242e3e0d` | source of truth |
+| `/step-rail/active-rule` (RuleResolver, runtime) | `div.elementor-element-242e3e0d` | ✓ |
+| Picker readout | `Editing rule for: Post type "post"` | ✓ |
+| Picker include chip | `div.elementor-element-242e3e0d` | ✓ |
+| Picker chips: exclude CSS / tags / phrase | matches per-type override | ✓ |
+
+Toggle test:
+
+  * `tta__settings_use_own_css_selectors = true` →
+    `/active-rule` resolves to source `post`.
+  * `tta__settings_use_own_css_selectors = false` →
+    `/active-rule` falls through to source `post_type`.
+
+Picker UI = REST `/active-rule` = REST `/scope-rule` = runtime
+extractor. Single source of truth.
