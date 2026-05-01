@@ -1313,7 +1313,7 @@
                     state.selection.scope     = opt.value;
                     state.selection.post_type = opt.needsPt   ? state.postType : '';
                     state.selection.language  = opt.needsLang ? state.postLang : '';
-                    renderScopeRow();
+                    renderScopeReadout();
                     loadRulesForScope();
                 });
             }
@@ -1331,6 +1331,61 @@
 
             wrap.appendChild(label);
         });
+    }
+
+    /* \u2500\u2500\u2500 D26.1 \u2014 scope from URL + read-only readout \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+
+    // Parse the scope context the rail was launched in, from a URL
+    // query parameter. The dashboard (Pick visually button) builds these:
+    //
+    //   ?scope=global              edit the legacy global keys
+    //   ?scope=post_type:<slug>    edit per-post-type override (Pro)
+    //   ?scope=post:<post_id>      edit per-post override (Pro)
+    //
+    // Default when the parameter is missing or unrecognised: 'global' on
+    // Free, 'post:<currentPostId>' on Pro (matches the v5 default).
+    function parseScopeFromUrl() {
+        var raw = '';
+        try {
+            var qs = w.location && w.location.search ? w.location.search.substring(1) : '';
+            qs.split('&').forEach(function (pair) {
+                var p = pair.split('=');
+                if (decodeURIComponent(p[0] || '') === 'scope') {
+                    raw = decodeURIComponent(p[1] || '');
+                }
+            });
+        } catch (e) {}
+        if (!raw) { return null; }
+        if (raw === 'global') { return { kind: 'global' }; }
+        var m;
+        if ((m = /^post_type:([a-z0-9_\-]+)$/i.exec(raw))) { return { kind: 'post_type', post_type: m[1] }; }
+        if ((m = /^post:(\d+)$/.exec(raw)))                 { return { kind: 'post', post_id: parseInt(m[1], 10) }; }
+        return null;
+    }
+
+    function describeScope(scope) {
+        if (!scope) { return ''; }
+        if (scope.kind === 'global')    { return 'Editing rule for: Global'; }
+        if (scope.kind === 'post_type') { return 'Editing rule for: Post type "' + scope.post_type + '"'; }
+        if (scope.kind === 'post')      { return 'Editing rule for: This post (#' + scope.post_id + ')'; }
+        return '';
+    }
+
+    function renderScopeReadout() {
+        var slot = $('.av-scope-readout');
+        if (!slot) { return; }
+        slot.innerHTML = '';
+        slot.appendChild(d.createTextNode(describeScope(state.scope) || 'Scope unknown'));
+        var hint = d.createElement('span');
+        hint.className = 'av-scope-readout__hint';
+        if (state.scope && state.scope.kind === 'global') {
+            hint.textContent = 'Saves to global CSS-selector settings.';
+        } else if (state.scope && state.scope.kind === 'post_type') {
+            hint.textContent = 'Saves to per-post-type override (Pro).';
+        } else if (state.scope && state.scope.kind === 'post') {
+            hint.textContent = 'Saves to this post only (Pro).';
+        }
+        slot.appendChild(hint);
     }
 
     /* ─── load rules for a selected scope ──────────────────────── */
@@ -1976,26 +2031,24 @@
         btn.disabled = true;
         status('Saving\u2026');
 
-        var path, body;
-        if (state.selection.scope === 'post') {
-            path = '/post-rules';
-            body = { action: 'set', post_id: state.selection.post_id, selector: state.selection.selector };
+        // D26.2 — single endpoint, scope_kind in the body picks the storage slot.
+        var body = {
+            selector:   state.selection.selector,
+            excl_css:   (state.selection.excl_css   || []).join('\n'),
+            excl_texts: (state.selection.excl_texts || []).slice(),
+            excl_tags:  (state.selection.excl_tags  || []).slice()
+        };
+        if (state.scope && state.scope.kind === 'post') {
+            body.scope_kind = 'post';
+            body.post_id    = state.scope.post_id;
+        } else if (state.scope && state.scope.kind === 'post_type') {
+            body.scope_kind = 'post_type';
+            body.post_type  = state.scope.post_type;
         } else {
-            path = '/save-selector';
-            body = { selector: state.selection.selector };
-            if (state.selection.scope === 'post_type' || state.selection.scope === 'post_type_language') {
-                body.post_type = state.selection.post_type;
-            }
-            if (state.selection.scope === 'language' || state.selection.scope === 'post_type_language') {
-                body.language = state.selection.language;
-            }
+            body.scope_kind = 'global';
         }
-        // Always send all excl_* for every scope so clearing chips is persisted.
-        body.excl_css   = (state.selection.excl_css   || []).slice();
-        body.excl_texts = (state.selection.excl_texts || []).slice();
-        body.excl_tags  = (state.selection.excl_tags  || []).slice();
 
-        restFetch(path, { method: 'POST', body: body }).then(function (resp) {
+        restFetch('/atlasvoice/save-rule', { method: 'POST', body: body }).then(function (resp) {
             status('Saved \u2713 — content selector updated.');
             state.userEdited = false; // revert preview to "active system" view
             btn.disabled = false;
@@ -2092,7 +2145,7 @@
                 state.selection.excl_tags  = Array.isArray(resp.excl_tags)  ? resp.excl_tags  : [];
             }
             state.userEdited = false;
-            renderScopeRow();
+            renderScopeReadout();
             updateSelectorDisplay();
             updateWordCount();
             renderAllChips();
@@ -2143,9 +2196,26 @@
             delimiter:   shell.getAttribute('data-delimiter')    || '. '
         };
         state.selection.post_id = state.postId;
-        // Per-post rules are Pro-only. Free sites default to global scope so
-        // saves go to the selector store (readable by RuleResolver on Free).
-        state.selection.scope   = state.pro ? 'post' : 'global';
+
+        // D26.1 — scope is now driven by the URL query string. Dashboard
+        // "Pick visually" buttons launch with ?scope=global, ?scope=
+        // post_type:<slug>, or ?scope=post:N. When the rail is opened
+        // without an explicit scope (e.g. directly hitting the post
+        // with ?atlasvoice_picker=1), default to per-post on Pro and
+        // global on Free.
+        var parsed = parseScopeFromUrl();
+        if (!parsed) {
+            parsed = state.pro
+                ? { kind: 'post', post_id: state.postId }
+                : { kind: 'global' };
+        }
+        state.scope = parsed;
+        // Keep state.selection.scope populated with the legacy 5-way
+        // string for the existing save() / loadExistingRules() callers
+        // (those will move to scope-aware writes in D26.2). Mapping:
+        if (parsed.kind === 'post')      { state.selection.scope = 'post';      }
+        else if (parsed.kind === 'post_type') { state.selection.scope = 'post_type'; state.selection.post_type = parsed.post_type; }
+        else                             { state.selection.scope = 'global';    }
 
         // Tab toggles.
         var leftTab  = shell.querySelector('.av-tab--left');
@@ -2181,7 +2251,7 @@
         }).catch(function () {
             state.scopes = { post_types: [], languages: [] };
         }).then(function () {
-            renderScopeRow();
+            renderScopeReadout();
         });
 
         // Wire pickers + chips.

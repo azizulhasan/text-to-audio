@@ -318,6 +318,35 @@ class RestRoutes {
 			)
 		);
 
+		// D26.2 — scope-aware rule save. Replaces /save-selector +
+		// /post-rules, writes directly into the legacy keys
+		// (tta_settings_data + tts_pro_custom_css_selectors).
+		register_rest_route(
+			$ns,
+			'/atlasvoice/save-rule',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( __CLASS__, 'save_rule_by_scope' ),
+					'permission_callback' => array( __CLASS__, 'admin_guard' ),
+					'args'                => array(
+						'scope_kind' => array(
+							'type'        => 'string',
+							'required'    => true,
+							'enum'        => array( 'global', 'post_type', 'post' ),
+							'description' => 'Which legacy slot to write to.',
+						),
+						'post_type' => array( 'type' => 'string',  'required' => false ),
+						'post_id'   => array( 'type' => 'integer', 'required' => false ),
+						'selector'  => array( 'type' => 'string',  'required' => true  ),
+						'excl_css'   => array( 'type' => 'string', 'required' => false ),
+						'excl_texts' => array( 'type' => 'array',  'required' => false ),
+						'excl_tags'  => array( 'type' => 'array',  'required' => false ),
+					),
+				),
+			)
+		);
+
 		// D9 — step-rail active-rule resolver. Returns the winning rule for a
 		// given post across all scopes (per-post → post_type_language →
 		// language → post_type → global) including the scope label, so the
@@ -638,6 +667,115 @@ class RestRoutes {
 	 * @param \WP_REST_Request $request
 	 * @return \WP_REST_Response
 	 */
+	/**
+	 * D26.2 — Write a picker rule into the legacy storage slots based on
+	 * scope_kind. Replaces save_selector (selector store) and the per-post
+	 * route. Three branches:
+	 *
+	 *   global    → tta_settings_data['settings'][<four legacy keys>]
+	 *   post_type → tta_settings_data['settings']['tta__settings_atlasvoice_per_type_overrides'][<slug>]
+	 *   post      → post meta tts_pro_custom_css_selectors (Pro only)
+	 *
+	 * Read-modify-write under no explicit lock (settings option already
+	 * follows WP's option-cache discipline). Returns the merged rule the
+	 * picker can echo back to the user as a "Saved" confirmation.
+	 *
+	 * @param \WP_REST_Request $request
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public static function save_rule_by_scope( $request ) {
+		$scope     = (string) $request->get_param( 'scope_kind' );
+		$selector  = trim( (string) $request->get_param( 'selector' ) );
+		$post_type = sanitize_key( (string) $request->get_param( 'post_type' ) );
+		$post_id   = (int) $request->get_param( 'post_id' );
+
+		// Sanitise the four CSS-selector fields. Selector and excl_css come
+		// in as strings (multi-line); excl_tags and excl_texts arrive as
+		// arrays from the picker chips.
+		if ( $selector === '' || strlen( $selector ) > 2048 ) {
+			return new \WP_Error( 'invalid_selector', __( 'Selector is empty or too long.', 'text-to-audio' ), array( 'status' => 400 ) );
+		}
+
+		$excl_css_raw   = (string) $request->get_param( 'excl_css' );
+		$excl_texts_raw = $request->get_param( 'excl_texts' );
+		$excl_tags_raw  = $request->get_param( 'excl_tags' );
+
+		$excl_texts = is_array( $excl_texts_raw ) ? array_values( array_filter( array_map( 'sanitize_text_field', $excl_texts_raw ) ) ) : array();
+		$excl_tags  = is_array( $excl_tags_raw )
+			? array_values( array_filter(
+				array_map( 'sanitize_key', $excl_tags_raw ),
+				function ( $t ) { return $t !== '' && strlen( $t ) <= 32 && preg_match( '/^[a-z][a-z0-9]*$/', $t ); }
+			) )
+			: array();
+
+		$rule = array(
+			'tta__settings_css_selectors'                    => $selector,
+			'tta__settings_exclude_content_by_css_selectors' => $excl_css_raw,
+			// Legacy keys store these as pipe-joined strings on Free, but
+			// the per-type and per-post stores accept arrays directly.
+			'tta__settings_exclude_texts' => $excl_texts,
+			'tta__settings_exclude_tags'  => $excl_tags,
+		);
+
+		if ( $scope === 'post' ) {
+			if ( $post_id <= 0 ) { return new \WP_Error( 'missing_post_id', 'post_id required for scope=post.', array( 'status' => 400 ) ); }
+			$is_pro = class_exists( '\\TTA\\TTA_Helper' ) && \TTA\TTA_Helper::is_pro_active();
+			if ( ! $is_pro ) { return new \WP_Error( 'pro_only', 'Per-post override is a Pro feature.', array( 'status' => 403 ) ); }
+
+			$existing = get_post_meta( $post_id, 'tts_pro_custom_css_selectors', true );
+			if ( ! is_array( $existing ) ) { $existing = array(); }
+			$rule['tta__settings_use_own_css_selectors'] = true;
+			$merged = array_merge( $existing, $rule );
+			update_post_meta( $post_id, 'tts_pro_custom_css_selectors', $merged );
+			if ( class_exists( '\\TTA\\TTA_Cache' ) ) { \TTA\TTA_Cache::delete( 'all_settings' ); }
+
+			return new \WP_REST_Response( array( 'status' => true, 'scope' => 'post', 'post_id' => $post_id, 'rule' => $merged ), 200 );
+		}
+
+		if ( $scope === 'post_type' ) {
+			if ( $post_type === '' ) { return new \WP_Error( 'missing_post_type', 'post_type required for scope=post_type.', array( 'status' => 400 ) ); }
+			$is_pro = class_exists( '\\TTA\\TTA_Helper' ) && \TTA\TTA_Helper::is_pro_active();
+			if ( ! $is_pro ) { return new \WP_Error( 'pro_only', 'Per-post-type override is a Pro feature.', array( 'status' => 403 ) ); }
+
+			$opt = get_option( 'tta_settings_data', array() );
+			if ( ! is_array( $opt ) ) { $opt = array(); }
+			if ( ! isset( $opt['settings'] ) || ! is_array( $opt['settings'] ) ) { $opt['settings'] = array(); }
+			$bag = isset( $opt['settings']['tta__settings_atlasvoice_per_type_overrides'] ) && is_array( $opt['settings']['tta__settings_atlasvoice_per_type_overrides'] )
+				? $opt['settings']['tta__settings_atlasvoice_per_type_overrides']
+				: array();
+			$bag[ $post_type ] = $rule;
+			$opt['settings']['tta__settings_atlasvoice_per_type_overrides'] = $bag;
+			update_option( 'tta_settings_data', $opt );
+			if ( class_exists( '\\TTA\\TTA_Cache' ) ) { \TTA\TTA_Cache::delete( 'all_settings' ); }
+
+			return new \WP_REST_Response( array( 'status' => true, 'scope' => 'post_type', 'post_type' => $post_type, 'rule' => $rule ), 200 );
+		}
+
+		// scope=global — write the four legacy keys directly. Excl_texts /
+		// excl_tags become pipe-joined strings (legacy shape) for backward
+		// compatibility with the existing extractor.
+		$opt = get_option( 'tta_settings_data', array() );
+		if ( ! is_array( $opt ) ) { $opt = array(); }
+		if ( ! isset( $opt['settings'] ) || ! is_array( $opt['settings'] ) ) { $opt['settings'] = array(); }
+		$opt['settings']['tta__settings_css_selectors']                    = $selector;
+		$opt['settings']['tta__settings_exclude_content_by_css_selectors'] = $excl_css_raw;
+		$opt['settings']['tta__settings_exclude_texts'] = implode( '|', $excl_texts );
+		$opt['settings']['tta__settings_exclude_tags']  = implode( '|', $excl_tags );
+		update_option( 'tta_settings_data', $opt );
+		if ( class_exists( '\\TTA\\TTA_Cache' ) ) { \TTA\TTA_Cache::delete( 'all_settings' ); }
+
+		return new \WP_REST_Response( array(
+			'status'   => true,
+			'scope'    => 'global',
+			'rule'     => array(
+				'selector'   => $selector,
+				'excl_css'   => $excl_css_raw,
+				'excl_texts' => $excl_texts,
+				'excl_tags'  => $excl_tags,
+			),
+		), 200 );
+	}
+
 	public static function get_step_rail_verify_sample( $request ) {
 		$pt      = (string) $request->get_param( 'post_type' );
 		$lang    = (string) $request->get_param( 'language' );

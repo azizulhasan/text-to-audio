@@ -151,7 +151,7 @@ class StepRail {
 							<strong><?php echo esc_html__( 'Scope', 'text-to-audio' ); ?></strong>
 						</div>
 						<div class="av-step__body">
-							<div class="av-scope-group" role="radiogroup"></div>
+							<p class="av-scope-readout"><?php echo esc_html__( 'Loading…', 'text-to-audio' ); ?></p>
 						</div>
 					</section>
 
@@ -453,6 +453,14 @@ class StepRail {
 .av-status{flex:1;font-size:12px;color:#4b5563;}
 
 /* ── Scope pills ─────────────────────────────────────────────── */
+.av-scope-readout{
+  margin:0;font-size:13px;color:#1d2327;font-weight:500;
+  background:#eaf3f4;border-left:3px solid #184c53;
+  padding:6px 10px;border-radius:3px;
+}
+.av-scope-readout .av-scope-readout__hint{
+  display:block;font-size:11px;color:#6b7280;font-weight:400;margin-top:2px;
+}
 .av-scope-group{display:flex;flex-wrap:wrap;gap:6px;}
 .av-scope-group label{
   display:inline-flex;align-items:center;gap:5px;

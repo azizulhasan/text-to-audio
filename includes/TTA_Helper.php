@@ -602,36 +602,59 @@ class TTA_Helper
         }
 
         if ($post_id) {
+            $css_fields = array(
+                'tta__settings_css_selectors',
+                'tta__settings_exclude_content_by_css_selectors',
+                'tta__settings_exclude_texts',
+                'tta__settings_exclude_tags',
+            );
+
+            $settings = isset( $all_settings_data['settings'] ) && is_array( $all_settings_data['settings'] )
+                ? $all_settings_data['settings']
+                : array();
+
+            // TTS-238 D26.3 — Tier 2: per-post-type override (Pro). Whole-entry
+            // replace gated by non-empty include selector. Read from
+            // tta__settings_atlasvoice_per_type_overrides[<post_type>].
+            $post_type = get_post_type( $post_id );
+            if ( $post_type
+                 && isset( $settings['tta__settings_atlasvoice_per_type_overrides'] )
+                 && is_array( $settings['tta__settings_atlasvoice_per_type_overrides'] )
+                 && isset( $settings['tta__settings_atlasvoice_per_type_overrides'][ $post_type ] )
+                 && is_array( $settings['tta__settings_atlasvoice_per_type_overrides'][ $post_type ] )
+            ) {
+                $type_override = $settings['tta__settings_atlasvoice_per_type_overrides'][ $post_type ];
+                $gate          = isset( $type_override['tta__settings_css_selectors'] )
+                    ? trim( (string) $type_override['tta__settings_css_selectors'] )
+                    : '';
+                if ( $gate !== '' ) {
+                    foreach ( $css_fields as $field ) {
+                        if ( array_key_exists( $field, $type_override ) ) {
+                            $settings[ $field ] = $type_override[ $field ];
+                        }
+                    }
+                }
+            }
+
+            // Tier 1: per-post override (Pro, existing field-by-field merge
+            // gated by tta__settings_use_own_css_selectors).
             $post_css_selectors = get_post_meta($post_id, 'tts_pro_custom_css_selectors');
             if (isset($post_css_selectors[0])) {
                 $post_css_selectors = json_decode(json_encode($post_css_selectors[0]), true);
             }
 
-
             if (!empty($post_css_selectors) && isset($post_css_selectors['tta__settings_use_own_css_selectors']) && $post_css_selectors['tta__settings_use_own_css_selectors']) {
 
                 if (self::check_all_properties_are_empty($post_css_selectors)) {
-                    $settings = $all_settings_data['settings'];
-
-                    // Merge field-by-field: only override if per-post value is non-empty.
-                    // This allows users to override just one field while keeping global values for the rest.
-                    $css_fields = array(
-                        'tta__settings_css_selectors',
-                        'tta__settings_exclude_content_by_css_selectors',
-                        'tta__settings_exclude_texts',
-                        'tta__settings_exclude_tags',
-                    );
-
                     foreach ( $css_fields as $field ) {
                         if ( isset( $post_css_selectors[ $field ] ) && ! empty( $post_css_selectors[ $field ] ) ) {
                             $settings[ $field ] = $post_css_selectors[ $field ];
                         }
                     }
-
-                    $all_settings_data['settings'] = $settings;
                 }
             }
 
+            $all_settings_data['settings'] = $settings;
         }
 
 

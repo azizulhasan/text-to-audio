@@ -1047,21 +1047,37 @@ function tta_free_emit_atlasvoice_markers( $content ) {
         return $content;
     }
 
-    $settings = \TTA\TTA_Helper::tts_get_settings( 'settings' );
-    if ( empty( $settings['tta__settings_use_atlasvoice_extractor'] ) ) {
-        return $content;
-    }
+    // D26.7 — emit the wrapper + comment markers on Free (was previously
+    // gated on the now-removed `tta__settings_use_atlasvoice_extractor`).
+    // The wrapper can be opted out via tta__settings_emit_legacy_wrapper
+    // for themes whose layout breaks on it; markers always emit so the
+    // picker has something to target.
+    $settings    = \TTA\TTA_Helper::tts_get_settings( 'settings' );
+    $emit_wrapper = ! isset( $settings['tta__settings_emit_legacy_wrapper'] )
+        ? true
+        : ! empty( $settings['tta__settings_emit_legacy_wrapper'] );
+    $emit_wrapper = (bool) apply_filters( 'tts_emit_legacy_wrapper', $emit_wrapper, $content, get_the_ID() );
 
-    // Let integrators opt out selectively.
-    if ( ! apply_filters( 'tts_free_emit_atlasvoice_markers', true, get_the_ID() ) ) {
+    // Let integrators opt out of marker emission specifically.
+    $emit_markers = (bool) apply_filters( 'tts_free_emit_atlasvoice_markers', true, get_the_ID() );
+
+    if ( ! $emit_markers && ! $emit_wrapper ) {
         return $content;
     }
 
     static $btn_no = 0;
     $btn_no++;
 
+    $body = $emit_wrapper
+        ? '<div class="tts_content_wrapper_' . intval( $btn_no ) . '">' . $content . '</div>'
+        : $content;
+
+    if ( ! $emit_markers ) {
+        return $body;
+    }
+
     return '<!--atlasvoice:start:' . intval( $btn_no ) . '-->'
-         . $content
+         . $body
          . '<!--atlasvoice:end:' . intval( $btn_no ) . '-->';
 }
 add_filter( 'the_content', 'tta_free_emit_atlasvoice_markers', 20 );
