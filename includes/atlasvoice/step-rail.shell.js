@@ -2216,6 +2216,10 @@
         if (parsed.kind === 'post')      { state.selection.scope = 'post';      }
         else if (parsed.kind === 'post_type') { state.selection.scope = 'post_type'; state.selection.post_type = parsed.post_type; }
         else                             { state.selection.scope = 'global';    }
+        // Render the read-only scope label immediately so the panel doesn't
+        // stay on the PHP-rendered "Loading…" placeholder while the
+        // /step-rail/scopes fetch settles.
+        renderScopeReadout();
 
         // Tab toggles.
         var leftTab  = shell.querySelector('.av-tab--left');

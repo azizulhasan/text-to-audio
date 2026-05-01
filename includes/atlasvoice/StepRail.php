@@ -44,14 +44,15 @@ class StepRail {
 	public static function maybe_activate() {
 		if ( ! is_singular() ) { return; }
 		if ( ! current_user_can( 'manage_options' ) ) { return; }
-		if ( ! self::post_has_listening( get_the_ID() ) ) { return; }
 
-		// Gate on the AtlasVoice opt-in. When the extractor is OFF the step-rail
-		// has nothing to do — selectors saved here feed the new engine only.
-		$settings = class_exists( '\\TTA\\TTA_Helper' )
-			? \TTA\TTA_Helper::tts_get_settings( 'settings' )
-			: array();
-		if ( empty( $settings['tta__settings_use_atlasvoice_extractor'] ) ) { return; }
+		// D26 — the picker now writes to legacy keys the extractor already
+		// consumes; the opt-in flag (`tta__settings_use_atlasvoice_extractor`)
+		// is gone. We also bypass the post-has-listening gate when the
+		// admin explicitly arms the picker via `?atlasvoice_picker=1` so
+		// the rail is reachable on any singular post even if its post type
+		// isn't on the listening allow-list yet.
+		$forced = isset( $_GET[ self::AUTO_PARAM ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! $forced && ! self::post_has_listening( get_the_ID() ) ) { return; }
 
 		self::$front_active = true;
 
