@@ -237,6 +237,7 @@ export default function CSSSelectorsForPosts() {
     }
 
     const isPro = ttsObj.is_pro_active;
+    const useOwnSelectors = !!settings.tta__settings_use_own_css_selectors;
 
     const fields = [
         {
@@ -314,20 +315,26 @@ export default function CSSSelectorsForPosts() {
                                 <p style={{...styles.subtitle, margin: 0}}>{__('Override global content extraction settings for this post only.', 'text-to-audio')}</p>
                             </div>
                         </div>
-                        {/* TTS-238 D27.16 — Pick Visually launcher (per-post scope).
-                            Render whenever we have a post id; the per-post
-                            metabox itself is Pro-only (mount target lives in
-                            the Pro plugin), so an isPro gate here would be
-                            redundant. */}
+                        {/* TTS-238 D27.16/D27.19 — Pick Visually launcher (per-post
+                            scope). Disabled when "Use Own CSS Selectors" is OFF —
+                            in that mode the per-post slot is logically inactive
+                            and the picker would only let admins draft a rule
+                            that won't apply at runtime. */}
                         {tta_obj && tta_obj.post_id && (
                             <button
                                 type="button"
                                 className="btn btn-sm btn-dark"
+                                disabled={!useOwnSelectors}
+                                style={!useOwnSelectors ? {opacity: 0.5, cursor: 'not-allowed'} : undefined}
+                                title={useOwnSelectors
+                                    ? __('Open the visual picker for this post.', 'text-to-audio')
+                                    : __('Enable "Use Own CSS Selectors" to edit this post\'s rule.', 'text-to-audio')}
                                 onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
+                                    if (!useOwnSelectors) { return; }
                                     try {
-                                        const postId   = parseInt(tta_obj.post_id, 10);
+                                        const postId    = parseInt(tta_obj.post_id, 10);
                                         const permalink = (tta_obj.post_permalink || tta_obj.permalink || '').toString();
                                         if (!permalink) {
                                             window.alert(__('Could not resolve this post URL. Save the post first.', 'text-to-audio'));

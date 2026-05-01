@@ -1574,10 +1574,20 @@ class RestRoutes {
 
 		// Per-post scope — read post meta `tts_pro_custom_css_selectors`
 		// (Pro). PerPostRules wraps that meta but exposes legacy short
-		// names; we re-shape its output here.
+		// names; we re-shape its output here. When the per-post master
+		// toggle (`tta__settings_use_own_css_selectors`) is OFF we treat
+		// the meta as logically unset — the scope is not active so the
+		// picker should show an empty rule instead of letting admins
+		// edit a draft that won't apply at runtime.
 		if ( $scope === 'post' ) {
 			$meta = get_post_meta( $post_id, 'tts_pro_custom_css_selectors', true );
 			if ( ! is_array( $meta ) ) { $meta = array(); }
+			$use_own = isset( $meta['tta__settings_use_own_css_selectors'] )
+				? ! empty( $meta['tta__settings_use_own_css_selectors'] )
+				: false;
+			if ( ! $use_own ) {
+				return new \WP_REST_Response( $empty, 200 );
+			}
 			$selector = isset( $meta['tta__settings_css_selectors'] ) ? (string) $meta['tta__settings_css_selectors'] : '';
 			if ( $selector === '' ) {
 				return new \WP_REST_Response( $empty, 200 );
