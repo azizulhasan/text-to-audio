@@ -16,13 +16,61 @@
  */
 import React from "react";
 import {__} from "@wordpress/i18n";
-import {Form, Row, Col, OverlayTrigger, Tooltip} from "react-bootstrap";
+import {Form, Row, Col, OverlayTrigger, Tooltip, Button} from "react-bootstrap";
 import Icon from "../../Icon";
 import {ProLockIcon} from "./SettingsPrimitives";
+
+/**
+ * D26.4 — Open the AtlasVoiceSelector picker on a sample published post.
+ * Hits the existing /step-rail/sample-url endpoint to find any recent
+ * post, then opens it with `?atlasvoice_picker=1&scope=global`. Save
+ * inside the picker writes back through /atlasvoice/save-rule (D26.2).
+ */
+async function openPickerForGlobal() {
+    try {
+        const apiRoot = (window.ttsObj && window.ttsObj.api_url) || "/wp-json/";
+        const nonce   = (window.wpApiSettings && window.wpApiSettings.nonce)
+            || (window.ttsObj && window.ttsObj.rest_nonce)
+            || "";
+        const r = await fetch(apiRoot + "tta/v1/step-rail/sample-url?scope=global", {
+            credentials: "same-origin",
+            headers: {"X-WP-Nonce": nonce},
+        });
+        const j = await r.json();
+        if (!j || !j.url) {
+            window.alert(__("No published post found to launch the picker.", "text-to-audio"));
+            return;
+        }
+        const u = new URL(j.url, window.location.origin);
+        u.searchParams.set("atlasvoice_picker", "1");
+        u.searchParams.set("scope", "global");
+        window.open(u.toString(), "_blank");
+    } catch (e) {
+        window.alert(__("Could not open the picker: ", "text-to-audio") + (e && e.message));
+    }
+}
 
 export default function LegacyExtractionSettings({settings, handleChange}) {
     return (
         <>
+            {/* D26.4 — Pick visually launcher (opens the AtlasVoiceSelector
+                picker on a sample post; saves to global CSS-selector keys). */}
+            <Row className="mb-3">
+                <Col xs={12}>
+                    <Button
+                        variant="dark"
+                        size="sm"
+                        onClick={openPickerForGlobal}
+                        className="d-inline-flex align-items-center"
+                    >
+                        <span style={{marginRight: 6}}>&#9654;</span>
+                        {__("Pick visually with AtlasVoiceSelector", "text-to-audio")}
+                    </Button>
+                    <div className="text-muted small mt-1">
+                        {__("Opens a sample post in a new tab. Pick / drag in the rail and click Save to update all four fields below.", "text-to-audio")}
+                    </div>
+                </Col>
+            </Row>
             {/* Include Content By CSS Selectors */}
             <Row className="mb-4">
                 <Col xs={12}>

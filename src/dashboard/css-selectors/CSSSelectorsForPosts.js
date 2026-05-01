@@ -260,6 +260,34 @@ export default function CSSSelectorsForPosts() {
                 <div style={styles.card}>
                     <h3 style={styles.header}>{__('CSS Selectors for This Post', 'text-to-audio')}</h3>
                     <p style={styles.subtitle}>{__('Override global content extraction settings for this post only.', 'text-to-audio')}</p>
+                    {/* D26.6 — Pick visually launcher (per-post scope). Opens
+                        THIS post in a new tab with ?atlasvoice_picker=1&scope=post:N.
+                        Save inside the rail writes to tts_pro_custom_css_selectors. */}
+                    {isPro && tta_obj && tta_obj.post_id && (
+                        <button
+                            type="button"
+                            className="btn btn-sm btn-dark mt-2"
+                            onClick={() => {
+                                try {
+                                    const postId = parseInt(tta_obj.post_id, 10);
+                                    const permalink = (tta_obj.post_permalink || tta_obj.permalink || '').toString();
+                                    if (!permalink) {
+                                        window.alert(__('Could not resolve this post URL. Save the post first.', 'text-to-audio'));
+                                        return;
+                                    }
+                                    const u = new URL(permalink, window.location.origin);
+                                    u.searchParams.set('atlasvoice_picker', '1');
+                                    u.searchParams.set('scope', 'post:' + postId);
+                                    window.open(u.toString(), '_blank');
+                                } catch (e) {
+                                    window.alert(__('Could not open the picker: ', 'text-to-audio') + (e && e.message));
+                                }
+                            }}
+                        >
+                            <span style={{marginRight: 6}}>&#9654;</span>
+                            {__('Pick visually with AtlasVoiceSelector', 'text-to-audio')}
+                        </button>
+                    )}
                 </div>
 
                 {/* Settings Card */}

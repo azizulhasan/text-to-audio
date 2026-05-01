@@ -466,6 +466,60 @@ export default function Settings() {
                                         </Col>
                                     </Row>
 
+                                    {/* D26.5 — Per-post-type CSS rule picker (Pro). One Pick visually
+                                        button per enabled type. Click opens a sample post of that
+                                        type in a new tab with ?atlasvoice_picker=1&scope=post_type:<slug>.
+                                        Save inside the rail writes to
+                                        tta__settings_atlasvoice_per_type_overrides[<slug>]. */}
+                                    {ttsObj.is_pro_active && Array.isArray(settings.tta__settings_allow_listening_for_post_types) && settings.tta__settings_allow_listening_for_post_types.length > 0 && (
+                                        <Row className="mb-4">
+                                            <Col xs={12}>
+                                                <Form.Label className="setting-label text-dark mb-2">
+                                                    {__("Per-post-type CSS rules (Pro)", "text-to-audio")}
+                                                </Form.Label>
+                                                <div className="text-muted small mb-2">
+                                                    {__("Override the global CSS rule for specific post types. Pick visually opens a sample post of that type so you can drag-pick the content region. Saves to the per-post-type override.", "text-to-audio")}
+                                                </div>
+                                                {settings.tta__settings_allow_listening_for_post_types.map((slug) => (
+                                                    <div key={slug} className="d-flex align-items-center justify-content-between border rounded px-3 py-2 mb-2" style={{background: "#fafafa"}}>
+                                                        <div>
+                                                            <strong>{slug}</strong>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-sm btn-dark"
+                                                            onClick={async () => {
+                                                                try {
+                                                                    const apiRoot = (window.ttsObj && window.ttsObj.api_url) || "/wp-json/";
+                                                                    const nonce   = (window.wpApiSettings && window.wpApiSettings.nonce)
+                                                                        || (window.ttsObj && window.ttsObj.rest_nonce)
+                                                                        || "";
+                                                                    const r = await fetch(apiRoot + "tta/v1/step-rail/sample-url?scope=post_type&post_type=" + encodeURIComponent(slug), {
+                                                                        credentials: "same-origin",
+                                                                        headers: {"X-WP-Nonce": nonce},
+                                                                    });
+                                                                    const j = await r.json();
+                                                                    if (!j || !j.url) {
+                                                                        window.alert(__("No published post found for this type.", "text-to-audio"));
+                                                                        return;
+                                                                    }
+                                                                    const u = new URL(j.url, window.location.origin);
+                                                                    u.searchParams.set("atlasvoice_picker", "1");
+                                                                    u.searchParams.set("scope", "post_type:" + slug);
+                                                                    window.open(u.toString(), "_blank");
+                                                                } catch (e) {
+                                                                    window.alert(__("Could not open the picker: ", "text-to-audio") + (e && e.message));
+                                                                }
+                                                            }}
+                                                        >
+                                                            {__("Pick visually", "text-to-audio")}&nbsp;&#9656;
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </Col>
+                                        </Row>
+                                    )}
+
                                     <Row className="mb-4">
                                         <Col xs={12}>
                                             <Form.Label className="setting-label text-dark mb-2">

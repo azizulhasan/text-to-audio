@@ -89,10 +89,18 @@ class TTA_Activator {
 				'tta__settings_apply_number_format'                   => false,
 				"tta__settings_allow_listening_for_post_types"        => [ 'post' ],
 				"tta__settings_allow_listening_for_posts_status"      => [ 'publish' ],
-				'tta__settings_css_selectors'                         => '',
+				// D26.8 — default selector points at the legacy wrapper class
+				// emitted by Pro and (post-D26.7) Free, so a fresh install
+				// extracts content out of the box without admin config.
+				'tta__settings_css_selectors'                         => '[class*="tts_content_wrapper_"]',
 				'tta__settings_exclude_content_by_css_selectors'      => '',
 				'tta__settings_exclude_texts'                         => [],
 				'tta__settings_exclude_tags'                          => [],
+				// D26.7 — wrapper opt-out flag. Default ON so the new default
+				// selector above keeps working; admins on themes that break
+				// on the wrapper can flip this off.
+				'tta__settings_emit_legacy_wrapper'                   => true,
+				'tta__settings_atlasvoice_per_type_overrides'         => [],
 				"tta__settings_display_btn_icon"                      => true,
 				"tta__settings_exclude_post_ids"                      => [],
 				'tta__settings_stop_auto_playing_after_switching_tab' => true,
