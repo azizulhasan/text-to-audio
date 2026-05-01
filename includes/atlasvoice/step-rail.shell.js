@@ -2145,7 +2145,11 @@
         // walk's winner. Without this, the picker shows the global
         // rule even when the admin explicitly opened "post type" or
         // "post" scope.
-        var urlPinned = state.scope && (state.scope.kind === 'post_type' || state.scope.kind === 'post' || state.scope.kind === 'global');
+        // Only fast-path through /scope-rule when the URL actually had
+        // ?scope=… set. Without it we want the precedence walk so the
+        // picker reflects the live winner.
+        var urlPinned = state.scopeFromUrl && state.scope
+            && (state.scope.kind === 'post_type' || state.scope.kind === 'post' || state.scope.kind === 'global');
         if (urlPinned) {
             var p = '?post_id=' + state.postId;
             if (state.scope.kind === 'post_type') {
@@ -2188,6 +2192,20 @@
             state.selection.language  = resp.language   || '';
             state.postType            = resp.post_type  || '';
             state.postLang            = resp.language   || '';
+            // TTS-238 D27.22 — When the URL didn't pin a scope, sync
+            // state.scope to whichever layer the resolver picked.
+            // Otherwise the readout would say "Editing rule for: This
+            // post" while the data shown is the post_type rule, and a
+            // Save would land in the wrong slot.
+            if (!state.scopeFromUrl && resp.scope) {
+                if (resp.scope === 'post_type') {
+                    state.scope = { kind: 'post_type', post_type: resp.post_type || state.postType || '' };
+                } else if (resp.scope === 'post') {
+                    state.scope = { kind: 'post', post_id: state.postId };
+                } else {
+                    state.scope = { kind: 'global' };
+                }
+            }
             // excl_set=true means the server has explicit excl_* data for this
             // scope (new array storage format). Restore them, even if empty —
             // empty means the user explicitly cleared all exclusions.
@@ -2258,6 +2276,12 @@
         // with ?atlasvoice_picker=1), default to per-post on Pro and
         // global on Free.
         var parsed = parseScopeFromUrl();
+        // TTS-238 D27.22 — track whether the URL explicitly pinned a
+        // scope. When it didn't, loadExistingRules falls through to the
+        // precedence walk (/active-rule) so the picker shows the rule
+        // that's actually winning at runtime instead of an empty per-
+        // post slot just because Pro defaults to "post".
+        state.scopeFromUrl = !!parsed;
         if (!parsed) {
             parsed = state.pro
                 ? { kind: 'post', post_id: state.postId }
