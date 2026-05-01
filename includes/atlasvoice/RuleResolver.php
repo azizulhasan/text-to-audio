@@ -11,18 +11,21 @@ namespace TTA\AtlasVoice;
  * breadcrumbs, and the dashboard Rules table all agree on what's
  * actually in effect when a visitor loads a page.
  *
- * Precedence (most-specific wins, same as the D3/D0d plan):
+ * Precedence (most-specific wins, post-D26 collapse):
  *
- *   1. per-post override            (_atlasvoice_post_rules meta)
- *   2. per-post-type + per-language (selectors.per_post_type_per_language[pt][lang])
- *   3. per-language                 (selectors.per_language[lang])
- *   4. per-post-type                (selectors.per_post_type[pt])
- *   5. global                       (selectors.global)
+ *   1. per-post override   (`tts_pro_custom_css_selectors` post meta,
+ *                          gated on `tta__settings_use_own_css_selectors`)
+ *   2. per-post-type       (`tta_settings_data['tta__settings_atlasvoice_per_type_overrides'][<slug>]`)
+ *   3. global              (`tta_settings_data['tta__settings_css_selectors']` and
+ *                          the three matching exclude keys, all flat)
  *
  * The resolver returns both the merged rule payload and a breadcrumb
  * trail — the latter is what the meta-box UI displays so admins can
  * see at a glance which layer contributed each rule and which layers
- * are being overridden further up the chain.
+ * are being overridden further up the chain. Per-language and
+ * per-post-type-per-language layers were retired by the D26 collapse;
+ * `language` is still echoed in the resolve() output for callers that
+ * include it in cache keys, but it no longer drives selection.
  *
  * This class has no side effects: pure read. It's safe to call during
  * template_redirect, from cron, or inside a REST handler without
@@ -55,68 +58,130 @@ class RuleResolver {
 			$lang = (string) LanguagePlugins::current_language_code();
 		}
 
-		$selectors = get_option(
-			'tta_atlasvoice_selectors',
-			array( 'global' => '', 'per_post_type' => array() )
-		);
-		if ( ! is_array( $selectors ) ) {
-			$selectors = array( 'global' => '', 'per_post_type' => array() );
+		// TTS-238 D27.21 — read from the post-D26 collapsed storage:
+		// global + per-post-type live in `tta_settings_data` (flat),
+		// per-post lives in `tts_pro_custom_css_selectors` post meta.
+		// The dashboard saves the option as a json_decode'd stdClass,
+		// so cast through json to a recursive array for uniform reads.
+		$opt_raw = get_option( 'tta_settings_data', array() );
+		$opt     = json_decode( wp_json_encode( $opt_raw ), true );
+		if ( ! is_array( $opt ) ) { $opt = array(); }
+		// Recover from prior nested-settings writes.
+		if ( isset( $opt['settings'] ) && is_array( $opt['settings'] ) ) {
+			foreach ( $opt['settings'] as $k => $v ) {
+				if ( ! array_key_exists( $k, $opt ) ) { $opt[ $k ] = $v; }
+			}
 		}
-		$per_pt      = isset( $selectors['per_post_type'] ) && is_array( $selectors['per_post_type'] ) ? $selectors['per_post_type'] : array();
-		$per_lang    = isset( $selectors['per_language'] ) && is_array( $selectors['per_language'] ) ? $selectors['per_language'] : array();
-		$per_pt_lang = isset( $selectors['per_post_type_per_language'] ) && is_array( $selectors['per_post_type_per_language'] ) ? $selectors['per_post_type_per_language'] : array();
+
+		$global_entry = self::settings_to_entry( $opt );
+
+		$per_pt = isset( $opt['tta__settings_atlasvoice_per_type_overrides'] )
+		         && is_array( $opt['tta__settings_atlasvoice_per_type_overrides'] )
+			? $opt['tta__settings_atlasvoice_per_type_overrides']
+			: array();
+		$pt_entry = ( $post_type !== '' && isset( $per_pt[ $post_type ] ) && is_array( $per_pt[ $post_type ] ) )
+			? self::settings_to_entry( $per_pt[ $post_type ] )
+			: null;
 
 		$post_override = self::load_post_rules( $post_id );
 
-		// Walk from most-specific to least-specific.
-		// $resolved_entry tracks the raw store value of the winning scope so
-		// entry_excl() can extract excl_* from it (array format) or return
-		// null (legacy string format → excl_set=false, keep UI defaults).
 		$resolved_selector = '';
 		$selector_source   = 'none';
 		$resolved_entry    = null;
 
 		$is_pro = class_exists( '\\TTA\\TTA_Helper' ) && \TTA\TTA_Helper::is_pro_active();
 
-		if ( $is_pro && isset( $post_override['selector'] ) && (string) $post_override['selector'] !== '' ) {
+		// Layer 1 — per-post override (Pro). Gated on the master toggle:
+		// if `tta__settings_use_own_css_selectors` is OFF the layer is
+		// inactive even when the meta has data.
+		if ( $is_pro
+			&& ! empty( $post_override['use_own'] )
+			&& isset( $post_override['selector'] )
+			&& (string) $post_override['selector'] !== '' ) {
 			$resolved_selector = (string) $post_override['selector'];
 			$selector_source   = 'post';
 			$resolved_entry    = $post_override;
-		} elseif ( $is_pro && $post_type !== '' && $lang !== '' && isset( $per_pt_lang[ $post_type ][ $lang ] ) && self::entry_sel( $per_pt_lang[ $post_type ][ $lang ] ) !== '' ) {
-			$resolved_selector = self::entry_sel( $per_pt_lang[ $post_type ][ $lang ] );
-			$selector_source   = 'post_type_language';
-			$resolved_entry    = $per_pt_lang[ $post_type ][ $lang ];
-		} elseif ( $is_pro && $lang !== '' && isset( $per_lang[ $lang ] ) && self::entry_sel( $per_lang[ $lang ] ) !== '' ) {
-			$resolved_selector = self::entry_sel( $per_lang[ $lang ] );
-			$selector_source   = 'language';
-			$resolved_entry    = $per_lang[ $lang ];
-		} elseif ( $is_pro && $post_type !== '' && isset( $per_pt[ $post_type ] ) && self::entry_sel( $per_pt[ $post_type ] ) !== '' ) {
-			$resolved_selector = self::entry_sel( $per_pt[ $post_type ] );
+		}
+		// Layer 2 — per-post-type (Pro).
+		elseif ( $is_pro && $pt_entry !== null && $pt_entry['selector'] !== '' ) {
+			$resolved_selector = $pt_entry['selector'];
 			$selector_source   = 'post_type';
-			$resolved_entry    = $per_pt[ $post_type ];
-		} elseif ( isset( $selectors['global'] ) && self::entry_sel( $selectors['global'] ) !== '' ) {
-			$resolved_selector = self::entry_sel( $selectors['global'] );
+			$resolved_entry    = $pt_entry;
+		}
+		// Layer 3 — global.
+		elseif ( $global_entry['selector'] !== '' ) {
+			$resolved_selector = $global_entry['selector'];
 			$selector_source   = 'global';
-			$resolved_entry    = $selectors['global'];
+			$resolved_entry    = $global_entry;
 		}
 
-		$excl       = self::entry_excl( $resolved_entry );
-		$excl_set   = $excl !== null;
-		$excl_css   = $excl_set && isset( $excl['excl_css'] )   ? $excl['excl_css']   : array();
-		$excl_texts = $excl_set && isset( $excl['excl_texts'] ) ? $excl['excl_texts'] : array();
-		$excl_tags  = $excl_set && isset( $excl['excl_tags'] )  ? $excl['excl_tags']  : array();
+		$excl_set   = ( $resolved_entry !== null );
+		$excl_css   = $excl_set && isset( $resolved_entry['excl_css'] )   ? $resolved_entry['excl_css']   : array();
+		$excl_texts = $excl_set && isset( $resolved_entry['excl_texts'] ) ? $resolved_entry['excl_texts'] : array();
+		$excl_tags  = $excl_set && isset( $resolved_entry['excl_tags'] )  ? $resolved_entry['excl_tags']  : array();
+
+		// `selector_store` retained as a back-compat key — older callers
+		// (Rules table, breadcrumbs() helper) used the old option as a
+		// freeform reference. We surface the new layered view here.
+		$selector_store = array(
+			'global'        => $global_entry,
+			'per_post_type' => array_combine(
+				array_keys( $per_pt ),
+				array_map( function ( $bag ) {
+					return is_array( $bag ) ? self::settings_to_entry( $bag ) : null;
+				}, array_values( $per_pt ) )
+			) ?: array(),
+		);
 
 		return array(
-			'selector'         => $resolved_selector,
-			'selector_source'  => $selector_source,
-			'post_type'        => $post_type,
-			'language'         => $lang,
-			'selector_store'   => $selectors,
-			'post_override'    => $post_override,
-			'excl_set'         => $excl_set,
-			'excl_css'         => $excl_css,
-			'excl_texts'       => $excl_texts,
-			'excl_tags'        => $excl_tags,
+			'selector'        => $resolved_selector,
+			'selector_source' => $selector_source,
+			'post_type'       => $post_type,
+			'language'        => $lang,
+			'selector_store'  => $selector_store,
+			'post_override'   => $post_override,
+			'excl_set'        => $excl_set,
+			'excl_css'        => $excl_css,
+			'excl_texts'      => $excl_texts,
+			'excl_tags'       => $excl_tags,
+		);
+	}
+
+	/**
+	 * Convert a flat `{tta__settings_*: ...}` bag into the resolver's
+	 * internal entry shape:
+	 *   { selector, excl_css[], excl_texts[], excl_tags[] }
+	 *
+	 * Storage uses pipe-joined strings for tags/texts and newline-
+	 * separated strings for css excludes. Tags split aggressively
+	 * (single-word tokens); texts split only on pipe/newline so
+	 * commas inside phrases survive.
+	 *
+	 * @param mixed $bag
+	 * @return array
+	 */
+	protected static function settings_to_entry( $bag ) {
+		if ( ! is_array( $bag ) ) { $bag = array(); }
+		$split_tags = function ( $val ) {
+			if ( is_array( $val ) ) { $parts = $val; }
+			else { $parts = preg_split( '/[\s,;|]+/', (string) $val ); }
+			return array_values( array_filter( array_map( 'trim', (array) $parts ), function ( $p ) { return $p !== ''; } ) );
+		};
+		$split_texts = function ( $val ) {
+			if ( is_array( $val ) ) { $parts = $val; }
+			else { $parts = preg_split( '/[|\r\n]+/', (string) $val ); }
+			return array_values( array_filter( array_map( 'trim', (array) $parts ), function ( $p ) { return $p !== ''; } ) );
+		};
+		$split_lines = function ( $val ) {
+			if ( is_array( $val ) ) { $parts = $val; }
+			else { $parts = preg_split( '/[\r\n|]+/', (string) $val ); }
+			return array_values( array_filter( array_map( 'trim', (array) $parts ), function ( $p ) { return $p !== ''; } ) );
+		};
+		return array(
+			'selector'   => isset( $bag['tta__settings_css_selectors'] ) ? (string) $bag['tta__settings_css_selectors'] : '',
+			'excl_css'   => $split_lines( isset( $bag['tta__settings_exclude_content_by_css_selectors'] ) ? $bag['tta__settings_exclude_content_by_css_selectors'] : '' ),
+			'excl_texts' => $split_texts( isset( $bag['tta__settings_exclude_texts'] )                    ? $bag['tta__settings_exclude_texts']                    : '' ),
+			'excl_tags'  => $split_tags(  isset( $bag['tta__settings_exclude_tags'] )                     ? $bag['tta__settings_exclude_tags']                     : '' ),
 		);
 	}
 
@@ -139,64 +204,45 @@ class RuleResolver {
 	 */
 	public static function breadcrumbs( $post_id ) {
 		$resolved = self::resolve( $post_id );
-		$sel      = $resolved['selector_store'];
+		$store    = $resolved['selector_store'];
 		$pt       = $resolved['post_type'];
-		$lang     = $resolved['language'];
 		$winner   = $resolved['selector_source'];
 
 		$trail = array();
 
-		// Layer 1 — per-post override
-		$post_override_sel = isset( $resolved['post_override']['selector'] ) ? (string) $resolved['post_override']['selector'] : '';
+		// Layer 1 — per-post override. The label distinguishes "unset"
+		// (no rule saved) from "draft" (saved but the master toggle is
+		// OFF) so the meta-box explains why a saved rule isn't winning.
+		$po          = isset( $resolved['post_override'] ) ? $resolved['post_override'] : array();
+		$po_selector = isset( $po['selector'] ) ? (string) $po['selector'] : '';
+		$po_use_own  = ! empty( $po['use_own'] );
+		$po_active   = $po_use_own && $po_selector !== '';
+		$po_label    = ( $po_selector !== '' && ! $po_use_own )
+			? __( 'This post (override, disabled)', 'text-to-audio' )
+			: __( 'This post (override)', 'text-to-audio' );
 		$trail[] = self::crumb(
 			'post:' . $post_id,
-			__( 'This post (override)', 'text-to-audio' ),
-			$post_override_sel,
+			$po_label,
+			$po_selector,
 			$winner === 'post',
-			$post_override_sel !== '' && $winner !== 'post'
+			$po_active && $winner !== 'post'
 		);
 
-		// Layer 2 — per-post-type + per-language
-		if ( $pt !== '' && $lang !== '' ) {
-			$val = isset( $sel['per_post_type_per_language'][ $pt ][ $lang ] ) ? self::entry_sel( $sel['per_post_type_per_language'][ $pt ][ $lang ] ) : '';
-			$trail[] = self::crumb(
-				'pt:' . $pt . ':lang:' . $lang,
-				sprintf( /* translators: 1: post type, 2: language */
-					__( 'Post type "%1$s" + language "%2$s"', 'text-to-audio' ),
-					$pt, $lang
-				),
-				$val,
-				$winner === 'post_type_language',
-				$val !== '' && $winner !== 'post_type_language'
-			);
-		}
-
-		// Layer 3 — per-language
-		if ( $lang !== '' ) {
-			$val = isset( $sel['per_language'][ $lang ] ) ? self::entry_sel( $sel['per_language'][ $lang ] ) : '';
-			$trail[] = self::crumb(
-				'lang:' . $lang,
-				sprintf( /* translators: %s: language */ __( 'Language "%s"', 'text-to-audio' ), $lang ),
-				$val,
-				$winner === 'language',
-				$val !== '' && $winner !== 'language'
-			);
-		}
-
-		// Layer 4 — per-post-type
+		// Layer 2 — per-post-type
 		if ( $pt !== '' ) {
-			$val = isset( $sel['per_post_type'][ $pt ] ) ? self::entry_sel( $sel['per_post_type'][ $pt ] ) : '';
+			$pt_entry = isset( $store['per_post_type'][ $pt ] ) && is_array( $store['per_post_type'][ $pt ] ) ? $store['per_post_type'][ $pt ] : null;
+			$pt_val   = $pt_entry !== null ? (string) $pt_entry['selector'] : '';
 			$trail[] = self::crumb(
 				'pt:' . $pt,
 				sprintf( /* translators: %s: post type */ __( 'Post type "%s"', 'text-to-audio' ), $pt ),
-				$val,
+				$pt_val,
 				$winner === 'post_type',
-				$val !== '' && $winner !== 'post_type'
+				$pt_val !== '' && $winner !== 'post_type'
 			);
 		}
 
-		// Layer 5 — global
-		$global_val = isset( $sel['global'] ) ? self::entry_sel( $sel['global'] ) : '';
+		// Layer 3 — global
+		$global_val = isset( $store['global']['selector'] ) ? (string) $store['global']['selector'] : '';
 		$trail[] = self::crumb(
 			'global',
 			__( 'Global default', 'text-to-audio' ),
@@ -274,12 +320,16 @@ class RuleResolver {
 	 * @return array
 	 */
 	protected static function load_post_rules( $post_id ) {
-		if ( ! class_exists( '\\TTA\\AtlasVoice\\PerPostRules' ) ) {
-			return array();
-		}
-		if ( ! PerPostRules::available() ) {
-			return array();
-		}
-		return PerPostRules::get( $post_id );
+		// TTS-238 D27.21 — read from `tts_pro_custom_css_selectors`
+		// (the post meta the dashboard's per-post accordion + the
+		// scope=post picker save target). Returns the parsed entry
+		// shape plus the master `use_own` flag the resolver gates on.
+		$post_id = (int) $post_id;
+		if ( $post_id <= 0 ) { return array(); }
+		$meta = get_post_meta( $post_id, 'tts_pro_custom_css_selectors', true );
+		if ( ! is_array( $meta ) ) { $meta = array(); }
+		$entry = self::settings_to_entry( $meta );
+		$entry['use_own'] = ! empty( $meta['tta__settings_use_own_css_selectors'] );
+		return $entry;
 	}
 }
