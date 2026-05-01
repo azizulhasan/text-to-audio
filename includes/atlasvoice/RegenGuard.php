@@ -160,8 +160,9 @@ class RegenGuard {
 	 * @return bool
 	 */
 	public static function opt_in_on() {
-		$row = self::settings_row();
-		return ! empty( $row[ self::OPT_IN_KEY ] );
+		// D26 — opt-in flag retired. Always considered on; runtime gating
+		// is now driven entirely by Mode::get() (staging vs production).
+		return true;
 	}
 
 	/**

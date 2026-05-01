@@ -511,7 +511,9 @@ class TTA_Admin
         // zero new JS loaded on the page.
         // Engine: loads on every page that has the player (used by getContent).
         // Picker: loads only for logged-in users with edit capability (admin UI).
-        $extractor_opt_in = ! empty( $this->localize_data['use_atlasvoice_extractor'] );
+        // D26 — opt-in flag retired; the extractor + picker bundle now load
+        // unconditionally so the new always-on architecture works.
+        $extractor_opt_in = true;
         if ( $extractor_opt_in ) {
             $extractor_ver = ( defined('WP_DEBUG') && WP_DEBUG )
                 ? filemtime( plugin_dir_path(__FILE__) . 'js/build/tts-extractor-engine.min.js' )

@@ -550,16 +550,15 @@ export default function Settings() {
                                         handleChange={handleChange}
                                     />
 
-                                    {/* TTS-238 (legacy system): the four pre-AtlasVoice CSS-based
-                                        extraction fields. Hidden when AtlasVoice extractor is ON
-                                        because the visual chip editor in AtlasVoiceSettings
-                                        replaces them. Remain functional when opt-in is OFF. */}
-                                    {!settings.tta__settings_use_atlasvoice_extractor && (
-                                        <LegacyExtractionSettings
-                                            settings={settings}
-                                            handleChange={handleChange}
-                                        />
-                                    )}
+                                    {/* D26 — the four legacy CSS-based extraction fields are now
+                                        always visible. The picker writes back into the same keys
+                                        via the new "Pick visually" button at the top, so the
+                                        previous gate on tta__settings_use_atlasvoice_extractor
+                                        no longer applies. */}
+                                    <LegacyExtractionSettings
+                                        settings={settings}
+                                        handleChange={handleChange}
+                                    />
 
                                     {/* Additional settings fields with tooltips */}
                                     <Row className="mb-4">

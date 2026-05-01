@@ -76,8 +76,12 @@ class Mode {
 	 * @return bool
 	 */
 	public static function is_opted_in() {
-		$row = self::settings_row();
-		return ! empty( $row[ self::OPT_IN_KEY ] );
+		// D26 — the picker now writes to the legacy keys (Free + Pro share
+		// the same storage), so we no longer require an admin opt-in for
+		// the AtlasVoice subsystem to consider itself active. Mode is
+		// always considered opted-in; what visitors actually hear is
+		// gated by Mode::get() (staging vs production).
+		return true;
 	}
 
 	/**

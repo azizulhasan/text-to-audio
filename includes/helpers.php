@@ -482,10 +482,10 @@ function get_enqueued_js_object($params, $plugin_all_settings)
             window.TTS.settings = ttsSettings
         }
 
-        // TTS-238: expose opt-in flag so the Pro player can gate AtlasVoice
-        // extraction. window.TTS is built here (not from wp_localize_script),
-        // so use_atlasvoice_extractor must be written explicitly.
-        window.TTS.use_atlasvoice_extractor = <?php echo json_encode( ! empty( $plugin_all_settings['settings']['tta__settings_use_atlasvoice_extractor'] ) ); ?>;
+        // D26 — opt-in flag retired. Hardcoded true so the Pro player's
+        // AtlasVoice path stays active everywhere on the new always-on
+        // architecture (legacy keys + Pro per-post override).
+        window.TTS.use_atlasvoice_extractor = true;
     </script>
     <?php
     // Audio schema is now output via wp_head hook (TTA_Helper::output_audio_schema_head)

@@ -74,13 +74,10 @@ class LocalizeData {
 			? LanguagePlugins::current_language_code()
 			: '';
 
-		// Opt-in flag — the JS engine stays dormant unless this is true.
-		// TTA_Admin passes its tts_get_settings('') result as
-		// $context['settings'], so the flag lives under
-		// settings['settings']['tta__settings_use_atlasvoice_extractor'].
-		$data['use_atlasvoice_extractor'] = ! empty(
-			$settings['settings']['tta__settings_use_atlasvoice_extractor'] ?? false
-		);
+		// D26 — opt-in flag retired. Hardcode true so any front-end
+		// caller still reading `tts.use_atlasvoice_extractor` keeps
+		// running on the new always-on path.
+		$data['use_atlasvoice_extractor'] = true;
 
 		// Admin capability for first-visit auto-save. Lifted into the
 		// bundle so the engine doesn't speculatively POST /save-selector
