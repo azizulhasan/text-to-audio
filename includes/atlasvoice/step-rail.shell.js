@@ -29,7 +29,7 @@
         scopes:      null,
         selection:   makeEmptySelection(),
         pickMode:    null,        // null | 'pick' | 'excl'
-        exclKind:    'excl_css',
+        exclKind:    'tta__settings_exclude_content_by_css_selectors',
         userEdited:  false,       // false = show active-system content; true = show live rule preview
         undoStack:   [],
         UNDO_MAX:    20,
@@ -42,12 +42,30 @@
         postLang:    ''           // post's actual language  (cached from /active-rule on init)
     };
 
-    var CHIP_KINDS = ['excl_css', 'excl_texts', 'excl_tags'];
+    var CHIP_KINDS = ['tta__settings_exclude_content_by_css_selectors', 'tta__settings_exclude_texts', 'tta__settings_exclude_tags'];
+
+    // TTS-238 D27.17 — wire ships canonical pipe-strings; split here.
+    function splitTags(v) {
+        if (Array.isArray(v)) { return v.slice(); }
+        return String(v == null ? '' : v).split(/[\s,;|]+/).map(function (s) { return s.trim(); }).filter(Boolean);
+    }
+    function splitTexts(v) {
+        // Phrases must preserve internal commas/semicolons. Storage
+        // separator is pipe (with newline accepted as a friendly fallback);
+        // splitting on commas would corrupt phrases like
+        // "Hello, world" into two chunks.
+        if (Array.isArray(v)) { return v.slice(); }
+        return String(v == null ? '' : v).split(/[|\r\n]+/).map(function (s) { return s.trim(); }).filter(Boolean);
+    }
+    function splitLines(v) {
+        if (Array.isArray(v)) { return v.slice(); }
+        return String(v == null ? '' : v).split(/[\r\n|]+/).map(function (s) { return s.trim(); }).filter(Boolean);
+    }
 
     var CHIP_FEATURE_NAMES = {
-        excl_css:   'Skip these areas',
-        excl_texts: 'Skip these phrases',
-        excl_tags:  'Skip these tag types'
+        tta__settings_exclude_content_by_css_selectors:   'Skip these areas',
+        tta__settings_exclude_texts: 'Skip these phrases',
+        tta__settings_exclude_tags:  'Skip these tag types'
     };
 
     var SCOPE_OPTIONS = [
@@ -60,27 +78,27 @@
 
     function makeEmptySelection() {
         return {
-            scope:      'post',
-            post_type:  '',
-            language:   '',
-            post_id:    0,
-            selector:   '',
-            excl_css:   [],
-            excl_texts: [],
-            excl_tags:  []
+            scope:                                            'post',
+            post_type:                                        '',
+            language:                                         '',
+            post_id:                                          0,
+            tta__settings_css_selectors:                      '',
+            tta__settings_exclude_content_by_css_selectors:   [],
+            tta__settings_exclude_texts:                      [],
+            tta__settings_exclude_tags:                       []
         };
     }
 
     function cloneSelection(sel) {
         return {
-            scope:      sel.scope,
-            post_type:  sel.post_type,
-            language:   sel.language,
-            post_id:    sel.post_id,
-            selector:   sel.selector,
-            excl_css:   (sel.excl_css   || []).slice(),
-            excl_texts: (sel.excl_texts || []).slice(),
-            excl_tags:  (sel.excl_tags  || []).slice()
+            scope:                                            sel.scope,
+            post_type:                                        sel.post_type,
+            language:                                         sel.language,
+            post_id:                                          sel.post_id,
+            tta__settings_css_selectors:                      sel.tta__settings_css_selectors,
+            tta__settings_exclude_content_by_css_selectors:   (sel.tta__settings_exclude_content_by_css_selectors || []).slice(),
+            tta__settings_exclude_texts:                      (sel.tta__settings_exclude_texts || []).slice(),
+            tta__settings_exclude_tags:                       (sel.tta__settings_exclude_tags  || []).slice()
         };
     }
 
@@ -100,9 +118,9 @@
         state.excludedEls = [];
         state.selection = entry.snap;
         // Re-apply highlights for restored selection.
-        if (state.selection.selector) {
+        if (state.selection.tta__settings_css_selectors) {
             try {
-                var el = d.querySelector(state.selection.selector);
+                var el = d.querySelector(state.selection.tta__settings_css_selectors);
                 if (el) { state.selectedEl = el; el.classList.add('av-picker-selected'); }
             } catch (e) {}
         }
@@ -111,7 +129,7 @@
         updateSelectorDisplay();
         updateWordCount();
         updatePreview();
-        saveBtn().disabled = !state.selection.selector;
+        saveBtn().disabled = !state.selection.tta__settings_css_selectors;
         status('Undid: ' + (entry.label || 'last change') + (state.undoStack.length ? ' (' + state.undoStack.length + ' more)' : ''));
         return true;
     }
@@ -274,7 +292,7 @@
         // don't trample each other's listeners.
         if (state.pickMode === 'select' || state.pickMode === 'select-excl') { stopSelectMode(); }
         state.pickMode = mode;
-        state.exclKind = kind || 'excl_css';
+        state.exclKind = kind || 'tta__settings_exclude_content_by_css_selectors';
         d.addEventListener('mouseover', onPickHover,    true);
         d.addEventListener('mouseout',  onPickHoverOut, true);
         d.addEventListener('click',     onPickClick,    true);
@@ -337,7 +355,7 @@
                 el.classList.remove('av-picker-selected');
                 state.selectedEl = null;
                 pushUndo('clear selector');
-                state.selection.selector = '';
+                state.selection.tta__settings_css_selectors = '';
                 state.userEdited = true;
                 updateSelectorDisplay();
                 updateWordCount();
@@ -352,7 +370,7 @@
             el.classList.add('av-picker-selected');
             var sel = generateSelector(el);
             pushUndo('set selector "' + sel + '"');
-            state.selection.selector = sel;
+            state.selection.tta__settings_css_selectors = sel;
             state.userEdited = true;
             updateSelectorDisplay();
             updateWordCount();
@@ -526,8 +544,8 @@
         if (!range || range.collapsed) { return []; }
         var raw = elementsInRange(range);
         var contained = null;
-        if (state.pickMode === 'select-excl' && state.selection.selector) {
-            try { contained = d.querySelector(state.selection.selector); } catch (e) {}
+        if (state.pickMode === 'select-excl' && state.selection.tta__settings_css_selectors) {
+            try { contained = d.querySelector(state.selection.tta__settings_css_selectors); } catch (e) {}
         }
         // Endpoint-containing-ancestor drop is exclude-only. In include mode
         // we want the cleaner topmost-rolled-up result (e.g. the wrapper)
@@ -595,7 +613,7 @@
                 }
                 clearTouchedHighlights();
                 pushUndo('select to include "' + selector + '"');
-                state.selection.selector = selector;
+                state.selection.tta__settings_css_selectors = selector;
                 state.userEdited = true;
                 updateSelectorDisplay();
                 reapplySelectedHighlight();
@@ -615,17 +633,17 @@
                 // addChip is single-value; for a comma-list we want the
                 // whole string saved as one chip (same shape produced by
                 // typing it manually). Skip validation reuse and push raw.
-                if ((state.selection.excl_css || []).indexOf(selector) !== -1) {
+                if ((state.selection.tta__settings_exclude_content_by_css_selectors || []).indexOf(selector) !== -1) {
                     status('Already in list: "' + selector + '"');
                     return;
                 }
                 pushUndo('select to exclude "' + selector + '"');
-                state.selection.excl_css = (state.selection.excl_css || []).concat([selector]);
+                state.selection.tta__settings_exclude_content_by_css_selectors = (state.selection.tta__settings_exclude_content_by_css_selectors || []).concat([selector]);
                 state.userEdited = true;
-                renderChipRow('excl_css');
+                renderChipRow('tta__settings_exclude_content_by_css_selectors');
                 reapplyExcludeHighlights();
                 updatePreview();
-                renderBrittleScopeWarning('excl_css', multi && brittleScope);
+                renderBrittleScopeWarning('tta__settings_exclude_content_by_css_selectors', multi && brittleScope);
                 status('Excluded: ' + selector + (multi && brittleScope ? ' (scope-brittle, see warning)' : ''));
                 // Auto-exit so the body text-cursor class is cleared and the
                 // admin gets default cursor everywhere again. Matches the
@@ -659,8 +677,8 @@
         var disp = $('.av-selector-display');
         var inp  = $('.av-selector-input');
         if (!disp || !inp) { return; }
-        if (state.selection.selector) {
-            inp.value = state.selection.selector;
+        if (state.selection.tta__settings_css_selectors) {
+            inp.value = state.selection.tta__settings_css_selectors;
             disp.hidden = false;
         } else {
             inp.value = '';
@@ -673,9 +691,9 @@
     function updateWordCount() {
         var slot = $('.av-word-count');
         if (!slot) { return; }
-        if (!state.selection.selector) { slot.hidden = true; slot.textContent = ''; return; }
+        if (!state.selection.tta__settings_css_selectors) { slot.hidden = true; slot.textContent = ''; return; }
         try {
-            var el = d.querySelector(state.selection.selector);
+            var el = d.querySelector(state.selection.tta__settings_css_selectors);
             if (!el) { slot.hidden = true; return; }
             var text = (el.innerText || el.textContent || '').trim();
             var words = text ? text.split(/\s+/).filter(Boolean).length : 0;
@@ -770,7 +788,7 @@
             }
         }
         // Tier 2 — saved selector with current exclude rules.
-        if (state.selection.selector) {
+        if (state.selection.tta__settings_css_selectors) {
             var t2 = extractWithRules();
             if (t2) { return { text: t2, source: 'Saved selector' }; } // applyContentMeta already called inside
         }
@@ -801,19 +819,19 @@
 
     // State B: live preview using whatever rules are currently in state.selection.
     function extractWithRules() {
-        if (!state.selection.selector) { return ''; }
+        if (!state.selection.tta__settings_css_selectors) { return ''; }
         var el;
-        try { el = d.querySelector(state.selection.selector); } catch (e) { return ''; }
+        try { el = d.querySelector(state.selection.tta__settings_css_selectors); } catch (e) { return ''; }
         if (!el) { return ''; }
 
-        // Resolve excl_css selectors against the LIVE DOM before cloning so
+        // Resolve tta__settings_exclude_content_by_css_selectors selectors against the LIVE DOM before cloning so
         // positional pseudos (:nth-of-type, :nth-child) reflect the actual
         // page structure — not the detached clone's shifted sibling context.
         // Tag each live match with a one-shot data attribute; after cloning
         // we strip the same-attribute nodes out of the clone by reference,
         // guaranteeing preview removal matches the red highlight 1:1.
         var EXCL_MARK = 'data-av-excl-match';
-        (state.selection.excl_css || []).forEach(function (sel) {
+        (state.selection.tta__settings_exclude_content_by_css_selectors || []).forEach(function (sel) {
             if (!sel) { return; }
             try {
                 // Match document-wide (same scope as reapplyExcludeHighlights)
@@ -869,7 +887,7 @@
             } catch (e) {}
         });
 
-        (state.selection.excl_tags || []).forEach(function (tag) {
+        (state.selection.tta__settings_exclude_tags || []).forEach(function (tag) {
             try {
                 Array.prototype.forEach.call(clone.querySelectorAll(tag), function (n) {
                     if (n.parentNode) { n.parentNode.removeChild(n); }
@@ -878,7 +896,7 @@
         });
 
         var raw  = clone.textContent || '';
-        var excl = state.selection.excl_texts || [];
+        var excl = state.selection.tta__settings_exclude_texts || [];
 
         // Text-level removal: strip each exact phrase string from the raw text.
         excl.forEach(function (phrase) {
@@ -931,7 +949,7 @@
         if (!body) { return; }
 
         var text, source;
-        if (state.selection.selector) {
+        if (state.selection.tta__settings_css_selectors) {
             // Selector known — always apply exclusion rules so the preview
             // reflects what the TTS engine will actually read.
             text   = extractWithRules();
@@ -952,9 +970,9 @@
         // prefixed so the meta line makes the rescue obvious to the
         // admin: their saved rule still needs updating, but the picker
         // shows what's available instead of looking dead.
-        if (!text && state.selection.selector) {
+        if (!text && state.selection.tta__settings_css_selectors) {
             var stillMatches = false;
-            try { stillMatches = !!d.querySelector(state.selection.selector); } catch (e) {}
+            try { stillMatches = !!d.querySelector(state.selection.tta__settings_css_selectors); } catch (e) {}
             if (!stillMatches) {
                 var fallback = extractFromActiveSystem();
                 if (fallback && fallback.text) {
@@ -1002,7 +1020,7 @@
         opts = opts || {};
         var sampleSize = Math.max(1, Math.min(20, parseInt(opts.sampleSize, 10) || 3));
         var perTimeout = parseInt(opts.timeoutMs, 10) || 12000;
-        var sel        = (state.selection.selector || '').toString().trim();
+        var sel        = (state.selection.tta__settings_css_selectors || '').toString().trim();
         if (!sel) { return Promise.resolve({ ok: false, error: 'No selector set.' }); }
 
         // Validate orderby against the same allowlist the server enforces.
@@ -1038,7 +1056,7 @@
 
     // Load a single post in a hidden iframe and report whether the saved
     // selector matches and how many chars of text would survive the full
-    // exclude pass (user excl_css + excl_tags + BUILTIN_EXCL_*). Iframes
+    // exclude pass (user tta__settings_exclude_content_by_css_selectors + tta__settings_exclude_tags + BUILTIN_EXCL_*). Iframes
     // are removed after measurement; per-load timeout guards against pages
     // that never fire `load` (CMP popups, infinite redirects).
     function verifyOnePost(post, selector, timeoutMs) {
@@ -1080,9 +1098,9 @@
     }
 
     // Mirrors extractWithRules's exclusion pipeline against an iframe doc:
-    // user excl_css (resolved against live iframe DOM, then removed from
+    // user tta__settings_exclude_content_by_css_selectors (resolved against live iframe DOM, then removed from
     // clone), built-in script/style + player-chrome excludes, user
-    // excl_tags. Returns { matched, charCount, error? }.
+    // tta__settings_exclude_tags. Returns { matched, charCount, error? }.
     function measureInIframe(iframe, selector) {
         var idoc;
         try { idoc = iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document); }
@@ -1095,7 +1113,7 @@
         if (!el) { return { matched: false, charCount: 0 }; }
 
         var EXCL_MARK = 'data-av-excl-match';
-        (state.selection.excl_css || []).forEach(function (s) {
+        (state.selection.tta__settings_exclude_content_by_css_selectors || []).forEach(function (s) {
             if (!s) { return; }
             try {
                 Array.prototype.forEach.call(idoc.querySelectorAll(s), function (n) {
@@ -1129,7 +1147,7 @@
                 });
             } catch (e) {}
         });
-        (state.selection.excl_tags || []).forEach(function (tag) {
+        (state.selection.tta__settings_exclude_tags || []).forEach(function (tag) {
             try {
                 Array.prototype.forEach.call(clone.querySelectorAll(tag), function (n) {
                     if (n.parentNode) { n.parentNode.removeChild(n); }
@@ -1150,7 +1168,7 @@
         if (!btn) { return; }
         btn.addEventListener('click', function () {
             if (btn.classList.contains('is-running')) { return; }
-            if (!state.selection.selector) {
+            if (!state.selection.tta__settings_css_selectors) {
                 renderVerifyResults({ ok: false, error: 'Pick a content region first.' });
                 return;
             }
@@ -1398,22 +1416,22 @@
         status('Loading\u2026');
         restFetch('/step-rail/scope-rule' + params).then(function (resp) {
             if (state.selectedEl) { state.selectedEl.classList.remove('av-picker-selected'); state.selectedEl = null; }
-            state.selection.selector = resp.selector || '';
+            state.selection.tta__settings_css_selectors = resp.tta__settings_css_selectors || '';
             state.userEdited = false;
             if (resp.excl_set) {
-                state.selection.excl_css   = Array.isArray(resp.excl_css)   ? resp.excl_css   : [];
-                state.selection.excl_texts = Array.isArray(resp.excl_texts) ? resp.excl_texts : [];
-                state.selection.excl_tags  = Array.isArray(resp.excl_tags)  ? resp.excl_tags  : [];
+                state.selection.tta__settings_exclude_content_by_css_selectors = splitLines(resp.tta__settings_exclude_content_by_css_selectors);
+                state.selection.tta__settings_exclude_texts                    = splitTexts(resp.tta__settings_exclude_texts);
+                state.selection.tta__settings_exclude_tags                     = splitTags(resp.tta__settings_exclude_tags);
             } else {
-                state.selection.excl_css   = [];
-                state.selection.excl_texts = [];
-                state.selection.excl_tags  = [];
+                state.selection.tta__settings_exclude_content_by_css_selectors   = [];
+                state.selection.tta__settings_exclude_texts = [];
+                state.selection.tta__settings_exclude_tags  = [];
                 if (state.shell) {
                     Array.prototype.forEach.call(
                         state.shell.querySelectorAll('.av-tag-check input[type=checkbox]'),
                         function (cb) {
-                            if (cb.defaultChecked && (state.selection.excl_tags || []).indexOf(cb.value) === -1) {
-                                state.selection.excl_tags.push(cb.value);
+                            if (cb.defaultChecked && (state.selection.tta__settings_exclude_tags || []).indexOf(cb.value) === -1) {
+                                state.selection.tta__settings_exclude_tags.push(cb.value);
                             }
                         }
                     );
@@ -1423,15 +1441,15 @@
             updateWordCount();
             renderAllChips();
             syncTagCheckboxes();
-            if (state.selection.selector) {
+            if (state.selection.tta__settings_css_selectors) {
                 try {
-                    var el = d.querySelector(state.selection.selector);
+                    var el = d.querySelector(state.selection.tta__settings_css_selectors);
                     if (el) { state.selectedEl = el; el.classList.add('av-picker-selected'); }
                 } catch (e) {}
             }
             var sb = saveBtn();
-            if (sb) { sb.disabled = !state.selection.selector; }
-            status(resp.selector ? 'Rule loaded for scope: ' + scope + '.' : 'No saved rule for scope: ' + scope + '.');
+            if (sb) { sb.disabled = !state.selection.tta__settings_css_selectors; }
+            status(resp.tta__settings_css_selectors ? 'Rule loaded for scope: ' + scope + '.' : 'No saved rule for scope: ' + scope + '.');
             updatePreview();
         }).catch(function () {
             status('Could not load rule for scope: ' + scope + '.');
@@ -1441,12 +1459,12 @@
     /* ─── chips ─────────────────────────────────────────────────── */
 
     // Re-apply red .av-picker-excluded highlight to every element matching a
-    // saved excl_css selector. Called after loadExistingRules so reloads keep
+    // saved tta__settings_exclude_content_by_css_selectors selector. Called after loadExistingRules so reloads keep
     // the visual state, and after any chip mutation so live edits track the DOM.
     function reapplyExcludeHighlights() {
         state.excludedEls.forEach(function (el) { el.classList.remove('av-picker-excluded'); });
         state.excludedEls = [];
-        (state.selection.excl_css || []).forEach(function (exclSel) {
+        (state.selection.tta__settings_exclude_content_by_css_selectors || []).forEach(function (exclSel) {
             if (!exclSel) { return; }
             try {
                 Array.prototype.forEach.call(d.querySelectorAll(exclSel), function (el) {
@@ -1465,9 +1483,9 @@
             state.selectedEl.classList.remove('av-picker-selected');
             state.selectedEl = null;
         }
-        if (!state.selection.selector) { return; }
+        if (!state.selection.tta__settings_css_selectors) { return; }
         try {
-            var el = d.querySelector(state.selection.selector);
+            var el = d.querySelector(state.selection.tta__settings_css_selectors);
             if (el && !isRailElement(el)) {
                 state.selectedEl = el;
                 el.classList.add('av-picker-selected');
@@ -1478,7 +1496,7 @@
     function validateChipValue(kind, val) {
         val = (val || '').toString().trim();
         if (!val) { return ''; }
-        if (kind === 'excl_tags') {
+        if (kind === 'tta__settings_exclude_tags') {
             val = val.replace(/^<+|>+$/g, '').toLowerCase();
             if (!/^[a-z][a-z0-9]*$/.test(val)) { return ''; }
         }
@@ -1524,7 +1542,7 @@
                 state.userEdited = true;
                 renderChipRow(kind);
                 syncTagCheckboxes();
-                if (kind === 'excl_css') { reapplyExcludeHighlights(); }
+                if (kind === 'tta__settings_exclude_content_by_css_selectors') { reapplyExcludeHighlights(); }
                 updatePreview();
                 status('Removed ' + val + '.');
             });
@@ -1564,7 +1582,7 @@
             if (state.selection[kind][idx] === next) { return; }
             state.selection[kind][idx] = next;
             state.userEdited = true;
-            if (kind === 'excl_css') { reapplyExcludeHighlights(); }
+            if (kind === 'tta__settings_exclude_content_by_css_selectors') { reapplyExcludeHighlights(); }
             updatePreview();
         }
 
@@ -1575,7 +1593,7 @@
             if (!finalVal) {
                 // Invalid — revert to original.
                 state.selection[kind][idx] = original;
-                if (kind === 'excl_css') { reapplyExcludeHighlights(); }
+                if (kind === 'tta__settings_exclude_content_by_css_selectors') { reapplyExcludeHighlights(); }
                 updatePreview();
                 renderChipRow(kind);
                 status('Invalid value — reverted.');
@@ -1585,7 +1603,7 @@
             var dupIdx = list.indexOf(finalVal);
             if (dupIdx !== -1 && dupIdx !== idx) {
                 state.selection[kind][idx] = original;
-                if (kind === 'excl_css') { reapplyExcludeHighlights(); }
+                if (kind === 'tta__settings_exclude_content_by_css_selectors') { reapplyExcludeHighlights(); }
                 updatePreview();
                 renderChipRow(kind);
                 status('Already in list: "' + finalVal + '" — reverted.');
@@ -1596,7 +1614,7 @@
                 state.selection[kind][idx] = finalVal;
                 state.userEdited = true;
                 syncTagCheckboxes();
-                if (kind === 'excl_css') { reapplyExcludeHighlights(); }
+                if (kind === 'tta__settings_exclude_content_by_css_selectors') { reapplyExcludeHighlights(); }
                 updatePreview();
                 status('Updated: ' + finalVal);
             }
@@ -1606,7 +1624,7 @@
             if (done) { return; } done = true;
             // Restore original value + visuals.
             state.selection[kind][idx] = original;
-            if (kind === 'excl_css') { reapplyExcludeHighlights(); }
+            if (kind === 'tta__settings_exclude_content_by_css_selectors') { reapplyExcludeHighlights(); }
             updatePreview();
             renderChipRow(kind);
         }
@@ -1660,7 +1678,7 @@
         if ((state.selection[kind] || []).indexOf(val) !== -1) { return; }
         state._addPreview = { kind: kind, val: val };
         state.selection[kind] = (state.selection[kind] || []).concat([val]);
-        if (kind === 'excl_css') { reapplyExcludeHighlights(); }
+        if (kind === 'tta__settings_exclude_content_by_css_selectors') { reapplyExcludeHighlights(); }
         updatePreview();
     }
 
@@ -1672,7 +1690,7 @@
         var list = state.selection[k] || [];
         var idx  = list.lastIndexOf(v);
         if (idx !== -1) { list.splice(idx, 1); }
-        if (k === 'excl_css') { reapplyExcludeHighlights(); }
+        if (k === 'tta__settings_exclude_content_by_css_selectors') { reapplyExcludeHighlights(); }
         updatePreview();
     }
 
@@ -1692,7 +1710,7 @@
         state.userEdited = true;
         renderChipRow(kind);
         var sb = saveBtn();
-        if (sb) { sb.disabled = !state.selection.selector; }
+        if (sb) { sb.disabled = !state.selection.tta__settings_css_selectors; }
         return true;
     }
 
@@ -1704,13 +1722,13 @@
             cb.addEventListener('change', function () {
                 var tag = cb.value;
                 if (cb.checked) {
-                    if (addChip('excl_tags', tag)) { updatePreview(); }
+                    if (addChip('tta__settings_exclude_tags', tag)) { updatePreview(); }
                 } else {
-                    var idx = (state.selection.excl_tags || []).indexOf(tag);
+                    var idx = (state.selection.tta__settings_exclude_tags || []).indexOf(tag);
                     if (idx !== -1) {
-                        pushUndo('remove excl_tags "' + tag + '"');
-                        state.selection.excl_tags.splice(idx, 1);
-                        renderChipRow('excl_tags');
+                        pushUndo('remove tta__settings_exclude_tags "' + tag + '"');
+                        state.selection.tta__settings_exclude_tags.splice(idx, 1);
+                        renderChipRow('tta__settings_exclude_tags');
                         updatePreview();
                     }
                 }
@@ -1721,7 +1739,7 @@
     function syncTagCheckboxes() {
         if (!state.shell) { return; }
         Array.prototype.forEach.call(state.shell.querySelectorAll('.av-tag-check input[type=checkbox]'), function (cb) {
-            cb.checked = (state.selection.excl_tags || []).indexOf(cb.value) !== -1;
+            cb.checked = (state.selection.tta__settings_exclude_tags || []).indexOf(cb.value) !== -1;
         });
     }
 
@@ -1732,7 +1750,7 @@
             var step = state.shell && state.shell.querySelector('.av-step[data-chip-kind="' + kind + '"]');
             if (!step) { return; }
 
-            // Pick-to-exclude button (only on excl_css step).
+            // Pick-to-exclude button (only on tta__settings_exclude_content_by_css_selectors step).
             var pickExcl = step.querySelector('.av-btn--pick-excl');
             if (pickExcl) {
                 pickExcl.addEventListener('click', function () {
@@ -1745,9 +1763,9 @@
                 });
             }
 
-            // Drag-to-exclude button (loose-snap selection → excl_css chip).
+            // Drag-to-exclude button (loose-snap selection → tta__settings_exclude_content_by_css_selectors chip).
             var selectExcl = step.querySelector('.av-btn--select-excl');
-            if (selectExcl && kind === 'excl_css') {
+            if (selectExcl && kind === 'tta__settings_exclude_content_by_css_selectors') {
                 selectExcl.addEventListener('click', function () {
                     if (!state.pro) { showProPromo('Exclude areas'); return; }
                     if (state.pickMode === 'select-excl') {
@@ -1814,7 +1832,7 @@
             clearBtn.addEventListener('click', function () {
                 if (state.selectedEl) { state.selectedEl.classList.remove('av-picker-selected'); state.selectedEl = null; }
                 pushUndo('clear selector');
-                state.selection.selector = '';
+                state.selection.tta__settings_css_selectors = '';
                 state.userEdited = true;
                 updateSelectorDisplay();
                 updateWordCount();
@@ -1830,7 +1848,7 @@
         if (selectorInput) {
             selectorInput.addEventListener('input', function () {
                 var val = selectorInput.value.trim();
-                state.selection.selector = val;
+                state.selection.tta__settings_css_selectors = val;
                 state.userEdited = true;
                 reapplySelectedHighlight();
                 updateWordCount();
@@ -2025,18 +2043,18 @@
     /* ─── save ──────────────────────────────────────────────────── */
 
     function save() {
-        if (!state.selection.selector) { status('Pick a content region first.'); return; }
+        if (!state.selection.tta__settings_css_selectors) { status('Pick a content region first.'); return; }
         var btn = saveBtn();
         if (!btn) { return; }
         btn.disabled = true;
         status('Saving\u2026');
 
-        // D26.2 — single endpoint, scope_kind in the body picks the storage slot.
+        // TTS-238 D27.17 — wire body uses canonical storage keys.
         var body = {
-            selector:   state.selection.selector,
-            excl_css:   (state.selection.excl_css   || []).join('\n'),
-            excl_texts: (state.selection.excl_texts || []).slice(),
-            excl_tags:  (state.selection.excl_tags  || []).slice()
+            tta__settings_css_selectors:                      state.selection.tta__settings_css_selectors,
+            tta__settings_exclude_content_by_css_selectors:   (state.selection.tta__settings_exclude_content_by_css_selectors || []).join('\n'),
+            tta__settings_exclude_texts:                      (state.selection.tta__settings_exclude_texts || []).slice(),
+            tta__settings_exclude_tags:                       (state.selection.tta__settings_exclude_tags  || []).slice()
         };
         if (state.scope && state.scope.kind === 'post') {
             body.scope_kind = 'post';
@@ -2054,7 +2072,7 @@
             btn.disabled = false;
             try {
                 w.dispatchEvent(new CustomEvent('atlasvoice:steprail:saved', {
-                    detail: { scope: state.selection.scope, selector: state.selection.selector, response: resp }
+                    detail: { scope: state.selection.scope, selector: state.selection.tta__settings_css_selectors, response: resp }
                 }));
             } catch (e) {}
         }).catch(function (err) {
@@ -2099,10 +2117,10 @@
     // extraction selector and pre-fills the Content Region field so the admin
     // immediately sees what the TTS system is already reading.
     function autoFillActiveSelector() {
-        if (state.selection.selector) { return; } // already set by loadExistingRules
+        if (state.selection.tta__settings_css_selectors) { return; } // already set by loadExistingRules
         var sel = detectActiveSelector();
         if (!sel) { return; }
-        state.selection.selector = sel;
+        state.selection.tta__settings_css_selectors = sel;
         state.userEdited = false;
         updateSelectorDisplay();
         updateWordCount();
@@ -2120,15 +2138,51 @@
 
     function loadExistingRules() {
         if (!state.postId) { return; }
+        // TTS-238 D27.15 — When the URL pinned us to a specific scope
+        // (?scope=global | post_type:slug | post:N), load the rule
+        // saved at THAT scope (via /step-rail/scope-rule reading
+        // tta_settings_data + post-meta) instead of the precedence
+        // walk's winner. Without this, the picker shows the global
+        // rule even when the admin explicitly opened "post type" or
+        // "post" scope.
+        var urlPinned = state.scope && (state.scope.kind === 'post_type' || state.scope.kind === 'post' || state.scope.kind === 'global');
+        if (urlPinned) {
+            var p = '?post_id=' + state.postId;
+            if (state.scope.kind === 'post_type') {
+                p += '&scope=post_type&post_type=' + encodeURIComponent(state.scope.post_type || '');
+            } else if (state.scope.kind === 'post') {
+                p += '&scope=post';
+            } else {
+                p += '&scope=global';
+            }
+            restFetch('/step-rail/scope-rule' + p).then(function (resp) {
+                if (!resp || !resp.tta__settings_css_selectors) { autoFillActiveSelector(); return; }
+                state.selection.tta__settings_css_selectors = resp.tta__settings_css_selectors || '';
+                if (resp.excl_set) {
+                    state.selection.tta__settings_exclude_content_by_css_selectors = splitLines(resp.tta__settings_exclude_content_by_css_selectors);
+                    state.selection.tta__settings_exclude_texts                    = splitTexts(resp.tta__settings_exclude_texts);
+                    state.selection.tta__settings_exclude_tags                     = splitTags(resp.tta__settings_exclude_tags);
+                }
+                state.userEdited = false;
+                renderScopeReadout(); updateSelectorDisplay(); updateWordCount();
+                renderAllChips(); syncTagCheckboxes();
+                try { var el = d.querySelector(resp.tta__settings_css_selectors); if (el) { state.selectedEl = el; el.classList.add('av-picker-selected'); } } catch (e) {}
+                reapplyExcludeHighlights();
+                var sb2 = saveBtn(); if (sb2) { sb2.disabled = false; }
+                status('Active rule loaded (' + state.scope.kind + ').');
+                updatePreview();
+            }).catch(function () { autoFillActiveSelector(); });
+            return;
+        }
         // /step-rail/active-rule resolves the full precedence walk (per-post →
         // post_type_language → language → post_type → global) and returns the
         // winning rule + the scope it came from so the UI reflects reality.
         restFetch('/step-rail/active-rule?post_id=' + state.postId).then(function (resp) {
-            if (!resp || !resp.selector) {
+            if (!resp || !resp.tta__settings_css_selectors) {
                 autoFillActiveSelector();
                 return;
             }
-            state.selection.selector  = resp.selector  || '';
+            state.selection.tta__settings_css_selectors  = resp.tta__settings_css_selectors  || '';
             state.selection.scope     = resp.scope      || 'global';
             state.selection.post_type = resp.post_type  || '';
             state.selection.language  = resp.language   || '';
@@ -2140,9 +2194,9 @@
             // excl_set=false means a legacy string-format entry: keep the
             // pre-populated defaults from the HTML checkboxes.
             if (resp.excl_set) {
-                state.selection.excl_css   = Array.isArray(resp.excl_css)   ? resp.excl_css   : [];
-                state.selection.excl_texts = Array.isArray(resp.excl_texts) ? resp.excl_texts : [];
-                state.selection.excl_tags  = Array.isArray(resp.excl_tags)  ? resp.excl_tags  : [];
+                state.selection.tta__settings_exclude_content_by_css_selectors = splitLines(resp.tta__settings_exclude_content_by_css_selectors);
+                state.selection.tta__settings_exclude_texts                    = splitTexts(resp.tta__settings_exclude_texts);
+                state.selection.tta__settings_exclude_tags                     = splitTags(resp.tta__settings_exclude_tags);
             }
             state.userEdited = false;
             renderScopeReadout();
@@ -2151,7 +2205,7 @@
             renderAllChips();
             syncTagCheckboxes();
             try {
-                var el = d.querySelector(resp.selector);
+                var el = d.querySelector(resp.tta__settings_css_selectors);
                 if (el) { state.selectedEl = el; el.classList.add('av-picker-selected'); }
             } catch (e) {}
             reapplyExcludeHighlights();
@@ -2264,13 +2318,13 @@
         attachTagCheckboxes();
         attachVerifyButton();
 
-        // Pre-populate excl_tags from the default-checked tag checkboxes.
+        // Pre-populate tta__settings_exclude_tags from the default-checked tag checkboxes.
         // loadExistingRules() will overwrite when this post already has saved rules.
         Array.prototype.forEach.call(
             state.shell.querySelectorAll('.av-tag-check input[type=checkbox]'),
             function (cb) {
-                if (cb.checked && (state.selection.excl_tags || []).indexOf(cb.value) === -1) {
-                    state.selection.excl_tags.push(cb.value);
+                if (cb.checked && (state.selection.tta__settings_exclude_tags || []).indexOf(cb.value) === -1) {
+                    state.selection.tta__settings_exclude_tags.push(cb.value);
                 }
             }
         );

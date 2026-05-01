@@ -18,6 +18,7 @@ import Icon from "../../Icon";
 // independently without stepping on each other.
 import {ToggleSwitch, SettingRow, ProLockIcon} from "./SettingsPrimitives";
 import AtlasVoiceSettings from "./AtlasVoiceSettings";
+import ScopeAccordion from "./ScopeAccordion";
 import LegacyExtractionSettings from "./LegacyExtractionSettings";
 
 export default function Settings() {
@@ -45,7 +46,6 @@ export default function Settings() {
         tta__settings_text_after_content: "",
         tta__settings_text_before_content: "",
         tta__settings_read_content_from_dom: true,
-        tta__settings_use_atlasvoice_extractor: false,
         tta__settings_player_use_old_player: false,
         tta__settings_enable_tts_status: true,
         tta__settings_delete_data_on_uninstall: false,
@@ -139,9 +139,25 @@ export default function Settings() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        // D27.4 — Free strips the three Pro-gated exclude fields before
+        // posting and surfaces a toast if any of them had a non-empty
+        // value (so the admin knows they were skipped). The Include
+        // selector saves on Free unchanged. Per-post-type overrides are
+        // wholly Pro and are dropped client-side too.
+        let droppedCount = 0;
         if (!ttsObj.is_pro_active) {
-            settings.tta__settings_css_selectors = "";
+            ["tta__settings_exclude_content_by_css_selectors",
+             "tta__settings_exclude_tags",
+             "tta__settings_exclude_texts"].forEach((k) => {
+                const v = settings[k];
+                const empty = !v || (Array.isArray(v) ? v.length === 0 : String(v).trim() === "");
+                if (!empty) droppedCount++;
+                settings[k] = Array.isArray(v) ? [] : "";
+            });
+            settings.tta__settings_atlasvoice_per_type_overrides = {};
         }
+
         let cache_clear_notice_text = "";
         if (settings?.tta__settings_clear_all_cache) {
             cache_clear_notice_text = __("All cache deleted", "text-to-audio");
@@ -159,6 +175,13 @@ export default function Settings() {
                         autoClose: 15000,
                     }
                 );
+                if (droppedCount > 0) {
+                    toast(
+                        __("Some Pro-only fields were skipped — upgrade to enable them.", "text-to-audio"),
+                        "warning",
+                        {autoClose: 8000}
+                    );
+                }
                 if (cache_clear_notice_text) {
                     toast(cache_clear_notice_text, "info", {
                         autoClose: 1500,
@@ -466,65 +489,30 @@ export default function Settings() {
                                         </Col>
                                     </Row>
 
-                                    {/* D26.5 — Per-post-type CSS rule picker (Pro). One Pick visually
-                                        button per enabled type. Click opens a sample post of that
-                                        type in a new tab with ?atlasvoice_picker=1&scope=post_type:<slug>.
-                                        Save inside the rail writes to
-                                        tta__settings_atlasvoice_per_type_overrides[<slug>]. */}
-                                    {ttsObj.is_pro_active && Array.isArray(settings.tta__settings_allow_listening_for_post_types) && settings.tta__settings_allow_listening_for_post_types.length > 0 && (
-                                        <Row className="mb-4">
-                                            <Col xs={12}>
-                                                <Form.Label className="setting-label text-dark mb-2">
-                                                    {__("Per-post-type CSS rules (Pro)", "text-to-audio")}
-                                                </Form.Label>
-                                                <div className="text-muted small mb-2">
-                                                    {__("Override the global CSS rule for specific post types. Pick visually opens a sample post of that type so you can drag-pick the content region. Saves to the per-post-type override.", "text-to-audio")}
-                                                </div>
-                                                {settings.tta__settings_allow_listening_for_post_types.map((slug) => (
-                                                    <div key={slug} className="d-flex align-items-center justify-content-between border rounded px-3 py-2 mb-2" style={{background: "#fafafa"}}>
-                                                        <div>
-                                                            <strong>{slug}</strong>
-                                                        </div>
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-sm btn-dark"
-                                                            onClick={async () => {
-                                                                try {
-                                                                    const apiRoot = (window.ttsObj && window.ttsObj.api_url) || "/wp-json/";
-                                                                    const nonce   = (window.wpApiSettings && window.wpApiSettings.nonce)
-                                                                        || (window.ttsObj && window.ttsObj.rest_nonce)
-                                                                        || "";
-                                                                    const r = await fetch(apiRoot + "tta/v1/step-rail/sample-url?scope=post_type&post_type=" + encodeURIComponent(slug), {
-                                                                        credentials: "same-origin",
-                                                                        headers: {"X-WP-Nonce": nonce},
-                                                                    });
-                                                                    const j = await r.json();
-                                                                    if (!j || !j.url) {
-                                                                        window.alert(__("No published post found for this type.", "text-to-audio"));
-                                                                        return;
-                                                                    }
-                                                                    const u = new URL(j.url, window.location.origin);
-                                                                    u.searchParams.set("atlasvoice_picker", "1");
-                                                                    u.searchParams.set("scope", "post_type:" + slug);
-                                                                    window.open(u.toString(), "_blank");
-                                                                } catch (e) {
-                                                                    window.alert(__("Could not open the picker: ", "text-to-audio") + (e && e.message));
-                                                                }
-                                                            }}
-                                                        >
-                                                            {__("Pick visually", "text-to-audio")}&nbsp;&#9656;
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                            </Col>
-                                        </Row>
-                                    )}
+                                    {/* D27.3 — D26.5's per-type Pick block was replaced by the
+                                        ScopeAccordion below; "Allow Listening For Post Status"
+                                        moves below the accordion in this v5 layout. */}
 
+                                    {/* D27 — AtlasVoice heal log + boilerplate detector
+                                        rendered always; the "Use AtlasVoice Extractor (Beta)"
+                                        toggle was retired in v5. */}
+                                    <AtlasVoiceSettings />
+
+                                    {/* D27.3 — Scope accordion replaces the flat field list.
+                                        Global is always shown; one collapsed accordion appears
+                                        below per enabled post type (Pro only). All four CSS-
+                                        selector fields render inside each accordion body. */}
+                                    <ScopeAccordion
+                                        settings={settings}
+                                        handleChange={handleChange}
+                                    />
+
+                                    {/* D27.3 — "Allow Listening For Post Status" relocated below
+                                        the scope accordion per v5 layout. */}
                                     <Row className="mb-4">
                                         <Col xs={12}>
                                             <Form.Label className="setting-label text-dark mb-2">
                                                 {__("Allow Listening For Post Status", "text-to-audio")}
-                                                {/* <i className="fas fa-question-circle ms-2" style={{ color: '#999', fontSize: '14px' }}></i> */}
                                             </Form.Label>
                                             <MultiSelect
                                                 id="tta__settings_allow_listening_for_posts_status"
@@ -539,26 +527,6 @@ export default function Settings() {
                                             />
                                         </Col>
                                     </Row>
-
-                                    {/* TTS-238 (new system): AtlasVoice opt-in + visual picker launcher.
-                                        Placed right after the Post Status multi-select per product spec.
-                                        When the opt-in is OFF only the toggle renders; the picker card
-                                        is gated inside <AtlasVoiceSettings> so the legacy path stays
-                                        completely untouched. */}
-                                    <AtlasVoiceSettings
-                                        settings={settings}
-                                        handleChange={handleChange}
-                                    />
-
-                                    {/* D26 — the four legacy CSS-based extraction fields are now
-                                        always visible. The picker writes back into the same keys
-                                        via the new "Pick visually" button at the top, so the
-                                        previous gate on tta__settings_use_atlasvoice_extractor
-                                        no longer applies. */}
-                                    <LegacyExtractionSettings
-                                        settings={settings}
-                                        handleChange={handleChange}
-                                    />
 
                                     {/* Additional settings fields with tooltips */}
                                     <Row className="mb-4">
@@ -771,10 +739,18 @@ export default function Settings() {
 
                                 </div>
 
+                                {/* Spacer so the sticky Save All bar never overlaps the last form field. */}
+                                <div style={{height: "80px"}} aria-hidden="true" />
+
                                 {/* Save Button */}
                                 <div
                                     className="position-sticky bottom-0"
-                                    style={{zIndex: 1030, marginTop: "20px"}}
+                                    style={{
+                                        zIndex: 1030,
+                                        marginTop: "20px",
+                                        background: "linear-gradient(to top, rgba(255,255,255,0.95) 60%, rgba(255,255,255,0))",
+                                        padding: "12px 0 8px",
+                                    }}
                                 >
                                     <div className="text-center">
                                         <button

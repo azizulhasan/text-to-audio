@@ -118,6 +118,45 @@ const styles = {
         transition: 'background-color 0.2s',
         width: '100%',
     },
+    // TTS-238 D27.18 — accordion styling for the <details>/<summary> wrapper.
+    accordion: {
+        background: '#fff',
+        borderRadius: '8px',
+        border: '1px solid #e2e4e7',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+        overflow: 'hidden',
+        marginBottom: '16px',
+    },
+    accordionSummary: {
+        listStyle: 'none',
+        cursor: 'pointer',
+        padding: '14px 18px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        background: 'linear-gradient(180deg, #fafbfc 0%, #f1f3f5 100%)',
+        borderBottom: '1px solid #e2e4e7',
+        userSelect: 'none',
+    },
+    accordionTitle: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+    },
+    accordionChevron: {
+        display: 'inline-block',
+        width: '14px',
+        textAlign: 'center',
+        color: '#6c757d',
+        transition: 'transform 0.18s ease',
+        fontSize: '12px',
+        lineHeight: 1,
+    },
+    accordionRight: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+    },
 };
 
 export default function CSSSelectorsForPosts() {
@@ -256,42 +295,59 @@ export default function CSSSelectorsForPosts() {
                 pauseOnHover
             />
             <form onSubmit={handleSubmit}>
-                {/* Header */}
-                <div style={styles.card}>
-                    <h3 style={styles.header}>{__('CSS Selectors for This Post', 'text-to-audio')}</h3>
-                    <p style={styles.subtitle}>{__('Override global content extraction settings for this post only.', 'text-to-audio')}</p>
-                    {/* D26.6 — Pick visually launcher (per-post scope). Opens
-                        THIS post in a new tab with ?atlasvoice_picker=1&scope=post:N.
-                        Save inside the rail writes to tts_pro_custom_css_selectors. */}
-                    {isPro && tta_obj && tta_obj.post_id && (
-                        <button
-                            type="button"
-                            className="btn btn-sm btn-dark mt-2"
-                            onClick={() => {
-                                try {
-                                    const postId = parseInt(tta_obj.post_id, 10);
-                                    const permalink = (tta_obj.post_permalink || tta_obj.permalink || '').toString();
-                                    if (!permalink) {
-                                        window.alert(__('Could not resolve this post URL. Save the post first.', 'text-to-audio'));
-                                        return;
+                {/* TTS-238 D27.18 — Accordion-styled <details> wrapper (closed by
+                    default). Custom-styled summary with hidden native marker,
+                    a rotating chevron, and the Pick Visually button on the
+                    right. e.preventDefault() / stopPropagation on the button
+                    keeps it from toggling the accordion. */}
+                <style>{`
+                    .tta-cssrules-acc > summary { list-style: none; }
+                    .tta-cssrules-acc > summary::-webkit-details-marker { display: none; }
+                    .tta-cssrules-acc[open] .tta-cssrules-chev { transform: rotate(90deg); }
+                `}</style>
+                <details className="tta-cssrules-acc" style={styles.accordion}>
+                    <summary style={styles.accordionSummary}>
+                        <div style={styles.accordionTitle}>
+                            <span className="tta-cssrules-chev" style={styles.accordionChevron}>&#9654;</span>
+                            <div>
+                                <h3 style={{...styles.header, margin: 0}}>{__('CSS Selectors for This Post', 'text-to-audio')}</h3>
+                                <p style={{...styles.subtitle, margin: 0}}>{__('Override global content extraction settings for this post only.', 'text-to-audio')}</p>
+                            </div>
+                        </div>
+                        {/* TTS-238 D27.16 — Pick Visually launcher (per-post scope).
+                            Render whenever we have a post id; the per-post
+                            metabox itself is Pro-only (mount target lives in
+                            the Pro plugin), so an isPro gate here would be
+                            redundant. */}
+                        {tta_obj && tta_obj.post_id && (
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-dark"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    try {
+                                        const postId   = parseInt(tta_obj.post_id, 10);
+                                        const permalink = (tta_obj.post_permalink || tta_obj.permalink || '').toString();
+                                        if (!permalink) {
+                                            window.alert(__('Could not resolve this post URL. Save the post first.', 'text-to-audio'));
+                                            return;
+                                        }
+                                        const u = new URL(permalink, window.location.origin);
+                                        u.searchParams.set('atlasvoice_picker', '1');
+                                        u.searchParams.set('scope', 'post:' + postId);
+                                        window.open(u.toString(), '_blank');
+                                    } catch (err) {
+                                        window.alert(__('Could not open the picker: ', 'text-to-audio') + (err && err.message));
                                     }
-                                    const u = new URL(permalink, window.location.origin);
-                                    u.searchParams.set('atlasvoice_picker', '1');
-                                    u.searchParams.set('scope', 'post:' + postId);
-                                    window.open(u.toString(), '_blank');
-                                } catch (e) {
-                                    window.alert(__('Could not open the picker: ', 'text-to-audio') + (e && e.message));
-                                }
-                            }}
-                        >
-                            <span style={{marginRight: 6}}>&#9654;</span>
-                            {__('Pick visually with AtlasVoiceSelector', 'text-to-audio')}
-                        </button>
-                    )}
-                </div>
-
-                {/* Settings Card */}
-                <div style={styles.card}>
+                                }}
+                            >
+                                <span style={{marginRight: 6}}>&#9654;</span>
+                                {__('Pick Visually', 'text-to-audio')}
+                            </button>
+                        )}
+                    </summary>
+                <div style={{padding: '20px'}}>
                     {/* Toggle Row */}
                     <div style={styles.toggleRow}>
                         <div style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
@@ -359,6 +415,7 @@ export default function CSSSelectorsForPosts() {
                         </div>
                     ))}
                 </div>
+                </details>
 
                 {/* Save Button */}
                 <button
