@@ -649,6 +649,32 @@ already used the canonical `tta__settings_*` names. That meant:
     hidden native marker). Pro localize fixed: `post_id` from
     `$post->ID` / `$_GET['post']`, `post_permalink` populated.
 
+### 11.4 D27.19 — Honor per-post master toggle
+
+`tta__settings_use_own_css_selectors` is the master switch for the
+per-post layer. When the admin turns it off:
+
+  * `/step-rail/scope-rule?scope=post` returns the same empty
+    payload it would return for an unsaved post — picker doesn't
+    load and re-edit a draft that won't apply at runtime.
+  * The Pick Visually button on the per-post accordion summary is
+    disabled with a tooltip ("Enable 'Use Own CSS Selectors' to
+    edit this post's rule") so admins don't open a picker URL that
+    won't reflect their save.
+
+Saving from the picker (scope=post) re-flips the toggle to true —
+saving means the admin wants the per-post rule active.
+
+### 11.5 D27.20 — Pro bundle sync
+
+The Pro plugin enqueues `tts-css-selectors.min.js` from the Free
+plugin's path **only when `TTA_DEBUG_MODE` is on**; otherwise it
+loads its own copy at
+`text-to-audio-pro/Assets/js/build/`. The release pipeline used to
+sync only `text-to-audio-pro-button.min.js` via the `copyProButton`
+gulp task. Added `tts-css-selectors.min.js` (and its LICENSE.txt)
+to that task so the per-post metabox bundle stays in sync.
+
 ### 11.3 Verified live (2026-05-01)
 
 Save → reload renders correctly for all three scopes on
