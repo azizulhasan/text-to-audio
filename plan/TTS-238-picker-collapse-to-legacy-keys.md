@@ -576,4 +576,92 @@ the `<details>` doesn't toggle when the button is clicked.
 
 Estimated **~1 focused day** for D27.2–D27.7.
 
+## 11. v5 follow-ups (2026-05-01) — wire-format collapse, save/read parity
+
+Discovered while testing D27.x: the picker save/read pipeline still
+carried short-name parallel keys (`selector` / `excl_css` / `excl_tags`
+/ `excl_texts`) on the wire and inside the picker JS, while storage
+already used the canonical `tta__settings_*` names. That meant:
+
+  * Saves landed in the right slot but the dashboard/picker reads
+    looked at a different shape (dashboard saves option flat, picker
+    save endpoint wrote nested under `settings`).
+  * Per-type/per-post excludes were stored as arrays by the picker;
+    React surfaced them via `array.toString()` → comma-separated
+    display, even though storage was meant to be pipe-joined.
+  * Phrases (excl_texts) were split on commas — fragmenting natural
+    language like `"Hello, world"` into two chunks.
+  * `/step-rail/scope-rule` reader was still pointing at the dead
+    `tta_atlasvoice_selectors` option, so saves never reflected on
+    re-open of the picker.
+  * Per-post URL-pinned scope (`?scope=post:N`) bypassed the new
+    reader and fell back through `RuleResolver`'s old store.
+
+### 11.1 Decisions
+
+  * Drop the parallel naming entirely. **One** key per concept, the
+    canonical storage key, used everywhere admin-visible:
+    storage option, REST request body, REST response, picker JS
+    `state.selection.*`, DOM `data-*` attributes, and `CHIP_KINDS`.
+  * Tags split on `[\s,;|]+` (single-word tokens). Texts split only
+    on `[|\r\n]+` so commas inside phrases survive. CSS lines split
+    on `[\r\n|]+`.
+  * `tta_settings_data` is read through
+    `json_decode(wp_json_encode(...), true)` because the dashboard
+    POST stores the whole option as a json-decoded `stdClass`; raw
+    `is_array()` checks against the option object would silently
+    no-op the picker save.
+  * Per-post UI is a styled accordion (closed by default), built on
+    native `<details>`/`<summary>` with a hidden marker, custom
+    chevron that rotates on open, header gradient, and the Pick
+    Visually launcher fixed to the right of the summary line.
+  * Pro plugin localize must resolve `post_id` reliably (was
+    `\the_ID()` — echoes, returns null) and ship a `post_permalink`
+    so the per-post Pick button can build the picker URL without
+    extra REST calls.
+
+### 11.2 Sequencing (D27.10–D27.18)
+
+  * **D27.10** Picker save endpoint writes flat at the top level of
+    `tta_settings_data` (not nested under `settings`). Stale-nested
+    sub-keys are merged up + deleted on next save.
+  * **D27.11** Dashboard save handler in `TTA_Api_Routes` normalizes
+    `tta__settings_exclude_tags` / `_exclude_texts` to pipe-joined
+    strings on save (global + per-type overrides).
+  * **D27.12** `/step-rail/scope-rule` reader switched to read the
+    canonical storage (flat `tta_settings_data` keys, plus the
+    `tts_pro_custom_css_selectors` post meta for `scope=post`).
+  * **D27.13** Picker save always stores pipe-strings (not arrays)
+    for tags/texts, matching dashboard textarea read shape.
+  * **D27.14** Pro per-post save endpoint
+    (`TTA_Pro_Api_Routes::css_selectors_for_posts`) gets the same
+    pipe normalization.
+  * **D27.15** Picker initial-load uses `/scope-rule` for any
+    URL-pinned scope (global / post_type / post), instead of
+    bouncing through `/active-rule` and `RuleResolver`'s old store.
+  * **D27.16** Per-post UI: closed by default, Pick Visually
+    rendered whenever there's a `post_id` (drop redundant `isPro`
+    gate — the metabox itself is Pro-mounted).
+  * **D27.17** Full rename of `selector` / `excl_*` →
+    `tta__settings_*` across REST contracts, picker JS state, DOM
+    `data-*` attrs, `CHIP_KINDS`, save body, and read parsers.
+  * **D27.18** Per-post styled accordion (custom summary, chevron,
+    hidden native marker). Pro localize fixed: `post_id` from
+    `$post->ID` / `$_GET['post']`, `post_permalink` populated.
+
+### 11.3 Verified live (2026-05-01)
+
+Save → reload renders correctly for all three scopes on
+`http://localhost/tts/mcp-10-simple-daily-habits-for-better-health-and-wellness/`:
+
+  * `?scope=global` — include selector, all 10 default tag
+    checkboxes.
+  * `?scope=post_type:post` — include + 1 exclude-CSS chip + 4 tag
+    checkboxes (`aside, blockquote, table, footer`) + phrase chip
+    with period preserved.
+  * `?scope=post:175` — include + 2 exclude-CSS chips + 4 tag
+    checkboxes + a multi-clause phrase chip with **internal commas
+    preserved** (regression that originally split the phrase into
+    two chunks).
+
 

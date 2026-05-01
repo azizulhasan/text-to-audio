@@ -692,6 +692,58 @@ class TTA_Api_Routes {
 				TTA_Cache::delete( 'all_settings' );
 			}
 
+			// TTS-238 D27.11 — Normalize the two pipe-format exclude fields.
+			// User can paste comma-, whitespace- or pipe-separated values
+			// into the textareas; we always store them as pipe-joined
+			// strings (legacy extractor format). Applied at two levels:
+			//  - global (top-level keys on $fields)
+			//  - per post type ($fields->tta__settings_atlasvoice_per_type_overrides[<slug>])
+			// Tags = single-word tokens (split aggressively on whitespace
+			// too). Texts = phrases — preserve internal whitespace, only
+			// split on the explicit separators a user might use.
+			$normalize_tags = function ( $val ) {
+				if ( is_array( $val ) ) { $parts = $val; }
+				else { $parts = preg_split( '/[\s,;|]+/', (string) $val ); }
+				$parts = array_values( array_filter( array_map( 'trim', (array) $parts ), function ( $p ) { return $p !== ''; } ) );
+				return implode( '|', $parts );
+			};
+			$normalize_texts = function ( $val ) {
+				// Phrases preserve internal commas/semicolons. Pipe
+				// (and newline) are the only legitimate separators.
+				if ( is_array( $val ) ) { $parts = $val; }
+				else { $parts = preg_split( '/[|\r\n]+/', (string) $val ); }
+				$parts = array_values( array_filter( array_map( 'trim', (array) $parts ), function ( $p ) { return $p !== ''; } ) );
+				return implode( '|', $parts );
+			};
+			$apply_to_bag = function ( $bag ) use ( $normalize_tags, $normalize_texts ) {
+				$is_obj = is_object( $bag );
+				if ( $is_obj && isset( $bag->tta__settings_exclude_tags ) ) {
+					$bag->tta__settings_exclude_tags = $normalize_tags( $bag->tta__settings_exclude_tags );
+				} elseif ( is_array( $bag ) && isset( $bag['tta__settings_exclude_tags'] ) ) {
+					$bag['tta__settings_exclude_tags'] = $normalize_tags( $bag['tta__settings_exclude_tags'] );
+				}
+				if ( $is_obj && isset( $bag->tta__settings_exclude_texts ) ) {
+					$bag->tta__settings_exclude_texts = $normalize_texts( $bag->tta__settings_exclude_texts );
+				} elseif ( is_array( $bag ) && isset( $bag['tta__settings_exclude_texts'] ) ) {
+					$bag['tta__settings_exclude_texts'] = $normalize_texts( $bag['tta__settings_exclude_texts'] );
+				}
+				return $bag;
+			};
+			if ( is_object( $fields ) ) {
+				$fields = $apply_to_bag( $fields );
+				if ( isset( $fields->tta__settings_atlasvoice_per_type_overrides )
+					&& ( is_object( $fields->tta__settings_atlasvoice_per_type_overrides )
+						|| is_array( $fields->tta__settings_atlasvoice_per_type_overrides ) ) ) {
+					$ovr = $fields->tta__settings_atlasvoice_per_type_overrides;
+					foreach ( (array) $ovr as $slug => $bag ) {
+						if ( ! is_object( $bag ) && ! is_array( $bag ) ) { continue; }
+						$bag = $apply_to_bag( $bag );
+						if ( is_object( $ovr ) ) { $ovr->{$slug} = $bag; }
+						else { $ovr[ $slug ] = $bag; }
+					}
+					$fields->tta__settings_atlasvoice_per_type_overrides = $ovr;
+				}
+			}
 
 			update_option( 'tta_settings_data', $fields );
 

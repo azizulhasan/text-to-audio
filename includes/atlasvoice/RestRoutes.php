@@ -338,10 +338,11 @@ class RestRoutes {
 						),
 						'post_type' => array( 'type' => 'string',  'required' => false ),
 						'post_id'   => array( 'type' => 'integer', 'required' => false ),
-						'selector'  => array( 'type' => 'string',  'required' => true  ),
-						'excl_css'   => array( 'type' => 'string', 'required' => false ),
-						'excl_texts' => array( 'type' => 'array',  'required' => false ),
-						'excl_tags'  => array( 'type' => 'array',  'required' => false ),
+						// TTS-238 D27.17 — wire format uses canonical storage keys.
+						'tta__settings_css_selectors'                    => array( 'type' => 'string', 'required' => true  ),
+						'tta__settings_exclude_content_by_css_selectors' => array( 'type' => 'string', 'required' => false ),
+						'tta__settings_exclude_texts'                    => array( 'type' => array( 'array', 'string' ), 'required' => false ),
+						'tta__settings_exclude_tags'                     => array( 'type' => array( 'array', 'string' ), 'required' => false ),
 					),
 				),
 			)
@@ -469,8 +470,17 @@ class RestRoutes {
 	 */
 	public static function get_step_rail_active_rule( $request ) {
 		$post_id = (int) $request->get_param( 'post_id' );
-		$empty   = array( 'scope' => '', 'selector' => '', 'post_type' => '', 'language' => '',
-		                   'excl_css' => array(), 'excl_texts' => array(), 'excl_tags' => array() );
+		// TTS-238 D27.17 — response uses canonical storage keys.
+		$empty = array(
+			'scope'                                          => '',
+			'tta__settings_css_selectors'                    => '',
+			'post_type'                                      => '',
+			'language'                                       => '',
+			'excl_set'                                       => false,
+			'tta__settings_exclude_content_by_css_selectors' => '',
+			'tta__settings_exclude_texts'                    => '',
+			'tta__settings_exclude_tags'                     => '',
+		);
 
 		if ( $post_id <= 0 || ! class_exists( '\\TTA\\AtlasVoice\\RuleResolver' ) ) {
 			return new \WP_REST_Response( $empty, 200 );
@@ -480,7 +490,6 @@ class RestRoutes {
 		$source   = isset( $resolved['selector_source'] ) ? (string) $resolved['selector_source'] : 'none';
 		$selector = isset( $resolved['selector'] )        ? (string) $resolved['selector']         : '';
 
-		// Map RuleResolver source keys to the scope values the JS shell uses.
 		$scope_map = array(
 			'post'               => 'post',
 			'post_type_language' => 'post_type_language',
@@ -490,33 +499,33 @@ class RestRoutes {
 		);
 		$scope = isset( $scope_map[ $source ] ) ? $scope_map[ $source ] : '';
 
-		// excl_* and excl_set come directly from RuleResolver::resolve().
-		// excl_set=true  → stored as array format; JS should use these values.
-		// excl_set=false → legacy string format; JS keeps its pre-checked defaults.
-		$excl_set   = ! empty( $resolved['excl_set'] );
-		$excl_css   = isset( $resolved['excl_css'] )   && is_array( $resolved['excl_css'] )   ? array_values( $resolved['excl_css'] )   : array();
-		$excl_texts = isset( $resolved['excl_texts'] ) && is_array( $resolved['excl_texts'] ) ? array_values( $resolved['excl_texts'] ) : array();
-		$excl_tags  = isset( $resolved['excl_tags'] )  && is_array( $resolved['excl_tags'] )  ? array_values( $resolved['excl_tags'] )  : array();
+		// Helper: array-or-string → pipe-joined string for tags/texts.
+		$to_str = function ( $val ) {
+			if ( is_array( $val ) ) { return implode( '|', array_map( 'strval', $val ) ); }
+			return (string) $val;
+		};
+		$excl_set        = ! empty( $resolved['excl_set'] );
+		$excl_css_str    = isset( $resolved['excl_css'] )   ? $to_str( $resolved['excl_css'] )   : '';
+		$excl_texts_str  = isset( $resolved['excl_texts'] ) ? $to_str( $resolved['excl_texts'] ) : '';
+		$excl_tags_str   = isset( $resolved['excl_tags'] )  ? $to_str( $resolved['excl_tags'] )  : '';
 
-		// For post scope: excl_* come from the post_override, which is always
-		// in array format — so excl_set is always true for per-post rules.
 		if ( $source === 'post' && isset( $resolved['post_override'] ) && is_array( $resolved['post_override'] ) ) {
-			$po = $resolved['post_override'];
-			$excl_set   = true;
-			$excl_css   = isset( $po['excl_css'] )   && is_array( $po['excl_css'] )   ? array_values( $po['excl_css'] )   : array();
-			$excl_texts = isset( $po['excl_texts'] ) && is_array( $po['excl_texts'] ) ? array_values( $po['excl_texts'] ) : array();
-			$excl_tags  = isset( $po['excl_tags'] )  && is_array( $po['excl_tags'] )  ? array_values( $po['excl_tags'] )  : array();
+			$po             = $resolved['post_override'];
+			$excl_set       = true;
+			$excl_css_str   = isset( $po['excl_css'] )   ? $to_str( $po['excl_css'] )   : '';
+			$excl_texts_str = isset( $po['excl_texts'] ) ? $to_str( $po['excl_texts'] ) : '';
+			$excl_tags_str  = isset( $po['excl_tags'] )  ? $to_str( $po['excl_tags'] )  : '';
 		}
 
 		return new \WP_REST_Response( array(
-			'scope'      => $scope,
-			'selector'   => $selector,
-			'post_type'  => isset( $resolved['post_type'] ) ? (string) $resolved['post_type'] : '',
-			'language'   => isset( $resolved['language'] )  ? (string) $resolved['language']  : '',
-			'excl_set'   => $excl_set,
-			'excl_css'   => $excl_css,
-			'excl_texts' => $excl_texts,
-			'excl_tags'  => $excl_tags,
+			'scope'                                          => $scope,
+			'tta__settings_css_selectors'                    => $selector,
+			'post_type'                                      => isset( $resolved['post_type'] ) ? (string) $resolved['post_type'] : '',
+			'language'                                       => isset( $resolved['language'] )  ? (string) $resolved['language']  : '',
+			'excl_set'                                       => $excl_set,
+			'tta__settings_exclude_content_by_css_selectors' => $excl_css_str,
+			'tta__settings_exclude_texts'                    => $excl_texts_str,
+			'tta__settings_exclude_tags'                     => $excl_tags_str,
 		), 200 );
 	}
 
@@ -685,21 +694,27 @@ class RestRoutes {
 	 */
 	public static function save_rule_by_scope( $request ) {
 		$scope     = (string) $request->get_param( 'scope_kind' );
-		$selector  = trim( (string) $request->get_param( 'selector' ) );
+		// TTS-238 D27.17 — request body uses canonical storage keys.
+		$selector  = trim( (string) $request->get_param( 'tta__settings_css_selectors' ) );
 		$post_type = sanitize_key( (string) $request->get_param( 'post_type' ) );
 		$post_id   = (int) $request->get_param( 'post_id' );
 
-		// Sanitise the four CSS-selector fields. Selector and excl_css come
-		// in as strings (multi-line); excl_tags and excl_texts arrive as
-		// arrays from the picker chips.
 		if ( $selector === '' || strlen( $selector ) > 2048 ) {
 			return new \WP_Error( 'invalid_selector', __( 'Selector is empty or too long.', 'text-to-audio' ), array( 'status' => 400 ) );
 		}
 
-		$excl_css_raw   = (string) $request->get_param( 'excl_css' );
-		$excl_texts_raw = $request->get_param( 'excl_texts' );
-		$excl_tags_raw  = $request->get_param( 'excl_tags' );
+		$excl_css_raw   = (string) $request->get_param( 'tta__settings_exclude_content_by_css_selectors' );
+		$excl_texts_raw = $request->get_param( 'tta__settings_exclude_texts' );
+		$excl_tags_raw  = $request->get_param( 'tta__settings_exclude_tags' );
 
+		// Accept either array (from chip lists) or string (already pipe-joined).
+		if ( is_string( $excl_texts_raw ) ) {
+			// Phrases preserve internal commas/semicolons.
+			$excl_texts_raw = preg_split( '/[|\r\n]+/', $excl_texts_raw );
+		}
+		if ( is_string( $excl_tags_raw ) ) {
+			$excl_tags_raw = preg_split( '/[\s,;|]+/', $excl_tags_raw );
+		}
 		$excl_texts = is_array( $excl_texts_raw ) ? array_values( array_filter( array_map( 'sanitize_text_field', $excl_texts_raw ) ) ) : array();
 		$excl_tags  = is_array( $excl_tags_raw )
 			? array_values( array_filter(
@@ -708,13 +723,12 @@ class RestRoutes {
 			) )
 			: array();
 
+		// Always store pipe-joined strings to match dashboard read shape.
 		$rule = array(
 			'tta__settings_css_selectors'                    => $selector,
 			'tta__settings_exclude_content_by_css_selectors' => $excl_css_raw,
-			// Legacy keys store these as pipe-joined strings on Free, but
-			// the per-type and per-post stores accept arrays directly.
-			'tta__settings_exclude_texts' => $excl_texts,
-			'tta__settings_exclude_tags'  => $excl_tags,
+			'tta__settings_exclude_texts'                    => implode( '|', $excl_texts ),
+			'tta__settings_exclude_tags'                     => implode( '|', $excl_tags ),
 		);
 
 		if ( $scope === 'post' ) {
@@ -737,41 +751,65 @@ class RestRoutes {
 			$is_pro = class_exists( '\\TTA\\TTA_Helper' ) && \TTA\TTA_Helper::is_pro_active();
 			if ( ! $is_pro ) { return new \WP_Error( 'pro_only', 'Per-post-type override is a Pro feature.', array( 'status' => 403 ) ); }
 
-			$opt = get_option( 'tta_settings_data', array() );
+			// TTS-238 D27.10 — write flat at the top level of `tta_settings_data`
+			// to match the dashboard's read/write shape (Settings.js + the
+			// /tta/v1/settings POST handler both treat this option as flat).
+			// Wrapping under a `settings` sub-key here would be invisible
+			// to the dashboard. Cast through JSON to an array because the
+			// dashboard's POST handler saves the option as a json_decode'd
+			// stdClass.
+			$opt_raw = get_option( 'tta_settings_data', array() );
+			$opt     = json_decode( wp_json_encode( $opt_raw ), true );
 			if ( ! is_array( $opt ) ) { $opt = array(); }
-			if ( ! isset( $opt['settings'] ) || ! is_array( $opt['settings'] ) ) { $opt['settings'] = array(); }
-			$bag = isset( $opt['settings']['tta__settings_atlasvoice_per_type_overrides'] ) && is_array( $opt['settings']['tta__settings_atlasvoice_per_type_overrides'] )
-				? $opt['settings']['tta__settings_atlasvoice_per_type_overrides']
+			// Recover from stale nested writes (`tta_settings_data['settings'][...]`).
+			if ( isset( $opt['settings'] ) && is_array( $opt['settings'] ) ) {
+				foreach ( $opt['settings'] as $k => $v ) {
+					if ( ! array_key_exists( $k, $opt ) ) { $opt[ $k ] = $v; }
+				}
+				unset( $opt['settings'] );
+			}
+			$bag = isset( $opt['tta__settings_atlasvoice_per_type_overrides'] ) && is_array( $opt['tta__settings_atlasvoice_per_type_overrides'] )
+				? $opt['tta__settings_atlasvoice_per_type_overrides']
 				: array();
 			$bag[ $post_type ] = $rule;
-			$opt['settings']['tta__settings_atlasvoice_per_type_overrides'] = $bag;
+			$opt['tta__settings_atlasvoice_per_type_overrides'] = $bag;
 			update_option( 'tta_settings_data', $opt );
 			if ( class_exists( '\\TTA\\TTA_Cache' ) ) { \TTA\TTA_Cache::delete( 'all_settings' ); }
 
 			return new \WP_REST_Response( array( 'status' => true, 'scope' => 'post_type', 'post_type' => $post_type, 'rule' => $rule ), 200 );
 		}
 
-		// scope=global — write the four legacy keys directly. Excl_texts /
+		// scope=global — write the four legacy keys flat at the top level
+		// of `tta_settings_data` so the dashboard picks them up. Excl_texts /
 		// excl_tags become pipe-joined strings (legacy shape) for backward
-		// compatibility with the existing extractor.
-		$opt = get_option( 'tta_settings_data', array() );
+		// compatibility with the existing extractor. Cast through JSON to
+		// an array because the dashboard's POST handler saves the option
+		// as a json_decode'd stdClass.
+		$opt_raw = get_option( 'tta_settings_data', array() );
+		$opt     = json_decode( wp_json_encode( $opt_raw ), true );
 		if ( ! is_array( $opt ) ) { $opt = array(); }
-		if ( ! isset( $opt['settings'] ) || ! is_array( $opt['settings'] ) ) { $opt['settings'] = array(); }
-		$opt['settings']['tta__settings_css_selectors']                    = $selector;
-		$opt['settings']['tta__settings_exclude_content_by_css_selectors'] = $excl_css_raw;
-		$opt['settings']['tta__settings_exclude_texts'] = implode( '|', $excl_texts );
-		$opt['settings']['tta__settings_exclude_tags']  = implode( '|', $excl_tags );
+		// Recover from stale nested writes (`tta_settings_data['settings'][...]`).
+		if ( isset( $opt['settings'] ) && is_array( $opt['settings'] ) ) {
+			foreach ( $opt['settings'] as $k => $v ) {
+				if ( ! array_key_exists( $k, $opt ) ) { $opt[ $k ] = $v; }
+			}
+			unset( $opt['settings'] );
+		}
+		$opt['tta__settings_css_selectors']                    = $selector;
+		$opt['tta__settings_exclude_content_by_css_selectors'] = $excl_css_raw;
+		$opt['tta__settings_exclude_texts'] = implode( '|', $excl_texts );
+		$opt['tta__settings_exclude_tags']  = implode( '|', $excl_tags );
 		update_option( 'tta_settings_data', $opt );
 		if ( class_exists( '\\TTA\\TTA_Cache' ) ) { \TTA\TTA_Cache::delete( 'all_settings' ); }
 
 		return new \WP_REST_Response( array(
-			'status'   => true,
-			'scope'    => 'global',
-			'rule'     => array(
-				'selector'   => $selector,
-				'excl_css'   => $excl_css_raw,
-				'excl_texts' => $excl_texts,
-				'excl_tags'  => $excl_tags,
+			'status' => true,
+			'scope'  => 'global',
+			'rule'   => array(
+				'tta__settings_css_selectors'                    => $selector,
+				'tta__settings_exclude_content_by_css_selectors' => $excl_css_raw,
+				'tta__settings_exclude_texts'                    => implode( '|', $excl_texts ),
+				'tta__settings_exclude_tags'                     => implode( '|', $excl_tags ),
 			),
 		), 200 );
 	}
@@ -1521,95 +1559,118 @@ class RestRoutes {
 		$post_type = sanitize_key( (string) $request->get_param( 'post_type' ) );
 		$language  = sanitize_key( (string) $request->get_param( 'language' ) );
 
+		// TTS-238 D27.17 — response uses canonical storage keys.
 		$empty = array(
-			'selector' => '', 'excl_set' => false,
-			'excl_css' => array(), 'excl_texts' => array(), 'excl_tags' => array(),
+			'tta__settings_css_selectors'                    => '',
+			'excl_set'                                       => false,
+			'tta__settings_exclude_content_by_css_selectors' => array(),
+			'tta__settings_exclude_texts'                    => array(),
+			'tta__settings_exclude_tags'                     => array(),
 		);
 
 		if ( $post_id <= 0 ) {
 			return new \WP_REST_Response( $empty, 200 );
 		}
 
-		// Per-post scope — delegate to PerPostRules.
+		// Per-post scope — read post meta `tts_pro_custom_css_selectors`
+		// (Pro). PerPostRules wraps that meta but exposes legacy short
+		// names; we re-shape its output here.
 		if ( $scope === 'post' ) {
-			if ( ! class_exists( '\\TTA\\AtlasVoice\\PerPostRules' ) || ! PerPostRules::available() ) {
+			$meta = get_post_meta( $post_id, 'tts_pro_custom_css_selectors', true );
+			if ( ! is_array( $meta ) ) { $meta = array(); }
+			$selector = isset( $meta['tta__settings_css_selectors'] ) ? (string) $meta['tta__settings_css_selectors'] : '';
+			if ( $selector === '' ) {
 				return new \WP_REST_Response( $empty, 200 );
 			}
-			$rule = PerPostRules::get( $post_id );
-			if ( ! is_array( $rule ) || ! isset( $rule['selector'] ) || (string) $rule['selector'] === '' ) {
-				return new \WP_REST_Response( $empty, 200 );
-			}
+			$pick = function ( $key ) use ( $meta ) {
+				return isset( $meta[ $key ] ) ? $meta[ $key ] : '';
+			};
 			return new \WP_REST_Response( array(
-				'selector'   => (string) $rule['selector'],
-				'excl_set'   => true,
-				'excl_css'   => isset( $rule['excl_css'] )   && is_array( $rule['excl_css'] )   ? array_values( $rule['excl_css'] )   : array(),
-				'excl_texts' => isset( $rule['excl_texts'] ) && is_array( $rule['excl_texts'] ) ? array_values( $rule['excl_texts'] ) : array(),
-				'excl_tags'  => isset( $rule['excl_tags'] )  && is_array( $rule['excl_tags'] )  ? array_values( $rule['excl_tags'] )  : array(),
+				'tta__settings_css_selectors'                    => $selector,
+				'excl_set'                                       => true,
+				'tta__settings_exclude_content_by_css_selectors' => (string) $pick( 'tta__settings_exclude_content_by_css_selectors' ),
+				'tta__settings_exclude_texts'                    => (string) $pick( 'tta__settings_exclude_texts' ),
+				'tta__settings_exclude_tags'                     => (string) $pick( 'tta__settings_exclude_tags' ),
 			), 200 );
 		}
 
-		// Derive post_type / language from the post when the client omits them.
-		if ( $post_type === '' && in_array( $scope, array( 'post_type', 'post_type_language' ), true ) ) {
+		// Derive post_type from the post when the client omits it.
+		if ( $post_type === '' && $scope === 'post_type' ) {
 			$post_type = (string) get_post_type( $post_id );
 		}
-		if ( $language === '' && in_array( $scope, array( 'language', 'post_type_language' ), true ) ) {
-			if ( class_exists( '\\TTA\\AtlasVoice\\LanguagePlugins' ) ) {
-				$language = (string) LanguagePlugins::current_language_code();
+
+		// TTS-238 D27.12 — Read from the new collapsed storage in
+		// `tta_settings_data` (flat) so the picker shows what the
+		// dashboard / save endpoint actually have. Legacy
+		// `tta_atlasvoice_selectors` and the per-language scopes have
+		// been retired. Note: the dashboard saves $fields as a
+		// json_decode()'d stdClass, so the option round-trips as an
+		// object — cast through json to a fully-array shape (recursive)
+		// so isset()/is_array() checks below work uniformly.
+		$opt_raw = get_option( 'tta_settings_data', array() );
+		$opt     = json_decode( wp_json_encode( $opt_raw ), true );
+		if ( ! is_array( $opt ) ) { $opt = array(); }
+		// Recover from any stale nested-settings data.
+		if ( isset( $opt['settings'] ) && is_array( $opt['settings'] ) ) {
+			foreach ( $opt['settings'] as $k => $v ) {
+				if ( ! array_key_exists( $k, $opt ) ) { $opt[ $k ] = $v; }
 			}
 		}
 
-		$store = get_option( 'tta_atlasvoice_selectors', array() );
-		if ( ! is_array( $store ) ) { $store = array(); }
+		// Helpers. tags = single-word tokens, split aggressively. texts
+		// = phrases (preserve internal whitespace), split only on
+		// pipe / comma / semicolon / newline. CSS = newline-separated.
+		$split_tags = function ( $val ) {
+			if ( is_array( $val ) ) { $parts = $val; }
+			else { $parts = preg_split( '/[\s,;|]+/', (string) $val ); }
+			return array_values( array_filter( array_map( 'trim', (array) $parts ), function ( $p ) { return $p !== ''; } ) );
+		};
+		$split_texts = function ( $val ) {
+			if ( is_array( $val ) ) { $parts = $val; }
+			else { $parts = preg_split( '/[|,;\r\n]+/', (string) $val ); }
+			return array_values( array_filter( array_map( 'trim', (array) $parts ), function ( $p ) { return $p !== ''; } ) );
+		};
+		$split_lines = function ( $val ) {
+			if ( is_array( $val ) ) { $parts = $val; }
+			else { $parts = preg_split( '/[\r\n]+/', (string) $val ); }
+			return array_values( array_filter( array_map( 'trim', (array) $parts ), function ( $p ) { return $p !== ''; } ) );
+		};
 
-		$entry = null;
-		switch ( $scope ) {
-			case 'global':
-				$entry = isset( $store['global'] ) ? $store['global'] : null;
-				break;
-			case 'post_type':
-				if ( $post_type !== '' && isset( $store['per_post_type'][ $post_type ] ) ) {
-					$entry = $store['per_post_type'][ $post_type ];
-				}
-				break;
-			case 'language':
-				if ( $language !== '' && isset( $store['per_language'][ $language ] ) ) {
-					$entry = $store['per_language'][ $language ];
-				}
-				break;
-			case 'post_type_language':
-				if ( $post_type !== '' && $language !== ''
-					 && isset( $store['per_post_type_per_language'][ $post_type ][ $language ] ) ) {
-					$entry = $store['per_post_type_per_language'][ $post_type ][ $language ];
-				}
-				break;
+		$bag = null; // associative-shape bag with the 4 legacy keys.
+		if ( $scope === 'global' ) {
+			$bag = array(
+				'tta__settings_css_selectors'                    => isset( $opt['tta__settings_css_selectors'] ) ? $opt['tta__settings_css_selectors'] : '',
+				'tta__settings_exclude_content_by_css_selectors' => isset( $opt['tta__settings_exclude_content_by_css_selectors'] ) ? $opt['tta__settings_exclude_content_by_css_selectors'] : '',
+				'tta__settings_exclude_tags'                     => isset( $opt['tta__settings_exclude_tags'] ) ? $opt['tta__settings_exclude_tags'] : '',
+				'tta__settings_exclude_texts'                    => isset( $opt['tta__settings_exclude_texts'] ) ? $opt['tta__settings_exclude_texts'] : '',
+			);
+		} elseif ( $scope === 'post_type' && $post_type !== '' ) {
+			$ovr = isset( $opt['tta__settings_atlasvoice_per_type_overrides'] ) && is_array( $opt['tta__settings_atlasvoice_per_type_overrides'] )
+				? $opt['tta__settings_atlasvoice_per_type_overrides']
+				: array();
+			if ( isset( $ovr[ $post_type ] ) && ( is_array( $ovr[ $post_type ] ) || is_object( $ovr[ $post_type ] ) ) ) {
+				$bag = (array) $ovr[ $post_type ];
+			}
 		}
 
-		if ( $entry === null ) {
+		if ( ! is_array( $bag ) ) {
 			return new \WP_REST_Response( $empty, 200 );
 		}
 
-		// Inline RuleResolver::entry_sel / entry_excl (protected methods).
-		$selector = is_array( $entry )
-			? ( isset( $entry['selector'] ) ? (string) $entry['selector'] : '' )
-			: (string) $entry;
-
+		$selector = isset( $bag['tta__settings_css_selectors'] ) ? (string) $bag['tta__settings_css_selectors'] : '';
 		if ( $selector === '' ) {
 			return new \WP_REST_Response( $empty, 200 );
 		}
 
-		if ( ! is_array( $entry ) ) {
-			return new \WP_REST_Response( array(
-				'selector' => $selector, 'excl_set' => false,
-				'excl_css' => array(), 'excl_texts' => array(), 'excl_tags' => array(),
-			), 200 );
-		}
-
+		// TTS-238 D27.17 — response uses canonical storage keys, shipped
+		// as raw strings (pipe-joined for tags/texts, newline-separated
+		// for CSS). The picker shell splits on the wire.
 		return new \WP_REST_Response( array(
-			'selector'   => $selector,
-			'excl_set'   => true,
-			'excl_css'   => isset( $entry['excl_css'] )   && is_array( $entry['excl_css'] )   ? array_values( $entry['excl_css'] )   : array(),
-			'excl_texts' => isset( $entry['excl_texts'] ) && is_array( $entry['excl_texts'] ) ? array_values( $entry['excl_texts'] ) : array(),
-			'excl_tags'  => isset( $entry['excl_tags'] )  && is_array( $entry['excl_tags'] )  ? array_values( $entry['excl_tags'] )  : array(),
+			'tta__settings_css_selectors'                    => $selector,
+			'excl_set'                                       => true,
+			'tta__settings_exclude_content_by_css_selectors' => (string) ( isset( $bag['tta__settings_exclude_content_by_css_selectors'] ) ? $bag['tta__settings_exclude_content_by_css_selectors'] : '' ),
+			'tta__settings_exclude_texts'                    => (string) ( isset( $bag['tta__settings_exclude_texts'] )                    ? $bag['tta__settings_exclude_texts']                    : '' ),
+			'tta__settings_exclude_tags'                     => (string) ( isset( $bag['tta__settings_exclude_tags'] )                     ? $bag['tta__settings_exclude_tags']                     : '' ),
 		), 200 );
 	}
 

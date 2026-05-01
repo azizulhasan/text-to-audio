@@ -181,7 +181,7 @@ class StepRail {
 					</section>
 
 					<!-- Step ④ Skip areas (CSS excludes) — Pro -->
-					<section class="av-step av-step--chips" data-step="excl_css" data-chip-kind="excl_css">
+					<section class="av-step av-step--chips" data-step="tta__settings_exclude_content_by_css_selectors" data-chip-kind="tta__settings_exclude_content_by_css_selectors">
 						<div class="av-step__head">
 							<span class="av-step__num">&#9314;</span>
 							<strong><?php echo esc_html__( 'Skip these areas', 'text-to-audio' ); ?></strong>
@@ -191,10 +191,10 @@ class StepRail {
 							<p class="av-hint"><?php echo esc_html__( 'Elements matching these selectors are removed before reading (e.g. .sidebar, .share-bar).', 'text-to-audio' ); ?></p>
 							<div class="av-chips" role="list"></div>
 							<div class="av-chip-add">
-								<button type="button" class="av-btn av-btn--pick-excl" data-kind="excl_css">
+								<button type="button" class="av-btn av-btn--pick-excl" data-kind="tta__settings_exclude_content_by_css_selectors">
 									&#11040; <?php echo esc_html__( 'Pick to exclude', 'text-to-audio' ); ?>
 								</button>
-								<button type="button" class="av-btn av-btn--select-excl" data-kind="excl_css" title="<?php echo esc_attr__( 'Drag across the page to mark areas to exclude.', 'text-to-audio' ); ?>">
+								<button type="button" class="av-btn av-btn--select-excl" data-kind="tta__settings_exclude_content_by_css_selectors" title="<?php echo esc_attr__( 'Drag across the page to mark areas to exclude.', 'text-to-audio' ); ?>">
 									&#9112; <?php echo esc_html__( 'Select to exclude', 'text-to-audio' ); ?>
 								</button>
 								<span class="av-chip-sep"><?php echo esc_html__( 'or', 'text-to-audio' ); ?></span>
@@ -205,7 +205,7 @@ class StepRail {
 					</section>
 
 					<!-- Step ⑤ Skip tags — Pro -->
-					<section class="av-step av-step--chips" data-step="excl_tags" data-chip-kind="excl_tags">
+					<section class="av-step av-step--chips" data-step="tta__settings_exclude_tags" data-chip-kind="tta__settings_exclude_tags">
 						<div class="av-step__head">
 							<span class="av-step__num">&#9315;</span>
 							<strong><?php echo esc_html__( 'Skip these tag types', 'text-to-audio' ); ?></strong>
@@ -223,7 +223,7 @@ class StepRail {
 					</section>
 
 					<!-- Step ⑥ Skip phrases — Pro -->
-					<section class="av-step av-step--chips" data-step="excl_texts" data-chip-kind="excl_texts">
+					<section class="av-step av-step--chips" data-step="tta__settings_exclude_texts" data-chip-kind="tta__settings_exclude_texts">
 						<div class="av-step__head">
 							<span class="av-step__num">&#9316;</span>
 							<strong><?php echo esc_html__( 'Skip these phrases', 'text-to-audio' ); ?></strong>
@@ -492,8 +492,8 @@ class StepRail {
   background:#eef2ff;border:1px solid #c7d2fe;color:#312e81;
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
 }
-[data-chip-kind="excl_texts"] .av-chip{background:#fef3c7;border-color:#fde68a;color:#78350f;font-family:inherit;}
-[data-chip-kind="excl_tags"]  .av-chip{background:#ecfdf5;border-color:#a7f3d0;color:#065f46;}
+[data-chip-kind="tta__settings_exclude_texts"] .av-chip{background:#fef3c7;border-color:#fde68a;color:#78350f;font-family:inherit;}
+[data-chip-kind="tta__settings_exclude_tags"]  .av-chip{background:#ecfdf5;border-color:#a7f3d0;color:#065f46;}
 .av-chip button{background:transparent!important;border:0!important;cursor:pointer!important;color:inherit!important;font-size:13px!important;padding:0 3px!important;line-height:1!important;text-shadow:none!important;}
 .av-chip button:hover{color:#b91c1c!important;background:transparent!important;}
 .av-chip-add{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;}
