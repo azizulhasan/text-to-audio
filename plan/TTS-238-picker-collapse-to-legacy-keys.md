@@ -1,4 +1,4 @@
-# TTS-238 — Picker collapse to legacy keys (proposal v4)
+# TTS-238 — Picker collapse to legacy keys (proposal v5)
 
 **Status:** draft, not yet implemented
 **Author conversation:** 2026-04-30
@@ -427,6 +427,153 @@ Estimated **~1.5 focused days**. Atomic commits:
 
 ## 9. Decision
 
-Awaiting approval to proceed with D26.1.
+Approved 2026-05-01. D26.1–D26.9 shipped under commits `d0a01f8` + `facf304`.
+
+---
+
+## 10. v5 revision (2026-05-01) — accordion UI + Pro notices + extractor toggle removal
+
+After D26 shipped, the user requested a UX restructure to make scopes
+discoverable and the upgrade path visible on Free.
+
+### 10.1 Decisions captured (2026-05-01 conversation)
+
+| Question | Decision |
+| -------- | -------- |
+| Remove "Use AtlasVoice Extractor (Beta)" toggle from UI + storage? | **Yes.** Drop the checkbox in `AtlasVoiceSettings.js`, the `tta__settings_use_atlasvoice_extractor` key from `TTA_Activator.php` defaults, the `window.TTS.use_atlasvoice_extractor` line in `helpers.php`, and any remaining handler refs. The PHP gates were already neutralized in D26.9. |
+| Settings UI shape | **Accordion per scope.** First item = Global (always shown, expanded by default). One additional item per enabled post type below it, **Pro only**, collapsed by default. |
+| Per-scope content inside each accordion | The four legacy fields (Include, Exclude CSS, Exclude tags, Exclude texts) + an optional "Manual post (slug or post ID)" input + a Pick Visually button in the accordion header. |
+| Where does "Allow Listening For Post Status" sit? | **After all scope accordions.** |
+| Free + global excludes — locked or editable-but-ignored? | **Editable, ignored on save**, with a layered Pro notice (banner + pill + toast). Only the Include field saves on Free. |
+| Manual post resolution | **At click time only** (no REST chatter while typing). Resolves by post ID first; if non-numeric, treats as slug and queries `wp/v2/posts?slug=`. |
+| Per-post metabox accordion | **`<details>`** wrapper. Pick Visually button in the summary line. Saves to existing `tts_pro_custom_css_selectors`. |
+
+### 10.2 Dashboard UI (final)
+
+```
+Settings → Allow Listening For Post Type:  [ post × ] [ page × ]
+
+┌── ▼ Global                                  [ Pick Visually ▸ ] ─────────────┐
+│                                                                              │
+│   Manual post (optional):  ┌──────────────────────────┐                      │
+│                            │ slug or post ID          │                      │
+│                            └──────────────────────────┘                      │
+│                                                                              │
+│  ┌──────────────────────────── FREE ONLY ─────────────────────────────────┐  │
+│  │ ⚡ Excludes are a Pro feature                                          │  │
+│  │                                                                        │  │
+│  │ You can type into all four fields below, but only Include Content By   │  │
+│  │ CSS Selectors saves on Free. The other three are ignored until you     │  │
+│  │ upgrade.    [ Upgrade to Pro → ]                                       │  │
+│  └────────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+│   Include Content By CSS Selectors                                           │
+│   ┌────────────────────────────────────────────────────────────────────────┐ │
+│   │ #main-content                                                          │ │
+│   └────────────────────────────────────────────────────────────────────────┘ │
+│   Exclude Content By CSS Selectors  [Pro]    ← pill on Free                  │
+│   ┌────────────────────────────────────────────────────────────────────────┐ │
+│   │ .share-bar                                                             │ │
+│   └────────────────────────────────────────────────────────────────────────┘ │
+│   Exclude HTML Tags To Speak  [Pro]                                          │
+│   ┌────────────────────────────────────────────────────────────────────────┐ │
+│   │ blockquote|figure                                                      │ │
+│   └────────────────────────────────────────────────────────────────────────┘ │
+│   Exclude Texts To Speak  [Pro]                                              │
+│   ┌────────────────────────────────────────────────────────────────────────┐ │
+│   │ Read more...|Advertisement                                             │ │
+│   └────────────────────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌── ▶ Post (Pro)                              [ Pick Visually ▸ ] ─────────────┐
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌── ▶ Page (Pro)                              [ Pick Visually ▸ ] ─────────────┐
+└──────────────────────────────────────────────────────────────────────────────┘
+
+Allow Listening For Post Status:  [ publish × ]
+```
+
+### 10.3 Per-post metabox UI (final)
+
+```
+<details>                                   ← native HTML, no React-bootstrap dep
+  <summary>
+    AtlasVoice — Custom rules for this post (Pro)
+                                            [ Pick Visually ▸ ]
+  </summary>
+
+  ☑ Use Own CSS Selectors
+
+  Include Content By CSS Selectors
+  ┌────────────────────────────────────────┐
+  │ .my-recipe-body                        │
+  └────────────────────────────────────────┘
+
+  Exclude Content By CSS Selectors
+  …three more fields…
+</details>
+```
+
+Pick Visually button uses `e.preventDefault(); e.stopPropagation();` so
+the `<details>` doesn't toggle when the button is clicked.
+
+### 10.4 Functional flow
+
+**Global accordion**
+- Pick Visually click resolves target URL: read manual-post input; if
+  numeric, fetch `WP /posts/<id>`; if non-empty string, fetch
+  `WP /posts?slug=<value>`; else hit `/tta/v1/step-rail/sample-url?scope=global`.
+- Open in new tab with `?atlasvoice_picker=1&scope=global`.
+- Picker save in the new tab → `/tta/v1/atlasvoice/save-rule` with
+  `scope_kind=global` (D26.2, already shipped).
+- Dashboard text-area edits go through the existing `handleChange` →
+  `POST /tta/v1/settings`. Free strips the three exclude fields from the
+  payload before send (with toast notification).
+
+**Per-type accordion (Pro only)**
+- Pick Visually click resolves target URL: same as global but with
+  `?scope=post_type&post_type=<slug>` on the sample-url query, and
+  `&scope=post_type:<slug>` on the picker URL.
+- Picker save → `/tta/v1/atlasvoice/save-rule` with
+  `scope_kind=post_type` (already shipped).
+- Dashboard text-area edits go through a small per-type handler:
+  reads-modifies-writes `settings.tta__settings_atlasvoice_per_type_overrides[<slug>][<field>]`.
+
+**Per-post metabox**
+- Pick Visually click opens the current post in a new tab with
+  `?atlasvoice_picker=1&scope=post:<id>` (no manual input needed).
+- Picker save → existing `/tta_pro/v1/css_selectors_for_posts` route
+  (D26.2 wires this through the same `/atlasvoice/save-rule` endpoint
+  on `scope=post`, which delegates to the post meta).
+- Direct text-area edits in the metabox keep using the existing
+  `CSSSelectorsForPosts.js` save flow.
+
+### 10.5 Pro-notice layers (Free only, global accordion)
+
+| Layer | Trigger | Content |
+| ----- | ------- | ------- |
+| Inline banner | Always visible at top of Global accordion body | "⚡ Excludes are a Pro feature. You can type into all four fields below, but only Include Content By CSS Selectors saves on Free. The other three are ignored until you upgrade. [Upgrade to Pro →]" |
+| `[Pro]` pill | Always visible, next to each gated field's label | Hover tooltip: "Pro feature — value won't be saved on Free. [Upgrade]" |
+| Toast on save | Only when admin had typed into a gated field | "Saved 1 of 4 fields. Three exclude fields were skipped — they need Pro. [Upgrade →]" |
+
+### 10.6 Sequencing (D27.x atomic commits)
+
+1. **D27.1** Plan v5 doc.
+2. **D27.2** Remove "Use AtlasVoice Extractor (Beta)" — `AtlasVoiceSettings.js`, `TTA_Activator.php`, `helpers.php` inline, dead handler refs.
+3. **D27.3** Settings.js — restructure into Accordion. Global expanded, per-type collapsed Pro-only.
+4. **D27.4** Pro-notice layers — banner + pill + toast in the global accordion.
+5. **D27.5** Per-type save handler — read-modify-write
+   `tta__settings_atlasvoice_per_type_overrides`. Move "Allow Listening
+   For Post Status" below the accordions.
+6. **D27.6** Manual post resolver in Pick Visually click handler
+   (id → `/wp/v2/posts/<id>`, slug → `/wp/v2/posts?slug=`).
+7. **D27.7** Per-post metabox `<details>` accordion + Pick Visually
+   button on the post-edit screen.
+8. **D27.8** Production build + commit + push.
+9. **D27.9** Live browser verification on dashboard + picker post + edit
+   screen.
+
+Estimated **~1 focused day** for D27.2–D27.7.
 
 
