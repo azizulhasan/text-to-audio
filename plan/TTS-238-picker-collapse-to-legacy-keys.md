@@ -1,4 +1,4 @@
-# TTS-238 — Picker collapse to legacy keys (proposal v2)
+# TTS-238 — Picker collapse to legacy keys (proposal v4)
 
 **Status:** draft, not yet implemented
 **Author conversation:** 2026-04-30
@@ -8,313 +8,425 @@
 
 ## 1. Why
 
-The new picker introduced a parallel rule store (`tta_atlasvoice_selectors`
-option + `_atlasvoice_post_rules` post meta + `RuleResolver` precedence walk)
-that **duplicates four mechanisms that already work** in the legacy plugin:
+The new picker introduced a parallel rule store
+(`tta_atlasvoice_selectors` option + `_atlasvoice_post_rules` post meta
++ `RuleResolver` precedence walk) that **duplicates four mechanisms
+already wired in the legacy plugin**:
 
-| Picker UI step | Legacy equivalent |
-| -------------- | ----------------- |
-| Content region | Include Content By CSS Selectors |
-| Skip these areas | Exclude Content By CSS Selectors |
-| Skip these tag types | Exclude HTML Tags To Speak |
-| Skip these phrases | Exclude Texts To Speak |
+| Picker UI step | Legacy storage key |
+| -------------- | ------------------ |
+| Content region | `tta__settings_css_selectors` |
+| Skip these areas | `tta__settings_exclude_content_by_css_selectors` |
+| Skip these tag types | `tta__settings_exclude_tags` |
+| Skip these phrases | `tta__settings_exclude_texts` |
 
-The legacy engine (PHP `tta_clean_content` + the JS reader) already consumes
-the legacy keys at runtime. Keeping a second store means two places where
-the same data lives (drift risk), two save paths, a 5-way scope precedence
-resolver to maintain, and Free vs Pro gating logic in two places.
+Per-post override is **also already wired** in the legacy plugin:
 
-**Greenfield — the new picker has not shipped to users.** No migration cost
-to remove the parallel store.
+- Storage: `tts_pro_custom_css_selectors` (post meta, JSON).
+- Save endpoint: `POST /wp-json/tta_pro/v1/css_selectors_for_posts`.
+- React UI: `src/dashboard/css-selectors/CSSSelectorsForPosts.js`.
+- **Reader: `TTA_Helper::tts_get_settings($key, $post_id)`** —
+  field-by-field merges per-post values over global when
+  `tta__settings_use_own_css_selectors` is true and the per-post field
+  is non-empty.
 
----
+So the legacy plugin already has the **two scopes** we actually need
+(global + per-post) and a working merge resolver. The new picker's
+parallel store reinvents this.
 
-## 2. Schema
-
-Each legacy CSS-selector key becomes a **per-scope-keyed array**. Old
-string values keep working — they're treated as `__global__`.
-
-### 2.1 Scope key format
-
-```
-__global__               // site-wide fallback
-post                     // post-type scope (any language)
-post|lang:fr             // post-type + language scope
-lang:fr                  // language-only scope
-```
-
-### 2.2 Settings store (one option per concern)
-
-```php
-tta__settings_atlasvoice_include_selectors = [
-  '__global__'       => '#main-content',
-  'post'             => '.entry-content',
-  'post|lang:fr'     => '.contenu-article',
-  'page'             => '#page-body',
-  'product'          => 'div.product-summary',
-];
-
-tta__settings_atlasvoice_excl_css   = [ '__global__' => […], 'post' => […], 'post|lang:fr' => […], … ];
-tta__settings_atlasvoice_excl_tags  = [ '__global__' => […], 'post' => […], … ];
-tta__settings_atlasvoice_excl_texts = [ '__global__' => […], 'post' => […], … ];
-```
-
-Each option is an independent map. The resolver picks the **winning scope
-key** based on the precedence walk in §3, then reads that scope's value
-from each of the four options.
-
-### 2.3 Per-post override (Pro only)
-
-Reuses the existing meta key — greenfield, no rename:
-
-```
-post meta:  _atlasvoice_post_rules
-value: [
-  'selector'   => '…',
-  'excl_css'   => […],
-  'excl_texts' => […],
-  'excl_tags'  => […],
-]
-```
-
-### 2.4 Backward-compat reader
-
-```php
-$opt = get_option('tta__settings_atlasvoice_include_selectors', []);
-if (is_string($opt))      { $opt = ['__global__' => $opt]; }
-if (! is_array($opt))     { $opt = []; }
-$global = $opt['__global__'] ?? '';
-```
+**Greenfield — the new picker store has not shipped to users.** No
+migration cost to delete the parallel.
 
 ---
 
-## 3. Resolver — cascade, no merge
-
-**Per-post wins entirely. Else post-type+language. Else language. Else
-post-type. Else global.** Each tier owns its own excludes; we do **not**
-merge across tiers (per user direction 2026-04-30).
-
-```
-Tier 1 — _atlasvoice_post_rules            (Pro only)
-Tier 2 — opt['<post_type>|lang:<lang>']    (when multilingual + lang set)
-Tier 3 — opt['lang:<lang>']                (language-only fallback)
-Tier 4 — opt['<post_type>']
-Tier 5 — opt['__global__']                 (or string-form root)
-```
-
-The first tier with a **non-empty `selector`** wins. The rule returned to
-the extractor is `{selector, excl_css, excl_texts, excl_tags}` from
-**that tier alone** — no union with anything below. If a tier has a
-selector but no excludes, that's the admin's intent: read everything,
-exclude nothing at this scope.
-
-Implementation: ~40-line `LegacyRuleReader::resolve($post_id)` static
-helper; PHP-side. JS port mirrors it for the picker preview.
-
----
-
-## 4. Dashboard UI
-
-### 4.1 "Allow Listening For Post Type" section (extended)
-
-Each enabled post type expands into a small editor block. Per-language
-sub-rows only render when a multilingual plugin is active
-(`LanguagePlugins::is_multilingual()`).
-
-```
-┌── Allow Listening For Post Type ───────────────────────────────────┐
-│                                                                    │
-│  ☑  Post                                                           │
-│      ┌──────────────────────────────────────────────────────────┐  │
-│      │ Default selector       .entry-content       [ Pick ▸ ]   │  │
-│      │ Skip areas             .share-bar, .author  [ Edit ▸ ]   │  │
-│      │ Skip tags              blockquote, figure   [ Edit ▸ ]   │  │
-│      │ Skip phrases           "Read more"          [ Edit ▸ ]   │  │
-│      │                                                          │  │
-│      │ Per-language overrides   (WPML detected)                 │  │
-│      │   en   uses Default                       [ Pick ▸ ]     │  │
-│      │   fr   .contenu-article                   [ Pick ▸ ] [✕] │  │
-│      │   de   uses Default                       [ Pick ▸ ]     │  │
-│      └──────────────────────────────────────────────────────────┘  │
-│                                                                    │
-│  ☑  Page                                                           │
-│      ┌──────────────────────────────────────────────────────────┐  │
-│      │ Default selector       #page-body           [ Pick ▸ ]   │  │
-│      │ … (excludes rows) …                                      │  │
-│      │ Per-language overrides   (none yet)                      │  │
-│      └──────────────────────────────────────────────────────────┘  │
-│                                                                    │
-│  ☐  Product   (post type not enabled)                              │
-│                                                                    │
-└────────────────────────────────────────────────────────────────────┘
-
-┌── Global fallback ─────────────────────────────────────────────────┐
-│ Applies to any post type without its own entry above.              │
-│   Default selector       #main-content              [ Pick ▸ ]     │
-│   Skip areas             .sidebar                   [ Edit ▸ ]     │
-│   …                                                                │
-└────────────────────────────────────────────────────────────────────┘
-
-┌── Per-language only (no post type) ────────────────────────────────┐
-│ Optional: rule that applies to all post types in this language     │
-│ (when no post-type rule exists for that pair).                     │
-│   en   uses Global                          [ Pick ▸ ]             │
-│   fr   .article-body                        [ Pick ▸ ] [✕]         │
-└────────────────────────────────────────────────────────────────────┘
-```
-
-**Rules of behaviour**
-
-- "Pick ▸" launches the step rail in a new tab on a random post of that
-  type (and language, when applicable). URL carries the scope context
-  (`?atlasvoice_picker=1&scope=post_type:post|lang:fr`). Save writes back
-  to that exact scope key in the four legacy options.
-- "✕" clears the per-language override for that row, falling back to the
-  post-type-default rule.
-- Per-language sub-section is hidden when `LanguagePlugins::is_multilingual()`
-  is false. The "Per-language only" block at the bottom is also hidden
-  in that case.
-- "Edit ▸" on excludes opens an inline editor (chip-style, same as the
-  rail) without leaving the dashboard — for tweaks that don't need a
-  visual pick.
-
-### 4.2 Per-post override meta box (Pro only)
-
-On the post-edit screen, a single button. No scope chooser, no inline
-editor:
-
-```
-┌── AtlasVoice — Listen rule for this post (Pro) ────────────┐
-│                                                            │
-│  Effective rule:   .entry-content   (post type "post")     │
-│                                                            │
-│  [ Pick custom selector for THIS post ▸ ]                  │
-│  [ Reset to post-type rule ]                               │
-│                                                            │
-└────────────────────────────────────────────────────────────┘
-```
-
-- "Pick custom selector for THIS post" opens this post with
-  `?atlasvoice_picker=1&scope=post:152`. Save writes the post meta
-  `_atlasvoice_post_rules`.
-- "Reset to post-type rule" deletes the meta — the post falls back to
-  the post-type / language / global cascade.
-- The "Effective rule" line is read-only, computed by
-  `LegacyRuleReader::resolve($post_id)`. Helps the admin see what
-  WOULD apply before they override.
-
-### 4.3 Step rail — trimmed
-
-Scope radio is gone. Rail opens with scope context already pinned via
-URL parameter. Header reads:
-
-> *Editing rule for: Post type "post" + language "fr"*
-
-The four steps (Content region / Skip areas / Skip tags / Skip phrases)
-behave the same as today. Save writes to whichever scope key the URL
-parameter dictates.
-
-### 4.4 Wrapper opt-out
-
-New checkbox in settings:
-
-> *☑ Emit legacy `<div class="tts_content_wrapper_N">` wrapper
-> (turn off if your theme's layout breaks on it; comment markers
-> are still emitted)*
-
-Default ON.
-
----
-
-## 5. What gets deleted
-
-- `tta_atlasvoice_selectors` option — gone.
-- `RuleResolver` class — replaced by `LegacyRuleReader`.
-- `PerPostRules` + `PerPostRulesMetaBox` — replaced by the new minimal
-  meta box; `_atlasvoice_post_rules` key reused.
-- `/wp-json/tta/v1/save-selector` REST route — replaced by writes
-  through the existing settings save endpoint + a new
-  `/wp-json/tta/v1/post-rule` for per-post saves.
-- `/wp-json/tta/v1/post-rules` REST route — same replacement.
-- Step rail's `ScopeRow` component / scope radio markup.
-
-## 6. What stays
-
-- Step rail's drag-to-include / drag-to-exclude / chip editor / verify-
-  across-posts (D14) / Tier 1–4 extractor fallback — all unchanged on
-  the read side.
-- Comment-marker emission (Pro filter) — unchanged.
-- Mode (staging/production), Snapshots, RegenGuard, ContentHash,
-  SelectorHash — orthogonal, unchanged.
-
----
-
-## 7. Free vs Pro split
-
-| Feature | Free | Pro |
-| ------- | ---- | --- |
-| Global selector + excludes | ✓ | ✓ |
-| Per-post-type selector + excludes | ✓ | ✓ |
-| Per-language selector + excludes | ✓ | ✓ |
-| Per-post-type+language combos | ✓ | ✓ |
-| Per-post override (`_atlasvoice_post_rules`) | — | ✓ |
-| Verify across posts | — | ✓ |
-| Snapshots / Go Live | — | ✓ |
-
-Pro differentiator stays "per-post override + admin tooling around the
-live mode flip."
-
----
-
-## 8. Cost & sequencing
-
-Estimated **~2 focused days**, atomic commits:
-
-1. **D26.1** Schema + `LegacyRuleReader::resolve($post_id)`. Backward-compat
-   string-form support. PHP-side only, no write changes yet.
-2. **D26.2** JS port of the resolver in `step-rail.shell.js`. Picker
-   preview consumes the new reader.
-3. **D26.3** Picker save → legacy keys. Step rail save() and the REST
-   handler write to `tta__settings_atlasvoice_*[scope_key]`.
-4. **D26.4** Dashboard "Allow Listening For Post Type" extended UI —
-   per-type editor blocks, per-language sub-rows when multilingual,
-   global fallback block, language-only block.
-5. **D26.5** Step rail scope chooser removed. Header reads scope from
-   URL param.
-6. **D26.6** Per-post meta box rewrite. Single "Pick custom selector"
-   button + "Reset to post-type rule". Effective-rule read-out.
-7. **D26.7** PHP extractor swap — `tta_clean_content` consumes
-   `LegacyRuleReader` instead of `RuleResolver`. Old `RuleResolver`,
-   `tta_atlasvoice_selectors` option write path, `PerPostRulesMetaBox`
-   deletion.
-8. **D26.8** Wrapper opt-out checkbox + smoke tests.
-9. **D26.9** Plan doc + revision log update.
-
----
-
-## 9. Decisions captured (2026-04-30)
+## 2. Decisions captured (2026-04-30 conversation)
 
 | Question | Decision |
 | -------- | -------- |
-| Per-post meta key | **Reuse `_atlasvoice_post_rules`** (greenfield, no rename needed). |
-| Excludes merging | **No merge** — winning tier owns its excludes outright. |
-| Per-language UI | **Ship now**, not deferred. Schema and dashboard rows above. |
+| Reuse legacy keys directly? | **Yes** — `tta__settings_*` for global, `tts_pro_custom_css_selectors` for per-post. |
+| Per-post-type scope? | **Yes — Pro only.** New option `tta__settings_atlasvoice_per_type_overrides`. |
+| Per-language scope? | **No** — no user complaints. Per-post override absorbs language edge cases. |
+| Drop `_atlasvoice_post_rules`, `tta_atlasvoice_selectors`, `RuleResolver`, `PerPostRules*`, `/save-selector`, `/post-rules`? | **Yes** — redundant. |
+| Picker on dashboard global "CSS Selectors" tab? | **Yes** — single "Pick visually" button at top. Multi-field rail. |
+| Picker on per-post `CSSSelectorsForPosts.js`? | **Yes** — single "Pick visually" button at top. Multi-field rail. |
+| Picker on Pro per-post-type editor? | **Yes** — Pro only, per type. |
+| Free picker scope? | **Content region only.** Excludes steps locked. |
+| Free emits wrapper + comment markers? | **Yes (NEW).** Today only Pro emits them. |
+| Default value of `tta__settings_css_selectors`? | **`[class*="tts_content_wrapper_"]`** — selects whatever wrapper the Pro/Free filter emitted. Was empty string. |
+| Per-post-type entry needs `use_own_css_selectors` toggle? | **No.** The include selector is the gate: non-empty = entry active (whole entry replaces global, even empty fields). Empty include = entry ignored, fall through to global. |
+| Per-post entry keeps `tta__settings_use_own_css_selectors`? | **Yes** — existing implementation, don't change. |
+| Wrapper opt-out checkbox? | **Yes**, default ON. |
+
+### Net schema
+
+```
+┌── Global settings (Free + Pro) ──────────────────────────────────┐
+│  tta__settings_css_selectors                = '[class*="tts_content_wrapper_"]'  ← NEW DEFAULT
+│  tta__settings_exclude_content_by_css_selectors                                  ← unchanged shape
+│  tta__settings_exclude_tags                                                      ← unchanged shape
+│  tta__settings_exclude_texts                                                     ← unchanged shape
+│  tta__settings_emit_legacy_wrapper          = bool (NEW, default true)           ← wrapper opt-out
+└──────────────────────────────────────────────────────────────────┘
+
+┌── Per-post-type overrides (Pro only) ────────────────────────────┐
+│  tta__settings_atlasvoice_per_type_overrides = [                 │
+│    'post' => [                                                   │
+│      'tta__settings_css_selectors'                    => '…',    │  ← include = the GATE
+│      'tta__settings_exclude_content_by_css_selectors' => '…',    │  ← applied if gate set
+│      'tta__settings_exclude_tags'                     => […],    │  ← applied if gate set
+│      'tta__settings_exclude_texts'                    => […],    │  ← applied if gate set
+│    ],                                                            │
+│    'page' => [                                                   │
+│      'tta__settings_css_selectors' => '',                        │  ← gate empty, ignore
+│    ],                                                            │
+│  ]                                                               │
+│                                                                  │
+│  No `use_own_css_selectors` field at this tier.                  │
+└──────────────────────────────────────────────────────────────────┘
+
+┌── Per-post override (Pro only) ──────────────────────────────────┐
+│  post meta: tts_pro_custom_css_selectors  (existing, unchanged)  │
+│  value: {                                                        │
+│    'tta__settings_use_own_css_selectors' => bool,                │  ← existing GATE
+│    'tta__settings_css_selectors'                    => '…',      │
+│    'tta__settings_exclude_content_by_css_selectors' => '…',      │
+│    'tta__settings_exclude_tags'                     => […],      │
+│    'tta__settings_exclude_texts'                    => […],      │
+│  }                                                               │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### Three-tier cascade — mixed semantics
+
+Implemented inside `TTA_Helper::tts_get_settings('settings', $post_id)`:
+
+```
+1. start with $result = global  (existing legacy keys)
+
+2. PER-POST-TYPE — replace whole entry (Pro only, gate is include != '')
+   $pt = get_post_type($post_id)
+   $override = $per_type[$pt]
+   if $override && $override['tta__settings_css_selectors'] !== '':
+       foreach (4 css-selector fields):
+           $result[field] = $override[field]   // even empty values apply
+
+3. PER-POST — field-by-field merge (Pro only, existing logic)
+   if $per_post['tta__settings_use_own_css_selectors'] === true:
+       foreach (4 css-selector fields):
+           if $per_post[field] non-empty:
+               $result[field] = $per_post[field]
+```
+
+**Why the asymmetry between tiers 2 and 3:**
+
+- Per-post **already exists** with the field-by-field merge + boolean
+  toggle. Don't break it.
+- Per-post-type is **new**. The boolean toggle is redundant when the
+  include selector itself can be the gate. Cleaner UX, fewer fields.
 
 ---
 
-## 10. Open questions
+## 3. UI
 
-1. **Settings export/import.** Existing tooling reads the flat
-   `tta_settings_data` row. Does the new per-scope-keyed value
-   roundtrip through the export/import path cleanly? Believed yes;
-   verify before D26.4.
-2. **Multilingual plugin coverage.** `LanguagePlugins::detect()` covers
-   WPML / Polylang / TranslatePress / GTranslate. Anything else
-   commonly seen on TTA installs that needs detection here?
+### 3.1 Dashboard "CSS Selectors" tab (existing, gains a Pick button)
+
+The existing global-settings tab in the React dashboard. A single
+**Pick visually ▸** button at the top of the section opens the step
+rail on a sample post; the admin edits all four fields in the rail and
+saves once. The text inputs below stay editable for admins who prefer
+typing.
+
+```
+┌── Settings → CSS Selectors ───────────────────────────────────────┐
+│                                                                   │
+│  [ Pick visually with AtlasVoiceSelector ▸ ]                      │
+│   Opens a sample post in a new tab — pick / drag in the rail and  │
+│   click Save. All four fields below update at once.               │
+│                                                                   │
+│  Include Content By CSS Selectors                                 │
+│  ┌──────────────────────────────────────────────┐                 │
+│  │ #main-content                                │                 │
+│  └──────────────────────────────────────────────┘                 │
+│                                                                   │
+│  Exclude Content By CSS Selectors                                 │
+│  ┌──────────────────────────────────────────────┐                 │
+│  │ .share-bar                                   │                 │
+│  │ .related-posts                               │                 │
+│  └──────────────────────────────────────────────┘                 │
+│                                                                   │
+│  Exclude HTML Tags To Speak                                       │
+│  ┌──────────────────────────────────────────────┐                 │
+│  │ blockquote|figure                            │                 │
+│  └──────────────────────────────────────────────┘                 │
+│                                                                   │
+│  Exclude Texts To Speak                                           │
+│  ┌──────────────────────────────────────────────┐                 │
+│  │ Read more...|Advertisement                   │                 │
+│  └──────────────────────────────────────────────┘                 │
+│                                                                   │
+└───────────────────────────────────────────────────────────────────┘
+```
+
+**Pick ▸ behaviour:**
+
+1. Fetches a sample post URL via
+   `GET /step-rail/sample-url?scope=global`.
+2. Opens it in a new tab with `?atlasvoice_picker=1&scope=global`.
+3. Step rail launches with all four steps editable. Header reads
+   *"Editing rule for: Global"*.
+4. Save writes the four fields back through the existing settings
+   save endpoint (writes `tta_settings_data['settings'][<field>]` for
+   each).
+5. After save, the dashboard tab can refresh its inputs from the
+   settings reader — or the admin manually reloads the page.
+
+### 3.1.5 Pro section: per-post-type editor (in "Allow Listening For Post Type")
+
+For Pro installs only, each enabled post type in the existing
+"Allow Listening For Post Type" section grows a small editor block:
+
+```
+┌── Allow Listening For Post Type (Pro) ────────────────────────────┐
+│                                                                   │
+│  ☑  Post                                                          │
+│      CSS rule:    [ Global / All  ▾ ]                             │
+│                                                                   │
+│  ☑  Page                                                          │
+│      CSS rule:    [ Custom         ▾ ]                            │
+│      ┌──────────────────────────────────────────────────────────┐ │
+│      │ [ Pick visually with AtlasVoiceSelector ▸ ]              │ │
+│      │  Opens a sample 'page' in a new tab.                     │ │
+│      │                                                          │ │
+│      │  Include Content By CSS Selectors                        │ │
+│      │  ┌────────────────────────────────────────────────────┐  │ │
+│      │  │ #page-body                                         │  │ │
+│      │  └────────────────────────────────────────────────────┘  │ │
+│      │  Exclude Content By CSS Selectors                        │ │
+│      │  ┌────────────────────────────────────────────────────┐  │ │
+│      │  │ .footer-cta                                        │  │ │
+│      │  └────────────────────────────────────────────────────┘  │ │
+│      │  Exclude HTML Tags To Speak                              │ │
+│      │  ┌────────────────────────────────────────────────────┐  │ │
+│      │  │ blockquote                                         │  │ │
+│      │  └────────────────────────────────────────────────────┘  │ │
+│      │  Exclude Texts To Speak                                  │ │
+│      │  ┌────────────────────────────────────────────────────┐  │ │
+│      │  │                                                    │  │ │
+│      │  └────────────────────────────────────────────────────┘  │ │
+│      └──────────────────────────────────────────────────────────┘ │
+│                                                                   │
+│  ☑  Product (Pro pill — type registered but no per-type rule)     │
+│      CSS rule:    [ Global / All  ▾ ]                             │
+│                                                                   │
+└───────────────────────────────────────────────────────────────────┘
+```
+
+**Dropdown semantics:**
+
+- **Global / All** (default) — no entry stored for this type in
+  `tta__settings_atlasvoice_per_type_overrides`. The post type falls
+  through to the global tier.
+- **Custom** — expands the editor. Picker writes to
+  `per_type[$post_type]`. Switching back to Global removes the entry
+  (or sets the include selector to empty, which is the
+  gate-off state).
+
+**Pick visually behaviour for per-type:**
+
+1. Fetches a sample post URL of *that* post type via
+   `GET /step-rail/sample-url?post_type=<type>`.
+2. Opens it with `?atlasvoice_picker=1&scope=post_type:<type>`.
+3. Step rail launches with all four steps editable.
+4. Save writes the four fields to
+   `tta__settings_atlasvoice_per_type_overrides[<type>]`.
+
+**Free vs Pro at this section:**
+
+- Free hides this entire block — only sees the existing
+  "Allow Listening For Post Type" checkboxes.
+- Pro sees the dropdown + editor + Pick button per type.
+
+### 3.2 Per-post override meta box (Pro, existing tab + a Pick button)
+
+`CSSSelectorsForPosts.js` already exposes the four fields with a
+"Use own CSS selectors for this post" toggle. Add a single
+**Pick visually ▸** button at the top — identical UX to §3.1 but the
+sample post is **this post** and save writes through the existing
+`POST tta_pro/v1/css_selectors_for_posts` endpoint to
+`tts_pro_custom_css_selectors`. All four fields update in one save.
+
+```
+┌── AtlasVoice — Custom rules for this post (Pro) ──────────────────┐
+│                                                                   │
+│  ☑ Use own CSS selectors for this post                            │
+│                                                                   │
+│  [ Pick visually with AtlasVoiceSelector ▸ ]                      │
+│   Opens THIS post in a new tab. Pick / drag in the rail and click │
+│   Save. All four fields below update at once.                     │
+│                                                                   │
+│  Include Content By CSS Selectors                                 │
+│  ┌──────────────────────────────────────────────┐                 │
+│  │ .my-recipe-body                              │                 │
+│  └──────────────────────────────────────────────┘                 │
+│                                                                   │
+│  … (three more fields, no per-field Pick buttons) …               │
+│                                                                   │
+└───────────────────────────────────────────────────────────────────┘
+```
+
+### 3.3 Step rail — trimmed
+
+The scope radio (`global / post_type / language / post_type+language /
+this post`) is removed. The rail opens **already scoped** based on the
+URL parameter that launched it:
+
+- `?atlasvoice_picker=1&scope=global`
+- `?atlasvoice_picker=1&scope=post_type:post`     (Pro only)
+- `?atlasvoice_picker=1&scope=post:152`           (Pro only)
+
+Header reads:
+
+> *Editing rule for: Global*
+>
+> *Editing rule for: Post type "post"*
+>
+> *Editing rule for: This post (#152)*
+
+All four steps (Content region / Skip areas / Skip tags / Skip phrases)
+remain interactive — the admin edits everything in one session and
+clicks **Save** once to persist the whole bundle.
+
+**On Free**, only the Content region step is editable. The three
+exclude steps render with the existing `is-locked` CSS + `.av-pro-pill`
+badge (already implemented). The Pick visually buttons on the Free
+dashboard launch with `scope=global`; saving only updates
+`tta__settings_css_selectors`. The Free build never sees
+`scope=post_type:*` or `scope=post:N` URLs.
+
+**Save targets** by scope:
+
+- `scope=global` → existing settings save endpoint. Writes the four
+  fields (or just the Content region on Free) into
+  `tta_settings_data['settings']`.
+- `scope=post_type:<slug>` → existing settings save endpoint. Writes
+  to `tta__settings_atlasvoice_per_type_overrides[<slug>]`.
+- `scope=post:N` → `POST tta_pro/v1/css_selectors_for_posts`. Writes
+  to the post meta `tts_pro_custom_css_selectors`. Sets
+  `tta__settings_use_own_css_selectors = true` so the existing
+  `tts_get_settings($post_id)` cascade picks it up.
+
+### 3.4 Wrapper opt-out
+
+New checkbox in **Settings → Compatibility** (or wherever the existing
+boolean flags live):
+
+> *☑ Emit legacy `<div class="tts_content_wrapper_N">` wrapper around
+> post content (turn off if your theme's layout breaks on it; comment
+> markers are still emitted regardless)*
+
+Default ON. Read-side: the Pro filter
+`tts_button_with_content_callback` already gates wrapper emission on
+the `tts_emit_legacy_wrapper` filter (default true) — wire this
+checkbox to that filter.
 
 ---
 
-## 11. Decision
+## 4. What gets deleted
+
+- `tta_atlasvoice_selectors` option write path — gone.
+- `RuleResolver` class — gone (legacy `tts_get_settings` already
+  implements the cascade).
+- `PerPostRules` + `PerPostRulesMetaBox` — gone (existing
+  `CSSSelectorsForPosts.js` covers the same surface).
+- `_atlasvoice_post_rules` post meta — gone (existing
+  `tts_pro_custom_css_selectors` covers the same need).
+- `/wp-json/tta/v1/save-selector` REST route — gone.
+- `/wp-json/tta/v1/post-rules` REST route — gone.
+- Step rail's `ScopeRow` component / scope radio markup — gone.
+
+## 5. What stays untouched
+
+- Step rail's drag-to-include / drag-to-exclude / chip editor / verify-
+  across-posts (D14) / Tier 1–4 extractor fallback — all read-side,
+  unchanged.
+- Comment-marker emission (Pro filter) — unchanged.
+- Mode (staging/production), Snapshots, RegenGuard, ContentHash,
+  SelectorHash — orthogonal, unchanged.
+- `TTA_Helper::tts_get_settings` cascade logic — unchanged.
+
+---
+
+## 6. Free vs Pro split
+
+| Feature | Free | Pro |
+| ------- | ---- | --- |
+| Wrapper + comment markers emission | ✓ (NEW for Free) | ✓ |
+| Global selector (text input + Pick) | ✓ | ✓ |
+| Global excludes (text input + Pick) | text input only | ✓ |
+| Picker Content region step | ✓ | ✓ |
+| Picker Skip-areas / Skip-tags / Skip-phrases steps | locked | ✓ |
+| Per-post-type override (dropdown + editor + Pick) | — | ✓ |
+| Per-post override (existing tab + Pick) | — | ✓ |
+| Verify across posts | — | ✓ |
+| Snapshots / Go Live | — | ✓ |
+
+Pro differentiates on every per-scope override (per-type and per-post),
+on the picker's exclude steps, and on the existing admin tooling
+(Verify, Snapshots, Go Live). Free still gets a working visual picker
+limited to the Content region — enough to make the legacy wrapper auto-
+detection foolproof out of the box.
+
+---
+
+## 7. Cost & sequencing
+
+Estimated **~1.5 focused days**. Atomic commits:
+
+1. **D26.1** Step rail URL param parser — `?scope=global`,
+   `?scope=post_type:<slug>`, `?scope=post:N`. Header read-out
+   reflects the scope. Scope radio markup deleted; rail opens with
+   all four steps interactive (or only Content region on Free).
+2. **D26.2** Step rail save target switch — `scope=global` writes
+   through the existing settings save endpoint, `scope=post_type:*`
+   writes to `tta__settings_atlasvoice_per_type_overrides`,
+   `scope=post:N` writes through
+   `tta_pro/v1/css_selectors_for_posts`. Old `/save-selector` and
+   `/post-rules` REST routes deleted.
+3. **D26.3** Per-post-type cascade in
+   `TTA_Helper::tts_get_settings('settings', $post_id)` — read
+   `tta__settings_atlasvoice_per_type_overrides[$pt]`, gate on
+   non-empty include, replace four fields when gate set.
+4. **D26.4** Dashboard "CSS Selectors" tab — single **Pick
+   visually** button at the top; URL builder + new-tab open.
+5. **D26.5** Dashboard "Allow Listening For Post Type" — Pro
+   section with per-type dropdown (Global / Custom), expanded
+   editor, Pick button per type.
+6. **D26.6** `CSSSelectorsForPosts.js` — single **Pick visually**
+   button at the top; URL builder + new-tab open.
+7. **D26.7** Free-side wrapper + marker emission (extends
+   `TTA_Pro_Filters::tts_button_with_content_callback`'s logic to
+   the Free filter chain). Wrapper opt-out checkbox in settings.
+8. **D26.8** Default value of `tta__settings_css_selectors` in
+   `TTA_Activator.php` changed from `''` to
+   `[class*="tts_content_wrapper_"]`.
+9. **D26.9** Cleanup. Delete `tta_atlasvoice_selectors` option write
+   path, `RuleResolver`, `PerPostRules*`, `_atlasvoice_post_rules`
+   cleanup. Revision log update.
+
+---
+
+## 8. Open questions
+
+1. **Sample-post URL endpoint** — `/step-rail/sample-url` already
+   exists and accepts a `scope` query. We can reuse it as-is for
+   `scope=global` (returns any recent published post). For per-post,
+   the post id is known so we just use that post's permalink — no
+   sample needed. ✓ no work.
+
+---
+
+## 9. Decision
 
 Awaiting approval to proceed with D26.1.
+
 
