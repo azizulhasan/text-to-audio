@@ -622,6 +622,21 @@ add_action('admin_init', function () {
         // TTS-238 D27.29 — rule-snapshot ring buffer retired.
         delete_option( 'tta_atlasvoice_snapshots' );
 
+        // TTS-238 D27.31 — AuthVariants retired. Strip per-post
+        // variant pin + sample ring meta in batches.
+        foreach ( array( '_tta_mp3_variant', '_tta_atlasvoice_auth_samples' ) as $orphan_meta_key ) {
+            $orphan_ids = get_posts( array(
+                'post_type'      => 'any',
+                'post_status'    => 'any',
+                'posts_per_page' => 200,
+                'fields'         => 'ids',
+                'meta_key'       => $orphan_meta_key,
+            ) );
+            foreach ( (array) $orphan_ids as $orphan_pid ) {
+                delete_post_meta( $orphan_pid, $orphan_meta_key );
+            }
+        }
+
         // Strip per-post `_atlasvoice_post_rules` meta in batches so a
         // huge site doesn't blow memory on this admin_init pass.
         $orphan_meta_post_ids = get_posts( array(
