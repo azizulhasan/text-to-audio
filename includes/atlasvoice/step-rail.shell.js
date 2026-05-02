@@ -1285,13 +1285,6 @@
         d.getElementById('av-promo-close').addEventListener('click', function () { overlay.remove(); });
     }
 
-    /* ─── scope radiogroup retired (D27.27): /step-rail/scopes
-         endpoint deleted, renderScopeRow / SCOPE_OPTIONS removed.
-         Scope is driven entirely by URL params now. The body of
-         the old function is gone — scope changes happen by
-         relaunching the picker with a different ?scope=… URL,
-         not by a radio inside the panel. ───────────────────── */
-
 
     /* \u2500\u2500\u2500 D26.1 \u2014 scope from URL + read-only readout \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 
@@ -2236,9 +2229,7 @@
         if (parsed.kind === 'post')      { state.selection.scope = 'post';      }
         else if (parsed.kind === 'post_type') { state.selection.scope = 'post_type'; state.selection.post_type = parsed.post_type; }
         else                             { state.selection.scope = 'global';    }
-        // Render the read-only scope label immediately. (The
-        // /step-rail/scopes fetch was retired in D27.27 — scope is
-        // pinned by URL params now, so there's nothing to wait on.)
+        // Render the read-only scope label immediately.
         renderScopeReadout();
 
         // Tab toggles.

@@ -1064,10 +1064,6 @@ class TTA_Api_Routes {
             '/tta/v1/save_schedule_report',
             '/tta/v1/get_schedule_report',
             '/tta/v1/onboarding-event',
-            '/tta/v1/save-selector',
-            '/tta/v1/heal-log',
-            '/tta/v1/boilerplate-suggestions',
-            '/tta/v1/boilerplate-exclude',
             '/tta/v1/language-context',
             // /auth-variant GET needs admin. The POST verb has a custom
             // gate because anonymous visitors must be able to report

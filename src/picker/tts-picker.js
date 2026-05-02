@@ -194,28 +194,12 @@
      *   - old_selector: the selector being replaced. Only meaningful when
      *                   reason === 'heal'.
      */
+    // TTS-238 D27.28 — /save-selector REST route was retired. The
+    // auto-save / auto-heal flow that used to call this function on
+    // confident DOM detection is no longer wired up. Kept as a no-op
+    // so any straggler caller resolves cleanly instead of throwing.
     function persistSelector(selector, postType, extra) {
-        var tts = global.ttsObj || global.tta_obj || {};
-        var base = (tts.api_url || '/wp-json/').replace(/\/$/, '/');
-        var nonce = tts.rest_nonce || tts.nonce || '';
-        var body = { selector: selector, post_type: postType || '' };
-        if (extra && extra.reason) { body.reason = extra.reason; }
-        if (extra && extra.old_selector) { body.old_selector = extra.old_selector; }
-        // PR-C (C5b): tag the save with the current language so multilingual
-        // sites key storage per-language. An explicit extra.language wins;
-        // otherwise we fall back to the bootstrap-exposed language code.
-        // Empty string is fine — the server treats it as "no language".
-        var lang = (extra && extra.language) || tts.atlasvoice_language_code || '';
-        if (lang) { body.language = lang; }
-        return fetch(base + 'tta/v1/save-selector', {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-WP-Nonce': nonce
-            },
-            body: JSON.stringify(body)
-        }).then(function (r) { return r.json(); });
+        return Promise.resolve({ status: false, retired: true });
     }
 
     /**

@@ -611,6 +611,14 @@ add_action('admin_init', function () {
     if ( ! get_option( 'tta_d27_legacy_cleanup_done' ) ) {
         delete_option( 'tta_atlasvoice_selectors' );
 
+        // TTS-238 D27.28 — heal log + boilerplate detector retired.
+        delete_option( 'tta_atlasvoice_heal_log' );
+        delete_option( 'tta_atlasvoice_boilerplate_suggestions' );
+        $boilerplate_cron = wp_next_scheduled( 'tta_atlasvoice_detect_boilerplate' );
+        if ( $boilerplate_cron ) {
+            wp_unschedule_event( $boilerplate_cron, 'tta_atlasvoice_detect_boilerplate' );
+        }
+
         // Strip per-post `_atlasvoice_post_rules` meta in batches so a
         // huge site doesn't blow memory on this admin_init pass.
         $orphan_meta_post_ids = get_posts( array(

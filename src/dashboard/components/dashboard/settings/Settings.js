@@ -17,7 +17,8 @@ import Icon from "../../Icon";
 // settings live in their own modules so the two systems can evolve
 // independently without stepping on each other.
 import {ToggleSwitch, SettingRow, ProLockIcon} from "./SettingsPrimitives";
-import AtlasVoiceSettings from "./AtlasVoiceSettings";
+// TTS-238 D27.28 — AtlasVoiceSettings (heal log + boilerplate detector)
+// retired. Both surfaces removed; import dropped.
 import ScopeAccordion from "./ScopeAccordion";
 import LegacyExtractionSettings from "./LegacyExtractionSettings";
 
@@ -492,11 +493,6 @@ export default function Settings() {
                                     {/* D27.3 — D26.5's per-type Pick block was replaced by the
                                         ScopeAccordion below; "Allow Listening For Post Status"
                                         moves below the accordion in this v5 layout. */}
-
-                                    {/* D27 — AtlasVoice heal log + boilerplate detector
-                                        rendered always; the "Use AtlasVoice Extractor (Beta)"
-                                        toggle was retired in v5. */}
-                                    <AtlasVoiceSettings />
 
                                     {/* D27.3 — Scope accordion replaces the flat field list.
                                         Global is always shown; one collapsed accordion appears
