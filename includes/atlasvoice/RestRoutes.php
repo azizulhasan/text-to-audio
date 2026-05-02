@@ -970,68 +970,60 @@ class RestRoutes {
 			}
 		}
 
-		$store = get_option( 'tta_atlasvoice_selectors', array(
-			'global'        => '',
-			'per_post_type' => array(),
-		) );
-		if ( ! is_array( $store ) ) {
-			$store = array( 'global' => '', 'per_post_type' => array() );
-		}
-		if ( ! isset( $store['per_post_type'] ) || ! is_array( $store['per_post_type'] ) ) {
-			$store['per_post_type'] = array();
-		}
-		if ( ! isset( $store['per_language'] ) || ! is_array( $store['per_language'] ) ) {
-			$store['per_language'] = array();
-		}
-		if ( ! isset( $store['per_post_type_per_language'] ) || ! is_array( $store['per_post_type_per_language'] ) ) {
-			$store['per_post_type_per_language'] = array();
-		}
-
-		// Build rule array: selector + excl_* so non-post scopes persist the
-		// full rule, not just the selector string (backwards-compatible with the
-		// old string-only format via RuleResolver::entry_sel / entry_excl).
+		// TTS-238 D27.24 — repointed at the new collapsed storage.
+		// Previously wrote to the retired `tta_atlasvoice_selectors`
+		// option. Per-language and per-post-type+language buckets are
+		// retired (no migration needed — those layers were dropped in
+		// the v5 plan, §11). Auto-save / heal callers still work; their
+		// rule lands in `tta_settings_data` instead of the dead store.
 		$req_excl_css   = $request->get_param( 'excl_css' );
 		$req_excl_texts = $request->get_param( 'excl_texts' );
 		$req_excl_tags  = $request->get_param( 'excl_tags' );
 
-		$rule = array(
-			'selector'   => $selector,
-			'excl_css'   => is_array( $req_excl_css )   ? array_values( array_filter( array_map( 'sanitize_text_field', $req_excl_css ) ) )   : array(),
-			'excl_texts' => is_array( $req_excl_texts ) ? array_values( array_filter( array_map( 'sanitize_text_field', $req_excl_texts ) ) ) : array(),
-			// Accept any valid HTML element name (letter + alphanumeric, max 32 chars).
-			// Not limited to the predefined checkbox set so custom tags like "span" persist.
-			'excl_tags'  => is_array( $req_excl_tags )
-				? array_values( array_filter(
-					array_map( 'sanitize_key', $req_excl_tags ),
-					function ( $t ) { return $t !== '' && strlen( $t ) <= 32 && preg_match( '/^[a-z][a-z0-9]*$/', $t ); }
-				) )
-				: array(),
+		$excl_css_str = is_array( $req_excl_css ) ? implode( "\n", array_filter( array_map( 'sanitize_text_field', $req_excl_css ) ) ) : (string) $req_excl_css;
+		$excl_texts_arr = is_array( $req_excl_texts ) ? array_values( array_filter( array_map( 'sanitize_text_field', $req_excl_texts ) ) ) : array();
+		$excl_tags_arr  = is_array( $req_excl_tags )
+			? array_values( array_filter(
+				array_map( 'sanitize_key', $req_excl_tags ),
+				function ( $t ) { return $t !== '' && strlen( $t ) <= 32 && preg_match( '/^[a-z][a-z0-9]*$/', $t ); }
+			) )
+			: array();
+
+		$rule_kv = array(
+			'tta__settings_css_selectors'                    => $selector,
+			'tta__settings_exclude_content_by_css_selectors' => $excl_css_str,
+			'tta__settings_exclude_texts'                    => implode( '|', $excl_texts_arr ),
+			'tta__settings_exclude_tags'                     => implode( '|', $excl_tags_arr ),
 		);
 
-		// Language-keyed buckets only apply when a multilingual plugin is
-		// actually active. Ignoring the param otherwise prevents stale data
-		// from being written by a crafted request with no real language context.
-		$lang_plugin = class_exists( '\\TTA\\AtlasVoice\\LanguagePlugins' )
-			&& LanguagePlugins::is_multilingual();
-
-		if ( $post_type !== '' && $language !== '' && $lang_plugin ) {
-			if ( ! isset( $store['per_post_type_per_language'][ $post_type ] )
-				 || ! is_array( $store['per_post_type_per_language'][ $post_type ] ) ) {
-				$store['per_post_type_per_language'][ $post_type ] = array();
+		$opt_raw = get_option( 'tta_settings_data', array() );
+		$opt     = json_decode( wp_json_encode( $opt_raw ), true );
+		if ( ! is_array( $opt ) ) { $opt = array(); }
+		if ( isset( $opt['settings'] ) && is_array( $opt['settings'] ) ) {
+			foreach ( $opt['settings'] as $k => $v ) {
+				if ( ! array_key_exists( $k, $opt ) ) { $opt[ $k ] = $v; }
 			}
-			$store['per_post_type_per_language'][ $post_type ][ $language ] = $rule;
-		} elseif ( $language !== '' && $lang_plugin ) {
-			$store['per_language'][ $language ] = $rule;
-		} elseif ( $post_type !== '' ) {
-			$store['per_post_type'][ $post_type ] = $rule;
-		} else {
-			$store['global'] = $rule;
+			unset( $opt['settings'] );
 		}
 
-		update_option( 'tta_atlasvoice_selectors', $store, false );
+		if ( $post_type !== '' ) {
+			if ( ! isset( $opt['tta__settings_atlasvoice_per_type_overrides'] ) || ! is_array( $opt['tta__settings_atlasvoice_per_type_overrides'] ) ) {
+				$opt['tta__settings_atlasvoice_per_type_overrides'] = array();
+			}
+			$opt['tta__settings_atlasvoice_per_type_overrides'][ $post_type ] = $rule_kv;
+		} else {
+			foreach ( $rule_kv as $k => $v ) { $opt[ $k ] = $v; }
+		}
+		update_option( 'tta_settings_data', $opt );
 		if ( class_exists( '\\TTA\\TTA_Cache' ) ) {
 			\TTA\TTA_Cache::delete( 'all_settings' );
 		}
+
+		// `$store` retained as a local alias so the heal-log block below
+		// (which embeds a snapshot of the resolved rule for audit) keeps
+		// compiling unchanged.
+		$store = $opt;
+		$rule  = $rule_kv;
 
 		// PR-C (C1c + C2a) — heal/revert audit log.
 		if ( ( $reason === 'heal' || $reason === 'revert' )
@@ -1506,35 +1498,51 @@ class RestRoutes {
 		}
 
 		if ( $action === 'set' ) {
-			// D7 passed only { selector }. D10 accepts the step-rail's
-			// chip arrays (excl_css / excl_texts / excl_tags) too. The
-			// sanitiser drops unknown fields, so callers can safely send
-			// a superset and rely on the server to normalise it.
-			$selector = (string) $request->get_param( 'selector' );
-			$rules    = array( 'selector' => $selector );
+			// TTS-238 D27.24 — write to `tts_pro_custom_css_selectors`
+			// post meta (the canonical per-post slot since D26) instead
+			// of the retired `_atlasvoice_post_rules` meta. Saving via
+			// this endpoint also flips the master toggle on, mirroring
+			// the picker save path.
+			$selector = trim( (string) $request->get_param( 'selector' ) );
 
-			$excl_css = $request->get_param( 'excl_css' );
-			if ( $excl_css !== null ) { $rules['excl_css'] = $excl_css; }
+			$req_excl_css   = $request->get_param( 'excl_css' );
+			$req_excl_texts = $request->get_param( 'excl_texts' );
+			$req_excl_tags  = $request->get_param( 'excl_tags' );
 
-			$excl_texts = $request->get_param( 'excl_texts' );
-			if ( is_array( $excl_texts ) ) { $rules['excl_texts'] = $excl_texts; }
+			$excl_css_str   = is_array( $req_excl_css ) ? implode( "\n", array_filter( array_map( 'sanitize_text_field', $req_excl_css ) ) ) : (string) $req_excl_css;
+			$excl_texts_arr = is_array( $req_excl_texts ) ? array_values( array_filter( array_map( 'sanitize_text_field', $req_excl_texts ) ) ) : array();
+			$excl_tags_arr  = is_array( $req_excl_tags )
+				? array_values( array_filter(
+					array_map( 'sanitize_key', $req_excl_tags ),
+					function ( $t ) { return $t !== '' && strlen( $t ) <= 32 && preg_match( '/^[a-z][a-z0-9]*$/', $t ); }
+				) )
+				: array();
 
-			$excl_tags = $request->get_param( 'excl_tags' );
-			if ( is_array( $excl_tags ) ) { $rules['excl_tags'] = $excl_tags; }
+			$existing = get_post_meta( $post_id, 'tts_pro_custom_css_selectors', true );
+			if ( ! is_array( $existing ) ) { $existing = array(); }
+			$merged = array_merge( $existing, array(
+				'tta__settings_use_own_css_selectors'            => true,
+				'tta__settings_css_selectors'                    => $selector,
+				'tta__settings_exclude_content_by_css_selectors' => $excl_css_str,
+				'tta__settings_exclude_texts'                    => implode( '|', $excl_texts_arr ),
+				'tta__settings_exclude_tags'                     => implode( '|', $excl_tags_arr ),
+			) );
+			update_post_meta( $post_id, 'tts_pro_custom_css_selectors', $merged );
+			if ( class_exists( '\\TTA\\TTA_Cache' ) ) { \TTA\TTA_Cache::delete( 'all_settings' ); }
 
-			$payload = PerPostRules::set( $post_id, $rules );
 			return rest_ensure_response( array(
 				'status'   => true,
 				'post_id'  => $post_id,
-				'override' => $payload,
+				'override' => $merged,
 			) );
 		}
 		if ( $action === 'clear' ) {
-			PerPostRules::clear( $post_id );
+			delete_post_meta( $post_id, 'tts_pro_custom_css_selectors' );
+			if ( class_exists( '\\TTA\\TTA_Cache' ) ) { \TTA\TTA_Cache::delete( 'all_settings' ); }
 			return rest_ensure_response( array(
 				'status'   => true,
 				'post_id'  => $post_id,
-				'override' => PerPostRules::empty_payload(),
+				'override' => array(),
 			) );
 		}
 
