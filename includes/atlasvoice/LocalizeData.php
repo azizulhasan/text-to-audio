@@ -71,9 +71,11 @@ class LocalizeData {
 			array( 'global' => '', 'per_post_type' => array() )
 		);
 
-		$data['atlasvoice_language_code'] = class_exists( '\\TTA\\AtlasVoice\\LanguagePlugins' )
-			? LanguagePlugins::current_language_code()
-			: '';
+		// TTS-238 D27.33 — LanguagePlugins retired. The legacy extractor
+		// engine's Tier-2 fallback walk reads this field, so we keep
+		// the key for back-compat but ship an empty value (per-language
+		// scopes were already retired by the D26 collapse).
+		$data['atlasvoice_language_code'] = '';
 
 		// D26 — opt-in flag retired. Hardcode true so any front-end
 		// caller still reading `tts.use_atlasvoice_extractor` keeps
