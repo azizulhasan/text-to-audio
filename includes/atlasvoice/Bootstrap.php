@@ -134,13 +134,12 @@ class Bootstrap {
 			StepRail::register();
 		}
 
-		// D13 — Readers integration glue. Registers the legacy-side
-		// `atlasvoice_after_clean_content` listener so all reader-append
-		// logic stays inside `includes/atlasvoice/` (P1 isolation).
-		// Dormant unless a third party hooks `atlasvoice_extra_field_text`.
-		if ( class_exists( '\\TTA\\AtlasVoice\\ReadersIntegration' ) ) {
-			ReadersIntegration::register();
-		}
+		// TTS-238 D27.32 — D13 Readers integration retired (the
+		// `Readers/` directory + ReadersIntegration class were dormant-
+		// by-design and shipped without an in-tree consumer). The
+		// `apply_filters('atlasvoice_after_clean_content', ...)` emit
+		// in helpers.php stays as a public extension point — with no
+		// listener attached it returns the content unchanged.
 
 	}
 }
