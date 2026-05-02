@@ -110,9 +110,10 @@ class Bootstrap {
 		if ( class_exists( '\\TTA\\AtlasVoice\\PerPostRules' ) ) {
 			PerPostRules::register();
 		}
-		if ( class_exists( '\\TTA\\AtlasVoice\\PerPostRulesMetaBox' ) ) {
-			PerPostRulesMetaBox::register();
-		}
+		// TTS-238 D27.31 — PerPostRulesMetaBox retired. The breadcrumb
+		// table it added to the post-edit metabox is gone; the React
+		// per-post accordion (CSSSelectorsForPosts.js) is the canonical
+		// per-post UI now.
 
 		// D8 — lazy picker bundle loader. Registers the picker with
 		// WP_Scripts but doesn't enqueue it; emits an inline

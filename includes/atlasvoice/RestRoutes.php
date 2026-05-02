@@ -24,11 +24,10 @@ namespace TTA\AtlasVoice;
  * (D27.28); /snapshots (D27.29); /auth-variant (pre-D27.28),
  * /language-context, /mode (D27.30).
  *
- * All handlers live on this class too — they own the option keys the
- * AtlasVoice subsystem touches (post meta via AuthVariants::*). Keeping
- * route registration and handler code together makes the module
- * delete-safe: removing `includes/atlasvoice/` wipes every AtlasVoice
- * REST surface with no dangling callbacks left in the legacy routes.
+ * All handlers live on this class too. Keeping route registration
+ * and handler code together makes the module delete-safe: removing
+ * `includes/atlasvoice/` wipes every AtlasVoice REST surface with
+ * no dangling callbacks left in the legacy routes.
  *
  * Permission model mirrors the legacy file:
  *   - Admin routes use a closure that checks manage_options + nonce.

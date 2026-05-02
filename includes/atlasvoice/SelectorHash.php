@@ -20,11 +20,11 @@ namespace TTA\AtlasVoice;
  *                  after the precedence walk),
  *     lang:        language code at synthesis time (empty on monolingual
  *                  sites, WPML/Polylang code otherwise),
- *     auth_bucket: logged-out | logged-in | both (post-meta auth variant
- *                  from AuthVariants),
  *     provider:    int player_id that synthesised this MP3, because
  *                  switching TTS providers bumps the fingerprint too,
  *   }
+ *
+ *   (D27.31: `auth_bucket` field was retired with AuthVariants.)
  *
  * Why sha1 and not md5? md5 is reserved for ContentHash — keeping the
  * two at different hash functions makes it obvious in logs / debugger
@@ -168,11 +168,15 @@ class SelectorHash {
 	 */
 	public static function build_fingerprint( $post_id, $player_id = 0 ) {
 		$post_id = (int) $post_id;
-		$input   = array(
-			'rules'       => self::resolve_rules( $post_id ),
-			'lang'        => self::current_language_code(),
-			'auth_bucket' => self::current_auth_bucket( $post_id ),
-			'provider'    => (int) $player_id,
+		// TTS-238 D27.31 — `auth_bucket` retired with AuthVariants. The
+		// fingerprint no longer includes the logged-in/out variant key;
+		// existing MP3 cache entries on installs that ever pinned a
+		// variant will get a single fingerprint change, which is fine —
+		// they just regenerate once on next request.
+		$input = array(
+			'rules'    => self::resolve_rules( $post_id ),
+			'lang'     => self::current_language_code(),
+			'provider' => (int) $player_id,
 		);
 		return sha1( wp_json_encode( $input ) );
 	}
@@ -281,21 +285,6 @@ class SelectorHash {
 	protected static function current_language_code() {
 		if ( class_exists( '\\TTA\\AtlasVoice\\LanguagePlugins' ) ) {
 			return (string) LanguagePlugins::current_language_code();
-		}
-		return '';
-	}
-
-	/**
-	 * Defer to AuthVariants for the post's synthesis bucket. Empty
-	 * string means "not pinned" — fingerprint incorporates that too,
-	 * so flipping "both → logged-in only" invalidates existing MP3s.
-	 *
-	 * @param int $post_id
-	 * @return string
-	 */
-	protected static function current_auth_bucket( $post_id ) {
-		if ( class_exists( '\\TTA\\AtlasVoice\\AuthVariants' ) ) {
-			return (string) AuthVariants::get_variant( $post_id );
 		}
 		return '';
 	}
