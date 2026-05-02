@@ -52,12 +52,9 @@ class Bootstrap {
 		if ( self::$registered ) { return; }
 		self::$registered = true;
 
-		// C3a — nightly boilerplate detector cron. Registration is
-		// idempotent and safe to call on every `init`. The cron itself
-		// only fires once per 24h via WP-Cron's scheduling table.
-		if ( class_exists( '\\TTA\\AtlasVoice\\BoilerplateDetector' ) ) {
-			BoilerplateDetector::register_cron();
-		}
+		// TTS-238 D27.28 — boilerplate detector retired (UI + class +
+		// cron all removed). The migration in text-to-audio.php
+		// unschedules the legacy cron hook on the next admin_init pass.
 
 		// REST routes live in a dedicated registrar (D0b). Hooks on
 		// `rest_api_init`, so it's safe to register here during the
