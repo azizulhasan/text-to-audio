@@ -18,14 +18,11 @@ namespace TTA\AtlasVoice;
  *   GET  /step-rail/sample-url
  *   POST /step-rail/verify-sample
  *   GET  /step-rail/verify-sample
- *   GET  /auth-variant
- *   POST /auth-variant                      (pin OR record-sample)
- *   GET  /language-context
- *   GET|POST /mode                          (Pro: staging / Go Live)
  *
  * Retired: /save-selector, /post-rules, /heal-log,
  * /boilerplate-suggestions, /boilerplate-exclude, /step-rail/scopes
- * (D27.28); /snapshots (D27.29).
+ * (D27.28); /snapshots (D27.29); /auth-variant (pre-D27.28),
+ * /language-context, /mode (D27.30).
  *
  * All handlers live on this class too — they own the option keys the
  * AtlasVoice subsystem touches (post meta via AuthVariants::*). Keeping
@@ -67,56 +64,7 @@ class RestRoutes {
 
 
 
-		// PR-C (C5a) — language context read-out.
-		register_rest_route(
-			$ns,
-			'/language-context',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( __CLASS__, 'get_language_context' ),
-					'permission_callback' => array( __CLASS__, 'admin_guard' ),
-					'args'                => array(),
-				),
-			)
-		);
 
-		// TTS-238 v5 (D5) — mode status read + Go Live / revert mutation.
-		// GET  returns the current status (state / colour / label) so the
-		//      React dashboard can render its own banner / pill without
-		//      re-deriving settings logic.
-		// POST mutates the mode under a typed-confirmation gate:
-		//        action=go-live  + confirm="GO LIVE"  → production
-		//        action=revert                         → staging
-		register_rest_route(
-			$ns,
-			'/mode',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( __CLASS__, 'get_mode' ),
-					'permission_callback' => array( __CLASS__, 'admin_guard' ),
-					'args'                => array(),
-				),
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( __CLASS__, 'post_mode' ),
-					'permission_callback' => array( __CLASS__, 'admin_guard' ),
-					'args'                => array(
-						'action'  => array(
-							'type'        => 'string',
-							'required'    => true,
-							'description' => 'One of: go-live | revert.',
-						),
-						'confirm' => array(
-							'type'        => 'string',
-							'required'    => false,
-							'description' => 'Typed confirmation phrase. Required for action=go-live and must equal "GO LIVE" exactly.',
-						),
-					),
-				),
-			)
-		);
 
 
 		// TTS-238 D27.28 — `/post-rules` and `/save-selector` REST routes
@@ -649,132 +597,7 @@ class RestRoutes {
 
 
 
-	/**
-	 * GET /mode — current AtlasVoice pipeline status.
-	 *
-	 * Returns the three-state banner info the dashboard needs to render
-	 * its mode pill / toolbar dot mirror. Cheap — no option write, just
-	 * delegates to `Mode::status()` which reads the cached settings row.
-	 *
-	 * @param \WP_REST_Request $request
-	 * @return \WP_REST_Response
-	 */
-	public static function get_mode( $request ) {
-		if ( ! class_exists( '\\TTA\\AtlasVoice\\Mode' ) ) {
-			return rest_ensure_response( array(
-				'status' => false,
-				'error'  => 'Mode class not loaded.',
-			) );
-		}
-		return rest_ensure_response( array(
-			'status'        => true,
-			'opted_in'      => Mode::is_opted_in(),
-			'mode'          => Mode::get(),
-			'is_production' => Mode::is_production(),
-			'display'       => Mode::status(),
-		) );
-	}
 
-	/**
-	 * POST /mode — Go Live / revert-to-staging mutator.
-	 *
-	 * Two actions are supported:
-	 *
-	 *   action=go-live  confirm="GO LIVE"  →  switch to production.
-	 *                   The confirm string is compared byte-exactly
-	 *                   against the literal "GO LIVE". Case matters.
-	 *                   The reason this lives server-side (not just in
-	 *                   the React dialog) is that a CSRF-armed client
-	 *                   with a valid nonce must still type the phrase
-	 *                   to flip the production bit. It's the same
-	 *                   belt-and-braces style GitHub uses for
-	 *                   irreversible org-level actions.
-	 *
-	 *   action=revert   →  switch to staging (no confirmation needed —
-	 *                   reverting is always safe and we want it to be a
-	 *                   one-click affordance when a live issue hits).
-	 *
-	 * On success emits `atlasvoice_mode_changed` (via Mode::set) and a
-	 * dedicated `atlasvoice_go_live` / `atlasvoice_reverted_to_staging`
-	 * event for consumers that only care about one direction (e.g. a
-	 * CDN purge hook only wants to fire on Go Live).
-	 *
-	 * @param \WP_REST_Request $request
-	 * @return \WP_REST_Response|\WP_Error
-	 */
-	public static function post_mode( $request ) {
-		if ( ! class_exists( '\\TTA\\AtlasVoice\\Mode' ) ) {
-			return new \WP_Error( 'not_available', 'Mode class not loaded.', array( 'status' => 500 ) );
-		}
-
-		// Opt-in must be on before mode can be flipped at all. Flipping
-		// to production while the whole subsystem is disabled would be
-		// a no-op from the visitor's perspective and would confuse
-		// later debugging — refuse early so the dashboard can show a
-		// precise error instead.
-		if ( ! Mode::is_opted_in() ) {
-			return new \WP_Error(
-				'not_opted_in',
-				__( 'Enable the AtlasVoice extractor in the settings before changing mode.', 'text-to-audio' ),
-				array( 'status' => 409 )
-			);
-		}
-
-		$action = sanitize_key( (string) $request->get_param( 'action' ) );
-
-		if ( $action === 'go-live' ) {
-			$confirm = (string) $request->get_param( 'confirm' );
-			// Intentionally byte-exact: not strcasecmp, not trim. The
-			// dashboard dialog hint copy says «type GO LIVE to
-			// confirm» so we hold the line on the literal.
-			if ( $confirm !== 'GO LIVE' ) {
-				return new \WP_Error(
-					'confirmation_required',
-					__( 'Type GO LIVE exactly to confirm production rollout.', 'text-to-audio' ),
-					array( 'status' => 400 )
-				);
-			}
-			Mode::set( Mode::MODE_PRODUCTION );
-			/**
-			 * Fires after a successful Go Live. Receivers can purge CDN
-			 * caches, broadcast to multisite, or log the rollout to an
-			 * external SIEM without monkey-patching Mode::set.
-			 *
-			 * @param int $user_id
-			 */
-			do_action( 'atlasvoice_go_live', get_current_user_id() );
-			return rest_ensure_response( array(
-				'status'  => true,
-				'message' => __( 'AtlasVoice is now live in production.', 'text-to-audio' ),
-				'mode'    => Mode::get(),
-				'display' => Mode::status(),
-			) );
-		}
-
-		if ( $action === 'revert' ) {
-			Mode::set( Mode::MODE_STAGING );
-			/**
-			 * Fires after a revert-to-staging. Useful for alerting —
-			 * monitors can page on-call when a live site drops back
-			 * to staging unexpectedly.
-			 *
-			 * @param int $user_id
-			 */
-			do_action( 'atlasvoice_reverted_to_staging', get_current_user_id() );
-			return rest_ensure_response( array(
-				'status'  => true,
-				'message' => __( 'Reverted to staging mode.', 'text-to-audio' ),
-				'mode'    => Mode::get(),
-				'display' => Mode::status(),
-			) );
-		}
-
-		return new \WP_Error(
-			'unknown_action',
-			__( 'Unknown mode action. Expected go-live or revert.', 'text-to-audio' ),
-			array( 'status' => 400 )
-		);
-	}
 
 
 
@@ -922,26 +745,4 @@ class RestRoutes {
 		), 200 );
 	}
 
-	/**
-	 * GET /language-context — multilingual-plugin detection for the
-	 * dashboard settings panel + picker overlay.
-	 *
-	 * @param \WP_REST_Request $request
-	 * @return \WP_REST_Response
-	 */
-	public static function get_language_context( $request ) {
-		$ctx = array(
-			'active_plugin'    => '',
-			'current_language' => '',
-			'default_language' => '',
-			'all_languages'    => array(),
-		);
-		if ( class_exists( '\\TTA\\AtlasVoice\\LanguagePlugins' ) ) {
-			$ctx = LanguagePlugins::detect();
-		}
-		return rest_ensure_response( array(
-			'status'  => true,
-			'context' => $ctx,
-		) );
-	}
 }
