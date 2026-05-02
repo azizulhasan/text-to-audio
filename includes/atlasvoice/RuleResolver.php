@@ -53,10 +53,11 @@ class RuleResolver {
 	public static function resolve( $post_id ) {
 		$post_id   = (int) $post_id;
 		$post_type = (string) get_post_type( $post_id );
-		$lang      = '';
-		if ( class_exists( '\\TTA\\AtlasVoice\\LanguagePlugins' ) ) {
-			$lang = (string) LanguagePlugins::current_language_code();
-		}
+		// TTS-238 D27.33 — LanguagePlugins retired. The `language` key is
+		// kept on the resolved payload for back-compat with any caller
+		// that destructures it, but always returns empty (per-language
+		// scopes were retired by the D26 collapse).
+		$lang = '';
 
 		// TTS-238 D27.21 — read from the post-D26 collapsed storage:
 		// global + per-post-type live in `tta_settings_data` (flat),

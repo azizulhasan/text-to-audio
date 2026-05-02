@@ -72,24 +72,12 @@ class Bootstrap {
 			LocalizeData::register();
 		}
 
-		// D1 — regen-guard on template_redirect priority 5. Self-gates
-		// on Layer 1 opt-in + Layer 2 mode, so it's safe to register
-		// unconditionally. In staging mode it's a true no-op; in
-		// production mode it short-circuits on the lock / dirty-flag
-		// before doing any work.
-		if ( class_exists( '\\TTA\\AtlasVoice\\RegenGuard' ) ) {
-			RegenGuard::register();
-		}
-
-		// D3 — selector-hash tagger. Listens for the Pro synthesis
-		// completion action (`atlasvoice_mp3_generated`) and for
-		// RegenGuard's SKIP branch (`atlasvoice_regen_skip`) to stamp
-		// the MP3's rule fingerprint onto `_atlasvoice_selector_hash`
-		// post meta. Dormant on Free because the synthesis hook never
-		// fires there — safe to register unconditionally.
-		if ( class_exists( '\\TTA\\AtlasVoice\\SelectorHash' ) ) {
-			SelectorHash::register();
-		}
+		// TTS-238 D27.33 — D1 RegenGuard, D3 SelectorHash, ContentHash,
+		// and LanguagePlugins all retired. The MP3-cache fingerprint /
+		// regen-guard pipeline they formed had no Pro consumer
+		// (audited 2026-05-02) and was waiting for an integration that
+		// never landed. The Pro plugin's MP3 synthesis runs its own
+		// invalidation path independently.
 
 		// D4 — admin-bar mode indicator. Shows a coloured dot (grey /
 		// yellow / green) on the toolbar so admins can tell at a glance
