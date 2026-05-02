@@ -22,10 +22,10 @@ namespace TTA\AtlasVoice;
  *   POST /auth-variant                      (pin OR record-sample)
  *   GET  /language-context
  *   GET|POST /mode                          (Pro: staging / Go Live)
- *   GET|POST /snapshots                     (Pro: ring buffer + revert)
  *
- * Retired in D27.28: /save-selector, /post-rules, /heal-log,
- * /boilerplate-suggestions, /boilerplate-exclude, /step-rail/scopes.
+ * Retired: /save-selector, /post-rules, /heal-log,
+ * /boilerplate-suggestions, /boilerplate-exclude, /step-rail/scopes
+ * (D27.28); /snapshots (D27.29).
  *
  * All handlers live on this class too — they own the option keys the
  * AtlasVoice subsystem touches (post meta via AuthVariants::*). Keeping
@@ -118,45 +118,6 @@ class RestRoutes {
 			)
 		);
 
-		// TTS-238 v5 (D6) — snapshot ring buffer reads + revert.
-		// GET returns rev-chrono snapshots for a scope. POST either
-		// takes a new snapshot (action=take) or reverts to an index
-		// (action=revert). The actual rule-apply step is the caller's
-		// job; revert returns the payload so the caller's scope-specific
-		// writer (selectors option, per-post meta, etc.) can apply it
-		// without this class hard-coding each storage location.
-		register_rest_route(
-			$ns,
-			'/snapshots',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( __CLASS__, 'get_snapshots' ),
-					'permission_callback' => array( __CLASS__, 'admin_guard' ),
-					'args'                => array(
-						'scope_type' => array( 'type' => 'string', 'default' => 'global' ),
-						'post_type'  => array( 'type' => 'string', 'required' => false ),
-						'language'   => array( 'type' => 'string', 'required' => false ),
-						'post_id'    => array( 'type' => 'integer', 'required' => false ),
-					),
-				),
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( __CLASS__, 'post_snapshots' ),
-					'permission_callback' => array( __CLASS__, 'admin_guard' ),
-					'args'                => array(
-						'action'     => array( 'type' => 'string', 'required' => true ),
-						'scope_type' => array( 'type' => 'string', 'default' => 'global' ),
-						'post_type'  => array( 'type' => 'string', 'required' => false ),
-						'language'   => array( 'type' => 'string', 'required' => false ),
-						'post_id'    => array( 'type' => 'integer', 'required' => false ),
-						'index'      => array( 'type' => 'integer', 'required' => false ),
-						'rules'      => array( 'type' => 'object',  'required' => false ),
-						'reason'     => array( 'type' => 'string',  'required' => false ),
-					),
-				),
-			)
-		);
 
 		// TTS-238 D27.28 — `/post-rules` and `/save-selector` REST routes
 		// retired. Per-post saves now go through `/atlasvoice/save-rule`
@@ -815,100 +776,7 @@ class RestRoutes {
 		);
 	}
 
-	/**
-	 * Build a scope descriptor from REST request params. Encapsulated
-	 * so get_snapshots / post_snapshots share identical scope logic.
-	 *
-	 * @param \WP_REST_Request $request
-	 * @return array { type, post_type?, language?, post_id? }
-	 */
-	protected static function scope_from_request( $request ) {
-		$type = sanitize_key( (string) $request->get_param( 'scope_type' ) );
-		if ( $type === '' ) { $type = 'global'; }
-		return array(
-			'type'      => $type,
-			'post_type' => (string) $request->get_param( 'post_type' ),
-			'language'  => (string) $request->get_param( 'language' ),
-			'post_id'   => (int) $request->get_param( 'post_id' ),
-		);
-	}
 
-	/**
-	 * GET /snapshots — list the ring buffer for a given scope.
-	 *
-	 * @param \WP_REST_Request $request
-	 * @return \WP_REST_Response
-	 */
-	public static function get_snapshots( $request ) {
-		if ( ! class_exists( '\\TTA\\AtlasVoice\\Snapshots' ) ) {
-			return rest_ensure_response( array( 'status' => false, 'error' => 'Snapshots class not loaded.' ) );
-		}
-		$scope = self::scope_from_request( $request );
-		return rest_ensure_response( array(
-			'status'    => true,
-			'scope'     => $scope,
-			'scope_key' => Snapshots::scope_key( $scope ),
-			'snapshots' => Snapshots::listing( $scope ),
-		) );
-	}
-
-	/**
-	 * POST /snapshots — mutate the ring (take or revert).
-	 *
-	 *   action=take    rules={...}       → append rules to the ring.
-	 *   action=revert  index=<N>         → restore snapshot N; returns
-	 *                                      the rule payload so the
-	 *                                      caller's scope-writer can
-	 *                                      apply it.
-	 *
-	 * @param \WP_REST_Request $request
-	 * @return \WP_REST_Response|\WP_Error
-	 */
-	public static function post_snapshots( $request ) {
-		if ( ! class_exists( '\\TTA\\AtlasVoice\\Snapshots' ) ) {
-			return new \WP_Error( 'not_available', 'Snapshots class not loaded.', array( 'status' => 500 ) );
-		}
-		$scope  = self::scope_from_request( $request );
-		$action = sanitize_key( (string) $request->get_param( 'action' ) );
-
-		if ( $action === 'take' ) {
-			$rules = $request->get_param( 'rules' );
-			if ( is_object( $rules ) ) { $rules = (array) $rules; }
-			if ( ! is_array( $rules ) ) {
-				return new \WP_Error( 'bad_rules', __( 'Rules payload must be an object.', 'text-to-audio' ), array( 'status' => 400 ) );
-			}
-			$reason = (string) $request->get_param( 'reason' );
-			$ring = Snapshots::take( $scope, $rules, array( 'reason' => $reason ?: 'manual' ) );
-			return rest_ensure_response( array(
-				'status'    => true,
-				'scope'     => $scope,
-				'scope_key' => Snapshots::scope_key( $scope ),
-				'ring_size' => count( $ring ),
-				'snapshots' => Snapshots::listing( $scope ),
-			) );
-		}
-
-		if ( $action === 'revert' ) {
-			$index   = (int) $request->get_param( 'index' );
-			$current = $request->get_param( 'rules' );
-			if ( is_object( $current ) ) { $current = (array) $current; }
-			if ( ! is_array( $current ) ) { $current = null; }
-
-			$payload = Snapshots::revert( $scope, $index, $current );
-			if ( is_wp_error( $payload ) ) {
-				return $payload;
-			}
-			return rest_ensure_response( array(
-				'status'    => true,
-				'scope'     => $scope,
-				'scope_key' => Snapshots::scope_key( $scope ),
-				'rules'     => $payload,
-				'snapshots' => Snapshots::listing( $scope ),
-			) );
-		}
-
-		return new \WP_Error( 'unknown_action', __( 'Unknown snapshot action.', 'text-to-audio' ), array( 'status' => 400 ) );
-	}
 
 
 	/**

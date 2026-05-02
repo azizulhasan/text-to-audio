@@ -28,10 +28,12 @@ namespace TTA\AtlasVoice;
  *     }
  *
  * Hook surface:
- *   - Writes fire `atlasvoice_rules_changed` so the Snapshots ring
- *     picks up the previous payload automatically.
+ *   - Writes fire `atlasvoice_post_rules_changed` so the dirty-flag
+ *     bridge marks the post for regen.
  *   - Writes also fire `atlasvoice_regen_dirty_set` so visible regen
  *     (RegenGuard) re-evaluates on the next visitor hit.
+ *   - (D27.29: the Snapshots ring buffer was retired and its
+ *     `atlasvoice_rules_changed` feed was removed.)
  *
  * Free tier: `available()` returns false unless Pro is active, so the
  * meta is never read/written on Free. The class still ships in Free
@@ -108,8 +110,7 @@ class PerPostRules {
 	/**
 	 * Write the override payload. Merges against the canonical empty
 	 * shape so partial updates from the UI don't silently drop fields.
-	 * Snapshots the previous payload via `atlasvoice_rules_changed` and
-	 * fires `atlasvoice_post_rules_changed` for the dirty bridge.
+	 * Fires `atlasvoice_post_rules_changed` for the dirty-flag bridge.
 	 *
 	 * @param int   $post_id
 	 * @param array $rules
@@ -126,14 +127,10 @@ class PerPostRules {
 
 		update_post_meta( $post_id, self::META_KEY, $clean );
 
-		// Snapshot the previous payload so the editor can undo via the
-		// Rules table [History ▾] dropdown.
-		do_action(
-			'atlasvoice_rules_changed',
-			array( 'type' => 'post', 'post_id' => $post_id ),
-			$prev,
-			array( 'reason' => 'per-post-edit' )
-		);
+		// TTS-238 D27.29 — `atlasvoice_rules_changed` was the Snapshots
+		// ring buffer's input feed; that subsystem is retired so the
+		// emit was removed. `atlasvoice_post_rules_changed` (below)
+		// still fires for the dirty-flag bridge.
 
 		/**
 		 * Fires after a per-post override is written. Payload includes
@@ -162,12 +159,8 @@ class PerPostRules {
 		$prev = self::get( $post_id );
 		delete_post_meta( $post_id, self::META_KEY );
 
-		do_action(
-			'atlasvoice_rules_changed',
-			array( 'type' => 'post', 'post_id' => $post_id ),
-			$prev,
-			array( 'reason' => 'per-post-clear' )
-		);
+		// TTS-238 D27.29 — Snapshots ring retired; the
+		// `atlasvoice_rules_changed` emit was removed.
 		do_action( 'atlasvoice_post_rules_changed', $post_id, self::empty_payload(), $prev );
 		return true;
 	}

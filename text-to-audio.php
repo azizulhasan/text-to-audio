@@ -619,6 +619,9 @@ add_action('admin_init', function () {
             wp_unschedule_event( $boilerplate_cron, 'tta_atlasvoice_detect_boilerplate' );
         }
 
+        // TTS-238 D27.29 — rule-snapshot ring buffer retired.
+        delete_option( 'tta_atlasvoice_snapshots' );
+
         // Strip per-post `_atlasvoice_post_rules` meta in batches so a
         // huge site doesn't blow memory on this admin_init pass.
         $orphan_meta_post_ids = get_posts( array(

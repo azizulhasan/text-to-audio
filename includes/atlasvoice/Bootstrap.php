@@ -99,14 +99,9 @@ class Bootstrap {
 			Mode::register();
 		}
 
-		// D6 — rule-snapshot ring buffer. Wires into the generic
-		// `atlasvoice_rules_changed` action and exposes a 5-deep
-		// history per scope so the Rules table [History ▾] dropdown
-		// (and any future timeline UI) can walk prior payloads without
-		// consulting an external store.
-		if ( class_exists( '\\TTA\\AtlasVoice\\Snapshots' ) ) {
-			Snapshots::register();
-		}
+		// TTS-238 D27.29 — rule-snapshot ring buffer retired. The
+		// /snapshots REST route and the Snapshots class file were
+		// removed; nothing in either plugin produced or consumed them.
 
 		// D7 — per-post rule override (Pro). Storage layer registers
 		// the dirty-flag bridge; the meta-box registers the render +
@@ -146,10 +141,5 @@ class Bootstrap {
 			ReadersIntegration::register();
 		}
 
-		// Future feature registrations slot in below. Every new module
-		// exposes a `register()` static so the sequence stays readable
-		// and feature toggles are obvious.
-		//
-		//   SelfHealer::register();        // heal-on-miss
 	}
 }
