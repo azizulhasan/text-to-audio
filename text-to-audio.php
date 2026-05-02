@@ -602,6 +602,35 @@ add_action('admin_init', function () {
         update_option( 'tta_analytics_migrated_2_1_10', true, false );
     }
 
+    // TTS-238 D27.25 — One-shot cleanup of legacy storage that was
+    // retired by the v5 picker collapse. The picker, dashboard, runtime
+    // extractor, RuleResolver, and breadcrumb metabox all read from the
+    // new canonical keys (tta_settings_data flat + tts_pro_custom_css_selectors
+    // post meta) since D27.21. The two stores below are now write-only
+    // dead drops on installs that ever had AtlasVoice rules saved.
+    if ( ! get_option( 'tta_d27_legacy_cleanup_done' ) ) {
+        delete_option( 'tta_atlasvoice_selectors' );
+
+        // Strip per-post `_atlasvoice_post_rules` meta in batches so a
+        // huge site doesn't blow memory on this admin_init pass.
+        $orphan_meta_post_ids = get_posts( array(
+            'post_type'      => 'any',
+            'post_status'    => 'any',
+            'posts_per_page' => 200,
+            'fields'         => 'ids',
+            'meta_key'       => '_atlasvoice_post_rules',
+        ) );
+        foreach ( (array) $orphan_meta_post_ids as $orphan_pid ) {
+            delete_post_meta( $orphan_pid, '_atlasvoice_post_rules' );
+        }
+        // If we hit the batch ceiling there are likely more rows to
+        // clean; defer marking the migration done until a later request
+        // so the next admin_init keeps draining the queue.
+        if ( count( $orphan_meta_post_ids ) < 200 ) {
+            update_option( 'tta_d27_legacy_cleanup_done', true, false );
+        }
+    }
+
     // Allow resetting onboarding via ?page=text-to-audio&reset_onboard=true
     if ( isset( $_GET['page'] ) && 'text-to-audio' === $_GET['page']
         && isset( $_GET['reset_onboard'] ) && 'true' === $_GET['reset_onboard']

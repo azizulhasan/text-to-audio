@@ -191,36 +191,42 @@ class SelectorHash {
 		$rules     = array();
 		$post_type = (string) get_post_type( $post_id );
 
-		$selectors = get_option(
-			'tta_atlasvoice_selectors',
-			array( 'global' => '', 'per_post_type' => array() )
-		);
-
-		// Effective selector for this post — honours the per-post
-		// override when it exists, otherwise falls back through the
-		// per-pt+lang / per-lang / per-pt / global chain.
+		// TTS-238 D27.26 — fingerprint inputs read the new collapsed
+		// storage. RuleResolver gives us the resolved (post→type→global)
+		// rule + a snapshot of the per-post override, both of which are
+		// already pulling from `tta_settings_data` + `tts_pro_custom_css_selectors`
+		// after D27.21. We also stamp the per-type override and global
+		// flat keys directly so the hash bumps when an admin edits a
+		// scope that doesn't currently win.
 		if ( class_exists( '\\TTA\\AtlasVoice\\RuleResolver' ) ) {
 			$resolved                       = RuleResolver::resolve( $post_id );
 			$rules['selector_effective']    = isset( $resolved['selector'] ) ? (string) $resolved['selector'] : '';
 			$rules['selector_effective_on'] = isset( $resolved['selector_source'] ) ? (string) $resolved['selector_source'] : 'none';
 			if ( isset( $resolved['post_override'] ) && is_array( $resolved['post_override'] ) ) {
-				// Fingerprint the override payload too so per-post
-				// exclude-list tweaks bump the fingerprint even when
-				// the selector itself didn't change.
 				$rules['post_override'] = $resolved['post_override'];
 			}
 		}
 
-		$rules['selector_global']        = isset( $selectors['global'] ) ? (string) $selectors['global'] : '';
-		$rules['selector_post_type']     = isset( $selectors['per_post_type'][ $post_type ] )
-			? (string) $selectors['per_post_type'][ $post_type ]
-			: '';
-		$rules['selectors_per_language'] = isset( $selectors['per_language'] )
-			? (array) $selectors['per_language']
+		$opt_raw = get_option( 'tta_settings_data', array() );
+		$opt     = json_decode( wp_json_encode( $opt_raw ), true );
+		if ( ! is_array( $opt ) ) { $opt = array(); }
+		if ( isset( $opt['settings'] ) && is_array( $opt['settings'] ) ) {
+			foreach ( $opt['settings'] as $k => $v ) {
+				if ( ! array_key_exists( $k, $opt ) ) { $opt[ $k ] = $v; }
+			}
+		}
+		$per_pt = isset( $opt['tta__settings_atlasvoice_per_type_overrides'] ) && is_array( $opt['tta__settings_atlasvoice_per_type_overrides'] )
+			? $opt['tta__settings_atlasvoice_per_type_overrides']
 			: array();
-		$rules['selectors_per_pt_lang']  = isset( $selectors['per_post_type_per_language'] )
-			? (array) $selectors['per_post_type_per_language']
+
+		$rules['selector_global']    = isset( $opt['tta__settings_css_selectors'] ) ? (string) $opt['tta__settings_css_selectors'] : '';
+		$rules['selector_post_type'] = ( $post_type !== '' && isset( $per_pt[ $post_type ] ) && is_array( $per_pt[ $post_type ] ) )
+			? $per_pt[ $post_type ]
 			: array();
+		// Per-language layers retired by D26 collapse — emit empty
+		// arrays so callers expecting these keys don't blow up.
+		$rules['selectors_per_language'] = array();
+		$rules['selectors_per_pt_lang']  = array();
 
 		// Settings-level excludes — same keys the JS engine keys off.
 		if ( class_exists( '\\TTA\\TTA_Helper' ) ) {

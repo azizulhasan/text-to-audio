@@ -60,16 +60,17 @@ class LocalizeData {
 			? $context['settings']
 			: array();
 
-		// Selector store — engine uses this to resolve Tier 2 selectors.
+		// TTS-238 D27.23 — back-compat shim for any front-end caller
+		// still reading `tta_obj.atlasvoice_selectors`. The legacy
+		// `tta_atlasvoice_selectors` option is retired (no writers
+		// since D26.9), so this almost always returns the empty
+		// default; the engine's authoritative input is now the
+		// pre-resolved rule below.
 		$data['atlasvoice_selectors'] = get_option(
 			'tta_atlasvoice_selectors',
 			array( 'global' => '', 'per_post_type' => array() )
 		);
 
-		// Current multilingual-plugin language code so the client-side
-		// resolver picks the language-scoped selector first. Empty string
-		// on non-multilingual sites — resolveSavedSelector falls through
-		// the per_language slot entirely in that case.
 		$data['atlasvoice_language_code'] = class_exists( '\\TTA\\AtlasVoice\\LanguagePlugins' )
 			? LanguagePlugins::current_language_code()
 			: '';
@@ -106,6 +107,7 @@ class LocalizeData {
 	public static function inject_lazy( $data ) {
 		if ( ! is_array( $data ) ) { $data = array(); }
 
+		$post_id = 0;
 		if ( empty( $data['current_post_type'] ) ) {
 			if ( function_exists( 'is_singular' ) && is_singular() ) {
 				$data['current_post_type'] = (string) get_post_type();
@@ -113,9 +115,35 @@ class LocalizeData {
 		}
 		if ( empty( $data['current_post_id'] ) ) {
 			if ( function_exists( 'is_singular' ) && is_singular() ) {
-				$data['current_post_id'] = (int) get_the_ID();
+				$post_id                   = (int) get_the_ID();
+				$data['current_post_id']   = $post_id;
+			}
+		} else {
+			$post_id = (int) $data['current_post_id'];
+		}
+
+		// TTS-238 D27.23 — server-resolve the rule for the current post
+		// via RuleResolver and ship the answer. The JS extractor engine
+		// prefers this over the old `atlasvoice_selectors` store walk
+		// so PHP and JS see the same winner. Includes the full payload
+		// the engine needs for content extraction (selector + the three
+		// exclude lists). If RuleResolver returns no winner the field
+		// is null and the engine falls through to its existing tiers.
+		if ( $post_id > 0 && class_exists( '\\TTA\\AtlasVoice\\RuleResolver' ) ) {
+			$resolved = RuleResolver::resolve( $post_id );
+			if ( ! empty( $resolved['selector'] ) ) {
+				$data['atlasvoice_resolved_rule'] = array(
+					'selector'   => (string) $resolved['selector'],
+					'source'     => isset( $resolved['selector_source'] ) ? (string) $resolved['selector_source'] : '',
+					'excl_css'   => isset( $resolved['excl_css'] )   && is_array( $resolved['excl_css'] )   ? array_values( $resolved['excl_css'] )   : array(),
+					'excl_texts' => isset( $resolved['excl_texts'] ) && is_array( $resolved['excl_texts'] ) ? array_values( $resolved['excl_texts'] ) : array(),
+					'excl_tags'  => isset( $resolved['excl_tags'] )  && is_array( $resolved['excl_tags'] )  ? array_values( $resolved['excl_tags'] )  : array(),
+				);
+			} else {
+				$data['atlasvoice_resolved_rule'] = null;
 			}
 		}
+
 		return $data;
 	}
 }

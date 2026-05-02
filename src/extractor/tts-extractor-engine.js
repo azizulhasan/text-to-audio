@@ -317,25 +317,43 @@
             return { selector: opts.savedSelector, excl_css: [], excl_texts: [], excl_tags: [] };
         }
         var tts = global.ttsObj || global.tta_obj || {};
+
+        // TTS-238 D27.23 — prefer the server-resolved rule shipped via
+        // LocalizeData. PHP runs RuleResolver against the new collapsed
+        // storage (post meta gated on use_own → per-post-type override
+        // → flat global keys) so PHP and JS agree on the winner. The
+        // legacy store walk below is a back-compat fallback that only
+        // fires when the resolved field is missing (older bundles or
+        // contexts where LocalizeData::inject_lazy didn't run).
+        if (tts.atlasvoice_resolved_rule && tts.atlasvoice_resolved_rule.selector) {
+            var r = tts.atlasvoice_resolved_rule;
+            return {
+                selector:   r.selector,
+                excl_css:   Array.isArray(r.excl_css)   ? r.excl_css.slice()   : [],
+                excl_texts: Array.isArray(r.excl_texts) ? r.excl_texts.slice() : [],
+                excl_tags:  Array.isArray(r.excl_tags)  ? r.excl_tags.slice()  : []
+            };
+        }
+
         var store = tts.atlasvoice_selectors || {};
         var lang = opts.language || tts.atlasvoice_language_code || '';
         var entry;
 
-        // 1. post_type + language
+        // 1. post_type + language (legacy)
         if (opts.postType && lang) {
             var perTypePerLang = store.per_post_type_per_language || {};
             var langMap = perTypePerLang[opts.postType];
             if (langMap && langMap[lang]) { entry = normaliseRuleEntry(langMap[lang]); if (entry) { return entry; } }
         }
-        // 2. post_type
+        // 2. post_type (legacy)
         var perType = store.per_post_type || {};
         if (opts.postType && perType[opts.postType]) { entry = normaliseRuleEntry(perType[opts.postType]); if (entry) { return entry; } }
-        // 3. language
+        // 3. language (legacy)
         if (lang) {
             var perLang = store.per_language || {};
             if (perLang[lang]) { entry = normaliseRuleEntry(perLang[lang]); if (entry) { return entry; } }
         }
-        // 4. global
+        // 4. global (legacy)
         return normaliseRuleEntry(store.global) || null;
     }
 
