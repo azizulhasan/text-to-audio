@@ -208,115 +208,115 @@ class RestRoutes {
 		//      a single post so the dashboard / meta-box UI can render
 		//      without duplicating the precedence logic.
 		// POST writes the override (action=set) or removes it (action=clear).
-		register_rest_route(
-			$ns,
-			'/post-rules',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( __CLASS__, 'get_post_rules' ),
-					'permission_callback' => array( __CLASS__, 'admin_guard' ),
-					'args'                => array(
-						'post_id' => array( 'type' => 'integer', 'required' => true ),
-					),
-				),
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( __CLASS__, 'post_post_rules' ),
-					'permission_callback' => array( __CLASS__, 'admin_guard' ),
-					'args'                => array(
-						'action'   => array( 'type' => 'string',  'required' => true ),
-						'post_id'  => array( 'type' => 'integer', 'required' => true ),
-						'selector' => array( 'type' => 'string',  'required' => false ),
-						// D10 — chip arrays from the step-rail. Accept
-						// array OR string (legacy) for excl_css; arrays
-						// only for texts/tags.
-						'excl_css' => array( 'required' => false ),
-						'excl_texts' => array(
-							'type'     => 'array',
-							'required' => false,
-							'items'    => array( 'type' => 'string' ),
-						),
-						'excl_tags'  => array(
-							'type'     => 'array',
-							'required' => false,
-							'items'    => array( 'type' => 'string' ),
-						),
-					),
-				),
-			)
-		);
+//		register_rest_route(
+//			$ns,
+//			'/post-rules',
+//			array(
+//				array(
+//					'methods'             => \WP_REST_Server::READABLE,
+//					'callback'            => array( __CLASS__, 'get_post_rules' ),
+//					'permission_callback' => array( __CLASS__, 'admin_guard' ),
+//					'args'                => array(
+//						'post_id' => array( 'type' => 'integer', 'required' => true ),
+//					),
+//				),
+//				array(
+//					'methods'             => \WP_REST_Server::CREATABLE,
+//					'callback'            => array( __CLASS__, 'post_post_rules' ),
+//					'permission_callback' => array( __CLASS__, 'admin_guard' ),
+//					'args'                => array(
+//						'action'   => array( 'type' => 'string',  'required' => true ),
+//						'post_id'  => array( 'type' => 'integer', 'required' => true ),
+//						'selector' => array( 'type' => 'string',  'required' => false ),
+//						// D10 — chip arrays from the step-rail. Accept
+//						// array OR string (legacy) for excl_css; arrays
+//						// only for texts/tags.
+//						'excl_css' => array( 'required' => false ),
+//						'excl_texts' => array(
+//							'type'     => 'array',
+//							'required' => false,
+//							'items'    => array( 'type' => 'string' ),
+//						),
+//						'excl_tags'  => array(
+//							'type'     => 'array',
+//							'required' => false,
+//							'items'    => array( 'type' => 'string' ),
+//						),
+//					),
+//				),
+//			)
+//		);
 
 		// TTS-238 — selector save (used by picker + heal flow). Lives in
 		// AtlasVoice because it owns the `tta_atlasvoice_selectors` option,
 		// the heal log, and the cache-purge hint payload. Pre-§0.7 this
 		// was a stub in TTA_Api_Routes; v5 §14 moved the whole surface
 		// into this file so TTA_Api_Routes can revert byte-identical.
-		register_rest_route(
-			$ns,
-			'/save-selector',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( __CLASS__, 'save_selector' ),
-					'permission_callback' => array( __CLASS__, 'admin_guard' ),
-					'args'                => array(
-						'selector' => array(
-							'type'        => 'string',
-							'required'    => true,
-							'description' => 'Stable CSS selector picked via AtlasVoiceSelector.',
-						),
-						'post_type' => array(
-							'type'        => 'string',
-							'required'    => false,
-							'description' => 'Post type to scope the selector to (Pro only).',
-						),
-						// PR-C (C5b): language scoping. When present we store
-						// the selector under the per-language slot so
-						// multilingual sites can pick different DOM regions
-						// per language without overwriting each other.
-						'language' => array(
-							'type'        => 'string',
-							'required'    => false,
-							'description' => 'Language code (e.g. "en", "fr"). Omit to store globally.',
-						),
-						// PR-C (C1c) — heal audit fields.
-						'reason' => array(
-							'type'        => 'string',
-							'required'    => false,
-							'description' => 'Origin of the save. "heal" means the picker is rewriting a broken saved selector.',
-						),
-						'old_selector' => array(
-							'type'        => 'string',
-							'required'    => false,
-							'description' => 'When reason="heal", the selector being replaced. Recorded in the heal log for audit + one-click revert.',
-						),
-						'post_id' => array(
-							'type'        => 'integer',
-							'required'    => false,
-							'description' => 'Post that triggered the heal/revert, recorded in the heal log for the post-link column.',
-						),
-						// Chip exclusions. Stored alongside the selector so
-						// non-post scopes persist the full rule, not just selector.
-						'excl_css' => array(
-							'type'     => 'array',
-							'required' => false,
-							'items'    => array( 'type' => 'string' ),
-						),
-						'excl_texts' => array(
-							'type'     => 'array',
-							'required' => false,
-							'items'    => array( 'type' => 'string' ),
-						),
-						'excl_tags' => array(
-							'type'     => 'array',
-							'required' => false,
-							'items'    => array( 'type' => 'string' ),
-						),
-					),
-				),
-			)
-		);
+//		register_rest_route(
+//			$ns,
+//			'/save-selector',
+//			array(
+//				array(
+//					'methods'             => \WP_REST_Server::CREATABLE,
+//					'callback'            => array( __CLASS__, 'save_selector' ),
+//					'permission_callback' => array( __CLASS__, 'admin_guard' ),
+//					'args'                => array(
+//						'selector' => array(
+//							'type'        => 'string',
+//							'required'    => true,
+//							'description' => 'Stable CSS selector picked via AtlasVoiceSelector.',
+//						),
+//						'post_type' => array(
+//							'type'        => 'string',
+//							'required'    => false,
+//							'description' => 'Post type to scope the selector to (Pro only).',
+//						),
+//						// PR-C (C5b): language scoping. When present we store
+//						// the selector under the per-language slot so
+//						// multilingual sites can pick different DOM regions
+//						// per language without overwriting each other.
+//						'language' => array(
+//							'type'        => 'string',
+//							'required'    => false,
+//							'description' => 'Language code (e.g. "en", "fr"). Omit to store globally.',
+//						),
+//						// PR-C (C1c) — heal audit fields.
+//						'reason' => array(
+//							'type'        => 'string',
+//							'required'    => false,
+//							'description' => 'Origin of the save. "heal" means the picker is rewriting a broken saved selector.',
+//						),
+//						'old_selector' => array(
+//							'type'        => 'string',
+//							'required'    => false,
+//							'description' => 'When reason="heal", the selector being replaced. Recorded in the heal log for audit + one-click revert.',
+//						),
+//						'post_id' => array(
+//							'type'        => 'integer',
+//							'required'    => false,
+//							'description' => 'Post that triggered the heal/revert, recorded in the heal log for the post-link column.',
+//						),
+//						// Chip exclusions. Stored alongside the selector so
+//						// non-post scopes persist the full rule, not just selector.
+//						'excl_css' => array(
+//							'type'     => 'array',
+//							'required' => false,
+//							'items'    => array( 'type' => 'string' ),
+//						),
+//						'excl_texts' => array(
+//							'type'     => 'array',
+//							'required' => false,
+//							'items'    => array( 'type' => 'string' ),
+//						),
+//						'excl_tags' => array(
+//							'type'     => 'array',
+//							'required' => false,
+//							'items'    => array( 'type' => 'string' ),
+//						),
+//					),
+//				),
+//			)
+//		);
 
 		// D26.2 — scope-aware rule save. Replaces /save-selector +
 		// /post-rules, writes directly into the legacy keys
@@ -368,20 +368,6 @@ class RestRoutes {
 			)
 		);
 
-		// D9 — step-rail /scopes and /sample-url. Both are admin reads
-		// used by the client-side shell to populate row ② (post-type +
-		// language selects) and to resolve row ③'s iframe URL.
-		register_rest_route(
-			$ns,
-			'/step-rail/scopes',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( __CLASS__, 'get_step_rail_scopes' ),
-					'permission_callback' => array( __CLASS__, 'admin_guard' ),
-				),
-			)
-		);
 		// D13 — scope-rule reader: returns the saved rule at exactly the
 		// requested scope (no precedence walk) so the picker can repopulate
 		// the UI when the admin changes the scope radio.
@@ -526,64 +512,6 @@ class RestRoutes {
 			'tta__settings_exclude_content_by_css_selectors' => $excl_css_str,
 			'tta__settings_exclude_texts'                    => $excl_texts_str,
 			'tta__settings_exclude_tags'                     => $excl_tags_str,
-		), 200 );
-	}
-
-	/**
-	 * D9 — Step-rail scope enumerator. Returns:
-	 *   - post_types:  array of { slug, label } registered public CPTs
-	 *                  that the settings page tracks, so rail and
-	 *                  settings agree on what's "rulable".
-	 *   - languages:   array of language codes from LanguagePlugins
-	 *                  (empty when the site isn't multilingual).
-	 *   - active_lang: the currently-resolved language for the caller.
-	 *   - active_plugin: detected multilingual plugin ('' when none).
-	 *
-	 * @return \WP_REST_Response
-	 */
-	public static function get_step_rail_scopes() {
-		// Honor the admin's "Allow Listening For Post Type" setting.
-		// Only types that have been explicitly enabled for listening
-		// should appear as scope-chooser options — otherwise the picker
-		// surfaces post types that can't even play audio (Floating
-		// Element, Elementor Template, etc.).
-		$allowed = array();
-		if ( class_exists( '\\TTA\\TTA_Helper' ) ) {
-			$settings = \TTA\TTA_Helper::tts_get_settings( 'settings' );
-			if ( is_array( $settings )
-				&& isset( $settings['tta__settings_allow_listening_for_post_types'] )
-				&& is_array( $settings['tta__settings_allow_listening_for_post_types'] )
-			) {
-				$allowed = array_map( 'strval', $settings['tta__settings_allow_listening_for_post_types'] );
-			}
-		}
-
-		$post_types = array();
-		$candidates = get_post_types( array( 'public' => true ), 'objects' );
-		if ( is_array( $candidates ) ) {
-			foreach ( $candidates as $slug => $obj ) {
-				if ( $slug === 'attachment' ) { continue; }
-				if ( ! empty( $allowed ) && ! in_array( (string) $slug, $allowed, true ) ) { continue; }
-				$label = isset( $obj->labels->singular_name ) ? (string) $obj->labels->singular_name : $slug;
-				$post_types[] = array( 'slug' => (string) $slug, 'label' => $label );
-			}
-		}
-
-		$lang_ctx = array(
-			'active_plugin'    => '',
-			'current_language' => '',
-			'default_language' => '',
-			'all_languages'    => array(),
-		);
-		if ( class_exists( '\\TTA\\AtlasVoice\\LanguagePlugins' ) ) {
-			$lang_ctx = array_merge( $lang_ctx, (array) LanguagePlugins::detect() );
-		}
-
-		return new \WP_REST_Response( array(
-			'post_types'    => $post_types,
-			'languages'     => array_values( (array) $lang_ctx['all_languages'] ),
-			'active_lang'   => (string) $lang_ctx['current_language'],
-			'active_plugin' => (string) $lang_ctx['active_plugin'],
 		), 200 );
 	}
 

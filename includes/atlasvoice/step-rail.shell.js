@@ -68,14 +68,6 @@
         tta__settings_exclude_tags:  'Skip these tag types'
     };
 
-    var SCOPE_OPTIONS = [
-        { value: 'global',             label: 'Global',               needsPt: false, needsLang: false, proOnly: false },
-        { value: 'post_type',          label: 'Post type',            needsPt: true,  needsLang: false, proOnly: true  },
-        { value: 'language',           label: 'Language',             needsPt: false, needsLang: true,  proOnly: true  },
-        { value: 'post_type_language', label: 'Post type + language', needsPt: true,  needsLang: true,  proOnly: true  },
-        { value: 'post',               label: 'This post',            needsPt: false, needsLang: false, proOnly: true  }
-    ];
-
     function makeEmptySelection() {
         return {
             scope:                                            'post',
@@ -1293,63 +1285,13 @@
         d.getElementById('av-promo-close').addEventListener('click', function () { overlay.remove(); });
     }
 
-    /* ─── scope radiogroup ──────────────────────────────────────── */
+    /* ─── scope radiogroup retired (D27.27): /step-rail/scopes
+         endpoint deleted, renderScopeRow / SCOPE_OPTIONS removed.
+         Scope is driven entirely by URL params now. The body of
+         the old function is gone — scope changes happen by
+         relaunching the picker with a different ?scope=… URL,
+         not by a radio inside the panel. ───────────────────── */
 
-    function renderScopeRow() {
-        var wrap = $('.av-scope-group');
-        if (!wrap) { return; }
-        wrap.innerHTML = '';
-        var scopes = state.scopes || { post_types: [], languages: [] };
-
-        SCOPE_OPTIONS.forEach(function (opt) {
-            // Language-based scopes: only render when a language plugin is active.
-            if (opt.needsLang && !(scopes.languages || []).length) { return; }
-
-            var id       = 'av-scope-' + opt.value;
-            var isGated  = opt.proOnly && !state.pro;
-            var isActive = (state.selection.scope === opt.value);
-
-            var label = d.createElement('label');
-            label.setAttribute('for', id);
-            var cls = [];
-            if (isActive)  { cls.push('is-checked'); }
-            if (isGated)   { cls.push('is-disabled'); }
-            if (cls.length) { label.className = cls.join(' '); }
-
-            var input = d.createElement('input');
-            input.type = 'radio'; input.name = 'av-scope'; input.id = id; input.value = opt.value;
-            input.checked = isActive;
-
-            if (isGated) {
-                input.disabled = true;
-                label.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    showProPromo(opt.label);
-                });
-            } else {
-                input.addEventListener('change', function () {
-                    state.selection.scope     = opt.value;
-                    state.selection.post_type = opt.needsPt   ? state.postType : '';
-                    state.selection.language  = opt.needsLang ? state.postLang : '';
-                    renderScopeReadout();
-                    loadRulesForScope();
-                });
-            }
-
-            label.appendChild(input);
-            label.appendChild(d.createTextNode('\u00a0' + opt.label));
-
-            if (isGated) {
-                var pill = d.createElement('span');
-                pill.className = 'av-pro-pill';
-                pill.textContent = 'Pro';
-                label.appendChild(d.createTextNode('\u00a0'));
-                label.appendChild(pill);
-            }
-
-            wrap.appendChild(label);
-        });
-    }
 
     /* \u2500\u2500\u2500 D26.1 \u2014 scope from URL + read-only readout \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
 
@@ -2294,9 +2236,9 @@
         if (parsed.kind === 'post')      { state.selection.scope = 'post';      }
         else if (parsed.kind === 'post_type') { state.selection.scope = 'post_type'; state.selection.post_type = parsed.post_type; }
         else                             { state.selection.scope = 'global';    }
-        // Render the read-only scope label immediately so the panel doesn't
-        // stay on the PHP-rendered "Loading…" placeholder while the
-        // /step-rail/scopes fetch settles.
+        // Render the read-only scope label immediately. (The
+        // /step-rail/scopes fetch was retired in D27.27 — scope is
+        // pinned by URL params now, so there's nothing to wait on.)
         renderScopeReadout();
 
         // Tab toggles.
@@ -2327,14 +2269,7 @@
         // Draggable preview.
         attachDraggable();
 
-        // Scope radiogroup — fetch dynamic data (post types / languages).
-        restFetch('/step-rail/scopes').then(function (resp) {
-            state.scopes = resp || { post_types: [], languages: [] };
-        }).catch(function () {
-            state.scopes = { post_types: [], languages: [] };
-        }).then(function () {
-            renderScopeReadout();
-        });
+        // Scope radiogroup retired — fetch removed in D27.27.
 
         // Wire pickers + chips.
         attachPickButton();
