@@ -49,6 +49,7 @@ export default function Settings() {
         tta__settings_read_content_from_dom: true,
         tta__settings_player_use_old_player: false,
         tta__settings_enable_tts_status: true,
+        tta__settings_emit_legacy_wrapper: true,
         tta__settings_delete_data_on_uninstall: false,
     });
     const [postTypes, setPostTypes] = useState([]);
@@ -406,6 +407,29 @@ export default function Settings() {
                                         onChange={(e) => handleChange(e)}
                                         name="tta__settings_enable_tts_status"
                                         id="tta__settings_enable_tts_status"
+                                    />
+                                </SettingRow>
+
+                                {/* TTS-238 D27.38 — emit legacy content wrapper toggle.
+                                    Default ON so the picker's auto-detect lands on
+                                    `[class*="tts_content_wrapper_"]` (the strongest
+                                    stability hook for content extraction). Themes whose
+                                    layout breaks on the wrapper div can flip this off,
+                                    which makes the picker fall through to dynamic-class
+                                    filtering + theme content classes. */}
+                                <SettingRow
+                                    label={__("Emit Content Wrapper", "text-to-audio")}
+                                    questionIcon={true}
+                                    questionTooltip={__(
+                                        "Wrap rendered post content in a stable `tts_content_wrapper_<N>` div so the picker / runtime extractor can reliably find it across all posts. Turn off only if your theme's layout breaks on the wrapper.",
+                                        "text-to-audio"
+                                    )}
+                                >
+                                    <ToggleSwitch
+                                        checked={settings.tta__settings_emit_legacy_wrapper}
+                                        onChange={(e) => handleChange(e)}
+                                        name="tta__settings_emit_legacy_wrapper"
+                                        id="tta__settings_emit_legacy_wrapper"
                                     />
                                 </SettingRow>
 
