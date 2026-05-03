@@ -174,7 +174,7 @@ class StepRail {
 								<span class="av-word-count" hidden></span>
 							</div>
 							<div class="av-selector-display" hidden>
-								<input type="text" class="av-selector-value av-selector-input" placeholder="<?php echo esc_attr__( 'e.g. div.entry-content', 'text-to-audio' ); ?>" />
+								<input type="text" class="av-selector-value av-selector-input av-chip-input" placeholder="<?php echo esc_attr__( 'e.g. div.entry-content', 'text-to-audio' ); ?>" />
 								<button type="button" class="av-btn av-btn--clear-selector" title="<?php echo esc_attr__( 'Clear selector', 'text-to-audio' ); ?>">&times;</button>
 							</div>
 						</div>
@@ -480,13 +480,14 @@ class StepRail {
 /* ── Region ──────────────────────────────────────────────────── */
 .av-region-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
 .av-word-count{font-size:11px;color:#6b7280;font-style:italic;}
+/* TTS-238 D27.37 — Content region readout: input now uses the same
+   chip-input visual treatment as Step ④/⑤/⑥, so the field reads as
+   an editable input rather than a flat text pill. */
 .av-selector-display{
   display:flex;align-items:center;gap:6px;
-  padding:6px 10px;background:#f3f4f6;border-radius:6px;font-size:12px;
+  padding:0;background:transparent;font-size:12px;
 }
 .av-selector-value{flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all;}
-.av-selector-input{border:0;background:transparent;outline:none;min-width:0;padding:0;font-size:12px;color:inherit;width:100%;}
-.av-selector-input:focus{outline:1px dashed #184c53;border-radius:2px;}
 .av-btn--clear-selector{background:transparent!important;border:0!important;cursor:pointer!important;color:#6b7280!important;font-size:16px!important;padding:0 4px!important;flex-shrink:0;text-shadow:none!important;}
 .av-btn--clear-selector:hover{color:#b91c1c!important;background:transparent!important;}
 
@@ -503,7 +504,12 @@ class StepRail {
 .av-chip button{background:transparent!important;border:0!important;cursor:pointer!important;color:inherit!important;font-size:13px!important;padding:0 3px!important;line-height:1!important;text-shadow:none!important;}
 .av-chip button:hover{color:#b91c1c!important;background:transparent!important;}
 .av-chip-add{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap;}
-.av-chip-add .av-chip-input{flex:1;min-width:80px;font-size:12px;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;}
+/* TTS-238 D27.37 — `.av-chip-input` is now reused by the Content
+   region readout in Step ③, so its rule is no longer scoped under
+   `.av-chip-add`. Background pinned to #fff so the input stands out
+   when nested inside transparent containers. */
+.av-chip-input{flex:1;min-width:80px;font-size:12px;padding:4px 6px;border:1px solid #d1d5db;border-radius:4px;background:#fff;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+.av-chip-input:focus{outline:1px dashed #184c53;}
 .av-chip-sep{font-size:11px;color:#9ca3af;}
 
 /* ── Tag checkboxes ─────────────────────────────────────────── */

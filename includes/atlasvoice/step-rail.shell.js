@@ -166,11 +166,16 @@
             return '#' + el.id;
         }
         var tag = el.tagName.toLowerCase();
-        var cls = cleanClasses(el).split(/\s+/).filter(Boolean);
+        // TTS-238 D27.35 — filter out per-instance hash classes here
+        // too. An exclude rule built around `elementor-element-242e3e0d`
+        // would only match on the post the admin happened to open the
+        // picker on; on every other post the same widget renders with a
+        // different hash and the exclusion silently fails.
+        var cls = stableClassesOf(el);
         var nth = nthOfType(el);
         var nthSfx = nth > 0 ? ':nth-of-type(' + nth + ')' : '';
 
-        // Try unique class inside the selected content container.
+        // Try unique stable class inside the selected content container.
         if (state.selectedEl && cls.length) {
             for (var i = 0; i < cls.length; i++) {
                 var cand = tag + '.' + cls[i];
@@ -184,7 +189,7 @@
         var parent = el.parentElement;
         if (parent) {
             var ptag = parent.tagName.toLowerCase();
-            var pcls = cleanClasses(parent).split(/\s+/).filter(Boolean);
+            var pcls = stableClassesOf(parent);
             if (parent.id && !/^\d/.test(parent.id)) {
                 return '#' + parent.id + ' ' + tag + (cls.length ? '.' + cls[0] : '') + nthSfx;
             }
@@ -221,6 +226,85 @@
         return orig.replace(PICKER_CLASSES, '').trim().replace(/\s{2,}/g, ' ');
     }
 
+    // TTS-238 D27.35 — selector stability layer.
+    //
+    // Page-builders (Elementor, Gutenberg blocks, scoped CSS-in-JS) emit
+    // per-instance hash classes that change every time the post is rebuilt
+    // and are unique per element on every page. Picking those gives a
+    // selector that won't match anywhere else, which defeats the whole
+    // point of a content-region rule.
+    //
+    // Three pieces:
+    //   1. findContentWrapper() — if the picked element sits inside this
+    //      plugin's own `tts_content_wrapper_<N>`, return that as the
+    //      canonical site-wide selector. Highest stability guarantee
+    //      because the wrapper is emitted server-side by Free + Pro.
+    //   2. DYNAMIC_CLASS_PATTERNS — block obvious per-instance hash
+    //      classes from being chosen for tag.class candidates.
+    //   3. STABLE_CLASS_RANK — when a node has multiple non-dynamic
+    //      classes, prefer well-known theme content classes over random
+    //      ones. (No Elementor widget classes here per project decision.)
+    var DYNAMIC_CLASS_PATTERNS = [
+        /^elementor-element-[0-9a-f]{6,}$/,    // Elementor per-instance hash
+        /^e-con-[0-9a-f]+$/,                   // Elementor v3 container hash
+        /^wp-block-[a-z-]+-\d+$/,              // Gutenberg numbered block id
+        /^css-[a-z0-9]{6,}$/,                  // emotion / styled-components
+        /^id-[a-z0-9]{6,}$/,                   // generic page-builder ids
+        /(^|[_-])[a-f0-9]{8,}([_-]|$)/         // any 8+ hex segment delimited by _ or -
+    ];
+
+    var STABLE_CLASS_RANK = {
+        'entry-content':   10,
+        'post-content':    9,
+        'article-content': 8,
+        'main-content':    7,
+        'site-content':    6,
+        'content':         5
+    };
+
+    function isDynamicClass(cls) {
+        if (!cls) { return true; }
+        for (var i = 0; i < DYNAMIC_CLASS_PATTERNS.length; i++) {
+            if (DYNAMIC_CLASS_PATTERNS[i].test(cls)) { return true; }
+        }
+        return false;
+    }
+
+    // Returns the el's classes minus picker chrome AND minus per-instance
+    // hash classes, sorted with well-known theme classes first.
+    function stableClassesOf(el) {
+        var raw = cleanClasses(el).split(/\s+/).filter(Boolean);
+        var stable = raw.filter(function (c) { return !isDynamicClass(c); });
+        stable.sort(function (a, b) {
+            return (STABLE_CLASS_RANK[b] || 0) - (STABLE_CLASS_RANK[a] || 0);
+        });
+        return stable;
+    }
+
+    // Walk ancestors (and self) looking for the plugin's content wrapper.
+    // The wrapper class is `tts_content_wrapper_<N>` where N is a per-PHP-
+    // request counter; we pull the exact N from the first matched ancestor
+    // and return `div.tts_content_wrapper_<N>` so the saved rule targets
+    // exactly the wrapper the admin clicked into. (TTS-238 D27.39 — was
+    // previously the substring match `[class*="tts_content_wrapper_"]`,
+    // which matched every wrapper on the page — useful for the "read all
+    // wrapped regions" case but loses specificity when the admin wants to
+    // target one of several.)
+    function findContentWrapper(el) {
+        var node = el;
+        while (node && node.nodeType === 1 && node !== d.body) {
+            var className = (typeof node.className === 'string')
+                ? node.className
+                : (node.className && node.className.baseVal) || '';
+            var m = className.match(/\btts_content_wrapper_(\d+)\b/);
+            if (m) {
+                return 'div.tts_content_wrapper_' + m[1];
+            }
+            node = node.parentElement;
+        }
+        return null;
+    }
+
     // Returns 1-based position of el among its parent's children of the SAME tag.
     function nthOfType(el) {
         var tag = el.tagName;
@@ -243,15 +327,24 @@
     }
 
     function generateSelector(el) {
+        // TTS-238 D27.35 — Pass 0: prefer this plugin's own wrapper if
+        // it's an ancestor. `tts_content_wrapper_<N>` is emitted by Free
+        // (D26.7) + Pro and is the strongest stability hook — same
+        // selector works on every post on the site.
+        var wrapperSel = findContentWrapper(el);
+        if (wrapperSel) { return wrapperSel; }
+
         if (el.id && !/^\d/.test(el.id) && d.getElementById(el.id) === el) {
             return '#' + el.id;
         }
         var tag = el.tagName.toLowerCase();
-        var cls = cleanClasses(el).split(/\s+/).filter(Boolean);
+        // Pass 1: drop per-instance hash classes; rank well-known theme
+        // content classes ahead of arbitrary ones.
+        var cls = stableClassesOf(el);
         var nth = nthOfType(el);
         var nthSfx = nth > 0 ? ':nth-of-type(' + nth + ')' : '';
 
-        // Try each class for global uniqueness (no positional suffix needed).
+        // Try each stable class for global uniqueness (no positional suffix needed).
         for (var i = 0; i < cls.length; i++) {
             var cand = tag + '.' + cls[i];
             try { if (d.querySelectorAll(cand).length === 1) { return cand; } } catch (e) {}
@@ -266,7 +359,7 @@
                 return '#' + parent.id + ' ' + base;
             }
             var ptag = parent.tagName.toLowerCase();
-            var pcls = cleanClasses(parent).split(/\s+/).filter(Boolean);
+            var pcls = stableClassesOf(parent);
             return ptag + (pcls.length ? '.' + pcls[0] : '') + ' ' + base;
         }
         return base;
@@ -467,11 +560,20 @@
     }
 
     // Build a CSS selector string covering every element. Single → bare
-    // selector. Many → comma-list. Reuses generateSelector for each so the
-    // output matches what click-pick would produce.
+    // selector. Many → comma-list. Reuses the same per-element builder
+    // that click-pick uses so the output is consistent. TTS-238 D27.36 —
+    // when the drag is in `select-excl` mode we route through
+    // generateExcludeSelector instead, because generateSelector escalates
+    // to the plugin's content wrapper if it's an ancestor — which is
+    // correct for the include path (broadest stable container) but
+    // catastrophic for the exclude path (would delete the entire
+    // content region).
     function selectorsFromTouched(els) {
         if (!els.length) { return ''; }
-        var parts = els.map(function (el) { return generateSelector(el); }).filter(Boolean);
+        var build = (state.pickMode === 'select-excl')
+            ? generateExcludeSelector
+            : generateSelector;
+        var parts = els.map(function (el) { return build(el); }).filter(Boolean);
         // De-dupe identical strings (rare, but happens if two siblings
         // share a unique-class shortcut path).
         var seen = {};
