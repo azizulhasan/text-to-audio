@@ -128,7 +128,7 @@ const config = {
 		src: [
 			'admin/js/build/text-to-audio-pro-button.min.js'
 		],
-		output: 'D:/xampp/htdocs/azizulhasan/tts/wp-content/plugins/text-to-audio-pro/Assets/js/build/',
+		output: 'D:/laragon/www/tts/wp-content/plugins/text-to-audio-pro/Assets/js/build/',
 		options: {
 			//compress: true,
 			//modifiedTime: undefined
@@ -250,9 +250,15 @@ gulp.task('copy', function () {
 })
 
 // Copy pro button
+//
+// gulp-copy preserves the source folder structure under the output dir, so the
+// previous gulpCopy(...) wrote to <output>/admin/js/build/<file>.min.js instead
+// of dropping the file directly in <output>. The Pro plugin loads from
+// <output>/<file>.min.js, so the bundle was never actually updated.
+// gulp.dest with no glob base writes the file straight into the output dir.
 gulp.task('copyProButton', function () {
 	return gulp.src(config.copyProButton.src)
-		.pipe(gulpCopy(config.copyProButton.output, config.copyProButton.src.options))
+		.pipe(gulp.dest(config.copyProButton.output))
 		.pipe(notify({ message: 'Copy Completed! 💯', onLast: true }))
 })
 
