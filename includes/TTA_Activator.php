@@ -95,7 +95,12 @@ class TTA_Activator {
 				'tta__settings_css_selectors'                         => '[class*="tts_content_wrapper_"]',
 				'tta__settings_exclude_content_by_css_selectors'      => '',
 				'tta__settings_exclude_texts'                         => [],
-				'tta__settings_exclude_tags'                          => [],
+				// TTS-238 D27.34 — default-skip these tag types out of the
+				// box. Mirrors the picker's pre-checked checkbox set so a
+				// fresh install never reads aside / figure / blockquote /
+				// script / style aloud. Pipe-joined string to match the
+				// canonical storage shape.
+				'tta__settings_exclude_tags'                          => 'aside|figure|blockquote|pre|code|table|form|nav|footer|header|script|style',
 				// D26.7 — wrapper opt-out flag. Default ON so the new default
 				// selector above keeps working; admins on themes that break
 				// on the wrapper can flip this off.

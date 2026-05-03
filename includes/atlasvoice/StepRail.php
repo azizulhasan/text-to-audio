@@ -309,7 +309,13 @@ class StepRail {
 	// -----------------------------------------------------------------------
 
 	protected static function render_common_tag_checkboxes() {
-		$tags = array( 'aside', 'figure', 'blockquote', 'pre', 'code', 'table', 'form', 'nav', 'footer', 'header' );
+		// TTS-238 D27.34 — `script` and `style` added to the default
+		// "Skip these tag types" set. Their text content (JS source,
+		// stylesheet rules) is meaningless to a listener so they're
+		// always-skip candidates by convention. All twelve checkboxes
+		// ship `checked` so a fresh install excludes them out of the
+		// box; admins can uncheck individual rows to re-include any.
+		$tags = array( 'aside', 'figure', 'blockquote', 'pre', 'code', 'table', 'form', 'nav', 'footer', 'header', 'script', 'style' );
 		$out  = '';
 		foreach ( $tags as $tag ) {
 			$id   = 'av-tag-' . $tag;
