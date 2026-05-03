@@ -339,28 +339,44 @@ export default class TextToSpeech {
                     speech.resume();
                 }, 0);
 
-                thisClass.timer = setTimeout(pauseResumeTimer, 10000)
+                thisClass.timer = setTimeout(pauseResumeTimer, 13000)
 
                 if (!speech.speaking()) {
                     clearTimeout(thisClass.timer)
                     thisClass.timer = null
                 }
 
-            }, 10000);
+            }, 13000);
         }
     }
 
     pause(speech, isClicked = false) {
         /**
-         * If desktop then cancel after 7/8 second
-         * If mobile cancel and restart again.
+         * Desktop Chrome workaround: speechSynthesis.pause() alone is
+         * unreliable on resume — the engine often refuses to continue the
+         * current utterance. So we pause() for immediate UX feedback, then
+         * issue cancel() once the pause has actually settled. resume() then
+         * detects `isCanceled` and re-speak()s the remaining content from
+         * the current sentence (see splittedSentances slicing below).
+         *
+         * TTS-243 — interval was 1ms (firing cancel() ~every 1ms forever
+         * until cleared). One delayed cancel is enough; raised to 50ms so
+         * Chrome has time to actually enter the paused state before the
+         * cancel arrives. Below ~30ms the engine occasionally swallows the
+         * cancel mid-transition and the next resume produces no audio.
+         *
+         * Still a setInterval (not setTimeout) so subsequent fires keep
+         * asserting cancel() if the engine flips back to "speaking" — this
+         * is defensive against Chrome's flaky pause/cancel race.
+         *
+         * Android takes a different path: cancel-and-restart on resume.
          */
         if (!this.browser.isAndroid()) {
             speech.pause();
             this.shouldCancelTimer = setInterval(() => {
                 speech.cancel();
                 this.isCanceled = true;
-            }, 1)
+            }, 50)
 
         } else {
             speech.cancel();
@@ -407,13 +423,13 @@ export default class TextToSpeech {
                     speech.resume();
                 }, 0);
 
-                thisClass.timer = setTimeout(pauseResumeTimer, 10000)
+                thisClass.timer = setTimeout(pauseResumeTimer, 13000)
 
                 if (!speech.speaking()) {
                     clearTimeout(thisClass.timer)
                     thisClass.timer = null
                 }
-            }, 10000);
+            }, 13000);
         }
     }
 

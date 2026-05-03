@@ -89,6 +89,17 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
     const incrementIntervalRef = useRef(null)
     const decrementIntervalRef = useRef(null)
 
+    // TTS-243 — refs mirror state vars that callBackAfterEnd needs. The
+    // speech instance captures callBackAfterEnd at _init time, so any
+    // state read directly inside it is the stale snapshot from first
+    // render. Refs stay current across renders.
+    const incrementedTimeRef   = useRef(0)
+    const incrementDeadlineRef = useRef(0)
+    const decrementDeadlineRef = useRef(0)
+    useEffect(() => { incrementedTimeRef.current   = incrementedTime   }, [incrementedTime])
+    useEffect(() => { incrementDeadlineRef.current = incrementDeadline }, [incrementDeadline])
+    useEffect(() => { decrementDeadlineRef.current = decrementDeadline }, [decrementDeadline])
+
 
     /**
      * Open/close settings modal with animation
@@ -556,18 +567,73 @@ const TextToSpeech = ({ buttonId, button, cssStyle = '', buttonCSS = {}, buttonL
 
 
     /**
-     * After reading text callback for redesing button
+     * Bridge from the inner TextToSpeech speech-engine class to React state.
+     *
+     * Invoked from admin/js/TextToSpeech.js in three places, each with a
+     * different `speech.listenStatus` snapshot:
+     *
+     *   1. finishedSpeaking()                          → 'listen'   (audio ended)
+     *   2. visibilitychange tab HIDDEN  (auto-pause)   → 'resume'   (now paused)
+     *   3a. visibilitychange tab VISIBLE (auto-resume ran)   → 'pause'  (now playing)
+     *   3b. visibilitychange tab VISIBLE (auto-resume skipped) → 'resume' (still paused)
+     *
+     * Naming gotcha: speech.listenStatus reflects the BUTTON label, not the
+     * playback state. 'pause' on the button means audio is currently playing
+     * (so clicking shows pause icon), 'resume' means audio is paused.
+     *
+     * TTS-243 — fixes two closure-staleness bugs:
+     *
+     * • The speech instance captures THIS function at _init time, so any
+     *   useState value referenced directly inside is the snapshot from the
+     *   render that started playback (typically zero). Hence we read from
+     *   *Ref values, which always reflect current state.
+     *
+     * • Cleanup on auto-pause must use the interval refs — the previously
+     *   used `clearInterval(decrementInterval)` reads the state var, which
+     *   is stale `null` here, so it never actually cleared anything.
+     *
+     * • On auto-resume (case 3a) we must RESTART the React countdown
+     *   intervals — they were cleared during auto-pause, and the speech
+     *   class doesn't know about them. Without this restart, audio would
+     *   resume but the visual timer would stay frozen at its paused value.
      */
     const callBackAfterEnd = () => {
         speech = speech.getData()
         setListenStatus(speech.listenStatus)
-        setIsPlaying(false)
+
+        const isNowPlaying = speech.listenStatus === 'pause'; // 'pause' = currently playing
+        setIsPlaying(isNowPlaying)
+
+        if (!isNowPlaying) {
+            // cases 1, 2, 3b — audio finished/paused; tear down React
+            // countdown intervals via refs (state vars are stale here).
+            if (incrementIntervalRef.current) {
+                clearInterval(incrementIntervalRef.current);
+                incrementIntervalRef.current = null;
+            }
+            if (decrementIntervalRef.current) {
+                clearInterval(decrementIntervalRef.current);
+                decrementIntervalRef.current = null;
+            }
+        } else {
+            // case 3a — auto-resume just succeeded; restart the visual
+            // countdown from the position it was at when auto-paused.
+            // Reading via *Ref so we get current elapsed/deadline, not
+            // the zeros that were captured at _init.
+            let deadline = new Date(Date.parse(new Date()) + decrementDeadlineRef.current);
+            getDecreamentTime(deadline);
+            getIncrementTime(incrementDeadlineRef.current, incrementedTimeRef.current);
+        }
     }
 
     const pauseButton = (speech, finishIntentionally = false) => {
-        speech.pause(speech.speech)
+        speech.pause(speech.speech, !finishIntentionally);
         if (finishIntentionally) {
             speech.finishedSpeaking(speech.speech, {}, finishIntentionally);
+        } else {
+            // TTS-243 — match free button: mark intentional user pause so
+            // visibilitychange handler doesn't auto-resume on tab return.
+            window.sessionStorage.setItem('tts_paused_by_intention', true);
         }
         setIsPlaying(!isPlaying);
         // Clear intervals using refs
