@@ -417,17 +417,6 @@
         // tier wins (markers, saved-selector, heuristic).
         var activeRule = resolveRuleEntry(opts);
 
-        // Tier 1 — comment markers.
-        try {
-            node = extractFromMarkers(buttonId);
-            if (node) {
-                applyExclusions(node, activeRule);
-                text = applyTextExclusions((node.textContent || '').replace(/\s+/g, ' ').trim(), activeRule);
-                if (text.length > 0) {
-                    return { text: text, tier: 'markers', node: node, confidence: CONFIDENCE_MARKERS, healedFrom: '' };
-                }
-            }
-        } catch (_) { /* fall through */ }
 
         // Tier 2 — user-saved stable selector. PR-C (C1a): beyond "does it
         // match anything", we also require the live element to still score
@@ -458,6 +447,19 @@
                 healedFrom = savedSelector;
             }
         }
+
+        // Tier 1 — comment markers.
+        try {
+            node = extractFromMarkers(buttonId);
+            if (node) {
+                applyExclusions(node, activeRule);
+                text = applyTextExclusions((node.textContent || '').replace(/\s+/g, ' ').trim(), activeRule);
+                if (text.length > 0) {
+                    return { text: text, tier: 'markers', node: node, confidence: CONFIDENCE_MARKERS, healedFrom: '' };
+                }
+            }
+        } catch (_) { /* fall through */ }
+
 
         // Tier 3 — legacy .tts_content_wrapper_N.
         try {
