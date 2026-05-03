@@ -822,3 +822,193 @@ Toggle test:
 
 Picker UI = REST `/active-rule` = REST `/scope-rule` = runtime
 extractor. Single source of truth.
+
+## 14. D27.23–D27.33 — runtime parity tail + dead-code retirement
+
+After §13 declared parity, an audit caught a remaining gap and a
+large amount of dormant infrastructure that the v5 collapse made
+unreachable. This section records the work that landed on this
+branch beyond the originally-planned checkpoints.
+
+### 14.1 D27.23 — JS extractor migrated to new storage
+
+The browser-side `tts-extractor-engine.js` was still walking the
+retired `tts.atlasvoice_selectors` localized store for its Tier 2
+saved-selector resolution. PHP was on the new storage, JS was not.
+Closed by:
+
+  * `LocalizeData::inject_lazy()` now ships a server-resolved
+    `tta_obj.atlasvoice_resolved_rule = { selector, source,
+    excl_css[], excl_texts[], excl_tags[] }` computed via
+    `RuleResolver::resolve()` against the canonical storage.
+  * `tts-extractor-engine.js::resolveRuleEntry` prefers that
+    pre-resolved field. The legacy store walk stays as a back-compat
+    fallback for older bundles or contexts where the lazy localize
+    didn't run.
+
+### 14.2 D27.24 — `/save-selector` + `/post-rules` repointed (later deleted)
+
+The two legacy REST routes were repointed at the new canonical
+storage instead of being deregistered (judgment call I rolled back
+in D27.28 after the user pushed for full deletion).
+
+### 14.3 D27.25 — One-shot upgrade-cleanup migration
+
+`text-to-audio.php` admin_init: deletes the dead options /
+post meta in batches and unschedules retired crons. Marker
+`tta_d27_legacy_cleanup_done` blocks re-runs once the queue
+drains. Targets accumulated across D27.25–D27.31:
+
+  * `tta_atlasvoice_selectors` option (D27.21)
+  * `tta_atlasvoice_heal_log` option (D27.28)
+  * `tta_atlasvoice_boilerplate_suggestions` option (D27.28)
+  * `tta_atlasvoice_snapshots` option (D27.29)
+  * `_atlasvoice_post_rules` post meta (D27.21)
+  * `_tta_mp3_variant` post meta (D27.31)
+  * `_tta_atlasvoice_auth_samples` post meta (D27.31)
+  * `tta_atlasvoice_detect_boilerplate` cron hook unscheduled
+    (D27.28)
+
+### 14.4 D27.26 — SelectorHash fingerprint inputs from new storage
+
+(Subsequently obsolete: SelectorHash itself was retired in D27.33.)
+
+### 14.5 D27.27 — `/step-rail/scopes` endpoint retired
+
+The endpoint fed the scope-radio markup that the v5 picker
+collapse retired (scope is URL-pinned now). Endpoint + handler +
+the JS shell's `restFetch('/step-rail/scopes')` call + the
+`renderScopeRow()` function + `SCOPE_OPTIONS` constant all
+removed. (Commit `bdc9475`.)
+
+### 14.6 D27.28 — `/save-selector` + `/post-rules` actually deregistered; heal log + boilerplate detector retired
+
+The previous "repoint" left the routes alive in the public REST
+surface. This commit physically deletes the registrations + the
+handlers + every consumer in-tree, and at the same time retires
+two features the auto-save / heal flow used to feed:
+
+  * **Heal log** — UI component (`AtlasVoiceHealLog.js`) deleted;
+    `/heal-log` route + `get_heal_log()` handler removed; option
+    `tta_atlasvoice_heal_log` queued for cleanup.
+  * **Detected boilerplate (beta)** — UI component
+    (`AtlasVoiceBoilerplate.js`), `BoilerplateDetector` class +
+    nightly cron, and the three `/boilerplate-*` REST routes all
+    deleted.
+  * `tts-picker.js::persistSelector()` reduced to a no-op stub so
+    straggler callers resolve cleanly.
+  * `AtlasVoiceSettings.js` (the wrapper) deleted; `Settings.js`
+    drops the import + render site.
+
+(Commit `dc07862`.)
+
+### 14.7 D27.29 — Rule-snapshot ring buffer retired
+
+Audit confirmed `Snapshots` was infrastructure waiting for a
+consumer that never landed: no JS callers in either plugin, no
+`atlasvoice_rules_changed` emitters, no readers of
+`tta_atlasvoice_snapshots` option. Removed:
+
+  * `Snapshots.php` class file deleted; `Bootstrap` registration
+    removed.
+  * `/snapshots` route + `get_snapshots()` + `post_snapshots()` +
+    `scope_from_request()` helper deleted.
+  * `do_action('atlasvoice_rules_changed', …)` emits in
+    `PerPostRules::set/clear` removed (no remaining listeners).
+  * Option queued for cleanup.
+
+(Commit `b94d2f2`.)
+
+### 14.8 D27.30 — Tier 1 dead-code retirement
+
+Mechanical-delete batch — REST routes with no in-tree consumers
+and class files that were never registered:
+
+  * `/language-context` route + handler — no JS callers.
+  * `/mode` (GET + POST) routes + `get_mode()` + `post_mode()`
+    handlers — dashboard never surfaced a Go-Live UI; `Mode::set()`
+    became permanently unreachable.
+  * `AuthVariantsMetaBox.php` — orphan file, never registered.
+  * `CachePurgeHints.php` — zero callers.
+  * Stale `/auth-variant` reference dropped from class docblock.
+
+Documented public-extension `do_action` emits left intact
+(`atlasvoice_mode_changed`, `regen_*`, etc.) — emit-only with no
+in-tree subscribers but documented API surface for third parties.
+
+(Commit `c293a27`.)
+
+### 14.9 D27.31 — Tier 2: AuthVariants + PerPostRulesMetaBox
+
+  * **`AuthVariants`** — per-post auth-variant pin + 10-deep
+    sample ring, used by `SelectorHash` for cache fingerprinting.
+    Variant-aware MP3 caching never shipped end-to-end (no UI, no
+    Pro consumer). Class file deleted; SelectorHash
+    `auth_bucket` field + `current_auth_bucket()` helper dropped.
+  * **`PerPostRulesMetaBox`** — added a redundant breadcrumb table
+    to the post-edit metabox. Superseded by the React per-post
+    accordion (`CSSSelectorsForPosts.js`). Deleted.
+  * Cleanup migration extended to strip `_tta_mp3_variant` and
+    `_tta_atlasvoice_auth_samples` meta in batches.
+  * `Mode` class kept per user direction — `is_opted_in() / get()
+    / status()` still consulted by `RegenGuard` and `PickerLoader`
+    until those are retired in D27.33.
+
+(Commit `b8a1be9`.)
+
+### 14.10 D27.32 — D13 Readers integration retired
+
+The eight reader files in `includes/atlasvoice/Readers/` plus
+`ReadersIntegration.php` were dormant-by-design (the
+`ReaderRegistry` docblock said so explicitly). Project decision
+to read what visitors see in the DOM superseded the out-of-DOM
+custom-field reader path. Eight files + the glue all deleted.
+
+`apply_filters('atlasvoice_after_clean_content', ...)` emit in
+`helpers.php` kept as a public extension point.
+
+(Commit `1469292`.)
+
+### 14.11 D27.33 — Tier 3: SelectorHash + RegenGuard + ContentHash + LanguagePlugins
+
+Pro-side audit confirmed zero references to any of these classes,
+the `atlasvoice_mp3_generated` / `atlasvoice_regen_skip` actions,
+or the `_atlasvoice_selector_hash` post meta. The entire
+D3/D4/D7/D8 fingerprint-and-regen pipeline was speculative
+infrastructure that never connected to Pro's MP3 synthesis flow.
+
+  * **`SelectorHash`** — fingerprint generator for an MP3 cache
+    invalidator that no consumer existed for. Class file deleted.
+  * **`RegenGuard`** — visitor-request gate firing actions nobody
+    subscribed to. Class file deleted.
+  * **`ContentHash`** — content-based fingerprint, only used by
+    the two above. Class file deleted.
+  * **`LanguagePlugins`** — WPML/Polylang detection. Per-language
+    scopes were retired in D26 collapse; the remaining `lang`
+    field in `SelectorHash` fingerprint became dead with that
+    class. Multilingual sites lose the per-language `lang` value
+    in `tta_obj` — acceptable per user direction. Class file
+    deleted; downstream callers in `LocalizeData`, `RuleResolver`,
+    and `RestRoutes` stripped of the `LanguagePlugins::*` calls.
+
+`Mode` class still alive but its consumers (`PickerLoader::is_opted_in`
+gate, etc.) were also untangled in this commit so deleting Mode
+later is a one-file delete rather than a cascade.
+
+(Commit `ac61b73`.)
+
+### 14.12 Net result
+
+`includes/atlasvoice/` directory at the start of this branch:
+~22 PHP class files + a `Readers/` subdirectory of 8 reader
+implementations. After D27.33: 9 files + `step-rail.shell.js` —
+`Bootstrap`, `LocalizeData`, `Mode`, `PerPostRules`,
+`PickerLoader`, `RestRoutes`, `RuleResolver`, `StepRail`,
+`VerifyAcrossPosts`. The directory now contains only what powers
+the live picker, the resolver it feeds, and the per-post storage
+layer.
+
+The migration in `text-to-audio.php` will keep draining stale data
+on every admin pageview until `tta_d27_legacy_cleanup_done` is
+set; long-tail installs that ever stored AtlasVoice rules
+get cleaned automatically without an explicit upgrade prompt.
