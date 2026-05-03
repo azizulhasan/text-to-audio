@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1.17
+Stable tag: 2.1.18
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -353,6 +353,13 @@ Please report security bugs through the [Patchstack Vulnerability Disclosure Pro
 We are looking for people to help translate this plugin. If you can help, we would love to hear from you.
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
+
+= 2.1.18 ( 03 May 2026 ) =
+Fixed : Default Pro player visual countdown now correctly pauses on tab switch and resumes from the saved position (previously it kept ticking after auto-pause and reset to 0 on auto-resume).
+Fixed : Default Pro player no longer auto-resumes after the user intentionally clicks pause and switches tabs (intent flag now set on the React click handler, matching the free button).
+Improved : Inline documentation for the Chrome SpeechSynthesis pause/cancel workaround in `admin/js/TextToSpeech.js` and the React → speech-engine bridge in the Default Pro component.
+Improved : `pause()` cancel-interval raised from 1ms to 50ms so Chrome has time to enter the paused state before cancel fires (previously could be swallowed mid-transition).
+Fixed : Build script `npm run copyProButton` was writing the synced bundle to a nested folder the Pro plugin never read; now drops it directly in the destination.
 
 = 2.1.17 ( 26 Apr 2026 ) =
 Added : Customize → "Button Texts & Icons" section for Default and Default Pro players — edit per-state text (Listen / Pause / Resume / Replay), pick from 8 icon presets or paste custom SVG, set hover tooltips, and reset per-state or all at once.
@@ -861,6 +868,11 @@ Improved :  Pro and free version performance improved.
 
 
 == Upgrade Notice ==
+
+= 2.1.18 =
+Fixed : Default Pro player visual countdown now correctly pauses on tab switch and resumes from the saved position.
+Fixed : Default Pro no longer auto-resumes after an intentional pause + tab switch.
+Improved : Chrome pause workaround timing raised to 50ms for more reliable resume.
 
 = 2.1.17 =
 Added : Customize → Button Texts & Icons section (Listen/Pause/Resume/Replay text + icon presets + custom SVG paste) for Default and Default Pro.
