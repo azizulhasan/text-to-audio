@@ -131,15 +131,33 @@ class LocalizeData {
 		// the engine needs for content extraction (selector + the three
 		// exclude lists). If RuleResolver returns no winner the field
 		// is null and the engine falls through to its existing tiers.
+		//
+		// TTS-238 D27.41 — payload uses the canonical `tta__settings_*`
+		// keys that the picker / storage / REST contract already use.
+		// `source` is metadata, kept as-is. `selector_source` from
+		// RuleResolver maps to it.
 		if ( $post_id > 0 && class_exists( '\\TTA\\AtlasVoice\\RuleResolver' ) ) {
 			$resolved = RuleResolver::resolve( $post_id );
-			if ( ! empty( $resolved['selector'] ) ) {
+			// TTS-238 D27.42 — RuleResolver::resolve() returns
+			// canonical-keyed output now; read directly without
+			// short-name aliases.
+			//
+			// TTS-238 D27.43 — payload is the picker's authoritative
+			// source for the active rule (no more round-trip to
+			// /step-rail/active-rule). Adds the four metadata fields
+			// the picker sets `state.scope` / `state.postType` /
+			// `state.postLang` from: source, post_type, language,
+			// excl_set.
+			if ( ! empty( $resolved['tta__settings_css_selectors'] ) ) {
 				$data['atlasvoice_resolved_rule'] = array(
-					'selector'   => (string) $resolved['selector'],
-					'source'     => isset( $resolved['selector_source'] ) ? (string) $resolved['selector_source'] : '',
-					'excl_css'   => isset( $resolved['excl_css'] )   && is_array( $resolved['excl_css'] )   ? array_values( $resolved['excl_css'] )   : array(),
-					'excl_texts' => isset( $resolved['excl_texts'] ) && is_array( $resolved['excl_texts'] ) ? array_values( $resolved['excl_texts'] ) : array(),
-					'excl_tags'  => isset( $resolved['excl_tags'] )  && is_array( $resolved['excl_tags'] )  ? array_values( $resolved['excl_tags'] )  : array(),
+					'tta__settings_css_selectors'                    => (string) $resolved['tta__settings_css_selectors'],
+					'source'                                         => isset( $resolved['selector_source'] ) ? (string) $resolved['selector_source'] : '',
+					'post_type'                                      => isset( $resolved['post_type'] ) ? (string) $resolved['post_type'] : '',
+					'language'                                       => isset( $resolved['language'] )  ? (string) $resolved['language']  : '',
+					'excl_set'                                       => ! empty( $resolved['excl_set'] ),
+					'tta__settings_exclude_content_by_css_selectors' => isset( $resolved['tta__settings_exclude_content_by_css_selectors'] ) && is_array( $resolved['tta__settings_exclude_content_by_css_selectors'] ) ? array_values( $resolved['tta__settings_exclude_content_by_css_selectors'] ) : array(),
+					'tta__settings_exclude_texts'                    => isset( $resolved['tta__settings_exclude_texts'] )                    && is_array( $resolved['tta__settings_exclude_texts'] )                    ? array_values( $resolved['tta__settings_exclude_texts'] )                    : array(),
+					'tta__settings_exclude_tags'                     => isset( $resolved['tta__settings_exclude_tags'] )                     && is_array( $resolved['tta__settings_exclude_tags'] )                     ? array_values( $resolved['tta__settings_exclude_tags'] )                     : array(),
 				);
 			} else {
 				$data['atlasvoice_resolved_rule'] = null;

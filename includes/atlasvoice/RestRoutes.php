@@ -13,7 +13,6 @@ namespace TTA\AtlasVoice;
  * Routes owned by this class (namespace `tts/v1`):
  *
  *   POST /atlasvoice/save-rule              (scope-aware rule save)
- *   GET  /step-rail/active-rule
  *   GET  /step-rail/scope-rule
  *   GET  /step-rail/sample-url
  *   POST /step-rail/verify-sample
@@ -22,7 +21,8 @@ namespace TTA\AtlasVoice;
  * Retired: /save-selector, /post-rules, /heal-log,
  * /boilerplate-suggestions, /boilerplate-exclude, /step-rail/scopes
  * (D27.28); /snapshots (D27.29); /auth-variant (pre-D27.28),
- * /language-context, /mode (D27.30).
+ * /language-context, /mode (D27.30); /step-rail/active-rule
+ * (D27.43 — picker reads `ttsObj.atlasvoice_resolved_rule` directly).
  *
  * All handlers live on this class too. Keeping route registration
  * and handler code together makes the module delete-safe: removing
@@ -102,25 +102,6 @@ class RestRoutes {
 			)
 		);
 
-		// D9 — step-rail active-rule resolver. Returns the winning rule for a
-		// given post across all scopes (per-post → post_type_language →
-		// language → post_type → global) including the scope label, so the
-		// picker shell can pre-fill scope radio, selector field, and chips
-		// without duplicating RuleResolver precedence logic on the client.
-		register_rest_route(
-			$ns,
-			'/step-rail/active-rule',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( __CLASS__, 'get_step_rail_active_rule' ),
-					'permission_callback' => array( __CLASS__, 'admin_guard' ),
-					'args'                => array(
-						'post_id' => array( 'type' => 'integer', 'required' => true ),
-					),
-				),
-			)
-		);
 
 		// D13 — scope-rule reader: returns the saved rule at exactly the
 		// requested scope (no precedence walk) so the picker can repopulate
@@ -191,83 +172,6 @@ class RestRoutes {
 		);
 	}
 
-	/**
-	 * D9 — Return the winning AtlasVoice rule for a given post across all
-	 * scopes. Delegates to RuleResolver::resolve() and maps selector_source
-	 * to the scope key the picker shell uses for its scope radio group.
-	 *
-	 * Response shape:
-	 *   scope      string  'post'|'post_type_language'|'language'|'post_type'|'global'|''
-	 *   selector   string  CSS selector of the winning rule, '' when none
-	 *   post_type  string  post type of the queried post
-	 *   language   string  resolved language code ('' on non-multilingual sites)
-	 *   excl_css   array   CSS exclusion selectors (only populated for scope=post)
-	 *   excl_texts array   phrase exclusions      (only populated for scope=post)
-	 *   excl_tags  array   tag exclusions          (only populated for scope=post)
-	 *
-	 * @param \WP_REST_Request $request
-	 * @return \WP_REST_Response
-	 */
-	public static function get_step_rail_active_rule( $request ) {
-		$post_id = (int) $request->get_param( 'post_id' );
-		// TTS-238 D27.17 — response uses canonical storage keys.
-		$empty = array(
-			'scope'                                          => '',
-			'tta__settings_css_selectors'                    => '',
-			'post_type'                                      => '',
-			'language'                                       => '',
-			'excl_set'                                       => false,
-			'tta__settings_exclude_content_by_css_selectors' => '',
-			'tta__settings_exclude_texts'                    => '',
-			'tta__settings_exclude_tags'                     => '',
-		);
-
-		if ( $post_id <= 0 || ! class_exists( '\\TTA\\AtlasVoice\\RuleResolver' ) ) {
-			return new \WP_REST_Response( $empty, 200 );
-		}
-
-		$resolved = RuleResolver::resolve( $post_id );
-		$source   = isset( $resolved['selector_source'] ) ? (string) $resolved['selector_source'] : 'none';
-		$selector = isset( $resolved['selector'] )        ? (string) $resolved['selector']         : '';
-
-		$scope_map = array(
-			'post'               => 'post',
-			'post_type_language' => 'post_type_language',
-			'language'           => 'language',
-			'post_type'          => 'post_type',
-			'global'             => 'global',
-		);
-		$scope = isset( $scope_map[ $source ] ) ? $scope_map[ $source ] : '';
-
-		// Helper: array-or-string → pipe-joined string for tags/texts.
-		$to_str = function ( $val ) {
-			if ( is_array( $val ) ) { return implode( '|', array_map( 'strval', $val ) ); }
-			return (string) $val;
-		};
-		$excl_set        = ! empty( $resolved['excl_set'] );
-		$excl_css_str    = isset( $resolved['excl_css'] )   ? $to_str( $resolved['excl_css'] )   : '';
-		$excl_texts_str  = isset( $resolved['excl_texts'] ) ? $to_str( $resolved['excl_texts'] ) : '';
-		$excl_tags_str   = isset( $resolved['excl_tags'] )  ? $to_str( $resolved['excl_tags'] )  : '';
-
-		if ( $source === 'post' && isset( $resolved['post_override'] ) && is_array( $resolved['post_override'] ) ) {
-			$po             = $resolved['post_override'];
-			$excl_set       = true;
-			$excl_css_str   = isset( $po['excl_css'] )   ? $to_str( $po['excl_css'] )   : '';
-			$excl_texts_str = isset( $po['excl_texts'] ) ? $to_str( $po['excl_texts'] ) : '';
-			$excl_tags_str  = isset( $po['excl_tags'] )  ? $to_str( $po['excl_tags'] )  : '';
-		}
-
-		return new \WP_REST_Response( array(
-			'scope'                                          => $scope,
-			'tta__settings_css_selectors'                    => $selector,
-			'post_type'                                      => isset( $resolved['post_type'] ) ? (string) $resolved['post_type'] : '',
-			'language'                                       => isset( $resolved['language'] )  ? (string) $resolved['language']  : '',
-			'excl_set'                                       => $excl_set,
-			'tta__settings_exclude_content_by_css_selectors' => $excl_css_str,
-			'tta__settings_exclude_texts'                    => $excl_texts_str,
-			'tta__settings_exclude_tags'                     => $excl_tags_str,
-		), 200 );
-	}
 
 	/**
 	 * D9 — Resolve a sample-post URL for the iframe sandbox. The
