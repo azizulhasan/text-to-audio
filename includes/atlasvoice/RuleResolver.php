@@ -92,34 +92,41 @@ class RuleResolver {
 
 		$is_pro = class_exists( '\\TTA\\TTA_Helper' ) && \TTA\TTA_Helper::is_pro_active();
 
+		// TTS-238 D27.42 — internal entry shape now uses canonical
+		// `tta__settings_*` keys, matching storage / REST / picker
+		// state. `selector_source` / `excl_set` / `post_type` /
+		// `language` are runtime metadata (not storage keys) so they
+		// keep their existing names; `use_own` is the per-post master
+		// toggle (also non-storage, kept).
+
 		// Layer 1 — per-post override (Pro). Gated on the master toggle:
 		// if `tta__settings_use_own_css_selectors` is OFF the layer is
 		// inactive even when the meta has data.
 		if ( $is_pro
 			&& ! empty( $post_override['use_own'] )
-			&& isset( $post_override['selector'] )
-			&& (string) $post_override['selector'] !== '' ) {
-			$resolved_selector = (string) $post_override['selector'];
+			&& isset( $post_override['tta__settings_css_selectors'] )
+			&& (string) $post_override['tta__settings_css_selectors'] !== '' ) {
+			$resolved_selector = (string) $post_override['tta__settings_css_selectors'];
 			$selector_source   = 'post';
 			$resolved_entry    = $post_override;
 		}
 		// Layer 2 — per-post-type (Pro).
-		elseif ( $is_pro && $pt_entry !== null && $pt_entry['selector'] !== '' ) {
-			$resolved_selector = $pt_entry['selector'];
+		elseif ( $is_pro && $pt_entry !== null && $pt_entry['tta__settings_css_selectors'] !== '' ) {
+			$resolved_selector = $pt_entry['tta__settings_css_selectors'];
 			$selector_source   = 'post_type';
 			$resolved_entry    = $pt_entry;
 		}
 		// Layer 3 — global.
-		elseif ( $global_entry['selector'] !== '' ) {
-			$resolved_selector = $global_entry['selector'];
+		elseif ( $global_entry['tta__settings_css_selectors'] !== '' ) {
+			$resolved_selector = $global_entry['tta__settings_css_selectors'];
 			$selector_source   = 'global';
 			$resolved_entry    = $global_entry;
 		}
 
 		$excl_set   = ( $resolved_entry !== null );
-		$excl_css   = $excl_set && isset( $resolved_entry['excl_css'] )   ? $resolved_entry['excl_css']   : array();
-		$excl_texts = $excl_set && isset( $resolved_entry['excl_texts'] ) ? $resolved_entry['excl_texts'] : array();
-		$excl_tags  = $excl_set && isset( $resolved_entry['excl_tags'] )  ? $resolved_entry['excl_tags']  : array();
+		$excl_css   = $excl_set && isset( $resolved_entry['tta__settings_exclude_content_by_css_selectors'] ) ? $resolved_entry['tta__settings_exclude_content_by_css_selectors'] : array();
+		$excl_texts = $excl_set && isset( $resolved_entry['tta__settings_exclude_texts'] )                    ? $resolved_entry['tta__settings_exclude_texts']                    : array();
+		$excl_tags  = $excl_set && isset( $resolved_entry['tta__settings_exclude_tags'] )                     ? $resolved_entry['tta__settings_exclude_tags']                     : array();
 
 		// `selector_store` retained as a back-compat key — older callers
 		// (Rules table, breadcrumbs() helper) used the old option as a
@@ -135,23 +142,22 @@ class RuleResolver {
 		);
 
 		return array(
-			'selector'        => $resolved_selector,
-			'selector_source' => $selector_source,
-			'post_type'       => $post_type,
-			'language'        => $lang,
-			'selector_store'  => $selector_store,
-			'post_override'   => $post_override,
-			'excl_set'        => $excl_set,
-			'excl_css'        => $excl_css,
-			'excl_texts'      => $excl_texts,
-			'excl_tags'       => $excl_tags,
+			'tta__settings_css_selectors'                    => $resolved_selector,
+			'selector_source'                                => $selector_source,
+			'post_type'                                      => $post_type,
+			'language'                                       => $lang,
+			'selector_store'                                 => $selector_store,
+			'post_override'                                  => $post_override,
+			'excl_set'                                       => $excl_set,
+			'tta__settings_exclude_content_by_css_selectors' => $excl_css,
+			'tta__settings_exclude_texts'                    => $excl_texts,
+			'tta__settings_exclude_tags'                     => $excl_tags,
 		);
 	}
 
 	/**
 	 * Convert a flat `{tta__settings_*: ...}` bag into the resolver's
-	 * internal entry shape:
-	 *   { selector, excl_css[], excl_texts[], excl_tags[] }
+	 * internal entry shape (also canonical-keyed since D27.42).
 	 *
 	 * Storage uses pipe-joined strings for tags/texts and newline-
 	 * separated strings for css excludes. Tags split aggressively
@@ -179,10 +185,10 @@ class RuleResolver {
 			return array_values( array_filter( array_map( 'trim', (array) $parts ), function ( $p ) { return $p !== ''; } ) );
 		};
 		return array(
-			'selector'   => isset( $bag['tta__settings_css_selectors'] ) ? (string) $bag['tta__settings_css_selectors'] : '',
-			'excl_css'   => $split_lines( isset( $bag['tta__settings_exclude_content_by_css_selectors'] ) ? $bag['tta__settings_exclude_content_by_css_selectors'] : '' ),
-			'excl_texts' => $split_texts( isset( $bag['tta__settings_exclude_texts'] )                    ? $bag['tta__settings_exclude_texts']                    : '' ),
-			'excl_tags'  => $split_tags(  isset( $bag['tta__settings_exclude_tags'] )                     ? $bag['tta__settings_exclude_tags']                     : '' ),
+			'tta__settings_css_selectors'                    => isset( $bag['tta__settings_css_selectors'] ) ? (string) $bag['tta__settings_css_selectors'] : '',
+			'tta__settings_exclude_content_by_css_selectors' => $split_lines( isset( $bag['tta__settings_exclude_content_by_css_selectors'] ) ? $bag['tta__settings_exclude_content_by_css_selectors'] : '' ),
+			'tta__settings_exclude_texts'                    => $split_texts( isset( $bag['tta__settings_exclude_texts'] )                    ? $bag['tta__settings_exclude_texts']                    : '' ),
+			'tta__settings_exclude_tags'                     => $split_tags(  isset( $bag['tta__settings_exclude_tags'] )                     ? $bag['tta__settings_exclude_tags']                     : '' ),
 		);
 	}
 
@@ -215,7 +221,7 @@ class RuleResolver {
 		// (no rule saved) from "draft" (saved but the master toggle is
 		// OFF) so the meta-box explains why a saved rule isn't winning.
 		$po          = isset( $resolved['post_override'] ) ? $resolved['post_override'] : array();
-		$po_selector = isset( $po['selector'] ) ? (string) $po['selector'] : '';
+		$po_selector = isset( $po['tta__settings_css_selectors'] ) ? (string) $po['tta__settings_css_selectors'] : '';
 		$po_use_own  = ! empty( $po['use_own'] );
 		$po_active   = $po_use_own && $po_selector !== '';
 		$po_label    = ( $po_selector !== '' && ! $po_use_own )
@@ -232,7 +238,7 @@ class RuleResolver {
 		// Layer 2 — per-post-type
 		if ( $pt !== '' ) {
 			$pt_entry = isset( $store['per_post_type'][ $pt ] ) && is_array( $store['per_post_type'][ $pt ] ) ? $store['per_post_type'][ $pt ] : null;
-			$pt_val   = $pt_entry !== null ? (string) $pt_entry['selector'] : '';
+			$pt_val   = $pt_entry !== null ? (string) $pt_entry['tta__settings_css_selectors'] : '';
 			$trail[] = self::crumb(
 				'pt:' . $pt,
 				sprintf( /* translators: %s: post type */ __( 'Post type "%s"', 'text-to-audio' ), $pt ),
@@ -243,7 +249,7 @@ class RuleResolver {
 		}
 
 		// Layer 3 — global
-		$global_val = isset( $store['global']['selector'] ) ? (string) $store['global']['selector'] : '';
+		$global_val = isset( $store['global']['tta__settings_css_selectors'] ) ? (string) $store['global']['tta__settings_css_selectors'] : '';
 		$trail[] = self::crumb(
 			'global',
 			__( 'Global default', 'text-to-audio' ),
@@ -277,39 +283,11 @@ class RuleResolver {
 		);
 	}
 
-	/**
-	 * Extract the selector string from a store entry that may be either
-	 * a legacy plain string (old /save-selector format) or the new rule
-	 * array { selector, excl_css, excl_texts, excl_tags }.
-	 *
-	 * @param mixed $val
-	 * @return string
-	 */
-	protected static function entry_sel( $val ) {
-		if ( is_array( $val ) ) {
-			return isset( $val['selector'] ) ? (string) $val['selector'] : '';
-		}
-		return (string) $val;
-	}
-
-	/**
-	 * Extract excl_* from a store entry. Returns null for legacy string
-	 * entries so callers can distinguish "no data saved" (keep UI defaults)
-	 * from "data was saved but all arrays are empty" (user cleared all chips).
-	 *
-	 * @param mixed $val
-	 * @return array|null
-	 */
-	protected static function entry_excl( $val ) {
-		if ( ! is_array( $val ) ) {
-			return null;
-		}
-		return array(
-			'excl_css'   => isset( $val['excl_css'] )   && is_array( $val['excl_css'] )   ? array_values( $val['excl_css'] )   : array(),
-			'excl_texts' => isset( $val['excl_texts'] ) && is_array( $val['excl_texts'] ) ? array_values( $val['excl_texts'] ) : array(),
-			'excl_tags'  => isset( $val['excl_tags'] )  && is_array( $val['excl_tags'] )  ? array_values( $val['excl_tags'] )  : array(),
-		);
-	}
+	// TTS-238 D27.42 — `entry_sel()` + `entry_excl()` removed. Both
+	// were left over from the pre-D27.21 `tta_atlasvoice_selectors`
+	// store walk; the new `settings_to_entry()` flow consumes the
+	// canonical `tta__settings_*` keys directly so the helper-style
+	// extractors are no longer reachable.
 
 	/**
 	 * Read the per-post override array, or return an empty array if the

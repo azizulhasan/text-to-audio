@@ -292,29 +292,48 @@
      * when present (set server-side from \TTA\AtlasVoice\LanguagePlugins);
      * absent on non-multilingual sites, which skips steps 2 and 4 entirely.
      */
-    // Normalise a stored rule entry to a plain object with selector + excl_*.
-    // Old format was a bare string; new format is {selector, excl_css, excl_texts, excl_tags}.
+    // TTS-238 D27.41 — canonical-key parity with picker / storage / REST.
+    // Internal rule object now uses the same `tta__settings_*` keys the
+    // wire and storage layers already use. Legacy short-name input
+    // (`selector` / `excl_css` / `excl_texts` / `excl_tags`) is still
+    // accepted in normaliseRuleEntry's input so older `atlasvoice_selectors`
+    // payloads (when present) still flow through, but the engine's output
+    // is canonical-only.
     function normaliseRuleEntry(raw) {
         if (!raw) { return null; }
         if (typeof raw === 'string') {
-            return { selector: raw, excl_css: [], excl_texts: [], excl_tags: [] };
-        }
-        if (typeof raw === 'object' && raw.selector) {
             return {
-                selector:   raw.selector,
-                excl_css:   Array.isArray(raw.excl_css)   ? raw.excl_css   : [],
-                excl_texts: Array.isArray(raw.excl_texts) ? raw.excl_texts : [],
-                excl_tags:  Array.isArray(raw.excl_tags)  ? raw.excl_tags  : []
+                tta__settings_css_selectors:                    raw,
+                tta__settings_exclude_content_by_css_selectors: [],
+                tta__settings_exclude_texts:                    [],
+                tta__settings_exclude_tags:                     []
             };
         }
-        return null;
+        if (typeof raw !== 'object') { return null; }
+        // Accept either canonical or legacy short-name shape on input.
+        var sel    = raw.tta__settings_css_selectors                    || raw.selector   || '';
+        var xcss   = raw.tta__settings_exclude_content_by_css_selectors || raw.excl_css   || [];
+        var xtexts = raw.tta__settings_exclude_texts                    || raw.excl_texts || [];
+        var xtags  = raw.tta__settings_exclude_tags                     || raw.excl_tags  || [];
+        if (!sel) { return null; }
+        return {
+            tta__settings_css_selectors:                    sel,
+            tta__settings_exclude_content_by_css_selectors: Array.isArray(xcss)   ? xcss   : [],
+            tta__settings_exclude_texts:                    Array.isArray(xtexts) ? xtexts : [],
+            tta__settings_exclude_tags:                     Array.isArray(xtags)  ? xtags  : []
+        };
     }
 
-    // Returns the full rule entry {selector, excl_css, excl_texts, excl_tags} for
-    // the current page, walking the precedence chain (most-specific first).
+    // Returns the full rule entry (canonical-keyed) for the current page,
+    // walking the precedence chain (most-specific first).
     function resolveRuleEntry(opts) {
         if (opts.savedSelector) {
-            return { selector: opts.savedSelector, excl_css: [], excl_texts: [], excl_tags: [] };
+            return {
+                tta__settings_css_selectors:                    opts.savedSelector,
+                tta__settings_exclude_content_by_css_selectors: [],
+                tta__settings_exclude_texts:                    [],
+                tta__settings_exclude_tags:                     []
+            };
         }
         var tts = global.ttsObj || global.tta_obj || {};
 
@@ -325,14 +344,9 @@
         // legacy store walk below is a back-compat fallback that only
         // fires when the resolved field is missing (older bundles or
         // contexts where LocalizeData::inject_lazy didn't run).
-        if (tts.atlasvoice_resolved_rule && tts.atlasvoice_resolved_rule.selector) {
-            var r = tts.atlasvoice_resolved_rule;
-            return {
-                selector:   r.selector,
-                excl_css:   Array.isArray(r.excl_css)   ? r.excl_css.slice()   : [],
-                excl_texts: Array.isArray(r.excl_texts) ? r.excl_texts.slice() : [],
-                excl_tags:  Array.isArray(r.excl_tags)  ? r.excl_tags.slice()  : []
-            };
+        var resolved = tts.atlasvoice_resolved_rule;
+        if (resolved && (resolved.tta__settings_css_selectors || resolved.selector)) {
+            return normaliseRuleEntry(resolved);
         }
 
         var store = tts.atlasvoice_selectors || {};
@@ -359,21 +373,22 @@
 
     function resolveSavedSelector(opts) {
         var entry = resolveRuleEntry(opts);
-        return entry ? entry.selector : '';
+        return entry ? entry.tta__settings_css_selectors : '';
     }
 
-    // Remove excl_css elements, excl_tags elements, and excl_texts phrases
-    // from a cloned DOM node in-place. Mirrors step-rail.shell.js extractWithRules().
+    // Remove exclude-CSS elements, exclude-tag elements, and exclude-text
+    // phrases from a cloned DOM node in-place. Mirrors step-rail.shell.js
+    // extractWithRules().
     function applyExclusions(node, rule) {
         if (!rule || !node) { return; }
-        (rule.excl_css || []).forEach(function (sel) {
+        (rule.tta__settings_exclude_content_by_css_selectors || []).forEach(function (sel) {
             try {
                 Array.prototype.forEach.call(node.querySelectorAll(sel), function (n) {
                     if (n.parentNode) { n.parentNode.removeChild(n); }
                 });
             } catch (_) {}
         });
-        (rule.excl_tags || []).forEach(function (tag) {
+        (rule.tta__settings_exclude_tags || []).forEach(function (tag) {
             try {
                 Array.prototype.forEach.call(node.querySelectorAll(tag), function (n) {
                     if (n.parentNode) { n.parentNode.removeChild(n); }
@@ -382,11 +397,12 @@
         });
     }
 
-    // Apply excl_texts to a raw text string. Kept separate because text removal
-    // happens after DOM extraction (same order as step-rail preview).
+    // Apply phrase exclusions to a raw text string. Kept separate because
+    // text removal happens after DOM extraction (same order as step-rail
+    // preview).
     function applyTextExclusions(text, rule) {
         if (!rule) { return text; }
-        (rule.excl_texts || []).forEach(function (phrase) {
+        (rule.tta__settings_exclude_texts || []).forEach(function (phrase) {
             if (phrase) { text = text.split(phrase).join(''); }
         });
         return text;
@@ -402,7 +418,6 @@
         opts = opts || {};
         var buttonId = opts.buttonId || 1;
         var savedSelector = resolveSavedSelector(opts);
-
         var text, node;
         // PR-C (C1a) — when the saved-selector tier fails health-check we set
         // `healedFrom` to the broken selector. It threads through every lower
@@ -417,6 +432,7 @@
         // tier wins (markers, saved-selector, heuristic).
         var activeRule = resolveRuleEntry(opts);
 
+        console.log({savedSelector, activeRule})
 
         // Tier 2 — user-saved stable selector. PR-C (C1a): beyond "does it
         // match anything", we also require the live element to still score

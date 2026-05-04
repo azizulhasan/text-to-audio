@@ -38,8 +38,8 @@
         hoveredEl:   null,
         selectedEl:  null,
         excludedEls: [],
-        postType:    '',          // post's actual post type (cached from /active-rule on init)
-        postLang:    ''           // post's actual language  (cached from /active-rule on init)
+        postType:    '',          // post's actual post type (cached from atlasvoice_resolved_rule on init)
+        postLang:    ''           // post's actual language  (cached from atlasvoice_resolved_rule on init)
     };
 
     var CHIP_KINDS = ['tta__settings_exclude_content_by_css_selectors', 'tta__settings_exclude_texts', 'tta__settings_exclude_tags'];
@@ -362,6 +362,7 @@
             var pcls = stableClassesOf(parent);
             return ptag + (pcls.length ? '.' + pcls[0] : '') + ' ' + base;
         }
+
         return base;
     }
 
@@ -2215,62 +2216,71 @@
             }).catch(function () { autoFillActiveSelector(); });
             return;
         }
-        // /step-rail/active-rule resolves the full precedence walk (per-post →
-        // post_type_language → language → post_type → global) and returns the
-        // winning rule + the scope it came from so the UI reflects reality.
-        restFetch('/step-rail/active-rule?post_id=' + state.postId).then(function (resp) {
-            if (!resp || !resp.tta__settings_css_selectors) {
-                autoFillActiveSelector();
-                return;
-            }
-            state.selection.tta__settings_css_selectors  = resp.tta__settings_css_selectors  || '';
-            state.selection.scope     = resp.scope      || 'global';
-            state.selection.post_type = resp.post_type  || '';
-            state.selection.language  = resp.language   || '';
-            state.postType            = resp.post_type  || '';
-            state.postLang            = resp.language   || '';
-            // TTS-238 D27.22 — When the URL didn't pin a scope, sync
-            // state.scope to whichever layer the resolver picked.
-            // Otherwise the readout would say "Editing rule for: This
-            // post" while the data shown is the post_type rule, and a
-            // Save would land in the wrong slot.
-            if (!state.scopeFromUrl && resp.scope) {
-                if (resp.scope === 'post_type') {
-                    state.scope = { kind: 'post_type', post_type: resp.post_type || state.postType || '' };
-                } else if (resp.scope === 'post') {
-                    state.scope = { kind: 'post', post_id: state.postId };
-                } else {
-                    state.scope = { kind: 'global' };
-                }
-            }
-            // excl_set=true means the server has explicit excl_* data for this
-            // scope (new array storage format). Restore them, even if empty —
-            // empty means the user explicitly cleared all exclusions.
-            // excl_set=false means a legacy string-format entry: keep the
-            // pre-populated defaults from the HTML checkboxes.
-            if (resp.excl_set) {
-                state.selection.tta__settings_exclude_content_by_css_selectors = splitLines(resp.tta__settings_exclude_content_by_css_selectors);
-                state.selection.tta__settings_exclude_texts                    = splitTexts(resp.tta__settings_exclude_texts);
-                state.selection.tta__settings_exclude_tags                     = splitTags(resp.tta__settings_exclude_tags);
-            }
-            state.userEdited = false;
-            renderScopeReadout();
-            updateSelectorDisplay();
-            updateWordCount();
-            renderAllChips();
-            syncTagCheckboxes();
-            try {
-                var el = d.querySelector(resp.tta__settings_css_selectors);
-                if (el) { state.selectedEl = el; el.classList.add('av-picker-selected'); }
-            } catch (e) {}
-            reapplyExcludeHighlights();
-            var sb = saveBtn();
-            if (sb) { sb.disabled = false; }
-            status('Active rule loaded (' + (resp.scope || 'post') + ').');
-            updatePreview();
-        }).catch(function () {
+        // TTS-238 D27.43 — read the resolved rule synchronously from the
+        // localized field that LocalizeData::inject_lazy already shipped
+        // for this page. /step-rail/active-rule was the same payload over
+        // REST (one round-trip + a deferred state update); the localized
+        // field has it on the page already so we skip the request.
+        var resp = (w.ttsObj && w.ttsObj.atlasvoice_resolved_rule)
+            || (w.tta_obj && w.tta_obj.atlasvoice_resolved_rule)
+            || null;
+
+        if (!resp || !resp.tta__settings_css_selectors) {
             autoFillActiveSelector();
-        });
+            return;
+        }
+
+        // `source` (= RuleResolver's selector_source) maps to the picker's
+        // legacy `scope` string verbatim for the small set of values that
+        // remain post-D26: post / post_type / global.
+        var scope = resp.source || 'global';
+
+        state.selection.tta__settings_css_selectors = resp.tta__settings_css_selectors || '';
+        state.selection.scope     = scope;
+        state.selection.post_type = resp.post_type || '';
+        state.selection.language  = resp.language  || '';
+        state.postType            = resp.post_type || '';
+        state.postLang            = resp.language  || '';
+
+        // TTS-238 D27.22 — When the URL didn't pin a scope, sync
+        // state.scope to whichever layer the resolver picked. Otherwise
+        // the readout would say "Editing rule for: This post" while the
+        // data shown is the post_type rule, and a Save would land in
+        // the wrong slot.
+        if (!state.scopeFromUrl) {
+            if (scope === 'post_type') {
+                state.scope = { kind: 'post_type', post_type: resp.post_type || state.postType || '' };
+            } else if (scope === 'post') {
+                state.scope = { kind: 'post', post_id: state.postId };
+            } else {
+                state.scope = { kind: 'global' };
+            }
+        }
+
+        // excl_set=true means the server has explicit excl_* data for
+        // this scope. excl_set=false means no rule actually saved yet —
+        // keep the pre-populated defaults from the HTML checkboxes.
+        if (resp.excl_set) {
+            state.selection.tta__settings_exclude_content_by_css_selectors = splitLines(resp.tta__settings_exclude_content_by_css_selectors);
+            state.selection.tta__settings_exclude_texts                    = splitTexts(resp.tta__settings_exclude_texts);
+            state.selection.tta__settings_exclude_tags                     = splitTags(resp.tta__settings_exclude_tags);
+        }
+
+        state.userEdited = false;
+        renderScopeReadout();
+        updateSelectorDisplay();
+        updateWordCount();
+        renderAllChips();
+        syncTagCheckboxes();
+        try {
+            var el = d.querySelector(resp.tta__settings_css_selectors);
+            if (el) { state.selectedEl = el; el.classList.add('av-picker-selected'); }
+        } catch (e) {}
+        reapplyExcludeHighlights();
+        var sb = saveBtn();
+        if (sb) { sb.disabled = false; }
+        status('Active rule loaded (' + scope + ').');
+        updatePreview();
     }
 
     /* ─── keyboard ──────────────────────────────────────────────── */
@@ -2313,11 +2323,12 @@
         // with ?atlasvoice_picker=1), default to per-post on Pro and
         // global on Free.
         var parsed = parseScopeFromUrl();
-        // TTS-238 D27.22 — track whether the URL explicitly pinned a
-        // scope. When it didn't, loadExistingRules falls through to the
-        // precedence walk (/active-rule) so the picker shows the rule
-        // that's actually winning at runtime instead of an empty per-
-        // post slot just because Pro defaults to "post".
+        // TTS-238 D27.22/D27.43 — track whether the URL explicitly pinned
+        // a scope. When it didn't, loadExistingRules reads the resolved
+        // rule from `ttsObj.atlasvoice_resolved_rule` (precedence walk
+        // already applied server-side) so the picker shows what's actually
+        // winning at runtime instead of an empty per-post slot just because
+        // Pro defaults to "post".
         state.scopeFromUrl = !!parsed;
         if (!parsed) {
             parsed = state.pro
