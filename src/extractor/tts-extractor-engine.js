@@ -337,13 +337,19 @@
         }
         var tts = global.ttsObj || global.tta_obj || {};
 
-        // TTS-238 D27.23 — prefer the server-resolved rule shipped via
-        // LocalizeData. PHP runs RuleResolver against the new collapsed
-        // storage (post meta gated on use_own → per-post-type override
-        // → flat global keys) so PHP and JS agree on the winner. The
-        // legacy store walk below is a back-compat fallback that only
-        // fires when the resolved field is missing (older bundles or
-        // contexts where LocalizeData::inject_lazy didn't run).
+        // TTS-238 D27.23/D27.41 — primary path: the server-resolved
+        // rule shipped via LocalizeData. PHP runs RuleResolver against
+        // the canonical storage (post meta gated on use_own →
+        // per-post-type override → flat global keys) so PHP and JS
+        // agree on the winner. Payload uses canonical
+        // `tta__settings_*` keys post-D27.41.
+        //
+        // The legacy `atlasvoice_selectors` walk below is a strict
+        // fallback for older bundles still on the page, or contexts
+        // where LocalizeData::inject_lazy didn't run. After D27.25's
+        // cleanup migration the option is empty on every install
+        // anyway, so the fallback's main job today is to not throw if
+        // a third-party JS still reads the field.
         var resolved = tts.atlasvoice_resolved_rule;
         if (resolved && (resolved.tta__settings_css_selectors || resolved.selector)) {
             return normaliseRuleEntry(resolved);

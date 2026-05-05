@@ -26,7 +26,8 @@
         rest:        '',
         nonce:       '',
         pro:         false,
-        scopes:      null,
+        // TTS-238 D27.27 — `scopes` field retired with the
+        // /step-rail/scopes endpoint. Scope is URL-driven now.
         selection:   makeEmptySelection(),
         pickMode:    null,        // null | 'pick' | 'excl'
         exclKind:    'tta__settings_exclude_content_by_css_selectors',

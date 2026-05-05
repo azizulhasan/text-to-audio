@@ -346,38 +346,46 @@ checkbox to that filter.
 
 ### 4.1 What actually shipped
 
-  * **`tta_atlasvoice_selectors` option** — no longer written by
-    any code path (D26.9 removed the writer). Reads removed from
-    `RuleResolver::resolve()` (D27.21) and from
-    `/step-rail/scope-rule` (D27.12). Stale data may still exist
-    on installs; no migration was run.
-  * **`RuleResolver`** — kept, repointed to the new storage in
-    D27.21:
-    - layer 1 = `tts_pro_custom_css_selectors` post meta, gated on
-      `tta__settings_use_own_css_selectors`
+> Note: this section was rewritten 2026-05-01 to record the
+> initial v5 reality, then again 2026-05-02 after the §14 +
+> §15 cleanup waves retired several items I had originally
+> claimed would stay. The "kept" items below are accurate at
+> the current HEAD; see §15.12 for the definitive surviving-
+> files list.
+
+  * **`tta_atlasvoice_selectors` option** — writer removed
+    (D26.9), readers removed (D27.21 in `RuleResolver`, D27.12
+    in `/step-rail/scope-rule`), JS reader's fallback removed
+    (D27.41), data deleted on installs that ever stored it via
+    the cleanup migration (D27.25). Fully retired.
+  * **`RuleResolver`** — kept, repointed to the new storage
+    (D27.21), output keys later renamed to canonical
+    `tta__settings_*` (D27.42):
+    - layer 1 = `tts_pro_custom_css_selectors` post meta, gated
+      on `tta__settings_use_own_css_selectors`
     - layer 2 = `tta_settings_data['tta__settings_atlasvoice_per_type_overrides'][<slug>]`
     - layer 3 = flat `tta_settings_data['tta__settings_*']` keys
     Per-language and per-post-type+language layers retired.
-    `breadcrumbs()` collapsed to the same 3-layer view; the
-    per-post crumb labels itself "(disabled)" when the meta has
-    data but the master toggle is off.
-  * **`PerPostRules` + `PerPostRulesMetaBox`** — kept. The metabox
-    renders the rule-scope breadcrumb on the post-edit screen and
-    feeds off `RuleResolver::breadcrumbs()`, so it inherits the
-    new storage automatically. `PerPostRules` itself is no longer
-    consulted by the resolver (D27.21 reads the post meta
-    directly), but the class is left alone to avoid breaking
-    callers we can't see from here.
-  * **`_atlasvoice_post_rules` post meta** — no migration done.
-    The picker save endpoint and the per-post UI both write to
-    `tts_pro_custom_css_selectors` instead, so any existing
-    `_atlasvoice_post_rules` payload is now dead data.
+    `breadcrumbs()` collapsed to the 3-layer view; the per-post
+    crumb labels itself "(disabled)" when the meta has data but
+    the master toggle is off.
+  * **`PerPostRules`** — kept. Owns the per-post-meta storage
+    layer that the resolver and Pro per-post API both consume.
+  * **`PerPostRulesMetaBox`** — **deleted in D27.31.** The
+    breadcrumb-table UI it added to the post-edit metabox was
+    superseded by the React per-post accordion in
+    `CSSSelectorsForPosts.js`.
+  * **`_atlasvoice_post_rules` post meta** — dead data on
+    installs that ever wrote it via the legacy `/post-rules`
+    POST. Cleanup migration in `text-to-audio.php` (D27.25)
+    strips it on every admin pageview in batches of 200 until
+    fully drained.
   * **`/wp-json/tta/v1/save-selector` and `/post-rules` REST
-    routes** — left registered. Neither is called by the picker,
-    the dashboard, or the per-post UI any longer (D26.2 moved
-    every save target onto `/atlasvoice/save-rule` +
-    `/css_selectors_for_posts`). Routes stay for backward
-    compatibility with any external integrators.
+    routes** — initially "kept registered, no longer called",
+    then **deleted in D27.28** along with the heal log + boilerplate
+    detector features they fed. JS callers in `tts-picker.js` and
+    `AtlasVoiceHealLog.js` removed (or stubbed for the heal log,
+    which is also gone).
   * **Step rail's `ScopeRow` / scope radio markup** — gone (D26.1).
     Scope is driven entirely by URL params now.
 
@@ -387,16 +395,18 @@ checkbox to that filter.
 > wholesale-delete in v5. Kept here so the audit trail stays
 > intact.
 
-  * ~~`tta_atlasvoice_selectors` option write path — gone.~~ (Done.)
+  * ~~`tta_atlasvoice_selectors` option write path — gone.~~
+    (Writes gone D26.9; readers + data fully retired by D27.41/D27.25.)
   * ~~`RuleResolver` class — gone.~~ Refactored to read the new
-    storage instead.
-  * ~~`PerPostRules` + `PerPostRulesMetaBox` — gone.~~ Kept; the
-    metabox is the breadcrumb UI on the post-edit screen.
-  * ~~`_atlasvoice_post_rules` post meta — gone.~~ Stranded as
-    dead data; no migration ran.
-  * ~~`/wp-json/tta/v1/save-selector` REST route — gone.~~ Left
-    registered, no longer called.
-  * ~~`/wp-json/tta/v1/post-rules` REST route — gone.~~ Same.
+    storage (D27.21) and emit canonical keys (D27.42).
+  * ~~`PerPostRules` + `PerPostRulesMetaBox` — gone.~~ `PerPostRules`
+    kept (storage layer); `PerPostRulesMetaBox` deleted in D27.31.
+  * ~~`_atlasvoice_post_rules` post meta — gone.~~ Cleanup migration
+    in D27.25 strips it on admin pageviews until drained.
+  * ~~`/wp-json/tta/v1/save-selector` REST route — gone.~~ Deleted
+    in D27.28.
+  * ~~`/wp-json/tta/v1/post-rules` REST route — gone.~~ Deleted
+    in D27.28.
   * Step rail's `ScopeRow` component / scope radio markup — gone. ✓
 
 ## 5. What stays untouched
@@ -999,12 +1009,16 @@ later is a one-file delete rather than a cascade.
 
 ### 14.12 Net result
 
+> Stale snapshot — see **§15.12** for the current surviving-files
+> map. After §14 closed at D27.33 the directory had 9 PHP files;
+> `PerPostRulesMetaBox` was already gone (retired in §14's D27.31
+> commit) but the count below counted it incorrectly. §15's
+> picker-UX work (D27.34–D27.43) didn't add or remove any class
+> files; the live count is now 8 PHP files + `step-rail.shell.js`.
+
 `includes/atlasvoice/` directory at the start of this branch:
 ~22 PHP class files + a `Readers/` subdirectory of 8 reader
-implementations. After D27.33: 9 files + `step-rail.shell.js` —
-`Bootstrap`, `LocalizeData`, `Mode`, `PerPostRules`,
-`PickerLoader`, `RestRoutes`, `RuleResolver`, `StepRail`,
-`VerifyAcrossPosts`. The directory now contains only what powers
+implementations. The directory now contains only what powers
 the live picker, the resolver it feeds, and the per-post storage
 layer.
 
@@ -1012,3 +1026,237 @@ The migration in `text-to-audio.php` will keep draining stale data
 on every admin pageview until `tta_d27_legacy_cleanup_done` is
 set; long-tail installs that ever stored AtlasVoice rules
 get cleaned automatically without an explicit upgrade prompt.
+
+## 15. D27.34–D27.43 — picker UX hardening + extractor parity
+
+After §14's dead-code retirement closed the bulk of the cleanup,
+the next round addressed three things in parallel: (a) picker UI
+defaults that surfaced bad selectors on Elementor/Gutenberg sites,
+(b) the runtime extractor still using short-name keys instead of
+the canonical `tta__settings_*` set everything else had moved to,
+and (c) one more REST endpoint that turned out to be redundant
+once the resolved rule was on the localize bag.
+
+### 15.1 D27.34 — `script` + `style` join the default skip-tag set
+
+The picker's step ④ "Skip these tag types" shipped with ten
+default-checked tags but never `<script>` / `<style>`. Their text
+content (JS source, CSS rules) is meaningless to a listener so
+they're always-skip candidates.
+
+  * `StepRail.php::render_common_tag_checkboxes()` — list extended to twelve.
+  * `TTA_Activator.php` — `tta__settings_exclude_tags` default
+    seeded with the same twelve pipe-joined, so a fresh install
+    excludes them at runtime without requiring the admin to open
+    the picker first. Was an empty array before.
+
+(Commit `caacc55`.)
+
+### 15.2 D27.35 — Picker selector-stability layer
+
+When an admin clicked an Elementor widget the picker generated
+selectors like `div.elementor-element-242e3e0d` — per-instance
+hash classes that change every page render and never match on
+other posts. Fix is in `step-rail.shell.js`:
+
+  * `findContentWrapper(el)` walks ancestors looking for
+    `tts_content_wrapper_<N>`; the strongest stability hook
+    because Free + Pro both emit it.
+  * `DYNAMIC_CLASS_PATTERNS` blocks `^elementor-element-<hash>`,
+    `^e-con-<hash>`, `^wp-block-*-<n>`, `^css-<hash>`, `^id-<hash>`,
+    and any 8+ hex segment delimited by `_`/`-`.
+  * `STABLE_CLASS_RANK` ranks well-known theme content classes
+    (entry-content > post-content > article-content > main-content
+    > site-content > content) ahead of arbitrary stable classes.
+    No Elementor widget classes in the rank per project decision.
+  * `generateSelector()` runs all three (wrapper preference, then
+    dynamic-class filter, then ranked stable class).
+    `generateExcludeSelector()` inherits the dynamic-class filter
+    only — exclude rules are scoped inside the content clone, so
+    escalating to the wrapper would delete the entire content
+    region.
+
+(Commit `ce210b8`.)
+
+### 15.3 D27.36 — Drag-exclude routes through `generateExcludeSelector`
+
+`selectorsFromTouched()` was always calling `generateSelector()`
+per touched element, including for `select-excl` (drag-exclude)
+mode. After D27.35 introduced the wrapper-preference pass in
+`generateSelector`, drag-excluding a region produced a rule that
+deleted the entire content wrapper. Fixed by branching on
+`state.pickMode === 'select-excl'` and using
+`generateExcludeSelector` instead.
+
+(Commit `ce210b8`.)
+
+### 15.4 D27.37 — Content region readout looks like an input
+
+The Content region's selector readout was styled as a flat grey
+text pill (`.av-selector-display`) with a transparent inner field.
+Now reuses the same `av-chip-input` visual treatment as Step
+④/⑤/⑥'s chip-add inputs — proper border, white background,
+monospace font. `.av-chip-input` rule unscoped from `.av-chip-add`
+so the styling applies wherever the class is used.
+
+(Commit `ce210b8`.)
+
+### 15.5 D27.38 — "Emit Content Wrapper" toggle in Settings
+
+`tta__settings_emit_legacy_wrapper` was wired in `helpers.php`
+(Free) and `TTA_Pro_Filters.php` (Pro) since D26.7 but never had
+a UI. Added a new `<SettingRow>` after "Enable TTS Status" in
+`Settings.js`. Default ON; admins on themes that break on the
+wrapper div can flip it off, which makes the picker's
+wrapper-preference pass fall through to the dynamic-class
+blocklist + theme content classes.
+
+(Commit `ce210b8`.)
+
+### 15.6 D27.39 — `findContentWrapper` extracts the actual N
+
+D27.35 returned `[class*="tts_content_wrapper_"]` (substring
+match — every wrapper on the page). When pages render multiple
+shortcode instances the admin couldn't target one specifically.
+Now extracts the actual N from the matched ancestor's class and
+returns `div.tts_content_wrapper_<N>`. Walking up parentElement
+guarantees the picker pulls the wrapper the clicked element
+actually sits inside — clicking inside `_2` returns
+`div.tts_content_wrapper_2`, not `_1`.
+
+(Commit `ce210b8`.)
+
+### 15.7 D27.40 — Extractor tier reorder: saved selector beats markers
+
+`tts-extractor-engine.js::resolveContent` had Tier 1 = comment
+markers, Tier 2 = saved selector. When an admin saved a specific
+selector like `div.elementor-element p:nth-of-type(3)` the marker
+tier still won and read the entire bracketed wrapper, ignoring
+the explicit choice. Reordered:
+
+```
+1. Saved selector  (admin's explicit pick)
+2. Comment markers (atlasvoice:start:N / :end:N)
+3. Legacy `.tts_content_wrapper_<N>`
+4. Schema / ARIA
+5. Builder body selectors
+6. Generic article / .entry-content / main article
+7. PHP-baked ttsCurrentContent
+```
+
+Saved-selector exclusions are still applied to the matched node
+before text extraction.
+
+(Commit `9578525`.)
+
+### 15.8 D27.41 — Extractor + LocalizeData payload use canonical keys
+
+The wire/storage/picker layers had been on `tta__settings_*`
+canonical keys since D27.17, but the runtime extractor's internal
+rule object still used the legacy short names (`selector`,
+`excl_css`, `excl_texts`, `excl_tags`). The PHP→JS transport
+that feeds the engine (`atlasvoice_resolved_rule`) used the same
+short names.
+
+  * `tts-extractor-engine.js` — `normaliseRuleEntry` /
+    `resolveRuleEntry` / `applyExclusions` /
+    `applyTextExclusions` / `resolveSavedSelector` all rewritten
+    to read/emit canonical keys. `normaliseRuleEntry` accepts
+    legacy short-name input as a back-compat (older
+    `atlasvoice_selectors` payloads still flow through) but
+    emits canonical only.
+  * `LocalizeData::inject_lazy` ships `atlasvoice_resolved_rule`
+    with canonical keys.
+
+End state: anywhere you inspect the rule shape — picker state,
+REST body, storage, localized data, runtime engine — you see only
+`tta__settings_*` keys.
+
+(Commit `389f7d0`.)
+
+### 15.9 D27.42 — `RuleResolver::resolve()` output canonical-keyed
+
+Same rename, server side. `RuleResolver::resolve()` was returning
+`{ selector: ..., excl_css: ..., excl_texts: ..., excl_tags: ... }`
+to its callers (`LocalizeData`, `RestRoutes`'s `/active-rule`
+handler — about to retire in D27.43). Now returns the canonical
+keys directly. `selector_source` / `excl_set` / `post_type` /
+`language` / `selector_store` / `post_override` are runtime
+metadata (not storage keys) and keep their existing names.
+
+  * `RuleResolver::settings_to_entry()` returns canonical entry
+    shape; `breadcrumbs()` reads canonical from the store
+    snapshot.
+  * `LocalizeData::inject_lazy` updated to read canonical from
+    resolver output.
+  * Dead helpers `entry_sel()` / `entry_excl()` removed (zero
+    callers since D27.21).
+
+(Commit `389f7d0`.)
+
+### 15.10 D27.43 — `/step-rail/active-rule` retired
+
+The picker's `loadExistingRules()` was calling
+`/step-rail/active-rule` to get the resolver's answer, but
+`atlasvoice_resolved_rule` already ships that exact payload via
+`LocalizeData::inject_lazy`. One round-trip per picker open for
+data already on the page.
+
+  * `LocalizeData::inject_lazy` payload extended with
+    `post_type` / `language` / `excl_set` so it's a complete
+    drop-in for the old REST response.
+  * `step-rail.shell.js::loadExistingRules()` rewritten to read
+    `ttsObj.atlasvoice_resolved_rule` synchronously. The
+    URL-pinned-scope branch (D27.15) is unchanged — it still
+    uses `/step-rail/scope-rule` because it asks for the rule
+    at one specific scope, not the resolver's winner.
+  * `RestRoutes.php` — `/step-rail/active-rule` route registration
+    + `get_step_rail_active_rule()` handler deleted. Class-level
+    route list updated.
+  * Class-level state docs updated: `state.postType` /
+    `state.postLang` are now noted as cached from
+    `atlasvoice_resolved_rule` (was "from /active-rule on init").
+
+(Commit `389f7d0`.)
+
+### 15.11 Side-edit on Pro plugin (no D number)
+
+Concurrent with D27.41–D27.43, `TTSProHelper.js::getModifiedContent`
+had its `window.AtlasVoiceExtractor.getContentForPlayer()`
+short-circuit removed. The short-circuit was opt-in gated on
+`tts.use_atlasvoice_extractor`, a flag retired back in D26.9 (now
+hard-coded `true` in `LocalizeData::inject`). With the flag always
+true, the short-circuit was effectively always-on for any install
+loading the extractor bundle, which competed with Pro's own
+content pipeline. Pro now stays on its existing path.
+
+(Pro commit `341824157`.)
+
+### 15.12 Updated surviving-files map
+
+After Tier 1/2/3 retirements and §15's runtime-parity work,
+`includes/atlasvoice/` contains 8 PHP class files plus
+`step-rail.shell.js`:
+
+  * `Bootstrap.php`
+  * `LocalizeData.php`
+  * `Mode.php`
+  * `PerPostRules.php`
+  * `PickerLoader.php`
+  * `RestRoutes.php`
+  * `RuleResolver.php`
+  * `StepRail.php`
+  * `VerifyAcrossPosts.php`
+  * `step-rail.shell.js`
+
+(§14.12's earlier 9-file count was stale — `PerPostRulesMetaBox`
+went away in D27.31; that's reflected here.)
+
+REST surface still registered:
+
+  * `POST /atlasvoice/save-rule`
+  * `GET  /step-rail/scope-rule`
+  * `GET  /step-rail/sample-url`
+  * `GET|POST /step-rail/verify-sample`
+
+Everything else listed in earlier §10/§12 docblocks is retired.

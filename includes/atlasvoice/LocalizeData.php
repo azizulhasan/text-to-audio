@@ -60,21 +60,25 @@ class LocalizeData {
 			? $context['settings']
 			: array();
 
-		// TTS-238 D27.23 — back-compat shim for any front-end caller
-		// still reading `tta_obj.atlasvoice_selectors`. The legacy
-		// `tta_atlasvoice_selectors` option is retired (no writers
-		// since D26.9), so this almost always returns the empty
-		// default; the engine's authoritative input is now the
-		// pre-resolved rule below.
+		// TTS-238 D27.23/D27.25/D27.41 — back-compat shim only. The
+		// `tta_atlasvoice_selectors` option had its writers removed
+		// in D26.9, its data deleted by the cleanup migration in
+		// D27.25, and the JS extractor's legacy-store walk is fallback
+		// only (the resolved-rule field below is the authoritative
+		// input post-D27.41). Always returns the empty default on
+		// migrated installs; left in place because removing the field
+		// would crash any third-party JS that still references
+		// `tts.atlasvoice_selectors`.
 		$data['atlasvoice_selectors'] = get_option(
 			'tta_atlasvoice_selectors',
 			array( 'global' => '', 'per_post_type' => array() )
 		);
 
-		// TTS-238 D27.33 — LanguagePlugins retired. The legacy extractor
-		// engine's Tier-2 fallback walk reads this field, so we keep
-		// the key for back-compat but ship an empty value (per-language
-		// scopes were already retired by the D26 collapse).
+		// TTS-238 D27.33 — LanguagePlugins retired. Per-language
+		// scopes were removed by the D26 collapse and the
+		// LanguagePlugins detector class was deleted in D27.33; this
+		// field now always ships empty. Left in place so the legacy
+		// JS extractor fallback walk doesn't read an undefined.
 		$data['atlasvoice_language_code'] = '';
 
 		// D26 — opt-in flag retired. Hardcode true so any front-end
