@@ -1873,7 +1873,7 @@ class TTA_Helper
      */
     public static function output_audio_schema_head()
     {
-        if (!is_singular()) {
+        if ( !is_singular() || !is_pro_active()  || self::get_player_id()  < 3) {
             return;
         }
 
@@ -1891,26 +1891,28 @@ class TTA_Helper
         $post_url   = get_permalink($post);
 
         // Determine contentUrl: use MP3 if available (Pro), otherwise fall back to post URL (browser TTS)
-        $content_url     = $post_url;
+        $content_url     = '';
         $encoding_format = '';
 
-        if (is_pro_active()) {
-            $settings  = self::tts_get_settings('', $post->ID);
-            $language  = self::tts_site_language($settings);
-            $voice     = self::tts_get_voice($settings);
-            $lang_voice = self::get_player_language_and_player_voice($language, $voice, $settings, $post);
-            $language  = $lang_voice['language'];
-            $voice     = $lang_voice['voice'];
-            $file_url_key = self::tts_get_file_url_key($language, $voice);
+        $settings  = self::tts_get_settings('', $post->ID);
+        $language  = self::tts_site_language($settings);
+        $voice     = self::tts_get_voice($settings);
+        $lang_voice = self::get_player_language_and_player_voice($language, $voice, $settings, $post);
+        $language  = $lang_voice['language'];
+        $voice     = $lang_voice['voice'];
+        $file_url_key = self::tts_get_file_url_key($language, $voice);
 
-            $mp3_file_urls = get_post_meta($post->ID, 'tts_mp3_file_urls');
-            if (isset($mp3_file_urls[0])) {
-                $mp3_file_urls = $mp3_file_urls[0];
-            }
-            if (!empty($mp3_file_urls) && isset($mp3_file_urls[$file_url_key]) && $mp3_file_urls[$file_url_key]) {
-                $content_url     = $mp3_file_urls[$file_url_key];
-                $encoding_format = 'audio/mpeg';
-            }
+        $mp3_file_urls = get_post_meta($post->ID, 'tts_mp3_file_urls');
+        if (isset($mp3_file_urls[0])) {
+            $mp3_file_urls = $mp3_file_urls[0];
+        }
+        if (!empty($mp3_file_urls) && isset($mp3_file_urls[$file_url_key]) && $mp3_file_urls[$file_url_key]) {
+            $content_url     = $mp3_file_urls[$file_url_key];
+            $encoding_format = 'audio/mpeg';
+        }
+
+        if(!$content_url) {
+            return;
         }
 
         // Estimate duration from word count at 150 wpm, format as ISO 8601 (PT5M30S)
@@ -1940,7 +1942,7 @@ class TTA_Helper
             'isAccessibleForFree' => true,
             'uploadDate'          => get_the_date('c', $post->ID),
             'associatedArticle'   => [
-                '@type'    => 'Article',
+                '@type'    => 'NewsArticle',
                 'headline' => $post_title,
                 'url'      => esc_url($post_url),
             ],
