@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1.18
+Stable tag: 2.1.19
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -353,6 +353,10 @@ Please report security bugs through the [Patchstack Vulnerability Disclosure Pro
 We are looking for people to help translate this plugin. If you can help, we would love to hear from you.
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
+
+= 2.1.19 ( 10 May 2026 ) =
+Fixed : running schema for free version issue fixed.
+Fixed : invalid schema issue fixed.
 
 = 2.1.18 ( 03 May 2026 ) =
 Fixed : Default Pro player visual countdown now correctly pauses on tab switch and resumes from the saved position (previously it kept ticking after auto-pause and reset to 0 on auto-resume).
@@ -869,27 +873,7 @@ Improved :  Pro and free version performance improved.
 
 == Upgrade Notice ==
 
-= 2.1.18 =
-Fixed : Default Pro player visual countdown now correctly pauses on tab switch and resumes from the saved position.
-Fixed : Default Pro no longer auto-resumes after an intentional pause + tab switch.
-Improved : Chrome pause workaround timing raised to 50ms for more reliable resume.
-
-= 2.1.17 =
-Added : Customize → Button Texts & Icons section (Listen/Pause/Resume/Replay text + icon presets + custom SVG paste) for Default and Default Pro.
-Added : Live, functional Default-player preview using SpeechSynthesis API.
-Added : ElevenLabs search box now auto-resolves pasted 20-character voice IDs.
-Improved : ElevenLabs voices cached per language; Default Pro front-end honors all design settings.
-Fixed : Right-click "border expansion" gone; soundwave overflow on Default Pro fixed; Default Pro click no longer destroys the player.
-Fixed : CDN/CORS detector now correctly reports cross-origin script failures so the admin notice actually appears.
-
-= 2.1.16 =
-Improved : Content extraction with better special character and whitespace handling.
-Improved : Bulk MP3 generation reliability and script loading.
-Added : AtlasAiDev plugins discovery page and Maintenance tab (Pro) for orphan temp-file cleanup.
-Added : CDN / CORS troubleshooting guide and automatic in-dashboard detection.
-Fixed : Figure/figcaption text leaking into audio, Cloudflare stale MP3 cache, and Rocket Loader breaking dashboard chunks.
-
-= 2.1.15 =
-Fixed : Memory exhausted issue fixed.
-Fixed : Double track issue fixed.
+= 2.1.19 =
+Fixed : running schema for free version issue fixed.
+Fixed : invalid schema issue fixed.
 
