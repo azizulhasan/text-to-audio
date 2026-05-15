@@ -878,7 +878,7 @@ Improved :  Pro and free version performance improved.
 
 == Upgrade Notice ==
 
-= 2.1.19 =
-Fixed : running schema for free version issue fixed.
-Fixed : invalid schema issue fixed.
+= 2.1.20 =
+Improved : "Other AtlasAiDev Plugins" page now mirrors the official WordPress.org plugin titles, and the sibling plugin cards include a new "Start Trial" button.
+
 
