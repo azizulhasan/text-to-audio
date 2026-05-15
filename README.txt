@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1.19
+Stable tag: 2.1.20
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -353,6 +353,11 @@ Please report security bugs through the [Patchstack Vulnerability Disclosure Pro
 We are looking for people to help translate this plugin. If you can help, we would love to hear from you.
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
+
+= 2.1.20 ( 15 May 2026 ) =
+Improved : Plugin card titles on the "Other AtlasAiDev Plugins" page now prefer the canonical WordPress.org title (via the public plugin info API), so cards mirror the wp.org listing instead of locally-configured names.
+Added : New-brand fallback names (AtlasAI, AtlasML) for sibling plugins when WordPress.org returns no name.
+Added : "Start Trial" CTA button on every sibling plugin card; the TTS card itself still shows the plain "Learn More" link.
 
 = 2.1.19 ( 10 May 2026 ) =
 Fixed : running schema for free version issue fixed.
@@ -873,7 +878,7 @@ Improved :  Pro and free version performance improved.
 
 == Upgrade Notice ==
 
-= 2.1.19 =
-Fixed : running schema for free version issue fixed.
-Fixed : invalid schema issue fixed.
+= 2.1.20 =
+Improved : "Other AtlasAiDev Plugins" page now mirrors the official WordPress.org plugin titles, and the sibling plugin cards include a new "Start Trial" button.
+
 
