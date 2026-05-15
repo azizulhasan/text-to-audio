@@ -572,7 +572,9 @@ class TTA_Admin
     /**
      * Transient key for WP.org plugin info cache.
      */
-    const ATLAS_PLUGINS_WPORG_TRANSIENT = 'atlas_plugins_wporg_info';
+    // _v2 suffix invalidates pre-existing caches that don't carry the
+    // `name` field added by the wporg-canonical-title fix.
+    const ATLAS_PLUGINS_WPORG_TRANSIENT = 'atlas_plugins_wporg_info_v2';
 
     /**
      * Cache duration in seconds (24 hours).
@@ -587,7 +589,7 @@ class TTA_Admin
     public static function get_atlas_plugins() {
         $cached = get_transient(self::ATLAS_PLUGINS_TRANSIENT);
         if (false !== $cached && is_array($cached)) {
-            return $cached;
+            return self::apply_name_overrides($cached);
         }
 
         $response = wp_remote_get(self::ATLAS_PLUGINS_REMOTE_URL, array(
@@ -600,12 +602,42 @@ class TTA_Admin
             $data = json_decode($body, true);
             if (is_array($data) && !empty($data)) {
                 set_transient(self::ATLAS_PLUGINS_TRANSIENT, $data, self::ATLAS_PLUGINS_CACHE_TTL);
-                return $data;
+                return self::apply_name_overrides($data);
             }
         }
 
         // Fallback: hardcoded plugin data.
-        return self::get_fallback_plugins();
+        return self::apply_name_overrides(self::get_fallback_plugins());
+    }
+
+    /**
+     * Override the `name` field for specific slugs with the new brand-name
+     * fallback titles.
+     *
+     * The JS card renderer prefers `wporg_info[slug].name` (the canonical
+     * WP.org title) when present, so this override only surfaces when
+     * WP.org returns no name for a slug — exactly the "if somehow it
+     * misses" path. Rename slugs on WP.org in due course; this map exists
+     * so the AtlasAiDev branding stays consistent in the meantime.
+     *
+     * @param array $plugins
+     * @return array
+     */
+    private static function apply_name_overrides($plugins) {
+        $overrides = array(
+            'ai-workflow-automation-ai-agent-hub' => 'AI Workflow Automation – AtlasAI',
+            'smart-local-ai'                       => 'Smart Local AI – AtlasML',
+        );
+        if (!is_array($plugins)) {
+            return $plugins;
+        }
+        foreach ($plugins as &$p) {
+            if (is_array($p) && isset($p['slug']) && isset($overrides[$p['slug']])) {
+                $p['name'] = $overrides[$p['slug']];
+            }
+        }
+        unset($p);
+        return $plugins;
     }
 
     /**
@@ -745,6 +777,9 @@ class TTA_Admin
                 $data = json_decode(wp_remote_retrieve_body($response), true);
                 if (is_array($data) && !empty($data['slug'])) {
                     $info[$slug] = array(
+                        // Canonical title from WP.org (e.g. "AR/VR 3D Model Viewer / Try-On" instead
+                        // of the locally-curated "Text To Speech TTS – AtlasVoice" style names).
+                        'name'            => isset($data['name']) ? wp_strip_all_tags( html_entity_decode( $data['name'] ) ) : '',
                         'rating'          => isset($data['rating']) ? (int) $data['rating'] : 0,
                         'num_ratings'     => isset($data['num_ratings']) ? (int) $data['num_ratings'] : 0,
                         'active_installs' => isset($data['active_installs']) ? (int) $data['active_installs'] : 0,
@@ -752,7 +787,7 @@ class TTA_Admin
                 }
             }
             if (!isset($info[$slug])) {
-                $info[$slug] = array('rating' => 0, 'num_ratings' => 0, 'active_installs' => 0);
+                $info[$slug] = array('name' => '', 'rating' => 0, 'num_ratings' => 0, 'active_installs' => 0);
             }
         }
 
