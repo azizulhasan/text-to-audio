@@ -144,18 +144,25 @@ const WelcomeWizard = () => {
             ];
 
             // Save analytics settings (uses 'analytics' param, not 'fields').
-            const analyticsFormData = new FormData();
-            analyticsFormData.append('analytics', JSON.stringify({
-                tts_enable_analytics: analytics.enableAnalytics,
-                tts_trackable_post_ids: analytics.enableAnalytics
-                    ? analytics.trackablePostIds
-                    : [],
-            }));
+            // TTS-246: send as JSON, not FormData, to bypass WAF rules that 403
+            // form-encoded POSTs to /wp-json/* (see wizardApi.js for context).
+            const analyticsBody = JSON.stringify({
+                analytics: JSON.stringify({
+                    tts_enable_analytics: analytics.enableAnalytics,
+                    tts_trackable_post_ids: analytics.enableAnalytics
+                        ? analytics.trackablePostIds
+                        : [],
+                }),
+            });
             requests.push(
                 fetch(window.ttsWizardData.api_url + 'save_analytics_settings', {
                     method: 'POST',
-                    body: analyticsFormData,
-                    headers: { 'X-WP-Nonce': window.ttsWizardData.nonce },
+                    body: analyticsBody,
+                    headers: {
+                        'X-WP-Nonce': window.ttsWizardData.nonce,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
                 }).then((r) => r.json())
             );
 

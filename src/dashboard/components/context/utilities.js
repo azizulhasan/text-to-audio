@@ -17,6 +17,105 @@ export const addScripts = (scripts) => {
 };
 
 /**
+ * TTS-246: Decide how to encode a request body.
+ *
+ * Background: front-of-site WAFs (notably Cloudflare's managed ruleset) reject
+ * POSTs to /wp-json/* whose bodies are `multipart/form-data` or
+ * `application/x-www-form-urlencoded` and contain JSON-shaped strings (CSS
+ * selectors with `.`, `{`, quotes, etc. in a `fields` form value). The same
+ * payload sent as `application/json` passes the WAF, so we convert text-only
+ * FormData to JSON.
+ *
+ * Exception: FormData that carries a File/Blob CANNOT be JSON-stringified
+ * (binary doesn't survive JSON), so we send those as-is and let the browser
+ * generate the multipart boundary. File uploads (e.g. Google Cloud service
+ * account JSON in the Integrations tab) keep working. The PHP REST handler
+ * reads the same param names off `WP_REST_Request` regardless of encoding.
+ *
+ * @param {*} data FormData | URLSearchParams | string | object | null
+ * @returns {{ body: BodyInit, contentType: string | null }}
+ *   `contentType=null` means "let fetch/XHR set the boundary" (multipart).
+ */
+const prepareBody = (data) => {
+    if (data == null) {
+        return { body: JSON.stringify({}), contentType: 'application/json' };
+    }
+    if (typeof data === 'string') {
+        // Already serialized (caller's responsibility to set type if needed).
+        return { body: data, contentType: 'application/json' };
+    }
+    if (typeof FormData !== 'undefined' && data instanceof FormData) {
+        // If any entry is a File/Blob, keep as multipart — JSON can't carry binary.
+        for (const [, v] of data.entries()) {
+            if (typeof Blob !== 'undefined' && v instanceof Blob) {
+                return { body: data, contentType: null /* browser sets boundary */ };
+            }
+        }
+        return {
+            body: JSON.stringify(Object.fromEntries(data.entries())),
+            contentType: 'application/json',
+        };
+    }
+    if (typeof URLSearchParams !== 'undefined' && data instanceof URLSearchParams) {
+        return {
+            body: JSON.stringify(Object.fromEntries(data.entries())),
+            contentType: 'application/json',
+        };
+    }
+    return { body: JSON.stringify(data), contentType: 'application/json' };
+};
+
+/**
+ * TTS-246: Read a fetch response while tolerating WAF HTML 403/5xx pages.
+ *
+ * Before this change, a 403 with an HTML body surfaced as
+ * `SyntaxError: Unexpected token '<'` — useless for diagnosing the real cause
+ * (firewall/CDN block, expired nonce, missing capability, etc.). Now we always
+ * return a structured `{ status, message, ... }` shape, and we log a one-line
+ * breadcrumb so the dev console makes the cause obvious.
+ *
+ * Callers that check `res.status` continue to work. Callers that read
+ * `res.message` get a human-friendly explanation. Nothing throws.
+ */
+const parseRestResponse = async (response, url) => {
+    const contentType = (response.headers.get('content-type') || '').toLowerCase();
+    if (contentType.includes('application/json')) {
+        try {
+            const json = await response.json();
+            if (!response.ok && json && typeof json === 'object' && json.status === undefined) {
+                // WP_Error JSON: { code, message, data: { status } }
+                json.status = false;
+                json.httpStatus = response.status;
+            }
+            if (!response.ok) {
+                // eslint-disable-next-line no-console
+                console.error(
+                    `[AtlasVoice] REST ${response.status} on ${url || '(unknown URL)'}:`,
+                    json && json.message ? json.message : json
+                );
+            }
+            return json;
+        } catch (e) { /* fall through */ }
+    }
+    const text = await response.text().catch(() => '');
+    if (!response.ok) {
+        const fwHint = response.status === 403
+            ? 'Save failed (HTTP 403) — your firewall (Cloudflare/Wordfence/Sucuri) may be blocking this request. See TTS-246.'
+            : `Save failed (HTTP ${response.status}).`;
+        // eslint-disable-next-line no-console
+        console.error(`[AtlasVoice] REST ${response.status} on ${url || '(unknown URL)'}: ${fwHint}`, text.slice(0, 500));
+        return {
+            status: false,
+            httpStatus: response.status,
+            code: 'non_json_response',
+            message: fwHint,
+            body: text.slice(0, 500),
+        };
+    }
+    return { status: true, raw: text };
+};
+
+/**
  * Post data method.
  * @param {url} url api url
  * @param {method} method request type
@@ -34,18 +133,22 @@ export const postData = async (url = "", data = {}, $method = "POST") => {
             },
         });
     } else {
+        // TTS-246: send JSON so Cloudflare/WAF doesn't 403 our save requests.
+        // FormData with File/Blob still goes as multipart — see prepareBody().
+        const { body, contentType } = prepareBody(data);
+        const headers = {
+            'X-WP-Nonce': ttsObj.rest_nonce,
+            'Accept': 'application/json',
+        };
+        if (contentType) headers['Content-Type'] = contentType;
         response = await fetch(url, {
             method: $method, // *GET, POST, PUT, DELETE, etc.
-            body: data, // body data type must match "Content-Type" header
-            headers: {
-                'X-WP-Nonce': ttsObj.rest_nonce
-            },
+            body,
+            headers,
         });
     }
 
-    const responseData = await response.json(); // parses JSON response into native JavaScript objects
-
-    return responseData;
+    return await parseRestResponse(response, url);
 };
 
 /**
@@ -55,20 +158,20 @@ export const postData = async (url = "", data = {}, $method = "POST") => {
  * @returns
  */
 export const postWithoutImage = async (url = "", data = {}) => {
-    // Default options are marked with *
+    // TTS-246: see postData() — JSON bypasses WAF rules that target form bodies.
+    // FormData with File/Blob still goes as multipart — see prepareBody().
+    const { body, contentType } = prepareBody(data);
+    const headers = {
+        'X-WP-Nonce': window?.ttsObj?.rest_nonce ?? ttsObjPro?.rest_nonce,
+        'Accept': 'application/json',
+    };
+    if (contentType) headers['Content-Type'] = contentType;
     const response = await fetch(url, {
-        // headers: {
-        //   "Content-Type": "application/json",
-        // },
         method: "POST", // *GET, POST, PUT, DELETE, etc.
-        body: data, // body data type must match "Content-Type" header
-        headers: {
-            'X-WP-Nonce': window?.ttsObj?.rest_nonce ?? ttsObjPro?.rest_nonce
-        },
+        body,
+        headers,
     });
-    const responseData = await response.json(); // parses JSON response into native JavaScript objects
-
-    return responseData;
+    return await parseRestResponse(response, url);
 };
 
 /**
