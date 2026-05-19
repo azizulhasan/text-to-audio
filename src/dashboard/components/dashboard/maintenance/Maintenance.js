@@ -181,14 +181,18 @@ export default function Maintenance() {
         if (confirmText !== "DELETE") return;
         setIsDeleting(true);
         try {
-            const body = new FormData();
-            // TTS-239: "Delete all" OR "selected across all pages" both use the
-            // server-side all=1 path so we don't ship thousands of paths over
-            // the wire.
-            // TTS-239: pass age threshold so server-side re-scan/re-validate uses the same cutoff.
-            body.append("min_age_seconds", String(ageThreshold));
+            // TTS-246: send as JSON (was FormData) so Cloudflare/WAF doesn't
+            // 403 form-encoded POSTs to /wp-json/*. The PHP handler reads the
+            // same param names off WP_REST_Request regardless of body encoding.
+            const payload = {
+                // TTS-239: pass age threshold so server-side re-scan/re-validate uses the same cutoff.
+                min_age_seconds: String(ageThreshold),
+            };
             if (deleteMode === "all" || (deleteMode === "selected" && selectAllPages)) {
-                body.append("all", "1");
+                // TTS-239: "Delete all" OR "selected across all pages" both use
+                // the server-side all=1 path so we don't ship thousands of
+                // paths over the wire.
+                payload.all = "1";
             } else {
                 const paths = Object.keys(selected);
                 if (!paths.length) {
@@ -196,14 +200,18 @@ export default function Maintenance() {
                     setIsDeleting(false);
                     return;
                 }
-                paths.forEach((p) => body.append("paths[]", p));
+                payload.paths = paths;
             }
             const res = await fetch(
                 `${API_BASE}tta_pro/v1/delete_orphan_temp_files`,
                 {
                     method: "POST",
-                    headers: { "X-WP-Nonce": nonce },
-                    body,
+                    headers: {
+                        "X-WP-Nonce": nonce,
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                    },
+                    body: JSON.stringify(payload),
                 }
             );
             const data = await res.json();
