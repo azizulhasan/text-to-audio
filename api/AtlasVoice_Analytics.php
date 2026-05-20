@@ -17,6 +17,17 @@ use TTA\TTA_Helper;
 class AtlasVoice_Analytics {
 
 	/**
+	 * TTS-247: opt-in gate for third-party IP geolocation lookups
+	 * (icanhazip / ip-api / ipinfo). The toggle lives under the Analytics
+	 * tab (next to `tts_enable_analytics`) and is saved by
+	 * save_analytics_settings() into the `tta_analytics_settings` option.
+	 */
+	private static function is_geolocation_enabled() {
+		$settings = (array) get_option( 'tta_analytics_settings' );
+		return ! empty( $settings['tts_show_listener_location'] );
+	}
+
+	/**
 	 * @param $request
 	 *
 	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
@@ -483,6 +494,21 @@ class AtlasVoice_Analytics {
      * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
      */
     public function get_geolocation( $request ) {
+        // TTS-247: geolocation is opt-in (wp.org Guideline 7). When the
+        // setting is off (default), no remote calls to icanhazip / ip-api
+        // / ipinfo happen and the endpoint returns a neutral "Unknown"
+        // response. UI toggle: Settings tab; readme documents the services.
+        if ( ! self::is_geolocation_enabled() ) {
+            return rest_ensure_response( array(
+                'status' => true,
+                'data'   => array(
+                    'city'    => 'Unknown',
+                    'country' => 'Unknown',
+                    'region'  => '',
+                ),
+            ) );
+        }
+
         $ip = $this->get_client_ip();
         // Don't process local IPs
         if ( $this->is_local_ip( $ip ) ) {
@@ -534,6 +560,10 @@ class AtlasVoice_Analytics {
     }
 
     private function get_client_ip() {
+        // TTS-247: bail if the opt-in switch is off; no icanhazip call.
+        if ( ! self::is_geolocation_enabled() ) {
+            return '';
+        }
         $response = wp_safe_remote_get( 'https://icanhazip.com/' );
         if ( is_wp_error( $response ) ) {
             return '';
@@ -577,6 +607,10 @@ class AtlasVoice_Analytics {
      * @return array|false
      */
     private function fetch_geolocation_ipapi( $ip ) {
+        // TTS-247: bail if the opt-in switch is off.
+        if ( ! self::is_geolocation_enabled() ) {
+            return false;
+        }
         $url = "http://ip-api.com/json/{$ip}?fields=status,country,regionName,city";
 
         $response = wp_remote_get( $url, array(
@@ -609,6 +643,10 @@ class AtlasVoice_Analytics {
      * @return array|false
      */
     private function fetch_geolocation_ipinfo( $ip ) {
+        // TTS-247: bail if the opt-in switch is off.
+        if ( ! self::is_geolocation_enabled() ) {
+            return false;
+        }
         $url = "https://ipinfo.io/{$ip}/json";
 
         $response = wp_remote_get( $url, array(

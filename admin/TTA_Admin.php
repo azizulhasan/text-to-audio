@@ -594,6 +594,13 @@ class TTA_Admin
             return self::apply_name_overrides($cached);
         }
 
+        // TTS-247: defence-in-depth — never hit GitHub from the front-end or
+        // an unauthenticated context. Callers gate this to the AtlasAiDev
+        // plugins admin screen + a manual refresh AJAX; this is the safety net.
+        if (!is_admin() || !current_user_can('manage_options')) {
+            return self::apply_name_overrides(self::get_fallback_plugins());
+        }
+
         $response = wp_remote_get(self::ATLAS_PLUGINS_REMOTE_URL, array(
             'timeout' => 10,
             'headers' => array('Accept' => 'application/json'),
@@ -832,8 +839,21 @@ class TTA_Admin
     }
 
     public function atlasaidev_plugins($menu_slug = 'atlasvoice-other-plugins', $plugin_slug = 'text-to-audio') {
-        // Atlas Plugins submenu
+        // TTS-247: the remote catalog fetch (get_atlas_plugins -> github raw)
+        // only runs when the user explicitly opens this admin page, and the
+        // user sees a disclosure notice on entry. Documented in readme's
+        // "External services" section.
         if (!empty($_REQUEST['page']) && $_REQUEST['page'] === $menu_slug) {
+            add_action('admin_notices', function () {
+                printf(
+                    '<div class="notice notice-info"><p>%s</p></div>',
+                    esc_html__(
+                        'This page loads a public plugin catalog from github.com (raw.githubusercontent.com/atlasaidev/plugins). No personal data is sent. See "External services" in the plugin readme for details.',
+                        'text-to-audio'
+                    )
+                );
+            });
+
             wp_enqueue_script(
                 'atlas-plugins',
                 plugin_dir_url(__FILE__) . 'js/atlas-plugins.js',

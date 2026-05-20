@@ -402,15 +402,20 @@ and links to the provider's Terms of Use and Privacy Policy.
 
 = AtlasAiDev Tracker (track.atlasaidev.com) =
 
-This service receives anonymous usage telemetry — plugin version, active
-WordPress / PHP version, site language, and which AtlasVoice features
-are enabled. It is used by AtlasAiDev to understand which features
-matter to users and to prioritize improvements.
+**Off by default. Opt-in.** Nothing is sent to this service unless the
+site administrator explicitly accepts the Freemius opt-in dialog on
+first activation. Internally the opt-in is stored in the WordPress
+option `text-to-audio_allow_tracking` (`'yes'` to enable, `'no'` /
+unset to disable). The user can revoke at any time from the Freemius
+account screen inside the plugin, after which no further requests are
+made.
 
-This service is **opt-in**. Nothing is sent until the user accepts the
-Freemius opt-in screen on first activation, and the user can opt out at
-any time from the Freemius account screen inside the plugin. The user's
-email address is sent only if they choose to share diagnostics.
+When opted-in, the service receives anonymous usage telemetry — plugin
+version, active WordPress / PHP version, site language, and which
+AtlasVoice features are enabled. The administrator's email address is
+only included if the user explicitly chooses to share diagnostics from
+the Freemius dialog. Used by AtlasAiDev to understand which features
+matter to users and to prioritise improvements.
 
 Service provided by AtlasAiDev:
 - Terms of Use: https://atlasaidev.com/terms-of-use/
@@ -418,13 +423,16 @@ Service provided by AtlasAiDev:
 
 = AtlasAiDev plugin catalog (raw.githubusercontent.com) =
 
-When the user visits the "Other AtlasAiDev Plugins" admin screen, the
-plugin fetches a small JSON catalog from
+When the site administrator opens the "Other AtlasAiDev Plugins" admin
+page (and only then), the plugin fetches a small JSON catalog from
 `https://raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json`
 so the listing reflects the current set of AtlasAiDev plugins without
-needing a plugin update for every catalog change. No user or site data
-is sent in the request beyond standard HTTP headers added by WordPress.
-The catalog is cached locally for 24 hours.
+needing a plugin update for every catalog change. The fetch is gated
+to that admin screen, requires the `manage_options` capability, and
+the screen shows an on-page notice describing the request before the
+user sees the catalog. No user or site data is sent beyond standard
+HTTP headers added by WordPress. The catalog is cached locally for
+24 hours.
 
 Service provided by GitHub, Inc.:
 - Terms of Service: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service
@@ -432,20 +440,40 @@ Service provided by GitHub, Inc.:
 
 = Translation downloads (api.github.com, raw.githubusercontent.com) =
 
-The plugin can download additional language files on demand from the
-public translation repository at
-`https://github.com/azizulhasan/atlasaidev-translations`. Triggered
-either by the user clicking a "Download translation" action in the
-plugin's settings, or by an automatic check when the WordPress locale
-changes. Only the locale code (e.g. `es_ES`) is sent.
+To keep the plugin ZIP small, translation files (`.mo`) are not
+bundled — they are downloaded on demand from the public translation
+repository at `https://github.com/azizulhasan/atlasaidev-translations`.
 
-Service provided by GitHub, Inc. — see Terms / Privacy links above.
+The plugin contacts two GitHub endpoints:
+
+1. `https://api.github.com/repos/azizulhasan/atlasaidev-translations/contents/atlasvoice/<locale>` — to list the available files for the active site locale.
+2. `https://raw.githubusercontent.com/azizulhasan/atlasaidev-translations/main/atlasvoice/<file>` — to fetch each `.mo` file referenced by that listing.
+
+The only data sent is the WordPress locale code (for example `es_ES`,
+`pt_BR`) as part of the URL. No user-identifying information, site
+URL, or admin email is transmitted. The download is triggered:
+
+* On plugin activation, for the site's current locale.
+* When the site language is changed in **Settings → General**.
+* The plugin skips the download entirely if a `.mo` for the locale
+  already exists in the plugin's `languages/` folder.
+
+Service provided by GitHub, Inc.:
+- Terms of Service: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service
+- Privacy Statement: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
 
 = Geolocation lookups (ip-api.com, ipinfo.io, icanhazip.com) =
 
-For the analytics dashboard to display where listeners are located, the
-plugin resolves a listener's public IP address to country / region /
-city via:
+**Off by default. Opt-in.** No request is ever sent to any of these
+services until the site administrator turns on the **"Show listener
+location in analytics"** toggle inside **AtlasVoice → Analytics**
+(visible only once the parent "Enable analytics" toggle is on). When
+the toggle is off, the dashboard simply shows "Unknown" for location
+fields and the helpers below short-circuit before any network call.
+
+When enabled, the analytics dashboard displays where listeners are
+located by resolving the listener's public IP address to country /
+region / city via:
 
 1. `https://icanhazip.com/` — used once per session to determine the
    site's outbound public IP, so the rest of the plugin can call the
@@ -464,11 +492,15 @@ Services:
 
 = Premium voice demos (cdn.openai.com) =
 
-The plugin admin dashboard and the Pro player demo pages preview an
-OpenAI / ChatGPT TTS voice using a short pre-recorded audio sample
-hosted at `https://cdn.openai.com/API/docs/audio/alloy.wav`. The file
-is only loaded when the user clicks "Preview" on the ChatGPT/OpenAI
-provider card. No user data is sent.
+The plugin's admin dashboard, the welcome wizard, the "Listening"
+settings tab, and the Pro player demo pages preview the OpenAI /
+ChatGPT TTS "alloy" voice using a short pre-recorded audio sample
+that OpenAI publishes for documentation purposes at
+`https://cdn.openai.com/API/docs/audio/alloy.wav`. The file is loaded
+only when the user clicks the "Preview" / "Play" control on the
+ChatGPT/OpenAI provider card; it is not loaded on first page render.
+Only the standard HTTP headers added by the browser are sent — no
+user-identifying information, site URL, or admin email.
 
 Service provided by OpenAI, L.L.C.:
 - Terms of Use: https://openai.com/policies/terms-of-use
