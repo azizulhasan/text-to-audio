@@ -1358,23 +1358,31 @@ class TTA_Helper
     /**
      * Get the text value based on the given attributes and saved texts.
      *
-     * @param array $atts The attributes array.
-     * @param array $saved_texts The saved texts array.
-     * @param string $key The key to look for in both arrays.
-     * @param string $default The default text if neither $atts nor $saved_texts has the value.
-     * @param string $text_domain The text domain for translation.
+     * TTS-247: dropped the `$text_domain` parameter and the internal `__($default,
+     * $text_domain)` call. The WP.org review (HelpScout #293) flagged that call
+     * because both arguments were variables, which prevents gettext-extraction
+     * tools (makepot, wp-cli) from discovering the translatable strings. Callers
+     * now pass an already-translated literal default (e.g. `__('Listen',
+     * 'text-to-audio')`) so the extractor sees the string and domain literally
+     * at the call site. This helper just decides which of (attr override / saved
+     * setting / default) to return — no translation here.
+     *
+     * @param array  $atts        The attributes array.
+     * @param array  $saved_texts The saved texts array.
+     * @param string $key         The key to look for in both arrays.
+     * @param string $default     The default (already-translated) text if neither
+     *                            $atts nor $saved_texts has the value.
      *
      * @return string The final text value.
      */
-    public static function get_text_value($atts, $saved_texts, $key, $default, $text_domain)
+    public static function get_text_value($atts, $saved_texts, $key, $default)
     {
         if (isset($atts[$key]) && strlen($atts[$key])) {
             return esc_html(sanitize_text_field($atts[$key]));
         } elseif (isset($saved_texts[$key])) {
             return esc_html(sanitize_text_field($saved_texts[$key]));
-        } else {
-            return __($default, $text_domain);
         }
+        return $default;
     }
 
     /**
