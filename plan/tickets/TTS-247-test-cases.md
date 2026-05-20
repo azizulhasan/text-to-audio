@@ -402,6 +402,257 @@ grep -rn "'text-to-speech-pro'" --include="*.php" . | grep -v vendor | grep -v f
 
 ---
 
+---
+
+## S1–S11 — Ship unminified source in the production ZIP (lean variant)
+
+**Scope:** Free plugin only. `gulpfile.js productionSrc` updated so the release ZIP now contains the unminified source for every shipped compiled bundle, plus the build manifest.
+
+**Surface changed:**
+- `gulpfile.js` — `productionSrc` array. Removed these exclusions (so they now ship in the ZIP): `src/**`, `admin/js/blocks/**`, `admin/js/tts/**`, the standalone `admin/js/text-to-audio-button.js` / `text-to-audio-dashboard.js` / `TextToSpeech.js` / `AtlasVoiceAnalytics.js` / `AtlasVoicePlayerInsights.js`, the two demo player sources, `.browserslistrc`, `gulpfile.js` itself, `package.json`, `composer.json`, `webpack.mix.js`. Kept these exclusions for size: `package-lock.json`, `composer.lock`, `scripts/**`, `node_modules/**`, `.git/**`, `plan/**`, `.claude/**`, etc.
+- Added a `TTS-247:` rationale comment block above the array documenting what changed, what was added, what stayed excluded, and how to revert.
+
+### Pro-impact audit
+
+- This change touches Free's `gulpfile.js` only. Pro has its own build pipeline.
+- Pro is NOT on wp.org — it's distributed via Freemius — so the wp.org source-availability rule doesn't apply to Pro at this time.
+- If/when Pro ever goes to wp.org, the equivalent change would need to be made in Pro's gulpfile.
+- **Verdict: No Pro impact for this change.**
+
+### Code-level test ⬜
+
+```bash
+# 1. Confirm the exclusions for source files are gone
+cd D:/laragon/www/tts/wp-content/plugins/text-to-audio
+grep -E "^\s*'!src/\*\*'" gulpfile.js
+# Expected: zero hits
+
+grep -E "^\s*'!admin/js/text-to-audio-button.js'" gulpfile.js
+# Expected: zero hits
+
+# 2. Confirm the TTS-247 comment is in place
+grep -n "TTS-247: production ZIP now ships" gulpfile.js
+# Expected: one match
+```
+
+Then run a production build and inspect the ZIP:
+
+```bash
+# Build (from plugin root)
+# (npm run translate is intentionally skipped at this stage — translations
+#  are downloaded at runtime by includes/TTA_Translation_Downloader.php
+#  and are not part of the wp.org-shipped build pipeline.)
+npm run production
+npm run block:build
+npm run makeZip      # or: npx gulp makeZip
+
+# Inspect the resulting ZIP
+ls -lh production/*.zip
+# Expected: file appears, around (previous-size + ~300 KB)
+
+# Verify source files are inside
+unzip -l production/text-to-audio.zip | grep -E "(src/|webpack.mix.js|package.json|composer.json|gulpfile.js|\.browserslistrc|admin/js/text-to-audio-button\.js|admin/js/AtlasVoicePlayerInsights\.js|admin/js/blocks/)" | head -30
+# Expected: src/ contents, webpack.mix.js, package.json, composer.json, gulpfile.js,
+#           .browserslistrc, and all the listed source .js files are present.
+
+# Verify excluded files are NOT inside
+unzip -l production/text-to-audio.zip | grep -E "(node_modules/|package-lock\.json|\.git/|plan/|\.claude/|scripts/)" | head
+# Expected: empty.
+```
+
+### Browser / admin test ⬜
+
+1. Extract the new ZIP into a clean WordPress install's `wp-content/plugins/` directory.
+2. Activate the plugin from **Plugins** screen.
+3. Visit a front-end post with the listen button → button renders, audio plays.
+4. Visit **AtlasVoice → Dashboard** in wp-admin → React dashboard loads (uses the **minified** bundles, not the new unminified `src/`).
+5. Open browser DevTools → Network tab → reload the admin page.
+   - **Expected:** the enqueued JS files are still the `.min.js` versions in `admin/js/build/`. The unminified `src/` files are **not** loaded at runtime.
+6. Open the **AtlasVoice → Customize** tab, change button color, save. Front-end change reflected on reload.
+7. With `WP_DEBUG = true`: confirm no PHP warnings/notices appear in `wp-content/debug.log` (especially nothing about missing source files or wrong asset paths).
+
+### Static check ⬜
+
+```bash
+# In the freshly built ZIP, the wp.org reviewer's mental grep:
+# for every shipped *.min.js or *.chunk.js, can we point at a readable source?
+unzip -l production/text-to-audio.zip | awk '{print $NF}' | grep -E "\.min\.js$|chunks/.*\.chunk\.js$" | while read f; do
+    echo "MIN: $f"
+done
+
+# Run Plugin Check on the extracted ZIP:
+# (assuming wp-cli + plugin-check are installed)
+# wp plugin check text-to-audio --include-low-severity
+# Expected: no "Code is obfuscated / no source available" errors.
+```
+
+### Free-side change
+
+This IS the Free-side change. Applied to `gulpfile.js`.
+
+### Pro-side change
+
+None for this fix. Pro can adopt the same pattern if/when it ships to wp.org.
+
+### Follow-ups
+
+- **S9 (readme update)** is still pending. Even with source bundled in the ZIP, the readme should still get a `Source code` section pointing to https://github.com/azizulhasan/text-to-audio plus build instructions. Reviewers expect both routes documented.
+- After the next build, **measure the actual ZIP-size delta** and update this entry if it differs significantly from the ~300 KB estimate.
+
+### Reversibility
+
+To revert: in `gulpfile.js productionSrc`, re-add the exclusion lines listed in the `TTS-247:` comment block (e.g. `'!src/**'`, `'!admin/js/blocks/**'`, `'!admin/js/text-to-audio-button.js'`, etc.). The next build will go back to the previous minified-only payload. Source code on GitHub (https://github.com/azizulhasan/text-to-audio) becomes the sole route for reviewer source access — still compliant with Guideline 4 since the link satisfies the "or link to a public repo" branch.
+
+---
+
+## L1 — Stop force-deactivating Pro on Free deactivation
+
+**Surface changed:**
+- `includes/TTA_Deactivator.php:32-42` (Free) — the body of `TTA_Deactivator::deactivate()` is replaced with explanatory comments only. The deactivation hook registration in `text-to-audio.php` is unchanged, so future deactivation-time cleanup tasks have a place to live without re-introducing the cross-plugin deactivation.
+- **No Pro-side code change** — Pro already shows the missing-Free admin notice via `free_version_activation_notice()` in `text-to-audio-pro.php`, and its `Requires Plugins: text-to-audio` header (line 26) already opts in to the WP 6.5+ Plugin Dependencies API.
+
+### Pro-impact audit
+
+- Free no longer touches Pro's activation state.
+- Pro is **NOT** auto-deactivated when Free is deactivated. The user remains in control.
+- On WP 6.5+: WP shows Pro's "Requires: Text To Speech TTS Accessibility" status in the plugins admin list. If Free is inactive, WP prevents Pro from being re-activated until Free is active again, but does NOT auto-deactivate an already-active Pro.
+- On WP 5.6-6.4: Pro shows an admin notice on every wp-admin page load until Free is reactivated.
+- **Behavioral risk:** if Pro is left active while Free is inactive, any Pro code path that requires Free's classes (e.g. `use TTA\TTA_Helper`) will fatal at the next page load that exercises it. This was hidden by the previous force-deactivation. **Mitigation:** all Pro entry points should be hardened against missing Free in a follow-up fix (graceful early-return + admin notice instead of fatal). Tracked as a separate concern; not part of this commit because it's an enhancement, not a wp.org guideline requirement.
+
+### Code-level test ⬜
+
+```bash
+cd D:/laragon/www/tts/wp-content/plugins/text-to-audio
+# 1. The forbidden call is gone
+grep -n "deactivate_plugins" includes/TTA_Deactivator.php
+# Expected: zero matches
+
+# 2. The forced redirect is gone
+grep -n "header.*Location" includes/TTA_Deactivator.php
+# Expected: zero matches
+
+# 3. The function still exists (so the deactivation_hook registration in
+#    text-to-audio.php doesn't fatal on "method not found")
+grep -n "public static function deactivate" includes/TTA_Deactivator.php
+# Expected: one match
+
+# 4. Free does not touch the Pro plugin name anywhere
+grep -rn "text-to-audio-pro" --include="*.php" . | grep -v vendor | grep -v freemius | grep -v "plan/"
+# Expected: zero matches outside vendor/freemius (the check the previous
+#           code did against 'text-to-audio-pro/text-to-audio-pro.php' is gone).
+```
+
+### Browser / admin test ⬜
+
+**Setup:** clean WordPress install with both Free (`text-to-audio`) and Pro (`text-to-audio-pro`) installed and activated.
+
+#### Path 1 — WP 6.5+ behavior (Plugin Dependencies API)
+
+1. Confirm site is on WP 6.5 or later: `wp core version` >= 6.5.
+2. **Plugins screen:** Pro should show "Requires: Text To Speech TTS Accessibility" badge near its name.
+3. Deactivate Free from the plugins screen.
+4. **Expected:** Free deactivates with the standard green "Plugin deactivated" notice. Pro **remains active**. No redirect. The user lands back on the plugins screen normally.
+5. The Pro row now shows a warning that its required plugin is inactive.
+6. Try to reactivate Free → normal activation.
+7. Try to reactivate Free, then deactivate Pro alone → both can be controlled independently.
+
+#### Path 2 — WP 5.6 to 6.4 behavior (admin-notice fallback)
+
+1. Switch test site to WP 6.4.x (or any version < 6.5).
+2. Repeat steps 1–4 above.
+3. **Expected:** Free deactivates normally. Pro stays active. Pro's `free_version_activation_notice()` shows a yellow admin notice at the top of every wp-admin page: *"Text To Speech TTS Pro requires Text To Speech TTS to be installed and activated. You can install and activate Text To Speech TTS from here."*
+4. The link in the notice goes to `plugin-install.php?s=text-to-audio&…`. Click it → search results for the Free plugin.
+
+#### Path 3 — regression check (previous bad behavior must NOT happen)
+
+1. Activate both Free and Pro on a clean install.
+2. Open the plugins screen.
+3. Deactivate Free.
+4. **Expected:** the user **stays on the plugins screen**. There is **no redirect** to `plugins.php?deactivate=true` triggered by `header('Location: …'); die();`. The browser address bar shows the normal WP "after deactivation" URL.
+5. Pro is **not** silently deactivated (compare to the old behavior, which used to deactivate Pro too).
+
+### Static check ⬜
+
+```bash
+# Project-wide grep — no remaining places where Free changes another plugin's state
+cd D:/laragon/www/tts/wp-content/plugins/text-to-audio
+grep -rn "deactivate_plugins\s*(" --include="*.php" . | grep -v vendor | grep -v freemius | grep -v "plan/"
+# Expected: zero matches in our own source.
+```
+
+### Free-side change
+
+This IS the Free-side change. `includes/TTA_Deactivator.php:32-42` body removed; explanatory comments added.
+
+### Pro-side change
+
+None needed in this commit. Pro's existing setup is already correct:
+- `Requires Plugins: text-to-audio` header (line 26 of `text-to-audio-pro.php`) — WP 6.5+ dependency declaration.
+- `free_version_activation_notice()` (line 538+) — admin notice for WP < 6.5 (and as a redundant signal on WP 6.5+).
+
+### Follow-up (not in this commit)
+
+- Harden Pro entry points so they don't fatal when Free's classes are missing — e.g. wrap `use TTA\TTA_Helper` call sites with `if ( class_exists('TTA\\TTA_Helper') )` guards or with a `plugins_loaded` priority that short-circuits Pro's bootstrap when `is_plugin_active('text-to-audio/text-to-audio.php')` is false. Currently relies on the user reading the admin notice and not leaving Pro running without Free. Separate ticket.
+
+---
+
+## R1, R2, R6 — Stop loading remote assets from CDNs on admin pages
+
+**Surface changed:**
+- `admin/TTA_Admin.php:387` — Chart.js no longer enqueued from `cdn.jsdelivr.net/npm/chart.js`; now uses local `admin/js/vendor/chart.umd.min.js` (Chart.js 4.4.7, MIT).
+- `admin/TTA_Admin.php:476` — countries-and-timezones no longer enqueued from jsDelivr; now local `admin/js/vendor/countries-and-timezones.min.js` (v3.7.2, MIT).
+- `includes/TTA_Lib_AtlasAiDev.php:62-68` (R6) — already commented out by the user: `$this->promotion` instantiation, `set_source('https://gist.githubusercontent.com/...')`, and `$this->promotion->init()` are all disabled.
+
+### Pro-impact audit
+
+Pro grep for `cdn.jsdelivr.net/npm/chart\.js` and `cdn.jsdelivr.net/npm/countries-and-timezones` → **0 hits**. Pro doesn't share these enqueues, so no Pro change needed.
+
+### Code-level test ⬜
+
+```bash
+cd D:/laragon/www/tts/wp-content/plugins/text-to-audio
+# No remote CDN script enqueues remain
+grep -rn "cdn\.jsdelivr\.net" --include="*.php" . | grep -v vendor | grep -v freemius
+# Expected: zero hits
+
+# Local vendor files exist
+ls admin/js/vendor/chart.umd.min.js admin/js/vendor/countries-and-timezones.min.js
+# Expected: both files present
+
+# R6 promotion source call is disabled
+grep -n "promotion->set_source\|promotion->init" includes/TTA_Lib_AtlasAiDev.php
+# Expected: only commented lines (start with //)
+```
+
+### Browser / admin test ⬜
+
+1. Activate Free on a clean WP install with `WP_DEBUG = true`.
+2. Open the post edit screen (or AtlasVoice dashboard page).
+3. DevTools → Network → reload. Filter by "jsdelivr" and "gist".
+4. **Expected:** zero requests to `cdn.jsdelivr.net` or `gist.githubusercontent.com`.
+5. Verify Chart.js + timezone scripts still load from `wp-content/plugins/text-to-audio/admin/js/vendor/`.
+6. Visit AtlasVoice → Analytics → charts render normally (Chart.js works).
+7. AtlasVoice → Listening tab — timezone-aware UI still functions.
+
+### Static check ⬜
+
+```bash
+# Project-wide grep for any remaining remote-asset enqueues
+grep -rn "wp_enqueue_script\|wp_enqueue_style" --include="*.php" . | grep -E "https?://" | grep -v vendor | grep -v freemius
+# Expected: zero hits (no PHP enqueue takes an external URL)
+```
+
+### Free-side change
+
+This entry. No Pro change.
+
+### Follow-up
+
+- License attribution: append a note to `readme.txt` "External services" / "Source code" section listing Chart.js (MIT) and countries-and-timezones (MIT) as bundled third-party libraries.
+- Add the two vendor JS files to the GitHub repo if not already present.
+
+---
+
 ## Future entries
 
 (Append a new section per fix as work progresses. Use the same 6-part structure: surface, Pro audit, code test, browser test, static check, Pro-side change.)

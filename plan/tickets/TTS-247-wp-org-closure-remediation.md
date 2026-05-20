@@ -80,34 +80,34 @@ Verified the AI-flagged examples against the actual source. All claims so far ar
 
 | # | Area | File(s) | Action | Priority | Status |
 |---|---|---|---|---|---|
-| S1 | Compiled JS — no source link | `admin/js/build/chunks/tab-settings.chunk.js` | Add public GitHub repo link in `readme.txt` | P1 | ⬜ |
-| S2 | Compiled JS — no source link | `admin/js/build/chunks/tab-customize.chunk.js` | covered by S1 readme link | P1 | ⬜ |
-| S3 | Compiled JS — no source link | `admin/js/build/chunks/tab-aliases.chunk.js` | covered by S1 readme link | P1 | ⬜ |
-| S4 | Compiled JS — no source link | `admin/js/build/chunks/tab-analytics.chunk.js` | covered by S1 readme link | P1 | ⬜ |
-| S5 | Compiled JS — no source link | `admin/js/build/text-to-audio-button.min.js` | covered by S1 readme link | P1 | ⬜ |
-| S6 | Compiled JS — no source link | `admin/js/build/AtlasVoicePlayerInsights.min.js` | covered by S1 readme link | P1 | ⬜ |
-| S7 | Compiled JS — no source link | `build/blocks.js` | covered by S1 readme link | P1 | ⬜ |
-| S8 | Compiled JS — no source link | `admin/js/build/tts-bulk-mp3-file-ui.min.js` | covered by S1 readme link | P1 | ⬜ |
-| S9 | Readme build instructions | `readme.txt` | Add a "Building from source" section: clone repo → `npm install` → `npm run production` / `npm run block:build` | P1 | ⬜ |
-| S10 | Confirm public repo | GitHub | Verify the repo exists, is public, and contains `src/` + `webpack.mix.js` matching the published build | P1 | ⬜ |
-| S11 | Enumerate the remaining 11 unlisted bundles | Email says **"out of a total of 19 incidences"** | Grep `admin/js/build/**/*.min.js` and `admin/js/build/chunks/*.chunk.js` against `src/` and add the missing source-paths or a single repo link covering them all | P1 | ⬜ |
+| S1 | Compiled JS — no source link | `admin/js/build/chunks/tab-settings.chunk.js` | Ship unminified source in the production ZIP via `gulpfile.js productionSrc` (lean variant) + add GitHub repo link in `readme.txt` as a secondary route | P1 | 🟨 |
+| S2 | Compiled JS — no source link | `admin/js/build/chunks/tab-customize.chunk.js` | covered by S1 (src/ now in ZIP) | P1 | 🟨 |
+| S3 | Compiled JS — no source link | `admin/js/build/chunks/tab-aliases.chunk.js` | covered by S1 | P1 | 🟨 |
+| S4 | Compiled JS — no source link | `admin/js/build/chunks/tab-analytics.chunk.js` | covered by S1 | P1 | 🟨 |
+| S5 | Compiled JS — no source link | `admin/js/build/text-to-audio-button.min.js` | `admin/js/text-to-audio-button.js` now in ZIP | P1 | 🟨 |
+| S6 | Compiled JS — no source link | `admin/js/build/AtlasVoicePlayerInsights.min.js` | `admin/js/AtlasVoicePlayerInsights.js` now in ZIP | P1 | 🟨 |
+| S7 | Compiled JS — no source link | `build/blocks.js` | `admin/js/blocks/**` now in ZIP | P1 | 🟨 |
+| S8 | Compiled JS — no source link | `admin/js/build/tts-bulk-mp3-file-ui.min.js` | `src/dashboard/bulk-mp3-file.js` now in ZIP | P1 | 🟨 |
+| S9 | Readme build instructions | `readme.txt` | New "Source code and building from source" section inserted between Screenshots and Changelog. Lists GitHub URL, build requirements, clone+build commands, and per-bundle source mapping | P1 | 🟨 |
+| S10 | Confirm public repo | https://github.com/azizulhasan/text-to-audio | ✅ Verified: public, default branch `main`, 241 tags, contains `src/` + `webpack.mix.js` + `package.json` + `composer.json` + `gulpfile.js`. Discipline: every SVN release must have a matching git tag pushed | P1 | 🟢 |
+| S11 | Enumerate the remaining 11 unlisted bundles | Email says **"out of a total of 19 incidences"** | Not needed once the lean variant lands — `src/`, `admin/js/blocks/`, `admin/js/tts/` and the standalone unminified `admin/js/*.js` source files are all shipped. Verify by running Plugin Check on the built ZIP | P1 | 🟨 |
 
 ### 3.3 Plugin lifecycle / activation hooks
 
 | # | Area | File(s) | Action | Priority | Status |
 |---|---|---|---|---|---|
-| L1 | Force-deactivating Pro + forced redirect | `includes/TTA_Deactivator.php:32-42` (`deactivate()` method) | Remove the `deactivate_plugins(['text-to-audio-pro/...'])` call **and** the `header('Location: ...'); die();` redirect. Use the **Plugin Dependencies API** (WP 6.5+) — add `Requires Plugins: text-to-audio` header in the Pro plugin instead, so Pro auto-deactivates when free is deactivated, not the other way around | P0 | ⬜ |
+| L1 | Force-deactivating Pro + forced redirect | `includes/TTA_Deactivator.php:32-42` (`deactivate()` method) | Body removed — Free no longer touches Pro's activation state, nor redirects. Dependency now handled in Pro: WP 6.5+ via `Requires Plugins: text-to-audio` header (already present); WP 5.6-6.4 via Pro's existing `free_version_activation_notice()` admin notice (user-driven, no self-deactivation, preserves user agency) | P0 | 🟨 |
 
 ### 3.4 Remote calls / phoning home (no opt-in)
 
 | # | Area | File(s) — Line | URL | Action | Status |
 |---|---|---|---|---|---|
-| R1 | Chart.js CDN | `admin/TTA_Admin.php:387` | `cdn.jsdelivr.net/npm/chart.js` | Bundle locally under `admin/js/vendor/chart.umd.js` and `wp_enqueue_script` from plugin URL | ⬜ |
-| R2 | Countries-and-timezones CDN | `admin/TTA_Admin.php:476` | `cdn.jsdelivr.net/npm/countries-and-timezones/...` | Bundle locally | ⬜ |
+| R1 | Chart.js CDN | `admin/TTA_Admin.php:387` | `cdn.jsdelivr.net/npm/chart.js` | Bundled locally at `admin/js/vendor/chart.umd.min.js` (v4.4.7, MIT) | 🟨 |
+| R2 | Countries-and-timezones CDN | `admin/TTA_Admin.php:476` | `cdn.jsdelivr.net/npm/countries-and-timezones/...` | Bundled locally at `admin/js/vendor/countries-and-timezones.min.js` (v3.7.2, MIT) | 🟨 |
 | R3 | Atlas plugins.json | `admin/TTA_Admin.php:565` `ATLAS_PLUGINS_REMOTE_URL` | `raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json` | Move behind opt-in (Pro promo banner); only fetch when user explicitly opens promo screen, with a Privacy disclosure | ⬜ |
 | R4 | Translations from GitHub raw | `includes/TTA_Translation_Downloader.php:19` | `raw.githubusercontent.com/.../atlasvoice` | Either ship translations in plugin `languages/` (preferred — wp.org translates anyway) or document the service in readme with Terms/Privacy | ⬜ |
 | R5 | Translations GitHub API | `includes/TTA_Translation_Downloader.php:24, 113` | `api.github.com/repos/.../contents/atlasvoice` | Same as R4 | ⬜ |
-| R6 | Promotion source (Gist) | `includes/TTA_Lib_AtlasAiDev.php:65` | `gist.githubusercontent.com/.../text-to-speech-pro.json` | Behind opt-in or remove | ⬜ |
+| R6 | Promotion source (Gist) | `includes/TTA_Lib_AtlasAiDev.php:65` | `gist.githubusercontent.com/.../text-to-speech-pro.json` | Removed — promotion `set_source()` call commented out along with `$this->promotion` init and `$this->promotion->init()` | 🟨 |
 | R7 | Demo audio (OpenAI CDN) | `admin/demos/player3/js/build/plyr-demo.min.js`; `admin/js/build/tts-welcome-wizard.min.js`; `admin/js/build/chunks/tab-listening.chunk.js` | `cdn.openai.com/API/docs/audio/alloy.wav` | Self-host a short royalty-free MP3 in `admin/assets/audio/` and reference locally | ⬜ |
 | R8 | Geolocation — ip-api.com | `api/AtlasVoice_Analytics.php:582` | `ip-api.com/json/` | Either disclose as a service in readme **and** make opt-in, or remove and rely on server-side `REMOTE_ADDR` only | ⬜ |
 | R9 | Public IP — icanhazip | `api/AtlasVoice_Analytics.php:537` | `icanhazip.com/` | Remove; use `$_SERVER['REMOTE_ADDR']` server-side | ⬜ |
@@ -118,8 +118,8 @@ Verified the AI-flagged examples against the actual source. All claims so far ar
 
 | # | Area | Action | Status |
 |---|---|---|---|
-| D1 | Add `== External services ==` block to `readme.txt` covering every remaining remote endpoint after R1–R11, with: what it is, what data is sent, when, ToS link, Privacy link | ⬜ |
-| D2 | Publish/update Terms & Privacy pages on `atlasaidev.com` for `track.atlasaidev.com` and reference in D1 | ⬜ |
+| D1 | Add `== External services ==` block to `readme.txt` covering every remaining remote endpoint after R1–R11, with: what it is, what data is sent, when, ToS link, Privacy link | 🟨 (drafted; needs ToS/Privacy URL verification once R8/R9/R10 are kept or dropped) |
+| D2 | Publish/update Terms & Privacy pages on `atlasaidev.com` for `track.atlasaidev.com` and reference in D1 | 🟢 — confirmed live: `https://atlasaidev.com/terms-of-use/` and `https://atlasaidev.com/privacy-policy/`; both referenced from the readme's "External services" section |
 
 ### 3.6 Code quality / WP guidelines
 

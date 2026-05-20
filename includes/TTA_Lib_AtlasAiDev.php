@@ -60,13 +60,12 @@ final class TTA_Lib_AtlasAiDev {
         $this->client = new \AtlasAiDev\AppService\Client( 'dec06622-980f-4674-8b08-72e23cc9e70f', TEXT_TO_AUDIO_PLUGIN_NAME, TEXT_TO_AUDIO_ROOT_FILE );
         // Load
         $this->insights  = $this->client->insights(); // Plugin Insights
-        $this->promotion = $this->client->promotions(); // Promo offers
-
-        $this->promotion->set_source( 'https://gist.githubusercontent.com/azizulhasan/afcc74f398b290e586f3a4578341b699/raw/text-to-speech-pro.json' );
+//        $this->promotion = $this->client->promotions(); // Promo offers
+//        $this->promotion->set_source();
 
         // Initialize
         $this->insightInit();
-        $this->promotion->init();
+//        $this->promotion->init();
 
 
         // Filter updater api data
