@@ -347,6 +347,135 @@ Please report security bugs through the [Patchstack Vulnerability Disclosure Pro
 
 
 
+== Source code and building from source ==
+
+The complete, unminified source code for this plugin is published at
+https://github.com/azizulhasan/text-to-audio (GPLv3 — the same license
+as the distributed plugin). The release ZIP also bundles the same
+sources alongside the minified runtime files, so reviewers and curious
+developers can inspect everything without leaving the wp.org SVN browser.
+
+Every minified JavaScript bundle shipped under `admin/js/build/` and
+`build/` is compiled from the matching files in `src/` and
+`admin/js/` using webpack via Laravel Mix. SCSS sources and Gutenberg
+block sources are also in the plugin folder and the public repository.
+
+= Build requirements =
+
+* Node.js 18 or later
+* npm 9 or later
+* PHP 7.4 or later
+* Composer 2.x
+
+= Reproducing the build =
+
+    git clone https://github.com/azizulhasan/text-to-audio
+    cd text-to-audio
+    composer install --no-dev
+    npm install
+    npm run production       # builds the React dashboard + all admin/frontend JS bundles
+    npm run block:build      # builds the Gutenberg block (build/blocks.js)
+
+Output lands in `admin/js/build/` and `build/`. The git tag matching
+the wp.org plugin version (for example, tag `2.1.20` for plugin
+version 2.1.20) reflects the exact source used to produce the wp.org
+release ZIP.
+
+= Where each bundle comes from =
+
+* `admin/js/build/text-to-audio-dashboard-ui.min.js` — built from `src/dashboard/index.js`
+* `admin/js/build/text-to-audio-button.min.js` — built from `admin/js/text-to-audio-button.js`
+* `admin/js/build/TextToSpeech.min.js` — built from `admin/js/TextToSpeech.js`
+* `admin/js/build/AtlasVoiceAnalytics.min.js` — built from `admin/js/AtlasVoiceAnalytics.js`
+* `admin/js/build/AtlasVoicePlayerInsights.min.js` — built from `admin/js/AtlasVoicePlayerInsights.js`
+* `admin/js/build/tts-bulk-mp3-file-ui.min.js` — built from `src/dashboard/bulk-mp3-file.js`
+* `admin/js/build/chunks/tab-*.chunk.js` — webpack lazy-loaded chunks for `src/dashboard/components/tabs/*`
+* `build/blocks.js` — built from `admin/js/blocks/blocks.js` via `@wordpress/scripts`
+
+
+
+== External services ==
+
+This plugin connects to a number of third-party services. Each one is
+described below — what it is, what data is sent, when it is contacted,
+and links to the provider's Terms of Use and Privacy Policy.
+
+= AtlasAiDev Tracker (track.atlasaidev.com) =
+
+This service receives anonymous usage telemetry — plugin version, active
+WordPress / PHP version, site language, and which AtlasVoice features
+are enabled. It is used by AtlasAiDev to understand which features
+matter to users and to prioritize improvements.
+
+This service is **opt-in**. Nothing is sent until the user accepts the
+Freemius opt-in screen on first activation, and the user can opt out at
+any time from the Freemius account screen inside the plugin. The user's
+email address is sent only if they choose to share diagnostics.
+
+Service provided by AtlasAiDev:
+- Terms of Use: https://atlasaidev.com/terms-of-use/
+- Privacy Policy: https://atlasaidev.com/privacy-policy/
+
+= AtlasAiDev plugin catalog (raw.githubusercontent.com) =
+
+When the user visits the "Other AtlasAiDev Plugins" admin screen, the
+plugin fetches a small JSON catalog from
+`https://raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json`
+so the listing reflects the current set of AtlasAiDev plugins without
+needing a plugin update for every catalog change. No user or site data
+is sent in the request beyond standard HTTP headers added by WordPress.
+The catalog is cached locally for 24 hours.
+
+Service provided by GitHub, Inc.:
+- Terms of Service: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service
+- Privacy Statement: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
+
+= Translation downloads (api.github.com, raw.githubusercontent.com) =
+
+The plugin can download additional language files on demand from the
+public translation repository at
+`https://github.com/azizulhasan/atlasaidev-translations`. Triggered
+either by the user clicking a "Download translation" action in the
+plugin's settings, or by an automatic check when the WordPress locale
+changes. Only the locale code (e.g. `es_ES`) is sent.
+
+Service provided by GitHub, Inc. — see Terms / Privacy links above.
+
+= Geolocation lookups (ip-api.com, ipinfo.io, icanhazip.com) =
+
+For the analytics dashboard to display where listeners are located, the
+plugin resolves a listener's public IP address to country / region /
+city via:
+
+1. `https://icanhazip.com/` — used once per session to determine the
+   site's outbound public IP, so the rest of the plugin can call the
+   geolocation services with the right address.
+2. `http://ip-api.com/json/<ip>` — primary geolocation lookup.
+3. `https://ipinfo.io/<ip>/json` — fallback when ip-api.com returns an
+   error or rate-limits.
+
+Only the listener's IP address is sent. Geolocation responses are
+stored against the play event in the local analytics table.
+
+Services:
+- ip-api.com — Terms: https://ip-api.com/docs/legal, Privacy: https://members.ip-api.com/privacy-policy
+- ipinfo.io — Terms: https://ipinfo.io/terms-of-service, Privacy: https://ipinfo.io/privacy-policy
+- icanhazip.com — https://major.io/p/a-new-future-for-icanhazip/
+
+= Premium voice demos (cdn.openai.com) =
+
+The plugin admin dashboard and the Pro player demo pages preview an
+OpenAI / ChatGPT TTS voice using a short pre-recorded audio sample
+hosted at `https://cdn.openai.com/API/docs/audio/alloy.wav`. The file
+is only loaded when the user clicks "Preview" on the ChatGPT/OpenAI
+provider card. No user data is sent.
+
+Service provided by OpenAI, L.L.C.:
+- Terms of Use: https://openai.com/policies/terms-of-use
+- Privacy Policy: https://openai.com/policies/privacy-policy
+
+
+
 == Changelog ==
 
 ### TRANSLATION REQUEST

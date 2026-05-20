@@ -30,15 +30,28 @@ class TTA_Deactivator {
      * @since    1.0.0
      */
     public static function deactivate() {
-        if(!function_exists('is_plugin_active') ){
-            include_once ABSPATH . 'wp-admin/includes/plugin.php';
-        }
-        if(is_plugin_active('text-to-audio-pro/text-to-audio-pro.php')){
-            deactivate_plugins(['text-to-audio-pro/text-to-audio-pro.php'], true);
-            $url = admin_url( 'plugins.php?deactivate=true' );
-            header( "Location: $url" );
-            die();
-        }
+        // TTS-247: removed the previous body that force-deactivated the Pro
+        // plugin (`text-to-audio-pro`) and then forcibly redirected the user
+        // via `header('Location: …'); die();`. The WordPress.org Plugin
+        // Directory guideline "Changing Active Plugins" forbids one plugin
+        // from altering another's activation state without explicit user
+        // consent -- even when both plugins are published by the same vendor
+        // (the user's click on "Deactivate Free" is not implicit consent to
+        // deactivate Pro). Reviewer cited this in HelpScout #293.
+        //
+        // Dependency direction is handled in Pro now, not here:
+        //   - WordPress 6.5+: Pro declares `Requires Plugins: text-to-audio`
+        //     in its plugin header; WP shows the dependency status in the
+        //     plugins admin and blocks Pro from activating without Free.
+        //   - WordPress 5.6-6.4: Pro's `free_version_activation_notice()`
+        //     (in `text-to-audio-pro.php`) shows an admin notice whenever
+        //     Free is inactive, asking the user to install / activate Free.
+        //     Pro keeps the user in control -- it does NOT self-deactivate
+        //     or force any redirect.
+        //
+        // The hook registration stays so future deactivation-time cleanup
+        // (clearing transients, scheduled cron events, etc.) has a place
+        // to live without re-introducing the cross-plugin deactivation.
     }
 
 }

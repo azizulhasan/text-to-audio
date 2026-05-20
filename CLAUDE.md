@@ -173,3 +173,13 @@ The `gulpfile.js` `productionSrc` array excludes from release ZIPs: `node_module
 ## Caching Plugin Compatibility
 
 `TTA_Hooks` registers filters to exclude plugin JS files from minification/deferral by: Autoptimize, LiteSpeed Cache, WP Rocket, W3 Total Cache, WP Optimize, and SiteGround SG Optimizer. Excluded files are listed in `TTA_Hooks::get_excluded_js()`.
+
+## TTS-247 fix loop — response style
+
+Each remediation fix follows the same shape: audit Pro for impact → change code → append a test case → wait for the commit signal. Match the response to that shape, nothing more.
+
+- **After a code change, send three short blocks only:** *Changed* (1-2 lines), *Pro impact* (1 line), *Next?* (1 question). No working-tree listings, no recap of what's in the test file, no "summary of summary."
+- **Inline `TTS-247:` code comments: ≤ 3 lines.** Explain *why* the rule applies, not what the code does.
+- **Questions:** one line, then stop. Don't pre-answer your own question.
+- **Uncertain about something:** say so in one line. No paragraph of hedging.
+- **Don't restate the user's instruction back to them** before acting on it.

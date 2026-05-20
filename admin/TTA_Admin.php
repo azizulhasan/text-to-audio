@@ -384,7 +384,8 @@ class TTA_Admin
         }
 
         if (TTA_Helper::is_edit_page() || isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
-            wp_enqueue_script('AtlasVoice_chart', 'https://cdn.jsdelivr.net/npm/chart.js', [], $this->version, true);
+            // TTS-247: ship Chart.js locally instead of jsDelivr CDN (wp.org Guideline 8 — no remote assets).
+            wp_enqueue_script('AtlasVoice_chart', plugin_dir_url(__FILE__) . 'js/vendor/chart.umd.min.js', [], '4.4.7', true);
             wp_enqueue_script('AtlasVoicePlayerInsights', plugin_dir_url(__FILE__) . 'js/build/AtlasVoicePlayerInsights.min.js', array(
                 'wp-hooks',
                 'wp-i18n',
@@ -473,7 +474,8 @@ class TTA_Admin
             );
         }
 
-        wp_enqueue_script('atlasvoice-timezone', 'https://cdn.jsdelivr.net/npm/countries-and-timezones/dist/index.min.js', [], $this->version, true);
+        // TTS-247: ship countries-and-timezones locally instead of jsDelivr CDN (wp.org Guideline 8).
+        wp_enqueue_script('atlasvoice-timezone', plugin_dir_url(__FILE__) . 'js/vendor/countries-and-timezones.min.js', [], '3.7.2', true);
         array_push($dependencies, 'atlasvoice-timezone');
         if ($player_id > 1) {
             wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', $dependencies, $this->version, true);
