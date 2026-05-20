@@ -33,8 +33,13 @@ export default function Analytics() {
 
     // State
     const [analytics, setAnalytics] = useState({
-        tts_enable_analytics: false,
+        // Mirrors the activator defaults in includes/TTA_Activator.php so
+        // first-paint matches what the GET endpoint will return.
+        tts_enable_analytics: true,
         tts_trackable_post_ids: [],
+        // TTS-247: opt-in gate for third-party IP geolocation lookups
+        // (icanhazip / ip-api / ipinfo). Off by default per wp.org Guideline 7.
+        tts_show_listener_location: false,
     });
     const [postIds, setPostIds] = useState([]);
     const [selectedIds, setSelectedIds] = useState([]);
@@ -828,6 +833,44 @@ export default function Analytics() {
                             <p className="tta_analytics_subtitle">
                                 {__("Track and analyze your TTS player engagement to understand listener behavior.", "text-to-audio")}
                             </p>
+                            {/* TTS-247: opt-in for third-party IP geolocation, shown only when master analytics is on. Off by default per wp.org Guideline 7. */}
+                            {analytics.tts_enable_analytics && (
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "flex-start",
+                                        gap: "12px",
+                                        marginTop: "16px",
+                                        padding: "12px 14px",
+                                        background: "#f6f8fa",
+                                        border: "1px solid #e5e7eb",
+                                        borderRadius: "8px",
+                                    }}
+                                >
+                                    <div style={{ flexShrink: 0, paddingTop: "2px" }}>
+                                        <ToggleSwitch
+                                            checked={!!analytics.tts_show_listener_location}
+                                            onChange={handleChange}
+                                            name="tts_show_listener_location"
+                                            id="tts_show_listener_location"
+                                        />
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <label
+                                            htmlFor="tts_show_listener_location"
+                                            style={{ display: "block", fontWeight: 600, color: "#1f2937", cursor: "pointer", marginBottom: "2px", fontSize: "14px" }}
+                                        >
+                                            {__("Show listener location in analytics", "text-to-audio")}
+                                        </label>
+                                        <span style={{ fontSize: "12px", color: "#6b7280", lineHeight: 1.5, display: "block" }}>
+                                            {__(
+                                                'Off by default. When on, listener IP addresses are sent to ip-api.com, ipinfo.io and icanhazip.com to resolve city / country for the Location chart. See "External services" in the plugin readme.',
+                                                "text-to-audio"
+                                            )}
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Export & Reports upsell for free users */}
@@ -950,21 +993,25 @@ export default function Analytics() {
                                     </Col>
                                 </Row>
 
-                                {/* Location Analytics */}
-                                <Row className="tta_analytics_row">
-                                    <Col xs={12}>
-                                        <LocationAnalytics
-                                            data={locationData}
-                                            rawResults={rawResults}
-                                            dateRange={locationDateRange}
-                                            globalDateRange={globalDateRange}
-                                            onDateRangeChange={setLocationDateRange}
-                                            filterResultsByDateRange={filterResultsByDateRange}
-                                            aggregateFilteredData={aggregateFilteredData}
-                                            limit={3}
-                                        />
-                                    </Col>
-                                </Row>
+                                {/* Location Analytics — TTS-247: only shown when the
+                                    site admin has opted in to third-party IP geolocation
+                                    (otherwise this section would be all "Unknown"). */}
+                                {analytics.tts_show_listener_location && (
+                                    <Row className="tta_analytics_row">
+                                        <Col xs={12}>
+                                            <LocationAnalytics
+                                                data={locationData}
+                                                rawResults={rawResults}
+                                                dateRange={locationDateRange}
+                                                globalDateRange={globalDateRange}
+                                                onDateRangeChange={setLocationDateRange}
+                                                filterResultsByDateRange={filterResultsByDateRange}
+                                                aggregateFilteredData={aggregateFilteredData}
+                                                limit={3}
+                                            />
+                                        </Col>
+                                    </Row>
+                                )}
 
                                 {/* Playing Trend Chart */}
                                 <Row className="tta_analytics_row">

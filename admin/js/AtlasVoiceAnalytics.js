@@ -361,17 +361,26 @@ class AtlasVoiceAnalytics {
 
         const deviceInfo = await this.getDeviceData().then(info => info);
 
-        // Fetch accurate city/country from server-side geolocation API
-        const geoData = await this.#fetchGeolocation();
-        if (geoData) {
-            if (geoData.city && geoData.city !== 'Unknown') {
-                deviceInfo.city = geoData.city;
-            }
-            if (geoData.country && geoData.country !== 'Unknown') {
-                deviceInfo.country = geoData.country;
-            }
-            if (geoData.region) {
-                deviceInfo.region = geoData.region;
+        // TTS-247: only resolve city/country/region when the site admin has
+        // explicitly opted in to third-party geolocation lookups (ip-api /
+        // ipinfo / icanhazip). Flag lives in ttsObj.settings.analytics —
+        // the existing analytics-settings envelope already localised here.
+        const geoEnabled = typeof ttsObj !== 'undefined'
+            && ttsObj.settings
+            && ttsObj.settings.analytics
+            && ttsObj.settings.analytics.tts_show_listener_location;
+        if (geoEnabled) {
+            const geoData = await this.#fetchGeolocation();
+            if (geoData) {
+                if (geoData.city && geoData.city !== 'Unknown') {
+                    deviceInfo.city = geoData.city;
+                }
+                if (geoData.country && geoData.country !== 'Unknown') {
+                    deviceInfo.country = geoData.country;
+                }
+                if (geoData.region) {
+                    deviceInfo.region = geoData.region;
+                }
             }
         }
 

@@ -202,8 +202,11 @@ class TTA_Activator {
 			) );
 
 			update_option( 'tta_analytics_settings', array(
-				"tts_enable_analytics"   => true,
-				"tts_trackable_post_ids" => $latest_post_ids,
+				"tts_enable_analytics"       => true,
+				"tts_trackable_post_ids"     => $latest_post_ids,
+				// TTS-247: third-party IP geolocation (ip-api / ipinfo /
+				// icanhazip) is opt-in per wp.org Guideline 7; default off.
+				"tts_show_listener_location" => false,
 			), false );
 		}
 

@@ -653,6 +653,151 @@ This entry. No Pro change.
 
 ---
 
+## R3 — Gate GitHub catalog fetch behind admin screen + disclosure
+
+**Surface changed:**
+- `admin/TTA_Admin.php` — `atlasaidev_plugins()`: added `add_action('admin_notices', …)` on entry that prints an on-page notice about the GitHub fetch.
+- `admin/TTA_Admin.php` — `get_atlas_plugins()`: added `is_admin() && current_user_can('manage_options')` guard before `wp_remote_get`, falls back to the bundled list otherwise.
+- `readme.txt` — "External services" entry for the catalog now states the call is gated to the admin screen + capability + 24 h cache.
+
+### Pro-impact audit
+
+Pro grep for `ATLAS_PLUGINS_REMOTE_URL` / `get_atlas_plugins` → 0 hits. No Pro change.
+
+### Code-level test ⬜
+
+```bash
+grep -n "ATLAS_PLUGINS_REMOTE_URL\|admin_notices" admin/TTA_Admin.php
+# Expected: const at ~567; admin_notices callback added inside atlasaidev_plugins()
+grep -n "is_admin.*current_user_can" admin/TTA_Admin.php
+# Expected: the new guard inside get_atlas_plugins()
+```
+
+### Browser / admin test ⬜
+
+1. Clean WP install, Free activated, DevTools → Network.
+2. Visit Dashboard, Posts, Settings → confirm **no request** to `raw.githubusercontent.com`.
+3. Open **AtlasVoice → Other AtlasAiDev Plugins** → one request to `raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json`; the blue notice "This page loads a public plugin catalog from github.com …" is visible at the top.
+4. Reload the same page within 24 h → no new GitHub request (transient hit).
+5. Click the page's "Refresh" control (if present) → one new GitHub request.
+
+---
+
+## R4, R5 — Document the GitHub translation downloader
+
+**Surface changed:** readme "External services" — the translation-downloads entry now lists both GitHub endpoints separately (`api.github.com/repos/.../contents/...` and `raw.githubusercontent.com/.../*.mo`), the exact trigger conditions (activation, locale change, skip-if-MO-present), the data sent (locale code only), and explicit GitHub Terms + Privacy URLs.
+
+**No code change** — `includes/TTA_Translation_Downloader.php` is unchanged. The reviewer's flag was about missing disclosure, not about the call itself; per Guideline 6 a documented service is permitted.
+
+### Pro-impact audit
+
+Pro grep for `atlasaidev-translations` / `REPO_BASE_URL` / `REPO_API_URL` → 0 hits. Pro does not use this downloader. No Pro change.
+
+### Static check ⬜
+
+```bash
+grep -n "atlasaidev-translations" readme.txt
+# Expected: 1+ match inside the "External services" section
+grep -n "https://docs.github.com/en/site-policy" readme.txt
+# Expected: ToS + Privacy URLs both present
+```
+
+### Browser / admin test ⬜
+
+1. Paste the readme.txt block into https://wordpress.org/plugins/developers/readme-validator/ → green / no warnings.
+2. On a clean WP install: switch site language to a locale that has translations available (e.g. `es_ES`) and confirm the MO is fetched once, then no further GitHub traffic on subsequent admin loads.
+
+### Follow-up (separate fix)
+
+- `TTA_Translation_Downloader::download_locale()` writes the `.mo` file into `TTA_PLUGIN_PATH . 'languages/'` (the plugin folder). wp.org guideline forbids writing to the plugin folder — files there are wiped on plugin update. The cleaner long-term fix is to write into `wp_upload_dir()` or to bundle MO files in the ZIP and drop the downloader entirely. Tracked under §3.6 C9 (writes outside uploads) — not part of this commit.
+
+---
+
+## R7 — Document OpenAI CDN demo audio (no code change)
+
+**Surface changed:** readme "External services" — OpenAI/ChatGPT entry expanded with all four surfaces that trigger the load, the explicit Preview-click trigger, the "no user data sent" statement, and OpenAI ToS + Privacy URLs.
+
+**No code change** in this round. The three JS bundles (`admin/demos/player3/js/build/plyr-demo.min.js`, `admin/js/build/tts-welcome-wizard.min.js`, `admin/js/build/chunks/tab-listening.chunk.js`) still reference `cdn.openai.com/API/docs/audio/alloy.wav`.
+
+### Pro-impact audit
+
+Pro grep for `cdn.openai.com` → 0 hits in Pro source. No Pro change.
+
+### Static check ⬜
+
+```bash
+grep -n "cdn.openai.com" readme.txt
+# Expected: 1 match inside the External services section.
+```
+
+### Browser / admin test ⬜
+
+1. Open **AtlasVoice → Listening** tab → page renders, **no** request to `cdn.openai.com` in DevTools Network.
+2. Click the ChatGPT/OpenAI "Preview" control → **one** request to `https://cdn.openai.com/API/docs/audio/alloy.wav`, audio plays.
+3. Same check on the Welcome Wizard's ChatGPT card, the player demo page, and the bundled `plyr-demo` admin demo.
+
+### Fallback if reviewer pushes back
+
+If wp.org doesn't accept the documented-service framing, drop in a CC0 / MIT-licensed short clip at `admin/assets/audio/openai-preview.mp3`, replace the URL in the three source files (under `src/dashboard/...` and `admin/js/...`), rebuild via `npm run production`, and re-tag. ~30 minutes of work.
+
+---
+
+## R8, R9, R10 — Make IP geolocation opt-in (`tta_analytics_geolocation_enabled`)
+
+**Surface changed:** `api/AtlasVoice_Analytics.php` — new `get_option('tta_analytics_geolocation_enabled', false)` guard at the top of `get_geolocation()`, plus defence-in-depth guards inside `get_client_ip()`, `fetch_geolocation_ipapi()`, and `fetch_geolocation_ipinfo()`. `readme.txt` — geolocation entry now leads with **"Off by default. Opt-in."**
+
+### Pro-impact audit
+
+Pro grep for `ip-api.com` / `icanhazip` / `ipinfo.io` / `tta_analytics_geolocation_enabled` → 0 hits. No Pro change.
+
+### Code-level test ⬜
+
+```bash
+grep -n "tta_analytics_geolocation_enabled" api/AtlasVoice_Analytics.php
+# Expected: 4 matches (get_geolocation + the 3 private helpers).
+```
+
+### Browser / admin test ⬜
+
+1. Clean WP install, Free active, option not set → DevTools Network on the Analytics page: **zero** requests to `icanhazip.com`, `ip-api.com`, `ipinfo.io`. Location column shows "Unknown".
+2. From wp-cli set the option: `wp option update tta_analytics_geolocation_enabled 1`.
+3. Reload Analytics → one request to icanhazip.com (and ip-api.com or ipinfo.io). Location populates.
+4. From wp-cli unset: `wp option delete tta_analytics_geolocation_enabled` → reload → back to zero remote calls.
+
+### Follow-up
+
+- Add a checkbox **AtlasVoice → Analytics → "Show listener location in analytics"** that writes `tta_analytics_geolocation_enabled`, with help-text linking the readme's "External services" section. Lives in the React dashboard (`src/dashboard/components/tabs/analytics/...`).
+
+---
+
+## R11 — Document opt-in telemetry to `track.atlasaidev.com`
+
+**Surface changed:** readme "External services" — the AtlasAiDev Tracker entry now states "Off by default. Opt-in.", names the option key (`text-to-audio_allow_tracking`), and describes the opt-out path. No code change — telemetry was already gated by `Insights::is_tracking_allowed()` (returns false when the option is `'no'` or unset).
+
+### Pro-impact audit
+
+Pro has its own AtlasAiDev tracker instance under `Libs/AtlasAiDev/`; option key for Pro is `text-to-audio-pro_allow_tracking` (same opt-in pattern). Free's R11 disclosure doesn't change Pro's behaviour. Pro's own readme/disclosure is out of scope here because Pro is not on wp.org.
+
+### Code-level test ⬜
+
+```bash
+grep -n "is_tracking_allowed\|_allow_tracking" libs/AtlasAiDev/Insights.php
+# Expected: opt-in check + option name visible.
+
+# Confirm the option default is 'no'
+grep -n "allow_tracking.*'no'" libs/AtlasAiDev/Insights.php
+# Expected: one match (the get_option default param)
+```
+
+### Browser / admin test ⬜
+
+1. Fresh activation on a clean WP install. Decline Freemius opt-in dialog. Wait 24 h or force a tick.
+2. DevTools / `tcpdump` / Freemius logger: zero outbound requests to `track.atlasaidev.com`.
+3. Repeat with opt-in accepted (`wp option update text-to-audio_allow_tracking yes`): one POST to `track.atlasaidev.com/wp-json/atlasaidev_tracker/tracker/track` within the next tick window.
+4. Flip back to `no` → next tick window: zero requests.
+
+---
+
 ## Future entries
 
 (Append a new section per fix as work progresses. Use the same 6-part structure: surface, Pro audit, code test, browser test, static check, Pro-side change.)
