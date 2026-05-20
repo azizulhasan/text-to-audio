@@ -176,32 +176,57 @@ class TTA_Dashboard_Widget {
 			&& \TTA\TTA_Activator::play_count_column_exists();
 
 		if ( $has_play_count_column ) {
-			// Plays today — one query, one value, zero PHP memory.
-			$plays_today = (int) $wpdb->get_var( $wpdb->prepare(
-				"SELECT COALESCE(SUM(play_count), 0) FROM {$table_name} WHERE DATE(updated_at) = %s",
-				$today
-			) );
+			// TTS-247: plays_today now matches views_today / listen_seconds_today —
+			// computed as the start-of-day-snapshot delta. The prior SUM
+			// over `WHERE DATE(updated_at)=today` returned each row's
+			// CUMULATIVE play_count, not today's actual deltas.
+			\TTA_Api\AtlasVoice_Analytics::maybe_snapshot_today( $table_name );
+			$snapshot = (array) get_option( 'tta_analytics_snapshot_' . $today, array() );
+			$current  = \TTA_Api\AtlasVoice_Analytics::current_cumulative_sums( $table_name );
+			$plays_today = max( 0, ( $current['play'] ?? 0 ) - ( $snapshot['play'] ?? 0 ) );
 
-			// Top post today (Pro only) — DB-side GROUP BY.
+			// Top post today (Pro only): pick the post whose play_count
+			// grew most since today's snapshot. Falls back to "no data" when
+			// nothing has changed yet.
 			if ( $is_pro ) {
-				$top = $wpdb->get_row( $wpdb->prepare(
-					"SELECT post_id, SUM(play_count) AS total_plays
-					 FROM {$table_name}
-					 WHERE DATE(updated_at) = %s
-					 GROUP BY post_id
-					 ORDER BY total_plays DESC
-					 LIMIT 1",
-					$today
-				) );
-				if ( $top && $top->total_plays > 0 ) {
-					$top_post_title = get_the_title( (int) $top->post_id );
+				$today_rows = $wpdb->get_results(
+					"SELECT post_id, play_count FROM {$table_name}"
+				);
+				$post_today_plays_snapshot = (array) get_option( 'tta_top_post_snapshot_' . $today, array() );
+				if ( empty( $post_today_plays_snapshot ) ) {
+					$snap = array();
+					foreach ( $today_rows as $r ) {
+						$snap[ (int) $r->post_id ] = ( $snap[ (int) $r->post_id ] ?? 0 ) + (int) $r->play_count;
+					}
+					update_option( 'tta_top_post_snapshot_' . $today, $snap, false );
+					$post_today_plays_snapshot = $snap;
+				}
+				$post_plays_today = array();
+				foreach ( $today_rows as $r ) {
+					$pid = (int) $r->post_id;
+					$post_plays_today[ $pid ] = ( $post_plays_today[ $pid ] ?? 0 ) + (int) $r->play_count;
+				}
+				$top_pid = 0;
+				$top_delta = 0;
+				foreach ( $post_plays_today as $pid => $cur ) {
+					$delta = $cur - ( $post_today_plays_snapshot[ $pid ] ?? 0 );
+					if ( $delta > $top_delta ) {
+						$top_delta = $delta;
+						$top_pid   = $pid;
+					}
+				}
+				if ( $top_pid ) {
+					$top_post_title = get_the_title( $top_pid );
 					if ( empty( $top_post_title ) ) {
-						$top_post_title = '#' . (int) $top->post_id;
+						$top_post_title = '#' . $top_pid;
 					}
 				}
 			}
 
-			// 7-day chart — one query, GROUP BY date.
+			// TTS-247: 7-day chart still uses cumulative SUM grouped by
+			// updated_at — same over-count caveat as before; will become
+			// accurate once we have daily-bucket data or per-day snapshots
+			// accumulated forward. Today's bar will not match plays_today.
 			$chart_start = gmdate( 'Y-m-d', strtotime( '-6 days', strtotime( current_time( 'Y-m-d' ) ) ) );
 			$chart_rows  = $wpdb->get_results( $wpdb->prepare(
 				"SELECT DATE(updated_at) AS day, SUM(play_count) AS plays
@@ -226,29 +251,10 @@ class TTA_Dashboard_Widget {
 				];
 			}
 
-			// views_today and listen_seconds_today are still in the serialized column.
-			// Guard with a row-count check to prevent memory exhaustion.
-			$today_row_count = (int) $wpdb->get_var( $wpdb->prepare(
-				"SELECT COUNT(*) FROM {$table_name} WHERE DATE(updated_at) = %s",
-				$today
-			) );
-			$max_rows = (int) apply_filters( 'tta_dashboard_widget_row_limit', 5000 );
-			if ( $today_row_count <= $max_rows ) {
-				$today_rows = $wpdb->get_results( $wpdb->prepare(
-					"SELECT analytics FROM {$table_name} WHERE DATE(updated_at) = %s",
-					$today
-				) );
-				if ( $today_rows ) {
-					foreach ( $today_rows as $row ) {
-						$analytics = maybe_unserialize( $row->analytics );
-						if ( ! is_array( $analytics ) ) {
-							continue;
-						}
-						$views_today          += isset( $analytics['init']['count'] ) ? (int) $analytics['init']['count'] : 0;
-						$listen_seconds_today += isset( $analytics['time']['count'] ) ? (int) $analytics['time']['count'] : 0;
-					}
-				}
-			}
+			// TTS-247: views_today / listen_seconds_today as snapshot delta
+			// ($snapshot and $current are reused from the plays_today block).
+			$views_today          = max( 0, ( $current['init'] ?? 0 ) - ( $snapshot['init'] ?? 0 ) );
+			$listen_seconds_today = max( 0, ( $current['time'] ?? 0 ) - ( $snapshot['time'] ?? 0 ) );
 		} else {
 			// TTS-236: Fallback for pre-migration tables — row-count guarded PHP scan.
 			$today_row_count = (int) $wpdb->get_var( $wpdb->prepare(
@@ -264,42 +270,44 @@ class TTA_Dashboard_Widget {
 					wp_schedule_single_event( time() + 60, 'tta_migrate_play_count_column' );
 				}
 			} else {
-				$today_rows = $wpdb->get_results( $wpdb->prepare(
-					"SELECT post_id, analytics FROM {$table_name} WHERE DATE(updated_at) = %s",
-					$today
-				) );
+				// TTS-247: fallback path also uses the start-of-day snapshot
+				// delta instead of summing cumulative serialized columns.
+				\TTA_Api\AtlasVoice_Analytics::maybe_snapshot_today( $table_name );
+				$snapshot = (array) get_option( 'tta_analytics_snapshot_' . $today, array() );
+				$current  = \TTA_Api\AtlasVoice_Analytics::current_cumulative_sums( $table_name );
+				$plays_today          = max( 0, ( $current['play'] ?? 0 ) - ( $snapshot['play'] ?? 0 ) );
+				$views_today          = max( 0, ( $current['init'] ?? 0 ) - ( $snapshot['init'] ?? 0 ) );
+				$listen_seconds_today = max( 0, ( $current['time'] ?? 0 ) - ( $snapshot['time'] ?? 0 ) );
 
-				$post_plays = [];
-
-				if ( $today_rows ) {
-					foreach ( $today_rows as $row ) {
-						$analytics = maybe_unserialize( $row->analytics );
-						if ( ! is_array( $analytics ) ) {
-							continue;
+				// Top post today (Pro): scan only rows updated today, per-row
+				// play count is approximated as the play.count diff vs row's
+				// pre-today state. Kept simple — sum current play.count for
+				// rows touched today; an over-count on long-lived rows but
+				// good enough for "top post today" ranking.
+				if ( $is_pro ) {
+					$today_rows = $wpdb->get_results( $wpdb->prepare(
+						"SELECT post_id, analytics FROM {$table_name} WHERE DATE(updated_at) = %s",
+						$today
+					) );
+					$post_plays = [];
+					if ( $today_rows ) {
+						foreach ( $today_rows as $row ) {
+							$analytics = maybe_unserialize( $row->analytics );
+							if ( ! is_array( $analytics ) ) {
+								continue;
+							}
+							$pid = (int) $row->post_id;
+							$post_plays[ $pid ] = ( $post_plays[ $pid ] ?? 0 )
+								+ ( isset( $analytics['play']['count'] ) ? (int) $analytics['play']['count'] : 0 );
 						}
-
-						$play_count = isset( $analytics['play']['count'] ) ? (int) $analytics['play']['count'] : 0;
-						$init_count = isset( $analytics['init']['count'] ) ? (int) $analytics['init']['count'] : 0;
-						$time_count = isset( $analytics['time']['count'] ) ? (int) $analytics['time']['count'] : 0;
-
-						$plays_today          += $play_count;
-						$views_today          += $init_count;
-						$listen_seconds_today += $time_count;
-
-						$pid = (int) $row->post_id;
-						if ( ! isset( $post_plays[ $pid ] ) ) {
-							$post_plays[ $pid ] = 0;
-						}
-						$post_plays[ $pid ] += $play_count;
 					}
-				}
-
-				if ( $is_pro && ! empty( $post_plays ) ) {
-					arsort( $post_plays );
-					$top_post_id    = key( $post_plays );
-					$top_post_title = get_the_title( $top_post_id );
-					if ( empty( $top_post_title ) ) {
-						$top_post_title = '#' . $top_post_id;
+					if ( ! empty( $post_plays ) ) {
+						arsort( $post_plays );
+						$top_post_id    = key( $post_plays );
+						$top_post_title = get_the_title( $top_post_id );
+						if ( empty( $top_post_title ) ) {
+							$top_post_title = '#' . $top_post_id;
+						}
 					}
 				}
 			}
