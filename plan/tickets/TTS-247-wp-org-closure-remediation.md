@@ -7,6 +7,8 @@
 **Closed on:** 2026-05-19
 **Deadline:** 2026-07-18 (60 days from closure) — after this date, the public closure reason becomes "Guideline Violation"
 
+**Test cases:** see [`TTS-247-test-cases.md`](TTS-247-test-cases.md) — populated as each fix lands, includes Pro-impact audit per fix.
+
 ---
 
 ## 1. Context
@@ -139,11 +141,11 @@ Verified the AI-flagged examples against the actual source. All claims so far ar
 | C14 | Output escaping — `the_content` filter | `includes/helpers.php:615` (`add_listen_button`) | Same | ⬜ |
 | C15 | Unclosed `ob_start()` | `includes/helpers.php:403` | Ensure paired `ob_get_clean()` before every `return`/early exit in the function | ⬜ |
 | C16 | Unclosed `ob_start()` | `admin/TTA_Admin.php:359` | Same | ⬜ |
-| C17 | Redefining `ABSPATH` | `text-to-audio.php:30-33` (block) | Remove the whole `if (!defined('ABSPATH')) { define('ABSPATH', dirname(__FILE__) . '/'); }` block — WP defines ABSPATH before plugins load, so this is dead code | ⬜ |
+| C17 | Redefining `ABSPATH` | `text-to-audio.php:30-33` (block) | Remove the whole `if (!defined('ABSPATH')) { define('ABSPATH', dirname(__FILE__) . '/'); }` block — WP defines ABSPATH before plugins load, so this is dead code | ✅ |
 | C18 | Text domain mismatch (`atlasaidev`) | 49 strings across codebase | Replace `'atlasaidev'` → `'text-to-audio'` in all gettext calls | ⬜ |
 | C19 | Text domain mismatch (`text-to-speech-pro`) | 1 string | Replace → `'text-to-audio'` | ⬜ |
-| C20 | Variable as string AND domain in `__()` | `includes/TTA_Helper.php:1369-1378` (`get_text_value($atts, $saved_texts, $key, $default, $text_domain)` → `__($default, $text_domain);`) | Refactor: don't pass dynamic text/domain through `__()`. Replace with a switch/match over known `$key` values that maps to literal `__('...', 'text-to-audio')` calls. **Caution**: this helper is called from multiple places — audit all call sites before refactoring | ⬜ |
-| C21 | Missing text-domain + missing translator comment | `text-to-audio.php:138-146` (Freemius `connect_message_on_update` filter) | First call uses `__('Hey %1$s')` with no domain; second call uses `text-to-speech-pro` domain. Replace with `printf( /* translators: %1$s username, %2$s plugin name, %5$s freemius link */ esc_html__('Hey %1$s, ...', 'text-to-audio'), ... )` | ⬜ |
+| C20 | Variable as string AND domain in `__()` | `includes/TTA_Helper.php:1369-1378` (`get_text_value(..., $default, $text_domain)` → `__($default, $text_domain);`) | Dropped `$text_domain` param and removed the inner `__()` call; callers now pass already-translated literals (`__( 'Listen', 'text-to-audio' )` etc.). All 4 call sites in `includes/helpers.php:530-543` updated. | ✅ |
+| C21 | Missing text-domain + missing translator comment | `text-to-audio.php:138-146` (Freemius `connect_message_on_update` filter) | Both `__()` calls now use `'text-to-audio'`; added `/* translators: ... */` comment. Kept plain `__()` (not `esc_html__`) because `$plugin_title` and `$freemius_link` are pre-rendered HTML by Freemius. | ✅ |
 | C22 | High admin menu position | `admin/TTA_Admin.php:493` (`add_menu_page(..., 20)`) | Change position to `null` (default) or a high integer like `99` — competing with core slot 20 (Pages) | ⬜ |
 
 ### 3.7 Build / Release

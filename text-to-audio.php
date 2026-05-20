@@ -27,11 +27,12 @@
  */
 
 
-// Absolute path to the WordPress directory.
-if (!defined('ABSPATH')) {
-    define('ABSPATH', dirname(__FILE__) . '/');
-}
-
+// TTS-247: dropped the previous `if (!defined('ABSPATH')) { define('ABSPATH', ...); }`
+// block. WordPress defines ABSPATH in wp-load.php before any plugin file is loaded,
+// so the body never executed in practice. The WordPress.org Plugin Directory review
+// (May 2026, HelpScout #293) still flagged it under "Changing global behaviour" —
+// a plugin must not redefine WordPress core constants.
+//
 // If this file is called directly, abort.
 if (!defined('WPINC')) {
     die;
@@ -135,9 +136,18 @@ if (function_exists('ttsp_fs')) {
         $freemius_link
     )
     {
+        // TTS-247: fixed gettext domains for both translatable strings below.
+        // Previously the first call was `__('Hey %1$s')` with no text domain at
+        // all, and the second used the wrong domain `'text-to-speech-pro'`. The
+        // WP.org plugin slug is `text-to-audio`, so all gettext calls must use
+        // that domain (Plugin Directory guideline — Internationalization).
+        // Added a /* translators: */ comment so the translators understand the
+        // sprintf placeholders. Kept plain __() (not esc_html__) because
+        // $plugin_title and $freemius_link are pre-rendered HTML from Freemius.
         return sprintf(
-            __('Hey %1$s') . ',<br>' .
-            __('Please help us improve %2$s! If you opt-in, some data about your usage of %2$s will be sent to %5$s. If you skip this, that\'s okay! %2$s will still work just fine.', 'text-to-speech-pro'),
+            /* translators: 1: user's first name, 2: plugin name (already HTML-wrapped), 5: Freemius account link (already HTML) */
+            __( 'Hey %1$s', 'text-to-audio' ) . ',<br>' .
+            __( 'Please help us improve %2$s! If you opt-in, some data about your usage of %2$s will be sent to %5$s. If you skip this, that\'s okay! %2$s will still work just fine.', 'text-to-audio' ),
             $user_first_name,
             '<b>' . $plugin_title . '</b>',
             '<b>' . $user_login . '</b>',

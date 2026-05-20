@@ -526,19 +526,24 @@ function get_button_text($atts, $content_read_time)
         ? $saved_texts['players'][$player_id]
         : [];
 
+    // TTS-247: the translated defaults below are now passed as literal __()
+    // calls at this call site (instead of `'Listen'` strings being translated
+    // inside get_text_value()). This is required so that makepot / wp-cli can
+    // extract the strings — the WP.org review flagged the previous design as
+    // a gettext-with-variables violation. See TTA_Helper::get_text_value().
     $resolve = function ($state, $flat_key, $fallback) use ($atts, $saved_texts, $player_states) {
         if (!empty($player_states[$state]['text'])) {
             return $player_states[$state]['text'];
         }
-        return TTA_Helper::get_text_value($atts, $saved_texts, $flat_key, $fallback, 'text-to-audio');
+        return TTA_Helper::get_text_value($atts, $saved_texts, $flat_key, $fallback);
     };
 
-    $listen_text = $resolve('listen', 'listen_text', 'Listen');
-    $pause_text  = $resolve('pause',  'pause_text',  'Pause');
-    $resume_text = $resolve('resume', 'resume_text', 'Resume');
-    $replay_text = $resolve('replay', 'replay_text', 'Replay');
-    $start_text  = TTA_Helper::get_text_value($atts, $saved_texts, 'start_text', 'Start', 'text-to-audio');
-    $stop_text   = TTA_Helper::get_text_value($atts, $saved_texts, 'stop_text',  'Stop',  'text-to-audio');
+    $listen_text = $resolve('listen', 'listen_text', __( 'Listen', 'text-to-audio' ));
+    $pause_text  = $resolve('pause',  'pause_text',  __( 'Pause',  'text-to-audio' ));
+    $resume_text = $resolve('resume', 'resume_text', __( 'Resume', 'text-to-audio' ));
+    $replay_text = $resolve('replay', 'replay_text', __( 'Replay', 'text-to-audio' ));
+    $start_text  = TTA_Helper::get_text_value($atts, $saved_texts, 'start_text', __( 'Start', 'text-to-audio' ));
+    $stop_text   = TTA_Helper::get_text_value($atts, $saved_texts, 'stop_text',  __( 'Stop',  'text-to-audio' ));
 
     $text_arr = [
         'listen_text' => $listen_text,
