@@ -180,13 +180,17 @@ class TTA_Dashboard_Widget {
 
 		if ( $has_play_count_column ) {
 			// Plays today — one query, one value, zero PHP memory.
+			// {$table_name} is internal whitelisted (wpdb prefix + 'atlasvoice_analytics'); user-input flows through %s/%d placeholders.
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			$plays_today = (int) $wpdb->get_var( $wpdb->prepare(
 				"SELECT COALESCE(SUM(play_count), 0) FROM {$table_name} WHERE DATE(updated_at) = %s",
 				$today
 			) );
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 			// Top post today (Pro only) — DB-side GROUP BY.
 			if ( $is_pro ) {
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 				$top = $wpdb->get_row( $wpdb->prepare(
 					"SELECT post_id, SUM(play_count) AS total_plays
 					 FROM {$table_name}
@@ -196,6 +200,7 @@ class TTA_Dashboard_Widget {
 					 LIMIT 1",
 					$today
 				) );
+				// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 				if ( $top && $top->total_plays > 0 ) {
 					$top_post_title = get_the_title( (int) $top->post_id );
 					if ( empty( $top_post_title ) ) {
@@ -206,6 +211,7 @@ class TTA_Dashboard_Widget {
 
 			// 7-day chart — one query, GROUP BY date.
 			$chart_start = gmdate( 'Y-m-d', strtotime( '-6 days', strtotime( current_time( 'Y-m-d' ) ) ) );
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			$chart_rows  = $wpdb->get_results( $wpdb->prepare(
 				"SELECT DATE(updated_at) AS day, SUM(play_count) AS plays
 				 FROM {$table_name}
@@ -214,6 +220,7 @@ class TTA_Dashboard_Widget {
 				 ORDER BY day ASC",
 				$chart_start
 			) );
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			$chart_map = [];
 			if ( $chart_rows ) {
 				foreach ( $chart_rows as $r ) {
@@ -231,16 +238,20 @@ class TTA_Dashboard_Widget {
 
 			// views_today and listen_seconds_today are still in the serialized column.
 			// Guard with a row-count check to prevent memory exhaustion.
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			$today_row_count = (int) $wpdb->get_var( $wpdb->prepare(
 				"SELECT COUNT(*) FROM {$table_name} WHERE DATE(updated_at) = %s",
 				$today
 			) );
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			$max_rows = (int) apply_filters( 'tta_dashboard_widget_row_limit', 5000 );
 			if ( $today_row_count <= $max_rows ) {
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 				$today_rows = $wpdb->get_results( $wpdb->prepare(
 					"SELECT analytics FROM {$table_name} WHERE DATE(updated_at) = %s",
 					$today
 				) );
+				// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 				if ( $today_rows ) {
 					foreach ( $today_rows as $row ) {
 						$analytics = maybe_unserialize( $row->analytics );
@@ -254,10 +265,12 @@ class TTA_Dashboard_Widget {
 			}
 		} else {
 			// TTS-236: Fallback for pre-migration tables — row-count guarded PHP scan.
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			$today_row_count = (int) $wpdb->get_var( $wpdb->prepare(
 				"SELECT COUNT(*) FROM {$table_name} WHERE DATE(updated_at) = %s",
 				$today
 			) );
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			$max_rows = (int) apply_filters( 'tta_dashboard_widget_row_limit', 5000 );
 
 			if ( $today_row_count > $max_rows ) {
@@ -267,10 +280,12 @@ class TTA_Dashboard_Widget {
 					wp_schedule_single_event( time() + 60, 'tta_migrate_play_count_column' );
 				}
 			} else {
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 				$today_rows = $wpdb->get_results( $wpdb->prepare(
 					"SELECT post_id, analytics FROM {$table_name} WHERE DATE(updated_at) = %s",
 					$today
 				) );
+				// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 				$post_plays = [];
 
@@ -313,16 +328,20 @@ class TTA_Dashboard_Widget {
 				$label = date_i18n( 'D', strtotime( $date ) );
 
 				$day_plays = 0;
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 				$day_row_count = (int) $wpdb->get_var( $wpdb->prepare(
 					"SELECT COUNT(*) FROM {$table_name} WHERE DATE(updated_at) = %s",
 					$date
 				) );
+				// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 				if ( $day_row_count <= $max_rows ) {
+					// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 					$day_rows = $wpdb->get_results( $wpdb->prepare(
 						"SELECT analytics FROM {$table_name} WHERE DATE(updated_at) = %s",
 						$date
 					) );
+					// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 					if ( $day_rows ) {
 						foreach ( $day_rows as $row ) {
 							$analytics = maybe_unserialize( $row->analytics );

@@ -250,7 +250,9 @@ class TTA_Activator {
 		if ( ! self::play_count_column_exists( true ) ) {
 			// Suppress errors — we'll re-check below.
 			$wpdb->hide_errors();
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			$wpdb->query( "ALTER TABLE $table_name ADD COLUMN play_count INT UNSIGNED NOT NULL DEFAULT 0" );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			$wpdb->query( "ALTER TABLE $table_name ADD INDEX idx_play_count (play_count)" );
 			$wpdb->show_errors();
 			// Bust the cache so the next check re-reads from the DB.
@@ -290,10 +292,12 @@ class TTA_Activator {
 			return false;
 		}
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$column = $wpdb->get_results( $wpdb->prepare(
 			"SHOW COLUMNS FROM {$table} LIKE %s",
 			'play_count'
 		) );
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$exists = ! empty( $column );
 		return $exists;
 	}
@@ -325,9 +329,11 @@ class TTA_Activator {
 			if ( ! self::play_count_column_exists( true ) ) {
 				// Migration impossible without the column. Still populate the
 				// counter via PHP scan (guarded by size).
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 				$row_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
 				$max_rows  = (int) apply_filters( 'tta_total_plays_scan_row_limit', 5000 );
 				if ( $row_count <= $max_rows ) {
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 					$rows  = $wpdb->get_col( "SELECT analytics FROM {$table}" );
 					$total = 0;
 					if ( $rows ) {
@@ -350,14 +356,17 @@ class TTA_Activator {
 		$batch_size = (int) apply_filters( 'tta_play_count_migration_batch_size', 500 );
 
 		// Read next chunk by ID (not OFFSET — OFFSET is O(N) on large tables).
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$rows = $wpdb->get_results( $wpdb->prepare(
 			"SELECT id, analytics FROM {$table} WHERE id > %d AND play_count = 0 ORDER BY id ASC LIMIT %d",
 			$last_id,
 			$batch_size
 		) );
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		if ( empty( $rows ) ) {
 			// Done. Reconcile the running counter with the column sum.
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			$total = (int) $wpdb->get_var( "SELECT COALESCE(SUM(play_count), 0) FROM {$table}" );
 			update_option( 'tta_total_plays_counter', $total, false );
 			update_option( 'tta_total_plays_fallback', $total, false );
@@ -375,6 +384,7 @@ class TTA_Activator {
 				? (int) $data['play']['count']
 				: 0;
 
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->update(
 				$table,
 				array( 'play_count' => $count ),
@@ -423,6 +433,7 @@ class TTA_Activator {
 
 		// Retrieve existing indexes on the table.
 		$existing_indexes = array();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$index_results    = $wpdb->get_results( "SHOW INDEX FROM `{$table_name}`", ARRAY_A );
 		if ( is_array( $index_results ) ) {
 			foreach ( $index_results as $row ) {
@@ -438,9 +449,11 @@ class TTA_Activator {
 
 		foreach ( $indexes_to_add as $index_name => $column_name ) {
 			if ( ! in_array( $index_name, $existing_indexes, true ) ) {
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,PluginCheck.Security.DirectDB.UnescapedDBParameter
 				$wpdb->query(
 					"ALTER TABLE `{$table_name}` ADD INDEX `{$index_name}` (`{$column_name}`)"
 				);
+				// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			}
 		}
 

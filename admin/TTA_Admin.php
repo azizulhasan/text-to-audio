@@ -234,8 +234,12 @@ class TTA_Admin
         do_action('tta_enqueue_pro_dashboard_scripts');
 
         // Welcome wizard (separate bundle, only on first activation).
+        // Read-only routing check on admin page; no state mutation, no nonce required.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         $is_wizard_page = is_admin()
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             && isset( $_REQUEST['page'] ) && 'text-to-audio' === $_REQUEST['page']
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             && isset( $_REQUEST['welcome'] ) && '1' === $_REQUEST['welcome']
             && ( ! get_option( 'tta_onboarding_completed' ) || ( TTA_Helper::is_pro_active() && ! get_option( 'tta_pro_onboarding_completed' ) ) );
         if ( $is_wizard_page ) {
@@ -323,6 +327,7 @@ class TTA_Admin
             return; // Don't load dashboard scripts when wizard is active.
         }
 
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page-name read for asset enqueue, no state mutation
         if (is_admin() && isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
             /* Load react js */
             wp_enqueue_style('tts-bootstrap', plugin_dir_url(__FILE__) . 'css/bootstrap.css', [], $this->version, 'all');
@@ -364,6 +369,7 @@ class TTA_Admin
         }
 
 
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page-name read for asset enqueue, no state mutation
         if (TTA_Helper::is_edit_page() || isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
             // TTS-247: ship Chart.js locally instead of jsDelivr CDN (wp.org Guideline 8 — no remote assets).
             wp_enqueue_script('AtlasVoice_chart', plugin_dir_url(__FILE__) . 'js/vendor/chart.umd.min.js', [], '4.4.7', true);
@@ -394,7 +400,8 @@ class TTA_Admin
             'tta-blocks',
             plugin_dir_url(dirname(__FILE__)) . 'build/blocks.js',
             array('wp-blocks', 'wp-element', 'wp-i18n', 'wp-block-editor'),
-            filemtime(plugin_dir_path(dirname(__FILE__)) . 'build/blocks.js')
+            filemtime(plugin_dir_path(dirname(__FILE__)) . 'build/blocks.js'),
+            true
         );
 
         // Localize script data
@@ -494,6 +501,7 @@ class TTA_Admin
 
 
         if (get_player_id() > 2) {
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page-name read, no state mutation
             if (!empty($_REQUEST['page']) && $_REQUEST['page'] == 'bulk-mp3-generate') {
                 wp_enqueue_style('tts-bootstrap', plugin_dir_url(__FILE__) . 'css/bootstrap.css', [], $this->version, 'all');
             }
@@ -517,6 +525,7 @@ class TTA_Admin
     {
         echo '<h1>AtlasVoice Pro : Bulk MP3 File Generate</h1>';
 
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin route check for which view to render
         if (!empty($_REQUEST['atlasvoice_mp3_file'])) {
             echo '<div id="atlasvoice_generate_bulk_mp3_file"></div>';
         } else {
@@ -537,6 +546,7 @@ class TTA_Admin
 
     public function TTA_settings()
     {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin route check, no state mutation
         $show_wizard = ( isset( $_GET['welcome'] ) && '1' === $_GET['welcome'] )
             && ( ! get_option( 'tta_onboarding_completed' ) || ( TTA_Helper::is_pro_active() && ! get_option( 'tta_pro_onboarding_completed' ) ) );
         if ( $show_wizard ) {
@@ -829,6 +839,7 @@ class TTA_Admin
         // only runs when the user explicitly opens this admin page, and the
         // user sees a disclosure notice on entry. Documented in readme's
         // "External services" section.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page-name read for current-screen check
         if (!empty($_REQUEST['page']) && $_REQUEST['page'] === $menu_slug) {
             add_action('admin_notices', function () {
                 // TTS-247: the surrounding "Other AtlasAiDev Plugins" page has a

@@ -44,6 +44,7 @@ class TTA_Helper
         $option_name = 'tta_total_plays_counter';
 
         // Check if the option exists.
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $exists = $wpdb->get_var( $wpdb->prepare(
             "SELECT option_id FROM {$wpdb->options} WHERE option_name = %s LIMIT 1",
             $option_name
@@ -55,6 +56,7 @@ class TTA_Helper
         } else {
             // Atomic increment via direct SQL. This is safe under concurrent writes
             // because MySQL guarantees atomicity of a single UPDATE statement.
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
             $wpdb->query( $wpdb->prepare(
                 "UPDATE {$wpdb->options} SET option_value = CAST(option_value AS UNSIGNED) + %d WHERE option_name = %s",
                 $delta,
@@ -107,6 +109,7 @@ class TTA_Helper
         }
 
         // Row-count guard.
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
         $count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
         if ( $count > $max_rows ) {
             return $fallback;
@@ -1751,12 +1754,14 @@ class TTA_Helper
 
         $table = $wpdb->postmeta;
 
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $deleted = $wpdb->query(
             $wpdb->prepare(
                 "DELETE FROM $table WHERE meta_key = %s",
                 $meta_key
             )
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
 
         return $deleted;
@@ -1814,7 +1819,9 @@ class TTA_Helper
     }
 
     public  static  function detect_browser() {
-        $user_agent = strtolower( $_SERVER['HTTP_USER_AGENT'] );
+        $user_agent = isset( $_SERVER['HTTP_USER_AGENT'] )
+            ? strtolower( sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) )
+            : '';
 
         $browser = 'unknown';
         if (strpos($user_agent, 'firefox') !== false) {
@@ -1843,7 +1850,7 @@ class TTA_Helper
 
         foreach ( $ip_keys as $key ) {
             if ( ! empty( $_SERVER[ $key ] ) ) {
-                $ip = $_SERVER[ $key ];
+                $ip = sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) );
 
                 // Handle multiple IPs (e.g. "116.206.88.143, 10.0.0.1")
                 if ( strpos( $ip, ',' ) !== false ) {
