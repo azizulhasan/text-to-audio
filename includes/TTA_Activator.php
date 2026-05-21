@@ -450,9 +450,9 @@ class TTA_Activator {
 	private static function is_table_exists() {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'atlasvoice_analytics';
-		$query      = $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table_name ) );
 
-		if ( ! $wpdb->get_var( $query ) == $table_name ) {
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
+		if ( ! $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table_name ) ) ) == $table_name ) {
 			return false;
 		}
 

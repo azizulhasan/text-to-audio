@@ -235,14 +235,9 @@ class TTA_Init
 }
 
 
-// Load text domain at init (WordPress 6.7+ requires init or later).
-add_action('init', function () {
-    load_plugin_textdomain(
-        'text-to-audio',
-        false,
-        dirname(plugin_basename(__FILE__)) . '/languages'
-    );
-}, 0);
+// TTS-247: load_plugin_textdomain() has been discouraged since WP 4.6 for
+// wp.org-hosted plugins -- WordPress loads translations automatically from
+// translate.wordpress.org. Removed per the Plugin Check warning.
 
 add_action('plugins_loaded', function () {
     //Rest api init.

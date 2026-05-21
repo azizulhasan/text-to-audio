@@ -2,6 +2,9 @@
 
 namespace TTA_Admin;
 
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
+
 use TTA\TTA_Helper;
 
 /**
@@ -358,8 +361,8 @@ class TTA_Dashboard_Widget {
 	private function table_exists() {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'atlasvoice_analytics';
-		$query      = $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table_name ) );
-
-		return $wpdb->get_var( $query ) === $table_name;
+		// $query is pre-prepared on the prior line; phpcs misses the chained prepare().
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
+		return $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table_name ) ) ) === $table_name;
 	}
 }

@@ -2,6 +2,9 @@
 
 namespace TTA_Admin;
 
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
+
 use TTA\TTA_Helper;
 use TTA\TTA_Cache;
 use TTA\TTA_i18n;
@@ -518,7 +521,7 @@ class TTA_Admin
             echo '<div id="atlasvoice_generate_bulk_mp3_file"></div>';
         } else {
             $url = admin_url('edit.php');
-            echo '<p>No post ID found. Please select multiple posts from the post page. And apply <strong>AtlasVoice Generate MP3 File</strong> bulk action. <a href="' . $url . '">Go to Posts Page</a></p>';
+            echo '<p>No post ID found. Please select multiple posts from the post page. And apply <strong>AtlasVoice Generate MP3 File</strong> bulk action. <a href="' . esc_url( $url ) . '">Go to Posts Page</a></p>';
             echo 'How it works? <a style="text-decoration:none;color:red" target="_blank" href="https://www.youtube.com/watch?v=HFoqlkPCP80"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 576 512" fill="currentColor" style="vertical-align:-0.125em"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg></a>';
         }
 
@@ -1195,19 +1198,19 @@ class TTA_Admin
                 <ul style="margin:0 0 20px;padding:0;list-style:none;">
                     <li style="margin-bottom:10px;font-size:14px;color:#1d2327;">
                         <?php echo esc_html__( 'Voice not working', 'text-to-audio' ); ?> &rarr;
-                        <a href="<?php echo $docs_url; ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
+                        <a href="<?php echo esc_url( $docs_url ); ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
                             <?php echo esc_html__( 'Quick Fix Guide', 'text-to-audio' ); ?>
                         </a>
                     </li>
                     <li style="margin-bottom:10px;font-size:14px;color:#1d2327;">
                         <?php echo esc_html__( 'Player not showing', 'text-to-audio' ); ?> &rarr;
-                        <a href="<?php echo $compat_url; ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
+                        <a href="<?php echo esc_url( $compat_url ); ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
                             <?php echo esc_html__( 'Troubleshoot', 'text-to-audio' ); ?>
                         </a>
                     </li>
                     <li style="margin-bottom:10px;font-size:14px;color:#1d2327;">
                         <?php echo esc_html__( 'Need better voices', 'text-to-audio' ); ?> &rarr;
-                        <a href="<?php echo $integrations_url; ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
+                        <a href="<?php echo esc_url( $integrations_url ); ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
                             <?php echo esc_html__( 'See AI Voices', 'text-to-audio' ); ?>
                         </a>
                     </li>

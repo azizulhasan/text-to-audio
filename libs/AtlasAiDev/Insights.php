@@ -477,7 +477,11 @@ class Insights {
 			$notice .= ' (<a class="' . $this->client->getSlug() . '-insights-data-we-collect" href="#">' . esc_html__( 'what we collect', 'text-to-audio' ) . '</a>)';
 			$notice .= '<p class="description" style="display:none;">' . implode( ', ', $this->data_we_collect() ) . '. ' . esc_html__( 'No sensitive data is tracked.', 'text-to-audio' ) . '</p>';
 			echo '<div class="updated"><p>';
-			echo $notice; // phpcs:ignore xss ok
+			// TTS-247: $notice is admin-only opt-in banner HTML built from a
+			// static filter value plus a hand-assembled <a>+<p>, no user data.
+			// Run through wp_kses_post so output is escaped to the post-content
+			// allow-list (covers the <a> and <p class="description"> we add).
+			echo wp_kses_post( $notice );
 			echo '</p><p class="submit">';
 			echo '&nbsp;<a href="' . esc_url( $this->get_opt_out_url() ) . '" class="button button-secondary">' . esc_html__( 'No thanks', 'text-to-audio' ) . '</a>';
 			echo '&nbsp;<a href="' . esc_url( $this->get_opt_in_url() ) . '" class="button button-primary">' . esc_html__( 'Allow', 'text-to-audio' ) . '</a>';

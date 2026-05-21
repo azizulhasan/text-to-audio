@@ -115,7 +115,9 @@ class TTA_Helper
         try {
             return $callback();
         } catch ( \Throwable $e ) {
-            if ( function_exists( 'error_log' ) ) {
+            // TTS-247: log only when WP_DEBUG is on; production sites stay quiet.
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'error_log' ) ) {
+                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 error_log( 'TTA safe_large_query failed: ' . $e->getMessage() );
             }
             return $fallback;
@@ -883,7 +885,7 @@ class TTA_Helper
         $upload_dir = wp_upload_dir();
         $base_dir = $upload_dir['basedir'];
 
-        if (is_writable($base_dir)) {
+        if (wp_is_writable($base_dir)) {
             return true;
         }
 
@@ -952,29 +954,14 @@ class TTA_Helper
             }
         }
 
-        $file_headers = @get_headers($url);
-
-        if (!$file_headers && function_exists('curl_init')) {
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_NOBODY, true); // fetch headers only, no body
-            curl_setopt($ch, CURLOPT_HEADER, true);
-            $file_headers = curl_exec($ch);
-            curl_close($ch);
+        // TTS-247: prefer wp_remote_head() over raw get_headers/curl (Plugin
+        // Check guideline -- core HTTP API handles timeouts, SSL, redirects).
+        $response = wp_remote_head( $url, array( 'timeout' => 5, 'redirection' => 3 ) );
+        if ( is_wp_error( $response ) ) {
+            return true; // treat as missing
         }
-                
-
-        if (isset($file_headers[0])) {
-            $file_headers = $file_headers[0];
-        }
-
-        if (!$file_headers || strpos($file_headers, 'Not Found') !== false) {
-            return true;
-        }
-
-
-        return false;
+        $code = (int) wp_remote_retrieve_response_code( $response );
+        return ( 404 === $code || $code === 0 );
     }
 
     /**
@@ -983,7 +970,7 @@ class TTA_Helper
     public static function is_signed_url_expired($signedUrl)
     {
         // Parse the URL to get the query string
-        $urlComponents = parse_url($signedUrl);
+        $urlComponents = wp_parse_url($signedUrl);
         if(!isset($urlComponents['query'])) {
             return false;
         }
@@ -1702,7 +1689,7 @@ class TTA_Helper
     public static function get_post_date($post)
     {
         $post_date = get_post_field('post_date', $post->ID);
-        $date = date('Y/m/d', strtotime($post_date));
+        $date = gmdate('Y/m/d', strtotime($post_date));
 
         return $date;
     }
@@ -1993,11 +1980,15 @@ class TTA_Helper
         // Generate JSON-LD markup
         $json = wp_json_encode($schema_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
+        // TTS-247: JSON-LD goes inside a <script type="application/ld+json">.
+        // The JSON body itself is produced by wp_json_encode() so it's safe;
+        // the wrapping comment / <script> tags are static. The filtered final
+        // markup is allowed through wp_kses with a script-allowlist so any
+        // third-party filter that injects tags can't escape the JSON-LD scope.
         $schema_markup = "<!-- Text To Audio Schema -->\n<script type=\"application/ld+json\">\n" . $json . "\n</script>\n";
-
-        // Allow filtering of final schema markup
         $schema_markup = apply_filters('tts_audio_schema_markup', $schema_markup, $schema_data, [], $post);
 
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- intentional raw JSON-LD <script> block, body is wp_json_encode()'d
         echo $schema_markup;
     }
 

@@ -2,6 +2,9 @@
 
 namespace TTA;
 
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
+
 use TTA_Admin\TTA_Admin;
 use TTA_Admin\TTA_Posts_List;
 
@@ -156,36 +159,29 @@ class TTA {
      * Appears under Settings > Privacy > Privacy Policy page as suggested text.
      */
     public function register_privacy_policy_content() {
-        $content = __(
-            'This site uses the AtlasVoice plugin to provide text-to-speech audio playback. ' .
-            'When listening analytics are enabled, the plugin collects the following data:' .
-            "\n\n" .
-            '<strong>Analytics data (per visitor):</strong>' .
-            "\n" .
-            '<ul>' .
-            '<li>A pseudonymous browser fingerprint identifier (not your name, email, or IP address)</li>' .
-            '<li>Which posts or pages you listened to</li>' .
-            '<li>Playback events (play, pause, resume, completion)</li>' .
-            '<li>Device type, browser, and operating system</li>' .
-            '<li>Listening duration and timestamps</li>' .
-            '</ul>' .
-            "\n" .
-            'This data is stored in your site\'s database and is used solely to understand how visitors ' .
-            'interact with the audio player. Because the identifier is a browser fingerprint (not tied to ' .
-            'your email or account), it cannot be linked to you personally.' .
-            "\n\n" .
-            '<strong>Optional telemetry (opt-in only):</strong>' .
-            "\n" .
-            'If the site administrator opts in to usage telemetry, anonymized plugin configuration data ' .
-            '(e.g., which text-to-speech engine is selected, feature flags, active post types) is sent ' .
-            'weekly to AtlasAiDev. No visitor data, post content, or personal information is included.' .
-            "\n\n" .
-            '<strong>Data retention:</strong>' .
-            "\n" .
-            'Analytics data is stored indefinitely until the site administrator clears it via the plugin ' .
-            'settings or uninstalls the plugin. All plugin data is permanently deleted on uninstall.',
-            TEXT_TO_AUDIO_TEXT_DOMAIN
-        );
+        // TTS-247: each paragraph / list item is its own gettext call so the
+        // $text and $domain parameters stay single string literals (the
+        // makepot extractor and wp.org Plugin Check both require this).
+        $content =
+            __( 'This site uses the AtlasVoice plugin to provide text-to-speech audio playback. When listening analytics are enabled, the plugin collects the following data:', 'text-to-audio' )
+            . "\n\n"
+            . '<strong>' . __( 'Analytics data (per visitor):', 'text-to-audio' ) . '</strong>'
+            . "\n<ul>"
+            . '<li>' . __( 'A pseudonymous browser fingerprint identifier (not your name, email, or IP address)', 'text-to-audio' ) . '</li>'
+            . '<li>' . __( 'Which posts or pages you listened to', 'text-to-audio' ) . '</li>'
+            . '<li>' . __( 'Playback events (play, pause, resume, completion)', 'text-to-audio' ) . '</li>'
+            . '<li>' . __( 'Device type, browser, and operating system', 'text-to-audio' ) . '</li>'
+            . '<li>' . __( 'Listening duration and timestamps', 'text-to-audio' ) . '</li>'
+            . "</ul>\n"
+            . __( "This data is stored in your site's database and is used solely to understand how visitors interact with the audio player. Because the identifier is a browser fingerprint (not tied to your email or account), it cannot be linked to you personally.", 'text-to-audio' )
+            . "\n\n"
+            . '<strong>' . __( 'Optional telemetry (opt-in only):', 'text-to-audio' ) . '</strong>'
+            . "\n"
+            . __( 'If the site administrator opts in to usage telemetry, anonymized plugin configuration data (e.g., which text-to-speech engine is selected, feature flags, active post types) is sent weekly to AtlasAiDev. No visitor data, post content, or personal information is included.', 'text-to-audio' )
+            . "\n\n"
+            . '<strong>' . __( 'Data retention:', 'text-to-audio' ) . '</strong>'
+            . "\n"
+            . __( 'Analytics data is stored indefinitely until the site administrator clears it via the plugin settings or uninstalls the plugin. All plugin data is permanently deleted on uninstall.', 'text-to-audio' );
 
         wp_add_privacy_policy_content(
             'AtlasVoice – Text to Speech',
@@ -204,7 +200,7 @@ class TTA {
      */
     public function register_data_exporter( $exporters ) {
         $exporters['atlasvoice'] = array(
-            'exporter_friendly_name' => __( 'AtlasVoice Analytics Data', TEXT_TO_AUDIO_TEXT_DOMAIN ),
+            'exporter_friendly_name' => __( 'AtlasVoice Analytics Data', 'text-to-audio' ),
             'callback'               => array( $this, 'export_personal_data' ),
         );
         return $exporters;
@@ -234,7 +230,7 @@ class TTA {
      */
     public function register_data_eraser( $erasers ) {
         $erasers['atlasvoice'] = array(
-            'eraser_friendly_name' => __( 'AtlasVoice Analytics Data', TEXT_TO_AUDIO_TEXT_DOMAIN ),
+            'eraser_friendly_name' => __( 'AtlasVoice Analytics Data', 'text-to-audio' ),
             'callback'             => array( $this, 'erase_personal_data' ),
         );
         return $erasers;
@@ -255,7 +251,7 @@ class TTA {
             'items_removed'  => false,
             'items_retained' => false,
             'messages'       => array(
-                __( 'AtlasVoice analytics uses pseudonymous browser fingerprints that cannot be linked to email addresses. No matching data found.', TEXT_TO_AUDIO_TEXT_DOMAIN ),
+                __( 'AtlasVoice analytics uses pseudonymous browser fingerprints that cannot be linked to email addresses. No matching data found.', 'text-to-audio' ),
             ),
             'done'           => true,
         );
