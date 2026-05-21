@@ -347,7 +347,33 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     do_action('tts_enqueue_button_scripts', $params);
     $data = apply_filters('tts__listening_button', $button, $player_number, $class, $post);
 
-    return $data;
+    // TTS-247: escape the filter output before returning so shortcode /
+    // block / the_content callers can echo the result safely. Allow-list
+    // covers our default markup (<tts-play-button>) plus the common HTML
+    // surfaces a third-party filter might use (button, span, svg, img, a).
+    $allowed = array(
+        'tts-play-button' => array(
+            'data-id'    => true,
+            'class'      => true,
+            'role'       => true,
+            'aria-label' => true,
+            'style'      => true,
+        ),
+        'button' => array(
+            'class' => true, 'id' => true, 'style' => true, 'type' => true,
+            'aria-label' => true, 'aria-pressed' => true, 'role' => true,
+            'data-id' => true, 'data-state' => true, 'tabindex' => true,
+        ),
+        'span'   => array( 'class' => true, 'id' => true, 'style' => true, 'aria-hidden' => true ),
+        'a'      => array( 'class' => true, 'id' => true, 'style' => true, 'href' => true, 'target' => true, 'rel' => true, 'aria-label' => true ),
+        'img'    => array( 'class' => true, 'id' => true, 'style' => true, 'src' => true, 'alt' => true, 'width' => true, 'height' => true ),
+        'svg'    => array( 'class' => true, 'xmlns' => true, 'viewbox' => true, 'width' => true, 'height' => true, 'fill' => true, 'stroke' => true, 'aria-hidden' => true ),
+        'path'   => array( 'd' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true ),
+        'g'      => array( 'fill' => true, 'stroke' => true ),
+        'div'    => array( 'class' => true, 'id' => true, 'style' => true ),
+        'br'     => array(),
+    );
+    return wp_kses( (string) $data, $allowed );
 }
 
 
@@ -400,7 +426,10 @@ function get_enqueued_js_object($params, $plugin_all_settings)
     $compatible_data = TTA_Helper::tts_get_settings('compatible');
     $compatible_content = apply_filters('tts_compatible_plugins_content', [], $compatible_data, $post);
 
-    $object = ob_start();
+    // TTS-247: close the output buffer with ob_get_clean() at the end of this
+    // function (was leaking on ob_get_contents alone, which the wp.org review
+    // flagged as an unclosed ob_start).
+    ob_start();
     ?>
     <!-- AtlasVoice Settings  -->
     <script id='tts_button_settings_<?php echo $player_number; ?>'>
@@ -475,9 +504,8 @@ function get_enqueued_js_object($params, $plugin_all_settings)
     </script>
     <?php
     // Audio schema is now output via wp_head hook (TTA_Helper::output_audio_schema_head)
-    $object = ob_get_contents();
-
-    return $object;
+    // TTS-247: ob_get_clean() closes + returns the buffer in one step.
+    return (string) ob_get_clean();
 }
 
 
@@ -661,17 +689,13 @@ function add_listen_button($content)
             && $reduce_enqueue['button_no'] > 0
         ) {
             if ($button_no == $reduce_enqueue['button_no'] && isset($post->post_content) && !(has_shortcode($post->post_content, 'tta_listen_btn') || has_shortcode($post->post_content, 'atlasvoice'))) {
-                ob_start();
-                echo tta_get_button_content('');
-                $button = ob_get_contents();
-                ob_end_clean();
+                // TTS-247: tta_get_button_content() now wp_kses-escapes its
+                // own output around the tts__listening_button filter point.
+                $button = tta_get_button_content('');
             }
         } else {
             if (!TTA_Helper::tts_has_shortcode($post)) {
-                ob_start();
-                echo tta_get_button_content('');
-                $button = ob_get_contents();
-                ob_end_clean();
+                $button = tta_get_button_content('');
             }
         }
     }
@@ -1000,15 +1024,23 @@ function is_pro_active()
  * @param string $message  The log message.
  */
 function tts_debug( $message ) {
+    // TTS-247: write to uploads/text-to-audio/ instead of wp-content/debug.log.
+    // wp.org guideline forbids writing into the plugin folder or hijacking
+    // core's debug.log; create the per-plugin folder lazily under wp_upload_dir().
+    $upload = wp_upload_dir();
+    if ( ! empty( $upload['error'] ) ) {
+        return;
+    }
+    $dir = trailingslashit( $upload['basedir'] ) . 'text-to-audio';
+    if ( ! file_exists( $dir ) ) {
+        wp_mkdir_p( $dir );
+        @file_put_contents( $dir . '/index.php', "<?php\n// Silence is golden.\n" );
+    }
+    $log_file = $dir . '/debug.log';
 
-    // Plugin directory
-    $log_file = WP_CONTENT_DIR . '/debug.log';
-
-    // Prepare log message with timestamp
     $time = date( 'Y-m-d H:i:s' );
     $formatted_message = "[$time] [atlasvoice] " . print_r( $message, true ) . PHP_EOL;
 
-    // Append to log file
     file_put_contents( $log_file, $formatted_message, FILE_APPEND | LOCK_EX );
 }
 

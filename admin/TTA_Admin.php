@@ -72,8 +72,9 @@ class TTA_Admin
         add_filter('script_loader_tag', [$this, 'load_script_as_tag'], 10, 3);
         add_action('wp_ajax_atlas_plugins_refresh', array($this, 'ajax_refresh_plugins'));
 
+        // TTS-247: switched plain include to require_once per wp.org guideline.
         if (!function_exists('is_plugin_active')) {
-            include ABSPATH . 'wp-admin/includes/plugin.php';
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
         }
 
         if (!function_exists('wp_is_mobile')) {
@@ -106,8 +107,10 @@ class TTA_Admin
             'api_url' => $rest_api_url,
             'api_namespace' => 'tta',
             'api_version' => 'v1',
-            'image_url' => WP_PLUGIN_URL . '/text-to-audio/admin/images',
-            'plugin_url' => WP_PLUGIN_URL . '/text-to-audio',
+            // TTS-247: resolve plugin URL via plugin_dir_url/__FILE__ instead of
+            // hardcoding the slug -- breaks when the folder is renamed/symlinked.
+            'image_url' => plugins_url( 'admin/images', TEXT_TO_AUDIO_ROOT_FILE ),
+            'plugin_url' => untrailingslashit( plugin_dir_url( TEXT_TO_AUDIO_ROOT_FILE ) ),
             'nonce' => wp_create_nonce(TEXT_TO_AUDIO_NONCE),
             'plugin_name' => TEXT_TO_AUDIO_PLUGIN_NAME,
             'rest_nonce' => wp_create_nonce('wp_rest'),
@@ -214,8 +217,9 @@ class TTA_Admin
          * Looad wp-speeh script
          */
 
+        // TTS-247: switched plain include to require_once per wp.org guideline.
         if (!function_exists('is_plugin_active')) {
-            include ABSPATH . 'wp-admin/includes/plugin.php';
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
         }
 
         // Populate latest_post_preview_url lazily here (not in constructor)
@@ -303,7 +307,8 @@ class TTA_Admin
                 'pro_url'           => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
                 'dashboard_url'     => admin_url( 'admin.php?page=text-to-audio' ),
                 'site_locale'       => get_locale(),
-                'plugin_url'        => WP_PLUGIN_URL . '/text-to-audio',
+                // TTS-247: use plugin_dir_url so renamed/symlinked installs work.
+                'plugin_url'        => untrailingslashit( plugin_dir_url( TEXT_TO_AUDIO_ROOT_FILE ) ),
             ) );
 
             wp_enqueue_script( 'tts-welcome-wizard' );
@@ -356,7 +361,10 @@ class TTA_Admin
         }
 
         if (is_admin() && isset($GLOBALS['pagenow']) && $GLOBALS['pagenow'] === 'plugins.php') {
-            $object = ob_start();
+            // TTS-247: pair ob_start() with ob_get_clean() so the buffer
+            // closes in the same scope (was using ob_get_contents() alone,
+            // which the wp.org review flagged as an unclosed ob_start).
+            ob_start();
             ?>
             <script>
                 window.document.addEventListener('DOMContentLoaded', function () {
@@ -379,8 +387,7 @@ class TTA_Admin
             </script>
 
             <?php
-            $object = ob_get_contents();
-            echo $object;
+            echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
         }
 
         if (TTA_Helper::is_edit_page() || isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
@@ -440,6 +447,8 @@ class TTA_Admin
      */
     public function render_button($customize)
     {
+        // TTS-247: escape happens inside tta_get_button_content (wp_kses
+        // with a small allow-list around the tts__listening_button output).
         return tta_get_button_content($customize, true);
     }
 
