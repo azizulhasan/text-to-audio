@@ -828,10 +828,17 @@ class TTA_Admin
         // "External services" section.
         if (!empty($_REQUEST['page']) && $_REQUEST['page'] === $menu_slug) {
             add_action('admin_notices', function () {
+                // TTS-247: the surrounding "Other AtlasAiDev Plugins" page has a
+                // dark hero card that bleeds into the default .notice text
+                // colour; inline styles guarantee readable contrast.
                 printf(
-                    '<div class="notice notice-info"><p>%s</p></div>',
+                    '<div class="notice notice-info" style="background:#fff;border-left-color:#2271b1;color:#1d2327;"><p style="color:#1d2327;margin:8px 0;font-size:13px;line-height:1.5;"><strong style="color:#1d2327;">%s</strong> %s</p></div>',
                     esc_html__(
-                        'This page loads a public plugin catalog from github.com (raw.githubusercontent.com/atlasaidev/plugins). No personal data is sent. See "External services" in the plugin readme for details.',
+                        'Heads up:',
+                        'text-to-audio'
+                    ),
+                    esc_html__(
+                        'this page fetches the latest AtlasAiDev plugin list from a public GitHub file. No site or user data is sent — see "External services" in the readme for details.',
                         'text-to-audio'
                     )
                 );
