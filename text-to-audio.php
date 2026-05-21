@@ -645,6 +645,8 @@ register_deactivation_hook(__FILE__, function () {
  */
 function tta_create_shortcode($atts, $content, $shortcode_tag)
 {
+    // TTS-247: escape happens inside tta_get_button_content (wp_kses with
+    // a small allow-list around the tts__listening_button filter output).
     return tta_get_button_content($atts, false, $content);
 }
 

@@ -222,9 +222,13 @@ class Client {
 	 * @return void
 	 */
 	protected function set_basename_and_slug() {
-		
-		if ( false === strpos( $this->file, WP_CONTENT_DIR . '/themes/' ) ) {
-			
+
+		// TTS-247: use get_theme_root() instead of hardcoding WP_CONTENT_DIR.'/themes/'
+		// so custom theme roots (register_theme_directory, multisite) work too.
+		$theme_root = trailingslashit( get_theme_root() );
+
+		if ( false === strpos( $this->file, $theme_root ) ) {
+
 			$this->basename = plugin_basename( $this->file );
 			/** @noinspection SpellCheckingInspection, PhpUnusedLocalVariableInspection */
 			list( $this->slug, $mainfile ) = explode( '/', $this->basename );
@@ -233,8 +237,8 @@ class Client {
 			$this->project_version = $plugin_data['Version'];
 			$this->type = 'plugin';
 		} else {
-			$this->basename = str_replace( WP_CONTENT_DIR . '/themes/', '', $this->file );
-			
+			$this->basename = str_replace( $theme_root, '', $this->file );
+
 			list( $this->slug, $main_file ) = explode( '/', $this->basename );
 			$theme = wp_get_theme( $this->slug );
 			$this->project_version = $theme->version;
