@@ -17,49 +17,6 @@ use TTA\TTA_Helper;
 class AtlasVoice_Analytics {
 
 	/**
-	 * TTS-247: take the first-of-day snapshot of cumulative SUMs so the
-	 * dashboard widget can compute today's delta. Idempotent — once today's
-	 * snapshot exists we don't overwrite. Public so the same SUMs helper
-	 * can be reused from the widget.
-	 */
-	public static function maybe_snapshot_today( $table_name = '' ) {
-		global $wpdb;
-		if ( ! $table_name ) {
-			$table_name = $wpdb->prefix . 'atlasvoice_analytics';
-		}
-		$today  = current_time( 'Y-m-d' );
-		$option = 'tta_analytics_snapshot_' . $today;
-		if ( false !== get_option( $option ) ) {
-			return;
-		}
-		update_option( $option, self::current_cumulative_sums( $table_name ), false );
-	}
-
-	/**
-	 * TTS-247: sum init / play / time / pause / end counts across every row
-	 * in the analytics table. Used both for the daily snapshot and at widget
-	 * render time. Stopgap until per-event schema lands.
-	 */
-	public static function current_cumulative_sums( $table_name = '' ) {
-		global $wpdb;
-		if ( ! $table_name ) {
-			$table_name = $wpdb->prefix . 'atlasvoice_analytics';
-		}
-		$rows = $wpdb->get_col( "SELECT analytics FROM {$table_name}" );
-		$totals = array( 'init' => 0, 'play' => 0, 'pause' => 0, 'end' => 0, 'time' => 0 );
-		foreach ( $rows as $blob ) {
-			$d = maybe_unserialize( $blob );
-			if ( ! is_array( $d ) ) {
-				continue;
-			}
-			foreach ( $totals as $k => $_ ) {
-				$totals[ $k ] += isset( $d[ $k ]['count'] ) ? (int) $d[ $k ]['count'] : 0;
-			}
-		}
-		return $totals;
-	}
-
-	/**
 	 * TTS-247: opt-in gate for third-party IP geolocation lookups
 	 * (icanhazip / ip-api / ipinfo). The toggle lives under the Analytics
 	 * tab (next to `tts_enable_analytics`) and is saved by
@@ -136,12 +93,6 @@ class AtlasVoice_Analytics {
 
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'atlasvoice_analytics';
-
-		// TTS-247: lazy start-of-day snapshot so the dashboard widget can show
-		// today's delta (current SUM − today's snapshot) instead of the
-		// cumulative whole-row counts it sums today. Created on the first
-		// /track call of each day, BEFORE the merge below.
-		self::maybe_snapshot_today( $table_name );
 
 		// Check if an entry exists
 		$existing_entry = $wpdb->get_row( $wpdb->prepare(
@@ -743,14 +694,8 @@ class AtlasVoice_Analytics {
         $conditions = array();
         $values     = array();
 
-        // TTS-247: filter on updated_at instead of created_at — analytics rows
-        // are persistent per (user_id, post_id) and accumulate events; the
-        // previous created_at filter dropped rows that pre-dated the window
-        // even when they had been updated inside it. Stopgap until per-event
-        // (or daily-bucket) schema lands; slight over-count on rows that had
-        // pre-window history.
         if ( $dates['from_date'] ) {
-            $conditions[] = 'updated_at >= %s';
+            $conditions[] = 'created_at >= %s';
             $values[]     = $dates['from_date'];
         }
 
@@ -780,9 +725,8 @@ class AtlasVoice_Analytics {
         if ( TTA_Helper::is_pro_active() ) {
             $previous_dates = $this->get_previous_period_dates( $dates );
             if ( $previous_dates['from_date'] && $previous_dates['to_date'] ) {
-                // TTS-247: same filter switch as above (updated_at, not created_at).
                 $prev_conditions = array(
-                    'updated_at >= %s',
+                    'created_at >= %s',
                     'updated_at <= %s'
                 );
                 $prev_values = array( $previous_dates['from_date'], $previous_dates['to_date'] );
