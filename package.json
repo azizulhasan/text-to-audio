@@ -18,6 +18,7 @@
     "makeZip": "gulp makeZip",
     "release": "gulp release",
     "copy": "gulp copy",
+    "copy:seven": "gulp copyToSeven",
     "copyProButton": "gulp copyProButton",
     "makepot": "wp i18n make-pot . languages/text-to-audio.pot",
     "translate": "node scripts/generate-translations.js"

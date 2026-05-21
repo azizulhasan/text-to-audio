@@ -149,6 +149,15 @@ const config = {
 			//compress: true,
 			//modifiedTime: undefined
 		}
+	},
+	// TTS-247: deploy the built plugin to the secondary local install at
+	// D:/laragon/www/seven/wp-content/plugins/. Run `npm run copy:seven`
+	// after `npm run makeZip` (or `npm run copy`) has refreshed
+	// production/text-to-audio/.
+	copyToSeven: {
+		src: 'production/text-to-audio/**',
+		output: 'D:/laragon/www/seven/wp-content/plugins/text-to-audio/',
+		options: {}
 	}
 
 	// ftp:{
@@ -283,6 +292,21 @@ gulp.task('release', function () {
 		.pipe(gulpCopy('D:/xampp/htdocs/wordpress.org/text-to-audio-release/', config.copy.src.options))
 		.pipe(notify({ message: 'Release version copy Completed! 💯', onLast: true }))
 })
+
+// TTS-247: internal deploy step — copy the already-built
+// production/text-to-audio/ tree to the secondary local WP install at
+// D:/laragon/www/seven/wp-content/plugins/. Strips the leading
+// "production/text-to-audio/" path segments so the files land directly
+// under the target plugin folder.
+gulp.task('copyToSevenDeploy', function () {
+	return gulp.src(config.copyToSeven.src)
+		.pipe(gulpCopy(config.copyToSeven.output, { prefix: 2 }))
+		.pipe(notify({ message: 'Copied to seven/wp-content/plugins/text-to-audio/ 💯', onLast: true }))
+})
+
+// Public task — refresh the production/ build and deploy it in one command
+// (npm run copy:seven). Mirrors the makeZip = copy + zip pattern.
+gulp.task('copyToSeven', gulp.series('copy', 'copyToSevenDeploy'))
 
 // watch
 gulp.task(
