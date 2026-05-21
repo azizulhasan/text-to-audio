@@ -1118,12 +1118,7 @@ class Insights {
 			.atlasaidev-dr-modal .button.disabled, .atlasaidev-dr-modal button.disabled { cursor: not-allowed !important; }
 			/*.atlasaidev-dr-modal .atlasaidev-row input, .atlasaidev-dr-modal .atlasaidev-row textarea { width: calc( 100% - 10px ); margin: 0 5px; display: block; vertical-align: middle; box-sizing: border-box; float: left; }*/
 		</style>
-		<?php
-		// Freemius deactivation data for parallel submission.
-		$freemius_data = apply_filters( 'AtlasAiDev_' . $this->client->getSlug() . '_freemius_deactivation_data', array() );
-		if ( ! empty( $freemius_data ) ) : ?>
-		<script type="text/javascript">window._fsDeactivationData = <?php echo wp_json_encode( $freemius_data ); ?>;</script>
-		<?php endif; ?>
+		<?php ?>
 		<!--suppress ES6ConvertVarToLetConst, JSUnresolvedVariable -->
 		<script type="text/javascript">
             (function ($) {
@@ -1139,23 +1134,6 @@ class Insights {
                     function _ajax(data, buttonElem, cb) {
                         if (buttonElem.hasClass('disabled')) return;
                         buttonElem.attr('data-label', buttonElem.text());
-                        // Send to Freemius via sendBeacon (survives page navigation).
-                        if (window._fsDeactivationData && data.reason_id) {
-                            var fsReasonMap = {
-                                'could-not-understand': 10, 'found-better-plugin': 2,
-                                'not-have-that-feature': 11, 'is-not-working': 12,
-                                'looking-for-other': 13, 'did-not-work-as-expected': 14,
-                                'debugging': 15, 'other': 7, 'no-comment': 7, 'none': 7
-                            };
-                            var fd = new FormData();
-                            fd.append('action', window._fsDeactivationData.action);
-                            fd.append('security', window._fsDeactivationData.security);
-                            fd.append('module_id', window._fsDeactivationData.module_id);
-                            fd.append('reason_id', fsReasonMap[data.reason_id] || 7);
-                            fd.append('reason_info', data.reason_info || '');
-                            fd.append('is_anonymous', '0');
-                            navigator.sendBeacon(ajaxurl, fd);
-                        }
                         return $.ajax({
                             url: ajaxurl,
                             type: 'POST',

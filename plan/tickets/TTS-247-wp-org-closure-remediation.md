@@ -125,39 +125,39 @@ Verified the AI-flagged examples against the actual source. All claims so far ar
 
 | # | Area | File(s) — Line | Action | Status |
 |---|---|---|---|---|
-| C1 | composer.json missing in SVN | Plugin root | Add `composer.json` (already exists in repo) to the production ZIP — update `gulpfile.js productionSrc` | ⬜ |
-| C2 | Out-of-date Plyr | `admin/demos/player3/js/build/plyr-demo.lib.min.js` (3.6.8) | Update Plyr to latest stable | ⬜ |
-| C3 | Un-prefixed Freemius | `freemius/start.php` | Run `composer mozart`/`strauss`/`php-scoper` on the Freemius SDK to namespace it under `TTA\Vendor\Freemius` | ⬜ |
-| C4 | Plain `include ABSPATH/...` | `admin/TTA_Admin.php:76` | Replace with `require_once ABSPATH . 'wp-admin/includes/plugin.php';` and use a function from it immediately after | ⬜ |
-| C5 | Plain `include ABSPATH/...` | `admin/TTA_Admin.php:218` | Same | ⬜ |
-| C6 | Plain `include ABSPATH/...` | `libs/AtlasAiDev/Insights.php:629` | Same | ⬜ |
-| C7 | Hardcoded plugin URL | `admin/TTA_Admin.php:109, 110, 306` | `WP_PLUGIN_URL . '/text-to-audio'` → `plugins_url('', TEXT_TO_AUDIO_ROOT_FILE)` (or use `TTA_PLUGIN_URL` constant consistently) | ⬜ |
-| C8 | Hardcoded themes path | `libs/AtlasAiDev/Client.php:226, 236` | `WP_CONTENT_DIR . '/themes/'` → `get_theme_root()` | ⬜ |
-| C9 | Writing to wp-content | `includes/helpers.php:1007` (`debug.log`) | Move log writes into `wp_upload_dir()['basedir'] . '/text-to-audio/'` | ⬜ |
-| C10 | REST permission_callback audit | `api/TTA_Api_Routes.php` (18 routes) | Document the auth model on `get_route_access` (nonce + cap) and confirm each route uses the right capability | ⬜ |
-| C11 | Output escaping — shortcode `tta_listen_btn` | `text-to-audio.php:643` → `tta_get_button_content()` | Either escape the filtered HTML inside `tta_get_button_content()`, or rebuild output via `wp_kses_post()` / allow-listed tags | ⬜ |
-| C12 | Output escaping — shortcode `atlasvoice` | `text-to-audio.php:644` | Same as C11 | ⬜ |
-| C13 | Output escaping — block `render_callback` | `admin/TTA_Admin.php:422` | Same | ⬜ |
-| C14 | Output escaping — `the_content` filter | `includes/helpers.php:615` (`add_listen_button`) | Same | ⬜ |
-| C15 | Unclosed `ob_start()` | `includes/helpers.php:403` | Ensure paired `ob_get_clean()` before every `return`/early exit in the function | ⬜ |
-| C16 | Unclosed `ob_start()` | `admin/TTA_Admin.php:359` | Same | ⬜ |
-| C17 | Redefining `ABSPATH` | `text-to-audio.php:30-33` (block) | Remove the whole `if (!defined('ABSPATH')) { define('ABSPATH', dirname(__FILE__) . '/'); }` block — WP defines ABSPATH before plugins load, so this is dead code | ✅ |
-| C18 | Text domain mismatch (`atlasaidev`) | 49 strings across codebase | Replace `'atlasaidev'` → `'text-to-audio'` in all gettext calls | ⬜ |
-| C19 | Text domain mismatch (`text-to-speech-pro`) | 1 string | Replace → `'text-to-audio'` | ⬜ |
-| C20 | Variable as string AND domain in `__()` | `includes/TTA_Helper.php:1369-1378` (`get_text_value(..., $default, $text_domain)` → `__($default, $text_domain);`) | Dropped `$text_domain` param and removed the inner `__()` call; callers now pass already-translated literals (`__( 'Listen', 'text-to-audio' )` etc.). All 4 call sites in `includes/helpers.php:530-543` updated. | ✅ |
-| C21 | Missing text-domain + missing translator comment | `text-to-audio.php:138-146` (Freemius `connect_message_on_update` filter) | Both `__()` calls now use `'text-to-audio'`; added `/* translators: ... */` comment. Kept plain `__()` (not `esc_html__`) because `$plugin_title` and `$freemius_link` are pre-rendered HTML by Freemius. | ✅ |
-| C22 | High admin menu position | `admin/TTA_Admin.php:493` (`add_menu_page(..., 20)`) | Change position to `null` (default) or a high integer like `99` — competing with core slot 20 (Pages) | ⬜ |
+| C1 | composer.json missing in SVN | Plugin root | `gulpfile.js productionSrc` no longer excludes `composer.json` (landed with S1-S11 source-availability) | ✅ |
+| C2 | Out-of-date Plyr | `admin/demos/player3/js/build/plyr-demo.lib.min.js` (3.6.8) | Update Plyr to latest stable | ⏸ Skipped — revisit |
+| C3 | Un-prefixed Freemius | `freemius/start.php` | Freemius bootstrap removed from `text-to-audio.php` entirely; `freemius/` directory excluded from the production ZIP via `gulpfile.js productionSrc`. Unprefixed shared classes no longer ship, so the "library conflict" check is moot. Re-init from scratch if needed after re-approval. | ✅ |
+| C4 | Plain `include ABSPATH/...` | `admin/TTA_Admin.php:76` | Changed to `require_once` with TTS-247 comment | ✅ |
+| C5 | Plain `include ABSPATH/...` | `admin/TTA_Admin.php:218` | Changed to `require_once` with TTS-247 comment | ✅ |
+| C6 | Plain `include ABSPATH/...` | `libs/AtlasAiDev/Insights.php:629` | Changed to `require_once`; also normalised the leading-slash path | ✅ |
+| C7 | Hardcoded plugin URL | `admin/TTA_Admin.php:109, 110, 306` | All three replaced with `plugin_dir_url(TEXT_TO_AUDIO_ROOT_FILE)` / `plugins_url('admin/images', TEXT_TO_AUDIO_ROOT_FILE)` | ✅ |
+| C8 | Hardcoded themes path | `libs/AtlasAiDev/Client.php:226, 236` | Both branches now use `get_theme_root()` (with a single `$theme_root` variable) | ✅ |
+| C9 | Writing to wp-content | `includes/helpers.php:1007` (`debug.log`) | `tts_debug()` writes to `wp_upload_dir()/text-to-audio/debug.log`, creates the folder + `index.php` sentinel on first call | ✅ |
+| C10 | REST permission_callback audit | `api/TTA_Api_Routes.php` (25 routes) | Added a 3-tier-policy docblock to `get_route_access()`. Deleted the dead `get_route_access_old()` and `get_route_access_new()` methods. Reconciled the route lists against every `register_rest_route` call site — 23 admin / 2 frontend-nonce / 1 intentionally public `/cors-alert` with a public-by-design TTS-247 comment now annotating that exception | ✅ |
+| C11 | Output escaping — shortcode `tta_listen_btn` | `text-to-audio.php:643` → `tta_get_button_content()` | Escape moved INSIDE `tta_get_button_content()` — `wp_kses()` with a small allow-list (`tts-play-button`, button/span/a/img/svg/path/g/div) right after the `tts__listening_button` filter. All 4 surfaces inherit it transparently. | ✅ |
+| C12 | Output escaping — shortcode `atlasvoice` | `text-to-audio.php:644` | Same — escape inside `tta_get_button_content()` | ✅ |
+| C13 | Output escaping — block `render_callback` | `admin/TTA_Admin.php:422` | Same — escape inside `tta_get_button_content()` | ✅ |
+| C14 | Output escaping — `the_content` filter | `includes/helpers.php:615` (`add_listen_button`) | Same — escape inside `tta_get_button_content()` | ✅ |
+| C15 | Unclosed `ob_start()` | `includes/helpers.php:403` | `ob_start()` now paired with `echo ob_get_clean();` (the function is hooked to `wp_print_footer_scripts`, so direct echo is correct; an earlier `return (string) ob_get_clean()` was a regression and was hot-fixed) | ✅ |
+| C16 | Unclosed `ob_start()` | `admin/TTA_Admin.php:359` | `ob_start()` now paired with `echo ob_get_clean();` in the same scope | ✅ |
+| C17 | Redefining `ABSPATH` | `text-to-audio.php:30-33` (block) | Block removed in an earlier TTS-247 commit | ✅ |
+| C18 | Text domain mismatch (`atlasaidev`) | 49 strings across codebase | Replaced via `replace_all` in `libs/AtlasAiDev/Insights.php` + `libs/AtlasAiDev/Promotions.php`. Project-wide grep for `'atlasaidev'` returns 0 hits | ✅ |
+| C19 | Text domain mismatch (`text-to-speech-pro`) | 1 string | Already cleared by the C21 fix; only an explanatory `// TTS-247` comment now references the old domain string | ✅ |
+| C20 | Variable as string AND domain in `__()` | `includes/TTA_Helper.php:1369-1378` (`get_text_value(..., $default, $text_domain)` → `__($default, $text_domain);`) | Dropped `$text_domain` param and removed the inner `__()` call; callers pass literals | ✅ |
+| C21 | Missing text-domain + missing translator comment | `text-to-audio.php:138-146` (Freemius `connect_message_on_update` filter) | Both `__()` calls now use `'text-to-audio'` + translator comment | ✅ |
+| C22 | High admin menu position | `admin/TTA_Admin.php:511` (`add_menu_page(..., 20)`) | Position changed from `20` (core Pages slot) to `80` (between Tools and Settings) — still top-level and discoverable, no clash with core WP hierarchy | ✅ |
 
 ### 3.7 Build / Release
 
 | # | Area | Action | Status |
 |---|---|---|---|
-| B1 | Add `composer.json` to release ZIP | Update `gulpfile.js productionSrc` to include `composer.json` | ⬜ |
-| B2 | Add `Building from source` section to `readme.txt` with link to GitHub repo + steps | ⬜ |
-| B3 | Add `== External services ==` section to `readme.txt` (per D1) | ⬜ |
+| B1 | Add `composer.json` to release ZIP | Update `gulpfile.js productionSrc` to include `composer.json` | ✅ (landed with S1-S11) |
+| B2 | Add `Building from source` section to `readme.txt` with link to GitHub repo + steps | ✅ (landed with S9) |
+| B3 | Add `== External services ==` section to `readme.txt` (per D1) | ✅ (landed with D1) |
 | B4 | Bump `Version:` in `text-to-audio.php` header | ⬜ |
 | B5 | Bump `Stable tag:` in `readme.txt` | ⬜ |
-| B6 | `composer install --no-dev` + `npm run production` + `npm run block:build` + `npm run translate` | ⬜ |
+| B6 | `composer install --no-dev` + `npm run production` + `npm run block:build` | ⬜ (npm run translate intentionally skipped — runtime download) |
 | B7 | Generate release ZIP via `npm run makeZip` | ⬜ |
 
 ### 3.8 Verification

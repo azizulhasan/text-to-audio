@@ -55,6 +55,7 @@ const productionSrc = [
 	'!.husky/**',
 	'!node_modules/**',
 	'!production/**',
+	'!freemius/**',
 	'!admin/js/build/*.LICENSE.txt',
 	'!admin/js/build/chunks/*.LICENSE.txt',
 	'!.claude/**',

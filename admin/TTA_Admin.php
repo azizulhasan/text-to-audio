@@ -360,35 +360,6 @@ class TTA_Admin
 
         }
 
-        if (is_admin() && isset($GLOBALS['pagenow']) && $GLOBALS['pagenow'] === 'plugins.php') {
-            // TTS-247: pair ob_start() with ob_get_clean() so the buffer
-            // closes in the same scope (was using ob_get_contents() alone,
-            // which the wp.org review flagged as an unclosed ob_start).
-            ob_start();
-            ?>
-            <script>
-                window.document.addEventListener('DOMContentLoaded', function () {
-                    /**
-                     * If free version then remove the opt-in link from plugin link.
-                     * Also remove the deactivation modal by freemius. So that
-                     * AtlasAiDev tracking software works properly.
-                     */
-                    // if(isProActive && document.querySelector('.opt-in-or-opt-out.text-to-audio')) {
-                    //     document.querySelector('.opt-in-or-opt-out.text-to-audio').style.display = 'none';
-                    // }
-
-                    if (document.querySelector('[data-plugin="text-to-audio/text-to-audio.php"]')) {
-                        var moduleIdElement = document.querySelector('i.fs-module-id[data-module-id="13388"]');
-                        if (moduleIdElement) {
-                            moduleIdElement.parentNode.removeChild(moduleIdElement);
-                        }
-                    }
-                })
-            </script>
-
-            <?php
-            echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-        }
 
         if (TTA_Helper::is_edit_page() || isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
             // TTS-247: ship Chart.js locally instead of jsDelivr CDN (wp.org Guideline 8 — no remote assets).
@@ -508,7 +479,10 @@ class TTA_Admin
             TEXT_TO_AUDIO_TEXT_DOMAIN,
             array($this, "TTA_settings"),
             'dashicons-controls-volumeon',
-            20
+            // TTS-247: moved off slot 20 (core Pages) to 80 — sits between
+            // Tools and Settings, still top-level and discoverable, no
+            // conflict with WP's core admin hierarchy.
+            80
         );
         add_submenu_page(TEXT_TO_AUDIO_TEXT_DOMAIN, __('AtlasVoice', 'text-to-audio'), __('AtlasVoice', 'text-to-audio'), 'manage_options', TEXT_TO_AUDIO_TEXT_DOMAIN, array(
             $this,
@@ -1185,8 +1159,9 @@ class TTA_Admin
     /**
      * Render a "Need Help?" rescue modal on the plugins.php page.
      *
-     * Intercepts the deactivation click for text-to-audio and shows
-     * quick-fix links before passing through to the Freemius modal.
+     * Intercepts the first deactivation click for text-to-audio and shows
+     * quick-fix links; a second click after "Continue to Deactivate"
+     * proceeds to WP's normal deactivation flow.
      *
      * @since 2.2.0
      */
@@ -1259,7 +1234,7 @@ class TTA_Admin
                 var rescueShown = false;
 
                 function rescueHandler(e) {
-                    if (rescueShown) return; // Already shown once, let other handlers (Freemius/AtlasAiDev) take over.
+                    if (rescueShown) return; // Already shown once, let the click proceed normally.
                     e.preventDefault();
                     e.stopImmediatePropagation();
                     overlay.style.display = 'flex';
@@ -1281,7 +1256,7 @@ class TTA_Admin
                     }
                 });
 
-                // "Continue to Deactivate" — hide rescue modal, re-click so Freemius/AtlasAiDev can intercept.
+                // "Continue to Deactivate" — hide rescue modal and re-click the link to proceed.
                 continueBtn.addEventListener('click', function(){
                     overlay.style.display = 'none';
                     rescueShown = true;

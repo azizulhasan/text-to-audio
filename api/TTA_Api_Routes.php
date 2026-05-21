@@ -510,6 +510,12 @@ class TTA_Api_Routes {
 
 		// TTS-240: CORS alert (public, rate-limited). Front-end posts here when
 		// one of our scripts fails to load from a CDN due to missing CORS header.
+		//
+		// TTS-247: intentionally public — uses '__return_true' instead of
+		// get_route_access() because the request originates from anonymous
+		// front-end visitors (no nonce available). The handler itself
+		// hard-rate-limits with a 1-hour transient lock (cors_alert(), line
+		// ~550) so the surface is safe.
 		register_rest_route(
 			$this->namespace,
 			'/cors-alert',
@@ -888,89 +894,39 @@ class TTA_Api_Routes {
 		return rest_ensure_response( array( 'status' => true ) );
 	}
 
-	/*
-	 * Get route access if request is valid.
-	 */
-	public function get_route_access_old($request) {
-
-        $has_valid_nonce = false;
-        if ( isset( $_SERVER['HTTP_X_WP_NONCE'] ) && wp_verify_nonce( wp_unslash( $_SERVER['HTTP_X_WP_NONCE'] ), 'wp_rest' ) ) {
-            $has_valid_nonce = true;
-        } elseif ( isset( $request['rest_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $request['rest_nonce'] ) ), 'wp_rest' ) ) {
-            $has_valid_nonce = true;
-        }
-
-		return apply_filters( 'tts_rest_route_access', $has_valid_nonce );
-	}
+    // TTS-247: get_route_access_old() and get_route_access_new() were dead
+    // experimentation copies superseded by get_route_access() below. Removed
+    // so the reviewer's grep doesn't hit unused permission_callback variants.
 
     /**
-     * Permission check for REST routes.
+     * Permission callback for every REST route registered with this->namespace.
      *
-     * @param \WP_REST_Request $request
-     * @return true|\WP_Error
-     */
-    public function get_route_access_new( $request ) {
-        $route  = $request->get_route();
-        $method = strtoupper( $_SERVER['REQUEST_METHOD'] ?? 'GET' );
-        $has_valid_nonce = false;
-
-        // Admin-only routes: only users with manage_tts (or manage_options) can access.
-        $admin_only = array(
-            '/tta/v1/customize',
-            '/tta/v1/settings',
-            '/tta/v1/save_analytics_settings',
-            '/tta/v1/get_analytics_settings',
-            '/tta/v1/compatible_data',
-            '/tta/v1/text_alias',
-            '/tta/v1/insights',
-            '/tta/v1/all_insights',
-            '/tta/v1/latest_posts',
-            '/tta/v1/categories_and_tags',
-            '/tta/v1/acf_fields',
-            '/tta/v1/browser', // if this truly only returns non-sensitive info
-        );
-
-        // If route is admin-only -> enforce capability
-        if ( in_array( $route, $admin_only, true ) ) {
-            if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-                return new \WP_Error( 'rest_forbidden', __( 'You do not have permission to access this resource.', 'text-to-audio' ), array( 'status' => 403 ) );
-            }
-            $has_valid_nonce = true;
-        }
-
-        // Public read-only routes (allowed for GET without auth)
-        $public_get_routes = array(
-            '/tta/v1/track', // if this truly only returns non-sensitive info
-        );
-
-        // If route is read-only and method is GET -> allow public
-        if ( ! $has_valid_nonce && in_array( $route, $public_get_routes, true ) ) {
-            $has_valid_nonce = true;
-        }
-
-        if ( isset( $_SERVER['HTTP_X_WP_NONCE'] ) && wp_verify_nonce( wp_unslash( $_SERVER['HTTP_X_WP_NONCE'] ), 'wp_rest' ) ) {
-            $has_valid_nonce = true;
-        } elseif ( isset( $request['rest_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $request['rest_nonce'] ) ), 'wp_rest' ) ) {
-            $has_valid_nonce = true;
-        }
-
-        if ( $has_valid_nonce ) {
-            return true;
-        }
-
-        // Fallback: allow logged-in admins
-        if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
-            return true;
-        }
-
-
-        return new \WP_Error( 'rest_forbidden', __( 'Invalid nonce or insufficient permissions.', 'text-to-audio' ), array( 'status' => 403 ) );
-
-
-    }
-
-    /**
-     * Permission check for REST routes.
+     * Three policy tiers — first match wins, otherwise the request is denied:
+     *
+     *   1. ADMIN-ONLY — request must come from a logged-in user with the
+     *      `manage_options` capability. Used for every route that reads or
+     *      writes plugin configuration, settings, or analytics (`/customize`,
+     *      `/settings`, `/listening`, `/save_analytics_settings`,
+     *      `/get_analytics_settings`, `/compatible_data`, `/text_alias`,
+     *      `/insights`, `/all_insights`, `/latest_posts`,
+     *      `/categories_and_tags`, `/acf_fields`, `/browser`,
+     *      `/get_all_user_roles`, `/aggregated_insights`, `/trend_data`,
+     *      `/heatmap_data`, `/export_csv`, `/export_pdf`,
+     *      `/filtered_insights`, `/save_schedule_report`,
+     *      `/get_schedule_report`, `/onboarding-event`).
+     *
+     *   2. FRONTEND-NONCE — request must carry a valid `wp_rest` nonce in the
+     *      `X-WP-Nonce` header or the `rest_nonce` body field. Used by
+     *      `/track` (listener events) and `/geolocation` (per-listener city /
+     *      country lookup, behind the opt-in flag). No capability check —
+     *      frontend visitors aren't logged in.
+     *
+     *   3. DEFAULT DENY — any route reaching this callback that isn't in
+     *      either list above is rejected with HTTP 403.
+     *
+     * Routes that are intentionally public (e.g. `/cors-alert`) bypass this
+     * callback entirely by registering with `'permission_callback' =>
+     * '__return_true'` and a code comment explaining the public exposure.
      *
      * @param \WP_REST_Request $request
      * @return true|\WP_Error
