@@ -504,8 +504,10 @@ function get_enqueued_js_object($params, $plugin_all_settings)
     </script>
     <?php
     // Audio schema is now output via wp_head hook (TTA_Helper::output_audio_schema_head)
-    // TTS-247: ob_get_clean() closes + returns the buffer in one step.
-    return (string) ob_get_clean();
+    // TTS-247: echo + close. The caller (tts_enqueue_button_scripts hook on
+    // wp_print_footer_scripts) doesn't use the return value, so the inline
+    // <script> needs to land in the page directly via echo, not via return.
+    echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
 
