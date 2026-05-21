@@ -46,6 +46,9 @@ export default function Settings() {
     });
     const [postTypes, setPostTypes] = useState([]);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
+    // TTS-247: Settings → Danger zone "Reset all plugin data".
+    const [resetConfirmText, setResetConfirmText] = useState("");
+    const [resetting, setResetting] = useState(false);
     const [postsStatus, setPostsStatus] = useState([]);
     const [categories, setCategories] = useState([]);
     const [tags, setTags] = useState([]);
@@ -129,6 +132,42 @@ export default function Settings() {
             ...settings,
             ...{[e.target.name]: value},
         });
+    };
+
+    // TTS-247: POST to /reset_plugin_data with the literal "DELETE" confirmation.
+    // Permission + nonce gating is enforced server-side by get_route_access().
+    const handleReset = () => {
+        if (resetConfirmText !== "DELETE" || resetting) return;
+        setResetting(true);
+        fetch(tta_obj.api_url + "tta/v1/reset_plugin_data", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-WP-Nonce": tta_obj.rest_nonce,
+            },
+            body: JSON.stringify({confirm: "DELETE"}),
+        })
+            .then((r) => r.json())
+            .then((res) => {
+                if (res && res.status) {
+                    toast(
+                        __("All plugin data has been reset. Reloading…", "text-to-audio"),
+                        "success",
+                        {autoClose: 2000}
+                    );
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    toast(
+                        (res && res.message) || __("Reset failed.", "text-to-audio"),
+                        "error"
+                    );
+                    setResetting(false);
+                }
+            })
+            .catch(() => {
+                toast(__("Reset failed.", "text-to-audio"), "error");
+                setResetting(false);
+            });
     };
 
     const handleSubmit = (e) => {
@@ -987,6 +1026,93 @@ export default function Settings() {
                                         </div>
                                     )}
 
+                                </div>
+
+                                {/* TTS-247: Danger zone — reset all plugin data. */}
+                                <div
+                                    style={{
+                                        marginTop: "32px",
+                                        padding: "20px 24px",
+                                        border: "1px solid #f1c4c4",
+                                        borderLeft: "4px solid #d63638",
+                                        borderRadius: "8px",
+                                        background: "#fef8f8",
+                                    }}
+                                >
+                                    <h3
+                                        style={{
+                                            margin: "0 0 6px",
+                                            color: "#b32d2e",
+                                            fontSize: "16px",
+                                            fontWeight: 600,
+                                        }}
+                                    >
+                                        {__("Danger zone — reset all plugin data", "text-to-audio")}
+                                    </h3>
+                                    <p
+                                        style={{
+                                            margin: "0 0 14px",
+                                            color: "#50575e",
+                                            fontSize: "13px",
+                                            lineHeight: 1.5,
+                                        }}
+                                    >
+                                        {__(
+                                            "Permanently deletes every AtlasVoice option, transient, post-meta entry, cron event, and the analytics database table. The plugin stays active and boots as a fresh install on the next page load. This action cannot be undone.",
+                                            "text-to-audio"
+                                        )}
+                                    </p>
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            gap: "10px",
+                                            alignItems: "center",
+                                            flexWrap: "wrap",
+                                        }}
+                                    >
+                                        <label
+                                            htmlFor="tta-reset-confirm"
+                                            style={{fontSize: "13px", color: "#1d2327"}}
+                                        >
+                                            {__("Type", "text-to-audio")}{" "}
+                                            <code style={{background: "#fff", padding: "1px 6px", border: "1px solid #d0d0d0", borderRadius: "3px"}}>DELETE</code>{" "}
+                                            {__("to confirm:", "text-to-audio")}
+                                        </label>
+                                        <input
+                                            id="tta-reset-confirm"
+                                            type="text"
+                                            value={resetConfirmText}
+                                            onChange={(e) => setResetConfirmText(e.target.value)}
+                                            placeholder="DELETE"
+                                            style={{
+                                                padding: "6px 10px",
+                                                border: "1px solid #c3c4c7",
+                                                borderRadius: "4px",
+                                                width: "140px",
+                                                fontSize: "13px",
+                                            }}
+                                            disabled={resetting}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={handleReset}
+                                            disabled={resetConfirmText !== "DELETE" || resetting}
+                                            style={{
+                                                padding: "7px 18px",
+                                                background: resetConfirmText === "DELETE" && !resetting ? "#d63638" : "#e8a3a4",
+                                                color: "#fff",
+                                                border: "0",
+                                                borderRadius: "4px",
+                                                fontSize: "13px",
+                                                fontWeight: 600,
+                                                cursor: resetConfirmText === "DELETE" && !resetting ? "pointer" : "not-allowed",
+                                            }}
+                                        >
+                                            {resetting
+                                                ? __("Resetting…", "text-to-audio")
+                                                : __("Reset all plugin data", "text-to-audio")}
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {/* Save Button */}

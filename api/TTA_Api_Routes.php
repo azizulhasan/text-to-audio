@@ -529,6 +529,61 @@ class TTA_Api_Routes {
 			)
 		);
 
+		// TTS-247: Settings → Danger zone "Reset all plugin data" button.
+		// Admin-only (gated by get_route_access). Requires a literal
+		// confirmation string "DELETE" in the body to guard against
+		// accidental triggers from CSRF or stale UI sessions.
+		register_rest_route(
+			$this->namespace,
+			'/reset_plugin_data',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'reset_plugin_data' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
+	}
+
+	/**
+	 * TTS-247: Reset every option, transient, post-meta row, cron event and
+	 * the analytics DB table this plugin created. Surfaces a "fresh-install"
+	 * state without uninstalling the plugin itself.
+	 *
+	 * Triple-gated:
+	 *  - get_route_access permission_callback enforces manage_options + nonce.
+	 *  - This handler additionally requires the request body to contain
+	 *    `confirm === 'DELETE'` so an accidental click in an old browser
+	 *    tab can't wipe the site.
+	 *  - The React UI requires the user to type DELETE before the button
+	 *    becomes enabled.
+	 *
+	 * @param \WP_REST_Request $request
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function reset_plugin_data( $request ) {
+		$body    = json_decode( (string) $request->get_body(), true );
+		$confirm = is_array( $body ) && isset( $body['confirm'] ) ? (string) $body['confirm'] : '';
+		if ( 'DELETE' !== $confirm ) {
+			return new \WP_Error(
+				'rest_forbidden',
+				__( 'Missing or invalid confirmation. Type DELETE to confirm.', 'text-to-audio' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( ! class_exists( '\\TTA\\TTA_Reset' ) ) {
+			require_once dirname( __DIR__ ) . '/includes/TTA_Reset.php';
+		}
+		\TTA\TTA_Reset::wipe_plugin_data();
+
+		return rest_ensure_response( array(
+			'status'  => true,
+			'message' => __( 'All plugin data has been reset. Reload the page to start fresh.', 'text-to-audio' ),
+		) );
 	}
 
 	/**
@@ -959,6 +1014,7 @@ class TTA_Api_Routes {
             '/tta/v1/save_schedule_report',
             '/tta/v1/get_schedule_report',
             '/tta/v1/onboarding-event',
+            '/tta/v1/reset_plugin_data',
         );
 
         if ( in_array( $route, $admin_only, true ) ) {
