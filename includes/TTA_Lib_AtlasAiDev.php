@@ -153,22 +153,6 @@ final class TTA_Lib_AtlasAiDev {
         // Enrich tracking payload with plugin-specific usage telemetry.
         add_filter( $projectSlug . '_tracker_data', array( $this, 'get_plugin_telemetry' ), 10, 1 );
 
-        // Provide Freemius AJAX credentials to the AtlasAiDev deactivation JS.
-        add_filter(
-            "AtlasAiDev_{$projectSlug}_freemius_deactivation_data",
-            function () {
-                if ( function_exists( 'ttsp_fs' ) ) {
-                    $fs = ttsp_fs();
-                    return array(
-                        'action'    => $fs->get_ajax_action( 'submit_uninstall_reason' ),
-                        'security'  => $fs->get_ajax_security( 'submit_uninstall_reason' ),
-                        'module_id' => $fs->get_id(),
-                    );
-                }
-                return array();
-            }
-        );
-
         $this->insights->init();
     }
 
