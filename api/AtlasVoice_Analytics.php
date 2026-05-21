@@ -288,8 +288,14 @@ class AtlasVoice_Analytics {
 			$where_clause = 'WHERE ' . implode( ' AND ', $conditions );
 		}
 
+		// TTS-247: $table_name is `$wpdb->prefix . 'atlasvoice_analytics'`
+		// (server-controlled, set at class init), $where_clause is built only
+		// from our own conditions; the user-controlled values go through
+		// $wpdb->prepare() placeholders below.
 		$query          = "SELECT * FROM $table_name $where_clause";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$prepared_query = $wpdb->prepare( $query, ...$values );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$results        = $wpdb->get_results( $prepared_query );
 		$total_results  = [];
 		foreach ( $results as $result ) {
@@ -709,11 +715,16 @@ class AtlasVoice_Analytics {
             $where_clause = 'WHERE ' . implode( ' AND ', $conditions );
         }
 
-        // Get all records within date range
+        // TTS-247: $table_name is server-controlled (wpdb prefix +
+        // 'atlasvoice_analytics'). User-controlled values flow through
+        // $wpdb->prepare() placeholders. Direct DB + NoCaching are
+        // intentional for analytics reads (must reflect the latest write).
         if ( ! empty( $values ) ) {
             $query   = "SELECT * FROM $table_name $where_clause";
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $results = $wpdb->get_results( $wpdb->prepare( $query, ...$values ), ARRAY_A );
         } else {
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $results = $wpdb->get_results( "SELECT * FROM $table_name", ARRAY_A );
         }
 
@@ -732,6 +743,7 @@ class AtlasVoice_Analytics {
                 $prev_values = array( $previous_dates['from_date'], $previous_dates['to_date'] );
                 $prev_where  = 'WHERE ' . implode( ' AND ', $prev_conditions );
                 $prev_query  = "SELECT * FROM $table_name $prev_where";
+                // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
                 $prev_results = $wpdb->get_results( $wpdb->prepare( $prev_query, ...$prev_values ), ARRAY_A );
                 $previous_aggregated = $this->aggregate_analytics_data( $prev_results );
             }
@@ -773,32 +785,32 @@ class AtlasVoice_Analytics {
 
         switch ( $date_range ) {
             case 'Yesterday':
-                $from = date( 'Y-m-d 00:00:00', strtotime( '-1 day' ) );
-                $to   = date( 'Y-m-d 23:59:59', strtotime( '-1 day' ) );
+                $from = gmdate( 'Y-m-d 00:00:00', strtotime( '-1 day' ) );
+                $to   = gmdate( 'Y-m-d 23:59:59', strtotime( '-1 day' ) );
                 break;
             case 'Last 7 Days':
-                $from = date( 'Y-m-d 00:00:00', strtotime( '-7 days' ) );
+                $from = gmdate( 'Y-m-d 00:00:00', strtotime( '-7 days' ) );
                 break;
             case 'Last 30 Days':
-                $from = date( 'Y-m-d 00:00:00', strtotime( '-30 days' ) );
+                $from = gmdate( 'Y-m-d 00:00:00', strtotime( '-30 days' ) );
                 break;
             case 'Last 90 Days':
-                $from = date( 'Y-m-d 00:00:00', strtotime( '-90 days' ) );
+                $from = gmdate( 'Y-m-d 00:00:00', strtotime( '-90 days' ) );
                 break;
             case 'Custom':
                 if ( $from_date ) {
-                    $from = date( 'Y-m-d 00:00:00', strtotime( $from_date ) );
+                    $from = gmdate( 'Y-m-d 00:00:00', strtotime( $from_date ) );
                 }
                 if ( $to_date ) {
-                    $to = date( 'Y-m-d 23:59:59', strtotime( $to_date ) );
+                    $to = gmdate( 'Y-m-d 23:59:59', strtotime( $to_date ) );
                 }
                 break;
             default:
                 // Default to last 7 days
-                $from = date( 'Y-m-d 00:00:00', strtotime( '-7 days' ) );
+                $from = gmdate( 'Y-m-d 00:00:00', strtotime( '-7 days' ) );
                 $number = preg_replace('/[^0-9]/', '', $date_range);
                 if(is_numeric($number)) {
-                    $from = date( 'Y-m-d 00:00:00', strtotime(  '-'.$from_date. ' days' ) );
+                    $from = gmdate( 'Y-m-d 00:00:00', strtotime(  '-'.$from_date. ' days' ) );
                 }
 
                 break;
@@ -826,8 +838,8 @@ class AtlasVoice_Analytics {
         $period_length  = $to_timestamp - $from_timestamp;
 
         return array(
-            'from_date' => date( 'Y-m-d H:i:s', $from_timestamp - $period_length - 1 ),
-            'to_date'   => date( 'Y-m-d H:i:s', $from_timestamp - 1 ),
+            'from_date' => gmdate( 'Y-m-d H:i:s', $from_timestamp - $period_length - 1 ),
+            'to_date'   => gmdate( 'Y-m-d H:i:s', $from_timestamp - 1 ),
         );
     }
 
@@ -917,8 +929,8 @@ class AtlasVoice_Analytics {
 
             // Track hourly distribution from timestamps
             if ( isset( $analytics['play']['timestamp'] ) ) {
-                $hour = date( 'H', strtotime( $analytics['play']['timestamp'] ) );
-                $day  = date( 'l', strtotime( $analytics['play']['timestamp'] ) );
+                $hour = gmdate( 'H', strtotime( $analytics['play']['timestamp'] ) );
+                $day  = gmdate( 'l', strtotime( $analytics['play']['timestamp'] ) );
 
                 if ( ! isset( $aggregated['hourly'][ $hour ] ) ) {
                     $aggregated['hourly'][ $hour ] = 0;
@@ -1054,11 +1066,13 @@ class AtlasVoice_Analytics {
             $where_clause = 'WHERE ' . implode( ' AND ', $conditions );
         }
 
-        // Get data grouped by date
+        // Get data grouped by date. Table name + WHERE clause are built from internal whitelisted parts; user-supplied values pass through wpdb->prepare placeholders.
         if ( ! empty( $values ) ) {
             $query = "SELECT DATE(created_at) as date, analytics FROM $table_name $where_clause ORDER BY created_at ASC";
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
             $results = $wpdb->get_results( $wpdb->prepare( $query, ...$values ), ARRAY_A );
         } else {
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
             $results = $wpdb->get_results( "SELECT DATE(created_at) as date, analytics FROM $table_name ORDER BY created_at ASC", ARRAY_A );
         }
 
@@ -1144,8 +1158,10 @@ class AtlasVoice_Analytics {
 
         if ( ! empty( $values ) ) {
             $query = "SELECT created_at, analytics FROM $table_name $where_clause";
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
             $results = $wpdb->get_results( $wpdb->prepare( $query, ...$values ), ARRAY_A );
         } else {
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
             $results = $wpdb->get_results( "SELECT created_at, analytics FROM $table_name", ARRAY_A );
         }
 
@@ -1166,8 +1182,8 @@ class AtlasVoice_Analytics {
                 $timestamp = $analytics['play']['timestamp'];
             }
 
-            $day_of_week = date( 'l', strtotime( $timestamp ) );
-            $hour        = intval( date( 'H', strtotime( $timestamp ) ) );
+            $day_of_week = gmdate( 'l', strtotime( $timestamp ) );
+            $hour        = intval( gmdate( 'H', strtotime( $timestamp ) ) );
 
             $play_count = isset( $analytics['play']['count'] ) ? intval( $analytics['play']['count'] ) : 1;
             $heatmap[ $day_of_week ][ $hour ] += $play_count;
@@ -1238,8 +1254,10 @@ class AtlasVoice_Analytics {
 
         if ( ! empty( $values ) ) {
             $query = "SELECT * FROM $table_name $where_clause ORDER BY created_at DESC";
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
             $results = $wpdb->get_results( $wpdb->prepare( $query, ...$values ), ARRAY_A );
         } else {
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
             $results = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY created_at DESC", ARRAY_A );
         }
 
@@ -1305,7 +1323,7 @@ class AtlasVoice_Analytics {
 
         $response['status']   = true;
         $response['data']     = base64_encode( $csv_string );
-        $response['filename'] = 'tts-analytics-' . date( 'Y-m-d' ) . '.csv';
+        $response['filename'] = 'tts-analytics-' . gmdate( 'Y-m-d' ) . '.csv';
 
         return rest_ensure_response( $response );
     }
@@ -1501,7 +1519,7 @@ class AtlasVoice_Analytics {
 
         $response['status']   = true;
         $response['data']     = $settings;
-        $response['next_run'] = $next_run ? date( 'Y-m-d H:i:s', $next_run ) : null;
+        $response['next_run'] = $next_run ? gmdate( 'Y-m-d H:i:s', $next_run ) : null;
 
         return rest_ensure_response( $response );
     }
@@ -1709,7 +1727,7 @@ class AtlasVoice_Analytics {
                             <li class="post-item">
                                 <span class="post-title"><?php echo esc_html( $post['title'] ?: 'Post #' . $post['post_id'] ); ?></span>
                                 <?php /* translators: %d: Number of plays */ ?>
-                                <span class="post-plays"><?php printf( esc_html__( '%d plays', 'text-to-audio' ), $post['total_plays'] ); ?></span>
+                                <span class="post-plays"><?php printf( esc_html__( '%d plays', 'text-to-audio' ), (int) $post['total_plays'] ); ?></span>
                             </li>
                             <?php endforeach; ?>
                         </ul>
@@ -1822,8 +1840,10 @@ class AtlasVoice_Analytics {
 
         if ( ! empty( $values ) ) {
             $query = "SELECT * FROM $table_name $where_clause ORDER BY created_at DESC";
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
             $results = $wpdb->get_results( $wpdb->prepare( $query, ...$values ), ARRAY_A );
         } else {
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
             $results = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY created_at DESC", ARRAY_A );
         }
 
@@ -1838,7 +1858,7 @@ class AtlasVoice_Analytics {
         // Return HTML content that will be converted to PDF on frontend
         $response['status']      = true;
         $response['data']        = base64_encode( $html_content );
-        $response['filename']    = 'tts-analytics-' . date( 'Y-m-d' ) . '.pdf';
+        $response['filename']    = 'tts-analytics-' . gmdate( 'Y-m-d' ) . '.pdf';
         $response['aggregated']  = $aggregated;
         $response['date_range']  = $date_range;
         $response['dates']       = $dates;
@@ -1900,7 +1920,7 @@ class AtlasVoice_Analytics {
         <?php /* translators: %s: Date range for the analytics report */ ?>
         <p><?php printf( esc_html__( 'TTS Analytics Report - %s', 'text-to-audio' ), esc_html( $date_range ) ); ?></p>
         <?php /* translators: %s: Generated date and time */ ?>
-        <p style="font-size: 11px; margin-top: 5px;"><?php printf( esc_html__( 'Generated on %s', 'text-to-audio' ), date( 'F j, Y g:i A' ) ); ?></p>
+        <p style="font-size: 11px; margin-top: 5px;"><?php printf( esc_html__( 'Generated on %s', 'text-to-audio' ), esc_html( gmdate( 'F j, Y g:i A' ) ) ); ?></p>
     </div>
 
     <!-- Summary Section -->
@@ -2188,8 +2208,10 @@ class AtlasVoice_Analytics {
 
         if ( ! empty( $values ) ) {
             $query   = "SELECT * FROM $table_name $where_clause ORDER BY updated_at DESC";
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
             $results = $wpdb->get_results( $wpdb->prepare( $query, ...$values ), ARRAY_A );
         } else {
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
             $results = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY updated_at DESC", ARRAY_A );
         }
 

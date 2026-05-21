@@ -432,20 +432,25 @@ function get_enqueued_js_object($params, $plugin_all_settings)
     ob_start();
     ?>
     <!-- AtlasVoice Settings  -->
-    <script id='tts_button_settings_<?php echo $player_number; ?>'>
-        var ttsCurrentButtonNo = <?php echo $player_number; ?>;
-        var ttsCurrentContent = "<?php echo apply_filters('atlasvoice_player_content', $content, $post, $language, $voice, $player_number); ?>";
-        var ttsListening = <?php echo json_encode($plugin_all_settings['listening']); ?>;
-        var ttsCSSClass = "<?php echo $class; ?>";
-        var ttsBtnStyle = "<?php echo $btn_style; ?>";
-        var ttsTextArr = <?php echo json_encode($text_arr); ?>;
-        var ttsCustomCSS = "<?php print($custom_css); ?>";
-        var ttsShouldDisplayIcon = "<?php echo $should_display_icon; ?>";
-        var readingTime = "<?php echo $content_read_time; ?>";
-        var postId = "<?php echo $post->ID; ?>";
-        var fileURLs = <?php echo json_encode($mp3_file_urls); ?>;
-        var get_content_from_dom = <?php echo json_encode($get_content_from_dom); ?>;
-        var use_old_player = "<?php echo $use_old_player; ?>";
+    <?php
+    // TTS-247: escape every interpolation into the inline <script>. JS string
+    // literals get esc_js(); numeric IDs become (int); structured payloads use
+    // wp_json_encode() (already in use) which is safe to echo unwrapped.
+    ?>
+    <script id='tts_button_settings_<?php echo (int) $player_number; ?>'>
+        var ttsCurrentButtonNo = <?php echo (int) $player_number; ?>;
+        var ttsCurrentContent = "<?php echo esc_js( apply_filters('atlasvoice_player_content', $content, $post, $language, $voice, $player_number) ); ?>";
+        var ttsListening = <?php echo wp_json_encode( $plugin_all_settings['listening'] ); ?>;
+        var ttsCSSClass = "<?php echo esc_js( $class ); ?>";
+        var ttsBtnStyle = "<?php echo esc_js( $btn_style ); ?>";
+        var ttsTextArr = <?php echo wp_json_encode( $text_arr ); ?>;
+        var ttsCustomCSS = "<?php echo esc_js( $custom_css ); ?>";
+        var ttsShouldDisplayIcon = "<?php echo esc_js( $should_display_icon ); ?>";
+        var readingTime = "<?php echo esc_js( $content_read_time ); ?>";
+        var postId = "<?php echo (int) $post->ID; ?>";
+        var fileURLs = <?php echo wp_json_encode( $mp3_file_urls ); ?>;
+        var get_content_from_dom = <?php echo wp_json_encode( $get_content_from_dom ); ?>;
+        var use_old_player = "<?php echo esc_js( $use_old_player ); ?>";
 
 
 
@@ -468,33 +473,33 @@ function get_enqueued_js_object($params, $plugin_all_settings)
         // ttsObj is built in TTA_Admin.__construct() without post ID (global only).
         // This inline script runs after post context is available, so per-post CSS selector overrides are included.
         if (window.ttsObj && window.ttsObj.settings) {
-            window.ttsObj.settings.settings = <?php echo json_encode(isset($plugin_all_settings['settings']) ? $plugin_all_settings['settings'] : new \stdClass()); ?>;
+            window.ttsObj.settings.settings = <?php echo wp_json_encode( isset($plugin_all_settings['settings']) ? $plugin_all_settings['settings'] : new \stdClass() ); ?>;
         }
 
         var dateTitle = {
-            title: "<?php echo $title; ?>",
-            file_name: "<?php echo $file_name; ?>",
-            date: "<?php echo $date; ?>",
-            language: "<?php echo $language; ?>",
-            voice: "<?php echo $voice; ?>",
-            file_url_key: "<?php echo $file_url_key; ?>",
-            compatible_contents: <?php echo json_encode($compatible_content); ?>,
-            excerpt: "<?php echo $excerpt_sanitized; ?>",
-            text_before_content: "<?php echo apply_filters('atlasvoice__text_before_content', $text_before_content, $post, $language, $voice, $player_number); ?>",
-            text_after_content: "<?php echo apply_filters('atlasvoice__text_after_content', $text_after_content, $post, $language, $voice, $player_number); ?>",
+            title: "<?php echo esc_js( $title ); ?>",
+            file_name: "<?php echo esc_js( $file_name ); ?>",
+            date: "<?php echo esc_js( $date ); ?>",
+            language: "<?php echo esc_js( $language ); ?>",
+            voice: "<?php echo esc_js( $voice ); ?>",
+            file_url_key: "<?php echo esc_js( $file_url_key ); ?>",
+            compatible_contents: <?php echo wp_json_encode( $compatible_content ); ?>,
+            excerpt: "<?php echo esc_js( $excerpt_sanitized ); ?>",
+            text_before_content: "<?php echo esc_js( apply_filters('atlasvoice__text_before_content', $text_before_content, $post, $language, $voice, $player_number) ); ?>",
+            text_after_content: "<?php echo esc_js( apply_filters('atlasvoice__text_after_content', $text_after_content, $post, $language, $voice, $player_number) ); ?>",
         }
 
         if (window.hasOwnProperty('TTS')) { // add content if a page have multiple button
             window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
             window.TTS.extra[ttsCurrentButtonNo] = dateTitle;
-            window.TTS.extra.player_id = "<?php echo get_player_id(); ?>";
+            window.TTS.extra.player_id = "<?php echo esc_js( get_player_id() ); ?>";
         } else { // add content for the if a page have one button
             window.TTS = {}
             window.TTS.contents = {}
             window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
             window.TTS.extra = {}
             window.TTS.extra[ttsCurrentButtonNo] = dateTitle;
-            window.TTS.extra.player_id = "<?php echo get_player_id(); ?>";
+            window.TTS.extra.player_id = "<?php echo esc_js( get_player_id() ); ?>";
         }
 
         // add settings
@@ -1040,9 +1045,14 @@ function tts_debug( $message ) {
     }
     $log_file = $dir . '/debug.log';
 
-    $time = date( 'Y-m-d H:i:s' );
+    // TTS-247: print_r is the readable serializer for debug logs; the
+    // log file is gated by tts_debug() being called explicitly from a
+    // dev/troubleshoot context, not in production hot paths.
+    $time = gmdate( 'Y-m-d H:i:s' );
+    // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
     $formatted_message = "[$time] [atlasvoice] " . print_r( $message, true ) . PHP_EOL;
 
+    // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
     file_put_contents( $log_file, $formatted_message, FILE_APPEND | LOCK_EX );
 }
 

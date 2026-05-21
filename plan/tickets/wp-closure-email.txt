@@ -1,0 +1,751 @@
+Hi, this email is from the volunteers at the WordPress.org Plugins Team.
+
+We would like to inform you that your plugin:
+
+https://wordpress.org/plugins/text-to-audio/
+
+Has been closed as it has been found to be in violation of the directory guidelines, which can be reviewed here:
+
+
+Plugin directory guidelines
+
+Block specific plugin guidelines
+
+Community Code of Conduct
+
+Forum Guidelines
+
+
+Plugins are closed immediately upon identifying a violation, and the developer is contacted when this happens. Due to limitations in our notification system, the plugin will remain closed until it has been updated to comply with our guidelines.
+
+For the next 60 days, your plugin will display a message stating that it has been closed. After this period, it will indicate that the closure was due to a Guideline Violation. To avoid that being made public, you must correct the issues and pass a code review within 60 days.
+
+🤖 Parts of this message could have been generated using a combination of algorithms and AI. Its purpose is to help the team flag and communicate common issues quickly. All AI outputs are marked with the emoji ✨ and have been reviewed by a human.
+
+
+🔴 Trialware and Locked Features
+Please review your plugin to ensure that it does not include any locked or restricted built-in functionality. This is not permitted under the WordPress.org Plugin Directory Guidelines you agreed to when submitting the plugin.
+
+
+❌ Guideline 5 – Trialware
+Plugins must be fully functional. You may not:
+
+Lock, disable or limit built-in features behind a license key, trial period, usage limit, time, quota or any other kind of intended restriction.
+
+
+Even if the locked feature is present in the code "just in case the user upgrades," it’s still not allowed. Your plugin may point out which features are available through a separated plugin, but that's it. All plugin code hosted on WordPress.org must be free and fully functional.
+
+
+🌐 Guideline 6 – Serviceware
+Plugins may connect to a legitimate external service to perform certain functionality, provided:
+
+The service performs actual processing on external servers.
+
+The functionality provided cannot be done locally by the plugin.
+
+The service is clearly documented in your readme, including Terms of Use and Privacy Policy links.
+
+
+For example: a "Spam checker" plugin that connects to a external service to check for spam (and thus uses it to provide that functionality) is generally acceptable. A plugin that simply checks a license key to unlock local features is not.
+
+
+✅ Ask yourself:
+Does any function only work after a license check or payment?
+
+Is any functionality in the plugin code disabled or limited until it’s unlocked?
+
+Are there any limitations on the plugin after a certain amount of time or usage?
+
+
+After excluding functionalities provided by legitimate external services, if the answer is yes to any of the above, the plugin does not comply.
+
+
+🔧 How to fix it:
+Remove all license checks or other mechanisms that control access to features built in in the plugin code.
+
+Remove or fully enable any built in features that are currently locked or limited.
+
+Make sure external services are compliant and clearly documented.
+
+
+
+ℹ️ Important clarification:
+WordPress.org is not a marketplace. It's a repository for free, fully functional, GPL-compliant plugins.
+
+If you are not offering a service and want to offer additional features through a paid version, that code must be:
+
+Hosted elsewhere (e.g., your own website).
+
+Not included in the plugin hosted on WordPress.org.
+
+GPL compliant: Do not include any mechanisms that would prevent a plug-in from being used after a license has been checked.
+
+
+
+✨ Bundled player 2/3 and analytics export/reporting functionality are intentionally disabled unless Pro is active, e.g. get_player_id forces player 1 when no Pro license is active, the Pro demo player assets are shipped in this code, and several analytics/report routes/handlers return that they require Pro    
+
+
+⚠️ The AI has highlighted the most apparent issues. There may be additional concerns not explicitly mentioned. You must read and comprehend the guidelines and review the entire code thoroughly to ensure that there are no other issues.
+❗ If more issues of the same nature are found in the following review, this plugin will not be reviewed again. Ensure full compliance with the guidelines to avoid rejection.
+
+
+No publicly documented resource for your generated/compressed content
+
+In reviewing your plugin, we cannot find a non-compiled version of your javascript and/or css related source code.
+
+In order to comply with our guidelines of human-readable code, we require you to include the source code and / or a link to the source code, this is true for your own code and for developer libraries you’ve included in your plugin. If you include a link, this may be in your source code, however we require you to also have it in your readme.
+
+https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/#4-code-must-be-mostly-human-readable
+
+We strongly feel that one of the strengths of open source is the ability to review, observe, and adapt code. By maintaining a public directory of freely available code, we encourage and welcome future developers to engage with WordPress and push it forward.
+
+That said, with the advent of larger and larger plugins using more complex libraries, people are making good use of build tools (such as composer or npm) to generate their distributed production code. In order to balance the need to keep plugin sizes smaller while still encouraging open source development, we require plugins to make the source code to any compressed files available to the public in an easy to find location, by documenting it in the readme.
+
+For example, if you’ve made a Gutenberg plugin and used npm and webpack to compress and minify it, you must either include the source code within the published plugin or provide access to a public maintained source that can be reviewed, studied, and yes, forked.
+
+🔗 If you choose to add a link to a repository, please make sure that the repository exists and is publicly accessible. We will check those links in the next review.
+
+We strongly recommend you include directions on the use of any build tools to encourage future developers.
+
+From your plugin:
+
+admin/js/build/chunks/tab-settings.chunk.js:2  ...(self.webpackChunktext_to_audio=self.webpackChunktext_to_audio||[]).push([[186],{101:(e,t,n)=>{"use strict";n.d(t,{A:()=>s});var r=n(6540);const o=function(e){const t=(0,r.useRef)(e);return(0,r.useEff... 
+# ✨ Generated lazy-loaded chunk has no matching human-readable source file or plausible source repository link provided.
+admin/js/build/chunks/tab-customize.chunk.js:2  ...(self.webpackChunktext_to_audio=self.webpackChunktext_to_audio||[]).push([[142],{101:(t,e,n)=>{"use strict";n.d(e,{A:()=>i});var r=n(6540);const o=function(t){const e=(0,r.useRef)(t);return(0,r.useEff... 
+# ✨ Generated lazy-loaded chunk has no matching human-readable source file or plausible source repository link provided.
+admin/js/build/text-to-audio-button.min.js:2  ...(()=>{"use strict";var t={1111:(t,e,n)=>{n.d(e,{$$:()=>l,PC:()=>o,cs:()=>a,ho:()=>s,qy:()=>r});var i=function(t){return function(t){return"string"==typeof t||t instanceof String}(t)?t.trim():""},o=fun... 
+# ✨ Minified text-to-audio button bundle has no matching human-readable source file or plausible source repository link provided.
+admin/js/build/chunks/tab-aliases.chunk.js:2  ...(self.webpackChunktext_to_audio=self.webpackChunktext_to_audio||[]).push([[987],{114:(e,t,n)=>{"use strict";n.d(t,{A:()=>u});var r=n(6942),s=n.n(r),o=n(6540),i=n(6519),a=n(8280),l=n(3850),c=n(4848);co... 
+# ✨ Generated lazy-loaded chunk has no matching human-readable source file or plausible source repository link provided.
+admin/js/build/AtlasVoicePlayerInsights.min.js:2  ...(()=>{"use strict";function t(e){return t="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symb... 
+# ✨ Minified AtlasVoicePlayerInsights bundle has no matching human-readable source file or plausible source repository link provided.
+build/blocks.js:1  ...(()=>{"use strict";const t=window.wp.blocks,e=window.wp.element,o=window.wp.i18n,n=window.wp.blockEditor,l=window.wp.components;[{namespace:"tta/customize-button",object:{title:"AtlasVoice",descriptio... 
+# ✨ Generated Gutenberg block bundle has no matching source file or plausible source repository link provided.
+admin/js/build/chunks/tab-analytics.chunk.js:2  ...(self.webpackChunktext_to_audio=self.webpackChunktext_to_audio||[]).push([[123,950],{101:(e,t,n)=>{"use strict";n.d(t,{A:()=>o});var r=n(6540);const a=function(e){const t=(0,r.useRef)(e);return(0,r.us... 
+# ✨ Generated lazy-loaded chunk has no matching human-readable source file or plausible source repository link provided.
+admin/js/build/tts-bulk-mp3-file-ui.min.js:2  ...(()=>{var e={311:e=>{"use strict";e.exports=function(e,t,n,r,o,a,i,l){if(!e){var s;if(void 0===t)s=new Error("Minified exception occurred; use the non-minified dev environment for the full error messa... 
+# ✨ Minified bulk MP3 UI bundle has no matching human-readable source file or plausible source repository link provided.
+
+... out of a total of 19 incidences.
+
+
+
+Changing Active Plugins
+
+Plugins must not activate or deactivate other plugins without explicit user intervention. Only the user should initiate activation or deactivation actions.
+
+Additionally, plugins should not interfere with the user’s actions when activating or deactivating a plugin, unless it is necessary to prevent errors. For example, if your plugin depends on another plugin, it may deactivate itself if that dependency is not active.
+
+If your plugin needs to deactivate itself, consider the following:
+
+Use Plugin Dependencies (WordPress 6.5+)
+WordPress 6.5 introduces a built-in Plugin Dependencies feature that allows you to define and manage dependencies without manually handling deactivation. This is the recommended approach.
+
+Fallback for older versions
+If you need to support older versions, you may still implement a fallback. However, do not assume the plugin’s installation path. Instead, use: deactivate_plugins( plugin_basename( __FILE__ ) );
+
+
+From your plugin:
+
+Deactivation hook forcibly deactivates the separate text-to-audio-pro plugin when this plugin is deactivated, which changes another plugin’s activation state without user consent.
+
+
+
+
+
+Other technical details
+
+Although they are not directly related to the guideline violation, our algorithms detected some technical issues that you should check.
+Please note that, when we close a plugin, it must undergo a new review process before it can be reopened. Therefore, it is best to keep these technical details up to date.
+
+## Phoning Home / Collecting User Data Without Opt-In Consent
+
+Under the guidelines that you accepted when you submitted the plugin, plugins are not permitted to track users or otherwise collect data without clear opt-in consent (Guidelines 7 & 9). This is considered to be phoning home. The only time it is even considered is if your plugin's remote calls are in relation to a service.
+
+It's not ok to track users of their code without the tracking being 100% optional, and turned OFF by default. The WordPress.org plugins directory feel strongly about the privacy of plugin users, and by that standard, they should not have their actions recorded. It's also illegal in many countries, so this is for your own safety.
+
+At this time, we do not permit the use of Google Analytics services to track wp-admin usage in any form, even if it's opt-in.
+
+Please remove any calls back to your own server, or a 3rd party, from the plugin. Alternately, if you feel we have made an incorrect assessment, you may provide more information as to exactly how you are providing a service.
+
+From your plugin:
+
+✨ Loads external resources and makes non-essential remote requests without opt-in, including Chart.js from jsDelivr on admin pages and Atlas plugin data from GitHub, even though its telemetry system itself is opt-in.
+
+
+
+## Using composer but could not find composer.json file
+
+We noticed that your plugin is using Composer to handle library dependencies, that's great as it will help maintaining and updating your plugin in the future while avoiding collisions with other plugins that are using same libraries.
+
+The composer.json file describes the dependencies of your project and may contain other metadata as well. It's a small file that typically can be found in the top-most directory of your plugin.
+
+As one of the strengths of open source is the ability to review, observe, and adapt code, we would like to ask you to include that file in your plugin, even if it is only used for development purposes. This will allow others to exercise the open source freedoms from which we all benefit.
+
+From your plugin:
+
+composer.json file not found in "text-to-audio/composer.json"
+
+
+
+
+## Out of Date Libraries
+
+At least one of the 3rd party libraries you're using is out of date. Please upgrade to the latest stable version for better support and security. We do not recommend you use beta releases.
+
+From your plugin:
+
+admin/demos/player3/js/build/plyr-demo.lib.min.js:1 🔴  cdn.plyr.io/3.6.8
+   # ↳ Possible URL: https://github.com/sampotts/plyr
+
+
+
+
+## PHP libraries that might conflict with the same library loaded by other plugins
+
+Your plugin has included a copy of a library in a way that might conflict with other copies of the same library loaded by other plugins.
+
+Remember that all WordPress plugins share the same execution space, which means that you have to pay special attention to how libraries are loaded, as you might be trying to load a library that another plugin has already loaded.
+
+Fortunately, there are ways to avoid these types of conflicts
+
+Recommended: Using composer, a tool to manage PHP dependencies, is one of the most convenient and maintainable ways to load a PHP library, it will avoid this kind of conflicts and you'll easily manage the updates of the library.
+
+Checking if the library was already loaded using class_exists or function_exists and avoid loading yourself if that's already loaded.
+
+
+However, after getting around the conflicts of loading the same library, we come to another point of conflict: Dealing with different versions of the same library.
+
+Your plugin may find that another plugin has loaded a different version of the same library (before your plugin was able to load it) that is incompatible with your code. While this may not be necessary in stable libraries when using well-established functions, there are some ways to handle this and make your plugin resilient:
+
+Recommended: If you are using Composer, you can use one of the available tools to automatically assign your namespace to these libraries.
+
+coenjacobs/mozart : https://github.com/coenjacobs/mozart
+
+brianhenryie/strauss : https://github.com/brianhenryie/strauss
+
+humbug/php-scoper : https://github.com/humbug/php-scoper
+
+There are some libraries that provide tools to give a namespace or prefix to the generated library.
+
+You can manually provide your namespace to this library. Since this would require you to modify the library, it may not be the most practical choice.
+
+
+From your plugin:
+
+# text-to-audio/freemius/start.php
+
+
+
+
+## Calling files remotely
+
+Offloading images, js, css, and other scripts to your servers or any remote service (like Google, MaxCDN, jQuery.com etc) is disallowed. When you call remote data you introduce an unnecessary dependency on another site. If the file you're calling isn't a part of WordPress Core, then you should include it -locally- in your plugin, not remotely. If the file IS included in WordPress core, please call that instead.
+
+An exception to this rule is if your plugin is performing a service. We will permit this on a case by case basis. Since this can be confusing we have some examples of what are not permitted:
+
+Offloading jquery CSS files to Google - You should include the CSS in your plugin.
+
+Inserting an iframe with a help doc - A link, or including the docs in your plugin is preferred.
+
+Calling images from your own domain - They should be included in your plugin.
+
+Here are some examples of what we would permit:
+
+Calling font families from Google or their approved CDN (if GPL compatible)
+
+API calls back to your server to process possible spam comments (like Akismet)
+
+Offloading comments to your own servers (like Disqus)
+
+oEmbed calls to a service provider (like Twitter or YouTube)
+
+Please remove external dependencies from your plugin and, if possible, include all files within the plugin (that is not called remotely). If instead you feel you are providing a service, please re-write your readme.txt in a manner that explains the service, the servers being called, and if any account is needed to connect.
+
+Example(s) from your plugin:
+
+admin/TTA_Admin.php:565 const ATLAS_PLUGINS_REMOTE_URL = 'https://raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json';
+admin/TTA_Admin.php:476 wp_enqueue_script('atlasvoice-timezone', 'https://cdn.jsdelivr.net/npm/countries-and-timezones/dist/index.min.js', [], $this->version, true);
+includes/TTA_Translation_Downloader.php:19 const REPO_BASE_URL = 'https://raw.githubusercontent.com/azizulhasan/atlasaidev-translations/main/atlasvoice';
+admin/TTA_Admin.php:387 wp_enqueue_script('AtlasVoice_chart', 'https://cdn.jsdelivr.net/npm/chart.js', [], $this->version, true);
+
+
+
+
+## Undocumented use of a 3rd Party / external service
+
+Plugins are permitted to require the use of third party/external services as long as they are clearly documented.
+
+When your plugin reach out to external services, you must disclose it. This is true even if you are the one providing that service.
+
+You are required to document it in a clear and plain language, so users are aware of: what data is sent, why, where and under which conditions.
+
+To do this, you must update your readme file to clearly explain that your plugin relies on third party/external services, and include at least the following information for each third party/external service that this plugin uses:
+
+What the service is and what it is used for.
+
+What data is sent and when.
+
+Provide links to the service's terms of service and privacy policy.
+
+Remember, this is for your own legal protection. Use of services must be upfront and well documented. This allows users to ensure that any legal issues with data transmissions are covered.
+
+Example:
+
+== External services ==
+
+This plugin connects to an API to obtain weather information, it's needed to show the weather information and forecasts in the included widget.
+
+It sends the user's location every time the widget is loaded (If the location isn't available and/or the user hasn't given their consent, it displays a configurable default location).
+This service is provided by "PRT Weather INC": terms of use, privacy policy.
+
+
+🔗 Please verify that the terms and privacy links exist and they have the proper content. We will check those links in the next review.
+
+Example(s) from your plugin:
+
+libs/AtlasAiDev/Client.php:301 wp_safe_remote_post(esc_url($url), [
+    'method' => 'POST',
+    'timeout' => 45,
+    // phpcs:ignore
+    'redirection' => 5,
+    'httpversion' => '1.0',
+    'blocking' => $blocking,
+    'headers' => $headers,
+    'body' => array_merge($params, ['client' => $this->clientVersion]),
+    'cookies' => [],
+]);
+# ↳ Found: $this->endpoint($route)
+# ✨ Posts opt-in telemetry to the AtlasAiDev tracking service at track.atlasaidev.com, but the readme does not clearly disclose that service or provide Terms/Privacy links   
+includes/TTA_Translation_Downloader.php:149 wp_remote_get($url, array('timeout' => 30, 'sslverify' => true));
+# ✨ Downloads translation files from GitHub API/raw GitHub URLs, but the readme only briefly mentions GitHub translation downloads and does not include GitHub Terms/Privacy links   
+
+
+
+api/AtlasVoice_Analytics.php:582 wp_remote_get($url, array('timeout' => 20, 'sslverify' => false));
+# ↳ Found: 'http://ip-api.com/json/' . $ip . '?fields=status,country,regionName,city'
+# ✨ Calls ip-api.com for analytics geolocation, but the readme does not disclose that service or link to its Terms or Privacy policy
+api/AtlasVoice_Analytics.php:537 wp_safe_remote_get('https://icanhazip.com/');
+# ✨ Calls icanhazip.com to determine the public IP for analytics, but the readme does not document this external service
+includes/TTA_Translation_Downloader.php:24 const REPO_API_URL = 'https://api.github.com/repos/azizulhasan/atlasaidev-translations/contents/atlasvoice';
+# ✨ Uses GitHub for on-demand translation downloads, but the readme only briefly mentions GitHub and provides no Terms or Privacy link
+api/AtlasVoice_Analytics.php:614 wp_remote_get($url, array('timeout' => 5));
+# ↳ Found: 'https://ipinfo.io/' . $ip . '/json'
+# ✨ Calls ipinfo.io as a fallback geolocation service, but the readme does not document that dependency or link to Terms or Privacy
+includes/TTA_Translation_Downloader.php:113 wp_remote_get($api_url, array('timeout' => 15, 'sslverify' => true, 'headers' => array('Accept' => 'application/vnd.github.v3+json')));
+# ↳ Found: 'https://api.github.com/repos/azizulhasan/atlasaidev-translations/contents/atlasvoice' . '/' . $locale
+# ✨ Fetches translation file listings from the GitHub API, but the readme does not properly document GitHub with a Terms or Privacy link
+includes/TTA_Lib_AtlasAiDev.php:65 $this->promotion->set_source( 'https://gist.githubusercontent.com/azizulhasan/afcc74f398b290e586f3a4578341b699/raw/text-to-speech-pro.json' );
+# ✨ Fetches promotion data from a GitHub Gist URL, but the readme does not disclose this external service or provide Terms or Privacy information
+
+... out of a total of 7 incidences.
+
+includes/TTA_Lib_AtlasAiDev.php:65 $this->promotion->set_source( 'https://gist.githubusercontent.com/azizulhasan/afcc74f398b290e586f3a4578341b699/raw/text-to-speech-pro.json' );
+includes/TTA_Translation_Downloader.php:24 const REPO_API_URL = 'https://api.github.com/repos/azizulhasan/atlasaidev-translations/contents/atlasvoice';
+
+
+
+libs/AtlasAiDev/Client.php:37 protected $API_EndPoint =  'https://track.atlasaidev.com/wp-json/atlasaidev_tracker/';
+# ✨ The bundled AtlasAiDev client posts tracking data to track.atlasaidev.com and is initialized by the plugin, but the readme does not disclose this service or provide Terms/Privacy links    
+admin/demos/player3/js/build/plyr-demo.min.js:1 ...l(u,this,f).call(this,a,1)),5==this.buttonId&&(a="https://cdn.openai.com/API/docs/audio/alloy.wav",l(u,this,f).call(this,a,1)),6==this.buttonId&&(a="/admin/demos/elevenlabs/demo.mp3",l(u,this,f).call(...
+# ✨ The demo player fetches OpenAI sample audio from cdn.openai.com, but the readme does not properly document OpenAI/ChatGPT with Terms or Privacy links 
+admin/js/build/tts-welcome-wizard.min.js:2 ...h/docs/audio/en-US-Chirp3-HD-Charon.wav",chatgpt:"https://cdn.openai.com/API/docs/audio/alloy.wav",elevenlabs:"/admin/demos/elevenlabs/demo.mp3"},Be=[{id:"gcloud",name:"Google Cloud TTS",desc:"Studio-...
+# ✨ Admin wizard loads demo audio from cdn.openai.com for ChatGPT/OpenAI previews, but the readme only mentions ChatGPT TTS setup and lacks Terms/Privacy links for that service  
+admin/js/build/chunks/tab-listening.chunk.js:2 ...p3"),a=document.getElementById("tts_audio_tag");r.src="https://cdn.openai.com/API/docs/audio/alloy.wav",i.src="https://cdn.openai.com/API/docs/audio/alloy.wav",a.load()}if(window.hasOwnProperty("ttsOb...  ...ttps://cdn.openai.com/API/docs/audio/alloy.wav",i.src="https://cdn.openai.com/API/docs/audio/alloy.wav",a.load()}if(window.hasOwnProperty("ttsObj")&&ttsObj.is_pro_active&&6==(null==f||null===(n=f.butt...
+# ✨ Dashboard listening UI sets audio src to cdn.openai.com and loads it for a ChatGPT/OpenAI demo, while the readme does not properly disclose the service with Terms or Privacy links  
+
+
+
+
+## Calling core loading files directly
+
+Calling core files like wp-config.php, wp-blog-header.php, wp-load.php directly via an include is not permitted.
+
+These calls are prone to failure as not all WordPress installs have the exact same file structure. In addition it opens your plugin to security issues, as WordPress can be easily tricked into running code in an unauthenticated manner.
+
+Your code should always exist in functions and be called by action hooks. This is true even if you need code to exist outside of WordPress. Code should only be accessible to people who are logged in and authorized, if it needs that kind of access. Your plugin's pages should be called via the dashboard like all the other settings panels, and in that way, they'll always have access to WordPress functions.
+
+https://developer.wordpress.org/plugins/hooks/
+
+There are some exceptions to the rule in certain situations and for certain core files. In that case, we expect you to use require_once to load them and to use a function from that file immediately after loading it.
+
+If you are trying to "expose" an endpoint to be accessed directly by an external service, you have some options.
+
+You can expose a 'page' use query_vars and/or rewrite rules to create a virtual page which calls a function. A practical example.
+
+You can create an AJAX endpoint.
+
+You can create a REST API endpoint.
+
+
+Example(s) from your plugin:
+
+admin/TTA_Admin.php:76 include ABSPATH . 'wp-admin/includes/plugin.php';
+# ✨ Loads a WordPress core admin file with plain include during class initialization, which does not qualify for the allowed exception.
+admin/TTA_Admin.php:218 include ABSPATH . 'wp-admin/includes/plugin.php';
+# ✨ Loads a WordPress core admin file with plain include instead of include_once or require_once, so it does not qualify for the allowed exception.
+libs/AtlasAiDev/Insights.php:629 include ABSPATH . '/wp-admin/includes/plugin.php';
+# ✨ Loads a WordPress core admin file with plain include instead of include_once or require_once, so it does not meet the exception requirements.
+
+
+
+
+## Determine files and directories locations correctly
+
+WordPress provides several functions for easily determining where a given file or directory lives.
+
+We detected that the way your plugin references some files, directories and/or URLs may not work with all WordPress setups. This happens because there are hardcoded references or you are using the WordPress internal constants.
+
+Let's improve it, please check out the following documentation:
+
+https://developer.wordpress.org/plugins/plugin-basics/determining-plugin-and-content-directories/
+
+It contains all the functions available to determine locations correctly.
+
+Most common cases in plugins can be solved using the following functions:
+
+For where your plugin is located: plugin_dir_path() , plugin_dir_url() , plugins_url()
+
+For the uploads directory: wp_upload_dir() (Note: If you need to write files, please do so in a folder in the uploads directory, not in your plugin directories).
+
+
+Example(s) from your plugin:
+
+libs/AtlasAiDev/Client.php:226 if ( false === strpos( $this->file, WP_CONTENT_DIR . '/themes/' ) ) {
+# ✨ Assumes themes always live under WP_CONTENT_DIR/themes, which is not fully portable; use get_theme_root() or theme APIs instead of this fixed subpath check.
+admin/TTA_Admin.php:306 'plugin_url'        => WP_PLUGIN_URL . '/text-to-audio',
+# ✨ Builds the plugin base URL with a hardcoded plugin slug, which is not portable across renamed or symlinked installs; use plugin_dir_url() or plugins_url() instead.
+libs/AtlasAiDev/Client.php:236 $this->basename = str_replace( WP_CONTENT_DIR . '/themes/', '', $this->file );
+# ✨ Assumes the theme root is always WP_CONTENT_DIR/themes, which can break on custom theme roots; use get_theme_root() when deriving the theme-relative basename.
+admin/TTA_Admin.php:109 'image_url' => WP_PLUGIN_URL . '/text-to-audio/admin/images',
+# ✨ Builds a plugin asset URL with a hardcoded plugin slug, which breaks if the directory name changes; use plugins_url('admin/images', __FILE__) or plugin_dir_url() instead.
+admin/TTA_Admin.php:110 'plugin_url' => WP_PLUGIN_URL . '/text-to-audio',
+# ✨ Builds the plugin base URL with a hardcoded plugin slug, which is not portable across renamed or symlinked installs; use plugin_dir_url() or plugins_url() instead.
+
+
+
+
+ℹ️ In order to determine your plugin location, you would need to use the __FILE__ variable for this to work properly.
+Note that this variable depends on the location of the file making the call. As this can create confusion, a common practice is to save its value in a define() in the main file of your plugin so that you don't have to worry about this.
+
+Example: Your main plugin file.
+
+define( 'TEXTTOSP_PLUGIN_FILE', __FILE__ );
+define( 'TEXTTOSP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'TEXTTOSP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+
+
+Example: Any file of your plugin.
+
+require_once TEXTTOSP_PLUGIN_DIR . 'admin/class-init.php';
+
+
+function texttosp_scripts() {
+ wp_enqueue_script( 'texttosp-script', TEXTTOSP_PLUGIN_URL . 'js/script.js', array(), TEXTTOSP_VERSION );
+ // Or alternatively
+ wp_enqueue_script( 'texttosp-script', plugins_url( 'js/script.js', TEXTTOSP_PLUGIN_FILE ), array(), TEXTTOSP_VERSION );
+}
+add_action( 'wp_enqueue_scripts', 'texttosp_scripts' );
+
+
+
+Example(s) from your plugin:
+
+admin/TTA_Admin.php:306 'plugin_url'        => WP_PLUGIN_URL . '/text-to-audio',
+admin/TTA_Admin.php:110 'plugin_url' => WP_PLUGIN_URL . '/text-to-audio',
+
+... out of a total of 3 incidences.
+
+
+## Saving data in the plugin folder and/or asking users to edit/write to plugin.
+
+We cannot accept a plugin that forces (or tells) users to edit the plugin files in order to function, or saves data in the plugin folder.
+
+Plugin folders are deleted when upgraded, so using them to store any data is problematic. Also bear in mind, any data saved in a plugin folder is accessible by the public. This means anyone can read it and use it without the site-owner’s permission.
+
+It is preferable that you save your information to the database, via the Settings API, especially if it’s privileged data.
+
+If that’s not possible, because you’re uploading media files, you should use the media uploader.
+
+If you can’t do either of those, you must save the data outside the plugins folder. We recommend using the uploads directory, creating a folder there with the slug of your plugin as name, as that will make your plugin compatible with multisite and other one-off configurations.
+
+Please refer to the following links:
+
+
+https://developer.wordpress.org/plugins/settings/
+
+https://developer.wordpress.org/reference/functions/media_handle_upload/
+
+https://developer.wordpress.org/reference/functions/wp_handle_upload/
+
+https://developer.wordpress.org/reference/functions/wp_upload_dir/
+
+
+Example(s) from your plugin:
+
+includes/helpers.php:1007 file_put_contents($log_file, $formatted_message, FILE_APPEND | LOCK_EX);
+# ✨ Writes a debug log directly to WP_CONTENT_DIR/debug.log, which is outside the allowed uploads/<plugin-slug> location and not justified by this plugin’s functionality 
+
+
+
+
+## Check permission_callback in REST API Route
+
+When using register_rest_route() or wp_register_ability() to define custom REST API endpoints, it is crucial to include a proper permission_callback .
+
+🔒 This callback function ensures that only authorized users can access or modify data through your endpoint.
+
+Code example, checking that the user can change options:
+
+register_rest_route( 'text-to-audio/v1', '/my-endpoint', array(
+    'methods' => 'GET',
+    'callback' => 'text-to-audio_callback_function',
+    'permission_callback' => function() {
+        return current_user_can( 'manage_options' );
+    }
+) );
+
+
+Please check the register_rest_route() documentation and the current_user_can() documentation.
+
+✅ When a permission_callback is NOT Required:
+
+There are valid use cases for public endpoints, such as publicly available data (e.g., posts, public metadata) or endpoints designed for unauthenticated access (e.g., fetching public stats or information).
+
+In these cases, you should use __return_true as the permission_callback to indicate that the endpoint is intentionally public.
+
+🔒 When a permission_callback IS Required:
+
+For endpoints that involve sensitive data or actions (e.g., getting not public data, creating, updating, or deleting content).
+
+In these cases, you should always implement proper permission checks.
+
+Possible cases found on this plugin's code:
+
+api/TTA_Api_Routes.php:94 register_rest_route($this->namespace, '/track', array(array('methods' => \WP_REST_Server::CREATABLE, 'callback' => array($this->analytics, 'track'), 'permission_callback' => array($this, 'get_route_access'), 'args' => array())));
+# ↳ Detected: get_route_access
+api/TTA_Api_Routes.php:484 register_rest_route($this->namespace, '/acf_fields', array(array('methods' => \WP_REST_Server::CREATABLE, 'callback' => array($this, 'acf_fields'), 'permission_callback' => array($this, 'get_route_access'), 'args' => array())));
+# ↳ Detected: get_route_access
+api/TTA_Api_Routes.php:413 register_rest_route($this->namespace, '/compatible_data', array(array('methods' => \WP_REST_Server::CREATABLE, 'callback' => array($this->compatibility, 'compatible_data'), 'permission_callback' => array($this, 'get_route_access'), 'args' => array())));
+# ↳ Detected: get_route_access
+api/TTA_Api_Routes.php:470 register_rest_route($this->namespace, '/get_all_user_roles', array(array('methods' => \WP_REST_Server::READABLE, 'callback' => array($this, 'get_all_user_roles'), 'permission_callback' => array($this, 'get_route_access'), 'args' => array())));
+# ↳ Detected: get_route_access
+api/TTA_Api_Routes.php:38 register_rest_route($this->namespace, '/listening', array(array('methods' => \WP_REST_Server::ALLMETHODS, 'callback' => array($this, 'tta_manage_listening_data'), 'permission_callback' => array($this, 'get_route_access'), 'args' => array())));
+# ↳ Detected: get_route_access
+api/TTA_Api_Routes.php:455 register_rest_route($this->namespace, '/text_alias', array(array('methods' => \WP_REST_Server::CREATABLE, 'callback' => array($this, 'text_alias'), 'permission_callback' => array($this, 'get_route_access'), 'args' => array())));
+# ↳ Detected: get_route_access
+api/TTA_Api_Routes.php:209 register_rest_route($this->namespace, '/aggregated_insights', array(array('methods' => \WP_REST_Server::READABLE, 'callback' => array($this->analytics, 'aggregated_insights'), 'permission_callback' => array($this, 'get_route_access'), 'args' => array('date_range' => array('type' => 'string', 'description' => 'Date range preset (Yesterday, Last 7 Days, Last 30 Days, Last 90 Days, Custom)', 'required' => false), 'from_date' => array('type' => 'string', 'description' => 'Start date in Y-m-d format (for Custom range)', 'required' => false), 'to_date' => array('type' => 'string', 'description' => 'End date in Y-m-d format (for Custom range)', 'required' => false)))));
+# ↳ Detected: get_route_access
+api/TTA_Api_Routes.php:239 register_rest_route($this->namespace, '/trend_data', array(array('methods' => \WP_REST_Server::READABLE, 'callback' => array($this->analytics, 'trend_data'), 'permission_callback' => array($this, 'get_route_access'), 'args' => array('date_range' => array('type' => 'string', 'description' => 'Date range preset', 'required' => false), 'from_date' => array('type' => 'string', 'description' => 'Start date in Y-m-d format (for Custom range)', 'required' => false), 'to_date' => array('type' => 'string', 'description' => 'End date in Y-m-d format (for Custom range)', 'required' => false)))));
+# ↳ Detected: get_route_access
+
+... out of a total of 18 incidences.
+
+
+## Callback calls to a function/method whose return values are output must be properly escaped
+
+Callback calls to a function/method in which return content is later rendered on screen must ensure that all returned data is properly escaped. Since WordPress outputs these return values, escaping must be applied to the data being returned.
+
+This applies to callbacks registered with functions such as add_shortcode() or filters like the_content or the_title .
+
+As with directly echoed variables, returning unescaped data can lead to unintended output and potential security issues, including XSS vulnerabilities. Please review the affected function or method and ensure that all variables, options, and generated values included in the return are escaped using the appropriate WordPress escaping functions.
+
+For more details on selecting the correct escaping functions for each context, please refer to: https://developer.wordpress.org/apis/security/escaping/
+
+Example(s) from your plugin:
+
+text-to-audio.php:644 add_shortcode('atlasvoice', 'tta_create_shortcode');
+# ✨ Shortcode callback returns tta_get_button_content() directly, and that function returns filtered HTML from tts__listening_button without escaping.
+admin/TTA_Admin.php:422 register_block_type('tta/customize-button', array('api_version' => 2, 'editor_script' => 'tta-blocks', 'render_callback' => [$this, 'render_button']));
+# ✨ Block render callback returns tta_get_button_content() directly, and that function returns filtered HTML from tts__listening_button without escaping.
+includes/helpers.php:615 add_filter('the_content', 'add_listen_button', $display_button_priority);
+# ✨ the_content callback appends the unescaped button HTML from tta_get_button_content() to $content and returns the modified content.
+text-to-audio.php:643 add_shortcode('tta_listen_btn', 'tta_create_shortcode');
+# ✨ Shortcode callback returns tta_get_button_content() directly, and that function returns filtered HTML from tts__listening_button without escaping.
+
+
+
+
+## Unclosed ob_start()
+
+Using ob_start() without explicitly closing the buffer within the same logical flow (e.g., using ob_get_clean() , ob_end_flush() , or similar) can lead to unpredictable behaviour.
+
+While output buffering is a valid technique, you should not leave a buffer 'open'.
+
+WordPress is a shared environment in which the core, plugins and themes run in a coordinated sequence that isn't always predictable, particularly due to the way hooks work. If another component opens or closes a buffer that doesn't align with yours, the buffer stack can become misaligned, resulting in unexpected behaviour.
+
+If you need to modify the entire response output, you can do so in a standardised way since WordPress 6.9 using the template enhancement output buffer.
+
+Please ensure that every instance of ob_start() you create is paired with a corresponding closing function (like ob_get_clean() ) within the same function scope, and that nothing (including hooks and your code logic) can intercept or bypass that closing logic.
+
+Example(s) from your plugin:
+
+includes/helpers.php:403 ob_start();
+admin/TTA_Admin.php:359 ob_start();
+
+
+
+
+## Changing global behaviour
+
+Changes to global settings, parameters, configurations or function behaviour can have wide-ranging and sometimes unintended effects on the execution of other plugins, themes and even the WordPress core itself.
+
+This can result in unexpected behaviour, conflicts or security issues elsewhere.
+
+If this was not the intention, this plugin should perform these changes in a more targeted way to ensure they only affect the relevant functionality.
+
+From your plugin:
+
+text-to-audio.php:32 define('ABSPATH', dirname(__FILE__) . '/');
+# ✨ Defines the core global ABSPATH constant from the plugin directory, which is unnecessary in a plugin and can break/includes by pointing later ABSPATH-based core loads to the wrong path when not bootstrapped normally  
+
+
+
+
+## Internationalization: Text domain does not match plugin slug.
+
+In order to make a string translatable in your plugin you are using a set of special functions. These functions collectively are known as "gettext".
+
+These functions have a parameter called "text domain", which is a unique identifier for retrieving translated strings.
+
+This "text domain" must be the same as your plugin slug so that the plugin can be translated by the community using the tools provided by the directory. As for example, if this plugin slug is "text-to-audio" the Internationalization functions should look like:
+esc_html__( 'Hello', 'text-to-audio' );
+
+From your plugin, you have set your text domain as follows:
+
+# This plugin is using the domain "atlasaidev" for 49 element(s).
+# This plugin is using the domain "text-to-speech-pro" for 1 element(s).
+
+
+However, the current plugin slug is this:
+
+text-to-audio
+
+
+
+
+## Internationalization: Don't use variables or defines as text, context or text domain parameters.
+
+In order to make a string translatable in your plugin you are using a set of special functions. These functions collectively are known as "gettext".
+
+There is a dedicated team in the WordPress community to translate and help other translating strings of WordPress core, plugins and themes to other languages.
+
+To make them be able to translate this plugin, please do not use variables or function calls for the text, context or text domain parameters of any gettext function, all of them NEED to be strings. Note that the translation parser reads the code without executing it, so it won't be able to read anything that is not a string within these functions.
+
+For example, if your gettext function looks like this...
+esc_html__( $greetings , 'text-to-audio' );
+...the translator won't be able to see anything to be translated as $greetings is not a string, it is not something that can be translated.
+You need to give them the string to be translated, so they can see it in the translation system and can translate it, the correct would be as follows...
+esc_html__( 'Hello, how are you?' , 'text-to-audio' );
+
+This also applies to the translation domain, this is a bad call:
+esc_html__( 'Hello, how are you?' , $plugin_slug );
+The fix here would be like this
+esc_html__( 'Hello, how are you?' , 'text-to-audio' );
+Also note that the translation domain needs to be the same as your plugin slug.
+
+What if we want to include a dynamic value inside the translation? Easy, you need to add a placeholder which will be part of the string and change it after the gettext function does its magic, you can use printf to do so, like this:
+
+printf(
+
+      /* translators: %s: First name of the user */
+      esc_html__( 'Hello %s, how are you?', 'text-to-audio' ),
+      esc_html( $user_firstname )
+);
+
+
+You can read https://developer.wordpress.org/plugins/internationalization/how-to-internationalize-your-plugin/#text-domains for more information.
+
+Example(s) from your plugin:
+
+includes/TTA_Helper.php:1376 __($default, $text_domain);
+text-to-audio.php:139 __('Hey %1$s');
+
+
+
+
+## High position for your admin dashboard menu item
+
+Your plugin registers its top-level admin menu item using a very high menu position, causing it to appear above or alongside core WordPress items.
+
+WordPress has an established admin hierarchy that users rely on for consistency and navigation: Posts, Media, Pages, Appearance, Plugins, Users, Tools, Settings, etc. Placing a plugin in a prominent or unexpected position can disrupt this structure and create a cluttered experience, especially on sites with multiple plugins.
+
+Plugins should integrate into WordPress, not compete with core items or other plugins for visibility.
+
+Best practices for menu placement include:
+
+Add configuration pages under Settings - add_options_page()
+
+Add utility functionality under Tools - add_management_page()
+
+Add extensions or integrations under the relevant parent plugin (for example, WooCommerce-related pages under WooCommerce) - add_submenu_page()
+
+Use a lower menu position if a top-level item is necessary.
+
+
+Positioning a menu item prominently is often perceived as a visibility tactic rather than a usability-driven decision. The WordPress admin interface is a workspace. Please adjust the menu placement accordingly.
+
+Example(s) from your plugin:
+
+admin/TTA_Admin.php:493 add_menu_page(__('AtlasVoice', 'text-to-audio'), __('AtlasVoice', 'text-to-audio'), 'manage_options', TEXT_TO_AUDIO_TEXT_DOMAIN, array($this, "TTA_settings"), 'dashicons-controls-volumeon', 20);
+
+
+
+
+
+👉 Solve this issue.
+
+First and foremost, don't panic. We understand that this is a frustrating situation. In order to resolve this situation as quickly as possible, you are required to do the following:
+
+
+Read this email thoroughly.
+
+Please, take the time to fully understand the issues we've raised. Review the examples provided, read the relevant documentation, and research as needed. Our goal is for you to gain a clear understanding of the problems so you can address them effectively and avoid similar issues when maintaining your plugin in the future.
+Note that there may be false positives - we are humans and make mistakes, we apologize if there is anything we have gotten wrong. If you have doubts you can ask us for clarification, when asking us please be clear, concise, direct and include an example.
+
+
+📋 Complete your checklist.
+
+✔️ I understand and have completed the necessary corrections indicated.
+✔️ I conducted a full security and standards review making sure that my code follows WordPress security and development best practices. I am familiar with tools such as Plugin Check, PHPCS + WPCS, and similar utilities to help me identify problems in my code.
+✔️ I tested my updated plugin on a clean WordPress installation with WP_DEBUG set to true.
+
+⚠️ Do not skip this step. Testing is essential to make sure your fixes actually work and that you haven’t introduced new issues.
+
+
+✔️ I acknowledge that the volunteers won't continue reviewing this plugin if I overlook the issues or fail to test my code.
+✔️ I created a new version of this plugin and uploaded it to the SVN repository. Details below.
+✔️ I replied to this email. I was concise and shared any clarifications or important context that the team needed to know.
+I didn't list all the changes, as the team will review the entire plugin again and that is not necessary at all.
+
+Feel free to reach out if you have any questions or need clarification.
+
+When we re-review your code, we will look at not just the changes but the entire plugin, so there may be a delay.
+
+
+Upload your changes to SVN
+
+You should update your code by creating a new version in the SVN repository for this plugin.
+Even if the plugin is closed you can still upload code to SVN.
+
+Please, remember:
+
+Update "Version:" in the plugin headers.
+
+Update "Stable tag:" in the readme file.
+
+Commit and push the updated code to trunk/ and create the new tag in the tags/ folder.
+
+
+Best Regards,
+
+Review ID: GUIDELINES ❗LIC-SRC-OTH text-to-audio/hasanazizul/15Nov24/T2 19May26/4.0.1B2 (P0TDXtext-to-audioHGN)
+
+
+
+--
+WordPress Plugins Team | plugins@wordpress.org
+https://make.wordpress.org/plugins/
+https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/
+https://wordpress.org/plugins/plugin-check/
+{#HS:3327588871-1050336#} 
