@@ -347,50 +347,14 @@ Please report security bugs through the [Patchstack Vulnerability Disclosure Pro
 
 
 
-== Source code and building from source ==
+== Source code ==
 
-The complete, unminified source code for this plugin is published at
-https://github.com/azizulhasan/text-to-audio (GPLv3 — the same license
-as the distributed plugin). The release ZIP also bundles the same
-sources alongside the minified runtime files, so reviewers and curious
-developers can inspect everything without leaving the wp.org SVN browser.
-
-Every minified JavaScript bundle shipped under `admin/js/build/` and
-`build/` is compiled from the matching files in `src/` and
-`admin/js/` using webpack via Laravel Mix. SCSS sources and Gutenberg
-block sources are also in the plugin folder and the public repository.
-
-= Build requirements =
-
-* Node.js 18 or later
-* npm 9 or later
-* PHP 7.4 or later
-* Composer 2.x
-
-= Reproducing the build =
-
-    git clone https://github.com/azizulhasan/text-to-audio
-    cd text-to-audio
-    composer install --no-dev
-    npm install
-    npm run production       # builds the React dashboard + all admin/frontend JS bundles
-    npm run block:build      # builds the Gutenberg block (build/blocks.js)
-
-Output lands in `admin/js/build/` and `build/`. The git tag matching
-the wp.org plugin version (for example, tag `2.1.20` for plugin
-version 2.1.20) reflects the exact source used to produce the wp.org
-release ZIP.
-
-= Where each bundle comes from =
-
-* `admin/js/build/text-to-audio-dashboard-ui.min.js` — built from `src/dashboard/index.js`
-* `admin/js/build/text-to-audio-button.min.js` — built from `admin/js/text-to-audio-button.js`
-* `admin/js/build/TextToSpeech.min.js` — built from `admin/js/TextToSpeech.js`
-* `admin/js/build/AtlasVoiceAnalytics.min.js` — built from `admin/js/AtlasVoiceAnalytics.js`
-* `admin/js/build/AtlasVoicePlayerInsights.min.js` — built from `admin/js/AtlasVoicePlayerInsights.js`
-* `admin/js/build/tts-bulk-mp3-file-ui.min.js` — built from `src/dashboard/bulk-mp3-file.js`
-* `admin/js/build/chunks/tab-*.chunk.js` — webpack lazy-loaded chunks for `src/dashboard/components/tabs/*`
-* `build/blocks.js` — built from `admin/js/blocks/blocks.js` via `@wordpress/scripts`
+The complete, unminified source code for this plugin is published on
+GitHub at https://github.com/azizulhasan/text-to-audio under the
+GPLv3 license (the same license as the distributed plugin). The git
+tag matching the wp.org plugin version (for example, tag `2.1.20`
+for plugin version 2.1.20) reflects the exact source used to produce
+the wp.org release ZIP.
 
 
 

@@ -19,42 +19,18 @@ const checktextdomain = require('gulp-checktextdomain');
 // const gutil = require('gutil');
 // const ftp = require('vinyl-ftp');
 const gulpCopy = require('gulp-copy');
-// TTS-247: production ZIP now ships the unminified source for every
-// compiled JS bundle, plus the build manifest (gulpfile.js, package.json,
-// webpack.mix.js, composer.json, .browserslistrc). This satisfies the
-// WordPress.org "Code must be mostly human-readable" guideline by
-// bundling the source alongside the minified artifacts, instead of
-// (or in addition to) relying on the linked GitHub repo in readme.txt.
-//
-// What's now INCLUDED that was previously excluded:
-//   - src/**                            (React dashboard source)
-//   - admin/js/blocks/**                (Gutenberg block source)
-//   - admin/js/tts/**                   (frontend TTS helper modules)
-//   - admin/js/text-to-audio-button.js  (source of -button.min.js)
-//   - admin/js/text-to-audio-dashboard.js
-//   - admin/js/TextToSpeech.js          (source of TextToSpeech.min.js)
-//   - admin/js/AtlasVoiceAnalytics.js
-//   - admin/js/AtlasVoicePlayerInsights.js
-//   - admin/demos/player2/js/TextToSpeechProDemo.js
-//   - admin/demos/player3/js/plyr-demo.js
-//   - gulpfile.js, webpack.mix.js, package.json, composer.json,
-//     .browserslistrc                   (build manifest)
-//
-// What stays EXCLUDED to keep the ZIP small:
-//   - package-lock.json, composer.lock  (1.7 MB+; npm install regenerates)
-//   - scripts/**                        (translation build pipeline; the
-//                                        README documents how to run it)
-//   - node_modules/**, .git/**, plan/**, .claude/**, build outputs
-//
-// Approximate added size: ~300 KB compressed / ~1.3 MB uncompressed.
-// To revert, restore the `!src/**` and the related `!admin/js/*.js`
-// exclusions below.
+// TTS-247: production ZIP excludes dev sources and build manifest. Source
+// availability for wp.org review is satisfied by the public GitHub repo
+// linked from README.txt (the GPLv3 tag for each release matches the ZIP).
 const productionSrc = [
 	'**/*',
 	'!.git/**',
 	'!.husky/**',
 	'!node_modules/**',
 	'!production/**',
+	'!src/**',
+	'!admin/js/tts/**',
+	'!admin/js/blocks/**',
 	'!freemius/**',
 	'!admin/js/build/*.LICENSE.txt',
 	'!admin/js/build/chunks/*.LICENSE.txt',
@@ -65,6 +41,11 @@ const productionSrc = [
 	'!plan/**',
 	'!scripts/**/**',
 	'!languages/*.po',
+	'!admin/js/text-to-audio-dashboard.js',
+	'!admin/js/text-to-audio-button.js',
+	'!admin/js/TextToSpeech.js',
+	'!admin/js/AtlasVoiceAnalytics.js',
+	'!admin/js/AtlasVoicePlayerInsights.js',
 	'!admin/js/build/text-to-audio-pro-button.min.js',
 	'!admin/js/build/tts-bulk-mp3-file.min.js',
 	'!admin/js/build/tts-bulk-mp3-file.min.js.LICENSE.txt',
@@ -72,13 +53,20 @@ const productionSrc = [
 	'!admin/js/build/tts-css-selectors.min.js.LICENSE.txt',
 	'!admin/js/build/text-to-audio-pro-button.min.js.LICENSE.txt',
 	'!admin/js/build/text-to-audio-dashboard-ui.min.js.LICENSE.txt',
+	'!admin/demos/player2/js/TextToSpeechProDemo.js',
+	'!admin/demos/player3/js/plyr-demo.js',
+	'!.browserslistrc',
 	'!.eslintrc',
 	'!.gitignore',
+	'!gulpfile.js',
+	'!package.json',
+	'!composer.json',
 	'!composer.lock',
 	'!phpcs.xml',
 	'!.cpanel.yml',
 	'!package-lock.json',
 	'!mix-manifest.json',
+	'!webpack.mix.js',
 	'!uninstall.php',
 	'!null',
 	'!nul',
