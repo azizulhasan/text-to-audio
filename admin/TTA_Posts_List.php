@@ -180,7 +180,8 @@ class TTA_Posts_List
             return;
         }
 
-        $current_filter = isset($_GET['atlasvoice_filter']) ? sanitize_text_field($_GET['atlasvoice_filter']) : '';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only GET filter on posts list, no state mutation
+        $current_filter = isset($_GET['atlasvoice_filter']) ? sanitize_text_field( wp_unslash( $_GET['atlasvoice_filter'] ) ) : '';
         $player_id = get_player_id();
 
         // Determine filter label based on player ID
@@ -218,11 +219,13 @@ class TTA_Posts_List
         }
 
         // Check if filter is applied
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only GET filter on posts list
         if (!isset($_GET['atlasvoice_filter']) || empty($_GET['atlasvoice_filter'])) {
             return;
         }
 
-        $filter = sanitize_text_field($_GET['atlasvoice_filter']);
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only GET filter on posts list
+        $filter = sanitize_text_field( wp_unslash( $_GET['atlasvoice_filter'] ) );
 
         if (!in_array($filter, array('with_audio', 'without_audio'))) {
             return;
@@ -299,11 +302,13 @@ class TTA_Posts_List
     {
         global $wpdb;
 
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only GET filter on posts list
         if (!isset($_GET['atlasvoice_filter']) || empty($_GET['atlasvoice_filter'])) {
             return $clauses;
         }
 
-        $filter = sanitize_text_field($_GET['atlasvoice_filter']);
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only GET filter on posts list
+        $filter = sanitize_text_field( wp_unslash( $_GET['atlasvoice_filter'] ) );
         $settings = TTA_Helper::tts_get_settings('settings');
 
         // Check if automatic player is enabled

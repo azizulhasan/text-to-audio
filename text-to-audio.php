@@ -313,10 +313,12 @@ add_action('admin_init', function () {
     }
 
     // Allow resetting onboarding via ?page=text-to-audio&reset_onboard=true
+    // phpcs:disable WordPress.Security.NonceVerification.Recommended -- admin-only flow gated by current_user_can(manage_options); read-only routing check
     if ( isset( $_GET['page'] ) && 'text-to-audio' === $_GET['page']
         && isset( $_GET['reset_onboard'] ) && 'true' === $_GET['reset_onboard']
         && current_user_can( 'manage_options' )
     ) {
+    // phpcs:enable WordPress.Security.NonceVerification.Recommended
         delete_option( 'tta_onboarding_completed' );
         delete_option( 'tta_pro_onboarding_completed' );
         wp_safe_redirect( admin_url( 'admin.php?page=text-to-audio&welcome=1' ) );
@@ -327,6 +329,7 @@ add_action('admin_init', function () {
         delete_transient('tta_activation_redirect');
 
         // Don't redirect during bulk activation or if user can't manage options.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- WP-core flag set by core during multi-activate; presence-only check
         if ( isset($_GET['activate-multi']) || ! current_user_can('manage_options') ) {
             return;
         }

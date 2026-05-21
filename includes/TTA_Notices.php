@@ -1450,6 +1450,7 @@ class TTA_Notices {
 		$table_name = $wpdb->prefix . 'atlasvoice_analytics';
 
 		// Check if table exists.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
 		$table_exists = $wpdb->get_var(
 			$wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table_name ) )
 		);
@@ -1468,6 +1469,7 @@ class TTA_Notices {
 
 		// TTS-236 Priority 2: SUM(play_count) via indexed column (DB-side).
 		if ( class_exists( '\\TTA\\TTA_Activator' ) && TTA_Activator::play_count_column_exists() ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			$total = (int) $wpdb->get_var( "SELECT COALESCE(SUM(play_count), 0) FROM {$table_name}" );
 			// Cache it as the running counter so next call is O(1).
 			update_option( 'tta_total_plays_counter', $total, false );
@@ -1477,6 +1479,7 @@ class TTA_Notices {
 
 		// TTS-236 Priority 3: Row-count-guarded PHP scan.
 		// On large tables we skip the scan entirely to prevent memory exhaustion.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$row_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table_name}" );
 		$max_rows  = (int) apply_filters( 'tta_total_plays_scan_row_limit', 5000 );
 
@@ -1490,6 +1493,7 @@ class TTA_Notices {
 		}
 
 		// Small site — safe to scan in PHP.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$rows  = $wpdb->get_col( "SELECT analytics FROM {$table_name}" );
 		$total = 0;
 		if ( $rows ) {

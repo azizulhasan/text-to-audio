@@ -95,11 +95,13 @@ class AtlasVoice_Analytics {
 		$table_name = $wpdb->prefix . 'atlasvoice_analytics';
 
 		// Check if an entry exists
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$existing_entry = $wpdb->get_row( $wpdb->prepare(
 			"SELECT * FROM $table_name WHERE user_id = %s AND post_id = %d",
 			$user_id,
 			$post_id
 		) );
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		if ( $existing_entry ) {
 			// Unserialize the existing analytics data
@@ -143,6 +145,7 @@ class AtlasVoice_Analytics {
 			}
 
 			// Update the entry
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->update(
 				$table_name,
 				$update_data,
@@ -183,6 +186,7 @@ class AtlasVoice_Analytics {
 				$insert_format[]           = '%d';
 			}
 
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->insert(
 				$table_name,
 				$insert_data,
@@ -293,9 +297,9 @@ class AtlasVoice_Analytics {
 		// from our own conditions; the user-controlled values go through
 		// $wpdb->prepare() placeholders below.
 		$query          = "SELECT * FROM $table_name $where_clause";
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$prepared_query = $wpdb->prepare( $query, ...$values );
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$results        = $wpdb->get_results( $prepared_query );
 		$total_results  = [];
 		foreach ( $results as $result ) {
@@ -319,7 +323,8 @@ class AtlasVoice_Analytics {
 	public function all_insights( $request ) {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'atlasvoice_analytics'; // Replace with your table name
-		$results    = $wpdb->get_results( "SELECT * FROM $table_name", ARRAY_A ); // ARRAY_A returns an associative array
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$results    = $wpdb->get_results( "SELECT * FROM $table_name", ARRAY_A );
 
 		if ( ! empty( $results ) ) {
 			foreach ( $results as &$result ) {
@@ -721,10 +726,10 @@ class AtlasVoice_Analytics {
         // intentional for analytics reads (must reflect the latest write).
         if ( ! empty( $values ) ) {
             $query   = "SELECT * FROM $table_name $where_clause";
-            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
             $results = $wpdb->get_results( $wpdb->prepare( $query, ...$values ), ARRAY_A );
         } else {
-            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
             $results = $wpdb->get_results( "SELECT * FROM $table_name", ARRAY_A );
         }
 
@@ -743,7 +748,7 @@ class AtlasVoice_Analytics {
                 $prev_values = array( $previous_dates['from_date'], $previous_dates['to_date'] );
                 $prev_where  = 'WHERE ' . implode( ' AND ', $prev_conditions );
                 $prev_query  = "SELECT * FROM $table_name $prev_where";
-                // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+                // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
                 $prev_results = $wpdb->get_results( $wpdb->prepare( $prev_query, ...$prev_values ), ARRAY_A );
                 $previous_aggregated = $this->aggregate_analytics_data( $prev_results );
             }
