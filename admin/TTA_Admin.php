@@ -541,7 +541,14 @@ class TTA_Admin
      */
     public function atlas_plugins_page()
     {
-        echo '<div class="wrap"><div id="atlas_plugins_container"></div></div>';
+        // TTS-247: emit an <h1> + .wp-header-end anchor so WordPress relocates any
+        // admin notices to sit beneath the heading instead of overlapping the
+        // JS-rendered hero. The screen-reader-only h1 keeps the visual hero intact.
+        echo '<div class="wrap">';
+        echo '<h1 class="screen-reader-text">' . esc_html__( 'AtlasAiDev Plugins', 'text-to-audio' ) . '</h1>';
+        echo '<hr class="wp-header-end">';
+        echo '<div id="atlas_plugins_container"></div>';
+        echo '</div>';
     }
 
     public function TTA_settings()
