@@ -901,6 +901,31 @@ class TTA_Helper
     }
 
     /**
+     * TTS-249: registry of players the site can actually deliver.
+     *
+     * Free ships only player 1 (browser speechSynthesis). Pro registers ids 2-6
+     * via the `tts_available_players` filter. This is a capability registry — NOT
+     * a license gate — used to (a) populate the player selector and (b) let
+     * get_player_id() fall back to 1 when a saved id has no implementation present
+     * (e.g. Pro was deactivated). Keys are player ids.
+     *
+     * @return array<int,array>
+     */
+    public static function get_available_players()
+    {
+        $players = array(
+            1 => array(
+                'id'     => 1,
+                'name'   => __( 'Default', 'text-to-audio' ),
+                'object' => 'TextToSpeech',
+                'pro'    => false,
+            ),
+        );
+
+        return (array) apply_filters( 'tts_available_players', $players );
+    }
+
+    /**
      * Is pro license active
      */
     public static function is_pro_license_active()

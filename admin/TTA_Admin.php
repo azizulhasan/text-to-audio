@@ -125,6 +125,10 @@ class TTA_Admin
             'is_pro_license_active' => is_pro_active(),
             'is_admin_page' => is_admin(),
             "player_id" => get_player_id(),
+            // TTS-249: the players this site can actually deliver. Free = player 1
+            // only; Pro adds 2-6 via the `tts_available_players` filter. The React
+            // customize UI renders the selector from this list (no locked options).
+            'availablePlayers' => array_values( TTA_Helper::get_available_players() ),
             "is_folder_writable" => TTA_Helper::is_audio_folder_writable(),
             'compatible' => TTA_Helper::get_compatible_plugins_data(),
             'gctts_is_authenticated' => get_player_id() == '4',
@@ -230,6 +234,14 @@ class TTA_Admin
         if ( empty( $this->localize_data['latest_post_preview_url'] ) ) {
             $this->localize_data['latest_post_preview_url'] = TTA_Helper::get_latest_post_preview_url();
         }
+
+        // TTS-249: recompute the player registry + current id lazily. The
+        // constructor runs on plugins_loaded — BEFORE Pro registers its
+        // `tts_available_players` filter on `init` — so the constructor-time value
+        // only ever contains player 1. Recomputing here (admin_enqueue_scripts)
+        // picks up Pro's players when Pro is active.
+        $this->localize_data['availablePlayers'] = array_values( TTA_Helper::get_available_players() );
+        $this->localize_data['player_id']         = get_player_id();
 
         do_action('tta_enqueue_pro_dashboard_scripts');
 
@@ -445,6 +457,11 @@ class TTA_Admin
         }
 
         $player_id = get_player_id();
+
+        // TTS-249: refresh the localized id/registry at render time (constructor
+        // ran before Pro's init filter — see enqueue_scripts note).
+        $this->localize_data['player_id']        = $player_id;
+        $this->localize_data['availablePlayers'] = array_values( TTA_Helper::get_available_players() );
 
         $dependencies = ['wp-hooks'];
         if (wp_is_mobile()) {

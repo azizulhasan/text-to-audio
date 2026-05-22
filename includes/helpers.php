@@ -977,14 +977,19 @@ function get_player_id()
     ];
 
 
-    $player_id = isset($customize_settings['buttonSettings']['id']) ? $customize_settings['buttonSettings']['id'] : 1;
+    $player_id = isset($customize_settings['buttonSettings']['id']) ? (int) $customize_settings['buttonSettings']['id'] : 1;
 
-    if (!is_pro_license_active() && $player_id > 1) {
+    $player_id = (int) apply_filters('tts_get_player_id', $player_id);
+
+    // TTS-249: capability fallback — NOT a license check. Free ships only player 1;
+    // Pro registers 2-6 via `tts_available_players`. If the saved id has no
+    // implementation present (e.g. Pro was deactivated leaving a stale id), fall
+    // back to 1 so the player still works. This replaces the old license clamp
+    // that the wp.org review flagged as trialware (Guideline 5).
+    $available = array_keys( TTA_Helper::get_available_players() );
+    if (!in_array($player_id, $available, true)) {
         $player_id = 1;
     }
-
-
-    $player_id = apply_filters('tts_get_player_id', $player_id);
 
     return $player_id;
 
