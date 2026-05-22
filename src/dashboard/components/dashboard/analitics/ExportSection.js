@@ -51,7 +51,7 @@ export default function ExportSection({ onExportCSV, onExportPDF, dateRange, fro
         setIsLoadingSettings(true);
         try {
             const response = await fetch(
-                `${tta_obj.api_url}tta/v1/get_schedule_report`,
+                `${tta_obj.api_url}tta_pro/v1/get_schedule_report`,
                 {
                     method: "GET",
                     headers: {
@@ -129,7 +129,7 @@ export default function ExportSection({ onExportCSV, onExportPDF, dateRange, fro
         setIsSaving(true);
         try {
             const response = await fetch(
-                `${tta_obj.api_url}tta/v1/save_schedule_report`,
+                `${tta_obj.api_url}tta_pro/v1/save_schedule_report`,
                 {
                     method: "POST",
                     headers: {

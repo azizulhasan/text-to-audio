@@ -409,7 +409,7 @@ export default function Analytics() {
         if (!isProActive) return;
 
         try {
-            let url = `${tta_obj.api_url}tta/v1/heatmap_data?date_range=${encodeURIComponent(dateRange)}`;
+            let url = `${tta_obj.api_url}tta_pro/v1/heatmap_data?date_range=${encodeURIComponent(dateRange)}`;
 
             // Add custom dates if provided
             if (dateRange === "Custom" && fromDate && toDate) {
@@ -444,7 +444,7 @@ export default function Analytics() {
 
         try {
             const response = await fetch(
-                `${tta_obj.api_url}tta/v1/export_csv?date_range=${encodeURIComponent(dateRange)}`,
+                `${tta_obj.api_url}tta_pro/v1/export_csv?date_range=${encodeURIComponent(dateRange)}`,
                 {
                     method: "GET",
                     headers: {
@@ -486,7 +486,7 @@ export default function Analytics() {
         }
 
         try {
-            let url = `${tta_obj.api_url}tta/v1/export_pdf?date_range=${encodeURIComponent(dateRange)}`;
+            let url = `${tta_obj.api_url}tta_pro/v1/export_pdf?date_range=${encodeURIComponent(dateRange)}`;
 
             // Add custom dates if provided
             if (dateRange === "Custom" && globalFromDate && globalToDate) {

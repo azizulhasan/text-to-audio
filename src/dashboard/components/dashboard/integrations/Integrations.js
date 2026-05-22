@@ -12,6 +12,10 @@ export default function Integrations() {
   const [currentTTSServic, setCurrentTTSServic] = useState(""); // Empty by default
   const [authenticatedServices, setAuthenticatedServices] = useState([]);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  // TTS-249: voice-provider integrations (Google Cloud / ChatGPT / ElevenLabs) are
+  // a Pro feature. In free we show a non-interactive upsell instead of the
+  // configurable setup (no API-key forms / authenticate buttons shipped active).
+  const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
 
   const apiURL = useMemo(() => {
     return (
@@ -204,6 +208,44 @@ export default function Integrations() {
     return '';
   };
 
+
+  // TTS-249: free build shows a locked, non-interactive upsell — the provider
+  // configuration UI (dropdown + API-key forms) is only rendered when Pro is active.
+  if (isDataLoaded && !isProActive) {
+    return (
+      <Container fluid className="tta-container">
+        <Row>
+          <Col xs={12} lg={8}>
+            <div className="bg-white rounded p-3 mb-3 shadow-sm">
+              <h2 className="fs-3 fw-bold mb-2 text-dark">{__("Integration Setup", "text-to-audio")}</h2>
+              <p className="text-secondary m-0 small">
+                {__("Connect premium AI voice providers to generate natural MP3 audio.", "text-to-audio")}
+              </p>
+            </div>
+            <div className="tta-card mb-3 text-center" style={{ padding: "40px 24px" }}>
+              <div style={{ fontSize: 32, marginBottom: 8 }} aria-hidden="true">{"🔒"}</div>
+              <h5 className="fw-semibold mb-2">{__("Voice Integrations — Pro Feature", "text-to-audio")}</h5>
+              <p className="text-secondary small mb-3 mx-auto" style={{ maxWidth: 460 }}>
+                {__("Google Cloud TTS, ChatGPT, and ElevenLabs integrations are available in AtlasVoice Pro. The free plugin uses your browser's built-in voices.", "text-to-audio")}
+              </p>
+              <a
+                className="btn btn-primary"
+                href="https://atlasaidev.com/plugins/text-to-speech-pro/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ background: "#FF7853", borderColor: "#FF7853" }}
+              >
+                {__("Upgrade to Pro", "text-to-audio")}
+              </a>
+            </div>
+          </Col>
+          <Col xs={12} lg={4}>
+            <UpgradeToPro />
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
 
   return isDataLoaded ? (
     <Container fluid className="tta-container">
