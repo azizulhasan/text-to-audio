@@ -925,18 +925,6 @@ class TTA_Helper
         return (array) apply_filters( 'tts_available_players', $players );
     }
 
-    /**
-     * Is pro license active
-     */
-    public static function is_pro_license_active()
-    {
-        if (self::is_pro_active()) {
-            return apply_filters('tts_is_pro_license_active', false);
-        }
-
-        return false;
-    }
-
     public static function set_default_settings()
     {
         $settings = (array)get_option('tta_settings_data');

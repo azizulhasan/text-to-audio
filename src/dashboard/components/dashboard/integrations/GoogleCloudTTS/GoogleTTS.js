@@ -146,7 +146,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
 
         if (
             window.hasOwnProperty("ttsObjPro") &&
-            !ttsObjPro.is_pro_license_active
+            !ttsObjPro.is_pro_active
         ) {
             toast(
                 <>
@@ -933,7 +933,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                             {__("Save", "text-to-audio")}
                         </button>
                         {window.hasOwnProperty("ttsObjPro") &&
-                            ttsObjPro.is_pro_license_active &&
+                            ttsObjPro.is_pro_active &&
                             isAuthenticated && (
                                 <Button
                                     variant="outline-danger"

@@ -255,7 +255,7 @@ export default function Customize() {
       if (
         window.hasOwnProperty("TTS") &&
         window.hasOwnProperty("ttsObjPro") &&
-        ttsObjPro.is_pro_license_active
+        ttsObjPro.is_pro_active
       ) {
         window.TTS.contents[1] = initialText;
       }
@@ -646,7 +646,7 @@ export default function Customize() {
     if (
       window.hasOwnProperty("TTS") &&
       window.hasOwnProperty("ttsObjPro") &&
-      ttsObjPro.is_pro_license_active
+      ttsObjPro.is_pro_active
     ) {
       window.TTS.contents[1] = e.target.value;
     }
