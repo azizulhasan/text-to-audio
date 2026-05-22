@@ -54,15 +54,44 @@ export default function useVoiceLoader(customizationSettings, listeningVoiceMode
     if (typeof TTSProLanguageHelper === "function") {
       languageHelper = new TTSProLanguageHelper();
     }
+
+    // Build the language map from a Google Cloud voice list and push both the
+    // voices and the derived languages into state. Shared by the cache path
+    // and the fetch path so a freshly-fetched voice list populates the
+    // language dropdown immediately — no second load / reload required.
+    const applyGoogleVoices = (voices) => {
+      if (!Array.isArray(voices) || !voices.length) {
+        return false;
+      }
+      let langs = [];
+      let langs2 = {};
+      voices.forEach((voice) => {
+        const code = voice?.languageCodes?.[0];
+        if (code && !langs.includes(code)) {
+          langs.push(code);
+          let languageName = code;
+          if (languageHelper) {
+            languageName = languageHelper.getLangByCode(code);
+          }
+          langs2[code] = languageName;
+        }
+      });
+      setVoicesAndLanguages(voices, langs2);
+      return true;
+    };
+
     if (!stored_voices?.tta__voices) {
       getData(apiURL + "voices")
         .then((res) => {
-          console.log(res?.voices?.voices);
-          if (res?.voices?.length) {
-            setLocalStorage({ tta__voices: JSON.stringify(res.voices) });
-          }
-          if (res?.voices?.voices?.length) {
-            setLocalStorage({ tta__voices: JSON.stringify(res.voices.voices) });
+          // The API may return { voices: [...] } or { voices: { voices: [...] } }.
+          const voices = res?.voices?.voices?.length
+            ? res.voices.voices
+            : res?.voices?.length
+            ? res.voices
+            : [];
+          if (voices.length) {
+            setLocalStorage({ tta__voices: JSON.stringify(voices) });
+            applyGoogleVoices(voices);
           } else {
             setVoicesAndLanguages();
           }
@@ -72,8 +101,6 @@ export default function useVoiceLoader(customizationSettings, listeningVoiceMode
         });
     } else {
       let voices = JSON.parse(stored_voices.tta__voices);
-      let langs = [];
-      let langs2 = {};
 
       try {
         voices = JSON.parse(voices);
@@ -85,18 +112,7 @@ export default function useVoiceLoader(customizationSettings, listeningVoiceMode
         voices = voices.voices;
       }
 
-      voices.map((voice) => {
-        if (!langs.includes(voice.languageCodes[0])) {
-          langs.push(voice.languageCodes[0]);
-          let languageName = voice.languageCodes[0];
-          if (languageHelper) {
-            languageName = languageHelper.getLangByCode(languageName);
-          }
-          langs2[voice.languageCodes[0]] = languageName;
-        }
-      });
-
-      setVoicesAndLanguages(voices, langs2);
+      applyGoogleVoices(voices);
     }
   };
 

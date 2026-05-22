@@ -344,6 +344,14 @@ class TTA_Admin
             wp_enqueue_style('tts-bootstrap', plugin_dir_url(__FILE__) . 'css/bootstrap.css', [], $this->version, 'all');
             wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', array('wp-hooks',), $this->version, true);
             wp_localize_script('TextToSpeech', 'ttsObj', $this->localize_data);
+            // TTS-250: the shared React dashboard reads the `ttsObjPro` global for
+            // pro-context checks (the is_pro_active gate that loads the Listening
+            // language list, multilingual `compatible` detection, customize preview).
+            // Provide a reliable base on the free dashboard so this UI works whether
+            // or not a Pro script localizes ttsObjPro on this page; Pro overrides it
+            // with its own data when its scripts load. This was previously supplied
+            // by the Pro player demo bundle, which was removed in TTS-249.
+            wp_localize_script('TextToSpeech', 'ttsObjPro', $this->localize_data);
             // Register dashboard UI script (following i18n best practices)
             wp_register_script(
                 'text-to-audio-dashboard-ui',
@@ -363,25 +371,17 @@ class TTA_Admin
             );
             wp_enqueue_style('dashicons');
 
-            // Player 2
-            wp_enqueue_style('text-to-audio-pro-demo', plugin_dir_url(__FILE__) . 'demos/player2/text-to-audio-pro-demo.css', [], $this->version, 'all');
-            wp_enqueue_script('TextToSpeechProDemo', plugin_dir_url(__FILE__) . 'demos/player2/js/TextToSpeechProDemo.min.js', array(
-                'wp-hooks',
-                'TextToSpeech'
-            ), $this->version, true);
-            wp_localize_script('TextToSpeechProDemo', 'ttsObjPro', $this->localize_data);
-
-            // Player 3
-            wp_enqueue_style('tts-pro-demo-plyr', plugin_dir_url(__FILE__) . 'demos/player3/css/plyr-demo.min.css', [], $this->version, 'all');
-            wp_enqueue_script('text-to-audio-plyr-demo-lib', plugin_dir_url(__FILE__) . 'demos/player3/js/build/plyr-demo.lib.min.js', array('wp-hooks'), $this->version, true);
-            wp_enqueue_script('text-to-audio-demo-plyr', plugin_dir_url(__FILE__) . 'demos/player3/js/build/plyr-demo.min.js', array(), $this->version, true);
-            wp_localize_script('text-to-audio-demo-plyr', 'ttsObj', $this->localize_data);
-
         }
 
 
+        // TTS-250: the per-post insights script calls the `/insights` REST route,
+        // so only load it on a post-edit screen where TTS is actually enabled for
+        // this post (should_load_button() == true). Previously it loaded on every
+        // post.php / post-new.php screen — for any post type, including ones where
+        // the player is never shown — firing a needless /insights request. The
+        // dashboard analytics page (page=text-to-audio) still loads it.
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page-name read for asset enqueue, no state mutation
-        if (TTA_Helper::is_edit_page() || isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
+        if ((TTA_Helper::is_edit_page() && TTA_Helper::should_load_button()) || (isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page']))) {
             // TTS-247: ship Chart.js locally instead of jsDelivr CDN (wp.org Guideline 8 — no remote assets).
             wp_enqueue_script('AtlasVoice_chart', plugin_dir_url(__FILE__) . 'js/vendor/chart.umd.min.js', [], '4.4.7', true);
             wp_enqueue_script('AtlasVoicePlayerInsights', plugin_dir_url(__FILE__) . 'js/build/AtlasVoicePlayerInsights.min.js', array(
