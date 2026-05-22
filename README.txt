@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1.20
+Stable tag: 2.2.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -289,6 +289,10 @@ Service provided by OpenAI, L.L.C.:
 We are looking for people to help translate this plugin. If you can help, we would love to hear from you.
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
+
+= 2.2.0 ( 22 May 2026 ) =
+Improved : The free plugin is now fully functional on its own — premium player options, button positions, voice integrations, and advanced analytics are presented as upgrade prompts instead of locked controls.
+Fixed : Removed external sample-audio requests from the dashboard; previews now use your browser's built-in voices.
 
 = 2.1.20 ( 15 May 2026 ) =
 Improved : Plugin card titles on the "Other AtlasAiDev Plugins" page now prefer the canonical WordPress.org title (via the public plugin info API), so cards mirror the wp.org listing instead of locally-configured names.
@@ -813,6 +817,9 @@ Improved :  Pro and free version performance improved.
 
 
 == Upgrade Notice ==
+
+= 2.2.0 =
+The free plugin is now fully functional standalone; premium features show as upgrade prompts. Dashboard no longer makes external sample-audio requests.
 
 = 2.1.20 =
 Improved : "Other AtlasAiDev Plugins" page now mirrors the official WordPress.org plugin titles, and the sibling plugin cards include a new "Start Trial" button.
