@@ -736,18 +736,6 @@ function get_used_shortcodes($content)
     return $tagnames;
 }
 
-/**
- * Is pro license active
- */
-function is_pro_license_active()
-{
-    if (is_pro_active()) {
-        return true;
-    }
-
-    return false;
-}
-
 function tta_get_default_languages()
 {
     return array(

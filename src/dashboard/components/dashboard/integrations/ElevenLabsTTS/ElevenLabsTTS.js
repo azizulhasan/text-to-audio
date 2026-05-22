@@ -31,7 +31,7 @@ export default function ElevenLabsTTS({ elevenLabsAPIData, currentTTSServic, set
             return;
         }
 
-        if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_license_active) {
+        if (window.hasOwnProperty('ttsObjPro') && !ttsObjPro.is_pro_active) {
             toast(<>
                 <h4>{__("ElevenLabs text to speech feature is only in pro version.", "text-to-audio")}</h4>
                 <button onClick={(e) => {

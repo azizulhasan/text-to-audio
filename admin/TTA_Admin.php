@@ -122,7 +122,6 @@ class TTA_Admin
             'user_id' => get_current_user_id(),
             'is_dashboard' => is_admin(),
             'is_pro_active' => is_pro_active(),
-            'is_pro_license_active' => is_pro_active(),
             'is_admin_page' => is_admin(),
             "player_id" => get_player_id(),
             // TTS-249: the players this site can actually deliver. Free = player 1
