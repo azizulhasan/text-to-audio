@@ -1031,14 +1031,14 @@ function is_pro_active()
  * @param string $message  The log message.
  */
 function tts_debug( $message ) {
-    // TTS-247: write to uploads/text-to-audio/ instead of wp-content/debug.log.
+    // TTS-247: write to uploads/atlasvoice/ instead of wp-content/debug.log.
     // wp.org guideline forbids writing into the plugin folder or hijacking
     // core's debug.log; create the per-plugin folder lazily under wp_upload_dir().
     $upload = wp_upload_dir();
     if ( ! empty( $upload['error'] ) ) {
         return;
     }
-    $dir = trailingslashit( $upload['basedir'] ) . 'text-to-audio';
+    $dir = trailingslashit( $upload['basedir'] ) . 'atlasvoice';
     if ( ! file_exists( $dir ) ) {
         wp_mkdir_p( $dir );
         @file_put_contents( $dir . '/index.php', "<?php\n// Silence is golden.\n" );
