@@ -19,6 +19,7 @@
     "release": "gulp release",
     "copy": "gulp copy",
     "copy:seven": "gulp copyToSeven",
+    "build:seven": "npm run production && gulp copy && gulp copyToSeven",
     "copyProButton": "gulp copyProButton",
     "makepot": "wp i18n make-pot . languages/text-to-audio.pot",
     "translate": "node scripts/generate-translations.js"
