@@ -43,7 +43,7 @@ Verified the AI-flagged examples against the actual source. All claims so far ar
 | `__('Hey %1$s')` at `text-to-audio.php:139` | ✅ Confirmed inside a `sprintf` Freemius connect-message filter | Missing text-domain + missing translator comment. |
 | `__($default, $text_domain)` at `TTA_Helper.php:1376` | ✅ Confirmed in `get_text_value()` helper | Both the string and domain are variables — translators can't read them. |
 | Deactivation hook force-deactivates `text-to-audio-pro` | ✅ Real, but the actual location is `includes/TTA_Deactivator.php:37`, **not** `text-to-audio.php` | Worse than flagged — also calls `header('Location: ...'); die();` to force redirect. |
-| Trialware: locked Pro features in free | ⏳ To verify file-by-file (see §3.1) | |
+| Trialware: locked Pro features in free | ✅ DONE (TTS-249) — see §3.1 (P1–P5 all ✅): player clamp removed + data-driven list, demo assets excluded from ZIP, premium analytics routes moved to Pro `tta_pro/v1`, Button Position + Integrations gated. Verified in free-only and free+pro. | |
 
 **Discrepancies / clarifications worth noting in our reply to wp.org:**
 - The deactivation hook lives in `includes/TTA_Deactivator.php` (not the main file). Same severity, just a different location.
@@ -70,11 +70,11 @@ Verified the AI-flagged examples against the actual source. All claims so far ar
 
 | # | Area | File(s) / Symptom | Action | Priority | Status |
 |---|---|---|---|---|---|
-| P1 | Trialware: player lock | `get_player_id()` forces player 1 when no Pro | Always return the user-selected player ID in the free plugin; gate the *premium voice provider* via Pro, not the player UI | P0 | ⬜ |
-| P2 | Trialware: demo player assets | `admin/demos/player2/`, `admin/demos/player3/` shipped in free | Remove the Pro demo bundles from the free build (`gulpfile.js` `productionSrc`) | P0 | ⬜ |
-| P3 | Trialware: analytics routes | REST routes / handlers that early-return "requires Pro" | Either (a) remove the routes entirely from the free plugin, or (b) make them fully functional in free | P0 | ⬜ |
-| P4 | Trialware: analytics export/reports | Export & report handlers locked behind Pro | Same as P3 — remove or unlock | P0 | ⬜ |
-| P5 | Servicware doc | Any remaining license-gated calls | Audit `is_pro_active()` call sites — none may gate local-only features | P0 | ⬜ |
+| P1 | Trialware: player lock | `get_player_id()` forces player 1 when no Pro | DONE (TTS-249): removed the `is_pro_license_active()` clamp; `get_player_id()` returns the stored id with a *capability* fallback (id not in the registered `tts_available_players` list → 1). Free ships only player 1 + upsell link; Pro registers players 2-6 via the filter. Verified free=[1], pro=[1-6], stale-id falls back to 1 | P0 | ✅ |
+| P2 | Trialware: demo player assets | `admin/demos/player2/`, `admin/demos/player3/` shipped in free | DONE (TTS-249): `gulpfile.js productionSrc` now excludes `admin/demos/**`; the wizard/listening UI no longer references demo audio | P0 | ✅ |
+| P3 | Trialware: analytics routes | REST routes / handlers that early-return "requires Pro" | DONE (TTS-249, option a): Free stopped registering `heatmap_data`/`export_csv`/`export_pdf`; registered by Pro under `tta_pro/v1`. Verified free→404, pro→200. (`trend_data`/`aggregated_insights` are genuine free features and stay) | P0 | ✅ |
+| P4 | Trialware: analytics export/reports | Export & report handlers locked behind Pro | DONE (TTS-249): `save_schedule_report`/`get_schedule_report` removed from free, registered by Pro under `tta_pro/v1`; React calls `tta_pro/v1`. UI shows "Upgrade to Pro" in free | P0 | ✅ |
+| P5 | Servicware doc | Any remaining license-gated calls | DONE (TTS-249): the clamp was the only free-side license gate (removed). `is_pro_active()` is presence-based, used only for upsell visibility. Also gated Button Position + Integrations UI (hide-in-free + upsell, no selectable-then-blocked controls) | P0 | ✅ |
 
 ### 3.2 Source availability
 
