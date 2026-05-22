@@ -28,6 +28,22 @@ class AtlasVoice_Analytics {
 	}
 
 	/**
+	 * TTS-247: defensive guard so analytics reads never query a missing table.
+	 * After a data reset the `atlasvoice_analytics` table is dropped; the dashboard
+	 * still calls aggregated_insights/trend_data on load. Without this check those
+	 * queries spam "Table doesn't exist" DB errors. Returns false when absent so
+	 * callers can fall back to empty results.
+	 *
+	 * @return bool
+	 */
+	private function analytics_table_exists() {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'atlasvoice_analytics';
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
+		return (bool) $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table_name ) ) );
+	}
+
+	/**
 	 * @param $request
 	 *
 	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
@@ -724,7 +740,11 @@ class AtlasVoice_Analytics {
         // 'atlasvoice_analytics'). User-controlled values flow through
         // $wpdb->prepare() placeholders. Direct DB + NoCaching are
         // intentional for analytics reads (must reflect the latest write).
-        if ( ! empty( $values ) ) {
+        // TTS-247: skip the query when the table is missing (e.g. just after a
+        // data reset) so we don't emit "Table doesn't exist" DB errors.
+        if ( ! $this->analytics_table_exists() ) {
+            $results = array();
+        } elseif ( ! empty( $values ) ) {
             $query   = "SELECT * FROM $table_name $where_clause";
             // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
             $results = $wpdb->get_results( $wpdb->prepare( $query, ...$values ), ARRAY_A );
@@ -738,7 +758,7 @@ class AtlasVoice_Analytics {
 
         // Get previous period data for comparison (Pro only)
         $previous_aggregated = null;
-        if ( TTA_Helper::is_pro_active() ) {
+        if ( TTA_Helper::is_pro_active() && $this->analytics_table_exists() ) {
             $previous_dates = $this->get_previous_period_dates( $dates );
             if ( $previous_dates['from_date'] && $previous_dates['to_date'] ) {
                 $prev_conditions = array(
@@ -1072,7 +1092,10 @@ class AtlasVoice_Analytics {
         }
 
         // Get data grouped by date. Table name + WHERE clause are built from internal whitelisted parts; user-supplied values pass through wpdb->prepare placeholders.
-        if ( ! empty( $values ) ) {
+        // TTS-247: skip the query when the table is missing (e.g. just after a data reset).
+        if ( ! $this->analytics_table_exists() ) {
+            $results = array();
+        } elseif ( ! empty( $values ) ) {
             $query = "SELECT DATE(created_at) as date, analytics FROM $table_name $where_clause ORDER BY created_at ASC";
             // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
             $results = $wpdb->get_results( $wpdb->prepare( $query, ...$values ), ARRAY_A );

@@ -1739,8 +1739,10 @@ class TTA_Helper
         $current_data = (array)$current_data;
         $previous_data = (array)TTA_Helper::tts_get_settings('customize');
 
-        $previous_data['buttonSettings'] = (array) $previous_data['buttonSettings'];
-        $current_data['buttonSettings'] = (array) $current_data['buttonSettings'];
+        // TTS-247: guard missing keys — after a data reset the customize option
+        // is gone, so buttonSettings may be unset (caused an "undefined array key" warning).
+        $previous_data['buttonSettings'] = isset( $previous_data['buttonSettings'] ) ? (array) $previous_data['buttonSettings'] : array();
+        $current_data['buttonSettings']  = isset( $current_data['buttonSettings'] ) ? (array) $current_data['buttonSettings'] : array();
 
         $previous_player_id = isset($previous_data['buttonSettings']['id']) ? $previous_data['buttonSettings']['id'] : 1;
         $current_player_id = isset($current_data['buttonSettings']['id']) ? $current_data['buttonSettings']['id'] : 1;
