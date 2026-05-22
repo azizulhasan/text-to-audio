@@ -1,5 +1,5 @@
 ﻿=== Text To Speech TTS Accessibility ===
-Contributors: atlasaidev, hasanazizul, freemius
+Contributors: atlasaidev, hasanazizul
 Donate link: http://atlasaidev.com/
 Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
@@ -178,19 +178,20 @@ and links to the provider's Terms of Use and Privacy Policy.
 = AtlasAiDev Tracker (track.atlasaidev.com) =
 
 **Off by default. Opt-in.** Nothing is sent to this service unless the
-site administrator explicitly accepts the Freemius opt-in dialog on
-first activation. Internally the opt-in is stored in the WordPress
-option `text-to-audio_allow_tracking` (`'yes'` to enable, `'no'` /
-unset to disable). The user can revoke at any time from the Freemius
-account screen inside the plugin, after which no further requests are
-made.
+site administrator explicitly opts in to usage tracking from the
+consent notice shown by the plugin. The choice is stored in the
+WordPress option `text-to-audio_allow_tracking` (`'yes'` to enable,
+`'no'` / unset to disable) and can be revoked at any time, after which
+no further requests are made.
 
-When opted-in, the service receives anonymous usage telemetry — plugin
-version, active WordPress / PHP version, site language, and which
-AtlasVoice features are enabled. The administrator's email address is
-only included if the user explicitly chooses to share diagnostics from
-the Freemius dialog. Used by AtlasAiDev to understand which features
-matter to users and to prioritise improvements.
+When opted-in, the service receives usage telemetry — plugin version,
+active WordPress / PHP version, site language, which AtlasVoice
+features are enabled, the site name and URL, the administrator email,
+and the site's outbound public IP address (resolved via icanhazip.com;
+see the Geolocation entry below for that provider's links). This is
+used by AtlasAiDev to understand which features matter to users and to
+prioritise improvements. No website visitor / listener data is sent to
+this service.
 
 Service provided by AtlasAiDev:
 - Terms of Use: https://atlasaidev.com/terms-of-use/
@@ -264,24 +265,6 @@ Services:
 - ip-api.com — Terms: https://ip-api.com/docs/legal, Privacy: https://members.ip-api.com/privacy-policy
 - ipinfo.io — Terms: https://ipinfo.io/terms-of-service, Privacy: https://ipinfo.io/privacy-policy
 - icanhazip.com — https://major.io/p/a-new-future-for-icanhazip/
-
-= Premium voice demos (cdn.openai.com) =
-
-The plugin's admin dashboard, the welcome wizard, the "Listening"
-settings tab, and the Pro player demo pages preview the OpenAI /
-ChatGPT TTS "alloy" voice using a short pre-recorded audio sample
-that OpenAI publishes for documentation purposes at
-`https://cdn.openai.com/API/docs/audio/alloy.wav`. The file is loaded
-only when the user clicks the "Preview" / "Play" control on the
-ChatGPT/OpenAI provider card; it is not loaded on first page render.
-Only the standard HTTP headers added by the browser are sent — no
-user-identifying information, site URL, or admin email.
-
-Service provided by OpenAI, L.L.C.:
-- Terms of Use: https://openai.com/policies/terms-of-use
-- Privacy Policy: https://openai.com/policies/privacy-policy
-
-
 
 == Changelog ==
 
