@@ -50,9 +50,9 @@ export default function Listening() {
     tta__elevenlabs_speaker_boost: true,
   });
 
-  const [baseMP3File, setBaseMP3File] = useState(
-    "https://cloud.google.com/text-to-speech/docs/audio/en-GB-Chirp-HD-F.wav"
-  );
+  // TTS-249: no hardcoded remote preview URL in the free bundle (wp.org Guideline 8).
+  // Pro voice previews use the provider-supplied preview_url at runtime.
+  const [baseMP3File, setBaseMP3File] = useState("");
   const [isListeningSettingsLoaded, setIsListeningSettingsLoaded] =
     useState(false);
 
@@ -81,20 +81,7 @@ export default function Listening() {
       pro: ttsObj.is_pro_active,
       id: customizationSettings?.buttonSettings?.id,
     });
-    if (
-      window.hasOwnProperty("ttsObj") &&
-      ttsObj.is_pro_active &&
-      customizationSettings?.buttonSettings?.id == 5
-    ) {
-      setBaseMP3File("https://cdn.openai.com/API/docs/audio/alloy.wav");
-      const audio_wav = document.getElementById("tts_audio_wav");
-      const audio_mp3 = document.getElementById("tts_audio_mp3");
-      const audio_tag = document.getElementById("tts_audio_tag");
-
-      audio_wav.src = "https://cdn.openai.com/API/docs/audio/alloy.wav";
-      audio_mp3.src = "https://cdn.openai.com/API/docs/audio/alloy.wav";
-      audio_tag.load();
-    }
+    // TTS-249: removed the hardcoded cdn.openai.com sample preview (Guideline 8).
 
     if (
       window.hasOwnProperty("ttsObj") &&
@@ -286,25 +273,11 @@ export default function Listening() {
             audio_tag.play();
           }
         }
-      } else {
-        let currentVoice = e.target.value;
-        let baseURL = "https://cloud.google.com/text-to-speech/docs/audio/";
-        if (customizationSettings?.buttonSettings?.id == 5) {
-          baseURL = "https://cdn.openai.com/API/docs/audio/";
-        }
-        currentVoice = currentVoice.replace(/-(MALE|FEMALE)$/, "");
-
-        let wavFileName = baseURL + currentVoice + ".wav";
-        let mp3FileName = baseURL + currentVoice + ".mp3";
-        const audio_wav = document.getElementById("tts_audio_wav");
-        const audio_mp3 = document.getElementById("tts_audio_mp3");
-        const audio_tag = document.getElementById("tts_audio_tag");
-
-        audio_wav.src = wavFileName;
-        audio_mp3.src = mp3FileName;
-        audio_tag.load();
-        audio_tag.play();
       }
+      // TTS-249: removed hardcoded cloud.google.com / cdn.openai.com sample preview
+      // URLs (wp.org Guideline 8). Google/OpenAI dashboard voice previews are no
+      // longer played from remote docs samples bundled in the plugin; ElevenLabs
+      // continues to use its API-provided preview_url above.
     }
 
     let listeningSettingsCloned = structuredClone(listeningSettings);

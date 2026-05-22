@@ -53,8 +53,11 @@ const productionSrc = [
 	'!admin/js/build/tts-css-selectors.min.js.LICENSE.txt',
 	'!admin/js/build/text-to-audio-pro-button.min.js.LICENSE.txt',
 	'!admin/js/build/text-to-audio-dashboard-ui.min.js.LICENSE.txt',
-	'!admin/demos/player2/js/TextToSpeechProDemo.js',
-	'!admin/demos/player3/js/plyr-demo.js',
+	// TTS-249: exclude ALL Pro player demo assets from the wp.org ZIP. These are
+	// premium-player previews (player2/player3/elevenlabs) and the plyr-demo bundle
+	// carried a hardcoded cdn.openai.com sample URL (Guideline 6/8). They ship in
+	// the Pro plugin, not the free distribution.
+	'!admin/demos/**',
 	'!.browserslistrc',
 	'!.eslintrc',
 	'!.gitignore',
