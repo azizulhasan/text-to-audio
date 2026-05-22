@@ -583,6 +583,17 @@ class TTA_Api_Routes {
 		}
 		\TTA\TTA_Reset::wipe_plugin_data();
 
+		// TTS-247: re-seed a fresh-install state right after wiping. wipe_plugin_data()
+		// is shared with uninstall.php (where re-seeding would be wrong), so this
+		// activate() call lives in the reset path only. It recreates the analytics
+		// table + indexes and restores default options (incl.
+		// tta_customize_settings.buttonSettings), preventing "table doesn't exist"
+		// and "undefined buttonSettings" errors when tabs reload after a reset.
+		if ( ! class_exists( '\\TTA\\TTA_Activator' ) ) {
+			require_once dirname( __DIR__ ) . '/includes/TTA_Activator.php';
+		}
+		\TTA\TTA_Activator::activate( true );
+
 		return rest_ensure_response( array(
 			'status'  => true,
 			'message' => __( 'All plugin data has been reset. Reload the page to start fresh.', 'text-to-audio' ),
