@@ -231,6 +231,10 @@ class TTA_Notices {
 			'message_callback'    => array( $this, 'get_translation_message' ),
 			'type'                => 'info',
 			'dismissible'         => true,
+			// TTS-247: only on the AtlasVoice dashboard. Without this, the notice
+			// had no `screens` filter and leaked onto every admin page (incl. the
+			// "Other Plugins" page where it collided with the JS hero).
+			'screens'             => array( 'toplevel_page_text-to-audio' ),
 			'reshow_after_days'   => 90,
 			'buttons'             => array(
 				array(
@@ -276,6 +280,8 @@ class TTA_Notices {
 			'message_callback'    => array( $this, 'get_features_message' ),
 			'type'                => 'info',
 			'dismissible'         => true,
+			// TTS-247: dashboard-only (see translation notice above).
+			'screens'             => array( 'toplevel_page_text-to-audio' ),
 			'reshow_after_days'   => 90,
 			'condition'           => function() {
 				return ! is_pro_active();
