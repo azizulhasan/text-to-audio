@@ -63,7 +63,6 @@ const productionSrc = [
 	'!.gitignore',
 	'!gulpfile.js',
 	'!package.json',
-	'!composer.json',
 	'!composer.lock',
 	'!phpcs.xml',
 	'!.cpanel.yml',
@@ -246,7 +245,7 @@ gulp.task(
 gulp.task(
 	'makeZip',
 	function () {
-		return gulp.series('copy', 'zip')()
+		return gulp.series('clean:production', 'copy', 'zip')()
 	}
 );
 
@@ -263,6 +262,25 @@ gulp.task('copy', function () {
 		.pipe(gulpCopy(config.copy.output, config.copy.src.options))
 		.pipe(notify({ message: 'Copy Completed! 💯', onLast: true }))
 
+})
+
+// TTS-249: gulp-copy does NOT clean its destination, so files removed from
+// `productionSrc` (e.g. admin/demos/**) would persist from earlier builds in
+// production/text-to-audio/ — and therefore in the wp.org ZIP. Wipe the build
+// output before each copy so excluded files actually leave the distribution.
+gulp.task('clean:production', function (done) {
+	const fs = require('fs');
+	fs.rmSync('production/text-to-audio', { recursive: true, force: true });
+	fs.rmSync('production/text-to-audio.zip', { force: true });
+	done();
+})
+
+// Wipe the secondary "seven" install's plugin folder before deploying, so a
+// clean copy lands there too (same stale-file reasoning as clean:production).
+gulp.task('clean:seven', function (done) {
+	const fs = require('fs');
+	fs.rmSync(config.copyToSeven.output, { recursive: true, force: true });
+	done();
 })
 
 // Copy pro button
@@ -297,7 +315,7 @@ gulp.task('copyToSevenDeploy', function () {
 
 // Public task — refresh the production/ build and deploy it in one command
 // (npm run copy:seven). Mirrors the makeZip = copy + zip pattern.
-gulp.task('copyToSeven', gulp.series('copy', 'copyToSevenDeploy'))
+gulp.task('copyToSeven', gulp.series('clean:production', 'copy', 'clean:seven', 'copyToSevenDeploy'))
 
 // watch
 gulp.task(
