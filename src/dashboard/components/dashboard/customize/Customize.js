@@ -652,24 +652,31 @@ export default function Customize() {
     }
   };
 
-  const [buttonLists, setButtonLists] = useState([
+  // TTS-249: the player selector is data-driven from the server-provided
+  // registry (ttsObj/tta_obj.availablePlayers). Free exposes only player 1; Pro
+  // adds 2-6 via the `tts_available_players` filter. We keep a master definition
+  // (for the `object` mapping the preview needs) but only SHOW players the site
+  // can actually deliver — no locked options shipped in the free UI.
+  const ALL_PLAYERS = [
     { id: 1, name: __("Default", "text-to-audio"), object: "TextToSpeech", disabled: false },
     { id: 2, name: __("Default Pro", "text-to-audio"), object: "TextToSpeechPro", disabled: false },
-    {
-      id: 3,
-      name: "AtlasVoice TTS Pro",
-      object: "TextToSpeechPro",
-      disabled: false,
-    },
-    {
-      id: 4,
-      name: "Google Cloud TTS",
-      object: "TextToSpeechPro",
-      disabled: false,
-    },
+    { id: 3, name: "AtlasVoice TTS Pro", object: "TextToSpeechPro", disabled: false },
+    { id: 4, name: "Google Cloud TTS", object: "TextToSpeechPro", disabled: false },
     { id: 5, name: "ChatGPT TTS", object: "TextToSpeechPro", disabled: false },
     { id: 6, name: "ElevenLabs TTS", object: "TextToSpeechPro", disabled: false },
-  ]);
+  ];
+  const localizedObj =
+    (typeof tta_obj !== "undefined" && tta_obj) ||
+    (typeof ttsObj !== "undefined" && ttsObj) ||
+    {};
+  const availablePlayerIds = (
+    Array.isArray(localizedObj.availablePlayers) && localizedObj.availablePlayers.length
+      ? localizedObj.availablePlayers
+      : [{ id: 1 }]
+  ).map((p) => Number(p.id));
+  const [buttonLists, setButtonLists] = useState(
+    ALL_PLAYERS.filter((p) => availablePlayerIds.includes(p.id))
+  );
 
   return isDataLoaded ? (
     <Container fluid className="tta-container">

@@ -84,6 +84,21 @@ export default function TTSCustomizationButton({
                 );
               })}
             </Form.Select>
+            {/* TTS-249: upsell link instead of shipping locked player options.
+                Shown only when the premium players aren't registered (Pro inactive). */}
+            {!buttonLists.some((b) => b.id > 1) && (
+              <p className="tta_player-upsell text-secondary mt-2 mb-0 small">
+                {__("More players (AI voices, MP3) are available in", "text-to-audio")}{" "}
+                <a
+                  href="https://atlasaidev.com/plugins/text-to-speech-pro/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {__("AtlasVoice Pro", "text-to-audio")}
+                </a>
+                .
+              </p>
+            )}
           </Form.Group>
         </Col>
 
