@@ -307,9 +307,19 @@ Reproduces with **only Free + Pro active** (baseline) — not caused by any comp
 - No PHP notices/warnings in `debug.log`
 - "AtlasVoice: On" indicator in the admin bar ✓ (so the runtime DOES think the button is active)
 
-This is a regression introduced somewhere in the cleanup work since the last successful frontend test (which DID render the Listen button on this same post with player 1). Did NOT investigate or fix per direction — flagging for inspection.
+This is a regression introduced somewhere in the cleanup work since the last successful frontend test (which DID render the Listen button on this same post with player 1).
 
-Suspect first to check: the recent `2d03217b` "delete dead `Includes/Compatibality` and `Libs/GTTS`" commit + composer dump-autoload regen — even though both folders were unreferenced, the autoload reshuffle could have changed class-load order. Other candidates: `composer.json` now ships in the production ZIP (`8c572ecd`) — autoloader may behave differently. Worth bisecting against an earlier production build to confirm.
+**Root cause (identified, not fixed per direction):** commit **`1466a126` — "TTS-247: escape unescaped output"** wrapped the `$button` echo in Pro's `Includes/TTA_Pro_Filters.php::tts_button_with_content_callback()` with `wp_kses_post( $button )`. Free builds the button as a **custom HTML element** (`<tts-play-button data-id='…' class='tts_play_button' role='region' aria-label='…'></tts-play-button>` — see Free `includes/helpers.php:323`). `wp_kses_post()` uses the generic post-content allow-list which does **not** include the `<tts-play-button>` custom element, so it strips the tag entirely and an empty string is echoed. The wrapper `<div class="tts_content_wrapper_1">` renders fine (built separately in the same callback) but the button is gone.
+
+Repro chain when Pro is active: Free's `tta_get_button_content()` builds `<tts-play-button>` → applies `tts__listening_button` filter (Free's own `wp_kses()` with explicit allow-list including `tts-play-button` *survives* this step) → applies `tts_button_with_content` filter → Pro's callback runs `wp_kses_post()` on it → custom element stripped → empty output.
+
+Affects all six players (the same callback handles all of them).
+
+**Why the lint was added:** PHPCS `WordPress.Security.EscapeOutput.OutputNotEscaped` flagged the original bare `echo $button;`. Safe fixes (NOT applied yet):
+- Drop the `wp_kses_post()` wrapper and trust upstream — Free already kses-escapes the button via its own custom allow-list — with a targeted `phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- already kses-escaped upstream` comment.
+- Or replicate Free's custom allow-list inside Pro and use `wp_kses( $button, $allowed )` so `<tts-play-button>` survives.
+
+Same hypothesis applies to the `$content` echo on the next line: `wp_kses_post($content)` is idempotent on standard post markup, but if a third-party plugin/theme inserts a custom element or non-standard attribute into the_content, the same stripping behaviour could surface.
 
 ### Notes
 - LiteSpeed compatibility could not be conclusively verified due to Issue #2 (button missing even before LiteSpeed's optimization kicks in). The `TTA_Hooks::get_excluded_js()` filter is still registered, so the protection is in place at PHP-filter level.
