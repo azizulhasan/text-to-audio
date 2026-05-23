@@ -118,19 +118,44 @@ Customize "Select Player" dropdown options: ["Select Player", "1"]
 - Run on the *deployed* seven copy (built ZIP-equivalent, excludes dev artifacts).
 
 ### 4.2 Pro plugin
-- **Result: 766 errors / 1459 warnings** ⚠️
+- **Result (baseline, pre-fix): 766 errors / 1459 warnings** ⚠️
+- **Result (after TTS-247 Pro cleanup pass): 583 errors / 1541 warnings** — errors down **−183 (−24%)**; warnings slightly up because newly-required `/* translators: */` comments + escaping triggered a few "missing context" sub-rules.
 - Pro is **distributed off-wp.org via Freemius** — these checks are informational, not release-blocking for the free SVN publish.
-- **Categories found** (top codes):
-  - `WordPress.WP.I18n.NonSingularStringLiteralDomain` — `__(..., TTA_PRO_TEXT_DOMAIN)` using a constant instead of the literal `'text-to-audio-pro'` (mirrors the issue we fixed in free under TTS-247).
-  - `WordPress.WP.I18n.MissingTranslatorsComment`
-  - `WordPress.WP.I18n.TextDomainMismatch`
-  - `WordPress.WP.I18n.NonSingularStringLiteralSingle` / `…Plural`
-  - `WordPress.Security.EscapeOutput.ExceptionNotEscaped`
-  - `WordPress.Security.EscapeOutput.OutputNotEscaped`
-  - `WordPress.Security.SafeRedirect.wp_redirect_wp_redirect`
-  - `Generic.PHP.ForbiddenFunctions.Found`
-  - `hidden_files`, `ai_instruction_directory`, `unexpected_markdown_file`, `plugin_updater_detected`, `update_modification_detected` — most of these are from dev artifacts (`.git`, `.claude`, `CLAUDE.md`, the Freemius updater, `node_modules`) that exist in the working copy but are excluded by `gulpfile.js` from the release ZIP. Re-run Plugin Check against the production ZIP to get the "real" Pro number.
-- **Suggested follow-up ticket** (Pro): "Pro i18n + escaping pass — mirror the TTS-247 work for the Pro codebase."
+
+**TTS-247 Pro fixes applied** (8 commits on `feature/TTS-247`):
+1. `a351900b` — `TTA_PRO_TEXT_DOMAIN` constant → literal `'text-to-audio-pro'` in every gettext call (59 swaps).
+2. `095afad4` — wrong gettext domains (`atlasaidev`, `absolute-addons`) → `'text-to-audio-pro'` (93 swaps).
+3. `c381d5ad` — `/* translators: %s, %d ... */` comments added above placeholder-bearing gettext calls (5 added).
+4. `9946820b` — dropped dead `_n()` wrappers around user-input button text in `tta__button_text_arr_callback` (NonSingularStringLiteralSingle/Plural).
+5. `666f4dd3` — `is_null()` → `=== null` (9 swaps).
+6. `6b647c17` — `json_encode()` → `wp_json_encode()` (6 swaps).
+7. `ab83e941` — refactored 3 `curl_init()` fallbacks to `wp_remote_get` / `wp_remote_head`.
+8. `1466a126` — escape unescaped output (`wp_kses_post` / `esc_html` / `esc_attr` / `esc_url` per context, 10 fixes / 6 files).
+- `wp_redirect_wp_redirect`: only hit was inside `freemius/` (excluded). Nothing to fix in plugin-owned code.
+- `freemius/` folder left untouched per release policy.
+
+**Top remaining categories** (583 / 1541) — almost entirely in `vendor/google/apiclient/` and Freemius templates; these are NOT in scope for fixing in this pass:
+| Rule | Count |
+|---|---:|
+| `NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound` | 1098 |
+| `Security.EscapeOutput.OutputNotEscaped` | 519 |
+| `NonPrefixedFunctionFound` | 103 |
+| `NonPrefixedConstantFound` | 57 |
+| `NonPrefixedClassFound` | 56 |
+| `NonPrefixedHooknameFound` | 53 |
+| `ValidatedSanitizedInput.MissingUnslash` | 30 |
+| `DirectDatabaseQuery.DirectQuery` | 21 |
+| `DirectDatabaseQuery.NoCaching` | 20 |
+| `ValidatedSanitizedInput.InputNotSanitized` | 17 |
+| `NonceVerification.Recommended` | 15 |
+| `WP.AlternativeFunctions.unlink_unlink` | 14 |
+
+**Suggested follow-up tickets** (Pro, off-wp.org so not release-blocking):
+- "Pro nonce verification + input unslash/sanitize pass" (~62 hits).
+- "Pro hook & class prefixing audit (`tta_pro_` namespace consistency)."
+- "Replace `unlink()` with `wp_delete_file()` in TTA_Pro_Helper (14 hits)."
+- "DB caching pass for analytics queries (`$wpdb` + transient layer)."
+- The big NamingConventions noise (1100+) is essentially vendor — either suppress with `phpcs:disable` block scoped to `vendor/`, or shrink vendor by tree-shaking the unused Google API client modules.
 
 ### 4.3 readme.txt validator (`wordpress.org/plugins/developers/readme-validator/`)
 - POSTed `README.txt` via `curl` — the validator returned only the form page (no session/cookie), no result HTML. **Not completed via this path.**
