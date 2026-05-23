@@ -833,7 +833,7 @@ class AtlasVoice_Analytics {
             default:
                 // Default to last 7 days
                 $from = gmdate( 'Y-m-d 00:00:00', strtotime( '-7 days' ) );
-                $number = preg_replace('/[^0-9]/', '', $date_range);
+                $number = preg_replace('/[^0-9]/', '', (string) ( $date_range ?? '' ));
                 if(is_numeric($number)) {
                     $from = gmdate( 'Y-m-d 00:00:00', strtotime(  '-'.$from_date. ' days' ) );
                 }
