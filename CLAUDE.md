@@ -4,13 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Text To Speech TTS Accessibility** — a WordPress plugin that adds a text-to-audio player to WordPress sites. Built by AtlasAiDev. Uses Freemius for premium licensing. Has a companion Pro plugin (`text-to-speech-pro` / `text-to-audio-pro`) that extends functionality with AI voice providers.
+**Text To Speech TTS Accessibility** — a WordPress plugin that adds a text-to-audio player to WordPress sites. Built by AtlasAiDev. The free plugin is fully functional standalone with no license check (Freemius SDK was removed in TTS-249 to comply with wp.org Guidelines 5/6). Premium TTS providers, bulk MP3, advanced analytics live in the companion Pro plugin (`text-to-audio-pro`), which is the one wired to Freemius.
 
 - Plugin slug: `text-to-audio`
 - Text domain: `text-to-audio`
+- License: GPL-3.0+
 - Requires PHP 7.4+, WordPress 5.6+
-- Main entry: `text-to-audio.php`
+- Main entry: `text-to-audio.php` (current version: `2.2.0`)
 - Admin page: `admin.php?page=text-to-audio`
+
+For cross-plugin (free ↔ Pro) work — shared option/meta keys, the `tts_*/tta_*/atlasvoice_*` filter bridge, voice providers, MP3/GCS, the player system — load the `atlasvoice` skill. Almost every change in one plugin affects the other.
 
 ## Build Commands
 
@@ -75,13 +78,17 @@ AtlasAiDev\AppService\     → libs/AtlasAiDev/ (telemetry client)
 ```
 text-to-audio.php
   → Composer autoload
-  → Freemius SDK init (if Pro plugin not present)
   → Constants defined (TEXT_TO_AUDIO_*, TTA_*)
   → plugins_loaded (priority 9999):
       TTA_Init → TTA (core) → TTA_Loader (hook registry)
       → init (priority 9999):
           TTA_Api_Routes, TTA_Notices, TTA_Lib_AtlasAiDev
+  → register_activation_hook → TTA_Activator::activate()
+  → admin_init: one-time migrations + first-activation redirect to onboarding
+  → cron hooks: tta_send_scheduled_report (Pro email), tta_migrate_play_count_batch (TTS-236)
 ```
+
+Debug helper: `?page=text-to-audio&reset_onboard=true` (requires `manage_options`) clears `tta_onboarding_completed` / `tta_pro_onboarding_completed` and re-runs the wizard.
 
 **Key classes:**
 - `TTA\TTA` — Core plugin class, wires up hooks via `TTA_Loader`
@@ -100,21 +107,22 @@ text-to-audio.php
 - `tta_settings_data` — Plugin settings (post types, excluded posts/tags/categories)
 - `tta_customize_settings` — Button appearance (color, size, border, styles)
 - `tta_alias_settings` — Text aliases for pronunciation corrections
+- `tta_analytics_settings` — `tts_enable_analytics` + `tts_trackable_post_ids` (drives `/insights`, `/aggregated_insights`, `/trend_data`)
+- `tta_onboarding_completed` / `tta_pro_onboarding_completed` — Onboarding wizard flags
+- `tts_rest_api_url` — Cached REST root (also mirrored in `TTA_Cache`)
 
 ### REST API
 
-Namespace: `tta/v1`
+Namespace: `tta/v1` (Pro adds a parallel `tta_pro/v1` namespace).
 
-Routes registered in `api/TTA_Api_Routes.php`:
-- `POST|GET /listening` — Track listening analytics
-- `POST|GET /customize` — Save button customization
-- `POST|GET /settings` — Get/save plugin settings
-- `POST /browser` — Browser configuration
-- `POST /track` — Analytics tracking
-- `GET /geolocation` — IP-based city/country detection
-- `GET /insights` — Single post analytics
+All ~20 routes are registered in `api/TTA_Api_Routes.php` and share a single permission callback, `get_route_access()` — nonce (`X-WP-Nonce`) + capability check. Grep that file for the exhaustive list; the main groupings are:
 
-All routes use `get_route_access()` for nonce + capability validation.
+- **Settings / customize:** `/settings`, `/customize`, `/text_alias`, `/save_analytics_settings`, `/get_analytics_settings`, `/reset_plugin_data`
+- **Analytics & insights:** `/listening`, `/track`, `/insights`, `/all_insights`, `/aggregated_insights`, `/trend_data`, `/filtered_insights`
+- **Discovery / pickers:** `/latest_posts`, `/categories_and_tags`, `/get_all_user_roles`, `/acf_fields`, `/compatible_data`
+- **Misc:** `/browser`, `/geolocation`, `/onboarding-event`, `/cors-alert`
+
+When adding a route, mirror the `get_route_access()` permission callback rather than rolling your own.
 
 ### React Frontend
 
@@ -146,7 +154,13 @@ Source: `admin/js/blocks/blocks.js` → Built to `build/` via `@wordpress/script
 
 ### Pro Plugin Interaction
 
-The free plugin detects Pro via `is_pro_plugin_exists()` checking for any of these plugin directories: `text-to-speech-pro`, `text-to-speech-pro-premium`, `text-to-audio-pro`, `text-to-audio-pro-premium`. When Pro is present, Freemius SDK init is skipped (Pro handles it), and `TTA_PRO_PLUGIN_PATH` is defined by the Pro plugin. Use `TTA_Helper::is_pro_active()` to check Pro status at runtime.
+`is_pro_plugin_exists()` (top of `text-to-audio.php`) probes for the file `text-to-audio-pro.php` inside any of these plugin dirs: `text-to-speech-pro`, `text-to-speech-pro-premium`, `text-to-audio-pro`, `text-to-audio-pro-premium`. When Pro is present:
+
+- Freemius SDK init is skipped here (Pro owns it; see the TTS-249 cleanup).
+- Pro defines `TTA_PRO_PLUGIN_PATH`; the free plugin then suppresses its own telemetry init (`TTA_Lib_AtlasAiDev`).
+- Cron hook `tta_send_scheduled_report` delegates to `\TTA_Pro\TTA_Pro_Report_Email` only if the class exists.
+
+Use `TTA_Helper::is_pro_active()` for runtime checks. For deeper rules (shared option/meta keys, `tts_*/tta_*/atlasvoice_*` filter bridge, player system, voice providers) load the `atlasvoice` skill.
 
 ## Translation Workflow
 
@@ -173,6 +187,10 @@ The `gulpfile.js` `productionSrc` array excludes from release ZIPs: `node_module
 ## Caching Plugin Compatibility
 
 `TTA_Hooks` registers filters to exclude plugin JS files from minification/deferral by: Autoptimize, LiteSpeed Cache, WP Rocket, W3 Total Cache, WP Optimize, and SiteGround SG Optimizer. Excluded files are listed in `TTA_Hooks::get_excluded_js()`.
+
+## TTS-247 — wp.org Plugin Directory review
+
+The current `feature/TTS-247` branch addresses Plugin Directory review feedback (HelpScout #293, May 2026). Look for inline `// TTS-247:` comments — each one cites *why* a Plugin Check rule applies (e.g. plugins must not redefine WP core constants, must not call `load_plugin_textdomain()` for wp.org-hosted plugins, must `defined('ABSPATH') || exit;` at the top of every PHP file). Keep that pattern when adding new files.
 
 ## TTS-247 fix loop — response style
 
