@@ -362,7 +362,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
         'button' => array(
             'class' => true, 'id' => true, 'style' => true, 'type' => true,
             'aria-label' => true, 'aria-pressed' => true, 'role' => true,
-            'data-id' => true, 'data-state' => true, 'tabindex' => true,
+            'data-id' => true, 'data-state' => true, 'tabindex' => true, 'data-id'    => true,
         ),
         'span'   => array( 'class' => true, 'id' => true, 'style' => true, 'aria-hidden' => true ),
         'a'      => array( 'class' => true, 'id' => true, 'style' => true, 'href' => true, 'target' => true, 'rel' => true, 'aria-label' => true ),
@@ -370,7 +370,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
         'svg'    => array( 'class' => true, 'xmlns' => true, 'viewbox' => true, 'width' => true, 'height' => true, 'fill' => true, 'stroke' => true, 'aria-hidden' => true ),
         'path'   => array( 'd' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true ),
         'g'      => array( 'fill' => true, 'stroke' => true ),
-        'div'    => array( 'class' => true, 'id' => true, 'style' => true ),
+        'div'    => array( 'class' => true, 'id' => true, 'style' => true , 'data-id' => true ),
         'br'     => array(),
     );
     return wp_kses( (string) $data, $allowed );
