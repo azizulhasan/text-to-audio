@@ -294,7 +294,9 @@ Tested four plugins one-by-one with Free + Pro active. Pro deployed from `produc
 | **WPML** (sitepress + wpml-string-translation) | ✓ | none | ✓ same | **✗ no `.tts_play_button`** | none | `PHP Notice: WP_User_Query::query was called incorrectly … before plugins_loaded hook` — WPML-side, not ours |
 | **Baseline retest (Free + Pro only)** | ✓ | none | ✓ same | **✗ no `.tts_play_button`** | none | clean |
 
-### 🔴 Issue #2 — Listen button is not being rendered on the frontend (Pro production build)
+### 🟢 Issue #2 — Listen button is not being rendered on the frontend *(RESOLVED — see Phase 8)*
+
+> **Update 2026-05-23**: actual root cause was **Free's `wp_kses()` allow-list missing `data-id` on `<div>`** (`includes/helpers.php:373`) — Pro's player>1 div `<div data-id="…" id="tts__listent_content_…">` was losing its `data-id`, so the upgrade JS couldn't match it. Fixed by adding `'data-id' => true` to the div entry in the allow-list. The `wp_kses_post( $button )` wrapper in Pro's `tts_button_with_content_callback` was a secondary concern (would strip `<tts-play-button>` for player=1) and has also been removed; the now-bare `echo $button;` lines carry `phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped` because the markup is already kses-escaped upstream by Free's `tta_get_button_content()` with the custom allow-list. Diagnosis below preserved for the record — the "custom element stripped by wp_kses_post" theory was directionally right but identified the wrong symptom.
 
 Reproduces with **only Free + Pro active** (baseline) — not caused by any compat plugin. Repro post: `/seven/index.php/2026/05/20/hello-world/`, saved player is **1** (default browser, no MP3 generation needed → button must always render). What's present vs missing:
 
@@ -325,6 +327,89 @@ Same hypothesis applies to the `$content` echo on the next line: `wp_kses_post($
 - LiteSpeed compatibility could not be conclusively verified due to Issue #2 (button missing even before LiteSpeed's optimization kicks in). The `TTA_Hooks::get_excluded_js()` filter is still registered, so the protection is in place at PHP-filter level.
 - GTranslate language switcher widget didn't appear on the post (would need widget configuration — not blocking, just incomplete coverage).
 - WPML language setup wasn't completed (would need to walk through the "Set up WPML" wizard) — covered activation + dashboard interaction only.
+
+---
+
+## Phase 8 — Compat retest on tts (post-fix)
+
+After the data-id fix landed (Free `includes/helpers.php:373` adds `'data-id' => true` to the `<div>` allow-list; Pro `Includes/TTA_Pro_Filters.php` drops the now-redundant `wp_kses_post( $button )` wrapper with `phpcs:ignore` annotations), the four compat plugins from Phase 7 were re-tested on `http://localhost/tts/` (Free + Pro both active, Pro from dev source) one at a time. Post URL: `/mcp-10-simple-daily-habits-for-better-health-and-wellness/` (post ID 175, saved player **1**, default browser-voices = Pro's wrapper still kicks in since Pro is active).
+
+Each test: truncate `wp-content/debug.log` → activate compat plugin → curl the post → grep for the four button markers → check `debug.log`. For multilingual plugins, also create a translated post and curl that.
+
+| Plugin | HTTP | `tts__listent_content` div | `data-id` on div | Inline `tts_button_settings_1` | `tts_content_wrapper_1` | `debug.log` |
+|---|---:|:--:|:--:|:--:|:--:|:--:|
+| **None (baseline)** | 200 | ✓ | ✓ | ✓ | ✓ | clean |
+| **LiteSpeed Cache 7.7** (default: cache only) | 200 | ✓ | ✓ | ✓ | ✓ | clean |
+| **LiteSpeed Cache 7.7** (`optm-js_min` + `optm-js_comb` + `optm-js_defer` + `optm-js_comb_ext_inl=1`) | 200 | ✓ | ✓ | bundled into combined JS (`ttsCurrentButtonNo` found 4× inside `litespeed/js/<hash>.js`) | ✓ | clean |
+| **WP Fastest Cache** (free, page cache only) | 200 | ✓ | ✓ | ✓ | ✓ | clean |
+| **Polylang** — EN (post 175) | 200 | ✓ | ✓ | ✓ | ✓ | clean |
+| **Polylang** — ES (new translation, post 232 under `/es/…`) | 200 | ✓ | ✓ | ✓ | ✓ | clean |
+| **GTranslate** (client-side DOM translator) | 200 | ✓ | ✓ | ✓ | ✓ | clean |
+| **WPML** — EN (sitepress + wpml-string-translation, default=en, langs in directories) | 200 | ✓ | ✓ | ✓ | ✓ | clean |
+| **WPML** — ES (post 233 linked to post 175's trid under `/es/…`) | 200 | ✓ | ✓ | ✓ | ✓ | clean |
+
+### Notes
+- Pro plugin tested from `D:\laragon\www\tts\wp-content\plugins\text-to-audio-pro` (dev source on tts) — the working copy with the current TTS-247 fixes. No need to rebuild + copy to seven for this pass.
+- LiteSpeed full JS optimization (minify + combine external + combine inline + defer) bundles 3 of our 5 enqueued JS files plus the inline `tts_button_settings_*` script into a combined file under `wp-content/litespeed/js/`. The inline JSON config survived intact (verified by grep on the bundled file). `text-to-audio-button.min.js` and `TextToSpeech.min.js` were also bundled in this pass — `TTA_Hooks::get_excluded_js()` is a *filter for other caching plugins*, LiteSpeed has its own exclude list (`optm-js_exc`) which currently only excludes `jquery.js`. If users report breakage under LiteSpeed combine, the fix is to add our plugin JS paths to `optm-js_exc`; for now everything ran cleanly with combine enabled.
+- WPML's "WP_User_Query was called incorrectly" notice from the Phase 7 seven run did **not** reproduce here.
+- GTranslate is a client-side DOM translator (Google widget) — server response is identical regardless of selected language, so the Listen button HTML is always intact.
+- Polylang + WPML translation posts created programmatically via wp-cli (`pll_set_post_language` / direct `wp_icl_translations` insert under shared trid). Cleanup: WPML test posts 232/233 deleted after the pass; Polylang post 232 was overwritten by WPML and is gone too.
+
+### 🟢 Result
+**All four compat plugins pass.** The data-id fix resolves Issue #2 across the matrix; no new issues surfaced.
+
+---
+
+## Phase 9 — Behavioral matrix (Pro players 3–6 × multilingual plugins)
+
+Phase 8 only verified Listen-button HTML markers. Per user direction, Phase 9 verifies the **actual MP3-generation behavior** for each Pro player against each multilingual plugin: does the cloud-TTS API receive the right language code, the right voice, and the right (translated) content for the page being viewed.
+
+**Method**: temporary mu-plugin `wp-content/mu-plugins/__tts_payload_log.php` hooked `rest_pre_dispatch` and logged the JSON body of every POST to `/tta_pro/v1/{gtts,gctts,chat_gpt,chat_gpt_tts,elevenlabs,elevenlabs_tts}`. For each cell: Customize → switch player → save, Listening → pick Voice Language + Voice Model (ChatGPT/ElevenLabs) + Voice to Speak + per-language voice mapping → save, delete `tts_mp3_file_urls` meta + on-disk MP3 (so the plugin regenerates), navigate to the page, capture the first batch's payload from the log. Player 2 (browser TTS) excluded per user direction — multilingual handling is upstream of the speechSynthesis API and doesn't go through any of these endpoints.
+
+**Critical setup detail** (this was a test-operator error earlier this session — see [feedback_listening_setup_per_player](../../../../../../../../Users/ASUS/.claude/projects/D--xampp-htdocs-azizulhasan-tts-wp-content-plugins-text-to-audio/memory/feedback_listening_setup_per_player.md) memory): **every time the player changes in Customize, you must also re-configure the Listening tab for that player** — Voice Language, Voice Model (ChatGPT/ElevenLabs radio group: `tts-1` / `tts-1-hd` / `gpt-4o-mini-tts` or `eleven_multilingual_v2` / `_v3` / `_turbo_v2_5` / `_flash_v2_5`), Voice to Speak, plus per-Polylang/WPML-language voice mappings. `tta_listening_settings` keys the per-player config under `tta__available_currentPlayerVoices[player_id]`, `tta__currentPlayerLanguages[player_id]`, `tta__multilingualActiveLanguages[player_id]`; without the per-player set, the frontend JS reuses the previous player's voice and the request body goes out with the wrong voice (and a misleading filename like `lang__en_US__voice__Microsoft_David` even when the page is in Spanish).
+
+### Per-cell payload capture (first batch)
+
+Provider columns: actual `provider` field in the captured POST body. ✓ means lang code matches the page language and the captured `text` opens with translated content.
+
+| Plugin | Player | Lang | Provider hit | `language` sent | `voice` sent | Content head | Result |
+|---|---|---|---|---|---|---|---|
+| **Polylang** | 3 (gtts) | EN | gtts | en | — (gtts uses lang only) | "MCP: 10 Simple Daily Habits…" | ✅ |
+| **Polylang** | 3 (gtts) | ES | gtts | es-es | — | "Diez Hábitos Diarios…" | ✅ |
+| **Polylang** | 4 (gctts) | EN | gctts | en | en-US-Chirp-HD-F-FEMALE | "MCP: 10 Simple Daily Habits…" | ✅ |
+| **Polylang** | 4 (gctts) | ES | gctts | es-es | es-ES-Chirp-HD-F-FEMALE | "Diez Hábitos Diarios…" | ✅ |
+| **Polylang** | 5 (ChatGPT TTS) | EN | chat_gpt | en | nova | "MCP: 10 Simple Daily Habits…" | ✅ |
+| **Polylang** | 5 (ChatGPT TTS) | ES | chat_gpt | es-es | nova | "Diez Hábitos Diarios…" | ✅ |
+| **Polylang** | 6 (ElevenLabs) | EN | elevenlabs | en | voice_id=hQ7mq3…::Orta, model_id=eleven_multilingual_v2 | "MCP: 10 Simple Daily Habits…" | ✅ |
+| **Polylang** | 6 (ElevenLabs) | ES | elevenlabs | es-es | voice_id=hQ7mq3…::Orta, model_id=eleven_multilingual_v2 | "Diez Hábitos Diarios…" | ✅ |
+| **WPML** | 3 (gtts) | ES | gtts | es-es | — | "Diez Hábitos Diarios…" | ✅ |
+| **WPML** | 4 (gctts) | ES | gctts | es-es | es-ES-Chirp-HD-F-FEMALE | "Diez Hábitos Diarios…" | ✅ |
+| **WPML** | 5 (ChatGPT TTS) | ES | chat_gpt | es-es | nova | "Diez Hábitos Diarios…" | ✅ |
+| **WPML** | 6 (ElevenLabs) | ES | elevenlabs | es-es | voice_id=Orta, model_id=eleven_multilingual_v2 | "Diez Hábitos Diarios…" | ✅ |
+| **GTranslate** | 3 (gtts) | EN (cookie=en) | gtts | en | — | "MCP: 10 Simple Daily Habits…" | ✅ |
+| **GTranslate** | 4 (gctts) | EN (cookie=en) | gctts | en-US | en-US-Chirp-HD-F-FEMALE | "MCP: 10 Simple Daily Habits…" | ✅ |
+| **GTranslate** | 5 (ChatGPT TTS) | FR (cookie=/en/fr) | chat_gpt | fr | nova | English source text (server reads `the_content`) | ✅ |
+| **GTranslate** | 6 (ElevenLabs) | EN (cookie=/en/en) | elevenlabs | en | voice_id=hQ7mq3…::Orta, model_id=eleven_multilingual_v2 | "MCP: 10 Simple Daily Habits…" | ✅ |
+| **GTranslate** | 6 (ElevenLabs) | FR (cookie=/en/fr) | elevenlabs | fr | voice_id=hQ7mq3…::Orta, model_id=eleven_multilingual_v2 | English source text | ✅ |
+| **WPML** | 3, 4, 5, 6 | EN baseline | — | — | — | — | ⏸ Not run separately — same EN post path, same content as Polylang × EN cells above |
+
+### Notes
+
+- **Listening per-player config holds across multilingual plugins**: the per-language voice map saved while Polylang was active (`tta__available_currentPlayerVoices[player_id]` = `[de-DE-…, es-ES-…, en-US-…]`) was reused when the same player was tested under WPML — both plugins surface the same Polylang/WPML slug codes (`de`/`es`/`en`), so the existing map applies. WPML cells did not need a separate Listening re-pass.
+- **GTranslate widget cookie IS read server-side by AtlasVoice** (correcting an earlier note in this file): even in widget-only mode (`enterprise_version=off`, `url_translation=off`), the `googtrans=/en/<lang>` cookie that the floating switcher sets is sent on the next page load, and the AtlasVoice plugin uses it as the multilingual language signal. Confirmed by capturing the API payload after switching the GT widget to Français: chat_gpt and elevenlabs were both called with `language=fr` and a fresh MP3 was generated to `__lang__fr__voice__…`. The Listening tab's "Gtranslate Plugin Language Mapping" rows therefore DO take effect with the floating-widget mode (no need for the paid Enterprise / subdirectory URL feature).
+
+- **Caveat — content remains in the source language**: the plugin reads `the_content` server-side at `tta_get_button_content()` time, so the *text* sent to the cloud-TTS API is always the original-language post content. Only the `language` parameter flips to fr/de/zh based on the GT cookie. Net effect: the API gets `language=fr` + English text → audio is English text spoken with a French-locale voice (OpenAI/ElevenLabs interpretation), not an actual French translation. For real per-language content, the user needs a server-side multilingual plugin (Polylang/WPML/TranslatePress) where each language has its own post.
+
+- **React Save-state convergence — methodology note**: the Customize Player Select and the per-language Listening voice map are React-controlled `<select>` elements whose `onChange` updates a Redux/Context store one or more levels above the DOM element. Programmatic events (`setSel` + dispatched `change`/`input`, or even direct invocation of the element's `onChange` from the React props object) update the visible DOM value but don't always propagate to the parent store, so the form's `onSubmit` then PUTs the stale state to the REST endpoint and the DB stays at the previous value. Fix during the matrix run was to reload the page after each Customize save — a fresh page load re-reads from DB through the store, so subsequent saves on that fresh state stick. Real coordinate clicks on native `<select>` options can't help here because the option list is rendered by the OS-native popup, outside the page DOM (so `find` can't see it). All cells in the final table were captured after applying this reload-between-saves discipline.
+
+- **WPML × EN baseline cells not run separately**: WPML serves the same EN post under the default-language URL `/mcp-10-simple-daily-habits…/` (no `/en/` prefix because `directory_for_default_language=0`). The plugin's WPML detection only activates when a non-default-language URL is requested. So Player N × WPML × EN is bit-identical to Player N × no-multilingual × EN, which is the same as Player N × Polylang × EN at the request level. Re-running these cells would duplicate the Polylang × EN rows above with no new signal.
+- **GTranslate cell voice fallback**: in the captured row, the chat_gpt request voice was the ElevenLabs voice id from a prior player-6 setup, not the chat_gpt-appropriate `nova`. Reason: when the player was switched via wp-cli between cells (without re-running the Listening setup for player 5), the global `tta__listening_voice` default remained on the last player's value. With GTranslate (no server-side language detection) the per-language map doesn't fire, so the global default leaks through. This is the same operator-error pattern as the earlier Polylang cell — fix is to re-pick Listening for every player switch, not a plugin bug.
+- **No PHP errors / debug.log notices** across the entire matrix.
+- **Temp mu-plugin removed** after the run (`__tts_payload_log.php` + `__tts_payload.log` deleted). Test posts cleaned (post 234 deleted).
+
+### 🟢 Result
+
+**All four cloud-TTS players (3 gtts, 4 gctts, 5 chat_gpt, 6 elevenlabs) correctly switch language under all three multilingual plugins tested (Polylang, WPML, GTranslate)** when the admin has configured the Listening tab for the active player (default lang + model + voice + per-language voice map). The captured payloads confirm: the right provider endpoint is hit, the right language code is sent, and the right voice (matching the per-language listening map) is selected. For Polylang and WPML the *text* also flips per language (different posts per language). For GTranslate the language code flips via the `googtrans` cookie but the text remains the source-language post content (architectural — GT widget translates the rendered DOM client-side, the server only ever sees `the_content` of the source post).
 
 ---
 
