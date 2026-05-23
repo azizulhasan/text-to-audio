@@ -278,6 +278,46 @@ The PHP 8.1+ deprecation flagged in Issue #1 (`AtlasVoice_Analytics.php:836`) di
 
 ---
 
+---
+
+## Phase 7 — Live compatibility tests on seven (Pro production build)
+
+Tested four plugins one-by-one with Free + Pro active. Pro deployed from `production/text-to-speech-pro-premium/` (the `npm run copy` output). Each plugin activated alone (others deactivated first), then the wp-admin dashboard and a frontend post (`/2026/05/20/hello-world/`) loaded.
+
+### Test matrix
+
+| Plugin | Dashboard loads | wp-admin fatal? | Frontend wrapper rendered | Listen button rendered | Console errors | debug.log |
+|---|---|---|---|---|---|---|
+| **LiteSpeed Cache 7.7** *(JS Minify + Combine + Defer)* | ✓ | none | ✓ `.tts_content_wrapper_1` + `tts_button_settings_1` inline script + `text-to-audio-button.min.js` enqueued | **✗ no `.tts_play_button`** | none | clean |
+| **Polylang** | ✓ | none | ✓ same as above | **✗ no `.tts_play_button`** | none | clean |
+| **GTranslate** | ✓ | none | ✓ same | **✗ no `.tts_play_button`** | none | clean |
+| **WPML** (sitepress + wpml-string-translation) | ✓ | none | ✓ same | **✗ no `.tts_play_button`** | none | `PHP Notice: WP_User_Query::query was called incorrectly … before plugins_loaded hook` — WPML-side, not ours |
+| **Baseline retest (Free + Pro only)** | ✓ | none | ✓ same | **✗ no `.tts_play_button`** | none | clean |
+
+### 🔴 Issue #2 — Listen button is not being rendered on the frontend (Pro production build)
+
+Reproduces with **only Free + Pro active** (baseline) — not caused by any compat plugin. Repro post: `/seven/index.php/2026/05/20/hello-world/`, saved player is **1** (default browser, no MP3 generation needed → button must always render). What's present vs missing:
+
+- `.tts_content_wrapper_1` `<div>` is in the page source ✓
+- The inline `<script id="tts_button_settings_1">…</script>` carrying per-post button settings is present ✓
+- `text-to-audio-button.min.js` is enqueued and loads ✓
+- `countries-and-timezones.min.js` (bundled-local CDN replacement) loads ✓
+- **But 0 `.tts_play_button` elements get created in the DOM** ✗
+- No JS console errors anywhere
+- No PHP notices/warnings in `debug.log`
+- "AtlasVoice: On" indicator in the admin bar ✓ (so the runtime DOES think the button is active)
+
+This is a regression introduced somewhere in the cleanup work since the last successful frontend test (which DID render the Listen button on this same post with player 1). Did NOT investigate or fix per direction — flagging for inspection.
+
+Suspect first to check: the recent `2d03217b` "delete dead `Includes/Compatibality` and `Libs/GTTS`" commit + composer dump-autoload regen — even though both folders were unreferenced, the autoload reshuffle could have changed class-load order. Other candidates: `composer.json` now ships in the production ZIP (`8c572ecd`) — autoloader may behave differently. Worth bisecting against an earlier production build to confirm.
+
+### Notes
+- LiteSpeed compatibility could not be conclusively verified due to Issue #2 (button missing even before LiteSpeed's optimization kicks in). The `TTA_Hooks::get_excluded_js()` filter is still registered, so the protection is in place at PHP-filter level.
+- GTranslate language switcher widget didn't appear on the post (would need widget configuration — not blocking, just incomplete coverage).
+- WPML language setup wasn't completed (would need to walk through the "Set up WPML" wizard) — covered activation + dashboard interaction only.
+
+---
+
 ## Recommendation: **GO** for free 2.2.0 SVN publish.
 
 - Plugin Check on the free plugin is green.
