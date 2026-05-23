@@ -118,37 +118,54 @@ Customize "Select Player" dropdown options: ["Select Player", "1"]
 - Run on the *deployed* seven copy (built ZIP-equivalent, excludes dev artifacts).
 
 ### 4.2 Pro plugin
-- **Result (baseline, pre-fix): 766 errors / 1459 warnings** ⚠️
-- **Result (after TTS-247 Pro cleanup pass): 583 errors / 1541 warnings** — errors down **−183 (−24%)**; warnings slightly up because newly-required `/* translators: */` comments + escaping triggered a few "missing context" sub-rules.
-- Pro is **distributed off-wp.org via Freemius** — these checks are informational, not release-blocking for the free SVN publish.
 
-**TTS-247 Pro fixes applied** (8 commits on `feature/TTS-247`):
-1. `a351900b` — `TTA_PRO_TEXT_DOMAIN` constant → literal `'text-to-audio-pro'` in every gettext call (59 swaps).
-2. `095afad4` — wrong gettext domains (`atlasaidev`, `absolute-addons`) → `'text-to-audio-pro'` (93 swaps).
-3. `c381d5ad` — `/* translators: %s, %d ... */` comments added above placeholder-bearing gettext calls (5 added).
+Three reference points, run against `D:\laragon\www\seven\wp-content\plugins\text-to-speech-pro-premium\` (the **production build** copied from `npm run copy` output, not the dev source):
+
+| | Errors | Warnings | Notes |
+|---|---:|---:|---|
+| **Baseline (pre-cleanup)** | 766 | 1459 | first scan this session |
+| **Mid-cleanup (Libs/ still touched)** | 583 | 1541 | after the initial 8 i18n + WPCS commits, before the Libs/ revert |
+| **Final (after Libs/ revert + 4 more commits)** | **811** | **1413** | the number that matches what would ship |
+
+The final pass is **+45 errors / −46 warnings** vs the baseline. The net regression on errors is explained almost entirely by the deliberate `Libs/` revert (`262ec960`), which restored the AtlasAiDev telemetry library to its pre-session state per release policy — that revert alone brought back **209 `TextDomainMismatch`** (atlasaidev domain in Libs/) and **~35 `NonSingularStringLiteralDomain`** (TTA_PRO_TEXT_DOMAIN constant inside `Includes/TTA_Pro_Lib_AtlasAiDev.php`). Plugin-owned code is genuinely cleaner; the AtlasAiDev library needs a coordinated upstream pass.
+
+Pro is **distributed off-wp.org via Freemius** — these checks are informational, not release-blocking for the free SVN publish.
+
+**TTS-247 Pro fixes applied** (commits on `feature/TTS-247`; Libs/ revert noted last):
+1. `a351900b` — `TTA_PRO_TEXT_DOMAIN` constant → literal `'text-to-audio-pro'` in every gettext call.
+2. `095afad4` — wrong gettext domains (`atlasaidev`, `absolute-addons`) → `'text-to-audio-pro'`.
+3. `c381d5ad` — `/* translators: %s, %d ... */` comments added above placeholder-bearing gettext calls.
 4. `9946820b` — dropped dead `_n()` wrappers around user-input button text in `tta__button_text_arr_callback` (NonSingularStringLiteralSingle/Plural).
-5. `666f4dd3` — `is_null()` → `=== null` (9 swaps).
-6. `6b647c17` — `json_encode()` → `wp_json_encode()` (6 swaps).
-7. `ab83e941` — refactored 3 `curl_init()` fallbacks to `wp_remote_get` / `wp_remote_head`.
-8. `1466a126` — escape unescaped output (`wp_kses_post` / `esc_html` / `esc_attr` / `esc_url` per context, 10 fixes / 6 files).
+5. `666f4dd3` — `is_null()` → `=== null`.
+6. `6b647c17` — `json_encode()` → `wp_json_encode()`.
+7. `ab83e941` — refactored `curl_init()` fallbacks to `wp_remote_get` / `wp_remote_head`.
+8. `1466a126` — escape unescaped output (`wp_kses_post` / `esc_html` / `esc_attr` / `esc_url` per context).
+9. `5caa7f42` — `unlink()` → `wp_delete_file()` (14 hits; `Api/TTA_Pro_Api_Routes.php:3098` needed a two-step refactor because `wp_delete_file()` returns void, unlike `unlink()`).
+10. `219d15ec` — `wp_unslash() + sanitize_text_field()` on three simple `$_X[...]` reads.
+11. `be898696` — `phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching` on the 16 `$wpdb` query sites that don't benefit from caching (deactivation, uninstall, scheduled email).
+12. **`262ec960` — revert all `Libs/AtlasAiDev/*`, `Libs/GTTS/GoogleTranslateTTS.php` and `Includes/TTA_Pro_Lib_AtlasAiDev.php` changes** (out of scope per release policy — vendored telemetry library, must be coordinated upstream).
 - `wp_redirect_wp_redirect`: only hit was inside `freemius/` (excluded). Nothing to fix in plugin-owned code.
 - `freemius/` folder left untouched per release policy.
 
-**Top remaining categories** (583 / 1541) — almost entirely in `vendor/google/apiclient/` and Freemius templates; these are NOT in scope for fixing in this pass:
-| Rule | Count |
-|---|---:|
-| `NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound` | 1098 |
-| `Security.EscapeOutput.OutputNotEscaped` | 519 |
-| `NonPrefixedFunctionFound` | 103 |
-| `NonPrefixedConstantFound` | 57 |
-| `NonPrefixedClassFound` | 56 |
-| `NonPrefixedHooknameFound` | 53 |
-| `ValidatedSanitizedInput.MissingUnslash` | 30 |
-| `DirectDatabaseQuery.DirectQuery` | 21 |
-| `DirectDatabaseQuery.NoCaching` | 20 |
-| `ValidatedSanitizedInput.InputNotSanitized` | 17 |
-| `NonceVerification.Recommended` | 15 |
-| `WP.AlternativeFunctions.unlink_unlink` | 14 |
+**Top remaining categories on the production build** (811 / 1413):
+| Rule | Count | Where |
+|---|---:|---|
+| `NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound` | 1088 | almost entirely `vendor/google/apiclient/` |
+| `Security.EscapeOutput.OutputNotEscaped` | 522 | `vendor/` + Freemius templates + `Libs/` (reverted) |
+| `WP.I18n.TextDomainMismatch` | 209 | **`Libs/AtlasAiDev/*` (reverted)** — atlasaidev domain |
+| `NonPrefixedFunctionFound` | 102 | `vendor/` |
+| `NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound` | 53 | `Libs/AtlasAiDev/*` AtlasAiDev_<slug>_* hooks (reverted) |
+| `WP.I18n.NonSingularStringLiteralDomain` | 35 | mostly `Includes/TTA_Pro_Lib_AtlasAiDev.php` (reverted) |
+| `Security.ValidatedSanitizedInput.MissingUnslash` | 29 | mostly `Libs/AtlasAiDev/*` (reverted) |
+| `NonPrefixedConstantFound` | 19 | `vendor/` |
+| `NonPrefixedNamespaceFound` | 17 | `vendor/` |
+| `Security.ValidatedSanitizedInput.InputNotSanitized` | 16 | mix |
+| `Security.NonceVerification.Recommended` | 15 | mostly `Libs/AtlasAiDev/*` |
+| `NonPrefixedHooknameFound (Dynamic)` | 14 | `vendor/` |
+| `missing_direct_file_access_protection` | 14 | `vendor/` |
+| `NonPrefixedClassFound` | 13 | `vendor/` |
+
+`WP.AlternativeFunctions.unlink_unlink` (was 14) and the `WPDB.DirectDatabaseQuery.*` rules (was 41) no longer appear in the top list — those categories are now clean in plugin-owned code.
 
 **Suggested follow-up tickets** (Pro, off-wp.org so not release-blocking):
 - "Pro nonce verification + input unslash/sanitize pass" (~62 hits).
