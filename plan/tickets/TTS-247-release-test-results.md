@@ -125,7 +125,8 @@ Three reference points, run against `D:\laragon\www\seven\wp-content\plugins\tex
 |---|---:|---:|---|
 | **Baseline (pre-cleanup)** | 766 | 1459 | first scan this session |
 | **Mid-cleanup (Libs/ still touched)** | 583 | 1541 | after the initial 8 i18n + WPCS commits, before the Libs/ revert |
-| **Final (after Libs/ revert + 4 more commits)** | **811** | **1413** | the number that matches what would ship |
+| **Final (after Libs/ revert + 4 more commits)** | 811 | 1413 | number with dev artifacts |
+| **After dead-folder removal (2d03217b)** | **805** | **1408** | post `npm run copy` + rebuilt production deployed to seven |
 
 The final pass is **+45 errors / −46 warnings** vs the baseline. The net regression on errors is explained almost entirely by the deliberate `Libs/` revert (`262ec960`), which restored the AtlasAiDev telemetry library to its pre-session state per release policy — that revert alone brought back **209 `TextDomainMismatch`** (atlasaidev domain in Libs/) and **~35 `NonSingularStringLiteralDomain`** (TTA_PRO_TEXT_DOMAIN constant inside `Includes/TTA_Pro_Lib_AtlasAiDev.php`). Plugin-owned code is genuinely cleaner; the AtlasAiDev library needs a coordinated upstream pass.
 
@@ -144,6 +145,7 @@ Pro is **distributed off-wp.org via Freemius** — these checks are informationa
 10. `219d15ec` — `wp_unslash() + sanitize_text_field()` on three simple `$_X[...]` reads.
 11. `be898696` — `phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching` on the 16 `$wpdb` query sites that don't benefit from caching (deactivation, uninstall, scheduled email).
 12. **`262ec960` — revert all `Libs/AtlasAiDev/*`, `Libs/GTTS/GoogleTranslateTTS.php` and `Includes/TTA_Pro_Lib_AtlasAiDev.php` changes** (out of scope per release policy — vendored telemetry library, must be coordinated upstream).
+13. **`2d03217b` — delete dead `Includes/Compatibality/` (`TTA_Pro\Compatibality\Compatibality` + `Toolset_WP_Views`) and `Libs/GTTS/` (`AtlasAiDev\GTTS\GoogleTranslateTTS` + `GoogleTokenGenerator`)** — neither folder was referenced anywhere; Compatibality wasn't even autoloaded; GTTS was autoloaded but never instantiated (active Google TTS path goes through `vendor/google/apiclient`). Drops the `AtlasAiDev\\GTTS\\` PSR-4 entry from composer.json; `composer dump-autoload --optimize` shrinks the classmap to 793 classes. Production build dropped from 1130 → 1125 files.
 - `wp_redirect_wp_redirect`: only hit was inside `freemius/` (excluded). Nothing to fix in plugin-owned code.
 - `freemius/` folder left untouched per release policy.
 
