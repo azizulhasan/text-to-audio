@@ -882,9 +882,11 @@ class TTA_Api_Routes {
      *      `/insights`, `/all_insights`, `/latest_posts`,
      *      `/categories_and_tags`, `/acf_fields`, `/browser`,
      *      `/get_all_user_roles`, `/aggregated_insights`, `/trend_data`,
-     *      `/heatmap_data`, `/export_csv`, `/export_pdf`,
-     *      `/filtered_insights`, `/save_schedule_report`,
-     *      `/get_schedule_report`, `/onboarding-event`).
+     *      `/filtered_insights`, `/onboarding-event`).
+     *      Premium analytics endpoints (`heatmap_data`, `export_csv`,
+     *      `export_pdf`, `save_schedule_report`, `get_schedule_report`,
+     *      `send_test_report`) live in the Pro plugin under `tta_pro/v1/`
+     *      with their own permission check.
      *
      *   2. FRONTEND-NONCE — request must carry a valid `wp_rest` nonce in the
      *      `X-WP-Nonce` header or the `rest_nonce` body field. Used by
@@ -924,8 +926,9 @@ class TTA_Api_Routes {
             '/tta/v1/aggregated_insights',
             '/tta/v1/trend_data',
             // TTS-249: heatmap_data/export_csv/export_pdf/save_schedule_report/
-            // get_schedule_report moved to the Pro plugin (registered there under
-            // tta/v1 with their own permission check).
+            // get_schedule_report were moved out of Free to the Pro plugin (3.3.0+)
+            // and re-registered under `tta_pro/v1/` with their own permission
+            // check (see Pro's TTA_Pro_Api_Routes + TTA_Pro_AtlasVoice_Analytics).
             '/tta/v1/filtered_insights',
             '/tta/v1/onboarding-event',
             '/tta/v1/reset_plugin_data',
