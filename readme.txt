@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.2.0
+Stable tag: 2.2.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -273,6 +273,11 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.2.1 ( 24 May 2026 ) =
+Improved : Removed ~1,100 lines of premium-feature code from `api/AtlasVoice_Analytics.php` that the free build no longer needs — the heatmap, CSV/PDF export, scheduled-report save/get, and PDF-render handlers now live exclusively in AtlasVoice Pro 3.3.0 under the `tta_pro/v1/` REST namespace. No behavior change for free users; the free dashboard continues to show heatmap / export / scheduled-report sections only when Pro is active.
+Improved : Trimmed three legacy / vestigial handlers from the free analytics class (`track_old`, `insights_old`, `report`, plus deprecated `send_test_report`, `generate_and_send_report`, and `build_report_email` shims) that no live code path was calling.
+Improved : Updated `TTA_Api_Routes` doc comments to point to the correct `tta_pro/v1/` namespace for the premium analytics endpoints.
+
 = 2.2.0 ( 22 May 2026 ) =
 Improved : The free plugin is now fully functional on its own — premium player options, button positions, voice integrations, and advanced analytics are presented as upgrade prompts instead of locked controls.
 Fixed : Removed external sample-audio requests from the dashboard; previews now use your browser's built-in voices.
@@ -457,6 +462,9 @@ Introduced :  Complete new UI introduced.
 
 
 == Upgrade Notice ==
+
+= 2.2.1 =
+Code-cleanup release: removed ~1,100 lines of unused premium-feature code from the free analytics class. No behavior change for free users; AtlasVoice Pro 3.3.0+ now owns those handlers under its own REST namespace.
 
 = 2.2.0 =
 The free plugin is now fully functional standalone; premium features show as upgrade prompts. Dashboard no longer makes external sample-audio requests.
