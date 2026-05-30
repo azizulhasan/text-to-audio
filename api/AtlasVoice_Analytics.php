@@ -312,12 +312,12 @@ class AtlasVoice_Analytics {
 		}
 		$settings = TTA_Helper::tts_get_settings( 'settings' );
 
+		// TTS-247: use every configured post type — no is_pro_active() cap.
+		// The previous code limited free sites to the first configured post type,
+		// which the wp.org review flagged as trialware (limiting a built-in
+		// feature). Free now honours the full configured list.
 		if ( isset( $settings['tta__settings_allow_listening_for_post_types'] ) && count( $settings['tta__settings_allow_listening_for_post_types'] ) ) {
-			if ( ! TTA_Helper::is_pro_active() ) {
-				$post_types[] = $settings['tta__settings_allow_listening_for_post_types'][0];
-			} else {
-				$post_types = $settings['tta__settings_allow_listening_for_post_types'];
-			}
+			$post_types = $settings['tta__settings_allow_listening_for_post_types'];
 		}
 
 		if ( empty( $post_types ) ) {
@@ -347,9 +347,12 @@ class AtlasVoice_Analytics {
 		$posts = $query->posts;
 
 		$post_data = array();
-		if ( TTA_Helper::is_pro_active() && apply_filters( 'tts_track_all_ids_by_default', true ) && empty( $post_ids ) ) {
-			$post_data['all'] = 'All Posts:: Track All Ids of post type ' . implode( ', ', $post_types );
-		}
+
+		// TTS-247: the "All Posts" auto-track entry is a companion-plugin (Pro)
+		// convenience. Free no longer branches on is_pro_active(); a companion
+		// plugin prepends the entry by hooking tts_analytics_post_list. When
+		// nothing hooks it, the list contains only individually-selectable posts.
+		$post_data = (array) apply_filters( 'tts_analytics_post_list', $post_data, $post_types, $post_ids );
 
 		foreach ( $posts as $post_id ) {
 			$post_data[ $post_id ] = get_the_title( $post_id );
@@ -402,8 +405,11 @@ class AtlasVoice_Analytics {
 		$body = [];
 		$body = (array) get_option( 'tta_analytics_settings' );
 
-		if ( TTA_Helper::is_pro_active() && apply_filters( 'tts_track_all_ids_by_default', true ) && isset( $body['tts_trackable_post_ids'] ) && ! in_array( 'all', $body['tts_trackable_post_ids'] ) ) {
-			array_push( $body['tts_trackable_post_ids'], 'all' );
+		// TTS-247: the "track all" sentinel is a companion-plugin (Pro)
+		// convenience injected via tts_trackable_post_ids — no is_pro_active()
+		// branch in Free. Free returns the saved list untouched when nothing hooks.
+		if ( isset( $body['tts_trackable_post_ids'] ) ) {
+			$body['tts_trackable_post_ids'] = (array) apply_filters( 'tts_trackable_post_ids', $body['tts_trackable_post_ids'] );
 		}
 
 		$response['status'] = true;
@@ -677,24 +683,6 @@ class AtlasVoice_Analytics {
         // Aggregate the data
         $aggregated = $this->aggregate_analytics_data( $results );
 
-        // Get previous period data for comparison (Pro only)
-        $previous_aggregated = null;
-        if ( TTA_Helper::is_pro_active() && $this->analytics_table_exists() ) {
-            $previous_dates = $this->get_previous_period_dates( $dates );
-            if ( $previous_dates['from_date'] && $previous_dates['to_date'] ) {
-                $prev_conditions = array(
-                    'created_at >= %s',
-                    'updated_at <= %s'
-                );
-                $prev_values = array( $previous_dates['from_date'], $previous_dates['to_date'] );
-                $prev_where  = 'WHERE ' . implode( ' AND ', $prev_conditions );
-                $prev_query  = "SELECT * FROM $table_name $prev_where";
-                // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
-                $prev_results = $wpdb->get_results( $wpdb->prepare( $prev_query, ...$prev_values ), ARRAY_A );
-                $previous_aggregated = $this->aggregate_analytics_data( $prev_results );
-            }
-        }
-
         // Prepare raw results for client-side filtering (include created_at for date filtering)
         $raw_results = array();
         foreach ( $results as $result ) {
@@ -710,11 +698,28 @@ class AtlasVoice_Analytics {
 
         $response['status']      = true;
         $response['data']        = $aggregated;
-        $response['previous']    = $previous_aggregated;
         $response['dates']       = $dates;
         $response['raw_results'] = $raw_results;
 
-        return rest_ensure_response( $response );
+        // TTS-247: premium enrichment (e.g. previous-period comparison) is added
+        // by companion plugins hooking tts_analytics_response. Free computes only
+        // base data and never branches on is_pro_active(); the frontend renders a
+        // section only when its data slice is present.
+        return rest_ensure_response( $this->filter_analytics_response( $response, 'aggregated_insights', $dates, $results ) );
+    }
+
+    /**
+     * TTS-247: single extension point for premium analytics enrichment.
+     * Free returns the base response unchanged when nothing hooks the filter.
+     *
+     * @param array  $response The base response array.
+     * @param string $context  Which analytics endpoint produced it.
+     * @param array  $dates    The resolved from/to date range.
+     * @param array  $results  The raw DB rows for the current period.
+     * @return array
+     */
+    private function filter_analytics_response( $response, $context, $dates = array(), $results = array() ) {
+        return (array) apply_filters( 'tts_analytics_response', $response, $context, $dates, $results );
     }
 
     /**
@@ -765,27 +770,6 @@ class AtlasVoice_Analytics {
         return array(
             'from_date' => $from,
             'to_date'   => $to,
-        );
-    }
-
-    /**
-     * Get previous period dates for comparison
-     *
-     * @param array $current_dates
-     * @return array
-     */
-    private function get_previous_period_dates( $current_dates ) {
-        if ( ! $current_dates['from_date'] || ! $current_dates['to_date'] ) {
-            return array( 'from_date' => null, 'to_date' => null );
-        }
-
-        $from_timestamp = strtotime( $current_dates['from_date'] );
-        $to_timestamp   = strtotime( $current_dates['to_date'] );
-        $period_length  = $to_timestamp - $from_timestamp;
-
-        return array(
-            'from_date' => gmdate( 'Y-m-d H:i:s', $from_timestamp - $period_length - 1 ),
-            'to_date'   => gmdate( 'Y-m-d H:i:s', $from_timestamp - 1 ),
         );
     }
 
@@ -846,13 +830,13 @@ class AtlasVoice_Analytics {
                 }
             }
 
-            // Process device info (stored at top level of analytics)
+            // Process device info (stored at top level of analytics).
+            // TTS-247/2.2.2: the audience breakdowns (OS, device, browser,
+            // country, city) are a premium feature — Free no longer aggregates
+            // them here. The Pro plugin computes and injects them into the
+            // aggregated_insights response by hooking tts_analytics_response
+            // (see TTA_Pro_AtlasVoice_Analytics::inject_premium_analytics).
             $device_fields = array(
-                'platform' => 'os',
-                'deviceType' => 'device',
-                'browser' => 'browser',
-                'country' => 'country',
-                'city' => 'city',
                 'timeZone' => 'timezone',
                 'language' => 'language',
             );
@@ -967,12 +951,9 @@ class AtlasVoice_Analytics {
         });
         $aggregated['posts'] = array_slice( $aggregated['posts'], 0, 50, true );
 
-        // Sort OS, device, browser, country by count
-        arsort( $aggregated['os'] );
-        arsort( $aggregated['device'] );
-        arsort( $aggregated['browser'] );
-        arsort( $aggregated['country'] );
-        arsort( $aggregated['city'] );
+        // TTS-247/2.2.2: os/device/browser/country/city are populated by Pro
+        // (injected into aggregated_insights), so Free leaves them empty here.
+        // Pro sorts its own injected breakdowns.
 
         // Remove raw user data from response (keep only segments)
         unset( $aggregated['users'] );
@@ -981,90 +962,12 @@ class AtlasVoice_Analytics {
     }
 
     /**
-     * Get trend data for charts (daily breakdown)
-     *
-     * @param $request
-     * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
+     * NOTE: trend_data() was moved to the Pro plugin in 2.2.2. The Playing
+     * Trend Analysis chart is now a premium feature — Free no longer computes
+     * or exposes this data (the free dashboard shows the locked "Upgrade to
+     * Pro" card). The handler now lives in Pro's TTA_Pro_AtlasVoice_Analytics,
+     * registered under tta_pro/v1/trend_data. (Same pattern as heatmap_data.)
      */
-    public function trend_data( $request ) {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'atlasvoice_analytics';
-
-        $date_range = $request->get_param( 'date_range' );
-        $from_date  = $request->get_param( 'from_date' );
-        $to_date    = $request->get_param( 'to_date' );
-        $dates      = $this->calculate_date_range( $date_range, $from_date, $to_date );
-
-        $conditions = array();
-        $values     = array();
-
-        if ( $dates['from_date'] ) {
-            $conditions[] = 'created_at >= %s';
-            $values[]     = $dates['from_date'];
-        }
-        if ( $dates['to_date'] ) {
-            $conditions[] = 'updated_at <= %s';
-            $values[]     = $dates['to_date'];
-        }
-
-        $where_clause = '';
-        if ( ! empty( $conditions ) ) {
-            $where_clause = 'WHERE ' . implode( ' AND ', $conditions );
-        }
-
-        // Get data grouped by date. Table name + WHERE clause are built from internal whitelisted parts; user-supplied values pass through wpdb->prepare placeholders.
-        // TTS-247: skip the query when the table is missing (e.g. just after a data reset).
-        if ( ! $this->analytics_table_exists() ) {
-            $results = array();
-        } elseif ( ! empty( $values ) ) {
-            $query = "SELECT DATE(created_at) as date, analytics FROM $table_name $where_clause ORDER BY created_at ASC";
-            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
-            $results = $wpdb->get_results( $wpdb->prepare( $query, ...$values ), ARRAY_A );
-        } else {
-            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
-            $results = $wpdb->get_results( "SELECT DATE(created_at) as date, analytics FROM $table_name ORDER BY created_at ASC", ARRAY_A );
-        }
-
-        // Aggregate by date
-        $trend = array();
-        foreach ( $results as $result ) {
-            $date = $result['date'];
-            $analytics = maybe_unserialize( $result['analytics'] );
-
-            if ( ! isset( $trend[ $date ] ) ) {
-                $trend[ $date ] = array(
-                    'date'       => $date,
-                    'plays'      => 0,
-                    'time'       => 0,
-                    'init'       => 0,
-                    'end'        => 0,
-                    'downloads'  => 0,
-                );
-            }
-
-            if ( isset( $analytics['play']['count'] ) ) {
-                $trend[ $date ]['plays'] += intval( $analytics['play']['count'] );
-            }
-            if ( isset( $analytics['time']['count'] ) ) {
-                $trend[ $date ]['time'] += intval( $analytics['time']['count'] );
-            }
-            if ( isset( $analytics['init']['count'] ) ) {
-                $trend[ $date ]['init'] += intval( $analytics['init']['count'] );
-            }
-            if ( isset( $analytics['end']['count'] ) ) {
-                $trend[ $date ]['end'] += intval( $analytics['end']['count'] );
-            }
-            if ( isset( $analytics['download']['count'] ) ) {
-                $trend[ $date ]['downloads'] += intval( $analytics['download']['count'] );
-            }
-        }
-
-        $response['status'] = true;
-        $response['data']   = array_values( $trend );
-        $response['dates']  = $dates;
-
-        return rest_ensure_response( $response );
-    }
 
 
     /**
@@ -1136,6 +1039,6 @@ class AtlasVoice_Analytics {
         $response['dates']  = $dates;
         $response['count']  = count( $processed );
 
-        return rest_ensure_response( $response );
+        return rest_ensure_response( $this->filter_analytics_response( $response, 'filtered_insights', $dates, $results ) );
     }
 }

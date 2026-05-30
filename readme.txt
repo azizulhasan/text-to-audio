@@ -194,7 +194,7 @@ prioritise improvements. No website visitor / listener data is sent to
 this service.
 
 Service provided by AtlasAiDev:
-- Terms of Use: https://atlasaidev.com/terms-of-use/
+- Terms and Conditions: https://atlasaidev.com/terms-and-conditions/
 - Privacy Policy: https://atlasaidev.com/privacy-policy/
 
 = AtlasAiDev plugin catalog (raw.githubusercontent.com) =

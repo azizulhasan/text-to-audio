@@ -160,9 +160,19 @@ class TTA_Translation_Downloader {
 			return false;
 		}
 
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-		$written = file_put_contents( $local_path, $body );
+		// TTS-247: use the WordPress filesystem API instead of file_put_contents()
+		// so the write respects hosting filesystems that gate direct file ops
+		// (FTP/SSH credentialed installs).
+		global $wp_filesystem;
 
-		return false !== $written;
+		if ( ! function_exists( 'WP_Filesystem' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+
+		if ( ! WP_Filesystem() ) {
+			return false;
+		}
+
+		return (bool) $wp_filesystem->put_contents( $local_path, $body, FS_CHMOD_FILE );
 	}
 }

@@ -29,7 +29,11 @@ import {
 } from "./index";
 
 export default function Analytics() {
-    const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
+    // TTS-247: data-driven capability map (no is_pro_active gating in the UI).
+    // Free ships an empty object; companion plugins (Pro) declare available
+    // premium features via the `tts_capabilities` PHP filter. A control renders
+    // only when its capability key is present, or when its data slice arrives.
+    const capabilities = (typeof ttsObj !== "undefined" && ttsObj.capabilities) || {};
 
     // State
     const [analytics, setAnalytics] = useState({
@@ -374,11 +378,15 @@ export default function Analytics() {
     }, []);
 
     /**
-     * Fetch trend data for charts
+     * Fetch trend data for charts (Pro only)
      */
     const fetchTrendData = useCallback(async (dateRange = "Last 30 Days", fromDate = null, toDate = null) => {
+        // TTS-247: Playing Trend Analysis is a premium feature. Only fetch when
+        // the trend capability is present (Pro active); the free dashboard shows
+        // the locked "Upgrade to Pro" card instead.
+        if (!capabilities.trend) return;
         try {
-            let url = `${tta_obj.api_url}tta/v1/trend_data?date_range=${encodeURIComponent(dateRange)}`;
+            let url = `${tta_obj.api_url}tta_pro/v1/trend_data?date_range=${encodeURIComponent(dateRange)}`;
 
             // Add custom dates if provided
             if (dateRange === "Custom" && fromDate && toDate) {
@@ -400,13 +408,14 @@ export default function Analytics() {
         } catch (error) {
             console.error("Error fetching trend data:", error);
         }
-    }, []);
+    }, [capabilities.trend]);
 
     /**
      * Fetch heatmap data (Pro only)
      */
     const fetchHeatmapData = useCallback(async (dateRange = "Last 30 Days", fromDate = null, toDate = null) => {
-        if (!isProActive) return;
+        // TTS-247: only fetch when the heatmap capability is present (Pro active).
+        if (!capabilities.heatmap) return;
 
         try {
             let url = `${tta_obj.api_url}tta_pro/v1/heatmap_data?date_range=${encodeURIComponent(dateRange)}`;
@@ -431,13 +440,14 @@ export default function Analytics() {
         } catch (error) {
             console.error("Error fetching heatmap data:", error);
         }
-    }, [isProActive]);
+    }, [capabilities.heatmap]);
 
     /**
      * Export analytics as CSV (Pro only)
      */
     const handleExportCSV = useCallback(async (dateRange = "Last 999 Days") => {
-        if (!isProActive) return;
+        // TTS-247: export is a Pro action route; only call it when the capability is present.
+        if (!capabilities.export) return;
         if(globalDateRange){
             dateRange = globalDateRange;
         }
@@ -474,13 +484,13 @@ export default function Analytics() {
             console.error("Error exporting CSV:", error);
             toast(__("Error exporting CSV", "text-to-audio"), "error");
         }
-    }, [isProActive]);
+    }, [capabilities.export]);
 
     /**
      * Export analytics as PDF (Pro only)
      */
     const handleExportPDF = useCallback(async (dateRange = "Last 999 Days") => {
-        if (!isProActive) return;
+        if (!capabilities.export) return;
         if (globalDateRange) {
             dateRange = globalDateRange;
         }
@@ -544,7 +554,7 @@ export default function Analytics() {
             console.error("Error exporting PDF:", error);
             toast(__("Error exporting PDF", "text-to-audio"), "error");
         }
-    }, [isProActive, globalDateRange, globalFromDate, globalToDate]);
+    }, [capabilities.export, globalDateRange, globalFromDate, globalToDate]);
 
 
     /**
@@ -630,7 +640,7 @@ export default function Analytics() {
                 return { post_id, totalScore };
             })
             .sort((a, b) => b.totalScore - a.totalScore)
-            .slice(0, isProActive ? 50 : 10);
+            .slice(0, 50);
     }
 
     // Load initial data
@@ -646,14 +656,16 @@ export default function Analytics() {
         // Fetch aggregated insights from new API endpoint
         fetchAggregatedInsights(globalDateRange, globalFromDate, globalToDate);
 
-        // Fetch trend data
-        fetchTrendData(globalDateRange, globalFromDate, globalToDate);
+        // Fetch trend data (present only when the trend capability is active)
+        if (capabilities.trend) {
+            fetchTrendData(globalDateRange, globalFromDate, globalToDate);
+        }
 
-        // Fetch heatmap data (Pro only)
-        if (isProActive) {
+        // Fetch heatmap data (present only when the heatmap capability is active)
+        if (capabilities.heatmap) {
             fetchHeatmapData(globalDateRange, globalFromDate, globalToDate);
         }
-    }, [fetchAggregatedInsights, fetchTrendData, fetchHeatmapData, isProActive]);
+    }, [fetchAggregatedInsights, fetchTrendData, fetchHeatmapData, capabilities.trend, capabilities.heatmap]);
 
     // Refetch data when global date range changes
     useEffect(() => {
@@ -663,16 +675,16 @@ export default function Analytics() {
     }, [globalDateRange, globalFromDate, globalToDate, analytics.tts_enable_analytics, fetchAggregatedInsights]);
 
     useEffect(() => {
-        if (analytics.tts_enable_analytics) {
+        if (analytics.tts_enable_analytics && capabilities.trend) {
             fetchTrendData(globalDateRange, globalFromDate, globalToDate);
         }
-    }, [globalDateRange, globalFromDate, globalToDate, analytics.tts_enable_analytics, fetchTrendData]);
+    }, [globalDateRange, globalFromDate, globalToDate, analytics.tts_enable_analytics, capabilities.trend, fetchTrendData]);
 
     useEffect(() => {
-        if (analytics.tts_enable_analytics && isProActive) {
+        if (analytics.tts_enable_analytics && capabilities.heatmap) {
             fetchHeatmapData(globalDateRange, globalFromDate, globalToDate);
         }
-    }, [globalDateRange, globalFromDate, globalToDate, analytics.tts_enable_analytics, isProActive, fetchHeatmapData]);
+    }, [globalDateRange, globalFromDate, globalToDate, analytics.tts_enable_analytics, capabilities.heatmap, fetchHeatmapData]);
 
     // Load analytics settings
     useEffect(() => {
@@ -787,12 +799,14 @@ export default function Analytics() {
         // Fetch all data with new date range
         if (analytics.tts_enable_analytics) {
             fetchAggregatedInsights(dateRange, fromDate, toDate);
-            fetchTrendData(dateRange, fromDate, toDate);
-            if (isProActive) {
+            if (capabilities.trend) {
+                fetchTrendData(dateRange, fromDate, toDate);
+            }
+            if (capabilities.heatmap) {
                 fetchHeatmapData(dateRange, fromDate, toDate);
             }
         }
-    }, [analytics.tts_enable_analytics, isProActive, fetchAggregatedInsights, fetchTrendData, fetchHeatmapData]);
+    }, [analytics.tts_enable_analytics, capabilities.trend, capabilities.heatmap, fetchAggregatedInsights, fetchTrendData, fetchHeatmapData]);
 
     return isDataLoaded ? (
         <React.Fragment>
@@ -812,8 +826,8 @@ export default function Analytics() {
                                     />
                                 </div>
                                 <div className="tta_analytics_header_right">
-                                    {/* Export buttons - inline for Pro users only */}
-                                    {isProActive && analytics.tts_enable_analytics && (
+                                    {/* Export buttons - shown when the export capability is present */}
+                                    {capabilities.export && analytics.tts_enable_analytics && (
                                         <ExportSection
                                             onExportCSV={handleExportCSV}
                                             onExportPDF={handleExportPDF}
@@ -873,8 +887,8 @@ export default function Analytics() {
                             )}
                         </div>
 
-                        {/* Export & Reports upsell for free users */}
-                        {!isProActive && analytics.tts_enable_analytics && (
+                        {/* Export & Reports upsell — shown when the export capability is absent */}
+                        {!capabilities.export && analytics.tts_enable_analytics && (
                             <div style={{
                                 background: '#f8f9fa',
                                 border: '1px dashed #dee2e6',
@@ -1066,7 +1080,7 @@ export default function Analytics() {
                                             globalDateRange={globalDateRange}
                                             onDateRangeChange={setPopularDateRange}
                                             filterResultsByDateRange={filterResultsByDateRange}
-                                            limit={isProActive ? 10 : 3}
+                                            limit={10}
                                         />
                                     </Col>
                                 </Row>

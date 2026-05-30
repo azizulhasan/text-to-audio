@@ -38,7 +38,11 @@ export default function PeakHoursHeatmap({
     onDateRangeChange,
     filterResultsByDateRange
 }) {
-    const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
+    // TTS-247: heatmap is a premium feature whose data is injected by Pro
+    // (tta_pro/v1/heatmap_data). Driven by the data-driven capability flag, not
+    // an is_pro_active license check. When absent, the upsell overlay shows.
+    const capabilities = (typeof ttsObj !== "undefined" && ttsObj.capabilities) || {};
+    const hasHeatmap = !!capabilities.heatmap;
 
     // Standard date range options
     const standardDateRangeOptions = [
@@ -75,20 +79,13 @@ export default function PeakHoursHeatmap({
     const hours = ["6AM", "9AM", "12PM", "3PM", "6PM", "9PM", "12AM"];
     const hourMapping = [6, 9, 12, 15, 18, 21, 0]; // Map display slots to actual hours
 
-    // Demo data - 7 days x 7 time slots
-    const demoData = [
-        [120, 180, 350, 420, 520, 180, 90],   // Mon
-        [100, 200, 380, 580, 600, 320, 110],  // Tue
-        [90, 280, 520, 480, 420, 350, 150],   // Wed
-        [110, 260, 450, 380, 550, 380, 180],  // Thu
-        [80, 190, 320, 520, 400, 620, 280],   // Fri
-        [200, 350, 280, 220, 380, 580, 320],  // Sat
-        [180, 380, 240, 180, 350, 620, 350],  // Sun
-    ];
+    // TTS-247: placeholder behind the upsell overlay is empty (zeros), never
+    // fabricated demo numbers.
+    const emptyData = Array.from({ length: 7 }, () => Array(7).fill(0));
 
     // Filter and aggregate heatmap data based on component's date range
     const filteredHeatmapData = useMemo(() => {
-        if (!isProActive) return null;
+        if (!hasHeatmap) return null;
 
         // If date range matches global, use the already fetched data
         if (dateRange === globalDateRange) {
@@ -120,14 +117,14 @@ export default function PeakHoursHeatmap({
         }
 
         return data;
-    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange, isProActive, dayNames]);
+    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange, hasHeatmap, dayNames]);
 
     // Use filtered data
     const displayHeatmapData = filteredHeatmapData || data;
 
     // Transform API data to display format
     const transformApiData = () => {
-        if (!displayHeatmapData || Object.keys(displayHeatmapData).length === 0) return demoData;
+        if (!displayHeatmapData || Object.keys(displayHeatmapData).length === 0) return emptyData;
 
         return dayNames.map((dayName) => {
             const dayData = displayHeatmapData[dayName] || Array(24).fill(0);
@@ -144,7 +141,7 @@ export default function PeakHoursHeatmap({
         });
     };
 
-    const displayData = isProActive && Object.keys(displayHeatmapData).length > 0 ? transformApiData() : demoData;
+    const displayData = hasHeatmap && Object.keys(displayHeatmapData).length > 0 ? transformApiData() : emptyData;
 
     // Find max value for color scaling
     const maxValue = Math.max(...displayData.flat());
@@ -239,7 +236,7 @@ export default function PeakHoursHeatmap({
 
     return (
         <ProFeatureOverlay
-            showOverlay={!isProActive}
+            showOverlay={!hasHeatmap}
             featureName={__("Peak Hours Heatmap", "text-to-audio")}
         >
             {content}

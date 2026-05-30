@@ -3,6 +3,7 @@ import { __ } from "@wordpress/i18n";
 import { Form, Button } from "react-bootstrap";
 import { MultiSelect } from "../../context/MultiSelect";
 import notify from "../../context/Notify";
+import ProFeatureOverlay from "./ProFeatureOverlay";
 import AtlasVoicePlayerInsights from "../../../../../admin/js/AtlasVoicePlayerInsights";
 
 /**
@@ -50,7 +51,14 @@ export default function TrackPostIds({
     onDateRangeChange,
     analyticsEnabled = true,
 }) {
-    const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
+    // TTS-247: data-driven (no is_pro_active gating). Per-post metrics are all
+    // computed in the free base aggregator, so they show for everyone. Only the
+    // custom date-range search is premium, gated by the extendedDateRange capability.
+    const capabilities = (typeof ttsObj !== "undefined" && ttsObj.capabilities) || {};
+    const hasExtendedRange = !!capabilities.extendedDateRange;
+    // TTS-247/2.2.2: MP3 download is premium, so the free build always reports 0
+    // downloads — hide the totalDownload row unless the capability is present.
+    const hasDownload = !!capabilities.download;
     const [searchParams, setSearchParams] = useState({});
     const [searchedMetrics, setSearchedMetrics] = useState(null);
     const [isSearching, setIsSearching] = useState(false);
@@ -64,7 +72,7 @@ export default function TrackPostIds({
         }
 
         // Check date range restriction for free users
-        if (!isProActive && (e.target.name === "from_date" || e.target.name === "to_date")) {
+        if (!hasExtendedRange && (e.target.name === "from_date" || e.target.name === "to_date")) {
             notify(
                 <>
                     <h6>{__("Date Range is only available in Pro version", "text-to-audio")}</h6>
@@ -156,7 +164,7 @@ export default function TrackPostIds({
         { key: "totalPause", label: "totalPause", value: totalPause },
         { key: "totalTime", label: "totalTime", value: formatTime(totalTime) },
         { key: "totalEnd", label: "totalEnd", value: totalEnd, isPro: true },
-        { key: "totalDownload", label: "totalDownload", value: totalDownload, isPro: true },
+        ...(hasDownload ? [{ key: "totalDownload", label: "totalDownload", value: totalDownload, isPro: true }] : []),
         { key: "averagePlayClickRatio", label: "averagePlayClickRatio", value: playClickRatio, isPro: true },
         { key: "averageListenTillEndRatio", label: "averageListenTillEndRatio", value: listenTillEndRatio, isPro: true },
         { key: "averageListeningTimePerPlay", label: "averageListeningTimePerPlay", value: avgTimePerPlay, isPro: true },
@@ -171,10 +179,8 @@ export default function TrackPostIds({
         { key: "bounceRate", label: "bounceRate", value: bounceRate, isPro: true },
     ];
 
-    // Combine metrics, filtering for free users
-    const displayMetrics = isProActive
-        ? [...defaultMetrics, ...milestoneMetrics]
-        : defaultMetrics.filter(m => !m.isPro);
+    // TTS-247: all metrics are free (base-aggregator data) — show every row.
+    const displayMetrics = [...defaultMetrics, ...milestoneMetrics];
 
     return (
         <div className="tta_analytics_card tta_track_posts_card">
@@ -196,7 +202,7 @@ export default function TrackPostIds({
                     name="tts_trackable_post_ids"
                     id="tts_trackable_post_ids"
                     selectedItems={selectedIds}
-                    selectionLimit={isProActive ? 999 : 20}
+                    selectionLimit={999}
                     options={postIds}
                     onChange={onSelectionChange}
                 />
@@ -213,24 +219,33 @@ export default function TrackPostIds({
                     className="tta_search_input"
                     disabled={!analyticsEnabled}
                 />
-                <div className="tta_date_inputs">
-                    <Form.Control
-                        type="date"
-                        name="from_date"
-                        value={searchParams.from_date || ""}
-                        onChange={handleSearchChange}
-                        className="tta_search_input"
-                        disabled={!analyticsEnabled}
-                    />
-                    <Form.Control
-                        type="date"
-                        name="to_date"
-                        value={searchParams.to_date || ""}
-                        onChange={handleSearchChange}
-                        className="tta_search_input"
-                        disabled={!analyticsEnabled}
-                    />
-                </div>
+                {/* Custom date-range search is premium. The post selector,
+                    Post ID search and metrics table above/below stay free; only
+                    these date inputs are locked behind the Pro overlay. */}
+                <ProFeatureOverlay
+                    compact
+                    showOverlay={!hasExtendedRange}
+                    featureName={__("Custom Date Range", "text-to-audio")}
+                >
+                    <div className="tta_date_inputs">
+                        <Form.Control
+                            type="date"
+                            name="from_date"
+                            value={searchParams.from_date || ""}
+                            onChange={handleSearchChange}
+                            className="tta_search_input"
+                            disabled={!analyticsEnabled}
+                        />
+                        <Form.Control
+                            type="date"
+                            name="to_date"
+                            value={searchParams.to_date || ""}
+                            onChange={handleSearchChange}
+                            className="tta_search_input"
+                            disabled={!analyticsEnabled}
+                        />
+                    </div>
+                </ProFeatureOverlay>
                 <Button
                     onClick={handleSearch}
                     className="tta_search_btn"
@@ -278,25 +293,22 @@ export default function TrackPostIds({
                         <div key={`metric-${index}`} className="tta_table_row">
                             <div className="tta_table_cell">
                                 {metric.label}
-                                {metric.isPro && !isProActive && (
-                                    <span className="tta_pro_badge_inline">{__("Pro", "text-to-audio")}</span>
-                                )}
                             </div>
                             <div className="tta_table_cell">
-                                {metric.isPro && !isProActive ? "--" : metric.value}
+                                {metric.value}
                             </div>
                         </div>
                     ))}
 
-                    {/* Show pro upsell for additional metrics */}
-                    {!isProActive && (
+                    {/* Premium upsell — custom date-range search (shown when capability absent) */}
+                    {!hasExtendedRange && (
                         <div className="tta_metrics_pro_upsell">
                             <a
                                 href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
-                                {__("Unlock 10+ more metrics with Pro", "text-to-audio")} →
+                                {__("Unlock custom date-range search with Pro", "text-to-audio")} →
                             </a>
                         </div>
                     )}

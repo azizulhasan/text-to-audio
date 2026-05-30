@@ -238,42 +238,14 @@ class TTA_Api_Routes {
 			)
 		);
 
-		// register trend_data route for charts.
-		register_rest_route(
-			$this->namespace,
-			'/trend_data',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this->analytics, 'trend_data' ),
-					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(
-						'date_range' => array(
-							'type'        => 'string',
-							'description' => 'Date range preset',
-							'required'    => false,
-						),
-						'from_date' => array(
-							'type'        => 'string',
-							'description' => 'Start date in Y-m-d format (for Custom range)',
-							'required'    => false,
-						),
-						'to_date' => array(
-							'type'        => 'string',
-							'description' => 'End date in Y-m-d format (for Custom range)',
-							'required'    => false,
-						),
-					),
-				),
-			)
-		);
-
-		// TTS-249: heatmap_data / export_csv / export_pdf routes are NOT registered
-		// by the free plugin. Their handlers returned "This feature requires Pro
-		// version" — a Guideline-5 trialware stub. They are now registered by the
-		// Pro plugin (under the same tta/v1 namespace) so they exist only when Pro
-		// is active. The free analytics UI never calls them (the React fetches
-		// early-return when !isProActive).
+		// TTS-249/2.2.2: trend_data / heatmap_data / export_csv / export_pdf
+		// routes are NOT registered by the free plugin. The Playing Trend
+		// Analysis chart and these other handlers are premium features (their
+		// free stubs returned "This feature requires Pro version" — a
+		// Guideline-5 trialware pattern). They are now registered by the Pro
+		// plugin under tta_pro/v1/ so they exist only when Pro is active. The
+		// free analytics UI never calls them (the React fetches early-return
+		// when the matching capability is absent).
 
 		// register filtered_insights route.
 		register_rest_route(
@@ -924,9 +896,8 @@ class TTA_Api_Routes {
             '/tta/v1/browser',
             '/tta/v1/get_all_user_roles',
             '/tta/v1/aggregated_insights',
-            '/tta/v1/trend_data',
-            // TTS-249: heatmap_data/export_csv/export_pdf/save_schedule_report/
-            // get_schedule_report were moved out of Free to the Pro plugin (3.3.0+)
+            // TTS-249/2.2.2: trend_data/heatmap_data/export_csv/export_pdf/
+            // save_schedule_report/get_schedule_report were moved out of Free to the Pro plugin (3.3.0+)
             // and re-registered under `tta_pro/v1/` with their own permission
             // check (see Pro's TTA_Pro_Api_Routes + TTA_Pro_AtlasVoice_Analytics).
             '/tta/v1/filtered_insights',
