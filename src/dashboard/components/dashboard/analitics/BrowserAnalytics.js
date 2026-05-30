@@ -71,7 +71,11 @@ export default function BrowserAnalytics({
     filterResultsByDateRange,
     aggregateFilteredData
 }) {
-    const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
+    // TTS-247/2.2.2: browser breakdown is premium (data injected by Pro into
+    // aggregated_insights). Locked behind the full-card overlay when the
+    // data-driven `audience` capability is absent.
+    const capabilities = (typeof ttsObj !== "undefined" && ttsObj.capabilities) || {};
+    const hasAudience = !!capabilities.audience;
 
     // Standard date range options
     const standardDateRangeOptions = [
@@ -92,33 +96,22 @@ export default function BrowserAnalytics({
         return options;
     }, [globalDateRange]);
 
-    // Demo data
-    const demoData = {
-        Chrome: 62300,
-        Firefox: 28100,
-        Safari: 24500,
-        Edge: 14200,
-        Other: 1200,
-    };
-
-    // Filter and aggregate data based on component's date range
+    // TTS-247: data-driven, no demo data. Browser breakdown is computed in the
+    // free base aggregator, so it renders with the site's real data for everyone.
     const filteredData = useMemo(() => {
-        if (!isProActive) return demoData;
-
         // If date range matches global, use the already aggregated data
         if (dateRange === globalDateRange) {
-            return Object.keys(data).length > 0 ? data : demoData;
+            return data;
         }
 
         // Otherwise, filter and re-aggregate from raw results
         if (filterResultsByDateRange && aggregateFilteredData && rawResults.length > 0) {
             const filtered = filterResultsByDateRange(rawResults, dateRange);
-            const aggregated = aggregateFilteredData(filtered, "browser");
-            return Object.keys(aggregated).length > 0 ? aggregated : demoData;
+            return aggregateFilteredData(filtered, "browser");
         }
 
-        return Object.keys(data).length > 0 ? data : demoData;
-    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange, aggregateFilteredData, isProActive]);
+        return data;
+    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange, aggregateFilteredData]);
 
     // Use filtered data
     const displayData = filteredData;
@@ -173,8 +166,8 @@ export default function BrowserAnalytics({
 
     return (
         <ProFeatureOverlay
-            showOverlay={!isProActive}
-            featureName={__("Browser Analytics", "text-to-audio")}
+            showOverlay={!hasAudience}
+            featureName={__("Browser", "text-to-audio")}
         >
             {content}
         </ProFeatureOverlay>

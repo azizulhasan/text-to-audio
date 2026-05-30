@@ -82,7 +82,11 @@ export default function LocationAnalytics({
     aggregateFilteredData,
     limit = 3
 }) {
-    const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
+    // TTS-247/2.2.2: location breakdown (countries + cities) is premium (data
+    // injected by Pro into aggregated_insights). Locked behind the full-card
+    // overlay when the data-driven `audience` capability is absent.
+    const capabilities = (typeof ttsObj !== "undefined" && ttsObj.capabilities) || {};
+    const hasAudience = !!capabilities.audience;
 
     // Standard date range options
     const standardDateRangeOptions = [
@@ -103,56 +107,31 @@ export default function LocationAnalytics({
         return options;
     }, [globalDateRange]);
 
-    // Demo country data
-    const demoCountries = {
-        Germany: 18500,
-        Brazil: 69200,
-        "United States": 12800,
-        Vietnam: 25700,
-        Switzerland: 4600,
-        Bangladesh: 4600,
-    };
-
-    // Demo city data
-    const demoCities = {
-        "São Paulo, Brazil": 12300,
-        "Ho Chi Minh, Vietnam": 8200,
-        "Berlin, Germany": 6800,
-        "New York, USA": 5400,
-        "Munich, Germany": 4200,
-        "Hanoi, Vietnam": 4100,
-    };
-
-    // Filter and aggregate data based on component's date range
+    // TTS-247: data-driven, no demo data. Country + city breakdowns are computed
+    // in the free base aggregator, so they render with real data for everyone.
     const { countryData, cityData } = useMemo(() => {
-        if (!isProActive) {
-            return { countryData: demoCountries, cityData: demoCities };
-        }
-
         // If date range matches global, use the already aggregated data
         if (dateRange === globalDateRange) {
             return {
-                countryData: data.countries && Object.keys(data.countries).length > 0 ? data.countries : demoCountries,
-                cityData: data.cities && Object.keys(data.cities).length > 0 ? data.cities : demoCities,
+                countryData: data.countries || {},
+                cityData: data.cities || {},
             };
         }
 
         // Otherwise, filter and re-aggregate from raw results
         if (filterResultsByDateRange && aggregateFilteredData && rawResults.length > 0) {
             const filtered = filterResultsByDateRange(rawResults, dateRange);
-            const aggregatedCountries = aggregateFilteredData(filtered, "country");
-            const aggregatedCities = aggregateFilteredData(filtered, "city");
             return {
-                countryData: Object.keys(aggregatedCountries).length > 0 ? aggregatedCountries : demoCountries,
-                cityData: Object.keys(aggregatedCities).length > 0 ? aggregatedCities : demoCities,
+                countryData: aggregateFilteredData(filtered, "country"),
+                cityData: aggregateFilteredData(filtered, "city"),
             };
         }
 
         return {
-            countryData: data.countries && Object.keys(data.countries).length > 0 ? data.countries : demoCountries,
-            cityData: data.cities && Object.keys(data.cities).length > 0 ? data.cities : demoCities,
+            countryData: data.countries || {},
+            cityData: data.cities || {},
         };
-    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange, aggregateFilteredData, isProActive]);
+    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange, aggregateFilteredData]);
 
     // Convert countries to array and sort
     const countryArray = Object.entries(countryData)
@@ -172,10 +151,8 @@ export default function LocationAnalytics({
         }))
         .sort((a, b) => b.count - a.count);
 
-    // Apply limit for free version
-    const displayLimit = isProActive ? countryArray.length : limit;
-    const displayCountries = countryArray.slice(0, displayLimit);
-    const hasMoreCountries = countryArray.length > displayLimit;
+    // TTS-247: show the full real country list — no artificial free-tier cap.
+    const displayCountries = countryArray;
 
     const content = (
         <div className="tta_analytics_card tta_location_analytics_card">
@@ -208,47 +185,32 @@ export default function LocationAnalytics({
                         />
                     ))}
 
-                    {hasMoreCountries && !isProActive && (
-                        <div className="tta_analytics_list_more">
-                            <a
-                                href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="tta_view_more_link"
-                            >
-                                +{countryArray.length - displayLimit} {__("more", "text-to-audio")} ({__("Pro", "text-to-audio")})
-                            </a>
-                        </div>
-                    )}
                 </div>
             </div>
 
-            {/* Cities Section - Pro Only */}
-            {isProActive && (
-                <div className="tta_location_section tta_location_cities">
-                    <h4 className="tta_location_section_title">{__("Top Cities", "text-to-audio")}</h4>
-                    <div className="tta_location_list tta_location_cities_list">
-                        {cityArray.slice(0, 6).map((item, index) => (
-                            <LocationItem
-                                key={`city-${index}`}
-                                name={item.name}
-                                count={item.count}
-                                flag={item.flag}
-                            />
-                        ))}
-                    </div>
+            {/* Cities Section — real city data from the base aggregator */}
+            <div className="tta_location_section tta_location_cities">
+                <h4 className="tta_location_section_title">{__("Top Cities", "text-to-audio")}</h4>
+                <div className="tta_location_list tta_location_cities_list">
+                    {cityArray.slice(0, 6).map((item, index) => (
+                        <LocationItem
+                            key={`city-${index}`}
+                            name={item.name}
+                            count={item.count}
+                            flag={item.flag}
+                        />
+                    ))}
                 </div>
-            )}
-
-            {/* Pro upsell for cities */}
-            {!isProActive && (
-                <div className="tta_location_cities_promo">
-                    <span className="tta_pro_badge_small">{__("Pro", "text-to-audio")}</span>
-                    <span>{__("Unlock city-level analytics", "text-to-audio")}</span>
-                </div>
-            )}
+            </div>
         </div>
     );
 
-    return content;
+    return (
+        <ProFeatureOverlay
+            showOverlay={!hasAudience}
+            featureName={__("Location", "text-to-audio")}
+        >
+            {content}
+        </ProFeatureOverlay>
+    );
 }

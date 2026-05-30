@@ -24,15 +24,25 @@ export default function GlobalDateRangePicker({
     const [customTo, setCustomTo] = useState(toDate || "");
     const dropdownRef = useRef(null);
 
-    // Date range presets
+    // TTS-247: data-driven capability map (no is_pro_active gating). The
+    // extended date range (beyond 30 days + custom) is offered only when a
+    // companion plugin (Pro) declares the `extendedDateRange` capability via
+    // the tts_capabilities PHP filter.
+    const capabilities = (typeof ttsObj !== "undefined" && ttsObj.capabilities) || {};
+    const hasExtendedRange = !!capabilities.extendedDateRange;
+
+    // Date range presets. Free shows up to 30 days; the longer ranges + custom
+    // appear once the extendedDateRange capability is present.
     const presets = [
         { value: "Yesterday", label: __("Yesterday", "text-to-audio") },
         { value: "Last 7 Days", label: __("Last 7 Days", "text-to-audio") },
         { value: "Last 14 Days", label: __("Last 14 Days", "text-to-audio") },
         { value: "Last 30 Days", label: __("Last 30 Days", "text-to-audio") },
-        { value: "Last 90 Days", label: __("Last 90 Days", "text-to-audio") },
-        { value: "Last 999 Days", label: __("All Time", "text-to-audio") },
-        { value: "Custom", label: __("Custom Range", "text-to-audio") },
+        ...(hasExtendedRange ? [
+            { value: "Last 90 Days", label: __("Last 90 Days", "text-to-audio") },
+            { value: "Last 999 Days", label: __("All Time", "text-to-audio") },
+            { value: "Custom", label: __("Custom Range", "text-to-audio") },
+        ] : []),
     ];
 
     /**
@@ -113,7 +123,7 @@ export default function GlobalDateRangePicker({
         } else {
             setShowCustom(false);
             const number = preset.replace(/[^0-9]/g, '');
-            if(isNumeric(number) && number > 30 && !ttsObj.is_pro_active){
+            if(isNumeric(number) && number > 30 && !hasExtendedRange){
                 toast(
                     <h6>
                         {__('Getting more than 30 days data is pro feature. Please ', 'text-to-audio')}
@@ -140,7 +150,7 @@ export default function GlobalDateRangePicker({
      * Apply custom date range
      */
     const handleApplyCustom = () => {
-        if(!ttsObj.is_pro_active){
+        if(!hasExtendedRange){
             toast(
                 <h6>
                     {__('Custom date select is only available in pro version. Please ', 'text-to-audio')}

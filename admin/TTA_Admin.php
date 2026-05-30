@@ -122,6 +122,14 @@ class TTA_Admin
             'user_id' => get_current_user_id(),
             'is_dashboard' => is_admin(),
             'is_pro_active' => is_pro_active(),
+            // TTS-247: data-driven capability map. Free ships an empty array;
+            // companion plugins (Pro) declare which premium features are
+            // available by hooking `tts_capabilities`. The React dashboard shows
+            // a premium control only when its capability key is present here —
+            // it never branches on is_pro_active() for feature gating.
+            // Default empty; resolved lazily in enqueue_scripts() after Pro's
+            // `tts_capabilities` filter is registered (see note there).
+            'capabilities' => array(),
             'is_admin_page' => is_admin(),
             "player_id" => get_player_id(),
             // TTS-249: the players this site can actually deliver. Free = player 1
@@ -241,6 +249,13 @@ class TTA_Admin
         // picks up Pro's players when Pro is active.
         $this->localize_data['availablePlayers'] = array_values( TTA_Helper::get_available_players() );
         $this->localize_data['player_id']         = get_player_id();
+
+        // TTS-247: same lazy-recompute reason as availablePlayers above — the
+        // constructor builds localize_data on plugins_loaded, before Pro
+        // registers `tts_capabilities` on `init`, so a constructor-time value is
+        // always empty. Resolve it here (admin_enqueue_scripts) so the React
+        // dashboard's data-driven gates see Pro's capabilities when Pro is active.
+        $this->localize_data['capabilities'] = (array) apply_filters( 'tts_capabilities', array() );
 
         do_action('tta_enqueue_pro_dashboard_scripts');
 

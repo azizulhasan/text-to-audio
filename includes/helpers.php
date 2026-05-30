@@ -384,7 +384,8 @@ add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 1);
  */
 function tts_enqueue_button_scripts($params)
 {
-    // enqueue footer script
+    // enqueue footer script — TTS-247: priority 5 so wp_add_inline_script
+    // queues before core's wp_print_scripts (priority 10).
     add_action('wp_print_footer_scripts', function () use ($params) {
         extract($params);
         $original_title = trim($title);
@@ -408,7 +409,7 @@ function tts_enqueue_button_scripts($params)
         } else {
             get_enqueued_js_object($params, $plugin_all_settings);
         }
-    });
+    }, 5);
 }
 
 function get_enqueued_js_object($params, $plugin_all_settings)
@@ -426,87 +427,54 @@ function get_enqueued_js_object($params, $plugin_all_settings)
     $compatible_data = TTA_Helper::tts_get_settings('compatible');
     $compatible_content = apply_filters('tts_compatible_plugins_content', [], $compatible_data, $post);
 
+    // TTS-247: per-button settings via wp_add_inline_script instead of a raw
+    // inline <script> tag. IIFE-wrapped so multiple buttons on one page don't
+    // collide on the shared `var` names.
+    $inline_payload = sprintf(
+        '(function(){var ttsCurrentButtonNo=%d;var ttsCurrentContent=%s;var ttsListening=%s;var ttsCSSClass=%s;var ttsBtnStyle=%s;var ttsTextArr=%s;var ttsCustomCSS=%s;var ttsShouldDisplayIcon=%s;var readingTime=%s;var postId=%s;var fileURLs=%s;var get_content_from_dom=%s;var use_old_player=%s;var ttsSettings={listening:ttsListening,cssClass:ttsCSSClass,btnStyle:ttsBtnStyle,textArr:ttsTextArr,customCSS:ttsCustomCSS,shouldDisplayIcon:ttsShouldDisplayIcon,readingTime:readingTime,postId:postId,fileURLs:fileURLs,get_content_from_dom:get_content_from_dom,use_old_player:use_old_player};if(window.ttsObj&&window.ttsObj.settings){window.ttsObj.settings.settings=%s;}var dateTitle={title:%s,file_name:%s,date:%s,language:%s,voice:%s,file_url_key:%s,compatible_contents:%s,excerpt:%s,text_before_content:%s,text_after_content:%s};if(window.hasOwnProperty("TTS")){window.TTS.contents[ttsCurrentButtonNo]=ttsCurrentContent;window.TTS.extra[ttsCurrentButtonNo]=dateTitle;window.TTS.extra.player_id=%s;}else{window.TTS={};window.TTS.contents={};window.TTS.contents[ttsCurrentButtonNo]=ttsCurrentContent;window.TTS.extra={};window.TTS.extra[ttsCurrentButtonNo]=dateTitle;window.TTS.extra.player_id=%s;}if(!window.TTS.hasOwnProperty("settings")){window.TTS.settings=ttsSettings;}})();',
+        (int) $player_number,
+        wp_json_encode( (string) apply_filters( 'atlasvoice_player_content', $content, $post, $language, $voice, $player_number ) ),
+        wp_json_encode( $plugin_all_settings['listening'] ),
+        wp_json_encode( (string) $class ),
+        wp_json_encode( (string) $btn_style ),
+        wp_json_encode( $text_arr ),
+        wp_json_encode( (string) $custom_css ),
+        wp_json_encode( (string) $should_display_icon ),
+        wp_json_encode( (string) $content_read_time ),
+        wp_json_encode( (string) (int) $post->ID ),
+        wp_json_encode( $mp3_file_urls ),
+        wp_json_encode( $get_content_from_dom ),
+        wp_json_encode( (string) $use_old_player ),
+        wp_json_encode( isset( $plugin_all_settings['settings'] ) ? $plugin_all_settings['settings'] : new \stdClass() ),
+        wp_json_encode( (string) $title ),
+        wp_json_encode( (string) $file_name ),
+        wp_json_encode( (string) $date ),
+        wp_json_encode( (string) $language ),
+        wp_json_encode( (string) $voice ),
+        wp_json_encode( (string) $file_url_key ),
+        wp_json_encode( $compatible_content ),
+        wp_json_encode( (string) $excerpt_sanitized ),
+        wp_json_encode( (string) apply_filters( 'atlasvoice__text_before_content', $text_before_content, $post, $language, $voice, $player_number ) ),
+        wp_json_encode( (string) apply_filters( 'atlasvoice__text_after_content', $text_after_content, $post, $language, $voice, $player_number ) ),
+        wp_json_encode( (string) get_player_id() ),
+        wp_json_encode( (string) get_player_id() )
+    );
+    // TTS-247: attach the payload to every button-script handle in the
+    // filtered list. Free ships 'text-to-audio-button'; companion plugins
+    // (e.g. Pro) extend via `tts_button_inline_handles`.
+    $inline_handles = apply_filters( 'tts_button_inline_handles', array( 'text-to-audio-button' ), $params, $plugin_all_settings );
+    foreach ( (array) $inline_handles as $handle ) {
+        if ( wp_script_is( $handle, 'registered' ) ) {
+            wp_add_inline_script( $handle, $inline_payload, 'before' );
+        }
+    }
+
     // TTS-247: close the output buffer with ob_get_clean() at the end of this
     // function (was leaking on ob_get_contents alone, which the wp.org review
     // flagged as an unclosed ob_start).
     ob_start();
     ?>
-    <!-- AtlasVoice Settings  -->
-    <?php
-    // TTS-247: escape every interpolation into the inline <script>. JS string
-    // literals get esc_js(); numeric IDs become (int); structured payloads use
-    // wp_json_encode() (already in use) which is safe to echo unwrapped.
-    ?>
-    <script id='tts_button_settings_<?php echo (int) $player_number; ?>'>
-        var ttsCurrentButtonNo = <?php echo (int) $player_number; ?>;
-        var ttsCurrentContent = "<?php echo esc_js( apply_filters('atlasvoice_player_content', $content, $post, $language, $voice, $player_number) ); ?>";
-        var ttsListening = <?php echo wp_json_encode( $plugin_all_settings['listening'] ); ?>;
-        var ttsCSSClass = "<?php echo esc_js( $class ); ?>";
-        var ttsBtnStyle = "<?php echo esc_js( $btn_style ); ?>";
-        var ttsTextArr = <?php echo wp_json_encode( $text_arr ); ?>;
-        var ttsCustomCSS = "<?php echo esc_js( $custom_css ); ?>";
-        var ttsShouldDisplayIcon = "<?php echo esc_js( $should_display_icon ); ?>";
-        var readingTime = "<?php echo esc_js( $content_read_time ); ?>";
-        var postId = "<?php echo (int) $post->ID; ?>";
-        var fileURLs = <?php echo wp_json_encode( $mp3_file_urls ); ?>;
-        var get_content_from_dom = <?php echo wp_json_encode( $get_content_from_dom ); ?>;
-        var use_old_player = "<?php echo esc_js( $use_old_player ); ?>";
-
-
-
-        var ttsSettings = {
-            listening: ttsListening,
-            cssClass: ttsCSSClass,
-            btnStyle: ttsBtnStyle,
-            textArr: ttsTextArr,
-            customCSS: ttsCustomCSS,
-            shouldDisplayIcon: ttsShouldDisplayIcon,
-            readingTime: readingTime,
-            postId: postId,
-            fileURLs: fileURLs,
-            get_content_from_dom:get_content_from_dom,
-            use_old_player:use_old_player
-        };
-
-
-        // Override global ttsObj.settings.settings with per-post aware settings.
-        // ttsObj is built in TTA_Admin.__construct() without post ID (global only).
-        // This inline script runs after post context is available, so per-post CSS selector overrides are included.
-        if (window.ttsObj && window.ttsObj.settings) {
-            window.ttsObj.settings.settings = <?php echo wp_json_encode( isset($plugin_all_settings['settings']) ? $plugin_all_settings['settings'] : new \stdClass() ); ?>;
-        }
-
-        var dateTitle = {
-            title: "<?php echo esc_js( $title ); ?>",
-            file_name: "<?php echo esc_js( $file_name ); ?>",
-            date: "<?php echo esc_js( $date ); ?>",
-            language: "<?php echo esc_js( $language ); ?>",
-            voice: "<?php echo esc_js( $voice ); ?>",
-            file_url_key: "<?php echo esc_js( $file_url_key ); ?>",
-            compatible_contents: <?php echo wp_json_encode( $compatible_content ); ?>,
-            excerpt: "<?php echo esc_js( $excerpt_sanitized ); ?>",
-            text_before_content: "<?php echo esc_js( apply_filters('atlasvoice__text_before_content', $text_before_content, $post, $language, $voice, $player_number) ); ?>",
-            text_after_content: "<?php echo esc_js( apply_filters('atlasvoice__text_after_content', $text_after_content, $post, $language, $voice, $player_number) ); ?>",
-        }
-
-        if (window.hasOwnProperty('TTS')) { // add content if a page have multiple button
-            window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
-            window.TTS.extra[ttsCurrentButtonNo] = dateTitle;
-            window.TTS.extra.player_id = "<?php echo esc_js( get_player_id() ); ?>";
-        } else { // add content for the if a page have one button
-            window.TTS = {}
-            window.TTS.contents = {}
-            window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
-            window.TTS.extra = {}
-            window.TTS.extra[ttsCurrentButtonNo] = dateTitle;
-            window.TTS.extra.player_id = "<?php echo esc_js( get_player_id() ); ?>";
-        }
-
-        // add settings
-        if (!window.TTS.hasOwnProperty('settings')) {
-            window.TTS.settings = ttsSettings
-        }
-    </script>
+    <!-- AtlasVoice Settings (per-button JS moved to wp_add_inline_script — handle 'text-to-audio-button') -->
     <?php
     // Audio schema is now output via wp_head hook (TTA_Helper::output_audio_schema_head)
     // TTS-247: echo + close. The caller (tts_enqueue_button_scripts hook on
