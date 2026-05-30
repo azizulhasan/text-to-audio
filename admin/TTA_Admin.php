@@ -168,7 +168,10 @@ class TTA_Admin
 
         $defaults = \TTA\TTA_Player_Icons::default_players();
         $out      = [];
-        foreach ([1, 2] as $pid) {
+        // TTS-249 (T2): Free emits icon maps for player 1 only. Player 2
+        // (Default Pro) is premium — Pro appends its id-2 map via the
+        // tts_player_customizations filter, so no player-2 data ships in free.
+        foreach ([1] as $pid) {
             $states = $players[$pid] ?? $defaults[$pid];
             $out[(string) $pid] = [
                 'play'   => \TTA\TTA_Player_Icons::resolve($states['listen']['icon'] ?? 'preset:play'),

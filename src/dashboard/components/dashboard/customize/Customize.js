@@ -16,9 +16,6 @@ import {
   postData,
   postWithoutImage,
 } from "../../context/utilities";
-import TextToSpeech from "../../../buttons/components/TextToSpeech";
-import TextToSpeechThree from "../../../buttons/components/TextToSpeechThree";
-import TextToSpeechFour from "../../../buttons/components/TextToSpeechFour";
 import CustomizationTabs from "./CustomizationTabs";
 import TTSButtonDesign from "./design/TTSButtonDesign";
 import ButtonPreview from "./design/ButtonPreview";
@@ -792,85 +789,41 @@ export default function Customize() {
               </div>
 
               <div className="d-grid mb-0">
-                {/* TTS-241 — player 2 (Default Pro) keeps its dedicated
-                    TextToSpeech preview component (matching the production
-                    front-end UI), but receives buttonTexts + playerId so
-                    its label and icons honor the per-player draft. */}
-                {listeningBtnStyle?.buttonSettings?.id == 2 ? (
-                  <TextToSpeech
-                    buttonCSS={listeningBtnStyle}
-                    button={
-                      <div
-                        dataId="1"
-                        id="tts__listent_content_1"
-                        className="tts__listent_content"
-                      ></div>
-                    }
-                    buttonId={2}
-                    buttonTexts={buttonTexts}
-                    playerId={2}
-                  />
-                ) : listeningBtnStyle?.buttonSettings?.id == 3 ? (
-                  <TextToSpeechThree
-                    buttonCSS={listeningBtnStyle}
-                    button={
-                      <div
-                        dataId="1"
-                        id="tts__listent_content_1"
-                        className="tts__listent_content"
-                      ></div>
-                    }
-                    buttonId={3}
-                    cssStyle={""}
-                  />
-                ) : listeningBtnStyle?.buttonSettings?.id == 4 ? (
-                  <TextToSpeechFour
-                    buttonCSS={listeningBtnStyle}
-                    button={
-                      <div
-                        dataId="1"
-                        id="tts__listent_content_1"
-                        className="tts__listent_content"
-                      ></div>
-                    }
-                    buttonId={4}
-                    cssStyle={""}
-                  />
-                ) : listeningBtnStyle?.buttonSettings?.id == 5 ? (
-                  <TextToSpeechThree
-                    buttonCSS={listeningBtnStyle}
-                    button={
-                      <div
-                        dataId="1"
-                        id="tts__listent_content_1"
-                        className="tts__listent_content"
-                      ></div>
-                    }
-                    buttonId={5}
-                    cssStyle={""}
-                  />
-                ) : listeningBtnStyle?.buttonSettings?.id == 6 ? (
-                  <TextToSpeechThree
-                    buttonCSS={listeningBtnStyle}
-                    button={
-                      <div
-                        dataId="1"
-                        id="tts__listent_content_1"
-                        className="tts__listent_content"
-                      ></div>
-                    }
-                    buttonId={6}
-                    cssStyle={""}
-                  />
-                ) : (
-                  // TTS-241 — live preview that mirrors the in-memory
-                  // ButtonStateEditor draft for Default / Default Pro.
-                  <ButtonPreview
-                    buttonTexts={buttonTexts}
-                    playerId={parseInt(listeningBtnStyle?.buttonSettings?.id || 1, 10)}
-                    buttonStyle={listeningBtnStyle}
-                  />
-                )}
+                {/* TTS-249 (T2): player 1 preview is rendered by Free. For
+                    players 2..6 (premium) Free renders only an empty slot; the
+                    Pro plugin mounts its own React preview into it (player-2..6
+                    preview code no longer ships in the free ZIP).
+
+                    The slot is used only when the selected id is actually a
+                    registered available player (i.e. Pro is present to handle
+                    it). If a stale Pro id is saved but Pro is inactive, fall
+                    back to the player-1 ButtonPreview — capability fallback,
+                    same as get_player_id() server-side. */}
+                {(() => {
+                  const selectedId = parseInt(listeningBtnStyle?.buttonSettings?.id || 1, 10);
+                  const available = (typeof ttsObj !== "undefined" && Array.isArray(ttsObj.availablePlayers))
+                    ? ttsObj.availablePlayers.map((p) => parseInt(p.id, 10))
+                    : [1];
+                  const canRenderProPreview = selectedId > 1 && available.includes(selectedId);
+
+                  return canRenderProPreview ? (
+                    <div
+                      id="tts_customize_pro_preview"
+                      className="tts_customize_pro_preview"
+                      data-player-id={selectedId}
+                      data-button-css={JSON.stringify(listeningBtnStyle || {})}
+                      data-button-texts={JSON.stringify(buttonTexts || {})}
+                    ></div>
+                  ) : (
+                    // TTS-241 — live preview that mirrors the in-memory
+                    // ButtonStateEditor draft for the Default (player 1) button.
+                    <ButtonPreview
+                      buttonTexts={buttonTexts}
+                      playerId={available.includes(selectedId) ? selectedId : 1}
+                      buttonStyle={listeningBtnStyle}
+                    />
+                  );
+                })()}
               </div>
             </div>
 

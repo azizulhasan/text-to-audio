@@ -4,7 +4,9 @@ const mix = require('laravel-mix');
 mix.js('src/dashboard/index.js', 'admin/js/build/text-to-audio-dashboard-ui.min.js').react();
 mix.js('src/dashboard/welcome.js', 'admin/js/build/tts-welcome-wizard.min.js').react();
 
-mix.js('src/dashboard/button.js', 'admin/js/build/text-to-audio-pro-button.min.js').react();
+// TTS-249 (T2): the frontend pro-button (players 2..6) moved to the Pro plugin,
+// which now builds text-to-audio-pro-button.min.js from its own source. Free no
+// longer builds it — no player-2..6 code ships in the free ZIP.
 mix.js('src/dashboard/css-selectors.js', 'admin/js/build/tts-css-selectors.min.js').react();
 mix.js('src/dashboard/bulk-mp3-file-ui.js', 'admin/js/build/tts-bulk-mp3-file-ui.min.js').react();
 
