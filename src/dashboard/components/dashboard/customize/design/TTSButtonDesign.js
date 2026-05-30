@@ -10,7 +10,10 @@ export default function TTSButtonDesign({
                                             setButtonTexts,
                                         }) {
     const playerId = parseInt(listeningBtnStyle?.buttonSettings?.id || 1, 10);
-    const supportsButtonStates = playerId === 1 || playerId === 2;
+    // TTS-249 (T2): the per-state button editor ships in Free for player 1 only.
+    // Player 2 (Default Pro) is premium — its editor is injected by the Pro
+    // plugin, so this code no longer references player 2 in the free ZIP.
+    const supportsButtonStates = playerId === 1;
     return (
         <>
             {/* Color Controls Section */}

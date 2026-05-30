@@ -290,10 +290,11 @@ gulp.task('clean:seven', function (done) {
 // of dropping the file directly in <output>. The Pro plugin loads from
 // <output>/<file>.min.js, so the bundle was never actually updated.
 // gulp.dest with no glob base writes the file straight into the output dir.
-gulp.task('copyProButton', function () {
-	return gulp.src(config.copyProButton.src)
-		.pipe(gulp.dest(config.copyProButton.output))
-		.pipe(notify({ message: 'Copy Completed! 💯', onLast: true }))
+// TTS-249 (T2): retired. The frontend pro-button (players 2..6) is no longer
+// built by Free — the Pro plugin builds text-to-audio-pro-button.min.js from
+// its own source. This copy task is kept as a no-op for backward reference.
+gulp.task('copyProButton', function (done) {
+	done();
 })
 
 gulp.task('release', function () {

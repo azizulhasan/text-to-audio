@@ -86,7 +86,8 @@ class TTA_Hooks {
 			'TextToSpeech.min.js',
 			'text-to-audio-button.min.js',
 			'text-to-audio-dashboard-ui.min.js',
-			'text-to-audio-pro-button.min.js',
+			// TTS-249 (T2): text-to-audio-pro-button.min.js now ships from Pro,
+			// which adds it to this list via the tts_excludable_js_arr filter.
 			'tts-welcome-wizard.min.js',
 			'tts-bulk-mp3-file.min.js',
 			'tts-css-selectors.min.js',
