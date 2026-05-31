@@ -24,7 +24,7 @@ export default function GlobalDateRangePicker({
     const [customTo, setCustomTo] = useState(toDate || "");
     const dropdownRef = useRef(null);
 
-    // TTS-247: data-driven capability map (no is_pro_active gating). The
+    // TTS-247: data-driven capability map (no is_atlasvoice_addon_functional gating). The
     // extended date range (beyond 30 days + custom) is offered only when a
     // companion plugin (Pro) declares the `extendedDateRange` capability via
     // the tts_capabilities PHP filter.

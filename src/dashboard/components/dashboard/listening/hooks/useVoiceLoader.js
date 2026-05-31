@@ -32,7 +32,7 @@ export default function useVoiceLoader(customizationSettings, listeningVoiceMode
   const lastElevenLabsCacheKeyRef = useRef("");
 
   const apiURL = useMemo(() => {
-    if (window.hasOwnProperty("ttsObj") && ttsObj.is_pro_active) {
+    if (window.hasOwnProperty("ttsObj") && ttsObj.is_atlasvoice_addon_functional) {
       return (
         ttsObj.api_url +
         ttsObj.api_namespace +
@@ -130,7 +130,7 @@ export default function useVoiceLoader(customizationSettings, listeningVoiceMode
   // Cache is language-keyed so switching the listening language triggers
   // a fresh fetch of `/v1/shared-voices` for that language (capped at 100).
   const setElevenLabsVoicesAndLanguages = (language = "") => {
-    if (!(window.hasOwnProperty("ttsObj") && ttsObj.is_pro_active)) {
+    if (!(window.hasOwnProperty("ttsObj") && ttsObj.is_atlasvoice_addon_functional)) {
       return;
     }
 
@@ -261,7 +261,7 @@ export default function useVoiceLoader(customizationSettings, listeningVoiceMode
 
   // ── Player-type dependent loading ───────────────────────────────────
   useEffect(() => {
-    if (window.hasOwnProperty("ttsObjPro") && ttsObjPro?.is_pro_active) {
+    if (window.hasOwnProperty("ttsObjPro") && ttsObjPro?.is_atlasvoice_addon_functional) {
       if (customizationSettings?.buttonSettings?.id == 3) {
         let gttsLanguages = gttsSupportedLanguages();
         setCurrentPlayerLanguages(gttsLanguages);

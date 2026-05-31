@@ -51,7 +51,7 @@ export default function TrackPostIds({
     onDateRangeChange,
     analyticsEnabled = true,
 }) {
-    // TTS-247: data-driven (no is_pro_active gating). Per-post metrics are all
+    // TTS-247: data-driven (no is_atlasvoice_addon_functional gating). Per-post metrics are all
     // computed in the free base aggregator, so they show for everyone. Only the
     // custom date-range search is premium, gated by the extendedDateRange capability.
     const capabilities = (typeof ttsObj !== "undefined" && ttsObj.capabilities) || {};

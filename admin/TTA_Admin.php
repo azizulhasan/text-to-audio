@@ -124,16 +124,18 @@ class TTA_Admin
             'nonce' => wp_create_nonce(TEXT_TO_AUDIO_NONCE),
             'plugin_name' => TEXT_TO_AUDIO_PLUGIN_NAME,
             'rest_nonce' => wp_create_nonce('wp_rest'),
-            'VERSION' => is_pro_active() ? get_option('TTA_PRO_VERSION') : TEXT_TO_AUDIO_VERSION,
+            'VERSION' => is_atlasvoice_addon_functional() ? get_option('TTA_PRO_VERSION') : TEXT_TO_AUDIO_VERSION,
             'is_logged_in' => is_user_logged_in(),
             'user_id' => get_current_user_id(),
             'is_dashboard' => is_admin(),
-            'is_pro_active' => is_pro_active(),
+            // TTS-250: new key; 'is_pro_active' kept as a backward-compatible alias.
+            'is_atlasvoice_addon_functional' => is_atlasvoice_addon_functional(),
+            'is_pro_active' => is_atlasvoice_addon_functional(),
             // TTS-247: data-driven capability map. Free ships an empty array;
             // companion plugins (Pro) declare which premium features are
             // available by hooking `tts_capabilities`. The React dashboard shows
             // a premium control only when its capability key is present here —
-            // it never branches on is_pro_active() for feature gating.
+            // it never branches on is_atlasvoice_addon_functional() for feature gating.
             // Default empty; resolved lazily in enqueue_scripts() after Pro's
             // `tts_capabilities` filter is registered (see note there).
             'capabilities' => array(),
@@ -277,7 +279,7 @@ class TTA_Admin
             && isset( $_REQUEST['page'] ) && 'text-to-audio' === $_REQUEST['page']
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             && isset( $_REQUEST['welcome'] ) && '1' === $_REQUEST['welcome']
-            && ( ! get_option( 'tta_onboarding_completed' ) || ( TTA_Helper::is_pro_active() && ! get_option( 'tta_pro_onboarding_completed' ) ) );
+            && ( ! get_option( 'tta_onboarding_completed' ) || ( TTA_Helper::is_atlasvoice_addon_functional() && ! get_option( 'tta_pro_onboarding_completed' ) ) );
         if ( $is_wizard_page ) {
             $post_types      = get_post_types( array( 'public' => true ), 'objects' );
             $post_types_data = array();
@@ -343,8 +345,10 @@ class TTA_Admin
                 'current_customize' => get_option( 'tta_customize_settings', array() ),
                 'current_listening' => get_option( 'tta_listening_settings', array() ),
                 'latest_post_url'   => $latest_post_url,
-                'is_pro_active'     => TTA_Helper::is_pro_active(),
-                'is_pro_wizard'     => TTA_Helper::is_pro_active() && ! get_option( 'tta_pro_onboarding_completed' ),
+                // TTS-250: new key; 'is_pro_active' kept as a backward-compatible alias.
+                'is_atlasvoice_addon_functional' => TTA_Helper::is_atlasvoice_addon_functional(),
+                'is_pro_active'     => TTA_Helper::is_atlasvoice_addon_functional(),
+                'is_pro_wizard'     => TTA_Helper::is_atlasvoice_addon_functional() && ! get_option( 'tta_pro_onboarding_completed' ),
                 'nonce'             => wp_create_nonce( 'wp_rest' ),
                 'api_url'           => esc_url_raw( rest_url( 'tta/v1/' ) ),
                 'pro_url'           => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
@@ -605,7 +609,7 @@ class TTA_Admin
     {
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin route check, no state mutation
         $show_wizard = ( isset( $_GET['welcome'] ) && '1' === $_GET['welcome'] )
-            && ( ! get_option( 'tta_onboarding_completed' ) || ( TTA_Helper::is_pro_active() && ! get_option( 'tta_pro_onboarding_completed' ) ) );
+            && ( ! get_option( 'tta_onboarding_completed' ) || ( TTA_Helper::is_atlasvoice_addon_functional() && ! get_option( 'tta_pro_onboarding_completed' ) ) );
         if ( $show_wizard ) {
             echo "<div class='wpwrap'><div id='tts_welcome_wizard'></div></div>";
             return;

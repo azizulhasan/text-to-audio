@@ -21,7 +21,7 @@ export default function TTSCustomizationButton({
   // TTS-249: free ships only the two positions it can deliver. The floating/fixed
   // positions are a Pro feature, so show them only when Pro is active (no
   // locked-then-blocked options in the free UI) with an upsell hint below.
-  const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
+  const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_atlasvoice_addon_functional;
   const buttonPositions = {
     before_content: __("Before Content", "text-to-audio"),
     after_content: __("After Content", "text-to-audio"),

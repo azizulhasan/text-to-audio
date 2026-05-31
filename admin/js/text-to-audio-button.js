@@ -657,7 +657,7 @@ class TTSPlayButton extends HTMLElement {
             };
         }
 
-        this.isProLicenseActive = window?.ttsObj?.is_pro_active;
+        this.isProLicenseActive = window?.ttsObj?.is_atlasvoice_addon_functional;
 
         // Check if user wants to use old player via filter
 

@@ -18,7 +18,7 @@ import notify from "../../context/Notify";
 export default function ExportSection({ onExportCSV, onExportPDF, dateRange, fromDate, toDate }) {
     // TTS-247: this section is rendered by the parent only when the `export`
     // capability is present; the local flag mirrors that capability (no
-    // is_pro_active gating in the UI).
+    // is_atlasvoice_addon_functional gating in the UI).
     const canExport = (typeof ttsObj !== "undefined" && ttsObj.capabilities && ttsObj.capabilities.export) || false;
     const [showScheduleModal, setShowScheduleModal] = useState(false);
     const [scheduleSettings, setScheduleSettings] = useState({

@@ -282,7 +282,7 @@ class TTA_Notices {
 			'dismissible'         => true,
 			'reshow_after_days'   => 90,
 			'condition'           => function() {
-				return ! is_pro_active();
+				return ! is_atlasvoice_addon_functional();
 			},
 			'buttons'             => array(
 				array(
@@ -307,7 +307,7 @@ class TTA_Notices {
 			'screens'             => array( 'toplevel_page_text-to-audio' ),
 			'reshow_after_days'   => 90,
 			'condition'           => function() {
-				return ! is_pro_active();
+				return ! is_atlasvoice_addon_functional();
 			},
 			'buttons'             => array(
 				array(
@@ -329,7 +329,7 @@ class TTA_Notices {
 		// 	'title'               => '',
 		// 	'dismissible'         => true,
 		// 	'condition'           => function() {
-		// 		return ! is_pro_active();
+		// 		return ! is_atlasvoice_addon_functional();
 		// 	},
 		// 	'render_callback'     => array( $this, 'render_promotion_notice' ),
 		// 	'legacy_dismiss_meta' => 'tta_promotion_new_year_26_notice_dismissed',
@@ -388,7 +388,7 @@ class TTA_Notices {
 		// 	'dismissible'         => true,
 		// 	'reshow_after_days'   => 30,
 		// 	'condition'           => function() {
-		// 		return ! is_pro_active();
+		// 		return ! is_atlasvoice_addon_functional();
 		// 	},
 		// 	'buttons'             => array(
 		// 		array(
@@ -437,7 +437,7 @@ class TTA_Notices {
 					return false;
 				}
 				// 2. Never show to Pro users.
-				if ( TTA_Helper::is_pro_active() ) {
+				if ( TTA_Helper::is_atlasvoice_addon_functional() ) {
 					return false;
 				}
 				// 3. Must be active for at least 7 days.
@@ -556,7 +556,7 @@ class TTA_Notices {
 		// 	'dismissible'         => true,
 		// 	'reshow_after_days'   => 30,
 		// 	'condition'           => function() {
-		// 		return ! is_pro_active();
+		// 		return ! is_atlasvoice_addon_functional();
 		// 	},
 		// 	'buttons'             => array(
 		// 		array(

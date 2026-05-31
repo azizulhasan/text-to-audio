@@ -40,7 +40,7 @@ export default function PeakHoursHeatmap({
 }) {
     // TTS-247: heatmap is a premium feature whose data is injected by Pro
     // (tta_pro/v1/heatmap_data). Driven by the data-driven capability flag, not
-    // an is_pro_active license check. When absent, the upsell overlay shows.
+    // an is_atlasvoice_addon_functional license check. When absent, the upsell overlay shows.
     const capabilities = (typeof ttsObj !== "undefined" && ttsObj.capabilities) || {};
     const hasHeatmap = !!capabilities.heatmap;
 

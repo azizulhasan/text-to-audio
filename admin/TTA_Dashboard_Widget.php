@@ -65,14 +65,17 @@ class TTA_Dashboard_Widget {
 		}
 
 		$data    = $this->get_data();
-		$is_pro  = TTA_Helper::is_pro_active();
+		// TTS-250: $is_pro is used ONLY to decide whether to show the optional
+		// "Upgrade to Pro" pointer at the bottom (an allowed up-sell under
+		// Guideline 5/11). It no longer gates any statistic — every stat below is
+		// computed and shown for all users.
+		$is_pro  = TTA_Helper::is_atlasvoice_addon_functional();
 
 		$plays_today    = $data['plays_today'];
 		$views_today    = $data['views_today'];
 		$chart_data     = $data['chart']; // array of 7 items: [ ['label'=>'Mon','plays'=>X], ... ]
 		$max_plays      = max( 1, max( array_column( $chart_data, 'plays' ) ) );
 
-		// Pro-only data
 		$listen_minutes = isset( $data['listen_seconds_today'] ) ? round( $data['listen_seconds_today'] / 60 ) : 0;
 		$top_post_title = isset( $data['top_post_title'] ) ? $data['top_post_title'] : '';
 
@@ -88,15 +91,13 @@ class TTA_Dashboard_Widget {
 					<div style="font-size:28px;font-weight:600;color:#2271b1;line-height:1.2;"><?php echo esc_html( number_format_i18n( $views_today ) ); ?></div>
 					<div style="font-size:12px;color:#50575e;margin-top:4px;"><?php echo esc_html__( 'Views Today', 'text-to-audio' ); ?></div>
 				</div>
-				<?php if ( $is_pro ) : ?>
 					<div style="flex:1;background:#f6f7f7;border-radius:4px;padding:14px 16px;text-align:center;">
 						<div style="font-size:28px;font-weight:600;color:#2271b1;line-height:1.2;"><?php echo esc_html( number_format_i18n( $listen_minutes ) ); ?></div>
 						<div style="font-size:12px;color:#50575e;margin-top:4px;"><?php echo esc_html__( 'Min Listened', 'text-to-audio' ); ?></div>
 					</div>
-				<?php endif; ?>
 			</div>
 
-			<?php if ( $is_pro && $top_post_title ) : ?>
+			<?php if ( $top_post_title ) : ?>
 				<div style="padding:0 12px;margin-bottom:16px;">
 					<div style="font-size:12px;color:#50575e;margin-bottom:2px;"><?php echo esc_html__( 'Top Post Today', 'text-to-audio' ); ?></div>
 					<div style="font-size:13px;font-weight:500;color:#1d2327;"><?php echo esc_html( $top_post_title ); ?></div>
@@ -139,7 +140,7 @@ class TTA_Dashboard_Widget {
 						<?php
 						printf(
 							/* translators: %s: link to Pro pricing page */
-							esc_html__( 'Unlock listening time, top posts, device analytics — %s', 'text-to-audio' ),
+							esc_html__( 'Unlock device, browser & location analytics, CSV/PDF export, and scheduled email reports — %s', 'text-to-audio' ),
 							'<a href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/" target="_blank">' . esc_html__( 'Upgrade to Pro', 'text-to-audio' ) . '</a>'
 						);
 						?>
@@ -165,7 +166,6 @@ class TTA_Dashboard_Widget {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'atlasvoice_analytics';
 		$today      = current_time( 'Y-m-d' );
-		$is_pro     = TTA_Helper::is_pro_active();
 
 		$plays_today          = 0;
 		$views_today          = 0;
@@ -188,24 +188,22 @@ class TTA_Dashboard_Widget {
 			) );
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
-			// Top post today (Pro only) — DB-side GROUP BY.
-			if ( $is_pro ) {
-				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
-				$top = $wpdb->get_row( $wpdb->prepare(
-					"SELECT post_id, SUM(play_count) AS total_plays
-					 FROM {$table_name}
-					 WHERE DATE(updated_at) = %s
-					 GROUP BY post_id
-					 ORDER BY total_plays DESC
-					 LIMIT 1",
-					$today
-				) );
-				// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
-				if ( $top && $top->total_plays > 0 ) {
-					$top_post_title = get_the_title( (int) $top->post_id );
-					if ( empty( $top_post_title ) ) {
-						$top_post_title = '#' . (int) $top->post_id;
-					}
+			// TTS-250: Top post today — computed for ALL users (no Pro gate). DB-side GROUP BY.
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
+			$top = $wpdb->get_row( $wpdb->prepare(
+				"SELECT post_id, SUM(play_count) AS total_plays
+				 FROM {$table_name}
+				 WHERE DATE(updated_at) = %s
+				 GROUP BY post_id
+				 ORDER BY total_plays DESC
+				 LIMIT 1",
+				$today
+			) );
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
+			if ( $top && $top->total_plays > 0 ) {
+				$top_post_title = get_the_title( (int) $top->post_id );
+				if ( empty( $top_post_title ) ) {
+					$top_post_title = '#' . (int) $top->post_id;
 				}
 			}
 
@@ -312,7 +310,7 @@ class TTA_Dashboard_Widget {
 					}
 				}
 
-				if ( $is_pro && ! empty( $post_plays ) ) {
+				if ( ! empty( $post_plays ) ) {
 					arsort( $post_plays );
 					$top_post_id    = key( $post_plays );
 					$top_post_title = get_the_title( $top_post_id );

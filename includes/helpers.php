@@ -262,10 +262,13 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
             }
         }
 
-        // Pro plugin JS handles intro/outro in getContent() to ensure correct order:
-        // intro + title + excerpt + body + ACF + outro
-        // Free plugin reads ttsCurrentContent directly, so bake intro/outro into PHP content.
-        if ( ! function_exists( 'is_pro_active' ) || ! is_pro_active() || get_player_id() == 1 ) {
+        // TTS-250: bake intro/outro straight into the PHP content unless something
+        // declares it will handle intro/outro ordering itself. The Pro player JS
+        // (players 2-6) composes intro + title + excerpt + body + ACF + outro in
+        // getContent(), so it sets `tts_content_handles_intro_outro` true for those
+        // players; the free player reads ttsCurrentContent directly and bakes here.
+        // Uses a positive capability filter instead of any Pro/license check.
+        if ( ! apply_filters( 'tts_content_handles_intro_outro', false ) ) {
             $content = $text_before_content . ' ' . $content;
             $content .= ' ' . $text_after_content;
         }
@@ -482,7 +485,8 @@ function get_enqueued_js_object($params, $plugin_all_settings)
     ?>
     <!-- AtlasVoice Settings (per-button JS moved to wp_add_inline_script — handle 'text-to-audio-button') -->
     <?php
-    // Audio schema is now output via wp_head hook (TTA_Helper::output_audio_schema_head)
+    // TTS-250: AudioObject schema output now lives in AtlasVoice Pro (it requires
+    // an MP3 contentUrl that the free player never produces).
     // TTS-247: echo + close. The caller (tts_enqueue_button_scripts hook on
     // wp_print_footer_scripts) doesn't use the return value, so the inline
     // <script> needs to land in the page directly via echo, not via return.
@@ -982,16 +986,20 @@ function get_player_id()
 }
 
 /**
- * Is plugin active
+ * TTS-250: Detect whether the AtlasVoice companion add-on plugin is installed
+ * and active. This is a plugin-PRESENCE check (the add-on is a separate plugin),
+ * NOT a license/trialware gate — the free plugin is fully functional on its own.
+ * Renamed from is_pro_active() to better reflect intent; is_pro_active() is kept
+ * below as a deprecated backward-compatible alias.
  */
-function is_pro_active()
+function is_atlasvoice_addon_functional()
 {
 
     if (!function_exists('is_plugin_active')) {
         include_once ABSPATH . 'wp-admin/includes/plugin.php';
     }
 
-    $pro_plugins = [
+    $addon_plugins = [
         'text-to-speech-pro/text-to-audio-pro.php',
         'text-to-speech-pro-premium/text-to-audio-pro.php',
         'text-to-audio-pro/text-to-audio-pro.php',
@@ -1000,19 +1008,30 @@ function is_pro_active()
 
     $status = false;
 
-    foreach ($pro_plugins as $plugin) {
+    foreach ($addon_plugins as $plugin) {
         if (is_plugin_active($plugin)) {
             $status = true;
             break; // Exit loop as soon as one active plugin is found
         }
     }
 
+    // New filter name; old name kept applied for backward compatibility.
+    $status = apply_filters('tts_is_atlasvoice_addon_functional', $status);
     $status = apply_filters('tts_is_pro_active', $status);
 
 
     return $status;
 
 
+}
+
+/**
+ * @deprecated TTS-250 Use is_atlasvoice_addon_functional() instead.
+ * Backward-compatible alias retained as a safety net.
+ */
+function is_pro_active()
+{
+    return is_atlasvoice_addon_functional();
 }
 
 /**

@@ -26,7 +26,7 @@ export default function LanguageMapping({
         <h3 className="tta_mapping_title">
           {activePluginName} Plugin Language Mapping
         </h3>
-        {!ttsObj.is_pro_active && (
+        {!ttsObj.is_atlasvoice_addon_functional && (
           <OverlayTrigger
             placement="top"
             overlay={

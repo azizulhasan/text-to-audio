@@ -7,14 +7,14 @@
     "/admin/js/build/text-to-audio-button.min.js": "/admin/js/build/text-to-audio-button.min.js",
     "/admin/js/build/AtlasVoiceAnalytics.min.js": "/admin/js/build/AtlasVoiceAnalytics.min.js",
     "/admin/js/build/AtlasVoicePlayerInsights.min.js": "/admin/js/build/AtlasVoicePlayerInsights.min.js",
-    "/chunks/tab-settings.c2d2d064d05dfd93.chunk.js": "/chunks/tab-settings.c2d2d064d05dfd93.chunk.js",
-    "/chunks/tab-listening.155238ad16e954a2.chunk.js": "/chunks/tab-listening.155238ad16e954a2.chunk.js",
-    "/chunks/tab-customize.a02a1f4cc0cb1301.chunk.js": "/chunks/tab-customize.a02a1f4cc0cb1301.chunk.js",
-    "/chunks/tab-docs.3ef75132164246d5.chunk.js": "/chunks/tab-docs.3ef75132164246d5.chunk.js",
-    "/chunks/tab-analytics.b250fc98cec2cf46.chunk.js": "/chunks/tab-analytics.b250fc98cec2cf46.chunk.js",
-    "/chunks/tab-integrations.19babd4dd9272254.chunk.js": "/chunks/tab-integrations.19babd4dd9272254.chunk.js",
-    "/chunks/tab-compatibility.c171c1cde8887565.chunk.js": "/chunks/tab-compatibility.c171c1cde8887565.chunk.js",
-    "/chunks/tab-aliases.1a061bf86cd1445f.chunk.js": "/chunks/tab-aliases.1a061bf86cd1445f.chunk.js",
+    "/chunks/tab-settings.4879a47e28e61edc.chunk.js": "/chunks/tab-settings.4879a47e28e61edc.chunk.js",
+    "/chunks/tab-listening.9871206229427b3f.chunk.js": "/chunks/tab-listening.9871206229427b3f.chunk.js",
+    "/chunks/tab-customize.14b36fbafc8770e8.chunk.js": "/chunks/tab-customize.14b36fbafc8770e8.chunk.js",
+    "/chunks/tab-docs.dde8bbf8c6ef184d.chunk.js": "/chunks/tab-docs.dde8bbf8c6ef184d.chunk.js",
+    "/chunks/tab-analytics.21a443fafa96df1d.chunk.js": "/chunks/tab-analytics.21a443fafa96df1d.chunk.js",
+    "/chunks/tab-integrations.a38a4ded20fffc93.chunk.js": "/chunks/tab-integrations.a38a4ded20fffc93.chunk.js",
+    "/chunks/tab-compatibility.96aac1a055cd1871.chunk.js": "/chunks/tab-compatibility.96aac1a055cd1871.chunk.js",
+    "/chunks/tab-aliases.21d76ace98cbe09a.chunk.js": "/chunks/tab-aliases.21d76ace98cbe09a.chunk.js",
     "/chunks/tab-plugins.8522ee6267bacdcf.chunk.js": "/chunks/tab-plugins.8522ee6267bacdcf.chunk.js",
-    "/chunks/tab-maintenance.131aa592f7557601.chunk.js": "/chunks/tab-maintenance.131aa592f7557601.chunk.js"
+    "/chunks/tab-maintenance.d2fe32095cac3d8f.chunk.js": "/chunks/tab-maintenance.d2fe32095cac3d8f.chunk.js"
 }

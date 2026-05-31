@@ -231,7 +231,7 @@ export default function UpgradeToPro({ promotionType = "general" }) {
    * ------------------------------- */
   const getVideos = () => {
     if (promotionType === "youtube") {
-      const videoIndex = ttsObj.is_pro_active ? 1 : 0;
+      const videoIndex = ttsObj.is_atlasvoice_addon_functional ? 1 : 0;
       return proFeatures.youtube[videoIndex];
     }
     return [];
@@ -913,7 +913,7 @@ function tta__button_text_arr_callback($text_arr) {
       )}
 
       {/* General Promotion (Pro Features) */}
-      {promotionType === "general" && !ttsObj.is_pro_active && (
+      {promotionType === "general" && !ttsObj.is_atlasvoice_addon_functional && (
         <Accordion style={{ marginTop: "20px" }}>
           <Accordion.Item eventKey="0">
             <Accordion.Header>⭐ Pro Features</Accordion.Header>

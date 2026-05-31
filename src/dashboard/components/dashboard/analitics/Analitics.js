@@ -29,7 +29,7 @@ import {
 } from "./index";
 
 export default function Analytics() {
-    // TTS-247: data-driven capability map (no is_pro_active gating in the UI).
+    // TTS-247: data-driven capability map (no is_atlasvoice_addon_functional gating in the UI).
     // Free ships an empty object; companion plugins (Pro) declare available
     // premium features via the `tts_capabilities` PHP filter. A control renders
     // only when its capability key is present, or when its data slice arrives.
