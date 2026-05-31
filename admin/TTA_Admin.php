@@ -505,7 +505,7 @@ class TTA_Admin
         }
 
         // TTS-247: ship countries-and-timezones locally instead of jsDelivr CDN (wp.org Guideline 8).
-        wp_enqueue_script('atlasvoice-timezone', plugin_dir_url(__FILE__) . 'js/vendor/countries-and-timezones.min.js', [], '3.7.2', true);
+        wp_enqueue_script('atlasvoice-timezone', plugin_dir_url(__FILE__) . 'js/vendor/countries-and-timezones.min.js', [], '3.9.0', true);
         array_push($dependencies, 'atlasvoice-timezone');
         if ($player_id > 1) {
             wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', $dependencies, $this->version, true);
@@ -1084,7 +1084,7 @@ class TTA_Admin
      *
      * @since 2.1.16
      */
-    public function print_cors_detector_script() {
+    public function enqueue_cors_detector() {
         if ( is_admin() ) { return; }
         if ( ! TTA_Helper::should_load_button() ) { return; }
         if ( ! TTA_Helper::is_cdn_likely_active() ) { return; }
@@ -1092,91 +1092,32 @@ class TTA_Admin
         $endpoint  = esc_url_raw( rest_url( 'tta/v1/cors-alert' ) );
         $site_host = wp_parse_url( home_url(), PHP_URL_HOST );
         if ( ! $site_host || ! $endpoint ) { return; }
-        ?>
-        <script data-cfasync="false" id="tta-cors-detector">
-        (function () {
-            var endpoint = <?php echo wp_json_encode( $endpoint ); ?>;
-            var siteHost = <?php echo wp_json_encode( $site_host ); ?>;
-            var reported = false;
-            window.addEventListener('error', function (e) {
-                if (reported || !e || !e.target || e.target.tagName !== 'SCRIPT') return;
-                var src = e.target.src || '';
-                if (!/\/plugins\/text-to-(audio|speech)/.test(src)) return;
-                var host = '';
-                try { host = new URL(src).host; } catch (_) { return; }
-                if (!host || host === siteHost) return;
-                // A script 'error' event + our plugin-path + cross-origin host is
-                // already strong proof of a CORS/CDN load failure. The previous
-                // HEAD verification was itself CORS-blocked (no ACAO on the CDN
-                // response), which suppressed the beacon on the exact failure
-                // mode we need to detect. Send directly; server re-validates and
-                // rate-limits to 1 alert/hour.
-                reported = true;
-                var payload = JSON.stringify({ url: src });
-                if (navigator.sendBeacon) {
-                    var blob = new Blob([payload], { type: 'application/json' });
-                    navigator.sendBeacon(endpoint, blob);
-                } else {
-                    fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: true }).catch(function(){});
-                }
-            }, true);
-        })();
-        </script>
-        <?php
+
+        // TTS-249 (I3): enqueued instead of an inline <script>. Registered with
+        // no deps + in <head> (priority 1 on wp_enqueue_scripts) so the error
+        // listener exists before our other bundles can be CORS-blocked.
+        wp_enqueue_script(
+            'tta-cors-detector',
+            plugin_dir_url( __FILE__ ) . 'js/tta-cors-detector.js',
+            array(),
+            $this->version,
+            false
+        );
+        wp_localize_script( 'tta-cors-detector', 'ttaCorsDetector', array(
+            'endpoint' => $endpoint,
+            'siteHost' => $site_host,
+        ) );
     }
 
     /**
-     * Print inline CSS for the admin bar AtlasVoice toggle (front-end only).
+     * TTS-249 (I3): enqueue the admin-bar toggle CSS + JS as proper assets
+     * (front-end, logged-in admins). Replaces the former inline <style>/<script>
+     * printed on wp_head/wp_footer. Dynamic values (post id, ajax url, nonce,
+     * on/off labels) are passed via wp_localize_script.
      *
      * @since 2.2.0
      */
-    public function admin_bar_inline_css() {
-        if ( is_admin() || ! is_admin_bar_showing() || ! is_singular() || ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            return;
-        }
-
-        $settings    = TTA_Helper::tts_get_settings( 'settings' );
-        $show_toggle = isset( $settings['tta__settings_show_admin_bar_toggle'] ) ? $settings['tta__settings_show_admin_bar_toggle'] : true;
-        if ( ! $show_toggle ) {
-            return;
-        }
-        ?>
-        <style id="tta-admin-bar-toggle-css">
-            #wp-admin-bar-tta-audio-toggle .ab-icon.dashicons {
-                font-family: dashicons !important;
-                font-size: 20px !important;
-                line-height: 1 !important;
-                position: relative;
-                top: 3px;
-                margin-right: 2px;
-            }
-            .tta-ab-indicator {
-                display: inline-block;
-                width: 8px;
-                height: 8px;
-                border-radius: 50%;
-                margin-right: 4px;
-                vertical-align: middle;
-            }
-            .tta-ab-indicator.tta-ab-on {
-                background-color: #46b450;
-            }
-            .tta-ab-indicator.tta-ab-off {
-                background-color: #dc3232;
-            }
-            #wp-admin-bar-tta-audio-toggle a.ab-item {
-                cursor: pointer;
-            }
-        </style>
-        <?php
-    }
-
-    /**
-     * Print inline JS for the admin bar AtlasVoice AJAX toggle (front-end only).
-     *
-     * @since 2.2.0
-     */
-    public function admin_bar_inline_js() {
+    public function enqueue_admin_bar_assets() {
         if ( is_admin() || ! is_admin_bar_showing() || ! is_singular() || ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
             return;
         }
@@ -1191,47 +1132,28 @@ class TTA_Admin
         if ( ! $post ) {
             return;
         }
-        ?>
-        <script id="tta-admin-bar-toggle-js">
-        (function(){
-            var node = document.getElementById('wp-admin-bar-tta-audio-toggle');
-            if (!node) return;
 
-            var link = node.querySelector('a.ab-item');
-            if (!link) return;
-
-            link.addEventListener('click', function(e){
-                e.preventDefault();
-
-                var data = new FormData();
-                data.append('action', 'tta_toggle_audio');
-                data.append('post_id', <?php echo (int) $post->ID; ?>);
-                data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'tta_toggle_audio_nonce' ) ); ?>');
-
-                fetch('<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>', {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    body: data
-                })
-                .then(function(r){ return r.json(); })
-                .then(function(resp){
-                    if (!resp.success) return;
-
-                    var indicator = node.querySelector('.tta-ab-indicator');
-                    var textNode  = link.lastChild;
-
-                    if (resp.data.is_active) {
-                        indicator.className = 'tta-ab-indicator tta-ab-on';
-                        textNode.textContent = ' <?php echo esc_js( __( 'AtlasVoice: On', 'text-to-audio' ) ); ?>';
-                    } else {
-                        indicator.className = 'tta-ab-indicator tta-ab-off';
-                        textNode.textContent = ' <?php echo esc_js( __( 'AtlasVoice: Off', 'text-to-audio' ) ); ?>';
-                    }
-                });
-            });
-        })();
-        </script>
-        <?php
+        wp_enqueue_style(
+            'tta-admin-bar',
+            plugin_dir_url( __FILE__ ) . 'css/tta-admin-bar.css',
+            array(),
+            $this->version,
+            'all'
+        );
+        wp_enqueue_script(
+            'tta-admin-bar',
+            plugin_dir_url( __FILE__ ) . 'js/tta-admin-bar.js',
+            array(),
+            $this->version,
+            true
+        );
+        wp_localize_script( 'tta-admin-bar', 'ttaAdminBar', array(
+            'postId'   => (int) $post->ID,
+            'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
+            'nonce'    => wp_create_nonce( 'tta_toggle_audio_nonce' ),
+            'onLabel'  => __( 'AtlasVoice: On', 'text-to-audio' ),
+            'offLabel' => __( 'AtlasVoice: Off', 'text-to-audio' ),
+        ) );
     }
 
     /**
@@ -1295,56 +1217,28 @@ class TTA_Admin
                 </div>
             </div>
         </div>
-        <script>
-        (function(){
-            document.addEventListener('DOMContentLoaded', function(){
-                var pluginRow = document.querySelector('tr[data-plugin="text-to-audio/text-to-audio.php"]');
-                if (!pluginRow) return;
-
-                var deactivateLink = pluginRow.querySelector('.deactivate a');
-                if (!deactivateLink) return;
-
-                var overlay   = document.getElementById('tta-rescue-modal-overlay');
-                var continueBtn = document.getElementById('tta-rescue-continue-deactivate');
-                if (!overlay || !continueBtn) return;
-
-                var originalHref = deactivateLink.getAttribute('href');
-                var rescueShown = false;
-
-                function rescueHandler(e) {
-                    if (rescueShown) return; // Already shown once, let the click proceed normally.
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    overlay.style.display = 'flex';
-                }
-
-                deactivateLink.addEventListener('click', rescueHandler, true);
-
-                // Close modal when clicking the overlay background.
-                overlay.addEventListener('click', function(e){
-                    if (e.target === overlay) {
-                        overlay.style.display = 'none';
-                    }
-                });
-
-                // Close on Escape key.
-                document.addEventListener('keydown', function(e){
-                    if (e.key === 'Escape' && overlay.style.display === 'flex') {
-                        overlay.style.display = 'none';
-                    }
-                });
-
-                // "Continue to Deactivate" — hide rescue modal and re-click the link to proceed.
-                continueBtn.addEventListener('click', function(){
-                    overlay.style.display = 'none';
-                    rescueShown = true;
-                    deactivateLink.removeEventListener('click', rescueHandler, true);
-                    deactivateLink.click();
-                });
-            });
-        })();
-        </script>
         <?php
+        // TTS-249 (I3): the modal behaviour lives in the enqueued
+        // tta-deactivation-rescue.js (see enqueue_deactivation_rescue_assets),
+        // not an inline <script>.
+    }
+
+    /**
+     * TTS-249 (I3): enqueue the deactivation-rescue modal JS on plugins.php.
+     *
+     * @param string $hook Current admin page hook.
+     */
+    public function enqueue_deactivation_rescue_assets( $hook ) {
+        if ( 'plugins.php' !== $hook ) {
+            return;
+        }
+        wp_enqueue_script(
+            'tta-deactivation-rescue',
+            plugin_dir_url( __FILE__ ) . 'js/tta-deactivation-rescue.js',
+            array(),
+            $this->version,
+            true
+        );
     }
 
     /**

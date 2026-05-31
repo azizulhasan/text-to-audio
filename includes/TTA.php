@@ -126,15 +126,18 @@ class TTA {
 
         // Admin bar quick-toggle for AtlasVoice on front-end singular pages.
         $this->loader->add_action('admin_bar_menu', $plugin_admin, 'add_admin_bar_toggle', 999);
-        $this->loader->add_action('wp_head', $plugin_admin, 'admin_bar_inline_css', 999);
-        $this->loader->add_action('wp_footer', $plugin_admin, 'admin_bar_inline_js', 999);
+        // TTS-249 (I3): enqueue the admin-bar toggle CSS + JS as proper assets
+        // (were inline <style>/<script> on wp_head/wp_footer).
+        $this->loader->add_action('wp_enqueue_scripts', $plugin_admin, 'enqueue_admin_bar_assets', 999);
 
-        // TTS-240: CORS/CDN failure detector — must run before our bundles.
-        $this->loader->add_action('wp_head', $plugin_admin, 'print_cors_detector_script', 1);
+        // TTS-240/249: CORS/CDN failure detector — enqueued (was inline <script>).
+        $this->loader->add_action('wp_enqueue_scripts', $plugin_admin, 'enqueue_cors_detector', 1);
         $this->loader->add_action('wp_ajax_tta_toggle_audio', $plugin_admin, 'ajax_toggle_audio');
 
         // Deactivation rescue modal on plugins.php (shows quick-fix options on the first deactivate click).
         $this->loader->add_action('admin_footer', $plugin_admin, 'render_deactivation_rescue_modal');
+        // TTS-249 (I3): modal behaviour as an enqueued script (was inline <script>).
+        $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_deactivation_rescue_assets');
 
         // Output AudioObject JSON-LD schema in <head> for singular posts with audio player
         add_action('wp_head', [TTA_Helper::class, 'output_audio_schema_head'], 99);

@@ -114,13 +114,36 @@ class TTA_Notices {
 			true
 		);
 
+		// TTS-249 (I3): notice CSS (rotation keyframe + browser-support notice)
+		// as an enqueued stylesheet instead of a JS-injected <style>.
+		wp_enqueue_style(
+			'tta-admin-notice',
+			TTA_PLUGIN_URL . 'admin/css/tta-admin-notice.css',
+			array(),
+			TEXT_TO_AUDIO_VERSION,
+			'all'
+		);
+
 		wp_localize_script(
 			'tta-admin-notice',
 			'ttaNoticeData',
 			array(
-				'ajaxurl' => admin_url( 'admin-ajax.php' ),
-				'nonce'   => wp_create_nonce( 'tta_notice_nonce' ),
-				'isRtl'   => function_exists( 'tta_is_rtl' ) && tta_is_rtl() ? '1' : '0',
+				'ajaxurl'          => admin_url( 'admin-ajax.php' ),
+				'nonce'            => wp_create_nonce( 'tta_notice_nonce' ),
+				'isRtl'            => function_exists( 'tta_is_rtl' ) && tta_is_rtl() ? '1' : '0',
+				// TTS-249 (I3): browser-support feature-detect notice (was an inline <script>).
+				'browserSupport'   => array(
+					'strongLabel' => __( 'AtlasVoice:', 'text-to-audio' ),
+					'message'     => __( 'This browser does not support the speechSynthesis API. Please use Chrome, Firefox, Safari, Samsung, Edge, or Opera. The Pro version works in all browsers.', 'text-to-audio' ),
+				),
+				// TTS-249 (I3): translation-download handler strings (was an inline <script>).
+				'translation'      => array(
+					'downloading'  => __( 'Downloading...', 'text-to-audio' ),
+					'downloadedReloading' => __( 'Downloaded! Reloading...', 'text-to-audio' ),
+					'downloaded'   => __( 'Downloaded!', 'text-to-audio' ),
+					'retry'        => __( 'Retry Download', 'text-to-audio' ),
+					'networkError' => __( 'Network error. Please try again.', 'text-to-audio' ),
+				),
 			)
 		);
 	}
@@ -1072,25 +1095,10 @@ class TTA_Notices {
 	 * @param array  $notice    Notice configuration.
 	 */
 	public function render_browser_support( $notice_id, $notice ) {
-		?>
-		<script>
-			(function() {
-				'use strict';
-				if ( ! ( 'speechSynthesis' in window || 'webkitSpeechSynthesis' in window ) ) {
-					var notice = document.createElement('div');
-					notice.className = 'notice notice-warning tta-admin-notice';
-					notice.setAttribute('data-notice-id', '<?php echo esc_js( $notice_id ); ?>');
-					notice.style.padding = '12px 20px';
-					notice.innerHTML = '<p><strong><?php echo esc_js( __( 'AtlasVoice:', 'text-to-audio' ) ); ?></strong> ' +
-						'<?php echo esc_js( __( 'This browser does not support the speechSynthesis API. Please use Chrome, Firefox, Safari, Samsung, Edge, or Opera. The Pro version works in all browsers.', 'text-to-audio' ) ); ?></p>';
-					var wpbody = document.querySelector('.wrap') || document.querySelector('#wpbody-content');
-					if ( wpbody ) {
-						wpbody.insertBefore(notice, wpbody.firstChild);
-					}
-				}
-			})();
-		</script>
-		<?php
+		// TTS-249 (I3): the client-side speechSynthesis feature-detect that
+		// builds this warning notice moved into the enqueued tta-admin-notice.js
+		// (strings localized via ttaNoticeData.browserSupport). No inline
+		// <script> is printed here anymore.
 	}
 
 	/**
@@ -1675,46 +1683,10 @@ class TTA_Notices {
 				</div>
 			</div>
 		</div>
-		<script>
-		(function($) {
-			$('#tta-download-translations').on('click', function(e) {
-				e.preventDefault();
-				var $btn    = $(this);
-				var $status = $('#tta-download-status');
-				var locale  = $btn.data('locale');
-
-				$btn.prop('disabled', true).text('<?php esc_html_e( 'Downloading...', 'text-to-audio' ); ?>');
-				$status.show().html('<span class="spinner is-active" style="float: none; margin: 0;"></span>');
-
-				$.ajax({
-					url: ttaNoticeData.ajaxurl,
-					type: 'POST',
-					data: {
-						action: 'tta_download_translations',
-						locale: locale,
-						nonce: ttaNoticeData.nonce
-					},
-					success: function(response) {
-						if (response.success) {
-							$status.html('<span style="color: #00a32a; font-weight: 600;">&#10003; <?php esc_html_e( 'Downloaded! Reloading...', 'text-to-audio' ); ?></span>');
-							$btn.text('<?php esc_html_e( 'Downloaded!', 'text-to-audio' ); ?>');
-							setTimeout(function() {
-								window.location.reload();
-							}, 1000);
-						} else {
-							$status.html('<span style="color: #d63638;">' + response.data.message + '</span>');
-							$btn.prop('disabled', false).text('<?php esc_html_e( 'Retry Download', 'text-to-audio' ); ?>');
-						}
-					},
-					error: function() {
-						$status.html('<span style="color: #d63638;"><?php esc_html_e( 'Network error. Please try again.', 'text-to-audio' ); ?></span>');
-						$btn.prop('disabled', false).text('<?php esc_html_e( 'Retry Download', 'text-to-audio' ); ?>');
-					}
-				});
-			});
-		})(jQuery);
-		</script>
 		<?php
+		// TTS-249 (I3): the translation-download click handler moved into the
+		// enqueued tta-admin-notice.js (strings via ttaNoticeData.translation).
+		// No inline <script> is printed here.
 	}
 
 	/**
