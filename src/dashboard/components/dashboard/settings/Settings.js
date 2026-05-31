@@ -40,7 +40,6 @@ export default function Settings() {
         tta__settings_text_after_content: "",
         tta__settings_text_before_content: "",
         tta__settings_read_content_from_dom: true,
-        tta__settings_player_use_old_player: false,
         tta__settings_enable_tts_status: true,
         tta__settings_delete_data_on_uninstall: false,
     });
@@ -431,20 +430,6 @@ export default function Settings() {
                                         </SettingRow>
                                     </>
                                 )}
-                                {
-                                    ttsObj.player_id == 1 && <SettingRow
-                                        label={__("Use Old Player UI", 'text-to-audio')}
-                                        questionIcon={true}
-                                        questionTooltip={__("Use Old Player UI", 'text-to-audio')}
-                                    >
-                                        <ToggleSwitch
-                                            checked={settings.tta__settings_player_use_old_player}
-                                            onChange={(e) => handleChange(e)}
-                                            name="tta__settings_player_use_old_player"
-                                            id="tta__settings_player_use_old_player"
-                                        />
-                                    </SettingRow>
-                                }
 
                                 <SettingRow
                                     label={__("Add Post Title To Read", "text-to-audio")}

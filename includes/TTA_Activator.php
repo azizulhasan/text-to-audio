@@ -56,7 +56,6 @@ class TTA_Activator {
 				"color"                  => "#000000",
 				"hoverTextColor"         => "#000000",
 				"width"                  => "100",
-				'custom_css'             => '',
 				'tta_play_btn_shortcode' => '[atlasvoice]',
 				'buttonSettings'         => [
 					'id'                         => 1,
@@ -109,7 +108,6 @@ class TTA_Activator {
 				'tta__settings_text_after_content'					  => '',
 				'tta__settings_text_before_content'					  => '',
 				'tta__settings_read_content_from_dom'				  => true,
-				'tta__settings_player_use_old_player'				  => false,
 				'tta__settings_enable_tts_status'				      => true,
 			) );
 		}
@@ -266,6 +264,54 @@ class TTA_Activator {
 				wp_schedule_single_event( time() + 60, 'tta_migrate_play_count_column' );
 			}
 		}
+
+		// TTS-249 (A1): migrate any previously-saved Custom CSS to WP core's
+		// Additional CSS (the raw Custom CSS field was removed).
+		self::migrate_custom_css_to_additional_css();
+	}
+
+	/**
+	 * TTS-249 (A1): one-time migration of the removed Custom CSS field.
+	 *
+	 * The Customize tab no longer exposes a raw Custom CSS textarea (wp.org no
+	 * longer permits persisting arbitrary CSS). Any value a site already saved in
+	 * `tta_customize_settings['custom_css']` is appended, once, to the active
+	 * theme's Additional CSS (Appearance → Customize → Additional CSS) via WP
+	 * core's sanctioned, sanitized store — so existing users don't lose styling.
+	 * The Free player now renders in the light DOM, so that CSS reaches it.
+	 *
+	 * The original option value is preserved in the DB (not deleted) as a backup;
+	 * it is simply no longer read or echoed by the plugin.
+	 */
+	public static function migrate_custom_css_to_additional_css() {
+		// Run once per site.
+		if ( get_option( 'tta_custom_css_migrated' ) ) {
+			return;
+		}
+
+		$customize = get_option( 'tta_customize_settings' );
+		// Settings can be stored as an object (json_decode) or array; normalise.
+		$saved_css = '';
+		if ( is_object( $customize ) && isset( $customize->custom_css ) ) {
+			$saved_css = (string) $customize->custom_css;
+		} elseif ( is_array( $customize ) && isset( $customize['custom_css'] ) ) {
+			$saved_css = (string) $customize['custom_css'];
+		}
+
+		$saved_css = trim( $saved_css );
+
+		if ( '' !== $saved_css && function_exists( 'wp_update_custom_css_post' ) ) {
+			$existing = (string) wp_get_custom_css();
+			$marker   = "\n\n/* Migrated from AtlasVoice Custom CSS (v2.2.2) */\n";
+
+			// Avoid duplicating the migrated block if this somehow runs twice.
+			if ( false === strpos( $existing, trim( $marker ) ) ) {
+				wp_update_custom_css_post( $existing . $marker . $saved_css );
+			}
+		}
+
+		// Flag set regardless of whether there was CSS, so we never re-scan.
+		update_option( 'tta_custom_css_migrated', true, false );
 	}
 
 	/**

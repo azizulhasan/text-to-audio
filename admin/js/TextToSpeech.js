@@ -596,7 +596,6 @@ if ('page=text-to-audio' === urlParams) {
                 start_text: "Start",
                 stop_text: "Start"
             },
-            customCSS: "",
             shouldDisplayIcon: "inline-block"
         }
 

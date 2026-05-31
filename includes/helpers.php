@@ -285,9 +285,11 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     $content_read_time = apply_filters('tts_content_reading_time', 1, $content, $post);
     $text_arr = get_button_text($atts, $content_read_time);
 
-    $use_old_player = isset($settings['tta__settings_player_use_old_player']) && $settings['tta__settings_player_use_old_player'];
-    $use_old_player = apply_filters('tts_player_use_old_player', $use_old_player, $post);
-    $justify_content_css = $use_old_player ?  ' center' : ' space-between' ;
+    // TTS-249: the legacy "old player" was removed — the new player is always
+    // used. $use_old_player is retained only as a (false) payload field for
+    // backward compatibility with any cached JS; the JS no longer branches on it.
+    $use_old_player = false;
+    $justify_content_css = ' space-between';
 
     // Button style.
     $backgroundColor = isset($customize['backgroundColor']) ? $customize['backgroundColor'] : '#184c53';
@@ -309,18 +311,17 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
         $btn_style = 'background-color:' . esc_attr($backgroundColor) . ';color:' . esc_attr($color) . ';width:' . esc_attr($width) . '%;height:' . esc_attr($height) . ';font-size:' . esc_attr($font_size) . ';border:' . esc_attr($border) . ';display:flex;align-content:center;justify-content:'.$justify_content_css.';align-items:center;border-radius:' . esc_attr($border_radius) . ';text-decoration:none;cursor:pointer;margin-top:' . esc_attr($margin_top) . ';margin-bottom:' . esc_attr($margin_bottom) . ';margin-left:' . esc_attr($margin_left) . ';margin-right:' . esc_attr($margin_right) . ';';
     }
 
-    //Custom Css
-    $custom_css = '';
-    if (isset($customize['custom_css']) && '' !== $customize['custom_css']) {
-        $custom_css = esc_attr($customize['custom_css']);
-        $custom_css = str_replace("\n", '', $custom_css);
-    }
-    $custom_css = compatibility_with_themes($custom_css, $customize, $player_number);
+    // TTS-249 (A1): the user-facing Custom CSS field was removed (wp.org bars
+    // persisting arbitrary CSS). Any previously-saved value was migrated to WP
+    // core's Additional CSS on upgrade and is no longer read/echoed here. We
+    // still build the theme-compatibility CSS (max-width / centering) below —
+    // that's plugin-generated, not user input.
+    $custom_css = compatibility_with_themes('', $customize, $player_number);
     // Custom class to button.
     $class = (isset($text_arr['class'])) && strlen($text_arr['class']) ? esc_attr($text_arr['class']) : "";
     $class .= (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
 
-    $button = "<tts-play-button data-id='$player_number' class='tts_play_button' role='region' aria-label='" . esc_attr__('Text to speech player', 'text-to-audio') . "'></tts-play-button>";
+    $button = "<tts-play-button data-id='" . esc_attr($player_number) . "' class='tts_play_button' role='region' aria-label='" . esc_attr__('Text to speech player', 'text-to-audio') . "'></tts-play-button>";
 
 
     // init button scripts
@@ -852,6 +853,60 @@ function tta_is_rtl()
     }
 
     return $rtl;
+}
+
+
+/**
+ * TTS-249: build the player-1 button CSS from the global customize settings,
+ * for injection into the document head via wp_add_inline_style() (attached to
+ * the `text-to-audio-button` stylesheet handle). This replaces the inline
+ * style="" attribute the JS used to set on the button — the values are global
+ * per-site settings (identical for every player-1 button), so one class-scoped
+ * rule covers them all. The hover/icon values are exposed as --tts-* custom
+ * properties which the static stylesheet (text-to-audio-button.css) consumes.
+ *
+ * @return string CSS (no <style> wrapper).
+ */
+function tta_get_player_button_inline_css()
+{
+    $customize = (array) TTA_Helper::tts_get_settings('customize');
+    $settings  = (array) TTA_Helper::tts_get_settings('settings');
+
+    $backgroundColor = isset($customize['backgroundColor']) ? $customize['backgroundColor'] : '#184c53';
+    $color           = isset($customize['color']) ? $customize['color'] : '#ffffff';
+    $width           = isset($customize['width']) ? $customize['width'] : '100';
+    $height          = isset($customize['height']) ? $customize['height'] . 'px' : '50px';
+    $border          = isset($customize['border']) ? $customize['border'] . 'px' : '0px';
+    $border_color    = isset($customize['border_color']) ? $customize['border_color'] : '#000000';
+    $border          = $border . ' solid ' . $border_color;
+    $border_radius   = isset($customize['borderRadius']) ? $customize['borderRadius'] . 'px' : '4px';
+    $font_size       = isset($customize['fontSize']) ? $customize['fontSize'] . 'px' : '18px';
+    $margin_top      = isset($customize['marginTop']) ? $customize['marginTop'] . 'px' : '0px';
+    $margin_bottom   = isset($customize['marginBottom']) ? $customize['marginBottom'] . 'px' : '0px';
+    $margin_left     = isset($customize['marginLeft']) ? $customize['marginLeft'] . '%' : '0%';
+    $margin_right    = isset($customize['marginRight']) ? $customize['marginRight'] . 'px' : '0px';
+    $hover_bg        = isset($customize['hoverBackgroundColor']) ? $customize['hoverBackgroundColor'] : '#f0f0f0';
+    $hover_color     = isset($customize['hoverTextColor']) ? $customize['hoverTextColor'] : '#000000';
+    $icon_display    = (isset($settings['tta__settings_display_btn_icon']) && $settings['tta__settings_display_btn_icon']) ? 'inline-block' : 'none';
+
+    $css  = '.tts__listent_content{';
+    $css .= 'background-color:' . esc_attr($backgroundColor) . ';';
+    $css .= 'color:' . esc_attr($color) . ';';
+    $css .= 'width:' . esc_attr($width) . '%;';
+    $css .= 'height:' . esc_attr($height) . ';';
+    $css .= 'font-size:' . esc_attr($font_size) . ';';
+    $css .= 'border:' . esc_attr($border) . ';';
+    $css .= 'border-radius:' . esc_attr($border_radius) . ';';
+    $css .= 'margin:' . esc_attr($margin_top) . ' ' . esc_attr($margin_right) . ' ' . esc_attr($margin_bottom) . ' ' . esc_attr($margin_left) . ';';
+    $css .= 'display:flex;align-items:center;justify-content:space-between;padding:8px 12px;text-decoration:none;cursor:pointer;box-sizing:border-box;';
+    // Hover/icon values consumed by the static stylesheet's :hover rules.
+    $css .= '--tts-hover-bg:' . esc_attr($hover_bg) . ';';
+    $css .= '--tts-hover-color:' . esc_attr($hover_color) . ';';
+    $css .= '--tts-color:' . esc_attr($color) . ';';
+    $css .= '--tts-icon-display:' . esc_attr($icon_display) . ';';
+    $css .= '}';
+
+    return $css;
 }
 
 

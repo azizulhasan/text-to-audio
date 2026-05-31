@@ -1,5 +1,5 @@
 import TextToSpeech from "./TextToSpeech.js";
-import {getButtonContent, setSvgColorOnEvent, splitSentences} from "./tts/utilities.js";
+import {splitSentences} from "./tts/utilities.js";
 import AtlasVoiceAnalytics from "./AtlasVoiceAnalytics";
 
 // Auto-close timeout duration (15 seconds)
@@ -44,227 +44,11 @@ class TTSSettingsModalManager {
     }
 
     static injectStyles() {
-        if (document.getElementById('tts-settings-modal-styles')) return;
-
-        const colors = this.getColors();
-        const style = document.createElement('style');
-        style.id = 'tts-settings-modal-styles';
-        style.textContent = `
-            /* Settings Modal Backdrop */
-            .tts__settings-modal-backdrop {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-color: rgba(0, 0, 0, 0.5);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 999999;
-                opacity: 0;
-                transition: opacity 0.2s ease;
-                pointer-events: none;
-            }
-            .tts__settings-modal-backdrop.tts__modal-visible {
-                opacity: 1;
-                pointer-events: auto;
-            }
-            .tts__settings-modal-backdrop.tts__modal-closing {
-                opacity: 0;
-                pointer-events: none;
-            }
-
-            /* Settings Modal Container */
-            .tts__settings-modal {
-                width: 90%;
-                max-width: 400px;
-                background-color: var(--tts-modal-bg, #184c53);
-                color: var(--tts-modal-color, #ffffff);
-                border-radius: 12px;
-                padding: 20px;
-                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-                transform: scale(0.8);
-                opacity: 0;
-                transition: transform 0.2s ease, opacity 0.2s ease;
-                position: relative;
-            }
-            .tts__settings-modal-backdrop.tts__modal-visible .tts__settings-modal {
-                transform: scale(1);
-                opacity: 1;
-            }
-            .tts__settings-modal-backdrop.tts__modal-closing .tts__settings-modal {
-                transform: scale(0.8);
-                opacity: 0;
-            }
-
-            /* Modal Header */
-            .tts__settings-modal-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 20px;
-                padding-bottom: 12px;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-            }
-            .tts__settings-modal-title {
-                font-size: 16px;
-                font-weight: 600;
-                margin: 0;
-            }
-            .tts__settings-modal-close {
-                background: transparent;
-                border: none;
-                cursor: pointer;
-                padding: 4px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: background-color 0.2s ease;
-            }
-            .tts__settings-modal-close:hover,
-            .tts__settings-modal-close:focus-visible {
-                background-color: rgba(255, 255, 255, 0.12);
-            }
-            .tts__settings-modal-close:focus-visible {
-                outline: 2px solid currentColor;
-                outline-offset: 2px;
-            }
-
-            /* Settings Select */
-            .tts__settings-select {
-                outline: none;
-            }
-            .tts__settings-select:focus {
-                border-color: rgba(255, 255, 255, 0.5) !important;
-            }
-
-            /* Custom Slider Styles */
-            .tts__settings-slider {
-                -webkit-appearance: none;
-                appearance: none;
-                height: 6px;
-                background: rgba(255, 255, 255, 0.19);
-                border-radius: 3px;
-                outline: none;
-            }
-            .tts__settings-slider::-webkit-slider-thumb {
-                -webkit-appearance: none;
-                appearance: none;
-                width: 18px;
-                height: 18px;
-                background: var(--tts-modal-color, #ffffff);
-                border-radius: 50%;
-                cursor: pointer;
-                transition: transform 0.1s ease;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            }
-            .tts__settings-slider::-webkit-slider-thumb:hover {
-                transform: scale(1.15);
-            }
-            .tts__settings-slider::-moz-range-thumb {
-                width: 18px;
-                height: 18px;
-                background: var(--tts-modal-color, #ffffff);
-                border-radius: 50%;
-                cursor: pointer;
-                border: none;
-                transition: transform 0.1s ease;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            }
-            .tts__settings-slider::-moz-range-thumb:hover {
-                transform: scale(1.15);
-            }
-            .tts__settings-slider::-moz-range-track {
-                background: rgba(255, 255, 255, 0.19);
-                height: 6px;
-                border-radius: 3px;
-            }
-
-            /* Setting row styles */
-            .tts__setting-row {
-                margin-bottom: 16px;
-            }
-            .tts__setting-row:last-child {
-                margin-bottom: 0;
-            }
-            .tts__setting-label {
-                display: block;
-                font-size: 12px;
-                margin-bottom: 6px;
-                opacity: 0.85;
-            }
-            .tts__setting-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 6px;
-            }
-            .tts__setting-value {
-                font-size: 12px;
-                font-weight: 600;
-            }
-
-            /* Loader for settings */
-            .tts__settings-loader-overlay {
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-color: rgba(0, 0, 0, 0.3);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 12px;
-                z-index: 10;
-            }
-            .tts__settings-loader {
-                width: 28px;
-                height: 28px;
-                border: 3px solid var(--tts-modal-bg, #184c53);
-                border-top: 3px solid var(--tts-modal-color, #ffffff);
-                border-radius: 50%;
-                animation: tts-modal-spin 0.8s linear infinite;
-            }
-            @keyframes tts-modal-spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-
-            /* Mute button */
-            .tts__mute-btn {
-                background: transparent;
-                border: none;
-                cursor: pointer;
-                padding: 4px;
-                border-radius: 4px;
-                display: flex;
-                align-items: center;
-                transition: background-color 0.2s ease;
-            }
-            .tts__mute-btn:hover {
-                background-color: rgba(255, 255, 255, 0.12);
-            }
-            .tts__mute-btn:focus-visible {
-                outline: 2px solid currentColor;
-                outline-offset: 2px;
-                background-color: rgba(255, 255, 255, 0.12);
-            }
-            .tts__mute-btn.muted {
-                background-color: rgba(255, 255, 255, 0.12);
-            }
-            .tts__settings-slider:focus-visible {
-                outline: 2px solid currentColor;
-                outline-offset: 2px;
-            }
-            .tts__settings-select:focus-visible {
-                outline: 2px solid currentColor;
-                outline-offset: 2px;
-            }
-        `;
-        document.head.appendChild(style);
+        // TTS-249 (I2): the settings-modal CSS moved to the enqueued stylesheet
+        // (admin/css/text-to-audio-button.css) so no plugin <style> tag ships in
+        // the page. The dynamic colours are still set as --tts-modal-* custom
+        // properties on the modal container at runtime. This method is kept as a
+        // no-op so existing callers don't need to change.
     }
 
     static getColors() {
@@ -877,8 +661,20 @@ class TTSPlayButton extends HTMLElement {
 
         // Check if user wants to use old player via filter
 
-        // Create a shadow root
-        const shadow = this.attachShadow({mode: 'open'});
+        // TTS-249 (A1): player 1 (the Free player) renders into the LIGHT DOM so
+        // WordPress core's Additional CSS (Appearance → Customize → Additional
+        // CSS) can style it — the plugin no longer ships a raw Custom CSS field.
+        // A shadow root would isolate the button from light-DOM CSS and make
+        // Additional CSS a dead end. Players 2-6 (Pro) keep their shadow root.
+        // All button styles are #id-scoped (#tts__listent_content_N…) so they
+        // win over theme rules and don't leak out; a defensive typography reset
+        // (see getLightDomReset) blocks the few inheritable props theme rules
+        // could otherwise bleed in.
+        const playerId = parseInt(window?.ttsObj?.player_id || 1, 10);
+        this.useLightDom = (playerId === 1);
+        const shadow = this.useLightDom
+            ? this
+            : this.attachShadow({mode: 'open'});
 
         if (window.hasOwnProperty('TTS')) {
             let contents = window.TTS.contents;
@@ -890,92 +686,13 @@ class TTSPlayButton extends HTMLElement {
             for (let buttonId of buttonIds) {
                 if (buttonId == this.getAttribute('data-id')) {
                     this.buttonId = buttonId;
-                    this.useOldPlayer = settings.use_old_player;
-                    if (this.useOldPlayer) {
-                        this.initOldPlayer(shadow, buttonId, contents, settings);
-                    } else {
-                        this.initNewPlayer(shadow, buttonId, contents, settings);
-                    }
-
+                    // TTS-249: the legacy "old player" was removed — always the
+                    // new player now.
+                    this.initNewPlayer(shadow, buttonId, contents, settings);
                     break;
                 }
             } // end loop
         }
-    }
-
-    /**
-     * Initialize OLD player (original functionality - unchanged)
-     */
-    initOldPlayer(shadow, buttonId, contents, settings) {
-        // Create div
-        const wrapper = document.createElement('div');
-        wrapper.setAttribute('class', 'wrapper');
-        wrapper.innerHTML = getButtonContent(buttonId, settings.cssClass, this.isProLicenseActive);
-        this.analytics.trackInit();
-        console.log(contents[buttonId]);
-
-        this.addEventListener('click', function (e) {
-            let button = [...wrapper.children][0];
-            if (this.speech != null && this.speech.listenStatus == 'listen') {
-                this.speech = null;
-            }
-            if (this.speech === null) {
-                let speech = new TextToSpeech(buttonId, contents[buttonId], button, window.TTS);
-                speech._init(null, true);
-                this.speech = speech.getData();
-                this.speech.callBackAfterEnd = this.callBackAfterEnd;
-            } else {
-                this.speech = this.speech.getData();
-                if (this.speech.listenStatus == 'pause') {
-                    this.speech.pause(this.speech.speech, true);
-                    window.sessionStorage.setItem('tts_paused_by_intention', true);
-                } else if (this.speech.listenStatus == 'resume') {
-                    this.speech.resume(this.speech.speech, true);
-                }
-            }
-        });
-
-        // Create some CSS to apply to the shadow dom
-        const style = document.createElement('style');
-        style.setAttribute('id', 'tts_style');
-
-        // CSS style for this button.
-        // TTS-241 — locked metrics:
-        //   * `box-sizing: border-box` so the border lives inside the box
-        //     and click-driven content swaps don't shift the border.
-        //   * `.tts_button` is inline-flex with a fixed gap so icon + label
-        //     stay aligned regardless of which state is rendered.
-        //   * Focus ring uses an `inset box-shadow` (no `outline-offset`)
-        //     so it overlays the border instead of growing the visual size.
-        style.textContent = `
-            /* TTS-241 — suppress focus outline on the custom-element host
-               (right-click / contextmenu would otherwise paint a thin
-               rectangle around the wrapper that reads as a border). */
-            :host(:focus), :host(:focus-visible), :host(:focus-within) {
-                outline: none !important;
-                box-shadow: none !important;
-            }
-            #tts__listent_content_${buttonId}.tts__listent_content{ ${settings.btnStyle} box-sizing: border-box; transition: all 0.5s ease-in-out; }
-            #tts__listent_content_${buttonId}.tts__listent_content:hover{ ${settings.btnStyle} box-sizing: border-box; background-color:${ttsObj?.settings?.customize?.hoverBackgroundColor || '#f0f0f0'};}
-            #tts__listent_content_${buttonId}.tts__listent_content .tts_button{ display: inline-flex; align-items: center; gap: 8px; }
-            #tts__listent_content_${buttonId}.tts__listent_content .tts_button_label{ display: inline-block; }
-            #tts__listent_content_${buttonId}.tts__listent_content svg{ display:${settings.shouldDisplayIcon}; flex: 0 0 auto; }
-            #tts__listent_content_${buttonId}.tts__listent_content:hover svg{ display:${settings.shouldDisplayIcon}; flex: 0 0 auto; }
-            #tts__listent_content_${buttonId}.tts__listent_content:hover .tts_button_label{ color: ${ ttsObj?.settings?.customize?.hoverTextColor || "#000000" } }
-            #tts__listent_content_${buttonId}.tts__listent_content:focus,
-            #tts__listent_content_${buttonId}.tts__listent_content:focus-visible{ outline: none; box-shadow: none; }
-        `;
-
-        if (settings?.customCSS) {
-            style.textContent += `
-                ${this.#htmlDecode(settings.customCSS)}
-            `;
-        }
-
-        setSvgColorOnEvent(wrapper);
-        // Attach the created elements to the shadow dom
-        shadow.appendChild(style);
-        shadow.appendChild(wrapper);
     }
 
     /**
@@ -991,9 +708,10 @@ class TTSPlayButton extends HTMLElement {
         const hoverBgColor = colors.hoverBackgroundColor || '#f0f0f0';
         const hoverTextColor = colors.hoverTextColor || '#000000';
 
-        // Create wrapper
-        const wrapper = document.createElement('div');
-        wrapper.setAttribute('class', 'wrapper');
+        // TTS-249: render straight into the host (light DOM, player 1) or into
+        // the shadow root (players 2-6) — no extra .wrapper / region div. The
+        // host <tts-play-button> is the container and already has the region role.
+        const wrapper = this.useLightDom ? this : shadow;
 
         // Create button with flexbox layout: text on left, settings icon on right
         const buttonHTML = this.getNewButtonContent(buttonId, settings, 'listen');
@@ -1040,117 +758,14 @@ class TTSPlayButton extends HTMLElement {
 
         this.addEventListener('click', handlePlayClick);
 
-        // Create styles
-        const style = document.createElement('style');
-        style.setAttribute('id', 'tts_style');
-
-        style.textContent = `
-            /* TTS-241 — suppress the focus ring that browsers (and some
-               accessibility heuristics) put on the custom-element HOST
-               when it gains focus on right-click / contextmenu. The
-               wrapping rectangle that read as "border expanding" was the
-               UA outline on <tts-play-button>, which lives in the light
-               DOM and isn't reachable by inner-element rules. */
-            :host(:focus), :host(:focus-visible), :host(:focus-within) {
-                outline: none !important;
-                box-shadow: none !important;
-            }
-            .wrapper {
-                display: inline-block;
-                width: 100%;
-            }
-            #tts__listent_content_${buttonId}.tts__listent_content {
-                ${settings.btnStyle}
-                transition: all 0.5s ease-in-out;
-                display: flex !important;
-                align-items: center;
-                justify-content: space-between;
-                padding: 8px 12px;
-            }
-            #tts__listent_content_${buttonId}.tts__listent_content:hover {
-                ${settings.btnStyle}
-                background-color: ${hoverBgColor};
-                /* TTS-241 — set color on the button itself so SVG presets
-                   using currentColor inherit the hover color too. */
-                color: ${hoverTextColor};
-            }
-            #tts__listent_content_${buttonId}.tts__listent_content:hover span {
-                color: ${hoverTextColor};
-            }
-            #tts__listent_content_${buttonId}.tts__listent_content:hover svg polygon,
-            #tts__listent_content_${buttonId}.tts__listent_content:hover svg path {
-                fill: ${hoverTextColor};
-            }
-            #tts__listent_content_${buttonId}.tts__listent_content:hover svg[stroke] path,
-            #tts__listent_content_${buttonId}.tts__listent_content:hover svg[stroke] line,
-            #tts__listent_content_${buttonId}.tts__listent_content:hover .tts-settings-icon svg path,
-            #tts__listent_content_${buttonId}.tts__listent_content:hover .tts-settings-icon svg circle {
-                stroke: ${hoverTextColor};
-            }
-            .tts-button-left {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-            .tts-button-left svg {
-                display: ${settings.shouldDisplayIcon};
-            }
-            .tts-button-right {
-                display: flex;
-                align-items: center;
-            }
-            .tts-settings-icon {
-                cursor: pointer;
-                padding: 4px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: background-color 0.2s ease;
-            }
-            .tts-settings-icon:hover {
-                background-color: rgba(255, 255, 255, 0.2);
-            }
-            .tts-settings-icon:focus-visible {
-                outline: 2px solid ${textColor};
-                outline-offset: 2px;
-                background-color: rgba(255, 255, 255, 0.2);
-            }
-            /* TTS-241 — no focus ring on this button. The earlier
-               outline-offset version pushed a stripe 2px outside the
-               border (read as "border expanding on click"); the inset
-               box-shadow version stacked a 2px stripe inside the border
-               (read as "border getting thicker on right-click"). The
-               existing hover background change already provides clear
-               visual feedback for both mouse and touch. Keyboard
-               accessibility is preserved by browsers' default focus ring
-               on the gear icon and by the SR-only live region. */
-            #tts__listent_content_${buttonId}.tts__listent_content:focus,
-            #tts__listent_content_${buttonId}.tts__listent_content:focus-visible {
-                outline: none;
-                box-shadow: none;
-            }
-            .tts-sr-only {
-                position: absolute;
-                width: 1px;
-                height: 1px;
-                padding: 0;
-                margin: -1px;
-                overflow: hidden;
-                clip: rect(0, 0, 0, 0);
-                white-space: nowrap;
-                border: 0;
-            }
-        `;
-
-        if (settings?.customCSS) {
-            style.textContent += `
-                ${this.#htmlDecode(settings.customCSS)}
-            `;
-        }
-
-        shadow.appendChild(style);
-        shadow.appendChild(wrapper);
+        this.applyButtonStyles(shadow, wrapper, buttonId, settings, {
+            base: `${settings.btnStyle} display:flex;align-items:center;justify-content:space-between;padding:8px 12px;`,
+            hoverBg: hoverBgColor,
+            hoverColor: hoverTextColor,
+            color: textColor,
+        });
+        // Content was rendered directly into the root (host / shadow) above —
+        // no extra append needed (the wrapper div was removed in TTS-249).
     }
 
     /**
@@ -1254,23 +869,24 @@ class TTSPlayButton extends HTMLElement {
             ariaLabel = buttonText; // Resume
         }
 
+        // TTS-249: no outer wrapper / region div — the host <tts-play-button>
+        // already carries role="region" + aria-label, so the button and its
+        // sr-only live region are returned as direct children of the host.
         return `
-            <div role="region" aria-label="Text to speech player">
-                <button id="tts__listent_content_${buttonId}" class="tts__listent_content ${settings.cssClass}" type="button" title="${buttonHoverTitle}" aria-label="${ariaLabel} audio">
-                    <div class="tts-button-left" aria-hidden="true">
-                        ${iconSVG}
-                        <span>${buttonText}</span>
-                    </div>
-                    <div class="tts-button-right">
-                        ${showSettingsIcon ? `
-                            <div class="tts-settings-icon" role="button" tabindex="0" aria-label="Player settings" title="Settings" data-button-id="${buttonId}">
-                                ${settingsIconSVG}
-                            </div>
-                        ` : ''}
-                    </div>
-                </button>
-                <div class="tts-sr-only tts-live-region" role="status" aria-live="polite" aria-atomic="true"></div>
-            </div>
+            <button id="tts__listent_content_${buttonId}" class="tts__listent_content ${settings.cssClass}" type="button" title="${buttonHoverTitle}" aria-label="${ariaLabel} audio">
+                <div class="tts-button-left" aria-hidden="true">
+                    ${iconSVG}
+                    <span>${buttonText}</span>
+                </div>
+                <div class="tts-button-right">
+                    ${showSettingsIcon ? `
+                        <div class="tts-settings-icon" role="button" tabindex="0" aria-label="Player settings" title="Settings" data-button-id="${buttonId}">
+                            ${settingsIconSVG}
+                        </div>
+                    ` : ''}
+                </div>
+            </button>
+            <div class="tts-sr-only tts-live-region" role="status" aria-live="polite" aria-atomic="true"></div>
         `;
     }
 
@@ -1281,8 +897,23 @@ class TTSPlayButton extends HTMLElement {
         const button = wrapper.querySelector(`#tts__listent_content_${buttonId}`);
         if (!button) return;
 
+        // TTS-249: replace ONLY the button + live region, not the whole root.
+        // The root is now the host / shadow root itself, so wiping innerHTML
+        // would also destroy the shadow-DOM <style> (players 2-6). Swap the
+        // button's markup in place and refresh the live region instead.
         const newHTML = this.getNewButtonContent(buttonId, settings, this.listenStatus);
-        wrapper.innerHTML = newHTML;
+        const tpl = document.createElement('template');
+        tpl.innerHTML = newHTML.trim();
+        const newButton = tpl.content.querySelector(`#tts__listent_content_${buttonId}`);
+        if (newButton) {
+            button.replaceWith(newButton);
+        }
+        // The live region is a sibling of the button; ensure exactly one exists.
+        let existingLive = wrapper.querySelector('.tts-live-region');
+        const newLive = tpl.content.querySelector('.tts-live-region');
+        if (!existingLive && newLive) {
+            wrapper.appendChild(newLive);
+        }
 
         // Announce state change to screen readers
         const liveRegion = wrapper.querySelector('.tts-live-region');
@@ -1331,11 +962,11 @@ class TTSPlayButton extends HTMLElement {
         this.listenStatus = 'listen';
         this.speech = this.speech.getData();
 
-        // Update UI
-        const shadow = this.shadowRoot;
-        const wrapper = shadow.querySelector('.wrapper');
-        if (wrapper) {
-            this.updateButtonUI(wrapper, this.buttonId, window.TTS.settings);
+        // Update UI. The render root is the host itself (light DOM, player 1) or
+        // the shadow root (players 2-6) — no .wrapper div anymore (TTS-249).
+        const root = this.useLightDom ? this : this.shadowRoot;
+        if (root) {
+            this.updateButtonUI(root, this.buttonId, window.TTS.settings);
         }
     }
 
@@ -1349,6 +980,66 @@ class TTSPlayButton extends HTMLElement {
         let txt = document.createElement("textarea");
         txt.innerHTML = str;
         return txt.value;
+    }
+
+    /**
+     * TTS-249 (I2/A1): apply the per-button styling.
+     *
+     *  - Light DOM (player 1): NO <style> tag is injected (wp.org bars inline
+     *    <style> in output). The selector/state/layout rules live in the
+     *    enqueued stylesheet (admin/css/text-to-audio-button.css); here we set
+     *    the dynamic base box/visual props on the button via the inline `style`
+     *    ATTRIBUTE (allowed — highest specificity, beats theme rules) and the
+     *    hover/icon values as CSS custom properties the stylesheet consumes.
+     *    A `tts_button_wrapper` class scopes the wrapper-level rules.
+     *  - Shadow DOM (players 2-6): unchanged — a scoped <style> inside the
+     *    shadow root, which never appears in the page's light DOM.
+     *
+     * @param {Node}        root      shadow root (shadow players) or `this` (light)
+     * @param {HTMLElement} wrapper   the button wrapper div
+     * @param {string|number} buttonId
+     * @param {Object}      settings  per-button settings (btnStyle, shouldDisplayIcon, …)
+     * @param {Object}      vars      { base, hoverBg, hoverColor, color }
+     */
+    applyButtonStyles(root, wrapper, buttonId, settings, vars) {
+        const button = wrapper.querySelector(`#tts__listent_content_${buttonId}`);
+
+        if (this.useLightDom) {
+            // TTS-249: player 1's styling (box/visual props + hover/icon custom
+            // properties) is injected into the document <head> by PHP via
+            // wp_add_inline_style (see tta_get_player_button_inline_css), scoped
+            // to the .tts__listent_content class. Nothing is set inline here — no
+            // style="" attribute, no JS-applied CSS variables.
+            return;
+        }
+
+        // Shadow-DOM players: keep the scoped <style> (isolated, not in the page).
+        const style = document.createElement('style');
+        style.setAttribute('id', 'tts_style');
+        style.textContent = `
+            :host(:focus), :host(:focus-visible), :host(:focus-within) {
+                outline: none !important;
+                box-shadow: none !important;
+            }
+            #tts__listent_content_${buttonId}.tts__listent_content{ ${vars.base} transition: all 0.5s ease-in-out; }
+            #tts__listent_content_${buttonId}.tts__listent_content:hover{ ${vars.base} background-color:${vars.hoverBg}; color:${vars.hoverColor}; }
+            #tts__listent_content_${buttonId}.tts__listent_content .tts_button{ display: inline-flex; align-items: center; gap: 8px; }
+            #tts__listent_content_${buttonId}.tts__listent_content .tts_button_label{ display: inline-block; color:${vars.hoverColor}; }
+            #tts__listent_content_${buttonId}.tts__listent_content .tts-button-left{ display:flex; align-items:center; gap:8px; }
+            #tts__listent_content_${buttonId}.tts__listent_content .tts-button-right{ display:flex; align-items:center; }
+            #tts__listent_content_${buttonId}.tts__listent_content svg,
+            #tts__listent_content_${buttonId}.tts__listent_content .tts-button-left svg{ display:${settings.shouldDisplayIcon}; flex: 0 0 auto; }
+            #tts__listent_content_${buttonId}.tts__listent_content:hover svg polygon,
+            #tts__listent_content_${buttonId}.tts__listent_content:hover svg path{ fill:${vars.hoverColor}; }
+            #tts__listent_content_${buttonId}.tts__listent_content:hover svg[stroke] path,
+            #tts__listent_content_${buttonId}.tts__listent_content:hover svg[stroke] line{ stroke:${vars.hoverColor}; }
+            .tts-settings-icon{ cursor:pointer; padding:4px; border-radius:50%; display:flex; align-items:center; justify-content:center; transition: background-color 0.2s ease; }
+            .tts-settings-icon:hover, .tts-settings-icon:focus-visible{ background-color: rgba(255,255,255,0.2); }
+            #tts__listent_content_${buttonId}.tts__listent_content:focus,
+            #tts__listent_content_${buttonId}.tts__listent_content:focus-visible{ outline: none; box-shadow: none; }
+            .tts-sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+        `;
+        root.appendChild(style);
     }
 }
 

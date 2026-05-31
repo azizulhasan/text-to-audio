@@ -4,11 +4,14 @@ import ButtonStateEditor from "./ButtonStateEditor";
 
 export default function TTSButtonDesign({
                                             handleChange,
-                                            customCSS,
                                             listeningBtnStyle,
                                             buttonTexts,
                                             setButtonTexts,
                                         }) {
+    // TTS-249 (A1): WP core's Additional CSS editor, deep-linked to its panel.
+    const additionalCssUrl =
+        (typeof ttsObj !== "undefined" && ttsObj.admin_url ? ttsObj.admin_url : "/wp-admin/") +
+        "customize.php?autofocus[section]=custom_css";
     const playerId = parseInt(listeningBtnStyle?.buttonSettings?.id || 1, 10);
     // TTS-249 (T2): the per-state button editor ships in Free for player 1 only.
     // Player 2 (Default Pro) is premium — its editor is injected by the Pro
@@ -335,17 +338,18 @@ export default function TTSButtonDesign({
                 />
             ) : null}
 
-            {/* Custom CSS Section */}
+            {/* TTS-249 (A1): the raw Custom CSS textarea was removed (wp.org no
+                longer permits persisting arbitrary CSS). Point users to WP
+                core's sanctioned Additional CSS editor instead — the Free
+                player now renders in the light DOM so that CSS reaches it. */}
             <div className="tta_section_title">{__("Custom CSS", "text-to-audio")}</div>
-            <Form.Control
-                as="textarea"
-                name="custom_css"
-                id="custom_css"
-                className="tta_custom_css_textarea"
-                onChange={handleChange}
-                value={customCSS ? customCSS : ""}
-                placeholder={__('Enter Custom CSS here', 'text-to-audio')}
-            />
+            <p className="tta_custom_css_note">
+                {__("Add custom styling for your player using the WordPress Customizer's Additional CSS editor.", "text-to-audio")}{" "}
+                <a href={additionalCssUrl} target="_blank" rel="noopener noreferrer">
+                    {__("Open Appearance → Customize → Additional CSS", "text-to-audio")}
+                </a>
+                .
+            </p>
         </>
 
     );

@@ -86,7 +86,7 @@ Verified the AI-flagged claims against the actual code. All 8 are **real**, no f
 | # | Area | File(s) / Symptom | Action | Priority | Status |
 |---|---|---|---|---|---|
 | T1 | Trialware: top-post + previous-period analytics calculated only when `is_pro_active()` | `api/AtlasVoice_Analytics.php` + `admin/TTA_Admin.php` (Free); `Api/TTA_Pro_AtlasVoice_Analytics.php` + `Includes/TTA_Pro_Filters.php` (Pro); `src/dashboard/components/dashboard/analitics/*` (frontend) | **DONE — filter-injection model (§3.1a) implemented + verified.** Free: deleted previous-period branch + `get_previous_period_dates()`, removed post-type cap, removed all `is_pro_active()` from analytics handlers, added `tts_analytics_response` / `tts_analytics_post_list` / `tts_trackable_post_ids` filters + `tts_capabilities` key. Pro: `register_analytics_filters()` injects previous-period, the all-sentinel, and `{previousPeriod, heatmap, export, scheduleReports, extendedDateRange}` capabilities. Frontend: removed every `is_pro_active`/demo-data/overlay from Analitics, BrowserAnalytics, DeviceTypes, EngagementFunnel, PopularPosts, ListenerSegments, GlobalDateRangePicker, ExportSection — sections now render by data-presence / `capabilities.*`. Built (`npm run production`); fresh `tab-analytics.chunk.js` has 0 `is_pro_active`, 3 `capabilities` gates. wp-cli verified: `aggregated_insights`→`previous` injected, `trend_data`→not, post-list + trackable-ids sentinels present. | P0 | ✅ |
-| T2 | Trialware: player-2 handling / customization code in Free | `src/dashboard/components/dashboard/customize/*` — Pro-only `if (player_id === 2)` branches, `player_customizations[2]` defaults in the Customize React state, any Pro-skin assets referenced from Free's bundles. Also `includes/helpers.php` `tta_get_button_content()` callers that switch on player id > 1 | Strip all player-2 (and higher) branches from Free's React + PHP code paths. Free's customize form should show only Player 1 controls; Pro registers Players 2-6 via `tts_available_players` filter (already wired). Rebuild `admin/js/build/*` bundles | P0 | ⬜ |
+| T2 | Trialware: player-2 handling / customization code in Free | `src/dashboard/components/dashboard/customize/*` — Pro-only `if (player_id === 2)` branches, `player_customizations[2]` defaults in the Customize React state, any Pro-skin assets referenced from Free's bundles. Also `includes/helpers.php` `tta_get_button_content()` callers that switch on player id > 1 | **DONE — moved player-2..6 code into Pro via the mounted-island model (§3.1b) + verified across Free-only / Free+Pro / stale-id.** Free: deleted the whole `src/dashboard/buttons/` tree (`TextToSpeech`, `TextToSpeechThree/Four`, dead `TextToSpeechTwo`) + `button.js` + its webpack entry + the `copyProButton` task; `Customize.js` preview branches collapsed to player-1 `ButtonPreview` + an empty `#tts_customize_pro_preview` slot for ids > 1 (with an `availablePlayers` fallback to player 1 for stale Pro ids); `TTSButtonDesign`/`ButtonStateEditor` gated to player 1 only; `build_player_customizations()` emits id 1 only. Pro: new `src/dashboard-customize/` bundle (`text-to-audio-dashboard-pro.min.js`) mounts its OWN React tree into Free's slot and renders the moved components, reading `data-player-id`/`data-button-css`/`data-button-texts` (re-renders via MutationObserver on player switch); Pro builds its own `text-to-audio-pro-button.min.js` (cutting the copyProButton dep); demo preview assets restored under Pro `demos/`. Built; grep confirms 0 player-2..6 component code in Free's `tab-customize.chunk.js`. | P0 | ✅ |
 
 ### 3.1a Analytics architecture — filter-injection model (the T1 design)
 
@@ -173,19 +173,159 @@ Why the split: filter-injection only works when there's a server response to enr
 
 ---
 
+### 3.1b Player-code move — mounted-island model (the T2 design)
+
+**Goal:** the Free ZIP ships code for **player 1 only**. All player-2..6 implementation (frontend players + customize preview + per-player customization controls) lives in **Pro**, so there is no locked player code in Free to flag under Guideline 5.
+
+#### Audit findings (what was actually in Free, and who owned it at runtime)
+
+| Surface | Runtime owner | Disposition |
+|---|---|---|
+| Frontend players 2-6 on posts (`TextToSpeechPro.min.js`, Plyr, `text-to-audio-pro-button.min.js`) | **Pro already self-sufficient** | n/a |
+| Free's `button.js` + `TextToSpeechThree/Four.js` (frontend renderer) | Free bundle, but **never executes** (free = player 1 only; Pro ships its own) | **moved to Pro** |
+| Customize dashboard (`text-to-audio-dashboard-ui` bundle) | **Always Free**, even when Pro active (Pro has no React dashboard of its own) | stays Free |
+| Player-2..6 preview components + player-2 customization controls inside that bundle | Free bundle — rendered the Pro previews when Pro active | **moved to Pro** |
+| `TextToSpeechTwo.js` | imported nowhere (player 2 preview used the `TextToSpeech` base) | **deleted as dead code** |
+
+#### Why mounted-island, not a filter-returned component
+
+Stage-0 found both plugins bundle their **own React 17** via Laravel Mix `.react()`; neither uses `wp-element` as a shared external. A filter that returns a Pro-built JSX element rendered inside Free's React tree would throw "two copies of React". The existing cross-plugin hook (`ttsProPlayerDesign`) works only because it passes **plain data, not components**. So instead of forcing a shared-React migration across 8+ bundles (high blast radius), the preview crosses the boundary as a **mounted island**:
+
+```
+Free Customize.js renders, for player ids > 1, an empty slot:
+  <div id="tts_customize_pro_preview"
+       data-player-id data-button-css data-button-texts />
+  (and renders only the player-1 ButtonPreview itself)
+        │
+Pro's dashboard-customize bundle (its OWN React 17) finds that node and
+  ReactDOM.render(<ProPreview …/>, slot), reading the data-* attributes;
+  a MutationObserver re-renders on player switch / draft edits.
+```
+
+Each plugin keeps its own React (no migration), DRY is preserved (Pro renders the **moved** components), and no player-2..6 code ships in Free.
+
+#### Free-side changes
+
+1. Delete `src/dashboard/buttons/` (the `TextToSpeech` base + `TextToSpeechThree/Four`, and dead `TextToSpeechTwo`) and `src/dashboard/button.js`; drop the `button.js` webpack entry and neutralise the `copyProButton` gulp task.
+2. `Customize.js`: replace the `id == 2/3/4/5/6` preview branch chain with the single `#tts_customize_pro_preview` slot for ids > 1, falling back to the player-1 `ButtonPreview` when the saved id isn't in `ttsObj.availablePlayers` (stale-Pro-id safety — mirrors `get_player_id()`'s server-side capability fallback).
+3. `TTSButtonDesign.js` / `ButtonStateEditor.js`: change the `playerId === 1 || playerId === 2` gate to player-1 only.
+4. `admin/TTA_Admin.php` `build_player_customizations()`: emit the icon map for id 1 only (Pro appends id 2 via the existing `tts_player_customizations` filter).
+5. `TTA_Hooks` minification-exclusion list: drop `text-to-audio-pro-button.min.js` (Pro now adds its own).
+
+#### Pro-side changes
+
+1. New `src/dashboard-customize/` source tree holds the moved components, built to `text-to-audio-dashboard-pro.min.js` (the preview island) and `text-to-audio-pro-button.min.js` (frontend pro-button, from Pro source — replaces the copyProButton copy).
+2. `index.js` mounts the island into `#tts_customize_pro_preview`, renders the player-2..6 preview, and re-renders on `data-*` changes.
+3. `TTA_Pro_Actions::enqueue_customize_preview()` enqueues the island on the AtlasVoice page (Pro active only) after Free's `text-to-audio-dashboard-ui`.
+4. `TTA_Pro_Hooks` adds the new bundles to the JS/CSS minification-exclusion lists.
+
+#### Demo preview assets (sub-issue surfaced during T2)
+
+The customize previews depend on demo CSS/JS/audio that TTS-247 had deleted from Free's `admin/demos/`. Those are Pro-only preview assets, so they were **restored inside Pro** (`text-to-audio-pro/demos/`): player-2 styling + the `TextToSpeechProDemo` speechSynthesis class (which defines `window.TextToSpeechPro` used by the player-2 play handler), and the player-3..6 Plyr demo player. Notes:
+
+- Demo scripts are enqueued **independently** (not as dependencies of the React bundle) so a demo-script issue can never blank the dashboard.
+- The Plyr demo plays each preview once and loads provider sample clips per player — player 4 → Google `en-US-Wavenet-C.wav`, player 5 → OpenAI `alloy.wav`, players 3/6 → bundled local mp3 — with the `<source>` MIME type derived from the file extension. (Remote sample URLs are acceptable here because this is the **Pro** plugin, not the wp.org free ZIP that Guideline 8 governs.)
+- The preview effect lists `buttonId` in its deps and clears the container before re-init, so switching players loads the correct clip.
+
+#### Cross-version impact
+
+| Site | Behavior |
+|---|---|
+| Free-only | Customize shows player 1 only (selector + preview + controls); the slot is never created for ids > 1 (those aren't selectable); frontend plays player 1. No player-2..6 code in the ZIP. |
+| Free 2.2.2 + Pro 3.3.0 | Pro mounts the island → players 1-6 preview + controls render; frontend players 2-6 play from Pro's own bundles. |
+| Pro removed, stale id (e.g. 3) saved | Customize preview + frontend both fall back to player 1 (capability fallback), no JS error. |
+
+---
+
 ### 3.2 Arbitrary code insertion (NEW)
 
 | # | Area | File(s) / Symptom | Action | Priority | Status |
 |---|---|---|---|---|---|
-| A1 | Custom CSS setting exposes raw user CSS | `src/dashboard/components/dashboard/customize/TTSCustomization.js` (Custom CSS `<textarea>`); `includes/TTA_Helper.php` customize-settings schema (`custom_css` key + sanitization); `tta_customize_settings` option storage; `includes/helpers.php` `tta_get_button_content()` where `custom_css` is echoed into the inline `<style>` block and into the localized `tta_obj` settings object | Remove the Custom CSS textarea from the Customize tab; drop `custom_css` from the customize-settings schema, sanitization, and default values; stop reading it in `tta_get_button_content()`; delete the stored value on uninstall. Existing per-site installs that already saved a `custom_css` value: leave the option key intact in DB so the value isn't destroyed, but stop reading/echoing it. Users who need site CSS can use WP core's Customizer → Additional CSS, which is sanitized + reviewable by core | P0 | ⬜ |
+| A1 | Custom CSS setting exposes raw user CSS | UI: `src/dashboard/components/dashboard/customize/design/TTSButtonDesign.js` (the `<textarea name="custom_css">`) + `Customize.js` `customCSS` state/prop wiring. Save: `api/TTA_Api_Routes.php` `tta_manage_customize_data()`. Render: `includes/helpers.php` `tta_get_button_content()` → frontend `admin/js/text-to-audio-button.js` injected `settings.customCSS` verbatim as `<style>`. Schema/defaults: `includes/TTA_Activator.php`, React defaults. | **DONE — raw-CSS field removed + migrated to WP core Additional CSS (see §3.2a).** Textarea replaced with a note + deep-link to Appearance → Customize → Additional CSS; `customCSS` plumbing removed from `Customize.js`/`CustomizationTabs.js`/`TTSButtonDesign.js`; `custom_css` read dropped from `helpers.php` + the verbatim `<style>` injection removed; defaults removed from `TTA_Activator.php` + `TextToSpeech.js`. One-time migration (`TTA_Activator::migrate_custom_css_to_additional_css()`, guarded by `tta_custom_css_migrated`, wired on the upgrader hook + `admin_init` fallback) appends any saved value to the theme's Additional CSS via `wp_update_custom_css_post()`; original DB value preserved. Player 1 converted shadow→light DOM with a defensive typography reset so Additional CSS reaches it. Verified: no textarea (link present), migration runs, button renders + plays in light DOM, no theme leak, no console errors. | P0 | ✅ |
+
+### 3.2a Custom CSS removal + Additional-CSS migration (the A1 design)
+
+**Goal:** remove the arbitrary-CSS textarea (the barred category) **without** stranding users who relied on it — by migrating their CSS into WordPress core's sanctioned Additional CSS editor and making player 1 actually stylable from there.
+
+#### The shadow-DOM problem (why "just use Additional CSS" isn't enough on its own)
+
+The frontend button is a custom element (`<tts-play-button>`) that calls `this.attachShadow({mode:'open'})` and appends its `<style>` + wrapper **inside the shadow root** (`admin/js/text-to-audio-button.js` ~line 881). Shadow DOM is an isolation boundary: **light-DOM CSS (which is where WP core's Additional CSS lives) cannot reach inside it.** So removing the field and telling users "use Additional CSS" would be a dead end — their CSS wouldn't apply to the button. Only CSS variables, `::part()`, and a few inheritable props cross a shadow boundary.
+
+**Decision:** drop the shadow DOM for **player 1 only** (the Free player) and render it into the light DOM, so Additional CSS reaches it. Players 2-6 (Pro: speechSynthesis-Pro + Plyr) keep their shadow DOM — they're unaffected by this change and their previews/players already work as-is.
+
+#### Leak study — measured on a live page (2026-05-30, `…/mcp-10-simple-daily-habits…`)
+
+Inspected the shadow `<style>` the button currently ships and compared against the theme's global rules:
+
+- The shadow style **explicitly declares** all the major box/visual props on the button: `display, width, height, font-size, color, background-color, border, border-radius, padding, margin(-*), box-shadow, cursor, text-decoration, transition, outline, gap, …`.
+- Our scoping selector is `#tts__listent_content_N.tts__listent_content` — **ID + class** specificity, which **outranks any theme `button{…}` rule** (element-level). So every property we explicitly set still wins in the light DOM → **no "leak-in" for those props.**
+- **The only real leak surface** is the handful of inheritable/typographic props we *don't* declare, which a theme's `button{}` or global rules could impose: `font-family, line-height, text-transform, letter-spacing, word-spacing, text-shadow, font-weight, font-style`. (e.g. a theme doing `button{text-transform:uppercase}` would bleed in.)
+- Leak-**out** is already contained: every selector is ID-scoped, so the button's styles can't affect the rest of the page.
+
+#### Leak-prevention plan
+
+Add a small **defensive reset** to player 1's light-DOM style block, scoped to the same ID selector, neutralising exactly the props the audit flagged as leak-prone — so the button looks identical to its old shadow-DOM rendering regardless of theme:
+
+```css
+#tts__listent_content_N.tts__listent_content,
+#tts__listent_content_N.tts__listent_content * {
+    font-family: inherit;          /* or the plugin's chosen stack */
+    line-height: normal;
+    text-transform: none;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-shadow: none;
+    font-style: normal;
+}
+```
+
+This is **additive** — it sits alongside the existing ID-scoped declarations (already high-specificity), so user/theme Additional CSS targeting the same selector with equal-or-higher specificity still wins where intended. The reset only blocks unintended inheritance of typographic props, not deliberate styling.
+
+#### Migration of existing saved CSS
+
+One-time, on upgrade to 2.2.2:
+
+1. Read `tta_customize_settings['custom_css']`. If empty → nothing to do.
+2. Append it to the active theme's Additional CSS using WP core's API:
+   ```php
+   $existing = wp_get_custom_css();                     // current Additional CSS
+   $marker   = "\n\n/* Migrated from AtlasVoice Custom CSS (v2.2.2) */\n";
+   wp_update_custom_css_post( $existing . $marker . $saved_custom_css );
+   ```
+   (`wp_update_custom_css_post()` writes the `custom_css` CPT that the Customizer → Additional CSS panel reads/edits — the sanctioned, core-sanitized store.)
+3. Guard with a one-shot option flag (e.g. `tta_custom_css_migrated`) so it runs once.
+4. **Do not delete** `tta_customize_settings['custom_css']` from the DB (preserve the original value as a safety copy); just stop reading/echoing it.
+
+Caveat to note in the upgrade notice: Additional CSS is **per-theme**, so the migrated block lives under the theme active at upgrade time; if the user switches themes they re-add it (same as any Additional CSS). Also, migrated rules now apply in the light DOM — author them against `#tts__listent_content_N` / `.tts__listent_content` (unchanged selectors), which is exactly what the old field used.
+
+#### UI change
+
+Replace the `<textarea name="custom_css">` in `TTSButtonDesign.js` with a short note + link:
+> *Custom CSS has moved. Use Appearance → Customize → Additional CSS.*
+linking to `customize.php?autofocus[section]=custom_css`. Remove the `customCSS` state/prop plumbing from `Customize.js` and the `custom_css` key from React defaults + `TTA_Activator.php` defaults.
+
+#### Free / Pro split
+
+All of the above lives in **Free** (the button element, the migration hook, the Customize UI are Free-owned), so **Pro inherits the fix automatically** — player 1 is the Free player, and the Pro players (2-6) are untouched. No Pro-side change required for A1.
+
+#### Cross-impact / risk
+
+| Concern | Handling |
+|---|---|
+| Player 1 loses shadow-DOM isolation | ID-scoped styles already win over theme rules; defensive typography reset covers the only measured leak-in surface. |
+| Existing users lose their Custom CSS | Migrated into per-theme Additional CSS on upgrade; original value preserved in DB as backup. |
+| Theme switch after migration | Documented in upgrade notice (Additional CSS is per-theme). |
+| Players 2-6 | Unchanged — still shadow DOM; not in scope. |
+
+---
 
 ### 3.3 Inline assets (soft-flag → fix)
 
 | # | Area | File(s) / Symptom | Action | Priority | Status |
 |---|---|---|---|---|---|
 | I1 | Inline `<script>` carrying per-button settings JSON | `includes/helpers.php` `get_enqueued_js_object()` (called via `tta_get_button_content()` → `do_action('tts_enqueue_button_scripts')`) emitted `<script id="tts_button_settings_N">…</script>` inside a `wp_print_footer_scripts` closure | Replaced the raw inline `<script>` with paired `wp_add_inline_script(..., 'before')` calls — one for Free's `text-to-audio-button` handle, one (gated by `wp_script_is(..., 'registered')`) for Pro's `text-to-audio-pro-button` handle, so the per-button payload lands on whichever button-script handle is actually registered (Free-only sites use Free's, Pro-active sites use Pro's; Pro doesn't enqueue Free's button JS when its own is loaded). Closure hook priority dropped from default 10 → 5 so it runs **before** core's `wp_print_scripts` (also priority 10), otherwise the inline data is queued too late and silently dropped. Payload is IIFE-wrapped so multiple buttons on one page don't collide on shared `var` names; all `window.TTS.contents[N]` / `window.TTS.extra[N]` / `window.ttsObj.settings.settings` writes preserved verbatim. Verified live on a Pro-active page (player 1, post 175) — exactly one `<script id="text-to-audio-pro-button-js-before">` block on the page, ordered before `text-to-audio-pro-button-js`, IIFE side-effects intact. PHP `-l` clean. | P1 | ✅ |
-| I2 | Inline `<style>` carrying per-button CSS variables | Same `tta_get_button_content()` — emits `<style id="tts_button_settings_style_N"></style>` with the customize colors / sizes | Either (a) move to a `wp_enqueue_style()` + `wp_add_inline_style()` pattern hung off `text-to-audio-button` handle, or (b) replace inline-style with CSS custom properties set on a wrapper element via `style="--tts-bg: …"` (no inline `<style>` tag). Option (b) is cleaner and survives Plugin Check's "no inline styles" rule | P1 | ⬜ |
-| I3 | Audit for any other inline `<script>` / `<style>` Plugin Check flags | repo-wide | `grep -rn '<script' includes/ admin/` and `grep -rn '<style' includes/ admin/` — every hit either gets enqueued + localized or removed. Document the audit in §7 working notes | P1 | ⬜ |
+| I2 | Inline `<style>` in the page from the player JS | Player 1's `<style id="tts_style">` (the per-button rules), surfaced into the page when A1 moved player 1 to the light DOM; plus the pre-existing settings-modal `<style id="tts-settings-modal-styles">` injected into `<head>` by `TTSPlayButton.injectStyles()` | **DONE — option (a)+(b) combined.** New enqueued stylesheet `admin/css/text-to-audio-button.css` holds all the selector/state/layout rules + the settings-modal CSS (migrated out of `injectStyles()`, now a no-op). The dynamic per-button values (colours/size/border/margins + `--tts-hover-*`/`--tts-icon-display`) are built in PHP from the global customize settings (`tta_get_player_button_inline_css()`) and attached via **`wp_add_inline_style('text-to-audio-button', …)`** — WP renders them in `<head>`, NOT as a `style=""` attribute. JS no longer injects any `<style>` (light DOM) or sets inline styles. Players 2-6 keep their isolated shadow-DOM `<style>` (never in the page). `data-id` attr also hardened with `esc_attr()`. Verified live: **zero plugin `<style>` tags** in the page (only WP core's `wp-custom-css`), no `style=""` on host/button, button styled from head CSS, playback + gear modal work. | P1 | ✅ |
+| I3 | Audit for any other inline `<script>` / `<style>` Plugin Check flags | repo-wide | Player-1 frontend now emits **no** inline `<script>` (I1) or `<style>` (I2) — verified via live DOM scan. Remaining: run the repo-wide grep + Plugin Check during the pre-SVN audit to confirm no other surfaces. | P1 | 🟨 |
 
 ### 3.4 Readme URL validity
 
@@ -259,11 +399,11 @@ Per the reviewer's standing invitation to flag mistakes, every AI-marked (`✨`)
 |---|---|---|---|
 | FP1 | Top-post + previous-period analytics only when `is_pro_active()` (T1) | **Real** — Free's analytics methods contain Pro-only math branches that short-circuit on `is_pro_active()` then continue to compute extra metrics; the extra metrics shouldn't ship in the Free build | Fix: move the math to Pro. Same pattern wp.org closed AtlasVoice for in §3.1 of the original ticket; arguing would be slow and reviewer's escalated warning rules out a second chance |
 | FP2 | Player-2 handling/customization in Free (T2) | **Real** — the React Customize tab still has Pro-only branches for player 2 customizations and the `player_customizations[2]` schema. wp.org's view: the code shouldn't be in the Free build at all | Fix: strip the Pro-specific branches from Free's React; Pro can carry its own customization additions. (The `tts_available_players` filter pattern from TTS-247 already cleanly separates the player *registry*; what's left is just the customization UI.) |
-| FP3 | Custom CSS field allows arbitrary CSS insertion (A1) | **Real, and a new 2026 wp.org rule** — plugins may not persist arbitrary user CSS/JS/PHP. WP core's Customizer "Additional CSS" exists for this | Fix: remove the field. No defensible workaround (sanitization isn't enough — the whole *category* of feature is now barred) |
+| FP3 | Custom CSS field allows arbitrary CSS insertion (A1) | **Real, and a new 2026 wp.org rule** — plugins may not persist arbitrary user CSS/JS/PHP. WP core's Customizer "Additional CSS" exists for this | Fix: ✅ field removed; any saved value migrated to WP core's Additional CSS (`wp_update_custom_css_post`), and player 1 moved to the light DOM so that core-sanitized CSS actually reaches the button. |
 | FP4 | Invalid Terms/Privacy URL (U1) | **Real** — the URL in readme returned 404 | Fix: ✅ already corrected to the working `terms-and-conditions/` and `privacy-policy/` paths |
 | FP5 | Out-of-date Chart.js (L1) | **Real** — 4.4.7 is from late 2024, latest stable is 4.5.1 (May 2025) | Fix: ✅ upgraded to 4.5.1 |
 | FP6 | Direct `file_put_contents` in translation downloader (F1) | **Real** — even gated by a `phpcs:ignore`, reviewer wants `WP_Filesystem` | Fix: ✅ swapped to WP_Filesystem |
-| FP7 | Inline `<script>` + `<style>` tags in output (I1/I2) | **Real** — both come out of `tta_get_button_content()`. Reviewer's email explicitly says "admin screens are not considered an exception, and neither are inline styles or scripts" | Fix: enqueue + localize (script) and inline-style-attribute or `wp_add_inline_style` (style) |
+| FP7 | Inline `<script>` + `<style>` tags in output (I1/I2) | **Real** — both come out of `tta_get_button_content()`. Reviewer's email explicitly says "admin screens are not considered an exception, and neither are inline styles or scripts" | Fix: ✅ script → `wp_add_inline_script` (I1); style → enqueued stylesheet + `wp_add_inline_style` in `<head>` (I2). Verified zero inline `<script>`/`<style>` in the player-1 output. |
 | FP8 | External services need 1/2/3 for each entry (E1) | **Met already** after U1 — re-audit confirms all 4 entries have all three pieces | No fix needed; just confirm in the reply |
 
 ---
@@ -301,10 +441,15 @@ _(append as work progresses)_
   - **L1** ✅ — `admin/js/vendor/chart.umd.min.js` swapped from 4.4.7 → 4.5.1 (jsDelivr UMD build, 208,522 bytes, header attribution preserved).
   - **F1** ✅ — `includes/TTA_Translation_Downloader.php` `download_file()` switched to `WP_Filesystem::put_contents()` with `wp-admin/includes/file.php` require + `WP_Filesystem()` init + `FS_CHMOD_FILE`.
   - **E1** ✅ — full external-services audit confirms all 4 entries have purpose / data + trigger / ToS + Privacy. No additional readme edits needed beyond U1.
+- **T1** ✅ (committed) — analytics filter-injection model implemented + verified across free-only / Free+Pro (see §3.1a). Free holds no premium analytics math and no `is_pro_active()` in any analytics handler.
+- **T2** ✅ (committed) — player-2..6 code moved out of Free via the mounted-island model (see §3.1b). Free's `src/dashboard/buttons/` + `button.js` deleted; Pro owns the preview island + frontend pro-button + demo assets.
+  - Verified: **Free-only** → selector + preview + controls are player-1 only, frontend plays player 1, no player-2..6 code in the built bundle (grep). **Free+Pro** → preview renders players 1-6 (player switch reactive via MutationObserver), frontend players 2-6 play from Pro's bundle. **Stale id** (saved 3, Pro inactive) → falls back to player 1, no JS error.
+  - Sub-fixes landed during T2: restored the Pro `demos/` preview assets (player-2 CSS + `TextToSpeechProDemo` defining `window.TextToSpeechPro`, player-3..6 Plyr demo); fixed a blank-dashboard regression (don't make the React bundle depend on the demo scripts); fixed player-4..6 double-init + stale-clip-on-switch; wired provider sample clips (Google/ChatGPT `.wav` + ext-derived MIME type).
+- **A1** ✅ — Custom CSS field removed + migrated to WP core Additional CSS; player 1 moved shadow→light DOM with a defensive typography reset (see §3.2a). Verified free-only + Free+Pro.
+- **I1** ✅ / **I2** ✅ — player-1 frontend emits no inline `<script>` or `<style>`. Per-button CSS is now an enqueued stylesheet + `wp_add_inline_style` (head), settings-modal CSS migrated into the same sheet. Verified: zero plugin `<style>` tags in the page.
+- **Also (2.2.2 cleanup):** removed the legacy "old player" system entirely (UI toggle + `initOldPlayer` + `getButtonContent` usage + `use_old_player` setting/branches — new player always runs); flattened the player DOM (dropped the `.wrapper` div + the redundant inner `role="region"` div, fixing the duplicate-landmark a11y issue — the host `<tts-play-button>` is now the single region container).
 - **Outstanding for 2.2.2 (in priority order)**:
-  - T1 (Pro analytics math move) — P0, biggest scope item
-  - T2 (player-2 code strip from Free) — P0, biggest React refactor
-  - A1 (Custom CSS field removal) — P0, isolated to one tab + one settings key
-  - I1 + I2 (inline → enqueue) — P1, mechanical but touches every button-render path
-  - I3, F2, L2 — defensive audits, run after the P0 items land
+  - I3, F2, L2 — defensive audits (repo-wide inline-`<script>`/`<style>` grep, filesystem-call audit, vendor-lib staleness) — run during the pre-SVN pass
   - B1-B6 → V1-V8 → F1-F7 (version bump, build, verify, release) — last
+- **2026-05-30** — T1 + T2 completed on `feature/TTS-247` (Free + Pro). T2 was the largest item; resolved with the mounted-island approach (§3.1b) rather than a shared-React migration, after Stage-0 confirmed both plugins bundle their own React. Full design + plan: [`TTS-249-T2-player-code-move.md`](TTS-249-T2-player-code-move.md).
+- **2026-05-31** — A1 + I1/I2 completed on `feature/TTS-247` (Free). Custom CSS removed/migrated to WP core Additional CSS; player 1 moved to the light DOM so that CSS reaches it; all per-button + settings-modal CSS moved to an enqueued stylesheet + `wp_add_inline_style` (no inline `<style>`/`style=""`). Also removed the old-player system and flattened the player DOM (two redundant wrapper divs gone). `data-id` output hardened with `esc_attr()`. Verified live across free-only, Free+Pro, and stale-id states; no console errors. **A1, I1, I2 done — remaining 2.2.2 work is the defensive audits (I3/F2/L2) + the release chain (B/V/F).**
