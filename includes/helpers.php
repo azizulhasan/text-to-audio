@@ -313,10 +313,15 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
 
     // TTS-249 (A1): the user-facing Custom CSS field was removed (wp.org bars
     // persisting arbitrary CSS). Any previously-saved value was migrated to WP
-    // core's Additional CSS on upgrade and is no longer read/echoed here. We
-    // still build the theme-compatibility CSS (max-width / centering) below —
-    // that's plugin-generated, not user input.
-    $custom_css = compatibility_with_themes('', $customize, $player_number);
+    // core's Additional CSS on upgrade and is no longer read/echoed here.
+    //
+    // TTS-249: the old compatibility_with_themes() helper (hardcoded
+    // `max-width:650px; margin:auto` for `twenty*` themes only) was removed —
+    // theme compatibility is now handled universally by the enqueued stylesheet
+    // (`tts-play-button{display:block;width:100%}`), which defers the content-
+    // width cap to the active theme's own responsive layout. The frontend player
+    // JS never consumed this value, so it stays empty.
+    $custom_css = '';
     // Custom class to button.
     $class = (isset($text_arr['class'])) && strlen($text_arr['class']) ? esc_attr($text_arr['class']) : "";
     $class .= (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
@@ -909,37 +914,6 @@ function tta_get_player_button_inline_css()
     return $css;
 }
 
-
-function compatibility_with_themes($custom_css, $customize, $player_number = 1)
-{
-
-    if (false !== strpos(get_option('stylesheet'), 'twenty')) {
-        $selector = '';
-        for ($i = 1; $i <= $player_number; $i++) {
-            $comma = '';
-            if ($i > 1 && $i < $player_number) {
-                $comma = ', ';
-            }
-            $selector .= '#tts__listent_content_' . $i . '.tts__listent_content, #tts__listent_content_' . $i . '.tts__listent_content:hover'. $comma;
-        }
-        $custom_css .= $selector . '  {max-width:650px;';
-        if (
-            (isset($customize['marginLeft']) && $customize['marginLeft'] == '0'
-                && isset($customize['marginRight']) && $customize['marginRight'] == '0'
-                && isset($customize['marginTop']) && $customize['marginTop'] == '0'
-                && isset($customize['marginBottom']) && $customize['marginBottom'] == '0'
-            )
-            ||
-            (!isset($customize['marginLeft']) )
-        ) {
-            $custom_css .= 'margin:auto;}';
-        }else{
-            $custom_css .= '}';
-        }
-    }
-
-    return $custom_css;
-}
 
 function set_initial_button_texts($content_read_time)
 {
