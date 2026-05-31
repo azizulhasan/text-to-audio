@@ -119,6 +119,67 @@
 		});
 
 		/**
+		 * TTS-249 (I3): browser speechSynthesis feature-detect warning. Was an
+		 * inline <script> printed by render_browser_support(); now runs here with
+		 * strings from ttaNoticeData.browserSupport.
+		 */
+		if ( ttaNoticeData.browserSupport && ! ( 'speechSynthesis' in window || 'webkitSpeechSynthesis' in window ) ) {
+			var bsNotice = document.createElement('div');
+			bsNotice.className = 'notice notice-warning tta-admin-notice';
+			bsNotice.setAttribute('data-notice-id', 'browser_support');
+			bsNotice.style.padding = '12px 20px';
+			var bsP = document.createElement('p');
+			var bsStrong = document.createElement('strong');
+			bsStrong.textContent = ttaNoticeData.browserSupport.strongLabel;
+			bsP.appendChild(bsStrong);
+			bsP.appendChild(document.createTextNode(' ' + ttaNoticeData.browserSupport.message));
+			bsNotice.appendChild(bsP);
+			var bsWrap = document.querySelector('.wrap') || document.querySelector('#wpbody-content');
+			if ( bsWrap ) {
+				bsWrap.insertBefore(bsNotice, bsWrap.firstChild);
+			}
+		}
+
+		/**
+		 * TTS-249 (I3): translation-download handler. Was an inline <script> in
+		 * the translation notice; strings from ttaNoticeData.translation.
+		 */
+		$(document).on('click', '#tta-download-translations', function(e) {
+			e.preventDefault();
+			var $btn    = $(this);
+			var $status = $('#tta-download-status');
+			var locale  = $btn.data('locale');
+			var t       = ttaNoticeData.translation || {};
+
+			$btn.prop('disabled', true).text(t.downloading || 'Downloading...');
+			$status.show().html('<span class="spinner is-active" style="float: none; margin: 0;"></span>');
+
+			$.ajax({
+				url: ttaNoticeData.ajaxurl,
+				type: 'POST',
+				data: {
+					action: 'tta_download_translations',
+					locale: locale,
+					nonce: ttaNoticeData.nonce
+				},
+				success: function(response) {
+					if (response.success) {
+						$status.html('<span style="color: #00a32a; font-weight: 600;">&#10003; ' + (t.downloadedReloading || '') + '</span>');
+						$btn.text(t.downloaded || 'Downloaded!');
+						setTimeout(function() { window.location.reload(); }, 1000);
+					} else {
+						$status.html('<span style="color: #d63638;">' + (response.data && response.data.message ? response.data.message : '') + '</span>');
+						$btn.prop('disabled', false).text(t.retry || 'Retry Download');
+					}
+				},
+				error: function() {
+					$status.html('<span style="color: #d63638;">' + (t.networkError || '') + '</span>');
+					$btn.prop('disabled', false).text(t.retry || 'Retry Download');
+				}
+			});
+		});
+
+		/**
 		 * Handle URL buttons that also dismiss the notice.
 		 */
 		$(document).on('click', '.tta-admin-notice .tta-notice-url-btn', function(e) {
@@ -153,9 +214,7 @@
 
 	});
 
-	// CSS for rotation animation.
-	var style = document.createElement('style');
-	style.innerHTML = '@keyframes ttaNoticeRotation { from { transform: rotate(0deg); } to { transform: rotate(359deg); } }';
-	document.head.appendChild(style);
+	// TTS-249 (I3): the rotation keyframe moved to the enqueued
+	// admin/css/tta-admin-notice.css (no JS-injected <style>).
 
 })(jQuery);

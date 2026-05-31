@@ -84,8 +84,9 @@ class TTA_Posts_List
             add_filter('parse_query', array($this, 'filter_posts_by_audio_status'));
         }
 
-        // Add CSS for styling
-        add_action('admin_head', array($this, 'add_admin_styles'));
+        // TTS-249 (I3): enqueue the column styles as a proper stylesheet
+        // (was an inline <style> on admin_head).
+        add_action('admin_enqueue_scripts', array($this, 'add_admin_styles'));
     }
 
     /**
@@ -437,22 +438,13 @@ class TTA_Posts_List
             return;
         }
 
-        ?>
-        <style>
-            .column-atlasvoice {
-                width: 100px;
-                text-align: center;
-            }
-
-            .column-atlasvoice .dashicons {
-                vertical-align: middle;
-                cursor: help;
-            }
-
-            #atlasvoice_filter {
-                min-width: 150px;
-            }
-        </style>
-        <?php
+        // TTS-249 (I3): enqueued stylesheet instead of an inline <style> tag.
+        wp_enqueue_style(
+            'tta-posts-list',
+            plugin_dir_url(dirname(__FILE__)) . 'admin/css/tta-posts-list.css',
+            array(),
+            defined('TEXT_TO_AUDIO_VERSION') ? TEXT_TO_AUDIO_VERSION : false,
+            'all'
+        );
     }
 }
