@@ -554,7 +554,7 @@ export default class TextToSpeech {
 /**
  * Load text to speech after DOMContentLoaded in free version.
  */
-if (window?.ttsObj?.is_pro_active) {
+if (window?.ttsObj?.is_atlasvoice_addon_functional) {
     window.TextToSpeech = TextToSpeech;
 } else {
     window.document.addEventListener('DOMContentLoaded', function () {

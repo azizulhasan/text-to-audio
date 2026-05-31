@@ -146,7 +146,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
 
         if (
             window.hasOwnProperty("ttsObjPro") &&
-            !ttsObjPro.is_pro_active
+            !ttsObjPro.is_atlasvoice_addon_functional
         ) {
             toast(
                 <>
@@ -295,7 +295,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
     };
 
     useEffect(() => {
-        if (ttsObj.is_pro_active) {
+        if (ttsObj.is_atlasvoice_addon_functional) {
             postData(apiURL + "get_auth_file", {}, "GET")
                 .then((res) => {
                     setAuthFile(res.file);
@@ -933,7 +933,7 @@ export default function GoogleTTS({getShouldCheckChatGPT, setCurrentTTSServic, s
                             {__("Save", "text-to-audio")}
                         </button>
                         {window.hasOwnProperty("ttsObjPro") &&
-                            ttsObjPro.is_pro_active &&
+                            ttsObjPro.is_atlasvoice_addon_functional &&
                             isAuthenticated && (
                                 <Button
                                     variant="outline-danger"

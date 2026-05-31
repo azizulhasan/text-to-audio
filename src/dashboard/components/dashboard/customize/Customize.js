@@ -117,7 +117,7 @@ export default function Customize() {
 
   useEffect(() => {
     let completedRequests = 0;
-    const totalRequests = window.hasOwnProperty("ttsObj") && ttsObj?.is_pro_active ? 5 : 2;
+    const totalRequests = window.hasOwnProperty("ttsObj") && ttsObj?.is_atlasvoice_addon_functional ? 5 : 2;
 
     const checkLoadingComplete = () => {
       completedRequests++;
@@ -246,13 +246,13 @@ export default function Customize() {
       if (
         window.hasOwnProperty("TTS") &&
         window.hasOwnProperty("ttsObjPro") &&
-        ttsObjPro.is_pro_active
+        ttsObjPro.is_atlasvoice_addon_functional
       ) {
         window.TTS.contents[1] = initialText;
       }
     }, 1000);
 
-    if (window.hasOwnProperty("ttsObj") && ttsObj?.is_pro_active) {
+    if (window.hasOwnProperty("ttsObj") && ttsObj?.is_atlasvoice_addon_functional) {
       postData(ttsObj.api_url + "tta_pro/v1/get_auth_file", {}, "GET")
         .then((res) => {
           if (res?.file && res?.is_authenticated) {
@@ -356,7 +356,7 @@ export default function Customize() {
       if (
         e.target.name === "button_position" &&
         !["before_content", "after_content"].includes(e.target.value) &&
-        !ttsObj.is_pro_active
+        !ttsObj.is_atlasvoice_addon_functional
       ) {
         toast(__("This option is only available for the pro version.", "text-to-audio"), "error");
         return;
@@ -511,7 +511,7 @@ export default function Customize() {
     }
 
     if (formData?.buttonSettings?.id == 4) {
-      if (ttsObj.is_pro_active && !isGCAuthenticated) {
+      if (ttsObj.is_atlasvoice_addon_functional && !isGCAuthenticated) {
 
       notify(
         __("To select this player, you must authenticate first from the Integration menu", "text-to-audio"),
@@ -529,7 +529,7 @@ export default function Customize() {
     }
 
     if (formData?.buttonSettings?.id == 5) {
-      if (ttsObj.is_pro_active && !isChatGPTAuthenticated) {
+      if (ttsObj.is_atlasvoice_addon_functional && !isChatGPTAuthenticated) {
         notify(
           __("To select this player you have to authenticate first from Integration menu", "text-to-audio"),
           "error",
@@ -546,7 +546,7 @@ export default function Customize() {
     }
 
     if (formData?.buttonSettings?.id == 6) {
-      if (ttsObj.is_pro_active && !isElevenLabsAuthenticated) {
+      if (ttsObj.is_atlasvoice_addon_functional && !isElevenLabsAuthenticated) {
         notify(
           __("To select this player you have to authenticate first from Integration menu", "text-to-audio"),
           "error",
@@ -562,7 +562,7 @@ export default function Customize() {
       }
     }
 
-    if (!ttsObj.is_pro_active && formData?.buttonSettings?.id > 1) {
+    if (!ttsObj.is_atlasvoice_addon_functional && formData?.buttonSettings?.id > 1) {
       CTANotice(__("Default Pro player is only available in the pro version.", "text-to-audio"));
       return;
     }
@@ -631,7 +631,7 @@ export default function Customize() {
     if (
       window.hasOwnProperty("TTS") &&
       window.hasOwnProperty("ttsObjPro") &&
-      ttsObjPro.is_pro_active
+      ttsObjPro.is_atlasvoice_addon_functional
     ) {
       window.TTS.contents[1] = e.target.value;
     }

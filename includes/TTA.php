@@ -139,8 +139,11 @@ class TTA {
         // TTS-249 (I3): modal behaviour as an enqueued script (was inline <script>).
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_deactivation_rescue_assets');
 
-        // Output AudioObject JSON-LD schema in <head> for singular posts with audio player
-        add_action('wp_head', [TTA_Helper::class, 'output_audio_schema_head'], 99);
+        // TTS-250: the AudioObject JSON-LD schema generator was removed from the
+        // free plugin. It only ever produced output when an MP3 file existed
+        // (a Pro-only feature — the free browser-SpeechSynthesis player has no
+        // audio file / contentUrl), so it now lives entirely in AtlasVoice Pro,
+        // which registers its own wp_head schema output.
 
         // Initialize Posts List customization
         if (is_admin()) {

@@ -78,14 +78,14 @@ export default function Listening() {
   // ── Audio preview effect ───────────────────────────────────────────
   useEffect(() => {
     console.log({
-      pro: ttsObj.is_pro_active,
+      pro: ttsObj.is_atlasvoice_addon_functional,
       id: customizationSettings?.buttonSettings?.id,
     });
     // TTS-249: removed the hardcoded cdn.openai.com sample preview (Guideline 8).
 
     if (
       window.hasOwnProperty("ttsObj") &&
-      ttsObj.is_pro_active &&
+      ttsObj.is_atlasvoice_addon_functional &&
       customizationSettings?.buttonSettings?.id == 6 &&
       elevenLabsVoices.length > 0
     ) {
@@ -151,7 +151,7 @@ export default function Listening() {
   useEffect(() => {
     if (
       window.hasOwnProperty("ttsObj") &&
-      ttsObj.is_pro_active &&
+      ttsObj.is_atlasvoice_addon_functional &&
       customizationSettings?.buttonSettings?.id == 6 &&
       listeningSettings.tta__listening_lang
     ) {
@@ -188,7 +188,7 @@ export default function Listening() {
         "tta__currentPlayerLanguages" === key ||
         "tta__multilingualActiveLanguages" === key
       ) {
-        if (!ttsObj.is_pro_active) {
+        if (!ttsObj.is_atlasvoice_addon_functional) {
           formData[key] = {};
           continue;
         }

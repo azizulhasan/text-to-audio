@@ -54,7 +54,7 @@ class MultiSelect extends React.Component {
 
     if (
       window.hasOwnProperty("ttsObjPro") &&
-      !ttsObjPro.is_pro_active &&
+      !ttsObjPro.is_atlasvoice_addon_functional &&
       selectedItems.length > selectionLimit
     ) {
       toast(
@@ -106,7 +106,7 @@ class MultiSelect extends React.Component {
     } else {
       if (
         window.hasOwnProperty("ttsObjPro") &&
-        !ttsObjPro.is_pro_active &&
+        !ttsObjPro.is_atlasvoice_addon_functional &&
         selectedItems.length === selectionLimit
       ) {
         toast(

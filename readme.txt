@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.2.2
+Stable tag: 2.2.3
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -273,6 +273,11 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.2.3 ( 31 May 2026 ) =
+Improved : The Dashboard widget's "Minutes Listened" and "Top Post Today" statistics are now shown to every user (previously hidden unless the premium add-on was active).
+Improved : Removed the remaining audio-file features from the free plugin — the AudioObject (JSON-LD) schema generator and all MP3 file-URL handling now live entirely in the AtlasVoice Pro add-on, because they require a generated audio file that the free browser-voice player does not produce. The free plugin no longer contains any functionality that is limited unless the add-on is active.
+Improved : Player responsiveness — the player now flows with your theme's content width on all screen sizes.
+
 = 2.2.2 ( 31 May 2026 ) =
 Improved : Custom button CSS now uses the WordPress Customizer's built-in "Additional CSS" panel (Appearance → Customize → Additional CSS) instead of a separate plugin field. Any CSS you previously saved in the plugin's Custom CSS box is migrated there automatically on update — nothing to re-enter.
 Improved : The player now renders in the normal page DOM (light DOM) so your theme styles and Customizer Additional CSS apply to it directly.
@@ -468,6 +473,9 @@ Introduced :  Complete new UI introduced.
 
 
 == Upgrade Notice ==
+
+= 2.2.3 =
+Dashboard "Minutes Listened" and "Top Post Today" stats now show for all users. Audio-file features (AudioObject schema, MP3 URL handling) moved entirely to the AtlasVoice Pro add-on; nothing in the free plugin is gated behind the add-on anymore.
 
 = 2.2.2 =
 Custom button CSS moves to the WordPress Customizer's "Additional CSS" panel and is migrated automatically — nothing to re-enter. The player now renders in the normal page DOM, and all inline styles/scripts are properly enqueued for WordPress.org compliance.

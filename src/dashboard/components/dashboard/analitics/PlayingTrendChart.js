@@ -27,7 +27,7 @@ export default function PlayingTrendChart({
 }) {
     // TTS-247/2.2.2: Playing Trend Analysis is a premium feature whose data is
     // supplied by Pro (tta_pro/v1/trend_data). Driven by the data-driven `trend`
-    // capability flag, not an is_pro_active license check. When absent, the whole
+    // capability flag, not an is_atlasvoice_addon_functional license check. When absent, the whole
     // card is locked behind the "Upgrade to Pro" overlay (same as Peak Hours
     // Heatmap). The previousPeriod comparison line is an extra premium layer.
     const capabilities = (typeof ttsObj !== "undefined" && ttsObj.capabilities) || {};

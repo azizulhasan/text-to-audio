@@ -354,33 +354,12 @@ class TTA_Posts_List
             return false;
         }
 
-        // Check if pro is active and player ID > 2
-        if (!is_pro_active() || get_player_id() <= 2) {
-            return false;
-        }
-
-        // Get the plugin settings
-        $plugin_all_settings = TTA_Helper::tts_get_settings();
-        $language = TTA_Helper::tts_site_language($plugin_all_settings);
-        $voice = TTA_Helper::tts_get_voice($plugin_all_settings);
-
-        // Get language and voice specific to this post
-        $language_and_voice = TTA_Helper::get_player_language_and_player_voice($language, $voice, $plugin_all_settings, $post);
-        $language = $language_and_voice['language'];
-        $voice = $language_and_voice['voice'];
-
-        // Get the file URL key
-        $file_url_key = TTA_Helper::tts_get_file_url_key($language, $voice);
-
-        // Get MP3 file URLs array from post meta
-        $mp3_file_urls = get_post_meta($post->ID, 'tts_mp3_file_urls', true);
-
-        // Check if the specific file_url_key exists and has a value
-        if (is_array($mp3_file_urls) && isset($mp3_file_urls[$file_url_key]) && !empty($mp3_file_urls[$file_url_key])) {
-            return true;
-        }
-
-        return false;
+        // TTS-250: MP3 generation is a Pro-only feature (only players 3-6 produce
+        // an audio file). The detection logic was removed from the free plugin and
+        // now lives in AtlasVoice Pro, which registers the `tts_post_has_mp3`
+        // filter. With Pro absent there is no listener, so this is always false —
+        // no Pro/license check and no premium code in the free plugin.
+        return (bool) apply_filters('tts_post_has_mp3', false, $post);
     }
 
     /**

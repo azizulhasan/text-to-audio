@@ -61,7 +61,7 @@ export default function OSAnalytics({
 }) {
     // TTS-247/2.2.2: the OS breakdown is a premium feature whose data is
     // injected by Pro into aggregated_insights. Driven by the data-driven
-    // `audience` capability flag (not is_pro_active). When absent, the whole
+    // `audience` capability flag (not is_atlasvoice_addon_functional). When absent, the whole
     // card is locked behind the "Upgrade to Pro" overlay (same as Heatmap).
     const capabilities = (typeof ttsObj !== "undefined" && ttsObj.capabilities) || {};
     const hasAudience = !!capabilities.audience;

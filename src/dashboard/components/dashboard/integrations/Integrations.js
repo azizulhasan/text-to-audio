@@ -15,7 +15,7 @@ export default function Integrations() {
   // TTS-249: voice-provider integrations (Google Cloud / ChatGPT / ElevenLabs) are
   // a Pro feature. In free we show a non-interactive upsell instead of the
   // configurable setup (no API-key forms / authenticate buttons shipped active).
-  const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
+  const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_atlasvoice_addon_functional;
 
   const apiURL = useMemo(() => {
     return (
@@ -63,7 +63,7 @@ export default function Integrations() {
 
   // Check all services authentication status on mount
   useEffect(() => {
-    if (ttsObj.is_pro_active) {
+    if (ttsObj.is_atlasvoice_addon_functional) {
       let completedRequests = 0;
       const totalRequests = 3;
 
@@ -154,7 +154,7 @@ export default function Integrations() {
 
   // Fetch usage data when authenticated and selected
   useEffect(() => {
-    if (!ttsObj.is_pro_active) return;
+    if (!ttsObj.is_atlasvoice_addon_functional) return;
 
     if (
       currentTTSServic === "elevenlabs_tts" &&
@@ -176,7 +176,7 @@ export default function Integrations() {
   // Additional check when service is selected or shouldCheckChatGPT changes
   useEffect(() => {
     if (
-      (ttsObj.is_pro_active && currentTTSServic === "chat_gpt_tts") ||
+      (ttsObj.is_atlasvoice_addon_functional && currentTTSServic === "chat_gpt_tts") ||
       shouldCheckChatGPT
     ) {
       let data = new FormData();

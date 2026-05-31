@@ -394,7 +394,7 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
             {/* ============================================================ */}
             {/* Section 3: Pro Upsell                                         */}
             {/* ============================================================ */}
-            {!wizardData.is_pro_active && (
+            {!wizardData.is_atlasvoice_addon_functional && (
                 <div style={styles.proSection}>
                     <h3 style={styles.proTitle}>
                         {__('Take it further with Pro', 'text-to-audio')}

@@ -56,7 +56,7 @@ export default function ElevenLabsSettings({
     if (
       typeof window !== "undefined" &&
       window.hasOwnProperty("ttsObj") &&
-      window.ttsObj?.is_pro_active
+      window.ttsObj?.is_atlasvoice_addon_functional
     ) {
       return (
         window.ttsObj.api_url +

@@ -117,7 +117,7 @@ export default function Settings() {
 
         if (e.target.name == "tta__settings_exclude_post_ids") {
             let ids = [];
-            if (ttsObj.is_pro_active) {
+            if (ttsObj.is_atlasvoice_addon_functional) {
                 ids = e.target.value?.split(",");
             } else {
                 ids = e.target.value?.split(",")?.slice(0, 5);
@@ -171,7 +171,7 @@ export default function Settings() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!ttsObj.is_pro_active) {
+        if (!ttsObj.is_atlasvoice_addon_functional) {
             settings.tta__settings_css_selectors = "";
         }
         let cache_clear_notice_text = "";
@@ -399,7 +399,7 @@ export default function Settings() {
                                 )}
 
                                 {/* Apply number format with YouTube icon - Missing from new */}
-                                {window?.ttsObj?.is_pro_active && (
+                                {window?.ttsObj?.is_atlasvoice_addon_functional && (
                                     <>
                                         <SettingRow
                                             label={__("Apply number format", "text-to-audio")}
@@ -587,7 +587,7 @@ export default function Settings() {
                                                     <Form.Label className="setting-label text-dark m-0">
                                                         {__("Include Content By CSS Selectors", "text-to-audio")}
                                                     </Form.Label>
-                                                    {!ttsObj.is_pro_active && (
+                                                    {!ttsObj.is_atlasvoice_addon_functional && (
                                                         <ProLockIcon
                                                             tooltipText={__(
                                                                 "Include Content By CSS Selectors feature is available in pro version", "text-to-audio"
@@ -620,11 +620,11 @@ export default function Settings() {
                                                 value={settings.tta__settings_css_selectors}
                                                 onChange={(e) => handleChange(e)}
                                                 placeholder={
-                                                    ttsObj.is_pro_active
+                                                    ttsObj.is_atlasvoice_addon_functional
                                                         ? __("Multiple selector will be multiline.", "text-to-audio")
                                                         : __("Some content may be missing, It can be found by css selectors", "text-to-audio")
                                                 }
-                                                disabled={!ttsObj.is_pro_active}
+                                                disabled={!ttsObj.is_atlasvoice_addon_functional}
                                                 className="tta-textarea"
                                             />
                                             <Form.Text className="text-muted">
@@ -640,7 +640,7 @@ export default function Settings() {
                                                     <Form.Label className="setting-label text-dark m-0">
                                                         {__("Exclude Content By CSS Selectors", "text-to-audio")}
                                                     </Form.Label>
-                                                    {!ttsObj.is_pro_active && (
+                                                    {!ttsObj.is_atlasvoice_addon_functional && (
                                                         <ProLockIcon
                                                             tooltipText={__(
                                                                 "Exclude Content By CSS Selectors feature is available in pro version", "text-to-audio"
@@ -675,11 +675,11 @@ export default function Settings() {
                                                 }
                                                 onChange={(e) => handleChange(e)}
                                                 placeholder={
-                                                    ttsObj.is_pro_active
+                                                    ttsObj.is_atlasvoice_addon_functional
                                                         ? __("Multiple selector will be multiline.", "text-to-audio")
                                                         : __("Exclude content by CSS selectors", "text-to-audio")
                                                 }
-                                                disabled={!ttsObj.is_pro_active}
+                                                disabled={!ttsObj.is_atlasvoice_addon_functional}
                                                 className="tta-textarea"
                                             />
                                             <small
@@ -704,7 +704,7 @@ export default function Settings() {
                                                     <Form.Label className="setting-label text-dark m-0">
                                                         {__("Exclude HTML Tags To Speak", "text-to-audio")}
                                                     </Form.Label>
-                                                    {!ttsObj.is_pro_active && (
+                                                    {!ttsObj.is_atlasvoice_addon_functional && (
                                                         <ProLockIcon
                                                             tooltipText={__(
                                                                 "Exclude Tags. So that its content skipped. Like ( Subscript, Superscript etc.) This is a pro feature.", "text-to-audio"
@@ -737,11 +737,11 @@ export default function Settings() {
                                                 value={settings.tta__settings_exclude_tags}
                                                 onChange={(e) => handleChange(e)}
                                                 placeholder={
-                                                    ttsObj.is_pro_active
+                                                    ttsObj.is_atlasvoice_addon_functional
                                                         ? __("Multiple Tags Will Be Pipe(|) Separated.", "text-to-audio")
                                                         : __("Exclude tags is a pro feature.", "text-to-audio")
                                                 }
-                                                disabled={!ttsObj.is_pro_active}
+                                                disabled={!ttsObj.is_atlasvoice_addon_functional}
                                                 className="tta-textarea"
                                             />
                                             <Form.Text className="text-muted">
@@ -757,7 +757,7 @@ export default function Settings() {
                                                     <Form.Label className="setting-label text-dark m-0">
                                                         {__("Exclude Texts To Speak", "text-to-audio")}
                                                     </Form.Label>
-                                                    {!ttsObj.is_pro_active && (
+                                                    {!ttsObj.is_atlasvoice_addon_functional && (
                                                         <ProLockIcon
                                                             tooltipText={__(
                                                                 "Excluding texts to be spoken is a pro feature.", "text-to-audio"
@@ -790,11 +790,11 @@ export default function Settings() {
                                                 value={settings.tta__settings_exclude_texts}
                                                 onChange={(e) => handleChange(e)}
                                                 placeholder={
-                                                    ttsObj.is_pro_active
+                                                    ttsObj.is_atlasvoice_addon_functional
                                                         ? __("Multiple Texts Will Be Pipe(|) Separated.", "text-to-audio")
                                                         : __("Exclude texts is a pro feature.", "text-to-audio")
                                                 }
-                                                disabled={!ttsObj.is_pro_active}
+                                                disabled={!ttsObj.is_atlasvoice_addon_functional}
                                                 className="tta-textarea"
                                             />
                                             <Form.Text className="text-muted">
@@ -810,7 +810,7 @@ export default function Settings() {
                                                     <Form.Label className="setting-label text-dark m-0">
                                                         {__("Exclude Posts By IDs To Speak", "text-to-audio")}
                                                     </Form.Label>
-                                                    {!ttsObj.is_pro_active && (
+                                                    {!ttsObj.is_atlasvoice_addon_functional && (
                                                         <ProLockIcon
                                                             tooltipText={__(
                                                                 "Exclude more than 5 IDs is a pro feature", "text-to-audio"
@@ -843,7 +843,7 @@ export default function Settings() {
                                                 value={settings.tta__settings_exclude_post_ids}
                                                 onChange={(e) => handleChange(e)}
                                                 placeholder={
-                                                    ttsObj.is_pro_active
+                                                    ttsObj.is_atlasvoice_addon_functional
                                                         ? __("Multiple IDs Will Be Comma(,) Separated.", "text-to-audio")
                                                         : __("Excluding more than 5 IDs is a pro feature. Multiple IDs Will Be Comma(,) Separated.", "text-to-audio")
                                                 }
@@ -859,7 +859,7 @@ export default function Settings() {
                                                     <Form.Label className="setting-label text-dark m-0">
                                                         {__("Exclude Categories To Speak", "text-to-audio")}
                                                     </Form.Label>
-                                                    {!ttsObj.is_pro_active && (
+                                                    {!ttsObj.is_atlasvoice_addon_functional && (
                                                         <ProLockIcon
                                                             tooltipText={__(
                                                                 "Exclude more than 1 categories is a pro feature", "text-to-audio"
@@ -906,7 +906,7 @@ export default function Settings() {
                                                     <Form.Label className="setting-label text-dark m-0">
                                                         {__("Exclude Tags To Speak", "text-to-audio")}
                                                     </Form.Label>
-                                                    {!ttsObj.is_pro_active && (
+                                                    {!ttsObj.is_atlasvoice_addon_functional && (
                                                         <ProLockIcon
                                                             tooltipText={__(
                                                                 "Exclude more than 1 tags is a pro feature", "text-to-audio"
