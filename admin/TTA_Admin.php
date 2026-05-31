@@ -75,6 +75,13 @@ class TTA_Admin
         add_filter('script_loader_tag', [$this, 'load_script_as_tag'], 10, 3);
         add_action('wp_ajax_atlas_plugins_refresh', array($this, 'ajax_refresh_plugins'));
 
+        // TTS-249 (A1): one-time Custom CSS → Additional CSS migration. Runs on
+        // admin_init as a fallback for already-installed sites whose update path
+        // doesn't fire the activation/upgrader hook (e.g. wp.org auto-update).
+        // Self-guards via the tta_custom_css_migrated option, so it's a single
+        // option read after the first run.
+        add_action('admin_init', array('\\TTA\\TTA_Activator', 'migrate_custom_css_to_additional_css'));
+
         // TTS-247: switched plain include to require_once per wp.org guideline.
         if (!function_exists('is_plugin_active')) {
             require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -380,7 +387,6 @@ class TTA_Admin
             );
 
             wp_localize_script('text-to-audio-dashboard-ui', 'tta_obj', $this->localize_data);
-            wp_localize_script('text-to-audio-dashboard-ui', 'ttsTR', TTA_i18n::get_default_labels());
             wp_enqueue_script('text-to-audio-dashboard-ui');
             wp_set_script_translations(
                 'text-to-audio-dashboard-ui',
@@ -507,6 +513,16 @@ class TTA_Admin
         } else if ($player_id == 1) {
             wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-button.min.js', $dependencies, $this->version, true);
             wp_localize_script('text-to-audio-button', 'ttsObj', $this->localize_data);
+            // TTS-249 (I2): player 1 renders in the light DOM, so its CSS is a
+            // proper enqueued stylesheet (not a JS-injected <style> tag). The
+            // dynamic per-button values (colours/size/border/margins + hover &
+            // icon custom properties, all from the global customize settings)
+            // are attached to the same handle via wp_add_inline_style() — WP
+            // renders them in the document <head>, not as an inline style="".
+            wp_enqueue_style('text-to-audio-button', plugin_dir_url(__FILE__) . 'css/text-to-audio-button.css', [], $this->version, 'all');
+            if (function_exists('tta_get_player_button_inline_css')) {
+                wp_add_inline_style('text-to-audio-button', tta_get_player_button_inline_css());
+            }
         }
     }
 

@@ -46,7 +46,6 @@ export default function Customize() {
       generate_mp3_date_from: "",
       generate_mp3_date_to: "",
     },
-    custom_css: "",
     marginTop: 0,
     marginBottom: 0,
     marginLeft: 0,
@@ -72,7 +71,6 @@ export default function Customize() {
   });
 
   const [shortCode, setShortCode] = useState("[atlasvoice]");
-  const [customCSS, setCustomCSS] = useState("");
   // TTS-241 — per-player button text/icon state. Hydrated from
   // /customize GET (res.button_texts) and posted back under formData.button_texts.
   const [buttonTexts, setButtonTexts] = useState({
@@ -194,7 +192,6 @@ export default function Customize() {
               res.data?.tta_play_btn_shortcode ||
               defaultValue.tta_play_btn_shortcode,
           },
-          ...{ custom_css: res.data?.custom_css || defaultValue.custom_css },
         };
 
         setListeningStyle(value);
@@ -213,9 +210,6 @@ export default function Customize() {
             preset_svgs: res.button_texts.preset_svgs || {},
             defaults,
           });
-        }
-        if (res.data.custom_css) {
-          setCustomCSS(res.data.custom_css || "");
         }
         setShortCode(
           res.data?.tta_play_btn_shortcode ||
@@ -340,10 +334,6 @@ export default function Customize() {
       return;
     }
 
-    if (e.target.name == "custom_css") {
-      setCustomCSS(e.target.value);
-      return;
-    }
 
     if (
       ![
@@ -478,7 +468,6 @@ export default function Customize() {
     let formData = {};
     for (let [key, value] of form.entries()) {
       if (
-        key !== "custom_css" &&
         key !== "generate_mp3_date_to" &&
         key !== "generate_mp3_date_from"
       ) {
@@ -510,7 +499,6 @@ export default function Customize() {
       formData[key] = value;
     }
 
-    formData["custom_css"] = customCSS;
     formData["tta_play_btn_shortcode"] = shortCode;
     formData["buttonSettings"] = listeningBtnStyle.buttonSettings;
     // TTS-241 — ride along with the same /customize round-trip.
@@ -722,7 +710,6 @@ export default function Customize() {
             {/* Player Customization Accordion */}
             <CustomizationTabs
               buttonLists={buttonLists}
-              customCSS={customCSS}
               listeningBtnStyle={listeningBtnStyle}
               handleChange={handleChange}
               listeningSettings={listeningSettings}
@@ -831,7 +818,6 @@ export default function Customize() {
             <div className="bg-white rounded p-3 mb-3 shadow-sm">
               <h5 className="mb-3 fw-semibold">{__("Design Customization", "text-to-audio")}</h5>
               <TTSButtonDesign
-                customCSS={customCSS}
                 listeningBtnStyle={listeningBtnStyle}
                 handleChange={handleChange}
                 buttonTexts={buttonTexts}

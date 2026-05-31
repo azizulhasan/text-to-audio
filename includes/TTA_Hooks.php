@@ -292,6 +292,9 @@ class TTA_Hooks {
 				if ( $plugin == $text_to_audio ) {
 					TTA_Cache::delete( 'tts_rest_api_url' );
 					TTA_Activator::create_analytics_table_if_not_exists();
+					// TTS-249 (A1): migrate any saved Custom CSS to WP core's
+					// Additional CSS now that the raw field is removed.
+					TTA_Activator::migrate_custom_css_to_additional_css();
 					break;
 				}
 			}
