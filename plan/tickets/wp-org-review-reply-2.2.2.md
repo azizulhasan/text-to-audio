@@ -357,25 +357,25 @@ All of the above lives in **Free** (the button element, the migration hook, the 
 
 | # | Area | Action | Status |
 |---|---|---|---|
-| B1 | Bump `Version:` in `text-to-audio.php` header → **2.2.2** | text-to-audio.php (plugin header line + `TEXT_TO_AUDIO_VERSION` constant define) | ⬜ |
-| B2 | Bump `Stable tag:` in `readme.txt` → **2.2.2** | readme.txt header | ⬜ |
-| B3 | Add `== Changelog == = 2.2.2 =` block | readme.txt | ⬜ |
-| B4 | Add `== Upgrade Notice == = 2.2.2 =` block — explain Custom CSS migration to WP core Customizer | readme.txt | ⬜ |
-| B5 | `npm run production` + `npm run block:build` to rebuild bundles after T1/T2/A1/I1/I2 React changes | repo root | ⬜ |
-| B6 | `npm run makeZip` → release ZIP in `production/` | repo root | ⬜ |
+| B1 | Bump `Version:` in `text-to-audio.php` header → **2.2.2** | text-to-audio.php (plugin header line + `TEXT_TO_AUDIO_VERSION` constant define) | ✅ |
+| B2 | Bump `Stable tag:` in `readme.txt` → **2.2.2** | readme.txt header | ✅ |
+| B3 | Add `== Changelog == = 2.2.2 =` block | readme.txt | ✅ |
+| B4 | Add `== Upgrade Notice == = 2.2.2 =` block — explain Custom CSS migration to WP core Customizer | readme.txt | ✅ |
+| B5 | `npm run production` + `npm run block:build` to rebuild bundles after T1/T2/A1/I1/I2 React changes | repo root | ✅ (also `build:seven` deployed to `/seven/`) |
+| B6 | `npm run makeZip` → release ZIP in `production/` | repo root | ✅ (`production/text-to-audio.zip`, 1.1 MB; v2.2.2 inside, 8 new CSS/JS assets present, src/po excluded) |
 
 ### 3.9 Verification
 
 | # | Action | Status |
 |---|---|---|
-| V1 | Clean WP install, `WP_DEBUG = true`, `WP_DEBUG_LOG = true` | ⬜ |
-| V2 | Install built 2.2.2 ZIP; activate; no PHP notices/warnings | ⬜ |
-| V3 | Run Plugin Check — "Checks complete. No errors found." | ⬜ |
-| V4 | Smoke: shortcode `[tta_listen_btn]` and block render with no inline `<style>` / `<script>` in the page source (Plugin Check + manual DOM inspection) | ⬜ |
-| V5 | Smoke: Customize tab no longer shows Custom CSS textarea or Player 2/3+ controls when Pro is not active | ⬜ |
-| V6 | Smoke: Pro active → React dashboard's premium analytics views still populate (top-post + previous-period) via Pro routes | ⬜ |
-| V7 | Smoke: translation downloader still writes locale `.mo` files on locale change (WP_Filesystem path) | ⬜ |
-| V8 | Smoke: `admin/js/vendor/chart.umd.min.js` v4.5.1 loads cleanly on the Analytics tab; no console errors | ⬜ |
+| V1 | Clean WP install, `WP_DEBUG = true`, `WP_DEBUG_LOG = true` | ✅ Tested on `/seven/` (WP 7.0); `WP_DEBUG`/`WP_DEBUG_LOG`/`WP_DEBUG_DISPLAY` all `1`. |
+| V2 | Install built 2.2.2 ZIP; activate; no PHP notices/warnings | ✅ Free 2.2.2 active; `debug.log` mtime frozen at pre-deploy time — **zero** new entries after deploy across plugins.php + Plugin Check + Customize + Analytics + Pro activation. |
+| V3 | Run Plugin Check — "Checks complete. No errors found." | ✅ **"Checks complete. No errors found."** — all 5 categories (General, Plugin Repo, Security, Performance, Accessibility) + Error & Warning types. |
+| V4 | Smoke: shortcode `[tta_listen_btn]` and block render with no inline `<style>` / `<script>` in the page source (Plugin Check + manual DOM inspection) | ✅ Frontend `?p=1`: light-DOM `<tts-play-button>` (no shadow root, no `style=""`). Only plugin CSS tag = sanctioned `wp_add_inline_style` (`#text-to-audio-button-inline-css`); only plugin inline scripts = sanctioned `-js-extra`/`-js-before` localize blocks. No hand-rolled inline `<style>`/`<script>`. |
+| V5 | Smoke: Customize tab no longer shows Custom CSS textarea or Player 2/3+ controls when Pro is not active | ✅ Custom CSS section is now a pointer to "Appearance → Customize → Additional CSS" (no textarea); Player dropdown = "Default" only + Pro upsells; live light-DOM "Listen" preview renders. |
+| V6 | Smoke: Pro active → React dashboard's premium analytics views still populate (top-post + previous-period) via Pro routes | ✅ (Free-side + coexistence) Pro activated → Active(3); **zero** PHP/console errors; dashboard `is_pro_active="1"` yet `capabilities=[]` ⇒ premium sections correctly stay **locked** (capability-driven, never `is_pro_active`-driven — design confirmed). ⚠ Data-populate not shown here: `/seven/` Pro is **active-but-unlicensed** (Freemius "Change License") so its capability filter injects nothing. Full premium unlock was verified earlier on the **licensed** `/tts/` install. |
+| V7 | Smoke: translation downloader still writes locale `.mo` files on locale change (WP_Filesystem path) | ⬜ Not runtime-exercised this session (locale-dependent); WP_Filesystem path was code-verified under Fix #2. |
+| V8 | Smoke: `admin/js/vendor/chart.umd.min.js` v4.5.1 loads cleanly on the Analytics tab; no console errors | ✅ Analytics tab renders Engagement Funnel + Peak Listening Hours heatmap; summary/segments/popular-post populate with real data; no console errors. |
 
 ### 3.10 Release / Re-review
 

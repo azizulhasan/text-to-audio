@@ -26,7 +26,14 @@ const fs = require('fs');
 
 mix.webpackConfig({
     output: {
-        chunkFilename: 'chunks/[name].chunk.js',
+        // TTS-249: content-hashed chunk filenames so each build produces uniquely
+        // named lazy chunks. Without this, the static `tab-*.chunk.js` names never
+        // change, so browsers cache them forever and existing users never see new
+        // dashboard UI on upgrade (the main bundle's ?ver= cache-buster does NOT
+        // propagate to webpack's chunk URLs). The hash changes only when a chunk's
+        // content changes, so the main bundle re-fetched on the ?ver bump points at
+        // the new chunk name → guaranteed cache-miss → fresh fetch.
+        chunkFilename: 'chunks/[name].[contenthash].chunk.js',
     },
     plugins: [
         {
@@ -37,6 +44,13 @@ mix.webpackConfig({
                     if (!fs.existsSync(srcDir)) return;
                     if (!fs.existsSync(destDir)) {
                         fs.mkdirSync(destDir, { recursive: true });
+                    } else {
+                        // TTS-249: clear stale content-hashed chunks before copying the
+                        // fresh build, so old hashes don't accumulate in the folder and
+                        // bloat the release ZIP.
+                        fs.readdirSync(destDir).forEach(file => {
+                            try { fs.unlinkSync(path.join(destDir, file)); } catch (e) { /* ignore */ }
+                        });
                     }
                     fs.readdirSync(srcDir).forEach(file => {
                         fs.copyFileSync(

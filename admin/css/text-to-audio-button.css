@@ -33,6 +33,28 @@
     font-style: normal;
 }
 
+/* TTS-249: the player host is a custom element (`<tts-play-button>`), which the
+   UA renders as `display: inline` by default. Inline elements IGNORE `max-width`
+   and `margin-inline: auto`, so block-theme "constrained" layouts (Twenty
+   Twenty-Five and every other block theme, plus classic themes' content wrappers)
+   could not limit the player to the content width — the width:100% button then
+   stretched to the full content container (e.g. 1590px) while the post text stayed
+   at the ~645px content column. Promoting the host to a block element lets the
+   theme's own constrained-layout rules (max-width + auto margins) apply, so the
+   player aligns to and matches the content column on any theme. The old player
+   had a block-level wrapper <div> that provided this; flattening the DOM removed
+   it, so we restore the behaviour on the host itself. */
+tts-play-button,
+.tts_play_button {
+    display: block;          /* so the theme's constrained-layout max-width + auto-margins apply */
+    width: 100%;             /* fluid, percentage-based — fills the content column on every viewport; never a fixed px */
+    box-sizing: border-box;  /* padding/border included in the 100%, so it can't overflow its container */
+    /* No max-width here on purpose: the theme's own content-width (responsive,
+       e.g. --wp--style--global--content-size, which shrinks on small screens)
+       governs the cap. On themes with no cap the player simply fills its
+       container — still 100%/fluid, never a hardcoded pixel width. */
+}
+
 /* New-player layout */
 .tts__listent_content {
     box-sizing: border-box;
