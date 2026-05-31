@@ -13,7 +13,6 @@ import {
 import notify, { toast } from "../../context/Notify";
 import {
   copyToClipBoard,
-  postData,
   postWithoutImage,
 } from "../../context/utilities";
 import CustomizationTabs from "./CustomizationTabs";
@@ -81,10 +80,13 @@ export default function Customize() {
   });
   const [speakingText, setSpeakingText] = useState("");
   const [listeningSettings, setListeningSettings] = useState({});
-  const [isGCAuthenticated, setGCIsAuthenticated] = useState(false);
-  const [isBackUpToGCS, setIsBackUpToGCS] = useState(false);
-  const [isChatGPTAuthenticated, setIsChatGPTAuthenticated] = useState(false);
-  const [isElevenLabsAuthenticated, setIsElevenLabsAuthenticated] = useState(false);
+  // TTS-250: voice-provider auth status (Google Cloud / ChatGPT / ElevenLabs)
+  // and the GCS-backup flag are published by the AtlasVoice add-on on
+  // window.ttsAddonAuth (the free plugin no longer queries the tta_pro REST API).
+  // Read at save time so the player-4/5/6 selection gating works exactly as
+  // before when the add-on is active; empty/false when the add-on is absent.
+  const getAddonAuth = () =>
+    (typeof window !== "undefined" && window.ttsAddonAuth) || {};
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   const setDefaultButtonSettingsIfNeeded = (res) => {
@@ -117,7 +119,10 @@ export default function Customize() {
 
   useEffect(() => {
     let completedRequests = 0;
-    const totalRequests = window.hasOwnProperty("ttsObj") && ttsObj?.is_atlasvoice_addon_functional ? 5 : 2;
+    // TTS-250: always 2 (customize + listening). The 3 Pro provider-auth checks
+    // that used to add to this count were moved into the add-on, so the loading
+    // state no longer waits on them.
+    const totalRequests = 2;
 
     const checkLoadingComplete = () => {
       completedRequests++;
@@ -252,58 +257,13 @@ export default function Customize() {
       }
     }, 1000);
 
-    if (window.hasOwnProperty("ttsObj") && ttsObj?.is_atlasvoice_addon_functional) {
-      postData(ttsObj.api_url + "tta_pro/v1/get_auth_file", {}, "GET")
-        .then((res) => {
-          if (res?.file && res?.is_authenticated) {
-            setGCIsAuthenticated(res.is_authenticated);
-            setIsBackUpToGCS(res?.tts_is_backup_mp3_file || false);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        })
-        .finally(() => {
-          checkLoadingComplete();
-        });
-
-      let data = new FormData();
-      data.append("method", "get");
-      postData(ttsObj.api_url + "tta_pro/v1/chat_gpt_tts", data)
-        .then((res) => {
-          if (
-            res.data?.currentTTSServic === "chat_gpt_tts" &&
-            res?.data?.chatgpt_tts_api_key
-          ) {
-            setIsChatGPTAuthenticated(true);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        })
-        .finally(() => {
-          checkLoadingComplete();
-        });
-
-      // Check ElevenLabs TTS authentication
-      let elevenLabsData = new FormData();
-      elevenLabsData.append("method", "get");
-      postData(ttsObj.api_url + "tta_pro/v1/elevenlabs_tts", elevenLabsData)
-        .then((res) => {
-          if (
-            res.data?.currentTTSServic === "elevenlabs_tts" &&
-            res?.data?.elevenlabs_api_key
-          ) {
-            setIsElevenLabsAuthenticated(true);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        })
-        .finally(() => {
-          checkLoadingComplete();
-        });
-    }
+    // TTS-250: the voice-provider auth-status checks (Google Cloud / ChatGPT /
+    // ElevenLabs) were Pro-only REST calls to the tta_pro/v1 namespace. They have
+    // been moved into the AtlasVoice add-on, which performs them on the dashboard
+    // and publishes the results on window.ttsAddonAuth. The free plugin no longer
+    // calls any Pro endpoint here; the save handler reads window.ttsAddonAuth (see
+    // getAddonAuth()) to keep the player-4/5/6 selection gating working unchanged
+    // when the add-on is active.
   }, []);
 
   const handleChange = (e, keyName = "") => {
@@ -511,7 +471,7 @@ export default function Customize() {
     }
 
     if (formData?.buttonSettings?.id == 4) {
-      if (ttsObj.is_atlasvoice_addon_functional && !isGCAuthenticated) {
+      if (ttsObj.is_atlasvoice_addon_functional && !getAddonAuth().google_cloud_tts) {
 
       notify(
         __("To select this player, you must authenticate first from the Integration menu", "text-to-audio"),
@@ -522,14 +482,14 @@ export default function Customize() {
       );
               return;
       }
-      if (!isGCAuthenticated) {
+      if (!getAddonAuth().google_cloud_tts) {
         CTANotice(__("Google Cloud TTS player is only available in the pro version.", "text-to-audio"));
         return;
       }
     }
 
     if (formData?.buttonSettings?.id == 5) {
-      if (ttsObj.is_atlasvoice_addon_functional && !isChatGPTAuthenticated) {
+      if (ttsObj.is_atlasvoice_addon_functional && !getAddonAuth().chat_gpt_tts) {
         notify(
           __("To select this player you have to authenticate first from Integration menu", "text-to-audio"),
           "error",
@@ -539,14 +499,14 @@ export default function Customize() {
         );
         return;
       }
-      if (!isChatGPTAuthenticated) {
+      if (!getAddonAuth().chat_gpt_tts) {
         CTANotice(__("ChatGPT TTS player is only available in the pro version.", "text-to-audio"));
         return;
       }
     }
 
     if (formData?.buttonSettings?.id == 6) {
-      if (ttsObj.is_atlasvoice_addon_functional && !isElevenLabsAuthenticated) {
+      if (ttsObj.is_atlasvoice_addon_functional && !getAddonAuth().elevenlabs_tts) {
         notify(
           __("To select this player you have to authenticate first from Integration menu", "text-to-audio"),
           "error",
@@ -556,7 +516,7 @@ export default function Customize() {
         );
         return;
       }
-      if (!isElevenLabsAuthenticated) {
+      if (!getAddonAuth().elevenlabs_tts) {
         CTANotice(__("ElevenLabs TTS player is only available in the pro version.", "text-to-audio"));
         return;
       }
@@ -571,7 +531,7 @@ export default function Customize() {
       window.hasOwnProperty("ttsObjPro") &&
       !ttsObjPro.is_folder_writable &&
       formData?.buttonSettings?.id > 2 &&
-      !isBackUpToGCS
+      !getAddonAuth().tts_is_backup_mp3_file
     ) {
     toast(
       __("AtlasVoice stores synthesized content in the uploads folder. Your uploads folder is not writable. Please make the uploads folder writable to enjoy all features of the plugin.", "text-to-audio"),
