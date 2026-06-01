@@ -323,6 +323,39 @@ class TTA_Notices {
 			'version_option'      => 'plugin_features_notice_2',
 		) );
 
+		// ── 5b. Pro Add-on Update Required (TTS-250) ──
+		// Some UI now lives only in the AtlasVoice Pro add-on and is mounted into
+		// the free dashboard at runtime: the Listening tab's premium voice
+		// settings (#tts_listening_pro), the voice-provider integrations
+		// (#tts_integrations_pro), and the player-2..6 customize preview. That
+		// mounting code shipped in Pro 3.3.1. A Pro user still on an older add-on
+		// would see empty / non-working screens, so warn them to update. Shown
+		// only when the add-on is active but older than the required version.
+		$this->register_notice( array(
+			'id'                => 'pro_update_required',
+			'title'             => '<h3>' . esc_html__( 'AtlasVoice Pro — Please Update', 'text-to-audio' ) . '</h3>',
+			'message_callback'  => array( $this, 'get_pro_update_required_message' ),
+			'type'              => 'warning',
+			'dismissible'       => true,
+			'reshow_after_days' => 7,
+			'condition'         => function () {
+				if ( ! current_user_can( 'update_plugins' ) ) {
+					return false;
+				}
+				// Add-on active (present) but older than the version that mounts
+				// the moved UI — or so old it predates the version constant.
+				return is_atlasvoice_addon_functional()
+					&& ( ! defined( 'TTA_PRO_VERSION' ) || version_compare( TTA_PRO_VERSION, TTA_REQUIRED_PRO_VERSION, '<' ) );
+			},
+			'buttons'           => array(
+				array(
+					'text' => __( 'Update AtlasVoice Pro', 'text-to-audio' ),
+					'url'  => self_admin_url( 'admin.php?page=text-to-audio-account' ),
+					'type' => 'primary',
+				),
+			),
+		) );
+
 		// ── 6. Promotion / Sale (commented out — uncomment to activate) ──
 		// $this->register_notice( array(
 		// 	'id'                  => 'promotion',
@@ -1201,6 +1234,25 @@ class TTA_Notices {
 		}
 
 		return implode( '<br/>', $selected );
+	}
+
+	/**
+	 * Get the "please update the Pro add-on" message (TTS-250).
+	 *
+	 * Names the installed add-on version and the version required to restore the
+	 * UI that now lives inside the add-on.
+	 *
+	 * @return string
+	 */
+	public function get_pro_update_required_message() {
+		$installed = defined( 'TTA_PRO_VERSION' ) ? TTA_PRO_VERSION : __( 'an older version', 'text-to-audio' );
+
+		return sprintf(
+			/* translators: 1: installed Pro add-on version, 2: required Pro add-on version */
+			esc_html__( 'The Listening voice settings and the AI voice-provider integrations now run inside the AtlasVoice Pro add-on. Your installed add-on (%1$s) is older than %2$s, so those screens may appear empty or stop working. Please update AtlasVoice Pro to %2$s or later to restore full functionality.', 'text-to-audio' ),
+			'<strong>' . esc_html( $installed ) . '</strong>',
+			'<strong>' . esc_html( TTA_REQUIRED_PRO_VERSION ) . '</strong>'
+		);
 	}
 
 	/**

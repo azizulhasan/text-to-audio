@@ -281,6 +281,7 @@ Improved : Player responsiveness — the player now flows with your theme's cont
 Improved : The Listening tab's premium voice settings — provider voices, voice/language selection for the AI players, and the multilingual voice-to-language mapping — now live entirely in the AtlasVoice Pro add-on. The free plugin keeps the default browser-voice player's listening settings and, when a translation plugin (GTranslate, WPML/SitePress, TranslatePress, Polylang) is detected, shows an upgrade prompt in place of the mapping UI.
 Fixed : After the AtlasVoice Pro add-on is deactivated, the Customize tab now reliably reverts a previously selected premium player back to the Default player and saves it. Previously the saved premium player id stayed selected, so "Default" could not be re-saved.
 Improved : Analytics now tracks all your posts — the previous 20-post tracking cap has been removed from both the dashboard and the setup wizard. New and existing installs default to tracking every post.
+Added : If the AtlasVoice Pro add-on is active but older than the version that hosts the screens moved out of the free plugin, the dashboard now shows a notice prompting you to update the add-on so those screens keep working.
 
 = 2.2.2 ( 31 May 2026 ) =
 Improved : Custom button CSS now uses the WordPress Customizer's built-in "Additional CSS" panel (Appearance → Customize → Additional CSS) instead of a separate plugin field. Any CSS you previously saved in the plugin's Custom CSS box is migrated there automatically on update — nothing to re-enter.
