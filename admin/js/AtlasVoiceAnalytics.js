@@ -680,20 +680,25 @@ class AtlasVoiceAnalytics {
     }
 
     shouldTrackAnalyticsData() {
-        let should_track = true;
         if (!window?.ttsObj?.settings?.analytics?.tts_enable_analytics) {
             return false;
         }
-        if (window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids?.length) {
 
-            if ((window?.ttsObj.is_atlasvoice_addon_functional && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes('all')) || window?.ttsObj.is_atlasvoice_addon_functional && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.postId)) {
-                should_track = true;
-            } else if (!window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.postId)) {
-                should_track = false;
-            }
+        const ids = window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids;
+
+        // No list configured → track everything.
+        if (!ids || !ids.length) {
+            return true;
         }
 
-        return should_track;
+        // TTS-250: honor the "all" sentinel and any explicitly-listed post for
+        // every user — no add-on gate. The free plugin is no longer capped to a
+        // fixed number of trackable posts (wp.org Guideline 5: no artificial
+        // limits on a shipped feature). Compare as strings since stored IDs may
+        // be numbers while this.postId can be a string.
+        const norm = ids.map((value) => String(value));
+
+        return norm.includes('all') || norm.includes(String(this.postId));
     }
 }
 

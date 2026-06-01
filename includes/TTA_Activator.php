@@ -190,18 +190,13 @@ class TTA_Activator {
 		 * analytics settings.
 		 */
 		if ( $renew_all_settings || ! get_option( 'tta_analytics_settings' ) ) {
-			$latest_post_ids = get_posts( array(
-				'posts_per_page' => 20,
-				'post_type'      => 'post',
-				'post_status'    => 'publish',
-				'fields'         => 'ids',
-				'orderby'        => 'date',
-				'order'          => 'DESC',
-			) );
-
 			update_option( 'tta_analytics_settings', array(
 				"tts_enable_analytics"       => true,
-				"tts_trackable_post_ids"     => $latest_post_ids,
+				// TTS-250: track every post by default (the "all" sentinel). The
+				// free plugin used to default to the latest 20 posts and could
+				// not track more — an artificial cap on a shipped feature
+				// (wp.org Guideline 5). Free now honours "all".
+				"tts_trackable_post_ids"     => array( 'all' ),
 				// TTS-247: third-party IP geolocation (ip-api / ipinfo /
 				// icanhazip) is opt-in per wp.org Guideline 7; default off.
 				"tts_show_listener_location" => false,

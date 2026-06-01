@@ -1,8 +1,10 @@
 import React, { useEffect, useCallback } from 'react';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 
 const wizardData = window.ttsWizardData || {};
-const MAX_TRACKABLE_POSTS = 20;
+// TTS-250: the "all" sentinel tracks every post. The free plugin no longer caps
+// the number of trackable posts (wp.org Guideline 5 — no artificial limits).
+const TRACK_ALL = 'all';
 
 /**
  * Step 4 — Analytics Configuration.
@@ -15,19 +17,15 @@ const StepAnalytics = ({ data, onChange, selectedPostType }) => {
     const postsByType  = wizardData.recent_posts_by_type || {};
     const recentPosts  = postsByType[ selectedPostType ] || postsByType['post'] || [];
 
+    const allSelected = data.trackablePostIds.includes(TRACK_ALL);
+
     /**
-     * Pre-select the most recent 20 posts on first mount or when
-     * selected post type changes and no manual selection was made.
+     * Default to tracking ALL posts on first mount (or post-type change) when
+     * analytics is on and nothing has been chosen yet.
      */
     useEffect(() => {
-        if (
-            data.enableAnalytics &&
-            recentPosts.length > 0
-        ) {
-            const preSelected = recentPosts
-                .slice(0, MAX_TRACKABLE_POSTS)
-                .map((p) => p.id);
-            onChange({ ...data, trackablePostIds: preSelected });
+        if (data.enableAnalytics && data.trackablePostIds.length === 0) {
+            onChange({ ...data, trackablePostIds: [TRACK_ALL] });
         }
     }, [selectedPostType]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -36,33 +34,45 @@ const StepAnalytics = ({ data, onChange, selectedPostType }) => {
     /* ------------------------------------------------------------------ */
 
     const handleToggle = useCallback(() => {
-        onChange({ ...data, enableAnalytics: !data.enableAnalytics });
+        const enabling = !data.enableAnalytics;
+        onChange({
+            ...data,
+            enableAnalytics: enabling,
+            // Default to "track all" the first time analytics is switched on.
+            trackablePostIds:
+                enabling && data.trackablePostIds.length === 0
+                    ? [TRACK_ALL]
+                    : data.trackablePostIds,
+        });
     }, [data, onChange]);
 
     const handlePostToggle = useCallback(
         (postId) => {
+            // Switching from "all" to a specific pick narrows tracking to just
+            // that post; from there the user can add/remove individual posts.
+            if (allSelected) {
+                onChange({ ...data, trackablePostIds: [postId] });
+                return;
+            }
             const ids = data.trackablePostIds;
             if (ids.includes(postId)) {
                 onChange({
                     ...data,
                     trackablePostIds: ids.filter((id) => id !== postId),
                 });
-            } else if (ids.length < MAX_TRACKABLE_POSTS) {
+            } else {
                 onChange({
                     ...data,
                     trackablePostIds: [...ids, postId],
                 });
             }
         },
-        [data, onChange]
+        [data, onChange, allSelected]
     );
 
     const handleSelectAll = useCallback(() => {
-        const allIds = recentPosts
-            .slice(0, MAX_TRACKABLE_POSTS)
-            .map((p) => p.id);
-        onChange({ ...data, trackablePostIds: allIds });
-    }, [data, onChange, recentPosts]);
+        onChange({ ...data, trackablePostIds: [TRACK_ALL] });
+    }, [data, onChange]);
 
     const handleDeselectAll = useCallback(() => {
         onChange({ ...data, trackablePostIds: [] });
@@ -231,8 +241,9 @@ const StepAnalytics = ({ data, onChange, selectedPostType }) => {
     /* ------------------------------------------------------------------ */
     /*  Render                                                             */
     /* ------------------------------------------------------------------ */
-    const selectedCount = data.trackablePostIds.length;
-    const atLimit = selectedCount >= MAX_TRACKABLE_POSTS;
+    const selectedCount = allSelected
+        ? recentPosts.length
+        : data.trackablePostIds.length;
 
     return (
         <div>
@@ -293,13 +304,9 @@ const StepAnalytics = ({ data, onChange, selectedPostType }) => {
                     ) : (
                         <div>
                             <p style={styles.sectionLabel}>
-                                {sprintf(
-                                    /* translators: %d: maximum number of trackable posts */
-                                    __(
-                                        'Select posts to track (up to %d in free version):',
-                                        'text-to-audio'
-                                    ),
-                                    MAX_TRACKABLE_POSTS
+                                {__(
+                                    'All posts are tracked by default. Pick specific posts below to track only those:',
+                                    'text-to-audio'
                                 )}
                             </p>
 
@@ -345,10 +352,11 @@ const StepAnalytics = ({ data, onChange, selectedPostType }) => {
                             <ul style={styles.postList} role="listbox" aria-label={__('Posts to track', 'text-to-audio')} aria-multiselectable="true">
                                 {recentPosts.map((post) => {
                                     const isChecked =
+                                        allSelected ||
                                         data.trackablePostIds.includes(
                                             post.id
                                         );
-                                    const isDisabled = !isChecked && atLimit;
+                                    const isDisabled = false;
 
                                     return (
                                         <li
@@ -431,14 +439,18 @@ const StepAnalytics = ({ data, onChange, selectedPostType }) => {
 
                             {/* Selection counter */}
                             <p style={styles.counter}>
-                                <span style={styles.counterHighlight}>
-                                    {selectedCount}
-                                </span>
-                                {' '}
-                                {sprintf(
-                                    /* translators: %d: maximum number of trackable posts */
-                                    __('of %d selected', 'text-to-audio'),
-                                    MAX_TRACKABLE_POSTS
+                                {allSelected ? (
+                                    <span style={styles.counterHighlight}>
+                                        {__('All posts will be tracked', 'text-to-audio')}
+                                    </span>
+                                ) : (
+                                    <>
+                                        <span style={styles.counterHighlight}>
+                                            {selectedCount}
+                                        </span>
+                                        {' '}
+                                        {__('selected', 'text-to-audio')}
+                                    </>
                                 )}
                             </p>
                         </div>
@@ -449,7 +461,7 @@ const StepAnalytics = ({ data, onChange, selectedPostType }) => {
             {/* Pro upsell */}
             <div style={styles.infoBox}>
                 {__(
-                    'AtlasVoice Pro unlocks unlimited post tracking, geographic insights, device analytics, and CSV exports.',
+                    'AtlasVoice Pro adds geographic insights, device analytics, custom date ranges, and CSV/PDF exports.',
                     'text-to-audio'
                 )}{' '}
                 <a
