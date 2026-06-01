@@ -109,6 +109,25 @@ export default function Customize() {
     if (!res?.data?.buttonSettings?.id) {
       res.data.buttonSettings.id = defaultValue.buttonSettings.id;
     }
+    // TTS-250: clamp a saved-but-unavailable player to the default. If the
+    // add-on was deactivated while a premium player (2-6) was selected, that id
+    // is still stored but the selector only offers available players. Without
+    // this, the dropdown shows "Default" while state stays e.g. 6, re-picking
+    // Default fires no change event, and Save is blocked by the "only in pro"
+    // guard — so the user can never get back to player 1. Normalising here keeps
+    // state, the dropdown, and Save in agreement.
+    const _localized =
+      (typeof tta_obj !== "undefined" && tta_obj) ||
+      (typeof ttsObj !== "undefined" && ttsObj) ||
+      {};
+    const _availableIds = (
+      Array.isArray(_localized.availablePlayers) && _localized.availablePlayers.length
+        ? _localized.availablePlayers
+        : [{ id: 1 }]
+    ).map((p) => Number(p.id));
+    if (!_availableIds.includes(Number(res.data.buttonSettings.id))) {
+      res.data.buttonSettings.id = 1;
+    }
     if (!res?.data?.buttonSettings?.button_position) {
       res.data.buttonSettings.button_position =
         defaultValue.buttonSettings.button_position;

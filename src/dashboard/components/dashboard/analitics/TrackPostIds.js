@@ -198,11 +198,11 @@ export default function TrackPostIds({
                     )}
                 </Form.Label>
                 <MultiSelect
-                    toastMessage={__("Tracking more than 20 post IDs is a Pro feature", "text-to-audio")}
+                    toastMessage={__("You've reached the selection limit.", "text-to-audio")}
                     name="tts_trackable_post_ids"
                     id="tts_trackable_post_ids"
                     selectedItems={selectedIds}
-                    selectionLimit={999}
+                    selectionLimit={100000}
                     options={postIds}
                     onChange={onSelectionChange}
                 />

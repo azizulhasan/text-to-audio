@@ -293,20 +293,15 @@ register_activation_hook(__FILE__, function () {
  * @since 2.1.8
  */
 add_action('admin_init', function () {
-    // One-time migration (2.1.10): enable analytics with latest 20 posts for existing free users.
+    // One-time migration (2.1.10): enable analytics for existing free users.
+    // TTS-250: track every post by default (the "all" sentinel) instead of the
+    // latest 20 — the old 20-post cap was an artificial limit on a shipped
+    // feature (wp.org Guideline 5).
     if ( ! get_option( 'tta_analytics_migrated_2_1_10' ) ) {
         $analytics = (array) get_option( 'tta_analytics_settings' );
         if ( empty( $analytics['tts_enable_analytics'] ) && empty( $analytics['tts_trackable_post_ids'] ) ) {
-            $latest_ids = get_posts( array(
-                'posts_per_page' => 20,
-                'post_type'      => 'post',
-                'post_status'    => 'publish',
-                'fields'         => 'ids',
-                'orderby'        => 'date',
-                'order'          => 'DESC',
-            ) );
             $analytics['tts_enable_analytics']   = true;
-            $analytics['tts_trackable_post_ids'] = $latest_ids;
+            $analytics['tts_trackable_post_ids'] = array( 'all' );
             update_option( 'tta_analytics_settings', $analytics, false );
         }
         update_option( 'tta_analytics_migrated_2_1_10', true, false );
