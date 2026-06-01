@@ -127,6 +127,15 @@ if (!defined('TTA_DEBUG_MODE')) {
     define('TTA_DEBUG_MODE', 0);
 }
 
+if (!defined('TTA_REQUIRED_PRO_VERSION')) {
+    // TTS-250: minimum AtlasVoice Pro add-on version that mounts the UI moved
+    // out of the free plugin (Listening voice settings, voice-provider
+    // integrations, player-2..6 preview). Free shows an "update the add-on"
+    // notice when an older Pro is active. Bump this when the free plugin starts
+    // to depend on a newer add-on contract.
+    define('TTA_REQUIRED_PRO_VERSION', '3.3.1');
+}
+
 
 if (!defined('TTA_PLUGIN_URL')) {
     /**
