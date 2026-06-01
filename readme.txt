@@ -276,6 +276,7 @@ Help us and the WordPress community translate the plugin. [Contact us](http://at
 = 2.2.3 ( 31 May 2026 ) =
 Improved : The Dashboard widget's "Minutes Listened" and "Top Post Today" statistics are now shown to every user (previously hidden unless the premium add-on was active).
 Improved : Removed the remaining audio-file features from the free plugin — the AudioObject (JSON-LD) schema generator and all MP3 file-URL handling now live entirely in the AtlasVoice Pro add-on, because they require a generated audio file that the free browser-voice player does not produce. The free plugin no longer contains any functionality that is limited unless the add-on is active.
+Improved : The premium voice-provider integrations (Google Cloud TTS, ChatGPT, ElevenLabs) — their setup screen, API-key forms, and authentication checks — now live entirely in the AtlasVoice Pro add-on. The free plugin shows an upgrade prompt in their place; no provider or API-key code ships in the free build.
 Improved : Player responsiveness — the player now flows with your theme's content width on all screen sizes.
 
 = 2.2.2 ( 31 May 2026 ) =
@@ -475,7 +476,7 @@ Introduced :  Complete new UI introduced.
 == Upgrade Notice ==
 
 = 2.2.3 =
-Dashboard "Minutes Listened" and "Top Post Today" stats now show for all users. Audio-file features (AudioObject schema, MP3 URL handling) moved entirely to the AtlasVoice Pro add-on; nothing in the free plugin is gated behind the add-on anymore.
+Dashboard stats now show for all users. Audio-file features and the AI voice-provider integrations moved entirely to the AtlasVoice Pro add-on; nothing in the free plugin is gated behind the add-on anymore.
 
 = 2.2.2 =
 Custom button CSS moves to the WordPress Customizer's "Additional CSS" panel and is migrated automatically — nothing to re-enter. The player now renders in the normal page DOM, and all inline styles/scripts are properly enqueued for WordPress.org compliance.
