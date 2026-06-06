@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **Editing live atlasaidev.com posts?** Read `plan/atlasaidev-wp-post-editing-playbook.md` FIRST.
+> The site's Gutenberg editor is heavily plugin-augmented and has traps (Custom HTML modal freezes,
+> Table-block Tab nav broken, Classic-block selection doesn't register, autosave "invalid JSON"
+> false alarms). The playbook documents the reliable techniques (Convert to blocks, Table "Edit as
+> HTML", verify via MCP + live front-end).
+
 ## Project Overview
 
 **Text To Speech TTS Accessibility** — a WordPress plugin that adds a text-to-audio player to WordPress sites. Built by AtlasAiDev. Uses Freemius for premium licensing. Has a companion Pro plugin (`text-to-speech-pro` / `text-to-audio-pro`) that extends functionality with AI voice providers.
