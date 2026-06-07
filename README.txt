@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.1.20
+Stable tag: 2.1.21
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -353,6 +353,10 @@ Please report security bugs through the [Patchstack Vulnerability Disclosure Pro
 We are looking for people to help translate this plugin. If you can help, we would love to hear from you.
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
+
+= 2.1.21 ( 07 Jun 2026 ) =
+Fixed : Plyr-backed Pro player (players 3-6) could appear blank/invisible until the first user interaction on sites running Perfmatters with the "Lazy Load CSS" or "Remove Unused CSS" features enabled. Perfmatters was rewriting our two stylesheets (`text-to-audio-pro.css`, `plyr.min.css`) to `data-pmdelayedstyle` and only swapping the real `href` back after a mousemove / scroll / touch, so the widget rendered without any styles in the meantime.
+Improved : `TTA_Hooks::init_cache_compatibility()` now also subscribes to `perfmatters_lazy_load_css_exclusions`, `perfmatters_combine_css_exclusions`, and `perfmatters_unused_css_excluded_stylesheets` so the TTS/Pro stylesheets stay as ordinary `<link href>` tags at page load.
 
 = 2.1.20 ( 15 May 2026 ) =
 Improved : Plugin card titles on the "Other AtlasAiDev Plugins" page now prefer the canonical WordPress.org title (via the public plugin info API), so cards mirror the wp.org listing instead of locally-configured names.
@@ -877,6 +881,9 @@ Improved :  Pro and free version performance improved.
 
 
 == Upgrade Notice ==
+
+= 2.1.21 =
+Fixes the Pro player (players 3-6) showing as blank until first mouse movement on sites using Perfmatters' Lazy Load CSS or Remove Unused CSS features. Update recommended.
 
 = 2.1.20 =
 Improved : "Other AtlasAiDev Plugins" page now mirrors the official WordPress.org plugin titles, and the sibling plugin cards include a new "Start Trial" button.
