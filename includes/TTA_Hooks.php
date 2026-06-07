@@ -155,6 +155,17 @@ class TTA_Hooks {
 		add_filter( 'perfmatters_defer_js_exclusions', [ $this, 'cache_exclude_js_text_to_speech' ] );
 		add_filter( 'perfmatters_delay_js_exclusions', [ $this, 'cache_exclude_js_text_to_speech' ] );
 		add_filter( 'perfmatters_minify_css_exclusions', [ $this, 'cache_exclude_css_text_to_speech' ] );
+		// TTS-250: Perfmatters "Lazy Load CSS" / "Remove Unused CSS" features
+		// rewrite our stylesheets' `href` to `data-pmdelayedstyle` and only
+		// swap it back after the first user interaction. The player widget
+		// has zero styles in the meantime, so it appears blank/invisible and
+		// the user perceives "only renders after first mouse movement" even
+		// when the JS has already initialized Plyr. Excluding our two CSS
+		// handles from both features keeps them as real <link href="..."> at
+		// page load.
+		add_filter( 'perfmatters_lazy_load_css_exclusions', [ $this, 'cache_exclude_css_text_to_speech' ] );
+		add_filter( 'perfmatters_combine_css_exclusions', [ $this, 'cache_exclude_css_text_to_speech' ] );
+		add_filter( 'perfmatters_unused_css_excluded_stylesheets', [ $this, 'cache_exclude_css_text_to_speech' ] );
 
 		// ----- Flying Press -----
 		// @see https://docs.flyingpress.com/
