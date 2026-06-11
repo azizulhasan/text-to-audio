@@ -114,13 +114,36 @@ class TTA_Notices {
 			true
 		);
 
+		// TTS-249 (I3): notice CSS (rotation keyframe + browser-support notice)
+		// as an enqueued stylesheet instead of a JS-injected <style>.
+		wp_enqueue_style(
+			'tta-admin-notice',
+			TTA_PLUGIN_URL . 'admin/css/tta-admin-notice.css',
+			array(),
+			TEXT_TO_AUDIO_VERSION,
+			'all'
+		);
+
 		wp_localize_script(
 			'tta-admin-notice',
 			'ttaNoticeData',
 			array(
-				'ajaxurl' => admin_url( 'admin-ajax.php' ),
-				'nonce'   => wp_create_nonce( 'tta_notice_nonce' ),
-				'isRtl'   => function_exists( 'tta_is_rtl' ) && tta_is_rtl() ? '1' : '0',
+				'ajaxurl'          => admin_url( 'admin-ajax.php' ),
+				'nonce'            => wp_create_nonce( 'tta_notice_nonce' ),
+				'isRtl'            => function_exists( 'tta_is_rtl' ) && tta_is_rtl() ? '1' : '0',
+				// TTS-249 (I3): browser-support feature-detect notice (was an inline <script>).
+				'browserSupport'   => array(
+					'strongLabel' => __( 'AtlasVoice:', 'text-to-audio' ),
+					'message'     => __( 'This browser does not support the speechSynthesis API. Please use Chrome, Firefox, Safari, Samsung, Edge, or Opera. The Pro version works in all browsers.', 'text-to-audio' ),
+				),
+				// TTS-249 (I3): translation-download handler strings (was an inline <script>).
+				'translation'      => array(
+					'downloading'  => __( 'Downloading...', 'text-to-audio' ),
+					'downloadedReloading' => __( 'Downloaded! Reloading...', 'text-to-audio' ),
+					'downloaded'   => __( 'Downloaded!', 'text-to-audio' ),
+					'retry'        => __( 'Retry Download', 'text-to-audio' ),
+					'networkError' => __( 'Network error. Please try again.', 'text-to-audio' ),
+				),
 			)
 		);
 	}
@@ -231,6 +254,10 @@ class TTA_Notices {
 			'message_callback'    => array( $this, 'get_translation_message' ),
 			'type'                => 'info',
 			'dismissible'         => true,
+			// TTS-247: only on the AtlasVoice dashboard. Without this, the notice
+			// had no `screens` filter and leaked onto every admin page (incl. the
+			// "Other Plugins" page where it collided with the JS hero).
+			'screens'             => array( 'toplevel_page_text-to-audio' ),
 			'reshow_after_days'   => 90,
 			'buttons'             => array(
 				array(
@@ -255,7 +282,7 @@ class TTA_Notices {
 			'dismissible'         => true,
 			'reshow_after_days'   => 90,
 			'condition'           => function() {
-				return ! is_pro_active();
+				return ! is_atlasvoice_addon_functional();
 			},
 			'buttons'             => array(
 				array(
@@ -276,9 +303,11 @@ class TTA_Notices {
 			'message_callback'    => array( $this, 'get_features_message' ),
 			'type'                => 'info',
 			'dismissible'         => true,
+			// TTS-247: dashboard-only (see translation notice above).
+			'screens'             => array( 'toplevel_page_text-to-audio' ),
 			'reshow_after_days'   => 90,
 			'condition'           => function() {
-				return ! is_pro_active();
+				return ! is_atlasvoice_addon_functional();
 			},
 			'buttons'             => array(
 				array(
@@ -294,13 +323,46 @@ class TTA_Notices {
 			'version_option'      => 'plugin_features_notice_2',
 		) );
 
+		// ── 5b. Pro Add-on Update Required (TTS-250) ──
+		// Some UI now lives only in the AtlasVoice Pro add-on and is mounted into
+		// the free dashboard at runtime: the Listening tab's premium voice
+		// settings (#tts_listening_pro), the voice-provider integrations
+		// (#tts_integrations_pro), and the player-2..6 customize preview. That
+		// mounting code shipped in Pro 3.3.1. A Pro user still on an older add-on
+		// would see empty / non-working screens, so warn them to update. Shown
+		// only when the add-on is active but older than the required version.
+		$this->register_notice( array(
+			'id'                => 'pro_update_required',
+			'title'             => '<h3>' . esc_html__( 'AtlasVoice Pro — Please Update', 'text-to-audio' ) . '</h3>',
+			'message_callback'  => array( $this, 'get_pro_update_required_message' ),
+			'type'              => 'warning',
+			'dismissible'       => true,
+			'reshow_after_days' => 7,
+			'condition'         => function () {
+				if ( ! current_user_can( 'update_plugins' ) ) {
+					return false;
+				}
+				// Add-on active (present) but older than the version that mounts
+				// the moved UI — or so old it predates the version constant.
+				return is_atlasvoice_addon_functional()
+					&& ( ! defined( 'TTA_PRO_VERSION' ) || version_compare( TTA_PRO_VERSION, TTA_REQUIRED_PRO_VERSION, '<' ) );
+			},
+			'buttons'           => array(
+				array(
+					'text' => __( 'Update AtlasVoice Pro', 'text-to-audio' ),
+					'url'  => self_admin_url( 'admin.php?page=text-to-audio-account' ),
+					'type' => 'primary',
+				),
+			),
+		) );
+
 		// ── 6. Promotion / Sale (commented out — uncomment to activate) ──
 		// $this->register_notice( array(
 		// 	'id'                  => 'promotion',
 		// 	'title'               => '',
 		// 	'dismissible'         => true,
 		// 	'condition'           => function() {
-		// 		return ! is_pro_active();
+		// 		return ! is_atlasvoice_addon_functional();
 		// 	},
 		// 	'render_callback'     => array( $this, 'render_promotion_notice' ),
 		// 	'legacy_dismiss_meta' => 'tta_promotion_new_year_26_notice_dismissed',
@@ -359,7 +421,7 @@ class TTA_Notices {
 		// 	'dismissible'         => true,
 		// 	'reshow_after_days'   => 30,
 		// 	'condition'           => function() {
-		// 		return ! is_pro_active();
+		// 		return ! is_atlasvoice_addon_functional();
 		// 	},
 		// 	'buttons'             => array(
 		// 		array(
@@ -408,7 +470,7 @@ class TTA_Notices {
 					return false;
 				}
 				// 2. Never show to Pro users.
-				if ( TTA_Helper::is_pro_active() ) {
+				if ( TTA_Helper::is_atlasvoice_addon_functional() ) {
 					return false;
 				}
 				// 3. Must be active for at least 7 days.
@@ -527,7 +589,7 @@ class TTA_Notices {
 		// 	'dismissible'         => true,
 		// 	'reshow_after_days'   => 30,
 		// 	'condition'           => function() {
-		// 		return ! is_pro_active();
+		// 		return ! is_atlasvoice_addon_functional();
 		// 	},
 		// 	'buttons'             => array(
 		// 		array(
@@ -1066,25 +1128,10 @@ class TTA_Notices {
 	 * @param array  $notice    Notice configuration.
 	 */
 	public function render_browser_support( $notice_id, $notice ) {
-		?>
-		<script>
-			(function() {
-				'use strict';
-				if ( ! ( 'speechSynthesis' in window || 'webkitSpeechSynthesis' in window ) ) {
-					var notice = document.createElement('div');
-					notice.className = 'notice notice-warning tta-admin-notice';
-					notice.setAttribute('data-notice-id', '<?php echo esc_js( $notice_id ); ?>');
-					notice.style.padding = '12px 20px';
-					notice.innerHTML = '<p><strong><?php echo esc_js( __( 'AtlasVoice:', 'text-to-audio' ) ); ?></strong> ' +
-						'<?php echo esc_js( __( 'This browser does not support the speechSynthesis API. Please use Chrome, Firefox, Safari, Samsung, Edge, or Opera. The Pro version works in all browsers.', 'text-to-audio' ) ); ?></p>';
-					var wpbody = document.querySelector('.wrap') || document.querySelector('#wpbody-content');
-					if ( wpbody ) {
-						wpbody.insertBefore(notice, wpbody.firstChild);
-					}
-				}
-			})();
-		</script>
-		<?php
+		// TTS-249 (I3): the client-side speechSynthesis feature-detect that
+		// builds this warning notice moved into the enqueued tta-admin-notice.js
+		// (strings localized via ttaNoticeData.browserSupport). No inline
+		// <script> is printed here anymore.
 	}
 
 	/**
@@ -1187,6 +1234,25 @@ class TTA_Notices {
 		}
 
 		return implode( '<br/>', $selected );
+	}
+
+	/**
+	 * Get the "please update the Pro add-on" message (TTS-250).
+	 *
+	 * Names the installed add-on version and the version required to restore the
+	 * UI that now lives inside the add-on.
+	 *
+	 * @return string
+	 */
+	public function get_pro_update_required_message() {
+		$installed = defined( 'TTA_PRO_VERSION' ) ? TTA_PRO_VERSION : __( 'an older version', 'text-to-audio' );
+
+		return sprintf(
+			/* translators: 1: installed Pro add-on version, 2: required Pro add-on version */
+			esc_html__( 'The Listening voice settings and the AI voice-provider integrations now run inside the AtlasVoice Pro add-on. Your installed add-on (%1$s) is older than %2$s, so those screens may appear empty or stop working. Please update AtlasVoice Pro to %2$s or later to restore full functionality.', 'text-to-audio' ),
+			'<strong>' . esc_html( $installed ) . '</strong>',
+			'<strong>' . esc_html( TTA_REQUIRED_PRO_VERSION ) . '</strong>'
+		);
 	}
 
 	/**
@@ -1450,6 +1516,7 @@ class TTA_Notices {
 		$table_name = $wpdb->prefix . 'atlasvoice_analytics';
 
 		// Check if table exists.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
 		$table_exists = $wpdb->get_var(
 			$wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table_name ) )
 		);
@@ -1468,6 +1535,7 @@ class TTA_Notices {
 
 		// TTS-236 Priority 2: SUM(play_count) via indexed column (DB-side).
 		if ( class_exists( '\\TTA\\TTA_Activator' ) && TTA_Activator::play_count_column_exists() ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			$total = (int) $wpdb->get_var( "SELECT COALESCE(SUM(play_count), 0) FROM {$table_name}" );
 			// Cache it as the running counter so next call is O(1).
 			update_option( 'tta_total_plays_counter', $total, false );
@@ -1477,6 +1545,7 @@ class TTA_Notices {
 
 		// TTS-236 Priority 3: Row-count-guarded PHP scan.
 		// On large tables we skip the scan entirely to prevent memory exhaustion.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$row_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table_name}" );
 		$max_rows  = (int) apply_filters( 'tta_total_plays_scan_row_limit', 5000 );
 
@@ -1490,6 +1559,7 @@ class TTA_Notices {
 		}
 
 		// Small site — safe to scan in PHP.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$rows  = $wpdb->get_col( "SELECT analytics FROM {$table_name}" );
 		$total = 0;
 		if ( $rows ) {
@@ -1665,46 +1735,10 @@ class TTA_Notices {
 				</div>
 			</div>
 		</div>
-		<script>
-		(function($) {
-			$('#tta-download-translations').on('click', function(e) {
-				e.preventDefault();
-				var $btn    = $(this);
-				var $status = $('#tta-download-status');
-				var locale  = $btn.data('locale');
-
-				$btn.prop('disabled', true).text('<?php esc_html_e( 'Downloading...', 'text-to-audio' ); ?>');
-				$status.show().html('<span class="spinner is-active" style="float: none; margin: 0;"></span>');
-
-				$.ajax({
-					url: ttaNoticeData.ajaxurl,
-					type: 'POST',
-					data: {
-						action: 'tta_download_translations',
-						locale: locale,
-						nonce: ttaNoticeData.nonce
-					},
-					success: function(response) {
-						if (response.success) {
-							$status.html('<span style="color: #00a32a; font-weight: 600;">&#10003; <?php esc_html_e( 'Downloaded! Reloading...', 'text-to-audio' ); ?></span>');
-							$btn.text('<?php esc_html_e( 'Downloaded!', 'text-to-audio' ); ?>');
-							setTimeout(function() {
-								window.location.reload();
-							}, 1000);
-						} else {
-							$status.html('<span style="color: #d63638;">' + response.data.message + '</span>');
-							$btn.prop('disabled', false).text('<?php esc_html_e( 'Retry Download', 'text-to-audio' ); ?>');
-						}
-					},
-					error: function() {
-						$status.html('<span style="color: #d63638;"><?php esc_html_e( 'Network error. Please try again.', 'text-to-audio' ); ?></span>');
-						$btn.prop('disabled', false).text('<?php esc_html_e( 'Retry Download', 'text-to-audio' ); ?>');
-					}
-				});
-			});
-		})(jQuery);
-		</script>
 		<?php
+		// TTS-249 (I3): the translation-download click handler moved into the
+		// enqueued tta-admin-notice.js (strings via ttaNoticeData.translation).
+		// No inline <script> is printed here.
 	}
 
 	/**

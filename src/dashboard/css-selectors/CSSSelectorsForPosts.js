@@ -197,7 +197,7 @@ export default function CSSSelectorsForPosts() {
         return false;
     }
 
-    const isPro = ttsObj.is_pro_active;
+    const isPro = ttsObj.is_atlasvoice_addon_functional;
 
     const fields = [
         {

@@ -29,12 +29,21 @@ import {
 } from "./index";
 
 export default function Analytics() {
-    const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
+    // TTS-247: data-driven capability map (no is_atlasvoice_addon_functional gating in the UI).
+    // Free ships an empty object; companion plugins (Pro) declare available
+    // premium features via the `tts_capabilities` PHP filter. A control renders
+    // only when its capability key is present, or when its data slice arrives.
+    const capabilities = (typeof ttsObj !== "undefined" && ttsObj.capabilities) || {};
 
     // State
     const [analytics, setAnalytics] = useState({
-        tts_enable_analytics: false,
+        // Mirrors the activator defaults in includes/TTA_Activator.php so
+        // first-paint matches what the GET endpoint will return.
+        tts_enable_analytics: true,
         tts_trackable_post_ids: [],
+        // TTS-247: opt-in gate for third-party IP geolocation lookups
+        // (icanhazip / ip-api / ipinfo). Off by default per wp.org Guideline 7.
+        tts_show_listener_location: false,
     });
     const [postIds, setPostIds] = useState([]);
     const [selectedIds, setSelectedIds] = useState([]);
@@ -369,11 +378,15 @@ export default function Analytics() {
     }, []);
 
     /**
-     * Fetch trend data for charts
+     * Fetch trend data for charts (Pro only)
      */
     const fetchTrendData = useCallback(async (dateRange = "Last 30 Days", fromDate = null, toDate = null) => {
+        // TTS-247: Playing Trend Analysis is a premium feature. Only fetch when
+        // the trend capability is present (Pro active); the free dashboard shows
+        // the locked "Upgrade to Pro" card instead.
+        if (!capabilities.trend) return;
         try {
-            let url = `${tta_obj.api_url}tta/v1/trend_data?date_range=${encodeURIComponent(dateRange)}`;
+            let url = `${tta_obj.api_url}tta_pro/v1/trend_data?date_range=${encodeURIComponent(dateRange)}`;
 
             // Add custom dates if provided
             if (dateRange === "Custom" && fromDate && toDate) {
@@ -395,16 +408,17 @@ export default function Analytics() {
         } catch (error) {
             console.error("Error fetching trend data:", error);
         }
-    }, []);
+    }, [capabilities.trend]);
 
     /**
      * Fetch heatmap data (Pro only)
      */
     const fetchHeatmapData = useCallback(async (dateRange = "Last 30 Days", fromDate = null, toDate = null) => {
-        if (!isProActive) return;
+        // TTS-247: only fetch when the heatmap capability is present (Pro active).
+        if (!capabilities.heatmap) return;
 
         try {
-            let url = `${tta_obj.api_url}tta/v1/heatmap_data?date_range=${encodeURIComponent(dateRange)}`;
+            let url = `${tta_obj.api_url}tta_pro/v1/heatmap_data?date_range=${encodeURIComponent(dateRange)}`;
 
             // Add custom dates if provided
             if (dateRange === "Custom" && fromDate && toDate) {
@@ -426,20 +440,21 @@ export default function Analytics() {
         } catch (error) {
             console.error("Error fetching heatmap data:", error);
         }
-    }, [isProActive]);
+    }, [capabilities.heatmap]);
 
     /**
      * Export analytics as CSV (Pro only)
      */
     const handleExportCSV = useCallback(async (dateRange = "Last 999 Days") => {
-        if (!isProActive) return;
+        // TTS-247: export is a Pro action route; only call it when the capability is present.
+        if (!capabilities.export) return;
         if(globalDateRange){
             dateRange = globalDateRange;
         }
 
         try {
             const response = await fetch(
-                `${tta_obj.api_url}tta/v1/export_csv?date_range=${encodeURIComponent(dateRange)}`,
+                `${tta_obj.api_url}tta_pro/v1/export_csv?date_range=${encodeURIComponent(dateRange)}`,
                 {
                     method: "GET",
                     headers: {
@@ -469,19 +484,19 @@ export default function Analytics() {
             console.error("Error exporting CSV:", error);
             toast(__("Error exporting CSV", "text-to-audio"), "error");
         }
-    }, [isProActive]);
+    }, [capabilities.export]);
 
     /**
      * Export analytics as PDF (Pro only)
      */
     const handleExportPDF = useCallback(async (dateRange = "Last 999 Days") => {
-        if (!isProActive) return;
+        if (!capabilities.export) return;
         if (globalDateRange) {
             dateRange = globalDateRange;
         }
 
         try {
-            let url = `${tta_obj.api_url}tta/v1/export_pdf?date_range=${encodeURIComponent(dateRange)}`;
+            let url = `${tta_obj.api_url}tta_pro/v1/export_pdf?date_range=${encodeURIComponent(dateRange)}`;
 
             // Add custom dates if provided
             if (dateRange === "Custom" && globalFromDate && globalToDate) {
@@ -539,7 +554,7 @@ export default function Analytics() {
             console.error("Error exporting PDF:", error);
             toast(__("Error exporting PDF", "text-to-audio"), "error");
         }
-    }, [isProActive, globalDateRange, globalFromDate, globalToDate]);
+    }, [capabilities.export, globalDateRange, globalFromDate, globalToDate]);
 
 
     /**
@@ -625,7 +640,7 @@ export default function Analytics() {
                 return { post_id, totalScore };
             })
             .sort((a, b) => b.totalScore - a.totalScore)
-            .slice(0, isProActive ? 50 : 10);
+            .slice(0, 50);
     }
 
     // Load initial data
@@ -641,14 +656,16 @@ export default function Analytics() {
         // Fetch aggregated insights from new API endpoint
         fetchAggregatedInsights(globalDateRange, globalFromDate, globalToDate);
 
-        // Fetch trend data
-        fetchTrendData(globalDateRange, globalFromDate, globalToDate);
+        // Fetch trend data (present only when the trend capability is active)
+        if (capabilities.trend) {
+            fetchTrendData(globalDateRange, globalFromDate, globalToDate);
+        }
 
-        // Fetch heatmap data (Pro only)
-        if (isProActive) {
+        // Fetch heatmap data (present only when the heatmap capability is active)
+        if (capabilities.heatmap) {
             fetchHeatmapData(globalDateRange, globalFromDate, globalToDate);
         }
-    }, [fetchAggregatedInsights, fetchTrendData, fetchHeatmapData, isProActive]);
+    }, [fetchAggregatedInsights, fetchTrendData, fetchHeatmapData, capabilities.trend, capabilities.heatmap]);
 
     // Refetch data when global date range changes
     useEffect(() => {
@@ -658,16 +675,16 @@ export default function Analytics() {
     }, [globalDateRange, globalFromDate, globalToDate, analytics.tts_enable_analytics, fetchAggregatedInsights]);
 
     useEffect(() => {
-        if (analytics.tts_enable_analytics) {
+        if (analytics.tts_enable_analytics && capabilities.trend) {
             fetchTrendData(globalDateRange, globalFromDate, globalToDate);
         }
-    }, [globalDateRange, globalFromDate, globalToDate, analytics.tts_enable_analytics, fetchTrendData]);
+    }, [globalDateRange, globalFromDate, globalToDate, analytics.tts_enable_analytics, capabilities.trend, fetchTrendData]);
 
     useEffect(() => {
-        if (analytics.tts_enable_analytics && isProActive) {
+        if (analytics.tts_enable_analytics && capabilities.heatmap) {
             fetchHeatmapData(globalDateRange, globalFromDate, globalToDate);
         }
-    }, [globalDateRange, globalFromDate, globalToDate, analytics.tts_enable_analytics, isProActive, fetchHeatmapData]);
+    }, [globalDateRange, globalFromDate, globalToDate, analytics.tts_enable_analytics, capabilities.heatmap, fetchHeatmapData]);
 
     // Load analytics settings
     useEffect(() => {
@@ -782,12 +799,14 @@ export default function Analytics() {
         // Fetch all data with new date range
         if (analytics.tts_enable_analytics) {
             fetchAggregatedInsights(dateRange, fromDate, toDate);
-            fetchTrendData(dateRange, fromDate, toDate);
-            if (isProActive) {
+            if (capabilities.trend) {
+                fetchTrendData(dateRange, fromDate, toDate);
+            }
+            if (capabilities.heatmap) {
                 fetchHeatmapData(dateRange, fromDate, toDate);
             }
         }
-    }, [analytics.tts_enable_analytics, isProActive, fetchAggregatedInsights, fetchTrendData, fetchHeatmapData]);
+    }, [analytics.tts_enable_analytics, capabilities.trend, capabilities.heatmap, fetchAggregatedInsights, fetchTrendData, fetchHeatmapData]);
 
     return isDataLoaded ? (
         <React.Fragment>
@@ -807,8 +826,8 @@ export default function Analytics() {
                                     />
                                 </div>
                                 <div className="tta_analytics_header_right">
-                                    {/* Export buttons - inline for Pro users only */}
-                                    {isProActive && analytics.tts_enable_analytics && (
+                                    {/* Export buttons - shown when the export capability is present */}
+                                    {capabilities.export && analytics.tts_enable_analytics && (
                                         <ExportSection
                                             onExportCSV={handleExportCSV}
                                             onExportPDF={handleExportPDF}
@@ -828,10 +847,48 @@ export default function Analytics() {
                             <p className="tta_analytics_subtitle">
                                 {__("Track and analyze your TTS player engagement to understand listener behavior.", "text-to-audio")}
                             </p>
+                            {/* TTS-247: opt-in for third-party IP geolocation, shown only when master analytics is on. Off by default per wp.org Guideline 7. */}
+                            {analytics.tts_enable_analytics && (
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "flex-start",
+                                        gap: "12px",
+                                        marginTop: "16px",
+                                        padding: "12px 14px",
+                                        background: "#f6f8fa",
+                                        border: "1px solid #e5e7eb",
+                                        borderRadius: "8px",
+                                    }}
+                                >
+                                    <div style={{ flexShrink: 0, paddingTop: "2px" }}>
+                                        <ToggleSwitch
+                                            checked={!!analytics.tts_show_listener_location}
+                                            onChange={handleChange}
+                                            name="tts_show_listener_location"
+                                            id="tts_show_listener_location"
+                                        />
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <label
+                                            htmlFor="tts_show_listener_location"
+                                            style={{ display: "block", fontWeight: 600, color: "#1f2937", cursor: "pointer", marginBottom: "2px", fontSize: "14px" }}
+                                        >
+                                            {__("Show listener location in analytics", "text-to-audio")}
+                                        </label>
+                                        <span style={{ fontSize: "12px", color: "#6b7280", lineHeight: 1.5, display: "block" }}>
+                                            {__(
+                                                'Off by default. When on, listener IP addresses are sent to ip-api.com, ipinfo.io and icanhazip.com to resolve city / country for the Location chart. See "External services" in the plugin readme.',
+                                                "text-to-audio"
+                                            )}
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
-                        {/* Export & Reports upsell for free users */}
-                        {!isProActive && analytics.tts_enable_analytics && (
+                        {/* Export & Reports upsell — shown when the export capability is absent */}
+                        {!capabilities.export && analytics.tts_enable_analytics && (
                             <div style={{
                                 background: '#f8f9fa',
                                 border: '1px dashed #dee2e6',
@@ -950,21 +1007,25 @@ export default function Analytics() {
                                     </Col>
                                 </Row>
 
-                                {/* Location Analytics */}
-                                <Row className="tta_analytics_row">
-                                    <Col xs={12}>
-                                        <LocationAnalytics
-                                            data={locationData}
-                                            rawResults={rawResults}
-                                            dateRange={locationDateRange}
-                                            globalDateRange={globalDateRange}
-                                            onDateRangeChange={setLocationDateRange}
-                                            filterResultsByDateRange={filterResultsByDateRange}
-                                            aggregateFilteredData={aggregateFilteredData}
-                                            limit={3}
-                                        />
-                                    </Col>
-                                </Row>
+                                {/* Location Analytics — TTS-247: only shown when the
+                                    site admin has opted in to third-party IP geolocation
+                                    (otherwise this section would be all "Unknown"). */}
+                                {analytics.tts_show_listener_location && (
+                                    <Row className="tta_analytics_row">
+                                        <Col xs={12}>
+                                            <LocationAnalytics
+                                                data={locationData}
+                                                rawResults={rawResults}
+                                                dateRange={locationDateRange}
+                                                globalDateRange={globalDateRange}
+                                                onDateRangeChange={setLocationDateRange}
+                                                filterResultsByDateRange={filterResultsByDateRange}
+                                                aggregateFilteredData={aggregateFilteredData}
+                                                limit={3}
+                                            />
+                                        </Col>
+                                    </Row>
+                                )}
 
                                 {/* Playing Trend Chart */}
                                 <Row className="tta_analytics_row">
@@ -1019,7 +1080,7 @@ export default function Analytics() {
                                             globalDateRange={globalDateRange}
                                             onDateRangeChange={setPopularDateRange}
                                             filterResultsByDateRange={filterResultsByDateRange}
-                                            limit={isProActive ? 10 : 3}
+                                            limit={10}
                                         />
                                     </Col>
                                 </Row>

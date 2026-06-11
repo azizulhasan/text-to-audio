@@ -44,6 +44,7 @@ class TTA_Helper
         $option_name = 'tta_total_plays_counter';
 
         // Check if the option exists.
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $exists = $wpdb->get_var( $wpdb->prepare(
             "SELECT option_id FROM {$wpdb->options} WHERE option_name = %s LIMIT 1",
             $option_name
@@ -55,6 +56,7 @@ class TTA_Helper
         } else {
             // Atomic increment via direct SQL. This is safe under concurrent writes
             // because MySQL guarantees atomicity of a single UPDATE statement.
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
             $wpdb->query( $wpdb->prepare(
                 "UPDATE {$wpdb->options} SET option_value = CAST(option_value AS UNSIGNED) + %d WHERE option_name = %s",
                 $delta,
@@ -107,6 +109,7 @@ class TTA_Helper
         }
 
         // Row-count guard.
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
         $count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
         if ( $count > $max_rows ) {
             return $fallback;
@@ -115,7 +118,9 @@ class TTA_Helper
         try {
             return $callback();
         } catch ( \Throwable $e ) {
-            if ( function_exists( 'error_log' ) ) {
+            // TTS-247: log only when WP_DEBUG is on; production sites stay quiet.
+            if ( defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'error_log' ) ) {
+                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                 error_log( 'TTA safe_large_query failed: ' . $e->getMessage() );
             }
             return $fallback;
@@ -662,118 +667,26 @@ class TTA_Helper
         return false; // Return false if all properties are empty
     }
 
+    /**
+     * TTS-250: MP3 file URLs are a Pro-only feature — the free browser-
+     * SpeechSynthesis player produces no audio file. The resolver (post-meta
+     * read, GCS backup, signed-URL refresh) was removed from the free plugin and
+     * now lives in AtlasVoice Pro, which registers the `tts_mp3_file_urls` filter.
+     * With Pro absent there is no listener, so this returns an empty array — there
+     * is no Pro/license check and no premium code in the free plugin.
+     *
+     * @param string      $file_url_key Language/voice file key.
+     * @param int|WP_Post  $post         Post (defaults to global).
+     * @param string      $date         Optional date.
+     * @param string      $file_name    Optional file name.
+     * @return array
+     */
     public static function get_mp3_file_urls($file_url_key, $post = '', $date = '', $file_name = '')
     {
-
         if (!$post) {
-
             global $post;
         }
-        if (!is_pro_active() || self::get_player_id() < 3) {
-            return [];
-        }
-
-        $date = TTA_Helper::get_post_date($post);
-
-
-        $mp3_file_urls = get_post_meta($post->ID, 'tts_mp3_file_urls');
-        if (isset($mp3_file_urls[0])) {
-            $mp3_file_urls = $mp3_file_urls[0];
-        }
-        $final_mp3_file_ulrs = $mp3_file_urls;
-        $should_update_urls = false;
-        /**
-         * front count to empty function used.
-         * TTS-195: eric.corbett2@gmail.com TTA_Helper.php:556 issue fixed
-         */
-        if (get_post_meta($post->ID, 'tts_is_mp3_file_url_exists', true) && !empty($final_mp3_file_ulrs)) {
-            // TTS-239: append ?v={filemtime} so Cloudflare / CDN edge caches re-fetch after regeneration.
-            return self::append_cache_buster_to_urls(apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls));
-        }
-
-        if (isset($mp3_file_urls[$file_url_key]) && $mp3_file_urls[$file_url_key]) {
-            $url = $mp3_file_urls[$file_url_key];
-            $language_code = $file_url_key;
-            if (self::is_file_url_not_exists_and_is_file_empty($url, $date, $file_name)) {
-                $should_update_urls = true;
-                unset($final_mp3_file_ulrs[$file_url_key]);
-                update_post_meta($post->ID, 'tts_is_mp3_file_url_exists', false);
-            } else {
-                // Generate new singed url or backup only current post applicable url.
-                if (get_option('tts_is_backup_mp3_file') == 'true' && strtolower($language_code) == strtolower($file_url_key)) {
-                    // previously generated mp3 file to 'TTA_Pro' folder but not backup to Google Cloud Storage.
-                    // $url = 'http://localhost/azizulhasan/tts/wp-content/uploads/TTA_Pro/gtts/2024/04/21/Hello_world__lang__en_us.mp3';
-                    $gcs_url = '';
-                    if (strpos($url, 'TTA_Pro') !== false) {
-                        $full_path = self::get_path_from_url($url);
-
-                        $gcs_url = apply_filters('tts_upload_previous_file_to_gcs_and_get_new_url', $url, $full_path, $post, $language_code);
-                        if ($gcs_url) {
-                            $url = $gcs_url;
-                        }
-                    }
-
-                    if (self::is_signed_url_expired($url)) {
-                        // Get new signed url
-                        $gcs_new_signed_url = apply_filters('tts_get_gcs_new_signed_url', $url, $post, $language_code);
-                        if ($gcs_new_signed_url) {
-                            $url = $gcs_new_signed_url;
-                        }
-                    }
-                } elseif (get_option('tts_is_backup_mp3_file') == 'false' && strtolower($language_code) == strtolower($file_url_key) && strpos($url, 'storage.googleapis.com') !== false) {
-                    $should_update_urls = true;
-                }
-
-                $final_mp3_file_ulrs[$language_code] = $url;
-                update_post_meta($post->ID, 'tts_is_mp3_file_url_exists', true);
-            }
-        }
-
-        //TODO: don't remove this loop, setup a settings if needed to check oll url or single url.
-//		foreach ( $mp3_file_urls as $language_code => $url ) {
-//
-//			if ( self::is_file_url_not_exists_and_is_file_empty( $url, $date, $file_name ) ) {
-//
-//				$should_update_urls = true;
-//			} else {
-//				// Generate new singed url or backup only current post applicable url.
-//				if ( get_option( 'tts_is_backup_mp3_file' ) == 'true' && strtolower( $language_code ) == strtolower( $file_url_key ) ) {
-//					// previously generated mp3 file to 'TTA_Pro' folder but not backup to Google Cloud Storage.
-//					// $url = 'http://localhost/azizulhasan/tts/wp-content/uploads/TTA_Pro/gtts/2024/04/21/Hello_world__lang__en_us.mp3';
-//					$gcs_url = '';
-//					if ( strpos( $url, 'TTA_Pro' ) !== false ) {
-//						$full_path = self::get_path_from_url( $url );
-//						$gcs_url   = apply_filters( 'tts_upload_previous_file_to_gcs_and_get_new_url', $url, $full_path, $post, $language_code );
-//						if ( $gcs_url ) {
-//							$url = $gcs_url;
-//						}
-//					}
-//
-//					if ( self::is_signed_url_expired( $url ) ) {
-//						// Get new signed url
-//						$gcs_new_signed_url = apply_filters( 'tts_get_gcs_new_signed_url', $url, $post );
-//						if ( $gcs_new_signed_url ) {
-//							$url = $gcs_new_signed_url;
-//						}
-//					}
-//				} elseif ( get_option( 'tts_is_backup_mp3_file' ) == 'false' && strtolower( $language_code ) == strtolower( $file_url_key ) && strpos( $url, 'https://storage.googleapis.com' ) !== false ) {
-//					$should_update_urls = true;
-//					continue;
-//				}
-//
-//
-//				$final_mp3_file_ulrs[ $language_code ] = $url;
-//			}
-//		}
-
-        if ($should_update_urls
-            || empty($final_mp3_file_ulrs)
-        ) {
-            update_post_meta($post->ID, 'tts_mp3_file_urls', $final_mp3_file_ulrs);
-        }
-
-        // TTS-239: append ?v={filemtime} so Cloudflare / CDN edge caches re-fetch after regeneration.
-        return self::append_cache_buster_to_urls(apply_filters('tts_mp3_file_urls', $final_mp3_file_ulrs, $post, $mp3_file_urls));
+        return (array) apply_filters('tts_mp3_file_urls', array(), $post, $file_url_key, $date, $file_name);
     }
 
     /**
@@ -871,11 +784,20 @@ class TTA_Helper
 
 
     /**
-     * Is plugin active
+     * TTS-250: Whether the AtlasVoice companion add-on plugin is active
+     * (presence check, not a license gate). Renamed from is_pro_active().
+     */
+    public static function is_atlasvoice_addon_functional()
+    {
+        return is_atlasvoice_addon_functional();
+    }
+
+    /**
+     * @deprecated TTS-250 Use is_atlasvoice_addon_functional(). Backward-compatible alias.
      */
     public static function is_pro_active()
     {
-        return is_pro_active();
+        return self::is_atlasvoice_addon_functional();
     }
 
     public static function is_audio_folder_writable()
@@ -883,7 +805,7 @@ class TTA_Helper
         $upload_dir = wp_upload_dir();
         $base_dir = $upload_dir['basedir'];
 
-        if (is_writable($base_dir)) {
+        if (wp_is_writable($base_dir)) {
             return true;
         }
 
@@ -896,15 +818,28 @@ class TTA_Helper
     }
 
     /**
-     * Is pro license active
+     * TTS-249: registry of players the site can actually deliver.
+     *
+     * Free ships only player 1 (browser speechSynthesis). Pro registers ids 2-6
+     * via the `tts_available_players` filter. This is a capability registry — NOT
+     * a license gate — used to (a) populate the player selector and (b) let
+     * get_player_id() fall back to 1 when a saved id has no implementation present
+     * (e.g. Pro was deactivated). Keys are player ids.
+     *
+     * @return array<int,array>
      */
-    public static function is_pro_license_active()
+    public static function get_available_players()
     {
-        if (self::is_pro_active()) {
-            return apply_filters('tts_is_pro_license_active', false);
-        }
+        $players = array(
+            1 => array(
+                'id'     => 1,
+                'name'   => __( 'Default', 'text-to-audio' ),
+                'object' => 'TextToSpeech',
+                'pro'    => false,
+            ),
+        );
 
-        return false;
+        return (array) apply_filters( 'tts_available_players', $players );
     }
 
     public static function set_default_settings()
@@ -952,29 +887,14 @@ class TTA_Helper
             }
         }
 
-        $file_headers = @get_headers($url);
-
-        if (!$file_headers && function_exists('curl_init')) {
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_NOBODY, true); // fetch headers only, no body
-            curl_setopt($ch, CURLOPT_HEADER, true);
-            $file_headers = curl_exec($ch);
-            curl_close($ch);
+        // TTS-247: prefer wp_remote_head() over raw get_headers/curl (Plugin
+        // Check guideline -- core HTTP API handles timeouts, SSL, redirects).
+        $response = wp_remote_head( $url, array( 'timeout' => 5, 'redirection' => 3 ) );
+        if ( is_wp_error( $response ) ) {
+            return true; // treat as missing
         }
-                
-
-        if (isset($file_headers[0])) {
-            $file_headers = $file_headers[0];
-        }
-
-        if (!$file_headers || strpos($file_headers, 'Not Found') !== false) {
-            return true;
-        }
-
-
-        return false;
+        $code = (int) wp_remote_retrieve_response_code( $response );
+        return ( 404 === $code || $code === 0 );
     }
 
     /**
@@ -983,7 +903,7 @@ class TTA_Helper
     public static function is_signed_url_expired($signedUrl)
     {
         // Parse the URL to get the query string
-        $urlComponents = parse_url($signedUrl);
+        $urlComponents = wp_parse_url($signedUrl);
         if(!isset($urlComponents['query'])) {
             return false;
         }
@@ -1358,23 +1278,31 @@ class TTA_Helper
     /**
      * Get the text value based on the given attributes and saved texts.
      *
-     * @param array $atts The attributes array.
-     * @param array $saved_texts The saved texts array.
-     * @param string $key The key to look for in both arrays.
-     * @param string $default The default text if neither $atts nor $saved_texts has the value.
-     * @param string $text_domain The text domain for translation.
+     * TTS-247: dropped the `$text_domain` parameter and the internal `__($default,
+     * $text_domain)` call. The WP.org review (HelpScout #293) flagged that call
+     * because both arguments were variables, which prevents gettext-extraction
+     * tools (makepot, wp-cli) from discovering the translatable strings. Callers
+     * now pass an already-translated literal default (e.g. `__('Listen',
+     * 'text-to-audio')`) so the extractor sees the string and domain literally
+     * at the call site. This helper just decides which of (attr override / saved
+     * setting / default) to return — no translation here.
+     *
+     * @param array  $atts        The attributes array.
+     * @param array  $saved_texts The saved texts array.
+     * @param string $key         The key to look for in both arrays.
+     * @param string $default     The default (already-translated) text if neither
+     *                            $atts nor $saved_texts has the value.
      *
      * @return string The final text value.
      */
-    public static function get_text_value($atts, $saved_texts, $key, $default, $text_domain)
+    public static function get_text_value($atts, $saved_texts, $key, $default)
     {
         if (isset($atts[$key]) && strlen($atts[$key])) {
             return esc_html(sanitize_text_field($atts[$key]));
         } elseif (isset($saved_texts[$key])) {
             return esc_html(sanitize_text_field($saved_texts[$key]));
-        } else {
-            return __($default, $text_domain);
         }
+        return $default;
     }
 
     /**
@@ -1694,7 +1622,7 @@ class TTA_Helper
     public static function get_post_date($post)
     {
         $post_date = get_post_field('post_date', $post->ID);
-        $date = date('Y/m/d', strtotime($post_date));
+        $date = gmdate('Y/m/d', strtotime($post_date));
 
         return $date;
     }
@@ -1741,8 +1669,10 @@ class TTA_Helper
         $current_data = (array)$current_data;
         $previous_data = (array)TTA_Helper::tts_get_settings('customize');
 
-        $previous_data['buttonSettings'] = (array) $previous_data['buttonSettings'];
-        $current_data['buttonSettings'] = (array) $current_data['buttonSettings'];
+        // TTS-247: guard missing keys — after a data reset the customize option
+        // is gone, so buttonSettings may be unset (caused an "undefined array key" warning).
+        $previous_data['buttonSettings'] = isset( $previous_data['buttonSettings'] ) ? (array) $previous_data['buttonSettings'] : array();
+        $current_data['buttonSettings']  = isset( $current_data['buttonSettings'] ) ? (array) $current_data['buttonSettings'] : array();
 
         $previous_player_id = isset($previous_data['buttonSettings']['id']) ? $previous_data['buttonSettings']['id'] : 1;
         $current_player_id = isset($current_data['buttonSettings']['id']) ? $current_data['buttonSettings']['id'] : 1;
@@ -1756,12 +1686,14 @@ class TTA_Helper
 
         $table = $wpdb->postmeta;
 
+        // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
         $deleted = $wpdb->query(
             $wpdb->prepare(
                 "DELETE FROM $table WHERE meta_key = %s",
                 $meta_key
             )
         );
+        // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 
 
         return $deleted;
@@ -1819,7 +1751,9 @@ class TTA_Helper
     }
 
     public  static  function detect_browser() {
-        $user_agent = strtolower( $_SERVER['HTTP_USER_AGENT'] );
+        $user_agent = isset( $_SERVER['HTTP_USER_AGENT'] )
+            ? strtolower( sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) )
+            : '';
 
         $browser = 'unknown';
         if (strpos($user_agent, 'firefox') !== false) {
@@ -1848,7 +1782,7 @@ class TTA_Helper
 
         foreach ( $ip_keys as $key ) {
             if ( ! empty( $_SERVER[ $key ] ) ) {
-                $ip = $_SERVER[ $key ];
+                $ip = sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) );
 
                 // Handle multiple IPs (e.g. "116.206.88.143, 10.0.0.1")
                 if ( strpos( $ip, ',' ) !== false ) {
@@ -1860,151 +1794,6 @@ class TTA_Helper
         }
 
         return 'UNKNOWN';
-    }
-
-    /**
-     * Output AudioObject JSON-LD schema markup in wp_head for the current post.
-     *
-     * Hooked to wp_head at priority 99. Only outputs on singular posts/pages
-     * where the audio player is enabled.
-     *
-     * @since 2.2.0
-     * @return void
-     */
-    public static function output_audio_schema_head()
-    {
-        if ( !is_singular() || !is_pro_active()  || self::get_player_id()  < 3) {
-            return;
-        }
-
-        global $post;
-        if (!$post || !self::should_load_button($post, 'audio_schema')) {
-            return;
-        }
-
-        // Allow disabling schema output entirely
-        if (!apply_filters('tts_enable_audio_schema_markup', true, $post)) {
-            return;
-        }
-
-        $post_title = get_the_title($post);
-        $post_url   = get_permalink($post);
-
-        // Determine contentUrl: use MP3 if available (Pro), otherwise fall back to post URL (browser TTS)
-        $content_url     = '';
-        $encoding_format = '';
-
-        $settings  = self::tts_get_settings('', $post->ID);
-        $language  = self::tts_site_language($settings);
-        $voice     = self::tts_get_voice($settings);
-        $lang_voice = self::get_player_language_and_player_voice($language, $voice, $settings, $post);
-        $language  = $lang_voice['language'];
-        $voice     = $lang_voice['voice'];
-        $file_url_key = self::tts_get_file_url_key($language, $voice);
-
-        $mp3_file_urls = get_post_meta($post->ID, 'tts_mp3_file_urls');
-        if (isset($mp3_file_urls[0])) {
-            $mp3_file_urls = $mp3_file_urls[0];
-        }
-        if (!empty($mp3_file_urls) && isset($mp3_file_urls[$file_url_key]) && $mp3_file_urls[$file_url_key]) {
-            $content_url     = $mp3_file_urls[$file_url_key];
-            $encoding_format = 'audio/mpeg';
-        }
-
-        if(!$content_url) {
-            return;
-        }
-
-        // Estimate duration from word count at 150 wpm, format as ISO 8601 (PT5M30S)
-        $content       = get_the_content(null, false, $post);
-        $content       = wp_strip_all_tags($content);
-        $word_count    = str_word_count($content);
-        $total_seconds = ($word_count > 0) ? intval(ceil(($word_count / 150) * 60)) : 0;
-        $minutes       = intval(floor($total_seconds / 60));
-        $seconds       = $total_seconds % 60;
-        $duration      = 'PT';
-        if ($minutes > 0) {
-            $duration .= $minutes . 'M';
-        }
-        if ($seconds > 0 || $minutes === 0) {
-            $duration .= $seconds . 'S';
-        }
-
-        // Build schema data array
-        $schema_data = [
-            '@context'            => 'https://schema.org',
-            '@type'               => 'AudioObject',
-            'name'                => 'Listen to: ' . $post_title,
-            'description'         => 'Audio version of ' . $post_title,
-            'contentUrl'          => esc_url($content_url),
-            'duration'            => $duration,
-            'inLanguage'          => get_locale(),
-            'isAccessibleForFree' => true,
-            'uploadDate'          => get_the_date('c', $post->ID),
-            'associatedArticle'   => [
-                '@type'    => 'NewsArticle',
-                'headline' => $post_title,
-                'url'      => esc_url($post_url),
-            ],
-        ];
-
-        if (!empty($encoding_format)) {
-            $schema_data['encodingFormat'] = $encoding_format;
-        }
-
-        // Add author information
-        $post_author = get_the_author_meta('display_name', $post->post_author);
-        if (!empty($post_author)) {
-            $schema_data['author'] = [
-                '@type' => 'Person',
-                'name'  => $post_author,
-            ];
-        }
-
-        // Add publisher information
-        $site_name = get_bloginfo('name');
-        if (!empty($site_name)) {
-            $schema_data['publisher'] = [
-                '@type' => 'Organization',
-                'name'  => $site_name,
-            ];
-        }
-
-        /**
-         * Filter the AudioObject schema data before JSON-LD output.
-         *
-         * @since 2.2.0
-         * @param array   $schema_data The schema data array.
-         * @param WP_Post $post        The current post object.
-         */
-        $schema_data = apply_filters('tta_audio_schema', $schema_data, $post);
-
-        // Legacy filter for backward compatibility
-        $schema_data = apply_filters('tts_audio_schema_data', $schema_data, [], $post);
-
-        // Generate JSON-LD markup
-        $json = wp_json_encode($schema_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-
-        $schema_markup = "<!-- Text To Audio Schema -->\n<script type=\"application/ld+json\">\n" . $json . "\n</script>\n";
-
-        // Allow filtering of final schema markup
-        $schema_markup = apply_filters('tts_audio_schema_markup', $schema_markup, $schema_data, [], $post);
-
-        echo $schema_markup;
-    }
-
-    /**
-     * Generate AudioObject JSON-LD schema markup string.
-     *
-     * @deprecated 2.2.0 Use TTA_Helper::output_audio_schema_head() instead.
-     *             Schema is now output via the wp_head hook automatically.
-     * @param array $params Legacy parameters (no longer used).
-     * @return string Empty string. Schema is output via wp_head hook.
-     */
-    public static function generate_audio_schema($params = [])
-    {
-        // Schema is now output via wp_head hook to avoid duplicate markup.
-        return '';
     }
 
     /**

@@ -2,6 +2,9 @@
 
 namespace TTA_Admin;
 
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
+
 use TTA\TTA_Helper;
 use TTA\TTA_Cache;
 use TTA\TTA_i18n;
@@ -72,8 +75,16 @@ class TTA_Admin
         add_filter('script_loader_tag', [$this, 'load_script_as_tag'], 10, 3);
         add_action('wp_ajax_atlas_plugins_refresh', array($this, 'ajax_refresh_plugins'));
 
+        // TTS-249 (A1): one-time Custom CSS → Additional CSS migration. Runs on
+        // admin_init as a fallback for already-installed sites whose update path
+        // doesn't fire the activation/upgrader hook (e.g. wp.org auto-update).
+        // Self-guards via the tta_custom_css_migrated option, so it's a single
+        // option read after the first run.
+        add_action('admin_init', array('\\TTA\\TTA_Activator', 'migrate_custom_css_to_additional_css'));
+
+        // TTS-247: switched plain include to require_once per wp.org guideline.
         if (!function_exists('is_plugin_active')) {
-            include ABSPATH . 'wp-admin/includes/plugin.php';
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
         }
 
         if (!function_exists('wp_is_mobile')) {
@@ -106,19 +117,34 @@ class TTA_Admin
             'api_url' => $rest_api_url,
             'api_namespace' => 'tta',
             'api_version' => 'v1',
-            'image_url' => WP_PLUGIN_URL . '/text-to-audio/admin/images',
-            'plugin_url' => WP_PLUGIN_URL . '/text-to-audio',
+            // TTS-247: resolve plugin URL via plugin_dir_url/__FILE__ instead of
+            // hardcoding the slug -- breaks when the folder is renamed/symlinked.
+            'image_url' => plugins_url( 'admin/images', TEXT_TO_AUDIO_ROOT_FILE ),
+            'plugin_url' => untrailingslashit( plugin_dir_url( TEXT_TO_AUDIO_ROOT_FILE ) ),
             'nonce' => wp_create_nonce(TEXT_TO_AUDIO_NONCE),
             'plugin_name' => TEXT_TO_AUDIO_PLUGIN_NAME,
             'rest_nonce' => wp_create_nonce('wp_rest'),
-            'VERSION' => is_pro_active() ? get_option('TTA_PRO_VERSION') : TEXT_TO_AUDIO_VERSION,
+            'VERSION' => is_atlasvoice_addon_functional() ? get_option('TTA_PRO_VERSION') : TEXT_TO_AUDIO_VERSION,
             'is_logged_in' => is_user_logged_in(),
             'user_id' => get_current_user_id(),
             'is_dashboard' => is_admin(),
-            'is_pro_active' => is_pro_active(),
-            'is_pro_license_active' => is_pro_active(),
+            // TTS-250: new key; 'is_pro_active' kept as a backward-compatible alias.
+            'is_atlasvoice_addon_functional' => is_atlasvoice_addon_functional(),
+            'is_pro_active' => is_atlasvoice_addon_functional(),
+            // TTS-247: data-driven capability map. Free ships an empty array;
+            // companion plugins (Pro) declare which premium features are
+            // available by hooking `tts_capabilities`. The React dashboard shows
+            // a premium control only when its capability key is present here —
+            // it never branches on is_atlasvoice_addon_functional() for feature gating.
+            // Default empty; resolved lazily in enqueue_scripts() after Pro's
+            // `tts_capabilities` filter is registered (see note there).
+            'capabilities' => array(),
             'is_admin_page' => is_admin(),
             "player_id" => get_player_id(),
+            // TTS-249: the players this site can actually deliver. Free = player 1
+            // only; Pro adds 2-6 via the `tts_available_players` filter. The React
+            // customize UI renders the selector from this list (no locked options).
+            'availablePlayers' => array_values( TTA_Helper::get_available_players() ),
             "is_folder_writable" => TTA_Helper::is_audio_folder_writable(),
             'compatible' => TTA_Helper::get_compatible_plugins_data(),
             'gctts_is_authenticated' => get_player_id() == '4',
@@ -151,7 +177,10 @@ class TTA_Admin
 
         $defaults = \TTA\TTA_Player_Icons::default_players();
         $out      = [];
-        foreach ([1, 2] as $pid) {
+        // TTS-249 (T2): Free emits icon maps for player 1 only. Player 2
+        // (Default Pro) is premium — Pro appends its id-2 map via the
+        // tts_player_customizations filter, so no player-2 data ships in free.
+        foreach ([1] as $pid) {
             $states = $players[$pid] ?? $defaults[$pid];
             $out[(string) $pid] = [
                 'play'   => \TTA\TTA_Player_Icons::resolve($states['listen']['icon'] ?? 'preset:play'),
@@ -214,8 +243,9 @@ class TTA_Admin
          * Looad wp-speeh script
          */
 
+        // TTS-247: switched plain include to require_once per wp.org guideline.
         if (!function_exists('is_plugin_active')) {
-            include ABSPATH . 'wp-admin/includes/plugin.php';
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
         }
 
         // Populate latest_post_preview_url lazily here (not in constructor)
@@ -224,13 +254,32 @@ class TTA_Admin
             $this->localize_data['latest_post_preview_url'] = TTA_Helper::get_latest_post_preview_url();
         }
 
+        // TTS-249: recompute the player registry + current id lazily. The
+        // constructor runs on plugins_loaded — BEFORE Pro registers its
+        // `tts_available_players` filter on `init` — so the constructor-time value
+        // only ever contains player 1. Recomputing here (admin_enqueue_scripts)
+        // picks up Pro's players when Pro is active.
+        $this->localize_data['availablePlayers'] = array_values( TTA_Helper::get_available_players() );
+        $this->localize_data['player_id']         = get_player_id();
+
+        // TTS-247: same lazy-recompute reason as availablePlayers above — the
+        // constructor builds localize_data on plugins_loaded, before Pro
+        // registers `tts_capabilities` on `init`, so a constructor-time value is
+        // always empty. Resolve it here (admin_enqueue_scripts) so the React
+        // dashboard's data-driven gates see Pro's capabilities when Pro is active.
+        $this->localize_data['capabilities'] = (array) apply_filters( 'tts_capabilities', array() );
+
         do_action('tta_enqueue_pro_dashboard_scripts');
 
         // Welcome wizard (separate bundle, only on first activation).
+        // Read-only routing check on admin page; no state mutation, no nonce required.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         $is_wizard_page = is_admin()
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             && isset( $_REQUEST['page'] ) && 'text-to-audio' === $_REQUEST['page']
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended
             && isset( $_REQUEST['welcome'] ) && '1' === $_REQUEST['welcome']
-            && ( ! get_option( 'tta_onboarding_completed' ) || ( TTA_Helper::is_pro_active() && ! get_option( 'tta_pro_onboarding_completed' ) ) );
+            && ( ! get_option( 'tta_onboarding_completed' ) || ( TTA_Helper::is_atlasvoice_addon_functional() && ! get_option( 'tta_pro_onboarding_completed' ) ) );
         if ( $is_wizard_page ) {
             $post_types      = get_post_types( array( 'public' => true ), 'objects' );
             $post_types_data = array();
@@ -296,14 +345,17 @@ class TTA_Admin
                 'current_customize' => get_option( 'tta_customize_settings', array() ),
                 'current_listening' => get_option( 'tta_listening_settings', array() ),
                 'latest_post_url'   => $latest_post_url,
-                'is_pro_active'     => TTA_Helper::is_pro_active(),
-                'is_pro_wizard'     => TTA_Helper::is_pro_active() && ! get_option( 'tta_pro_onboarding_completed' ),
+                // TTS-250: new key; 'is_pro_active' kept as a backward-compatible alias.
+                'is_atlasvoice_addon_functional' => TTA_Helper::is_atlasvoice_addon_functional(),
+                'is_pro_active'     => TTA_Helper::is_atlasvoice_addon_functional(),
+                'is_pro_wizard'     => TTA_Helper::is_atlasvoice_addon_functional() && ! get_option( 'tta_pro_onboarding_completed' ),
                 'nonce'             => wp_create_nonce( 'wp_rest' ),
                 'api_url'           => esc_url_raw( rest_url( 'tta/v1/' ) ),
                 'pro_url'           => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
                 'dashboard_url'     => admin_url( 'admin.php?page=text-to-audio' ),
                 'site_locale'       => get_locale(),
-                'plugin_url'        => WP_PLUGIN_URL . '/text-to-audio',
+                // TTS-247: use plugin_dir_url so renamed/symlinked installs work.
+                'plugin_url'        => untrailingslashit( plugin_dir_url( TEXT_TO_AUDIO_ROOT_FILE ) ),
             ) );
 
             wp_enqueue_script( 'tts-welcome-wizard' );
@@ -315,11 +367,20 @@ class TTA_Admin
             return; // Don't load dashboard scripts when wizard is active.
         }
 
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page-name read for asset enqueue, no state mutation
         if (is_admin() && isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
             /* Load react js */
             wp_enqueue_style('tts-bootstrap', plugin_dir_url(__FILE__) . 'css/bootstrap.css', [], $this->version, 'all');
             wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', array('wp-hooks',), $this->version, true);
             wp_localize_script('TextToSpeech', 'ttsObj', $this->localize_data);
+            // TTS-250: the shared React dashboard reads the `ttsObjPro` global for
+            // pro-context checks (the is_pro_active gate that loads the Listening
+            // language list, multilingual `compatible` detection, customize preview).
+            // Provide a reliable base on the free dashboard so this UI works whether
+            // or not a Pro script localizes ttsObjPro on this page; Pro overrides it
+            // with its own data when its scripts load. This was previously supplied
+            // by the Pro player demo bundle, which was removed in TTS-249.
+            wp_localize_script('TextToSpeech', 'ttsObjPro', $this->localize_data);
             // Register dashboard UI script (following i18n best practices)
             wp_register_script(
                 'text-to-audio-dashboard-ui',
@@ -330,7 +391,6 @@ class TTA_Admin
             );
 
             wp_localize_script('text-to-audio-dashboard-ui', 'tta_obj', $this->localize_data);
-            wp_localize_script('text-to-audio-dashboard-ui', 'ttsTR', TTA_i18n::get_default_labels());
             wp_enqueue_script('text-to-audio-dashboard-ui');
             wp_set_script_translations(
                 'text-to-audio-dashboard-ui',
@@ -339,52 +399,19 @@ class TTA_Admin
             );
             wp_enqueue_style('dashicons');
 
-            // Player 2
-            wp_enqueue_style('text-to-audio-pro-demo', plugin_dir_url(__FILE__) . 'demos/player2/text-to-audio-pro-demo.css', [], $this->version, 'all');
-            wp_enqueue_script('TextToSpeechProDemo', plugin_dir_url(__FILE__) . 'demos/player2/js/TextToSpeechProDemo.min.js', array(
-                'wp-hooks',
-                'TextToSpeech'
-            ), $this->version, true);
-            wp_localize_script('TextToSpeechProDemo', 'ttsObjPro', $this->localize_data);
-
-            // Player 3
-            wp_enqueue_style('tts-pro-demo-plyr', plugin_dir_url(__FILE__) . 'demos/player3/css/plyr-demo.min.css', [], $this->version, 'all');
-            wp_enqueue_script('text-to-audio-plyr-demo-lib', plugin_dir_url(__FILE__) . 'demos/player3/js/build/plyr-demo.lib.min.js', array('wp-hooks'), $this->version, true);
-            wp_enqueue_script('text-to-audio-demo-plyr', plugin_dir_url(__FILE__) . 'demos/player3/js/build/plyr-demo.min.js', array(), $this->version, true);
-            wp_localize_script('text-to-audio-demo-plyr', 'ttsObj', $this->localize_data);
-
         }
 
-        if (is_admin() && isset($GLOBALS['pagenow']) && $GLOBALS['pagenow'] === 'plugins.php') {
-            $object = ob_start();
-            ?>
-            <script>
-                window.document.addEventListener('DOMContentLoaded', function () {
-                    /**
-                     * If free version then remove the opt-in link from plugin link.
-                     * Also remove the deactivation modal by freemius. So that
-                     * AtlasAiDev tracking software works properly.
-                     */
-                    // if(isProActive && document.querySelector('.opt-in-or-opt-out.text-to-audio')) {
-                    //     document.querySelector('.opt-in-or-opt-out.text-to-audio').style.display = 'none';
-                    // }
 
-                    if (document.querySelector('[data-plugin="text-to-audio/text-to-audio.php"]')) {
-                        var moduleIdElement = document.querySelector('i.fs-module-id[data-module-id="13388"]');
-                        if (moduleIdElement) {
-                            moduleIdElement.parentNode.removeChild(moduleIdElement);
-                        }
-                    }
-                })
-            </script>
-
-            <?php
-            $object = ob_get_contents();
-            echo $object;
-        }
-
-        if (TTA_Helper::is_edit_page() || isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
-            wp_enqueue_script('AtlasVoice_chart', 'https://cdn.jsdelivr.net/npm/chart.js', [], $this->version, true);
+        // TTS-250: the per-post insights script calls the `/insights` REST route,
+        // so only load it on a post-edit screen where TTS is actually enabled for
+        // this post (should_load_button() == true). Previously it loaded on every
+        // post.php / post-new.php screen — for any post type, including ones where
+        // the player is never shown — firing a needless /insights request. The
+        // dashboard analytics page (page=text-to-audio) still loads it.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page-name read for asset enqueue, no state mutation
+        if ((TTA_Helper::is_edit_page() && TTA_Helper::should_load_button()) || (isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page']))) {
+            // TTS-247: ship Chart.js locally instead of jsDelivr CDN (wp.org Guideline 8 — no remote assets).
+            wp_enqueue_script('AtlasVoice_chart', plugin_dir_url(__FILE__) . 'js/vendor/chart.umd.min.js', [], '4.4.7', true);
             wp_enqueue_script('AtlasVoicePlayerInsights', plugin_dir_url(__FILE__) . 'js/build/AtlasVoicePlayerInsights.min.js', array(
                 'wp-hooks',
                 'wp-i18n',
@@ -412,7 +439,8 @@ class TTA_Admin
             'tta-blocks',
             plugin_dir_url(dirname(__FILE__)) . 'build/blocks.js',
             array('wp-blocks', 'wp-element', 'wp-i18n', 'wp-block-editor'),
-            filemtime(plugin_dir_path(dirname(__FILE__)) . 'build/blocks.js')
+            filemtime(plugin_dir_path(dirname(__FILE__)) . 'build/blocks.js'),
+            true
         );
 
         // Localize script data
@@ -439,6 +467,8 @@ class TTA_Admin
      */
     public function render_button($customize)
     {
+        // TTS-247: escape happens inside tta_get_button_content (wp_kses
+        // with a small allow-list around the tts__listening_button output).
         return tta_get_button_content($customize, true);
     }
 
@@ -454,6 +484,11 @@ class TTA_Admin
         }
 
         $player_id = get_player_id();
+
+        // TTS-249: refresh the localized id/registry at render time (constructor
+        // ran before Pro's init filter — see enqueue_scripts note).
+        $this->localize_data['player_id']        = $player_id;
+        $this->localize_data['availablePlayers'] = array_values( TTA_Helper::get_available_players() );
 
         $dependencies = ['wp-hooks'];
         if (wp_is_mobile()) {
@@ -473,7 +508,8 @@ class TTA_Admin
             );
         }
 
-        wp_enqueue_script('atlasvoice-timezone', 'https://cdn.jsdelivr.net/npm/countries-and-timezones/dist/index.min.js', [], $this->version, true);
+        // TTS-247: ship countries-and-timezones locally instead of jsDelivr CDN (wp.org Guideline 8).
+        wp_enqueue_script('atlasvoice-timezone', plugin_dir_url(__FILE__) . 'js/vendor/countries-and-timezones.min.js', [], '3.9.0', true);
         array_push($dependencies, 'atlasvoice-timezone');
         if ($player_id > 1) {
             wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', $dependencies, $this->version, true);
@@ -481,6 +517,16 @@ class TTA_Admin
         } else if ($player_id == 1) {
             wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-button.min.js', $dependencies, $this->version, true);
             wp_localize_script('text-to-audio-button', 'ttsObj', $this->localize_data);
+            // TTS-249 (I2): player 1 renders in the light DOM, so its CSS is a
+            // proper enqueued stylesheet (not a JS-injected <style> tag). The
+            // dynamic per-button values (colours/size/border/margins + hover &
+            // icon custom properties, all from the global customize settings)
+            // are attached to the same handle via wp_add_inline_style() — WP
+            // renders them in the document <head>, not as an inline style="".
+            wp_enqueue_style('text-to-audio-button', plugin_dir_url(__FILE__) . 'css/text-to-audio-button.css', [], $this->version, 'all');
+            if (function_exists('tta_get_player_button_inline_css')) {
+                wp_add_inline_style('text-to-audio-button', tta_get_player_button_inline_css());
+            }
         }
     }
 
@@ -497,7 +543,10 @@ class TTA_Admin
             TEXT_TO_AUDIO_TEXT_DOMAIN,
             array($this, "TTA_settings"),
             'dashicons-controls-volumeon',
-            20
+            // TTS-247: moved off slot 20 (core Pages) to 80 — sits between
+            // Tools and Settings, still top-level and discoverable, no
+            // conflict with WP's core admin hierarchy.
+            80
         );
         add_submenu_page(TEXT_TO_AUDIO_TEXT_DOMAIN, __('AtlasVoice', 'text-to-audio'), __('AtlasVoice', 'text-to-audio'), 'manage_options', TEXT_TO_AUDIO_TEXT_DOMAIN, array(
             $this,
@@ -506,6 +555,7 @@ class TTA_Admin
 
 
         if (get_player_id() > 2) {
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page-name read, no state mutation
             if (!empty($_REQUEST['page']) && $_REQUEST['page'] == 'bulk-mp3-generate') {
                 wp_enqueue_style('tts-bootstrap', plugin_dir_url(__FILE__) . 'css/bootstrap.css', [], $this->version, 'all');
             }
@@ -529,11 +579,12 @@ class TTA_Admin
     {
         echo '<h1>AtlasVoice Pro : Bulk MP3 File Generate</h1>';
 
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin route check for which view to render
         if (!empty($_REQUEST['atlasvoice_mp3_file'])) {
             echo '<div id="atlasvoice_generate_bulk_mp3_file"></div>';
         } else {
             $url = admin_url('edit.php');
-            echo '<p>No post ID found. Please select multiple posts from the post page. And apply <strong>AtlasVoice Generate MP3 File</strong> bulk action. <a href="' . $url . '">Go to Posts Page</a></p>';
+            echo '<p>No post ID found. Please select multiple posts from the post page. And apply <strong>AtlasVoice Generate MP3 File</strong> bulk action. <a href="' . esc_url( $url ) . '">Go to Posts Page</a></p>';
             echo 'How it works? <a style="text-decoration:none;color:red" target="_blank" href="https://www.youtube.com/watch?v=HFoqlkPCP80"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 576 512" fill="currentColor" style="vertical-align:-0.125em"><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"/></svg></a>';
         }
 
@@ -544,13 +595,21 @@ class TTA_Admin
      */
     public function atlas_plugins_page()
     {
-        echo '<div class="wrap"><div id="atlas_plugins_container"></div></div>';
+        // TTS-247: emit an <h1> + .wp-header-end anchor so WordPress relocates any
+        // admin notices to sit beneath the heading instead of overlapping the
+        // JS-rendered hero. The screen-reader-only h1 keeps the visual hero intact.
+        echo '<div class="wrap">';
+        echo '<h1 class="screen-reader-text">' . esc_html__( 'AtlasAiDev Plugins', 'text-to-audio' ) . '</h1>';
+        echo '<hr class="wp-header-end">';
+        echo '<div id="atlas_plugins_container"></div>';
+        echo '</div>';
     }
 
     public function TTA_settings()
     {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin route check, no state mutation
         $show_wizard = ( isset( $_GET['welcome'] ) && '1' === $_GET['welcome'] )
-            && ( ! get_option( 'tta_onboarding_completed' ) || ( TTA_Helper::is_pro_active() && ! get_option( 'tta_pro_onboarding_completed' ) ) );
+            && ( ! get_option( 'tta_onboarding_completed' ) || ( TTA_Helper::is_atlasvoice_addon_functional() && ! get_option( 'tta_pro_onboarding_completed' ) ) );
         if ( $show_wizard ) {
             echo "<div class='wpwrap'><div id='tts_welcome_wizard'></div></div>";
             return;
@@ -590,6 +649,13 @@ class TTA_Admin
         $cached = get_transient(self::ATLAS_PLUGINS_TRANSIENT);
         if (false !== $cached && is_array($cached)) {
             return self::apply_name_overrides($cached);
+        }
+
+        // TTS-247: defence-in-depth — never hit GitHub from the front-end or
+        // an unauthenticated context. Callers gate this to the AtlasAiDev
+        // plugins admin screen + a manual refresh AJAX; this is the safety net.
+        if (!is_admin() || !current_user_can('manage_options')) {
+            return self::apply_name_overrides(self::get_fallback_plugins());
         }
 
         $response = wp_remote_get(self::ATLAS_PLUGINS_REMOTE_URL, array(
@@ -830,8 +896,29 @@ class TTA_Admin
     }
 
     public function atlasaidev_plugins($menu_slug = 'atlasvoice-other-plugins', $plugin_slug = 'text-to-audio') {
-        // Atlas Plugins submenu
+        // TTS-247: the remote catalog fetch (get_atlas_plugins -> github raw)
+        // only runs when the user explicitly opens this admin page, and the
+        // user sees a disclosure notice on entry. Documented in readme's
+        // "External services" section.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page-name read for current-screen check
         if (!empty($_REQUEST['page']) && $_REQUEST['page'] === $menu_slug) {
+            add_action('admin_notices', function () {
+                // TTS-247: the surrounding "Other AtlasAiDev Plugins" page has a
+                // dark hero card that bleeds into the default .notice text
+                // colour; inline styles guarantee readable contrast.
+                printf(
+                    '<div class="notice notice-info" style="background:#fff;border-left-color:#2271b1;color:#1d2327;"><p style="color:#1d2327;margin:8px 0;font-size:13px;line-height:1.5;"><strong style="color:#1d2327;">%s</strong> %s</p></div>',
+                    esc_html__(
+                        'Heads up:',
+                        'text-to-audio'
+                    ),
+                    esc_html__(
+                        'this page fetches the latest AtlasAiDev plugin list from a public GitHub file. No site or user data is sent — see "External services" in the readme for details.',
+                        'text-to-audio'
+                    )
+                );
+            });
+
             wp_enqueue_script(
                 'atlas-plugins',
                 plugin_dir_url(__FILE__) . 'js/atlas-plugins.js',
@@ -1001,7 +1088,7 @@ class TTA_Admin
      *
      * @since 2.1.16
      */
-    public function print_cors_detector_script() {
+    public function enqueue_cors_detector() {
         if ( is_admin() ) { return; }
         if ( ! TTA_Helper::should_load_button() ) { return; }
         if ( ! TTA_Helper::is_cdn_likely_active() ) { return; }
@@ -1009,91 +1096,32 @@ class TTA_Admin
         $endpoint  = esc_url_raw( rest_url( 'tta/v1/cors-alert' ) );
         $site_host = wp_parse_url( home_url(), PHP_URL_HOST );
         if ( ! $site_host || ! $endpoint ) { return; }
-        ?>
-        <script data-cfasync="false" id="tta-cors-detector">
-        (function () {
-            var endpoint = <?php echo wp_json_encode( $endpoint ); ?>;
-            var siteHost = <?php echo wp_json_encode( $site_host ); ?>;
-            var reported = false;
-            window.addEventListener('error', function (e) {
-                if (reported || !e || !e.target || e.target.tagName !== 'SCRIPT') return;
-                var src = e.target.src || '';
-                if (!/\/plugins\/text-to-(audio|speech)/.test(src)) return;
-                var host = '';
-                try { host = new URL(src).host; } catch (_) { return; }
-                if (!host || host === siteHost) return;
-                // A script 'error' event + our plugin-path + cross-origin host is
-                // already strong proof of a CORS/CDN load failure. The previous
-                // HEAD verification was itself CORS-blocked (no ACAO on the CDN
-                // response), which suppressed the beacon on the exact failure
-                // mode we need to detect. Send directly; server re-validates and
-                // rate-limits to 1 alert/hour.
-                reported = true;
-                var payload = JSON.stringify({ url: src });
-                if (navigator.sendBeacon) {
-                    var blob = new Blob([payload], { type: 'application/json' });
-                    navigator.sendBeacon(endpoint, blob);
-                } else {
-                    fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: true }).catch(function(){});
-                }
-            }, true);
-        })();
-        </script>
-        <?php
+
+        // TTS-249 (I3): enqueued instead of an inline <script>. Registered with
+        // no deps + in <head> (priority 1 on wp_enqueue_scripts) so the error
+        // listener exists before our other bundles can be CORS-blocked.
+        wp_enqueue_script(
+            'tta-cors-detector',
+            plugin_dir_url( __FILE__ ) . 'js/tta-cors-detector.js',
+            array(),
+            $this->version,
+            false
+        );
+        wp_localize_script( 'tta-cors-detector', 'ttaCorsDetector', array(
+            'endpoint' => $endpoint,
+            'siteHost' => $site_host,
+        ) );
     }
 
     /**
-     * Print inline CSS for the admin bar AtlasVoice toggle (front-end only).
+     * TTS-249 (I3): enqueue the admin-bar toggle CSS + JS as proper assets
+     * (front-end, logged-in admins). Replaces the former inline <style>/<script>
+     * printed on wp_head/wp_footer. Dynamic values (post id, ajax url, nonce,
+     * on/off labels) are passed via wp_localize_script.
      *
      * @since 2.2.0
      */
-    public function admin_bar_inline_css() {
-        if ( is_admin() || ! is_admin_bar_showing() || ! is_singular() || ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-            return;
-        }
-
-        $settings    = TTA_Helper::tts_get_settings( 'settings' );
-        $show_toggle = isset( $settings['tta__settings_show_admin_bar_toggle'] ) ? $settings['tta__settings_show_admin_bar_toggle'] : true;
-        if ( ! $show_toggle ) {
-            return;
-        }
-        ?>
-        <style id="tta-admin-bar-toggle-css">
-            #wp-admin-bar-tta-audio-toggle .ab-icon.dashicons {
-                font-family: dashicons !important;
-                font-size: 20px !important;
-                line-height: 1 !important;
-                position: relative;
-                top: 3px;
-                margin-right: 2px;
-            }
-            .tta-ab-indicator {
-                display: inline-block;
-                width: 8px;
-                height: 8px;
-                border-radius: 50%;
-                margin-right: 4px;
-                vertical-align: middle;
-            }
-            .tta-ab-indicator.tta-ab-on {
-                background-color: #46b450;
-            }
-            .tta-ab-indicator.tta-ab-off {
-                background-color: #dc3232;
-            }
-            #wp-admin-bar-tta-audio-toggle a.ab-item {
-                cursor: pointer;
-            }
-        </style>
-        <?php
-    }
-
-    /**
-     * Print inline JS for the admin bar AtlasVoice AJAX toggle (front-end only).
-     *
-     * @since 2.2.0
-     */
-    public function admin_bar_inline_js() {
+    public function enqueue_admin_bar_assets() {
         if ( is_admin() || ! is_admin_bar_showing() || ! is_singular() || ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
             return;
         }
@@ -1108,54 +1136,36 @@ class TTA_Admin
         if ( ! $post ) {
             return;
         }
-        ?>
-        <script id="tta-admin-bar-toggle-js">
-        (function(){
-            var node = document.getElementById('wp-admin-bar-tta-audio-toggle');
-            if (!node) return;
 
-            var link = node.querySelector('a.ab-item');
-            if (!link) return;
-
-            link.addEventListener('click', function(e){
-                e.preventDefault();
-
-                var data = new FormData();
-                data.append('action', 'tta_toggle_audio');
-                data.append('post_id', <?php echo (int) $post->ID; ?>);
-                data.append('_ajax_nonce', '<?php echo esc_js( wp_create_nonce( 'tta_toggle_audio_nonce' ) ); ?>');
-
-                fetch('<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>', {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    body: data
-                })
-                .then(function(r){ return r.json(); })
-                .then(function(resp){
-                    if (!resp.success) return;
-
-                    var indicator = node.querySelector('.tta-ab-indicator');
-                    var textNode  = link.lastChild;
-
-                    if (resp.data.is_active) {
-                        indicator.className = 'tta-ab-indicator tta-ab-on';
-                        textNode.textContent = ' <?php echo esc_js( __( 'AtlasVoice: On', 'text-to-audio' ) ); ?>';
-                    } else {
-                        indicator.className = 'tta-ab-indicator tta-ab-off';
-                        textNode.textContent = ' <?php echo esc_js( __( 'AtlasVoice: Off', 'text-to-audio' ) ); ?>';
-                    }
-                });
-            });
-        })();
-        </script>
-        <?php
+        wp_enqueue_style(
+            'tta-admin-bar',
+            plugin_dir_url( __FILE__ ) . 'css/tta-admin-bar.css',
+            array(),
+            $this->version,
+            'all'
+        );
+        wp_enqueue_script(
+            'tta-admin-bar',
+            plugin_dir_url( __FILE__ ) . 'js/tta-admin-bar.js',
+            array(),
+            $this->version,
+            true
+        );
+        wp_localize_script( 'tta-admin-bar', 'ttaAdminBar', array(
+            'postId'   => (int) $post->ID,
+            'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
+            'nonce'    => wp_create_nonce( 'tta_toggle_audio_nonce' ),
+            'onLabel'  => __( 'AtlasVoice: On', 'text-to-audio' ),
+            'offLabel' => __( 'AtlasVoice: Off', 'text-to-audio' ),
+        ) );
     }
 
     /**
      * Render a "Need Help?" rescue modal on the plugins.php page.
      *
-     * Intercepts the deactivation click for text-to-audio and shows
-     * quick-fix links before passing through to the Freemius modal.
+     * Intercepts the first deactivation click for text-to-audio and shows
+     * quick-fix links; a second click after "Continue to Deactivate"
+     * proceeds to WP's normal deactivation flow.
      *
      * @since 2.2.0
      */
@@ -1182,19 +1192,19 @@ class TTA_Admin
                 <ul style="margin:0 0 20px;padding:0;list-style:none;">
                     <li style="margin-bottom:10px;font-size:14px;color:#1d2327;">
                         <?php echo esc_html__( 'Voice not working', 'text-to-audio' ); ?> &rarr;
-                        <a href="<?php echo $docs_url; ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
+                        <a href="<?php echo esc_url( $docs_url ); ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
                             <?php echo esc_html__( 'Quick Fix Guide', 'text-to-audio' ); ?>
                         </a>
                     </li>
                     <li style="margin-bottom:10px;font-size:14px;color:#1d2327;">
                         <?php echo esc_html__( 'Player not showing', 'text-to-audio' ); ?> &rarr;
-                        <a href="<?php echo $compat_url; ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
+                        <a href="<?php echo esc_url( $compat_url ); ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
                             <?php echo esc_html__( 'Troubleshoot', 'text-to-audio' ); ?>
                         </a>
                     </li>
                     <li style="margin-bottom:10px;font-size:14px;color:#1d2327;">
                         <?php echo esc_html__( 'Need better voices', 'text-to-audio' ); ?> &rarr;
-                        <a href="<?php echo $integrations_url; ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
+                        <a href="<?php echo esc_url( $integrations_url ); ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
                             <?php echo esc_html__( 'See AI Voices', 'text-to-audio' ); ?>
                         </a>
                     </li>
@@ -1211,56 +1221,28 @@ class TTA_Admin
                 </div>
             </div>
         </div>
-        <script>
-        (function(){
-            document.addEventListener('DOMContentLoaded', function(){
-                var pluginRow = document.querySelector('tr[data-plugin="text-to-audio/text-to-audio.php"]');
-                if (!pluginRow) return;
-
-                var deactivateLink = pluginRow.querySelector('.deactivate a');
-                if (!deactivateLink) return;
-
-                var overlay   = document.getElementById('tta-rescue-modal-overlay');
-                var continueBtn = document.getElementById('tta-rescue-continue-deactivate');
-                if (!overlay || !continueBtn) return;
-
-                var originalHref = deactivateLink.getAttribute('href');
-                var rescueShown = false;
-
-                function rescueHandler(e) {
-                    if (rescueShown) return; // Already shown once, let other handlers (Freemius/AtlasAiDev) take over.
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    overlay.style.display = 'flex';
-                }
-
-                deactivateLink.addEventListener('click', rescueHandler, true);
-
-                // Close modal when clicking the overlay background.
-                overlay.addEventListener('click', function(e){
-                    if (e.target === overlay) {
-                        overlay.style.display = 'none';
-                    }
-                });
-
-                // Close on Escape key.
-                document.addEventListener('keydown', function(e){
-                    if (e.key === 'Escape' && overlay.style.display === 'flex') {
-                        overlay.style.display = 'none';
-                    }
-                });
-
-                // "Continue to Deactivate" — hide rescue modal, re-click so Freemius/AtlasAiDev can intercept.
-                continueBtn.addEventListener('click', function(){
-                    overlay.style.display = 'none';
-                    rescueShown = true;
-                    deactivateLink.removeEventListener('click', rescueHandler, true);
-                    deactivateLink.click();
-                });
-            });
-        })();
-        </script>
         <?php
+        // TTS-249 (I3): the modal behaviour lives in the enqueued
+        // tta-deactivation-rescue.js (see enqueue_deactivation_rescue_assets),
+        // not an inline <script>.
+    }
+
+    /**
+     * TTS-249 (I3): enqueue the deactivation-rescue modal JS on plugins.php.
+     *
+     * @param string $hook Current admin page hook.
+     */
+    public function enqueue_deactivation_rescue_assets( $hook ) {
+        if ( 'plugins.php' !== $hook ) {
+            return;
+        }
+        wp_enqueue_script(
+            'tta-deactivation-rescue',
+            plugin_dir_url( __FILE__ ) . 'js/tta-deactivation-rescue.js',
+            array(),
+            $this->version,
+            true
+        );
     }
 
     /**

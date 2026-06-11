@@ -59,7 +59,12 @@ export default function OSAnalytics({
     aggregateFilteredData,
     limit = 3
 }) {
-    const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
+    // TTS-247/2.2.2: the OS breakdown is a premium feature whose data is
+    // injected by Pro into aggregated_insights. Driven by the data-driven
+    // `audience` capability flag (not is_atlasvoice_addon_functional). When absent, the whole
+    // card is locked behind the "Upgrade to Pro" overlay (same as Heatmap).
+    const capabilities = (typeof ttsObj !== "undefined" && ttsObj.capabilities) || {};
+    const hasAudience = !!capabilities.audience;
 
     // Standard date range options
     const standardDateRangeOptions = [
@@ -80,33 +85,22 @@ export default function OSAnalytics({
         return options;
     }, [globalDateRange]);
 
-    // Demo data
-    const demoData = {
-        android: 18500,
-        windows: 69200,
-        ios: 12800,
-        mac: 25700,
-        other: 4600,
-    };
-
-    // Filter and aggregate data based on component's date range
+    // TTS-247: data-driven, no demo data. OS breakdown is computed in the free
+    // base aggregator, so it renders with the site's real data for everyone.
     const filteredData = useMemo(() => {
-        if (!isProActive) return demoData;
-
         // If date range matches global, use the already aggregated data
         if (dateRange === globalDateRange) {
-            return Object.keys(data).length > 0 ? data : demoData;
+            return data;
         }
 
         // Otherwise, filter and re-aggregate from raw results
         if (filterResultsByDateRange && aggregateFilteredData && rawResults.length > 0) {
             const filtered = filterResultsByDateRange(rawResults, dateRange);
-            const aggregated = aggregateFilteredData(filtered, "os");
-            return Object.keys(aggregated).length > 0 ? aggregated : demoData;
+            return aggregateFilteredData(filtered, "os");
         }
 
-        return Object.keys(data).length > 0 ? data : demoData;
-    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange, aggregateFilteredData, isProActive]);
+        return data;
+    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange, aggregateFilteredData]);
 
     // Use filtered data
     const displayData = filteredData;
@@ -123,10 +117,8 @@ export default function OSAnalytics({
         })
         .sort((a, b) => b.count - a.count);
 
-    // Apply limit for free version
-    const displayLimit = isProActive ? osArray.length : limit;
-    const displayItems = osArray.slice(0, displayLimit);
-    const hasMore = osArray.length > displayLimit;
+    // TTS-247: show the full real breakdown — no artificial free-tier row cap.
+    const displayItems = osArray;
 
     const content = (
         <div className="tta_analytics_card tta_os_analytics_card">
@@ -155,24 +147,16 @@ export default function OSAnalytics({
                         icon={item.icon}
                     />
                 ))}
-
-                {/* Show "more" indicator for free version */}
-                {hasMore && !isProActive && (
-                    <div className="tta_analytics_list_more">
-                        <a
-                            href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="tta_view_more_link"
-                        >
-                            +{osArray.length - displayLimit} {__("more", "text-to-audio")} ({__("Pro", "text-to-audio")})
-                        </a>
-                    </div>
-                )}
             </div>
         </div>
     );
 
-    // No overlay needed for this component, but show limited data for free
-    return content;
+    return (
+        <ProFeatureOverlay
+            showOverlay={!hasAudience}
+            featureName={__("OS Breakdown", "text-to-audio")}
+        >
+            {content}
+        </ProFeatureOverlay>
+    );
 }

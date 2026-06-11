@@ -1,5 +1,9 @@
 <?php
 namespace TTA;
+
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Register all actions and filters for the plugin
  *

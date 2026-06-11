@@ -2,6 +2,9 @@
 
 namespace TTA_Api;
 
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
+
 use TTA\TTA_Cache;
 use TTA\TTA_Helper;
 
@@ -235,115 +238,14 @@ class TTA_Api_Routes {
 			)
 		);
 
-		// register trend_data route for charts.
-		register_rest_route(
-			$this->namespace,
-			'/trend_data',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this->analytics, 'trend_data' ),
-					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(
-						'date_range' => array(
-							'type'        => 'string',
-							'description' => 'Date range preset',
-							'required'    => false,
-						),
-						'from_date' => array(
-							'type'        => 'string',
-							'description' => 'Start date in Y-m-d format (for Custom range)',
-							'required'    => false,
-						),
-						'to_date' => array(
-							'type'        => 'string',
-							'description' => 'End date in Y-m-d format (for Custom range)',
-							'required'    => false,
-						),
-					),
-				),
-			)
-		);
-
-		// register heatmap_data route (Pro only).
-		register_rest_route(
-			$this->namespace,
-			'/heatmap_data',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this->analytics, 'heatmap_data' ),
-					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(
-						'date_range' => array(
-							'type'        => 'string',
-							'description' => 'Date range preset',
-							'required'    => false,
-						),
-						'from_date' => array(
-							'type'        => 'string',
-							'description' => 'Start date in Y-m-d format (for Custom range)',
-							'required'    => false,
-						),
-						'to_date' => array(
-							'type'        => 'string',
-							'description' => 'End date in Y-m-d format (for Custom range)',
-							'required'    => false,
-						),
-					),
-				),
-			)
-		);
-
-		// register export_csv route (Pro only).
-		register_rest_route(
-			$this->namespace,
-			'/export_csv',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this->analytics, 'export_csv' ),
-					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(
-						'date_range' => array(
-							'type'        => 'string',
-							'description' => 'Date range preset',
-							'required'    => false,
-						),
-					),
-				),
-			)
-		);
-
-		// register export_pdf route (Pro only).
-		register_rest_route(
-			$this->namespace,
-			'/export_pdf',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this->analytics, 'export_pdf' ),
-					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(
-						'date_range' => array(
-							'type'        => 'string',
-							'description' => 'Date range preset',
-							'required'    => false,
-						),
-						'from_date' => array(
-							'type'        => 'string',
-							'description' => 'Start date in Y-m-d format (for Custom range)',
-							'required'    => false,
-						),
-						'to_date' => array(
-							'type'        => 'string',
-							'description' => 'End date in Y-m-d format (for Custom range)',
-							'required'    => false,
-						),
-					),
-				),
-			)
-		);
+		// TTS-249/2.2.2: trend_data / heatmap_data / export_csv / export_pdf
+		// routes are NOT registered by the free plugin. The Playing Trend
+		// Analysis chart and these other handlers are premium features (their
+		// free stubs returned "This feature requires Pro version" — a
+		// Guideline-5 trialware pattern). They are now registered by the Pro
+		// plugin under tta_pro/v1/ so they exist only when Pro is active. The
+		// free analytics UI never calls them (the React fetches early-return
+		// when the matching capability is absent).
 
 		// register filtered_insights route.
 		register_rest_route(
@@ -380,34 +282,9 @@ class TTA_Api_Routes {
 			)
 		);
 
-		// register save_schedule_report route (Pro only).
-		register_rest_route(
-			$this->namespace,
-			'/save_schedule_report',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( $this->analytics, 'save_schedule_report' ),
-					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
-				),
-			)
-		);
-
-		// register get_schedule_report route (Pro only).
-		register_rest_route(
-			$this->namespace,
-			'/get_schedule_report',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this->analytics, 'get_schedule_report' ),
-					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
-				),
-			)
-		);
-
+		// TTS-249: save_schedule_report / get_schedule_report are NOT registered by
+		// the free plugin (their handlers were "requires Pro" trialware stubs).
+		// Registered by the Pro plugin under the tta/v1 namespace instead.
 
 		// register compatible_data route.
 		register_rest_route(
@@ -510,6 +387,12 @@ class TTA_Api_Routes {
 
 		// TTS-240: CORS alert (public, rate-limited). Front-end posts here when
 		// one of our scripts fails to load from a CDN due to missing CORS header.
+		//
+		// TTS-247: intentionally public — uses '__return_true' instead of
+		// get_route_access() because the request originates from anonymous
+		// front-end visitors (no nonce available). The handler itself
+		// hard-rate-limits with a 1-hour transient lock (cors_alert(), line
+		// ~550) so the surface is safe.
 		register_rest_route(
 			$this->namespace,
 			'/cors-alert',
@@ -523,6 +406,72 @@ class TTA_Api_Routes {
 			)
 		);
 
+		// TTS-247: Settings → Danger zone "Reset all plugin data" button.
+		// Admin-only (gated by get_route_access). Requires a literal
+		// confirmation string "DELETE" in the body to guard against
+		// accidental triggers from CSRF or stale UI sessions.
+		register_rest_route(
+			$this->namespace,
+			'/reset_plugin_data',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'reset_plugin_data' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
+	}
+
+	/**
+	 * TTS-247: Reset every option, transient, post-meta row, cron event and
+	 * the analytics DB table this plugin created. Surfaces a "fresh-install"
+	 * state without uninstalling the plugin itself.
+	 *
+	 * Triple-gated:
+	 *  - get_route_access permission_callback enforces manage_options + nonce.
+	 *  - This handler additionally requires the request body to contain
+	 *    `confirm === 'DELETE'` so an accidental click in an old browser
+	 *    tab can't wipe the site.
+	 *  - The React UI requires the user to type DELETE before the button
+	 *    becomes enabled.
+	 *
+	 * @param \WP_REST_Request $request
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function reset_plugin_data( $request ) {
+		$body    = json_decode( (string) $request->get_body(), true );
+		$confirm = is_array( $body ) && isset( $body['confirm'] ) ? (string) $body['confirm'] : '';
+		if ( 'DELETE' !== $confirm ) {
+			return new \WP_Error(
+				'rest_forbidden',
+				__( 'Missing or invalid confirmation. Type DELETE to confirm.', 'text-to-audio' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		if ( ! class_exists( '\\TTA\\TTA_Reset' ) ) {
+			require_once dirname( __DIR__ ) . '/includes/TTA_Reset.php';
+		}
+		\TTA\TTA_Reset::wipe_plugin_data();
+
+		// TTS-247: re-seed a fresh-install state right after wiping. wipe_plugin_data()
+		// is shared with uninstall.php (where re-seeding would be wrong), so this
+		// activate() call lives in the reset path only. It recreates the analytics
+		// table + indexes and restores default options (incl.
+		// tta_customize_settings.buttonSettings), preventing "table doesn't exist"
+		// and "undefined buttonSettings" errors when tabs reload after a reset.
+		if ( ! class_exists( '\\TTA\\TTA_Activator' ) ) {
+			require_once dirname( __DIR__ ) . '/includes/TTA_Activator.php';
+		}
+		\TTA\TTA_Activator::activate( true );
+
+		return rest_ensure_response( array(
+			'status'  => true,
+			'message' => __( 'All plugin data has been reset. Reload the page to start fresh.', 'text-to-audio' ),
+		) );
 	}
 
 	/**
@@ -888,89 +837,41 @@ class TTA_Api_Routes {
 		return rest_ensure_response( array( 'status' => true ) );
 	}
 
-	/*
-	 * Get route access if request is valid.
-	 */
-	public function get_route_access_old($request) {
-
-        $has_valid_nonce = false;
-        if ( isset( $_SERVER['HTTP_X_WP_NONCE'] ) && wp_verify_nonce( wp_unslash( $_SERVER['HTTP_X_WP_NONCE'] ), 'wp_rest' ) ) {
-            $has_valid_nonce = true;
-        } elseif ( isset( $request['rest_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $request['rest_nonce'] ) ), 'wp_rest' ) ) {
-            $has_valid_nonce = true;
-        }
-
-		return apply_filters( 'tts_rest_route_access', $has_valid_nonce );
-	}
+    // TTS-247: get_route_access_old() and get_route_access_new() were dead
+    // experimentation copies superseded by get_route_access() below. Removed
+    // so the reviewer's grep doesn't hit unused permission_callback variants.
 
     /**
-     * Permission check for REST routes.
+     * Permission callback for every REST route registered with this->namespace.
      *
-     * @param \WP_REST_Request $request
-     * @return true|\WP_Error
-     */
-    public function get_route_access_new( $request ) {
-        $route  = $request->get_route();
-        $method = strtoupper( $_SERVER['REQUEST_METHOD'] ?? 'GET' );
-        $has_valid_nonce = false;
-
-        // Admin-only routes: only users with manage_tts (or manage_options) can access.
-        $admin_only = array(
-            '/tta/v1/customize',
-            '/tta/v1/settings',
-            '/tta/v1/save_analytics_settings',
-            '/tta/v1/get_analytics_settings',
-            '/tta/v1/compatible_data',
-            '/tta/v1/text_alias',
-            '/tta/v1/insights',
-            '/tta/v1/all_insights',
-            '/tta/v1/latest_posts',
-            '/tta/v1/categories_and_tags',
-            '/tta/v1/acf_fields',
-            '/tta/v1/browser', // if this truly only returns non-sensitive info
-        );
-
-        // If route is admin-only -> enforce capability
-        if ( in_array( $route, $admin_only, true ) ) {
-            if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-                return new \WP_Error( 'rest_forbidden', __( 'You do not have permission to access this resource.', 'text-to-audio' ), array( 'status' => 403 ) );
-            }
-            $has_valid_nonce = true;
-        }
-
-        // Public read-only routes (allowed for GET without auth)
-        $public_get_routes = array(
-            '/tta/v1/track', // if this truly only returns non-sensitive info
-        );
-
-        // If route is read-only and method is GET -> allow public
-        if ( ! $has_valid_nonce && in_array( $route, $public_get_routes, true ) ) {
-            $has_valid_nonce = true;
-        }
-
-        if ( isset( $_SERVER['HTTP_X_WP_NONCE'] ) && wp_verify_nonce( wp_unslash( $_SERVER['HTTP_X_WP_NONCE'] ), 'wp_rest' ) ) {
-            $has_valid_nonce = true;
-        } elseif ( isset( $request['rest_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $request['rest_nonce'] ) ), 'wp_rest' ) ) {
-            $has_valid_nonce = true;
-        }
-
-        if ( $has_valid_nonce ) {
-            return true;
-        }
-
-        // Fallback: allow logged-in admins
-        if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
-            return true;
-        }
-
-
-        return new \WP_Error( 'rest_forbidden', __( 'Invalid nonce or insufficient permissions.', 'text-to-audio' ), array( 'status' => 403 ) );
-
-
-    }
-
-    /**
-     * Permission check for REST routes.
+     * Three policy tiers — first match wins, otherwise the request is denied:
+     *
+     *   1. ADMIN-ONLY — request must come from a logged-in user with the
+     *      `manage_options` capability. Used for every route that reads or
+     *      writes plugin configuration, settings, or analytics (`/customize`,
+     *      `/settings`, `/listening`, `/save_analytics_settings`,
+     *      `/get_analytics_settings`, `/compatible_data`, `/text_alias`,
+     *      `/insights`, `/all_insights`, `/latest_posts`,
+     *      `/categories_and_tags`, `/acf_fields`, `/browser`,
+     *      `/get_all_user_roles`, `/aggregated_insights`, `/trend_data`,
+     *      `/filtered_insights`, `/onboarding-event`).
+     *      Premium analytics endpoints (`heatmap_data`, `export_csv`,
+     *      `export_pdf`, `save_schedule_report`, `get_schedule_report`,
+     *      `send_test_report`) live in the Pro plugin under `tta_pro/v1/`
+     *      with their own permission check.
+     *
+     *   2. FRONTEND-NONCE — request must carry a valid `wp_rest` nonce in the
+     *      `X-WP-Nonce` header or the `rest_nonce` body field. Used by
+     *      `/track` (listener events) and `/geolocation` (per-listener city /
+     *      country lookup, behind the opt-in flag). No capability check —
+     *      frontend visitors aren't logged in.
+     *
+     *   3. DEFAULT DENY — any route reaching this callback that isn't in
+     *      either list above is rejected with HTTP 403.
+     *
+     * Routes that are intentionally public (e.g. `/cors-alert`) bypass this
+     * callback entirely by registering with `'permission_callback' =>
+     * '__return_true'` and a code comment explaining the public exposure.
      *
      * @param \WP_REST_Request $request
      * @return true|\WP_Error
@@ -995,14 +896,13 @@ class TTA_Api_Routes {
             '/tta/v1/browser',
             '/tta/v1/get_all_user_roles',
             '/tta/v1/aggregated_insights',
-            '/tta/v1/trend_data',
-            '/tta/v1/heatmap_data',
-            '/tta/v1/export_csv',
-            '/tta/v1/export_pdf',
+            // TTS-249/2.2.2: trend_data/heatmap_data/export_csv/export_pdf/
+            // save_schedule_report/get_schedule_report were moved out of Free to the Pro plugin (3.3.0+)
+            // and re-registered under `tta_pro/v1/` with their own permission
+            // check (see Pro's TTA_Pro_Api_Routes + TTA_Pro_AtlasVoice_Analytics).
             '/tta/v1/filtered_insights',
-            '/tta/v1/save_schedule_report',
-            '/tta/v1/get_schedule_report',
             '/tta/v1/onboarding-event',
+            '/tta/v1/reset_plugin_data',
         );
 
         if ( in_array( $route, $admin_only, true ) ) {

@@ -4,12 +4,10 @@ import { getDemoText } from '../demoTexts';
 
 const wizardData = window.ttsWizardData || {};
 
-const AUDIO_SOURCES = {
-    gtts: '/admin/demos/player3/demo.mp3',
-    gcloud: 'https://cloud.google.com/text-to-speech/docs/audio/en-US-Chirp3-HD-Charon.wav',
-    chatgpt: 'https://cdn.openai.com/API/docs/audio/alloy.wav',
-    elevenlabs: '/admin/demos/elevenlabs/demo.mp3',
-};
+// TTS-249: the free plugin no longer fetches remote audio (cdn.openai.com /
+// cloud.google.com) or ships bundled premium demo files (wp.org Guideline 6/8).
+// Pro voice previews now link to the public demo page instead — see openProDemo().
+const PRO_DEMO_URL = 'https://atlasaidev.com/plugins/text-to-speech-pro/';
 
 const PRO_VOICES = [
     { id: 'gcloud', name: 'Google Cloud TTS', desc: 'Studio-quality neural voices', badge: 'Popular', badgeColor: '#FF7853' },
@@ -70,24 +68,11 @@ const StepHearDifference = ({ listening, pluginUrl, proUrl }) => {
         window.speechSynthesis.speak(utterance);
     };
 
-    const playProVoice = (providerId) => {
-        if (currentlyPlaying === providerId) {
-            stopAll();
-            return;
-        }
+    // TTS-249: free can't synthesize premium voices, so instead of fetching
+    // remote/bundled audio we open the public demo page where they can be heard.
+    const playProVoice = () => {
         stopAll();
-
-        const src = AUDIO_SOURCES[providerId];
-        if (!src || !audioRef.current) return;
-
-        const url = src.startsWith('http') ? src : (pluginUrl || '') + src;
-        audioRef.current.src = url;
-        audioRef.current.load();
-        audioRef.current.play().catch(() => {
-            setErrorCards((prev) => ({ ...prev, [providerId]: true }));
-            setCurrentlyPlaying(null);
-        });
-        setCurrentlyPlaying(providerId);
+        window.open(proUrl || PRO_DEMO_URL, '_blank', 'noopener');
     };
 
     const voiceDisplayName = listening.voice

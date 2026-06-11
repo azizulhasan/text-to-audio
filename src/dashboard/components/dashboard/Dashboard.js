@@ -48,7 +48,7 @@ function Dashboard() {
 	const [isProVersion, setIsProVersion] = useState(false)
 
 	useEffect(() => {
-		setIsProVersion(ttsObj.is_pro_active)
+		setIsProVersion(ttsObj.is_atlasvoice_addon_functional)
 	}, [])
 
 	return (

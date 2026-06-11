@@ -2,6 +2,9 @@
 
 namespace TTA_Admin;
 
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
+
 use TTA\TTA_Helper;
 
 /**
@@ -81,8 +84,9 @@ class TTA_Posts_List
             add_filter('parse_query', array($this, 'filter_posts_by_audio_status'));
         }
 
-        // Add CSS for styling
-        add_action('admin_head', array($this, 'add_admin_styles'));
+        // TTS-249 (I3): enqueue the column styles as a proper stylesheet
+        // (was an inline <style> on admin_head).
+        add_action('admin_enqueue_scripts', array($this, 'add_admin_styles'));
     }
 
     /**
@@ -177,7 +181,8 @@ class TTA_Posts_List
             return;
         }
 
-        $current_filter = isset($_GET['atlasvoice_filter']) ? sanitize_text_field($_GET['atlasvoice_filter']) : '';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only GET filter on posts list, no state mutation
+        $current_filter = isset($_GET['atlasvoice_filter']) ? sanitize_text_field( wp_unslash( $_GET['atlasvoice_filter'] ) ) : '';
         $player_id = get_player_id();
 
         // Determine filter label based on player ID
@@ -215,11 +220,13 @@ class TTA_Posts_List
         }
 
         // Check if filter is applied
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only GET filter on posts list
         if (!isset($_GET['atlasvoice_filter']) || empty($_GET['atlasvoice_filter'])) {
             return;
         }
 
-        $filter = sanitize_text_field($_GET['atlasvoice_filter']);
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only GET filter on posts list
+        $filter = sanitize_text_field( wp_unslash( $_GET['atlasvoice_filter'] ) );
 
         if (!in_array($filter, array('with_audio', 'without_audio'))) {
             return;
@@ -296,11 +303,13 @@ class TTA_Posts_List
     {
         global $wpdb;
 
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only GET filter on posts list
         if (!isset($_GET['atlasvoice_filter']) || empty($_GET['atlasvoice_filter'])) {
             return $clauses;
         }
 
-        $filter = sanitize_text_field($_GET['atlasvoice_filter']);
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only GET filter on posts list
+        $filter = sanitize_text_field( wp_unslash( $_GET['atlasvoice_filter'] ) );
         $settings = TTA_Helper::tts_get_settings('settings');
 
         // Check if automatic player is enabled
@@ -345,33 +354,12 @@ class TTA_Posts_List
             return false;
         }
 
-        // Check if pro is active and player ID > 2
-        if (!is_pro_active() || get_player_id() <= 2) {
-            return false;
-        }
-
-        // Get the plugin settings
-        $plugin_all_settings = TTA_Helper::tts_get_settings();
-        $language = TTA_Helper::tts_site_language($plugin_all_settings);
-        $voice = TTA_Helper::tts_get_voice($plugin_all_settings);
-
-        // Get language and voice specific to this post
-        $language_and_voice = TTA_Helper::get_player_language_and_player_voice($language, $voice, $plugin_all_settings, $post);
-        $language = $language_and_voice['language'];
-        $voice = $language_and_voice['voice'];
-
-        // Get the file URL key
-        $file_url_key = TTA_Helper::tts_get_file_url_key($language, $voice);
-
-        // Get MP3 file URLs array from post meta
-        $mp3_file_urls = get_post_meta($post->ID, 'tts_mp3_file_urls', true);
-
-        // Check if the specific file_url_key exists and has a value
-        if (is_array($mp3_file_urls) && isset($mp3_file_urls[$file_url_key]) && !empty($mp3_file_urls[$file_url_key])) {
-            return true;
-        }
-
-        return false;
+        // TTS-250: MP3 generation is a Pro-only feature (only players 3-6 produce
+        // an audio file). The detection logic was removed from the free plugin and
+        // now lives in AtlasVoice Pro, which registers the `tts_post_has_mp3`
+        // filter. With Pro absent there is no listener, so this is always false —
+        // no Pro/license check and no premium code in the free plugin.
+        return (bool) apply_filters('tts_post_has_mp3', false, $post);
     }
 
     /**
@@ -429,22 +417,13 @@ class TTA_Posts_List
             return;
         }
 
-        ?>
-        <style>
-            .column-atlasvoice {
-                width: 100px;
-                text-align: center;
-            }
-
-            .column-atlasvoice .dashicons {
-                vertical-align: middle;
-                cursor: help;
-            }
-
-            #atlasvoice_filter {
-                min-width: 150px;
-            }
-        </style>
-        <?php
+        // TTS-249 (I3): enqueued stylesheet instead of an inline <style> tag.
+        wp_enqueue_style(
+            'tta-posts-list',
+            plugin_dir_url(dirname(__FILE__)) . 'admin/css/tta-posts-list.css',
+            array(),
+            defined('TEXT_TO_AUDIO_VERSION') ? TEXT_TO_AUDIO_VERSION : false,
+            'all'
+        );
     }
 }

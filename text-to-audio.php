@@ -15,7 +15,7 @@
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
  * Description:       The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
- * Version:           2.1.20
+ * Version:           2.2.3
  * Author:            AtlasAiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-3.0+
@@ -27,11 +27,12 @@
  */
 
 
-// Absolute path to the WordPress directory.
-if (!defined('ABSPATH')) {
-    define('ABSPATH', dirname(__FILE__) . '/');
-}
-
+// TTS-247: dropped the previous `if (!defined('ABSPATH')) { define('ABSPATH', ...); }`
+// block. WordPress defines ABSPATH in wp-load.php before any plugin file is loaded,
+// so the body never executed in practice. The WordPress.org Plugin Directory review
+// (May 2026, HelpScout #293) still flagged it under "Changing global behaviour" —
+// a plugin must not redefine WordPress core constants.
+//
 // If this file is called directly, abort.
 if (!defined('WPINC')) {
     die;
@@ -42,10 +43,10 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
 }
 
-// Suppress WordPress 6.7+ "textdomain loaded too early" notice.
-// Freemius SDK calls __() during fs_dynamic_init() at file-load time,
-// which triggers _load_textdomain_just_in_time before init. This is
-// harmless but the notice corrupts REST API JSON responses when WP_DEBUG is on.
+// Suppress WordPress 6.7+ "textdomain loaded too early" notice. Some
+// bundled dependencies still call __() before init; the resulting
+// _load_textdomain_just_in_time notice is harmless but corrupts REST API
+// JSON responses when WP_DEBUG is on.
 add_filter( 'doing_it_wrong_trigger_error', function ( $trigger, $function_name ) {
     if ( '_load_textdomain_just_in_time' === $function_name ) {
         return false;
@@ -83,276 +84,6 @@ function is_pro_plugin_exists()
     return false;
 }
 
-if (! is_pro_plugin_exists()  && !function_exists('ttsp_fs')) {
-//if (!function_exists('ttsp_fs')) {
-    // Create a helper function for easy SDK access.
-    function ttsp_fs()
-    {
-        global $ttsp_fs;
-
-        if (!isset($ttsp_fs)) {
-            // Include Freemius SDK.
-            require_once dirname(__FILE__) . '/freemius/start.php';
-
-            $ttsp_fs = fs_dynamic_init(array(
-                'id' => '13388',
-                'slug' => 'text-to-audio',
-                'type' => 'plugin',
-                'public_key' => 'pk_937e16238dbdbc42dc1d7a4ead3b7',
-                'is_premium' => false,
-                'is_premium_only' => false,
-                'has_premium_version' => true,
-                'has_addons' => false,
-                'has_paid_plans' => true,
-                'has_affiliation' => 'all',
-                'menu' => array(
-                    'slug' => 'text-to-audio',
-                    'support' => 1,
-                    'pricing' => 1,
-                    'contact' => false,
-                    'account' => false,
-                ),
-            ));
-        }
-
-        return $ttsp_fs;
-    }
-
-    // Init Freemius.
-    ttsp_fs();
-    // Signal that SDK was initiated.
-    do_action('ttsp_fs_loaded');
-
-}
-
-if (function_exists('ttsp_fs')) {
-    function ttsp_fs_custom_connect_message_on_update(
-        $message,
-        $user_first_name,
-        $plugin_title,
-        $user_login,
-        $site_link,
-        $freemius_link
-    )
-    {
-        return sprintf(
-            __('Hey %1$s') . ',<br>' .
-            __('Please help us improve %2$s! If you opt-in, some data about your usage of %2$s will be sent to %5$s. If you skip this, that\'s okay! %2$s will still work just fine.', 'text-to-speech-pro'),
-            $user_first_name,
-            '<b>' . $plugin_title . '</b>',
-            '<b>' . $user_login . '</b>',
-            $site_link,
-            $freemius_link
-        );
-    }
-
-    ttsp_fs()->add_filter('connect_message_on_update', 'ttsp_fs_custom_connect_message_on_update', 10, 6);
-
-    // Disable Freemius deactivation feedback modal — AtlasAiDev modal handles it.
-    ttsp_fs()->add_filter('show_deactivation_feedback_form', '__return_false');
-}
-
-/**
- * Deactivation confirmation message with usage stats.
- * Shows users what they'll lose when deactivating.
- *
- * @since 2.1.10
- */
-if ( function_exists( 'ttsp_fs' ) ) {
-    ttsp_fs()->add_filter( 'deactivation_confirmation_message', function ( $message ) {
-        global $wpdb;
-        $table = $wpdb->prefix . 'atlasvoice_analytics';
-
-        // Check table exists before querying.
-        if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) ) !== $table ) {
-            return $message;
-        }
-
-        // Use cached stats if available.
-        $cached = get_transient( 'tta_deactivation_stats' );
-        if ( false === $cached ) {
-            $rows        = $wpdb->get_col( "SELECT analytics FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            $total_plays = 0;
-            $total_posts = 0;
-            $post_ids    = array();
-            foreach ( $rows as $row ) {
-                $data = maybe_unserialize( $row );
-                if ( is_array( $data ) && isset( $data['play']['count'] ) ) {
-                    $total_plays += (int) $data['play']['count'];
-                }
-            }
-            $total_posts = (int) $wpdb->get_var( "SELECT COUNT(DISTINCT post_id) FROM {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-            $cached      = array( 'plays' => $total_plays, 'posts' => $total_posts );
-            set_transient( 'tta_deactivation_stats', $cached, HOUR_IN_SECONDS );
-        }
-
-        $msg = '';
-        if ( $cached['plays'] > 0 ) {
-            /* translators: %d: total number of audio plays */
-            $msg .= sprintf( __( 'Your audio player has been used %d times by your visitors. ', 'text-to-audio' ), $cached['plays'] );
-        }
-        if ( $cached['posts'] > 0 ) {
-            /* translators: %d: number of posts with audio players */
-            $msg .= sprintf( __( '%d of your posts currently have audio players. ', 'text-to-audio' ), $cached['posts'] );
-        }
-        $msg .= __( 'Deactivating will remove audio from all posts immediately.', 'text-to-audio' );
-
-        return $msg ?: $message;
-    });
-
-    /**
-     * Custom TTS-specific deactivation reasons.
-     *
-     * @since 2.1.10
-     */
-    ttsp_fs()->add_filter( 'uninstall_reasons', function ( $reasons ) {
-        return array(
-            array(
-                'id'                => 'voice-quality',
-                'text'              => __( 'Voice quality is not good enough', 'text-to-audio' ),
-                'input_type'        => '',
-                'input_placeholder' => '',
-            ),
-            array(
-                'id'                => 'no-visitors',
-                'text'              => __( 'My visitors are not using the audio player', 'text-to-audio' ),
-                'input_type'        => '',
-                'input_placeholder' => '',
-            ),
-            array(
-                'id'                => 'too-complex',
-                'text'              => __( 'Too difficult to set up or configure', 'text-to-audio' ),
-                'input_type'        => '',
-                'input_placeholder' => '',
-            ),
-            array(
-                'id'                => 'wrong-language',
-                'text'              => __( 'My language is not supported well', 'text-to-audio' ),
-                'input_type'        => 'textfield',
-                'input_placeholder' => __( 'Which language do you need?', 'text-to-audio' ),
-            ),
-            array(
-                'id'                => 'performance',
-                'text'              => __( 'It slowed down my website', 'text-to-audio' ),
-                'input_type'        => '',
-                'input_placeholder' => '',
-            ),
-            array(
-                'id'                => 'found-better',
-                'text'              => __( 'I found a better alternative', 'text-to-audio' ),
-                'input_type'        => 'textfield',
-                'input_placeholder' => __( 'Which plugin?', 'text-to-audio' ),
-            ),
-            array(
-                'id'                => 'temporary',
-                'text'              => __( 'Temporary deactivation, I plan to reactivate', 'text-to-audio' ),
-                'input_type'        => '',
-                'input_placeholder' => '',
-            ),
-            array(
-                'id'                => 'pro-expensive',
-                'text'              => __( 'Pro version is too expensive', 'text-to-audio' ),
-                'input_type'        => '',
-                'input_placeholder' => '',
-            ),
-            array(
-                'id'                => 'other',
-                'text'              => __( 'Other', 'text-to-audio' ),
-                'input_type'        => 'textfield',
-                'input_placeholder' => __( 'Please share the reason...', 'text-to-audio' ),
-            ),
-        );
-    });
-
-    /**
-     * Freemius after_uninstall hook — runs the same cleanup as uninstall.php.
-     * Freemius registers its own register_uninstall_hook() which overrides
-     * uninstall.php, so we must hook into Freemius's after_uninstall action.
-     *
-     * @since 2.1.11
-     */
-    ttsp_fs()->add_action( 'after_uninstall', function () {
-        // Only delete data if the user opted in.
-        $settings = get_option( 'tta_settings_data', array() );
-        if ( empty( $settings['tta__settings_delete_data_on_uninstall'] ) ) {
-            return;
-        }
-
-        global $wpdb;
-
-        // 1. Delete known options.
-        $options = array(
-            'tta_settings_data',
-            'tta_customize_settings',
-            'tta_listening_settings',
-            'tta_record_settings',
-            'tta_analytics_settings',
-            'tta__button_text_arr',
-            'tta_alias_settings',
-            'tts_text_aliases',
-            'tta_compatible_data',
-            'tta_current_browser_info',
-            'tts_rest_api_url',
-            'tta_schedule_report_settings',
-            'tta_last_report_sent',
-            'tta_analytics_migrated_2_1_10',
-            'atlasvoice_analytics_table_is_created',
-            'tta_analytics_indexes_added',
-            'text-to-audio_allow_tracking',
-            'text-to-audio_tracking_last_send',
-            'text-to-audio_tracking_notice',
-            'tta_has_been_activated_before',
-            'tta_activated_at',
-            'tta_onboarding_completed',
-            'tta_pro_onboarding_completed',
-            'tta_onboarding_events',
-            'tta_onboarding_summary',
-            'tta_milestones_reached',
-            'tta_review_notice_next_show_time',
-            'tta_feedback_notice_next_show_time',
-            // TTS-236: analytics memory exhaustion fix options
-            'tta_total_plays_counter',
-            'tta_total_plays_fallback',
-            'tta_play_count_migration_last_id',
-            'tta_play_count_migration_done',
-        );
-        foreach ( $options as $option ) {
-            delete_option( $option );
-        }
-
-        // 2. Delete dynamic options.
-        $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'tta\_reshow\_%'" );
-        $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'tta\_clicks\_%'" );
-
-        // 3. Drop the analytics table.
-        $table_name = $wpdb->prefix . 'atlasvoice_analytics';
-        $wpdb->query( "DROP TABLE IF EXISTS {$table_name}" );
-
-        // 4. Delete post meta.
-        $meta_keys = array( 'tts_mp3_file_urls', 'tts_is_mp3_file_url_exists', 'atlasVoice_analytics' );
-        foreach ( $meta_keys as $meta_key ) {
-            $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = %s", $meta_key ) );
-        }
-
-        // 5. Delete transients.
-        $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_tta\_%' OR option_name LIKE '_transient_timeout_tta\_%'" );
-        $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_tts\_%' OR option_name LIKE '_transient_timeout_tts\_%'" );
-        $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_text-to-audio\_%' OR option_name LIKE '_transient_timeout_text-to-audio\_%'" );
-
-        // 6. Unschedule cron jobs.
-        $cron_hooks = array(
-            'tta_send_scheduled_report',
-            'text-to-audio_tracker_send_event',
-            'tta_migrate_play_count_column', // TTS-236
-        );
-        foreach ( $cron_hooks as $hook ) {
-            $timestamp = wp_next_scheduled( $hook );
-            if ( $timestamp ) {
-                wp_unschedule_event( $timestamp, $hook );
-            }
-        }
-    });
-}
 
 /**
  * Currently plugin version.
@@ -394,6 +125,15 @@ if (!defined('TTA_ADMIN_PATH')) {
 if (!defined('TTA_DEBUG_MODE')) {
 
     define('TTA_DEBUG_MODE', 0);
+}
+
+if (!defined('TTA_REQUIRED_PRO_VERSION')) {
+    // TTS-250: minimum AtlasVoice Pro add-on version that mounts the UI moved
+    // out of the free plugin (Listening voice settings, voice-provider
+    // integrations, player-2..6 preview). Free shows an "update the add-on"
+    // notice when an older Pro is active. Bump this when the free plugin starts
+    // to depend on a newer add-on contract.
+    define('TTA_REQUIRED_PRO_VERSION', '3.3.1');
 }
 
 
@@ -438,7 +178,7 @@ class TTA_Init
     public function __construct()
     {
         if (!defined('TEXT_TO_AUDIO_VERSION')) {
-            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '2.1.20'));
+            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '2.2.3'));
         }
 
         if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
@@ -504,14 +244,9 @@ class TTA_Init
 }
 
 
-// Load text domain at init (WordPress 6.7+ requires init or later).
-add_action('init', function () {
-    load_plugin_textdomain(
-        'text-to-audio',
-        false,
-        dirname(plugin_basename(__FILE__)) . '/languages'
-    );
-}, 0);
+// TTS-247: load_plugin_textdomain() has been discouraged since WP 4.6 for
+// wp.org-hosted plugins -- WordPress loads translations automatically from
+// translate.wordpress.org. Removed per the Plugin Check warning.
 
 add_action('plugins_loaded', function () {
     //Rest api init.
@@ -567,30 +302,27 @@ register_activation_hook(__FILE__, function () {
  * @since 2.1.8
  */
 add_action('admin_init', function () {
-    // One-time migration (2.1.10): enable analytics with latest 20 posts for existing free users.
+    // One-time migration (2.1.10): enable analytics for existing free users.
+    // TTS-250: track every post by default (the "all" sentinel) instead of the
+    // latest 20 — the old 20-post cap was an artificial limit on a shipped
+    // feature (wp.org Guideline 5).
     if ( ! get_option( 'tta_analytics_migrated_2_1_10' ) ) {
         $analytics = (array) get_option( 'tta_analytics_settings' );
         if ( empty( $analytics['tts_enable_analytics'] ) && empty( $analytics['tts_trackable_post_ids'] ) ) {
-            $latest_ids = get_posts( array(
-                'posts_per_page' => 20,
-                'post_type'      => 'post',
-                'post_status'    => 'publish',
-                'fields'         => 'ids',
-                'orderby'        => 'date',
-                'order'          => 'DESC',
-            ) );
             $analytics['tts_enable_analytics']   = true;
-            $analytics['tts_trackable_post_ids'] = $latest_ids;
+            $analytics['tts_trackable_post_ids'] = array( 'all' );
             update_option( 'tta_analytics_settings', $analytics, false );
         }
         update_option( 'tta_analytics_migrated_2_1_10', true, false );
     }
 
     // Allow resetting onboarding via ?page=text-to-audio&reset_onboard=true
+    // phpcs:disable WordPress.Security.NonceVerification.Recommended -- admin-only flow gated by current_user_can(manage_options); read-only routing check
     if ( isset( $_GET['page'] ) && 'text-to-audio' === $_GET['page']
         && isset( $_GET['reset_onboard'] ) && 'true' === $_GET['reset_onboard']
         && current_user_can( 'manage_options' )
     ) {
+    // phpcs:enable WordPress.Security.NonceVerification.Recommended
         delete_option( 'tta_onboarding_completed' );
         delete_option( 'tta_pro_onboarding_completed' );
         wp_safe_redirect( admin_url( 'admin.php?page=text-to-audio&welcome=1' ) );
@@ -601,6 +333,7 @@ add_action('admin_init', function () {
         delete_transient('tta_activation_redirect');
 
         // Don't redirect during bulk activation or if user can't manage options.
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- WP-core flag set by core during multi-activate; presence-only check
         if ( isset($_GET['activate-multi']) || ! current_user_can('manage_options') ) {
             return;
         }
@@ -635,6 +368,8 @@ register_deactivation_hook(__FILE__, function () {
  */
 function tta_create_shortcode($atts, $content, $shortcode_tag)
 {
+    // TTS-247: escape happens inside tta_get_button_content (wp_kses with
+    // a small allow-list around the tts__listening_button filter output).
     return tta_get_button_content($atts, false, $content);
 }
 

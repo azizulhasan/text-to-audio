@@ -20,10 +20,13 @@ class TTA_Error_Handler {
 		// Ensure the log file exists
 		$this->ensurel_file_is_exists();
 
-		// Open the log file for appending
+		// TTS-247: direct fopen() is required here -- WP_Filesystem can't be
+		// used in an error-handler context (it needs credentials and the WP
+		// admin bootstrap, neither of which is guaranteed when an error fires).
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
 		$this->handle = fopen( $this->log_file, 'a' );
 		if ( ! $this->handle ) {
-			throw new \Exception( "Unable to open log file: " . $this->log_file );
+			throw new \Exception( "Unable to open log file: " . esc_html( $this->log_file ) );
 		}
 
 		$this->log( $message );
@@ -38,18 +41,23 @@ class TTA_Error_Handler {
 	private function ensurel_file_is_exists() {
 		// Check if the file does not exist
 		if ( ! file_exists( $this->log_file ) ) {
-			// Create the directory if it does not exist
+			// Create the directory if it does not exist (wp_mkdir_p handles
+			// recursion + parents correctly and is the wp.org-preferred API).
 			$dir = dirname( $this->log_file );
 			if ( ! file_exists( $dir ) ) {
-				mkdir( $dir, 0755, true );
+				wp_mkdir_p( $dir );
 			}
 
-			// Create the file
+			// TTS-247: direct fopen/fclose for log-file creation (same
+			// reasoning as the constructor -- WP_Filesystem is unavailable
+			// in an error-handler context).
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
 			$handle = fopen( $this->log_file, 'w' );
 			if ( $handle ) {
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 				fclose( $handle );
 			} else {
-				throw new \Exception( "Failed to create log file: " . $this->log_file );
+				throw new \Exception( "Failed to create log file: " . esc_html( $this->log_file ) );
 			}
 		}
 	}
@@ -63,7 +71,8 @@ class TTA_Error_Handler {
 	 */
 	public function log( $message ) {
 		if ( $this->handle ) {
-			fwrite( $this->handle, date( 'Y-m-d H:i:s' ) . " - " . $message . "\n" );
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
+			fwrite( $this->handle, gmdate( 'Y-m-d H:i:s' ) . " - " . $message . "\n" );
 		}
 	}
 
@@ -72,6 +81,7 @@ class TTA_Error_Handler {
 	 */
 	public function __destruct() {
 		if ( $this->handle ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 			fclose( $this->handle );
 		}
 	}
