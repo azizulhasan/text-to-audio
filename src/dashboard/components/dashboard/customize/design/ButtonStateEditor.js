@@ -22,8 +22,10 @@ export default function ButtonStateEditor({
   buttonTexts,
   setButtonTexts,
 }) {
-  // Phase 1 — only ids 1 (Default) and 2 (Default Pro) get this editor.
-  const supported = playerId === 1 || playerId === 2;
+  // TTS-249 (T2): Free ships this editor for player 1 only. Player 2 (Default
+  // Pro) is premium — the Pro plugin injects its own editor, so no player-2
+  // handling ships in the free ZIP.
+  const supported = playerId === 1;
   if (!supported) {
     return null;
   }

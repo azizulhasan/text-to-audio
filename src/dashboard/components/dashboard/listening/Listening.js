@@ -1,30 +1,41 @@
-import React, { useEffect, useState, useMemo } from "react";
-import {
-  Col,
-  Container,
-  Row,
-  Form,
-  Button,
-} from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Col, Container, Row, Form, Button } from "react-bootstrap";
 import { __ } from "@wordpress/i18n";
 
 import { postWithoutImage } from "../../context/utilities";
 import toast from "../../context/Notify";
 import UpgradeToPro from "../../UpgradeToPro";
 
-// Hooks
-import useVoiceLoader from "./hooks/useVoiceLoader";
-import useMultilingualDetection from "./hooks/useMultilingualDetection";
-
-// TTS Provider Components
+// Free ships only player 1 (browser SpeechSynthesis voices). Player 2 ("Default
+// Pro", also browser-based) and players 3-6 (Google Cloud / ChatGPT / ElevenLabs)
+// are add-on features. Their Listening UI — provider voice settings, Pro voice
+// loading, and multilingual mapping — lives entirely in the AtlasVoice add-on and
+// is mounted into the #tts_listening_pro slot below when the add-on is active.
 import DefaultPlayerSettings from "./tts-providers/DefaultPlayerSettings";
-import GoogleCloudSettings from "./tts-providers/GoogleCloudSettings";
-import ChatGPTSettings from "./tts-providers/ChatGPTSettings";
-import ElevenLabsSettings from "./tts-providers/ElevenLabsSettings";
 
-// Multilingual
-import LanguageMapping from "./LanguageMapping";
-import { getLanguageFlag } from "./utils";
+// Multilingual plugin basenames the add-on can map voices for (Pro feature).
+const MULTILINGUAL_PLUGINS = {
+  "gtranslate/gtranslate.php": "GTranslate",
+  "sitepress-multilingual-cms/sitepress.php": "WPML",
+  "translatepress-multilingual/index.php": "TranslatePress",
+  "polylang/polylang.php": "Polylang",
+};
+
+/**
+ * Detect an active multilingual plugin from the free plugin's own compatibility
+ * data (ttsObj.compatible only contains active plugins). Returns the display name
+ * or "" if none is active.
+ */
+function detectMultilingualPlugin() {
+  const compatible =
+    (typeof ttsObj !== "undefined" && ttsObj.compatible) || {};
+  for (const basename in MULTILINGUAL_PLUGINS) {
+    if (compatible[basename]) {
+      return MULTILINGUAL_PLUGINS[basename];
+    }
+  }
+  return "";
+}
 
 export default function Listening() {
   const [customizationSettings, setCustomizationSettings] = useState({});
@@ -34,114 +45,59 @@ export default function Listening() {
     tta__listening_rate: 1,
     tta__listening_volume: 1,
     tta__listening_lang: "en-GB",
-    tta__listening_activeLanguages_mapping: {},
-    tta__multilingualActiveLanguages: {},
-    tta__currentPlayerLanguages: {},
-    tta__available_currentPlayerVoices: {},
-    tta__listening_voice_model: "tts-1",
-    tta__listening_instructions: "",
-    tta__listening_instruction_preset: "native",
-    tta__elevenlabs_model: "eleven_multilingual_v2",
-    tta__elevenlabs_output_format: "mp3_44100_128",
-    tta__elevenlabs_stability: "",
-    tta__elevenlabs_similarity_boost: "",
-    tta__elevenlabs_style: "",
-    tta__elevenlabs_speed: 1.0,
-    tta__elevenlabs_speaker_boost: true,
   });
+  const [currentPlayerLanguages, setCurrentPlayerLanguages] = useState({});
+  const [browserVoices, setBrowserVoices] = useState([]);
+  const [filteredVoices, setFilteredVoices] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const [baseMP3File, setBaseMP3File] = useState(
-    "https://cloud.google.com/text-to-speech/docs/audio/en-GB-Chirp-HD-F.wav"
-  );
-  const [isListeningSettingsLoaded, setIsListeningSettingsLoaded] =
-    useState(false);
+  const addonActive =
+    typeof ttsObj !== "undefined" && !!ttsObj.is_atlasvoice_addon_functional;
+  // Multilingual voice mapping is an add-on feature; show the upsell only to free
+  // users (no add-on). With the add-on active, mapping lives in the Pro Listening
+  // island for players 2-6.
+  const multilingualPlugin = !addonActive ? detectMultilingualPlugin() : "";
+  const playerId = customizationSettings?.buttonSettings?.id || 1;
+  // Free owns player 1 only; player >= 2 is an add-on player (rendered by the
+  // add-on into the #tts_listening_pro slot below).
+  const isAddonPlayer = playerId >= 2 && addonActive;
 
-  // ── Hooks ──────────────────────────────────────────────────────────
-  const {
-    currentPlayerVoices,
-    currentPlayerLanguages,
-    currentPlayerFilteredVoices,
-    speechSynthesisVoices,
-    elevenLabsVoices,
-    languageMissingMessage,
-    setCurrentPlayerFilteredVoices,
-    setGPTVoicesAndLanguages,
-    setGoogleVoicesAndLanguages,
-    setVoicesAndLanguages,
-    setElevenLabsVoicesAndLanguages,
-    addElevenLabsVoice,
-  } = useVoiceLoader(customizationSettings, listeningSettings.tta__listening_voice_model);
-
-  const { multilingualActiveLanguages, activePluginName } =
-    useMultilingualDetection();
-
-  // ── Audio preview effect ───────────────────────────────────────────
+  // ── Load browser voices (player 1) ──────────────────────────────────
   useEffect(() => {
-    console.log({
-      pro: ttsObj.is_pro_active,
-      id: customizationSettings?.buttonSettings?.id,
-    });
-    if (
-      window.hasOwnProperty("ttsObj") &&
-      ttsObj.is_pro_active &&
-      customizationSettings?.buttonSettings?.id == 5
-    ) {
-      setBaseMP3File("https://cdn.openai.com/API/docs/audio/alloy.wav");
-      const audio_wav = document.getElementById("tts_audio_wav");
-      const audio_mp3 = document.getElementById("tts_audio_mp3");
-      const audio_tag = document.getElementById("tts_audio_tag");
-
-      audio_wav.src = "https://cdn.openai.com/API/docs/audio/alloy.wav";
-      audio_mp3.src = "https://cdn.openai.com/API/docs/audio/alloy.wav";
-      audio_tag.load();
-    }
-
-    if (
-      window.hasOwnProperty("ttsObj") &&
-      ttsObj.is_pro_active &&
-      customizationSettings?.buttonSettings?.id == 6 &&
-      elevenLabsVoices.length > 0
-    ) {
-      const firstVoice = elevenLabsVoices[0];
-      if (firstVoice?.preview_url) {
-        setBaseMP3File(firstVoice.preview_url);
-        const audio_wav = document.getElementById("tts_audio_wav");
-        const audio_mp3 = document.getElementById("tts_audio_mp3");
-        const audio_tag = document.getElementById("tts_audio_tag");
-
-        if (audio_wav && audio_mp3 && audio_tag) {
-          audio_wav.src = firstVoice.preview_url;
-          audio_mp3.src = firstVoice.preview_url;
-          audio_tag.load();
-        }
-      }
-    }
-  }, [customizationSettings, elevenLabsVoices]);
-
-  // ── Initial data load ──────────────────────────────────────────────
-  useEffect(() => {
-    if (
-      window.hasOwnProperty("ttsObj") &&
-      ttsObj?.gctts_is_authenticated == 1
-    ) {
-      setGoogleVoicesAndLanguages();
-    } else {
-      setVoicesAndLanguages();
-    }
-
-    let data2 = new FormData();
-    data2.append("method", "get");
-    postWithoutImage(tta_obj.api_url + "tta/v1/listening", data2)
-      .then((res) => {
-        setListeningSettings({
-          ...res.data,
-        });
-      })
-      .catch((err) => {
-        console.log(err);
+    const loadVoices = () => {
+      if (!window.speechSynthesis) return;
+      const voices = window.speechSynthesis.getVoices();
+      if (!voices.length) return;
+      setBrowserVoices(voices);
+      setFilteredVoices(voices);
+      const langs = {};
+      voices.forEach((v) => {
+        if (v.lang) langs[v.lang] = v.lang;
       });
+      setCurrentPlayerLanguages(langs);
+    };
+    loadVoices();
+    if (window.speechSynthesis) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+    return () => {
+      if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = null;
+    };
+  }, []);
 
-    let customize = new FormData();
+  // ── Initial data load (settings + selected player) ──────────────────
+  useEffect(() => {
+    const listening = new FormData();
+    listening.append("method", "get");
+    postWithoutImage(tta_obj.api_url + "tta/v1/listening", listening)
+      .then((res) => {
+        if (res?.data) {
+          setListeningSettings((prev) => ({ ...prev, ...res.data }));
+        }
+      })
+      .catch((err) => console.log(err));
+
+    const customize = new FormData();
     customize.append("method", "get");
     postWithoutImage(tta_obj.api_url + "tta/v1/customize", customize)
       .then((res) => {
@@ -150,193 +106,56 @@ export default function Listening() {
         } else if (!res.data.buttonSettings.id) {
           res.data.buttonSettings.id = 1;
         }
-
-        console.log({ dta: res.data.buttonSettings.id });
         setCustomizationSettings(res.data);
-        setIsListeningSettingsLoaded(true);
+        setIsLoaded(true);
       })
       .catch((err) => {
         console.log(err);
+        setIsLoaded(true);
       });
   }, []);
 
-  // ── Refetch ElevenLabs voices when listening language changes ──────
-  useEffect(() => {
-    if (
-      window.hasOwnProperty("ttsObj") &&
-      ttsObj.is_pro_active &&
-      customizationSettings?.buttonSettings?.id == 6 &&
-      listeningSettings.tta__listening_lang
-    ) {
-      setElevenLabsVoicesAndLanguages(listeningSettings.tta__listening_lang);
+  // ── Field change ────────────────────────────────────────────────────
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "tta__listening_lang") {
+      const matched = browserVoices.filter((v) => v.lang === value);
+      setFilteredVoices(matched.length ? matched : browserVoices);
     }
-  }, [
-    customizationSettings?.buttonSettings?.id,
-    listeningSettings.tta__listening_lang,
-  ]);
+    setListeningSettings((prev) => ({ ...prev, [name]: value }));
+  };
 
-  // ── Sync multilingual languages to listening settings ──────────────
-  useEffect(() => {
-    if (Object.keys(multilingualActiveLanguages).length) {
-      setListeningSettings((prev) => ({
-        ...prev,
-        tta__listening_activeLanguages_mapping: multilingualActiveLanguages,
-      }));
-    }
-  }, [multilingualActiveLanguages]);
-
-  // ── Form submit ────────────────────────────────────────────────────
+  // ── Save (player 1) ─────────────────────────────────────────────────
   const handleSubmit = (e) => {
     e.preventDefault();
-    let form = new FormData(e.target);
-
-    let formData = {};
-    for (let [key, value] of form.entries()) {
-      if (key === "" || value === "") {
-        toast(__("Please fill the  field : ", "text-to-audio") + key);
-        return;
-      }
-      if (
-        key === "tta__available_currentPlayerVoices" ||
-        "tta__currentPlayerLanguages" === key ||
-        "tta__multilingualActiveLanguages" === key
-      ) {
-        if (!ttsObj.is_pro_active) {
-          formData[key] = {};
-          continue;
-        }
-
-        if (!formData?.[key]) {
-          formData[key] = {};
-        }
-        if (!Object.keys(formData?.[key]).length) {
-          formData[key][customizationSettings?.buttonSettings?.id] = [];
-        }
-        formData[key][customizationSettings?.buttonSettings?.id].push(value);
-      } else {
-        formData[key] = value;
-      }
+    const form = new FormData(e.target);
+    const formData = {};
+    for (const [key, value] of form.entries()) {
+      formData[key] = value;
     }
-    formData.tta__available_currentPlayerVoices = {
-      ...listeningSettings.tta__available_currentPlayerVoices,
-      ...formData.tta__available_currentPlayerVoices,
-    };
-
-    formData.tta__currentPlayerLanguages = {
-      ...listeningSettings.tta__currentPlayerLanguages,
-      ...formData.tta__currentPlayerLanguages,
-    };
-
-    formData.tta__multilingualActiveLanguages = {
-      ...listeningSettings.tta__multilingualActiveLanguages,
-      ...formData.tta__multilingualActiveLanguages,
-    };
-    console.log(formData);
-    let data = new FormData();
+    const data = new FormData();
     data.append("fields", JSON.stringify(formData));
     data.append("method", "post");
     postWithoutImage(tta_obj.api_url + "tta/v1/listening", data)
       .then((res) => {
-        setListeningSettings(res.data);
-        toast(__("Listening settings saved. Now all setup done. Enjoy", "text-to-audio"), "info", {
-          autoClose: 15000,
-        });
+        if (res?.data) setListeningSettings(res.data);
+        toast(
+          __("Listening settings saved. Now all setup done. Enjoy", "text-to-audio"),
+          "info",
+          { autoClose: 15000 }
+        );
       })
-      .catch((err) => {
-        console.log(err);
-      });
+      .catch((err) => console.log(err));
   };
 
-  // ── Field change handler ───────────────────────────────────────────
-  const handleChange = (e, index = "", player_id = "") => {
-    if (
-      e.target.name === "tta__listening_lang" &&
-      customizationSettings?.buttonSettings?.id == 4
-    ) {
-      let filteredVoices = speechSynthesisVoices.filter((voice) => {
-        return voice.languageCodes[0] == e.target.value;
-      });
-      if (filteredVoices.length === 1) {
-        setListeningSettings({
-          ...listeningSettings,
-          ...{ ["tta__listening_voice"]: filteredVoices[0].languageCodes[0] },
-        });
-      }
+  // Players 2-6 are add-on players: the add-on mounts its OWN full-width
+  // Listening UI (header, provider voices, multilingual mapping, save) into this
+  // slot. Render only the bare slot — no Free header or column wrapper — so there
+  // is no duplicate "Listening Preferences" header and no nested/narrower column.
+  if (isAddonPlayer) {
+    return <div id="tts_listening_pro"></div>;
+  }
 
-      setCurrentPlayerFilteredVoices(filteredVoices);
-    }
-
-    if (
-      e.target.name === "tta__listening_voice" &&
-      customizationSettings?.buttonSettings?.id > 3
-    ) {
-      // ElevenLabs uses preview_url from the voice object
-      if (customizationSettings?.buttonSettings?.id == 6) {
-        const voiceIdPart = e.target.value.split('::')[0];
-        const selectedVoice = elevenLabsVoices.find(v => v.voice_id === voiceIdPart);
-        if (selectedVoice?.preview_url) {
-          const audio_wav = document.getElementById("tts_audio_wav");
-          const audio_mp3 = document.getElementById("tts_audio_mp3");
-          const audio_tag = document.getElementById("tts_audio_tag");
-
-          if (audio_wav && audio_mp3 && audio_tag) {
-            audio_wav.src = selectedVoice.preview_url;
-            audio_mp3.src = selectedVoice.preview_url;
-            audio_tag.load();
-            audio_tag.play();
-          }
-        }
-      } else {
-        let currentVoice = e.target.value;
-        let baseURL = "https://cloud.google.com/text-to-speech/docs/audio/";
-        if (customizationSettings?.buttonSettings?.id == 5) {
-          baseURL = "https://cdn.openai.com/API/docs/audio/";
-        }
-        currentVoice = currentVoice.replace(/-(MALE|FEMALE)$/, "");
-
-        let wavFileName = baseURL + currentVoice + ".wav";
-        let mp3FileName = baseURL + currentVoice + ".mp3";
-        const audio_wav = document.getElementById("tts_audio_wav");
-        const audio_mp3 = document.getElementById("tts_audio_mp3");
-        const audio_tag = document.getElementById("tts_audio_tag");
-
-        audio_wav.src = wavFileName;
-        audio_mp3.src = mp3FileName;
-        audio_tag.load();
-        audio_tag.play();
-      }
-    }
-
-    let listeningSettingsCloned = structuredClone(listeningSettings);
-
-    if (
-      e.target.name === "tta__available_currentPlayerVoices" ||
-      "tta__currentPlayerLanguages" === e.target.name ||
-      "tta__multilingualActiveLanguages" === e.target.name
-    ) {
-      if (!listeningSettingsCloned?.[e.target.name]?.[player_id]) {
-        if (!Object.keys(listeningSettingsCloned[e.target.name]).length) {
-          listeningSettingsCloned[e.target.name] = {};
-        }
-        listeningSettingsCloned[e.target.name][player_id] = [];
-      }
-      listeningSettingsCloned[e.target.name][player_id][index] = e.target.value;
-      if ("tta__multilingualActiveLanguages" != e.target.name) {
-        setListeningSettings(listeningSettingsCloned);
-      }
-    } else {
-      setListeningSettings({
-        ...listeningSettings,
-        ...{ [e.target.name]: e.target.value },
-      });
-    }
-  };
-
-  // ── Derived values ─────────────────────────────────────────────────
-  const playerId = customizationSettings?.buttonSettings?.id;
-  const isDefaultPlayer = playerId < 3;
-
-  // ── Render ─────────────────────────────────────────────────────────
   return (
     <Container>
       <Row>
@@ -348,68 +167,55 @@ export default function Listening() {
             </p>
           </div>
 
-          <Form onSubmit={handleSubmit}>
-            {isDefaultPlayer ? (
+            <Form onSubmit={handleSubmit}>
               <DefaultPlayerSettings
                 listeningSettings={listeningSettings}
                 currentPlayerLanguages={currentPlayerLanguages}
-                currentPlayerFilteredVoices={currentPlayerFilteredVoices}
+                currentPlayerFilteredVoices={filteredVoices}
                 handleChange={handleChange}
               />
-            ) : playerId == 3 || playerId == 4 ? (
-              <GoogleCloudSettings
-                listeningSettings={listeningSettings}
-                customizationSettings={customizationSettings}
-                currentPlayerLanguages={currentPlayerLanguages}
-                currentPlayerFilteredVoices={currentPlayerFilteredVoices}
-                handleChange={handleChange}
-                baseMP3File={baseMP3File}
-              />
-            ) : playerId == 5 ? (
-              <ChatGPTSettings
-                listeningSettings={listeningSettings}
-                setListeningSettings={setListeningSettings}
-                currentPlayerLanguages={currentPlayerLanguages}
-                currentPlayerFilteredVoices={currentPlayerFilteredVoices}
-                handleChange={handleChange}
-                baseMP3File={baseMP3File}
-                getLanguageFlag={getLanguageFlag}
-                onModelChange={(model) => setGPTVoicesAndLanguages(model)}
-              />
-            ) : playerId == 6 ? (
-              <ElevenLabsSettings
-                listeningSettings={listeningSettings}
-                setListeningSettings={setListeningSettings}
-                currentPlayerLanguages={currentPlayerLanguages}
-                elevenLabsVoices={elevenLabsVoices}
-                addElevenLabsVoice={addElevenLabsVoice}
-                handleChange={handleChange}
-                baseMP3File={baseMP3File}
-              />
-            ) : null}
 
-            <LanguageMapping
-              multilingualActiveLanguages={multilingualActiveLanguages}
-              activePluginName={activePluginName}
-              listeningSettings={listeningSettings}
-              customizationSettings={customizationSettings}
-              currentPlayerLanguages={currentPlayerLanguages}
-              currentPlayerVoices={currentPlayerVoices}
-              elevenLabsVoices={elevenLabsVoices}
-              handleChange={handleChange}
-            />
+              {multilingualPlugin && (
+                <div
+                  className="tta-card mb-3 mt-3 text-center"
+                  style={{ padding: "32px 24px" }}
+                >
+                  <div style={{ fontSize: 30, marginBottom: 8 }} aria-hidden="true">
+                    {"🌐"}
+                  </div>
+                  <h5 className="fw-semibold mb-2">
+                    {__("Multilingual Voice Mapping — Pro Feature", "text-to-audio")}
+                  </h5>
+                  <p
+                    className="text-secondary small mb-3 mx-auto"
+                    style={{ maxWidth: 460 }}
+                  >
+                    {__(
+                      "We detected an active translation plugin. Mapping a voice and language to each translated language is available in AtlasVoice Pro.",
+                      "text-to-audio"
+                    )}
+                  </p>
+                  <a
+                    className="btn btn-primary"
+                    href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ background: "#FF7853", borderColor: "#FF7853" }}
+                  >
+                    {__("Upgrade to Pro", "text-to-audio")}
+                  </a>
+                </div>
+              )}
 
-            <div
-              className="position-sticky bottom-0"
-              style={{ zIndex: 1030, marginTop: "20px" }}
-            >
-              <div className="">
+              <div
+                className="position-sticky bottom-0"
+                style={{ zIndex: 1030, marginTop: "20px" }}
+              >
                 <Button type="submit" className="tta_btn">
-                  {__('Save', 'text-to-audio')}
+                  {__("Save", "text-to-audio")}
                 </Button>
               </div>
-            </div>
-          </Form>
+            </Form>
         </Col>
         <Col xs={12} sm={12} lg={4}>
           <UpgradeToPro />

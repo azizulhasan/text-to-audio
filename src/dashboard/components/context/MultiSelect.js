@@ -54,7 +54,7 @@ class MultiSelect extends React.Component {
 
     if (
       window.hasOwnProperty("ttsObjPro") &&
-      !ttsObjPro.is_pro_active &&
+      !ttsObjPro.is_atlasvoice_addon_functional &&
       selectedItems.length > selectionLimit
     ) {
       toast(
@@ -106,7 +106,7 @@ class MultiSelect extends React.Component {
     } else {
       if (
         window.hasOwnProperty("ttsObjPro") &&
-        !ttsObjPro.is_pro_active &&
+        !ttsObjPro.is_atlasvoice_addon_functional &&
         selectedItems.length === selectionLimit
       ) {
         toast(
@@ -125,8 +125,12 @@ class MultiSelect extends React.Component {
         return;
       }
 
+      // TTS-247: compare as strings — stored IDs may be numbers while the
+      // checkbox/pill value is always a string. A strict (===) compare would
+      // never match on removal and fall through to the push below, duplicating
+      // the entry instead of removing it.
       for (let i = 0; i < selectedItems.length; i++) {
-        if (value === selectedItems[i]) {
+        if (String(value) === String(selectedItems[i])) {
           selectedItems.splice(i, 1);
 
           this.setState(
@@ -196,8 +200,12 @@ class MultiSelect extends React.Component {
         this.props.onChange(selectedItems, this.state.name);
       }
     } else {
+      // TTS-247: compare as strings — stored IDs may be numbers while the pill
+      // value (innerText) is always a string. A strict (===) compare would never
+      // match on removal and fall through to the push below, duplicating the
+      // entry instead of removing it.
       for (let i = 0; i < selectedItems.length; i++) {
-        if (value === selectedItems[i]) {
+        if (String(value) === String(selectedItems[i])) {
           selectedItems.splice(i, 1);
           this.setState(
             {
@@ -237,7 +245,9 @@ class MultiSelect extends React.Component {
 
   checkStatus = (item) => {
     const selectedItems = this.state?.selectedItems || [];
-    return selectedItems.some((element) => element === item);
+    // TTS-247: string-compare so a numeric stored ID still matches the string
+    // checkbox value (keeps the checked state correct for post-ID selections).
+    return selectedItems.some((element) => String(element) === String(item));
   };
 
   toggleDropdown = (event) => {

@@ -151,7 +151,7 @@ class AtlasVoicePlayerInsights {
     // Function to generate insights
     generateInsights() {
 
-        if (ttsObj.is_pro_active) {
+        if (ttsObj.is_atlasvoice_addon_functional) {
             let resultFree = this.hooks.applyFilters('atlasVoice_player_insights', {
                 totalInit: this.getTotalInit(),
                 totalPlay: this.getTotalPlay(),
@@ -544,20 +544,26 @@ class AtlasVoicePlayerInsights {
     }
 
     shouldTrackAnalyticsData() {
-        let should_track = true;
         if (!window?.ttsObj?.settings?.analytics?.tts_enable_analytics) {
             return false;
         }
-        if (window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids?.length) {
 
-            if ((window?.ttsObj.is_pro_active && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes('all')) || window?.ttsObj.is_pro_active && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.searchParams?.post_id)) {
-                should_track = true;
-            } else if (!window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.searchParams?.post_id)) {
-                should_track = false;
-            }
+        const trackableIds = window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids;
+
+        // No explicit list configured → every post is trackable.
+        if (!trackableIds?.length) {
+            return true;
         }
 
-        return should_track;
+        // TTS-247: compare as strings — stored IDs may be numbers while the
+        // requested post_id is a string. A strict includes() would never match
+        // and wrongly report "not enabled". Also, the "all" sentinel and the
+        // per-post match are data-driven and no longer gated by is_atlasvoice_addon_functional
+        // (Pro injects "all" via the tts_trackable_post_ids filter).
+        const ids = trackableIds.map((id) => String(id));
+        const postId = String(this.searchParams?.post_id ?? "");
+
+        return ids.includes("all") || ids.includes(postId);
     }
 
 
@@ -568,7 +574,7 @@ export default AtlasVoicePlayerInsights;
 /**
  * Load AtlasVoicePlayerAnalytics after DOMContentLoaded if pro version exists.
  */
-if (window?.ttsObj?.is_pro_active) {
+if (window?.ttsObj?.is_atlasvoice_addon_functional) {
     window.AtlasVoicePlayerInsights = AtlasVoicePlayerInsights;
 }
 

@@ -350,32 +350,66 @@ class AtlasVoiceAnalytics {
 
 
     async trackDeviceInfo() {
+        // TTS-247: opt-in flag for any listener-location data (city / country
+        // / region). Flag lives in the existing ttsObj.settings.analytics
+        // envelope. When off, we (1) skip the /geolocation round-trip,
+        // (2) blank country/city/region on the device_info payload even
+        // though getDeviceData() may have inferred a country from the
+        // browser timezone, and (3) blank the same fields on any stale
+        // localStorage cache from when the toggle was previously on.
+        const geoEnabled = typeof ttsObj !== 'undefined'
+            && ttsObj.settings
+            && ttsObj.settings.analytics
+            && ttsObj.settings.analytics.tts_show_listener_location;
+
+        const stripLocation = (info) => {
+            if (info && typeof info === 'object') {
+                info.country = null;
+                info.city = null;
+                info.region = null;
+            }
+            return info;
+        };
 
         let storedDeviceInfo = localStorage.getItem('atlasVoice_stored_device_info');
         storedDeviceInfo = JSON.parse(storedDeviceInfo);
-        if(storedDeviceInfo) {
-            this.addEvent('device_info', storedDeviceInfo);
-            return;
+        if (storedDeviceInfo) {
+            if (!geoEnabled) {
+                stripLocation(storedDeviceInfo);
+                localStorage.setItem('atlasVoice_stored_device_info', JSON.stringify(storedDeviceInfo));
+                this.addEvent('device_info', storedDeviceInfo);
+                return;
+            }
+            // Geo is on but the cache was written while it was off (or the
+            // server returned "Unknown"): treat as a cache miss so we
+            // re-fetch /geolocation and fill the fields.
+            const hasLocation = storedDeviceInfo.country || storedDeviceInfo.city || storedDeviceInfo.region;
+            if (hasLocation) {
+                this.addEvent('device_info', storedDeviceInfo);
+                return;
+            }
         }
-
 
         const deviceInfo = await this.getDeviceData().then(info => info);
 
-        // Fetch accurate city/country from server-side geolocation API
-        const geoData = await this.#fetchGeolocation();
-        if (geoData) {
-            if (geoData.city && geoData.city !== 'Unknown') {
-                deviceInfo.city = geoData.city;
+        if (geoEnabled) {
+            const geoData = await this.#fetchGeolocation();
+            if (geoData) {
+                if (geoData.city && geoData.city !== 'Unknown') {
+                    deviceInfo.city = geoData.city;
+                }
+                if (geoData.country && geoData.country !== 'Unknown') {
+                    deviceInfo.country = geoData.country;
+                }
+                if (geoData.region) {
+                    deviceInfo.region = geoData.region;
+                }
             }
-            if (geoData.country && geoData.country !== 'Unknown') {
-                deviceInfo.country = geoData.country;
-            }
-            if (geoData.region) {
-                deviceInfo.region = geoData.region;
-            }
+        } else {
+            stripLocation(deviceInfo);
         }
 
-        localStorage.setItem('atlasVoice_stored_device_info', JSON.stringify(deviceInfo))
+        localStorage.setItem('atlasVoice_stored_device_info', JSON.stringify(deviceInfo));
 
         this.addEvent('device_info', deviceInfo);
     }
@@ -646,20 +680,25 @@ class AtlasVoiceAnalytics {
     }
 
     shouldTrackAnalyticsData() {
-        let should_track = true;
         if (!window?.ttsObj?.settings?.analytics?.tts_enable_analytics) {
             return false;
         }
-        if (window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids?.length) {
 
-            if ((window?.ttsObj.is_pro_active && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes('all')) || window?.ttsObj.is_pro_active && window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.postId)) {
-                should_track = true;
-            } else if (!window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids.includes(this.postId)) {
-                should_track = false;
-            }
+        const ids = window?.ttsObj?.settings?.analytics?.tts_trackable_post_ids;
+
+        // No list configured → track everything.
+        if (!ids || !ids.length) {
+            return true;
         }
 
-        return should_track;
+        // TTS-250: honor the "all" sentinel and any explicitly-listed post for
+        // every user — no add-on gate. The free plugin is no longer capped to a
+        // fixed number of trackable posts (wp.org Guideline 5: no artificial
+        // limits on a shipped feature). Compare as strings since stored IDs may
+        // be numbers while this.postId can be a string.
+        const norm = ids.map((value) => String(value));
+
+        return norm.includes('all') || norm.includes(String(this.postId));
     }
 }
 

@@ -44,7 +44,7 @@ function formatTime(epoch) {
 }
 
 export default function Maintenance() {
-    const isProActive = Boolean(window.ttsObj && window.ttsObj.is_pro_active);
+    const isProActive = Boolean(window.ttsObj && window.ttsObj.is_atlasvoice_addon_functional);
 
     const [isScanning, setIsScanning] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);

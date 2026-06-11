@@ -253,17 +253,21 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
 
     const playerColor = (customize && customize.backgroundColor) || '#ffffff';
 
+    // TTS-250: the "all" sentinel means every post is tracked.
+    const trackingAll = !!(analytics && analytics.trackablePostIds && analytics.trackablePostIds.includes('all'));
     const trackingCount = (analytics && analytics.enableAnalytics && analytics.trackablePostIds)
         ? analytics.trackablePostIds.length
         : 0;
 
     const trackingText = (analytics && analytics.enableAnalytics)
-        ? sprintf(
-              /* translators: 1: number of posts being tracked, 2: post type label (e.g. "Posts") */
-              __('%1$d %2$s', 'text-to-audio'),
-              trackingCount,
-              postTypeLabel
-          )
+        ? (trackingAll
+            ? __('All posts', 'text-to-audio')
+            : sprintf(
+                  /* translators: 1: number of posts being tracked, 2: post type label (e.g. "Posts") */
+                  __('%1$d %2$s', 'text-to-audio'),
+                  trackingCount,
+                  postTypeLabel
+              ))
         : __('Off', 'text-to-audio');
 
     return (
@@ -394,7 +398,7 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
             {/* ============================================================ */}
             {/* Section 3: Pro Upsell                                         */}
             {/* ============================================================ */}
-            {!wizardData.is_pro_active && (
+            {!wizardData.is_atlasvoice_addon_functional && (
                 <div style={styles.proSection}>
                     <h3 style={styles.proTitle}>
                         {__('Take it further with Pro', 'text-to-audio')}

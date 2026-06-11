@@ -2,6 +2,9 @@
 
 namespace TTA;
 
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
+
 use TTA_Admin\TTA_Admin;
 use TTA_Admin\TTA_Posts_List;
 
@@ -123,18 +126,24 @@ class TTA {
 
         // Admin bar quick-toggle for AtlasVoice on front-end singular pages.
         $this->loader->add_action('admin_bar_menu', $plugin_admin, 'add_admin_bar_toggle', 999);
-        $this->loader->add_action('wp_head', $plugin_admin, 'admin_bar_inline_css', 999);
-        $this->loader->add_action('wp_footer', $plugin_admin, 'admin_bar_inline_js', 999);
+        // TTS-249 (I3): enqueue the admin-bar toggle CSS + JS as proper assets
+        // (were inline <style>/<script> on wp_head/wp_footer).
+        $this->loader->add_action('wp_enqueue_scripts', $plugin_admin, 'enqueue_admin_bar_assets', 999);
 
-        // TTS-240: CORS/CDN failure detector — must run before our bundles.
-        $this->loader->add_action('wp_head', $plugin_admin, 'print_cors_detector_script', 1);
+        // TTS-240/249: CORS/CDN failure detector — enqueued (was inline <script>).
+        $this->loader->add_action('wp_enqueue_scripts', $plugin_admin, 'enqueue_cors_detector', 1);
         $this->loader->add_action('wp_ajax_tta_toggle_audio', $plugin_admin, 'ajax_toggle_audio');
 
-        // Deactivation rescue modal on plugins.php (shows before Freemius modal).
+        // Deactivation rescue modal on plugins.php (shows quick-fix options on the first deactivate click).
         $this->loader->add_action('admin_footer', $plugin_admin, 'render_deactivation_rescue_modal');
+        // TTS-249 (I3): modal behaviour as an enqueued script (was inline <script>).
+        $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_deactivation_rescue_assets');
 
-        // Output AudioObject JSON-LD schema in <head> for singular posts with audio player
-        add_action('wp_head', [TTA_Helper::class, 'output_audio_schema_head'], 99);
+        // TTS-250: the AudioObject JSON-LD schema generator was removed from the
+        // free plugin. It only ever produced output when an MP3 file existed
+        // (a Pro-only feature — the free browser-SpeechSynthesis player has no
+        // audio file / contentUrl), so it now lives entirely in AtlasVoice Pro,
+        // which registers its own wp_head schema output.
 
         // Initialize Posts List customization
         if (is_admin()) {
@@ -156,36 +165,29 @@ class TTA {
      * Appears under Settings > Privacy > Privacy Policy page as suggested text.
      */
     public function register_privacy_policy_content() {
-        $content = __(
-            'This site uses the AtlasVoice plugin to provide text-to-speech audio playback. ' .
-            'When listening analytics are enabled, the plugin collects the following data:' .
-            "\n\n" .
-            '<strong>Analytics data (per visitor):</strong>' .
-            "\n" .
-            '<ul>' .
-            '<li>A pseudonymous browser fingerprint identifier (not your name, email, or IP address)</li>' .
-            '<li>Which posts or pages you listened to</li>' .
-            '<li>Playback events (play, pause, resume, completion)</li>' .
-            '<li>Device type, browser, and operating system</li>' .
-            '<li>Listening duration and timestamps</li>' .
-            '</ul>' .
-            "\n" .
-            'This data is stored in your site\'s database and is used solely to understand how visitors ' .
-            'interact with the audio player. Because the identifier is a browser fingerprint (not tied to ' .
-            'your email or account), it cannot be linked to you personally.' .
-            "\n\n" .
-            '<strong>Optional telemetry (opt-in only):</strong>' .
-            "\n" .
-            'If the site administrator opts in to usage telemetry, anonymized plugin configuration data ' .
-            '(e.g., which text-to-speech engine is selected, feature flags, active post types) is sent ' .
-            'weekly to AtlasAiDev. No visitor data, post content, or personal information is included.' .
-            "\n\n" .
-            '<strong>Data retention:</strong>' .
-            "\n" .
-            'Analytics data is stored indefinitely until the site administrator clears it via the plugin ' .
-            'settings or uninstalls the plugin. All plugin data is permanently deleted on uninstall.',
-            TEXT_TO_AUDIO_TEXT_DOMAIN
-        );
+        // TTS-247: each paragraph / list item is its own gettext call so the
+        // $text and $domain parameters stay single string literals (the
+        // makepot extractor and wp.org Plugin Check both require this).
+        $content =
+            __( 'This site uses the AtlasVoice plugin to provide text-to-speech audio playback. When listening analytics are enabled, the plugin collects the following data:', 'text-to-audio' )
+            . "\n\n"
+            . '<strong>' . __( 'Analytics data (per visitor):', 'text-to-audio' ) . '</strong>'
+            . "\n<ul>"
+            . '<li>' . __( 'A pseudonymous browser fingerprint identifier (not your name, email, or IP address)', 'text-to-audio' ) . '</li>'
+            . '<li>' . __( 'Which posts or pages you listened to', 'text-to-audio' ) . '</li>'
+            . '<li>' . __( 'Playback events (play, pause, resume, completion)', 'text-to-audio' ) . '</li>'
+            . '<li>' . __( 'Device type, browser, and operating system', 'text-to-audio' ) . '</li>'
+            . '<li>' . __( 'Listening duration and timestamps', 'text-to-audio' ) . '</li>'
+            . "</ul>\n"
+            . __( "This data is stored in your site's database and is used solely to understand how visitors interact with the audio player. Because the identifier is a browser fingerprint (not tied to your email or account), it cannot be linked to you personally.", 'text-to-audio' )
+            . "\n\n"
+            . '<strong>' . __( 'Optional telemetry (opt-in only):', 'text-to-audio' ) . '</strong>'
+            . "\n"
+            . __( 'If the site administrator opts in to usage telemetry, anonymized plugin configuration data (e.g., which text-to-speech engine is selected, feature flags, active post types) is sent weekly to AtlasAiDev. No visitor data, post content, or personal information is included.', 'text-to-audio' )
+            . "\n\n"
+            . '<strong>' . __( 'Data retention:', 'text-to-audio' ) . '</strong>'
+            . "\n"
+            . __( 'Analytics data is stored indefinitely until the site administrator clears it via the plugin settings or uninstalls the plugin. All plugin data is permanently deleted on uninstall.', 'text-to-audio' );
 
         wp_add_privacy_policy_content(
             'AtlasVoice – Text to Speech',
@@ -204,7 +206,7 @@ class TTA {
      */
     public function register_data_exporter( $exporters ) {
         $exporters['atlasvoice'] = array(
-            'exporter_friendly_name' => __( 'AtlasVoice Analytics Data', TEXT_TO_AUDIO_TEXT_DOMAIN ),
+            'exporter_friendly_name' => __( 'AtlasVoice Analytics Data', 'text-to-audio' ),
             'callback'               => array( $this, 'export_personal_data' ),
         );
         return $exporters;
@@ -234,7 +236,7 @@ class TTA {
      */
     public function register_data_eraser( $erasers ) {
         $erasers['atlasvoice'] = array(
-            'eraser_friendly_name' => __( 'AtlasVoice Analytics Data', TEXT_TO_AUDIO_TEXT_DOMAIN ),
+            'eraser_friendly_name' => __( 'AtlasVoice Analytics Data', 'text-to-audio' ),
             'callback'             => array( $this, 'erase_personal_data' ),
         );
         return $erasers;
@@ -255,7 +257,7 @@ class TTA {
             'items_removed'  => false,
             'items_retained' => false,
             'messages'       => array(
-                __( 'AtlasVoice analytics uses pseudonymous browser fingerprints that cannot be linked to email addresses. No matching data found.', TEXT_TO_AUDIO_TEXT_DOMAIN ),
+                __( 'AtlasVoice analytics uses pseudonymous browser fingerprints that cannot be linked to email addresses. No matching data found.', 'text-to-audio' ),
             ),
             'done'           => true,
         );
