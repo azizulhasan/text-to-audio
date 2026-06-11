@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useMemo } from "react";
 import { __ } from "@wordpress/i18n";
 import { Form } from "react-bootstrap";
-import ProFeatureOverlay from "./ProFeatureOverlay";
 
 /**
  * ListenerSegments Component
@@ -23,8 +22,6 @@ export default function ListenerSegments({
     onDateRangeChange,
     filterResultsByDateRange
 }) {
-    const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
-
     // Standard date range options
     const standardDateRangeOptions = [
         { value: "Last 7 Days", label: __("Last 7 Days", "text-to-audio") },
@@ -46,10 +43,9 @@ export default function ListenerSegments({
     const chartRef = useRef(null);
     const chartInstanceRef = useRef(null);
 
-    // Filter and calculate segments data based on component's date range
+    // TTS-247: data-driven, no demo data. New-vs-returning split is computed in
+    // the free base aggregator, so it renders with real data for everyone.
     const filteredSegmentsData = useMemo(() => {
-        if (!isProActive) return null;
-
         // If date range matches global, use the already aggregated data
         if (dateRange === globalDateRange) {
             return data;
@@ -81,7 +77,7 @@ export default function ListenerSegments({
         }
 
         return data;
-    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange, isProActive]);
+    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange]);
 
     // Use filtered data
     const displaySegmentData = filteredSegmentsData || data;
@@ -91,31 +87,19 @@ export default function ListenerSegments({
     const returningListeners = displaySegmentData.returning_users || displaySegmentData.returningListeners || 0;
     const totalListeners = newListeners + returningListeners;
 
-    // Calculate percentages
-    const newPercentage = totalListeners > 0 ? (newListeners / totalListeners) * 100 : 62;
-    const returningPercentage = totalListeners > 0 ? (returningListeners / totalListeners) * 100 : 38;
+    // Calculate percentages from real data (0 when there is no data yet)
+    const displayNewPercentage = totalListeners > 0 ? (newListeners / totalListeners) * 100 : 0;
+    const displayReturningPercentage = totalListeners > 0 ? (returningListeners / totalListeners) * 100 : 0;
 
-    // Demo data for non-pro users
-    const demoData = {
-        newListeners: 11284,
-        returningListeners: 6916,
-        avgSessions: 2.4,
+    const displayData = {
+        newListeners,
+        returningListeners,
+        avgSessions: displaySegmentData.avgSessions || 0,
     };
-
-    const displayData = isProActive
-        ? {
-            newListeners,
-            returningListeners,
-            avgSessions: displaySegmentData.avgSessions || 0,
-        }
-        : demoData;
-
-    const displayNewPercentage = isProActive ? newPercentage : 62;
-    const displayReturningPercentage = isProActive ? returningPercentage : 38;
 
     // Initialize Chart
     useEffect(() => {
-        if (!chartRef.current || !window.Chart || !isProActive) return;
+        if (!chartRef.current || !window.Chart) return;
 
         // Destroy existing chart
         if (chartInstanceRef.current) {
@@ -164,7 +148,7 @@ export default function ListenerSegments({
                 chartInstanceRef.current.destroy();
             }
         };
-    }, [isProActive, displayNewPercentage, displayReturningPercentage]);
+    }, [displayNewPercentage, displayReturningPercentage]);
 
     const content = (
         <div className="tta_analytics_card tta_listener_segments_card">
@@ -187,44 +171,7 @@ export default function ListenerSegments({
             <div className="tta_segments_content">
                 {/* Pie Chart */}
                 <div className="tta_segments_chart_wrapper">
-                    {isProActive ? (
-                        <canvas ref={chartRef} id="listenerSegmentsChart"></canvas>
-                    ) : (
-                        <div className="tta_segments_demo_chart">
-                            <svg viewBox="0 0 100 100" className="tta_donut_chart">
-                                <circle
-                                    cx="50"
-                                    cy="50"
-                                    r="40"
-                                    fill="none"
-                                    stroke="#e0e0e0"
-                                    strokeWidth="20"
-                                />
-                                <circle
-                                    cx="50"
-                                    cy="50"
-                                    r="40"
-                                    fill="none"
-                                    stroke="#4ECDC4"
-                                    strokeWidth="20"
-                                    strokeDasharray={`${62 * 2.51} ${100 * 2.51}`}
-                                    strokeDashoffset="0"
-                                    transform="rotate(-90 50 50)"
-                                />
-                                <circle
-                                    cx="50"
-                                    cy="50"
-                                    r="40"
-                                    fill="none"
-                                    stroke="#FF6B6B"
-                                    strokeWidth="20"
-                                    strokeDasharray={`${38 * 2.51} ${100 * 2.51}`}
-                                    strokeDashoffset={`${-62 * 2.51}`}
-                                    transform="rotate(-90 50 50)"
-                                />
-                            </svg>
-                        </div>
-                    )}
+                    <canvas ref={chartRef} id="listenerSegmentsChart"></canvas>
                 </div>
 
                 {/* Legend */}
@@ -266,12 +213,5 @@ export default function ListenerSegments({
         </div>
     );
 
-    return (
-        <ProFeatureOverlay
-            showOverlay={!isProActive}
-            featureName={__("Listener Segments", "text-to-audio")}
-        >
-            {content}
-        </ProFeatureOverlay>
-    );
+    return content;
 }

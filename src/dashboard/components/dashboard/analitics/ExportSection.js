@@ -16,7 +16,10 @@ import notify from "../../context/Notify";
  * @param {string} props.toDate - Custom to date
  */
 export default function ExportSection({ onExportCSV, onExportPDF, dateRange, fromDate, toDate }) {
-    const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
+    // TTS-247: this section is rendered by the parent only when the `export`
+    // capability is present; the local flag mirrors that capability (no
+    // is_atlasvoice_addon_functional gating in the UI).
+    const canExport = (typeof ttsObj !== "undefined" && ttsObj.capabilities && ttsObj.capabilities.export) || false;
     const [showScheduleModal, setShowScheduleModal] = useState(false);
     const [scheduleSettings, setScheduleSettings] = useState({
         enabled: false,
@@ -39,10 +42,10 @@ export default function ExportSection({ onExportCSV, onExportPDF, dateRange, fro
 
     // Load schedule settings when modal opens
     useEffect(() => {
-        if (showScheduleModal && isProActive) {
+        if (showScheduleModal && canExport) {
             loadScheduleSettings();
         }
-    }, [showScheduleModal, isProActive]);
+    }, [showScheduleModal, canExport]);
 
     /**
      * Load schedule settings from the API
@@ -51,7 +54,7 @@ export default function ExportSection({ onExportCSV, onExportPDF, dateRange, fro
         setIsLoadingSettings(true);
         try {
             const response = await fetch(
-                `${tta_obj.api_url}tta/v1/get_schedule_report`,
+                `${tta_obj.api_url}tta_pro/v1/get_schedule_report`,
                 {
                     method: "GET",
                     headers: {
@@ -75,7 +78,7 @@ export default function ExportSection({ onExportCSV, onExportPDF, dateRange, fro
 
     // Handle CSV export
     const handleExportCSV = async () => {
-        if (!isProActive) return;
+        if (!canExport) return;
 
         setIsExporting(true);
         try {
@@ -93,7 +96,7 @@ export default function ExportSection({ onExportCSV, onExportPDF, dateRange, fro
 
     // Handle PDF export
     const handleExportPDF = async () => {
-        if (!isProActive) return;
+        if (!canExport) return;
 
         setIsExporting(true);
         try {
@@ -118,7 +121,7 @@ export default function ExportSection({ onExportCSV, onExportPDF, dateRange, fro
 
     // Save schedule settings
     const handleSaveSchedule = async () => {
-        if (!isProActive) return;
+        if (!canExport) return;
 
         // Validate recipients if enabled
         if (scheduleSettings.enabled && !scheduleSettings.recipients.trim()) {
@@ -129,7 +132,7 @@ export default function ExportSection({ onExportCSV, onExportPDF, dateRange, fro
         setIsSaving(true);
         try {
             const response = await fetch(
-                `${tta_obj.api_url}tta/v1/save_schedule_report`,
+                `${tta_obj.api_url}tta_pro/v1/save_schedule_report`,
                 {
                     method: "POST",
                     headers: {
@@ -171,7 +174,7 @@ export default function ExportSection({ onExportCSV, onExportPDF, dateRange, fro
 
     // Send test report
     const handleSendTestReport = async () => {
-        if (!isProActive) return;
+        if (!canExport) return;
 
         if (!scheduleSettings.recipients.trim()) {
             notify(__("Please enter recipient email addresses first.", "text-to-audio"), "error");
@@ -219,7 +222,7 @@ export default function ExportSection({ onExportCSV, onExportPDF, dateRange, fro
                 <Button
                     className="tta_export_btn tta_export_csv"
                     onClick={handleExportCSV}
-                    disabled={isExporting || !isProActive}
+                    disabled={isExporting || !canExport}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -232,7 +235,7 @@ export default function ExportSection({ onExportCSV, onExportPDF, dateRange, fro
                 <Button
                     className="tta_export_btn tta_export_pdf"
                     onClick={handleExportPDF}
-                    disabled={isExporting || !isProActive}
+                    disabled={isExporting || !canExport}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -247,7 +250,7 @@ export default function ExportSection({ onExportCSV, onExportPDF, dateRange, fro
                 <Button
                     className="tta_export_btn tta_export_schedule"
                     onClick={() => setShowScheduleModal(true)}
-                    disabled={!isProActive}
+                    disabled={!canExport}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
@@ -256,7 +259,7 @@ export default function ExportSection({ onExportCSV, onExportPDF, dateRange, fro
                     {__("Schedule Report", "text-to-audio")}
                 </Button>
 
-                {!isProActive && (
+                {!canExport && (
                     <span className="tta_export_pro_badge">{__("Pro", "text-to-audio")}</span>
                 )}
             </div>
@@ -432,7 +435,7 @@ export default function ExportSection({ onExportCSV, onExportPDF, dateRange, fro
 
     return (
         <ProFeatureOverlay
-            showOverlay={!isProActive}
+            showOverlay={!canExport}
             featureName={__("Export & Reports", "text-to-audio")}
         >
             {content}

@@ -30,22 +30,29 @@ class TTA_Deactivator {
      * @since    1.0.0
      */
     public static function deactivate() {
-        // TTS-238 C3a / v5 §14.1: tear down the nightly boilerplate cron
-        // so we don't leave orphan hooks pointing at a class that's no
-        // longer loaded. Post-refactor the detector lives under
-        // TTA\AtlasVoice\BoilerplateDetector.
-        if ( class_exists( '\\TTA\\AtlasVoice\\BoilerplateDetector' ) ) {
-            \TTA\AtlasVoice\BoilerplateDetector::unregister_cron();
-        }
-        if(!function_exists('is_plugin_active') ){
-            include_once ABSPATH . 'wp-admin/includes/plugin.php';
-        }
-        if(is_plugin_active('text-to-audio-pro/text-to-audio-pro.php')){
-            deactivate_plugins(['text-to-audio-pro/text-to-audio-pro.php'], true);
-            $url = admin_url( 'plugins.php?deactivate=true' );
-            header( "Location: $url" );
-            die();
-        }
+        // TTS-247: removed the previous body that force-deactivated the Pro
+        // plugin (`text-to-audio-pro`) and then forcibly redirected the user
+        // via `header('Location: …'); die();`. The WordPress.org Plugin
+        // Directory guideline "Changing Active Plugins" forbids one plugin
+        // from altering another's activation state without explicit user
+        // consent -- even when both plugins are published by the same vendor
+        // (the user's click on "Deactivate Free" is not implicit consent to
+        // deactivate Pro). Reviewer cited this in HelpScout #293.
+        //
+        // Dependency direction is handled in Pro now, not here:
+        //   - WordPress 6.5+: Pro declares `Requires Plugins: text-to-audio`
+        //     in its plugin header; WP shows the dependency status in the
+        //     plugins admin and blocks Pro from activating without Free.
+        //   - WordPress 5.6-6.4: Pro's `free_version_activation_notice()`
+        //     (in `text-to-audio-pro.php`) shows an admin notice whenever
+        //     Free is inactive, asking the user to install / activate Free.
+        //     Pro keeps the user in control -- it does NOT self-deactivate
+        //     or force any redirect.
+        //
+        // TTS-238 D27.28 — the previous TTS-238 branch also added a
+        // `BoilerplateDetector::unregister_cron()` call here; that whole
+        // subsystem was retired in D27.28 (the cron is unscheduled by the
+        // D27.25 admin_init cleanup migration instead) so it's gone too.
     }
 
 }

@@ -4042,12 +4042,22 @@ a:hover {
 /* Pro Feature Overlay */
 .tta_pro_feature_wrapper {
     position: relative;
+    /* TTS-247/2.2.2: locked premium cards (OS/Device/Browser/Location) have no
+       data behind the lock, so their content can collapse to ~96px — far
+       shorter than the centered "Upgrade to Pro" notice (~300px), which would
+       overflow into the next row. Reserve enough height for the notice so every
+       locked card looks intentional. Taller cards (chart/heatmap) keep their
+       own height since this is only a minimum. */
+    min-height: 320px;
 }
 
 .tta_pro_feature_content {
     filter: blur(3px);
     pointer-events: none;
     user-select: none;
+    /* Stretch the (possibly short) blurred placeholder to fill the reserved
+       wrapper height so there's no blank gap above/below the overlay. */
+    min-height: 320px;
 }
 
 .tta_pro_feature_overlay {
@@ -4111,6 +4121,59 @@ a:hover {
     background: #e5683f;
     color: #ffffff;
     transform: translateY(-2px);
+}
+
+/* TTS-247: compact inline lock — for small premium sub-controls inside an
+   otherwise-free card (comparison toggle, custom date inputs). Sized to the
+   wrapped control so the lock stays proportional instead of overflowing. */
+.tta_pro_feature_wrapper_compact {
+    display: inline-block;
+    /* Compact inline locks wrap tiny controls — override the full-card
+       min-height so they stay proportional to the control they cover. */
+    min-height: 0;
+}
+
+.tta_pro_feature_content_compact {
+    filter: blur(2px);
+    opacity: 0.55;
+    min-height: 0;
+}
+
+.tta_pro_feature_overlay_compact {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.tta_pro_compact_lock {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: #7a4f01;
+    background: linear-gradient(135deg, #ffd86b, #f5a623);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+    white-space: nowrap;
+    transition: transform 0.15s ease;
+}
+
+.tta_pro_feature_overlay_compact:hover .tta_pro_compact_lock {
+    transform: translateY(-1px);
 }
 
 /* Engagement Funnel */

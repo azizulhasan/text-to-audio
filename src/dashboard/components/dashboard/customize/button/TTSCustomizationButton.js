@@ -18,13 +18,21 @@ export default function TTSCustomizationButton({
   buttonLists,
 }) {
   const [userRoles, setUserRoles] = useState({});
-  let buttonPositions = {
+  // TTS-249: free ships only the two positions it can deliver. The floating/fixed
+  // positions are a Pro feature, so show them only when Pro is active (no
+  // locked-then-blocked options in the free UI) with an upsell hint below.
+  const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_atlasvoice_addon_functional;
+  const buttonPositions = {
     before_content: __("Before Content", "text-to-audio"),
     after_content: __("After Content", "text-to-audio"),
-    bottom_fixed: __("Bottom Fixed (Pro)", "text-to-audio"),
-    bottom_left: __("Bottom Left (Pro)", "text-to-audio"),
-    bottom_right: __("Bottom Right (Pro)", "text-to-audio"),
-    bottom_center: __("Bottom Center (Pro)", "text-to-audio"),
+    ...(isProActive
+      ? {
+          bottom_fixed: __("Bottom Fixed", "text-to-audio"),
+          bottom_left: __("Bottom Left", "text-to-audio"),
+          bottom_right: __("Bottom Right", "text-to-audio"),
+          bottom_center: __("Bottom Center", "text-to-audio"),
+        }
+      : {}),
   };
 
   useEffect(() => {
@@ -84,6 +92,21 @@ export default function TTSCustomizationButton({
                 );
               })}
             </Form.Select>
+            {/* TTS-249: upsell link instead of shipping locked player options.
+                Shown only when the premium players aren't registered (Pro inactive). */}
+            {!buttonLists.some((b) => b.id > 1) && (
+              <p className="tta_player-upsell text-secondary mt-2 mb-0 small">
+                {__("More players (AI voices, MP3) are available in", "text-to-audio")}{" "}
+                <a
+                  href="https://atlasaidev.com/plugins/text-to-speech-pro/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {__("AtlasVoice Pro", "text-to-audio")}
+                </a>
+                .
+              </p>
+            )}
           </Form.Group>
         </Col>
 
@@ -128,6 +151,19 @@ export default function TTSCustomizationButton({
                 );
               })}
             </Form.Select>
+            {!isProActive && (
+              <p className="tta_player-upsell text-secondary mt-2 mb-0 small">
+                {__("Floating & fixed positions are available in", "text-to-audio")}{" "}
+                <a
+                  href="https://atlasaidev.com/plugins/text-to-speech-pro/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {__("AtlasVoice Pro", "text-to-audio")}
+                </a>
+                .
+              </p>
+            )}
           </Form.Group>
         </Col>
 
