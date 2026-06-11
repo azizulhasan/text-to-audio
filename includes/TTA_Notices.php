@@ -331,13 +331,14 @@ class TTA_Notices {
 		// mounting code shipped in Pro 3.3.1. A Pro user still on an older add-on
 		// would see empty / non-working screens, so warn them to update. Shown
 		// only when the add-on is active but older than the required version.
+		// Non-dismissible: updating is required, and the notice removes itself
+		// once the add-on reaches TTA_REQUIRED_PRO_VERSION (condition turns false).
 		$this->register_notice( array(
 			'id'                => 'pro_update_required',
 			'title'             => '<h3>' . esc_html__( 'AtlasVoice Pro — Please Update', 'text-to-audio' ) . '</h3>',
 			'message_callback'  => array( $this, 'get_pro_update_required_message' ),
 			'type'              => 'warning',
-			'dismissible'       => true,
-			'reshow_after_days' => 7,
+			'dismissible'       => false,
 			'condition'         => function () {
 				if ( ! current_user_can( 'update_plugins' ) ) {
 					return false;

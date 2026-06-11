@@ -485,16 +485,3 @@ Introduced :  Complete new UI introduced.
 
 = 2.2.4 =
 Fixes the Pro player (players 3-6) showing as blank until first mouse movement on sites using Perfmatters' Remove Unused CSS (RUCSS) feature. Update recommended if you use Perfmatters.
-
-= 2.2.3 =
-Dashboard stats now show for all users. Audio-file features and the AI voice-provider integrations moved entirely to the AtlasVoice Pro add-on; nothing in the free plugin is gated behind the add-on anymore.
-
-= 2.2.2 =
-Custom button CSS moves to the WordPress Customizer's "Additional CSS" panel and is migrated automatically — nothing to re-enter. The player now renders in the normal page DOM, and all inline styles/scripts are properly enqueued for WordPress.org compliance.
-
-= 2.2.1 =
-Code-cleanup release: removed ~1,100 lines of unused premium-feature code from the free analytics class. No behavior change for free users; AtlasVoice Pro 3.3.0+ now owns those handlers under its own REST namespace.
-
-= 2.2.0 =
-The free plugin is now fully functional standalone; premium features show as upgrade prompts. Dashboard no longer makes external sample-audio requests.
-
