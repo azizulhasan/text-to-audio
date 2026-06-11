@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import { __ } from "@wordpress/i18n";
 import { Form } from "react-bootstrap";
-import ProFeatureOverlay from "./ProFeatureOverlay";
 
 /**
  * PopularPosts Component
@@ -23,10 +22,8 @@ export default function PopularPosts({
     globalDateRange = "Last 30 Days",
     onDateRangeChange,
     filterResultsByDateRange,
-    limit = 3
+    limit = 10
 }) {
-    const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
-
     // Standard date range options
     const standardDateRangeOptions = [
         { value: "Last 7 Days", label: __("Last 7 Days", "text-to-audio") },
@@ -46,27 +43,12 @@ export default function PopularPosts({
         return options;
     }, [globalDateRange]);
 
-    // Demo data
-    const demoPosts = [
-        { post_id: 1, title: "Exploring the Wonders of Nature", totalScore: 310 },
-        { post_id: 2, title: "The Art of Mindful Living", totalScore: 223 },
-        { post_id: 3, title: "Tech Innovations Shaping Our Future", totalScore: 38 },
-        { post_id: 4, title: "Culinary Adventures: A Taste of Italy", totalScore: 22 },
-        { post_id: 5, title: "Fitness Trends to Watch in 2024", totalScore: 9 },
-        { post_id: 6, title: "Travel Diaries: Hidden Gems Around the...", totalScore: 8 },
-        { post_id: 7, title: "Sustainable Fashion: Dressing with Purp...", totalScore: 7 },
-        { post_id: 8, title: "The Power of Positive Thinking", totalScore: 6 },
-        { post_id: 9, title: "Home Decor Ideas for a Cozy Space", totalScore: 4 },
-        { post_id: 10, title: "Mastering the Art of Photography", totalScore: 3 },
-    ];
-
-    // Filter and calculate popular posts based on component's date range
+    // TTS-247: data-driven, no demo data. Popular posts come from the free base
+    // aggregator, so the real ranking renders for everyone.
     const filteredPosts = useMemo(() => {
-        if (!isProActive) return posts.length > 0 ? posts : demoPosts;
-
         // If date range matches global, use the already fetched posts
         if (dateRange === globalDateRange) {
-            return posts.length > 0 ? posts : demoPosts;
+            return posts;
         }
 
         // Otherwise, filter and re-calculate from raw results
@@ -94,14 +76,14 @@ export default function PopularPosts({
                 .sort((a, b) => b.totalScore - a.totalScore);
         }
 
-        return posts.length > 0 ? posts : demoPosts;
-    }, [posts, rawResults, dateRange, globalDateRange, filterResultsByDateRange, isProActive]);
+        return posts;
+    }, [posts, rawResults, dateRange, globalDateRange, filterResultsByDateRange]);
 
     // Use filtered posts
     const displayPosts = filteredPosts;
 
-    // Apply limit for free version (3 for free, 10 default for pro)
-    const displayLimit = isProActive ? Math.min(limit, 50) : 3;
+    // TTS-247: show the real ranking up to the display limit — no free-tier cap.
+    const displayLimit = Math.min(limit, 50);
     const postsToShow = displayPosts.slice(0, displayLimit);
     const hasMore = displayPosts.length > displayLimit;
 
@@ -166,22 +148,8 @@ export default function PopularPosts({
                 )}
             </div>
 
-            {/* More posts indicator */}
-            {hasMore && !isProActive && (
-                <div className="tta_popular_more">
-                    <a
-                        href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="tta_view_more_link"
-                    >
-                        {__("View all", "text-to-audio")} {displayPosts.length} {__("posts", "text-to-audio")} ({__("Pro", "text-to-audio")}) →
-                    </a>
-                </div>
-            )}
-
-            {/* View all link for pro users */}
-            {isProActive && displayPosts.length > displayLimit && (
+            {/* View all indicator when there are more ranked posts than shown */}
+            {hasMore && (
                 <div className="tta_popular_more">
                     <button
                         className="tta_view_all_btn"
@@ -194,7 +162,5 @@ export default function PopularPosts({
         </div>
     );
 
-    // For free users, show limited version without overlay
-    // The overlay is only for completely locked features
     return content;
 }

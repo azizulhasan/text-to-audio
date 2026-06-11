@@ -47,13 +47,15 @@ export default function Settings() {
         tta__settings_text_after_content: "",
         tta__settings_text_before_content: "",
         tta__settings_read_content_from_dom: true,
-        tta__settings_player_use_old_player: false,
         tta__settings_enable_tts_status: true,
         tta__settings_emit_legacy_wrapper: true,
         tta__settings_delete_data_on_uninstall: false,
     });
     const [postTypes, setPostTypes] = useState([]);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
+    // TTS-247: Settings → Danger zone "Reset all plugin data".
+    const [resetConfirmText, setResetConfirmText] = useState("");
+    const [resetting, setResetting] = useState(false);
     const [postsStatus, setPostsStatus] = useState([]);
     const [categories, setCategories] = useState([]);
     const [tags, setTags] = useState([]);
@@ -123,7 +125,7 @@ export default function Settings() {
 
         if (e.target.name == "tta__settings_exclude_post_ids") {
             let ids = [];
-            if (ttsObj.is_pro_active) {
+            if (ttsObj.is_atlasvoice_addon_functional) {
                 ids = e.target.value?.split(",");
             } else {
                 ids = e.target.value?.split(",")?.slice(0, 5);
@@ -139,17 +141,57 @@ export default function Settings() {
         });
     };
 
+    // TTS-247: POST to /reset_plugin_data with the literal "DELETE" confirmation.
+    // Permission + nonce gating is enforced server-side by get_route_access().
+    const handleReset = () => {
+        if (resetConfirmText !== "DELETE" || resetting) return;
+        setResetting(true);
+        fetch(tta_obj.api_url + "tta/v1/reset_plugin_data", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-WP-Nonce": tta_obj.rest_nonce,
+            },
+            body: JSON.stringify({confirm: "DELETE"}),
+        })
+            .then((r) => r.json())
+            .then((res) => {
+                if (res && res.status) {
+                    toast(
+                        __("All plugin data has been reset. Reloading…", "text-to-audio"),
+                        "success",
+                        {autoClose: 2000}
+                    );
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    toast(
+                        (res && res.message) || __("Reset failed.", "text-to-audio"),
+                        "error"
+                    );
+                    setResetting(false);
+                }
+            })
+            .catch(() => {
+                toast(__("Reset failed.", "text-to-audio"), "error");
+                setResetting(false);
+            });
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // D27.4 — Free strips the three Pro-gated exclude fields before
-        // posting and surfaces a toast if any of them had a non-empty
-        // value (so the admin knows they were skipped). The Include
-        // selector saves on Free unchanged. Per-post-type overrides are
-        // wholly Pro and are dropped client-side too.
+        // Merge of develop (TTS-249) + TTS-238 D27.4 Pro-gating strip.
+        // When the AtlasVoice picker addon isn't functional (= Free without
+        // Pro), drop:
+        //   - the include selector (develop behavior; the picker is Pro-only)
+        //   - the three exclude fields (TTS-238 D27.4)
+        //   - the per-post-type override map (TTS-238 D27.4)
+        // and surface a toast if any non-empty value was actually dropped
+        // so the admin knows fields were stripped server-side.
         let droppedCount = 0;
-        if (!ttsObj.is_pro_active) {
-            ["tta__settings_exclude_content_by_css_selectors",
+        if (!ttsObj.is_atlasvoice_addon_functional) {
+            ["tta__settings_css_selectors",
+             "tta__settings_exclude_content_by_css_selectors",
              "tta__settings_exclude_tags",
              "tta__settings_exclude_texts"].forEach((k) => {
                 const v = settings[k];
@@ -315,7 +357,7 @@ export default function Settings() {
                                 )}
 
                                 {/* Apply number format with YouTube icon - Missing from new */}
-                                {window?.ttsObj?.is_pro_active && (
+                                {window?.ttsObj?.is_atlasvoice_addon_functional && (
                                     <>
                                         <SettingRow
                                             label={__("Apply number format", "text-to-audio")}
@@ -348,20 +390,6 @@ export default function Settings() {
                                             which is rendered after the Post Status multi-select below. */}
                                     </>
                                 )}
-                                {
-                                    ttsObj.player_id == 1 && <SettingRow
-                                        label={__("Use Old Player UI", 'text-to-audio')}
-                                        questionIcon={true}
-                                        questionTooltip={__("Use Old Player UI", 'text-to-audio')}
-                                    >
-                                        <ToggleSwitch
-                                            checked={settings.tta__settings_player_use_old_player}
-                                            onChange={(e) => handleChange(e)}
-                                            name="tta__settings_player_use_old_player"
-                                            id="tta__settings_player_use_old_player"
-                                        />
-                                    </SettingRow>
-                                }
 
                                 <SettingRow
                                     label={__("Add Post Title To Read", "text-to-audio")}
@@ -556,7 +584,7 @@ export default function Settings() {
                                                     <Form.Label className="setting-label text-dark m-0">
                                                         {__("Exclude Posts By IDs To Speak", "text-to-audio")}
                                                     </Form.Label>
-                                                    {!ttsObj.is_pro_active && (
+                                                    {!ttsObj.is_atlasvoice_addon_functional && (
                                                         <ProLockIcon
                                                             tooltipText={__(
                                                                 "Exclude more than 5 IDs is a pro feature", "text-to-audio"
@@ -589,7 +617,7 @@ export default function Settings() {
                                                 value={settings.tta__settings_exclude_post_ids}
                                                 onChange={(e) => handleChange(e)}
                                                 placeholder={
-                                                    ttsObj.is_pro_active
+                                                    ttsObj.is_atlasvoice_addon_functional
                                                         ? __("Multiple IDs Will Be Comma(,) Separated.", "text-to-audio")
                                                         : __("Excluding more than 5 IDs is a pro feature. Multiple IDs Will Be Comma(,) Separated.", "text-to-audio")
                                                 }
@@ -605,7 +633,7 @@ export default function Settings() {
                                                     <Form.Label className="setting-label text-dark m-0">
                                                         {__("Exclude Categories To Speak", "text-to-audio")}
                                                     </Form.Label>
-                                                    {!ttsObj.is_pro_active && (
+                                                    {!ttsObj.is_atlasvoice_addon_functional && (
                                                         <ProLockIcon
                                                             tooltipText={__(
                                                                 "Exclude more than 1 categories is a pro feature", "text-to-audio"
@@ -652,7 +680,7 @@ export default function Settings() {
                                                     <Form.Label className="setting-label text-dark m-0">
                                                         {__("Exclude Tags To Speak", "text-to-audio")}
                                                     </Form.Label>
-                                                    {!ttsObj.is_pro_active && (
+                                                    {!ttsObj.is_atlasvoice_addon_functional && (
                                                         <ProLockIcon
                                                             tooltipText={__(
                                                                 "Exclude more than 1 tags is a pro feature", "text-to-audio"
@@ -759,8 +787,6 @@ export default function Settings() {
 
                                 </div>
 
-                                {/* Spacer so the sticky Save All bar never overlaps the last form field. */}
-                                <div style={{height: "80px"}} aria-hidden="true" />
 
                                 {/* Save Button */}
                                 <div

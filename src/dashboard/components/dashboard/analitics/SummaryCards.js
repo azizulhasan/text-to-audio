@@ -42,8 +42,11 @@ const formatTime = (totalSeconds) => {
 /**
  * Single stat card component
  */
-const StatCard = ({ label, value, change, trend, tooltip, colorClass, isPro = false, isProActive = false }) => {
-    const showChange = isProActive && change !== undefined && change !== null;
+const StatCard = ({ label, value, change, trend, tooltip, colorClass }) => {
+    // TTS-247: the period-over-period change arrow shows only when comparison
+    // data is present (previous-period is injected by Pro via the analytics
+    // response filter) — driven by data-presence, not a license check.
+    const showChange = change !== undefined && change !== null;
 
     const card = (
         <div className={`tta_stat_card ${colorClass}`}>
@@ -53,9 +56,6 @@ const StatCard = ({ label, value, change, trend, tooltip, colorClass, isPro = fa
                 <div className={`tta_stat_change ${trend === "up" ? "tta_stat_change_up" : "tta_stat_change_down"}`}>
                     {trend === "up" ? "▲" : "▼"} {Math.abs(change).toFixed(1)}%
                 </div>
-            )}
-            {isPro && !isProActive && (
-                <div className="tta_stat_pro_badge">{__("Pro", "text-to-audio")}</div>
             )}
         </div>
     );
@@ -84,7 +84,11 @@ const StatCard = ({ label, value, change, trend, tooltip, colorClass, isPro = fa
  * @param {string} props.dateRange - Current date range label
  */
 export default function SummaryCards({ summary = {}, previousSummary = null, dateRange = "Last 7 Days" }) {
-    const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
+    // TTS-247/2.2.2: MP3 download is a premium player feature, so the free
+    // build always reports 0 downloads. Hide the Download stat unless the
+    // data-driven `download` capability is present (Pro active).
+    const capabilities = (typeof ttsObj !== "undefined" && ttsObj.capabilities) || {};
+    const hasDownload = !!capabilities.download;
 
     // Calculate percentage changes if previous data is available
     const calculateChange = (current, previous) => {
@@ -166,40 +170,38 @@ export default function SummaryCards({ summary = {}, previousSummary = null, dat
         },
     ];
 
-    // Pro metrics (shown with lock in free, full in pro)
-    const proMetrics = [
-        {
+    // TTS-247/2.2.2: End / Bounce are computed in the free base aggregator and
+    // shown for everyone. Download is premium-only (free has no MP3 download),
+    // so it's added only when the `download` capability is present.
+    const extraMetrics = [
+        ...(hasDownload ? [{
             label: __("Download", "text-to-audio"),
-            value: isProActive ? formatNumber(totalDownload) : "--",
+            value: formatNumber(totalDownload),
             change: calculateChange(totalDownload, prevDownload),
             trend: getTrend(calculateChange(totalDownload, prevDownload)),
             colorClass: "tta_stat_download",
             tooltip: __("Total MP3 downloads", "text-to-audio"),
-            isPro: true,
-        },
+        }] : []),
         {
             label: __("End", "text-to-audio"),
-            value: isProActive ? formatNumber(totalEnd) : "--",
+            value: formatNumber(totalEnd),
             change: calculateChange(totalEnd, prevEnd),
             trend: getTrend(calculateChange(totalEnd, prevEnd)),
             colorClass: "tta_stat_end",
             tooltip: __("Total completions", "text-to-audio"),
-            isPro: true,
         },
         {
             label: __("Bounce Rate", "text-to-audio"),
-            value: isProActive ? `${bounceRate.toFixed(1)}%` : "--",
+            value: `${bounceRate.toFixed(1)}%`,
             change: null, // Bounce rate change calculated differently
             trend: bounceRate > 20 ? "down" : "up", // Lower bounce is better
             colorClass: "tta_stat_bounce",
             tooltip: __("Users who didn't complete the audio", "text-to-audio"),
-            isPro: true,
         },
     ];
 
-    // Limit metrics for free version (show only first 3 free metrics fully)
-    const displayFreeMetrics = isProActive ? freeMetrics : freeMetrics.slice(0, 5);
-    const displayProMetrics = proMetrics;
+    const displayFreeMetrics = freeMetrics;
+    const displayProMetrics = extraMetrics;
 
     return (
         <div className="tta_summary_card">
@@ -216,21 +218,19 @@ export default function SummaryCards({ summary = {}, previousSummary = null, dat
             </div>
 
             <div className="tta_stat_cards_container">
-                {/* Free metrics */}
+                {/* Core metrics */}
                 {displayFreeMetrics.map((metric, index) => (
                     <StatCard
                         key={`free-${index}`}
                         {...metric}
-                        isProActive={isProActive}
                     />
                 ))}
 
-                {/* Pro metrics */}
+                {/* Download / End / Bounce */}
                 {displayProMetrics.map((metric, index) => (
                     <StatCard
                         key={`pro-${index}`}
                         {...metric}
-                        isProActive={isProActive}
                     />
                 ))}
             </div>

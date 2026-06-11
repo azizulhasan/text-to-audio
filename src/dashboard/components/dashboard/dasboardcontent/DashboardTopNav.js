@@ -26,7 +26,7 @@ export default function DashboardTopNav() {
           className="tta-text-style"
           >
             {tta_obj.plugin_name}
-            {ttsObj.is_pro_active && (
+            {ttsObj.is_atlasvoice_addon_functional && (
               <span
               className="tta-pro-badge-style "
               >
@@ -177,7 +177,7 @@ export default function DashboardTopNav() {
           </a>
 
           {/* Upgrade to Pro */}
-          {!ttsObj.is_pro_active && (
+          {!ttsObj.is_atlasvoice_addon_functional && (
             <a
               href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
               target="_blank"

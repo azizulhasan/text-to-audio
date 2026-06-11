@@ -236,7 +236,10 @@ export default function CSSSelectorsForPosts() {
         return false;
     }
 
-    const isPro = ttsObj.is_pro_active;
+    // Develop uses `is_atlasvoice_addon_functional` as the Pro-or-addon
+    // gate; TTS-238's per-post UI uses the same boolean plus the master
+    // toggle for the per-post override layer.
+    const isPro = ttsObj.is_atlasvoice_addon_functional;
     const useOwnSelectors = !!settings.tta__settings_use_own_css_selectors;
 
     const fields = [

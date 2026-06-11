@@ -1,0 +1,9 @@
+/**
+ * TTS-249 (I3): admin-notice styles. The rotation keyframe was previously
+ * injected as an inline <style> from tta-admin-notice.js; moved here to an
+ * enqueued stylesheet.
+ */
+@keyframes ttaNoticeRotation {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(359deg); }
+}
