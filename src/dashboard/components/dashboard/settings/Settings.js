@@ -787,6 +787,98 @@ export default function Settings() {
 
                                 </div>
 
+                                {/* TTS-247 — Danger zone: reset all plugin data.
+                                    Restored after merge — develop had this JSX in
+                                    conflict block #3 of Settings.js; the handler
+                                    (`handleReset`) + REST endpoint
+                                    (POST /tta/v1/reset_plugin_data) were preserved
+                                    during the merge but the rendered block was
+                                    dropped. Re-pasted here verbatim from develop. */}
+                                <div
+                                    style={{
+                                        marginTop: "32px",
+                                        padding: "20px 24px",
+                                        border: "1px solid #f1c4c4",
+                                        borderLeft: "4px solid #d63638",
+                                        borderRadius: "8px",
+                                        background: "#fef8f8",
+                                    }}
+                                >
+                                    <h3
+                                        style={{
+                                            margin: "0 0 6px",
+                                            color: "#b32d2e",
+                                            fontSize: "16px",
+                                            fontWeight: 600,
+                                        }}
+                                    >
+                                        {__("Danger zone — reset all plugin data", "text-to-audio")}
+                                    </h3>
+                                    <p
+                                        style={{
+                                            margin: "0 0 14px",
+                                            color: "#50575e",
+                                            fontSize: "13px",
+                                            lineHeight: 1.5,
+                                        }}
+                                    >
+                                        {__(
+                                            "Permanently deletes every AtlasVoice option, transient, post-meta entry, cron event, and the analytics database table. The plugin stays active and boots as a fresh install on the next page load. This action cannot be undone.",
+                                            "text-to-audio"
+                                        )}
+                                    </p>
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            gap: "10px",
+                                            alignItems: "center",
+                                            flexWrap: "wrap",
+                                        }}
+                                    >
+                                        <label
+                                            htmlFor="tta-reset-confirm"
+                                            style={{fontSize: "13px", color: "#1d2327"}}
+                                        >
+                                            {__("Type", "text-to-audio")}{" "}
+                                            <code style={{background: "#fff", padding: "1px 6px", border: "1px solid #d0d0d0", borderRadius: "3px"}}>DELETE</code>{" "}
+                                            {__("to confirm:", "text-to-audio")}
+                                        </label>
+                                        <input
+                                            id="tta-reset-confirm"
+                                            type="text"
+                                            value={resetConfirmText}
+                                            onChange={(e) => setResetConfirmText(e.target.value)}
+                                            placeholder="DELETE"
+                                            style={{
+                                                padding: "6px 10px",
+                                                border: "1px solid #c3c4c7",
+                                                borderRadius: "4px",
+                                                width: "140px",
+                                                fontSize: "13px",
+                                            }}
+                                            disabled={resetting}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={handleReset}
+                                            disabled={resetConfirmText !== "DELETE" || resetting}
+                                            style={{
+                                                padding: "7px 18px",
+                                                background: resetConfirmText === "DELETE" && !resetting ? "#d63638" : "#e8a3a4",
+                                                color: "#fff",
+                                                border: "0",
+                                                borderRadius: "4px",
+                                                fontSize: "13px",
+                                                fontWeight: 600,
+                                                cursor: resetConfirmText === "DELETE" && !resetting ? "pointer" : "not-allowed",
+                                            }}
+                                        >
+                                            {resetting
+                                                ? __("Resetting…", "text-to-audio")
+                                                : __("Reset all plugin data", "text-to-audio")}
+                                        </button>
+                                    </div>
+                                </div>
 
                                 {/* Save Button */}
                                 <div
