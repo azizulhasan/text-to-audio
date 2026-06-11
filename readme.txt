@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.2.3
+Stable tag: 2.2.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -273,6 +273,10 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.2.4 ( 11 Jun 2026 ) =
+Fixed : Plyr-backed Pro player (players 3-6) could appear blank/invisible until the first user interaction on sites running Perfmatters with the "Remove Unused CSS" (RUCSS) feature enabled. Perfmatters was rewriting our two stylesheets (`text-to-audio-pro.css`, `plyr.min.css`) to `data-pmdelayedstyle` and only swapping the real `href` back after a mousemove / scroll / touch, so the widget rendered without any styles in the meantime.
+Improved : `TTA_Hooks::init_cache_compatibility()` now also subscribes to `perfmatters_rucss_excluded_stylesheets` so the TTS/Pro stylesheets stay as ordinary `<link href>` tags at page load.
+
 = 2.2.3 ( 31 May 2026 ) =
 Improved : The Dashboard widget's "Minutes Listened" and "Top Post Today" statistics are now shown to every user (previously hidden unless the premium add-on was active).
 Improved : Removed the remaining audio-file features from the free plugin — the AudioObject (JSON-LD) schema generator and all MP3 file-URL handling now live entirely in the AtlasVoice Pro add-on, because they require a generated audio file that the free browser-voice player does not produce. The free plugin no longer contains any functionality that is limited unless the add-on is active.
@@ -297,10 +301,6 @@ Improved : Updated `TTA_Api_Routes` doc comments to point to the correct `tta_pr
 = 2.2.0 ( 22 May 2026 ) =
 Improved : The free plugin is now fully functional on its own — premium player options, button positions, voice integrations, and advanced analytics are presented as upgrade prompts instead of locked controls.
 Fixed : Removed external sample-audio requests from the dashboard; previews now use your browser's built-in voices.
-
-= 2.1.21 ( 07 Jun 2026 ) =
-Fixed : Plyr-backed Pro player (players 3-6) could appear blank/invisible until the first user interaction on sites running Perfmatters with the "Remove Unused CSS" (RUCSS) feature enabled. Perfmatters was rewriting our two stylesheets (`text-to-audio-pro.css`, `plyr.min.css`) to `data-pmdelayedstyle` and only swapping the real `href` back after a mousemove / scroll / touch, so the widget rendered without any styles in the meantime.
-Improved : `TTA_Hooks::init_cache_compatibility()` now also subscribes to `perfmatters_rucss_excluded_stylesheets` so the TTS/Pro stylesheets stay as ordinary `<link href>` tags at page load.
 
 = 2.1.20 ( 15 May 2026 ) =
 Improved : Plugin card titles on the "Other AtlasAiDev Plugins" page now prefer the canonical WordPress.org title (via the public plugin info API), so cards mirror the wp.org listing instead of locally-configured names.
@@ -483,15 +483,5 @@ Introduced :  Complete new UI introduced.
 
 == Upgrade Notice ==
 
-= 2.2.3 =
-Dashboard stats now show for all users. Audio-file features and the AI voice-provider integrations moved entirely to the AtlasVoice Pro add-on; nothing in the free plugin is gated behind the add-on anymore.
-
-= 2.2.2 =
-Custom button CSS moves to the WordPress Customizer's "Additional CSS" panel and is migrated automatically — nothing to re-enter. The player now renders in the normal page DOM, and all inline styles/scripts are properly enqueued for WordPress.org compliance.
-
-= 2.2.1 =
-Code-cleanup release: removed ~1,100 lines of unused premium-feature code from the free analytics class. No behavior change for free users; AtlasVoice Pro 3.3.0+ now owns those handlers under its own REST namespace.
-
-= 2.2.0 =
-The free plugin is now fully functional standalone; premium features show as upgrade prompts. Dashboard no longer makes external sample-audio requests.
-
+= 2.2.4 =
+Fixes the Pro player (players 3-6) showing as blank until first mouse movement on sites using Perfmatters' Remove Unused CSS (RUCSS) feature. Update recommended if you use Perfmatters.
