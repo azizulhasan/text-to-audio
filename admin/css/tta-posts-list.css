@@ -1,0 +1,18 @@
+/**
+ * TTS-249 (I3): AtlasVoice column styles for the Posts list table (edit.php).
+ * Moved out of an inline <style> block (wp.org: no inline styles, admin screens
+ * included) into this enqueued stylesheet.
+ */
+.column-atlasvoice {
+    width: 100px;
+    text-align: center;
+}
+
+.column-atlasvoice .dashicons {
+    vertical-align: middle;
+    cursor: help;
+}
+
+#atlasvoice_filter {
+    min-width: 150px;
+}

@@ -13,12 +13,8 @@ import {
 import notify, { toast } from "../../context/Notify";
 import {
   copyToClipBoard,
-  postData,
   postWithoutImage,
 } from "../../context/utilities";
-import TextToSpeech from "../../../buttons/components/TextToSpeech";
-import TextToSpeechThree from "../../../buttons/components/TextToSpeechThree";
-import TextToSpeechFour from "../../../buttons/components/TextToSpeechFour";
 import CustomizationTabs from "./CustomizationTabs";
 import TTSButtonDesign from "./design/TTSButtonDesign";
 import ButtonPreview from "./design/ButtonPreview";
@@ -49,7 +45,6 @@ export default function Customize() {
       generate_mp3_date_from: "",
       generate_mp3_date_to: "",
     },
-    custom_css: "",
     marginTop: 0,
     marginBottom: 0,
     marginLeft: 0,
@@ -75,7 +70,6 @@ export default function Customize() {
   });
 
   const [shortCode, setShortCode] = useState("[atlasvoice]");
-  const [customCSS, setCustomCSS] = useState("");
   // TTS-241 — per-player button text/icon state. Hydrated from
   // /customize GET (res.button_texts) and posted back under formData.button_texts.
   const [buttonTexts, setButtonTexts] = useState({
@@ -86,10 +80,13 @@ export default function Customize() {
   });
   const [speakingText, setSpeakingText] = useState("");
   const [listeningSettings, setListeningSettings] = useState({});
-  const [isGCAuthenticated, setGCIsAuthenticated] = useState(false);
-  const [isBackUpToGCS, setIsBackUpToGCS] = useState(false);
-  const [isChatGPTAuthenticated, setIsChatGPTAuthenticated] = useState(false);
-  const [isElevenLabsAuthenticated, setIsElevenLabsAuthenticated] = useState(false);
+  // TTS-250: voice-provider auth status (Google Cloud / ChatGPT / ElevenLabs)
+  // and the GCS-backup flag are published by the AtlasVoice add-on on
+  // window.ttsAddonAuth (the free plugin no longer queries the tta_pro REST API).
+  // Read at save time so the player-4/5/6 selection gating works exactly as
+  // before when the add-on is active; empty/false when the add-on is absent.
+  const getAddonAuth = () =>
+    (typeof window !== "undefined" && window.ttsAddonAuth) || {};
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   const setDefaultButtonSettingsIfNeeded = (res) => {
@@ -112,6 +109,25 @@ export default function Customize() {
     if (!res?.data?.buttonSettings?.id) {
       res.data.buttonSettings.id = defaultValue.buttonSettings.id;
     }
+    // TTS-250: clamp a saved-but-unavailable player to the default. If the
+    // add-on was deactivated while a premium player (2-6) was selected, that id
+    // is still stored but the selector only offers available players. Without
+    // this, the dropdown shows "Default" while state stays e.g. 6, re-picking
+    // Default fires no change event, and Save is blocked by the "only in pro"
+    // guard — so the user can never get back to player 1. Normalising here keeps
+    // state, the dropdown, and Save in agreement.
+    const _localized =
+      (typeof tta_obj !== "undefined" && tta_obj) ||
+      (typeof ttsObj !== "undefined" && ttsObj) ||
+      {};
+    const _availableIds = (
+      Array.isArray(_localized.availablePlayers) && _localized.availablePlayers.length
+        ? _localized.availablePlayers
+        : [{ id: 1 }]
+    ).map((p) => Number(p.id));
+    if (!_availableIds.includes(Number(res.data.buttonSettings.id))) {
+      res.data.buttonSettings.id = 1;
+    }
     if (!res?.data?.buttonSettings?.button_position) {
       res.data.buttonSettings.button_position =
         defaultValue.buttonSettings.button_position;
@@ -122,7 +138,10 @@ export default function Customize() {
 
   useEffect(() => {
     let completedRequests = 0;
-    const totalRequests = window.hasOwnProperty("ttsObj") && ttsObj?.is_pro_active ? 5 : 2;
+    // TTS-250: always 2 (customize + listening). The 3 Pro provider-auth checks
+    // that used to add to this count were moved into the add-on, so the loading
+    // state no longer waits on them.
+    const totalRequests = 2;
 
     const checkLoadingComplete = () => {
       completedRequests++;
@@ -197,7 +216,6 @@ export default function Customize() {
               res.data?.tta_play_btn_shortcode ||
               defaultValue.tta_play_btn_shortcode,
           },
-          ...{ custom_css: res.data?.custom_css || defaultValue.custom_css },
         };
 
         setListeningStyle(value);
@@ -216,9 +234,6 @@ export default function Customize() {
             preset_svgs: res.button_texts.preset_svgs || {},
             defaults,
           });
-        }
-        if (res.data.custom_css) {
-          setCustomCSS(res.data.custom_css || "");
         }
         setShortCode(
           res.data?.tta_play_btn_shortcode ||
@@ -255,64 +270,19 @@ export default function Customize() {
       if (
         window.hasOwnProperty("TTS") &&
         window.hasOwnProperty("ttsObjPro") &&
-        ttsObjPro.is_pro_license_active
+        ttsObjPro.is_atlasvoice_addon_functional
       ) {
         window.TTS.contents[1] = initialText;
       }
     }, 1000);
 
-    if (window.hasOwnProperty("ttsObj") && ttsObj?.is_pro_active) {
-      postData(ttsObj.api_url + "tta_pro/v1/get_auth_file", {}, "GET")
-        .then((res) => {
-          if (res?.file && res?.is_authenticated) {
-            setGCIsAuthenticated(res.is_authenticated);
-            setIsBackUpToGCS(res?.tts_is_backup_mp3_file || false);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        })
-        .finally(() => {
-          checkLoadingComplete();
-        });
-
-      let data = new FormData();
-      data.append("method", "get");
-      postData(ttsObj.api_url + "tta_pro/v1/chat_gpt_tts", data)
-        .then((res) => {
-          if (
-            res.data?.currentTTSServic === "chat_gpt_tts" &&
-            res?.data?.chatgpt_tts_api_key
-          ) {
-            setIsChatGPTAuthenticated(true);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        })
-        .finally(() => {
-          checkLoadingComplete();
-        });
-
-      // Check ElevenLabs TTS authentication
-      let elevenLabsData = new FormData();
-      elevenLabsData.append("method", "get");
-      postData(ttsObj.api_url + "tta_pro/v1/elevenlabs_tts", elevenLabsData)
-        .then((res) => {
-          if (
-            res.data?.currentTTSServic === "elevenlabs_tts" &&
-            res?.data?.elevenlabs_api_key
-          ) {
-            setIsElevenLabsAuthenticated(true);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        })
-        .finally(() => {
-          checkLoadingComplete();
-        });
-    }
+    // TTS-250: the voice-provider auth-status checks (Google Cloud / ChatGPT /
+    // ElevenLabs) were Pro-only REST calls to the tta_pro/v1 namespace. They have
+    // been moved into the AtlasVoice add-on, which performs them on the dashboard
+    // and publishes the results on window.ttsAddonAuth. The free plugin no longer
+    // calls any Pro endpoint here; the save handler reads window.ttsAddonAuth (see
+    // getAddonAuth()) to keep the player-4/5/6 selection gating working unchanged
+    // when the add-on is active.
   }, []);
 
   const handleChange = (e, keyName = "") => {
@@ -343,10 +313,6 @@ export default function Customize() {
       return;
     }
 
-    if (e.target.name == "custom_css") {
-      setCustomCSS(e.target.value);
-      return;
-    }
 
     if (
       ![
@@ -369,7 +335,7 @@ export default function Customize() {
       if (
         e.target.name === "button_position" &&
         !["before_content", "after_content"].includes(e.target.value) &&
-        !ttsObj.is_pro_active
+        !ttsObj.is_atlasvoice_addon_functional
       ) {
         toast(__("This option is only available for the pro version.", "text-to-audio"), "error");
         return;
@@ -481,7 +447,6 @@ export default function Customize() {
     let formData = {};
     for (let [key, value] of form.entries()) {
       if (
-        key !== "custom_css" &&
         key !== "generate_mp3_date_to" &&
         key !== "generate_mp3_date_from"
       ) {
@@ -513,7 +478,6 @@ export default function Customize() {
       formData[key] = value;
     }
 
-    formData["custom_css"] = customCSS;
     formData["tta_play_btn_shortcode"] = shortCode;
     formData["buttonSettings"] = listeningBtnStyle.buttonSettings;
     // TTS-241 — ride along with the same /customize round-trip.
@@ -526,7 +490,7 @@ export default function Customize() {
     }
 
     if (formData?.buttonSettings?.id == 4) {
-      if (ttsObj.is_pro_active && !isGCAuthenticated) {
+      if (ttsObj.is_atlasvoice_addon_functional && !getAddonAuth().google_cloud_tts) {
 
       notify(
         __("To select this player, you must authenticate first from the Integration menu", "text-to-audio"),
@@ -537,14 +501,14 @@ export default function Customize() {
       );
               return;
       }
-      if (!isGCAuthenticated) {
+      if (!getAddonAuth().google_cloud_tts) {
         CTANotice(__("Google Cloud TTS player is only available in the pro version.", "text-to-audio"));
         return;
       }
     }
 
     if (formData?.buttonSettings?.id == 5) {
-      if (ttsObj.is_pro_active && !isChatGPTAuthenticated) {
+      if (ttsObj.is_atlasvoice_addon_functional && !getAddonAuth().chat_gpt_tts) {
         notify(
           __("To select this player you have to authenticate first from Integration menu", "text-to-audio"),
           "error",
@@ -554,14 +518,14 @@ export default function Customize() {
         );
         return;
       }
-      if (!isChatGPTAuthenticated) {
+      if (!getAddonAuth().chat_gpt_tts) {
         CTANotice(__("ChatGPT TTS player is only available in the pro version.", "text-to-audio"));
         return;
       }
     }
 
     if (formData?.buttonSettings?.id == 6) {
-      if (ttsObj.is_pro_active && !isElevenLabsAuthenticated) {
+      if (ttsObj.is_atlasvoice_addon_functional && !getAddonAuth().elevenlabs_tts) {
         notify(
           __("To select this player you have to authenticate first from Integration menu", "text-to-audio"),
           "error",
@@ -571,13 +535,13 @@ export default function Customize() {
         );
         return;
       }
-      if (!isElevenLabsAuthenticated) {
+      if (!getAddonAuth().elevenlabs_tts) {
         CTANotice(__("ElevenLabs TTS player is only available in the pro version.", "text-to-audio"));
         return;
       }
     }
 
-    if (!ttsObj.is_pro_active && formData?.buttonSettings?.id > 1) {
+    if (!ttsObj.is_atlasvoice_addon_functional && formData?.buttonSettings?.id > 1) {
       CTANotice(__("Default Pro player is only available in the pro version.", "text-to-audio"));
       return;
     }
@@ -586,7 +550,7 @@ export default function Customize() {
       window.hasOwnProperty("ttsObjPro") &&
       !ttsObjPro.is_folder_writable &&
       formData?.buttonSettings?.id > 2 &&
-      !isBackUpToGCS
+      !getAddonAuth().tts_is_backup_mp3_file
     ) {
     toast(
       __("AtlasVoice stores synthesized content in the uploads folder. Your uploads folder is not writable. Please make the uploads folder writable to enjoy all features of the plugin.", "text-to-audio"),
@@ -646,30 +610,37 @@ export default function Customize() {
     if (
       window.hasOwnProperty("TTS") &&
       window.hasOwnProperty("ttsObjPro") &&
-      ttsObjPro.is_pro_license_active
+      ttsObjPro.is_atlasvoice_addon_functional
     ) {
       window.TTS.contents[1] = e.target.value;
     }
   };
 
-  const [buttonLists, setButtonLists] = useState([
+  // TTS-249: the player selector is data-driven from the server-provided
+  // registry (ttsObj/tta_obj.availablePlayers). Free exposes only player 1; Pro
+  // adds 2-6 via the `tts_available_players` filter. We keep a master definition
+  // (for the `object` mapping the preview needs) but only SHOW players the site
+  // can actually deliver — no locked options shipped in the free UI.
+  const ALL_PLAYERS = [
     { id: 1, name: __("Default", "text-to-audio"), object: "TextToSpeech", disabled: false },
     { id: 2, name: __("Default Pro", "text-to-audio"), object: "TextToSpeechPro", disabled: false },
-    {
-      id: 3,
-      name: "AtlasVoice TTS Pro",
-      object: "TextToSpeechPro",
-      disabled: false,
-    },
-    {
-      id: 4,
-      name: "Google Cloud TTS",
-      object: "TextToSpeechPro",
-      disabled: false,
-    },
+    { id: 3, name: "AtlasVoice TTS Pro", object: "TextToSpeechPro", disabled: false },
+    { id: 4, name: "Google Cloud TTS", object: "TextToSpeechPro", disabled: false },
     { id: 5, name: "ChatGPT TTS", object: "TextToSpeechPro", disabled: false },
     { id: 6, name: "ElevenLabs TTS", object: "TextToSpeechPro", disabled: false },
-  ]);
+  ];
+  const localizedObj =
+    (typeof tta_obj !== "undefined" && tta_obj) ||
+    (typeof ttsObj !== "undefined" && ttsObj) ||
+    {};
+  const availablePlayerIds = (
+    Array.isArray(localizedObj.availablePlayers) && localizedObj.availablePlayers.length
+      ? localizedObj.availablePlayers
+      : [{ id: 1 }]
+  ).map((p) => Number(p.id));
+  const [buttonLists, setButtonLists] = useState(
+    ALL_PLAYERS.filter((p) => availablePlayerIds.includes(p.id))
+  );
 
   return isDataLoaded ? (
     <Container fluid className="tta-container">
@@ -718,7 +689,6 @@ export default function Customize() {
             {/* Player Customization Accordion */}
             <CustomizationTabs
               buttonLists={buttonLists}
-              customCSS={customCSS}
               listeningBtnStyle={listeningBtnStyle}
               handleChange={handleChange}
               listeningSettings={listeningSettings}
@@ -785,85 +755,41 @@ export default function Customize() {
               </div>
 
               <div className="d-grid mb-0">
-                {/* TTS-241 — player 2 (Default Pro) keeps its dedicated
-                    TextToSpeech preview component (matching the production
-                    front-end UI), but receives buttonTexts + playerId so
-                    its label and icons honor the per-player draft. */}
-                {listeningBtnStyle?.buttonSettings?.id == 2 ? (
-                  <TextToSpeech
-                    buttonCSS={listeningBtnStyle}
-                    button={
-                      <div
-                        dataId="1"
-                        id="tts__listent_content_1"
-                        className="tts__listent_content"
-                      ></div>
-                    }
-                    buttonId={2}
-                    buttonTexts={buttonTexts}
-                    playerId={2}
-                  />
-                ) : listeningBtnStyle?.buttonSettings?.id == 3 ? (
-                  <TextToSpeechThree
-                    buttonCSS={listeningBtnStyle}
-                    button={
-                      <div
-                        dataId="1"
-                        id="tts__listent_content_1"
-                        className="tts__listent_content"
-                      ></div>
-                    }
-                    buttonId={3}
-                    cssStyle={""}
-                  />
-                ) : listeningBtnStyle?.buttonSettings?.id == 4 ? (
-                  <TextToSpeechFour
-                    buttonCSS={listeningBtnStyle}
-                    button={
-                      <div
-                        dataId="1"
-                        id="tts__listent_content_1"
-                        className="tts__listent_content"
-                      ></div>
-                    }
-                    buttonId={4}
-                    cssStyle={""}
-                  />
-                ) : listeningBtnStyle?.buttonSettings?.id == 5 ? (
-                  <TextToSpeechThree
-                    buttonCSS={listeningBtnStyle}
-                    button={
-                      <div
-                        dataId="1"
-                        id="tts__listent_content_1"
-                        className="tts__listent_content"
-                      ></div>
-                    }
-                    buttonId={5}
-                    cssStyle={""}
-                  />
-                ) : listeningBtnStyle?.buttonSettings?.id == 6 ? (
-                  <TextToSpeechThree
-                    buttonCSS={listeningBtnStyle}
-                    button={
-                      <div
-                        dataId="1"
-                        id="tts__listent_content_1"
-                        className="tts__listent_content"
-                      ></div>
-                    }
-                    buttonId={6}
-                    cssStyle={""}
-                  />
-                ) : (
-                  // TTS-241 — live preview that mirrors the in-memory
-                  // ButtonStateEditor draft for Default / Default Pro.
-                  <ButtonPreview
-                    buttonTexts={buttonTexts}
-                    playerId={parseInt(listeningBtnStyle?.buttonSettings?.id || 1, 10)}
-                    buttonStyle={listeningBtnStyle}
-                  />
-                )}
+                {/* TTS-249 (T2): player 1 preview is rendered by Free. For
+                    players 2..6 (premium) Free renders only an empty slot; the
+                    Pro plugin mounts its own React preview into it (player-2..6
+                    preview code no longer ships in the free ZIP).
+
+                    The slot is used only when the selected id is actually a
+                    registered available player (i.e. Pro is present to handle
+                    it). If a stale Pro id is saved but Pro is inactive, fall
+                    back to the player-1 ButtonPreview — capability fallback,
+                    same as get_player_id() server-side. */}
+                {(() => {
+                  const selectedId = parseInt(listeningBtnStyle?.buttonSettings?.id || 1, 10);
+                  const available = (typeof ttsObj !== "undefined" && Array.isArray(ttsObj.availablePlayers))
+                    ? ttsObj.availablePlayers.map((p) => parseInt(p.id, 10))
+                    : [1];
+                  const canRenderProPreview = selectedId > 1 && available.includes(selectedId);
+
+                  return canRenderProPreview ? (
+                    <div
+                      id="tts_customize_pro_preview"
+                      className="tts_customize_pro_preview"
+                      data-player-id={selectedId}
+                      data-button-css={JSON.stringify(listeningBtnStyle || {})}
+                      data-button-texts={JSON.stringify(buttonTexts || {})}
+                    ></div>
+                  ) : (
+                    // TTS-241 — live preview that mirrors the in-memory
+                    // ButtonStateEditor draft for the Default (player 1) button.
+                    <ButtonPreview
+                      buttonTexts={buttonTexts}
+                      playerId={available.includes(selectedId) ? selectedId : 1}
+                      buttonStyle={listeningBtnStyle}
+                    />
+                  );
+                })()}
               </div>
             </div>
 
@@ -871,7 +797,6 @@ export default function Customize() {
             <div className="bg-white rounded p-3 mb-3 shadow-sm">
               <h5 className="mb-3 fw-semibold">{__("Design Customization", "text-to-audio")}</h5>
               <TTSButtonDesign
-                customCSS={customCSS}
                 listeningBtnStyle={listeningBtnStyle}
                 handleChange={handleChange}
                 buttonTexts={buttonTexts}

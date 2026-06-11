@@ -19,6 +19,9 @@ const checktextdomain = require('gulp-checktextdomain');
 // const gutil = require('gutil');
 // const ftp = require('vinyl-ftp');
 const gulpCopy = require('gulp-copy');
+// TTS-247: production ZIP excludes dev sources and build manifest. Source
+// availability for wp.org review is satisfied by the public GitHub repo
+// linked from README.txt (the GPLv3 tag for each release matches the ZIP).
 const productionSrc = [
 	'**/*',
 	'!.git/**',
@@ -28,6 +31,7 @@ const productionSrc = [
 	'!src/**',
 	'!admin/js/tts/**',
 	'!admin/js/blocks/**',
+	'!freemius/**',
 	'!admin/js/build/*.LICENSE.txt',
 	'!admin/js/build/chunks/*.LICENSE.txt',
 	'!.claude/**',
@@ -43,20 +47,22 @@ const productionSrc = [
 	'!admin/js/AtlasVoiceAnalytics.js',
 	'!admin/js/AtlasVoicePlayerInsights.js',
 	'!admin/js/build/text-to-audio-pro-button.min.js',
-	'!admin/js/build/tts-bulk-mp3-file.min.js',
-	'!admin/js/build/tts-bulk-mp3-file.min.js.LICENSE.txt',
+	'!admin/js/build/tts-bulk-mp3-file-ui.min.js',
+	'!admin/js/build/tts-bulk-mp3-file-ui.min.js.LICENSE.txt',
 	'!admin/js/build/tts-css-selectors.min.js',
 	'!admin/js/build/tts-css-selectors.min.js.LICENSE.txt',
 	'!admin/js/build/text-to-audio-pro-button.min.js.LICENSE.txt',
 	'!admin/js/build/text-to-audio-dashboard-ui.min.js.LICENSE.txt',
-	'!admin/demos/player2/js/TextToSpeechProDemo.js',
-	'!admin/demos/player3/js/plyr-demo.js',
+	// TTS-249: exclude ALL Pro player demo assets from the wp.org ZIP. These are
+	// premium-player previews (player2/player3/elevenlabs) and the plyr-demo bundle
+	// carried a hardcoded cdn.openai.com sample URL (Guideline 6/8). They ship in
+	// the Pro plugin, not the free distribution.
+	'!admin/demos/**',
 	'!.browserslistrc',
 	'!.eslintrc',
 	'!.gitignore',
 	'!gulpfile.js',
 	'!package.json',
-	'!composer.json',
 	'!composer.lock',
 	'!phpcs.xml',
 	'!.cpanel.yml',
@@ -133,6 +139,15 @@ const config = {
 			//compress: true,
 			//modifiedTime: undefined
 		}
+	},
+	// TTS-247: deploy the built plugin to the secondary local install at
+	// D:/laragon/www/seven/wp-content/plugins/. Run `npm run copy:seven`
+	// after `npm run makeZip` (or `npm run copy`) has refreshed
+	// production/text-to-audio/.
+	copyToSeven: {
+		src: 'production/text-to-audio/**',
+		output: 'D:/laragon/www/seven/wp-content/plugins/text-to-audio/',
+		options: {}
 	}
 
 	// ftp:{
@@ -230,7 +245,7 @@ gulp.task(
 gulp.task(
 	'makeZip',
 	function () {
-		return gulp.series('copy', 'zip')()
+		return gulp.series('clean:production', 'copy', 'zip')()
 	}
 );
 
@@ -249,6 +264,25 @@ gulp.task('copy', function () {
 
 })
 
+// TTS-249: gulp-copy does NOT clean its destination, so files removed from
+// `productionSrc` (e.g. admin/demos/**) would persist from earlier builds in
+// production/text-to-audio/ — and therefore in the wp.org ZIP. Wipe the build
+// output before each copy so excluded files actually leave the distribution.
+gulp.task('clean:production', function (done) {
+	const fs = require('fs');
+	fs.rmSync('production/text-to-audio', { recursive: true, force: true });
+	fs.rmSync('production/text-to-audio.zip', { force: true });
+	done();
+})
+
+// Wipe the secondary "seven" install's plugin folder before deploying, so a
+// clean copy lands there too (same stale-file reasoning as clean:production).
+gulp.task('clean:seven', function (done) {
+	const fs = require('fs');
+	fs.rmSync(config.copyToSeven.output, { recursive: true, force: true });
+	done();
+})
+
 // Copy pro button
 //
 // gulp-copy preserves the source folder structure under the output dir, so the
@@ -256,10 +290,11 @@ gulp.task('copy', function () {
 // of dropping the file directly in <output>. The Pro plugin loads from
 // <output>/<file>.min.js, so the bundle was never actually updated.
 // gulp.dest with no glob base writes the file straight into the output dir.
-gulp.task('copyProButton', function () {
-	return gulp.src(config.copyProButton.src)
-		.pipe(gulp.dest(config.copyProButton.output))
-		.pipe(notify({ message: 'Copy Completed! 💯', onLast: true }))
+// TTS-249 (T2): retired. The frontend pro-button (players 2..6) is no longer
+// built by Free — the Pro plugin builds text-to-audio-pro-button.min.js from
+// its own source. This copy task is kept as a no-op for backward reference.
+gulp.task('copyProButton', function (done) {
+	done();
 })
 
 gulp.task('release', function () {
@@ -267,6 +302,21 @@ gulp.task('release', function () {
 		.pipe(gulpCopy('D:/xampp/htdocs/wordpress.org/text-to-audio-release/', config.copy.src.options))
 		.pipe(notify({ message: 'Release version copy Completed! 💯', onLast: true }))
 })
+
+// TTS-247: internal deploy step — copy the already-built
+// production/text-to-audio/ tree to the secondary local WP install at
+// D:/laragon/www/seven/wp-content/plugins/. Strips the leading
+// "production/text-to-audio/" path segments so the files land directly
+// under the target plugin folder.
+gulp.task('copyToSevenDeploy', function () {
+	return gulp.src(config.copyToSeven.src)
+		.pipe(gulpCopy(config.copyToSeven.output, { prefix: 2 }))
+		.pipe(notify({ message: 'Copied to seven/wp-content/plugins/text-to-audio/ 💯', onLast: true }))
+})
+
+// Public task — refresh the production/ build and deploy it in one command
+// (npm run copy:seven). Mirrors the makeZip = copy + zip pattern.
+gulp.task('copyToSeven', gulp.series('clean:production', 'copy', 'clean:seven', 'copyToSevenDeploy'))
 
 // watch
 gulp.task(

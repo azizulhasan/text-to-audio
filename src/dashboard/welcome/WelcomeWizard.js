@@ -97,7 +97,9 @@ const WelcomeWizard = () => {
 
     const [analytics, setAnalytics] = useState({
         enableAnalytics: true,
-        trackablePostIds: [],
+        // TTS-250: track every post by default (the "all" sentinel); the free
+        // plugin no longer caps the number of trackable posts.
+        trackablePostIds: ['all'],
     });
 
     const [saving, setSaving] = useState(false);

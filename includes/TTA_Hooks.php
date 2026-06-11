@@ -1,6 +1,10 @@
 <?php
 
 namespace TTA;
+
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Fired during plugin activation
  *
@@ -82,7 +86,8 @@ class TTA_Hooks {
 			'TextToSpeech.min.js',
 			'text-to-audio-button.min.js',
 			'text-to-audio-dashboard-ui.min.js',
-			'text-to-audio-pro-button.min.js',
+			// TTS-249 (T2): text-to-audio-pro-button.min.js now ships from Pro,
+			// which adds it to this list via the tts_excludable_js_arr filter.
 			'tts-welcome-wizard.min.js',
 			'tts-bulk-mp3-file.min.js',
 			'tts-css-selectors.min.js',
@@ -287,6 +292,9 @@ class TTA_Hooks {
 				if ( $plugin == $text_to_audio ) {
 					TTA_Cache::delete( 'tts_rest_api_url' );
 					TTA_Activator::create_analytics_table_if_not_exists();
+					// TTS-249 (A1): migrate any saved Custom CSS to WP core's
+					// Additional CSS now that the raw field is removed.
+					TTA_Activator::migrate_custom_css_to_additional_css();
 					break;
 				}
 			}
@@ -314,7 +322,7 @@ class TTA_Hooks {
 	 */
 	public function add_custom_meta_box() {
 		$plugin_name = __( 'AtlasVoice', 'text-to-audio' );
-		if ( \is_pro_active() ) {
+		if ( \is_atlasvoice_addon_functional() ) {
 			$plugin_name = __( 'AtlasVoice Pro', 'text-to-audio' );
 		}
 
@@ -510,8 +518,12 @@ class TTA_Hooks {
 
 	public function tta__content_description_callback( $description_sanitized, $description, $post_id, $post ) {
 		// ACF plugin compatible.
+		// TTS-250: NOT a feature lock. This is the free plugin DOING the ACF read
+		// itself when running standalone; when the Pro add-on is active it performs
+		// its own (richer) ACF handling, so we step aside here to avoid reading the
+		// fields twice. The free feature is fully functional without Pro.
 		$compatible_data = TTA_Helper::tts_get_settings( 'compatible' );
-		if ( TTA_Helper::is_acf_active() && ! TTA_Helper::is_pro_active() && isset( $compatible_data['tts_acf_fields'] ) && count( $compatible_data['tts_acf_fields'] ) ) {
+		if ( TTA_Helper::is_acf_active() && ! TTA_Helper::is_atlasvoice_addon_functional() && isset( $compatible_data['tts_acf_fields'] ) && count( $compatible_data['tts_acf_fields'] ) ) {
 			$selected_acf_fields = $compatible_data['tts_acf_fields'];
 
 			$fields = get_field_objects( $post_id );
@@ -545,7 +557,10 @@ class TTA_Hooks {
 			}
 		}
 
-		if ( ! TTA_Helper::is_pro_active() && ! empty( $compatible_data ) && count( $compatible_data ) ) {
+		// TTS-250: NOT a feature lock — the free plugin cleans the description
+		// itself when standalone; Pro runs its own cleaning when active (avoids
+		// double-processing). Fully functional without Pro.
+		if ( ! TTA_Helper::is_atlasvoice_addon_functional() && ! empty( $compatible_data ) && count( $compatible_data ) ) {
 			$description_sanitized = $this->tta_clean_content_callback( $description_sanitized );
 		}
 
@@ -554,8 +569,11 @@ class TTA_Hooks {
 
 	public function tta_clean_content_callback( $content_sanitized ) {
 		// Aliases
+		// TTS-250: NOT a feature lock — the free plugin applies pronunciation
+		// aliases itself when standalone; Pro applies them itself when active
+		// (avoids applying twice). The alias feature works fully without Pro.
 		$alias_data = (array) TTA_Helper::tts_get_settings( 'aliases' );
-		if ( ! TTA_Helper::is_pro_active() && ! empty( $alias_data ) && count( $alias_data ) ) {
+		if ( ! TTA_Helper::is_atlasvoice_addon_functional() && ! empty( $alias_data ) && count( $alias_data ) ) {
 			$counter = 0;
 			foreach ( $alias_data as $index => $alias ) {
 				$alias = (array) $alias;

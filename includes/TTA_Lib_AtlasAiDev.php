@@ -2,6 +2,8 @@
 
 namespace TTA;
 
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Class TTA_Lib_AtlasAiDev
@@ -60,13 +62,12 @@ final class TTA_Lib_AtlasAiDev {
         $this->client = new \AtlasAiDev\AppService\Client( 'dec06622-980f-4674-8b08-72e23cc9e70f', TEXT_TO_AUDIO_PLUGIN_NAME, TEXT_TO_AUDIO_ROOT_FILE );
         // Load
         $this->insights  = $this->client->insights(); // Plugin Insights
-        $this->promotion = $this->client->promotions(); // Promo offers
-
-        $this->promotion->set_source( 'https://gist.githubusercontent.com/azizulhasan/afcc74f398b290e586f3a4578341b699/raw/text-to-speech-pro.json' );
+//        $this->promotion = $this->client->promotions(); // Promo offers
+//        $this->promotion->set_source();
 
         // Initialize
         $this->insightInit();
-        $this->promotion->init();
+//        $this->promotion->init();
 
 
         // Filter updater api data
@@ -100,7 +101,7 @@ final class TTA_Lib_AtlasAiDev {
      * @since 1.0.2
      */
     public function __clone() {
-        _doing_it_wrong( __FUNCTION__, esc_html__( 'Cloning is forbidden.', TEXT_TO_AUDIO_TEXT_DOMAIN ), '1.0.2' );
+        _doing_it_wrong( __FUNCTION__, esc_html__( 'Cloning is forbidden.', 'text-to-audio' ), '1.0.2' );
     }
 
     /**
@@ -154,22 +155,6 @@ final class TTA_Lib_AtlasAiDev {
         // Enrich tracking payload with plugin-specific usage telemetry.
         add_filter( $projectSlug . '_tracker_data', array( $this, 'get_plugin_telemetry' ), 10, 1 );
 
-        // Provide Freemius AJAX credentials to the AtlasAiDev deactivation JS.
-        add_filter(
-            "AtlasAiDev_{$projectSlug}_freemius_deactivation_data",
-            function () {
-                if ( function_exists( 'ttsp_fs' ) ) {
-                    $fs = ttsp_fs();
-                    return array(
-                        'action'    => $fs->get_ajax_action( 'submit_uninstall_reason' ),
-                        'security'  => $fs->get_ajax_security( 'submit_uninstall_reason' ),
-                        'module_id' => $fs->get_id(),
-                    );
-                }
-                return array();
-            }
-        );
-
         $this->insights->init();
     }
 
@@ -200,21 +185,21 @@ final class TTA_Lib_AtlasAiDev {
      */
     public function supportResponse() {
         $response        = '';
-        $response       .= sprintf( '<h3>%s</h3>', esc_html__( 'Thank you -- Support Ticket Submitted.', TEXT_TO_AUDIO_TEXT_DOMAIN ) );
-        $ticketSubmitted = esc_html__( 'Your ticket has been successfully submitted.', TEXT_TO_AUDIO_TEXT_DOMAIN );
-        $twenty4Hours    = sprintf( '<strong>%s</strong>', esc_html__( '24 hours', TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+        $response       .= sprintf( '<h3>%s</h3>', esc_html__( 'Thank you -- Support Ticket Submitted.', 'text-to-audio' ) );
+        $ticketSubmitted = esc_html__( 'Your ticket has been successfully submitted.', 'text-to-audio' );
+        $twenty4Hours    = sprintf( '<strong>%s</strong>', esc_html__( '24 hours', 'text-to-audio' ) );
         /* translators: %s: Approx. time to response after ticket submission. */
-        $notification = sprintf( esc_html__( 'You will receive an email notification from "contact.atlasaidev@gmail.com" in your inbox within %s.', TEXT_TO_AUDIO_TEXT_DOMAIN ), $twenty4Hours );
-        $followUp     = esc_html__( 'Please Follow the email and AtlasAiDev Support Team will get back with you shortly.', TEXT_TO_AUDIO_TEXT_DOMAIN );
+        $notification = sprintf( esc_html__( 'You will receive an email notification from "contact.atlasaidev@gmail.com" in your inbox within %s.', 'text-to-audio' ), $twenty4Hours );
+        $followUp     = esc_html__( 'Please Follow the email and AtlasAiDev Support Team will get back with you shortly.', 'text-to-audio' );
         $response    .= sprintf( '<p>%s %s %s</p>', $ticketSubmitted, $notification, $followUp );
-        $docLink      = sprintf( '<a class="button button-primary" href="https://atlasaidev.helpscoutdocs.com/" target="_blank"><span class="dashicons dashicons-media-document" aria-hidden="true"></span> %s</a>', esc_html__( 'Documentation', TEXT_TO_AUDIO_TEXT_DOMAIN ) );
-        $vidLink      = sprintf( '<a class="button button-primary" href="https://www.youtube.com/@atlasaidev" target="_blank"><span class="dashicons dashicons-video-alt3" aria-hidden="true"></span> %s</a>', esc_html__( 'Video Tutorials', TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+        $docLink      = sprintf( '<a class="button button-primary" href="https://atlasaidev.helpscoutdocs.com/" target="_blank"><span class="dashicons dashicons-media-document" aria-hidden="true"></span> %s</a>', esc_html__( 'Documentation', 'text-to-audio' ) );
+        $vidLink      = sprintf( '<a class="button button-primary" href="https://www.youtube.com/@atlasaidev" target="_blank"><span class="dashicons dashicons-video-alt3" aria-hidden="true"></span> %s</a>', esc_html__( 'Video Tutorials', 'text-to-audio' ) );
         $response    .= sprintf( '<p>%s %s</p>', $docLink, $vidLink );
         $response    .= '<br><br><br>';
-        $toc          = sprintf( '<a href="https://atlasaidev.com/terms-and-conditions/" target="_blank">%s</a>', esc_html__( 'Terms & Conditions', TEXT_TO_AUDIO_TEXT_DOMAIN ) );
-        $pp           = sprintf( '<a href="https://atlasaidev.com/privacy-policy/" target="_blank">%s</a>', esc_html__( 'Privacy Policy', TEXT_TO_AUDIO_TEXT_DOMAIN ) );
+        $toc          = sprintf( '<a href="https://atlasaidev.com/terms-and-conditions/" target="_blank">%s</a>', esc_html__( 'Terms & Conditions', 'text-to-audio' ) );
+        $pp           = sprintf( '<a href="https://atlasaidev.com/privacy-policy/" target="_blank">%s</a>', esc_html__( 'Privacy Policy', 'text-to-audio' ) );
         /* translators: 1: Link to the Trams And Condition Page, 2: Link to the Privacy Policy Page */
-        $policy    = sprintf( esc_html__( 'Please read our %1$s and %2$s', TEXT_TO_AUDIO_TEXT_DOMAIN ), $toc, $pp );
+        $policy    = sprintf( esc_html__( 'Please read our %1$s and %2$s', 'text-to-audio' ), $toc, $pp );
         $response .= sprintf( '<p style="font-size: 12px;">%s</p>', $policy );
 
         return $response;
@@ -228,9 +213,9 @@ final class TTA_Lib_AtlasAiDev {
     public function supportErrorResponse() {
         return sprintf(
             '<div class="mui-error"><p>%s</p><p>%s</p><br><br><p style="font-size: 12px;">%s</p></div>',
-            esc_html__( 'Something Went Wrong. Please Try The Support Ticket Form On Our Website.', TEXT_TO_AUDIO_TEXT_DOMAIN ),
-            sprintf( '<a class="button button-primary" href="https://atlasaidev.com/contact-us/" target="_blank">%s</a>', esc_html__( 'Get Support', TEXT_TO_AUDIO_TEXT_DOMAIN ) ),
-            esc_html__( 'Support Ticket form will open in new tab in 5 seconds.', TEXT_TO_AUDIO_TEXT_DOMAIN )
+            esc_html__( 'Something Went Wrong. Please Try The Support Ticket Form On Our Website.', 'text-to-audio' ),
+            sprintf( '<a class="button button-primary" href="https://atlasaidev.com/contact-us/" target="_blank">%s</a>', esc_html__( 'Get Support', 'text-to-audio' ) ),
+            esc_html__( 'Support Ticket form will open in new tab in 5 seconds.', 'text-to-audio' )
         );
     }
 
@@ -245,11 +230,11 @@ final class TTA_Lib_AtlasAiDev {
         $data = array_merge(
             $data,
             array(
-                esc_html__( 'Site name, language and url.', TEXT_TO_AUDIO_TEXT_DOMAIN ),
-                esc_html__( 'Number of active and inactive plugins.', TEXT_TO_AUDIO_TEXT_DOMAIN ),
-                esc_html__( 'Your name and email address.', TEXT_TO_AUDIO_TEXT_DOMAIN ),
-                esc_html__( 'Which text-to-speech engine and voice settings are selected.', TEXT_TO_AUDIO_TEXT_DOMAIN ),
-                esc_html__( 'Feature usage flags (analytics, aliases, download, CSS selectors — no content data).', TEXT_TO_AUDIO_TEXT_DOMAIN ),
+                esc_html__( 'Site name, language and url.', 'text-to-audio' ),
+                esc_html__( 'Number of active and inactive plugins.', 'text-to-audio' ),
+                esc_html__( 'Your name and email address.', 'text-to-audio' ),
+                esc_html__( 'Which text-to-speech engine and voice settings are selected.', 'text-to-audio' ),
+                esc_html__( 'Feature usage flags (analytics, aliases, download, CSS selectors — no content data).', 'text-to-audio' ),
             )
         );
 

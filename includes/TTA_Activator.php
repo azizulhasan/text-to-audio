@@ -56,7 +56,6 @@ class TTA_Activator {
 				"color"                  => "#000000",
 				"hoverTextColor"         => "#000000",
 				"width"                  => "100",
-				'custom_css'             => '',
 				'tta_play_btn_shortcode' => '[atlasvoice]',
 				'buttonSettings'         => [
 					'id'                         => 1,
@@ -109,7 +108,6 @@ class TTA_Activator {
 				'tta__settings_text_after_content'					  => '',
 				'tta__settings_text_before_content'					  => '',
 				'tta__settings_read_content_from_dom'				  => true,
-				'tta__settings_player_use_old_player'				  => false,
 				'tta__settings_enable_tts_status'				      => true,
 			) );
 		}
@@ -192,18 +190,16 @@ class TTA_Activator {
 		 * analytics settings.
 		 */
 		if ( $renew_all_settings || ! get_option( 'tta_analytics_settings' ) ) {
-			$latest_post_ids = get_posts( array(
-				'posts_per_page' => 20,
-				'post_type'      => 'post',
-				'post_status'    => 'publish',
-				'fields'         => 'ids',
-				'orderby'        => 'date',
-				'order'          => 'DESC',
-			) );
-
 			update_option( 'tta_analytics_settings', array(
-				"tts_enable_analytics"   => true,
-				"tts_trackable_post_ids" => $latest_post_ids,
+				"tts_enable_analytics"       => true,
+				// TTS-250: track every post by default (the "all" sentinel). The
+				// free plugin used to default to the latest 20 posts and could
+				// not track more — an artificial cap on a shipped feature
+				// (wp.org Guideline 5). Free now honours "all".
+				"tts_trackable_post_ids"     => array( 'all' ),
+				// TTS-247: third-party IP geolocation (ip-api / ipinfo /
+				// icanhazip) is opt-in per wp.org Guideline 7; default off.
+				"tts_show_listener_location" => false,
 			), false );
 		}
 
@@ -247,7 +243,9 @@ class TTA_Activator {
 		if ( ! self::play_count_column_exists( true ) ) {
 			// Suppress errors — we'll re-check below.
 			$wpdb->hide_errors();
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			$wpdb->query( "ALTER TABLE $table_name ADD COLUMN play_count INT UNSIGNED NOT NULL DEFAULT 0" );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			$wpdb->query( "ALTER TABLE $table_name ADD INDEX idx_play_count (play_count)" );
 			$wpdb->show_errors();
 			// Bust the cache so the next check re-reads from the DB.
@@ -261,6 +259,54 @@ class TTA_Activator {
 				wp_schedule_single_event( time() + 60, 'tta_migrate_play_count_column' );
 			}
 		}
+
+		// TTS-249 (A1): migrate any previously-saved Custom CSS to WP core's
+		// Additional CSS (the raw Custom CSS field was removed).
+		self::migrate_custom_css_to_additional_css();
+	}
+
+	/**
+	 * TTS-249 (A1): one-time migration of the removed Custom CSS field.
+	 *
+	 * The Customize tab no longer exposes a raw Custom CSS textarea (wp.org no
+	 * longer permits persisting arbitrary CSS). Any value a site already saved in
+	 * `tta_customize_settings['custom_css']` is appended, once, to the active
+	 * theme's Additional CSS (Appearance → Customize → Additional CSS) via WP
+	 * core's sanctioned, sanitized store — so existing users don't lose styling.
+	 * The Free player now renders in the light DOM, so that CSS reaches it.
+	 *
+	 * The original option value is preserved in the DB (not deleted) as a backup;
+	 * it is simply no longer read or echoed by the plugin.
+	 */
+	public static function migrate_custom_css_to_additional_css() {
+		// Run once per site.
+		if ( get_option( 'tta_custom_css_migrated' ) ) {
+			return;
+		}
+
+		$customize = get_option( 'tta_customize_settings' );
+		// Settings can be stored as an object (json_decode) or array; normalise.
+		$saved_css = '';
+		if ( is_object( $customize ) && isset( $customize->custom_css ) ) {
+			$saved_css = (string) $customize->custom_css;
+		} elseif ( is_array( $customize ) && isset( $customize['custom_css'] ) ) {
+			$saved_css = (string) $customize['custom_css'];
+		}
+
+		$saved_css = trim( $saved_css );
+
+		if ( '' !== $saved_css && function_exists( 'wp_update_custom_css_post' ) ) {
+			$existing = (string) wp_get_custom_css();
+			$marker   = "\n\n/* Migrated from AtlasVoice Custom CSS (v2.2.2) */\n";
+
+			// Avoid duplicating the migrated block if this somehow runs twice.
+			if ( false === strpos( $existing, trim( $marker ) ) ) {
+				wp_update_custom_css_post( $existing . $marker . $saved_css );
+			}
+		}
+
+		// Flag set regardless of whether there was CSS, so we never re-scan.
+		update_option( 'tta_custom_css_migrated', true, false );
 	}
 
 	/**
@@ -287,10 +333,12 @@ class TTA_Activator {
 			return false;
 		}
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$column = $wpdb->get_results( $wpdb->prepare(
 			"SHOW COLUMNS FROM {$table} LIKE %s",
 			'play_count'
 		) );
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$exists = ! empty( $column );
 		return $exists;
 	}
@@ -322,9 +370,11 @@ class TTA_Activator {
 			if ( ! self::play_count_column_exists( true ) ) {
 				// Migration impossible without the column. Still populate the
 				// counter via PHP scan (guarded by size).
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 				$row_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
 				$max_rows  = (int) apply_filters( 'tta_total_plays_scan_row_limit', 5000 );
 				if ( $row_count <= $max_rows ) {
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 					$rows  = $wpdb->get_col( "SELECT analytics FROM {$table}" );
 					$total = 0;
 					if ( $rows ) {
@@ -347,14 +397,17 @@ class TTA_Activator {
 		$batch_size = (int) apply_filters( 'tta_play_count_migration_batch_size', 500 );
 
 		// Read next chunk by ID (not OFFSET — OFFSET is O(N) on large tables).
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$rows = $wpdb->get_results( $wpdb->prepare(
 			"SELECT id, analytics FROM {$table} WHERE id > %d AND play_count = 0 ORDER BY id ASC LIMIT %d",
 			$last_id,
 			$batch_size
 		) );
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		if ( empty( $rows ) ) {
 			// Done. Reconcile the running counter with the column sum.
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			$total = (int) $wpdb->get_var( "SELECT COALESCE(SUM(play_count), 0) FROM {$table}" );
 			update_option( 'tta_total_plays_counter', $total, false );
 			update_option( 'tta_total_plays_fallback', $total, false );
@@ -372,6 +425,7 @@ class TTA_Activator {
 				? (int) $data['play']['count']
 				: 0;
 
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->update(
 				$table,
 				array( 'play_count' => $count ),
@@ -420,6 +474,7 @@ class TTA_Activator {
 
 		// Retrieve existing indexes on the table.
 		$existing_indexes = array();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$index_results    = $wpdb->get_results( "SHOW INDEX FROM `{$table_name}`", ARRAY_A );
 		if ( is_array( $index_results ) ) {
 			foreach ( $index_results as $row ) {
@@ -435,9 +490,11 @@ class TTA_Activator {
 
 		foreach ( $indexes_to_add as $index_name => $column_name ) {
 			if ( ! in_array( $index_name, $existing_indexes, true ) ) {
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,PluginCheck.Security.DirectDB.UnescapedDBParameter
 				$wpdb->query(
 					"ALTER TABLE `{$table_name}` ADD INDEX `{$index_name}` (`{$column_name}`)"
 				);
+				// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,PluginCheck.Security.DirectDB.UnescapedDBParameter
 			}
 		}
 
@@ -447,9 +504,9 @@ class TTA_Activator {
 	private static function is_table_exists() {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'atlasvoice_analytics';
-		$query      = $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table_name ) );
 
-		if ( ! $wpdb->get_var( $query ) == $table_name ) {
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange
+		if ( ! $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table_name ) ) ) == $table_name ) {
 			return false;
 		}
 
