@@ -262,10 +262,13 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
             }
         }
 
-        // Pro plugin JS handles intro/outro in getContent() to ensure correct order:
-        // intro + title + excerpt + body + ACF + outro
-        // Free plugin reads ttsCurrentContent directly, so bake intro/outro into PHP content.
-        if ( ! function_exists( 'is_pro_active' ) || ! is_pro_active() || get_player_id() == 1 ) {
+        // TTS-250: bake intro/outro straight into the PHP content unless something
+        // declares it will handle intro/outro ordering itself. The Pro player JS
+        // (players 2-6) composes intro + title + excerpt + body + ACF + outro in
+        // getContent(), so it sets `tts_content_handles_intro_outro` true for those
+        // players; the free player reads ttsCurrentContent directly and bakes here.
+        // Uses a positive capability filter instead of any Pro/license check.
+        if ( ! apply_filters( 'tts_content_handles_intro_outro', false ) ) {
             $content = $text_before_content . ' ' . $content;
             $content .= ' ' . $text_after_content;
         }
@@ -285,9 +288,11 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     $content_read_time = apply_filters('tts_content_reading_time', 1, $content, $post);
     $text_arr = get_button_text($atts, $content_read_time);
 
-    $use_old_player = isset($settings['tta__settings_player_use_old_player']) && $settings['tta__settings_player_use_old_player'];
-    $use_old_player = apply_filters('tts_player_use_old_player', $use_old_player, $post);
-    $justify_content_css = $use_old_player ?  ' center' : ' space-between' ;
+    // TTS-249: the legacy "old player" was removed — the new player is always
+    // used. $use_old_player is retained only as a (false) payload field for
+    // backward compatibility with any cached JS; the JS no longer branches on it.
+    $use_old_player = false;
+    $justify_content_css = ' space-between';
 
     // Button style.
     $backgroundColor = isset($customize['backgroundColor']) ? $customize['backgroundColor'] : '#184c53';
@@ -309,18 +314,22 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
         $btn_style = 'background-color:' . esc_attr($backgroundColor) . ';color:' . esc_attr($color) . ';width:' . esc_attr($width) . '%;height:' . esc_attr($height) . ';font-size:' . esc_attr($font_size) . ';border:' . esc_attr($border) . ';display:flex;align-content:center;justify-content:'.$justify_content_css.';align-items:center;border-radius:' . esc_attr($border_radius) . ';text-decoration:none;cursor:pointer;margin-top:' . esc_attr($margin_top) . ';margin-bottom:' . esc_attr($margin_bottom) . ';margin-left:' . esc_attr($margin_left) . ';margin-right:' . esc_attr($margin_right) . ';';
     }
 
-    //Custom Css
+    // TTS-249 (A1): the user-facing Custom CSS field was removed (wp.org bars
+    // persisting arbitrary CSS). Any previously-saved value was migrated to WP
+    // core's Additional CSS on upgrade and is no longer read/echoed here.
+    //
+    // TTS-249: the old compatibility_with_themes() helper (hardcoded
+    // `max-width:650px; margin:auto` for `twenty*` themes only) was removed —
+    // theme compatibility is now handled universally by the enqueued stylesheet
+    // (`tts-play-button{display:block;width:100%}`), which defers the content-
+    // width cap to the active theme's own responsive layout. The frontend player
+    // JS never consumed this value, so it stays empty.
     $custom_css = '';
-    if (isset($customize['custom_css']) && '' !== $customize['custom_css']) {
-        $custom_css = esc_attr($customize['custom_css']);
-        $custom_css = str_replace("\n", '', $custom_css);
-    }
-    $custom_css = compatibility_with_themes($custom_css, $customize, $player_number);
     // Custom class to button.
     $class = (isset($text_arr['class'])) && strlen($text_arr['class']) ? esc_attr($text_arr['class']) : "";
     $class .= (isset($atts['class'])) && strlen($atts['class']) ? esc_attr($atts['class']) : "";
 
-    $button = "<tts-play-button data-id='$player_number' class='tts_play_button' role='region' aria-label='" . esc_attr__('Text to speech player', 'text-to-audio') . "'></tts-play-button>";
+    $button = "<tts-play-button data-id='" . esc_attr($player_number) . "' class='tts_play_button' role='region' aria-label='" . esc_attr__('Text to speech player', 'text-to-audio') . "'></tts-play-button>";
 
 
     // init button scripts
@@ -347,7 +356,33 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     do_action('tts_enqueue_button_scripts', $params);
     $data = apply_filters('tts__listening_button', $button, $player_number, $class, $post);
 
-    return $data;
+    // TTS-247: escape the filter output before returning so shortcode /
+    // block / the_content callers can echo the result safely. Allow-list
+    // covers our default markup (<tts-play-button>) plus the common HTML
+    // surfaces a third-party filter might use (button, span, svg, img, a).
+    $allowed = array(
+        'tts-play-button' => array(
+            'data-id'    => true,
+            'class'      => true,
+            'role'       => true,
+            'aria-label' => true,
+            'style'      => true,
+        ),
+        'button' => array(
+            'class' => true, 'id' => true, 'style' => true, 'type' => true,
+            'aria-label' => true, 'aria-pressed' => true, 'role' => true,
+            'data-id' => true, 'data-state' => true, 'tabindex' => true, 'data-id'    => true,
+        ),
+        'span'   => array( 'class' => true, 'id' => true, 'style' => true, 'aria-hidden' => true ),
+        'a'      => array( 'class' => true, 'id' => true, 'style' => true, 'href' => true, 'target' => true, 'rel' => true, 'aria-label' => true ),
+        'img'    => array( 'class' => true, 'id' => true, 'style' => true, 'src' => true, 'alt' => true, 'width' => true, 'height' => true ),
+        'svg'    => array( 'class' => true, 'xmlns' => true, 'viewbox' => true, 'width' => true, 'height' => true, 'fill' => true, 'stroke' => true, 'aria-hidden' => true ),
+        'path'   => array( 'd' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true ),
+        'g'      => array( 'fill' => true, 'stroke' => true ),
+        'div'    => array( 'class' => true, 'id' => true, 'style' => true , 'data-id' => true ),
+        'br'     => array(),
+    );
+    return wp_kses( (string) $data, $allowed );
 }
 
 
@@ -358,7 +393,8 @@ add_action('tts_enqueue_button_scripts', 'tts_enqueue_button_scripts', 10, 1);
  */
 function tts_enqueue_button_scripts($params)
 {
-    // enqueue footer script
+    // enqueue footer script — TTS-247: priority 5 so wp_add_inline_script
+    // queues before core's wp_print_scripts (priority 10).
     add_action('wp_print_footer_scripts', function () use ($params) {
         extract($params);
         $original_title = trim($title);
@@ -382,7 +418,7 @@ function tts_enqueue_button_scripts($params)
         } else {
             get_enqueued_js_object($params, $plugin_all_settings);
         }
-    });
+    }, 5);
 }
 
 function get_enqueued_js_object($params, $plugin_all_settings)
@@ -400,84 +436,61 @@ function get_enqueued_js_object($params, $plugin_all_settings)
     $compatible_data = TTA_Helper::tts_get_settings('compatible');
     $compatible_content = apply_filters('tts_compatible_plugins_content', [], $compatible_data, $post);
 
-    $object = ob_start();
+    // TTS-247: per-button settings via wp_add_inline_script instead of a raw
+    // inline <script> tag. IIFE-wrapped so multiple buttons on one page don't
+    // collide on the shared `var` names.
+    $inline_payload = sprintf(
+        '(function(){var ttsCurrentButtonNo=%d;var ttsCurrentContent=%s;var ttsListening=%s;var ttsCSSClass=%s;var ttsBtnStyle=%s;var ttsTextArr=%s;var ttsCustomCSS=%s;var ttsShouldDisplayIcon=%s;var readingTime=%s;var postId=%s;var fileURLs=%s;var get_content_from_dom=%s;var use_old_player=%s;var ttsSettings={listening:ttsListening,cssClass:ttsCSSClass,btnStyle:ttsBtnStyle,textArr:ttsTextArr,customCSS:ttsCustomCSS,shouldDisplayIcon:ttsShouldDisplayIcon,readingTime:readingTime,postId:postId,fileURLs:fileURLs,get_content_from_dom:get_content_from_dom,use_old_player:use_old_player};if(window.ttsObj&&window.ttsObj.settings){window.ttsObj.settings.settings=%s;}var dateTitle={title:%s,file_name:%s,date:%s,language:%s,voice:%s,file_url_key:%s,compatible_contents:%s,excerpt:%s,text_before_content:%s,text_after_content:%s};if(window.hasOwnProperty("TTS")){window.TTS.contents[ttsCurrentButtonNo]=ttsCurrentContent;window.TTS.extra[ttsCurrentButtonNo]=dateTitle;window.TTS.extra.player_id=%s;}else{window.TTS={};window.TTS.contents={};window.TTS.contents[ttsCurrentButtonNo]=ttsCurrentContent;window.TTS.extra={};window.TTS.extra[ttsCurrentButtonNo]=dateTitle;window.TTS.extra.player_id=%s;}if(!window.TTS.hasOwnProperty("settings")){window.TTS.settings=ttsSettings;}})();',
+        (int) $player_number,
+        wp_json_encode( (string) apply_filters( 'atlasvoice_player_content', $content, $post, $language, $voice, $player_number ) ),
+        wp_json_encode( $plugin_all_settings['listening'] ),
+        wp_json_encode( (string) $class ),
+        wp_json_encode( (string) $btn_style ),
+        wp_json_encode( $text_arr ),
+        wp_json_encode( (string) $custom_css ),
+        wp_json_encode( (string) $should_display_icon ),
+        wp_json_encode( (string) $content_read_time ),
+        wp_json_encode( (string) (int) $post->ID ),
+        wp_json_encode( $mp3_file_urls ),
+        wp_json_encode( $get_content_from_dom ),
+        wp_json_encode( (string) $use_old_player ),
+        wp_json_encode( isset( $plugin_all_settings['settings'] ) ? $plugin_all_settings['settings'] : new \stdClass() ),
+        wp_json_encode( (string) $title ),
+        wp_json_encode( (string) $file_name ),
+        wp_json_encode( (string) $date ),
+        wp_json_encode( (string) $language ),
+        wp_json_encode( (string) $voice ),
+        wp_json_encode( (string) $file_url_key ),
+        wp_json_encode( $compatible_content ),
+        wp_json_encode( (string) $excerpt_sanitized ),
+        wp_json_encode( (string) apply_filters( 'atlasvoice__text_before_content', $text_before_content, $post, $language, $voice, $player_number ) ),
+        wp_json_encode( (string) apply_filters( 'atlasvoice__text_after_content', $text_after_content, $post, $language, $voice, $player_number ) ),
+        wp_json_encode( (string) get_player_id() ),
+        wp_json_encode( (string) get_player_id() )
+    );
+    // TTS-247: attach the payload to every button-script handle in the
+    // filtered list. Free ships 'text-to-audio-button'; companion plugins
+    // (e.g. Pro) extend via `tts_button_inline_handles`.
+    $inline_handles = apply_filters( 'tts_button_inline_handles', array( 'text-to-audio-button' ), $params, $plugin_all_settings );
+    foreach ( (array) $inline_handles as $handle ) {
+        if ( wp_script_is( $handle, 'registered' ) ) {
+            wp_add_inline_script( $handle, $inline_payload, 'before' );
+        }
+    }
+
+    // TTS-247: close the output buffer with ob_get_clean() at the end of this
+    // function (was leaking on ob_get_contents alone, which the wp.org review
+    // flagged as an unclosed ob_start).
+    ob_start();
     ?>
-    <!-- AtlasVoice Settings  -->
-    <script id='tts_button_settings_<?php echo $player_number; ?>'>
-        var ttsCurrentButtonNo = <?php echo $player_number; ?>;
-        var ttsCurrentContent = "<?php echo apply_filters('atlasvoice_player_content', $content, $post, $language, $voice, $player_number); ?>";
-        var ttsListening = <?php echo json_encode($plugin_all_settings['listening']); ?>;
-        var ttsCSSClass = "<?php echo $class; ?>";
-        var ttsBtnStyle = "<?php echo $btn_style; ?>";
-        var ttsTextArr = <?php echo json_encode($text_arr); ?>;
-        var ttsCustomCSS = "<?php print($custom_css); ?>";
-        var ttsShouldDisplayIcon = "<?php echo $should_display_icon; ?>";
-        var readingTime = "<?php echo $content_read_time; ?>";
-        var postId = "<?php echo $post->ID; ?>";
-        var fileURLs = <?php echo json_encode($mp3_file_urls); ?>;
-        var get_content_from_dom = <?php echo json_encode($get_content_from_dom); ?>;
-        var use_old_player = "<?php echo $use_old_player; ?>";
-
-
-
-        var ttsSettings = {
-            listening: ttsListening,
-            cssClass: ttsCSSClass,
-            btnStyle: ttsBtnStyle,
-            textArr: ttsTextArr,
-            customCSS: ttsCustomCSS,
-            shouldDisplayIcon: ttsShouldDisplayIcon,
-            readingTime: readingTime,
-            postId: postId,
-            fileURLs: fileURLs,
-            get_content_from_dom:get_content_from_dom,
-            use_old_player:use_old_player
-        };
-
-
-        // Override global ttsObj.settings.settings with per-post aware settings.
-        // ttsObj is built in TTA_Admin.__construct() without post ID (global only).
-        // This inline script runs after post context is available, so per-post CSS selector overrides are included.
-        if (window.ttsObj && window.ttsObj.settings) {
-            window.ttsObj.settings.settings = <?php echo json_encode(isset($plugin_all_settings['settings']) ? $plugin_all_settings['settings'] : new \stdClass()); ?>;
-        }
-
-        var dateTitle = {
-            title: "<?php echo $title; ?>",
-            file_name: "<?php echo $file_name; ?>",
-            date: "<?php echo $date; ?>",
-            language: "<?php echo $language; ?>",
-            voice: "<?php echo $voice; ?>",
-            file_url_key: "<?php echo $file_url_key; ?>",
-            compatible_contents: <?php echo json_encode($compatible_content); ?>,
-            excerpt: "<?php echo $excerpt_sanitized; ?>",
-            text_before_content: "<?php echo apply_filters('atlasvoice__text_before_content', $text_before_content, $post, $language, $voice, $player_number); ?>",
-            text_after_content: "<?php echo apply_filters('atlasvoice__text_after_content', $text_after_content, $post, $language, $voice, $player_number); ?>",
-        }
-
-        if (window.hasOwnProperty('TTS')) { // add content if a page have multiple button
-            window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
-            window.TTS.extra[ttsCurrentButtonNo] = dateTitle;
-            window.TTS.extra.player_id = "<?php echo get_player_id(); ?>";
-        } else { // add content for the if a page have one button
-            window.TTS = {}
-            window.TTS.contents = {}
-            window.TTS.contents[ttsCurrentButtonNo] = ttsCurrentContent;
-            window.TTS.extra = {}
-            window.TTS.extra[ttsCurrentButtonNo] = dateTitle;
-            window.TTS.extra.player_id = "<?php echo get_player_id(); ?>";
-        }
-
-        // add settings
-        if (!window.TTS.hasOwnProperty('settings')) {
-            window.TTS.settings = ttsSettings
-        }
-    </script>
+    <!-- AtlasVoice Settings (per-button JS moved to wp_add_inline_script — handle 'text-to-audio-button') -->
     <?php
-    // Audio schema is now output via wp_head hook (TTA_Helper::output_audio_schema_head)
-    $object = ob_get_contents();
-
-    return $object;
+    // TTS-250: AudioObject schema output now lives in AtlasVoice Pro (it requires
+    // an MP3 contentUrl that the free player never produces).
+    // TTS-247: echo + close. The caller (tts_enqueue_button_scripts hook on
+    // wp_print_footer_scripts) doesn't use the return value, so the inline
+    // <script> needs to land in the page directly via echo, not via return.
+    echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
 
@@ -526,19 +539,24 @@ function get_button_text($atts, $content_read_time)
         ? $saved_texts['players'][$player_id]
         : [];
 
+    // TTS-247: the translated defaults below are now passed as literal __()
+    // calls at this call site (instead of `'Listen'` strings being translated
+    // inside get_text_value()). This is required so that makepot / wp-cli can
+    // extract the strings — the WP.org review flagged the previous design as
+    // a gettext-with-variables violation. See TTA_Helper::get_text_value().
     $resolve = function ($state, $flat_key, $fallback) use ($atts, $saved_texts, $player_states) {
         if (!empty($player_states[$state]['text'])) {
             return $player_states[$state]['text'];
         }
-        return TTA_Helper::get_text_value($atts, $saved_texts, $flat_key, $fallback, 'text-to-audio');
+        return TTA_Helper::get_text_value($atts, $saved_texts, $flat_key, $fallback);
     };
 
-    $listen_text = $resolve('listen', 'listen_text', 'Listen');
-    $pause_text  = $resolve('pause',  'pause_text',  'Pause');
-    $resume_text = $resolve('resume', 'resume_text', 'Resume');
-    $replay_text = $resolve('replay', 'replay_text', 'Replay');
-    $start_text  = TTA_Helper::get_text_value($atts, $saved_texts, 'start_text', 'Start', 'text-to-audio');
-    $stop_text   = TTA_Helper::get_text_value($atts, $saved_texts, 'stop_text',  'Stop',  'text-to-audio');
+    $listen_text = $resolve('listen', 'listen_text', __( 'Listen', 'text-to-audio' ));
+    $pause_text  = $resolve('pause',  'pause_text',  __( 'Pause',  'text-to-audio' ));
+    $resume_text = $resolve('resume', 'resume_text', __( 'Resume', 'text-to-audio' ));
+    $replay_text = $resolve('replay', 'replay_text', __( 'Replay', 'text-to-audio' ));
+    $start_text  = TTA_Helper::get_text_value($atts, $saved_texts, 'start_text', __( 'Start', 'text-to-audio' ));
+    $stop_text   = TTA_Helper::get_text_value($atts, $saved_texts, 'stop_text',  __( 'Stop',  'text-to-audio' ));
 
     $text_arr = [
         'listen_text' => $listen_text,
@@ -656,17 +674,13 @@ function add_listen_button($content)
             && $reduce_enqueue['button_no'] > 0
         ) {
             if ($button_no == $reduce_enqueue['button_no'] && isset($post->post_content) && !(has_shortcode($post->post_content, 'tta_listen_btn') || has_shortcode($post->post_content, 'atlasvoice'))) {
-                ob_start();
-                echo tta_get_button_content('');
-                $button = ob_get_contents();
-                ob_end_clean();
+                // TTS-247: tta_get_button_content() now wp_kses-escapes its
+                // own output around the tts__listening_button filter point.
+                $button = tta_get_button_content('');
             }
         } else {
             if (!TTA_Helper::tts_has_shortcode($post)) {
-                ob_start();
-                echo tta_get_button_content('');
-                $button = ob_get_contents();
-                ob_end_clean();
+                $button = tta_get_button_content('');
             }
         }
     }
@@ -698,18 +712,6 @@ function get_used_shortcodes($content)
     $tagnames = array_intersect(array_keys($shortcode_tags), $matches[1]);
 
     return $tagnames;
-}
-
-/**
- * Is pro license active
- */
-function is_pro_license_active()
-{
-    if (is_pro_active()) {
-        return true;
-    }
-
-    return false;
 }
 
 function tta_get_default_languages()
@@ -863,36 +865,59 @@ function tta_is_rtl()
 }
 
 
-function compatibility_with_themes($custom_css, $customize, $player_number = 1)
+/**
+ * TTS-249: build the player-1 button CSS from the global customize settings,
+ * for injection into the document head via wp_add_inline_style() (attached to
+ * the `text-to-audio-button` stylesheet handle). This replaces the inline
+ * style="" attribute the JS used to set on the button — the values are global
+ * per-site settings (identical for every player-1 button), so one class-scoped
+ * rule covers them all. The hover/icon values are exposed as --tts-* custom
+ * properties which the static stylesheet (text-to-audio-button.css) consumes.
+ *
+ * @return string CSS (no <style> wrapper).
+ */
+function tta_get_player_button_inline_css()
 {
+    $customize = (array) TTA_Helper::tts_get_settings('customize');
+    $settings  = (array) TTA_Helper::tts_get_settings('settings');
 
-    if (false !== strpos(get_option('stylesheet'), 'twenty')) {
-        $selector = '';
-        for ($i = 1; $i <= $player_number; $i++) {
-            $comma = '';
-            if ($i > 1 && $i < $player_number) {
-                $comma = ', ';
-            }
-            $selector .= '#tts__listent_content_' . $i . '.tts__listent_content, #tts__listent_content_' . $i . '.tts__listent_content:hover'. $comma;
-        }
-        $custom_css .= $selector . '  {max-width:650px;';
-        if (
-            (isset($customize['marginLeft']) && $customize['marginLeft'] == '0'
-                && isset($customize['marginRight']) && $customize['marginRight'] == '0'
-                && isset($customize['marginTop']) && $customize['marginTop'] == '0'
-                && isset($customize['marginBottom']) && $customize['marginBottom'] == '0'
-            )
-            ||
-            (!isset($customize['marginLeft']) )
-        ) {
-            $custom_css .= 'margin:auto;}';
-        }else{
-            $custom_css .= '}';
-        }
-    }
+    $backgroundColor = isset($customize['backgroundColor']) ? $customize['backgroundColor'] : '#184c53';
+    $color           = isset($customize['color']) ? $customize['color'] : '#ffffff';
+    $width           = isset($customize['width']) ? $customize['width'] : '100';
+    $height          = isset($customize['height']) ? $customize['height'] . 'px' : '50px';
+    $border          = isset($customize['border']) ? $customize['border'] . 'px' : '0px';
+    $border_color    = isset($customize['border_color']) ? $customize['border_color'] : '#000000';
+    $border          = $border . ' solid ' . $border_color;
+    $border_radius   = isset($customize['borderRadius']) ? $customize['borderRadius'] . 'px' : '4px';
+    $font_size       = isset($customize['fontSize']) ? $customize['fontSize'] . 'px' : '18px';
+    $margin_top      = isset($customize['marginTop']) ? $customize['marginTop'] . 'px' : '0px';
+    $margin_bottom   = isset($customize['marginBottom']) ? $customize['marginBottom'] . 'px' : '0px';
+    $margin_left     = isset($customize['marginLeft']) ? $customize['marginLeft'] . '%' : '0%';
+    $margin_right    = isset($customize['marginRight']) ? $customize['marginRight'] . 'px' : '0px';
+    $hover_bg        = isset($customize['hoverBackgroundColor']) ? $customize['hoverBackgroundColor'] : '#f0f0f0';
+    $hover_color     = isset($customize['hoverTextColor']) ? $customize['hoverTextColor'] : '#000000';
+    $icon_display    = (isset($settings['tta__settings_display_btn_icon']) && $settings['tta__settings_display_btn_icon']) ? 'inline-block' : 'none';
 
-    return $custom_css;
+    $css  = '.tts__listent_content{';
+    $css .= 'background-color:' . esc_attr($backgroundColor) . ';';
+    $css .= 'color:' . esc_attr($color) . ';';
+    $css .= 'width:' . esc_attr($width) . '%;';
+    $css .= 'height:' . esc_attr($height) . ';';
+    $css .= 'font-size:' . esc_attr($font_size) . ';';
+    $css .= 'border:' . esc_attr($border) . ';';
+    $css .= 'border-radius:' . esc_attr($border_radius) . ';';
+    $css .= 'margin:' . esc_attr($margin_top) . ' ' . esc_attr($margin_right) . ' ' . esc_attr($margin_bottom) . ' ' . esc_attr($margin_left) . ';';
+    $css .= 'display:flex;align-items:center;justify-content:space-between;padding:8px 12px;text-decoration:none;cursor:pointer;box-sizing:border-box;';
+    // Hover/icon values consumed by the static stylesheet's :hover rules.
+    $css .= '--tts-hover-bg:' . esc_attr($hover_bg) . ';';
+    $css .= '--tts-hover-color:' . esc_attr($hover_color) . ';';
+    $css .= '--tts-color:' . esc_attr($color) . ';';
+    $css .= '--tts-icon-display:' . esc_attr($icon_display) . ';';
+    $css .= '}';
+
+    return $css;
 }
+
 
 function set_initial_button_texts($content_read_time)
 {
@@ -941,14 +966,19 @@ function get_player_id()
     ];
 
 
-    $player_id = isset($customize_settings['buttonSettings']['id']) ? $customize_settings['buttonSettings']['id'] : 1;
+    $player_id = isset($customize_settings['buttonSettings']['id']) ? (int) $customize_settings['buttonSettings']['id'] : 1;
 
-    if (!is_pro_license_active() && $player_id > 1) {
+    $player_id = (int) apply_filters('tts_get_player_id', $player_id);
+
+    // TTS-249: capability fallback — NOT a license check. Free ships only player 1;
+    // Pro registers 2-6 via `tts_available_players`. If the saved id has no
+    // implementation present (e.g. Pro was deactivated leaving a stale id), fall
+    // back to 1 so the player still works. This replaces the old license clamp
+    // that the wp.org review flagged as trialware (Guideline 5).
+    $available = array_keys( TTA_Helper::get_available_players() );
+    if (!in_array($player_id, $available, true)) {
         $player_id = 1;
     }
-
-
-    $player_id = apply_filters('tts_get_player_id', $player_id);
 
     return $player_id;
 
@@ -956,16 +986,20 @@ function get_player_id()
 }
 
 /**
- * Is plugin active
+ * TTS-250: Detect whether the AtlasVoice companion add-on plugin is installed
+ * and active. This is a plugin-PRESENCE check (the add-on is a separate plugin),
+ * NOT a license/trialware gate — the free plugin is fully functional on its own.
+ * Renamed from is_pro_active() to better reflect intent; is_pro_active() is kept
+ * below as a deprecated backward-compatible alias.
  */
-function is_pro_active()
+function is_atlasvoice_addon_functional()
 {
 
     if (!function_exists('is_plugin_active')) {
         include_once ABSPATH . 'wp-admin/includes/plugin.php';
     }
 
-    $pro_plugins = [
+    $addon_plugins = [
         'text-to-speech-pro/text-to-audio-pro.php',
         'text-to-speech-pro-premium/text-to-audio-pro.php',
         'text-to-audio-pro/text-to-audio-pro.php',
@@ -974,13 +1008,15 @@ function is_pro_active()
 
     $status = false;
 
-    foreach ($pro_plugins as $plugin) {
+    foreach ($addon_plugins as $plugin) {
         if (is_plugin_active($plugin)) {
             $status = true;
             break; // Exit loop as soon as one active plugin is found
         }
     }
 
+    // New filter name; old name kept applied for backward compatibility.
+    $status = apply_filters('tts_is_atlasvoice_addon_functional', $status);
     $status = apply_filters('tts_is_pro_active', $status);
 
 
@@ -990,20 +1026,42 @@ function is_pro_active()
 }
 
 /**
+ * @deprecated TTS-250 Use is_atlasvoice_addon_functional() instead.
+ * Backward-compatible alias retained as a safety net.
+ */
+function is_pro_active()
+{
+    return is_atlasvoice_addon_functional();
+}
+
+/**
  * Write debug logs for Text-to-Audio plugin.
  *
  * @param string $message  The log message.
  */
 function tts_debug( $message ) {
+    // TTS-247: write to uploads/atlasvoice/ instead of wp-content/debug.log.
+    // wp.org guideline forbids writing into the plugin folder or hijacking
+    // core's debug.log; create the per-plugin folder lazily under wp_upload_dir().
+    $upload = wp_upload_dir();
+    if ( ! empty( $upload['error'] ) ) {
+        return;
+    }
+    $dir = trailingslashit( $upload['basedir'] ) . 'atlasvoice';
+    if ( ! file_exists( $dir ) ) {
+        wp_mkdir_p( $dir );
+        @file_put_contents( $dir . '/index.php', "<?php\n// Silence is golden.\n" );
+    }
+    $log_file = $dir . '/debug.log';
 
-    // Plugin directory
-    $log_file = WP_CONTENT_DIR . '/debug.log';
-
-    // Prepare log message with timestamp
-    $time = date( 'Y-m-d H:i:s' );
+    // TTS-247: print_r is the readable serializer for debug logs; the
+    // log file is gated by tts_debug() being called explicitly from a
+    // dev/troubleshoot context, not in production hot paths.
+    $time = gmdate( 'Y-m-d H:i:s' );
+    // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
     $formatted_message = "[$time] [atlasvoice] " . print_r( $message, true ) . PHP_EOL;
 
-    // Append to log file
+    // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
     file_put_contents( $log_file, $formatted_message, FILE_APPEND | LOCK_EX );
 }
 

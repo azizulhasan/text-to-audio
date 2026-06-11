@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import { __ } from "@wordpress/i18n";
 import { Form } from "react-bootstrap";
-import ProFeatureOverlay from "./ProFeatureOverlay";
 
 /**
  * Single funnel stage component
@@ -54,8 +53,6 @@ export default function EngagementFunnel({
     filterResultsByDateRange,
     aggregateFilteredData
 }) {
-    const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
-
     // Standard date range options
     const standardDateRangeOptions = [
         { value: "Last 7 Days", label: __("Last 7 Days", "text-to-audio") },
@@ -84,9 +81,9 @@ export default function EngagementFunnel({
     }, [globalDateRange]);
 
     // Filter and aggregate funnel data based on component's date range
+    // TTS-247: data-driven, no demo data. The funnel is built from the free
+    // base summary counts, so it renders with the site's real data for everyone.
     const filteredFunnelData = useMemo(() => {
-        if (!isProActive) return null;
-
         // If date range matches global, use the already aggregated data
         if (dateRange === globalDateRange) {
             return data;
@@ -99,7 +96,7 @@ export default function EngagementFunnel({
         }
 
         return data;
-    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange, aggregateFilteredData, isProActive]);
+    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange, aggregateFilteredData]);
 
     // Use filtered data
     const displayFunnelData = filteredFunnelData || data;
@@ -158,17 +155,7 @@ export default function EngagementFunnel({
         },
     ];
 
-    // Demo data for non-pro users
-    const demoStages = [
-        { label: __("Init", "text-to-audio"), count: 18200, percentage: 100, color: "#4CAF50" },
-        { label: __("Play", "text-to-audio"), count: 15800, percentage: 87, color: "#8BC34A" },
-        { label: __("25%", "text-to-audio"), count: 12100, percentage: 66, color: "#CDDC39" },
-        { label: __("50%", "text-to-audio"), count: 9400, percentage: 52, color: "#FFC107" },
-        { label: __("75%", "text-to-audio"), count: 6800, percentage: 37, color: "#FF9800" },
-        { label: __("End", "text-to-audio"), count: 4700, percentage: 26, color: "#FF5722" },
-    ];
-
-    const displayStages = isProActive ? stages : demoStages;
+    const displayStages = stages;
 
     const content = (
         <div className="tta_analytics_card tta_engagement_funnel_card">
@@ -198,7 +185,7 @@ export default function EngagementFunnel({
             </div>
 
             {/* Drop-off insights */}
-            {isProActive && totalInit > 0 && (
+            {totalInit > 0 && (
                 <div className="tta_funnel_insights">
                     <div className="tta_funnel_insight_item">
                         <span className="tta_insight_label">{__("Play Rate:", "text-to-audio")}</span>
@@ -223,12 +210,5 @@ export default function EngagementFunnel({
         </div>
     );
 
-    return (
-        <ProFeatureOverlay
-            showOverlay={!isProActive}
-            featureName={__("Engagement Funnel", "text-to-audio")}
-        >
-            {content}
-        </ProFeatureOverlay>
-    );
+    return content;
 }

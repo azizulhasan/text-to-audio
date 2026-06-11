@@ -6,7 +6,6 @@ function CustomizationTabs({
   buttonLists,
   listeningSettings,
   handleChange,
-  customCSS,
   listeningBtnStyle,
 }) {
   const [isPlayerSectionOpen, setIsPlayerSectionOpen] = useState(true);

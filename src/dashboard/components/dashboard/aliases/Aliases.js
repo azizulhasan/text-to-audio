@@ -31,7 +31,7 @@ export default function Aliases() {
  
     const handleAddRow = () => {
         console.log(ttsTextAliases.length)
-        if(!ttsObj.is_pro_active && ttsTextAliases.length >= 1 ) {
+        if(!ttsObj.is_atlasvoice_addon_functional && ttsTextAliases.length >= 1 ) {
             toast(
                 <h6>
                     {__('More than 1 alias is available in the pro version. Please ', 'text-to-audio')}

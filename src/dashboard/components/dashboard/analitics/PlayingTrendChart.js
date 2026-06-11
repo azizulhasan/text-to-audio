@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { __ } from "@wordpress/i18n";
 import { Form } from "react-bootstrap";
+import ProFeatureOverlay from "./ProFeatureOverlay";
 
 /**
  * PlayingTrendChart Component
@@ -24,7 +25,14 @@ export default function PlayingTrendChart({
     onDateRangeChange,
     filterResultsByDateRange
 }) {
-    const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_pro_active;
+    // TTS-247/2.2.2: Playing Trend Analysis is a premium feature whose data is
+    // supplied by Pro (tta_pro/v1/trend_data). Driven by the data-driven `trend`
+    // capability flag, not an is_atlasvoice_addon_functional license check. When absent, the whole
+    // card is locked behind the "Upgrade to Pro" overlay (same as Peak Hours
+    // Heatmap). The previousPeriod comparison line is an extra premium layer.
+    const capabilities = (typeof ttsObj !== "undefined" && ttsObj.capabilities) || {};
+    const hasTrend = !!capabilities.trend;
+    const hasPreviousPeriod = !!capabilities.previousPeriod;
     const chartRef = useRef(null);
     const chartInstanceRef = useRef(null);
     const [showComparison, setShowComparison] = useState(false);
@@ -55,7 +63,7 @@ export default function PlayingTrendChart({
      * Fetch previous period trend data when comparison is enabled
      */
     const fetchPreviousPeriodData = useCallback(async () => {
-        if (!isProActive || !showComparison) return;
+        if (!hasPreviousPeriod || !showComparison) return;
 
         // Calculate previous period dates
         const now = new Date();
@@ -109,41 +117,19 @@ export default function PlayingTrendChart({
         } finally {
             setIsLoadingPrevious(false);
         }
-    }, [isProActive, showComparison, dateRange]);
+    }, [hasPreviousPeriod, showComparison, dateRange]);
 
     // Fetch previous period data when comparison is toggled on
     useEffect(() => {
-        if (showComparison && isProActive) {
+        if (showComparison && hasPreviousPeriod) {
             fetchPreviousPeriodData();
         } else {
             setPreviousTrendData([]);
         }
-    }, [showComparison, isProActive, dateRange, fetchPreviousPeriodData]);
+    }, [showComparison, hasPreviousPeriod, dateRange, fetchPreviousPeriodData]);
 
-    // Demo data
-    const demoData = {
-        labels: Array.from({ length: 23 }, (_, i) => `Dec ${i + 2}`),
-        playingQuantity: [
-            2400, 1800, 1500, 2200, 2700, 3200, 3800, 4200, 4600,
-            4800, 4200, 3800, 3200, 2800, 2200, 1600, 1200, 900,
-            800, 1200, 1800, 2400, 2200
-        ],
-        playingTime: [
-            1800, 2200, 2600, 2400, 2000, 1800, 2200, 2800, 3400,
-            3800, 4200, 4600, 4800, 4600, 4200, 3800, 3200, 2800,
-            2600, 3200, 3800, 4400, 5000
-        ],
-        previousQuantity: [
-            2100, 1600, 1300, 2000, 2400, 2900, 3500, 3900, 4300,
-            4500, 3900, 3500, 2900, 2500, 1900, 1400, 1000, 700,
-            600, 1000, 1600, 2200, 2000
-        ],
-    };
-
-    // Filter and aggregate trend data based on component's date range
+    // TTS-247: data-driven, no demo data. The base trend chart is free.
     const filteredTrendData = useMemo(() => {
-        if (!isProActive) return null;
-
         // If date range matches global, use the already fetched data
         if (dateRange === globalDateRange) {
             return data;
@@ -176,14 +162,14 @@ export default function PlayingTrendChart({
         }
 
         return data;
-    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange, isProActive]);
+    }, [data, rawResults, dateRange, globalDateRange, filterResultsByDateRange]);
 
     // Use filtered data or original data
     const displayTrendData = filteredTrendData || data;
 
     // Calculate previous period data based on fetched data or props
     const previousPeriodData = useMemo(() => {
-        if (!isProActive || !showComparison) return [];
+        if (!hasPreviousPeriod || !showComparison) return [];
 
         // Use fetched previous trend data first
         if (previousTrendData && previousTrendData.length > 0) {
@@ -196,9 +182,9 @@ export default function PlayingTrendChart({
         }
 
         return [];
-    }, [isProActive, showComparison, previousTrendData, previousData]);
+    }, [hasPreviousPeriod, showComparison, previousTrendData, previousData]);
 
-    // Use real data if available, otherwise demo
+    // Use real data; empty structure when there is no data yet (no demo data).
     const chartData = displayTrendData.length > 0 ? {
         labels: displayTrendData.map(d => {
             // Format date for display
@@ -208,7 +194,7 @@ export default function PlayingTrendChart({
         playingQuantity: displayTrendData.map(d => d.plays || d.playCount || 0),
         playingTime: displayTrendData.map(d => Math.round((d.time || d.playTime || 0) / 60)), // Convert seconds to minutes
         previousQuantity: previousPeriodData,
-    } : demoData;
+    } : { labels: [], playingQuantity: [], playingTime: [], previousQuantity: [] };
 
     // Initialize/Update Chart
     useEffect(() => {
@@ -253,7 +239,7 @@ export default function PlayingTrendChart({
         ];
 
         // Add comparison dataset for Pro users
-        if (isProActive && showComparison && chartData.previousQuantity.length > 0) {
+        if (hasPreviousPeriod && showComparison && chartData.previousQuantity.length > 0) {
             datasets.push({
                 label: __("Previous Period", "text-to-audio"),
                 data: chartData.previousQuantity,
@@ -359,16 +345,20 @@ export default function PlayingTrendChart({
                 chartInstanceRef.current.destroy();
             }
         };
-    }, [showComparison, displayTrendData, previousPeriodData, isProActive]);
+    }, [showComparison, displayTrendData, previousPeriodData, hasPreviousPeriod]);
 
-    return (
+    const content = (
         <div className="tta_analytics_card tta_trend_chart_card">
             <div className="tta_card_header">
                 <div className="tta_chart_header_left">
-                    <h3 className="tta_section_title">{__("Playing Trend Analysis", "text-to-audio")}</h3>
+                    <h3 className="tta_section_title">
+                        {__("Playing Trend Analysis", "text-to-audio")}
+                    </h3>
 
-                    {/* Comparison toggle - Pro only */}
-                    {isProActive && (
+                    {/* Comparison toggle — only shown when the previousPeriod
+                        capability is present (Pro). The whole card is already
+                        gated by the trend capability above. */}
+                    {hasPreviousPeriod && (
                         <div className="tta_comparison_toggle">
                             <Form.Check
                                 type="checkbox"
@@ -396,14 +386,6 @@ export default function PlayingTrendChart({
                 </Form.Select>
             </div>
 
-            {/* Comparison not available notice for free users */}
-            {!isProActive && (
-                <div className="tta_comparison_promo">
-                    <span className="tta_pro_badge_small">{__("Pro", "text-to-audio")}</span>
-                    <span>{__("Enable comparison with previous period", "text-to-audio")}</span>
-                </div>
-            )}
-
             <div className="tta_chart_container" style={{ height: "400px", position: "relative" }}>
                 <canvas ref={chartRef} id="playingTrendChart"></canvas>
             </div>
@@ -424,5 +406,14 @@ export default function PlayingTrendChart({
                 </div>
             </div>
         </div>
+    );
+
+    return (
+        <ProFeatureOverlay
+            showOverlay={!hasTrend}
+            featureName={__("Playing Trend Analysis", "text-to-audio")}
+        >
+            {content}
+        </ProFeatureOverlay>
     );
 }

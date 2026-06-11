@@ -115,3 +115,6 @@ languages/null
 null
 nul
 .claude
+
+# Local MCP config — contains JWT bearer token, must not be committed
+.mcp.json

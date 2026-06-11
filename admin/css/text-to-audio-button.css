@@ -1,0 +1,367 @@
+/**
+ * TTS-249 (I2 / A1): frontend stylesheet for the light-DOM player (player 1).
+ *
+ * Player 1 renders into the light DOM (so WordPress core's Additional CSS can
+ * style it), which means its CSS must NOT be a JS-injected <style> tag in the
+ * page (wp.org bars inline <style>/<script> in output). Instead:
+ *   - the selector-based / stateful / layout rules live here (enqueued via
+ *     wp_enqueue_style), and
+ *   - the dynamic per-button values (colors, size, border, margins, icon
+ *     visibility) are passed as CSS custom properties + inline style="" on the
+ *     button/wrapper by text-to-audio-button.js (a style ATTRIBUTE is allowed;
+ *     only <style> TAGS are flagged).
+ *
+ * Players 2-6 (Pro) keep their own shadow-DOM <style> — that's isolated and
+ * never appears in the page's light DOM, so it isn't a page-level concern.
+ *
+ * Selectors are class-scoped (`.tts__listent_content`). The base box/visual
+ * props are applied inline on the button element (highest specificity, beats
+ * theme rules); the colour-critical hover rules below use !important so theme
+ * `button:hover{}` rules can't override them.
+ */
+
+/* Defensive typography reset — neutralise the few inheritable props a theme's
+   `button{}` / global rules could bleed into the light-DOM button. Box/visual
+   props are set inline on the element and already win. */
+.tts__listent_content,
+.tts__listent_content * {
+    line-height: normal;
+    text-transform: none;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-shadow: none;
+    font-style: normal;
+}
+
+/* TTS-249: the player host is a custom element (`<tts-play-button>`), which the
+   UA renders as `display: inline` by default. Inline elements IGNORE `max-width`
+   and `margin-inline: auto`, so block-theme "constrained" layouts (Twenty
+   Twenty-Five and every other block theme, plus classic themes' content wrappers)
+   could not limit the player to the content width — the width:100% button then
+   stretched to the full content container (e.g. 1590px) while the post text stayed
+   at the ~645px content column. Promoting the host to a block element lets the
+   theme's own constrained-layout rules (max-width + auto margins) apply, so the
+   player aligns to and matches the content column on any theme. The old player
+   had a block-level wrapper <div> that provided this; flattening the DOM removed
+   it, so we restore the behaviour on the host itself. */
+tts-play-button,
+.tts_play_button {
+    display: block;          /* so the theme's constrained-layout max-width + auto-margins apply */
+    width: 100%;             /* fluid, percentage-based — fills the content column on every viewport; never a fixed px */
+    box-sizing: border-box;  /* padding/border included in the 100%, so it can't overflow its container */
+    /* No max-width here on purpose: the theme's own content-width (responsive,
+       e.g. --wp--style--global--content-size, which shrinks on small screens)
+       governs the cap. On themes with no cap the player simply fills its
+       container — still 100%/fluid, never a hardcoded pixel width. */
+}
+
+/* New-player layout */
+.tts__listent_content {
+    box-sizing: border-box;
+    transition: all 0.5s ease-in-out;
+}
+
+.tts__listent_content:hover {
+    background-color: var(--tts-hover-bg, #f0f0f0) !important;
+    /* set colour on the button so SVG presets using currentColor inherit it */
+    color: var(--tts-hover-color, #000000) !important;
+}
+
+.tts__listent_content:hover .tts_button_label,
+.tts__listent_content:hover span {
+    color: var(--tts-hover-color, #000000);
+}
+
+.tts__listent_content:hover svg polygon,
+.tts__listent_content:hover svg path {
+    fill: var(--tts-hover-color, #000000);
+}
+
+.tts__listent_content:hover svg[stroke] path,
+.tts__listent_content:hover svg[stroke] line,
+.tts__listent_content:hover .tts-settings-icon svg path,
+.tts__listent_content:hover .tts-settings-icon svg circle {
+    stroke: var(--tts-hover-color, #000000);
+}
+
+.tts__listent_content .tts_button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tts__listent_content .tts_button_label {
+    display: inline-block;
+}
+
+.tts__listent_content svg,
+.tts-button-left svg {
+    display: var(--tts-icon-display, inline-block);
+    flex: 0 0 auto;
+}
+
+/* Focus: no ring (matches the prior shadow-DOM behaviour). */
+.tts__listent_content:focus,
+.tts__listent_content:focus-visible,
+.tts__listent_content:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Settings (gear) icon — shown while playing/paused. */
+.tts__listent_content .tts-settings-icon {
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.tts__listent_content .tts-settings-icon:hover,
+.tts__listent_content .tts-settings-icon:focus-visible {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.tts__listent_content .tts-settings-icon:focus-visible {
+    outline: 2px solid var(--tts-color, #ffffff);
+    outline-offset: 2px;
+}
+
+/* Screen-reader-only live region (direct child of the host element). */
+.tts-play-button .tts-sr-only,
+tts-play-button .tts-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ------------------------------------------------------------------ *
+ * TTS-249 (I2): Settings modal (the gear → language/voice/speed panel).
+ * Previously injected as an inline <style id="tts-settings-modal-styles">
+ * into <head> by JS; moved here so no plugin <style> tag ships in the page.
+ * The dynamic colours are applied as --tts-modal-* custom properties on the
+ * modal container at runtime (see setProperty in the JS), which these rules
+ * consume.
+ * ------------------------------------------------------------------ */
+
+/* Settings Modal Backdrop */
+.tts__settings-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+.tts__settings-modal-backdrop.tts__modal-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+.tts__settings-modal-backdrop.tts__modal-closing {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Settings Modal Container */
+.tts__settings-modal {
+    width: 90%;
+    max-width: 400px;
+    background-color: var(--tts-modal-bg, #184c53);
+    color: var(--tts-modal-color, #ffffff);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    transform: scale(0.8);
+    opacity: 0;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    position: relative;
+}
+.tts__settings-modal-backdrop.tts__modal-visible .tts__settings-modal {
+    transform: scale(1);
+    opacity: 1;
+}
+.tts__settings-modal-backdrop.tts__modal-closing .tts__settings-modal {
+    transform: scale(0.8);
+    opacity: 0;
+}
+
+/* Modal Header */
+.tts__settings-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+.tts__settings-modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+.tts__settings-modal-close {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+.tts__settings-modal-close:hover,
+.tts__settings-modal-close:focus-visible {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+.tts__settings-modal-close:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+/* Settings Select */
+.tts__settings-select {
+    outline: none;
+}
+.tts__settings-select:focus {
+    border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Custom Slider Styles */
+.tts__settings-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.19);
+    border-radius: 3px;
+    outline: none;
+}
+.tts__settings-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: var(--tts-modal-color, #ffffff);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+.tts__settings-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+}
+.tts__settings-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: var(--tts-modal-color, #ffffff);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.1s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+.tts__settings-slider::-moz-range-thumb:hover {
+    transform: scale(1.15);
+}
+.tts__settings-slider::-moz-range-track {
+    background: rgba(255, 255, 255, 0.19);
+    height: 6px;
+    border-radius: 3px;
+}
+
+/* Setting row styles */
+.tts__setting-row {
+    margin-bottom: 16px;
+}
+.tts__setting-row:last-child {
+    margin-bottom: 0;
+}
+.tts__setting-label {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 6px;
+    opacity: 0.85;
+}
+.tts__setting-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+.tts__setting-value {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Loader for settings */
+.tts__settings-loader-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    z-index: 10;
+}
+.tts__settings-loader {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--tts-modal-bg, #184c53);
+    border-top: 3px solid var(--tts-modal-color, #ffffff);
+    border-radius: 50%;
+    animation: tts-modal-spin 0.8s linear infinite;
+}
+@keyframes tts-modal-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Mute button */
+.tts__mute-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s ease;
+}
+.tts__mute-btn:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+.tts__mute-btn:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+    background-color: rgba(255, 255, 255, 0.12);
+}
+.tts__mute-btn.muted {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+.tts__settings-slider:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+.tts__settings-select:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}

@@ -196,7 +196,7 @@ export default function Compatibility() {
                         <Row className='mt-4'>
                             <Col xs={12} sm={6} lg={4}>
                                 <Form.Label htmlFor='tta__settings_exclude_wp_tags'>
-                                    {__('Add ACF Fields To Posts', 'text-to-audio')} {ttsObj.is_pro_active ? "" : (<>
+                                    {__('Add ACF Fields To Posts', 'text-to-audio')} {ttsObj.is_atlasvoice_addon_functional ? "" : (<>
                                     {['top'].map((placement) => (<OverlayTrigger
                                         key={placement}
                                         placement={placement}
@@ -215,7 +215,7 @@ export default function Compatibility() {
                                     onChange={handleSelectionChange}
                                     selectionLimit={1}
                                     toastMessage={__('Adding more than 1 ACF field is a pro feature', 'text-to-audio')}
-                                    isPro={ttsObj.is_pro_active}
+                                    isPro={ttsObj.is_atlasvoice_addon_functional}
                                 />
                                 <div className="mt-2 mb-2">
                                     <Form.Check

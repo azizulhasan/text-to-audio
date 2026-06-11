@@ -40,12 +40,14 @@ export default function Settings() {
         tta__settings_text_after_content: "",
         tta__settings_text_before_content: "",
         tta__settings_read_content_from_dom: true,
-        tta__settings_player_use_old_player: false,
         tta__settings_enable_tts_status: true,
         tta__settings_delete_data_on_uninstall: false,
     });
     const [postTypes, setPostTypes] = useState([]);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
+    // TTS-247: Settings → Danger zone "Reset all plugin data".
+    const [resetConfirmText, setResetConfirmText] = useState("");
+    const [resetting, setResetting] = useState(false);
     const [postsStatus, setPostsStatus] = useState([]);
     const [categories, setCategories] = useState([]);
     const [tags, setTags] = useState([]);
@@ -115,7 +117,7 @@ export default function Settings() {
 
         if (e.target.name == "tta__settings_exclude_post_ids") {
             let ids = [];
-            if (ttsObj.is_pro_active) {
+            if (ttsObj.is_atlasvoice_addon_functional) {
                 ids = e.target.value?.split(",");
             } else {
                 ids = e.target.value?.split(",")?.slice(0, 5);
@@ -131,9 +133,45 @@ export default function Settings() {
         });
     };
 
+    // TTS-247: POST to /reset_plugin_data with the literal "DELETE" confirmation.
+    // Permission + nonce gating is enforced server-side by get_route_access().
+    const handleReset = () => {
+        if (resetConfirmText !== "DELETE" || resetting) return;
+        setResetting(true);
+        fetch(tta_obj.api_url + "tta/v1/reset_plugin_data", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-WP-Nonce": tta_obj.rest_nonce,
+            },
+            body: JSON.stringify({confirm: "DELETE"}),
+        })
+            .then((r) => r.json())
+            .then((res) => {
+                if (res && res.status) {
+                    toast(
+                        __("All plugin data has been reset. Reloading…", "text-to-audio"),
+                        "success",
+                        {autoClose: 2000}
+                    );
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    toast(
+                        (res && res.message) || __("Reset failed.", "text-to-audio"),
+                        "error"
+                    );
+                    setResetting(false);
+                }
+            })
+            .catch(() => {
+                toast(__("Reset failed.", "text-to-audio"), "error");
+                setResetting(false);
+            });
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!ttsObj.is_pro_active) {
+        if (!ttsObj.is_atlasvoice_addon_functional) {
             settings.tta__settings_css_selectors = "";
         }
         let cache_clear_notice_text = "";
@@ -361,7 +399,7 @@ export default function Settings() {
                                 )}
 
                                 {/* Apply number format with YouTube icon - Missing from new */}
-                                {window?.ttsObj?.is_pro_active && (
+                                {window?.ttsObj?.is_atlasvoice_addon_functional && (
                                     <>
                                         <SettingRow
                                             label={__("Apply number format", "text-to-audio")}
@@ -392,20 +430,6 @@ export default function Settings() {
                                         </SettingRow>
                                     </>
                                 )}
-                                {
-                                    ttsObj.player_id == 1 && <SettingRow
-                                        label={__("Use Old Player UI", 'text-to-audio')}
-                                        questionIcon={true}
-                                        questionTooltip={__("Use Old Player UI", 'text-to-audio')}
-                                    >
-                                        <ToggleSwitch
-                                            checked={settings.tta__settings_player_use_old_player}
-                                            onChange={(e) => handleChange(e)}
-                                            name="tta__settings_player_use_old_player"
-                                            id="tta__settings_player_use_old_player"
-                                        />
-                                    </SettingRow>
-                                }
 
                                 <SettingRow
                                     label={__("Add Post Title To Read", "text-to-audio")}
@@ -563,7 +587,7 @@ export default function Settings() {
                                                     <Form.Label className="setting-label text-dark m-0">
                                                         {__("Include Content By CSS Selectors", "text-to-audio")}
                                                     </Form.Label>
-                                                    {!ttsObj.is_pro_active && (
+                                                    {!ttsObj.is_atlasvoice_addon_functional && (
                                                         <ProLockIcon
                                                             tooltipText={__(
                                                                 "Include Content By CSS Selectors feature is available in pro version", "text-to-audio"
@@ -596,11 +620,11 @@ export default function Settings() {
                                                 value={settings.tta__settings_css_selectors}
                                                 onChange={(e) => handleChange(e)}
                                                 placeholder={
-                                                    ttsObj.is_pro_active
+                                                    ttsObj.is_atlasvoice_addon_functional
                                                         ? __("Multiple selector will be multiline.", "text-to-audio")
                                                         : __("Some content may be missing, It can be found by css selectors", "text-to-audio")
                                                 }
-                                                disabled={!ttsObj.is_pro_active}
+                                                disabled={!ttsObj.is_atlasvoice_addon_functional}
                                                 className="tta-textarea"
                                             />
                                             <Form.Text className="text-muted">
@@ -616,7 +640,7 @@ export default function Settings() {
                                                     <Form.Label className="setting-label text-dark m-0">
                                                         {__("Exclude Content By CSS Selectors", "text-to-audio")}
                                                     </Form.Label>
-                                                    {!ttsObj.is_pro_active && (
+                                                    {!ttsObj.is_atlasvoice_addon_functional && (
                                                         <ProLockIcon
                                                             tooltipText={__(
                                                                 "Exclude Content By CSS Selectors feature is available in pro version", "text-to-audio"
@@ -651,11 +675,11 @@ export default function Settings() {
                                                 }
                                                 onChange={(e) => handleChange(e)}
                                                 placeholder={
-                                                    ttsObj.is_pro_active
+                                                    ttsObj.is_atlasvoice_addon_functional
                                                         ? __("Multiple selector will be multiline.", "text-to-audio")
                                                         : __("Exclude content by CSS selectors", "text-to-audio")
                                                 }
-                                                disabled={!ttsObj.is_pro_active}
+                                                disabled={!ttsObj.is_atlasvoice_addon_functional}
                                                 className="tta-textarea"
                                             />
                                             <small
@@ -680,7 +704,7 @@ export default function Settings() {
                                                     <Form.Label className="setting-label text-dark m-0">
                                                         {__("Exclude HTML Tags To Speak", "text-to-audio")}
                                                     </Form.Label>
-                                                    {!ttsObj.is_pro_active && (
+                                                    {!ttsObj.is_atlasvoice_addon_functional && (
                                                         <ProLockIcon
                                                             tooltipText={__(
                                                                 "Exclude Tags. So that its content skipped. Like ( Subscript, Superscript etc.) This is a pro feature.", "text-to-audio"
@@ -713,11 +737,11 @@ export default function Settings() {
                                                 value={settings.tta__settings_exclude_tags}
                                                 onChange={(e) => handleChange(e)}
                                                 placeholder={
-                                                    ttsObj.is_pro_active
+                                                    ttsObj.is_atlasvoice_addon_functional
                                                         ? __("Multiple Tags Will Be Pipe(|) Separated.", "text-to-audio")
                                                         : __("Exclude tags is a pro feature.", "text-to-audio")
                                                 }
-                                                disabled={!ttsObj.is_pro_active}
+                                                disabled={!ttsObj.is_atlasvoice_addon_functional}
                                                 className="tta-textarea"
                                             />
                                             <Form.Text className="text-muted">
@@ -733,7 +757,7 @@ export default function Settings() {
                                                     <Form.Label className="setting-label text-dark m-0">
                                                         {__("Exclude Texts To Speak", "text-to-audio")}
                                                     </Form.Label>
-                                                    {!ttsObj.is_pro_active && (
+                                                    {!ttsObj.is_atlasvoice_addon_functional && (
                                                         <ProLockIcon
                                                             tooltipText={__(
                                                                 "Excluding texts to be spoken is a pro feature.", "text-to-audio"
@@ -766,11 +790,11 @@ export default function Settings() {
                                                 value={settings.tta__settings_exclude_texts}
                                                 onChange={(e) => handleChange(e)}
                                                 placeholder={
-                                                    ttsObj.is_pro_active
+                                                    ttsObj.is_atlasvoice_addon_functional
                                                         ? __("Multiple Texts Will Be Pipe(|) Separated.", "text-to-audio")
                                                         : __("Exclude texts is a pro feature.", "text-to-audio")
                                                 }
-                                                disabled={!ttsObj.is_pro_active}
+                                                disabled={!ttsObj.is_atlasvoice_addon_functional}
                                                 className="tta-textarea"
                                             />
                                             <Form.Text className="text-muted">
@@ -786,7 +810,7 @@ export default function Settings() {
                                                     <Form.Label className="setting-label text-dark m-0">
                                                         {__("Exclude Posts By IDs To Speak", "text-to-audio")}
                                                     </Form.Label>
-                                                    {!ttsObj.is_pro_active && (
+                                                    {!ttsObj.is_atlasvoice_addon_functional && (
                                                         <ProLockIcon
                                                             tooltipText={__(
                                                                 "Exclude more than 5 IDs is a pro feature", "text-to-audio"
@@ -819,7 +843,7 @@ export default function Settings() {
                                                 value={settings.tta__settings_exclude_post_ids}
                                                 onChange={(e) => handleChange(e)}
                                                 placeholder={
-                                                    ttsObj.is_pro_active
+                                                    ttsObj.is_atlasvoice_addon_functional
                                                         ? __("Multiple IDs Will Be Comma(,) Separated.", "text-to-audio")
                                                         : __("Excluding more than 5 IDs is a pro feature. Multiple IDs Will Be Comma(,) Separated.", "text-to-audio")
                                                 }
@@ -835,7 +859,7 @@ export default function Settings() {
                                                     <Form.Label className="setting-label text-dark m-0">
                                                         {__("Exclude Categories To Speak", "text-to-audio")}
                                                     </Form.Label>
-                                                    {!ttsObj.is_pro_active && (
+                                                    {!ttsObj.is_atlasvoice_addon_functional && (
                                                         <ProLockIcon
                                                             tooltipText={__(
                                                                 "Exclude more than 1 categories is a pro feature", "text-to-audio"
@@ -882,7 +906,7 @@ export default function Settings() {
                                                     <Form.Label className="setting-label text-dark m-0">
                                                         {__("Exclude Tags To Speak", "text-to-audio")}
                                                     </Form.Label>
-                                                    {!ttsObj.is_pro_active && (
+                                                    {!ttsObj.is_atlasvoice_addon_functional && (
                                                         <ProLockIcon
                                                             tooltipText={__(
                                                                 "Exclude more than 1 tags is a pro feature", "text-to-audio"
@@ -987,6 +1011,93 @@ export default function Settings() {
                                         </div>
                                     )}
 
+                                </div>
+
+                                {/* TTS-247: Danger zone — reset all plugin data. */}
+                                <div
+                                    style={{
+                                        marginTop: "32px",
+                                        padding: "20px 24px",
+                                        border: "1px solid #f1c4c4",
+                                        borderLeft: "4px solid #d63638",
+                                        borderRadius: "8px",
+                                        background: "#fef8f8",
+                                    }}
+                                >
+                                    <h3
+                                        style={{
+                                            margin: "0 0 6px",
+                                            color: "#b32d2e",
+                                            fontSize: "16px",
+                                            fontWeight: 600,
+                                        }}
+                                    >
+                                        {__("Danger zone — reset all plugin data", "text-to-audio")}
+                                    </h3>
+                                    <p
+                                        style={{
+                                            margin: "0 0 14px",
+                                            color: "#50575e",
+                                            fontSize: "13px",
+                                            lineHeight: 1.5,
+                                        }}
+                                    >
+                                        {__(
+                                            "Permanently deletes every AtlasVoice option, transient, post-meta entry, cron event, and the analytics database table. The plugin stays active and boots as a fresh install on the next page load. This action cannot be undone.",
+                                            "text-to-audio"
+                                        )}
+                                    </p>
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            gap: "10px",
+                                            alignItems: "center",
+                                            flexWrap: "wrap",
+                                        }}
+                                    >
+                                        <label
+                                            htmlFor="tta-reset-confirm"
+                                            style={{fontSize: "13px", color: "#1d2327"}}
+                                        >
+                                            {__("Type", "text-to-audio")}{" "}
+                                            <code style={{background: "#fff", padding: "1px 6px", border: "1px solid #d0d0d0", borderRadius: "3px"}}>DELETE</code>{" "}
+                                            {__("to confirm:", "text-to-audio")}
+                                        </label>
+                                        <input
+                                            id="tta-reset-confirm"
+                                            type="text"
+                                            value={resetConfirmText}
+                                            onChange={(e) => setResetConfirmText(e.target.value)}
+                                            placeholder="DELETE"
+                                            style={{
+                                                padding: "6px 10px",
+                                                border: "1px solid #c3c4c7",
+                                                borderRadius: "4px",
+                                                width: "140px",
+                                                fontSize: "13px",
+                                            }}
+                                            disabled={resetting}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={handleReset}
+                                            disabled={resetConfirmText !== "DELETE" || resetting}
+                                            style={{
+                                                padding: "7px 18px",
+                                                background: resetConfirmText === "DELETE" && !resetting ? "#d63638" : "#e8a3a4",
+                                                color: "#fff",
+                                                border: "0",
+                                                borderRadius: "4px",
+                                                fontSize: "13px",
+                                                fontWeight: 600,
+                                                cursor: resetConfirmText === "DELETE" && !resetting ? "pointer" : "not-allowed",
+                                            }}
+                                        >
+                                            {resetting
+                                                ? __("Resetting…", "text-to-audio")
+                                                : __("Reset all plugin data", "text-to-audio")}
+                                        </button>
+                                    </div>
                                 </div>
 
                                 {/* Save Button */}
