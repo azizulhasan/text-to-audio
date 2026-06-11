@@ -298,6 +298,10 @@ Improved : Updated `TTA_Api_Routes` doc comments to point to the correct `tta_pr
 Improved : The free plugin is now fully functional on its own — premium player options, button positions, voice integrations, and advanced analytics are presented as upgrade prompts instead of locked controls.
 Fixed : Removed external sample-audio requests from the dashboard; previews now use your browser's built-in voices.
 
+= 2.1.21 ( 07 Jun 2026 ) =
+Fixed : Plyr-backed Pro player (players 3-6) could appear blank/invisible until the first user interaction on sites running Perfmatters with the "Remove Unused CSS" (RUCSS) feature enabled. Perfmatters was rewriting our two stylesheets (`text-to-audio-pro.css`, `plyr.min.css`) to `data-pmdelayedstyle` and only swapping the real `href` back after a mousemove / scroll / touch, so the widget rendered without any styles in the meantime.
+Improved : `TTA_Hooks::init_cache_compatibility()` now also subscribes to `perfmatters_rucss_excluded_stylesheets` so the TTS/Pro stylesheets stay as ordinary `<link href>` tags at page load.
+
 = 2.1.20 ( 15 May 2026 ) =
 Improved : Plugin card titles on the "Other AtlasAiDev Plugins" page now prefer the canonical WordPress.org title (via the public plugin info API), so cards mirror the wp.org listing instead of locally-configured names.
 Added : New-brand fallback names (AtlasAI, AtlasML) for sibling plugins when WordPress.org returns no name.
