@@ -122,6 +122,13 @@ class TTA_Activator {
 				'tta__settings_text_before_content'					  => '',
 				'tta__settings_read_content_from_dom'				  => true,
 				'tta__settings_enable_tts_status'				      => true,
+				// TTS-247 — fresh installs start in STAGING. Nothing
+				// auto-generates or shows to visitors until the admin
+				// verifies content via the step-rail picker and clicks
+				// "Go Live". Existing installs are grandfathered to
+				// 'production' by TTA_Activator::maybe_set_default_mode()
+				// so their live players / MP3s never disappear on upgrade.
+				'tta__settings_atlasvoice_mode'                       => 'staging',
 			) );
 		}
 
@@ -219,6 +226,45 @@ class TTA_Activator {
 
 		self::create_analytics_table_if_not_exists();
 		self::maybe_add_analytics_indexes();
+	}
+
+	/**
+	 * TTS-247 — one-time backward-compat migration for the staging/live mode.
+	 *
+	 * The staging gate (TTA_Helper::should_load_button) hides the visitor
+	 * player and blocks MP3 generation whenever the mode is not 'production'.
+	 * Mode::get() defaults to 'staging' when the key is absent — so without
+	 * this migration, EXISTING sites would lose their live player and stop
+	 * generating audio the moment they upgrade.
+	 *
+	 * Rule: if the mode key is missing on an install that already has saved
+	 * settings, it is an upgrade of a working site → grandfather it to
+	 * 'production' so nothing changes for current users. Brand-new installs
+	 * never reach this branch because TTA_Activator::activate() already wrote
+	 * 'staging' into the default settings at activation time.
+	 *
+	 * Runs on every load but is a single guarded option read after the first
+	 * pass (the `tta_mode_default_migrated` flag). Hooked early (plugins_loaded)
+	 * so it lands before should_load_button runs on the same request — no
+	 * visitor-facing regression window.
+	 *
+	 * @return void
+	 */
+	public static function maybe_set_default_mode() {
+		if ( get_option( 'tta_mode_default_migrated' ) ) {
+			return;
+		}
+
+		$opt = get_option( 'tta_settings_data' );
+		if ( is_array( $opt ) && ! array_key_exists( 'tta__settings_atlasvoice_mode', $opt ) ) {
+			$opt['tta__settings_atlasvoice_mode'] = 'production';
+			update_option( 'tta_settings_data', $opt );
+			if ( class_exists( '\\TTA\\TTA_Cache' ) ) {
+				\TTA\TTA_Cache::delete( 'all_settings' );
+			}
+		}
+
+		update_option( 'tta_mode_default_migrated', true, false );
 	}
 
 

@@ -550,6 +550,31 @@ export default function Settings() {
                                         Global is always shown; one collapsed accordion appears
                                         below per enabled post type (Pro only). All four CSS-
                                         selector fields render inside each accordion body. */}
+                                    <div style={{marginTop: "24px"}}>
+                                        <h3
+                                            style={{
+                                                margin: "0 0 4px",
+                                                color: "#1d2327",
+                                                fontSize: "16px",
+                                                fontWeight: 600,
+                                            }}
+                                        >
+                                            {__("Content Selection Rules", "text-to-audio")}
+                                        </h3>
+                                        <p
+                                            style={{
+                                                margin: "0 0 12px",
+                                                color: "#50575e",
+                                                fontSize: "13px",
+                                                lineHeight: 1.5,
+                                            }}
+                                        >
+                                            {__(
+                                                "Control which part of your content is read aloud. Set a rule for the whole site (Global) below.",
+                                                "text-to-audio"
+                                            )}
+                                        </p>
+                                    </div>
                                     <ScopeAccordion
                                         settings={settings}
                                         handleChange={handleChange}

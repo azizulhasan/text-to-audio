@@ -17,12 +17,17 @@ namespace TTA\AtlasVoice;
  *   GET  /step-rail/sample-url
  *   POST /step-rail/verify-sample
  *   GET  /step-rail/verify-sample
+ *   GET  /mode                              (status pill)
+ *   POST /mode                              (Go Live / revert)
  *
  * Retired: /save-selector, /post-rules, /heal-log,
  * /boilerplate-suggestions, /boilerplate-exclude, /step-rail/scopes
  * (D27.28); /snapshots (D27.29); /auth-variant (pre-D27.28),
- * /language-context, /mode (D27.30); /step-rail/active-rule
+ * /language-context (D27.30); /step-rail/active-rule
  * (D27.43 — picker reads `ttsObj.atlasvoice_resolved_rule` directly).
+ *
+ * /mode was retired in D27.30 but restored in TTS-247 — Mode.php's
+ * admin-bar Go Live dialog posts to it, so it is not actually dead.
  *
  * All handlers live on this class too. Keeping route registration
  * and handler code together makes the module delete-safe: removing
@@ -170,8 +175,143 @@ class RestRoutes {
 				),
 			)
 		);
+
+		// TTS-247 — restore the mode status / Go-Live route. It was retired
+		// in D27.30 as "unused", but Mode.php's admin-bar Go Live dialog
+		// posts to tta/v1/mode (action=go-live|revert); removing it broke
+		// Go Live with "No route was found matching the URL". GET returns
+		// the status pill data; POST flips the mode under a typed-confirm gate.
+		register_rest_route(
+			$ns,
+			'/mode',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( __CLASS__, 'get_mode' ),
+					'permission_callback' => array( __CLASS__, 'admin_guard' ),
+					'args'                => array(),
+				),
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( __CLASS__, 'post_mode' ),
+					'permission_callback' => array( __CLASS__, 'admin_guard' ),
+					'args'                => array(
+						'action'  => array(
+							'type'        => 'string',
+							'required'    => true,
+							'description' => 'One of: go-live | revert.',
+						),
+						'confirm' => array(
+							'type'        => 'string',
+							'required'    => false,
+							'description' => 'Typed confirmation phrase. Required for action=go-live and must equal "GO LIVE" exactly.',
+						),
+					),
+				),
+			)
+		);
 	}
 
+	/**
+	 * GET /mode — current AtlasVoice pipeline status. Returns the
+	 * three-state banner info (state / colour / label) the dashboard and
+	 * admin-bar dot mirror need. Read-only — delegates to Mode::status().
+	 *
+	 * @param \WP_REST_Request $request
+	 * @return \WP_REST_Response
+	 */
+	public static function get_mode( $request ) {
+		if ( ! class_exists( '\\TTA\\AtlasVoice\\Mode' ) ) {
+			return rest_ensure_response( array(
+				'status' => false,
+				'error'  => 'Mode class not loaded.',
+			) );
+		}
+		return rest_ensure_response( array(
+			'status'        => true,
+			'opted_in'      => Mode::is_opted_in(),
+			'mode'          => Mode::get(),
+			'is_production' => Mode::is_production(),
+			'display'       => Mode::status(),
+		) );
+	}
+
+	/**
+	 * POST /mode — Go Live / revert-to-staging mutator.
+	 *
+	 *   action=go-live  confirm="GO LIVE"  →  switch to production
+	 *                   (confirm compared byte-exactly).
+	 *   action=revert                       →  switch to staging.
+	 *
+	 * On success Mode::set fires `atlasvoice_mode_changed`, plus a
+	 * direction-specific `atlasvoice_go_live` / `atlasvoice_reverted_to_staging`.
+	 *
+	 * @param \WP_REST_Request $request
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public static function post_mode( $request ) {
+		if ( ! class_exists( '\\TTA\\AtlasVoice\\Mode' ) ) {
+			return new \WP_Error( 'not_available', 'Mode class not loaded.', array( 'status' => 500 ) );
+		}
+
+		// Opt-in must be on before mode can be flipped at all.
+		if ( ! Mode::is_opted_in() ) {
+			return new \WP_Error(
+				'not_opted_in',
+				__( 'Enable the AtlasVoice extractor in the settings before changing mode.', 'text-to-audio' ),
+				array( 'status' => 409 )
+			);
+		}
+
+		$action = sanitize_key( (string) $request->get_param( 'action' ) );
+
+		if ( $action === 'go-live' ) {
+			$confirm = (string) $request->get_param( 'confirm' );
+			// Intentionally byte-exact: not strcasecmp, not trim.
+			if ( $confirm !== 'GO LIVE' ) {
+				return new \WP_Error(
+					'confirmation_required',
+					__( 'Type GO LIVE exactly to confirm production rollout.', 'text-to-audio' ),
+					array( 'status' => 400 )
+				);
+			}
+			Mode::set( Mode::MODE_PRODUCTION );
+			/**
+			 * Fires after a successful Go Live.
+			 *
+			 * @param int $user_id
+			 */
+			do_action( 'atlasvoice_go_live', get_current_user_id() );
+			return rest_ensure_response( array(
+				'status'  => true,
+				'message' => __( 'AtlasVoice is now live in production.', 'text-to-audio' ),
+				'mode'    => Mode::get(),
+				'display' => Mode::status(),
+			) );
+		}
+
+		if ( $action === 'revert' ) {
+			Mode::set( Mode::MODE_STAGING );
+			/**
+			 * Fires after a revert-to-staging.
+			 *
+			 * @param int $user_id
+			 */
+			do_action( 'atlasvoice_reverted_to_staging', get_current_user_id() );
+			return rest_ensure_response( array(
+				'status'  => true,
+				'message' => __( 'Reverted to staging mode.', 'text-to-audio' ),
+				'mode'    => Mode::get(),
+				'display' => Mode::status(),
+			) );
+		}
+
+		return new \WP_Error(
+			'unknown_action',
+			__( 'Unknown mode action. Expected go-live or revert.', 'text-to-audio' ),
+			array( 'status' => 400 )
+		);
+	}
 
 	/**
 	 * D9 — Resolve a sample-post URL for the iframe sandbox. The
