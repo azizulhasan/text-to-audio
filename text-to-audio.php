@@ -306,6 +306,14 @@ register_activation_hook(__FILE__, function () {
 });
 
 /**
+ * TTS-247 — grandfather existing installs onto the new staging/live mode.
+ * Runs early (front + admin) so an upgraded site keeps its live player on
+ * the very first request, before should_load_button's staging gate runs.
+ * Self-disables after one pass via the tta_mode_default_migrated flag.
+ */
+add_action('plugins_loaded', ['TTA\\TTA_Activator', 'maybe_set_default_mode'], 1);
+
+/**
  * Redirect to settings page on first activation.
  * Uses a transient set in TTA_Activator::activate() to detect first-time activation.
  *

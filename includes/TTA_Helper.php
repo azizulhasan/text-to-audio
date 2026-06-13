@@ -241,7 +241,28 @@ class TTA_Helper
             }
         }
 
-        return apply_filters('tta_should_load_button', $should_load_button, $current_post);
+        $should_load_button = apply_filters('tta_should_load_button', $should_load_button, $current_post);
+
+        // TTS-247 — staging/live gate. Applied AFTER the filter so it is the
+        // final word and overrides Pro's tta_should_load_button callback
+        // (which can force true). Until the admin verifies content via the
+        // step-rail picker and clicks "Go Live", the site stays in staging:
+        // the visitor auto-player must not render and Pro must not enqueue
+        // its generation scripts — so a misconfigured extractor never costs
+        // the user a single MP3 generation. Exceptions:
+        //   - the post edit screen keeps the player so admins can preview;
+        //   - the step-rail picker launches via ?atlasvoice_picker=1 (forced)
+        //     and bypasses this path entirely, so verification still works.
+        if (
+            $should_load_button
+            && ! self::is_edit_page()
+            && class_exists('\\TTA\\AtlasVoice\\Mode')
+            && ! \TTA\AtlasVoice\Mode::is_production()
+        ) {
+            $should_load_button = false;
+        }
+
+        return $should_load_button;
     }
 
 
