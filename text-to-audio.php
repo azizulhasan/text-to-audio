@@ -27,12 +27,7 @@
  */
 
 
-// TTS-247: dropped the previous `if (!defined('ABSPATH')) { define('ABSPATH', ...); }`
-// block. WordPress defines ABSPATH in wp-load.php before any plugin file is loaded,
-// so the body never executed in practice. The WordPress.org Plugin Directory review
-// (May 2026, HelpScout #293) still flagged it under "Changing global behaviour" —
-// a plugin must not redefine WordPress core constants.
-//
+
 // If this file is called directly, abort.
 if (!defined('WPINC')) {
     die;
@@ -127,12 +122,11 @@ if (!defined('TTA_DEBUG_MODE')) {
     define('TTA_DEBUG_MODE', 0);
 }
 
+if (!defined('TTA_ENABLE_RESET_UI')) {
+    define('TTA_ENABLE_RESET_UI', );
+}
+
 if (!defined('TTA_REQUIRED_PRO_VERSION')) {
-    // TTS-250: minimum AtlasVoice Pro add-on version that mounts the UI moved
-    // out of the free plugin (Listening voice settings, voice-provider
-    // integrations, player-2..6 preview). Free shows an "update the add-on"
-    // notice when an older Pro is active. Bump this when the free plugin starts
-    // to depend on a newer add-on contract.
     define('TTA_REQUIRED_PRO_VERSION', '3.3.1');
 }
 
@@ -330,61 +324,6 @@ add_action('admin_init', function () {
             update_option( 'tta_analytics_settings', $analytics, false );
         }
         update_option( 'tta_analytics_migrated_2_1_10', true, false );
-    }
-
-    // TTS-238 D27.25 — One-shot cleanup of legacy storage that was
-    // retired by the v5 picker collapse. The picker, dashboard, runtime
-    // extractor, RuleResolver, and breadcrumb metabox all read from the
-    // new canonical keys (tta_settings_data flat + tts_pro_custom_css_selectors
-    // post meta) since D27.21. The two stores below are now write-only
-    // dead drops on installs that ever had AtlasVoice rules saved.
-    if ( ! get_option( 'tta_d27_legacy_cleanup_done' ) ) {
-        delete_option( 'tta_atlasvoice_selectors' );
-
-        // TTS-238 D27.28 — heal log + boilerplate detector retired.
-        delete_option( 'tta_atlasvoice_heal_log' );
-        delete_option( 'tta_atlasvoice_boilerplate_suggestions' );
-        $boilerplate_cron = wp_next_scheduled( 'tta_atlasvoice_detect_boilerplate' );
-        if ( $boilerplate_cron ) {
-            wp_unschedule_event( $boilerplate_cron, 'tta_atlasvoice_detect_boilerplate' );
-        }
-
-        // TTS-238 D27.29 — rule-snapshot ring buffer retired.
-        delete_option( 'tta_atlasvoice_snapshots' );
-
-        // TTS-238 D27.31 — AuthVariants retired. Strip per-post
-        // variant pin + sample ring meta in batches.
-        foreach ( array( '_tta_mp3_variant', '_tta_atlasvoice_auth_samples' ) as $orphan_meta_key ) {
-            $orphan_ids = get_posts( array(
-                'post_type'      => 'any',
-                'post_status'    => 'any',
-                'posts_per_page' => 200,
-                'fields'         => 'ids',
-                'meta_key'       => $orphan_meta_key,
-            ) );
-            foreach ( (array) $orphan_ids as $orphan_pid ) {
-                delete_post_meta( $orphan_pid, $orphan_meta_key );
-            }
-        }
-
-        // Strip per-post `_atlasvoice_post_rules` meta in batches so a
-        // huge site doesn't blow memory on this admin_init pass.
-        $orphan_meta_post_ids = get_posts( array(
-            'post_type'      => 'any',
-            'post_status'    => 'any',
-            'posts_per_page' => 200,
-            'fields'         => 'ids',
-            'meta_key'       => '_atlasvoice_post_rules',
-        ) );
-        foreach ( (array) $orphan_meta_post_ids as $orphan_pid ) {
-            delete_post_meta( $orphan_pid, '_atlasvoice_post_rules' );
-        }
-        // If we hit the batch ceiling there are likely more rows to
-        // clean; defer marking the migration done until a later request
-        // so the next admin_init keeps draining the queue.
-        if ( count( $orphan_meta_post_ids ) < 200 ) {
-            update_option( 'tta_d27_legacy_cleanup_done', true, false );
-        }
     }
 
     // Allow resetting onboarding via ?page=text-to-audio&reset_onboard=true

@@ -213,7 +213,12 @@ class StepRail {
 						</div>
 						<div class="av-step__body">
 							<p class="av-hint"><?php echo esc_html__( 'Elements with these tag names are skipped (e.g. aside, figure, blockquote).', 'text-to-audio' ); ?></p>
-							<div class="av-tags-checkboxes"><?php echo self::render_common_tag_checkboxes(); ?></div>
+							<div class="av-tags-checkboxes"><?php
+								// render_common_tag_checkboxes() builds static markup
+								// and escapes every dynamic value internally with
+								// esc_attr()/esc_html(); safe to echo verbatim.
+								echo self::render_common_tag_checkboxes(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							?></div>
 							<div class="av-chips" role="list"></div>
 							<div class="av-chip-add">
 								<input type="text" class="av-chip-input" placeholder="<?php echo esc_attr__( 'Tag name (e.g. aside)…', 'text-to-audio' ); ?>" />
@@ -308,6 +313,16 @@ class StepRail {
 	// Common tag checkboxes for excl_tags step
 	// -----------------------------------------------------------------------
 
+	/**
+	 * Build the "Skip these tag types" checkbox row.
+	 *
+	 * Returns ready-to-print HTML: the structure is a hardcoded string
+	 * literal and every interpolated value (`$id`, `$tag`) is escaped
+	 * with esc_attr()/esc_html() before concatenation, so the caller
+	 * can echo the return value directly.
+	 *
+	 * @return string Escaped HTML markup.
+	 */
 	protected static function render_common_tag_checkboxes() {
 		// TTS-238 D27.34 — `script` and `style` added to the default
 		// "Skip these tag types" set. Their text content (JS source,

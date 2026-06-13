@@ -66,9 +66,15 @@ class VerifyAcrossPosts {
 		if ( $orderby === 'date_desc' ) { $wp_orderby = 'date'; $wp_order = 'DESC'; }
 		if ( $orderby === 'date_asc'  ) { $wp_orderby = 'date'; $wp_order = 'ASC';  }
 
+		// TTS-238 — avoid post__not_in (flagged by the VIP performance
+		// sniff for its NOT IN subquery). We only ever exclude the single
+		// post the admin is picking on, so over-fetch by one and drop
+		// that id in PHP after the query instead.
+		$fetch = ( $exclude_post_id > 0 ) ? ( $size + 1 ) : $size;
+
 		$args = array(
 			'post_status'    => 'publish',
-			'posts_per_page' => $size,
+			'posts_per_page' => $fetch,
 			'orderby'        => $wp_orderby,
 			'order'          => $wp_order,
 			'fields'         => 'ids',
@@ -76,10 +82,6 @@ class VerifyAcrossPosts {
 			// Re-run multilingual plugin filters so `lang` below works.
 			'suppress_filters' => false,
 		);
-
-		if ( $exclude_post_id > 0 ) {
-			$args['post__not_in'] = array( $exclude_post_id );
-		}
 
 		if ( (string) $post_type !== '' ) {
 			$args['post_type'] = $post_type;
@@ -104,6 +106,15 @@ class VerifyAcrossPosts {
 		if ( ! is_array( $ids ) ) {
 			return array();
 		}
+
+		// Drop the excluded post in PHP (replaces post__not_in), then
+		// trim back to the requested sample size.
+		if ( $exclude_post_id > 0 ) {
+			$ids = array_values( array_filter( $ids, function ( $id ) use ( $exclude_post_id ) {
+				return (int) $id !== (int) $exclude_post_id;
+			} ) );
+		}
+		$ids = array_slice( $ids, 0, $size );
 
 		$out = array();
 		foreach ( $ids as $id ) {

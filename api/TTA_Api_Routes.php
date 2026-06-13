@@ -447,6 +447,18 @@ class TTA_Api_Routes {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function reset_plugin_data( $request ) {
+		// TTS-247: destructive reset is gated behind TTA_ENABLE_RESET_UI
+		// (default false; flip on a test site only). The Settings UI hides
+		// the Danger zone when this is off, but we enforce it server-side
+		// too so the endpoint can't be hit directly while disabled.
+		if ( ! ( defined( 'TTA_ENABLE_RESET_UI' ) && TTA_ENABLE_RESET_UI ) ) {
+			return new \WP_Error(
+				'rest_forbidden',
+				__( 'The reset tool is disabled.', 'text-to-audio' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		$body    = json_decode( (string) $request->get_body(), true );
 		$confirm = is_array( $body ) && isset( $body['confirm'] ) ? (string) $body['confirm'] : '';
 		if ( 'DELETE' !== $confirm ) {

@@ -151,6 +151,10 @@ class TTA_Admin
             'settings' => $settings,
             'player_customizations' => apply_filters('tts_player_customizations', $this->build_player_customizations()),
             'is_mobile' => wp_is_mobile(),
+            // TTS-247: gates the Settings "Danger zone — reset all plugin
+            // data" tool in the React dashboard. Defined in the plugin
+            // main file (default false); flip via wp-config on a test site.
+            'enable_reset_ui' => defined('TTA_ENABLE_RESET_UI') && TTA_ENABLE_RESET_UI,
             'current_plugin_slug' => 'text-to-audio',
             'detected_caching_plugins' => TTA_Helper::get_detected_caching_plugins(),
             'latest_post_preview_url'  => '', // populated lazily in enqueue to avoid early get_permalink() call
