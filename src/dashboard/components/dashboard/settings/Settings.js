@@ -180,18 +180,18 @@ export default function Settings() {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Merge of develop (TTS-249) + TTS-238 D27.4 Pro-gating strip.
-        // When the AtlasVoice picker addon isn't functional (= Free without
-        // Pro), drop:
-        //   - the include selector (develop behavior; the picker is Pro-only)
-        //   - the three exclude fields (TTS-238 D27.4)
-        //   - the per-post-type override map (TTS-238 D27.4)
-        // and surface a toast if any non-empty value was actually dropped
-        // so the admin knows fields were stripped server-side.
+        // TTS-247 — Free vs Pro field gating.
+        // On Free (AtlasVoice Pro add-on not active) the Include selector is a
+        // genuine, functional Free feature and MUST be saved. Only the Pro-only
+        // fields are dropped:
+        //   - the three exclude fields (CSS / tags / texts)
+        //   - the per-post-type override map
+        // These fields are no longer rendered on Free (ScopeAccordion hides
+        // them), so this strip is just server-side defense-in-depth. We surface
+        // a toast if any non-empty value was actually dropped.
         let droppedCount = 0;
         if (!ttsObj.is_atlasvoice_addon_functional) {
-            ["tta__settings_css_selectors",
-             "tta__settings_exclude_content_by_css_selectors",
+            ["tta__settings_exclude_content_by_css_selectors",
              "tta__settings_exclude_tags",
              "tta__settings_exclude_texts"].forEach((k) => {
                 const v = settings[k];
