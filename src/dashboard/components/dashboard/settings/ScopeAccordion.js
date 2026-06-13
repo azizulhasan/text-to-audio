@@ -155,7 +155,7 @@ function ProBanner() {
                 <strong>{__("Excludes are a Pro feature", "text-to-audio")}</strong>
                 <div className="mt-1">
                     {__(
-                        "You can type into all four fields below, but only Include Content By CSS Selectors saves on Free. The other three are ignored until you upgrade.",
+                        "On Free you can set the Include Content By CSS Selectors rule below. Excluding content by CSS selectors, HTML tags, or text — plus per-post and per-post-type targeting — are AtlasVoice Pro features.",
                         "text-to-audio"
                     )}
                 </div>
@@ -311,7 +311,11 @@ function ScopeSection({scopeKind, postType, settings, handleChange, isPro}) {
 
                 {showProBanner && <ProBanner />}
 
-                {FIELDS.map((f) => (
+                {/* TTS-247 — wp.org Guideline 5: the free build must not
+                    render interactive Pro controls. On Free we show only the
+                    non-gated fields (Include); the Pro-gated exclude fields are
+                    not rendered at all (the ProBanner above is the CTA). */}
+                {FIELDS.filter((f) => isPro || !f.proGated).map((f) => (
                     <Form.Group className="mb-3" key={f.key}>
                         <Form.Label className="setting-label">
                             {f.label}

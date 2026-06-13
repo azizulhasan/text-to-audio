@@ -123,7 +123,7 @@ if (!defined('TTA_DEBUG_MODE')) {
 }
 
 if (!defined('TTA_ENABLE_RESET_UI')) {
-    define('TTA_ENABLE_RESET_UI', );
+    define('TTA_ENABLE_RESET_UI', false);
 }
 
 if (!defined('TTA_REQUIRED_PRO_VERSION')) {

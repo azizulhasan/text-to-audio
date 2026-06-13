@@ -91,6 +91,13 @@ class StepRail {
 		$pro       = ( class_exists( '\\TTA\\AtlasVoice\\PerPostRules' ) && PerPostRules::available() ) ? '1' : '0';
 		$auto_open = isset( $_GET[ self::AUTO_PARAM ] ) ? '1' : '0'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
+		// TTS-247: wp.org Guideline 5 — the free build must not render
+		// interactive Pro controls. On Free the three "skip" steps below
+		// (CSS excludes, tag excludes, phrase excludes) are replaced by a
+		// single, clearly-promotional Upgrade CTA instead of editable
+		// controls that pop an upgrade modal on use.
+		$upgrade_url = apply_filters( 'tts_upgrade_url', 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/' );
+
 		$settings     = class_exists( '\\TTA\\TTA_Helper' ) ? \TTA\TTA_Helper::tts_get_settings( 'settings' ) : array();
 		$add_title    = ! empty( $settings['tta__settings_add_post_title_to_read'] )    ? '1' : '0';
 		$add_excerpt  = ! empty( $settings['tta__settings_add_post_excerpt_to_read'] )  ? '1' : '0';
@@ -180,6 +187,7 @@ class StepRail {
 						</div>
 					</section>
 
+					<?php if ( '1' === $pro ) : ?>
 					<!-- Step ④ Skip areas (CSS excludes) — Pro -->
 					<section class="av-step av-step--chips" data-step="tta__settings_exclude_content_by_css_selectors" data-chip-kind="tta__settings_exclude_content_by_css_selectors">
 						<div class="av-step__head">
@@ -243,6 +251,21 @@ class StepRail {
 							</div>
 						</div>
 					</section>
+					<?php else : ?>
+					<!-- Free: single promotional CTA in place of the three Pro
+					     "skip" steps. No interactive controls — Guideline 5. -->
+					<section class="av-step av-step--pro-cta" data-step="pro-cta">
+						<div class="av-step__head">
+							<span class="av-step__num">&#9314;</span>
+							<strong><?php echo esc_html__( 'Skip areas, tags & phrases', 'text-to-audio' ); ?></strong>
+							<span class="av-pro-pill-static">Pro</span>
+						</div>
+						<div class="av-step__body">
+							<p class="av-hint"><?php echo esc_html__( 'Excluding areas, HTML tags, and phrases from narration is an AtlasVoice Pro feature. On Free you can set the content region above.', 'text-to-audio' ); ?></p>
+							<a class="av-btn av-btn--upgrade" href="<?php echo esc_url( $upgrade_url ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html__( 'Upgrade to Pro', 'text-to-audio' ); ?> &rarr;</a>
+						</div>
+					</section>
+					<?php endif; ?>
 
 					<!-- Step ⑦ Verify across posts — D14 -->
 					<section class="av-step" data-step="verify">
@@ -540,6 +563,18 @@ class StepRail {
   padding:1px 6px;line-height:1.6;vertical-align:middle;
 }
 .av-pro-pill[hidden]{display:none !important;}
+/* Static (always-visible) Pro pill used by the Free upgrade CTA step. */
+.av-pro-pill-static{
+  display:inline-block;font-size:10px;font-weight:700;
+  letter-spacing:.04em;text-transform:uppercase;
+  background:#7c3aed;color:#fff;border-radius:3px;
+  padding:1px 6px;line-height:1.6;vertical-align:middle;margin-left:6px;
+}
+.av-btn--upgrade{
+  background:#7c3aed!important;color:#fff!important;border-color:#7c3aed!important;
+  margin-top:8px;
+}
+.av-btn--upgrade:hover{background:#6d28d9!important;color:#fff!important;}
 
 /* ── Buttons ────────────────────────────────────────────────── */
 /* Theme-defensive: aggressive themes (Avada, Divi, etc.) ship rules
