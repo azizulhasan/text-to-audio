@@ -788,12 +788,13 @@ export default function Settings() {
                                 </div>
 
                                 {/* TTS-247 — Danger zone: reset all plugin data.
-                                    Restored after merge — develop had this JSX in
-                                    conflict block #3 of Settings.js; the handler
-                                    (`handleReset`) + REST endpoint
-                                    (POST /tta/v1/reset_plugin_data) were preserved
-                                    during the merge but the rendered block was
-                                    dropped. Re-pasted here verbatim from develop. */}
+                                    Gated behind the TTA_ENABLE_RESET_UI constant
+                                    (shipped via ttsObj.enable_reset_ui). Default
+                                    OFF in production; flip on a test site only.
+                                    The REST endpoint enforces the same constant
+                                    server-side, so hiding this block doesn't leave
+                                    a reachable destructive endpoint. */}
+                                {ttsObj.enable_reset_ui && (
                                 <div
                                     style={{
                                         marginTop: "32px",
@@ -879,6 +880,7 @@ export default function Settings() {
                                         </button>
                                     </div>
                                 </div>
+                                )}
 
                                 {/* Save Button */}
                                 <div
