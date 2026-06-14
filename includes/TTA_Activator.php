@@ -257,6 +257,13 @@ class TTA_Activator {
 		}
 
 		$opt = get_option( 'tta_settings_data' );
+		// The dashboard stores tta_settings_data as a stdClass (json_decode),
+		// so guard for both shapes — an is_array()-only check would skip the
+		// grandfather on every real site and leave existing users stuck in
+		// staging (no player). Normalise object -> array first.
+		if ( is_object( $opt ) ) {
+			$opt = json_decode( wp_json_encode( $opt ), true );
+		}
 		if ( is_array( $opt ) && ! array_key_exists( 'tta__settings_atlasvoice_mode', $opt ) ) {
 			$opt['tta__settings_atlasvoice_mode'] = 'production';
 			update_option( 'tta_settings_data', $opt );

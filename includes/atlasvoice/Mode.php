@@ -110,6 +110,14 @@ class Mode {
 	public static function set( $mode ) {
 		$mode = ( $mode === self::MODE_PRODUCTION ) ? self::MODE_PRODUCTION : self::MODE_STAGING;
 		$opt  = get_option( 'tta_settings_data', array() );
+		// TTS-247 — the dashboard saves tta_settings_data via json_decode(),
+		// so it is frequently a stdClass, not an array. Casting an object to
+		// array() here would WIPE every other setting and write only the mode
+		// key. Normalise object -> array (deep) so all existing settings are
+		// preserved on Go Live / revert.
+		if ( is_object( $opt ) ) {
+			$opt = json_decode( wp_json_encode( $opt ), true );
+		}
 		if ( ! is_array( $opt ) ) {
 			$opt = array();
 		}
