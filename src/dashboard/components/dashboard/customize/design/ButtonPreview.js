@@ -57,8 +57,8 @@ export default function ButtonPreview({
   const colors = useMemo(() => {
     const bg = buttonStyle?.backgroundColor || "#184c53";
     const color = buttonStyle?.color?.replace?.(/[#"]/g, "") ? buttonStyle.color : "#ffffff";
-    const hoverBg = buttonStyle?.hoverBackgroundColor || "#f0f0f0";
-    const hoverText = buttonStyle?.hoverTextColor || "#000000";
+    const hoverBg = buttonStyle?.hoverBackgroundColor || "#000000";
+    const hoverText = buttonStyle?.hoverTextColor || "#ffffff";
     return { bg, color, hoverBg, hoverText };
   }, [buttonStyle]);
 
