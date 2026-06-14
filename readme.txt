@@ -492,6 +492,3 @@ Introduced :  Complete new UI introduced.
 
 = 2.2.5 =
 Fixes several text-to-speech reading issues (punctuation, headings, lists, abbreviations and numbers), restores the full-width Listen button, and fixes playback when the player is used across multiple browser tabs. Update recommended.
-
-= 2.2.4 =
-Fixes the Pro player (players 3-6) showing as blank until first mouse movement on sites using Perfmatters' Remove Unused CSS (RUCSS) feature. Update recommended if you use Perfmatters.
