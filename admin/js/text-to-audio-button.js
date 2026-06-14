@@ -699,6 +699,8 @@ class TTSPlayButton extends HTMLElement {
      * Initialize NEW player with settings modal functionality
      */
     initNewPlayer(shadow, buttonId, contents, settings) {
+        console.log(contents[buttonId])
+
         // Initialize modal manager
         TTSSettingsModalManager.init();
 
