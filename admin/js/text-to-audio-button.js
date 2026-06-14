@@ -707,8 +707,8 @@ class TTSPlayButton extends HTMLElement {
         const colors = ttsObj?.settings?.customize || {};
         const bgColor = colors.backgroundColor || '#184c53';
         const textColor = colors.color || '#ffffff';
-        const hoverBgColor = colors.hoverBackgroundColor || '#f0f0f0';
-        const hoverTextColor = colors.hoverTextColor || '#000000';
+        const hoverBgColor = colors.hoverBackgroundColor || '#000000';
+        const hoverTextColor = colors.hoverTextColor || '#ffffff';
 
         // TTS-249: render straight into the host (light DOM, player 1) or into
         // the shadow root (players 2-6) — no extra .wrapper / region div. The
