@@ -62,29 +62,34 @@ tts-play-button,
 }
 
 .tts__listent_content:hover {
-    background-color: var(--tts-hover-bg, #f0f0f0) !important;
+    background-color: var(--tts-hover-bg, #000000) !important;
     /* set colour on the button so SVG presets using currentColor inherit it */
-    color: var(--tts-hover-color, #000000) !important;
+    color: var(--tts-hover-color, #ffffff) !important;
 }
 
 .tts__listent_content:hover .tts_button_label,
 .tts__listent_content:hover span {
-    color: var(--tts-hover-color, #000000);
+    color: var(--tts-hover-color, #ffffff);
 }
 
 .tts__listent_content:hover svg polygon,
 .tts__listent_content:hover svg path {
-    fill: var(--tts-hover-color, #000000);
+    fill: var(--tts-hover-color, #ffffff);
 }
 
 .tts__listent_content:hover svg[stroke] path,
 .tts__listent_content:hover svg[stroke] line,
 .tts__listent_content:hover .tts-settings-icon svg path,
 .tts__listent_content:hover .tts-settings-icon svg circle {
-    stroke: var(--tts-hover-color, #000000);
+    stroke: var(--tts-hover-color, #ffffff);
 }
 
-.tts__listent_content .tts_button {
+/* TTS-251: center the icon + label. Both class names are covered because the two
+   button-build paths disagree (utilities.js emits .tts_button, the live player
+   emits .tts-button-left). Without flex centering the inline icon baseline-aligns
+   and sits ~1.6px above the text's optical centre. */
+.tts__listent_content .tts_button,
+.tts__listent_content .tts-button-left {
     display: inline-flex;
     align-items: center;
     gap: 8px;

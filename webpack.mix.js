@@ -33,7 +33,16 @@ mix.webpackConfig({
         // propagate to webpack's chunk URLs). The hash changes only when a chunk's
         // content changes, so the main bundle re-fetched on the ?ver bump points at
         // the new chunk name → guaranteed cache-miss → fresh fetch.
-        chunkFilename: 'chunks/[name].[contenthash].chunk.js',
+        //
+        // TTS-253: but ONLY hash in production. In dev/watch every rebuild changes the
+        // hash AND the MoveChunksPlugin (below) deletes the old chunk, so an already-
+        // open dashboard whose runtime still points at the previous hash throws
+        // `ChunkLoadError: Loading chunk failed` when you click a not-yet-loaded tab.
+        // Stable dev names are overwritten in place (never deleted), so the open
+        // dashboard keeps resolving them. Prod keeps the hash for cache-busting.
+        chunkFilename: process.env.NODE_ENV === 'production'
+            ? 'chunks/[name].[contenthash].chunk.js'
+            : 'chunks/[name].chunk.js',
     },
     plugins: [
         {

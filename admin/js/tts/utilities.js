@@ -1,7 +1,12 @@
+// TTS-252: sentence splitting is delegated to a shared, abbreviation/number-aware
+// module so the highlighter (here) and the audio engine (speak-tts/lib/utils.js)
+// chunk text identically. See admin/js/tts/sentence-splitter.js.
+import { splitSentences as sharedSplitSentences } from './sentence-splitter.js';
+
 /**
- * 
- * @param {*} value 
- * @returns 
+ *
+ * @param {*} value
+ * @returns
  */
 export const isString = function isString(value) {
     return typeof value === 'string' || value instanceof String;
@@ -21,12 +26,7 @@ export const trim = function (value) {
  * @param {*} text 
  * @returns 
  */
-export const splitSentences = function splitSentences(text = '') {
-
-    return text.replace(/\.+/g, '.|').replace(/\?/g, '?|').replace(/\!/g, '!|').split("|").map(function (sentence) {
-        return trim(sentence);
-    }).filter(Boolean);
-};
+export const splitSentences = sharedSplitSentences;
 
 
 export const getButtonContent = (buttonId, cssClass, isProLicenseActive) => {
