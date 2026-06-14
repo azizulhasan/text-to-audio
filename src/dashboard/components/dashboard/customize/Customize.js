@@ -28,8 +28,8 @@ export default function Customize() {
   const defaultValue = {
     backgroundColor: "#ffffff",
     color: "#000000",
-    hoverBackgroundColor: "#f0f0f0",
-    hoverTextColor: "#000000",
+    hoverBackgroundColor: "#000000",
+    hoverTextColor: "#ffffff",
     width: "100",
     height: "50",
     border: "2",

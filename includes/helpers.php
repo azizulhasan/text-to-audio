@@ -916,8 +916,8 @@ function tta_get_player_button_inline_css()
     $margin_bottom   = isset($customize['marginBottom']) ? $customize['marginBottom'] . 'px' : '0px';
     $margin_left     = isset($customize['marginLeft']) ? $customize['marginLeft'] . '%' : '0%';
     $margin_right    = isset($customize['marginRight']) ? $customize['marginRight'] . 'px' : '0px';
-    $hover_bg        = isset($customize['hoverBackgroundColor']) ? $customize['hoverBackgroundColor'] : '#f0f0f0';
-    $hover_color     = isset($customize['hoverTextColor']) ? $customize['hoverTextColor'] : '#000000';
+    $hover_bg        = isset($customize['hoverBackgroundColor']) ? $customize['hoverBackgroundColor'] : '#000000';
+    $hover_color     = isset($customize['hoverTextColor']) ? $customize['hoverTextColor'] : '#ffffff';
     $icon_display    = (isset($settings['tta__settings_display_btn_icon']) && $settings['tta__settings_display_btn_icon']) ? 'inline-block' : 'none';
 
     $css  = '.tts__listent_content{';
