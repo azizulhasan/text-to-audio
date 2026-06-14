@@ -706,6 +706,27 @@ class TTA_Api_Routes {
 				}
 			}
 
+			// TTS-247 — the staging/live mode lives inside tta_settings_data,
+			// but the dashboard Settings UI doesn't manage it, so a full-option
+			// save here would drop the key and silently revert the site to
+			// staging (player + MP3 generation vanish). Preserve the stored
+			// mode whenever the incoming payload doesn't carry it.
+			$existing_raw = get_option( 'tta_settings_data' );
+			$existing_arr = is_object( $existing_raw )
+				? json_decode( wp_json_encode( $existing_raw ), true )
+				: ( is_array( $existing_raw ) ? $existing_raw : array() );
+			if ( isset( $existing_arr['tta__settings_atlasvoice_mode'] ) ) {
+				$incoming_has_mode = ( is_object( $fields ) && isset( $fields->tta__settings_atlasvoice_mode ) )
+					|| ( is_array( $fields ) && isset( $fields['tta__settings_atlasvoice_mode'] ) );
+				if ( ! $incoming_has_mode ) {
+					if ( is_object( $fields ) ) {
+						$fields->tta__settings_atlasvoice_mode = $existing_arr['tta__settings_atlasvoice_mode'];
+					} elseif ( is_array( $fields ) ) {
+						$fields['tta__settings_atlasvoice_mode'] = $existing_arr['tta__settings_atlasvoice_mode'];
+					}
+				}
+			}
+
 			update_option( 'tta_settings_data', $fields );
 
 			// Mark onboarding as completed if flag is present.
