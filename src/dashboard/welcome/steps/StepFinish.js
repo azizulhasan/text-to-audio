@@ -1,12 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 
 const wizardData = window.ttsWizardData || {};
 
 /**
  * Finish screen with setup summary, Pro upsell, and cross-promo.
+ *
+ * TTS-247 — also hosts the Go Live decision: setup leaves the site in
+ * staging (player hidden, no MP3 cost) so the admin commits to production
+ * here, only after configuring + verifying content.
  */
 const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
+    const [goneLive, setGoneLive] = useState(false);
+    const [goingLive, setGoingLive] = useState(false);
+    const [liveErr, setLiveErr] = useState('');
+    const docUrl = wizardData.steprail_doc_url || '';
+
+    const goLive = async () => {
+        setGoingLive(true);
+        setLiveErr('');
+        try {
+            const res = await fetch((wizardData.api_url || '/wp-json/tta/v1/') + 'mode', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'X-WP-Nonce': wizardData.nonce || '', 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'go-live', confirm: 'GO LIVE' }),
+            });
+            const json = await res.json();
+            if (res.ok && json && json.status) {
+                setGoneLive(true);
+            } else {
+                setLiveErr((json && json.message) || __('Could not go live. Please try from the dashboard.', 'text-to-audio'));
+            }
+        } catch (e) {
+            setLiveErr(__('Could not go live. Please try from the dashboard.', 'text-to-audio'));
+        } finally {
+            setGoingLive(false);
+        }
+    };
+
     const postTypes = wizardData.post_types || [];
     const matched = postTypes.find((pt) => pt.slug === selectedPostType);
     const postTypeLabel = matched ? matched.label : selectedPostType;
@@ -293,50 +325,83 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
                     />
                 </svg>
 
-                <h2 style={styles.heading}>
-                    {__('AtlasVoice is ready!', 'text-to-audio')}
-                </h2>
-
-                <p style={styles.subheading}>
-                    {sprintf(
-                        /* translators: %s: post type label (e.g. "Posts", "Pages") */
-                        __('Your audio player is now live on all your %s.', 'text-to-audio'),
-                        postTypeLabel
-                    )}
-                </p>
-
-                <div style={styles.buttons}>
-                    {wizardData.latest_post_url && (
-                        <a
-                            href={wizardData.latest_post_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={styles.btnPrimary}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = '#ff5533';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = '#FF7853';
-                            }}
-                        >
-                            {__('View Player on Your Site', 'text-to-audio')}
-                            <span aria-hidden="true">{'\u2197'}</span>
-                        </a>
-                    )}
-
-                    <a
-                        href={wizardData.dashboard_url || '#'}
-                        style={styles.btnSecondary}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = '#fff5f2';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = 'transparent';
-                        }}
-                    >
-                        {__('Go to Dashboard', 'text-to-audio')}
-                    </a>
-                </div>
+                {goneLive ? (
+                    <>
+                        <h2 style={styles.heading}>
+                            {__('You\u2019re live! \ud83c\udf89', 'text-to-audio')}
+                        </h2>
+                        <p style={styles.subheading}>
+                            {sprintf(
+                                /* translators: %s: post type label (e.g. "Posts", "Pages") */
+                                __('The audio player is now visible to visitors on all your %s.', 'text-to-audio'),
+                                postTypeLabel
+                            )}
+                        </p>
+                        <div style={styles.buttons}>
+                            {wizardData.latest_post_url && (
+                                <a
+                                    href={wizardData.latest_post_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={styles.btnPrimary}
+                                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#ff5533'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#FF7853'; }}
+                                >
+                                    {__('View Player on Your Site', 'text-to-audio')}
+                                    <span aria-hidden="true">{'\u2197'}</span>
+                                </a>
+                            )}
+                            <a
+                                href={wizardData.dashboard_url || '#'}
+                                style={styles.btnSecondary}
+                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#fff5f2'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                            >
+                                {__('Go to Dashboard', 'text-to-audio')}
+                            </a>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <h2 style={styles.heading}>
+                            {__('Setup complete \u2014 you\u2019re in Staging', 'text-to-audio')}
+                        </h2>
+                        <p style={styles.subheading}>
+                            {__('Your settings are saved, but the player is still hidden from visitors and no audio is generated yet. When you\u2019re happy with how your content reads, Go Live to show it on your site.', 'text-to-audio')}
+                        </p>
+                        <div style={styles.buttons}>
+                            <button
+                                type="button"
+                                style={{ ...styles.btnPrimary, cursor: goingLive ? 'wait' : 'pointer', opacity: goingLive ? 0.7 : 1 }}
+                                disabled={goingLive}
+                                onClick={goLive}
+                                onMouseEnter={(e) => { if (!goingLive) e.currentTarget.style.backgroundColor = '#ff5533'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#FF7853'; }}
+                            >
+                                {goingLive ? __('Going live\u2026', 'text-to-audio') : __('Go Live now', 'text-to-audio')}
+                                <span aria-hidden="true">{'\u2192'}</span>
+                            </button>
+                            <a
+                                href={wizardData.dashboard_url || '#'}
+                                style={styles.btnSecondary}
+                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#fff5f2'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                            >
+                                {__('Stay in Staging', 'text-to-audio')}
+                            </a>
+                        </div>
+                        {liveErr && (
+                            <p style={{ marginTop: 12, fontSize: 13, color: '#b32d2e' }}>{liveErr}</p>
+                        )}
+                        {docUrl && (
+                            <p style={{ marginTop: 14, fontSize: 13 }}>
+                                <a href={docUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#FF7853', textDecoration: 'none', fontWeight: 500 }}>
+                                    {__('How does Staging \u2192 Live work? \u2192', 'text-to-audio')}
+                                </a>
+                            </p>
+                        )}
+                    </>
+                )}
             </div>
 
             {/* ============================================================ */}
