@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.2.4
+Stable tag: 2.2.5
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -273,6 +273,13 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.2.5 ( 14 Jun 2026 ) =
+Fixed : The player no longer reads punctuation marks such as apostrophes and quotation marks aloud as the word "backslash".
+Fixed : Headings, section dividers, lists and quotes are now read as their own sentences instead of running into the next paragraph.
+Fixed : Abbreviations, decimal numbers, email addresses and initials are no longer broken up while being read.
+Fixed : The Listen button again matches the width of your content instead of appearing as a small box.
+Fixed : Playback now starts from the beginning when you open and play a post in a new browser tab.
+
 = 2.2.4 ( 11 Jun 2026 ) =
 Fixed : Plyr-backed Pro player (players 3-6) could appear blank/invisible until the first user interaction on sites running Perfmatters with the "Remove Unused CSS" (RUCSS) feature enabled. Perfmatters was rewriting our two stylesheets (`text-to-audio-pro.css`, `plyr.min.css`) to `data-pmdelayedstyle` and only swapping the real `href` back after a mousemove / scroll / touch, so the widget rendered without any styles in the meantime.
 Improved : `TTA_Hooks::init_cache_compatibility()` now also subscribes to `perfmatters_rucss_excluded_stylesheets` so the TTS/Pro stylesheets stay as ordinary `<link href>` tags at page load.
@@ -483,5 +490,5 @@ Introduced :  Complete new UI introduced.
 
 == Upgrade Notice ==
 
-= 2.2.4 =
-Fixes the Pro player (players 3-6) showing as blank until first mouse movement on sites using Perfmatters' Remove Unused CSS (RUCSS) feature. Update recommended if you use Perfmatters.
+= 2.2.5 =
+Fixes several text-to-speech reading issues (punctuation, headings, lists, abbreviations and numbers), restores the full-width Listen button, and fixes playback when the player is used across multiple browser tabs. Update recommended.
