@@ -641,6 +641,57 @@ class TTA_Notices {
 				),
 			) );
 		}
+
+		// ── Step-rail staging / live notices (TTS-247) ──────────────────────
+		// Shown only on the AtlasVoice dashboard page, branched on the current
+		// mode. Staging: a persistent status notice explaining the workflow.
+		// Production: a short, dismiss-once tip + doc link.
+		$steprail_doc = apply_filters( 'tts_steprail_doc_url', 'https://atlasaidev.com/docs/atlasvoice/content-selector-staging-live/' );
+
+		$this->register_notice( array(
+			'id'          => 'steprail_staging',
+			'title'       => '<h3>' . esc_html__( '🎚️ AtlasVoice is in Staging — not visible to visitors yet', 'text-to-audio' ) . '</h3>',
+			'message'     => '<p>' . esc_html__( 'Your audio player is hidden and no audio is generated while in Staging — so you can get it right at no cost. Use “Pick Visually” on the Settings tab to confirm the right content is read aloud, then click “Go Live” in the top admin bar to publish it to visitors.', 'text-to-audio' ) . '</p>',
+			'type'        => 'info',
+			'dismissible' => false,
+			'screens'     => array( 'toplevel_page_text-to-audio' ),
+			'condition'   => function () {
+				if ( ! current_user_can( 'manage_options' ) ) { return false; }
+				if ( ! class_exists( '\\TTA\\AtlasVoice\\Mode' ) ) { return false; }
+				return \TTA\AtlasVoice\Mode::get() !== 'production';
+			},
+			'buttons'     => array(
+				array(
+					'text'    => __( 'How Staging → Live works', 'text-to-audio' ),
+					'url'     => $steprail_doc,
+					'type'    => 'primary',
+					'new_tab' => true,
+				),
+			),
+		) );
+
+		$this->register_notice( array(
+			'id'          => 'steprail_production',
+			'title'       => '<h3>' . esc_html__( '✅ AtlasVoice is Live', 'text-to-audio' ) . '</h3>',
+			'message'     => '<p>' . esc_html__( 'Tip: AtlasVoice has a Staging → Live workflow. Before a post’s audio goes out, you can verify exactly what gets read with “Pick Visually”, then Go Live — so listeners never hear the wrong content.', 'text-to-audio' ) . '</p>',
+			'type'        => 'success',
+			'dismissible' => true,
+			'show_once'   => true,
+			'screens'     => array( 'toplevel_page_text-to-audio' ),
+			'condition'   => function () {
+				if ( ! current_user_can( 'manage_options' ) ) { return false; }
+				if ( ! class_exists( '\\TTA\\AtlasVoice\\Mode' ) ) { return false; }
+				return \TTA\AtlasVoice\Mode::get() === 'production';
+			},
+			'buttons'     => array(
+				array(
+					'text'    => __( 'Learn more', 'text-to-audio' ),
+					'url'     => $steprail_doc,
+					'type'    => 'secondary',
+					'new_tab' => true,
+				),
+			),
+		) );
 	}
 
 	// =========================================================================
