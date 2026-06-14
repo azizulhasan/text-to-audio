@@ -278,15 +278,25 @@ export default class TextToSpeech {
             this.displayApiMissing("tts__listent_content_" + this.buttonId)
             return;
         }
+
+        // TTS-253: speechSynthesis is shared across all tabs, so another tab may have
+        // left the engine stuck in a "paused" state. If we speak() while it's paused,
+        // Chrome produces no audio (or resumes the other tab's leftover). Un-stick it
+        // first — resume() to clear the paused flag, then cancel() to flush any queue —
+        // so this play always starts cleanly from our content.
+        try {
+            if (window.speechSynthesis && window.speechSynthesis.paused) {
+                window.speechSynthesis.resume();
+                window.speechSynthesis.cancel();
+            }
+        } catch (e) { /* no-op */ }
+
         speech.setLanguage(this.browser.getLanguage())
         speech.setVoice(this.browser.getVoice())
-
+        console.log(content)
         /**
          * 1. Microsoft edge browser has same voices(306 voices) for mobile and desktop
          * It uses the v8 engine as chrome browser.
-         *
-         *
-         *
          */
         speech
             .speak({
@@ -373,9 +383,22 @@ export default class TextToSpeech {
          */
         if (!this.browser.isAndroid()) {
             speech.pause();
+            // TTS-253: window.speechSynthesis is ONE engine shared across ALL browser
+            // tabs. Previously this setInterval fired cancel() every 50ms FOREVER
+            // (until resume() cleared it), so a paused tab kept hammering cancel() on
+            // the shared engine and corrupted playback in OTHER tabs (a 2nd post read
+            // from a random spot). We still assert cancel() until the engine has truly
+            // stopped — preserving the TTS-243 Chrome workaround — but then STOP, with
+            // a hard cap as a backstop, so a paused tab no longer touches the engine.
+            let cancelTries = 0;
             this.shouldCancelTimer = setInterval(() => {
                 speech.cancel();
                 this.isCanceled = true;
+                cancelTries++;
+                if (!speech.speaking() || cancelTries >= 20) {
+                    clearInterval(this.shouldCancelTimer);
+                    this.shouldCancelTimer = null;
+                }
             }, 50)
 
         } else {

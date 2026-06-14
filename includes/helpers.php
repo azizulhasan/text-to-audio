@@ -16,27 +16,32 @@ use TTA\TTA_Helper;
  */
 function tta_clean_content($text)
 {
+    // TTS-251: normalize fancy quotes/apostrophes to plain ASCII " and ' — but
+    // WITHOUT a leading backslash. The content is later wp_json_encode()'d into the
+    // inline player payload; emitting "\'" / "\\"" here makes json_encode escape the
+    // backslash to "\\\\", so the runtime string keeps a literal backslash that the
+    // speech engine (and Pro's cloud-TTS MP3 path) reads aloud as "backslash".
     $quotationMarks = array(
-        "'" => "\'",
-        '"' => '\"',
-        '&#8216;' => "\'",
-        '&#8217;' => "\'",
-        '&rsquo;' => "\'",
-        '&lsquo;' => "\'",
+        "'" => "'",
+        '"' => '"',
+        '&#8216;' => "'",
+        '&#8217;' => "'",
+        '&rsquo;' => "'",
+        '&lsquo;' => "'",
         '&#8218;' => '',
-        '&#8220;' => '\"',
-        '&#8221;' => '\"',
-        '&#8222;' => '\"',
-        '&ldquo;' => '\"',
-        '&rdquo;' => '\"',
-        '&quot;' => '\"',
+        '&#8220;' => '"',
+        '&#8221;' => '"',
+        '&#8222;' => '"',
+        '&ldquo;' => '"',
+        '&rdquo;' => '"',
+        '&quot;' => '"',
         // ADD these — actual Unicode characters (decoded by wp_strip_all_tags before replacements run)
-        "\u{201C}" => '\"',  // " LEFT DOUBLE QUOTATION MARK
-        "\u{201D}" => '\"',  // " RIGHT DOUBLE QUOTATION MARK
-        "\u{2018}" => "\'",  // ' LEFT SINGLE QUOTATION MARK
-        "\u{2019}" => "\'",  // ' RIGHT SINGLE QUOTATION MARK
-        "\u{201A}" => "\'",  // ‚ SINGLE LOW-9 QUOTATION MARK
-        "\u{201E}" => '\"',  // „ DOUBLE LOW-9 QUOTATION MARK
+        "\u{201C}" => '"',  // " LEFT DOUBLE QUOTATION MARK
+        "\u{201D}" => '"',  // " RIGHT DOUBLE QUOTATION MARK
+        "\u{2018}" => "'",  // ' LEFT SINGLE QUOTATION MARK
+        "\u{2019}" => "'",  // ' RIGHT SINGLE QUOTATION MARK
+        "\u{201A}" => "'",  // ‚ SINGLE LOW-9 QUOTATION MARK
+        "\u{201E}" => '"',  // „ DOUBLE LOW-9 QUOTATION MARK
     );
 
     $otherMarks = array(
@@ -77,6 +82,21 @@ function tta_clean_content($text)
     // elements from the HTML here. Supports .class, #id, and tag.class selectors.
     $text = TTA_Helper::strip_elements_by_css_selectors($text);
 
+    // TTS-251: Block-level elements (headings, paragraphs, list items, blockquotes,
+    // table/definition cells) and <hr>/<br> dividers often carry no terminal
+    // punctuation, so once their tags are stripped they glue onto the next block's
+    // first sentence — e.g. a heading reads "Why she did it In January 1968…", and
+    // list items run together as one breath. Insert a sentence delimiter at each
+    // block boundary (period attached to the preceding text, no leading space, so
+    // clean_string() preserves it) so every block reads — and highlights — as its
+    // own sentence. Any resulting ".." / ". ." is collapsed by
+    // TTA_Helper::clean_string() at the end of this function.
+    $text = preg_replace(
+        '#\s*(?:</(?:h[1-6]|p|li|blockquote|dd|dt|td|th)\s*>|<(?:hr|br)\b[^>]*>)\s*#i',
+        '. ',
+        $text
+    );
+
     // TTS-235: Add a space before tags only when preceded by a word character.
     // This prevents joining words when tags are stripped: "on<a>Kharg</a>" → "on Kharg"
     // But avoids adding space after punctuation: "diseases.</strong>" stays "diseases."
@@ -106,8 +126,10 @@ function tta_clean_content($text)
     $text = str_replace(array_keys($otherMarks), array_values($otherMarks), $text);
 
 
-    $text = preg_replace('/\\\\{2,}"/', '\"', $text);
-    $text = preg_replace("/\\\\{2,}'/", "\'", $text);
+    // TTS-251: strip any backslash(es) appearing immediately before a quote or
+    // apostrophe so a literal "\" is never spoken — covers both our own past
+    // escaping and any backslashes present in the source content.
+    $text = preg_replace('/\\\\+(?=["\'])/', '', $text);
 
     $text = TTA_Helper::clean_string($text);
 
@@ -894,8 +916,8 @@ function tta_get_player_button_inline_css()
     $margin_bottom   = isset($customize['marginBottom']) ? $customize['marginBottom'] . 'px' : '0px';
     $margin_left     = isset($customize['marginLeft']) ? $customize['marginLeft'] . '%' : '0%';
     $margin_right    = isset($customize['marginRight']) ? $customize['marginRight'] . 'px' : '0px';
-    $hover_bg        = isset($customize['hoverBackgroundColor']) ? $customize['hoverBackgroundColor'] : '#f0f0f0';
-    $hover_color     = isset($customize['hoverTextColor']) ? $customize['hoverTextColor'] : '#000000';
+    $hover_bg        = isset($customize['hoverBackgroundColor']) ? $customize['hoverBackgroundColor'] : '#000000';
+    $hover_color     = isset($customize['hoverTextColor']) ? $customize['hoverTextColor'] : '#ffffff';
     $icon_display    = (isset($settings['tta__settings_display_btn_icon']) && $settings['tta__settings_display_btn_icon']) ? 'inline-block' : 'none';
 
     $css  = '.tts__listent_content{';
