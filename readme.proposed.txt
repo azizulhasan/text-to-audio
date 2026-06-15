@@ -12,11 +12,11 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 Free text to speech with browser voices + premium AI voices from Google, OpenAI & ElevenLabs. Add an audio player to any WordPress post.
 
 == Description ==
-**AtlasVoice â€” Text To Speech TTS Accessibility** is the most user-friendly text-to-speech plugin for WordPress and WooCommerce. Convert any post, page, or product description into natural-sounding audio with one click. The free version uses the browser's built-in speechSynthesis engine with 20â€“300+ voices across all major browsers. Upgrade to Pro for **AtlasVoice's own AI voice engine** (included with Pro â€” no extra API costs), or connect premium third-party providers like **Google Cloud TTS**, **OpenAI (ChatGPT) TTS**, and **ElevenLabs TTS**.
+**AtlasVoice â€” Text To Speech TTS Accessibility** is the most user-friendly **text to speech plugin** for WordPress and WooCommerce, and the simplest way to add a text to audio player to your site. Convert any post, page, or product description into natural-sounding audio with one click. The free version uses the browser's built-in speechSynthesis engine with 20â€“300+ voices across all major browsers. Upgrade to Pro for **AtlasVoice's own AI voice engine** (included with Pro â€” no extra API costs), or connect premium third-party providers like **Google Cloud TTS**, **OpenAI (ChatGPT) TTS**, and **ElevenLabs TTS**.
 
 **No Registration, No Account, No API required for the free version. Simply install and let your visitors listen.**
 
-Whether you run a blog, news site, online store, or educational platform, AtlasVoice makes your content accessible to everyone â€” including users with visual impairments, reading difficulties, or those who simply prefer listening. Support **81+ languages**, **300+ AI voices**, and reach a truly global audience.
+Whether you run a blog, news site, online store, or educational platform, AtlasVoice, the free WordPress TTS plugin, makes your content accessible to everyone â€” including users with visual impairments, reading difficulties, or those who simply prefer listening. Support **81+ languages**, **300+ AI voices**, and reach a truly global audience.
 
 ### How It Works â€” 3 Simple Steps
 
@@ -43,7 +43,7 @@ Whether you run a blog, news site, online store, or educational platform, AtlasV
 * **Multilingual & Accessibility-First Websites** â€” Serve a global audience in 81+ languages and meet WCAG 2.1 / ADA compliance.
 
 
-### Why Choose AtlasVoice?
+### Why Choose AtlasVoice, the WordPress Text To Speech Plugin?
 
 1. **Accessibility & WCAG Compliance:** Help your site meet WCAG 2.1 and ADA requirements with audio alternatives for users with visual impairments, dyslexia, or reading difficulties.
 
@@ -220,15 +220,13 @@ Use the `[atlasvoice]` shortcode to add the audio player anywhere:
 
 **Get Started Today!**
 
-Boost engagement, accessibility, and SEO on your WordPress and WooCommerce site with AtlasVoice Text To Speech. Meet WCAG 2.1 accessibility standards, increase time-on-page, reduce bounce rate, and cater to a global audience in 81+ languages.
+Boost engagement, accessibility, and SEO on your WordPress and WooCommerce site with the AtlasVoice text to speech plugin. It is the easiest way to turn your content from text to audio. Meet WCAG 2.1 accessibility standards, increase time-on-page, reduce bounce rate, and cater to a global audience in 81+ languages.
 
 [Try AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) for premium AI voices, bulk MP3 generation, cloud storage backup, advanced analytics, and priority support.
 
 
 ### CHECK OUT OUR OTHER PLUGINS:
-> * [AI Workflow Automation“ MCP ](https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/) â€“ AI-powered WordPress hub with 80+ abilities, built-in MCP server, role-based access control, JWT auth, workflow builder, and WooCommerce support.
-> * [Smart Local AI“ Browser-Based Private AI Tools ](https://wordpress.org/plugins/smart-local-ai/) â€“ Privacy-first browser ML suite. Client-side AI for content recommendations, personalized suggestions, and image alt text â€” no cloud APIs needed.
-> * [Augmented Reality and 3D Model Viewer for WordPress and WooCommerce â€“ AR VR Try-On](https://wordpress.org/plugins/ar-vr-3d-model-try-on/) â€“ Turn your WooCommerce store into an immersive 3D experience. Let customers explore products in detail using interactive 3D viewers and Augmented Reality (AR) on both iOS and Android â€” no apps needed.
+> More free plugins from AtlasAiDev: [AI Workflow Automation - MCP](https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/), [Smart Local AI](https://wordpress.org/plugins/smart-local-ai/), and [AR/VR 3D Model & Try-On](https://wordpress.org/plugins/ar-vr-3d-model-try-on/).
 
 == Source code ==
 
