@@ -12,17 +12,18 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 Free text to speech with browser voices + premium AI voices from Google, OpenAI & ElevenLabs. Add an audio player to any WordPress post.
 
 == Description ==
-**AtlasVoice â€” Text To Speech TTS Accessibility** is the most user-friendly text-to-speech plugin for WordPress and WooCommerce. Convert any post, page, or product description into natural-sounding audio with one click. The free version uses the browser's built-in speechSynthesis engine with 20â€“300+ voices across all major browsers. Upgrade to Pro for **AtlasVoice's own AI voice engine** (included with Pro â€” no extra API costs), or connect premium third-party providers like **Google Cloud TTS**, **OpenAI (ChatGPT) TTS**, and **ElevenLabs TTS**.
+
+**AtlasVoice — Text To Speech TTS Accessibility** is the most user-friendly **text to speech plugin** for WordPress and WooCommerce, and the simplest way to add a text to audio player to your site. Convert any post, page, or product description into natural-sounding audio with one click. The free version uses the browser's built-in speechSynthesis engine with 20–300+ voices across all major browsers. Upgrade to Pro for **AtlasVoice's own AI voice engine** (included with Pro — no extra API costs), or connect premium third-party providers like **Google Cloud TTS**, **OpenAI (ChatGPT) TTS**, and **ElevenLabs TTS**.
 
 **No Registration, No Account, No API required for the free version. Simply install and let your visitors listen.**
 
-Whether you run a blog, news site, online store, or educational platform, AtlasVoice makes your content accessible to everyone â€” including users with visual impairments, reading difficulties, or those who simply prefer listening. Support **81+ languages**, **300+ AI voices**, and reach a truly global audience.
+Whether you run a blog, news site, online store, or educational platform, AtlasVoice, the free WordPress TTS plugin, makes your content accessible to everyone — including users with visual impairments, reading difficulties, or those who simply prefer listening. Support **81+ languages**, **300+ AI voices**, and reach a truly global audience.
 
-### How It Works â€” 3 Simple Steps
+### How It Works — 3 Simple Steps
 
-1. **Install & Activate** â€” Install the plugin from the WordPress repository. The audio player appears automatically on your selected post types.
-2. **Choose Your Voice** â€” Pick a free browser voice, use AtlasVoice's own AI engine (included with Pro), or connect a third-party AI provider (Google Cloud, OpenAI, or ElevenLabs) from the **Integration** menu.
-3. **Customize & Publish** â€” Select your player style from the **Customization** menu, choose your preferred voice and language from the **Listening** menu, and you're live.
+1. **Install & Activate** — Install the plugin from the WordPress repository. The audio player appears automatically on your selected post types.
+2. **Choose Your Voice** — Pick a free browser voice, use AtlasVoice's own AI engine (included with Pro), or connect a third-party AI provider (Google Cloud, OpenAI, or ElevenLabs) from the **Integration** menu.
+3. **Customize & Publish** — Select your player style from the **Customization** menu, choose your preferred voice and language from the **Listening** menu, and you're live.
 
 ### SOME USEFUL LINKS:
 > * [AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/)
@@ -33,17 +34,17 @@ Whether you run a blog, news site, online store, or educational platform, AtlasV
 > * [Documentation](https://atlasaidev.com/docs/)
 
 ### SUPPORT AND HAVE QUESTIONS?
-> * [Contact Us](http://atlasaidev.com/contact-us/) â€” We usually reply within 1 hour.
+> * [Contact Us](http://atlasaidev.com/contact-us/) — We usually reply within 1 hour.
 
 
 ### Who Is This For?
 
-* **Bloggers, News & Media Sites** â€” Let readers listen to articles while multitasking. Increase time-on-page and reduce bounce rate.
-* **WooCommerce & E-Learning Sites** â€” Make product descriptions and course materials listenable for shoppers and auditory learners.
-* **Multilingual & Accessibility-First Websites** â€” Serve a global audience in 81+ languages and meet WCAG 2.1 / ADA compliance.
+* **Bloggers, News & Media Sites** — Let readers listen to articles while multitasking. Increase time-on-page and reduce bounce rate.
+* **WooCommerce & E-Learning Sites** — Make product descriptions and course materials listenable for shoppers and auditory learners.
+* **Multilingual & Accessibility-First Websites** — Serve a global audience in 81+ languages and meet WCAG 2.1 / ADA compliance.
 
 
-### Why Choose AtlasVoice?
+### Why Choose AtlasVoice, the WordPress Text To Speech Plugin?
 
 1. **Accessibility & WCAG Compliance:** Help your site meet WCAG 2.1 and ADA requirements with audio alternatives for users with visual impairments, dyslexia, or reading difficulties.
 
@@ -60,13 +61,13 @@ Whether you run a blog, news site, online store, or educational platform, AtlasV
 
 * **Easy Shortcode Integration:** Add the `[atlasvoice]` shortcode to any post, page, or widget to place an audio player exactly where you want it.
 
-* **20â€“300+ Browser Voices:** Depending on the browser and operating system, access a wide range of voices. Microsoft Edge supports all available system voices; Chrome offers 20+ voices; Firefox supports core languages.
+* **20–300+ Browser Voices:** Depending on the browser and operating system, access a wide range of voices. Microsoft Edge supports all available system voices; Chrome offers 20+ voices; Firefox supports core languages.
 
-* **Analytics Dashboard:** Track how visitors interact with your audio content â€” play counts, pause events, engagement metrics, and more with the built-in [analytics dashboard](https://www.youtube.com/watch?v=amkrAtVQGBY).
+* **Analytics Dashboard:** Track how visitors interact with your audio content — play counts, pause events, engagement metrics, and more with the built-in [analytics dashboard](https://www.youtube.com/watch?v=amkrAtVQGBY).
 
 * **Text Alias:** Replace abbreviations, acronyms, or complex words with their spoken equivalents using the [Text Alias](https://www.youtube.com/watch?v=oeW652YKmG0&t=3s) feature.
 
-* **Unlimited Text-to-Speech:** Convert unlimited text to speech at no cost â€” no character limits, no monthly quotas.
+* **Unlimited Text-to-Speech:** Convert unlimited text to speech at no cost — no character limits, no monthly quotas.
 
 * **Full Customization:** Customize button color, width, border radius, hover effects, and text labels. Preview all changes in real-time from the dashboard.
 
@@ -76,11 +77,11 @@ Whether you run a blog, news site, online store, or educational platform, AtlasV
 
 * **Custom CSS Support:** Apply custom styles to the audio player using your own CSS for pixel-perfect integration with your theme.
 
-* **Custom Post Type Support:** Extend text-to-speech to any custom post type â€” WooCommerce products, portfolios, testimonials, and more. Compatible with [Advanced Custom Fields (ACF)](https://wordpress.org/plugins/advanced-custom-fields/), [Custom Post Type UI](https://wordpress.org/plugins/custom-post-type-ui/), and [Toolset Types](https://toolset.com/home/types-manage-post-types-taxonomy-and-custom-fields/).
+* **Custom Post Type Support:** Extend text-to-speech to any custom post type — WooCommerce products, portfolios, testimonials, and more. Compatible with [Advanced Custom Fields (ACF)](https://wordpress.org/plugins/advanced-custom-fields/), [Custom Post Type UI](https://wordpress.org/plugins/custom-post-type-ui/), and [Toolset Types](https://toolset.com/home/types-manage-post-types-taxonomy-and-custom-fields/).
 
 * **Clean Audio Output:** Automatically removes special characters, URLs, shortcodes, and HTML tags from content before speaking, ensuring clean, professional audio.
 
-* **Gutenberg Block:** Add and customize the AtlasVoice player directly from the Gutenberg block editor â€” adjust colors, size, and styles visually.
+* **Gutenberg Block:** Add and customize the AtlasVoice player directly from the Gutenberg block editor — adjust colors, size, and styles visually.
 
 
 ### Upgrade to AtlasVoice Pro for Advanced Features:
@@ -93,17 +94,17 @@ Unlock premium AI voices, bulk operations, cloud backup, advanced analytics, and
 
 *For each provider: select its player from the **Customization** menu, then choose voice and language from the **Listening** menu.*
 
-* **AtlasVoice TTS Pro (Included with Pro):** AtlasVoice's own AI voice engine â€” **included with your Pro license at no extra API cost**. Access **81 languages** with natural-sounding voices, smart sentence splitting, and seamless audio without mid-sentence pauses. No third-party account needed â€” just activate Pro and start generating MP3 files.
+* **AtlasVoice TTS Pro (Included with Pro):** AtlasVoice's own AI voice engine — **included with your Pro license at no extra API cost**. Access **81 languages** with natural-sounding voices, smart sentence splitting, and seamless audio without mid-sentence pauses. No third-party account needed — just activate Pro and start generating MP3 files.
 
-* **Google Cloud Text To Speech:** Integrate with [Google Cloud Text To Speech](https://cloud.google.com/text-to-speech) for enterprise-grade voices. 300+ voices across 90+ languages including **Neural2**, **WaveNet**, and **Standard** voice types. Paid service â€” billed by Google based on usage. [Learn more](https://www.youtube.com/watch?v=h4VJxM-mh74&t=200s)
+* **Google Cloud Text To Speech:** Integrate with [Google Cloud Text To Speech](https://cloud.google.com/text-to-speech) for enterprise-grade voices. 300+ voices across 90+ languages including **Neural2**, **WaveNet**, and **Standard** voice types. Paid service — billed by Google based on usage. [Learn more](https://www.youtube.com/watch?v=h4VJxM-mh74&t=200s)
 
-* **ChatGPT Text To Speech (OpenAI):** Integrate with [OpenAI Text To Speech](https://platform.openai.com/docs/guides/text-to-speech/overview) for natural-sounding audio. 6 voices â€” **Alloy, Echo, Fable, Nova, Onyx, Shimmer** â€” with Standard (tts-1) and HD (tts-1-hd) models. Paid service â€” billed by OpenAI based on usage. [Learn more](https://www.youtube.com/watch?v=h4VJxM-mh74&t=200s)
+* **ChatGPT Text To Speech (OpenAI):** Integrate with [OpenAI Text To Speech](https://platform.openai.com/docs/guides/text-to-speech/overview) for natural-sounding audio. 6 voices — **Alloy, Echo, Fable, Nova, Onyx, Shimmer** — with Standard (tts-1) and HD (tts-1-hd) models. Paid service — billed by OpenAI based on usage. [Learn more](https://www.youtube.com/watch?v=h4VJxM-mh74&t=200s)
 
-* **ElevenLabs Text To Speech:** Integrate with [ElevenLabs](https://elevenlabs.io/) for ultra-realistic AI voices. **100+ premium voices** with accent labels, plus **stability**, **similarity boost**, **style**, and **speed** controls. Real-time character usage tracking in your dashboard. Paid service â€” billed by ElevenLabs based on usage.
+* **ElevenLabs Text To Speech:** Integrate with [ElevenLabs](https://elevenlabs.io/) for ultra-realistic AI voices. **100+ premium voices** with accent labels, plus **stability**, **similarity boost**, **style**, and **speed** controls. Real-time character usage tracking in your dashboard. Paid service — billed by ElevenLabs based on usage.
 
 **Cloud Storage & Backup (Pro):**
 
-* **Google Cloud Storage Backup:** Back up generated MP3 files to [Google Cloud Storage](https://cloud.google.com/storage). Available for **all TTS providers** â€” Google Cloud TTS, ChatGPT TTS, AtlasVoice TTS Pro, and ElevenLabs TTS. Configure a Google Cloud service account JSON file from the **Integration** menu, even if using a non-Google TTS provider.
+* **Google Cloud Storage Backup:** Back up generated MP3 files to [Google Cloud Storage](https://cloud.google.com/storage). Available for **all TTS providers** — Google Cloud TTS, ChatGPT TTS, AtlasVoice TTS Pro, and ElevenLabs TTS. Configure a Google Cloud service account JSON file from the **Integration** menu, even if using a non-Google TTS provider.
 
 **Content & Playback Control (Pro):**
 
@@ -135,7 +136,7 @@ Unlock premium AI voices, bulk operations, cloud backup, advanced analytics, and
 
 * **Advanced Analytics Dashboard:** Comprehensive analytics with engagement funnels, browser breakdown, device type analysis, OS distribution, location tracking, popular posts ranking, peak hours heatmap, listening trends, and listener segments. [Watch demo](https://www.youtube.com/watch?v=amkrAtVQGBY).
 
-* **Usage Tracking:** Monitor your AI provider usage directly from the WordPress dashboard â€” track ElevenLabs character usage with real-time subscription data, or access Google Cloud and OpenAI usage dashboards with one click.
+* **Usage Tracking:** Monitor your AI provider usage directly from the WordPress dashboard — track ElevenLabs character usage with real-time subscription data, or access Google Cloud and OpenAI usage dashboards with one click.
 
 * **Search by Post ID & Date Range:** Filter analytics data by specific posts or custom date ranges to measure content performance.
 
@@ -180,22 +181,22 @@ Afrikaans, Albanian, Arabic, Armenian, Bengali, Bulgarian, Catalan, Chinese (Man
 
 The free version uses the browser's [speechSynthesis API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis), so available voices and languages depend on the user's browser and operating system:
 
-* **Chrome Desktop:** UK English, US English, Spanish (Spain), Spanish (US), French, German, Italian, Russian, Dutch, Japanese, Korean, Chinese (China, Hong Kong, Taiwan), Hindi, Indonesian, Polish, Brazilian Portuguese â€” **18+ languages**.
+* **Chrome Desktop:** UK English, US English, Spanish (Spain), Spanish (US), French, German, Italian, Russian, Dutch, Japanese, Korean, Chinese (China, Hong Kong, Taiwan), Hindi, Indonesian, Polish, Brazilian Portuguese — **18+ languages**.
 
-* **Chrome Mobile:** English (US/UK), German, Italian, Russian, French, Spanish â€” **7 languages**.
+* **Chrome Mobile:** English (US/UK), German, Italian, Russian, French, Spanish — **7 languages**.
 
-* **Microsoft Edge (Desktop & Mobile):** **All available system voices** â€” the widest selection of any browser.
+* **Microsoft Edge (Desktop & Mobile):** **All available system voices** — the widest selection of any browser.
 
-* **Firefox Desktop:** English (US/UK) â€” additional voices with OS speech packs installed.
+* **Firefox Desktop:** English (US/UK) — additional voices with OS speech packs installed.
 
-* **Firefox Mobile:** English (US/UK), German, Italian, Russian, French, Spanish â€” **7 languages**.
+* **Firefox Mobile:** English (US/UK), German, Italian, Russian, French, Spanish — **7 languages**.
 
 *Tip: For the widest voice selection on the free version, recommend Microsoft Edge to your visitors. For consistent, high-quality voices across all browsers and devices, upgrade to [AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) with premium AI voices.*
 
 
 ### Compatibility
 
-**Multilingual:** [WPML](https://wpml.org/), [GTranslate](https://wordpress.org/plugins/gtranslate/), [TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/), [Polylang](https://wordpress.org/plugins/polylang/) â€” auto-detects language and adjusts voice.
+**Multilingual:** [WPML](https://wpml.org/), [GTranslate](https://wordpress.org/plugins/gtranslate/), [TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/), [Polylang](https://wordpress.org/plugins/polylang/) — auto-detects language and adjusts voice.
 
 **Page Builders & Themes:** [Elementor](https://wordpress.org/plugins/elementor/), [Avada](https://avada.com/), [WPBakery](https://wpbakery.com/), [Divi](https://www.elegantthemes.com/)
 
@@ -210,25 +211,23 @@ The free version uses the browser's [speechSynthesis API](https://developer.mozi
 
 Use the `[atlasvoice]` shortcode to add the audio player anywhere:
 
-`[atlasvoice]` â€” Basic player.
-`[atlasvoice listen_text="Listen" pause_text="Pause" resume_text="Resume" replay_text="Replay"]` â€” Custom button text.
-`[atlasvoice text_to_read="Welcome to our website."]` â€” Custom text to read.
-`[atlasvoice class="my-custom-player"]` â€” Add CSS class.
-`[atlasvoice lang="en-GB" voice="Google UK English"]` â€” Change language and voice.
-`[atlasvoice id="42"]` â€” Read a specific post by ID.
-`[atlasvoice]This content will be read aloud.[/atlasvoice]` â€” Container tag.
+`[atlasvoice]` — Basic player.
+`[atlasvoice listen_text="Listen" pause_text="Pause" resume_text="Resume" replay_text="Replay"]` — Custom button text.
+`[atlasvoice text_to_read="Welcome to our website."]` — Custom text to read.
+`[atlasvoice class="my-custom-player"]` — Add CSS class.
+`[atlasvoice lang="en-GB" voice="Google UK English"]` — Change language and voice.
+`[atlasvoice id="42"]` — Read a specific post by ID.
+`[atlasvoice]This content will be read aloud.[/atlasvoice]` — Container tag.
 
 **Get Started Today!**
 
-Boost engagement, accessibility, and SEO on your WordPress and WooCommerce site with AtlasVoice Text To Speech. Meet WCAG 2.1 accessibility standards, increase time-on-page, reduce bounce rate, and cater to a global audience in 81+ languages.
+Boost engagement, accessibility, and SEO on your WordPress and WooCommerce site with the AtlasVoice text to speech plugin. It is the easiest way to turn your content from text to audio. Meet WCAG 2.1 accessibility standards, increase time-on-page, reduce bounce rate, and cater to a global audience in 81+ languages.
 
 [Try AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) for premium AI voices, bulk MP3 generation, cloud storage backup, advanced analytics, and priority support.
 
 
 ### CHECK OUT OUR OTHER PLUGINS:
-> * [AI Workflow Automation“ MCP ](https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/) â€“ AI-powered WordPress hub with 80+ abilities, built-in MCP server, role-based access control, JWT auth, workflow builder, and WooCommerce support.
-> * [Smart Local AI“ Browser-Based Private AI Tools ](https://wordpress.org/plugins/smart-local-ai/) â€“ Privacy-first browser ML suite. Client-side AI for content recommendations, personalized suggestions, and image alt text â€” no cloud APIs needed.
-> * [Augmented Reality and 3D Model Viewer for WordPress and WooCommerce â€“ AR VR Try-On](https://wordpress.org/plugins/ar-vr-3d-model-try-on/) â€“ Turn your WooCommerce store into an immersive 3D experience. Let customers explore products in detail using interactive 3D viewers and Augmented Reality (AR) on both iOS and Android â€” no apps needed.
+> More free plugins from AtlasAiDev: [AI Workflow Automation - MCP](https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/), [Smart Local AI](https://wordpress.org/plugins/smart-local-ai/), and [AR/VR 3D Model & Try-On](https://wordpress.org/plugins/ar-vr-3d-model-try-on/).
 
 == Source code ==
 
