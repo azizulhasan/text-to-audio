@@ -93,6 +93,8 @@ class TTA_Hooks {
 			'tts-css-selectors.min.js',
 			'AtlasVoiceAnalytics.min.js',
 			'AtlasVoicePlayerInsights.min.js',
+			'tts-extractor-engine.min.js',
+			'tts-picker.min.js',
 			'tts_button_settings',
 			'tts_button_settings_1',
 			'tts_button_settings_2',

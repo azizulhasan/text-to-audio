@@ -151,11 +151,30 @@ class TTA_Admin
             'settings' => $settings,
             'player_customizations' => apply_filters('tts_player_customizations', $this->build_player_customizations()),
             'is_mobile' => wp_is_mobile(),
+            // TTS-247: gates the Settings "Danger zone — reset all plugin
+            // data" tool in the React dashboard. Defined in the plugin
+            // main file (default false); flip via wp-config on a test site.
+            'enable_reset_ui' => defined('TTA_ENABLE_RESET_UI') && TTA_ENABLE_RESET_UI,
             'current_plugin_slug' => 'text-to-audio',
             'detected_caching_plugins' => TTA_Helper::get_detected_caching_plugins(),
             'latest_post_preview_url'  => '', // populated lazily in enqueue to avoid early get_permalink() call
 
         ];
+
+        // TTS-238 v5 §14.2 (D0d) — AtlasVoice-specific localisation fields
+        // are injected via a dedicated filter so legacy TTA_Admin stays
+        // free of AtlasVoice-surface additions (P1). The callback lives
+        // in `\TTA\AtlasVoice\LocalizeData::inject` and handles the
+        // opt-in flag, selector store, language code, capability, and
+        // lazy-seeded post context fields.
+        $this->localize_data = apply_filters(
+            'atlasvoice_localize_data',
+            $this->localize_data,
+            array(
+                'post_id'  => $post_id,
+                'settings' => $settings,
+            )
+        );
     }
 
     /**
@@ -253,6 +272,12 @@ class TTA_Admin
         if ( empty( $this->localize_data['latest_post_preview_url'] ) ) {
             $this->localize_data['latest_post_preview_url'] = TTA_Helper::get_latest_post_preview_url();
         }
+
+        // TTS-238 v5 §14.2 (D0d) — lazy pass for AtlasVoice fields that
+        // can't be computed until the main query resolves (current_post_type,
+        // current_post_id, atlasvoice_resolved_rule). The filter callback is in
+        // `\TTA\AtlasVoice\LocalizeData::inject_lazy`.
+        $this->localize_data = apply_filters( 'atlasvoice_localize_data_lazy', $this->localize_data );
 
         // TTS-249: recompute the player registry + current id lazily. The
         // constructor runs on plugins_loaded — BEFORE Pro registers its
@@ -352,6 +377,9 @@ class TTA_Admin
                 'nonce'             => wp_create_nonce( 'wp_rest' ),
                 'api_url'           => esc_url_raw( rest_url( 'tta/v1/' ) ),
                 'pro_url'           => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
+                // TTS-247: single shared doc link for the step-rail / staging
+                // system, reused by the wizard step and the dashboard notices.
+                'steprail_doc_url'  => apply_filters( 'tts_steprail_doc_url', 'https://atlasaidev.com/docs/text-to-speech/getting-started/atlasvoice-content-selector-staging-live/' ),
                 'dashboard_url'     => admin_url( 'admin.php?page=text-to-audio' ),
                 'site_locale'       => get_locale(),
                 // TTS-247: use plugin_dir_url so renamed/symlinked installs work.
@@ -483,6 +511,14 @@ class TTA_Admin
             return;
         }
 
+        // TTS-238 v5 §14.2 (D0d) — frontend lazy pass for AtlasVoice
+        // post-context fields. The admin-side enqueue_scripts() does not
+        // fire on frontend hits, so without this second pass ttsObj would
+        // have empty current_post_type/current_post_id on the live post
+        // and the first-visit auto-detect couldn't key saved selectors
+        // to the right CPT. Same filter, same callback — idempotent.
+        $this->localize_data = apply_filters( 'atlasvoice_localize_data_lazy', $this->localize_data );
+
         $player_id = get_player_id();
 
         // TTS-249: refresh the localized id/registry at render time (constructor
@@ -511,6 +547,28 @@ class TTA_Admin
         // TTS-247: ship countries-and-timezones locally instead of jsDelivr CDN (wp.org Guideline 8).
         wp_enqueue_script('atlasvoice-timezone', plugin_dir_url(__FILE__) . 'js/vendor/countries-and-timezones.min.js', [], '3.9.0', true);
         array_push($dependencies, 'atlasvoice-timezone');
+
+        // TTS-238: AtlasVoice extractor engine + visual picker.
+        // Both are gated on the opt-in setting. When opt-in is OFF (default)
+        // neither asset is enqueued — legacy extraction runs as before with
+        // zero new JS loaded on the page.
+        // Engine: loads on every page that has the player (used by getContent).
+        // Picker: loads only for logged-in users with edit capability (admin UI).
+        // D26 — opt-in flag retired; the extractor + picker bundle now load
+        // unconditionally so the new always-on architecture works.
+        $extractor_opt_in = true;
+        if ( $extractor_opt_in ) {
+            $extractor_ver = ( defined('WP_DEBUG') && WP_DEBUG )
+                ? filemtime( plugin_dir_path(__FILE__) . 'js/build/tts-extractor-engine.min.js' )
+                : $this->version;
+            wp_enqueue_script('tts-extractor-engine', plugin_dir_url(__FILE__) . 'js/build/tts-extractor-engine.min.js', [], $extractor_ver, true);
+            array_push($dependencies, 'tts-extractor-engine');
+
+            if (is_user_logged_in() && current_user_can('edit_posts')) {
+                wp_enqueue_script('tts-picker');
+            }
+        }
+
         if ($player_id > 1) {
             wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', $dependencies, $this->version, true);
             wp_localize_script('TextToSpeech', 'ttsObj', $this->localize_data);
@@ -1079,6 +1137,7 @@ class TTA_Admin
                 'title' => __( 'Toggle AtlasVoice audio player for this post', 'text-to-audio' ),
             ],
         ] );
+
     }
 
     /**
@@ -1137,6 +1196,10 @@ class TTA_Admin
             return;
         }
 
+        // TTS-247 / merge note: previous TTS-238 branch carried this as
+        // inline `<script>`. Develop moved it to a proper enqueued JS file
+        // + wp_localize_script per the WP review-team requirement (no inline
+        // scripts in templates). Take develop's version.
         wp_enqueue_style(
             'tta-admin-bar',
             plugin_dir_url( __FILE__ ) . 'css/tta-admin-bar.css',

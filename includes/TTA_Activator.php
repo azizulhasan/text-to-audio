@@ -89,10 +89,23 @@ class TTA_Activator {
 				'tta__settings_apply_number_format'                   => false,
 				"tta__settings_allow_listening_for_post_types"        => [ 'post' ],
 				"tta__settings_allow_listening_for_posts_status"      => [ 'publish' ],
-				'tta__settings_css_selectors'                         => '',
+				// D26.8 — default selector points at the legacy wrapper class
+				// emitted by Pro and (post-D26.7) Free, so a fresh install
+				// extracts content out of the box without admin config.
+				'tta__settings_css_selectors'                         => '[class*="tts_content_wrapper_"]',
 				'tta__settings_exclude_content_by_css_selectors'      => '',
 				'tta__settings_exclude_texts'                         => [],
-				'tta__settings_exclude_tags'                          => [],
+				// TTS-238 D27.34 — default-skip these tag types out of the
+				// box. Mirrors the picker's pre-checked checkbox set so a
+				// fresh install never reads aside / figure / blockquote /
+				// script / style aloud. Pipe-joined string to match the
+				// canonical storage shape.
+				'tta__settings_exclude_tags'                          => 'aside|figure|blockquote|pre|code|table|form|nav|footer|header|script|style',
+				// D26.7 — wrapper opt-out flag. Default ON so the new default
+				// selector above keeps working; admins on themes that break
+				// on the wrapper can flip this off.
+				'tta__settings_emit_legacy_wrapper'                   => true,
+				'tta__settings_atlasvoice_per_type_overrides'         => [],
 				"tta__settings_display_btn_icon"                      => true,
 				"tta__settings_exclude_post_ids"                      => [],
 				'tta__settings_stop_auto_playing_after_switching_tab' => true,
@@ -110,6 +123,13 @@ class TTA_Activator {
 				'tta__settings_text_before_content'					  => '',
 				'tta__settings_read_content_from_dom'				  => true,
 				'tta__settings_enable_tts_status'				      => true,
+				// TTS-247 — fresh installs start in STAGING. Nothing
+				// auto-generates or shows to visitors until the admin
+				// verifies content via the step-rail picker and clicks
+				// "Go Live". Existing installs are grandfathered to
+				// 'production' by TTA_Activator::maybe_set_default_mode()
+				// so their live players / MP3s never disappear on upgrade.
+				'tta__settings_atlasvoice_mode'                       => 'staging',
 			) );
 		}
 
@@ -207,6 +227,52 @@ class TTA_Activator {
 
 		self::create_analytics_table_if_not_exists();
 		self::maybe_add_analytics_indexes();
+	}
+
+	/**
+	 * TTS-247 — one-time backward-compat migration for the staging/live mode.
+	 *
+	 * The staging gate (TTA_Helper::should_load_button) hides the visitor
+	 * player and blocks MP3 generation whenever the mode is not 'production'.
+	 * Mode::get() defaults to 'staging' when the key is absent — so without
+	 * this migration, EXISTING sites would lose their live player and stop
+	 * generating audio the moment they upgrade.
+	 *
+	 * Rule: if the mode key is missing on an install that already has saved
+	 * settings, it is an upgrade of a working site → grandfather it to
+	 * 'production' so nothing changes for current users. Brand-new installs
+	 * never reach this branch because TTA_Activator::activate() already wrote
+	 * 'staging' into the default settings at activation time.
+	 *
+	 * Runs on every load but is a single guarded option read after the first
+	 * pass (the `tta_mode_default_migrated` flag). Hooked early (plugins_loaded)
+	 * so it lands before should_load_button runs on the same request — no
+	 * visitor-facing regression window.
+	 *
+	 * @return void
+	 */
+	public static function maybe_set_default_mode() {
+		if ( get_option( 'tta_mode_default_migrated' ) ) {
+			return;
+		}
+
+		$opt = get_option( 'tta_settings_data' );
+		// The dashboard stores tta_settings_data as a stdClass (json_decode),
+		// so guard for both shapes — an is_array()-only check would skip the
+		// grandfather on every real site and leave existing users stuck in
+		// staging (no player). Normalise object -> array first.
+		if ( is_object( $opt ) ) {
+			$opt = json_decode( wp_json_encode( $opt ), true );
+		}
+		if ( is_array( $opt ) && ! array_key_exists( 'tta__settings_atlasvoice_mode', $opt ) ) {
+			$opt['tta__settings_atlasvoice_mode'] = 'production';
+			update_option( 'tta_settings_data', $opt );
+			if ( class_exists( '\\TTA\\TTA_Cache' ) ) {
+				\TTA\TTA_Cache::delete( 'all_settings' );
+			}
+		}
+
+		update_option( 'tta_mode_default_migrated', true, false );
 	}
 
 
