@@ -379,7 +379,7 @@ class TTA_Admin
                 'pro_url'           => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
                 // TTS-247: single shared doc link for the step-rail / staging
                 // system, reused by the wizard step and the dashboard notices.
-                'steprail_doc_url'  => apply_filters( 'tts_steprail_doc_url', 'https://atlasaidev.com/docs/atlasvoice/content-selector-staging-live/' ),
+                'steprail_doc_url'  => apply_filters( 'tts_steprail_doc_url', 'https://atlasaidev.com/docs/text-to-speech/getting-started/atlasvoice-content-selector-staging-live/' ),
                 'dashboard_url'     => admin_url( 'admin.php?page=text-to-audio' ),
                 'site_locale'       => get_locale(),
                 // TTS-247: use plugin_dir_url so renamed/symlinked installs work.

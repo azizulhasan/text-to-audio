@@ -367,7 +367,7 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
                             {__('Setup complete \u2014 you\u2019re in Staging', 'text-to-audio')}
                         </h2>
                         <p style={styles.subheading}>
-                            {__('Your settings are saved, but the player is still hidden from visitors and no audio is generated yet. When you\u2019re happy with how your content reads, Go Live to show it on your site.', 'text-to-audio')}
+                            {__('Your settings are saved, but the player is still hidden from visitors. When you\u2019re happy with how your content reads, Go Live to show the player on your site.', 'text-to-audio')}
                         </p>
                         <div style={styles.buttons}>
                             <button
@@ -536,7 +536,7 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
                     </span>
                     <div style={styles.crossContent}>
                         <h4 style={styles.crossTitle}>
-                            {__('AI Workflow Automation — AI Agent Hub', 'text-to-audio')}
+                            {__('AtlasAI — MCP Server & AI Experiments – WooCommerce Compatible', 'text-to-audio')}
                         </h4>
                         <p style={styles.crossText}>
                             {__('Turn your WordPress into an AI-powered hub with 80+ abilities, MCP server, workflow builder & WooCommerce automation.', 'text-to-audio')}
@@ -550,6 +550,28 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
                     >
                         {__('Learn More', 'text-to-audio')}
                         {' \u2192'}
+                    </a>
+                </div>
+                <div style={{ ...styles.crossCard, marginTop: 10 }}>
+                    <span style={styles.crossIcon} aria-hidden="true">
+                        {'🥽'}
+                    </span>
+                    <div style={styles.crossContent}>
+                        <h4 style={styles.crossTitle}>
+                            {__('AtlasAR – 3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On', 'text-to-audio')}
+                        </h4>
+                        <p style={styles.crossText}>
+                            {__('Add interactive 3D model viewers and Augmented Reality try-on to your WordPress & WooCommerce store — no app needed.', 'text-to-audio')}
+                        </p>
+                    </div>
+                    <a
+                        href="https://downloads.wordpress.org/plugin/ar-vr-3d-model-try-on.2.0.2.zip"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={styles.crossLink}
+                    >
+                        {__('Download', 'text-to-audio')}
+                        {' →'}
                     </a>
                 </div>
             </div>

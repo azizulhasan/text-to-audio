@@ -90,7 +90,7 @@ const StepContentCheck = ({ postType }) => {
         <div style={styles.wrapper}>
             <h2 style={styles.heading}>{__('Check what gets read aloud', 'text-to-audio')}</h2>
             <p style={styles.sub}>
-                {__('Before going live, make sure the player reads the right part of your content — and skips menus, sidebars, and footers. AtlasVoice starts in Staging (hidden from visitors) so you can verify first, with no audio generated until you Go Live.', 'text-to-audio')}
+                {__('Before going live, make sure the player reads the right part of your content — and skips menus, sidebars, and footers. AtlasVoice starts in Staging (hidden from visitors) so you can verify it first, before the player goes live.', 'text-to-audio')}
             </p>
 
             <div style={styles.card}>
@@ -141,7 +141,7 @@ const StepContentCheck = ({ postType }) => {
             </p>
 
             <div style={styles.tip}>
-                {__('Tip: nothing is shown to visitors and no MP3s are generated while you’re in Staging — so verifying costs you nothing.', 'text-to-audio')}
+                {__('Tip: the player stays hidden from visitors while you’re in Staging, so you can verify it safely first.', 'text-to-audio')}
             </div>
         </div>
     );

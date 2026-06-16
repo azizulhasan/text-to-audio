@@ -86,14 +86,12 @@ class VerifyAcrossPosts {
 		if ( (string) $post_type !== '' ) {
 			$args['post_type'] = $post_type;
 		} else {
-			// "Any" means every public post type the user can voice — drop
-			// attachments since they don't render the picker chrome.
-			$tracked = get_post_types( array( 'public' => true ) );
-			if ( is_array( $tracked ) && ! empty( $tracked ) ) {
-				$args['post_type'] = array_values( array_filter( $tracked, function ( $slug ) {
-					return $slug !== 'attachment';
-				} ) );
-			}
+			// TTS-247 — "Any" means the post types enabled in "Allow Listening
+			// For Post Type" (default: post), not every public type. This keeps
+			// the verify sample on the types the player actually runs on.
+			$args['post_type'] = class_exists( '\\TTA\\TTA_Helper' )
+				? \TTA\TTA_Helper::get_listening_post_types()
+				: array( 'post' );
 		}
 
 		// WPML / Polylang activate via the `lang` query-arg. On non-

@@ -245,17 +245,20 @@ class TTA_Helper
 
         // TTS-247 — staging/live gate. Applied AFTER the filter so it is the
         // final word and overrides Pro's tta_should_load_button callback
-        // (which can force true). Until the admin verifies content via the
-        // step-rail picker and clicks "Go Live", the site stays in staging:
-        // the visitor auto-player must not render and Pro must not enqueue
-        // its generation scripts — so a misconfigured extractor never costs
-        // the user a single MP3 generation. Exceptions:
-        //   - the post edit screen keeps the player so admins can preview;
+        // (which can force true). Until the admin verifies content and clicks
+        // "Go Live", the site stays in staging: the player is hidden from
+        // visitors and Pro does not enqueue its generation scripts for them.
+        // Exceptions (the player still renders):
+        //   - logged-in admins (manage_options) — so they can preview the real
+        //     player and confirm the right content is read / audio generates
+        //     correctly before going live;
+        //   - the post edit screen;
         //   - the step-rail picker launches via ?atlasvoice_picker=1 (forced)
         //     and bypasses this path entirely, so verification still works.
         if (
             $should_load_button
             && ! self::is_edit_page()
+            && ! current_user_can('manage_options')
             && class_exists('\\TTA\\AtlasVoice\\Mode')
             && ! \TTA\AtlasVoice\Mode::is_production()
         ) {
@@ -284,6 +287,27 @@ class TTA_Helper
         global $post;
 
         return isset($post->post_status) ? $post->post_status : '';
+    }
+
+    /**
+     * TTS-247: the post types the admin enabled in "Allow Listening For
+     * Post Type". Used to scope the picker's sample/verify post pickers so
+     * they only ever surface a post type the player actually runs on (never
+     * a Page or unrelated CPT). Defaults to ['post'] when the setting is
+     * empty, matching the activation default.
+     *
+     * @return string[]
+     */
+    public static function get_listening_post_types()
+    {
+        $settings = self::tts_get_settings('settings');
+        $types = (is_array($settings)
+            && !empty($settings['tta__settings_allow_listening_for_post_types'])
+            && is_array($settings['tta__settings_allow_listening_for_post_types']))
+            ? array_values(array_filter(array_map('strval', $settings['tta__settings_allow_listening_for_post_types'])))
+            : array();
+
+        return !empty($types) ? $types : array('post');
     }
 
 
