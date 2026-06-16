@@ -156,6 +156,9 @@ class TTA_Helper
             global $post;
             $current_post = $post;
         }
+        if (is_numeric($current_post) && $current_post > 0) {
+            $current_post = get_post((int) $current_post);
+        }
         // is_home() || is_archive() || is_front_page() || is_category()
         if (\is_single($current_post) || apply_filters('tts_force_check_is_singular', is_singular() , $current_post)) {
             $should_load_button = true;
@@ -238,7 +241,31 @@ class TTA_Helper
             }
         }
 
-        return apply_filters('tta_should_load_button', $should_load_button, $current_post);
+        $should_load_button = apply_filters('tta_should_load_button', $should_load_button, $current_post);
+
+        // TTS-247 — staging/live gate. Applied AFTER the filter so it is the
+        // final word and overrides Pro's tta_should_load_button callback
+        // (which can force true). Until the admin verifies content and clicks
+        // "Go Live", the site stays in staging: the player is hidden from
+        // visitors and Pro does not enqueue its generation scripts for them.
+        // Exceptions (the player still renders):
+        //   - logged-in admins (manage_options) — so they can preview the real
+        //     player and confirm the right content is read / audio generates
+        //     correctly before going live;
+        //   - the post edit screen;
+        //   - the step-rail picker launches via ?atlasvoice_picker=1 (forced)
+        //     and bypasses this path entirely, so verification still works.
+        if (
+            $should_load_button
+            && ! self::is_edit_page()
+            && ! current_user_can('manage_options')
+            && class_exists('\\TTA\\AtlasVoice\\Mode')
+            && ! \TTA\AtlasVoice\Mode::is_production()
+        ) {
+            $should_load_button = false;
+        }
+
+        return $should_load_button;
     }
 
 
@@ -260,6 +287,27 @@ class TTA_Helper
         global $post;
 
         return isset($post->post_status) ? $post->post_status : '';
+    }
+
+    /**
+     * TTS-247: the post types the admin enabled in "Allow Listening For
+     * Post Type". Used to scope the picker's sample/verify post pickers so
+     * they only ever surface a post type the player actually runs on (never
+     * a Page or unrelated CPT). Defaults to ['post'] when the setting is
+     * empty, matching the activation default.
+     *
+     * @return string[]
+     */
+    public static function get_listening_post_types()
+    {
+        $settings = self::tts_get_settings('settings');
+        $types = (is_array($settings)
+            && !empty($settings['tta__settings_allow_listening_for_post_types'])
+            && is_array($settings['tta__settings_allow_listening_for_post_types']))
+            ? array_values(array_filter(array_map('strval', $settings['tta__settings_allow_listening_for_post_types'])))
+            : array();
+
+        return !empty($types) ? $types : array('post');
     }
 
 
@@ -604,36 +652,59 @@ class TTA_Helper
         }
 
         if ($post_id) {
+            $css_fields = array(
+                'tta__settings_css_selectors',
+                'tta__settings_exclude_content_by_css_selectors',
+                'tta__settings_exclude_texts',
+                'tta__settings_exclude_tags',
+            );
+
+            $settings = isset( $all_settings_data['settings'] ) && is_array( $all_settings_data['settings'] )
+                ? $all_settings_data['settings']
+                : array();
+
+            // TTS-238 D26.3 — Tier 2: per-post-type override (Pro). Whole-entry
+            // replace gated by non-empty include selector. Read from
+            // tta__settings_atlasvoice_per_type_overrides[<post_type>].
+            $post_type = get_post_type( $post_id );
+            if ( $post_type
+                 && isset( $settings['tta__settings_atlasvoice_per_type_overrides'] )
+                 && is_array( $settings['tta__settings_atlasvoice_per_type_overrides'] )
+                 && isset( $settings['tta__settings_atlasvoice_per_type_overrides'][ $post_type ] )
+                 && is_array( $settings['tta__settings_atlasvoice_per_type_overrides'][ $post_type ] )
+            ) {
+                $type_override = $settings['tta__settings_atlasvoice_per_type_overrides'][ $post_type ];
+                $gate          = isset( $type_override['tta__settings_css_selectors'] )
+                    ? trim( (string) $type_override['tta__settings_css_selectors'] )
+                    : '';
+                if ( $gate !== '' ) {
+                    foreach ( $css_fields as $field ) {
+                        if ( array_key_exists( $field, $type_override ) ) {
+                            $settings[ $field ] = $type_override[ $field ];
+                        }
+                    }
+                }
+            }
+
+            // Tier 1: per-post override (Pro, existing field-by-field merge
+            // gated by tta__settings_use_own_css_selectors).
             $post_css_selectors = get_post_meta($post_id, 'tts_pro_custom_css_selectors');
             if (isset($post_css_selectors[0])) {
                 $post_css_selectors = json_decode(json_encode($post_css_selectors[0]), true);
             }
 
-
             if (!empty($post_css_selectors) && isset($post_css_selectors['tta__settings_use_own_css_selectors']) && $post_css_selectors['tta__settings_use_own_css_selectors']) {
 
                 if (self::check_all_properties_are_empty($post_css_selectors)) {
-                    $settings = $all_settings_data['settings'];
-
-                    // Merge field-by-field: only override if per-post value is non-empty.
-                    // This allows users to override just one field while keeping global values for the rest.
-                    $css_fields = array(
-                        'tta__settings_css_selectors',
-                        'tta__settings_exclude_content_by_css_selectors',
-                        'tta__settings_exclude_texts',
-                        'tta__settings_exclude_tags',
-                    );
-
                     foreach ( $css_fields as $field ) {
                         if ( isset( $post_css_selectors[ $field ] ) && ! empty( $post_css_selectors[ $field ] ) ) {
                             $settings[ $field ] = $post_css_selectors[ $field ];
                         }
                     }
-
-                    $all_settings_data['settings'] = $settings;
                 }
             }
 
+            $all_settings_data['settings'] = $settings;
         }
 
 

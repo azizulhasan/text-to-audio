@@ -406,6 +406,11 @@ class TTA_Api_Routes {
 			)
 		);
 
+		// TTS-238 v5 §14 (D0b) — AtlasVoice REST routes moved into
+		// `\TTA\AtlasVoice\RestRoutes::register_routes()`. This legacy
+		// file carries no AtlasVoice endpoint registration; the Bootstrap
+		// wires RestRoutes on `rest_api_init` independently.
+
 		// TTS-247: Settings → Danger zone "Reset all plugin data" button.
 		// Admin-only (gated by get_route_access). Requires a literal
 		// confirmation string "DELETE" in the body to guard against
@@ -442,6 +447,18 @@ class TTA_Api_Routes {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function reset_plugin_data( $request ) {
+		// TTS-247: destructive reset is gated behind TTA_ENABLE_RESET_UI
+		// (default false; flip on a test site only). The Settings UI hides
+		// the Danger zone when this is off, but we enforce it server-side
+		// too so the endpoint can't be hit directly while disabled.
+		if ( ! ( defined( 'TTA_ENABLE_RESET_UI' ) && TTA_ENABLE_RESET_UI ) ) {
+			return new \WP_Error(
+				'rest_forbidden',
+				__( 'The reset tool is disabled.', 'text-to-audio' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		$body    = json_decode( (string) $request->get_body(), true );
 		$confirm = is_array( $body ) && isset( $body['confirm'] ) ? (string) $body['confirm'] : '';
 		if ( 'DELETE' !== $confirm ) {
@@ -473,6 +490,10 @@ class TTA_Api_Routes {
 			'message' => __( 'All plugin data has been reset. Reload the page to start fresh.', 'text-to-audio' ),
 		) );
 	}
+
+	// TTS-238 v5 §14 (D0b) — Handlers moved to \TTA\AtlasVoice\RestRoutes.
+	// Legacy wrappers removed; see includes/atlasvoice/RestRoutes.php.
+
 
 	/**
 	 * TTS-240: Record a CORS failure reported by the front-end detector.
@@ -632,6 +653,79 @@ class TTA_Api_Routes {
 				TTA_Cache::delete( 'all_settings' );
 			}
 
+			// TTS-238 D27.11 — Normalize the two pipe-format exclude fields.
+			// User can paste comma-, whitespace- or pipe-separated values
+			// into the textareas; we always store them as pipe-joined
+			// strings (legacy extractor format). Applied at two levels:
+			//  - global (top-level keys on $fields)
+			//  - per post type ($fields->tta__settings_atlasvoice_per_type_overrides[<slug>])
+			// Tags = single-word tokens (split aggressively on whitespace
+			// too). Texts = phrases — preserve internal whitespace, only
+			// split on the explicit separators a user might use.
+			$normalize_tags = function ( $val ) {
+				if ( is_array( $val ) ) { $parts = $val; }
+				else { $parts = preg_split( '/[\s,;|]+/', (string) $val ); }
+				$parts = array_values( array_filter( array_map( 'trim', (array) $parts ), function ( $p ) { return $p !== ''; } ) );
+				return implode( '|', $parts );
+			};
+			$normalize_texts = function ( $val ) {
+				// Phrases preserve internal commas/semicolons. Pipe
+				// (and newline) are the only legitimate separators.
+				if ( is_array( $val ) ) { $parts = $val; }
+				else { $parts = preg_split( '/[|\r\n]+/', (string) $val ); }
+				$parts = array_values( array_filter( array_map( 'trim', (array) $parts ), function ( $p ) { return $p !== ''; } ) );
+				return implode( '|', $parts );
+			};
+			$apply_to_bag = function ( $bag ) use ( $normalize_tags, $normalize_texts ) {
+				$is_obj = is_object( $bag );
+				if ( $is_obj && isset( $bag->tta__settings_exclude_tags ) ) {
+					$bag->tta__settings_exclude_tags = $normalize_tags( $bag->tta__settings_exclude_tags );
+				} elseif ( is_array( $bag ) && isset( $bag['tta__settings_exclude_tags'] ) ) {
+					$bag['tta__settings_exclude_tags'] = $normalize_tags( $bag['tta__settings_exclude_tags'] );
+				}
+				if ( $is_obj && isset( $bag->tta__settings_exclude_texts ) ) {
+					$bag->tta__settings_exclude_texts = $normalize_texts( $bag->tta__settings_exclude_texts );
+				} elseif ( is_array( $bag ) && isset( $bag['tta__settings_exclude_texts'] ) ) {
+					$bag['tta__settings_exclude_texts'] = $normalize_texts( $bag['tta__settings_exclude_texts'] );
+				}
+				return $bag;
+			};
+			if ( is_object( $fields ) ) {
+				$fields = $apply_to_bag( $fields );
+				if ( isset( $fields->tta__settings_atlasvoice_per_type_overrides )
+					&& ( is_object( $fields->tta__settings_atlasvoice_per_type_overrides )
+						|| is_array( $fields->tta__settings_atlasvoice_per_type_overrides ) ) ) {
+					$ovr = $fields->tta__settings_atlasvoice_per_type_overrides;
+					foreach ( (array) $ovr as $slug => $bag ) {
+						if ( ! is_object( $bag ) && ! is_array( $bag ) ) { continue; }
+						$bag = $apply_to_bag( $bag );
+						if ( is_object( $ovr ) ) { $ovr->{$slug} = $bag; }
+						else { $ovr[ $slug ] = $bag; }
+					}
+					$fields->tta__settings_atlasvoice_per_type_overrides = $ovr;
+				}
+			}
+
+			// TTS-247 — the staging/live mode lives inside tta_settings_data,
+			// but the dashboard Settings UI doesn't manage it, so a full-option
+			// save here would drop the key and silently revert the site to
+			// staging (player + MP3 generation vanish). Preserve the stored
+			// mode whenever the incoming payload doesn't carry it.
+			$existing_raw = get_option( 'tta_settings_data' );
+			$existing_arr = is_object( $existing_raw )
+				? json_decode( wp_json_encode( $existing_raw ), true )
+				: ( is_array( $existing_raw ) ? $existing_raw : array() );
+			if ( isset( $existing_arr['tta__settings_atlasvoice_mode'] ) ) {
+				$incoming_has_mode = ( is_object( $fields ) && isset( $fields->tta__settings_atlasvoice_mode ) )
+					|| ( is_array( $fields ) && isset( $fields['tta__settings_atlasvoice_mode'] ) );
+				if ( ! $incoming_has_mode ) {
+					if ( is_object( $fields ) ) {
+						$fields->tta__settings_atlasvoice_mode = $existing_arr['tta__settings_atlasvoice_mode'];
+					} elseif ( is_array( $fields ) ) {
+						$fields['tta__settings_atlasvoice_mode'] = $existing_arr['tta__settings_atlasvoice_mode'];
+					}
+				}
+			}
 
 			update_option( 'tta_settings_data', $fields );
 
@@ -902,7 +996,11 @@ class TTA_Api_Routes {
             // check (see Pro's TTA_Pro_Api_Routes + TTA_Pro_AtlasVoice_Analytics).
             '/tta/v1/filtered_insights',
             '/tta/v1/onboarding-event',
+            // TTS-247: new admin-only route for the Danger zone reset button.
             '/tta/v1/reset_plugin_data',
+            // TTS-238 / merge note: /language-context (D27.30) and
+            // /auth-variant (pre-D27.28) were retired so they're no longer
+            // in this allowlist.
         );
 
         if ( in_array( $route, $admin_only, true ) ) {

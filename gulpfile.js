@@ -131,8 +131,13 @@ const config = {
 		}
 	},
 	copyProButton: {
+		// TTS-238 D27.20 — also sync the css-selectors bundle to the
+		// Pro plugin's Assets folder so the per-post metabox doesn't
+		// load a stale copy when TTA_DEBUG_MODE is off.
 		src: [
-			'admin/js/build/text-to-audio-pro-button.min.js'
+			'admin/js/build/text-to-audio-pro-button.min.js',
+			'admin/js/build/tts-css-selectors.min.js',
+			'admin/js/build/tts-css-selectors.min.js.LICENSE.txt'
 		],
 		output: 'D:/laragon/www/tts/wp-content/plugins/text-to-audio-pro/Assets/js/build/',
 		options: {

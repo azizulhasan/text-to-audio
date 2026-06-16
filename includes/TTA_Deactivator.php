@@ -49,9 +49,10 @@ class TTA_Deactivator {
         //     Pro keeps the user in control -- it does NOT self-deactivate
         //     or force any redirect.
         //
-        // The hook registration stays so future deactivation-time cleanup
-        // (clearing transients, scheduled cron events, etc.) has a place
-        // to live without re-introducing the cross-plugin deactivation.
+        // TTS-238 D27.28 — the previous TTS-238 branch also added a
+        // `BoilerplateDetector::unregister_cron()` call here; that whole
+        // subsystem was retired in D27.28 (the cron is unscheduled by the
+        // D27.25 admin_init cleanup migration instead) so it's gone too.
     }
 
 }
