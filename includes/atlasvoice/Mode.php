@@ -311,35 +311,21 @@ class Mode {
 		}
 
 		$endpoint    = esc_url_raw( rest_url( 'tta/v1/mode' ) );
-		$sample_url  = esc_url_raw( rest_url( 'tta/v1/step-rail/sample-url' ) );
 		$nonce       = wp_create_nonce( 'wp_rest' );
-
-		// Multi-line confirm body. Each line is its own translatable string
-		// (translators don't have to remember \n placeholders) and we use
-		// PHP double-quoted "\n" so the linebreaks reach the browser as
-		// real newlines, not literal backslash-n.
-		$verify_lines = array(
-			__( 'Recommended: run "Verify across posts" on a sample post first to confirm your rules still match before visitor audio switches.', 'text-to-audio' ),
-			'',
-			__( 'OK     — open a sample post in a new tab (picker auto-opens; click "Test rule across N posts").', 'text-to-audio' ),
-			__( 'Cancel — skip Verify and go straight to the Go Live confirmation.', 'text-to-audio' ),
-		);
 
 		$l10n = array(
 			'prompt'        => __( 'Type GO LIVE (in capitals) to switch AtlasVoice to production. This drives visitor audio through the new extractor.', 'text-to-audio' ),
 			'revert'        => __( 'Revert AtlasVoice to staging? Visitor audio will switch back to the legacy pipeline on the next page load.', 'text-to-audio' ),
 			'mismatch'      => __( 'Confirmation phrase did not match. No changes made.', 'text-to-audio' ),
-			'done_go'       => __( 'AtlasVoice is now live. Reload to see the production dot.', 'text-to-audio' ),
-			'done_rev'      => __( 'AtlasVoice reverted to staging. Reload to see the staging dot.', 'text-to-audio' ),
+			'done_go'       => __( 'AtlasVoice is now live. This page will reload.', 'text-to-audio' ),
+			'done_rev'      => __( 'AtlasVoice reverted to staging. This page will reload.', 'text-to-audio' ),
 			'fail'          => __( 'AtlasVoice mode change failed: ', 'text-to-audio' ),
-			'verify_prompt' => implode( "\n", $verify_lines ),
 		);
 
 		?>
 		<script id="atlasvoice-bar-actions">
 		(function () {
 			var ENDPOINT   = <?php echo wp_json_encode( $endpoint ); ?>;
-			var SAMPLE_URL = <?php echo wp_json_encode( $sample_url ); ?>;
 			var NONCE      = <?php echo wp_json_encode( $nonce ); ?>;
 			var L10N       = <?php echo wp_json_encode( $l10n ); ?>;
 
@@ -359,6 +345,7 @@ class Mode {
 				}).then(function (res) {
 					if (res.ok && res.body && res.body.status) {
 						window.alert(successMsg);
+						window.location.reload();
 						return true;
 					}
 					var msg = (res.body && (res.body.message || res.body.code)) || 'unknown error';
@@ -370,48 +357,19 @@ class Mode {
 				});
 			}
 
-			// D5/D14 — soft prereq. Offer to open a sample post (with the
-			// picker auto-armed) so the admin can run Verify-across-posts
-			// before flipping to production. OK opens the sample in a new
-			// tab and short-circuits this round (admin clicks Go Live again
-			// after they're satisfied). Cancel falls through to the
-			// existing typed-confirm flow — soft, not hard, so admins who
-			// already verified elsewhere aren't blocked by the dialog.
-			function verifyFirstOrSkip() {
-				return new Promise(function (resolve) {
-					var wantsVerify = window.confirm(L10N.verify_prompt);
-					if (!wantsVerify) { resolve('skip'); return; }
-					fetch(SAMPLE_URL, {
-						credentials: 'same-origin',
-						headers: { 'X-WP-Nonce': NONCE }
-					}).then(function (r) { return r.json(); })
-					  .then(function (j) {
-						if (j && j.url) {
-							window.open(j.url, '_blank');
-							resolve('opened');
-						} else {
-							// No sample post — fall through silently to the
-							// typed-confirm prompt. No alarming alert: the
-							// admin already chose to proceed by clicking OK,
-							// and this prereq is advisory not mandatory.
-							resolve('skip');
-						}
-					})
-					  .catch(function () { resolve('skip'); });
-				});
-			}
-
+			// D5 — typed-confirm Go Live. Prompt for the phrase, POST to the
+			// REST gate, then auto-reload on success so the admin doesn't have
+			// to refresh manually to see the production state. The REST
+			// endpoint re-validates the "GO LIVE" phrase server-side, so the
+			// client-side check here is just for a friendly mismatch message.
 			window.atlasvoiceGoLive = function () {
-				verifyFirstOrSkip().then(function (decision) {
-					if (decision === 'opened') { return; } // admin verifies in new tab
-					var answer = window.prompt(L10N.prompt, '');
-					if (answer === null) { return; }
-					if (answer !== 'GO LIVE') {
-						window.alert(L10N.mismatch);
-						return;
-					}
-					call({ action: 'go-live', confirm: 'GO LIVE' }, L10N.done_go);
-				});
+				var answer = window.prompt(L10N.prompt, '');
+				if (answer === null) { return false; }
+				if (answer !== 'GO LIVE') {
+					window.alert(L10N.mismatch);
+					return false;
+				}
+				call({ action: 'go-live', confirm: 'GO LIVE' }, L10N.done_go);
 				return false;
 			};
 

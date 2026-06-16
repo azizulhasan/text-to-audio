@@ -582,12 +582,13 @@ class RestRoutes {
 		if ( $pt !== '' ) {
 			$args['post_type'] = $pt;
 		} else {
-			$tracked = get_post_types( array( 'public' => true ) );
-			if ( is_array( $tracked ) && ! empty( $tracked ) ) {
-				$args['post_type'] = array_values( array_filter( $tracked, function ( $slug ) {
-					return $slug !== 'attachment';
-				} ) );
-			}
+			// TTS-247 — for Global / Language scope, sample only from the post
+			// types enabled in "Allow Listening For Post Type" (default: post),
+			// NOT every public type. Otherwise the newest published item could
+			// be a Page or unrelated CPT the player never runs on.
+			$args['post_type'] = class_exists( '\\TTA\\TTA_Helper' )
+				? \TTA\TTA_Helper::get_listening_post_types()
+				: array( 'post' );
 		}
 
 		// WPML / Polylang language filter. The plugins both read
