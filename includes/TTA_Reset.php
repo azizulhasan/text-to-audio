@@ -66,6 +66,8 @@ class TTA_Reset {
             // Notices
             'tta_review_notice_next_show_time',
             'tta_feedback_notice_next_show_time',
+
+            'tta_mode_default_migrated'
         );
 
         foreach ( $options as $option ) {
