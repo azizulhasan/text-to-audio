@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.2.5
+Stable tag: 2.3.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -384,6 +384,13 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.3.0 ( 16 Jun 2026 ) =
+Added : A new Staging mode. When you set the plugin up, the Listen player stays hidden from your visitors so you can get everything right first. When you are happy, click "Go Live" to show it to everyone.
+Added : While in Staging, you and your other site admins can still see and try the player, so you can check it reads the correct content before any visitor sees it.
+Added : A simple "Go Live" button in the WordPress toolbar. Type GO LIVE to confirm, and the page refreshes on its own.
+Added : A new step in the setup wizard that helps you check what gets read aloud before going live.
+Improved : Clearer wizard and dashboard messages explaining what Staging means and what happens when you go live.
+
 = 2.2.5 ( 14 Jun 2026 ) =
 Fixed : The player no longer reads punctuation marks such as apostrophes and quotation marks aloud as the word "backslash".
 Fixed : Headings, section dividers, lists and quotes are now read as their own sentences instead of running into the next paragraph.
@@ -600,6 +607,9 @@ Introduced :  Complete new UI introduced.
 
 
 == Upgrade Notice ==
+
+= 2.3.0 =
+Adds a new Staging mode so you can set up and check the Listen player privately before showing it to your visitors, plus a one-click "Go Live" button in the toolbar. Update recommended.
 
 = 2.2.5 =
 Fixes several text-to-speech reading issues (punctuation, headings, lists, abbreviations and numbers), restores the full-width Listen button, and fixes playback when the player is used across multiple browser tabs. Update recommended.
