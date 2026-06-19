@@ -7,8 +7,9 @@ import StepCustomize from './steps/StepCustomize';
 import StepAnalytics from './steps/StepAnalytics';
 import StepFinish from './steps/StepFinish';
 import StepHearDifference from './steps/StepHearDifference';
+import StepContentCheck from './steps/StepContentCheck';
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 6;
 
 const wizardData = window.ttsWizardData || {};
 
@@ -225,8 +226,9 @@ const WelcomeWizard = () => {
         const labels = {
             1: __('Next: Choose Voice', 'text-to-audio'),
             2: __('Next: Hear the Difference', 'text-to-audio'),
-            3: __('Next: Customize', 'text-to-audio'),
-            4: __('Next: Analytics', 'text-to-audio'),
+            3: __('Next: Check Content', 'text-to-audio'),
+            4: __('Next: Customize', 'text-to-audio'),
+            5: __('Next: Analytics', 'text-to-audio'),
         };
         return labels[step] || __('Next', 'text-to-audio');
     };
@@ -260,12 +262,18 @@ const WelcomeWizard = () => {
                 );
             case 4:
                 return (
+                    <StepContentCheck
+                        postType={settings.postType}
+                    />
+                );
+            case 5:
+                return (
                     <StepCustomize
                         data={customize}
                         onChange={setCustomize}
                     />
                 );
-            case 5:
+            case 6:
                 return (
                     <StepAnalytics
                         data={analytics}

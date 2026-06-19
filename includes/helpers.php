@@ -302,6 +302,15 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
      */
 
     $content = tta_clean_content($content);
+
+    /**
+     * AtlasVoice integration hook (TTS-238 v5 §1 P1). One-line emission
+     * point — keeps the legacy code path byte-identical when no AtlasVoice
+     * listener is attached. Real logic lives in
+     * `includes/atlasvoice/ReadersIntegration.php`.
+     */
+    $content = apply_filters( 'atlasvoice_after_clean_content', $content, $post );
+
     $content = TTA_Helper::sazitize_content($content);
     $content = TTA_Helper::clean_content($content);
     $content = trim($content);
@@ -506,6 +515,12 @@ function get_enqueued_js_object($params, $plugin_all_settings)
     ob_start();
     ?>
     <!-- AtlasVoice Settings (per-button JS moved to wp_add_inline_script — handle 'text-to-audio-button') -->
+    <!-- TTS-238 D27 / merge note: previous branch carried an inline <script>
+         that wrote window.TTS.use_atlasvoice_extractor = true. That flag was
+         retired in D26.9 (always-on now); develop moved the rest of the
+         per-button payload into wp_add_inline_script handle 'text-to-audio-button'.
+         If anything in TTS.contents/extra/settings is missing, the canonical
+         emission lives in admin/TTA_Admin.php's enqueue path. -->
     <?php
     // TTS-250: AudioObject schema output now lives in AtlasVoice Pro (it requires
     // an MP3 contentUrl that the free player never produces).
@@ -1086,4 +1101,65 @@ function tts_debug( $message ) {
     // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
     file_put_contents( $log_file, $formatted_message, FILE_APPEND | LOCK_EX );
 }
+
+/**
+ * TTS-238: Emit AtlasVoice comment markers around post content for Free sites.
+ *
+ * Strictly opt-in. Runs ONLY when:
+ *   - Setting `tta__settings_use_atlasvoice_extractor` is ON
+ *   - Pro plugin is NOT active (Pro emits markers in its own filter so we skip
+ *     here to avoid double-wrapping)
+ *   - We're in the main query on a singular post the plugin should handle
+ *
+ * Additive-only: never modifies content when opt-in is off. Filter-gated
+ * so integrators can fine-tune (tts_free_emit_atlasvoice_markers).
+ */
+function tta_free_emit_atlasvoice_markers( $content ) {
+    // Pro handles its own emission — don't double-wrap.
+    if ( function_exists( 'is_pro_active' ) && is_pro_active() ) {
+        return $content;
+    }
+
+    if ( is_admin() || ! in_the_loop() || ! is_main_query() ) {
+        return $content;
+    }
+
+    if ( ! is_singular() ) {
+        return $content;
+    }
+
+    // D26.7 — emit the wrapper + comment markers on Free (was previously
+    // gated on the now-removed `tta__settings_use_atlasvoice_extractor`).
+    // The wrapper can be opted out via tta__settings_emit_legacy_wrapper
+    // for themes whose layout breaks on it; markers always emit so the
+    // picker has something to target.
+    $settings    = \TTA\TTA_Helper::tts_get_settings( 'settings' );
+    $emit_wrapper = ! isset( $settings['tta__settings_emit_legacy_wrapper'] )
+        ? true
+        : ! empty( $settings['tta__settings_emit_legacy_wrapper'] );
+    $emit_wrapper = (bool) apply_filters( 'tts_emit_legacy_wrapper', $emit_wrapper, $content, get_the_ID() );
+
+    // Let integrators opt out of marker emission specifically.
+    $emit_markers = (bool) apply_filters( 'tts_free_emit_atlasvoice_markers', true, get_the_ID() );
+
+    if ( ! $emit_markers && ! $emit_wrapper ) {
+        return $content;
+    }
+
+    static $btn_no = 0;
+    $btn_no++;
+
+    $body = $emit_wrapper
+        ? '<div class="tts_content_wrapper_' . intval( $btn_no ) . '">' . $content . '</div>'
+        : $content;
+
+    if ( ! $emit_markers ) {
+        return $body;
+    }
+
+    return '<!--atlasvoice:start:' . intval( $btn_no ) . '-->'
+         . $body
+         . '<!--atlasvoice:end:' . intval( $btn_no ) . '-->';
+}
+add_filter( 'the_content', 'tta_free_emit_atlasvoice_markers', 20 );
 

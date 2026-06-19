@@ -15,7 +15,7 @@
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
  * Description:       The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
- * Version:           2.2.5
+ * Version:           2.3.0
  * Author:            AtlasAiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-3.0+
@@ -27,12 +27,7 @@
  */
 
 
-// TTS-247: dropped the previous `if (!defined('ABSPATH')) { define('ABSPATH', ...); }`
-// block. WordPress defines ABSPATH in wp-load.php before any plugin file is loaded,
-// so the body never executed in practice. The WordPress.org Plugin Directory review
-// (May 2026, HelpScout #293) still flagged it under "Changing global behaviour" —
-// a plugin must not redefine WordPress core constants.
-//
+
 // If this file is called directly, abort.
 if (!defined('WPINC')) {
     die;
@@ -127,12 +122,11 @@ if (!defined('TTA_DEBUG_MODE')) {
     define('TTA_DEBUG_MODE', 0);
 }
 
+if (!defined('TTA_ENABLE_RESET_UI')) {
+    define('TTA_ENABLE_RESET_UI', true);
+}
+
 if (!defined('TTA_REQUIRED_PRO_VERSION')) {
-    // TTS-250: minimum AtlasVoice Pro add-on version that mounts the UI moved
-    // out of the free plugin (Listening voice settings, voice-provider
-    // integrations, player-2..6 preview). Free shows an "update the add-on"
-    // notice when an older Pro is active. Bump this when the free plugin starts
-    // to depend on a newer add-on contract.
     define('TTA_REQUIRED_PRO_VERSION', '3.3.1');
 }
 
@@ -178,7 +172,7 @@ class TTA_Init
     public function __construct()
     {
         if (!defined('TEXT_TO_AUDIO_VERSION')) {
-            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '2.2.5'));
+            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '2.3.0'));
         }
 
         if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
@@ -190,6 +184,22 @@ class TTA_Init
 
     public function run()
     {
+        // TTS-238 v5 §14 D0c — single hook-based entry into the
+        // AtlasVoice subsystem. Wires cron, meta boxes, REST routes,
+        // localise-data filters, and (later) the regen-guard. All
+        // individual feature modules self-gate on Layer 1 opt-in so
+        // this call is safe even when the admin has not opted in.
+        //
+        // CRITICAL ORDERING: must run BEFORE `new TTA()` below, because
+        // TTA::run() → TTA_Admin::__construct() invokes the
+        // `atlasvoice_localize_data` filter during construction. The
+        // LocalizeData::inject callback must already be registered by
+        // then, otherwise the filter fires against an empty hook chain
+        // and no AtlasVoice fields make it into ttsObj.
+        if ( class_exists( '\\TTA\\AtlasVoice\\Bootstrap' ) ) {
+            \TTA\AtlasVoice\Bootstrap::register();
+        }
+
         $plugin = new TTA();
         $plugin->run();
 
@@ -294,6 +304,14 @@ add_action('tta_migrate_play_count_column', array('\TTA\TTA_Activator', 'migrate
 register_activation_hook(__FILE__, function () {
     TTA_Activator::activate();
 });
+
+/**
+ * TTS-247 — grandfather existing installs onto the new staging/live mode.
+ * Runs early (front + admin) so an upgraded site keeps its live player on
+ * the very first request, before should_load_button's staging gate runs.
+ * Self-disables after one pass via the tta_mode_default_migrated flag.
+ */
+add_action('plugins_loaded', ['TTA\\TTA_Activator', 'maybe_set_default_mode'], 1);
 
 /**
  * Redirect to settings page on first activation.

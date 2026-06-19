@@ -7,13 +7,20 @@ import {
     Container,
     Tooltip,
     OverlayTrigger,
-    Button,
 } from "react-bootstrap";
 import {postWithoutImage} from "../../context/utilities";
 import toast from "../../context/Notify";
 import UpgradeToPro from "../../UpgradeToPro";
 import {MultiSelect} from "../../context/MultiSelect";
 import Icon from "../../Icon";
+// TTS-238: UI split — legacy extraction fields and AtlasVoice (new system)
+// settings live in their own modules so the two systems can evolve
+// independently without stepping on each other.
+import {ToggleSwitch, SettingRow, ProLockIcon} from "./SettingsPrimitives";
+// TTS-238 D27.28 — AtlasVoiceSettings (heal log + boilerplate detector)
+// retired. Both surfaces removed; import dropped.
+import ScopeAccordion from "./ScopeAccordion";
+import LegacyExtractionSettings from "./LegacyExtractionSettings";
 
 export default function Settings() {
     const [settings, setSettings] = useState({
@@ -41,6 +48,7 @@ export default function Settings() {
         tta__settings_text_before_content: "",
         tta__settings_read_content_from_dom: true,
         tta__settings_enable_tts_status: true,
+        tta__settings_emit_legacy_wrapper: true,
         tta__settings_delete_data_on_uninstall: false,
     });
     const [postTypes, setPostTypes] = useState([]);
@@ -171,9 +179,29 @@ export default function Settings() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        // TTS-247 — Free vs Pro field gating.
+        // On Free (AtlasVoice Pro add-on not active) the Include selector is a
+        // genuine, functional Free feature and MUST be saved. Only the Pro-only
+        // fields are dropped:
+        //   - the three exclude fields (CSS / tags / texts)
+        //   - the per-post-type override map
+        // These fields are no longer rendered on Free (ScopeAccordion hides
+        // them), so this strip is just server-side defense-in-depth. We surface
+        // a toast if any non-empty value was actually dropped.
+        let droppedCount = 0;
         if (!ttsObj.is_atlasvoice_addon_functional) {
-            settings.tta__settings_css_selectors = "";
+            ["tta__settings_exclude_content_by_css_selectors",
+             "tta__settings_exclude_tags",
+             "tta__settings_exclude_texts"].forEach((k) => {
+                const v = settings[k];
+                const empty = !v || (Array.isArray(v) ? v.length === 0 : String(v).trim() === "");
+                if (!empty) droppedCount++;
+                settings[k] = Array.isArray(v) ? [] : "";
+            });
+            settings.tta__settings_atlasvoice_per_type_overrides = {};
         }
+
         let cache_clear_notice_text = "";
         if (settings?.tta__settings_clear_all_cache) {
             cache_clear_notice_text = __("All cache deleted", "text-to-audio");
@@ -191,6 +219,13 @@ export default function Settings() {
                         autoClose: 15000,
                     }
                 );
+                if (droppedCount > 0) {
+                    toast(
+                        __("Some Pro-only fields were skipped — upgrade to enable them.", "text-to-audio"),
+                        "warning",
+                        {autoClose: 8000}
+                    );
+                }
                 if (cache_clear_notice_text) {
                     toast(cache_clear_notice_text, "info", {
                         autoClose: 1500,
@@ -203,85 +238,8 @@ export default function Settings() {
             });
     };
 
-    // Custom Toggle Switch Component
-    const ToggleSwitch = ({checked, onChange, name, id, disabled}) => (
-        <label className={`custom-switch ${disabled ? "switch-disabled" : ""}`}>
-            <input
-                type="checkbox"
-                checked={checked}
-                onChange={onChange}
-                name={name}
-                id={id}
-                disabled={disabled}
-            />
-            <span className="switch-track">
-        <span className="switch-thumb"></span>
-      </span>
-        </label>
-    );
-
-    // Setting Row Component
-    const SettingRow = ({
-                            label,
-                            children,
-                            helpIcon,
-                            tooltipText,
-                            questionIcon,
-                            questionTooltip,
-                            youtubeLink,
-                        }) => (
-        <div className="setting-row">
-            <div className="setting-label-area">
-                <span className="setting-label">{label}</span>
-
-                {questionIcon && (
-                    <OverlayTrigger
-                        placement="top"
-                        overlay={
-                            <Tooltip>
-                                {questionTooltip || __("Help information about this setting", "text-to-audio")}
-                            </Tooltip>
-                        }
-                    >
-            <span className="ms-2" style={{cursor: "pointer"}}>
-              <Icon name="question-circle" style={{color: "#999", fontSize: "14px"}} />
-            </span>
-                    </OverlayTrigger>
-                )}
-
-                {helpIcon && (
-                    <OverlayTrigger
-                        placement="top"
-                        overlay={
-                            <Tooltip>
-                                {tooltipText || __("Click To Know How It Works?", "text-to-audio")}
-                            </Tooltip>
-                        }
-                    >
-                        <a
-                            className="text-danger ms-2"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            href={youtubeLink || "#"}
-                        >
-                            <Icon name="youtube" />
-                        </a>
-                    </OverlayTrigger>
-                )}
-            </div>
-
-            <div>{children}</div>
-        </div>
-    );
-
-    // Lock Icon with Tooltip for pro features
-    const ProLockIcon = ({tooltipText}) => (
-        <OverlayTrigger placement="top" overlay={<Tooltip>{tooltipText}</Tooltip>}>
-            <Button className="m-0 p-0 text-dark bg-light border-0 ms-2">
-                <Icon name="lock" />
-            </Button>
-        </OverlayTrigger>
-    );
+    // TTS-238: ToggleSwitch, SettingRow, ProLockIcon now come from
+    // ./SettingsPrimitives so both split sub-components can share them.
 
     return isDataLoaded ? (
         <React.Fragment>
@@ -428,6 +386,8 @@ export default function Settings() {
                                                 id="tta__settings_read_content_from_dom"
                                             />
                                         </SettingRow>
+                                        {/* TTS-238: AtlasVoice opt-in toggle moved into <AtlasVoiceSettings>
+                                            which is rendered after the Post Status multi-select below. */}
                                     </>
                                 )}
 
@@ -475,6 +435,29 @@ export default function Settings() {
                                         onChange={(e) => handleChange(e)}
                                         name="tta__settings_enable_tts_status"
                                         id="tta__settings_enable_tts_status"
+                                    />
+                                </SettingRow>
+
+                                {/* TTS-238 D27.38 — emit legacy content wrapper toggle.
+                                    Default ON so the picker's auto-detect lands on
+                                    `[class*="tts_content_wrapper_"]` (the strongest
+                                    stability hook for content extraction). Themes whose
+                                    layout breaks on the wrapper div can flip this off,
+                                    which makes the picker fall through to dynamic-class
+                                    filtering + theme content classes. */}
+                                <SettingRow
+                                    label={__("Emit Content Wrapper", "text-to-audio")}
+                                    questionIcon={true}
+                                    questionTooltip={__(
+                                        "Wrap rendered post content in a stable `tts_content_wrapper_<N>` div so the picker / runtime extractor can reliably find it across all posts. Turn off only if your theme's layout breaks on the wrapper.",
+                                        "text-to-audio"
+                                    )}
+                                >
+                                    <ToggleSwitch
+                                        checked={settings.tta__settings_emit_legacy_wrapper}
+                                        onChange={(e) => handleChange(e)}
+                                        name="tta__settings_emit_legacy_wrapper"
+                                        id="tta__settings_emit_legacy_wrapper"
                                     />
                                 </SettingRow>
 
@@ -559,11 +542,50 @@ export default function Settings() {
                                         </Col>
                                     </Row>
 
+                                    {/* D27.3 — D26.5's per-type Pick block was replaced by the
+                                        ScopeAccordion below; "Allow Listening For Post Status"
+                                        moves below the accordion in this v5 layout. */}
+
+                                    {/* D27.3 — Scope accordion replaces the flat field list.
+                                        Global is always shown; one collapsed accordion appears
+                                        below per enabled post type (Pro only). All four CSS-
+                                        selector fields render inside each accordion body. */}
+                                    <div style={{marginTop: "24px"}}>
+                                        <h3
+                                            style={{
+                                                margin: "0 0 4px",
+                                                color: "#1d2327",
+                                                fontSize: "16px",
+                                                fontWeight: 600,
+                                            }}
+                                        >
+                                            {__("Content Selection Rules", "text-to-audio")}
+                                        </h3>
+                                        <p
+                                            style={{
+                                                margin: "0 0 12px",
+                                                color: "#50575e",
+                                                fontSize: "13px",
+                                                lineHeight: 1.5,
+                                            }}
+                                        >
+                                            {__(
+                                                "Control which part of your content is read aloud. Set a rule for the whole site (Global) below.",
+                                                "text-to-audio"
+                                            )}
+                                        </p>
+                                    </div>
+                                    <ScopeAccordion
+                                        settings={settings}
+                                        handleChange={handleChange}
+                                    />
+
+                                    {/* D27.3 — "Allow Listening For Post Status" relocated below
+                                        the scope accordion per v5 layout. */}
                                     <Row className="mb-4">
                                         <Col xs={12}>
                                             <Form.Label className="setting-label text-dark mb-2">
                                                 {__("Allow Listening For Post Status", "text-to-audio")}
-                                                {/* <i className="fas fa-question-circle ms-2" style={{ color: '#999', fontSize: '14px' }}></i> */}
                                             </Form.Label>
                                             <MultiSelect
                                                 id="tta__settings_allow_listening_for_posts_status"
@@ -580,229 +602,6 @@ export default function Settings() {
                                     </Row>
 
                                     {/* Additional settings fields with tooltips */}
-                                    <Row className="mb-4">
-                                        <Col xs={12}>
-                                            <div className="d-flex align-items-center justify-content-between mb-2">
-                                                <div className="d-flex align-items-center">
-                                                    <Form.Label className="setting-label text-dark m-0">
-                                                        {__("Include Content By CSS Selectors", "text-to-audio")}
-                                                    </Form.Label>
-                                                    {!ttsObj.is_atlasvoice_addon_functional && (
-                                                        <ProLockIcon
-                                                            tooltipText={__(
-                                                                "Include Content By CSS Selectors feature is available in pro version", "text-to-audio"
-                                                            )}
-                                                        />
-                                                    )}
-                                                </div>
-                                                <OverlayTrigger
-                                                    placement="top"
-                                                    overlay={
-                                                        <Tooltip>
-                                                            {__("Click To Know How It Works?", "text-to-audio")}
-                                                        </Tooltip>
-                                                    }
-                                                >
-                                                    <a
-                                                        className="text-danger"
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
-                                                    >
-                                                        <Icon name="youtube" />
-                                                    </a>
-                                                </OverlayTrigger>
-                                            </div>
-                                            <Form.Control
-                                                as="textarea"
-                                                rows={3}
-                                                name="tta__settings_css_selectors"
-                                                value={settings.tta__settings_css_selectors}
-                                                onChange={(e) => handleChange(e)}
-                                                placeholder={
-                                                    ttsObj.is_atlasvoice_addon_functional
-                                                        ? __("Multiple selector will be multiline.", "text-to-audio")
-                                                        : __("Some content may be missing, It can be found by css selectors", "text-to-audio")
-                                                }
-                                                disabled={!ttsObj.is_atlasvoice_addon_functional}
-                                                className="tta-textarea"
-                                            />
-                                            <Form.Text className="text-muted">
-                                                {__("Add CSS selectors for the content areas the player should read. One selector per line. Only target post/page body content. If left empty, the player automatically detects the content area.", "text-to-audio")}
-                                            </Form.Text>
-                                        </Col>
-                                    </Row>
-
-                                    <Row className="mb-4">
-                                        <Col xs={12}>
-                                            <div className="d-flex align-items-center justify-content-between mb-2">
-                                                <div className="d-flex align-items-center">
-                                                    <Form.Label className="setting-label text-dark m-0">
-                                                        {__("Exclude Content By CSS Selectors", "text-to-audio")}
-                                                    </Form.Label>
-                                                    {!ttsObj.is_atlasvoice_addon_functional && (
-                                                        <ProLockIcon
-                                                            tooltipText={__(
-                                                                "Exclude Content By CSS Selectors feature is available in pro version", "text-to-audio"
-                                                            )}
-                                                        />
-                                                    )}
-                                                </div>
-                                                <OverlayTrigger
-                                                    placement="top"
-                                                    overlay={
-                                                        <Tooltip>
-                                                            {__("Click To Know How It Works?", "text-to-audio")}
-                                                        </Tooltip>
-                                                    }
-                                                >
-                                                    <a
-                                                        className="text-danger ms-2"
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
-                                                    >
-                                                        <Icon name="youtube" />
-                                                    </a>
-                                                </OverlayTrigger>
-                                            </div>
-                                            <Form.Control
-                                                as="textarea"
-                                                rows={3}
-                                                name="tta__settings_exclude_content_by_css_selectors"
-                                                value={
-                                                    settings.tta__settings_exclude_content_by_css_selectors
-                                                }
-                                                onChange={(e) => handleChange(e)}
-                                                placeholder={
-                                                    ttsObj.is_atlasvoice_addon_functional
-                                                        ? __("Multiple selector will be multiline.", "text-to-audio")
-                                                        : __("Exclude content by CSS selectors", "text-to-audio")
-                                                }
-                                                disabled={!ttsObj.is_atlasvoice_addon_functional}
-                                                className="tta-textarea"
-                                            />
-                                            <small
-                                                style={{
-                                                    color: "#d32f2f",
-                                                    marginTop: "4px",
-                                                    display: "block",
-                                                }}
-                                            >
-                                                {__('You can add ".atlasvoice_no_read" class to exclude content.', "text-to-audio")}
-                                            </small>
-                                            <Form.Text className="text-muted">
-                                                {__("Remove specific elements within the included content areas above. One selector per line. Example: .social-share, .related-posts, .author-bio", "text-to-audio")}
-                                            </Form.Text>
-                                        </Col>
-                                    </Row>
-
-                                    <Row className="mb-4">
-                                        <Col xs={12}>
-                                            <div className="d-flex align-items-center justify-content-between mb-2">
-                                                <div className="d-flex align-items-center">
-                                                    <Form.Label className="setting-label text-dark m-0">
-                                                        {__("Exclude HTML Tags To Speak", "text-to-audio")}
-                                                    </Form.Label>
-                                                    {!ttsObj.is_atlasvoice_addon_functional && (
-                                                        <ProLockIcon
-                                                            tooltipText={__(
-                                                                "Exclude Tags. So that its content skipped. Like ( Subscript, Superscript etc.) This is a pro feature.", "text-to-audio"
-                                                            )}
-                                                        />
-                                                    )}
-                                                </div>
-                                                <OverlayTrigger
-                                                    placement="top"
-                                                    overlay={
-                                                        <Tooltip>
-                                                            {__("Click To Know How It Works?", "text-to-audio")}
-                                                        </Tooltip>
-                                                    }
-                                                >
-                                                    <a
-                                                        className="text-danger ms-2"
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
-                                                    >
-                                                        <Icon name="youtube" />
-                                                    </a>
-                                                </OverlayTrigger>
-                                            </div>
-                                            <Form.Control
-                                                as="textarea"
-                                                rows={3}
-                                                name="tta__settings_exclude_tags"
-                                                value={settings.tta__settings_exclude_tags}
-                                                onChange={(e) => handleChange(e)}
-                                                placeholder={
-                                                    ttsObj.is_atlasvoice_addon_functional
-                                                        ? __("Multiple Tags Will Be Pipe(|) Separated.", "text-to-audio")
-                                                        : __("Exclude tags is a pro feature.", "text-to-audio")
-                                                }
-                                                disabled={!ttsObj.is_atlasvoice_addon_functional}
-                                                className="tta-textarea"
-                                            />
-                                            <Form.Text className="text-muted">
-                                                {__("HTML tags to skip within the included content. Pipe-separated. script, style, figure, and figcaption are always excluded automatically. Example: sub|sup|blockquote", "text-to-audio")}
-                                            </Form.Text>
-                                        </Col>
-                                    </Row>
-
-                                    <Row className="mb-4">
-                                        <Col xs={12}>
-                                            <div className="d-flex align-items-center justify-content-between mb-2">
-                                                <div className="d-flex align-items-center">
-                                                    <Form.Label className="setting-label text-dark m-0">
-                                                        {__("Exclude Texts To Speak", "text-to-audio")}
-                                                    </Form.Label>
-                                                    {!ttsObj.is_atlasvoice_addon_functional && (
-                                                        <ProLockIcon
-                                                            tooltipText={__(
-                                                                "Excluding texts to be spoken is a pro feature.", "text-to-audio"
-                                                            )}
-                                                        />
-                                                    )}
-                                                </div>
-                                                <OverlayTrigger
-                                                    placement="top"
-                                                    overlay={
-                                                        <Tooltip>
-                                                            {__("Click To Know How It Works?", "text-to-audio")}
-                                                        </Tooltip>
-                                                    }
-                                                >
-                                                    <a
-                                                        className="text-danger ms-2"
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        href="https://www.youtube.com/watch?v=TfgDezWuFkA&t=350s&ab_channel=AtlasAiDev"
-                                                    >
-                                                        <Icon name="youtube" />
-                                                    </a>
-                                                </OverlayTrigger>
-                                            </div>
-                                            <Form.Control
-                                                as="textarea"
-                                                rows={3}
-                                                name="tta__settings_exclude_texts"
-                                                value={settings.tta__settings_exclude_texts}
-                                                onChange={(e) => handleChange(e)}
-                                                placeholder={
-                                                    ttsObj.is_atlasvoice_addon_functional
-                                                        ? __("Multiple Texts Will Be Pipe(|) Separated.", "text-to-audio")
-                                                        : __("Exclude texts is a pro feature.", "text-to-audio")
-                                                }
-                                                disabled={!ttsObj.is_atlasvoice_addon_functional}
-                                                className="tta-textarea"
-                                            />
-                                            <Form.Text className="text-muted">
-                                                {__("Exact text patterns to remove from the spoken content. Pipe-separated. Applied after all CSS and tag exclusions. Example: Read more...|Advertisement|Sponsored Content", "text-to-audio")}
-                                            </Form.Text>
-                                        </Col>
-                                    </Row>
-
                                     <Row className="mb-4">
                                         <Col xs={12}>
                                             <div className="d-flex align-items-center justify-content-between mb-2">
@@ -1013,7 +812,14 @@ export default function Settings() {
 
                                 </div>
 
-                                {/* TTS-247: Danger zone — reset all plugin data. */}
+                                {/* TTS-247 — Danger zone: reset all plugin data.
+                                    Gated behind the TTA_ENABLE_RESET_UI constant
+                                    (shipped via ttsObj.enable_reset_ui). Default
+                                    OFF in production; flip on a test site only.
+                                    The REST endpoint enforces the same constant
+                                    server-side, so hiding this block doesn't leave
+                                    a reachable destructive endpoint. */}
+                                {ttsObj.enable_reset_ui && (
                                 <div
                                     style={{
                                         marginTop: "32px",
@@ -1099,11 +905,17 @@ export default function Settings() {
                                         </button>
                                     </div>
                                 </div>
+                                )}
 
                                 {/* Save Button */}
                                 <div
                                     className="position-sticky bottom-0"
-                                    style={{zIndex: 1030, marginTop: "20px"}}
+                                    style={{
+                                        zIndex: 1030,
+                                        marginTop: "20px",
+                                        background: "linear-gradient(to top, rgba(255,255,255,0.95) 60%, rgba(255,255,255,0))",
+                                        padding: "12px 0 8px",
+                                    }}
                                 >
                                     <div className="text-center">
                                         <button

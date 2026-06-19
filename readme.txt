@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.2.5
+Stable tag: 2.3.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -13,35 +13,256 @@ Free text to speech with browser voices + premium AI voices from Google, OpenAI 
 
 == Description ==
 
-**AtlasVoice — Text To Speech TTS Accessibility** is a user-friendly text-to-speech plugin for WordPress and WooCommerce. Convert any post, page, or product description into natural-sounding audio with one click. The free version uses the browser's built-in speechSynthesis engine — no account, no API key, no registration. Upgrade to Pro for AtlasVoice's own AI voice engine, **Google Cloud TTS**, **OpenAI TTS**, or **ElevenLabs TTS**.
+**AtlasVoice — Text To Speech TTS Accessibility** is the most user-friendly **text to speech plugin** for WordPress and WooCommerce, and the simplest way to add a text to audio player to your site. Convert any post, page, or product description into natural-sounding audio with one click. The free version uses the browser's built-in speechSynthesis engine with 20–300+ voices across all major browsers. Upgrade to Pro for **AtlasVoice's own AI voice engine** (included with Pro — no extra API costs), or connect premium third-party providers like **Google Cloud TTS**, **OpenAI (ChatGPT) TTS**, and **ElevenLabs TTS**.
 
-**No Registration, No Account, No API required for the free version.**
+**No Registration, No Account, No API required for the free version. Simply install and let your visitors listen.**
 
-### How It Works
+Whether you run a blog, news site, online store, or educational platform, AtlasVoice, the free WordPress TTS plugin, makes your content accessible to everyone — including users with visual impairments, reading difficulties, or those who simply prefer listening. Support **81+ languages**, **300+ AI voices**, and reach a truly global audience.
 
-1. Install & activate — the audio player appears automatically on selected post types.
-2. Choose a voice — free browser voice, or a Pro AI provider (Google, OpenAI, ElevenLabs, AtlasVoice TTS Pro).
-3. Customize and publish.
+### How It Works — 3 Simple Steps
 
-### Free Version — Key Features
+1. **Install & Activate** — Install the plugin from the WordPress repository. The audio player appears automatically on your selected post types.
+2. **Choose Your Voice** — Pick a free browser voice, use AtlasVoice's own AI engine (included with Pro), or connect a third-party AI provider (Google Cloud, OpenAI, or ElevenLabs) from the **Integration** menu.
+3. **Customize & Publish** — Select your player style from the **Customization** menu, choose your preferred voice and language from the **Listening** menu, and you're live.
 
-* 20–300+ browser voices via the browser's built-in [speechSynthesis API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
-* Shortcode `[atlasvoice]` and a Gutenberg block.
-* Analytics dashboard — play counts, pause events, engagement.
-* Text aliases — replace abbreviations with spoken equivalents.
-* Unlimited TTS — no character limits, no monthly quotas.
-* Full customization — color, size, border, hover, custom CSS.
-* Cross-device — works on desktop, tablet, mobile.
-* Custom post types — WooCommerce, ACF, CPT UI, Toolset Types.
-* Caching/multilingual compatible — Autoptimize, LiteSpeed, WP Rocket, W3TC, SG Optimizer, WPML, Polylang, TranslatePress.
+### SOME USEFUL LINKS:
+> * [AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/)
+> * [Pricing](https://atlasaidev.com/pricing/)
+> * [Live Demo Pro Version](https://atlasaidev.com/plugins/text-to-speech-pro/demo/)
+> * [Live Demo Free Version](https://wordpress.org/plugins/text-to-audio/?preview=1)
+> * [Video Tutorials](https://www.youtube.com/@atlasaidev)
+> * [Documentation](https://atlasaidev.com/docs/)
 
-### AtlasVoice Pro adds
+### SUPPORT AND HAVE QUESTIONS?
+> * [Contact Us](http://atlasaidev.com/contact-us/) — We usually reply within 1 hour.
 
-AI voice providers (AtlasVoice TTS Pro, Google Cloud, OpenAI, ElevenLabs), bulk MP3 generation, downloadable MP3 audio, Google Cloud Storage backup, JSON-LD audio schema, scheduled email reports, advanced analytics. See [AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/).
 
-### Useful Links
+### Who Is This For?
 
-[Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) · [Pricing](https://atlasaidev.com/pricing/) · [Demo](https://atlasaidev.com/plugins/text-to-speech-pro/demo/) · [Docs](https://atlasaidev.com/docs/) · [Tutorials](https://www.youtube.com/@atlasaidev) · [Contact](http://atlasaidev.com/contact-us/)
+* **Bloggers, News & Media Sites** — Let readers listen to articles while multitasking. Increase time-on-page and reduce bounce rate.
+* **WooCommerce & E-Learning Sites** — Make product descriptions and course materials listenable for shoppers and auditory learners.
+* **Multilingual & Accessibility-First Websites** — Serve a global audience in 81+ languages and meet WCAG 2.1 / ADA compliance.
+
+
+### Why Choose AtlasVoice, the WordPress Text To Speech Plugin?
+
+1. **Accessibility & WCAG Compliance:** Help your site meet WCAG 2.1 and ADA requirements with audio alternatives for users with visual impairments, dyslexia, or reading difficulties.
+
+2. **Boost SEO & Engagement:** Audio increases dwell time and reduces bounce rate. Pro generates **Audio Schema markup** (JSON-LD) for rich results in Google Search.
+
+3. **Multiple AI Providers:** AtlasVoice's own AI engine (included with Pro), Google Cloud Neural2 voices, ElevenLabs ultra-realistic voices, and OpenAI ChatGPT voices.
+
+4. **Works Everywhere:** Compatible with all major browsers, mobile devices, page builders (Elementor, WPBakery, Divi), caching plugins, and multilingual plugins (WPML, GTranslate, TranslatePress, Polylang).
+
+
+### Text To Speech Plugin Free Version Features
+
+* **Zero Configuration Required:** No account, no API key, no registration. Install and the audio player starts working immediately on your selected post types using your browser's built-in speech synthesis engine.
+
+* **Easy Shortcode Integration:** Add the `[atlasvoice]` shortcode to any post, page, or widget to place an audio player exactly where you want it.
+
+* **20–300+ Browser Voices:** Depending on the browser and operating system, access a wide range of voices. Microsoft Edge supports all available system voices; Chrome offers 20+ voices; Firefox supports core languages.
+
+* **Analytics Dashboard:** Track how visitors interact with your audio content — play counts, pause events, engagement metrics, and more with the built-in [analytics dashboard](https://www.youtube.com/watch?v=amkrAtVQGBY).
+
+* **Text Alias:** Replace abbreviations, acronyms, or complex words with their spoken equivalents using the [Text Alias](https://www.youtube.com/watch?v=oeW652YKmG0&t=3s) feature.
+
+* **Unlimited Text-to-Speech:** Convert unlimited text to speech at no cost — no character limits, no monthly quotas.
+
+* **Full Customization:** Customize button color, width, border radius, hover effects, and text labels. Preview all changes in real-time from the dashboard.
+
+* **Language & Voice Selection:** Choose the default language and voice from the **Listening** menu. Adjust speed, pitch, and volume for browser-native players.
+
+* **Cross-Device Compatibility:** The free version uses the browser's built-in [speechSynthesis API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis), ensuring compatibility across desktops, tablets, and mobile devices.
+
+* **Custom CSS Support:** Apply custom styles to the audio player using your own CSS for pixel-perfect integration with your theme.
+
+* **Custom Post Type Support:** Extend text-to-speech to any custom post type — WooCommerce products, portfolios, testimonials, and more. Compatible with [Advanced Custom Fields (ACF)](https://wordpress.org/plugins/advanced-custom-fields/), [Custom Post Type UI](https://wordpress.org/plugins/custom-post-type-ui/), and [Toolset Types](https://toolset.com/home/types-manage-post-types-taxonomy-and-custom-fields/).
+
+* **Clean Audio Output:** Automatically removes special characters, URLs, shortcodes, and HTML tags from content before speaking, ensuring clean, professional audio.
+
+* **Gutenberg Block:** Add and customize the AtlasVoice player directly from the Gutenberg block editor — adjust colors, size, and styles visually.
+
+
+### Upgrade to AtlasVoice Pro for Advanced Features:
+
+Unlock premium AI voices, bulk operations, cloud backup, advanced analytics, and more by upgrading to [AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/). This premium add-on extends the free plugin with enterprise-grade capabilities.
+
+**Text To Speech TTS Accessibility Pro Features:**
+
+**AI Voice Providers (Pro):**
+
+*For each provider: select its player from the **Customization** menu, then choose voice and language from the **Listening** menu.*
+
+* **AtlasVoice TTS Pro (Included with Pro):** AtlasVoice's own AI voice engine — **included with your Pro license at no extra API cost**. Access **81 languages** with natural-sounding voices, smart sentence splitting, and seamless audio without mid-sentence pauses. No third-party account needed — just activate Pro and start generating MP3 files.
+
+* **Google Cloud Text To Speech:** Integrate with [Google Cloud Text To Speech](https://cloud.google.com/text-to-speech) for enterprise-grade voices. 300+ voices across 90+ languages including **Neural2**, **WaveNet**, and **Standard** voice types. Paid service — billed by Google based on usage. [Learn more](https://www.youtube.com/watch?v=h4VJxM-mh74&t=200s)
+
+* **ChatGPT Text To Speech (OpenAI):** Integrate with [OpenAI Text To Speech](https://platform.openai.com/docs/guides/text-to-speech/overview) for natural-sounding audio. 6 voices — **Alloy, Echo, Fable, Nova, Onyx, Shimmer** — with Standard (tts-1) and HD (tts-1-hd) models. Paid service — billed by OpenAI based on usage. [Learn more](https://www.youtube.com/watch?v=h4VJxM-mh74&t=200s)
+
+* **ElevenLabs Text To Speech:** Integrate with [ElevenLabs](https://elevenlabs.io/) for ultra-realistic AI voices. **100+ premium voices** with accent labels, plus **stability**, **similarity boost**, **style**, and **speed** controls. Real-time character usage tracking in your dashboard. Paid service — billed by ElevenLabs based on usage.
+
+**Cloud Storage & Backup (Pro):**
+
+* **Google Cloud Storage Backup:** Back up generated MP3 files to [Google Cloud Storage](https://cloud.google.com/storage). Available for **all TTS providers** — Google Cloud TTS, ChatGPT TTS, AtlasVoice TTS Pro, and ElevenLabs TTS. Configure a Google Cloud service account JSON file from the **Integration** menu, even if using a non-Google TTS provider.
+
+**Content & Playback Control (Pro):**
+
+* **Bulk MP3 File Generation:** Generate MP3 files for hundreds of posts at once using the bulk action from the WordPress posts list. Select your posts, choose "AtlasVoice Generate MP3 File", and the plugin processes each post automatically. [Watch tutorial](https://www.youtube.com/watch?v=HFoqlkPCP80).
+
+* **Downloadable MP3 Audio:** Allow visitors to download MP3 files for offline listening. Unlimited downloads. Also upload your own pre-recorded MP3 files for any post.
+
+* **Read Content from DOM:** Capture dynamically rendered content by reading directly from the page DOM instead of the database.
+
+* **Audio Schema Markup (SEO):** Generates JSON-LD structured data for audio content, enabling rich audio results in Google Search.
+
+* **Content Splitting:** Long articles are automatically split into chunks, then seamlessly combined into a single MP3 file.
+
+* **Content Controls:** Add text before/after content for intros and outros. Include or exclude post title and excerpt from the audio output.
+
+**Content Filtering (Pro):**
+
+* **Add CSS Selector:** Target specific elements within your content to include in the text-to-speech playback using CSS selectors. Read content from sidebars, footers, or any DOM element.
+
+* **Exclude Texts To Speak:** Exclude specific words, phrases, or sentences from being vocalized. Separate multiple entries with the pipe symbol (|).
+
+* **Exclude Tag's Content:** Skip content inside specific HTML tags (e.g., `code`, `blockquote`, `figcaption`). Separate multiple tags with the pipe symbol (|).
+
+* **Exclude by Post ID, Category, or Tag:** Precisely control which content gets audio by excluding specific posts, categories, or WordPress tags.
+
+* **Unlimited Text Alias:** Replace unlimited abbreviations, acronyms, or domain-specific terms with their spoken equivalents using the [Text Alias](https://www.youtube.com/watch?v=oeW652YKmG0&t=3s) system.
+
+**Analytics & Insights (Pro):**
+
+* **Advanced Analytics Dashboard:** Comprehensive analytics with engagement funnels, browser breakdown, device type analysis, OS distribution, location tracking, popular posts ranking, peak hours heatmap, listening trends, and listener segments. [Watch demo](https://www.youtube.com/watch?v=amkrAtVQGBY).
+
+* **Usage Tracking:** Monitor your AI provider usage directly from the WordPress dashboard — track ElevenLabs character usage with real-time subscription data, or access Google Cloud and OpenAI usage dashboards with one click.
+
+* **Search by Post ID & Date Range:** Filter analytics data by specific posts or custom date ranges to measure content performance.
+
+**Player & Customization (Pro):**
+
+* **6 Player Styles:** Default (free browser voices), Default Pro, AtlasVoice TTS Pro (own AI engine), Google Cloud TTS, ChatGPT TTS, and ElevenLabs TTS. Pro players use a modern, responsive HTML5 audio player with progress bar, volume, speed, and download button.
+
+* **Floating Player & Display Controls:** Optional sticky player, display by date range, custom margin control, and full CSS customization.
+
+**Translation & Multilingual (Pro):**
+
+* **81+ Languages with WPML, GTranslate, TranslatePress & Polylang:** Full multilingual support. The player automatically detects language changes and adjusts the voice accordingly.
+
+**Developer-Friendly (Pro):**
+
+* **50+ Filters & Hooks, REST API:** Extensive WordPress filter/action API and full REST API (`tta_pro/v1`) for programmatic audio generation. Priority live support within 1 hour.
+
+**Try [AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) today and transform your content into audio.**
+
+
+### AtlasVoice: Text To Speech Pro Review by Experts
+
+[youtube https://www.youtube.com/watch?v=Nzph8h8zH8o&t=788s]
+
+### Video Tutorials
+
+[youtube https://www.youtube.com/watch?v=25xJtIwFM2U&ab_channel=AtlasAiDev]
+
+[youtube https://www.youtube.com/watch?v=h4VJxM-mh74&t=4s&ab_channel=AtlasAiDev]
+
+
+### Text To Speech Pro Supported Languages:
+
+AtlasVoice Pro supports **81+ languages** with premium AI voices:
+
+Afrikaans, Albanian, Arabic, Armenian, Bengali, Bulgarian, Catalan, Chinese (Mandarin/China), Chinese (Mandarin/Taiwan), Chinese (Cantonese), Croatian, Czech, Danish, Dutch, English, English (Australia), English (United Kingdom), English (United States), Esperanto, Finnish, French, German, Greek, Haitian Creole, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Italian, Japanese, Korean, Latin, Latvian, Macedonian, Norwegian, Polish, Portuguese, Portuguese (Brazil), Portuguese (Portugal), Romanian, Russian, Serbian, Slovak, Spanish, Spanish (Spain), Spanish (United States), Swahili, Swedish, Tamil, Thai, Turkish, Urdu, Vietnamese, Welsh
+
+*Google Cloud TTS supports 90+ languages. ElevenLabs supports 29+ languages with multilingual models. Exact availability varies by provider.*
+
+
+### Text To Speech TTS Free Supported Languages:
+
+The free version uses the browser's [speechSynthesis API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis), so available voices and languages depend on the user's browser and operating system:
+
+* **Chrome Desktop:** UK English, US English, Spanish (Spain), Spanish (US), French, German, Italian, Russian, Dutch, Japanese, Korean, Chinese (China, Hong Kong, Taiwan), Hindi, Indonesian, Polish, Brazilian Portuguese — **18+ languages**.
+
+* **Chrome Mobile:** English (US/UK), German, Italian, Russian, French, Spanish — **7 languages**.
+
+* **Microsoft Edge (Desktop & Mobile):** **All available system voices** — the widest selection of any browser.
+
+* **Firefox Desktop:** English (US/UK) — additional voices with OS speech packs installed.
+
+* **Firefox Mobile:** English (US/UK), German, Italian, Russian, French, Spanish — **7 languages**.
+
+*Tip: For the widest voice selection on the free version, recommend Microsoft Edge to your visitors. For consistent, high-quality voices across all browsers and devices, upgrade to [AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) with premium AI voices.*
+
+
+### Compatibility
+
+**Multilingual:** [WPML](https://wpml.org/), [GTranslate](https://wordpress.org/plugins/gtranslate/), [TranslatePress](https://wordpress.org/plugins/translatepress-multilingual/), [Polylang](https://wordpress.org/plugins/polylang/) — auto-detects language and adjusts voice.
+
+**Page Builders & Themes:** [Elementor](https://wordpress.org/plugins/elementor/), [Avada](https://avada.com/), [WPBakery](https://wpbakery.com/), [Divi](https://www.elegantthemes.com/)
+
+**Caching:** [WP-Optimize](https://wordpress.org/plugins/wp-optimize/), [LiteSpeed Cache](https://wordpress.org/plugins/litespeed-cache/), [Autoptimize](https://wordpress.org/plugins/autoptimize/), [W3 Total Cache](https://wordpress.org/plugins/w3-total-cache/), [Speed Optimizer](https://wordpress.org/plugins/sg-cachepress/)
+
+**Custom Post Types:** [ACF](https://wordpress.org/plugins/advanced-custom-fields/), [Custom Post Type UI](https://wordpress.org/plugins/custom-post-type-ui/), [Toolset Types](https://toolset.com/home/types-manage-post-types-taxonomy-and-custom-fields/)
+
+**Other:** [Yoast Duplicate Post](https://wordpress.org/plugins/duplicate-post/), [Duplicate Post](https://wordpress.org/plugins/copy-delete-posts/), [Duplicate Page](https://wordpress.org/plugins/duplicate-page/), [Easy Table of Contents](https://wordpress.org/plugins/easy-table-of-contents/)
+
+
+### USAGE:
+
+Use the `[atlasvoice]` shortcode to add the audio player anywhere:
+
+`[atlasvoice]` — Basic player.
+`[atlasvoice listen_text="Listen" pause_text="Pause" resume_text="Resume" replay_text="Replay"]` — Custom button text.
+`[atlasvoice text_to_read="Welcome to our website."]` — Custom text to read.
+`[atlasvoice class="my-custom-player"]` — Add CSS class.
+`[atlasvoice lang="en-GB" voice="Google UK English"]` — Change language and voice.
+`[atlasvoice id="42"]` — Read a specific post by ID.
+`[atlasvoice]This content will be read aloud.[/atlasvoice]` — Container tag.
+
+**Get Started Today!**
+
+Boost engagement, accessibility, and SEO on your WordPress and WooCommerce site with the AtlasVoice text to speech plugin. It is the easiest way to turn your content from text to audio. Meet WCAG 2.1 accessibility standards, increase time-on-page, reduce bounce rate, and cater to a global audience in 81+ languages.
+
+[Try AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) for premium AI voices, bulk MP3 generation, cloud storage backup, advanced analytics, and priority support.
+
+
+### CHECK OUT OUR OTHER PLUGINS:
+> More free plugins from AtlasAiDev: [AI Workflow Automation - MCP](https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/), [Smart Local AI](https://wordpress.org/plugins/smart-local-ai/), and [AR/VR 3D Model & Try-On](https://wordpress.org/plugins/ar-vr-3d-model-try-on/).
+
+== Source code ==
+
+The complete, unminified source (GPLv3) is on GitHub: https://github.com/azizulhasan/text-to-audio. The git tag matching each wp.org version (e.g. `2.1.20`) is the exact source used for that release ZIP.
+
+
+
+== External services ==
+
+The third-party services below may be contacted. For each: what it does, the data sent, when, and the provider's Terms/Privacy.
+
+= AtlasAiDev Tracker (track.atlasaidev.com) =
+
+**Opt-in, off by default** (stored in option `text-to-audio_allow_tracking`; revocable anytime). When enabled, sends usage telemetry — plugin/WordPress/PHP versions, site language, enabled features, site name and URL, admin email, and the site's outbound public IP (resolved via icanhazip.com) — so AtlasAiDev can prioritise improvements. No visitor/listener data is sent.
+Provided by AtlasAiDev — Terms: https://atlasaidev.com/terms-and-conditions/ Privacy: https://atlasaidev.com/privacy-policy/
+
+= AtlasAiDev plugin catalog (raw.githubusercontent.com) =
+
+Fetches `https://raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json` only when an admin opens the "Other AtlasAiDev Plugins" screen (cached 24h). No site or user data is sent beyond standard HTTP headers.
+
+= Translation downloads (api.github.com, raw.githubusercontent.com) =
+
+To keep the ZIP small, `.mo` translations are downloaded on demand from `https://github.com/azizulhasan/atlasaidev-translations` (via api.github.com and raw.githubusercontent.com) on activation and when the site language changes, and skipped if the `.mo` already exists. Only the WordPress locale code (e.g. `es_ES`) is sent.
+
+GitHub, Inc. (catalog + translations) — Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
+
+= Geolocation lookups (ip-api.com, ipinfo.io, icanhazip.com) =
+
+**Opt-in, off by default** (AtlasVoice → Analytics → "Show listener location in analytics"; requires Analytics on). When enabled, resolves a listener's public IP to country/region/city via icanhazip.com (site's outbound IP), ip-api.com (primary), and ipinfo.io (fallback). Only the listener's IP is sent.
+- ip-api.com — Terms: https://ip-api.com/docs/legal, Privacy: https://members.ip-api.com/privacy-policy
+- ipinfo.io — Terms: https://ipinfo.io/terms-of-service, Privacy: https://ipinfo.io/privacy-policy
+- icanhazip.com — https://major.io/p/a-new-future-for-icanhazip/
+
+
+
 
 == Installation ==
 
@@ -156,122 +377,19 @@ Please report security bugs through the [Patchstack Vulnerability Disclosure Pro
 18. Text to Speech Aliases
 19. Add ACF Fields To Posts
 
-
-
-== Source code ==
-
-The complete, unminified source code for this plugin is published on
-GitHub at https://github.com/azizulhasan/text-to-audio under the
-GPLv3 license (the same license as the distributed plugin). The git
-tag matching the wp.org plugin version (for example, tag `2.1.20`
-for plugin version 2.1.20) reflects the exact source used to produce
-the wp.org release ZIP.
-
-
-
-== External services ==
-
-This plugin connects to a number of third-party services. Each one is
-described below — what it is, what data is sent, when it is contacted,
-and links to the provider's Terms of Use and Privacy Policy.
-
-= AtlasAiDev Tracker (track.atlasaidev.com) =
-
-**Off by default. Opt-in.** Nothing is sent to this service unless the
-site administrator explicitly opts in to usage tracking from the
-consent notice shown by the plugin. The choice is stored in the
-WordPress option `text-to-audio_allow_tracking` (`'yes'` to enable,
-`'no'` / unset to disable) and can be revoked at any time, after which
-no further requests are made.
-
-When opted-in, the service receives usage telemetry — plugin version,
-active WordPress / PHP version, site language, which AtlasVoice
-features are enabled, the site name and URL, the administrator email,
-and the site's outbound public IP address (resolved via icanhazip.com;
-see the Geolocation entry below for that provider's links). This is
-used by AtlasAiDev to understand which features matter to users and to
-prioritise improvements. No website visitor / listener data is sent to
-this service.
-
-Service provided by AtlasAiDev:
-- Terms and Conditions: https://atlasaidev.com/terms-and-conditions/
-- Privacy Policy: https://atlasaidev.com/privacy-policy/
-
-= AtlasAiDev plugin catalog (raw.githubusercontent.com) =
-
-When the site administrator opens the "Other AtlasAiDev Plugins" admin
-page (and only then), the plugin fetches a small JSON catalog from
-`https://raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json`
-so the listing reflects the current set of AtlasAiDev plugins without
-needing a plugin update for every catalog change. The fetch is gated
-to that admin screen, requires the `manage_options` capability, and
-the screen shows an on-page notice describing the request before the
-user sees the catalog. No user or site data is sent beyond standard
-HTTP headers added by WordPress. The catalog is cached locally for
-24 hours.
-
-Service provided by GitHub, Inc.:
-- Terms of Service: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service
-- Privacy Statement: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
-
-= Translation downloads (api.github.com, raw.githubusercontent.com) =
-
-To keep the plugin ZIP small, translation files (`.mo`) are not
-bundled — they are downloaded on demand from the public translation
-repository at `https://github.com/azizulhasan/atlasaidev-translations`.
-
-The plugin contacts two GitHub endpoints:
-
-1. `https://api.github.com/repos/azizulhasan/atlasaidev-translations/contents/atlasvoice/<locale>` — to list the available files for the active site locale.
-2. `https://raw.githubusercontent.com/azizulhasan/atlasaidev-translations/main/atlasvoice/<file>` — to fetch each `.mo` file referenced by that listing.
-
-The only data sent is the WordPress locale code (for example `es_ES`,
-`pt_BR`) as part of the URL. No user-identifying information, site
-URL, or admin email is transmitted. The download is triggered:
-
-* On plugin activation, for the site's current locale.
-* When the site language is changed in **Settings → General**.
-* The plugin skips the download entirely if a `.mo` for the locale
-  already exists in the plugin's `languages/` folder.
-
-Service provided by GitHub, Inc.:
-- Terms of Service: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service
-- Privacy Statement: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
-
-= Geolocation lookups (ip-api.com, ipinfo.io, icanhazip.com) =
-
-**Off by default. Opt-in.** No request is ever sent to any of these
-services until the site administrator turns on the **"Show listener
-location in analytics"** toggle inside **AtlasVoice → Analytics**
-(visible only once the parent "Enable analytics" toggle is on). When
-the toggle is off, the dashboard simply shows "Unknown" for location
-fields and the helpers below short-circuit before any network call.
-
-When enabled, the analytics dashboard displays where listeners are
-located by resolving the listener's public IP address to country /
-region / city via:
-
-1. `https://icanhazip.com/` — used once per session to determine the
-   site's outbound public IP, so the rest of the plugin can call the
-   geolocation services with the right address.
-2. `http://ip-api.com/json/<ip>` — primary geolocation lookup.
-3. `https://ipinfo.io/<ip>/json` — fallback when ip-api.com returns an
-   error or rate-limits.
-
-Only the listener's IP address is sent. Geolocation responses are
-stored against the play event in the local analytics table.
-
-Services:
-- ip-api.com — Terms: https://ip-api.com/docs/legal, Privacy: https://members.ip-api.com/privacy-policy
-- ipinfo.io — Terms: https://ipinfo.io/terms-of-service, Privacy: https://ipinfo.io/privacy-policy
-- icanhazip.com — https://major.io/p/a-new-future-for-icanhazip/
-
 == Changelog ==
 
 ### TRANSLATION REQUEST
 We are looking for people to help translate this plugin. If you can help, we would love to hear from you.
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
+
+= 2.3.0 ( 16 Jun 2026 ) =
+Added : A new Staging mode. When you set the plugin up, the Listen player stays hidden from your visitors so you can get everything right first. When you are happy, click "Go Live" to show it to everyone.
+Added : While in Staging, you and your other site admins can still see and try the player, so you can check it reads the correct content before any visitor sees it.
+Added : A simple "Go Live" button in the WordPress toolbar. Type GO LIVE to confirm, and the page refreshes on its own.
+Added : A new step in the setup wizard that helps you check what gets read aloud before going live.
+Improved : Clearer wizard and dashboard messages explaining what Staging means and what happens when you go live.
 
 = 2.2.5 ( 14 Jun 2026 ) =
 Fixed : The player no longer reads punctuation marks such as apostrophes and quotation marks aloud as the word "backslash".
@@ -489,6 +607,9 @@ Introduced :  Complete new UI introduced.
 
 
 == Upgrade Notice ==
+
+= 2.3.0 =
+Adds a new Staging mode so you can set up and check the Listen player privately before showing it to your visitors, plus a one-click "Go Live" button in the toolbar. Update recommended.
 
 = 2.2.5 =
 Fixes several text-to-speech reading issues (punctuation, headings, lists, abbreviations and numbers), restores the full-width Listen button, and fixes playback when the player is used across multiple browser tabs. Update recommended.
