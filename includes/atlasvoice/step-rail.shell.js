@@ -1428,21 +1428,86 @@
         return '';
     }
 
+    // Scope chooser. Was a read-only readout; now an interactive pill group
+    // so the admin can target the content rule at this post, this post type,
+    // or the whole site without relaunching the picker. The selected pill
+    // mirrors state.scope — which init() sets from the launch URL
+    // (?scope=post:N | post_type:slug | global) or the resolved-rule default
+    // — so the dashboard / edit-page launch URLs pre-select correctly and a
+    // bare ?atlasvoice_picker=1 keeps its existing default. Free shows only
+    // the global pill (per-post / per-type are Pro).
+    function scopePillLabel(kind) {
+        if (kind === 'post')      { return 'Only this post'; }
+        if (kind === 'post_type') { return 'This post type'; }
+        return 'Everywhere';
+    }
+
+    function scopeHint(kind) {
+        if (kind === 'post') {
+            return { text: 'Saves to this post only. It overrides the post-type and global rules on this page.', warn: false };
+        }
+        if (kind === 'post_type') {
+            var pt = state.postType ? ('“' + state.postType + '”') : 'this post type';
+            return { text: 'Saves one rule for all ' + pt + ' posts. To use the global rule for this post type instead: open the AtlasVoice Settings page, clear this post type’s content selector there, and save — it then falls back to the global default.', warn: false };
+        }
+        return { text: 'Saves the site-wide default. A post or post-type rule will still override it wherever one exists.', warn: true };
+    }
+
     function renderScopeReadout() {
         var slot = $('.av-scope-readout');
         if (!slot) { return; }
         slot.innerHTML = '';
-        slot.appendChild(d.createTextNode(describeScope(state.scope) || 'Scope unknown'));
-        var hint = d.createElement('span');
-        hint.className = 'av-scope-readout__hint';
-        if (state.scope && state.scope.kind === 'global') {
-            hint.textContent = 'Saves to global CSS-selector settings.';
-        } else if (state.scope && state.scope.kind === 'post_type') {
-            hint.textContent = 'Saves to per-post-type override (Pro).';
-        } else if (state.scope && state.scope.kind === 'post') {
-            hint.textContent = 'Saves to this post only (Pro).';
-        }
+
+        var current = (state.scope && state.scope.kind) || 'post';
+        if (!state.pro) { current = 'global'; }
+        var kinds = state.pro ? ['post', 'post_type', 'global'] : ['global'];
+
+        var group = d.createElement('div');
+        group.className = 'av-scope-group';
+        kinds.forEach(function (kind) {
+            var btn = d.createElement('button');
+            btn.type = 'button';
+            btn.className = 'av-scope-pill' + (kind === current ? ' is-checked' : '');
+            btn.setAttribute('data-scope-kind', kind);
+            btn.textContent = scopePillLabel(kind);
+            if (state.pro) {
+                btn.addEventListener('click', function () { switchScope(kind); });
+            }
+            group.appendChild(btn);
+        });
+        slot.appendChild(group);
+
+        var h = state.pro
+            ? scopeHint(current)
+            : { text: 'Free uses one content rule for your whole site.', warn: false };
+        var hint = d.createElement('p');
+        hint.className = 'av-scope-hint' + (h.warn ? ' av-scope-hint--warn' : '');
+        hint.textContent = h.text;
         slot.appendChild(hint);
+    }
+
+    // Switch the active scope from a pill click. Mirrors the retired scope
+    // radiogroup: update state.scope + the legacy selection.scope string,
+    // re-render the pills, then reload whatever rule is saved at the new
+    // scope (loadRulesForScope reads selection.scope and hits
+    // /step-rail/scope-rule). No-op on Free for non-global scopes.
+    function switchScope(kind) {
+        if (!state.pro && kind !== 'global') { return; }
+        if (state.scope && state.scope.kind === kind) { return; }
+        if (kind === 'post') {
+            state.scope = { kind: 'post', post_id: state.postId };
+            state.selection.scope = 'post';
+        } else if (kind === 'post_type') {
+            var pt = state.postType || (state.scope && state.scope.post_type) || '';
+            state.scope = { kind: 'post_type', post_type: pt };
+            state.selection.scope = 'post_type';
+            state.selection.post_type = pt;
+        } else {
+            state.scope = { kind: 'global' };
+            state.selection.scope = 'global';
+        }
+        renderScopeReadout();
+        loadRulesForScope();
     }
 
     /* ─── load rules for a selected scope ──────────────────────── */
@@ -2240,7 +2305,7 @@
         state.selection.scope     = scope;
         state.selection.post_type = resp.post_type || '';
         state.selection.language  = resp.language  || '';
-        state.postType            = resp.post_type || '';
+        state.postType            = resp.post_type || state.postType || '';
         state.postLang            = resp.language  || '';
 
         // TTS-238 D27.22 — When the URL didn't pin a scope, sync
@@ -2306,6 +2371,7 @@
         state.rest        = shell.getAttribute('data-rest')  || '';
         state.nonce       = shell.getAttribute('data-nonce') || '';
         state.pro         = shell.getAttribute('data-pro') === '1';
+        state.postType    = shell.getAttribute('data-post-type') || '';
         state.contentMeta = {
             addTitle:    shell.getAttribute('data-add-title')    === '1',
             addExcerpt:  shell.getAttribute('data-add-excerpt')  === '1',
