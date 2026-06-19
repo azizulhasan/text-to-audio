@@ -12,6 +12,7 @@ class ComposerStaticInitd518cadaed440bd90dc9e4378262121d
             'TTA_Public\\' => 11,
             'TTA_Api\\' => 8,
             'TTA_Admin\\' => 10,
+            'TTA\\AtlasVoice\\' => 15,
             'TTA\\' => 4,
         ),
         'A' => 
@@ -32,6 +33,10 @@ class ComposerStaticInitd518cadaed440bd90dc9e4378262121d
         'TTA_Admin\\' => 
         array (
             0 => __DIR__ . '/../..' . '/admin',
+        ),
+        'TTA\\AtlasVoice\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/includes/atlasvoice',
         ),
         'TTA\\' => 
         array (

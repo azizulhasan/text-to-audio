@@ -66,6 +66,8 @@ class TTA_Reset {
             // Notices
             'tta_review_notice_next_show_time',
             'tta_feedback_notice_next_show_time',
+
+            'tta_mode_default_migrated'
         );
 
         foreach ( $options as $option ) {
@@ -88,12 +90,49 @@ class TTA_Reset {
             'tts_mp3_file_urls',
             'tts_is_mp3_file_url_exists',
             'atlasVoice_analytics',
+            // TTS-238: per-post CSS-selector override (set via the picker /
+            // per-post UI). Shared between Free and Pro — Pro's uninstall.php
+            // also clears it, but a Free "reset all data" should too.
+            'tts_pro_custom_css_selectors',
         );
         foreach ( $meta_keys as $meta_key ) {
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
             $wpdb->query( $wpdb->prepare(
                 "DELETE FROM {$wpdb->postmeta} WHERE meta_key = %s",
                 $meta_key
+            ) );
+        }
+
+        // 4b. User meta — per-user notice / review / milestone state.
+        // The notices system (TTA_Notices) stores dismissal/seen/clicked
+        // flags as user meta. A "reset all plugin data" must clear these
+        // or notices stay suppressed for users who dismissed them.
+        //
+        // Scoping is deliberately conservative to avoid wiping ANOTHER
+        // plugin's data:
+        //   - `tta_` is this plugin's unique namespace prefix, so a
+        //     LIKE 'tta\_%' is safe and covers the dynamic ids
+        //     (`tta_dismiss_<id>`, `tta_shown_<id>`, `tta_clicked_<id>`)
+        //     plus all fixed `tta_*` keys.
+        //   - `tts_` is a generic "text-to-speech" abbreviation that
+        //     another plugin could legitimately use, so we do NOT do a
+        //     blanket `tts_%` delete. Instead we list only the handful of
+        //     legacy `tts_*` notice keys this plugin is known to have set.
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+        $wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE 'tta\_%'" );
+
+        $legacy_tts_user_meta = array(
+            'tts_plugin_voice_and_language_mismatch_dismissed',
+            'tts_plugin_features_notice_dismissed',
+            'tts_plugin_compatible_notice_dismissed',
+            'tts_setup_notice_dismissed',
+            'tts_plugin_analytics_notice_dismissed',
+        );
+        foreach ( $legacy_tts_user_meta as $um_key ) {
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+            $wpdb->query( $wpdb->prepare(
+                "DELETE FROM {$wpdb->usermeta} WHERE meta_key = %s",
+                $um_key
             ) );
         }
 

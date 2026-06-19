@@ -1,7 +1,7 @@
 # Research: How TTS Plugins Extract Content
 
-**Date:** 2026-04-03
-**Plugins studied:** AtlasVoice, GSpeech, Mementor TTS, ResponsiveVoice
+**Date:** 2026-04-03 (updated 2026-04-20)
+**Plugins studied:** AtlasVoice, GSpeech, Mementor TTS, ResponsiveVoice, SpeechKit (BeyondWords), Trinity Audio
 
 ---
 
@@ -305,28 +305,195 @@ const getContentSettingsFingerprint = (tts, buttonId) => {
 
 ---
 
+## 5. SpeechKit (BeyondWords)
+
+**Installed via:** `wp plugin install speechkit` (v6.3.0)
+**Location:** `wp-content/plugins/speechkit/`
+**Approach:** Cloud-only. WordPress is a content *feeder* to the BeyondWords API — the audio player is a remote widget that renders audio generated server-side by BeyondWords.
+
+**Content extraction** (`src/Component/Post/PostContentUtils.php`):
+
+```php
+// getPostBody($post) — builds the HTML payload sent to BeyondWords
+// Gutenberg path:
+$blocks = parse_blocks( $post->post_content );
+$html   = '';
+foreach ( $blocks as $block ) {
+    // Skip blocks the editor marked `beyondwordsAudio: false`
+    if ( isset( $block['attrs']['beyondwordsAudio'] ) && ! $block['attrs']['beyondwordsAudio'] ) {
+        continue;
+    }
+    $html .= render_block( $block );
+}
+
+// Classic path:
+$html = apply_filters( 'the_content', $post->post_content );
+```
+
+**Payload assembly** (`PostContentUtils::getContentParams()`):
+```php
+return wp_json_encode( [
+    'title'        => get_the_title( $postId ),
+    'summary'      => $summary,           // excerpt, optional, wrapped in <div data-beyondwords-summary>
+    'body'         => $body,              // rendered HTML from above
+    'image_url'    => $featured_image,
+    'publish_date' => $published,
+    'author'       => get_the_author_meta( 'display_name', $post->post_author ),
+    'metadata'     => [ 'taxonomies' => ... ],
+] );
+```
+
+The JSON is POSTed to BeyondWords' REST API on post save. BeyondWords renders HTML → audio on its servers, returns a `content_id`, and the WordPress side stores only that ID. The frontend player is a remote `<script>` widget (`/src/Core/Player/Renderer/Javascript.php`) that auto-prepends via `add_filter('the_content', ..., 1000000)`.
+
+**Per-block exclusion in Gutenberg:**
+```json
+// Block attrs written by the BeyondWords editor sidebar
+{ "attrs": { "beyondwordsAudio": false } }
+```
+This is the ONLY granular control — no CSS selectors, no tag/text exclusions, no per-site selector list.
+
+**Excerpt handling:**
+```php
+// Option `beyondwords_prepend_excerpt` controls whether excerpt is sent as summary
+$summary = wpautop( apply_filters( 'get_the_excerpt', $post->post_excerpt, $post ) );
+$summary = '<div data-beyondwords-summary>' . $summary . '</div>';
+```
+
+**TTS engine:** BeyondWords cloud (SaaS) — aggregates Google Cloud, AWS Polly, Microsoft Azure, ElevenLabs voices. Requires active API key and project ID. No local/browser fallback.
+
+**Strengths:**
+- Uses `the_content` filter *and* Gutenberg `render_block` → Elementor/ACF-the-content/shortcodes render fully server-side before leaving WordPress.
+- Per-block opt-out is a clean editor UX — users toggle a block in the sidebar instead of writing CSS.
+- Title, excerpt, body, image, author, publish-date, taxonomies all sent as structured JSON fields → BeyondWords can assign different voices per section (title voice vs body voice).
+- WPGraphQL support baked in for headless WP.
+
+**Weaknesses:**
+- **Zero control over page-builder body containers.** No CSS selector include/exclude — if Elementor/Divi Theme Builder bypasses `the_content`, BeyondWords sees empty body and has no escape hatch.
+- Classic editor + non-block themes get no granular exclusion at all (no "skip sidebar" equivalent).
+- Fully cloud-dependent — no offline/browser voices, no local MP3 generation.
+- No ACF custom-fields support — anything outside `post_content`/excerpt is invisible.
+
+---
+
+## 6. Trinity Audio
+
+**Installed via:** `wp plugin install trinity-audio` (v5.26.0)
+**Location:** `wp-content/plugins/trinity-audio/`
+**Approach:** Cloud-only (Amazon Polly via Trinity backend). Content is pre-cleaned in PHP using a custom `simple_html_dom` parser; a content hash is sent to Trinity's cloud so the backend knows whether to regenerate audio.
+
+**Content extraction** (`inc/common.php` + `inc/text.php`):
+
+```php
+// inc/common.php — build the text the player/backend will use
+$post_id = get_the_ID();
+$title   = get_the_title( $post_id );
+$content = get_post_field( 'post_content', $post_id );   // RAW, not filtered
+
+$clean = trinity_get_clean_text( $title, $content, $whitelist_shortcodes );
+```
+
+Trinity deliberately uses `get_post_field()` — bypassing `the_content` — then walks the HTML with a bundled `simple_html_dom` library:
+
+```php
+// inc/text.php — trinity_get_text_from_html()
+$html = str_get_html( $content );
+
+// Remove elements matching any user-configured "skip tag"
+foreach ( $skip_tags as $tag ) {
+    foreach ( $html->find( $tag ) as $el ) {
+        $el->outertext = '';
+    }
+}
+
+$text = $html->plaintext;     // strip to plaintext
+$html->clear();
+```
+
+**Shortcode whitelist** (`inc/text.php`):
+```php
+// Non-whitelisted shortcodes are regex-stripped BEFORE do_shortcode runs
+$content = preg_replace( '/\[(?!' . $whitelist_regex . ')[^\]]+\]/', '', $content );
+$content = do_shortcode( $content );   // only whitelisted ones survive
+```
+User configures whitelist in settings (e.g. `vc_row, vc_column, su_heading`) so Visual Composer / Shortcodes Ultimate content can be kept.
+
+**Hash-based versioning** (`inc/post-hashes.php`):
+```php
+// Three text variants are hashed and stored so Trinity backend knows when to regenerate
+$hashes = [
+    'title_content' => sha1( $title . ' ' . $cleaned ),
+    'content_only'  => sha1( $cleaned ),
+    'content_no_title' => sha1( $cleaned_without_title ),
+];
+update_post_meta( $post_id, 'trinity_audio_post_hashes', $hashes );
+```
+
+**Player injection** — hooks `the_content` at priority `99999` in `trinity.php`:
+```php
+add_filter( 'the_content', 'trinity_content_filter', 99999 );
+```
+Inside the filter it checks `in_the_loop()`, `is_singular()`, and the "Check for loop" option (`TRINITY_AUDIO_CHECK_FOR_LOOP`) — an explicit escape hatch for Divi / custom themes that don't call `the_loop()`.
+
+**Config shipped to JS:**
+```php
+// inc/common.php — inline JS config read by the player
+$config = [
+    'cleanText'    => $title . ' ' . $cleaned,
+    'headlineText' => $title,
+    'articleText'  => $cleaned,          // content without title
+    'metadata'     => [ 'author' => ..., 'pluginVersion' => ... ],
+];
+echo '<script>var TRINITY_TTS_WP_CONFIG = ' . wp_json_encode( $config ) . ';</script>';
+```
+
+**Content cleaning** (`inc/text.php`):
+- Converts newlines / block-level breaks to custom pause markers (`BREAK_MACRO`, `BLOCK_MACRO`) so Polly gets intentional pauses.
+- `html_entity_decode` → `strip_tags` → regex whitespace collapse.
+- No CSS-selector exclusion — `skip_tags` is tag-name only (e.g. `blockquote`, `figure`, `pre`).
+
+**TTS engine:** Amazon Polly via Trinity Audio cloud (freemium — ~5 articles/month free, paid tiers for more). No local/browser voices.
+
+**Strengths:**
+- **`simple_html_dom` parsing in PHP** — closer to what we want in Layer A of TTS-238. Robust against malformed markup, works without DOMDocument quirks.
+- **Hash-based regeneration** — clean way to invalidate cloud audio only when content actually changed. Directly relevant to our MP3 cache fingerprint (`getContentSettingsFingerprint`).
+- **Shortcode whitelist** — elegant middle ground: strip noisy shortcodes globally, keep builder ones selectively.
+- **Pause/break macros** — injects intentional silence at block boundaries, gives Polly prosody hints. We don't do this.
+- **"Check for loop" toggle** — pragmatic recognition that Divi / custom themes break `in_the_loop()`.
+
+**Weaknesses:**
+- **Bypasses `the_content` filter entirely.** Raw `post_content` → Gutenberg blocks, shortcodes (other than whitelisted), ACF-the-content, Elementor inline output, `do_blocks()`-rendered content all get dropped or mangled. Worse than our free plugin's current path.
+- **Skip-tags is tag-name only**, no class/id selectors. Can't exclude `.sidebar`, `#ad-wrapper`, `[data-no-audio]`.
+- **No per-post settings** (no per-post override, no per-post disable).
+- **No excerpt support.** Only `title + post_content`.
+- **No ACF / custom-fields support.**
+- **Hash overhead for all posts** whether audio is enabled or not.
+
+---
+
 ## Comparison Matrix
 
-| Feature | ResponsiveVoice | GSpeech | Mementor TTS | AtlasVoice |
-|---------|----------------|---------|-------------|------------|
-| Content source | `get_the_content()` | Cloud widget DOM | PHP DOMDocument + XPath | PHP + JS DOM |
-| CSS selectors | None | Cloud config | PHP XPath | JS querySelector |
-| Title handling | Not separate | Data attribute | Separate with author/date | Separate + dedup |
-| Excerpt | Not handled | Not separate | Optional | Optional |
-| ACF support | No | No | No | Yes (native) |
-| Exclude selectors | No | No | Yes (XPath) | Yes (JS) |
-| Exclude tags | No | No | No | Yes |
-| Exclude texts | No | No | No | Yes |
-| Per-post overrides | No | No | No | Yes |
-| Builder support | Shortcodes only | Cloud auto-detect | Fusion Builder dedicated | Common selectors + config |
-| Content deduplication | No | No | Yes (substring) | Yes (title dedup) |
-| TTS engines | ResponsiveVoice (browser+cloud) | GSpeech/Google cloud | ElevenLabs only | Browser + Google + ChatGPT + ElevenLabs |
-| Offline | Partial | No | No | Yes |
-| Reading time | No | No | No | Yes (PHP + JS) |
-| Multilingual | No | No | No | Yes (WPML, GTranslate, TranslatePress, Polylang) |
-| Cache system | No | No | Database | Session storage + fingerprint |
-| Intro/outro | No | No | Yes | Yes |
-| Complexity | Low | Medium | High | High |
+| Feature | ResponsiveVoice | GSpeech | Mementor TTS | SpeechKit | Trinity Audio | AtlasVoice |
+|---------|----------------|---------|-------------|-----------|---------------|------------|
+| Content source | `get_the_content()` | Cloud widget DOM | PHP DOMDocument + XPath | Gutenberg `render_block` + `the_content` | Raw `post_content` + simple_html_dom | PHP + JS DOM |
+| Runs `the_content` filter | Yes (via `get_the_content()`? no — raw) | N/A (cloud) | Yes | Yes (classic path) | **No** | Partial (planned in TTS-238) |
+| CSS selectors | None | Cloud config | PHP XPath | None | None (tag-name skip only) | JS querySelector |
+| Title handling | Not separate | Data attribute | Separate with author/date | Separate JSON field | Separate variant | Separate + dedup |
+| Excerpt | Not handled | Not separate | Optional | Optional (`beyondwords_prepend_excerpt`) | Not supported | Optional |
+| ACF support | No | No | No | No | No | Yes (native) |
+| Exclude selectors | No | No | Yes (XPath) | No | No | Yes (JS) |
+| Exclude tags | No | No | No | No | Yes (`skip_tags`) | Yes |
+| Exclude texts | No | No | No | No | No | Yes |
+| Per-post overrides | No | No | No | Per-block `beyondwordsAudio` | No | Yes |
+| Builder support | Shortcodes only | Cloud auto-detect | Fusion Builder dedicated | Gutenberg block-aware | Shortcode whitelist + "loop" toggle | Common selectors + config |
+| Content deduplication | No | No | Yes (substring) | No | No | Yes (title dedup) |
+| Content hashing / invalidation | No | No | No | Content ID per post | **sha1 per variant** | Session fingerprint (JS) |
+| TTS engines | ResponsiveVoice (browser+cloud) | GSpeech/Google cloud | ElevenLabs only | BeyondWords SaaS (Google/AWS/Azure/ElevenLabs) | Amazon Polly (via Trinity cloud) | Browser + Google + ChatGPT + ElevenLabs |
+| Offline | Partial | No | No | No | No | Yes |
+| Reading time | No | No | No | No | No | Yes (PHP + JS) |
+| Multilingual | No | No | No | Voice-per-section | No | Yes (WPML, GTranslate, TranslatePress, Polylang) |
+| Cache system | No | No | Database | Cloud `content_id` | Post meta hashes | Session storage + fingerprint |
+| Intro/outro | No | No | Yes | No | Pause/break macros | Yes |
+| Complexity | Low | Medium | High | Medium | Medium | High |
 
 ---
 
@@ -354,6 +521,21 @@ $nodes = $xpath->query('//p | //h1 | //h2 | //h3 | //h4 | //h5 | //h6 | //li');
 ### Keep from ResponsiveVoice: Simplicity principle
 The simpler the extraction, the fewer bugs. Consider reducing the number of content paths in `getContent()` from 3 (non-DOM, cached, DOM) to a cleaner pipeline.
 
+### Adopt from SpeechKit: Gutenberg block-level opt-out
+Per-block `beyondwordsAudio: false` is a cleaner editor UX than CSS-selector excludes for the Gutenberg path. In our Pro plugin we could add a block-inspector toggle and persist it on `block.attrs.ttsAudio`. Then Layer A's extractor skips those blocks in `parse_blocks()` before rendering. No new settings page, no selector guessing.
+
+### Adopt from SpeechKit: Structured content payload
+SpeechKit sends `{ title, summary, body, image_url, author, publish_date, metadata }` as discrete fields, not a concatenated string. This lets the cloud engine apply different voices / prosody per section. Useful for our Pro ChatGPT + ElevenLabs players — currently we hand them one giant string.
+
+### Adopt from Trinity Audio: Content hash for regeneration
+Trinity stores per-post sha1 hashes and uses them to decide whether cloud audio must be regenerated. We already have a JS-side `getContentSettingsFingerprint`, but nothing on the PHP side. A PHP fingerprint stored in post meta (title + extracted body + settings) would let Bulk MP3 skip unchanged posts and correctly invalidate stale MP3s after content edits.
+
+### Adopt from Trinity Audio: Shortcode whitelist
+Instead of either `strip_shortcodes()` or `do_shortcode()` wholesale, let users whitelist a small set (`vc_row, su_heading, fusion_text, …`). Cheap to implement as a comma-separated setting and solves the "shortcode name gets read aloud" complaint without forcing full rendering of every plugin's shortcodes.
+
+### Avoid Trinity Audio's mistake: Never bypass `the_content`
+Trinity reads raw `post_content` via `get_post_field()` and loses every builder's output. This is exactly the F4 failure mode in TTS-238. Layer A must always run `apply_filters('the_content', …)` first — the opposite of Trinity's choice.
+
 ---
 
 ## Verdict: Which is Best?
@@ -366,4 +548,10 @@ The simpler the extraction, the fewer bugs. Consider reducing the number of cont
 
 **For overall simplicity:** ResponsiveVoice — `get_the_content()` and done, but with minimal features
 
-**Best overall approach would combine:** AtlasVoice features + GSpeech parent traversal + Mementor DOMDocument fallback
+**Best overall approach would combine:** AtlasVoice features + GSpeech parent traversal + Mementor DOMDocument fallback + SpeechKit's Gutenberg block-level opt-out and structured payload + Trinity's per-post content hash (while explicitly avoiding its bypass of `the_content`).
+
+---
+
+## Update log
+
+- **2026-04-20** — Added sections for SpeechKit (BeyondWords v6.3.0) and Trinity Audio (v5.26.0). Both plugins installed via `wp plugin install` into the local WP (`wp-content/plugins/speechkit`, `wp-content/plugins/trinity-audio`). Matrix extended with two new columns and a "Runs `the_content` filter" row (Trinity's single biggest weakness). Recommendations section extended with 5 new items (block-level opt-out, structured payload, PHP content hash, shortcode whitelist, and an explicit anti-pattern callout to never bypass `the_content`).
