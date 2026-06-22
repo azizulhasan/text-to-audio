@@ -39,6 +39,7 @@ const productionSrc = [
 	'!scripts/**',
 	'!sdk/**',
 	'!plan/**',
+	'!docs/**',
 	'!scripts/**/**',
 	'!languages/*.po',
 	'!admin/js/text-to-audio-dashboard.js',

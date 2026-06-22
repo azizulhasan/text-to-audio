@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.3.0
+Stable tag: 2.3.1
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -384,6 +384,12 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.3.1 ( 22 Jun 2026 ) =
+Improved : The on-page content selector no longer appears on your posts on its own. It now opens only when you choose to open it, so it stays out of your way while you work.
+Added : A new setting to turn the on-page content selector on or off.
+Added : A new setting to show or hide the Staging / Live indicator in the toolbar (off by default).
+Added : A new setting to show or hide the per-post player on/off button in the toolbar (off by default).
+
 = 2.3.0 ( 16 Jun 2026 ) =
 Added : A new Staging mode. When you set the plugin up, the Listen player stays hidden from your visitors so you can get everything right first. When you are happy, click "Go Live" to show it to everyone.
 Added : While in Staging, you and your other site admins can still see and try the player, so you can check it reads the correct content before any visitor sees it.
@@ -607,6 +613,9 @@ Introduced :  Complete new UI introduced.
 
 
 == Upgrade Notice ==
+
+= 2.3.1 =
+The on-page content selector no longer appears automatically on your posts — it opens only when you choose to, and you can turn it (and the new toolbar items) on or off from Settings. Update recommended.
 
 = 2.3.0 =
 Adds a new Staging mode so you can set up and check the Listen player privately before showing it to your visitors, plus a one-click "Go Live" button in the toolbar. Update recommended.
