@@ -310,6 +310,39 @@ class TTA_Helper
         return !empty($types) ? $types : array('post');
     }
 
+    /**
+     * TTS-255: whether the front-end on-page selector (Step Rail) may render.
+     * OFF by default; even when enabled it renders only via
+     * ?atlasvoice_picker=1 (see StepRail::maybe_activate), never on a plain
+     * post URL. Filterable so developers can force it on/off, e.g.
+     * add_filter('tts_enable_steprail', '__return_false').
+     *
+     * @return bool
+     */
+    public static function is_steprail_enabled()
+    {
+        $settings = self::tts_get_settings('settings');
+        $val = (is_array($settings) && !empty($settings['tta__settings_enable_steprail']));
+
+        return (bool) apply_filters('tts_enable_steprail', $val);
+    }
+
+    /**
+     * TTS-255: whether the admin-bar AtlasVoice production/staging indicator
+     * shows. OFF by default. Callers may still show it in other contexts
+     * (e.g. while the Step Rail picker is open). Filter:
+     * tts_show_atlasvoice_mode_bar.
+     *
+     * @return bool
+     */
+    public static function show_mode_bar()
+    {
+        $settings = self::tts_get_settings('settings');
+        $val = (is_array($settings) && !empty($settings['tta__settings_show_mode_bar']));
+
+        return (bool) apply_filters('tts_show_atlasvoice_mode_bar', $val);
+    }
+
 
     /**
      *
