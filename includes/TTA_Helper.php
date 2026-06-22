@@ -542,8 +542,54 @@ class TTA_Helper
         return apply_filters('tts_site_language', $default_language);
     }
 
+    /**
+     * Normalize deprecated ISO-639 language codes to their modern equivalents.
+     *
+     * Google / GTranslate still emit legacy codes (iw, in, ji, jw) that browser
+     * speechSynthesis and provider TTS (he-IL, etc.) don't recognise. We map only
+     * the primary subtag and preserve any region/script suffix, so "iw" -> "he"
+     * and "iw-IL" -> "he-IL". The matching side (tta__multilingualActiveLanguages,
+     * keyed to the GTranslate cookie) is left untouched — we normalize on output only.
+     *
+     * @param string $language A BCP-47-ish code (e.g. "iw", "iw-IL", "en-us").
+     * @return string Normalized code.
+     */
+    public static function tts_normalize_language_code($language)
+    {
+        if (!is_string($language) || $language === '') {
+            return $language;
+        }
+
+        $legacy_map = array(
+            'iw' => 'he', // Hebrew
+            'in' => 'id', // Indonesian
+            'ji' => 'yi', // Yiddish
+            'jw' => 'jv', // Javanese
+        );
+
+        // Split primary subtag from any region/script suffix ("iw-IL", "iw_IL").
+        $rest = '';
+        if (preg_match('/^([A-Za-z]+)([-_].*)$/', $language, $m)) {
+            $primary = $m[1];
+            $rest    = $m[2];
+        } else {
+            $primary = $language;
+        }
+
+        $primary_lower = strtolower($primary);
+        if (isset($legacy_map[$primary_lower])) {
+            $primary = $legacy_map[$primary_lower];
+        }
+
+        return apply_filters('tts_normalize_language_code', $primary . $rest, $language);
+    }
+
     public static function tts_get_file_url_key($language, $voice = '')
     {
+        // Normalize here too: some callers (e.g. Pro generation) pass a saved
+        // language straight in without going through resolution.
+        $language = self::tts_normalize_language_code($language);
+
         $file_url_key = $language;
         if ((get_player_id() > 3) && $voice) {
             // For ElevenLabs (player 6), voice is "voice_id::FirstName" — use only FirstName.
@@ -1344,10 +1390,18 @@ class TTA_Helper
 
     public static function get_player_language_and_player_voice($language, $voice, $plugin_all_settings, $post)
     {
-        return apply_filters('tts_player_language_and_player_voice', [
+        $language_and_voice = apply_filters('tts_player_language_and_player_voice', [
             'language' => $language,
             'voice' => $voice
         ], $plugin_all_settings, $post);
+
+        // Normalize deprecated codes (iw->he, etc.) on the resolved language so
+        // file_url_key, MP3 generation and the front-end all use the modern code.
+        if (isset($language_and_voice['language'])) {
+            $language_and_voice['language'] = self::tts_normalize_language_code($language_and_voice['language']);
+        }
+
+        return $language_and_voice;
     }
 
     public static function is_edit_page()
