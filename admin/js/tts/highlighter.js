@@ -95,8 +95,29 @@ function applyCssVars(cfg) {
     root.style.setProperty('--atlasvoice-hl-word-bg', cfg.wordBg);
     root.style.setProperty('--atlasvoice-hl-word-color', cfg.wordColor);
     root.style.setProperty('--atlasvoice-hl-sentence-bg', cfg.sentenceBg);
-    const op = isNaN(cfg.dimOpacity) ? DEFAULTS.dimOpacity : Math.max(0.1, Math.min(0.7, cfg.dimOpacity));
-    root.style.setProperty('--atlasvoice-dim-color', 'rgba(60, 64, 67, ' + op + ')');
+    const dimOpacity = isNaN(cfg.dimOpacity) ? DEFAULTS.dimOpacity : Math.max(0.1, Math.min(0.7, cfg.dimOpacity));
+    root.style.setProperty('--atlasvoice-dim-color', 'rgba(60, 64, 67, ' + dimOpacity + ')');
+}
+
+/**
+ * Lowercase + canonicalize a string for matching. ONLY 1:1 (length-preserving)
+ * replacements so character offsets stay valid for Range mapping: unify dash
+ * variants (– — ‐ …) to "-", curly quotes to straight, and NBSP to space. This
+ * lets the spoken sentence match the rendered text even when the theme uses
+ * typographic dashes/quotes.
+ */
+function canonicalize(str) {
+    return (str || '')
+        .toLowerCase()
+        .replace(/[‐-―]/g, '-')
+        .replace(/[‘’‚‛]/g, "'")
+        .replace(/[“”„‟]/g, '"')
+        .replace(/ /g, ' ');
+}
+
+/** Strip a leading player-button label that may be prepended to the content. */
+function stripButtonLabel(str) {
+    return (str || '').replace(/^(listen|pause|resume|replay)\s+/, '');
 }
 
 class WrapperHighlighter {
@@ -154,7 +175,9 @@ class WrapperHighlighter {
             offset += len;
         }
         this.text = this.nodes.map((n) => n.node.nodeValue).join('');
-        this.lower = this.text.toLowerCase();
+        // canonicalize() is 1:1 (length-preserving), so offsets into `lower`
+        // map directly back to `text` / DOM ranges.
+        this.lower = canonicalize(this.text);
     }
 
     /** Map a [start, end) span in the flat text back to a DOM Range. */
@@ -178,11 +201,18 @@ class WrapperHighlighter {
         if (this.cfg.dimEnabled) {
             this.root.classList.add(DIM_CLASS);
         }
-        const s = (sentence || '').trim();
-        if (!s) {
+        // Canonicalize + drop any leading button label ("Listen "/"Pause "…) that
+        // may be prepended to the spoken content, so the probe matches the body.
+        const normalizedSentence = stripButtonLabel(canonicalize((sentence || '').trim()));
+        if (!normalizedSentence) {
             return;
         }
-        const probe = s.slice(0, Math.min(24, s.length)).toLowerCase();
+        // Probe on the first chars; strip trailing punctuation so short headings
+        // ("Why she did it." spoken vs "Why she did it" rendered) still match.
+        const probe = normalizedSentence.slice(0, Math.min(24, normalizedSentence.length)).replace(/[^\p{L}\p{N})\]]+$/u, '');
+        if (!probe) {
+            return;
+        }
         let idx = this.lower.indexOf(probe, Math.max(0, this.cursor - 4));
         if (idx === -1) {
             idx = this.lower.indexOf(probe); // fresh playback: re-anchor from the top
@@ -190,14 +220,16 @@ class WrapperHighlighter {
         if (idx === -1) {
             // Sentence not present in the readable area (e.g. the post title,
             // which is spoken but lives OUTSIDE .tts_content_wrapper). Skip it —
-            // do NOT let its words match random text elsewhere in the body.
+            // do NOT let its words match random text elsewhere — and clear the
+            // previous highlight so a stale (wrong) sentence isn't left showing.
             this._lastSentence = null;
+            this.clear();
             return;
         }
         this.cursor = idx;
         // Exact sentence end — no padding, or the sentence highlight bleeds into
         // the next sentence. Word-search tolerance (below) handles whitespace drift.
-        this._lastSentence = { start: idx, end: Math.min(idx + s.length, this.text.length) };
+        this._lastSentence = { start: idx, end: Math.min(idx + normalizedSentence.length, this.text.length) };
         this._wordCursor = idx;
 
         // Paint the sentence when the mode asks for it, OR when the no-boundary
@@ -231,8 +263,10 @@ class WrapperHighlighter {
         }
         this._sentence.clear();
         this._sentence.add(range);
-        // In fallback (no per-word scroll) keep the sentence in view.
-        if (this.fallbackActive && this.cfg.autoscroll) {
+        // Keep the sentence in view. In word mode the per-word highlight handles
+        // scrolling; in sentence mode (and fallback) scroll here, else the page
+        // never follows the read down a long article.
+        if (this.cfg.autoscroll && (!this.cfg.wantWord || this.fallbackActive)) {
             const anchor = range.startContainer.parentElement;
             if (anchor && typeof anchor.scrollIntoView === 'function') {
                 anchor.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -251,8 +285,8 @@ class WrapperHighlighter {
             clearTimeout(this.fallbackTimer);
             this.fallbackTimer = null;
         }
-        const w = (word || '').trim().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
-        if (!w) {
+        const cleanWord = (word || '').trim().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
+        if (!cleanWord) {
             return;
         }
         // Only paint words belonging to the currently-located sentence. If the
@@ -262,7 +296,7 @@ class WrapperHighlighter {
         if (!this._lastSentence) {
             return;
         }
-        const needle = w.toLowerCase();
+        const needle = canonicalize(cleanWord);
         const start = this._lastSentence.start;
         // Small tolerance for the WORD search only (whitespace drift between the
         // spoken string and rendered text) — the sentence PAINT range stays exact.
@@ -274,13 +308,13 @@ class WrapperHighlighter {
         if (idx === -1 || idx >= end) {
             return; // word not within this sentence — skip rather than mis-highlight
         }
-        const range = this._rangeAt(idx, idx + w.length);
+        const range = this._rangeAt(idx, idx + cleanWord.length);
         if (!range) {
             return;
         }
         this._word.clear();
         this._word.add(range);
-        this._wordCursor = idx + w.length;
+        this._wordCursor = idx + cleanWord.length;
 
         if (this.cfg.autoscroll) {
             const anchor = range.startContainer.parentElement;
