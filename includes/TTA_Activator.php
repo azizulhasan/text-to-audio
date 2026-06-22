@@ -242,7 +242,9 @@ class TTA_Activator {
 		if ( $renew_all_settings || ! get_option( 'tta_highlight_settings' ) ) {
 			update_option( 'tta_highlight_settings', array(
 				'tta__highlight_enabled'     => true,
-				'tta__highlight_mode'        => 'word_sentence', // word_sentence | word | sentence
+				// Default to sentence — works with any voice/browser. Word-level
+				// modes need a local voice that fires speechSynthesis boundaries.
+				'tta__highlight_mode'        => 'sentence', // sentence | word | word_sentence
 				'tta__highlight_word_bg'     => '#ffd54f',
 				'tta__highlight_word_color'  => '#202124',
 				'tta__highlight_sentence_bg' => '#fff3b0',

@@ -31,13 +31,6 @@ export default function DashboardSideNav({ isProVersion }) {
               </div>
               Settings
             </NavLink>
-            {/* TTS-256: read-along word/sentence highlighting settings. */}
-            <NavLink className={getNavLinkClass} to={"/highlight"}>
-              <div className="sb-nav-link-icon">
-                <span className="dashicons dashicons-editor-textcolor"></span>
-              </div>
-              Highlight
-            </NavLink>
             <NavLink className={getNavLinkClass} to={"/integrations"}>
               <div className="sb-nav-link-icon">
                 <span className="dashicons dashicons-admin-links"></span>
@@ -61,6 +54,13 @@ export default function DashboardSideNav({ isProVersion }) {
                 <span className="dashicons dashicons-controls-volumeon"></span>
               </div>
               Listening
+            </NavLink>
+            {/* TTS-256: read-along word/sentence highlighting settings. */}
+            <NavLink className={getNavLinkClass} to={"/highlight"}>
+              <div className="sb-nav-link-icon">
+                <span className="dashicons dashicons-editor-textcolor"></span>
+              </div>
+              Highlight
             </NavLink>
             <NavLink className={getNavLinkClass} to={"/analytics"}>
               <div className="sb-nav-link-icon">
