@@ -1,38 +1,108 @@
 /**
  * TTS-256 — Read-along highlighting for the speechSynthesis players (1 & 2).
  *
- * The base TextToSpeech.speak() fires two wp.hooks actions while the browser
+ * The base TextToSpeech.speak() fires these wp.hooks actions while the browser
  * speaks:
  *   - `tts_high_light_text`  (sentence, buttonId, splitSentences)  — onstart
  *   - `tts_highlight_word`   ({buttonId, sentence, word, charIndex}) — onboundary
  *   - `tts_highlight_clear`  (buttonId)                             — onend/stop
  *
- * This module paints the currently-spoken WORD inside the post content wrapper
- * (`.tts_content_wrapper_<buttonId>`) using the CSS Custom Highlight API — i.e.
- * a Range registered in `CSS.highlights`, styled via `::highlight(tts-word)`.
- * That paints over the live DOM WITHOUT mutating it, so links / bold / images
- * in the article stay intact (a naive word-span rewrite would flatten them).
- * The rest of the article is dimmed via a class on the wrapper so the active
- * word stands out ("word + dim the rest").
+ * This module paints the currently-spoken WORD (and, optionally, the active
+ * SENTENCE) inside the post content wrapper (`.tts_content_wrapper_<buttonId>`)
+ * using the CSS Custom Highlight API — Ranges registered in `CSS.highlights`,
+ * styled via `::highlight(tts-word)` / `::highlight(tts-sentence)`. That paints
+ * over the live DOM WITHOUT mutating it, so links / bold / images in the article
+ * stay intact (a naive word-span rewrite would flatten them). The rest of the
+ * article can be dimmed so the active word stands out.
  *
- * Word position is resolved by a forward-search cursor rather than raw
- * charIndex math: speechSynthesis `charIndex` is relative to the current
- * sentence (speak-tts speaks one utterance per sentence), and the extracted
- * spoken text never lines up 1:1 with the rendered HTML's whitespace/markup.
- * Searching forward for each spoken word from a moving cursor is resilient to
- * those differences; each new sentence re-anchors the cursor.
+ * All behaviour is driven by the admin "Highlight" tab, stored in the
+ * tta_highlight_settings option and localized to window.ttsObj.settings.highlight.
  *
- * Graceful degradation: where the CSS Custom Highlight API is missing (older
- * Safari) or the voice fires no boundary events (most remote/Google voices,
- * Firefox), nothing is painted and playback is unaffected.
+ * Word position uses a forward-search cursor rather than raw charIndex math:
+ * speechSynthesis `charIndex` is relative to the current sentence (speak-tts
+ * speaks one utterance per sentence) and the extracted spoken text doesn't align
+ * 1:1 with the rendered HTML's whitespace/markup. Searching forward for each
+ * spoken word from a moving cursor is resilient to those differences; each new
+ * sentence re-anchors the cursor.
+ *
+ * Degrades silently where the CSS Custom Highlight API is missing (older Safari)
+ * or the voice fires no boundary events (remote voices, Firefox) — in the latter
+ * case the sentence-level highlight (driven by onstart) still works.
  */
 
 const HL_WORD = 'tts-word';
+const HL_SENTENCE = 'tts-sentence';
 const DIM_CLASS = 'tts-reading-dim';
+
+const DEFAULTS = {
+    enabled: true,
+    mode: 'word_sentence', // word_sentence | word | sentence
+    wordBg: '#ffd54f',
+    wordColor: '#202124',
+    sentenceBg: '#fff3b0',
+    dimEnabled: true,
+    dimOpacity: 0.4,
+    autoscroll: true,
+};
+
+/** Read the admin Highlight settings off the localized ttsObj, with defaults. */
+function readConfig() {
+    const s = (window.ttsObj && window.ttsObj.settings && window.ttsObj.settings.highlight) || {};
+    const cfg = {
+        enabled: s.tta__highlight_enabled !== undefined ? !!s.tta__highlight_enabled : DEFAULTS.enabled,
+        mode: s.tta__highlight_mode || DEFAULTS.mode,
+        wordBg: s.tta__highlight_word_bg || DEFAULTS.wordBg,
+        wordColor: s.tta__highlight_word_color || DEFAULTS.wordColor,
+        sentenceBg: s.tta__highlight_sentence_bg || DEFAULTS.sentenceBg,
+        dimEnabled: s.tta__highlight_dim_enabled !== undefined ? !!s.tta__highlight_dim_enabled : DEFAULTS.dimEnabled,
+        dimOpacity: s.tta__highlight_dim_opacity !== undefined ? parseFloat(s.tta__highlight_dim_opacity) : DEFAULTS.dimOpacity,
+        autoscroll: s.tta__highlight_autoscroll !== undefined ? !!s.tta__highlight_autoscroll : DEFAULTS.autoscroll,
+    };
+    cfg.wantWord = cfg.mode !== 'sentence';
+    cfg.wantSentence = cfg.mode !== 'word';
+    return cfg;
+}
+
+/**
+ * Inject the highlight stylesheet once. Done from JS (not a PHP-enqueued .css)
+ * because the rules must exist on BOTH player pages, and Free's button CSS is
+ * not loaded on Pro player-2 pages. Colors come from the CSS variables set by
+ * applyCssVars() so the admin Highlight tab still drives them.
+ */
+function injectStyles() {
+    if (document.getElementById('tts-highlight-styles')) {
+        return;
+    }
+    const dimSel = ['', ' p', ' li', ' span', ' a', ' h1', ' h2', ' h3', ' h4', ' h5', ' h6', ' blockquote', ' td', ' th']
+        .map((s) => '.tts-reading-dim' + s)
+        .join(',');
+    const css =
+        '::highlight(tts-sentence){background-color:var(--tts-hl-sentence-bg,#fff3b0);}' +
+        '::highlight(tts-word){background-color:var(--tts-hl-word-bg,#ffd54f);color:var(--tts-hl-word-color,#202124);}' +
+        dimSel + '{color:var(--tts-dim-color,rgba(60,64,67,0.4)) !important;transition:color .25s ease;}';
+    const style = document.createElement('style');
+    style.id = 'tts-highlight-styles';
+    style.textContent = css;
+    (document.head || document.documentElement).appendChild(style);
+}
+
+/** Expose the configured colors as CSS variables the stylesheet consumes. */
+function applyCssVars(cfg) {
+    const root = document.documentElement;
+    if (!root || !root.style) {
+        return;
+    }
+    root.style.setProperty('--tts-hl-word-bg', cfg.wordBg);
+    root.style.setProperty('--tts-hl-word-color', cfg.wordColor);
+    root.style.setProperty('--tts-hl-sentence-bg', cfg.sentenceBg);
+    const op = isNaN(cfg.dimOpacity) ? DEFAULTS.dimOpacity : Math.max(0.1, Math.min(0.7, cfg.dimOpacity));
+    root.style.setProperty('--tts-dim-color', 'rgba(60, 64, 67, ' + op + ')');
+}
 
 class WrapperHighlighter {
     constructor(buttonId) {
         this.buttonId = buttonId;
+        this.cfg = readConfig();
         this.root = document.querySelector('.tts_content_wrapper_' + buttonId);
         this.supported = typeof Highlight !== 'undefined' && window.CSS && CSS.highlights;
         this.nodes = [];
@@ -40,16 +110,18 @@ class WrapperHighlighter {
         this.lower = '';
         this.cursor = 0;
 
+        if (this.cfg.enabled) {
+            injectStyles();
+            applyCssVars(this.cfg);
+        }
         if (this.root) {
             this._index();
         }
         if (this.supported) {
-            if (!CSS.highlights.has(HL_WORD)) {
-                this._hl = new Highlight();
-                CSS.highlights.set(HL_WORD, this._hl);
-            } else {
-                this._hl = CSS.highlights.get(HL_WORD);
-            }
+            this._word = CSS.highlights.get(HL_WORD) || new Highlight();
+            CSS.highlights.set(HL_WORD, this._word);
+            this._sentence = CSS.highlights.get(HL_SENTENCE) || new Highlight();
+            CSS.highlights.set(HL_SENTENCE, this._sentence);
         }
     }
 
@@ -59,7 +131,6 @@ class WrapperHighlighter {
         let offset = 0;
         const walker = document.createTreeWalker(this.root, NodeFilter.SHOW_TEXT, {
             acceptNode: (n) => {
-                // Skip the player button's own label text and any script/style.
                 if (n.parentElement && n.parentElement.closest('tts-play-button, .tts__listent_content, script, style')) {
                     return NodeFilter.FILTER_REJECT;
                 }
@@ -88,37 +159,43 @@ class WrapperHighlighter {
         }
         const range = document.createRange();
         range.setStart(startNode.node, start - startNode.start);
-        range.setEnd(endNode.node, end - endNode.start);
+        range.setEnd(endNode.node, Math.min(end - endNode.start, endNode.node.nodeValue.length));
         return range;
     }
 
-    /** Re-anchor the cursor to the located sentence so word search stays in sync. */
+    /** Re-anchor the cursor to the located sentence; optionally paint the sentence. */
     syncSentence(sentence) {
-        if (!this.root) {
+        if (!this.cfg.enabled || !this.root) {
             return;
         }
-        this.root.classList.add(DIM_CLASS);
+        if (this.cfg.dimEnabled) {
+            this.root.classList.add(DIM_CLASS);
+        }
         const s = (sentence || '').trim();
         if (!s) {
             return;
         }
         const probe = s.slice(0, Math.min(24, s.length)).toLowerCase();
-        // Prefer a match ahead of the cursor; fall back to a global search so a
-        // fresh playback (cursor left at the end of a previous read) re-anchors.
         let idx = this.lower.indexOf(probe, Math.max(0, this.cursor - 4));
         if (idx === -1) {
-            idx = this.lower.indexOf(probe);
+            idx = this.lower.indexOf(probe); // fresh playback: re-anchor from the top
         }
         if (idx !== -1) {
             this.cursor = idx;
+            if (this.cfg.wantSentence && this.supported && this._sentence) {
+                const range = this._rangeAt(idx, Math.min(idx + s.length, this.text.length));
+                if (range) {
+                    this._sentence.clear();
+                    this._sentence.add(range);
+                }
+            }
         }
     }
 
     highlightWord(word) {
-        if (!this.supported || !this.root || !this._hl) {
+        if (!this.cfg.enabled || !this.cfg.wantWord || !this.supported || !this.root || !this._word) {
             return;
         }
-        // Trim leading/trailing punctuation; keep letters/numbers (incl. unicode).
         const w = (word || '').trim().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
         if (!w) {
             return;
@@ -126,7 +203,6 @@ class WrapperHighlighter {
         const needle = w.toLowerCase();
         let idx = this.lower.indexOf(needle, this.cursor);
         if (idx === -1) {
-            // small backward tolerance for drift, then give up silently
             idx = this.lower.indexOf(needle, Math.max(0, this.cursor - 40));
         }
         if (idx === -1) {
@@ -136,23 +212,26 @@ class WrapperHighlighter {
         if (!range) {
             return;
         }
-        this._hl.clear();
-        this._hl.add(range);
+        this._word.clear();
+        this._word.add(range);
         this.cursor = idx + w.length;
 
-        const anchor = range.startContainer.parentElement;
-        if (anchor && typeof anchor.scrollIntoView === 'function') {
-            anchor.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        if (this.cfg.autoscroll) {
+            const anchor = range.startContainer.parentElement;
+            if (anchor && typeof anchor.scrollIntoView === 'function') {
+                anchor.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            }
         }
     }
 
     clear() {
-        if (this.supported && this._hl) {
-            this._hl.clear();
+        if (this.supported) {
+            if (this._word) this._word.clear();
+            if (this._sentence) this._sentence.clear();
         }
     }
 
-    /** Full stop: clear the word highlight, undim, reset the cursor. */
+    /** Full stop: clear highlights, undim, reset the cursor. */
     stop() {
         this.clear();
         if (this.root) {
