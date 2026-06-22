@@ -39,7 +39,9 @@ export default function Settings() {
         tta__settings_stop_floating_button: true,
         tta__settings_exclude_categories: [],
         tta__settings_exclude_wp_tags: [],
-        tta__settings_show_admin_bar_toggle: true,
+        tta__settings_show_admin_bar_toggle: false,
+        tta__settings_enable_steprail: false,
+        tta__settings_show_mode_bar: false,
         tta__settings_show_dashboard_widget: true,
         tta__settings_clear_all_cache: false,
         tta__settings_add_post_title_to_read: true,
@@ -550,6 +552,24 @@ export default function Settings() {
                                         Global is always shown; one collapsed accordion appears
                                         below per enabled post type (Pro only). All four CSS-
                                         selector fields render inside each accordion body. */}
+                                    <SettingRow label={__("Show on-page content selector", "text-to-audio")} tooltip={__("Adds the AtlasVoice Selector tabs on the front end for admins. Off by default; even when on, it only opens from the “Pick visually” links and never appears on a plain page.", "text-to-audio")}>
+                                        <ToggleSwitch
+                                            checked={settings.tta__settings_enable_steprail}
+                                            onChange={(e) => handleChange(e)}
+                                            name="tta__settings_enable_steprail"
+                                            id="tta__settings_enable_steprail"
+                                        />
+                                    </SettingRow>
+
+                                    <SettingRow label={__("Show Staging / Live indicator in toolbar", "text-to-audio")} tooltip={__("Shows the AtlasVoice mode (Staging or Live) in the WordPress admin bar. It is always shown while the on-page content selector is open.", "text-to-audio")}>
+                                        <ToggleSwitch
+                                            checked={settings.tta__settings_show_mode_bar}
+                                            onChange={(e) => handleChange(e)}
+                                            name="tta__settings_show_mode_bar"
+                                            id="tta__settings_show_mode_bar"
+                                        />
+                                    </SettingRow>
+
                                     <div style={{marginTop: "24px"}}>
                                         <h3
                                             style={{
@@ -755,7 +775,7 @@ export default function Settings() {
                                         </SettingRow>
                                     )}
 
-                                    <SettingRow label={__("Show admin bar toggle", "text-to-audio")} tooltip={__("Show AtlasVoice on/off toggle in the WordPress admin bar on front-end pages.", "text-to-audio")}>
+                                    <SettingRow label={__("Show per-post player toggle in toolbar", "text-to-audio")} tooltip={__("Adds a “Toggle AtlasVoice audio player for this post” control to the WordPress admin bar on front-end pages.", "text-to-audio")}>
                                         <ToggleSwitch
                                             checked={settings.tta__settings_show_admin_bar_toggle}
                                             onChange={(e) => handleChange(e)}

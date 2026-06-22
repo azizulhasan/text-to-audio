@@ -199,6 +199,17 @@ class Mode {
 			return;
 		}
 
+		// TTS-255 — the production/staging indicator is hidden by default
+		// (setting tta__settings_show_mode_bar, filter
+		// tts_show_atlasvoice_mode_bar). Exception: always show it while the
+		// front-end Step Rail picker is open, so the admin can see the mode
+		// they would be going live from.
+		$show_mode_bar = class_exists( '\\TTA\\TTA_Helper' ) && \TTA\TTA_Helper::show_mode_bar();
+		$steprail_open = class_exists( '\\TTA\\AtlasVoice\\StepRail' ) && \TTA\AtlasVoice\StepRail::is_front_active();
+		if ( ! $show_mode_bar && ! $steprail_open ) {
+			return;
+		}
+
 		$status = self::status();
 		$title  = sprintf(
 			'<span class="atlasvoice-bar-dot" style="background:%s"></span><span class="atlasvoice-bar-label">%s</span>',
