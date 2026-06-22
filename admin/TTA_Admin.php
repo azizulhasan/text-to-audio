@@ -1108,8 +1108,10 @@ class TTA_Admin
 
         $settings   = TTA_Helper::tts_get_settings( 'settings' );
 
-        // Check if admin bar toggle is disabled in settings.
-        $show_toggle = isset( $settings['tta__settings_show_admin_bar_toggle'] ) ? $settings['tta__settings_show_admin_bar_toggle'] : true;
+        // TTS-255 — per-post player toggle is OFF by default now (was on).
+        // Filter: tts_show_post_player_toggle.
+        $show_toggle = isset( $settings['tta__settings_show_admin_bar_toggle'] ) ? $settings['tta__settings_show_admin_bar_toggle'] : false;
+        $show_toggle = (bool) apply_filters( 'tts_show_post_player_toggle', (bool) $show_toggle, $post );
         if ( ! $show_toggle ) {
             return;
         }

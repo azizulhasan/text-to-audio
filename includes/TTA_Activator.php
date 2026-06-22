@@ -114,7 +114,18 @@ class TTA_Activator {
 				'tta__settings_exclude_categories'                    => [],
 				'tta__settings_exclude_wp_tags'                       => [],
 				'tta__settings_clear_cache'                           => [],
-				'tta__settings_show_admin_bar_toggle'                 => true,
+				// TTS-255 — per-post player toggle in the admin bar ("Toggle
+				// AtlasVoice audio player for this post"). OFF by default;
+				// filter: tts_show_post_player_toggle.
+				'tta__settings_show_admin_bar_toggle'                 => false,
+				// TTS-255 — front-end on-page selector (Step Rail). OFF by
+				// default; even when on it renders only via ?atlasvoice_picker=1,
+				// never on a plain post URL. Filter: tts_enable_steprail.
+				'tta__settings_enable_steprail'                       => false,
+				// TTS-255 — admin-bar AtlasVoice production/staging indicator.
+				// OFF by default (still shown while the Step Rail UI is open).
+				// Filter: tts_show_atlasvoice_mode_bar.
+				'tta__settings_show_mode_bar'                         => false,
 				'tta__settings_show_dashboard_widget'                 => true,
 				'tta__settings_clear_all_cache'                       => true,
 				'tta__settings_add_post_title_to_read'                => true,
