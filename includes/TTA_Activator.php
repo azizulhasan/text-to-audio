@@ -249,7 +249,8 @@ class TTA_Activator {
 				'tta__highlight_word_color'  => '#202124',
 				'tta__highlight_sentence_bg' => '#fff3b0',
 				'tta__highlight_dim_enabled' => true,
-				'tta__highlight_dim_opacity' => 0.4,
+				'tta__highlight_dim_opacity' => 0.7, // a11y: keep dimmed text near 4.5:1
+
 				'tta__highlight_autoscroll'  => true,
 			), false );
 		}

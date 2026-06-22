@@ -24,7 +24,7 @@ export default function Highlight() {
         tta__highlight_word_color: "#202124",
         tta__highlight_sentence_bg: "#fff3b0",
         tta__highlight_dim_enabled: true,
-        tta__highlight_dim_opacity: 0.4,
+        tta__highlight_dim_opacity: 0.7,
         tta__highlight_autoscroll: true,
     });
     const [isDataLoaded, setIsDataLoaded] = useState(false);
@@ -233,7 +233,7 @@ export default function Highlight() {
                                                 type="range"
                                                 name="tta__highlight_dim_opacity"
                                                 min="0.1"
-                                                max="0.7"
+                                                max="0.85"
                                                 step="0.05"
                                                 value={settings.tta__highlight_dim_opacity ?? 0.4}
                                                 onChange={handleChange}

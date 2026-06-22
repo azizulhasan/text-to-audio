@@ -41,9 +41,22 @@ const DEFAULTS = {
     wordColor: '#202124',
     sentenceBg: '#fff3b0',
     dimEnabled: true,
-    dimOpacity: 0.4,
+    // a11y (WCAG 1.4.3): the dimmed (non-spoken) body text must stay readable.
+    // 0.7 keeps the dimmed grey near the 4.5:1 minimum on a white background;
+    // users can dim further (lower value) as an explicit opt-in.
+    dimOpacity: 0.7,
     autoscroll: true,
 };
+
+/** Respect the user's reduced-motion preference for auto-scroll (WCAG 2.3.3). */
+function prefersReducedMotion() {
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+
+/** Scroll behavior: instant under reduced-motion, smooth otherwise. */
+function scrollBehavior() {
+    return prefersReducedMotion() ? 'auto' : 'smooth';
+}
 
 /** Read the admin Highlight settings off the localized ttsObj, with defaults. */
 function readConfig() {
@@ -79,7 +92,15 @@ function injectStyles() {
     const css =
         '::highlight(atlasvoice-sentence){background-color:var(--atlasvoice-hl-sentence-bg,#fff3b0);}' +
         '::highlight(atlasvoice-word){background-color:var(--atlasvoice-hl-word-bg,#ffd54f);color:var(--atlasvoice-hl-word-color,#202124);}' +
-        dimSel + '{color:var(--atlasvoice-dim-color,rgba(60,64,67,0.4)) !important;transition:color .25s ease;}';
+        dimSel + '{color:var(--atlasvoice-dim-color,rgba(60,64,67,0.7)) !important;transition:color .25s ease;}' +
+        // a11y (WCAG 1.4.3, Windows High Contrast): in forced-colors mode use
+        // system highlight colors so the highlight stays visible, and stop
+        // dimming (let the OS-forced text color through) so content stays legible.
+        '@media (forced-colors: active){' +
+            '::highlight(atlasvoice-sentence){background-color:Highlight;color:HighlightText;}' +
+            '::highlight(atlasvoice-word){background-color:Highlight;color:HighlightText;}' +
+            dimSel + '{color:CanvasText !important;}' +
+        '}';
     const style = document.createElement('style');
     style.id = 'atlasvoice-highlight-styles';
     style.textContent = css;
@@ -95,7 +116,7 @@ function applyCssVars(cfg) {
     root.style.setProperty('--atlasvoice-hl-word-bg', cfg.wordBg);
     root.style.setProperty('--atlasvoice-hl-word-color', cfg.wordColor);
     root.style.setProperty('--atlasvoice-hl-sentence-bg', cfg.sentenceBg);
-    const dimOpacity = isNaN(cfg.dimOpacity) ? DEFAULTS.dimOpacity : Math.max(0.1, Math.min(0.7, cfg.dimOpacity));
+    const dimOpacity = isNaN(cfg.dimOpacity) ? DEFAULTS.dimOpacity : Math.max(0.1, Math.min(0.85, cfg.dimOpacity));
     root.style.setProperty('--atlasvoice-dim-color', 'rgba(60, 64, 67, ' + dimOpacity + ')');
 }
 
@@ -269,7 +290,7 @@ class WrapperHighlighter {
         if (this.cfg.autoscroll && (!this.cfg.wantWord || this.fallbackActive)) {
             const anchor = range.startContainer.parentElement;
             if (anchor && typeof anchor.scrollIntoView === 'function') {
-                anchor.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                anchor.scrollIntoView({ block: 'center', behavior: scrollBehavior() });
             }
         }
     }
@@ -319,7 +340,7 @@ class WrapperHighlighter {
         if (this.cfg.autoscroll) {
             const anchor = range.startContainer.parentElement;
             if (anchor && typeof anchor.scrollIntoView === 'function') {
-                anchor.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                anchor.scrollIntoView({ block: 'center', behavior: scrollBehavior() });
             }
         }
     }
