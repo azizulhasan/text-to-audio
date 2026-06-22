@@ -370,3 +370,29 @@ tts-play-button .tts-sr-only {
     outline: 2px solid currentColor;
     outline-offset: 2px;
 }
+
+/* TTS-256: read-along highlighting (speechSynthesis players 1 & 2).
+   The active word is painted via the CSS Custom Highlight API (no DOM
+   mutation), and the rest of the article is dimmed while reading so the
+   spoken word stands out. The highlight pseudo's color overrides the dim. */
+::highlight(tts-word) {
+    background-color: #ffd54f;
+    color: #202124;
+}
+.tts-reading-dim,
+.tts-reading-dim p,
+.tts-reading-dim li,
+.tts-reading-dim span,
+.tts-reading-dim a,
+.tts-reading-dim h1,
+.tts-reading-dim h2,
+.tts-reading-dim h3,
+.tts-reading-dim h4,
+.tts-reading-dim h5,
+.tts-reading-dim h6,
+.tts-reading-dim blockquote,
+.tts-reading-dim td,
+.tts-reading-dim th {
+    color: rgba(60, 64, 67, 0.4) !important;
+    transition: color 0.25s ease;
+}
