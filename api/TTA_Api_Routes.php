@@ -790,8 +790,8 @@ class TTA_Api_Routes {
 			$word_color  = isset( $fields['tta__highlight_word_color'] ) ? sanitize_hex_color( $fields['tta__highlight_word_color'] ) : '';
 			$sentence_bg = isset( $fields['tta__highlight_sentence_bg'] ) ? sanitize_hex_color( $fields['tta__highlight_sentence_bg'] ) : '';
 
-			$opacity = isset( $fields['tta__highlight_dim_opacity'] ) ? floatval( $fields['tta__highlight_dim_opacity'] ) : 0.4;
-			$opacity = max( 0.1, min( 0.7, $opacity ) );
+			$opacity = isset( $fields['tta__highlight_dim_opacity'] ) ? floatval( $fields['tta__highlight_dim_opacity'] ) : 0.7;
+			$opacity = max( 0.1, min( 0.85, $opacity ) );
 
 			$clean = array(
 				'tta__highlight_enabled'     => ! empty( $fields['tta__highlight_enabled'] ),
