@@ -5,6 +5,9 @@ import Speech from "./tts/speak-tts/lib/speak-tts.js";
 import BrowserSupport from './tts/BrowserSupport.js'
 import {addHoverColor, getButtonSVGIcon, setSvgColorOnEvent, splitSentences} from "./tts/utilities.js";
 import AtlasVoiceAnalytics from "./AtlasVoiceAnalytics";
+// TTS-256: read-along highlighter — registers wp.hooks listeners on import
+// (tts_high_light_text / tts_highlight_word / tts_highlight_clear).
+import "./tts/highlighter.js";
 
 export default class TextToSpeech {
     TTS = window.TTS
@@ -36,6 +39,7 @@ export default class TextToSpeech {
     playButtonNo = 1
     analytics = null
     playButtonIcon = null;
+    _activeSentence = '' // TTS-256: current sentence being spoken (for onboundary)
 
     constructor(buttonId, content = '', button = null, TTS = window.TTS) {
         this.TTS = TTS
@@ -257,6 +261,8 @@ export default class TextToSpeech {
             // set up initial content to replacy.
             this.splittedSentances = splitSentences(window.TTS.contents[this.buttonId])
             speech.cancel();
+            // TTS-256: reading finished — clear the word highlight and undim.
+            wp.hooks.doAction('tts_highlight_clear', this.buttonId)
         }
         console.log("Success !", data);
         this.analytics.trackEnd();
@@ -306,7 +312,10 @@ export default class TextToSpeech {
                     onstart: (utterance) => {
                         console.log("Start utterance");
                         this.utterence = utterance
-                        wp.hooks.doAction('tts_high_light_text', utterance.currentTarget.text, this.buttonId, splitSentences)
+                        // TTS-256: remember the sentence so onboundary can resolve words
+                        // against it; the highlighter re-anchors on this sentence text.
+                        this._activeSentence = (utterance?.currentTarget?.text) || (utterance?.target?.text) || ''
+                        wp.hooks.doAction('tts_high_light_text', this._activeSentence, this.buttonId, splitSentences)
                     },
                     onend: (utterance) => {
                         console.log('End utterance')
@@ -317,14 +326,32 @@ export default class TextToSpeech {
                     onresume: (utterance) => {
                         console.log("Resume utterance");
                     },
-                    onboundary: utterance => {
-                        // console.log(
-                        // 	utterance.name +
-                        // 	" boundary reached after " +
-                        // 	utterance.elapsedTime +
-                        // 	" milliseconds."
-                        // );
-                        // console.log(utterance)
+                    onboundary: (e) => {
+                        // TTS-256: fire one action per spoken word so the highlighter can
+                        // paint it. charIndex is relative to the current sentence; some
+                        // browsers omit charLength, so derive the word end by scanning to
+                        // the next whitespace. Non-word boundaries (sentence) are ignored.
+                        if (e && e.name && e.name !== 'word') {
+                            return
+                        }
+                        const text = (e?.target?.text) || (e?.currentTarget?.text) || this._activeSentence || ''
+                        const start = (e && typeof e.charIndex === 'number') ? e.charIndex : 0
+                        let len = (e && e.charLength) ? e.charLength : 0
+                        if (!len) {
+                            const rest = text.slice(start)
+                            const sp = rest.search(/\s|$/)
+                            len = sp === -1 ? rest.length : sp
+                        }
+                        const word = text.slice(start, start + len)
+                        if (word && word.trim()) {
+                            wp.hooks.doAction('tts_highlight_word', {
+                                buttonId: this.buttonId,
+                                sentence: text,
+                                word: word,
+                                charIndex: start,
+                                charLength: len,
+                            })
+                        }
                     }
                 }
             })
