@@ -29,6 +29,18 @@ class StepRail {
 	private static $registered   = false;
 	private static $front_active = false;
 
+	/**
+	 * TTS-255: whether the front-end Step Rail UI is rendering on this request.
+	 * Set in maybe_activate() (template_redirect, before admin_bar_menu) so the
+	 * Mode bar node can show the staging/production indicator while the picker
+	 * is open even when its own setting is off.
+	 *
+	 * @return bool
+	 */
+	public static function is_front_active() {
+		return self::$front_active;
+	}
+
 	public static function register() {
 		// Front-end: show picker tabs on eligible singular posts.
 		add_action( 'template_redirect', array( __CLASS__, 'maybe_activate' ), 5 );
@@ -51,8 +63,18 @@ class StepRail {
 		// admin explicitly arms the picker via `?atlasvoice_picker=1` so
 		// the rail is reachable on any singular post even if its post type
 		// isn't on the listening allow-list yet.
+		// TTS-255 — the on-page selector no longer auto-appears for logged-in
+		// admins on a plain post URL (the cause of the "bloating" feedback).
 		$forced = isset( $_GET[ self::AUTO_PARAM ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( ! $forced && ! self::post_has_listening( get_the_ID() ) ) { return; }
+		if ( ! $forced ) {
+			// No explicit launch: the selector auto-appears on the page only
+			// when the admin has turned it on (tta__settings_enable_steprail,
+			// default OFF; filter tts_enable_steprail) and the post type has
+			// listening. By default nothing shows on a plain post URL — it
+			// opens only via the "Pick visually" links (?atlasvoice_picker=1).
+			$enabled = class_exists( '\\TTA\\TTA_Helper' ) ? \TTA\TTA_Helper::is_steprail_enabled() : false;
+			if ( ! $enabled || ! self::post_has_listening( get_the_ID() ) ) { return; }
+		}
 
 		self::$front_active = true;
 
