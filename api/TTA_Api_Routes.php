@@ -781,9 +781,9 @@ class TTA_Api_Routes {
 			$fields = json_decode( $request['fields'], true );
 			$fields = is_array( $fields ) ? $fields : array();
 
-			$mode = isset( $fields['tta__highlight_mode'] ) ? $fields['tta__highlight_mode'] : 'word_sentence';
+			$mode = isset( $fields['tta__highlight_mode'] ) ? $fields['tta__highlight_mode'] : 'sentence';
 			if ( ! in_array( $mode, array( 'word_sentence', 'word', 'sentence' ), true ) ) {
-				$mode = 'word_sentence';
+				$mode = 'sentence';
 			}
 
 			$word_bg     = isset( $fields['tta__highlight_word_bg'] ) ? sanitize_hex_color( $fields['tta__highlight_word_bg'] ) : '';

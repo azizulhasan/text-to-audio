@@ -315,7 +315,7 @@ export default class TextToSpeech {
                         // TTS-256: remember the sentence so onboundary can resolve words
                         // against it; the highlighter re-anchors on this sentence text.
                         this._activeSentence = (utterance?.currentTarget?.text) || (utterance?.target?.text) || ''
-                        wp.hooks.doAction('tts_high_light_text', this._activeSentence, this.buttonId, splitSentences)
+                        wp.hooks.doAction('tts_high_light_sentence', this._activeSentence, this.buttonId, splitSentences)
                     },
                     onend: (utterance) => {
                         console.log('End utterance')

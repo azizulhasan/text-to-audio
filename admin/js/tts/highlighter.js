@@ -3,14 +3,14 @@
  *
  * The base TextToSpeech.speak() fires these wp.hooks actions while the browser
  * speaks:
- *   - `tts_high_light_text`  (sentence, buttonId, splitSentences)  — onstart
+ *   - `tts_high_light_sentence`  (sentence, buttonId, splitSentences)  — onstart
  *   - `tts_highlight_word`   ({buttonId, sentence, word, charIndex}) — onboundary
  *   - `tts_highlight_clear`  (buttonId)                             — onend/stop
  *
  * This module paints the currently-spoken WORD (and, optionally, the active
  * SENTENCE) inside the post content wrapper (`.tts_content_wrapper_<buttonId>`)
  * using the CSS Custom Highlight API — Ranges registered in `CSS.highlights`,
- * styled via `::highlight(tts-word)` / `::highlight(tts-sentence)`. That paints
+ * styled via `::highlight(atlasvoice-word)` / `::highlight(atlasvoice-sentence)`. That paints
  * over the live DOM WITHOUT mutating it, so links / bold / images in the article
  * stay intact (a naive word-span rewrite would flatten them). The rest of the
  * article can be dimmed so the active word stands out.
@@ -30,13 +30,13 @@
  * case the sentence-level highlight (driven by onstart) still works.
  */
 
-const HL_WORD = 'tts-word';
-const HL_SENTENCE = 'tts-sentence';
-const DIM_CLASS = 'tts-reading-dim';
+const HL_WORD = 'atlasvoice-word';
+const HL_SENTENCE = 'atlasvoice-sentence';
+const DIM_CLASS = 'atlasvoice-reading-dim';
 
 const DEFAULTS = {
     enabled: true,
-    mode: 'word_sentence', // word_sentence | word | sentence
+    mode: 'sentence', // sentence | word | word_sentence — sentence works with any voice
     wordBg: '#ffd54f',
     wordColor: '#202124',
     sentenceBg: '#fff3b0',
@@ -70,18 +70,18 @@ function readConfig() {
  * applyCssVars() so the admin Highlight tab still drives them.
  */
 function injectStyles() {
-    if (document.getElementById('tts-highlight-styles')) {
+    if (document.getElementById('atlasvoice-highlight-styles')) {
         return;
     }
     const dimSel = ['', ' p', ' li', ' span', ' a', ' h1', ' h2', ' h3', ' h4', ' h5', ' h6', ' blockquote', ' td', ' th']
-        .map((s) => '.tts-reading-dim' + s)
+        .map((s) => '.atlasvoice-reading-dim' + s)
         .join(',');
     const css =
-        '::highlight(tts-sentence){background-color:var(--tts-hl-sentence-bg,#fff3b0);}' +
-        '::highlight(tts-word){background-color:var(--tts-hl-word-bg,#ffd54f);color:var(--tts-hl-word-color,#202124);}' +
-        dimSel + '{color:var(--tts-dim-color,rgba(60,64,67,0.4)) !important;transition:color .25s ease;}';
+        '::highlight(atlasvoice-sentence){background-color:var(--atlasvoice-hl-sentence-bg,#fff3b0);}' +
+        '::highlight(atlasvoice-word){background-color:var(--atlasvoice-hl-word-bg,#ffd54f);color:var(--atlasvoice-hl-word-color,#202124);}' +
+        dimSel + '{color:var(--atlasvoice-dim-color,rgba(60,64,67,0.4)) !important;transition:color .25s ease;}';
     const style = document.createElement('style');
-    style.id = 'tts-highlight-styles';
+    style.id = 'atlasvoice-highlight-styles';
     style.textContent = css;
     (document.head || document.documentElement).appendChild(style);
 }
@@ -92,11 +92,11 @@ function applyCssVars(cfg) {
     if (!root || !root.style) {
         return;
     }
-    root.style.setProperty('--tts-hl-word-bg', cfg.wordBg);
-    root.style.setProperty('--tts-hl-word-color', cfg.wordColor);
-    root.style.setProperty('--tts-hl-sentence-bg', cfg.sentenceBg);
+    root.style.setProperty('--atlasvoice-hl-word-bg', cfg.wordBg);
+    root.style.setProperty('--atlasvoice-hl-word-color', cfg.wordColor);
+    root.style.setProperty('--atlasvoice-hl-sentence-bg', cfg.sentenceBg);
     const op = isNaN(cfg.dimOpacity) ? DEFAULTS.dimOpacity : Math.max(0.1, Math.min(0.7, cfg.dimOpacity));
-    root.style.setProperty('--tts-dim-color', 'rgba(60, 64, 67, ' + op + ')');
+    root.style.setProperty('--atlasvoice-dim-color', 'rgba(60, 64, 67, ' + op + ')');
 }
 
 class WrapperHighlighter {
@@ -109,6 +109,13 @@ class WrapperHighlighter {
         this.text = '';
         this.lower = '';
         this.cursor = 0;
+        // Fallback state: when a word-capable mode fires no boundary events
+        // (remote voices / Firefox), degrade to sentence highlighting.
+        this.gotWordEvent = false;
+        this.fallbackActive = false;
+        this.fallbackTimer = null;
+        this._lastSentence = null; // {start, end} of the located sentence in flat text
+        this._wordCursor = 0;      // forward search position WITHIN the located sentence
 
         if (this.cfg.enabled) {
             injectStyles();
@@ -180,14 +187,55 @@ class WrapperHighlighter {
         if (idx === -1) {
             idx = this.lower.indexOf(probe); // fresh playback: re-anchor from the top
         }
-        if (idx !== -1) {
-            this.cursor = idx;
-            if (this.cfg.wantSentence && this.supported && this._sentence) {
-                const range = this._rangeAt(idx, Math.min(idx + s.length, this.text.length));
-                if (range) {
-                    this._sentence.clear();
-                    this._sentence.add(range);
+        if (idx === -1) {
+            // Sentence not present in the readable area (e.g. the post title,
+            // which is spoken but lives OUTSIDE .tts_content_wrapper). Skip it —
+            // do NOT let its words match random text elsewhere in the body.
+            this._lastSentence = null;
+            return;
+        }
+        this.cursor = idx;
+        // Exact sentence end — no padding, or the sentence highlight bleeds into
+        // the next sentence. Word-search tolerance (below) handles whitespace drift.
+        this._lastSentence = { start: idx, end: Math.min(idx + s.length, this.text.length) };
+        this._wordCursor = idx;
+
+        // Paint the sentence when the mode asks for it, OR when the no-boundary
+        // fallback has kicked in (word events never arrived).
+        if (this.cfg.wantSentence || this.fallbackActive) {
+            this._paintSentence();
+        }
+
+        // Word-capable mode but no boundary events yet → arm a one-shot timer.
+        // If still no word event when it fires, the voice doesn't support
+        // boundaries (remote voice / Firefox) → fall back to sentence highlight.
+        if (this.cfg.wantWord && !this.gotWordEvent && !this.fallbackActive) {
+            clearTimeout(this.fallbackTimer);
+            this.fallbackTimer = setTimeout(() => {
+                if (!this.gotWordEvent) {
+                    this.fallbackActive = true;
+                    this._paintSentence();
                 }
+            }, 1200);
+        }
+    }
+
+    /** Paint the last-located sentence range (used by sentence mode + fallback). */
+    _paintSentence() {
+        if (!this.supported || !this._sentence || !this._lastSentence) {
+            return;
+        }
+        const range = this._rangeAt(this._lastSentence.start, this._lastSentence.end);
+        if (!range) {
+            return;
+        }
+        this._sentence.clear();
+        this._sentence.add(range);
+        // In fallback (no per-word scroll) keep the sentence in view.
+        if (this.fallbackActive && this.cfg.autoscroll) {
+            const anchor = range.startContainer.parentElement;
+            if (anchor && typeof anchor.scrollIntoView === 'function') {
+                anchor.scrollIntoView({ block: 'center', behavior: 'smooth' });
             }
         }
     }
@@ -196,17 +244,35 @@ class WrapperHighlighter {
         if (!this.cfg.enabled || !this.cfg.wantWord || !this.supported || !this.root || !this._word) {
             return;
         }
+        // A boundary event arrived — boundaries ARE supported, cancel the
+        // fallback timer so we keep word-level highlighting.
+        this.gotWordEvent = true;
+        if (this.fallbackTimer) {
+            clearTimeout(this.fallbackTimer);
+            this.fallbackTimer = null;
+        }
         const w = (word || '').trim().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
         if (!w) {
             return;
         }
-        const needle = w.toLowerCase();
-        let idx = this.lower.indexOf(needle, this.cursor);
-        if (idx === -1) {
-            idx = this.lower.indexOf(needle, Math.max(0, this.cursor - 40));
-        }
-        if (idx === -1) {
+        // Only paint words belonging to the currently-located sentence. If the
+        // active sentence isn't in the readable area (e.g. the title), skip —
+        // never scan the whole body (that made title words like "the"/"City"
+        // land on random body text and scrambled the cursor before body reading).
+        if (!this._lastSentence) {
             return;
+        }
+        const needle = w.toLowerCase();
+        const start = this._lastSentence.start;
+        // Small tolerance for the WORD search only (whitespace drift between the
+        // spoken string and rendered text) — the sentence PAINT range stays exact.
+        const end = Math.min(this._lastSentence.end + 20, this.text.length);
+        let idx = this.lower.indexOf(needle, Math.max(start, this._wordCursor));
+        if (idx === -1 || idx >= end) {
+            idx = this.lower.indexOf(needle, start); // retry from the sentence start
+        }
+        if (idx === -1 || idx >= end) {
+            return; // word not within this sentence — skip rather than mis-highlight
         }
         const range = this._rangeAt(idx, idx + w.length);
         if (!range) {
@@ -214,7 +280,7 @@ class WrapperHighlighter {
         }
         this._word.clear();
         this._word.add(range);
-        this.cursor = idx + w.length;
+        this._wordCursor = idx + w.length;
 
         if (this.cfg.autoscroll) {
             const anchor = range.startContainer.parentElement;
@@ -231,13 +297,21 @@ class WrapperHighlighter {
         }
     }
 
-    /** Full stop: clear highlights, undim, reset the cursor. */
+    /** Full stop: clear highlights, undim, reset the cursor + fallback state. */
     stop() {
         this.clear();
         if (this.root) {
             this.root.classList.remove(DIM_CLASS);
         }
         this.cursor = 0;
+        this.gotWordEvent = false;
+        this.fallbackActive = false;
+        if (this.fallbackTimer) {
+            clearTimeout(this.fallbackTimer);
+            this.fallbackTimer = null;
+        }
+        this._lastSentence = null;
+        this._wordCursor = 0;
     }
 }
 
@@ -253,7 +327,7 @@ function getHighlighter(buttonId) {
 if (window.wp && window.wp.hooks && !window.__ttsHighlighterReady) {
     window.__ttsHighlighterReady = true;
 
-    wp.hooks.addAction('tts_high_light_text', 'tts/highlighter', (sentence, buttonId) => {
+    wp.hooks.addAction('tts_high_light_sentence', 'tts/highlighter', (sentence, buttonId) => {
         getHighlighter(buttonId).syncSentence(sentence);
     });
 
