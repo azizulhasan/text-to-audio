@@ -110,10 +110,10 @@ class TTA_Admin
         }
 
         $this->localize_data = [
-            'json_url' => $rest_api_url,
             'admin_url' => admin_url('/'),
             'buttonTextArr' => get_option('tta__button_text_arr'),
-            'ajax_url' => admin_url('admin-ajax.php'),
+            // TTS-258: ajax_url (admin-ajax.php) removed -- no JS reads
+            // ttsObj.ajax_url; it only leaked the /wp-admin path into page source.
             'api_url' => $rest_api_url,
             'api_namespace' => 'tta',
             'api_version' => 'v1',
@@ -569,12 +569,23 @@ class TTA_Admin
             }
         }
 
+        // TTS-258: the front-end player payload must not expose the wp-admin
+        // path. admin_url is read only by dashboard-only branches in the player
+        // JS, so strip it here (and let plugins filter) so security scanners
+        // (e.g. WP Ghost) don't flag /wp-admin in front-end page source.
+        // image_url + plugin_url are dashboard/wizard-only too (no player JS reads
+        // ttsObj.plugin_url) -- drop them from the front end as well.
+        $frontend_localize_data = apply_filters(
+            'tta_frontend_localize_data',
+            array_diff_key( $this->localize_data, array( 'admin_url' => '', 'image_url' => '', 'plugin_url' => '' ) )
+        );
+
         if ($player_id > 1) {
             wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', $dependencies, $this->version, true);
-            wp_localize_script('TextToSpeech', 'ttsObj', $this->localize_data);
+            wp_localize_script('TextToSpeech', 'ttsObj', $frontend_localize_data);
         } else if ($player_id == 1) {
             wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-button.min.js', $dependencies, $this->version, true);
-            wp_localize_script('text-to-audio-button', 'ttsObj', $this->localize_data);
+            wp_localize_script('text-to-audio-button', 'ttsObj', $frontend_localize_data);
             // TTS-249 (I2): player 1 renders in the light DOM, so its CSS is a
             // proper enqueued stylesheet (not a JS-injected <style> tag). The
             // dynamic per-button values (colours/size/border/margins + hover &
