@@ -552,7 +552,7 @@ export default function Settings() {
                                         Global is always shown; one collapsed accordion appears
                                         below per enabled post type (Pro only). All four CSS-
                                         selector fields render inside each accordion body. */}
-                                    <SettingRow label={__("Show on-page content selector", "text-to-audio")} tooltip={__("Adds the AtlasVoice Selector tabs on the front end for admins. Off by default; even when on, it only opens from the “Pick visually” links and never appears on a plain page.", "text-to-audio")}>
+                                    <SettingRow label={__("Show on-page content selector", "text-to-audio")} questionIcon={true} questionTooltip={__("Adds the AtlasVoice Selector tabs on the front end for admins so you can pick what gets read aloud right on the post page. Off by default; even when on, it only opens from the “Pick visually” links and never appears on a plain page.", "text-to-audio")} docLink={"https://atlasaidev.com/docs/text-to-speech/getting-started/atlasvoice-content-selector-staging-live/"} docTooltip={__("Full details: on-page content selector & Staging / Live", "text-to-audio")}>
                                         <ToggleSwitch
                                             checked={settings.tta__settings_enable_steprail}
                                             onChange={(e) => handleChange(e)}
@@ -561,7 +561,7 @@ export default function Settings() {
                                         />
                                     </SettingRow>
 
-                                    <SettingRow label={__("Show Staging / Live indicator in toolbar", "text-to-audio")} tooltip={__("Shows the AtlasVoice mode (Staging or Live) in the WordPress admin bar. It is always shown while the on-page content selector is open.", "text-to-audio")}>
+                                    <SettingRow label={__("Show Staging / Live indicator in toolbar", "text-to-audio")} questionIcon={true} questionTooltip={__("Shows the AtlasVoice mode (Staging or Live) in the WordPress admin bar so you can tell at a glance whether saved rules are driving visitor audio. It is always shown while the on-page content selector is open.", "text-to-audio")} docLink={"https://atlasaidev.com/docs/text-to-speech/getting-started/atlasvoice-content-selector-staging-live/"} docTooltip={__("Full details: on-page content selector & Staging / Live", "text-to-audio")}>
                                         <ToggleSwitch
                                             checked={settings.tta__settings_show_mode_bar}
                                             onChange={(e) => handleChange(e)}
