@@ -118,7 +118,7 @@ class StepRail {
 		// (CSS excludes, tag excludes, phrase excludes) are replaced by a
 		// single, clearly-promotional Upgrade CTA instead of editable
 		// controls that pop an upgrade modal on use.
-		$upgrade_url = apply_filters( 'tts_upgrade_url', 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/' );
+		$upgrade_url = apply_filters( 'tts_upgrade_url', class_exists( '\\TTA\\TTA_Helper' ) ? \TTA\TTA_Helper::get_pro_url( 'admin', 'steprail_upgrade' ) : 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/' );
 
 		$settings     = class_exists( '\\TTA\\TTA_Helper' ) ? \TTA\TTA_Helper::tts_get_settings( 'settings' ) : array();
 		$add_title    = ! empty( $settings['tta__settings_add_post_title_to_read'] )    ? '1' : '0';

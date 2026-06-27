@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { __ } from "@wordpress/i18n";
 import { Button, Form, Dropdown } from "react-bootstrap";
 import toast from "../../context/Notify";
+import { proUrl } from "../../../proUrl";
 
 /**
  * GlobalDateRangePicker Component
@@ -127,7 +128,7 @@ export default function GlobalDateRangePicker({
                 toast(
                     <h6>
                         {__('Getting more than 30 days data is pro feature. Please ', 'text-to-audio')}
-                        <a target='_blank' href='https://atlasaidev.com/plugins/text-to-speech-pro/pricing/'>
+                        <a target='_blank' href={proUrl('date_range_picker')}>
                             {__('Buy Pro version', 'text-to-audio')}
                         </a>
                     </h6>,
@@ -154,7 +155,7 @@ export default function GlobalDateRangePicker({
             toast(
                 <h6>
                     {__('Custom date select is only available in pro version. Please ', 'text-to-audio')}
-                    <a target='_blank' href='https://atlasaidev.com/plugins/text-to-speech-pro/pricing/'>
+                    <a target='_blank' href={proUrl('date_range_picker')}>
                         {__('Buy Pro version', 'text-to-audio')}
                     </a>
                 </h6>,

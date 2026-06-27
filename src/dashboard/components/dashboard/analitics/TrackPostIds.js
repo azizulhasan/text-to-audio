@@ -4,6 +4,7 @@ import { Form, Button } from "react-bootstrap";
 import { MultiSelect } from "../../context/MultiSelect";
 import notify from "../../context/Notify";
 import ProFeatureOverlay from "./ProFeatureOverlay";
+import { proUrl } from "../../../proUrl";
 import AtlasVoicePlayerInsights from "../../../../../admin/js/AtlasVoicePlayerInsights";
 
 /**
@@ -77,7 +78,7 @@ export default function TrackPostIds({
                 <>
                     <h6>{__("Date Range is only available in Pro version", "text-to-audio")}</h6>
                     <a
-                        href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
+                        href={proUrl('track_post_ids')}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="tta_btn"
@@ -304,7 +305,7 @@ export default function TrackPostIds({
                     {!hasExtendedRange && (
                         <div className="tta_metrics_pro_upsell">
                             <a
-                                href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
+                                href={proUrl('track_post_ids')}
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >

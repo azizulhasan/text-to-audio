@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
+import { proUrl } from '../../proUrl';
 
 const wizardData = window.ttsWizardData || {};
 
@@ -100,6 +101,25 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
             backgroundColor: 'transparent',
             color: '#FF7853',
             border: '1px solid #FF7853',
+            padding: '12px 28px',
+            borderRadius: 4,
+            fontSize: 15,
+            fontWeight: 500,
+            cursor: 'pointer',
+            textDecoration: 'none',
+            transition: 'background-color 0.15s',
+        },
+        // TTS-258: Pro upsell button — sky-blue fill + star. Blue reads as
+        // trust (vs. an aggressive dark fill) and stays distinct from the
+        // primary (orange) and secondary (outline) actions. Sky-600 (not a
+        // pale sky-500) keeps the white label legible (contrast).
+        btnPro: {
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            backgroundColor: '#0284c7',
+            color: '#ffffff',
+            border: 'none',
             padding: '12px 28px',
             borderRadius: 4,
             fontSize: 15,
@@ -276,32 +296,6 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
         },
     };
 
-    /* ------------------------------------------------------------------ */
-    /*  Derived summary data                                               */
-    /* ------------------------------------------------------------------ */
-    const voiceName = (listening && listening.voice)
-        ? listening.voice.replace(/^Google\s+/i, '').split('(')[0].trim()
-        : __('Default', 'text-to-audio');
-
-    const playerColor = (customize && customize.backgroundColor) || '#ffffff';
-
-    // TTS-250: the "all" sentinel means every post is tracked.
-    const trackingAll = !!(analytics && analytics.trackablePostIds && analytics.trackablePostIds.includes('all'));
-    const trackingCount = (analytics && analytics.enableAnalytics && analytics.trackablePostIds)
-        ? analytics.trackablePostIds.length
-        : 0;
-
-    const trackingText = (analytics && analytics.enableAnalytics)
-        ? (trackingAll
-            ? __('All posts', 'text-to-audio')
-            : sprintf(
-                  /* translators: 1: number of posts being tracked, 2: post type label (e.g. "Posts") */
-                  __('%1$d %2$s', 'text-to-audio'),
-                  trackingCount,
-                  postTypeLabel
-              ))
-        : __('Off', 'text-to-audio');
-
     return (
         <div style={styles.wrapper}>
             {/* ============================================================ */}
@@ -359,6 +353,19 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
                             >
                                 {__('Go to Dashboard', 'text-to-audio')}
                             </a>
+                            {!wizardData.is_atlasvoice_addon_functional && (
+                                <a
+                                    href={proUrl('finish_upgrade_btn')}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={styles.btnPro}
+                                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#0369a1'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#0284c7'; }}
+                                >
+                                    <span aria-hidden="true">{'★'}</span>
+                                    {__('Upgrade to Pro', 'text-to-audio')}
+                                </a>
+                            )}
                         </div>
                     </>
                 ) : (
@@ -405,72 +412,13 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
             </div>
 
             {/* ============================================================ */}
-            {/* Section 2: Your Setup Summary                                 */}
-            {/* ============================================================ */}
-            <div style={styles.summarySection}>
-                <h3 style={styles.summaryTitle}>
-                    {__('Your Setup', 'text-to-audio')}
-                </h3>
-                <div style={styles.summaryRow}>
-                    <div style={styles.summaryCard}>
-                        <span style={styles.summaryIcon} aria-hidden="true">
-                            {'\uD83C\uDF99\uFE0F'}
-                        </span>
-                        <span style={styles.summaryLabel}>
-                            {__('Voice', 'text-to-audio')}
-                        </span>
-                        <span style={styles.summaryValue} title={listening ? listening.voice : ''}>
-                            {voiceName}
-                        </span>
-                    </div>
-                    <div style={styles.summaryCard}>
-                        <span style={styles.summaryIcon} aria-hidden="true">
-                            {'\uD83C\uDFA8'}
-                        </span>
-                        <span style={styles.summaryLabel}>
-                            {__('Player', 'text-to-audio')}
-                        </span>
-                        <span style={styles.summaryValue}>
-                            <span
-                                style={{
-                                    display: 'inline-block',
-                                    width: 14,
-                                    height: 14,
-                                    borderRadius: '50%',
-                                    backgroundColor: playerColor,
-                                    border: '1px solid #c3c4c7',
-                                    verticalAlign: 'middle',
-                                    marginRight: 6,
-                                }}
-                            />
-                            {__('Customized', 'text-to-audio')}
-                        </span>
-                    </div>
-                    <div style={styles.summaryCard}>
-                        <span style={styles.summaryIcon} aria-hidden="true">
-                            {'\uD83D\uDCCA'}
-                        </span>
-                        <span style={styles.summaryLabel}>
-                            {__('Analytics', 'text-to-audio')}
-                        </span>
-                        <span style={styles.summaryValue}>
-                            {trackingText}
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            {/* ============================================================ */}
             {/* Section 3: Pro Upsell                                         */}
             {/* ============================================================ */}
             {!wizardData.is_atlasvoice_addon_functional && (
                 <div style={styles.proSection}>
                     <h3 style={styles.proTitle}>
-                        {__('Take it further with Pro', 'text-to-audio')}
+                        {__('Hear the difference with Pro', 'text-to-audio')}
                     </h3>
-                    <p style={styles.proSubtitle}>
-                        {__('Upgrade to unlock premium features that enhance your visitors\' experience.', 'text-to-audio')}
-                    </p>
                     <div style={styles.proCards}>
                         <div style={styles.proCard}>
                             <span style={styles.proCardIcon} aria-hidden="true">
@@ -508,7 +456,7 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
                     </div>
                     <div style={styles.proCta}>
                         <a
-                            href={wizardData.pro_url || '#'}
+                            href={proUrl('finish_explore_plans')}
                             target="_blank"
                             rel="noopener noreferrer"
                             style={styles.proBtn}

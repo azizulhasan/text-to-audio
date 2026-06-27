@@ -131,6 +131,9 @@ class TTA_Admin
             // TTS-250: new key; 'is_pro_active' kept as a backward-compatible alias.
             'is_atlasvoice_addon_functional' => is_atlasvoice_addon_functional(),
             'is_pro_active' => is_atlasvoice_addon_functional(),
+            // TTS-258: Pro-link campaign config (window.tta_obj.pro). The React
+            // proUrl() helper builds UTM-tagged upgrade links from this.
+            'pro' => TTA_Helper::get_pro_url_config('admin'),
             // TTS-247: data-driven capability map. Free ships an empty array;
             // companion plugins (Pro) declare which premium features are
             // available by hooking `tts_capabilities`. The React dashboard shows
@@ -376,7 +379,10 @@ class TTA_Admin
                 'is_pro_wizard'     => TTA_Helper::is_atlasvoice_addon_functional() && ! get_option( 'tta_pro_onboarding_completed' ),
                 'nonce'             => wp_create_nonce( 'wp_rest' ),
                 'api_url'           => esc_url_raw( rest_url( 'tta/v1/' ) ),
-                'pro_url'           => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
+                // TTS-258: back-compat default + campaign config for the React
+                // proUrl() helper (window.ttsWizardData.pro). medium=onboarding.
+                'pro_url'           => TTA_Helper::get_pro_url( 'wizard', 'wizard_generic' ),
+                'pro'               => TTA_Helper::get_pro_url_config( 'wizard' ),
                 // TTS-247: single shared doc link for the step-rail / staging
                 // system, reused by the wizard step and the dashboard notices.
                 'steprail_doc_url'  => apply_filters( 'tts_steprail_doc_url', 'https://atlasaidev.com/docs/text-to-speech/getting-started/atlasvoice-content-selector-staging-live/' ),
@@ -575,9 +581,10 @@ class TTA_Admin
         // (e.g. WP Ghost) don't flag /wp-admin in front-end page source.
         // image_url + plugin_url are dashboard/wizard-only too (no player JS reads
         // ttsObj.plugin_url) -- drop them from the front end as well.
+        // 'pro' (Pro upgrade-link campaign config) is admin/dashboard-only too.
         $frontend_localize_data = apply_filters(
             'tta_frontend_localize_data',
-            array_diff_key( $this->localize_data, array( 'admin_url' => '', 'image_url' => '', 'plugin_url' => '' ) )
+            array_diff_key( $this->localize_data, array( 'admin_url' => '', 'image_url' => '', 'plugin_url' => '', 'pro' => '' ) )
         );
 
         if ($player_id > 1) {
@@ -787,14 +794,14 @@ class TTA_Admin
                 'slug'          => 'text-to-audio',
                 'basename'      => 'text-to-audio/text-to-audio.php',
                 'icon'          => 'https://ps.w.org/text-to-audio/assets/icon-256x256.gif',
-                'learnMoreUrl'  => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
+                'learnMoreUrl'  => TTA_Helper::get_pro_url( 'admin', 'plugins_learnmore' ),
                 'proBasenames'  => array(
                     'text-to-speech-pro/text-to-audio-pro.php',
                     'text-to-speech-pro-premium/text-to-audio-pro.php',
                     'text-to-audio-pro/text-to-audio-pro.php',
                     'text-to-audio-pro-premium/text-to-audio-pro.php',
                 ),
-                'proUrl'        => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
+                'proUrl'        => TTA_Helper::get_pro_url( 'admin', 'plugins_pro' ),
                 'configureSlug' => 'text-to-audio',
                 'isNew'         => false,
                 'complementary' => array('ai-workflow-automation-ai-agent-hub', 'smart-local-ai'),
