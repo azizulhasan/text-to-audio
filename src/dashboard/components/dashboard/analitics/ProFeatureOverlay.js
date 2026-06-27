@@ -1,5 +1,6 @@
 import React from "react";
 import { __ } from "@wordpress/i18n";
+import { proUrl as buildProUrl } from "../../../proUrl";
 
 /**
  * ProFeatureOverlay Component
@@ -21,7 +22,7 @@ import { __ } from "@wordpress/i18n";
  * @param {boolean} props.compact - Use the small inline lock chip instead of the full-card notice
  */
 export default function ProFeatureOverlay({ children, featureName = "", showOverlay = true, compact = false }) {
-    const proUrl = "https://atlasaidev.com/plugins/text-to-speech-pro/pricing/";
+    const proUrl = buildProUrl('pro_feature_overlay');
 
     if (!showOverlay) {
         return <>{children}</>;

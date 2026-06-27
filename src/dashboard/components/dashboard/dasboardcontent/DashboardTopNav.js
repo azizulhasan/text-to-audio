@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import Icon from "../../Icon";
+import { proUrl } from "../../../proUrl";
 
 export default function DashboardTopNav() {
   return (
@@ -179,7 +180,7 @@ export default function DashboardTopNav() {
           {/* Upgrade to Pro */}
           {!ttsObj.is_atlasvoice_addon_functional && (
             <a
-              href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
+              href={proUrl('top_nav')}
               target="_blank"
               className="btn d-flex align-items-center gap-2 tta-tab-style"
 
