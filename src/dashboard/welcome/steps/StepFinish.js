@@ -252,46 +252,48 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
             textDecoration: 'none',
             transition: 'background-color 0.15s',
         },
-        /* Section 4: Cross-promo */
+        /* Section 4: Explore all AtlasAiDev plugins */
         crossSection: {
             marginTop: 28,
             paddingTop: 24,
             borderTop: '1px solid #e0e0e0',
+            textAlign: 'center',
         },
-        crossCard: {
-            display: 'flex',
+        exploreBtn: {
+            display: 'inline-flex',
             alignItems: 'center',
-            gap: 16,
-            padding: '16px 20px',
-            backgroundColor: '#fafafa',
-            borderRadius: 8,
-            border: '1px solid #e0e0e0',
+            gap: 12,
+            minWidth: 300,
+            padding: '14px 22px',
+            backgroundColor: '#ffffff',
+            border: '1px solid #dcdcde',
+            borderRadius: 10,
+            textDecoration: 'none',
+            color: '#1d2327',
+            fontSize: 15,
+            fontWeight: 600,
+            boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+            transition: 'box-shadow 0.15s, border-color 0.15s, transform 0.15s',
+            cursor: 'pointer',
         },
-        crossIcon: {
-            fontSize: 32,
+        exploreIcon: {
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 34,
+            height: 34,
+            borderRadius: 8,
+            backgroundColor: '#fff5f2',
+            color: '#FF7853',
             flexShrink: 0,
         },
-        crossContent: {
+        exploreLabel: {
             flex: 1,
+            textAlign: 'left',
         },
-        crossTitle: {
-            fontSize: 14,
-            fontWeight: 600,
-            color: '#1d2327',
-            margin: 0,
-            marginBottom: 4,
-        },
-        crossText: {
-            fontSize: 12,
-            color: '#50575e',
-            margin: 0,
-            lineHeight: 1.5,
-        },
-        crossLink: {
+        exploreArrow: {
             color: '#FF7853',
-            textDecoration: 'none',
-            fontWeight: 500,
-            fontSize: 13,
+            fontSize: 16,
             flexShrink: 0,
         },
     };
@@ -478,50 +480,33 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
             {/* Section 4: Cross-Promo — AI Agent Hub                         */}
             {/* ============================================================ */}
             <div style={styles.crossSection}>
-                <div style={styles.crossCard}>
-                    <span style={styles.crossIcon} aria-hidden="true">
-                        {'\uD83E\uDD16'}
+                <a
+                    href={(wizardData.admin_url || '') + 'admin.php?page=atlasvoice-other-plugins'}
+                    style={styles.exploreBtn}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#FF7853';
+                        e.currentTarget.style.boxShadow = '0 4px 14px rgba(255,120,83,0.18)';
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#dcdcde';
+                        e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.04)';
+                        e.currentTarget.style.transform = 'none';
+                    }}
+                >
+                    <span style={styles.exploreIcon} aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+                            <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+                            <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+                            <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+                        </svg>
                     </span>
-                    <div style={styles.crossContent}>
-                        <h4 style={styles.crossTitle}>
-                            {__('AtlasAI — MCP Server & AI Experiments – WooCommerce Compatible', 'text-to-audio')}
-                        </h4>
-                        <p style={styles.crossText}>
-                            {__('Turn your WordPress into an AI-powered hub with 80+ abilities, MCP server, workflow builder & WooCommerce automation.', 'text-to-audio')}
-                        </p>
-                    </div>
-                    <a
-                        href="https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={styles.crossLink}
-                    >
-                        {__('Learn More', 'text-to-audio')}
-                        {' \u2192'}
-                    </a>
-                </div>
-                <div style={{ ...styles.crossCard, marginTop: 10 }}>
-                    <span style={styles.crossIcon} aria-hidden="true">
-                        {'🥽'}
+                    <span style={styles.exploreLabel}>
+                        {__('Explore all AtlasAiDev plugins', 'text-to-audio')}
                     </span>
-                    <div style={styles.crossContent}>
-                        <h4 style={styles.crossTitle}>
-                            {__('AtlasAR – 3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On', 'text-to-audio')}
-                        </h4>
-                        <p style={styles.crossText}>
-                            {__('Add interactive 3D model viewers and Augmented Reality try-on to your WordPress & WooCommerce store — no app needed.', 'text-to-audio')}
-                        </p>
-                    </div>
-                    <a
-                        href="https://downloads.wordpress.org/plugin/ar-vr-3d-model-try-on.2.0.2.zip"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={styles.crossLink}
-                    >
-                        {__('Download', 'text-to-audio')}
-                        {' →'}
-                    </a>
-                </div>
+                    <span style={styles.exploreArrow} aria-hidden="true">{'→'}</span>
+                </a>
             </div>
         </div>
     );
