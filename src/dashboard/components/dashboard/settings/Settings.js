@@ -41,7 +41,7 @@ export default function Settings() {
         tta__settings_exclude_wp_tags: [],
         tta__settings_show_admin_bar_toggle: false,
         tta__settings_enable_steprail: false,
-        tta__settings_show_mode_bar: false,
+        tta__settings_show_mode_bar: true,
         tta__settings_show_dashboard_widget: true,
         tta__settings_clear_all_cache: false,
         tta__settings_add_post_title_to_read: true,

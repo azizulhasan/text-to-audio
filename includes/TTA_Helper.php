@@ -329,16 +329,20 @@ class TTA_Helper
 
     /**
      * TTS-255: whether the admin-bar AtlasVoice production/staging indicator
-     * shows. OFF by default. Callers may still show it in other contexts
-     * (e.g. while the Step Rail picker is open). Filter:
-     * tts_show_atlasvoice_mode_bar.
+     * shows. ON by default (TTS-258); only an explicit off setting hides it.
+     * Callers may still show it in other contexts (e.g. while the Step Rail
+     * picker is open). Filter: tts_show_atlasvoice_mode_bar.
      *
      * @return bool
      */
     public static function show_mode_bar()
     {
         $settings = self::tts_get_settings('settings');
-        $val = (is_array($settings) && !empty($settings['tta__settings_show_mode_bar']));
+        // TTS-258: default ON when the setting was never saved; honor an
+        // explicit false once the user toggles it off.
+        $val = ( ! is_array($settings) || ! array_key_exists('tta__settings_show_mode_bar', $settings) )
+            ? true
+            : ! empty($settings['tta__settings_show_mode_bar']);
 
         return (bool) apply_filters('tts_show_atlasvoice_mode_bar', $val);
     }
