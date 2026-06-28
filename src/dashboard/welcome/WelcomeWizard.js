@@ -78,18 +78,12 @@ const WelcomeWizard = () => {
     });
 
     const [customize, setCustomize] = useState({
-        backgroundColor:
-            (wizardData.current_customize &&
-                wizardData.current_customize.backgroundColor) ||
-            '#ffffff',
-        color:
-            (wizardData.current_customize &&
-                wizardData.current_customize.color) ||
-            '#000000',
-        border_color:
-            (wizardData.current_customize &&
-                wizardData.current_customize.border_color) ||
-            '#000000',
+        // TTS-258: the wizard's customize step always starts from a clean,
+        // neutral player (white background, black text + border) regardless of
+        // any previously saved customization, so the live preview is legible.
+        backgroundColor: '#ffffff',
+        color: '#000000',
+        border_color: '#000000',
         borderRadius:
             (wizardData.current_customize &&
                 wizardData.current_customize.borderRadius) ||
@@ -256,8 +250,6 @@ const WelcomeWizard = () => {
                 return (
                     <StepHearDifference
                         listening={listening}
-                        pluginUrl={wizardData.plugin_url}
-                        proUrl={wizardData.pro_url}
                     />
                 );
             case 4:
@@ -271,6 +263,7 @@ const WelcomeWizard = () => {
                     <StepCustomize
                         data={customize}
                         onChange={setCustomize}
+                        listening={listening}
                     />
                 );
             case 6:

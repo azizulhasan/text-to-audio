@@ -34,6 +34,8 @@ export const SettingRow = ({
     questionIcon,
     questionTooltip,
     youtubeLink,
+    docLink,
+    docTooltip,
 }) => (
     <div className="setting-row">
         <div className="setting-label-area">
@@ -51,6 +53,27 @@ export const SettingRow = ({
                     <span className="ms-2" style={{cursor: "pointer"}}>
                         <Icon name="question-circle" style={{color: "#999", fontSize: "14px"}} />
                     </span>
+                </OverlayTrigger>
+            )}
+
+            {docLink && (
+                <OverlayTrigger
+                    placement="top"
+                    overlay={
+                        <Tooltip>
+                            {docTooltip || __("Read the full documentation", "text-to-audio")}
+                        </Tooltip>
+                    }
+                >
+                    <a
+                        className="ms-2"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={docLink}
+                        style={{color: "#2271b1", cursor: "pointer"}}
+                    >
+                        <Icon name="info-circle" style={{fontSize: "14px"}} />
+                    </a>
                 </OverlayTrigger>
             )}
 

@@ -2,6 +2,7 @@ import "./multiselect.css";
 import toast from "./Notify";
 import { isObject } from "./utilities";
 import {__} from "@wordpress/i18n";
+import { proUrl } from "../../proUrl";
 class MultiSelect extends React.Component {
   constructor(props) {
     super(props);
@@ -62,7 +63,7 @@ class MultiSelect extends React.Component {
           {this.state.toastMessage} Please{" "}
           <a
             target="_blank"
-            href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
+            href={proUrl('multiselect_limit')}
           >
             buy pro version
           </a>
@@ -114,7 +115,7 @@ class MultiSelect extends React.Component {
             {this.state.toastMessage} Please{" "}
             <a
               target="_blank"
-              href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
+              href={proUrl('multiselect_limit')}
             >
               buy pro version
             </a>

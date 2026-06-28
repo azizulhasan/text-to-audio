@@ -329,16 +329,20 @@ class TTA_Helper
 
     /**
      * TTS-255: whether the admin-bar AtlasVoice production/staging indicator
-     * shows. OFF by default. Callers may still show it in other contexts
-     * (e.g. while the Step Rail picker is open). Filter:
-     * tts_show_atlasvoice_mode_bar.
+     * shows. ON by default (TTS-258); only an explicit off setting hides it.
+     * Callers may still show it in other contexts (e.g. while the Step Rail
+     * picker is open). Filter: tts_show_atlasvoice_mode_bar.
      *
      * @return bool
      */
     public static function show_mode_bar()
     {
         $settings = self::tts_get_settings('settings');
-        $val = (is_array($settings) && !empty($settings['tta__settings_show_mode_bar']));
+        // TTS-258: default ON when the setting was never saved; honor an
+        // explicit false once the user toggles it off.
+        $val = ( ! is_array($settings) || ! array_key_exists('tta__settings_show_mode_bar', $settings) )
+            ? true
+            : ! empty($settings['tta__settings_show_mode_bar']);
 
         return (bool) apply_filters('tts_show_atlasvoice_mode_bar', $val);
     }
@@ -542,8 +546,54 @@ class TTA_Helper
         return apply_filters('tts_site_language', $default_language);
     }
 
+    /**
+     * Normalize deprecated ISO-639 language codes to their modern equivalents.
+     *
+     * Google / GTranslate still emit legacy codes (iw, in, ji, jw) that browser
+     * speechSynthesis and provider TTS (he-IL, etc.) don't recognise. We map only
+     * the primary subtag and preserve any region/script suffix, so "iw" -> "he"
+     * and "iw-IL" -> "he-IL". The matching side (tta__multilingualActiveLanguages,
+     * keyed to the GTranslate cookie) is left untouched — we normalize on output only.
+     *
+     * @param string $language A BCP-47-ish code (e.g. "iw", "iw-IL", "en-us").
+     * @return string Normalized code.
+     */
+    public static function tts_normalize_language_code($language)
+    {
+        if (!is_string($language) || $language === '') {
+            return $language;
+        }
+
+        $legacy_map = array(
+            'iw' => 'he', // Hebrew
+            'in' => 'id', // Indonesian
+            'ji' => 'yi', // Yiddish
+            'jw' => 'jv', // Javanese
+        );
+
+        // Split primary subtag from any region/script suffix ("iw-IL", "iw_IL").
+        $rest = '';
+        if (preg_match('/^([A-Za-z]+)([-_].*)$/', $language, $m)) {
+            $primary = $m[1];
+            $rest    = $m[2];
+        } else {
+            $primary = $language;
+        }
+
+        $primary_lower = strtolower($primary);
+        if (isset($legacy_map[$primary_lower])) {
+            $primary = $legacy_map[$primary_lower];
+        }
+
+        return apply_filters('tts_normalize_language_code', $primary . $rest, $language);
+    }
+
     public static function tts_get_file_url_key($language, $voice = '')
     {
+        // Normalize here too: some callers (e.g. Pro generation) pass a saved
+        // language straight in without going through resolution.
+        $language = self::tts_normalize_language_code($language);
+
         $file_url_key = $language;
         if ((get_player_id() > 3) && $voice) {
             // For ElevenLabs (player 6), voice is "voice_id::FirstName" — use only FirstName.
@@ -902,6 +952,55 @@ class TTA_Helper
     public static function is_pro_active()
     {
         return self::is_atlasvoice_addon_functional();
+    }
+
+    /**
+     * TTS-258: Campaign config for Pro marketing links. `medium` differs by
+     * context so the setup wizard and the rest of the admin are attributable
+     * separately in analytics. Localized to JS (window.tta_obj.pro /
+     * window.ttsWizardData.pro) so the React proUrl() helper can build links
+     * with the same scheme PHP uses.
+     *
+     * @param string $context 'wizard' | 'admin'
+     * @return array
+     */
+    public static function get_pro_url_config($context = 'admin')
+    {
+        return array(
+            'source'   => 'text-to-audio',
+            'medium'   => ('wizard' === $context) ? 'onboarding' : 'plugin_admin',
+            'campaign' => 'free_to_pro',
+            'bases'    => array(
+                'pricing' => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
+                'product' => 'https://atlasaidev.com/plugins/text-to-speech-pro/',
+                'demo'    => 'https://atlasaidev.com/plugins/text-to-speech-pro/demo/',
+            ),
+        );
+    }
+
+    /**
+     * TTS-258: Build a Pro marketing URL with the campaign UTM scheme. Single
+     * source of truth for PHP-rendered links (notices, dashboard widget,
+     * step-rail). React uses the JS proUrl() helper fed by get_pro_url_config().
+     *
+     * @param string $context 'wizard' | 'admin'
+     * @param string $content utm_content slug identifying the exact call site.
+     * @param string $page    'pricing' | 'product' | 'demo'
+     * @return string
+     */
+    public static function get_pro_url($context = 'admin', $content = '', $page = 'pricing')
+    {
+        $cfg  = self::get_pro_url_config($context);
+        $base = isset($cfg['bases'][$page]) ? $cfg['bases'][$page] : $cfg['bases']['pricing'];
+        $args = array(
+            'utm_source'   => $cfg['source'],
+            'utm_medium'   => $cfg['medium'],
+            'utm_campaign' => $cfg['campaign'],
+        );
+        if ('' !== $content) {
+            $args['utm_content'] = sanitize_key($content);
+        }
+        return apply_filters('tts_pro_url', add_query_arg($args, $base), $context, $content, $page);
     }
 
     public static function is_audio_folder_writable()
@@ -1344,10 +1443,18 @@ class TTA_Helper
 
     public static function get_player_language_and_player_voice($language, $voice, $plugin_all_settings, $post)
     {
-        return apply_filters('tts_player_language_and_player_voice', [
+        $language_and_voice = apply_filters('tts_player_language_and_player_voice', [
             'language' => $language,
             'voice' => $voice
         ], $plugin_all_settings, $post);
+
+        // Normalize deprecated codes (iw->he, etc.) on the resolved language so
+        // file_url_key, MP3 generation and the front-end all use the modern code.
+        if (isset($language_and_voice['language'])) {
+            $language_and_voice['language'] = self::tts_normalize_language_code($language_and_voice['language']);
+        }
+
+        return $language_and_voice;
     }
 
     public static function is_edit_page()

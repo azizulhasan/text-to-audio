@@ -289,7 +289,7 @@ class TTA_Notices {
 			'buttons'             => array(
 				array(
 					'text'    => __( 'Learn About Pro', 'text-to-audio' ),
-					'url'     => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
+					'url'     => TTA_Helper::get_pro_url( 'admin', 'notice_pro_features' ),
 					'type'    => 'secondary',
 					'new_tab' => true,
 				),
@@ -315,7 +315,7 @@ class TTA_Notices {
 			'buttons'             => array(
 				array(
 					'text'    => __( 'View Pro Features', 'text-to-audio' ),
-					'url'     => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
+					'url'     => TTA_Helper::get_pro_url( 'admin', 'notice_pro_features' ),
 					'type'    => 'secondary',
 					'new_tab' => true,
 				),
@@ -431,7 +431,7 @@ class TTA_Notices {
 		// 	'buttons'             => array(
 		// 		array(
 		// 			'text'    => __( 'Buy Now', 'text-to-audio' ),
-		// 			'url'     => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
+		// 			'url'     => TTA_Helper::get_pro_url( 'admin', 'notice_pro_features' ),
 		// 			'type'    => 'primary',
 		// 			'new_tab' => true,
 		// 		),
@@ -599,7 +599,7 @@ class TTA_Notices {
 		// 	'buttons'             => array(
 		// 		array(
 		// 			'text'    => __( 'Unlock The Premium Features', 'text-to-audio' ),
-		// 			'url'     => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
+		// 			'url'     => TTA_Helper::get_pro_url( 'admin', 'notice_pro_features' ),
 		// 			'type'    => 'primary',
 		// 			'new_tab' => true,
 		// 		),

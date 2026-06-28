@@ -1,5 +1,6 @@
 import { __ } from "@wordpress/i18n";
 import React, { useState } from "react";
+import { proUrl } from "../proUrl";
 import { Accordion, Table } from "react-bootstrap";
 import toast from "./context/Notify";
 import { copyToClipBoard } from "./context/utilities";
@@ -927,7 +928,7 @@ function tta__button_text_arr_callback($text_arr) {
               </ul>
 
               <a
-                href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
+                href={proUrl('upgrade_page')}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
