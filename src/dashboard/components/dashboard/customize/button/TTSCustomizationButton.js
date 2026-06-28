@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { proUrl } from "../../../../proUrl";
 import {
   Button,
   Form,
@@ -98,7 +99,7 @@ export default function TTSCustomizationButton({
               <p className="tta_player-upsell text-secondary mt-2 mb-0 small">
                 {__("More players (AI voices, MP3) are available in", "text-to-audio")}{" "}
                 <a
-                  href="https://atlasaidev.com/plugins/text-to-speech-pro/"
+                  href={proUrl('customize_button', 'product')}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -155,7 +156,7 @@ export default function TTSCustomizationButton({
               <p className="tta_player-upsell text-secondary mt-2 mb-0 small">
                 {__("Floating & fixed positions are available in", "text-to-audio")}{" "}
                 <a
-                  href="https://atlasaidev.com/plugins/text-to-speech-pro/"
+                  href={proUrl('customize_button', 'product')}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

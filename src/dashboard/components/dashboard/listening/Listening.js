@@ -4,6 +4,7 @@ import { __ } from "@wordpress/i18n";
 
 import { postWithoutImage } from "../../context/utilities";
 import toast from "../../context/Notify";
+import { proUrl } from "../../../proUrl";
 import UpgradeToPro from "../../UpgradeToPro";
 
 // Free ships only player 1 (browser SpeechSynthesis voices). Player 2 ("Default
@@ -197,7 +198,7 @@ export default function Listening() {
                   </p>
                   <a
                     className="btn btn-primary"
-                    href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
+                    href={proUrl('listening_tab')}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ background: "#FF7853", borderColor: "#FF7853" }}

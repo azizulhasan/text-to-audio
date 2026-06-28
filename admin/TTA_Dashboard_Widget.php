@@ -141,7 +141,7 @@ class TTA_Dashboard_Widget {
 						printf(
 							/* translators: %s: link to Pro pricing page */
 							esc_html__( 'Unlock device, browser & location analytics, CSV/PDF export, and scheduled email reports — %s', 'text-to-audio' ),
-							'<a href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/" target="_blank">' . esc_html__( 'Upgrade to Pro', 'text-to-audio' ) . '</a>'
+							'<a href="' . esc_url( \TTA\TTA_Helper::get_pro_url( 'admin', 'dashboard_widget' ) ) . '" target="_blank">' . esc_html__( 'Upgrade to Pro', 'text-to-audio' ) . '</a>'
 						);
 						?>
 					</p>

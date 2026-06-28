@@ -118,7 +118,7 @@ class StepRail {
 		// (CSS excludes, tag excludes, phrase excludes) are replaced by a
 		// single, clearly-promotional Upgrade CTA instead of editable
 		// controls that pop an upgrade modal on use.
-		$upgrade_url = apply_filters( 'tts_upgrade_url', 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/' );
+		$upgrade_url = apply_filters( 'tts_upgrade_url', class_exists( '\\TTA\\TTA_Helper' ) ? \TTA\TTA_Helper::get_pro_url( 'admin', 'steprail_upgrade' ) : 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/' );
 
 		$settings     = class_exists( '\\TTA\\TTA_Helper' ) ? \TTA\TTA_Helper::tts_get_settings( 'settings' ) : array();
 		$add_title    = ! empty( $settings['tta__settings_add_post_title_to_read'] )    ? '1' : '0';
@@ -171,6 +171,7 @@ class StepRail {
 			<div id="av-rail-panel" class="av-rail-panel" role="dialog" aria-modal="false" aria-label="<?php echo esc_attr__( 'AtlasVoice content selector', 'text-to-audio' ); ?>" hidden>
 				<div class="av-rail-panel__header">
 					<span class="av-rail-panel__title"><?php echo esc_html__( 'Content Selector', 'text-to-audio' ); ?></span>
+					<a class="av-rail-panel__help" href="https://atlasaidev.com/docs/text-to-speech/getting-started/atlasvoice-content-selector-staging-live/" target="_blank" rel="noopener noreferrer" title="<?php echo esc_attr__( 'How the content selector & Staging / Live work — read the docs', 'text-to-audio' ); ?>" aria-label="<?php echo esc_attr__( 'Read the documentation', 'text-to-audio' ); ?>"><span><?php echo esc_html__( 'Docs', 'text-to-audio' ); ?></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"></path></svg></a>
 					<button type="button" class="av-rail-panel__close" aria-label="<?php echo esc_attr__( 'Close', 'text-to-audio' ); ?>">&times;</button>
 				</div>
 
@@ -486,7 +487,16 @@ class StepRail {
   display:flex;align-items:center;justify-content:space-between;
   flex:none;
 }
-.av-rail-panel__title{font:600 14px/1.3 inherit;}
+.av-rail-panel__title{font:600 14px/1.3 inherit;flex:1;}
+.av-rail-panel__help{
+  display:inline-flex!important;align-items:center;gap:4px;
+  flex:none;margin-right:2px;padding:2px 8px;
+  border:1px solid rgba(255,255,255,.4)!important;border-radius:999px;
+  color:#fff!important;font:500 11px/1 inherit!important;
+  text-decoration:none!important;text-shadow:none!important;
+}
+.av-rail-panel__help svg{width:12px;height:12px;flex:none;}
+.av-rail-panel__help:hover{background:rgba(255,255,255,.16)!important;color:#fff!important;border-color:rgba(255,255,255,.7)!important;}
 .av-rail-panel__close{
   background:transparent!important;border:0!important;color:#fff!important;
   font-size:20px!important;line-height:1!important;
