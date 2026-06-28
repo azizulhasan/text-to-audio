@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { proUrl } from "../../../proUrl";
 import {
     Button,
     Col,
@@ -910,7 +911,7 @@ export default function Analytics() {
                                     </p>
                                 </div>
                                 <a
-                                    href="https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
+                                    href={proUrl('analytics_export')}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     style={{
