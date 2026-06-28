@@ -35,6 +35,7 @@
 import React, {useMemo, useState} from "react";
 import {__} from "@wordpress/i18n";
 import {Accordion, Form, useAccordionButton} from "react-bootstrap";
+import { proUrl } from "../../../proUrl";
 
 const FIELDS = [
     {
@@ -65,7 +66,7 @@ const FIELDS = [
 
 const upgradeUrl = () =>
     (typeof window !== "undefined" && window.ttsObj && window.ttsObj.upgrade_url) ||
-    "https://atlasaidev.com/plugins/text-to-speech-pro/pricing/";
+    proUrl('scope_accordion');
 
 /**
  * Resolve the URL of the post the picker should open on. Manual input

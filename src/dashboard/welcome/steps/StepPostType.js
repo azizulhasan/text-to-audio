@@ -1,5 +1,6 @@
 import React from 'react';
 import { __, sprintf } from '@wordpress/i18n';
+import { proUrl } from '../../proUrl';
 
 const wizardData = window.ttsWizardData || {};
 
@@ -194,7 +195,7 @@ const StepPostType = ({ data, onChange }) => {
                     'text-to-audio'
                 )}{' '}
                 <a
-                    href={wizardData.pro_url || '#'}
+                    href={proUrl('post_type_step')}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={styles.link}

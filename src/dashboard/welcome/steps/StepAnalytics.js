@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { __ } from '@wordpress/i18n';
+import { proUrl } from '../../proUrl';
 
 const wizardData = window.ttsWizardData || {};
 // TTS-250: the "all" sentinel tracks every post. The free plugin no longer caps
@@ -465,7 +466,7 @@ const StepAnalytics = ({ data, onChange, selectedPostType }) => {
                     'text-to-audio'
                 )}{' '}
                 <a
-                    href={wizardData.pro_url || '#'}
+                    href={proUrl('analytics_step')}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={styles.link}

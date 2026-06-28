@@ -2,6 +2,7 @@ import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { __ } from "@wordpress/i18n";
 import UpgradeToPro from "../../UpgradeToPro";
+import { proUrl } from "../../../proUrl";
 
 /**
  * TTS-250: Voice-provider integrations (Google Cloud TTS, ChatGPT, ElevenLabs)
@@ -62,7 +63,7 @@ export default function Integrations() {
               </p>
               <a
                 className="btn btn-primary"
-                href="https://atlasaidev.com/plugins/text-to-speech-pro/"
+                href={proUrl('integrations', 'product')}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ background: "#FF7853", borderColor: "#FF7853" }}

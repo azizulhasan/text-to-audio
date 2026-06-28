@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.3.1
+Stable tag: 2.3.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -384,6 +384,13 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.3.2 ( 28 Jun 2026 ) =
+Improved : A cleaner final step in the setup wizard, with a Listen preview that plays a sample so you can hear your chosen voice right away.
+Changed : The Staging / Live indicator now shows in the toolbar by default. You can still turn it off in Settings.
+Added : Quick links to the documentation from Settings and the on-page content selector.
+Fixed : Voice, speed, volume and pitch now stay correct when you switch between players.
+Improved : Small privacy and security improvements under the hood.
+
 = 2.3.1 ( 22 Jun 2026 ) =
 Improved : The on-page content selector no longer appears on your posts on its own. It now opens only when you choose to open it, so it stays out of your way while you work.
 Added : A new setting to turn the on-page content selector on or off.
@@ -613,6 +620,9 @@ Introduced :  Complete new UI introduced.
 
 
 == Upgrade Notice ==
+
+= 2.3.2 =
+A tidier setup wizard with a playable voice preview, the Staging / Live indicator now shown by default, handy documentation links, and small fixes plus privacy improvements. Update recommended.
 
 = 2.3.1 =
 The on-page content selector no longer appears automatically on your posts — it opens only when you choose to, and you can turn it (and the new toolbar items) on or off from Settings. Update recommended.

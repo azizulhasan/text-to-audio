@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
+import { getDemoText } from '../demoTexts';
+import { proUrl } from '../../proUrl';
 
 const wizardData = window.ttsWizardData || {};
 
@@ -10,12 +12,50 @@ const wizardData = window.ttsWizardData || {};
  * @param {Object}   props.data     - { backgroundColor, color, border_color, borderRadius }
  * @param {Function} props.onChange  - Receives updated data object.
  */
-const StepCustomize = ({ data, onChange }) => {
+const StepCustomize = ({ data, onChange, listening = {} }) => {
+    const [isPlaying, setIsPlaying] = useState(false);
+
+    // Stop any in-flight speech when leaving the step.
+    useEffect(() => {
+        return () => { window.speechSynthesis.cancel(); };
+    }, []);
+
     const handleChange = (key, value) => {
         onChange({ ...data, [key]: value });
     };
 
     const radius = parseInt(data.borderRadius, 10) || 0;
+
+    // Demo sentence shown + spoken — language-aware, mirrors Step 3.
+    const previewText = getDemoText(listening.lang);
+
+    // Click the live-preview button to hear the sample with the voice,
+    // language, pitch, rate, and volume chosen on Step 2 (Choose Voice).
+    // Mirrors StepHearDifference.playBrowserVoice.
+    const playPreview = () => {
+        if (isPlaying) {
+            window.speechSynthesis.cancel();
+            setIsPlaying(false);
+            return;
+        }
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(previewText);
+        const voices = window.speechSynthesis.getVoices();
+        const selectedVoice = voices.find((v) => v.name === listening.voice);
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+            utterance.lang = selectedVoice.lang;
+        }
+        utterance.pitch = parseFloat(listening.pitch) || 1;
+        utterance.rate = parseFloat(listening.rate) || 1;
+        utterance.volume = parseFloat(listening.volume) || 1;
+        utterance.onend = () => setIsPlaying(false);
+        utterance.onerror = () => setIsPlaying(false);
+
+        setIsPlaying(true);
+        window.speechSynthesis.speak(utterance);
+    };
 
     /* ------------------------------------------------------------------ */
     /*  Styles                                                             */
@@ -104,9 +144,12 @@ const StepCustomize = ({ data, onChange }) => {
             marginBottom: 16,
         },
         previewButton: {
-            display: 'inline-flex',
+            display: 'flex',
             alignItems: 'center',
+            justifyContent: 'center',
             gap: 10,
+            width: '90%',
+            margin: '0 auto',
             padding: '12px 24px',
             backgroundColor: data.backgroundColor,
             color: data.color,
@@ -114,7 +157,7 @@ const StepCustomize = ({ data, onChange }) => {
             borderRadius: radius + 'px',
             fontSize: 15,
             fontWeight: 500,
-            cursor: 'default',
+            cursor: 'pointer',
             fontFamily:
                 '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             transition: 'all 0.2s',
@@ -255,16 +298,17 @@ const StepCustomize = ({ data, onChange }) => {
                 <p style={styles.previewLabel}>
                     {__('Live Preview', 'text-to-audio')}
                 </p>
-                <div style={styles.previewButton}>
-                    <span style={styles.playIcon}>{'\u25B6'}</span>
+                <div
+                    style={styles.previewButton}
+                    onClick={playPreview}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') playPreview(); }}
+                >
+                    <span style={styles.playIcon}>{isPlaying ? '\u25A0' : '\u25B6'}</span>
                     {__('Listen', 'text-to-audio')}
                 </div>
-                <p style={styles.previewText}>
-                    {__(
-                        'Welcome to your site. Your visitors can now listen to your content with one click.',
-                        'text-to-audio'
-                    )}
-                </p>
+                <p style={styles.previewText}>{previewText}</p>
             </div>
 
             {/* Info text */}
@@ -282,7 +326,7 @@ const StepCustomize = ({ data, onChange }) => {
                     'text-to-audio'
                 )}{' '}
                 <a
-                    href={wizardData.pro_url || '#'}
+                    href={proUrl('customize_designs')}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={styles.link}
