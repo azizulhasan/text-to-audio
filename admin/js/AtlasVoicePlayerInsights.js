@@ -1,4 +1,5 @@
 const {__} = wp.i18n;
+import { proUrl } from '../../src/dashboard/proUrl';
 
 class AtlasVoicePlayerInsights {
     data = {}
@@ -22,7 +23,7 @@ class AtlasVoicePlayerInsights {
         platform: __("Platform type"),
         browser: __("Browser Name"),
     };
-    proPage = 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/';
+    proPage = proUrl('player_insights');
     place_to_display = 'post_edit'
     chartInstance = null
     chartContainerId = 'atlasVoice_analytics_chart'

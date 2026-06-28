@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { __ } from '@wordpress/i18n';
 import { getDemoText } from '../demoTexts';
+import { proUrl } from '../../proUrl';
 
 const wizardData = window.ttsWizardData || {};
 
@@ -352,7 +353,7 @@ const StepVoice = ({ data, onChange }) => {
                             'text-to-audio'
                         )}{' '}
                         <a
-                            href={wizardData.pro_url || '#'}
+                            href={proUrl('voice_step')}
                             target="_blank"
                             rel="noopener noreferrer"
                             style={styles.link}

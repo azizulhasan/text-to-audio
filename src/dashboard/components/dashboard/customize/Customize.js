@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { __ } from "@wordpress/i18n";
+import { proUrl } from "../../../proUrl";
 import {
   Col,
   Container,
@@ -425,7 +426,7 @@ export default function Customize() {
         <button
           onClick={(e) => {
             window.open(
-              "https://atlasaidev.com/plugins/text-to-speech-pro/pricing/"
+              proUrl('customize_tab')
             );
           }}
           className="tta_btn"
