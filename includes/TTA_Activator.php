@@ -123,9 +123,9 @@ class TTA_Activator {
 				// never on a plain post URL. Filter: tts_enable_steprail.
 				'tta__settings_enable_steprail'                       => false,
 				// TTS-255 — admin-bar AtlasVoice production/staging indicator.
-				// OFF by default (still shown while the Step Rail UI is open).
-				// Filter: tts_show_atlasvoice_mode_bar.
-				'tta__settings_show_mode_bar'                         => false,
+				// TTS-258: ON by default (still shown while the Step Rail UI is
+				// open). Filter: tts_show_atlasvoice_mode_bar.
+				'tta__settings_show_mode_bar'                         => true,
 				'tta__settings_show_dashboard_widget'                 => true,
 				'tta__settings_clear_all_cache'                       => true,
 				'tta__settings_add_post_title_to_read'                => true,

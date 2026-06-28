@@ -329,16 +329,20 @@ class TTA_Helper
 
     /**
      * TTS-255: whether the admin-bar AtlasVoice production/staging indicator
-     * shows. OFF by default. Callers may still show it in other contexts
-     * (e.g. while the Step Rail picker is open). Filter:
-     * tts_show_atlasvoice_mode_bar.
+     * shows. ON by default (TTS-258); only an explicit off setting hides it.
+     * Callers may still show it in other contexts (e.g. while the Step Rail
+     * picker is open). Filter: tts_show_atlasvoice_mode_bar.
      *
      * @return bool
      */
     public static function show_mode_bar()
     {
         $settings = self::tts_get_settings('settings');
-        $val = (is_array($settings) && !empty($settings['tta__settings_show_mode_bar']));
+        // TTS-258: default ON when the setting was never saved; honor an
+        // explicit false once the user toggles it off.
+        $val = ( ! is_array($settings) || ! array_key_exists('tta__settings_show_mode_bar', $settings) )
+            ? true
+            : ! empty($settings['tta__settings_show_mode_bar']);
 
         return (bool) apply_filters('tts_show_atlasvoice_mode_bar', $val);
     }
@@ -948,6 +952,55 @@ class TTA_Helper
     public static function is_pro_active()
     {
         return self::is_atlasvoice_addon_functional();
+    }
+
+    /**
+     * TTS-258: Campaign config for Pro marketing links. `medium` differs by
+     * context so the setup wizard and the rest of the admin are attributable
+     * separately in analytics. Localized to JS (window.tta_obj.pro /
+     * window.ttsWizardData.pro) so the React proUrl() helper can build links
+     * with the same scheme PHP uses.
+     *
+     * @param string $context 'wizard' | 'admin'
+     * @return array
+     */
+    public static function get_pro_url_config($context = 'admin')
+    {
+        return array(
+            'source'   => 'text-to-audio',
+            'medium'   => ('wizard' === $context) ? 'onboarding' : 'plugin_admin',
+            'campaign' => 'free_to_pro',
+            'bases'    => array(
+                'pricing' => 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/',
+                'product' => 'https://atlasaidev.com/plugins/text-to-speech-pro/',
+                'demo'    => 'https://atlasaidev.com/plugins/text-to-speech-pro/demo/',
+            ),
+        );
+    }
+
+    /**
+     * TTS-258: Build a Pro marketing URL with the campaign UTM scheme. Single
+     * source of truth for PHP-rendered links (notices, dashboard widget,
+     * step-rail). React uses the JS proUrl() helper fed by get_pro_url_config().
+     *
+     * @param string $context 'wizard' | 'admin'
+     * @param string $content utm_content slug identifying the exact call site.
+     * @param string $page    'pricing' | 'product' | 'demo'
+     * @return string
+     */
+    public static function get_pro_url($context = 'admin', $content = '', $page = 'pricing')
+    {
+        $cfg  = self::get_pro_url_config($context);
+        $base = isset($cfg['bases'][$page]) ? $cfg['bases'][$page] : $cfg['bases']['pricing'];
+        $args = array(
+            'utm_source'   => $cfg['source'],
+            'utm_medium'   => $cfg['medium'],
+            'utm_campaign' => $cfg['campaign'],
+        );
+        if ('' !== $content) {
+            $args['utm_content'] = sanitize_key($content);
+        }
+        return apply_filters('tts_pro_url', add_query_arg($args, $base), $context, $content, $page);
     }
 
     public static function is_audio_folder_writable()

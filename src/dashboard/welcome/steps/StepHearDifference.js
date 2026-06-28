@@ -1,13 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { __ } from '@wordpress/i18n';
 import { getDemoText } from '../demoTexts';
+import { proUrl } from '../../proUrl';
 
 const wizardData = window.ttsWizardData || {};
-
-// TTS-249: the free plugin no longer fetches remote audio (cdn.openai.com /
-// cloud.google.com) or ships bundled premium demo files (wp.org Guideline 6/8).
-// Pro voice previews now link to the public demo page instead — see openProDemo().
-const PRO_DEMO_URL = 'https://atlasaidev.com/plugins/text-to-speech-pro/';
 
 const PRO_VOICES = [
     { id: 'gcloud', name: 'Google Cloud TTS', desc: 'Studio-quality neural voices', badge: 'Popular', badgeColor: '#FF7853' },
@@ -20,7 +16,7 @@ const PRO_VOICES = [
  * Step 3 — Hear the Difference.
  * Lets users compare their free browser voice with Pro AI voice demos.
  */
-const StepHearDifference = ({ listening, pluginUrl, proUrl }) => {
+const StepHearDifference = ({ listening }) => {
     const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
     const [errorCards, setErrorCards] = useState({});
     const audioRef = useRef(null);
@@ -72,7 +68,9 @@ const StepHearDifference = ({ listening, pluginUrl, proUrl }) => {
     // remote/bundled audio we open the public demo page where they can be heard.
     const playProVoice = () => {
         stopAll();
-        window.open(proUrl || PRO_DEMO_URL, '_blank', 'noopener');
+        // TTS-258: pro voice previews open the public demo page (where the
+        // voices can actually be heard), not the pricing page. UTM-tagged.
+        window.open(proUrl('hear_difference_demo', 'demo'), '_blank', 'noopener');
     };
 
     const voiceDisplayName = listening.voice
@@ -172,7 +170,7 @@ const StepHearDifference = ({ listening, pluginUrl, proUrl }) => {
                     {__('Every visitor hears the same high-quality audio. No browser dependency, consistent across all devices.', 'text-to-audio')}
                 </p>
                 <a
-                    href={proUrl || '#'}
+                    href={proUrl('hear_difference_plans')}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={styles.ctaButton}

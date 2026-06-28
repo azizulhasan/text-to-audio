@@ -4,6 +4,7 @@ import {Button, Col, Container, Form, OverlayTrigger, Row, Tooltip} from "react-
 import UpgradeToPro from "../../UpgradeToPro";
 import toast from '../../context/Notify';
 import {postWithoutImage} from "../../context/utilities";
+import { proUrl } from "../../../proUrl";
 import Icon from "../../Icon";
 
 
@@ -35,7 +36,7 @@ export default function Aliases() {
             toast(
                 <h6>
                     {__('More than 1 alias is available in the pro version. Please ', 'text-to-audio')}
-                    <a target='_blank' href='https://atlasaidev.com/plugins/text-to-speech-pro/pricing/'>
+                    <a target='_blank' href={proUrl('aliases_tab')}>
                         {__('Buy Pro version', 'text-to-audio')}
                     </a>
                 </h6>,
