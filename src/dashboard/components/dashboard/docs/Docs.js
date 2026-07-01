@@ -14,6 +14,7 @@ export default function Docs() {
 		{ name: 'tta_clean_content', arguments: '$text' },
 		{ name: 'tts__listening_button', arguments: '$button, $btn_no, $class, $post' },
 		{ name: 'tts_player_customizations', arguments: '$player_icons' },
+		{ name: 'tts_is_secondary_loop', arguments: '$is_secondary, $current_id, $queried_id' },
 	];
 
 	const pro_filters = [
@@ -214,6 +215,37 @@ export default function Docs() {
 										{__('Read the full guide on atlasaidev.com →', 'text-to-audio')}
 									</a>
 								</p>
+							</Accordion.Body>
+						</Accordion.Item>
+
+						<Accordion.Item eventKey="9">
+							<Accordion.Header>
+								{__('9. The player or markers are missing inside post cards, related posts or widgets', 'text-to-audio')}
+							</Accordion.Header>
+							<Accordion.Body>
+								<p>
+									{__('By default the player button and the AtlasVoice markers/wrapper are emitted only on the main content of the post or page being viewed — never inside a secondary loop such as an Avada "Post Cards" grid, a "Related Posts" block, or a widget. This is intentional: it prevents the content wrapper from being injected into your theme\'s grid markup and breaking the layout.', 'text-to-audio')}
+								</p>
+								<p>
+									{__('If you deliberately want the player to render inside a secondary loop, override the tts_is_secondary_loop filter. It receives the computed boolean, the current loop post ID, and the queried object ID.', 'text-to-audio')}
+								</p>
+								<p>
+									<strong>{__('Allow the player everywhere, including post cards:', 'text-to-audio')}</strong>
+								</p>
+								<pre>
+									<code>{`add_filter( 'tts_is_secondary_loop', '__return_false' );`}</code>
+								</pre>
+								<p>
+									<strong>{__('Allow it only for a specific post type:', 'text-to-audio')}</strong>
+								</p>
+								<pre>
+									<code>{`add_filter( 'tts_is_secondary_loop', function ( $is_secondary, $current_id, $queried_id ) {
+    if ( get_post_type( $current_id ) === 'product' ) {
+        return false; // always emit for products, even in sub-loops
+    }
+    return $is_secondary;
+}, 10, 3 );`}</code>
+								</pre>
 							</Accordion.Body>
 						</Accordion.Item>
 
