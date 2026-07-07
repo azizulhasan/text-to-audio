@@ -182,7 +182,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     }
 
     // this is a pro feature to show button on blog main page with title and excerpt.
-    if (!TTA_Helper::should_load_button($post, 'tta_get_button_content') || $block_btn_no > 0) {
+    if (!TTA_Helper::should_load_button($post, 'tta_get_button_content') || $block_btn_no > 0 || TTA_Helper::is_secondary_loop()) {
         return;
     }
 
@@ -678,7 +678,7 @@ function add_listen_button($content)
     static $button_no = 0;
     $button_no++;
     global $post;
-    if (!TTA_Helper::should_load_button($post) ) {
+    if (!TTA_Helper::should_load_button($post) || TTA_Helper::is_secondary_loop() ) {
        return $content;
     }
     TTA_Helper::set_default_settings();
@@ -1125,6 +1125,14 @@ function tta_free_emit_atlasvoice_markers( $content ) {
     }
 
     if ( ! is_singular() ) {
+        return $content;
+    }
+
+    // Respect "Allow Listening For Post Type" and skip secondary loops: don't emit
+    // markers/wrapper on content the player itself would skip (e.g. a Page when only
+    // `post` is enabled, or a Post Cards sub-loop). Same gate as the player button so
+    // emission and the player stay in lockstep.
+    if ( ! \TTA\TTA_Helper::should_load_button() || TTA_Helper::is_secondary_loop() ) {
         return $content;
     }
 
