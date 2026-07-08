@@ -73,8 +73,19 @@ export default function Highlight() {
             .finally(() => setSaving(false));
     };
 
+    // Current player. MP3 players — 3 (Google Translate) & 5 (ChatGPT) — have no
+    // word timing, so they're sentence-only: hide the mode selector + word
+    // options and force "sentence". (Players 4 & 6 gain word options in Phase 2.)
+    const currentPlayer = Number(
+        window?.ttsObj?.player_id ??
+        window?.ttsObj?.settings?.customize?.buttonSettings?.id ??
+        1
+    );
+    const isSentenceOnlyPlayer = currentPlayer === 3 || currentPlayer === 5;
+
     const enabled = !!settings.tta__highlight_enabled;
-    const mode = settings.tta__highlight_mode || "sentence";
+    const mode = isSentenceOnlyPlayer ? "sentence" : (settings.tta__highlight_mode || "sentence");
+    const showMode = !isSentenceOnlyPlayer;
     const showWord = mode !== "sentence";
     const showSentence = mode !== "word";
 
@@ -139,23 +150,31 @@ export default function Highlight() {
                                     />
                                 </SettingRow>
 
-                                <SettingRow
-                                    label={__("Highlight mode", "text-to-audio")}
-                                    questionIcon={true}
-                                    questionTooltip={__("“Sentence only” works with any voice. “Word” and “Word + Sentence” need a local voice that fires boundary events, and fall back to sentence highlighting otherwise.", "text-to-audio")}
-                                >
-                                    <Form.Select
-                                        name="tta__highlight_mode"
-                                        value={mode}
-                                        onChange={handleChange}
-                                        disabled={!enabled}
-                                        style={{ maxWidth: "260px" }}
+                                {showMode && (
+                                    <SettingRow
+                                        label={__("Highlight mode", "text-to-audio")}
+                                        questionIcon={true}
+                                        questionTooltip={__("“Sentence only” works with any voice. “Word” and “Word + Sentence” need a local voice that fires boundary events, and fall back to sentence highlighting otherwise.", "text-to-audio")}
                                     >
-                                        <option value="sentence">{__("Sentence only (recommended)", "text-to-audio")}</option>
-                                        <option value="word">{__("Word only", "text-to-audio")}</option>
-                                        <option value="word_sentence">{__("Word + Sentence", "text-to-audio")}</option>
-                                    </Form.Select>
-                                </SettingRow>
+                                        <Form.Select
+                                            name="tta__highlight_mode"
+                                            value={mode}
+                                            onChange={handleChange}
+                                            disabled={!enabled}
+                                            style={{ maxWidth: "260px" }}
+                                        >
+                                            <option value="sentence">{__("Sentence only (recommended)", "text-to-audio")}</option>
+                                            <option value="word">{__("Word only", "text-to-audio")}</option>
+                                            <option value="word_sentence">{__("Word + Sentence", "text-to-audio")}</option>
+                                        </Form.Select>
+                                    </SettingRow>
+                                )}
+
+                                {!showMode && (
+                                    <div className="mb-3 p-2 rounded" style={{ backgroundColor: "#eef6ff", border: "1px solid #b6d4fe", color: "#084298", fontSize: "13px" }}>
+                                        {__("The current player uses generated audio, so read-along highlighting is sentence-level. Word-level options don't apply here.", "text-to-audio")}
+                                    </div>
+                                )}
 
                                 {showWord && (
                                     <SettingRow
