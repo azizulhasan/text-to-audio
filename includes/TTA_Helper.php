@@ -270,6 +270,27 @@ class TTA_Helper
 
 
     /**
+     * Whether the current the_content render is a SECONDARY loop — a Post Cards
+     * item, related-posts entry, widget, etc. — rather than the main queried object.
+     *
+     * AtlasVoice emission (markers/wrapper) and the player button are skipped for
+     * secondary loops so they never leak into host-theme grids (e.g. Avada Post
+     * Cards). Override per context with the `tts_is_secondary_loop` filter — e.g.
+     * return false to force emission inside a specific secondary loop.
+     *
+     * @return bool True when the loop post is not the queried object.
+     */
+    public static function is_secondary_loop()
+    {
+        $current_id   = (int) get_the_ID();
+        $queried_id   = (int) get_queried_object_id();
+        $is_secondary = ( $current_id !== $queried_id );
+
+        return (bool) apply_filters( 'tts_is_secondary_loop', $is_secondary, $current_id, $queried_id );
+    }
+
+
+    /**
      * Get post type
      *
      * @see

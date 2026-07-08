@@ -1181,7 +1181,11 @@ class Insights {
                             support.hide();
                             // enable buttons and restore original labels
                             buttons.removeClass('disabled');
-                            responseButtons.addClass('disabled');
+                            // TTS-fix: removed `responseButtons.addClass('disabled')` — a leftover from the old
+                            // .response overlay whose re-enabling `.not-interested` link no longer exists, which
+                            // left the reason-modal footer buttons ("Submit & Deactivate" / "Cancel" / "I rather
+                            // wouldn't say") disabled after the modal was closed and reopened. Scoped to this
+                            // plugin's own modal (#text-to-audio-atlasaidev-dr-modal), so other plugins are unaffected.
                             buttons.each(function () {
                                 var self = $(this), label = self.attr('data-label');
                                 if (label) self.text(label);
