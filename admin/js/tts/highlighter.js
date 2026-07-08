@@ -30,6 +30,8 @@
  * case the sentence-level highlight (driven by onstart) still works.
  */
 
+import { splitSentences } from './sentence-splitter.js';
+
 const HL_WORD = 'atlasvoice-word';
 const HL_SENTENCE = 'atlasvoice-sentence';
 const DIM_CLASS = 'atlasvoice-reading-dim';
@@ -142,6 +144,15 @@ function stripButtonLabel(str) {
 }
 
 class WrapperHighlighter {
+    /**
+     * Shared sentence splitter (TTS-252), exposed on the painter so companion
+     * plugins that extend it (e.g. Pro's audio-time highlighter) chunk sentences
+     * identically to the browser players instead of a naive "."/"?"/"!" split.
+     */
+    static splitSentences(text = '') {
+        return splitSentences(text);
+    }
+
     constructor(buttonId) {
         this.buttonId = buttonId;
         this.cfg = readConfig();
