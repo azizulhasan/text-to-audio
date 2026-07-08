@@ -378,6 +378,14 @@ function getHighlighter(buttonId) {
     return instances[buttonId];
 }
 
+// Expose the painter so companion plugins (Pro) can reuse/extend it for their
+// own players — e.g. the MP3 players, which drive highlighting from audio time
+// instead of speechSynthesis events. This is generic, free painting code:
+// subclasses just call syncSentence()/highlightWord()/stop() as needed.
+if (typeof window !== 'undefined') {
+    window.AtlasVoiceHighlighter = WrapperHighlighter;
+}
+
 // Register once even if this module is bundled into more than one entry.
 if (window.wp && window.wp.hooks && !window.__ttsHighlighterReady) {
     window.__ttsHighlighterReady = true;
