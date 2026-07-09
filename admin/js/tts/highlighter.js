@@ -61,30 +61,69 @@ function scrollBehavior() {
 }
 
 /**
- * Auto-scroll yields to the reader. Any manual scroll intent — mouse wheel, touch
- * drag, or a page/arrow/space key — pauses the read-along auto-scroll for a few
- * seconds so the user can look ahead or back without being yanked to the
- * highlight. Each interaction re-arms the pause; auto-scroll resumes on its own
- * once the reader stops scrolling. We listen for INTENT events (not the generic
- * `scroll` event, which our own scrolling also fires) so we never fight ourselves.
+ * Follow-mode auto-scroll — the industry-standard read-along behaviour (Speechify,
+ * MS Edge "Read Aloud", Natural Reader, Voice Dream, Kindle, …):
+ *
+ *  - The page scrolls ONLY when the highlighted line reaches the bottom of a
+ *    comfort band (or has moved above the top). It never re-centres on every
+ *    tick; when it does scroll it places the line ~30% down, not dead-centre, so
+ *    the reader is never stuck reading the very bottom edge.
+ *  - A manual scroll (wheel / touch / page keys) DISENGAGES follow mode with no
+ *    timer, so the reader stays exactly where they scrolled for as long as they
+ *    like — no forced return.
+ *  - Follow mode RE-ENGAGES on its own the moment the active line is back in a
+ *    comfortable reading position — whether the reader scrolled back to it or the
+ *    narration caught up to where they are.
+ *
+ * We listen only for scroll INTENT (wheel/touch/keys), never the generic `scroll`
+ * event (which our own programmatic scrolling also fires), so we never disengage
+ * ourselves.
  */
-const USER_SCROLL_PAUSE_MS = 4000;
-let userScrollPausedUntil = 0;
+const FOLLOW_BAND_BOTTOM = 0.82; // keep the line above ~82% of the viewport
+const FOLLOW_TARGET_TOP = 0.30;  // when we do scroll, land the line ~30% down
+let followMode = true;
 
-function markUserScroll() {
-    userScrollPausedUntil = Date.now() + USER_SCROLL_PAUSE_MS;
+function disengageFollow() {
+    followMode = false;
 }
 
-/** True when auto-scroll is allowed (i.e. the reader isn't manually scrolling). */
-function autoScrollAllowed() {
-    return Date.now() >= userScrollPausedUntil;
+/** Keep the active line in a comfortable reading band, respecting the reader. */
+function followScroll(anchor) {
+    if (!anchor || typeof anchor.getBoundingClientRect !== 'function') {
+        return;
+    }
+    const rect = anchor.getBoundingClientRect();
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+    if (!viewportHeight) {
+        return;
+    }
+    const bandBottom = viewportHeight * FOLLOW_BAND_BOTTOM;
+
+    // Re-engage once the line is back in a comfortable spot (top of the viewport
+    // down to the band bottom) — covers both "reader scrolled back to the
+    // highlight" and "narration caught up to where the reader is".
+    if (!followMode && rect.top >= 0 && rect.top <= bandBottom) {
+        followMode = true;
+    }
+    if (!followMode) {
+        return; // reader scrolled away on purpose — leave them be
+    }
+
+    // Only scroll when the line has reached/passed the band bottom or gone above
+    // the top; otherwise it's comfortably in view, so don't move the page at all.
+    if (rect.top < 0 || rect.top > bandBottom) {
+        const delta = rect.top - viewportHeight * FOLLOW_TARGET_TOP;
+        if (Math.abs(delta) > 4) { // ignore sub-pixel jitter
+            window.scrollBy({ top: delta, behavior: scrollBehavior() });
+        }
+    }
 }
 
 if (typeof window !== 'undefined' && !window.__ttsAutoScrollGuard) {
     window.__ttsAutoScrollGuard = true;
     const passive = { passive: true, capture: true };
-    window.addEventListener('wheel', markUserScroll, passive);
-    window.addEventListener('touchmove', markUserScroll, passive);
+    window.addEventListener('wheel', disengageFollow, passive);
+    window.addEventListener('touchmove', disengageFollow, passive);
     window.addEventListener('keydown', (e) => {
         // Ignore typing in form fields; only page-scrolling keys count.
         const t = e.target;
@@ -92,7 +131,7 @@ if (typeof window !== 'undefined' && !window.__ttsAutoScrollGuard) {
             return;
         }
         if (['PageUp', 'PageDown', 'Home', 'End', 'ArrowUp', 'ArrowDown', ' ', 'Spacebar'].indexOf(e.key) !== -1) {
-            markUserScroll();
+            disengageFollow();
         }
     }, true);
 }
@@ -335,11 +374,8 @@ class WrapperHighlighter {
         // Keep the sentence in view. In word mode the per-word highlight handles
         // scrolling; in sentence mode (and fallback) scroll here, else the page
         // never follows the read down a long article.
-        if (this.cfg.autoscroll && autoScrollAllowed() && (!this.cfg.wantWord || this.fallbackActive)) {
-            const anchor = range.startContainer.parentElement;
-            if (anchor && typeof anchor.scrollIntoView === 'function') {
-                anchor.scrollIntoView({ block: 'center', behavior: scrollBehavior() });
-            }
+        if (this.cfg.autoscroll && (!this.cfg.wantWord || this.fallbackActive)) {
+            followScroll(range.startContainer.parentElement);
         }
     }
 
@@ -385,11 +421,8 @@ class WrapperHighlighter {
         this._word.add(range);
         this._wordCursor = idx + cleanWord.length;
 
-        if (this.cfg.autoscroll && autoScrollAllowed()) {
-            const anchor = range.startContainer.parentElement;
-            if (anchor && typeof anchor.scrollIntoView === 'function') {
-                anchor.scrollIntoView({ block: 'center', behavior: scrollBehavior() });
-            }
+        if (this.cfg.autoscroll) {
+            followScroll(range.startContainer.parentElement);
         }
     }
 
