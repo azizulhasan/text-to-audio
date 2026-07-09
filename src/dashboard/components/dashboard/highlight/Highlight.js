@@ -16,7 +16,9 @@ import { ToggleSwitch, SettingRow } from "../settings/SettingsPrimitives";
  */
 export default function Highlight() {
     const [settings, setSettings] = useState({
-        tta__highlight_enabled: true,
+        // Off by default — highlighting is opt-in (matches PHP: TTA_Activator sets
+        // tta__highlight_enabled => false, and the front-end painter DEFAULTS.enabled).
+        tta__highlight_enabled: false,
         // Default to "sentence" — it works with ANY voice/browser. Word-level
         // modes need a local voice that fires speechSynthesis boundary events.
         tta__highlight_mode: "sentence",
