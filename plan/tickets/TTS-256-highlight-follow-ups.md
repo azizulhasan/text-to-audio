@@ -1,0 +1,173 @@
+# TTS-256 — Read-Along Highlighting: Remaining Issues & Follow-ups
+
+Status of the feature as of this doc:
+
+- **Players 1 & 2** (browser / speechSynthesis) — word + sentence highlighting. Shipped.
+- **Players 3 & 5** (Google Translate MP3, ChatGPT MP3) — sentence-level estimate from audio time (no provider word timing). **Phase 1**, shipped.
+- **Player 6** (ElevenLabs) — real per-word timing via `/with-timestamps`. **Phase 2a**, shipped.
+- **Player 4** (Google Cloud) — real per-word timing via v1beta1 `text:synthesize` + SSML `<mark>`. **Phase 2b**, shipped.
+
+Everything is gated on the `tta_highlight_settings['tta__highlight_enabled']` setting: with highlighting OFF, generation and playback behave exactly as before (no timing capture, no sidecar, no driver attach).
+
+Word-timing sidecar contract (next to each MP3, `{title}.json`):
+```json
+{ "v": 1, "provider": "elevenlabs|gcloud", "words": [ { "w": "Word", "t": 12.34, "o": 567 } ] }
+```
+- `w` = word string, `t` = absolute start time (s) across the whole concatenated audio, `o` = char offset (informational; the frontend driver keys off `w` + `t`).
+
+Key source files:
+- Free painter (base class, exposed as `window.AtlasVoiceHighlighter`): `admin/js/tts/highlighter.js`
+- Shared splitter: `admin/js/tts/sentence-splitter.js`
+- Highlight settings UI: `src/dashboard/components/dashboard/highlight/Highlight.js`
+- Pro sentence-estimate driver (3/5): `text-to-audio-pro/Assets/js/AudioHighlighter.js`
+- Pro word driver (4/6): `text-to-audio-pro/Assets/js/WordAudioHighlighter.js`
+- Pro backend capture: `text-to-audio-pro/Api/TTA_Pro_Api_Routes.php` (`elevenlabs()`, `synthesize_content_and_rename_file()`, `gcloud_synthesize_with_timing()`, `write_batch_word_timings()`, `write_final_word_timings()`, `delete_word_timings()`)
+- Player wiring: `text-to-audio-pro/Assets/js/plyr.js`
+
+---
+
+## 1. Player-aware Highlight menu copy (Free React) — **recommended next**
+
+**Problem.** The Highlight tab shows the same two blurbs for every player:
+- Header: *"…while the browser reads a post aloud (Default and Default Pro players)."*
+- A yellow **"speechSynthesis limitation"** warning that word highlighting only works with local voices and falls back to sentence otherwise.
+
+Both are only true for the browser players (1 & 2). For the MP3 players they're misleading:
+- Players **4 & 6** now have precise provider word timing — it works in **every** browser, no fallback.
+- Players **3 & 5** are sentence-only by design (already shown a blue "generated audio" note, but the header/warning above still contradict it).
+
+**Impact.** A user on player 4/6 reads the warning and believes word highlighting won't work (or is browser-dependent) when it actually does. Undersells the feature.
+
+**Where.** `src/dashboard/components/dashboard/highlight/Highlight.js` — the header `<p>` (~line 112) and the yellow warning `<div>` (~line 121). `currentPlayer` / `isSentenceOnlyPlayer` are already computed in this file.
+
+**Proposed fix.** Make the top note player-aware, three states:
+- Players 1–2 → keep the speechSynthesis warning.
+- Players 3, 5 → "This player uses generated audio, so highlighting is sentence-level." (already have the inline blue note; align the header too.)
+- Players 4, 6 → "This player uses precise provider word timing — word highlighting works in every browser." No speechSynthesis warning.
+
+Also update the header line "(Default and Default Pro players)" → generic ("the players you've enabled").
+
+**Effort.** ~30–40 lines React + rebuild Free dashboard. Low risk (copy only).
+
+---
+
+## 2. Sidecar JSON not uploaded to Google Cloud Storage backup
+
+**Problem.** When "Backup MP3 to cloud storage" (`tts_is_backup_mp3_file`) is ON, the final MP3 is uploaded to GCS and the local copy is deleted; the frontend then plays from the GCS URL. The word-timing `{title}.json` is **not** uploaded, and the frontend derives the sidecar URL from the (GCS) MP3 URL → 404 → word driver falls back to the sentence estimate.
+
+**Impact.** On GCS-backup sites, players 4 & 6 lose word-level highlighting (degrade to sentence estimate). Playback unaffected.
+
+**Where.** `TTA_Pro_Api_Routes.php` — the `get_option('tts_is_backup_mp3_file') == 'true'` branches in `synthesize_content_and_rename_file()` (Google) and `elevenlabs()` (ElevenLabs); `TTA_Pro_Helper::upload_google_cloud_content()`; GCS URL refresh via the `tts_get_gcs_new_signed_url` filter.
+
+**Proposed fix.** After the final JSON is written, upload it to GCS alongside the MP3 (same signed-URL scheme), and have the frontend resolve the sidecar URL from the stored mapping rather than naive `.mp3`→`.json` when the MP3 is a GCS URL. Requires a small meta entry mapping MP3→JSON URL (or a parallel `tts_mp3_timing_urls` post-meta).
+
+**Effort.** ~40–70 lines PHP + a few lines JS. Medium (touches GCS signing + a new URL surface).
+
+---
+
+## 3. Disabled-path gate — implemented but not empirically tested
+
+**Problem.** The gate (with-timestamps / v1beta1 timepointing only when highlighting is enabled; plain endpoint otherwise) is implemented at every spot but was not exercised end-to-end, because verifying it means regenerating (costs a provider call) and would delete the good sidecar used for other tests.
+
+**Impact.** Low — the gate is three simple `if ($highlight_enabled)` branches — but it's unverified.
+
+**Where.** `elevenlabs()` (endpoint + response parse + finalization), `synthesize_content_and_rename_file()` (synth branch + finalization), `plyr.js` (attach gate).
+
+**Proposed test.** Toggle highlighting OFF, delete a post's MP3, regenerate, assert: (a) a plain MP3 is produced, (b) **no** `{title}.json` exists, (c) any previously-existing sidecar was removed (lifecycle reconcile). Then re-enable and confirm the sidecar returns.
+
+**Effort.** ~10 min once, plus one regeneration per provider.
+
+---
+
+## 4. Phase-1 drivers (players 3 & 5) can mis-locate the title
+
+**Problem.** `AudioHighlighter` (sentence estimate, players 3/5) splits `this.content` and drives `syncSentence()`, but has **no** `_sentenceInBody` guard. The audio content includes the post title (read first); the painter matches on a short prefix. If a title shares a prefix with a body sentence (e.g. title "The Future of Reading …" vs body "The future of reading is …"), the title read can highlight the wrong body sentence — the exact bug fixed for the word driver in Phase 2a.
+
+**Impact.** Cosmetic but visible mis-highlight during the ~title window, only when a title prefix collides with a body sentence. Not observed in the default test posts, but real.
+
+**Where.** `text-to-audio-pro/Assets/js/AudioHighlighter.js` (`update()` → `syncSentence`).
+
+**Proposed fix.** Port the `_sentenceInBody(sentence)` guard from `WordAudioHighlighter` to `AudioHighlighter` (both extend the same base, so `this.root.textContent` is available). Better: lift the guard into the base painter's `syncSentence()` so every driver benefits — but that also touches players 1 & 2, so verify those still highlight (their spoken text is the body; title handling there needs a check).
+
+**Effort.** ~20 lines if duplicated in `AudioHighlighter`; more if lifted to the base (needs 1/2 regression check).
+
+---
+
+## 5. Google Cloud partial-batch-failure → misaligned sidecar
+
+**Problem.** `gcloud_synthesize_with_timing()` returns `null` on any per-batch failure, and the caller falls back to the plain client synth for **that batch** (MP3 fine, but no `.avtim.json` for it). If some batches succeed and others fail, `write_final_word_timings()` stitches only the successful batches → word times/offsets are shifted for everything after the missing batch.
+
+**Impact.** Rare (timepointing usually succeeds when plain synth does), but when it happens the highlight drifts out of sync for the rest of the article. ElevenLabs has the same theoretical exposure.
+
+**Where.** `synthesize_content_and_rename_file()` (fallback path) + `write_final_word_timings()`.
+
+**Proposed fix.** On the last batch, compare the count of `{title}-*.avtim.json` files to the number of MP3 batches; if they don't match, **delete** the partial sidecar (via `delete_word_timings`) so the frontend cleanly falls back to the sentence estimate instead of showing drifted word timing. Log the drop.
+
+**Effort.** ~15 lines PHP.
+
+---
+
+## 6. Selected content (CSS selectors) outside the article wrapper → no highlight
+
+**Problem.** Players 4/6 read whatever `getContentsFromDom()` resolves, including content matched by `tta__settings_css_selectors` anywhere on the page. The painter, however, is scoped to `.tts_content_wrapper_<id>` (the post body). When the selected content lives **outside** that wrapper, the audio reads it but the read-along highlight paints nothing (fails safe via the `_sentenceInBody` guard — no wrong highlight, just none).
+
+**Impact.** Sites that point AtlasVoice at a non-body region (custom container, ACF block rendered elsewhere) get audio but no highlighting on players 4/6 (and 1/2/3/5 similarly, since the painter root is always the wrapper).
+
+**Where.** `TTSProHelper.js::getContentsFromDom()` (content source) vs `highlighter.js` (`this.root = querySelector('.tts_content_wrapper_' + buttonId)`).
+
+**Proposed fix (larger).** Let the painter scope to the same selector set the reader used, instead of hard-coding the wrapper: when `tta__settings_css_selectors` is set, the painter should index/paint across those matched elements (a multi-root painter), falling back to the wrapper otherwise. This is an architectural change to the base painter (multi-root ranges) and should be its own ticket.
+
+**Effort.** Medium–large. Base-painter change affecting all players; needs its own design + test matrix.
+
+---
+
+## 7. Google Cloud batch-duration uses the `end` mark (small drift) — accepted trade-off
+
+**Problem.** For cross-batch offsetting, ElevenLabs uses the exact last character-end time (precise). Google Cloud has no per-batch MP3 available to measure and no duration lib is bundled, so we use the trailing `<mark name="end"/>` timepoint as the batch duration. That ignores trailing silence, so word start times can drift by ~0.1–0.5s cumulatively over several batches (later words highlight slightly early/late).
+
+**Impact.** Minor; most noticeable near the end of long, multi-batch Google Cloud audio.
+
+**Where.** `gcloud_synthesize_with_timing()` (`$duration` from the `end` mark).
+
+**Proposed fix (optional).** Add a minimal MP3 frame-duration parser (~40–60 lines: sum frame durations from MPEG headers) and use the real per-batch duration for the offset, matching ElevenLabs precision. Only worth it if drift is reported.
+
+**Effort.** ~50 lines PHP + tests. Defer unless drift is observed.
+
+---
+
+## 8. Header/description copy also says "(Default and Default Pro players)"
+
+Covered under #1 — the whole top-of-tab copy predates MP3 support and should be generalized. Grouped here so it isn't missed if #1 is scoped narrowly to just the warning box.
+
+---
+
+## 9. "Listen to selected text" — read only what the user selects with the mouse (NEW FEATURE)
+
+**Request.** In a 10-paragraph post the reader highlights, say, the 5th paragraph (or a single sentence) with the mouse and wants the player to read **only that selection**.
+
+**Current state.** Not implemented for ANY player — there is no `getSelection` usage anywhere in either plugin's source. Every player reads the full post content (or the `tta__settings_css_selectors` content), not a mouse selection. (The user's assumption that players 1 & 2 already do this is incorrect; it's just *easy* to add there.)
+
+**Feasibility by player:**
+- **Players 1 & 2 (speechSynthesis)** — *Easy.* speechSynthesis speaks any string on demand. On selection, read `window.getSelection().toString()` (cleaned via the shared alias/normalisation) and speak it. The existing sentence/word highlight actions already work off the spoken text.
+- **Players 4 & 6 (MP3 + real word timing)** — *Feasible now, no extra API cost.* The audio is one fixed MP3, but the Phase-2 word-timing sidecar (`{title}.json`, `words:[{w,t,o}]`) lets us map the selection to a **time range**:
+  1. On `mouseup`/selection inside `.tts_content_wrapper_<id>`, get the selected string.
+  2. Locate its first + last words in the `words[]` array (normalized subsequence match, in reading order) → `tStart` = first word's `t`, `tEnd` = word-after-last's `t` (or audio end).
+  3. `player.currentTime = tStart`, `player.play()`, and on `timeupdate` auto-pause when `currentTime >= tEnd`.
+  4. `WordAudioHighlighter` already highlights along the way — bonus, no extra work.
+- **Players 3 & 5 (MP3, no word timing)** — *Rough only.* Without per-word times we can only estimate the selection's start from its character-proportion of the content (imprecise; may start mid-sentence). Acceptable as a "best effort" or disabled for these players.
+
+**UX.** A small floating "▶ Listen to selection" button on text selection inside the article (like Medium's highlight menu), or a right-click/toolbar affordance. Selecting nothing → normal full-post playback.
+
+**Where.**
+- Selection capture + floating control: new small module, enqueued with the player (Free for 1/2 via `TextToSpeech.js`; Pro for 4/6 via `plyr.js`).
+- Time mapping for 4/6: reuse the loaded sidecar `words[]` (the `WordAudioHighlighter` already has it — expose a `seekToText(selection)` / `rangeForText(selection)` helper on the driver).
+- speechSynthesis path for 1/2: a `speakText(selection)` entry that bypasses the full-content utterance queue.
+
+**Effort.** Medium. ~1 day: selection UI + speechSynthesis path (1/2) + time-range seek path (4/6) + fallbacks. Should be its own ticket; depends on the Phase-2 timing already shipped.
+
+**Open questions.** Selection spanning multiple non-contiguous ranges; selection partially outside the wrapper (tie-in with #6 multi-root); whether to gate behind a setting.
+
+---
+
+### Suggested order
+1 (copy, quick win) → 3 (verify the gate) → 4 (port the title guard to 3/5) → 5 (partial-batch guard) → 9 (listen-to-selection, new feature — high user value, own ticket) → 2 (GCS sidecar) → 6 (multi-root painter, own ticket) → 7 (duration parser, optional).

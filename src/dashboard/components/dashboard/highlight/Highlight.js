@@ -82,6 +82,10 @@ export default function Highlight() {
         1
     );
     const isSentenceOnlyPlayer = currentPlayer === 3 || currentPlayer === 5;
+    // Players 4 (Google Cloud) & 6 (ElevenLabs) have real provider word timing, so
+    // word-by-word highlighting works in every browser — no speechSynthesis caveat.
+    const isWordTimedPlayer = currentPlayer === 4 || currentPlayer === 6;
+    const isBrowserPlayer = currentPlayer === 1 || currentPlayer === 2;
 
     const enabled = !!settings.tta__highlight_enabled;
     const mode = isSentenceOnlyPlayer ? "sentence" : (settings.tta__highlight_mode || "sentence");
@@ -111,28 +115,48 @@ export default function Highlight() {
                             </h2>
                             <p className="text-secondary m-0 small">
                                 {__(
-                                    "Highlight the word and/or sentence being spoken while the browser reads a post aloud (Default and Default Pro players).",
+                                    "Highlight the word and/or sentence being spoken while the post is read aloud.",
                                     "text-to-audio"
                                 )}
                             </p>
                         </div>
 
-                        {/* Browser limitation note */}
-                        <div
-                            className="mb-3 p-3 rounded"
-                            style={{
-                                backgroundColor: "#fff3cd",
-                                border: "1px solid #ffc107",
-                                color: "#856404",
-                                fontSize: "13px",
-                            }}
-                        >
-                            <strong>{__("speechSynthesis limitation:", "text-to-audio")}</strong>{" "}
-                            {__(
-                                "Word-level highlighting relies on the browser's speechSynthesis “boundary” events, which only fire for local (offline) device voices. Remote voices (e.g. the “Google …” voices) and some browsers (notably Firefox) fire no word boundaries, so word highlighting can't track them. When that happens the player automatically falls back to sentence highlighting. Sentence highlighting works with every voice and browser — it's the recommended default.",
-                                "text-to-audio"
-                            )}
-                        </div>
+                        {/* Player-aware note: the highlight mechanism differs by player. */}
+                        {isBrowserPlayer && (
+                            <div
+                                className="mb-3 p-3 rounded"
+                                style={{
+                                    backgroundColor: "#fff3cd",
+                                    border: "1px solid #ffc107",
+                                    color: "#856404",
+                                    fontSize: "13px",
+                                }}
+                            >
+                                <strong>{__("speechSynthesis limitation:", "text-to-audio")}</strong>{" "}
+                                {__(
+                                    "Word-level highlighting relies on the browser's speechSynthesis “boundary” events, which only fire for local (offline) device voices. Remote voices (e.g. the “Google …” voices) and some browsers (notably Firefox) fire no word boundaries, so word highlighting can't track them. When that happens the player automatically falls back to sentence highlighting. Sentence highlighting works with every voice and browser — it's the recommended default.",
+                                    "text-to-audio"
+                                )}
+                            </div>
+                        )}
+
+                        {isWordTimedPlayer && (
+                            <div
+                                className="mb-3 p-3 rounded"
+                                style={{
+                                    backgroundColor: "#d1e7dd",
+                                    border: "1px solid #a3cfbb",
+                                    color: "#0f5132",
+                                    fontSize: "13px",
+                                }}
+                            >
+                                <strong>{__("Precise word timing:", "text-to-audio")}</strong>{" "}
+                                {__(
+                                    "This player generates audio with real per-word timing, so word-by-word highlighting is accurate and works in every browser — no local-voice requirement and no fallback.",
+                                    "text-to-audio"
+                                )}
+                            </div>
+                        )}
 
                         {/* Settings Card */}
                         <Form onSubmit={handleSubmit}>
