@@ -37,7 +37,8 @@ const HL_SENTENCE = 'atlasvoice-sentence';
 const DIM_CLASS = 'atlasvoice-reading-dim';
 
 const DEFAULTS = {
-    enabled: true,
+    // Off by default — highlighting is opt-in; the user turns it on in the dashboard.
+    enabled: false,
     mode: 'sentence', // sentence | word | word_sentence — sentence works with any voice
     wordBg: '#ffd54f',
     wordColor: '#202124',
@@ -238,8 +239,12 @@ class WrapperHighlighter {
         // normalize it exactly like a spoken sentence, so we can recognize and skip
         // the title utterance — its opening words can coincide with a body paragraph
         // and get mis-highlighted there.
+        // Browser players (1/2) localize the title on window.TTS.extra; Pro's MP3
+        // players (3/5/4/6) localize it on window.ttsObjPro.title — accept either so
+        // the title-skip guard in syncSentence() works for every driver.
         const extra = (window.TTS && window.TTS.extra && window.TTS.extra[buttonId]) || {};
-        this.title = stripButtonLabel(canonicalize((extra.title || '').trim()))
+        const rawTitle = extra.title || (window.ttsObjPro && window.ttsObjPro.title) || '';
+        this.title = stripButtonLabel(canonicalize(rawTitle.trim()))
             .replace(/[^\p{L}\p{N})\]]+$/u, '');
         this.supported = typeof Highlight !== 'undefined' && window.CSS && CSS.highlights;
         this.nodes = [];
