@@ -26,7 +26,11 @@ Key source files:
 
 ---
 
-## 1. Player-aware Highlight menu copy (Free React) — **recommended next**
+## 1. Player-aware Highlight menu copy (Free React) — ✅ RESOLVED
+
+**Done.** `Highlight.js` is now player-aware: `isBrowserPlayer` (1/2), `isSentenceOnlyPlayer` (3/5), `isWordTimedPlayer` (4/6) drive the header copy, the mode selector visibility, and the speechSynthesis warning (browser players only). Covers #8 as well.
+
+<details><summary>Original write-up</summary>
 
 **Problem.** The Highlight tab shows the same two blurbs for every player:
 - Header: *"…while the browser reads a post aloud (Default and Default Pro players)."*
@@ -49,6 +53,8 @@ Also update the header line "(Default and Default Pro players)" → generic ("th
 
 **Effort.** ~30–40 lines React + rebuild Free dashboard. Low risk (copy only).
 
+</details>
+
 ---
 
 ## 2. Sidecar JSON not uploaded to Google Cloud Storage backup — ✅ RESOLVED
@@ -58,6 +64,7 @@ Also update the header line "(Default and Default Pro players)" → generic ("th
 - GCS sends **no CORS headers** by default; without the bucket CORS rule the cross-origin `fetch()` is blocked (public or signed alike). The word timings come from public post content, so public-read + `*` CORS is acceptable.
 - Deletion (issue below / task 3) also removes the GCS sidecar in `delete_mp3_file` (route handler + helper). Verified end-to-end: players 4 & 6 generate → MP3 + public JSON on GCS → word highlighting works; meta-box delete removes both.
 - *Minor residual:* GCS may edge-cache a no-Origin response without CORS if a non-browser request hits the object first (unlikely for unguessable URLs). Add `Cache-Control: no-store` on the JSON object if it ever surfaces.
+- **Follow-up done (Pro `d79767de9`):** the *migrate* path was also covered. If backup is enabled **after** the audio already exists, `tts_upload_previous_file_to_gcs_and_get_new_url_callback` now uploads the `{title}.json` alongside the MP3 (it previously only moved the MP3, leaving the sidecar local → 404 → sentence fallback). Already-migrated posts (MP3 URL no longer local) won't re-fire that path — regenerate or backfill their sidecar once.
 
 <details><summary>Original write-up</summary>
 
@@ -91,9 +98,11 @@ Also update the header line "(Default and Default Pro players)" → generic ("th
 
 ---
 
-## 4. Phase-1 drivers (players 3 & 5) can mis-locate the title
+## 4. Phase-1 drivers (players 3 & 5) can mis-locate the title — ⚠️ PARTIALLY DONE
 
-**Problem.** `AudioHighlighter` (sentence estimate, players 3/5) splits `this.content` and drives `syncSentence()`, but has **no** `_sentenceInBody` guard. The audio content includes the post title (read first); the painter matches on a short prefix. If a title shares a prefix with a body sentence (e.g. title "The Future of Reading …" vs body "The future of reading is …"), the title read can highlight the wrong body sentence — the exact bug fixed for the word driver in Phase 2a.
+> **Update.** The **browser players (1 & 2)** version of this bug was fixed in Free `fad8d290`: the base painter (`highlighter.js`) now captures the post title (from `window.TTS.extra[buttonId].title`), normalizes it like a spoken sentence, and **skips the utterance that IS the title** in `syncSentence()` — so a title sharing a prefix with a body paragraph no longer paints the body. This lives in the shared base `syncSentence()`, so the guard is *already present* for every driver; it just needs a **title source** for the Pro sentence drivers. Players **3 & 5** (`SentenceAudioHighlighter`) read `ttsObjPro`, not `window.TTS.extra`, so `this.title` is empty for them → **still open**. Fix: feed the title into the Pro driver (e.g. `ttsObjPro.title` or the loaded content's first sentence) so the base guard fires.
+
+**Problem.** `AudioHighlighter`/`SentenceAudioHighlighter` (sentence estimate, players 3/5) splits `this.content` and drives `syncSentence()`, but has **no** title source, so the base title-skip guard can't fire. The audio content includes the post title (read first); the painter matches on a short prefix. If a title shares a prefix with a body sentence (e.g. title "The Future of Reading …" vs body "The future of reading is …"), the title read can highlight the wrong body sentence — the exact bug fixed for the word driver in Phase 2a.
 
 **Impact.** Cosmetic but visible mis-highlight during the ~title window, only when a title prefix collides with a body sentence. Not observed in the default test posts, but real.
 
@@ -133,23 +142,27 @@ Also update the header line "(Default and Default Pro players)" → generic ("th
 
 ---
 
-## 7. Google Cloud batch-duration uses the `end` mark (small drift) — accepted trade-off
+## 7. Google Cloud batch-duration uses the `end` mark (small drift) — ✅ RESOLVED
+
+**Fixed** (Pro `d79767de9`). Drift *was* reported (highlight ran ~4–5 words ahead of the voice, worst late in long articles). Root cause confirmed by measuring a real file: the `<mark name="end"/>` timepoint is shorter than the batch's real MP3 (trailing/encoder silence after the mark; measured 1.87s unaccounted on a 205s file), and the stitcher summed those short values (`$time_offset += $data['dur']`), so every later word's timestamp drifted earlier and the error accumulated.
+
+Now `gcloud_synthesize_with_timing()` sets each batch's `dur` from the batch MP3's **real decoded duration** via the new `TTA_Pro_Helper::measure_mp3_duration()` (sums MPEG-1/2/2.5 Layer III frame durations); the `end` mark is kept only as a fallback. Validated: helper matches an independent parse to the millisecond. Regenerate a Google Cloud post to pick it up (sidecars are written at generation time).
+
+*Note:* the same helper is provider-agnostic — if ElevenLabs (player 6) ever shows the same lead, point its batch `dur` at `measure_mp3_duration()` too.
+
+<details><summary>Original write-up</summary>
 
 **Problem.** For cross-batch offsetting, ElevenLabs uses the exact last character-end time (precise). Google Cloud has no per-batch MP3 available to measure and no duration lib is bundled, so we use the trailing `<mark name="end"/>` timepoint as the batch duration. That ignores trailing silence, so word start times can drift by ~0.1–0.5s cumulatively over several batches (later words highlight slightly early/late).
 
-**Impact.** Minor; most noticeable near the end of long, multi-batch Google Cloud audio.
-
 **Where.** `gcloud_synthesize_with_timing()` (`$duration` from the `end` mark).
 
-**Proposed fix (optional).** Add a minimal MP3 frame-duration parser (~40–60 lines: sum frame durations from MPEG headers) and use the real per-batch duration for the offset, matching ElevenLabs precision. Only worth it if drift is reported.
-
-**Effort.** ~50 lines PHP + tests. Defer unless drift is observed.
+</details>
 
 ---
 
-## 8. Header/description copy also says "(Default and Default Pro players)"
+## 8. Header/description copy also says "(Default and Default Pro players)" — ✅ RESOLVED
 
-Covered under #1 — the whole top-of-tab copy predates MP3 support and should be generalized. Grouped here so it isn't missed if #1 is scoped narrowly to just the warning box.
+Resolved as part of #1 — the top-of-tab copy is now player-aware.
 
 ---
 
@@ -181,5 +194,21 @@ Covered under #1 — the whole top-of-tab copy predates MP3 support and should b
 
 ---
 
+## 10. Frontend JS bundles are versioned by plugin version, not filemtime
+
+**Problem.** `wp_enqueue_script()` for the frontend players uses `$this->version` (the plugin version) as the `?ver` (`TTA_Admin.php:408` and `591`), not `filemtime()`. So when a JS bundle is rebuilt **without** a version bump, browsers keep serving the cached old bundle — a mid-cycle JS fix (e.g. the title guard in #4) doesn't reach users until the next release bumps the version. Surfaced this session: the title fix required a manual hard-refresh to verify.
+
+**Impact.** Self-resolves at release (the version bump busts the cache), so it's not a shipping bug — but it makes hotfix-style JS changes invisible until release, and makes local/staging testing require hard refreshes.
+
+**Where.** `admin/TTA_Admin.php:408`, `591` (frontend `TextToSpeech` enqueue). Note blocks already use `filemtime()` (line ~476), so the pattern exists in-repo.
+
+**Proposed fix.** Version the built bundles with `filemtime(build_path)` (like the blocks do), or a hash, instead of the plugin version — so any rebuild busts the cache immediately.
+
+**Effort.** ~5–10 lines. Low risk.
+
+---
+
 ### Suggested order
-1 (copy, quick win) → 3 (verify the gate) → 4 (port the title guard to 3/5) → 5 (partial-batch guard) → 9 (listen-to-selection, new feature — high user value, own ticket) → 2 (GCS sidecar) → 6 (multi-root painter, own ticket) → 7 (duration parser, optional).
+3 (verify the gate) → 4 (feed the title into the 3/5 driver so the base guard fires) → 5 (partial-batch guard) → 10 (filemtime versioning, quick win) → 9 (listen-to-selection, new feature — high user value, own ticket) → 6 (multi-root painter, own ticket).
+
+**Resolved:** #1, #2, #7, #8 (+ non-doc: player-6 Xing-header seek fix, player-1/2 title mis-highlight, `chat_gpt()` fatal guard, OpenAI batch-size timeout tuning).
