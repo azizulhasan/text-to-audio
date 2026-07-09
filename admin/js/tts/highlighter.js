@@ -60,6 +60,43 @@ function scrollBehavior() {
     return prefersReducedMotion() ? 'auto' : 'smooth';
 }
 
+/**
+ * Auto-scroll yields to the reader. Any manual scroll intent — mouse wheel, touch
+ * drag, or a page/arrow/space key — pauses the read-along auto-scroll for a few
+ * seconds so the user can look ahead or back without being yanked to the
+ * highlight. Each interaction re-arms the pause; auto-scroll resumes on its own
+ * once the reader stops scrolling. We listen for INTENT events (not the generic
+ * `scroll` event, which our own scrolling also fires) so we never fight ourselves.
+ */
+const USER_SCROLL_PAUSE_MS = 4000;
+let userScrollPausedUntil = 0;
+
+function markUserScroll() {
+    userScrollPausedUntil = Date.now() + USER_SCROLL_PAUSE_MS;
+}
+
+/** True when auto-scroll is allowed (i.e. the reader isn't manually scrolling). */
+function autoScrollAllowed() {
+    return Date.now() >= userScrollPausedUntil;
+}
+
+if (typeof window !== 'undefined' && !window.__ttsAutoScrollGuard) {
+    window.__ttsAutoScrollGuard = true;
+    const passive = { passive: true, capture: true };
+    window.addEventListener('wheel', markUserScroll, passive);
+    window.addEventListener('touchmove', markUserScroll, passive);
+    window.addEventListener('keydown', (e) => {
+        // Ignore typing in form fields; only page-scrolling keys count.
+        const t = e.target;
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) {
+            return;
+        }
+        if (['PageUp', 'PageDown', 'Home', 'End', 'ArrowUp', 'ArrowDown', ' ', 'Spacebar'].indexOf(e.key) !== -1) {
+            markUserScroll();
+        }
+    }, true);
+}
+
 /** Read the admin Highlight settings off the localized ttsObj, with defaults. */
 function readConfig() {
     const s = (window.ttsObj && window.ttsObj.settings && window.ttsObj.settings.highlight) || {};
@@ -298,7 +335,7 @@ class WrapperHighlighter {
         // Keep the sentence in view. In word mode the per-word highlight handles
         // scrolling; in sentence mode (and fallback) scroll here, else the page
         // never follows the read down a long article.
-        if (this.cfg.autoscroll && (!this.cfg.wantWord || this.fallbackActive)) {
+        if (this.cfg.autoscroll && autoScrollAllowed() && (!this.cfg.wantWord || this.fallbackActive)) {
             const anchor = range.startContainer.parentElement;
             if (anchor && typeof anchor.scrollIntoView === 'function') {
                 anchor.scrollIntoView({ block: 'center', behavior: scrollBehavior() });
@@ -348,7 +385,7 @@ class WrapperHighlighter {
         this._word.add(range);
         this._wordCursor = idx + cleanWord.length;
 
-        if (this.cfg.autoscroll) {
+        if (this.cfg.autoscroll && autoScrollAllowed()) {
             const anchor = range.startContainer.parentElement;
             if (anchor && typeof anchor.scrollIntoView === 'function') {
                 anchor.scrollIntoView({ block: 'center', behavior: scrollBehavior() });
