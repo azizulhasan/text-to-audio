@@ -233,6 +233,14 @@ class WrapperHighlighter {
         this.buttonId = buttonId;
         this.cfg = readConfig();
         this.root = document.querySelector('.tts_content_wrapper_' + buttonId);
+        // TTS-256: the post title is spoken but rendered OUTSIDE the readable
+        // wrapper. Capture it (localized to window.TTS.extra[buttonId].title) and
+        // normalize it exactly like a spoken sentence, so we can recognize and skip
+        // the title utterance — its opening words can coincide with a body paragraph
+        // and get mis-highlighted there.
+        const extra = (window.TTS && window.TTS.extra && window.TTS.extra[buttonId]) || {};
+        this.title = stripButtonLabel(canonicalize((extra.title || '').trim()))
+            .replace(/[^\p{L}\p{N})\]]+$/u, '');
         this.supported = typeof Highlight !== 'undefined' && window.CSS && CSS.highlights;
         this.nodes = [];
         this.text = '';
@@ -313,6 +321,14 @@ class WrapperHighlighter {
         // may be prepended to the spoken content, so the probe matches the body.
         const normalizedSentence = stripButtonLabel(canonicalize((sentence || '').trim()));
         if (!normalizedSentence) {
+            return;
+        }
+        // TTS-256: if this utterance IS the post title, it has no target inside the
+        // wrapper — skip it outright. Otherwise its shared opening words let the
+        // prefix search below paint a body paragraph while the title is read.
+        if (this.title && normalizedSentence.replace(/[^\p{L}\p{N})\]]+$/u, '') === this.title) {
+            this._lastSentence = null;
+            this.clear();
             return;
         }
         // Probe on the first chars; strip trailing punctuation so short headings
