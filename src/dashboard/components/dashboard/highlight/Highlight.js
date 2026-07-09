@@ -29,18 +29,43 @@ export default function Highlight() {
     });
     const [isDataLoaded, setIsDataLoaded] = useState(false);
     const [saving, setSaving] = useState(false);
+    // The active player can be changed on the Customize tab without a page reload,
+    // which leaves window.ttsObj.player_id (localized once at load) stale. Seed from
+    // it, then refresh from the saved customize setting in the effect below.
+    const [currentPlayer, setCurrentPlayer] = useState(() =>
+        Number(
+            window?.ttsObj?.player_id ??
+            window?.ttsObj?.settings?.customize?.buttonSettings?.id ??
+            1
+        )
+    );
 
     useEffect(() => {
-        const formData = new FormData();
-        formData.append("method", "get");
-        postWithoutImage(tta_obj.api_url + "tta/v1/highlight", formData)
+        const hlForm = new FormData();
+        hlForm.append("method", "get");
+        const highlightReq = postWithoutImage(tta_obj.api_url + "tta/v1/highlight", hlForm)
             .then((res) => {
                 if (res?.data && typeof res.data === "object") {
                     setSettings((prev) => ({ ...prev, ...res.data }));
                 }
             })
-            .catch((err) => console.log(err))
-            .finally(() => setIsDataLoaded(true));
+            .catch((err) => console.log(err));
+
+        // Refresh the active player from the saved customize setting, so the notes
+        // and word/sentence options always match the CURRENT player even after it
+        // was changed on the Customize tab without a page reload.
+        const playerForm = new FormData();
+        playerForm.append("method", "get");
+        const playerReq = postWithoutImage(tta_obj.api_url + "tta/v1/customize", playerForm)
+            .then((res) => {
+                const id = Number(res?.data?.buttonSettings?.id);
+                if (id) setCurrentPlayer(id);
+            })
+            .catch((err) => console.log(err));
+
+        Promise.allSettled([highlightReq, playerReq]).finally(() =>
+            setIsDataLoaded(true)
+        );
     }, []);
 
     const handleChange = (e) => {
@@ -76,11 +101,6 @@ export default function Highlight() {
     // Current player. MP3 players — 3 (Google Translate) & 5 (ChatGPT) — have no
     // word timing, so they're sentence-only: hide the mode selector + word
     // options and force "sentence". (Players 4 & 6 gain word options in Phase 2.)
-    const currentPlayer = Number(
-        window?.ttsObj?.player_id ??
-        window?.ttsObj?.settings?.customize?.buttonSettings?.id ??
-        1
-    );
     const isSentenceOnlyPlayer = currentPlayer === 3 || currentPlayer === 5;
     // Players 4 (Google Cloud) & 6 (ElevenLabs) have real provider word timing, so
     // word-by-word highlighting works in every browser — no speechSynthesis caveat.
