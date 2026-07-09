@@ -239,12 +239,13 @@ class WrapperHighlighter {
         // normalize it exactly like a spoken sentence, so we can recognize and skip
         // the title utterance — its opening words can coincide with a body paragraph
         // and get mis-highlighted there.
-        // Browser players (1/2) localize the title on window.TTS.extra; Pro's MP3
-        // players (3/5/4/6) localize it on window.ttsObjPro.title — accept either so
-        // the title-skip guard in syncSentence() works for every driver.
+        // TTS-256: the post title is spoken but rendered OUTSIDE the readable
+        // wrapper. It's localized on window.TTS.extra[buttonId].title by the button
+        // init (emitted for EVERY player), so normalize it like a spoken sentence and
+        // skip the title utterance in syncSentence() — its opening words can coincide
+        // with a body paragraph and get mis-highlighted there.
         const extra = (window.TTS && window.TTS.extra && window.TTS.extra[buttonId]) || {};
-        const rawTitle = extra.title || (window.ttsObjPro && window.ttsObjPro.title) || '';
-        this.title = stripButtonLabel(canonicalize(rawTitle.trim()))
+        this.title = stripButtonLabel(canonicalize((extra.title || '').trim()))
             .replace(/[^\p{L}\p{N})\]]+$/u, '');
         this.supported = typeof Highlight !== 'undefined' && window.CSS && CSS.highlights;
         this.nodes = [];
