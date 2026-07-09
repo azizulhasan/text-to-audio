@@ -51,7 +51,17 @@ Also update the header line "(Default and Default Pro players)" → generic ("th
 
 ---
 
-## 2. Sidecar JSON not uploaded to Google Cloud Storage backup
+## 2. Sidecar JSON not uploaded to Google Cloud Storage backup — ✅ RESOLVED
+
+**Fixed** (Pro `85ac9bed1`). The sidecar is now uploaded to GCS as a **public** object next to the MP3 (`backup_json_sidecar_to_gcs`), the bucket gets a GET/HEAD CORS rule (`ensure_gcs_bucket_cors`, transient-gated), and the front-end rewrites the derived URL from GCS **virtual-hosted** (`bucket.storage.googleapis.com`) to **path-style** (`storage.googleapis.com/bucket/…`). Two gotchas found while testing on live GCS:
+- **Underscore bucket names** (e.g. `atlas_voice_gtts_…`) make the virtual-hosted host an invalid DNS/TLS name → the browser's `fetch()` fails ("Failed to fetch"). Path-style avoids it.
+- GCS sends **no CORS headers** by default; without the bucket CORS rule the cross-origin `fetch()` is blocked (public or signed alike). The word timings come from public post content, so public-read + `*` CORS is acceptable.
+- Deletion (issue below / task 3) also removes the GCS sidecar in `delete_mp3_file` (route handler + helper). Verified end-to-end: players 4 & 6 generate → MP3 + public JSON on GCS → word highlighting works; meta-box delete removes both.
+- *Minor residual:* GCS may edge-cache a no-Origin response without CORS if a non-browser request hits the object first (unlikely for unguessable URLs). Add `Cache-Control: no-store` on the JSON object if it ever surfaces.
+
+<details><summary>Original write-up</summary>
+
+## (was) 2. Sidecar JSON not uploaded to Google Cloud Storage backup
 
 **Problem.** When "Backup MP3 to cloud storage" (`tts_is_backup_mp3_file`) is ON, the final MP3 is uploaded to GCS and the local copy is deleted; the frontend then plays from the GCS URL. The word-timing `{title}.json` is **not** uploaded, and the frontend derives the sidecar URL from the (GCS) MP3 URL → 404 → word driver falls back to the sentence estimate.
 
@@ -62,6 +72,8 @@ Also update the header line "(Default and Default Pro players)" → generic ("th
 **Proposed fix.** After the final JSON is written, upload it to GCS alongside the MP3 (same signed-URL scheme), and have the frontend resolve the sidecar URL from the stored mapping rather than naive `.mp3`→`.json` when the MP3 is a GCS URL. Requires a small meta entry mapping MP3→JSON URL (or a parallel `tts_mp3_timing_urls` post-meta).
 
 **Effort.** ~40–70 lines PHP + a few lines JS. Medium (touches GCS signing + a new URL surface).
+
+</details>
 
 ---
 
