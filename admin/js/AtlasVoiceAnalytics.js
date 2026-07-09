@@ -675,7 +675,11 @@ class AtlasVoiceAnalytics {
     getReport(period) {
         // Fetch aggregated data from the backend for the given period
         // Period can be 'all_time', '7_days', '15_days', '30_days', etc.
-        return fetch(`${this.apiUrl}/report?period=${period}`)
+        // Use "&" when the REST base already has a query string (plain-permalink
+        // sites use index.php?rest_route=/…) so we don't emit a second "?".
+        const base = `${this.apiUrl}/report`;
+        const url = base + (base.includes('?') ? '&' : '?') + `period=${encodeURIComponent(period)}`;
+        return fetch(url)
             .then(response => response.json());
     }
 
