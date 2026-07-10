@@ -160,7 +160,12 @@ class TTA_Helper
             $current_post = get_post((int) $current_post);
         }
         // is_home() || is_archive() || is_front_page() || is_category()
-        if (\is_single($current_post) || apply_filters('tts_force_check_is_singular', is_singular() , $current_post)) {
+        // TTS-261: is_single() needs a scalar (ID/slug), never a WP_Post object.
+        // Formidable stores style/action posts whose post_content is an array;
+        // casting such an object inside is_single() throws "Array to string
+        // conversion" at class-wp-query.php. Pass the post ID instead.
+        $current_post_id = ($current_post instanceof \WP_Post) ? $current_post->ID : $current_post;
+        if (\is_single($current_post_id) || apply_filters('tts_force_check_is_singular', is_singular() , $current_post)) {
             $should_load_button = true;
         }
 
@@ -1979,7 +1984,10 @@ class TTA_Helper
     }
     
     public static function tts_has_shortcode($post) {
-        return isset($post->post_content) && (has_shortcode($post->post_content, 'tta_listen_btn') || has_shortcode($post->post_content, 'atlasvoice'));
+        // TTS-261: has_shortcode() runs str_contains() on the content — a non-string
+        // post_content (Formidable style/action objects hold an array) fatals on PHP 8.
+        return isset($post->post_content) && is_string($post->post_content)
+            && (has_shortcode($post->post_content, 'tta_listen_btn') || has_shortcode($post->post_content, 'atlasvoice'));
     }
 
     public  static  function detect_browser() {
