@@ -240,13 +240,12 @@ class WrapperHighlighter {
         // the title utterance — its opening words can coincide with a body paragraph
         // and get mis-highlighted there.
         // TTS-256: the post title is spoken but rendered OUTSIDE the readable
-        // wrapper. It's localized on window.TTS.extra[buttonId].title by the button
-        // init (emitted for EVERY player), so normalize it like a spoken sentence and
-        // skip the title utterance in syncSentence() — its opening words can coincide
-        // with a body paragraph and get mis-highlighted there.
-        const extra = (window.TTS && window.TTS.extra && window.TTS.extra[buttonId]) || {};
-        this.title = stripButtonLabel(canonicalize((extra.title || '').trim()))
-            .replace(/[^\p{L}\p{N})\]]+$/u, '');
+        // wrapper; its opening words can coincide with a body paragraph, so we skip
+        // the title utterance in syncSentence(). Resolve it here for the normal case
+        // — but it is ALSO re-resolved lazily in syncSentence(), because a "delay
+        // JavaScript" optimizer can leave window.TTS.extra unpopulated at the moment
+        // this singleton is constructed (the localize script hasn't run yet).
+        this.title = this._resolveTitle();
         this.supported = typeof Highlight !== 'undefined' && window.CSS && CSS.highlights;
         this.nodes = [];
         this.text = '';
@@ -273,6 +272,18 @@ class WrapperHighlighter {
             this._sentence = CSS.highlights.get(HL_SENTENCE) || new Highlight();
             CSS.highlights.set(HL_SENTENCE, this._sentence);
         }
+    }
+
+    /**
+     * Read + normalize the post title from the localized button data. Returns '' if
+     * it isn't available yet — e.g. a "delay JavaScript execution" optimizer hasn't
+     * run the button-init localize script, so window.TTS.extra is still empty. It is
+     * therefore re-resolved lazily in syncSentence() until it comes back non-empty.
+     */
+    _resolveTitle() {
+        const extra = (window.TTS && window.TTS.extra && window.TTS.extra[this.buttonId]) || {};
+        return stripButtonLabel(canonicalize((extra.title || '').trim()))
+            .replace(/[^\p{L}\p{N})\]]+$/u, '');
     }
 
     /** Build a flat index of the wrapper's text nodes with cumulative offsets. */
@@ -332,6 +343,12 @@ class WrapperHighlighter {
         // TTS-256: if this utterance IS the post title, it has no target inside the
         // wrapper — skip it outright. Otherwise its shared opening words let the
         // prefix search below paint a body paragraph while the title is read.
+        // Re-resolve lazily: on sites with a "delay JavaScript" optimizer the
+        // localize data (window.TTS.extra) may not have existed when this singleton
+        // was constructed, so this.title could still be empty on the first calls.
+        if (!this.title) {
+            this.title = this._resolveTitle();
+        }
         if (this.title && normalizedSentence.replace(/[^\p{L}\p{N})\]]+$/u, '') === this.title) {
             this._lastSentence = null;
             this.clear();
