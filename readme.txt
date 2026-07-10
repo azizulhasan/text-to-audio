@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.3.3
+Stable tag: 2.3.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -384,6 +384,9 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.3.4 ( 10 Jul 2026 ) =
+Fixed : A conflict with Formidable Forms that could fill pages containing a form with repeated PHP warnings. The player no longer triggers these notices.
+
 = 2.3.3 ( 1 Jul 2026 ) =
 Fixed : The Listen player and its hidden read markers could appear inside post-card grids and other post listings — and on page types you haven't enabled for listening — which could break the layout on some themes. They now appear only on the content you've enabled.
 Fixed : The deactivation feedback form could leave its buttons disabled after the dialog was closed and reopened, so you couldn't submit or cancel. The buttons now stay clickable.
@@ -624,6 +627,9 @@ Introduced :  Complete new UI introduced.
 
 
 == Upgrade Notice ==
+
+= 2.3.4 =
+Fixes a conflict with Formidable Forms that could show repeated PHP warnings on pages containing a form. Update recommended.
 
 = 2.3.3 =
 Fixes the Listen player and its hidden markers appearing inside post-card grids and other listings (and on post types you haven't enabled), which could break the layout on some themes, plus a deactivation feedback form whose buttons could get stuck disabled. Update recommended.
