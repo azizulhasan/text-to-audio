@@ -180,6 +180,26 @@ export default function Highlight() {
                             </div>
                         )}
 
+                        {/* Old audio has no word-timing data — explain the sentence fallback
+                            and the (deliberate) cost of upgrading via regeneration. */}
+                        {isWordTimedPlayer && enabled && (
+                            <div
+                                className="mb-3 p-3 rounded"
+                                style={{
+                                    backgroundColor: "#cfe2ff",
+                                    border: "1px solid #9ec5fe",
+                                    color: "#084298",
+                                    fontSize: "13px",
+                                }}
+                            >
+                                <strong>{__("Already-generated audio:", "text-to-audio")}</strong>{" "}
+                                {__(
+                                    "Word timing is captured while the audio is being generated, so posts whose MP3 was created before highlighting was enabled have no timing data — they will use sentence highlighting until their audio is regenerated. To upgrade them, regenerate the audio with the Bulk MP3 tool (or regenerate an individual post). Note: regeneration sends the post content to your TTS provider (Google Cloud / ElevenLabs) again, so it consumes provider characters/credits just like the first generation — word timing can only be produced by the provider during synthesis, which is why it isn't added to existing files automatically.",
+                                    "text-to-audio"
+                                )}
+                            </div>
+                        )}
+
                         {/* Settings Card */}
                         <Form onSubmit={handleSubmit}>
                             <div className="tta-card">
