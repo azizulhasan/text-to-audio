@@ -125,9 +125,11 @@ Also update the header line "(Default and Default Pro players)" → generic ("th
 
 ---
 
-## 5. Google Cloud partial-batch-failure → misaligned sidecar — ✅ RESOLVED
+## 5. Google Cloud partial-batch-failure → misaligned sidecar — ✅ RESOLVED (marker approach)
 
-**Fixed** (Pro `21fc89b50`). `write_final_word_timings()` now takes the concatenated audio batch count (`count($matched_files)` from both the gcloud and ElevenLabs finalization blocks); if the `{title}-*.avtim.json` count differs, it deletes ALL timing data (final sidecar + temps via `delete_word_timings`) and logs through `TTA_Error_Handler` — the front end falls back to the clean sentence estimate instead of drifted word timing. Verified by direct invocation: 2 timing files vs 3 batches → sidecar dropped; 2 vs 2 → stitched with correct cumulative offsets.
+**Fixed** (Pro `21fc89b50`, reworked in `52f2e673c`). `write_final_word_timings()` takes the concatenated audio batch count from both the gcloud and ElevenLabs finalization blocks. First iteration **deleted** all timing data on mismatch — rejected, because a missing timing batch is a NORMAL resume scenario, not just a timepointing failure: resumed generation skips batches whose MP3 already exists (no provider call → no `.avtim.json`), and since the final MP3 short-circuits later requests, deletion left the post without word timing until a full regeneration.
+
+**Final behavior (marker + all-or-nothing fallback):** on mismatch the sidecar is still written with all available words plus `"complete": false` and `"batches": {"expected": N, "got": M}`; the player's word driver requires `timing.complete !== false`, so a marked sidecar falls back to **sentence** highlighting (never drifted word times). Complete sidecars carry no marker, so all previously generated sidecars remain valid. Old posts with no sidecar at all also fall back to sentence mode; upgrading them requires regeneration via the existing Bulk MP3 flow (provider cost — see the Highlight-tab notice added in Free `aec99f90`). Verified: mismatch → marked + data kept; match → unmarked, offsets correct.
 
 <details><summary>Original write-up</summary>
 
@@ -227,7 +229,55 @@ Resolved as part of #1 — the top-of-tab copy is now player-aware.
 
 ---
 
+## 11. Highlight style option — background color alone fails WCAG 1.4.1 (Use of Color)
+
+**Problem.** The spoken word/sentence is marked **only** by a background-color change. Colorblind and low-vision users may not perceive it at all. This is the one real WCAG compliance gap in the feature (ReadSpeaker offers an underline style for exactly this reason).
+
+**Proposed fix.** Add a "Highlight style" select to the Highlight tab: **Background / Underline / Both** (word + sentence separately or one shared setting). Painter side is small — `::highlight()` supports `text-decoration`, so it's extra CSS in the injected styles keyed off a new setting (`tta__highlight_style`).
+
+**Where.** `admin/js/tts/highlighter.js` (`injectStyles`/`applyCssVars`), `Highlight.js` (new select), `TTA_Activator.php` + `/settings` route (new key, default `background`).
+
+**Effort.** ~40–60 lines across painter + dashboard. Low risk.
+
+---
+
+## 12. Dashboard contrast validation for highlight colors (WCAG 1.4.3 / 1.4.11)
+
+**Problem.** Nothing stops an admin picking word text vs word background below 4.5:1 (e.g. yellow on white) — the highlight then *reduces* readability for everyone.
+
+**Proposed fix.** Live contrast-ratio check next to the color pickers in the Highlight tab: compute the ratio client-side (few lines of relative-luminance math), show a warning badge under 4.5:1 (word text/bg pair) and an informational note for the sentence bg vs typical body text. Warn only — don't block saving.
+
+**Where.** `Highlight.js` only (pure dashboard UI). No frontend/PHP changes.
+
+**Effort.** ~40 lines React. Zero risk to the frontend.
+
+---
+
+## 13. Visitor-side highlight control in the player settings menu
+
+**Problem.** Highlighting/dimming is admin-decided; the end reader can't turn it off or soften it on the front end. Industry players (ReadSpeaker, Speechify) expose this in the player's own settings menu — and the plugin already has one (`TTSSettingsModalManager`: rate/pitch/volume/mute).
+
+**Proposed fix.** Add "Highlighting" (on/off, maybe dim on/off) to the existing player settings modal, persisted per-visitor in `localStorage`, read by the painter as an override on top of the admin config (visitor can only *reduce*, not enable what the admin disabled).
+
+**Where.** `text-to-audio-button.js` (settings modal), `highlighter.js` (`readConfig()` — merge the localStorage override).
+
+**Effort.** ~60–80 lines. Medium-low risk.
+
+---
+
+## 14. Dark-theme highlight defaults
+
+**Problem.** The fixed light-yellow defaults (`#ffd54f` / `#fff3b0`) look wrong (and can hurt contrast) on dark themes.
+
+**Proposed fix.** Either a `prefers-color-scheme: dark` fallback pair in the injected styles (used only when the admin hasn't customized colors), or simply a Highlight-tab note advising dark-theme sites to pick their own colors. Cheapest acceptable: the note.
+
+**Effort.** ~15 lines (media-query variant) or copy-only (note). Cosmetic.
+
+---
+
 ### Suggested order (remaining)
-9 (listen-to-selection, new feature — high user value, own ticket/release) → 6 (multi-root painter, own ticket/release after 9).
+11 (WCAG 1.4.1 underline option) → 12 (contrast warning) → 9 (listen-to-selection, own ticket/release — also covers the industry-standard "click a word to read from there") → 13 (visitor-side control) → 6 (multi-root painter, own ticket/release) → 14 (dark-theme polish).
 
 **Resolved:** #1, #2, #3, #4, #5, #7, #8, #10 (+ non-doc: player-6 Xing-header seek fix, `chat_gpt()` WP_Error fatal guard, OpenAI batch-size timeout tuning, highlight default-off everywhere, lazy title resolve for delay-JS optimizers).
+
+**A11y already covered (audited 2026-07-09 vs ReadSpeaker/Speechify/Immersive Reader):** reduced motion (WCAG 2.3.3, `prefers-reduced-motion` on auto-scroll), dim-opacity readability floor (WCAG 1.4.3, 0.7 default), Windows High Contrast (`forced-colors` media query), zero-DOM-mutation painting (CSS Custom Highlight API — screen readers unaffected), dim/line-focus, auto-scroll with manual-override + re-engage.
