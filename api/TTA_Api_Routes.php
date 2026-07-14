@@ -79,6 +79,20 @@ class TTA_Api_Routes {
 			)
 		);
 
+		// TTS-256: read-along highlight settings route (players 1 & 2).
+		register_rest_route(
+			$this->namespace,
+			'/highlight',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::ALLMETHODS,
+					'callback'            => array( $this, 'tta_manage_highlight_settings' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
 		// register settings route.
 		register_rest_route(
 			$this->namespace,
@@ -750,6 +764,62 @@ class TTA_Api_Routes {
 	}
 
 	/**
+	 * TTS-256 — read-along highlight settings (speechSynthesis players 1 & 2).
+	 *
+	 * Stored as its own option (tta_highlight_settings) and localized to the
+	 * front-end via TTA_Helper::tts_get_settings() so admin/js/tts/highlighter.js
+	 * can read window.ttsObj.settings.highlight. All values are sanitized here.
+	 *
+	 * @param \WP_REST_Request $request
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function tta_manage_highlight_settings( $request ) {
+		$response['status'] = true;
+
+		if ( 'post' == $request['method'] ) {
+			$fields = json_decode( $request['fields'], true );
+			$fields = is_array( $fields ) ? $fields : array();
+
+			$mode = isset( $fields['tta__highlight_mode'] ) ? $fields['tta__highlight_mode'] : 'sentence';
+			if ( ! in_array( $mode, array( 'word_sentence', 'word', 'sentence' ), true ) ) {
+				$mode = 'sentence';
+			}
+
+			$word_bg     = isset( $fields['tta__highlight_word_bg'] ) ? sanitize_hex_color( $fields['tta__highlight_word_bg'] ) : '';
+			$word_color  = isset( $fields['tta__highlight_word_color'] ) ? sanitize_hex_color( $fields['tta__highlight_word_color'] ) : '';
+			$sentence_bg = isset( $fields['tta__highlight_sentence_bg'] ) ? sanitize_hex_color( $fields['tta__highlight_sentence_bg'] ) : '';
+
+			$opacity = isset( $fields['tta__highlight_dim_opacity'] ) ? floatval( $fields['tta__highlight_dim_opacity'] ) : 0.7;
+			$opacity = max( 0.1, min( 0.85, $opacity ) );
+
+			$clean = array(
+				'tta__highlight_enabled'     => ! empty( $fields['tta__highlight_enabled'] ),
+				'tta__highlight_mode'        => $mode,
+				'tta__highlight_word_bg'     => $word_bg ? $word_bg : '#ffd54f',
+				'tta__highlight_word_color'  => $word_color ? $word_color : '#202124',
+				'tta__highlight_sentence_bg' => $sentence_bg ? $sentence_bg : '#fff3b0',
+				'tta__highlight_dim_enabled' => ! empty( $fields['tta__highlight_dim_enabled'] ),
+				'tta__highlight_dim_opacity' => $opacity,
+				'tta__highlight_autoscroll'  => ! empty( $fields['tta__highlight_autoscroll'] ),
+			);
+
+			update_option( 'tta_highlight_settings', $clean, false );
+			TTA_Cache::delete( 'all_settings' ); // invalidate the merged tts_get_settings cache.
+
+			$response['data'] = $clean;
+
+			return rest_ensure_response( $response );
+		}
+
+		if ( 'get' == $request['method'] ) {
+			$response['data'] = TTA_Helper::tts_get_settings( 'highlight' );
+
+			return rest_ensure_response( $response );
+		}
+	}
+
+	/**
 	 * @param WP_REST_Request
 	 *
 	 * @return WP_Rest_Response;
@@ -977,6 +1047,7 @@ class TTA_Api_Routes {
         $admin_only = array(
             '/tta/v1/customize',
             '/tta/v1/settings',
+            '/tta/v1/highlight',
             '/tta/v1/listening',
             '/tta/v1/save_analytics_settings',
             '/tta/v1/get_analytics_settings',

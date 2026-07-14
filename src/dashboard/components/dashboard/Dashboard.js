@@ -27,6 +27,8 @@ import DashboardLoader from './DashboardLoader';
  * when the user navigates to it, reducing the initial bundle size.
  */
 const Settings = lazy(() => import(/* webpackChunkName: "tab-settings" */ './settings/Settings'));
+// TTS-256: read-along highlight settings tab.
+const Highlight = lazy(() => import(/* webpackChunkName: "tab-highlight" */ './highlight/Highlight'));
 const Listening = lazy(() => import(/* webpackChunkName: "tab-listening" */ './listening/Listening'));
 const Customize = lazy(() => import(/* webpackChunkName: "tab-customize" */ './customize/Customize'));
 const Docs = lazy(() => import(/* webpackChunkName: "tab-docs" */ './docs/Docs'));
@@ -76,7 +78,8 @@ function Dashboard() {
 										path='/'
 										element={<Settings />}
 									/>
-									<Route path='/integrations' element={<Integrations />} />
+									<Route path='/highlight' element={<Highlight />} />
+										<Route path='/integrations' element={<Integrations />} />
 									<Route
 										path={'/customize'}
 										element={<Customize />}

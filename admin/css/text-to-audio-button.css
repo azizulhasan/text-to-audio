@@ -370,3 +370,10 @@ tts-play-button .tts-sr-only {
     outline: 2px solid currentColor;
     outline-offset: 2px;
 }
+
+/* TTS-256: read-along highlight styles (::highlight(atlasvoice-word /
+   atlasvoice-sentence) + .atlasvoice-reading-dim) are injected at runtime by
+   admin/js/tts/highlighter.js so they exist on BOTH player 1 and player 2 pages
+   (Free's button CSS is not enqueued on Pro player-2 pages). Colors come from
+   --atlasvoice-* CSS variables the admin Highlight tab drives. Intentionally
+   not duplicated here. */

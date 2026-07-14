@@ -186,27 +186,38 @@ class Mode {
 	 * @param \WP_Admin_Bar $bar
 	 * @return void
 	 */
+	/**
+	 * Whether the Staging/Live admin-bar status node — and therefore its inline
+	 * CSS — should render on this request. Shared by render_bar_node() and
+	 * render_inline_style() so the `atlasvoice-bar-dot-style` <style> is never
+	 * emitted on pages where the node itself isn't shown (TTS-255 setting
+	 * tta__settings_show_mode_bar, or while the front-end Step Rail is open).
+	 *
+	 * @return bool
+	 */
+	private static function should_render_bar_node() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return false;
+		}
+		// Hide entirely when the whole subsystem is opted out — no clutter for
+		// admins who've never touched AtlasVoice.
+		if ( ! self::is_opted_in() && ! apply_filters( 'atlasvoice_show_bar_when_off', false ) ) {
+			return false;
+		}
+		// TTS-255 — the production/staging indicator is hidden by default
+		// (setting tta__settings_show_mode_bar, filter tts_show_atlasvoice_mode_bar).
+		// Exception: always show it while the front-end Step Rail picker is open.
+		$show_mode_bar = class_exists( '\\TTA\\TTA_Helper' ) && \TTA\TTA_Helper::show_mode_bar();
+		$steprail_open = class_exists( '\\TTA\\AtlasVoice\\StepRail' ) && \TTA\AtlasVoice\StepRail::is_front_active();
+
+		return ( $show_mode_bar || $steprail_open );
+	}
+
 	public static function render_bar_node( $bar ) {
 		if ( ! ( $bar instanceof \WP_Admin_Bar ) ) {
 			return;
 		}
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-		// Hide the node entirely when the whole subsystem is opted out —
-		// no clutter for admins who've never touched AtlasVoice.
-		if ( ! self::is_opted_in() && ! apply_filters( 'atlasvoice_show_bar_when_off', false ) ) {
-			return;
-		}
-
-		// TTS-255 — the production/staging indicator is hidden by default
-		// (setting tta__settings_show_mode_bar, filter
-		// tts_show_atlasvoice_mode_bar). Exception: always show it while the
-		// front-end Step Rail picker is open, so the admin can see the mode
-		// they would be going live from.
-		$show_mode_bar = class_exists( '\\TTA\\TTA_Helper' ) && \TTA\TTA_Helper::show_mode_bar();
-		$steprail_open = class_exists( '\\TTA\\AtlasVoice\\StepRail' ) && \TTA\AtlasVoice\StepRail::is_front_active();
-		if ( ! $show_mode_bar && ! $steprail_open ) {
+		if ( ! self::should_render_bar_node() ) {
 			return;
 		}
 
@@ -281,7 +292,9 @@ class Mode {
 		if ( ! is_admin_bar_showing() ) {
 			return;
 		}
-		if ( ! current_user_can( 'manage_options' ) ) {
+		// TTS-255: only emit the dot CSS when the status node actually renders —
+		// otherwise the <style> is an orphan on every page (no markup to style).
+		if ( ! self::should_render_bar_node() ) {
 			return;
 		}
 		echo '<style id="atlasvoice-bar-dot-style">'

@@ -185,6 +185,12 @@ class AtlasVoicePlayerInsights {
     mergeAnalytics(data) {
         const mergedAnalytics = {};
 
+        // A failed request (e.g. 404) returns an error object, not the analytics
+        // array — bail out cleanly instead of throwing "forEach is not a function".
+        if (!Array.isArray(data)) {
+            return mergedAnalytics;
+        }
+
         data.forEach((item, item_key) => {
             const analytics = item.analytics;
             for (const [key, value] of Object.entries(analytics)) {
@@ -241,12 +247,15 @@ class AtlasVoicePlayerInsights {
         if (this.searchParams?.to_date) {
             params.append('to_date', this.searchParams.to_date);
         }
-        // Build the final URL
-        const param = params.toString() ? `?${params.toString()}` : '';
+        // Build the final URL. Use "&" when the REST base already carries a query
+        // string — plain-permalink sites expose REST as index.php?rest_route=/… ,
+        // so a hardcoded "?" here would create a second "?" and 404 the request.
+        const query = params.toString();
+        const url = query
+            ? this.apiUrl + (this.apiUrl.includes('?') ? '&' : '?') + query
+            : this.apiUrl;
 
-        this.apiUrl += param;
-
-        let response = await fetch(this.apiUrl, {
+        let response = await fetch(url, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
