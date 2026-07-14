@@ -84,23 +84,34 @@ Also update the header line "(Default and Default Pro players)" → generic ("th
 
 ---
 
-## 3. Disabled-path gate — implemented but not empirically tested
+## 3. Disabled-path gate — ✅ RESOLVED (empirically verified 2026-07-09)
+
+**Verified at both enforcement points:**
+
+1. **Sidecar/API gate (players 4/6)** — exercised the real `/tta_pro/v1/elevenlabs` route end-to-end (real handler → real ElevenLabs call → real finalization), single short batch per run:
+   - Highlight **OFF** → plain MP3 produced (63 KB), **no** `{title}.json` written, **and a pre-placed stale sidecar was reconciled away** (`delete_word_timings` lifecycle works).
+   - Highlight **ON** → MP3 + real word-timing sidecar (11 words, correct times).
+2. **Frontend paint gate (players 1/2, Default/Default Pro)** — verified in the browser against the built bundle: with `tta__highlight_enabled` false, `syncSentence()` bails (`cfg.enabled=false`, 0 painted ranges); with it true, the sentence paints (1 range).
+
+*Test gotcha worth remembering:* when switching the active player for a test, the previous player's voice/language linger in `tta_listening_settings` and are invalid for the new provider (e.g. a browser voice sent as an ElevenLabs `voice_id` → "invalid ID"; `en-US` → "model does not support language_code"). Always set voice+language in the Listening menu after switching players. Also: `tta_customize_settings` is cached (`TTA_Cache`) — flush after direct option writes, and clear `mp3_generation_lock__post_id__{id}` after failed runs.
+
+<details><summary>Original write-up</summary>
 
 **Problem.** The gate (with-timestamps / v1beta1 timepointing only when highlighting is enabled; plain endpoint otherwise) is implemented at every spot but was not exercised end-to-end, because verifying it means regenerating (costs a provider call) and would delete the good sidecar used for other tests.
 
-**Impact.** Low — the gate is three simple `if ($highlight_enabled)` branches — but it's unverified.
-
 **Where.** `elevenlabs()` (endpoint + response parse + finalization), `synthesize_content_and_rename_file()` (synth branch + finalization), `plyr.js` (attach gate).
 
-**Proposed test.** Toggle highlighting OFF, delete a post's MP3, regenerate, assert: (a) a plain MP3 is produced, (b) **no** `{title}.json` exists, (c) any previously-existing sidecar was removed (lifecycle reconcile). Then re-enable and confirm the sidecar returns.
-
-**Effort.** ~10 min once, plus one regeneration per provider.
+</details>
 
 ---
 
-## 4. Phase-1 drivers (players 3 & 5) can mis-locate the title — ⚠️ PARTIALLY DONE
+## 4. Phase-1 drivers (players 3 & 5) can mis-locate the title — ✅ RESOLVED
 
-> **Update.** The **browser players (1 & 2)** version of this bug was fixed in Free `fad8d290`: the base painter (`highlighter.js`) now captures the post title (from `window.TTS.extra[buttonId].title`), normalizes it like a spoken sentence, and **skips the utterance that IS the title** in `syncSentence()` — so a title sharing a prefix with a body paragraph no longer paints the body. This lives in the shared base `syncSentence()`, so the guard is *already present* for every driver; it just needs a **title source** for the Pro sentence drivers. Players **3 & 5** (`SentenceAudioHighlighter`) read `ttsObjPro`, not `window.TTS.extra`, so `this.title` is empty for them → **still open**. Fix: feed the title into the Pro driver (e.g. `ttsObjPro.title` or the loaded content's first sentence) so the base guard fires.
+> **Resolution.** Fixed in the base painter, so **every** driver benefits with no per-driver code:
+> - Free `fad8d290` — the base painter captures the post title from `window.TTS.extra[buttonId].title`, normalizes it like a spoken sentence, and **skips the utterance that IS the title** in `syncSentence()`.
+> - The title source is universal: `window.TTS.extra[buttonId]` (incl. `title`) is emitted by the button-init inline script (`helpers.php`) for **all players**, not just 1/2 — so players 3/5's `SentenceAudioHighlighter` (which extends the base) gets the guard for free. A briefly-added `ttsObjPro.title` fallback was reverted as unnecessary (Free `b9ab9bc2`, Pro `2f6fbaba8`).
+> - Free `b25e8b92` — the title is additionally **resolved lazily** in `syncSentence()` (re-read if empty), surviving "delay JavaScript execution" optimizers (script `type="o/js-lzl"`) that run the localize script after the highlighter singleton is constructed. That was the live-site regression on oshaccredited.com.
+> - Verified in-browser: title utterance → skipped (`_lastSentence=null`); colliding body paragraph and normal sentences → still highlight; constructor-before-data case → re-resolves on first utterance.
 
 **Problem.** `AudioHighlighter`/`SentenceAudioHighlighter` (sentence estimate, players 3/5) splits `this.content` and drives `syncSentence()`, but has **no** title source, so the base title-skip guard can't fire. The audio content includes the post title (read first); the painter matches on a short prefix. If a title shares a prefix with a body sentence (e.g. title "The Future of Reading …" vs body "The future of reading is …"), the title read can highlight the wrong body sentence — the exact bug fixed for the word driver in Phase 2a.
 
@@ -208,7 +219,7 @@ Resolved as part of #1 — the top-of-tab copy is now player-aware.
 
 ---
 
-### Suggested order
-3 (verify the gate) → 4 (feed the title into the 3/5 driver so the base guard fires) → 5 (partial-batch guard) → 10 (filemtime versioning, quick win) → 9 (listen-to-selection, new feature — high user value, own ticket) → 6 (multi-root painter, own ticket).
+### Suggested order (remaining)
+5 (partial-batch guard, ~15 lines) → 10 (filemtime versioning, quick win) → 9 (listen-to-selection, new feature — high user value, own ticket) → 6 (multi-root painter, own ticket).
 
-**Resolved:** #1, #2, #7, #8 (+ non-doc: player-6 Xing-header seek fix, player-1/2 title mis-highlight, `chat_gpt()` fatal guard, OpenAI batch-size timeout tuning).
+**Resolved:** #1, #2, #3, #4, #7, #8 (+ non-doc: player-6 Xing-header seek fix, `chat_gpt()` WP_Error fatal guard, OpenAI batch-size timeout tuning, highlight default-off everywhere, lazy title resolve for delay-JS optimizers).
