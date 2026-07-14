@@ -743,6 +743,8 @@ class TTA_Helper
             'analytics' => 'tta_analytics_settings',
             'compatible' => 'tta_compatible_data',
             'aliases' => 'tts_text_aliases',
+            // TTS-256: read-along highlight settings (players 1 & 2).
+            'highlight' => 'tta_highlight_settings',
         ];
         $cache_key = TTA_Cache::get_key('tts_get_settings');
         $cached_settings = TTA_Cache::get($cache_key);
