@@ -510,6 +510,25 @@ class TTA_Admin
      * Enqueue wp speech file
      *
      */
+    /**
+     * TTS-256 (#10): cache-bust built assets by file mtime, not plugin version.
+     * Frontend bundles otherwise refresh only on a version bump, so a JS fix
+     * shipped between releases keeps serving the stale cached bundle (browsers
+     * AND page-optimizer plugins key on ?ver). Mirrors the MP3 cache-buster
+     * (TTS-239) and the blocks enqueue. Falls back to the plugin version if the
+     * file is unreadable.
+     *
+     * @param string $relative_path Path relative to the admin/ directory.
+     * @return string Version string for wp_enqueue_script/style.
+     */
+    private function asset_version( $relative_path )
+    {
+        $file  = plugin_dir_path( __FILE__ ) . $relative_path;
+        $mtime = file_exists( $file ) ? filemtime( $file ) : false;
+
+        return $mtime ? (string) $mtime : $this->version;
+    }
+
     public function enqueue_TTA()
     {
 
@@ -542,7 +561,7 @@ class TTA_Admin
                     'wp-shortcode'
                 );
             }
-            wp_enqueue_script('tts-no-sleep', plugin_dir_url(__FILE__) . 'js/build/NoSleep.min.js', array(), $this->version, true);
+            wp_enqueue_script('tts-no-sleep', plugin_dir_url(__FILE__) . 'js/build/NoSleep.min.js', array(), $this->asset_version('js/build/NoSleep.min.js'), true);
         } else {
             $dependencies = array(
                 'wp-hooks',
@@ -564,10 +583,7 @@ class TTA_Admin
         // unconditionally so the new always-on architecture works.
         $extractor_opt_in = true;
         if ( $extractor_opt_in ) {
-            $extractor_ver = ( defined('WP_DEBUG') && WP_DEBUG )
-                ? filemtime( plugin_dir_path(__FILE__) . 'js/build/tts-extractor-engine.min.js' )
-                : $this->version;
-            wp_enqueue_script('tts-extractor-engine', plugin_dir_url(__FILE__) . 'js/build/tts-extractor-engine.min.js', [], $extractor_ver, true);
+            wp_enqueue_script('tts-extractor-engine', plugin_dir_url(__FILE__) . 'js/build/tts-extractor-engine.min.js', [], $this->asset_version('js/build/tts-extractor-engine.min.js'), true);
             array_push($dependencies, 'tts-extractor-engine');
 
             if (is_user_logged_in() && current_user_can('edit_posts')) {
@@ -588,10 +604,10 @@ class TTA_Admin
         );
 
         if ($player_id > 1) {
-            wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', $dependencies, $this->version, true);
+            wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', $dependencies, $this->asset_version('js/build/TextToSpeech.min.js'), true);
             wp_localize_script('TextToSpeech', 'ttsObj', $frontend_localize_data);
         } else if ($player_id == 1) {
-            wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-button.min.js', $dependencies, $this->version, true);
+            wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-button.min.js', $dependencies, $this->asset_version('js/build/text-to-audio-button.min.js'), true);
             wp_localize_script('text-to-audio-button', 'ttsObj', $frontend_localize_data);
             // TTS-249 (I2): player 1 renders in the light DOM, so its CSS is a
             // proper enqueued stylesheet (not a JS-injected <style> tag). The
@@ -599,7 +615,7 @@ class TTA_Admin
             // icon custom properties, all from the global customize settings)
             // are attached to the same handle via wp_add_inline_style() — WP
             // renders them in the document <head>, not as an inline style="".
-            wp_enqueue_style('text-to-audio-button', plugin_dir_url(__FILE__) . 'css/text-to-audio-button.css', [], $this->version, 'all');
+            wp_enqueue_style('text-to-audio-button', plugin_dir_url(__FILE__) . 'css/text-to-audio-button.css', [], $this->asset_version('css/text-to-audio-button.css'), 'all');
             if (function_exists('tta_get_player_button_inline_css')) {
                 wp_add_inline_style('text-to-audio-button', tta_get_player_button_inline_css());
             }
@@ -1076,8 +1092,8 @@ class TTA_Admin
         }
         add_submenu_page(
             TEXT_TO_AUDIO_TEXT_DOMAIN,
-            __('Plugins', 'text-to-audio'),
-            __('Plugins', 'text-to-audio'),
+            __('Our Plugins', 'text-to-audio'),
+            __('Our Plugins', 'text-to-audio'),
             'manage_options',
             $menu_slug,
             array($this, 'atlas_plugins_page'),

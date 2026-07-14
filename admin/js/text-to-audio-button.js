@@ -419,14 +419,10 @@ class TTSSettingsModalManager {
     }
 
     static splitSentencesForSeek(text = '') {
-        if (!text) return [];
-        return text
-            .replace(/\.+/g, '.|')
-            .replace(/\?/g, '?|')
-            .replace(/!/g, '!|')
-            .split('|')
-            .map(sentence => sentence.trim())
-            .filter(Boolean);
+        // Use the shared splitter (TTS-252) so seek chunks match the spoken
+        // utterances and highlighted ranges — the old naive split shredded
+        // abbreviations, decimals and emails ("Dr.", "$3.50", "info@x.com").
+        return splitSentences(text);
     }
 
     static applySettingsAndRestart() {
