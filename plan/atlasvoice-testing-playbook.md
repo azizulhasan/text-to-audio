@@ -32,9 +32,12 @@
 ## Environment & links
 
 - Staging site: `https://cors2.atlasaidev.com`
-- Test posts:
-  - https://cors2.atlasaidev.com/atlasvoice-2-2-5-test-reading/
-  - https://cors2.atlasaidev.com/atlasmcp-scope-test-post/
+- **Test posts: never save/reuse specific post URLs** — the staging site gets
+  reset and posts change day to day. At the start of every run, list the
+  current posts (`/wp-json/wp/v2/posts` or the admin posts list) and, if there
+  is no suitable **long** post (several thousand chars, headings + paragraphs,
+  ideally a body paragraph sharing the title's opening words to exercise the
+  title guard), **create a fresh one** for the run.
 - Admin:
   - Plugins: https://cors2.atlasaidev.com/wp-admin/plugins.php
   - Dashboard: https://cors2.atlasaidev.com/wp-admin/admin.php?page=text-to-audio
