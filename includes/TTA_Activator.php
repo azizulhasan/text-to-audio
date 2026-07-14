@@ -236,6 +236,25 @@ class TTA_Activator {
 		}
 
 
+		/**
+		 * TTS-256 — read-along highlight settings (speechSynthesis players 1 & 2).
+		 */
+		if ( $renew_all_settings || ! get_option( 'tta_highlight_settings' ) ) {
+			update_option( 'tta_highlight_settings', array(
+				'tta__highlight_enabled'     => false,
+				// Default to sentence — works with any voice/browser. Word-level
+				// modes need a local voice that fires speechSynthesis boundaries.
+				'tta__highlight_mode'        => 'sentence', // sentence | word | word_sentence
+				'tta__highlight_word_bg'     => '#ffd54f',
+				'tta__highlight_word_color'  => '#202124',
+				'tta__highlight_sentence_bg' => '#fff3b0',
+				'tta__highlight_dim_enabled' => true,
+				'tta__highlight_dim_opacity' => 0.7, // a11y: keep dimmed text near 4.5:1
+
+				'tta__highlight_autoscroll'  => true,
+			), false );
+		}
+
 		self::create_analytics_table_if_not_exists();
 		self::maybe_add_analytics_indexes();
 	}

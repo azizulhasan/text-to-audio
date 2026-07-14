@@ -45,8 +45,10 @@ function isAbbreviation(token) {
     if (!token) return false;
     const cleaned = token.toLowerCase().replace(/[^a-z.]/g, '').replace(/\./g, '');
     if (!cleaned) return false;
-    // single letter before the dot => initialism (U.S.A., M.I.T.)
-    if (/^[a-z]$/.test(cleaned)) return true;
+    // Single letter before the dot => initialism (U.S.A., M.I.T., "J. Smith").
+    // But a token carrying digits is a version number like "v1.2.3", not an
+    // initialism — it genuinely ends the sentence, so let it split.
+    if (/^[a-z]$/.test(cleaned)) return !/[0-9]/.test(token);
     return ABBREVIATION_SET.has(cleaned);
 }
 
