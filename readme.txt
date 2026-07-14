@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.3.4
+Stable tag: 2.3.5
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -384,6 +384,13 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.3.5 ( 14 Jul 2026 ) =
+Added : Read-along highlighting — the player can highlight each sentence, and each word with supported voices, as your post is read aloud. Choose your own colors, dim the rest of the article to help readers focus, and let the page scroll along with the reading. Off by default — turn it on from the new Highlight tab.
+Improved : Auto-scroll follows the reading politely — if you scroll away it stops following, and it resumes when the spoken text comes back into view.
+Fixed : While the post title is being read, the highlight could land on a paragraph that starts with similar words. This no longer happens, including on sites using speed-optimizer plugins.
+Fixed : Two errors that could appear on the Analytics page when viewing a post's listening insights.
+Improved : After a plugin update, your visitors now get the latest player files right away instead of older cached ones.
+
 = 2.3.4 ( 10 Jul 2026 ) =
 Fixed : A conflict with Formidable Forms that could fill pages containing a form with repeated PHP warnings. The player no longer triggers these notices.
 
@@ -627,6 +634,9 @@ Introduced :  Complete new UI introduced.
 
 
 == Upgrade Notice ==
+
+= 2.3.5 =
+New read-along highlighting: the player highlights each sentence (and word, with supported voices) as it reads, with your colors, focus dimming and gentle auto-scroll — off by default, enable it from the new Highlight tab. Also fixes Analytics page errors and keeps player files fresh after updates. Update recommended.
 
 = 2.3.4 =
 Fixes a conflict with Formidable Forms that could show repeated PHP warnings on pages containing a form. Update recommended.
