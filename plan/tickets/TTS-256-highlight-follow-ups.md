@@ -125,7 +125,13 @@ Also update the header line "(Default and Default Pro players)" → generic ("th
 
 ---
 
-## 5. Google Cloud partial-batch-failure → misaligned sidecar
+## 5. Google Cloud partial-batch-failure → misaligned sidecar — ✅ RESOLVED
+
+**Fixed** (Pro `21fc89b50`). `write_final_word_timings()` now takes the concatenated audio batch count (`count($matched_files)` from both the gcloud and ElevenLabs finalization blocks); if the `{title}-*.avtim.json` count differs, it deletes ALL timing data (final sidecar + temps via `delete_word_timings`) and logs through `TTA_Error_Handler` — the front end falls back to the clean sentence estimate instead of drifted word timing. Verified by direct invocation: 2 timing files vs 3 batches → sidecar dropped; 2 vs 2 → stitched with correct cumulative offsets.
+
+<details><summary>Original write-up</summary>
+
+## (was) 5. Google Cloud partial-batch-failure → misaligned sidecar
 
 **Problem.** `gcloud_synthesize_with_timing()` returns `null` on any per-batch failure, and the caller falls back to the plain client synth for **that batch** (MP3 fine, but no `.avtim.json` for it). If some batches succeed and others fail, `write_final_word_timings()` stitches only the successful batches → word times/offsets are shifted for everything after the missing batch.
 
@@ -136,6 +142,8 @@ Also update the header line "(Default and Default Pro players)" → generic ("th
 **Proposed fix.** On the last batch, compare the count of `{title}-*.avtim.json` files to the number of MP3 batches; if they don't match, **delete** the partial sidecar (via `delete_word_timings`) so the frontend cleanly falls back to the sentence estimate instead of showing drifted word timing. Log the drop.
 
 **Effort.** ~15 lines PHP.
+
+</details>
 
 ---
 
@@ -205,21 +213,21 @@ Resolved as part of #1 — the top-of-tab copy is now player-aware.
 
 ---
 
-## 10. Frontend JS bundles are versioned by plugin version, not filemtime
+## 10. Frontend JS bundles are versioned by plugin version, not filemtime — ✅ RESOLVED
+
+**Fixed** (Free `b90dfe3b`, Pro `21fc89b50`). Both plugins gained an `asset_version()` helper (Free: `TTA_Admin`, Pro: `TTA_Pro_Actions`) that returns the built file's `filemtime()` with the plugin version as fallback. Applied to every **frontend** bundle: Free — `TextToSpeech.min.js`, `text-to-audio-button.min.js`, `NoSleep.min.js`, `tts-extractor-engine.min.js` (replacing its WP_DEBUG-only variant), button CSS; Pro — `plyr.min.js`, `plyr.lib.min.js`, `TextToSpeechPro.min.js`, `AtlasVoiceAnalyticsPro.min.js`, `text-to-audio-pro-button.min.js`, plyr + pro CSS. Vendor libs (chart.js, countries-and-timezones) keep their real upstream versions; admin dashboard bundles stay on plugin version. Verified live: all frontend `?ver=` values now show mtimes. Mirrors the TTS-239 MP3 cache-buster.
+
+<details><summary>Original write-up</summary>
 
 **Problem.** `wp_enqueue_script()` for the frontend players uses `$this->version` (the plugin version) as the `?ver` (`TTA_Admin.php:408` and `591`), not `filemtime()`. So when a JS bundle is rebuilt **without** a version bump, browsers keep serving the cached old bundle — a mid-cycle JS fix (e.g. the title guard in #4) doesn't reach users until the next release bumps the version. Surfaced this session: the title fix required a manual hard-refresh to verify.
 
-**Impact.** Self-resolves at release (the version bump busts the cache), so it's not a shipping bug — but it makes hotfix-style JS changes invisible until release, and makes local/staging testing require hard refreshes.
-
 **Where.** `admin/TTA_Admin.php:408`, `591` (frontend `TextToSpeech` enqueue). Note blocks already use `filemtime()` (line ~476), so the pattern exists in-repo.
 
-**Proposed fix.** Version the built bundles with `filemtime(build_path)` (like the blocks do), or a hash, instead of the plugin version — so any rebuild busts the cache immediately.
-
-**Effort.** ~5–10 lines. Low risk.
+</details>
 
 ---
 
 ### Suggested order (remaining)
-5 (partial-batch guard, ~15 lines) → 10 (filemtime versioning, quick win) → 9 (listen-to-selection, new feature — high user value, own ticket) → 6 (multi-root painter, own ticket).
+9 (listen-to-selection, new feature — high user value, own ticket/release) → 6 (multi-root painter, own ticket/release after 9).
 
-**Resolved:** #1, #2, #3, #4, #7, #8 (+ non-doc: player-6 Xing-header seek fix, `chat_gpt()` WP_Error fatal guard, OpenAI batch-size timeout tuning, highlight default-off everywhere, lazy title resolve for delay-JS optimizers).
+**Resolved:** #1, #2, #3, #4, #5, #7, #8, #10 (+ non-doc: player-6 Xing-header seek fix, `chat_gpt()` WP_Error fatal guard, OpenAI batch-size timeout tuning, highlight default-off everywhere, lazy title resolve for delay-JS optimizers).
