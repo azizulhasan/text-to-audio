@@ -1092,8 +1092,8 @@ class TTA_Admin
         }
         add_submenu_page(
             TEXT_TO_AUDIO_TEXT_DOMAIN,
-            __('Plugins', 'text-to-audio'),
-            __('Plugins', 'text-to-audio'),
+            __('Our Plugins', 'text-to-audio'),
+            __('Our Plugins', 'text-to-audio'),
             'manage_options',
             $menu_slug,
             array($this, 'atlas_plugins_page'),
