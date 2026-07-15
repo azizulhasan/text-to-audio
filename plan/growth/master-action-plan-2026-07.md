@@ -49,7 +49,7 @@ the business.*
 | 10 | **Elementor smoke-test added to release checklist** | Data: 41% of users; untested per release | hours | ☐ todo |
 | 11 | **Pricing page strengthening** + **demo video/interactive playground** on /demo (4,896 views, no video; spec ready in `product-demo-video-and-interactive-demo.md`) | Data: pricing = #1 GA page, 92.6% of buyers arrive outside free-plugin funnel; June #25/F9 | 2–3 days | ☐ todo |
 | 12 | **Lifetime-upgrade offer — DECIDE then ship or kill** (cash now vs MRR; Fable flagged the conflict with MRR targets) | June #2; founder decision | decision + day | ☐ todo |
-| 13 | **In-plugin announcement channel** (admin notice feed you control — reopen/rebrand/updates) | June F6; also survives wp.org dependence | day | ☐ todo |
+| 13 | **In-plugin announcement channel — re-enable the existing `Promotions` lib**: uncomment init in `TTA_Lib_AtlasAiDev` + `set_source()` to a JSON on atlasaidev.com; rule: every campaign `dismissible:1`, unique hash, tight date window. First campaign = the voice-demo link (#7). Reaches sites after they update. | June F6; system already built in `libs/AtlasAiDev/Promotions.php` | ~2h | ☐ todo |
 
 ## 4. P1 — THIS MONTH: AtlasAI Connector (the 20% lane)
 
