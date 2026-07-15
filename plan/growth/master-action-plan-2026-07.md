@@ -29,7 +29,7 @@ items below · **1 admin afternoon** = batch-review all drafts/support/marketing
 
 | # | Action | Origin / evidence | Effort | Status |
 |---|--------|-------------------|--------|--------|
-| 1 | **Identify + protect the July install-surge source** (wp.org stats, referrers, directory ranking for "text to speech") | Data: ~70 installs/day since Jul 5, 83% new; ≈$75–80/day at 2025 conversion | hours | ☐ todo |
+| 1 | **Identify the July install-surge source** → ✅ **RESOLVED: tracking artifact, not acquisition** (existing sites re-firing; see `surge-source-findings-2026-07.md`). Remaining sub-question for founder: what changed on track.atlasaidev.com ~Jul 4? | Investigation 2026-07-15 | done | ✅ done |
 | 2 | **Launch the renewal-rescue program** (F2): pre-renewal email at day −30/−7 with value recap + renewal discount ladder; save-offer on cancel | June-Fable: renewal ≈32% ⇒ MRR halves in ~10 months — the single biggest revenue leak | 1–2 days | ☐ todo |
 | 3 | **Wire Mailchimp↔Freemius purchase attribution** ("Connect store") | June #1 ("non-negotiable prerequisite") + Data #14 — email revenue is unmeasurable today | hours | ☐ todo |
 | 4 | **Verify lapsed listings:** G2 (submitted Jun 5, "1–2 days", never verified) + submit AlternativeTo (unblocked since Jun 12, copy ready in artifacts) | June: both lapsed | hours | ☐ todo |
@@ -112,6 +112,6 @@ Phase 1 shipped · ✅ March audit: 42/56 tasks done · ✅ July: data pull + 5 
 | Renewal rate | ~32% | ≥ 45% |
 | Install→first-play | unmeasured | measured, then ≥ 60% |
 | Same-day churn share | 63.7% | ≤ 50% |
-| Installs/day (consented) | ~70 (surge) / ~2–5 (pre-surge) | surge source identified & held ≥ 30/day |
+| Installs/day (consented) | ~2–5 (the "surge" was a tracking artifact — see surge-source-findings) | ≥ 10/day via listing/citations work |
 | Connector paying users | 1 | ≥ 10 |
 | Free→Pro conversion (tracked) | 1.17% (1.87% best-year) | ≥ 2% |
