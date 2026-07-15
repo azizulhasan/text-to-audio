@@ -1,5 +1,9 @@
 # Action Plan — July 2026 (data-driven)
 
+> **⚠ SUPERSEDED (2026-07-15):** merged into the single master plan —
+> [`plan/growth/master-action-plan-2026-07.md`](../../growth/master-action-plan-2026-07.md).
+> Track status THERE, not here. This file remains as the data-evidence reference.
+
 > Built from the July 2026 data pull + 5 analyses + revenue reality-check (`plan/data/2026-07/`).
 > Priorities reflect **measured impact**, not guesses. Update the Status column as work progresses:
 > `☐ todo` · `🔄 in progress` · `✅ done` · `✋ decided-no`.
