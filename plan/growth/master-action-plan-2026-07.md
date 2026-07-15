@@ -43,7 +43,7 @@ the business.*
 |---|--------|-------------------|--------|--------|
 | 5 | **First-play experience:** user hears their own latest post in <60s after activation (auto-demo before configuration) | Data (lifetime); June abandon-plan Phase 2 (wizard Phase 1 ✅ shipped) | days | ☐ todo |
 | 6 | **Instrument `first_play` event** → install→first-play = the #1 product metric | Data | hours | ☐ todo |
-| 7 | **Voice preview without signup** (sample premium voices in player/settings) | Data (churn): "no option to sample the alleged fantastic AI voices" | days | ☐ todo |
+| 7 | **Surface the existing no-signup voice demo inside the plugin** — the demo already exists (atlasaidev.com/plugins/text-to-speech-pro/demo/); add prominent "Hear the premium voices" links in voice settings + upgrade prompt + wizard voice step (later: embed pre-rendered sample MP3s in settings) | Data (churn): "no option to sample the AI voices" — a discoverability gap, capability exists | hours | ☐ todo |
 | 8 | **Mobile QA sweep** (iOS Safari / Android Chrome player) | Data: #1 concrete reliability complaint | days | ☐ todo |
 | 9 | **Fix title-only extraction bug** (reported Jul 11, live) | Data (churn) | ticket | ☐ todo |
 | 10 | **Elementor smoke-test added to release checklist** | Data: 41% of users; untested per release | hours | ☐ todo |
