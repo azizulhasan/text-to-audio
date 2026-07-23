@@ -569,6 +569,11 @@ class TTA_Admin
             );
         }
 
+        // TTS-264: the player bundle now uses wp.i18n.__() (selection-control.js),
+        // so wp-i18n must load first. Script translations are registered per
+        // handle below (wp_set_script_translations).
+        array_push($dependencies, 'wp-i18n');
+
         // TTS-247: ship countries-and-timezones locally instead of jsDelivr CDN (wp.org Guideline 8).
         wp_enqueue_script('atlasvoice-timezone', plugin_dir_url(__FILE__) . 'js/vendor/countries-and-timezones.min.js', [], '3.9.0', true);
         array_push($dependencies, 'atlasvoice-timezone');
@@ -606,9 +611,13 @@ class TTA_Admin
         if ($player_id > 1) {
             wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', $dependencies, $this->asset_version('js/build/TextToSpeech.min.js'), true);
             wp_localize_script('TextToSpeech', 'ttsObj', $frontend_localize_data);
+            // TTS-264: load JS translations for the bundled selection-control strings.
+            wp_set_script_translations('TextToSpeech', 'text-to-audio', plugin_dir_path(dirname(__FILE__)) . 'languages');
         } else if ($player_id == 1) {
             wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-button.min.js', $dependencies, $this->asset_version('js/build/text-to-audio-button.min.js'), true);
             wp_localize_script('text-to-audio-button', 'ttsObj', $frontend_localize_data);
+            // TTS-264: load JS translations for the bundled selection-control strings.
+            wp_set_script_translations('text-to-audio-button', 'text-to-audio', plugin_dir_path(dirname(__FILE__)) . 'languages');
             // TTS-249 (I2): player 1 renders in the light DOM, so its CSS is a
             // proper enqueued stylesheet (not a JS-injected <style> tag). The
             // dynamic per-button values (colours/size/border/margins + hover &
