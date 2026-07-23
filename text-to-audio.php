@@ -204,9 +204,10 @@ class TTA_Init
         $plugin->run();
 
         add_action('init', function () {
-            if (!defined('TTA_PRO_PLUGIN_PATH')) {
-                TTA_Lib_AtlasAiDev::instance()->init();
-            }
+            // TTS-262: init() now runs in BOTH states. Audience-targeted
+            // promotions run always (so 'pro'/'all' promos can reach Pro users);
+            // telemetry/Insights stays free-only, gated inside init().
+            TTA_Lib_AtlasAiDev::instance()->init();
             if (!TTA_Cache::get('tts_rest_api_url')) {
                 $rest_url = esc_url_raw(rest_url());
                 update_option('tts_rest_api_url', $rest_url, false);
