@@ -2,6 +2,7 @@ import React from "react";
 import { Col, Row, Form, Button } from "react-bootstrap";
 import { __ } from "@wordpress/i18n";
 import Icon from "../../../Icon";
+import DemoLink from "../../../DemoLink";
 import { getLanguageFlag, generateSpeedTicks, generateVolumeTicks } from "../utils";
 
 export default function DefaultPlayerSettings({
@@ -65,6 +66,13 @@ export default function DefaultPlayerSettings({
                 </option>
               ))}
             </Form.Select>
+            {/* TTS-264 — hear the 200+ Pro AI voices on the live demo. */}
+            <div className="mt-2">
+              <DemoLink
+                content="listening_voices"
+                label={__("Hear 200+ Pro AI voices live", "text-to-audio")}
+              />
+            </div>
           </div>
         </Col>
       </Row>

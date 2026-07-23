@@ -12,6 +12,7 @@ import { __ } from "@wordpress/i18n";
 import { postData } from "../../../context/utilities";
 import { MultiSelect } from "../../../context/MultiSelect";
 import Icon from "../../../Icon";
+import DemoLink from "../../../DemoLink";
 
 export default function TTSCustomizationButton({
   listeningBtnStyle,
@@ -96,17 +97,26 @@ export default function TTSCustomizationButton({
             {/* TTS-249: upsell link instead of shipping locked player options.
                 Shown only when the premium players aren't registered (Pro inactive). */}
             {!buttonLists.some((b) => b.id > 1) && (
-              <p className="tta_player-upsell text-secondary mt-2 mb-0 small">
-                {__("More players (AI voices, MP3) are available in", "text-to-audio")}{" "}
-                <a
-                  href={proUrl('customize_button', 'product')}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {__("AtlasVoice Pro", "text-to-audio")}
-                </a>
-                .
-              </p>
+              <>
+                <p className="tta_player-upsell text-secondary mt-2 mb-0 small">
+                  {__("More players (AI voices, MP3) are available in", "text-to-audio")}{" "}
+                  <a
+                    href={proUrl('customize_button', 'product')}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {__("AtlasVoice Pro", "text-to-audio")}
+                  </a>
+                  .
+                </p>
+                {/* TTS-264 — hear those locked players on the live demo. */}
+                <div className="mt-2">
+                  <DemoLink
+                    content="customize_players"
+                    label={__("Hear the Pro players live", "text-to-audio")}
+                  />
+                </div>
+              </>
             )}
           </Form.Group>
         </Col>

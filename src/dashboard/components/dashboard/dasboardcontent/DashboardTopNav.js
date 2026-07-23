@@ -1,7 +1,9 @@
 import React from "react";
+import { __ } from "@wordpress/i18n";
 import { Link } from "react-router-dom";
 import Icon from "../../Icon";
 import { proUrl } from "../../../proUrl";
+import DemoLink from "../../DemoLink";
 
 export default function DashboardTopNav() {
   return (
@@ -248,6 +250,9 @@ export default function DashboardTopNav() {
               Upgrade to Pro
             </a>
           )}
+
+          {/* TTS-264 — persistent live-demo link (free only) */}
+          <DemoLink content="top_nav" label={__("Live demo", "text-to-audio")} variant="nav" />
 
           {/* Support */}
           <a
