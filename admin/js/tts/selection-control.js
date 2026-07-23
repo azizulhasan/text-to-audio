@@ -39,6 +39,13 @@
  * already chose, no extra color settings.
  */
 
+// TTS-264: i18n. wp-i18n is enqueued as a dependency of the player scripts that
+// bundle this module, with wp_set_script_translations('text-to-audio') (see
+// TTA_Admin frontend enqueue). The guard keeps the control working if i18n
+// isn't present. All strings here are plain (no placeholders), so a bare __()
+// is correct — no sprintf needed.
+const { __ } = (typeof wp !== 'undefined' && wp.i18n) ? wp.i18n : { __: (s) => s };
+
 const PILL_ID = 'atlasvoice-selection-control';
 const TIP_ID = 'atlasvoice-selection-tip';
 const BADGE_ID = 'atlasvoice-selection-badge';
@@ -76,13 +83,13 @@ function controlColors() {
  */
 function controlLabels() {
     const defaults = {
-        listen: 'Listen',
-        fromHere: 'From here',
-        listenTitle: 'Listen to the selected text',
-        fromHereTitle: 'Listen from here to the end',
-        tip: 'Tip: select any text in the article to listen to just that part.',
-        badge: 'Select any text to listen to it',
-        dismiss: 'Dismiss',
+        listen: __('Listen', 'text-to-audio'),
+        fromHere: __('From here', 'text-to-audio'),
+        listenTitle: __('Listen to the selected text', 'text-to-audio'),
+        fromHereTitle: __('Listen from here to the end', 'text-to-audio'),
+        tip: __('Tip: select any text in the article to listen to just that part.', 'text-to-audio'),
+        badge: __('Select any text to listen to it', 'text-to-audio'),
+        dismiss: __('Dismiss', 'text-to-audio'),
     };
     if (window.wp && window.wp.hooks) {
         return { ...defaults, ...(wp.hooks.applyFilters('tts_selection_control_labels', defaults) || {}) };
