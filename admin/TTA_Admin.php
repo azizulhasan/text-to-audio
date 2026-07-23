@@ -673,6 +673,12 @@ class TTA_Admin
         }
 
         $this->atlasaidev_plugins();
+
+        // TTS-265: free-only "Pricing" submenu, sits right after "Our Plugins".
+        // Pro users already own the plugin, so they never see the upsell page.
+        if (!TTA_Helper::is_atlasvoice_addon_functional()) {
+            $this->tta_pricing_menu();
+        }
     }
 
     // Callback function to display the content of the page
@@ -1108,6 +1114,74 @@ class TTA_Admin
             array($this, 'atlas_plugins_page'),
             34
         );
+    }
+
+    /**
+     * TTS-265: register the "Pricing" submenu and enqueue its React app.
+     *
+     * Mirrors atlasaidev_plugins(): the bundle only enqueues when the user is
+     * actually on the pricing screen, and the submenu registers at position 35
+     * so it lands directly after "Our Plugins" (34). Free-only — the caller in
+     * TTA_menu() gates this behind !is_atlasvoice_addon_functional().
+     */
+    public function tta_pricing_menu($menu_slug = 'atlasvoice-pricing') {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page-name read for current-screen check
+        if (!empty($_REQUEST['page']) && $_REQUEST['page'] === $menu_slug) {
+            // wp-scripts emits a sibling manifest of externalized deps + a
+            // content hash; fall back to a sane dependency set if it's missing.
+            $asset_file = TTA_PLUGIN_PATH . 'build/pricing/index.asset.php';
+            $asset = file_exists($asset_file)
+                ? include $asset_file
+                : array('dependencies' => array('wp-element', 'wp-components', 'wp-i18n'), 'version' => $this->version);
+
+            wp_enqueue_script(
+                'tta-pricing',
+                TTA_PLUGIN_URL . 'build/pricing/index.js',
+                $asset['dependencies'],
+                $asset['version'],
+                true
+            );
+            wp_set_script_translations(
+                'tta-pricing',
+                'text-to-audio',
+                TTA_PLUGIN_PATH . 'languages'
+            );
+            // @wordpress/components styling (Card, Button, etc.).
+            wp_enqueue_style('wp-components');
+
+            wp_localize_script('tta-pricing', 'ttsPricingData', array(
+                'is_pro_active' => TTA_Helper::is_atlasvoice_addon_functional(),
+                'demo_url'      => add_query_arg(
+                    array(
+                        'utm_source'   => 'atlasvoice_free',
+                        'utm_medium'   => 'plugin',
+                        'utm_campaign' => 'pricing',
+                        'utm_content'  => 'pricing_page',
+                    ),
+                    'https://atlasaidev.com/plugins/text-to-speech-pro/demo/'
+                ),
+            ));
+        }
+        add_submenu_page(
+            TEXT_TO_AUDIO_TEXT_DOMAIN,
+            __('Pricing', 'text-to-audio'),
+            __('Pricing', 'text-to-audio'),
+            'manage_options',
+            $menu_slug,
+            array($this, 'tta_pricing_page'),
+            35
+        );
+    }
+
+    /**
+     * TTS-265: Pricing page callback — React mounts into #tta-pricing-root.
+     */
+    public function tta_pricing_page() {
+        echo '<div class="wrap">';
+        echo '<h1 class="screen-reader-text">' . esc_html__('AtlasVoice Pro Pricing', 'text-to-audio') . '</h1>';
+        echo '<hr class="wp-header-end">';
+        echo '<div id="tta-pricing-root"></div>';
+        echo '</div>';
     }
 
     /**

@@ -15,6 +15,8 @@
     "production": "cross-env NODE_ENV=production webpack --progress --config=node_modules/laravel-mix/setup/webpack.config.js",
     "block:build": "wp-scripts build admin/js/blocks/blocks.js --output-path=build",
     "block:start": "wp-scripts start admin/js/blocks/blocks.js --output-path=build",
+    "pricing:build": "wp-scripts build admin/js/pricing/index.js --output-path=build/pricing",
+    "pricing:start": "wp-scripts start admin/js/pricing/index.js --output-path=build/pricing",
     "makeZip": "gulp makeZip",
     "release": "gulp release",
     "copy": "gulp copy",
