@@ -239,7 +239,13 @@ class Promotions {
 		}
 		// decode to array.
 		$promos = json_decode( $promos );
-		
+
+		// TTS-262: guard — an empty body, a network hiccup, or a malformed feed
+		// makes json_decode() return null; array_filter(null) would fatal.
+		if ( ! is_array( $promos ) ) {
+			$promos = array();
+		}
+
 		// filter promotions by date.
 		$promos = array_filter( $promos, [ $this, '__is_promo_active' ] );
 		if ( ! empty( $promos ) ) {
