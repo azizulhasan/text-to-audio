@@ -35,19 +35,28 @@ const TIERS = [
 ];
 
 const FEATURES = [
-	__( '200+ AI voices (Google Cloud TTS)', 'text-to-audio' ),
-	__( 'Google Cloud, OpenAI and ElevenLabs engines', 'text-to-audio' ),
-	__( 'Bulk MP3 generation, unlimited characters', 'text-to-audio' ),
-	__( 'Unlimited MP3 downloads', 'text-to-audio' ),
+	__( 'Read-along highlighting — words and sentences light up as they are spoken', 'text-to-audio' ),
+	__( '4 AI voice engines — AtlasVoice AI, Google Cloud, OpenAI (ChatGPT) and ElevenLabs', 'text-to-audio' ),
+	__( 'AtlasVoice AI voices — 80+ languages, included at no extra cost', 'text-to-audio' ),
+	__( '300+ Google Cloud voices across 90+ languages', 'text-to-audio' ),
+	__( 'Ultra-realistic ElevenLabs and OpenAI HD voices', 'text-to-audio' ),
+	__( 'Bulk MP3 generation — unlimited characters, hundreds of posts', 'text-to-audio' ),
+	__( 'Unlimited MP3 downloads for you and your visitors', 'text-to-audio' ),
 	__( 'Save MP3s to Google Cloud Storage', 'text-to-audio' ),
-	__( 'WPML, GTranslate and TranslatePress support', 'text-to-audio' ),
+	__( '6 player styles plus floating / sticky player', 'text-to-audio' ),
+	__( 'CSS-selector targeting and exclude by category, tag or ID', 'text-to-audio' ),
+	__( 'WPML, GTranslate and TranslatePress — full multilingual support', 'text-to-audio' ),
 	__( 'ACF, SCF and page-builder compatible', 'text-to-audio' ),
-	__( 'Multiple audio players and designs', 'text-to-audio' ),
-	__( 'CSS-selector content targeting', 'text-to-audio' ),
-	__( 'Exclude by category, tag or ID', 'text-to-audio' ),
-	__( 'Advanced listening analytics', 'text-to-audio' ),
-	__( 'Text aliases and live setup support', 'text-to-audio' ),
+	__( 'Advanced analytics plus Audio Schema for SEO rich results', 'text-to-audio' ),
+	__( 'Text aliases plus priority support (1-hour) and live setup help', 'text-to-audio' ),
 ];
+
+// Small print shown under the feature grid — clarifies the BYO-provider model.
+const PROVIDER_NOTE = __( 'Bring your own provider keys: AtlasVoice AI voices are included free. Google Cloud, OpenAI (ChatGPT) and ElevenLabs connect to your own provider account, so their usage is billed by the provider — not by us.', 'text-to-audio' );
+
+// Honest one-line summary of the refund conditions (see refund-policy link).
+const REFUND_NOTE = __( 'Refunds cover an unresolved bug that leaves the plugin inoperable, requested within 14 days of purchase, after giving us a chance to fix it. Not covered: missing features, third-party plugin conflicts, change of mind, or subscription renewals.', 'text-to-audio' );
+const REFUND_URL = 'https://atlasaidev.com/refund-policy/';
 
 function checkoutUrl( licenses, cycle ) {
 	const base = CHECKOUT_BASE + licenses + '/';
@@ -145,8 +154,12 @@ function Pricing() {
 				) ) }
 			</Flex>
 
-			<p style={ { textAlign: 'center', color: '#757575', fontSize: 13, margin: '16px 0' } }>
-				{ __( '14-day money-back guarantee', 'text-to-audio' ) }
+			<p style={ { textAlign: 'center', color: '#757575', fontSize: 13, margin: '16px 0 4px' } }>
+				<strong style={ { color: '#1d2327' } }>{ __( '14-day money-back guarantee', 'text-to-audio' ) }</strong>
+				{ ' — ' }
+				<a href={ REFUND_URL } target="_blank" rel="noopener noreferrer" style={ { color: BRAND } }>
+					{ __( 'conditions apply ↗', 'text-to-audio' ) }
+				</a>
 				{ DATA.demo_url && (
 					<>
 						{ ' · ' }
@@ -155,6 +168,9 @@ function Pricing() {
 						</a>
 					</>
 				) }
+			</p>
+			<p style={ { textAlign: 'center', color: '#949494', fontSize: 12, margin: '0 auto 20px', maxWidth: 720, lineHeight: 1.5 } }>
+				{ REFUND_NOTE }
 			</p>
 
 			<Card size="medium">
@@ -168,6 +184,9 @@ function Pricing() {
 							</div>
 						) ) }
 					</div>
+					<p style={ { color: '#949494', fontSize: 12, marginBottom: 0, marginTop: 16, lineHeight: 1.5 } }>
+						{ PROVIDER_NOTE }
+					</p>
 				</CardBody>
 			</Card>
 		</div>
