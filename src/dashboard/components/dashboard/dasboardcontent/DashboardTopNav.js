@@ -53,10 +53,11 @@ export default function DashboardTopNav() {
             overflow: "hidden",
           }}
         >
-          {/* What's New */}
+          {/* What's New → the plugin changelog on the wp.org Developers tab. */}
           <a
-            href="https://atlasaidev.com/"
+            href="https://wordpress.org/plugins/text-to-audio/#developers"
             target="_blank"
+            rel="noopener noreferrer"
             className="btn d-flex align-items-center gap-2 tta-tab-style"
 
             // onMouseOver={(e) =>
