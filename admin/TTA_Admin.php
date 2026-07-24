@@ -676,13 +676,15 @@ class TTA_Admin
             );
         }
 
-        $this->atlasaidev_plugins();
-
-        // TTS-265: free-only "Pricing" submenu, sits right after "Our Plugins".
-        // Pro users already own the plugin, so they never see the upsell page.
+        // TTS-264: register Pricing BEFORE "Our Plugins" so the conversion page
+        // sits above the catalog. WP appends submenus in registration order here,
+        // so call order (not just the position arg) determines placement. Free-
+        // only — Pro users own the plugin and never see the upsell page.
         if (!TTA_Helper::is_atlasvoice_addon_functional()) {
             $this->tta_pricing_menu();
         }
+
+        $this->atlasaidev_plugins();
     }
 
     // Callback function to display the content of the page
@@ -1116,7 +1118,8 @@ class TTA_Admin
             'manage_options',
             $menu_slug,
             array($this, 'atlas_plugins_page'),
-            34
+            // TTS-264: 35 so the higher-intent "Pricing" page (34) sits above it.
+            35
         );
     }
 
@@ -1124,9 +1127,9 @@ class TTA_Admin
      * TTS-265: register the "Pricing" submenu and enqueue its React app.
      *
      * Mirrors atlasaidev_plugins(): the bundle only enqueues when the user is
-     * actually on the pricing screen, and the submenu registers at position 35
-     * so it lands directly after "Our Plugins" (34). Free-only — the caller in
-     * TTA_menu() gates this behind !is_atlasvoice_addon_functional().
+     * actually on the pricing screen, and the submenu registers at position 34
+     * so it sits just above "Our Plugins" (35) — conversion page first. Free-only
+     * — the caller in TTA_menu() gates this behind !is_atlasvoice_addon_functional().
      */
     public function tta_pricing_menu($menu_slug = 'atlasvoice-pricing') {
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page-name read for current-screen check
@@ -1174,7 +1177,8 @@ class TTA_Admin
             'manage_options',
             $menu_slug,
             array($this, 'tta_pricing_page'),
-            35
+            // TTS-264: 34 — placed just above "Our Plugins" (35); conversion first.
+            34
         );
     }
 
