@@ -135,7 +135,7 @@ function Pricing() {
 			<div style={ { textAlign: 'center' } }>
 				<h1 style={ { marginBottom: 4 } }>{ __( 'Upgrade to AtlasVoice Pro', 'text-to-audio' ) }</h1>
 				<p style={ { color: '#757575', margin: 0 } }>
-					{ __( '200+ AI voices, MP3 export and bulk generation — one plugin, every site you own.', 'text-to-audio' ) }
+					{ __( '4 AI voice engines, 80+ languages, MP3 export and read-along highlighting — one plugin, every site you own.', 'text-to-audio' ) }
 				</p>
 			</div>
 
