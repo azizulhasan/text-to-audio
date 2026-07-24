@@ -31,6 +31,8 @@
  */
 
 import { splitSentences } from './sentence-splitter.js';
+// TTS-263: floating "Listen to selection" control (fires tts_listen_selection).
+import { initSelectionControl } from './selection-control.js';
 
 const HL_WORD = 'atlasvoice-word';
 const HL_SENTENCE = 'atlasvoice-sentence';
@@ -40,9 +42,11 @@ const DEFAULTS = {
     // Off by default — highlighting is opt-in; the user turns it on in the dashboard.
     enabled: false,
     mode: 'sentence', // sentence | word | word_sentence — sentence works with any voice
-    wordBg: '#ffd54f',
+    // TTS-263: read-along palette — soft lavender sentence tint with a slightly
+    // deeper periwinkle for the current word; word text stays near-black.
+    wordBg: '#a5abf0',
     wordColor: '#202124',
-    sentenceBg: '#fff3b0',
+    sentenceBg: '#e8e7fe',
     dimEnabled: true,
     // a11y (WCAG 1.4.3): the dimmed (non-spoken) body text must stay readable.
     // 0.7 keeps the dimmed grey near the 4.5:1 minimum on a white background;
@@ -169,8 +173,8 @@ function injectStyles() {
         .map((s) => '.atlasvoice-reading-dim' + s)
         .join(',');
     const css =
-        '::highlight(atlasvoice-sentence){background-color:var(--atlasvoice-hl-sentence-bg,#fff3b0);}' +
-        '::highlight(atlasvoice-word){background-color:var(--atlasvoice-hl-word-bg,#ffd54f);color:var(--atlasvoice-hl-word-color,#202124);}' +
+        '::highlight(atlasvoice-sentence){background-color:var(--atlasvoice-hl-sentence-bg,#e8e7fe);}' +
+        '::highlight(atlasvoice-word){background-color:var(--atlasvoice-hl-word-bg,#a5abf0);color:var(--atlasvoice-hl-word-color,#202124);}' +
         dimSel + '{color:var(--atlasvoice-dim-color,rgba(60,64,67,0.7)) !important;transition:color .25s ease;}' +
         // a11y (WCAG 1.4.3, Windows High Contrast): in forced-colors mode use
         // system highlight colors so the highlight stays visible, and stop
@@ -228,6 +232,34 @@ class WrapperHighlighter {
      */
     static splitSentences(text = '') {
         return splitSentences(text);
+    }
+
+    /**
+     * TTS-263 — singleton accessor: the SAME per-button instances the wp.hooks
+     * listeners paint with, so companion code (selection control, Pro drivers)
+     * shares one text index instead of building parallel ones.
+     */
+    static get(buttonId) {
+        return getHighlighter(buttonId);
+    }
+
+    /**
+     * TTS-263 — enhanced sentence-band renderer hook (premium overlay).
+     *
+     * Free ships NO renderer, so the base always uses the CSS Custom Highlight
+     * API (the current behaviour, line gap and all). Pro registers an overlay
+     * renderer here to paint a gap-free banded sentence highlight. Registration
+     * is global on the class, so EVERY player — including player 1 (Default)
+     * when Pro is active — picks it up through the shared painter.
+     *
+     * A renderer is `{ paint(painter, range) => boolean, clear(painter) }`:
+     * `paint` returns true if it drew the band, or false to DECLINE (e.g. the
+     * range has no geometry / lives outside the wrapper) — in which case the
+     * base automatically falls back to the CSS-highlight sentence paint. So the
+     * overlay is never worse than Free, only better when it can render.
+     */
+    static registerSentenceRenderer(renderer) {
+        WrapperHighlighter._sentenceRenderer = renderer || null;
     }
 
     constructor(buttonId) {
@@ -311,6 +343,79 @@ class WrapperHighlighter {
         // canonicalize() is 1:1 (length-preserving), so offsets into `lower`
         // map directly back to `text` / DOM ranges.
         this.lower = canonicalize(this.text);
+    }
+
+    /**
+     * TTS-263 — map a live DOM Range (a user selection) to a [start, end) span
+     * in the flat indexed text. Clips naturally to the wrapper: nodes outside
+     * the index are skipped, so a selection that starts or ends outside the
+     * readable area yields just its in-wrapper part. Returns null when the
+     * selection doesn't intersect the indexed text at all.
+     */
+    spanForRange(range) {
+        if (!range || !this.nodes.length) {
+            return null;
+        }
+        let start = -1;
+        let end = -1;
+        for (const entry of this.nodes) {
+            const len = entry.node.nodeValue.length;
+            let before;
+            let after;
+            try {
+                // comparePoint: -1 = point before the range, 0 = inside, 1 = after.
+                before = range.comparePoint(entry.node, len) === -1; // node ends before the selection
+                after = range.comparePoint(entry.node, 0) === 1;     // node starts after the selection
+            } catch (e) {
+                continue; // node detached / different tree — ignore
+            }
+            if (before) {
+                continue;
+            }
+            if (after) {
+                break; // nodes are in document order — nothing further intersects
+            }
+            if (start === -1) {
+                start = entry.start + (range.startContainer === entry.node ? range.startOffset : 0);
+            }
+            end = entry.start + (range.endContainer === entry.node ? range.endOffset : len);
+        }
+        if (start === -1 || end <= start) {
+            return null;
+        }
+        return { start, end, text: this.text.slice(start, end) };
+    }
+
+    /** TTS-263 — widen a span's edges to whole words (mid-word drag tolerance). */
+    snapSpanToWords(span) {
+        let { start, end } = span;
+        const isWordChar = (ch) => !!ch && !/\s/.test(ch);
+        while (start > 0 && isWordChar(this.text[start - 1]) && isWordChar(this.text[start])) {
+            start--;
+        }
+        while (end < this.text.length && isWordChar(this.text[end - 1]) && isWordChar(this.text[end])) {
+            end++;
+        }
+        return { start, end, text: this.text.slice(start, end) };
+    }
+
+    /**
+     * TTS-263 — rough audio time range for a flat-text span, by character
+     * proportion of the indexed text. Generic fallback for drivers with no
+     * per-word timing (and for word drivers whose token match fails). The
+     * caller supplies the audio duration; `estimated: true` marks the result
+     * as best-effort.
+     */
+    estimateTimeRange(start, end, duration) {
+        const total = this.text.length;
+        if (!total || !duration || !isFinite(duration)) {
+            return null;
+        }
+        return {
+            tStart: Math.max(0, (Math.min(start, total) / total) * duration),
+            tEnd: Math.min(duration, (Math.min(end, total) / total) * duration),
+            estimated: true,
+        };
     }
 
     /** Map a [start, end) span in the flat text back to a DOM Range. */
@@ -401,15 +506,37 @@ class WrapperHighlighter {
 
     /** Paint the last-located sentence range (used by sentence mode + fallback). */
     _paintSentence() {
-        if (!this.supported || !this._sentence || !this._lastSentence) {
+        if (!this._lastSentence) {
             return;
         }
         const range = this._rangeAt(this._lastSentence.start, this._lastSentence.end);
         if (!range) {
             return;
         }
-        this._sentence.clear();
-        this._sentence.add(range);
+        // TTS-263: offer the band to the enhanced (Pro overlay) renderer first,
+        // keeping the located range so it can reposition on resize/reflow. It
+        // returns false when it can't draw (no geometry) → fall back to the base
+        // CSS Custom Highlight paint below. Free registers no renderer, so this
+        // is always the CSS path there.
+        this._sentenceRange = range;
+        let enhanced = false;
+        const renderer = WrapperHighlighter._sentenceRenderer;
+        if (renderer) {
+            try {
+                enhanced = !!renderer.paint(this, range);
+            } catch (e) {
+                enhanced = false;
+            }
+        }
+        if (this.supported && this._sentence) {
+            // Overlay owns the band → keep the CSS sentence highlight empty (no
+            // double paint); otherwise paint it as before. The WORD highlight is
+            // untouched — it stays on the CSS API in both Free and Pro.
+            this._sentence.clear();
+            if (!enhanced) {
+                this._sentence.add(range);
+            }
+        }
         // Keep the sentence in view. In word mode the per-word highlight handles
         // scrolling; in sentence mode (and fallback) scroll here, else the page
         // never follows the read down a long article.
@@ -470,6 +597,14 @@ class WrapperHighlighter {
             if (this._word) this._word.clear();
             if (this._sentence) this._sentence.clear();
         }
+        // TTS-263: tear down the enhanced overlay band too, if Pro drew one.
+        const renderer = WrapperHighlighter._sentenceRenderer;
+        if (renderer && typeof renderer.clear === 'function') {
+            try {
+                renderer.clear(this);
+            } catch (e) { /* no-op */ }
+        }
+        this._sentenceRange = null;
     }
 
     /** Full stop: clear highlights, undim, reset the cursor + fallback state. */
@@ -523,6 +658,13 @@ if (window.wp && window.wp.hooks && !window.__ttsHighlighterReady) {
     wp.hooks.addAction('tts_highlight_clear', 'tts/highlighter', (buttonId) => {
         getHighlighter(buttonId).stop();
     });
+}
+
+// TTS-263: wire the "Listen to selection" floating control (its own module —
+// this painter only lends it the singleton accessor). Gating on the
+// tta__selection_listen_enabled setting happens inside, per selection.
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    initSelectionControl(getHighlighter);
 }
 
 export default WrapperHighlighter;

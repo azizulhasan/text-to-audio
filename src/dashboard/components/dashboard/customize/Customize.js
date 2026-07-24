@@ -853,7 +853,7 @@ export default function Customize() {
         </Col>
 
         <Col xs={12} lg={4}>
-          <UpgradeToPro promotionType={"youtube"} />
+          <UpgradeToPro promotionType={"youtube"} showDemoCard={true} />
         </Col>
       </Row>
     </Container>

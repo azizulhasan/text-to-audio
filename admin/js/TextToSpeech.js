@@ -602,6 +602,85 @@ export default class TextToSpeech {
 }
 
 /**
+ * TTS-263 — selection playback for the speechSynthesis players (1 & 2).
+ *
+ * The floating selection control (admin/js/tts/selection-control.js) fires
+ * `tts_listen_selection` with the selected text; this handler speaks it. The
+ * MP3 players (3-6) have their own subscriber in Pro that seeks the audio
+ * instead — this one bails for them.
+ *
+ * A dedicated per-button speaker instance is reused for selections rather than
+ * the button's own instance, so the play button's pause/resume state machine is
+ * never fought over; any in-flight full-post read is stopped and its button
+ * reset to "listen" first. Because the read-along highlight hooks fire from
+ * speak() as usual, the selection also highlights while it's read (when
+ * highlighting is enabled).
+ */
+if (typeof window !== 'undefined' && window.wp && window.wp.hooks && !window.__ttsSelectionSpeakReady) {
+    window.__ttsSelectionSpeakReady = true;
+    const selectionSpeakers = {};
+
+    wp.hooks.addAction('tts_listen_selection', 'tts/selection-speak', (payload) => {
+        const playerId = parseInt(window?.ttsObj?.player_id ?? window?.TTS?.extra?.player_id ?? 1, 10);
+        if (playerId !== 1 && playerId !== 2) {
+            return; // MP3 players are handled by the Pro subscriber
+        }
+        if (!payload || !payload.text || !payload.text.trim()) {
+            return;
+        }
+
+        // The normal read gets pronunciation aliases applied server-side; the
+        // selection is raw DOM text, so apply the same aliases here.
+        let text = payload.text;
+        const aliasData = window?.ttsObj?.settings?.aliases;
+        const aliases = aliasData ? Object.values(aliasData) : [];
+        for (const alias of aliases) {
+            if (alias && alias.actual_text) {
+                text = text.split(alias.actual_text).join(alias.to_read ?? '');
+            }
+        }
+
+        // Stop an in-flight full-post read cleanly: speak({queue:false}) would
+        // cancel its audio anyway, but its button/timers must be reset too or
+        // the play button is left saying "Pause" with nothing playing.
+        const cur = window.TextToSpeech;
+        if (cur instanceof TextToSpeech && cur.speech && cur.listenStatus && cur.listenStatus !== 'listen') {
+            try {
+                cur.speech.cancel();
+            } catch (e) { /* no-op */ }
+            clearTimeout(cur.timer);
+            clearInterval(cur.shouldCancelTimer);
+            cur.timer = null;
+            cur.shouldCancelTimer = null;
+            cur.listenStatus = 'listen';
+            cur.displayButtonText('listen');
+            const original = window.TTS?.contents?.[cur.buttonId];
+            if (original) {
+                cur.content = original;
+                cur.splittedSentances = splitSentences(original);
+            }
+        }
+
+        // One hidden speaker per button, reused across selections (so repeated
+        // selections don't stack per-instance visibilitychange listeners).
+        let speaker = selectionSpeakers[payload.buttonId];
+        if (speaker && speaker.browser) {
+            speaker.content = text;
+            speaker.splittedSentances = splitSentences(text);
+            speaker.listenStatus = 'listen';
+            speaker.speak(speaker.speech, text, false);
+        } else {
+            // Detached dummy button: keeps the constructor's getElementById
+            // fallback from grabbing a page element and lets displayButtonText
+            // no-op — the selection speaker must never repaint the play button.
+            speaker = new TextToSpeech(payload.buttonId, text, document.createElement('button'), window.TTS);
+            selectionSpeakers[payload.buttonId] = speaker;
+            speaker._init(null, false);
+        }
+    });
+}
+
+/**
  * Load text to speech after DOMContentLoaded in free version.
  */
 if (window?.ttsObj?.is_atlasvoice_addon_functional) {

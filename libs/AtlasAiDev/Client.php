@@ -21,7 +21,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Class Client
  */
 class Client {
-	
+
+	/**
+	 * Short unique prefix of the host plugin. Namespaces every CSS class,
+	 * element id, AJAX action, and nonce this library outputs, so multiple
+	 * plugins bundling the library never collide. Change this single value
+	 * when copying the library into another plugin.
+	 */
+	const PLUGIN_PREFIX = 'atlasvoice';
+
 	/**
 	 * The client version.
 	 *
