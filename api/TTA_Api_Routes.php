@@ -793,15 +793,24 @@ class TTA_Api_Routes {
 			$opacity = isset( $fields['tta__highlight_dim_opacity'] ) ? floatval( $fields['tta__highlight_dim_opacity'] ) : 0.7;
 			$opacity = max( 0.1, min( 0.85, $opacity ) );
 
+			// TTS-263 — announcement strategy for the selection-listen feature.
+			$announce = isset( $fields['tta__selection_announce'] ) ? $fields['tta__selection_announce'] : 'tip';
+			if ( ! in_array( $announce, array( 'tip', 'badge', 'both', 'off' ), true ) ) {
+				$announce = 'tip';
+			}
+
 			$clean = array(
 				'tta__highlight_enabled'     => ! empty( $fields['tta__highlight_enabled'] ),
 				'tta__highlight_mode'        => $mode,
-				'tta__highlight_word_bg'     => $word_bg ? $word_bg : '#ffd54f',
+				'tta__highlight_word_bg'     => $word_bg ? $word_bg : '#a5abf0',
 				'tta__highlight_word_color'  => $word_color ? $word_color : '#202124',
-				'tta__highlight_sentence_bg' => $sentence_bg ? $sentence_bg : '#fff3b0',
+				'tta__highlight_sentence_bg' => $sentence_bg ? $sentence_bg : '#e8e7fe',
 				'tta__highlight_dim_enabled' => ! empty( $fields['tta__highlight_dim_enabled'] ),
 				'tta__highlight_dim_opacity' => $opacity,
 				'tta__highlight_autoscroll'  => ! empty( $fields['tta__highlight_autoscroll'] ),
+				// TTS-263 — "Listen to selected text" floating control (all players).
+				'tta__selection_listen_enabled' => ! empty( $fields['tta__selection_listen_enabled'] ),
+				'tta__selection_announce'       => $announce,
 			);
 
 			update_option( 'tta_highlight_settings', $clean, false );

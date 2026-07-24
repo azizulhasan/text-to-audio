@@ -139,7 +139,7 @@ class Promotions {
 		// only run if there is active promotions.
 		if ( count( $this->promotions ) ) {
 			add_action( 'admin_notices', [ $this, '__show_promos' ], 10 );
-			add_action( 'wp_ajax_atlasaidev_dismiss_promo', [ $this, '__atlasaidev_dismiss_promo' ], 10 );
+			add_action( 'wp_ajax_' . Client::PLUGIN_PREFIX . '_dismiss_promo', [ $this, '__atlasaidev_dismiss_promo' ], 10 );
 			add_action( 'admin_print_styles', [ $this, '__get_promo_styles' ], 99 );
 			add_action( 'admin_enqueue_scripts', [ $this, '__enqueue_deps' ], 10 );
 			add_action( 'admin_print_footer_scripts', [ $this, '__get_promo_scripts' ], 10 );
@@ -151,6 +151,7 @@ class Promotions {
 	 * @return void
 	 */
 	public function __show_promos() {
+		$ns = Client::PLUGIN_PREFIX;
 		foreach ( $this->promotions as $promotion ) {
 			$wrapperStyles  = '';
 			$buttonStyles   = '';
@@ -183,24 +184,27 @@ class Promotions {
 					$buttonStyles .= 'color: ' . $promotion->button->color . ';';
 				}
 			}
-			$noticeClasses = 'notice notice-success atlasaidev-promo';
-			if ( $is_dismissible ) {
-				$noticeClasses .= ' is-dismissible';
-			}
+			// Note: deliberately NOT using core's `is-dismissible` class — its
+			// dismiss button is injected by admin JS and renders unreliably on
+			// custom-colored notices. We output our own button below instead.
+			$noticeClasses = 'notice notice-success ' . $ns . '-promo';
 	?>
-		<div class="<?php echo esc_attr( $noticeClasses ); ?> " id="<?php echo esc_attr( $promotion->hash ); ?>" data-nonce="<?php echo esc_attr( wp_create_nonce( 'atlasaidev-dismiss-promo' ) ); ?>" style="<?php echo esc_attr( $wrapperStyles ); ?>">
-			<div class="atlasaidev-promo-wrap<?php if ( ! $has_columns ) echo ' no-column'; ?>">
+		<div class="<?php echo esc_attr( $noticeClasses ); ?> " id="<?php echo esc_attr( $promotion->hash ); ?>" data-nonce="<?php echo esc_attr( wp_create_nonce( $ns . '-dismiss-promo' ) ); ?>" style="<?php echo esc_attr( $wrapperStyles ); ?>">
+			<?php if ( $is_dismissible ) { ?>
+			<button type="button" class="notice-dismiss"><span class="screen-reader-text"><?php esc_html_e( 'Dismiss this notice.', 'text-to-audio' ); ?></span></button>
+			<?php } ?>
+			<div class="<?php echo $ns; ?>-promo-wrap<?php if ( ! $has_columns ) echo ' no-column'; ?>">
 				<?php if ( isset( $promotion->logo ) && ! empty( $promotion->logo ) ) { ?>
-				<div class="atlasaidev-logo atlasaidev-column">
+				<div class="<?php echo $ns; ?>-logo <?php echo $ns; ?>-column">
 					<img src="<?php echo esc_url( $promotion->logo->src ); ?>" alt="<?php echo esc_attr( $promotion->logo->alt ); ?>">
 				</div>
 				<?php } ?>
-				<div class="atlasaidev-details<?php if ( $has_columns ) echo ' atlasaidev-column'; ?>">
+				<div class="<?php echo $ns; ?>-details<?php if ( $has_columns ) echo ' ' . $ns . '-column'; ?>">
 					<?php echo wp_kses_post( $promotion->content ); ?>
 				</div>
 				<?php if ( isset( $promotion->button ) && ! empty( $promotion->button ) ) { ?>
-					<div class="atlasaidev-btn-container atlasaidev-column">
-						<a href="<?php echo esc_url( $promotion->button->url ); ?>" class="button atlasaidev-promo-btn" style="<?php echo esc_attr( $buttonStyles ); ?>" target="_blank"><?php echo wp_kses_post( $promotion->button->label ); ?></a>
+					<div class="<?php echo $ns; ?>-btn-container <?php echo $ns; ?>-column">
+						<a href="<?php echo esc_url( $promotion->button->url ); ?>" class="button <?php echo $ns; ?>-promo-btn" style="<?php echo esc_attr( $buttonStyles ); ?>" target="_blank"><?php echo wp_kses_post( $promotion->button->label ); ?></a>
 						<?php
 						if ( isset( $promotion->button->after ) && ! empty( $promotion->button->after ) ) {
 							echo wp_kses_post( $promotion->button->after );
@@ -235,10 +239,18 @@ class Promotions {
 		}
 		// decode to array.
 		$promos = json_decode( $promos );
-		
+
+		// TTS-262: guard — an empty body, a network hiccup, or a malformed feed
+		// makes json_decode() return null; array_filter(null) would fatal.
+		if ( ! is_array( $promos ) ) {
+			$promos = array();
+		}
+
 		// filter promotions by date.
 		$promos = array_filter( $promos, [ $this, '__is_promo_active' ] );
 		if ( ! empty( $promos ) ) {
+			// TTS-262: filter by target audience (free|pro|all).
+			$promos = array_filter( $promos, [ $this, '__is_promo_for_audience' ] );
 			// filter promotions by list of hidden promotions by the user.
 			$promos = array_filter( $promos, [ $this, '__is_promo_hidden' ] );
 		}
@@ -274,6 +286,27 @@ class Promotions {
 	public function __is_promo_hidden( $promo ) {
 		return ! in_array( $promo->hash, $this->hiddenPromotions );
 	}
+
+	/**
+	 * TTS-262 — check if a promo targets the current audience.
+	 *
+	 * Each promo may declare `"audience": "free" | "pro" | "all"` (default
+	 * "free" — never nag Pro users unless explicitly opted in). The host plugin
+	 * resolves the current site's audience via the `{slug}_promo_audience`
+	 * filter (default "free"); the AtlasVoice free plugin returns "pro" when the
+	 * Pro add-on is active and "free" otherwise. Since this library is generic,
+	 * the pro/free determination lives in the host, not here.
+	 *
+	 * @param object $promo the promo object; optional `audience` property.
+	 *
+	 * @return bool true if the promo should be shown to the current audience.
+	 */
+	public function __is_promo_for_audience( $promo ) {
+		$audience = apply_filters( $this->client->getSlug() . '_promo_audience', 'free' );
+		$target   = ( isset( $promo->audience ) && $promo->audience ) ? $promo->audience : 'free';
+
+		return 'all' === $target || $target === $audience;
+	}
 	
 	/**
 	 * Js Dependencies
@@ -289,14 +322,15 @@ class Promotions {
 	 * @return void
 	 */
 	public function __get_promo_scripts() {
+		$ns = Client::PLUGIN_PREFIX;
 	?>
 		<!--suppress ES6ConvertVarToLetConst -->
 		<script>
 			(function($){
-                $('body').on('click', '.atlasaidev-promo .notice-dismiss', function (e) {
+                $('body').on('click', '.<?php echo $ns; ?>-promo .notice-dismiss', function (e) {
                     e.preventDefault();
-                    var $parent = $(this).closest( '.atlasaidev-promo' );
-                    wp.ajax.post('atlasaidev_dismiss_promo', {
+                    var $parent = $(this).closest( '.<?php echo $ns; ?>-promo' );
+                    wp.ajax.post('<?php echo $ns; ?>_dismiss_promo', {
                         dismissed:  true,
 	                    hash:       $parent.attr( 'id' ),
                         _wpnonce:   $parent.data( 'nonce' ),
@@ -312,34 +346,39 @@ class Promotions {
 	 * @return void
 	 */
 	public function __get_promo_styles() {
+		$ns = Client::PLUGIN_PREFIX;
 	?>
 		<!--suppress CssUnusedSymbol -->
 		<style>
-			.atlasaidev-promo { border: none; padding: 15px 0; }
-			.atlasaidev-promo-wrap { display: flex; justify-content: center; align-items: center; text-align: center; color: inherit; max-width: 1820px; margin: 0 auto; }
-			.atlasaidev-promo-wrap.no-column{ display: block; }
-			.atlasaidev-column.atlasaidev-logo { flex: 0 0 25%; }
-			.atlasaidev-column.atlasaidev-logo img { height: 48px; width: auto; }
-			.atlasaidev-details {display: block;}
-			.atlasaidev-details h3 { color: inherit; font-size: 30px; margin: 12px 0; }
-			.atlasaidev-details p { color: inherit; font-size: 15px; }
-			.atlasaidev-column.atlasaidev-details { flex: 0 0 50%; }
-			.atlasaidev-column.atlasaidev-btn-container { flex: 0 0 25%; }
-			.atlasaidev-promo-wrap .atlasaidev-promo-btn { position: relative; padding: 15px; border-radius: 30px; font-size: 15px; font-weight: 700; display: block; color: inherit; text-decoration: none; max-width: 200px; margin: 0 auto; line-height: normal; height: auto; box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.1); }
-			.atlasaidev-promo-wrap .atlasaidev-promo-btn:focus,
-			.atlasaidev-promo-wrap .atlasaidev-promo-btn:hover,
-			.atlasaidev-promo-wrap .atlasaidev-promo-btn:active { box-shadow: inset 3px 4px 6px 0 rgba(1, 9, 12, 0.25); }
-			.atlasaidev-promo-wrap .atlasaidev-promo-btn:active { top: 1px; }
+			.<?php echo $ns; ?>-promo { border: none; padding: 15px 0; position: relative; }
+			.<?php echo $ns; ?>-promo .notice-dismiss { position: absolute; top: 8px; right: 8px; margin: 0; padding: 6px; border: none; background: transparent; color: inherit; cursor: pointer; line-height: 1; }
+			.<?php echo $ns; ?>-promo .notice-dismiss:before { content: "\00d7"; font-family: inherit; font-size: 24px; font-weight: 400; line-height: 1; color: inherit; opacity: .8; }
+			.<?php echo $ns; ?>-promo .notice-dismiss:hover:before,
+			.<?php echo $ns; ?>-promo .notice-dismiss:focus:before { opacity: 1; }
+			.<?php echo $ns; ?>-promo-wrap { display: flex; justify-content: center; align-items: center; text-align: center; color: inherit; max-width: 1820px; margin: 0 auto; }
+			.<?php echo $ns; ?>-promo-wrap.no-column{ display: block; }
+			.<?php echo $ns; ?>-column.<?php echo $ns; ?>-logo { flex: 0 0 25%; }
+			.<?php echo $ns; ?>-column.<?php echo $ns; ?>-logo img { height: 48px; width: auto; }
+			.<?php echo $ns; ?>-details {display: block;}
+			.<?php echo $ns; ?>-details h3 { color: inherit; font-size: 30px; margin: 12px 0; }
+			.<?php echo $ns; ?>-details p { color: inherit; font-size: 15px; }
+			.<?php echo $ns; ?>-column.<?php echo $ns; ?>-details { flex: 0 0 50%; }
+			.<?php echo $ns; ?>-column.<?php echo $ns; ?>-btn-container { flex: 0 0 25%; }
+			.<?php echo $ns; ?>-promo-wrap .<?php echo $ns; ?>-promo-btn { position: relative; padding: 15px; border-radius: 30px; font-size: 15px; font-weight: 700; display: block; color: inherit; text-decoration: none; max-width: 200px; margin: 0 auto; line-height: normal; height: auto; box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.1); }
+			.<?php echo $ns; ?>-promo-wrap .<?php echo $ns; ?>-promo-btn:focus,
+			.<?php echo $ns; ?>-promo-wrap .<?php echo $ns; ?>-promo-btn:hover,
+			.<?php echo $ns; ?>-promo-wrap .<?php echo $ns; ?>-promo-btn:active { box-shadow: inset 3px 4px 6px 0 rgba(1, 9, 12, 0.25); }
+			.<?php echo $ns; ?>-promo-wrap .<?php echo $ns; ?>-promo-btn:active { top: 1px; }
 			@media screen and (max-width: 1200px) {
-				.atlasaidev-promo-wrap { display: block; overflow: hidden; }
-				.atlasaidev-column .atlasaidev-logo { width: 100%; margin: 0 auto; }
-				.atlasaidev-column .atlasaidev-details { width: 68%; float: left; margin-right: 4%; margin-top: 32px; }
-				.atlasaidev-column.atlasaidev-btn-container { width: 28%; float: right; margin-top: 42px; }
+				.<?php echo $ns; ?>-promo-wrap { display: block; overflow: hidden; }
+				.<?php echo $ns; ?>-column .<?php echo $ns; ?>-logo { width: 100%; margin: 0 auto; }
+				.<?php echo $ns; ?>-column .<?php echo $ns; ?>-details { width: 68%; float: left; margin-right: 4%; margin-top: 32px; }
+				.<?php echo $ns; ?>-column.<?php echo $ns; ?>-btn-container { width: 28%; float: right; margin-top: 42px; }
 			}
 			@media screen and (max-width: 782px) {
-				.atlasaidev-promo-wrap .atlasaidev-details { float: none; width: 100%; }
-				.atlasaidev-btn-container { float: none; width: 100%; margin-top: 32px; }
-				.atlasaidev-column.atlasaidev-btn-container { width: 100%; float: right; margin-top: 42px; }
+				.<?php echo $ns; ?>-promo-wrap .<?php echo $ns; ?>-details { float: none; width: 100%; }
+				.<?php echo $ns; ?>-btn-container { float: none; width: 100%; margin-top: 32px; }
+				.<?php echo $ns; ?>-column.<?php echo $ns; ?>-btn-container { width: 100%; float: right; margin-top: 42px; }
 			}
 		</style>
 	<?php
@@ -353,7 +392,7 @@ class Promotions {
 		if (
 				isset( $_REQUEST['dismissed'], $_REQUEST['hash'], $_REQUEST['_wpnonce'] ) &&
 				'true' == $_REQUEST['dismissed'] && ! empty( $_REQUEST['hash'] ) &&
-				wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ), 'atlasaidev-dismiss-promo' )
+				wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ), Client::PLUGIN_PREFIX . '-dismiss-promo' )
 		) {
 			$this->hiddenPromotions = array_merge( $this->hiddenPromotions, [ sanitize_text_field( wp_unslash( $_REQUEST['hash'] ) ) ] );
 			update_user_option( $this->currentUser, $this->client->getSlug() . '_hidden_promos', $this->hiddenPromotions );

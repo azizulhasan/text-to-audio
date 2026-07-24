@@ -60,26 +60,41 @@ final class TTA_Lib_AtlasAiDev {
         }
         // Load Client
         $this->client = new \AtlasAiDev\AppService\Client( 'dec06622-980f-4674-8b08-72e23cc9e70f', TEXT_TO_AUDIO_PLUGIN_NAME, TEXT_TO_AUDIO_ROOT_FILE );
-        // Load
-        $this->insights  = $this->client->insights(); // Plugin Insights
-//        $this->promotion = $this->client->promotions(); // Promo offers
-//        $this->promotion->set_source();
 
-        // Initialize
-        $this->insightInit();
-//        $this->promotion->init();
+        // TTS-262: remote promotions feed. Runs in BOTH states (Free-only AND
+        // Pro-active) so per-promo audience targeting can reach Pro users too —
+        // the audience filter below decides who actually sees each promo. Single
+        // free-owned JSON; cached 12h, date-windowed, per-user dismissible.
+        // Editing the JSON on GitHub publishes/retires notices without a release.
+        $this->promotion = $this->client->promotions();
+        $this->promotion->set_source( 'https://raw.githubusercontent.com/atlasaidev/plugins/main/text-to-audio-promotions.json' );
+        $this->promotion->init();
 
+        // Resolve the current audience for each promo's `audience` field
+        // (free|pro|all, default free). Because Pro hard-depends on Free, the
+        // only states are Free-only and Pro-active — so "is Pro loaded" is the
+        // whole distinction. Evaluated lazily when promos are fetched.
+        add_filter( $this->client->getSlug() . '_promo_audience', function () {
+            return defined( 'TTA_PRO_PLUGIN_PATH' ) ? 'pro' : 'free';
+        } );
 
-        // Filter updater api data
-        add_filter(
-            'AtlasAiDev_' . $this->client->getSlug() . '_plugin_api_info',
-            array(
-                $this,
-                '__plugin_api_info',
-            ),
-            10,
-            1
-        );
+        // Insights/telemetry stay FREE-ONLY: suppressed when Pro is active (Pro
+        // ships its own tracker) to avoid double-counting.
+        if ( ! defined( 'TTA_PRO_PLUGIN_PATH' ) ) {
+            $this->insights = $this->client->insights();
+            $this->insightInit();
+
+            // Filter updater api data
+            add_filter(
+                'AtlasAiDev_' . $this->client->getSlug() . '_plugin_api_info',
+                array(
+                    $this,
+                    '__plugin_api_info',
+                ),
+                10,
+                1
+            );
+        }
     }
 
     /**

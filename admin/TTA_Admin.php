@@ -111,6 +111,10 @@ class TTA_Admin
 
         $this->localize_data = [
             'admin_url' => admin_url('/'),
+            // TTS-264: internal Pro pricing page (free-only submenu). The React
+            // upgrade CTAs target this in-admin page instead of the external
+            // marketing site — lower friction, one-click Freemius checkout.
+            'pricing_url' => admin_url('admin.php?page=atlasvoice-pricing'),
             'buttonTextArr' => get_option('tta__button_text_arr'),
             // TTS-258: ajax_url (admin-ajax.php) removed -- no JS reads
             // ttsObj.ajax_url; it only leaked the /wp-admin path into page source.
@@ -569,6 +573,11 @@ class TTA_Admin
             );
         }
 
+        // TTS-264: the player bundle now uses wp.i18n.__() (selection-control.js),
+        // so wp-i18n must load first. Script translations are registered per
+        // handle below (wp_set_script_translations).
+        array_push($dependencies, 'wp-i18n');
+
         // TTS-247: ship countries-and-timezones locally instead of jsDelivr CDN (wp.org Guideline 8).
         wp_enqueue_script('atlasvoice-timezone', plugin_dir_url(__FILE__) . 'js/vendor/countries-and-timezones.min.js', [], '3.9.0', true);
         array_push($dependencies, 'atlasvoice-timezone');
@@ -606,9 +615,13 @@ class TTA_Admin
         if ($player_id > 1) {
             wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', $dependencies, $this->asset_version('js/build/TextToSpeech.min.js'), true);
             wp_localize_script('TextToSpeech', 'ttsObj', $frontend_localize_data);
+            // TTS-264: load JS translations for the bundled selection-control strings.
+            wp_set_script_translations('TextToSpeech', 'text-to-audio', plugin_dir_path(dirname(__FILE__)) . 'languages');
         } else if ($player_id == 1) {
             wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-button.min.js', $dependencies, $this->asset_version('js/build/text-to-audio-button.min.js'), true);
             wp_localize_script('text-to-audio-button', 'ttsObj', $frontend_localize_data);
+            // TTS-264: load JS translations for the bundled selection-control strings.
+            wp_set_script_translations('text-to-audio-button', 'text-to-audio', plugin_dir_path(dirname(__FILE__)) . 'languages');
             // TTS-249 (I2): player 1 renders in the light DOM, so its CSS is a
             // proper enqueued stylesheet (not a JS-injected <style> tag). The
             // dynamic per-button values (colours/size/border/margins + hover &
@@ -661,6 +674,14 @@ class TTA_Admin
                 [$this, 'bulk_mp3_generate'],
                 33, // Position (optional)
             );
+        }
+
+        // TTS-264: register Pricing BEFORE "Our Plugins" so the conversion page
+        // sits above the catalog. WP appends submenus in registration order here,
+        // so call order (not just the position arg) determines placement. Free-
+        // only — Pro users own the plugin and never see the upsell page.
+        if (!TTA_Helper::is_atlasvoice_addon_functional()) {
+            $this->tta_pricing_menu();
         }
 
         $this->atlasaidev_plugins();
@@ -1097,8 +1118,79 @@ class TTA_Admin
             'manage_options',
             $menu_slug,
             array($this, 'atlas_plugins_page'),
+            // TTS-264: 35 so the higher-intent "Pricing" page (34) sits above it.
+            35
+        );
+    }
+
+    /**
+     * TTS-265: register the "Pricing" submenu and enqueue its React app.
+     *
+     * Mirrors atlasaidev_plugins(): the bundle only enqueues when the user is
+     * actually on the pricing screen, and the submenu registers at position 34
+     * so it sits just above "Our Plugins" (35) — conversion page first. Free-only
+     * — the caller in TTA_menu() gates this behind !is_atlasvoice_addon_functional().
+     */
+    public function tta_pricing_menu($menu_slug = 'atlasvoice-pricing') {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page-name read for current-screen check
+        if (!empty($_REQUEST['page']) && $_REQUEST['page'] === $menu_slug) {
+            // wp-scripts emits a sibling manifest of externalized deps + a
+            // content hash; fall back to a sane dependency set if it's missing.
+            $asset_file = TTA_PLUGIN_PATH . 'build/pricing/index.asset.php';
+            $asset = file_exists($asset_file)
+                ? include $asset_file
+                : array('dependencies' => array('wp-element', 'wp-components', 'wp-i18n'), 'version' => $this->version);
+
+            wp_enqueue_script(
+                'tta-pricing',
+                TTA_PLUGIN_URL . 'build/pricing/index.js',
+                $asset['dependencies'],
+                $asset['version'],
+                true
+            );
+            wp_set_script_translations(
+                'tta-pricing',
+                'text-to-audio',
+                TTA_PLUGIN_PATH . 'languages'
+            );
+            // @wordpress/components styling (Card, Button, etc.).
+            wp_enqueue_style('wp-components');
+
+            $pricing_utm = array(
+                'utm_source'   => 'atlasvoice_free',
+                'utm_medium'   => 'plugin',
+                'utm_campaign' => 'pricing',
+                'utm_content'  => 'pricing_page',
+            );
+            wp_localize_script('tta-pricing', 'ttsPricingData', array(
+                'is_pro_active' => TTA_Helper::is_atlasvoice_addon_functional(),
+                'demo_url'      => add_query_arg($pricing_utm, 'https://atlasaidev.com/plugins/text-to-speech-pro/demo/'),
+                // Link out to the full marketing page (reviews, FAQ, comparison
+                // table) for users who want the deeper pitch before buying.
+                'compare_url'   => add_query_arg($pricing_utm, 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/'),
+            ));
+        }
+        add_submenu_page(
+            TEXT_TO_AUDIO_TEXT_DOMAIN,
+            __('Pricing', 'text-to-audio'),
+            __('Pricing', 'text-to-audio'),
+            'manage_options',
+            $menu_slug,
+            array($this, 'tta_pricing_page'),
+            // TTS-264: 34 — placed just above "Our Plugins" (35); conversion first.
             34
         );
+    }
+
+    /**
+     * TTS-265: Pricing page callback — React mounts into #tta-pricing-root.
+     */
+    public function tta_pricing_page() {
+        echo '<div class="wrap">';
+        echo '<h1 class="screen-reader-text">' . esc_html__('AtlasVoice Pro Pricing', 'text-to-audio') . '</h1>';
+        echo '<hr class="wp-header-end">';
+        echo '<div id="tta-pricing-root"></div>';
+        echo '</div>';
     }
 
     /**
