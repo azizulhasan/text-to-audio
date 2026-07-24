@@ -189,6 +189,14 @@ function Pricing() {
 					</p>
 				</CardBody>
 			</Card>
+
+			{ DATA.compare_url && (
+				<p style={ { textAlign: 'center', fontSize: 13, margin: '18px 0 0' } }>
+					<a href={ DATA.compare_url } target="_blank" rel="noopener noreferrer" style={ { color: BRAND } }>
+						{ __( 'See the full comparison, reviews and FAQ ↗', 'text-to-audio' ) }
+					</a>
+				</p>
+			) }
 		</div>
 	);
 }

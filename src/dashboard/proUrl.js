@@ -46,4 +46,22 @@ export const proUrl = (content = '', page = 'pricing') => {
     return base + (base.indexOf('?') === -1 ? '?' : '&') + params.toString();
 };
 
+/**
+ * TTS-264 — URL of the internal (in-admin) Pro pricing page.
+ *
+ * Upgrade CTAs target this in-context page (lower friction, one-click Freemius
+ * checkout) instead of the external marketing site. Falls back to the external
+ * pricing page if the localized admin URL isn't present.
+ *
+ * @param {string} [content] - utm_content slug used only for the external fallback.
+ * @returns {string}
+ */
+export const pricingPageUrl = (content = '') => {
+    const o =
+        (typeof window !== 'undefined' &&
+            (window.tta_obj || window.ttsObj || window.ttsWizardData)) ||
+        {};
+    return o.pricing_url || proUrl(content, 'pricing');
+};
+
 export default proUrl;

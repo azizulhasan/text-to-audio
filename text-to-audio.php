@@ -247,6 +247,16 @@ class TTA_Init
             'review' => sprintf('<a href="%s" target="_blank">%s</a>', $review, __('Write a Review', 'text-to-audio')),
         );
 
+        // TTS-264: free-only "Go Pro" action link -> the internal Pricing page.
+        // Prepended and colour-accented so it stands out on the Plugins screen.
+        if (!is_atlasvoice_addon_functional()) {
+            $pricing_url = esc_url(admin_url() . 'admin.php?page=atlasvoice-pricing');
+            $custom_actions = array_merge(
+                array('go_pro' => sprintf('<a href="%s" style="color:#184c53;font-weight:600;">%s</a>', $pricing_url, __('Go Pro', 'text-to-audio'))),
+                $custom_actions
+            );
+        }
+
         // add the links to the front of the actions list
         return array_merge($custom_actions, $actions);
 
