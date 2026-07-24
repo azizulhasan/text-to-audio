@@ -355,17 +355,21 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
                             >
                                 {__('Go to Dashboard', 'text-to-audio')}
                             </a>
+                            {/* TTS-264: post-go-live is an experience moment, not a
+                                buy moment — a soft "hear the live demo" converts better
+                                here than a hard pricing push (the demo page links to
+                                pricing anyway). Free-users only. */}
                             {!wizardData.is_atlasvoice_addon_functional && (
                                 <a
-                                    href={proUrl('finish_upgrade_btn')}
+                                    href={proUrl('finish_demo_btn', 'demo')}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     style={styles.btnPro}
                                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#0369a1'; }}
                                     onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#0284c7'; }}
                                 >
-                                    <span aria-hidden="true">{'★'}</span>
-                                    {__('Upgrade to Pro', 'text-to-audio')}
+                                    <span aria-hidden="true">{'▶'}</span>
+                                    {__('Hear the live demo', 'text-to-audio')}
                                 </a>
                             )}
                         </div>
@@ -413,68 +417,10 @@ const StepFinish = ({ selectedPostType, listening, customize, analytics }) => {
                 )}
             </div>
 
-            {/* ============================================================ */}
-            {/* Section 3: Pro Upsell                                         */}
-            {/* ============================================================ */}
-            {!wizardData.is_atlasvoice_addon_functional && (
-                <div style={styles.proSection}>
-                    <h3 style={styles.proTitle}>
-                        {__('Hear the difference with Pro', 'text-to-audio')}
-                    </h3>
-                    <div style={styles.proCards}>
-                        <div style={styles.proCard}>
-                            <span style={styles.proCardIcon} aria-hidden="true">
-                                {'\uD83E\uDD16'}
-                            </span>
-                            <div style={styles.proCardTitle}>
-                                {__('AI Voices', 'text-to-audio')}
-                            </div>
-                            <p style={styles.proCardText}>
-                                {__('200+ natural voices from Google Cloud, ElevenLabs & OpenAI. Consistent quality for every visitor.', 'text-to-audio')}
-                            </p>
-                        </div>
-                        <div style={styles.proCard}>
-                            <span style={styles.proCardIcon} aria-hidden="true">
-                                {'\uD83D\uDCE5'}
-                            </span>
-                            <div style={styles.proCardTitle}>
-                                {__('Bulk MP3 Export', 'text-to-audio')}
-                            </div>
-                            <p style={styles.proCardText}>
-                                {__('Auto-generate MP3 for every post. Loads instantly, works offline, boosts SEO.', 'text-to-audio')}
-                            </p>
-                        </div>
-                        <div style={styles.proCard}>
-                            <span style={styles.proCardIcon} aria-hidden="true">
-                                {'\uD83D\uDCC8'}
-                            </span>
-                            <div style={styles.proCardTitle}>
-                                {__('Deep Analytics', 'text-to-audio')}
-                            </div>
-                            <p style={styles.proCardText}>
-                                {__('Listening time, top posts, device breakdown, geographic insights & CSV export.', 'text-to-audio')}
-                            </p>
-                        </div>
-                    </div>
-                    <div style={styles.proCta}>
-                        <a
-                            href={proUrl('finish_explore_plans')}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={styles.proBtn}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = '#ff5533';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = '#FF7853';
-                            }}
-                        >
-                            {__('Explore Pro Plans', 'text-to-audio')}
-                            <span aria-hidden="true">{'\u2192'}</span>
-                        </a>
-                    </div>
-                </div>
-            )}
+            {/* TTS-264: the "Hear the difference with Pro" 3-card upsell block was
+                removed here \u2014 right after go-live it read as a hard pitch, and that
+                messaging now lives on the Pricing page + dashboard upsells. The soft
+                "Hear the live demo" button above is the single Pro touchpoint. */}
 
             {/* ============================================================ */}
             {/* Section 4: Cross-Promo — AI Agent Hub                         */}
