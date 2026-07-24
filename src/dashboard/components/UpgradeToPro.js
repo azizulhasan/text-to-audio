@@ -1,12 +1,12 @@
 import { __ } from "@wordpress/i18n";
 import React, { useState } from "react";
-import { proUrl } from "../proUrl";
+import { proUrl, pricingPageUrl } from "../proUrl";
 import { Accordion, Table } from "react-bootstrap";
 import toast from "./context/Notify";
 import { copyToClipBoard } from "./context/utilities";
 import DemoLink from "./DemoLink";
 
-export default function UpgradeToPro({ promotionType = "general" }) {
+export default function UpgradeToPro({ promotionType = "general", showDemoCard = false }) {
   const [activeTab, setActiveTab] = useState("documentation");
 
   /**
@@ -243,10 +243,11 @@ export default function UpgradeToPro({ promotionType = "general" }) {
 
   return (
     <div style={{ position: "sticky", top: "20px" }}>
-      {/* TTS-264 — dedicated live-demo card. Rendered by UpgradeToPro, which
-          sits in the right column of every tab, so this appears on all pages.
-          Free-users only. */}
-      {!ttsObj.is_atlasvoice_addon_functional && (
+      {/* TTS-264 — dedicated live-demo card. UpgradeToPro sits in the right
+          column of every tab, but the card is opt-in per tab (showDemoCard) so
+          it only appears on the two evaluation tabs (Customize, Listening)
+          instead of repeating on all six. Free-users only. */}
+      {showDemoCard && !ttsObj.is_atlasvoice_addon_functional && (
         <div
           style={{
             background: "#fff",
@@ -959,9 +960,7 @@ function tta__button_text_arr_callback($text_arr) {
               </ul>
 
               <a
-                href={proUrl('upgrade_page')}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={pricingPageUrl('upgrade_page')}
                 style={{
                   display: "block",
                   textAlign: "center",

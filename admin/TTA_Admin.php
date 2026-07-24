@@ -111,6 +111,10 @@ class TTA_Admin
 
         $this->localize_data = [
             'admin_url' => admin_url('/'),
+            // TTS-264: internal Pro pricing page (free-only submenu). The React
+            // upgrade CTAs target this in-admin page instead of the external
+            // marketing site — lower friction, one-click Freemius checkout.
+            'pricing_url' => admin_url('admin.php?page=atlasvoice-pricing'),
             'buttonTextArr' => get_option('tta__button_text_arr'),
             // TTS-258: ajax_url (admin-ajax.php) removed -- no JS reads
             // ttsObj.ajax_url; it only leaked the /wp-admin path into page source.
@@ -1149,17 +1153,18 @@ class TTA_Admin
             // @wordpress/components styling (Card, Button, etc.).
             wp_enqueue_style('wp-components');
 
+            $pricing_utm = array(
+                'utm_source'   => 'atlasvoice_free',
+                'utm_medium'   => 'plugin',
+                'utm_campaign' => 'pricing',
+                'utm_content'  => 'pricing_page',
+            );
             wp_localize_script('tta-pricing', 'ttsPricingData', array(
                 'is_pro_active' => TTA_Helper::is_atlasvoice_addon_functional(),
-                'demo_url'      => add_query_arg(
-                    array(
-                        'utm_source'   => 'atlasvoice_free',
-                        'utm_medium'   => 'plugin',
-                        'utm_campaign' => 'pricing',
-                        'utm_content'  => 'pricing_page',
-                    ),
-                    'https://atlasaidev.com/plugins/text-to-speech-pro/demo/'
-                ),
+                'demo_url'      => add_query_arg($pricing_utm, 'https://atlasaidev.com/plugins/text-to-speech-pro/demo/'),
+                // Link out to the full marketing page (reviews, FAQ, comparison
+                // table) for users who want the deeper pitch before buying.
+                'compare_url'   => add_query_arg($pricing_utm, 'https://atlasaidev.com/plugins/text-to-speech-pro/pricing/'),
             ));
         }
         add_submenu_page(

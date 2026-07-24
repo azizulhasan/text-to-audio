@@ -2,7 +2,7 @@ import React from "react";
 import { __ } from "@wordpress/i18n";
 import { Link } from "react-router-dom";
 import Icon from "../../Icon";
-import { proUrl } from "../../../proUrl";
+import { pricingPageUrl } from "../../../proUrl";
 import DemoLink from "../../DemoLink";
 
 export default function DashboardTopNav() {
@@ -182,8 +182,7 @@ export default function DashboardTopNav() {
           {/* Upgrade to Pro */}
           {!ttsObj.is_atlasvoice_addon_functional && (
             <a
-              href={proUrl('top_nav')}
-              target="_blank"
+              href={pricingPageUrl('top_nav')}
               className="btn d-flex align-items-center gap-2 tta-tab-style"
 
               // onMouseOver={(e) =>
