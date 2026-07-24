@@ -14,55 +14,54 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Class Promotions
- * Source Format
  *
-	$promos = [
-		(object) [
-		// required; offer start
-		'start'             => '2019-11-20 00:00:01',
-		// required; offer end
-		'end'               => '2019-12-04 23:59:00',
-		// required; some unique hash for offer, use for hiding the offer when user click to close.
-		'hash'              => '9df37798-bd35-421b-b6f2-fbc095686efc',
-		// Optional; Allow closing default is 0, set to 1 to allow user hide it
-		'dismissible'       => 1, // 0
-		// required; main content required, will be filtered with wp_kses_post()
-		'content'           => '<p>Biggest Sale of the year on this</p><h3>Black Friday & Cyber Monday</h3><p>Claim your discount on  till 4th December</p>',
-		// optional; wrapper padding
-		wrapperPadding      => ''
-		// optional; image source url or data url
-		'backgroundImage'  => '',
-		// optional;
-		'backgroundRepeat' => '',
-		// optional;
-		'backgroundSize'   => '',
-		// optional; background color to apply with the background image
-		'backgroundColor'  => '#000',
-		// optional; text color will be inherited by the content
-		'color'        => '#fff',
-		// optional; can be empty
-		'logo'              => [
-		// required; image source url or data url
-		'src' => '',
-		// required;
-		'alt' => 'Woo Feed Pro',
-		],
-		// optional; can be empty
-		'button'            => [
-		// required
-		'label'         => 'Save 30%',
-		// required
-		'url'           => '#?utm_campaign=black_friday_&_cyber_monday&utm_medium=banner&utm_source=wp_dashboard',
-		// optional;
-		'backgroundColor'    => '#F71560',
-		// optional;
-		'color'         => '#FFF',
-		// optional;
-		'after'         => '<span style="font-size: 12px; font-weight: 700; margin-top: 12px; display: block;">Coupon: BFCM2019</span>', // html content filtered with wp_kses_post()
-		],
-		],
-	];
+ * Promotion object schema - one entry in the promotions JSON feed (the feed is an
+ * array of these objects).
  *
+ * REQUIRED
+ *   content  string  Notice HTML (filtered with wp_kses_post()).
+ *   start    string  Show from  - "YYYY-MM-DD" or "YYYY-MM-DD HH:MM:SS".
+ *   end      string  Hide after - same format.
+ *   hash     string  Unique id: the notice's DOM id + the per-user "dismissed"
+ *                    key. If omitted, it is derived from `id`.
+ *
+ * TARGETING (optional)
+ *   allowed_sites  string[]  List of site hostnames (matched against the
+ *                            home_url() host). When present, the promo shows ONLY
+ *                            on those sites - use it to preview a promo on a
+ *                            specific staging/local site. When absent, it shows
+ *                            on every site (the default).
+ *   audience       string    "free" (default) | "pro" | "all" - which install sees it.
+ *   id             string    Stable slug; also used to derive `hash` when absent.
+ *
+ * BEHAVIOUR (optional)
+ *   dismissible  int  0 (default) | 1 - show the close (x) button.
+ *
+ * APPEARANCE (optional)
+ *   color            string  Text colour (CSS).
+ *   backgroundColor  string  Notice background colour (CSS).
+ *   backgroundImage  string  Image URL / data-URI.
+ *   backgroundRepeat string  CSS background-repeat.
+ *   backgroundSize   string  CSS background-size.
+ *   wrapperPadding   string  CSS padding on the wrapper.
+ *   logo    object  { src: string (required), alt: string }
+ *   button  object  { url, label, backgroundColor, color, after } (all strings)
+ *
+ * Example (one JSON feed entry):
+ * {
+ *   "id": "atlasvoice-pricing-2026-07",
+ *   "hash": "atlasvoice-pricing-2026-07",
+ *   "audience": "free",
+ *   "start": "2026-07-24",
+ *   "end": "2026-08-31",
+ *   "dismissible": 1,
+ *   "content": "<strong>Upgrade to AtlasVoice Pro</strong> ...",
+ *   "button": { "label": "View pricing", "url": "admin.php?page=atlasvoice-pricing",
+ *               "backgroundColor": "#184c53", "color": "#ffffff" }
+ * }
+ *
+ * For a testing-only promo, add an allowlist (shown ONLY on the listed sites):
+ *   "allowed_sites": [ "cors2.atlasaidev.com", "localhost" ]
  */
 class Promotions {
 	
@@ -246,9 +245,23 @@ class Promotions {
 			$promos = array();
 		}
 
+		// TTS-262: every promo needs a stable, unique hash — it is the notice's
+		// DOM id and the per-user dismissal key. Feeds may omit it, so derive one
+		// from the promo's `id` (or its content) to avoid an "undefined property"
+		// warning and keep dismissal working.
+		foreach ( $promos as $promo ) {
+			if ( empty( $promo->hash ) ) {
+				$promo->hash = ! empty( $promo->id )
+					? sanitize_title( $promo->id )
+					: md5( wp_json_encode( $promo ) );
+			}
+		}
+
 		// filter promotions by date.
 		$promos = array_filter( $promos, [ $this, '__is_promo_active' ] );
 		if ( ! empty( $promos ) ) {
+			// Allowlist gate: a promo with `allowed_sites` renders only on those sites.
+			$promos = array_filter( $promos, [ $this, '__is_promo_for_allowed_sites' ] );
 			// TTS-262: filter by target audience (free|pro|all).
 			$promos = array_filter( $promos, [ $this, '__is_promo_for_audience' ] );
 			// filter promotions by list of hidden promotions by the user.
@@ -272,6 +285,35 @@ class Promotions {
 	public function __is_promo_active( $promo ) {
 		$ct = current_time( 'timestamp' ); // phpcs:ignore
 		return ( ! empty( $promo->content ) && strtotime( $promo->start ) < $ct && $ct < strtotime( $promo->end ) );
+	}
+
+	/**
+	 * Site allowlist gate — a promo with `allowed_sites` renders only on those sites.
+	 *
+	 * `allowed_sites` (optional) is a list of site hostnames. When present, the
+	 * promo shows only if the current site's home_url() host matches one of them —
+	 * used to preview a promo on a specific staging/local site. When absent, the
+	 * promo shows on every site (the default "live" behaviour).
+	 *
+	 * @param object $promo the promo object; optional `allowed_sites` array of hostnames.
+	 *
+	 * @return bool true if the promo should render on the current site.
+	 */
+	public function __is_promo_for_allowed_sites( $promo ) {
+		// No allowlist -> show on every site (default).
+		if ( empty( $promo->allowed_sites ) || ! is_array( $promo->allowed_sites ) ) {
+			return true;
+		}
+		$current = strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
+		foreach ( $promo->allowed_sites as $site ) {
+			$site = (string) $site;
+			// Accept "example.com" or a full URL; compare host to host.
+			$host = wp_parse_url( ( false === strpos( $site, '//' ) ? '//' . $site : $site ), PHP_URL_HOST );
+			if ( $host && strtolower( $host ) === $current ) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**
