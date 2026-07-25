@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.3.5
+Stable tag: 2.3.6
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -73,6 +73,8 @@ Whether you run a blog, news site, online store, or educational platform, AtlasV
 
 * **Language & Voice Selection:** Choose the default language and voice from the **Listening** menu. Adjust speed, pitch, and volume for browser-native players.
 
+* **Read-Along Highlighting & Listen to Selection:** As your content is read aloud, the player highlights the text in time with the voice — sentence by sentence, and word by word with supported browser voices — with your own colors, optional focus-dimming, and gentle auto-scroll. Visitors can also select any passage and press **Listen** to hear just that part, or click a word to start reading from there. Turn it on from the new **Highlight** tab (off by default).
+
 * **Cross-Device Compatibility:** The free version uses the browser's built-in [speechSynthesis API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis), ensuring compatibility across desktops, tablets, and mobile devices.
 
 * **Custom CSS Support:** Apply custom styles to the audio player using your own CSS for pixel-perfect integration with your theme.
@@ -107,6 +109,8 @@ Unlock premium AI voices, bulk operations, cloud backup, advanced analytics, and
 * **Google Cloud Storage Backup:** Back up generated MP3 files to [Google Cloud Storage](https://cloud.google.com/storage). Available for **all TTS providers** — Google Cloud TTS, ChatGPT TTS, AtlasVoice TTS Pro, and ElevenLabs TTS. Configure a Google Cloud service account JSON file from the **Integration** menu, even if using a non-Google TTS provider.
 
 **Content & Playback Control (Pro):**
+
+* **Word-Perfect Read-Along Highlighting:** With Google Cloud and ElevenLabs voices, every word lights up at the exact moment it's spoken (sentence-level for AtlasVoice TTS Pro and ChatGPT), with smoother, gap-free highlighting that flows cleanly across lines.
 
 * **Bulk MP3 File Generation:** Generate MP3 files for hundreds of posts at once using the bulk action from the WordPress posts list. Select your posts, choose "AtlasVoice Generate MP3 File", and the plugin processes each post automatically. [Watch tutorial](https://www.youtube.com/watch?v=HFoqlkPCP80).
 
@@ -248,11 +252,15 @@ Provided by AtlasAiDev — Terms: https://atlasaidev.com/terms-and-conditions/ P
 
 Fetches `https://raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json` only when an admin opens the "Other AtlasAiDev Plugins" screen (cached 24h). No site or user data is sent beyond standard HTTP headers.
 
+= AtlasAiDev promotions (raw.githubusercontent.com) =
+
+Fetches `https://raw.githubusercontent.com/atlasaidev/plugins/main/text-to-audio-promotions.json` in the admin to show occasional plugin notices (cached 12h). No site or user data is sent beyond standard HTTP headers.
+
 = Translation downloads (api.github.com, raw.githubusercontent.com) =
 
 To keep the ZIP small, `.mo` translations are downloaded on demand from `https://github.com/azizulhasan/atlasaidev-translations` (via api.github.com and raw.githubusercontent.com) on activation and when the site language changes, and skipped if the `.mo` already exists. Only the WordPress locale code (e.g. `es_ES`) is sent.
 
-GitHub, Inc. (catalog + translations) — Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
+GitHub, Inc. (catalog, promotions + translations) — Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
 
 = Geolocation lookups (ip-api.com, ipinfo.io, icanhazip.com) =
 
@@ -298,6 +306,9 @@ Yes! AtlasVoice works on all WooCommerce pages — product pages, shop pages, an
 
 = What is ElevenLabs Text To Speech? =
 [ElevenLabs](https://elevenlabs.io/) offers the most realistic AI voices available, with human-like intonation, emotion, and expression. Access 100+ premium voices with fine-tuning controls for stability, similarity boost, style exaggeration, and speed. To set it up: (1) Create an ElevenLabs account, (2) Get your API key from your profile, (3) Enter the API key in **AtlasVoice > Integration > ElevenLabs TTS**. ElevenLabs TTS is a paid service — you will be billed by ElevenLabs based on character usage.
+
+= What is read-along highlighting, and how do I turn it on? =
+As your post is read aloud, AtlasVoice highlights the text in time with the voice — sentence by sentence, and word by word with supported voices. Open the **Highlight** tab, switch it on, and pick your highlight colors; you can also dim the rest of the article to help readers focus and let the page scroll along automatically. It's off by default. Readers can also select any passage and press **Listen** to hear just that part, or click a word to start reading from there.
 
 = Can I back up MP3 files to Google Cloud Storage? =
 Yes! The Google Cloud Storage backup feature works with **all** TTS providers — Google Cloud TTS, ChatGPT TTS, AtlasVoice TTS Pro, and ElevenLabs TTS. Even if you use ElevenLabs for voice generation, you can store the MP3 files in Google Cloud Storage. You need to configure a Google Cloud service account JSON file with Storage Admin permissions from the **Integration** menu.
@@ -383,6 +394,13 @@ Please report security bugs through the [Patchstack Vulnerability Disclosure Pro
 We are looking for people to help translate this plugin. If you can help, we would love to hear from you.
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
+
+= 2.3.6 ( 24 Jul 2026 ) =
+Added : Listen to selected text — visitors can highlight any passage on your post and a small button reads just that part aloud, or start reading from any word they click. Off by default; turn it on from the Highlight tab.
+Added : A Pricing page inside the plugin so you can compare AtlasVoice Pro plans and features without leaving your dashboard.
+Improved : Easier ways to explore Pro — a live demo you can hear, a "Go Pro" link on the Plugins screen, and tidier menu names.
+Improved : Softer default colors for read-along highlighting and a friendlier final step in the setup wizard.
+Fixed : Plugin settings could not be saved on sites running certain security/firewall plugins, which blocked the save request. Settings now save reliably on those sites.
 
 = 2.3.5 ( 14 Jul 2026 ) =
 Added : Read-along highlighting — the player can highlight each sentence, and each word with supported voices, as your post is read aloud. Choose your own colors, dim the rest of the article to help readers focus, and let the page scroll along with the reading. Off by default — turn it on from the new Highlight tab.
@@ -635,23 +653,5 @@ Introduced :  Complete new UI introduced.
 
 == Upgrade Notice ==
 
-= 2.3.5 =
-New read-along highlighting: the player highlights each sentence (and word, with supported voices) as it reads, with your colors, focus dimming and gentle auto-scroll — off by default, enable it from the new Highlight tab. Also fixes Analytics page errors and keeps player files fresh after updates. Update recommended.
-
-= 2.3.4 =
-Fixes a conflict with Formidable Forms that could show repeated PHP warnings on pages containing a form. Update recommended.
-
-= 2.3.3 =
-Fixes the Listen player and its hidden markers appearing inside post-card grids and other listings (and on post types you haven't enabled), which could break the layout on some themes, plus a deactivation feedback form whose buttons could get stuck disabled. Update recommended.
-
-= 2.3.2 =
-A tidier setup wizard with a playable voice preview, the Staging / Live indicator now shown by default, handy documentation links, and small fixes plus privacy improvements. Update recommended.
-
-= 2.3.1 =
-The on-page content selector no longer appears automatically on your posts — it opens only when you choose to, and you can turn it (and the new toolbar items) on or off from Settings. Update recommended.
-
-= 2.3.0 =
-Adds a new Staging mode so you can set up and check the Listen player privately before showing it to your visitors, plus a one-click "Go Live" button in the toolbar. Update recommended.
-
-= 2.2.5 =
-Fixes several text-to-speech reading issues (punctuation, headings, lists, abbreviations and numbers), restores the full-width Listen button, and fixes playback when the player is used across multiple browser tabs. Update recommended.
+= 2.3.6 =
+New "Listen to selected text" (highlight a passage and hear just that part — off by default, enable in the Highlight tab), a built-in Pricing page, and easier ways to explore Pro. Also fixes settings not saving on sites with certain security plugins. Update recommended.
