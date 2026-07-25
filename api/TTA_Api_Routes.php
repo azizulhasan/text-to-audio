@@ -66,18 +66,25 @@ class TTA_Api_Routes {
 		);
 
 		// register settings route.
-		register_rest_route(
-			$this->namespace,
-			'/settings',
-			array(
+		// '/settings-data' is an alias for '/settings'. Some security plugins (e.g. WP Ghost)
+		// harden the WP core endpoint wp/v2/settings with a rule that blocks ANY REST path whose
+		// final segment is exactly "settings" — which also blocked our save endpoint and made
+		// "SAVE does not work". The dashboard now calls '/settings-data'; '/settings' is kept for
+		// backward compatibility. Both map to the same callback (no duplicated logic).
+		foreach ( array( '/settings', '/settings-data' ) as $settings_route ) {
+			register_rest_route(
+				$this->namespace,
+				$settings_route,
 				array(
-					'methods'             => \WP_REST_Server::ALLMETHODS,
-					'callback'            => array( $this, 'tta_manage_settings_data' ),
-					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
-				),
-			)
-		);
+					array(
+						'methods'             => \WP_REST_Server::ALLMETHODS,
+						'callback'            => array( $this, 'tta_manage_settings_data' ),
+						'permission_callback' => array( $this, 'get_route_access' ),
+						'args'                => array(),
+					),
+				)
+			);
+		}
 
 		// TTS-256: read-along highlight settings route (players 1 & 2).
 		register_rest_route(
@@ -1056,6 +1063,9 @@ class TTA_Api_Routes {
         $admin_only = array(
             '/tta/v1/customize',
             '/tta/v1/settings',
+            // Alias of /settings — same admin-only gate. Added so the WP-Ghost-safe
+            // '/settings-data' route the dashboard now calls isn't denied by default.
+            '/tta/v1/settings-data',
             '/tta/v1/highlight',
             '/tta/v1/listening',
             '/tta/v1/save_analytics_settings',
