@@ -400,6 +400,7 @@ Added : Listen to selected text — visitors can highlight any passage on your p
 Added : A Pricing page inside the plugin so you can compare AtlasVoice Pro plans and features without leaving your dashboard.
 Improved : Easier ways to explore Pro — a live demo you can hear, a "Go Pro" link on the Plugins screen, and tidier menu names.
 Improved : Softer default colors for read-along highlighting and a friendlier final step in the setup wizard.
+Fixed : Plugin settings could not be saved on sites running certain security/firewall plugins, which blocked the save request. Settings now save reliably on those sites.
 
 = 2.3.5 ( 14 Jul 2026 ) =
 Added : Read-along highlighting — the player can highlight each sentence, and each word with supported voices, as your post is read aloud. Choose your own colors, dim the rest of the article to help readers focus, and let the page scroll along with the reading. Off by default — turn it on from the new Highlight tab.
@@ -653,4 +654,4 @@ Introduced :  Complete new UI introduced.
 == Upgrade Notice ==
 
 = 2.3.6 =
-New "Listen to selected text" (highlight a passage and hear just that part — off by default, enable in the Highlight tab), a built-in Pricing page, and easier ways to explore Pro. Update recommended.
+New "Listen to selected text" (highlight a passage and hear just that part — off by default, enable in the Highlight tab), a built-in Pricing page, and easier ways to explore Pro. Also fixes settings not saving on sites with certain security plugins. Update recommended.
