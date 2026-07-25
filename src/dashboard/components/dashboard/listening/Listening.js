@@ -219,7 +219,7 @@ export default function Listening() {
             </Form>
         </Col>
         <Col xs={12} sm={12} lg={4}>
-          <UpgradeToPro />
+          <UpgradeToPro showDemoCard={true} />
         </Col>
       </Row>
     </Container>

@@ -1,3 +1,5 @@
+> **SUPERSEDED (2026-07-15):** merged into plan/growth/master-action-plan-2026-07.md - track status THERE. This file remains as reference/audit trail.
+
 # AtlasVoice TTS — 90-Day Plan (Fable 5 analysis)
 
 > **Model:** Claude Fable 5 · **Prepared:** 2026-06-10 (data re-pulled live today)

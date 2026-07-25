@@ -1,3 +1,5 @@
+> **SUPERSEDED (2026-07-15):** merged into plan/growth/master-action-plan-2026-07.md - track status THERE. This file remains as reference/audit trail.
+
 # AtlasVoice TTS — 2026 Q3 Action Plan
 
 > **One plan. Read in 15 minutes. Execute over 90 days.**

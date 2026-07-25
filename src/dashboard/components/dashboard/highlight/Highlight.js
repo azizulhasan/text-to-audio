@@ -22,12 +22,17 @@ export default function Highlight() {
         // Default to "sentence" — it works with ANY voice/browser. Word-level
         // modes need a local voice that fires speechSynthesis boundary events.
         tta__highlight_mode: "sentence",
-        tta__highlight_word_bg: "#ffd54f",
+        tta__highlight_word_bg: "#a5abf0",
         tta__highlight_word_color: "#202124",
-        tta__highlight_sentence_bg: "#fff3b0",
+        tta__highlight_sentence_bg: "#e8e7fe",
         tta__highlight_dim_enabled: true,
         tta__highlight_dim_opacity: 0.7,
         tta__highlight_autoscroll: true,
+        // TTS-263 — "Listen to selected text" floating control (opt-in, like
+        // highlighting; matches TTA_Activator + the painter's lazy gate).
+        tta__selection_listen_enabled: false,
+        // TTS-263 — how visitors learn the selection feature exists.
+        tta__selection_announce: "tip",
     });
     const [isDataLoaded, setIsDataLoaded] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -251,7 +256,7 @@ export default function Highlight() {
                                         <input
                                             type="color"
                                             name="tta__highlight_word_bg"
-                                            value={settings.tta__highlight_word_bg || "#ffd54f"}
+                                            value={settings.tta__highlight_word_bg || "#a5abf0"}
                                             onChange={handleChange}
                                             disabled={!enabled}
                                             style={colorInputStyle}
@@ -285,7 +290,7 @@ export default function Highlight() {
                                         <input
                                             type="color"
                                             name="tta__highlight_sentence_bg"
-                                            value={settings.tta__highlight_sentence_bg || "#fff3b0"}
+                                            value={settings.tta__highlight_sentence_bg || "#e8e7fe"}
                                             onChange={handleChange}
                                             disabled={!enabled}
                                             style={colorInputStyle}
@@ -329,6 +334,41 @@ export default function Highlight() {
                                                 {Math.round((settings.tta__highlight_dim_opacity ?? 0.4) * 100)}%
                                             </span>
                                         </div>
+                                    </SettingRow>
+                                )}
+
+                                {/* TTS-263 — independent of the highlight toggle: readers can
+                                    listen to a selection even when highlighting is off. */}
+                                <SettingRow
+                                    label={__("Listen to selected text", "text-to-audio")}
+                                    questionIcon={true}
+                                    questionTooltip={__("Show a small “Listen” control when a reader selects text in the article, to read only the selection — or from the selected word to the end. On the browser players the selection is spoken directly; on MP3 players the audio jumps to the matching position (precise on Google Cloud/ElevenLabs with word timing, approximate otherwise).", "text-to-audio")}
+                                >
+                                    <ToggleSwitch
+                                        checked={!!settings.tta__selection_listen_enabled}
+                                        onChange={handleChange}
+                                        name="tta__selection_listen_enabled"
+                                        id="tta__selection_listen_enabled"
+                                    />
+                                </SettingRow>
+
+                                {!!settings.tta__selection_listen_enabled && (
+                                    <SettingRow
+                                        label={__("Announce selection listening", "text-to-audio")}
+                                        questionIcon={true}
+                                        questionTooltip={__("How readers learn the feature exists. The one-time tip appears under the player after their first play and never returns once dismissed. The floating side badge sits collapsed on the left edge and expands on hover; closing it hides it for the visitor's session.", "text-to-audio")}
+                                    >
+                                        <Form.Select
+                                            name="tta__selection_announce"
+                                            value={settings.tta__selection_announce || "tip"}
+                                            onChange={handleChange}
+                                            style={{ maxWidth: "300px" }}
+                                        >
+                                            <option value="tip">{__("One-time tip after first play (recommended)", "text-to-audio")}</option>
+                                            <option value="badge">{__("Floating side badge", "text-to-audio")}</option>
+                                            <option value="both">{__("Both", "text-to-audio")}</option>
+                                            <option value="off">{__("Off — discover by selecting", "text-to-audio")}</option>
+                                        </Form.Select>
                                     </SettingRow>
                                 )}
 

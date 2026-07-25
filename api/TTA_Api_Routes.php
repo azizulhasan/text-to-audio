@@ -66,18 +66,25 @@ class TTA_Api_Routes {
 		);
 
 		// register settings route.
-		register_rest_route(
-			$this->namespace,
-			'/settings',
-			array(
+		// '/settings-data' is an alias for '/settings'. Some security plugins (e.g. WP Ghost)
+		// harden the WP core endpoint wp/v2/settings with a rule that blocks ANY REST path whose
+		// final segment is exactly "settings" — which also blocked our save endpoint and made
+		// "SAVE does not work". The dashboard now calls '/settings-data'; '/settings' is kept for
+		// backward compatibility. Both map to the same callback (no duplicated logic).
+		foreach ( array( '/settings', '/settings-data' ) as $settings_route ) {
+			register_rest_route(
+				$this->namespace,
+				$settings_route,
 				array(
-					'methods'             => \WP_REST_Server::ALLMETHODS,
-					'callback'            => array( $this, 'tta_manage_settings_data' ),
-					'permission_callback' => array( $this, 'get_route_access' ),
-					'args'                => array(),
-				),
-			)
-		);
+					array(
+						'methods'             => \WP_REST_Server::ALLMETHODS,
+						'callback'            => array( $this, 'tta_manage_settings_data' ),
+						'permission_callback' => array( $this, 'get_route_access' ),
+						'args'                => array(),
+					),
+				)
+			);
+		}
 
 		// TTS-256: read-along highlight settings route (players 1 & 2).
 		register_rest_route(
@@ -793,15 +800,24 @@ class TTA_Api_Routes {
 			$opacity = isset( $fields['tta__highlight_dim_opacity'] ) ? floatval( $fields['tta__highlight_dim_opacity'] ) : 0.7;
 			$opacity = max( 0.1, min( 0.85, $opacity ) );
 
+			// TTS-263 — announcement strategy for the selection-listen feature.
+			$announce = isset( $fields['tta__selection_announce'] ) ? $fields['tta__selection_announce'] : 'tip';
+			if ( ! in_array( $announce, array( 'tip', 'badge', 'both', 'off' ), true ) ) {
+				$announce = 'tip';
+			}
+
 			$clean = array(
 				'tta__highlight_enabled'     => ! empty( $fields['tta__highlight_enabled'] ),
 				'tta__highlight_mode'        => $mode,
-				'tta__highlight_word_bg'     => $word_bg ? $word_bg : '#ffd54f',
+				'tta__highlight_word_bg'     => $word_bg ? $word_bg : '#a5abf0',
 				'tta__highlight_word_color'  => $word_color ? $word_color : '#202124',
-				'tta__highlight_sentence_bg' => $sentence_bg ? $sentence_bg : '#fff3b0',
+				'tta__highlight_sentence_bg' => $sentence_bg ? $sentence_bg : '#e8e7fe',
 				'tta__highlight_dim_enabled' => ! empty( $fields['tta__highlight_dim_enabled'] ),
 				'tta__highlight_dim_opacity' => $opacity,
 				'tta__highlight_autoscroll'  => ! empty( $fields['tta__highlight_autoscroll'] ),
+				// TTS-263 — "Listen to selected text" floating control (all players).
+				'tta__selection_listen_enabled' => ! empty( $fields['tta__selection_listen_enabled'] ),
+				'tta__selection_announce'       => $announce,
 			);
 
 			update_option( 'tta_highlight_settings', $clean, false );
@@ -1047,6 +1063,9 @@ class TTA_Api_Routes {
         $admin_only = array(
             '/tta/v1/customize',
             '/tta/v1/settings',
+            // Alias of /settings — same admin-only gate. Added so the WP-Ghost-safe
+            // '/settings-data' route the dashboard now calls isn't denied by default.
+            '/tta/v1/settings-data',
             '/tta/v1/highlight',
             '/tta/v1/listening',
             '/tta/v1/save_analytics_settings',

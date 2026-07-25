@@ -15,7 +15,7 @@
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
  * Description:       The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
- * Version:           2.3.5
+ * Version:           2.3.6
  * Author:            AtlasAiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-3.0+
@@ -172,7 +172,7 @@ class TTA_Init
     public function __construct()
     {
         if (!defined('TEXT_TO_AUDIO_VERSION')) {
-            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '2.3.5'));
+            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '2.3.6'));
         }
 
         if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
@@ -204,9 +204,10 @@ class TTA_Init
         $plugin->run();
 
         add_action('init', function () {
-            if (!defined('TTA_PRO_PLUGIN_PATH')) {
-                TTA_Lib_AtlasAiDev::instance()->init();
-            }
+            // TTS-262: init() now runs in BOTH states. Audience-targeted
+            // promotions run always (so 'pro'/'all' promos can reach Pro users);
+            // telemetry/Insights stays free-only, gated inside init().
+            TTA_Lib_AtlasAiDev::instance()->init();
             if (!TTA_Cache::get('tts_rest_api_url')) {
                 $rest_url = esc_url_raw(rest_url());
                 update_option('tts_rest_api_url', $rest_url, false);
@@ -245,6 +246,16 @@ class TTA_Init
             'support' => sprintf('<a href="%s" target="_blank">%s</a>', $support, __('Support', 'text-to-audio')),
             'review' => sprintf('<a href="%s" target="_blank">%s</a>', $review, __('Write a Review', 'text-to-audio')),
         );
+
+        // TTS-264: free-only "Go Pro" action link -> the internal Pricing page.
+        // Prepended and colour-accented so it stands out on the Plugins screen.
+        if (!is_atlasvoice_addon_functional()) {
+            $pricing_url = esc_url(admin_url() . 'admin.php?page=atlasvoice-pricing');
+            $custom_actions = array_merge(
+                array('go_pro' => sprintf('<a href="%s" style="color:#184c53;font-weight:600;">%s</a>', $pricing_url, __('Go Pro', 'text-to-audio'))),
+                $custom_actions
+            );
+        }
 
         // add the links to the front of the actions list
         return array_merge($custom_actions, $actions);
