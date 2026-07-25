@@ -65,7 +65,7 @@ export default function Settings() {
     useEffect(() => {
         let formData = new FormData();
         formData.append("method", "get");
-        postWithoutImage(tta_obj.api_url + "tta/v1/settings", formData).then(
+        postWithoutImage(tta_obj.api_url + "tta/v1/settings-data", formData).then(
             (res) => {
                 setSettings({...settings, ...res.data});
             }
@@ -211,7 +211,7 @@ export default function Settings() {
         let formData = new FormData();
         formData.append("fields", JSON.stringify(settings));
         formData.append("method", "post");
-        postWithoutImage(tta_obj.api_url + "tta/v1/settings", formData)
+        postWithoutImage(tta_obj.api_url + "tta/v1/settings-data", formData)
             .then((res) => {
                 setSettings(res.data);
                 toast(
