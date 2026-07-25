@@ -451,7 +451,7 @@ class Insights {
 		if ( $this->__notice_dismissed() ) {
 			return;
 		}
-		
+
 		if ( $this->is_tracking_allowed() ) {
 			return;
 		}
@@ -961,75 +961,76 @@ class Insights {
 		$admin_user  = $this->__get_admin();
 		$displayName = ( ! empty( $admin_user->first_name ) && ! empty( $admin_user->last_name ) ) ? $admin_user->first_name . ' ' . $admin_user->last_name : $admin_user->display_name;
 		$showSupportTicket = ( ! empty( $this->ticketTemplate ) && ! empty( $this->ticketRecipient ) && ! empty( $this->supportURL ) );
+		$ns = Client::PLUGIN_PREFIX;
 		?>
-		<div class="atlasaidev-dr-modal" id="<?php echo esc_attr( $this->client->getSlug() ); ?>-atlasaidev-dr-modal" aria-label="<?php /* translators: 1: Plugin Name */ printf( esc_attr__( '&ldquo;%s&rdquo; Uninstall Confirmation', 'text-to-audio' ), esc_attr( $this->client->getName() ) ); ?>" role="dialog" aria-modal="true">
+		<div class="<?php echo $ns; ?>-dr-modal" id="<?php echo $ns; ?>-dr-modal" aria-label="<?php /* translators: 1: Plugin Name */ printf( esc_attr__( '&ldquo;%s&rdquo; Uninstall Confirmation', 'text-to-audio' ), esc_attr( $this->client->getName() ) ); ?>" role="dialog" aria-modal="true">
 			<?php if ( $showSupportTicket ) { ?>
-			<div class="atlasaidev-dr-modal-wrap support" style="display: none;">
-				<div class="atlasaidev-dr-modal-header">
+			<div class="<?php echo $ns; ?>-dr-modal-wrap support" style="display: none;">
+				<div class="<?php echo $ns; ?>-dr-modal-header">
 					<h3><?php esc_html_e( 'Submit Support Ticket.', 'text-to-audio' ); ?></h3>
-					<a href="javascript:void 0;" class="atlasaidev-dr-modal-close" aria-label="<?php esc_attr_e( 'Close', 'text-to-audio' ); ?>">
+					<a href="javascript:void 0;" class="<?php echo $ns; ?>-dr-modal-close" aria-label="<?php esc_attr_e( 'Close', 'text-to-audio' ); ?>">
 						<!--suppress HtmlUnknownAttribute -->
 						<svg class="" focusable="false" viewBox="0 0 24 24" aria-hidden="true" role="presentation">
 							<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path>
 						</svg>
 					</a>
 				</div>
-				<div class="atlasaidev-dr-modal-body">
-					<div class="atlasaidev-row mui col-2 col-left">
-						<label for="atlasaidev-support-name" class="<?php echo ! empty( $displayName ) ? 'shrink' : ''; ?>"><?php esc_html_e( 'Name', 'text-to-audio' ); ?></label>
-						<div class="atlasaidev-form-control">
-							<input type="text" name="name" id="atlasaidev-support-name" value="<?php echo esc_attr( $displayName ); ?>" required>
+				<div class="<?php echo $ns; ?>-dr-modal-body">
+					<div class="<?php echo $ns; ?>-row mui col-2 col-left">
+						<label for="<?php echo $ns; ?>-support-name" class="<?php echo ! empty( $displayName ) ? 'shrink' : ''; ?>"><?php esc_html_e( 'Name', 'text-to-audio' ); ?></label>
+						<div class="<?php echo $ns; ?>-form-control">
+							<input type="text" name="name" id="<?php echo $ns; ?>-support-name" value="<?php echo esc_attr( $displayName ); ?>" required>
 						</div>
 					</div>
-					<div class="atlasaidev-row mui col-2 col-right">
-						<label for="atlasaidev-support-email" class="shrink"><?php esc_html_e( 'Email', 'text-to-audio' ); ?></label>
-						<div class="atlasaidev-form-control">
-							<input type="email" name="email" id="atlasaidev-support-email" value="<?php echo esc_attr( $admin_user->user_email ); ?>" required>
-						</div>
-					</div>
-					<div class="clear"></div>
-					<div class="atlasaidev-row mui col-2 col-left">
-						<label for="atlasaidev-support-subject"><?php esc_html_e( 'Subject', 'text-to-audio' ); ?></label>
-						<div class="atlasaidev-form-control">
-							<input type="text" name="subject" id="atlasaidev-support-subject" required>
-						</div>
-					</div>
-					<div class="atlasaidev-row mui col-2 col-right">
-						<label for="atlasaidev-support-website" class="shrink"><?php esc_html_e( 'Website', 'text-to-audio' ); ?></label>
-						<div class="atlasaidev-form-control">
-							<input type="url" name="website" id="atlasaidev-support-website" value="<?php echo esc_url( site_url() ); ?>" required>
+					<div class="<?php echo $ns; ?>-row mui col-2 col-right">
+						<label for="<?php echo $ns; ?>-support-email" class="shrink"><?php esc_html_e( 'Email', 'text-to-audio' ); ?></label>
+						<div class="<?php echo $ns; ?>-form-control">
+							<input type="email" name="email" id="<?php echo $ns; ?>-support-email" value="<?php echo esc_attr( $admin_user->user_email ); ?>" required>
 						</div>
 					</div>
 					<div class="clear"></div>
-					<div class="atlasaidev-row mui">
-						<label for="atlasaidev-support-message"><?php esc_html_e( 'Message', 'text-to-audio' ); ?></label>
-						<div class="atlasaidev-form-control">
-							<textarea id="atlasaidev-support-message" name='message' rows="11" required></textarea>
+					<div class="<?php echo $ns; ?>-row mui col-2 col-left">
+						<label for="<?php echo $ns; ?>-support-subject"><?php esc_html_e( 'Subject', 'text-to-audio' ); ?></label>
+						<div class="<?php echo $ns; ?>-form-control">
+							<input type="text" name="subject" id="<?php echo $ns; ?>-support-subject" required>
+						</div>
+					</div>
+					<div class="<?php echo $ns; ?>-row mui col-2 col-right">
+						<label for="<?php echo $ns; ?>-support-website" class="shrink"><?php esc_html_e( 'Website', 'text-to-audio' ); ?></label>
+						<div class="<?php echo $ns; ?>-form-control">
+							<input type="url" name="website" id="<?php echo $ns; ?>-support-website" value="<?php echo esc_url( site_url() ); ?>" required>
+						</div>
+					</div>
+					<div class="clear"></div>
+					<div class="<?php echo $ns; ?>-row mui">
+						<label for="<?php echo $ns; ?>-support-message"><?php esc_html_e( 'Message', 'text-to-audio' ); ?></label>
+						<div class="<?php echo $ns; ?>-form-control">
+							<textarea id="<?php echo $ns; ?>-support-message" name='message' rows="11" required></textarea>
 						</div>
 					</div>
 					<div class="response">
 						<div class="wrapper"></div>
 					</div>
 				</div>
-				<div class="atlasaidev-dr-modal-footer">
+				<div class="<?php echo $ns; ?>-dr-modal-footer">
 					<button class="button button-primary send-ticket"><?php esc_html_e( 'Send Message', 'text-to-audio' ); ?></button>
 					<button class="button button-secondary close-ticket"><?php esc_html_e( 'Cancel', 'text-to-audio' ); ?></button>
 				</div>
 			</div>
 			<?php } ?>
-			<div class="atlasaidev-dr-modal-wrap reason">
-				<div class="atlasaidev-dr-modal-header">
+			<div class="<?php echo $ns; ?>-dr-modal-wrap reason">
+				<div class="<?php echo $ns; ?>-dr-modal-header">
 					<h3><?php esc_html_e( 'If you have a moment, please let us know why you are deactivating:', 'text-to-audio' ); ?></h3>
-					<a href="javascript:void 0;" class="atlasaidev-dr-modal-close" aria-label="<?php esc_attr_e( 'Close', 'text-to-audio' ); ?>">
+					<a href="javascript:void 0;" class="<?php echo $ns; ?>-dr-modal-close" aria-label="<?php esc_attr_e( 'Close', 'text-to-audio' ); ?>">
 						<!--suppress HtmlUnknownAttribute -->
 						<svg class="" focusable="false" viewBox="0 0 24 24" aria-hidden="true" role="presentation">
 							<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path>
 						</svg>
 					</a>
 				</div>
-				<div class="atlasaidev-dr-modal-body">
+				<div class="<?php echo $ns; ?>-dr-modal-body">
 					<?php if ( $showSupportTicket ) { ?>
-					<div class="atlasaidev-support-banner">
+					<div class="<?php echo $ns; ?>-support-banner">
 						<span><?php esc_html_e( 'Having trouble? Get help before you go.', 'text-to-audio' ); ?></span>
 						<button class="button button-small button-primary open-ticket-form"><?php esc_html_e( 'Open Support Ticket', 'text-to-audio' ); ?></button>
 					</div>
@@ -1042,7 +1043,7 @@ class Insights {
 						<?php } ?>
 					</ul>
 				</div>
-				<div class="atlasaidev-dr-modal-footer">
+				<div class="<?php echo $ns; ?>-dr-modal-footer">
 					<a href="#" class="button button-link dont-bother-me"><?php esc_html_e( 'I rather wouldn\'t say', 'text-to-audio' ); ?></a>
 					<button class="button button-secondary deactivate"><?php esc_html_e( 'Submit & Deactivate', 'text-to-audio' ); ?></button>
 					<button class="button button-primary modal-close"><?php esc_html_e( 'Cancel', 'text-to-audio' ); ?></button>
@@ -1051,76 +1052,76 @@ class Insights {
 		</div>
 		<!--suppress CssUnusedSymbol, CssInvalidPseudoSelector, CssFloatPxLength -->
 		<style type="text/css">
-			.atlasaidev-dr-modal, .atlasaidev-dr-modal * { box-sizing: border-box; }
-			.atlasaidev-dr-modal { position: fixed; z-index: 99999; top: 0; right: 0; bottom: 0; left: 0; background: rgba(0, 0, 0, 0.5); display: none; }
-			.atlasaidev-dr-modal.modal-active { display: block; }
-			.atlasaidev-dr-modal strong, .atlasaidev-dr-modal b { font-weight: bold; }
-			.atlasaidev-dr-modal-wrap { width: 475px; position: relative; margin: 10% auto; background: #fff; }
-			.atlasaidev-dr-modal-wrap { position: absolute; display: block; top: 0; left: 0; right: 0; /*bottom: 0;*/ z-index: 99; }
-			.atlasaidev-dr-modal-wrap.support { z-index: 999; margin: 6% auto; }
-			.atlasaidev-dr-modal-wrap .response { position: absolute; display: none; background: rgba(0, 150, 136, 0.68); top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; }
-			.atlasaidev-dr-modal .response.show { display: block; }
-			.atlasaidev-dr-modal-wrap .response .wrapper { display: flex; align-items: center; justify-content: center; width: calc(100% - 40px); height: calc(100% - 40px); flex-flow: column; padding: 40px 40px; margin: 20px 20px; text-align: center; background: #FFF; }
-			.atlasaidev-dr-modal .reason .response .wrapper { width: calc(100% - 80px); height: calc(100% - 80px); flex-flow: column; padding: 40px 40px; margin: 40px; }
-			.atlasaidev-dr-modal .button .dashicons { margin: 4px 0; }
-			.atlasaidev-dr-modal-header { border-bottom: 1px solid #eee; padding: 8px 40px 8px 20px; position: relative; display: block; width: 100%; float: left; }
-			.atlasaidev-dr-modal-header h3 { line-height: 150%; margin: 0; }
-			.atlasaidev-dr-modal-close { position: absolute; top: 50%; right: 10px; transform: translateY(-50%); width: 20px; height: 20px; line-height: 0; }
-			.atlasaidev-dr-modal-close svg { font-size: 20px; display: inline-block; width: 1em; height: 1em; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
-			.atlasaidev-dr-modal-body { padding: 5px 20px 20px 20px; position: relative; display: block; width: 100%; float: left; box-sizing: border-box; }
-			.atlasaidev-support-banner { background: #f0f6fc; border: 1px solid #c3d1e0; border-radius: 4px; padding: 10px 15px; margin: 10px 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-			.atlasaidev-support-banner span { font-size: 13px; color: #1d2327; }
-			.atlasaidev-dr-modal-body .reason-input { margin-top: 5px; margin-left: 20px; }
-			.atlasaidev-dr-modal-footer { border-top: 1px solid #eee; padding: 12px 20px; text-align: right; position: relative; display: block; width: 100%; float: left; }
-			.atlasaidev-dr-modal-footer a, .atlasaidev-dr-modal-footer button { vertical-align: middle; }
-			.support .atlasaidev-dr-modal-footer { text-align: left; }
-			.support .atlasaidev-dr-modal-footer button { float: right; margin-left: 10px; }
-			.atlasaidev-dr-modal .atlasaidev-row { position: relative; width: 100%; display: block; box-sizing: border-box; float: left; margin: 4px auto; }
+			.<?php echo $ns; ?>-dr-modal, .<?php echo $ns; ?>-dr-modal * { box-sizing: border-box; }
+			.<?php echo $ns; ?>-dr-modal { position: fixed; z-index: 99999; top: 0; right: 0; bottom: 0; left: 0; background: rgba(0, 0, 0, 0.5); display: none; }
+			.<?php echo $ns; ?>-dr-modal.modal-active { display: block; }
+			.<?php echo $ns; ?>-dr-modal strong, .<?php echo $ns; ?>-dr-modal b { font-weight: bold; }
+			.<?php echo $ns; ?>-dr-modal-wrap { width: 475px; position: relative; margin: 10% auto; background: #fff; }
+			.<?php echo $ns; ?>-dr-modal-wrap { position: absolute; display: block; top: 0; left: 0; right: 0; /*bottom: 0;*/ z-index: 99; }
+			.<?php echo $ns; ?>-dr-modal-wrap.support { z-index: 999; margin: 6% auto; }
+			.<?php echo $ns; ?>-dr-modal-wrap .response { position: absolute; display: none; background: rgba(0, 150, 136, 0.68); top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; }
+			.<?php echo $ns; ?>-dr-modal .response.show { display: block; }
+			.<?php echo $ns; ?>-dr-modal-wrap .response .wrapper { display: flex; align-items: center; justify-content: center; width: calc(100% - 40px); height: calc(100% - 40px); flex-flow: column; padding: 40px 40px; margin: 20px 20px; text-align: center; background: #FFF; }
+			.<?php echo $ns; ?>-dr-modal .reason .response .wrapper { width: calc(100% - 80px); height: calc(100% - 80px); flex-flow: column; padding: 40px 40px; margin: 40px; }
+			.<?php echo $ns; ?>-dr-modal .button .dashicons { margin: 4px 0; }
+			.<?php echo $ns; ?>-dr-modal-header { border-bottom: 1px solid #eee; padding: 8px 40px 8px 20px; position: relative; display: block; width: 100%; float: left; }
+			.<?php echo $ns; ?>-dr-modal-header h3 { line-height: 150%; margin: 0; }
+			.<?php echo $ns; ?>-dr-modal-close { position: absolute; top: 50%; right: 10px; transform: translateY(-50%); width: 20px; height: 20px; line-height: 0; }
+			.<?php echo $ns; ?>-dr-modal-close svg { font-size: 20px; display: inline-block; width: 1em; height: 1em; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+			.<?php echo $ns; ?>-dr-modal-body { padding: 5px 20px 20px 20px; position: relative; display: block; width: 100%; float: left; box-sizing: border-box; }
+			.<?php echo $ns; ?>-support-banner { background: #f0f6fc; border: 1px solid #c3d1e0; border-radius: 4px; padding: 10px 15px; margin: 10px 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+			.<?php echo $ns; ?>-support-banner span { font-size: 13px; color: #1d2327; }
+			.<?php echo $ns; ?>-dr-modal-body .reason-input { margin-top: 5px; margin-left: 20px; }
+			.<?php echo $ns; ?>-dr-modal-footer { border-top: 1px solid #eee; padding: 12px 20px; text-align: right; position: relative; display: block; width: 100%; float: left; }
+			.<?php echo $ns; ?>-dr-modal-footer a, .<?php echo $ns; ?>-dr-modal-footer button { vertical-align: middle; }
+			.support .<?php echo $ns; ?>-dr-modal-footer { text-align: left; }
+			.support .<?php echo $ns; ?>-dr-modal-footer button { float: right; margin-left: 10px; }
+			.<?php echo $ns; ?>-dr-modal .<?php echo $ns; ?>-row { position: relative; width: 100%; display: block; box-sizing: border-box; float: left; margin: 4px auto; }
 			.mui { border: 0; margin: 0; display: inline-flex; padding: 0; min-width: 0; flex-direction: column; vertical-align: top; }
-			.atlasaidev-dr-modal .atlasaidev-row.col-2 { width: calc(50% - 16px); }
-			.atlasaidev-dr-modal .atlasaidev-row.col-3 { width: calc(calc(100% / 3) - 16px); }
-			.atlasaidev-dr-modal .atlasaidev-row.col-left { margin-right: 8px; }
-			.atlasaidev-dr-modal .atlasaidev-row.col-center { margin-left: 8px; margin-right: 8px; }
-			.atlasaidev-dr-modal .atlasaidev-row.col-right { margin-left: 8px; }
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control { cursor: text; display: inline-flex; position: relative; font-size: 1rem; box-sizing: border-box; align-items: center; line-height: 1.1875em; width: 100%; }
-			.atlasaidev-dr-modal .mui label { color: rgba(0, 0, 0, 0.54); padding: 0; font-size: 1rem; font-weight: 400; line-height: 1; letter-spacing: 0.00938em; display: block; transform-origin: top left; top: 0; left: 0; position: absolute; transform: translate(0, 24px) scale(1); transition: color 200ms cubic-bezier(0.0, 0, 0.2, 1) 0ms, transform 200ms cubic-bezier(0.0, 0, 0.2, 1) 0ms; }
-			.atlasaidev-dr-modal .mui label.focused { color: #007cba; }
-			p:not(.helper-text).mui-error, div:not(.helper-text).mui-error, .atlasaidev-dr-modal .mui label.mui-error { color: #f44336; }
+			.<?php echo $ns; ?>-dr-modal .<?php echo $ns; ?>-row.col-2 { width: calc(50% - 16px); }
+			.<?php echo $ns; ?>-dr-modal .<?php echo $ns; ?>-row.col-3 { width: calc(calc(100% / 3) - 16px); }
+			.<?php echo $ns; ?>-dr-modal .<?php echo $ns; ?>-row.col-left { margin-right: 8px; }
+			.<?php echo $ns; ?>-dr-modal .<?php echo $ns; ?>-row.col-center { margin-left: 8px; margin-right: 8px; }
+			.<?php echo $ns; ?>-dr-modal .<?php echo $ns; ?>-row.col-right { margin-left: 8px; }
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control { cursor: text; display: inline-flex; position: relative; font-size: 1rem; box-sizing: border-box; align-items: center; line-height: 1.1875em; width: 100%; }
+			.<?php echo $ns; ?>-dr-modal .mui label { color: rgba(0, 0, 0, 0.54); padding: 0; font-size: 1rem; font-weight: 400; line-height: 1; letter-spacing: 0.00938em; display: block; transform-origin: top left; top: 0; left: 0; position: absolute; transform: translate(0, 24px) scale(1); transition: color 200ms cubic-bezier(0.0, 0, 0.2, 1) 0ms, transform 200ms cubic-bezier(0.0, 0, 0.2, 1) 0ms; }
+			.<?php echo $ns; ?>-dr-modal .mui label.focused { color: #007cba; }
+			p:not(.helper-text).mui-error, div:not(.helper-text).mui-error, .<?php echo $ns; ?>-dr-modal .mui label.mui-error { color: #f44336; }
 			p:not(.helper-text).mui-error, div:not(.helper-text).mui-error { padding: 5px 10px; border: 1px solid #f44336; font-weight: bold; }
-			.atlasaidev-dr-modal .mui label.shrink { transform: translate(0, 1.5px) scale(0.75); transform-origin: top left; }
-			.atlasaidev-dr-modal .mui label + .atlasaidev-form-control { margin-top: 16px; }
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control:before { left: 0; right: 0; bottom: 0; content: "\00a0"; position: absolute; transition: border-bottom-color 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms; border-bottom: 1px solid rgba(0, 0, 0, 0.42); pointer-events: none; }
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control:hover:not(.disabled):before { border-bottom: 2px solid rgba(0, 0, 0, 0.87); }
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control:after { left: 0; right: 0; bottom: 0; content: ""; position: absolute; transform: scaleX(0); transition: transform 200ms cubic-bezier(0.0, 0, 0.2, 1) 0ms; border-bottom: 2px solid #007cba; pointer-events: none; }
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control.focused:after { transform: scaleX(1); }
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control.mui-error:after { transform: scaleX(1); border-bottom-color: #f44336; }
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control input,
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control textarea { font: inherit; color: currentColor; width: 100%; border: 0; height: 1.1875em; min-height: auto; margin: 0; display: block; padding: 6px 0 7px; min-width: 0; background: none; box-sizing: content-box; -webkit-tap-highlight-color: transparent; }
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control input { animation-name: mui-keyframes-auto-fill-cancel; }
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control input:-moz-autofill,
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control input:-webkit-autofill { animation-name: mui-keyframes-auto-fill; animation-duration: 5000s; }
+			.<?php echo $ns; ?>-dr-modal .mui label.shrink { transform: translate(0, 1.5px) scale(0.75); transform-origin: top left; }
+			.<?php echo $ns; ?>-dr-modal .mui label + .<?php echo $ns; ?>-form-control { margin-top: 16px; }
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control:before { left: 0; right: 0; bottom: 0; content: "\00a0"; position: absolute; transition: border-bottom-color 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms; border-bottom: 1px solid rgba(0, 0, 0, 0.42); pointer-events: none; }
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control:hover:not(.disabled):before { border-bottom: 2px solid rgba(0, 0, 0, 0.87); }
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control:after { left: 0; right: 0; bottom: 0; content: ""; position: absolute; transform: scaleX(0); transition: transform 200ms cubic-bezier(0.0, 0, 0.2, 1) 0ms; border-bottom: 2px solid #007cba; pointer-events: none; }
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control.focused:after { transform: scaleX(1); }
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control.mui-error:after { transform: scaleX(1); border-bottom-color: #f44336; }
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control input,
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control textarea { font: inherit; color: currentColor; width: 100%; border: 0; height: 1.1875em; min-height: auto; margin: 0; display: block; padding: 6px 0 7px; min-width: 0; background: none; box-sizing: content-box; -webkit-tap-highlight-color: transparent; }
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control input { animation-name: mui-keyframes-auto-fill-cancel; }
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control input:-moz-autofill,
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control input:-webkit-autofill { animation-name: mui-keyframes-auto-fill; animation-duration: 5000s; }
 			@-webkit-keyframes mui-keyframes-auto-fill {}
 			@-webkit-keyframes mui-keyframes-auto-fill-cancel {}
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control textarea { height: auto; resize: none; padding: 0; }
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control input::-webkit-search-decoration,
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control textarea::-webkit-search-decoration { -webkit-appearance: none; }
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control input::-webkit-input-placeholder,
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control textarea::-webkit-input-placeholder { color: currentColor; opacity: 0.42; transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms; }
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control input::-moz-placeholder,
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control textarea::-moz-placeholder { color: currentColor; opacity: 0.42; transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms; }
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control input:-ms-input-placeholder,
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control textarea:-ms-input-placeholder { color: currentColor; opacity: 0.42; transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms; }
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control input::-ms-input-placeholder,
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control textarea::-ms-input-placeholder { color: currentColor; opacity: 0.42; transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms; }
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control input:focus,
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control input:invalid,
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control textarea:focus,
-			.atlasaidev-dr-modal .mui .atlasaidev-form-control textarea:invalid { outline: 0; box-shadow: none; }
-			.atlasaidev-dr-modal .mui .helper-text { color: rgba(0, 0, 0, 0.54); margin: 8px 0 0 0; font-size: 0.75rem; min-height: 1em; text-align: left; font-weight: 400; line-height: 1em; letter-spacing: 0.03333em; }
-			.atlasaidev-dr-modal .mui .helper-text.contained { margin: 8px 14px 0; }
-			.atlasaidev-dr-modal .mui .helper-text.mui-error { color: #f44336; }
-			.atlasaidev-dr-modal .button.disabled, .atlasaidev-dr-modal button.disabled { cursor: not-allowed !important; }
-			/*.atlasaidev-dr-modal .atlasaidev-row input, .atlasaidev-dr-modal .atlasaidev-row textarea { width: calc( 100% - 10px ); margin: 0 5px; display: block; vertical-align: middle; box-sizing: border-box; float: left; }*/
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control textarea { height: auto; resize: none; padding: 0; }
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control input::-webkit-search-decoration,
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control textarea::-webkit-search-decoration { -webkit-appearance: none; }
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control input::-webkit-input-placeholder,
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control textarea::-webkit-input-placeholder { color: currentColor; opacity: 0.42; transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms; }
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control input::-moz-placeholder,
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control textarea::-moz-placeholder { color: currentColor; opacity: 0.42; transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms; }
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control input:-ms-input-placeholder,
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control textarea:-ms-input-placeholder { color: currentColor; opacity: 0.42; transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms; }
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control input::-ms-input-placeholder,
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control textarea::-ms-input-placeholder { color: currentColor; opacity: 0.42; transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms; }
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control input:focus,
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control input:invalid,
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control textarea:focus,
+			.<?php echo $ns; ?>-dr-modal .mui .<?php echo $ns; ?>-form-control textarea:invalid { outline: 0; box-shadow: none; }
+			.<?php echo $ns; ?>-dr-modal .mui .helper-text { color: rgba(0, 0, 0, 0.54); margin: 8px 0 0 0; font-size: 0.75rem; min-height: 1em; text-align: left; font-weight: 400; line-height: 1em; letter-spacing: 0.03333em; }
+			.<?php echo $ns; ?>-dr-modal .mui .helper-text.contained { margin: 8px 14px 0; }
+			.<?php echo $ns; ?>-dr-modal .mui .helper-text.mui-error { color: #f44336; }
+			.<?php echo $ns; ?>-dr-modal .button.disabled, .<?php echo $ns; ?>-dr-modal button.disabled { cursor: not-allowed !important; }
+			/*.<?php echo $ns; ?>-dr-modal .<?php echo $ns; ?>-row input, .<?php echo $ns; ?>-dr-modal .<?php echo $ns; ?>-row textarea { width: calc( 100% - 10px ); margin: 0 5px; display: block; vertical-align: middle; box-sizing: border-box; float: left; }*/
 		</style>
 		<?php ?>
 		<!--suppress ES6ConvertVarToLetConst, JSUnresolvedVariable -->
@@ -1159,7 +1160,7 @@ class Insights {
                         });
                     }
                     // Variables.
-                    var modal = $('#<?php echo esc_attr( $this->client->getSlug() ); ?>-atlasaidev-dr-modal'),
+                    var modal = $('#<?php echo $ns; ?>-dr-modal'),
                         deactivateLink = '',
 	                    reason = modal.find('.reason'),
 	                    support = modal.find('.support'),
@@ -1169,23 +1170,18 @@ class Insights {
                         // sendButton = modal.find('.send-ticket'),
                         validMessage = false,
                         preventDefault = function ( e ) { e && e.preventDefault() },
-                        responseButtons = modal.find('.reason .atlasaidev-dr-modal-footer .button'),
+                        responseButtons = modal.find('.reason .<?php echo $ns; ?>-dr-modal-footer .button'),
 	                    supportURL = '<?php echo esc_url( $this->supportURL ); ?>',
                         closeModal = function (e) {
                             preventDefault(e);
                             var buttons = modal.find('.button');
                             modal.removeClass('modal-active');
-                            // modal.find('.atlasaidev-dr-modal-wrap').show();
+                            // modal.find('.<?php echo $ns; ?>-dr-modal-wrap').show();
                             supportResponse.hide().find('.wrapper').html('');
                             reasonResponse.show();
                             support.hide();
                             // enable buttons and restore original labels
                             buttons.removeClass('disabled');
-                            // TTS-fix: removed `responseButtons.addClass('disabled')` — a leftover from the old
-                            // .response overlay whose re-enabling `.not-interested` link no longer exists, which
-                            // left the reason-modal footer buttons ("Submit & Deactivate" / "Cancel" / "I rather
-                            // wouldn't say") disabled after the modal was closed and reopened. Scoped to this
-                            // plugin's own modal (#text-to-audio-atlasaidev-dr-modal), so other plugins are unaffected.
                             buttons.each(function () {
                                 var self = $(this), label = self.attr('data-label');
                                 if (label) self.text(label);
@@ -1198,7 +1194,7 @@ class Insights {
                             var target = e && e.target ? e.target : this;
                             var self = $(this), currentMui = self.closest('.mui'),
                                 label = currentMui.find('label'),
-                                control = currentMui.find('.atlasaidev-form-control');
+                                control = currentMui.find('.<?php echo $ns; ?>-form-control');
                             if (target.checkValidity()) {
                                 if (label.hasClass('mui-error')) label.removeClass('mui-error');
                                 if (control.hasClass('mui-error')) control.removeClass('mui-error');
@@ -1211,7 +1207,7 @@ class Insights {
                             $('.mui-error').removeClass('mui-error');
                             if( clearValues ) {
                                 if( clearAll ) mui.val('');
-                                else modal.find('#atlasaidev-support-message,#atlasaidev-support-subject').val('');
+                                else modal.find('#<?php echo $ns; ?>-support-message,#<?php echo $ns; ?>-support-subject').val('');
                             }
                         };
                     // The MUI
@@ -1224,7 +1220,7 @@ class Insights {
                             .on('focus', function () {
                                 var self = $(this), currentMui = self.closest('.mui'),
                                     label = currentMui.find('label'),
-                                    control = currentMui.find('.atlasaidev-form-control');
+                                    control = currentMui.find('.<?php echo $ns; ?>-form-control');
                                 control.addClass('focused');
                                 label.addClass('focused');
                                 label.addClass('shrink');
@@ -1232,7 +1228,7 @@ class Insights {
                             .on('blur', function () {
                                 var self = $(this), currentMui = self.closest('.mui'),
                                     label = currentMui.find('label'),
-                                    control = currentMui.find('.atlasaidev-form-control');
+                                    control = currentMui.find('.<?php echo $ns; ?>-form-control');
                                 control.removeClass('focused');
                                 label.removeClass('focused');
                                 if (self.val() === '') {
@@ -1246,7 +1242,7 @@ class Insights {
                                 preventDefault(e);
                                 var self = $(this), currentMui = self.closest('.mui'),
                                     label = currentMui.find('label'),
-                                    control = currentMui.find('.atlasaidev-form-control');
+                                    control = currentMui.find('.<?php echo $ns; ?>-form-control');
                                 currentMui.find('p.helper-text').remove();
                                 validMessage = false;
                                 if (!label.hasClass('mui-error')) label.addClass('mui-error');
@@ -1258,6 +1254,8 @@ class Insights {
                     $('#the-list').on('click', 'a.<?php echo esc_attr( $this->client->getSlug() ); ?>-deactivate-link', function (e) {
                         preventDefault(e);
                         modal.addClass('modal-active');
+                        // defensive: never open with stale disabled state.
+                        modal.find('.button').removeClass('disabled');
                         deactivateLink = $(this).attr('href');
                         modal.find('a.dont-bother-me').attr('href', deactivateLink).css('float', 'left');
                     });
@@ -1279,7 +1277,7 @@ class Insights {
                             support.slideUp();
                             //if( ! reasonResponse.is(':visible') ) responseButtons.removeClass('disabled');
                         } )
-                        .on( 'click', '.modal-close, .atlasaidev-dr-modal-close', closeModal )
+                        .on( 'click', '.modal-close, .<?php echo $ns; ?>-dr-modal-close', closeModal )
                         .on( 'click', 'input[type="radio"]', function () {
                             modal.find('.reason-input').remove();
                             var parent = $(this).parents('li:first'),
@@ -1323,7 +1321,7 @@ class Insights {
                                     supportResponse.show();
                                 }
                                 if( response.success ) {
-                                    modal.find('#atlasaidev-support-message,#atlasaidev-support-subject').val('');
+                                    modal.find('#<?php echo $ns; ?>-support-message,#<?php echo $ns; ?>-support-subject').val('');
                                 } else {
                                     setTimeout( function() {
                                         window.open( supportURL, '_blank' );
@@ -1421,7 +1419,7 @@ class Insights {
 		$allowed_pages  = [
 			admin_url() . 'index.php',
 			admin_url() . 'plugins.php',
-			admin_url().'admin.php?page=' . TEXT_TO_AUDIO_TEXT_DOMAIN
+			admin_url().'admin.php?page=' . $this->client->getSlug()
 		];
 		
 

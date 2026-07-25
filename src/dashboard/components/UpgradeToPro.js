@@ -1,11 +1,12 @@
 import { __ } from "@wordpress/i18n";
 import React, { useState } from "react";
-import { proUrl } from "../proUrl";
+import { proUrl, pricingPageUrl } from "../proUrl";
 import { Accordion, Table } from "react-bootstrap";
 import toast from "./context/Notify";
 import { copyToClipBoard } from "./context/utilities";
+import DemoLink from "./DemoLink";
 
-export default function UpgradeToPro({ promotionType = "general" }) {
+export default function UpgradeToPro({ promotionType = "general", showDemoCard = false }) {
   const [activeTab, setActiveTab] = useState("documentation");
 
   /**
@@ -242,6 +243,37 @@ export default function UpgradeToPro({ promotionType = "general" }) {
 
   return (
     <div style={{ position: "sticky", top: "20px" }}>
+      {/* TTS-264 — dedicated live-demo card. UpgradeToPro sits in the right
+          column of every tab, but the card is opt-in per tab (showDemoCard) so
+          it only appears on the two evaluation tabs (Customize, Listening)
+          instead of repeating on all six. Free-users only. */}
+      {showDemoCard && !ttsObj.is_atlasvoice_addon_functional && (
+        <div
+          style={{
+            background: "#fff",
+            border: "0.5px solid #e6e6e6",
+            borderRadius: "12px",
+            padding: "16px",
+            marginBottom: "16px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+            <span aria-hidden="true" style={{ color: "#184c53" }}>{"▶"}</span>
+            <h5 style={{ margin: 0, fontSize: "15px", fontWeight: 600, color: "#184c53" }}>
+              {__("See AtlasVoice Pro in action", "text-to-audio")}
+            </h5>
+          </div>
+          <p style={{ fontSize: "13px", color: "#6b6b6b", margin: "0 0 12px", lineHeight: 1.5 }}>
+            {__("Hear 200+ AI voices, MP3 players, and bulk generation on a live page — no install needed.", "text-to-audio")}
+          </p>
+          <DemoLink
+            content="sidebar_demo_card"
+            label={__("Watch the live demo", "text-to-audio")}
+            variant="block"
+          />
+        </div>
+      )}
+
       {/* Documentation Section → Accordion with Docs.js content */}
       <Accordion defaultActiveKey="" className="tta-custom-accordion">
         <Accordion.Item eventKey="0">
@@ -915,7 +947,7 @@ function tta__button_text_arr_callback($text_arr) {
 
       {/* General Promotion (Pro Features) */}
       {promotionType === "general" && !ttsObj.is_atlasvoice_addon_functional && (
-        <Accordion style={{ marginTop: "20px" }}>
+        <Accordion defaultActiveKey="0" style={{ marginTop: "20px" }}>
           <Accordion.Item eventKey="0">
             <Accordion.Header>⭐ Pro Features</Accordion.Header>
             <Accordion.Body>
@@ -928,9 +960,7 @@ function tta__button_text_arr_callback($text_arr) {
               </ul>
 
               <a
-                href={proUrl('upgrade_page')}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={pricingPageUrl('upgrade_page')}
                 style={{
                   display: "block",
                   textAlign: "center",
@@ -945,6 +975,14 @@ function tta__button_text_arr_callback($text_arr) {
               >
                 Upgrade to Pro
               </a>
+
+              {/* TTS-264 — secondary demo CTA inside the Pro Features card. */}
+              <DemoLink
+                content="pro_features_accordion"
+                label={__("Try the live demo", "text-to-audio")}
+                variant="block"
+                style={{ marginTop: "10px" }}
+              />
             </Accordion.Body>
           </Accordion.Item>
         </Accordion>

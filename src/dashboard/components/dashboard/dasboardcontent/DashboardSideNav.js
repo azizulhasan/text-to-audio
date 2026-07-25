@@ -1,5 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
+import { pricingPageUrl } from "../../../proUrl";
 
 import "./DashboardSideNav.css"; // Make sure to import the CSS
 
@@ -95,11 +96,22 @@ export default function DashboardSideNav({ isProVersion }) {
               </div>
               Docs
             </NavLink>
+            {/* TTS-264: free-only Pricing link, just above "Our Plugins". Points
+                to the standalone Pricing admin page (not a router route), so it's
+                a plain anchor rather than a NavLink. */}
+            {!isProVersion && (
+              <a className="nav-link" href={pricingPageUrl("sidenav")}>
+                <div className="sb-nav-link-icon">
+                  <span className="dashicons dashicons-money-alt"></span>
+                </div>
+                Pricing
+              </a>
+            )}
             <NavLink className={getNavLinkClass} to={"/plugins"}>
               <div className="sb-nav-link-icon">
                 <span className="dashicons dashicons-screenoptions"></span>
               </div>
-              Plugins
+              Our Plugins
             </NavLink>
             {/* <NavLink className={getNavLinkClass} to={'/analitics'}>
 							<div className='sb-nav-link-icon'>
