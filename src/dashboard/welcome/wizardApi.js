@@ -4,7 +4,9 @@
  * Sends data as FormData with `method` and `fields` params,
  * matching the existing TTA REST API convention.
  *
- * @param {string} endpoint - REST route suffix (e.g. 'settings', 'listening', 'customize').
+ * @param {string} endpoint - REST route suffix (e.g. 'settings-data', 'listening', 'customize').
+ *                            Use 'settings-data' (not 'settings') — some security plugins
+ *                            block any REST path ending in the exact segment "settings".
  * @param {Object} data     - Payload object to be JSON-stringified into `fields`.
  * @returns {Promise<Object>} Parsed JSON response.
  */

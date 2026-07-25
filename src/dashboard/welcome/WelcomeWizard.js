@@ -117,7 +117,7 @@ const WelcomeWizard = () => {
             const currentCustomize = wizardData.current_customize || {};
 
             const requests = [
-                wizardFetch('settings', {
+                wizardFetch('settings-data', {
                     ...currentSettings,
                     tta__settings_allow_listening_for_post_types: [
                         settings.postType,
@@ -180,7 +180,7 @@ const WelcomeWizard = () => {
     const handleSkip = async () => {
         try {
             const currentSettings = wizardData.current_settings || {};
-            await wizardFetch('settings', {
+            await wizardFetch('settings-data', {
                 ...currentSettings,
                 tta_onboarding_completed: true,
             });
