@@ -304,8 +304,12 @@ gulp.task('copyProButton', function (done) {
 })
 
 gulp.task('release', function () {
+	// gulp-copy preserves the source path under the destination, so without a
+	// prefix the files would land in text-to-audio-release/production/text-to-audio/.
+	// prefix: 2 strips the leading "production/text-to-audio/" so files drop
+	// directly into the release folder (same reasoning as copyToSevenDeploy).
 	return gulp.src('production/text-to-audio/**')
-		.pipe(gulpCopy('D:/xampp/htdocs/wordpress.org/text-to-audio-release/', config.copy.src.options))
+		.pipe(gulpCopy('D:/xampp/htdocs/wordpress.org/text-to-audio-release/', { prefix: 2 }))
 		.pipe(notify({ message: 'Release version copy Completed! 💯', onLast: true }))
 })
 
