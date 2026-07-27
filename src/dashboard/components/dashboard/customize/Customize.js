@@ -542,14 +542,37 @@ export default function Customize() {
       }
     }
 
-    if (!ttsObj.is_atlasvoice_addon_functional && formData?.buttonSettings?.id > 1) {
+    // TTS-266: this guard predates player 7 and assumed every id above 1 was a
+    // Pro player. Player 7 (AtlasVoice Cloud) is a FREE player, so blocking it
+    // here would both break the feature and be exactly the trialware pattern
+    // wp.org Guideline 5 forbids. Gate on the server-provided registry instead
+    // of on the id, so any future free player is handled automatically.
+    const availableIds = (
+      Array.isArray(ttsObj?.availablePlayers) && ttsObj.availablePlayers.length
+        ? ttsObj.availablePlayers
+        : [{ id: 1 }]
+    ).map((p) => Number(p.id));
+
+    if (
+      !ttsObj.is_atlasvoice_addon_functional &&
+      formData?.buttonSettings?.id > 1 &&
+      !availableIds.includes(Number(formData?.buttonSettings?.id))
+    ) {
       CTANotice(__("Default Pro player is only available in the pro version.", "text-to-audio"));
       return;
     }
 
+    // TTS-266: any MP3-based player needs a writable uploads folder, player 7
+    // included. Read the flag from ttsObj first — on a free-only site ttsObjPro
+    // is a stub that may not carry is_folder_writable, and treating "missing" as
+    // "not writable" would block player 7 on a perfectly healthy site.
+    const folderWritable =
+      typeof ttsObj?.is_folder_writable !== "undefined"
+        ? ttsObj.is_folder_writable
+        : window.ttsObjPro?.is_folder_writable;
+
     if (
-      window.hasOwnProperty("ttsObjPro") &&
-      !ttsObjPro.is_folder_writable &&
+      !folderWritable &&
       formData?.buttonSettings?.id > 2 &&
       !getAddonAuth().tts_is_backup_mp3_file
     ) {

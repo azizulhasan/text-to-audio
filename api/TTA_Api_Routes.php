@@ -1195,10 +1195,23 @@ class TTA_Api_Routes {
         $payload['path']   = $date_path;
         $payload['site_url'] = \site_url();
 
+        /**
+         * Synthesis timeout, in seconds.
+         *
+         * Measured: a ~1,950-character batch takes ~63s on the Kokoro engine
+         * (1.9x realtime on CPU), which overran an earlier 60s timeout by a
+         * second — the service finished the audio and WordPress had already given
+         * up, so nothing was written. Piper is ~10x faster and nowhere near this.
+         * Generous by default, and filterable for slow hosts or slower engines.
+         *
+         * @param int $timeout Seconds.
+         */
+        $timeout = (int) apply_filters( 'tta_atlasvoice_request_timeout', 180 );
+
         $response = \wp_remote_post( TTA_ATLASVOICE_API_URL, array(
             'body'    => \wp_json_encode( $payload ),
             'headers' => array( 'Content-Type' => 'application/json' ),
-            'timeout' => 60,
+            'timeout' => $timeout,
             'method'  => 'POST',
         ) );
 
@@ -1223,7 +1236,7 @@ class TTA_Api_Routes {
         }
 
         // ---- fetch the generated batch and store it ------------------------
-        $audio = \wp_remote_get( $decoded['path'], array( 'timeout' => 60 ) );
+        $audio = \wp_remote_get( $decoded['path'], array( 'timeout' => $timeout ) );
 
         if ( \is_wp_error( $audio ) ) {
             delete_transient( $transient_key );

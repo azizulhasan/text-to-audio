@@ -160,7 +160,10 @@ if (!defined('TTA_PLUGIN_PATH')) {
  * until the feature is finished and the default flips.
  */
 if (!defined('TTA_ENABLE_ATLASVOICE_CLOUD')) {
-    define('TTA_ENABLE_ATLASVOICE_CLOUD', false);
+    // TTS-266: ON while the feature is being built and tested. MUST go back to
+    // false before this branch is merged or released — see the release checklist
+    // in plan/tickets/TTS-266-*.md.
+    define('TTA_ENABLE_ATLASVOICE_CLOUD', true);
 }
 
 /**
@@ -206,7 +209,10 @@ add_action('plugins_loaded', function () {
     // 7 are different players on different engines and must stay independently
     // deployable and monitorable.
     if (!defined('TTA_ATLASVOICE_API_URL')) {
-        $api_url = TTA_DEBUG_MODE
+        // TTS-266: while the service is only running locally, TTA_ENABLE_ATLASVOICE_CLOUD
+        // also routes to localhost. Once voice.atlasaidev.com is live this reverts
+        // to keying off TTA_DEBUG_MODE alone.
+        $api_url = ( TTA_DEBUG_MODE || TTA_ENABLE_ATLASVOICE_CLOUD )
             ? 'http://127.0.0.1:8080/api/atlasvoice'
             : 'https://voice.atlasaidev.com/api/atlasvoice';
 
