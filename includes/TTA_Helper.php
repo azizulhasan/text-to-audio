@@ -1112,6 +1112,48 @@ class TTA_Helper
     }
 
     /**
+     * TTS-266: the AtlasVoice Cloud voice catalogue for player 7.
+     *
+     * Bundled in the plugin rather than fetched from the service, deliberately:
+     * browsing voices in wp-admin must not contact an external server (wp.org
+     * Guideline 7), and a local list also renders instantly and works offline.
+     * Only actual synthesis talks to the service, and only after opt-in.
+     *
+     * Keep in sync with the engines registered in the service (app/engines.py).
+     *
+     * @return array<int,array<string,string>>
+     */
+    public static function get_atlasvoice_voices()
+    {
+        $voices = array(
+            // Kokoro — higher quality, ~7x the CPU cost. Curated shortlist.
+            array('id' => 'af_heart',   'label' => 'Heart (Female)',  'lang' => 'en-US', 'gender' => 'female', 'engine' => 'kokoro'),
+            array('id' => 'am_michael', 'label' => 'Michael (Male)',  'lang' => 'en-US', 'gender' => 'male',   'engine' => 'kokoro'),
+            array('id' => 'bf_emma',    'label' => 'Emma (Female)',   'lang' => 'en-GB', 'gender' => 'female', 'engine' => 'kokoro'),
+            array('id' => 'bm_george',  'label' => 'George (Male)',   'lang' => 'en-GB', 'gender' => 'male',   'engine' => 'kokoro'),
+            array('id' => 'ef_dora',    'label' => 'Dora (Female)',   'lang' => 'es-ES', 'gender' => 'female', 'engine' => 'kokoro'),
+            array('id' => 'em_alex',    'label' => 'Alex (Male)',     'lang' => 'es-ES', 'gender' => 'male',   'engine' => 'kokoro'),
+            array('id' => 'ff_siwis',   'label' => 'Siwis (Female)',  'lang' => 'fr-FR', 'gender' => 'female', 'engine' => 'kokoro'),
+            array('id' => 'if_sara',    'label' => 'Sara (Female)',   'lang' => 'it-IT', 'gender' => 'female', 'engine' => 'kokoro'),
+            array('id' => 'im_nicola',  'label' => 'Nicola (Male)',   'lang' => 'it-IT', 'gender' => 'male',   'engine' => 'kokoro'),
+            array('id' => 'hf_alpha',   'label' => 'Alpha (Female)',  'lang' => 'hi-IN', 'gender' => 'female', 'engine' => 'kokoro'),
+            array('id' => 'pf_dora',    'label' => 'Dora (Female)',   'lang' => 'pt-BR', 'gender' => 'female', 'engine' => 'kokoro'),
+            array('id' => 'pm_alex',    'label' => 'Alex (Male)',     'lang' => 'pt-BR', 'gender' => 'male',   'engine' => 'kokoro'),
+
+            // Piper — much cheaper per character and far broader language coverage.
+            array('id' => 'en_US-amy-medium',    'label' => 'Amy (Female)',   'lang' => 'en-US', 'gender' => 'female', 'engine' => 'piper'),
+            array('id' => 'pt_BR-faber-medium',  'label' => 'Faber (Male)',   'lang' => 'pt-BR', 'gender' => 'male',   'engine' => 'piper'),
+        );
+
+        /**
+         * Filter the AtlasVoice Cloud voice catalogue.
+         *
+         * @param array $voices List of voice definitions.
+         */
+        return (array) apply_filters('tts_atlasvoice_voices', $voices);
+    }
+
+    /**
      * TTS-266: has the site owner explicitly switched AtlasVoice Cloud on?
      *
      * wp.org Guideline 7 forbids sending site or user data to an external

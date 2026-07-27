@@ -152,6 +152,10 @@ class TTA_Admin
             // only; Pro adds 2-6 via the `tts_available_players` filter. The React
             // customize UI renders the selector from this list (no locked options).
             'availablePlayers' => array_values( TTA_Helper::get_available_players() ),
+            // TTS-266: player 7 voice catalogue, bundled locally so the Listening
+            // screen never contacts an external service just to list voices.
+            'atlasVoiceVoices' => TTA_Helper::get_atlasvoice_voices(),
+            'atlasVoiceEnabled' => TTA_Helper::is_atlasvoice_cloud_enabled(),
             "is_folder_writable" => TTA_Helper::is_audio_folder_writable(),
             'compatible' => TTA_Helper::get_compatible_plugins_data(),
             'gctts_is_authenticated' => get_player_id() == '4',
