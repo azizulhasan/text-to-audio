@@ -201,12 +201,14 @@ add_action('plugins_loaded', function () {
         define('TTA_ATLASVOICE_DIR_URL', apply_filters('tta_atlasvoice_dir_url', TTA_AUDIO_DIR_URL . 'atlasvoice/'));
     }
 
-    // Same shape as Pro's TTA_PRO_GTTS_API_URL so both plugins speak one contract,
-    // declared here because Free owns player 7.
+    // Declared here because Free owns player 7. Same request/response SHAPE as
+    // Pro's TTA_PRO_GTTS_API_URL, but its own endpoint path — player 3 and player
+    // 7 are different players on different engines and must stay independently
+    // deployable and monitorable.
     if (!defined('TTA_ATLASVOICE_API_URL')) {
         $api_url = TTA_DEBUG_MODE
-            ? 'http://127.0.0.1:8080/api/gtts'
-            : 'https://voice.atlasaidev.com/api/gtts';
+            ? 'http://127.0.0.1:8080/api/atlasvoice'
+            : 'https://voice.atlasaidev.com/api/atlasvoice';
 
         define('TTA_ATLASVOICE_API_URL', apply_filters('tta_atlasvoice_api_url', $api_url));
     }
