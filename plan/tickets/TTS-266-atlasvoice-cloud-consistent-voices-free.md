@@ -365,15 +365,25 @@ throttles sustained CPU (some cheap VPS plans are burst-only, which would silent
 
 ### 8.1.2 Setup
 
+> **Which engine is the free tier is NOT pre-decided — Phase 0 decides it by measurement.**
+> §3 of this plan frames Piper as the free tier and Kokoro as premium, but
+> [`../research/research-opensource-tts-models.md`](../research/research-opensource-tts-models.md)
+> (2026-04-15) independently ranked **Kokoro first** on quality and noted that `Kokoro-FastAPI` ships a
+> Docker image exposing an **OpenAI-compatible** `/v1/audio/speech` endpoint. If that holds up, starting
+> from it removes most of the Phase 1 API surface work — build the throwaway endpoint around it rather
+> than hand-rolling one. Settle the free-vs-premium engine split from the numbers and the listening test.
+
 1. Provision the VPS, plain Ubuntu LTS, no panel.
-2. Install **Piper** (ONNX runtime + the `piper` binary) and download a small voice set — English
+2. Stand up **Kokoro** first, ideally via the ready-made `Kokoro-FastAPI` Docker image
+   (`POST /v1/audio/speech`, OpenAI-compatible), since that is also the shape Pro's provider code
+   already speaks.
+3. Install **Piper** alongside it (ONNX runtime + the `piper` binary) with a small voice set — English
    (US + UK), one Latin-script European language, and **one non-Latin-script language** (e.g. Hindi,
    Arabic or Chinese) so we test the hard case, not just English. Check the current `rhasspy/piper-voices`
    catalogue for the exact voice ids and the `low` / `medium` / `high` quality tiers.
-3. Install **Kokoro-82M** (ONNX) alongside it, so both engines can be compared on the same box with
-   the same text.
-4. Wrap both in a throwaway HTTP endpoint: `POST /synth {text, engine, voice}` → MP3. No auth, no
-   quota, no database — that is Phase 1's job.
+4. Expose both behind one throwaway HTTP endpoint: `POST /synth {text, engine, voice}` → MP3, so the two
+   engines are compared on the same box with the same text. No auth, no quota, no database — that is
+   Phase 1's job.
 5. Encode output as MP3 (mono, 22.05 kHz, ~64 kbps) so the file-size numbers match what the plugin
    would really store.
 
@@ -498,4 +508,10 @@ with the date and the reason. That file is what unblocks Phase 1.
   `TTA_Helper::get_available_players()`, filter `tts_available_players`.
 - Related plans: `TTS-249-guideline-5-6-trialware-fix.md`, `TTS-256-highlight-follow-ups.md`,
   `free-pro-architecture-pattern.md`.
+- Competitor free/Pro models (ResponsiveVoice + GSpeech, source-read):
+  [`../research/research-competitor-free-pro-models.md`](../research/research-competitor-free-pro-models.md).
+  Confirms the cloud + cache pattern is what both competitors run, and carries the open
+  subscription-vs-bundled pricing decision that should be settled before Phase 1.
+- Engine shortlist and deployment notes:
+  [`../research/research-opensource-tts-models.md`](../research/research-opensource-tts-models.md).
 - Engines: Piper (MIT, VITS/ONNX, 30+ languages), Kokoro-82M (Apache-2.0, ~80 MB ONNX).
