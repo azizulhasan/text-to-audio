@@ -685,14 +685,16 @@ class TTA_Helper
             $title = $md5_hash . '__lang__' . $selectedLang;
         }
 
-        // Player 3 (gTTS): truncate long filenames to avoid ENAMETOOLONG error on Linux (255 byte limit).
-        // Keep first 100 chars + md5 hash for uniqueness.
-        if (get_player_id() == 3 && strlen($title) > 200) {
+        // Player 3 (gTTS) and 7 (AtlasVoice Cloud): truncate long filenames to avoid
+        // ENAMETOOLONG on Linux (255 byte limit). Keep first 100 chars + md5 hash.
+        if ((get_player_id() == 3 || get_player_id() == 7) && strlen($title) > 200) {
             $hash = md5($title);
             $title = substr($title, 0, 100) . '_' . $hash;
         }
 
-        if ((get_player_id() == 4 || get_player_id() == 5 || get_player_id() == 6) && $voice) {
+        // TTS-266: player 7 added — one post can hold one audio per language+voice,
+        // so the voice must be part of the file name exactly as for players 4-6.
+        if ((get_player_id() == 4 || get_player_id() == 5 || get_player_id() == 6 || get_player_id() == 7) && $voice) {
             // For ElevenLabs (player 6), voice is "voice_id::FirstName" — use only FirstName.
             $voice_for_name = $voice;
             if (get_player_id() == 6 && strpos($voice, '::') !== false) {
@@ -927,11 +929,34 @@ class TTA_Helper
      */
     public static function get_path_from_url($url)
     {
-        $audio_dir = TTA_PRO_GTTS_DIR;
-        $audio_dir_url = TTA_PRO_GTTS_DIR_URL;
         $player_id = self::get_player_id();
 
-        if ($player_id == 4) {
+        /**
+         * TTS-266: default to the free plugin's own AtlasVoice folder.
+         *
+         * This method used to open with `$audio_dir = TTA_PRO_GTTS_DIR;` — a Pro
+         * constant referenced from Free. It never blew up because Free shipped
+         * only player 1 and never reached here; with player 7 in Free it does,
+         * and an undefined constant is a fatal on PHP 8. So: start from the Free
+         * dir, and only use the Pro dirs when Pro actually defined them.
+         *
+         * Resolved through defined() rather than used directly, so that an early
+         * or unusual call order can never re-create the very fatal being fixed.
+         */
+        $upload_dir    = wp_upload_dir();
+        $audio_dir     = defined('TTA_ATLASVOICE_DIR')
+            ? TTA_ATLASVOICE_DIR
+            : trailingslashit($upload_dir['basedir'] . '/TTA/atlasvoice');
+        $audio_dir_url = defined('TTA_ATLASVOICE_DIR_URL')
+            ? TTA_ATLASVOICE_DIR_URL
+            : trailingslashit($upload_dir['baseurl'] . '/TTA/atlasvoice');
+
+        if ($player_id != 7 && defined('TTA_PRO_GTTS_DIR') && defined('TTA_PRO_GTTS_DIR_URL')) {
+            $audio_dir     = TTA_PRO_GTTS_DIR;
+            $audio_dir_url = TTA_PRO_GTTS_DIR_URL;
+        }
+
+        if ($player_id == 4 && defined('TTA_PRO_AUDIO_DIR')) {
 
             if (strpos($url, 'gtts') !== false) {
                 $url = str_replace('gtts/', '', $url);
@@ -945,7 +970,7 @@ class TTA_Helper
             $audio_dir_url = TTA_PRO_AUDIO_DIR_URL;
         }
 
-        if ($player_id == 5) {
+        if ($player_id == 5 && defined('TTA_PRO_CHAT_GPT_TTS_DIR')) {
             $audio_dir = TTA_PRO_CHAT_GPT_TTS_DIR;
             $audio_dir_url = TTA_PRO_CHAT_GPT_TTS_DIR_URL;
         }
@@ -1069,6 +1094,19 @@ class TTA_Helper
                 'pro'    => false,
             ),
         );
+
+        // TTS-266: AtlasVoice Cloud. Free owns this player (pre-generated MP3 in a
+        // native <audio> element, identical on every device), but it stays behind
+        // TTA_ENABLE_ATLASVOICE_CLOUD until the implementation is complete — an
+        // unfinished player must never become selectable on live sites.
+        if ( defined( 'TTA_ENABLE_ATLASVOICE_CLOUD' ) && TTA_ENABLE_ATLASVOICE_CLOUD ) {
+            $players[7] = array(
+                'id'     => 7,
+                'name'   => __( 'AtlasVoice Cloud', 'text-to-audio' ),
+                'object' => 'AtlasVoiceCloudPlayer',
+                'pro'    => false,
+            );
+        }
 
         return (array) apply_filters( 'tts_available_players', $players );
     }
