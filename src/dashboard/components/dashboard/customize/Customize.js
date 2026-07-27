@@ -629,6 +629,9 @@ export default function Customize() {
     { id: 4, name: "Google Cloud TTS", object: "TextToSpeechPro", disabled: false },
     { id: 5, name: "ChatGPT TTS", object: "TextToSpeechPro", disabled: false },
     { id: 6, name: "ElevenLabs TTS", object: "TextToSpeechPro", disabled: false },
+    // TTS-266: AtlasVoice Cloud is a FREE player — it appears here only when the
+    // server registry lists it (feature flag), like every other entry.
+    { id: 7, name: "AtlasVoice Cloud", object: "AtlasVoiceCloudPlayer", disabled: false },
   ];
   const localizedObj =
     (typeof tta_obj !== "undefined" && tta_obj) ||

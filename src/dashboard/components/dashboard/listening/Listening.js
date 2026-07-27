@@ -13,6 +13,9 @@ import UpgradeToPro from "../../UpgradeToPro";
 // loading, and multilingual mapping — lives entirely in the AtlasVoice add-on and
 // is mounted into the #tts_listening_pro slot below when the add-on is active.
 import DefaultPlayerSettings from "./tts-providers/DefaultPlayerSettings";
+// TTS-266: player 7 (AtlasVoice Cloud) is a Free player, so unlike players 2-6
+// its Listening UI lives here rather than in the add-on island.
+import AtlasVoiceCloudSettings from "./tts-providers/AtlasVoiceCloudSettings";
 
 // Multilingual plugin basenames the add-on can map voices for (Pro feature).
 const MULTILINGUAL_PLUGINS = {
@@ -58,10 +61,13 @@ export default function Listening() {
   // users (no add-on). With the add-on active, mapping lives in the Pro Listening
   // island for players 2-6.
   const multilingualPlugin = !addonActive ? detectMultilingualPlugin() : "";
-  const playerId = customizationSettings?.buttonSettings?.id || 1;
-  // Free owns player 1 only; player >= 2 is an add-on player (rendered by the
+  const playerId = Number(customizationSettings?.buttonSettings?.id || 1);
+  // TTS-266: player 7 (AtlasVoice Cloud) is owned by Free, so it must never be
+  // routed to the add-on island — check it before the add-on test.
+  const isAtlasVoiceCloud = playerId === 7;
+  // Free owns players 1 and 7; players 2-6 are add-on players (rendered by the
   // add-on into the #tts_listening_pro slot below).
-  const isAddonPlayer = playerId >= 2 && addonActive;
+  const isAddonPlayer = !isAtlasVoiceCloud && playerId >= 2 && addonActive;
 
   // ── Load browser voices (player 1) ──────────────────────────────────
   useEffect(() => {
@@ -169,14 +175,21 @@ export default function Listening() {
           </div>
 
             <Form onSubmit={handleSubmit}>
-              <DefaultPlayerSettings
-                listeningSettings={listeningSettings}
-                currentPlayerLanguages={currentPlayerLanguages}
-                currentPlayerFilteredVoices={filteredVoices}
-                handleChange={handleChange}
-              />
+              {isAtlasVoiceCloud ? (
+                <AtlasVoiceCloudSettings
+                  listeningSettings={listeningSettings}
+                  handleChange={handleChange}
+                />
+              ) : (
+                <DefaultPlayerSettings
+                  listeningSettings={listeningSettings}
+                  currentPlayerLanguages={currentPlayerLanguages}
+                  currentPlayerFilteredVoices={filteredVoices}
+                  handleChange={handleChange}
+                />
+              )}
 
-              {multilingualPlugin && (
+              {multilingualPlugin && !isAtlasVoiceCloud && (
                 <div
                   className="tta-card mb-3 mt-3 text-center"
                   style={{ padding: "32px 24px" }}
