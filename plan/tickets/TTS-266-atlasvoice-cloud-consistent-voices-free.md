@@ -338,6 +338,37 @@ writability and the dashboard already surfaces the failure).
 - Reuse the existing `mp3_generation_lock__post_id__{id}` lock convention so concurrent requests for the
   same post do not double-charge quota.
 
+### B5a. Batching — reuse the existing protocol unchanged
+
+Long posts are **already** synthesized in batches today, and player 7 reuses that flow rather than
+inventing a new one. Verified in Pro `Api/TTA_Pro_Api_Routes.php`:
+
+- `TTA_Pro_Helper::is_first_batch()` and an `is_last_batch` flag drive the sequence.
+- Each batch writes a temp file named `{temp_title}-{batch_no}`.
+- Each batch writes its own word-timing sidecar (`{temp_title}.avtim.json`), offset by that batch's
+  **real decoded MP3 duration** — not the provider's reported "end" mark.
+- On `is_last_batch` the plugin merges the temp files into the final MP3 (with the Xing/VBR header
+  rebuild) and writes the final timing sidecar.
+- Orphan per-batch temp files are cleaned up by the TTS-239 maintenance scan.
+
+**Why this gets easier with our own engine.** Batching exists only because third-party providers cap a
+single request — Google ~5,000 characters, OpenAI ~4,096, ElevenLabs similar. **Our engine has no such
+cap and no per-request cost**, so batch size stops being a hard constraint and becomes a tuning knob.
+
+Decisions:
+
+1. **Phase 2 keeps the batch protocol exactly as-is.** Same first/last-batch flags, same temp files, same
+   merge and Xing rebuild, same sidecar offsetting. No new plugin logic, and player 7 stays consistent
+   with players 3–6.
+2. **Tune batch size upward.** Fewer round-trips and fewer concatenation seams (every join is a small
+   prosody discontinuity). Phase 0 should measure where larger batches stop helping — the trade-offs are
+   worker memory and time-to-first-audio.
+3. **Later optimisation, explicitly out of scope for this ticket:** have the engine accept a whole post in
+   one request, chunk it internally on sentence boundaries, and return a single MP3 plus a single timing
+   sidecar. Cleaner audio and no client-side merge, but a much larger plugin change — revisit only after
+   player 7 ships. It would also remove the cross-batch timing-offset class of bugs entirely, which is a
+   further argument for the Python runtime (§A1), since alignment lives there.
+
 ### B6. Fallback chain (never break playback)
 
 1. Cached MP3 exists → play it.
