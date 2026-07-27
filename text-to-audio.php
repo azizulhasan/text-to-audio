@@ -151,6 +151,67 @@ if (!defined('TTA_PLUGIN_PATH')) {
     define('TTA_PLUGIN_PATH', trailingslashit(plugin_dir_path(TEXT_TO_AUDIO_ROOT_FILE)));
 }
 
+/**
+ * TTS-266: AtlasVoice Cloud (player 7) feature flag.
+ *
+ * OFF by default and deliberately so: the plugin is live on thousands of sites,
+ * and a half-built player must never appear in their Customize menu or expose a
+ * public REST route. Everything gated by this flag is inert for existing users
+ * until the feature is finished and the default flips.
+ */
+if (!defined('TTA_ENABLE_ATLASVOICE_CLOUD')) {
+    define('TTA_ENABLE_ATLASVOICE_CLOUD', false);
+}
+
+/**
+ * TTS-266: audio storage roots, declared HERE in the free plugin so both Free and
+ * Pro resolve the same path from one place — change the filter (or define the
+ * constant earlier) once and every player follows.
+ *
+ * TTA_AUDIO_DIR       {uploads}/TTA/              base for free-plugin audio
+ * TTA_ATLASVOICE_DIR  {uploads}/TTA/atlasvoice/   player 7 (AtlasVoice Cloud)
+ *
+ * Defined on `plugins_loaded` rather than at file scope for two reasons:
+ *   1. wp_upload_dir() at file scope runs a DB read on every request before WP is
+ *      fully set up, and fires the `upload_dir` filter before other plugins have
+ *      loaded — which multisite/CDN plugins hook.
+ *   2. At file scope no other plugin could ever attach to these filters, since
+ *      Free loads before Pro. On plugins_loaded, both Pro and third parties can.
+ *
+ * The directory itself is created lazily by the writer, never on a page load.
+ */
+add_action('plugins_loaded', function () {
+    if (!defined('TTA_AUDIO_DIR')) {
+        $upload_dir = wp_upload_dir();
+
+        define('TTA_AUDIO_DIR', apply_filters('tta_audio_dir', trailingslashit($upload_dir['basedir'] . '/TTA')));
+
+        $audio_url = trailingslashit($upload_dir['baseurl'] . '/TTA');
+        // Mirror Pro: force https when the request is https but the stored upload
+        // URL is not, otherwise the browser blocks the audio as mixed content.
+        if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' && strpos($audio_url, 'http:') === 0) {
+            $audio_url = str_replace('http:', 'https:', $audio_url);
+        }
+
+        define('TTA_AUDIO_DIR_URL', apply_filters('tta_audio_dir_url', $audio_url));
+    }
+
+    if (!defined('TTA_ATLASVOICE_DIR')) {
+        define('TTA_ATLASVOICE_DIR', apply_filters('tta_atlasvoice_dir', TTA_AUDIO_DIR . 'atlasvoice/'));
+        define('TTA_ATLASVOICE_DIR_URL', apply_filters('tta_atlasvoice_dir_url', TTA_AUDIO_DIR_URL . 'atlasvoice/'));
+    }
+
+    // Same shape as Pro's TTA_PRO_GTTS_API_URL so both plugins speak one contract,
+    // declared here because Free owns player 7.
+    if (!defined('TTA_ATLASVOICE_API_URL')) {
+        $api_url = TTA_DEBUG_MODE
+            ? 'http://127.0.0.1:8080/api/gtts'
+            : 'https://voice.atlasaidev.com/api/gtts';
+
+        define('TTA_ATLASVOICE_API_URL', apply_filters('tta_atlasvoice_api_url', $api_url));
+    }
+}, 1);
+
 if (TTA_DEBUG_MODE  && defined('WP_SITEURL') && WP_SITEURL) {
     $rest_url = WP_SITEURL . '/wp-json/';
     update_option('tts_rest_api_url', $rest_url, false);
