@@ -1111,6 +1111,34 @@ class TTA_Helper
         return (array) apply_filters( 'tts_available_players', $players );
     }
 
+    /**
+     * TTS-266: has the site owner explicitly switched AtlasVoice Cloud on?
+     *
+     * wp.org Guideline 7 forbids sending site or user data to an external
+     * service without explicit, off-by-default consent. Player 7 sends post text
+     * to the AtlasVoice synthesis service, so nothing may leave the site until
+     * the owner turns this on in the Listening screen.
+     *
+     * Stored as a key inside the existing `tta_listening_settings` option — the
+     * same screen where the AtlasVoice language and voice are chosen — rather
+     * than as a new option, so no new storage is introduced.
+     *
+     * @return bool Defaults to false: consent is opt-in, never assumed.
+     */
+    public static function is_atlasvoice_cloud_enabled()
+    {
+        $listening = (array) self::tts_get_settings('listening');
+
+        $enabled = isset($listening['tta__atlasvoice_cloud_enabled'])
+            ? $listening['tta__atlasvoice_cloud_enabled']
+            : false;
+
+        // Accept the values the React dashboard round-trips ('1'/'true'/true).
+        $enabled = filter_var($enabled, FILTER_VALIDATE_BOOLEAN);
+
+        return (bool) apply_filters('tts_atlasvoice_cloud_enabled', $enabled);
+    }
+
     public static function set_default_settings()
     {
         $settings = (array)get_option('tta_settings_data');

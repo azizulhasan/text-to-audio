@@ -1124,6 +1124,20 @@ class TTA_Api_Routes {
             ) );
         }
 
+        /**
+         * wp.org Guideline 7: no site or user data may reach an external service
+         * without explicit, off-by-default consent. This route forwards post text
+         * to the AtlasVoice synthesis service, so it refuses to do anything at all
+         * until the owner has switched it on in the Listening screen. The front
+         * end treats this like any other failure and falls back to player 1.
+         */
+        if ( ! TTA_Helper::is_atlasvoice_cloud_enabled() ) {
+            return \rest_ensure_response( array(
+                'status' => false,
+                'data'   => array( 'url' => '', 'message' => 'not_connected', 'file_already_exists' => false ),
+            ) );
+        }
+
         $post_id    = isset( $body['post_id'] ) ? absint( $body['post_id'] ) : 0;
         $user_id    = isset( $body['user_id'] ) ? absint( $body['user_id'] ) : 0;
         $content    = isset( $body['content'] ) ? (string) $body['content'] : '';
