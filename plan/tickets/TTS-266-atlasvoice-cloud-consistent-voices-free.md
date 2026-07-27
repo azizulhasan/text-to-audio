@@ -117,6 +117,57 @@ WP saves MP3 into wp-content/uploads/…  →  post meta tts_mp3_file_urls
 
 ---
 
+## 4.1 Storage model — local by default, cloud offload as the Pro option
+
+**Decision: the MP3 lives on the customer's own server (`wp-content/uploads`), and that stays our
+default. Do not copy GSpeech's vendor-hosted storage.**
+
+Both competitors host the audio themselves. They have to — vendor-hosted storage is what makes
+per-playback metering possible. We do not meter playback, so we should not inherit the drawback that
+comes with it.
+
+**The question that decides it for the customer:** *what happens to my audio when I stop paying?*
+
+| | GSpeech / ResponsiveVoice | AtlasVoice |
+|---|---|---|
+| Where the MP3 lives | Vendor servers | **Customer's own server** |
+| Stop paying | Every listen button goes dead | **Everything keeps playing forever** |
+| Per-play metering | Yes | No — generate once, unlimited plays |
+| Vendor outage | Site audio is down | Audio unaffected (only new generation pauses) |
+| Customer's text retained by vendor | Yes | No (§A5 — deleted within ~20 min) |
+
+Segment reality, stated honestly:
+
+| Segment | Prefers | Why |
+|---|---|---|
+| Casual blogger / small site | Slight edge to vendor-hosted | Doesn't think about disk; "nothing on my server" *feels* simpler, and writable-folder problems never arise |
+| Serious publisher (500+ posts) | **Ours, decisively** | Owns the asset, no meter, works with their CDN, survives vendor death |
+| Agency / client sites | **Ours, decisively** | Cannot hand a client a site that breaks when a subscription lapses |
+| Very high traffic | Vendor-hosted or CDN | Bandwidth genuinely matters at scale |
+
+Cost of our model on the customer's host — a 2,000-word post ≈ 13 minutes of audio ≈ **~6 MB** at
+64 kbps mono, or **~3 MB** at 32 kbps (fine for speech). So 200 posts ≈ 0.6–1.2 GB, and 1,000 plays/month
+≈ 3–6 GB of their bandwidth. Noticeable on small shared hosting, not fatal. Mitigations: encode at
+**32–48 kbps mono**, generate **on first play** rather than for every post, and offer the offload below.
+
+**Their model's four real advantages — no customer disk, no customer bandwidth, no backup bloat, no
+writable-folder support tickets (`TTA_Helper::is_audio_folder_writable()` exists precisely because of
+this) — are all already answered by Pro's existing Google Cloud Storage backup.** That feature is
+GSpeech's storage model, available to us as an *option* rather than a constraint.
+
+So we ship what neither competitor can:
+
+- **Free / default** — the customer's server. Their files, theirs forever.
+- **Pro option** — offload to cloud/CDN (existing GCS backup) for small hosting or heavy traffic.
+- **The customer chooses, and can switch later without losing anything.**
+
+Positioning line for the wp.org page and the Pro sales page:
+
+> **Your audio, on your server, yours forever. Generate once — play unlimited, with no per-listen meter
+> and nothing to keep paying for.**
+
+---
+
 ## 5. Component A — AtlasVoice Cloud service (new)
 
 ### A1. Hosting
@@ -124,8 +175,15 @@ WP saves MP3 into wp-content/uploads/…  →  post meta tts_mp3_file_urls
 - A CPU VPS (shared hosting cannot run ONNX runtimes). Start at 2–4 vCPU / 4 GB.
 - Piper runs ~2× faster than realtime on a **single** CPU core and fits in 1–2 GB RAM; Kokoro-82M
   (~80 MB ONNX) also runs CPU-only. No GPU required for launch.
-- Node or Python service + a job queue; the existing `gtts.atlasaidev.com` service stays as-is for now
-  and is migrated to the same host in Phase 3.
+- **Runtime: Python.** Both engines are Python-native (Kokoro is PyTorch/ONNX; `Kokoro-FastAPI` ships as
+  a Python Docker image), and everything we will want next is Python-side too — chunking, phonemization,
+  voice catalogues, and especially **forced alignment for the TTS-256 word-timing sidecars** (WhisperX,
+  aeneas, MFA are all Python). Choosing Node would add an HTTP hop or a shell-out for no benefit and
+  would push word timings into a second service.
+- **Reuse option, decided in Phase 1, not Phase 0:** the existing `gtts.atlasaidev.com` Node service
+  already implements quota, file serving and the ~20-minute cleanup. The lowest-risk production shape may
+  be Node as the front door calling the Python engine over localhost. Phase 0 runs pure Python.
+- **Disk:** small. Audio is transient (§A5) — do not buy a large-SSD plan.
 
 ### A2. Engines & voices
 
@@ -166,6 +224,15 @@ network call and a failed probe never wipes a working configuration.
   under wp.org guidelines 5/6 (see `TTS-249-guideline-5-6-trialware-fix.md`).
 - **Metered at synthesis, not at playback.** Once the MP3 is on the customer's server, replays are
   invisible to us and free. This is the core economic difference from ResponsiveVoice.
+- **Audio is transient on our side; only the quota ledger persists.** Our VPS is a *generation buffer,
+  not storage* — the same pattern the existing Pro `gtts.atlasaidev.com` service already uses, where the
+  generated MP3 is deleted by a cleanup routine roughly 20 minutes after creation. We therefore keep only
+  `hash + character count + timestamp` per synthesis (a few bytes), never the text and never the audio.
+  A repeat request after the file has been cleaned up is **re-synthesized but not re-charged**. This
+  resolves what would otherwise be a contradiction between the retention rule and the dedupe rule below.
+  Two consequences: **disk is a non-issue** (a few GB, not hundreds — do not pay for storage when sizing
+  the VPS), and we get a marketing line neither competitor can match — *"your text and audio are deleted
+  from our servers within 20 minutes; we keep a character count and nothing else."*
 - **Dedupe key** `sha256(normalised_text + voice_id + speed)` per site key: a regenerate of unchanged
   content returns the cached object and does **not** re-charge quota.
 - **Monthly reset** per site key, calendar month, plan row in the service DB (`free`, `pro`, `unlimited`).

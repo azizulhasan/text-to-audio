@@ -159,6 +159,52 @@ through a wp.org closure (`TTS-247`, `TTS-249`):
 
 ---
 
+## 5.1 Storage model — why local by default beats vendor-hosted
+
+Both competitors store the generated audio on **their own** servers and serve it from there. We generate
+on our server, hand the MP3 to the site, and store it in the customer's `wp-content/uploads` — our server
+keeps it only as a transient buffer (~20 minutes, matching the existing Pro `gtts.atlasaidev.com`
+cleanup).
+
+**Their choice is not a feature — it is what per-playback metering requires.** If you bill per listen,
+you must control the file. We bill per generation, so we are free to hand the file over.
+
+**The question that decides it for a customer:** *what happens to my audio when I stop paying?*
+
+| | GSpeech / ResponsiveVoice | AtlasVoice |
+|---|---|---|
+| Where the MP3 lives | Vendor servers | **Customer's own server** |
+| Stop paying | Every listen button goes dead | **Everything keeps playing forever** |
+| Per-play metering | Yes | No — generate once, unlimited plays |
+| Vendor outage | Site audio is down | Audio unaffected |
+| Customer text retained by vendor | Yes, indefinitely | No — deleted within ~20 min |
+| Customer's disk / bandwidth | None used | ~3–6 MB per post, their bandwidth |
+
+Who actually prefers which, stated honestly:
+
+| Segment | Prefers | Why |
+|---|---|---|
+| Casual blogger / small site | Slight edge to vendor-hosted | Doesn't think about disk; "nothing on my server" *feels* simpler |
+| Serious publisher (500+ posts) | **Ours, decisively** | Owns the asset, no meter, works with their CDN, survives vendor death |
+| Agency / client sites | **Ours, decisively** | Cannot hand a client a site that breaks when a subscription lapses |
+| Very high traffic | Vendor-hosted or CDN | Bandwidth genuinely matters at scale |
+
+The only segment where they hold an edge is the one that cares least — and there the edge is *perceived*
+ease, not real benefit.
+
+**Their model's four genuine advantages** — no customer disk, no customer bandwidth, no backup bloat, no
+writable-folder support tickets — **are already answered by Pro's existing Google Cloud Storage backup.**
+That is GSpeech's storage model, available to us as an option instead of a constraint. So we can offer
+what neither competitor can: local by default, cloud offload when the customer wants it, switchable
+either way without losing anything.
+
+**Verdict: keep local storage as the default and market it as ownership. Do not copy their model.**
+
+> **Your audio, on your server, yours forever. Generate once — play unlimited, with no per-listen meter
+> and nothing to keep paying for.**
+
+---
+
 ## 6. What to copy
 
 - **"No API keys required"** as our headline promise for the free plugin.
