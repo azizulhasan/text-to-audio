@@ -732,7 +732,15 @@ class TTSPlayButton extends HTMLElement {
             }
 
             if (this.speech === null) {
-                let speech = new TextToSpeech(buttonId, contents[buttonId], button, window.TTS);
+                // TTS-266: player 7 (AtlasVoice Cloud) reuses this whole button —
+                // markup, modal, analytics — and only swaps the player class, which
+                // is a subclass of TextToSpeech that plays a pre-generated MP3
+                // through an <audio> element instead of speechSynthesis.
+                const PlayerClass =
+                    Number(window?.ttsObj?.player_id) === 7 && window.AtlasVoiceCloudPlayer
+                        ? window.AtlasVoiceCloudPlayer
+                        : TextToSpeech;
+                let speech = new PlayerClass(buttonId, contents[buttonId], button, window.TTS);
                 speech._init(null, true);
                 this.speech = speech.getData();
                 this.speech.callBackAfterEnd = () => {

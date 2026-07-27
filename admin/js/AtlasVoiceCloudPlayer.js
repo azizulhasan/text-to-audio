@@ -21,16 +21,26 @@
 
 import { ATLASVOICE_VOICES } from "./tts/atlasvoice-voices.js";
 
-const Base = typeof window !== "undefined" ? window.TextToSpeech : null;
+/**
+ * The subclass is built lazily, not at module scope.
+ *
+ * On a free site TextToSpeech.js assigns `window.TextToSpeech` INSIDE a
+ * DOMContentLoaded listener, so at the moment this file is parsed — footer
+ * script, before DOMContentLoaded — the base class does not exist yet. Declaring
+ * the script dependency guarantees load ORDER, not that the global is populated.
+ * So define the class once the base is actually there.
+ *
+ * Note `window.TextToSpeech` is later reassigned to a player *instance*, so the
+ * base is only usable while it is still a function — capture it at that point.
+ */
+function defineAtlasVoiceCloudPlayer() {
+    if (typeof window === "undefined") return false;
+    if (window.AtlasVoiceCloudPlayer) return true;
 
-if (!Base) {
-    // TextToSpeech.min.js is a declared script dependency, so this should be
-    // unreachable; log rather than throw so one bad enqueue cannot take the page
-    // down for a visitor.
-    console.warn("[AtlasVoice] player 7 loaded before TextToSpeech — skipping.");
-}
+    const Base = window.TextToSpeech;
+    if (typeof Base !== "function") return false;
 
-class AtlasVoiceCloudPlayer extends (Base || Object) {
+    class AtlasVoiceCloudPlayer extends Base {
     /** The <audio> element doing the actual playback. */
     audio = null;
 
@@ -53,24 +63,52 @@ class AtlasVoiceCloudPlayer extends (Base || Object) {
     }
 
     // ── settings ────────────────────────────────────────────────────────
-    get settings() {
+    //
+    // All prefixed `av*` on purpose. The base class declares `voice`, `language`,
+    // `content`, `settings` and friends as CLASS FIELDS, which are installed as
+    // own properties on the instance during construction and therefore shadow any
+    // same-named getter on this subclass's prototype. Using plain names here
+    // silently yielded the browser defaults ("Google UK English Female", "en-GB")
+    // instead of the configured AtlasVoice voice.
+    get avSettings() {
         return window.TTS?.settings?.listening || {};
     }
 
-    get language() {
-        return this.settings.tta__listening_lang || "en-US";
+    /**
+     * Per-button server-side data: file_name, date, file_url_key, language.
+     *
+     * These are the values PHP itself uses to build the audio path and the merge
+     * glob, so the client MUST read them rather than deriving its own — if the
+     * two disagree, the server writes {title}-{n}.mp3 under one name and looks
+     * for another, and nothing ever merges.
+     */
+    get avExtra() {
+        return window.TTS?.extra?.[this.buttonId] || {};
     }
 
-    get voice() {
-        const saved = this.settings.tta__listening_voice;
-        if (saved) return saved;
-        const first = ATLASVOICE_VOICES.find((v) => v.lang === this.language);
+    get avLanguage() {
+        return this.avExtra.language || this.avSettings.tta__listening_lang || "en-US";
+    }
+
+    get avVoice() {
+        // Only accept a saved voice that exists in the catalogue: sites upgrading
+        // from player 1 still carry a browser voice name here.
+        const saved = this.avSettings.tta__listening_voice;
+        if (saved && ATLASVOICE_VOICES.some((v) => v.id === saved)) return saved;
+
+        const first = ATLASVOICE_VOICES.find((v) => v.lang === this.avLanguage);
         return first ? first.id : "";
     }
 
-    get speed() {
-        const rate = parseFloat(this.settings.tta__listening_rate);
+    get avSpeed() {
+        const rate = parseFloat(this.avSettings.tta__listening_rate);
         return Number.isFinite(rate) && rate > 0 ? rate : 1;
+    }
+
+    /** Which engine owns the selected voice, per the shared catalogue. */
+    get avEngine() {
+        const match = ATLASVOICE_VOICES.find((v) => v.id === this.avVoice);
+        return match ? match.engine : "";
     }
 
     /**
@@ -78,10 +116,18 @@ class AtlasVoiceCloudPlayer extends (Base || Object) {
      * generated. Mirrors how the Pro players read `settings.fileURLs`, which is
      * the `tts_mp3_file_urls` post meta keyed by language(+voice).
      */
-    get fileURL() {
+    get avFileURL() {
         const urls = window.TTS?.settings?.fileURLs || {};
-        const key = `${this.language}--voice--${this.voice}`;
-        return urls[key] || urls[this.language] || "";
+        // Prefer the key PHP computed (tts_get_file_url_key) over rebuilding it
+        // here — it already accounts for whether a voice forms part of the key.
+        const serverKey = this.avExtra.file_url_key;
+
+        return (
+            (serverKey && urls[serverKey]) ||
+            urls[`${this.avLanguage}--voice--${this.avVoice}`] ||
+            urls[this.avLanguage] ||
+            ""
+        );
     }
 
     // ── audio element wiring ────────────────────────────────────────────
@@ -129,7 +175,7 @@ class AtlasVoiceCloudPlayer extends (Base || Object) {
     async speak(speech, content = this.content, isClicked = false) {
         if (!content) content = this.content;
 
-        let url = this.fileURL;
+        let url = this.avFileURL;
 
         if (!url) {
             url = await this.generate(content);
@@ -147,7 +193,7 @@ class AtlasVoiceCloudPlayer extends (Base || Object) {
             this.audio.src = url;
         }
 
-        this.audio.playbackRate = this.speed;
+        this.audio.playbackRate = this.avSpeed;
 
         try {
             await this.audio.play();
@@ -189,11 +235,22 @@ class AtlasVoiceCloudPlayer extends (Base || Object) {
         if (this.isGenerating) return "";
         this.isGenerating = true;
 
-        const batchSize = 2000;
+        // Smaller batches mean audio starts sooner and each request stays well
+        // inside the server-side HTTP timeout. Measured: ~1,950 chars is ~63s of
+        // compute on Kokoro, which is uncomfortably close to any sane timeout;
+        // Piper covers the same text in a few seconds.
+        const batchSize = 1200;
         const chunks = this.splitForBatches(content, batchSize);
-        const title = window.TTS?.settings?.file_name || "";
-        const path = window.TTS?.settings?.date || "";
+        // Server-authored, per button — see the `extra` getter above.
+        const title = this.avExtra.file_name || "";
+        const path = this.avExtra.date || "";
         let url = "";
+
+        if (!title) {
+            console.warn("[AtlasVoice] no file_name for button", this.buttonId);
+            this.isGenerating = false;
+            return "";
+        }
 
         try {
             for (let i = 0; i < chunks.length; i++) {
@@ -205,7 +262,11 @@ class AtlasVoiceCloudPlayer extends (Base || Object) {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
-                            "X-WP-Nonce": window.ttsObj?.nonce || "",
+                            // ttsObj carries two nonces. `nonce` is the plugin's own
+                            // action nonce; the REST permission callback verifies
+                            // against 'wp_rest', which is `rest_nonce`. Using the
+                            // wrong one returns 403 with no visible error.
+                            "X-WP-Nonce": window.ttsObj?.rest_nonce || "",
                         },
                         body: JSON.stringify({
                             is_last_batch: isLast,
@@ -214,9 +275,13 @@ class AtlasVoiceCloudPlayer extends (Base || Object) {
                             content: chunks[i],
                             path,
                             settings: {
-                                language: this.language,
-                                voice: this.voice,
-                                speed: this.speed,
+                                language: this.avLanguage,
+                                voice: this.avVoice,
+                                speed: this.avSpeed,
+                                // Voice ids are engine-specific, so name the engine
+                                // explicitly rather than letting the service guess
+                                // from its default.
+                                engine: this.avEngine,
                             },
                             post_id: window.TTS?.settings?.postId || 0,
                             user_id: this.analytics?.userId || 0,
@@ -274,10 +339,24 @@ class AtlasVoiceCloudPlayer extends (Base || Object) {
 
         return out.length ? out : [String(text)];
     }
-}
+    }
 
-if (typeof window !== "undefined") {
     window.AtlasVoiceCloudPlayer = AtlasVoiceCloudPlayer;
+
+    return true;
 }
 
-export default AtlasVoiceCloudPlayer;
+// Try immediately (covers Pro-active sites, where the base is assigned at module
+// scope), then again once the DOM is ready — our listener is registered after
+// TextToSpeech.js's, so by then the base class exists.
+if (!defineAtlasVoiceCloudPlayer() && typeof window !== "undefined") {
+    window.document.addEventListener("DOMContentLoaded", function () {
+        if (!defineAtlasVoiceCloudPlayer()) {
+            console.warn(
+                "[AtlasVoice] player 7 could not find the TextToSpeech base class."
+            );
+        }
+    });
+}
+
+export default defineAtlasVoiceCloudPlayer;

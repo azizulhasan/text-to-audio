@@ -28,14 +28,36 @@ export default function AtlasVoiceCloudSettings({
 }) {
   const languages = useMemo(() => getAtlasVoiceLanguages(), []);
 
-  const selectedLang = listeningSettings?.tta__listening_lang || "en-US";
-  const selectedVoice = listeningSettings?.tta__listening_voice || "";
-  const isEnabled = !!listeningSettings?.tta__atlasvoice_cloud_enabled;
+  /**
+   * Existing sites arrive here carrying player 1's values — a bare language like
+   * "en" and a browser voice name like "Google UK English Female" — neither of
+   * which exists in this catalogue. Resolve both to something real, otherwise
+   * the selects silently show the wrong language and an empty voice list.
+   */
+  const selectedLang = useMemo(() => {
+    const saved = listeningSettings?.tta__listening_lang || "";
+    if (languages.includes(saved)) return saved;
+
+    // "en" -> first "en-*" in the catalogue.
+    const base = String(saved).split(/[-_]/)[0].toLowerCase();
+    const match = languages.find((l) => l.split("-")[0].toLowerCase() === base);
+
+    return match || languages[0] || "en-US";
+  }, [listeningSettings?.tta__listening_lang, languages]);
 
   const voicesForLang = useMemo(
     () => getAtlasVoicesForLanguage(selectedLang),
     [selectedLang]
   );
+
+  const selectedVoice = useMemo(() => {
+    const saved = listeningSettings?.tta__listening_voice || "";
+    const known = voicesForLang.some((v) => v.id === saved);
+
+    return known ? saved : voicesForLang[0]?.id || "";
+  }, [listeningSettings?.tta__listening_voice, voicesForLang]);
+
+  const isEnabled = !!listeningSettings?.tta__atlasvoice_cloud_enabled;
 
   return (
     <>

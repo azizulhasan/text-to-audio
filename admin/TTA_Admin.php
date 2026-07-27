@@ -617,12 +617,17 @@ class TTA_Admin
             array_diff_key( $this->localize_data, array( 'admin_url' => '', 'image_url' => '', 'plugin_url' => '', 'pro' => '' ) )
         );
 
-        if ($player_id > 1) {
+        // TTS-266: player 7 is a FREE player, so it takes the free bootstrap path
+        // (text-to-audio-button.min.js) below rather than this one. The `> 1`
+        // branch loads only the player CLASS and relies on Pro to bootstrap it —
+        // on a free site nothing would ever instantiate a player, and the button
+        // would render but do nothing when clicked.
+        if ($player_id > 1 && 7 != $player_id) {
             wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', $dependencies, $this->asset_version('js/build/TextToSpeech.min.js'), true);
             wp_localize_script('TextToSpeech', 'ttsObj', $frontend_localize_data);
             // TTS-264: load JS translations for the bundled selection-control strings.
             wp_set_script_translations('TextToSpeech', 'text-to-audio', plugin_dir_path(dirname(__FILE__)) . 'languages');
-        } else if ($player_id == 1) {
+        } else if ($player_id == 1 || 7 == $player_id) {
             wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-button.min.js', $dependencies, $this->asset_version('js/build/text-to-audio-button.min.js'), true);
             wp_localize_script('text-to-audio-button', 'ttsObj', $frontend_localize_data);
             // TTS-264: load JS translations for the bundled selection-control strings.
@@ -636,6 +641,19 @@ class TTA_Admin
             wp_enqueue_style('text-to-audio-button', plugin_dir_url(__FILE__) . 'css/text-to-audio-button.css', [], $this->asset_version('css/text-to-audio-button.css'), 'all');
             if (function_exists('tta_get_player_button_inline_css')) {
                 wp_add_inline_style('text-to-audio-button', tta_get_player_button_inline_css());
+            }
+
+            // TTS-266: the player 7 subclass, loaded after the bootstrap bundle so
+            // window.TextToSpeech exists. Declared as a dependency rather than
+            // relying on enqueue order.
+            if (7 == $player_id) {
+                wp_enqueue_script(
+                    'atlasvoice-cloud-player',
+                    plugin_dir_url(__FILE__) . 'js/build/AtlasVoiceCloudPlayer.min.js',
+                    array('text-to-audio-button'),
+                    $this->asset_version('js/build/AtlasVoiceCloudPlayer.min.js'),
+                    true
+                );
             }
         }
     }
