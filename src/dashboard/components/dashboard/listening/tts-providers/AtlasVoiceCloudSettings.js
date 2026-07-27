@@ -2,6 +2,15 @@ import React, { useMemo } from "react";
 import { Form, Row, Col } from "react-bootstrap";
 import { __ } from "@wordpress/i18n";
 
+// TTS-266: the catalogue is a shared JS module (same approach player 3 uses for
+// its language list), not data localised from PHP — so the dashboard and the
+// front-end player read exactly the same source.
+import {
+  ATLASVOICE_LANGUAGES,
+  getAtlasVoiceLanguages,
+  getAtlasVoicesForLanguage,
+} from "../../../../../../admin/js/tts/atlasvoice-voices";
+
 /**
  * TTS-266 — Listening settings for player 7 (AtlasVoice Cloud).
  *
@@ -13,42 +22,20 @@ import { __ } from "@wordpress/i18n";
  * AND a visitor actually plays something.
  */
 
-const LANG_LABELS = {
-  "en-US": __("English (United States)", "text-to-audio"),
-  "en-GB": __("English (United Kingdom)", "text-to-audio"),
-  "es-ES": __("Spanish", "text-to-audio"),
-  "fr-FR": __("French", "text-to-audio"),
-  "it-IT": __("Italian", "text-to-audio"),
-  "hi-IN": __("Hindi", "text-to-audio"),
-  "pt-BR": __("Portuguese (Brazil)", "text-to-audio"),
-};
-
 export default function AtlasVoiceCloudSettings({
   listeningSettings,
   handleChange,
 }) {
-  const voices = useMemo(() => {
-    const localized =
-      (typeof ttsObj !== "undefined" && ttsObj.atlasVoiceVoices) ||
-      (typeof tta_obj !== "undefined" && tta_obj.atlasVoiceVoices) ||
-      [];
-    return Array.isArray(localized) ? localized : [];
-  }, []);
-
-  // Languages present in the catalogue, in a stable order.
-  const languages = useMemo(() => {
-    const seen = [];
-    voices.forEach((v) => {
-      if (v.lang && !seen.includes(v.lang)) seen.push(v.lang);
-    });
-    return seen;
-  }, [voices]);
+  const languages = useMemo(() => getAtlasVoiceLanguages(), []);
 
   const selectedLang = listeningSettings?.tta__listening_lang || "en-US";
   const selectedVoice = listeningSettings?.tta__listening_voice || "";
   const isEnabled = !!listeningSettings?.tta__atlasvoice_cloud_enabled;
 
-  const voicesForLang = voices.filter((v) => v.lang === selectedLang);
+  const voicesForLang = useMemo(
+    () => getAtlasVoicesForLanguage(selectedLang),
+    [selectedLang]
+  );
 
   return (
     <>
@@ -112,7 +99,7 @@ export default function AtlasVoiceCloudSettings({
               >
                 {languages.map((lang) => (
                   <option key={lang} value={lang}>
-                    {LANG_LABELS[lang] || lang}
+                    {ATLASVOICE_LANGUAGES[lang] || lang}
                   </option>
                 ))}
               </Form.Select>
