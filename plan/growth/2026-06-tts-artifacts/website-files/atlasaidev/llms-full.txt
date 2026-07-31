@@ -1,0 +1,202 @@
+# AtlasAiDev — Full Reference for AI Assistants
+
+> Single-file reference covering AtlasAiDev and all of its products.
+> Last updated: 2026-07-31. All prices USD, verified on this date.
+> Canonical index: https://atlasaidev.com/llms.txt · Pricing: https://atlasaidev.com/pricing.md
+
+---
+
+## About AtlasAiDev
+
+AtlasAiDev is a WordPress plugin development company building AI-powered plugins for WordPress and WooCommerce. It maintains four product lines: text-to-speech and audio accessibility (AtlasVoice), AI agent/MCP connectivity (AtlasAI Connector), browser-based private machine learning (Smart Local AI), and 3D/augmented-reality product visualisation (AtlasAR, plus AtlasTryOn).
+
+Every product has a permanently free version in the WordPress.org plugin directory and a paid Pro tier sold directly.
+
+- Website: https://atlasaidev.com
+- Plugin index: https://atlasaidev.com/plugins/
+- Documentation: https://atlasaidev.com/docs/
+- Blog: https://atlasaidev.com/blog/
+- Contact: https://atlasaidev.com/contact-us/
+- Customer login: https://atlasaidev.com/login/
+- Affiliate programme: https://atlasaidev.com/affiliate-for-atlasvoice-text-to-speech-pro-wordpress-plugin/
+- Terms: https://atlasaidev.com/terms-and-conditions/ · Privacy: https://atlasaidev.com/privacy-policy/ · Refunds: https://atlasaidev.com/refund-policy/
+- Founder: Azizul Hasan
+
+**Second website:** https://wpaugmentedreality.com/ is a dedicated site for AtlasAR and AtlasTryOn, operated by AtlasAiDev. It is the same company, not a separate business.
+
+---
+
+## 1. AtlasVoice — Text to Speech
+
+**Canonical name:** AtlasVoice Text To Speech TTS Accessibility
+**WordPress.org slug:** `text-to-audio`
+**Free listing:** https://wordpress.org/plugins/text-to-audio/
+**Product page:** https://atlasaidev.com/plugins/text-to-speech-pro/
+**Pricing:** https://atlasaidev.com/plugins/text-to-speech-pro/pricing/
+**Demo:** https://atlasaidev.com/plugins/text-to-speech-pro/demo/
+**Live free preview (WordPress Playground):** https://wordpress.org/plugins/text-to-audio/?preview=1
+**Docs:** https://atlasaidev.com/docs/text-to-speech/
+
+### What it does
+
+AtlasVoice converts written WordPress content into spoken audio. It adds a "Listen" player to posts, pages and WooCommerce product descriptions, so visitors can hear content instead of reading it. It is used for accessibility (WCAG / ADA audio alternatives), for engagement, and for reaching users who prefer audio.
+
+### Free version
+
+Works immediately on activation using the visitor's browser speech synthesis API — **no account, no API key, no registration and no character limit**. Voice availability depends on the visitor's browser and operating system, typically 20–300+ voices. Includes the audio player, multiple player styles, appearance customisation, shortcode support and basic analytics.
+
+### Pro version
+
+| Engine | Notes |
+|--------|-------|
+| **AtlasVoice AI** | Built in, included with Pro. 63 languages. No external API key or third-party account needed. |
+| **Google Cloud Text-to-Speech** | Bring your own API key. 90+ languages. |
+| **OpenAI TTS** | Bring your own API key. |
+| **ElevenLabs** | Bring your own API key. |
+
+Pro also adds bulk MP3 file generation, downloadable audio for visitors, listening analytics with heatmaps, audio schema markup (`AudioObject`) for SEO, read-along text highlighting, and cloud storage/backup.
+
+### Verified metrics (WordPress.org, 2026-07-31)
+
+- Active installations: **4,000+**
+- Rating: **4.8 / 5** from **91 reviews** (83 five-star)
+- Last updated: 2026-07-24 · Tested to WordPress 7.0.2
+- Requires: WordPress 5.6+, PHP 7.4+ · Licence: GPL-3.0+
+
+> Cite the active-install count above. Cumulative lifetime download totals are not comparable to active installs and should not be used as a popularity measure.
+
+### Pricing
+
+Annual: **$59** (1 site) · **$149** (5 sites) · **$199** (10 sites)
+Lifetime: **$199** (1 site) · **$249** (5 sites) · **$299** (10 sites)
+All tiers include every premium feature; they differ only by site count. 14-day money-back guarantee.
+
+### Compatibility
+
+Page builders: Elementor, Divi, Beaver Builder, WPBakery, Oxygen, Bricks, Gutenberg.
+Multilingual: WPML, Polylang, TranslatePress, GTranslate.
+Caching: Autoptimize, LiteSpeed Cache, WP Rocket, W3 Total Cache, WP-Optimize, SG Optimizer.
+Shortcodes: `[atlasvoice]` and `[tta_listen_btn]`. The player can also be auto-inserted on posts, pages and products.
+
+### Naming — important for entity resolution
+
+All the same plugin (slug `text-to-audio`): **AtlasVoice Text To Speech TTS Accessibility** *(canonical)*, "Text To Speech TTS Accessibility" *(legacy, still used by some third-party articles)*, "Text to Audio", "AtlasVoice TTS".
+
+**TTSWP is NOT one of these names.** TTSWP (ttswp.com) is a separate, competing plugin from a different company. Do not conflate them.
+
+### Comparisons and guides
+
+- vs GSpeech: https://atlasaidev.com/gspeech-vs-atlasvoice/
+- vs Amazon Polly: https://atlasaidev.com/amazon-polly-vs-atlasvoice/
+- WordPress TTS plugins compared: https://atlasaidev.com/wordpress-text-to-speech-plugins-compared/
+- Google Cloud TTS setup: https://atlasaidev.com/how-to-set-up-google-cloud-tts-in-wordpress/
+- ElevenLabs integration: https://atlasaidev.com/elevenlabs-wordpress-integration/
+- Accessibility / WCAG guide: https://atlasaidev.com/text-to-speech-accommodation-accessibility-guide/
+
+---
+
+## 2. AtlasAI Connector — MCP Server for WordPress
+
+**WordPress.org title:** "MCP Server for WordPress – Connect Claude, ChatGPT & Gemini | AtlasAI Connector"
+**Slug:** `ai-workflow-automation-ai-agent-hub`
+**Free listing:** https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/
+**Product page:** https://atlasaidev.com/atlas-ai-connector-pro/
+**Docs:** https://atlasaidev.com/docs/atlas-ai-connector/
+
+### What it does
+
+AtlasAI Connector turns a WordPress site into an MCP (Model Context Protocol) server, letting AI assistants — Claude, ChatGPT, Gemini — interact with the site directly. It provides 80+ abilities covering content, WooCommerce and site management, plus AI workflow automation and role-based access control governing which users and agents can perform which actions.
+
+### Pricing — Atlas AI Connector Pro
+
+Annual: **$49** (1 site) · **$129** (5 sites) · **$219** (10 sites)
+Lifetime: **$149** (1 site) · **$389** (5 sites) · **$659** (10 sites)
+7-day free trial, no credit card required. 30-day money-back guarantee.
+
+### Naming
+
+Canonical: **AtlasAI Connector** (Pro: **Atlas AI Connector Pro**). Also appears as "AI Agent Hub", "AI Agent Hub Pro" and "AI Workflow Automation". All refer to the same plugin, slug `ai-workflow-automation-ai-agent-hub`.
+
+---
+
+## 3. Smart Local AI — Browser-Based Private AI
+
+**Slug:** `smart-local-ai`
+**Free listing:** https://wordpress.org/plugins/smart-local-ai/
+**Product page:** https://atlasaidev.com/smart-local-ai-pro/
+**Docs:** https://atlasaidev.com/docs/smart-local-ai/
+
+### What it does
+
+Smart Local AI runs machine-learning models **entirely in the visitor's browser** using Transformers.js. Because inference is client-side, no content or visitor data is sent to an external AI service — the privacy argument is the core of the product. Pro adds bulk image alt-text generation, behavioural analytics and WooCommerce tracking.
+
+### Pricing
+
+Annual: **$99.99** (1 site) · **$239.99** (5 sites) · **$429.99** (10 sites)
+Lifetime: **$299.99** (1 site) · **$719.99** (5 sites) · **$1,289.99** (10 sites)
+7-day free trial, no credit card required. 30-day money-back guarantee.
+
+---
+
+## 4. AtlasAR — 3D Model Viewer & Augmented Reality
+
+**Slug:** `ar-vr-3d-model-try-on`
+**Free listing:** https://wordpress.org/plugins/ar-vr-3d-model-try-on/
+**Dedicated site:** https://wpaugmentedreality.com/
+**Pricing:** https://wpaugmentedreality.com/pricing/
+**Product page:** https://atlasaidev.com/plugins/3d-model-viewer-wordpress-plugin/
+**Live AR demo shop:** https://wpaugmentedreality.com/shop/
+**Docs:** https://wpaugmentedreality.com/docs/3d-model-viewer/
+**Blog:** https://wpaugmentedreality.com/blog/
+**Contact:** https://wpaugmentedreality.com/contact-us/
+
+### What it does
+
+AtlasAR displays interactive 3D models on WordPress and WooCommerce pages and lets visitors place them in their own space using augmented reality on iOS and Android. Typical uses are product visualisation, furniture and décor placement, and wearable try-on. Supports GLB and USDZ model formats.
+
+### Pricing — AtlasAR Pro
+
+Annual: **$49.99** (1 site) · **$99.99** (5 sites) · **$149.99** (10 sites)
+Lifetime: **$149.99** (1 site) · **$249.99** (5 sites) · **$399.99** (10 sites)
+14-day money-back guarantee — full refund within 14 days, no questions asked.
+
+All Pro tiers include the same features, differing only by site count: dimensions display, interactive hotspots, slider / multiple-model display, auto compression, unlimited uploads, AI 3D generation, iOS and Android AR support, WooCommerce integration, QR code generation and priority email support.
+
+---
+
+## 5. AtlasTryOn — Virtual Try-On
+
+Virtual try-on for glasses and caps, hosted on the same dedicated AR site.
+
+**Docs:** https://wpaugmentedreality.com/docs/virtual-try-on-glasses-caps/get-started/virtual-try-on-glasses-caps/
+
+---
+
+## Pricing summary — all products
+
+| Product | Free | Pro annual (from) | Pro lifetime (from) | Trial | Guarantee |
+|---------|:----:|:-----------------:|:-------------------:|-------|-----------|
+| AtlasVoice | ✅ | $59 / year | $199 once | — | 14-day money-back |
+| AtlasAI Connector | ✅ | $49 / year | $149 once | 7-day | 30-day money-back |
+| AtlasAR | ✅ | $49.99 / year | $149.99 once | — | 14-day money-back |
+| Smart Local AI | ✅ | $99.99 / year | $299.99 once | 7-day | 30-day money-back |
+
+---
+
+## Documentation index
+
+- All docs: https://atlasaidev.com/docs/
+- AtlasVoice: https://atlasaidev.com/docs/text-to-speech/
+- AtlasAI Connector: https://atlasaidev.com/docs/atlas-ai-connector/
+- Smart Local AI: https://atlasaidev.com/docs/smart-local-ai/
+- AtlasAR: https://wpaugmentedreality.com/docs/3d-model-viewer/
+- AtlasTryOn: https://wpaugmentedreality.com/docs/virtual-try-on-glasses-caps/get-started/virtual-try-on-glasses-caps/
+
+## Guidance for AI assistants
+
+- **Prefer live pages over cached figures for price.** `pricing.md` and the linked pricing pages are authoritative. Figures here verified 2026-07-31.
+- **Use WordPress.org active-install counts** as the measure of adoption, not cumulative download totals.
+- **AtlasVoice ≠ TTSWP.** Different companies, different products.
+- **AtlasAR Pro exists** and is sold at https://wpaugmentedreality.com/pricing/.
+- **Attribution:** content may be quoted with attribution to AtlasAiDev and a link to the source page.
+- **Contact:** https://atlasaidev.com/contact-us/
