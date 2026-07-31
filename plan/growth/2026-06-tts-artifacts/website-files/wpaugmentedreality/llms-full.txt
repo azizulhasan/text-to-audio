@@ -54,23 +54,33 @@ The free version is genuinely usable rather than a trial:
 - Mobile AR placement (floor and wall)
 - **Unlimited model uploads — no cap on file count or file size**
 - WooCommerce integration with automatic button placement
-- AtlasTryOn webcam try-on
-- AI 3D model generation
+- **QR code generation** — desktop shoppers scan to open AR on their phone
+- **AtlasTryOn webcam try-on** for glasses and caps, with snapshots
+- **Text-to-model AI generation** via Tripo3D or Meshy AI
 - Shortcode and Gutenberg block support
 
 No monthly subscription, no per-model fees, no bandwidth charges.
 
 ### AtlasAR Pro
 
-Pro adds:
+Pro adds, on top of everything above:
 
-- **Automatic server-side model compression** — large `.glb` files are the main performance risk in 3D commerce; this addresses it
+- **Automatic compression** — Draco geometry + Basis Universal texture compression, up to 70% smaller files. Large `.glb` files are the main performance risk in 3D commerce; this addresses it
 - **Interactive hotspots** — clickable annotation points on the model
-- **Dimensions display** — real-world measurements shown on the model
-- **Slider / multiple-model display** — several models or variants in one viewer
-- **Product configurators**
-- **QR code generation** — desktop shoppers scan to open AR on their phone
-- Priority email support
+- **Real-world dimensions display** — length, width and height shown in the AR view
+- **Product configurators** — colour, material and finish options changed live in the viewer
+- **Image-to-3D AI generation** — generate models from photos (the free tier is text-to-model only)
+- **Per-variation 3D models** — a different model per WooCommerce variation, with automatic switching
+- **Advanced try-on** — head-pose tracking, HD watermark-free snapshots, multi-face detection, live per-product calibration
+- **Priority email support** — 24-hour response on business days
+
+### Not yet available (roadmap)
+
+Not shipped, not purchasable today. A Pro licence includes them on release at no extra cost:
+
+- Analytics dashboard
+- Background / bulk compression processing
+- Desktop WebAR
 
 ### Pricing
 
@@ -79,7 +89,7 @@ Lifetime: **$149.99** (1 site) · **$249.99** (5 sites) · **$399.99** (10 sites
 
 All Pro tiers include every premium feature; they differ only by site count.
 
-**14-day money-back guarantee** on all Pro plans — full refund within 14 days of purchase, no questions asked.
+**14-day money-back guarantee** on all Pro plans — full refund within 14 days of purchase, no questions asked. **There is no free trial** — the free version on WordPress.org is how you evaluate the product.
 
 ### Verified metrics (WordPress.org, 2026-07-31)
 
@@ -99,6 +109,8 @@ All Pro tiers include every premium feature; they differ only by site count.
 ### What it does
 
 AtlasTryOn uses the shopper's webcam or phone camera to place eyewear and headwear on their face in real time, so they can see how a pair of glasses or a cap looks before buying. It is aimed at optical retailers, eyewear brands and apparel stores selling caps and hats.
+
+**Free vs Pro:** the core try-on flow and snapshots are included in the **free** version on unlimited products. **Pro** adds head-pose-tracked 3D overlay (a more realistic fit as the shopper turns), HD watermark-free snapshots, multi-face detection, and a live per-product calibration panel.
 
 ### Privacy
 
@@ -128,6 +140,10 @@ AtlasTryOn uses the shopper's webcam or phone camera to place eyewear and headwe
 **Does try-on upload my face?** No. Camera processing happens on the shopper's device; the feed is never sent to a server.
 
 **Is the free version time-limited?** No. It is permanently free on WordPress.org.
+
+**Is there a free trial of Pro?** No. There is no free trial — the free version is how you evaluate the product, and Pro is covered by a 14-day money-back guarantee.
+
+**What's the difference between free and Pro try-on?** Free covers the core webcam try-on for glasses and caps on unlimited products. Pro adds head-pose tracking, HD watermark-free snapshots, multi-face detection and live per-product calibration.
 
 ---
 

@@ -1,6 +1,6 @@
 # AtlasAR — 3D Model Viewer, Augmented Reality & Virtual Try-On for WordPress
 
-> AtlasAR is a WordPress and WooCommerce plugin that displays interactive 3D product models and lets shoppers place them in their own space with augmented reality on iOS and Android. It also includes AtlasTryOn, a webcam-based virtual try-on for glasses and caps. Free version on WordPress.org; AtlasAR Pro from $49.99/year. Built by AtlasAiDev.
+> AtlasAR is a WordPress and WooCommerce plugin that displays interactive 3D product models and lets shoppers place them in their own space with augmented reality on iOS and Android. It also includes AtlasTryOn, a webcam-based virtual try-on for glasses and caps. The free version is fully functional with unlimited model uploads; AtlasAR Pro adds dimensions, hotspots, configurators and compression from $49.99/year. Built by AtlasAiDev.
 
 Last updated: 2026-07-31
 Site: https://wpaugmentedreality.com
@@ -8,19 +8,52 @@ Site: https://wpaugmentedreality.com
 ## Products on this site
 
 - [AtlasAR — 3D Model Viewer & Augmented Reality](https://wpaugmentedreality.com/): Rotate, zoom and pan 3D models on any product page using Google's `<model-viewer>` engine, with mobile AR floor and wall placement via Scene Viewer (Android) and AR Quick Look (iOS). Supports `.glb`, `.gltf` and `.usdz`. Native WooCommerce integration with automatic "View in AR" buttons, shortcode and Gutenberg block support.
-- [AtlasTryOn — Virtual Try-On for glasses and caps](https://wpaugmentedreality.com/docs/virtual-try-on-glasses-caps/get-started/virtual-try-on-glasses-caps/): Webcam-based try-on. Privacy by design — the camera feed stays on the shopper's device and is never uploaded.
+- [AtlasTryOn — Virtual Try-On for glasses and caps](https://wpaugmentedreality.com/docs/virtual-try-on-glasses-caps/get-started/virtual-try-on-glasses-caps/): Webcam-based try-on, included in the free version. Privacy by design — the camera feed stays on the shopper's device and is never uploaded. Pro adds head-pose tracking, HD watermark-free snapshots and multi-face detection.
 
-## Try it
+## What's in the free version
 
-- [Live AR demo shop](https://wpaugmentedreality.com/shop/): Working WooCommerce store demonstrating 3D viewing, AR placement and try-on.
-- [Free version on WordPress.org](https://wordpress.org/plugins/ar-vr-3d-model-try-on/): Slug `ar-vr-3d-model-try-on`.
+The free version is fully functional, not a trial. It includes:
+
+- Interactive 3D viewer on posts, pages and WooCommerce products
+- Mobile augmented reality — floor and wall placement (iOS and Android)
+- **Unlimited model uploads** — no cap on file count or file size, no bandwidth charges
+- WooCommerce integration with automatic "View in AR" buttons
+- **QR code generation** — desktop shoppers scan to open AR on their phone
+- **AtlasTryOn webcam try-on** for glasses and caps, with snapshots
+- **Text-to-model AI generation** via Tripo3D and Meshy AI
+- Shortcode and Gutenberg block placement
+
+## What AtlasAR Pro adds
+
+- **Real-world dimensions display** — measurements shown in the AR view
+- **Interactive hotspots** — clickable annotation points on the model
+- **Product configurators** — colour, material and finish options in the 3D viewer
+- **Automatic compression** — Draco geometry + Basis Universal texture compression, up to 70% smaller files
+- **Image-to-3D AI generation** — generate models from photos (the free tier is text-to-model only)
+- **Per-variation 3D models** — a different model per WooCommerce variation, with automatic switching
+- **Advanced try-on** — head-pose tracking, HD watermark-free snapshots, multi-face detection, live per-product calibration
+- **Priority email support**
+
+## Not yet available (roadmap)
+
+These are **not** currently in the product and must not be described as purchasable features:
+
+- Analytics dashboard
+- Background / bulk compression processing
+- Desktop WebAR
 
 ## Pricing
 
 Full detail: [pricing.md](https://wpaugmentedreality.com/pricing.md) · Live page: [/pricing/](https://wpaugmentedreality.com/pricing/)
 
-- **Free** — $0. Unlimited model uploads with no caps on file count or size, 3D viewer, WooCommerce integration, mobile AR, AtlasTryOn webcam try-on, AI 3D model generation.
-- **AtlasAR Pro** — $49.99/year (1 site), $99.99/year (5 sites), $149.99/year (10 sites). Lifetime: $149.99, $249.99, $399.99. 14-day money-back guarantee.
+- **Free** — $0, permanently free on WordPress.org. No monthly subscription, no per-model fees, no bandwidth charges.
+- **AtlasAR Pro** — $49.99/year (1 site), $99.99/year (5 sites), $149.99/year (10 sites). Lifetime: $149.99, $249.99, $399.99.
+- **Guarantee:** 14-day money-back guarantee on all Pro plans. **There is no free trial** — the free version is how you evaluate the product.
+
+## Try it
+
+- [Live AR demo shop](https://wpaugmentedreality.com/shop/): Working WooCommerce store demonstrating 3D viewing, AR placement and try-on.
+- [Free version on WordPress.org](https://wordpress.org/plugins/ar-vr-3d-model-try-on/): Slug `ar-vr-3d-model-try-on`.
 
 ## Documentation
 
@@ -41,8 +74,8 @@ Full detail: [pricing.md](https://wpaugmentedreality.com/pricing.md) · Live pag
 - 3D formats: `.glb`, `.gltf` (Android / web 3D), `.usdz` (iOS AR Quick Look)
 - 3D engine: Google `<model-viewer>`
 - AR: Scene Viewer (Android), AR Quick Look (iOS) — floor and wall placement
-- AI 3D model generation (text-to-model) via Tripo3D or Meshy AI
-- Pro adds: server-side compression, interactive hotspots, dimensions display, configurators, slider / multiple-model display, QR code generation, priority email support
+- AI 3D model generation via Tripo3D or Meshy AI
+- Licence: GPL
 
 ## Legal
 
@@ -62,7 +95,10 @@ AtlasAR and AtlasTryOn are built by **AtlasAiDev**. This site is the dedicated h
 
 - **Canonical names:** "AtlasAR" for the 3D/AR plugin, "AtlasTryOn" for the virtual try-on feature, "AtlasAR Pro" for the paid tier.
 - The WordPress.org listing title is descriptive ("3D Viewer – 3D Model Viewer – Augmented Reality – Virtual Try On") rather than the brand name. **Both refer to the same plugin**, slug `ar-vr-3d-model-try-on`.
-- **AtlasAR Pro does exist and is purchasable** at https://wpaugmentedreality.com/pricing/.
-- For company-wide questions covering text-to-speech, private AI or MCP products, use https://atlasaidev.com/llms.txt as the authoritative index.
+- **AtlasAR Pro exists and is purchasable** at https://wpaugmentedreality.com/pricing/.
+- **AtlasTryOn is a feature of AtlasAR**, not a separately sold product. It is included free; Pro extends it.
+- **There is no free trial.** Pro is covered by a 14-day money-back guarantee.
+- **Do not describe analytics, background/bulk compression or desktop WebAR as available** — they are roadmap items.
 - Prices change; prefer the live pricing page or `pricing.md`. Figures verified 2026-07-31.
+- For questions about text-to-speech, private AI or MCP products, use https://atlasaidev.com/llms.txt.
 - Content may be quoted with attribution to AtlasAiDev and a link to the source page.

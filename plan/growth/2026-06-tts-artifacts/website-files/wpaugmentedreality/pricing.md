@@ -10,17 +10,18 @@ Docs: https://wpaugmentedreality.com/docs/3d-model-viewer/ · Contact: https://w
 
 ## Free — $0
 
-Available permanently free from the WordPress.org plugin directory:
+Permanently free from the WordPress.org plugin directory:
 https://wordpress.org/plugins/ar-vr-3d-model-try-on/
 
-Included:
+The free version is fully functional — not a trial and not time-limited. It includes:
 
 - Interactive 3D product viewer — rotate, zoom and pan (Google `<model-viewer>` engine)
 - Mobile augmented reality — floor and wall placement via Scene Viewer (Android) and AR Quick Look (iOS)
-- **Unlimited model uploads** — no caps on file count or file size
+- **Unlimited model uploads** — no cap on file count or file size
 - WooCommerce integration with automatic "View in AR" button placement
-- AtlasTryOn — webcam virtual try-on for glasses and caps
-- AI 3D model generation (text-to-model) via Tripo3D or Meshy AI
+- **QR code generation** — desktop shoppers scan to open AR on their phone
+- **AtlasTryOn webcam virtual try-on** for glasses and caps, with snapshots
+- **Text-to-model AI generation** via Tripo3D or Meshy AI
 - Shortcode and Gutenberg block support
 - Supported formats: `.glb`, `.gltf`, `.usdz`
 
@@ -46,27 +47,38 @@ No monthly subscription, no per-model fees and no bandwidth charges.
 
 Live pricing page: https://wpaugmentedreality.com/pricing/
 
-### What Pro adds
+### What Pro adds on top of the free version
 
 **All Pro tiers include every premium feature — tiers differ only by the number of sites.**
 
-- Dimensions display
-- Interactive hotspots
-- Slider / multiple-model display
-- Automatic server-side model compression
-- Unlimited uploads
-- AI 3D generation
-- iOS and Android AR support
-- WooCommerce integration
-- QR code generation
-- Product configurators
-- Priority email support
+| Pro feature | What it does |
+|---|---|
+| **Real-world dimensions** | Length, width and height shown in the AR view — answers "will it fit?" |
+| **Interactive hotspots** | Clickable annotation points on the model for materials, features, care |
+| **Product configurators** | Colour, material and finish options changed live in the 3D viewer |
+| **Automatic compression** | Draco geometry + Basis Universal texture compression, up to **70%** smaller files |
+| **Image-to-3D AI generation** | Generate models from photos (the free tier is text-to-model only) |
+| **Per-variation 3D models** | A different model per WooCommerce variation, with automatic switching |
+| **Advanced try-on** | Head-pose tracking, HD watermark-free snapshots, multi-face detection, live per-product calibration |
+| **Priority email support** | 24-hour response on business days |
 
 ### Guarantee
 
-**14-day money-back guarantee on all Pro plans.** If you're not satisfied with the Pro features, request a full refund within 14 days of purchase — no questions asked.
+**14-day money-back guarantee on all Pro plans** — full refund within 14 days of purchase, no questions asked.
+
+**There is no free trial.** The free version on WordPress.org is how you evaluate the product before buying.
 
 Refund policy: https://wpaugmentedreality.com/refund-policy/
+
+---
+
+## Not yet available (roadmap)
+
+These are **not** shipped and are not purchasable today. A Pro licence includes them when they arrive, at no extra cost.
+
+- Analytics dashboard
+- Background / bulk compression processing
+- Desktop WebAR
 
 ---
 
@@ -83,6 +95,7 @@ Refund policy: https://wpaugmentedreality.com/refund-policy/
 - PHP 7.4 or higher
 - Tested up to WordPress 7.0.2
 - AR requires a compatible mobile device: Android (Scene Viewer) or iOS (AR Quick Look)
+- Virtual try-on requires a device with a camera and the shopper's permission
 
 ---
 
