@@ -21,7 +21,22 @@ Three structural things moved, and none of them were prompt-level tweaks:
 
 1. **Ship the AI-readable file layer.** `/llms.txt` is 8 months stale (2025-11-28) and carries **no pricing at all**; `/llms-full.txt` returns **404**; there are no per-page `.md` mirrors. Add all three, starting with a `pricing.md` — an unambiguous machine-readable price with no theme markup is the durable fix for pricing drift, not a one-off page edit.
 2. **Fix three factual inconsistencies that AI answers are now repeating back.** The homepage meta description says **"2,000+ websites"** while wp.org shows **4,000+ active installs** (Perplexity repeated the low number on prompt 13); the language/voice count varies across your own pages (**51+ / 63 / 81+ / 300+**); and the pricing page — your #1 commercial page — still shows a **Black Friday/Cyber Monday 2025 promo (coupon `FSBFCM2025`) in July 2026**. Models read all of this as authoritative.
-3. **Answer TTSWP's audio-schema claim.** A new competitor (below) is beating AtlasVoice on discovery prompts specifically by advertising *"AudioObject JSON-LD on every plan, including free."* Perplexity now repeats, twice, that *"AtlasVoice and GSpeech do not document this on free tiers."* AtlasVoice **has** audio schema — this is a documentation gap, not a product gap. Also: the Capterra listing has **0 reviews**; it is now load-bearing as a citation, so seed it.
+3. **Answer TTSWP's audio-schema claim.** A new competitor (below) is beating AtlasVoice on discovery prompts specifically by advertising *"AudioObject JSON-LD on every plan, including free."* Perplexity now repeats, twice, that *"AtlasVoice and GSpeech do not document this on free tiers."* Also: the Capterra listing has **0 reviews**; it is now load-bearing as a citation, so seed it.
+
+> ### ⚠️ CORRECTION (2026-07-31, verified in code — this reverses the original claim)
+> An earlier version of this line said *"AtlasVoice **has** audio schema — this is a documentation
+> gap, not a product gap."* **That is wrong.** `text-to-audio/includes/helpers.php` carries an
+> explicit **TTS-250** note: *"AudioObject schema output now lives in AtlasVoice Pro (it requires an
+> MP3 contentUrl that the free player never produces)."* `AudioObject` appears in Pro's
+> `TTA_Pro_Actions.php` and readme, and nowhere in Free except that comment. The wp.org listing
+> agrees — it lists Audio Schema Markup under **Pro**.
+>
+> **So TTSWP's advantage on this point is real, not a documentation gap.** It is a genuine
+> product-tier difference: their free tier emits audio schema, ours does not — and it structurally
+> can't without free-tier MP3 generation. **Never claim free-tier audio schema in outreach, a
+> listing, or a comment; it would be a false statement about our own product.** The available
+> honest responses are (a) document clearly that schema is a Pro feature and why, or (b) treat
+> free-tier schema as a product decision to be taken deliberately, not a copy fix.
 
 ---
 
@@ -149,7 +164,13 @@ Genuine name fragmentation still exists (AtlasVoice / Text to Audio / Text To Sp
 
 **Now citing AtlasVoice favourably:** `wordpress.org` (the big one — reopened listing), `capterra.com` (new; the pricing authority), `atlasaidev.com` own comparison pages (vs GSpeech, vs Polly, vs Trinity), `learnwoo.com`, `unite.ai`, own YouTube.
 
-**Where AtlasVoice is absent from the sources — and therefore from the answer:** the third-party round-ups that own the "alternatives to X" and use-case prompts — `elegantthemes`, `toolradar`, `wpexplorer`, `producthunt`, `speechify`, `ondoku3`. Prompt 5 (Speechify alternatives) misses on both engines in both runs for exactly this reason: the sources Perplexity trusts for that question don't list AtlasVoice at all. **Getting into those round-ups is the remaining lever for Set B/C**, and it matches the baseline's #1 systemic gap (third-party authority) — which is still open, just less damaging now that wp.org and Capterra are back.
+**Where AtlasVoice is absent from the sources — and therefore from the answer:** the third-party round-ups that own the "alternatives to X" and use-case prompts — `elegantthemes`, `toolradar`, `wpexplorer`, `producthunt`, `speechify`.
+
+> **⚠️ Correction (2026-07-31):** `ondoku3` was listed here as a source where AtlasVoice is absent.
+> **It isn't.** [ondoku3.com/en/post/wordpress-tts-plugin/](https://ondoku3.com/en/post/wordpress-tts-plugin/)
+> (published 2026-04-15) ranks AtlasVoice **#2 of 5 — and calls it "AtlasVoice"**, not the legacy
+> name. That is a rare third-party source already using the brand name; it is an entity-consolidation
+> *asset*, not a gap. It is a vendor blog (Ondoku ranks itself #1) and has **no comment section**. Prompt 5 (Speechify alternatives) misses on both engines in both runs for exactly this reason: the sources Perplexity trusts for that question don't list AtlasVoice at all. **Getting into those round-ups is the remaining lever for Set B/C**, and it matches the baseline's #1 systemic gap (third-party authority) — which is still open, just less damaging now that wp.org and Capterra are back.
 
 ---
 

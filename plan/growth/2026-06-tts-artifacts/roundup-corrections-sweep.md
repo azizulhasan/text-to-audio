@@ -29,7 +29,7 @@ Three emails plausibly do more for entity consolidation than a quarter of conten
 | Site | Route | Notes |
 |---|---|---|
 | **WPExplorer** | `hello@wpexplorer.com` | ✅ **sent 2026-07-30** — awaiting reply. Pack: `outreach-wpexplorer.md` |
-| **WPMU DEV** | `contact@wpmudev.com` (general enquiry form also available) | ✅ **sent 2026-07-30** — awaiting reply. No guest-post/editorial route exists; blog is staffed (author: Martin Aranovitch), so this may route via support first. |
+| **WPMU DEV** | `contact@wpmudev.com` (general enquiry form also available) | 🎉 **REPLIED AND UPDATED** — the only win so far. Name changed to the full canonical form, moved **#4/5 → #3/4**, Pro now acknowledged. **Still stale:** the "20+ languages" line, and the post still stamps "7 July 2023". Judgement: do **not** send a second correction — one accommodation has been made and pushing again converts a goodwill contact into a nuisance. Re-evaluate only at the 2026-08-29 recheck. |
 | **BDThemes** | `support@bdthemes.com` / [contact form](https://bdthemes.com/contact/) | ✅ **sent 2026-07-30** — awaiting reply. Byline is "admin", no individual to target. Elementor-addons company (Element Pack), Bangladesh. |
 
 **All three correction emails sent 2026-07-30.** Follow-up: one short bump at **2026-08-06** for any that haven't replied, then stop. Measure the effect at the **2026-08-29** recheck.
@@ -103,6 +103,35 @@ atlasaidev.com
 - **"I'm not asking to be moved up the list"** — keep this. It's what separates a correction from a pitch, and it's why editors act on it.
 - **Don't mention competitors.** The BeyondWords conflict of interest is specific to WPExplorer and is already handled there; raising it elsewhere is just mud.
 - **7-day gap, one bump, then stop.**
+
+---
+
+## 🔍 Comment-surface audit (2026-07-31) — the "just comment on TTS articles" idea does not survive contact
+
+Searched for live places to leave contextual comments on text-to-speech content. **Almost none exist.**
+Recording it so this isn't re-attempted from scratch:
+
+| Surface | Checked | Verdict |
+|---|---|---|
+| [ondoku3.com round-up](https://ondoku3.com/en/post/wordpress-tts-plugin/) | 2026-07-31 | **No comment section.** Already ranks us **#2 and names us "AtlasVoice"** — an asset, not a gap |
+| [theblogmetrics.com](https://theblogmetrics.com/text-to-speech/) | 2026-07-31 | **No comment section.** 7 plugins, accessibility-framed, updated 2026-05-17 by Adithya Shetty — **AtlasVoice absent entirely**. New outreach target, but see caveat below |
+| Reddit — [r/Wordpress "Text to speech player, any recommendations?"](https://www.reddit.com/r/Wordpress/comments/1q4na31/text_to_speech_player_any_recommendations/) | 2026-07-31 | **Archived — "New comments cannot be posted."** Best-fit thread on the platform; OP even lists our plugin as a candidate. r/Wordpress archives at ~6 months |
+| Reddit — past 30 days, TTS + WordPress | 2026-07-31 | **Zero on-topic threads.** This demand is low-frequency on Reddit |
+| WordPress Stack Exchange | 2026-07-31 | **Dead.** 3 results total (2013/2018/2021), none about choosing a plugin; plugin-recommendation questions are off-topic there by policy |
+| wordpress.org general forums | 2026-07-31 | Relevant threads found are **resolved and closed to replies** |
+| Our own wp.org support forum | 2026-07-31 | **Clean** — 3 unresolved topics, all self-started, 2.5–3.5 years old. Nothing to answer |
+| Quora | 2026-07-31 | **Login wall** — no Quora session in the working Chrome profile. Needs the founder to sign in. The only genuinely open, never-archiving Q&A surface found |
+
+**Conclusion:** there is no standing backlog of open threads to join. Comment-based citation building is
+opportunistic — worth doing *when* a live thread appears, not something to schedule. **The durable
+levers remain listings and directories** (Capterra reviews, ToolRadar, Product Hunt alternatives),
+which is exactly what the recheck data already said moved the number.
+
+**⚠️ Blocker before any comment or listing copy is written:** our own pages currently contradict each
+other and carry a banned claim — "315,000+ Downloads" is still live on both the product and pricing
+pages, review count reads 83 vs wp.org's 91, and the language count is 81 on wp.org vs 63 on the
+product page. See master-action-plan **#24b**. Fix that first; otherwise every comment we write is
+citing a number our own site contradicts.
 
 ## Success measure
 
