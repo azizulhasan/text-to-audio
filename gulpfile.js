@@ -248,10 +248,19 @@ gulp.task(
 );
 
 // makeZip
+// TTS-267: the series is still resolved lazily — clean:production, copy and
+// zip are defined further down this file, so passing gulp.series(...) directly
+// would throw "Task never defined" at registration time. What changed is that
+// the callback is now handed to the series: the old form called it with no
+// arguments and returned undefined, so gulp never learned when the task
+// finished, printed "Did you forget to signal async completion?" and exited
+// non-zero. Harmless when makeZip ran alone, but it broke `npm run release`
+// (makeZip && svn:sync && svn:stale) at the first &&, and it made a genuine
+// build failure look identical to a success.
 gulp.task(
 	'makeZip',
-	function () {
-		return gulp.series('clean:production', 'copy', 'zip')()
+	function (done) {
+		gulp.series('clean:production', 'copy', 'zip')(done)
 	}
 );
 
@@ -483,15 +492,12 @@ gulp.task('copyProButton', function (done) {
 	done();
 })
 
-gulp.task('release', function () {
-	// gulp-copy preserves the source path under the destination, so without a
-	// prefix the files would land in text-to-audio-release/production/text-to-audio/.
-	// prefix: 2 strips the leading "production/text-to-audio/" so files drop
-	// directly into the release folder (same reasoning as copyToSevenDeploy).
-	return gulp.src('production/text-to-audio/**')
-		.pipe(gulpCopy('D:/xampp/htdocs/wordpress.org/text-to-audio-release/', { prefix: 2 }))
-		.pipe(notify({ message: 'Release version copy Completed! 💯', onLast: true }))
-})
+// TTS-267: the old `release` task copied the build into
+// wordpress.org/text-to-audio-release/ with gulp-copy, which only adds and
+// overwrites — the same paste-never-delete pattern that let stale webpack
+// chunks accumulate in the SVN working copy. Replaced by `npm run release`
+// (makeZip → svn:sync → svn:stale), which mirrors into the working copy and
+// verifies the result.
 
 // TTS-247: internal deploy step — copy the already-built
 // production/text-to-audio/ tree to the secondary local WP install at
