@@ -71,6 +71,8 @@ Whether you run a blog, news site, online store, or educational platform, AtlasV
 
 * **Full Customization:** Customize button color, width, border radius, hover effects, and text labels. Preview all changes in real-time from the dashboard.
 
+* **Floating Player:** Place the player before or after your content, and choose where it docks once readers scroll past it — bottom right, bottom left, bottom center, or full width. Prefer it to stay put? Turn docking off with a single switch in Settings.
+
 * **Language & Voice Selection:** Choose the default language and voice from the **Listening** menu. Adjust speed, pitch, and volume for browser-native players.
 
 * **Read-Along Highlighting & Listen to Selection:** As your content is read aloud, the player highlights the text in time with the voice — sentence by sentence, and word by word with supported browser voices — with your own colors, optional focus-dimming, and gentle auto-scroll. Visitors can also select any passage and press **Listen** to hear just that part, or click a word to start reading from there. Turn it on from the new **Highlight** tab (off by default).
@@ -148,7 +150,7 @@ Unlock premium AI voices, bulk operations, cloud backup, advanced analytics, and
 
 * **6 Player Styles:** Default (free browser voices), Default Pro, AtlasVoice TTS Pro (own AI engine), Google Cloud TTS, ChatGPT TTS, and ElevenLabs TTS. Pro players use a modern, responsive HTML5 audio player with progress bar, volume, speed, and download button.
 
-* **Floating Player & Display Controls:** Optional sticky player, display by date range, custom margin control, and full CSS customization.
+* **Display Controls:** Display the player by date range, control margins, and apply full CSS customization. (Floating player positions are now included in the free version.)
 
 **Translation & Multilingual (Pro):**
 
