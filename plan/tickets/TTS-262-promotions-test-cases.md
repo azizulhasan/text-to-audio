@@ -35,6 +35,9 @@
 | T10 | **kses safety** | Add `<script>alert(1)</script>` inside `content` | Script stripped, no alert, rest renders |
 | T11 | **Non-dismissible guard** | Remove `"dismissible"` from the promo | Renders WITHOUT an X (confirms the campaign rule: always set `dismissible:1` — never ship without it) |
 | T12 | **Insights separation** | With Pro active | Promotions still run (intended per TTS-262), while free insights stay suppressed |
+| T13 | **Site allowlist** | Add `"allowed_sites": ["cors2.atlasaidev.com","localhost"]`, clear transient | Shows on those two sites only; hidden on every other site |
+| T14 | **Dismiss hides it immediately** | Click X and stay on the page (do NOT reload) | Notice fades out and is removed from the DOM right away — not only after a reload |
+| T15 | **Stored dismissal list is clean** | After T14, inspect the `<prefix>_<slug>_hidden_promos` user meta | Array holds only the promo hash strings — no stray `b:0` / `false` entry |
 
 ## After testing
 Reset the feed to `[]` on GitHub, clear the transient, and delete the test dismissal row
