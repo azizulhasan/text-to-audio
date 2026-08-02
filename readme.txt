@@ -71,13 +71,11 @@ Whether you run a blog, news site, online store, or educational platform, AtlasV
 
 * **Full Customization:** Customize button color, width, border radius, hover effects, and text labels. Preview all changes in real-time from the dashboard.
 
-* **Button Position:** Place the Listen button before or after your post content, or drop it anywhere with the `[atlasvoice]` shortcode.
-
-* **Floating Player:** On long articles the button follows your readers instead of scrolling away. It stays in your content until they scroll past it, then docks to the edge of the screen — choose bottom full width, bottom right, bottom left, or sticky top. Readers arriving part-way down a page see it straight away, and you can switch docking off entirely with a single toggle in Settings.
+* **Button Position & Floating Player:** Place the Listen button before or after your content, or anywhere with the `[atlasvoice]` shortcode. On long posts it follows readers, docking to the edge once they scroll past. Choose bottom full width, bottom right, bottom left or sticky top — or turn docking off.
 
 * **Language & Voice Selection:** Choose the default language and voice from the **Listening** menu. Adjust speed, pitch, and volume for browser-native players.
 
-* **Read-Along Highlighting & Listen to Selection:** As your content is read aloud, the player highlights the text in time with the voice — sentence by sentence, and word by word with supported browser voices — with your own colors, optional focus-dimming, and gentle auto-scroll. Visitors can also select any passage and press **Listen** to hear just that part, or click a word to start reading from there. Turn it on from the new **Highlight** tab (off by default).
+* **Read-Along Highlighting & Listen to Selection:** The player highlights text as it is read — sentence by sentence, and word by word with supported voices — in your own colors, with optional focus-dimming and auto-scroll. Visitors can also select any passage to hear just that part, or click a word to start from there. Off by default; enable it in the **Highlight** tab.
 
 * **Cross-Device Compatibility:** The free version uses the browser's built-in [speechSynthesis API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis), ensuring compatibility across desktops, tablets, and mobile devices.
 
@@ -114,7 +112,7 @@ Unlock premium AI voices, bulk operations, cloud backup, advanced analytics, and
 
 **Content & Playback Control (Pro):**
 
-* **Word-Perfect Read-Along Highlighting:** With Google Cloud and ElevenLabs voices, every word lights up at the exact moment it's spoken (sentence-level for AtlasVoice TTS Pro and ChatGPT), with smoother, gap-free highlighting that flows cleanly across lines.
+* **Word-Perfect Read-Along Highlighting:** With Google Cloud and ElevenLabs voices, every word lights up exactly as it is spoken — sentence-level for AtlasVoice TTS Pro and ChatGPT.
 
 * **Bulk MP3 File Generation:** Generate MP3 files for hundreds of posts at once using the bulk action from the WordPress posts list. Select your posts, choose "AtlasVoice Generate MP3 File", and the plugin processes each post automatically. [Watch tutorial](https://www.youtube.com/watch?v=HFoqlkPCP80).
 
