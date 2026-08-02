@@ -281,6 +281,95 @@ gulp.task('clean:production', function (done) {
 	done();
 })
 
+// TTS-267: wp.org SVN stale-file audit.
+//
+// clean:production keeps the ZIP correct, but a wp.org release is done by
+// PASTING production/text-to-audio/ over the SVN working copy — and pasting
+// only adds and overwrites, it never deletes. Webpack renames its code-split
+// chunks on every build, so trunk accumulates every hash ever shipped: at
+// 2.3.7 the working copy held 60 files in admin/js/build/chunks (6.8 MB) where
+// the release needs 11 (1.1 MB) — roughly 5.7 MB of dead JavaScript that every
+// user had been downloading for several releases.
+//
+// Run AFTER `npm run makeZip`, before `svn commit`:
+//   gulp svn:stale --svn "D:/xampp/htdocs/wordpress.org/text-to-audio"
+//   gulp svn:stale --svn "..." --delete    (issues `svn delete` for each)
+//
+// Report-only by default — deleting from a working copy is not something a
+// build script should do behind your back.
+gulp.task('svn:stale', function (done) {
+	const fs = require('fs');
+	const path = require('path');
+	const { execFileSync } = require('child_process');
+
+	const argv = process.argv;
+	const svnFlag = argv.indexOf('--svn');
+	const svnRoot = svnFlag !== -1 ? argv[svnFlag + 1] : null;
+	const shouldDelete = argv.includes('--delete');
+	const buildRoot = 'production/text-to-audio';
+
+	if (!svnRoot) {
+		done(new Error('Pass the working copy: gulp svn:stale --svn "<path to SVN text-to-audio>"'));
+		return;
+	}
+	if (!fs.existsSync(buildRoot)) {
+		done(new Error('Run `npm run makeZip` first — ' + buildRoot + ' does not exist.'));
+		return;
+	}
+	if (!fs.existsSync(svnRoot)) {
+		done(new Error('Not found: ' + svnRoot));
+		return;
+	}
+
+	// Relative file list for a tree, skipping SVN's own metadata.
+	const listing = (root) => {
+		const found = [];
+		const walk = (dir) => {
+			for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+				if (entry.name === '.svn') {
+					continue;
+				}
+				const full = path.join(dir, entry.name);
+				if (entry.isDirectory()) {
+					walk(full);
+				} else {
+					found.push(path.relative(root, full).split(path.sep).join('/'));
+				}
+			}
+		};
+		walk(root);
+		return found;
+	};
+
+	const fresh = new Set(listing(buildRoot));
+	const stale = listing(svnRoot).filter((f) => !fresh.has(f)).sort();
+
+	if (!stale.length) {
+		console.log('svn:stale — working copy is clean, nothing to remove.');
+		done();
+		return;
+	}
+
+	console.log('svn:stale — ' + stale.length + ' file(s) in the working copy are not in this release:');
+	stale.forEach((f) => console.log('  ' + f));
+
+	if (!shouldDelete) {
+		console.log('\nRe-run with --delete to `svn delete` them.');
+		done();
+		return;
+	}
+
+	try {
+		// One call per file: paths can contain spaces, and a failure should name
+		// the file that caused it rather than aborting an opaque batch.
+		stale.forEach((f) => execFileSync('svn', ['delete', '--force', f], { cwd: svnRoot, stdio: 'inherit' }));
+		console.log('\nDeleted ' + stale.length + ' file(s). Review with `svn status`, then commit.');
+		done();
+	} catch (err) {
+		done(err);
+	}
+})
+
 // Wipe the secondary "seven" install's plugin folder before deploying, so a
 // clean copy lands there too (same stale-file reasoning as clean:production).
 gulp.task('clean:seven', function (done) {
