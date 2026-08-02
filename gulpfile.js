@@ -154,7 +154,14 @@ const config = {
 		src: 'production/text-to-audio/**',
 		output: 'D:/laragon/www/seven/wp-content/plugins/text-to-audio/',
 		options: {}
-	}
+	},
+
+	// TTS-267: local wp.org SVN working copy, used by `npm run release`
+	// (svn:sync / svn:stale). Override per run with --svn "<path>" or the
+	// WPORG_SVN_DIR env var; both win over this default. The tasks refuse any
+	// path lacking .svn + text-to-audio.php, so a wrong value here fails loudly
+	// rather than mirroring over the wrong folder.
+	wporgSvn: 'D:/xampp/htdocs/wordpress.org/text-to-audio'
 
 	// ftp:{
 	// 	src: [
@@ -327,14 +334,15 @@ const svnRelease = {
 	},
 
 	// Returns the validated working-copy path, or throws with the reason.
-	// Path comes from --svn, or the WPORG_SVN_DIR env var so it can be set once
-	// per machine (it is machine-specific, so it must not be hardcoded here).
+	// Precedence: --svn flag, then WPORG_SVN_DIR env var, then config.wporgSvn
+	// — so `npm run release` works with no arguments on this machine, and any
+	// other checkout can override without editing the gulpfile.
 	resolveTarget() {
 		const fs = require('fs');
 		const path = require('path');
-		const svnRoot = this.arg('svn') || process.env.WPORG_SVN_DIR;
+		const svnRoot = this.arg('svn') || process.env.WPORG_SVN_DIR || config.wporgSvn;
 		if (!svnRoot) {
-			throw new Error('Set the working copy with --svn "<path>" or the WPORG_SVN_DIR env var.');
+			throw new Error('Set the working copy with --svn "<path>", the WPORG_SVN_DIR env var, or config.wporgSvn.');
 		}
 		if (!fs.existsSync(this.buildRoot)) {
 			throw new Error('Run `npm run makeZip` first — ' + this.buildRoot + ' does not exist.');
