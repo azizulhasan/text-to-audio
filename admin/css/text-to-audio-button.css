@@ -377,3 +377,165 @@ tts-play-button .tts-sr-only {
    (Free's button CSS is not enqueued on Pro player-2 pages). Colors come from
    --atlasvoice-* CSS variables the admin Highlight tab drives. Intentionally
    not duplicated here. */
+
+/* ------------------------------------------------------------------ *
+ * TTS-267: floating player positions, ported from Pro so player 1 gets
+ * the same four placements (Pro: Assets/css/text-to-audio-pro.css).
+ *
+ * Class names are kept IDENTICAL to Pro's on purpose — the two plugins
+ * must not drift, and a site switching between players should see the
+ * same geometry. The class is applied to the <tts-play-button> host by
+ * initFloatingPosition() in admin/js/text-to-audio-button.js once the
+ * reader scrolls past the button's inline position.
+ *
+ * These rules come after the base `tts-play-button { width: 100% }` block
+ * above, so the fixed widths below win on equal specificity.
+ * ------------------------------------------------------------------ */
+.tts__custom-position_bottom_right,
+.tts__custom-position_bottom_left,
+.tts__custom-position_bottom_fixed,
+.tts__custom-position_sticky_top {
+    position: fixed;
+    bottom: 3%;
+    width: 455px;
+    z-index: 9999;
+    border-radius: 2px;
+    overflow: visible !important;
+}
+
+/* TTS-267: sticky top. Unlike the bottom placements this one has to clear
+   whatever the site already pins to the top edge — the WP admin bar and any
+   theme sticky header. --tts-sticky-top is measured at runtime by
+   topChromeOffset() in admin/js/text-to-audio-button.js; the 0 fallback only
+   applies for the frame before the first measurement lands. */
+.tts__custom-position_sticky_top {
+    top: var(--tts-sticky-top, 0px);
+    bottom: auto;
+    left: 5%;
+    right: 5%;
+    width: calc(100% - 10%);
+    margin: 0 auto;
+}
+
+.tts__custom-position_bottom_right {
+    right: 5%;
+}
+
+.tts__custom-position_bottom_left {
+    left: 5%;
+}
+
+
+.tts__custom-position_bottom_fixed {
+    right: 5%;
+    left: 5%;
+    margin: 0 auto;
+}
+
+@media (max-width: 575.98px) {
+    .tts__custom-position_bottom_right {
+        right: 1%;
+        width: 98%;
+    }
+
+    .tts__custom-position_bottom_left {
+        left: 1%;
+        width: 98%;
+    }
+
+
+    .tts__custom-position_bottom_fixed {
+        left: 1%;
+        right: 1%;
+        width: 98%;
+        margin: 0;
+    }
+
+    .tts__custom-position_sticky_top {
+        left: 1%;
+        right: 1%;
+        width: 98%;
+        margin: 0;
+    }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .tts__custom-position_bottom_right {
+        right: 2%;
+        width: 380px;
+    }
+
+    .tts__custom-position_bottom_left {
+        left: 2%;
+        width: 380px;
+    }
+
+
+    .tts__custom-position_bottom_fixed {
+        left: 2%;
+        right: 2%;
+        width: calc(100% - 4%);
+        margin: 0 auto;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1199.98px) {
+    .tts__custom-position_bottom_right {
+        right: 2%;
+        width: 420px;
+    }
+
+    .tts__custom-position_bottom_left {
+        left: 2%;
+        width: 420px;
+    }
+
+
+    .tts__custom-position_bottom_fixed {
+        left: 2%;
+        right: 2%;
+        width: calc(100% - 4%);
+        margin: 0 auto;
+    }
+
+    .tts__custom-position_sticky_top {
+        left: 2%;
+        right: 2%;
+        width: calc(100% - 4%);
+        margin: 0 auto;
+    }
+}
+
+@media (min-width: 1200px) {
+    .tts__custom-position_bottom_right {
+        right: 5%;
+        width: 455px;
+    }
+
+    .tts__custom-position_bottom_left {
+        left: 5%;
+        width: 455px;
+    }
+
+
+    .tts__custom-position_bottom_fixed {
+        left: 5%;
+        right: 5%;
+        width: calc(100% - 10%);
+        margin: 0 auto;
+    }
+
+    .tts__custom-position_sticky_top {
+        left: 2%;
+        right: 2%;
+        width: calc(100% - 4%);
+        margin: 0 auto;
+    }
+}
+
+    .tts__custom-position_sticky_top {
+        left: 5%;
+        right: 5%;
+        width: calc(100% - 10%);
+        margin: 0 auto;
+    }
