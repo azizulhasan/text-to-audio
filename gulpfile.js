@@ -318,12 +318,14 @@ const svnRelease = {
 	},
 
 	// Returns the validated working-copy path, or throws with the reason.
+	// Path comes from --svn, or the WPORG_SVN_DIR env var so it can be set once
+	// per machine (it is machine-specific, so it must not be hardcoded here).
 	resolveTarget() {
 		const fs = require('fs');
 		const path = require('path');
-		const svnRoot = this.arg('svn');
+		const svnRoot = this.arg('svn') || process.env.WPORG_SVN_DIR;
 		if (!svnRoot) {
-			throw new Error('Pass the working copy: --svn "<path to SVN text-to-audio>"');
+			throw new Error('Set the working copy with --svn "<path>" or the WPORG_SVN_DIR env var.');
 		}
 		if (!fs.existsSync(this.buildRoot)) {
 			throw new Error('Run `npm run makeZip` first — ' + this.buildRoot + ' does not exist.');
