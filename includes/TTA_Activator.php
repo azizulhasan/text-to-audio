@@ -92,7 +92,7 @@ class TTA_Activator {
 				// D26.8 — default selector points at the legacy wrapper class
 				// emitted by Pro and (post-D26.7) Free, so a fresh install
 				// extracts content out of the box without admin config.
-				'tta__settings_css_selectors'                         => '[class*="tts_content_wrapper_"]',
+				'tta__settings_css_selectors'                         => '',
 				'tta__settings_exclude_content_by_css_selectors'      => '',
 				'tta__settings_exclude_texts'                         => [],
 				// TTS-238 D27.34 — default-skip these tag types out of the
