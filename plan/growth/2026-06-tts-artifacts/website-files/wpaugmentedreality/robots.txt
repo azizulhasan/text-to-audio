@@ -1,0 +1,87 @@
+# robots.txt — wpaugmentedreality.com
+# Updated 2026-07-31
+# Note: the previous file had TWO separate "User-agent: *" groups (a WooCommerce
+# block and a Yoast block with an empty Disallow). They are merged into one group
+# below — same effective rules, but unambiguous for every parser.
+
+User-agent: *
+Disallow: /wp-admin/
+Allow: /wp-admin/admin-ajax.php
+Disallow: /wp-content/uploads/wc-logs/
+Disallow: /wp-content/uploads/woocommerce_transient_files/
+Disallow: /wp-content/uploads/woocommerce_uploads/
+Disallow: /*?add-to-cart=
+Disallow: /*?*add-to-cart=
+
+# WordPress core boilerplate — restored by every core update, so block rather than delete
+Disallow: /readme.html
+Disallow: /license.txt
+Disallow: /wp-links-opml.php
+
+Sitemap: https://wpaugmentedreality.com/sitemap_index.xml
+
+# --- Explicitly allow major AI / LLM crawlers ---
+
+# OpenAI
+# GPTBot = model training
+# ChatGPT-User = user-triggered browsing
+# OAI-SearchBot = ChatGPT Search indexing and citations (distinct from GPTBot)
+User-agent: GPTBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+
+# Google Gemini / Vertex AI training + AI Overviews grounding
+User-agent: Google-Extended
+Allow: /
+
+# Anthropic (Claude)
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-User
+Allow: /
+User-agent: Claude-Web
+Allow: /
+User-agent: Claude-SearchBot
+Allow: /
+
+# Perplexity
+User-agent: PerplexityBot
+Allow: /
+User-agent: Perplexity-User
+Allow: /
+
+# Microsoft Copilot / Bing AI
+User-agent: bingbot
+Allow: /
+
+# Apple Intelligence / Siri
+User-agent: Applebot
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+
+# Meta AI
+User-agent: meta-externalagent
+Allow: /
+
+# Amazon (Alexa / Rufus)
+User-agent: Amazonbot
+Allow: /
+
+# DuckDuckGo AI assist
+User-agent: DuckAssistBot
+Allow: /
+
+# Common AI / data crawlers
+User-agent: CCBot
+Allow: /
+User-agent: cohere-ai
+Allow: /
+
+# --- AI helper files (convention only — no standard robots directive exists) ---
+# https://wpaugmentedreality.com/llms.txt
+# https://wpaugmentedreality.com/llms-full.txt
+# https://wpaugmentedreality.com/pricing.md
