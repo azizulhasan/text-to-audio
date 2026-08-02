@@ -36,7 +36,7 @@ export default function Settings() {
         tta__settings_exclude_post_ids: "",
         tta__settings_stop_auto_playing_after_switching_tab: true,
         tta__settings_stop_auto_pause_after_switching_tab: true,
-        tta__settings_stop_floating_button: true,
+        tta__settings_stop_floating_button: false,
         tta__settings_exclude_categories: [],
         tta__settings_exclude_wp_tags: [],
         tta__settings_show_admin_bar_toggle: false,
@@ -340,23 +340,22 @@ export default function Settings() {
                                     </>
                                 )}
 
-                                {/* When Scroll Down Stop Floating Player - Missing from new */}
-                                {window?.ttsObj?.player_id > 1 && (
-                                    <SettingRow
-                                        label={__("When Scroll Down Stop Floating Player", "text-to-audio")}
-                                        questionIcon={true}
-                                        questionTooltip={__(
-                                            "Automatically pause the floating player when users scroll down the page", "text-to-audio"
-                                        )}
-                                    >
-                                        <ToggleSwitch
-                                            checked={settings.tta__settings_stop_floating_button}
-                                            onChange={(e) => handleChange(e)}
-                                            name="tta__settings_stop_floating_button"
-                                            id="tta__settings_stop_floating_button"
-                                        />
-                                    </SettingRow>
-                                )}
+                                {/* TTS-267: floating placement now ships in free too, so this
+                                    toggle is no longer gated on a Pro player being active. */}
+                                <SettingRow
+                                    label={__("When Scroll Down Stop Floating Player", "text-to-audio")}
+                                    questionIcon={true}
+                                    questionTooltip={__(
+                                        "Turn this on to keep the player in place instead of floating it when readers scroll past. Applies to the Bottom positions in Customization.", "text-to-audio"
+                                    )}
+                                >
+                                    <ToggleSwitch
+                                        checked={settings.tta__settings_stop_floating_button}
+                                        onChange={(e) => handleChange(e)}
+                                        name="tta__settings_stop_floating_button"
+                                        id="tta__settings_stop_floating_button"
+                                    />
+                                </SettingRow>
 
                                 {/* Apply number format with YouTube icon - Missing from new */}
                                 {window?.ttsObj?.is_atlasvoice_addon_functional && (
