@@ -154,7 +154,14 @@ const config = {
 		src: 'production/text-to-audio/**',
 		output: 'D:/laragon/www/seven/wp-content/plugins/text-to-audio/',
 		options: {}
-	}
+	},
+
+	// TTS-267: local wp.org SVN working copy, used by `npm run release`
+	// (svn:sync / svn:stale). Override per run with --svn "<path>" or the
+	// WPORG_SVN_DIR env var; both win over this default. The tasks refuse any
+	// path lacking .svn + text-to-audio.php, so a wrong value here fails loudly
+	// rather than mirroring over the wrong folder.
+	wporgSvn: 'D:/xampp/htdocs/wordpress.org/text-to-audio'
 
 	// ftp:{
 	// 	src: [
@@ -248,10 +255,19 @@ gulp.task(
 );
 
 // makeZip
+// TTS-267: the series is still resolved lazily — clean:production, copy and
+// zip are defined further down this file, so passing gulp.series(...) directly
+// would throw "Task never defined" at registration time. What changed is that
+// the callback is now handed to the series: the old form called it with no
+// arguments and returned undefined, so gulp never learned when the task
+// finished, printed "Did you forget to signal async completion?" and exited
+// non-zero. Harmless when makeZip ran alone, but it broke `npm run release`
+// (makeZip && svn:sync && svn:stale) at the first &&, and it made a genuine
+// build failure look identical to a success.
 gulp.task(
 	'makeZip',
-	function () {
-		return gulp.series('clean:production', 'copy', 'zip')()
+	function (done) {
+		gulp.series('clean:production', 'copy', 'zip')(done)
 	}
 );
 
@@ -281,6 +297,187 @@ gulp.task('clean:production', function (done) {
 	done();
 })
 
+// TTS-267: shared helpers for the wp.org SVN release tasks below.
+//
+// A working copy is only a valid target if it carries BOTH .svn metadata and
+// the plugin's main file. svn:sync deletes whatever it does not recognise, so
+// a mistyped --svn path must fail loudly rather than mirror over someone's
+// Documents folder.
+const svnRelease = {
+	buildRoot: 'production/text-to-audio',
+
+	arg(name) {
+		const i = process.argv.indexOf('--' + name);
+		return i === -1 ? null : process.argv[i + 1];
+	},
+
+	// Relative file list for a tree, skipping SVN's own metadata.
+	listing(root) {
+		const fs = require('fs');
+		const path = require('path');
+		const found = [];
+		const walk = (dir) => {
+			for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+				if (entry.name === '.svn') {
+					continue;
+				}
+				const full = path.join(dir, entry.name);
+				if (entry.isDirectory()) {
+					walk(full);
+				} else {
+					found.push(path.relative(root, full).split(path.sep).join('/'));
+				}
+			}
+		};
+		walk(root);
+		return found;
+	},
+
+	// Returns the validated working-copy path, or throws with the reason.
+	// Precedence: --svn flag, then WPORG_SVN_DIR env var, then config.wporgSvn
+	// — so `npm run release` works with no arguments on this machine, and any
+	// other checkout can override without editing the gulpfile.
+	resolveTarget() {
+		const fs = require('fs');
+		const path = require('path');
+		const svnRoot = this.arg('svn') || process.env.WPORG_SVN_DIR || config.wporgSvn;
+		if (!svnRoot) {
+			throw new Error('Set the working copy with --svn "<path>", the WPORG_SVN_DIR env var, or config.wporgSvn.');
+		}
+		if (!fs.existsSync(this.buildRoot)) {
+			throw new Error('Run `npm run makeZip` first — ' + this.buildRoot + ' does not exist.');
+		}
+		if (!fs.existsSync(svnRoot)) {
+			throw new Error('Not found: ' + svnRoot);
+		}
+		if (!fs.existsSync(path.join(svnRoot, '.svn'))) {
+			throw new Error('Not an SVN working copy (no .svn): ' + svnRoot);
+		}
+		if (!fs.existsSync(path.join(svnRoot, 'text-to-audio.php'))) {
+			throw new Error('Does not look like the text-to-audio working copy (no text-to-audio.php): ' + svnRoot);
+		}
+		return svnRoot;
+	}
+};
+
+// TTS-267: mirror the release into the wp.org working copy.
+//
+// This REPLACES pasting production/text-to-audio/ over trunk by hand. Pasting
+// only adds and overwrites, so files that disappear between releases — chiefly
+// webpack's renamed code-split chunks — pile up forever; at 2.3.7 that was 49
+// dead files (5.7 MB) being downloaded by every user. Mirroring makes the
+// working copy exactly match the build, so those leave on their own.
+//
+// Deleted files are left on disk as SVN "missing" entries, which is what you
+// want: TortoiseSVN's commit dialog lists them and commits them as deletions.
+// No svn CLI needed.
+//
+//   npm run makeZip
+//   gulp svn:sync --svn "D:/xampp/htdocs/wordpress.org/text-to-audio"
+//   gulp svn:stale --svn "..."      (should report clean)
+gulp.task('svn:sync', function (done) {
+	const fs = require('fs');
+	const path = require('path');
+
+	let svnRoot;
+	try {
+		svnRoot = svnRelease.resolveTarget();
+	} catch (err) {
+		done(err);
+		return;
+	}
+
+	const fresh = svnRelease.listing(svnRelease.buildRoot);
+	const existing = svnRelease.listing(svnRoot);
+	const freshSet = new Set(fresh);
+
+	const removed = existing.filter((f) => !freshSet.has(f));
+	removed.forEach((rel) => fs.rmSync(path.join(svnRoot, rel.split('/').join(path.sep)), { force: true }));
+
+	let added = 0;
+	let updated = 0;
+	fresh.forEach((rel) => {
+		const from = path.join(svnRelease.buildRoot, rel.split('/').join(path.sep));
+		const to = path.join(svnRoot, rel.split('/').join(path.sep));
+		const isNew = !fs.existsSync(to);
+		fs.mkdirSync(path.dirname(to), { recursive: true });
+		fs.copyFileSync(from, to);
+		if (isNew) {
+			added++;
+		} else {
+			updated++;
+		}
+	});
+
+	console.log('svn:sync — ' + added + ' added, ' + updated + ' updated, ' + removed.length + ' removed.');
+	if (added) {
+		console.log('  Mark the ' + added + ' new file(s) as Add in the commit dialog.');
+	}
+	if (removed.length) {
+		console.log('  The ' + removed.length + ' removed file(s) show as "missing" — tick them to commit the deletions.');
+		removed.forEach((f) => console.log('    ' + f));
+	}
+	done();
+})
+
+// TTS-267: wp.org SVN stale-file audit.
+//
+// clean:production keeps the ZIP correct, but a wp.org release is done by
+// PASTING production/text-to-audio/ over the SVN working copy — and pasting
+// only adds and overwrites, it never deletes. Webpack renames its code-split
+// chunks on every build, so trunk accumulates every hash ever shipped: at
+// 2.3.7 the working copy held 60 files in admin/js/build/chunks (6.8 MB) where
+// the release needs 11 (1.1 MB) — roughly 5.7 MB of dead JavaScript that every
+// user had been downloading for several releases.
+//
+// Run AFTER `npm run makeZip`, before `svn commit`:
+//   gulp svn:stale --svn "D:/xampp/htdocs/wordpress.org/text-to-audio"
+//   gulp svn:stale --svn "..." --delete    (issues `svn delete` for each)
+//
+// Report-only by default — deleting from a working copy is not something a
+// build script should do behind your back.
+gulp.task('svn:stale', function (done) {
+	const { execFileSync } = require('child_process');
+
+	const shouldDelete = process.argv.includes('--delete');
+
+	let svnRoot;
+	try {
+		svnRoot = svnRelease.resolveTarget();
+	} catch (err) {
+		done(err);
+		return;
+	}
+
+	const fresh = new Set(svnRelease.listing(svnRelease.buildRoot));
+	const stale = svnRelease.listing(svnRoot).filter((f) => !fresh.has(f)).sort();
+
+	if (!stale.length) {
+		console.log('svn:stale — working copy is clean, nothing to remove.');
+		done();
+		return;
+	}
+
+	console.log('svn:stale — ' + stale.length + ' file(s) in the working copy are not in this release:');
+	stale.forEach((f) => console.log('  ' + f));
+
+	if (!shouldDelete) {
+		console.log('\nRe-run with --delete to `svn delete` them.');
+		done();
+		return;
+	}
+
+	try {
+		// One call per file: paths can contain spaces, and a failure should name
+		// the file that caused it rather than aborting an opaque batch.
+		stale.forEach((f) => execFileSync('svn', ['delete', '--force', f], { cwd: svnRoot, stdio: 'inherit' }));
+		console.log('\nDeleted ' + stale.length + ' file(s). Review with `svn status`, then commit.');
+		done();
+	} catch (err) {
+		done(err);
+	}
+})
+
 // Wipe the secondary "seven" install's plugin folder before deploying, so a
 // clean copy lands there too (same stale-file reasoning as clean:production).
 gulp.task('clean:seven', function (done) {
@@ -303,15 +500,12 @@ gulp.task('copyProButton', function (done) {
 	done();
 })
 
-gulp.task('release', function () {
-	// gulp-copy preserves the source path under the destination, so without a
-	// prefix the files would land in text-to-audio-release/production/text-to-audio/.
-	// prefix: 2 strips the leading "production/text-to-audio/" so files drop
-	// directly into the release folder (same reasoning as copyToSevenDeploy).
-	return gulp.src('production/text-to-audio/**')
-		.pipe(gulpCopy('D:/xampp/htdocs/wordpress.org/text-to-audio-release/', { prefix: 2 }))
-		.pipe(notify({ message: 'Release version copy Completed! 💯', onLast: true }))
-})
+// TTS-267: the old `release` task copied the build into
+// wordpress.org/text-to-audio-release/ with gulp-copy, which only adds and
+// overwrites — the same paste-never-delete pattern that let stale webpack
+// chunks accumulate in the SVN working copy. Replaced by `npm run release`
+// (makeZip → svn:sync → svn:stale), which mirrors into the working copy and
+// verifies the result.
 
 // TTS-247: internal deploy step — copy the already-built
 // production/text-to-audio/ tree to the secondary local WP install at

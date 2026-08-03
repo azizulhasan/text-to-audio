@@ -41,6 +41,9 @@ export default function Customize() {
     buttonSettings: {
       id: 1,
       button_position: "before_content",
+      // TTS-267: where the player docks once it scrolls out of view. Separate
+      // from button_position, which is where it sits inline.
+      float_position: "bottom_fixed",
       display_player_to: ["all"],
       who_can_download_mp3_file: ["all"],
       generate_mp3_date_from: "",
@@ -333,15 +336,9 @@ export default function Customize() {
         "hoverTextColor",
       ].includes(e.target.name)
     ) {
-      if (
-        e.target.name === "button_position" &&
-        !["before_content", "after_content"].includes(e.target.value) &&
-        !ttsObj.is_atlasvoice_addon_functional
-      ) {
-        toast(__("This option is only available for the pro version.", "text-to-audio"), "error");
-        return;
-      }
-
+      // TTS-267: the Pro-only guard on the Bottom_* positions was removed —
+      // all six placements ship in free now, and free implements the floating
+      // behaviour itself (see initFloatingPosition in text-to-audio-button.js).
       let tempButtonSettings = structuredClone(
         listeningBtnStyle.buttonSettings
       );

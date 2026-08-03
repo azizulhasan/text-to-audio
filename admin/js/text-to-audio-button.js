@@ -5,6 +5,15 @@ import AtlasVoiceAnalytics from "./AtlasVoiceAnalytics";
 // Auto-close timeout duration (15 seconds)
 const MODAL_AUTO_CLOSE_TIMEOUT = 15000;
 
+// TTS-267: the four floating placements from the Customize → "Select Button
+// Position" list. `before_content` / `after_content` are inline and never float.
+const TTS_FLOAT_POSITIONS = ['bottom_fixed', 'bottom_left', 'bottom_right', 'sticky_top'];
+
+// TTS-267: retired placements mapped onto the survivor. bottom_center was
+// dropped because it offers nothing the full-width bottom bar doesn't, while
+// being the one placement that sits directly over the column being read.
+const TTS_FLOAT_ALIASES = { bottom_center: 'bottom_fixed' };
+
 // Settings Modal Manager - Singleton to handle modal outside Shadow DOM
 class TTSSettingsModalManager {
     static instance = null;
@@ -715,6 +724,9 @@ class TTSPlayButton extends HTMLElement {
         const buttonHTML = this.getNewButtonContent(buttonId, settings, 'listen');
         wrapper.innerHTML = buttonHTML;
 
+        // TTS-267: wire up the floating placement now that the button exists.
+        this.initFloatingPosition();
+
         this.analytics.trackInit();
 
         // Button click handler (for play/pause area only)
@@ -959,6 +971,170 @@ class TTSPlayButton extends HTMLElement {
      */
     openSettingsModal() {
         TTSSettingsModalManager.openModal(this);
+    }
+
+    /**
+     * TTS-267: float the player once the reader scrolls past its inline slot.
+     *
+     * Ported from Pro's React effect (Pro: TextToSpeech.js, the
+     * `tta__settings_stop_floating_button` useEffect) into vanilla, because
+     * player 1 is a light-DOM custom element rather than a React tree. The
+     * behaviour is deliberately identical: the button renders inline, and only
+     * after the page scrolls past its original document offset does it become
+     * fixed at the chosen corner. Scroll back up and it returns to the flow.
+     *
+     * Two differences from Pro, both intentional:
+     *   - the position class follows the admin's actual `button_position`
+     *     choice instead of always being bottom-right, and
+     *   - the class goes on the host element rather than an extra wrapper div,
+     *     since the host is already the player's outer box.
+     *
+     * @return {void}
+     */
+    initFloatingPosition() {
+        // Player 1 only — Pro's players 2-6 ship their own floating logic.
+        if (!this.useLightDom) {
+            return;
+        }
+        // Re-entry guard: a second call would bind a second scroll listener and
+        // orphan the first. Today there is one call site, but the element can be
+        // re-rendered, so make it idempotent rather than rely on that.
+        if (this._floatListeners) {
+            return;
+        }
+        const settings = window?.ttsObj?.settings || {};
+        // Same inverted meaning as Pro: the setting is "stop floating", so a
+        // truthy value means the admin opted OUT of the floating behaviour.
+        // This is the only switch that disables docking — it applies to every
+        // inline placement, not just some of them.
+        if (settings?.settings?.tta__settings_stop_floating_button) {
+            return;
+        }
+
+        const buttonSettings = settings?.customize?.buttonSettings || {};
+        // Installs configured before the placement/dock split stored a Bottom_*
+        // value in button_position; fall back to it so they keep their corner.
+        // Note the fallback is bottom_right, NOT the bottom_fixed default that
+        // fresh installs get from the activator: reaching here means the key is
+        // missing, i.e. an install that predates the split, and those sites were
+        // docking bottom-right under Pro. Keep their corner; only new installs
+        // get the better default.
+        const resolve = (value) => TTS_FLOAT_ALIASES[value] || value;
+        let position = resolve(buttonSettings.float_position);
+        if (TTS_FLOAT_POSITIONS.indexOf(position) === -1) {
+            const legacy = resolve(buttonSettings.button_position);
+            position = TTS_FLOAT_POSITIONS.indexOf(legacy) !== -1 ? legacy : 'bottom_right';
+        }
+
+        const className = 'tts__custom-position_' + position;
+        const isStickyTop = position === 'sticky_top';
+        let anchorTop = null;
+
+        // Measured lazily and only while inline — once the element is fixed its
+        // rect is viewport-relative and would give a meaningless anchor.
+        const measure = () => {
+            if (this.classList.contains(className)) {
+                return;
+            }
+            const rect = this.getBoundingClientRect();
+            if (rect.height) {
+                anchorTop = rect.top + window.scrollY;
+            }
+        };
+        const sync = () => {
+            if (anchorTop === null) {
+                measure();
+            }
+            if (anchorTop === null) {
+                return;
+            }
+            const docked = window.scrollY > anchorTop;
+            this.classList.toggle(className, docked);
+            // Only the top placement has to negotiate with existing chrome; the
+            // bottom ones own their edge outright.
+            if (isStickyTop) {
+                if (docked) {
+                    this.style.setProperty('--tts-sticky-top', this.topChromeOffset() + 'px');
+                } else {
+                    this.style.removeProperty('--tts-sticky-top');
+                }
+            }
+        };
+        const onResize = () => {
+            anchorTop = null;
+            sync();
+        };
+
+        this._floatListeners = { sync, onResize };
+        window.addEventListener('scroll', sync, { passive: true });
+        window.addEventListener('resize', onResize, { passive: true });
+        // Dock immediately when the button is ALREADY out of view on arrival —
+        // a deep link to a mid-article anchor, or the browser restoring scroll
+        // on a back-navigation. Without this the player would be silently
+        // missing for those readers until they happened to scroll. Two passes:
+        // the first frame (layout settled) and `load` (scroll restoration can
+        // land after that first frame).
+        requestAnimationFrame(sync);
+        window.addEventListener('load', sync, { once: true });
+    }
+
+    /**
+     * TTS-267: measure how much fixed chrome occupies the top of the viewport.
+     *
+     * Only the sticky-top placement needs this. Pinning at `top: 0` puts the
+     * player underneath whatever the site already fixes there — the WP admin bar
+     * for logged-in users, and theme sticky headers (on Avada that is 32-127px
+     * at z-index 210, which hid the player completely while it was correctly
+     * positioned). Rather than hardcode per-theme offsets, walk the top edge:
+     * sample the element stack, and if anything fixed/sticky is there, drop
+     * below it and sample again. Handles admin bars, sticky headers and cookie
+     * bars without knowing any of them by name.
+     *
+     * @return {number} Pixels of chrome to sit below.
+     */
+    topChromeOffset() {
+        const x = Math.round(window.innerWidth / 2);
+        let offset = 0;
+        // Bounded loop — each pass must strictly advance or we stop.
+        for (let pass = 0; pass < 5; pass++) {
+            let advanced = false;
+            const stack = document.elementsFromPoint(x, offset + 1) || [];
+            for (const node of stack) {
+                if (node === this || this.contains(node)) {
+                    continue;
+                }
+                const nodePosition = getComputedStyle(node).position;
+                if (nodePosition !== 'fixed' && nodePosition !== 'sticky') {
+                    continue;
+                }
+                const bottom = Math.ceil(node.getBoundingClientRect().bottom);
+                // Ignore anything taller than half the viewport — that is a
+                // layout element that happens to be sticky, not top chrome.
+                if (bottom > offset && bottom < window.innerHeight / 2) {
+                    offset = bottom;
+                    advanced = true;
+                }
+            }
+            if (!advanced) {
+                break;
+            }
+        }
+        return offset;
+    }
+
+    /**
+     * TTS-267: drop the floating listeners if the host leaves the document.
+     *
+     * @return {void}
+     */
+    disconnectedCallback() {
+        const listeners = this._floatListeners;
+        if (!listeners) {
+            return;
+        }
+        this._floatListeners = null;
+        window.removeEventListener('scroll', listeners.sync);
+        window.removeEventListener('resize', listeners.onResize);
     }
 
     /**

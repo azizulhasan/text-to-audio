@@ -61,6 +61,10 @@ class TTA_Activator {
 				'buttonSettings'         => [
 					'id'                         => 1,
 					'button_position'            => 'before_content',
+					// TTS-267: where the player docks once it scrolls out of
+					// view. Separate from button_position (inline placement);
+					// honoured unless tta__settings_stop_floating_button is on.
+					'float_position'             => 'bottom_fixed',
 					'display_player_to'          => [ 'all' ],
 					'who_can_download_mp3_file'  => [ 'all' ],
 					'generate_mp3_date_from' => '',
@@ -92,7 +96,7 @@ class TTA_Activator {
 				// D26.8 — default selector points at the legacy wrapper class
 				// emitted by Pro and (post-D26.7) Free, so a fresh install
 				// extracts content out of the box without admin config.
-				'tta__settings_css_selectors'                         => '[class*="tts_content_wrapper_"]',
+				'tta__settings_css_selectors'                         => '',
 				'tta__settings_exclude_content_by_css_selectors'      => '',
 				'tta__settings_exclude_texts'                         => [],
 				// TTS-238 D27.34 — default-skip these tag types out of the
@@ -110,7 +114,9 @@ class TTA_Activator {
 				"tta__settings_exclude_post_ids"                      => [],
 				'tta__settings_stop_auto_playing_after_switching_tab' => true,
 				'tta__settings_stop_auto_pause_after_switching_tab'   => true,
-				'tta__settings_stop_floating_button'                  => true,
+				// TTS-267: false = docking ON by default. The key reads as
+				// "stop floating", so false is the feature enabled.
+				'tta__settings_stop_floating_button'                  => false,
 				'tta__settings_exclude_categories'                    => [],
 				'tta__settings_exclude_wp_tags'                       => [],
 				'tta__settings_clear_cache'                           => [],
