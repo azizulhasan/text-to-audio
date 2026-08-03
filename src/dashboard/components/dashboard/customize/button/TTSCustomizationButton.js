@@ -20,22 +20,35 @@ export default function TTSCustomizationButton({
   buttonLists,
 }) {
   const [userRoles, setUserRoles] = useState({});
-  // TTS-249: free ships only the two positions it can deliver. The floating/fixed
-  // positions are a Pro feature, so show them only when Pro is active (no
-  // locked-then-blocked options in the free UI) with an upsell hint below.
-  const isProActive = typeof ttsObj !== "undefined" && ttsObj.is_atlasvoice_addon_functional;
+  // TTS-267: two separate concepts. `button_position` is where the player sits
+  // in the content; `float_position` is the corner it docks to once it scrolls
+  // out of view. Both ship in free — placement is a preference, not a metered
+  // capability, and every comparable TTS plugin offers floating for free.
+  // (Positions were Pro-gated in TTS-249.)
   const buttonPositions = {
     before_content: __("Before Content", "text-to-audio"),
     after_content: __("After Content", "text-to-audio"),
-    ...(isProActive
-      ? {
-          bottom_fixed: __("Bottom Fixed", "text-to-audio"),
-          bottom_left: __("Bottom Left", "text-to-audio"),
-          bottom_right: __("Bottom Right", "text-to-audio"),
-          bottom_center: __("Bottom Center", "text-to-audio"),
-        }
-      : {}),
   };
+  const floatPositions = {
+    bottom_fixed: __("Bottom Full Width", "text-to-audio"),
+    bottom_right: __("Bottom Right", "text-to-audio"),
+    bottom_left: __("Bottom Left", "text-to-audio"),
+    sticky_top: __("Sticky Top", "text-to-audio"),
+  };
+  // TTS-267: retired placements mapped onto the survivor, so a site that saved
+  // one still shows a valid selection instead of an empty select.
+  const floatAliases = { bottom_center: "bottom_fixed" };
+  const resolveFloat = (value) => floatAliases[value] || value;
+  // Installs configured before the split stored a Bottom_* value in
+  // button_position; treat that as the dock corner so nothing regresses. The
+  // fallback is bottom_right rather than the bottom_fixed default because
+  // reaching it means a pre-split install, and those docked bottom-right.
+  const legacyPosition = resolveFloat(
+    listeningBtnStyle?.buttonSettings?.button_position
+  );
+  const currentFloat =
+    resolveFloat(listeningBtnStyle?.buttonSettings?.float_position) ||
+    (floatPositions[legacyPosition] ? legacyPosition : "bottom_right");
 
   useEffect(() => {
     postData(ttsObj.api_url + "tta/v1/get_all_user_roles", {}, "GET")
@@ -147,8 +160,9 @@ export default function TTSCustomizationButton({
               name="button_position"
               id="button_position"
               value={
-                listeningBtnStyle?.buttonSettings?.button_position ||
-                "before_content"
+                buttonPositions[listeningBtnStyle?.buttonSettings?.button_position]
+                  ? listeningBtnStyle.buttonSettings.button_position
+                  : "before_content"
               }
               aria-label={__("Select Button Position", "text-to-audio")}
               className="tta_player-select"
@@ -162,19 +176,45 @@ export default function TTSCustomizationButton({
                 );
               })}
             </Form.Select>
-            {!isProActive && (
-              <p className="tta_player-upsell text-secondary mt-2 mb-0 small">
-                {__("Floating & fixed positions are available in", "text-to-audio")}{" "}
-                <a
-                  href={proUrl('customize_button', 'product')}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {__("AtlasVoice Pro", "text-to-audio")}
-                </a>
-                .
-              </p>
-            )}
+          </Form.Group>
+        </Col>
+
+        <Col md={4}>
+          <Form.Group className="tta_player-form-group">
+            <Form.Label htmlFor="float_position" className="tta_player-label">
+              {__("Floating Position", "text-to-audio")}
+              <OverlayTrigger
+                placement="top"
+                overlay={
+                  <Tooltip id="tooltip-float-position">
+                    {__(
+                      "Where the player docks once the reader scrolls past it. Turn docking off entirely with \"When Scroll Down Stop Floating Player\" in Settings.",
+                      "text-to-audio"
+                    )}
+                  </Tooltip>
+                }
+              >
+                <span className="tta_youtube-link">
+                  <Icon name="question-circle" />
+                </span>
+              </OverlayTrigger>
+            </Form.Label>
+            <Form.Select
+              onChange={handleChange}
+              name="float_position"
+              id="float_position"
+              value={currentFloat}
+              aria-label={__("Floating Position", "text-to-audio")}
+              className="tta_player-select"
+            >
+              {Object.keys(floatPositions).map((positionKey) => {
+                return (
+                  <option key={positionKey} value={positionKey}>
+                    {floatPositions[positionKey]}
+                  </option>
+                );
+              })}
+            </Form.Select>
           </Form.Group>
         </Col>
 

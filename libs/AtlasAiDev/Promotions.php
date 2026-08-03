@@ -133,7 +133,11 @@ class Promotions {
 	 */
 	public function __init_internal() {
 		$this->currentUser = get_current_user_id();
-		$this->hiddenPromotions = (array) get_user_option( $this->client->getSlug() . '_hidden_promos', $this->currentUser );
+		// TTS-262: get_user_option() returns false when unset, and casting that to an
+		// array yields array( false ) — junk that pollutes the stored list and makes
+		// the hash lookup unreliable. Keep only real string hashes.
+		$hidden                 = get_user_option( $this->client->getSlug() . '_hidden_promos', $this->currentUser );
+		$this->hiddenPromotions = is_array( $hidden ) ? array_values( array_filter( $hidden, 'is_string' ) ) : array();
 		$this->promotions = $this->__get_promos();
 		// only run if there is active promotions.
 		if ( count( $this->promotions ) ) {
@@ -326,7 +330,7 @@ class Promotions {
 	 * @return bool         true if promo is hidden by user
 	 */
 	public function __is_promo_hidden( $promo ) {
-		return ! in_array( $promo->hash, $this->hiddenPromotions );
+		return ! in_array( $promo->hash, $this->hiddenPromotions, true );
 	}
 
 	/**
@@ -372,10 +376,18 @@ class Promotions {
                 $('body').on('click', '.<?php echo $ns; ?>-promo .notice-dismiss', function (e) {
                     e.preventDefault();
                     var $parent = $(this).closest( '.<?php echo $ns; ?>-promo' );
+                    if ( $parent.data( 'dismissing' ) ) { return; }
+                    $parent.data( 'dismissing', true );
                     wp.ajax.post('<?php echo $ns; ?>_dismiss_promo', {
                         dismissed:  true,
 	                    hash:       $parent.attr( 'id' ),
                         _wpnonce:   $parent.data( 'nonce' ),
+                    });
+                    // TTS-262: hide the notice ourselves. Core's fade/slide handler is
+                    // bound only to buttons it injects into `is-dismissible` notices —
+                    // this promo renders its own button, so nothing else removes it.
+                    $parent.fadeTo( 100, 0, function () {
+                        $parent.slideUp( 100, function () { $parent.remove(); } );
                     });
                 });
 			})(jQuery);
