@@ -617,13 +617,27 @@ class TTA_Admin
             array_diff_key( $this->localize_data, array( 'admin_url' => '', 'image_url' => '', 'plugin_url' => '', 'pro' => '' ) )
         );
 
-        // TTS-266: player 7 is a FREE player, so it takes the free bootstrap path
+        // TTS-266: ALWAYS register the `TextToSpeech` handle, whichever player is
+        // active. Pro enqueues its own scripts (AtlasVoiceAnalyticsPro,
+        // text-to-audio-pro-button) declaring `TextToSpeech` as a dependency. If
+        // the handle does not exist, WordPress refuses to enqueue those Pro
+        // scripts — "enqueued with dependencies that are not registered" — and the
+        // player button vanishes from every post on the site.
+        //
+        // Registering is not enqueuing: the file is only actually output if this
+        // method enqueues it below, or if something else depends on it. So this
+        // costs nothing for players that do not use it, while keeping Pro working.
+        wp_register_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', $dependencies, $this->asset_version('js/build/TextToSpeech.min.js'), true);
+        wp_localize_script('TextToSpeech', 'ttsObj', $frontend_localize_data);
+        wp_set_script_translations('TextToSpeech', 'text-to-audio', plugin_dir_path(dirname(__FILE__)) . 'languages');
+
+        // Player 7 is a FREE player, so it takes the free bootstrap path
         // (text-to-audio-button.min.js) below rather than this one. The `> 1`
         // branch loads only the player CLASS and relies on Pro to bootstrap it —
         // on a free site nothing would ever instantiate a player, and the button
         // would render but do nothing when clicked.
         if ($player_id > 1 && 7 != $player_id) {
-            wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', $dependencies, $this->asset_version('js/build/TextToSpeech.min.js'), true);
+            wp_enqueue_script('TextToSpeech');
             wp_localize_script('TextToSpeech', 'ttsObj', $frontend_localize_data);
             // TTS-264: load JS translations for the bundled selection-control strings.
             wp_set_script_translations('TextToSpeech', 'text-to-audio', plugin_dir_path(dirname(__FILE__)) . 'languages');
