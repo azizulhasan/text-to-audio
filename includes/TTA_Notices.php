@@ -118,7 +118,7 @@ class TTA_Notices {
 		// as an enqueued stylesheet instead of a JS-injected <style>.
 		wp_enqueue_style(
 			'tta-admin-notice',
-			TTA_PLUGIN_URL . 'admin/css/tta-admin-notice.css',
+			TTA_PLUGIN_URL . 'admin/css/minify/tta-admin-notice.min.css',
 			array(),
 			TEXT_TO_AUDIO_VERSION,
 			'all'
