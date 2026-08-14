@@ -467,39 +467,70 @@ function get_enqueued_js_object($params, $plugin_all_settings)
     $compatible_data = TTA_Helper::tts_get_settings('compatible');
     $compatible_content = apply_filters('tts_compatible_plugins_content', [], $compatible_data, $post);
 
-    // TTS-247: per-button settings via wp_add_inline_script instead of a raw
-    // inline <script> tag. IIFE-wrapped so multiple buttons on one page don't
-    // collide on the shared `var` names.
-    $inline_payload = sprintf(
-        '(function(){var ttsCurrentButtonNo=%d;var ttsCurrentContent=%s;var ttsListening=%s;var ttsCSSClass=%s;var ttsBtnStyle=%s;var ttsTextArr=%s;var ttsCustomCSS=%s;var ttsShouldDisplayIcon=%s;var readingTime=%s;var postId=%s;var fileURLs=%s;var get_content_from_dom=%s;var use_old_player=%s;var ttsSettings={listening:ttsListening,cssClass:ttsCSSClass,btnStyle:ttsBtnStyle,textArr:ttsTextArr,customCSS:ttsCustomCSS,shouldDisplayIcon:ttsShouldDisplayIcon,readingTime:readingTime,postId:postId,fileURLs:fileURLs,get_content_from_dom:get_content_from_dom,use_old_player:use_old_player};if(window.ttsObj&&window.ttsObj.settings){window.ttsObj.settings.settings=%s;}var dateTitle={title:%s,file_name:%s,date:%s,language:%s,voice:%s,file_url_key:%s,compatible_contents:%s,excerpt:%s,text_before_content:%s,text_after_content:%s};if(window.hasOwnProperty("TTS")){window.TTS.contents[ttsCurrentButtonNo]=ttsCurrentContent;window.TTS.extra[ttsCurrentButtonNo]=dateTitle;window.TTS.extra.player_id=%s;}else{window.TTS={};window.TTS.contents={};window.TTS.contents[ttsCurrentButtonNo]=ttsCurrentContent;window.TTS.extra={};window.TTS.extra[ttsCurrentButtonNo]=dateTitle;window.TTS.extra.player_id=%s;}if(!window.TTS.hasOwnProperty("settings")){window.TTS.settings=ttsSettings;}})();',
-        (int) $player_number,
-        wp_json_encode( (string) apply_filters( 'atlasvoice_player_content', $content, $post, $language, $voice, $player_number ) ),
-        wp_json_encode( $plugin_all_settings['listening'] ),
-        wp_json_encode( (string) $class ),
-        wp_json_encode( (string) $btn_style ),
-        wp_json_encode( $text_arr ),
-        wp_json_encode( (string) $custom_css ),
-        wp_json_encode( (string) $should_display_icon ),
-        wp_json_encode( (string) $content_read_time ),
-        wp_json_encode( (string) (int) $post->ID ),
-        wp_json_encode( $mp3_file_urls ),
-        wp_json_encode( $get_content_from_dom ),
-        wp_json_encode( (string) $use_old_player ),
-        wp_json_encode( isset( $plugin_all_settings['settings'] ) ? $plugin_all_settings['settings'] : new \stdClass() ),
-        wp_json_encode( (string) $title ),
-        wp_json_encode( (string) $file_name ),
-        wp_json_encode( (string) $date ),
-        wp_json_encode( (string) $language ),
-        wp_json_encode( (string) $voice ),
-        wp_json_encode( (string) $file_url_key ),
-        wp_json_encode( $compatible_content ),
-        wp_json_encode( (string) $excerpt_sanitized ),
-        wp_json_encode( (string) apply_filters( 'atlasvoice__text_before_content', $text_before_content, $post, $language, $voice, $player_number ) ),
-        wp_json_encode( (string) apply_filters( 'atlasvoice__text_after_content', $text_after_content, $post, $language, $voice, $player_number ) ),
-        wp_json_encode( (string) get_player_id() ),
-        wp_json_encode( (string) get_player_id() )
+    // TTS-270: the per-post data below is emitted as JSON in the markup, never
+    // as inline JS. JS optimizers that merge inline scripts (WP-Optimize,
+    // Autoptimize, LiteSpeed, WP Rocket, Perfmatters…) bake the merged result
+    // into ONE shared cache file, so post A's audio then plays on every post.
+    // Markup is rendered per request and is never merged.
+    $payload = array(
+        'playerNo'             => (int) $player_number,
+        'playerId'             => (string) get_player_id(),
+        'content'              => (string) apply_filters( 'atlasvoice_player_content', $content, $post, $language, $voice, $player_number ),
+        'listening'            => $plugin_all_settings['listening'],
+        'cssClass'             => (string) $class,
+        'btnStyle'             => (string) $btn_style,
+        'textArr'              => $text_arr,
+        'customCSS'            => (string) $custom_css,
+        'shouldDisplayIcon'    => (string) $should_display_icon,
+        'readingTime'          => (string) $content_read_time,
+        'postId'               => (string) (int) $post->ID,
+        'fileURLs'             => $mp3_file_urls,
+        'get_content_from_dom' => $get_content_from_dom,
+        'use_old_player'       => (string) $use_old_player,
+        'settings'             => isset( $plugin_all_settings['settings'] ) ? $plugin_all_settings['settings'] : new \stdClass(),
+        'extra'                => array(
+            'title'               => (string) $title,
+            'file_name'           => (string) $file_name,
+            'date'                => (string) $date,
+            'language'            => (string) $language,
+            'voice'               => (string) $voice,
+            'file_url_key'        => (string) $file_url_key,
+            'compatible_contents' => $compatible_content,
+            'excerpt'             => (string) $excerpt_sanitized,
+            'text_before_content' => (string) apply_filters( 'atlasvoice__text_before_content', $text_before_content, $post, $language, $voice, $player_number ),
+            'text_after_content'  => (string) apply_filters( 'atlasvoice__text_after_content', $text_after_content, $post, $language, $voice, $player_number ),
+        ),
     );
-    // TTS-247: attach the payload to every button-script handle in the
+
+    // TTS-270: the hydrator is deliberately POST-INDEPENDENT — identical bytes on
+    // every page — so an optimizer merging it into a shared bundle is harmless.
+    // Only the JSON above varies per post, and that no longer travels in JS.
+    $inline_payload = <<<'JS'
+(function(){
+if(window.AtlasVoicePayload&&window.AtlasVoicePayload.hydrate){window.AtlasVoicePayload.hydrate();return;}
+function hydrate(){
+var nodes=document.querySelectorAll('script.atlasvoice-payload:not([data-atlasvoice-hydrated])');
+for(var i=0;i<nodes.length;i++){
+var node=nodes[i],data;
+try{data=JSON.parse(node.textContent);}catch(e){continue;}
+node.setAttribute('data-atlasvoice-hydrated','1');
+if(window.ttsObj&&window.ttsObj.settings){window.ttsObj.settings.settings=data.settings;}
+if(!window.TTS){window.TTS={};}
+if(!window.TTS.contents){window.TTS.contents={};}
+if(!window.TTS.extra){window.TTS.extra={};}
+window.TTS.contents[data.playerNo]=data.content;
+window.TTS.extra[data.playerNo]=data.extra;
+window.TTS.extra.player_id=data.playerId;
+if(!window.TTS.hasOwnProperty('settings')){window.TTS.settings={listening:data.listening,cssClass:data.cssClass,btnStyle:data.btnStyle,textArr:data.textArr,customCSS:data.customCSS,shouldDisplayIcon:data.shouldDisplayIcon,readingTime:data.readingTime,postId:data.postId,fileURLs:data.fileURLs,get_content_from_dom:data.get_content_from_dom,use_old_player:data.use_old_player};}
+}
+}
+window.AtlasVoicePayload={hydrate:hydrate};
+hydrate();
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',hydrate);}
+})();
+JS;
+
+    // TTS-247: attach the hydrator to every button-script handle in the
     // filtered list. Free ships 'text-to-audio-button'; companion plugins
     // (e.g. Pro) extend via `tts_button_inline_handles`.
     $inline_handles = apply_filters( 'tts_button_inline_handles', array( 'text-to-audio-button' ), $params, $plugin_all_settings );
@@ -508,6 +539,17 @@ function get_enqueued_js_object($params, $plugin_all_settings)
             wp_add_inline_script( $handle, $inline_payload, 'before' );
         }
     }
+
+    // TTS-270: JSON_HEX_TAG keeps a literal `</script>` inside post content from
+    // closing the block early. This runs on wp_print_footer_scripts priority 5,
+    // so the JSON is in the DOM before core prints scripts (priority 10) and the
+    // hydrator executes; the DOMContentLoaded re-run covers deferred bundles.
+    $payload_json = wp_json_encode( $payload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT );
+    printf(
+        '<script type="application/json" class="atlasvoice-payload" data-player-no="%d">%s</script>',
+        (int) $player_number,
+        $payload_json // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode with JSON_HEX_* is the escaping.
+    );
 
     // TTS-247: close the output buffer with ob_get_clean() at the end of this
     // function (was leaking on ob_get_contents alone, which the wp.org review
