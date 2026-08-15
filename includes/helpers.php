@@ -171,18 +171,37 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     static $block_btn_no = 0;
     $player_number++;
     global $post;
-    if(isset($atts['id']) && $atts['id']) {
-        $post = get_post($atts['id']);
+
+    // TTS-270: an explicit id="" is a deliberate cross-post override, not a
+    // secondary loop. Keep the original global so every exit can restore it —
+    // leaving it clobbered suppressed every later AtlasVoice shortcode on the
+    // page, because is_secondary_loop() reads get_the_ID().
+    $original_post   = $post;
+    $has_explicit_id = false;
+    if ( isset( $atts['id'] ) && $atts['id'] ) {
+        $override_post = get_post( (int) $atts['id'] );
+        if ( $override_post instanceof WP_Post ) {
+            $post            = $override_post;
+            $has_explicit_id = true;
+        }
     }
+
     /**
      * TTS-168
      */
     if(is_admin()) {
+        $post = $original_post;
         return;
     }
 
     // this is a pro feature to show button on blog main page with title and excerpt.
-    if (!TTA_Helper::should_load_button($post, 'tta_get_button_content') || $block_btn_no > 0 || TTA_Helper::is_secondary_loop()) {
+    // TTS-270: is_secondary_loop() compares get_the_ID() against the queried
+    // object; with an explicit id= those differ by design, so the guard must
+    // not apply to that call.
+    if (!TTA_Helper::should_load_button($post, 'tta_get_button_content')
+        || $block_btn_no > 0
+        || ( ! $has_explicit_id && TTA_Helper::is_secondary_loop() )) {
+        $post = $original_post;
         return;
     }
 
@@ -413,7 +432,12 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
         'div'    => array( 'class' => true, 'id' => true, 'style' => true , 'data-id' => true ),
         'br'     => array(),
     );
-    return wp_kses( (string) $data, $allowed );
+    $output = wp_kses( (string) $data, $allowed );
+    // TTS-270: restore the global before handing control back, so an id="" render
+    // cannot leak its post into the rest of the page.
+    $post = $original_post;
+
+    return $output;
 }
 
 
