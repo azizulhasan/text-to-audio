@@ -542,9 +542,11 @@ if(window.ttsObj&&window.ttsObj.settings){window.ttsObj.settings.settings=data.s
 if(!window.TTS){window.TTS={};}
 if(!window.TTS.contents){window.TTS.contents={};}
 if(!window.TTS.extra){window.TTS.extra={};}
+if(!window.TTS.buttons){window.TTS.buttons={};}
 window.TTS.contents[data.playerNo]=data.content;
 window.TTS.extra[data.playerNo]=data.extra;
 window.TTS.extra.player_id=data.playerId;
+window.TTS.buttons[data.playerNo]={textArr:data.textArr};
 if(!window.TTS.hasOwnProperty('settings')){window.TTS.settings={listening:data.listening,cssClass:data.cssClass,btnStyle:data.btnStyle,textArr:data.textArr,customCSS:data.customCSS,shouldDisplayIcon:data.shouldDisplayIcon,readingTime:data.readingTime,postId:data.postId,fileURLs:data.fileURLs,get_content_from_dom:data.get_content_from_dom,use_old_player:data.use_old_player};}
 }
 }
