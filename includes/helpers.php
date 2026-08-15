@@ -551,25 +551,10 @@ JS;
         $payload_json // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode with JSON_HEX_* is the escaping.
     );
 
-    // TTS-247: close the output buffer with ob_get_clean() at the end of this
-    // function (was leaking on ob_get_contents alone, which the wp.org review
-    // flagged as an unclosed ob_start).
-    ob_start();
-    ?>
-    <!-- AtlasVoice Settings (per-button JS moved to wp_add_inline_script — handle 'text-to-audio-button') -->
-    <!-- TTS-238 D27 / merge note: previous branch carried an inline <script>
-         that wrote window.TTS.use_atlasvoice_extractor = true. That flag was
-         retired in D26.9 (always-on now); develop moved the rest of the
-         per-button payload into wp_add_inline_script handle 'text-to-audio-button'.
-         If anything in TTS.contents/extra/settings is missing, the canonical
-         emission lives in admin/TTA_Admin.php's enqueue path. -->
-    <?php
-    // TTS-250: AudioObject schema output now lives in AtlasVoice Pro (it requires
-    // an MP3 contentUrl that the free player never produces).
-    // TTS-247: echo + close. The caller (tts_enqueue_button_scripts hook on
-    // wp_print_footer_scripts) doesn't use the return value, so the inline
-    // <script> needs to land in the page directly via echo, not via return.
-    echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+    // TTS-270: the trailing ob_start()/echo ob_get_clean() pair was removed — it
+    // buffered nothing once TTS-247 moved the payload to wp_add_inline_script and
+    // TTS-250 moved AudioObject schema output to Pro. This function now emits only
+    // the JSON payload above; the caller ignores the return value.
 }
 
 
