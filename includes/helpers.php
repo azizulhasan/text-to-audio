@@ -559,10 +559,22 @@ JS;
     // TTS-247: attach the hydrator to every button-script handle in the
     // filtered list. Free ships 'text-to-audio-button'; companion plugins
     // (e.g. Pro) extend via `tts_button_inline_handles`.
+    // TTS-270: the hydrator is post-independent, so attach it once per handle
+    // per request. wp_add_inline_script() concatenates on repeat calls, which
+    // emitted the whole function once per button (6 buttons = 6 identical
+    // copies). One copy is enough: hydrate() loops every payload node and
+    // re-runs on DOMContentLoaded, so late-printed buttons are still covered.
+    // Keyed by handle because only one of several registered handles may be
+    // enqueued on a given page.
+    static $hydrator_added = array();
     $inline_handles = apply_filters( 'tts_button_inline_handles', array( 'text-to-audio-button' ), $params, $plugin_all_settings );
     foreach ( (array) $inline_handles as $handle ) {
+        if ( isset( $hydrator_added[ $handle ] ) ) {
+            continue;
+        }
         if ( wp_script_is( $handle, 'registered' ) ) {
             wp_add_inline_script( $handle, $inline_payload, 'before' );
+            $hydrator_added[ $handle ] = true;
         }
     }
 
