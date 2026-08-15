@@ -614,6 +614,9 @@ function tts_text_match_80_percent($text1, $text2)
 function get_button_text($atts, $content_read_time)
 {
     $saved_texts = get_option('tta__button_text_arr');
+    // TTS-270: remember whether the option already existed, so the persist at the
+    // end of this function only ever seeds and never rewrites admin state.
+    $saved_texts_existed = ! empty( $saved_texts );
     if (!$saved_texts) {
         $saved_texts = set_initial_button_texts($content_read_time);
     }
@@ -633,9 +636,17 @@ function get_button_text($atts, $content_read_time)
     // extract the strings — the WP.org review flagged the previous design as
     // a gettext-with-variables violation. See TTA_Helper::get_text_value().
     $resolve = function ($state, $flat_key, $fallback) use ($atts, $saved_texts, $player_states) {
-        if (!empty($player_states[$state]['text'])) {
-            return $player_states[$state]['text'];
+        // TTS-270: an instance attribute is the most specific expression of
+        // intent, so the per-player Customize value — which ships populated for
+        // every state and therefore always short-circuited — must yield to it.
+        // Detection mirrors TTA_Helper::get_text_value() so sanitising and
+        // escaping stay in that one helper instead of being duplicated here.
+        $has_instance_att = isset( $atts[ $flat_key ] ) && strlen( $atts[ $flat_key ] );
+
+        if ( ! $has_instance_att && ! empty( $player_states[ $state ]['text'] ) ) {
+            return $player_states[ $state ]['text'];
         }
+
         return TTA_Helper::get_text_value($atts, $saved_texts, $flat_key, $fallback);
     };
 
@@ -664,18 +675,39 @@ function get_button_text($atts, $content_read_time)
 
 
     $customize_settings = (array)TTA_Helper::tts_get_settings('customize');
-    $text_arr = get_text_array_from_shortcode($customize_settings, $text_arr);
+    $text_arr = get_text_array_from_shortcode($customize_settings, $text_arr, $atts);
 
+    // The filter still runs last, so existing `tta__button_text_arr` integrations
+    // keep overriding every source below it exactly as before.
     $text_arr = apply_filters('tta__button_text_arr', $text_arr, $atts, $content_read_time);
 
-    update_option('tta__button_text_arr', $text_arr);
+    // TTS-270: this option is site-wide admin state owned by the Customize
+    // screen. Writing it on every front-end render meant a single
+    // [atlasvoice listen_text="…"] relabelled every button on the site from the
+    // next request onward — and cost a DB write on every page view. Seeding is
+    // handled at the top of this function, so only persist when nothing existed.
+    if ( ! $saved_texts_existed ) {
+        update_option('tta__button_text_arr', $text_arr);
+    }
 
 
     return $text_arr;
 }
 
 
-function get_text_array_from_shortcode($customize_settings, $text_arr)
+/**
+ * Apply the site-wide "play button shortcode" field from Customize.
+ *
+ * @param array $customize_settings Customize settings.
+ * @param array $text_arr           Resolved texts so far.
+ * @param array $instance_atts      TTS-270: this render's own shortcode/block
+ *                                  attributes. Defaults to an empty array so
+ *                                  existing callers (including Pro) are
+ *                                  unaffected.
+ *
+ * @return array
+ */
+function get_text_array_from_shortcode($customize_settings, $text_arr, $instance_atts = array())
 {
     $shortcode = '[atlasvoice]';
     if (isset($customize_settings['tta_play_btn_shortcode']) && $customize_settings['tta_play_btn_shortcode']) {
@@ -697,6 +729,11 @@ function get_text_array_from_shortcode($customize_settings, $text_arr)
     }
 
     foreach ($attributes as $key => $value) {
+        // TTS-270: this field is a site-wide default. It must not overwrite a
+        // value the individual shortcode/block supplied for itself.
+        if ( is_array( $instance_atts ) && isset( $instance_atts[ $key ] ) && strlen( $instance_atts[ $key ] ) ) {
+            continue;
+        }
         if (isset($attributes[$key]) && $attributes[$key]) {
             $text = sanitize_text_field($value);
             $text = esc_html($text);
