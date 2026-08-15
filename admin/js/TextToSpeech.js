@@ -46,7 +46,10 @@ export default class TextToSpeech {
         this.content = content ? content : window.TTS.contents[buttonId]
         this.splittedSentances = splitSentences(content)
         this.buttonId = buttonId
-        this.buttonTextArr = this.TTS.settings.textArr
+        // TTS-270: prefer this button's own payload. TTS.settings is a singleton
+        // written by the first button only, so per-instance text could never
+        // reach buttons 2..N. Falls back to exactly today's value.
+        this.buttonTextArr = this.TTS?.buttons?.[buttonId]?.textArr || this.TTS.settings.textArr
         this.speakButton = button ? button : document.getElementById(buttonId)
         this.ttsListeningSettings = this.TTS.settings.listening
         this.speech = new Speech()
