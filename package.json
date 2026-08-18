@@ -20,7 +20,7 @@
     "makeZip": "gulp makeZip",
     "svn:sync": "gulp svn:sync",
     "svn:stale": "gulp svn:stale",
-    "release": "npm run production && npm run makeZip && gulp svn:sync && gulp svn:stale",
+    "release": "npm run production && gulp minify:css && npm run makeZip && gulp svn:sync && gulp svn:stale",
     "copy": "gulp copy",
     "build:seven": "npm run production && gulp copy && gulp copyToSeven",
     "copyProButton": "gulp copyProButton",

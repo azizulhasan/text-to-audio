@@ -420,7 +420,7 @@ class TTA_Posts_List
         // TTS-249 (I3): enqueued stylesheet instead of an inline <style> tag.
         wp_enqueue_style(
             'tta-posts-list',
-            plugin_dir_url(dirname(__FILE__)) . 'admin/css/tta-posts-list.css',
+            plugin_dir_url(dirname(__FILE__)) . 'admin/css/minify/tta-posts-list.min.css',
             array(),
             defined('TEXT_TO_AUDIO_VERSION') ? TEXT_TO_AUDIO_VERSION : false,
             'all'
