@@ -171,18 +171,37 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     static $block_btn_no = 0;
     $player_number++;
     global $post;
-    if(isset($atts['id']) && $atts['id']) {
-        $post = get_post($atts['id']);
+
+    // TTS-270: an explicit id="" is a deliberate cross-post override, not a
+    // secondary loop. Keep the original global so every exit can restore it —
+    // leaving it clobbered suppressed every later AtlasVoice shortcode on the
+    // page, because is_secondary_loop() reads get_the_ID().
+    $original_post   = $post;
+    $has_explicit_id = false;
+    if ( isset( $atts['id'] ) && $atts['id'] ) {
+        $override_post = get_post( (int) $atts['id'] );
+        if ( $override_post instanceof WP_Post ) {
+            $post            = $override_post;
+            $has_explicit_id = true;
+        }
     }
+
     /**
      * TTS-168
      */
     if(is_admin()) {
+        $post = $original_post;
         return;
     }
 
     // this is a pro feature to show button on blog main page with title and excerpt.
-    if (!TTA_Helper::should_load_button($post, 'tta_get_button_content') || $block_btn_no > 0 || TTA_Helper::is_secondary_loop()) {
+    // TTS-270: is_secondary_loop() compares get_the_ID() against the queried
+    // object; with an explicit id= those differ by design, so the guard must
+    // not apply to that call.
+    if (!TTA_Helper::should_load_button($post, 'tta_get_button_content')
+        || $block_btn_no > 0
+        || ( ! $has_explicit_id && TTA_Helper::is_secondary_loop() )) {
+        $post = $original_post;
         return;
     }
 
@@ -413,7 +432,12 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
         'div'    => array( 'class' => true, 'id' => true, 'style' => true , 'data-id' => true ),
         'br'     => array(),
     );
-    return wp_kses( (string) $data, $allowed );
+    $output = wp_kses( (string) $data, $allowed );
+    // TTS-270: restore the global before handing control back, so an id="" render
+    // cannot leak its post into the rest of the page.
+    $post = $original_post;
+
+    return $output;
 }
 
 
@@ -467,67 +491,108 @@ function get_enqueued_js_object($params, $plugin_all_settings)
     $compatible_data = TTA_Helper::tts_get_settings('compatible');
     $compatible_content = apply_filters('tts_compatible_plugins_content', [], $compatible_data, $post);
 
-    // TTS-247: per-button settings via wp_add_inline_script instead of a raw
-    // inline <script> tag. IIFE-wrapped so multiple buttons on one page don't
-    // collide on the shared `var` names.
-    $inline_payload = sprintf(
-        '(function(){var ttsCurrentButtonNo=%d;var ttsCurrentContent=%s;var ttsListening=%s;var ttsCSSClass=%s;var ttsBtnStyle=%s;var ttsTextArr=%s;var ttsCustomCSS=%s;var ttsShouldDisplayIcon=%s;var readingTime=%s;var postId=%s;var fileURLs=%s;var get_content_from_dom=%s;var use_old_player=%s;var ttsSettings={listening:ttsListening,cssClass:ttsCSSClass,btnStyle:ttsBtnStyle,textArr:ttsTextArr,customCSS:ttsCustomCSS,shouldDisplayIcon:ttsShouldDisplayIcon,readingTime:readingTime,postId:postId,fileURLs:fileURLs,get_content_from_dom:get_content_from_dom,use_old_player:use_old_player};if(window.ttsObj&&window.ttsObj.settings){window.ttsObj.settings.settings=%s;}var dateTitle={title:%s,file_name:%s,date:%s,language:%s,voice:%s,file_url_key:%s,compatible_contents:%s,excerpt:%s,text_before_content:%s,text_after_content:%s};if(window.hasOwnProperty("TTS")){window.TTS.contents[ttsCurrentButtonNo]=ttsCurrentContent;window.TTS.extra[ttsCurrentButtonNo]=dateTitle;window.TTS.extra.player_id=%s;}else{window.TTS={};window.TTS.contents={};window.TTS.contents[ttsCurrentButtonNo]=ttsCurrentContent;window.TTS.extra={};window.TTS.extra[ttsCurrentButtonNo]=dateTitle;window.TTS.extra.player_id=%s;}if(!window.TTS.hasOwnProperty("settings")){window.TTS.settings=ttsSettings;}})();',
-        (int) $player_number,
-        wp_json_encode( (string) apply_filters( 'atlasvoice_player_content', $content, $post, $language, $voice, $player_number ) ),
-        wp_json_encode( $plugin_all_settings['listening'] ),
-        wp_json_encode( (string) $class ),
-        wp_json_encode( (string) $btn_style ),
-        wp_json_encode( $text_arr ),
-        wp_json_encode( (string) $custom_css ),
-        wp_json_encode( (string) $should_display_icon ),
-        wp_json_encode( (string) $content_read_time ),
-        wp_json_encode( (string) (int) $post->ID ),
-        wp_json_encode( $mp3_file_urls ),
-        wp_json_encode( $get_content_from_dom ),
-        wp_json_encode( (string) $use_old_player ),
-        wp_json_encode( isset( $plugin_all_settings['settings'] ) ? $plugin_all_settings['settings'] : new \stdClass() ),
-        wp_json_encode( (string) $title ),
-        wp_json_encode( (string) $file_name ),
-        wp_json_encode( (string) $date ),
-        wp_json_encode( (string) $language ),
-        wp_json_encode( (string) $voice ),
-        wp_json_encode( (string) $file_url_key ),
-        wp_json_encode( $compatible_content ),
-        wp_json_encode( (string) $excerpt_sanitized ),
-        wp_json_encode( (string) apply_filters( 'atlasvoice__text_before_content', $text_before_content, $post, $language, $voice, $player_number ) ),
-        wp_json_encode( (string) apply_filters( 'atlasvoice__text_after_content', $text_after_content, $post, $language, $voice, $player_number ) ),
-        wp_json_encode( (string) get_player_id() ),
-        wp_json_encode( (string) get_player_id() )
+    // TTS-270: the per-post data below is emitted as JSON in the markup, never
+    // as inline JS. JS optimizers that merge inline scripts (WP-Optimize,
+    // Autoptimize, LiteSpeed, WP Rocket, Perfmatters…) bake the merged result
+    // into ONE shared cache file, so post A's audio then plays on every post.
+    // Markup is rendered per request and is never merged.
+    $payload = array(
+        'playerNo'             => (int) $player_number,
+        'playerId'             => (string) get_player_id(),
+        'content'              => (string) apply_filters( 'atlasvoice_player_content', $content, $post, $language, $voice, $player_number ),
+        'listening'            => $plugin_all_settings['listening'],
+        'cssClass'             => (string) $class,
+        'btnStyle'             => (string) $btn_style,
+        'textArr'              => $text_arr,
+        'customCSS'            => (string) $custom_css,
+        'shouldDisplayIcon'    => (string) $should_display_icon,
+        'readingTime'          => (string) $content_read_time,
+        'postId'               => (string) (int) $post->ID,
+        'fileURLs'             => $mp3_file_urls,
+        'get_content_from_dom' => $get_content_from_dom,
+        'use_old_player'       => (string) $use_old_player,
+        'settings'             => isset( $plugin_all_settings['settings'] ) ? $plugin_all_settings['settings'] : new \stdClass(),
+        'extra'                => array(
+            'title'               => (string) $title,
+            'file_name'           => (string) $file_name,
+            'date'                => (string) $date,
+            'language'            => (string) $language,
+            'voice'               => (string) $voice,
+            'file_url_key'        => (string) $file_url_key,
+            'compatible_contents' => $compatible_content,
+            'excerpt'             => (string) $excerpt_sanitized,
+            'text_before_content' => (string) apply_filters( 'atlasvoice__text_before_content', $text_before_content, $post, $language, $voice, $player_number ),
+            'text_after_content'  => (string) apply_filters( 'atlasvoice__text_after_content', $text_after_content, $post, $language, $voice, $player_number ),
+        ),
     );
-    // TTS-247: attach the payload to every button-script handle in the
+
+    // TTS-270: the hydrator is deliberately POST-INDEPENDENT — identical bytes on
+    // every page — so an optimizer merging it into a shared bundle is harmless.
+    // Only the JSON above varies per post, and that no longer travels in JS.
+    $inline_payload = <<<'JS'
+(function(){
+if(window.AtlasVoicePayload&&window.AtlasVoicePayload.hydrate){window.AtlasVoicePayload.hydrate();return;}
+function hydrate(){
+var nodes=document.querySelectorAll('script.atlasvoice-payload:not([data-atlasvoice-hydrated])');
+for(var i=0;i<nodes.length;i++){
+var node=nodes[i],data;
+try{data=JSON.parse(node.textContent);}catch(e){continue;}
+node.setAttribute('data-atlasvoice-hydrated','1');
+if(window.ttsObj&&window.ttsObj.settings){window.ttsObj.settings.settings=data.settings;}
+if(!window.TTS){window.TTS={};}
+if(!window.TTS.contents){window.TTS.contents={};}
+if(!window.TTS.extra){window.TTS.extra={};}
+if(!window.TTS.buttons){window.TTS.buttons={};}
+window.TTS.contents[data.playerNo]=data.content;
+window.TTS.extra[data.playerNo]=data.extra;
+window.TTS.extra.player_id=data.playerId;
+window.TTS.buttons[data.playerNo]={textArr:data.textArr};
+if(!window.TTS.hasOwnProperty('settings')){window.TTS.settings={listening:data.listening,cssClass:data.cssClass,btnStyle:data.btnStyle,textArr:data.textArr,customCSS:data.customCSS,shouldDisplayIcon:data.shouldDisplayIcon,readingTime:data.readingTime,postId:data.postId,fileURLs:data.fileURLs,get_content_from_dom:data.get_content_from_dom,use_old_player:data.use_old_player};}
+}
+}
+window.AtlasVoicePayload={hydrate:hydrate};
+hydrate();
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',hydrate);}
+})();
+JS;
+
+    // TTS-247: attach the hydrator to every button-script handle in the
     // filtered list. Free ships 'text-to-audio-button'; companion plugins
     // (e.g. Pro) extend via `tts_button_inline_handles`.
+    // TTS-270: the hydrator is post-independent, so attach it once per handle
+    // per request. wp_add_inline_script() concatenates on repeat calls, which
+    // emitted the whole function once per button (6 buttons = 6 identical
+    // copies). One copy is enough: hydrate() loops every payload node and
+    // re-runs on DOMContentLoaded, so late-printed buttons are still covered.
+    // Keyed by handle because only one of several registered handles may be
+    // enqueued on a given page.
+    static $hydrator_added = array();
     $inline_handles = apply_filters( 'tts_button_inline_handles', array( 'text-to-audio-button' ), $params, $plugin_all_settings );
     foreach ( (array) $inline_handles as $handle ) {
+        if ( isset( $hydrator_added[ $handle ] ) ) {
+            continue;
+        }
         if ( wp_script_is( $handle, 'registered' ) ) {
             wp_add_inline_script( $handle, $inline_payload, 'before' );
+            $hydrator_added[ $handle ] = true;
         }
     }
 
-    // TTS-247: close the output buffer with ob_get_clean() at the end of this
-    // function (was leaking on ob_get_contents alone, which the wp.org review
-    // flagged as an unclosed ob_start).
-    ob_start();
-    ?>
-    <!-- AtlasVoice Settings (per-button JS moved to wp_add_inline_script — handle 'text-to-audio-button') -->
-    <!-- TTS-238 D27 / merge note: previous branch carried an inline <script>
-         that wrote window.TTS.use_atlasvoice_extractor = true. That flag was
-         retired in D26.9 (always-on now); develop moved the rest of the
-         per-button payload into wp_add_inline_script handle 'text-to-audio-button'.
-         If anything in TTS.contents/extra/settings is missing, the canonical
-         emission lives in admin/TTA_Admin.php's enqueue path. -->
-    <?php
-    // TTS-250: AudioObject schema output now lives in AtlasVoice Pro (it requires
-    // an MP3 contentUrl that the free player never produces).
-    // TTS-247: echo + close. The caller (tts_enqueue_button_scripts hook on
-    // wp_print_footer_scripts) doesn't use the return value, so the inline
-    // <script> needs to land in the page directly via echo, not via return.
-    echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+    // TTS-270: JSON_HEX_TAG keeps a literal `</script>` inside post content from
+    // closing the block early. This runs on wp_print_footer_scripts priority 5,
+    // so the JSON is in the DOM before core prints scripts (priority 10) and the
+    // hydrator executes; the DOMContentLoaded re-run covers deferred bundles.
+    $payload_json = wp_json_encode( $payload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT );
+    printf(
+        '<script type="application/json" class="atlasvoice-payload" data-player-no="%d">%s</script>',
+        (int) $player_number,
+        $payload_json // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode with JSON_HEX_* is the escaping.
+    );
+
+    // TTS-270: the trailing ob_start()/echo ob_get_clean() pair was removed — it
+    // buffered nothing once TTS-247 moved the payload to wp_add_inline_script and
+    // TTS-250 moved AudioObject schema output to Pro. This function now emits only
+    // the JSON payload above; the caller ignores the return value.
 }
 
 
@@ -563,6 +628,9 @@ function tts_text_match_80_percent($text1, $text2)
 function get_button_text($atts, $content_read_time)
 {
     $saved_texts = get_option('tta__button_text_arr');
+    // TTS-270: remember whether the option already existed, so the persist at the
+    // end of this function only ever seeds and never rewrites admin state.
+    $saved_texts_existed = ! empty( $saved_texts );
     if (!$saved_texts) {
         $saved_texts = set_initial_button_texts($content_read_time);
     }
@@ -582,9 +650,17 @@ function get_button_text($atts, $content_read_time)
     // extract the strings — the WP.org review flagged the previous design as
     // a gettext-with-variables violation. See TTA_Helper::get_text_value().
     $resolve = function ($state, $flat_key, $fallback) use ($atts, $saved_texts, $player_states) {
-        if (!empty($player_states[$state]['text'])) {
-            return $player_states[$state]['text'];
+        // TTS-270: an instance attribute is the most specific expression of
+        // intent, so the per-player Customize value — which ships populated for
+        // every state and therefore always short-circuited — must yield to it.
+        // Detection mirrors TTA_Helper::get_text_value() so sanitising and
+        // escaping stay in that one helper instead of being duplicated here.
+        $has_instance_att = isset( $atts[ $flat_key ] ) && strlen( $atts[ $flat_key ] );
+
+        if ( ! $has_instance_att && ! empty( $player_states[ $state ]['text'] ) ) {
+            return $player_states[ $state ]['text'];
         }
+
         return TTA_Helper::get_text_value($atts, $saved_texts, $flat_key, $fallback);
     };
 
@@ -613,18 +689,39 @@ function get_button_text($atts, $content_read_time)
 
 
     $customize_settings = (array)TTA_Helper::tts_get_settings('customize');
-    $text_arr = get_text_array_from_shortcode($customize_settings, $text_arr);
+    $text_arr = get_text_array_from_shortcode($customize_settings, $text_arr, $atts);
 
+    // The filter still runs last, so existing `tta__button_text_arr` integrations
+    // keep overriding every source below it exactly as before.
     $text_arr = apply_filters('tta__button_text_arr', $text_arr, $atts, $content_read_time);
 
-    update_option('tta__button_text_arr', $text_arr);
+    // TTS-270: this option is site-wide admin state owned by the Customize
+    // screen. Writing it on every front-end render meant a single
+    // [atlasvoice listen_text="…"] relabelled every button on the site from the
+    // next request onward — and cost a DB write on every page view. Seeding is
+    // handled at the top of this function, so only persist when nothing existed.
+    if ( ! $saved_texts_existed ) {
+        update_option('tta__button_text_arr', $text_arr);
+    }
 
 
     return $text_arr;
 }
 
 
-function get_text_array_from_shortcode($customize_settings, $text_arr)
+/**
+ * Apply the site-wide "play button shortcode" field from Customize.
+ *
+ * @param array $customize_settings Customize settings.
+ * @param array $text_arr           Resolved texts so far.
+ * @param array $instance_atts      TTS-270: this render's own shortcode/block
+ *                                  attributes. Defaults to an empty array so
+ *                                  existing callers (including Pro) are
+ *                                  unaffected.
+ *
+ * @return array
+ */
+function get_text_array_from_shortcode($customize_settings, $text_arr, $instance_atts = array())
 {
     $shortcode = '[atlasvoice]';
     if (isset($customize_settings['tta_play_btn_shortcode']) && $customize_settings['tta_play_btn_shortcode']) {
@@ -646,6 +743,11 @@ function get_text_array_from_shortcode($customize_settings, $text_arr)
     }
 
     foreach ($attributes as $key => $value) {
+        // TTS-270: this field is a site-wide default. It must not overwrite a
+        // value the individual shortcode/block supplied for itself.
+        if ( is_array( $instance_atts ) && isset( $instance_atts[ $key ] ) && strlen( $instance_atts[ $key ] ) ) {
+            continue;
+        }
         if (isset($attributes[$key]) && $attributes[$key]) {
             $text = sanitize_text_field($value);
             $text = esc_html($text);
