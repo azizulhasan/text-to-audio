@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.3.7
+Stable tag: 2.3.8
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -397,6 +397,11 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.3.8 ( 14 Aug 2026 ) =
+Improved : Faster page loads. The plugin now serves compressed stylesheets, cutting the size of the player stylesheet your visitors download by around 40%.
+Improved : Smaller download. Duplicate uncompressed stylesheets and an unused icon font stylesheet are no longer bundled with the plugin.
+Updated : Documentation.
+
 = 2.3.7 ( 02 Aug 2026 ) =
 Added : Floating player — the Listen button now follows your readers. It sits in your content as usual, then docks to the edge of the screen once they scroll past it, so the controls are always within reach on long articles. Choose where it docks from Customization: bottom full width, bottom right, bottom left, or sticky top. Prefer it to stay put? Switch docking off in Settings.
 Added : Button position and floating position are now two separate choices, so you can place the button before or after your content and still pick a different corner for it to dock to.
@@ -662,6 +667,9 @@ Introduced :  Complete new UI introduced.
 
 
 == Upgrade Notice ==
+
+= 2.3.8 =
+Serves compressed stylesheets for faster page loads, trims duplicate files from the download, and updates the documentation. No change to how the player looks or behaves.
 
 = 2.3.7 =
 The Listen button can now float — it follows readers down the page and docks to the edge you choose (bottom bar, either corner, or sticky top), and this is now free rather than Pro-only. Button position and docking position are separate settings. Update recommended.
