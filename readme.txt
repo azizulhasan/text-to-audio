@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.9
+Stable tag: 2.3.10
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -397,7 +397,7 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
-= 2.3.9 ( 18 Aug 2026 ) =
+= 2.3.10 ( 18 Aug 2026 ) =
 Fixed : Every article could end up playing the same audio. On sites using a speed or optimisation plugin that combines scripts, one article's audio was reused for every other article. Each article now always plays its own.
 Fixed : The shortcode's id attribute did nothing. Pointing the player at another article with [atlasvoice id="123"] produced no player at all, and it also stopped every later player on that page from appearing.
 Fixed : Custom button wording set in a shortcode was ignored, and could overwrite the wording on every other button across the site.
@@ -676,7 +676,7 @@ Introduced :  Complete new UI introduced.
 
 == Upgrade Notice ==
 
-= 2.3.9 =
+= 2.3.10 =
 Fixes a problem where every article could play the same audio on sites that combine scripts for speed, restores the shortcode's id attribute and custom button wording, and stops the editing-only content picker loading for visitors. Update recommended.
 
 = 2.3.8 =
