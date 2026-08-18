@@ -253,7 +253,7 @@ class TTA_Admin
     public function enqueue_styles()
     {
         if (TTA_Helper::is_text_to_audio_page()) {
-            wp_enqueue_style('text-to-audio-dashboard', plugin_dir_url(__FILE__) . 'css/text-to-audio-dashboard.css', [], $this->version, 'all');
+            wp_enqueue_style('text-to-audio-dashboard', plugin_dir_url(__FILE__) . 'css/minify/text-to-audio-dashboard.min.css', [], $this->version, 'all');
         }
     }
 
@@ -408,7 +408,7 @@ class TTA_Admin
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page-name read for asset enqueue, no state mutation
         if (is_admin() && isset($_REQUEST['page']) && ('text-to-audio' == $_REQUEST['page'])) {
             /* Load react js */
-            wp_enqueue_style('tts-bootstrap', plugin_dir_url(__FILE__) . 'css/bootstrap.css', [], $this->version, 'all');
+            wp_enqueue_style('tts-bootstrap', plugin_dir_url(__FILE__) . 'css/minify/bootstrap.min.css', [], $this->version, 'all');
             wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', array('wp-hooks',), $this->version, true);
             wp_localize_script('TextToSpeech', 'ttsObj', $this->localize_data);
             // TTS-250: the shared React dashboard reads the `ttsObjPro` global for
@@ -628,7 +628,7 @@ class TTA_Admin
             // icon custom properties, all from the global customize settings)
             // are attached to the same handle via wp_add_inline_style() — WP
             // renders them in the document <head>, not as an inline style="".
-            wp_enqueue_style('text-to-audio-button', plugin_dir_url(__FILE__) . 'css/text-to-audio-button.css', [], $this->asset_version('css/text-to-audio-button.css'), 'all');
+            wp_enqueue_style('text-to-audio-button', plugin_dir_url(__FILE__) . 'css/minify/text-to-audio-button.min.css', [], $this->asset_version('css/minify/text-to-audio-button.min.css'), 'all');
             if (function_exists('tta_get_player_button_inline_css')) {
                 wp_add_inline_style('text-to-audio-button', tta_get_player_button_inline_css());
             }
@@ -662,7 +662,7 @@ class TTA_Admin
         if (get_player_id() > 2) {
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page-name read, no state mutation
             if (!empty($_REQUEST['page']) && $_REQUEST['page'] == 'bulk-mp3-generate') {
-                wp_enqueue_style('tts-bootstrap', plugin_dir_url(__FILE__) . 'css/bootstrap.css', [], $this->version, 'all');
+                wp_enqueue_style('tts-bootstrap', plugin_dir_url(__FILE__) . 'css/minify/bootstrap.min.css', [], $this->version, 'all');
             }
             // Register a new admin page under "Bulk MP3 Generate" menu
             add_submenu_page(
@@ -1330,7 +1330,7 @@ class TTA_Admin
         // scripts in templates). Take develop's version.
         wp_enqueue_style(
             'tta-admin-bar',
-            plugin_dir_url( __FILE__ ) . 'css/tta-admin-bar.css',
+            plugin_dir_url( __FILE__ ) . 'css/minify/tta-admin-bar.min.css',
             array(),
             $this->version,
             'all'
