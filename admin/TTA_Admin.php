@@ -475,9 +475,9 @@ class TTA_Admin
         // Register the block script
         wp_register_script(
             'tta-blocks',
-            plugin_dir_url(dirname(__FILE__)) . 'build/blocks.js',
+            plugin_dir_url(dirname(__FILE__)) . 'build/blocks/blocks.js',
             array('wp-blocks', 'wp-element', 'wp-i18n', 'wp-block-editor'),
-            filemtime(plugin_dir_path(dirname(__FILE__)) . 'build/blocks.js'),
+            filemtime(plugin_dir_path(dirname(__FILE__)) . 'build/blocks/blocks.js'),
             true
         );
 
