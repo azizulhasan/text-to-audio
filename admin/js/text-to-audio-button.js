@@ -787,14 +787,22 @@ class TTSPlayButton extends HTMLElement {
 
         // TTS-241 — resolve text + icon from per-player overrides first.
         const playerId = window?.ttsObj?.player_id || 1;
+        // TTS-270: PHP has already applied the full precedence chain for THIS
+        // button — instance attribute → per-player → flat → default →
+        // tta__button_text_arr filter — so prefer its result and keep one
+        // source of truth. The page-global buttonTextArr stays as the fallback
+        // for markup rendered before this payload existed.
+        const perButton = window?.TTS?.buttons?.[buttonId]?.textArr || null;
         const players = window?.ttsObj?.buttonTextArr?.players || {};
         const stateForPlayer = (s) => (players[playerId] && players[playerId][s]) || null;
         const resolveText = (s, flatKey, fallback) => {
+            if (perButton && perButton[flatKey]) return perButton[flatKey];
             const ps = stateForPlayer(s);
             if (ps && ps.text) return ps.text;
             return window?.ttsObj?.buttonTextArr?.[flatKey] || fallback;
         };
         const resolveHover = (s, flatKey, fallback) => {
+            if (perButton && perButton[flatKey]) return 'Text To Audio : ' + perButton[flatKey];
             const ps = stateForPlayer(s);
             if (ps && ps.hover) return 'Text To Audio : ' + ps.hover;
             const flat = window?.ttsObj?.buttonTextArr?.[flatKey];

@@ -282,6 +282,15 @@ class PickerLoader {
 	 */
 	protected static function emit_on_front() {
 		if ( ! function_exists( 'is_singular' ) || ! is_singular() ) { return false; }
+
+		// TTS-272: the picker is an admin-only authoring tool, but this method
+		// had no login or capability check — and the only other gate below,
+		// Mode::is_opted_in(), is hardcoded to true — so the stub was emitted to
+		// every logged-out visitor on every singular view. Require a user who can
+		// actually author, matching the capability the same bundle is enqueued
+		// under on admin screens. Overridable via the
+		// `atlasvoice_emit_picker_stub` filter applied in should_emit().
+		if ( ! is_user_logged_in() || ! current_user_can( 'edit_posts' ) ) { return false; }
 		if ( class_exists( '\\TTA\\AtlasVoice\\Mode' ) && ! Mode::is_opted_in() ) {
 			// When AtlasVoice is opted out, the step rail / picker can
 			// never be reached from the front-end, so skip the stub
