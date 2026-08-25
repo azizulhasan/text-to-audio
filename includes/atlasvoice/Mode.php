@@ -344,9 +344,18 @@ class Mode {
 			return false;
 		}
 
-		// In wp-admin a notice can host the buttons on any screen. On the front
-		// end the toolbar node is the only entry point, so it still gates there.
-		return is_admin() ? true : is_admin_bar_showing();
+		// Emit only when an entry point will actually render. The toolbar node
+		// covers both directions (Go Live and Revert) and honours the TTS-255
+		// tta__settings_show_mode_bar setting.
+		if ( self::should_render_bar_node() ) {
+			return true;
+		}
+
+		// Otherwise the only hosts are the staging notices, which exist in
+		// wp-admin and only while staging. In production with the mode bar off
+		// nothing can call these functions, so shipping them would be dead weight
+		// on every page.
+		return is_admin() && self::MODE_PRODUCTION !== self::get();
 	}
 
 	/**
