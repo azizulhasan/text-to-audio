@@ -16,7 +16,7 @@ Investigated 2026-08-25 against **20 of her posts (1,395 blocks)**.
 
 ---
 
-## Root cause: two implementations that disagree
+## Root cause: three implementations that disagree
 
 | | PHP path — `TTA_Hooks.php:497` | DOM path — `TTSProHelper.js:382` |
 |---|---|---|
@@ -25,14 +25,35 @@ Investigated 2026-08-25 against **20 of her posts (1,395 blocks)**.
 | Delimiter source | `tts_sentence_delimiter` filter | `tta__sentence_delimiter` **setting** |
 | "Already punctuated?" | regex lookahead | hardcoded character list |
 
-The same post produces different spoken text depending on which path ran, `tts_sentence_delimiter`
-is silently ignored in Pro, and a snippet author must guess which of two filter names applies.
+**Corrected during implementation: there is a THIRD implementation.** `tta_clean_content()`
+(`helpers.php:94-98`) inserts block-boundary delimiters too, with its own hardcoded list
+(`h1`-`h6`, `p`, `li`, `blockquote`, `dd`, `dt`, `td`, `th`, plus `hr` and `br`), unconditionally
+and with no "already punctuated" check at all. It runs a few lines AFTER the filter above, so on
+the PHP path both fired on the same document.
+
+Two consequences for the defect list below:
+
+- **D7 was wrong for the PHP path.** Separators already produced a pause there — `hr` and `br`
+  were in that hardcoded regex. D7 stands only for the DOM path.
+- **D6 was wrong for the PHP path.** `p`, `li`, `blockquote`, `td`, `th` were already covered.
+
+The same post still produces different spoken text depending on which path ran,
+`tts_sentence_delimiter` is silently ignored in Pro, and a snippet author must guess which of two
+filter names applies.
 
 ### The structural bug behind the whole ticket
 
 `TTSProHelper.js:161-171` force-pushes `figure` and `figcaption` onto the exclude list **after** the
 user's setting is read. Nothing set in the UI or in a filter can win. That is why no snippet Yvonne
 wrote could ever have worked.
+
+**Corrected during implementation: the PHP path had the same bug, in a different shape.**
+`tta_clean_content()` (`helpers.php:77`) hardcoded
+`preg_replace('#<(figure|figcaption|aside)[^>]*>.*?</>#is', '', $text)` — equally
+unoverridable. And `tta__settings_exclude_tags` turned out to be **never applied on the PHP path at
+all**: it is stored, validated by the REST routes and localised to JS, but no PHP code ever removed
+anything with it. So on Free, which has no DOM extractor, the exclude-tags setting did nothing
+whatsoever.
 
 ---
 
@@ -71,6 +92,26 @@ wrote could ever have worked.
 | D8 | Two filter names for one job, and `tts_sentence_delimiter` ignored on the DOM path |
 | D9 | **The DOM path reads a setting nobody can set.** `tta__sentence_delimiter` is written once by `TTA_Activator.php:199` as `"."` and has **no UI**. Four JS sites (`TTSProHelper.js:215, 385, 427, 700`) treat it as the source of truth, so the delimiter is effectively frozen at `.` in Pro and the `tts_sentence_delimiter` filter can never reach it. |
 | D10 | PHP itself is inconsistent about the default: `'. '` at `helpers.php:219`, `TTA_Helper.php:428` and `StepRail.php:142`, but `'.'` at `TTA_Hooks.php:499` and `TTA_Helper.php:1414` — a trailing space present or absent depending on which line ran. |
+
+| D11 | `tta_after_clean_content_callback()` built a **byte-based** character class containing the two-byte inverted question mark, inverted exclamation mark and Arabic comma/question mark, so it matched their halves and corrupted the text — a Spanish sentence opening with an inverted question mark came out with U+FFFD in its place. Pre-existing, found while testing, same defect family as D3/D4. |
+| D12 | `tta__settings_exclude_tags` was **never applied on the PHP path**, so on Free the setting did nothing. |
+
+### Found during implementation, fixed, not in the original design
+
+- **Delimiter placement.** Writing the delimiter *after* the closing tag looks equivalent to writing
+  it before. It is not: the TTS-235 rule at `helpers.php:110` inserts a space in front of any tag
+  preceded by a word character, and `TTA_Helper::clean_string()` then discards a delimiter that has
+  become space-separated. The pause vanished from the finished audio. It must be written **before**
+  the tag, attached to the text it terminates — which is what the old TTS-251 code achieved by
+  replacing the tag outright.
+- **Walk direction.** Walking matches backwards keeps byte offsets valid, but a later boundary
+  cannot see a delimiter an earlier one has not inserted yet, so `</p><hr/>` emitted two. The pass
+  runs forwards, rebuilding the string, with a running tail instead of re-stripping the document.
+- **Skipping the delimiter must not skip the separator.** The old code always emitted `. ` and got
+  the space for free. Emitting nothing for an already-punctuated block produced `full stop.E3 list
+  item`.
+- **`br` must be in `void_boundary_tags()`.** `tta_clean_content()` already paused on `<br>`;
+  omitting it would have silently removed line-break pauses from every existing site.
 
 **Not fixed here: pause _length_.** A full stop is a short pause; a structural pause needs SSML.
 Her blocks already end in full stops, so this ticket fixes her pullquotes, her Jetpack junk and her
@@ -728,6 +769,46 @@ Verify against `getContentSettingsFingerprint()` (`TTSProHelper.js:1183`) before
     reading the code.
 15. Every Pro PHP call into `\TTA\TTA_Speech` is `class_exists()`-guarded with a fall-through to the
     pre-TTS-280 code; one unguarded static call blocks the release.
+
+---
+
+## Verification — done, on a live install
+
+Four repro posts (`tts-280-block-pause-repro`, `-yvonne-style`, `-multilingual`, `-edge-cases`),
+Pro active, `read_content_from_dom = true`, player 3 (gTTS).
+
+- The DOM path was **confirmed to be the producer**: a temporary `tta_clean_content` filter stamped
+  a marker onto the PHP output only; the marker appeared in `window.TTS.contents` but **not** in the
+  `/tta_pro/v1/gtts` payload. Every browser result below therefore exercised the new JS, not the PHP
+  string.
+- **DOM output is byte-identical to PHP output** on all four posts. That is AC 9.
+- **Logged in and logged out produce identical output.** The only console errors on the page come
+  from the unrelated `code-snippets` plugin's admin bar.
+- No PHP fatals, warnings or notices on any page, in any configuration.
+- **New Pro + old Free**: no fatal; `class_exists()` fell through; output reproduced the
+  pre-TTS-280 result *including its bugs* (doubled CJK stop, doubled danda, doubled ellipsis,
+  corrupted Spanish mark, blockquote/pre spoken) — which is the correct definition of "unchanged".
+- **New Free + old Pro**: no fatal; the deprecated `tta_should_add_delimiter()` alias resolved.
+
+---
+
+## Behaviour change to warn about before release
+
+The largest output change in this ticket is **D12, not the punctuation work**. Because
+`tta__settings_exclude_tags` was never applied on the PHP path, any site that typed tags into that
+setting has been ignoring them. After this ticket the setting works — so on the test install, whose
+setting reads `aside|figure|blockquote|pre|code|table|form|nav|footer|header|script|style`,
+blockquotes, tables, preformatted blocks and code stopped being spoken.
+
+That is the setting doing what it says. It is still a large, silent change for anyone who typed
+something there years ago and forgot. Decide before release whether to ship it as-is, or to migrate
+existing values once with a notice.
+
+Related: excluding `figure` by default also excludes **tables and pullquotes**, because Gutenberg
+wraps both in `<figure>`. Excluding only `figcaption` (plus `aside`) would achieve the original
+TTS-239 goal — keep captions out of the audio — while letting tables and pullquotes be read, which
+is what the customer actually asked for. The default was left as `figure`, `figcaption`, `aside` to
+match today's behaviour; **this is worth revisiting.**
 
 ---
 
