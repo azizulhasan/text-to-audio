@@ -36,11 +36,49 @@ class TTA_Speech {
 	}
 
 	/**
+	 * The shipped default exclude list, in one place.
+	 *
+	 * TTS-280: TTA_Activator writes this same list into tta__settings_exclude_tags
+	 * on activation. Both sides read it from here so the activator default and the
+	 * runtime fallback can never drift apart — which is exactly how the PHP path
+	 * ended up hardcoding figure/figcaption/aside while the setting said something
+	 * else entirely.
+	 *
+	 * @return array
+	 */
+	public static function default_exclude_tags() {
+		return array(
+			'aside',
+			'figure',
+			'blockquote',
+			'pre',
+			'code',
+			'table',
+			'form',
+			'nav',
+			'footer',
+			'header',
+			'script',
+			'style',
+		);
+	}
+
+	/**
+	 * The shipped default as the pipe-joined string the option stores.
+	 *
+	 * @return string
+	 */
+	public static function default_exclude_tags_string() {
+		return implode( '|', self::default_exclude_tags() );
+	}
+
+	/**
 	 * Mirrors haveExcludeTags() in TTSProHelper.js.
 	 *
 	 * Global include/exclude list, seeded from the Settings UI value
-	 * (pipe-separated). Only script/style are non-negotiable; 'figure' comes from
-	 * the setting so a site can remove it and have pullquotes read aloud.
+	 * (pipe-separated). Only script/style are non-negotiable; every other tag comes
+	 * from the setting, so a site that wants its pullquotes or tables read aloud
+	 * removes them in the UI or via the filter and it actually takes effect.
 	 *
 	 * @return array
 	 */
@@ -54,13 +92,13 @@ class TTA_Speech {
 
 		$tags = array_values( array_filter( array_map( 'trim', $tags ) ) );
 
-		// TTS-280: these are DEFAULTS, not hardcodes, and they match what
-		// tta_clean_content() used to strip unconditionally. They are seeded only
-		// when the site has never configured the setting — otherwise removing one
-		// in the UI would be undone on every page load, which is the bug this
-		// ticket exists to fix.
+		// TTS-280: fall back to the shipped default, the same list TTA_Activator
+		// writes. This is a DEFAULT, not a hardcode: it applies only when the site
+		// has no value at all. Re-adding it to a configured list would undo the
+		// user's choice on every page load, which is the bug this ticket exists to
+		// fix.
 		if ( empty( $tags ) ) {
-			$tags = array( 'figure', 'figcaption', 'aside' );
+			$tags = self::default_exclude_tags();
 		}
 
 		foreach ( array( 'script', 'style' ) as $required ) {

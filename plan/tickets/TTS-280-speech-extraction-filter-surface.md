@@ -794,21 +794,24 @@ Pro active, `read_content_from_dom = true`, player 3 (gTTS).
 
 ## Behaviour change to warn about before release
 
-The largest output change in this ticket is **D12, not the punctuation work**. Because
-`tta__settings_exclude_tags` was never applied on the PHP path, any site that typed tags into that
-setting has been ignoring them. After this ticket the setting works — so on the test install, whose
-setting reads `aside|figure|blockquote|pre|code|table|form|nav|footer|header|script|style`,
-blockquotes, tables, preformatted blocks and code stopped being spoken.
+The largest output change in this ticket is **D12, not the punctuation work** — but it is smaller
+and far more predictable than it first looked.
 
-That is the setting doing what it says. It is still a large, silent change for anyone who typed
-something there years ago and forgot. Decide before release whether to ship it as-is, or to migrate
-existing values once with a notice.
+`aside|figure|blockquote|pre|code|table|form|nav|footer|header|script|style` is **the shipped
+default**, written by `TTA_Activator` since TTS-238 — it is not a value users typed and forgot. So
+D12's real effect is uniform across the install base: the list the settings screen has always
+advertised finally takes effect on the PHP path, instead of that path quietly excluding
+`figure`/`figcaption`/`aside` and nothing else.
 
-Related: excluding `figure` by default also excludes **tables and pullquotes**, because Gutenberg
-wraps both in `<figure>`. Excluding only `figcaption` (plus `aside`) would achieve the original
-TTS-239 goal — keep captions out of the audio — while letting tables and pullquotes be read, which
-is what the customer actually asked for. The default was left as `figure`, `figcaption`, `aside` to
-match today's behaviour; **this is worth revisiting.**
+Concretely, blockquotes, tables, preformatted text and code stop being spoken on Free. That is the
+product's stated default doing what it says. `figure` covering tables and pullquotes (Gutenberg
+wraps both) is a deliberate product decision, confirmed 2026-08-26, not a side effect — a site that
+wants them read removes the tag in the UI or via `tta__settings_exclude_tags`, and that now works.
+
+The list lives in `TTA_Speech::default_exclude_tags()`. `TTA_Activator` writes it and
+`have_exclude_tags()` falls back to it, so the activator default and the runtime default cannot
+drift — which is precisely how the PHP path came to exclude a different set of tags than the
+setting claimed.
 
 ---
 
