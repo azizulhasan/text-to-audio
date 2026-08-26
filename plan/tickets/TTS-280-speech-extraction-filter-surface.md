@@ -114,8 +114,8 @@ whatsoever.
   omitting it would have silently removed line-break pauses from every existing site.
 
 **Not fixed here: pause _length_.** A full stop is a short pause; a structural pause needs SSML.
-Her blocks already end in full stops, so this ticket fixes her pullquotes, her Jetpack junk and her
-separators — not how long the pause lasts.
+See *Pause LENGTH is out of scope* below for her verbatim words and the two measurements showing why
+no filter can deliver it today.
 
 ---
 
@@ -183,6 +183,40 @@ reading it in JS is what makes `tts_sentence_delimiter` unreachable in Pro (D9).
 
 A filter is the right surface here precisely *because* there is no UI: a value the user cannot set
 is not a setting, and pretending otherwise gave us a knob that looked adjustable and was not.
+
+### Pause LENGTH is out of scope — decided 2026-08-26
+
+The customer's own words, from the support thread:
+
+> "Is there a code snippet that would instruct the system to pause between blocks or at paragra[phs]"
+> "I don't want you to add punctuation; I want to know how to create a pause between the different blocks."
+> "The mp3 file that generates does not pause the voice between a header, pullquote, separator block"
+> "you need to know the exact filter or hook the plugin uses to modify text before it's sent to Google TTS"
+
+Of the three blocks she names, this ticket fixes **separator** (it emitted nothing at all on the DOM
+path) and makes **pullquote** reachable by filter (it was being dropped, not un-paused). **Header**
+already received a `. ` before this ticket and still does — so if she still hears no pause there,
+the delimiter is present and simply too short.
+
+**Making that gap longer is not solvable by any filter today, and we are not going to force it.**
+Verified by running it:
+
+| Attempt | Result |
+|---|---|
+| `tta_boundary_delimiter` returns `'. . . '` | Arrives as `'. '` — `clean_string()` deletes `. . . ` outright, and two separate delimiter-collapse passes flatten the rest. |
+| `tta_boundary_delimiter` returns `'<break time="800ms"/>'` | Arrives as **nothing** — `wp_strip_all_tags()` removes it. |
+
+A token-placeholder scheme was written to route a multi-character delimiter past those passes, and
+then **deliberately rejected**: it is a workaround for a symptom, it adds a protect/restore step to
+every content path in both languages, and duration is properly expressed as `<break time>` in SSML,
+not as repeated punctuation. Shipping it would mean deleting it again when SSML lands.
+
+**What we tell the customer:** she gets working filters today for *what* is read
+(`tta__settings_exclude_tags` to bring her pullquotes back, `tta_clean_content` to rewrite the text,
+`tts_sentence_delimiter` to change the terminator we insert), and pause *length* is not among them
+and is coming with SSML. Do not imply this release resolves the length complaint.
+
+See the follow-up SSML ticket for the work that does resolve it.
 
 ### The SSML seam
 
