@@ -59,13 +59,18 @@ answers "did someone arm it with the URL parameter", which is what the menu item
 
 No CSS. Inheriting the toolbar's own submenu styling is the point of putting it there.
 
-### Known limitation
+### Inherited visibility
 
-The item inherits the parent node's visibility, and that node is gated by
-`Mode::should_render_bar_node()` — i.e. `tta__settings_show_mode_bar`, which is **off by default**
-(TTS-255). So on a site that has never switched the staging/live indicator on, this link is not
-reachable. That is the accepted trade-off for putting it in the existing menu rather than beside it.
-Worth revisiting if the indicator stays hidden for most installs.
+The item inherits the parent node's visibility, which is gated by
+`Mode::should_render_bar_node()` — `tta__settings_show_mode_bar`, plus an always-on exception while
+the Step Rail is open.
+
+That setting **defaults to ON**: TTS-255 shipped it off, and TTS-258 reversed that
+(`TTA_Helper::show_mode_bar()` returns true when the key was never saved). So the link is reachable
+out of the box. Only a site that has explicitly toggled the staging/live indicator off loses it —
+and on such a site the picker is still reachable the old way, via the dashboard's "Open & Pick".
+
+Filter `tts_show_atlasvoice_mode_bar` controls the parent, and therefore this item.
 
 ---
 
