@@ -104,7 +104,11 @@ class TTA_Activator {
 				// fresh install never reads aside / figure / blockquote /
 				// script / style aloud. Pipe-joined string to match the
 				// canonical storage shape.
-				'tta__settings_exclude_tags'                          => 'aside|figure|blockquote|pre|code|table|form|nav|footer|header|script|style',
+				// TTS-280: the list itself now lives on TTA_Speech, which is
+				// also what applies it at runtime in Free and Pro. Two copies
+				// is how the PHP path ended up excluding a different set of
+				// tags than the setting claimed.
+				'tta__settings_exclude_tags'                          => TTA_Speech::default_exclude_tags_string(),
 				// D26.7 — wrapper opt-out flag. Default ON so the new default
 				// selector above keeps working; admins on themes that break
 				// on the wrapper can flip this off.
