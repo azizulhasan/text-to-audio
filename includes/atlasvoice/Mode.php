@@ -271,6 +271,44 @@ class Mode {
 			) );
 		}
 
+		// TTS-283: open the content picker on the post being viewed.
+		//
+		// The picker is off by default in both modes (TTS-255 removed the
+		// auto-appear), and its only entry point was the "Open & Pick" button on
+		// the dashboard — so an admin already reading a post had to go back into
+		// wp-admin, find the post, and come out again. This is the same
+		// ?atlasvoice_picker=1 launch, reachable from where they already are.
+		//
+		// Mode-independent on purpose: choosing what gets read is not a
+		// staging-only task, and a production site is where a wrong selector
+		// costs the most. Arming it affects only the admin who clicked —
+		// visitors never see the rail.
+		//
+		// StepRail owns the URL; this only links to it. An empty string means
+		// there is nothing to pick on here (wp-admin, an archive, a user without
+		// manage_options), so the item is simply not added.
+		if ( class_exists( '\\TTA\\AtlasVoice\\StepRail' ) ) {
+			$picker_url = StepRail::picker_toggle_url();
+
+			if ( $picker_url ) {
+				$armed = StepRail::is_picker_armed();
+
+				$bar->add_node( array(
+					'parent' => self::BAR_NODE_ID,
+					'id'     => self::BAR_NODE_ID . '-pick',
+					'title'  => $armed
+						? esc_html__( 'Close content picker', 'text-to-audio' )
+						: esc_html__( 'Pick content to read', 'text-to-audio' ),
+					'href'   => esc_url( $picker_url ),
+					'meta'   => array(
+						'title' => $armed
+							? esc_attr__( 'Leave the AtlasVoice content picker.', 'text-to-audio' )
+							: esc_attr__( 'Choose which parts of this page are read aloud.', 'text-to-audio' ),
+					),
+				) );
+			}
+		}
+
 		// Settings shortcut — identical on every state so admins always
 		// have a one-click route to the full dashboard.
 		$bar->add_node( array(

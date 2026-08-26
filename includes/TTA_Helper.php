@@ -425,7 +425,8 @@ class TTA_Helper
         if ($should_clean_content) {
             $output = \tta_clean_content($output);
             if ($content_type === 'title') {
-                $output = \tta_should_add_delimiter($output, \apply_filters('tts_sentence_delimiter', '. '));
+                // TTS-280: renamed helper; delimiter resolved in one place.
+                $output = \tta_append_delimiter($output, \TTA\TTA_Speech::default_delimiter());
             }
         }
         // Format Output According to output type
