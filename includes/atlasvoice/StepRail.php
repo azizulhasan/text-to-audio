@@ -83,6 +83,50 @@ class StepRail {
 	}
 
 	/**
+	 * TTS-283: whether the picker is currently armed on this request.
+	 *
+	 * Distinct from is_front_active(): that answers "is the rail rendering",
+	 * which is also true when the steprail setting turns it on by itself. This
+	 * answers "did someone arm it with the URL parameter", which is what the
+	 * toolbar link toggles.
+	 *
+	 * @return bool
+	 */
+	public static function is_picker_armed() {
+		return isset( $_GET[ self::AUTO_PARAM ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	}
+
+	/**
+	 * TTS-283: the URL that opens — or closes — the picker on the post being
+	 * viewed.
+	 *
+	 * Lives here because StepRail owns AUTO_PARAM; the toolbar just links to it.
+	 * Returns '' when there is nothing to pick on (not a singular front-end view,
+	 * or the user cannot manage options), so callers can use it as their gate.
+	 *
+	 * @return string Empty string when the picker is not offerable here.
+	 */
+	public static function picker_toggle_url() {
+		if ( is_admin() || ! is_singular() || ! current_user_can( 'manage_options' ) ) {
+			return '';
+		}
+
+		$post_id = get_the_ID();
+		if ( ! $post_id ) {
+			return '';
+		}
+
+		$permalink = get_permalink( $post_id );
+		if ( ! $permalink ) {
+			return '';
+		}
+
+		return self::is_picker_armed()
+			? remove_query_arg( self::AUTO_PARAM, $permalink )
+			: add_query_arg( self::AUTO_PARAM, '1', $permalink );
+	}
+
+	/**
 	 * Check whether listening is enabled for this post's post type.
 	 * Mirrors TTA_Helper::should_load_button() without the full helper dep.
 	 */

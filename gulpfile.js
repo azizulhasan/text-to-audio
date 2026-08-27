@@ -278,7 +278,9 @@ gulp.task(
 );
 
 gulp.task('zip', function () {
-	return gulp.src('production/**')
+	// Exclude any previously built archive: production/ holds the zip we wrote
+	// last run, so globbing it would nest the old zip inside the new one.
+	return gulp.src(['production/**', '!production/*.zip'])
 		.pipe(zip(config.zip.file_name.replace('.zip', '') + '.zip'), config.zip.options)
 		.pipe(gulp.dest(config.zip.dist))
 		.pipe(notify({ message: 'Zipping Completed! 💯', onLast: true }))

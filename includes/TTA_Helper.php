@@ -425,7 +425,8 @@ class TTA_Helper
         if ($should_clean_content) {
             $output = \tta_clean_content($output);
             if ($content_type === 'title') {
-                $output = \tta_should_add_delimiter($output, \apply_filters('tts_sentence_delimiter', '. '));
+                // TTS-280: renamed helper; delimiter resolved in one place.
+                $output = \tta_append_delimiter($output, \TTA\TTA_Speech::default_delimiter());
             }
         }
         // Format Output According to output type
@@ -1792,57 +1793,60 @@ class TTA_Helper
     {
         // Retrieve customization settings for the player
         $customize = (array)self::tts_get_settings('customize');
-        $should_generate_mp3 = false;
 
-        // Check if button settings exist
-        if (isset($customize['buttonSettings']) && isset($post->post_date)) {
-            // Safely retrieve button settings, avoiding key errors
-            $button_settings = (array)$customize['buttonSettings'];
+        // TTS-287: default TRUE. "No date range configured" must mean ALLOW, not
+        // block -- this gate exists to NARROW playback to a date window, so its
+        // absence cannot be a reason to hide the player.
+        //
+        // It was initialised false with every assignment living inside the
+        // isset($customize['buttonSettings']) branch below, so an install with no
+        // tta_customize_settings row returned false and should_load_button() hit
+        // `|| !$display_player_based_on_date_range`. That is any subsite created
+        // after network activation: TTA_Activator::activate() runs only for the
+        // site that activates, so a later subsite never gets the option and
+        // NOTHING rendered there -- not auto-insert, not the shortcode, in either
+        // mode, for admins or visitors.
+        //
+        // Renamed from $should_generate_mp3: this decides whether the PLAYER
+        // renders, and Free generates no MP3 at all. The option keys keep their
+        // original generate_mp3_* names -- those are stored data.
+        $is_within_date_range = true;
 
-            $generate_mp3_date_from = isset($button_settings['generate_mp3_date_from'])
-                ? (string)$button_settings['generate_mp3_date_from']
-                : '';
-
-            $generate_mp3_date_to = isset($button_settings['generate_mp3_date_to'])
-                ? (string)$button_settings['generate_mp3_date_to']
-                : '';
-
-            // Get the current date in YYYY-MM-DD format
-            $post_date = explode(' ', $post->post_date);
-            if (isset($post_date[0])) {
-                $post_date = $post_date[0];
-            }
-            // Validate date format (ensure correct YYYY-MM-DD format)
-            if (self::validate_date($generate_mp3_date_from) && self::validate_date($generate_mp3_date_to)) {
-                // Check if the post date falls within the date range
-                if ($post_date >= $generate_mp3_date_from && $post_date <= $generate_mp3_date_to) {
-                    $should_generate_mp3 = true;
-                }
-            }
-
-            if (empty($generate_mp3_date_to) && self::validate_date($generate_mp3_date_from)) {
-                // Check if the post date is greater or equal to date_from
-                if ($post_date >= $generate_mp3_date_from) {
-                    $should_generate_mp3 = true;
-                }
-            }
-
-            if (empty($generate_mp3_date_from) && self::validate_date($generate_mp3_date_to)) {
-                // Check if the post date is less or equal to  date_to
-                if ($post_date <= $generate_mp3_date_to) {
-                    $should_generate_mp3 = true;
-                }
-            }
-
-
-            // both value are empty then return true
-            if (empty($generate_mp3_date_from) && empty($generate_mp3_date_to)) {
-                $should_generate_mp3 = true;
-            }
-
+        if (!isset($customize['buttonSettings']) || !isset($post->post_date)) {
+            return $is_within_date_range;
         }
 
-        return $should_generate_mp3;
+        $button_settings = (array)$customize['buttonSettings'];
+
+        $generate_mp3_date_from = isset($button_settings['generate_mp3_date_from'])
+            ? (string)$button_settings['generate_mp3_date_from']
+            : '';
+
+        $generate_mp3_date_to = isset($button_settings['generate_mp3_date_to'])
+            ? (string)$button_settings['generate_mp3_date_to']
+            : '';
+
+        $has_from = self::validate_date($generate_mp3_date_from);
+        $has_to   = self::validate_date($generate_mp3_date_to);
+
+        // Only a CONFIGURED bound can narrow anything. Neither set -> stay true.
+        if (!$has_from && !$has_to) {
+            return $is_within_date_range;
+        }
+
+        // Get the post date in YYYY-MM-DD format
+        $post_date = explode(' ', $post->post_date);
+        $post_date = isset($post_date[0]) ? $post_date[0] : '';
+
+        if ($has_from && $has_to) {
+            $is_within_date_range = ($post_date >= $generate_mp3_date_from && $post_date <= $generate_mp3_date_to);
+        } elseif ($has_from) {
+            $is_within_date_range = ($post_date >= $generate_mp3_date_from);
+        } else {
+            $is_within_date_range = ($post_date <= $generate_mp3_date_to);
+        }
+
+        return $is_within_date_range;
     }
 
     /**
