@@ -38,10 +38,17 @@ together with no delimiter and no space. So the one thing TTS-280 was raised to 
 thing the customer complained about, is invisible in the preview. An admin tuning pauses cannot see
 pauses.
 
-**2. Exclusions are not applied.** The panel shows `X6 header one`, `X7 header two`, `X8 cell`,
-`X9 cell.` (table), `X11 caption text` (figcaption) and `X12 preformatted line` — all of which the
-real extractor **drops**, because `tta__settings_exclude_tags` ships with
-`table`, `pre` and `figure` in it. The panel is showing the admin content that will never be spoken.
+**2. Exclusions are not applied on the fallback tier.** The panel shows `X6 header one`,
+`X7 header two`, `X8 cell`, `X9 cell.` (table), `X11 caption text` (figcaption) and
+`X12 preformatted line` — all of which the real extractor **drops**, because
+`tta__settings_exclude_tags` ships with `table`, `pre` and `figure` in it.
+
+To be precise about which code did that: `extractWithRules()` *does* apply
+`state.selection.tta__settings_exclude_tags` (`:986`). This run fell through to
+`extractFromActiveSystem()`, whose tiers apply **no** exclusions at all — they read `.textContent`
+off the marker/wrapper node and return it. So failure 2 is specific to the fallback tier, while
+failure 1 affects both. Both tiers are reachable in normal use, and the fallback is the one an admin
+hits after a theme change — exactly when they most need an accurate preview.
 
 The net effect is a preview that is wrong in both directions at once: it hides the sentence structure
 that *will* exist and displays text that *will not* be read.
@@ -76,6 +83,143 @@ tell a real preview from an approximation.
 **At minimum, and cheaply:** `extractWithRules()` should apply the `TTA_Speech` boundary delimiters
 and the exclude-tags list, both of which are already localised to the page by TTS-280 as
 `window.TTS.settings.speech`. That alone fixes both measured failures without any cross-plugin work.
+
+---
+
+## The root cause, exactly
+
+`step-rail.shell.js:995`:
+
+```js
+var raw = clone.textContent || '';
+```
+
+`textContent` concatenates every descendant text node with **no separator**. So
+`…follows</p><p>X2 outer item` becomes `followsX2 outer item`. Every tier of
+`extractFromActiveSystem()` does the same (`:883`, `:894`, and tier 1's marker read) — the one
+exception is its tier 4, which returns `TTS.contents[k]`, the real PHP string. In the measured run
+tier 1 won, so the accurate tier was never reached.
+
+The shell also carries its **own** "already punctuated" list at `:1039`:
+
+```js
+var DELIM_PUNCT = ['.', ',', '?', '!', '|', ';', ':', '¿', '¡', '،', '؟'];
+```
+
+That is a fourth copy of the list TTS-280 consolidated, still carrying the pre-TTS-280 bugs: Latin
+and Arabic only, no CJK or Devanagari, no ellipsis, and no walk past a closing quote. It is used
+only for the title/excerpt/intro/outro joins, never for block boundaries.
+
+---
+
+## The cheap fix, concretely
+
+Everything needed is already on the page — TTS-280 localises it as `window.TTS.settings.speech`.
+No cross-plugin work, no REST round trip.
+
+### 1. Read the shared rules
+
+```js
+// TTS-284: the resolved speech surface TTS-280 localises. Reuse it rather than
+// inventing a fifth delimiter list in this file.
+function speechRules() {
+    return (window.TTS && window.TTS.settings && window.TTS.settings.speech) || {};
+}
+```
+
+### 2. Replace DELIM_PUNCT with the shared, closer-aware test
+
+```js
+// TTS-284: mirrors TTA_Speech::tta_should_add_delimiter() and its JS twin.
+// Walks back past closing quotes/brackets before deciding, and uses Array.from
+// so characters outside the BMP are not split. DELIM_PUNCT stays only as the
+// fallback for a Free that predates TTS-280.
+function needsDelimiter(text) {
+    var rules   = speechRules();
+    var enders  = rules.delimiter_characters || DELIM_PUNCT;
+    var closers = rules.closing_characters || [];
+
+    var chars = Array.from(String(text || '').trim());
+    for (var i = chars.length - 1; i >= 0; i--) {
+        if (closers.indexOf(chars[i]) !== -1) { continue; }
+        return enders.indexOf(chars[i]) === -1;
+    }
+    return false;
+}
+```
+
+### 3. Replace `clone.textContent` with a block-aware walk
+
+```js
+// TTS-284: textContent glues blocks together. Walk the tree instead and emit
+// the SAME boundary delimiter the real extractor will, so the preview shows
+// the sentence structure the listener will actually hear.
+//
+// Closing boundaries are emitted after the subtree (a </p> ends a unit); void
+// boundaries (hr, br) are emitted in place. Absent payload => previous
+// behaviour, so an un-updated Free is unchanged.
+function blockAwareText(node) {
+    var rules  = speechRules();
+    var closes = rules.boundary_delimiters;
+
+    if (!closes) { return node.textContent || ''; }
+
+    var voids = rules.void_delimiters || {};
+    var out   = '';
+
+    (function walk(el) {
+        for (var i = 0; i < el.childNodes.length; i++) {
+            var c = el.childNodes[i];
+
+            if (c.nodeType === 3) { out += c.nodeValue; continue; }
+            if (c.nodeType !== 1) { continue; }
+
+            var tag = c.tagName.toLowerCase();
+
+            if (voids[tag]) {
+                out += needsDelimiter(out) ? voids[tag] : ' ';
+                continue;
+            }
+
+            walk(c);
+
+            if (closes[tag]) {
+                out += needsDelimiter(out) ? closes[tag] : ' ';
+            }
+        }
+    })(node);
+
+    return out;
+}
+```
+
+### 4. Use it at the four `.textContent` call sites
+
+```js
+// extractWithRules(), :995
+var raw = blockAwareText(clone);
+```
+
+```js
+// extractFromActiveSystem() — tier 1 (markers), tier 2 (saved selector),
+// tier 3 (legacy wrapper). Tier 4 already returns the real string.
+var t3 = blockAwareText(legacies[j]).trim();
+```
+
+### 5. Label the source honestly
+
+`updatePreview()` already writes a `source` string into the meta line. Append the engine to it, so
+an admin can tell a faithful preview from an approximation:
+
+```js
+source += rules.boundary_delimiters ? ' · shared rules' : ' · approximate';
+```
+
+**What this does not fix:** the panel still runs its own DOM walk rather than the extractor that
+actually produces the audio, so `removeShortcodes()`, `removeDoubleDelimiters()` and
+`decodeHTMLEntities()` are still not applied, and a future change to `getContent()` can still drift
+away from it. That is why option 1 above remains the real fix — this is the cheap one that makes the
+preview honest today.
 
 ---
 
