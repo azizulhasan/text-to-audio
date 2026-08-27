@@ -317,6 +317,42 @@ register_activation_hook(__FILE__, function () {
 });
 
 /**
+ * TTS-286: seed plugin defaults on a subsite created AFTER network activation.
+ *
+ * register_activation_hook() fires once, for the site that activates. On a
+ * network-activated install every subsite created later starts with no
+ * tta_settings_data and no tta_customize_settings, so every option-driven gate
+ * in should_load_button() reads an empty array and the player never renders --
+ * not auto-insert, not the [atlasvoice] shortcode, in either mode, for admins
+ * or visitors. The site looks installed and is silently inert.
+ *
+ * Verified on a fresh subsite: making the individual gates default-permissive
+ * is NOT sufficient on its own, because several independent options are
+ * missing at once. The defaults have to exist.
+ *
+ * wp_initialize_site runs after the new site's tables exist, so switch_to_blog()
+ * is safe here. Priority 20 leaves room for core to finish provisioning.
+ */
+add_action('wp_initialize_site', function ($new_site) {
+    if (!function_exists('is_plugin_active_for_network')) {
+        require_once ABSPATH . 'wp-admin/includes/plugin.php';
+    }
+
+    if (!is_plugin_active_for_network(plugin_basename(TEXT_TO_AUDIO_ROOT_FILE))) {
+        return;
+    }
+
+    $blog_id = ($new_site instanceof WP_Site) ? (int) $new_site->blog_id : (int) $new_site;
+    if (!$blog_id) {
+        return;
+    }
+
+    switch_to_blog($blog_id);
+    TTA_Activator::activate();
+    restore_current_blog();
+}, 20, 1);
+
+/**
  * TTS-247 — grandfather existing installs onto the new staging/live mode.
  * Runs early (front + admin) so an upgraded site keeps its live player on
  * the very first request, before should_load_button's staging gate runs.
