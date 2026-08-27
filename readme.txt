@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.10
+Stable tag: 2.3.11
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -397,6 +397,16 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.3.11 ( 26 Aug 2026 ) =
+Fixed : On a multisite network, any site added after the plugin was activated showed no player at all. The plugin appeared installed and its settings page worked, but nothing was ever read aloud on that site. New sites now start with working settings.
+Fixed : The player could stay hidden on sites where no "generate audio between these dates" range had been set. An empty date range now means every post, as it always should have.
+Fixed : Audio ran sentences together and sometimes doubled a full stop. Headings, list items, quotes and separators now each read as their own sentence, and a paragraph that already ends in a full stop no longer gets a second one added after a closing quote.
+Fixed : Pauses now work in every language. Chinese, Japanese, Korean, Hindi and Arabic endings were not recognised, so an extra English full stop was read aloud after them.
+Fixed : Spanish and Arabic text could be corrupted, showing a replacement character in place of an opening inverted question mark or exclamation mark.
+Fixed : The "Exclude HTML tags to speak" setting had no effect at all on sites not using the Pro plugin. Whatever you chose there is now actually applied.
+Added : A new "Pick content to read" link in the AtlasVoice toolbar menu opens the content picker on the page you are already viewing, instead of going back to the dashboard to find the post.
+Improved : Site owners can now change any part of how content is read using filters, without editing the plugin.
+
 = 2.3.10 ( 18 Aug 2026 ) =
 Fixed : Every article could end up playing the same audio. On sites using a speed or optimisation plugin that combines scripts, one article's audio was reused for every other article. Each article now always plays its own.
 Fixed : The shortcode's id attribute did nothing. Pointing the player at another article with [atlasvoice id="123"] produced no player at all, and it also stopped every later player on that page from appearing.
@@ -675,6 +685,9 @@ Introduced :  Complete new UI introduced.
 
 
 == Upgrade Notice ==
+
+= 2.3.11 =
+Important for multisite: sites added after the plugin was activated showed no player at all; they now work out of the box. Also fixes audio running sentences together and doubling full stops, makes pauses work correctly in Chinese, Japanese, Korean, Hindi and Arabic, stops Spanish and Arabic text being corrupted, and makes the "Exclude HTML tags to speak" setting actually work. Adds a toolbar link to open the content picker on the page you are viewing. Update recommended.
 
 = 2.3.10 =
 Fixes a problem where every article could play the same audio on sites that combine scripts for speed, restores the shortcode's id attribute and custom button wording, and stops the editing-only content picker loading for visitors. Update recommended.
