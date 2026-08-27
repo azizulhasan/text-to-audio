@@ -317,7 +317,7 @@ register_activation_hook(__FILE__, function () {
 });
 
 /**
- * TTS-286: seed plugin defaults on a subsite created AFTER network activation.
+ * TTS-287: seed plugin defaults on a subsite created AFTER network activation.
  *
  * register_activation_hook() fires once, for the site that activates. On a
  * network-activated install every subsite created later starts with no
