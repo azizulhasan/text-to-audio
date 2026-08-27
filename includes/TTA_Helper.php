@@ -1794,7 +1794,7 @@ class TTA_Helper
         // Retrieve customization settings for the player
         $customize = (array)self::tts_get_settings('customize');
 
-        // TTS-286: default TRUE. "No date range configured" must mean ALLOW, not
+        // TTS-287: default TRUE. "No date range configured" must mean ALLOW, not
         // block -- this gate exists to NARROW playback to a date window, so its
         // absence cannot be a reason to hide the player.
         //
