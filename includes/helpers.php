@@ -73,8 +73,14 @@ function tta_clean_content($text)
      * TTS-239: Strip <figure>, <figcaption>, <aside> (with inner text) before
      * wp_strip_all_tags, which would otherwise keep caption/aside text and bake
      * it into generated audio for cloud providers (ChatGPT/GCTTS/ElevenLabs).
+     *
+     * TTS-280: the tag list is no longer hardcoded here. It comes from
+     * TTA_Speech::have_exclude_tags(), which is seeded from the Settings UI —
+     * previously tta__settings_exclude_tags was never applied on the PHP path at
+     * all, so a Free user's exclude-tags setting did nothing. The same three tags
+     * remain the default when that setting has never been configured.
      */
-    $text = preg_replace('#<(figure|figcaption|aside)\b[^>]*>.*?</\1>#is', '', $text);
+    $text = \TTA\TTA_Speech::strip_excluded_tags($text);
 
     // TTS-235: Remove elements matching exclude CSS selectors before stripping tags.
     // When DOM reading is on, the JS path handles this via querySelectorAll().remove().
@@ -86,16 +92,17 @@ function tta_clean_content($text)
     // table/definition cells) and <hr>/<br> dividers often carry no terminal
     // punctuation, so once their tags are stripped they glue onto the next block's
     // first sentence — e.g. a heading reads "Why she did it In January 1968…", and
-    // list items run together as one breath. Insert a sentence delimiter at each
-    // block boundary (period attached to the preceding text, no leading space, so
-    // clean_string() preserves it) so every block reads — and highlights — as its
-    // own sentence. Any resulting ".." / ". ." is collapsed by
-    // TTA_Helper::clean_string() at the end of this function.
-    $text = preg_replace(
-        '#\s*(?:</(?:h[1-6]|p|li|blockquote|dd|dt|td|th)\s*>|<(?:hr|br)\b[^>]*>)\s*#i',
-        '. ',
-        $text
-    );
+    // list items run together as one breath.
+    //
+    // TTS-280: this was the third place in the codebase inserting block-boundary
+    // delimiters, each with its own tag list and its own idea of "already
+    // punctuated". It now runs through TTA_Speech, which is filterable, walks past
+    // closing quotes so '…that.”' does not become '…that.”.', and knows the
+    // terminators of all 81 supported languages instead of Latin only.
+    //
+    // It runs HERE, after the exclusions above, so we never insert a delimiter
+    // into content that is about to be removed.
+    $text = \TTA\TTA_Speech::add_delimiter_if_need($text);
 
     // TTS-235: Add a space before tags only when preceded by a word character.
     // This prevents joining words when tags are stripped: "on<a>Kharg</a>" → "on Kharg"
@@ -138,23 +145,50 @@ function tta_clean_content($text)
 }
 
 /**
+ * Append a delimiter to a string unless it already ends in one.
  *
+ * TTS-280: renamed from tta_should_add_delimiter(). It appends and returns a
+ * string; it does not answer a yes/no question, and the old name said it did.
+ * The "already punctuated" test now lives in TTA_Speech so the PHP and DOM paths
+ * share one definition — the old inline $delimiterArr was Latin-only and used
+ * byte-based substr(), so it never matched a CJK or Devanagari ending.
+ *
+ * @param string $title     Text to terminate.
+ * @param string $delimiter Delimiter to append when one is missing.
+ *
+ * @return string
  */
-function tta_should_add_delimiter($title, $delimiter)
+function tta_append_delimiter($title, $delimiter)
 {
-    $delimiterArr = ['.', ',', '?', '!', '|', ';', ':', '¿', '¡', '،', '؟'];
-    $end = substr($title, -1);
-    if (in_array($end, $delimiterArr)) {
-        return $title . ' ';
-    }
-
     if (!$title) {
         return $title;
     }
 
+    if (!\TTA\TTA_Speech::tta_should_add_delimiter($title)) {
+        return $title . ' ';
+    }
 
     return $title . $delimiter . " ";
 
+}
+
+/**
+ * TTS-280: deprecated alias for tta_append_delimiter().
+ *
+ * DO NOT REMOVE without first raising Pro's minimum Free version. An
+ * un-updated Pro calls this from TTA_Pro_Api_Routes.php, so a user who updates
+ * Free before Pro would get a fatal on every generation request.
+ *
+ * @deprecated 2.3.11 Use tta_append_delimiter().
+ *
+ * @param string $title     Text to terminate.
+ * @param string $delimiter Delimiter to append when one is missing.
+ *
+ * @return string
+ */
+function tta_should_add_delimiter($title, $delimiter)
+{
+    return tta_append_delimiter($title, $delimiter);
 }
 
 
@@ -215,8 +249,9 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
 
     $date = TTA_Helper::get_post_date($post);
     $should_display_icon = isset($settings['tta__settings_display_btn_icon']) && $settings['tta__settings_display_btn_icon'] ? 'inline-block' : 'none';
-    // TODO make it dynamic. now Recording it not available in UI.
-    $sentence_delimiter =  apply_filters('tts_sentence_delimiter', '. ' );
+    // TTS-280: resolves the TODO that used to sit here. tta__sentence_delimiter has
+    // no UI, so the filter is the surface — one place, one default, both paths.
+    $sentence_delimiter = \TTA\TTA_Speech::default_delimiter();
 
     $get_content_from_dom = isset($settings['tta__settings_read_content_from_dom']) && $settings['tta__settings_read_content_from_dom'];
 
@@ -235,7 +270,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     }
 
     $title = tta_clean_content($post->post_title);
-    $title = tta_should_add_delimiter($title, $sentence_delimiter);
+    $title = tta_append_delimiter($title, $sentence_delimiter);
     $title = apply_filters('tta__content_title', $title, $post);
     $excerpt_sanitized = '';
     $text_before_content = '';
@@ -261,7 +296,7 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
                 $wp_filter['get_the_excerpt'] = $backup_filters;
             }
             $excerpt_sanitized = tta_clean_content($excerpt);
-            $excerpt_sanitized = tta_should_add_delimiter($excerpt_sanitized, $sentence_delimiter);
+            $excerpt_sanitized = tta_append_delimiter($excerpt_sanitized, $sentence_delimiter);
             $excerpt_sanitized = apply_filters('tta__content_excerpt', $excerpt_sanitized, $post);
         }
 
@@ -277,12 +312,12 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
 
         $text_before_content = isset($settings['tta__settings_text_before_content']) && $settings['tta__settings_text_before_content'] ? $settings['tta__settings_text_before_content'] : '';
         $text_before_content = TTA_Helper::clean_content($text_before_content);
-        $text_before_content = tta_should_add_delimiter($text_before_content, $sentence_delimiter);
+        $text_before_content = tta_append_delimiter($text_before_content, $sentence_delimiter);
 
 
         $text_after_content = isset($settings['tta__settings_text_after_content']) && $settings['tta__settings_text_after_content'] ? $settings['tta__settings_text_after_content'] : '';
         $text_after_content = TTA_Helper::clean_content($text_after_content);
-        $text_after_content = tta_should_add_delimiter($text_after_content, $sentence_delimiter);
+        $text_after_content = tta_append_delimiter($text_after_content, $sentence_delimiter);
 
 
         // Append ACF/compatible plugin content to $content (before intro/outro).
@@ -401,6 +436,8 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
         'text_after_content'  => $text_after_content,
         'get_content_from_dom' => $get_content_from_dom,
         'use_old_player' => $use_old_player,
+        // TTS-280: single filterable speech surface, consumed by the Pro DOM path.
+        'speech' => \TTA\TTA_Speech::payload(),
     ];
 
     do_action('tts_enqueue_button_scripts', $params);
@@ -510,6 +547,8 @@ function get_enqueued_js_object($params, $plugin_all_settings)
         'postId'               => (string) (int) $post->ID,
         'fileURLs'             => $mp3_file_urls,
         'get_content_from_dom' => $get_content_from_dom,
+        // TTS-280: single filterable speech surface, consumed by the Pro DOM path.
+        'speech'               => \TTA\TTA_Speech::payload(),
         'use_old_player'       => (string) $use_old_player,
         'settings'             => isset( $plugin_all_settings['settings'] ) ? $plugin_all_settings['settings'] : new \stdClass(),
         'extra'                => array(
@@ -547,7 +586,7 @@ window.TTS.contents[data.playerNo]=data.content;
 window.TTS.extra[data.playerNo]=data.extra;
 window.TTS.extra.player_id=data.playerId;
 window.TTS.buttons[data.playerNo]={textArr:data.textArr};
-if(!window.TTS.hasOwnProperty('settings')){window.TTS.settings={listening:data.listening,cssClass:data.cssClass,btnStyle:data.btnStyle,textArr:data.textArr,customCSS:data.customCSS,shouldDisplayIcon:data.shouldDisplayIcon,readingTime:data.readingTime,postId:data.postId,fileURLs:data.fileURLs,get_content_from_dom:data.get_content_from_dom,use_old_player:data.use_old_player};}
+if(!window.TTS.hasOwnProperty('settings')){window.TTS.settings={listening:data.listening,cssClass:data.cssClass,btnStyle:data.btnStyle,textArr:data.textArr,customCSS:data.customCSS,shouldDisplayIcon:data.shouldDisplayIcon,readingTime:data.readingTime,postId:data.postId,fileURLs:data.fileURLs,get_content_from_dom:data.get_content_from_dom,speech:data.speech,use_old_player:data.use_old_player};}
 }
 }
 window.AtlasVoicePayload={hydrate:hydrate};

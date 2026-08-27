@@ -655,7 +655,10 @@ class TTA_Notices {
 		// While in Staging the player is hidden from visitors but still shown
 		// to logged-in admins, so an admin can preview the real player and
 		// confirm the right content is read aloud before going live.
-		$steprail_staging_msg = esc_html__( 'Your audio player is hidden from visitors while in Staging — only logged-in admins can see it, so you can confirm the right content is read aloud before going live. Use “Pick Visually” on the Settings tab to check the content, then click “Go Live” in the top admin bar to show the player to all visitors.', 'text-to-audio' );
+		// TTS-279: this used to end "click Go Live in the top admin bar", which sent
+		// people to a toolbar they may have hidden — and which was the only route
+		// once the setup wizard was finished. The button below replaces that.
+		$steprail_staging_msg = esc_html__( 'Your audio player is hidden from visitors while in Staging — only logged-in admins can see it, so you can confirm the right content is read aloud before going live. Use “Pick Visually” on the Settings tab to check the content, then go live to show the player to all visitors.', 'text-to-audio' );
 
 		$this->register_notice( array(
 			'id'          => 'steprail_staging',
@@ -670,11 +673,65 @@ class TTA_Notices {
 				return \TTA\AtlasVoice\Mode::get() !== 'production';
 			},
 			'buttons'     => array(
+				// TTS-279: the action the user actually came for is primary; the
+				// documentation link demotes to secondary. Opens the shared dialog
+				// from Mode::render_inline_script().
+				array(
+					'text'  => __( 'Go live now', 'text-to-audio' ),
+					'url'   => '#',
+					'type'  => 'primary',
+					'icon'  => 'megaphone',
+					'attrs' => array( 'data-atlasvoice-action' => 'go-live' ),
+				),
 				array(
 					'text'    => __( 'How Staging → Live works', 'text-to-audio' ),
 					'url'     => $steprail_doc,
-					'type'    => 'primary',
+					'type'    => 'secondary',
 					'new_tab' => true,
+				),
+			),
+		) );
+
+		/**
+		 * TTS-279: one-line staging reminder on every OTHER wp-admin screen.
+		 *
+		 * Staging is a silent failure — the logged-in admin sees the player working
+		 * while visitors get nothing — so an admin who never opens the AtlasVoice
+		 * page would otherwise never find out. Deliberately short: the full
+		 * explanation lives in steprail_staging above, and repeating it everywhere
+		 * would be a nag.
+		 *
+		 * Dismissible, and the dismissal is permanent (stored in user meta), unlike
+		 * steprail_staging which stays put on the plugin's own page.
+		 */
+		$this->register_notice( array(
+			'id'          => 'staging_sitewide',
+			'title'       => '',
+			'message'     => '<p>' . esc_html__( 'AtlasVoice is in Staging — visitors can’t hear your audio player yet.', 'text-to-audio' ) . '</p>',
+			'type'        => 'warning',
+			'dismissible' => true,
+			// Empty screens = every admin screen; the condition below carves out
+			// the AtlasVoice page so two staging warnings never stack.
+			'screens'     => array(),
+			'condition'   => function () {
+				if ( ! current_user_can( 'manage_options' ) ) { return false; }
+				if ( ! class_exists( '\\TTA\\AtlasVoice\\Mode' ) ) { return false; }
+				if ( \TTA\AtlasVoice\Mode::get() === 'production' ) { return false; }
+
+				// The buttons need the shared dialog; if it won't be emitted on this
+				// request there is no point showing a button that cannot work.
+				if ( ! \TTA\AtlasVoice\Mode::should_render_go_live_ui() ) { return false; }
+
+				$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
+				return ! ( $screen && 'toplevel_page_text-to-audio' === $screen->id );
+			},
+			'buttons'     => array(
+				array(
+					'text'  => __( 'Go live now', 'text-to-audio' ),
+					'url'   => '#',
+					'type'  => 'primary',
+					'attrs' => array( 'data-atlasvoice-action' => 'go-live' ),
 				),
 			),
 		) );
@@ -906,6 +963,9 @@ class TTA_Notices {
 			'track'            => false,
 			'new_tab'          => false,
 			'dismiss_on_click' => false,
+			// TTS-279: extra HTML attributes, so a notice button can trigger shared
+			// client behaviour (the Go Live dialog) instead of navigating somewhere.
+			'attrs'            => array(),
 		);
 
 		$btn = wp_parse_args( $button, $btn_defaults );
@@ -933,6 +993,14 @@ class TTA_Notices {
 			}
 			if ( $btn['new_tab'] ) {
 				$data_attrs .= ' data-new-tab="true"';
+			}
+		}
+
+		// TTS-279: emitted for every button type, including url === '#' buttons
+		// that exist purely to open a dialog.
+		if ( ! empty( $btn['attrs'] ) && is_array( $btn['attrs'] ) ) {
+			foreach ( $btn['attrs'] as $attr_name => $attr_value ) {
+				$data_attrs .= ' ' . esc_attr( $attr_name ) . '="' . esc_attr( $attr_value ) . '"';
 			}
 		}
 
