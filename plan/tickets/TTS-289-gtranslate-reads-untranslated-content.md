@@ -32,7 +32,7 @@ wrong.
 
 ## Root cause
 
-Six defects compound. Defect 6 is what actually fires on a free-GTranslate site; the others make it
+Eight defects compound. Defect 6 is what actually fires on a free-GTranslate site; the others make it
 permanent or would fire once it is fixed.
 
 ### 1. The readiness test trusts a marker instead of the content
@@ -446,3 +446,110 @@ Also verified:
 
 Not yet exercised: players 4-6, and GTranslate paid (`pro_version` / `enterprise_version`), which
 has no credentials on this machine.
+
+---
+
+## Round 2 — custom CSS selector, and the title
+
+Tested on localhost with **player 2 (Default Pro)** and **player 3 (AtlasVoice TTS Pro)**. Two more
+defects, both fixed: commits `0f73d18cb` and `3eceddfe9` on `feature/TTS-289`.
+
+### Custom CSS selector works
+
+The customer fills in **Include Content By CSS Selectors** (`tta__settings_css_selectors`), and every
+earlier test here said nothing about that path: the local value `div.post-content` matches **zero**
+elements on this theme, so those runs all used the fallback extractor.
+
+Set to `div.page-content` (which does match on hello-elementor) and switched language:
+
+- **Player 2** — `de` = `"DE TTS-280 Yvonne style — separators, quotes, Jetpack. DE Y1 The strike
+  committee…"`, `tta__listening_lang` `de-DE`, voice `Google Deutsch`.
+- **Player 3** — identical capture, followed by the reload the MP3 players need.
+
+So a custom selector does not break translation capture.
+
+**Worth checking with the customer:** their selector is `div.post-content`. If that matches nothing on
+*their* theme too, the extractor has been silently falling back for them all along — a separate
+configuration problem from this bug.
+
+### Defect 7 — the title was dropped. REGRESSION FROM THIS TICKET'S FIRST COMMIT
+
+`#readTranslatedDOMContent()` read the cloned wrapper's `textContent` directly, which has no title.
+That value is what `getContent()` falls back to when the Include selector matches nothing, so on those
+sites the title vanished as soon as the language changed.
+
+```js
+// Assets/js/compatibality/plugins/TTSGtranslate.js  (0f73d18cb)
+
+ import {
+     getContent,
+     getContentByLanguage,
+     findBatchSplitPoint,
+     shouldUseDOMTitle,
+-    normalizeLanguageCode
++    normalizeLanguageCode,
++    addTitleAndSanitizeContent
+ } from "../../TTSProHelper";
+
+     #readTranslatedDOMContent() {
+         // ...clone the wrapper, strip script/style/figure, apply exclude
+         // selectors and exclude tags (unchanged)...
+
+-        let content = clonedWrapper?.textContent || clonedWrapper?.innerText || '';
+-        content = content.replace(/\s+/g, ' ').trim();
++        // TTS-289: hand the cloned wrapper to the same routine the normal
++        // extractor uses, rather than reading textContent directly. It prepends
++        // the (translated) DOM title and applies the delimiter rules — reading
++        // textContent here dropped the title whenever the site's "Include
++        // Content By CSS Selectors" matched nothing, because this value is then
++        // what getContent() falls back to.
++        let content = addTitleAndSanitizeContent(window.TTS, clonedWrapper, buttonId, 0, this.selectedLang);
++        content = String(content || '').replace(/\s+/g, ' ').trim();
+
+         return content || null;
+     }
+```
+
+Reusing `addTitleAndSanitizeContent()` also means the title cannot double up: when the Include selector
+*does* match, the normal extractor wins and this value is never used.
+
+| Include selector | before | after |
+|---|---|---|
+| `div.page-content` (matches 1) | title present | title present |
+| `div.post-content` (matches 0) | `"DE Y1 The strike committee…"` — **no title** | `"DE TTS-280 Yvonne style — separators… DE Y1 …"` |
+
+### Defect 8 — `shouldUseDOMTitle()` keyed on a mutating value
+
+Same root cause as the `this.defaultLang` fix above. It compared the target language against
+`tta__listening_lang` — which a successful capture **rewrites** to the translated language — so any
+later call for that same language returned false, the DOM title was skipped and the untranslated PHP
+title came back: an English title prepended to German body text.
+
+```js
+// Assets/js/TTSProHelper.js, shouldUseDOMTitle()  (3eceddfe9)
+
+-    const defaultLang = (ttsObj?.settings?.listening?.tta__listening_lang || '').substring(0, 2).toLowerCase();
++    // TTS-289: read ttsObjPro.language first. tta__listening_lang is REWRITTEN to
++    // the translated language by a successful capture, so comparing against it
++    // makes this return false on the next call and the untranslated PHP title
++    // comes back. ttsObjPro.language is the site's own language from PHP and
++    // never moves.
++    const defaultLang = (window.ttsObjPro?.language || ttsObj?.settings?.listening?.tta__listening_lang || '')
++        .substring(0, 2).toLowerCase();
+     currentLang = (currentLang || '').substring(0, 2).toLowerCase();
+```
+
+| Test | Setup | Captured content |
+|---|---|---|
+| **A** — production post-capture state | `tta__listening_lang` pre-set to `de-DE`, `ttsObjPro.language` `en-US` | `"DE TTS-280 Yvonne style — separators…"` — translated title |
+| **B** — control, old behaviour | `ttsObjPro.language` *also* forced to `de-DE` | `"TTS-280 Yvonne style - separators, quotes, Jetpack. DE Y1 Das Streikkomitee gab am Vorabend…"` — **English title on German body** |
+| **C** — clean run, real Google | untouched | `"TTS-280 Yvonne-Stil – Trennzeichen, Anführungszeichen, Jetpack. Y1 Das Streikkomitee gab am Vorabend des Streiks…"`, `de-DE`, Google Deutsch |
+
+Test B is the load-bearing one: it forces the *new* variable to the translated language and the bug
+reappears exactly as described, so Test A is not passing by accident.
+
+### Branch state
+
+`feature/TTS-289`: `4832682f3` (main fix), `0f73d18cb` (title), `3eceddfe9` (`shouldUseDOMTitle`).
+Nothing pushed or merged. Still not exercised: players 4-6, and GTranslate paid
+(`pro_version` / `enterprise_version`), which has no credentials on this machine.
