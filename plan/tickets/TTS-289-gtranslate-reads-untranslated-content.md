@@ -32,7 +32,8 @@ wrong.
 
 ## Root cause
 
-Five defects compound. The first is the trigger; the rest are what make it permanent.
+Six defects compound. Defect 6 is what actually fires on a free-GTranslate site; the others make it
+permanent or would fire once it is fixed.
 
 ### 1. The readiness test trusts a marker instead of the content
 
@@ -74,6 +75,20 @@ a poisoned entry.
 player constructor, at page load, in the source language — into `getContent()`. With
 `get_content_from_dom` **off**, `getContent()` early-returns that value, so the "translated" capture is
 the original text *regardless of timing*. That path could never have worked.
+
+
+### 6. The urlLang fast path captured at page load. FOUND DURING IMPLEMENTATION
+
+`gtranslate()` has a fast path that captures immediately when `#getLanguageFromUrl()` returns a
+language. It was written for `pro_version` / `enterprise_version`, where GTranslate translates
+server-side and the markup really is already translated. **TTS-258 widened
+`#getLanguageFromUrl()` to every GTranslate variant**, and free GTranslate stamps `<html lang>` at
+page load while the text swap arrives seconds later. Measured locally, this branch wrote the source
+text into `translations.fr` **within ~1s of page load** — before any of the waiting logic ran, which
+is why fixing the wait alone did not fix the bug.
+
+The fast path now requires `#isDomAlreadyTranslated()`: true for pro/enterprise, and for free only
+once Google's `<font>` markers are present.
 
 ### Why the forced reload made it worse
 
@@ -374,3 +389,60 @@ the console warning from `updateTranslatedContent()` never fires.
 5. `get_content_from_dom` **off** + GTranslate: capture now returns translated text (this never worked
    before).
 6. No translation plugin active at all: no baseline polling side effects, no console noise.
+
+---
+
+## What changed during implementation
+
+Testing on localhost turned up three things the plan did not anticipate. All are in the shipped
+commit (`4832682f3` on `feature/TTS-289` in the Pro repo).
+
+**A content diff alone is not enough.** Lazy-loaded widgets inside the wrapper (the Jetpack
+subscribe form on the test post) mutate it after load and read as "the page changed", so the first
+build captured untranslated text anyway. `waitForTranslatedDom()` now takes an optional `isReady`
+predicate that must agree; `TTSGtranslate` supplies `#hasGoogleTranslatedText()`, which checks for
+the `<font>` elements Google wraps every swapped text node in. Both signals must hold.
+
+**`this.defaultLang` cannot be trusted.** `getSelectedLanguage()` starts with
+`this.defaultLang = selectedLang`, so the no-argument call in `gtranslate()` sets it to **null**.
+Passing it as the source language made `expectChange` true even when switching back to English, and
+the switch-back then cached the French text as the `en` entry. `getSourceLanguage()` reads
+`ttsObjPro.language` instead, which comes from PHP and never moves.
+
+**Equality was the wrong comparison in the guard.** The stored source content includes the post
+title; a DOM capture does not. A strict compare therefore never matched and let untranslated text
+through. The guard now refuses when either string contains the other.
+
+Two smaller adjustments: the wait window is 60s rather than 20s (waiting costs nothing, since the
+player reads `window.TTS.contents` at play time), and on timeout `isTranslated` is still set so
+players 3-6 fall back to the source text instead of spinning on a loader forever.
+
+---
+
+## Test results — localhost, 2026-08-28
+
+Free 2.3.11 / Pro 3.4.8 + this fix, GTranslate 3.1.1 free, float switcher, real Google Translate.
+
+| Step | DOM | `TTS.contents[1]` | listening lang | voice | cache |
+|---|---|---|---|---|---|
+| 1. clean English page | English | English | `en` | — | empty |
+| 2. switch to French | French | **French** | `fr-FR` | Google français | `fr` = real French |
+| 3. switch back to English | English | **English** | `en-GB` | Google UK English Female | `fr` French, `en` English |
+
+Content, language and voice track the page in both directions, and the cached `fr` entry holds real
+French rather than the English source.
+
+Also verified:
+
+- **Translation never arrives** (Google throttled the test session repeatedly, which turned out to
+  be useful): nothing is cached, the player keeps coherent English text with an English voice, and
+  `[TTS] GTranslate did not finish translating in time; skipping capture.` is logged. Before the fix
+  this is precisely the moment English was written into `translations.fr`.
+- **No forced reload on player 2**: an in-page probe survived the capture, so the page was not
+  thrown away.
+- **Player 3 (AtlasVoice TTS Pro)**: renders, loads its MP3, and on a language switch where the
+  translation never lands it falls back to the source-language MP3 with no spinner and no poisoned
+  cache. The reload still happens for the MP3 players, which need per-language file URLs from PHP.
+
+Not yet exercised: players 4-6, and GTranslate paid (`pro_version` / `enterprise_version`), which
+has no credentials on this machine.
