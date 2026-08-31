@@ -1,6 +1,7 @@
 import TextToSpeech from "./TextToSpeech.js";
 import {splitSentences} from "./tts/utilities.js";
 import AtlasVoiceAnalytics from "./AtlasVoiceAnalytics";
+import {hydrateAtlasVoicePayloads} from "./tts/payload-hydrator.js";
 
 // Auto-close timeout duration (15 seconds)
 const MODAL_AUTO_CLOSE_TIMEOUT = 15000;
@@ -1226,10 +1227,16 @@ class TTSPlayButton extends HTMLElement {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    // TTS-290: the element renders in its constructor from window.TTS, so the
+    // payload MUST be hydrated before the definition upgrades the elements
+    // already in the document. Doing it here (rather than relying on the PHP
+    // inline hydrator's own DOMContentLoaded listener being registered first)
+    // is what makes the player immune to optimizers that delay inline JS.
+    // No-ops when the hydrator already ran.
+    hydrateAtlasVoicePayloads();
+
     // Define the new element
     if (!customElements.get('tts-play-button')) {
         customElements.define('tts-play-button', TTSPlayButton);
-    } else {
-        console.log({foundcustomElements: customElements.get('tts-play-button')});
     }
 });
