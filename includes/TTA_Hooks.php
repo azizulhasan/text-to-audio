@@ -101,6 +101,16 @@ class TTA_Hooks {
 			'tts_button_settings_3',
 			'tts_button_settings_4',
 			'NoSleep.min.js',
+			// TTS-290: the inline hydrator + wp_localize_script payloads. Excluding
+			// the bundle but not these is what let WP Rocket delay one half of the
+			// pair, leaving window.TTS undefined when the element upgraded.
+			'text-to-audio-button-js-before',
+			'text-to-audio-button-js-extra',
+			'AtlasVoicePayload',
+			'atlasvoice-payload',
+			// TTS-290: front-end helpers that were being minified/delayed as well.
+			'tta-cors-detector.js',
+			'countries-and-timezones.min.js',
 		] );
 
 		self::$excludable_js_string = apply_filters(
