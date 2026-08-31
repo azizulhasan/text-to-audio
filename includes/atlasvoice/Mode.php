@@ -110,18 +110,24 @@ class Mode {
 	public static function set( $mode ) {
 		$mode = ( $mode === self::MODE_PRODUCTION ) ? self::MODE_PRODUCTION : self::MODE_STAGING;
 		$opt  = get_option( 'tta_settings_data', array() );
-		// TTS-247 — the dashboard saves tta_settings_data via json_decode(),
-		// so it is frequently a stdClass, not an array. Casting an object to
-		// array() here would WIPE every other setting and write only the mode
-		// key. Normalise object -> array (deep) so all existing settings are
-		// preserved on Go Live / revert.
+		// TTS-247 — the dashboard saves tta_settings_data via json_decode(), so
+		// it is frequently a stdClass, not an array. Casting an object to array()
+		// here would WIPE every other setting and write only the mode key.
+		//
+		// TTS-291 — that was fixed with a deep json round-trip, which preserved
+		// the values but reshaped what we persist: the container flipped
+		// stdClass -> array, and every nested stdClass was flattened too, so the
+		// REST layer began emitting [] where it used to emit {}. Write the key in
+		// place instead: it keeps TTS-247's guarantee without rewriting anything
+		// we were not asked to change. Reading stays shape-agnostic because
+		// settings_row() already casts object -> array on read.
 		if ( is_object( $opt ) ) {
-			$opt = json_decode( wp_json_encode( $opt ), true );
+			$opt->{ self::MODE_KEY } = $mode;
+		} elseif ( is_array( $opt ) ) {
+			$opt[ self::MODE_KEY ] = $mode;
+		} else {
+			$opt = array( self::MODE_KEY => $mode );
 		}
-		if ( ! is_array( $opt ) ) {
-			$opt = array();
-		}
-		$opt[ self::MODE_KEY ] = $mode;
 		update_option( 'tta_settings_data', $opt );
 		self::bust_cache();
 
