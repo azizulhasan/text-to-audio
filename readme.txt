@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.11
+Stable tag: 2.3.12
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -397,6 +397,9 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.3.12 ( 31 Aug 2026 ) =
+Fixed : The player could be missing for your visitors while still showing normally for you as a logged-in administrator. This happened on sites using a speed plugin that holds JavaScript back until someone interacts with the page. The player now appears for everyone, whichever speed plugin you use.
+
 = 2.3.11 ( 26 Aug 2026 ) =
 Fixed : On a multisite network, any site added after the plugin was activated showed no player at all. The plugin appeared installed and its settings page worked, but nothing was ever read aloud on that site. New sites now start with working settings.
 Fixed : The player could stay hidden on sites where no "generate audio between these dates" range had been set. An empty date range now means every post, as it always should have.
@@ -685,6 +688,9 @@ Introduced :  Complete new UI introduced.
 
 
 == Upgrade Notice ==
+
+= 2.3.12 =
+Fixes the player being missing for visitors while still appearing for logged-in administrators, on sites using a speed plugin that delays JavaScript. If your readers have reported not seeing the player, this update is for you. Update recommended.
 
 = 2.3.11 =
 Important for multisite: sites added after the plugin was activated showed no player at all; they now work out of the box. Also fixes audio running sentences together and doubling full stops, makes pauses work correctly in Chinese, Japanese, Korean, Hindi and Arabic, stops Spanish and Arabic text being corrupted, and makes the "Exclude HTML tags to speak" setting actually work. Adds a toolbar link to open the content picker on the page you are viewing. Update recommended.
