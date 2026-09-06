@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.12
+Stable tag: 2.3.13
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -397,6 +397,10 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.3.13 ( 06 Sep 2026 ) =
+Added : On a multisite network, AtlasVoice now appears in your Network Admin menu. It shows every site on the network at a glance - whether each one is in staging or live mode, which player it uses, and whether it has been set up yet - with a direct link to each site's settings. Previously you had to open every site one by one to find out.
+Fixed : Taking a site live, or putting it back into staging, no longer rewrites parts of your saved settings that it was never meant to touch. Your settings now come back exactly as you left them.
+
 = 2.3.12 ( 31 Aug 2026 ) =
 Fixed : The player could be missing for your visitors while still showing normally for you as a logged-in administrator. This happened on sites using a speed plugin that holds JavaScript back until someone interacts with the page. The player now appears for everyone, whichever speed plugin you use.
 
@@ -688,6 +692,9 @@ Introduced :  Complete new UI introduced.
 
 
 == Upgrade Notice ==
+
+= 2.3.13 =
+Multisite networks now get an AtlasVoice entry in Network Admin, showing every site's mode, player and setup status in one place instead of having to check each site individually. Also fixes going live or reverting to staging quietly altering parts of your saved settings. Recommended for anyone running a network.
 
 = 2.3.12 =
 Fixes the player being missing for visitors while still appearing for logged-in administrators, on sites using a speed plugin that delays JavaScript. If your readers have reported not seeing the player, this update is for you. Update recommended.
