@@ -118,6 +118,11 @@ class TTA {
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles', 999999);
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts', 99999);
         $this->loader->add_action('admin_menu', $plugin_admin, 'TTA_menu');
+        // TTS-286: WordPress never fires `admin_menu` in Network Admin, so a
+        // plugin registered only there is invisible to a super admin on a
+        // multisite install. `network_admin_menu` only fires on multisite, so
+        // single-site installs are untouched.
+        $this->loader->add_action('network_admin_menu', $plugin_admin, 'TTA_network_menu');
 
         // Block registration and translations (following i18n-block-demo pattern)
         $this->loader->add_action('init', $plugin_admin, 'engueue_block_scripts');

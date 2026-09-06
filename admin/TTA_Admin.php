@@ -1194,6 +1194,134 @@ class TTA_Admin
     }
 
     /**
+     * TTS-286: register AtlasVoice in Network Admin.
+     *
+     * The plugin only ever hooked `admin_menu`, which WordPress does not fire in
+     * Network Admin — so on a multisite install AtlasVoice appeared inside each
+     * subsite and nowhere at network level, and a super admin had no landing
+     * page at all. This hook only fires on multisite, so single-site installs
+     * are unaffected.
+     *
+     * Deliberately NOT a network settings screen. Every AtlasVoice option is
+     * per-site today, and making any of them network-scoped needs product
+     * decisions that are still open (override vs lock, credential visibility,
+     * a resolver on every settings read in both plugins). This registers the
+     * menu and gives the super admin an overview of where each site stands,
+     * without inventing a storage model.
+     */
+    public function TTA_network_menu() {
+        add_menu_page(
+            __('AtlasVoice', 'text-to-audio'),
+            __('AtlasVoice', 'text-to-audio'),
+            // Network screens gate on network capabilities, not manage_options —
+            // a plain site admin must not reach a network page.
+            'manage_network_options',
+            TEXT_TO_AUDIO_TEXT_DOMAIN,
+            array($this, 'TTA_network_page'),
+            'dashicons-controls-volumeon',
+            // Same slot as the per-site menu: between Tools and Settings.
+            80
+        );
+    }
+
+    /**
+     * TTS-286: Network Admin overview — one row per site.
+     *
+     * Reads each site's options directly rather than through TTA_Helper /
+     * TTA_Cache: the helper memoises settings, and that in-memory cache is not
+     * invalidated by switch_to_blog(), so routing this through it would report
+     * the first site's configuration for every row.
+     */
+    public function TTA_network_page() {
+        if (!current_user_can('manage_network_options')) {
+            wp_die(esc_html__('You do not have permission to view this page.', 'text-to-audio'));
+        }
+
+        // get_sites(), switch_to_blog() and restore_current_blog() only exist on
+        // multisite. network_admin_menu never fires elsewhere, so this is
+        // belt-and-braces against a direct call.
+        if (!is_multisite()) {
+            return;
+        }
+
+        // Mode ships in this plugin, but the codebase guards it everywhere
+        // (see PickerLoader) so a partial deploy degrades instead of fataling.
+        $has_mode  = class_exists('\\TTA\\AtlasVoice\\Mode');
+        $mode_key  = $has_mode ? \TTA\AtlasVoice\Mode::MODE_KEY : 'tta__settings_atlasvoice_mode';
+        $mode_prod = $has_mode ? \TTA\AtlasVoice\Mode::MODE_PRODUCTION : 'production';
+
+        // Cap the query: a large network should not switch_to_blog() hundreds of
+        // times on a page load. The notice below tells the admin when it capped.
+        $limit = (int) apply_filters('tts_network_overview_site_limit', 100);
+        $sites = get_sites(array('number' => $limit, 'orderby' => 'id'));
+        $total = (int) get_sites(array('count' => true));
+
+        echo '<div class="wrap">';
+        echo '<h1>' . esc_html__('AtlasVoice — Network Overview', 'text-to-audio') . '</h1>';
+        echo '<p>' . esc_html__('AtlasVoice settings are stored per site. This page shows where each site stands and links to its dashboard.', 'text-to-audio') . '</p>';
+
+        echo '<table class="wp-list-table widefat fixed striped"><thead><tr>';
+        echo '<th>' . esc_html__('Site', 'text-to-audio') . '</th>';
+        echo '<th>' . esc_html__('Mode', 'text-to-audio') . '</th>';
+        echo '<th>' . esc_html__('Player', 'text-to-audio') . '</th>';
+        echo '<th>' . esc_html__('Configured', 'text-to-audio') . '</th>';
+        echo '<th>' . esc_html__('Actions', 'text-to-audio') . '</th>';
+        echo '</tr></thead><tbody>';
+
+        foreach ($sites as $site) {
+            $blog_id = (int) $site->blog_id;
+            switch_to_blog($blog_id);
+
+            $name     = get_bloginfo('name');
+            $settings = get_option('tta_settings_data');
+            $settings = is_object($settings) ? (array) $settings : (array) $settings;
+            $seeded   = !empty($settings);
+
+            $mode = isset($settings[$mode_key]) ? (string) $settings[$mode_key] : 'staging';
+
+            $listening = get_option('tta_customize_settings');
+            $listening = is_object($listening) ? (array) $listening : (array) $listening;
+            $player    = isset($listening['buttonSettings'])
+                ? (array) $listening['buttonSettings']
+                : array();
+            $player_id = isset($player['id']) ? (int) $player['id'] : 0;
+
+            $dashboard = admin_url('admin.php?page=' . TEXT_TO_AUDIO_TEXT_DOMAIN);
+            $home      = home_url('/');
+            restore_current_blog();
+
+            echo '<tr>';
+            echo '<td><strong>' . esc_html($name ? $name : ('#' . $blog_id)) . '</strong><br />';
+            echo '<a href="' . esc_url($home) . '">' . esc_html($home) . '</a></td>';
+            echo '<td>' . esc_html($mode_prod === $mode
+                ? __('Production', 'text-to-audio')
+                : __('Staging', 'text-to-audio')) . '</td>';
+            echo '<td>' . ($player_id ? esc_html((string) $player_id) : '&mdash;') . '</td>';
+            echo '<td>' . ($seeded
+                ? esc_html__('Yes', 'text-to-audio')
+                : '<span style="color:#d63638">' . esc_html__('Not configured', 'text-to-audio') . '</span>') . '</td>';
+            echo '<td><a class="button button-secondary" href="' . esc_url($dashboard) . '">'
+                . esc_html__('Open dashboard', 'text-to-audio') . '</a></td>';
+            echo '</tr>';
+        }
+
+        echo '</tbody></table>';
+
+        if ($total > count($sites)) {
+            echo '<p>' . esc_html(
+                sprintf(
+                    /* translators: 1: number of sites shown, 2: total number of sites on the network. */
+                    __('Showing %1$d of %2$d sites.', 'text-to-audio'),
+                    count($sites),
+                    $total
+                )
+            ) . '</p>';
+        }
+
+        echo '</div>';
+    }
+
+    /**
      * AJAX handler to refresh plugin data from remote.
      */
     public function ajax_refresh_plugins() {
