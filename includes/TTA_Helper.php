@@ -1140,6 +1140,251 @@ class TTA_Helper
         return (bool) apply_filters('tts_atlasvoice_cloud_enabled', $enabled);
     }
 
+    /**
+     * TTS-266: may the visitor download player 7's MP3?
+     *
+     * Free always says no; Pro answers this filter with true. The capability
+     * therefore lives in ONE place, and the free plugin carries no Pro logic and
+     * no new setting.
+     *
+     * Not a security boundary: the file sits in uploads and its URL is in the
+     * page source. This hides the control, it does not lock the file.
+     *
+     * @param int $post_id Post the player is rendering for.
+     * @return bool Defaults to false.
+     */
+    public static function atlasvoice_can_download_mp3($post_id = 0)
+    {
+        return (bool) apply_filters('atlasvoice_allow_mp3_download', false, (int) $post_id);
+    }
+
+    /**
+     * TTS-266: describe every MP3 recorded against a post, for the edit-screen panel.
+     *
+     * Lives in Free because player 7 is a free player that writes its own audio into
+     * TTA_ATLASVOICE_DIR — managing those files cannot depend on Pro being installed.
+     * Pro extends the result through `atlasvoice_metabox_engine_labels` (its own
+     * folders) and `atlasvoice_metabox_files` (remote/GCS entries) rather than
+     * carrying a second copy of this.
+     *
+     * The old panel listed raw URLs, which told an editor nothing about what they
+     * were about to delete. This resolves each entry to what a person actually
+     * needs: which voice it is, which engine made it, how long it runs, how big it
+     * is, when it was made, and — the one the old list hid completely — whether the
+     * file is still on disk at all.
+     *
+     * @param \WP_Post $post
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    public static function atlasvoice_metabox_files($post)
+    {
+        if (empty($post->ID)) {
+            return array();
+        }
+
+        $urls = get_post_meta($post->ID, 'tts_mp3_file_urls', true);
+        if (!is_array($urls)) {
+            $urls = array();
+        }
+        // Legacy rows stored the map wrapped in a numeric array.
+        if (isset($urls[0]) && is_array($urls[0])) {
+            $urls = $urls[0];
+        }
+
+        $files = array();
+
+        foreach ($urls as $key => $url) {
+            if (!is_string($url) || '' === $url) {
+                continue;
+            }
+
+            $clean_url = strtok($url, '?');
+            $path      = self::atlasvoice_path_from_url($clean_url);
+            $is_remote = ('' === $path);
+            $exists    = $is_remote ? true : file_exists($path);
+            $size      = ($exists && !$is_remote) ? (int) filesize($path) : 0;
+
+            $files[] = array(
+                'key'      => (string) $key,
+                'url'      => $url,
+                'fileName' => basename($clean_url),
+                'label'    => self::atlasvoice_key_label((string) $key),
+                'engine'   => self::atlasvoice_engine_label($clean_url),
+                'remote'   => $is_remote,
+                'exists'   => (bool) $exists,
+                'size'     => $size,
+                'sizeText' => $size ? size_format($size, 1) : '',
+                'dateText' => ($exists && !$is_remote)
+                    ? date_i18n(get_option('date_format'), (int) filemtime($path))
+                    : '',
+                'duration' => ($exists && !$is_remote) ? self::atlasvoice_duration($path) : 0,
+            );
+        }
+
+        return apply_filters('atlasvoice_metabox_files', $files, $post);
+    }
+
+    /**
+     * Local filesystem path for an uploads URL, or '' when the URL is not ours
+     * (a signed cloud link, for instance — those are remote and always "present").
+     *
+     * Also the guard the delete and upload routes rely on: a path this returns is
+     * always inside the uploads directory.
+     *
+     * @param string $url
+     * @return string
+     */
+    public static function atlasvoice_path_from_url($url)
+    {
+        $uploads = wp_upload_dir();
+
+        if (empty($uploads['baseurl']) || empty($uploads['basedir'])) {
+            return '';
+        }
+
+        if (0 !== strpos($url, $uploads['baseurl'])) {
+            return '';
+        }
+
+        $path = $uploads['basedir'] . substr($url, strlen($uploads['baseurl']));
+
+        // Never let ".." in a stored URL walk out of uploads.
+        if (false !== strpos($path, '..')) {
+            return '';
+        }
+
+        return $path;
+    }
+
+    /**
+     * Duration in seconds, cached against the file's own mtime and size.
+     *
+     * getID3 has to read the file to answer this, and the edit screen would
+     * otherwise pay that cost for every file on every load. The cache key changes
+     * whenever the file does, so a replaced MP3 is re-measured automatically.
+     *
+     * @param string $path
+     * @return int Seconds, or 0 when the duration could not be read.
+     */
+    private static function atlasvoice_duration($path)
+    {
+        $key   = 'atlasvoice_dur_' . md5($path . '|' . filemtime($path) . '|' . filesize($path));
+        $known = get_transient($key);
+
+        if (false !== $known) {
+            return (int) $known;
+        }
+
+        if (!function_exists('wp_read_audio_metadata')) {
+            require_once ABSPATH . 'wp-admin/includes/media.php';
+        }
+
+        $seconds = 0;
+        if (function_exists('wp_read_audio_metadata')) {
+            $meta = wp_read_audio_metadata($path);
+            if (is_array($meta) && !empty($meta['length'])) {
+                $seconds = (int) round($meta['length']);
+            }
+        }
+
+        set_transient($key, $seconds, WEEK_IN_SECONDS);
+
+        return $seconds;
+    }
+
+    /**
+     * "en-US--voice--en_US-amy-medium" becomes "English (US) · Amy".
+     *
+     * @param string $key
+     * @return string
+     */
+    private static function atlasvoice_key_label($key)
+    {
+        $voice    = '';
+        $language = $key;
+
+        if (false !== strpos($key, '--voice--')) {
+            list($language, $voice) = explode('--voice--', $key, 2);
+        }
+
+        $languages = apply_filters('atlasvoice_metabox_language_names', array(
+            'en'    => __('English', 'text-to-audio'),
+            'en-us' => __('English (US)', 'text-to-audio'),
+            'en-gb' => __('English (UK)', 'text-to-audio'),
+            'es-es' => __('Spanish', 'text-to-audio'),
+            'fr-fr' => __('French', 'text-to-audio'),
+            'de-de' => __('German', 'text-to-audio'),
+            'it-it' => __('Italian', 'text-to-audio'),
+            'pt-br' => __('Portuguese (Brazil)', 'text-to-audio'),
+            'hi-in' => __('Hindi', 'text-to-audio'),
+            'ja-jp' => __('Japanese', 'text-to-audio'),
+            'ko-kr' => __('Korean', 'text-to-audio'),
+            'zh-cn' => __('Chinese', 'text-to-audio'),
+        ));
+
+        $lookup = strtolower(str_replace('_', '-', $language));
+        $name   = isset($languages[$lookup]) ? $languages[$lookup] : $language;
+
+        if ('' === $voice) {
+            return $name;
+        }
+
+        return $name . ' · ' . self::atlasvoice_voice_label($voice);
+    }
+
+    /**
+     * Voice ids are engine-shaped ("en_US-amy-medium", "voice_id::Bianca",
+     * "en-US-Chirp3-HD-Achernar-FEMALE"). Pull out the part a human recognises.
+     *
+     * @param string $voice
+     * @return string
+     */
+    private static function atlasvoice_voice_label($voice)
+    {
+        if (false !== strpos($voice, '::')) {
+            $parts = explode('::', $voice);
+            $voice = end($parts);
+        }
+
+        // Piper: "en_US-amy-medium" -> "Amy".
+        if (preg_match('/^[a-z]{2}_[A-Z]{2}-([a-z0-9]+)-/', $voice, $m)) {
+            return ucfirst($m[1]);
+        }
+
+        // Google: "en-US-Chirp3-HD-Achernar-FEMALE" -> "Achernar".
+        if (preg_match('/-([A-Za-z]+)-(?:FEMALE|MALE|NEUTRAL)$/', $voice, $m)) {
+            return $m[1];
+        }
+
+        return ucfirst(str_replace(array('_', '-'), ' ', $voice));
+    }
+
+    /**
+     * Which player produced a file, read from where it was stored. A post that has
+     * been through several players ends up with a mixed set, and the folder is the
+     * only record of which engine made which file.
+     *
+     * Free knows only its own folder; Pro adds its four through the filter.
+     *
+     * @param string $url
+     * @return string
+     */
+    private static function atlasvoice_engine_label($url)
+    {
+        $map = apply_filters('atlasvoice_metabox_engine_labels', array(
+            '/TTA/atlasvoice/' => __('AtlasVoice Cloud', 'text-to-audio'),
+        ));
+
+        foreach ($map as $fragment => $label) {
+            if (false !== strpos($url, $fragment)) {
+                return $label;
+            }
+        }
+
+        return '';
+    }
+
     public static function set_default_settings()
     {
         $settings = (array)get_option('tta_settings_data');

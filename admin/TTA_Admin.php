@@ -429,7 +429,15 @@ class TTA_Admin
                 'text-to-audio-dashboard-ui',
                 plugin_dir_url(__FILE__) . 'js/build/text-to-audio-dashboard-ui.min.js',
                 array('TextToSpeech', 'wp-element', 'wp-i18n'),
-                $this->version,
+                // The dashboard is code-split into content-hashed chunks, and this
+                // bundle holds the map from chunk id to file name. Versioning it on
+                // the plugin version alone lets a browser keep a cached bundle whose
+                // map points at chunk files that no longer exist -- "ChunkLoadError:
+                // Loading chunk N failed" and a blank tab. asset_version() keys on
+                // the file's mtime (falling back to the plugin version), so a rebuilt
+                // bundle always busts the cache. Every other handle here already
+                // uses it.
+                $this->asset_version('js/build/text-to-audio-dashboard-ui.min.js'),
                 true
             );
 
@@ -538,6 +546,100 @@ class TTA_Admin
         return $mtime ? (string) $mtime : $this->version;
     }
 
+
+    /**
+     * TTS-266: assets for the post edit screen's audio panel.
+     *
+     * `wp-element` and `wp-components` are core-registered scripts, not
+     * block-editor-only, so the same panel runs in the block editor, the classic
+     * editor and the WooCommerce product screen. The one thing the classic editor
+     * does NOT load is the components stylesheet — enqueue it explicitly or every
+     * control renders unstyled on exactly those screens.
+     *
+     * @param string $hook_suffix
+     * @return void
+     */
+    public function enqueue_audio_panel_assets( $hook_suffix )
+    {
+        if (!in_array($hook_suffix, array('post.php', 'post-new.php'), true)) {
+            return;
+        }
+
+        if (!apply_filters('atlasvoice_render_audio_panel', true)) {
+            return;
+        }
+
+        global $post;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- reading the edited post id, no state change.
+        if (empty($post) && isset($_GET['post'])) {
+            $post = get_post(absint($_GET['post']));
+        }
+
+        if (empty($post->ID) || !current_user_can('edit_post', $post->ID)) {
+            return;
+        }
+
+        $player_id = (int) get_player_id();
+
+        wp_enqueue_script(
+            'atlasvoice-audio-panel',
+            plugin_dir_url(__FILE__) . 'js/build/atlasvoice-audio-panel.min.js',
+            array('wp-element', 'wp-components', 'wp-i18n'),
+            $this->asset_version('js/build/atlasvoice-audio-panel.min.js'),
+            true
+        );
+
+        wp_enqueue_style('wp-components');
+        wp_enqueue_style('dashicons');
+        wp_enqueue_style(
+            'atlasvoice-audio-panel',
+            plugin_dir_url(__FILE__) . 'css/atlasvoice-audio-panel.css',
+            array('wp-components'),
+            $this->asset_version('css/atlasvoice-audio-panel.css')
+        );
+
+        $title     = TTA_Helper::sazitize_content($post->post_title, true, 'title');
+        $settings  = TTA_Helper::tts_get_settings();
+        $language  = TTA_Helper::tts_site_language($settings);
+        $voice     = TTA_Helper::tts_get_voice($settings);
+        $resolved  = TTA_Helper::get_player_language_and_player_voice($language, $voice, $settings, $post);
+        $file_name = TTA_Helper::tts_file_name($title, $resolved['language'], $resolved['voice'], $post->ID, $post);
+
+        wp_localize_script('atlasvoice-audio-panel', 'atlasVoiceMetabox', apply_filters(
+            'atlasvoice_audio_panel_data',
+            array(
+                'postId'       => (int) $post->ID,
+                'postStatus'   => (string) $post->post_status,
+                'path'         => TTA_Helper::get_post_date($post),
+                'playerId'     => $player_id,
+                'files'        => TTA_Helper::atlasvoice_metabox_files($post),
+                'expectedName' => $file_name ? $file_name . '.mp3' : '',
+                // Derive the pattern from the name tts_file_name() actually built,
+                // not from the player id. `player_id > 3` looked like the rule, but
+                // player 7 keys its META on language+voice while naming the FILE on
+                // language alone — so that test made the panel reject the very name
+                // it was telling the user to use.
+                'requiresVoice' => (bool) ( $file_name && false !== strpos( $file_name, '__voice__' ) ),
+                'fileFormat'   => ( $file_name && false !== strpos( $file_name, '__voice__' ) )
+                    ? '{file_name}__lang__{language}__voice__{voice}.mp3'
+                    : '{file_name}__lang__{language}.mp3',
+                // Pro switches this on for the players it generates; Free's player 7
+                // makes its audio on the first play, so it has nothing to trigger.
+                'canGenerate'  => false,
+                'generateUrl'  => '',
+                'apiURL'       => esc_url_raw(rest_url()) . 'tta/v1/',
+                'restNonce'    => wp_create_nonce('wp_rest'),
+            ),
+            $post
+        ));
+
+        wp_set_script_translations(
+            'atlasvoice-audio-panel',
+            'text-to-audio',
+            plugin_dir_path(dirname(__FILE__)) . 'languages'
+        );
+    }
+
     public function enqueue_TTA()
     {
 
@@ -612,6 +714,12 @@ class TTA_Admin
         // image_url + plugin_url are dashboard/wizard-only too (no player JS reads
         // ttsObj.plugin_url) -- drop them from the front end as well.
         // 'pro' (Pro upgrade-link campaign config) is admin/dashboard-only too.
+        // TTS-266: player 7 renders a native <audio controls>. Whether it keeps
+        // the browser's own download item is decided here — never for players
+        // 1-6, and for player 7 only when Pro answers the filter.
+        $this->localize_data['atlasvoice_allow_download'] =
+            ( 7 === (int) $player_id ) && TTA_Helper::atlasvoice_can_download_mp3( get_the_ID() );
+
         $frontend_localize_data = apply_filters(
             'tta_frontend_localize_data',
             array_diff_key( $this->localize_data, array( 'admin_url' => '', 'image_url' => '', 'plugin_url' => '', 'pro' => '' ) )

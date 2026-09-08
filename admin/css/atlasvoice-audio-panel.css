@@ -1,0 +1,275 @@
+/**
+ * TTS-266 — AtlasVoice post metabox.
+ *
+ * The panel is built from @wordpress/components, so almost all of its styling is
+ * inherited from the admin. What lives here is only the AtlasVoice identity —
+ * the existing brand teal and delete red the plugin already used — plus the few
+ * bits of layout the stock components do not cover (the file rows).
+ *
+ * Everything is scoped under .atlasvoice-metabox so nothing leaks into the rest
+ * of the edit screen.
+ */
+
+.atlasvoice-metabox {
+	/* The colours the plugin already shipped: the metabox banner teal and the
+	   delete-button red. Kept exactly, so the new panel reads as the same product. */
+	--av-brand: #184c53;
+	--av-brand-hover: #12393e;
+	--av-danger: #a02d2d;
+	--av-danger-hover: #822424;
+
+	margin-top: 12px;
+}
+
+/* ── brand the primary action, leave every other control stock ─────────── */
+.atlasvoice-metabox .components-button.is-primary {
+	background: var(--av-brand);
+	border-color: var(--av-brand);
+	color: #fff;
+}
+.atlasvoice-metabox .components-button.is-primary:hover:not(:disabled),
+.atlasvoice-metabox .components-button.is-primary:focus:not(:disabled) {
+	background: var(--av-brand-hover);
+	border-color: var(--av-brand-hover);
+	color: #fff;
+}
+.atlasvoice-metabox .components-button.is-primary:focus:not(:disabled) {
+	box-shadow: 0 0 0 1px #fff, 0 0 0 3px var(--av-brand);
+}
+
+.atlasvoice-metabox .av-destructive.components-button.is-primary {
+	background: var(--av-danger);
+	border-color: var(--av-danger);
+}
+.atlasvoice-metabox .av-destructive.components-button.is-primary:hover:not(:disabled),
+.atlasvoice-metabox .av-destructive.components-button.is-primary:focus:not(:disabled) {
+	background: var(--av-danger-hover);
+	border-color: var(--av-danger-hover);
+}
+.atlasvoice-metabox .components-button.is-link.av-delete-link {
+	color: var(--av-danger);
+	text-decoration: underline;
+}
+
+.atlasvoice-metabox .components-checkbox-control__input:checked {
+	background: var(--av-brand);
+	border-color: var(--av-brand);
+}
+
+/* ── section headings ─────────────────────────────────────────────────── */
+.atlasvoice-metabox .av-section-title,
+.atlasvoice-section-title {
+	margin: 0 0 8px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #646970;
+}
+
+/* ── the file list ────────────────────────────────────────────────────── */
+.atlasvoice-metabox .av-list {
+	border: 1px solid #dcdcde;
+	border-radius: 3px;
+	overflow: hidden;
+	background: #fff;
+}
+
+.atlasvoice-metabox .av-list-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	flex-wrap: wrap;
+	padding: 8px 12px;
+	background: #f6f7f7;
+	border-bottom: 1px solid #dcdcde;
+	font-size: 12px;
+	color: #646970;
+}
+/* The header checkbox is a label, not a form field with its own margin stack. */
+.atlasvoice-metabox .av-list-head .components-base-control,
+.atlasvoice-metabox .av-row .components-base-control {
+	margin-bottom: 0;
+}
+.atlasvoice-metabox .components-base-control__field {
+	margin-bottom: 0;
+}
+
+.atlasvoice-metabox .av-row {
+	display: grid;
+	grid-template-columns: auto auto 1fr auto;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 12px;
+	border-top: 1px solid #f0f0f1;
+}
+.atlasvoice-metabox .av-list > .av-row:first-of-type {
+	border-top: 0;
+}
+.atlasvoice-metabox .av-row.is-selected {
+	background: rgba(24, 76, 83, 0.06);
+}
+.atlasvoice-metabox .av-row.is-missing .av-row-name {
+	color: #646970;
+}
+
+.atlasvoice-metabox .av-play {
+	width: 32px;
+	height: 32px;
+	min-width: 32px;
+	padding: 0;
+	border-radius: 50%;
+	border: 1px solid rgba(24, 76, 83, 0.35);
+	background: #fff;
+	color: var(--av-brand);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+}
+.atlasvoice-metabox .av-play:hover:not(:disabled) {
+	background: rgba(24, 76, 83, 0.08);
+}
+.atlasvoice-metabox .av-play:disabled {
+	opacity: 0.4;
+	cursor: default;
+}
+.atlasvoice-metabox .av-play .dashicons {
+	width: 18px;
+	height: 18px;
+	font-size: 18px;
+	line-height: 1;
+}
+
+.atlasvoice-metabox .av-row-main {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+.atlasvoice-metabox .av-row-name {
+	font-weight: 600;
+	font-size: 13px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+.atlasvoice-metabox .av-engine {
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	padding: 1px 5px;
+	border-radius: 2px;
+	border: 1px solid #dcdcde;
+	color: #646970;
+	white-space: nowrap;
+}
+.atlasvoice-metabox .av-row-meta {
+	font-size: 12px;
+	color: #646970;
+	font-variant-numeric: tabular-nums;
+}
+.atlasvoice-metabox .av-row-meta .av-missing {
+	color: var(--av-danger);
+	font-weight: 600;
+}
+.atlasvoice-metabox .av-row-file {
+	font-family: Menlo, Consolas, monaco, monospace;
+	font-size: 11px;
+	color: #8c8f94;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* ── selection bar ────────────────────────────────────────────────────── */
+.atlasvoice-metabox .av-selbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	flex-wrap: wrap;
+	margin-top: 10px;
+	padding: 9px 12px;
+	border: 1px solid rgba(160, 45, 45, 0.4);
+	border-radius: 3px;
+	background: rgba(160, 45, 45, 0.06);
+	font-size: 13px;
+}
+.atlasvoice-metabox .av-selbar-actions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+/* ── upload + empty state ─────────────────────────────────────────────── */
+.atlasvoice-metabox .av-fold {
+	margin-top: 4px;
+	border-top: 1px solid #f0f0f1;
+}
+.atlasvoice-metabox .av-name-row {
+	display: flex;
+	align-items: stretch;
+	gap: 0;
+}
+.atlasvoice-metabox .av-name-row code {
+	flex: 1;
+	min-width: 0;
+	padding: 7px 9px;
+	border: 1px solid #dcdcde;
+	border-right: 0;
+	border-radius: 2px 0 0 2px;
+	background: #f6f7f7;
+	font-size: 11px;
+	overflow-x: auto;
+	white-space: nowrap;
+}
+.atlasvoice-metabox .av-name-row .components-button {
+	border-radius: 0 2px 2px 0;
+}
+.atlasvoice-metabox .av-hint {
+	margin: 8px 0 0;
+	font-size: 12px;
+	color: #646970;
+}
+.atlasvoice-metabox .av-hint code {
+	font-size: 11px;
+	background: #f6f7f7;
+	padding: 1px 4px;
+}
+.atlasvoice-metabox .av-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 10px;
+	padding: 14px;
+	border: 1px dashed #c3c4c7;
+	border-radius: 3px;
+	background: #f6f7f7;
+}
+.atlasvoice-metabox .av-empty p {
+	margin: 0;
+	font-size: 13px;
+	color: #646970;
+}
+.atlasvoice-metabox .av-busy {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 13px;
+	color: #646970;
+}
+
+/* ── the custom-CSS section keeps the same visual language ────────────── */
+.atlasvoice-css-section {
+	margin-top: 20px;
+	padding-top: 14px;
+	border-top: 1px solid #f0f0f1;
+}
+
+.atlasvoice-metabox .av-list-foot {
+	margin: 10px 0 0;
+}

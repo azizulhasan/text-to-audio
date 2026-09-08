@@ -26,12 +26,26 @@ mix.js('admin/js/AtlasVoicePlayerInsights.js', 'admin/js/build/AtlasVoicePlayerI
 mix.js('src/extractor/tts-extractor-engine.js', 'admin/js/build/tts-extractor-engine.min.js');
 mix.js('src/picker/tts-picker.js', 'admin/js/build/tts-picker.min.js');
 
+// TTS-266: the post edit screen's audio panel (list / play / delete / replace).
+// Built without JSX and with wp.element + wp.components as externals -- see the
+// note in the externals block below.
+mix.js('src/metabox/index.js', 'admin/js/build/atlasvoice-audio-panel.min.js');
+
 
 
 const path = require('path');
 const fs = require('fs');
 
 mix.webpackConfig({
+    // TTS-266: the audio panel imports @wordpress/element and @wordpress/components.
+    // Neither is installed here, and neither should be -- both are core-registered
+    // scripts declared as enqueue dependencies. Mapping them to the wp globals keeps
+    // ONE React on the page; bundling a second copy from node_modules is what
+    // produces "invalid hook call". No other bundle imports these two.
+    externals: {
+        '@wordpress/element': ['wp', 'element'],
+        '@wordpress/components': ['wp', 'components'],
+    },
     output: {
         // TTS-249: content-hashed chunk filenames so each build produces uniquely
         // named lazy chunks. Without this, the static `tab-*.chunk.js` names never

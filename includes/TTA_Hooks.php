@@ -402,6 +402,19 @@ class TTA_Hooks {
             <div id="atlasVoice_analytics"></div>
         </div>
 		<?php
+		/**
+		 * TTS-266: the audio panel — the list of generated MP3s, with play, delete
+		 * and replace. Rendered by Free because player 7 is a free player that
+		 * writes its own files; Pro extends the same panel through filters rather
+		 * than shipping a second one.
+		 *
+		 * Pro's legacy markup (behind `tts_pro_regenerate_mp3_old_ui`) turns this
+		 * off so the two never render together.
+		 */
+		if ( apply_filters( 'atlasvoice_render_audio_panel', true ) ) {
+			echo '<div id="atlasvoice-metabox-root" class="atlasvoice-metabox"></div>';
+		}
+
 		\do_action( 'tts_after_metabox_content' );
 	}
 

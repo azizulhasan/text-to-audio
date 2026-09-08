@@ -47,11 +47,50 @@ function defineAtlasVoiceCloudPlayer() {
     /** Batch loop state, so a second click cannot start a second generation. */
     isGenerating = false;
 
+    // ── progressive first play (TTS-266, option B) ──────────────────────
+    //
+    // A 40-batch post needs 2-3 minutes to finish, and nobody waits that long
+    // watching a counter. So the very first playthrough plays each batch's own
+    // part file as it lands — audio starts in a few seconds — and only switches
+    // to the single merged MP3 once the server has built it.
+    //
+    // The native seek bar is OFF during that phase on purpose: an <audio> element
+    // holds one part at a time, so its timeline would show the part's length and
+    // reset to 0:00 at every join. A player whose timer restarts ten times reads
+    // as broken. The button drives play/pause meanwhile, and the real controls
+    // appear with the merged file, which is what every later visitor gets.
+
+    /** Part-file URLs, in play order, as each batch comes back. */
+    avParts = [];
+
+    /** Index into avParts of the part currently playing. */
+    avPartIndex = -1;
+
+    /** True while this playthrough is chaining part files. */
+    avProgressive = false;
+
+    /** Set while swapping src between parts, so analytics sees one play, not N. */
+    avSwitchingPart = false;
+
+    /** A part ended before the next one had been generated: resume on arrival. */
+    avWaitingForPart = false;
+
+    /** The merged single-file MP3, once the last batch reports it. */
+    avMergedURL = "";
+
+    /** Seconds of audio in the parts already played, for the merged handover. */
+    avElapsed = 0;
+
+    /** Total batches for this post, known before the loop starts. */
+    avTotalBatches = 0;
+
+    /** The status line shown while batches are still being generated. */
+    avStatusEl = null;
+
     constructor(buttonId, content = "", button = null, TTS = window.TTS) {
         super(buttonId, content, button, TTS);
 
-        this.audio = new Audio();
-        this.audio.preload = "none";
+        this.audio = this.#mountAudio();
 
         this.#bindAudioEvents();
 
@@ -86,18 +125,57 @@ function defineAtlasVoiceCloudPlayer() {
         return window.TTS?.extra?.[this.buttonId] || {};
     }
 
+    // ── static resolvers ────────────────────────────────────────────────
+    //
+    // The bootstrap has to know whether a finished MP3 exists BEFORE it decides
+    // what to render — with a file, player 7 shows the native <audio> alone and
+    // no button at all. It cannot construct a player to find out (constructing
+    // one mounts DOM and claims window.TextToSpeech), so the resolution lives in
+    // statics and the instance getters below delegate to them. One implementation,
+    // two callers.
+
+    static avLanguageFor(buttonId) {
+        const extra = window.TTS?.extra?.[buttonId] || {};
+        const listening = window.TTS?.settings?.listening || {};
+
+        return extra.language || listening.tta__listening_lang || "en-US";
+    }
+
+    static avVoiceFor(buttonId) {
+        // Only accept a saved voice that exists in the catalogue: sites upgrading
+        // from player 1 still carry a browser voice name here.
+        const listening = window.TTS?.settings?.listening || {};
+        const saved = listening.tta__listening_voice;
+        if (saved && ATLASVOICE_VOICES.some((v) => v.id === saved)) return saved;
+
+        const language = this.avLanguageFor(buttonId);
+        const first = ATLASVOICE_VOICES.find((v) => v.lang === language);
+
+        return first ? first.id : "";
+    }
+
+    static fileURLFor(buttonId) {
+        const urls = window.TTS?.settings?.fileURLs || {};
+        // Prefer the key PHP computed (tts_get_file_url_key) over rebuilding it
+        // here — it already accounts for whether a voice forms part of the key.
+        const serverKey = window.TTS?.extra?.[buttonId]?.file_url_key;
+        const language = this.avLanguageFor(buttonId);
+        const voice = this.avVoiceFor(buttonId);
+
+        return (
+            (serverKey && urls[serverKey]) ||
+            urls[`${language}--voice--${voice}`] ||
+            urls[language] ||
+            ""
+        );
+    }
+
     get avLanguage() {
-        return this.avExtra.language || this.avSettings.tta__listening_lang || "en-US";
+        return AtlasVoiceCloudPlayer.avLanguageFor(this.buttonId);
     }
 
     get avVoice() {
-        // Only accept a saved voice that exists in the catalogue: sites upgrading
-        // from player 1 still carry a browser voice name here.
-        const saved = this.avSettings.tta__listening_voice;
-        if (saved && ATLASVOICE_VOICES.some((v) => v.id === saved)) return saved;
-
-        const first = ATLASVOICE_VOICES.find((v) => v.lang === this.avLanguage);
-        return first ? first.id : "";
+        return AtlasVoiceCloudPlayer.avVoiceFor(this.buttonId);
     }
 
     get avSpeed() {
@@ -117,20 +195,149 @@ function defineAtlasVoiceCloudPlayer() {
      * the `tts_mp3_file_urls` post meta keyed by language(+voice).
      */
     get avFileURL() {
-        const urls = window.TTS?.settings?.fileURLs || {};
-        // Prefer the key PHP computed (tts_get_file_url_key) over rebuilding it
-        // here — it already accounts for whether a voice forms part of the key.
-        const serverKey = this.avExtra.file_url_key;
-
-        return (
-            (serverKey && urls[serverKey]) ||
-            urls[`${this.avLanguage}--voice--${this.avVoice}`] ||
-            urls[this.avLanguage] ||
-            ""
-        );
+        return AtlasVoiceCloudPlayer.fileURLFor(this.buttonId);
     }
 
     // ── audio element wiring ────────────────────────────────────────────
+    /**
+     * Player 7 plays a real file, so it gets a real <audio controls> element:
+     * seek bar, volume, playback position and keyboard control all come from the
+     * browser, and assistive tech gets the native media widget instead of a lone
+     * button. It is mounted next to the button, inside the same root the button
+     * lives in (a shadow root for this player, so the host theme's CSS cannot
+     * reach it).
+     *
+     * Reused when one is already there: the bootstrap builds a NEW player
+     * instance every time playback returns to "listen", and each one must not
+     * append another element.
+     */
+    #mountAudio() {
+        const anchor = this.speakButton;
+        const root = this.avMountRoot();
+        const existing = root.querySelector?.(".atlasvoice-audio");
+        if (existing) return existing;
+
+        const audio = document.createElement("audio");
+        audio.className = "atlasvoice-audio";
+        // Controls stay off until a COMPLETE file is the source — see the
+        // progressive-play note on the fields above.
+        audio.controls = false;
+        audio.preload = "none";
+        audio.style.cssText = "display:block;width:100%;margin-top:8px;";
+        // Hidden until there is a source, so a page never shows an empty transport.
+        audio.hidden = true;
+
+        // Free hides the download affordance; Pro's filter turns it back on.
+        // controlsList is honoured by Chrome/Edge/Opera and IGNORED by Firefox
+        // and Safari — this is a feature gate, not a lock.
+        if (!window.ttsObj?.atlasvoice_allow_download) {
+            audio.setAttribute("controlsList", "nodownload");
+        }
+
+        if (anchor) anchor.insertAdjacentElement("afterend", audio);
+        else root.appendChild(audio);
+
+        return audio;
+    }
+
+    /**
+     * Where this button's UI lives: the button's own root when there is a button,
+     * otherwise the host element's shadow root — the audio-only render has no
+     * button to anchor against.
+     */
+    avMountRoot() {
+        // `isConnected` matters: updateButtonUI() re-renders the wrapper, which
+        // leaves this.speakButton pointing at a DETACHED node whose getRootNode()
+        // is its own orphan fragment — querying that finds nothing at all.
+        if (this.speakButton?.isConnected && this.speakButton.getRootNode) {
+            return this.speakButton.getRootNode();
+        }
+
+        const host = document.querySelector(
+            `tts-play-button[data-id="${this.buttonId}"]`
+        );
+
+        return host?.shadowRoot || host || document.body;
+    }
+
+    /**
+     * One-line progress while batches are generated: "Generating audio 5 of 12".
+     * Sits where the audio element will be, and is removed the moment the real
+     * controls appear, so the visitor never sees two things at once.
+     */
+    avSetStatus(text) {
+        const root = this.avMountRoot();
+
+        if (!this.avStatusEl) {
+            this.avStatusEl = root.querySelector?.(".atlasvoice-status") || null;
+        }
+
+        if (!this.avStatusEl) {
+            this.avStatusEl = document.createElement("p");
+            this.avStatusEl.className = "atlasvoice-status";
+            this.avStatusEl.setAttribute("role", "status");
+            this.avStatusEl.setAttribute("aria-live", "polite");
+            this.avStatusEl.style.cssText =
+                "margin:6px 0 0;font-size:13px;opacity:.75;";
+
+            if (this.audio) this.audio.insertAdjacentElement("beforebegin", this.avStatusEl);
+            else root.appendChild(this.avStatusEl);
+        }
+
+        this.avStatusEl.textContent = text;
+    }
+
+    avClearStatus() {
+        this.avStatusEl?.remove();
+        this.avStatusEl = null;
+    }
+
+    /**
+     * Hand playback over to the finished, single MP3: real controls, seek bar,
+     * download item (Pro), and no AtlasVoice button in front of it.
+     *
+     * Called both by the bootstrap, when the file already existed at page load,
+     * and at the end of a progressive first play.
+     */
+    avShowNativeControls(url, { autoplay = false } = {}) {
+        if (!url) return;
+
+        this.avProgressive = false;
+        this.avClearStatus();
+
+        if (this.audio.src !== url) this.audio.src = url;
+        // Headers only, so the control shows the real duration instead of
+        // "0:00 / 0:00" before the first play. The audio itself still waits.
+        this.audio.preload = "metadata";
+        this.audio.controls = true;
+        this.audio.hidden = false;
+
+        // The button was only ever the trigger for generating. With a real file
+        // the native element is the whole player.
+        //
+        // Query the LIVE node rather than using this.speakButton: updateButtonUI()
+        // re-renders the wrapper's innerHTML, so the reference captured at
+        // construction can point at a detached node. And hide with an inline
+        // display, not the `hidden` attribute — the button's own `#id{display:flex}`
+        // rule outranks `[hidden]` and would keep it on screen.
+        const liveButton = this.avMountRoot().querySelector?.(
+            `#tts__listent_content_${this.buttonId}`
+        );
+        if (liveButton) liveButton.style.display = "none";
+
+        if (autoplay) {
+            // The element is reused across player instances, so it can still be
+            // parked at the end of the previous playthrough.
+            if (this.audio.currentTime > 0) this.audio.currentTime = 0;
+            this.audio.playbackRate = this.avSpeed;
+            this.audio.play().catch((e) =>
+                // Autoplay policy blocks playback without a user gesture; expected
+                // on autoplay and not an error worth surfacing.
+                console.warn("[AtlasVoice] play blocked", e)
+            );
+        }
+    }
+
     /**
      * Analytics is driven from the <audio> element's own events rather than from
      * speechSynthesis callbacks. Same three calls the base class makes, so the
@@ -138,6 +345,11 @@ function defineAtlasVoiceCloudPlayer() {
      */
     #bindAudioEvents() {
         this.audio.addEventListener("play", () => {
+            // Moving to the next part is one continuous listen, not a new play.
+            if (this.avSwitchingPart) {
+                this.avSwitchingPart = false;
+                return;
+            }
             this.listenStatus = "pause";
             this.displayButtonText(this.listenStatus);
             this.analytics?.trackPlay();
@@ -145,13 +357,34 @@ function defineAtlasVoiceCloudPlayer() {
 
         this.audio.addEventListener("pause", () => {
             // 'ended' also fires a 'pause'; let the ended handler own that case.
-            if (this.audio.ended) return;
+            if (this.audio.ended || this.avSwitchingPart) return;
             this.listenStatus = "resume";
             this.displayButtonText(this.listenStatus);
             this.analytics?.trackPause();
         });
 
         this.audio.addEventListener("ended", () => {
+            if (this.avProgressive) {
+                // Keep a running total so the handover to the merged file can
+                // resume at the same point in the post.
+                this.avElapsed += this.audio.duration || 0;
+
+                // Next part already generated: play straight on.
+                if (this.avPlayNextPart()) return;
+
+                // Caught up with the generator — wait for the next batch rather
+                // than reporting the post as finished.
+                if (this.isGenerating) {
+                    this.avWaitingForPart = true;
+                    return;
+                }
+
+                // Every part played and the merge is done: hand over to the real
+                // file so the visitor gets a seek bar from here on.
+                this.avProgressive = false;
+                if (this.avMergedURL) this.avShowNativeControls(this.avMergedURL);
+            }
+
             this.listenStatus = "listen";
             this.displayButtonText(this.listenStatus);
             this.analytics?.trackEnd();
@@ -166,6 +399,89 @@ function defineAtlasVoiceCloudPlayer() {
         });
     }
 
+    /**
+     * Queue a freshly generated part and, if nothing is playing yet, start it.
+     * This is what turns "wait 3 minutes" into "audio in a few seconds".
+     */
+    avEnqueuePart(url) {
+        if (!url) return;
+
+        this.avParts.push(url);
+
+        if (!this.avProgressive) {
+            this.avProgressive = true;
+            this.audio.hidden = false;
+            this.avPlayNextPart();
+            return;
+        }
+
+        if (this.avWaitingForPart) {
+            this.avWaitingForPart = false;
+            this.avPlayNextPart();
+        }
+    }
+
+    /**
+     * Swap the queued parts for the finished single file, mid-playback, without
+     * the visitor noticing.
+     *
+     * This is not optional: merging DELETES the part files server-side, so once
+     * the last batch lands every part still sitting in the queue is a 404. The
+     * handover also earns the visitor the real seek bar the moment it is
+     * available, instead of at the end of the playthrough.
+     */
+    avHandoverToMerged(url) {
+        if (!url) return;
+
+        const offset = this.avElapsed + (this.audio.currentTime || 0);
+        const wasPlaying = !this.audio.paused;
+
+        this.avProgressive = false;
+        this.avWaitingForPart = false;
+        this.avParts = [];
+        this.avClearStatus();
+
+        // One continuous listen, not a new play: keep analytics quiet.
+        this.avSwitchingPart = true;
+
+        this.audio.addEventListener(
+            "loadedmetadata",
+            () => {
+                const duration = this.audio.duration;
+                if (Number.isFinite(duration)) {
+                    this.audio.currentTime = Math.min(offset, Math.max(duration - 0.25, 0));
+                }
+                if (wasPlaying) {
+                    this.audio.play().catch(() => {
+                        this.avSwitchingPart = false;
+                    });
+                } else {
+                    this.avSwitchingPart = false;
+                }
+            },
+            { once: true }
+        );
+
+        this.avShowNativeControls(url);
+    }
+
+    /** @returns {boolean} true when another part was available and started. */
+    avPlayNextPart() {
+        const next = this.avPartIndex + 1;
+        if (next >= this.avParts.length) return false;
+
+        this.avPartIndex = next;
+        this.avSwitchingPart = true;
+        this.audio.src = this.avParts[next];
+        this.audio.playbackRate = this.avSpeed;
+        this.audio.play().catch((e) => {
+            this.avSwitchingPart = false;
+            console.warn("[AtlasVoice] part playback blocked", e);
+        });
+
+        return true;
+    }
+
     // ── playback (overrides) ────────────────────────────────────────────
     /**
      * Signature matches the base class so every existing caller — button click,
@@ -175,32 +491,38 @@ function defineAtlasVoiceCloudPlayer() {
     async speak(speech, content = this.content, isClicked = false) {
         if (!content) content = this.content;
 
-        let url = this.avFileURL;
-
-        if (!url) {
-            url = await this.generate(content);
+        // The normal case: a finished MP3 already exists, so the native element
+        // is the whole player from the first frame.
+        const existing = this.avFileURL;
+        if (existing) {
+            this.avShowNativeControls(existing, { autoplay: true });
+            return;
         }
 
-        if (!url) {
+        // First ever play of this post. generate() streams parts into the queue
+        // as they arrive, so audio starts long before this promise settles.
+        const merged = await this.generate(content);
+        this.avMergedURL = merged;
+
+        if (!merged && !this.avParts.length) {
             // Nothing playable. The caller keeps the button in its idle state;
             // the PHP side decides whether to fall back to player 1.
+            this.avClearStatus();
             this.listenStatus = "listen";
             this.displayButtonText(this.listenStatus);
             return;
         }
 
-        if (this.audio.src !== url) {
-            this.audio.src = url;
-        }
+        this.avClearStatus();
 
-        this.audio.playbackRate = this.avSpeed;
+        if (!merged) return;
 
-        try {
-            await this.audio.play();
-        } catch (e) {
-            // Autoplay policy blocks playback without a user gesture; that is
-            // expected on autoplay and not an error worth surfacing.
-            console.warn("[AtlasVoice] play blocked", e);
+        // Still hearing the parts: swap to the merged file at the same position
+        // (the parts have just been deleted server-side). Otherwise start it.
+        if (this.avProgressive) {
+            this.avHandoverToMerged(merged);
+        } else {
+            this.avShowNativeControls(merged, { autoplay: true });
         }
     }
 
@@ -235,12 +557,26 @@ function defineAtlasVoiceCloudPlayer() {
         if (this.isGenerating) return "";
         this.isGenerating = true;
 
-        // Smaller batches mean audio starts sooner and each request stays well
-        // inside the server-side HTTP timeout. Measured: ~1,950 chars is ~63s of
-        // compute on Kokoro, which is uncomfortably close to any sane timeout;
-        // Piper covers the same text in a few seconds.
-        const batchSize = 1200;
-        const chunks = this.splitForBatches(content, batchSize);
+        // The FIRST batch is deliberately small — it is the one the visitor waits
+        // on, and ~600 characters comes back in a few seconds. Later batches are
+        // bigger because they are generated while earlier audio is already
+        // playing, so their latency is hidden. Same split Pro uses for players
+        // 3-6 (`initial_batch_charlen` / `latter_batch_char_length`).
+        //
+        // The upper bound also keeps each request inside the server-side HTTP
+        // timeout: ~1,950 chars is ~63s of compute on Kokoro, uncomfortably close
+        // to any sane timeout; Piper covers the same text in a few seconds.
+        // Filterable so a slow host can lengthen the first batch, or a fast one
+        // shorten it further, without touching the bundle.
+        const hooks = window.wp?.hooks;
+        const firstBatchSize = hooks
+            ? hooks.applyFilters("atlasvoice_first_batch_charlen", 300)
+            : 300;
+        const batchSize = hooks
+            ? hooks.applyFilters("atlasvoice_batch_charlen", 1200)
+            : 1200;
+        const chunks = this.splitForBatches(content, batchSize, firstBatchSize);
+        this.avTotalBatches = chunks.length;
         // Server-authored, per button — see the `extra` getter above.
         const title = this.avExtra.file_name || "";
         const path = this.avExtra.date || "";
@@ -255,6 +591,15 @@ function defineAtlasVoiceCloudPlayer() {
         try {
             for (let i = 0; i < chunks.length; i++) {
                 const isLast = i === chunks.length - 1;
+
+                // Progress is only worth showing while the visitor is still
+                // waiting for the first sound; after that the audio itself is the
+                // feedback, and the line just says the rest is still coming.
+                this.avSetStatus(
+                    this.avProgressive
+                        ? this.avStatusText("preparing", i + 1, chunks.length)
+                        : this.avStatusText("generating", i + 1, chunks.length)
+                );
 
                 const res = await fetch(
                     `${window.ttsObj?.api_url || ""}tta/v1/atlasvoice_synthesize`,
@@ -304,6 +649,12 @@ function defineAtlasVoiceCloudPlayer() {
                     url = json.data.url;
                 }
 
+                // Every stored batch reports its own part file. Queue it so the
+                // visitor hears batch 1 while batch 2 is still being made.
+                if (!isLast && json?.status && json?.data?.url) {
+                    this.avEnqueuePart(json.data.url);
+                }
+
                 if (json?.status === false) {
                     console.warn("[AtlasVoice] generation stopped:", json?.data?.message);
                     break;
@@ -321,14 +672,21 @@ function defineAtlasVoiceCloudPlayer() {
     /**
      * Split on sentence ends, never mid-word, so each batch is independently
      * speakable and the joins between batches land on natural pauses.
+     *
+     * @param {string} text
+     * @param {number} size      Characters per batch after the first.
+     * @param {number} firstSize Characters in the first batch (smaller: it is the
+     *                           one the visitor actually waits for).
      */
-    splitForBatches(text, size) {
+    splitForBatches(text, size, firstSize = size) {
         const sentences = String(text).split(/(?<=[.!?])\s+/);
         const out = [];
         let buffer = "";
 
         sentences.forEach((sentence) => {
-            if (buffer.length + sentence.length > size && buffer) {
+            const limit = out.length === 0 ? firstSize : size;
+
+            if (buffer.length + sentence.length > limit && buffer) {
                 out.push(buffer.trim());
                 buffer = "";
             }
@@ -338,6 +696,34 @@ function defineAtlasVoiceCloudPlayer() {
         if (buffer.trim()) out.push(buffer.trim());
 
         return out.length ? out : [String(text)];
+    }
+
+    /**
+     * Progress wording. Kept in one place so both states read the same way and
+     * stay translatable.
+     */
+    avStatusText(phase, batchNo, total) {
+        const { sprintf, __ } = window.wp?.i18n || {};
+
+        if (!sprintf || !__) {
+            return phase === "generating"
+                ? `Generating audio ${batchNo} of ${total}…`
+                : `Preparing the full track ${batchNo} of ${total}…`;
+        }
+
+        return phase === "generating"
+            ? sprintf(
+                  /* translators: 1: current batch number, 2: total batches. */
+                  __("Generating audio %1$d of %2$d…", "text-to-audio"),
+                  batchNo,
+                  total
+              )
+            : sprintf(
+                  /* translators: 1: current batch number, 2: total batches. */
+                  __("Preparing the full track %1$d of %2$d…", "text-to-audio"),
+                  batchNo,
+                  total
+              );
     }
     }
 

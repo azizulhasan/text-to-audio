@@ -140,6 +140,40 @@ class TTA_Api_Routes {
 			);
 		}
 
+		/**
+		 * TTS-266: the post edit screen's audio panel.
+		 *
+		 * Free owns these because player 7 is a free player writing into
+		 * TTA_ATLASVOICE_DIR — a site with no Pro must still be able to remove or
+		 * replace the audio it generated. Both are gated on `edit_post` for the
+		 * specific post, not on manage_options: an author manages their own posts.
+		 */
+		register_rest_route(
+			$this->namespace,
+			'/delete_mp3_file',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'atlasvoice_delete_mp3' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/upload_mp3_file',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'atlasvoice_upload_mp3' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
 		// register track route.
 		register_rest_route(
 			$this->namespace,
@@ -1267,11 +1301,15 @@ class TTA_Api_Routes {
             ) );
         }
 
-        // ---- not the last batch: nothing else to do ------------------------
+        // ---- not the last batch: report the batch file we just wrote -------
+        // The URL points at this batch's own part file, which the merge step
+        // deletes once the last batch arrives. Returning it keeps every response
+        // in the sequence the same shape as the final one, so a caller never has
+        // to special-case an empty `url`.
         if ( ! $is_last ) {
             return \rest_ensure_response( array(
                 'status' => true,
-                'data'   => array( 'url' => '', 'message' => 'batch_stored', 'file_already_exists' => false ),
+                'data'   => array( 'url' => $dir_url . $temp_title . '.mp3', 'message' => 'batch_stored', 'file_already_exists' => false ),
             ) );
         }
 
@@ -1326,6 +1364,219 @@ class TTA_Api_Routes {
      * TTS-266: strip anything that could escape the audio directory.
      * The route is visitor-callable, so the title is never trusted as a path.
      */
+
+    /**
+     * TTS-266: delete one or more generated MP3s for a post.
+     *
+     * Free owns this so a site without Pro can still manage player 7's audio. It
+     * only ever removes files it can resolve back inside wp_upload_dir() — a URL
+     * that resolves nowhere (a signed cloud link) drops out of the meta and is
+     * handed to `atlasvoice_mp3_deleted` so Pro can clean its bucket.
+     *
+     * @param \WP_REST_Request $request
+     * @return \WP_REST_Response
+     */
+    public function atlasvoice_delete_mp3( $request ) {
+        $body    = json_decode( $request->get_body(), true );
+        $post_id = is_array( $body ) && isset( $body['post_id'] ) ? absint( $body['post_id'] ) : 0;
+
+        if ( ! $post_id ) {
+            return \rest_ensure_response( array(
+                'status'  => false,
+                'message' => __( 'Missing post id.', 'text-to-audio' ),
+            ) );
+        }
+
+        $file_urls = \get_post_meta( $post_id, 'tts_mp3_file_urls', true );
+        if ( ! is_array( $file_urls ) ) {
+            $file_urls = array();
+        }
+        if ( isset( $file_urls[0] ) && is_array( $file_urls[0] ) ) {
+            $file_urls = $file_urls[0];
+        }
+
+        $keys = array();
+        if ( isset( $body['language_keys'] ) && is_array( $body['language_keys'] ) ) {
+            $keys = array_map( 'sanitize_text_field', $body['language_keys'] );
+        }
+        if ( ! empty( $body['delete_all'] ) ) {
+            $keys = array_keys( $file_urls );
+        }
+
+        $keys = array_values( array_unique( array_filter( $keys ) ) );
+
+        if ( empty( $keys ) ) {
+            return \rest_ensure_response( array(
+                'status'  => false,
+                'message' => __( 'Nothing selected to delete.', 'text-to-audio' ),
+            ) );
+        }
+
+        $deleted = array();
+        $removed = array();
+
+        foreach ( $keys as $key ) {
+            if ( ! isset( $file_urls[ $key ] ) ) {
+                continue;
+            }
+
+            $url  = $file_urls[ $key ];
+            $path = \TTA\TTA_Helper::atlasvoice_path_from_url( strtok( $url, '?' ) );
+
+            if ( $path && file_exists( $path ) ) {
+                $fs = self::atlasvoice_filesystem();
+                if ( $fs ) {
+                    $fs->delete( $path );
+                } else {
+                    // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- WP_Filesystem unavailable.
+                    @unlink( $path );
+                }
+
+                // TTS-256: the word-timing sidecar belongs to the same audio.
+                $sidecar = preg_replace( '/\.mp3$/', '.json', $path );
+                if ( $sidecar && $sidecar !== $path && file_exists( $sidecar ) ) {
+                    $fs ? $fs->delete( $sidecar ) : @unlink( $sidecar );
+                }
+            }
+
+            $removed[ $key ] = $url;
+            unset( $file_urls[ $key ] );
+            $deleted[] = $key;
+        }
+
+        if ( empty( $file_urls ) ) {
+            \delete_post_meta( $post_id, 'tts_mp3_file_urls' );
+            \delete_post_meta( $post_id, 'tts_is_mp3_file_url_exists' );
+        } else {
+            \update_post_meta( $post_id, 'tts_mp3_file_urls', $file_urls );
+        }
+
+        /**
+         * Fires after the local files and meta are gone.
+         *
+         * Pro listens to remove the matching objects from cloud storage — Free has
+         * no business knowing that storage exists.
+         *
+         * @param int   $post_id
+         * @param array $removed Map of language key => URL that was removed.
+         */
+        \do_action( 'atlasvoice_mp3_deleted', $post_id, $removed );
+
+        \TTA\TTA_Cache::flush();
+
+        return \rest_ensure_response( array(
+            'status'  => true,
+            'deleted' => $deleted,
+            'urls'    => $file_urls,
+        ) );
+    }
+
+    /**
+     * TTS-266: replace a post's audio with a hand-made MP3.
+     *
+     * The file name carries the language (and, above player 3, the voice) — that is
+     * how the player later matches a file to the selected voice, so a name that
+     * does not carry them is rejected rather than silently stored.
+     *
+     * @param \WP_REST_Request $request
+     * @return \WP_REST_Response
+     */
+    public function atlasvoice_upload_mp3( $request ) {
+        $post_id = absint( $request->get_param( 'post_id' ) );
+        $files   = $request->get_file_params();
+
+        if ( ! $post_id || empty( $files['file'] ) ) {
+            return \rest_ensure_response( array(
+                'status'  => false,
+                'message' => __( 'Missing post id or file.', 'text-to-audio' ),
+            ) );
+        }
+
+        $file = $files['file'];
+
+        if ( ! empty( $file['error'] ) || empty( $file['tmp_name'] ) || ! is_uploaded_file( $file['tmp_name'] ) ) {
+            return \rest_ensure_response( array(
+                'status'  => false,
+                'message' => __( 'The upload did not arrive intact.', 'text-to-audio' ),
+            ) );
+        }
+
+        // atlasvoice_safe_name() strips dots — it sanitises TITLES, which get their
+        // extension appended afterwards. Run it on the base name only, then put the
+        // extension back, or the name arrives as "...__lang__en_USmp3" and both the
+        // filetype check and the language regex below fail on a perfectly good file.
+        $name = self::atlasvoice_safe_name(
+            preg_replace( '/\.mp3$/i', '', basename( $file['name'] ) )
+        ) . '.mp3';
+
+        // Trust the bytes, not the browser's Content-Type: wp_check_filetype_and_ext
+        // sniffs the real file. An .mp3 name over a non-MP3 body is refused here.
+        $checked = \wp_check_filetype_and_ext( $file['tmp_name'], $name, array( 'mp3' => 'audio/mpeg' ) );
+
+        if ( empty( $checked['ext'] ) || 'mp3' !== $checked['ext'] || 'audio/mpeg' !== $checked['type'] ) {
+            return \rest_ensure_response( array(
+                'status'  => false,
+                'message' => __( 'That file is not an MP3.', 'text-to-audio' ),
+            ) );
+        }
+
+        if ( ! preg_match( '/__lang__([a-zA-Z0-9_-]+?)(?:__voice__([a-zA-Z0-9_-]+))?\.mp3$/', $name, $matches ) ) {
+            return \rest_ensure_response( array(
+                'status'  => false,
+                'message' => __( 'The file name must carry the language, like name__lang__en-US.mp3', 'text-to-audio' ),
+            ) );
+        }
+
+        $language = str_replace( '_', '-', $matches[1] );
+        $voice    = isset( $matches[2] ) ? $matches[2] : '';
+        $key      = \TTA\TTA_Helper::tts_get_file_url_key( $language, $voice );
+
+        $date_path = self::atlasvoice_safe_date_path( (string) $request->get_param( 'path' ) );
+
+        /**
+         * Where uploaded audio is written, per player.
+         *
+         * Free writes into its own folder; Pro points this at the folder its active
+         * player reads from, so a replacement lands where the player looks.
+         *
+         * @param array $target array( 'dir' => path, 'url' => url ) with trailing slashes.
+         */
+        $target = \apply_filters( 'atlasvoice_upload_target', array(
+            'dir' => TTA_ATLASVOICE_DIR,
+            'url' => TTA_ATLASVOICE_DIR_URL,
+        ), $post_id );
+
+        $dir     = \trailingslashit( $target['dir'] ) . ( $date_path ? \trailingslashit( $date_path ) : '' );
+        $dir_url = \trailingslashit( $target['url'] ) . ( $date_path ? \trailingslashit( $date_path ) : '' );
+
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- server-side path, not input.
+        $contents = file_get_contents( $file['tmp_name'] );
+
+        if ( false === $contents || ! self::atlasvoice_put_contents( $dir . $name, $contents ) ) {
+            return \rest_ensure_response( array(
+                'status'  => false,
+                'message' => __( 'The file could not be written. Check the uploads folder permissions.', 'text-to-audio' ),
+            ) );
+        }
+
+        $file_urls = \get_post_meta( $post_id, 'tts_mp3_file_urls', true );
+        if ( ! is_array( $file_urls ) ) {
+            $file_urls = array();
+        }
+        $file_urls[ $key ] = $dir_url . $name;
+
+        \update_post_meta( $post_id, 'tts_mp3_file_urls', $file_urls );
+        \update_post_meta( $post_id, 'tts_is_mp3_file_url_exists', true );
+
+        \TTA\TTA_Cache::flush();
+
+        return \rest_ensure_response( array(
+            'status' => true,
+            'key'    => $key,
+            'url'    => $file_urls[ $key ],
+        ) );
+    }
+
     private static function atlasvoice_safe_name( $name ) {
         $name = \str_replace( ' ', '_', (string) $name );
         $name = \preg_replace( '/[^\p{L}\p{N}_\-]/u', '', $name );
@@ -1476,6 +1727,47 @@ class TTA_Api_Routes {
                     array( 'status' => 403 )
                 );
             }
+            return true;
+        }
+
+        // 2️⃣ Post-editor routes: nonce, plus edit rights on THAT post.
+        //
+        // TTS-266. Deliberately not manage_options — an author managing the audio
+        // of their own post is normal editorial work, and the capability check is
+        // per-post rather than global so it cannot be used to touch someone else's.
+        $post_editor_routes = array(
+            '/tta/v1/delete_mp3_file',
+            '/tta/v1/upload_mp3_file',
+        );
+
+        if ( in_array( $route, $post_editor_routes, true ) ) {
+            $nonce = isset( $_SERVER['HTTP_X_WP_NONCE'] )
+                ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_WP_NONCE'] ) )
+                : '';
+
+            if ( ! $nonce || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+                return new \WP_Error(
+                    'rest_forbidden',
+                    __( 'Invalid or missing nonce.', 'text-to-audio' ),
+                    array( 'status' => 403 )
+                );
+            }
+
+            // The id arrives as JSON on delete and as multipart on upload.
+            $post_id = (int) $request->get_param( 'post_id' );
+            if ( ! $post_id ) {
+                $body    = json_decode( $request->get_body(), true );
+                $post_id = is_array( $body ) && isset( $body['post_id'] ) ? (int) $body['post_id'] : 0;
+            }
+
+            if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
+                return new \WP_Error(
+                    'rest_forbidden',
+                    __( 'You cannot edit this post.', 'text-to-audio' ),
+                    array( 'status' => 403 )
+                );
+            }
+
             return true;
         }
 

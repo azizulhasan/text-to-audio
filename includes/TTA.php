@@ -144,6 +144,10 @@ class TTA {
         // TTS-249 (I3): modal behaviour as an enqueued script (was inline <script>).
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_deactivation_rescue_assets');
 
+        // TTS-266: the post edit screen's audio panel (list / play / delete /
+        // replace). Free owns it because player 7 writes its own MP3s.
+        $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_audio_panel_assets');
+
         // TTS-250: the AudioObject JSON-LD schema generator was removed from the
         // free plugin. It only ever produced output when an MP3 file existed
         // (a Pro-only feature — the free browser-SpeechSynthesis player has no

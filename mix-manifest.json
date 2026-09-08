@@ -10,6 +10,7 @@
     "/admin/js/build/AtlasVoicePlayerInsights.min.js": "/admin/js/build/AtlasVoicePlayerInsights.min.js",
     "/admin/js/build/tts-extractor-engine.min.js": "/admin/js/build/tts-extractor-engine.min.js",
     "/admin/js/build/tts-picker.min.js": "/admin/js/build/tts-picker.min.js",
+    "/admin/js/build/atlasvoice-audio-panel.min.js": "/admin/js/build/atlasvoice-audio-panel.min.js",
     "/chunks/tab-settings.042d91f40b86e4a4.chunk.js": "/chunks/tab-settings.042d91f40b86e4a4.chunk.js",
     "/chunks/tab-highlight.5d733dfd1bbfeb49.chunk.js": "/chunks/tab-highlight.5d733dfd1bbfeb49.chunk.js",
     "/chunks/tab-listening.e43b817fbf7395c1.chunk.js": "/chunks/tab-listening.e43b817fbf7395c1.chunk.js",
