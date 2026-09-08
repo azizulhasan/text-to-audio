@@ -3,9 +3,9 @@ Contributors: atlasaidev, hasanazizul
 Donate link: http://atlasaidev.com/
 Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.7
+Stable tag: 2.3.13
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -397,6 +397,36 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.3.13 ( 06 Sep 2026 ) =
+Added : On a multisite network, AtlasVoice now appears in your Network Admin menu. It shows every site on the network at a glance - whether each one is in staging or live mode, which player it uses, and whether it has been set up yet - with a direct link to each site's settings. Previously you had to open every site one by one to find out.
+Fixed : Taking a site live, or putting it back into staging, no longer rewrites parts of your saved settings that it was never meant to touch. Your settings now come back exactly as you left them.
+
+= 2.3.12 ( 31 Aug 2026 ) =
+Fixed : The player could be missing for your visitors while still showing normally for you as a logged-in administrator. This happened on sites using a speed plugin that holds JavaScript back until someone interacts with the page. The player now appears for everyone, whichever speed plugin you use.
+
+= 2.3.11 ( 26 Aug 2026 ) =
+Fixed : On a multisite network, any site added after the plugin was activated showed no player at all. The plugin appeared installed and its settings page worked, but nothing was ever read aloud on that site. New sites now start with working settings.
+Fixed : The player could stay hidden on sites where no "generate audio between these dates" range had been set. An empty date range now means every post, as it always should have.
+Fixed : Audio ran sentences together and sometimes doubled a full stop. Headings, list items, quotes and separators now each read as their own sentence, and a paragraph that already ends in a full stop no longer gets a second one added after a closing quote.
+Fixed : Pauses now work in every language. Chinese, Japanese, Korean, Hindi and Arabic endings were not recognised, so an extra English full stop was read aloud after them.
+Fixed : Spanish and Arabic text could be corrupted, showing a replacement character in place of an opening inverted question mark or exclamation mark.
+Fixed : The "Exclude HTML tags to speak" setting had no effect at all on sites not using the Pro plugin. Whatever you chose there is now actually applied.
+Added : A new "Pick content to read" link in the AtlasVoice toolbar menu opens the content picker on the page you are already viewing, instead of going back to the dashboard to find the post.
+Improved : Site owners can now change any part of how content is read using filters, without editing the plugin.
+
+= 2.3.10 ( 18 Aug 2026 ) =
+Fixed : Every article could end up playing the same audio. On sites using a speed or optimisation plugin that combines scripts, one article's audio was reused for every other article. Each article now always plays its own.
+Fixed : The shortcode's id attribute did nothing. Pointing the player at another article with [atlasvoice id="123"] produced no player at all, and it also stopped every later player on that page from appearing.
+Fixed : Custom button wording set in a shortcode was ignored, and could overwrite the wording on every other button across the site.
+Improved : The content picker is no longer loaded for visitors. It is an editing tool, so it now loads only for logged-in users who can edit posts.
+Improved : Lighter pages. Player code is no longer repeated once per player on pages with several players.
+Updated : Tested with WordPress 7.1.
+
+= 2.3.8 ( 14 Aug 2026 ) =
+Improved : Faster page loads. The plugin now serves compressed stylesheets, cutting the size of the player stylesheet your visitors download by around 40%.
+Improved : Smaller download. Duplicate uncompressed stylesheets and an unused icon font stylesheet are no longer bundled with the plugin.
+Updated : Documentation.
+
 = 2.3.7 ( 02 Aug 2026 ) =
 Added : Floating player — the Listen button now follows your readers. It sits in your content as usual, then docks to the edge of the screen once they scroll past it, so the controls are always within reach on long articles. Choose where it docks from Customization: bottom full width, bottom right, bottom left, or sticky top. Prefer it to stay put? Switch docking off in Settings.
 Added : Button position and floating position are now two separate choices, so you can place the button before or after your content and still pick a different corner for it to dock to.
@@ -662,6 +692,21 @@ Introduced :  Complete new UI introduced.
 
 
 == Upgrade Notice ==
+
+= 2.3.13 =
+Multisite networks now get an AtlasVoice entry in Network Admin, showing every site's mode, player and setup status in one place instead of having to check each site individually. Also fixes going live or reverting to staging quietly altering parts of your saved settings. Recommended for anyone running a network.
+
+= 2.3.12 =
+Fixes the player being missing for visitors while still appearing for logged-in administrators, on sites using a speed plugin that delays JavaScript. If your readers have reported not seeing the player, this update is for you. Update recommended.
+
+= 2.3.11 =
+Important for multisite: sites added after the plugin was activated showed no player at all; they now work out of the box. Also fixes audio running sentences together and doubling full stops, makes pauses work correctly in Chinese, Japanese, Korean, Hindi and Arabic, stops Spanish and Arabic text being corrupted, and makes the "Exclude HTML tags to speak" setting actually work. Adds a toolbar link to open the content picker on the page you are viewing. Update recommended.
+
+= 2.3.10 =
+Fixes a problem where every article could play the same audio on sites that combine scripts for speed, restores the shortcode's id attribute and custom button wording, and stops the editing-only content picker loading for visitors. Update recommended.
+
+= 2.3.8 =
+Serves compressed stylesheets for faster page loads, trims duplicate files from the download, and updates the documentation. No change to how the player looks or behaves.
 
 = 2.3.7 =
 The Listen button can now float — it follows readers down the page and docks to the edge you choose (bottom bar, either corner, or sticky top), and this is now free rather than Pro-only. Button position and docking position are separate settings. Update recommended.

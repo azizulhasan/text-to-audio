@@ -1,6 +1,7 @@
 import TextToSpeech from "./TextToSpeech.js";
 import {splitSentences} from "./tts/utilities.js";
 import AtlasVoiceAnalytics from "./AtlasVoiceAnalytics";
+import {hydrateAtlasVoicePayloads} from "./tts/payload-hydrator.js";
 
 // Auto-close timeout duration (15 seconds)
 const MODAL_AUTO_CLOSE_TIMEOUT = 15000;
@@ -795,14 +796,22 @@ class TTSPlayButton extends HTMLElement {
 
         // TTS-241 — resolve text + icon from per-player overrides first.
         const playerId = window?.ttsObj?.player_id || 1;
+        // TTS-270: PHP has already applied the full precedence chain for THIS
+        // button — instance attribute → per-player → flat → default →
+        // tta__button_text_arr filter — so prefer its result and keep one
+        // source of truth. The page-global buttonTextArr stays as the fallback
+        // for markup rendered before this payload existed.
+        const perButton = window?.TTS?.buttons?.[buttonId]?.textArr || null;
         const players = window?.ttsObj?.buttonTextArr?.players || {};
         const stateForPlayer = (s) => (players[playerId] && players[playerId][s]) || null;
         const resolveText = (s, flatKey, fallback) => {
+            if (perButton && perButton[flatKey]) return perButton[flatKey];
             const ps = stateForPlayer(s);
             if (ps && ps.text) return ps.text;
             return window?.ttsObj?.buttonTextArr?.[flatKey] || fallback;
         };
         const resolveHover = (s, flatKey, fallback) => {
+            if (perButton && perButton[flatKey]) return 'Text To Audio : ' + perButton[flatKey];
             const ps = stateForPlayer(s);
             if (ps && ps.hover) return 'Text To Audio : ' + ps.hover;
             const flat = window?.ttsObj?.buttonTextArr?.[flatKey];
@@ -1226,10 +1235,16 @@ class TTSPlayButton extends HTMLElement {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    // TTS-290: the element renders in its constructor from window.TTS, so the
+    // payload MUST be hydrated before the definition upgrades the elements
+    // already in the document. Doing it here (rather than relying on the PHP
+    // inline hydrator's own DOMContentLoaded listener being registered first)
+    // is what makes the player immune to optimizers that delay inline JS.
+    // No-ops when the hydrator already ran.
+    hydrateAtlasVoicePayloads();
+
     // Define the new element
     if (!customElements.get('tts-play-button')) {
         customElements.define('tts-play-button', TTSPlayButton);
-    } else {
-        console.log({foundcustomElements: customElements.get('tts-play-button')});
     }
 });

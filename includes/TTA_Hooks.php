@@ -101,6 +101,16 @@ class TTA_Hooks {
 			'tts_button_settings_3',
 			'tts_button_settings_4',
 			'NoSleep.min.js',
+			// TTS-290: the inline hydrator + wp_localize_script payloads. Excluding
+			// the bundle but not these is what let WP Rocket delay one half of the
+			// pair, leaving window.TTS undefined when the element upgraded.
+			'text-to-audio-button-js-before',
+			'text-to-audio-button-js-extra',
+			'AtlasVoicePayload',
+			'atlasvoice-payload',
+			// TTS-290: front-end helpers that were being minified/delayed as well.
+			'tta-cors-detector.js',
+			'countries-and-timezones.min.js',
 		] );
 
 		self::$excludable_js_string = apply_filters(
@@ -495,17 +505,14 @@ class TTA_Hooks {
 	 * @return string The modified HTML string.
 	 */
 	public function tta_before_clean_content_callback( $htmlString ) {
-		$tags      = apply_filters( 'tts_delimiter_addable_tags', [ 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' ] );
-		$delimiter = \apply_filters( 'tts_sentence_delimiter', '.' );
-		// Iterate through each tag
-		foreach ( $tags as $tag ) {
-			// Create a regex pattern to match the closing tag
-			$pattern = sprintf( '/(<\/\s*%s\s*>)(?!\s*%s)/i', $tag, preg_quote( $delimiter, '/' ) );
-
-			// Replace each closing tag with the tag followed by the delimiter if it doesn't already have it
-			$htmlString = preg_replace( $pattern, '$1' . $delimiter, $htmlString );
-		}
-
+		// TTS-280: this used to insert block-boundary delimiters with its own tag
+		// list, its own delimiter lookup and its own regex-lookahead "already
+		// punctuated" test — while tta_clean_content() did the same job a few lines
+		// later with a DIFFERENT tag list, and TTSProHelper.js did it a third way.
+		//
+		// Boundary insertion now happens once, inside tta_clean_content(), after
+		// exclusions have been applied. Doing it here as well would double-insert.
+		// The filter below is kept: it is a public extension point.
 		return apply_filters( 'tta_pro_before_clean_content', $htmlString );
 	}
 
@@ -516,15 +523,32 @@ class TTA_Hooks {
 	 * @return string The modified HTML string.
 	 */
 	public function tta_after_clean_content_callback( $content ) {
-//        second one
-		// Define the delimiters
-		$delimiters = [ '\.', ',', '\?', '!', '\|', ';', ':', '¿', '¡', '،', '؟' ];
+		// TTS-280: this used to build a BYTE-based character class from a literal
+		// list that included '¿', '¡', '،' and '؟'. Those are two bytes each, so the
+		// class matched their halves, so "M9 ¿Es una pregunta" came out with a U+FFFD
+		// replacement character in place of the inverted mark, corrupting Spanish and
+		// Arabic content. The /u modifier and preg_quote() per character fix it, and the
+		// list now comes from TTA_Speech so it covers all 81 supported languages
+		// instead of Latin plus two Arabic marks.
+		$chars = array();
 
-		// Build a regular expression pattern to match multiple delimiters (with or without spaces) and keep only the first one
-		$pattern = '/([' . implode( '', $delimiters ) . '])\s*([' . implode( '', $delimiters ) . '])+(\s*)/';
+		foreach ( TTA_Speech::delimiter_characters() as $char ) {
+			if ( '' !== $char ) {
+				$chars[] = preg_quote( $char, '/' );
+			}
+		}
 
-		// Replace the matched pattern with the first delimiter and ensure there is a space after it
-		return preg_replace( $pattern, '$1 ', $content );
+		if ( empty( $chars ) ) {
+			return $content;
+		}
+
+		$class = '[' . implode( '', $chars ) . ']';
+
+		// Collapse a run of delimiters to the first one, followed by a single space.
+		$collapsed = preg_replace( '/(' . $class . ')(?:\s*' . $class . ')+\s*/u', '$1 ', $content );
+
+		// preg_replace returns null on a UTF-8 failure — never hand back null.
+		return null === $collapsed ? $content : $collapsed;
 	}
 
 

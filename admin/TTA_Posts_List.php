@@ -354,12 +354,20 @@ class TTA_Posts_List
             return false;
         }
 
-        // TTS-250: MP3 generation is a Pro-only feature (only players 3-6 produce
-        // an audio file). The detection logic was removed from the free plugin and
-        // now lives in AtlasVoice Pro, which registers the `tts_post_has_mp3`
-        // filter. With Pro absent there is no listener, so this is always false —
-        // no Pro/license check and no premium code in the free plugin.
-        return (bool) apply_filters('tts_post_has_mp3', false, $post);
+        // TTS-250: MP3 generation used to be Pro-only (players 3-6). The detection
+        // logic lives in AtlasVoice Pro, which registers the `tts_post_has_mp3`
+        // filter; with Pro absent there is no listener.
+        // TTS-266: player 7 is a FREE player that also writes `tts_mp3_file_urls`,
+        // so answer for it here — otherwise the column reports "not generated" for
+        // posts that do have audio. Still no Pro/license check in the free plugin.
+        $has_mp3 = false;
+
+        if (7 === (int) get_player_id()) {
+            $file_urls = get_post_meta($post->ID, 'tts_mp3_file_urls', true);
+            $has_mp3   = is_array($file_urls) && array_filter($file_urls);
+        }
+
+        return (bool) apply_filters('tts_post_has_mp3', $has_mp3, $post);
     }
 
     /**
@@ -420,7 +428,7 @@ class TTA_Posts_List
         // TTS-249 (I3): enqueued stylesheet instead of an inline <style> tag.
         wp_enqueue_style(
             'tta-posts-list',
-            plugin_dir_url(dirname(__FILE__)) . 'admin/css/tta-posts-list.css',
+            plugin_dir_url(dirname(__FILE__)) . 'admin/css/minify/tta-posts-list.min.css',
             array(),
             defined('TEXT_TO_AUDIO_VERSION') ? TEXT_TO_AUDIO_VERSION : false,
             'all'
