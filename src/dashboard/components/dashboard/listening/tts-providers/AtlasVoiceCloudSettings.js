@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Form, Row, Col } from "react-bootstrap";
 import { __ } from "@wordpress/i18n";
 
@@ -10,6 +10,17 @@ import {
   getAtlasVoiceLanguages,
   getAtlasVoicesForLanguage,
 } from "../../../../../../admin/js/tts/atlasvoice-voices";
+
+// TTS-266: the two synthesis engines behind player 7, shown as separate groups
+// in the voice list. Piper first because it is the one that keeps first play
+// fast; the label says why rather than naming the engine, which means nothing to
+// a site owner.
+const ENGINE_ORDER = ["piper", "kokoro"];
+
+const ENGINE_LABELS = {
+  piper: __("Fast voices", "text-to-audio"),
+  kokoro: __("Higher quality (slower to generate)", "text-to-audio"),
+};
 
 /**
  * TTS-266 — Listening settings for player 7 (AtlasVoice Cloud).
@@ -57,7 +68,34 @@ export default function AtlasVoiceCloudSettings({
     return known ? saved : voicesForLang[0]?.id || "";
   }, [listeningSettings?.tta__listening_voice, voicesForLang]);
 
+  const selectedVoiceEngine = useMemo(
+    () => voicesForLang.find((v) => v.id === selectedVoice)?.engine || "",
+    [voicesForLang, selectedVoice]
+  );
+
   const isEnabled = !!listeningSettings?.tta__atlasvoice_cloud_enabled;
+
+  // TTS-266: the preview plays a short pre-rendered recording of the selected
+  // voice. The base URL comes from PHP (derived from TTA_ATLASVOICE_API_URL), so
+  // nothing remote is hardcoded in this bundle — the mistake that had to be
+  // undone for the Google and OpenAI previews in TTS-249.
+  const sampleBase = window?.ttsObj?.atlasvoice_sample_base || "";
+  const sampleURL = sampleBase && selectedVoice ? sampleBase + selectedVoice + ".mp3" : "";
+
+  const sampleRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [sampleError, setSampleError] = useState(false);
+
+  const toggleSample = () => {
+    const el = sampleRef.current;
+    if (!el) return;
+    if (el.paused) {
+      setSampleError(false);
+      el.play().catch(() => setSampleError(true));
+    } else {
+      el.pause();
+    }
+  };
 
   return (
     <>
@@ -141,12 +179,42 @@ export default function AtlasVoiceCloudSettings({
                     {__("No voice available for this language", "text-to-audio")}
                   </option>
                 )}
-                {voicesForLang.map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {v.label}
-                  </option>
-                ))}
+
+                {/* TTS-266: grouped by engine, because the two are not
+                    interchangeable — Piper generates roughly seven times faster
+                    than Kokoro, which is the difference between a visitor
+                    waiting seconds and waiting minutes on the first play. The
+                    choice was previously invisible: both engines' voices sat in
+                    one flat list with nothing to tell them apart. */}
+                {ENGINE_ORDER.map((engine) => {
+                  const group = voicesForLang.filter((v) => v.engine === engine);
+                  if (!group.length) return null;
+
+                  return (
+                    <optgroup key={engine} label={ENGINE_LABELS[engine]}>
+                      {group.map((v) => (
+                        <option key={v.id} value={v.id}>
+                          {v.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  );
+                })}
               </Form.Select>
+
+              <Form.Text className="text-secondary d-block">
+                {selectedVoiceEngine === "piper" &&
+                  __(
+                    "Fast voice: a long post is ready in seconds.",
+                    "text-to-audio"
+                  )}
+                {selectedVoiceEngine === "kokoro" &&
+                  __(
+                    "Higher-quality voice, but roughly seven times slower to generate — a long post can take a few minutes the first time someone plays it.",
+                    "text-to-audio"
+                  )}
+              </Form.Text>
+
               <Form.Text className="text-secondary">
                 {__(
                   "Changing the language or voice means existing audio is regenerated on the next play — each language and voice is stored as its own file.",
@@ -156,6 +224,68 @@ export default function AtlasVoiceCloudSettings({
             </Form.Group>
           </Col>
         </Row>
+
+        {/* ── Voice preview ─────────────────────────────────────────
+            Only once the site owner has opted in: playing a sample is a
+            request to the AtlasVoice service, and nothing should reach it
+            before consent — even a request that carries no site data. */}
+        {isEnabled && sampleURL && (
+          <div className="d-flex align-items-center gap-3 p-2 mb-3 border rounded">
+            <button
+              type="button"
+              onClick={toggleSample}
+              className="btn btn-outline-dark rounded-circle d-flex align-items-center justify-content-center p-0 flex-shrink-0"
+              style={{ width: 38, height: 38 }}
+              aria-label={
+                isPlaying
+                  ? __("Stop the sample", "text-to-audio")
+                  : __("Play a sample of this voice", "text-to-audio")
+              }
+            >
+              <span
+                className={`dashicons dashicons-controls-${isPlaying ? "pause" : "play"}`}
+                aria-hidden="true"
+              />
+            </button>
+
+            <div className="flex-grow-1 min-width-0">
+              <div className="small fw-semibold">
+                {voicesForLang.find((v) => v.id === selectedVoice)?.label
+                  ? `${__("Hear", "text-to-audio")} ${
+                      voicesForLang.find((v) => v.id === selectedVoice).label
+                    }`
+                  : __("Hear this voice", "text-to-audio")}
+              </div>
+              <div className="small text-secondary">
+                {sampleError
+                  ? __(
+                      "That sample could not be played. The AtlasVoice service may be unreachable.",
+                      "text-to-audio"
+                    )
+                  : __(
+                      "A short recording, so you can choose a voice before generating anything.",
+                      "text-to-audio"
+                    )}
+              </div>
+            </div>
+
+            {/* Hidden: the button above is the whole control. A full transport
+                would offer seeking and volume for a three-second clip. */}
+            <audio
+              ref={sampleRef}
+              src={sampleURL}
+              preload="none"
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              onEnded={() => setIsPlaying(false)}
+              onError={() => {
+                setIsPlaying(false);
+                setSampleError(true);
+              }}
+              style={{ display: "none" }}
+            />
+          </div>
+        )}
 
         <Form.Group className="mb-0" controlId="tta__listening_rate">
           <Form.Label>

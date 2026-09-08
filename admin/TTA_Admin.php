@@ -128,6 +128,14 @@ class TTA_Admin
             'nonce' => wp_create_nonce(TEXT_TO_AUDIO_NONCE),
             'plugin_name' => TEXT_TO_AUDIO_PLUGIN_NAME,
             'rest_nonce' => wp_create_nonce('wp_rest'),
+            // TTS-266: base URL for player 7's voice preview samples. Derived from
+            // the same filterable constant the synthesis calls use, so no remote
+            // host is hardcoded in the bundle and a self-hosted service works
+            // without a code change. The samples themselves are static files —
+            // playing one sends nothing about the site.
+            'atlasvoice_sample_base' => defined('TTA_ATLASVOICE_API_URL')
+                ? untrailingslashit(str_replace('/api/atlasvoice', '', TTA_ATLASVOICE_API_URL)) . '/v1/samples/'
+                : '',
             'VERSION' => is_atlasvoice_addon_functional() ? get_option('TTA_PRO_VERSION') : TEXT_TO_AUDIO_VERSION,
             'is_logged_in' => is_user_logged_in(),
             'user_id' => get_current_user_id(),
