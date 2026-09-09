@@ -120,3 +120,12 @@ nul
 .mcp.json
 # Translation tooling — dev-only, never shipped
 translation-script/
+
+# Built translation catalogs. Only the .pot is committed; the .po/.mo/.json are
+# published to the atlasaidev-translations repo and fetched at runtime by
+# TTA_Translation_Downloader, so a site downloads only the language it needs.
+# Restore them locally with "npm run i18n:pull" before running i18n:sync.
+languages/*.po
+languages/*.mo
+languages/text-to-audio-*.json
+

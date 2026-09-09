@@ -1826,6 +1826,10 @@ class TTA_Notices {
 			'fr_FR' => 'Français',
 			'de_DE' => 'Deutsch',
 			'nl_NL' => 'Nederlands',
+			'pl_PL' => 'Polski',
+			'ru_RU' => 'Русский',
+			'tr_TR' => 'Türkçe',
+			'vi'    => 'Tiếng Việt',
 		);
 
 		return isset( $labels[ $locale ] ) ? $labels[ $locale ] : $locale;

@@ -3,6 +3,12 @@ import {splitSentences} from "./tts/utilities.js";
 import AtlasVoiceAnalytics from "./AtlasVoiceAnalytics";
 import {hydrateAtlasVoicePayloads} from "./tts/payload-hydrator.js";
 
+// TTS-296: i18n for the player settings modal. Same idiom as selection-control.js
+// in this bundle: wp-i18n is already a dependency of the player handle and
+// wp_set_script_translations() is already registered for it, so the strings only
+// ever needed wrapping. The guard keeps the modal working if i18n is absent.
+const { __ } = (typeof wp !== 'undefined' && wp.i18n) ? wp.i18n : { __: (s) => s };
+
 // Auto-close timeout duration (15 seconds)
 const MODAL_AUTO_CLOSE_TIMEOUT = 15000;
 
@@ -605,14 +611,14 @@ class TTSSettingsModalManager {
             <div class="tts__settings-modal-backdrop" onclick="TTSSettingsModalManager.handleBackdropClick(event)">
                 <div class="tts__settings-modal" role="dialog" aria-modal="true" aria-labelledby="tts-settings-modal-title" onclick="event.stopPropagation()">
                     <!-- Loading overlay -->
-                    <div class="tts__settings-loader-overlay" style="display: none;" role="status" aria-label="Loading">
+                    <div class="tts__settings-loader-overlay" style="display: none;" role="status" aria-label="${__('Loading', 'text-to-audio')}">
                         <div class="tts__settings-loader"></div>
                     </div>
 
                     <!-- Modal Header -->
                     <div class="tts__settings-modal-header">
-                        <h3 id="tts-settings-modal-title" class="tts__settings-modal-title">Player Settings</h3>
-                        <button class="tts__settings-modal-close" onclick="TTSSettingsModalManager.closeModal()" title="Close" aria-label="Close settings">
+                        <h3 id="tts-settings-modal-title" class="tts__settings-modal-title">${__('Player Settings', 'text-to-audio')}</h3>
+                        <button class="tts__settings-modal-close" onclick="TTSSettingsModalManager.closeModal()" title="${__('Close', 'text-to-audio')}" aria-label="${__('Close settings', 'text-to-audio')}">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${colors.color}" stroke-width="2" aria-hidden="true">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -622,7 +628,7 @@ class TTSSettingsModalManager {
 
                     <!-- Language Selection -->
                     <div class="tts__setting-row">
-                        <label class="tts__setting-label" for="tts-language-select">Language</label>
+                        <label class="tts__setting-label" for="tts-language-select">${__('Language', 'text-to-audio')}</label>
                         <select id="tts-language-select" class="tts__settings-select" onchange="TTSSettingsModalManager.handleLanguageChange(event)" style="
                             width: 100%;
                             padding: 10px 12px;
@@ -643,7 +649,7 @@ class TTSSettingsModalManager {
 
                     <!-- Voice Selection -->
                     <div class="tts__setting-row">
-                        <label class="tts__setting-label" for="tts-voice-select">Voice</label>
+                        <label class="tts__setting-label" for="tts-voice-select">${__('Voice', 'text-to-audio')}</label>
                         <select id="tts-voice-select" class="tts__settings-select" onchange="TTSSettingsModalManager.handleVoiceChange(event)" style="
                             width: 100%;
                             padding: 10px 12px;
@@ -665,28 +671,28 @@ class TTSSettingsModalManager {
                     <!-- Speed Control -->
                     <div class="tts__setting-row">
                         <div class="tts__setting-header">
-                            <label class="tts__setting-label" for="tts-rate-slider" style="margin-bottom: 0;">Speed</label>
+                            <label class="tts__setting-label" for="tts-rate-slider" style="margin-bottom: 0;">${__('Speed', 'text-to-audio')}</label>
                             <span id="tts-rate-value" class="tts__setting-value">${this.currentRate}x</span>
                         </div>
-                        <input type="range" id="tts-rate-slider" class="tts__settings-slider" min="0.5" max="2" step="0.1" value="${this.currentRate}" aria-label="Playback speed" aria-valuemin="0.5" aria-valuemax="2" aria-valuenow="${this.currentRate}" aria-valuetext="${this.currentRate}x" oninput="TTSSettingsModalManager.handleRateChange(event)" style="width: 100%; cursor: pointer;" />
+                        <input type="range" id="tts-rate-slider" class="tts__settings-slider" min="0.5" max="2" step="0.1" value="${this.currentRate}" aria-label="${__('Playback speed', 'text-to-audio')}" aria-valuemin="0.5" aria-valuemax="2" aria-valuenow="${this.currentRate}" aria-valuetext="${this.currentRate}x" oninput="TTSSettingsModalManager.handleRateChange(event)" style="width: 100%; cursor: pointer;" />
                     </div>
 
                     <!-- Pitch Control -->
                     <div class="tts__setting-row">
                         <div class="tts__setting-header">
-                            <label class="tts__setting-label" for="tts-pitch-slider" style="margin-bottom: 0;">Pitch</label>
+                            <label class="tts__setting-label" for="tts-pitch-slider" style="margin-bottom: 0;">${__('Pitch', 'text-to-audio')}</label>
                             <span id="tts-pitch-value" class="tts__setting-value">${this.currentPitch.toFixed(1)}</span>
                         </div>
-                        <input type="range" id="tts-pitch-slider" class="tts__settings-slider" min="0" max="2" step="0.1" value="${this.currentPitch}" aria-label="Voice pitch" aria-valuemin="0" aria-valuemax="2" aria-valuenow="${this.currentPitch}" aria-valuetext="${this.currentPitch.toFixed(1)}" oninput="TTSSettingsModalManager.handlePitchChange(event)" style="width: 100%; cursor: pointer;" />
+                        <input type="range" id="tts-pitch-slider" class="tts__settings-slider" min="0" max="2" step="0.1" value="${this.currentPitch}" aria-label="${__('Voice pitch', 'text-to-audio')}" aria-valuemin="0" aria-valuemax="2" aria-valuenow="${this.currentPitch}" aria-valuetext="${this.currentPitch.toFixed(1)}" oninput="TTSSettingsModalManager.handlePitchChange(event)" style="width: 100%; cursor: pointer;" />
                     </div>
 
                     <!-- Volume Control with Mute Button -->
                     <div class="tts__setting-row">
                         <div class="tts__setting-header">
-                            <label class="tts__setting-label" for="tts-volume-slider" style="margin-bottom: 0;">Volume</label>
+                            <label class="tts__setting-label" for="tts-volume-slider" style="margin-bottom: 0;">${__('Volume', 'text-to-audio')}</label>
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <span id="tts-volume-value" class="tts__setting-value">${Math.round(this.currentVolume * 100)}%</span>
-                                <button class="tts__mute-btn ${this.isMuted ? 'muted' : ''}" onclick="TTSSettingsModalManager.handleMuteToggle()" title="${this.isMuted ? 'Unmute' : 'Mute'}" aria-label="${this.isMuted ? 'Unmute audio' : 'Mute audio'}" aria-pressed="${this.isMuted}">
+                                <button class="tts__mute-btn ${this.isMuted ? 'muted' : ''}" onclick="TTSSettingsModalManager.handleMuteToggle()" title="${this.isMuted ? __('Unmute', 'text-to-audio') : __('Mute', 'text-to-audio')}" aria-label="${this.isMuted ? __('Unmute audio', 'text-to-audio') : __('Mute audio', 'text-to-audio')}" aria-pressed="${this.isMuted}">
                                     ${this.isMuted ? `
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${colors.color}" stroke-width="2">
                                             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
@@ -702,7 +708,7 @@ class TTSSettingsModalManager {
                                 </button>
                             </div>
                         </div>
-                        <input type="range" id="tts-volume-slider" class="tts__settings-slider" min="0" max="1" step="0.05" value="${this.currentVolume}" aria-label="Volume" aria-valuemin="0" aria-valuemax="1" aria-valuenow="${this.currentVolume}" aria-valuetext="${Math.round(this.currentVolume * 100)}%" oninput="TTSSettingsModalManager.handleVolumeChange(event)" style="width: 100%; cursor: pointer;" />
+                        <input type="range" id="tts-volume-slider" class="tts__settings-slider" min="0" max="1" step="0.05" value="${this.currentVolume}" aria-label="${__('Volume', 'text-to-audio')}" aria-valuemin="0" aria-valuemax="1" aria-valuenow="${this.currentVolume}" aria-valuetext="${Math.round(this.currentVolume * 100)}%" oninput="TTSSettingsModalManager.handleVolumeChange(event)" style="width: 100%; cursor: pointer;" />
                     </div>
                 </div>
             </div>
@@ -987,7 +993,7 @@ class TTSPlayButton extends HTMLElement {
                 </div>
                 <div class="tts-button-right">
                     ${showSettingsIcon ? `
-                        <div class="tts-settings-icon" role="button" tabindex="0" aria-label="Player settings" title="Settings" data-button-id="${buttonId}">
+                        <div class="tts-settings-icon" role="button" tabindex="0" aria-label="${__('Player settings', 'text-to-audio')}" title="${__('Settings', 'text-to-audio')}" data-button-id="${buttonId}">
                             ${settingsIconSVG}
                         </div>
                     ` : ''}
