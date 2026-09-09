@@ -222,7 +222,12 @@ class TTA_Translation_Downloader {
 	 * catches every route into a new version exactly once.
 	 */
 	public static function maybe_refresh_manifest() {
-		if ( get_option( self::MANIFEST_VERSION_OPTION ) === TEXT_TO_AUDIO_VERSION ) {
+		// Also refetch when the stored manifest is gone but the version marker
+		// survived — a data reset or a partial option wipe would otherwise leave
+		// the site permanently unable to tell a stale pack from a current one.
+		$have_manifest = ! empty( get_option( self::MANIFEST_OPTION, array() ) );
+
+		if ( $have_manifest && get_option( self::MANIFEST_VERSION_OPTION ) === TEXT_TO_AUDIO_VERSION ) {
 			return;
 		}
 

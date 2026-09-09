@@ -1808,8 +1808,12 @@ class TTA_Notices {
 			'condition'       => function () {
 				return current_user_can( 'manage_options' );
 			},
-			'render_callback' => function ( $notice ) use ( $status ) {
-				$this->render_translation_download_notice( $notice, $status );
+			// display_notice() calls this as ( $notice_id, $notice ) — take both,
+			// or the id arrives where the array is expected and the rendered
+			// data-notice-id silently falls back to the wrong value, which is
+			// what the dismiss handler posts back.
+			'render_callback' => function ( $notice_id, $notice ) use ( $status ) {
+				$this->render_translation_download_notice( $notice_id, $notice, $status );
 			},
 		) );
 	}
@@ -1847,11 +1851,11 @@ class TTA_Notices {
 		return isset( $labels[ $locale ] ) ? $labels[ $locale ] : $locale;
 	}
 
-	public function render_translation_download_notice( $notice, $status = 'missing' ) {
+	public function render_translation_download_notice( $notice_id, $notice = array(), $status = 'missing' ) {
 		$locale       = get_locale();
 		$locale_label = $this->get_locale_label( $locale );
 		$is_update    = ( 'stale' === $status );
-		$notice_id    = isset( $notice['id'] ) ? $notice['id'] : 'translation_download';
+		$notice_id    = is_string( $notice_id ) && '' !== $notice_id ? $notice_id : 'translation_download';
 		?>
 		<div class="notice notice-info is-dismissible tta-notice" data-notice-id="<?php echo esc_attr( $notice_id ); ?>" style="padding: 15px 20px; border-left-color: #2271b1;">
 			<div style="display: flex; align-items: center; gap: 15px;">
