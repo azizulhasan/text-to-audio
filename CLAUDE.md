@@ -176,7 +176,7 @@ The plugin uses a smart i18n system that separates JS and PHP translations based
 2. Edit `.po` files in `languages/` (zh_CN, ja, ko_KR, es_ES, it_IT, pt_BR)
 3. `npm run translate` — Generates optimized JSON (JS strings only) and MO (PHP strings only), with shared strings in both
 
-See `scripts/README.md` for full details.
+See `translation-script/README.md` for full details.
 
 ## Important Constants
 
@@ -188,7 +188,7 @@ Defined in `text-to-audio.php`:
 
 ## Production Build Exclusions
 
-The `gulpfile.js` `productionSrc` array excludes from release ZIPs: `node_modules/`, `src/`, `scripts/`, `.claude/`, source JS files, `*.md`, config files, `.po`/`.pot` files, and `uninstall.php`.
+The `gulpfile.js` `productionSrc` array excludes from release ZIPs: `node_modules/`, `src/`, `translation-script/`, `.claude/`, source JS files, `*.md`, config files, `.po`/`.pot` files, and `uninstall.php`.
 
 ## Caching Plugin Compatibility
 

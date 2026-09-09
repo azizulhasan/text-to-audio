@@ -118,3 +118,5 @@ nul
 
 # Local MCP config — contains JWT bearer token, must not be committed
 .mcp.json
+# Translation tooling — dev-only, never shipped
+translation-script/
