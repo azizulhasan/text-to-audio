@@ -47,7 +47,13 @@ const productionSrc = [
 	'!plan/**',
 	'!docs/**',
 	'!translation-script/**/**',
+	// Only text-to-audio.pot ships. The catalogs are published to the
+	// atlasaidev-translations repo and fetched at runtime by
+	// TTA_Translation_Downloader, so a site downloads just the language it
+	// needs instead of carrying all of them (~5 MB across 12 locales).
 	'!languages/*.po',
+	'!languages/*.mo',
+	'!languages/text-to-audio-*.json',
 	'!admin/js/text-to-audio-dashboard.js',
 	'!admin/js/text-to-audio-button.js',
 	'!admin/js/TextToSpeech.js',

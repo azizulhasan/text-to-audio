@@ -250,8 +250,9 @@ the credentials form that booting `WP_Filesystem()` inside an `admin_notices`
 callback would. Do not reach for `$wp_textdomain_registry->get()` here: it
 returns a *candidate* directory and answers `true` even for a locale that was
 never installed. Note `wp_get_installed_translations()` only counts a `.mo` with
-its `.po` beside it, which our packs always ship. The check also accepts the
-legacy plugin-relative path so existing sites are not re-prompted.
+its `.po` beside it, which our packs always ship. There is deliberately **no**
+fallback to the plugin's own `languages/` folder: the ZIP ships only the `.pot`,
+and WordPress deletes the plugin directory on update, so nothing can be there.
 
 Note `Listen` / `Pause` / `Resume` / `Replay` are **not** translatable this way —
 they come from the saved `tta__button_text_arr` option (`includes/helpers.php:672`),
@@ -274,7 +275,7 @@ Defined in `text-to-audio.php`:
 
 ## Production Build Exclusions
 
-The `gulpfile.js` `productionSrc` array excludes from release ZIPs: `node_modules/`, `src/`, `translation-script/`, `.claude/`, source JS files, `*.md`, config files, `.po`/`.pot` files, and `uninstall.php`.
+The `gulpfile.js` `productionSrc` array excludes from release ZIPs: `node_modules/`, `src/`, `translation-script/`, `.claude/`, source JS files, `*.md`, config files, and `uninstall.php`. From `languages/` only `text-to-audio.pot` ships — the `.po`, `.mo` and hashed `.json` are excluded (~5 MB across 12 locales) because sites fetch just their own language at runtime.
 
 ## Caching Plugin Compatibility
 

@@ -111,8 +111,11 @@ class TTA_Translation_Downloader {
 	 * always ship both, so this holds; if that ever changes, this check has to
 	 * change with it.
 	 *
-	 * The legacy plugin-relative path is still accepted so sites that downloaded
-	 * before packs moved out of the plugin folder are not prompted again.
+	 * There is deliberately no fallback to the plugin's own languages/ folder.
+	 * Nothing lands there: the release ZIP ships only the .pot, and WordPress
+	 * deletes the plugin directory on update — which is the whole reason packs
+	 * moved out of it — so a pack downloaded there by an older version is
+	 * already gone by the time this runs.
 	 *
 	 * @param string $locale
 	 * @return bool
@@ -120,11 +123,7 @@ class TTA_Translation_Downloader {
 	public static function is_locale_installed( $locale ) {
 		$installed = wp_get_installed_translations( 'plugins' );
 
-		if ( isset( $installed[ TEXT_TO_AUDIO_TEXT_DOMAIN ][ $locale ] ) ) {
-			return true;
-		}
-
-		return file_exists( TTA_PLUGIN_PATH . 'languages/text-to-audio-' . $locale . '.mo' );
+		return isset( $installed[ TEXT_TO_AUDIO_TEXT_DOMAIN ][ $locale ] );
 	}
 
 	/**
