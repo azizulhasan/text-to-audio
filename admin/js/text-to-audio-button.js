@@ -510,6 +510,22 @@ class TTSSettingsModalManager {
                 </svg>
             `;
         }
+
+        // TTS-296: the icon is not the only thing that carries mute state.
+        // renderModal() sets these correctly, but toggling only swapped the
+        // icon and the class, so a screen reader kept announcing "Mute audio"
+        // with aria-pressed="false" while the audio was already muted — the
+        // control described the opposite of what it would do. Both callers
+        // route through here, so state is reflected in one place.
+        muteBtn.setAttribute('aria-pressed', this.isMuted ? 'true' : 'false');
+        muteBtn.setAttribute(
+            'aria-label',
+            this.isMuted ? __('Unmute audio', 'text-to-audio') : __('Mute audio', 'text-to-audio')
+        );
+        muteBtn.setAttribute(
+            'title',
+            this.isMuted ? __('Unmute', 'text-to-audio') : __('Mute', 'text-to-audio')
+        );
     }
 
     static splitSentencesForSeek(text = '') {

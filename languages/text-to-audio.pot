@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-09T16:25:26+02:00\n"
+"POT-Creation-Date: 2026-09-09T17:17:39+02:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: text-to-audio\n"
@@ -236,9 +236,9 @@ msgid "Continue to Deactivate"
 msgstr ""
 
 #: admin/TTA_Admin.php:1576
-#: includes/TTA_Notices.php:1906
+#: includes/TTA_Notices.php:1910
 #: production/text-to-audio/admin/TTA_Admin.php:1576
-#: production/text-to-audio/includes/TTA_Notices.php:1883
+#: production/text-to-audio/includes/TTA_Notices.php:1910
 msgid "Permission denied."
 msgstr ""
 
@@ -681,7 +681,7 @@ msgstr ""
 #: production/text-to-audio/includes/atlasvoice/StepRail.php:219
 #: production/text-to-audio/libs/AtlasAiDev/Insights.php:971
 #: production/text-to-audio/libs/AtlasAiDev/Insights.php:1024
-#: admin/js/text-to-audio-button.js:621
+#: admin/js/text-to-audio-button.js:637
 msgid "Close"
 msgstr ""
 
@@ -1718,55 +1718,58 @@ msgstr ""
 msgid "Milestone dismissed."
 msgstr ""
 
-#: includes/TTA_Notices.php:1863
+#: includes/TTA_Notices.php:1867
+#: production/text-to-audio/includes/TTA_Notices.php:1867
 msgid "AtlasVoice — Updated Translation Available"
 msgstr ""
 
-#: includes/TTA_Notices.php:1864
-#: production/text-to-audio/includes/TTA_Notices.php:1846
+#: includes/TTA_Notices.php:1868
+#: production/text-to-audio/includes/TTA_Notices.php:1868
 msgid "AtlasVoice — Translation Available"
 msgstr ""
 
 #. translators: %s: language name with locale code
-#: includes/TTA_Notices.php:1871
+#: includes/TTA_Notices.php:1875
+#: production/text-to-audio/includes/TTA_Notices.php:1875
 #, php-format
 msgid "A newer %s translation is available for AtlasVoice, with strings added since you last downloaded it. Click the button below to update it."
 msgstr ""
 
 #. translators: %s: language name with locale code
-#: includes/TTA_Notices.php:1873
-#: production/text-to-audio/includes/TTA_Notices.php:1852
+#: includes/TTA_Notices.php:1877
+#: production/text-to-audio/includes/TTA_Notices.php:1877
 #, php-format
 msgid "Your site language is set to %s. A translation pack is available for AtlasVoice. Click the button below to download and activate it."
 msgstr ""
 
 #. translators: %s: language name
-#: includes/TTA_Notices.php:1882
+#: includes/TTA_Notices.php:1886
+#: production/text-to-audio/includes/TTA_Notices.php:1886
 #, php-format
 msgid "Update %s Translation"
 msgstr ""
 
 #. translators: %s: language name
-#: includes/TTA_Notices.php:1884
-#: production/text-to-audio/includes/TTA_Notices.php:1861
+#: includes/TTA_Notices.php:1888
+#: production/text-to-audio/includes/TTA_Notices.php:1888
 #, php-format
 msgid "Download %s Translation"
 msgstr ""
 
-#: includes/TTA_Notices.php:1912
-#: production/text-to-audio/includes/TTA_Notices.php:1889
+#: includes/TTA_Notices.php:1916
+#: production/text-to-audio/includes/TTA_Notices.php:1916
 msgid "Invalid locale."
 msgstr ""
 
 #. translators: %s: locale code
-#: includes/TTA_Notices.php:1924
-#: production/text-to-audio/includes/TTA_Notices.php:1901
+#: includes/TTA_Notices.php:1928
+#: production/text-to-audio/includes/TTA_Notices.php:1928
 #, php-format
 msgid "Translation files for %s downloaded successfully."
 msgstr ""
 
-#: includes/TTA_Notices.php:1930
-#: production/text-to-audio/includes/TTA_Notices.php:1907
+#: includes/TTA_Notices.php:1934
+#: production/text-to-audio/includes/TTA_Notices.php:1934
 msgid "Failed to download translation files. Please try again later."
 msgstr ""
 
@@ -2012,7 +2015,7 @@ msgstr ""
 
 #: production/text-to-audio/text-to-audio.php:244
 #: text-to-audio.php:244
-#: admin/js/text-to-audio-button.js:996
+#: admin/js/text-to-audio-button.js:1012
 msgid "Settings"
 msgstr ""
 
@@ -3473,7 +3476,7 @@ msgid "Selected fields are read after the main article content. If a field is al
 msgstr ""
 
 #: admin/js/build/chunks/tab-compatibility.1454b47de8303d47.chunk.js:2
-#: admin/js/text-to-audio-button.js:614
+#: admin/js/text-to-audio-button.js:630
 #: production/text-to-audio/admin/js/build/chunks/tab-compatibility.1454b47de8303d47.chunk.js:2
 #: src/dashboard/components/dashboard/compatibility/Compatibility.js:266
 msgid "Loading"
@@ -3944,7 +3947,7 @@ msgid "This is a preview of the player."
 msgstr ""
 
 #: admin/js/build/chunks/tab-customize.f093072f9c101885.chunk.js:2
-#: admin/js/text-to-audio-button.js:996
+#: admin/js/text-to-audio-button.js:1012
 #: production/text-to-audio/admin/js/build/chunks/tab-customize.f093072f9c101885.chunk.js:2
 #: src/dashboard/components/dashboard/customize/design/ButtonPreview.js:183
 msgid "Player settings"
@@ -5843,59 +5846,63 @@ msgstr ""
 msgid "Thanks for upgrading. Manage your license from the Pro plugin settings."
 msgstr ""
 
-#: admin/js/text-to-audio-button.js:620
+#: admin/js/text-to-audio-button.js:523
+#: admin/js/text-to-audio-button.js:711
+msgid "Unmute audio"
+msgstr ""
+
+#: admin/js/text-to-audio-button.js:523
+#: admin/js/text-to-audio-button.js:711
+msgid "Mute audio"
+msgstr ""
+
+#: admin/js/text-to-audio-button.js:527
+#: admin/js/text-to-audio-button.js:711
+msgid "Unmute"
+msgstr ""
+
+#: admin/js/text-to-audio-button.js:527
+#: admin/js/text-to-audio-button.js:711
+msgid "Mute"
+msgstr ""
+
+#: admin/js/text-to-audio-button.js:636
 msgid "Player Settings"
 msgstr ""
 
-#: admin/js/text-to-audio-button.js:621
+#: admin/js/text-to-audio-button.js:637
 msgid "Close settings"
 msgstr ""
 
-#: admin/js/text-to-audio-button.js:631
+#: admin/js/text-to-audio-button.js:647
 #: src/dashboard/welcome/steps/StepVoice.js:257
 msgid "Language"
 msgstr ""
 
-#: admin/js/text-to-audio-button.js:652
+#: admin/js/text-to-audio-button.js:668
 #: src/dashboard/welcome/steps/StepVoice.js:279
 msgid "Voice"
 msgstr ""
 
-#: admin/js/text-to-audio-button.js:674
+#: admin/js/text-to-audio-button.js:690
 msgid "Speed"
 msgstr ""
 
-#: admin/js/text-to-audio-button.js:677
+#: admin/js/text-to-audio-button.js:693
 msgid "Playback speed"
 msgstr ""
 
-#: admin/js/text-to-audio-button.js:683
+#: admin/js/text-to-audio-button.js:699
 msgid "Pitch"
 msgstr ""
 
-#: admin/js/text-to-audio-button.js:686
+#: admin/js/text-to-audio-button.js:702
 msgid "Voice pitch"
 msgstr ""
 
-#: admin/js/text-to-audio-button.js:692
-#: admin/js/text-to-audio-button.js:711
+#: admin/js/text-to-audio-button.js:708
+#: admin/js/text-to-audio-button.js:727
 msgid "Volume"
-msgstr ""
-
-#: admin/js/text-to-audio-button.js:695
-msgid "Unmute"
-msgstr ""
-
-#: admin/js/text-to-audio-button.js:695
-msgid "Mute"
-msgstr ""
-
-#: admin/js/text-to-audio-button.js:695
-msgid "Unmute audio"
-msgstr ""
-
-#: admin/js/text-to-audio-button.js:695
-msgid "Mute audio"
 msgstr ""
 
 #: admin/js/tts/selection-control.js:87
