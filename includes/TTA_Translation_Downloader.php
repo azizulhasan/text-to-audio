@@ -100,33 +100,31 @@ class TTA_Translation_Downloader {
 	 * Both the downloader and the admin notice need this answer, so it lives
 	 * here rather than being spelled out twice with two chances to drift.
 	 *
-	 * Deliberately a plain filesystem read against the WP_LANG_DIR constant, not
-	 * through get_target_dir(): that would boot WP_Filesystem(), which on an
-	 * FTP/SSH install can emit a credentials form — unacceptable from inside an
-	 * admin_notices callback. Reads are always local; only writes need the
-	 * abstraction.
+	 * Uses wp_get_installed_translations() rather than testing WP_LANG_DIR
+	 * ourselves: it is core's own answer to "what is installed", it reads the
+	 * canonical plugins language directory through the textdomain registry, and
+	 * it is a plain read — unlike the filesystem abstraction, which would boot
+	 * WP_Filesystem() and can emit a credentials form on FTP/SSH installs, which
+	 * is unacceptable from inside an admin_notices callback.
 	 *
-	 * The legacy plugin-relative path is still accepted so sites that
-	 * downloaded before this moved are not prompted to download again.
+	 * Note it only counts a .mo that has its .po beside it. Our published packs
+	 * always ship both, so this holds; if that ever changes, this check has to
+	 * change with it.
+	 *
+	 * The legacy plugin-relative path is still accepted so sites that downloaded
+	 * before packs moved out of the plugin folder are not prompted again.
 	 *
 	 * @param string $locale
 	 * @return bool
 	 */
 	public static function is_locale_installed( $locale ) {
-		$filename = 'text-to-audio-' . $locale . '.mo';
+		$installed = wp_get_installed_translations( 'plugins' );
 
-		$candidates = array(
-			trailingslashit( WP_LANG_DIR ) . 'plugins/' . $filename,
-			TTA_PLUGIN_PATH . 'languages/' . $filename,
-		);
-
-		foreach ( $candidates as $file ) {
-			if ( file_exists( $file ) ) {
-				return true;
-			}
+		if ( isset( $installed[ TEXT_TO_AUDIO_TEXT_DOMAIN ][ $locale ] ) ) {
+			return true;
 		}
 
-		return false;
+		return file_exists( TTA_PLUGIN_PATH . 'languages/text-to-audio-' . $locale . '.mo' );
 	}
 
 	/**

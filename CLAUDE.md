@@ -240,13 +240,18 @@ translated.
 written there is discarded every release. Core checks that location *before* any
 path given to `wp_set_script_translations()`, for both the `.mo`
 (`WP_Textdomain_Registry`) and the hashed `.json`
-(`_load_script_textdomain_from_src()`), so nothing else needed changing. The
-write resolves the directory via `$wp_filesystem->wp_lang_dir()` rather than the
-`WP_LANG_DIR` constant, since FTP/SSH installs write against a remote root;
-existence checks use the constant directly, because booting `WP_Filesystem()`
-inside an `admin_notices` callback can emit a credentials form. Use
-`TTA_Translation_Downloader::is_locale_installed()` for that check — it also
-accepts the legacy plugin-relative path so existing sites are not re-prompted.
+(`_load_script_textdomain_from_src()`), so nothing else needed changing. Never
+hardcode `WP_LANG_DIR`: the write resolves the directory via
+`$wp_filesystem->wp_lang_dir()`, since FTP/SSH installs write against a remote
+root where the literal constant does not resolve. For "is this pack installed?"
+use `TTA_Translation_Downloader::is_locale_installed()`, which wraps core's
+`wp_get_installed_translations( 'plugins' )` — a plain read, so it cannot trigger
+the credentials form that booting `WP_Filesystem()` inside an `admin_notices`
+callback would. Do not reach for `$wp_textdomain_registry->get()` here: it
+returns a *candidate* directory and answers `true` even for a locale that was
+never installed. Note `wp_get_installed_translations()` only counts a `.mo` with
+its `.po` beside it, which our packs always ship. The check also accepts the
+legacy plugin-relative path so existing sites are not re-prompted.
 
 Note `Listen` / `Pause` / `Resume` / `Replay` are **not** translatable this way —
 they come from the saved `tta__button_text_arr` option (`includes/helpers.php:672`),
