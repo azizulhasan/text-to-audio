@@ -391,7 +391,10 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     $font_size = isset($customize['fontSize']) ? $customize['fontSize'] . 'px' : '18px';
     $margin_top = isset($customize['marginTop']) ? $customize['marginTop'] . 'px' : '0px';
     $margin_bottom = isset($customize['marginBottom']) ? $customize['marginBottom'] . 'px' : '0px';
-    $margin_left = isset($customize['marginLeft']) ? $customize['marginLeft'] . '%' : '0%';
+    // TTS-296: px, not %. Customize offers four identical number fields with no
+    // unit selector, so the same value has to mean the same distance on all four
+    // sides; as a percentage the left gap also moved with the container width.
+    $margin_left = isset($customize['marginLeft']) ? $customize['marginLeft'] . 'px' : '0px';
     $margin_right = isset($customize['marginRight']) ? $customize['marginRight'] . 'px' : '0px';
     if ($is_block) {
         $btn_style = 'background-color:' . esc_attr($backgroundColor) . ' !important;color:' . esc_attr($color) . ' !important;width:' . esc_attr($width) . '%;height:' . esc_attr($height) . ';font-size:' . esc_attr($font_size) . ';border:' . esc_attr($border) . ';display:flex;align-content:center;justify-content:'.$justify_content_css.';align-items:center;border-radius:' . esc_attr($border_radius) . ';text-decoration:none;cursor:pointer;margin-top:' . esc_attr($margin_top) . ';margin-bottom:' . esc_attr($margin_bottom) . ';margin-left:' . esc_attr($margin_left) . ';margin-right:' . esc_attr($margin_right) . ';';
@@ -1070,7 +1073,8 @@ function tta_get_player_button_inline_css()
     $font_size       = isset($customize['fontSize']) ? $customize['fontSize'] . 'px' : '18px';
     $margin_top      = isset($customize['marginTop']) ? $customize['marginTop'] . 'px' : '0px';
     $margin_bottom   = isset($customize['marginBottom']) ? $customize['marginBottom'] . 'px' : '0px';
-    $margin_left     = isset($customize['marginLeft']) ? $customize['marginLeft'] . '%' : '0%';
+    // TTS-296: px, not % — see the matching note on the inline-style path above.
+    $margin_left     = isset($customize['marginLeft']) ? $customize['marginLeft'] . 'px' : '0px';
     $margin_right    = isset($customize['marginRight']) ? $customize['marginRight'] . 'px' : '0px';
     $hover_bg        = isset($customize['hoverBackgroundColor']) ? $customize['hoverBackgroundColor'] : '#000000';
     $hover_color     = isset($customize['hoverTextColor']) ? $customize['hoverTextColor'] : '#ffffff';

@@ -142,9 +142,12 @@ class TTSSettingsModalManager {
         if (savedSettings) {
             try {
                 const settings = JSON.parse(savedSettings);
-                if (settings.rate) this.currentRate = parseFloat(settings.rate);
-                if (settings.pitch) this.currentPitch = parseFloat(settings.pitch);
-                if (settings.volume) this.currentVolume = parseFloat(settings.volume);
+                // TTS-296: compare against undefined, not truthiness. A muted
+                // volume is 0 and a floor pitch is 0, both falsy, so the old
+                // checks silently dropped exactly the values a user had set.
+                if (settings.rate !== undefined) this.currentRate = parseFloat(settings.rate);
+                if (settings.pitch !== undefined) this.currentPitch = parseFloat(settings.pitch);
+                if (settings.volume !== undefined) this.currentVolume = parseFloat(settings.volume);
                 if (settings.language) this.currentLanguage = settings.language;
                 if (settings.voice) this.currentVoice = settings.voice;
                 if (settings.isMuted !== undefined) this.isMuted = settings.isMuted;
@@ -154,6 +157,47 @@ class TTSSettingsModalManager {
             }
         }
         return null;
+    }
+
+    /**
+     * TTS-296: the one place the player reads a visitor's own settings.
+     *
+     * The modal used to reach the audio only through applySettingsAndRestart(),
+     * i.e. only while it was open. TextToSpeech._init() built every utterance
+     * from the admin's Listening defaults, so mute, speed and pitch were dropped
+     * the moment playback started on its own — a visitor could mute and still
+     * hear the article on the next press.
+     *
+     * Exposed as a static on this already-global class rather than a new
+     * window.* helper or a second copy of the storage key, so the player and the
+     * modal cannot drift apart.
+     *
+     * @returns {Object} Any of rate, pitch, volume, voice, language actually set.
+     */
+    static getStoredSettings() {
+        try {
+            const raw = localStorage.getItem('tts_player_settings');
+            if (!raw) return {};
+
+            const s = JSON.parse(raw) || {};
+            const out = {};
+
+            if (s.rate !== undefined) out.rate = parseFloat(s.rate);
+            if (s.pitch !== undefined) out.pitch = parseFloat(s.pitch);
+            // isMuted wins over volume: the two are saved together, and a stale
+            // volume must never un-mute someone.
+            if (s.isMuted) {
+                out.volume = 0;
+            } else if (s.volume !== undefined) {
+                out.volume = parseFloat(s.volume);
+            }
+            if (s.voice) out.voice = s.voice;
+            if (s.language) out.language = s.language;
+
+            return out;
+        } catch (e) {
+            return {};
+        }
     }
 
     static saveSettingsToStorage(settings) {
@@ -172,14 +216,39 @@ class TTSSettingsModalManager {
             const voiceLangCode = this.getCountryCode(voice.lang);
             return voiceLangCode.toLowerCase() === langCode.toLowerCase();
         });
+
+        // TTS-296: put exact-locale voices first. The filter above matches on the
+        // base code, so asking for en-GB returned every English voice and callers
+        // that take matching[0] picked whatever came first — usually a US voice,
+        // which then overrode the language the user had just chosen. Sorting here
+        // rather than at each call site makes matching[0] correct by construction,
+        // and puts the most relevant voices at the top of the dropdown too.
+        const wanted = String(lang || '').toLowerCase();
+        matching.sort((a, b) => {
+            const aExact = String(a.lang || '').toLowerCase() === wanted ? 0 : 1;
+            const bExact = String(b.lang || '').toLowerCase() === wanted ? 0 : 1;
+            return aExact - bExact;
+        });
+
         this.filteredVoices = matching;
         return matching;
     }
 
     static _keyHandler = null;
     static _previousFocus = null;
+    // TTS-296: handle for the close animation's deferred teardown, so a reopen
+    // inside that window can cancel it.
+    static _closeTimer = null;
 
     static openModal(buttonInstance) {
+        // TTS-296: cancel a close still animating out, otherwise its deferred
+        // innerHTML = '' fires 200ms from now and empties the panel we are about
+        // to render.
+        if (this._closeTimer) {
+            clearTimeout(this._closeTimer);
+            this._closeTimer = null;
+        }
+
         this.currentButtonInstance = buttonInstance;
         this.isOpen = true;
         this._previousFocus = document.activeElement;
@@ -233,11 +302,20 @@ class TTSSettingsModalManager {
             backdrop.classList.remove('tts__modal-visible');
             backdrop.classList.add('tts__modal-closing');
 
-            setTimeout(() => {
+            // TTS-296: keep the handle so a reopen inside this 200ms window can
+            // cancel it. Previously the pending wipe ran regardless and emptied
+            // the freshly rendered panel.
+            this._closeTimer = setTimeout(() => {
+                this._closeTimer = null;
                 this.isOpen = false;
                 this.modalContainer.innerHTML = '';
                 this.currentButtonInstance = null;
             }, 200);
+        } else {
+            // No backdrop to animate out — tear down immediately so state and
+            // DOM cannot drift apart.
+            this.isOpen = false;
+            this.currentButtonInstance = null;
         }
         this.clearAutoCloseTimer();
 
@@ -629,6 +707,16 @@ class TTSSettingsModalManager {
                 </div>
             </div>
         `;
+
+        // TTS-296: the visible class lives on the backdrop, and this method has
+        // just replaced that node. openModal() adds it in a rAF, but the two
+        // in-place re-renders (language and voice change) came through here and
+        // left the panel at opacity 0 — open, focus-trapped and invisible.
+        // Restoring it here makes every caller correct by construction.
+        if (this.isOpen) {
+            const backdrop = this.modalContainer.querySelector('.tts__settings-modal-backdrop');
+            if (backdrop) backdrop.classList.add('tts__modal-visible');
+        }
     }
 
     static handleBackdropClick(event) {
@@ -1212,8 +1300,10 @@ class TTSPlayButton extends HTMLElement {
             #tts__listent_content_${buttonId}.tts__listent_content .tts-button-right{ display:flex; align-items:center; }
             #tts__listent_content_${buttonId}.tts__listent_content svg,
             #tts__listent_content_${buttonId}.tts__listent_content .tts-button-left svg{ display:${settings.shouldDisplayIcon}; flex: 0 0 auto; }
-            #tts__listent_content_${buttonId}.tts__listent_content:hover svg polygon,
-            #tts__listent_content_${buttonId}.tts__listent_content:hover svg path{ fill:${vars.hoverColor}; }
+            /* TTS-296: only shapes with their own fill. This ID-scoped rule beat the
+               stylesheet, so the gear had to be fixed here too — see the matching
+               note in admin/css/text-to-audio-button.css. */
+            #tts__listent_content_${buttonId}.tts__listent_content:hover svg [fill]:not([fill="none"]){ fill:${vars.hoverColor}; }
             #tts__listent_content_${buttonId}.tts__listent_content:hover svg[stroke] path,
             #tts__listent_content_${buttonId}.tts__listent_content:hover svg[stroke] line{ stroke:${vars.hoverColor}; }
             .tts-settings-icon{ cursor:pointer; padding:4px; border-radius:50%; display:flex; align-items:center; justify-content:center; transition: background-color 0.2s ease; }
