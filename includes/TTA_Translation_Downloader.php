@@ -56,11 +56,13 @@ class TTA_Translation_Downloader {
 			return false;
 		}
 
-		// Check if locale files already exist locally.
-		$languages_dir = TTA_PLUGIN_PATH . 'languages/';
-		$mo_file       = $languages_dir . 'text-to-audio-' . $locale . '.mo';
-		if ( file_exists( $mo_file ) ) {
+		if ( self::is_locale_installed( $locale ) ) {
 			return true;
+		}
+
+		$languages_dir = self::get_target_dir();
+		if ( ! $languages_dir ) {
+			return false;
 		}
 
 		if ( ! self::is_locale_available( $locale ) ) {
@@ -90,6 +92,80 @@ class TTA_Translation_Downloader {
 		}
 
 		return $success;
+	}
+
+	/**
+	 * Is a translation pack for this locale already on disk?
+	 *
+	 * Both the downloader and the admin notice need this answer, so it lives
+	 * here rather than being spelled out twice with two chances to drift.
+	 *
+	 * Deliberately a plain filesystem read against the WP_LANG_DIR constant, not
+	 * through get_target_dir(): that would boot WP_Filesystem(), which on an
+	 * FTP/SSH install can emit a credentials form — unacceptable from inside an
+	 * admin_notices callback. Reads are always local; only writes need the
+	 * abstraction.
+	 *
+	 * The legacy plugin-relative path is still accepted so sites that
+	 * downloaded before this moved are not prompted to download again.
+	 *
+	 * @param string $locale
+	 * @return bool
+	 */
+	public static function is_locale_installed( $locale ) {
+		$filename = 'text-to-audio-' . $locale . '.mo';
+
+		$candidates = array(
+			trailingslashit( WP_LANG_DIR ) . 'plugins/' . $filename,
+			TTA_PLUGIN_PATH . 'languages/' . $filename,
+		);
+
+		foreach ( $candidates as $file ) {
+			if ( file_exists( $file ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Where downloaded packs are written.
+	 *
+	 * The languages folder inside the plugin is the wrong place: WordPress
+	 * deletes the plugin directory on every update, so a pack downloaded there
+	 * is silently thrown away each release and the site falls back to English
+	 * until someone downloads it again.
+	 *
+	 * wp-content/languages/plugins/ survives updates, and WordPress looks there
+	 * first anyway — before any path passed to wp_set_script_translations() —
+	 * for both the .mo (WP_Textdomain_Registry::get_paths_for_domain()) and the
+	 * hashed .json (_load_script_textdomain_from_src()). So nothing else has to
+	 * change for the files to be found.
+	 *
+	 * The path is resolved through the filesystem abstraction rather than the
+	 * WP_LANG_DIR constant, because on FTP/SSH-credentialed installs the write
+	 * happens against a remote root and the literal constant would not resolve.
+	 *
+	 * @return string|false Trailing-slashed directory, or false if unavailable.
+	 */
+	private static function get_target_dir() {
+		global $wp_filesystem;
+
+		if ( ! function_exists( 'WP_Filesystem' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+
+		if ( ! WP_Filesystem() ) {
+			return false;
+		}
+
+		$lang_dir = $wp_filesystem->wp_lang_dir();
+		if ( ! $lang_dir ) {
+			return false;
+		}
+
+		return trailingslashit( $lang_dir ) . 'plugins/';
 	}
 
 	/**

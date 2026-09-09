@@ -1783,10 +1783,9 @@ class TTA_Notices {
 			return;
 		}
 
-		// Check if translation files already exist locally.
-		$languages_dir = TTA_PLUGIN_PATH . 'languages/';
-		$mo_file       = $languages_dir . 'text-to-audio-' . $locale . '.mo';
-		if ( file_exists( $mo_file ) ) {
+		// Check if translation files already exist locally. The downloader owns
+		// this test because it owns where packs are written.
+		if ( TTA_Translation_Downloader::is_locale_installed( $locale ) ) {
 			return;
 		}
 

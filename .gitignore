@@ -118,8 +118,10 @@ nul
 
 # Local MCP config — contains JWT bearer token, must not be committed
 .mcp.json
-# Translation tooling — dev-only, never shipped
-translation-script/
+# Translation tooling. Tracked so the pipeline survives losing a machine, but
+# excluded from release ZIPs by gulpfile.js productionSrc — it never ships.
+# Only the scratch work files are ignored.
+translation-script/pending/
 
 # Built translation catalogs. Only the .pot is committed; the .po/.mo/.json are
 # published to the atlasaidev-translations repo and fetched at runtime by

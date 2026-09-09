@@ -235,6 +235,19 @@ output, they are the input `i18n:collect` merges the `.pot` into, so syncing
 without them yields ~1,100 empty strings per locale as if nothing were ever
 translated.
 
+**Downloaded packs go to `wp-content/languages/plugins/`**, not the plugin's own
+`languages/` — WordPress deletes the plugin directory on update, so a pack
+written there is discarded every release. Core checks that location *before* any
+path given to `wp_set_script_translations()`, for both the `.mo`
+(`WP_Textdomain_Registry`) and the hashed `.json`
+(`_load_script_textdomain_from_src()`), so nothing else needed changing. The
+write resolves the directory via `$wp_filesystem->wp_lang_dir()` rather than the
+`WP_LANG_DIR` constant, since FTP/SSH installs write against a remote root;
+existence checks use the constant directly, because booting `WP_Filesystem()`
+inside an `admin_notices` callback can emit a credentials form. Use
+`TTA_Translation_Downloader::is_locale_installed()` for that check — it also
+accepts the legacy plugin-relative path so existing sites are not re-prompted.
+
 Note `Listen` / `Pause` / `Resume` / `Replay` are **not** translatable this way —
 they come from the saved `tta__button_text_arr` option (`includes/helpers.php:672`),
 not from `__()`.
