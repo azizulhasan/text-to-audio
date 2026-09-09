@@ -381,6 +381,12 @@ add_action('admin_init', function () {
         update_option( 'tta_analytics_migrated_2_1_10', true, false );
     }
 
+    // TTS-296: learn which translation packs the repo now offers, once per
+    // version. Nothing is downloaded here — this only records what is
+    // available so the admin notice can offer it; fetching the files stays
+    // behind an explicit click (wp.org Guidelines 7/8).
+    \TTA\TTA_Translation_Downloader::maybe_refresh_manifest();
+
     // Allow resetting onboarding via ?page=text-to-audio&reset_onboard=true
     // phpcs:disable WordPress.Security.NonceVerification.Recommended -- admin-only flow gated by current_user_can(manage_options); read-only routing check
     if ( isset( $_GET['page'] ) && 'text-to-audio' === $_GET['page']

@@ -23,8 +23,10 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { execFileSync } = require('child_process');
 const { availableLocales, PLUGIN_ROOT, LANG_DIR, DOMAIN } = require('./lib/locales');
+const { parsePO, serializePO, setRevisionDate } = require('./lib/po');
 
 // The repo sits beside the WordPress install, not inside it. Overridable so a
 // checkout somewhere else does not need the tree to be laid out just so.
@@ -140,23 +142,102 @@ function syncLocale(locale, repoDir, dryRun) {
  * exists, so a manifest listing only the locale you just added would hide the
  * rest. Other keys are preserved so the file stays ours to edit.
  */
-function writeManifest(locales, repoDir, dryRun) {
-    const file = path.join(repoDir, PLUGIN_SLUG, 'manifest.json');
-    let manifest = { plugin: DOMAIN, text_domain: DOMAIN, version: '1.0.0' };
+function md5File(file) {
+    return crypto.createHash('md5').update(fs.readFileSync(file)).digest('hex');
+}
 
-    if (fs.existsSync(file)) {
-        try {
-            manifest = JSON.parse(fs.readFileSync(file, 'utf8'));
-        } catch (e) {
-            throw new Error(`manifest.json is not valid JSON (${e.message}) — fix or delete it, then re-run`);
+/**
+ * Every filename that makes up one locale's pack.
+ *
+ * Recorded in the manifest so the plugin never has to ask api.github.com what a
+ * folder contains. That endpoint allows 60 requests/hour per IP unauthenticated,
+ * which shared hosting burns through collectively — downloads then fail with a
+ * 403 for reasons the site owner cannot see or fix.
+ */
+function builtFileNames(locale) {
+    const f = builtFiles(locale);
+    return [f.po, f.mo, ...f.json].filter(Boolean);
+}
+
+function readManifest(repoDir) {
+    const file = path.join(repoDir, PLUGIN_SLUG, 'manifest.json');
+    if (!fs.existsSync(file)) {
+        return { plugin: DOMAIN, text_domain: DOMAIN, version: '1.0.0' };
+    }
+    try {
+        return JSON.parse(fs.readFileSync(file, 'utf8'));
+    } catch (e) {
+        throw new Error(`manifest.json is not valid JSON (${e.message}) — fix or delete it, then re-run`);
+    }
+}
+
+/**
+ * Decide which locales actually changed, and stamp those.
+ *
+ * Must run BEFORE the files are copied, because the stamp goes into the source
+ * .po in languages/ and the copy has to carry it. Stamping only the published
+ * copy would leave the two files permanently different, so every run would see
+ * a changed hash and mint a new date forever.
+ *
+ * The hash is taken AFTER stamping for the same reason: it has to describe the
+ * file as published, or the next run compares against something that no longer
+ * exists on disk.
+ *
+ * An unchanged locale keeps its previous entry untouched — that is what stops
+ * a Spanish-only update from making the other eleven look stale.
+ *
+ * @returns {{locales: Object, stamped: string[]}}
+ */
+function stampAndFingerprint(locales, repoDir, dryRun) {
+    const previous = (() => {
+        const m = readManifest(repoDir).locales;
+        return m && !Array.isArray(m) ? m : {};
+    })();
+
+    const when = new Date().toISOString().slice(0, 16).replace('T', ' ') + '+0000';
+    const next = {};
+    const stamped = [];
+
+    for (const locale of locales) {
+        const poPath = path.join(LANG_DIR, `${DOMAIN}-${locale}.po`);
+        const current = md5File(poPath);
+
+        if (previous[locale] && previous[locale].po_md5 === current) {
+            next[locale] = previous[locale];
+            continue;
         }
+
+        if (dryRun) {
+            next[locale] = { po_md5: current, updated: when };
+            stamped.push(locale);
+            continue;
+        }
+
+        const po = parsePO(poPath);
+        fs.writeFileSync(poPath, serializePO(setRevisionDate(po.header, when), po.entries), 'utf8');
+
+        next[locale] = { po_md5: md5File(poPath), updated: when, files: builtFileNames(locale) };
+        stamped.push(locale);
     }
 
-    const before = (manifest.locales || []).join(',');
-    manifest.locales = locales;
+    return { locales: next, stamped };
+}
+
+/**
+ * Rewrite the manifest from the full locale list.
+ *
+ * Always rebuilt, never appended to: the downloader reads this to know what
+ * exists, so a manifest listing only the locale you just added would hide the
+ * rest. Other keys are preserved so the file stays ours to edit.
+ */
+function writeManifest(localeData, repoDir, dryRun) {
+    const file = path.join(repoDir, PLUGIN_SLUG, 'manifest.json');
+    const manifest = readManifest(repoDir);
+
+    manifest.locales = localeData;
 
     if (!dryRun) fs.writeFileSync(file, JSON.stringify(manifest, null, 4) + '\n', 'utf8');
-    return { changed: before !== locales.join(','), file };
+    return { file };
 }
 
 function git(repoDir, args) {
@@ -189,15 +270,22 @@ function main() {
         process.exit(1);
     }
 
+    // Stamp before copying: the revision date belongs in the source .po so the
+    // published copy carries it and both files stay identical.
+    const fingerprint = stampAndFingerprint(locales, repoDir, args.dryRun);
+
     for (const locale of locales) {
         const r = syncLocale(locale, repoDir, args.dryRun);
         const note = r.removed.length ? `   -${r.removed.length} stale` : '';
-        console.log(`  ${locale.padEnd(7)} ${String(r.copied).padStart(3)} files${note}`);
+        const mark = fingerprint.stamped.includes(locale) ? '  ← changed, re-stamped' : '';
+        console.log(`  ${locale.padEnd(7)} ${String(r.copied).padStart(3)} files${note}${mark}`);
     }
 
-    const m = writeManifest(locales, repoDir, args.dryRun);
+    writeManifest(fingerprint.locales, repoDir, args.dryRun);
     console.log('');
-    console.log(`  manifest.json ${m.changed ? 'updated' : 'unchanged'} (${locales.length} locales)`);
+    console.log(fingerprint.stamped.length
+        ? `  manifest.json — ${fingerprint.stamped.length} of ${locales.length} locale(s) changed: ${fingerprint.stamped.join(', ')}`
+        : `  manifest.json — no locale changed; every date left as it was`);
     console.log('');
 
     if (args.dryRun) {

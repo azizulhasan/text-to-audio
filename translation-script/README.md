@@ -599,6 +599,27 @@ It defaults to `atlasaidev-translations` sitting beside the WordPress install
 - **Never pushes on its own.** Publishing is outward-facing, so it stages and
   stops; `--commit` / `--push` are explicit.
 
+**What the manifest records**
+
+```json
+"locales": {
+    "es_ES": {
+        "po_md5":  "21c08a…",
+        "updated": "2026-09-09 14:19+0000",
+        "files":   ["text-to-audio-es_ES.po", "text-to-audio-es_ES.mo", "..."]
+    }
+}
+```
+
+- `updated` is stamped into the source `.po` as `PO-Revision-Date` **before** the
+  copy, and `po_md5` is taken **after** stamping. That ordering is what makes a
+  re-publish idempotent: reverse it and the file and the manifest disagree, so
+  every run mints a new date.
+- A locale whose `.po` hash is unchanged keeps its previous entry untouched —
+  which is why updating Spanish alone leaves the other eleven dates alone.
+- `files` exists so the plugin never has to ask api.github.com what a folder
+  contains (60 requests/hour per IP, shared across every site on a host).
+
 **The safety check**
 
 It refuses to touch the repo unless *every* locale in `AVAILABLE_LOCALES` is

@@ -24,6 +24,25 @@ class TTA_Translation_Downloader {
 	const REPO_API_URL = 'https://api.github.com/repos/azizulhasan/atlasaidev-translations/contents/atlasvoice';
 
 	/**
+	 * Manifest describing what the translations repo currently offers.
+	 *
+	 * Served from raw.githubusercontent.com rather than the API: api.github.com
+	 * is rate-limited to 60 requests/hour per IP unauthenticated, which a shared
+	 * host would burn through instantly.
+	 */
+	const MANIFEST_URL = self::REPO_BASE_URL . '/manifest.json';
+
+	/**
+	 * Option holding the last fetched manifest (the `locales` map only).
+	 */
+	const MANIFEST_OPTION = 'tta_translation_manifest';
+
+	/**
+	 * Plugin version the manifest was last fetched for.
+	 */
+	const MANIFEST_VERSION_OPTION = 'tta_translation_manifest_version';
+
+	/**
 	 * Available locales with translations.
 	 * Update this array when a new language is added to the GitHub repo.
 	 *
@@ -56,7 +75,11 @@ class TTA_Translation_Downloader {
 			return false;
 		}
 
-		if ( self::is_locale_installed( $locale ) ) {
+		// Skip only when the installed pack matches what the repo publishes.
+		// A stale pack must fall through and be re-fetched, otherwise the
+		// "Update translation" button would report success without changing
+		// anything.
+		if ( 'current' === self::get_locale_status( $locale ) ) {
 			return true;
 		}
 
@@ -91,7 +114,38 @@ class TTA_Translation_Downloader {
 			}
 		}
 
+		if ( $success ) {
+			self::flush_translation_cache();
+		}
+
 		return $success;
+	}
+
+	/**
+	 * Forget the cached listing of installed translation files.
+	 *
+	 * wp_get_installed_translations() is served from the `translation_files`
+	 * cache group. Without this, a site running a persistent object cache would
+	 * keep reporting the pack as missing or stale after a successful download,
+	 * so the notice would not go away.
+	 *
+	 * Delegated to core's own invalidator rather than deleting the cache key
+	 * ourselves, so the key derivation stays core's business.
+	 */
+	private static function flush_translation_cache() {
+		global $wp_textdomain_registry;
+
+		if ( ! $wp_textdomain_registry instanceof \WP_Textdomain_Registry ) {
+			return;
+		}
+
+		$wp_textdomain_registry->invalidate_mo_files_cache(
+			null,
+			array(
+				'type'         => 'translation',
+				'translations' => array( array( 'type' => 'plugin' ) ),
+			)
+		);
 	}
 
 	/**
@@ -121,9 +175,103 @@ class TTA_Translation_Downloader {
 	 * @return bool
 	 */
 	public static function is_locale_installed( $locale ) {
-		$installed = wp_get_installed_translations( 'plugins' );
+		return 'missing' !== self::get_locale_status( $locale );
+	}
 
-		return isset( $installed[ TEXT_TO_AUDIO_TEXT_DOMAIN ][ $locale ] );
+	/**
+	 * Fetch the manifest and remember what the repo currently offers.
+	 *
+	 * Called once per plugin version, never on a schedule and never on page
+	 * load. A site that does not update does not receive new strings either, so
+	 * its packs cannot silently fall behind.
+	 *
+	 * Failure is deliberately quiet: a GitHub outage must not block an update or
+	 * nag the admin. The previously stored manifest simply stays in place.
+	 *
+	 * @return bool Whether a manifest was stored.
+	 */
+	public static function refresh_manifest() {
+		$response = wp_remote_get( self::MANIFEST_URL, array(
+			'timeout'   => 15,
+			'sslverify' => true,
+		) );
+
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			return false;
+		}
+
+		$data = json_decode( wp_remote_retrieve_body( $response ), true );
+
+		// The locales map is an object keyed by locale. An older manifest used a
+		// plain array of codes; that carries no revision data, so ignore it
+		// rather than storing something get_locale_status() cannot read.
+		if ( ! isset( $data['locales'] ) || ! is_array( $data['locales'] ) || isset( $data['locales'][0] ) ) {
+			return false;
+		}
+
+		update_option( self::MANIFEST_OPTION, $data['locales'], false );
+
+		return true;
+	}
+
+	/**
+	 * Refresh the manifest once after the plugin version changes.
+	 *
+	 * Hooked on admin_init rather than upgrader_process_complete because that
+	 * action does not fire for manual or FTP updates; comparing a stored version
+	 * catches every route into a new version exactly once.
+	 */
+	public static function maybe_refresh_manifest() {
+		if ( get_option( self::MANIFEST_VERSION_OPTION ) === TEXT_TO_AUDIO_VERSION ) {
+			return;
+		}
+
+		// Record the version only on success. Marking it regardless would turn a
+		// single failed fetch — an outage, or the CDN still serving a manifest
+		// from before the packs were published — into "never check again until
+		// the next release".
+		if ( self::refresh_manifest() ) {
+			update_option( self::MANIFEST_VERSION_OPTION, TEXT_TO_AUDIO_VERSION, false );
+		}
+	}
+
+	/**
+	 * State of this site's translation pack for a locale.
+	 *
+	 * Compares the installed pack's PO-Revision-Date against the date the
+	 * manifest records for that locale. Both sides come from a core method, so
+	 * nothing here needs to know a file path — and because the date is stamped
+	 * per locale at publish time, updating one language never makes the others
+	 * look out of date.
+	 *
+	 * @param string $locale
+	 * @return string 'unavailable' | 'missing' | 'stale' | 'current'
+	 */
+	public static function get_locale_status( $locale ) {
+		if ( 'en_US' === $locale || ! self::is_locale_available( $locale ) ) {
+			return 'unavailable';
+		}
+
+		$installed = wp_get_installed_translations( 'plugins' );
+		$domain    = TEXT_TO_AUDIO_TEXT_DOMAIN;
+
+		if ( ! isset( $installed[ $domain ][ $locale ] ) ) {
+			return 'missing';
+		}
+
+		$manifest = get_option( self::MANIFEST_OPTION, array() );
+
+		// Without a manifest we cannot prove the pack is behind, and guessing
+		// would nag every site whose fetch failed. Treat it as good.
+		if ( empty( $manifest[ $locale ]['updated'] ) ) {
+			return 'current';
+		}
+
+		$revision = isset( $installed[ $domain ][ $locale ]['PO-Revision-Date'] )
+			? $installed[ $domain ][ $locale ]['PO-Revision-Date']
+			: '';
+
+		return $revision === $manifest[ $locale ]['updated'] ? 'current' : 'stale';
 	}
 
 	/**
@@ -186,6 +334,20 @@ class TTA_Translation_Downloader {
 	 * @return array List of filenames.
 	 */
 	private static function get_remote_file_list( $locale ) {
+		// Prefer the manifest: it already lists every file in the pack, so the
+		// common path costs no extra request at all.
+		//
+		// api.github.com allows 60 requests/hour per IP unauthenticated. Shared
+		// hosts share one IP between many sites, so that budget is spent
+		// collectively and downloads start failing with a 403 the site owner
+		// can neither see nor fix. The API call below is now only a fallback
+		// for a manifest published before file lists were recorded.
+		$manifest = get_option( self::MANIFEST_OPTION, array() );
+
+		if ( ! empty( $manifest[ $locale ]['files'] ) && is_array( $manifest[ $locale ]['files'] ) ) {
+			return $manifest[ $locale ]['files'];
+		}
+
 		$api_url = self::REPO_API_URL . '/' . $locale;
 
 		$response = wp_remote_get( $api_url, array(

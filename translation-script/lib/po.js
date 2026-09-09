@@ -181,4 +181,34 @@ function isUntranslated(e) {
     return !e.msgstr;
 }
 
-module.exports = { parsePO, serializePO, escapePO, unescapePO, entryKey, isUntranslated };
+/**
+ * Set PO-Revision-Date in a raw header block, inserting it when absent.
+ *
+ * Nothing else in this pipeline writes that header: collect and apply carry the
+ * header through verbatim, which is why every locale still reports the date its
+ * .po was born with — or gettext's literal YEAR-MO-DA placeholder for the ones
+ * created from scratch. i18n:publish stamps it so a site can tell a refreshed
+ * pack from the one it already has.
+ *
+ * @param {string} header Raw header block.
+ * @param {string} when   e.g. "2026-09-09 18:40+0000".
+ * @returns {string}
+ */
+function setRevisionDate(header, when) {
+    // The literal two characters backslash-n, because a .po header line ends
+    // with an escaped newline inside the quoted string, not a real line break.
+    const line = '"PO-Revision-Date: ' + when + '\\n"';
+
+    if (/^"PO-Revision-Date:.*$/m.test(header)) {
+        return header.replace(/^"PO-Revision-Date:.*$/m, line);
+    }
+
+    // Insert after Project-Id-Version so the header keeps conventional order.
+    if (/^"Project-Id-Version:.*$/m.test(header)) {
+        return header.replace(/^("Project-Id-Version:.*$)/m, '$1\n' + line);
+    }
+
+    return header + '\n' + line;
+}
+
+module.exports = { parsePO, serializePO, escapePO, unescapePO, entryKey, isUntranslated, setRevisionDate };

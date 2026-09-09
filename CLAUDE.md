@@ -215,6 +215,29 @@ Also add the locale to `$voice_map` (`includes/TTA_Activator.php`) and
 `get_locale_label()` (`includes/TTA_Notices.php`) so it does not fall back to
 English defaults; `includes/helpers.php` already has every WordPress locale name.
 
+**Staleness / the download notice (TTS-296).** A pack is offered on two states
+only: `missing` (nothing installed) or `stale` (installed but behind what the
+repo publishes). Both come from `TTA_Translation_Downloader::get_locale_status()`,
+which compares the installed pack's `PO-Revision-Date` against the date
+`manifest.json` records for that locale — per locale, so updating Spanish alone
+never makes the other eleven look out of date. `i18n:publish` stamps that date
+into the source `.po` **before** copying, and hashes the file **after** stamping;
+reverse either and the date and hash disagree forever, minting a new revision on
+every run. The manifest is fetched **once per plugin version** from
+`admin_init` (`maybe_refresh_manifest()`), never on a schedule, and the version
+marker is recorded only on success so one failed fetch is retried.
+
+**Never download anything without a click.** Fetching files from a third-party
+host without user action is what wp.org Guideline 7/8 reviews flag, so the
+update-time check only *records* what is available; the only code path that
+downloads is the notice's button. Do not "helpfully" add an auto-refresh.
+
+**Downloads must not use api.github.com.** It allows 60 requests/hour per IP
+unauthenticated, and shared hosts spend that budget collectively, so downloads
+fail with a 403 the site owner cannot diagnose. The manifest records each
+locale's file list; the API call remains only as a fallback for a manifest
+stored before those lists existed.
+
 **Publishing.** `languages/` is only half the story — the plugin downloads packs
 at runtime from the `atlasaidev-translations` repo. `npm run i18n:publish` copies
 `.po`/`.mo`/hashed `.json` into `atlasvoice/<locale>/`, deletes stale hashed files
