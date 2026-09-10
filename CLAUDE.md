@@ -176,7 +176,117 @@ The plugin uses a smart i18n system that separates JS and PHP translations based
 2. Edit `.po` files in `languages/` (zh_CN, ja, ko_KR, es_ES, it_IT, pt_BR)
 3. `npm run translate` — Generates optimized JSON (JS strings only) and MO (PHP strings only), with shared strings in both
 
-See `scripts/README.md` for full details.
+**Filling in missing translations (TTS-296).** `npm run translate` only *moves*
+translations that already exist — it never creates one, which is why newly added
+strings stay English until somebody supplies the words.
+To close that gap:
+
+```bash
+# one language
+npm run makepot
+npm run i18n:collect -- --locale=it_IT     # → translation-script/pending/it_IT.json
+#   ...fill that JSON from any AI client (Claude / ChatGPT / Gemini)...
+npm run i18n:apply   -- --locale=it_IT
+npm run translate                          # must run LAST
+
+# every language
+npm run i18n:sync                          # makepot + collect --all
+#   ...fill translation-script/pending/*.json...
+npm run i18n:finish                        # apply --all + translate
+
+# fully automatic (needs ANTHROPIC_API_KEY)
+npm run i18n:auto
+
+# publish the built files to the public translations repo
+npm run i18n:publish                  # copy + rewrite manifest, show the diff
+npm run i18n:publish -- --push        # ...and commit and push
+
+# restore languages/ on a fresh clone (REQUIRED before i18n:sync)
+npm run i18n:pull
+```
+
+`--all` reads the locale list from `TTA_Translation_Downloader::AVAILABLE_LOCALES`,
+so there is no second list to keep in sync. Only empty `msgstr` values are ever
+written, and strings the `.pot` no longer lists are retained rather than dropped.
+
+**Adding a locale** is one line in `AVAILABLE_LOCALES`, then
+`i18n:sync` → fill `pending/<locale>.json` → `i18n:finish` → `i18n:publish`.
+Also add the locale to `$voice_map` (`includes/TTA_Activator.php`) and
+`get_locale_label()` (`includes/TTA_Notices.php`) so it does not fall back to
+English defaults; `includes/helpers.php` already has every WordPress locale name.
+
+**Staleness / the download notice (TTS-296).** A pack is offered on two states
+only: `missing` (nothing installed) or `stale` (installed but behind what the
+repo publishes). Both come from `TTA_Translation_Downloader::get_locale_status()`,
+which compares the installed pack's `PO-Revision-Date` against the date
+`manifest.json` records for that locale — per locale, so updating Spanish alone
+never makes the other eleven look out of date. `i18n:publish` stamps that date
+into the source `.po` **before** copying, and hashes the file **after** stamping;
+reverse either and the date and hash disagree forever, minting a new revision on
+every run. The manifest is fetched **once per plugin version** from
+`admin_init` (`maybe_refresh_manifest()`), never on a schedule, and the version
+marker is recorded only on success so one failed fetch is retried.
+
+**Never download anything without a click.** Fetching files from a third-party
+host without user action is what wp.org Guideline 7/8 reviews flag, so the
+update-time check only *records* what is available; the only code path that
+downloads is the notice's button. Do not "helpfully" add an auto-refresh.
+
+**Downloads must not use api.github.com.** It allows 60 requests/hour per IP
+unauthenticated, and shared hosts spend that budget collectively, so downloads
+fail with a 403 the site owner cannot diagnose. The manifest records each
+locale's file list; the API call remains only as a fallback for a manifest
+stored before those lists existed.
+
+**Publishing.** `languages/` is only half the story — the plugin downloads packs
+at runtime from the `atlasaidev-translations` repo. `npm run i18n:publish` copies
+`.po`/`.mo`/hashed `.json` into `atlasvoice/<locale>/`, deletes stale hashed files
+it owns, and rewrites `manifest.json` from the full locale list (never appends —
+the downloader reads it to know what exists). It never pushes on its own; use
+`--commit`/`--push`. It refuses to run unless **every** locale in
+`AVAILABLE_LOCALES` has a `.po`, a `.mo` and at least one hashed `.json`, and
+unless every `pending/*.json` is gone — a surviving pending file means
+`i18n:apply` left empty strings, so that locale would ship with English gaps.
+Note `npm run translate` rebuilds every locale that has a `.po`, not just the one
+you changed, so publishing stays a one-folder diff.
+
+**Only `languages/text-to-audio.pot` is committed.** The `.po`/`.mo`/hashed
+`.json` are gitignored build artefacts: the plugin ships without them and a
+non-English site fetches just its own pack at runtime. On a fresh clone run
+**`npm run i18n:pull`** before `i18n:sync` — the `.po` files are not merely
+output, they are the input `i18n:collect` merges the `.pot` into, so syncing
+without them yields ~1,100 empty strings per locale as if nothing were ever
+translated.
+
+**Downloaded packs go to `wp-content/languages/plugins/`**, not the plugin's own
+`languages/` — WordPress deletes the plugin directory on update, so a pack
+written there is discarded every release. Core checks that location *before* any
+path given to `wp_set_script_translations()`, for both the `.mo`
+(`WP_Textdomain_Registry`) and the hashed `.json`
+(`_load_script_textdomain_from_src()`), so nothing else needed changing. Never
+hardcode `WP_LANG_DIR`: the write resolves the directory via
+`$wp_filesystem->wp_lang_dir()`, since FTP/SSH installs write against a remote
+root where the literal constant does not resolve. For "is this pack installed?"
+use `TTA_Translation_Downloader::is_locale_installed()`, which wraps core's
+`wp_get_installed_translations( 'plugins' )` — a plain read, so it cannot trigger
+the credentials form that booting `WP_Filesystem()` inside an `admin_notices`
+callback would. Do not reach for `$wp_textdomain_registry->get()` here: it
+returns a *candidate* directory and answers `true` even for a locale that was
+never installed. Note `wp_get_installed_translations()` only counts a `.mo` with
+its `.po` beside it, which our packs always ship. There is deliberately **no**
+fallback to the plugin's own `languages/` folder: the ZIP ships only the `.pot`,
+and WordPress deletes the plugin directory on update, so nothing can be there.
+
+Note `Listen` / `Pause` / `Resume` / `Replay` are **not** translatable this way —
+they come from the saved `tta__button_text_arr` option (`includes/helpers.php:672`),
+not from `__()`.
+
+**Script translation filenames:** WordPress hashes the script path *relative to
+the plugin root* and strips `.min` first, so the JSON for the player bundle must
+be named after `admin/js/build/text-to-audio-button.js`. That mapping lives in
+`sourceToBuiltMap` in `translation-script/generate-translations.js`.
+
+See `translation-script/README.md` for full details.
 
 ## Important Constants
 
@@ -188,7 +298,7 @@ Defined in `text-to-audio.php`:
 
 ## Production Build Exclusions
 
-The `gulpfile.js` `productionSrc` array excludes from release ZIPs: `node_modules/`, `src/`, `scripts/`, `.claude/`, source JS files, `*.md`, config files, `.po`/`.pot` files, and `uninstall.php`.
+The `gulpfile.js` `productionSrc` array excludes from release ZIPs: `node_modules/`, `src/`, `translation-script/`, `.claude/`, source JS files, `*.md`, config files, and `uninstall.php`. From `languages/` only `text-to-audio.pot` ships — the `.po`, `.mo` and hashed `.json` are excluded (~5 MB across 12 locales) because sites fetch just their own language at runtime.
 
 ## Caching Plugin Compatibility
 

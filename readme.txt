@@ -258,9 +258,15 @@ Fetches `https://raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json`
 
 Fetches `https://raw.githubusercontent.com/atlasaidev/plugins/main/text-to-audio-promotions.json` in the admin to show occasional plugin notices (cached 12h). No site or user data is sent beyond standard HTTP headers.
 
-= Translation downloads (api.github.com, raw.githubusercontent.com) =
+= Translation downloads (raw.githubusercontent.com, api.github.com) =
 
-To keep the ZIP small, `.mo` translations are downloaded on demand from `https://github.com/azizulhasan/atlasaidev-translations` (via api.github.com and raw.githubusercontent.com) on activation and when the site language changes, and skipped if the `.mo` already exists. Only the WordPress locale code (e.g. `es_ES`) is sent.
+Translations are not bundled in the plugin — only the `.pot` template is — so a site downloads just the language it uses instead of carrying every language. Two separate requests may be made to `https://github.com/azizulhasan/atlasaidev-translations`:
+
+1. **Availability check.** Once after the plugin is updated to a new version, `manifest.json` is fetched from raw.githubusercontent.com to learn which languages are offered and when each was last revised. This downloads no translation files and sends no site or user data beyond standard HTTP headers.
+
+2. **The download itself.** Only when an administrator clicks "Download translation" / "Update translation" in the admin notice, that one language's files are fetched from raw.githubusercontent.com. Only the WordPress locale code (e.g. `es_ES`) is sent. **Nothing is ever downloaded automatically** — no download happens on activation, on a schedule, or in the background.
+
+api.github.com is contacted only as a fallback, if the stored manifest predates the file lists now recorded in it.
 
 GitHub, Inc. (catalog, promotions + translations) — Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
 

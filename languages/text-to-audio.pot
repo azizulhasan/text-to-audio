@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-3.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Text To Speech TTS Accessibility 2.3.11\n"
+"Project-Id-Version: Text To Speech TTS Accessibility 2.3.13\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/text-to-audio\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-27T07:55:48+02:00\n"
+"POT-Creation-Date: 2026-09-10T06:47:35+02:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: text-to-audio\n"
@@ -42,7 +42,9 @@ msgstr ""
 #: admin/TTA_Admin.php:645
 #: admin/TTA_Admin.php:646
 #: admin/TTA_Admin.php:656
-#: includes/TTA_Hooks.php:336
+#: admin/TTA_Admin.php:1214
+#: admin/TTA_Admin.php:1215
+#: includes/TTA_Hooks.php:346
 #: includes/TTA_Notices.php:462
 #: includes/TTA_Notices.php:1323
 #: includes/TTA_Notices.php:1534
@@ -63,11 +65,13 @@ msgstr ""
 
 #: admin/TTA_Admin.php:1116
 #: admin/TTA_Admin.php:1117
+#: src/dashboard/components/dashboard/dasboardcontent/DashboardSideNav.js:115
 msgid "Our Plugins"
 msgstr ""
 
 #: admin/TTA_Admin.php:1175
 #: admin/TTA_Admin.php:1176
+#: src/dashboard/components/dashboard/dasboardcontent/DashboardSideNav.js:108
 msgid "Pricing"
 msgstr ""
 
@@ -75,66 +79,124 @@ msgstr ""
 msgid "AtlasVoice Pro Pricing"
 msgstr ""
 
-#: admin/TTA_Admin.php:1254
-#: admin/TTA_Admin.php:1349
-msgid "AtlasVoice: On"
+#: admin/TTA_Admin.php:1237
+msgid "You do not have permission to view this page."
 msgstr ""
 
-#: admin/TTA_Admin.php:1255
-#: admin/TTA_Admin.php:1350
-msgid "AtlasVoice: Off"
+#: admin/TTA_Admin.php:1260
+msgid "AtlasVoice — Network Overview"
+msgstr ""
+
+#: admin/TTA_Admin.php:1261
+msgid "AtlasVoice settings are stored per site. This page shows where each site stands and links to its dashboard."
+msgstr ""
+
+#: admin/TTA_Admin.php:1264
+msgid "Site"
 msgstr ""
 
 #: admin/TTA_Admin.php:1265
-msgid "Toggle AtlasVoice audio player for this post"
+msgid "Mode"
 msgstr ""
 
-#: admin/TTA_Admin.php:1378
-msgid "Having trouble? We can help!"
+#: admin/TTA_Admin.php:1266
+msgid "Player"
 msgstr ""
 
-#: admin/TTA_Admin.php:1381
-msgid "Many issues can be fixed in under 2 minutes:"
+#: admin/TTA_Admin.php:1267
+msgid "Configured"
 msgstr ""
 
-#: admin/TTA_Admin.php:1385
-msgid "Voice not working"
+#: admin/TTA_Admin.php:1268
+msgid "Actions"
 msgstr ""
 
-#: admin/TTA_Admin.php:1387
-msgid "Quick Fix Guide"
+#: admin/TTA_Admin.php:1297
+msgid "Production"
 msgstr ""
 
-#: admin/TTA_Admin.php:1391
-msgid "Player not showing"
+#: admin/TTA_Admin.php:1298
+msgid "Staging"
+msgstr ""
+
+#: admin/TTA_Admin.php:1301
+msgid "Yes"
+msgstr ""
+
+#: admin/TTA_Admin.php:1302
+msgid "Not configured"
+msgstr ""
+
+#: admin/TTA_Admin.php:1304
+msgid "Open dashboard"
+msgstr ""
+
+#. translators: 1: number of sites shown, 2: total number of sites on the network.
+#: admin/TTA_Admin.php:1314
+#, php-format
+msgid "Showing %1$d of %2$d sites."
+msgstr ""
+
+#: admin/TTA_Admin.php:1382
+#: admin/TTA_Admin.php:1477
+msgid "AtlasVoice: On"
+msgstr ""
+
+#: admin/TTA_Admin.php:1383
+#: admin/TTA_Admin.php:1478
+msgid "AtlasVoice: Off"
 msgstr ""
 
 #: admin/TTA_Admin.php:1393
+msgid "Toggle AtlasVoice audio player for this post"
+msgstr ""
+
+#: admin/TTA_Admin.php:1506
+msgid "Having trouble? We can help!"
+msgstr ""
+
+#: admin/TTA_Admin.php:1509
+msgid "Many issues can be fixed in under 2 minutes:"
+msgstr ""
+
+#: admin/TTA_Admin.php:1513
+msgid "Voice not working"
+msgstr ""
+
+#: admin/TTA_Admin.php:1515
+msgid "Quick Fix Guide"
+msgstr ""
+
+#: admin/TTA_Admin.php:1519
+msgid "Player not showing"
+msgstr ""
+
+#: admin/TTA_Admin.php:1521
 msgid "Troubleshoot"
 msgstr ""
 
-#: admin/TTA_Admin.php:1397
+#: admin/TTA_Admin.php:1525
 msgid "Need better voices"
 msgstr ""
 
-#: admin/TTA_Admin.php:1399
+#: admin/TTA_Admin.php:1527
 msgid "See AI Voices"
 msgstr ""
 
-#: admin/TTA_Admin.php:1407
+#: admin/TTA_Admin.php:1535
 msgid "Contact Support"
 msgstr ""
 
-#: admin/TTA_Admin.php:1410
+#: admin/TTA_Admin.php:1538
 msgid "Continue to Deactivate"
 msgstr ""
 
-#: admin/TTA_Admin.php:1448
-#: includes/TTA_Notices.php:1880
+#: admin/TTA_Admin.php:1576
+#: includes/TTA_Notices.php:1910
 msgid "Permission denied."
 msgstr ""
 
-#: admin/TTA_Admin.php:1453
+#: admin/TTA_Admin.php:1581
 msgid "Invalid post."
 msgstr ""
 
@@ -269,100 +331,100 @@ msgstr ""
 msgid "Invalid nonce or insufficient permissions."
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:164
+#: includes/atlasvoice/Mode.php:170
 msgid "AtlasVoice: off"
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:171
+#: includes/atlasvoice/Mode.php:177
 msgid "AtlasVoice: production"
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:177
+#: includes/atlasvoice/Mode.php:183
 msgid "AtlasVoice: staging"
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:252
+#: includes/atlasvoice/Mode.php:258
 msgid "Go Live…"
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:256
+#: includes/atlasvoice/Mode.php:262
 msgid "Switch AtlasVoice to production (requires typed confirmation)."
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:265
-#: includes/atlasvoice/Mode.php:468
+#: includes/atlasvoice/Mode.php:271
+#: includes/atlasvoice/Mode.php:474
 msgid "Revert to staging"
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:269
+#: includes/atlasvoice/Mode.php:275
 msgid "Drop AtlasVoice back to staging and let the legacy pipeline serve visitors."
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:300
+#: includes/atlasvoice/Mode.php:306
 msgid "Close content picker"
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:301
+#: includes/atlasvoice/Mode.php:307
 msgid "Pick content to read"
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:305
+#: includes/atlasvoice/Mode.php:311
 msgid "Leave the AtlasVoice content picker."
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:306
+#: includes/atlasvoice/Mode.php:312
 msgid "Choose which parts of this page are read aloud."
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:317
+#: includes/atlasvoice/Mode.php:323
 msgid "Open AtlasVoice settings"
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:425
+#: includes/atlasvoice/Mode.php:431
 msgid "Post types"
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:426
+#: includes/atlasvoice/Mode.php:432
 msgid "None selected"
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:437
+#: includes/atlasvoice/Mode.php:443
 msgid "Voice engine"
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:461
+#: includes/atlasvoice/Mode.php:467
 msgid "Go live?"
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:462
+#: includes/atlasvoice/Mode.php:468
 msgid "Your audio player becomes visible to everyone visiting your site."
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:463
+#: includes/atlasvoice/Mode.php:469
 msgid "You can revert to staging at any time."
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:464
+#: includes/atlasvoice/Mode.php:470
 msgid "Yes, go live"
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:465
+#: includes/atlasvoice/Mode.php:471
 msgid "Revert to staging?"
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:466
+#: includes/atlasvoice/Mode.php:472
 msgid "Your player disappears for visitors and becomes visible only to logged-in admins again."
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:467
+#: includes/atlasvoice/Mode.php:473
 msgid "Your generated MP3 files and settings are kept."
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:469
+#: includes/atlasvoice/Mode.php:475
 msgid "Stay live"
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:470
+#: includes/atlasvoice/Mode.php:476
 #: libs/AtlasAiDev/Insights.php:1017
 #: libs/AtlasAiDev/Insights.php:1049
 #: admin/js/build/chunks/tab-maintenance.d2fe32095cac3d8f.chunk.js:2
@@ -370,27 +432,27 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:471
+#: includes/atlasvoice/Mode.php:477
 msgid "Switching to live…"
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:472
+#: includes/atlasvoice/Mode.php:478
 msgid "Reverting to staging…"
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:473
+#: includes/atlasvoice/Mode.php:479
 msgid "You are live. Visitors can hear the player."
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:474
+#: includes/atlasvoice/Mode.php:480
 msgid "Reverted. Only logged-in admins can see the player."
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:475
+#: includes/atlasvoice/Mode.php:481
 msgid "Could not switch. You are still in staging."
 msgstr ""
 
-#: includes/atlasvoice/Mode.php:476
+#: includes/atlasvoice/Mode.php:482
 msgid "Could not revert. You are still live."
 msgstr ""
 
@@ -474,12 +536,14 @@ msgstr ""
 
 #: includes/atlasvoice/StepRail.php:218
 #: text-to-audio.php:245
+#: src/dashboard/components/dashboard/dasboardcontent/DashboardSideNav.js:98
 msgid "Docs"
 msgstr ""
 
 #: includes/atlasvoice/StepRail.php:219
 #: libs/AtlasAiDev/Insights.php:971
 #: libs/AtlasAiDev/Insights.php:1024
+#: admin/js/text-to-audio-button.js:637
 msgid "Close"
 msgstr ""
 
@@ -674,13 +738,13 @@ msgstr ""
 msgid "Open &amp; Pick"
 msgstr ""
 
-#: includes/helpers.php:417
+#: includes/helpers.php:420
 msgid "Text to speech player"
 msgstr ""
 
-#: includes/helpers.php:706
-#: includes/helpers.php:1105
-#: includes/TTA_Activator.php:209
+#: includes/helpers.php:709
+#: includes/helpers.php:1109
+#: includes/TTA_Activator.php:211
 #: includes/TTA_Player_Icons.php:120
 #: admin/js/blocks/customize-button/customize-button.js:83
 #: admin/js/tts/selection-control.js:86
@@ -689,95 +753,95 @@ msgstr ""
 msgid "Listen"
 msgstr ""
 
-#: includes/helpers.php:707
-#: includes/helpers.php:1106
-#: includes/TTA_Activator.php:210
+#: includes/helpers.php:710
+#: includes/helpers.php:1110
+#: includes/TTA_Activator.php:212
 #: includes/TTA_Player_Icons.php:121
 #: admin/js/build/chunks/tab-analytics.47d54d2778284f4f.chunk.js:2
 #: src/dashboard/components/dashboard/analitics/SummaryCards.js:164
 msgid "Pause"
 msgstr ""
 
-#: includes/helpers.php:708
-#: includes/helpers.php:1107
-#: includes/TTA_Activator.php:211
+#: includes/helpers.php:711
+#: includes/helpers.php:1111
+#: includes/TTA_Activator.php:213
 #: includes/TTA_Player_Icons.php:122
 msgid "Resume"
 msgstr ""
 
-#: includes/helpers.php:709
-#: includes/helpers.php:1108
-#: includes/TTA_Activator.php:212
+#: includes/helpers.php:712
+#: includes/helpers.php:1112
+#: includes/TTA_Activator.php:214
 #: includes/TTA_Player_Icons.php:123
 msgid "Replay"
 msgstr ""
 
-#: includes/helpers.php:710
-#: includes/helpers.php:1109
-#: includes/TTA_Activator.php:213
+#: includes/helpers.php:713
+#: includes/helpers.php:1113
+#: includes/TTA_Activator.php:215
 msgid "Start"
 msgstr ""
 
-#: includes/helpers.php:711
-#: includes/helpers.php:1110
-#: includes/TTA_Activator.php:214
+#: includes/helpers.php:714
+#: includes/helpers.php:1114
+#: includes/TTA_Activator.php:216
 msgid "Stop"
 msgstr ""
 
-#: includes/TTA.php:172
+#: includes/TTA.php:177
 msgid "This site uses the AtlasVoice plugin to provide text-to-speech audio playback. When listening analytics are enabled, the plugin collects the following data:"
 msgstr ""
 
-#: includes/TTA.php:174
+#: includes/TTA.php:179
 msgid "Analytics data (per visitor):"
 msgstr ""
 
-#: includes/TTA.php:176
+#: includes/TTA.php:181
 msgid "A pseudonymous browser fingerprint identifier (not your name, email, or IP address)"
 msgstr ""
 
-#: includes/TTA.php:177
+#: includes/TTA.php:182
 msgid "Which posts or pages you listened to"
 msgstr ""
 
-#: includes/TTA.php:178
+#: includes/TTA.php:183
 msgid "Playback events (play, pause, resume, completion)"
 msgstr ""
 
-#: includes/TTA.php:179
+#: includes/TTA.php:184
 msgid "Device type, browser, and operating system"
 msgstr ""
 
-#: includes/TTA.php:180
+#: includes/TTA.php:185
 msgid "Listening duration and timestamps"
 msgstr ""
 
-#: includes/TTA.php:182
+#: includes/TTA.php:187
 msgid "This data is stored in your site's database and is used solely to understand how visitors interact with the audio player. Because the identifier is a browser fingerprint (not tied to your email or account), it cannot be linked to you personally."
 msgstr ""
 
-#: includes/TTA.php:184
+#: includes/TTA.php:189
 msgid "Optional telemetry (opt-in only):"
 msgstr ""
 
-#: includes/TTA.php:186
+#: includes/TTA.php:191
 msgid "If the site administrator opts in to usage telemetry, anonymized plugin configuration data (e.g., which text-to-speech engine is selected, feature flags, active post types) is sent weekly to AtlasAiDev. No visitor data, post content, or personal information is included."
 msgstr ""
 
-#: includes/TTA.php:188
+#: includes/TTA.php:193
 msgid "Data retention:"
 msgstr ""
 
-#: includes/TTA.php:190
+#: includes/TTA.php:195
 msgid "Analytics data is stored indefinitely until the site administrator clears it via the plugin settings or uninstalls the plugin. All plugin data is permanently deleted on uninstall."
 msgstr ""
 
-#: includes/TTA.php:209
-#: includes/TTA.php:239
+#: includes/TTA.php:214
+#: includes/TTA.php:244
 msgid "AtlasVoice Analytics Data"
 msgstr ""
 
-#: includes/TTA.php:260
+#: includes/TTA.php:265
 msgid "AtlasVoice analytics uses pseudonymous browser fingerprints that cannot be linked to email addresses. No matching data found."
 msgstr ""
 
@@ -789,31 +853,31 @@ msgstr ""
 msgid "Default"
 msgstr ""
 
-#: includes/TTA_Helper.php:2067
+#: includes/TTA_Helper.php:2070
 msgid "Autoptimize"
 msgstr ""
 
-#: includes/TTA_Helper.php:2073
+#: includes/TTA_Helper.php:2076
 msgid "LiteSpeed Cache"
 msgstr ""
 
-#: includes/TTA_Helper.php:2079
+#: includes/TTA_Helper.php:2082
 msgid "WP Rocket"
 msgstr ""
 
-#: includes/TTA_Helper.php:2085
+#: includes/TTA_Helper.php:2088
 msgid "W3 Total Cache"
 msgstr ""
 
-#: includes/TTA_Helper.php:2091
+#: includes/TTA_Helper.php:2094
 msgid "WP-Optimize"
 msgstr ""
 
-#: includes/TTA_Helper.php:2097
+#: includes/TTA_Helper.php:2100
 msgid "SG Optimizer"
 msgstr ""
 
-#: includes/TTA_Hooks.php:338
+#: includes/TTA_Hooks.php:348
 #: admin/js/build/chunks/tab-customize.f093072f9c101885.chunk.js:2
 #: src/dashboard/components/dashboard/customize/button/TTSCustomizationButton.js:121
 msgid "AtlasVoice Pro"
@@ -1290,33 +1354,49 @@ msgstr ""
 msgid "Milestone dismissed."
 msgstr ""
 
-#: includes/TTA_Notices.php:1843
+#: includes/TTA_Notices.php:1867
+msgid "AtlasVoice — Updated Translation Available"
+msgstr ""
+
+#: includes/TTA_Notices.php:1868
 msgid "AtlasVoice — Translation Available"
 msgstr ""
 
 #. translators: %s: language name with locale code
-#: includes/TTA_Notices.php:1849
+#: includes/TTA_Notices.php:1875
+#, php-format
+msgid "A newer %s translation is available for AtlasVoice, with strings added since you last downloaded it. Click the button below to update it."
+msgstr ""
+
+#. translators: %s: language name with locale code
+#: includes/TTA_Notices.php:1877
 #, php-format
 msgid "Your site language is set to %s. A translation pack is available for AtlasVoice. Click the button below to download and activate it."
 msgstr ""
 
 #. translators: %s: language name
-#: includes/TTA_Notices.php:1858
+#: includes/TTA_Notices.php:1886
+#, php-format
+msgid "Update %s Translation"
+msgstr ""
+
+#. translators: %s: language name
+#: includes/TTA_Notices.php:1888
 #, php-format
 msgid "Download %s Translation"
 msgstr ""
 
-#: includes/TTA_Notices.php:1886
+#: includes/TTA_Notices.php:1916
 msgid "Invalid locale."
 msgstr ""
 
 #. translators: %s: locale code
-#: includes/TTA_Notices.php:1898
+#: includes/TTA_Notices.php:1928
 #, php-format
 msgid "Translation files for %s downloaded successfully."
 msgstr ""
 
-#: includes/TTA_Notices.php:1904
+#: includes/TTA_Notices.php:1934
 msgid "Failed to download translation files. Please try again later."
 msgstr ""
 
@@ -1512,6 +1592,8 @@ msgid "Method must be invoked inside admin_init action"
 msgstr ""
 
 #: text-to-audio.php:244
+#: admin/js/text-to-audio-button.js:1012
+#: src/dashboard/components/dashboard/dasboardcontent/DashboardSideNav.js:34
 msgid "Settings"
 msgstr ""
 
@@ -2546,6 +2628,7 @@ msgstr ""
 
 #: admin/js/build/chunks/tab-analytics.47d54d2778284f4f.chunk.js:2
 #: src/dashboard/components/dashboard/analitics/Analitics.js:821
+#: src/dashboard/components/dashboard/dasboardcontent/DashboardSideNav.js:71
 msgid "Analytics"
 msgstr ""
 
@@ -2701,6 +2784,7 @@ msgid "Selected fields are read after the main article content. If a field is al
 msgstr ""
 
 #: admin/js/build/chunks/tab-compatibility.1454b47de8303d47.chunk.js:2
+#: admin/js/text-to-audio-button.js:630
 #: src/dashboard/components/dashboard/compatibility/Compatibility.js:266
 msgid "Loading"
 msgstr ""
@@ -3095,6 +3179,7 @@ msgid "This is a preview of the player."
 msgstr ""
 
 #: admin/js/build/chunks/tab-customize.f093072f9c101885.chunk.js:2
+#: admin/js/text-to-audio-button.js:1012
 #: src/dashboard/components/dashboard/customize/design/ButtonPreview.js:183
 msgid "Player settings"
 msgstr ""
@@ -3106,6 +3191,7 @@ msgstr ""
 
 #: admin/js/build/chunks/tab-customize.f093072f9c101885.chunk.js:2
 #: src/dashboard/components/dashboard/customize/Customize.js:650
+#: src/dashboard/components/dashboard/dasboardcontent/DashboardSideNav.js:46
 msgid "Customization"
 msgstr ""
 
@@ -3761,6 +3847,7 @@ msgid "Deletion failed: "
 msgstr ""
 
 #: admin/js/build/chunks/tab-maintenance.d2fe32095cac3d8f.chunk.js:2
+#: src/dashboard/components/dashboard/dasboardcontent/DashboardSideNav.js:91
 #: src/dashboard/components/dashboard/maintenance/Maintenance.js:242
 #: src/dashboard/components/dashboard/maintenance/Maintenance.js:264
 msgid "Maintenance"
@@ -4646,6 +4733,65 @@ msgstr ""
 msgid "Thanks for upgrading. Manage your license from the Pro plugin settings."
 msgstr ""
 
+#: admin/js/text-to-audio-button.js:523
+#: admin/js/text-to-audio-button.js:711
+msgid "Unmute audio"
+msgstr ""
+
+#: admin/js/text-to-audio-button.js:523
+#: admin/js/text-to-audio-button.js:711
+msgid "Mute audio"
+msgstr ""
+
+#: admin/js/text-to-audio-button.js:527
+#: admin/js/text-to-audio-button.js:711
+msgid "Unmute"
+msgstr ""
+
+#: admin/js/text-to-audio-button.js:527
+#: admin/js/text-to-audio-button.js:711
+msgid "Mute"
+msgstr ""
+
+#: admin/js/text-to-audio-button.js:636
+msgid "Player Settings"
+msgstr ""
+
+#: admin/js/text-to-audio-button.js:637
+msgid "Close settings"
+msgstr ""
+
+#: admin/js/text-to-audio-button.js:647
+#: src/dashboard/welcome/steps/StepVoice.js:257
+msgid "Language"
+msgstr ""
+
+#: admin/js/text-to-audio-button.js:668
+#: src/dashboard/welcome/steps/StepVoice.js:279
+msgid "Voice"
+msgstr ""
+
+#: admin/js/text-to-audio-button.js:690
+msgid "Speed"
+msgstr ""
+
+#: admin/js/text-to-audio-button.js:693
+msgid "Playback speed"
+msgstr ""
+
+#: admin/js/text-to-audio-button.js:699
+msgid "Pitch"
+msgstr ""
+
+#: admin/js/text-to-audio-button.js:702
+msgid "Voice pitch"
+msgstr ""
+
+#: admin/js/text-to-audio-button.js:708
+#: admin/js/text-to-audio-button.js:727
+msgid "Volume"
+msgstr ""
+
 #: admin/js/tts/selection-control.js:87
 msgid "From here"
 msgstr ""
@@ -4709,6 +4855,26 @@ msgstr ""
 
 #: src/dashboard/components/context/utilities.js:785
 msgid "Custom"
+msgstr ""
+
+#: src/dashboard/components/dashboard/dasboardcontent/DashboardSideNav.js:40
+msgid "Integrations"
+msgstr ""
+
+#: src/dashboard/components/dashboard/dasboardcontent/DashboardSideNav.js:58
+msgid "Listening"
+msgstr ""
+
+#: src/dashboard/components/dashboard/dasboardcontent/DashboardSideNav.js:65
+msgid "Highlight"
+msgstr ""
+
+#: src/dashboard/components/dashboard/dasboardcontent/DashboardSideNav.js:77
+msgid "Compatibility"
+msgstr ""
+
+#: src/dashboard/components/dashboard/dasboardcontent/DashboardSideNav.js:83
+msgid "Aliases"
 msgstr ""
 
 #: src/dashboard/components/dashboard/dasboardcontent/DashboardTopNav.js:255
@@ -5122,16 +5288,8 @@ msgstr ""
 msgid "Select a browser voice for your audio player. Visitors will hear content read aloud using the Web Speech API."
 msgstr ""
 
-#: src/dashboard/welcome/steps/StepVoice.js:257
-msgid "Language"
-msgstr ""
-
 #: src/dashboard/welcome/steps/StepVoice.js:266
 msgid "All Languages"
-msgstr ""
-
-#: src/dashboard/welcome/steps/StepVoice.js:279
-msgid "Voice"
 msgstr ""
 
 #: src/dashboard/welcome/steps/StepVoice.js:289

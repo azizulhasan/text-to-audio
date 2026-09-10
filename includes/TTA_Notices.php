@@ -1783,22 +1783,38 @@ class TTA_Notices {
 			return;
 		}
 
-		// Check if translation files already exist locally.
-		$languages_dir = TTA_PLUGIN_PATH . 'languages/';
-		$mo_file       = $languages_dir . 'text-to-audio-' . $locale . '.mo';
-		if ( file_exists( $mo_file ) ) {
+		// The downloader owns this test because it owns where packs are written
+		// and what "up to date" means. Offer on two states only: nothing
+		// installed, or installed but behind what the repo now publishes.
+		$status = TTA_Translation_Downloader::get_locale_status( $locale );
+
+		if ( 'missing' !== $status && 'stale' !== $status ) {
 			return;
 		}
 
+		// TTS-296: key the dismissal to the pack being offered. A single flag
+		// meant that dismissing one offer silenced every later one, so a site
+		// that said "not now" in 2.1.8 was never told about any newer pack.
+		$manifest = get_option( TTA_Translation_Downloader::MANIFEST_OPTION, array() );
+		$stamp    = isset( $manifest[ $locale ]['po_md5'] )
+			? substr( $manifest[ $locale ]['po_md5'], 0, 8 )
+			: 'initial';
+
 		$this->register_notice( array(
-			'id'              => 'translation_download',
+			'id'              => 'translation_download_' . $locale . '_' . $stamp,
 			'type'            => 'info',
 			'dismissible'     => true,
 			'screens'         => array( 'toplevel_page_text-to-audio' ),
 			'condition'       => function () {
 				return current_user_can( 'manage_options' );
 			},
-			'render_callback' => array( $this, 'render_translation_download_notice' ),
+			// display_notice() calls this as ( $notice_id, $notice ) — take both,
+			// or the id arrives where the array is expected and the rendered
+			// data-notice-id silently falls back to the wrong value, which is
+			// what the dismiss handler posts back.
+			'render_callback' => function ( $notice_id, $notice ) use ( $status ) {
+				$this->render_translation_download_notice( $notice_id, $notice, $status );
+			},
 		) );
 	}
 
@@ -1826,38 +1842,52 @@ class TTA_Notices {
 			'fr_FR' => 'Français',
 			'de_DE' => 'Deutsch',
 			'nl_NL' => 'Nederlands',
+			'pl_PL' => 'Polski',
+			'ru_RU' => 'Русский',
+			'tr_TR' => 'Türkçe',
+			'vi'    => 'Tiếng Việt',
 		);
 
 		return isset( $labels[ $locale ] ) ? $labels[ $locale ] : $locale;
 	}
 
-	public function render_translation_download_notice( $notice ) {
+	public function render_translation_download_notice( $notice_id, $notice = array(), $status = 'missing' ) {
 		$locale       = get_locale();
 		$locale_label = $this->get_locale_label( $locale );
+		$is_update    = ( 'stale' === $status );
+		$notice_id    = is_string( $notice_id ) && '' !== $notice_id ? $notice_id : 'translation_download';
 		?>
-		<div class="notice notice-info is-dismissible tta-notice" data-notice-id="translation_download" style="padding: 15px 20px; border-left-color: #2271b1;">
+		<div class="notice notice-info is-dismissible tta-notice" data-notice-id="<?php echo esc_attr( $notice_id ); ?>" style="padding: 15px 20px; border-left-color: #2271b1;">
 			<div style="display: flex; align-items: center; gap: 15px;">
 				<span style="font-size: 32px;">🌐</span>
 				<div style="flex: 1;">
 					<h3 style="margin: 0 0 5px;">
-						<?php esc_html_e( 'AtlasVoice — Translation Available', 'text-to-audio' ); ?>
+						<?php
+						echo $is_update
+							? esc_html__( 'AtlasVoice — Updated Translation Available', 'text-to-audio' )
+							: esc_html__( 'AtlasVoice — Translation Available', 'text-to-audio' );
+						?>
 					</h3>
 					<p style="margin: 0 0 10px; font-size: 14px;">
 						<?php
-						printf(
+						$body = $is_update
 							/* translators: %s: language name with locale code */
-							esc_html__( 'Your site language is set to %s. A translation pack is available for AtlasVoice. Click the button below to download and activate it.', 'text-to-audio' ),
-							'<strong>' . esc_html( $locale_label ) . ' (' . esc_html( $locale ) . ')</strong>'
-						);
+							? esc_html__( 'A newer %s translation is available for AtlasVoice, with strings added since you last downloaded it. Click the button below to update it.', 'text-to-audio' )
+							/* translators: %s: language name with locale code */
+							: esc_html__( 'Your site language is set to %s. A translation pack is available for AtlasVoice. Click the button below to download and activate it.', 'text-to-audio' );
+
+						printf( $body, '<strong>' . esc_html( $locale_label ) . ' (' . esc_html( $locale ) . ')</strong>' );
 						?>
 					</p>
 					<button type="button" class="button button-primary" id="tta-download-translations" data-locale="<?php echo esc_attr( $locale ); ?>">
 						<?php
-						printf(
+						$button_label = $is_update
 							/* translators: %s: language name */
-							esc_html__( 'Download %s Translation', 'text-to-audio' ),
-							esc_html( $locale_label )
-						);
+							? esc_html__( 'Update %s Translation', 'text-to-audio' )
+							/* translators: %s: language name */
+							: esc_html__( 'Download %s Translation', 'text-to-audio' );
+
+						printf( $button_label, esc_html( $locale_label ) );
 						?>
 					</button>
 					<span id="tta-download-status" style="margin-left: 10px; display: none;"></span>
