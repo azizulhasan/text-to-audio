@@ -99,6 +99,17 @@ class PickerLoader {
 		// readability.
 		if ( ! wp_script_is( self::HANDLE, 'registered' ) ) {
 			wp_register_script( self::HANDLE, $url, array(), self::version(), true );
+
+			// TTS-296: without this the picker has no translations of its own.
+			// It only looked translated on player 1, because that page loads the
+			// button bundle's JSON and wp.i18n is a single shared registry per
+			// text domain — the picker was borrowing another handle's strings,
+			// and got nothing on players 2-6.
+			wp_set_script_translations(
+				self::HANDLE,
+				TEXT_TO_AUDIO_TEXT_DOMAIN,
+				TTA_PLUGIN_PATH . 'languages'
+			);
 		}
 	}
 

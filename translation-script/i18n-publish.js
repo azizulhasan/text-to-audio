@@ -201,9 +201,18 @@ function stampAndFingerprint(locales, repoDir, dryRun) {
     for (const locale of locales) {
         const poPath = path.join(LANG_DIR, `${DOMAIN}-${locale}.po`);
         const current = md5File(poPath);
+        const files = builtFileNames(locale);
 
         if (previous[locale] && previous[locale].po_md5 === current) {
-            next[locale] = previous[locale];
+            // The translations are unchanged, so the revision date must not
+            // move — but the *set* of built files can still differ, because
+            // generate-translations.js decides which bundle each string lands
+            // in. Refresh the list without touching the date, or a site would
+            // download from a manifest that omits a file the repo now has.
+            const before = (previous[locale].files || []).join('|');
+            next[locale] = before === files.join('|')
+                ? previous[locale]
+                : Object.assign({}, previous[locale], { files });
             continue;
         }
 

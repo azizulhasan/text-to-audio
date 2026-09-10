@@ -17,32 +17,55 @@ const { execSync } = require('child_process');
 
 const languagesDir = path.join(__dirname, '..', 'languages');
 
-// Mapping from source paths to built files
+// Mapping from source paths to built files.
+//
+// Values are arrays because one source can be compiled into more than one
+// bundle. WordPress loads translation JSON per *script handle*, so a string
+// shared by two bundles needs a JSON under each built path — otherwise whichever
+// player enqueues the unmapped handle silently renders English.
 const sourceToBuiltMap = {
     // Dashboard components map to dashboard UI build file
-    'src/dashboard/components/': 'admin/js/build/text-to-audio-dashboard-ui.js',
+    'src/dashboard/components/': ['admin/js/build/text-to-audio-dashboard-ui.js'],
     // TTS-296: the player button bundle. Note the target has no `.min` — core
     // strips it before hashing (SCRIPT_DEBUG handling), so the name WordPress
     // actually looks for is md5('admin/js/build/text-to-audio-button.js'). The
     // dashboard entry above follows the same convention.
-    'admin/js/text-to-audio-button.js': 'admin/js/build/text-to-audio-button.js',
-    'admin/js/tts/': 'admin/js/build/text-to-audio-button.js',
+    'admin/js/text-to-audio-button.js': ['admin/js/build/text-to-audio-button.js'],
+    // TTS-296: selection-control and the rest of admin/js/tts/ are bundled into
+    // BOTH the player-1 button bundle and TextToSpeech.js (players 2-6).
+    // Mapping them to only the first is why "Select any text to listen to it"
+    // was translated on the free player and English on every Pro player.
+    'admin/js/tts/': [
+        'admin/js/build/text-to-audio-button.js',
+        'admin/js/build/TextToSpeech.js',
+    ],
+    // TTS-296: players 2-6 enqueue this handle and TTA_Admin calls
+    // wp_set_script_translations() for it, but nothing generated a file for it
+    // to find, so nothing was ever loaded into wp.i18n on those players.
+    'admin/js/TextToSpeech.js': ['admin/js/build/TextToSpeech.js'],
+    // TTS-296: the on-page content picker registers its own handle
+    // (PickerLoader::HANDLE, bundle admin/js/build/tts-picker.min.js) and so
+    // needs its own JSON — see webpack.mix.js:24 for the entry.
+    'src/picker/': ['admin/js/build/tts-picker.js'],
     // TTS-296: legacy references. The modal used to live here until TTS-249
     // deleted the file; existing .po entries still point at it, and they must
     // resolve to the same bundle or their translations stay unreachable.
-    'src/dashboard/buttons/': 'admin/js/build/text-to-audio-button.js',
+    'src/dashboard/buttons/': ['admin/js/build/text-to-audio-button.js'],
     // Add more mappings as needed
 };
 
-// Map source file to its built file
+/**
+ * @param {string} sourcePath
+ * @returns {string[]} Every built file this source ends up inside.
+ */
 function mapSourceToBuilt(sourcePath) {
-    for (const [sourcePattern, builtFile] of Object.entries(sourceToBuiltMap)) {
+    for (const [sourcePattern, builtFiles] of Object.entries(sourceToBuiltMap)) {
         if (sourcePath.startsWith(sourcePattern)) {
-            return builtFile;
+            return builtFiles;
         }
     }
     // If no mapping found, return the original path
-    return sourcePath;
+    return [sourcePath];
 }
 
 // Calculate MD5 hash for the primary dashboard file (for filename)
@@ -131,8 +154,7 @@ function parsePOFile(poFilePath) {
                             // Remove line number if present (e.g., "file.js:123" -> "file.js")
                             const filePath = ref.split(':')[0];
                             // Map source path to built file
-                            const builtFile = mapSourceToBuilt(filePath);
-                            builtFiles.add(builtFile);
+                            mapSourceToBuilt(filePath).forEach(f => builtFiles.add(f));
                         }
                     });
 
