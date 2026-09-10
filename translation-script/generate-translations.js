@@ -47,12 +47,28 @@ const sourceToBuiltMap = {
     // (PickerLoader::HANDLE, bundle admin/js/build/tts-picker.min.js) and so
     // needs its own JSON — see webpack.mix.js:24 for the entry.
     'src/picker/': ['admin/js/build/tts-picker.js'],
+    // TTS-296: the onboarding wizard is its own webpack entry
+    // (webpack.mix.js:5), not part of the dashboard bundle, so its strings need
+    // their own JSON. Without this they were written under a src/ name nothing
+    // ever requests and the whole wizard rendered English.
+    'src/dashboard/welcome/': ['admin/js/build/tts-welcome-wizard.js'],
+    // TTS-296: the per-post CSS-selectors metabox (webpack.mix.js:10).
+    'src/dashboard/css-selectors/': ['admin/js/build/tts-css-selectors.js'],
+    // TTS-296: the bulk-MP3 admin UI (webpack.mix.js:11).
+    'src/dashboard/bulk-mp3-file/': ['admin/js/build/tts-bulk-mp3-file-ui.js'],
     // TTS-296: legacy references. The modal used to live here until TTS-249
     // deleted the file; existing .po entries still point at it, and they must
     // resolve to the same bundle or their translations stay unreachable.
     'src/dashboard/buttons/': ['admin/js/build/text-to-audio-button.js'],
     // Add more mappings as needed
 };
+
+// A source that maps to itself produces a JSON named after the *source* file —
+// a name WordPress never requests — so the strings silently render English
+// while the build reports success. gulpfile.js excludes src/** from the release
+// ZIP, so a src/ path can never be an enqueued script: if one reaches the
+// fallback, its mapping is simply missing.
+const unmappedSources = new Set();
 
 /**
  * @param {string} sourcePath
@@ -64,6 +80,10 @@ function mapSourceToBuilt(sourcePath) {
             return builtFiles;
         }
     }
+    if (sourcePath.startsWith('src/')) {
+        unmappedSources.add(sourcePath);
+    }
+
     // If no mapping found, return the original path
     return [sourcePath];
 }
@@ -355,6 +375,27 @@ poFiles.forEach(poFile => {
 // Clean up old JSON files
 console.log('Cleaning up old files...');
 cleanupOldJSONFiles(validJSONFiles);
+
+// Fail loudly rather than shipping translations nothing can load. This is the
+// check that would have caught the player-2..6 and onboarding-wizard bugs at
+// build time instead of on a customer's site.
+if (unmappedSources.size) {
+    console.error('');
+    console.error('='.repeat(70));
+    console.error('✗ These source files have no entry in sourceToBuiltMap:');
+    console.error('');
+    for (const s of [...unmappedSources].sort()) {
+        console.error('    ' + s);
+    }
+    console.error('');
+    console.error('  Their translations were written to a JSON named after the source');
+    console.error('  path, which WordPress never requests, so the strings will render');
+    console.error('  in English. Add each to sourceToBuiltMap near the top of this');
+    console.error('  file, mapped to the bundle(s) webpack compiles it into — see');
+    console.error('  webpack.mix.js. Use an array when a source ships in more than one.');
+    console.error('='.repeat(70));
+    process.exit(1);
+}
 
 console.log('='.repeat(70));
 console.log('✅ Translation generation complete!');
