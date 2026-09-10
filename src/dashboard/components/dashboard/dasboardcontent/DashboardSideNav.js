@@ -1,4 +1,5 @@
 import React from "react";
+import { __ } from "@wordpress/i18n";
 import { NavLink } from "react-router-dom";
 import { pricingPageUrl } from "../../../proUrl";
 
@@ -30,19 +31,19 @@ export default function DashboardSideNav({ isProVersion }) {
               <div className="sb-nav-link-icon">
                 <span className="dashicons dashicons-admin-generic"></span>
               </div>
-              Settings
+              {__("Settings", "text-to-audio")}
             </NavLink>
             <NavLink className={getNavLinkClass} to={"/integrations"}>
               <div className="sb-nav-link-icon">
                 <span className="dashicons dashicons-admin-links"></span>
               </div>
-              Integrations
+              {__("Integrations", "text-to-audio")}
             </NavLink>
             <NavLink className={getNavLinkClass} to={"/customize"}>
               <div className="sb-nav-link-icon">
                 <span className="dashicons dashicons-art"></span>
               </div>
-              Customization
+              {__("Customization", "text-to-audio")}
             </NavLink>
             {/* <NavLink className={getNavLinkClass} to={'/recording'}>
 							<div className='sb-nav-link-icon'>
@@ -54,32 +55,32 @@ export default function DashboardSideNav({ isProVersion }) {
               <div className="sb-nav-link-icon">
                 <span className="dashicons dashicons-controls-volumeon"></span>
               </div>
-              Listening
+              {__("Listening", "text-to-audio")}
             </NavLink>
             {/* TTS-256: read-along word/sentence highlighting settings. */}
             <NavLink className={getNavLinkClass} to={"/highlight"}>
               <div className="sb-nav-link-icon">
                 <span className="dashicons dashicons-editor-textcolor"></span>
               </div>
-              Highlight
+              {__("Highlight", "text-to-audio")}
             </NavLink>
             <NavLink className={getNavLinkClass} to={"/analytics"}>
               <div className="sb-nav-link-icon">
                 <span className="dashicons dashicons-chart-bar"></span>
               </div>
-              Analytics
+              {__("Analytics", "text-to-audio")}
             </NavLink>
             <NavLink className={getNavLinkClass} to={"/compatibility"}>
               <div className="sb-nav-link-icon">
                 <span className="dashicons dashicons-admin-plugins"></span>
               </div>
-              Compatibility
+              {__("Compatibility", "text-to-audio")}
             </NavLink>
             <NavLink className={getNavLinkClass} to={"/aliases"}>
               <div className="sb-nav-link-icon">
                 <span className="dashicons dashicons-text"></span>
               </div>
-              Aliases
+              {__("Aliases", "text-to-audio")}
             </NavLink>
             {/* TTS-239: Maintenance tab — Pro-only orphan temp-file cleanup. */}
             {isProVersion && (
@@ -87,14 +88,14 @@ export default function DashboardSideNav({ isProVersion }) {
                 <div className="sb-nav-link-icon">
                   <span className="dashicons dashicons-admin-tools"></span>
                 </div>
-                Maintenance
+                {__("Maintenance", "text-to-audio")}
               </NavLink>
             )}
             <NavLink className={getNavLinkClass} to={"/faq"}>
               <div className="sb-nav-link-icon">
                 <span className="dashicons dashicons-media-document"></span>
               </div>
-              Docs
+              {__("Docs", "text-to-audio")}
             </NavLink>
             {/* TTS-264: free-only Pricing link, just above "Our Plugins". Points
                 to the standalone Pricing admin page (not a router route), so it's
@@ -104,14 +105,14 @@ export default function DashboardSideNav({ isProVersion }) {
                 <div className="sb-nav-link-icon">
                   <span className="dashicons dashicons-money-alt"></span>
                 </div>
-                Pricing
+                {__("Pricing", "text-to-audio")}
               </a>
             )}
             <NavLink className={getNavLinkClass} to={"/plugins"}>
               <div className="sb-nav-link-icon">
                 <span className="dashicons dashicons-screenoptions"></span>
               </div>
-              Our Plugins
+              {__("Our Plugins", "text-to-audio")}
             </NavLink>
             {/* <NavLink className={getNavLinkClass} to={'/analitics'}>
 							<div className='sb-nav-link-icon'>
