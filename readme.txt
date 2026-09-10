@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.13
+Stable tag: 2.3.14
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -403,6 +403,15 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.3.14 ( 10 Sep 2026 ) =
+Added : Five more languages - Japanese, Polish, Russian, Turkish and Vietnamese - bringing the total to twelve. Every language is now fully translated.
+Added : The plugin now tells you when an updated translation is available for your language, not only when one is missing.
+Fixed : Downloading a translation could fail with an error even though the files had actually arrived. Downloads are now reliable.
+Fixed : Your downloaded translation was thrown away every time the plugin updated, leaving your site back in English until you downloaded it again. Translations now stay put across updates.
+Fixed : Parts of the plugin stayed in English even after downloading your language - the setup wizard, the settings menu on the left, and the text you see when selecting words to listen to. These are now translated.
+Fixed : The mute button in the player settings no longer describes itself incorrectly to screen readers.
+Changed : Translations are no longer bundled with the plugin, so the download is much smaller. Your site fetches only the language it needs.
+
 = 2.3.13 ( 06 Sep 2026 ) =
 Added : On a multisite network, AtlasVoice now appears in your Network Admin menu. It shows every site on the network at a glance - whether each one is in staging or live mode, which player it uses, and whether it has been set up yet - with a direct link to each site's settings. Previously you had to open every site one by one to find out.
 Fixed : Taking a site live, or putting it back into staging, no longer rewrites parts of your saved settings that it was never meant to touch. Your settings now come back exactly as you left them.
@@ -698,6 +707,9 @@ Introduced :  Complete new UI introduced.
 
 
 == Upgrade Notice ==
+
+= 2.3.14 =
+Adds Japanese, Polish, Russian, Turkish and Vietnamese, and completes the translations for all twelve languages. Fixes downloaded translations being lost every time the plugin updated, and translation downloads reporting an error when they had in fact succeeded. Several parts of the plugin that stayed in English - the setup wizard, the left-hand menu and the selection text - are now translated. Recommended for anyone using the plugin in a language other than English.
 
 = 2.3.13 =
 Multisite networks now get an AtlasVoice entry in Network Admin, showing every site's mode, player and setup status in one place instead of having to check each site individually. Also fixes going live or reverting to staging quietly altering parts of your saved settings. Recommended for anyone running a network.
