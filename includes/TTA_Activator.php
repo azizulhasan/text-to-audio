@@ -179,6 +179,8 @@ class TTA_Activator {
 				'hi_IN' => array( 'Google हिन्दी', 'hi-IN' ),
 				'id_ID' => array( 'Google Bahasa Indonesia', 'id-ID' ),
 				'pl_PL' => array( 'Google polski', 'pl-PL' ),
+				'tr_TR' => array( 'Google Türkçe', 'tr-TR' ),
+				'vi'    => array( 'Google Tiếng Việt', 'vi-VN' ),
 			);
 			$voice_defaults = isset( $voice_map[ $locale ] ) ? $voice_map[ $locale ] : array( 'Google UK English Female', 'en-GB' );
 

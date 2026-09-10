@@ -25,7 +25,15 @@
     "build:seven": "npm run production && gulp copy && gulp copyToSeven",
     "copyProButton": "gulp copyProButton",
     "makepot": "wp i18n make-pot . languages/text-to-audio.pot",
-    "translate": "node scripts/generate-translations.js"
+    "translate": "node translation-script/generate-translations.js",
+    "i18n:collect": "node translation-script/i18n-collect.js",
+    "i18n:apply": "node translation-script/i18n-apply.js",
+    "i18n:sync": "npm run makepot && node translation-script/i18n-collect.js --all",
+    "i18n:finish": "node translation-script/i18n-apply.js --all && npm run translate",
+    "i18n:publish": "node translation-script/i18n-publish.js",
+    "i18n:pull": "node translation-script/i18n-pull.js",
+    "i18n:fill": "node translation-script/i18n-fill.js",
+    "i18n:auto": "npm run makepot && node translation-script/i18n-collect.js --all && node translation-script/i18n-fill.js --all --provider=anthropic && node translation-script/i18n-apply.js --all && npm run translate"
   },
   "keywords": [
     "voice",
