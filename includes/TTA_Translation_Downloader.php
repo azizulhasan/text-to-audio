@@ -75,10 +75,21 @@ class TTA_Translation_Downloader {
 			return false;
 		}
 
-		// Skip only when the installed pack matches what the repo publishes.
-		// A stale pack must fall through and be re-fetched, otherwise the
-		// "Update translation" button would report success without changing
-		// anything.
+		if ( ! self::is_locale_available( $locale ) ) {
+			return false;
+		}
+
+		// Always re-read the manifest before downloading. It is otherwise only
+		// refreshed when the plugin version changes, so a site can hold a record
+		// from an earlier publish — naming files the repo no longer has. Every
+		// one of those 404s, and a single failure fails the whole download, so
+		// the user is told "Failed to download" for a pack that is fine. The
+		// click is already a network operation; one more request costs nothing.
+		self::refresh_manifest();
+
+		// Now that the record is current, a matching pack really is up to date.
+		// A stale one must fall through and be re-fetched, or the "Update"
+		// button would report success without changing anything.
 		if ( 'current' === self::get_locale_status( $locale ) ) {
 			return true;
 		}
@@ -88,11 +99,6 @@ class TTA_Translation_Downloader {
 			return false;
 		}
 
-		if ( ! self::is_locale_available( $locale ) ) {
-			return false;
-		}
-
-		// Get file list from GitHub API.
 		$files = self::get_remote_file_list( $locale );
 		if ( empty( $files ) ) {
 			return false;
@@ -276,7 +282,26 @@ class TTA_Translation_Downloader {
 			? $installed[ $domain ][ $locale ]['PO-Revision-Date']
 			: '';
 
-		return $revision === $manifest[ $locale ]['updated'] ? 'current' : 'stale';
+		// Behind the manifest means stale. Merely *different* does not: the
+		// stored manifest is only refreshed when the plugin version changes, so
+		// republishing within a version leaves sites holding an older record
+		// than the pack they just downloaded. Strict equality called that stale
+		// and the notice could never be cleared.
+		$installed_at = strtotime( $revision );
+		$published_at = strtotime( $manifest[ $locale ]['updated'] );
+
+		// An unparseable installed date is the gettext "YEAR-MO-DA" placeholder
+		// or a pack from before stamping — genuinely old, so offer the update.
+		if ( false === $installed_at ) {
+			return 'stale';
+		}
+
+		// An unreadable manifest date proves nothing; do not nag on a guess.
+		if ( false === $published_at ) {
+			return 'current';
+		}
+
+		return $installed_at < $published_at ? 'stale' : 'current';
 	}
 
 	/**
