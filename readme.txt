@@ -77,7 +77,7 @@ Whether you run a blog, news site, online store, or educational platform, AtlasV
 
 * **Read-Along Highlighting & Listen to Selection:** The player highlights text as it is read — sentence by sentence, and word by word with supported voices — in your own colors, with optional focus-dimming and auto-scroll. Visitors can also select any passage to hear just that part, or click a word to start from there. Off by default; enable it in the **Highlight** tab.
 
-* **Cross-Device Compatibility:** The free version uses the browser's built-in [speechSynthesis API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis), ensuring compatibility across desktops, tablets, and mobile devices.
+* **Cross-Device Compatibility:** Works across desktops, tablets and mobile via the browser's built-in [speechSynthesis API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
 
 * **Custom CSS Support:** Apply custom styles to the audio player using your own CSS for pixel-perfect integration with your theme.
 
@@ -187,15 +187,13 @@ Afrikaans, Albanian, Arabic, Armenian, Bengali, Bulgarian, Catalan, Chinese (Man
 
 The free version uses the browser's [speechSynthesis API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis), so available voices and languages depend on the user's browser and operating system:
 
-* **Chrome Desktop:** UK English, US English, Spanish (Spain), Spanish (US), French, German, Italian, Russian, Dutch, Japanese, Korean, Chinese (China, Hong Kong, Taiwan), Hindi, Indonesian, Polish, Brazilian Portuguese — **18+ languages**.
+* **Chrome Desktop:** **18+ languages** — English (UK/US), Spanish (Spain/US), French, German, Italian, Russian, Dutch, Japanese, Korean, Chinese, Hindi, Indonesian, Polish, Brazilian Portuguese.
 
-* **Chrome Mobile:** English (US/UK), German, Italian, Russian, French, Spanish — **7 languages**.
+* **Chrome & Firefox Mobile:** **7 languages** — English (US/UK), German, Italian, Russian, French, Spanish.
 
 * **Microsoft Edge (Desktop & Mobile):** **All available system voices** — the widest selection of any browser.
 
 * **Firefox Desktop:** English (US/UK) — additional voices with OS speech packs installed.
-
-* **Firefox Mobile:** English (US/UK), German, Italian, Russian, French, Spanish — **7 languages**.
 
 *Tip: For the widest voice selection on the free version, recommend Microsoft Edge to your visitors. For consistent, high-quality voices across all browsers and devices, upgrade to [AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) with premium AI voices.*
 
@@ -231,19 +229,13 @@ Boost engagement, accessibility, and SEO on your WordPress and WooCommerce site 
 
 [Try AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) for premium AI voices, bulk MP3 generation, cloud storage backup, advanced analytics, and priority support.
 
+= Source code =
 
-### CHECK OUT OUR OTHER PLUGINS:
-> More free plugins from AtlasAiDev: [AI Workflow Automation - MCP](https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/), [Smart Local AI](https://wordpress.org/plugins/smart-local-ai/), and [AR/VR 3D Model & Try-On](https://wordpress.org/plugins/ar-vr-3d-model-try-on/).
+Unminified GPLv3 source, tagged per release: https://github.com/azizulhasan/text-to-audio
 
-== Source code ==
+= External services =
 
-The complete, unminified source (GPLv3) is on GitHub: https://github.com/azizulhasan/text-to-audio. The git tag matching each wp.org version (e.g. `2.1.20`) is the exact source used for that release ZIP.
-
-
-
-== External services ==
-
-The third-party services below may be contacted. For each: what it does, the data sent, when, and the provider's Terms/Privacy.
+Third-party services that may be contacted:
 
 = AtlasAiDev Tracker (track.atlasaidev.com) =
 
@@ -260,13 +252,9 @@ Fetches `https://raw.githubusercontent.com/atlasaidev/plugins/main/text-to-audio
 
 = Translation downloads (raw.githubusercontent.com, api.github.com) =
 
-Translations are not bundled in the plugin — only the `.pot` template is — so a site downloads just the language it uses instead of carrying every language. Two separate requests may be made to `https://github.com/azizulhasan/atlasaidev-translations`:
+Translations are not bundled; only the `.pot` template ships, so a site downloads just the language it uses, from `https://github.com/azizulhasan/atlasaidev-translations`.
 
-1. **Availability check.** Once after the plugin is updated to a new version, `manifest.json` is fetched from raw.githubusercontent.com to learn which languages are offered and when each was last revised. This downloads no translation files and sends no site or user data beyond standard HTTP headers.
-
-2. **The download itself.** Only when an administrator clicks "Download translation" / "Update translation" in the admin notice, that one language's files are fetched from raw.githubusercontent.com. Only the WordPress locale code (e.g. `es_ES`) is sent. **Nothing is ever downloaded automatically** — no download happens on activation, on a schedule, or in the background.
-
-api.github.com is contacted only as a fallback, if the stored manifest predates the file lists now recorded in it.
+Once after the plugin updates, `manifest.json` is fetched from raw.githubusercontent.com to see which languages are available; it downloads no translation files and sends no site or user data beyond standard HTTP headers. The language files are fetched only when an administrator clicks "Download translation"; only the WordPress locale code (e.g. `es_ES`) is sent. Nothing is downloaded automatically. api.github.com is a fallback for older manifests.
 
 GitHub, Inc. (catalog, promotions + translations) — Terms: https://docs.github.com/en/site-policy/github-terms/github-terms-of-service Privacy: https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement
 
@@ -276,6 +264,10 @@ GitHub, Inc. (catalog, promotions + translations) — Terms: https://docs.github
 - ip-api.com — Terms: https://ip-api.com/docs/legal, Privacy: https://members.ip-api.com/privacy-policy
 - ipinfo.io — Terms: https://ipinfo.io/terms-of-service, Privacy: https://ipinfo.io/privacy-policy
 - icanhazip.com — https://major.io/p/a-new-future-for-icanhazip/
+
+
+### CHECK OUT OUR OTHER PLUGINS:
+> More free plugins from AtlasAiDev: [MCP Server For WordPress | AtlasAI Connector](https://wordpress.org/plugins/ai-workflow-automation-ai-agent-hub/), [Smart Local AI](https://wordpress.org/plugins/smart-local-ai/), and [3D Viewer – Augmented Reality & Virtual Try-On | AtlasAR](https://wordpress.org/plugins/ar-vr-3d-model-try-on/).
 
 
 
@@ -527,207 +519,10 @@ Improved : Updated `TTA_Api_Routes` doc comments to point to the correct `tta_pr
 Improved : The free plugin is now fully functional on its own — premium player options, button positions, voice integrations, and advanced analytics are presented as upgrade prompts instead of locked controls.
 Fixed : Removed external sample-audio requests from the dashboard; previews now use your browser's built-in voices.
 
-= 2.1.20 ( 15 May 2026 ) =
-Improved : Plugin card titles on the "Other AtlasAiDev Plugins" page now prefer the canonical WordPress.org title (via the public plugin info API), so cards mirror the wp.org listing instead of locally-configured names.
-Added : New-brand fallback names (AtlasAI, AtlasML) for sibling plugins when WordPress.org returns no name.
-Added : "Start Trial" CTA button on every sibling plugin card; the TTS card itself still shows the plain "Learn More" link.
 
-= 2.1.19 ( 10 May 2026 ) =
-Fixed : running schema for free version issue fixed.
-Fixed : invalid schema issue fixed.
-
-= 2.1.18 ( 03 May 2026 ) =
-Fixed : Default Pro player visual countdown now correctly pauses on tab switch and resumes from the saved position (previously it kept ticking after auto-pause and reset to 0 on auto-resume).
-Fixed : Default Pro player no longer auto-resumes after the user intentionally clicks pause and switches tabs (intent flag now set on the React click handler, matching the free button).
-Improved : Inline documentation for the Chrome SpeechSynthesis pause/cancel workaround in `admin/js/TextToSpeech.js` and the React → speech-engine bridge in the Default Pro component.
-Improved : `pause()` cancel-interval raised from 1ms to 50ms so Chrome has time to enter the paused state before cancel fires (previously could be swallowed mid-transition).
-Fixed : Build script `npm run copyProButton` was writing the synced bundle to a nested folder the Pro plugin never read; now drops it directly in the destination.
-
-= 2.1.17 ( 26 Apr 2026 ) =
-Added : Customize → "Button Texts & Icons" section for Default and Default Pro players — edit per-state text (Listen / Pause / Resume / Replay), pick from 8 icon presets or paste custom SVG, set hover tooltips, and reset per-state or all at once.
-Added : Live preview on the Customize page now renders the same DOM and CSS as the front-end button and is functional via the SpeechSynthesis API for the Default player.
-Added : ElevenLabs voice search auto-resolves a 20-character voice ID typed into the search box (fetches `/elevenlabs_voice` and selects/previews the result).
-Improved : ElevenLabs voice list is now language-scoped (cache key `tts_elevenlabs_voices_{lang}`); switching language fires exactly one fetch, reloads with hot cache fire none.
-Improved : Default Pro front-end button now honors user-customized `border`, `border-radius`, `height` and `font-size` from the Design Customization settings (previously fell back to defaults).
-Improved : Per-player icon swap on lifecycle events (Listen → Pause → Resume → Replay) honors saved per-player custom SVGs on both front-end and dashboard preview.
-Fixed : Right-click on the Default-player button no longer renders a thin black rectangle around the wrapper (host-element focus outline suppressed via `:host(:focus)` rule).
-Fixed : Sound-wave icon on Default Pro no longer overflows past the button's right border (`box-sizing: border-box` on `.tts__player`).
-Fixed : Clicking the Default Pro front-end button no longer destroys the React-rendered player tree (`displayButtonText` gated to player 1 only — player 2 swaps state via React).
-Fixed : Default Pro icons now render correctly across all four lifecycle states (resume state was previously aliased to listen).
-Fixed : CDN/CORS detector now reports script failures correctly — the previous HEAD verification was itself CORS-blocked on the exact failure mode we needed to detect, suppressing the admin notice.
-Removed : Accent dropdown from the Listening tab (ElevenLabs voice library has at most one accent per language; `accent_locale` no longer needed).
-
-= 2.1.16 ( 18 Apr 2026 ) =
-Improved : Content extraction with better special character and whitespace handling.
-Improved : CSS selector exclusion for more precise content selection.
-Improved : UTF-8 and multilingual content safety in text processing.
-Improved : Bulk MP3 generation reliability and script loading.
-Added : AtlasAiDev plugins discovery page.
-Added : Maintenance tab (Pro-only) for cleaning up orphan per-batch temp MP3 files.
-Added : CDN / CORS troubleshooting guide in the Docs tab with Apache and nginx snippets.
-Added : Automatic CDN/CORS detector — warns you in the dashboard when a visitor's browser blocks our scripts on your CDN.
-Added : ElevenLabs support in Bulk MP3 generation.
-Fixed : Figure / figcaption / aside text no longer leaks into generated audio.
-Fixed : Stale Cloudflare MP3 cache — audio URLs now include filemtime cache-buster.
-Fixed : Cloudflare Rocket Loader breaking lazy-loaded dashboard chunks.
-Fixed : Dashboard crash when switching between players with different voice schemas.
-Fixed : CORS-alert endpoint now validates URL before throttle check, returning proper 400 errors.
-
-= 2.1.15 ( 15 Apr 2026 ) =
-Fixed : Memory exhausted issue fixed.
-Fixed : Double track issue fixed.
-
-
-= 2.1.14 ( 06 Apr 2026 ) =
-Added : Expanded language support to 81 languages for AtlasVoice TTS Pro player.
-Added : Polylang multilingual plugin compatibility.
-Added : Per-post CSS selector override for custom content selection.
-Added : ACF custom field reading order with drag-and-drop reordering.
-Added : Automatic content detection for popular themes and page builders.
-Improved : Listening settings page split into organized sections.
-Improved : Per-post CSS selectors meta box with cleaner design.
-Fixed : Content not reading full article when using shortcode mode.
-Fixed : Smart quote characters breaking content on PHP 8.4+.
-Tested : WordPress 7.0 compatibility.
-
-= 2.1.13 ( 29 Mar 2026 ) =
-Added : GPT-4o-mini-TTS voice provider integration with ChatGPT settings UI.
-Added : Admin bar toggle setting to show/hide AtlasVoice on/off toggle on front-end pages.
-Added : Dashboard widget toggle setting to show/hide Quick Stats widget on the admin dashboard.
-Added : Translation support for German (de_DE), French (fr_FR), and Dutch (nl_NL).
-Added : On-demand translation download system from GitHub.
-Added : Cache compatibility for Perfmatters and Flying Press optimization plugins.
-Improved : Centralized cache plugin compatibility into a single method supporting 9 plugins.
-Improved : LiteSpeed Cache compatibility — added CSS exclusion and JS defer exclusion filters.
-Improved : SG Optimizer compatibility — added CSS minify/combine and JS async exclusion filters.
-Improved : Autoptimize compatibility — added CSS exclusion filter.
-Improved : WP Rocket compatibility — added delay JS exclusion filter.
-Fixed : Milestone notice dismiss not working properly.
-Fixed : Duplicate save_post/delete_post hook registrations removed.
-
-= 2.1.12 ( 17 Mar 2026 ) =
-Fixed : PHP 7.x parse error caused by named argument syntax in define() call.
-
-= 2.1.11 ( 15 Mar 2026 ) =
-Added : "Hear the Difference" wizard step with audio previews for all 5 TTS providers (Browser, GTTS, Google Cloud, ChatGPT, ElevenLabs).
-Added : Language-specific preview text for 68 languages in the setup wizard voice step.
-Added : ElevenLabs demo audio support in Customize tab.
-Added : "Delete Data on Uninstall" toggle with enhanced uninstall cleanup.
-Improved : Dashboard code splitting — 66% bundle size reduction using React.lazy() and Suspense.
-
-= 2.1.10 ( 13 Mar 2026 ) =
-Fixed: pro activation issue fixed.
-
-
-= 2.1.9  ( 12 Mar 2026 )  =
-Added : Welcome setup wizard with 5 steps (post types, voice, customize, analytics, finish) for new users.
-Added : Setup wizard voice step auto-selects the language matching your WordPress site locale.
-Added : Smart WordPress.org review prompt for free users after 10+ plays and 7+ days of active usage.
-Added : Export/Reports UI exposed in free version with Pro upsell banner.
-Improved : Replaced 1.2 MB Font Awesome bundle with a lightweight 3 KB inline SVG icon system.
-Improved : Added focus trap and focus restoration to settings modal for WCAG 2.1 AA accessibility.
-Improved : Added database indexes on analytics table for faster query performance.
-Improved : Optimized autoload flags across all plugin options to reduce memory usage on every page load.
-Fixed : Scheduled email reports not firing due to timezone mismatch in cron scheduling.
-Changed : Email report sending moved to Pro plugin for better architecture separation.
-
-= 2.1.8  ( 10 Mar 2026 )  =
-Added : Plugin translation for Portuguese.
-Added : Plugin translation for Italian.
-Added : Pro version activation issue fixed.
-
-
-= 2.1.7  ( 05 Mar 2026 )  =
-Added :  ElevenLabs TTS integration added for pro version.
-Added :  Google Cloud Storage backup support for all TTS providers (Google Cloud TTS, ChatGPT TTS, ElevenLabs TTS, AtlasVoice TTS Pro).
-Added :  Real-time usage tracking for ElevenLabs TTS subscription.
-Fixed :  Gtranslate plugin translation issue solved.
-Fixed :  Improved Multilingual.
-Fixed :  MP3 file delete issue solved.
-
-
-= 2.1.6  ( 28 Feb 2026 )  =
-Added :  Enable TTS Status added in Settings.
-Improved :  AtlasVoice Gutenberg block improved.
-
-
-= 2.1.5  ( 21 Feb 2026 )  =
-Added :  Plugins Menu added.
-Fixed :  License activation issue fixed.
-Fixed :  Old UI for player option missing issue fixed.
-Fixed :  Listening menu UI missing issue fixed.
-
-
-= 2.1.4  ( 17 Feb 2026 )  =
-Added :  New UI for Default player.
-Added :  Old UI back option added for Default player.
-Added :  New Analytics UI introduced.
-Added :  Select language, voice, pitch, mute option added in Default player.
-Fixed :  Missing Customization UI added.
-Fixed :  Content split issue fixed. (Pro)
-Fixed :  Player floating issue for all themes. (Pro)
-
-
-= 2.1.3  ( 10 Feb 2026 )  =
-Fixed :  MP3 player loading issue fixed.
-Added :  Default Pro player progress bar clickable.
-Added :  Default Pro player UI improved.
-Added :  Select language, voice, pitch, mute option added in Default Pro player.
-
-
-= 2.1.2  ( 28 Jan 2026 )  =
-Fixed :  Count issue fixed in TTA_Helper class.
-Added :  Filter system added in posts list page.
-Added :  Whether MP3 is generated column added. (Pro)
-Added :  TTS enabled or not column added.
-Introduced :  New UI introduced for Aliases.
-Updated :  Freemius version update.
-Fixed :  Duplicate post issue fixed.
-
-
-= 2.1.1  ( 18 Jan 2026 )  =
-Added :  ID attribute support for shortcode `[atlasvoice id='post_id']`.
-Added :  Audio Schema markup for pro version (SEO).
-Added :  Read Content from DOM feature. (Pro)
-
-
-= 2.1.0  ( 13 Jan 2026 )  =
-Improved :  Integration menu UI improved.
-Improved :  Customization menu UI improved.
-Improved :  Listening menu UI improved.
-
-
-= 2.0.1  ( 28 December 2025 )  =
-Notice added :  Translation help notice.
-Notice added :  Holiday deal notice.
-
-
-= 2.0.0  ( 13 December 2025 )  =
-Introduced :  Complete new UI introduced.
 
 
 == Upgrade Notice ==
 
 = 2.3.14 =
 Adds Japanese, Polish, Russian, Turkish and Vietnamese, and completes the translations for all twelve languages. Fixes downloaded translations being lost every time the plugin updated, and translation downloads reporting an error when they had in fact succeeded. Several parts of the plugin that stayed in English - the setup wizard, the left-hand menu and the selection text - are now translated. Recommended for anyone using the plugin in a language other than English.
-
-= 2.3.13 =
-Multisite networks now get an AtlasVoice entry in Network Admin, showing every site's mode, player and setup status in one place instead of having to check each site individually. Also fixes going live or reverting to staging quietly altering parts of your saved settings. Recommended for anyone running a network.
-
-= 2.3.12 =
-Fixes the player being missing for visitors while still appearing for logged-in administrators, on sites using a speed plugin that delays JavaScript. If your readers have reported not seeing the player, this update is for you. Update recommended.
-
-= 2.3.11 =
-Important for multisite: sites added after the plugin was activated showed no player at all; they now work out of the box. Also fixes audio running sentences together and doubling full stops, makes pauses work correctly in Chinese, Japanese, Korean, Hindi and Arabic, stops Spanish and Arabic text being corrupted, and makes the "Exclude HTML tags to speak" setting actually work. Adds a toolbar link to open the content picker on the page you are viewing. Update recommended.
-
-= 2.3.10 =
-Fixes a problem where every article could play the same audio on sites that combine scripts for speed, restores the shortcode's id attribute and custom button wording, and stops the editing-only content picker loading for visitors. Update recommended.
-
-= 2.3.8 =
-Serves compressed stylesheets for faster page loads, trims duplicate files from the download, and updates the documentation. No change to how the player looks or behaves.
-
-= 2.3.7 =
-The Listen button can now float — it follows readers down the page and docks to the edge you choose (bottom bar, either corner, or sticky top), and this is now free rather than Pro-only. Button position and docking position are separate settings. Update recommended.
-
-= 2.3.6 =
-New "Listen to selected text" (highlight a passage and hear just that part — off by default, enable in the Highlight tab), a built-in Pricing page, and easier ways to explore Pro. Also fixes settings not saving on sites with certain security plugins. Update recommended.
