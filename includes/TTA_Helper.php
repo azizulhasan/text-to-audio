@@ -149,8 +149,13 @@ class TTA_Helper
         return apply_filters('tts_is_exluded_by_terms', $is_exclude, $term_type);
     }
 
-    public static function should_load_button($current_post = '', $called_from = 'default')
+    public static function should_load_button($current_post = '', $called_from = 'default', &$reason = null)
     {
+        // TTS-305: $reason is an optional out-parameter. The shortcode returns
+        // an empty string when a page fails these checks, which left site
+        // owners unable to tell "the plugin said no" from "the theme never ran
+        // the shortcode" - a support ticket we could not answer without it.
+        $reason             = '';
         $should_load_button = false;
         if(!$current_post) {
             global $post;
@@ -167,6 +172,8 @@ class TTA_Helper
         $current_post_id = ($current_post instanceof \WP_Post) ? $current_post->ID : $current_post;
         if (\is_single($current_post_id) || apply_filters('tts_force_check_is_singular', is_singular() , $current_post)) {
             $should_load_button = true;
+        } else {
+            $reason = __('this is an archive, search or blog index; the player renders on single posts and pages only', 'text-to-audio');
         }
 
         $settings = self::tts_get_settings('settings');
@@ -226,6 +233,16 @@ class TTA_Helper
             || !$display_player_based_on_date_range
         ) {
             $should_load_button = false;
+            $reason             = self::button_skip_reason(
+                $settings,
+                $current_post,
+                $ids,
+                $is_exclude_by_tags,
+                $is_exclude_by_cagories,
+                $tta__settings_allow_listening_for_posts_status,
+                $display_player_to,
+                $display_player_based_on_date_range
+            );
         }
 
         if (TTA_Helper::is_edit_page()) {
@@ -268,9 +285,53 @@ class TTA_Helper
             && ! \TTA\AtlasVoice\Mode::is_production()
         ) {
             $should_load_button = false;
+            $reason             = __('the site is still in Staging, so only logged-in admins see the player', 'text-to-audio');
+        }
+
+        if ($should_load_button) {
+            $reason = '';
         }
 
         return $should_load_button;
+    }
+
+    /**
+     * TTS-305: name the check that rejected this post, for the admin-only
+     * comment the shortcode prints. Mirrors the condition block above, so keep
+     * the two in step when a new exclusion is added.
+     *
+     * @return string Human-readable reason, already translated.
+     */
+    protected static function button_skip_reason($settings, $current_post, $ids, $by_tags, $by_categories, $by_status, $by_role, $in_date_range)
+    {
+        $allowed = isset($settings['tta__settings_allow_listening_for_post_types']) && is_array($settings['tta__settings_allow_listening_for_post_types'])
+            ? $settings['tta__settings_allow_listening_for_post_types']
+            : array();
+
+        if (!$allowed || !in_array(self::tts_post_type(), $allowed, true)) {
+            /* translators: %s: post type name. */
+            return sprintf(__('post type "%s" is not enabled in AtlasVoice > Settings', 'text-to-audio'), self::tts_post_type());
+        }
+        if (isset($current_post->ID) && in_array($current_post->ID, $ids)) {
+            return __('this post is in the excluded posts list', 'text-to-audio');
+        }
+        if ($by_tags) {
+            return __('one of the tags on this post is excluded', 'text-to-audio');
+        }
+        if ($by_categories) {
+            return __('one of the categories on this post is excluded', 'text-to-audio');
+        }
+        if ($by_status) {
+            return __('this post status is not enabled for listening', 'text-to-audio');
+        }
+        if ($by_role) {
+            return __('the player is hidden from your user role', 'text-to-audio');
+        }
+        if (!$in_date_range) {
+            return __('this post falls outside the configured date range', 'text-to-audio');
+        }
+
+        return __('this post is excluded by your AtlasVoice settings', 'text-to-audio');
     }
 
 
