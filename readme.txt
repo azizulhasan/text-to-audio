@@ -400,6 +400,7 @@ Fixed : On some sites the player could be added to the same post more than once,
 Fixed : The player can now tell you why it did not appear on a page. If you add the shortcode somewhere and nothing shows up, logged-in editors get a short note in the page source explaining the reason - for example that the player only appears on single posts and pages.
 Changed : Listening analytics now collects nothing at all while it is switched off. Previously, turning it off stopped the reporting but the plugin still recorded basic visitor details, such as browser and time zone, in the visitor's own browser.
 Fixed : With the listener location setting turned off, an exact location could still be kept in the visitor's browser on sites that already had location access. It is now removed.
+Fixed : On sites that use a translation plugin, your settings could stop saving altogether - the plugin kept talking to an address left over from an earlier language setup, and each save silently did nothing. The address is now checked and corrected by itself.
 
 = 2.3.14 ( 10 Sep 2026 ) =
 Added : Five more languages - Japanese, Polish, Russian, Turkish and Vietnamese - bringing the total to twelve. Every language is now fully translated.
@@ -531,7 +532,7 @@ Fixed : Removed external sample-audio requests from the dashboard; previews now 
 == Upgrade Notice ==
 
 = 2.3.15 =
-Listening analytics now collects nothing while it is switched off - previously some visitor details were still recorded in the visitor's browser. Also stops the player being added twice on some sites, and explains to logged-in editors why the shortcode produced no player. Recommended for every site, and especially for anyone with privacy or cookie-notice obligations.
+Fixes settings not saving on sites with a translation plugin, where the plugin was still using an address left over from an earlier language setup. Listening analytics now collects nothing while it is switched off - previously some visitor details were still recorded in the visitor's browser. Also stops the player being added twice on some sites, and explains to logged-in editors why the shortcode produced no player. Recommended for every site.
 
 = 2.3.14 =
 Adds Japanese, Polish, Russian, Turkish and Vietnamese, and completes the translations for all twelve languages. Fixes downloaded translations being lost every time the plugin updated, and translation downloads reporting an error when they had in fact succeeded. Several parts of the plugin that stayed in English - the setup wizard, the left-hand menu and the selection text - are now translated. Recommended for anyone using the plugin in a language other than English.
