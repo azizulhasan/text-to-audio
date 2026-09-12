@@ -198,6 +198,26 @@ function tta_should_add_delimiter($title, $delimiter)
  * @param $is_block
  *
  */
+/**
+ * TTS-305: explain an empty player to whoever can fix it.
+ *
+ * Printed only for users who can edit posts, so visitors never see it and the
+ * markup cost on a public page is zero.
+ *
+ * @param string $reason Already-translated reason.
+ * @return string HTML comment, or an empty string for visitors.
+ */
+function tta_button_skip_note($reason)
+{
+    if (!$reason || !function_exists('current_user_can') || !current_user_can('edit_posts')) {
+        return '';
+    }
+
+    return "
+<!-- AtlasVoice: no player here - " . esc_html($reason) . " -->
+";
+}
+
 function tta_get_button_content($atts, $is_block = false, $tag_content = '')
 {
     
@@ -232,11 +252,23 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     // TTS-270: is_secondary_loop() compares get_the_ID() against the queried
     // object; with an explicit id= those differ by design, so the guard must
     // not apply to that call.
-    if (!TTA_Helper::should_load_button($post, 'tta_get_button_content')
-        || $block_btn_no > 0
-        || ( ! $has_explicit_id && TTA_Helper::is_secondary_loop() )) {
+    // TTS-305: an empty return told nobody anything. A customer put the
+    // shortcode in footer.php, saw nothing, and could not tell whether the
+    // plugin had rejected the page or the theme never ran the code (block
+    // themes do not load footer.php at all). Editors now get the reason as an
+    // HTML comment; visitors still get nothing.
+    $skip_reason = '';
+    if (!TTA_Helper::should_load_button($post, 'tta_get_button_content', $skip_reason)) {
         $post = $original_post;
-        return;
+        return tta_button_skip_note($skip_reason);
+    }
+    if ($block_btn_no > 0) {
+        $post = $original_post;
+        return tta_button_skip_note(__('an AtlasVoice block has already rendered on this page', 'text-to-audio'));
+    }
+    if (! $has_explicit_id && TTA_Helper::is_secondary_loop()) {
+        $post = $original_post;
+        return tta_button_skip_note(__('this runs inside a secondary loop; pass the post explicitly, e.g. [atlasvoice id="123"]', 'text-to-audio'));
     }
 
     $settings = TTA_Helper::tts_get_settings('settings');
