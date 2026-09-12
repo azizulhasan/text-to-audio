@@ -208,10 +208,16 @@ class TTA_Init
             // promotions run always (so 'pro'/'all' promos can reach Pro users);
             // telemetry/Insights stays free-only, gated inside init().
             TTA_Lib_AtlasAiDev::instance()->init();
+            // TTS-308: resolve through TTA_Cache so the value cached here can
+            // never carry the language prefix that rest_url() picks up on a
+            // translated page, and so a root cached by an older version is
+            // healed on the first front-end request rather than only in admin.
             if (!TTA_Cache::get('tts_rest_api_url')) {
-                $rest_url = esc_url_raw(rest_url());
+                $rest_url = TTA_Cache::get_rest_api_url();
                 update_option('tts_rest_api_url', $rest_url, false);
                 TTA_Cache::set('tts_rest_api_url', $rest_url);
+            } else {
+                TTA_Cache::get_rest_api_url();
             }
             TTA_Notices::instance();
             //Rest api init.

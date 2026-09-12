@@ -104,10 +104,9 @@ class TTA_Admin
             $color = $settings['customize']['color'];
         }
 
-        $rest_api_url = esc_url_raw(home_url() . '/wp-json/');
-        if (TTA_Cache::get('tts_rest_api_url')) {
-            $rest_api_url = TTA_Cache::get('tts_rest_api_url');
-        }
+        // TTS-308: one shared resolver, so a stale language-prefixed root is
+        // repaired wherever it is read. See TTA_Cache::get_rest_api_url().
+        $rest_api_url = TTA_Cache::get_rest_api_url();
 
         $this->localize_data = [
             'admin_url' => admin_url('/'),
