@@ -4,9 +4,6 @@ import {getUserAddress} from "./tts/utilities";
 class AtlasVoiceAnalytics {
     constructor(postId = '') {
         this.userId = ttsObj.user_id;
-        if (this.userId == '0') {
-            this.getUniqueUserId();
-        }
         this.apiUrl = ttsObj.api_url + ttsObj.api_namespace + '/' + ttsObj.api_version + '/track'; // Replace with your backend API URL
         this.postId = postId
         this.sessionData = this.getSessionData();
@@ -36,7 +33,18 @@ class AtlasVoiceAnalytics {
             });
         }
 
-        this.trackDeviceInfo()
+        // TTS-306: fingerprinting and the device-info write used to run here
+        // unconditionally, so a site with listening analytics switched OFF
+        // still generated a persistent visitor id and stored browser, OS,
+        // device type, language and timezone in the visitor's localStorage.
+        // Nothing is collected unless the same gate the events already use
+        // says yes.
+        if (this.shouldTrackAnalyticsData()) {
+            if (this.userId == '0') {
+                this.getUniqueUserId();
+            }
+            this.trackDeviceInfo();
+        }
     }
 
 
@@ -54,7 +62,8 @@ class AtlasVoiceAnalytics {
     }
 
     trackInit() {
-        if (this.userId == '0') {
+        // TTS-306: addEvent() below is gated, but getUniqueUserId() was not.
+        if (this.userId == '0' && this.shouldTrackAnalyticsData()) {
             this.getUniqueUserId();
         }
         this.addEvent('init');
@@ -367,6 +376,11 @@ class AtlasVoiceAnalytics {
                 info.country = null;
                 info.city = null;
                 info.region = null;
+                // TTS-306: getDeviceData() reads exact coordinates when the
+                // site already holds geolocation permission. They survived
+                // this strip, so they stayed in localStorage and reached
+                // /track even with listener location switched off.
+                info.location = null;
             }
             return info;
         };
