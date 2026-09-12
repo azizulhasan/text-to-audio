@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.14
+Stable tag: 2.3.15
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -395,6 +395,13 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.3.15 ( 12 Sep 2026 ) =
+Fixed : On some sites the player could be added to the same post more than once, which could put a stray copy of the player's data on the page. The player is now added once per post.
+Fixed : The player can now tell you why it did not appear on a page. If you add the shortcode somewhere and nothing shows up, logged-in editors get a short note in the page source explaining the reason - for example that the player only appears on single posts and pages.
+Changed : Listening analytics now collects nothing at all while it is switched off. Previously, turning it off stopped the reporting but the plugin still recorded basic visitor details, such as browser and time zone, in the visitor's own browser.
+Fixed : With the listener location setting turned off, an exact location could still be kept in the visitor's browser on sites that already had location access. It is now removed.
+Fixed : On sites that use a translation plugin, your settings could stop saving altogether - the plugin kept talking to an address left over from an earlier language setup, and each save silently did nothing. The address is now checked and corrected by itself.
+
 = 2.3.14 ( 10 Sep 2026 ) =
 Added : Five more languages - Japanese, Polish, Russian, Turkish and Vietnamese - bringing the total to twelve. Every language is now fully translated.
 Added : The plugin now tells you when an updated translation is available for your language, not only when one is missing.
@@ -523,6 +530,9 @@ Fixed : Removed external sample-audio requests from the dashboard; previews now 
 
 
 == Upgrade Notice ==
+
+= 2.3.15 =
+Fixes settings not saving on sites with a translation plugin, where the plugin was still using an address left over from an earlier language setup. Listening analytics now collects nothing while it is switched off - previously some visitor details were still recorded in the visitor's browser. Also stops the player being added twice on some sites, and explains to logged-in editors why the shortcode produced no player. Recommended for every site.
 
 = 2.3.14 =
 Adds Japanese, Polish, Russian, Turkish and Vietnamese, and completes the translations for all twelve languages. Fixes downloaded translations being lost every time the plugin updated, and translation downloads reporting an error when they had in fact succeeded. Several parts of the plugin that stayed in English - the setup wizard, the left-hand menu and the selection text - are now translated. Recommended for anyone using the plugin in a language other than English.

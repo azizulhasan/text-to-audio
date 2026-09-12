@@ -2,7 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> **Editing live atlasaidev.com posts?** Read `plan/atlasaidev-wp-post-editing-playbook.md` FIRST.
+> **This repo is PUBLIC.** Plans, growth docs, playbooks and customer data live in the private
+> `azizulhasan/atlasaidev-internal` repo (local clone: `D:\laragon\www\atlasaidev-internal`), under
+> `atlasvoice/plan/` and `company/data/`. Never commit plans, data exports or secrets here —
+> `plan/`, `*.csv` and `*.sql` are gitignored for that reason.
+>
+> **Editing live atlasaidev.com posts?** Read `atlasvoice/plan/atlasaidev-wp-post-editing-playbook.md`
+> (in atlasaidev-internal) FIRST.
 > The site's Gutenberg editor is heavily plugin-augmented and has traps (Custom HTML modal freezes,
 > Table-block Tab nav broken, Classic-block selection doesn't register, autosave "invalid JSON"
 > false alarms). The playbook documents the reliable techniques (Convert to blocks, Table "Edit as

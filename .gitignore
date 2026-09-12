@@ -118,6 +118,12 @@ nul
 
 # Local MCP config — contains JWT bearer token, must not be committed
 .mcp.json
+
+# Plans, business docs and customer data live in the PRIVATE atlasaidev-internal
+# repo. This repo is public — never commit them here.
+plan/
+*.csv
+*.sql
 # Translation tooling. Tracked so the pipeline survives losing a machine, but
 # excluded from release ZIPs by gulpfile.js productionSrc — it never ships.
 # Only the scratch work files are ignored.
