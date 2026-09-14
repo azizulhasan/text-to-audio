@@ -114,7 +114,12 @@ production/
 languages/null
 null
 nul
-.claude
+
+# Claude Code: keep the shared config (SessionStart hook for Claude Code on the
+# web) tracked, ignore everything else, including per-machine settings.
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
 
 # Local MCP config — contains JWT bearer token, must not be committed
 .mcp.json
