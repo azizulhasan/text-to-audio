@@ -223,6 +223,12 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     
     static $player_number = 0;
     static $block_btn_no = 0;
+
+    // TTS-303: a shortcode inside a discarded pass (excerpt, wp_head, a plugin
+    // reading the_content in wp_footer) would still print its payload.
+    if ( ! TTA_Helper::is_display_content_pass() ) {
+        return '';
+    }
     $player_number++;
     global $post;
 
@@ -852,22 +858,19 @@ add_filter('the_content', 'add_listen_button', $display_button_priority);
 function add_listen_button($content)
 {
     static $button_no = 0;
-    static $rendered_for = array();
-    $button_no++;
     global $post;
+
+    // TTS-303: skip passes whose output is discarded instead of locking to the
+    // first pass - an excerpt pass that ran first claimed the lock and the real
+    // article body rendered no player.
+    if ( ! TTA_Helper::is_display_content_pass() ) {
+        return $content;
+    }
+    $button_no++;
     if (!TTA_Helper::should_load_button($post) || TTA_Helper::is_secondary_loop() ) {
        return $content;
     }
 
-    // TTS-303: `the_content` runs several times for the SAME post - SEO meta
-    // descriptions built through wp_trim_excerpt, page builders, AMP/print
-    // views. is_secondary_loop() only blocks OTHER posts, so each extra pass
-    // emitted another player payload (9 on the reporter's site).
-    $rendered_post_id = ( $post instanceof WP_Post ) ? (int) $post->ID : 0;
-    if ( $rendered_post_id && isset( $rendered_for[ $rendered_post_id ] ) ) {
-        return $content;
-    }
-    $rendered_for[ $rendered_post_id ] = true;
     TTA_Helper::set_default_settings();
     $button = '';
     $settings = TTA_Helper::tts_get_settings('settings');

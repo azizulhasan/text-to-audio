@@ -355,6 +355,27 @@ class TTA_Helper
         return (bool) apply_filters( 'tts_is_secondary_loop', $is_secondary, $current_id, $queried_id );
     }
 
+    /**
+     * Whether the current render will actually reach the page.
+     *
+     * TTS-303: `the_content` and shortcodes also run for text nothing displays -
+     * a theme calling get_the_excerpt() before the_content(), an SEO plugin
+     * building og:description in wp_head, a plugin reading the content in
+     * wp_footer. A player built there is thrown away but its payload is still
+     * printed, and a "render once" lock claimed there hid the real player.
+     * Override with the `tts_is_display_content_pass` filter.
+     *
+     * @return bool False when the output of this pass is discarded.
+     */
+    public static function is_display_content_pass()
+    {
+        $is_throwaway = doing_filter( 'get_the_excerpt' )
+            || doing_action( 'wp_head' )
+            || ( doing_action( 'wp_footer' ) && doing_filter( 'the_content' ) );
+
+        return (bool) apply_filters( 'tts_is_display_content_pass', ! $is_throwaway, get_post() );
+    }
+
 
     /**
      * Get post type
