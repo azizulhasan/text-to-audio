@@ -72,8 +72,14 @@ tts-play-button,
     color: var(--tts-hover-color, #ffffff);
 }
 
-.tts__listent_content:hover svg polygon,
-.tts__listent_content:hover svg path {
+/* TTS-296: recolour only shapes that carry their own fill. The play triangle is
+   emitted with an explicit fill; the settings gear and the speaker icons are
+   svgs with fill="none" whose shapes have no fill of their own, so a blanket
+   `svg path` rule beat that presentation attribute and turned the outlines into
+   solid blobs. Keying on the shape's own fill attribute keeps the distinction in
+   the markup, rather than excluding .tts-settings-icon by name — which would
+   break again on the next outline icon someone adds. */
+.tts__listent_content:hover svg [fill]:not([fill="none"]) {
     fill: var(--tts-hover-color, #ffffff);
 }
 
@@ -248,11 +254,20 @@ tts-play-button .tts-sr-only {
 }
 
 /* Custom Slider Styles */
+/* TTS-296: the track was a fixed rgba(255,255,255,.19) — invisible whenever the
+   modal inherits a light background from the button colours, which is why Speed,
+   Pitch and Volume rendered as a lone thumb floating on white. Derive it from the
+   same token the thumb uses so it stays visible on a light or a dark modal, and
+   give it an edge so the track reads as a control rather than a hairline. */
 .tts__settings-slider {
     -webkit-appearance: none;
     appearance: none;
     height: 6px;
-    background: rgba(255, 255, 255, 0.19);
+    background: rgba(128, 128, 128, 0.38); /* fallback for no color-mix support */
+    background: color-mix(in srgb, var(--tts-modal-color, #ffffff) 32%, transparent);
+    border: 1px solid rgba(128, 128, 128, 0.30);
+    border: 1px solid color-mix(in srgb, var(--tts-modal-color, #ffffff) 26%, transparent);
+    box-sizing: border-box;
     border-radius: 3px;
     outline: none;
 }
@@ -283,8 +298,13 @@ tts-play-button .tts-sr-only {
 .tts__settings-slider::-moz-range-thumb:hover {
     transform: scale(1.15);
 }
+/* TTS-296: same as the base track above — Firefox draws this one instead. */
 .tts__settings-slider::-moz-range-track {
-    background: rgba(255, 255, 255, 0.19);
+    background: rgba(128, 128, 128, 0.38);
+    background: color-mix(in srgb, var(--tts-modal-color, #ffffff) 32%, transparent);
+    border: 1px solid rgba(128, 128, 128, 0.30);
+    border: 1px solid color-mix(in srgb, var(--tts-modal-color, #ffffff) 26%, transparent);
+    box-sizing: border-box;
     height: 6px;
     border-radius: 3px;
 }

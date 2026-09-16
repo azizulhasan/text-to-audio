@@ -15,7 +15,7 @@
  * Plugin Name:       Text To Speech TTS Accessibility
  * Plugin URI:        https://atlasaidev.com/
  * Description:       The most user-friendly Text-to-Speech Accessibility plugin. Just install and automatically add a Text to Audio player to your WordPress site!
- * Version:           2.3.13
+ * Version:           2.3.15
  * Author:            AtlasAiDev
  * Author URI:        http://atlasaidev.com/
  * License:           GPL-3.0+
@@ -241,7 +241,7 @@ class TTA_Init
     public function __construct()
     {
         if (!defined('TEXT_TO_AUDIO_VERSION')) {
-            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '2.3.13'));
+            define('TEXT_TO_AUDIO_VERSION', apply_filters('tts_version', '2.3.15'));
         }
 
         if (!defined('TEXT_TO_AUDIO_PLUGIN_NAME')) {
@@ -277,10 +277,16 @@ class TTA_Init
             // promotions run always (so 'pro'/'all' promos can reach Pro users);
             // telemetry/Insights stays free-only, gated inside init().
             TTA_Lib_AtlasAiDev::instance()->init();
+            // TTS-308: resolve through TTA_Cache so the value cached here can
+            // never carry the language prefix that rest_url() picks up on a
+            // translated page, and so a root cached by an older version is
+            // healed on the first front-end request rather than only in admin.
             if (!TTA_Cache::get('tts_rest_api_url')) {
-                $rest_url = esc_url_raw(rest_url());
+                $rest_url = TTA_Cache::get_rest_api_url();
                 update_option('tts_rest_api_url', $rest_url, false);
                 TTA_Cache::set('tts_rest_api_url', $rest_url);
+            } else {
+                TTA_Cache::get_rest_api_url();
             }
             TTA_Notices::instance();
             //Rest api init.
@@ -449,6 +455,12 @@ add_action('admin_init', function () {
         }
         update_option( 'tta_analytics_migrated_2_1_10', true, false );
     }
+
+    // TTS-296: learn which translation packs the repo now offers, once per
+    // version. Nothing is downloaded here — this only records what is
+    // available so the admin notice can offer it; fetching the files stays
+    // behind an explicit click (wp.org Guidelines 7/8).
+    \TTA\TTA_Translation_Downloader::maybe_refresh_manifest();
 
     // Allow resetting onboarding via ?page=text-to-audio&reset_onboard=true
     // phpcs:disable WordPress.Security.NonceVerification.Recommended -- admin-only flow gated by current_user_can(manage_options); read-only routing check

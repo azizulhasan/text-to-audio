@@ -495,18 +495,33 @@ export default class TextToSpeech {
     _init(callBackAfterEnd = null, isClicked = false) { // init speaking,
         this.callBackAfterEnd = callBackAfterEnd
         if (this.ttsListeningSettings === undefined) return;
+
+        // TTS-296: a visitor's own choices from the player settings modal beat the
+        // admin's Listening defaults. Without this the modal only reached the audio
+        // while it was open, so mute, speed and pitch were forgotten the moment
+        // playback restarted — muting and still hearing the article was the symptom.
+        const stored = (typeof window !== 'undefined' && window.TTSSettingsModalManager)
+            ? window.TTSSettingsModalManager.getStoredSettings()
+            : {};
+
         this.speech
             .init({
-                volume: this.ttsListeningSettings.tta__listening_volume
-                    ? this.ttsListeningSettings.tta__listening_volume
-                    : 1, // From 0 to 1,
+                volume: stored.volume !== undefined
+                    ? stored.volume
+                    : (this.ttsListeningSettings.tta__listening_volume
+                        ? this.ttsListeningSettings.tta__listening_volume
+                        : 1), // From 0 to 1,
                 // lang: lang, // It will be speaking language.
-                rate: this.ttsListeningSettings.tta__listening_rate
-                    ? this.ttsListeningSettings.tta__listening_rate
-                    : 1, // From 0.1 to 10
-                pitch: this.ttsListeningSettings.tta__listening_pitch
-                    ? this.ttsListeningSettings.tta__listening_pitch
-                    : 1, // From 0 to 2
+                rate: stored.rate !== undefined
+                    ? stored.rate
+                    : (this.ttsListeningSettings.tta__listening_rate
+                        ? this.ttsListeningSettings.tta__listening_rate
+                        : 1), // From 0.1 to 10
+                pitch: stored.pitch !== undefined
+                    ? stored.pitch
+                    : (this.ttsListeningSettings.tta__listening_pitch
+                        ? this.ttsListeningSettings.tta__listening_pitch
+                        : 1), // From 0 to 2
                 // voice: voice,
                 splitSentences: true,
                 listeners: {

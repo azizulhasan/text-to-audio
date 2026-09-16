@@ -78,6 +78,46 @@ class TTA_Cache {
 		return $wpdb->query( "DELETE FROM $wpdb->options WHERE ({$wpdb->options}.option_name LIKE '_transient_timeout___atlas_voice_cache_%') OR ({$wpdb->options}.option_name LIKE '_transient___atlas_voice_cache_%')" ); // phpcs:ignore
 	}
 
+	/**
+	 * The site's REST root, cached, and repaired when it no longer fits.
+	 *
+	 * TTS-308: this value is cached once and then reused indefinitely, but it
+	 * used to be built from home_url(), which WPML - and anything else
+	 * filtering home_url - rewrites per language. A root first cached while a
+	 * /es/ page was being served kept that prefix long after the multilingual
+	 * plugin was gone, and the dashboard then posted every save to a root with
+	 * no routes: customize, listening and roles all 404 silently, so settings
+	 * appeared to save and never stuck. Reproduced locally - one request to a
+	 * Spanish WPML page cached "http://localhost/tts/es/wp-json/".
+	 *
+	 * get_option('home') is the raw database value and is never language
+	 * filtered, so it is the one baseline that holds in both admin and
+	 * front-end requests. Comparing against home_url() instead would let a
+	 * Spanish page "repair" the cache back to the prefixed value.
+	 *
+	 * @return string REST root with a trailing slash, e.g. https://site/wp-json/
+	 */
+	public static function get_rest_api_url() {
+		$rest_api_url = esc_url_raw( untrailingslashit( get_option( 'home' ) ) . '/wp-json/' );
+		$cached       = self::get( 'tts_rest_api_url' );
+
+		if ( ! $cached ) {
+			return $rest_api_url;
+		}
+
+		if ( untrailingslashit( $cached ) === untrailingslashit( $rest_api_url ) ) {
+			return $cached;
+		}
+
+		// Stale: heal it in place, so an affected site recovers on the next
+		// page load instead of waiting for a settings change that may never
+		// come. Both callers share this, so the front end heals too.
+		self::set( 'tts_rest_api_url', $rest_api_url );
+		update_option( 'tts_rest_api_url', $rest_api_url, false );
+
+		return $rest_api_url;
+	}
+
 	public static function get_key( $cache_key = 'all' ) {
 		// key will be method name and value will be cache key,
 		$cache_keys = [

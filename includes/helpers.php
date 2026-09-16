@@ -198,11 +198,37 @@ function tta_should_add_delimiter($title, $delimiter)
  * @param $is_block
  *
  */
+/**
+ * TTS-305: explain an empty player to whoever can fix it.
+ *
+ * Printed only for users who can edit posts, so visitors never see it and the
+ * markup cost on a public page is zero.
+ *
+ * @param string $reason Already-translated reason.
+ * @return string HTML comment, or an empty string for visitors.
+ */
+function tta_button_skip_note($reason)
+{
+    if (!$reason || !function_exists('current_user_can') || !current_user_can('edit_posts')) {
+        return '';
+    }
+
+    return "
+<!-- AtlasVoice: no player here - " . esc_html($reason) . " -->
+";
+}
+
 function tta_get_button_content($atts, $is_block = false, $tag_content = '')
 {
     
     static $player_number = 0;
     static $block_btn_no = 0;
+
+    // TTS-303: a shortcode inside a discarded pass (excerpt, wp_head, a plugin
+    // reading the_content in wp_footer) would still print its payload.
+    if ( ! TTA_Helper::is_display_content_pass() ) {
+        return '';
+    }
     $player_number++;
     global $post;
 
@@ -232,11 +258,23 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     // TTS-270: is_secondary_loop() compares get_the_ID() against the queried
     // object; with an explicit id= those differ by design, so the guard must
     // not apply to that call.
-    if (!TTA_Helper::should_load_button($post, 'tta_get_button_content')
-        || $block_btn_no > 0
-        || ( ! $has_explicit_id && TTA_Helper::is_secondary_loop() )) {
+    // TTS-305: an empty return told nobody anything. A customer put the
+    // shortcode in footer.php, saw nothing, and could not tell whether the
+    // plugin had rejected the page or the theme never ran the code (block
+    // themes do not load footer.php at all). Editors now get the reason as an
+    // HTML comment; visitors still get nothing.
+    $skip_reason = '';
+    if (!TTA_Helper::should_load_button($post, 'tta_get_button_content', $skip_reason)) {
         $post = $original_post;
-        return;
+        return tta_button_skip_note($skip_reason);
+    }
+    if ($block_btn_no > 0) {
+        $post = $original_post;
+        return tta_button_skip_note(__('an AtlasVoice block has already rendered on this page', 'text-to-audio'));
+    }
+    if (! $has_explicit_id && TTA_Helper::is_secondary_loop()) {
+        $post = $original_post;
+        return tta_button_skip_note(__('this runs inside a secondary loop; pass the post explicitly, e.g. [atlasvoice id="123"]', 'text-to-audio'));
     }
 
     $settings = TTA_Helper::tts_get_settings('settings');
@@ -391,7 +429,10 @@ function tta_get_button_content($atts, $is_block = false, $tag_content = '')
     $font_size = isset($customize['fontSize']) ? $customize['fontSize'] . 'px' : '18px';
     $margin_top = isset($customize['marginTop']) ? $customize['marginTop'] . 'px' : '0px';
     $margin_bottom = isset($customize['marginBottom']) ? $customize['marginBottom'] . 'px' : '0px';
-    $margin_left = isset($customize['marginLeft']) ? $customize['marginLeft'] . '%' : '0%';
+    // TTS-296: px, not %. Customize offers four identical number fields with no
+    // unit selector, so the same value has to mean the same distance on all four
+    // sides; as a percentage the left gap also moved with the container width.
+    $margin_left = isset($customize['marginLeft']) ? $customize['marginLeft'] . 'px' : '0px';
     $margin_right = isset($customize['marginRight']) ? $customize['marginRight'] . 'px' : '0px';
     if ($is_block) {
         $btn_style = 'background-color:' . esc_attr($backgroundColor) . ' !important;color:' . esc_attr($color) . ' !important;width:' . esc_attr($width) . '%;height:' . esc_attr($height) . ';font-size:' . esc_attr($font_size) . ';border:' . esc_attr($border) . ';display:flex;align-content:center;justify-content:'.$justify_content_css.';align-items:center;border-radius:' . esc_attr($border_radius) . ';text-decoration:none;cursor:pointer;margin-top:' . esc_attr($margin_top) . ';margin-bottom:' . esc_attr($margin_bottom) . ';margin-left:' . esc_attr($margin_left) . ';margin-right:' . esc_attr($margin_right) . ';';
@@ -817,11 +858,19 @@ add_filter('the_content', 'add_listen_button', $display_button_priority);
 function add_listen_button($content)
 {
     static $button_no = 0;
-    $button_no++;
     global $post;
+
+    // TTS-303: skip passes whose output is discarded instead of locking to the
+    // first pass - an excerpt pass that ran first claimed the lock and the real
+    // article body rendered no player.
+    if ( ! TTA_Helper::is_display_content_pass() ) {
+        return $content;
+    }
+    $button_no++;
     if (!TTA_Helper::should_load_button($post) || TTA_Helper::is_secondary_loop() ) {
        return $content;
     }
+
     TTA_Helper::set_default_settings();
     $button = '';
     $settings = TTA_Helper::tts_get_settings('settings');
@@ -1070,7 +1119,8 @@ function tta_get_player_button_inline_css()
     $font_size       = isset($customize['fontSize']) ? $customize['fontSize'] . 'px' : '18px';
     $margin_top      = isset($customize['marginTop']) ? $customize['marginTop'] . 'px' : '0px';
     $margin_bottom   = isset($customize['marginBottom']) ? $customize['marginBottom'] . 'px' : '0px';
-    $margin_left     = isset($customize['marginLeft']) ? $customize['marginLeft'] . '%' : '0%';
+    // TTS-296: px, not % — see the matching note on the inline-style path above.
+    $margin_left     = isset($customize['marginLeft']) ? $customize['marginLeft'] . 'px' : '0px';
     $margin_right    = isset($customize['marginRight']) ? $customize['marginRight'] . 'px' : '0px';
     $hover_bg        = isset($customize['hoverBackgroundColor']) ? $customize['hoverBackgroundColor'] : '#000000';
     $hover_color     = isset($customize['hoverTextColor']) ? $customize['hoverTextColor'] : '#ffffff';

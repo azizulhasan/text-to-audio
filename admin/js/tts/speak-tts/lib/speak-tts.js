@@ -205,11 +205,14 @@ var SpeakTTS =
             var utterance = new SpeechSynthesisUtterance();
             if (_this3.synthesisVoice) utterance.voice = _this3.synthesisVoice;
             if (_this3.lang) utterance.lang = _this3.lang;
-            if (_this3.volume) utterance.volume = _this3.volume; // 0 to 1
+            // TTS-296: compare against null/undefined, not truthiness. Volume 0 is
+            // exactly what mute sets and pitch 0 is a legal floor, so `if (value)`
+            // silently discarded both — a muted visitor still heard the article.
+            if (!(0, _utils.isNil)(_this3.volume)) utterance.volume = _this3.volume; // 0 to 1
 
-            if (_this3.rate) utterance.rate = _this3.rate; // 0.1 to 10
+            if (!(0, _utils.isNil)(_this3.rate)) utterance.rate = _this3.rate; // 0.1 to 10
 
-            if (_this3.pitch) utterance.pitch = _this3.pitch; //0 to 2
+            if (!(0, _utils.isNil)(_this3.pitch)) utterance.pitch = _this3.pitch; //0 to 2
 
             utterance.text = sentence; // Attach event listeners
 

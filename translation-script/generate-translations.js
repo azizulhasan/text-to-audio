@@ -17,22 +17,75 @@ const { execSync } = require('child_process');
 
 const languagesDir = path.join(__dirname, '..', 'languages');
 
-// Mapping from source paths to built files
+// Mapping from source paths to built files.
+//
+// Values are arrays because one source can be compiled into more than one
+// bundle. WordPress loads translation JSON per *script handle*, so a string
+// shared by two bundles needs a JSON under each built path — otherwise whichever
+// player enqueues the unmapped handle silently renders English.
 const sourceToBuiltMap = {
     // Dashboard components map to dashboard UI build file
-    'src/dashboard/components/': 'admin/js/build/text-to-audio-dashboard-ui.js',
+    'src/dashboard/components/': ['admin/js/build/text-to-audio-dashboard-ui.js'],
+    // TTS-296: the player button bundle. Note the target has no `.min` — core
+    // strips it before hashing (SCRIPT_DEBUG handling), so the name WordPress
+    // actually looks for is md5('admin/js/build/text-to-audio-button.js'). The
+    // dashboard entry above follows the same convention.
+    'admin/js/text-to-audio-button.js': ['admin/js/build/text-to-audio-button.js'],
+    // TTS-296: selection-control and the rest of admin/js/tts/ are bundled into
+    // BOTH the player-1 button bundle and TextToSpeech.js (players 2-6).
+    // Mapping them to only the first is why "Select any text to listen to it"
+    // was translated on the free player and English on every Pro player.
+    'admin/js/tts/': [
+        'admin/js/build/text-to-audio-button.js',
+        'admin/js/build/TextToSpeech.js',
+    ],
+    // TTS-296: players 2-6 enqueue this handle and TTA_Admin calls
+    // wp_set_script_translations() for it, but nothing generated a file for it
+    // to find, so nothing was ever loaded into wp.i18n on those players.
+    'admin/js/TextToSpeech.js': ['admin/js/build/TextToSpeech.js'],
+    // TTS-296: the on-page content picker registers its own handle
+    // (PickerLoader::HANDLE, bundle admin/js/build/tts-picker.min.js) and so
+    // needs its own JSON — see webpack.mix.js:24 for the entry.
+    'src/picker/': ['admin/js/build/tts-picker.js'],
+    // TTS-296: the onboarding wizard is its own webpack entry
+    // (webpack.mix.js:5), not part of the dashboard bundle, so its strings need
+    // their own JSON. Without this they were written under a src/ name nothing
+    // ever requests and the whole wizard rendered English.
+    'src/dashboard/welcome/': ['admin/js/build/tts-welcome-wizard.js'],
+    // TTS-296: the per-post CSS-selectors metabox (webpack.mix.js:10).
+    'src/dashboard/css-selectors/': ['admin/js/build/tts-css-selectors.js'],
+    // TTS-296: the bulk-MP3 admin UI (webpack.mix.js:11).
+    'src/dashboard/bulk-mp3-file/': ['admin/js/build/tts-bulk-mp3-file-ui.js'],
+    // TTS-296: legacy references. The modal used to live here until TTS-249
+    // deleted the file; existing .po entries still point at it, and they must
+    // resolve to the same bundle or their translations stay unreachable.
+    'src/dashboard/buttons/': ['admin/js/build/text-to-audio-button.js'],
     // Add more mappings as needed
 };
 
-// Map source file to its built file
+// A source that maps to itself produces a JSON named after the *source* file —
+// a name WordPress never requests — so the strings silently render English
+// while the build reports success. gulpfile.js excludes src/** from the release
+// ZIP, so a src/ path can never be an enqueued script: if one reaches the
+// fallback, its mapping is simply missing.
+const unmappedSources = new Set();
+
+/**
+ * @param {string} sourcePath
+ * @returns {string[]} Every built file this source ends up inside.
+ */
 function mapSourceToBuilt(sourcePath) {
-    for (const [sourcePattern, builtFile] of Object.entries(sourceToBuiltMap)) {
+    for (const [sourcePattern, builtFiles] of Object.entries(sourceToBuiltMap)) {
         if (sourcePath.startsWith(sourcePattern)) {
-            return builtFile;
+            return builtFiles;
         }
     }
+    if (sourcePath.startsWith('src/')) {
+        unmappedSources.add(sourcePath);
+    }
+
     // If no mapping found, return the original path
-    return sourcePath;
+    return [sourcePath];
 }
 
 // Calculate MD5 hash for the primary dashboard file (for filename)
@@ -121,8 +174,7 @@ function parsePOFile(poFilePath) {
                             // Remove line number if present (e.g., "file.js:123" -> "file.js")
                             const filePath = ref.split(':')[0];
                             // Map source path to built file
-                            const builtFile = mapSourceToBuilt(filePath);
-                            builtFiles.add(builtFile);
+                            mapSourceToBuilt(filePath).forEach(f => builtFiles.add(f));
                         }
                     });
 
@@ -323,6 +375,27 @@ poFiles.forEach(poFile => {
 // Clean up old JSON files
 console.log('Cleaning up old files...');
 cleanupOldJSONFiles(validJSONFiles);
+
+// Fail loudly rather than shipping translations nothing can load. This is the
+// check that would have caught the player-2..6 and onboarding-wizard bugs at
+// build time instead of on a customer's site.
+if (unmappedSources.size) {
+    console.error('');
+    console.error('='.repeat(70));
+    console.error('✗ These source files have no entry in sourceToBuiltMap:');
+    console.error('');
+    for (const s of [...unmappedSources].sort()) {
+        console.error('    ' + s);
+    }
+    console.error('');
+    console.error('  Their translations were written to a JSON named after the source');
+    console.error('  path, which WordPress never requests, so the strings will render');
+    console.error('  in English. Add each to sourceToBuiltMap near the top of this');
+    console.error('  file, mapped to the bundle(s) webpack compiles it into — see');
+    console.error('  webpack.mix.js. Use an array when a source ships in more than one.');
+    console.error('='.repeat(70));
+    process.exit(1);
+}
 
 console.log('='.repeat(70));
 console.log('✅ Translation generation complete!');
