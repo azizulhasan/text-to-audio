@@ -127,14 +127,6 @@ class TTA_Admin
             'nonce' => wp_create_nonce(TEXT_TO_AUDIO_NONCE),
             'plugin_name' => TEXT_TO_AUDIO_PLUGIN_NAME,
             'rest_nonce' => wp_create_nonce('wp_rest'),
-            // TTS-266: base URL for player 7's voice preview samples. Derived from
-            // the same filterable constant the synthesis calls use, so no remote
-            // host is hardcoded in the bundle and a self-hosted service works
-            // without a code change. The samples themselves are static files —
-            // playing one sends nothing about the site.
-            'atlasvoice_sample_base' => defined('TTA_ATLASVOICE_API_URL')
-                ? untrailingslashit(str_replace('/api/atlasvoice', '', TTA_ATLASVOICE_API_URL)) . '/v1/samples/'
-                : '',
             'VERSION' => is_atlasvoice_addon_functional() ? get_option('TTA_PRO_VERSION') : TEXT_TO_AUDIO_VERSION,
             'is_logged_in' => is_user_logged_in(),
             'user_id' => get_current_user_id(),
@@ -159,11 +151,6 @@ class TTA_Admin
             // only; Pro adds 2-6 via the `tts_available_players` filter. The React
             // customize UI renders the selector from this list (no locked options).
             'availablePlayers' => array_values( TTA_Helper::get_available_players() ),
-            // TTS-266: the player 7 voice catalogue is NOT localised from PHP — it
-            // lives in admin/js/tts/atlasvoice-voices.js and is imported directly
-            // by both the dashboard and the front-end player, the same way player
-            // 3 declares its language list in JS.
-            'atlasVoiceEnabled' => TTA_Helper::is_atlasvoice_cloud_enabled(),
             "is_folder_writable" => TTA_Helper::is_audio_folder_writable(),
             'compatible' => TTA_Helper::get_compatible_plugins_data(),
             'gctts_is_authenticated' => get_player_id() == '4',
@@ -588,6 +575,13 @@ class TTA_Admin
 
         $player_id = (int) get_player_id();
 
+        /**
+         * Where an uploaded replacement would be written. Answered by the plugin
+         * that owns the active MP3 player; empty means the active player speaks
+         * in the browser and has no stored audio to replace.
+         */
+        $upload_target = (array) apply_filters('atlasvoice_upload_target', array(), (int) $post->ID);
+
         wp_enqueue_script(
             'atlasvoice-audio-panel',
             plugin_dir_url(__FILE__) . 'js/build/atlasvoice-audio-panel.min.js',
@@ -622,17 +616,17 @@ class TTA_Admin
                 'files'        => TTA_Helper::atlasvoice_metabox_files($post),
                 'expectedName' => $file_name ? $file_name . '.mp3' : '',
                 // Derive the pattern from the name tts_file_name() actually built,
-                // not from the player id. `player_id > 3` looked like the rule, but
-                // player 7 keys its META on language+voice while naming the FILE on
-                // language alone — so that test made the panel reject the very name
-                // it was telling the user to use.
+                // not from the player id: a player can key its META on
+                // language+voice while naming the FILE on language alone, and a
+                // player-id rule then rejects the very name the panel recommends.
                 'requiresVoice' => (bool) ( $file_name && false !== strpos( $file_name, '__voice__' ) ),
                 'fileFormat'   => ( $file_name && false !== strpos( $file_name, '__voice__' ) )
                     ? '{file_name}__lang__{language}__voice__{voice}.mp3'
                     : '{file_name}__lang__{language}.mp3',
-                // Pro switches this on for the players it generates; Free's player 7
-                // makes its audio on the first play, so it has nothing to trigger.
+                // Pro switches this on for the players it generates in advance.
+                // Players that generate on the first play leave it off.
                 'canGenerate'  => false,
+                'canUpload'    => !empty($upload_target['dir']) && !empty($upload_target['url']),
                 'generateUrl'  => '',
                 'apiURL'       => esc_url_raw(rest_url()) . 'tta/v1/',
                 'restNonce'    => wp_create_nonce('wp_rest'),
@@ -721,42 +715,17 @@ class TTA_Admin
         // image_url + plugin_url are dashboard/wizard-only too (no player JS reads
         // ttsObj.plugin_url) -- drop them from the front end as well.
         // 'pro' (Pro upgrade-link campaign config) is admin/dashboard-only too.
-        // TTS-266: player 7 renders a native <audio controls>. Whether it keeps
-        // the browser's own download item is decided here — never for players
-        // 1-6, and for player 7 only when Pro answers the filter.
-        $this->localize_data['atlasvoice_allow_download'] =
-            ( 7 === (int) $player_id ) && TTA_Helper::atlasvoice_can_download_mp3( get_the_ID() );
-
         $frontend_localize_data = apply_filters(
             'tta_frontend_localize_data',
             array_diff_key( $this->localize_data, array( 'admin_url' => '', 'image_url' => '', 'plugin_url' => '', 'pro' => '' ) )
         );
 
-        // TTS-266: ALWAYS register the `TextToSpeech` handle, whichever player is
-        // active. Pro enqueues its own scripts (AtlasVoiceAnalyticsPro,
-        // text-to-audio-pro-button) declaring `TextToSpeech` as a dependency. If
-        // the handle does not exist, WordPress refuses to enqueue those Pro
-        // scripts — "enqueued with dependencies that are not registered" — and the
-        // player button vanishes from every post on the site.
-        //
-        // Registering is not enqueuing: the file is only actually output if this
-        // method enqueues it below, or if something else depends on it. So this
-        // costs nothing for players that do not use it, while keeping Pro working.
-        wp_register_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', $dependencies, $this->asset_version('js/build/TextToSpeech.min.js'), true);
-        wp_localize_script('TextToSpeech', 'ttsObj', $frontend_localize_data);
-        wp_set_script_translations('TextToSpeech', 'text-to-audio', plugin_dir_path(dirname(__FILE__)) . 'languages');
-
-        // Player 7 is a FREE player, so it takes the free bootstrap path
-        // (text-to-audio-button.min.js) below rather than this one. The `> 1`
-        // branch loads only the player CLASS and relies on Pro to bootstrap it —
-        // on a free site nothing would ever instantiate a player, and the button
-        // would render but do nothing when clicked.
-        if ($player_id > 1 && 7 != $player_id) {
-            wp_enqueue_script('TextToSpeech');
+        if ($player_id > 1) {
+            wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', $dependencies, $this->asset_version('js/build/TextToSpeech.min.js'), true);
             wp_localize_script('TextToSpeech', 'ttsObj', $frontend_localize_data);
             // TTS-264: load JS translations for the bundled selection-control strings.
             wp_set_script_translations('TextToSpeech', 'text-to-audio', plugin_dir_path(dirname(__FILE__)) . 'languages');
-        } else if ($player_id == 1 || 7 == $player_id) {
+        } else if ($player_id == 1) {
             wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-button.min.js', $dependencies, $this->asset_version('js/build/text-to-audio-button.min.js'), true);
             wp_localize_script('text-to-audio-button', 'ttsObj', $frontend_localize_data);
             // TTS-264: load JS translations for the bundled selection-control strings.
@@ -770,19 +739,6 @@ class TTA_Admin
             wp_enqueue_style('text-to-audio-button', plugin_dir_url(__FILE__) . 'css/minify/text-to-audio-button.min.css', [], $this->asset_version('css/minify/text-to-audio-button.min.css'), 'all');
             if (function_exists('tta_get_player_button_inline_css')) {
                 wp_add_inline_style('text-to-audio-button', tta_get_player_button_inline_css());
-            }
-
-            // TTS-266: the player 7 subclass, loaded after the bootstrap bundle so
-            // window.TextToSpeech exists. Declared as a dependency rather than
-            // relying on enqueue order.
-            if (7 == $player_id) {
-                wp_enqueue_script(
-                    'atlasvoice-cloud-player',
-                    plugin_dir_url(__FILE__) . 'js/build/AtlasVoiceCloudPlayer.min.js',
-                    array('text-to-audio-button'),
-                    $this->asset_version('js/build/AtlasVoiceCloudPlayer.min.js'),
-                    true
-                );
             }
         }
     }
@@ -811,10 +767,7 @@ class TTA_Admin
         ), 21);
 
 
-        // TTS-266: the Bulk MP3 screen is a Pro feature, and its callback renders a
-        // Pro upsell. Player 7 is the first FREE player with an id above 2, so the
-        // bare `> 2` test would surface a Pro-only menu on free-only sites.
-        if (get_player_id() > 2 && 7 != get_player_id()) {
+        if (get_player_id() > 2) {
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- admin page-name read, no state mutation
             if (!empty($_REQUEST['page']) && $_REQUEST['page'] == 'bulk-mp3-generate') {
                 wp_enqueue_style('tts-bootstrap', plugin_dir_url(__FILE__) . 'css/minify/bootstrap.min.css', [], $this->version, 'all');

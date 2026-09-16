@@ -719,7 +719,10 @@ class TTA_Helper
     public static function tts_get_voice($plugin_all_settings)
     {
         $default_voice = '';
-        if (isset($plugin_all_settings['listening']['tta__listening_voice']) && (get_player_id() == 4 || get_player_id() == 5 || get_player_id() == 6)) {
+        // TTS-266: player 7 stores one file per language+voice like players 4-6.
+        // Leaving it out made the server key its files on language alone while the
+        // player writes language+voice, so nothing server-side found its audio.
+        if (isset($plugin_all_settings['listening']['tta__listening_voice']) && (get_player_id() == 4 || get_player_id() == 5 || get_player_id() == 6 || get_player_id() == 7)) {
             $default_voice = $plugin_all_settings['listening']['tta__listening_voice'];
         }
 
@@ -1015,28 +1018,16 @@ class TTA_Helper
         $player_id = self::get_player_id();
 
         /**
-         * TTS-266: default to the free plugin's own AtlasVoice folder.
-         *
-         * This method used to open with `$audio_dir = TTA_PRO_GTTS_DIR;` — a Pro
-         * constant referenced from Free. It never blew up because Free shipped
-         * only player 1 and never reached here; with player 7 in Free it does,
-         * and an undefined constant is a fatal on PHP 8. So: start from the Free
-         * dir, and only use the Pro dirs when Pro actually defined them.
-         *
-         * Resolved through defined() rather than used directly, so that an early
-         * or unusual call order can never re-create the very fatal being fixed.
+         * TTS-266: every folder below is defined by Pro. Read each through
+         * defined(): an undefined constant is a fatal on PHP 8, and this helper can
+         * be reached while Pro is inactive (a stored URL from an earlier player).
          */
-        $upload_dir    = wp_upload_dir();
-        $audio_dir     = defined('TTA_ATLASVOICE_DIR')
-            ? TTA_ATLASVOICE_DIR
-            : trailingslashit($upload_dir['basedir'] . '/TTA/atlasvoice');
-        $audio_dir_url = defined('TTA_ATLASVOICE_DIR_URL')
-            ? TTA_ATLASVOICE_DIR_URL
-            : trailingslashit($upload_dir['baseurl'] . '/TTA/atlasvoice');
+        $audio_dir     = defined('TTA_PRO_GTTS_DIR') ? TTA_PRO_GTTS_DIR : '';
+        $audio_dir_url = defined('TTA_PRO_GTTS_DIR_URL') ? TTA_PRO_GTTS_DIR_URL : '';
 
-        if ($player_id != 7 && defined('TTA_PRO_GTTS_DIR') && defined('TTA_PRO_GTTS_DIR_URL')) {
-            $audio_dir     = TTA_PRO_GTTS_DIR;
-            $audio_dir_url = TTA_PRO_GTTS_DIR_URL;
+        if ($player_id == 7 && defined('TTA_PRO_ATLASVOICE_DIR')) {
+            $audio_dir     = TTA_PRO_ATLASVOICE_DIR;
+            $audio_dir_url = TTA_PRO_ATLASVOICE_DIR_URL;
         }
 
         if ($player_id == 4 && defined('TTA_PRO_AUDIO_DIR')) {
@@ -1178,73 +1169,14 @@ class TTA_Helper
             ),
         );
 
-        // TTS-266: AtlasVoice Cloud. Free owns this player (pre-generated MP3 in a
-        // native <audio> element, identical on every device), but it stays behind
-        // TTA_ENABLE_ATLASVOICE_CLOUD until the implementation is complete — an
-        // unfinished player must never become selectable on live sites.
-        if ( defined( 'TTA_ENABLE_ATLASVOICE_CLOUD' ) && TTA_ENABLE_ATLASVOICE_CLOUD ) {
-            $players[7] = array(
-                'id'     => 7,
-                'name'   => __( 'AtlasVoice Cloud', 'text-to-audio' ),
-                'object' => 'AtlasVoiceCloudPlayer',
-                'pro'    => false,
-            );
-        }
-
         return (array) apply_filters( 'tts_available_players', $players );
-    }
-
-    /**
-     * TTS-266: has the site owner explicitly switched AtlasVoice Cloud on?
-     *
-     * wp.org Guideline 7 forbids sending site or user data to an external
-     * service without explicit, off-by-default consent. Player 7 sends post text
-     * to the AtlasVoice synthesis service, so nothing may leave the site until
-     * the owner turns this on in the Listening screen.
-     *
-     * Stored as a key inside the existing `tta_listening_settings` option — the
-     * same screen where the AtlasVoice language and voice are chosen — rather
-     * than as a new option, so no new storage is introduced.
-     *
-     * @return bool Defaults to false: consent is opt-in, never assumed.
-     */
-    public static function is_atlasvoice_cloud_enabled()
-    {
-        $listening = (array) self::tts_get_settings('listening');
-
-        $enabled = isset($listening['tta__atlasvoice_cloud_enabled'])
-            ? $listening['tta__atlasvoice_cloud_enabled']
-            : false;
-
-        // Accept the values the React dashboard round-trips ('1'/'true'/true).
-        $enabled = filter_var($enabled, FILTER_VALIDATE_BOOLEAN);
-
-        return (bool) apply_filters('tts_atlasvoice_cloud_enabled', $enabled);
-    }
-
-    /**
-     * TTS-266: may the visitor download player 7's MP3?
-     *
-     * Free always says no; Pro answers this filter with true. The capability
-     * therefore lives in ONE place, and the free plugin carries no Pro logic and
-     * no new setting.
-     *
-     * Not a security boundary: the file sits in uploads and its URL is in the
-     * page source. This hides the control, it does not lock the file.
-     *
-     * @param int $post_id Post the player is rendering for.
-     * @return bool Defaults to false.
-     */
-    public static function atlasvoice_can_download_mp3($post_id = 0)
-    {
-        return (bool) apply_filters('atlasvoice_allow_mp3_download', false, (int) $post_id);
     }
 
     /**
      * TTS-266: describe every MP3 recorded against a post, for the edit-screen panel.
      *
-     * Lives in Free because player 7 is a free player that writes its own audio into
-     * TTA_ATLASVOICE_DIR — managing those files cannot depend on Pro being installed.
+     * Lives in Free so there is one panel whichever plugin made the audio, and a
+     * site that deactivates Pro can still see and remove what is stored.
      * Pro extends the result through `atlasvoice_metabox_engine_labels` (its own
      * folders) and `atlasvoice_metabox_files` (remote/GCS entries) rather than
      * carrying a second copy of this.
@@ -1447,16 +1379,14 @@ class TTA_Helper
      * been through several players ends up with a mixed set, and the folder is the
      * only record of which engine made which file.
      *
-     * Free knows only its own folder; Pro adds its four through the filter.
+     * Free stores no audio of its own; Pro maps its folders through the filter.
      *
      * @param string $url
      * @return string
      */
     private static function atlasvoice_engine_label($url)
     {
-        $map = apply_filters('atlasvoice_metabox_engine_labels', array(
-            '/TTA/atlasvoice/' => __('AtlasVoice Cloud', 'text-to-audio'),
-        ));
+        $map = apply_filters('atlasvoice_metabox_engine_labels', array());
 
         foreach ($map as $fragment => $label) {
             if (false !== strpos($url, $fragment)) {

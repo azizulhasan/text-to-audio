@@ -115,38 +115,12 @@ class TTA_Api_Routes {
 		);
 
 		/**
-		 * TTS-266: player 7 (AtlasVoice Cloud) batch synthesis.
-		 *
-		 * Visitor-callable, like Pro's `gtts` route for player 3 — a first play
-		 * triggers generation. It is nonce-gated through get_route_access()'s
-		 * frontend list rather than capability-gated, and duplicate work is
-		 * prevented by the generation lock, not by a permission check.
-		 *
-		 * Registered only when the feature flag is on, so existing installs do
-		 * not expose an endpoint for an unfinished feature.
-		 */
-		if ( defined( 'TTA_ENABLE_ATLASVOICE_CLOUD' ) && TTA_ENABLE_ATLASVOICE_CLOUD ) {
-			register_rest_route(
-				$this->namespace,
-				'/atlasvoice_synthesize',
-				array(
-					array(
-						'methods'             => \WP_REST_Server::CREATABLE,
-						'callback'            => array( $this, 'atlasvoice_synthesize' ),
-						'permission_callback' => array( $this, 'get_route_access' ),
-						'args'                => array(),
-					),
-				)
-			);
-		}
-
-		/**
 		 * TTS-266: the post edit screen's audio panel.
 		 *
-		 * Free owns these because player 7 is a free player writing into
-		 * TTA_ATLASVOICE_DIR — a site with no Pro must still be able to remove or
-		 * replace the audio it generated. Both are gated on `edit_post` for the
-		 * specific post, not on manage_options: an author manages their own posts.
+		 * Free owns these so there is ONE panel whichever plugin generated the
+		 * audio, and a site that deactivates Pro can still remove what is stored.
+		 * Both are gated on `edit_post` for the specific post, not on
+		 * manage_options: an author manages their own posts.
 		 */
 		register_rest_route(
 			$this->namespace,
@@ -1103,10 +1077,8 @@ class TTA_Api_Routes {
      *   2. FRONTEND-NONCE — request must carry a valid `wp_rest` nonce in the
      *      `X-WP-Nonce` header or the `rest_nonce` body field. Used by
      *      `/track` (listener events), `/geolocation` (per-listener city /
-     *      country lookup, behind the opt-in flag) and, when the feature flag is
-     *      on, `/atlasvoice_synthesize` (TTS-266 player 7 generation, triggered
-     *      by a visitor's first play). No capability check — frontend visitors
-     *      aren't logged in.
+     *      country lookup, behind the opt-in flag). No capability check —
+     *      frontend visitors aren't logged in.
      *
      *   3. DEFAULT DENY — any route reaching this callback that isn't in
      *      either list above is rejected with HTTP 403.
@@ -1119,256 +1091,13 @@ class TTA_Api_Routes {
      * @return true|\WP_Error
      *
      * @see TTA_Api_Routes::get_route_access() — defined below the TTS-266
-     *      player 7 helpers that follow this block.
-     */
-
-    /**
-     * TTS-266: player 7 (AtlasVoice Cloud) — synthesize one batch.
-     *
-     * Deliberately mirrors Pro's player 3 `gtts` flow so the front end needs no
-     * new logic: one POST per batch, `{title}-{n}.mp3` written per batch, and on
-     * the last batch the parts are concatenated into `{title}.mp3`.
-     *
-     * Differences from Pro, both on purpose:
-     *   - WP_Filesystem instead of file_get_contents/file_put_contents, because
-     *     Free is wp.org-hosted and Plugin Check flags the raw calls.
-     *   - Paths and titles are re-sanitised server side; the request is public,
-     *     so nothing from the body is trusted as a filesystem path.
-     *
-     * @param \WP_REST_Request $request
-     * @return \WP_REST_Response
-     */
-    public function atlasvoice_synthesize( $request ) {
-
-        $body = json_decode( $request->get_body(), true );
-
-        if ( ! is_array( $body ) ) {
-            return \rest_ensure_response( array(
-                'status' => false,
-                'data'   => array( 'url' => '', 'message' => 'invalid_body', 'file_already_exists' => false ),
-            ) );
-        }
-
-        // Only serve this route while the site is actually on player 7, so it can
-        // never be used as a generic synthesis proxy.
-        if ( 7 !== (int) get_player_id() ) {
-            return \rest_ensure_response( array(
-                'status' => false,
-                'data'   => array( 'url' => '', 'message' => 'player_not_active', 'file_already_exists' => false ),
-            ) );
-        }
-
-        /**
-         * wp.org Guideline 7: no site or user data may reach an external service
-         * without explicit, off-by-default consent. This route forwards post text
-         * to the AtlasVoice synthesis service, so it refuses to do anything at all
-         * until the owner has switched it on in the Listening screen. The front
-         * end treats this like any other failure and falls back to player 1.
-         */
-        if ( ! TTA_Helper::is_atlasvoice_cloud_enabled() ) {
-            return \rest_ensure_response( array(
-                'status' => false,
-                'data'   => array( 'url' => '', 'message' => 'not_connected', 'file_already_exists' => false ),
-            ) );
-        }
-
-        $post_id    = isset( $body['post_id'] ) ? absint( $body['post_id'] ) : 0;
-        $user_id    = isset( $body['user_id'] ) ? absint( $body['user_id'] ) : 0;
-        $content    = isset( $body['content'] ) ? (string) $body['content'] : '';
-        $title      = self::atlasvoice_safe_name( isset( $body['title'] ) ? $body['title'] : '' );
-        $temp_title = self::atlasvoice_safe_name( isset( $body['temp_title'] ) ? $body['temp_title'] : '' );
-        $date_path  = self::atlasvoice_safe_date_path( isset( $body['path'] ) ? $body['path'] : '' );
-        $is_last    = ! empty( $body['is_last_batch'] );
-
-        if ( '' === $title || '' === $temp_title || '' === trim( $content ) ) {
-            return \rest_ensure_response( array(
-                'status' => false,
-                'data'   => array( 'url' => '', 'message' => 'missing_parameters', 'file_already_exists' => false ),
-            ) );
-        }
-
-        $dir           = trailingslashit( TTA_ATLASVOICE_DIR . $date_path );
-        $dir_url       = trailingslashit( TTA_ATLASVOICE_DIR_URL . $date_path );
-        $final_file    = $dir . $title . '.mp3';
-        $transient_key = "mp3_generation_lock__post_id__{$post_id}";
-
-        // Already generated: tell the front end to stop batching and just play it.
-        if ( file_exists( $final_file ) && filesize( $final_file ) > 0 ) {
-            delete_transient( $transient_key );
-
-            return \rest_ensure_response( array(
-                'status' => true,
-                'data'   => array(
-                    'url'                 => $dir_url . $title . '.mp3',
-                    'message'             => '',
-                    'file_already_exists' => true,
-                ),
-            ) );
-        }
-
-        // Another visitor is already generating this post — back off rather than
-        // paying for the same audio twice.
-        $lock = get_transient( $transient_key );
-        if ( is_array( $lock ) && isset( $lock['post_id'] ) && (int) $lock['post_id'] === $post_id
-             && isset( $lock['user_id'] ) && (int) $lock['user_id'] !== $user_id ) {
-            return \rest_ensure_response( array(
-                'status' => true,
-                'data'   => array( 'url' => '', 'message' => 'locked', 'file_already_exists' => false ),
-            ) );
-        }
-
-        if ( ! $lock ) {
-            set_transient( $transient_key, array( 'user_id' => $user_id, 'post_id' => $post_id ), 300 );
-        }
-
-        // ---- ask the service for this batch -------------------------------
-        $settings          = isset( $body['settings'] ) && is_array( $body['settings'] ) ? $body['settings'] : array();
-        $payload           = $body;
-        $payload['title']  = $title;
-        $payload['temp_title'] = $temp_title;
-        $payload['path']   = $date_path;
-        $payload['site_url'] = \site_url();
-
-        /**
-         * Synthesis timeout, in seconds.
-         *
-         * Measured: a ~1,950-character batch takes ~63s on the Kokoro engine
-         * (1.9x realtime on CPU), which overran an earlier 60s timeout by a
-         * second — the service finished the audio and WordPress had already given
-         * up, so nothing was written. Piper is ~10x faster and nowhere near this.
-         * Generous by default, and filterable for slow hosts or slower engines.
-         *
-         * @param int $timeout Seconds.
-         */
-        $timeout = (int) apply_filters( 'tta_atlasvoice_request_timeout', 180 );
-
-        $response = \wp_remote_post( TTA_ATLASVOICE_API_URL, array(
-            'body'    => \wp_json_encode( $payload ),
-            'headers' => array( 'Content-Type' => 'application/json' ),
-            'timeout' => $timeout,
-            'method'  => 'POST',
-        ) );
-
-        if ( \is_wp_error( $response ) ) {
-            delete_transient( $transient_key );
-
-            return \rest_ensure_response( array(
-                'status' => false,
-                'data'   => array( 'url' => '', 'message' => $response->get_error_message(), 'file_already_exists' => false ),
-            ) );
-        }
-
-        $decoded = json_decode( \wp_remote_retrieve_body( $response ), true );
-
-        if ( ! is_array( $decoded ) || empty( $decoded['path'] ) ) {
-            delete_transient( $transient_key );
-
-            return \rest_ensure_response( array(
-                'status' => false,
-                'data'   => array( 'url' => '', 'message' => 'synthesis_failed', 'file_already_exists' => false ),
-            ) );
-        }
-
-        // ---- fetch the generated batch and store it ------------------------
-        $audio = \wp_remote_get( $decoded['path'], array( 'timeout' => $timeout ) );
-
-        if ( \is_wp_error( $audio ) ) {
-            delete_transient( $transient_key );
-
-            return \rest_ensure_response( array(
-                'status' => false,
-                'data'   => array( 'url' => '', 'message' => $audio->get_error_message(), 'file_already_exists' => false ),
-            ) );
-        }
-
-        $audio_body = \wp_remote_retrieve_body( $audio );
-
-        if ( '' === $audio_body ) {
-            delete_transient( $transient_key );
-
-            return \rest_ensure_response( array(
-                'status' => false,
-                'data'   => array( 'url' => '', 'message' => 'empty_audio', 'file_already_exists' => false ),
-            ) );
-        }
-
-        if ( ! self::atlasvoice_put_contents( $dir . $temp_title . '.mp3', $audio_body ) ) {
-            delete_transient( $transient_key );
-
-            return \rest_ensure_response( array(
-                'status' => false,
-                'data'   => array( 'url' => '', 'message' => 'not_writable', 'file_already_exists' => false ),
-            ) );
-        }
-
-        // ---- not the last batch: report the batch file we just wrote -------
-        // The URL points at this batch's own part file, which the merge step
-        // deletes once the last batch arrives. Returning it keeps every response
-        // in the sequence the same shape as the final one, so a caller never has
-        // to special-case an empty `url`.
-        if ( ! $is_last ) {
-            return \rest_ensure_response( array(
-                'status' => true,
-                'data'   => array( 'url' => $dir_url . $temp_title . '.mp3', 'message' => 'batch_stored', 'file_already_exists' => false ),
-            ) );
-        }
-
-        // ---- last batch: concatenate, clean up, record ---------------------
-        $file_url = self::atlasvoice_merge_batches( $dir, $dir_url, $title );
-
-        delete_transient( $transient_key );
-
-        if ( ! $file_url ) {
-            return \rest_ensure_response( array(
-                'status' => false,
-                'data'   => array( 'url' => '', 'message' => 'merge_failed', 'file_already_exists' => false ),
-            ) );
-        }
-
-        // Same post meta as every other MP3 player: one entry per language+voice.
-        if ( $post_id ) {
-            $language = isset( $settings['language'] ) ? $settings['language'] : '';
-            $voice    = isset( $settings['voice'] ) ? $settings['voice'] : '';
-            $key      = TTA_Helper::tts_get_file_url_key( $language, $voice );
-
-            $file_urls = \get_post_meta( $post_id, 'tts_mp3_file_urls', true );
-            $file_urls = is_array( $file_urls ) ? $file_urls : array();
-            $file_urls[ $key ] = $file_url;
-
-            \update_post_meta( $post_id, 'tts_mp3_file_urls', $file_urls );
-            \update_post_meta( $post_id, 'tts_is_mp3_file_url_exists', true );
-        }
-
-        /**
-         * Fires once the final MP3 exists on disk.
-         *
-         * Free does nothing further. Pro hooks this to upload the file to Google
-         * Cloud Storage, so a Pro site gets cloud backup whether the audio came
-         * from a premium provider or from the free AtlasVoice voice — and a
-         * free-only site simply has no listener.
-         *
-         * @param string $file_path Absolute path to the final MP3.
-         * @param string $file_url  Public URL of the final MP3.
-         * @param int    $post_id   Post the audio belongs to.
-         * @param array  $body      The original request body.
-         */
-        do_action( 'atlasvoice_final_mp3_written', $dir . $title . '.mp3', $file_url, $post_id, $body );
-
-        return \rest_ensure_response( array(
-            'status' => true,
-            'data'   => array( 'url' => $file_url, 'message' => 'completed', 'file_already_exists' => false ),
-        ) );
-    }
-
-    /**
-     * TTS-266: strip anything that could escape the audio directory.
-     * The route is visitor-callable, so the title is never trusted as a path.
+     *      audio panel handlers that follow this block.
      */
 
     /**
      * TTS-266: delete one or more generated MP3s for a post.
      *
-     * Free owns this so a site without Pro can still manage player 7's audio. It
+     * Free owns this so a site without Pro can still manage stored audio. It
      * only ever removes files it can resolve back inside wp_upload_dir() — a URL
      * that resolves nowhere (a signed cloud link) drops out of the meta and is
      * handed to `atlasvoice_mp3_deleted` so Pro can clean its bucket.
@@ -1424,7 +1153,7 @@ class TTA_Api_Routes {
             $path = \TTA\TTA_Helper::atlasvoice_path_from_url( strtok( $url, '?' ) );
 
             if ( $path && file_exists( $path ) ) {
-                $fs = self::atlasvoice_filesystem();
+                $fs = \TTA\TTA_Audio_Storage::filesystem();
                 if ( $fs ) {
                     $fs->delete( $path );
                 } else {
@@ -1501,11 +1230,11 @@ class TTA_Api_Routes {
             ) );
         }
 
-        // atlasvoice_safe_name() strips dots — it sanitises TITLES, which get their
+        // TTA_Audio_Storage::safe_name() strips dots — it sanitises TITLES, which get their
         // extension appended afterwards. Run it on the base name only, then put the
         // extension back, or the name arrives as "...__lang__en_USmp3" and both the
         // filetype check and the language regex below fail on a perfectly good file.
-        $name = self::atlasvoice_safe_name(
+        $name = \TTA\TTA_Audio_Storage::safe_name(
             preg_replace( '/\.mp3$/i', '', basename( $file['name'] ) )
         ) . '.mp3';
 
@@ -1531,20 +1260,26 @@ class TTA_Api_Routes {
         $voice    = isset( $matches[2] ) ? $matches[2] : '';
         $key      = \TTA\TTA_Helper::tts_get_file_url_key( $language, $voice );
 
-        $date_path = self::atlasvoice_safe_date_path( (string) $request->get_param( 'path' ) );
+        $date_path = \TTA\TTA_Audio_Storage::safe_date_path( (string) $request->get_param( 'path' ) );
 
         /**
          * Where uploaded audio is written, per player.
          *
-         * Free writes into its own folder; Pro points this at the folder its active
-         * player reads from, so a replacement lands where the player looks.
+         * The plugin that owns the active MP3 player answers with the folder that
+         * player reads from, so a replacement lands where the player looks. No
+         * answer means the active player does not play stored audio (player 1
+         * speaks in the browser), so there is nowhere meaningful to put the file.
          *
          * @param array $target array( 'dir' => path, 'url' => url ) with trailing slashes.
          */
-        $target = \apply_filters( 'atlasvoice_upload_target', array(
-            'dir' => TTA_ATLASVOICE_DIR,
-            'url' => TTA_ATLASVOICE_DIR_URL,
-        ), $post_id );
+        $target = (array) \apply_filters( 'atlasvoice_upload_target', array(), $post_id );
+
+        if ( empty( $target['dir'] ) || empty( $target['url'] ) ) {
+            return \rest_ensure_response( array(
+                'status'  => false,
+                'message' => __( 'The active player does not play uploaded audio.', 'text-to-audio' ),
+            ) );
+        }
 
         $dir     = \trailingslashit( $target['dir'] ) . ( $date_path ? \trailingslashit( $date_path ) : '' );
         $dir_url = \trailingslashit( $target['url'] ) . ( $date_path ? \trailingslashit( $date_path ) : '' );
@@ -1552,7 +1287,7 @@ class TTA_Api_Routes {
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- server-side path, not input.
         $contents = file_get_contents( $file['tmp_name'] );
 
-        if ( false === $contents || ! self::atlasvoice_put_contents( $dir . $name, $contents ) ) {
+        if ( false === $contents || ! \TTA\TTA_Audio_Storage::put_contents( $dir . $name, $contents ) ) {
             return \rest_ensure_response( array(
                 'status'  => false,
                 'message' => __( 'The file could not be written. Check the uploads folder permissions.', 'text-to-audio' ),
@@ -1575,111 +1310,6 @@ class TTA_Api_Routes {
             'key'    => $key,
             'url'    => $file_urls[ $key ],
         ) );
-    }
-
-    private static function atlasvoice_safe_name( $name ) {
-        $name = \str_replace( ' ', '_', (string) $name );
-        $name = \preg_replace( '/[^\p{L}\p{N}_\-]/u', '', $name );
-
-        return \substr( (string) $name, 0, 200 );
-    }
-
-    /**
-     * TTS-266: the date folder the front end sends, e.g. "2026/07". Digits and
-     * slashes only, so no traversal is possible.
-     */
-    private static function atlasvoice_safe_date_path( $path ) {
-        $path = \preg_replace( '#[^0-9/]#', '', (string) $path );
-        $path = \trim( (string) $path, '/' );
-
-        return \substr( $path, 0, 20 );
-    }
-
-    /**
-     * TTS-266: write through WP_Filesystem (Plugin Check forbids the raw calls),
-     * creating the directory on demand rather than on every page load.
-     */
-    private static function atlasvoice_put_contents( $file, $contents ) {
-        $fs = self::atlasvoice_filesystem();
-
-        if ( ! $fs ) {
-            return false;
-        }
-
-        $dir = \dirname( $file );
-
-        if ( ! \is_dir( $dir ) && ! \wp_mkdir_p( $dir ) ) {
-            return false;
-        }
-
-        // FS_CHMOD_FILE is only defined once wp-admin/includes/file.php has been
-        // loaded, so never reference it bare.
-        $mode = \defined( 'FS_CHMOD_FILE' ) ? FS_CHMOD_FILE : 0644;
-
-        return (bool) $fs->put_contents( $file, $contents, $mode );
-    }
-
-    /**
-     * TTS-266: initialise WP_Filesystem once and hand back the instance.
-     * The require is idempotent and also defines FS_CHMOD_FILE.
-     */
-    private static function atlasvoice_filesystem() {
-        global $wp_filesystem;
-
-        if ( ! $wp_filesystem ) {
-            require_once ABSPATH . 'wp-admin/includes/file.php';
-            \WP_Filesystem();
-        }
-
-        return $wp_filesystem ? $wp_filesystem : false;
-    }
-
-    /**
-     * TTS-266: concatenate `{title}-{n}.mp3` into `{title}.mp3` and drop the parts.
-     *
-     * Byte concatenation, matching what Pro already does for players 3-6 — MP3
-     * frames are self-contained, which is why this works, and also why the
-     * resulting VBR header is rebuilt downstream for word timing (TTS-256).
-     *
-     * @return string|false Public URL of the merged file, or false.
-     */
-    private static function atlasvoice_merge_batches( $dir, $dir_url, $title ) {
-        $fs = self::atlasvoice_filesystem();
-
-        if ( ! $fs ) {
-            return false;
-        }
-
-        $parts = \glob( $dir . $title . '-*.mp3' );
-
-        if ( empty( $parts ) ) {
-            return false;
-        }
-
-        // natsort so -2 sorts before -10; a plain sort would reorder the audio.
-        \natsort( $parts );
-
-        $combined = '';
-        foreach ( $parts as $part ) {
-            $chunk = $fs->get_contents( $part );
-            if ( false !== $chunk ) {
-                $combined .= $chunk;
-            }
-        }
-
-        if ( '' === $combined ) {
-            return false;
-        }
-
-        if ( ! self::atlasvoice_put_contents( $dir . $title . '.mp3', $combined ) ) {
-            return false;
-        }
-
-        foreach ( $parts as $part ) {
-            \wp_delete_file( $part );
-        }
-
-        return $dir_url . $title . '.mp3';
     }
 
     public function get_route_access( $request ) {
@@ -1775,10 +1405,6 @@ class TTA_Api_Routes {
         $frontend_post_routes = array(
             '/tta/v1/track',
             '/tta/v1/geolocation',
-            // TTS-266: player 7 generation is triggered by a visitor's first play,
-            // so it must be reachable without login — but still nonce-verified,
-            // which is stricter than Pro's equivalent player 3 route.
-            '/tta/v1/atlasvoice_synthesize',
         );
 
         if ( in_array( $route, $frontend_post_routes, true )  ) {

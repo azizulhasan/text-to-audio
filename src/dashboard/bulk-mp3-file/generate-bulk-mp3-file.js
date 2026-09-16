@@ -155,6 +155,13 @@ export default function GenerateBulkMp3File({postId, language, selectedLang, isR
                             mp3FileGenerateCount++;
                             setPostURL(mp3File, mp3FileGenerateCount, postId)
                         }
+                    } else if (ttsObjPro.player_id == 7) {
+                        // TTS-266: AtlasVoice Cloud.
+                        let mp3File = await bulkMP3File.init_atlasvoice(1)
+                        if (mp3File) {
+                            mp3FileGenerateCount++;
+                            setPostURL(mp3File, mp3FileGenerateCount, postId)
+                        }
                     }
                 } else {
                     mp3FileGenerateCount++;

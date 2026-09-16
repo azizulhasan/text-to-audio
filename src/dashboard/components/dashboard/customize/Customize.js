@@ -539,30 +539,14 @@ export default function Customize() {
       }
     }
 
-    // TTS-266: this guard predates player 7 and assumed every id above 1 was a
-    // Pro player. Player 7 (AtlasVoice Cloud) is a FREE player, so blocking it
-    // here would both break the feature and be exactly the trialware pattern
-    // wp.org Guideline 5 forbids. Gate on the server-provided registry instead
-    // of on the id, so any future free player is handled automatically.
-    const availableIds = (
-      Array.isArray(ttsObj?.availablePlayers) && ttsObj.availablePlayers.length
-        ? ttsObj.availablePlayers
-        : [{ id: 1 }]
-    ).map((p) => Number(p.id));
-
-    if (
-      !ttsObj.is_atlasvoice_addon_functional &&
-      formData?.buttonSettings?.id > 1 &&
-      !availableIds.includes(Number(formData?.buttonSettings?.id))
-    ) {
+    if (!ttsObj.is_atlasvoice_addon_functional && formData?.buttonSettings?.id > 1) {
       CTANotice(__("Default Pro player is only available in the pro version.", "text-to-audio"));
       return;
     }
 
-    // TTS-266: any MP3-based player needs a writable uploads folder, player 7
-    // included. Read the flag from ttsObj first — on a free-only site ttsObjPro
-    // is a stub that may not carry is_folder_writable, and treating "missing" as
-    // "not writable" would block player 7 on a perfectly healthy site.
+    // TTS-266: any MP3-based player needs a writable uploads folder. Read the
+    // flag from ttsObj first — ttsObjPro may not carry is_folder_writable, and
+    // treating "missing" as "not writable" would block a healthy site.
     const folderWritable =
       typeof ttsObj?.is_folder_writable !== "undefined"
         ? ttsObj.is_folder_writable
@@ -649,9 +633,8 @@ export default function Customize() {
     { id: 4, name: "Google Cloud TTS", object: "TextToSpeechPro", disabled: false },
     { id: 5, name: "ChatGPT TTS", object: "TextToSpeechPro", disabled: false },
     { id: 6, name: "ElevenLabs TTS", object: "TextToSpeechPro", disabled: false },
-    // TTS-266: AtlasVoice Cloud is a FREE player — it appears here only when the
-    // server registry lists it (feature flag), like every other entry.
-    { id: 7, name: "AtlasVoice Cloud", object: "AtlasVoiceCloudPlayer", disabled: false },
+    // TTS-266: AtlasVoice Cloud (Pro) — shown only when the registry lists it.
+    { id: 7, name: "AtlasVoice Cloud", object: "TextToSpeechPro", disabled: false },
   ];
   const localizedObj =
     (typeof tta_obj !== "undefined" && tta_obj) ||

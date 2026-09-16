@@ -1,8 +1,8 @@
 /**
  * TTS-266 — the AtlasVoice post metabox, rebuilt on @wordpress/components.
  *
- * Lives in Free because player 7 is a free player that writes its own audio;
- * Pro extends it through filters instead of shipping a second copy.
+ * Lives in Free so there is one panel whichever plugin made the audio; Pro
+ * extends it through filters instead of shipping a second copy.
  *
  * Replaces the hand-rolled panel (three full-width #184c53 banners, a multi-select
  * listing raw URLs, and two delete buttons side by side) with the admin's own
@@ -264,6 +264,23 @@ function AudioSection( { files, setFiles, notify, busy, setBusy } ) {
 		} );
 	};
 
+	// The active player reads posts aloud in the browser: there is no file to
+	// list, and promising one "on first play" would be untrue.
+	if ( ! files.length && ! data.canUpload && ! data.canGenerate ) {
+		return el(
+			'div',
+			{ className: 'av-empty' },
+			el(
+				'p',
+				null,
+				__(
+					'The active player reads posts aloud in the browser, so there is no audio file to manage.',
+					TEXT_DOMAIN
+				)
+			)
+		);
+	}
+
 	if ( ! files.length ) {
 		return el(
 			'div',
@@ -271,8 +288,8 @@ function AudioSection( { files, setFiles, notify, busy, setBusy } ) {
 			el(
 				'p',
 				null,
-				// Player 7 makes its audio on demand; the Pro players are generated
-				// deliberately, so promising them "on first play" would be wrong.
+				// Some players make their audio on the first play; the others are
+				// generated deliberately, so promising them "on first play" would be wrong.
 				data.canGenerate
 					? __( 'No audio has been generated for this post yet.', TEXT_DOMAIN )
 					: __(
@@ -600,18 +617,20 @@ function Metabox() {
 			  )
 			: null,
 
-		el(
-			Panel,
-			{ className: 'av-fold' },
-			el(
-				PanelBody,
-				{
-					title: __( 'Replace with your own recording', TEXT_DOMAIN ),
-					initialOpen: false,
-				},
-				el( UploadSection, { notify: setNotice, busy, setBusy } )
-			)
-		)
+		data.canUpload
+			? el(
+					Panel,
+					{ className: 'av-fold' },
+					el(
+						PanelBody,
+						{
+							title: __( 'Replace with your own recording', TEXT_DOMAIN ),
+							initialOpen: false,
+						},
+						el( UploadSection, { notify: setNotice, busy, setBusy } )
+					)
+			  )
+			: null
 	);
 }
 

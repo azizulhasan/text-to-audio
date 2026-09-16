@@ -812,39 +812,6 @@ class TTSPlayButton extends HTMLElement {
     }
 
     /**
-     * TTS-266: render player 7 as the bare <audio> element when its MP3 already
-     * exists, instead of the AtlasVoice button.
-     *
-     * The player instance is built here rather than on click — nothing would ever
-     * click, and the instance is what carries analytics: its own play/pause/ended
-     * listeners drive trackPlay/trackPause/trackEnd, so insights keep working
-     * with no button in the page.
-     *
-     * @returns {boolean} true when the audio-only render took over.
-     */
-    initAtlasVoiceAudioOnly(wrapper, buttonId, contents) {
-        if (Number(window?.ttsObj?.player_id) !== 7) return false;
-
-        const Player = window.AtlasVoiceCloudPlayer;
-        if (typeof Player !== 'function') return false;
-
-        // No file yet: fall through to the button, which is what starts generation.
-        const url = Player.fileURLFor(buttonId);
-        if (!url) return false;
-
-        wrapper.innerHTML = '';
-        this.analytics.trackInit();
-
-        const player = new Player(buttonId, contents[buttonId], null, window.TTS);
-        player.avShowNativeControls(url);
-
-        this.speech = player.getData ? player.getData() : player;
-        this.listenStatus = 'pause';
-
-        return true;
-    }
-
-    /**
      * Initialize NEW player with settings modal functionality
      */
     initNewPlayer(shadow, buttonId, contents, settings) {
@@ -864,15 +831,6 @@ class TTSPlayButton extends HTMLElement {
         // host <tts-play-button> is the container and already has the region role.
         const wrapper = this.useLightDom ? this : shadow;
 
-        // TTS-266: player 7 plays a pre-generated MP3. Once that file exists —
-        // the normal case for a visitor — the native <audio> IS the player, so
-        // render it alone with no AtlasVoice button in front of it. The button
-        // survives only until the first generation finishes, because native
-        // controls cannot ask the server to build a file that does not exist yet.
-        if (this.initAtlasVoiceAudioOnly(wrapper, buttonId, contents)) {
-            return;
-        }
-
         // Create button with flexbox layout: text on left, settings icon on right
         const buttonHTML = this.getNewButtonContent(buttonId, settings, 'listen');
         wrapper.innerHTML = buttonHTML;
@@ -889,13 +847,6 @@ class TTSPlayButton extends HTMLElement {
                 return;
             }
 
-            // TTS-266: player 7's native <audio> lives inside this element, so its
-            // own play/pause clicks bubble here. Without this the handler would
-            // toggle playback a second time and undo what the visitor just did.
-            if (e.target.closest('.atlasvoice-audio')) {
-                return;
-            }
-
             let button = wrapper.querySelector(`#tts__listent_content_${buttonId}`);
 
             if (this.speech != null && this.speech.listenStatus == 'listen') {
@@ -904,15 +855,7 @@ class TTSPlayButton extends HTMLElement {
             }
 
             if (this.speech === null) {
-                // TTS-266: player 7 (AtlasVoice Cloud) reuses this whole button —
-                // markup, modal, analytics — and only swaps the player class, which
-                // is a subclass of TextToSpeech that plays a pre-generated MP3
-                // through an <audio> element instead of speechSynthesis.
-                const PlayerClass =
-                    Number(window?.ttsObj?.player_id) === 7 && window.AtlasVoiceCloudPlayer
-                        ? window.AtlasVoiceCloudPlayer
-                        : TextToSpeech;
-                let speech = new PlayerClass(buttonId, contents[buttonId], button, window.TTS);
+                let speech = new TextToSpeech(buttonId, contents[buttonId], button, window.TTS);
                 speech._init(null, true);
                 this.speech = speech.getData();
                 this.speech.callBackAfterEnd = () => {
