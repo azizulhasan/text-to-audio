@@ -395,8 +395,9 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
-= 2.3.15 ( 12 Sep 2026 ) =
+= 2.3.15 ( 16 Sep 2026 ) =
 Fixed : On some sites the player could be added to the same post more than once, which could put a stray copy of the player's data on the page. The player is now added once per post.
+Fixed : On some themes the player could disappear from the article completely - themes that build a short summary of the post before showing it, and plugins that read the post text in the background, could take the player away from the article. The player now ignores those hidden passes and appears in the article exactly once.
 Fixed : The player can now tell you why it did not appear on a page. If you add the shortcode somewhere and nothing shows up, logged-in editors get a short note in the page source explaining the reason - for example that the player only appears on single posts and pages.
 Changed : Listening analytics now collects nothing at all while it is switched off. Previously, turning it off stopped the reporting but the plugin still recorded basic visitor details, such as browser and time zone, in the visitor's own browser.
 Fixed : With the listener location setting turned off, an exact location could still be kept in the visitor's browser on sites that already had location access. It is now removed.
@@ -532,7 +533,7 @@ Fixed : Removed external sample-audio requests from the dashboard; previews now 
 == Upgrade Notice ==
 
 = 2.3.15 =
-Fixes settings not saving on sites with a translation plugin, where the plugin was still using an address left over from an earlier language setup. Listening analytics now collects nothing while it is switched off - previously some visitor details were still recorded in the visitor's browser. Also stops the player being added twice on some sites, and explains to logged-in editors why the shortcode produced no player. Recommended for every site.
+Fixes settings not saving on sites with a translation plugin, where the plugin was still using an address left over from an earlier language setup. Listening analytics now collects nothing while it is switched off - previously some visitor details were still recorded in the visitor's browser. Also stops the player being added twice on some sites, fixes the player disappearing from the article on themes that show a summary before the post, and explains to logged-in editors why the shortcode produced no player. Recommended for every site.
 
 = 2.3.14 =
 Adds Japanese, Polish, Russian, Turkish and Vietnamese, and completes the translations for all twelve languages. Fixes downloaded translations being lost every time the plugin updated, and translation downloads reporting an error when they had in fact succeeded. Several parts of the plugin that stayed in English - the setup wizard, the left-hand menu and the selection text - are now translated. Recommended for anyone using the plugin in a language other than English.
