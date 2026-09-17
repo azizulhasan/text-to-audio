@@ -559,7 +559,7 @@ class TTA_Admin
             return;
         }
 
-        if (!apply_filters('atlasvoice_render_audio_panel', true)) {
+        if (!TTA_Helper::atlasvoice_show_audio_panel()) {
             return;
         }
 
@@ -573,19 +573,10 @@ class TTA_Admin
             return;
         }
 
-        $player_id = (int) get_player_id();
-
-        /**
-         * Where an uploaded replacement would be written. Answered by the plugin
-         * that owns the active MP3 player; empty means the active player speaks
-         * in the browser and has no stored audio to replace.
-         */
-        $upload_target = (array) apply_filters('atlasvoice_upload_target', array(), (int) $post->ID);
-
         wp_enqueue_script(
             'atlasvoice-audio-panel',
             plugin_dir_url(__FILE__) . 'js/build/atlasvoice-audio-panel.min.js',
-            array('wp-element', 'wp-components', 'wp-i18n'),
+            array('wp-element', 'wp-components', 'wp-i18n', 'wp-hooks'),
             $this->asset_version('js/build/atlasvoice-audio-panel.min.js'),
             true
         );
@@ -599,39 +590,12 @@ class TTA_Admin
             $this->asset_version('css/atlasvoice-audio-panel.css')
         );
 
-        $title     = TTA_Helper::sazitize_content($post->post_title, true, 'title');
-        $settings  = TTA_Helper::tts_get_settings();
-        $language  = TTA_Helper::tts_site_language($settings);
-        $voice     = TTA_Helper::tts_get_voice($settings);
-        $resolved  = TTA_Helper::get_player_language_and_player_voice($language, $voice, $settings, $post);
-        $file_name = TTA_Helper::tts_file_name($title, $resolved['language'], $resolved['voice'], $post->ID, $post);
-
-        wp_localize_script('atlasvoice-audio-panel', 'atlasVoiceMetabox', apply_filters(
-            'atlasvoice_audio_panel_data',
-            array(
-                'postId'       => (int) $post->ID,
-                'postStatus'   => (string) $post->post_status,
-                'path'         => TTA_Helper::get_post_date($post),
-                'playerId'     => $player_id,
-                'files'        => TTA_Helper::atlasvoice_metabox_files($post),
-                'expectedName' => $file_name ? $file_name . '.mp3' : '',
-                // Derive the pattern from the name tts_file_name() actually built,
-                // not from the player id: a player can key its META on
-                // language+voice while naming the FILE on language alone, and a
-                // player-id rule then rejects the very name the panel recommends.
-                'requiresVoice' => (bool) ( $file_name && false !== strpos( $file_name, '__voice__' ) ),
-                'fileFormat'   => ( $file_name && false !== strpos( $file_name, '__voice__' ) )
-                    ? '{file_name}__lang__{language}__voice__{voice}.mp3'
-                    : '{file_name}__lang__{language}.mp3',
-                // Pro switches this on for the players it generates in advance.
-                // Players that generate on the first play leave it off.
-                'canGenerate'  => false,
-                'canUpload'    => !empty($upload_target['dir']) && !empty($upload_target['url']),
-                'generateUrl'  => '',
-                'apiURL'       => esc_url_raw(rest_url()) . 'tta/v1/',
-                'restNonce'    => wp_create_nonce('wp_rest'),
-            ),
-            $post
+        wp_localize_script('atlasvoice-audio-panel', 'atlasVoiceMetabox', array(
+            // TTS-312: the whole panel comes from one server-side builder; the
+            // delete and replace routes return the same shape after a change.
+            'state'     => TTA_Helper::atlasvoice_panel_state($post),
+            'apiURL'    => esc_url_raw(rest_url()) . 'tta/v1/',
+            'restNonce' => wp_create_nonce('wp_rest'),
         ));
 
         wp_set_script_translations(

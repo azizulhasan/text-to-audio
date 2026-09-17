@@ -148,6 +148,13 @@ class TTA {
         // replace). Free owns the one panel; the MP3 players extend it via filters.
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_audio_panel_assets');
 
+        // TTS-312: remember which content each stored MP3 was made from, so the
+        // panel can say "Outdated". Hooked on the meta write every generation and
+        // upload route already performs.
+        add_action('added_post_meta', array(TTA_Helper::class, 'atlasvoice_track_audio_hash'), 10, 4);
+        add_action('updated_post_meta', array(TTA_Helper::class, 'atlasvoice_track_audio_hash'), 10, 4);
+        add_action('deleted_post_meta', array(TTA_Helper::class, 'atlasvoice_forget_audio_hashes'), 10, 3);
+
         // TTS-250: the AudioObject JSON-LD schema generator was removed from the
         // free plugin. It only ever produced output when an MP3 file existed
         // (a Pro-only feature — the free browser-SpeechSynthesis player has no

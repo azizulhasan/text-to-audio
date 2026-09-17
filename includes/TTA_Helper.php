@@ -1166,6 +1166,8 @@ class TTA_Helper
                 'name'   => __( 'Default', 'text-to-audio' ),
                 'object' => 'TextToSpeech',
                 'pro'    => false,
+                // TTS-312: reads in the browser, so it stores no audio files.
+                'mp3'    => false,
             ),
         );
 
@@ -1173,70 +1175,449 @@ class TTA_Helper
     }
 
     /**
-     * TTS-266: describe every MP3 recorded against a post, for the edit-screen panel.
+     * TTS-312: does this player store its audio as MP3 files?
      *
-     * Lives in Free so there is one panel whichever plugin made the audio, and a
-     * site that deactivates Pro can still see and remove what is stored.
-     * Pro extends the result through `atlasvoice_metabox_engine_labels` (its own
-     * folders) and `atlasvoice_metabox_files` (remote/GCS entries) rather than
-     * carrying a second copy of this.
+     * Declared once, on the player's registry entry (`'mp3' => true`), by the
+     * plugin that registers the player. Screens ask this instead of testing
+     * player numbers.
      *
-     * The old panel listed raw URLs, which told an editor nothing about what they
-     * were about to delete. This resolves each entry to what a person actually
-     * needs: which voice it is, which engine made it, how long it runs, how big it
-     * is, when it was made, and — the one the old list hid completely — whether the
-     * file is still on disk at all.
-     *
-     * @param \WP_Post $post
-     *
-     * @return array<int,array<string,mixed>>
+     * @param int $player_id
+     * @return bool
      */
-    public static function atlasvoice_metabox_files($post)
+    public static function player_makes_mp3($player_id)
     {
-        if (empty($post->ID)) {
+        $players = self::get_available_players();
+
+        return !empty($players[(int) $player_id]['mp3']);
+    }
+
+    /**
+     * TTS-312: should the post editor show the audio panel?
+     *
+     * Wherever AtlasVoice runs, plus any post of a type allowed for listening
+     * whatever its status, so a draft explains that audio comes from the
+     * published page. Pro's legacy markup (`tts_pro_regenerate_mp3_old_ui`)
+     * switches it off through `atlasvoice_render_audio_panel`.
+     *
+     * @return bool
+     */
+    public static function atlasvoice_show_audio_panel()
+    {
+        if (!apply_filters('atlasvoice_render_audio_panel', true)) {
+            return false;
+        }
+
+        if (self::should_load_button() || apply_filters('atlas_voice_display_metabox', false)) {
+            return true;
+        }
+
+        $screen   = function_exists('get_current_screen') ? get_current_screen() : null;
+        $settings = (array) self::tts_get_settings('settings');
+        $types    = isset($settings['tta__settings_allow_listening_for_post_types'])
+            ? (array) $settings['tta__settings_allow_listening_for_post_types']
+            : array();
+
+        return $screen && !empty($screen->post_type) && in_array($screen->post_type, $types, true);
+    }
+
+    /**
+     * TTS-312: `tts_mp3_file_urls` as a flat key => URL map. Legacy rows stored
+     * the map wrapped in a numeric array.
+     *
+     * @param mixed $urls
+     * @return array<string,string>
+     */
+    public static function atlasvoice_normalise_urls($urls)
+    {
+        if (!is_array($urls)) {
             return array();
         }
 
-        $urls = get_post_meta($post->ID, 'tts_mp3_file_urls', true);
-        if (!is_array($urls)) {
-            $urls = array();
-        }
-        // Legacy rows stored the map wrapped in a numeric array.
         if (isset($urls[0]) && is_array($urls[0])) {
             $urls = $urls[0];
         }
 
-        $files = array();
+        $clean = array();
+        foreach ($urls as $key => $url) {
+            if (is_string($url) && '' !== $url) {
+                $clean[(string) $key] = $url;
+            }
+        }
+
+        return $clean;
+    }
+
+    /**
+     * TTS-312: fingerprint of what a post says, used to tell whether stored audio
+     * was made before the last content change.
+     *
+     * @param \WP_Post $post
+     * @return string
+     */
+    public static function atlasvoice_content_hash($post)
+    {
+        return md5((string) $post->post_title . "\n" . (string) $post->post_content);
+    }
+
+    /**
+     * TTS-312: remember the content fingerprint each audio file was made from.
+     *
+     * Hooked to the post-meta write of `tts_mp3_file_urls`, which every
+     * generation route (Free and Pro) and the upload route already perform, so
+     * no player has to call anything. A file keeps its fingerprint while its
+     * name is unchanged, which also survives the Cloud Storage move and signed
+     * URL refreshes; a regenerated local file (newer on disk) takes the current
+     * fingerprint.
+     *
+     * @param int    $meta_id
+     * @param int    $post_id
+     * @param string $meta_key
+     * @param mixed  $meta_value
+     * @return void
+     */
+    public static function atlasvoice_track_audio_hash($meta_id, $post_id, $meta_key, $meta_value)
+    {
+        if ('tts_mp3_file_urls' !== $meta_key) {
+            return;
+        }
+
+        $post = get_post($post_id);
+        if (!$post) {
+            return;
+        }
+
+        $urls    = self::atlasvoice_normalise_urls(maybe_unserialize($meta_value));
+        $records = get_post_meta($post_id, '_atlasvoice_audio_hashes', true);
+        $records = is_array($records) ? $records : array();
+        $hash    = self::atlasvoice_content_hash($post);
+        $next    = array();
 
         foreach ($urls as $key => $url) {
-            if (!is_string($url) || '' === $url) {
+            $key  = strtolower($key);
+            $file = basename((string) strtok($url, '?'));
+            $path = self::atlasvoice_path_from_url((string) strtok($url, '?'));
+            $old  = isset($records[$key]) ? $records[$key] : null;
+
+            $same_file   = $old && isset($old['file']) && $old['file'] === $file;
+            $regenerated = $same_file && $path && file_exists($path)
+                && (int) filemtime($path) > (int) (isset($old['time']) ? $old['time'] : 0);
+
+            $next[$key] = ($same_file && !$regenerated)
+                ? $old
+                : array('file' => $file, 'hash' => $hash, 'time' => time());
+        }
+
+        if ($next === $records) {
+            return;
+        }
+
+        if (empty($next)) {
+            delete_post_meta($post_id, '_atlasvoice_audio_hashes');
+        } else {
+            update_post_meta($post_id, '_atlasvoice_audio_hashes', $next);
+        }
+    }
+
+    /**
+     * TTS-312: the stored URLs are gone, so the fingerprints go with them.
+     *
+     * @param array  $meta_ids
+     * @param int    $post_id
+     * @param string $meta_key
+     * @return void
+     */
+    public static function atlasvoice_forget_audio_hashes($meta_ids, $post_id, $meta_key)
+    {
+        if ('tts_mp3_file_urls' === $meta_key) {
+            delete_post_meta($post_id, '_atlasvoice_audio_hashes');
+        }
+    }
+
+    /**
+     * TTS-312: a hand-uploaded file replaces the audio, so it matches the current
+     * content by definition, even when it kept the previous file name.
+     *
+     * @param int    $post_id
+     * @param string $key
+     * @param string $file_name
+     * @return void
+     */
+    public static function atlasvoice_mark_audio_current($post_id, $key, $file_name)
+    {
+        $post = get_post($post_id);
+        if (!$post) {
+            return;
+        }
+
+        $records = get_post_meta($post_id, '_atlasvoice_audio_hashes', true);
+        $records = is_array($records) ? $records : array();
+
+        $records[strtolower($key)] = array(
+            'file' => $file_name,
+            'hash' => self::atlasvoice_content_hash($post),
+            'time' => time(),
+        );
+
+        update_post_meta($post_id, '_atlasvoice_audio_hashes', $records);
+    }
+
+    /**
+     * TTS-312: everything the post editor audio panel shows, built in one place.
+     *
+     * Free produces the whole panel: one row per language the active player
+     * would use, plus any other stored file so it can still be removed. Pro
+     * extends it only through `atlasvoice_audio_panel_languages` (mapped
+     * languages and voices) and `atlasvoice_audio_panel_state` (Bulk MP3 link,
+     * provider notices, storage labels). The REST routes return the same state
+     * after a change, so the panel never rebuilds it in the browser.
+     *
+     * @param \WP_Post $post
+     * @return array<string,mixed>
+     */
+    public static function atlasvoice_panel_state($post)
+    {
+        $player_id = (int) get_player_id();
+        $players   = self::get_available_players();
+        $player    = isset($players[$player_id]) ? (array) $players[$player_id] : array();
+        $makes_mp3 = self::player_makes_mp3($player_id);
+        $pro       = is_atlasvoice_addon_functional();
+
+        $stored   = self::atlasvoice_normalise_urls(get_post_meta($post->ID, 'tts_mp3_file_urls', true));
+        $by_lower = array();
+        foreach (array_keys($stored) as $stored_key) {
+            $by_lower[strtolower($stored_key)] = $stored_key;
+        }
+
+        $records = get_post_meta($post->ID, '_atlasvoice_audio_hashes', true);
+        $records = is_array($records) ? $records : array();
+        $hash    = self::atlasvoice_content_hash($post);
+
+        $languages = array();
+        if ($makes_mp3) {
+            $settings = self::tts_get_settings();
+            $resolved = self::get_player_language_and_player_voice(
+                self::tts_site_language($settings),
+                self::tts_get_voice($settings),
+                $settings,
+                $post
+            );
+
+            $languages[] = array(
+                'language' => (string) $resolved['language'],
+                'voice'    => (string) $resolved['voice'],
+                'thisPost' => false,
+            );
+
+            /**
+             * The languages the active player produces audio in for this post.
+             *
+             * Free lists the site language. Pro replaces it with the languages
+             * mapped in Listening when a multilingual plugin is active.
+             *
+             * @param array    $languages List of array( 'language', 'voice', 'thisPost' ).
+             * @param \WP_Post $post
+             * @param int      $player_id
+             */
+            $languages = (array) apply_filters('atlasvoice_audio_panel_languages', $languages, $post, $player_id);
+        }
+
+        $rows = array();
+        $seen = array();
+
+        foreach ($languages as $language) {
+            $lang  = isset($language['language']) ? (string) $language['language'] : '';
+            $voice = isset($language['voice']) ? (string) $language['voice'] : '';
+            if ('' === $lang) {
                 continue;
             }
 
-            $clean_url = strtok($url, '?');
-            $path      = self::atlasvoice_path_from_url($clean_url);
-            $is_remote = ('' === $path);
-            $exists    = $is_remote ? true : file_exists($path);
-            $size      = ($exists && !$is_remote) ? (int) filesize($path) : 0;
+            $key = self::tts_get_file_url_key($lang, $voice);
+            if (isset($seen[strtolower($key)])) {
+                continue;
+            }
+            $seen[strtolower($key)] = true;
 
-            $files[] = array(
-                'key'      => (string) $key,
-                'url'      => $url,
-                'fileName' => basename($clean_url),
-                'label'    => self::atlasvoice_key_label((string) $key),
-                'engine'   => self::atlasvoice_engine_label($clean_url),
-                'remote'   => $is_remote,
-                'exists'   => (bool) $exists,
-                'size'     => $size,
-                'sizeText' => $size ? size_format($size, 1) : '',
-                'dateText' => ($exists && !$is_remote)
-                    ? date_i18n(get_option('date_format'), (int) filemtime($path))
-                    : '',
-                'duration' => ($exists && !$is_remote) ? self::atlasvoice_duration($path) : 0,
-            );
+            $stored_key = isset($by_lower[strtolower($key)]) ? $by_lower[strtolower($key)] : '';
+            $title      = self::sazitize_content($post->post_title, true, 'title');
+
+            $rows[] = self::atlasvoice_panel_row(array(
+                'key'        => $key,
+                'storedKey'  => $stored_key,
+                'url'        => $stored_key ? $stored[$stored_key] : '',
+                'language'   => $lang,
+                'voice'      => $voice,
+                'thisPost'   => !empty($language['thisPost']),
+                'expected'   => true,
+                'fileName'   => (string) self::tts_file_name($title, $lang, $voice, $post->ID, $post),
+            ), $records, $hash);
         }
 
-        return apply_filters('atlasvoice_metabox_files', $files, $post);
+        // Files made by another player or language setting stay visible, so they
+        // can still be heard and removed.
+        foreach ($stored as $stored_key => $url) {
+            if (isset($seen[strtolower($stored_key)])) {
+                continue;
+            }
+
+            $parts = explode('--voice--', $stored_key, 2);
+
+            $rows[] = self::atlasvoice_panel_row(array(
+                'key'       => $stored_key,
+                'storedKey' => $stored_key,
+                'url'       => $url,
+                'language'  => $parts[0],
+                'voice'     => isset($parts[1]) ? $parts[1] : '',
+                'thisPost'  => false,
+                'expected'  => false,
+                'fileName'  => '',
+            ), $records, $hash);
+        }
+
+        $notes = array();
+
+        if ($makes_mp3 && !$pro) {
+            $post_locale = self::atlasvoice_post_locale($post);
+            $site_locale = get_locale();
+
+            if ($post_locale && strtolower(str_replace('_', '-', $post_locale)) !== strtolower(str_replace('_', '-', $site_locale))) {
+                $notes[] = sprintf(
+                    /* translators: 1: language of this post, 2: language of the site. */
+                    __('This post is in %1$s. AtlasVoice reads every post in the site language (%2$s).', 'text-to-audio'),
+                    self::atlasvoice_language_name($post_locale),
+                    self::atlasvoice_language_name($site_locale)
+                );
+            }
+
+            $notes[] = __('Bulk generation and audio per language are available in AtlasVoice Pro.', 'text-to-audio');
+        }
+
+        $state = array(
+            'postId'      => (int) $post->ID,
+            'path'        => self::get_post_date($post),
+            'playerId'    => $player_id,
+            'playerName'  => isset($player['name']) ? (string) $player['name'] : '',
+            'makesMp3'    => $makes_mp3,
+            'isPublished' => 'publish' === $post->post_status,
+            'rows'        => $rows,
+            'notices'     => array(),
+            'notes'       => $notes,
+            'canGenerate' => false,
+            'generateUrl' => '',
+        );
+
+        /**
+         * The audio panel state, after Free built it.
+         *
+         * Pro adds the Bulk MP3 link, provider notices and storage labels here.
+         *
+         * @param array    $state
+         * @param \WP_Post $post
+         */
+        return (array) apply_filters('atlasvoice_audio_panel_state', $state, $post);
+    }
+
+    /**
+     * TTS-312: one panel row, resolved against the file on disk.
+     *
+     * @param array  $row
+     * @param array  $records Content fingerprints per lower-cased key.
+     * @param string $hash    Current content fingerprint.
+     * @return array<string,mixed>
+     */
+    private static function atlasvoice_panel_row($row, $records, $hash)
+    {
+        $url       = (string) $row['url'];
+        $clean_url = $url ? (string) strtok($url, '?') : '';
+        $path      = $clean_url ? self::atlasvoice_path_from_url($clean_url) : '';
+        $remote    = $clean_url && '' === $path;
+        $exists    = $remote || ($path && file_exists($path));
+        $record    = $row['storedKey'] && isset($records[strtolower($row['storedKey'])]) ? $records[strtolower($row['storedKey'])] : null;
+
+        if (!$url) {
+            $status = 'missing';
+        } elseif (!$exists) {
+            $status = 'gone';
+        } elseif (!empty($row['expected']) && $record && isset($record['hash']) && $record['hash'] !== $hash) {
+            $status = 'outdated';
+        } else {
+            $status = 'ready';
+        }
+
+        $local = $exists && !$remote;
+        $size  = $local ? (int) filesize($path) : 0;
+        $lang  = str_replace('_', '-', (string) $row['language']);
+
+        return array_merge($row, array(
+            'code'         => strtoupper((string) strtok($lang, '-')),
+            'name'         => self::atlasvoice_language_name($lang),
+            'voiceLabel'   => '' !== $row['voice'] ? self::atlasvoice_voice_label($row['voice']) : '',
+            'status'       => $status,
+            'remote'       => $remote,
+            'storageLabel' => $remote ? __('Stored off-site', 'text-to-audio') : '',
+            'sizeText'     => $size ? size_format($size, 1) : '',
+            'dateText'     => $local ? date_i18n(get_option('date_format'), (int) filemtime($path)) : '',
+            'duration'     => $local ? self::atlasvoice_duration($path) : 0,
+            'canReplace'   => (bool) $row['expected'],
+        ));
+    }
+
+    /**
+     * TTS-312: the language a multilingual plugin assigned to this post, as a
+     * locale, or '' when no plugin says.
+     *
+     * @param \WP_Post $post
+     * @return string
+     */
+    public static function atlasvoice_post_locale($post)
+    {
+        if (function_exists('pll_get_post_language')) {
+            $locale = pll_get_post_language($post->ID, 'locale');
+            if ($locale) {
+                return (string) $locale;
+            }
+        }
+
+        $details = apply_filters('wpml_post_language_details', null, $post->ID);
+        if (is_array($details) && !empty($details['locale'])) {
+            return (string) $details['locale'];
+        }
+
+        return '';
+    }
+
+    /**
+     * TTS-312: "es-ES" becomes "Spanish (Spain)", in the admin's own language when
+     * the intl extension is available, otherwise the language's native name.
+     *
+     * @param string $language
+     * @return string
+     */
+    public static function atlasvoice_language_name($language)
+    {
+        $language = str_replace('_', '-', (string) $language);
+
+        if (class_exists('Locale')) {
+            $name = \Locale::getDisplayName($language, get_user_locale());
+            if ($name && strtolower($name) !== strtolower($language)) {
+                return function_exists('mb_convert_case')
+                    ? mb_strtoupper(mb_substr($name, 0, 1)) . mb_substr($name, 1)
+                    : ucfirst($name);
+            }
+        }
+
+        if (function_exists('tta_get_default_languages')) {
+            $names   = tta_get_default_languages();
+            $as_wp   = str_replace('-', '_', $language);
+            $primary = strtolower((string) strtok($language, '-'));
+
+            foreach (array($as_wp, $primary) as $candidate) {
+                if (isset($names[$candidate])) {
+                    return $names[$candidate];
+                }
+            }
+        }
+
+        return $language;
     }
 
     /**
@@ -1308,47 +1689,7 @@ class TTA_Helper
     }
 
     /**
-     * "en-US--voice--en_US-amy-medium" becomes "English (US) · Amy".
-     *
-     * @param string $key
-     * @return string
-     */
-    private static function atlasvoice_key_label($key)
-    {
-        $voice    = '';
-        $language = $key;
-
-        if (false !== strpos($key, '--voice--')) {
-            list($language, $voice) = explode('--voice--', $key, 2);
-        }
-
-        $languages = apply_filters('atlasvoice_metabox_language_names', array(
-            'en'    => __('English', 'text-to-audio'),
-            'en-us' => __('English (US)', 'text-to-audio'),
-            'en-gb' => __('English (UK)', 'text-to-audio'),
-            'es-es' => __('Spanish', 'text-to-audio'),
-            'fr-fr' => __('French', 'text-to-audio'),
-            'de-de' => __('German', 'text-to-audio'),
-            'it-it' => __('Italian', 'text-to-audio'),
-            'pt-br' => __('Portuguese (Brazil)', 'text-to-audio'),
-            'hi-in' => __('Hindi', 'text-to-audio'),
-            'ja-jp' => __('Japanese', 'text-to-audio'),
-            'ko-kr' => __('Korean', 'text-to-audio'),
-            'zh-cn' => __('Chinese', 'text-to-audio'),
-        ));
-
-        $lookup = strtolower(str_replace('_', '-', $language));
-        $name   = isset($languages[$lookup]) ? $languages[$lookup] : $language;
-
-        if ('' === $voice) {
-            return $name;
-        }
-
-        return $name . ' · ' . self::atlasvoice_voice_label($voice);
-    }
-
-    /**
-     * Voice ids are engine-shaped ("en_US-amy-medium", "voice_id::Bianca",
+     * Voice ids are engine-shaped ("en_US-amy-medium", "af_heart", "voice_id::Bianca",
      * "en-US-Chirp3-HD-Achernar-FEMALE"). Pull out the part a human recognises.
      *
      * @param string $voice
@@ -1366,35 +1707,21 @@ class TTA_Helper
             return ucfirst($m[1]);
         }
 
-        // Google: "en-US-Chirp3-HD-Achernar-FEMALE" -> "Achernar".
-        if (preg_match('/-([A-Za-z]+)-(?:FEMALE|MALE|NEUTRAL)$/', $voice, $m)) {
-            return $m[1];
+        // Kokoro: "af_heart" -> "Heart".
+        if (preg_match('/^[a-z]{2}_([a-z]+)$/', $voice, $m)) {
+            return ucfirst($m[1]);
+        }
+
+        // Google: "en-US-Chirp3-HD-Achernar-FEMALE" -> "Achernar", but
+        // "es-ES-Neural2-F-MALE" -> "Neural2 F": a one-letter name needs its family.
+        if (preg_match('/^[a-z]{2,3}-[A-Z]{2}-(.+?)(?:-(?:FEMALE|MALE|NEUTRAL))?$/', $voice, $m)) {
+            $parts = explode('-', $m[1]);
+            $last  = end($parts);
+
+            return strlen($last) > 1 ? $last : implode(' ', $parts);
         }
 
         return ucfirst(str_replace(array('_', '-'), ' ', $voice));
-    }
-
-    /**
-     * Which player produced a file, read from where it was stored. A post that has
-     * been through several players ends up with a mixed set, and the folder is the
-     * only record of which engine made which file.
-     *
-     * Free stores no audio of its own; Pro maps its folders through the filter.
-     *
-     * @param string $url
-     * @return string
-     */
-    private static function atlasvoice_engine_label($url)
-    {
-        $map = apply_filters('atlasvoice_metabox_engine_labels', array());
-
-        foreach ($map as $fragment => $label) {
-            if (false !== strpos($url, $fragment)) {
-                return $label;
-            }
-        }
-
-        return '';
     }
 
     public static function set_default_settings()

@@ -1197,27 +1197,31 @@ class TTA_Api_Routes {
             'status'  => true,
             'deleted' => $deleted,
             'urls'    => $file_urls,
+            // TTS-312: the panel re-renders from this, so it never guesses.
+            'state'   => \TTA\TTA_Helper::atlasvoice_panel_state( get_post( $post_id ) ),
         ) );
     }
 
     /**
-     * TTS-266: replace a post's audio with a hand-made MP3.
+     * TTS-312: replace one row of the audio panel with a hand-made MP3.
      *
-     * The file name carries the language (and, above player 3, the voice) — that is
-     * how the player later matches a file to the selected voice, so a name that
-     * does not carry them is rejected rather than silently stored.
+     * The row decides the language, voice and file name, so the uploaded file can
+     * be called anything. Only rows the active player uses can be replaced; a
+     * file made by another player or setting can only be removed.
      *
      * @param \WP_REST_Request $request
      * @return \WP_REST_Response
      */
     public function atlasvoice_upload_mp3( $request ) {
         $post_id = absint( $request->get_param( 'post_id' ) );
+        $key     = sanitize_text_field( (string) $request->get_param( 'key' ) );
         $files   = $request->get_file_params();
+        $post    = $post_id ? get_post( $post_id ) : null;
 
-        if ( ! $post_id || empty( $files['file'] ) ) {
+        if ( ! $post || '' === $key || empty( $files['file'] ) ) {
             return \rest_ensure_response( array(
                 'status'  => false,
-                'message' => __( 'Missing post id or file.', 'text-to-audio' ),
+                'message' => __( 'Missing post, language or file.', 'text-to-audio' ),
             ) );
         }
 
@@ -1230,17 +1234,9 @@ class TTA_Api_Routes {
             ) );
         }
 
-        // TTA_Audio_Storage::safe_name() strips dots — it sanitises TITLES, which get their
-        // extension appended afterwards. Run it on the base name only, then put the
-        // extension back, or the name arrives as "...__lang__en_USmp3" and both the
-        // filetype check and the language regex below fail on a perfectly good file.
-        $name = \TTA\TTA_Audio_Storage::safe_name(
-            preg_replace( '/\.mp3$/i', '', basename( $file['name'] ) )
-        ) . '.mp3';
-
         // Trust the bytes, not the browser's Content-Type: wp_check_filetype_and_ext
         // sniffs the real file. An .mp3 name over a non-MP3 body is refused here.
-        $checked = \wp_check_filetype_and_ext( $file['tmp_name'], $name, array( 'mp3' => 'audio/mpeg' ) );
+        $checked = \wp_check_filetype_and_ext( $file['tmp_name'], 'upload.mp3', array( 'mp3' => 'audio/mpeg' ) );
 
         if ( empty( $checked['ext'] ) || 'mp3' !== $checked['ext'] || 'audio/mpeg' !== $checked['type'] ) {
             return \rest_ensure_response( array(
@@ -1249,26 +1245,29 @@ class TTA_Api_Routes {
             ) );
         }
 
-        if ( ! preg_match( '/__lang__([a-zA-Z0-9_-]+?)(?:__voice__([a-zA-Z0-9_-]+))?\.mp3$/', $name, $matches ) ) {
-            return \rest_ensure_response( array(
-                'status'  => false,
-                'message' => __( 'The file name must carry the language, like name__lang__en-US.mp3', 'text-to-audio' ),
-            ) );
+        $state = \TTA\TTA_Helper::atlasvoice_panel_state( $post );
+        $row   = null;
+        foreach ( $state['rows'] as $candidate ) {
+            if ( ! empty( $candidate['canReplace'] ) && strtolower( $candidate['key'] ) === strtolower( $key ) ) {
+                $row = $candidate;
+                break;
+            }
         }
 
-        $language = str_replace( '_', '-', $matches[1] );
-        $voice    = isset( $matches[2] ) ? $matches[2] : '';
-        $key      = \TTA\TTA_Helper::tts_get_file_url_key( $language, $voice );
+        $name = $row ? \TTA\TTA_Audio_Storage::safe_name( $row['fileName'] ) : '';
 
-        $date_path = \TTA\TTA_Audio_Storage::safe_date_path( (string) $request->get_param( 'path' ) );
+        if ( ! $row || '' === $name ) {
+            return \rest_ensure_response( array(
+                'status'  => false,
+                'message' => __( 'This audio cannot be replaced with the current player.', 'text-to-audio' ),
+            ) );
+        }
 
         /**
          * Where uploaded audio is written, per player.
          *
          * The plugin that owns the active MP3 player answers with the folder that
-         * player reads from, so a replacement lands where the player looks. No
-         * answer means the active player does not play stored audio (player 1
-         * speaks in the browser), so there is nowhere meaningful to put the file.
+         * player reads from, so a replacement lands where the player looks.
          *
          * @param array $target array( 'dir' => path, 'url' => url ) with trailing slashes.
          */
@@ -1281,34 +1280,34 @@ class TTA_Api_Routes {
             ) );
         }
 
-        $dir     = \trailingslashit( $target['dir'] ) . ( $date_path ? \trailingslashit( $date_path ) : '' );
-        $dir_url = \trailingslashit( $target['url'] ) . ( $date_path ? \trailingslashit( $date_path ) : '' );
+        $date_path = \TTA\TTA_Audio_Storage::safe_date_path( (string) $state['path'] );
+        $dir       = \trailingslashit( $target['dir'] ) . ( $date_path ? \trailingslashit( $date_path ) : '' );
+        $dir_url   = \trailingslashit( $target['url'] ) . ( $date_path ? \trailingslashit( $date_path ) : '' );
 
-        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- server-side path, not input.
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- reading PHP's own upload temp file.
         $contents = file_get_contents( $file['tmp_name'] );
 
-        if ( false === $contents || ! \TTA\TTA_Audio_Storage::put_contents( $dir . $name, $contents ) ) {
+        if ( false === $contents || ! \TTA\TTA_Audio_Storage::put_contents( $dir . $name . '.mp3', $contents ) ) {
             return \rest_ensure_response( array(
                 'status'  => false,
                 'message' => __( 'The file could not be written. Check the uploads folder permissions.', 'text-to-audio' ),
             ) );
         }
 
-        $file_urls = \get_post_meta( $post_id, 'tts_mp3_file_urls', true );
-        if ( ! is_array( $file_urls ) ) {
-            $file_urls = array();
-        }
-        $file_urls[ $key ] = $dir_url . $name;
+        $file_urls = \TTA\TTA_Helper::atlasvoice_normalise_urls( \get_post_meta( $post_id, 'tts_mp3_file_urls', true ) );
+        $meta_key  = $row['storedKey'] ? $row['storedKey'] : $row['key'];
+
+        $file_urls[ $meta_key ] = $dir_url . $name . '.mp3';
 
         \update_post_meta( $post_id, 'tts_mp3_file_urls', $file_urls );
         \update_post_meta( $post_id, 'tts_is_mp3_file_url_exists', true );
+        \TTA\TTA_Helper::atlasvoice_mark_audio_current( $post_id, $meta_key, $name . '.mp3' );
 
         \TTA\TTA_Cache::flush();
 
         return \rest_ensure_response( array(
             'status' => true,
-            'key'    => $key,
-            'url'    => $file_urls[ $key ],
+            'state'  => \TTA\TTA_Helper::atlasvoice_panel_state( get_post( $post_id ) ),
         ) );
     }
 

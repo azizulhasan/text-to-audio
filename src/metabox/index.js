@@ -1,18 +1,13 @@
 /**
- * TTS-266 — the AtlasVoice post metabox, rebuilt on @wordpress/components.
+ * TTS-312 — the "AtlasVoice audio" panel in the post editor sidebar.
  *
- * Lives in Free so there is one panel whichever plugin made the audio; Pro
- * extends it through filters instead of shipping a second copy.
+ * One panel for every player, in the block and the classic editor. Everything it
+ * shows comes from TTA_Helper::atlasvoice_panel_state() (Free), which Pro extends
+ * through PHP filters; the delete and replace routes return the same state, so the
+ * panel never rebuilds it here. Browser-side extensions use the wp.hooks points:
  *
- * Replaces the hand-rolled panel (three full-width #184c53 banners, a multi-select
- * listing raw URLs, and two delete buttons side by side) with the admin's own
- * controls. Only the brand colours carry over — see Assets/css/atlasvoice-metabox.css.
- *
- * Mounts into #atlasvoice-metabox-root, which the Free metabox renders inside the
- * existing metabox, so this works identically in the block editor, the classic
- * editor and the WooCommerce product screen: `wp-element` and `wp-components` are
- * core-registered scripts, not block-editor-only. The one thing the classic editor
- * does not load for us is the components stylesheet, which the PHP enqueues.
+ *   atlasvoice.audioPanel.state    filter  the state before it is drawn
+ *   atlasvoice.audioPanel.changed  action  after a delete or replace succeeded
  *
  * Written with createElement rather than JSX on purpose. JSX would compile to
  * `React.createElement` and pull this plugin's own React 17 out of node_modules,
@@ -27,616 +22,504 @@ import {
 	render,
 	useState,
 	useRef,
+	useEffect,
 	useCallback,
 } from '@wordpress/element';
-import {
-	Button,
-	CheckboxControl,
-	Notice,
-	Panel,
-	PanelBody,
-	Spinner,
-} from '@wordpress/components';
+import { Button, Spinner } from '@wordpress/components';
 
-const data = window.atlasVoiceMetabox || {};
+const boot = window.atlasVoiceMetabox || {};
 const i18n = ( window.wp && window.wp.i18n ) || {};
+const hooks = window.wp && window.wp.hooks;
 const __ = i18n.__ || ( ( s ) => s );
 const _n = i18n._n || ( ( s, p, n ) => ( n === 1 ? s : p ) );
-const sprintf = i18n.sprintf || ( ( s ) => s );
+const sprintf =
+	i18n.sprintf ||
+	( ( format, ...args ) => {
+		let i = 0;
+		return format.replace( /%(\d+\$)?[sd]/g, () => String( args[ i++ ] ) );
+	} );
 
 const TEXT_DOMAIN = 'text-to-audio';
 
-/**
- * Seconds to "10:07".
- */
-function formatDuration( seconds ) {
-	const total = Math.max( 0, Math.round( seconds ) );
+const STATUS_LABEL = {
+	ready: __( 'Ready', TEXT_DOMAIN ),
+	outdated: __( 'Outdated', TEXT_DOMAIN ),
+	missing: __( 'No file', TEXT_DOMAIN ),
+	gone: __( 'Missing', TEXT_DOMAIN ),
+};
+
+const hasFile = ( row ) => row.status === 'ready' || row.status === 'outdated';
+
+function formatTime( seconds ) {
+	const total = Number.isFinite( seconds ) ? Math.max( 0, Math.floor( seconds ) ) : 0;
 
 	return `${ Math.floor( total / 60 ) }:${ String( total % 60 ).padStart( 2, '0' ) }`;
 }
 
-async function postJSON( endpoint, body ) {
-	const response = await fetch( data.apiURL + endpoint, {
+function filterState( state ) {
+	return hooks ? hooks.applyFilters( 'atlasvoice.audioPanel.state', state ) : state;
+}
+
+async function request( endpoint, options ) {
+	const response = await fetch( boot.apiURL + endpoint, {
 		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json; charset=UTF-8',
-			'X-WP-Nonce': data.restNonce,
-		},
-		body: JSON.stringify( body ),
+		credentials: 'same-origin',
+		...options,
+		headers: { 'X-WP-Nonce': boot.restNonce, ...( options.headers || {} ) },
 	} );
 
 	return response.json();
 }
 
 /**
- * One generated file: hear it, see what it is, delete it.
+ * The small teal player on a row. One <audio> element is shared by the whole
+ * panel, so starting one row stops the other.
  */
-function FileRow( { file, selected, onToggle, onDelete, busy } ) {
-	const audioRef = useRef( null );
-	const [ playing, setPlaying ] = useState( false );
-
-	const togglePlay = useCallback( () => {
-		const audio = audioRef.current;
-		if ( ! audio ) {
-			return;
-		}
-		if ( audio.paused ) {
-			audio.play();
-		} else {
-			audio.pause();
-		}
-	}, [] );
-
-	const classes = [ 'av-row' ];
-	if ( selected ) {
-		classes.push( 'is-selected' );
-	}
-	if ( ! file.exists ) {
-		classes.push( 'is-missing' );
-	}
-
-	const meta = file.exists
-		? [
-				file.duration ? formatDuration( file.duration ) : null,
-				file.sizeText || null,
-				file.dateText || null,
-				file.remote ? __( 'stored off-site', TEXT_DOMAIN ) : null,
-		  ]
-				.filter( Boolean )
-				.join( ' · ' )
-		: el(
-				'span',
-				{ className: 'av-missing' },
-				__( 'File is missing from the server', TEXT_DOMAIN )
-		  );
+function MiniPlayer( { row, playback, onToggle } ) {
+	const active = playback.key === row.storedKey;
+	const duration = active && playback.duration ? playback.duration : row.duration;
+	const current = active ? playback.current : 0;
+	const width = duration ? Math.min( 100, ( current / duration ) * 100 ) : 0;
+	const playing = active && playback.playing;
 
 	return el(
 		'div',
-		{ className: classes.join( ' ' ) },
-
-		el( CheckboxControl, {
-			checked: selected,
-			onChange: onToggle,
-			disabled: busy,
-			label: '',
-			'aria-label': sprintf(
-				/* translators: %s: language and voice of the audio file. */
-				__( 'Select %s', TEXT_DOMAIN ),
-				file.label
-			),
-		} ),
-
+		{ className: 'av-mini' },
 		el(
 			'button',
 			{
 				type: 'button',
-				className: 'av-play',
-				onClick: togglePlay,
-				disabled: ! file.exists,
-				'aria-label': sprintf(
-					playing
-						? /* translators: %s: language and voice of the audio file. */
-						  __( 'Pause %s', TEXT_DOMAIN )
-						: /* translators: %s: language and voice of the audio file. */
-						  __( 'Play %s', TEXT_DOMAIN ),
-					file.label
-				),
+				className: 'av-mini__pp',
+				onClick: () => onToggle( row ),
+				'aria-label': playing
+					? sprintf( __( 'Pause the %s audio', TEXT_DOMAIN ), row.name )
+					: sprintf( __( 'Play the %s audio', TEXT_DOMAIN ), row.name ),
 			},
 			el( 'span', {
-				className:
-					'dashicons dashicons-controls-' + ( playing ? 'pause' : 'play' ),
+				className: `dashicons dashicons-controls-${ playing ? 'pause' : 'play' }`,
 				'aria-hidden': 'true',
 			} )
 		),
-
 		el(
 			'div',
-			{ className: 'av-row-main' },
+			{ className: 'av-mini__track', 'aria-hidden': 'true' },
+			el( 'i', { style: { width: `${ width }%` } } )
+		),
+		el(
+			'span',
+			{ className: 'av-mini__time' },
+			`${ formatTime( current ) } / ${ duration ? formatTime( duration ) : '–:––' }`
+		)
+	);
+}
+
+function Row( { row, state, playback, busyKey, onToggle, onReplace, onDelete } ) {
+	const fileInput = useRef( null );
+	const busy = '' !== busyKey && ( busyKey === row.storedKey || busyKey === row.key );
+
+	let meta;
+	if ( row.status === 'gone' ) {
+		meta = __( 'The file is no longer on the server', TEXT_DOMAIN );
+	} else if ( row.status === 'missing' ) {
+		meta = [ row.voiceLabel, __( 'No file yet', TEXT_DOMAIN ) ].filter( Boolean ).join( ' · ' );
+	} else {
+		meta = [ row.voiceLabel, row.sizeText, row.dateText ].filter( Boolean ).join( ' · ' );
+	}
+
+	const replaceButton = row.canReplace
+		? el(
+				Button,
+				{
+					variant: 'tertiary',
+					size: 'small',
+					className: 'av-btn',
+					disabled: !! busyKey,
+					onClick: () => fileInput.current && fileInput.current.click(),
+				},
+				row.status === 'missing' ? __( 'Upload', TEXT_DOMAIN ) : __( 'Replace', TEXT_DOMAIN )
+		  )
+		: null;
+
+	const deleteButton = el(
+		Button,
+		{
+			variant: 'tertiary',
+			size: 'small',
+			isDestructive: true,
+			className: 'av-btn',
+			disabled: !! busyKey,
+			onClick: () => onDelete( row ),
+		},
+		row.status === 'gone' ? __( 'Remove', TEXT_DOMAIN ) : __( 'Delete', TEXT_DOMAIN )
+	);
+
+	let actions;
+	if ( hasFile( row ) ) {
+		actions = [ el( MiniPlayer, { key: 'p', row, playback, onToggle } ), replaceButton, deleteButton ];
+	} else if ( row.status === 'gone' ) {
+		actions = [
 			el(
-				'span',
-				{ className: 'av-row-name' },
-				file.label,
-				file.engine
-					? el( 'span', { className: 'av-engine' }, file.engine )
+				'p',
+				{ key: 'h', className: 'av-hint av-hint--full' },
+				state.canGenerate
+					? __( 'Play the post or use Bulk MP3 to make it again.', TEXT_DOMAIN )
+					: __( 'Play the post to make it again.', TEXT_DOMAIN )
+			),
+			replaceButton,
+			deleteButton,
+		];
+	} else {
+		actions = [
+			el(
+				'p',
+				{ key: 'h', className: 'av-hint av-hint--full' },
+				state.canGenerate
+					? __( 'Generate it in Bulk MP3 or by playing the post.', TEXT_DOMAIN )
+					: __( 'Created the first time someone plays the post.', TEXT_DOMAIN )
+			),
+			replaceButton,
+		];
+	}
+
+	return el(
+		'li',
+		{ className: `av-row av-row--${ row.status }` },
+		el(
+			'div',
+			{ className: 'av-row__head' },
+			el(
+				'div',
+				{ className: 'av-row__lang' },
+				el( 'span', { className: 'av-code' }, row.code ),
+				el( 'span', { className: 'av-row__name' }, row.name ),
+				row.thisPost ? el( 'span', { className: 'av-badge' }, __( 'This post', TEXT_DOMAIN ) ) : null,
+				row.storageLabel
+					? el( 'span', { className: 'av-badge av-badge--storage' }, row.storageLabel )
 					: null
 			),
-			el( 'span', { className: 'av-row-meta' }, meta ),
 			el(
 				'span',
-				{ className: 'av-row-file', title: file.fileName },
-				file.fileName
+				{ className: `av-status av-status--${ row.status }` },
+				STATUS_LABEL[ row.status ] || row.status
 			)
 		),
-
+		meta ? el( 'div', { className: 'av-row__meta' }, meta ) : null,
+		! row.expected
+			? el(
+					'p',
+					{ className: 'av-hint' },
+					__( 'Not used by the current player or language settings.', TEXT_DOMAIN )
+			  )
+			: null,
 		el(
-			Button,
-			{
-				variant: 'link',
-				className: 'av-delete-link',
-				onClick: onDelete,
-				disabled: busy,
-			},
-			__( 'Delete', TEXT_DOMAIN )
+			'div',
+			{ className: 'av-row__actions' },
+			busy ? el( Spinner, { key: 's' } ) : null,
+			...actions.filter( Boolean )
 		),
-
-		file.exists
-			? el( 'audio', {
-					ref: audioRef,
-					src: file.url,
-					preload: 'none',
-					style: { display: 'none' },
-					onPlay: () => setPlaying( true ),
-					onPause: () => setPlaying( false ),
-					onEnded: () => setPlaying( false ),
+		row.canReplace
+			? el( 'input', {
+					ref: fileInput,
+					type: 'file',
+					accept: '.mp3,audio/mpeg',
+					className: 'av-file',
+					tabIndex: -1,
+					'aria-hidden': 'true',
+					onChange: ( event ) => {
+						const file = event.target.files && event.target.files[ 0 ];
+						event.target.value = '';
+						if ( file ) {
+							onReplace( row, file );
+						}
+					},
 			  } )
 			: null
 	);
 }
 
-function AudioSection( { files, setFiles, notify, busy, setBusy } ) {
-	const [ selected, setSelected ] = useState( [] );
+function Panel() {
+	const [ state, setState ] = useState( () => filterState( boot.state || {} ) );
+	const [ message, setMessage ] = useState( null );
+	const [ busyKey, setBusyKey ] = useState( '' );
+	const [ playback, setPlayback ] = useState( { key: '', playing: false, current: 0, duration: 0 } );
+	const audio = useRef( null );
 
-	const toggle = ( key ) =>
-		setSelected( ( current ) =>
-			current.includes( key )
-				? current.filter( ( k ) => k !== key )
-				: current.concat( key )
+	useEffect( () => {
+		const player = new window.Audio();
+		player.preload = 'none';
+		const sync = () =>
+			setPlayback( ( prev ) => ( {
+				...prev,
+				playing: ! player.paused,
+				current: player.currentTime || 0,
+				duration: Number.isFinite( player.duration ) ? player.duration : prev.duration,
+			} ) );
+		[ 'play', 'pause', 'timeupdate', 'loadedmetadata', 'ended' ].forEach( ( type ) =>
+			player.addEventListener( type, sync )
 		);
-
-	const allChecked = files.length > 0 && selected.length === files.length;
-	const toggleAll = () =>
-		setSelected( allChecked ? [] : files.map( ( file ) => file.key ) );
-
-	const remove = async ( keys ) => {
-		if ( ! keys.length ) {
-			return;
-		}
-
-		const deletingAll = keys.length === files.length && files.length > 1;
-		const message = deletingAll
-			? __(
-					'Delete every audio file for this post? This cannot be undone.',
-					TEXT_DOMAIN
-			  )
-			: sprintf(
-					/* translators: %s: comma-separated list of languages and voices. */
-					__( 'Delete the audio for %s? This cannot be undone.', TEXT_DOMAIN ),
-					files
-						.filter( ( file ) => keys.includes( file.key ) )
-						.map( ( file ) => file.label )
-						.join( ', ' )
-			  );
-
-		if ( ! window.confirm( message ) ) {
-			return;
-		}
-
-		setBusy( true );
-
-		const result = await postJSON( 'delete_mp3_file', {
-			post_id: data.postId,
-			path: data.path,
-			language_keys: keys,
-			delete_all: keys.length === files.length,
+		player.addEventListener( 'error', () => {
+			setPlayback( { key: '', playing: false, current: 0, duration: 0 } );
+			setMessage( { type: 'error', text: __( 'That audio file could not be played.', TEXT_DOMAIN ) } );
 		} );
+		audio.current = player;
 
-		setBusy( false );
+		return () => player.pause();
+	}, [] );
 
-		if ( ! result || ! result.status ) {
-			notify( {
-				type: 'error',
-				text:
-					( result && result.message ) ||
-					__( 'The audio could not be deleted.', TEXT_DOMAIN ),
-			} );
+	const toggle = useCallback(
+		( row ) => {
+			const player = audio.current;
+			if ( ! player ) {
+				return;
+			}
+			if ( playback.key === row.storedKey ) {
+				if ( player.paused ) {
+					player.play().catch( () => {} );
+				} else {
+					player.pause();
+				}
+				return;
+			}
+			player.pause();
+			player.src = row.url;
+			setPlayback( { key: row.storedKey, playing: false, current: 0, duration: row.duration || 0 } );
+			player.play().catch( () => {} );
+		},
+		[ playback.key ]
+	);
+
+	const applyResult = ( result, successText ) => {
+		if ( result && result.status && result.state ) {
+			setState( filterState( result.state ) );
+			setMessage( { type: 'success', text: successText } );
+			if ( hooks ) {
+				hooks.doAction( 'atlasvoice.audioPanel.changed', result.state );
+			}
 			return;
 		}
-
-		setFiles( files.filter( ( file ) => ! keys.includes( file.key ) ) );
-		setSelected( [] );
-		notify( {
-			type: 'success',
-			text: sprintf(
-				/* translators: %d: number of audio files deleted. */
-				_n( '%d audio file deleted.', '%d audio files deleted.', keys.length, TEXT_DOMAIN ),
-				keys.length
-			),
+		setMessage( {
+			type: 'error',
+			text: ( result && result.message ) || __( 'Something went wrong. Reload the page and try again.', TEXT_DOMAIN ),
 		} );
 	};
 
-	// The active player reads posts aloud in the browser: there is no file to
-	// list, and promising one "on first play" would be untrue.
-	if ( ! files.length && ! data.canUpload && ! data.canGenerate ) {
-		return el(
-			'div',
-			{ className: 'av-empty' },
+	const onDelete = async ( row ) => {
+		// eslint-disable-next-line no-alert
+		if ( ! window.confirm( sprintf( __( 'Delete the %s audio? This cannot be undone.', TEXT_DOMAIN ), row.name ) ) ) {
+			return;
+		}
+		if ( playback.key === row.storedKey && audio.current ) {
+			audio.current.pause();
+			setPlayback( { key: '', playing: false, current: 0, duration: 0 } );
+		}
+		setBusyKey( row.storedKey );
+		try {
+			const result = await request( 'delete_mp3_file', {
+				headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+				body: JSON.stringify( { post_id: state.postId, language_keys: [ row.storedKey ] } ),
+			} );
+			applyResult( result, sprintf( __( 'Deleted the %s audio.', TEXT_DOMAIN ), row.name ) );
+		} catch ( e ) {
+			applyResult( null );
+		}
+		setBusyKey( '' );
+	};
+
+	const onReplace = async ( row, file ) => {
+		const form = new window.FormData();
+		form.append( 'post_id', state.postId );
+		form.append( 'key', row.key );
+		form.append( 'file', file );
+		setBusyKey( row.storedKey || row.key );
+		try {
+			const result = await request( 'upload_mp3_file', { body: form } );
+			applyResult( result, sprintf( __( 'Saved your recording as the %s audio.', TEXT_DOMAIN ), row.name ) );
+		} catch ( e ) {
+			applyResult( null );
+		}
+		setBusyKey( '' );
+	};
+
+	const rows = Array.isArray( state.rows ) ? state.rows : [];
+	const expected = rows.filter( ( row ) => row.expected );
+	const others = rows.filter( ( row ) => ! row.expected );
+	const ready = expected.filter( ( row ) => row.status === 'ready' ).length;
+	const hasStoredFile = rows.some( ( row ) => row.status !== 'missing' );
+
+	const rowProps = { state, playback, busyKey, onToggle: toggle, onReplace, onDelete };
+
+	const children = [];
+
+	if ( message ) {
+		children.push(
 			el(
-				'p',
-				null,
-				__(
-					'The active player reads posts aloud in the browser, so there is no audio file to manage.',
-					TEXT_DOMAIN
+				'div',
+				{ key: 'msg', className: `av-notice av-notice--${ message.type }`, role: 'status' },
+				el( 'span', null, message.text ),
+				el(
+					'button',
+					{
+						type: 'button',
+						className: 'av-notice__close',
+						onClick: () => setMessage( null ),
+						'aria-label': __( 'Dismiss', TEXT_DOMAIN ),
+					},
+					'×'
 				)
 			)
 		);
 	}
 
-	if ( ! files.length ) {
-		return el(
-			'div',
-			{ className: 'av-empty' },
-			el(
-				'p',
-				null,
-				// Some players make their audio on the first play; the others are
-				// generated deliberately, so promising them "on first play" would be wrong.
-				data.canGenerate
-					? __( 'No audio has been generated for this post yet.', TEXT_DOMAIN )
-					: __(
-							'No audio yet. It is generated the first time someone presses play on this post.',
-							TEXT_DOMAIN
-					  )
-			),
-			data.canGenerate
-				? el(
-						Button,
-						{ variant: 'primary', href: data.generateUrl, target: '_blank' },
-						__( 'Generate it now', TEXT_DOMAIN )
-				  )
-				: null
-		);
-	}
-
-	const totalBytes = files.reduce( ( sum, file ) => sum + ( file.size || 0 ), 0 );
-
-	return el(
-		Fragment,
-		null,
-
-		el(
-			'div',
-			{ className: 'av-list' },
-
+	( state.notices || [] ).forEach( ( notice, index ) =>
+		children.push(
 			el(
 				'div',
-				{ className: 'av-list-head' },
-				el( CheckboxControl, {
-					checked: allChecked,
-					onChange: toggleAll,
-					disabled: busy,
-					label: __( 'Select all', TEXT_DOMAIN ),
-				} ),
+				{ key: `n${ index }`, className: `av-notice av-notice--${ notice.type || 'info' }` },
 				el(
 					'span',
 					null,
-					sprintf(
-						/* translators: %d: number of audio files stored for this post. */
-						_n( '%d file', '%d files', files.length, TEXT_DOMAIN ),
-						files.length
-					) +
-						( totalBytes
-							? ' · ' + ( totalBytes / 1048576 ).toFixed( 1 ) + ' MB'
-							: '' )
+					notice.text,
+					notice.link
+						? el(
+								Fragment,
+								null,
+								' ',
+								el( 'a', { href: notice.link.url }, notice.link.label )
+						  )
+						: null
 				)
-			),
-
-			files.map( ( file ) =>
-				el( FileRow, {
-					key: file.key,
-					file,
-					busy,
-					selected: selected.includes( file.key ),
-					onToggle: () => toggle( file.key ),
-					onDelete: () => remove( [ file.key ] ),
-				} )
 			)
-		),
-
-		// Pro players can generate another language or replace what is there, so the
-		// action stays available once files exist — the old panel offered it too,
-		// and hiding it behind the empty state would have lost that.
-		data.canGenerate
-			? el(
-					'p',
-					{ className: 'av-list-foot' },
-					el(
-						Button,
-						{ variant: 'secondary', href: data.generateUrl, target: '_blank' },
-						__( 'Generate another language', TEXT_DOMAIN )
-					)
-			  )
-			: null,
-
-		selected.length
-			? el(
-					'div',
-					{ className: 'av-selbar' },
-					el(
-						'span',
-						null,
-						sprintf(
-							/* translators: %d: number of audio files ticked. */
-							_n(
-								'%d file selected',
-								'%d files selected',
-								selected.length,
-								TEXT_DOMAIN
-							),
-							selected.length
-						)
-					),
-					el(
-						'span',
-						{ className: 'av-selbar-actions' },
-						el(
-							Button,
-							{
-								variant: 'link',
-								onClick: () => setSelected( [] ),
-								disabled: busy,
-							},
-							__( 'Clear', TEXT_DOMAIN )
-						),
-						el(
-							Button,
-							{
-								variant: 'primary',
-								className: 'av-destructive',
-								onClick: () => remove( selected ),
-								disabled: busy,
-							},
-							__( 'Delete selected', TEXT_DOMAIN )
-						)
-					)
-			  )
-			: null
-	);
-}
-
-function UploadSection( { notify, busy, setBusy } ) {
-	const [ copied, setCopied ] = useState( false );
-
-	const copyName = async () => {
-		try {
-			await window.navigator.clipboard.writeText( data.expectedName );
-			setCopied( true );
-			window.setTimeout( () => setCopied( false ), 1600 );
-		} catch ( error ) {
-			notify( {
-				type: 'error',
-				text: __(
-					'Your browser blocked the copy. Select the name and copy it by hand.',
-					TEXT_DOMAIN
-				),
-			} );
-		}
-	};
-
-	const upload = async ( event ) => {
-		const file = event.target.files && event.target.files[ 0 ];
-		if ( ! file ) {
-			return;
-		}
-
-		if ( data.postStatus !== 'publish' ) {
-			notify( {
-				type: 'error',
-				text: __( 'Publish the post before uploading audio for it.', TEXT_DOMAIN ),
-			} );
-			return;
-		}
-
-		if ( file.type !== 'audio/mpeg' ) {
-			notify( {
-				type: 'error',
-				text: __( 'That is not an MP3 file.', TEXT_DOMAIN ),
-			} );
-			return;
-		}
-
-		// The server reads the language (and voice) back out of the file name, so a
-		// name that does not carry them cannot be matched to a player. Same regex the
-		// previous upload script used, so the route sees exactly what it always did.
-		// The language part is lazy, as on the server: greedy, it also swallowed
-		// "__voice__en_US-amy-medium" (no digits), so a correct name was refused.
-		const match = file.name.match(
-			/^(.+)__lang__([a-zA-Z0-9_-]+?)(?:__voice__([a-zA-Z0-9_-]+))?\.mp3$/
-		);
-
-		if ( ! match ) {
-			notify( {
-				type: 'error',
-				text: sprintf(
-					/* translators: %s: required file name pattern. */
-					__( 'Rename the file first — it has to be %s', TEXT_DOMAIN ),
-					data.fileFormat
-				),
-			} );
-			return;
-		}
-
-		// Whether the name must carry a voice comes from the name the panel itself
-		// recommends, not from the player id — see the note in TTA_Admin.
-		if ( data.requiresVoice && ! match[ 3 ] ) {
-			notify( {
-				type: 'error',
-				text: __(
-					'This player needs the voice in the file name too.',
-					TEXT_DOMAIN
-				),
-			} );
-			return;
-		}
-
-		const form = new FormData();
-		form.append( 'file', file );
-		form.append( 'post_id', data.postId );
-		form.append( 'path', data.path );
-
-		setBusy( true );
-
-		try {
-			const response = await fetch( data.apiURL + 'upload_mp3_file', {
-				method: 'POST',
-				body: form,
-				headers: { 'X-WP-Nonce': data.restNonce },
-			} );
-			const result = await response.json();
-
-			// The route answers 200 with { status: false, message } for a refusal —
-			// checking response.ok alone reported "Uploaded" for every rejection.
-			notify(
-				response.ok && result && result.status
-					? {
-							type: 'success',
-							text: __(
-								'Uploaded. Reload the post to see it in the list.',
-								TEXT_DOMAIN
-							),
-					  }
-					: {
-							type: 'error',
-							text:
-								( result && result.message ) ||
-								__( 'The upload failed.', TEXT_DOMAIN ),
-					  }
-			);
-		} catch ( error ) {
-			notify( {
-				type: 'error',
-				text: __( 'The upload could not be sent.', TEXT_DOMAIN ),
-			} );
-		}
-
-		setBusy( false );
-		event.target.value = '';
-	};
-
-	return el(
-		Fragment,
-		null,
-		el(
-			'p',
-			{ className: 'av-section-title' },
-			__( 'Name the file exactly this', TEXT_DOMAIN )
-		),
-		el(
-			'div',
-			{ className: 'av-name-row' },
-			el( 'code', null, data.expectedName ),
-			el(
-				Button,
-				{ variant: 'secondary', onClick: copyName },
-				copied ? __( 'Copied', TEXT_DOMAIN ) : __( 'Copy', TEXT_DOMAIN )
-			)
-		),
-		el(
-			'p',
-			{ className: 'av-hint' },
-			sprintf(
-				/* translators: %s: file name pattern, e.g. {file_name}__lang__{language}.mp3 */
-				__(
-					'The pattern is %s — AtlasVoice reads the language back out of the name to match it to the right voice.',
-					TEXT_DOMAIN
-				),
-				data.fileFormat
-			)
-		),
-		el(
-			'p',
-			{ style: { marginBottom: 0 } },
-			el( 'input', {
-				type: 'file',
-				accept: 'audio/mpeg',
-				onChange: upload,
-				disabled: busy,
-			} )
 		)
 	);
-}
 
-function Metabox() {
-	const [ files, setFiles ] = useState( data.files || [] );
-	const [ notice, setNotice ] = useState( null );
-	const [ busy, setBusy ] = useState( false );
+	if ( ! state.makesMp3 ) {
+		children.push(
+			el(
+				'div',
+				{ key: 'browser', className: 'av-notice av-notice--muted' },
+				el(
+					'span',
+					null,
+					el( 'b', null, state.playerName ),
+					' ',
+					__( 'reads the post live in the visitor’s browser, so there are no MP3 files to manage.', TEXT_DOMAIN )
+				)
+			),
+			el(
+				'p',
+				{ key: 'switch', className: 'av-hint' },
+				__( 'Switch to an MP3 player in AtlasVoice → Customize to create audio files.', TEXT_DOMAIN )
+			)
+		);
+	} else if ( ! state.isPublished && ! hasStoredFile ) {
+		children.push(
+			el(
+				'div',
+				{ key: 'head', className: 'av-head' },
+				el( 'b', null, __( 'No audio yet', TEXT_DOMAIN ) ),
+				el( 'span', { className: 'av-badge' }, state.playerName )
+			),
+			el(
+				'div',
+				{ key: 'draft', className: 'av-notice av-notice--muted' },
+				el(
+					'span',
+					null,
+					state.canGenerate
+						? __( 'Audio is made from the published page. Publish the post, then play it or generate it in Bulk MP3.', TEXT_DOMAIN )
+						: __( 'Audio is made from the published page. Publish the post, then play it.', TEXT_DOMAIN )
+				)
+			)
+		);
+	} else {
+		children.push(
+			el(
+				'div',
+				{ key: 'head', className: 'av-head' },
+				el(
+					'span',
+					null,
+					el( 'b', null, sprintf( __( '%1$d of %2$d', TEXT_DOMAIN ), ready, expected.length ) ),
+					' ',
+					_n( 'file ready', 'languages ready', expected.length, TEXT_DOMAIN )
+				),
+				el( 'span', { className: 'av-badge' }, state.playerName )
+			),
+			el(
+				'ul',
+				{ key: 'list', className: 'av-list' },
+				expected.map( ( row ) => el( Row, { key: row.key, row, ...rowProps } ) )
+			)
+		);
 
-	return el(
-		Fragment,
-		null,
-
-		notice
-			? el(
-					Notice,
-					{
-						status: notice.type,
-						onRemove: () => setNotice( null ),
-						isDismissible: true,
-					},
-					notice.text
-			  )
-			: null,
-
-		el(
-			'p',
-			{ className: 'av-section-title' },
-			__( 'Audio for this post', TEXT_DOMAIN )
-		),
-
-		el( AudioSection, {
-			files,
-			setFiles,
-			notify: setNotice,
-			busy,
-			setBusy,
-		} ),
-
-		busy
-			? el(
-					'p',
-					{ className: 'av-busy' },
-					el( Spinner, null ),
-					' ' + __( 'Working…', TEXT_DOMAIN )
-			  )
-			: null,
-
-		data.canUpload
-			? el(
-					Panel,
-					{ className: 'av-fold' },
+		expected
+			.filter( ( row ) => row.status === 'outdated' )
+			.forEach( ( row ) =>
+				children.push(
 					el(
-						PanelBody,
-						{
-							title: __( 'Replace with your own recording', TEXT_DOMAIN ),
-							initialOpen: false,
-						},
-						el( UploadSection, { notify: setNotice, busy, setBusy } )
+						'div',
+						{ key: `o${ row.key }`, className: 'av-notice av-notice--warning' },
+						el(
+							'span',
+							null,
+							sprintf( __( '%s audio was made before the last content change.', TEXT_DOMAIN ), row.name )
+						)
 					)
-			  )
-			: null
+				)
+			);
+	}
+
+	if ( others.length ) {
+		children.push(
+			el( 'p', { key: 'others-title', className: 'av-subhead' }, __( 'Other stored audio', TEXT_DOMAIN ) ),
+			el(
+				'ul',
+				{ key: 'others', className: 'av-list' },
+				others.map( ( row ) => el( Row, { key: row.storedKey, row, ...rowProps } ) )
+			)
+		);
+	}
+
+	( state.notes || [] ).forEach( ( note, index ) =>
+		children.push( el( 'p', { key: `note${ index }`, className: 'av-hint' }, note ) )
 	);
+
+	if ( rows.some( ( row ) => row.canReplace ) && state.makesMp3 && ( state.isPublished || hasStoredFile ) ) {
+		children.push(
+			el(
+				'p',
+				{ key: 'replace', className: 'av-hint' },
+				__( 'Replace accepts any MP3 and saves it for that row’s language.', TEXT_DOMAIN )
+			)
+		);
+	}
+
+	// Bulk MP3 only processes published posts, so a draft gets the notice alone.
+	if ( state.canGenerate && state.generateUrl && state.isPublished ) {
+		children.push(
+			el(
+				'div',
+				{ key: 'bulk', className: 'av-card' },
+				el(
+					'span',
+					null,
+					expected.length > 1
+						? __( 'Check the text that will be read, then generate every language.', TEXT_DOMAIN )
+						: __( 'Check the text that will be read, then generate the file.', TEXT_DOMAIN )
+				),
+				el(
+					Button,
+					{ variant: 'primary', href: state.generateUrl, target: '_blank', className: 'av-card__button' },
+					__( 'Generate in Bulk MP3', TEXT_DOMAIN )
+				)
+			)
+		);
+	}
+
+	return el( 'div', { className: 'av-panel' }, ...children );
 }
 
 const root = document.getElementById( 'atlasvoice-metabox-root' );
 if ( root ) {
-	render( el( Metabox, null ), root );
+	render( el( Panel, null ), root );
 }

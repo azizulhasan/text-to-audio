@@ -364,7 +364,23 @@ class TTA_Hooks {
 			);
 		}
 
-
+		/**
+		 * TTS-312: the audio panel sits in the post sidebar, in the block editor
+		 * and the classic editor alike. Free renders it for every player; Pro
+		 * extends it through filters. Unlike the box above it also shows on drafts,
+		 * where it explains that audio is made from the published page.
+		 */
+		if ( TTA_Helper::atlasvoice_show_audio_panel() ) {
+			add_meta_box(
+				'atlasvoice-audio',
+				__( 'AtlasVoice audio', 'text-to-audio' ),
+				array( $this, 'atlasvoice_audio_meta_box' ),
+				get_current_screen()->post_type,
+				'side',
+				'default',
+				null
+			);
+		}
 	}
 
 	/**
@@ -402,20 +418,14 @@ class TTA_Hooks {
             <div id="atlasVoice_analytics"></div>
         </div>
 		<?php
-		/**
-		 * TTS-266: the audio panel — the list of generated MP3s, with play, delete
-		 * and replace. Rendered by Free so there is one panel whichever plugin made
-		 * the audio; Pro extends it through filters rather than shipping a second
-		 * one.
-		 *
-		 * Pro's legacy markup (behind `tts_pro_regenerate_mp3_old_ui`) turns this
-		 * off so the two never render together.
-		 */
-		if ( apply_filters( 'atlasvoice_render_audio_panel', true ) ) {
-			echo '<div id="atlasvoice-metabox-root" class="atlasvoice-metabox"></div>';
-		}
-
 		\do_action( 'tts_after_metabox_content' );
+	}
+
+	/**
+	 * TTS-312: mount point for the audio panel (src/metabox/index.js).
+	 */
+	public function atlasvoice_audio_meta_box() {
+		echo '<div id="atlasvoice-metabox-root" class="atlasvoice-metabox"></div>';
 	}
 
 
