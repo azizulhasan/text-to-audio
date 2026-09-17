@@ -457,8 +457,10 @@ function UploadSection( { notify, busy, setBusy } ) {
 		// The server reads the language (and voice) back out of the file name, so a
 		// name that does not carry them cannot be matched to a player. Same regex the
 		// previous upload script used, so the route sees exactly what it always did.
+		// The language part is lazy, as on the server: greedy, it also swallowed
+		// "__voice__en_US-amy-medium" (no digits), so a correct name was refused.
 		const match = file.name.match(
-			/^(.+)__lang__([a-zA-Z-_]+)(?:__voice__([a-zA-Z0-9-_]+))?\.mp3$/
+			/^(.+)__lang__([a-zA-Z0-9_-]+?)(?:__voice__([a-zA-Z0-9_-]+))?\.mp3$/
 		);
 
 		if ( ! match ) {
