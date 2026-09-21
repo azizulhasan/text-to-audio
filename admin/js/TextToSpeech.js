@@ -10,6 +10,30 @@ import AtlasVoiceAnalytics from "./AtlasVoiceAnalytics";
 import "./tts/highlighter.js";
 
 export default class TextToSpeech {
+    /**
+     * TTS-316: replace pronunciation aliases on whole words only, so "ca."
+     * no longer rewrites "Africa." — a letter/number next to the match blocks it.
+     * Shared with Pro (TextToSpeechPro extends this class).
+     */
+    static replaceAliases(text, aliases, caseInsensitive = false) {
+        if (!text || !aliases) {
+            return text;
+        }
+        const isWordChar = /[\p{L}\p{N}]/u;
+        for (const alias of Object.values(aliases)) {
+            const find = alias?.actual_text;
+            if (!find) {
+                continue;
+            }
+            const escaped = find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const before = isWordChar.test(find[0]) ? '(?<![\\p{L}\\p{N}])' : '';
+            const after = isWordChar.test(find[find.length - 1]) ? '(?![\\p{L}\\p{N}])' : '';
+            const regex = new RegExp(before + escaped + after, caseInsensitive ? 'giu' : 'gu');
+            text = text.replace(regex, () => alias.to_read ?? '');
+        }
+        return text;
+    }
+
     TTS = window.TTS
     browser = null
     speech = null
@@ -649,14 +673,7 @@ if (typeof window !== 'undefined' && window.wp && window.wp.hooks && !window.__t
 
         // The normal read gets pronunciation aliases applied server-side; the
         // selection is raw DOM text, so apply the same aliases here.
-        let text = payload.text;
-        const aliasData = window?.ttsObj?.settings?.aliases;
-        const aliases = aliasData ? Object.values(aliasData) : [];
-        for (const alias of aliases) {
-            if (alias && alias.actual_text) {
-                text = text.split(alias.actual_text).join(alias.to_read ?? '');
-            }
-        }
+        const text = TextToSpeech.replaceAliases(payload.text, window?.ttsObj?.settings?.aliases);
 
         // Stop an in-flight full-post read cleanly: speak({queue:false}) would
         // cancel its audio anyway, but its button/timers must be reset too or
