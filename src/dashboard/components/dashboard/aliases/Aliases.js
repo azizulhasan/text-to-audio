@@ -67,9 +67,11 @@ export default function Aliases() {
                 return;
             }
         }
-        // return;
+        let finalAliases = ttsTextAliases.map((alias) => {
+            return { actual_text: alias.actual_text.trim(), to_read: alias.to_read.trim() };
+        })
         let formData = new FormData();
-        formData.append('aliases', JSON.stringify(ttsTextAliases));
+        formData.append('aliases', JSON.stringify(finalAliases));
         formData.append('method', 'post');
         postWithoutImage(tta_obj.api_url + 'tta/v1/text_alias', formData)
             .then((res) => {
