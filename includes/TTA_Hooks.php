@@ -614,7 +614,7 @@ class TTA_Hooks {
 			foreach ( $alias_data as $index => $alias ) {
 				$alias = (array) $alias;
 				if ( isset( $alias['actual_text'] ) && isset( $alias['to_read'] ) ) {
-					$content_sanitized = str_replace( $alias['actual_text'], $alias['to_read'], $content_sanitized );
+					$content_sanitized = TTA_Helper::replace_alias( $content_sanitized, $alias['actual_text'], $alias['to_read'] );
 					$counter ++;
 				}
 				if ( $counter > 0 ) {

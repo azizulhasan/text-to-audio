@@ -810,6 +810,31 @@ class TTA_Helper
     }
 
     /**
+     * TTS-316: replace one alias on whole words only (mirrors
+     * TextToSpeech.replaceAliases in JS). Falls back to str_replace if the
+     * text is not valid UTF-8, so a bad byte never blanks the content.
+     *
+     * @param string $text    Content to change.
+     * @param string $find    Alias text as typed by the site owner.
+     * @param string $replace What the alias should be read as.
+     *
+     * @return string
+     */
+    public static function replace_alias( $text, $find, $replace )
+    {
+        $find    = (string) $find;
+        $replace = (string) $replace;
+        if ( '' === $find ) {
+            return $text;
+        }
+        $before = preg_match( '/^[\p{L}\p{N}]/u', $find ) ? '(?<![\p{L}\p{N}])' : '';
+        $after  = preg_match( '/[\p{L}\p{N}]$/u', $find ) ? '(?![\p{L}\p{N}])' : '';
+        $result = preg_replace( '/' . $before . preg_quote( $find, '/' ) . $after . '/u', addcslashes( $replace, '\\$' ), $text );
+
+        return null === $result ? str_replace( $find, $replace, $text ) : $result;
+    }
+
+    /**
      * @param $identifier
      * @param $post_id
      *
