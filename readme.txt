@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.15
+Stable tag: 2.3.16
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -395,6 +395,9 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.3.16 ( 21 Sep 2026 ) =
+Fixed : Text aliases could change parts of other words - an alias for "ca." also turned "Africa." into "Africirca". Aliases now only replace whole words.
+
 = 2.3.15 ( 16 Sep 2026 ) =
 Fixed : On some sites the player could be added to the same post more than once, which could put a stray copy of the player's data on the page. The player is now added once per post.
 Fixed : On some themes the player could disappear from the article completely - themes that build a short summary of the post before showing it, and plugins that read the post text in the background, could take the player away from the article. The player now ignores those hidden passes and appears in the article exactly once.
@@ -531,6 +534,9 @@ Fixed : Removed external sample-audio requests from the dashboard; previews now 
 
 
 == Upgrade Notice ==
+
+= 2.3.16 =
+Text aliases now only replace whole words, so a short alias such as "ca." no longer changes the end of other words like "Africa.". Recommended for anyone using text aliases.
 
 = 2.3.15 =
 Fixes settings not saving on sites with a translation plugin, where the plugin was still using an address left over from an earlier language setup. Listening analytics now collects nothing while it is switched off - previously some visitor details were still recorded in the visitor's browser. Also stops the player being added twice on some sites, fixes the player disappearing from the article on themes that show a summary before the post, and explains to logged-in editors why the shortcode produced no player. Recommended for every site.
