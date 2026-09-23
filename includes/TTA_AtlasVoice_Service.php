@@ -90,6 +90,8 @@ class TTA_AtlasVoice_Service {
 			'usage_at'        => 0,
 			'exhausted_until' => 0,
 			'license_attached' => false,
+			// TTS-314: the email already has an account, so its owner must approve this site.
+			'pending_approval' => false,
 		) );
 	}
 
@@ -136,6 +138,7 @@ class TTA_AtlasVoice_Service {
 			'plan'        => $state['plan'],
 			'usage'       => $state['usage'],
 			'exhausted'   => self::is_exhausted(),
+			'pendingApproval' => (bool) $state['pending_approval'],
 			'serviceUrl'  => self::base_url(),
 			'termsUrl'    => 'https://atlasaidev.com/terms-and-conditions/',
 			'privacyUrl'  => 'https://atlasaidev.com/privacy-policy/',
@@ -254,6 +257,7 @@ class TTA_AtlasVoice_Service {
 			'email'      => $email,
 			'project_id' => (int) $result['data']['project_id'],
 			'plan'       => (string) $result['data']['plan'],
+			'pending_approval' => isset( $result['data']['approval'] ) && 'pending' === $result['data']['approval'],
 		) );
 
 		/**
@@ -279,11 +283,12 @@ class TTA_AtlasVoice_Service {
 			'usage'            => array(),
 			'exhausted_until'  => 0,
 			'license_attached' => false,
+			'pending_approval' => false,
 		) );
 	}
 
 	/**
-	 * Current usage, cached for ten minutes.
+	 * Current usage, cached for ten minutes (not cached while waiting for approval).
 	 *
 	 * @param bool $force
 	 * @return array
@@ -295,17 +300,20 @@ class TTA_AtlasVoice_Service {
 			return array();
 		}
 
-		if ( ! $force && $state['usage_at'] > time() - 10 * MINUTE_IN_SECONDS ) {
+		if ( ! $force && ! $state['pending_approval'] && $state['usage_at'] > time() - 10 * MINUTE_IN_SECONDS ) {
 			return $state['usage'];
 		}
 
 		$result = self::request( 'GET', '/v1/usage' );
 
 		if ( 200 === $result['status'] && isset( $result['data']['usage'] ) ) {
+			self::put( array( 'pending_approval' => false ) );
 			self::remember_usage( $result['data']['usage'] );
 
 			return $result['data']['usage'];
 		}
+
+		self::note_key_error( $result['error'] );
 
 		return $state['usage'];
 	}
@@ -396,6 +404,10 @@ class TTA_AtlasVoice_Service {
 		), true, $timeout );
 
 		if ( 200 === $result['status'] && is_string( $result['data'] ) && '' !== $result['data'] ) {
+			if ( self::get()['pending_approval'] ) {
+				self::put( array( 'pending_approval' => false ) );
+			}
+
 			return array( 'ok' => true, 'audio' => $result['data'] );
 		}
 
@@ -403,12 +415,23 @@ class TTA_AtlasVoice_Service {
 			self::remember_usage( isset( $result['data']['usage'] ) ? $result['data']['usage'] : null );
 		}
 
-		if ( 'invalid_api_key' === $result['error'] ) {
-			// Revoked on the service: ask the owner to connect again.
-			self::put( array( 'api_key' => '', 'key_prefix' => '' ) );
-		}
+		self::note_key_error( $result['error'] );
 
 		return array( 'ok' => false, 'code' => $result['error'] ? $result['error'] : 'service_unreachable' );
+	}
+
+	/**
+	 * React to what the service says about this site's key.
+	 *
+	 * @param string $code Error code from the service.
+	 */
+	private static function note_key_error( $code ) {
+		if ( 'invalid_api_key' === $code ) {
+			// Revoked or rejected on the service: ask the owner to connect again.
+			self::put( array( 'api_key' => '', 'key_prefix' => '', 'pending_approval' => false ) );
+		} elseif ( 'approval_required' === $code ) {
+			self::put( array( 'pending_approval' => true ) );
+		}
 	}
 
 	/**

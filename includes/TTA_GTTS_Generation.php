@@ -70,7 +70,10 @@ class TTA_GTTS_Generation {
 
 		// Regeneration (Bulk MP3 "regenerate") replaces the file: drop it on the
 		// first batch so the rest of the run cannot mistake it for finished audio.
-		$regenerate = ! empty( $body['is_regenerate_file'] ) || ! empty( $body['regenerate_file'] );
+		// Only people who can edit the post (the Bulk MP3 screen): a visitor must
+		// not be able to delete finished audio and spend the allowance again.
+		$regenerate = ( ! empty( $body['is_regenerate_file'] ) || ! empty( $body['regenerate_file'] ) )
+			&& current_user_can( 'edit_post', $post_id );
 		if ( $regenerate && preg_match( '/-1$/', $temp_title ) && file_exists( $final_file ) ) {
 			wp_delete_file( $final_file );
 		}

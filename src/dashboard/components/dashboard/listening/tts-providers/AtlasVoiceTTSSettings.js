@@ -178,10 +178,22 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange 
           </>
         )}
 
+        {state && state.connected && state.pendingApproval && (
+          <Alert variant="warning" className="small">
+            {sprintf(
+              /* translators: %s: email address of the AtlasVoice account. */
+              __("Waiting for approval. %s already has an AtlasVoice account, so we emailed it a link to approve this site. Until then posts are read by the browser voice.", "text-to-audio"),
+              state.email
+            )}
+          </Alert>
+        )}
+
         {state && state.connected && (
           <>
             <p className="small mb-3">
-              <span className="badge bg-success me-2">{__("Connected", "text-to-audio")}</span>
+              {state.pendingApproval
+                ? <span className="badge bg-warning text-dark me-2">{__("Waiting for approval", "text-to-audio")}</span>
+                : <span className="badge bg-success me-2">{__("Connected", "text-to-audio")}</span>}
               {state.plan === "premium" ? __("Premium plan", "text-to-audio") : __("Free plan", "text-to-audio")}
               {state.keyPrefix && <span className="text-secondary ms-2">{sprintf(/* translators: %s: start of the site key. */ __("Key %s…", "text-to-audio"), state.keyPrefix)}</span>}
             </p>
