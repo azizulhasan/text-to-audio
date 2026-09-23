@@ -111,6 +111,10 @@ class TTA_Hooks {
 			// TTS-290: front-end helpers that were being minified/delayed as well.
 			'tta-cors-detector.js',
 			'countries-and-timezones.min.js',
+			// TTS-319: pronunciation filters are registered inline after wp-hooks
+			// (see the Pro developer guide). If an optimizer delayed that inline
+			// block but not the player, custom rules were silently skipped.
+			'wp-hooks-js-after',
 		] );
 
 		self::$excludable_js_string = apply_filters(
@@ -608,22 +612,32 @@ class TTA_Hooks {
 		// TTS-250: NOT a feature lock — the free plugin applies pronunciation
 		// aliases itself when standalone; Pro applies them itself when active
 		// (avoids applying twice). The alias feature works fully without Pro.
-		$alias_data = (array) TTA_Helper::tts_get_settings( 'aliases' );
-		if ( ! TTA_Helper::is_atlasvoice_addon_functional() && ! empty( $alias_data ) && count( $alias_data ) ) {
-			$counter = 0;
-			foreach ( $alias_data as $index => $alias ) {
-				$alias = (array) $alias;
-				if ( isset( $alias['actual_text'] ) && isset( $alias['to_read'] ) ) {
-					$content_sanitized = TTA_Helper::replace_alias( $content_sanitized, $alias['actual_text'], $alias['to_read'] );
-					$counter ++;
-				}
-				if ( $counter > 0 ) {
-					break;
-				}
+		if ( TTA_Helper::is_atlasvoice_addon_functional() ) {
+			return $content_sanitized;
+		}
+
+		// The free plugin reads one saved alias; code added through the filter
+		// below is a developer extension and is applied in full.
+		$saved = array();
+		foreach ( (array) TTA_Helper::tts_get_settings( 'aliases' ) as $alias ) {
+			$alias = (array) $alias;
+			if ( isset( $alias['actual_text'], $alias['to_read'] ) ) {
+				$saved[] = $alias;
+				break;
 			}
 		}
 
-		return $content_sanitized;
+		// TTS-319: same filters as TextToSpeech.replaceAliases() in JS, so one
+		// snippet works for every player, multilingual page and Bulk MP3.
+		$rules = (array) apply_filters( 'tts_text_aliases', $saved, $content_sanitized );
+		foreach ( $rules as $alias ) {
+			$alias = (array) $alias;
+			if ( isset( $alias['actual_text'], $alias['to_read'] ) ) {
+				$content_sanitized = TTA_Helper::replace_alias( $content_sanitized, $alias['actual_text'], $alias['to_read'], ! empty( $alias['apply_to_numbers'] ) );
+			}
+		}
+
+		return apply_filters( 'tts_pronunciation_text', $content_sanitized, $rules );
 	}
 
     public function clear_necessary_cache($plugin, $network) {
