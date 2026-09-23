@@ -431,5 +431,24 @@ final class TTA_Lib_AtlasAiDev {
         return $this->insights->is_tracking_allowed();
     }
 
+    /**
+     * TTS-314: may the AtlasVoice TTS connect form offer the tracking opt-in?
+     * Same rules as the admin notice: Free-only installs (Pro ships its own
+     * tracker), not on a local server, and only while the owner has not yet
+     * answered (Allow or No thanks), so an earlier "No thanks" is never re-asked.
+     *
+     * @return bool
+     */
+    public function can_offer_tracking() {
+        if ( null === $this->insights || null === $this->client ) {
+            return false;
+        }
+        if ( 'hide' === get_option( $this->client->getSlug() . '_tracking_notice', 'no' ) ) {
+            return false;
+        }
+
+        return ! $this->insights->__is_local_server();
+    }
+
 }
 

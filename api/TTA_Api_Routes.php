@@ -1203,6 +1203,12 @@ class TTA_Api_Routes {
             return rest_ensure_response( array( 'status' => false, 'code' => $result->get_error_code(), 'message' => $result->get_error_message() ) );
         }
 
+        // Optional, unticked by default: the owner chose to share diagnostic data.
+        // Same as the tracking notice's "Allow" (wp.org Guideline 7: opt-in only).
+        if ( ! empty( $body['share_diagnostics'] ) && \TTA\TTA_Lib_AtlasAiDev::instance()->can_offer_tracking() ) {
+            \TTA\TTA_Lib_AtlasAiDev::instance()->trackerOptIn();
+        }
+
         return rest_ensure_response( array( 'status' => true, 'data' => \TTA\TTA_AtlasVoice_Service::public_state() ) );
     }
 

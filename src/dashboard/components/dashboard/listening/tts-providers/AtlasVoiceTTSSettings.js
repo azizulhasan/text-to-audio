@@ -92,6 +92,9 @@ function UsageBlock({ state }) {
 export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange }) {
   const [state, setState] = useState(null);
   const [consent, setConsent] = useState(false);
+  // Optional and unticked by default (opt-in only).
+  const [shareDiagnostics, setShareDiagnostics] = useState(false);
+  const [showCollected, setShowCollected] = useState(false);
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -111,7 +114,7 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange 
     setBusy(true);
     setError("");
     try {
-      const res = await call("POST", { consent, email });
+      const res = await call("POST", { consent, email, share_diagnostics: shareDiagnostics });
       if (res?.status) {
         setState(res.data);
       } else {
@@ -148,9 +151,19 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange 
             <p className="small mb-2">
               {__("Reads your posts with a natural Google voice and saves each post's audio as an MP3 on your site, so every phone and browser plays the same audio.", "text-to-audio")}
             </p>
-            <p className="small text-secondary mb-3">
-              {__("To make the audio, the text of a post is sent to the AtlasVoice service the first time someone plays it, together with your site address. The free plan includes a monthly allowance.", "text-to-audio")}
+            <p className="small text-secondary mb-2">
+              {__("The first time someone plays a post, its text and your site address are sent to the AtlasVoice service to make the audio. The free plan includes a monthly allowance.", "text-to-audio")}
             </p>
+
+            <div className="small mb-3 p-3 rounded border bg-light">
+              <strong className="d-block mb-1">{__("Your content stays yours", "text-to-audio")}</strong>
+              <ul className="mb-0 ps-3">
+                <li>{__("We never store your post text. It is used once, to create the audio, and then discarded.", "text-to-audio")}</li>
+                <li>{__("We never sell it, reuse it or use it to train AI. It goes only to Google's voice engine, to be read aloud.", "text-to-audio")}</li>
+                <li>{__("The MP3 is saved on your own site. Our temporary copy is deleted within minutes.", "text-to-audio")}</li>
+                <li>{__("We keep only what the service needs: your site address, the email below, and usage records (characters, language and post ID, never the text).", "text-to-audio")}</li>
+              </ul>
+            </div>
 
             <Form.Group className="mb-3" controlId="atlasvoice_service_email">
               <Form.Label className="small fw-semibold">{__("Email for service notices", "text-to-audio")}</Form.Label>
@@ -171,6 +184,28 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange 
                 </span>
               }
             />
+
+            {state.diagnostics?.offer && (
+              <div className="mb-3 small">
+                <Form.Check
+                  id="atlasvoice_share_diagnostics"
+                  checked={shareDiagnostics}
+                  onChange={(e) => setShareDiagnostics(e.target.checked)}
+                  label={__("Help improve AtlasVoice by sharing non-sensitive diagnostic data and usage information (optional). You can turn this off at any time.", "text-to-audio")}
+                />
+                <Button variant="link" size="sm" className="p-0 ms-4 small" type="button" aria-expanded={showCollected} onClick={() => setShowCollected((v) => !v)}>
+                  {showCollected ? __("Hide what we collect", "text-to-audio") : __("What we collect", "text-to-audio")}
+                </Button>
+                {showCollected && (
+                  <div className="text-secondary ms-4 mt-1">
+                    <ul className="mb-1 ps-3">
+                      {state.diagnostics.items.map((item) => <li key={item}>{item}</li>)}
+                    </ul>
+                    {__("No sensitive data is tracked.", "text-to-audio")}
+                  </div>
+                )}
+              </div>
+            )}
 
             <Button className="tta_btn" type="button" disabled={!consent || !email || busy} onClick={connect}>
               {busy ? __("Connecting…", "text-to-audio") : __("Connect", "text-to-audio")}

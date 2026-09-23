@@ -142,10 +142,33 @@ class TTA_AtlasVoice_Service {
 			'exhausted'   => self::is_exhausted(),
 			'pendingApproval' => (bool) $state['pending_approval'],
 			'licenseSeatsFull' => (bool) $state['license_seats_full'],
+			'diagnostics' => self::diagnostics_offer(),
 			'serviceUrl'  => self::base_url(),
 			'termsUrl'    => 'https://atlasaidev.com/terms-and-conditions/',
 			'privacyUrl'  => 'https://atlasaidev.com/privacy-policy/',
 		);
+	}
+
+	/**
+	 * The optional "help improve AtlasVoice" opt-in shown next to Connect. It is
+	 * the plugin's existing tracking library (the same as the admin notice's
+	 * Allow button), offered only when that notice would still ask.
+	 *
+	 * @return array{offer:bool, items:string[]}
+	 */
+	private static function diagnostics_offer() {
+		if ( ! class_exists( TTA_Lib_AtlasAiDev::class ) || ! TTA_Lib_AtlasAiDev::instance()->can_offer_tracking() ) {
+			return array( 'offer' => false, 'items' => array() );
+		}
+
+		$items = array_map(
+			static function ( $item ) {
+				return wp_strip_all_tags( html_entity_decode( (string) $item, ENT_QUOTES, 'UTF-8' ) );
+			},
+			(array) TTA_Lib_AtlasAiDev::instance()->get_data_collection_description()
+		);
+
+		return array( 'offer' => true, 'items' => array_values( $items ) );
 	}
 
 	// ------------------------------------------------------------------- HTTP
