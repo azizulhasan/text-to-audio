@@ -605,6 +605,97 @@ class TTA_Admin
         );
     }
 
+    /**
+     * TTS-314: does Free render this player itself?
+     *
+     * Only player 3 (AtlasVoice TTS), only while Free is the one registering it
+     * (a Pro older than TTS-314 re-registers it as its own), and only when no
+     * extension takes it over (Pro renders player 3 with its own player).
+     *
+     * @param int $player_id
+     * @return bool
+     */
+    public static function renders_mp3_player($player_id)
+    {
+        if (\TTA\TTA_AtlasVoice_Service::PLAYER_ID !== (int) $player_id) {
+            return false;
+        }
+
+        $players = TTA_Helper::get_available_players();
+        if (!empty($players[$player_id]['pro'])) {
+            return false;
+        }
+
+        /**
+         * Whether Free's MP3 player renders player 3. Pro returns false.
+         *
+         * @param bool $render
+         * @param int  $player_id
+         */
+        return (bool) apply_filters('atlasvoice_free_mp3_player', true, (int) $player_id);
+    }
+
+    /**
+     * TTS-314: Free's player 3 bundle, Plyr's stylesheet and the colours chosen
+     * in Customize (as an inline style on the enqueued handle, not a JS-injected
+     * <style>, like player 1).
+     */
+    private function enqueue_mp3_player()
+    {
+        wp_enqueue_style('atlasvoice-plyr', plugin_dir_url(__FILE__) . 'css/vendor/plyr.css', array(), '3.8.4');
+        wp_add_inline_style('atlasvoice-plyr', $this->mp3_player_inline_css());
+
+        wp_enqueue_script(
+            'atlasvoice-mp3-player',
+            plugin_dir_url(__FILE__) . 'js/build/atlasvoice-mp3-player.min.js',
+            array('TextToSpeech', 'wp-hooks', 'wp-i18n'),
+            $this->asset_version('js/build/atlasvoice-mp3-player.min.js'),
+            true
+        );
+        wp_set_script_translations('atlasvoice-mp3-player', 'text-to-audio', plugin_dir_path(dirname(__FILE__)) . 'languages');
+
+        // The per-post payload hydrator (TTS-270) builds window.TTS; attach it to
+        // this bundle too, since player 1's bundle is not loaded for player 3.
+        add_filter('tts_button_inline_handles', static function ($handles) {
+            $handles[] = 'atlasvoice-mp3-player';
+            return $handles;
+        });
+    }
+
+    /**
+     * Colours, width and margins from Customize, applied to the Plyr controls the
+     * same way Pro's player 3 applies them.
+     *
+     * @return string
+     */
+    private function mp3_player_inline_css()
+    {
+        $c = get_option('tta_customize_settings', array());
+        $c = is_array($c) ? $c : array();
+
+        $color = static function ($value, $fallback) {
+            $value = sanitize_hex_color((string) $value);
+            return $value ? $value : $fallback;
+        };
+        $num = static function ($value, $fallback) {
+            return is_numeric($value) ? (float) $value : $fallback;
+        };
+
+        $bg     = $color($c['backgroundColor'] ?? '', '#184c53');
+        $fg     = $color($c['color'] ?? '', '#ffffff');
+        $width  = max(10, min(100, $num($c['width'] ?? 100, 100)));
+        $top    = $num($c['marginTop'] ?? 0, 0);
+        $bottom = $num($c['marginBottom'] ?? 0, 0);
+        $left   = $num($c['marginLeft'] ?? 0, 0);
+        $right  = $num($c['marginRight'] ?? 0, 0);
+
+        return ".atlasvoice-mp3-player .plyr--audio .plyr__controls{background-color:{$bg};color:{$fg};width:{$width}%;margin:{$top}px {$right}px {$bottom}px {$left}px;}"
+            . ".atlasvoice-mp3-player .plyr--audio .plyr__control,.atlasvoice-mp3-player .plyr--audio .plyr__control:hover{background-color:{$bg};color:{$fg};}"
+            . ".atlasvoice-mp3-player .plyr--full-ui input[type=range]{color:{$fg};}"
+            . ".atlasvoice-mp3-player__status{margin-top:6px;font-size:13px;opacity:.85;}"
+            . ".atlasvoice-mp3-player__fallback{background-color:{$bg};color:{$fg};border:0;border-radius:4px;padding:8px 14px;cursor:pointer;}";
+    }
+
     public function enqueue_TTA()
     {
 
@@ -689,6 +780,10 @@ class TTA_Admin
             wp_localize_script('TextToSpeech', 'ttsObj', $frontend_localize_data);
             // TTS-264: load JS translations for the bundled selection-control strings.
             wp_set_script_translations('TextToSpeech', 'text-to-audio', plugin_dir_path(dirname(__FILE__)) . 'languages');
+
+            if (self::renders_mp3_player($player_id)) {
+                $this->enqueue_mp3_player();
+            }
         } else if ($player_id == 1) {
             wp_enqueue_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-button.min.js', $dependencies, $this->asset_version('js/build/text-to-audio-button.min.js'), true);
             wp_localize_script('text-to-audio-button', 'ttsObj', $frontend_localize_data);

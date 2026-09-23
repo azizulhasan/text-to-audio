@@ -148,6 +148,46 @@ class TTA_Api_Routes {
 			)
 		);
 
+		/*
+		 * TTS-314: player 3 (AtlasVoice TTS). `gtts` generates one batch and is
+		 * called by the player on a visitor's first play (page nonce, POST only);
+		 * `atlasvoice_service` is the Listening screen's connect / disconnect.
+		 */
+		register_rest_route(
+			$this->namespace,
+			'/gtts',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'atlasvoice_gtts_batch' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+					'args'                => array(),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/atlasvoice_service',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'atlasvoice_service_state' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+				),
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'atlasvoice_service_connect' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+				),
+				array(
+					'methods'             => \WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'atlasvoice_service_disconnect' ),
+					'permission_callback' => array( $this, 'get_route_access' ),
+				),
+			)
+		);
+
 		// register track route.
 		register_rest_route(
 			$this->namespace,
@@ -1114,6 +1154,70 @@ class TTA_Api_Routes {
      */
 
     /**
+     * TTS-314: one batch of player 3 audio.
+     *
+     * Output buffered like Pro's route (TTS-275): a PHP notice printed on a host
+     * with display_errors on must not corrupt the JSON the player reads.
+     *
+     * @param \WP_REST_Request $request
+     * @return \WP_REST_Response
+     */
+    public function atlasvoice_gtts_batch( $request ) {
+        ob_start();
+        $result = \TTA\TTA_GTTS_Generation::handle( json_decode( $request->get_body(), true ) );
+        ob_end_clean();
+
+        return rest_ensure_response( $result );
+    }
+
+    /**
+     * TTS-314: service state for the Listening screen (never the key itself).
+     *
+     * @return \WP_REST_Response
+     */
+    public function atlasvoice_service_state() {
+        \TTA\TTA_AtlasVoice_Service::refresh_usage();
+
+        return rest_ensure_response( array( 'status' => true, 'data' => \TTA\TTA_AtlasVoice_Service::public_state() ) );
+    }
+
+    /**
+     * TTS-314: the site owner ticked the consent box and pressed Connect.
+     *
+     * @param \WP_REST_Request $request
+     * @return \WP_REST_Response
+     */
+    public function atlasvoice_service_connect( $request ) {
+        $body = json_decode( $request->get_body(), true );
+
+        if ( empty( $body['consent'] ) ) {
+            return rest_ensure_response( array(
+                'status'  => false,
+                'message' => __( 'Tick the box to agree before connecting.', 'text-to-audio' ),
+            ) );
+        }
+
+        $result = \TTA\TTA_AtlasVoice_Service::connect( isset( $body['email'] ) ? $body['email'] : '' );
+
+        if ( is_wp_error( $result ) ) {
+            return rest_ensure_response( array( 'status' => false, 'code' => $result->get_error_code(), 'message' => $result->get_error_message() ) );
+        }
+
+        return rest_ensure_response( array( 'status' => true, 'data' => \TTA\TTA_AtlasVoice_Service::public_state() ) );
+    }
+
+    /**
+     * TTS-314: withdraw consent. Stored audio stays and keeps playing.
+     *
+     * @return \WP_REST_Response
+     */
+    public function atlasvoice_service_disconnect() {
+        \TTA\TTA_AtlasVoice_Service::disconnect();
+
+        return rest_ensure_response( array( 'status' => true, 'data' => \TTA\TTA_AtlasVoice_Service::public_state() ) );
+    }
+
+    /**
      * TTS-266: delete one or more generated MP3s for a post.
      *
      * Free owns this so a site without Pro can still manage stored audio. It
@@ -1362,6 +1466,8 @@ class TTA_Api_Routes {
             '/tta/v1/onboarding-event',
             // TTS-247: new admin-only route for the Danger zone reset button.
             '/tta/v1/reset_plugin_data',
+            // TTS-314: connecting to the speech service records consent for the site.
+            '/tta/v1/atlasvoice_service',
             // TTS-238 / merge note: /language-context (D27.30) and
             // /auth-variant (pre-D27.28) were retired so they're no longer
             // in this allowlist.
@@ -1422,6 +1528,9 @@ class TTA_Api_Routes {
         // 3️⃣ Frontend routes that require nonce verification (e.g. analytics tracking)
         $frontend_post_routes = array(
             '/tta/v1/track',
+            // TTS-314: player 3 generation; the handler adds its own active-player,
+            // published-post, consent and per-post lock checks.
+            '/tta/v1/gtts',
             '/tta/v1/geolocation',
         );
 

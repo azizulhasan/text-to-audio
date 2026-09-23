@@ -1022,7 +1022,17 @@ class TTA_Helper
         if (!$post) {
             global $post;
         }
-        return (array) apply_filters('tts_mp3_file_urls', array(), $post, $file_url_key, $date, $file_name);
+
+        // TTS-314: Free stores player 3's files itself, so it reads them itself.
+        // Pro's filter replaces this with its own list (signed Cloud Storage URLs).
+        $urls = array();
+        if ($post && self::player_makes_mp3(self::get_player_id())) {
+            $urls = self::append_cache_buster_to_urls(
+                self::atlasvoice_normalise_urls(get_post_meta($post->ID, 'tts_mp3_file_urls', true))
+            );
+        }
+
+        return (array) apply_filters('tts_mp3_file_urls', $urls, $post, $file_url_key, $date, $file_name);
     }
 
     /**
@@ -1081,6 +1091,14 @@ class TTA_Helper
      */
     public static function get_path_from_url($url)
     {
+        // TTS-314: player 3 files made by Free live in uploads/TTA/gtts/, whatever
+        // player is active now. Older ones stay under Pro's folder, handled below.
+        $gtts_url = TTA_AtlasVoice_Service::audio_dir_url();
+        $plain    = strtok((string) $url, '?');
+        if (0 === strpos(set_url_scheme($plain), $gtts_url)) {
+            return TTA_AtlasVoice_Service::audio_dir() . substr(set_url_scheme($plain), strlen($gtts_url));
+        }
+
         $player_id = self::get_player_id();
 
         /**
@@ -1234,6 +1252,17 @@ class TTA_Helper
                 'pro'    => false,
                 // TTS-312: reads in the browser, so it stores no audio files.
                 'mp3'    => false,
+            ),
+            // TTS-314: the Google Translate voice through the AtlasVoice service,
+            // saved once per post as an MP3 so every device plays the same audio.
+            // Pro before TTS-314 re-registers id 3 with 'pro' => true; Free then
+            // leaves rendering and generation to that Pro (version handshake).
+            3 => array(
+                'id'     => 3,
+                'name'   => __( 'AtlasVoice TTS', 'text-to-audio' ),
+                'object' => 'AtlasVoiceMp3Player',
+                'pro'    => false,
+                'mp3'    => true,
             ),
         );
 
@@ -1408,6 +1437,25 @@ class TTA_Helper
      * @param string $file_name
      * @return void
      */
+    /**
+     * TTS-314: record a finished MP3 for a post under its file URL key.
+     *
+     * The same `tts_mp3_file_urls` meta every MP3 player uses; the audio panel
+     * fingerprints it through the meta hooks, so no extra bookkeeping is needed.
+     *
+     * @param int    $post_id
+     * @param string $key  File URL key (language, or language--voice--name).
+     * @param string $url
+     */
+    public static function atlasvoice_store_audio_url($post_id, $key, $url)
+    {
+        $urls = self::atlasvoice_normalise_urls(get_post_meta($post_id, 'tts_mp3_file_urls', true));
+        $urls[(string) $key] = (string) $url;
+
+        update_post_meta($post_id, 'tts_mp3_file_urls', $urls);
+        update_post_meta($post_id, 'tts_is_mp3_file_url_exists', true);
+    }
+
     public static function atlasvoice_mark_audio_current($post_id, $key, $file_name)
     {
         $post = get_post($post_id);

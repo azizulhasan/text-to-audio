@@ -13,6 +13,8 @@ import UpgradeToPro from "../../UpgradeToPro";
 // loading, and multilingual mapping — lives entirely in the AtlasVoice add-on and
 // is mounted into the #tts_listening_pro slot below when the add-on is active.
 import DefaultPlayerSettings from "./tts-providers/DefaultPlayerSettings";
+// TTS-314: player 3 (AtlasVoice TTS) is Free's own MP3 player.
+import AtlasVoiceTTSSettings from "./tts-providers/AtlasVoiceTTSSettings";
 
 // Multilingual plugin basenames the add-on can map voices for (Pro feature).
 const MULTILINGUAL_PLUGINS = {
@@ -169,12 +171,19 @@ export default function Listening() {
           </div>
 
             <Form onSubmit={handleSubmit}>
-              <DefaultPlayerSettings
-                listeningSettings={listeningSettings}
-                currentPlayerLanguages={currentPlayerLanguages}
-                currentPlayerFilteredVoices={filteredVoices}
-                handleChange={handleChange}
-              />
+              {Number(playerId) === 3 ? (
+                <AtlasVoiceTTSSettings
+                  listeningSettings={listeningSettings}
+                  handleChange={handleChange}
+                />
+              ) : (
+                <DefaultPlayerSettings
+                  listeningSettings={listeningSettings}
+                  currentPlayerLanguages={currentPlayerLanguages}
+                  currentPlayerFilteredVoices={filteredVoices}
+                  handleChange={handleChange}
+                />
+              )}
 
               {multilingualPlugin && (
                 <div

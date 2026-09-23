@@ -539,7 +539,11 @@ export default function Customize() {
       }
     }
 
-    if (!ttsObj.is_atlasvoice_addon_functional && formData?.buttonSettings?.id > 1) {
+    // TTS-314: any player Free registers itself (player 3, AtlasVoice TTS) saves
+    // without the add-on; only add-on players need it.
+    const freePlayer = (Array.isArray(ttsObj?.availablePlayers) ? ttsObj.availablePlayers : [])
+      .some((p) => Number(p.id) === Number(formData?.buttonSettings?.id) && !p.pro);
+    if (!ttsObj.is_atlasvoice_addon_functional && formData?.buttonSettings?.id > 1 && !freePlayer) {
       CTANotice(__("Default Pro player is only available in the pro version.", "text-to-audio"));
       return;
     }
@@ -645,8 +649,12 @@ export default function Customize() {
       ? localizedObj.availablePlayers
       : [{ id: 1 }]
   ).map((p) => Number(p.id));
+  // TTS-314: the registry's name wins (player 3 is "AtlasVoice TTS" once Free owns it).
+  const registryNames = Object.fromEntries(
+    (Array.isArray(localizedObj.availablePlayers) ? localizedObj.availablePlayers : []).map((p) => [Number(p.id), p.name])
+  );
   const [buttonLists, setButtonLists] = useState(
-    ALL_PLAYERS.filter((p) => availablePlayerIds.includes(p.id))
+    ALL_PLAYERS.filter((p) => availablePlayerIds.includes(p.id)).map((p) => (registryNames[p.id] ? { ...p, name: registryNames[p.id] } : p))
   );
 
   return isDataLoaded ? (
@@ -778,6 +786,16 @@ export default function Customize() {
                     ? ttsObj.availablePlayers.map((p) => parseInt(p.id, 10))
                     : [1];
                   const canRenderProPreview = selectedId > 1 && available.includes(selectedId);
+
+                  // TTS-314: player 3 without the add-on has no editor preview;
+                  // say where to hear it instead of leaving an empty box.
+                  if (canRenderProPreview && selectedId === 3 && !ttsObj?.is_atlasvoice_addon_functional) {
+                    return (
+                      <p className="small text-secondary mb-0">
+                        {__("AtlasVoice TTS plays on your posts with the colours chosen below. Open any post to hear it.", "text-to-audio")}
+                      </p>
+                    );
+                  }
 
                   return canRenderProPreview ? (
                     <div

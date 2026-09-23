@@ -48,6 +48,8 @@ class TTA_Reset {
             'tta_play_count_migration_done',
             'tta_total_plays_counter',
             'tta_total_plays_fallback',
+            // TTS-314: AtlasVoice TTS service connection (site key, usage cache).
+            'tta_atlasvoice_service',
 
             // Tracking / telemetry
             'text-to-audio_allow_tracking',

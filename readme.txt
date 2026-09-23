@@ -242,6 +242,11 @@ Third-party services that may be contacted:
 **Opt-in, off by default** (stored in option `text-to-audio_allow_tracking`; revocable anytime). When enabled, sends usage telemetry — plugin/WordPress/PHP versions, site language, enabled features, site name and URL, admin email, and the site's outbound public IP (resolved via icanhazip.com) — so AtlasAiDev can prioritise improvements. No visitor/listener data is sent.
 Provided by AtlasAiDev — Terms: https://atlasaidev.com/terms-and-conditions/ Privacy: https://atlasaidev.com/privacy-policy/
 
+= AtlasVoice speech service (gtts.atlasaidev.com) =
+
+Used only by the **AtlasVoice TTS** player, and only after an administrator ticks the consent box and presses Connect under Listening (off by default; Disconnect withdraws it). Connecting sends the site address, site name and the email entered on that screen, and returns a site key. After that, the first time someone plays a post that has no audio yet, the post's text, its language and the post ID are sent so the service can return the audio, which is saved as an MP3 on your site and played from there. The service keeps character counts for the monthly allowance, not the text. Players that read in the browser never contact it.
+Provided by AtlasAiDev — Terms: https://atlasaidev.com/terms-and-conditions/ Privacy: https://atlasaidev.com/privacy-policy/
+
 = AtlasAiDev plugin catalog (raw.githubusercontent.com) =
 
 Fetches `https://raw.githubusercontent.com/atlasaidev/plugins/main/plugins.json` only when an admin opens the "Other AtlasAiDev Plugins" screen (cached 24h). No site or user data is sent beyond standard HTTP headers.

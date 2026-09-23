@@ -18,6 +18,11 @@ mix.js('admin/js/tts-alias-engine.js', 'admin/js/build/tts-alias-engine.min.js')
 
 mix.js('admin/js/text-to-audio-button.js', 'admin/js/build/text-to-audio-button.min.js');
 
+// TTS-314: player 3 (AtlasVoice TTS), Free's MP3 player. Plyr (MIT) is bundled
+// from npm and its stylesheet copied locally: no CDN (wp.org Guideline 8).
+mix.js('admin/js/AtlasVoiceMp3Player.js', 'admin/js/build/atlasvoice-mp3-player.min.js');
+mix.copy('node_modules/plyr/dist/plyr.css', 'admin/css/vendor/plyr.css');
+
 mix.js('admin/js/AtlasVoiceAnalytics.js', 'admin/js/build/AtlasVoiceAnalytics.min.js');
 mix.js('admin/js/AtlasVoicePlayerInsights.js', 'admin/js/build/AtlasVoicePlayerInsights.min.js');
 
