@@ -3451,10 +3451,135 @@ a:hover {
 /* Table Rows */
 .tta_aliases_row {
     display: grid;
-    grid-template-columns: 1fr 1fr auto;
-    gap: 16px;
-    margin-bottom: 12px;
+    grid-template-columns: 1fr auto 1fr auto;
+    gap: 12px;
     align-items: center;
+}
+
+/* TTS-319: one pronunciation = row + optional number checkbox + hint. */
+.tta_aliases_item {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+}
+
+.tta_aliases_arrow {
+    color: #adb5bd;
+    font-size: 16px;
+}
+
+.tta_aliases_numbers {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0 0;
+    padding-left: 0;
+    min-height: 0;
+    font-size: 13px;
+    color: #495057;
+}
+
+.tta_aliases_numbers .form-check-input {
+    float: none;
+    margin: 0;
+}
+
+.tta_aliases_numbers .form-check-label {
+    margin: 0;
+}
+
+.tta_aliases_hint {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: #198754;
+}
+
+.tta_aliases_hint_warn {
+    color: #b45309;
+}
+
+.tta_aliases_notice {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: #e7f1ff;
+    color: #0a3d7a;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    font-size: 13px;
+}
+
+.tta_aliases_limit {
+    font-size: 13px;
+    color: #6f42c1;
+    margin: 0 0 12px;
+}
+
+.tta_aliases_try {
+    margin-top: 16px;
+}
+
+.tta_aliases_try_head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: #495057;
+}
+
+.tta_aliases_try_label {
+    margin: 12px 0 4px;
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.tta_aliases_try_output {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+/* TTS-319: Pro-only developer guide for the pronunciation filters. */
+.tta_aliases_dev {
+    margin-top: 16px;
+}
+
+.tta_aliases_dev summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.tta_aliases_dev_guide {
+    font-size: 13px;
+    color: #495057;
+    margin-top: 10px;
+}
+
+.tta_aliases_dev_guide ul {
+    padding-left: 18px;
+    margin: 0 0 10px;
+}
+
+.tta_aliases_dev_code {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 320px;
+    overflow: auto;
+}
+
+.tta_aliases_dev_note {
+    margin: 10px 0 0;
+    color: #6c757d;
 }
  
 .tta_aliases_input_wrapper {
@@ -3621,9 +3746,10 @@ a:hover {
     .tta_aliases_row {
         grid-template-columns: 1fr;
         gap: 12px;
-        padding-bottom: 12px;
-        margin-bottom: 16px;
-        border-bottom: 1px solid #e9ecef;
+    }
+
+    .tta_aliases_arrow {
+        display: none;
     }
  
     .tta_aliases_table_header {

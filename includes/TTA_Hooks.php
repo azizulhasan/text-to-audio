@@ -80,7 +80,21 @@ class TTA_Hooks {
 	 * @since 2.2.1
 	 */
 	private function init_cache_compatibility() {
-		// ----- Build exclusion arrays (extensible by Pro via add_filter) -----
+		$this->register_cache_exclusion_filters();
+	}
+
+	/**
+	 * TTS-317: build the exclusion arrays on first use, not at file load.
+	 * This file loads before Pro, so building them in the constructor ran
+	 * 'tts_excludable_js_arr' before Pro had added its scripts — WP Rocket
+	 * then delayed plyr.min.js and the Pro button on every site.
+	 */
+	private static function build_exclusion_arrays() {
+		static $built = false;
+		if ( $built ) {
+			return;
+		}
+		$built = true;
 
 		self::$excludable_js_arr = apply_filters( 'tts_excludable_js_arr', [
 			'TextToSpeech.min.js',
@@ -111,6 +125,16 @@ class TTA_Hooks {
 			// TTS-290: front-end helpers that were being minified/delayed as well.
 			'tta-cors-detector.js',
 			'countries-and-timezones.min.js',
+			// TTS-317: core scripts the player needs before it runs. Excluding
+			// our bundle but delaying these threw "wp is not defined", so no
+			// player rendered for logged-out visitors under WP Rocket.
+			'wp-includes/js/dist/hooks.min.js',
+			'wp-includes/js/dist/i18n.min.js',
+			'wp-i18n-js-after',
+			// TTS-319: pronunciation filters are registered inline after wp-hooks
+			// (see the Pro developer guide). If an optimizer delayed that inline
+			// block but not the player, custom rules were silently skipped.
+			'wp-hooks-js-after',
 		] );
 
 		self::$excludable_js_string = apply_filters(
@@ -127,7 +151,36 @@ class TTA_Hooks {
 			'tts_excludable_css_string',
 			implode( ',', self::$excludable_css_arr )
 		);
+	}
 
+	/** @return array JS exclusions (built on first use). */
+	private static function js_exclusions() {
+		self::build_exclusion_arrays();
+		return self::$excludable_js_arr;
+	}
+
+	/** @return string Comma-separated JS exclusions. */
+	private static function js_exclusions_string() {
+		self::build_exclusion_arrays();
+		return self::$excludable_js_string;
+	}
+
+	/** @return array CSS exclusions (built on first use). */
+	private static function css_exclusions() {
+		self::build_exclusion_arrays();
+		return self::$excludable_css_arr;
+	}
+
+	/** @return string Comma-separated CSS exclusions. */
+	private static function css_exclusions_string() {
+		self::build_exclusion_arrays();
+		return self::$excludable_css_string;
+	}
+
+	/**
+	 * Register exclusion filters for all known cache/optimization plugins.
+	 */
+	private function register_cache_exclusion_filters() {
 		// ----- LiteSpeed Cache -----
 		// @see https://docs.litespeedtech.com/lscache/lscwp/api/
 		add_filter( 'litespeed_optimize_js_excludes', [ $this, 'cache_exclude_js_text_to_speech' ] );
@@ -199,10 +252,10 @@ class TTA_Hooks {
 	 */
 	public function cache_exclude_js_text_to_speech( $excluded_js_files ) {
 		if ( is_array( $excluded_js_files ) ) {
-			return array_merge( $excluded_js_files, self::$excludable_js_arr );
+			return array_merge( $excluded_js_files, self::js_exclusions() );
 		}
 
-		return self::$excludable_js_arr;
+		return self::js_exclusions();
 	}
 
 	/**
@@ -215,10 +268,10 @@ class TTA_Hooks {
 	 */
 	public function cache_exclude_css_text_to_speech( $excluded_css_files ) {
 		if ( is_array( $excluded_css_files ) ) {
-			return array_merge( $excluded_css_files, self::$excludable_css_arr );
+			return array_merge( $excluded_css_files, self::css_exclusions() );
 		}
 
-		return self::$excludable_css_arr;
+		return self::css_exclusions();
 	}
 
 
@@ -437,7 +490,7 @@ class TTA_Hooks {
 	 * @return string
 	 */
 	public function autoptimize_filter_js_exclude_callback( $excluded_js_files ) {
-		$excluded_js_files .= ', ' . self::$excludable_js_string;
+		$excluded_js_files .= ', ' . self::js_exclusions_string();
 
 		return $excluded_js_files;
 	}
@@ -450,7 +503,7 @@ class TTA_Hooks {
 	 * @return string
 	 */
 	public function autoptimize_filter_css_exclude_callback( $excluded_css_files ) {
-		$excluded_css_files .= ', ' . self::$excludable_css_string;
+		$excluded_css_files .= ', ' . self::css_exclusions_string();
 
 		return $excluded_css_files;
 	}
@@ -464,10 +517,10 @@ class TTA_Hooks {
 	 */
 	public function rocket_defer_inline_exclusions_callback( $excluded_patterns ) {
 		if ( is_array( $excluded_patterns ) ) {
-			return array_merge( $excluded_patterns, self::$excludable_js_arr );
+			return array_merge( $excluded_patterns, self::js_exclusions() );
 		}
 
-		return self::$excludable_js_arr;
+		return self::js_exclusions();
 	}
 
 	/**
@@ -481,7 +534,7 @@ class TTA_Hooks {
 	 */
 	public function w3tc_minify_js_do_tag_minification_callback( $do_tag_minification, $script_tag, $file ) {
 		$basename = basename( $file );
-		if ( in_array( $basename, self::$excludable_js_arr ) ) {
+		if ( in_array( $basename, self::js_exclusions() ) ) {
 			return false;
 		}
 
@@ -500,7 +553,7 @@ class TTA_Hooks {
 			return $excluded_js;
 		}
 
-		return array_merge( $excluded_js, self::$excludable_js_arr );
+		return array_merge( $excluded_js, self::js_exclusions() );
 	}
 
 	/**
@@ -515,7 +568,7 @@ class TTA_Hooks {
 			return $excluded_css;
 		}
 
-		return array_merge( $excluded_css, self::$excludable_css_arr );
+		return array_merge( $excluded_css, self::css_exclusions() );
 	}
 
 	/**
@@ -631,22 +684,32 @@ class TTA_Hooks {
 		// TTS-250: NOT a feature lock — the free plugin applies pronunciation
 		// aliases itself when standalone; Pro applies them itself when active
 		// (avoids applying twice). The alias feature works fully without Pro.
-		$alias_data = (array) TTA_Helper::tts_get_settings( 'aliases' );
-		if ( ! TTA_Helper::is_atlasvoice_addon_functional() && ! empty( $alias_data ) && count( $alias_data ) ) {
-			$counter = 0;
-			foreach ( $alias_data as $index => $alias ) {
-				$alias = (array) $alias;
-				if ( isset( $alias['actual_text'] ) && isset( $alias['to_read'] ) ) {
-					$content_sanitized = str_replace( $alias['actual_text'], $alias['to_read'], $content_sanitized );
-					$counter ++;
-				}
-				if ( $counter > 0 ) {
-					break;
-				}
+		if ( TTA_Helper::is_atlasvoice_addon_functional() ) {
+			return $content_sanitized;
+		}
+
+		// The free plugin reads one saved alias; code added through the filter
+		// below is a developer extension and is applied in full.
+		$saved = array();
+		foreach ( (array) TTA_Helper::tts_get_settings( 'aliases' ) as $alias ) {
+			$alias = (array) $alias;
+			if ( isset( $alias['actual_text'], $alias['to_read'] ) ) {
+				$saved[] = $alias;
+				break;
 			}
 		}
 
-		return $content_sanitized;
+		// TTS-319: same filters as TextToSpeech.replaceAliases() in JS, so one
+		// snippet works for every player, multilingual page and Bulk MP3.
+		$rules = (array) apply_filters( 'tts_text_aliases', $saved, $content_sanitized );
+		foreach ( $rules as $alias ) {
+			$alias = (array) $alias;
+			if ( isset( $alias['actual_text'], $alias['to_read'] ) ) {
+				$content_sanitized = TTA_Helper::replace_alias( $content_sanitized, $alias['actual_text'], $alias['to_read'], ! empty( $alias['apply_to_numbers'] ) );
+			}
+		}
+
+		return apply_filters( 'tts_pronunciation_text', $content_sanitized, $rules );
 	}
 
     public function clear_necessary_cache($plugin, $network) {

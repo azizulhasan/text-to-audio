@@ -5,11 +5,24 @@ import Speech from "./tts/speak-tts/lib/speak-tts.js";
 import BrowserSupport from './tts/BrowserSupport.js'
 import {addHoverColor, getButtonSVGIcon, setSvgColorOnEvent, splitSentences} from "./tts/utilities.js";
 import AtlasVoiceAnalytics from "./AtlasVoiceAnalytics";
+import AliasEngine from "./AliasEngine";
 // TTS-256: read-along highlighter — registers wp.hooks listeners on import
 // (tts_high_light_text / tts_highlight_word / tts_highlight_clear).
 import "./tts/highlighter.js";
 
 export default class TextToSpeech {
+    /**
+     * TTS-316/319: pronunciation rules live in AliasEngine; these statics keep
+     * the public API (Pro calls TextToSpeech.replaceAliases()).
+     */
+    static replaceAliases(text, aliases, caseInsensitive = false) {
+        return AliasEngine.replaceAliases(text, aliases, caseInsensitive);
+    }
+
+    static buildAliasRule(alias, caseInsensitive = false) {
+        return AliasEngine.buildAliasRule(alias, caseInsensitive);
+    }
+
     TTS = window.TTS
     browser = null
     speech = null
@@ -649,14 +662,7 @@ if (typeof window !== 'undefined' && window.wp && window.wp.hooks && !window.__t
 
         // The normal read gets pronunciation aliases applied server-side; the
         // selection is raw DOM text, so apply the same aliases here.
-        let text = payload.text;
-        const aliasData = window?.ttsObj?.settings?.aliases;
-        const aliases = aliasData ? Object.values(aliasData) : [];
-        for (const alias of aliases) {
-            if (alias && alias.actual_text) {
-                text = text.split(alias.actual_text).join(alias.to_read ?? '');
-            }
-        }
+        const text = TextToSpeech.replaceAliases(payload.text, window?.ttsObj?.settings?.aliases);
 
         // Stop an in-flight full-post read cleanly: speak({queue:false}) would
         // cancel its audio anyway, but its button/timers must be reset too or
