@@ -5,33 +5,22 @@ import Speech from "./tts/speak-tts/lib/speak-tts.js";
 import BrowserSupport from './tts/BrowserSupport.js'
 import {addHoverColor, getButtonSVGIcon, setSvgColorOnEvent, splitSentences} from "./tts/utilities.js";
 import AtlasVoiceAnalytics from "./AtlasVoiceAnalytics";
+import AliasEngine from "./AliasEngine";
 // TTS-256: read-along highlighter — registers wp.hooks listeners on import
 // (tts_high_light_text / tts_highlight_word / tts_highlight_clear).
 import "./tts/highlighter.js";
 
 export default class TextToSpeech {
     /**
-     * TTS-316: replace pronunciation aliases on whole words only, so "ca."
-     * no longer rewrites "Africa." — a letter/number next to the match blocks it.
-     * Shared with Pro (TextToSpeechPro extends this class).
+     * TTS-316/319: pronunciation rules live in AliasEngine; these statics keep
+     * the public API (Pro calls TextToSpeech.replaceAliases()).
      */
     static replaceAliases(text, aliases, caseInsensitive = false) {
-        if (!text || !aliases) {
-            return text;
-        }
-        const isWordChar = /[\p{L}\p{N}]/u;
-        for (const alias of Object.values(aliases)) {
-            const find = alias?.actual_text;
-            if (!find) {
-                continue;
-            }
-            const escaped = find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const before = isWordChar.test(find[0]) ? '(?<![\\p{L}\\p{N}])' : '';
-            const after = isWordChar.test(find[find.length - 1]) ? '(?![\\p{L}\\p{N}])' : '';
-            const regex = new RegExp(before + escaped + after, caseInsensitive ? 'giu' : 'gu');
-            text = text.replace(regex, () => alias.to_read ?? '');
-        }
-        return text;
+        return AliasEngine.replaceAliases(text, aliases, caseInsensitive);
+    }
+
+    static buildAliasRule(alias, caseInsensitive = false) {
+        return AliasEngine.buildAliasRule(alias, caseInsensitive);
     }
 
     TTS = window.TTS
