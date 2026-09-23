@@ -92,6 +92,8 @@ class TTA_AtlasVoice_Service {
 			'license_attached' => false,
 			// TTS-314: the email already has an account, so its owner must approve this site.
 			'pending_approval' => false,
+			// Set when the service refused the Pro licence because all its seats are in use.
+			'license_seats_full' => false,
 		) );
 	}
 
@@ -139,6 +141,7 @@ class TTA_AtlasVoice_Service {
 			'usage'       => $state['usage'],
 			'exhausted'   => self::is_exhausted(),
 			'pendingApproval' => (bool) $state['pending_approval'],
+			'licenseSeatsFull' => (bool) $state['license_seats_full'],
 			'serviceUrl'  => self::base_url(),
 			'termsUrl'    => 'https://atlasaidev.com/terms-and-conditions/',
 			'privacyUrl'  => 'https://atlasaidev.com/privacy-policy/',
@@ -284,6 +287,7 @@ class TTA_AtlasVoice_Service {
 			'exhausted_until'  => 0,
 			'license_attached' => false,
 			'pending_approval' => false,
+			'license_seats_full' => false,
 		) );
 	}
 
@@ -333,10 +337,16 @@ class TTA_AtlasVoice_Service {
 		$result = self::request( 'POST', '/v1/projects/license', array( 'license_key' => (string) $license_key ) );
 
 		if ( 200 !== $result['status'] ) {
+			// Every site of the licence already uses it: this site stays Free, and the
+			// Listening screen says why. Pro retries hourly, so a freed seat is picked up.
+			if ( 'license_quota_reached' === $result['error'] ) {
+				self::put( array( 'license_seats_full' => true ) );
+			}
+
 			return self::error_from( $result );
 		}
 
-		self::put( array( 'license_attached' => true ) );
+		self::put( array( 'license_attached' => true, 'license_seats_full' => false ) );
 		self::remember_usage( isset( $result['data']['usage'] ) ? $result['data']['usage'] : null );
 
 		return true;
@@ -358,7 +368,7 @@ class TTA_AtlasVoice_Service {
 			return self::error_from( $result );
 		}
 
-		self::put( array( 'license_attached' => false ) );
+		self::put( array( 'license_attached' => false, 'license_seats_full' => false ) );
 		self::remember_usage( isset( $result['data']['usage'] ) ? $result['data']['usage'] : null );
 
 		return true;

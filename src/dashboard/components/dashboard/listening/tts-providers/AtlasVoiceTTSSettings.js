@@ -197,6 +197,17 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange 
               {state.plan === "premium" ? __("Premium plan", "text-to-audio") : __("Free plan", "text-to-audio")}
               {state.keyPrefix && <span className="text-secondary ms-2">{sprintf(/* translators: %s: start of the site key. */ __("Key %s…", "text-to-audio"), state.keyPrefix)}</span>}
             </p>
+            {state.licenseSeatsFull && state.plan !== "premium" && (
+              <Alert variant="warning" className="small">
+                {__("Your AtlasVoice Pro licence is already used on all the sites it covers, so this site stays on the Free allowance.", "text-to-audio")}{" "}
+                {__("Remove the licence from another site, or upgrade to a licence with more sites. This site becomes Premium within an hour of a seat being free.", "text-to-audio")}
+                <div className="mt-2">
+                  <a href={`${String(state.serviceUrl || "").replace(/\/+$/, "")}/app/projects`} target="_blank" rel="noopener noreferrer">{__("Manage your sites", "text-to-audio")}</a>
+                  {" · "}
+                  <a href="https://atlasaidev.com/text-to-speech-pro/" target="_blank" rel="noopener noreferrer">{__("Upgrade the licence", "text-to-audio")}</a>
+                </div>
+              </Alert>
+            )}
             <UsageBlock state={state} />
             <Button variant="link" className="p-0 mt-3 small" type="button" disabled={busy} onClick={disconnect}>
               {__("Disconnect", "text-to-audio")}
