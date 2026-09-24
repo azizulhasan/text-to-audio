@@ -1,3 +1,5 @@
+// Keeps browser page translation from crashing the screen.
+import './translationGuard';
 import ReactDOM from "react-dom";
 import GenerateBulkMp3File from "./bulk-mp3-file/generate-bulk-mp3-file";
 /**

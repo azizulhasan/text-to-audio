@@ -1,3 +1,5 @@
+// Keeps browser page translation from crashing the screen.
+import './translationGuard';
 import React from "react";
 import ReactDOM from "react-dom";
 import WelcomeWizard from "./welcome/WelcomeWizard";
