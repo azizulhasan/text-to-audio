@@ -66,7 +66,6 @@ class TTA_GTTS_Generation {
 		$dir        = trailingslashit( TTA_AtlasVoice_Service::audio_dir() . $date_path );
 		$dir_url    = trailingslashit( TTA_AtlasVoice_Service::audio_dir_url() . $date_path );
 		$final_file = $dir . $title . '.mp3';
-		$lock_key   = "mp3_generation_lock__post_id__{$post_id}";
 
 		// Regeneration (Bulk MP3 "regenerate") replaces the file: drop it on the
 		// first batch so the rest of the run cannot mistake it for finished audio.
@@ -80,9 +79,24 @@ class TTA_GTTS_Generation {
 
 		// Already made: stop batching and play it.
 		if ( ! $regenerate && file_exists( $final_file ) && filesize( $final_file ) > 0 ) {
-			delete_transient( $lock_key );
+			TTA_Generation_Lock::release( $post_id );
 
 			return self::ok( $dir_url . $title . '.mp3', '', true );
+		}
+
+		// Already made but not on disk (moved to Cloud Storage): play the stored copy.
+		if ( ! $regenerate ) {
+			$stored = TTA_Helper::atlasvoice_stored_audio_url(
+				$post_id,
+				isset( $settings['file_url_key'] ) && '' !== $settings['file_url_key']
+					? sanitize_text_field( (string) $settings['file_url_key'] )
+					: TTA_Helper::tts_get_file_url_key( $language )
+			);
+			if ( '' !== $stored ) {
+				TTA_Generation_Lock::release( $post_id );
+
+				return self::ok( $stored, '', true );
+			}
 		}
 
 		if ( ! TTA_AtlasVoice_Service::is_connected() ) {
@@ -103,14 +117,11 @@ class TTA_GTTS_Generation {
 			}
 		}
 
-		// Another visitor is already generating this post: back off rather than
-		// spending the allowance twice on the same audio.
-		$lock = get_transient( $lock_key );
-		if ( is_array( $lock ) && isset( $lock['user_id'] ) && (string) $lock['user_id'] !== $user_id ) {
+		// Another run is already generating this post (another visitor, or this
+		// visitor's own earlier run): back off rather than paying twice for the
+		// same audio. The player waits and then plays the finished file.
+		if ( ! TTA_Generation_Lock::acquire( $post_id, $user_id, TTA_Generation_Lock::batch_number( $temp_title ) ) ) {
 			return self::ok( '', 'locked', false );
-		}
-		if ( ! $lock ) {
-			set_transient( $lock_key, array( 'user_id' => $user_id, 'post_id' => $post_id ), 5 * MINUTE_IN_SECONDS );
 		}
 
 		$result = TTA_AtlasVoice_Service::synthesize( $content, $language, 'post-' . $post_id );
@@ -120,7 +131,7 @@ class TTA_GTTS_Generation {
 		$skipped = ! $result['ok'] && 'nothing_to_speak' === $result['code'];
 
 		if ( ! $result['ok'] && ! $skipped ) {
-			delete_transient( $lock_key );
+			TTA_Generation_Lock::release( $post_id );
 
 			return self::fail( $result['code'] );
 		}
@@ -130,7 +141,7 @@ class TTA_GTTS_Generation {
 		}
 
 		if ( ! $skipped && ! TTA_Audio_Storage::put_contents( $dir . $temp_title . '.mp3', $result['audio'] ) ) {
-			delete_transient( $lock_key );
+			TTA_Generation_Lock::release( $post_id );
 
 			return self::fail( 'not_writable' );
 		}
@@ -140,7 +151,7 @@ class TTA_GTTS_Generation {
 		}
 
 		$file_url = TTA_Audio_Storage::merge_batches( $dir, $dir_url, $title );
-		delete_transient( $lock_key );
+		TTA_Generation_Lock::release( $post_id );
 
 		if ( ! $file_url ) {
 			return self::fail( 'merge_failed' );

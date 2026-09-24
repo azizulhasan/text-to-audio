@@ -1456,6 +1456,36 @@ class TTA_Helper
         update_post_meta($post_id, 'tts_is_mp3_file_url_exists', true);
     }
 
+    /**
+     * The stored audio URL for one language/voice key, exactly as a freshly
+     * rendered page would get it (so Pro's filter still signs Cloud Storage
+     * URLs). Empty when there is none.
+     *
+     * Generation routes ask this before making audio: with Cloud Storage backup
+     * the local file is deleted after upload, so a "does the file exist?" check
+     * alone missed finished audio and a visitor whose page was rendered earlier
+     * (or served from a page cache) generated — and paid for — it again.
+     *
+     * @param int    $post_id
+     * @param string $file_url_key
+     * @return string
+     */
+    public static function atlasvoice_stored_audio_url($post_id, $file_url_key)
+    {
+        $post = get_post($post_id);
+        if (!$post || '' === (string) $file_url_key) {
+            return '';
+        }
+
+        foreach ((array) self::get_mp3_file_urls($file_url_key, $post) as $key => $url) {
+            if ($url && strtolower((string) $key) === strtolower((string) $file_url_key)) {
+                return (string) $url;
+            }
+        }
+
+        return '';
+    }
+
     public static function atlasvoice_mark_audio_current($post_id, $key, $file_name)
     {
         $post = get_post($post_id);
@@ -1883,14 +1913,43 @@ class TTA_Helper
             }
         }
 
+        // TTS-314: a file in this site's uploads is answered by the disk, not by an
+        // HTTP request to ourselves (loopback requests fail on many hosts). Mapped
+        // from the uploads root, so files in another player's folder count too.
+        $uploads  = wp_get_upload_dir();
+        $plain    = set_url_scheme(strtok((string) $url, '?'));
+        $base_url = untrailingslashit(set_url_scheme($uploads['baseurl']));
+        if (0 === strpos($plain, $base_url . '/')) {
+            $local = $uploads['basedir'] . rawurldecode(substr($plain, strlen($base_url)));
+
+            return !(file_exists($local) && filesize($local) > 0);
+        }
+
         // TTS-247: prefer wp_remote_head() over raw get_headers/curl (Plugin
         // Check guideline -- core HTTP API handles timeouts, SSL, redirects).
         $response = wp_remote_head( $url, array( 'timeout' => 5, 'redirection' => 3 ) );
         if ( is_wp_error( $response ) ) {
-            return true; // treat as missing
+            // TTS-314: a Cloud Storage copy that did not answer (timeout, network) is
+            // not gone: dropping its link made the next visitor pay to generate it
+            // again. Only a "not found" removes it. Other hosts keep the old rule, so
+            // a site moved to a new domain still replaces links to the old one.
+            return !self::is_cloud_storage_url($url);
         }
         $code = (int) wp_remote_retrieve_response_code( $response );
-        return ( 404 === $code || $code === 0 );
+        return ( 404 === $code || 410 === $code || ( $code === 0 && !self::is_cloud_storage_url($url) ) );
+    }
+
+    /**
+     * Is this a Google Cloud Storage URL (Pro's MP3 backup)?
+     *
+     * @param string $url
+     * @return bool
+     */
+    private static function is_cloud_storage_url($url)
+    {
+        $host = (string) wp_parse_url((string) $url, PHP_URL_HOST);
+
+        return 'storage.googleapis.com' === $host || '.storage.googleapis.com' === substr($host, -23);
     }
 
     /**
