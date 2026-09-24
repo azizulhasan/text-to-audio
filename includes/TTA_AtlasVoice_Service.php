@@ -116,6 +116,35 @@ class TTA_AtlasVoice_Service {
 	}
 
 	/**
+	 * Headers that identify this site to AtlasVoice services: its key and the
+	 * client. For other AtlasVoice engines the site calls itself (Pro's player 7
+	 * service checks the key with the AtlasVoice service before making audio).
+	 * Server-side only; never output them.
+	 *
+	 * @return array Empty when the site is not connected.
+	 */
+	public static function auth_headers() {
+		if ( ! self::is_connected() ) {
+			return array();
+		}
+
+		return array(
+			'Authorization'       => 'Bearer ' . self::get()['api_key'],
+			'X-AtlasVoice-Client' => 'wordpress/' . ( defined( 'TEXT_TO_AUDIO_VERSION' ) ? TEXT_TO_AUDIO_VERSION : '0' ),
+		);
+	}
+
+	/**
+	 * Let another AtlasVoice engine report an error code from the service, so a
+	 * revoked key or a pending approval is handled the same way everywhere.
+	 *
+	 * @param string $code Error code from the service.
+	 */
+	public static function note_error( $code ) {
+		self::note_key_error( (string) $code );
+	}
+
+	/**
 	 * Is the monthly allowance known to be used up right now?
 	 *
 	 * @return bool
