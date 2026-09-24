@@ -237,7 +237,7 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange 
                 {__("Your AtlasVoice Pro licence is already used on all the sites it covers, so this site stays on the Free allowance.", "text-to-audio")}{" "}
                 {__("Remove the licence from another site, or upgrade to a licence with more sites. This site becomes Premium within an hour of a seat being free.", "text-to-audio")}
                 <div className="mt-2">
-                  <a href={`${String(state.serviceUrl || "").replace(/\/+$/, "")}/app/projects`} target="_blank" rel="noopener noreferrer">{__("Manage your sites", "text-to-audio")}</a>
+                  <a href={`${String(state.dashboardUrl || `${String(state.serviceUrl || "").replace(/\/+$/, "")}/app`).replace(/\/+$/, "")}/projects`} target="_blank" rel="noopener noreferrer">{__("Manage your sites", "text-to-audio")}</a>
                   {" · "}
                   <a href="https://atlasaidev.com/text-to-speech-pro/" target="_blank" rel="noopener noreferrer">{__("Upgrade the licence", "text-to-audio")}</a>
                 </div>

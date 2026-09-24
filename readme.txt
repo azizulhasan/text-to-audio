@@ -242,7 +242,7 @@ Third-party services that may be contacted:
 **Opt-in, off by default** (stored in option `text-to-audio_allow_tracking`; revocable anytime). When enabled, sends usage telemetry — plugin/WordPress/PHP versions, site language, enabled features, site name and URL, admin email, and the site's outbound public IP (resolved via icanhazip.com) — so AtlasAiDev can prioritise improvements. No visitor/listener data is sent.
 Provided by AtlasAiDev — Terms: https://atlasaidev.com/terms-and-conditions/ Privacy: https://atlasaidev.com/privacy-policy/
 
-= AtlasVoice speech service (gtts.atlasaidev.com) =
+= AtlasVoice speech service (api.atlasvoice.cloud) =
 
 Used only by the **AtlasVoice TTS** player, and only after an administrator ticks the consent box and presses Connect under Listening (off by default; Disconnect withdraws it). Connecting sends the site address, site name and the email entered on that screen, and returns a site key. After that, the first time someone plays a post that has no audio yet, the post's text, its language and the post ID are sent so the service can return the audio, which is saved as an MP3 on your site and played from there. The text is used only to create that audio: to produce the voice, the service passes it to Google's text-to-speech engine, and AtlasAiDev never stores, sells or reuses it, or uses it to train AI. The service's temporary copy of the MP3 is deleted within minutes. The service keeps usage records for the monthly allowance (character counts, language and post ID), not the text. Players that read in the browser never contact it.
 Provided by AtlasAiDev — Terms: https://atlasaidev.com/terms-and-conditions/ Privacy: https://atlasaidev.com/privacy-policy/

@@ -37,7 +37,8 @@ class TTA_AtlasVoice_Service {
 		} elseif ( ( defined( 'TTA_DEBUG_MODE' ) && TTA_DEBUG_MODE ) || 'local' === wp_get_environment_type() ) {
 			$url = 'http://localhost:4000';
 		} else {
-			$url = 'https://gtts.atlasaidev.com';
+			// TTS-314: the AtlasVoice API's production home (was gtts.atlasaidev.com).
+			$url = 'https://api.atlasvoice.cloud';
 		}
 
 		/**
@@ -46,6 +47,30 @@ class TTA_AtlasVoice_Service {
 		 * @param string $url
 		 */
 		return untrailingslashit( (string) apply_filters( 'atlasvoice_service_url', $url ) );
+	}
+
+	/**
+	 * The customer dashboard (sites, keys, usage), without a trailing slash.
+	 * In production it has its own subdomain; a local service serves it under
+	 * /app.
+	 *
+	 * @return string
+	 */
+	public static function dashboard_url() {
+		if ( defined( 'TTA_ATLASVOICE_DASHBOARD_URL' ) ) {
+			$url = TTA_ATLASVOICE_DASHBOARD_URL;
+		} elseif ( defined( 'TTA_ATLASVOICE_SERVICE_URL' ) || ( defined( 'TTA_DEBUG_MODE' ) && TTA_DEBUG_MODE ) || 'local' === wp_get_environment_type() ) {
+			$url = self::base_url() . '/app';
+		} else {
+			$url = 'https://app.atlasvoice.cloud';
+		}
+
+		/**
+		 * AtlasVoice dashboard URL (the "Manage your sites" link).
+		 *
+		 * @param string $url
+		 */
+		return untrailingslashit( (string) apply_filters( 'atlasvoice_dashboard_url', $url ) );
 	}
 
 	/**
@@ -173,6 +198,7 @@ class TTA_AtlasVoice_Service {
 			'licenseSeatsFull' => (bool) $state['license_seats_full'],
 			'diagnostics' => self::diagnostics_offer(),
 			'serviceUrl'  => self::base_url(),
+			'dashboardUrl' => self::dashboard_url(),
 			'termsUrl'    => 'https://atlasaidev.com/terms-and-conditions/',
 			'privacyUrl'  => 'https://atlasaidev.com/privacy-policy/',
 		);
