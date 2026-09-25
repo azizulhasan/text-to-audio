@@ -59,10 +59,16 @@ class TTA_Rollback {
 	}
 
 	/**
-	 * @return string The Versions screen.
+	 * The Versions screen. The network admin's AtlasVoice page is only a per-site
+	 * overview, so from there the link goes to the main site's dashboard (a
+	 * rollback changes the plugin network-wide either way).
+	 *
+	 * @return string
 	 */
 	public static function screen_url() {
-		return self_admin_url( 'admin.php?page=text-to-audio#/versions' );
+		$path = 'admin.php?page=text-to-audio#/versions';
+
+		return is_network_admin() ? get_admin_url( get_main_site_id(), $path ) : admin_url( $path );
 	}
 
 	/**
