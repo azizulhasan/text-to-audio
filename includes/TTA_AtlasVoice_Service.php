@@ -32,10 +32,12 @@ class TTA_AtlasVoice_Service {
 	 * @return string
 	 */
 	public static function base_url() {
+		// Always the live service, unless a developer names another one in
+		// wp-config.php (e.g. http://localhost:4000). Never guessed from the
+		// environment: customers test on local servers (Local by Flywheel marks
+		// sites 'local') and turn on debugging, and must still reach the service.
 		if ( defined( 'TTA_ATLASVOICE_SERVICE_URL' ) ) {
 			$url = TTA_ATLASVOICE_SERVICE_URL;
-		} elseif ( ( defined( 'TTA_DEBUG_MODE' ) && TTA_DEBUG_MODE ) || 'local' === wp_get_environment_type() ) {
-			$url = 'http://localhost:4000';
 		} else {
 			// TTS-314: the AtlasVoice API's production home (was gtts.atlasaidev.com).
 			$url = 'https://api.atlasvoice.cloud';
@@ -59,7 +61,8 @@ class TTA_AtlasVoice_Service {
 	public static function dashboard_url() {
 		if ( defined( 'TTA_ATLASVOICE_DASHBOARD_URL' ) ) {
 			$url = TTA_ATLASVOICE_DASHBOARD_URL;
-		} elseif ( defined( 'TTA_ATLASVOICE_SERVICE_URL' ) || ( defined( 'TTA_DEBUG_MODE' ) && TTA_DEBUG_MODE ) || 'local' === wp_get_environment_type() ) {
+		} elseif ( defined( 'TTA_ATLASVOICE_SERVICE_URL' ) ) {
+			// A developer's own service serves the dashboard under /app.
 			$url = self::base_url() . '/app';
 		} else {
 			$url = 'https://app.atlasvoice.cloud';
