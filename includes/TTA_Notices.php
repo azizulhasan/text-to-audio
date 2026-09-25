@@ -290,7 +290,8 @@ class TTA_Notices {
 			'dismissible'       => true,
 			'reshow_after_days' => 30,
 			'max_dismissals'    => 3,
-			'screens'           => self::atlasvoice_screens(),
+			// AtlasVoice's Settings and Listening screens show this as a card.
+			'screens'           => self::wp_screens(),
 			'condition'         => function () {
 				return current_user_can( 'manage_options' ) && self::is_browser_voice_site();
 			},
@@ -802,7 +803,17 @@ class TTA_Notices {
 	 * @return string[]
 	 */
 	private static function atlasvoice_screens() {
-		return array( 'dashboard', 'dashboard-network', 'plugins', 'plugins-network', 'toplevel_page_text-to-audio' );
+		return array_merge( self::wp_screens(), array( 'toplevel_page_text-to-audio' ) );
+	}
+
+	/**
+	 * Only WordPress's Dashboard and Plugins screens, for a notice whose message
+	 * AtlasVoice's own page already shows as a card (no saying it twice).
+	 *
+	 * @return string[]
+	 */
+	private static function wp_screens() {
+		return array( 'dashboard', 'dashboard-network', 'plugins', 'plugins-network' );
 	}
 
 	/**
