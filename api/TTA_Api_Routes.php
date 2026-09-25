@@ -1199,10 +1199,22 @@ class TTA_Api_Routes {
             ) );
         }
 
-        $result = \TTA\TTA_AtlasVoice_Service::connect( isset( $body['email'] ) ? $body['email'] : '' );
+        $email = isset( $body['email'] ) ? $body['email'] : '';
+        // TTS-314: "Move this site to my email" — prove control of the site
+        // instead of registering (the site belongs to another email).
+        $result = empty( $body['takeover'] )
+            ? \TTA\TTA_AtlasVoice_Service::connect( $email )
+            : \TTA\TTA_AtlasVoice_Service::takeover( $email );
 
         if ( is_wp_error( $result ) ) {
-            return rest_ensure_response( array( 'status' => false, 'code' => $result->get_error_code(), 'message' => $result->get_error_message() ) );
+            $data = (array) $result->get_error_data();
+            return rest_ensure_response( array(
+                'status'    => false,
+                'code'      => $result->get_error_code(),
+                'message'   => $result->get_error_message(),
+                'ownerHint' => isset( $data['owner_hint'] ) ? $data['owner_hint'] : '',
+                'takeover'  => ! empty( $data['takeover'] ),
+            ) );
         }
 
         // Optional, unticked by default: the owner chose to share diagnostic data.

@@ -129,6 +129,8 @@ class TTA {
 
         $this->loader->add_action('template_redirect', $plugin_admin, 'serve_player_1_until_ready');
         $this->loader->add_action('admin_init', 'TTA\TTA_AtlasVoice_Service', 'maybe_recheck_approval');
+        // Publishes the one-time code while the site is being moved to another email.
+        $this->loader->add_action('init', 'TTA\TTA_AtlasVoice_Service', 'serve_takeover_code', 1);
         $this->loader->add_action('wp_enqueue_scripts', $plugin_admin, 'enqueue_TTA', 99999);
 
         // Admin bar quick-toggle for AtlasVoice on front-end singular pages.

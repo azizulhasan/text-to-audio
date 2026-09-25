@@ -371,14 +371,91 @@ class TTA_AtlasVoice_Service {
 			return self::error_from( $result );
 		}
 
+		return self::store_key( $result['data'], $email );
+	}
+
+	/**
+	 * The site is registered to another email: move it to this one by proving
+	 * control of the site. The service issues a one-time code, this site
+	 * publishes it at ?atlasvoice_verify=<id> (serve_takeover_code()), and the
+	 * service fetches it from the site's registered address before moving the
+	 * site and issuing a new key. A site the service cannot reach (localhost,
+	 * a private network) cannot be moved this way.
+	 *
+	 * @param string $email
+	 * @return true|\WP_Error
+	 */
+	public static function takeover( $email ) {
+		$email = sanitize_email( $email );
+		if ( ! is_email( $email ) ) {
+			return new \WP_Error( 'invalid_email', __( 'Enter a valid email address.', 'text-to-audio' ) );
+		}
+
+		self::put( array( 'api_key' => '' ) );
+
+		$start = self::request( 'POST', '/v1/projects/takeover', array(
+			'platform' => 'wordpress',
+			'site_url' => home_url( '/' ),
+			'email'    => $email,
+		) );
+		if ( 201 !== $start['status'] || empty( $start['data']['challenge_id'] ) || empty( $start['data']['token'] ) ) {
+			return self::error_from( $start );
+		}
+
+		set_transient( 'atlasvoice_takeover', array(
+			'id'    => (string) $start['data']['challenge_id'],
+			'token' => (string) $start['data']['token'],
+		), 15 * MINUTE_IN_SECONDS );
+
+		$result = self::request( 'POST', '/v1/projects/takeover/verify', array(
+			'challenge_id' => (string) $start['data']['challenge_id'],
+		) );
+		delete_transient( 'atlasvoice_takeover' );
+
+		if ( 200 !== $result['status'] || empty( $result['data']['api_key'] ) ) {
+			return self::error_from( $result );
+		}
+
+		return self::store_key( $result['data'], $email );
+	}
+
+	/**
+	 * Answer the service's check during a takeover: print the one-time code at
+	 * ?atlasvoice_verify=<id> while this site is moving, and nothing otherwise.
+	 * The code is useless on its own: it only confirms the request came from
+	 * someone who can run this site's admin.
+	 */
+	public static function serve_takeover_code() {
+		if ( ! isset( $_GET['atlasvoice_verify'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- public check, no state change.
+			return;
+		}
+		$pending = get_transient( 'atlasvoice_takeover' );
+		$asked   = sanitize_text_field( wp_unslash( $_GET['atlasvoice_verify'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! is_array( $pending ) || empty( $pending['id'] ) || ! hash_equals( (string) $pending['id'], $asked ) ) {
+			return;
+		}
+		nocache_headers();
+		header( 'Content-Type: text/plain; charset=utf-8' );
+		echo esc_html( $pending['token'] );
+		exit;
+	}
+
+	/**
+	 * Keep a key the service issued (registration or takeover).
+	 *
+	 * @param array  $data  Service response: api_key, key_prefix, project_id, plan, approval.
+	 * @param string $email
+	 * @return true
+	 */
+	private static function store_key( array $data, $email ) {
 		self::put( array(
 			'consent'    => true,
-			'api_key'    => (string) $result['data']['api_key'],
-			'key_prefix' => (string) $result['data']['key_prefix'],
+			'api_key'    => (string) $data['api_key'],
+			'key_prefix' => (string) $data['key_prefix'],
 			'email'      => $email,
-			'project_id' => (int) $result['data']['project_id'],
-			'plan'       => (string) $result['data']['plan'],
-			'pending_approval' => isset( $result['data']['approval'] ) && 'pending' === $result['data']['approval'],
+			'project_id' => (int) $data['project_id'],
+			'plan'       => (string) $data['plan'],
+			'pending_approval' => isset( $data['approval'] ) && 'pending' === $data['approval'],
 			'key_revoked'      => false,
 		) );
 
@@ -584,6 +661,13 @@ class TTA_AtlasVoice_Service {
 			$message = sanitize_text_field( $result['data']['error']['message'] );
 		}
 
-		return new \WP_Error( $result['error'] ? $result['error'] : 'service_unreachable', $message, array( 'status' => $result['status'] ) );
+		$data = array( 'status' => $result['status'] );
+		// project_exists: who owns the site (masked) and whether it can be moved.
+		if ( is_array( $result['data'] ) && isset( $result['data']['owner_hint'] ) ) {
+			$data['owner_hint'] = sanitize_text_field( (string) $result['data']['owner_hint'] );
+			$data['takeover']   = ! empty( $result['data']['takeover'] );
+		}
+
+		return new \WP_Error( $result['error'] ? $result['error'] : 'service_unreachable', $message, $data );
 	}
 }

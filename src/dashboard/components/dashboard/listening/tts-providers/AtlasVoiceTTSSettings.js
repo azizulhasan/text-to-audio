@@ -97,6 +97,8 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange 
   const [showCollected, setShowCollected] = useState(false);
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
+  // The site is registered to another email: offer to move it (proves control of the site).
+  const [takeoverOffer, setTakeoverOffer] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -117,11 +119,33 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange 
       const res = await call("POST", { consent, email, share_diagnostics: shareDiagnostics });
       if (res?.status) {
         setState(res.data);
+        setTakeoverOffer(null);
+      } else if (res?.code === "project_exists" && res?.takeover) {
+        setTakeoverOffer({ ownerHint: res.ownerHint || "" });
       } else {
         setError(res?.message || __("Could not connect. Please try again.", "text-to-audio"));
       }
     } catch (e) {
       setError(__("Could not connect. Please try again.", "text-to-audio"));
+    }
+    setBusy(false);
+  };
+
+  // Move this site to the email above: the service checks a one-time code this
+  // site publishes, so only someone who runs the site can do it.
+  const moveSite = async () => {
+    setBusy(true);
+    setError("");
+    try {
+      const res = await call("POST", { consent, email, takeover: true, share_diagnostics: shareDiagnostics });
+      if (res?.status) {
+        setState(res.data);
+        setTakeoverOffer(null);
+      } else {
+        setError(res?.message || __("Could not move the site. Please try again.", "text-to-audio"));
+      }
+    } catch (e) {
+      setError(__("Could not move the site. Please try again.", "text-to-audio"));
     }
     setBusy(false);
   };
@@ -278,6 +302,29 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange 
           </>
         )}
 
+        {takeoverOffer && state && !state.connected && (
+          <Alert variant="warning" className="mt-3 mb-0 small">
+            <strong>
+              {takeoverOffer.ownerHint
+                ? sprintf(
+                    /* translators: %s: masked email of the account that registered this site, e.g. a•••@gmail.com. */
+                    __("This site is already connected to another AtlasVoice account (%s).", "text-to-audio"),
+                    takeoverOffer.ownerHint
+                  )
+                : __("This site is already connected to another AtlasVoice account.", "text-to-audio")}
+            </strong>
+            <div className="mt-1">
+              {sprintf(
+                /* translators: %s: the email address entered above. */
+                __("If you run this site, you can move it to %s. We confirm you control the site with a one-time check; its old key stops working and the old address is told.", "text-to-audio"),
+                email
+              )}
+            </div>
+            <Button className="tta_btn mt-2" type="button" disabled={!consent || !email || busy} onClick={moveSite}>
+              {busy ? __("Checking the site…", "text-to-audio") : __("Move this site to my email", "text-to-audio")}
+            </Button>
+          </Alert>
+        )}
         {error && <Alert variant="danger" className="mt-3 mb-0 small">{error}</Alert>}
       </div>
 
