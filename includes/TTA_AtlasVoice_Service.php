@@ -507,9 +507,12 @@ class TTA_AtlasVoice_Service {
 	 * @param string $text
 	 * @param string $language
 	 * @param string $ref      Reference kept in the service's usage log (post id). Never content.
+	 * @param int    $total    The whole post's size, on its first batch: on Free the
+	 *                         service refuses a post the allowance cannot finish before
+	 *                         billing any of it. 0 = not sent (the older behaviour).
 	 * @return array{ok:bool, audio?:string, code?:string}
 	 */
-	public static function synthesize( $text, $language, $ref = '' ) {
+	public static function synthesize( $text, $language, $ref = '', $total = 0 ) {
 		if ( ! self::is_connected() ) {
 			return array( 'ok' => false, 'code' => 'not_connected' );
 		}
@@ -526,12 +529,17 @@ class TTA_AtlasVoice_Service {
 		 */
 		$timeout = (int) apply_filters( 'atlasvoice_service_timeout', 120 );
 
-		$result = self::request( 'POST', '/v1/synthesize?raw=1', array(
+		$payload = array(
 			'text'   => $text,
 			'lang'   => $language,
 			'engine' => 'gtts',
 			'ref'    => $ref,
-		), true, $timeout );
+		);
+		if ( $total > 0 ) {
+			$payload['total_chars'] = (int) $total;
+		}
+
+		$result = self::request( 'POST', '/v1/synthesize?raw=1', $payload, true, $timeout );
 
 		if ( 200 === $result['status'] && is_string( $result['data'] ) && '' !== $result['data'] ) {
 			if ( self::get()['pending_approval'] ) {

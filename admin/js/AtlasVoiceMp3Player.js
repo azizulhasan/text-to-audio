@@ -225,6 +225,9 @@ export class AtlasVoiceMp3Player {
                     content: batches[i],
                     temp_title: title + '-' + (i + 1),
                     is_last_batch: i === batches.length - 1,
+                    // The whole post's size, on the first batch: a Free site whose
+                    // allowance cannot cover it is refused before anything is billed.
+                    ...(i === 0 ? { total_chars: batches.reduce((n, b) => n + b.length, 0) } : {}),
                 });
 
                 if (!last?.status) {

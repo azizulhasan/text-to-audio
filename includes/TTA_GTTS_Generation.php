@@ -50,6 +50,8 @@ class TTA_GTTS_Generation {
 		$is_last    = ! empty( $body['is_last_batch'] );
 		$settings   = isset( $body['settings'] ) && is_array( $body['settings'] ) ? $body['settings'] : array();
 		$language   = isset( $settings['language'] ) ? sanitize_text_field( (string) $settings['language'] ) : '';
+		// The whole post's size, sent with its first batch (see synthesize()).
+		$total      = isset( $body['total_chars'] ) ? absint( $body['total_chars'] ) : 0;
 
 		if ( '' === $title || '' === $temp_title || '' === $content ) {
 			return self::fail( 'missing_parameters' );
@@ -124,7 +126,7 @@ class TTA_GTTS_Generation {
 			return self::ok( '', 'locked', false );
 		}
 
-		$result = TTA_AtlasVoice_Service::synthesize( $content, $language, 'post-' . $post_id );
+		$result = TTA_AtlasVoice_Service::synthesize( $content, $language, 'post-' . $post_id, $total );
 
 		// A batch that is only code or symbols has nothing to say: skip it and
 		// keep going instead of failing the whole post.
