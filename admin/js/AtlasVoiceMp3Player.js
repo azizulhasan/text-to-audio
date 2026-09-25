@@ -283,9 +283,13 @@ export class AtlasVoiceMp3Player {
         try { this.plyr.destroy(); } catch (e) { /* already gone */ }
         this.wrapper.innerHTML = '';
 
+        // Player 1's own button class, styled by player 1's stylesheet (loaded
+        // with this bundle), so the fallback looks like player 1, not a stray
+        // button. A site that is not connected never gets here: it is served
+        // player 1 from the start (TTA_Admin::serve_player_1_until_ready).
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'atlasvoice-mp3-player__fallback';
+        button.className = 'tts__listent_content atlasvoice-mp3-player__fallback';
         button.id = this.buttonId;
         this.wrapper.append(button);
 

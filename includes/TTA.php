@@ -127,6 +127,8 @@ class TTA {
         // Block registration and translations (following i18n-block-demo pattern)
         $this->loader->add_action('init', $plugin_admin, 'engueue_block_scripts');
 
+        $this->loader->add_action('template_redirect', $plugin_admin, 'serve_player_1_until_ready');
+        $this->loader->add_action('admin_init', 'TTA\TTA_AtlasVoice_Service', 'maybe_recheck_approval');
         $this->loader->add_action('wp_enqueue_scripts', $plugin_admin, 'enqueue_TTA', 99999);
 
         // Admin bar quick-toggle for AtlasVoice on front-end singular pages.

@@ -141,6 +141,39 @@ class TTA_AtlasVoice_Service {
 	}
 
 	/**
+	 * Can player 3 make audio for visitors right now? Not before the owner
+	 * connects (unless an extension connects on the first play, as Pro does),
+	 * and not while the connection waits for the account owner's approval.
+	 * A used-up allowance is not included: it ends by itself, and posts that
+	 * already have audio keep playing it.
+	 *
+	 * @return bool
+	 */
+	public static function can_serve_visitors() {
+		if ( self::is_connected() ) {
+			return ! self::get()['pending_approval'];
+		}
+
+		return (bool) apply_filters( 'atlasvoice_service_auto_connect', false );
+	}
+
+	/**
+	 * While a connection waits for approval, ask the service again on an admin
+	 * page view (at most every 15 minutes): the owner may have approved it from
+	 * the email, and visitors get player 3 back without opening Listening.
+	 */
+	public static function maybe_recheck_approval() {
+		if ( ! self::is_connected() || ! self::get()['pending_approval'] || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		if ( get_transient( 'atlasvoice_approval_recheck' ) ) {
+			return;
+		}
+		set_transient( 'atlasvoice_approval_recheck', 1, 15 * MINUTE_IN_SECONDS );
+		self::refresh_usage();
+	}
+
+	/**
 	 * Headers that identify this site to AtlasVoice services: its key and the
 	 * client. For other AtlasVoice engines the site calls itself (Pro's player 7
 	 * service checks the key with the AtlasVoice service before making audio).

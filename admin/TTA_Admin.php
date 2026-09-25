@@ -636,6 +636,27 @@ class TTA_Admin
     }
 
     /**
+     * TTS-314: until Free's player 3 can make audio (not connected yet, or
+     * waiting for the account owner's approval), visitors get player 1 — its
+     * own bundle, look and width — instead of an MP3 player that can only fall
+     * back on the first play. Front-end page views only (template_redirect):
+     * wp-admin and REST keep player 3, so Listening still shows Connect.
+     */
+    public function serve_player_1_until_ready()
+    {
+        if (!class_exists('\TTA\TTA_AtlasVoice_Service') || !function_exists('get_player_id')) {
+            return;
+        }
+        $player_id = get_player_id();
+        if (!self::renders_mp3_player($player_id) || \TTA\TTA_AtlasVoice_Service::can_serve_visitors()) {
+            return;
+        }
+        add_filter('tts_get_player_id', static function ($id) {
+            return \TTA\TTA_AtlasVoice_Service::PLAYER_ID === (int) $id ? 1 : $id;
+        }, 20);
+    }
+
+    /**
      * TTS-314: Free's player 3 bundle, Plyr's stylesheet and the colours chosen
      * in Customize (as an inline style on the enqueued handle, not a JS-injected
      * <style>, like player 1).
@@ -644,6 +665,15 @@ class TTA_Admin
     {
         wp_enqueue_style('atlasvoice-plyr', plugin_dir_url(__FILE__) . 'css/vendor/plyr.css', array(), '3.8.4');
         wp_add_inline_style('atlasvoice-plyr', $this->mp3_player_inline_css());
+
+        // Player 1's stylesheet too: it makes the <tts-play-button> host a block,
+        // so the theme's content width applies (without it the host is inline and
+        // the bar stretches across the page), and it styles the browser-voice
+        // button player 3 falls back to exactly like player 1's.
+        wp_enqueue_style('text-to-audio-button', plugin_dir_url(__FILE__) . 'css/minify/text-to-audio-button.min.css', [], $this->asset_version('css/minify/text-to-audio-button.min.css'), 'all');
+        if (function_exists('tta_get_player_button_inline_css')) {
+            wp_add_inline_style('text-to-audio-button', tta_get_player_button_inline_css());
+        }
 
         wp_enqueue_script(
             'atlasvoice-mp3-player',
@@ -692,8 +722,7 @@ class TTA_Admin
         return ".atlasvoice-mp3-player .plyr--audio .plyr__controls{background-color:{$bg};color:{$fg};width:{$width}%;margin:{$top}px {$right}px {$bottom}px {$left}px;}"
             . ".atlasvoice-mp3-player .plyr--audio .plyr__control,.atlasvoice-mp3-player .plyr--audio .plyr__control:hover{background-color:{$bg};color:{$fg};}"
             . ".atlasvoice-mp3-player .plyr--full-ui input[type=range]{color:{$fg};}"
-            . ".atlasvoice-mp3-player__status{margin-top:6px;font-size:13px;opacity:.85;}"
-            . ".atlasvoice-mp3-player__fallback{background-color:{$bg};color:{$fg};border:0;border-radius:4px;padding:8px 14px;cursor:pointer;}";
+            . ".atlasvoice-mp3-player__status{margin-top:6px;font-size:13px;opacity:.85;}";
     }
 
     public function enqueue_TTA()
