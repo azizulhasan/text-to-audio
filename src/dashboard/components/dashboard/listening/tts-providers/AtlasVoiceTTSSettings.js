@@ -215,11 +215,32 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange 
 
         {state && state.connected && state.pendingApproval && (
           <Alert variant="warning" className="small">
-            {sprintf(
-              /* translators: %s: email address of the AtlasVoice account. */
-              __("Waiting for approval. %s already has an AtlasVoice account, so we emailed it a link to approve this site. Until then posts are read by the browser voice.", "text-to-audio"),
-              state.email
-            )}
+            {/* The owner must act in their inbox: say what to open and what to click. */}
+            <strong>{__("One step left: approve this site from your email.", "text-to-audio")}</strong>
+            <ol className="mb-2 mt-2 ps-3">
+              <li>
+                {sprintf(
+                  /* translators: 1: email address of the AtlasVoice account, 2: email subject. */
+                  __("Open the inbox of %1$s and find the email “%2$s” (check spam too).", "text-to-audio"),
+                  state.email,
+                  __("Approve a new site for your AtlasVoice account", "text-to-audio")
+                )}
+              </li>
+              <li>{__("Click Approve in that email.", "text-to-audio")}</li>
+              <li>{__("Come back here and reload this page.", "text-to-audio")}</li>
+            </ol>
+            <div>
+              {sprintf(
+                /* translators: %s: email address of the AtlasVoice account. */
+                __("Why: %s already has an AtlasVoice account, so its owner must allow each new site. Until then, posts are read by the browser voice.", "text-to-audio"),
+                state.email
+              )}{" "}
+              {state.dashboardUrl && (
+                <a href={`${state.dashboardUrl}/projects`} target="_blank" rel="noreferrer">
+                  {__("You can also approve it in your AtlasVoice dashboard, under Projects.", "text-to-audio")}
+                </a>
+              )}
+            </div>
           </Alert>
         )}
 
