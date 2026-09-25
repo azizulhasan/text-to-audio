@@ -134,6 +134,8 @@ class TTA_Dashboard_Widget {
 				</a>
 			</div>
 
+			<?php $this->render_voice_status(); ?>
+
 			<?php if ( ! $is_pro ) : ?>
 				<div style="padding:8px 12px 0;border-top:1px solid #dcdcde;margin-top:8px;">
 					<p style="font-size:12px;color:#50575e;margin:0;">
@@ -146,6 +148,60 @@ class TTA_Dashboard_Widget {
 						?>
 					</p>
 				</div>
+			<?php endif; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * TTS-320: one line about the voice the site uses — the browser voice (with
+	 * a way to try AtlasVoice TTS) or this month's AtlasVoice TTS allowance.
+	 * Reads saved options only; no call to the service.
+	 */
+	private function render_voice_status() {
+		$summary = \TTA\TTA_AtlasVoice_Service::dashboard_summary();
+		$usage   = $summary['usage'];
+		$link    = admin_url( 'admin.php?page=text-to-audio#/listening' );
+
+		$browser_voice = 1 === $summary['playerId'] && ! $summary['connected'];
+		if ( ( $browser_voice && TTA_Helper::is_atlasvoice_addon_functional() ) || ( ! $browser_voice && ! $summary['pending'] && 'none' === $usage['band'] ) ) {
+			return;
+		}
+		?>
+		<div style="padding:8px 12px 0;border-top:1px solid #dcdcde;margin-top:8px;font-size:12px;color:#50575e;">
+			<?php if ( 1 === $summary['playerId'] && ! $summary['connected'] ) : ?>
+				<?php if ( ! TTA_Helper::is_atlasvoice_addon_functional() ) : ?>
+					<strong><?php esc_html_e( 'Voice:', 'text-to-audio' ); ?></strong>
+					<?php esc_html_e( 'Browser voice (different on every device).', 'text-to-audio' ); ?>
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=text-to-audio#/listening?setup=atlasvoice-tts' ) ); ?>"><?php esc_html_e( 'Try the free natural voice', 'text-to-audio' ); ?></a>
+				<?php endif; ?>
+			<?php elseif ( $summary['pending'] ) : ?>
+				<strong><?php esc_html_e( 'AtlasVoice TTS:', 'text-to-audio' ); ?></strong>
+				<?php esc_html_e( 'waiting for your email confirmation.', 'text-to-audio' ); ?>
+			<?php elseif ( 'covered' === $usage['band'] ) : ?>
+				<strong><?php esc_html_e( 'AtlasVoice TTS:', 'text-to-audio' ); ?></strong>
+				<?php esc_html_e( 'no monthly limit on this site.', 'text-to-audio' ); ?>
+			<?php elseif ( in_array( $usage['band'], array( 'ok', 'heads', 'low', 'out' ), true ) ) : ?>
+				<?php
+				$percent = $usage['limit'] ? min( 100, (int) round( $usage['used'] / $usage['limit'] * 100 ) ) : 0;
+				$colors  = array( 'ok' => '#198754', 'heads' => '#ffc107', 'low' => '#fd7e14', 'out' => '#dc3545' );
+				?>
+				<strong><?php esc_html_e( 'AtlasVoice TTS:', 'text-to-audio' ); ?></strong>
+				<?php
+				printf(
+					/* translators: 1: characters used, 2: monthly allowance, 3: date it resets. */
+					esc_html__( '%1$s of %2$s characters used · resets %3$s', 'text-to-audio' ),
+					esc_html( number_format_i18n( $usage['used'] ) ),
+					esc_html( number_format_i18n( (int) $usage['limit'] ) ),
+					esc_html( date_i18n( get_option( 'date_format' ), $usage['resets_at'] ) )
+				);
+				?>
+				<div style="height:6px;border-radius:3px;background:#e9ecef;overflow:hidden;margin:6px 0 4px;" role="progressbar" aria-valuenow="<?php echo esc_attr( $percent ); ?>" aria-valuemin="0" aria-valuemax="100">
+					<div style="height:100%;width:<?php echo esc_attr( $percent ); ?>%;background:<?php echo esc_attr( $colors[ $usage['band'] ] ); ?>;"></div>
+				</div>
+				<?php if ( in_array( $usage['band'], array( 'low', 'out' ), true ) ) : ?>
+					<a href="<?php echo esc_url( $link ); ?>"><?php esc_html_e( 'See usage and options', 'text-to-audio' ); ?></a>
+				<?php endif; ?>
 			<?php endif; ?>
 		</div>
 		<?php

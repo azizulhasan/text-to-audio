@@ -177,6 +177,8 @@ class TTA_Notices {
 			'dismissible'           => true,
 			'show_once'             => false,
 			'reshow_after_days'     => 0,
+			// TTS-320: after this many dismissals the notice never comes back (0 = no cap).
+			'max_dismissals'        => 0,
 			'condition'             => null,
 			'screens'               => array(),
 			'buttons'               => array(),
@@ -275,28 +277,57 @@ class TTA_Notices {
 		) );
 		*/
 
-		// ── 4. Voice & Language Mismatch (free only) ──
+		// ── 4. AtlasVoice TTS: the free natural voice (TTS-320) ──
+		// Replaces the old "Voice & Language Compatibility" notice, which named the
+		// browser-voice problem but only offered Pro, and showed even on sites that
+		// already play AtlasVoice TTS. A new id, so people who dismissed the old
+		// one see this once; after the third dismissal it never returns.
 		$this->register_notice( array(
-			'id'                  => 'voice_language_mismatch',
-			'title'               => '<h3>' . esc_html__( 'AtlasVoice: Voice & Language Compatibility', 'text-to-audio' ) . '</h3>',
-			'message'             => '<p>' . esc_html__( 'The free version uses the browser\'s built-in speechSynthesis API. Voice and language support varies by browser and device, so some combinations may not work as expected. The Pro version uses server-side audio generation for consistent results across all browsers.', 'text-to-audio' ) . '</p><p><a href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis#browser_compatibility" target="_blank">' . esc_html__( 'Check browser compatibility', 'text-to-audio' ) . ' &rarr;</a></p>',
-			'type'                => 'info',
-			'dismissible'         => true,
-			'reshow_after_days'   => 90,
-			'condition'           => function() {
-				return ! is_atlasvoice_addon_functional();
+			'id'                => 'atlasvoice_tts_intro',
+			'title'             => '<h3>' . esc_html__( 'AtlasVoice: A natural voice for your posts, now free', 'text-to-audio' ) . '</h3>',
+			'message'           => '<p>' . esc_html__( 'Your visitors hear their own device’s voice, so it sounds different in Chrome, Safari and on Android, and some languages have none. AtlasVoice TTS reads every post in one natural voice, saves it as an MP3, and includes 100,000 characters a month at no cost.', 'text-to-audio' ) . '</p>',
+			'type'              => 'info',
+			'dismissible'       => true,
+			'reshow_after_days' => 30,
+			'max_dismissals'    => 3,
+			'screens'           => self::atlasvoice_screens(),
+			'condition'         => function () {
+				return current_user_can( 'manage_options' ) && self::is_browser_voice_site();
 			},
-			'buttons'             => array(
+			'buttons'           => array(
 				array(
-					'text'    => __( 'Learn About Pro', 'text-to-audio' ),
-					'url'     => TTA_Helper::get_pro_url( 'admin', 'notice_pro_features' ),
-					'type'    => 'secondary',
-					'new_tab' => true,
+					'text' => __( 'Set up AtlasVoice TTS', 'text-to-audio' ),
+					'url'  => admin_url( 'admin.php?page=text-to-audio#/listening?setup=atlasvoice-tts' ),
+					'type' => 'primary',
 				),
 			),
-			'legacy_dismiss_meta' => 'tts_plugin_voice_and_language_mismatch_dismissed',
-			'legacy_option_key'   => 'tts_plugin_voice_and_language_mismatch_next_show_time',
 		) );
+
+		// ── 4b. Waiting for the owner's email confirmation (TTS-320) ──
+		$this->register_notice( array(
+			'id'          => 'atlasvoice_tts_pending',
+			'title'       => '<h3>' . esc_html__( 'Confirm your email to finish connecting AtlasVoice TTS', 'text-to-audio' ) . '</h3>',
+			'message'     => '<p>' . esc_html__( 'We sent a link to your email address. Visitors keep hearing the browser voice until you click it.', 'text-to-audio' ) . '</p>',
+			'type'        => 'info',
+			'dismissible' => false,
+			'screens'     => self::atlasvoice_screens(),
+			'condition'   => function () {
+				return current_user_can( 'manage_options' ) && TTA_AtlasVoice_Service::is_pending_approval();
+			},
+			'buttons'     => array(
+				array(
+					'text' => __( 'Open Listening', 'text-to-audio' ),
+					'url'  => admin_url( 'admin.php?page=text-to-audio#/listening' ),
+					'type' => 'secondary',
+				),
+			),
+		) );
+
+		// ── 4c. AtlasVoice TTS allowance nearly or fully used (TTS-320) ──
+		$this->register_usage_notices();
+
+		// ── 4d. Just updated: the way back (TTS-320) ──
+		$this->register_updated_notice();
 
 		// ── 5. Pro Features (free only, random features) ── (TTS-247: temporarily disabled in free)
 		/*
@@ -761,6 +792,161 @@ class TTA_Notices {
 	}
 
 	// =========================================================================
+	// TTS-320: AtlasVoice TTS launch notices
+	// =========================================================================
+
+	/**
+	 * Where the AtlasVoice TTS notices may appear. wp.org Guideline 11: not on
+	 * every admin screen — only the Dashboard, Plugins and AtlasVoice's own page.
+	 *
+	 * @return string[]
+	 */
+	private static function atlasvoice_screens() {
+		return array( 'dashboard', 'dashboard-network', 'plugins', 'plugins-network', 'toplevel_page_text-to-audio' );
+	}
+
+	/**
+	 * A site that reads posts with the browser voice and has not connected
+	 * AtlasVoice TTS. Pro sites are left alone (a presence check, used only to
+	 * decide whether to show the notice).
+	 *
+	 * @return bool
+	 */
+	private static function is_browser_voice_site() {
+		return 1 === (int) get_player_id()
+			&& ! TTA_AtlasVoice_Service::is_connected()
+			&& ! is_atlasvoice_addon_functional();
+	}
+
+	/**
+	 * The 95% and 100% warnings. Ids carry the allowance month, so a dismissed
+	 * warning comes back next month (a new id), never within the same month.
+	 */
+	private function register_usage_notices() {
+		$usage = TTA_AtlasVoice_Service::usage_summary();
+		if ( ! in_array( $usage['band'], array( 'low', 'out' ), true ) || '' === $usage['cycle'] ) {
+			return;
+		}
+
+		$reset_date = date_i18n( get_option( 'date_format' ), $usage['resets_at'] );
+		$cta        = TTA_AtlasVoice_Service::upgrade_cta();
+		$buttons    = array(
+			array(
+				'text' => __( 'See usage and options', 'text-to-audio' ),
+				'url'  => admin_url( 'admin.php?page=text-to-audio#/listening' ),
+				'type' => 'primary',
+			),
+		);
+		if ( '' !== $cta['url'] ) {
+			$buttons[] = array(
+				'text'    => $cta['text'],
+				'url'     => $cta['url'],
+				'type'    => 'secondary',
+				'new_tab' => true,
+			);
+		}
+
+		if ( 'low' === $usage['band'] ) {
+			$message = $usage['run_out']
+				/* translators: 1: date the allowance is expected to run out, 2: date it resets. */
+				? sprintf( __( 'At this pace it runs out around %1$s. After that, new and edited posts are read by the browser voice until %2$s. Posts that already have audio keep playing.', 'text-to-audio' ), date_i18n( get_option( 'date_format' ), $usage['run_out'] ), $reset_date )
+				/* translators: %s: date the allowance resets. */
+				: sprintf( __( 'When it runs out, new and edited posts are read by the browser voice until %s. Posts that already have audio keep playing.', 'text-to-audio' ), $reset_date );
+
+			$this->register_notice( array(
+				'id'          => 'atlasvoice_usage_low_' . $usage['cycle'],
+				/* translators: %s: number of characters left this month. */
+				'title'       => '<h3>' . esc_html( sprintf( __( 'AtlasVoice: %s characters left this month', 'text-to-audio' ), number_format_i18n( (int) $usage['left'] ) ) ) . '</h3>',
+				'message'     => '<p>' . esc_html( $message ) . '</p>',
+				'type'        => 'warning',
+				'dismissible' => true,
+				'screens'     => self::atlasvoice_screens(),
+				'condition'   => function () {
+					return current_user_can( 'manage_options' );
+				},
+				'buttons'     => $buttons,
+			) );
+
+			return;
+		}
+
+		$this->register_notice( array(
+			'id'          => 'atlasvoice_usage_out_' . $usage['cycle'],
+			'title'       => '<h3>' . esc_html__( 'AtlasVoice: this month’s allowance is used up', 'text-to-audio' ) . '</h3>',
+			/* translators: %s: date the allowance resets. */
+			'message'     => '<p>' . esc_html( sprintf( __( 'New and edited posts are read by the browser voice until %s. Posts that already have audio keep playing normally.', 'text-to-audio' ), $reset_date ) ) . '</p>',
+			'type'        => 'error',
+			'dismissible' => true,
+			'screens'     => self::atlasvoice_screens(),
+			'condition'   => function () {
+				return current_user_can( 'manage_options' );
+			},
+			'buttons'     => $buttons,
+		) );
+	}
+
+	/**
+	 * "Updated — roll back if something broke", for two weeks after an update.
+	 */
+	private function register_updated_notice() {
+		$history = TTA_Rollback::version_history();
+		if ( empty( $history['previous'] ) || ! version_compare( $history['current'], $history['previous'], '>' ) ) {
+			return;
+		}
+		if ( time() - (int) $history['updated_at'] > 14 * DAY_IN_SECONDS ) {
+			return;
+		}
+
+		$this->register_notice( array(
+			'id'          => 'atlasvoice_updated_' . str_replace( '.', '_', $history['current'] ),
+			/* translators: %s: plugin version number. */
+			'title'       => '<h3>' . esc_html( sprintf( __( 'AtlasVoice updated to %s', 'text-to-audio' ), $history['current'] ) ) . '</h3>',
+			'message'     => '<p>' . esc_html__( 'If something on your site doesn’t work as before, you can go back to the previous version. Your settings and audio files are kept.', 'text-to-audio' ) . '</p>',
+			'type'        => 'success',
+			'dismissible' => true,
+			'screens'     => array( 'dashboard', 'dashboard-network', 'plugins', 'plugins-network' ),
+			'condition'   => function () {
+				return TTA_Rollback::is_available();
+			},
+			'buttons'     => array(
+				array(
+					'text' => __( 'Roll back', 'text-to-audio' ),
+					'url'  => TTA_Rollback::screen_url(),
+					'type' => 'secondary',
+				),
+			),
+		) );
+	}
+
+	/**
+	 * How long a dismissal lasts for the notices above. Dismissals arrive over
+	 * AJAX, where notices are not registered (see lazy_register_notices), so
+	 * the rules must be known without registering them. Ids ending in '*'
+	 * match a prefix.
+	 *
+	 * @param string $notice_id
+	 * @return array|null {reshow_after_days, max_dismissals}
+	 */
+	private static function dismiss_policy( $notice_id ) {
+		$policies = array(
+			'atlasvoice_tts_intro'   => array( 'reshow_after_days' => 30, 'max_dismissals' => 3 ),
+			// One id per month / per version: dismissed means gone for good.
+			'atlasvoice_usage_low_*' => array( 'reshow_after_days' => 0, 'max_dismissals' => 0 ),
+			'atlasvoice_usage_out_*' => array( 'reshow_after_days' => 0, 'max_dismissals' => 0 ),
+			'atlasvoice_updated_*'   => array( 'reshow_after_days' => 0, 'max_dismissals' => 0 ),
+		);
+
+		foreach ( $policies as $key => $policy ) {
+			$prefix = rtrim( $key, '*' );
+			if ( $key === $notice_id || ( $prefix !== $key && 0 === strpos( $notice_id, $prefix ) ) ) {
+				return $policy;
+			}
+		}
+
+		return null;
+	}
+
+	// =========================================================================
 	// Display Pipeline
 	// =========================================================================
 
@@ -1124,6 +1310,25 @@ class TTA_Notices {
 
 		$user_id = get_current_user_id();
 		$notice  = isset( $this->notices[ $notice_id ] ) ? $this->notices[ $notice_id ] : null;
+
+		// TTS-320: notices with their own dismissal rules (known without registering).
+		$policy = self::dismiss_policy( $notice_id );
+		if ( ! $notice && $policy ) {
+			update_user_meta( $user_id, 'tta_dismiss_' . $notice_id, true );
+
+			$count = (int) get_user_meta( $user_id, 'tta_dismiss_count_' . $notice_id, true ) + 1;
+			update_user_meta( $user_id, 'tta_dismiss_count_' . $notice_id, $count );
+
+			$final = $policy['max_dismissals'] > 0 && $count >= $policy['max_dismissals'];
+			if ( $policy['reshow_after_days'] > 0 && ! $final ) {
+				update_option( 'tta_reshow_' . $notice_id, time() + DAY_IN_SECONDS * $policy['reshow_after_days'], false );
+			} else {
+				// No reshow time: is_dismissed() keeps it dismissed for good.
+				delete_option( 'tta_reshow_' . $notice_id );
+			}
+
+			wp_send_json_success( array( 'message' => __( 'Notice dismissed.', 'text-to-audio' ) ) );
+		}
 
 		// Save new standardized dismiss key.
 		update_user_meta( $user_id, 'tta_dismiss_' . $notice_id, true );

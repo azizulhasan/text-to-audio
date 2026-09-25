@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Row, Col, Form, Button, ProgressBar, Alert, Spinner } from "react-bootstrap";
+import { Row, Col, Form, Button, Alert, Spinner } from "react-bootstrap";
 import { __, sprintf } from "@wordpress/i18n";
 
 import { GTTS_LANGUAGES } from "../gttsLanguages";
+import AtlasVoiceUsage from "../../atlasvoice/AtlasVoiceUsage";
 
 /**
  * TTS-314: Listening settings for player 3 (AtlasVoice TTS).
@@ -23,73 +24,7 @@ async function call(method, body) {
   return res.json();
 }
 
-function formatNumber(n) {
-  try {
-    return new Intl.NumberFormat().format(n);
-  } catch (e) {
-    return String(n);
-  }
-}
-
-function formatDate(iso) {
-  try {
-    return new Intl.DateTimeFormat(undefined, { month: "long", day: "numeric" }).format(new Date(iso));
-  } catch (e) {
-    return iso;
-  }
-}
-
-function UsageBlock({ state }) {
-  const usage = state.usage || {};
-  const premium = usage.chars_limit === null || state.plan === "premium";
-
-  if (premium) {
-    return (
-      <p className="mb-0 text-secondary small">
-        {__("Premium plan: no monthly limit.", "text-to-audio")}
-      </p>
-    );
-  }
-
-  if (typeof usage.chars_limit !== "number") {
-    return null;
-  }
-
-  const used = Math.min(usage.chars_used || 0, usage.chars_limit);
-  const percent = usage.chars_limit ? Math.round((used / usage.chars_limit) * 100) : 0;
-
-  return (
-    <div>
-      <div className="d-flex justify-content-between small mb-1">
-        <span>
-          {sprintf(
-            /* translators: 1: characters used, 2: monthly allowance. */
-            __("%1$s of %2$s characters used this month", "text-to-audio"),
-            formatNumber(usage.chars_used || 0),
-            formatNumber(usage.chars_limit)
-          )}
-        </span>
-        {usage.resets_at && (
-          <span className="text-secondary">
-            {sprintf(
-              /* translators: %s: date the allowance resets. */
-              __("Resets %s", "text-to-audio"),
-              formatDate(usage.resets_at)
-            )}
-          </span>
-        )}
-      </div>
-      <ProgressBar now={percent} variant={percent >= 100 ? "danger" : percent >= 80 ? "warning" : "success"} aria-label={__("Monthly allowance used", "text-to-audio")} />
-      {state.exhausted && (
-        <Alert variant="warning" className="mt-3 mb-0 small">
-          {__("This month's allowance is used up. Posts that already have audio keep playing; new or edited posts are read by the browser voice until it resets.", "text-to-audio")}
-        </Alert>
-      )}
-    </div>
-  );
-}
-
-export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange }) {
+export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange, onConnected, showLanguage = true }) {
   const [state, setState] = useState(null);
   const [consent, setConsent] = useState(false);
   // Optional and unticked by default (opt-in only).
@@ -120,6 +55,7 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange 
       if (res?.status) {
         setState(res.data);
         setTakeoverOffer(null);
+        onConnected && onConnected(res.data);
       } else if (res?.code === "project_exists" && res?.takeover) {
         setTakeoverOffer({ ownerHint: res.ownerHint || "" });
       } else {
@@ -141,6 +77,7 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange 
       if (res?.status) {
         setState(res.data);
         setTakeoverOffer(null);
+        onConnected && onConnected(res.data);
       } else {
         setError(res?.message || __("Could not move the site. Please try again.", "text-to-audio"));
       }
@@ -295,7 +232,7 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange 
                 </div>
               </Alert>
             )}
-            <UsageBlock state={state} />
+            <AtlasVoiceUsage summary={state.usageSummary} cta={state.upgradeCta} />
             <Button variant="link" className="p-0 mt-3 small" type="button" disabled={busy} onClick={disconnect}>
               {__("Disconnect", "text-to-audio")}
             </Button>
@@ -328,6 +265,7 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange 
         {error && <Alert variant="danger" className="mt-3 mb-0 small">{error}</Alert>}
       </div>
 
+      {showLanguage && (
       <Row className="mb-3">
         <Col xs={12} md={6}>
           <div className="tta_voice_card">
@@ -350,6 +288,7 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange 
           </div>
         </Col>
       </Row>
+      )}
     </>
   );
 }

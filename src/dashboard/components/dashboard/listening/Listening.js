@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Col, Container, Row, Form, Button } from "react-bootstrap";
 import { __ } from "@wordpress/i18n";
 
@@ -15,6 +16,8 @@ import UpgradeToPro from "../../UpgradeToPro";
 import DefaultPlayerSettings from "./tts-providers/DefaultPlayerSettings";
 // TTS-314: player 3 (AtlasVoice TTS) is Free's own MP3 player.
 import AtlasVoiceTTSSettings from "./tts-providers/AtlasVoiceTTSSettings";
+// TTS-320: browser-voice sites are offered AtlasVoice TTS here.
+import AtlasVoiceTtsOffer from "../atlasvoice/AtlasVoiceTtsOffer";
 
 // Multilingual plugin basenames the add-on can map voices for (Pro feature).
 const MULTILINGUAL_PLUGINS = {
@@ -64,6 +67,9 @@ export default function Listening() {
   // Free owns player 1 only; player >= 2 is an add-on player (rendered by the
   // add-on into the #tts_listening_pro slot below).
   const isAddonPlayer = playerId >= 2 && addonActive;
+  // The admin notice's "Set up AtlasVoice TTS" opens the offer straight away.
+  const location = useLocation();
+  const setupRequested = new URLSearchParams(location.search).get("setup") === "atlasvoice-tts";
 
   // ── Load browser voices (player 1) ──────────────────────────────────
   useEffect(() => {
@@ -170,6 +176,14 @@ export default function Listening() {
             </p>
           </div>
 
+            {Number(playerId) === 1 && !addonActive && isLoaded && (
+              <AtlasVoiceTtsOffer
+                customizationSettings={customizationSettings}
+                listeningSettings={listeningSettings}
+                openOnLoad={setupRequested}
+              />
+            )}
+
             <Form onSubmit={handleSubmit}>
               {Number(playerId) === 3 ? (
                 <AtlasVoiceTTSSettings
@@ -183,6 +197,15 @@ export default function Listening() {
                   currentPlayerFilteredVoices={filteredVoices}
                   handleChange={handleChange}
                 />
+              )}
+
+              {!addonActive && (
+                <p className="small text-secondary mt-3 mb-0">
+                  {__("More voices? AtlasVoice Pro includes the AtlasVoice Cloud premium voices. It can also connect your own Google Cloud, ElevenLabs or OpenAI account; those companies bill you directly for what you use, and AtlasVoice charges nothing extra for them.", "text-to-audio")}{" "}
+                  <a href={proUrl("listening_voices")} target="_blank" rel="noopener noreferrer">
+                    {__("See AtlasVoice Pro", "text-to-audio")}
+                  </a>
+                </p>
               )}
 
               {multilingualPlugin && (

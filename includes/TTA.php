@@ -129,6 +129,8 @@ class TTA {
 
         $this->loader->add_action('template_redirect', $plugin_admin, 'serve_player_1_until_ready');
         $this->loader->add_action('admin_init', 'TTA\TTA_AtlasVoice_Service', 'maybe_recheck_approval');
+        // TTS-320: remember the version change once, for the "updated — roll back?" notice.
+        $this->loader->add_action('admin_init', 'TTA\TTA_Rollback', 'note_version', 5);
         // Publishes the one-time code while the site is being moved to another email.
         $this->loader->add_action('init', 'TTA\TTA_AtlasVoice_Service', 'serve_takeover_code', 1);
         $this->loader->add_action('wp_enqueue_scripts', $plugin_admin, 'enqueue_TTA', 99999);
@@ -142,6 +144,11 @@ class TTA {
         // TTS-240/249: CORS/CDN failure detector — enqueued (was inline <script>).
         $this->loader->add_action('wp_enqueue_scripts', $plugin_admin, 'enqueue_cors_detector', 1);
         $this->loader->add_action('wp_ajax_tta_toggle_audio', $plugin_admin, 'ajax_toggle_audio');
+
+        // TTS-320: "Roll back" on AtlasVoice's row (runs after the main file's own links).
+        $basename = plugin_basename(TEXT_TO_AUDIO_ROOT_FILE);
+        $this->loader->add_filter('plugin_action_links_' . $basename, $plugin_admin, 'add_rollback_action_link', 20);
+        $this->loader->add_filter('network_admin_plugin_action_links_' . $basename, $plugin_admin, 'add_rollback_action_link', 20);
 
         // Deactivation rescue modal on plugins.php (shows quick-fix options on the first deactivate click).
         $this->loader->add_action('admin_footer', $plugin_admin, 'render_deactivation_rescue_modal');

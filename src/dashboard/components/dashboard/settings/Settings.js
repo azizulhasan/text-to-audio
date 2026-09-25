@@ -21,6 +21,8 @@ import {ToggleSwitch, SettingRow, ProLockIcon} from "./SettingsPrimitives";
 // retired. Both surfaces removed; import dropped.
 import ScopeAccordion from "./ScopeAccordion";
 import LegacyExtractionSettings from "./LegacyExtractionSettings";
+// TTS-320: AtlasVoice TTS introduction / allowance at the top of Settings.
+import AtlasVoiceSettingsCard from "../atlasvoice/AtlasVoiceSettingsCard";
 
 export default function Settings() {
     const [settings, setSettings] = useState({
@@ -248,6 +250,7 @@ export default function Settings() {
             <Container fluid className="tta-container">
                 <Row>
                     <Col xs={12} lg={8}>
+                        <AtlasVoiceSettingsCard />
                         {/* Header Card */}
                         <div className="bg-white rounded p-3 mb-3 shadow-sm">
                             <div className="d-flex justify-content-between align-items-start">

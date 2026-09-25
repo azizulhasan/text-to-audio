@@ -1643,7 +1643,7 @@ class TTA_Helper
             'makesMp3'    => $makes_mp3,
             'isPublished' => 'publish' === $post->post_status,
             'rows'        => $rows,
-            'notices'     => array(),
+            'notices'     => self::atlasvoice_tts_panel_notices($post, $player_id, $makes_mp3, $rows),
             'notes'       => $notes,
             'canGenerate' => false,
             'generateUrl' => '',
@@ -1658,6 +1658,80 @@ class TTA_Helper
          * @param \WP_Post $post
          */
         return (array) apply_filters('atlasvoice_audio_panel_state', $state, $post);
+    }
+
+    /**
+     * TTS-320: what the site's voice means for this post, in the editor's
+     * AtlasVoice audio box. Status and a link to Listening only — upgrade
+     * buttons stay on AtlasVoice's own screens (wp.org Guideline 11).
+     *
+     * @param \WP_Post $post
+     * @param int      $player_id
+     * @param bool     $makes_mp3
+     * @param array    $rows
+     * @return array[] {type, text, link?}
+     */
+    private static function atlasvoice_tts_panel_notices($post, $player_id, $makes_mp3, $rows)
+    {
+        $service  = TTA_AtlasVoice_Service::class;
+        $listening = admin_url('admin.php?page=text-to-audio#/listening');
+
+        if (1 === $player_id && !$service::is_connected() && !is_atlasvoice_addon_functional()) {
+            return array(array(
+                'type' => 'info',
+                'text' => __('Want one natural voice for every visitor? Make an MP3 of this post for free with AtlasVoice TTS.', 'text-to-audio'),
+                'link' => array('url' => $listening . '?setup=atlasvoice-tts', 'label' => __('Set it up', 'text-to-audio')),
+            ));
+        }
+
+        if ($service::PLAYER_ID !== $player_id || !$makes_mp3) {
+            return array();
+        }
+
+        if ($service::is_pending_approval()) {
+            return array(array(
+                'type' => 'muted',
+                'text' => __('Waiting for your email confirmation. Audio is made once you click the link we sent.', 'text-to-audio'),
+            ));
+        }
+
+        $missing = false;
+        foreach ($rows as $row) {
+            if (!empty($row['expected']) && empty($row['url'])) {
+                $missing = true;
+                break;
+            }
+        }
+
+        $usage = $service::usage_summary();
+        if (!$missing || !in_array($usage['band'], array('low', 'out'), true)) {
+            return array();
+        }
+
+        $reset = date_i18n(get_option('date_format'), $usage['resets_at']);
+        $link  = array('url' => $listening, 'label' => __('See usage and options', 'text-to-audio'));
+
+        if ('out' === $usage['band']) {
+            return array(array(
+                'type' => 'warning',
+                /* translators: %s: date the monthly allowance resets. */
+                'text' => sprintf(__('This month’s AtlasVoice TTS allowance is used up. Visitors hear the browser voice on this post until %s; then it gets natural audio automatically.', 'text-to-audio'), $reset),
+                'link' => $link,
+            ));
+        }
+
+        // A rough size: what the post will cost once its audio is made.
+        $chars = (int) mb_strlen(trim(wp_strip_all_tags((string) $post->post_title . ' ' . strip_shortcodes((string) $post->post_content))));
+        if ($chars <= (int) $usage['left']) {
+            return array();
+        }
+
+        return array(array(
+            'type' => 'warning',
+            /* translators: 1: characters in this post, 2: characters left this month, 3: date the allowance resets. */
+            'text' => sprintf(__('This post needs about %1$s characters and %2$s are left this month. Visitors hear the browser voice on this post until %3$s.', 'text-to-audio'), number_format_i18n($chars), number_format_i18n((int) $usage['left']), $reset),
+            'link' => $link,
+        ));
     }
 
     /**

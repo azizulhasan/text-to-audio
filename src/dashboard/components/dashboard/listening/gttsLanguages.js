@@ -87,3 +87,24 @@ export const GTTS_LANGUAGES = {
     "et": "Estonian",
     "sq": "Albanian",
 };
+
+/**
+ * The AtlasVoice TTS language closest to the one the browser voice used, so a
+ * switched site keeps reading in its language (every player switch needs a
+ * language that player supports).
+ *
+ * @param {string} code e.g. "en-US".
+ * @returns {string}
+ */
+export function pickAtlasVoiceLanguage(code) {
+  const codes = Object.keys(GTTS_LANGUAGES);
+  const wanted = String(code || "").toLowerCase().replace("_", "-");
+  const base = wanted.split("-")[0];
+
+  return (
+    codes.find((c) => c.toLowerCase() === wanted) ||
+    codes.find((c) => c.toLowerCase() === base) ||
+    codes.find((c) => c.toLowerCase().split("-")[0] === base) ||
+    "en"
+  );
+}

@@ -218,6 +218,170 @@ class TTA_AtlasVoice_Service {
 	}
 
 	/**
+	 * Does the site owner still have to confirm the connection from their email?
+	 *
+	 * @return bool
+	 */
+	public static function is_pending_approval() {
+		return self::is_connected() && (bool) self::get()['pending_approval'];
+	}
+
+	/**
+	 * TTS-320: where the site stands with its monthly allowance, read from the
+	 * saved usage (never a remote call, so admin screens never wait on the
+	 * service). 'covered' = no monthly limit (Premium).
+	 *
+	 * @return string none|covered|ok|heads|low|out
+	 */
+	public static function usage_band() {
+		$state = self::get();
+		$usage = $state['usage'];
+
+		if ( ! self::is_connected() || $state['pending_approval'] || ! is_array( $usage ) || ! array_key_exists( 'chars_limit', $usage ) ) {
+			return 'none';
+		}
+		if ( null === $usage['chars_limit'] ) {
+			return 'covered';
+		}
+
+		$limit = (int) $usage['chars_limit'];
+		if ( $limit <= 0 ) {
+			return 'none';
+		}
+
+		$share = ( isset( $usage['chars_used'] ) ? (int) $usage['chars_used'] : 0 ) / $limit;
+
+		if ( $share >= 1 || self::is_exhausted() ) {
+			return 'out';
+		}
+		if ( $share >= 0.95 ) {
+			return 'low';
+		}
+		if ( $share >= 0.8 ) {
+			return 'heads';
+		}
+
+		return 'ok';
+	}
+
+	/**
+	 * TTS-320: the saved usage as the screens and notices show it.
+	 *
+	 * @return array{band:string, used:int, limit:int|null, left:int|null, resets_at:int, cycle:string, run_out:int}
+	 */
+	public static function usage_summary() {
+		$usage  = self::get()['usage'];
+		$usage  = is_array( $usage ) ? $usage : array();
+		$limit  = array_key_exists( 'chars_limit', $usage ) && null !== $usage['chars_limit'] ? (int) $usage['chars_limit'] : null;
+		$used   = isset( $usage['chars_used'] ) ? (int) $usage['chars_used'] : 0;
+		$resets = ! empty( $usage['resets_at'] ) ? (int) strtotime( (string) $usage['resets_at'] ) : 0;
+
+		return array(
+			'band'      => self::usage_band(),
+			'used'      => $used,
+			'limit'     => $limit,
+			'left'      => null === $limit ? null : max( 0, $limit - $used ),
+			'resets_at' => $resets,
+			// One key per allowance month: a dismissed warning comes back next month.
+			'cycle'     => $resets ? gmdate( 'Ymd', $resets ) : '',
+			'run_out'   => self::run_out_estimate( $used, $limit, $resets ),
+		);
+	}
+
+	/**
+	 * When the allowance runs out at this month's pace; 0 when it lasts until
+	 * the reset (or there is nothing to go on).
+	 *
+	 * @param int      $used
+	 * @param int|null $limit
+	 * @param int      $resets Unix time of the next reset.
+	 * @return int Unix time.
+	 */
+	private static function run_out_estimate( $used, $limit, $resets ) {
+		if ( null === $limit || $used <= 0 || ! $resets || $used >= $limit ) {
+			return 0;
+		}
+
+		// The allowance runs by calendar month: this one started a month before the reset.
+		$start   = (int) strtotime( '-1 month', $resets );
+		$elapsed = max( 0.5, ( time() - $start ) / DAY_IN_SECONDS );
+		$per_day = $used / $elapsed;
+		$when    = (int) ( time() + ( ( $limit - $used ) / $per_day ) * DAY_IN_SECONDS );
+
+		return $when < $resets ? $when : 0;
+	}
+
+	/**
+	 * TTS-320: the one upgrade button every allowance prompt shows.
+	 *
+	 * @return array{text:string, url:string}
+	 */
+	public static function upgrade_cta() {
+		$cta = self::get()['license_seats_full']
+			// A Pro customer whose licence covers other sites needs a seat, not Pro.
+			? array(
+				'text' => __( 'Add this site to your licence', 'text-to-audio' ),
+				'url'  => TTA_Helper::get_pro_url( 'admin', 'atlasvoice_tts_seats', 'pricing' ),
+			)
+			: array(
+				'text' => __( 'Go unlimited with Pro', 'text-to-audio' ),
+				'url'  => TTA_Helper::get_pro_url( 'admin', 'atlasvoice_tts_allowance', 'pricing' ),
+			);
+
+		/**
+		 * The upgrade button shown with the AtlasVoice TTS allowance warnings.
+		 *
+		 * @param array $cta {text, url}
+		 */
+		$cta = apply_filters( 'atlasvoice_upgrade_cta', $cta );
+
+		return array(
+			'text' => isset( $cta['text'] ) ? (string) $cta['text'] : '',
+			'url'  => isset( $cta['url'] ) ? esc_url_raw( (string) $cta['url'] ) : '',
+		);
+	}
+
+	/**
+	 * TTS-320: what the dashboard, the wizard and the widget show, from saved
+	 * options only.
+	 *
+	 * @return array
+	 */
+	public static function dashboard_summary() {
+		return array(
+			'connected'    => self::is_connected(),
+			'pending'      => self::is_pending_approval(),
+			'playerId'     => (int) get_player_id(),
+			'usage'        => self::usage_summary(),
+			'cta'          => self::upgrade_cta(),
+			'seatsFull'    => (bool) self::get()['license_seats_full'],
+			'termsUrl'     => 'https://atlasaidev.com/terms-and-conditions/',
+			'privacyUrl'   => 'https://atlasaidev.com/privacy-policy/',
+		);
+	}
+
+	/**
+	 * Count characters the service just billed, so warnings stay current
+	 * between usage refreshes. The service counts the whole account; the next
+	 * refresh (Listening, or ten minutes) replaces this estimate.
+	 *
+	 * @param int $chars
+	 */
+	private static function add_usage( $chars ) {
+		$usage = self::get()['usage'];
+		if ( $chars <= 0 || ! is_array( $usage ) || ! isset( $usage['chars_used'] ) ) {
+			return;
+		}
+
+		$usage['chars_used'] = (int) $usage['chars_used'] + $chars;
+		if ( isset( $usage['chars_remaining'] ) && null !== $usage['chars_remaining'] ) {
+			$usage['chars_remaining'] = max( 0, (int) $usage['chars_remaining'] - $chars );
+		}
+
+		self::put( array( 'usage' => $usage ) );
+	}
+
+	/**
 	 * What the Listening screen shows. Never includes the key itself.
 	 *
 	 * @return array
@@ -239,6 +403,8 @@ class TTA_AtlasVoice_Service {
 			'diagnostics' => self::diagnostics_offer(),
 			'serviceUrl'  => self::base_url(),
 			'dashboardUrl' => self::dashboard_url(),
+			'usageSummary' => self::usage_summary(),
+			'upgradeCta'  => self::upgrade_cta(),
 			'termsUrl'    => 'https://atlasaidev.com/terms-and-conditions/',
 			'privacyUrl'  => 'https://atlasaidev.com/privacy-policy/',
 		);
@@ -622,6 +788,9 @@ class TTA_AtlasVoice_Service {
 			if ( self::get()['pending_approval'] ) {
 				self::put( array( 'pending_approval' => false ) );
 			}
+			// TTS-320: the service reports what it billed; keep the warnings current.
+			$billed = isset( $result['headers']['x-atlasvoice-chars'] ) ? (int) $result['headers']['x-atlasvoice-chars'] : 0;
+			self::add_usage( $billed );
 
 			return array( 'ok' => true, 'audio' => $result['data'] );
 		}

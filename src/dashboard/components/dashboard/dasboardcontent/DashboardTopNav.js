@@ -1,11 +1,46 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { __ } from "@wordpress/i18n";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Icon from "../../Icon";
 import { pricingPageUrl } from "../../../proUrl";
 import DemoLink from "../../DemoLink";
+import WhatsNew from "../atlasvoice/WhatsNew";
 
 export default function DashboardTopNav() {
+  // TTS-320: What's New opens a short panel here instead of leaving for wordpress.org.
+  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
+  const [whatsNewSeen, setWhatsNewSeen] = useState(WhatsNew.isSeen());
+  const whatsNewRef = useRef(null);
+  const whatsNewButtonRef = useRef(null);
+  const location = useLocation();
+
+  useEffect(() => setWhatsNewOpen(false), [location.pathname]);
+
+  useEffect(() => {
+    if (!whatsNewOpen) {
+      return undefined;
+    }
+    const onKey = (e) => e.key === "Escape" && setWhatsNewOpen(false);
+    const onClick = (e) => {
+      const inside = [whatsNewRef.current, whatsNewButtonRef.current].some((el) => el && el.contains(e.target));
+      if (!inside) {
+        setWhatsNewOpen(false);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onClick);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onClick);
+    };
+  }, [whatsNewOpen]);
+
+  const toggleWhatsNew = () => {
+    setWhatsNewOpen((open) => !open);
+    WhatsNew.markSeen();
+    setWhatsNewSeen(true);
+  };
+
   return (
     <nav
       className="navbar navbar-expand navbar-style"
@@ -53,11 +88,12 @@ export default function DashboardTopNav() {
             overflow: "hidden",
           }}
         >
-          {/* What's New → the plugin changelog on the wp.org Developers tab. */}
-          <a
-            href="https://wordpress.org/plugins/text-to-audio/#developers"
-            target="_blank"
-            rel="noopener noreferrer"
+          {/* TTS-320: What's New opens an in-plugin panel (the changelog link is inside it). */}
+          <button
+            type="button"
+            ref={whatsNewButtonRef}
+            onClick={toggleWhatsNew}
+            aria-expanded={whatsNewOpen}
             className="btn d-flex align-items-center gap-2 tta-tab-style"
 
             // onMouseOver={(e) =>
@@ -177,8 +213,9 @@ export default function DashboardTopNav() {
                 />
               </svg>
             </span>
-            What's New
-          </a>
+            {__("What's New", "text-to-audio")}
+            {!whatsNewSeen && <span className="tta-whats-new-dot" aria-label={__("New", "text-to-audio")}></span>}
+          </button>
 
           {/* Upgrade to Pro */}
           {!ttsObj.is_atlasvoice_addon_functional && (
@@ -247,7 +284,7 @@ export default function DashboardTopNav() {
                   />
                 </svg>
               </span>
-              Upgrade to Pro
+              {__("Upgrade to Pro", "text-to-audio")}
             </a>
           )}
 
@@ -332,10 +369,15 @@ export default function DashboardTopNav() {
                 </defs>
               </svg>
             </span>
-            Support
+            {__("Support", "text-to-audio")}
           </a>
         </div>
       </div>
+      {whatsNewOpen && (
+        <div ref={whatsNewRef}>
+          <WhatsNew onClose={() => setWhatsNewOpen(false)} />
+        </div>
+      )}
     </nav>
   );
 }

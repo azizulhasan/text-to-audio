@@ -300,6 +300,11 @@ class TTA_Admin
         // dashboard's data-driven gates see Pro's capabilities when Pro is active.
         $this->localize_data['capabilities'] = (array) apply_filters( 'tts_capabilities', array() );
 
+        // TTS-320: AtlasVoice TTS status and the Versions tab, read from saved
+        // options only (no remote call while an admin page renders).
+        $this->localize_data['atlasvoiceTts'] = \TTA\TTA_AtlasVoice_Service::dashboard_summary();
+        $this->localize_data['canRollback']   = \TTA\TTA_Rollback::is_available();
+
         do_action('tta_enqueue_pro_dashboard_scripts');
 
         // Welcome wizard (separate bundle, only on first activation).
@@ -393,6 +398,16 @@ class TTA_Admin
                 'site_locale'       => get_locale(),
                 // TTS-247: use plugin_dir_url so renamed/symlinked installs work.
                 'plugin_url'        => untrailingslashit( plugin_dir_url( TEXT_TO_AUDIO_ROOT_FILE ) ),
+                // TTS-320: the voice step offers AtlasVoice TTS (connect in place).
+                'atlasvoice_tts'    => \TTA\TTA_AtlasVoice_Service::dashboard_summary(),
+                'admin_email'       => (string) get_option( 'admin_email' ),
+                /**
+                 * Extra voices the setup wizard's voice step can offer, as data:
+                 * each {id, player_id, tag, title, text, detail}. Pro adds its own.
+                 *
+                 * @param array[] $options
+                 */
+                'voice_options'     => array_values( (array) apply_filters( 'atlasvoice_wizard_voice_options', array() ) ),
             ) );
 
             wp_enqueue_script( 'tts-welcome-wizard' );
@@ -1714,6 +1729,38 @@ class TTA_Admin
      *
      * @since 2.2.0
      */
+    /**
+     * TTS-320: a "Roll back" link on AtlasVoice's row on the Plugins screen.
+     *
+     * @param string[] $links
+     * @return string[]
+     */
+    public function add_rollback_action_link( $links ) {
+        if ( ! \TTA\TTA_Rollback::is_available() ) {
+            return $links;
+        }
+
+        $link = sprintf(
+            '<a href="%s">%s</a>',
+            esc_url( \TTA\TTA_Rollback::screen_url() ),
+            esc_html__( 'Roll back', 'text-to-audio' )
+        );
+
+        // Just before Deactivate, where people look when an update breaks something.
+        if ( isset( $links['deactivate'] ) ) {
+            $deactivate = $links['deactivate'];
+            unset( $links['deactivate'] );
+            $links['atlasvoice_rollback'] = $link;
+            $links['deactivate']          = $deactivate;
+
+            return $links;
+        }
+
+        $links['atlasvoice_rollback'] = $link;
+
+        return $links;
+    }
+
     public function render_deactivation_rescue_modal() {
         global $pagenow;
         if ( 'plugins.php' !== $pagenow ) {
@@ -1735,6 +1782,15 @@ class TTA_Admin
                     <?php echo esc_html__( 'Many issues can be fixed in under 2 minutes:', 'text-to-audio' ); ?>
                 </p>
                 <ul style="margin:0 0 20px;padding:0;list-style:none;">
+                    <?php if ( \TTA\TTA_Rollback::is_available() ) : ?>
+                    <li style="margin-bottom:10px;font-size:14px;color:#1d2327;">
+                        <?php // TTS-320: an update broke something — going back is often faster than deactivating. ?>
+                        <?php echo esc_html__( 'Started after an update', 'text-to-audio' ); ?> &rarr;
+                        <a href="<?php echo esc_url( \TTA\TTA_Rollback::screen_url() ); ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">
+                            <?php echo esc_html__( 'Roll back to an earlier version', 'text-to-audio' ); ?>
+                        </a>
+                    </li>
+                    <?php endif; ?>
                     <li style="margin-bottom:10px;font-size:14px;color:#1d2327;">
                         <?php echo esc_html__( 'Voice not working', 'text-to-audio' ); ?> &rarr;
                         <a href="<?php echo esc_url( $docs_url ); ?>" style="color:#2271b1;text-decoration:none;font-weight:500;">

@@ -188,6 +188,46 @@ class TTA_Api_Routes {
 			)
 		);
 
+		// TTS-320: the Versions screen (rollback). Its own permission check:
+		// changing plugin files needs update_plugins, not manage_options.
+		register_rest_route(
+			$this->namespace,
+			'/versions',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'rollback_plan' ),
+					'permission_callback' => array( $this, 'rollback_access' ),
+				),
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'rollback_auto_update' ),
+					'permission_callback' => array( $this, 'rollback_access' ),
+					'args'                => array(
+						'plugin' => array( 'type' => 'string', 'required' => true, 'enum' => array( 'free', 'pro' ) ),
+						'on'     => array( 'type' => 'boolean', 'required' => true ),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/rollback',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'rollback_run' ),
+					'permission_callback' => array( $this, 'rollback_access' ),
+					'args'                => array(
+						'version'    => array( 'type' => 'string', 'required' => true, 'pattern' => '^\d+\.\d+\.\d+$' ),
+						'confirmed'  => array( 'type' => 'boolean', 'default' => false ),
+						'pause_auto' => array( 'type' => 'boolean', 'default' => true ),
+					),
+				),
+			)
+		);
+
 		// register track route.
 		register_rest_route(
 			$this->namespace,
@@ -1175,6 +1215,69 @@ class TTA_Api_Routes {
      *
      * @return \WP_REST_Response
      */
+    /**
+     * TTS-320: who may use the Versions screen. REST cookie auth already needs
+     * the nonce (without it the user counts as logged out).
+     *
+     * @return true|\WP_Error
+     */
+    public function rollback_access() {
+        if ( \TTA\TTA_Rollback::is_available() ) {
+            return true;
+        }
+
+        return new \WP_Error( 'rest_forbidden', __( 'You cannot change plugins on this site.', 'text-to-audio' ), array( 'status' => 403 ) );
+    }
+
+    /**
+     * TTS-320: older versions, each checked for this site.
+     *
+     * @return \WP_REST_Response
+     */
+    public function rollback_plan() {
+        return rest_ensure_response( array( 'status' => true, 'data' => \TTA\TTA_Rollback::plan() ) );
+    }
+
+    /**
+     * TTS-320: turn WordPress auto-updates on or off for Free or Pro.
+     *
+     * @param \WP_REST_Request $request
+     * @return \WP_REST_Response|\WP_Error
+     */
+    public function rollback_auto_update( $request ) {
+        $sources = \TTA\TTA_Rollback::sources();
+        $id      = (string) $request->get_param( 'plugin' );
+        if ( ! isset( $sources[ $id ] ) ) {
+            return new \WP_Error( 'unknown_plugin', __( 'That plugin is not installed.', 'text-to-audio' ), array( 'status' => 400 ) );
+        }
+
+        \TTA\TTA_Rollback::set_auto_update( $sources[ $id ]->plugin_file(), (bool) $request->get_param( 'on' ) );
+
+        return rest_ensure_response( array( 'status' => true, 'data' => \TTA\TTA_Rollback::plan() ) );
+    }
+
+    /**
+     * TTS-320: roll AtlasVoice (Free) back to an older version. Pro rolls
+     * itself back through its own route first when both are going back.
+     *
+     * @param \WP_REST_Request $request
+     * @return \WP_REST_Response|\WP_Error
+     */
+    public function rollback_run( $request ) {
+        $result = \TTA\TTA_Rollback::run_step(
+            'free',
+            (string) $request->get_param( 'version' ),
+            (bool) $request->get_param( 'confirmed' ),
+            (bool) $request->get_param( 'pause_auto' )
+        );
+
+        if ( is_wp_error( $result ) ) {
+            return $result;
+        }
+
+        return rest_ensure_response( array( 'status' => true ) );
+    }
+
     public function atlasvoice_service_state() {
         // Ask the service now, not the 10-minute cache: a key revoked in the
         // dashboard must show as disconnected the moment Listening opens.

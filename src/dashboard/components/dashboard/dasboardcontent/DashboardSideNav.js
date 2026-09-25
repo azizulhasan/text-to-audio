@@ -91,6 +91,15 @@ export default function DashboardSideNav({ isProVersion }) {
                 {__("Maintenance", "text-to-audio")}
               </NavLink>
             )}
+            {/* TTS-320: Versions — go back to an earlier version (needs update_plugins). */}
+            {window.tta_obj?.canRollback && (
+              <NavLink className={getNavLinkClass} to={"/versions"}>
+                <div className="sb-nav-link-icon">
+                  <span className="dashicons dashicons-backup"></span>
+                </div>
+                {__("Versions", "text-to-audio")}
+              </NavLink>
+            )}
             <NavLink className={getNavLinkClass} to={"/faq"}>
               <div className="sb-nav-link-icon">
                 <span className="dashicons dashicons-media-document"></span>

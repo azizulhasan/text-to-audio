@@ -39,6 +39,8 @@ const Aliases = lazy(() => import(/* webpackChunkName: "tab-aliases" */ './alias
 const Plugins = lazy(() => import(/* webpackChunkName: "tab-plugins" */ './plugins/Plugins.js'));
 // TTS-239: Maintenance tab — orphan temp-file cleanup (Pro-only).
 const Maintenance = lazy(() => import(/* webpackChunkName: "tab-maintenance" */ './maintenance/Maintenance.js'));
+// TTS-320: Versions — roll back an update (loaded only when opened).
+const Versions = lazy(() => import(/* webpackChunkName: "tab-versions" */ './versions/Versions.js'));
 
 function Dashboard() {
 	const [componentName, setComponentName] = useState(getComponentName());
@@ -98,6 +100,9 @@ function Dashboard() {
 									{/* TTS-239: Maintenance tab is Pro-only; route is registered only when Pro is active. */}
 									{isProVersion && (
 										<Route path='/maintenance' element={<Maintenance />} />
+									)}
+									{tta_obj.canRollback && (
+										<Route path='/versions' element={<Versions />} />
 									)}
 									<Route path='/faq' element={<Docs />} />
 									<Route path='/plugins' element={<Plugins />} />

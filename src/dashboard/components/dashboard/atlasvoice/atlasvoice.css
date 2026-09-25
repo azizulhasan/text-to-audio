@@ -1,0 +1,136 @@
+/* TTS-320: AtlasVoice TTS usage, launch cards and the Versions tab. */
+
+.tta-usage-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: #e9ecef;
+  overflow: hidden;
+}
+.tta-usage-bar > span {
+  display: block;
+  height: 100%;
+  background: #198754;
+  transition: width 0.25s ease;
+}
+.tta-usage-bar--heads > span { background: #ffc107; }
+.tta-usage-bar--low > span { background: #fd7e14; }
+.tta-usage-bar--out > span { background: #dc3545; }
+
+.tta-usage-alert {
+  border-radius: 4px;
+  padding: 12px 14px;
+  margin-top: 12px;
+  font-size: 14px;
+}
+.tta-usage-alert p { margin: 0 0 8px; }
+.tta-usage-alert p:last-child { margin-bottom: 0; }
+.tta-usage-alert--heads { background: #fff8e1; border: 1px solid #ffe29a; }
+.tta-usage-alert--low { background: #fff0e6; border: 1px solid #ffc9a8; }
+.tta-usage-alert--out { background: #fdecee; border: 1px solid #f5c2c7; }
+.tta-usage-alert .tta-usage-cta { margin-top: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tta-usage-bar > span { transition: none; }
+}
+
+.tta-launch-card {
+  background: #fff;
+  border: 1px solid #ffd2c2;
+  border-radius: 4px;
+  padding: 18px 20px;
+}
+.tta-launch-card ul { margin: 6px 0 14px; padding-left: 18px; }
+.tta-launch-chip {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 4px 7px;
+  border-radius: 3px;
+  background: #fff5f2;
+  color: #c9491f;
+}
+.tta-launch-btn {
+  background: #ff7853;
+  border: 1px solid #ff7853;
+  color: #fff;
+  padding: 7px 14px;
+  font-size: 14px;
+  border-radius: 4px;
+}
+.tta-launch-btn:hover,
+.tta-launch-btn:focus {
+  background: #e2603c;
+  border-color: #e2603c;
+  color: #fff;
+}
+.tta-outline-btn {
+  background: #fff !important;
+  color: #c9491f !important;
+  border: 1px solid #ff7853 !important;
+}
+.tta-compare {
+  background: #f8f9fc;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+/* Versions tab */
+.tta-versions-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+.tta-versions-row.is-selected { border-color: #ff7853; background: #fff5f2; }
+.tta-versions-row.is-blocked { cursor: default; background: #fafafa; border-style: dashed; }
+.tta-versions-row input { margin-top: 4px; accent-color: #ff7853; }
+.tta-status {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 3px;
+}
+.tta-status--safe { background: #d1e7dd; color: #0f5132; }
+.tta-status--changes { background: #fff3cd; color: #664d03; }
+.tta-status--blocked { background: #f8d7da; color: #842029; }
+.tta-versions-why { font-size: 13px; color: #842029; margin-top: 6px; }
+.tta-segment { display: inline-flex; flex-wrap: wrap; border: 1px solid #ff7853; border-radius: 3px; overflow: hidden; }
+.tta-segment button { border: 0; background: #fff; color: #c9491f; padding: 7px 12px; font-size: 14px; }
+.tta-segment button[aria-checked="true"] { background: #ff7853; color: #fff; }
+.tta-steps { list-style: none; padding: 0; margin: 0; }
+.tta-steps li { display: flex; gap: 10px; align-items: center; padding: 4px 0; color: #6c757d; }
+.tta-steps li.is-done, .tta-steps li.is-now { color: #212529; }
+.tta-steps li.is-now { font-weight: 600; }
+
+/* What's New */
+.tta-whats-new {
+  position: absolute;
+  right: 12px;
+  top: 100%;
+  margin-top: 6px;
+  width: min(380px, calc(100vw - 32px));
+  background: #fff;
+  color: #212529;
+  border-radius: 6px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.2);
+  padding: 16px;
+  z-index: 1050;
+  text-align: left;
+}
+.tta-whats-new h4 { font-size: 16px; margin: 0 0 6px; }
+.tta-whats-new .tta-whats-new__entry { border-top: 1px solid #eee; padding: 10px 0 6px; font-size: 14px; }
+.tta-whats-new-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ff7853;
+  margin-left: 4px;
+}

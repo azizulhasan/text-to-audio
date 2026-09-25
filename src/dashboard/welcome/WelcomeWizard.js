@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { __ } from '@wordpress/i18n';
 import { wizardFetch } from './wizardApi';
+import { pickAtlasVoiceLanguage } from '../components/dashboard/listening/gttsLanguages';
 import StepPostType from './steps/StepPostType';
 import StepVoice from './steps/StepVoice';
 import StepCustomize from './steps/StepCustomize';
@@ -41,6 +42,43 @@ const trackOnboardingEvent = (event, step = null, data = null) => {
  * Manages step navigation, aggregated state, and final save.
  * UI matches the Pro wizard layout: sticky header + progress bar + sticky footer.
  */
+/**
+ * TTS-320: the engine step 2 starts on — what the site uses now, or AtlasVoice
+ * TTS (recommended) for a Free site still on the browser voice.
+ */
+const initialEngine = () => {
+    const tts = wizardData.atlasvoice_tts || {};
+    const player = Number(tts.playerId || 1);
+    if (tts.connected && player === 3) {
+        return 'tts';
+    }
+    const option = (wizardData.voice_options || []).find((o) => Number(o.player_id) === player);
+    if (option) {
+        return option.id;
+    }
+    return wizardData.is_atlasvoice_addon_functional ? 'browser' : 'tts';
+};
+
+/**
+ * TTS-320: the player id the chosen engine uses.
+ *
+ * @param {string} engine
+ * @param {Object} currentCustomize Saved customize settings.
+ * @returns {number}
+ */
+const playerForEngine = (engine, currentCustomize) => {
+    if (engine === 'tts') {
+        return 3;
+    }
+    const option = (wizardData.voice_options || []).find((o) => o.id === engine);
+    if (option) {
+        return Number(option.player_id);
+    }
+    const current = Number((currentCustomize.buttonSettings || {}).id || 1);
+    // Leaving AtlasVoice TTS or a Pro voice for the browser voice.
+    return current === 1 || current === 2 ? current : 1;
+};
+
 const WelcomeWizard = () => {
     const [step, setStep] = useState(1);
 
@@ -75,7 +113,15 @@ const WelcomeWizard = () => {
             (wizardData.current_listening &&
                 wizardData.current_listening.tta__listening_volume) ||
             1,
+        // TTS-320: the voice engine picked in step 2 and, for AtlasVoice TTS,
+        // the connection details (nothing is sent before Connect and continue).
+        engine: initialEngine(),
+        email: wizardData.admin_email || '',
+        consent: false,
+        connectError: '',
     });
+    const [connecting, setConnecting] = useState(false);
+    const [ttsState, setTtsState] = useState(wizardData.atlasvoice_tts || {});
 
     const [customize, setCustomize] = useState({
         // TTS-258: the wizard's customize step always starts from a clean,
@@ -126,13 +172,20 @@ const WelcomeWizard = () => {
                 }),
                 wizardFetch('listening', {
                     tta__listening_voice: listening.voice,
-                    tta__listening_lang: listening.lang,
+                    // AtlasVoice TTS reads in one of its own languages.
+                    tta__listening_lang: listening.engine === 'tts'
+                        ? (listening.ttsLang || pickAtlasVoiceLanguage(listening.lang || wizardData.site_locale))
+                        : listening.lang,
                     tta__listening_pitch: listening.pitch,
                     tta__listening_rate: listening.rate,
                     tta__listening_volume: listening.volume,
                 }),
                 wizardFetch('customize', {
                     ...currentCustomize,
+                    buttonSettings: {
+                        ...(currentCustomize.buttonSettings || {}),
+                        id: playerForEngine(listening.engine, currentCustomize),
+                    },
                     backgroundColor: customize.backgroundColor,
                     color: customize.color,
                     border_color: customize.border_color,
@@ -193,7 +246,48 @@ const WelcomeWizard = () => {
     /* ------------------------------------------------------------------ */
     /*  Navigation                                                        */
     /* ------------------------------------------------------------------ */
-    const goNext = () => {
+    /**
+     * TTS-320: connect AtlasVoice TTS when leaving step 2 with it picked. The
+     * wizard never waits for the email confirmation.
+     *
+     * @returns {Promise<boolean>} true to move on.
+     */
+    const connectAtlasVoiceTts = async () => {
+        setConnecting(true);
+        setListening((l) => ({ ...l, connectError: '' }));
+        try {
+            const res = await fetch(wizardData.api_url + 'atlasvoice_service', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': wizardData.nonce },
+                body: JSON.stringify({ consent: true, email: listening.email }),
+            });
+            const json = await res.json();
+            if (json && json.status) {
+                setTtsState({ ...ttsState, connected: true, pending: !!(json.data && json.data.pendingApproval), playerId: 3 });
+                return true;
+            }
+            const message = json && json.code === 'project_exists'
+                ? __('This site is already connected to another AtlasVoice account. Finish setup with the browser voice, then move the site to your email in Listening.', 'text-to-audio')
+                : (json && json.message) || __('Could not connect. Please try again.', 'text-to-audio');
+            setListening((l) => ({ ...l, connectError: message }));
+            return false;
+        } catch (e) {
+            setListening((l) => ({ ...l, connectError: __('Could not connect. Please try again.', 'text-to-audio') }));
+            return false;
+        } finally {
+            setConnecting(false);
+        }
+    };
+
+    const needsConnect = step === 2 && listening.engine === 'tts' && !ttsState.connected;
+    const nextBlocked = needsConnect && (!listening.consent || !listening.email);
+
+    const goNext = async () => {
+        if (needsConnect && !(await connectAtlasVoiceTts())) {
+            return;
+        }
+
         // Track step completion (fire-and-forget).
         trackOnboardingEvent('step_completed', step);
 
@@ -216,6 +310,11 @@ const WelcomeWizard = () => {
             return saving
                 ? __('Saving...', 'text-to-audio')
                 : __('Finish Setup', 'text-to-audio');
+        }
+        if (needsConnect) {
+            return connecting
+                ? __('Connecting…', 'text-to-audio')
+                : __('Connect and continue', 'text-to-audio');
         }
         const labels = {
             1: __('Next: Choose Voice', 'text-to-audio'),
@@ -244,6 +343,7 @@ const WelcomeWizard = () => {
                     <StepVoice
                         data={listening}
                         onChange={setListening}
+                        ttsState={ttsState}
                     />
                 );
             case 3:
@@ -351,10 +451,10 @@ const WelcomeWizard = () => {
                         ) : <div />}
                         <button
                             onClick={goNext}
-                            disabled={saving}
+                            disabled={saving || connecting || nextBlocked}
                             style={{
                                 ...styles.nextBtn,
-                                opacity: saving ? 0.6 : 1,
+                                opacity: saving || connecting || nextBlocked ? 0.6 : 1,
                             }}
                             onMouseEnter={(e) => { if (!saving) e.currentTarget.style.background = '#ff5533'; }}
                             onMouseLeave={(e) => { e.currentTarget.style.background = '#FF7853'; }}

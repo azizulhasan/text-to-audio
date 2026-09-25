@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { __ } from '@wordpress/i18n';
 import { getDemoText } from '../demoTexts';
 import { proUrl } from '../../proUrl';
+import { GTTS_LANGUAGES, pickAtlasVoiceLanguage } from '../../components/dashboard/listening/gttsLanguages';
 
 const wizardData = window.ttsWizardData || {};
 
@@ -12,7 +13,7 @@ const wizardData = window.ttsWizardData || {};
  * @param {Object}   props.data     - { voice, lang, pitch, rate, volume }
  * @param {Function} props.onChange  - Receives updated data object.
  */
-const StepVoice = ({ data, onChange }) => {
+const StepVoice = ({ data, onChange, ttsState }) => {
     const [voices, setVoices] = useState([]);
     const [speaking, setSpeaking] = useState(false);
     const utteranceRef = useRef(null);
@@ -199,7 +200,7 @@ const StepVoice = ({ data, onChange }) => {
             marginTop: 28,
         },
         card: (isActive) => ({
-            flex: 1,
+            flex: '1 1 200px',
             padding: '20px',
             borderRadius: 8,
             border: isActive
@@ -239,130 +240,228 @@ const StepVoice = ({ data, onChange }) => {
         },
     };
 
+    // TTS-320: which voice engine the site will use. AtlasVoice TTS is the
+    // recommended free option; the browser voice needs no sign-up; Pro adds
+    // its own options as data (wizardData.voice_options). Free shows Pro only
+    // as an information card, never as an option that does nothing.
+    const tts = ttsState || wizardData.atlasvoice_tts || {};
+    const proOptions = Array.isArray(wizardData.voice_options) ? wizardData.voice_options : [];
+    const engine = data.engine || 'browser';
+    const setEngine = (next) => onChange({ ...data, engine: next, connectError: '' });
+    const activeProOption = proOptions.find((o) => Number(o.player_id) === Number(tts.playerId));
+    const currentEngine = tts.connected && Number(tts.playerId) === 3
+        ? 'tts'
+        : activeProOption ? activeProOption.id : 'browser';
+
+    const tagFor = (id, fallback) => (id === currentEngine ? __('Currently active', 'text-to-audio') : fallback);
+
+    const renderCard = (id, tag, title, text, extra = null) => (
+        <button
+            key={id}
+            type="button"
+            role="radio"
+            aria-checked={engine === id}
+            onClick={() => setEngine(id)}
+            style={{ ...styles.card(engine === id), textAlign: 'left', cursor: 'pointer', font: 'inherit' }}
+        >
+            <span style={styles.cardBadge(engine === id)}>{tag}</span>
+            <h3 style={styles.cardTitle}>{title}</h3>
+            <p style={styles.cardText}>{text}</p>
+            {extra}
+        </button>
+    );
+
+    const ttsLang = data.ttsLang || pickAtlasVoiceLanguage(data.lang || wizardData.site_locale);
+
     return (
         <div>
             <h2 style={styles.heading}>
-                {__('Choose your voice and language', 'text-to-audio')}
+                {__('How should your posts sound?', 'text-to-audio')}
             </h2>
             <p style={styles.description}>
-                {__(
-                    'Select a browser voice for your audio player. Visitors will hear content read aloud using the Web Speech API.',
-                    'text-to-audio'
-                )}
+                {__('Pick how visitors will hear your posts. You can change this any time in Listening.', 'text-to-audio')}
             </p>
 
-            {/* Language dropdown */}
-            <div style={styles.fieldGroup}>
-                <label style={styles.label} htmlFor="tts_wiz_lang">
-                    {__('Language', 'text-to-audio')}
-                </label>
-                <select
-                    id="tts_wiz_lang"
-                    style={styles.select}
-                    value={data.lang}
-                    onChange={(e) => handleLangChange(e.target.value)}
-                >
-                    <option value="">
-                        {__('All Languages', 'text-to-audio')}
-                    </option>
-                    {uniqueLangs.map((lang) => (
-                        <option key={lang} value={lang}>
-                            {lang}
-                        </option>
-                    ))}
-                </select>
+            <div role="radiogroup" aria-label={__('Voice', 'text-to-audio')} style={{ ...styles.cardsRow, flexWrap: 'wrap', marginTop: 0, marginBottom: 24 }}>
+                {renderCard(
+                    'tts',
+                    tagFor('tts', tts.connected ? __('Connected', 'text-to-audio') : __('Recommended', 'text-to-audio')),
+                    __('AtlasVoice TTS — Natural voice', 'text-to-audio'),
+                    __('The same natural voice for every visitor, saved as an MP3. Free for 100,000 characters a month (about 15 posts). Needs your email.', 'text-to-audio')
+                )}
+                {renderCard(
+                    'browser',
+                    tagFor('browser', __('No sign-up', 'text-to-audio')),
+                    __('Browser Voices (Free)', 'text-to-audio'),
+                    __('Good for basic accessibility. Quality depends on the visitor\'s browser and device.', 'text-to-audio')
+                )}
+                {proOptions.map((option) => renderCard(
+                    option.id,
+                    tagFor(option.id, option.tag),
+                    option.title,
+                    option.text
+                ))}
+                {!wizardData.is_atlasvoice_addon_functional && (
+                    <div style={{ ...styles.card(false), textAlign: 'left' }}>
+                        <span style={styles.cardBadge(false)}>{__('Pro', 'text-to-audio')}</span>
+                        <h3 style={styles.cardTitle}>{__('AtlasVoice Cloud — Premium voices', 'text-to-audio')}</h3>
+                        <p style={styles.cardText}>
+                            {__('Premium natural voices, included in the Pro licence. Pro can also connect your own Google Cloud, ElevenLabs or OpenAI account; those companies bill you directly.', 'text-to-audio')}{' '}
+                            <a href={proUrl('voice_step')} target="_blank" rel="noopener noreferrer" style={styles.link}>
+                                {__('Upgrade to Pro', 'text-to-audio')}
+                            </a>
+                        </p>
+                    </div>
+                )}
             </div>
 
-            {/* Voice dropdown */}
-            <div style={styles.fieldGroup}>
-                <label style={styles.label} htmlFor="tts_wiz_voice">
-                    {__('Voice', 'text-to-audio')}
-                </label>
-                <select
-                    id="tts_wiz_voice"
-                    style={styles.select}
-                    value={data.voice}
-                    onChange={(e) => handleVoiceChange(e.target.value)}
-                >
-                    {filteredVoices.length === 0 && (
-                        <option value="">
-                            {__('Loading voices...', 'text-to-audio')}
-                        </option>
-                    )}
-                    {filteredVoices.map((v) => (
-                        <option key={v.name} value={v.name}>
-                            {v.name} ({v.lang})
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            {/* Preview button */}
-            <button
-                type="button"
-                style={styles.previewBtn(speaking)}
-                onClick={speaking ? handleStop : handlePreview}
-                onMouseEnter={(e) => {
-                    if (!speaking) {
-                        e.currentTarget.style.backgroundColor = '#ff5533';
-                    }
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = speaking
-                        ? '#d63638'
-                        : '#FF7853';
-                }}
-            >
-                <span style={{ fontSize: 16 }}>
-                    {speaking ? '\u25A0' : '\u25B6'}
-                </span>
-                {speaking
-                    ? __('Stop Preview', 'text-to-audio')
-                    : __('Preview Voice', 'text-to-audio')}
-            </button>
-
-            {/* Info cards */}
-            <div style={styles.cardsRow}>
-                {/* Browser voices card */}
-                <div style={styles.card(true)}>
-                    <span style={styles.cardBadge(true)}>
-                        {__('Currently Active', 'text-to-audio')}
-                    </span>
-                    <h3 style={styles.cardTitle}>
-                        {__('Browser Voices (Free)', 'text-to-audio')}
-                    </h3>
-                    <p style={styles.cardText}>
-                        {__(
-                            'Good for basic accessibility. Quality depends on visitor\'s browser and device.',
-                            'text-to-audio'
-                        )}
-                    </p>
-                </div>
-
-                {/* AI voices card */}
-                <div style={styles.card(false)}>
-                    <span style={styles.cardBadge(false)}>
-                        {__('Pro', 'text-to-audio')}
-                    </span>
-                    <h3 style={styles.cardTitle}>
-                        {__('AI Voices — Natural & Consistent', 'text-to-audio')}
-                    </h3>
-                    <p style={styles.cardText}>
-                        {__(
-                            'Google Cloud TTS, ElevenLabs, ChatGPT TTS. 200+ premium voices. Same quality for every visitor.',
-                            'text-to-audio'
-                        )}{' '}
-                        <a
-                            href={proUrl('voice_step')}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={styles.link}
+            {engine === 'tts' && (
+                <div>
+                    <div style={styles.fieldGroup}>
+                        <label style={styles.label} htmlFor="tts_wiz_tts_lang">
+                            {__('Language', 'text-to-audio')}
+                        </label>
+                        <select
+                            id="tts_wiz_tts_lang"
+                            style={styles.select}
+                            value={ttsLang}
+                            onChange={(e) => onChange({ ...data, ttsLang: e.target.value })}
                         >
-                            {__('Upgrade to Pro', 'text-to-audio')}
-                        </a>
-                    </p>
+                            {Object.entries(GTTS_LANGUAGES).map(([code, name]) => (
+                                <option key={code} value={code}>{name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {tts.connected ? (
+                        <p style={styles.cardText}>
+                            {tts.pending
+                                ? __('Connected. Confirm the email we sent you; visitors hear the browser voice until then.', 'text-to-audio')
+                                : __('This site is connected to AtlasVoice TTS.', 'text-to-audio')}
+                        </p>
+                    ) : (
+                        <div style={{ background: '#fff5f2', border: '1px solid #ffd2c2', borderRadius: 6, padding: 16 }}>
+                            <div style={styles.fieldGroup}>
+                                <label style={styles.label} htmlFor="tts_wiz_email">
+                                    {__('Email for your free AtlasVoice account', 'text-to-audio')}
+                                </label>
+                                <input
+                                    id="tts_wiz_email"
+                                    type="email"
+                                    style={{ ...styles.select, backgroundImage: 'none', cursor: 'text' }}
+                                    value={data.email || ''}
+                                    onChange={(e) => onChange({ ...data, email: e.target.value })}
+                                />
+                            </div>
+                            <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, color: '#1d2327' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={!!data.consent}
+                                    onChange={(e) => onChange({ ...data, consent: e.target.checked })}
+                                    style={{ marginTop: 3 }}
+                                />
+                                <span>
+                                    {__('I agree to send this site\'s address, the text of posts I make audio for, and this email to the AtlasVoice service to create audio.', 'text-to-audio')}{' '}
+                                    <a href={tts.termsUrl} target="_blank" rel="noopener noreferrer" style={styles.link}>{__('Terms', 'text-to-audio')}</a>
+                                    {' · '}
+                                    <a href={tts.privacyUrl} target="_blank" rel="noopener noreferrer" style={styles.link}>{__('Privacy', 'text-to-audio')}</a>
+                                </span>
+                            </label>
+                            <p style={{ ...styles.cardText, marginTop: 10 }}>
+                                {__('We\'ll email you a link. Keep going with the setup in the meantime; visitors hear the browser voice until you click it. Nothing is sent until you press Connect and continue.', 'text-to-audio')}
+                            </p>
+                            {data.connectError && (
+                                <p style={{ ...styles.cardText, color: '#b32d2e', marginTop: 8 }}>{data.connectError}</p>
+                            )}
+                            <button
+                                type="button"
+                                onClick={() => setEngine('browser')}
+                                style={{ background: 'none', border: 0, padding: 0, marginTop: 10, color: '#50575e', textDecoration: 'underline', cursor: 'pointer', fontSize: 13 }}
+                            >
+                                {__('Use the browser voice for now', 'text-to-audio')}
+                            </button>
+                        </div>
+                    )}
                 </div>
-            </div>
+            )}
+
+            {engine === 'browser' && (
+                <div>
+                    {/* Language dropdown */}
+                    <div style={styles.fieldGroup}>
+                        <label style={styles.label} htmlFor="tts_wiz_lang">
+                            {__('Language', 'text-to-audio')}
+                        </label>
+                        <select
+                            id="tts_wiz_lang"
+                            style={styles.select}
+                            value={data.lang}
+                            onChange={(e) => handleLangChange(e.target.value)}
+                        >
+                            <option value="">
+                                {__('All Languages', 'text-to-audio')}
+                            </option>
+                            {uniqueLangs.map((lang) => (
+                                <option key={lang} value={lang}>
+                                    {lang}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Voice dropdown */}
+                    <div style={styles.fieldGroup}>
+                        <label style={styles.label} htmlFor="tts_wiz_voice">
+                            {__('Voice', 'text-to-audio')}
+                        </label>
+                        <select
+                            id="tts_wiz_voice"
+                            style={styles.select}
+                            value={data.voice}
+                            onChange={(e) => handleVoiceChange(e.target.value)}
+                        >
+                            {filteredVoices.length === 0 && (
+                                <option value="">
+                                    {__('Loading voices...', 'text-to-audio')}
+                                </option>
+                            )}
+                            {filteredVoices.map((v) => (
+                                <option key={v.name} value={v.name}>
+                                    {v.name} ({v.lang})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Preview button */}
+                    <button
+                        type="button"
+                        style={styles.previewBtn(speaking)}
+                        onClick={speaking ? handleStop : handlePreview}
+                        onMouseEnter={(e) => {
+                            if (!speaking) {
+                                e.currentTarget.style.backgroundColor = '#ff5533';
+                            }
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = speaking
+                                ? '#d63638'
+                                : '#FF7853';
+                        }}
+                    >
+                        <span style={{ fontSize: 16 }}>
+                            {speaking ? '■' : '▶'}
+                        </span>
+                        {speaking
+                            ? __('Stop Preview', 'text-to-audio')
+                            : __('Preview Voice', 'text-to-audio')}
+                    </button>
+                </div>
+            )}
+
+            {proOptions.filter((o) => o.id === engine && o.detail).map((option) => (
+                <p key={option.id} style={styles.cardText}>{option.detail}</p>
+            ))}
         </div>
     );
 };
