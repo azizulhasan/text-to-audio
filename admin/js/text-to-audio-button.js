@@ -786,8 +786,7 @@ class TTSPlayButton extends HTMLElement {
         // win over theme rules and don't leak out; a defensive typography reset
         // (see getLightDomReset) blocks the few inheritable props theme rules
         // could otherwise bleed in.
-        const playerId = parseInt(window?.ttsObj?.player_id || 1, 10);
-        this.useLightDom = (playerId === 1);
+        this.useLightDom = this.usesLightDom();
         const shadow = this.useLightDom
             ? this
             : this.attachShadow({mode: 'open'});
@@ -809,6 +808,29 @@ class TTSPlayButton extends HTMLElement {
                 }
             } // end loop
         }
+    }
+
+    /**
+     * Player 1 renders into the light DOM; players 2-6 keep a shadow root.
+     *
+     * @return {boolean}
+     */
+    usesLightDom() {
+        return parseInt(window?.ttsObj?.player_id || 1, 10) === 1;
+    }
+
+    /**
+     * The player whose text and icon overrides this button shows.
+     *
+     * @return {number|string}
+     */
+    buttonPlayerId() {
+        return window?.ttsObj?.player_id || 1;
+    }
+
+    /** Count this player as shown. */
+    trackInit() {
+        this.analytics.trackInit();
     }
 
     /**
@@ -838,7 +860,7 @@ class TTSPlayButton extends HTMLElement {
         // TTS-267: wire up the floating placement now that the button exists.
         this.initFloatingPosition();
 
-        this.analytics.trackInit();
+        this.trackInit();
 
         // Button click handler (for play/pause area only)
         const handlePlayClick = (e) => {
@@ -897,7 +919,7 @@ class TTSPlayButton extends HTMLElement {
         const textColor = colors.color || '#ffffff';
 
         // TTS-241 — resolve text + icon from per-player overrides first.
-        const playerId = window?.ttsObj?.player_id || 1;
+        const playerId = this.buttonPlayerId();
         // TTS-270: PHP has already applied the full precedence chain for THIS
         // button — instance attribute → per-player → flat → default →
         // tta__button_text_arr filter — so prefer its result and keep one
@@ -1338,17 +1360,48 @@ class TTSPlayButton extends HTMLElement {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    // TTS-290: the element renders in its constructor from window.TTS, so the
-    // payload MUST be hydrated before the definition upgrades the elements
-    // already in the document. Doing it here (rather than relying on the PHP
-    // inline hydrator's own DOMContentLoaded listener being registered first)
-    // is what makes the player immune to optimizers that delay inline JS.
-    // No-ops when the hydrator already ran.
-    hydrateAtlasVoicePayloads();
-
-    // Define the new element
-    if (!customElements.get('tts-play-button')) {
-        customElements.define('tts-play-button', TTSPlayButton);
+/**
+ * TTS-314: player 1's button standing in for player 3 (AtlasVoice TTS) when its
+ * audio cannot be made (allowance used up, site not connected…). The MP3 player
+ * loads this bundle only then, so the visitor gets player 1's real button,
+ * settings included, not a bare look-alike.
+ */
+class AtlasVoiceFallbackButton extends TTSPlayButton {
+    // Player 1's look, whatever player the page is set to.
+    usesLightDom() {
+        return true;
     }
-});
+
+    buttonPlayerId() {
+        return 1;
+    }
+
+    // The MP3 player already counted this view.
+    trackInit() {}
+
+    // Stays in the MP3 player's place instead of floating.
+    initFloatingPosition() {}
+}
+
+// Loaded by the MP3 player's fallback, register only the stand-in: defining
+// <tts-play-button> here would turn every MP3 player on the page into one.
+if (document.currentScript?.dataset?.atlasvoiceRole === 'fallback') {
+    if (!customElements.get('atlasvoice-fallback-button')) {
+        customElements.define('atlasvoice-fallback-button', AtlasVoiceFallbackButton);
+    }
+} else {
+    document.addEventListener('DOMContentLoaded', function () {
+        // TTS-290: the element renders in its constructor from window.TTS, so the
+        // payload MUST be hydrated before the definition upgrades the elements
+        // already in the document. Doing it here (rather than relying on the PHP
+        // inline hydrator's own DOMContentLoaded listener being registered first)
+        // is what makes the player immune to optimizers that delay inline JS.
+        // No-ops when the hydrator already ran.
+        hydrateAtlasVoicePayloads();
+
+        // Define the new element
+        if (!customElements.get('tts-play-button')) {
+            customElements.define('tts-play-button', TTSPlayButton);
+        }
+    });
+}

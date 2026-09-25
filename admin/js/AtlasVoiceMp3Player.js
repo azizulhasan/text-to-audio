@@ -24,6 +24,12 @@ const MAX_LOCK_RETRIES = 12;
 // the account owner.
 const FALLBACK_CODES = ['not_connected', 'quota_exceeded', 'player_not_active', 'invalid_api_key', 'approval_required'];
 
+/** Player 1's button, registered under this name when loaded for a fallback. */
+const FALLBACK_BUTTON_TAG = 'atlasvoice-fallback-button';
+
+/** Give up on player 1's bundle after this long and use the plain button. */
+const FALLBACK_LOAD_TIMEOUT = 8000;
+
 /** One id per tab: the server's per-post lock tells two visitors apart with it. */
 function visitorId() {
     const key = 'atlasvoice_mp3_visitor';
@@ -174,6 +180,11 @@ export class AtlasVoiceMp3Player {
     }
 
     async generateAndPlay() {
+        // Fetch player 1's button while the audio is being made: if it cannot be
+        // made, the fallback starts reading at once, while the browser still
+        // counts the visitor's click as the reason to speak.
+        AtlasVoiceMp3Player.loadFallbackButton().catch(() => {});
+
         if (!this.generating) {
             this.generating = this.generate().finally(() => { this.generating = null; });
         }
@@ -280,6 +291,51 @@ export class AtlasVoiceMp3Player {
             return;
         }
 
+        AtlasVoiceMp3Player.loadFallbackButton()
+            .then(() => this.mountFallbackButton())
+            .catch(() => this.mountBrowserVoice());
+
+        /**
+         * Lets a site react when player 3 falls back to the browser voice
+         * (e.g. to show its own message). Receives the reason code.
+         */
+        wp.hooks.doAction('atlasvoice.mp3Player.fallback', code, this);
+    }
+
+    /**
+     * Player 1's real button (settings included) in place of the MP3 player,
+     * reading right away: the visitor already pressed play.
+     */
+    mountFallbackButton() {
+        // Built in a template so data-id is set before the element is upgraded:
+        // the button renders from it in its constructor.
+        const tpl = document.createElement('template');
+        tpl.innerHTML = `<${FALLBACK_BUTTON_TAG}></${FALLBACK_BUTTON_TAG}>`;
+        const button = tpl.content.firstElementChild;
+        button.setAttribute('data-id', this.buttonId);
+        // Player 1's host classes, so player 1's stylesheet lays it out.
+        button.className = 'tts_play_button tts-play-button';
+        button.setAttribute('role', 'region');
+        button.setAttribute('aria-label', __('Text to speech player', 'text-to-audio'));
+
+        try { this.plyr.destroy(); } catch (e) { /* already gone */ }
+        this.wrapper.innerHTML = '';
+        this.wrapper.append(button);
+
+        if (!button.buttonId) {
+            // No text for this slot: the stand-in drew nothing.
+            button.remove();
+            this.mountBrowserVoice();
+            return;
+        }
+        button.click();
+    }
+
+    /**
+     * Last resort when player 1's bundle cannot be loaded: read with the
+     * browser-voice class already on the page, behind a plain button.
+     */
+    mountBrowserVoice() {
         const Speaker = window.TextToSpeech;
         if (typeof Speaker !== 'function' || !('speechSynthesis' in window)) {
             this.showStatus(__('Audio is not available right now. Please try again later.', 'text-to-audio'));
@@ -308,12 +364,48 @@ export class AtlasVoiceMp3Player {
 
         // Start reading right away: the visitor already pressed play.
         speaker._init(null, true);
+    }
 
-        /**
-         * Lets a site react when player 3 falls back to the browser voice
-         * (e.g. to show its own message). Receives the reason code.
-         */
-        wp.hooks.doAction('atlasvoice.mp3Player.fallback', code, this);
+    /**
+     * Load player 1's button bundle once per page, on demand: pages whose
+     * posts already have audio never download it.
+     *
+     * @return {Promise<void>} Resolves once the stand-in element is defined.
+     */
+    static loadFallbackButton() {
+        if (!AtlasVoiceMp3Player.fallbackButtonLoading) {
+            AtlasVoiceMp3Player.fallbackButtonLoading = new Promise((resolve, reject) => {
+                if (customElements.get(FALLBACK_BUTTON_TAG)) {
+                    resolve();
+                    return;
+                }
+                const src = window.ttsObj?.fallback_button_script;
+                if (!src) {
+                    reject(new Error('No fallback button script.'));
+                    return;
+                }
+                const timer = setTimeout(() => reject(new Error('Fallback button script timed out.')), FALLBACK_LOAD_TIMEOUT);
+                const script = document.createElement('script');
+                script.src = src;
+                script.async = true;
+                // Tells the bundle to register only the stand-in element.
+                script.dataset.atlasvoiceRole = 'fallback';
+                script.onload = () => customElements.whenDefined(FALLBACK_BUTTON_TAG).then(() => {
+                    clearTimeout(timer);
+                    resolve();
+                });
+                script.onerror = () => {
+                    clearTimeout(timer);
+                    reject(new Error('Fallback button script failed to load.'));
+                };
+                document.head.append(script);
+            });
+            // A failed load may succeed on the next fallback.
+            AtlasVoiceMp3Player.fallbackButtonLoading.catch(() => {
+                AtlasVoiceMp3Player.fallbackButtonLoading = null;
+            });
+        }
+        return AtlasVoiceMp3Player.fallbackButtonLoading;
     }
 
     /**

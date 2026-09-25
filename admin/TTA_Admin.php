@@ -693,6 +693,16 @@ class TTA_Admin
         );
         wp_set_script_translations('atlasvoice-mp3-player', 'text-to-audio', plugin_dir_path(dirname(__FILE__)) . 'languages');
 
+        // The player 1 button a fallback loads on demand is not enqueued, so
+        // WordPress never prints its translations. Registering it lets core
+        // build them, and they ride along with this bundle instead.
+        wp_register_script('text-to-audio-button', plugin_dir_url(__FILE__) . 'js/build/text-to-audio-button.min.js', array('wp-hooks', 'wp-i18n'), $this->asset_version('js/build/text-to-audio-button.min.js'), true);
+        wp_set_script_translations('text-to-audio-button', 'text-to-audio', plugin_dir_path(dirname(__FILE__)) . 'languages');
+        $button_translations = wp_scripts()->print_translations('text-to-audio-button', false);
+        if ($button_translations) {
+            wp_add_inline_script('atlasvoice-mp3-player', $button_translations, 'before');
+        }
+
         // The per-post payload hydrator (TTS-270) builds window.TTS; attach it to
         // this bundle too, since player 1's bundle is not loaded for player 3.
         add_filter('tts_button_inline_handles', static function ($handles) {
@@ -814,12 +824,23 @@ class TTA_Admin
         );
 
         if ($player_id > 1) {
+            $renders_mp3_player = self::renders_mp3_player($player_id);
+            if ($renders_mp3_player) {
+                // TTS-314: player 1's button bundle, loaded by the MP3 player only
+                // when a post's audio cannot be made (never enqueued up front).
+                $frontend_localize_data['fallback_button_script'] = add_query_arg(
+                    'ver',
+                    $this->asset_version('js/build/text-to-audio-button.min.js'),
+                    plugin_dir_url(__FILE__) . 'js/build/text-to-audio-button.min.js'
+                );
+            }
+
             wp_enqueue_script('TextToSpeech', plugin_dir_url(__FILE__) . 'js/build/TextToSpeech.min.js', $dependencies, $this->asset_version('js/build/TextToSpeech.min.js'), true);
             wp_localize_script('TextToSpeech', 'ttsObj', $frontend_localize_data);
             // TTS-264: load JS translations for the bundled selection-control strings.
             wp_set_script_translations('TextToSpeech', 'text-to-audio', plugin_dir_path(dirname(__FILE__)) . 'languages');
 
-            if (self::renders_mp3_player($player_id)) {
+            if ($renders_mp3_player) {
                 $this->enqueue_mp3_player();
             }
         } else if ($player_id == 1) {
