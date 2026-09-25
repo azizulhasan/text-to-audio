@@ -31,6 +31,16 @@ const sourceToBuiltMap = {
     // actually looks for is md5('admin/js/build/text-to-audio-button.js'). The
     // dashboard entry above follows the same convention.
     'admin/js/text-to-audio-button.js': ['admin/js/build/text-to-audio-button.js'],
+    // TTS-321: the progressive-play base is bundled into TextToSpeech.js (Pro's
+    // MP3 players extend it there) and Free's player 3; not the player-1 bundle.
+    // Listed before 'admin/js/tts/', which would otherwise match first.
+    'admin/js/tts/AtlasVoiceProgressivePlayer.js': [
+        'admin/js/build/TextToSpeech.js',
+        'admin/js/build/atlasvoice-mp3-player.js',
+    ],
+    // TTS-321: Free's player 3 (TTS-314) had no mapping, so its strings were
+    // written under the source name, which no enqueued handle ever requests.
+    'admin/js/AtlasVoiceMp3Player.js': ['admin/js/build/atlasvoice-mp3-player.js'],
     // TTS-296: selection-control and the rest of admin/js/tts/ are bundled into
     // BOTH the player-1 button bundle and TextToSpeech.js (players 2-6).
     // Mapping them to only the first is why "Select any text to listen to it"

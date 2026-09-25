@@ -760,7 +760,12 @@ class TTA_Admin
         return ".atlasvoice-mp3-player .plyr--audio .plyr__controls{background-color:{$bg};color:{$fg};width:{$width}%;margin:{$top}px {$right}px {$bottom}px {$left}px;}"
             . ".atlasvoice-mp3-player .plyr--audio .plyr__control,.atlasvoice-mp3-player .plyr--audio .plyr__control:hover{background-color:{$bg};color:{$fg};}"
             . ".atlasvoice-mp3-player .plyr--full-ui input[type=range]{color:{$fg};}"
-            . ".atlasvoice-mp3-player__status{margin-top:6px;font-size:13px;opacity:.85;}";
+            . ".atlasvoice-mp3-player__status{margin-top:6px;font-size:13px;opacity:.85;}"
+            // TTS-321: while parts play the post's length is unknown: no seek bar,
+            // no per-part time, no download of a part.
+            . ".atlasvoice-progressive .plyr__progress__container,.atlasvoice-progressive .plyr__time,.atlasvoice-progressive [data-plyr=\"download\"]{display:none!important;}"
+            . ".atlasvoice-progressive-status{display:flex;gap:8px;margin-top:6px;font-size:13px;opacity:.85;}"
+            . ".atlasvoice-progressive-status__time{font-variant-numeric:tabular-nums;}";
     }
 
     public function enqueue_TTA()

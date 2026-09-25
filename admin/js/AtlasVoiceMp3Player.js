@@ -12,6 +12,7 @@
  */
 import Plyr from 'plyr';
 import AtlasVoiceAnalytics from './AtlasVoiceAnalytics';
+import AtlasVoiceProgressivePlayer from './tts/AtlasVoiceProgressivePlayer';
 
 const { __, sprintf } = wp.i18n;
 
@@ -53,7 +54,9 @@ function visitorId() {
  * @param {number} next  Characters in later batches.
  * @returns {string[]}
  */
-export function splitIntoBatches(text, first = 1000, next = 1500) {
+// TTS-321: the first batch is the one the visitor waits for (parts play as
+// they arrive), so it is short; ~1,000 characters took ~6 s to come back.
+export function splitIntoBatches(text, first = 400, next = 1500) {
     const batches = [];
     let rest = text.trim();
     let size = first;
@@ -78,13 +81,14 @@ export function splitIntoBatches(text, first = 1000, next = 1500) {
     return batches;
 }
 
-export class AtlasVoiceMp3Player {
+export class AtlasVoiceMp3Player extends AtlasVoiceProgressivePlayer {
     /**
      * @param {string}      buttonId Key into window.TTS.contents / extra.
      * @param {HTMLElement} host     The `.tts__listent_content` container.
      * @param {Object}      TTS      Page data printed by the plugin.
      */
     constructor(buttonId, host, TTS = window.TTS) {
+        super();
         this.buttonId = buttonId;
         this.host = host;
         this.TTS = TTS;
@@ -143,7 +147,7 @@ export class AtlasVoiceMp3Player {
         // element without a source never fires `play`, so the click on Plyr's
         // play button is caught first (capture phase), keyboard included.
         const firstPlay = (event) => {
-            if (this.url || !event.target.closest?.('[data-plyr="play"]')) {
+            if (this.hasAudio() || !event.target.closest?.('[data-plyr="play"]')) {
                 return;
             }
             event.preventDefault();
@@ -152,11 +156,16 @@ export class AtlasVoiceMp3Player {
         };
         this.wrapper.addEventListener('click', firstPlay, true);
         this.audio.addEventListener('play', () => {
-            if (!this.url) {
+            if (!this.hasAudio()) {
                 this.audio.pause();
                 this.generateAndPlay();
             }
         });
+    }
+
+    /** A file, or (TTS-321) parts of it, to play. */
+    hasAudio() {
+        return !!this.url || !!this.progressive?.parts.length;
     }
 
     bindAnalytics() {
@@ -167,11 +176,14 @@ export class AtlasVoiceMp3Player {
             return;
         }
         const a = this.analytics;
-        this.audio.addEventListener('playing', () => a?.trackPlay());
-        this.audio.addEventListener('pause', () => { if (!this.audio.ended) a?.trackPause(); });
-        this.audio.addEventListener('ended', () => a?.trackEnd());
-        this.audio.addEventListener('loadedmetadata', () => a?.setAudioDuration(this.audio.duration));
-        this.audio.addEventListener('timeupdate', () => a?.trackProgress(this.audio.currentTime));
+        // TTS-321: moving between parts, or onto the merged file, is one
+        // listen; a part's own length and time are not the post's.
+        const quiet = (type) => this.isProgressiveTransition(type);
+        this.audio.addEventListener('playing', () => { if (!quiet('playing')) a?.trackPlay(); });
+        this.audio.addEventListener('pause', () => { if (!this.audio.ended && !quiet('pause')) a?.trackPause(); });
+        this.audio.addEventListener('ended', () => { if (!this.isProgressiveActive()) a?.trackEnd(); });
+        this.audio.addEventListener('loadedmetadata', () => { if (!this.isProgressiveActive()) a?.setAudioDuration(this.audio.duration); });
+        this.audio.addEventListener('timeupdate', () => { if (!this.isProgressiveActive()) a?.trackProgress(this.audio.currentTime); });
     }
 
     showStatus(text) {
@@ -193,8 +205,18 @@ export class AtlasVoiceMp3Player {
         if (result.url) {
             this.url = result.url;
             this.showStatus('');
+            // TTS-321: parts were playing: carry on in the merged file.
+            if (this.finishProgressive(result.url)) {
+                return;
+            }
             this.plyr.source = { type: 'audio', sources: [{ src: result.url, type: 'audio/mp3' }] };
             this.plyr.once('canplay', () => this.plyr.play());
+            return;
+        }
+
+        // Parts are already playing: never swap in the fallback mid-listen.
+        if (this.cancelProgressive()) {
+            this.showStatus('');
             return;
         }
 
@@ -222,14 +244,23 @@ export class AtlasVoiceMp3Player {
             },
         };
 
+        const totalChars = batches.reduce((n, b) => n + b.length, 0);
+
         for (let attempt = 0; attempt <= MAX_LOCK_RETRIES; attempt++) {
             let last = null;
+            // TTS-321: the visitor pressed play, so each part plays as it arrives.
+            if (!this.isProgressiveActive()) {
+                this.startProgressive({ totalChars, totalParts: batches.length, autoplay: true });
+            }
 
             for (let i = 0; i < batches.length; i++) {
-                this.showStatus(batches.length > 1
-                    /* translators: 1: current part, 2: number of parts. */
-                    ? sprintf(__('Preparing audio (%1$d of %2$d)…', 'text-to-audio'), i + 1, batches.length)
-                    : __('Preparing audio…', 'text-to-audio'));
+                // Once parts play, the progressive status line takes over.
+                if (!this.isProgressiveActive()) {
+                    this.showStatus(batches.length > 1
+                        /* translators: 1: current part, 2: number of parts. */
+                        ? sprintf(__('Preparing audio (%1$d of %2$d)…', 'text-to-audio'), i + 1, batches.length)
+                        : __('Preparing audio…', 'text-to-audio'));
+                }
 
                 last = await this.send({
                     ...base,
@@ -238,7 +269,7 @@ export class AtlasVoiceMp3Player {
                     is_last_batch: i === batches.length - 1,
                     // The whole post's size, on the first batch: a Free site whose
                     // allowance cannot cover it is refused before anything is billed.
-                    ...(i === 0 ? { total_chars: batches.reduce((n, b) => n + b.length, 0) } : {}),
+                    ...(i === 0 ? { total_chars: totalChars } : {}),
                 });
 
                 if (!last?.status) {
@@ -246,6 +277,10 @@ export class AtlasVoiceMp3Player {
                 }
                 if (last.data.file_already_exists || last.data.message === 'locked') {
                     break;
+                }
+                if (last.data.message === 'batch_stored') {
+                    this.showStatus('');
+                    this.addPart(last.data.url, batches[i].length);
                 }
             }
 

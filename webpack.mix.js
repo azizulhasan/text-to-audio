@@ -12,7 +12,8 @@ mix.js('src/dashboard/bulk-mp3-file-ui.js', 'admin/js/build/tts-bulk-mp3-file-ui
 
 
 
-mix.js('admin/js/TextToSpeech.js', 'admin/js/build/TextToSpeech.min.js');
+// TTS-321: the entry adds the MP3 players' progressive-play base to TextToSpeech.
+mix.js('admin/js/TextToSpeech.bundle.js', 'admin/js/build/TextToSpeech.min.js');
 // TTS-319: pronunciation rules alone, for pages without a player (Pro Bulk MP3).
 mix.js('admin/js/tts-alias-engine.js', 'admin/js/build/tts-alias-engine.min.js');
 
