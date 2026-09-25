@@ -122,6 +122,9 @@ class TTA_AtlasVoice_Service {
 			'pending_approval' => false,
 			// Set when the service refused the Pro licence because all its seats are in use.
 			'license_seats_full' => false,
+			// The service refused the key (revoked or rejected in the dashboard):
+			// the site was disconnected and Listening says why.
+			'key_revoked' => false,
 		) );
 	}
 
@@ -232,6 +235,7 @@ class TTA_AtlasVoice_Service {
 			'exhausted'   => self::is_exhausted(),
 			'pendingApproval' => (bool) $state['pending_approval'],
 			'licenseSeatsFull' => (bool) $state['license_seats_full'],
+			'keyRevoked'  => ! self::is_connected() && (bool) $state['key_revoked'],
 			'diagnostics' => self::diagnostics_offer(),
 			'serviceUrl'  => self::base_url(),
 			'dashboardUrl' => self::dashboard_url(),
@@ -375,6 +379,7 @@ class TTA_AtlasVoice_Service {
 			'project_id' => (int) $result['data']['project_id'],
 			'plan'       => (string) $result['data']['plan'],
 			'pending_approval' => isset( $result['data']['approval'] ) && 'pending' === $result['data']['approval'],
+			'key_revoked'      => false,
 		) );
 
 		/**
@@ -402,6 +407,7 @@ class TTA_AtlasVoice_Service {
 			'license_attached' => false,
 			'pending_approval' => false,
 			'license_seats_full' => false,
+			'key_revoked'      => false,
 		) );
 	}
 
@@ -551,8 +557,9 @@ class TTA_AtlasVoice_Service {
 	 */
 	private static function note_key_error( $code ) {
 		if ( 'invalid_api_key' === $code ) {
-			// Revoked or rejected on the service: ask the owner to connect again.
-			self::put( array( 'api_key' => '', 'key_prefix' => '', 'pending_approval' => false ) );
+			// Revoked or rejected on the service: disconnect, so visitors get
+			// player 1 at once, and ask the owner to connect again.
+			self::put( array( 'api_key' => '', 'key_prefix' => '', 'pending_approval' => false, 'key_revoked' => true ) );
 		} elseif ( 'approval_required' === $code ) {
 			self::put( array( 'pending_approval' => true ) );
 		}

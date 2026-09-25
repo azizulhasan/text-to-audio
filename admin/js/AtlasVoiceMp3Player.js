@@ -19,7 +19,10 @@ const { __, sprintf } = wp.i18n;
 const MAX_LOCK_RETRIES = 12;
 
 /** Browser voice for the rest of the visit when audio cannot be made. */
-const FALLBACK_CODES = ['not_connected', 'quota_exceeded', 'player_not_active'];
+// invalid_api_key: the key was revoked in the dashboard (the site disconnects
+// itself, so the next page view is player 1); approval_required: waiting for
+// the account owner.
+const FALLBACK_CODES = ['not_connected', 'quota_exceeded', 'player_not_active', 'invalid_api_key', 'approval_required'];
 
 /** One id per tab: the server's per-post lock tells two visitors apart with it. */
 function visitorId() {

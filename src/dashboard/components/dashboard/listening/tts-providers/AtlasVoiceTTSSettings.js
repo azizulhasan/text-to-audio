@@ -146,6 +146,13 @@ export default function AtlasVoiceTTSSettings({ listeningSettings, handleChange 
 
         {!state && !error && <Spinner animation="border" size="sm" role="status" />}
 
+        {state && !state.connected && state.keyRevoked && (
+          <Alert variant="warning" className="small">
+            <strong>{__("This site was disconnected.", "text-to-audio")}</strong>{" "}
+            {__("Its key was revoked in your AtlasVoice dashboard, so posts are read by the browser voice. Press Connect below to get a new key.", "text-to-audio")}
+          </Alert>
+        )}
+
         {state && !state.connected && (
           <>
             <p className="small mb-2">

@@ -1176,7 +1176,9 @@ class TTA_Api_Routes {
      * @return \WP_REST_Response
      */
     public function atlasvoice_service_state() {
-        \TTA\TTA_AtlasVoice_Service::refresh_usage();
+        // Ask the service now, not the 10-minute cache: a key revoked in the
+        // dashboard must show as disconnected the moment Listening opens.
+        \TTA\TTA_AtlasVoice_Service::refresh_usage( true );
 
         return rest_ensure_response( array( 'status' => true, 'data' => \TTA\TTA_AtlasVoice_Service::public_state() ) );
     }
