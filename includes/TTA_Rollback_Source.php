@@ -104,7 +104,13 @@ abstract class TTA_Rollback_Source {
 	public function min_partner( $version ) {
 		$releases = $this->releases();
 
-		return isset( $releases[ $version ]['min_partner'] ) ? (string) $releases[ $version ]['min_partner'] : $this->default_min_partner( $version );
+		// A listed release that declares no minimum has none; only a version
+		// with no entry of its own (the installed one) uses the default.
+		if ( isset( $releases[ $version ] ) ) {
+			return isset( $releases[ $version ]['min_partner'] ) ? (string) $releases[ $version ]['min_partner'] : '';
+		}
+
+		return $this->default_min_partner( $version );
 	}
 
 	/**
