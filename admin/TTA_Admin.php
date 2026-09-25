@@ -651,6 +651,15 @@ class TTA_Admin
         if (!self::renders_mp3_player($player_id) || \TTA\TTA_AtlasVoice_Service::can_serve_visitors()) {
             return;
         }
+        // Per post: a post that already has its MP3 keeps player 3 and plays
+        // it — the file is on this site and needs no service. Only posts
+        // without audio get player 1. (Archive pages list many posts: player 1.)
+        if (is_singular()) {
+            $urls = get_post_meta(get_queried_object_id(), 'tts_mp3_file_urls', true);
+            if (!empty($urls)) {
+                return;
+            }
+        }
         add_filter('tts_get_player_id', static function ($id) {
             return \TTA\TTA_AtlasVoice_Service::PLAYER_ID === (int) $id ? 1 : $id;
         }, 20);
