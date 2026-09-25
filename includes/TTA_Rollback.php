@@ -9,8 +9,8 @@ defined( 'ABSPATH' ) || exit;
  *
  * Permanent from the release that introduced it: never remove it. Free rolls
  * back only itself (WordPress.org); Pro registers its own source through the
- * `atlasvoice_rollback_sources` filter and rolls itself back through its own
- * route, using run_step() so both follow the same rules.
+ * `atlasvoice_rollback_sources` filter and its own admin-ajax action, and
+ * rolls itself back with run_step() so both follow the same rules.
  *
  * Every version is checked for this site before it can be picked (the other
  * AtlasVoice plugin, PHP, known security problems, what stops working) and
@@ -177,8 +177,8 @@ class TTA_Rollback {
 			'vcs'       => array_keys( array_filter( $sources, static function ( $source ) {
 				return self::is_vcs_checkout( $source->plugin_file() );
 			} ) ),
-			'routes'    => array_map( static function ( $source ) {
-				return $source->rest_route();
+			'actions'   => array_map( static function ( $source ) {
+				return $source->ajax_action();
 			}, $sources ),
 		);
 	}
@@ -439,6 +439,80 @@ class TTA_Rollback {
 		}
 
 		return true;
+	}
+
+	// -------------------------------------------------------------------- ajax
+
+	const NONCE = 'tta_rollback';
+
+	/**
+	 * Free's admin-ajax handlers. Free rolls back only itself: Pro registers
+	 * its own action (pointing at ajax_run() for its own source) and allows its
+	 * own download host, so Free never downloads code from anywhere but
+	 * WordPress.org (wp.org Guideline 8).
+	 */
+	public static function register_ajax() {
+		add_action( 'wp_ajax_tta_rollback_plan', array( __CLASS__, 'ajax_plan' ) );
+		add_action( 'wp_ajax_tta_rollback_auto_update', array( __CLASS__, 'ajax_auto_update' ) );
+		add_action( 'wp_ajax_tta_rollback_run', array( __CLASS__, 'ajax_run' ) );
+	}
+
+	/**
+	 * Nonce and capability for every rollback request.
+	 */
+	private static function check_request() {
+		check_ajax_referer( self::NONCE, 'nonce' );
+		if ( ! self::is_available() ) {
+			wp_send_json_error( array( 'message' => __( 'You cannot change plugins on this site.', 'text-to-audio' ) ), 403 );
+		}
+	}
+
+	public static function ajax_plan() {
+		self::check_request();
+		wp_send_json_success( self::plan() );
+	}
+
+	public static function ajax_auto_update() {
+		self::check_request();
+
+		$sources = self::sources();
+		$id      = isset( $_POST['plugin'] ) ? sanitize_key( wp_unslash( $_POST['plugin'] ) ) : '';
+		if ( ! isset( $sources[ $id ] ) ) {
+			wp_send_json_error( array( 'message' => __( 'That plugin is not installed.', 'text-to-audio' ) ), 400 );
+		}
+
+		self::set_auto_update( $sources[ $id ]->plugin_file(), ! empty( $_POST['on'] ) && 'false' !== $_POST['on'] );
+		wp_send_json_success( self::plan() );
+	}
+
+	public static function ajax_run() {
+		self::check_request();
+
+		// The action names the source: tta_rollback_run = Free, tta_pro_rollback_run = Pro.
+		$action    = isset( $_POST['action'] ) ? sanitize_key( wp_unslash( $_POST['action'] ) ) : '';
+		$source_id = '';
+		foreach ( self::sources() as $id => $source ) {
+			if ( $source->ajax_action() === $action ) {
+				$source_id = $id;
+			}
+		}
+		$version = isset( $_POST['version'] ) ? sanitize_text_field( wp_unslash( $_POST['version'] ) ) : '';
+
+		$result = '' === $source_id
+			? new \WP_Error( 'unknown_plugin', __( 'That plugin is not installed.', 'text-to-audio' ) )
+			: self::run_step(
+				$source_id,
+				$version,
+				! empty( $_POST['confirmed'] ) && 'false' !== $_POST['confirmed'],
+				! empty( $_POST['pause_auto'] ) && 'false' !== $_POST['pause_auto']
+			);
+
+		if ( is_wp_error( $result ) ) {
+			$data = $result->get_error_data();
+			wp_send_json_error( array( 'message' => $result->get_error_message() ), is_array( $data ) && isset( $data['status'] ) ? (int) $data['status'] : 400 );
+		}
+
+		wp_send_json_success();
 	}
 
 	// --------------------------------------------------------------------- run

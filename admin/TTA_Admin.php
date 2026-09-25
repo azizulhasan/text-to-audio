@@ -304,6 +304,10 @@ class TTA_Admin
         // options only (no remote call while an admin page renders).
         $this->localize_data['atlasvoiceTts'] = \TTA\TTA_AtlasVoice_Service::dashboard_summary();
         $this->localize_data['canRollback']   = \TTA\TTA_Rollback::is_available();
+        $this->localize_data['rollback']      = array(
+            'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+            'nonce'   => wp_create_nonce( \TTA\TTA_Rollback::NONCE ),
+        );
 
         do_action('tta_enqueue_pro_dashboard_scripts');
 

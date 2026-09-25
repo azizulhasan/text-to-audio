@@ -129,6 +129,8 @@ class TTA {
 
         $this->loader->add_action('template_redirect', $plugin_admin, 'serve_player_1_until_ready');
         $this->loader->add_action('admin_init', 'TTA\TTA_AtlasVoice_Service', 'maybe_recheck_approval');
+        // TTS-320: the Versions screen's admin-ajax handlers (Free and Pro).
+        \TTA\TTA_Rollback::register_ajax();
         // TTS-320: remember the version change once, for the "updated — roll back?" notice.
         $this->loader->add_action('admin_init', 'TTA\TTA_Rollback', 'note_version', 5);
         // Publishes the one-time code while the site is being moved to another email.

@@ -52,8 +52,8 @@ class TTA_Rollback_Source_WordPress_Org extends TTA_Rollback_Source {
 		return TEXT_TO_AUDIO_VERSION;
 	}
 
-	public function rest_route() {
-		return 'tta/v1/rollback';
+	public function ajax_action() {
+		return 'tta_rollback_run';
 	}
 
 	public function releases() {

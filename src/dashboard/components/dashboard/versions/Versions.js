@@ -14,20 +14,23 @@ import "../atlasvoice/atlasvoice.css";
  * that and runs the steps. With Pro installed the two plugins roll back as a
  * pair, Pro first (Pro through its own route).
  */
-const api = (route) => String(window.tta_obj?.api_url || "/wp-json/") + route;
+// admin-ajax, like WordPress's own plugin updates (Pro's licensing SDK loads only in wp-admin).
+async function request(action, fields = {}) {
+  const body = new FormData();
+  body.append("action", action);
+  body.append("nonce", window.tta_obj?.rollback?.nonce || "");
+  Object.entries(fields).forEach(([key, value]) => body.append(key, String(value)));
 
-async function request(route, method = "GET", body) {
-  const res = await fetch(api(route), {
-    method,
+  const res = await fetch(window.tta_obj?.rollback?.ajaxUrl || "/wp-admin/admin-ajax.php", {
+    method: "POST",
     credentials: "same-origin",
-    headers: { "Content-Type": "application/json", "X-WP-Nonce": window.tta_obj?.rest_nonce || "" },
-    body: body ? JSON.stringify(body) : undefined,
+    body,
   });
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(json?.message || __("Something went wrong. Please try again.", "text-to-audio"));
+  const json = await res.json().catch(() => null);
+  if (!json || !json.success) {
+    throw new Error(json?.data?.message || __("Something went wrong. Please try again.", "text-to-audio"));
   }
-  return json;
+  return json.data;
 }
 
 const STATUS = {
@@ -50,8 +53,8 @@ export default function Versions() {
 
   const load = () => {
     setLoadError("");
-    request("tta/v1/versions")
-      .then((res) => setPlan(res.data))
+    request("tta_rollback_plan")
+      .then((data) => setPlan(data))
       .catch((e) => setLoadError(e.message));
   };
 
@@ -75,8 +78,8 @@ export default function Versions() {
   };
 
   const toggleAutoUpdate = (plugin, on) => {
-    request("tta/v1/versions", "POST", { plugin, on })
-      .then((res) => setPlan(res.data))
+    request("tta_rollback_auto_update", { plugin, on })
+      .then((data) => setPlan(data))
       .catch((e) => setLoadError(e.message));
   };
 
@@ -112,7 +115,7 @@ export default function Versions() {
       step.state = "now";
       setRun({ ...state, steps: [...steps] });
       try {
-        await request(plan.routes[step.id], "POST", { version: step.version, confirmed, pause_auto: pauseAuto });
+        await request(plan.actions[step.id], { version: step.version, confirmed, pause_auto: pauseAuto });
         step.state = "done";
       } catch (e) {
         step.state = "failed";

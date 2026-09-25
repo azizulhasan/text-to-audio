@@ -9,8 +9,8 @@ defined( 'ABSPATH' ) || exit;
  * come from.
  *
  * Free registers its WordPress.org source; Pro extends this class with its
- * own source (versions from the AtlasVoice service) and performs its own
- * rollback through its own REST route, so Free never installs Pro's code.
+ * own source (versions from the AtlasVoice service) and registers its own
+ * admin-ajax action, so Free itself never downloads Pro's code.
  */
 abstract class TTA_Rollback_Source {
 
@@ -53,11 +53,13 @@ abstract class TTA_Rollback_Source {
 	abstract public function package( $version );
 
 	/**
-	 * The REST route that rolls this plugin back, relative to the REST root.
+	 * The admin-ajax action that rolls this plugin back. admin-ajax (like
+	 * core's own plugin updates) runs in wp-admin, where Pro's licensing SDK
+	 * is loaded; a REST request is not wp-admin.
 	 *
 	 * @return string
 	 */
-	abstract public function rest_route();
+	abstract public function ajax_action();
 
 	/**
 	 * What this build knows about older releases: per version, the lowest
