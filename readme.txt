@@ -401,6 +401,15 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.4.0-beta.1 ( 27 Sep 2026 ) =
+Beta: for testing before the 2.4.0 release.
+Added : AtlasVoice TTS, a natural voice for your posts. Every visitor hears the same voice on every browser and device, and the audio is saved as an MP3. Free for 100,000 characters a month; connecting asks for your email and your consent.
+Added : The first time a post is played, the audio starts within a few seconds while the rest is prepared.
+Added : An audio box in the post editor to listen to, replace or delete a post's audio.
+Added : A Versions screen to go back to an earlier version if an update causes trouble. Settings, audio and statistics are kept.
+Added : A voice step in the setup wizard, a "What's New" panel, and your AtlasVoice TTS usage in Listening and on the Dashboard, with a warning before the monthly allowance runs out.
+Changed : When AtlasVoice TTS cannot make audio (for example, the allowance is used up), the post is read by the browser voice with your usual player button and settings.
+
 = 2.3.17 ( 23 Sep 2026 ) =
 Added : A simpler Pronunciation page. Write a word as it appears on your site and how it should be spoken, and try it straight away in the "Try it with your own text" box, with a Listen button.
 Added : Number rules. Write one example such as "5k" read as "5 thousand", tick "Also apply to other numbers", and every number written that way is read the same way, for example "250k" as "250 thousand".
