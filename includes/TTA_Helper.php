@@ -814,22 +814,63 @@ class TTA_Helper
      * TextToSpeech.replaceAliases in JS). Falls back to str_replace if the
      * text is not valid UTF-8, so a bad byte never blanks the content.
      *
-     * @param string $text    Content to change.
-     * @param string $find    Alias text as typed by the site owner.
-     * @param string $replace What the alias should be read as.
+     * TTS-319: with $apply_to_numbers, the numbers in the example become "any
+     * number" and are reused in the spoken text ("5k" -> "5 thousand" also
+     * reads "250k" as "250 thousand").
+     *
+     * @param string $text             Content to change.
+     * @param string $find             Alias text as typed by the site owner.
+     * @param string $replace          What the alias should be read as.
+     * @param bool   $apply_to_numbers Treat the example's numbers as any number.
      *
      * @return string
      */
-    public static function replace_alias( $text, $find, $replace )
+    public static function replace_alias( $text, $find, $replace, $apply_to_numbers = false )
     {
         $find    = (string) $find;
         $replace = (string) $replace;
         if ( '' === $find ) {
             return $text;
         }
-        $before = preg_match( '/^[\p{L}\p{N}]/u', $find ) ? '(?<![\p{L}\p{N}])' : '';
-        $after  = preg_match( '/[\p{L}\p{N}]$/u', $find ) ? '(?![\p{L}\p{N}])' : '';
-        $result = preg_replace( '/' . $before . preg_quote( $find, '/' ) . $after . '/u', addcslashes( $replace, '\\$' ), $text );
+
+        $number  = '\p{Nd}+(?:[.,\'\x{00A0}\x{202F}]\p{Nd}+)*';
+        $numbers = array();
+        if ( $apply_to_numbers && preg_match_all( '/' . $number . '/u', $find, $found ) ) {
+            $numbers = $found[0];
+        }
+        // Reuse the numbers only when every one is in the spoken text too.
+        $generalize = ! empty( $numbers );
+        foreach ( $numbers as $n ) {
+            if ( false === strpos( $replace, $n ) ) {
+                $generalize = false;
+                break;
+            }
+        }
+
+        $source   = preg_quote( $find, '/' );
+        $template = addcslashes( $replace, '\\$' );
+        if ( $generalize ) {
+            $source = '';
+            $rest   = $find;
+            foreach ( $numbers as $i => $n ) {
+                $at       = strpos( $rest, $n );
+                $source  .= preg_quote( substr( $rest, 0, $at ), '/' ) . '(' . $number . ')';
+                $rest     = substr( $rest, $at + strlen( $n ) );
+                // Letter-only placeholder: a digit here could be matched by the next number.
+                $pos      = strpos( $template, $n );
+                $template = substr_replace( $template, "\x00" . chr( 65 + $i ) . "\x00", $pos, strlen( $n ) );
+            }
+            $source  .= preg_quote( $rest, '/' );
+            $template = preg_replace_callback( '/\x00([A-Z])\x00/', function ( $m ) {
+                return '${' . ( ord( $m[1] ) - 64 ) . '}';
+            }, $template );
+        }
+
+        // Whole words only, except in scripts written without spaces.
+        $no_space = '\p{Han}\p{Hiragana}\p{Katakana}\p{Thai}\p{Lao}\p{Khmer}\p{Myanmar}';
+        $before   = preg_match( '/^(?![' . $no_space . '])[\p{L}\p{N}]/u', $find ) ? '(?<![\p{L}\p{N}])' : '';
+        $after    = preg_match( '/(?![' . $no_space . '])[\p{L}\p{N}]$/u', $find ) ? '(?![\p{L}\p{N}])' : '';
+        $result   = preg_replace( '/' . $before . $source . $after . '/u', $template, $text );
 
         return null === $result ? str_replace( $find, $replace, $text ) : $result;
     }

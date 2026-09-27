@@ -13,6 +13,8 @@ mix.js('src/dashboard/bulk-mp3-file-ui.js', 'admin/js/build/tts-bulk-mp3-file-ui
 
 
 mix.js('admin/js/TextToSpeech.js', 'admin/js/build/TextToSpeech.min.js');
+// TTS-319: pronunciation rules alone, for pages without a player (Pro Bulk MP3).
+mix.js('admin/js/tts-alias-engine.js', 'admin/js/build/tts-alias-engine.min.js');
 
 mix.js('admin/js/text-to-audio-button.js', 'admin/js/build/text-to-audio-button.min.js');
 

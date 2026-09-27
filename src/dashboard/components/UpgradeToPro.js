@@ -6,7 +6,7 @@ import toast from "./context/Notify";
 import { copyToClipBoard } from "./context/utilities";
 import DemoLink from "./DemoLink";
 
-export default function UpgradeToPro({ promotionType = "general", showDemoCard = false }) {
+export default function UpgradeToPro({ promotionType = "general", showDemoCard = false, extraDocs = [] }) {
   const [activeTab, setActiveTab] = useState("documentation");
 
   /**
@@ -274,15 +274,25 @@ export default function UpgradeToPro({ promotionType = "general", showDemoCard =
         </div>
       )}
 
-      {/* Documentation Section → Accordion with Docs.js content */}
-      <Accordion defaultActiveKey="" className="tta-custom-accordion">
+      {/* Documentation Section → Accordion with Docs.js content.
+          TTS-319: open by default on every tab so help is visible without a click. */}
+      <Accordion defaultActiveKey="0" className="tta-custom-accordion">
         <Accordion.Item eventKey="0">
           <Accordion.Header className="tta-custom-orange-accordion">
-            Read Documentation
+            {__("Read Documentation", "text-to-audio")}
           </Accordion.Header>
           <Accordion.Body className="p-2" style={{ fontSize: "0.875rem" }}>
             {/* Nested Accordion from Docs.js */}
-            <Accordion flush className="tta-qa-accordion">
+            <Accordion flush className="tta-qa-accordion" defaultActiveKey={extraDocs.length ? "extra-0" : undefined}>
+              {/* TTS-319: page-specific help passed by the current tab, shown first. */}
+              {extraDocs.map((doc, i) => (
+                <Accordion.Item eventKey={`extra-${i}`} key={`extra-${i}`}>
+                  <Accordion.Header style={{ fontSize: "0.9rem" }}>{doc.title}</Accordion.Header>
+                  <Accordion.Body style={{ fontSize: "0.85rem", wordBreak: "break-word", overflowWrap: "break-word" }}>
+                    {doc.body}
+                  </Accordion.Body>
+                </Accordion.Item>
+              ))}
               <Accordion.Item eventKey="1">
                 <Accordion.Header style={{ fontSize: "0.9rem" }}>
                   1. Browser support issue on android phone and desktop
