@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.16
+Stable tag: 2.3.17
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -395,6 +395,15 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.3.17 ( 23 Sep 2026 ) =
+Added : A simpler Pronunciation page. Write a word as it appears on your site and how it should be spoken, and try it straight away in the "Try it with your own text" box, with a Listen button.
+Added : Number rules. Write one example such as "5k" read as "5 thousand", tick "Also apply to other numbers", and every number written that way is read the same way, for example "250k" as "250 thousand".
+Added : Sites that use a translation plugin now see a short guide on adding one pronunciation for each language.
+Added : Developers can add their own pronunciation rules with code. Pro users find a ready-to-copy example on the Pronunciation page.
+Changed : The Read Documentation panel is now open on every page of the dashboard.
+Fixed : With caching plugins such as WP Rocket, the player could be missing for visitors who were not logged in. The scripts the player needs are now kept out of delayed loading automatically.
+Fixed : Extra spaces at the start or end of a pronunciation are now removed when it is saved, so it always matches.
+
 = 2.3.16 ( 21 Sep 2026 ) =
 Fixed : Text aliases could change parts of other words - an alias for "ca." also turned "Africa." into "Africirca". Aliases now only replace whole words.
 
@@ -534,6 +543,9 @@ Fixed : Removed external sample-audio requests from the dashboard; previews now 
 
 
 == Upgrade Notice ==
+
+= 2.3.17 =
+A simpler Pronunciation page with a live preview, and number rules that read every "250k" the way you set "5k". Also fixes the player going missing for visitors on sites using caching plugins such as WP Rocket. Recommended for every site.
 
 = 2.3.16 =
 Text aliases now only replace whole words, so a short alias such as "ca." no longer changes the end of other words like "Africa.". Recommended for anyone using text aliases.
