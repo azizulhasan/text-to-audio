@@ -17,7 +17,7 @@ Free text to speech with browser voices + premium AI voices from Google, OpenAI 
 
 **No Registration, No Account, No API required for the free version. Simply install and let your visitors listen.**
 
-Whether you run a blog, news site, online store, or educational platform, AtlasVoice, the free WordPress TTS plugin, makes your content accessible to everyone — including users with visual impairments, reading difficulties, or those who simply prefer listening. Support **81+ languages**, **300+ AI voices**, and reach a truly global audience.
+Whether you run a blog, news site, online store, or educational platform, AtlasVoice, the free WordPress TTS plugin, makes your content easier to access for more people — including users with visual impairments, reading difficulties, or those who simply prefer listening. Support **81+ languages**, **300+ AI voices**, and reach a truly global audience.
 
 ### How It Works — 3 Simple Steps
 
@@ -41,12 +41,12 @@ Whether you run a blog, news site, online store, or educational platform, AtlasV
 
 * **Bloggers, News & Media Sites** — Let readers listen to articles while multitasking. Increase time-on-page and reduce bounce rate.
 * **WooCommerce & E-Learning Sites** — Make product descriptions and course materials listenable for shoppers and auditory learners.
-* **Multilingual & Accessibility-First Websites** — Serve a global audience in 81+ languages and meet WCAG 2.1 / ADA compliance.
+* **Multilingual & Accessibility-First Websites** — Serve a global audience in 81+ languages and add an audio option to your WCAG 2.1 / ADA accessibility work.
 
 
 ### Why Choose AtlasVoice, the WordPress Text To Speech Plugin?
 
-1. **Accessibility & WCAG Compliance:** Help your site meet WCAG 2.1 and ADA requirements with audio alternatives for users with visual impairments, dyslexia, or reading difficulties.
+1. **Accessibility & WCAG support:** Give visitors with visual impairments, dyslexia or reading difficulties a way to listen, as part of your WCAG 2.1 / ADA accessibility work. The player is a labelled button that works with a keyboard and screen readers.
 
 2. **Boost SEO & Engagement:** Audio increases dwell time and reduces bounce rate. Pro generates **Audio Schema markup** (JSON-LD) for rich results in Google Search.
 
@@ -225,7 +225,7 @@ Use the `[atlasvoice]` shortcode to add the audio player anywhere:
 
 **Get Started Today!**
 
-Boost engagement, accessibility, and SEO on your WordPress and WooCommerce site with the AtlasVoice text to speech plugin. It is the easiest way to turn your content from text to audio. Meet WCAG 2.1 accessibility standards, increase time-on-page, reduce bounce rate, and cater to a global audience in 81+ languages.
+Boost engagement, accessibility, and SEO on your WordPress and WooCommerce site with the AtlasVoice text to speech plugin. It is the easiest way to turn your content from text to audio. Support your WCAG 2.1 accessibility work, increase time-on-page, reduce bounce rate, and cater to a global audience in 81+ languages.
 
 [Try AtlasVoice Pro](https://atlasaidev.com/plugins/text-to-speech-pro/) for premium AI voices, bulk MP3 generation, cloud storage backup, advanced analytics, and priority support.
 
@@ -320,10 +320,10 @@ As your post is read aloud, AtlasVoice highlights the text in time with the voic
 Yes! The Google Cloud Storage backup feature works with **all** TTS providers — Google Cloud TTS, ChatGPT TTS, AtlasVoice TTS Pro, and ElevenLabs TTS. Even if you use ElevenLabs for voice generation, you can store the MP3 files in Google Cloud Storage. You need to configure a Google Cloud service account JSON file with Storage Admin permissions from the **Integration** menu.
 
 = Does audio content help with SEO? =
-Yes! Audio content improves SEO in several ways: (1) **Increased dwell time** — visitors stay longer on pages with audio, which is a positive Google ranking signal. (2) **Reduced bounce rate** — audio engagement keeps users on your site. (3) **Audio Schema markup** (Pro) — AtlasVoice generates JSON-LD structured data that helps search engines understand your audio content, potentially enabling rich results in Google Search. (4) **Accessibility compliance** — Google increasingly favors accessible websites in its rankings.
+Yes! Audio content improves SEO in several ways: (1) **Increased dwell time** — visitors stay longer on pages with audio, which is a positive Google ranking signal. (2) **Reduced bounce rate** — audio engagement keeps users on your site. (3) **Audio Schema markup** (Pro) — AtlasVoice generates JSON-LD structured data that helps search engines understand your audio content, potentially enabling rich results in Google Search. (4) **Accessibility** — an audio option makes your content usable by more visitors.
 
-= Is this plugin WCAG / ADA compliant? =
-AtlasVoice helps your website meet WCAG 2.1 (Web Content Accessibility Guidelines) and ADA (Americans with Disabilities Act) requirements by providing audio alternatives to text content. This is a key component of web accessibility, especially for users with visual impairments, dyslexia, or cognitive disabilities.
+= Does this plugin make my site WCAG / ADA compliant? =
+No plugin can do that on its own. WCAG 2.1 / 2.2 AA, the ADA and the European Accessibility Act (EN 301 549) cover the whole site — structure, colour contrast, forms, media, keyboard use and more — and conformance is confirmed by an accessibility audit. AtlasVoice supports that work: it gives visitors an audio version of your text, and the player is a labelled button that works with a keyboard and screen readers, with a settings panel you can use and close with the keyboard.
 
 = Can I use different AI voices on different posts? =
 The voice and language settings from the **Listening** menu apply globally. However, you can override the voice and language for individual posts using the shortcode: `[atlasvoice lang="en-GB" voice="Google UK English"]`. This gives you the flexibility to use different voices for different content.
