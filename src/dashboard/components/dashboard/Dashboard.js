@@ -41,6 +41,8 @@ const Plugins = lazy(() => import(/* webpackChunkName: "tab-plugins" */ './plugi
 const Maintenance = lazy(() => import(/* webpackChunkName: "tab-maintenance" */ './maintenance/Maintenance.js'));
 // TTS-320: Versions — roll back an update (loaded only when opened).
 const Versions = lazy(() => import(/* webpackChunkName: "tab-versions" */ './versions/Versions.js'));
+// TTS-329: SEO & AI Search — a slot Pro fills, or an upgrade notice.
+const SeoAiSearch = lazy(() => import(/* webpackChunkName: "tab-seo" */ './seo/SeoAiSearch.js'));
 
 function Dashboard() {
 	const [componentName, setComponentName] = useState(getComponentName());
@@ -95,6 +97,7 @@ function Dashboard() {
 										element={<Recording />}
 									/> */}
 									<Route path='/analytics' element={<Analitics />} />
+									<Route path='/seo' element={<SeoAiSearch />} />
 									<Route path='/compatibility' element={<Compatibility />} />
 									<Route path='/aliases' element={<Aliases />} />
 									{/* TTS-239: Maintenance tab is Pro-only; route is registered only when Pro is active. */}

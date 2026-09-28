@@ -70,6 +70,13 @@ export default function DashboardSideNav({ isProVersion }) {
               </div>
               {__("Analytics", "text-to-audio")}
             </NavLink>
+            {/* TTS-329: audio schema for search. Pro renders the screen; Free shows an upgrade notice. */}
+            <NavLink className={getNavLinkClass} to={"/seo"}>
+              <div className="sb-nav-link-icon">
+                <span className="dashicons dashicons-search"></span>
+              </div>
+              {__("SEO & AI Search", "text-to-audio")}
+            </NavLink>
             <NavLink className={getNavLinkClass} to={"/compatibility"}>
               <div className="sb-nav-link-icon">
                 <span className="dashicons dashicons-admin-plugins"></span>
