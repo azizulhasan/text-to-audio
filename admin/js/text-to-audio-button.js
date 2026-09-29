@@ -1140,6 +1140,26 @@ class TTSPlayButton extends HTMLElement {
         const className = 'tts__custom-position_' + position;
         const isStickyTop = position === 'sticky_top';
         let anchorTop = null;
+        // TTS-332: the box the player leaves behind when it docks, held by a
+        // placeholder so the text below doesn't jump up (and back down on undock).
+        // Same height AND margins as the player, so margin collapsing with the
+        // text around it works exactly as before and nothing moves.
+        let inlineBox = null;
+        let placeholder = null;
+        const holdSpace = (docked) => {
+            if (docked && inlineBox && !placeholder && this.parentNode) {
+                placeholder = document.createElement('div');
+                placeholder.className = 'tts__float-placeholder';
+                placeholder.setAttribute('aria-hidden', 'true');
+                placeholder.style.height = inlineBox.height + 'px';
+                placeholder.style.marginTop = inlineBox.marginTop;
+                placeholder.style.marginBottom = inlineBox.marginBottom;
+                this.parentNode.insertBefore(placeholder, this.nextSibling);
+            } else if (!docked && placeholder) {
+                placeholder.remove();
+                placeholder = null;
+            }
+        };
 
         // Measured lazily and only while inline — once the element is fixed its
         // rect is viewport-relative and would give a meaningless anchor.
@@ -1160,7 +1180,13 @@ class TTSPlayButton extends HTMLElement {
                 return;
             }
             const docked = window.scrollY > anchorTop;
+            if (!this.classList.contains(className)) {
+                const style = window.getComputedStyle(this);
+                const height = this.getBoundingClientRect().height;
+                inlineBox = height ? { height, marginTop: style.marginTop, marginBottom: style.marginBottom } : inlineBox;
+            }
             this.classList.toggle(className, docked);
+            holdSpace(docked);
             // Only the top placement has to negotiate with existing chrome; the
             // bottom ones own their edge outright.
             if (isStickyTop) {
@@ -1176,7 +1202,7 @@ class TTSPlayButton extends HTMLElement {
             sync();
         };
 
-        this._floatListeners = { sync, onResize };
+        this._floatListeners = { sync, onResize, release: () => holdSpace(false) };
         window.addEventListener('scroll', sync, { passive: true });
         window.addEventListener('resize', onResize, { passive: true });
         // Dock immediately when the button is ALREADY out of view on arrival —
@@ -1246,6 +1272,8 @@ class TTSPlayButton extends HTMLElement {
         this._floatListeners = null;
         window.removeEventListener('scroll', listeners.sync);
         window.removeEventListener('resize', listeners.onResize);
+        // TTS-332: don't leave an empty gap behind if the player is removed while docked.
+        listeners.release();
     }
 
     /**
