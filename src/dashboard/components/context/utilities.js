@@ -17,6 +17,40 @@ export const addScripts = (scripts) => {
 };
 
 /**
+ * TTS-333: current REST nonce, from whichever localized object this page has.
+ */
+const restNonce = () => window?.ttsObj?.rest_nonce ?? window?.ttsObjPro?.rest_nonce;
+
+/**
+ * TTS-333: fetch with the REST nonce. When WordPress rejects the nonce
+ * (403 rest_cookie_invalid_nonce, e.g. it was minted for another login on a
+ * server that sets the user late), ask core for a fresh one once and retry.
+ */
+export const fetchWithNonce = async (url, options = {}) => {
+    const send = () => fetch(url, { ...options, headers: { ...(options.headers || {}), 'X-WP-Nonce': restNonce() } });
+    let response = await send();
+    if (403 !== response.status) {
+        return response;
+    }
+    const error = await response.clone().json().catch(() => ({}));
+    const adminUrl = window?.ttsObj?.admin_url ?? window?.ttsObjPro?.admin_url;
+    if ('rest_cookie_invalid_nonce' !== error?.code || !adminUrl) {
+        return response;
+    }
+    const fresh = await fetch(adminUrl + 'admin-ajax.php?action=rest-nonce', { credentials: 'same-origin' });
+    const nonce = fresh.ok ? (await fresh.text()).trim() : '';
+    if (!/^[0-9a-f]{10}$/.test(nonce)) {
+        return response;
+    }
+    ['ttsObj', 'ttsObjPro', 'tta_obj'].forEach((name) => {
+        if (window[name]) {
+            window[name].rest_nonce = nonce;
+        }
+    });
+    return send();
+};
+
+/**
  * Post data method.
  * @param {url} url api url
  * @param {method} method request type
@@ -27,19 +61,13 @@ export const postData = async (url = "", data = {}, $method = "POST") => {
 
     let response = '';
     if ($method === 'GET') {
-        response = await fetch(url, {
+        response = await fetchWithNonce(url, {
             method: $method, // *GET, POST, PUT, DELETE, etc.
-            headers: {
-                'X-WP-Nonce': ttsObj.rest_nonce
-            },
         });
     } else {
-        response = await fetch(url, {
+        response = await fetchWithNonce(url, {
             method: $method, // *GET, POST, PUT, DELETE, etc.
             body: data, // body data type must match "Content-Type" header
-            headers: {
-                'X-WP-Nonce': ttsObj.rest_nonce
-            },
         });
     }
 
@@ -56,15 +84,12 @@ export const postData = async (url = "", data = {}, $method = "POST") => {
  */
 export const postWithoutImage = async (url = "", data = {}) => {
     // Default options are marked with *
-    const response = await fetch(url, {
+    const response = await fetchWithNonce(url, {
         // headers: {
         //   "Content-Type": "application/json",
         // },
         method: "POST", // *GET, POST, PUT, DELETE, etc.
         body: data, // body data type must match "Content-Type" header
-        headers: {
-            'X-WP-Nonce': window?.ttsObj?.rest_nonce ?? ttsObjPro?.rest_nonce
-        },
     });
     const responseData = await response.json(); // parses JSON response into native JavaScript objects
 
@@ -77,11 +102,7 @@ export const postWithoutImage = async (url = "", data = {}) => {
  * @returns  data mixed.
  */
 export const getData = async (url = "") => {
-    const response = await fetch(url, {
-        headers: {
-            'X-WP-Nonce': ttsObj.rest_nonce
-        },
-    });
+    const response = await fetchWithNonce(url);
     const data = await response.json();
     return data; // parses JSON response into native JavaScript objects
 };

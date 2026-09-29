@@ -284,6 +284,7 @@ class TTA_Admin
         // current_post_id, atlasvoice_resolved_rule). The filter callback is in
         // `\TTA\AtlasVoice\LocalizeData::inject_lazy`.
         $this->localize_data = apply_filters( 'atlasvoice_localize_data_lazy', $this->localize_data );
+        $this->refresh_request_nonces();
 
         // TTS-249: recompute the player registry + current id lazily. The
         // constructor runs on plugins_loaded — BEFORE Pro registers its
@@ -481,6 +482,7 @@ class TTA_Admin
         );
 
         // Localize script data
+        $this->refresh_request_nonces();
         wp_localize_script('tta-blocks', 'ttaBlocks', $this->localize_data);
 
         // Register the block type
@@ -524,6 +526,19 @@ class TTA_Admin
      * @param string $relative_path Path relative to the admin/ directory.
      * @return string Version string for wp_enqueue_script/style.
      */
+    /**
+     * TTS-333: mint the nonces when the scripts are localized, not in the
+     * constructor (plugins_loaded). Some servers finish setting the logged-in
+     * user after plugins_loaded, so the early nonce belongs to another user and
+     * WordPress rejects it ("Cookie check failed"). Same user = same value, so
+     * nothing changes on sites that already work.
+     */
+    private function refresh_request_nonces()
+    {
+        $this->localize_data['rest_nonce'] = wp_create_nonce( 'wp_rest' );
+        $this->localize_data['nonce']      = wp_create_nonce( TEXT_TO_AUDIO_NONCE );
+    }
+
     private function asset_version( $relative_path )
     {
         $file  = plugin_dir_path( __FILE__ ) . $relative_path;
@@ -546,6 +561,7 @@ class TTA_Admin
         // and the first-visit auto-detect couldn't key saved selectors
         // to the right CPT. Same filter, same callback — idempotent.
         $this->localize_data = apply_filters( 'atlasvoice_localize_data_lazy', $this->localize_data );
+        $this->refresh_request_nonces();
 
         $player_id = get_player_id();
 
