@@ -639,6 +639,14 @@ class TTA_Api_Routes {
 		if ( 'post' == $request['method'] ) {
 			$fields = json_decode( $request['fields'] );
 
+			// TTS-266: screens save only their own fields (free Listening for players 1/3,
+			// the setup wizard), so replacing the option wiped Pro's voice and language
+			// mapping. Sent fields win; everything else stays as saved.
+			$previous = get_option( 'tta_listening_settings', array() );
+			if ( is_object( $fields ) && ( is_object( $previous ) || is_array( $previous ) ) ) {
+				$fields = (object) array_merge( (array) $previous, (array) $fields );
+			}
+
             if(TTA_Helper::is_listening_lang_or_voice_changed($fields)) {
                 TTA_Helper::delete_post_meta();
             }
