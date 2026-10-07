@@ -32,6 +32,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                            specific staging/local site. When absent, it shows
  *                            on every site (the default).
  *   audience       string    "free" (default) | "pro" | "all" - which install sees it.
+ *   below_version  string    Show only while the installed version is older than
+ *                            this (version_compare), e.g. "3.5.0-beta.1" retires a
+ *                            "join the 3.5 beta" promo for sites already on it. The
+ *                            host decides which plugin's version counts through the
+ *                            `{slug}_promo_version` filter (default: this plugin's).
  *   id             string    Stable slug; also used to derive `hash` when absent.
  *
  * BEHAVIOUR (optional)
@@ -268,6 +273,7 @@ class Promotions {
 			$promos = array_filter( $promos, [ $this, '__is_promo_for_allowed_sites' ] );
 			// TTS-262: filter by target audience (free|pro|all).
 			$promos = array_filter( $promos, [ $this, '__is_promo_for_audience' ] );
+			$promos = array_filter( $promos, [ $this, '__is_promo_for_version' ] );
 			// filter promotions by list of hidden promotions by the user.
 			$promos = array_filter( $promos, [ $this, '__is_promo_hidden' ] );
 		}
@@ -352,6 +358,22 @@ class Promotions {
 		$target   = ( isset( $promo->audience ) && $promo->audience ) ? $promo->audience : 'free';
 
 		return 'all' === $target || $target === $audience;
+	}
+
+	/**
+	 * TTS-266 — hide a promo from sites that already have what it offers.
+	 *
+	 * @param object $promo the promo object; optional `below_version` property.
+	 *
+	 * @return bool true if there is no `below_version`, or the installed version is older.
+	 */
+	public function __is_promo_for_version( $promo ) {
+		if ( empty( $promo->below_version ) ) {
+			return true;
+		}
+		$version = (string) apply_filters( $this->client->getSlug() . '_promo_version', $this->client->getProjectVersion(), $promo );
+
+		return '' === $version || version_compare( $version, (string) $promo->below_version, '<' );
 	}
 	
 	/**

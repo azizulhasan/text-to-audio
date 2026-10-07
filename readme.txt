@@ -401,6 +401,10 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.4.0-beta.2 ( 7 Oct 2026 ) =
+Beta: for testing before the 2.4.0 release.
+Fixed : The invitation to join the beta no longer appears on sites that already run it.
+
 = 2.4.0-beta.1 ( 27 Sep 2026 ) =
 Beta: for testing before the 2.4.0 release.
 Added : AtlasVoice TTS, a natural voice for your posts. Every visitor hears the same voice on every browser and device, and the audio is saved as an MP3. Free for 100,000 characters a month; connecting asks for your email and your consent.

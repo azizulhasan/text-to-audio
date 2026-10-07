@@ -78,6 +78,16 @@ final class TTA_Lib_AtlasAiDev {
             return defined( 'TTA_PRO_PLUGIN_PATH' ) ? 'pro' : 'free';
         } );
 
+        // TTS-266: a promo's `below_version` is about the product it advertises,
+        // so a Pro-audience promo compares the Pro version ("join the Pro 3.5 beta"
+        // must disappear once Pro 3.5 is installed).
+        add_filter( $this->client->getSlug() . '_promo_version', function ( $version, $promo ) {
+            if ( isset( $promo->audience ) && 'pro' === $promo->audience && defined( 'TTA_PRO_VERSION' ) ) {
+                return TTA_PRO_VERSION;
+            }
+            return $version;
+        }, 10, 2 );
+
         // Insights/telemetry stay FREE-ONLY: suppressed when Pro is active (Pro
         // ships its own tracker) to avoid double-counting.
         if ( ! defined( 'TTA_PRO_PLUGIN_PATH' ) ) {
