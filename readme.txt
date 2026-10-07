@@ -401,6 +401,11 @@ We are looking for people to help translate this plugin. If you can help, we wou
 Help us and the WordPress community translate the plugin. [Contact us](http://atlasaidev.com/contact-us/) and we'll guide you through the process.
 
 
+= 2.4.0-beta.3 ( 7 Oct 2026 ) =
+Beta: for testing before the 2.4.0 release.
+Fixed : Saving the Listening settings or finishing the setup wizard no longer clears the AtlasVoice Pro voice and language choices.
+Fixed : Saving Listening without changing the language or voice no longer makes the plugin check every post's audio files again.
+
 = 2.4.0-beta.2 ( 7 Oct 2026 ) =
 Beta: for testing before the 2.4.0 release.
 Fixed : The invitation to join the beta no longer appears on sites that already run it.
