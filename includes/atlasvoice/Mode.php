@@ -2,6 +2,9 @@
 
 namespace TTA\AtlasVoice;
 
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
+
 /**
  * AtlasVoice Mode + admin-bar status indicator (TTS-238 v5 §5.4 / D4).
  *
