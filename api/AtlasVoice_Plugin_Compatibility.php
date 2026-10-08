@@ -1,6 +1,9 @@
 <?php
 
 namespace TTA_Api;
+
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
 /**
  * This class is for getting all  data related to analytics  through api.
  * This is applied for tracker menu.

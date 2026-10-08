@@ -5,7 +5,7 @@ Tags: accessibility, speech, tts, text to speech, text to audio
 Requires at least: 5.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.3.17
+Stable tag: 2.3.18
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 
@@ -418,6 +418,8 @@ Added : An audio box in the post editor to listen to, replace or delete a post's
 Added : A Versions screen to go back to an earlier version if an update causes trouble. Settings, audio and statistics are kept.
 Added : A voice step in the setup wizard, a "What's New" panel, and your AtlasVoice TTS usage in Listening and on the Dashboard, with a warning before the monthly allowance runs out.
 Changed : When AtlasVoice TTS cannot make audio (for example, the allowance is used up), the post is read by the browser voice with your usual player button and settings.
+= 2.3.18 ( 08 Oct 2026 ) =
+Changed : Behind-the-scenes tidy-up and a compatibility check with WordPress 7.1. Nothing changes in how the plugin works.
 
 = 2.3.17 ( 23 Sep 2026 ) =
 Added : A simpler Pronunciation page. Write a word as it appears on your site and how it should be spoken, and try it straight away in the "Try it with your own text" box, with a Listen button.
@@ -567,6 +569,9 @@ Fixed : Removed external sample-audio requests from the dashboard; previews now 
 
 
 == Upgrade Notice ==
+
+= 2.3.18 =
+Routine maintenance release with a behind-the-scenes tidy-up. Safe to update; nothing changes in how the plugin works.
 
 = 2.3.17 =
 A simpler Pronunciation page with a live preview, and number rules that read every "250k" the way you set "5k". Also fixes the player going missing for visitors on sites using caching plugins such as WP Rocket. Recommended for every site.

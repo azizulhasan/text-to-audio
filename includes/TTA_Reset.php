@@ -1,6 +1,9 @@
 <?php
 namespace TTA;
 
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
+
 /**
  * TTS-247: shared cleanup routine reused by uninstall.php and the
  * Settings → Danger zone → "Reset all plugin data" button.
