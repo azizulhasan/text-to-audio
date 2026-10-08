@@ -2,6 +2,9 @@
 
 namespace TTA;
 
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
+
 /**
  * settings,
  * mp3 files

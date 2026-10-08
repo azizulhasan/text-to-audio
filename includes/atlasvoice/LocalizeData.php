@@ -2,6 +2,9 @@
 
 namespace TTA\AtlasVoice;
 
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
+
 /**
  * AtlasVoice Localize Data (TTS-238 v5 §14.2 / D0d).
  *

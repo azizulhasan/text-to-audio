@@ -2,6 +2,9 @@
 
 namespace TTA;
 
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
+
 class TTA_Error_Handler {
 	private $log_file;
 	private $handle;

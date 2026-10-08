@@ -2,6 +2,9 @@
 
 namespace TTA\AtlasVoice;
 
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
+
 /**
  * AtlasVoice Step Rail — front-end content picker (TTS-238 v5 rebuilt).
  *

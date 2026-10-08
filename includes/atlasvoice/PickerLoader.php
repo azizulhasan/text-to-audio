@@ -2,6 +2,9 @@
 
 namespace TTA\AtlasVoice;
 
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
+
 /**
  * AtlasVoice lazy picker-bundle loader (TTS-238 v5 §5.8 / D8).
  *

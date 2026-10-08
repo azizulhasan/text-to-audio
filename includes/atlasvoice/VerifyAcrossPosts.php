@@ -2,6 +2,9 @@
 
 namespace TTA\AtlasVoice;
 
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
+
 /**
  * AtlasVoice "Verify across posts" sample picker (TTS-238 v5 §13 D14).
  *

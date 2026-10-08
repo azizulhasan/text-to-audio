@@ -2,6 +2,9 @@
 
 namespace TTA;
 
+// TTS-247: prevent direct file access (wp.org Plugin Check requirement).
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Downloads translation files from GitHub based on WordPress locale.
  *
